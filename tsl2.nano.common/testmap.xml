@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="UTF-8"?> 
+<java version="1.6.0_25" class="java.beans.XMLDecoder"> 
+ <object class="de.tsl2.nano.test.TypeBean"> 
+  <void property="object"> 
+   <object class="java.util.LinkedHashMap"> 
+    <void method="put"> 
+     <string>key1</string> 
+     <string>value1</string> 
+    </void> 
+    <void method="put"> 
+     <string>key2</string> 
+     <string>value2</string> 
+    </void> 
+   </object> 
+  </void> 
+ </object> 
+</java> 

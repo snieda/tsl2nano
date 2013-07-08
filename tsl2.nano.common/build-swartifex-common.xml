@@ -1,0 +1,54 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<project basedir="." default="doall" name="build-swartifex">
+	<property file="build.properties" />
+	<import file="../tsl2.nano.common/common.xml" />
+	<!-- to be used by calling build-files -->
+	<path id="swartifex.classpath.id">
+		<dirset dir="../tsl2.nano.common">
+			<include name="${bin.dir}" />
+		</dirset>
+		<fileset dir="../tsl2.nano.common/lib">
+			<include name="**" />
+		</fileset>
+	</path>
+
+	<path id="lib.junittest.path">
+		<path refid="swartifex.classpath.id" />
+		<dirset dir="../swartifex">
+			<include name="${bin.test.dir}" />
+		</dirset>
+		<fileset dir="${java.home}/lib">
+			<include name="**" />
+		</fileset>
+		<!--		<fileset dir="${java.ext.dirs}">
+					<include name="**" />
+				</fileset> -->
+		<fileset dir="../tsl2.nano.common/lib">
+			<include name="**" />
+		</fileset>
+	</path>
+	<path id="classpath.id">
+		<path refid="lib.junittest.path" />
+	</path>
+
+	<target name="compile">
+		<!-- overwriting common.xml target, doing nothing -->
+	</target>
+	
+	<target name="build">
+		<ant antfile="eclipse-tsl2.nano.common.xml" />
+	</target>
+
+	<!-- define project.name to execute this target. only if you created the *BeanEx.jar with BeanExaminer, this will work -->
+	<target name="beanex" depends="">
+		<java dir="${project.name}-beanex" jar="${project.name}-beanex/${project.name}BeanEx.jar" fork="true">
+		</java>
+	</target>
+
+	<target name="doall">
+		<!-- TODO: implement
+		<antcall target="junit">
+		</antcall> -->
+		<antcall target="build" />
+	</target>
+</project>

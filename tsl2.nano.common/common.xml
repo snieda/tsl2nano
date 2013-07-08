@@ -1,0 +1,351 @@
+<!-- some basic targets like clean, compile etc. -->
+     
+<project name="tsl2.nano.common">
+	<!-- Project standard build definitions -->
+	<!-- <property file="../${project.name}.shared/src/resources/project.properties" /> -->
+	<import file="shell.xml"/>
+	
+	<!-- Environment -->
+	<property environment="env" />
+
+	<property name="build.prj.dir" value="../${ant.project.name}" />
+
+	<property name="product-version.file" value="${build.prj.dir}/product-version.properties" />
+
+	<!-- Parse the ${product-version.file} file and transform the properties as needed -->
+	<!--
+	<loadproperties srcfile="${product-version.file}">
+		<filterchain>
+			<tokenfilter>
+				<replaceregex pattern="(product.branch)=(\$HeadURL:.*ipvs/ipvs/)trunk.*\$" replace="\1=trunk" />
+				<replaceregex pattern="(product.branch)=(\$HeadURL:.*ipvs/ipvs/)([^/]*/[^/]*/[^/]*).*\$"
+				              replace="\1=\3" />
+				<replaceregex pattern="(product.version)=(\$HeadURL:.*ipvs/ipvs/)trunk.*\$" replace="\1=trunk" />
+				<replaceregex pattern="(product.version)=(\$HeadURL:.*ipvs/ipvs/[^/]*/[^/]*/)([^/]*).*\$"
+				              replace="\1=\3" />
+			</tokenfilter>
+		</filterchain>
+	</loadproperties>
+	-->
+
+	<!-- standard folders -->
+	<property name="src.base.dir" value="src" />
+	<property name="src.main.dir" value="${src.base.dir}/main" />
+	<property name="src.gen.dir" value="${src.base.dir}/gen" />
+	<property name="src.res.dir" value="${src.base.dir}/resources" />
+	<property name="src.test.dir" value="${src.base.dir}/test" />
+
+	<property name="lib.dir" value="lib" />
+	<property name="lib-test.dir" value="lib-test" />
+	<property name="lib-tools.dir" value="lib-tools" />
+	<property name="doc.dir" value="doc" />
+	<property name="javadoc.dir" value="javadoc" />
+
+	<!-- target folder for intermediate storage -->
+	<property name="target.dir" value="target" />
+
+	<!-- compile destination -->
+	<property name="bin.dir" value="${target.dir}/bin" />
+	<property name="bin.test.dir" value="${target.dir}/bin-test" />
+	<!-- build destination -->
+	<property name="dist.dir" value="${target.dir}/dist" />
+	<!-- JUnit target report destination dir -->
+	<property name="dist.junit.dir" value="${target.dir}/junit" />
+
+	<path id="lib.tools.path" description="Jars from the projects lib-tools">
+		<fileset dir="${lib-tools.dir}" includes="**/*.jar" />
+	</path>
+
+	<path id="j2ee.lib.path">
+		<fileset dir="${server.lib.dir}">
+			<include name="**/*.jar" />
+		</fileset>
+	</path>
+
+	<path id="server.lib.path" description="server libraries">
+		<fileset dir="${server.lib.dir}" includes="**/*.jar" />
+		<fileset dir="${shared.lib.dir}" includes="**/*.jar" />
+	</path>
+
+	<path id="client.lib.path" description="client libraries">
+		<fileset dir="${client.lib.dir}" includes="**/*.jar" />
+		<fileset dir="${shared.lib.dir}" includes="**/*.jar" />
+	</path>
+
+
+	<!-- some commands that should always be executed -->
+	<tstamp />
+
+	<!-- common targets -->
+
+	<!-- make directories needed for compile/dist -->
+	<target name="mkdirs" description="creates bin and dist directories">
+		<mkdir dir="${bin.dir}" />
+		<mkdir dir="${bin.test.dir}" />
+		<mkdir dir="${dist.dir}" />
+		<mkdir dir="${dist.junit.dir}" />
+	</target>
+
+	<!-- clean everything generated during compile/dist -->
+	<target name="clean" description="cleans everything">
+		<delete failonerror="false" includeemptydirs="true">
+			<fileset dir="${target.dir}" />
+			<fileset dir="${shared.lib.dir}" includes="**/${product.name}*.jar" />
+		</delete>
+	</target>
+
+	<!-- Create a manifest for an JAR / EAR. Parameter / Properties:
+	     "module.name" - REQUIRED - the name of the project/module for which the manifest should be generated -->
+	<target name="create_manifest" description="Create a manifest in ${target.dir}">
+		<fail unless="module.name" message="Missing arg 'module.name'" />
+		<manifest file="${target.dir}/MANIFEST.MF" mode="replace">
+			<attribute name="Created-On" value="${DSTAMP} ${TSTAMP}" />
+			<attribute name="Project" value="${product.name}" />
+			<attribute name="Module" value="${module.name}" />
+			<attribute name="Branch" value="${product.branch}" />
+			<attribute name="Version" value="${product.version}" />
+			<attribute name="BuildNr" value="${product.buildNr}" />
+			<attribute name="Vendor" value="${product.vendor}" />
+			<attribute name="Built-By" value="${user.name}" />
+		</manifest>
+		<propertyfile comment="version properties (generated during build)" file="${target.dir}/${module.name}.properties">
+			<entry key="Created-On" value="${DSTAMP} ${TSTAMP}" />
+			<entry key="Project" value="${product.name}" />
+			<entry key="Module" value="${module.name}" />
+			<entry key="Branch" value="${product.branch}" />
+			<entry key="Version" value="${product.version}" />
+			<entry key="BuildNr" value="${product.buildNr}" />
+			<entry key="Vendor" value="${product.vendor}" />
+			<entry key="Built-By" value="${user.name}" />
+		</propertyfile>
+	</target>
+
+	<!-- Only for Eclipse internal execution (same VM). Refreshes a Eclipse project (e.g. because some lib has
+	     been copied there.
+	     Parameter (Property):
+	     "prj_base_dir" - REQUIRED - the base directory of the project to be refreshed. Use the "...prj.dir"
+	                      properties defined in common.xml -->
+	<target name="refresh_deployed" if="eclipse.running">
+		<fail unless="prj_base_dir" message="Missing arg 'prj_base_dir'" />
+		<echo>Update deploy target project: ${prj_base_dir} !!!</echo>
+		<eclipse.convertPath fileSystemPath="${prj_base_dir}" property="wrapperBasePath" />
+		<eclipse.refreshLocal resource="${wrapperBasePath}" depth="infinite" />
+	</target>
+
+
+	<!-- generic JUnit execution and report generation task. Projects that use this task MUST
+	     contain a "compile" task. JUnit-Test classes must end with "Test".
+	     Uses the following properties:
+	     "lib.junittest.path" - REQUIRED - A <path> with this id used as Classpath for the JUnit execution
+	     "junittest.exclude"  - OPTIONAL - A <property> with a filepattern used to exclude some Tests from the
+	                                       Junit task. -->
+	<target name="junit">
+		<macro.junit.clean dist.junit.dir="${basedir}/${dist.junit.dir}"/>
+		<macro.junit src.test.dir="${basedir}/${src.test.dir}" dest.base.dir="${basedir}" />
+	</target>
+
+	<macrodef name="macro.junit.clean">
+		<attribute name="dist.junit.dir"/>
+		<sequential>
+			<delete includeemptydirs="true">
+				<fileset dir="@{dist.junit.dir}" includes="**/*" />
+			</delete>
+			<mkdir dir="@{dist.junit.dir}/report" />
+		</sequential>
+	</macrodef>
+	<macrodef name="macro.junit">
+		<attribute name="src.test.dir" />
+		<attribute name="dest.base.dir" />
+		<sequential>
+			<!-- if not defined ... use fallback -->
+			<property name="junittest.exclude" value="**/BaseServiceTest.java" />
+			<junit fork="false">
+				<classpath refid="lib.junittest.path" />
+				<formatter type="xml" />
+				<batchtest todir="${dist.junit.dir}">
+					<fileset dir="@{src.test.dir}">
+						<include name="**/*Test.java" />
+						<include name="**/*JUnit.java" />
+						<exclude name="${junittest.exclude}" />
+					</fileset>
+				</batchtest>
+			</junit>
+			<junitreport todir="${dist.junit.dir}" tofile="${module.name}-TestSuite.xml">
+				<fileset dir="${dist.junit.dir}">
+					<include name="TEST*.xml" />
+				</fileset>
+				<report format="frames" todir="${dist.junit.dir}/report" />
+			</junitreport>
+		</sequential>
+	</macrodef>
+
+
+	<!-- generic execution of a single JUnit Test. A "compile" task must be available (see "junit" target comment).
+	     A possibly set command line property (passed with -D to the ant call) named "CLEANUP" is passed to the 
+	     called JUnit Test as system property (same name).
+	     Uses the following properties:
+	     "lib.junittest.path" - REQUIRED - A <path> with this id used as Classpath for the JUnit execution
+	     "junittest.name"     - REQUIRED - the full name of the test class (e.g. com.bmw.foo.TestXy) 
+	-->
+	<target name="singleJunit" depends="compile">
+		<tstamp>
+			<format property="timestamp" unit="millisecond" pattern="yyyyMMdd_hhmmss_SSS" />
+		</tstamp>
+		<fail unless="junittest.name" message="missing 'junittest.name' property (full test classname)" />
+		<!-- init to true if not set -->
+		<property name="CLEANUP" value="true" />
+		<junit fork="true">
+			<classpath refid="lib.junittest.path" />
+			<formatter type="xml" />
+			<sysproperty key="CLEANUP" value="${CLEANUP}" />
+			<test todir="${dist.junit.dir}" name="${junittest.name}" outfile="TEST-${junittest.name}_${timestamp}">
+			</test>
+		</junit>
+	</target>
+
+
+	<target name="common.usage">
+		<condition property="jUnitTargetMessage" value="junit       - execute all JUnit Tests for the project">
+			<isreference refid="lib.junittest.path" />
+		</condition>
+		<condition property="singleJUnitTargetMessage" value="singleJunit - execute a single JUnit Test (use -D)">
+			<isreference refid="lib.junittest.path" />
+		</condition>
+		<echo>Targets:
+	clean       - clean ${target.dir}
+	compile     - compile to ${target.dir}
+	${jUnitTargetMessage}
+	${singleJUnitTargetMessage}</echo>
+	</target>
+
+
+	<!-- Compile the shared project needed by other projects -->
+	<target name="compile.shared">
+		<!--
+		<ant antfile="../build-shared.xml"
+		     dir="../${project.name}.shared"
+		     target="compile"
+		     inheritall="false" />
+		     -->
+	</target>
+
+
+	<!-- Deploy the shared project needed by other projects -->
+	<target name="deploy.shared">
+		<!--
+		<ant antfile="../build-shared.xml"
+		     dir="../${project.name}.shared"
+		     target="deploy"
+		     inheritall="false" />
+		     -->
+	</target>
+
+
+	<target name="compile" depends="compile.shared,mkdirs">
+		<fail message="not implemented. Overwrite in your build file" />
+	</target>
+
+
+	<target name="deploy" depends="deploy.shared,clean,compile">
+		<fail message="Empty standard implementation. Does nothing. Overwrite in your build file" />
+	</target>
+
+	<!--
+		will create xsd files from java beans.
+		please define the following variables:
+		  - bin.dir: reference to binary path
+		  - src.gen.dir: destination directory
+		  - print.base.class: class file to generate xsd from
+	-->
+	<target name="jaxb.schemagen">
+		<echo message="basedir: ${basedir}" />
+		<echo message="schema-class: ${bin.dir}/${print.base.class}" />
+		<echo message="output-path: ${src.gen.dir}" />
+		<!-- workaround for schemagen.exe bug on java.home path containing spaces -->
+		<exec dir="${bin.dir}" executable="cmd.exe">
+			<arg value="/C" />
+			<arg value="echo" />
+			<arg value="subst" />
+			<arg value="y:" />
+			<arg value="${java.home}\.." />
+			<arg value=">schemagen.bat" />
+		</exec>
+		<exec dir="${bin.dir}" executable="cmd.exe">
+			<arg value="/C" />
+			<arg value="echo" />
+			<arg value="y:\bin\schemagen.exe" />
+			<arg value="%1" />
+			<arg value="%2" />
+			<arg value="%3" />
+			<arg value="%4" />
+			<arg value="%5" />
+			<arg value="%6" />
+			<arg value=">>schemagen.bat" />
+		</exec>
+		<exec dir="${bin.dir}" executable="cmd.exe">
+			<arg value="/C" />
+			<arg value="echo" />
+			<arg value="subst" />
+			<arg value="y:" />
+			<arg value="/D" />
+			<arg value=">>schemagen.bat" />
+		</exec>
+
+		<exec dir="${bin.dir}" executable="cmd.exe">
+			<arg value="/C" />
+			<arg value="schemagen.bat" />
+			<!--			<arg value="cp" />
+			<arg value="./" /> -->
+			<arg value="-d" />
+			<arg value="${src.gen.dir}" />
+			<arg value="${print.base.class}" />
+		</exec>
+	</target>
+
+	<!--
+		create java bean classes from xsd (through JAXB)
+	-->
+	<target name="jaxb.xjc">
+		<exec dir="${src.res.dir}" command="xjc -d ${src.gen.dir} ${print.base.class}.xsd" />
+	</target>
+
+	<!--
+		switches to given database server
+		vars: 
+		  server.db.ip: e.g. 192.168.56.101
+		  project.name: e.g. kion
+		  server.db.type: e.g. ora
+	-->
+	<target name="switch.dbserver.ip">
+		<echo message="changing server to ${server.db.ip} in ../${project.name}.server/src/resources/db/${server.db.type}db-connection.properties" />
+		<replaceregexp flags="g" byline="true">
+			<regexp pattern="\:@[^:]*[:]{0,1}" />
+			<substitution expression=":@${server.db.ip}" />
+			<fileset dir="../${project.name}.server/src/resources/db">
+				<include name="${server.db.type}db-connection.properties" />
+			</fileset>
+		</replaceregexp>
+	</target>
+
+	<!--
+		switches to given application server
+		vars: 
+		  appserver.name= e.g. jboss
+		  appserver.ip: e.g. 192.168.56.101
+		  project.name: e.g. kion
+	-->
+	<target name="switch.appserver.ip">
+		<echo message="changing server to ${appserver.ip} in all jndi-${appserver.name}.properties" />
+		<replaceregexp flags="g" byline="true">
+			<regexp pattern="\:\/\/.*[:]" />
+			<substitution expression="://${appserver.ip}:" />
+			<fileset dir="../${project.name}.shared/src/resources">
+				<include name="jndi-${appserver.name}.properties" />
+			</fileset>
+			<fileset dir="../${project.name}.${appserver.name}">
+				<include name="jndi-${appserver.name}.properties" />
+			</fileset>
+		</replaceregexp>
+	</target>
+
+</project>

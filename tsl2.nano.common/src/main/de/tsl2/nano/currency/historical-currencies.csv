@@ -1,0 +1,18 @@
+##############################################################################
+# Definition of historical currency-units with validation-periods and factor
+# to the current currency. Used by tsl2.nano.commons-->CurrencyUnit.
+# Values used from: http://de.wikipedia.org/wiki/ISO_4217#Fr.C3.BChere_W.C3.A4hrungen
+#
+# 1. ISO-Country-Code
+# 2. ISO-Currency-Code
+# 3. valid-from
+# 4. valid-to
+# 5. factor to the current currency of the country
+#
+# Author: Thomas Schneider 2012
+##############################################################################
+DE	DEM	1948-01-01	2001-12-31	1.95583
+DE	ATS	1947-01-01	2001-12-31	13.7603
+FR	FRF	1958-01-01	2001-12-31	6.55957
+IT	ITL	1862-01-01	2001-12-31	1936.27
+ES	ESP	1500-01-01	2001-12-31	166.386
