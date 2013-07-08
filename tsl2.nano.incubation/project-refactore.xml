@@ -1,0 +1,102 @@
+<!-- 
+##############################################################################
+# Provides refactoring of a project. 
+# Copies a given project, transforms application-name, 
+# packages and class descriptions
+#
+# Define property 'refactore.property.file' and fill the properties like done
+# in default file 'project-refactore.properties'
+##############################################################################
+-->
+
+<project default="project.refactore" name="project.refactore">
+	<!-- the property file name may be defined by an ant call -->
+	<property name="refactore.property.file" value="../swartifex.common/project-refactore.properties"/>
+	<echo message="loading refactoring properties from: ${refactore.property.file}" />
+	<property file="${refactore.property.file}" />
+	<property name="shell" value="../swartifex.common/shell.xml" />
+	<target name="project.refactore">
+		<property name="sh.regexp.exclude" value="**/*.*ar" />
+		<property name="sh.copy.includeemptydirs" value="true" />
+		<!-- perhaps clean old copy -->
+		<antcall target="refactore.clean" />
+
+		<!-- copy application -->
+		<ant antfile="${shell}" target="sh.copy">
+			<property name="sh.copy.srcdir" value="${project.path}" />
+			<property name="sh.copy.destination" value="${refactore.path}" />
+			<property name="sh.copy.exclude" value="**/bin/**" />
+		</ant>
+
+		<!-- move packages -->
+		<ant antfile="${shell}" target="sh.move">
+			<property name="sh.move.srcdir" value="${refactore.path}/${project.package.path1}" />
+			<property name="sh.move.destination" value="${refactore.path}/${refactore.package.path1}" />
+		</ant>
+
+		<ant antfile="${shell}" target="sh.move">
+			<property name="sh.move.srcdir" value="${refactore.path}/${project.package.path2}" />
+			<property name="sh.move.destination" value="${refactore.path}/${refactore.package.path2}" />
+		</ant>
+
+		<ant antfile="${shell}" target="sh.move">
+			<property name="sh.move.srcdir" value="${refactore.path}/${project.package.path3}" />
+			<property name="sh.move.destination" value="${refactore.path}/${refactore.package.path3}" />
+		</ant>
+
+		<!-- replace package import statements -->
+		<ant antfile="${shell}" target="sh.regexp.replace">
+			<property name="sh.regexp.srcdir" value="${refactore.path}" />
+			<property name="sh.regexp.pattern" value="${project.package}" />
+			<property name="sh.regexp.subst" value="${refactore.package}" />
+		</ant>
+
+		<!-- rename application (after package renaming!) -->
+		<ant antfile="${shell}" target="sh.regexp.replace">
+			<property name="sh.regexp.srcdir" value="${refactore.path}" />
+			<property name="sh.regexp.pattern" value="${project.name}" />
+			<property name="sh.regexp.subst" value="${refactore.name}" />
+		</ant>
+
+		<!-- replace descriptions -->
+		<ant antfile="${shell}" target="sh.regexp.replace">
+			<property name="sh.regexp.srcdir" value="${refactore.path}" />
+			<property name="sh.regexp.pattern" value="${project.description1}" />
+			<property name="sh.regexp.subst" value="${refactore.description1}" />
+		</ant>
+
+		<ant antfile="${shell}" target="sh.regexp.replace">
+			<property name="sh.regexp.srcdir" value="${refactore.path}" />
+			<property name="sh.regexp.pattern" value="${project.description2}" />
+			<property name="sh.regexp.subst" value="${refactore.description2}" />
+		</ant>
+
+		<ant antfile="${shell}" target="sh.regexp.replace">
+			<property name="sh.regexp.srcdir" value="${refactore.path}" />
+			<property name="sh.regexp.pattern" value="${project.description3}" />
+			<property name="sh.regexp.subst" value="${refactore.description3}" />
+		</ant>
+
+		<!-- perhaps build new project -->
+		<antcall target="refactore.build" />
+	</target>
+
+	<target name="refactore.clean" if="refactore.clean">
+		<ant antfile="${shell}" target="sh.delete">
+			<property name="sh.delete.srcdir" value="${refactore.path}" />
+		</ant>
+	</target>
+
+	<target name="refactore.build" if="refactore.build">
+		<ant antfile="${shell}" target="sh.build">
+			<property name="sh.build.basedir" value="${refactore.path}" />
+			<property name="sh.build.name" value="${refactore.name}" />
+			<!-- setting properties inside the ant file tag will overwrite previous settings!
+			<property name="sh.build.src" value="${refactore.path}/src/main" />
+			<property name="sh.build.lib" value="${refactore.path}/lib" />
+			<property name="sh.build.bin" value="${refactore.path}/bin" />
+			<property name="sh.build.extdirs" value="${refactore.extdirs}" />
+			-->
+		</ant>
+	</target>
+</project>

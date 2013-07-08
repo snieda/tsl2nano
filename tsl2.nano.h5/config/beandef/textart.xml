@@ -1,0 +1,60 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beanDefinition clazz="de.eom.kion.beans.abrechnung.Textart" name="Textart" xmlns="http://www.domain.com/beandef">
+   <presentable>
+      <type>-1</type>
+      <style>-1</style>
+      <visible>true</visible>
+   </presentable>
+   <valueExpression>
+      <expression>{bezeichnung}</expression>
+      <type>de.eom.kion.beans.abrechnung.Textart</type>
+      <isPersistable>true</isPersistable>
+   </valueExpression>
+   <isNested>false</isNested>
+   <isdefault>true</isdefault>
+   <attribute name="bezeichnung">
+      <attributeDefinition declaringClass="de.eom.kion.beans.abrechnung.Textart" name="bezeichnung">
+         <length>-1</length>
+         <scale>-1</scale>
+         <precision>-1</precision>
+         <nullable>true</nullable>
+         <id>false</id>
+      </attributeDefinition>
+   </attribute>
+   <attribute name="beschreibung">
+      <attributeDefinition declaringClass="de.eom.kion.beans.abrechnung.Textart" name="beschreibung">
+         <length>-1</length>
+         <scale>-1</scale>
+         <precision>-1</precision>
+         <nullable>true</nullable>
+         <id>false</id>
+      </attributeDefinition>
+   </attribute>
+   <attribute name="aendDatum">
+      <attributeDefinition declaringClass="de.eom.kion.beans.abrechnung.Textart" name="aendDatum">
+         <length>-1</length>
+         <scale>-1</scale>
+         <precision>-1</precision>
+         <nullable>true</nullable>
+         <id>false</id>
+      </attributeDefinition>
+   </attribute>
+   <attribute name="textartID">
+      <attributeDefinition declaringClass="de.eom.kion.beans.abrechnung.Textart" name="textartID">
+         <length>-1</length>
+         <scale>-1</scale>
+         <precision>-1</precision>
+         <nullable>true</nullable>
+         <id>false</id>
+      </attributeDefinition>
+   </attribute>
+   <attribute name="textartTyp">
+      <attributeDefinition declaringClass="de.eom.kion.beans.abrechnung.Textart" name="textartTyp">
+         <length>-1</length>
+         <scale>-1</scale>
+         <precision>-1</precision>
+         <nullable>true</nullable>
+         <id>false</id>
+      </attributeDefinition>
+   </attribute>
+</beanDefinition>

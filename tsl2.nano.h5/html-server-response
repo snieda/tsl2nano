@@ -1,0 +1,41 @@
+<html>
+<body>
+<table bgcolor="#cccccc" border="0" width="100%">
+<col>
+<col>
+<tr>
+<td>
+<h3 align="center">virtualbean-1348994655373</h3>
+</td><td>
+<image src="beanex-logo-small.jpg"></image>
+</td>
+</tr>
+</table>
+<form action="?" method="get">
+<table bgcolor="#cccccc" border="0" width="100%">
+<col>
+<col>
+<col>
+<tr>
+<td fgcolor="88ff88">Name</td><td><input list="" name="Name" pattern="[a-zA-Z]{0,15}" required="" type="text" value="Stefan" width="100%"></td>
+</tr>
+<tr>
+<td fgcolor="88ff88">Kategorie (*)</td><td><input list="[1, 2, 3]" name="Kategorie" pattern="" required="required" type="text" value="1" width="100%"></td>
+</tr>
+</table>
+<table bgcolor="#cccccc" border="0" width="100%">
+<col>
+<col>
+<tr>
+<td align="center"><button accesskey="+xxx" name="testid">+xxx</button><button accesskey="chlie&szlig;en" name="de.tsl2.nano.action.action_canceled">S&amp;chlie&szlig;en</button></td>
+</tr>
+</table>
+</form>
+<table bgcolor="#cccccc" border="0" width="100%">
+<col>
+<tr>
+<td></td>
+</tr>
+</table>
+</body>
+</html>

@@ -1,0 +1,204 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beanDefinition clazz="de.eom.kion.beans.abrechnung.aufschubverzicht.Stundungsverfuegung" name="Stundungsverfuegung" xmlns="http://www.domain.com/beandef">
+   <presentable>
+      <type>-1</type>
+      <style>-1</style>
+      <visible>true</visible>
+   </presentable>
+   <valueExpression>
+      <expression>{text}</expression>
+      <type>de.eom.kion.beans.abrechnung.aufschubverzicht.Stundungsverfuegung</type>
+      <isPersistable>true</isPersistable>
+   </valueExpression>
+   <isNested>false</isNested>
+   <isdefault>true</isdefault>
+   <attribute name="text">
+      <attributeDefinition declaringClass="de.eom.kion.beans.abrechnung.aufschubverzicht.Stundungsverfuegung" name="text">
+         <length>-1</length>
+         <scale>0</scale>
+         <precision>0</precision>
+         <nullable>true</nullable>
+         <id>false</id>
+      </attributeDefinition>
+   </attribute>
+   <attribute name="status">
+      <attributeDefinition declaringClass="de.eom.kion.beans.abrechnung.aufschubverzicht.Stundungsverfuegung" name="status">
+         <length>-1</length>
+         <scale>0</scale>
+         <precision>0</precision>
+         <nullable>true</nullable>
+         <id>false</id>
+      </attributeDefinition>
+   </attribute>
+   <attribute name="dokumentkomponente">
+      <attributeDefinition declaringClass="de.eom.kion.beans.abrechnung.aufschubverzicht.Stundungsverfuegung" name="dokumentkomponente">
+         <length>-1</length>
+         <scale>-1</scale>
+         <precision>-1</precision>
+         <nullable>true</nullable>
+         <id>false</id>
+      </attributeDefinition>
+   </attribute>
+   <attribute name="stundungsverfuegungID">
+      <attributeDefinition declaringClass="de.eom.kion.beans.abrechnung.aufschubverzicht.Stundungsverfuegung" name="stundungsverfuegungID">
+         <length>-1</length>
+         <scale>0</scale>
+         <precision>0</precision>
+         <nullable>true</nullable>
+         <id>false</id>
+      </attributeDefinition>
+   </attribute>
+   <attribute name="stundungsDatum">
+      <attributeDefinition declaringClass="de.eom.kion.beans.abrechnung.aufschubverzicht.Stundungsverfuegung" name="stundungsDatum">
+         <length>-1</length>
+         <scale>0</scale>
+         <precision>0</precision>
+         <nullable>true</nullable>
+         <id>false</id>
+      </attributeDefinition>
+   </attribute>
+   <attribute name="antragsDatum">
+      <attributeDefinition declaringClass="de.eom.kion.beans.abrechnung.aufschubverzicht.Stundungsverfuegung" name="antragsDatum">
+         <length>-1</length>
+         <scale>0</scale>
+         <precision>0</precision>
+         <nullable>true</nullable>
+         <id>false</id>
+      </attributeDefinition>
+   </attribute>
+   <attribute name="zustellerVerwenden">
+      <attributeDefinition declaringClass="de.eom.kion.beans.abrechnung.aufschubverzicht.Stundungsverfuegung" name="zustellerVerwenden">
+         <length>-1</length>
+         <scale>0</scale>
+         <precision>0</precision>
+         <nullable>true</nullable>
+         <id>false</id>
+      </attributeDefinition>
+   </attribute>
+   <attribute name="unterschrift">
+      <attributeDefinition declaringClass="de.eom.kion.beans.abrechnung.aufschubverzicht.Stundungsverfuegung" name="unterschrift">
+         <length>-1</length>
+         <scale>0</scale>
+         <precision>0</precision>
+         <nullable>true</nullable>
+         <id>false</id>
+      </attributeDefinition>
+   </attribute>
+   <attribute name="adresszeile1">
+      <attributeDefinition declaringClass="de.eom.kion.beans.abrechnung.aufschubverzicht.Stundungsverfuegung" name="adresszeile1">
+         <length>-1</length>
+         <scale>0</scale>
+         <precision>0</precision>
+         <nullable>true</nullable>
+         <id>false</id>
+      </attributeDefinition>
+   </attribute>
+   <attribute name="adresszeile2">
+      <attributeDefinition declaringClass="de.eom.kion.beans.abrechnung.aufschubverzicht.Stundungsverfuegung" name="adresszeile2">
+         <length>-1</length>
+         <scale>0</scale>
+         <precision>0</precision>
+         <nullable>true</nullable>
+         <id>false</id>
+      </attributeDefinition>
+   </attribute>
+   <attribute name="adresszeile3">
+      <attributeDefinition declaringClass="de.eom.kion.beans.abrechnung.aufschubverzicht.Stundungsverfuegung" name="adresszeile3">
+         <length>-1</length>
+         <scale>0</scale>
+         <precision>0</precision>
+         <nullable>true</nullable>
+         <id>false</id>
+      </attributeDefinition>
+   </attribute>
+   <attribute name="adresszeile4">
+      <attributeDefinition declaringClass="de.eom.kion.beans.abrechnung.aufschubverzicht.Stundungsverfuegung" name="adresszeile4">
+         <length>-1</length>
+         <scale>0</scale>
+         <precision>0</precision>
+         <nullable>true</nullable>
+         <id>false</id>
+      </attributeDefinition>
+   </attribute>
+   <attribute name="adresszeile5">
+      <attributeDefinition declaringClass="de.eom.kion.beans.abrechnung.aufschubverzicht.Stundungsverfuegung" name="adresszeile5">
+         <length>-1</length>
+         <scale>0</scale>
+         <precision>0</precision>
+         <nullable>true</nullable>
+         <id>false</id>
+      </attributeDefinition>
+   </attribute>
+   <attribute name="adresszeile6">
+      <attributeDefinition declaringClass="de.eom.kion.beans.abrechnung.aufschubverzicht.Stundungsverfuegung" name="adresszeile6">
+         <length>-1</length>
+         <scale>0</scale>
+         <precision>0</precision>
+         <nullable>true</nullable>
+         <id>false</id>
+      </attributeDefinition>
+   </attribute>
+   <attribute name="adresszeile7">
+      <attributeDefinition declaringClass="de.eom.kion.beans.abrechnung.aufschubverzicht.Stundungsverfuegung" name="adresszeile7">
+         <length>-1</length>
+         <scale>0</scale>
+         <precision>0</precision>
+         <nullable>true</nullable>
+         <id>false</id>
+      </attributeDefinition>
+   </attribute>
+   <attribute name="adresszeile8">
+      <attributeDefinition declaringClass="de.eom.kion.beans.abrechnung.aufschubverzicht.Stundungsverfuegung" name="adresszeile8">
+         <length>-1</length>
+         <scale>0</scale>
+         <precision>0</precision>
+         <nullable>true</nullable>
+         <id>false</id>
+      </attributeDefinition>
+   </attribute>
+   <attribute name="adresszeile9">
+      <attributeDefinition declaringClass="de.eom.kion.beans.abrechnung.aufschubverzicht.Stundungsverfuegung" name="adresszeile9">
+         <length>-1</length>
+         <scale>0</scale>
+         <precision>0</precision>
+         <nullable>true</nullable>
+         <id>false</id>
+      </attributeDefinition>
+   </attribute>
+   <attribute name="adresszeile10">
+      <attributeDefinition declaringClass="de.eom.kion.beans.abrechnung.aufschubverzicht.Stundungsverfuegung" name="adresszeile10">
+         <length>-1</length>
+         <scale>0</scale>
+         <precision>0</precision>
+         <nullable>true</nullable>
+         <id>false</id>
+      </attributeDefinition>
+   </attribute>
+   <attribute name="adresszeile11">
+      <attributeDefinition declaringClass="de.eom.kion.beans.abrechnung.aufschubverzicht.Stundungsverfuegung" name="adresszeile11">
+         <length>-1</length>
+         <scale>0</scale>
+         <precision>0</precision>
+         <nullable>true</nullable>
+         <id>false</id>
+      </attributeDefinition>
+   </attribute>
+   <attribute name="erstellDatum">
+      <attributeDefinition declaringClass="de.eom.kion.beans.abrechnung.aufschubverzicht.Stundungsverfuegung" name="erstellDatum">
+         <length>-1</length>
+         <scale>0</scale>
+         <precision>0</precision>
+         <nullable>true</nullable>
+         <id>false</id>
+      </attributeDefinition>
+   </attribute>
+   <attribute name="aktenzeichen">
+      <attributeDefinition declaringClass="de.eom.kion.beans.abrechnung.aufschubverzicht.Stundungsverfuegung" name="aktenzeichen">
+         <length>-1</length>
+         <scale>0</scale>
+         <precision>0</precision>
+         <nullable>true</nullable>
+         <id>false</id>
+      </attributeDefinition>
+   </attribute>
+</beanDefinition>

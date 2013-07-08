@@ -1,0 +1,92 @@
+*NanoFix.h5*
+<font size="-1">Autor: Thomas Schneider 2012</font>
+
+{toc}
+
+h2. Introduction
+
+generic html5 gui implementation, bound to swartfix-common bean-package. 
+goals: 
+* pure model implementation + plattform independency (works on android, too).
+* implementation through simple java beans + optional bean presenters
+* navigates through given beans showing bean-lists and bean-detail dialogs.
+
+Using the NanoHTTPD Server as base, this client application creates html surfaces, sending them through the integrated server to a html browser. Entry point is the file _application.html_ defining the browser request _http://localhost:8067_.
+
+It is not a real web-application platform but a simple way to use html5 as graphical user interface - in a standard client application.
+
+The data access is done by:
+* swartifex.serviceaccess
+* swartifex.directaccess
+
+It is possible to use a ejb container in an application server, but the default is set to use jpa directly on the client (using _swartifex.directaccess_).
+h3. Third Party Libraries
+
+* "Jing-Trang xml2xsd-Generator":https://code.google.com/p/jing-trang/downloads/list
+* "SimpleXML xml serializer":http://simple.sourceforge.net/download/stream/doc/tutorial/tutorial.php
+
+h2. Starting / Test
+
+Start the main method of class _Application_. Two entry-points are given:
+* _createGenericNavigationModel(String beanjar)_ is able to read a given jar file for serializable classes to be used as entities to browse.
+* a simple test implementation is provided (see _Application.createTestNavigationModel()_).
+
+h2. Developing and Deploying
+
+If you change sources of this plugin, you should start ant script _eclipse-tsl2.nano.h5.xml_ with target _swartifex.eclipse.h5.export_ and after that the 'deploy' target of your main project.
+
+Normally, you don't have to create html-pages by yourself, but if you are interested in html5, have a look at the following tutorials/references:
+* "W3C-Html5-Reference":http://www.w3.org/TR/2013/NOTE-html-markup-20130528/Overview.html
+* "Html-5.com":http://www.html-5.com/index.html
+* "Webkompetenz":http://webkompetenz.wikidot.com/docs:html-handbuch
+* "Html5 Poster":http://www.xhtml-lab.com
+
+h2. Changelog
+
+| Version | Date | Description |
+| 0.0.1 | 06.07.2013 | First alpha Version
+
+h2. TODOs
+
+* (v) BeanCollector.createItem() --> replace common BeanUtils call to be able to run on android
+* (v) main arguments: bean-jar, jdbc-url, user, passwd
+* (v) Show count of items
+* (v) Navigation Links have Problems
+* (v) show logging
+* (v) visible icons read by page
+* (v) Button-Panel for
+** Print
+** Export
+** select all
+** deselect all
+* (x) Application Menu: reset (--> caches, environment, navigation), restart, login, logout
+* (x) Use Environment
+* refactore ScriptUtil: extract Ant calls
+* Right-Alignments for Numbers
+* Problem on NanoHttp canceling button panel (sometimes)
+* Check for single selection
+* Check navigation (check input on button action like 'open' without selecting an item.
+* Styling (Collector, Details)
+* Show Progress-Page (using Statistics)
+* Use Xml-Configuration for BeanDefinitions
+* Html-Table: Sorting-Header, Style
+* Flag: show one-to-many in table
+* If search result is only one element, select it
+* Searches on big data:
+** first count data
+** checkbox to show only single values (or only ve-field of beans)
+** use thread to be interupted
+* default attribute names without @id field
+* BeanPresenterHelper: test OptionsWrapper
+* (x) Nesting Beans
+* (x) Bean with Layout
+* internal export and view (replacing ant-like variables and showing the document)
+* generate const class from property file
+* extract api
+* create xsd in through CommonTest with trang.jar
+* add configuration action (html-tool to edit xml files)
+* extend BeanContainer:
+** new action: 'getValueBetween()'
+** extend all finders with start index (see maxresult) to have a result range
+* beancollector with next() and previous() data (using 'start' index and 'maxresult')
+* eval validation annotations

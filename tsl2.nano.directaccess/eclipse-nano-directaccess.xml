@@ -1,0 +1,50 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- the export is only executable if you use the workspace java runtime!!! -->
+<project default="swartifex.eclipse.directaccess.export" name="eclipse.tsl2.nano.directaccess">
+	<!-- if not set, the default dir is swartifex.architect -->
+	<property name="swartifex.architect.home.dir" value="../swartifex.architect" />
+	<property name="dest.tsl2.nano.directaccess.dir" value="${swartifex.architect.home.dir}/packages" />
+
+	<!-- pde export - only running inside eclipse -->
+	<target name="swartifex.eclipse.directaccess.export" if="eclipse.running" depends="check.eclipse.running">
+		<delete dir="${swartifex.architect.home.dir}/packages" includes="**/de.tsl2.nano.directaccess*.jar" failonerror="false" />
+		<pde.exportPlugins destination="${dest.tsl2.nano.directaccess.dir}" exportSource="true" exportType="directory" plugins="de.tsl2.nano.directaccess" useJARFormat="true" />
+	</target>
+
+	<!-- should be called after calling swartifex.eclipse.directaccess.export -->
+	<target name="deploy.to.swartifex.architect">
+		<copy todir="${swartifex.architect.home.dir}/packages/shared/lib" failonerror="false">
+			<fileset dir="${dest.tsl2.nano.directaccess.dir}/plugins">
+				<include name="de.tsl2.nano.directaccess*.jar" />
+			</fileset>
+		</copy>
+	</target>
+
+	<!-- call that from outside to copy the new version to your lib dir -->
+	<!-- tsl2.nano.directaccess.deploy.path must be set -->
+	<!-- should be called after calling swartifex.eclipse.directaccess.export -->
+	<target name="deploy.tsl2.nano.directaccess" if="tsl2.nano.directaccess.deploy.path" depends="deploy.to.swartifex.architect">
+		<!-- <delete dir="${tsl2.nano.directaccess.deploy.path}" includes="**/de.tsl2.nano.directaccess*.jar" failonerror="false" /> -->
+		<copy todir="${tsl2.nano.directaccess.deploy.path}" failonerror="false">
+			<fileset dir="${dest.tsl2.nano.directaccess.dir}/plugins">
+				<include name="de.tsl2.nano.directaccess*.jar" />
+			</fileset>
+		</copy>
+	</target>
+	<target name="check.eclipse.running" unless="eclipse.running">
+		<echo message="WARNING: not using eclipse workspace java runtime ==> target will not be started !!!" />
+	</target>
+
+	<!-- Only for Eclipse internal execution (same VM). Refreshes a Eclipse project (e.g. because some lib has
+	     been copied there.
+	     Parameter (Property):
+	     "refresh.project.name" - REQUIRED - the base directory of the project to be refreshed. Use the "...prj.dir"
+	                      properties defined in common.xml -->
+	<target name="refresh.eclipse.project" if="eclipse.running" depends="check.eclipse.running">
+		<fail unless="refresh.project.name" message="Missing arg 'prj_base_dir'" />
+		<echo>Update deploy target project: ${prj_base_dir} !!!</echo>
+		<eclipse.convertPath fileSystemPath="${refresh.project.name}" property="wrapperBasePath" />
+		<eclipse.refreshLocal resource="${wrapperBasePath}" depth="infinite" />
+	</target>
+
+</project>

@@ -1,0 +1,48 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<project basedir="." default="doall" name="build-h5">
+	<property file="build.properties" />
+	<import file="../swartifex.common/common.xml" />
+	<property name="h5.dir" value="../tsl2.nano.h5"/>
+	<!-- to be used by calling build-files -->
+	<path id="h5.classpath.id">
+		<dirset dir="${h5.dir}">
+			<include name="${bin.dir}" />
+		</dirset>
+		<fileset dir="${h5.dir}/lib">
+			<include name="**" />
+		</fileset>
+	</path>
+
+	<path id="lib.junittest.path">
+		<path refid="h5.classpath.id" />
+		<dirset dir="${h5.dir}">
+			<include name="${bin.test.dir}" />
+		</dirset>
+		<fileset dir="${java.home}/lib">
+			<include name="**" />
+		</fileset>
+<!--		<fileset dir="${java.ext.dirs}">
+			<include name="**" />
+		</fileset> -->
+		<fileset dir="../swartifex.common/lib">
+			<include name="**" />
+		</fileset>
+	</path>
+	<path id="classpath.id">
+		<path refid="lib.junittest.path" />
+	</path>
+	
+	<target name="compile">
+		<!-- overwriting common.xml target, doing nothing -->
+	</target>
+	
+	<target name="build">
+		<ant antfile="export.xml" />
+	</target>
+
+	<target name="doall">
+		<antcall target="junit">
+		</antcall>
+		<antcall target="build" />
+	</target>
+</project>

@@ -1,0 +1,51 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beanDefinition clazz="de.eom.kion.beans.festsetzung.bescheid.BescheidFreitext" name="BescheidFreitext" xmlns="http://www.domain.com/beandef">
+   <presentable>
+      <type>-1</type>
+      <style>-1</style>
+      <visible>true</visible>
+   </presentable>
+   <valueExpression>
+      <expression>{text}</expression>
+      <type>de.eom.kion.beans.festsetzung.bescheid.BescheidFreitext</type>
+      <isPersistable>true</isPersistable>
+   </valueExpression>
+   <isNested>false</isNested>
+   <isdefault>true</isdefault>
+   <attribute name="text">
+      <attributeDefinition declaringClass="de.eom.kion.beans.festsetzung.bescheid.BescheidFreitext" name="text">
+         <length>-1</length>
+         <scale>0</scale>
+         <precision>0</precision>
+         <nullable>true</nullable>
+         <id>false</id>
+      </attributeDefinition>
+   </attribute>
+   <attribute name="vaj">
+      <attributeDefinition declaringClass="de.eom.kion.beans.festsetzung.bescheid.BescheidFreitext" name="vaj">
+         <length>-1</length>
+         <scale>0</scale>
+         <precision>0</precision>
+         <nullable>true</nullable>
+         <id>false</id>
+      </attributeDefinition>
+   </attribute>
+   <attribute name="bescheidfreitextID">
+      <attributeDefinition declaringClass="de.eom.kion.beans.festsetzung.bescheid.BescheidFreitext" name="bescheidfreitextID">
+         <length>-1</length>
+         <scale>0</scale>
+         <precision>0</precision>
+         <nullable>true</nullable>
+         <id>false</id>
+      </attributeDefinition>
+   </attribute>
+   <attribute name="loeschenNAusgabe">
+      <attributeDefinition declaringClass="de.eom.kion.beans.festsetzung.bescheid.BescheidFreitext" name="loeschenNAusgabe">
+         <length>-1</length>
+         <scale>0</scale>
+         <precision>0</precision>
+         <nullable>true</nullable>
+         <id>false</id>
+      </attributeDefinition>
+   </attribute>
+</beanDefinition>

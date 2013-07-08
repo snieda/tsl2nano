@@ -1,0 +1,159 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beanDefinition clazz="de.tsl2.nano.persistence.Persistence" name="Persistence" xmlns="http://www.domain.com/beandef">
+   <presentable>
+      <type>-1</type>
+      <style>-1</style>
+      <visible>true</visible>
+   </presentable>
+   <valueExpression>
+      <expression>{database}</expression>
+      <type>de.tsl2.nano.persistence.Persistence</type>
+      <isPersistable>false</isPersistable>
+   </valueExpression>
+   <isNested>false</isNested>
+   <isdefault>true</isdefault>
+   <attribute name="port">
+      <attributeDefinition declaringClass="de.tsl2.nano.persistence.Persistence" name="port">
+         <length>-1</length>
+         <scale>-1</scale>
+         <precision>-1</precision>
+         <nullable>true</nullable>
+         <id>false</id>
+      </attributeDefinition>
+   </attribute>
+   <attribute name="jarFile">
+      <attributeDefinition declaringClass="de.tsl2.nano.persistence.Persistence" name="jarFile">
+         <length>-1</length>
+         <scale>-1</scale>
+         <precision>-1</precision>
+         <nullable>true</nullable>
+         <id>false</id>
+      </attributeDefinition>
+   </attribute>
+   <attribute name="provider">
+      <attributeDefinition declaringClass="de.tsl2.nano.persistence.Persistence" name="provider">
+         <length>-1</length>
+         <scale>-1</scale>
+         <precision>-1</precision>
+         <nullable>true</nullable>
+         <id>false</id>
+      </attributeDefinition>
+   </attribute>
+   <attribute name="current">
+      <attributeDefinition declaringClass="de.tsl2.nano.persistence.Persistence" name="current">
+         <length>-1</length>
+         <scale>-1</scale>
+         <precision>-1</precision>
+         <nullable>true</nullable>
+         <id>false</id>
+      </attributeDefinition>
+   </attribute>
+   <attribute name="persistenceUnit">
+      <attributeDefinition declaringClass="de.tsl2.nano.persistence.Persistence" name="persistenceUnit">
+         <length>-1</length>
+         <scale>-1</scale>
+         <precision>-1</precision>
+         <nullable>true</nullable>
+         <id>false</id>
+      </attributeDefinition>
+   </attribute>
+   <attribute name="jtaDataSource">
+      <attributeDefinition declaringClass="de.tsl2.nano.persistence.Persistence" name="jtaDataSource">
+         <length>-1</length>
+         <scale>-1</scale>
+         <precision>-1</precision>
+         <nullable>true</nullable>
+         <id>false</id>
+      </attributeDefinition>
+   </attribute>
+   <attribute name="connectionDriverClass">
+      <attributeDefinition declaringClass="de.tsl2.nano.persistence.Persistence" name="connectionDriverClass">
+         <length>-1</length>
+         <scale>-1</scale>
+         <precision>-1</precision>
+         <nullable>true</nullable>
+         <id>false</id>
+      </attributeDefinition>
+   </attribute>
+   <attribute name="connectionUrl">
+      <attributeDefinition declaringClass="de.tsl2.nano.persistence.Persistence" name="connectionUrl">
+         <length>-1</length>
+         <scale>-1</scale>
+         <precision>-1</precision>
+         <nullable>true</nullable>
+         <id>false</id>
+      </attributeDefinition>
+   </attribute>
+   <attribute name="connectionUserName">
+      <attributeDefinition declaringClass="de.tsl2.nano.persistence.Persistence" name="connectionUserName">
+         <length>-1</length>
+         <scale>-1</scale>
+         <precision>-1</precision>
+         <nullable>true</nullable>
+         <id>false</id>
+      </attributeDefinition>
+   </attribute>
+   <attribute name="connectionPassword">
+      <attributeDefinition declaringClass="de.tsl2.nano.persistence.Persistence" name="connectionPassword">
+         <length>-1</length>
+         <scale>-1</scale>
+         <precision>-1</precision>
+         <nullable>true</nullable>
+         <id>false</id>
+      </attributeDefinition>
+   </attribute>
+   <attribute name="hibernateDialect">
+      <attributeDefinition declaringClass="de.tsl2.nano.persistence.Persistence" name="hibernateDialect">
+         <length>-1</length>
+         <scale>-1</scale>
+         <precision>-1</precision>
+         <nullable>true</nullable>
+         <id>false</id>
+      </attributeDefinition>
+   </attribute>
+   <attribute name="transactionType">
+      <attributeDefinition declaringClass="de.tsl2.nano.persistence.Persistence" name="transactionType">
+         <length>-1</length>
+         <scale>-1</scale>
+         <precision>-1</precision>
+         <nullable>true</nullable>
+         <id>false</id>
+      </attributeDefinition>
+   </attribute>
+   <attribute name="defaultSchema">
+      <attributeDefinition declaringClass="de.tsl2.nano.persistence.Persistence" name="defaultSchema">
+         <length>-1</length>
+         <scale>-1</scale>
+         <precision>-1</precision>
+         <nullable>true</nullable>
+         <id>false</id>
+      </attributeDefinition>
+   </attribute>
+   <attribute name="datasourceClass">
+      <attributeDefinition declaringClass="de.tsl2.nano.persistence.Persistence" name="datasourceClass">
+         <length>-1</length>
+         <scale>-1</scale>
+         <precision>-1</precision>
+         <nullable>true</nullable>
+         <id>false</id>
+      </attributeDefinition>
+   </attribute>
+   <attribute name="database">
+      <attributeDefinition declaringClass="de.tsl2.nano.persistence.Persistence" name="database">
+         <length>-1</length>
+         <scale>-1</scale>
+         <precision>-1</precision>
+         <nullable>true</nullable>
+         <id>false</id>
+      </attributeDefinition>
+   </attribute>
+   <attribute name="jdbcProperties">
+      <attributeDefinition declaringClass="de.tsl2.nano.persistence.Persistence" name="jdbcProperties">
+         <length>-1</length>
+         <scale>-1</scale>
+         <precision>-1</precision>
+         <nullable>true</nullable>
+         <id>false</id>
+      </attributeDefinition>
+   </attribute>
+</beanDefinition>

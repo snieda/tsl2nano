@@ -1,0 +1,87 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beanDefinition clazz="de.eom.kion.beans.abrechnung.VZBuchung" name="VZBuchung" xmlns="http://www.domain.com/beandef">
+   <presentable>
+      <type>-1</type>
+      <style>-1</style>
+      <visible>true</visible>
+   </presentable>
+   <valueExpression>
+      <expression>{vaj}</expression>
+      <type>de.eom.kion.beans.abrechnung.VZBuchung</type>
+      <isPersistable>true</isPersistable>
+   </valueExpression>
+   <isNested>false</isNested>
+   <isdefault>true</isdefault>
+   <attribute name="vaj">
+      <attributeDefinition declaringClass="de.eom.kion.beans.abrechnung.VZBuchung" name="vaj">
+         <length>-1</length>
+         <scale>0</scale>
+         <precision>0</precision>
+         <nullable>true</nullable>
+         <id>false</id>
+      </attributeDefinition>
+   </attribute>
+   <attribute name="buchungsschluessel">
+      <attributeDefinition declaringClass="de.eom.kion.beans.abrechnung.VZBuchung" name="buchungsschluessel">
+         <length>-1</length>
+         <scale>-1</scale>
+         <precision>-1</precision>
+         <nullable>false</nullable>
+         <id>false</id>
+      </attributeDefinition>
+   </attribute>
+   <attribute name="textart">
+      <attributeDefinition declaringClass="de.eom.kion.beans.abrechnung.VZBuchung" name="textart">
+         <length>-1</length>
+         <scale>-1</scale>
+         <precision>-1</precision>
+         <nullable>true</nullable>
+         <id>false</id>
+      </attributeDefinition>
+   </attribute>
+   <attribute name="steuerfall">
+      <attributeDefinition declaringClass="de.eom.kion.beans.abrechnung.VZBuchung" name="steuerfall">
+         <length>-1</length>
+         <scale>-1</scale>
+         <precision>-1</precision>
+         <nullable>false</nullable>
+         <id>false</id>
+      </attributeDefinition>
+   </attribute>
+   <attribute name="buchungsdatum">
+      <attributeDefinition declaringClass="de.eom.kion.beans.abrechnung.VZBuchung" name="buchungsdatum">
+         <length>-1</length>
+         <scale>0</scale>
+         <precision>0</precision>
+         <nullable>true</nullable>
+         <id>false</id>
+      </attributeDefinition>
+   </attribute>
+   <attribute name="betrag">
+      <attributeDefinition declaringClass="de.eom.kion.beans.abrechnung.VZBuchung" name="betrag">
+         <length>-1</length>
+         <scale>0</scale>
+         <precision>0</precision>
+         <nullable>true</nullable>
+         <id>false</id>
+      </attributeDefinition>
+   </attribute>
+   <attribute name="ausloeseDatum">
+      <attributeDefinition declaringClass="de.eom.kion.beans.abrechnung.VZBuchung" name="ausloeseDatum">
+         <length>-1</length>
+         <scale>0</scale>
+         <precision>0</precision>
+         <nullable>true</nullable>
+         <id>false</id>
+      </attributeDefinition>
+   </attribute>
+   <attribute name="vzbuchungID">
+      <attributeDefinition declaringClass="de.eom.kion.beans.abrechnung.VZBuchung" name="vzbuchungID">
+         <length>-1</length>
+         <scale>0</scale>
+         <precision>0</precision>
+         <nullable>true</nullable>
+         <id>false</id>
+      </attributeDefinition>
+   </attribute>
+</beanDefinition>

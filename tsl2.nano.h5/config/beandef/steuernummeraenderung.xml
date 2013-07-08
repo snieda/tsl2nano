@@ -1,0 +1,60 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beanDefinition clazz="de.eom.kion.beans.festsetzung.steuerakte.Steuernummeraenderung" name="Steuernummeraenderung" xmlns="http://www.domain.com/beandef">
+   <presentable>
+      <type>-1</type>
+      <style>-1</style>
+      <visible>true</visible>
+   </presentable>
+   <valueExpression>
+      <expression>{aendDatum}</expression>
+      <type>de.eom.kion.beans.festsetzung.steuerakte.Steuernummeraenderung</type>
+      <isPersistable>true</isPersistable>
+   </valueExpression>
+   <isNested>false</isNested>
+   <isdefault>true</isdefault>
+   <attribute name="aendDatum">
+      <attributeDefinition declaringClass="de.eom.kion.beans.festsetzung.steuerakte.Steuernummeraenderung" name="aendDatum">
+         <length>-1</length>
+         <scale>0</scale>
+         <precision>0</precision>
+         <nullable>true</nullable>
+         <id>false</id>
+      </attributeDefinition>
+   </attribute>
+   <attribute name="benutzer">
+      <attributeDefinition declaringClass="de.eom.kion.beans.festsetzung.steuerakte.Steuernummeraenderung" name="benutzer">
+         <length>-1</length>
+         <scale>-1</scale>
+         <precision>-1</precision>
+         <nullable>false</nullable>
+         <id>false</id>
+      </attributeDefinition>
+   </attribute>
+   <attribute name="steuerfall">
+      <attributeDefinition declaringClass="de.eom.kion.beans.festsetzung.steuerakte.Steuernummeraenderung" name="steuerfall">
+         <length>-1</length>
+         <scale>-1</scale>
+         <precision>-1</precision>
+         <nullable>false</nullable>
+         <id>false</id>
+      </attributeDefinition>
+   </attribute>
+   <attribute name="stnrAlt">
+      <attributeDefinition declaringClass="de.eom.kion.beans.festsetzung.steuerakte.Steuernummeraenderung" name="stnrAlt">
+         <length>-1</length>
+         <scale>0</scale>
+         <precision>0</precision>
+         <nullable>true</nullable>
+         <id>false</id>
+      </attributeDefinition>
+   </attribute>
+   <attribute name="steuernummeraenderungID">
+      <attributeDefinition declaringClass="de.eom.kion.beans.festsetzung.steuerakte.Steuernummeraenderung" name="steuernummeraenderungID">
+         <length>-1</length>
+         <scale>0</scale>
+         <precision>0</precision>
+         <nullable>true</nullable>
+         <id>false</id>
+      </attributeDefinition>
+   </attribute>
+</beanDefinition>

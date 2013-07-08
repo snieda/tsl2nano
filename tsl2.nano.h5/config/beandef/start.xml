@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beanDefinition clazz="de.tsl2.nano.util.bean.def.BeanDefinition$1" name="Start" xmlns="http://www.domain.com/beandef">
+   <presentable>
+      <type>-1</type>
+      <style>-1</style>
+      <visible>true</visible>
+   </presentable>
+   <valueExpression>
+      <expression>Start</expression>
+      <type>de.tsl2.nano.util.bean.def.BeanDefinition$1</type>
+      <isPersistable>false</isPersistable>
+   </valueExpression>
+   <isNested>false</isNested>
+   <isdefault>true</isdefault>
+</beanDefinition>

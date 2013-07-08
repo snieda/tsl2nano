@@ -1,0 +1,81 @@
+/** Java Access Control Policy for the JAAS ServiceAccess Application 
+    Search for sun.security.provider.PolicyParser$ParsingException to be sure
+    to have used the right syntax!
+    Use " for all parameters
+	
+	whats about the eclipse-security-manager: org.eclipse.osgi.framework.internal.core.FrameworkSecurityManager
+	using the permissions.perm file in the OSGI-INF folder?
+**/
+
+/* grant LoginModule permissions */
+/* TODO: evaluate the mimimum permissions! 
+permission java.security.AllPermission;
+   permission javax.security.auth.AuthPermission "modifyPrincipals";
+   permission javax.security.auth.AuthPermission "createLoginContext.LoginJaas";
+   permission javax.security.auth.AuthPermission "doAs";
+   permission java.security.SecurityPermission "getPolicy";
+   permission java.net.SocketPermission "localhost:1024-","resolve";
+   permission java.net.SocketPermission "localhost:1024-","connect";
+   permission java.net.SocketPermission "127.0.0.1:63078","connect";
+   permission java.net.SocketPermission "127.0.0.1:63078","resolve";
+   permission java.net.SocketPermission "230.0.0.4:0-","connect";
+   permission java.net.SocketPermission "230.0.0.4:0-","accept";
+   permission java.net.SocketPermission "230.0.0.4:0-","resolve";
+   permission java.lang.RuntimePermission "accessDeclaredMembers";
+   permission java.lang.RuntimePermission "createClassLoader";
+   permission java.lang.RuntimePermission "setContextClassLoader";
+   permission java.lang.RuntimePermission "modifyThreadGroup";
+   permission java.lang.RuntimePermission "accessClassInPackage.sun.security.x509";
+   permission java.lang.RuntimePermission "accessClassInPackage.sun.security.util";
+   permission java.lang.RuntimePermission "accessDeclaredMembers";
+   permission java.lang.RuntimePermission "createClassLoader";
+   permission java.lang.RuntimePermission "setContextClassLoader";
+   permission java.lang.RuntimePermission "modifyThreadGroup";
+   permission java.lang.RuntimePermission "accessClassInPackage.sun.security.x509";
+   permission java.lang.RuntimePermission "accessClassInPackage.sun.security.util";
+   permission java.lang.RuntimePermission "loadLibrary.*";
+   permission java.lang.RuntimePermission "getClassLoader";
+   permission java.lang.RuntimePermission "createSecurityManager";
+   permission java.lang.RuntimePermission "setFactory";
+   permission java.util.PropertyPermission "eclipse.bundle.application","read";
+   permission java.util.PropertyPermission "eclipse.bundle.application","write";
+   permission java.util.PropertyPermission "osgi.*","read";
+   permission java.util.PropertyPermission "org.apache.commons.logging.*","read";
+   permission java.util.PropertyPermission "log4j.*","read";
+   permission java.util.PropertyPermission "application.log.file","read";
+   permission java.io.FilePermission "<<ALL FILES>>","read";
+   permission java.io.FilePermission "<<ALL FILES>>","write";
+   permission java.lang.reflect.ReflectPermission "suppressAccessChecks";
+*/
+
+grant {
+   permission javax.security.auth.AuthPermission "modifyPrincipals";
+   permission javax.security.auth.AuthPermission "createLoginContext.LoginJaas";
+   permission javax.security.auth.AuthPermission "doAs";
+   permission java.security.SecurityPermission "getPolicy";
+   permission java.security.SecurityPermission "createAccessControlContext";
+   permission java.net.SocketPermission "localhost:1024-","resolve";
+   permission java.net.SocketPermission "localhost:1024-","connect";
+   permission java.net.SocketPermission "*:1024-","resolve,connect";
+   permission java.net.SocketPermission "127.0.0.1:63078","resolve";
+   permission java.net.SocketPermission "230.0.0.4:0-","connect";
+   permission java.net.SocketPermission "230.0.0.4:0-","accept";
+   permission java.net.SocketPermission "230.0.0.4:0-","resolve";
+   permission java.lang.RuntimePermission "*";
+   permission java.util.PropertyPermission "*","read";
+   permission java.util.PropertyPermission "*","write";
+   permission java.io.FilePermission "<<ALL FILES>>","read";
+   permission java.io.FilePermission "<<ALL FILES>>","write";
+   permission java.io.FilePermission "<<ALL FILES>>","delete";
+   permission java.lang.reflect.ReflectPermission "suppressAccessChecks";
+   permission java.net.NetPermission "specifyStreamHandler";
+   permission org.osgi.framework.AdminPermission;
+   permission org.osgi.framework.ServicePermission "*","register,get";
+   permission org.osgi.service.application.ApplicationAdminPermission "*","lifecycle";
+   permission org.osgi.framework.PackagePermission "*","export,import";
+   permission org.osgi.framework.BundlePermission "*","provide,require";
+   permission com.sun.corba.ee.impl.presentation.rmi.DynamicAccessPermission "access";
+};
+grant principal serviceaccess.aas.principal.UserPrincipal "testUser" {
+   permission serviceaccess.aas.principal.ActionPermission "action.exit";
+};

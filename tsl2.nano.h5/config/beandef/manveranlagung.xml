@@ -1,0 +1,663 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beanDefinition clazz="de.eom.kion.beans.festsetzung.lfst.ManVeranlagung" name="ManVeranlagung" xmlns="http://www.domain.com/beandef">
+   <presentable>
+      <type>-1</type>
+      <style>-1</style>
+      <visible>true</visible>
+   </presentable>
+   <valueExpression>
+      <expression>{vaj}</expression>
+      <type>de.eom.kion.beans.festsetzung.lfst.ManVeranlagung</type>
+      <isPersistable>true</isPersistable>
+   </valueExpression>
+   <isNested>false</isNested>
+   <isdefault>true</isdefault>
+   <attribute name="vaj">
+      <attributeDefinition declaringClass="de.eom.kion.beans.festsetzung.lfst.ManVeranlagung" name="vaj">
+         <length>-1</length>
+         <scale>0</scale>
+         <precision>0</precision>
+         <nullable>true</nullable>
+         <id>false</id>
+      </attributeDefinition>
+   </attribute>
+   <attribute name="bank">
+      <attributeDefinition declaringClass="de.eom.kion.beans.festsetzung.lfst.ManVeranlagung" name="bank">
+         <length>-1</length>
+         <scale>-1</scale>
+         <precision>-1</precision>
+         <nullable>true</nullable>
+         <id>false</id>
+      </attributeDefinition>
+   </attribute>
+   <attribute name="aendDatum">
+      <attributeDefinition declaringClass="de.eom.kion.beans.festsetzung.lfst.ManVeranlagung" name="aendDatum">
+         <length>-1</length>
+         <scale>0</scale>
+         <precision>0</precision>
+         <nullable>true</nullable>
+         <id>false</id>
+      </attributeDefinition>
+   </attribute>
+   <attribute name="iban">
+      <attributeDefinition declaringClass="de.eom.kion.beans.festsetzung.lfst.ManVeranlagung" name="iban">
+         <length>-1</length>
+         <scale>0</scale>
+         <precision>0</precision>
+         <nullable>true</nullable>
+         <id>false</id>
+      </attributeDefinition>
+   </attribute>
+   <attribute name="benutzer">
+      <attributeDefinition declaringClass="de.eom.kion.beans.festsetzung.lfst.ManVeranlagung" name="benutzer">
+         <length>-1</length>
+         <scale>-1</scale>
+         <precision>-1</precision>
+         <nullable>false</nullable>
+         <id>false</id>
+      </attributeDefinition>
+   </attribute>
+   <attribute name="steuerfall">
+      <attributeDefinition declaringClass="de.eom.kion.beans.festsetzung.lfst.ManVeranlagung" name="steuerfall">
+         <length>-1</length>
+         <scale>-1</scale>
+         <precision>-1</precision>
+         <nullable>false</nullable>
+         <id>false</id>
+      </attributeDefinition>
+   </attribute>
+   <attribute name="mitteilungsblatt">
+      <attributeDefinition declaringClass="de.eom.kion.beans.festsetzung.lfst.ManVeranlagung" name="mitteilungsblatt">
+         <length>-1</length>
+         <scale>-1</scale>
+         <precision>-1</precision>
+         <nullable>true</nullable>
+         <id>false</id>
+      </attributeDefinition>
+   </attribute>
+   <attribute name="halbeKinder">
+      <attributeDefinition declaringClass="de.eom.kion.beans.festsetzung.lfst.ManVeranlagung" name="halbeKinder">
+         <length>-1</length>
+         <scale>0</scale>
+         <precision>0</precision>
+         <nullable>true</nullable>
+         <id>false</id>
+      </attributeDefinition>
+   </attribute>
+   <attribute name="volleKinder">
+      <attributeDefinition declaringClass="de.eom.kion.beans.festsetzung.lfst.ManVeranlagung" name="volleKinder">
+         <length>-1</length>
+         <scale>0</scale>
+         <precision>0</precision>
+         <nullable>true</nullable>
+         <id>false</id>
+      </attributeDefinition>
+   </attribute>
+   <attribute name="gemSchluessel">
+      <attributeDefinition declaringClass="de.eom.kion.beans.festsetzung.lfst.ManVeranlagung" name="gemSchluessel">
+         <length>-1</length>
+         <scale>0</scale>
+         <precision>0</precision>
+         <nullable>true</nullable>
+         <id>false</id>
+      </attributeDefinition>
+   </attribute>
+   <attribute name="rechentermin">
+      <attributeDefinition declaringClass="de.eom.kion.beans.festsetzung.lfst.ManVeranlagung" name="rechentermin">
+         <length>-1</length>
+         <scale>0</scale>
+         <precision>0</precision>
+         <nullable>true</nullable>
+         <id>false</id>
+      </attributeDefinition>
+   </attribute>
+   <attribute name="adressName1">
+      <attributeDefinition declaringClass="de.eom.kion.beans.festsetzung.lfst.ManVeranlagung" name="adressName1">
+         <length>-1</length>
+         <scale>0</scale>
+         <precision>0</precision>
+         <nullable>true</nullable>
+         <id>false</id>
+      </attributeDefinition>
+   </attribute>
+   <attribute name="adressName2">
+      <attributeDefinition declaringClass="de.eom.kion.beans.festsetzung.lfst.ManVeranlagung" name="adressName2">
+         <length>-1</length>
+         <scale>0</scale>
+         <precision>0</precision>
+         <nullable>true</nullable>
+         <id>false</id>
+      </attributeDefinition>
+   </attribute>
+   <attribute name="adressName3">
+      <attributeDefinition declaringClass="de.eom.kion.beans.festsetzung.lfst.ManVeranlagung" name="adressName3">
+         <length>-1</length>
+         <scale>0</scale>
+         <precision>0</precision>
+         <nullable>true</nullable>
+         <id>false</id>
+      </attributeDefinition>
+   </attribute>
+   <attribute name="adressName4">
+      <attributeDefinition declaringClass="de.eom.kion.beans.festsetzung.lfst.ManVeranlagung" name="adressName4">
+         <length>-1</length>
+         <scale>0</scale>
+         <precision>0</precision>
+         <nullable>true</nullable>
+         <id>false</id>
+      </attributeDefinition>
+   </attribute>
+   <attribute name="adressStrasse1">
+      <attributeDefinition declaringClass="de.eom.kion.beans.festsetzung.lfst.ManVeranlagung" name="adressStrasse1">
+         <length>-1</length>
+         <scale>0</scale>
+         <precision>0</precision>
+         <nullable>true</nullable>
+         <id>false</id>
+      </attributeDefinition>
+   </attribute>
+   <attribute name="adressStrasse2">
+      <attributeDefinition declaringClass="de.eom.kion.beans.festsetzung.lfst.ManVeranlagung" name="adressStrasse2">
+         <length>-1</length>
+         <scale>0</scale>
+         <precision>0</precision>
+         <nullable>true</nullable>
+         <id>false</id>
+      </attributeDefinition>
+   </attribute>
+   <attribute name="adressOrt">
+      <attributeDefinition declaringClass="de.eom.kion.beans.festsetzung.lfst.ManVeranlagung" name="adressOrt">
+         <length>-1</length>
+         <scale>0</scale>
+         <precision>0</precision>
+         <nullable>true</nullable>
+         <id>false</id>
+      </attributeDefinition>
+   </attribute>
+   <attribute name="zustName1">
+      <attributeDefinition declaringClass="de.eom.kion.beans.festsetzung.lfst.ManVeranlagung" name="zustName1">
+         <length>-1</length>
+         <scale>0</scale>
+         <precision>0</precision>
+         <nullable>true</nullable>
+         <id>false</id>
+      </attributeDefinition>
+   </attribute>
+   <attribute name="zustName2">
+      <attributeDefinition declaringClass="de.eom.kion.beans.festsetzung.lfst.ManVeranlagung" name="zustName2">
+         <length>-1</length>
+         <scale>0</scale>
+         <precision>0</precision>
+         <nullable>true</nullable>
+         <id>false</id>
+      </attributeDefinition>
+   </attribute>
+   <attribute name="zustName3">
+      <attributeDefinition declaringClass="de.eom.kion.beans.festsetzung.lfst.ManVeranlagung" name="zustName3">
+         <length>-1</length>
+         <scale>0</scale>
+         <precision>0</precision>
+         <nullable>true</nullable>
+         <id>false</id>
+      </attributeDefinition>
+   </attribute>
+   <attribute name="zustName4">
+      <attributeDefinition declaringClass="de.eom.kion.beans.festsetzung.lfst.ManVeranlagung" name="zustName4">
+         <length>-1</length>
+         <scale>0</scale>
+         <precision>0</precision>
+         <nullable>true</nullable>
+         <id>false</id>
+      </attributeDefinition>
+   </attribute>
+   <attribute name="zustStrasse1">
+      <attributeDefinition declaringClass="de.eom.kion.beans.festsetzung.lfst.ManVeranlagung" name="zustStrasse1">
+         <length>-1</length>
+         <scale>0</scale>
+         <precision>0</precision>
+         <nullable>true</nullable>
+         <id>false</id>
+      </attributeDefinition>
+   </attribute>
+   <attribute name="zustStrasse2">
+      <attributeDefinition declaringClass="de.eom.kion.beans.festsetzung.lfst.ManVeranlagung" name="zustStrasse2">
+         <length>-1</length>
+         <scale>0</scale>
+         <precision>0</precision>
+         <nullable>true</nullable>
+         <id>false</id>
+      </attributeDefinition>
+   </attribute>
+   <attribute name="zustOrt">
+      <attributeDefinition declaringClass="de.eom.kion.beans.festsetzung.lfst.ManVeranlagung" name="zustOrt">
+         <length>-1</length>
+         <scale>0</scale>
+         <precision>0</precision>
+         <nullable>true</nullable>
+         <id>false</id>
+      </attributeDefinition>
+   </attribute>
+   <attribute name="zustAnrede">
+      <attributeDefinition declaringClass="de.eom.kion.beans.festsetzung.lfst.ManVeranlagung" name="zustAnrede">
+         <length>-1</length>
+         <scale>0</scale>
+         <precision>0</precision>
+         <nullable>true</nullable>
+         <id>false</id>
+      </attributeDefinition>
+   </attribute>
+   <attribute name="adressAnrede">
+      <attributeDefinition declaringClass="de.eom.kion.beans.festsetzung.lfst.ManVeranlagung" name="adressAnrede">
+         <length>-1</length>
+         <scale>0</scale>
+         <precision>0</precision>
+         <nullable>true</nullable>
+         <id>false</id>
+      </attributeDefinition>
+   </attribute>
+   <attribute name="grundstKz">
+      <attributeDefinition declaringClass="de.eom.kion.beans.festsetzung.lfst.ManVeranlagung" name="grundstKz">
+         <length>-1</length>
+         <scale>0</scale>
+         <precision>0</precision>
+         <nullable>true</nullable>
+         <id>false</id>
+      </attributeDefinition>
+   </attribute>
+   <attribute name="einkomPfl">
+      <attributeDefinition declaringClass="de.eom.kion.beans.festsetzung.lfst.ManVeranlagung" name="einkomPfl">
+         <length>-1</length>
+         <scale>0</scale>
+         <precision>0</precision>
+         <nullable>true</nullable>
+         <id>false</id>
+      </attributeDefinition>
+   </attribute>
+   <attribute name="einkomGatt">
+      <attributeDefinition declaringClass="de.eom.kion.beans.festsetzung.lfst.ManVeranlagung" name="einkomGatt">
+         <length>-1</length>
+         <scale>0</scale>
+         <precision>0</precision>
+         <nullable>true</nullable>
+         <id>false</id>
+      </attributeDefinition>
+   </attribute>
+   <attribute name="einkomStSumme">
+      <attributeDefinition declaringClass="de.eom.kion.beans.festsetzung.lfst.ManVeranlagung" name="einkomStSumme">
+         <length>-1</length>
+         <scale>0</scale>
+         <precision>0</precision>
+         <nullable>true</nullable>
+         <id>false</id>
+      </attributeDefinition>
+   </attribute>
+   <attribute name="einkomStAnteil">
+      <attributeDefinition declaringClass="de.eom.kion.beans.festsetzung.lfst.ManVeranlagung" name="einkomStAnteil">
+         <length>-1</length>
+         <scale>0</scale>
+         <precision>0</precision>
+         <nullable>true</nullable>
+         <id>false</id>
+      </attributeDefinition>
+   </attribute>
+   <attribute name="einkomStAntPz">
+      <attributeDefinition declaringClass="de.eom.kion.beans.festsetzung.lfst.ManVeranlagung" name="einkomStAntPz">
+         <length>-1</length>
+         <scale>0</scale>
+         <precision>0</precision>
+         <nullable>true</nullable>
+         <id>false</id>
+      </attributeDefinition>
+   </attribute>
+   <attribute name="halbEinkPfl">
+      <attributeDefinition declaringClass="de.eom.kion.beans.festsetzung.lfst.ManVeranlagung" name="halbEinkPfl">
+         <length>-1</length>
+         <scale>0</scale>
+         <precision>0</precision>
+         <nullable>true</nullable>
+         <id>false</id>
+      </attributeDefinition>
+   </attribute>
+   <attribute name="halbEinkGatt">
+      <attributeDefinition declaringClass="de.eom.kion.beans.festsetzung.lfst.ManVeranlagung" name="halbEinkGatt">
+         <length>-1</length>
+         <scale>0</scale>
+         <precision>0</precision>
+         <nullable>true</nullable>
+         <id>false</id>
+      </attributeDefinition>
+   </attribute>
+   <attribute name="halbEinkAnteil">
+      <attributeDefinition declaringClass="de.eom.kion.beans.festsetzung.lfst.ManVeranlagung" name="halbEinkAnteil">
+         <length>-1</length>
+         <scale>0</scale>
+         <precision>0</precision>
+         <nullable>true</nullable>
+         <id>false</id>
+      </attributeDefinition>
+   </attribute>
+   <attribute name="gewStMessBetr">
+      <attributeDefinition declaringClass="de.eom.kion.beans.festsetzung.lfst.ManVeranlagung" name="gewStMessBetr">
+         <length>-1</length>
+         <scale>0</scale>
+         <precision>0</precision>
+         <nullable>true</nullable>
+         <id>false</id>
+      </attributeDefinition>
+   </attribute>
+   <attribute name="ZVEinkomKirchg">
+      <attributeDefinition declaringClass="de.eom.kion.beans.festsetzung.lfst.ManVeranlagung" name="ZVEinkomKirchg">
+         <length>-1</length>
+         <scale>0</scale>
+         <precision>0</precision>
+         <nullable>true</nullable>
+         <id>false</id>
+      </attributeDefinition>
+   </attribute>
+   <attribute name="schaetzungKz">
+      <attributeDefinition declaringClass="de.eom.kion.beans.festsetzung.lfst.ManVeranlagung" name="schaetzungKz">
+         <length>-1</length>
+         <scale>0</scale>
+         <precision>0</precision>
+         <nullable>true</nullable>
+         <id>false</id>
+      </attributeDefinition>
+   </attribute>
+   <attribute name="guenstigPruefPfl">
+      <attributeDefinition declaringClass="de.eom.kion.beans.festsetzung.lfst.ManVeranlagung" name="guenstigPruefPfl">
+         <length>-1</length>
+         <scale>0</scale>
+         <precision>0</precision>
+         <nullable>true</nullable>
+         <id>false</id>
+      </attributeDefinition>
+   </attribute>
+   <attribute name="guenstigPruefGatt">
+      <attributeDefinition declaringClass="de.eom.kion.beans.festsetzung.lfst.ManVeranlagung" name="guenstigPruefGatt">
+         <length>-1</length>
+         <scale>0</scale>
+         <precision>0</precision>
+         <nullable>true</nullable>
+         <id>false</id>
+      </attributeDefinition>
+   </attribute>
+   <attribute name="kapertrPruefPfl">
+      <attributeDefinition declaringClass="de.eom.kion.beans.festsetzung.lfst.ManVeranlagung" name="kapertrPruefPfl">
+         <length>-1</length>
+         <scale>0</scale>
+         <precision>0</precision>
+         <nullable>true</nullable>
+         <id>false</id>
+      </attributeDefinition>
+   </attribute>
+   <attribute name="kapertrPruefGatt">
+      <attributeDefinition declaringClass="de.eom.kion.beans.festsetzung.lfst.ManVeranlagung" name="kapertrPruefGatt">
+         <length>-1</length>
+         <scale>0</scale>
+         <precision>0</precision>
+         <nullable>true</nullable>
+         <id>false</id>
+      </attributeDefinition>
+   </attribute>
+   <attribute name="abgStKapertrPfl">
+      <attributeDefinition declaringClass="de.eom.kion.beans.festsetzung.lfst.ManVeranlagung" name="abgStKapertrPfl">
+         <length>-1</length>
+         <scale>0</scale>
+         <precision>0</precision>
+         <nullable>true</nullable>
+         <id>false</id>
+      </attributeDefinition>
+   </attribute>
+   <attribute name="abgStKapertrGatt">
+      <attributeDefinition declaringClass="de.eom.kion.beans.festsetzung.lfst.ManVeranlagung" name="abgStKapertrGatt">
+         <length>-1</length>
+         <scale>0</scale>
+         <precision>0</precision>
+         <nullable>true</nullable>
+         <id>false</id>
+      </attributeDefinition>
+   </attribute>
+   <attribute name="vaVerarbBez">
+      <attributeDefinition declaringClass="de.eom.kion.beans.festsetzung.lfst.ManVeranlagung" name="vaVerarbBez">
+         <length>-1</length>
+         <scale>0</scale>
+         <precision>0</precision>
+         <nullable>true</nullable>
+         <id>false</id>
+      </attributeDefinition>
+   </attribute>
+   <attribute name="einKikapStGatt_K">
+      <attributeDefinition declaringClass="de.eom.kion.beans.festsetzung.lfst.ManVeranlagung" name="einKikapStGatt_K">
+         <length>-1</length>
+         <scale>0</scale>
+         <precision>0</precision>
+         <nullable>true</nullable>
+         <id>false</id>
+      </attributeDefinition>
+   </attribute>
+   <attribute name="einKikapStGatt_T">
+      <attributeDefinition declaringClass="de.eom.kion.beans.festsetzung.lfst.ManVeranlagung" name="einKikapStGatt_T">
+         <length>-1</length>
+         <scale>0</scale>
+         <precision>0</precision>
+         <nullable>true</nullable>
+         <id>false</id>
+      </attributeDefinition>
+   </attribute>
+   <attribute name="einKikapStPfl_K">
+      <attributeDefinition declaringClass="de.eom.kion.beans.festsetzung.lfst.ManVeranlagung" name="einKikapStPfl_K">
+         <length>-1</length>
+         <scale>0</scale>
+         <precision>0</precision>
+         <nullable>true</nullable>
+         <id>false</id>
+      </attributeDefinition>
+   </attribute>
+   <attribute name="einKikapStPfl_T">
+      <attributeDefinition declaringClass="de.eom.kion.beans.festsetzung.lfst.ManVeranlagung" name="einKikapStPfl_T">
+         <length>-1</length>
+         <scale>0</scale>
+         <precision>0</precision>
+         <nullable>true</nullable>
+         <id>false</id>
+      </attributeDefinition>
+   </attribute>
+   <attribute name="einkomSt">
+      <attributeDefinition declaringClass="de.eom.kion.beans.festsetzung.lfst.ManVeranlagung" name="einkomSt">
+         <length>-1</length>
+         <scale>0</scale>
+         <precision>0</precision>
+         <nullable>true</nullable>
+         <id>false</id>
+      </attributeDefinition>
+   </attribute>
+   <attribute name="kiLohnSt">
+      <attributeDefinition declaringClass="de.eom.kion.beans.festsetzung.lfst.ManVeranlagung" name="kiLohnSt">
+         <length>-1</length>
+         <scale>0</scale>
+         <precision>0</precision>
+         <nullable>true</nullable>
+         <id>false</id>
+      </attributeDefinition>
+   </attribute>
+   <attribute name="einkStBeregr">
+      <attributeDefinition declaringClass="de.eom.kion.beans.festsetzung.lfst.ManVeranlagung" name="einkStBeregr">
+         <length>-1</length>
+         <scale>0</scale>
+         <precision>0</precision>
+         <nullable>true</nullable>
+         <id>false</id>
+      </attributeDefinition>
+   </attribute>
+   <attribute name="religionPfl">
+      <attributeDefinition declaringClass="de.eom.kion.beans.festsetzung.lfst.ManVeranlagung" name="religionPfl">
+         <length>-1</length>
+         <scale>-1</scale>
+         <precision>-1</precision>
+         <nullable>false</nullable>
+         <id>false</id>
+      </attributeDefinition>
+   </attribute>
+   <attribute name="religionGatt">
+      <attributeDefinition declaringClass="de.eom.kion.beans.festsetzung.lfst.ManVeranlagung" name="religionGatt">
+         <length>-1</length>
+         <scale>-1</scale>
+         <precision>-1</precision>
+         <nullable>true</nullable>
+         <id>false</id>
+      </attributeDefinition>
+   </attribute>
+   <attribute name="abgeltStPfl">
+      <attributeDefinition declaringClass="de.eom.kion.beans.festsetzung.lfst.ManVeranlagung" name="abgeltStPfl">
+         <length>-1</length>
+         <scale>0</scale>
+         <precision>0</precision>
+         <nullable>true</nullable>
+         <id>false</id>
+      </attributeDefinition>
+   </attribute>
+   <attribute name="abgeltStGatt">
+      <attributeDefinition declaringClass="de.eom.kion.beans.festsetzung.lfst.ManVeranlagung" name="abgeltStGatt">
+         <length>-1</length>
+         <scale>0</scale>
+         <precision>0</precision>
+         <nullable>true</nullable>
+         <id>false</id>
+      </attributeDefinition>
+   </attribute>
+   <attribute name="einbehKiloStGatt">
+      <attributeDefinition declaringClass="de.eom.kion.beans.festsetzung.lfst.ManVeranlagung" name="einbehKiloStGatt">
+         <length>-1</length>
+         <scale>0</scale>
+         <precision>0</precision>
+         <nullable>true</nullable>
+         <id>false</id>
+      </attributeDefinition>
+   </attribute>
+   <attribute name="adressLand">
+      <attributeDefinition declaringClass="de.eom.kion.beans.festsetzung.lfst.ManVeranlagung" name="adressLand">
+         <length>-1</length>
+         <scale>-1</scale>
+         <precision>-1</precision>
+         <nullable>true</nullable>
+         <id>false</id>
+      </attributeDefinition>
+   </attribute>
+   <attribute name="zustLand">
+      <attributeDefinition declaringClass="de.eom.kion.beans.festsetzung.lfst.ManVeranlagung" name="zustLand">
+         <length>-1</length>
+         <scale>-1</scale>
+         <precision>-1</precision>
+         <nullable>true</nullable>
+         <id>false</id>
+      </attributeDefinition>
+   </attribute>
+   <attribute name="zustPlz">
+      <attributeDefinition declaringClass="de.eom.kion.beans.festsetzung.lfst.ManVeranlagung" name="zustPlz">
+         <length>-1</length>
+         <scale>0</scale>
+         <precision>0</precision>
+         <nullable>true</nullable>
+         <id>false</id>
+      </attributeDefinition>
+   </attribute>
+   <attribute name="adressPlz">
+      <attributeDefinition declaringClass="de.eom.kion.beans.festsetzung.lfst.ManVeranlagung" name="adressPlz">
+         <length>-1</length>
+         <scale>0</scale>
+         <precision>0</precision>
+         <nullable>true</nullable>
+         <id>false</id>
+      </attributeDefinition>
+   </attribute>
+   <attribute name="adressAusland">
+      <attributeDefinition declaringClass="de.eom.kion.beans.festsetzung.lfst.ManVeranlagung" name="adressAusland">
+         <length>-1</length>
+         <scale>0</scale>
+         <precision>0</precision>
+         <nullable>true</nullable>
+         <id>false</id>
+      </attributeDefinition>
+   </attribute>
+   <attribute name="zustAusland">
+      <attributeDefinition declaringClass="de.eom.kion.beans.festsetzung.lfst.ManVeranlagung" name="zustAusland">
+         <length>-1</length>
+         <scale>0</scale>
+         <precision>0</precision>
+         <nullable>true</nullable>
+         <id>false</id>
+      </attributeDefinition>
+   </attribute>
+   <attribute name="manveranlagungID">
+      <attributeDefinition declaringClass="de.eom.kion.beans.festsetzung.lfst.ManVeranlagung" name="manveranlagungID">
+         <length>-1</length>
+         <scale>0</scale>
+         <precision>0</precision>
+         <nullable>true</nullable>
+         <id>false</id>
+      </attributeDefinition>
+   </attribute>
+   <attribute name="personPfl">
+      <attributeDefinition declaringClass="de.eom.kion.beans.festsetzung.lfst.ManVeranlagung" name="personPfl">
+         <length>-1</length>
+         <scale>-1</scale>
+         <precision>-1</precision>
+         <nullable>true</nullable>
+         <id>false</id>
+      </attributeDefinition>
+   </attribute>
+   <attribute name="personGatt">
+      <attributeDefinition declaringClass="de.eom.kion.beans.festsetzung.lfst.ManVeranlagung" name="personGatt">
+         <length>-1</length>
+         <scale>-1</scale>
+         <precision>-1</precision>
+         <nullable>true</nullable>
+         <id>false</id>
+      </attributeDefinition>
+   </attribute>
+   <attribute name="abgStKapertr">
+      <attributeDefinition declaringClass="de.eom.kion.beans.festsetzung.lfst.ManVeranlagung" name="abgStKapertr">
+         <length>-1</length>
+         <scale>0</scale>
+         <precision>0</precision>
+         <nullable>true</nullable>
+         <id>false</id>
+      </attributeDefinition>
+   </attribute>
+   <attribute name="einkomStSchuld">
+      <attributeDefinition declaringClass="de.eom.kion.beans.festsetzung.lfst.ManVeranlagung" name="einkomStSchuld">
+         <length>-1</length>
+         <scale>0</scale>
+         <precision>0</precision>
+         <nullable>true</nullable>
+         <id>false</id>
+      </attributeDefinition>
+   </attribute>
+   <attribute name="grstBetr">
+      <attributeDefinition declaringClass="de.eom.kion.beans.festsetzung.lfst.ManVeranlagung" name="grstBetr">
+         <length>-1</length>
+         <scale>0</scale>
+         <precision>0</precision>
+         <nullable>true</nullable>
+         <id>false</id>
+      </attributeDefinition>
+   </attribute>
+   <attribute name="grstBetrPz">
+      <attributeDefinition declaringClass="de.eom.kion.beans.festsetzung.lfst.ManVeranlagung" name="grstBetrPz">
+         <length>-1</length>
+         <scale>0</scale>
+         <precision>0</precision>
+         <nullable>true</nullable>
+         <id>false</id>
+      </attributeDefinition>
+   </attribute>
+   <attribute name="guenstigPruef">
+      <attributeDefinition declaringClass="de.eom.kion.beans.festsetzung.lfst.ManVeranlagung" name="guenstigPruef">
+         <length>-1</length>
+         <scale>0</scale>
+         <precision>0</precision>
+         <nullable>true</nullable>
+         <id>false</id>
+      </attributeDefinition>
+   </attribute>
+</beanDefinition>

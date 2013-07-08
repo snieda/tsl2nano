@@ -1,0 +1,22 @@
+*NanoFix.Incubation*
+<font size="-1">Autor: Thomas Schneider 11/2012</font>
+
+{toc}
+
+h2. Introduction
+
+This project/plugin contains base technology implementations to be evaluated for future use in _swartifex.common_
+
+* caching 
+* threading with VNet (vnet package with ThreadingEventController, testing neuralnet, routing) for further informations see class _Net_ in vnet package
+* bytecode enhancing (javassist + BeanEnhancer)
+* excel-like tables: Logictable
+* math vector libary
+* Environment / Service / Configuration mechanism
+* evaluate uml-plugin with ejb
+* evaluate math-extended utils for EquationSolver
+* "JPA-UML-Diagram-Editor":http://wiki.eclipse.org/WTP/JPA_Diagram_Editor/Proposal
+
+h2. developing and deploying
+
+If you change sources of this plugin, you should start ant script _eclipse-tsl2.nano.incubation.xml_ with target _swartifex.eclipse.incubation.export_ and after that the 'deploy' target of your main project.

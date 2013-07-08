@@ -1,0 +1,87 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beanDefinition clazz="de.eom.kion.beans.festsetzung.steuerakte.Kontodaten" name="Kontodaten" xmlns="http://www.domain.com/beandef">
+   <presentable>
+      <type>-1</type>
+      <style>-1</style>
+      <visible>true</visible>
+   </presentable>
+   <valueExpression>
+      <expression>{iban}</expression>
+      <type>de.eom.kion.beans.festsetzung.steuerakte.Kontodaten</type>
+      <isPersistable>true</isPersistable>
+   </valueExpression>
+   <isNested>false</isNested>
+   <isdefault>true</isdefault>
+   <attribute name="bank">
+      <attributeDefinition declaringClass="de.eom.kion.beans.festsetzung.steuerakte.Kontodaten" name="bank">
+         <length>-1</length>
+         <scale>-1</scale>
+         <precision>-1</precision>
+         <nullable>false</nullable>
+         <id>false</id>
+      </attributeDefinition>
+   </attribute>
+   <attribute name="iban">
+      <attributeDefinition declaringClass="de.eom.kion.beans.festsetzung.steuerakte.Kontodaten" name="iban">
+         <length>-1</length>
+         <scale>0</scale>
+         <precision>0</precision>
+         <nullable>true</nullable>
+         <id>false</id>
+      </attributeDefinition>
+   </attribute>
+   <attribute name="steuerfall">
+      <attributeDefinition declaringClass="de.eom.kion.beans.festsetzung.steuerakte.Kontodaten" name="steuerfall">
+         <length>-1</length>
+         <scale>-1</scale>
+         <precision>-1</precision>
+         <nullable>false</nullable>
+         <id>false</id>
+      </attributeDefinition>
+   </attribute>
+   <attribute name="einzug">
+      <attributeDefinition declaringClass="de.eom.kion.beans.festsetzung.steuerakte.Kontodaten" name="einzug">
+         <length>-1</length>
+         <scale>0</scale>
+         <precision>0</precision>
+         <nullable>true</nullable>
+         <id>false</id>
+      </attributeDefinition>
+   </attribute>
+   <attribute name="kontodatenID">
+      <attributeDefinition declaringClass="de.eom.kion.beans.festsetzung.steuerakte.Kontodaten" name="kontodatenID">
+         <length>-1</length>
+         <scale>0</scale>
+         <precision>0</precision>
+         <nullable>true</nullable>
+         <id>false</id>
+      </attributeDefinition>
+   </attribute>
+   <attribute name="mandat">
+      <attributeDefinition declaringClass="de.eom.kion.beans.festsetzung.steuerakte.Kontodaten" name="mandat">
+         <length>-1</length>
+         <scale>0</scale>
+         <precision>0</precision>
+         <nullable>true</nullable>
+         <id>false</id>
+      </attributeDefinition>
+   </attribute>
+   <attribute name="kontakt">
+      <attributeDefinition declaringClass="de.eom.kion.beans.festsetzung.steuerakte.Kontodaten" name="kontakt">
+         <length>-1</length>
+         <scale>-1</scale>
+         <precision>-1</precision>
+         <nullable>true</nullable>
+         <id>false</id>
+      </attributeDefinition>
+   </attribute>
+   <attribute name="erstattung">
+      <attributeDefinition declaringClass="de.eom.kion.beans.festsetzung.steuerakte.Kontodaten" name="erstattung">
+         <length>-1</length>
+         <scale>0</scale>
+         <precision>0</precision>
+         <nullable>true</nullable>
+         <id>false</id>
+      </attributeDefinition>
+   </attribute>
+</beanDefinition>

@@ -1,0 +1,123 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beanDefinition clazz="de.eom.kion.beans.benutzer.Wiedervorlage" name="Wiedervorlage" xmlns="http://www.domain.com/beandef">
+   <presentable>
+      <type>-1</type>
+      <style>-1</style>
+      <visible>true</visible>
+   </presentable>
+   <valueExpression>
+      <expression>{bezeichnung}</expression>
+      <type>de.eom.kion.beans.benutzer.Wiedervorlage</type>
+      <isPersistable>true</isPersistable>
+   </valueExpression>
+   <isNested>false</isNested>
+   <isdefault>true</isdefault>
+   <attribute name="bezeichnung">
+      <attributeDefinition declaringClass="de.eom.kion.beans.benutzer.Wiedervorlage" name="bezeichnung">
+         <length>-1</length>
+         <scale>0</scale>
+         <precision>0</precision>
+         <nullable>true</nullable>
+         <id>false</id>
+      </attributeDefinition>
+   </attribute>
+   <attribute name="beschreibung">
+      <attributeDefinition declaringClass="de.eom.kion.beans.benutzer.Wiedervorlage" name="beschreibung">
+         <length>-1</length>
+         <scale>0</scale>
+         <precision>0</precision>
+         <nullable>true</nullable>
+         <id>false</id>
+      </attributeDefinition>
+   </attribute>
+   <attribute name="aendDatum">
+      <attributeDefinition declaringClass="de.eom.kion.beans.benutzer.Wiedervorlage" name="aendDatum">
+         <length>-1</length>
+         <scale>0</scale>
+         <precision>0</precision>
+         <nullable>true</nullable>
+         <id>false</id>
+      </attributeDefinition>
+   </attribute>
+   <attribute name="benutzer">
+      <attributeDefinition declaringClass="de.eom.kion.beans.benutzer.Wiedervorlage" name="benutzer">
+         <length>-1</length>
+         <scale>-1</scale>
+         <precision>-1</precision>
+         <nullable>true</nullable>
+         <id>false</id>
+      </attributeDefinition>
+   </attribute>
+   <attribute name="steuerfall">
+      <attributeDefinition declaringClass="de.eom.kion.beans.benutzer.Wiedervorlage" name="steuerfall">
+         <length>-1</length>
+         <scale>-1</scale>
+         <precision>-1</precision>
+         <nullable>false</nullable>
+         <id>false</id>
+      </attributeDefinition>
+   </attribute>
+   <attribute name="BInfoKopf">
+      <attributeDefinition declaringClass="de.eom.kion.beans.benutzer.Wiedervorlage" name="BInfoKopf">
+         <length>-1</length>
+         <scale>0</scale>
+         <precision>0</precision>
+         <nullable>true</nullable>
+         <id>false</id>
+      </attributeDefinition>
+   </attribute>
+   <attribute name="jederBescheid">
+      <attributeDefinition declaringClass="de.eom.kion.beans.benutzer.Wiedervorlage" name="jederBescheid">
+         <length>-1</length>
+         <scale>0</scale>
+         <precision>0</precision>
+         <nullable>true</nullable>
+         <id>false</id>
+      </attributeDefinition>
+   </attribute>
+   <attribute name="wiedervorlageID">
+      <attributeDefinition declaringClass="de.eom.kion.beans.benutzer.Wiedervorlage" name="wiedervorlageID">
+         <length>-1</length>
+         <scale>0</scale>
+         <precision>0</precision>
+         <nullable>true</nullable>
+         <id>false</id>
+      </attributeDefinition>
+   </attribute>
+   <attribute name="ersteller">
+      <attributeDefinition declaringClass="de.eom.kion.beans.benutzer.Wiedervorlage" name="ersteller">
+         <length>-1</length>
+         <scale>-1</scale>
+         <precision>-1</precision>
+         <nullable>false</nullable>
+         <id>false</id>
+      </attributeDefinition>
+   </attribute>
+   <attribute name="termin">
+      <attributeDefinition declaringClass="de.eom.kion.beans.benutzer.Wiedervorlage" name="termin">
+         <length>-1</length>
+         <scale>0</scale>
+         <precision>0</precision>
+         <nullable>true</nullable>
+         <id>false</id>
+      </attributeDefinition>
+   </attribute>
+   <attribute name="beiBescheid">
+      <attributeDefinition declaringClass="de.eom.kion.beans.benutzer.Wiedervorlage" name="beiBescheid">
+         <length>-1</length>
+         <scale>0</scale>
+         <precision>0</precision>
+         <nullable>true</nullable>
+         <id>false</id>
+      </attributeDefinition>
+   </attribute>
+   <attribute name="erledigt">
+      <attributeDefinition declaringClass="de.eom.kion.beans.benutzer.Wiedervorlage" name="erledigt">
+         <length>-1</length>
+         <scale>0</scale>
+         <precision>0</precision>
+         <nullable>true</nullable>
+         <id>false</id>
+      </attributeDefinition>
+   </attribute>
+</beanDefinition>

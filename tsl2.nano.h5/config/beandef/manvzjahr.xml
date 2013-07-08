@@ -1,0 +1,420 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beanDefinition clazz="de.eom.kion.beans.festsetzung.lfst.ManVZJahr" name="ManVZJahr" xmlns="http://www.domain.com/beandef">
+   <presentable>
+      <type>-1</type>
+      <style>-1</style>
+      <visible>true</visible>
+   </presentable>
+   <valueExpression>
+      <expression>{aendDatum}</expression>
+      <type>de.eom.kion.beans.festsetzung.lfst.ManVZJahr</type>
+      <isPersistable>true</isPersistable>
+   </valueExpression>
+   <isNested>false</isNested>
+   <isdefault>true</isdefault>
+   <attribute name="bank">
+      <attributeDefinition declaringClass="de.eom.kion.beans.festsetzung.lfst.ManVZJahr" name="bank">
+         <length>-1</length>
+         <scale>-1</scale>
+         <precision>-1</precision>
+         <nullable>true</nullable>
+         <id>false</id>
+      </attributeDefinition>
+   </attribute>
+   <attribute name="aendDatum">
+      <attributeDefinition declaringClass="de.eom.kion.beans.festsetzung.lfst.ManVZJahr" name="aendDatum">
+         <length>-1</length>
+         <scale>0</scale>
+         <precision>0</precision>
+         <nullable>true</nullable>
+         <id>false</id>
+      </attributeDefinition>
+   </attribute>
+   <attribute name="iban">
+      <attributeDefinition declaringClass="de.eom.kion.beans.festsetzung.lfst.ManVZJahr" name="iban">
+         <length>-1</length>
+         <scale>0</scale>
+         <precision>0</precision>
+         <nullable>true</nullable>
+         <id>false</id>
+      </attributeDefinition>
+   </attribute>
+   <attribute name="steuerfall">
+      <attributeDefinition declaringClass="de.eom.kion.beans.festsetzung.lfst.ManVZJahr" name="steuerfall">
+         <length>-1</length>
+         <scale>-1</scale>
+         <precision>-1</precision>
+         <nullable>false</nullable>
+         <id>false</id>
+      </attributeDefinition>
+   </attribute>
+   <attribute name="mitteilungsblatt">
+      <attributeDefinition declaringClass="de.eom.kion.beans.festsetzung.lfst.ManVZJahr" name="mitteilungsblatt">
+         <length>-1</length>
+         <scale>-1</scale>
+         <precision>-1</precision>
+         <nullable>true</nullable>
+         <id>false</id>
+      </attributeDefinition>
+   </attribute>
+   <attribute name="halbeKinder">
+      <attributeDefinition declaringClass="de.eom.kion.beans.festsetzung.lfst.ManVZJahr" name="halbeKinder">
+         <length>-1</length>
+         <scale>0</scale>
+         <precision>0</precision>
+         <nullable>true</nullable>
+         <id>false</id>
+      </attributeDefinition>
+   </attribute>
+   <attribute name="volleKinder">
+      <attributeDefinition declaringClass="de.eom.kion.beans.festsetzung.lfst.ManVZJahr" name="volleKinder">
+         <length>-1</length>
+         <scale>0</scale>
+         <precision>0</precision>
+         <nullable>true</nullable>
+         <id>false</id>
+      </attributeDefinition>
+   </attribute>
+   <attribute name="gemSchluessel">
+      <attributeDefinition declaringClass="de.eom.kion.beans.festsetzung.lfst.ManVZJahr" name="gemSchluessel">
+         <length>-1</length>
+         <scale>0</scale>
+         <precision>0</precision>
+         <nullable>true</nullable>
+         <id>false</id>
+      </attributeDefinition>
+   </attribute>
+   <attribute name="rechentermin">
+      <attributeDefinition declaringClass="de.eom.kion.beans.festsetzung.lfst.ManVZJahr" name="rechentermin">
+         <length>-1</length>
+         <scale>0</scale>
+         <precision>0</precision>
+         <nullable>true</nullable>
+         <id>false</id>
+      </attributeDefinition>
+   </attribute>
+   <attribute name="adressName1">
+      <attributeDefinition declaringClass="de.eom.kion.beans.festsetzung.lfst.ManVZJahr" name="adressName1">
+         <length>-1</length>
+         <scale>0</scale>
+         <precision>0</precision>
+         <nullable>true</nullable>
+         <id>false</id>
+      </attributeDefinition>
+   </attribute>
+   <attribute name="adressName2">
+      <attributeDefinition declaringClass="de.eom.kion.beans.festsetzung.lfst.ManVZJahr" name="adressName2">
+         <length>-1</length>
+         <scale>0</scale>
+         <precision>0</precision>
+         <nullable>true</nullable>
+         <id>false</id>
+      </attributeDefinition>
+   </attribute>
+   <attribute name="adressName3">
+      <attributeDefinition declaringClass="de.eom.kion.beans.festsetzung.lfst.ManVZJahr" name="adressName3">
+         <length>-1</length>
+         <scale>0</scale>
+         <precision>0</precision>
+         <nullable>true</nullable>
+         <id>false</id>
+      </attributeDefinition>
+   </attribute>
+   <attribute name="adressName4">
+      <attributeDefinition declaringClass="de.eom.kion.beans.festsetzung.lfst.ManVZJahr" name="adressName4">
+         <length>-1</length>
+         <scale>0</scale>
+         <precision>0</precision>
+         <nullable>true</nullable>
+         <id>false</id>
+      </attributeDefinition>
+   </attribute>
+   <attribute name="adressStrasse1">
+      <attributeDefinition declaringClass="de.eom.kion.beans.festsetzung.lfst.ManVZJahr" name="adressStrasse1">
+         <length>-1</length>
+         <scale>0</scale>
+         <precision>0</precision>
+         <nullable>true</nullable>
+         <id>false</id>
+      </attributeDefinition>
+   </attribute>
+   <attribute name="adressStrasse2">
+      <attributeDefinition declaringClass="de.eom.kion.beans.festsetzung.lfst.ManVZJahr" name="adressStrasse2">
+         <length>-1</length>
+         <scale>0</scale>
+         <precision>0</precision>
+         <nullable>true</nullable>
+         <id>false</id>
+      </attributeDefinition>
+   </attribute>
+   <attribute name="adressOrt">
+      <attributeDefinition declaringClass="de.eom.kion.beans.festsetzung.lfst.ManVZJahr" name="adressOrt">
+         <length>-1</length>
+         <scale>0</scale>
+         <precision>0</precision>
+         <nullable>true</nullable>
+         <id>false</id>
+      </attributeDefinition>
+   </attribute>
+   <attribute name="zustName1">
+      <attributeDefinition declaringClass="de.eom.kion.beans.festsetzung.lfst.ManVZJahr" name="zustName1">
+         <length>-1</length>
+         <scale>0</scale>
+         <precision>0</precision>
+         <nullable>true</nullable>
+         <id>false</id>
+      </attributeDefinition>
+   </attribute>
+   <attribute name="zustName2">
+      <attributeDefinition declaringClass="de.eom.kion.beans.festsetzung.lfst.ManVZJahr" name="zustName2">
+         <length>-1</length>
+         <scale>0</scale>
+         <precision>0</precision>
+         <nullable>true</nullable>
+         <id>false</id>
+      </attributeDefinition>
+   </attribute>
+   <attribute name="zustName3">
+      <attributeDefinition declaringClass="de.eom.kion.beans.festsetzung.lfst.ManVZJahr" name="zustName3">
+         <length>-1</length>
+         <scale>0</scale>
+         <precision>0</precision>
+         <nullable>true</nullable>
+         <id>false</id>
+      </attributeDefinition>
+   </attribute>
+   <attribute name="zustName4">
+      <attributeDefinition declaringClass="de.eom.kion.beans.festsetzung.lfst.ManVZJahr" name="zustName4">
+         <length>-1</length>
+         <scale>0</scale>
+         <precision>0</precision>
+         <nullable>true</nullable>
+         <id>false</id>
+      </attributeDefinition>
+   </attribute>
+   <attribute name="zustStrasse1">
+      <attributeDefinition declaringClass="de.eom.kion.beans.festsetzung.lfst.ManVZJahr" name="zustStrasse1">
+         <length>-1</length>
+         <scale>0</scale>
+         <precision>0</precision>
+         <nullable>true</nullable>
+         <id>false</id>
+      </attributeDefinition>
+   </attribute>
+   <attribute name="zustStrasse2">
+      <attributeDefinition declaringClass="de.eom.kion.beans.festsetzung.lfst.ManVZJahr" name="zustStrasse2">
+         <length>-1</length>
+         <scale>0</scale>
+         <precision>0</precision>
+         <nullable>true</nullable>
+         <id>false</id>
+      </attributeDefinition>
+   </attribute>
+   <attribute name="zustOrt">
+      <attributeDefinition declaringClass="de.eom.kion.beans.festsetzung.lfst.ManVZJahr" name="zustOrt">
+         <length>-1</length>
+         <scale>0</scale>
+         <precision>0</precision>
+         <nullable>true</nullable>
+         <id>false</id>
+      </attributeDefinition>
+   </attribute>
+   <attribute name="zustAnrede">
+      <attributeDefinition declaringClass="de.eom.kion.beans.festsetzung.lfst.ManVZJahr" name="zustAnrede">
+         <length>-1</length>
+         <scale>0</scale>
+         <precision>0</precision>
+         <nullable>true</nullable>
+         <id>false</id>
+      </attributeDefinition>
+   </attribute>
+   <attribute name="adressAnrede">
+      <attributeDefinition declaringClass="de.eom.kion.beans.festsetzung.lfst.ManVZJahr" name="adressAnrede">
+         <length>-1</length>
+         <scale>0</scale>
+         <precision>0</precision>
+         <nullable>true</nullable>
+         <id>false</id>
+      </attributeDefinition>
+   </attribute>
+   <attribute name="einkomPfl">
+      <attributeDefinition declaringClass="de.eom.kion.beans.festsetzung.lfst.ManVZJahr" name="einkomPfl">
+         <length>-1</length>
+         <scale>0</scale>
+         <precision>0</precision>
+         <nullable>true</nullable>
+         <id>false</id>
+      </attributeDefinition>
+   </attribute>
+   <attribute name="einkomGatt">
+      <attributeDefinition declaringClass="de.eom.kion.beans.festsetzung.lfst.ManVZJahr" name="einkomGatt">
+         <length>-1</length>
+         <scale>0</scale>
+         <precision>0</precision>
+         <nullable>true</nullable>
+         <id>false</id>
+      </attributeDefinition>
+   </attribute>
+   <attribute name="halbEinkPfl">
+      <attributeDefinition declaringClass="de.eom.kion.beans.festsetzung.lfst.ManVZJahr" name="halbEinkPfl">
+         <length>-1</length>
+         <scale>0</scale>
+         <precision>0</precision>
+         <nullable>true</nullable>
+         <id>false</id>
+      </attributeDefinition>
+   </attribute>
+   <attribute name="halbEinkGatt">
+      <attributeDefinition declaringClass="de.eom.kion.beans.festsetzung.lfst.ManVZJahr" name="halbEinkGatt">
+         <length>-1</length>
+         <scale>0</scale>
+         <precision>0</precision>
+         <nullable>true</nullable>
+         <id>false</id>
+      </attributeDefinition>
+   </attribute>
+   <attribute name="festsetzungsmethode">
+      <attributeDefinition declaringClass="de.eom.kion.beans.festsetzung.lfst.ManVZJahr" name="festsetzungsmethode">
+         <length>-1</length>
+         <scale>0</scale>
+         <precision>0</precision>
+         <nullable>true</nullable>
+         <id>false</id>
+      </attributeDefinition>
+   </attribute>
+   <attribute name="abDatum">
+      <attributeDefinition declaringClass="de.eom.kion.beans.festsetzung.lfst.ManVZJahr" name="abDatum">
+         <length>-1</length>
+         <scale>0</scale>
+         <precision>0</precision>
+         <nullable>true</nullable>
+         <id>false</id>
+      </attributeDefinition>
+   </attribute>
+   <attribute name="vzJahr">
+      <attributeDefinition declaringClass="de.eom.kion.beans.festsetzung.lfst.ManVZJahr" name="vzJahr">
+         <length>-1</length>
+         <scale>0</scale>
+         <precision>0</precision>
+         <nullable>true</nullable>
+         <id>false</id>
+      </attributeDefinition>
+   </attribute>
+   <attribute name="fiktJEkst">
+      <attributeDefinition declaringClass="de.eom.kion.beans.festsetzung.lfst.ManVZJahr" name="fiktJEkst">
+         <length>-1</length>
+         <scale>0</scale>
+         <precision>0</precision>
+         <nullable>true</nullable>
+         <id>false</id>
+      </attributeDefinition>
+   </attribute>
+   <attribute name="fiktJLstPfl">
+      <attributeDefinition declaringClass="de.eom.kion.beans.festsetzung.lfst.ManVZJahr" name="fiktJLstPfl">
+         <length>-1</length>
+         <scale>0</scale>
+         <precision>0</precision>
+         <nullable>true</nullable>
+         <id>false</id>
+      </attributeDefinition>
+   </attribute>
+   <attribute name="fiktJLstGatt">
+      <attributeDefinition declaringClass="de.eom.kion.beans.festsetzung.lfst.ManVZJahr" name="fiktJLstGatt">
+         <length>-1</length>
+         <scale>0</scale>
+         <precision>0</precision>
+         <nullable>true</nullable>
+         <id>false</id>
+      </attributeDefinition>
+   </attribute>
+   <attribute name="erlaeuterText">
+      <attributeDefinition declaringClass="de.eom.kion.beans.festsetzung.lfst.ManVZJahr" name="erlaeuterText">
+         <length>-1</length>
+         <scale>0</scale>
+         <precision>0</precision>
+         <nullable>true</nullable>
+         <id>false</id>
+      </attributeDefinition>
+   </attribute>
+   <attribute name="manvzjahrID">
+      <attributeDefinition declaringClass="de.eom.kion.beans.festsetzung.lfst.ManVZJahr" name="manvzjahrID">
+         <length>-1</length>
+         <scale>0</scale>
+         <precision>0</precision>
+         <nullable>true</nullable>
+         <id>false</id>
+      </attributeDefinition>
+   </attribute>
+   <attribute name="manVZQuartale">
+      <attributeDefinition declaringClass="de.eom.kion.beans.festsetzung.lfst.ManVZJahr" name="manVZQuartale">
+         <length>-1</length>
+         <scale>0</scale>
+         <precision>0</precision>
+         <nullable>true</nullable>
+         <id>false</id>
+      </attributeDefinition>
+   </attribute>
+   <attribute name="adressLand">
+      <attributeDefinition declaringClass="de.eom.kion.beans.festsetzung.lfst.ManVZJahr" name="adressLand">
+         <length>-1</length>
+         <scale>-1</scale>
+         <precision>-1</precision>
+         <nullable>true</nullable>
+         <id>false</id>
+      </attributeDefinition>
+   </attribute>
+   <attribute name="zustLand">
+      <attributeDefinition declaringClass="de.eom.kion.beans.festsetzung.lfst.ManVZJahr" name="zustLand">
+         <length>-1</length>
+         <scale>-1</scale>
+         <precision>-1</precision>
+         <nullable>true</nullable>
+         <id>false</id>
+      </attributeDefinition>
+   </attribute>
+   <attribute name="jahresVzBetrag">
+      <attributeDefinition declaringClass="de.eom.kion.beans.festsetzung.lfst.ManVZJahr" name="jahresVzBetrag">
+         <length>-1</length>
+         <scale>0</scale>
+         <precision>0</precision>
+         <nullable>true</nullable>
+         <id>false</id>
+      </attributeDefinition>
+   </attribute>
+   <attribute name="zustPlz">
+      <attributeDefinition declaringClass="de.eom.kion.beans.festsetzung.lfst.ManVZJahr" name="zustPlz">
+         <length>-1</length>
+         <scale>0</scale>
+         <precision>0</precision>
+         <nullable>true</nullable>
+         <id>false</id>
+      </attributeDefinition>
+   </attribute>
+   <attribute name="adressPlz">
+      <attributeDefinition declaringClass="de.eom.kion.beans.festsetzung.lfst.ManVZJahr" name="adressPlz">
+         <length>-1</length>
+         <scale>0</scale>
+         <precision>0</precision>
+         <nullable>true</nullable>
+         <id>false</id>
+      </attributeDefinition>
+   </attribute>
+   <attribute name="adressAusland">
+      <attributeDefinition declaringClass="de.eom.kion.beans.festsetzung.lfst.ManVZJahr" name="adressAusland">
+         <length>-1</length>
+         <scale>0</scale>
+         <precision>0</precision>
+         <nullable>true</nullable>
+         <id>false</id>
+      </attributeDefinition>
+   </attribute>
+   <attribute name="zustAusland">
+      <attributeDefinition declaringClass="de.eom.kion.beans.festsetzung.lfst.ManVZJahr" name="zustAusland">
+         <length>-1</length>
+         <scale>0</scale>
+         <precision>0</precision>
+         <nullable>true</nullable>
+         <id>false</id>
+      </attributeDefinition>
+   </attribute>
+</beanDefinition>

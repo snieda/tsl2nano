@@ -1,0 +1,12 @@
+*NanoFix.DirectAccess*
+<font size="-1">Autor: Thomas Schneider 06/2013</font>
+
+{toc}
+
+h2. Introduction
+
+This project/plugin extends the _swartifex.serviceaccess_ project to access the data without any application-server.
+
+h2. developing and deploying
+
+If you change sources of this plugin, you should start ant script _eclipse-tsl2.nano.directaccess.xml_ with target _swartifex.eclipse.directaccess.export_ and after that the 'deploy' target of your main project.

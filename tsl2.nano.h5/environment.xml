@@ -1,0 +1,55 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<environment>
+   <services class="java.util.Hashtable"/>
+   <property name="strict.mode">
+      <object class="java.lang.Boolean">false</object>
+   </property>
+   <property name="html5.http.method">
+      <object class="java.lang.String">post</object>
+   </property>
+   <property name="default.text.length">
+      <object class="java.lang.Integer">100</object>
+   </property>
+   <property name="default.bigdecimal.length">
+      <object class="java.lang.Integer">19</object>
+   </property>
+   <property name="default.attribute.id">
+      <object class="java.lang.Boolean">false</object>
+   </property>
+   <property name="beandef.usepersistent.cache">
+      <object class="java.lang.Boolean">true</object>
+   </property>
+   <property name="bean.best.attribute.regexp">
+      <object class="java.lang.String">.*(name|bezeichnung).*</object>
+   </property>
+   <property name="use.applicationserver">
+      <object class="java.lang.Boolean">false</object>
+   </property>
+   <property name="field.min.multiline.length">
+      <object class="java.lang.Integer">100</object>
+   </property>
+   <property name="default.bigdecimal.precision">
+      <object class="java.lang.Integer">4</object>
+   </property>
+   <property name="default.int.length">
+      <object class="java.lang.Integer">10</object>
+   </property>
+   <property name="bean.best.attribute.minlength">
+      <object class="java.lang.Integer">3</object>
+   </property>
+   <property name="de.tsl2.nano.config.path">
+      <object class="java.lang.String">C:\idv\wjax\distribution\tsl2.nano.h5\config/</object>
+   </property>
+   <property name="service.maxresult">
+      <object class="java.lang.Integer">100</object>
+   </property>
+   <property name="default.attribute.multivalue">
+      <object class="java.lang.Boolean">false</object>
+   </property>
+   <property name="bean.best.attribute.maxlength">
+      <object class="java.lang.Integer">30</object>
+   </property>
+   <property name="bean.best.attribute.type">
+      <object class="java.lang.Class">java.lang.String</object>
+   </property>
+</environment>

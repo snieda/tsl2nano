@@ -1,0 +1,184 @@
+*An implementation of EJBs FileSystemConnector*
+Authors: Erwin Guib IDV, Thomas Schneider IDV
+
+{toc}
+
+h1. Introduction
+
+To access files from services on server side - __java.io__ should not be used directly in your services - you may use the fsconnector.
+
+Read further informations in the "readme.txt":doc/readme.txt
+
+h1. Implementation
+
+The interface __FsConnectionFactory__ provides the building of an __FsConnection__. The FsConnection provides all file access methods - while the __FsManagedConnection__ implements the file access.
+
+h1. Use
+
+h2. Deploy to the application server
+
+Start build.xml-->deploy.fsconnector to deploy the connector to your appserver. the factories will be instantiated immediately by the server.
+
+h2. Using the connector in your service
+
+Define a fsConnection-factory resource in your service:
+<pre>
+@Resource(mappedName="java:kion/fsConnectionFactory")
+FsConnectionFactory fsConnectionFactory;
+</pre>
+
+create and read a connection through:
+<pre>
+...
+FsConnection con = fsConnectionFactory.getConnection();
+FileInputStream fis = new FileInputStream("MY_FILE_NAME");
+InputStream in  = con.getInputStream(fis);
+BufferedReader reader = new BufferedReader(new InputStreamReader(in));
+while((String line = reader.readLine()) != null) {
+	//evaluate file lines
+}
+...
+</pre>
+
+h2. The absolute path mode
+
+The __fsconnection__ is configured by "ra.xml":src/main/META-INF/ra.xml and defines a __rootDir__ path, read from an xml file in the applicationservers deploy dir.
+
+content example of this deployed xml file:
+<pre>
+
+<!DOCTYPE connection-factories PUBLIC
+          "-//JBoss//DTD JBOSS JCA Config 1.5//EN"
+          "http://www.jboss.org/j2ee/dtd/jboss-ds_1_5.dtd">
+<!--   
+       The non-transaction FileSystem resource adaptor service configuration
+-->
+<connection-factories>
+    <no-tx-connection-factory>
+        <jndi-name>kion/fsConnectionFactory</jndi-name>
+        <rar-name>fs-connector.rar</rar-name>
+        <connection-definition>
+             de.idv.resource.fs.FsConnectionFactory
+        </connection-definition>
+        <config-property name="rootDirPath"
+                         type="java.lang.String">server</config-property>
+    </no-tx-connection-factory>
+</connection-factories>
+
+</pre>
+
+The value of __rootDirPath__ can be any path to a file server - if the directories don't exist they will be created.
+
+But you can set *MODE_ABSOLUTE_PATH* as rootDirPath - then the rootDirPath will be ignored, and you have to give your file names (e.g. on getConnection(fileName) or write(fileName)) with absolute paths.
+
+h1. Example: FileService
+
+<pre>
+@Stateless
+@Local(IFileLocalService.class)
+@Remote(IFileService.class)
+public class FileServiceBean implements IFileService, IFileLocalService {
+
+    private static final Log logger = LogFactory.getLog(FileServiceBean.class);
+
+    @Resource(mappedName = "java:kion/fsConnectionFactory")
+    FsConnectionFactory fsConnectionFactory;
+
+    /**
+     * {@inheritDoc}
+     */
+    public BufferedReader getFileReader(String fileName) {
+        try {
+            FsConnection con = fsConnectionFactory.getConnection();
+            return new BufferedReader(new InputStreamReader(con.getInputStream(fileName)));
+        } catch (Exception e) {
+            ForwardedException.forward(e);
+        }
+        return null;
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    public void writeFile(String destFileName, InputStream data, boolean overwrite) throws IOException {
+        try {
+            FsConnection con = fsConnectionFactory.getConnection();
+            con.writeFile(destFileName, data, overwrite);
+        } catch (Exception e) {
+            ForwardedException.forward(e);
+        }
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    public void delete(String fileName) {
+        try {
+            FsConnection con = fsConnectionFactory.getConnection();
+            con.delete(fileName);
+        } catch (Exception e) {
+            ForwardedException.forward(e);
+        }
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    public boolean exists(String fileName) {
+        try {
+            FsConnection con = fsConnectionFactory.getConnection();
+            return con.exists(fileName);
+        } catch (Exception e) {
+            ForwardedException.forward(e);
+        }
+        return false;
+    }
+
+}
+</pre>
+
+h1. Example FileService JUnit Test
+
+<pre>
+public class FileServiceTest extends BaseServiceTest {
+
+    @BeforeClass
+    public static void setUp() {
+//        createTestData("akten");
+    }
+
+    @Test
+    public void testFileRead() throws Exception {
+        /*
+         * test for absolute path mode! see FsConnectionFactory.MODE_ABSOLUTE_PATH.
+         * create and write test file in home dir, read it and delete it.
+         * this works only on a test system where test-client and app-server
+         * are running on the same machine.
+         */
+        String userHome = System.getProperty("user.home");
+        String testFile = userHome + "fileservice-testfile.txt";
+        String testFileContent = "Dies ist eine Testdatei\nmit drei Zeilen\n";
+        IFileService fileService = getService(IFileService.class);
+        
+        //first: create it!
+        assert !fileService.exists(testFile);
+        InputStream stream = null;
+        fileService.writeFile(testFile, stream, true);
+        assert fileService.exists(testFile);
+        //second: do it again - overwriting
+        fileService.writeFile(testFile, stream, true);
+        //third: read it and compare it
+        BufferedReader fileReader = fileService.getFileReader(testFile);
+        String line = null;
+        StringBuilder buf = new StringBuilder();
+        while ((line  = fileReader.readLine()) != null) {
+            buf.append(line);
+        }
+        assert buf.toString().equals(testFileContent);
+        
+        //finally: delete it and check deletion
+        fileService.delete(testFile);
+        assert !fileService.exists(testFile);
+    }
+}
+</pre>

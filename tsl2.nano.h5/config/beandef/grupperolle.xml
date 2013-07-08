@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beanDefinition clazz="de.eom.kion.beans.benutzer.GruppeRolle" name="GruppeRolle" xmlns="http://www.domain.com/beandef">
+   <presentable>
+      <type>-1</type>
+      <style>-1</style>
+      <visible>true</visible>
+   </presentable>
+   <valueExpression>
+      <expression>{rolle}</expression>
+      <type>de.eom.kion.beans.benutzer.GruppeRolle</type>
+      <isPersistable>true</isPersistable>
+   </valueExpression>
+   <isNested>false</isNested>
+   <isdefault>true</isdefault>
+   <attribute name="grupperolleID">
+      <attributeDefinition declaringClass="de.eom.kion.beans.benutzer.GruppeRolle" name="grupperolleID">
+         <length>-1</length>
+         <scale>0</scale>
+         <precision>0</precision>
+         <nullable>true</nullable>
+         <id>false</id>
+      </attributeDefinition>
+   </attribute>
+   <attribute name="rolle">
+      <attributeDefinition declaringClass="de.eom.kion.beans.benutzer.GruppeRolle" name="rolle">
+         <length>-1</length>
+         <scale>-1</scale>
+         <precision>-1</precision>
+         <nullable>false</nullable>
+         <id>false</id>
+      </attributeDefinition>
+   </attribute>
+</beanDefinition>

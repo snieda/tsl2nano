@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<weblogic-connector xmlns="http://www.bea.com/ns/weblogic/90" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://java.sun.com/xml/ns/j2ee http://java.sun.com/xml/ns/j2ee/connector_1_5.xsd  http://www.bea.com/ns/weblogic/90 http://www.bea.com/ns/weblogic/90/weblogic-ra.xsd">
+	<!-- jndi-name>ipvs/ra/fsRa</jndi-name-->
+	<enable-access-outside-app>true</enable-access-outside-app>
+	<enable-global-access-to-classes>true</enable-global-access-to-classes>
+	<properties>
+		<property>
+			<name>RootDirPath</name>
+			<value>ipvs_fs</value>
+		</property>
+	</properties>
+	<outbound-resource-adapter>
+		<connection-definition-group>
+			<connection-factory-interface>de.tsl2.nano.resource.fs.FsConnectionFactory</connection-factory-interface>
+			<connection-instance>
+				<jndi-name>ipvs/ra/fs</jndi-name>
+				<connection-properties>
+					<pool-params>
+						<initial-capacity>1</initial-capacity>
+						<max-capacity>50</max-capacity>
+						<capacity-increment>1</capacity-increment>
+						<shrinking-enabled>true</shrinking-enabled>
+						<shrink-frequency-seconds>300</shrink-frequency-seconds>
+					</pool-params>
+				</connection-properties>
+			</connection-instance>
+		</connection-definition-group>
+	</outbound-resource-adapter>
+
+</weblogic-connector>

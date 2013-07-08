@@ -1,0 +1,773 @@
+*NanoFix.ServiceAccess*
+<font size="-1">Autor: Thomas Schneider 2009-2012</font>
+
+{toc}
+
+h2. Introduction
+
+This project provides implementations to access services through a "servicefactory":src/main/de.tsl2.nano/serviceaccess/ServiceFactory.java. The JAAS is used to do authentification and authorization (see: "here":src/main/de.tsl2.nano/serviceaccess/aas/module/AbstractLoginModule.java). A feature-mechanism provides the possibility to do optional calls to feature-implementations. 
+
+For further informations, see here: 
+* "Java Sun Tutorial":http://java.sun.com/j2se/1.4.2/docs/guide/security/jaas/tutorials/GeneralAcnAndAzn.html
+* "Short Tutorial":http://www.oio.de/public/java/jaas/sso-jaas-kerberos-tutorial.htm mit Sequenz-Diagrammen.
+
+h3. Using on different Application Servers
+
+This plugins contains some jboss specific api jars:
+* jboss-ejb-api_3.1_spec.jar
+* jboss-interceptors-api_1.1_spec.jar
+* hibernate-jpa-2.0-api.jar
+
+To use the plugin inside another appserver like glassfish, you should remove the file names from MANIFEST.MF. Your applications MANIFEST.MF should include the desired appserver-lib plugin as dependency - before the serviceaccess plugin.
+
+h2. Features
+
+* "ServiceFactory":src/main/de.tsl2.nano/serviceaccess/ServiceFactory.java 
+** service provider using a "ServiceLocator":src/main/de.tsl2.nano/serviceaccess/ServiceLocator.java and a "ServiceProxy":src/main/de.tsl2.nano/serviceaccess/ServiceProxy.java
+** holds a user session with current user, mandator and mandator-dependent features
+* "AbstractLoginModule":src/main/de.tsl2.nano/serviceaccess/aas/AbstractLoginModule.java java *aas* access with permissions, roles and principals.
+* "FeatureFactory":src/main/de.tsl2.nano/service/feature/FeatureFactory.java enables optional calling of feature implementations 
+* "GenericService":src/main/de.tsl2.nano/service/util/IGenericLocalService.java provides standard bean service access methods
+** Implementation of IQueryService provides support for complex queries, defining a collection of finders.
+* PersistenceUtil: some persistence utility methods
+* ServiceUtil: some query helper methods
+* "BeanContainerUtil":src/main/de.tsl2.nano/service/util/BeanContainerUtil.java bridge for framework standard bean service actions (delegates to  GenericServiceBean)
+* "JobScheduleServiceBean":src/main/de.tsl2.nano/service/schedule/IJobScheduleService.java provides ejb 3.1 timer service access.
+* "FileSystem-Connector":fsconnector.html simple filesystem connector implementation. a simple "FileService":src/main/de.tsl2.nano/service/util/FileServiceBean.java simplifies the use. have a look at the junit-test "FileServiceTest":src/test/de/idvag/serviceaccess/test/FileServiceTest.java to see some use-cases.c
+* CachingBatchLoader: is able to load data in a block, doing minimal communication with the server. second feature is optional storing that loaded data providing it as cache for the application.
+
+h3. Quick Start
+
+To see, how to use the the services in the simpliest way, have a look at the test class "ServiceAccessTest":src/test/de/idvag/serviceaccess/test/ServiceAccessTest.java.
+
+h2. Initializing
+
+The project depends on an ejb implementation. without a dependency to library project, holding and exporting a library like 'javaee.jar', it isn't compilable.
+
+The ServiceFactory as the main object of this package must be initialized to use the right classloader. You do that calling the _ServiceFactory.createInstance(...)_ method.<br>
+To use user-session informations and authorization and mandator-dependend features. The call of _ServiceFactory.instance().createSession(...)_ is neccessary. You will implement an own AAS LoginModule class to do the call on client side. On server side, a service method, doing the authentication and authorization should call that, too.
+
+h3. Setting server connections
+
+For developing the applicationserver will be started in default-mode, using the localhost. The database connection will be done through a datasource-connection, defined inside the applicationserver. To change the connections to the application-server or database, read the following descriptions.
+
+h4. JBoss 4-6 and Oracle 10-11
+
+* to start jboss for a given network-ip and a given mode:
+** __./run.sh -cminimal --host 192.168.56.102__
+** change jndi (__jndi-jboss.properties__) on shared-plugin: __java.naming.provider.url=jnp://192.168.56.102:1099__
+** change jndi (__jndi-jboss.properties__) on jboss-plugin : __java.naming.provider.url=jnp://192.168.56.102:1099__
+* to change the database-connection or your app-server, edit the deployed file oracle-ds.xml:
+** e.g.: connection-url: __jdbc:oracle:thin:@localhost:1521:xe__
+* to change the local test-data db-connection (see __create.db.test__), edit __oradb-connection.properties__ 
+
+h3. Creating the LoginModule
+
+overwrite the class _AbstractLoginModule_ to define the authentication and authorization.
+
+Example:
+<pre>
+/**
+ * 
+ * @author Thomas Schneider, Thomas Schneider, www.idv-ag.de
+ * @version $Revision$
+ */
+public class LoginModule extends AbstractLoginModule {
+    protected boolean authenticate() throws FailedLoginException {
+        IBenutzerService benutzerService = ServiceFactory.instance().getService(IBenutzerService.class);
+        Benutzer b;
+        if (password1 == null)
+            b = benutzerService.authenticate(username, String.valueOf(password));
+        else
+            //password changing
+            b = benutzerService.changePasswd(username,
+                String.valueOf(password),
+                String.valueOf(password1),
+                String.valueOf(password2));
+        if (b == null)
+            throw new FailedLoginException(Messages.getString("swartifex.login.error.userorpasswd"));
+
+        //create the mandator dependend features
+        Mandant mandant = benutzerService.getMandant();
+        Collection<String> mandatorModules = benutzerService.getMandatorFeatures();
+        ServiceFactory.instance().createSession(b, mandant, subject, null, mandatorFeatures, null);
+
+        return b != null;
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    protected void authorize() {
+        super.authorize();
+
+        //add all user roles as principals
+        IBenutzerService benutzerService = ServiceFactory.instance().getService(IBenutzerService.class);
+        Collection<String> userRoles = benutzerService.getUserRoles(username);
+        for (String roleName : userRoles) {
+            subject.getPrincipals().add(new Role(roleName));
+        }
+        LOG.info("logged-in-user:\n" + subject);
+    }
+ }
+</pre>
+
+h2. Using the Feature- and ServiceFactory
+
+Use the following methods, to work with the service factory:
+* ServiceFactory:
+** ServiceFactory.instance().getService(serviceInterface)
+** ServiceFactory.instance().getUserObject()
+** ServiceFactory.instance().getMandatorObject()
+* FeatureFactory:
+** FeatureFactory.instance().getImpl(featureInterface).featureMethod(...)
+
+*Tip:*
+Have a look into the log file (after user login) to see, which roles and features are assigned. The feature names will be compared case-sensitive!
+
+*WARNING*
+Do not use the ServiceFactory inside server-side service implementations! To get services
+on server side, use EJB conventions.
+Example:
+<pre>
+@EJB
+IGenericLocalService genService
+</pre>
+
+
+h2. Optional Feature Integration on Runtime
+
+The description will be found here:
+"4.14 Optional Feature Integration on Runtime":..\swartifex\doc\readme.txt.html#4.14
+
+h2. Entities and Services
+
+h3. Using Services - performance aspects
+
+If you call a service, you use an interface definition to define the service bean. On client side calls, you will use a remote interface - an expensive communication (RMI or Corba) to the remote vm will be done, serializing transferred data. on server side calls you use a local interface - no serializing and no communication has to be done.
+
+h3. The GenericService
+
+The "GenericService":src/main/de.tsl2.nano/service/util/IGenericService.java is an EJB 3 stateless Session Bean providing the following methods:
+
+<pre>
+    /** find all beans of type beanType (statement cache will be used!) */
+    public <T> Collection<T> findAll(Class<T> beanType, Class... lazyRelations);
+
+    /**
+     * find all beans of type beanType (statement cache will be used!)
+     * 
+     * @param <T> bean type
+     * @param beanType bean type
+     * @param maxResult (optional: set -1 to use no definition) maximum result count
+     * @param lazyRelations (optional) pre-loaded lazy-relation types
+     * @return filled collection with beans of type beantype
+     */
+    public <T> Collection<T> findAll(Class<T> beanType, int maxResult, Class... lazyRelations);
+
+    /**
+     * find all beans of type beanType beeing members of holder. useful if your beanType has no access to the holder.
+     * <p>
+     * 
+     * <pre>
+     * f.e.: 
+     *   Parent (1) <-- (*) Child
+     *   ==> but you want to get the parents children!
+     * will result in:
+     *   select t from Child t, Parent t1 
+     *   where t1.ID = holder.ID 
+     *   and t member of t1.{attributeName}
+     * </pre>
+     * 
+     * @param <H> holder type
+     * @param <T> member type
+     * @param beanType member type to be collected
+     * @param holder holder instance to get the members of (without direct access!)
+     * @param attributeName
+     * @return members of holder (member given by attributeName)
+     */
+    <H, T> Collection<T> findMembers(H holder, Class<T> beanType, String attributeName, Class... lazyRelations);
+
+    /**
+     * find all holders of the given member instance. useful if your member has no access to the holder. on composites
+     * and aggregations you will get a collection holding only one instance.
+     * <p>
+     * 
+     * <pre>
+     * f.e.: 
+     *   Parent (1) --> (*) Child
+     *   ==> but you want to get a childs parent!
+     * will result in:
+     *   select t from Child t, Parent t1 
+     *   where t.ID = member.ID 
+     *   and t member of t1.{attributeName}
+     * </pre>
+     * 
+     * @param <H> holder type
+     * @param <T> member type
+     * @param beanType member type to be collected
+     * @param holder holder instance to get the members of (without direct access!)
+     * @param attributeName
+     * @return members of holder (member given by attributeName)
+     */
+    <H, T> Collection<H> findHolders(T member, Class<H> holderType, String attributeName, Class... lazyRelations);
+
+    /**
+     * tries to find the given bean - if more than one bean was found, an exception will be thrown.
+     * 
+     * @param <T> bean type
+     * @param exampleBean example bean
+     * @return exactly one bean!
+     */
+    <T> T findByExample(T exampleBean, Class... lazyRelations);
+
+    /** find all beans with same attributes (only single value attributes!) as exampleBean */
+    public <T> Collection<T> findByExample(T exampleBean, boolean caseInsensitive, Class... lazyRelations);
+
+    /** find all beans with similar (like) attributes (only single value attributes!) as exampleBean */
+    public <T> Collection<T> findByExampleLike(T exampleBean, boolean caseInsensitive, Class... lazyRelations);
+
+    /** find bean with given id */
+    public <T> T findById(Class<T> beanType, Object id, Class... lazyRelations);
+
+    /** find all beans with same attributes (only single value attributes!) between first and second bean */
+    public <T> Collection<T> findBetween(T firstBean, T secondBean, boolean caseInsensitive, Class... lazyRelations);
+
+    /**
+     * finds all beans, having properties between firstBean and secondBean.
+     * 
+     * @param <T> beantype
+     * @param firstBean minimum bean
+     * @param secondBean maximum bean
+     * @param caseInsensitive whether to search strings case insensitive
+     * @param maxResult (optional: set -1 to use no definition) maximum result count
+     * @param lazyRelations (optional) pre-loaded lazy-relation types
+     * @return filled collection with beans of type T
+     */
+    public <T> Collection<T> findBetween(T firstBean,
+            T secondBean,
+            boolean caseInsensitive,
+            int maxResult,
+            Class... lazyRelations);
+
+    /**
+     * find items by query. args are optional. if nativeQuery is true, a standard sql-query will be done
+     * 
+     * @param queryString may be a jpa-ql (nativeQuery=false!) or sql string (nativeQuery=true)
+     * @param nativeQuery should only be true, if you use pure sql
+     * @param args if your queryString contains parameters (represented by questionmarks ('?'), they will be
+     *            sequentially filled with the values of args
+     * @param lazyRelations (optional) one-to-many types to be filled before returning
+     * @return result of query
+     */
+    public Collection<?> findByQuery(String queryString, boolean nativeQuery, Object[] args, Class... lazyRelations);
+
+    /**
+     * find items by query. args are optional. if nativeQuery is true, a standard sql-query will be done
+     * 
+     * @param queryString may be a jpa-ql (nativeQuery=false!) or sql string (nativeQuery=true)
+     * @param nativeQuery should only be true, if you use pure sql
+     * @param args if your queryString contains parameters (represented by ':' + varname (e.g. :myvar), they will be
+     *            filled with the values of args
+     * @param lazyRelations (optional) one-to-many types to be filled before returning
+     * @return result of query
+     */
+    public Collection<?> findByQuery(String queryString,
+            boolean nativeQuery,
+            Map<String, ?> args,
+            Class... lazyRelations);
+
+    /**
+     * find one item by query. args are optional. if nativeQuery is true, a standard sql-query will be done. for further
+     * informations, see {@link #findByQuery(String, boolean, Object[], Class...)}.
+     */
+    public Object findItemByQuery(String queryString, boolean nativeQuery, Object[] args, Class... lazyRelations);
+
+    /**
+     * find one value by query - fast way to get a single value like through 'count(*)' without packing it to a bean. 
+     * BE SURE TO RETURN EXACTLY ONE VALUE! Little bit faster than {@link #findItemByQuery(String, boolean, Object[], Class...)}.
+     * args are optional. if nativeQuery is true, a standard sql-query will be done. for further
+     * informations, see {@link #findByQuery(String, boolean, Object[], Class...)}.
+     */
+    public Object findValueByQuery(String queryString, boolean nativeQuery, Object... args);
+
+    /**
+     * persists or merges the given object - committing a transaction and calling refresh and flush after.
+     * {@link #persistNoTransaction(Object, boolean, boolean)} to work on bean-managed transactions
+     */
+    public <T> T persist(T bean, Class... lazyRelations);
+
+    /**
+     * persists or merges the given object - committing a transaction. if refresh and flush are false, you have a high
+     * performance. use {@link #persistNoTransaction(Object, boolean, boolean)} to work on bean-managed transactions
+     */
+    public <T> T persist(T bean, boolean refreshBean, boolean flush, Class... lazyRelations);
+
+    /**
+     * persists or merges the given object without accessing a transaction. if refresh and flush are false, you have a
+     * high performance.
+     */
+    public <T> T persistNoTransaction(T bean, boolean refreshBean, boolean flush, Class... lazyRelations);
+
+    /** persists or merges the objects of the given collection - using one transaction. */
+    public <T> Collection<T> persistCollection(Collection<T> beans, Class... lazyRelations);
+
+    /** refreshes the given object - reloads it in the current transaction / session! */
+    public <T> T refresh(T bean);
+
+    /** removes the given object */
+    public void remove(Object bean);
+
+    /**
+     * calls any method on the relation to invoke an instantiation of the given relation. this can't be done on a bean,
+     * that was already serialized, so we have to get a 'fresh' source bean to call any method on the given attribute.
+     * <p>
+     * WARNING: only useful on calling remote interfaces, where serialization will be done! if you call a service on the
+     * same jvm, you should use the IGenericLocalService - and the {@link #instantiateLazyRelationship(Object)} is
+     * obsolete.
+     * 
+     * 
+     * @param <T> type of bean
+     * @param clazz type of source bean
+     * @param beanId id of source bean
+     * @param attributes optional relation attributes to instantiate. if null, all attributes will be instantiated.
+     * @return new bean with given id.
+     */
+    public <T> T instantiateLazyRelationship(Class<T> clazz, Object beanId, String[] attributes);
+
+    /**
+     * calls any method on the relation to invoke an instantiation of the given relation. this can't be done on a bean,
+     * that was already serialized, so we have to get a 'fresh' source bean to call any method on the given attribute.
+     * <p>
+     * WARNING: works recursive! max recurs level is 10. if fillTypes is null, only the attributes of the current bean
+     * will be instantiated. if fillTypes is not null, all other relations will be evaluated through all its attributes!
+     * All beans will only be instantiated once!
+     * <p>
+     * WARNING: only useful on calling remote interfaces, where serialization will be done! if you call a service on the
+     * same jvm, you should use the IGenericLocalService - and the {@link #instantiateLazyRelationship(Object)} is
+     * obsolete.
+     * 
+     * 
+     * @param <T> type of bean
+     * @param clazz type of source bean
+     * @param beanId id of source bean
+     * @param fillTypes optional relation types to instantiate. if null, all attributes will be instantiated.
+     * @return new bean with given id.
+     */
+    public <T> T instantiateLazyRelationship(Class<T> clazz, Object beanId, List<Class> fillTypes);
+
+    /**
+     * convenience method for {@linkplain #instantiateLazyRelationship(Class, Object, String[])}. using reflection on
+     * id-annotation to get the id. if not implemented, it will throw a notimplemented exception - then use
+     * {@linkplain #instantiateLazyRelationship(Class, Object, String[])} instead.
+     * <p>
+     * WARNING: only useful on calling remote interfaces, where serialization will be done! if you call a service on the
+     * same jvm, you should use the IGenericLocalService - and the {@link #instantiateLazyRelationship(Object)} is
+     * obsolete.
+     * 
+     * @param <T> type of bean
+     * @param bean bean instance with unloaded lazy relations.
+     * @return bean instance with loaded relations.
+     */
+    public <T> T instantiateLazyRelationship(T bean);
+
+    /**
+     * tries to find the right user entity through the user principal
+     * 
+     * @param <T> user entitiy
+     * @param subject current subject
+     * @param userEntity user entity type
+     * @param userIdAttribute user name attribute
+     * @return bean representing current subject
+     */
+    public <T> T getUser(Subject subject, Class<T> userEntity, String userIdAttribute);
+
+    /**
+     * only for tests - creates an empty server side factory.
+     */
+    void initServerSideFactories();
+</pre>
+
+The service may be used inside your business services, but may be called directly by the client - but do that only, if you call the service once and the call is not usable by another business logic.
+
+The service is usable by standalone applications (without application-server), too. The __persistence.xml__ will define the behaviour of the sessions __EntityManager__ with caching and logging etc.
+
+An optional configuration file __genericservice.properties__ will be loaded by the __GenericServiceBean__ (the implementation of __IGenericService__). The following properties will be evaluated:
+* maxresult (default: 10000)
+
+If you are on client side, use the ServiceFactory to get the GenericServiceBean.
+Example:
+  ServiceFactory.instance().getService(IGenericService.class)
+or
+  ServiceFactory.getGenService()
+
+If you are on server side, use EJB injection:
+<pre>
+@EJB
+IGenericLocalService genService
+</pre>
+
+h4. Support for complex queries through a collection of finders: Implementation of _IQueryService_
+
+The GenericServiceBean implements the _IQueryService_:
+
+<pre>
+/**
+ * Provides finder expression - instead of sql or ejb-ql. Additional ejb-ql-queries are possible. Finder expressions
+ * will automatically create ejb-ql expressions through given transient bean instances.
+ * <p/>
+ * Combines multiple findBy-Expressions to create a complex query. Similar to criterias but working on intelligent
+ * finders. At the moment, all concatenations are added with AND.
+ * 
+ * @author Thomas Schneider, Thomas Schneider
+ * @version $Revision$
+ */
+public interface IQueryService {
+    /**
+     * combines several find-expressions, like findByExample and findBetween etc., to create complex queries through
+     * bean-attribute informations.
+     * 
+     * @param <T> type to return
+     * @param finder several finders to constrain the result
+     * @return query result as list of beans
+     */
+    <FINDER extends AbstractFinder<T>, T> java.util.Collection<T> find(FINDER... finder);
+}
+</pre>
+
+The method *find(FINDER...finder)* enhances the use of finders like _findBetween(..)_ and _findExample(..)_. You are able to define a collection of such finders to create a complex ejb-ql.
+
+*Example, showing all finders - but with senseless Example-Objects*:
+<pre>
+...
+import static de.tsl2.nano.service.util.finder.Finder.*;
+...
+/*
+ * first, create some example objects
+ */
+    Person p1 = new Person("test", DateUtil.getDate(1970, 1, 1), new Address("Berlinerstr.1",
+        "Frankfurt"));
+    Person p2 = new Person("test", DateUtil.getDate(1979, 12, 31), new Address("Berlinerstr.1",
+        "Frankfurt"));
+    Team team = new Team("team1", new ListSet(p1, p2));
+
+/*
+ * now, define a query through a collection of finders - it's only a senseless example,
+ * showing almost all finders.
+ */
+    Collection<Person> result = ServiceAccess.getGenService().find(
+        between(p1, p2),
+        or(example(p1)),
+        or(member(team, Person.class, "player")),
+        not(expression(Person.class, " myfield = myVariable ", false, null)),
+        union(Person.class),
+        holder(p1, Team.class, "player"),
+        orderBy(Person.class, "+name", "-birthday"));
+</pre>
+
+The select, given to a Query of the ejb EntityManager would look like this:
+<pre>
+select t from Person t 
+ where  ( t.address  >= ? and t.address  <= ? )  and  ( t.birthday  >= ? and t.birthday  <= ? ) 
+  or   t in (select t1 from Person t1 
+ where t1.address = ? and t1.birthday = ?)
+  or   t in (select t2 from Person t2 , Team tm2
+ where (tm2.name = ? and t2 member of tm2.player))
+ and not  ( myfield = myVariable )
+union select t from Person t 
+ where 1 = 1
+  and   t in (select t5 from Person t5 , Person th5
+ where (th5.name = ? and th5 member of t5.player))
+ order by name asc, birthday desc
+</pre>
+The parameters will automatically be filled.
+
+*A real working example:*
+<pre>
+    /*
+     * fuege zusaetzliche such-Felder als Example-Objekte an
+     */
+    if (sfrom.getStnr() != null) {
+        Steuerfall minSteuerfall = new Steuerfall();
+        String minStnr = StringUtilBase.fixString(sfrom.getStnr(), 13, '0', true);
+        minSteuerfall.setStnr(SteuerakteUtil.getFormattedStnrAsLong(minStnr));
+        wvFrom.setSteuerfall(minSteuerfall);
+
+        Steuerfall maxSteuerfall = new Steuerfall();
+        String maxStnr = StringUtilBase.fixString(sfrom.getStnr(), 13, '9', true);
+        maxSteuerfall.setStnr(SteuerakteUtil.getFormattedStnrAsLong(maxStnr));
+        wvTo.setSteuerfall(maxSteuerfall);
+    }
+    String qStbereich = "1=1";
+    Object[] argsStbereich = null;
+    if (sfrom.getDurchwahl() != null) {
+        qStbereich = 
+            " t.steuerfall in (select s from Steuerfall s, Steuerfallbereich b " +
+            " where b.telefon.nummer = ? and b.stnrVon < s.stnr and b.stnrBis > s.stnr)";
+        argsStbereich = new Object[]{sfrom.getDurchwahl().getNummer()};
+    }
+    String qPflName = "1=1";
+    Object[] argsPflName = null;
+    if (sfrom.getName() != null) {
+        qPflName = 
+            " t.steuerfall in (select s from Steuerfall s, Pflichtiger_ZO pzo " +
+            " where pzo.pflichtiger1.name1 like ? or pzo.pflichtiger2.name1 like ? " +
+            " and pzo member of s.steuerfallPflichtige)";
+        argsPflName = new Object[]{sfrom.getName(), sfrom.getName()};
+    }
+    result = ServiceFactory.getGenService().find(between(wvFrom, wvTo),
+        expression(Wiedervorlage.class, qStbereich, false, argsPflName),
+        expression(Wiedervorlage.class, qPflName, false, argsStbereich));
+</pre>
+
+h4. The Caching Batchloader mechanism
+
+Batch loader that is optionally able to cache loaded data. Useable to optimize performance on loading several data using a single communication line.
+
+May be used as application or session cache with simple access:
+* ServiceFactory.instance().getCache().get(MYPARTID);
+
+The execution-method of that cache uses the implementation of _IBatchService_ - implemented by the _GenericServiceBean_.
+
+*Example*:
+        final IGenericService genService = getService(IGenericService.class);
+        CachingBatchloader cache = ServiceFactory.instance().getCache();
+        cache.add("kistsatz.all", true, Finder.all(Kistsatz.class));
+        cache.add("bundesland.all", true, Finder.all(Bundesland.class));
+        Bundesland bayern = new Bundesland();
+        bayern.setBezeichnung("Bayern");
+        cache.add("bayern", true, Finder.example(bayern));
+        Collection<Bundesland> bundeslaender = cache.get(Bundesland.class, "bundesland.all");
+        Collection<Kistsatz> kistSaetze = cache.get(Kistsatz.class, "kistsatz.all");
+        bayern = cache.getSingle(Bundesland.class, "bayern");
+        log("gefundene bundeslaender: " + bundeslaender.size() + "\ngefundene kistSaetze: " + kistSaetze.size());
+        log("bayern is:" + bayern);
+
+h4. Howto include the GenericService into your project
+
+to use the GenericService, you should add a session to your ejb-jar.xml file:
+<pre>
+	...
+	<display-name>my project services</display-name>
+	<enterprise-beans>
+		<session>
+			<ejb-name>GenericServiceBean</ejb-name>
+			<mapped-name>kion/IGenericService</mapped-name>
+			<ejb-class>de.tsl2.nano.service.util.GenericServiceBean</ejb-class>
+			<session-type>Stateless</session-type>
+			<ejb-local-ref>
+				<ejb-ref-name>kion/IGenericLocalService</ejb-ref-name>
+				<local>de.tsl2.nano.service.util.IGenericLocalService</local>
+			</ejb-local-ref>
+			<persistence-unit-ref>
+				<persistence-unit-ref-name>../myproject-services.jar#myprojectPersistenceUnit</persistence-unit-ref-name>
+			</persistence-unit-ref>
+			<!--
+				Der folgende Eintrag 'biegt' eine existente persistenceunit auf eine
+				andere um!
+			-->
+			<!--
+				<persistence-context-ref>
+				<persistence-context-ref-name>persistence/kionPersistenceUnit</persistence-context-ref-name>
+				<persistence-unit-name>../kion-services.jar#kionPersistenceUnit</persistence-unit-name>
+				</persistence-context-ref>
+			-->
+		</session>
+		...
+	</enterprise-beans>
+</pre>
+
+The service-access*.jar file should be included in the lib dir of your ear file.
+
+h2. JobScheduleService
+
+h4. Howto include the GenericService in your project
+
+<pre>
+	<session>
+		<ejb-name>JobScheduleServiceBean</ejb-name>
+		<mapped-name>kion/IJobScheduleService</mapped-name>
+		<ejb-class>de.tsl2.nano.service.schedule.JobScheduleServiceBean</ejb-class>
+		<session-type>Singleton</session-type>
+		<ejb-local-ref>
+			<ejb-ref-name>kion/IJobScheduleLocalService</ejb-ref-name>
+			<local>de.tsl2.nano.service.schedule.IJobScheduleLocalService</local>
+		</ejb-local-ref>
+		<persistence-unit-ref>
+			<persistence-unit-ref-name>../kion-services.jar#kionPersistenceUnit</persistence-unit-ref-name>
+		</persistence-unit-ref>
+	</session>
+</pre>
+
+h3. Security / Authorization on Permissions
+
+In your _LoginModule_, the jaas user authentication and authorization is defined. all service calls will have an argument of type _Subject_ holding _Permission_ objects of different types. Before we discuss the different types, one important thing to know:
+* don't mix static permisssions (defined in your policy file) with dynamic ones (created by your _LoginModule_)! This may cause an _ClassCircularityError_.
+
+The different types of dynamic tsl2.nano.serviceaccess permissions are:
+* user-permission: holding the name of the user
+* feature permissions: holding all application features to be checked
+* role permissions: used to authorize client actions or server side services.
+
+We do a client side login. To enable server side permission checks, the _ServiceLocator_ provides a UserPrincipal to the subject, given as _Context.SECURITY_PRINCIPAL_. The server must know, how to handle the principal. In jboss we look at the login-config.xml file to select the right security domain. The _ClientLoginModule_ is usable by client side logins.
+
+login-config.xml:
+<pre>
+  <application-policy name="client-login">
+    <authentication>
+      <login-module code="org.jboss.security.ClientLoginModule"
+        flag="required">
+         <!-- Any existing security context will be restored on logout -->
+         <module-option name="restore-login-identity">true</module-option>
+      </login-module>
+    </authentication>
+  </application-policy>
+</pre>
+
+The tsl2.nano.serviceaccess type _UserPrincipal_ must be public to the jboss, so we have to put the jar to the jboss lib dir.
+
+To check permissions on server side use the session-context to evaluate them.
+
+<pre>
+@SecurityDomain("mydomain")
+@Stateless
+@Remote
+public class MyStatelessSession {
+	@EJB SessionContext sessionContext
+	...
+	sessionContext.getCallerPrincipal()
+	...
+}
+</pre>
+
+If you don't want to use SecurityDomain directly, create the file _jboss.xml_ in your _META-INF_ directory:
+
+<jboss>
+   <security-domain>client-login</security-domain>
+</jboss>
+
+h3. Creating own Entities and Services
+
+* business logic should be implemented only in services
+* in a lot of cases, beans and database structure are defined by another group
+* the gui should work on beans without a lot work
+
+If you have to present data, provided by a lot of beans, it would be recommended to create a database view and its entity bean to minimize coding and maximize performance. but in a lot of cases, you don't have access to the database structure - and entity beans are only created as direct images of database tables.
+A possible way is to create an own entity bean, not bound to a table, but to a query result. what you have to do is:
+* create a serializable class with entity annotation - the package should be part of the ejb-beans jar!!
+* create at least one named query
+* create a SqlResultSetMapping annotation, if your fieldnames match the query result, there is nothing more to do
+* create the entity fields (use the same names as the named query
+* create public getters and setters for all fields
+* create a serialversion uid
+* create the hashCode and equals and optional the toString methods
+* deploy the class
+
+If you want the swartifex framework to work on your bean like a normal entity, create the two named queries 'findAll' and 'findById'.
+
+Example:
+
+<pre>
+@Entity
+@NamedNativeQueries({
+@NamedNativeQuery(name="findAll", resultClass=BuchungItem.class, 
+    query = " select t1.steuerfallID, t1.buchungsdatum,t1.betrag,t1.belegNummer"
+    + " from "
+    + "   Buchung t1"
+    + "   left outer join Buchungszeichen t4 on t1.buchungszeichenID = t4.buchungszeichenID,"
+    + "   Buchungsschluessel t2"
+    + " where t1.buchungsschluesselID = t2.buchungsschluesselID"
+    + "   and t1.buchungsstatus in ('VERBUCHT', 'OFFEN')"
+    + " order by t1.buchungsdatum,t1.belegnummer"),
+@NamedNativeQuery(name="findBySteuerfallID", resultClass=BuchungItem.class, 
+    query = " select t1.steuerfallID, t1.buchungsdatum,t1.betrag,t1.belegNummer"
+    + " from "
+    + "   Buchung t1"
+    + "   left outer join Buchungszeichen t4 on t1.buchungszeichenID = t4.buchungszeichenID,"
+    + "   Buchungsschluessel t2"
+    + " where t1.steuerfallID = ?"
+    + " and t1.buchungsschluesselID = t2.buchungsschluesselID"
+    + "   and t1.buchungsstatus in ('VERBUCHT', 'OFFEN')"
+    + " order by t1.buchungsdatum,t1.belegnummer")}
+)
+@SqlResultSetMapping(name = "BuchungItem")
+public class BuchungItem implements Serializable {
+    /** serialVersionUID */
+    private static final long serialVersionUID = -2536464338260137496L;
+
+    /** kuenstliche id (wird von jpa gefordert) */
+    String buchungItemID;
+
+    String steuerfallID;
+    Date buchungsdatum;
+    BigDecimal betrag;
+    Integer belegNummer;
+
+    @Id
+    public String getBuchungItemID() {
+        if (buchungItemID == null) {
+            buchungItemID = steuerfallID + "." + belegNummer;
+        }
+        return buchungItemID;
+    }
+
+    public void setBuchungItemID(String buchungItemID) {
+        this.buchungItemID = buchungItemID;
+    }
+
+    public BuchungItem() {
+    }
+
+    public String getSteuerfallID() {
+        return steuerfallID;
+    }
+
+    public void setSteuerfallID(String steuerfallID) {
+        this.steuerfallID = steuerfallID;
+    }
+
+    public Date getBuchungsdatum() {
+        return buchungsdatum;
+    }
+
+    public void setBuchungsdatum(Date buchungsdatum) {
+        this.buchungsdatum = buchungsdatum;
+    }
+
+    public BigDecimal getBetrag() {
+        return betrag;
+    }
+
+    public void setBetrag(BigDecimal betrag) {
+        this.betrag = betrag;
+    }
+
+    public Integer getBelegNummer() {
+        return belegNummer;
+    }
+
+    public void setBelegNummer(Integer belegNummer) {
+        this.belegNummer = belegNummer;
+    }
+
+    @Override
+    public int hashCode() {
+    ...
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+    ...
+    }
+}
+</pre>
+
+Now, you can access the beans through the generic service method 'findByNamedQuery(beanType, queryName, args...)
+
+h2. developing and deploying
+
+If you change sources of this plugin, you should start the following ant scripts: 
+* _eclipse-tsl2.nano.serviceaccess.xml_ with target _swartifex.eclipse.serviceaccess.export_ (Please be sure to use the same jre-runtime as your eclipse-workspace - otherwise nothing will be done!).
+* the 'deploy' target of your main project.
+* perhaps an additional script to distribute the new libraray to a project-specific library-plugin. in _kion2plus_ it is _kion.swartifex.plugins_. In _kion2plus_ you run _kion/distribute-swartifex-plugins.xml_ with target _copy.swartifex.plugins_.

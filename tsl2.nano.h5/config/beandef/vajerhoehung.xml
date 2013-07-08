@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beanDefinition clazz="de.eom.kion.beans.festsetzung.steuerakte.VajErhoehung" name="VajErhoehung" xmlns="http://www.domain.com/beandef">
+   <presentable>
+      <type>-1</type>
+      <style>-1</style>
+      <visible>true</visible>
+   </presentable>
+   <valueExpression>
+      <expression>{vaj}</expression>
+      <type>de.eom.kion.beans.festsetzung.steuerakte.VajErhoehung</type>
+      <isPersistable>true</isPersistable>
+   </valueExpression>
+   <isNested>false</isNested>
+   <isdefault>true</isdefault>
+   <attribute name="vaj">
+      <attributeDefinition declaringClass="de.eom.kion.beans.festsetzung.steuerakte.VajErhoehung" name="vaj">
+         <length>-1</length>
+         <scale>0</scale>
+         <precision>0</precision>
+         <nullable>true</nullable>
+         <id>false</id>
+      </attributeDefinition>
+   </attribute>
+   <attribute name="anlageDatum">
+      <attributeDefinition declaringClass="de.eom.kion.beans.festsetzung.steuerakte.VajErhoehung" name="anlageDatum">
+         <length>-1</length>
+         <scale>0</scale>
+         <precision>0</precision>
+         <nullable>true</nullable>
+         <id>false</id>
+      </attributeDefinition>
+   </attribute>
+   <attribute name="vajerhoehungID">
+      <attributeDefinition declaringClass="de.eom.kion.beans.festsetzung.steuerakte.VajErhoehung" name="vajerhoehungID">
+         <length>-1</length>
+         <scale>0</scale>
+         <precision>0</precision>
+         <nullable>true</nullable>
+         <id>false</id>
+      </attributeDefinition>
+   </attribute>
+</beanDefinition>

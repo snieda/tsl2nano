@@ -1,0 +1,96 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beanDefinition clazz="de.eom.kion.beans.festsetzung.sepa.Vorabankuendigung" name="Vorabankuendigung" xmlns="http://www.domain.com/beandef">
+   <presentable>
+      <type>-1</type>
+      <style>-1</style>
+      <visible>true</visible>
+   </presentable>
+   <valueExpression>
+      <expression>{erstellDatum}</expression>
+      <type>de.eom.kion.beans.festsetzung.sepa.Vorabankuendigung</type>
+      <isPersistable>true</isPersistable>
+   </valueExpression>
+   <isNested>false</isNested>
+   <isdefault>true</isdefault>
+   <attribute name="status">
+      <attributeDefinition declaringClass="de.eom.kion.beans.festsetzung.sepa.Vorabankuendigung" name="status">
+         <length>-1</length>
+         <scale>0</scale>
+         <precision>0</precision>
+         <nullable>true</nullable>
+         <id>false</id>
+      </attributeDefinition>
+   </attribute>
+   <attribute name="steuerfall">
+      <attributeDefinition declaringClass="de.eom.kion.beans.festsetzung.sepa.Vorabankuendigung" name="steuerfall">
+         <length>-1</length>
+         <scale>-1</scale>
+         <precision>-1</precision>
+         <nullable>false</nullable>
+         <id>false</id>
+      </attributeDefinition>
+   </attribute>
+   <attribute name="typ">
+      <attributeDefinition declaringClass="de.eom.kion.beans.festsetzung.sepa.Vorabankuendigung" name="typ">
+         <length>-1</length>
+         <scale>0</scale>
+         <precision>0</precision>
+         <nullable>true</nullable>
+         <id>false</id>
+      </attributeDefinition>
+   </attribute>
+   <attribute name="erstellDatum">
+      <attributeDefinition declaringClass="de.eom.kion.beans.festsetzung.sepa.Vorabankuendigung" name="erstellDatum">
+         <length>-1</length>
+         <scale>0</scale>
+         <precision>0</precision>
+         <nullable>true</nullable>
+         <id>false</id>
+      </attributeDefinition>
+   </attribute>
+   <attribute name="vorabankuendigungID">
+      <attributeDefinition declaringClass="de.eom.kion.beans.festsetzung.sepa.Vorabankuendigung" name="vorabankuendigungID">
+         <length>-1</length>
+         <scale>0</scale>
+         <precision>0</precision>
+         <nullable>true</nullable>
+         <id>false</id>
+      </attributeDefinition>
+   </attribute>
+   <attribute name="ankuendBetrag">
+      <attributeDefinition declaringClass="de.eom.kion.beans.festsetzung.sepa.Vorabankuendigung" name="ankuendBetrag">
+         <length>-1</length>
+         <scale>0</scale>
+         <precision>0</precision>
+         <nullable>true</nullable>
+         <id>false</id>
+      </attributeDefinition>
+   </attribute>
+   <attribute name="gebuchterBetrag">
+      <attributeDefinition declaringClass="de.eom.kion.beans.festsetzung.sepa.Vorabankuendigung" name="gebuchterBetrag">
+         <length>-1</length>
+         <scale>0</scale>
+         <precision>0</precision>
+         <nullable>true</nullable>
+         <id>false</id>
+      </attributeDefinition>
+   </attribute>
+   <attribute name="mitOption">
+      <attributeDefinition declaringClass="de.eom.kion.beans.festsetzung.sepa.Vorabankuendigung" name="mitOption">
+         <length>-1</length>
+         <scale>0</scale>
+         <precision>0</precision>
+         <nullable>true</nullable>
+         <id>false</id>
+      </attributeDefinition>
+   </attribute>
+   <attribute name="ankuendDatum">
+      <attributeDefinition declaringClass="de.eom.kion.beans.festsetzung.sepa.Vorabankuendigung" name="ankuendDatum">
+         <length>-1</length>
+         <scale>0</scale>
+         <precision>0</precision>
+         <nullable>true</nullable>
+         <id>false</id>
+      </attributeDefinition>
+   </attribute>
+</beanDefinition>

@@ -1,0 +1,28 @@
+<project default="distribute.2nano" name="distrubute.2nano">
+	<target name="distribute.2nano">
+		<property name="refactore.clean" value="true" />
+		<property name="sh.compile.classpath2" value="../../../wjax/distribution/tsl2.nano.common" />
+		<ant antfile="project-refactore.xml">
+			<property name="refactore.property.file" value="${basedir}/project/distribute-common.properties" />
+		</ant>
+		<ant antfile="project-refactore.xml">
+			<property name="refactore.property.file" value="${basedir}/project/distribute-serviceaccess.properties" />
+		</ant>
+		<ant antfile="project-refactore.xml">
+			<property name="refactore.property.file" value="${basedir}/project/distribute-directaccess.properties" />
+		</ant>
+		<ant antfile="project-refactore.xml">
+			<property name="refactore.property.file" value="${basedir}/project/distribute-incubation.properties" />
+		</ant>
+		<ant antfile="project-refactore.xml">
+			<property name="refactore.property.file" value="${basedir}/project/distribute-h5.properties" />
+		</ant>
+
+		<ant antfile="../swartifex.common/shell.xml" target="sh.copy">
+			<property name="sh.copy.srcdir" value="../../../wjax/distribution" />
+			<property name="sh.copy.destination" value="../../../wjax/distribution/target" />
+			<property name="sh.copy.include" value="**/*.jar" />
+			<property name="sh.copy.flatten" value="true" />
+		</ant>
+	</target>
+</project>

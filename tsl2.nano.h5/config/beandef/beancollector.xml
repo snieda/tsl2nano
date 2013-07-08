@@ -1,0 +1,231 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beanDefinition clazz="de.tsl2.nano.util.bean.def.BeanCollector" name="BeanCollector" xmlns="http://www.domain.com/beandef">
+   <presentable>
+      <type>-1</type>
+      <style>-1</style>
+      <visible>true</visible>
+   </presentable>
+   <valueExpression>
+      <expression>{name}</expression>
+      <type>de.tsl2.nano.util.bean.def.BeanCollector</type>
+      <isPersistable>false</isPersistable>
+   </valueExpression>
+   <isNested>false</isNested>
+   <isdefault>true</isdefault>
+   <attribute name="beanFinder">
+      <attributeDefinition declaringClass="de.tsl2.nano.util.bean.def.BeanCollector" name="beanFinder">
+         <length>-1</length>
+         <scale>-1</scale>
+         <precision>-1</precision>
+         <nullable>true</nullable>
+         <id>false</id>
+      </attributeDefinition>
+   </attribute>
+   <attribute name="multiValue">
+      <attributeDefinition declaringClass="de.tsl2.nano.util.bean.def.BeanCollector" name="multiValue">
+         <length>-1</length>
+         <scale>-1</scale>
+         <precision>-1</precision>
+         <nullable>true</nullable>
+         <id>false</id>
+      </attributeDefinition>
+   </attribute>
+   <attribute name="selectionProvider">
+      <attributeDefinition declaringClass="de.tsl2.nano.util.bean.def.BeanCollector" name="selectionProvider">
+         <length>-1</length>
+         <scale>-1</scale>
+         <precision>-1</precision>
+         <nullable>true</nullable>
+         <id>false</id>
+      </attributeDefinition>
+   </attribute>
+   <attribute name="searchAction">
+      <attributeDefinition declaringClass="de.tsl2.nano.util.bean.def.BeanCollector" name="searchAction">
+         <length>-1</length>
+         <scale>-1</scale>
+         <precision>-1</precision>
+         <nullable>true</nullable>
+         <id>false</id>
+      </attributeDefinition>
+   </attribute>
+   <attribute name="currentData">
+      <attributeDefinition declaringClass="de.tsl2.nano.util.bean.def.BeanCollector" name="currentData">
+         <length>-1</length>
+         <scale>-1</scale>
+         <precision>-1</precision>
+         <nullable>true</nullable>
+         <id>false</id>
+      </attributeDefinition>
+   </attribute>
+   <attribute name="columnDefinitions">
+      <attributeDefinition declaringClass="de.tsl2.nano.util.bean.def.BeanCollector" name="columnDefinitions">
+         <length>-1</length>
+         <scale>-1</scale>
+         <precision>-1</precision>
+         <nullable>true</nullable>
+         <id>false</id>
+      </attributeDefinition>
+   </attribute>
+   <attribute name="searchPanelBeans">
+      <attributeDefinition declaringClass="de.tsl2.nano.util.bean.def.BeanCollector" name="searchPanelBeans">
+         <length>-1</length>
+         <scale>-1</scale>
+         <precision>-1</precision>
+         <nullable>true</nullable>
+         <id>false</id>
+      </attributeDefinition>
+   </attribute>
+   <attribute name="summary">
+      <attributeDefinition declaringClass="de.tsl2.nano.util.bean.def.BeanCollector" name="summary">
+         <length>-1</length>
+         <scale>-1</scale>
+         <precision>-1</precision>
+         <nullable>true</nullable>
+         <id>false</id>
+      </attributeDefinition>
+   </attribute>
+   <attribute name="reloadBean">
+      <attributeDefinition declaringClass="de.tsl2.nano.util.bean.def.BeanCollector" name="reloadBean">
+         <length>-1</length>
+         <scale>-1</scale>
+         <precision>-1</precision>
+         <nullable>true</nullable>
+         <id>false</id>
+      </attributeDefinition>
+   </attribute>
+   <attribute name="name">
+      <attributeDefinition declaringClass="de.tsl2.nano.util.bean.def.BeanDefinition" name="name">
+         <length>-1</length>
+         <scale>-1</scale>
+         <precision>-1</precision>
+         <nullable>true</nullable>
+         <id>false</id>
+      </attributeDefinition>
+   </attribute>
+   <attribute name="actions">
+      <attributeDefinition declaringClass="de.tsl2.nano.util.bean.def.BeanDefinition" name="actions">
+         <length>-1</length>
+         <scale>-1</scale>
+         <precision>-1</precision>
+         <nullable>true</nullable>
+         <id>false</id>
+      </attributeDefinition>
+   </attribute>
+   <attribute name="presentationHelper">
+      <attributeDefinition declaringClass="de.tsl2.nano.util.bean.def.BeanDefinition" name="presentationHelper">
+         <length>-1</length>
+         <scale>-1</scale>
+         <precision>-1</precision>
+         <nullable>true</nullable>
+         <id>false</id>
+      </attributeDefinition>
+   </attribute>
+   <attribute name="default">
+      <attributeDefinition declaringClass="de.tsl2.nano.util.bean.def.BeanDefinition" name="default">
+         <length>-1</length>
+         <scale>-1</scale>
+         <precision>-1</precision>
+         <nullable>true</nullable>
+         <id>false</id>
+      </attributeDefinition>
+   </attribute>
+   <attribute name="presentable">
+      <attributeDefinition declaringClass="de.tsl2.nano.util.bean.def.BeanDefinition" name="presentable">
+         <length>-1</length>
+         <scale>-1</scale>
+         <precision>-1</precision>
+         <nullable>true</nullable>
+         <id>false</id>
+      </attributeDefinition>
+   </attribute>
+   <attribute name="virtual">
+      <attributeDefinition declaringClass="de.tsl2.nano.util.bean.def.BeanDefinition" name="virtual">
+         <length>-1</length>
+         <scale>-1</scale>
+         <precision>-1</precision>
+         <nullable>true</nullable>
+         <id>false</id>
+      </attributeDefinition>
+   </attribute>
+   <attribute name="nested">
+      <attributeDefinition declaringClass="de.tsl2.nano.util.bean.def.BeanDefinition" name="nested">
+         <length>-1</length>
+         <scale>-1</scale>
+         <precision>-1</precision>
+         <nullable>true</nullable>
+         <id>false</id>
+      </attributeDefinition>
+   </attribute>
+   <attribute name="beanAttributes">
+      <attributeDefinition declaringClass="de.tsl2.nano.util.bean.def.BeanDefinition" name="beanAttributes">
+         <length>-1</length>
+         <scale>-1</scale>
+         <precision>-1</precision>
+         <nullable>true</nullable>
+         <id>false</id>
+      </attributeDefinition>
+   </attribute>
+   <attribute name="valueExpression">
+      <attributeDefinition declaringClass="de.tsl2.nano.util.bean.def.BeanDefinition" name="valueExpression">
+         <length>-1</length>
+         <scale>-1</scale>
+         <precision>-1</precision>
+         <nullable>true</nullable>
+         <id>false</id>
+      </attributeDefinition>
+   </attribute>
+   <attribute name="interfaces">
+      <attributeDefinition declaringClass="de.tsl2.nano.util.bean.BeanClass" name="interfaces">
+         <length>-1</length>
+         <scale>-1</scale>
+         <precision>-1</precision>
+         <nullable>true</nullable>
+         <id>false</id>
+      </attributeDefinition>
+   </attribute>
+   <attribute name="attributes">
+      <attributeDefinition declaringClass="de.tsl2.nano.util.bean.BeanClass" name="attributes">
+         <length>-1</length>
+         <scale>-1</scale>
+         <precision>-1</precision>
+         <nullable>true</nullable>
+         <id>false</id>
+      </attributeDefinition>
+   </attribute>
+   <attribute name="clazz">
+      <attributeDefinition declaringClass="de.tsl2.nano.util.bean.BeanClass" name="clazz">
+         <length>-1</length>
+         <scale>-1</scale>
+         <precision>-1</precision>
+         <nullable>true</nullable>
+         <id>false</id>
+      </attributeDefinition>
+   </attribute>
+   <attribute name="attributeNames">
+      <attributeDefinition declaringClass="de.tsl2.nano.util.bean.BeanClass" name="attributeNames">
+         <length>-1</length>
+         <scale>-1</scale>
+         <precision>-1</precision>
+         <nullable>true</nullable>
+         <id>false</id>
+      </attributeDefinition>
+   </attribute>
+   <attribute name="singleValueAttributes">
+      <attributeDefinition declaringClass="de.tsl2.nano.util.bean.BeanClass" name="singleValueAttributes">
+         <length>-1</length>
+         <scale>-1</scale>
+         <precision>-1</precision>
+         <nullable>true</nullable>
+         <id>false</id>
+      </attributeDefinition>
+   </attribute>
+   <attribute name="multiValueAttributes">
+      <attributeDefinition declaringClass="de.tsl2.nano.util.bean.BeanClass" name="multiValueAttributes">
+         <length>-1</length>
+         <scale>-1</scale>
+         <precision>-1</precision>
+         <nullable>true</nullable>
+         <id>false</id>
+      </attributeDefinition>
+   </attribute>
+</beanDefinition>

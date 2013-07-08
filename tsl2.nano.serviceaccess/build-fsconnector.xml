@@ -1,0 +1,72 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<project basedir="." default="usage" name="fs_connector">
+	<property name="bdir" value="../tsl2.nano.serviceaccess" />
+	<property name="module.name" value="fs-connector" />
+	<property name="src.dir" value="${bdir}/src/fs-connector" />
+	<property name="bin.dir" value="${bdir}/fs-connector/bin" />
+	<!-- <import file="../kion.shared/src/resources/project.properties" /> -->
+	<import file="../swartifex.common/common.xml" />
+
+	<!-- <import file="../kion.${appserver.name}/build-jboss.xml" /> -->
+
+	<target name="usage" depends="common.usage">
+		<echo>Targets:
+	deploy.fsconnector           - deploy the RAR to ${kion.server.dir}
+		</echo>
+	</target>
+
+	<path id="serviceaccess.lib.path">
+		<path id="j2ee.lib.path">
+			<fileset dir="${bdir}/${lib.dir}">
+				<include name="**/*.jar"/>
+			</fileset>
+		</path>
+		<path id="common.lib.path">
+			<fileset dir="../swartifex.common/lib">
+				<include name="**/*.jar"/>
+			</fileset>
+		</path>
+		<dirset dir="../swartifex.common/bin" />
+	</path>
+	
+	<target name="mkdirs" description="creates bin and dist directories">
+		<mkdir dir="${bin.dir}" />
+		<mkdir dir="${bdir}/${bin.test.dir}" />
+		<mkdir dir="${bdir}/${dist.dir}" />
+		<mkdir dir="${bdir}/${dist.junit.dir}" />
+	</target>
+
+	<target name="compile" depends="mkdirs">
+		<javac destdir="${bin.dir}" classpathref="serviceaccess.lib.path" nowarn="true" debug="${debug}">
+			<src path="${src.dir}" />
+		</javac>
+		<!-- compilte tests -->
+		<!--javac destdir="${bdir}/${bin.test.dir}" classpathref="lib.junittest.path" debug="${compile.debug}">
+			<src path="${bdir}/${src.test.dir}" />
+		</javac-->
+	</target>
+
+
+	<target name="rar" depends="compile, create_manifest" description="build RAR file">
+		<jar destfile="${dist.dir}/fs-connector.rar" manifest="${target.dir}/MANIFEST.MF">
+			<metainf dir="${src.dir}/META-INF" />
+			<fileset dir="${bin.dir}" />
+			<fileset file="${bdir}/${target.dir}/${module.name}.properties" />
+			<fileset dir="../swartifex.common/lib">
+				<include name="commons-io-*.jar"/>
+				<include name="commons-logging-*.jar"/>
+				<exclude name="*sources.jar"/>
+			</fileset>
+		</jar>
+		<jar destfile="${bdir}/${dist.dir}/fs-connector-client.jar" manifest="${bdir}/${target.dir}/MANIFEST.MF">
+			<fileset dir="${bin.dir}" includes="**/*.class" />
+		</jar>
+	</target>
+
+	<target name="deploy.fsconnector" depends="rar" description="deploy everything to app-server">
+		<copy todir="${server.deploy.dir}">
+			<fileset dir="${dist.dir}" includes="*.rar" />
+		</copy>
+	</target>
+
+</project>

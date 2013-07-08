@@ -1,0 +1,67 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema" elementFormDefault="qualified" targetNamespace="http://www.domain.com/beandef" xmlns:beandef="http://www.domain.com/beandef">
+  <xs:element name="beanDefinition">
+    <xs:complexType>
+      <xs:sequence>
+        <xs:element ref="beandef:presentable"/>
+        <xs:element ref="beandef:valueExpression"/>
+        <xs:element ref="beandef:isNested"/>
+        <xs:element ref="beandef:isdefault"/>
+        <xs:element maxOccurs="unbounded" ref="beandef:attribute"/>
+      </xs:sequence>
+      <xs:attribute name="clazz" use="required"/>
+      <xs:attribute name="name" use="required" type="xs:NCName"/>
+    </xs:complexType>
+  </xs:element>
+  <xs:element name="presentable">
+    <xs:complexType>
+      <xs:sequence>
+        <xs:element ref="beandef:type"/>
+        <xs:element ref="beandef:style"/>
+        <xs:element ref="beandef:visible"/>
+      </xs:sequence>
+    </xs:complexType>
+  </xs:element>
+  <xs:element name="style" type="xs:integer"/>
+  <xs:element name="visible" type="xs:boolean"/>
+  <xs:element name="valueExpression">
+    <xs:complexType>
+      <xs:sequence>
+        <xs:element ref="beandef:expression"/>
+        <xs:element ref="beandef:type"/>
+        <xs:element ref="beandef:isPersistable"/>
+      </xs:sequence>
+    </xs:complexType>
+  </xs:element>
+  <xs:element name="expression" type="xs:string"/>
+  <xs:element name="isPersistable" type="xs:boolean"/>
+  <xs:element name="isNested" type="xs:boolean"/>
+  <xs:element name="isdefault" type="xs:boolean"/>
+  <xs:element name="attribute">
+    <xs:complexType>
+      <xs:sequence>
+        <xs:element ref="beandef:attributeDefinition"/>
+      </xs:sequence>
+      <xs:attribute name="name" use="required" type="xs:NCName"/>
+    </xs:complexType>
+  </xs:element>
+  <xs:element name="attributeDefinition">
+    <xs:complexType>
+      <xs:sequence>
+        <xs:element ref="beandef:length"/>
+        <xs:element ref="beandef:scale"/>
+        <xs:element ref="beandef:precision"/>
+        <xs:element ref="beandef:nullable"/>
+        <xs:element ref="beandef:id"/>
+      </xs:sequence>
+      <xs:attribute name="declaringClass" use="required"/>
+      <xs:attribute name="name" use="required" type="xs:NCName"/>
+    </xs:complexType>
+  </xs:element>
+  <xs:element name="length" type="xs:integer"/>
+  <xs:element name="scale" type="xs:integer"/>
+  <xs:element name="precision" type="xs:integer"/>
+  <xs:element name="nullable" type="xs:boolean"/>
+  <xs:element name="id" type="xs:boolean"/>
+  <xs:element name="type" type="xs:NMTOKEN"/>
+</xs:schema>

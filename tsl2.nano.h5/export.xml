@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project default="plugin_export" name="export">
+	<target name="plugin_export">
+		<pde.exportPlugins destination="..\swartifex.architect\packages" exportSource="true" exportType="directory" plugins="de.tsl2.nano.h5" useJARFormat="true"/>
+	</target>
+</project>

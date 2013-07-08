@@ -1,0 +1,30 @@
+Manifest-Version: 1.0
+Signature-Version: 0.0.1 (20.04.2013)
+Ant-Version: Apache Ant 1.7.1
+Created-By: Thomas Schneider
+Main-Class: de.tsl2.nano.classloader.JarClassLoader
+Main-Arguments: de.tsl2.nano.execution.ScriptUtil ant shell.xml
+Class-Path: tsl2.nano.common.1.0.0.jar 
+ de.tsl2.nano.common_0.0.2.B.jar 
+ commons-logging-1.1.1.jar 
+ commons-collections-3.2.1.jar 
+ commons-lang-2.4.jar 
+ commons-beanutils-1.8.0.jar 
+ ant.jar ant-launcher.jar 
+ ant-nodeps.jar
+Bundle-ManifestVersion: 2
+Bundle-Name: NanoFix Incubation
+Bundle-SymbolicName: de.tsl2.nano.incubation
+Bundle-Version: 0.0.1.A
+Bundle-RequiredExecutionEnvironment: JavaSE-1.6
+Require-Bundle: org.junit4;bundle-version="4.5.0",
+ de.tsl2.nano.common;bundle-version="0.0.2"
+Eclipse-BuddyPolicy: registered
+Bundle-ClassPath: .,
+ bin/
+Export-Package: de.tsl2.nano.incubation.test,
+ de.tsl2.nano.incubation.vnet,
+ de.tsl2.nano.incubation.vnet.neuron,
+ de.tsl2.nano.incubation.vnet.routing,
+ de.tsl2.nano.logictable,
+ de.tsl2.nano.math.vector
