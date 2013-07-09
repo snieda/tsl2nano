@@ -410,7 +410,7 @@ public class BeanCollector<COLLECTIONTYPE extends Collection<T>, T> extends Bean
             }
             @Override
             public String getImagePath() {
-                return "config/icons/new.png";
+                return "icons/new.png";
             }
         };
         actions.add(newAction);
@@ -448,7 +448,7 @@ public class BeanCollector<COLLECTIONTYPE extends Collection<T>, T> extends Bean
             }
             @Override
             public String getImagePath() {
-                return "config/icons/blocked.png";
+                return "icons/blocked.png";
             }
         };
         actions.add(deleteAction);
@@ -491,7 +491,7 @@ public class BeanCollector<COLLECTIONTYPE extends Collection<T>, T> extends Bean
             }
             @Override
             public String getImagePath() {
-                return "config/icons/open.png";
+                return "icons/open.png";
             }
         };
         openAction.setDefault(true);
@@ -636,7 +636,7 @@ public class BeanCollector<COLLECTIONTYPE extends Collection<T>, T> extends Bean
             }
             @Override
             public String getImagePath() {
-                return "config/icons/find.png";
+                return "icons/find.png";
             }
         };
         searchAction.setDefault(true);
@@ -664,7 +664,7 @@ public class BeanCollector<COLLECTIONTYPE extends Collection<T>, T> extends Bean
             }
             @Override
             public String getImagePath() {
-                return "config/icons/reload.png";
+                return "icons/reload.png";
             }
         };
         actions.add(resetAction);

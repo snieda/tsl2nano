@@ -90,6 +90,7 @@ public class BeanPresentationHelper<T> {
     public static final String PROP_DEFAULT = "default";
     public static final String PROP_VALUE = "value";
     public static final String PROP_ALLOWED_VALUES = "allowedValues";
+    public static final String PROP_NULLABLE = "nullable";
 
     /*
      * IPresentables
@@ -1006,7 +1007,7 @@ public class BeanPresentationHelper<T> {
                     "selectall",
                     IAction.MODE_UNDEFINED,
                     false,
-                    "config/icons/cascade.png") {
+                    "icons/cascade.png") {
                     @Override
                     public Object action() throws Exception {
                         ISelectionProvider<T> selectionProvider = ((IBeanCollector<?, T>) bean).getSelectionProvider();
@@ -1027,7 +1028,7 @@ public class BeanPresentationHelper<T> {
                     "deselectall",
                     IAction.MODE_UNDEFINED,
                     false,
-                    "config/icons/new.png") {
+                    "icons/new.png") {
                     @Override
                     public Object action() throws Exception {
                         ISelectionProvider<T> selectionProvider = ((IBeanCollector<?, T>) bean).getSelectionProvider();
@@ -1048,7 +1049,7 @@ public class BeanPresentationHelper<T> {
                 "print",
                 IAction.MODE_UNDEFINED,
                 false,
-                "config/icons/print.png") {
+                "icons/print.png") {
                 @Override
                 public Object action() throws Exception {
                     return Environment.get(IPageBuilder.class).build(bean, null, false);
@@ -1059,7 +1060,7 @@ public class BeanPresentationHelper<T> {
                 "export",
                 IAction.MODE_UNDEFINED,
                 false,
-                "config/icons/view.png") {
+                "icons/view.png") {
                 @Override
                 public Object action() throws Exception {
                     return getSimpleTextualPresentation();
@@ -1070,7 +1071,7 @@ public class BeanPresentationHelper<T> {
                 "document",
                 IAction.MODE_UNDEFINED,
                 false,
-                "config/icons/images_all.png") {
+                "icons/images_all.png") {
                 @Override
                 public Object action() throws Exception {
                     //TODO: file selection, and ant-variable insertion...
@@ -1086,7 +1087,7 @@ public class BeanPresentationHelper<T> {
                 "configure",
                 IAction.MODE_UNDEFINED,
                 false,
-                "config/icons/compose.png") {
+                "icons/compose.png") {
                 @Override
                 public Object action() throws Exception {
 //                    File configFileName = BeanDefinition.getDefinitionFile(bean.getName());
@@ -1105,7 +1106,7 @@ public class BeanPresentationHelper<T> {
                 "help",
                 IAction.MODE_UNDEFINED,
                 false,
-                "config/icons/trust_unknown.png") {
+                "icons/trust_unknown.png") {
                 @Override
                 public Object action() throws Exception {
                     String helpFileName = Environment.getConfigPath() + bean.getName().toLowerCase() + ".help.html";
@@ -1125,7 +1126,7 @@ public class BeanPresentationHelper<T> {
                 "refresh",
                 IAction.MODE_UNDEFINED,
                 false,
-                "config/icons/reload.png") {
+                "icons/reload.png") {
                 @Override
                 public Object action() throws Exception {
                     Environment.reset();
@@ -1140,7 +1141,7 @@ public class BeanPresentationHelper<T> {
                 "dump",
                 IAction.MODE_UNDEFINED,
                 false,
-                "config/icons/save.png") {
+                "icons/save.png") {
                 @Override
                 public Object action() throws Exception {
                     Environment.persist();

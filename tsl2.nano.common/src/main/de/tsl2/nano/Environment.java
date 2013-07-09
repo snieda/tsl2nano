@@ -9,6 +9,7 @@
  */
 package de.tsl2.nano;
 
+import java.io.File;
 import java.io.Serializable;
 import java.text.Format;
 import java.util.Hashtable;
@@ -24,6 +25,7 @@ import org.simpleframework.xml.DefaultType;
 import org.simpleframework.xml.ElementMap;
 import org.simpleframework.xml.core.Persist;
 
+import de.tsl2.nano.execution.CompatibilityLayer;
 import de.tsl2.nano.execution.XmlUtil;
 import de.tsl2.nano.format.DefaultFormat;
 import de.tsl2.nano.util.FileUtil;
@@ -54,12 +56,12 @@ import de.tsl2.nano.util.bean.def.AttributeDefinition;
  * @version $Revision$
  */
 @SuppressWarnings({ "unchecked", "static-access" })
-@Default(value=DefaultType.FIELD, required=false)
+@Default(value = DefaultType.FIELD, required = false)
 public class Environment {
 //    Log LOG = LogFactory.getLog(Environment.class);
 
     private static Environment self;
-    @ElementMap(entry = "property", key = "name", attribute = true, inline = true, required = false, keyType=String.class, valueType=Object.class)
+    @ElementMap(entry = "property", key = "name", attribute = true, inline = true, required = false, keyType = String.class, valueType = Object.class)
     private Properties properties;
 
     /**
@@ -70,22 +72,13 @@ public class Environment {
 
     public static final String PREFIX = Environment.class.getPackage().getName() + ".";
 
+    public static final String KEY_SYS_BASEDIR = PREFIX + ".basedir";
     public static final String KEY_DEFAULT_FORMAT = PREFIX + "defaultformat";
     public static final String KEY_CONFIG_PATH = PREFIX + "config.path";
 
     public static final String CONFIG_XML_NAME = "environment.xml";
-    public static final String CONFIG_FILE_NAME = "environment.properties";
-    public static final String SERVICE_FILE_NAME = "environment.services";
 
     private Environment() {
-        try {
-            properties = FileUtil.loadProperties(CONFIG_FILE_NAME, Thread.currentThread().getContextClassLoader());
-        } catch (Exception e) {
-            properties = new Properties();
-//            LOG.warn("no environment.properties available");
-            properties.put(KEY_CONFIG_PATH, System.getProperty("user.dir") + "/");
-        }
-        services = new Hashtable<Class<?>, Object>();
     }
 
     /**
@@ -104,8 +97,22 @@ public class Environment {
     }
 
     protected final static Environment self() {
-        if (self == null)
-            self = new Environment();
+        if (self == null) {
+            File configFile = new File(System.getProperty("user.dir") + "/" + CONFIG_XML_NAME);//new File(System.getProperty(KEY_CONFIG_PATH, System.getProperty("user.dir")));
+            if (configFile.canRead()) {
+                self = XmlUtil.loadXml(configFile.getPath(), Environment.class, new CompatibilityLayer(), false);
+                String configPath = getConfigPath();
+                if (!configPath.endsWith("/"))
+                    setProperty(KEY_CONFIG_PATH, configPath + "/");
+                new File(configPath).mkdirs();
+            } else {
+                self = new Environment();
+                self.properties = new Properties();
+//              LOG.warn("no environment.properties available");
+                self.properties.put(KEY_CONFIG_PATH, System.getProperty("user.dir") + "/");
+                self.services = new Hashtable<Class<?>, Object>();
+            }
+        }
         return self;
     }
 
@@ -280,7 +287,7 @@ public class Environment {
 //        }
 //
 //        self().get(XmlUtil.class).saveXml(SERVICE_FILE_NAME, self().services);
-        
+
         self().get(XmlUtil.class).saveXml(CONFIG_XML_NAME, self());
     }
 
@@ -288,13 +295,15 @@ public class Environment {
      * assignClassloaderToCurrentThread
      */
     public static void assignClassloaderToCurrentThread() {
-        ClassLoader cl = get(ClassLoader.class);
+        ClassLoader cl = (ClassLoader) self().services.get(ClassLoader.class);
         if (cl != null)
             Thread.currentThread().setContextClassLoader(cl);
-//        else
+        else {
+            addService(Thread.currentThread().getContextClassLoader());
 //            get(Log.class).warn("no classloader defined!");
+        }
     }
-    
+
     @Persist
     protected void initSerialization() {
         /*
@@ -304,7 +313,8 @@ public class Environment {
         for (Iterator<?> keyIt = keySet.iterator(); keyIt.hasNext();) {
             Object key = (Object) keyIt.next();
             Object value = properties.get(key);
-            if (value != null && !Serializable.class.isAssignableFrom(value.getClass()) || !BeanUtil.isSingleValueType(value.getClass()))
+            if (value != null && !Serializable.class.isAssignableFrom(value.getClass())
+                || !BeanUtil.isSingleValueType(value.getClass()))
                 keyIt.remove();
         }
         Set<Class<?>> serviceKeys = services.keySet();

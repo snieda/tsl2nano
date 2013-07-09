@@ -141,13 +141,20 @@ public class FileUtil {
      */
     public static final void saveXml(Serializable serializable, String fileName) {
         createPath(fileName);
-        OutputStream stream;
+        OutputStream stream = null;
         try {
             LOG.debug("serializing to xml: " + fileName);
             stream = new FileOutputStream(new File(fileName));
             saveXml(serializable, stream);
         } catch (final Exception e) {
             ForwardedException.forward(e);
+        } finally {
+            if (stream != null)
+                try {
+                    stream.close();
+                } catch (IOException e) {
+                    ForwardedException.forward(e);
+                }
         }
     }
 

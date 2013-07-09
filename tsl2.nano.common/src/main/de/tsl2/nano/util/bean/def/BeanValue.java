@@ -85,6 +85,7 @@ public class BeanValue<T> extends AttributeDefinition<T> implements IValueDefini
         if (isVirtual())
             return ((IValueAccess<T>) instance).getType();
         else if (instance != null) {
+            //TODO: check, if really needed!
             T value = getValue();
             //don't use inner class infos or enum values
             if (value != null && !value.getClass().isAnonymousClass() && value.getClass().getDeclaringClass() == null)

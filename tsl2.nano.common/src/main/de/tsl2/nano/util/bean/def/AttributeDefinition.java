@@ -175,6 +175,15 @@ public class AttributeDefinition<T> extends BeanAttribute implements IAttributeD
         return this;
     }
 
+    
+    /**
+     * @return Returns the length.
+     */
+    @Override
+    public int getLength() {
+        return length;
+    }
+
     /**
      * {@inheritDoc}
      */
@@ -193,11 +202,46 @@ public class AttributeDefinition<T> extends BeanAttribute implements IAttributeD
     }
 
     /**
+     * @return Returns the scale.
+     */
+    @Override
+    public int getScale() {
+        return scale;
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public IAttributeDefinition<T> setScale(int scale) {
+        this.scale = scale;
+        return this;
+    }
+
+    /**
      * {@inheritDoc}
      */
     @Override
     public int scale() {
         return scale;
+    }
+
+    
+    /**
+     * @return Returns the precision.
+     */
+    @Override
+    public int getPrecision() {
+        return precision;
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public IAttributeDefinition<T> setPrecision(int precision) {
+        this.precision = precision;
+        return this;
     }
 
     /**
@@ -206,6 +250,23 @@ public class AttributeDefinition<T> extends BeanAttribute implements IAttributeD
     @Override
     public int precision() {
         return precision;
+    }
+
+    /**
+     * @return Returns the nullable.
+     */
+    @Override
+    public boolean isNullable() {
+        return nullable;
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public IAttributeDefinition<T> setNullable(boolean nullable) {
+        this.nullable = nullable;
+        return this;
     }
 
     /**

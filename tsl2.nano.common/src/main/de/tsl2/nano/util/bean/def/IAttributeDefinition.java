@@ -58,6 +58,20 @@ public interface IAttributeDefinition<T> extends IAttributeDef, Serializable {
      */
     public boolean isMultiValue();
     
+    /** maximum length - useful on strings */
+    int getLength();
+
+    /** scale - useful for numbers of type BigDecimal */
+    int getScale();
+
+    /** precision - useful for numbers of type BigDecimal */
+    int getPrecision();
+
+    /** should return true, if attribute-value may be null */
+    boolean isNullable();
+
+    /** should be true, if this attribute defines the id of the owning bean */
+    boolean id();
     /** define some basic attribute definitions */
     IAttributeDefinition<T> setBasicDef(int length, boolean nullable, Format format, T defaultValue, String description);
 
@@ -78,6 +92,15 @@ public interface IAttributeDefinition<T> extends IAttributeDef, Serializable {
 
     /** define maximum length */
     IAttributeDefinition<T>  setLength(int length);
+
+    /** define scale */
+    IAttributeDefinition<T>  setScale(int scale);
+
+    /** define precision */
+    IAttributeDefinition<T>  setPrecision(int precision);
+
+    /** define nullable */
+    IAttributeDefinition<T>  setNullable(boolean nullable);
 
     /** returns the current attribute value status (ok, warn or error) */
     IStatus getStatus();

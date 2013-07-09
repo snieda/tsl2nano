@@ -246,11 +246,12 @@ public class BeanDefinition<T> extends BeanClass<T> implements Serializable {
             if (isVirtual() && attributeDefinitions != null)
                 attributeFilter = attributeDefinitions.keySet().toArray(new String[0]);
             else if (!isVirtual()) {
-//                attributeFilter = super.getAttributeNames(readAndWriteAccess);
                 if (attributeDefinitions != null) {
                     attributeFilter = CollectionUtil.concat(String[].class,
 //                        attributeFilter,
                         attributeDefinitions.keySet().toArray(new String[0]));
+                } else {
+                  attributeFilter = super.getAttributeNames(readAndWriteAccess);
                 }
             } else {
                 attributeFilter = new String[0];

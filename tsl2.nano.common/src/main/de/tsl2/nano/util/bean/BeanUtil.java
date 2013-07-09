@@ -133,7 +133,7 @@ public class BeanUtil {
     /**
      * delegates to {@link BeanClass#copy(Object, Object)}.
      */
-    public static <D> D copy(Object src, D dest, String...noCopy) {
+    public static <D> D copy(Object src, D dest, String... noCopy) {
         return BeanClass.copy(src, dest, noCopy);
     }
 
@@ -470,19 +470,20 @@ public class BeanUtil {
      * @param o java instance
      * @param keyPrefix key prefix to be used for each attribute name. must not be null - use an empty string instead!
      * @param onlySingleValues if true, collections will be ignored
-     * @param onlyFilteredAttributes if true, only the filterAttributes will be filled - otherwise, all others will be filled.
+     * @param onlyFilteredAttributes if true, only the filterAttributes will be filled - otherwise, all others will be
+     *            filled.
      * @param filterAttributes attributes to be filtered
      * @return see {@link Bean#toValueMap()}
      */
     public static Map<String, Object> toValueMap(Object o,
-        String keyPrefix,
-        boolean onlySingleValues,
-        boolean onlyFilteredAttributes,
-        String... filterAttributes) {
-    final Bean<?> bean = Bean.getBean((Serializable)o);
-    bean.setAttributeFilter(filterAttributes);
-    return bean.toValueMap(keyPrefix, onlySingleValues, onlyFilteredAttributes, filterAttributes);
-}
+            String keyPrefix,
+            boolean onlySingleValues,
+            boolean onlyFilteredAttributes,
+            String... filterAttributes) {
+        final Bean<?> bean = Bean.getBean((Serializable) o);
+        bean.setAttributeFilter(filterAttributes);
+        return bean.toValueMap(keyPrefix, onlySingleValues, onlyFilteredAttributes, filterAttributes);
+    }
 
     /**
      * delegates to {@link #toFormattedMap(Object, String, boolean)}.

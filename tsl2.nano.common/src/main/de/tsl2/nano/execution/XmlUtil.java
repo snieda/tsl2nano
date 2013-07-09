@@ -131,15 +131,18 @@ public class XmlUtil {
         }
     }
     
-    @SuppressWarnings("unchecked")
     public static final <T> T loadXml(String xmlFile, Class<T> type) {
-        CompatibilityLayer compLayer = Environment.get(CompatibilityLayer.class);
+        return loadXml(xmlFile, type, Environment.get(CompatibilityLayer.class), true);
+    }
+    @SuppressWarnings("unchecked")
+    public static final <T> T loadXml(String xmlFile, Class<T> type, CompatibilityLayer compLayer, boolean assignClassloader) {
         //not available on android
         /*if (compLayer.isAvailable("javax.xml.bind.JAXB")) {
             return javax.xml.bind.JAXB.unmarshal(xmlFile, type);
         } else */if (compLayer.isAvailable("org.simpleframework.xml.core.Persister")) {
             try {
-                Environment.assignClassloaderToCurrentThread();
+                if (assignClassloader)
+                    Environment.assignClassloaderToCurrentThread();
                 return new org.simpleframework.xml.core.Persister().read(type, new FileInputStream(new File(xmlFile)));
             } catch (Exception e) {
                 ForwardedException.forward(e);

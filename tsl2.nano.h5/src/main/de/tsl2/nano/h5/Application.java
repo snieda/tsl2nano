@@ -93,7 +93,7 @@ public class Application extends NanoHTTPD {
     }
 
     public Application(int port, IPageBuilder<?, String> builder, Stack<BeanDefinition<?>> navigation) throws IOException {
-        super(port, new File("."));
+        super(port, new File(Environment.getConfigPath()));
         this.port = port;
         this.builder = builder;
         this.navigation = navigation;
@@ -156,6 +156,7 @@ public class Application extends NanoHTTPD {
             files));
         String msg = "[undefined]";
         try {
+            Environment.assignClassloaderToCurrentThread();
             if (method.equals("GET") && uri.contains("."))
                 return super.serve(uri, method, header, parms, files);
             //WORKAROUND for uri-problem
@@ -529,19 +530,23 @@ public class Application extends NanoHTTPD {
                     System.out.println("Please provide a path for application configurations!");
                     return;
                 } else {
+                    System.setProperty(Environment.KEY_CONFIG_PATH, args[0]);
                     File file = new File(args[0]);
-                    file.mkdirs();
                     Environment.setProperty(Environment.KEY_CONFIG_PATH, file.getAbsolutePath() + "/");
                 }
             }
-            Html5Presentation pageBuilder = new Html5Presentation();
-            Environment.addService(BeanPresentationHelper.class, pageBuilder);
-            Environment.addService(IPageBuilder.class, new Html5Presentation());
-            Environment.addService(Profiler.class, Profiler.si());
+            initServices();
             new Application().setNavigationModel(createGenericNavigationModel()).start();
         } catch (IOException e) {
             ForwardedException.forward(e);
         }
+    }
+
+    private static void initServices() {
+        Html5Presentation pageBuilder = new Html5Presentation();
+        Environment.addService(BeanPresentationHelper.class, pageBuilder);
+        Environment.addService(IPageBuilder.class, new Html5Presentation());
+        Environment.addService(Profiler.class, Profiler.si());
     }
 
     /**
@@ -569,6 +574,7 @@ public class Application extends NanoHTTPD {
     private static Bean<?> createLogin() {
         final Persistence persistence = Persistence.getCurrent();
         Bean<?> login = new Bean(persistence);
+        login.getPresentationHelper().change(BeanPresentationHelper.PROP_NULLABLE, false);
         login.addAction(new SecureAction<Object>("swartifex.login.ok") {
             @Override
             public Object action() throws Exception {
@@ -607,7 +613,7 @@ public class Application extends NanoHTTPD {
             }
             @Override
             public String getImagePath() {
-                return "config/icons/open.png";
+                return "icons/open.png";
             }
             @Override
             public boolean isDefault() {
@@ -640,9 +646,12 @@ public class Application extends NanoHTTPD {
         navigation = null;
         response = null;
         model = null;
+        Environment.reset();
         BeanDefinition.clearCache();
         BeanValue.clearCache();
         Thread.currentThread().setContextClassLoader(appstartClassloader);
+        initServices();
+        builder = Environment.get(IPageBuilder.class);
         setNavigationModel(createGenericNavigationModel());
     }
 

@@ -358,7 +358,7 @@ public class Persistence implements Serializable {
      * @return true, if already defined and saved
      */
     public static final boolean exists() {
-        return new File(getPath(FILE_MYPERSISTENCE)).exists();
+        return new File(getPath(FILE_MYPERSISTENCE)).canRead();
     }
 
     /**

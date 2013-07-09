@@ -337,8 +337,8 @@ public class Html5Presentation<T> extends BeanPresentationHelper<T> implements I
     Element createBeanActions(Element form, BeanDefinition<?> model) {
         Element panel = createActionPanel(form, model.getActions(), ALIGN_CENTER);
         if (model.isMultiValue() && ((BeanCollector) model).hasMode(MODE_ASSIGNABLE))
-            createAction(panel, BTN_ASSIGN, "submit", "config/icons/links.png");
-        createAction(panel, IAction.CANCELED, "swartifex.close", null, "config/icons/stop.png", true, false, true);
+            createAction(panel, BTN_ASSIGN, "submit", "icons/links.png");
+        createAction(panel, IAction.CANCELED, "swartifex.close", null, "icons/stop.png", true, false, true);
         return panel;
     }
 
@@ -671,13 +671,13 @@ public class Html5Presentation<T> extends BeanPresentationHelper<T> implements I
             Document doc = factory.newDocumentBuilder().newDocument();
             Element html = doc.createElement(TAG_HTML);
             doc.appendChild(html);
-            Element body = appendElement(html, TAG_BODY, "background", interactive ? "config/icons/spe.jpg" : null);
+            Element body = appendElement(html, TAG_BODY, "background", interactive ? "icons/spe.jpg" : null);
 
             Element row = appendElement(createGrid(body, null, 3), TAG_ROW);
             Element c1 = appendElement(row, TAG_CELL);
             Element c2 = appendElement(row, TAG_CELL);
             c1 = appendElement(c1, TAG_LINK, ATTR_HREF, "tsl2.nano.h5.html");
-            appendElement(c1, TAG_IMAGE, ATTR_SRC, "config/icons/beanex-logo-micro.jpg");
+            appendElement(c1, TAG_IMAGE, ATTR_SRC, "icons/beanex-logo-micro.jpg");
             appendElement(c2, TAG_H3, content(title), ATTR_ALIGN, ALIGN_CENTER);
             if (interactive && bean != null) {
                 Element c3 = appendElement(row, TAG_CELL, ATTR_ALIGN, ALIGN_RIGHT);
