@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testrun name="CommonTest" project="tsl2.nano.common" tests="17" started="17" failures="0" errors="0" ignored="0">
+  <testsuite name="de.tsl2.nano.test.CommonTest" time="78.158">
+    <testcase name="testEncryption" classname="de.tsl2.nano.test.CommonTest" time="0.038"/>
+    <testcase name="testStringUtil" classname="de.tsl2.nano.test.CommonTest" time="0.037"/>
+    <testcase name="testScriptUtil" classname="de.tsl2.nano.test.CommonTest" time="1.434"/>
+    <testcase name="testFileUtil" classname="de.tsl2.nano.test.CommonTest" time="0.003"/>
+    <testcase name="testNumberUtil" classname="de.tsl2.nano.test.CommonTest" time="0.072"/>
+    <testcase name="testCollectionUtil" classname="de.tsl2.nano.test.CommonTest" time="0.023"/>
+    <testcase name="testSimpleDateFormat" classname="de.tsl2.nano.test.CommonTest" time="0.038"/>
+    <testcase name="testDateAndPeriod" classname="de.tsl2.nano.test.CommonTest" time="0.18"/>
+    <testcase name="testCurrency" classname="de.tsl2.nano.test.CommonTest" time="0.006"/>
+    <testcase name="testCurrenciesHistorical" classname="de.tsl2.nano.test.CommonTest" time="0.055"/>
+    <testcase name="testBeanUtilFromFlatFile" classname="de.tsl2.nano.test.CommonTest" time="0.016"/>
+    <testcase name="testBeanUtils" classname="de.tsl2.nano.test.CommonTest" time="23.205"/>
+    <testcase name="testValueExpression" classname="de.tsl2.nano.test.CommonTest" time="0.018"/>
+    <testcase name="testOperation" classname="de.tsl2.nano.test.CommonTest" time="0.005"/>
+    <testcase name="testArrayPerformance" classname="de.tsl2.nano.test.CommonTest" time="52.752"/>
+    <testcase name="testJarClassloader" classname="de.tsl2.nano.test.CommonTest" time="0.006"/>
+    <testcase name="testEnhancer" classname="de.tsl2.nano.test.CommonTest" time="0.269"/>
+  </testsuite>
+</testrun>
