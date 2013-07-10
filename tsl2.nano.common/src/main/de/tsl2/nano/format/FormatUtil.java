@@ -29,6 +29,8 @@ import de.tsl2.nano.exception.FormattedException;
 import de.tsl2.nano.execution.CompatibilityLayer;
 import de.tsl2.nano.util.NumberUtil;
 import de.tsl2.nano.util.StringUtil;
+import de.tsl2.nano.util.bean.BeanClass;
+import de.tsl2.nano.util.bean.PrimitiveUtil;
 
 /**
  * evaluates a {@link Format} for a given type or instance. used by validators, to check input.
@@ -168,6 +170,20 @@ public class FormatUtil {
                     public Object parseObject(String source, ParsePosition pos) {
                         pos.setIndex(!StringUtil.isEmpty(source) ? source.length() : 1);
                         return !StringUtil.isEmpty(source) ? Enum.valueOf(type, source) : null;
+                    }
+
+                };
+            } else {
+                f = new Format() {
+                    @Override
+                    public StringBuffer format(Object obj, StringBuffer toAppendTo, FieldPosition pos) {
+                        return toAppendTo.append(obj != null ? obj.toString() : "");
+                    }
+
+                    @Override
+                    public Object parseObject(String source, ParsePosition pos) {
+                        pos.setIndex(!StringUtil.isEmpty(source) ? source.length() : 1);
+                        return !StringUtil.isEmpty(source) ? BeanClass.createInstance(type, source) : null;
                     }
 
                 };

@@ -144,8 +144,16 @@ public class BeanClass<T> implements Serializable {
                     continue;
                 }
                 if (!readAndWriteAccess || hasWriteAccessMethod(allMethods[i])) {
-                    beanAccessMethods.add(new BeanAttribute(allMethods[i]));
-                    accessedMethods.add(allMethods[i].getName());
+                    BeanAttribute attr = new BeanAttribute(allMethods[i]);
+                    //check, if attribute is BeanAttribute-compatible - but only if not boolean-type (because of get and is)
+                    if (isAssignableFrom(Boolean.class, allMethods[i].getReturnType()) || BeanAttribute.hasExpectedName(allMethods[i])) {
+                        beanAccessMethods.add(attr);
+                        accessedMethods.add(allMethods[i].getName());
+                    } else {
+                        LOG.warn("method " + allMethods[i]
+                            + " doesn't respect uppercase-starting getter ==> will be ignored!");
+                    }
+
                 }
             }
         }
@@ -484,6 +492,7 @@ public class BeanClass<T> implements Serializable {
 
     /**
      * hasDefaultConstructor
+     * 
      * @param clazz
      * @return
      */
@@ -494,7 +503,7 @@ public class BeanClass<T> implements Serializable {
             return false;
         }
     }
-    
+
     /**
      * creates a new instance through the given arguments. if you don't call the default constructor, the performance
      * will go down on searching the right constructor.
@@ -790,8 +799,8 @@ public class BeanClass<T> implements Serializable {
 
     /**
      * As {@link Class#getInterfaces()} will not return the interfaces of the hierarchy and {@link Class#getClasses()}
-     * will return all member classes (which is not usable for proxy declarations), this method returns all interfaces of this
-     * class and it's hierarchy.
+     * will return all member classes (which is not usable for proxy declarations), this method returns all interfaces
+     * of this class and it's hierarchy.
      * 
      * @return all interfaces of the class hierarchy.
      */

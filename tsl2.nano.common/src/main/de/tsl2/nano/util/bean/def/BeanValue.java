@@ -158,7 +158,8 @@ public class BeanValue<T> extends AttributeDefinition<T> implements IValueDefini
         changeHandler().fireEvent(event);
         if (!event.breakEvent) {
             setValue(instance, value);
-            status = isValid(value);
+            if (isDoValidation())
+                status = isValid(value);
             event.hasChanged = true;
             changeHandler().fireEvent(event);
         }
@@ -235,6 +236,17 @@ public class BeanValue<T> extends AttributeDefinition<T> implements IValueDefini
             return description;
         else
             return super.getId();
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public String getName() {
+        if (isVirtual())
+            return description;
+        else
+            return super.getName();
     }
 
     @Override

@@ -61,6 +61,8 @@ public class AttributeDefinition<T> extends BeanAttribute implements IAttributeD
     private transient Collection<T> allowedValues;
     private IPresentable presentable;
     private IPresentableColumn columnDefinition;
+    private boolean doValidation = true;
+
     private static final Log LOG = LogFactory.getLog(AttributeDefinition.class);
 
     /**
@@ -80,7 +82,7 @@ public class AttributeDefinition<T> extends BeanAttribute implements IAttributeD
      * jpa-annotations.
      */
     private void defineDefaults() {
-        if (BeanContainer.isInitialized() && BeanContainer.instance().isPersistable(getType())) {
+        if (BeanContainer.isInitialized() && BeanContainer.instance().isPersistable(getDeclaringClass())) {
             IAttributeDef def = BeanContainer.instance().getAttributeDef(getDeclaringClass(), getName());
             if (def != null) {
                 LOG.debug("setting defaults from annotations for attribute: " + getName());
@@ -120,7 +122,7 @@ public class AttributeDefinition<T> extends BeanAttribute implements IAttributeD
         this.format = format;
         this.defaultValue = defaultValue;
         this.description = description;
-        if (defaultValue != null) {
+        if (defaultValue != null && doValidation) {
             IStatus s = isValid(defaultValue);
             if (!s.ok())
                 throw new FormattedException(s.message());
@@ -535,4 +537,19 @@ public class AttributeDefinition<T> extends BeanAttribute implements IAttributeD
     public void setColumnDefinition(int index, int sortIndex, boolean sortUpDirection, int width) {
         this.columnDefinition = new ValueColumn(this, index, sortIndex, sortUpDirection, width);
     }
+
+    /**
+     * @return Returns the doValidation.
+     */
+    public boolean isDoValidation() {
+        return doValidation;
+    }
+
+    /**
+     * @param doValidation The doValidation to set.
+     */
+    public void setDoValidation(boolean doValidation) {
+        this.doValidation = doValidation;
+    }
+
 }

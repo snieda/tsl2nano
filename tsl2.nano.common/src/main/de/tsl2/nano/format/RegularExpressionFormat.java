@@ -150,6 +150,13 @@ public class RegularExpressionFormat extends Format {
     }
 
     /**
+     * constructor to be de-serializable
+     */
+    public RegularExpressionFormat() {
+        super();
+    }
+
+    /**
      * simple constructor without length argument. only usable on simple patterns without length definitions (like
      * {0,5}).
      * 
@@ -924,7 +931,7 @@ public class RegularExpressionFormat extends Format {
      */
     protected static final Format getDefaultNumberFormat(int precision, Class type) {
         //if the type is null, we don't know which object is a result of parsing!
-        if (precision < 1 || type == null) {
+        if (precision < 0 || type == null) {
             return null;
         }
         //this definition MUST match the definition of FormatUtil.getDefaultFormat(..)

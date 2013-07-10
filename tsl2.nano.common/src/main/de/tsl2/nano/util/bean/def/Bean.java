@@ -707,6 +707,6 @@ class SaveAction<T> extends SecureAction<T> implements Serializable {
     }
     @Override
     public String getImagePath() {
-        return "config/icons/save.png";
+        return "icons/save.png";
     }
 }

@@ -61,6 +61,7 @@ public class BeanAttribute implements Comparable<BeanAttribute>, Serializable {
     static final String PREFIX_CLASS = "class";
 
     static final Object[] EMPTY_ARG = new Object[0];
+    static final Class<?>[] EMPTY_CLS_ARG = new Class[0];
 
     public static final String ATTR_ENUM_NAME = "name";
     public static final String REGEXP_ATTR_NAME = "[a-z][a-zA-Z0-9_]*";
@@ -99,15 +100,14 @@ public class BeanAttribute implements Comparable<BeanAttribute>, Serializable {
      * @return an instance of Method with the given attributeName of clazz - or null.
      */
     protected static final Method getReadAccessMethod(Class<?> clazz, String attributeName, boolean throwException) {
-        String methodName = PREFIX_READ_ACCESS + attributeName.substring(0, 1).toUpperCase()
-            + attributeName.substring(1);
+        String methodName = getExpectedMethodName(attributeName);
         try {
-            return clazz.getMethod(methodName, new Class[] {});
+            return clazz.getMethod(methodName, EMPTY_CLS_ARG);
         } catch (final Exception e) {
             methodName = PREFIX_BOOLEAN_READ_ACCESS + attributeName.substring(0, 1).toUpperCase()
                 + attributeName.substring(1);
             try {
-                return clazz.getMethod(methodName, new Class[] {});
+                return clazz.getMethod(methodName, EMPTY_CLS_ARG);
             } catch (final Exception e1) {
                 if (throwException)
                     ForwardedException.forward(e);
@@ -118,6 +118,11 @@ public class BeanAttribute implements Comparable<BeanAttribute>, Serializable {
                 return null;
             }
         }
+    }
+
+    private static final String getExpectedMethodName(String attributeName) {
+        return PREFIX_READ_ACCESS + attributeName.substring(0, 1).toUpperCase()
+                + attributeName.substring(1);
     }
 
     /**
@@ -448,12 +453,12 @@ public class BeanAttribute implements Comparable<BeanAttribute>, Serializable {
      */
     private void writeObject(java.io.ObjectOutputStream out) throws IOException {
         //Method is not serializable, so we save informations to reconstruct it.
-        initSerializing();
+        initSerialization();
         out.defaultWriteObject();
     }
 
     @Persist
-    private void initSerializing() {
+    private void initSerialization() {
         declaringClass = readAccessMethod.getDeclaringClass();
         name = getName(readAccessMethod);
     }
@@ -469,6 +474,11 @@ public class BeanAttribute implements Comparable<BeanAttribute>, Serializable {
     @Commit
     private void initDeserializing() {
         readAccessMethod = getReadAccessMethod(declaringClass, name, true);
+    }
+
+    public static boolean hasExpectedName(Method method) {
+        String n = decapitalize(method.getName().substring(3));
+        return getExpectedMethodName(n).equals(method.getName());
     }
     
 //    private void readObjectNoData() throws ObjectStreamException {

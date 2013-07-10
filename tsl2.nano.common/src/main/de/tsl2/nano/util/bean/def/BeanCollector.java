@@ -18,10 +18,14 @@ import java.util.Iterator;
 import java.util.LinkedHashSet;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Map;
 
 import org.apache.commons.logging.Log;
 import org.simpleframework.xml.Default;
 import org.simpleframework.xml.DefaultType;
+import org.simpleframework.xml.ElementList;
+
+import tsl.StringUtil;
 
 import de.tsl2.nano.Environment;
 import de.tsl2.nano.Messages;
@@ -53,28 +57,33 @@ public class BeanCollector<COLLECTIONTYPE extends Collection<T>, T> extends Bean
 
     private static final Log LOG = LogFactory.getLog(BeanCollector.class);
 
-    protected COLLECTIONTYPE collection;
-    protected IBeanFinder<T, ?> beanFinder;
-    transient ISelectionProvider<T> selectionProvider;
+    public static final String POSTFIX_COLLECTOR = ".collector";
 
-    IAction<?> newAction;
-    IAction<?> editAction;
-    IAction<?> deleteAction;
+    protected transient COLLECTIONTYPE collection;
+    protected transient IBeanFinder<T, ?> beanFinder;
+    protected transient ISelectionProvider<T> selectionProvider;
+
+    protected transient IAction<?> newAction;
+    protected transient IAction<?> editAction;
+    protected transient IAction<?> deleteAction;
     /** the extending class has to set an instance for the ok action to set it as default button */
-    protected IAction<?> openAction;
+    protected transient IAction<?> openAction;
 
     protected int workingMode = MODE_EDITABLE | MODE_CREATABLE | MODE_SEARCHABLE;
     /**
      * search panel instructions.
      */
-    IAction<COLLECTIONTYPE> searchAction;
-    IAction<?> resetAction;
+    protected transient IAction<COLLECTIONTYPE> searchAction;
+    protected transient IAction<?> resetAction;
     String searchStatus = Messages.getString("swartifex.searchdialog.nosearch");
 
     /** whether to refresh data from beancontainer before opening edit-dialog */
     protected boolean reloadBean = true;
 
+    @ElementList(name = "column", inline = true, required = false/*, type=ValueColumn.class*/)
     private Collection<IPresentableColumn> columnDefinitions;
+
+    private String asString;
 
     /**
      * constructor. should only used by framework - for de-serialization.
@@ -132,7 +141,7 @@ public class BeanCollector<COLLECTIONTYPE extends Collection<T>, T> extends Bean
      *            see {@link IBeanCollector} for more modes.
      */
     private void init(IBeanFinder<T, ?> beanFinder, int workingMode) {
-        setName(Messages.getString("swartifex.list") + " " + getName());
+//        setName(Messages.getString("swartifex.list") + " " + getName());
         this.collection = (COLLECTIONTYPE) new LinkedList<T>();
         setBeanFinder(beanFinder);
         this.workingMode = workingMode;
@@ -170,7 +179,7 @@ public class BeanCollector<COLLECTIONTYPE extends Collection<T>, T> extends Bean
     protected Class<T> getType() {
         //try to evaluate the collection content type
         if (beanFinder == null) {
-            if (collection.size() > 0) {
+            if (collection != null && collection.size() > 0) {
                 setBeanFinder(new BeanFinder((Class<T>) collection.iterator().next().getClass()));
             }
         }
@@ -408,6 +417,7 @@ public class BeanCollector<COLLECTIONTYPE extends Collection<T>, T> extends Bean
             public boolean isEnabled() {
                 return super.isEnabled() && hasMode(MODE_CREATABLE);
             }
+
             @Override
             public String getImagePath() {
                 return "icons/new.png";
@@ -446,6 +456,7 @@ public class BeanCollector<COLLECTIONTYPE extends Collection<T>, T> extends Bean
             public boolean isEnabled() {
                 return super.isEnabled() && hasMode(MODE_CREATABLE) && hasSelection();
             }
+
             @Override
             public String getImagePath() {
                 return "icons/blocked.png";
@@ -489,6 +500,7 @@ public class BeanCollector<COLLECTIONTYPE extends Collection<T>, T> extends Bean
             public boolean isEnabled() {
                 return super.isEnabled() && hasMode(MODE_EDITABLE) && hasSelection();
             }
+
             @Override
             public String getImagePath() {
                 return "icons/open.png";
@@ -634,6 +646,7 @@ public class BeanCollector<COLLECTIONTYPE extends Collection<T>, T> extends Bean
                     DateUtil.getFormattedMinutes(time));
                 return result;
             }
+
             @Override
             public String getImagePath() {
                 return "icons/find.png";
@@ -662,6 +675,7 @@ public class BeanCollector<COLLECTIONTYPE extends Collection<T>, T> extends Bean
                 BeanUtil.resetValues(getBeanFinder().getFilterRange().getInstance().getTo());
                 return null;
             }
+
             @Override
             public String getImagePath() {
                 return "icons/reload.png";
@@ -674,5 +688,48 @@ public class BeanCollector<COLLECTIONTYPE extends Collection<T>, T> extends Bean
     @Override
     public String getSummary() {
         return searchStatus;
+    }
+
+    /**
+     * searches for an existing bean-definition and creates a bean-collector.
+     * 
+     * @param beanType bean-collectors bean-type
+     * @param collection optional prefilling collection (normally done by {@link IBeanFinder#getData(Object, Object)}.
+     * @param workingMode working mode of desired collector (see {@link IBeanCollector} for available modes.
+     * @return
+     */
+    public static final <C extends Collection<I>, I extends Serializable> BeanCollector<C, I> getBeanCollector(Class<I> beanType,
+            Collection<I> collection,
+            int workingMode) {
+        BeanDefinition<I> beandef = getBeanDefinition(beanType.getSimpleName() + POSTFIX_COLLECTOR,
+            beanType,
+            false);
+        return (BeanCollector<C, I>) createCollector(collection, workingMode, beandef);
+    }
+
+    /**
+     * creates a bean-collector through informations of a bean-definition
+     * 
+     * @param <I>
+     * @param collection optional collection for collector
+     * @param beandef bean description
+     * @return new created bean-collector holding given collection
+     */
+    protected static <C extends Collection<I>, I extends Serializable> BeanCollector<C, I> createCollector(C collection,
+            int workingMode,
+            BeanDefinition<I> beandef) {
+        BeanCollector<C, I> bc = new BeanCollector<C, I>();
+        copy(beandef, bc, "asString");
+        bc.init(new BeanFinder(beandef.getClazz()), workingMode);
+        return bc;
+    }
+
+    @Override
+    public String toString() {
+        if (asString == null) {
+            //empty search-beans are possible
+            asString = name != null ? Environment.translate("swartifex.list", false) + " " + StringUtil.substring(name, null, POSTFIX_COLLECTOR) : null;
+        }
+        return asString;
     }
 }

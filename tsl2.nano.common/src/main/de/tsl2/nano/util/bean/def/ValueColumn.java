@@ -25,7 +25,7 @@ public class ValueColumn<T> implements IPresentableColumn, Serializable {
     /** serialVersionUID */
     private static final long serialVersionUID = 3998475409703066783L;
     
-    IAttributeDefinition<T> attributeDefinition;
+    transient IAttributeDefinition<T> attributeDefinition;
     int columnIndex;
     int sortIndex;
     boolean isSortUpDirection;

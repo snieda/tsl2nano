@@ -16,6 +16,7 @@ import java.text.Format;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
 import java.util.LinkedList;
@@ -28,6 +29,7 @@ import org.simpleframework.xml.Default;
 import org.simpleframework.xml.DefaultType;
 import org.simpleframework.xml.ElementMap;
 import org.simpleframework.xml.Namespace;
+import org.simpleframework.xml.core.Persist;
 
 import de.tsl2.nano.Environment;
 import de.tsl2.nano.action.IAction;
@@ -83,7 +85,7 @@ public class BeanDefinition<T> extends BeanClass<T> implements Serializable {
      * optional bean actions. not serialized because most actions will be defined inline - so the containing class would
      * have to be serializable, too.
      */
-    protected transient Collection<IAction> actions;
+    protected Collection<IAction> actions;
 
     /** optional attribute relations */
     protected Map<String, IAttributeDefinition<?>> connections;
@@ -251,7 +253,7 @@ public class BeanDefinition<T> extends BeanClass<T> implements Serializable {
 //                        attributeFilter,
                         attributeDefinitions.keySet().toArray(new String[0]));
                 } else {
-                  attributeFilter = super.getAttributeNames(readAndWriteAccess);
+                    attributeFilter = super.getAttributeNames(readAndWriteAccess);
                 }
             } else {
                 attributeFilter = new String[0];
@@ -292,7 +294,13 @@ public class BeanDefinition<T> extends BeanClass<T> implements Serializable {
         BeanValue bv = BeanValue.getBeanValue(v, IValueAccess.ATTR_VALUE);
         bv.setBasicDef(-1, true, format, value, description != null ? description : name);
         getAttributeDefinitions().put(name, bv);
-        attributeFilter = CollectionUtil.concat(getAttributeNames(), new String[] { name });
+        //if no filter was defined, it will be prefilled in getAttributeNames()
+        if (attributeFilter == null)
+            attributeFilter = getAttributeNames();
+        else
+            attributeFilter = CollectionUtil.concat(new String[attributeFilter.length + 1],
+                attributeFilter,
+                new String[] { name });
         bv.setPresentation(presentation);
         allDefinitionsCached = false;
         return bv;
@@ -323,7 +331,12 @@ public class BeanDefinition<T> extends BeanClass<T> implements Serializable {
         description = description != null ? description : name;
         bv.setBasicDef(length, nullable, format, defaultValue, description);
         getAttributeDefinitions().put(description, bv);
-        attributeFilter = CollectionUtil.concat(getAttributeNames(), new String[] { name });
+        if (attributeFilter == null)
+            attributeFilter = getAttributeNames();
+        else
+            attributeFilter = CollectionUtil.concat(new String[attributeFilter.length + 1],
+                attributeFilter,
+                new String[] { name });
         bv.setPresentation(presentation);
         allDefinitionsCached = false;
         return bv;
@@ -562,7 +575,7 @@ public class BeanDefinition<T> extends BeanClass<T> implements Serializable {
 //                    if (true /*xmlFile.canWrite()*/) {
 //                        //be careful: having write access will introduce another behaviour
 //                        if (type != UNDEFINED.getClass())
-                        beandef.autoInit(name);
+                beandef.autoInit(name);
 //                        beandef.saveBeanDefinition(xmlFile);
 //                    } else
 //                        LOG.warn("couldn't write bean-definition cache to: " + xmlFile.getPath());
@@ -572,6 +585,24 @@ public class BeanDefinition<T> extends BeanClass<T> implements Serializable {
             beandef = virtualBeanCache.get(i);
         }
         return beandef;
+    }
+
+    @Persist
+    private void initSerialization() {
+        //remove not-serializable actions
+        if (actions != null && !Environment.get("strict.mode", false)) {
+            for (Iterator<IAction> actionIt = actions.iterator(); actionIt.hasNext();) {
+                IAction a = (IAction) actionIt.next();
+                //on inline implementations check the parent class
+                if (a.getClass().getEnclosingClass() != null && !Serializable.class.isAssignableFrom(a.getClass()
+                    .getEnclosingClass())) {
+                    LOG.warn("removing action " + a.getId() + " to do serialization");
+                    actionIt.remove();
+                }
+            }
+            if (actions.isEmpty())
+                actions = null;
+        }
     }
 
     /**
@@ -584,6 +615,15 @@ public class BeanDefinition<T> extends BeanClass<T> implements Serializable {
             createNaturalSortedAttributeNames(attributeFilter);
             allDefinitionsCached = true;
         }
+    }
+
+    /**
+     * Extension for {@link Serializable}
+     */
+    private void writeObject(java.io.ObjectOutputStream out) throws IOException {
+        //inline actions may not be serializable, so we remove them!
+        initSerialization();
+        out.defaultWriteObject();
     }
 
     protected static File getDefinitionFile(String name) {

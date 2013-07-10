@@ -25,6 +25,7 @@ import static de.tsl2.nano.util.bean.def.IPresentable.TYPE_TIME;
 import static de.tsl2.nano.util.bean.def.IPresentable.UNDEFINED;
 
 import java.io.File;
+import java.io.Serializable;
 import java.math.BigDecimal;
 import java.sql.Time;
 import java.sql.Timestamp;
@@ -91,6 +92,7 @@ public class BeanPresentationHelper<T> {
     public static final String PROP_VALUE = "value";
     public static final String PROP_ALLOWED_VALUES = "allowedValues";
     public static final String PROP_NULLABLE = "nullable";
+    public static final String PROP_DOVALIDATION = "doValidation";
 
     /*
      * IPresentables
@@ -172,7 +174,7 @@ public class BeanPresentationHelper<T> {
         for (int i = 0; i < attributeNames.length; i++) {
             Object instance = isPresProp ? bean.getAttribute(attributeNames[i]).getPresentation()
                 : bean.getAttribute(attributeNames[i]);
-            BeanValue.getBeanValue(instance, propertyName).setValue(newValue);
+            BeanAttribute.getBeanAttribute(instance.getClass(), propertyName).setValue(instance, newValue);
         }
         return this;
     }
@@ -403,35 +405,37 @@ public class BeanPresentationHelper<T> {
     }
 
     /** returns an optional action as finder/assigner - useful to select a new value */
-    public <V> IAction<IBeanCollector<?, V>> getSelector(final IAttributeDefinition<V> beanAttribute) {
+    public <V extends Serializable> IAction<IBeanCollector<?, V>> getSelector(final IAttributeDefinition<V> beanAttribute) {
         //TODO: move that to the attribute: IPresentable
         return new SecureAction<IBeanCollector<?, V>>(beanAttribute.getName() + POSTFIX_SELECTOR,
             Environment.get("field.selector.text", "...")) {
             @Override
             public IBeanCollector<?, V> action() throws Exception {
-                BeanCollector<?, V> beanCollector;
+                BeanCollector<?, ?> beanCollector;
                 if (beanAttribute.isMultiValue() && beanAttribute instanceof BeanValue) {
                     Collection<V> collection = (Collection<V>) ((BeanValue<V>) beanAttribute).getValue();
                     if (collection == null) {
                         collection = new ListSet<V>();
-                        beanCollector = new BeanCollector(((BeanAttribute) beanAttribute).getGenericType(), MODE_ALL);
+                        beanCollector = BeanCollector.getBeanCollector((Class<V>)((BeanAttribute) beanAttribute).getGenericType(),
+                            null,
+                            MODE_ALL);
                     } else {
-                        beanCollector = new BeanCollector(((BeanAttribute) beanAttribute).getGenericType(),
+                        beanCollector = BeanCollector.getBeanCollector((Class<V>)((BeanAttribute) beanAttribute).getGenericType(),
                             collection,
                             MODE_ALL);
                     }
                     ((BeanValue<V>) beanAttribute).setValue((V) collection);
-                    beanCollector.setSelectionProvider(new SelectionProvider<V>(beanCollector.getCurrentData()));
+                    beanCollector.setSelectionProvider(new SelectionProvider(beanCollector.getCurrentData()));
                 } else {
                     LinkedList<V> selection = new LinkedList<V>();
                     if (beanAttribute instanceof BeanValue)
                         selection.add(((BeanValue<V>) beanAttribute).getValue());
-                    beanCollector = new BeanCollector<Collection<V>, V>(beanAttribute.getType(),
+                    beanCollector = BeanCollector.getBeanCollector((Class<V>)beanAttribute.getType(),
                         selection,
                         MODE_ALL_SINGLE);
-                    beanCollector.setSelectionProvider(new SelectionProvider<V>(selection));
+                    beanCollector.setSelectionProvider(new SelectionProvider(selection));
                 }
-                return beanCollector;
+                return (IBeanCollector<?, V>) beanCollector;
             }
         };
     }
@@ -1045,22 +1049,14 @@ public class BeanPresentationHelper<T> {
                 });
             }
 
-            presActions.add(new SecureAction(bean.getClazz(),
-                "print",
-                IAction.MODE_UNDEFINED,
-                false,
-                "icons/print.png") {
+            presActions.add(new SecureAction(bean.getClazz(), "print", IAction.MODE_UNDEFINED, false, "icons/print.png") {
                 @Override
                 public Object action() throws Exception {
                     return Environment.get(IPageBuilder.class).build(bean, null, false);
                 }
             });
 
-            presActions.add(new SecureAction(bean.getClazz(),
-                "export",
-                IAction.MODE_UNDEFINED,
-                false,
-                "icons/view.png") {
+            presActions.add(new SecureAction(bean.getClazz(), "export", IAction.MODE_UNDEFINED, false, "icons/view.png") {
                 @Override
                 public Object action() throws Exception {
                     return getSimpleTextualPresentation();
@@ -1137,11 +1133,7 @@ public class BeanPresentationHelper<T> {
                 }
             });
 
-            presActions.add(new SecureAction(bean.getClazz(),
-                "dump",
-                IAction.MODE_UNDEFINED,
-                false,
-                "icons/save.png") {
+            presActions.add(new SecureAction(bean.getClazz(), "dump", IAction.MODE_UNDEFINED, false, "icons/save.png") {
                 @Override
                 public Object action() throws Exception {
                     Environment.persist();

@@ -29,6 +29,14 @@ public class GenericParser<T> extends DefaultFormat {
     protected String parsingPattern;
     private Format parsingFormat;
 
+    
+    /**
+     * constructor to be de-serializable
+     */
+    public GenericParser() {
+        super();
+    }
+
     /**
      * constructor
      * 
