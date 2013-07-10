@@ -90,7 +90,7 @@ public class ScriptTool {
                     String sqlFileName = "sql-script-" + System.currentTimeMillis() + ".sql";
                     String sqlFilePath = Environment.getConfigPath() + sqlFileName;
                     FileUtil.writeBytes(queries.getBytes(), sqlFilePath, false);
-                    Properties p = Persistence.getCurrent().getJdbcProperties();
+                    Properties p = Persistence.current().getJdbcProperties();
                     p.put("dir", Environment.getConfigPath());
                     p.put("includes", sqlFileName);
                     p.put("classloader", Environment.get(ClassLoader.class));

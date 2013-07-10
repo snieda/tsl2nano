@@ -406,7 +406,7 @@ public class Persistence implements Serializable {
      * 
      * @return loaded or created instance
      */
-    public static Persistence getCurrent() {
+    public static Persistence current() {
         if (Persistence.exists()) {
             return (Persistence) FileUtil.loadXml(getPath(FILE_MYPERSISTENCE_BEAN));
         } else {
