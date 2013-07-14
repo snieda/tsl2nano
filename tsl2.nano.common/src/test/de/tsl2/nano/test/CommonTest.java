@@ -42,8 +42,10 @@ import java.util.zip.ZipInputStream;
 
 import org.apache.commons.logging.Log;
 import org.junit.Assert;
+import org.junit.BeforeClass;
 import org.junit.Test;
 
+import de.tsl2.nano.Environment;
 import de.tsl2.nano.action.CommonAction;
 import de.tsl2.nano.action.IAction;
 import de.tsl2.nano.classloader.JarClassLoader;
@@ -89,6 +91,11 @@ import de.tsl2.nano.util.operation.OperableUnit;
 public class CommonTest {
     private static final Log LOG = LogFactory.getLog(CommonTest.class);
 
+    @BeforeClass
+    protected void setUp() {
+        Environment.setProperty(Environment.KEY_CONFIG_PATH, "test/");
+    }
+    
     @Test
     public void testEncryption() throws Exception {
         //TODO: define providers
@@ -135,7 +142,7 @@ public class CommonTest {
     public void testScriptUtil() throws Exception {
         final Properties p = new Properties();
         //par is not used
-        p.put("swartifex.test.parameter", "test");
+        p.put("tsl2nano.test.parameter", "test");
         p.put("client.lib.dir", "lib");
         p.put("shared.lib.dir", "lib");
         p.put("server.lib.dir", "lib");
@@ -313,7 +320,7 @@ public class CommonTest {
         tb1.setString("Anton");
         TypeBean tb2 = new TypeBean();
         tb2.setString("Berta");
-        List<TypeBean> transforming = CollectionUtil.getTransforming(Arrays.asList(tb1, tb2), new ITransformer<String, TypeBean>() {
+        List<TypeBean> transforming = CollectionUtil.getTransforming(Arrays.asList(tb1, tb2), new ITransformer<TypeBean, String>() {
             @Override
             public String transform(TypeBean toTransform) {
                 return toTransform.string;
@@ -521,7 +528,7 @@ public class CommonTest {
          * test it , using a separation string
          */
         //first, create an example file and test bean
-        String testFile = "commontest-fromflatfile.txt";
+        String testFile = Environment.getConfigPath() + "commontest-fromflatfile.txt";
         String s = "0123 456789 Monday\n1234 567890 Tuesday";
         FileUtil.writeBytes(s.getBytes(), testFile, false);
 
@@ -749,7 +756,7 @@ public class CommonTest {
         //check the adding action
         assertTrue((Integer) ((IAction) range.getActions().iterator().next()).activate() == 3);
         //check serialization
-        FileUtil.saveXml(range, "test.xml");
+        FileUtil.saveXml(range, Environment.getConfigPath() + "test.xml");
 
         /*
          * de-/serializing BeanDefinitions
@@ -763,10 +770,10 @@ public class CommonTest {
         map.put("key1", "value1");
         map.put("key2", "value2");
         tb.setObject(map);
-        FileUtil.saveXml(tb, "testmap.xml");
+        FileUtil.saveXml(tb, Environment.getConfigPath() + "testmap.xml");
         
         BeanClass bc = new BeanClass(TypeBean.class);
-        FileUtil.saveXml(bc, "beanclass.xml");
+        FileUtil.saveXml(bc, Environment.getConfigPath() + "beanclass.xml");
         
         final BeanDefinition<TypeBean> beandef = BeanDefinition.getBeanDefinition(TypeBean.class);
         beandef.getAttribute("immutableFloat").setBasicDef(10, false, RegularExpressionFormat.createCurrencyRegExp(), null, null);
@@ -778,8 +785,8 @@ public class CommonTest {
         });
         beandef.saveDefinition();
         //check standard serialization
-        FileUtil.save("beandef", beandef);
-        FileUtil.load("beandef");
+        FileUtil.save(Environment.getConfigPath() + "beandef", beandef);
+        FileUtil.load(Environment.getConfigPath() + "beandef");
         
         BeanDefinition.clearCache();
         BeanDefinition<TypeBean> beandefFromXml = BeanDefinition.getBeanDefinition(TypeBean.class);
@@ -1050,7 +1057,7 @@ public class CommonTest {
         ClassLoader contextClassLoader = Thread.currentThread().getContextClassLoader();
         JarClassLoader jarClassLoader = new JarClassLoader(contextClassLoader) {
             protected String getRootJarPath() {
-                return "../swartifex.architect/packages/plugins/de.tsl2.nano.common_0.0.2.B.jar";
+                return "../tsl2nano.architect/packages/plugins/de.tsl2.nano.common_0.0.2.B.jar";
             }
 
             @Override
