@@ -87,7 +87,7 @@ public class BeanAssigner<T> {
     public void moveToDest(Collection<T> selectedSourceItems) {
         assert sourceItems.containsAll(selectedSourceItems);
         if (!(sourceItems.removeAll(selectedSourceItems))) {
-            throw new FormattedException("swartifex.unexpectederror", null);
+            throw new FormattedException("tsl2nano.unexpectederror", null);
         }
 
         destItems.addAll(selectedSourceItems);
@@ -101,7 +101,7 @@ public class BeanAssigner<T> {
     public void moveToSource(Collection<T> selectedDestItems) {
         assert destItems.containsAll(selectedDestItems);
         if (!(destItems.removeAll(selectedDestItems))) {
-            throw new FormattedException("swartifex.unexpectederror", null);
+            throw new FormattedException("tsl2nano.unexpectederror", null);
         }
 
         sourceItems.addAll(selectedDestItems);

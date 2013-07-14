@@ -74,7 +74,7 @@ public class BeanValueConditionChecker implements Serializable {
                 if (mustHaveValues != null) {
                     for (final BeanValue mhValue : mustHaveValues) {
                         if (mhValue.getValue() == null) {
-                            throw new FormattedException("swartifex.musthavefailure",
+                            throw new FormattedException("tsl2nano.musthavefailure",
                                 new Object[] { beanValue.getName(), mhValue.getName() });
                         }
                     }
@@ -89,7 +89,7 @@ public class BeanValueConditionChecker implements Serializable {
                 if (mustNotHaveValues != null) {
                     for (final BeanValue mnhValue : mustNotHaveValues) {
                         if (mnhValue.getValue() != null) {
-                            throw new FormattedException("swartifex.mustnothavefailure",
+                            throw new FormattedException("tsl2nano.mustnothavefailure",
                                 new Object[] { beanValue.getName(), mnhValue.getName() });
                         }
                     }
