@@ -91,11 +91,11 @@ public class AttributeDefinition<T> extends BeanAttribute implements IAttributeD
                 setNumberDef(def.scale(), def.precision());
             }
         }
-        defineTransientDefaults();
+        initDeserialization();
     }
 
     @Commit
-    private void defineTransientDefaults() {
+    private void initDeserialization() {
         if (Enum.class.isAssignableFrom(getType()))
             allowedValues = CollectionUtil.getEnumValues((Class<Enum>)getType());
 
