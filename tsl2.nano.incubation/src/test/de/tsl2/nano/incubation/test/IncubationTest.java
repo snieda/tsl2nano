@@ -48,7 +48,7 @@ import de.tsl2.nano.messaging.IListener;
 import de.tsl2.nano.util.StringUtil;
 
 /**
- * basic tests for algorithms to be refactored to the project swartifex.common in future.
+ * basic tests for algorithms to be refactored to the project tsl2nano.common in future.
  * 
  * @author Thomas Schneider, Thomas Schneider
  * @version $Revision$
