@@ -1,9 +1,9 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
-<project basedir="." default="doall" name="build-swartifex">
+<project basedir="." default="doall" name="build-tsl2nano">
 	<property file="build.properties" />
 	<import file="../tsl2.nano.common/common.xml" />
 	<!-- to be used by calling build-files -->
-	<path id="swartifex.classpath.id">
+	<path id="tsl2nano.classpath.id">
 		<dirset dir="../tsl2.nano.common">
 			<include name="${bin.dir}" />
 		</dirset>
@@ -13,8 +13,8 @@
 	</path>
 
 	<path id="lib.junittest.path">
-		<path refid="swartifex.classpath.id" />
-		<dirset dir="../swartifex">
+		<path refid="tsl2nano.classpath.id" />
+		<dirset dir="../tsl2nano">
 			<include name="${bin.test.dir}" />
 		</dirset>
 		<fileset dir="${java.home}/lib">

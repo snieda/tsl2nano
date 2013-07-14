@@ -1,20 +1,20 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!-- the export is only executable if you use the workspace java runtime!!! -->
-<project default="swartifex.eclipse.common.export" name="eclipse.tsl2.nano.common">
-	<!-- if not set, the default dir is swartifex.architect -->
-	<property name="swartifex.architect.home.dir" value="../swartifex.architect" />
-	<property name="dest.tsl2.nano.common.dir" value="${swartifex.architect.home.dir}/packages/" />
+<project default="tsl2nano.eclipse.common.export" name="eclipse.tsl2.nano.common">
+	<!-- if not set, the default dir is tsl2nano.architect -->
+	<property name="tsl2nano.architect.home.dir" value="../tsl2nano.architect" />
+	<property name="dest.tsl2.nano.common.dir" value="${tsl2nano.architect.home.dir}/packages/" />
 
 	<!-- pde export - only running inside eclipse -->
-	<target name="swartifex.eclipse.common.export" if="eclipse.running" depends="check.eclipse.running">
-		<!-- <delete dir="${swartifex.architect.home.dir}/packages" includes="**/de.tsl2.nano.common*.jar" failonerror="false" /> -->
+	<target name="tsl2nano.eclipse.common.export" if="eclipse.running" depends="check.eclipse.running">
+		<!-- <delete dir="${tsl2nano.architect.home.dir}/packages" includes="**/de.tsl2.nano.common*.jar" failonerror="false" /> -->
 		<pde.exportPlugins destination="${dest.tsl2.nano.common.dir}" exportSource="true" exportType="directory" plugins="de.tsl2.nano.common" useJARFormat="true" />
 	</target>
 
-	<!-- should be called after calling swartifex.eclipse.common.export -->
-	<target name="deploy.to.swartifex.architect">
-		<!-- try to distribution to the swartifex.architect -->
-		<copy todir="${swartifex.architect.home.dir}/packages/shared/lib" failonerror="false">
+	<!-- should be called after calling tsl2nano.eclipse.common.export -->
+	<target name="deploy.to.tsl2nano.architect">
+		<!-- try to distribution to the tsl2nano.architect -->
+		<copy todir="${tsl2nano.architect.home.dir}/packages/shared/lib" failonerror="false">
 			<fileset dir="${dest.tsl2.nano.common.dir}/plugins">
 				<include name="de.tsl2.nano.common*.jar" />
 			</fileset>
@@ -23,8 +23,8 @@
 
 	<!-- call that from outside to copy the new version to your lib dir -->
 	<!-- tsl2.nano.common.deploy.path must be set -->
-	<!-- should be called after calling swartifex.eclipse.common.export -->
-	<target name="deploy.tsl2.nano.common" if="tsl2.nano.common.deploy.path" depends="deploy.to.swartifex.architect">
+	<!-- should be called after calling tsl2nano.eclipse.common.export -->
+	<target name="deploy.tsl2.nano.common" if="tsl2.nano.common.deploy.path" depends="deploy.to.tsl2nano.architect">
 		<delete dir="${tsl2.nano.common.deploy.path}" includes="**/de.tsl2.nano.common*.jar" failonerror="false" />
 		<copy todir="${tsl2.nano.common.deploy.path}" failonerror="false">
 			<fileset dir="${dest.tsl2.nano.common.dir}/plugins">

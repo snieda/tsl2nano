@@ -1,11 +1,11 @@
-*Swartifex.Common*
-<font size="-1">Autor: Thomas Schneider 2009-2012</font>
+*tsl2.nano.common*
+<font size="-1">Autor: Thomas Schneider 2009-2013</font>
 
 {toc}
 
 h1. Introduction
 
-A base plugin for all swartifex plugins to hold common libraries and code. There are no dependencies to eclipse and swt plugins to be usable on server side.
+A base plugin for all tsl2nano plugins to hold common libraries and code. There are no dependencies to eclipse and swt plugins to be usable on server side.
 
 h2. Features
 
@@ -28,14 +28,13 @@ h2. Features
 
 h2. ToDos
 
-* rename project to be independent of swartifex
+* rename project to be independent of tsl2nano
 * refactoring: move *bean* package out of *util*
 * refactore a new *cache* package
 
 h2. Deployment
 
 If you change sources of this plugin, you should start the following ant scripts: 
-* _eclipse-tsl2.nano.common.xml_ with target _swartifex.eclipse.common.export_ (Please be sure to use the same jre-runtime as your eclipse-workspace - otherwise nothing will be done!).
+* _eclipse-tsl2.nano.common.xml_ with target _tsl2nano.eclipse.common.export_ (Please be sure to use the same jre-runtime as your eclipse-workspace - otherwise nothing will be done!).
 * the 'deploy' target of your main project.
-* perhaps an additional script to distribute the new libraray to a project-specific library-plugin. in _kion2plus_ it is _kion.swartifex.plugins_. In _kion2plus_ you run _kion/distribute-swartifex-plugins.xml_ with target _copy.swartifex.plugins_.
 
