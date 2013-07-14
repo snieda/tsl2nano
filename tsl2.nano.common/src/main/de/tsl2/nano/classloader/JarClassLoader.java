@@ -198,7 +198,7 @@ public class JarClassLoader extends URLClassLoader {
     }
 
     protected String getRootJarPath() {
-//        String root = "../swartifex.architect/packages/plugins/de.tsl2.nano.common_0.0.2.B.jar";
+//        String root = "../tsl2nano.architect/packages/plugins/de.tsl2.nano.common_0.0.2.B.jar";
 //        log(new File(root).getAbsolutePath());
 //        return root;
         return System.getProperty("java.class.path");

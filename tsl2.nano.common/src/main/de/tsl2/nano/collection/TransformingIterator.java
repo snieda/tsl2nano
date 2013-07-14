@@ -13,7 +13,6 @@ import java.lang.reflect.InvocationHandler;
 import java.lang.reflect.Method;
 import java.lang.reflect.Proxy;
 import java.util.Iterator;
-import java.util.LinkedList;
 import java.util.Queue;
 
 import de.tsl2.nano.util.bean.BeanClass;
@@ -26,11 +25,11 @@ import de.tsl2.nano.util.bean.BeanClass;
  * @author Thomas Schneider
  * @version $Revision$
  */
-public class TransformingIterator<E> implements Iterator<E> {
-    Iterable<E> parent;
-    Queue<E> previewItems;
-    Iterator<E> parentIt;
-    ITransformer<?, E> transformer;
+public class TransformingIterator<S, T> implements Iterator<T> {
+    Iterable<S> parent;
+    Queue<S> previewItems;
+    Iterator<S> parentIt;
+    ITransformer<S, T> transformer;
     int i = 0;
 
     /**
@@ -39,7 +38,7 @@ public class TransformingIterator<E> implements Iterator<E> {
      * @param parent
      * @param transformer
      */
-    public TransformingIterator(Iterable<E> parent, ITransformer<?, E> transformer) {
+    public TransformingIterator(Iterable<S> parent, ITransformer<S, T> transformer) {
         super();
         this.parent = parent;
         this.transformer = transformer;
@@ -52,8 +51,8 @@ public class TransformingIterator<E> implements Iterator<E> {
     }
 
     @Override
-    public E next() {
-        return (E) transformer.transform(parentIt.next());
+    public T next() {
+        return (T) transformer.transform(parentIt.next());
     }
 
     @Override
@@ -75,8 +74,8 @@ public class TransformingIterator<E> implements Iterator<E> {
      * @return proxy, providing the given iterable filtered through the given predicate.
      */
     @SuppressWarnings("unchecked")
-    public static <I extends Iterable<T>, T> I getTransformingIterable(final I iterable,
-            final ITransformer<?, T> transformer) {
+    public static <I extends Iterable<T>, S, T> I getTransformingIterable(final Iterable<S> iterable,
+            final ITransformer<S, T> transformer) {
         return (I) Proxy.newProxyInstance(Thread.currentThread().getContextClassLoader(),
             new BeanClass(iterable.getClass()).getInterfaces(),
             new InvocationHandler() {
@@ -85,7 +84,7 @@ public class TransformingIterator<E> implements Iterator<E> {
                 public Object invoke(Object proxy, Method method, Object[] args) throws Throwable {
                     Object result = method.invoke(iterable, args);
                     if (Iterator.class.isAssignableFrom(method.getReturnType()))
-                        result = new TransformingIterator<T>(iterable, transformer);
+                        result = new TransformingIterator<S, T>(iterable, transformer);
                     return result;
                 }
             });

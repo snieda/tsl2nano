@@ -273,7 +273,7 @@ public class RegularExpressionFormat extends Format {
         if (pattern.indexOf('{') == -1 && pattern.indexOf('[') == -1 && pattern.indexOf('(') == -1) {
             return pattern.length();
         }
-        throw new FormattedException("swartifex.implementationerror", new Object[] { pattern,
+        throw new FormattedException("tsl2nano.implementationerror", new Object[] { pattern,
             "only simple patterns without length definitions (like {0,5}) are allowed!" });
     }
 
@@ -316,7 +316,7 @@ public class RegularExpressionFormat extends Format {
         if (matches) {
             return toAppendTo.append(matcher.group());
         } else {
-            throw new FormattedException("swartifex.regexpfailure", new Object[] { o, pattern });
+            throw new FormattedException("tsl2nano.regexpfailure", new Object[] { o, pattern });
         }
     }
 

@@ -221,7 +221,7 @@ public class FormatUtil {
                  * we have to check value correctness - throwing exceptions
                  */
                 if (source != null && !source.equals(format(jdkResult)))
-                    throw new FormattedException("swartifex.invalidvalue", new Object[] { source });
+                    throw new FormattedException("tsl2nano.invalidvalue", new Object[] { source });
                 return jdkResult;
             }
 

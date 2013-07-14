@@ -106,7 +106,7 @@ public class HistorizedInputFactory extends Properties {
     public static final boolean delete(String name) {
         final HistorizedInput<?> historizedInput = factoryMap.remove(name);
         if (historizedInput == null) {
-            throw new FormattedException("swartifex.implementationerror", new Object[] { name });
+            throw new FormattedException("tsl2nano.implementationerror", new Object[] { name });
         }
         return historizedInput.delete();
     }

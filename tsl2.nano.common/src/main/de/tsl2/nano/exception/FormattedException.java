@@ -34,14 +34,14 @@ public class FormattedException extends RuntimeException {
     /** optional messageParameter */
     protected Object[] messageParameter;
 
-    public static final String MSG_NOT_IMPLEMENTED_YET = "swartifex.notimplementedfailure";
-    public static final String MSG_FORMAT_FAILURE = "swartifex.formatfailure";
-    public static final String MSG_VALUERANGE_FAILURE = "swartifex.valuerangefailure";
-    public static final String MSG_MANDATORY_FAILURE = "swartifex.mandatoryfailure";
-    public static final String MSG_UNIQUE_FAILURE = "swartifex.uniqueobjectfailure";
-    public static final String MSG_OBJECTINLIST_FAILURE = "swartifex.objectinlistfailure";
-    public static final String MSG_UNSUPPORTED_COMMAND_FAILURE = "swartifex.unsupportedcommandfailure";
-    public static final String MSG_IMPLEMENTATION_FAILURE = "swartifex.implementationerror";
+    public static final String MSG_NOT_IMPLEMENTED_YET = "tsl2nano.notimplementedfailure";
+    public static final String MSG_FORMAT_FAILURE = "tsl2nano.formatfailure";
+    public static final String MSG_VALUERANGE_FAILURE = "tsl2nano.valuerangefailure";
+    public static final String MSG_MANDATORY_FAILURE = "tsl2nano.mandatoryfailure";
+    public static final String MSG_UNIQUE_FAILURE = "tsl2nano.uniqueobjectfailure";
+    public static final String MSG_OBJECTINLIST_FAILURE = "tsl2nano.objectinlistfailure";
+    public static final String MSG_UNSUPPORTED_COMMAND_FAILURE = "tsl2nano.unsupportedcommandfailure";
+    public static final String MSG_IMPLEMENTATION_FAILURE = "tsl2nano.implementationerror";
 
     public static final CharSequence PART_TIMEOUT = "ocket time";
 

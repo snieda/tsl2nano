@@ -9,9 +9,9 @@
  */
 package de.tsl2.nano.currency;
 
-import java.math.BigDecimal;
 import java.io.File;
 import java.io.InputStreamReader;
+import java.math.BigDecimal;
 import java.math.MathContext;
 import java.math.RoundingMode;
 import java.text.Format;
@@ -26,11 +26,11 @@ import java.util.Hashtable;
 import java.util.Locale;
 import java.util.Map;
 
-import org.apache.commons.collections.Predicate;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
 import de.tsl2.nano.collection.CollectionUtil;
+import de.tsl2.nano.collection.IPredicate;
 import de.tsl2.nano.collection.MapUtil;
 import de.tsl2.nano.util.FileUtil;
 import de.tsl2.nano.util.Period;
@@ -111,10 +111,9 @@ public class CurrencyUtil {
         if (historicCurrencyUnits.isEmpty())
             initializeCurrencyUnits();
         Collection<CurrencyUnit> currencies = CollectionUtil.getFilteredCollection(historicCurrencyUnits,
-            new Predicate() {
+            new IPredicate<CurrencyUnit>() {
                 @Override
-                public boolean evaluate(Object arg0) {
-                    CurrencyUnit cu = (CurrencyUnit) arg0;
+                public boolean eval(CurrencyUnit cu) {
                     return cu.getCountryCode().equals(loc.getCountry()) && new Period(cu.getValidFrom(),
                         cu.getValidUntil()).contains(new Period(date, date));
                 }

@@ -10,7 +10,7 @@ package de.tsl2.nano.action;
 
 /**
  * Implementors of this interface provide the possibility to check if a component should be active or not. will be used
- * as callback by the swartifex framework.
+ * as callback by the tsl2nano framework.
  * 
  * @author ts 06.03.2009
  * @version $Revision$

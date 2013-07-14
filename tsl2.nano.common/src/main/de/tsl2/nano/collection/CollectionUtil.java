@@ -24,7 +24,6 @@ import java.util.TreeSet;
 
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.collections.Predicate;
-import org.apache.commons.collections.Transformer;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
@@ -123,18 +122,18 @@ public class CollectionUtil {
     public static <S, T> Collection<T> getTransformedCollection(Collection<S> toTransform,
             final String attributeName,
             Class<T> transformedType) {
-        final Transformer transformer = new Transformer() {
+        final ITransformer<S, T> transformer = new ITransformer<S, T>() {
             BeanAttribute attribute = null;
 
             @Override
-            public T transform(Object arg0) {
+            public T transform(S arg0) {
                 if (attribute == null) {
                     attribute = BeanAttribute.getBeanAttribute(arg0.getClass(), attributeName);
                 }
                 return (T) attribute.getValue(arg0);
             }
         };
-        return CollectionUtils.collect(toTransform, transformer);
+        return getList(getTransforming(toTransform, transformer).iterator());
     }
 
     /**
@@ -145,9 +144,8 @@ public class CollectionUtil {
      * @param predicate filter
      * @return filtering collection
      */
-    @Deprecated
-    public static <T> Collection<T> getFilteredCollection(Collection<T> src, Predicate predicate) {
-        return CollectionUtils.select(src, predicate);
+    public static <T> Collection<T> getFilteredCollection(Iterable<T> src, IPredicate<T> predicate) {
+        return getList(getFiltering(src, predicate).iterator());
     }
 
     /**
@@ -466,7 +464,7 @@ public class CollectionUtil {
      * @param filter filter
      * @return filtering collection
      */
-    public static final <I extends Iterable<T>, T extends Comparable<T>> I getFiltering(I src, IPredicate<T> filter) {
+    public static final <I extends Iterable<T>, T> I getFiltering(I src, IPredicate<T> filter) {
         return FilteringIterator.getFilteringIterable(src, filter);
     }
 
@@ -572,7 +570,7 @@ public class CollectionUtil {
      * @param transformer transformer
      * @return proxied iterable giving {@link TransformingIterator} as iterator.
      */
-    public static final <I extends Iterable<T>, T> I getTransforming(I src, ITransformer<?, T> transformer) {
+    public static final <I extends Iterable<T>, S, T> I getTransforming(Iterable<S> src, ITransformer<S, T> transformer) {
         return TransformingIterator.getTransformingIterable(src, transformer);
     }
 }

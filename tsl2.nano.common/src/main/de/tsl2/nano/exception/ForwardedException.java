@@ -30,7 +30,7 @@ import de.tsl2.nano.util.bean.BeanUtil;
  */
 public class ForwardedException extends FormattedException {
     private static final long serialVersionUID = 1L;
-    private static final String MESSAGE_FORWARDED = "swartifex.forwarded";
+    private static final String MESSAGE_FORWARDED = "tsl2nano.forwarded";
     protected boolean isInsideGetLocalizedMessage = false;
 
     private static final Log LOG = LogFactory.getLog(ForwardedException.class);
@@ -57,7 +57,7 @@ public class ForwardedException extends FormattedException {
     public String getMessage() {
         if (myMessage == null) {
             if (getCause() == null) {
-                throw new FormattedException("swartifex.implementationerror",
+                throw new FormattedException("tsl2nano.implementationerror",
                     new Object[] { "cause=null",
                         "ForwardedException must have a cause! Please use <FormattedException> to create a new RuntimeException" });
             }
@@ -88,18 +88,18 @@ public class ForwardedException extends FormattedException {
             }
             if (message == null) {
                 final String msg = StringUtil.toFormattedString(current.toString(), MAX_MSG_LINECOUNT, false);
-                message = Messages.getFormattedString("swartifex.unknownerror", msg, current.getStackTrace()[0]);
+                message = Messages.getFormattedString("tsl2nano.unknownerror", msg, current.getStackTrace()[0]);
             } else if (isJavaException(current)) {
-                message = Messages.getFormattedString("swartifex.runtimeerror", message, current.getStackTrace()[0]);
+                message = Messages.getFormattedString("tsl2nano.runtimeerror", message, current.getStackTrace()[0]);
             }
             if (cause != null && causeMsg == null) {
-                causeMsg = Messages.getFormattedString("swartifex.unknownerror", cause, cause.getStackTrace()[0]);
+                causeMsg = Messages.getFormattedString("tsl2nano.unknownerror", cause, cause.getStackTrace()[0]);
             } else if (isJavaException(cause)) {
-                causeMsg = Messages.getFormattedString("swartifex.runtimeerror", cause, cause.getStackTrace()[0]);
+                causeMsg = Messages.getFormattedString("tsl2nano.runtimeerror", cause, cause.getStackTrace()[0]);
             }
             myMessage = getText(message);
             if (!msgContainsCause) {
-                myMessage += (message != null && message.length() > 0 && cause != null && causeMsg.length() > 0 ? "\n\n" + getText("swartifex.cause")
+                myMessage += (message != null && message.length() > 0 && cause != null && causeMsg.length() > 0 ? "\n\n" + getText("tsl2nano.cause")
                     + "\n"
                     : "") + (cause != null ? causeMsg : "");
             }
@@ -146,7 +146,7 @@ public class ForwardedException extends FormattedException {
 ////                break;
 //                cause = cause.getCause();
 //            }
-//            return getText(super.getMessage()) + "\n\n" + getText("swartifex.cause") + ":\n" + causeMessage;
+//            return getText(super.getMessage()) + "\n\n" + getText("tsl2nano.cause") + ":\n" + causeMessage;
 //        } else {
         return getMessage();
 //        }

@@ -10,10 +10,11 @@
 package de.tsl2.nano.collection;
 
 /**
- * Transforms an object into another one.
+ * Transforms an object from S to T.
  * @author Thomas Schneider
  * @version $Revision$ 
  */
 public interface ITransformer<S, T> {
-    S transform(T toTransform);
+    /** Transforms an object from S to T. */
+    T transform(S toTransform);
 }

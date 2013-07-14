@@ -58,7 +58,7 @@ public class PersistentCache {
     public static PersistentCache createInstance(String cachePath) {
         assert self == null : "cache already initialized!";
         self = new PersistentCache();
-        cacheFilePath = cachePath + "/swartifex-persistentcache.xml";
+        cacheFilePath = cachePath + "/tsl2nano-persistentcache.xml";
         try {
             if (new File(cacheFilePath).exists()) {
                 self.cache = (ReferenceMap) FileUtil.loadXml(cacheFilePath);
