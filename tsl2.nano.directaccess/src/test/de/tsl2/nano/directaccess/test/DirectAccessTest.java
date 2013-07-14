@@ -12,7 +12,7 @@ package de.tsl2.nano.directaccess.test;
 import org.junit.Test;
 
 /**
- * basic tests for algorithms to be refactored to the project swartifex.common in future.
+ * basic tests for algorithms to be refactored to the project tsl2nano.common in future.
  * 
  * @author Thomas Schneider, Thomas Schneider
  * @version $Revision$
