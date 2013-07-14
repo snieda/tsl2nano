@@ -8,18 +8,21 @@ h2. Introduction
 generic html5 gui implementation, bound to swartfix-common bean-package. 
 goals: 
 * pure model implementation + plattform independency (works on android, too).
+* full configurable (including standard bean behaviour and all entity behaviours)
 * implementation through simple java beans + optional bean presenters
 * navigates through given beans showing bean-lists and bean-detail dialogs.
+* prefills formatting, validation and presentation of relations
+* pure html-5
 
 Using the NanoHTTPD Server as base, this client application creates html surfaces, sending them through the integrated server to a html browser. Entry point is the file _application.html_ defining the browser request _http://localhost:8067_.
 
 It is not a real web-application platform but a simple way to use html5 as graphical user interface - in a standard client application.
 
 The data access is done by:
-* swartifex.serviceaccess
-* swartifex.directaccess
+* tsl2nano.serviceaccess
+* tsl2nano.directaccess
 
-It is possible to use a ejb container in an application server, but the default is set to use jpa directly on the client (using _swartifex.directaccess_).
+It is possible to use a ejb container in an application server, but the default is set to use jpa directly on the client (using _tsl2nano.directaccess_).
 h3. Third Party Libraries
 
 * "Jing-Trang xml2xsd-Generator":https://code.google.com/p/jing-trang/downloads/list
@@ -35,7 +38,7 @@ h2. Developing and Deploying
 
 * "Code Server":https://sourceforge.net/p/tsl2nano/code/ci/master/tree/tsl2.nano.common
 
-If you change sources of this plugin, you should start ant script _eclipse-tsl2.nano.h5.xml_ with target _swartifex.eclipse.h5.export_ and after that the 'deploy' target of your main project.
+If you change sources of this plugin, you should start ant script _eclipse-tsl2.nano.h5.xml_ with target _tsl2nano.eclipse.h5.export_ and after that the 'deploy' target of your main project.
 
 Normally, you don't have to create html-pages by yourself, but if you are interested in html5, have a look at the following tutorials/references:
 * "W3C-Html5-Reference":http://www.w3.org/TR/2013/NOTE-html-markup-20130528/Overview.html
@@ -58,12 +61,12 @@ h2. TODOs
 * (v) visible icons read by page
 * (v) Button-Panel for
 * (v) Use Xml-Configuration for BeanDefinitions
-** Print
-** Export
-** select all
-** deselect all
+** (v) Print
+** (v) Export
+** (v) select all
+** (v) deselect all
+* (v) Use Environment
 * (x) Application Menu: reset (--> caches, environment, navigation), restart, login, logout
-* (x) Use Environment
 * refactore ScriptUtil: extract Ant calls
 * Right-Alignments for Numbers
 * Problem on NanoHttp canceling button panel (sometimes)
@@ -71,7 +74,11 @@ h2. TODOs
 * Check navigation (check input on button action like 'open' without selecting an item.
 * Styling (Collector, Details)
 * Show Progress-Page (using Statistics)
-* Html-Table: Sorting-Header, Style
+* Html-Table:
+** Sorting-Header
+** Previous, Next
+** Style
+** up, down (for sorting values)
 * Flag: show one-to-many in table
 * If search result is only one element, select it
 * Searches on big data:
@@ -92,3 +99,16 @@ h2. TODOs
 ** extend all finders with start index (see maxresult) to have a result range
 * beancollector with next() and previous() data (using 'start' index and 'maxresult')
 * eval validation annotations
+* ConfigBeanContainer to configure BeanDefinition for special beans
+* *Refactoring:*
+** util.bean ==> bean
+** nano.h5 ==> fullrelation
+** extract bean as project
+** file-access: use Environment.getResource() reading through jar or file system
+* *Interfaces:*
+** java-interface-jar filled with BeanProxy to be used as mocks
+** reading xsd through dom - creating beandefinitions (as xml)
+** BeanEnhancer enhancing Beans having only attributes with getters/setters
+* *Replication / Offline*
+** FileBeanContainer serializing all lists of all BeanCollectors
+** GenericBeanContainer using filled FileBeanContainer re-attaching all serialized bean lists

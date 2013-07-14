@@ -5,7 +5,7 @@
 	<property name="src.dir" value="${bdir}/src/fs-connector" />
 	<property name="bin.dir" value="${bdir}/fs-connector/bin" />
 	<!-- <import file="../kion.shared/src/resources/project.properties" /> -->
-	<import file="../swartifex.common/common.xml" />
+	<import file="../tsl2nano.common/common.xml" />
 
 	<!-- <import file="../kion.${appserver.name}/build-jboss.xml" /> -->
 
@@ -22,11 +22,11 @@
 			</fileset>
 		</path>
 		<path id="common.lib.path">
-			<fileset dir="../swartifex.common/lib">
+			<fileset dir="../tsl2nano.common/lib">
 				<include name="**/*.jar"/>
 			</fileset>
 		</path>
-		<dirset dir="../swartifex.common/bin" />
+		<dirset dir="../tsl2nano.common/bin" />
 	</path>
 	
 	<target name="mkdirs" description="creates bin and dist directories">
@@ -52,7 +52,7 @@
 			<metainf dir="${src.dir}/META-INF" />
 			<fileset dir="${bin.dir}" />
 			<fileset file="${bdir}/${target.dir}/${module.name}.properties" />
-			<fileset dir="../swartifex.common/lib">
+			<fileset dir="../tsl2nano.common/lib">
 				<include name="commons-io-*.jar"/>
 				<include name="commons-logging-*.jar"/>
 				<exclude name="*sources.jar"/>

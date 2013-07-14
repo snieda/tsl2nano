@@ -85,7 +85,7 @@ public class LoginModule extends AbstractLoginModule {
                 String.valueOf(password1),
                 String.valueOf(password2));
         if (b == null)
-            throw new FailedLoginException(Messages.getString("swartifex.login.error.userorpasswd"));
+            throw new FailedLoginException(Messages.getString("tsl2nano.login.error.userorpasswd"));
 
         //create the mandator dependend features
         Mandant mandant = benutzerService.getMandant();
@@ -139,7 +139,7 @@ IGenericLocalService genService
 h2. Optional Feature Integration on Runtime
 
 The description will be found here:
-"4.14 Optional Feature Integration on Runtime":..\swartifex\doc\readme.txt.html#4.14
+"4.14 Optional Feature Integration on Runtime":..\tsl2nano\doc\readme.txt.html#4.14
 
 h2. Entities and Services
 
@@ -664,7 +664,7 @@ A possible way is to create an own entity bean, not bound to a table, but to a q
 * create the hashCode and equals and optional the toString methods
 * deploy the class
 
-If you want the swartifex framework to work on your bean like a normal entity, create the two named queries 'findAll' and 'findById'.
+If you want the tsl2nano framework to work on your bean like a normal entity, create the two named queries 'findAll' and 'findById'.
 
 Example:
 
@@ -768,6 +768,6 @@ Now, you can access the beans through the generic service method 'findByNamedQue
 h2. developing and deploying
 
 If you change sources of this plugin, you should start the following ant scripts: 
-* _eclipse-tsl2.nano.serviceaccess.xml_ with target _swartifex.eclipse.serviceaccess.export_ (Please be sure to use the same jre-runtime as your eclipse-workspace - otherwise nothing will be done!).
+* _eclipse-tsl2.nano.serviceaccess.xml_ with target _tsl2nano.eclipse.serviceaccess.export_ (Please be sure to use the same jre-runtime as your eclipse-workspace - otherwise nothing will be done!).
 * the 'deploy' target of your main project.
-* perhaps an additional script to distribute the new libraray to a project-specific library-plugin. in _kion2plus_ it is _kion.swartifex.plugins_. In _kion2plus_ you run _kion/distribute-swartifex-plugins.xml_ with target _copy.swartifex.plugins_.
+* perhaps an additional script to distribute the new libraray to a project-specific library-plugin. in _kion2plus_ it is _tsl2.nano.plugins_. In _kion2plus_ you run _kion/distribute-tsl2nano-plugins.xml_ with target _copy.tsl2nano.plugins_.
