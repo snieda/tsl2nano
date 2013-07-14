@@ -11,10 +11,10 @@
 
 <project default="project.refactore" name="project.refactore">
 	<!-- the property file name may be defined by an ant call -->
-	<property name="refactore.property.file" value="../swartifex.common/project-refactore.properties"/>
+	<property name="refactore.property.file" value="../tsl2nano.common/project-refactore.properties"/>
 	<echo message="loading refactoring properties from: ${refactore.property.file}" />
 	<property file="${refactore.property.file}" />
-	<property name="shell" value="../swartifex.common/shell.xml" />
+	<property name="shell" value="../tsl2nano.common/shell.xml" />
 	<target name="project.refactore">
 		<property name="sh.regexp.exclude" value="**/*.*ar" />
 		<property name="sh.copy.includeemptydirs" value="true" />

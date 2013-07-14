@@ -18,7 +18,7 @@
 			<property name="refactore.property.file" value="${basedir}/project/distribute-h5.properties" />
 		</ant>
 
-		<ant antfile="../swartifex.common/shell.xml" target="sh.copy">
+		<ant antfile="../tsl2nano.common/shell.xml" target="sh.copy">
 			<property name="sh.copy.srcdir" value="../../../wjax/distribution" />
 			<property name="sh.copy.destination" value="../../../wjax/distribution/target" />
 			<property name="sh.copy.include" value="**/*.jar" />
