@@ -19,6 +19,8 @@ import java.lang.reflect.ParameterizedType;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.simpleframework.xml.Attribute;
+import org.simpleframework.xml.Default;
+import org.simpleframework.xml.DefaultType;
 import org.simpleframework.xml.core.Commit;
 import org.simpleframework.xml.core.Persist;
 
@@ -35,6 +37,7 @@ import de.tsl2.nano.util.StringUtil;
  * @version $SVN_REV: 1.0 $
  * 
  */
+@Default(value = DefaultType.FIELD, required = false)
 public class BeanAttribute implements Comparable<BeanAttribute>, Serializable {
     /** serialVersionUID */
     private static final long serialVersionUID = -5107086042716326477L;
@@ -154,7 +157,8 @@ public class BeanAttribute implements Comparable<BeanAttribute>, Serializable {
         if (writeAccessMethod == null) {
             assert readAccessMethod.getName().startsWith(PREFIX_READ_ACCESS) || readAccessMethod.getName()
                 .startsWith(PREFIX_BOOLEAN_READ_ACCESS) : "method has to start with " + PREFIX_READ_ACCESS;
-            final String attributeName = getName();
+            //use the generic name through readAccessMethod, because extension may override getName() returning a presentation name.
+            final String attributeName = getName(readAccessMethod);
             try {
                 writeAccessMethod = readAccessMethod.getDeclaringClass()
                     .getMethod(PREFIX_WRITE_ACCESS + toFirstUpper(attributeName),
@@ -220,6 +224,8 @@ public class BeanAttribute implements Comparable<BeanAttribute>, Serializable {
             } catch (final Exception e) {
                 ForwardedException.forward(e);
             }
+        } else {
+            LOG.warn("no write access for attribute value '" + getName() + "'! missing setter for: " + readAccessMethod);
         }
     }
 

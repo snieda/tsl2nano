@@ -45,6 +45,7 @@ import org.apache.commons.logging.Log;
 
 import tsl.FileUtil;
 import de.tsl2.nano.Environment;
+import de.tsl2.nano.action.CommonAction;
 import de.tsl2.nano.action.IAction;
 import de.tsl2.nano.action.IActivator;
 import de.tsl2.nano.collection.CollectionUtil;
@@ -375,7 +376,12 @@ public class BeanPresentationHelper<T> {
                         : Environment.get("default.bigdecimal.length", 19);
                     int p = attribute.precision() != UNDEFINED ? attribute.precision()
                         : Environment.get("default.bigdecimal.precision", 4);
-                    return RegularExpressionFormat.createNumberRegExp(l, p, type);
+                    
+                    String currencyPattern = Environment.get("value.currency.length.precision", "11,4");
+                    if (currencyPattern.equals(l + "," + p))
+                        return RegularExpressionFormat.createCurrencyRegExp();
+                    else
+                        return RegularExpressionFormat.createNumberRegExp(l, p, type);
                 }
             } else if (NumberUtil.isFloating(type)) {
                 int l = attribute.length() != UNDEFINED ? attribute.length()
@@ -402,42 +408,6 @@ public class BeanPresentationHelper<T> {
             regexp = new GenericParser(attribute.getType());
         }
         return regexp;
-    }
-
-    /** returns an optional action as finder/assigner - useful to select a new value */
-    public <V extends Serializable> IAction<IBeanCollector<?, V>> getSelector(final IAttributeDefinition<V> beanAttribute) {
-        //TODO: move that to the attribute: IPresentable
-        return new SecureAction<IBeanCollector<?, V>>(beanAttribute.getName() + POSTFIX_SELECTOR,
-            Environment.get("field.selector.text", "...")) {
-            @Override
-            public IBeanCollector<?, V> action() throws Exception {
-                BeanCollector<?, ?> beanCollector;
-                if (beanAttribute.isMultiValue() && beanAttribute instanceof BeanValue) {
-                    Collection<V> collection = (Collection<V>) ((BeanValue<V>) beanAttribute).getValue();
-                    if (collection == null) {
-                        collection = new ListSet<V>();
-                        beanCollector = BeanCollector.getBeanCollector((Class<V>)((BeanAttribute) beanAttribute).getGenericType(),
-                            null,
-                            MODE_ALL);
-                    } else {
-                        beanCollector = BeanCollector.getBeanCollector((Class<V>)((BeanAttribute) beanAttribute).getGenericType(),
-                            collection,
-                            MODE_ALL);
-                    }
-                    ((BeanValue<V>) beanAttribute).setValue((V) collection);
-                    beanCollector.setSelectionProvider(new SelectionProvider(beanCollector.getCurrentData()));
-                } else {
-                    LinkedList<V> selection = new LinkedList<V>();
-                    if (beanAttribute instanceof BeanValue)
-                        selection.add(((BeanValue<V>) beanAttribute).getValue());
-                    beanCollector = BeanCollector.getBeanCollector((Class<V>)beanAttribute.getType(),
-                        selection,
-                        MODE_ALL_SINGLE);
-                    beanCollector.setSelectionProvider(new SelectionProvider(selection));
-                }
-                return (IBeanCollector<?, V>) beanCollector;
-            }
-        };
     }
 
     /**
@@ -787,7 +757,7 @@ public class BeanPresentationHelper<T> {
         OptionsWrapper<E> enumWrapper;
         if (isMultiSelection) {
             if (!Collection.class.isAssignableFrom((Class<?>) attribute.getType())) {
-                throw new FormattedException("swartifex.implementationerror",
+                throw new FormattedException("tsl2nano.implementationerror",
                     new Object[] { "IPresentable.STYLE_MULTI",
                         "If you define an EnumBooleanType with style IPresentable.STYLE_MULTI, you must have a bound bean attribute of type Collection!" });
             }
@@ -1007,6 +977,26 @@ public class BeanPresentationHelper<T> {
             presActions = new ArrayList<IAction>(10);
 
             if (bean.isMultiValue()) {
+                final BeanCollector<?, T> collector = (BeanCollector<?, T>) bean;
+                presActions.add(new SecureAction(bean.getClazz(),
+                    "switchrelations",
+                    IAction.MODE_UNDEFINED,
+                    false,
+                    "icons/links.png") {
+                    @Override
+                    public Object action() throws Exception {
+                        collector.setMode(NumberUtil.toggleBits(collector.getWorkingMode(),
+                            IBeanCollector.MODE_SHOW_MULTIPLES));
+                        collector.getSearchAction().activate();
+                        return bean;
+                    }
+
+                    @Override
+                    public boolean isEnabled() {
+                        return super.isEnabled() && ((IBeanCollector<?, T>) bean).getCurrentData().size() > 0;
+                    }
+                });
+
                 presActions.add(new SecureAction(bean.getClazz(),
                     "selectall",
                     IAction.MODE_UNDEFINED,
@@ -1089,7 +1079,10 @@ public class BeanPresentationHelper<T> {
 //                    File configFileName = BeanDefinition.getDefinitionFile(bean.getName());
 //                    String configFile = FileUtil.getFile(configFileName.getPath());
 //                    return configFile != null ? configFile : "No configuration found (" + configFileName + ")";
-                    return Bean.getBean(BeanDefinition.getBeanDefinition(bean.getName()));
+                    Bean<?> configBean = Bean.getBean(BeanDefinition.getBeanDefinition(bean.getName()));
+                    String[] writableAttributes = configBean.getAttributeNames(true);
+                    configBean.setAttributeFilter(writableAttributes);
+                    return configBean;
                 }
 
                 @Override
@@ -1138,10 +1131,22 @@ public class BeanPresentationHelper<T> {
                 public Object action() throws Exception {
                     Environment.persist();
                     BeanDefinition.dump();
-                    return "configuration saved";
+                    return "configuration saved. perhaps some application properties are lost. it is recommended to restart application!";
                 }
             });
         }
         return presActions;
+    }
+
+    /**
+     * override this method to define a special command handler to be used e.g. by BeanCollector.editItem() - perhaps
+     * opening a detail dialog.
+     * 
+     * @param beanToEdit instance to be edit in a detail dialog.
+     * @return result of bean editing.
+     */
+    public <E> E startUICommandHandler(final E beanToEdit) {
+        LOG.debug("beancollector.edit: no commandhandler defined in environment to edit a bean - doing nothing!");
+        return beanToEdit;
     }
 }

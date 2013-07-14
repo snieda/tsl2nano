@@ -9,6 +9,8 @@
  */
 package de.tsl2.nano.util.bean.def;
 
+import de.tsl2.nano.action.IAction;
+
 /**
  * Extends the {@link IColumn} to have a member of {@link IPresentable} for layouting in a table - this may differ from
  * attribute presentation.
@@ -17,6 +19,12 @@ package de.tsl2.nano.util.bean.def;
  * @version $Revision$
  */
 public interface IPresentableColumn extends IColumn {
+    /**
+     * getSortingAction
+     * @return action to sort the column
+     */
+    public IAction<?> getSortingAction(final IBeanCollector<?, ?> collector);
+    
     /**
      * extending layout informations for a table column
      */

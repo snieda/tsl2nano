@@ -10,16 +10,17 @@
 package de.tsl2.nano;
 
 import java.io.File;
+import java.io.InputStream;
 import java.io.Serializable;
 import java.text.Format;
 import java.util.Hashtable;
 import java.util.Iterator;
+import java.util.Locale;
 import java.util.Map;
 import java.util.Properties;
 import java.util.ResourceBundle;
 import java.util.Set;
 
-import org.apache.commons.logging.Log;
 import org.simpleframework.xml.Default;
 import org.simpleframework.xml.DefaultType;
 import org.simpleframework.xml.ElementMap;
@@ -28,10 +29,8 @@ import org.simpleframework.xml.core.Persist;
 import de.tsl2.nano.execution.CompatibilityLayer;
 import de.tsl2.nano.execution.XmlUtil;
 import de.tsl2.nano.format.DefaultFormat;
-import de.tsl2.nano.util.FileUtil;
 import de.tsl2.nano.util.bean.BeanClass;
 import de.tsl2.nano.util.bean.BeanUtil;
-import de.tsl2.nano.util.bean.def.AttributeDefinition;
 
 /**
  * Generic Application-Environment. Providing:
@@ -68,6 +67,7 @@ public class Environment {
      * holds all already loaded services - but wrapped into {@link ServiceProxy}. the {@link #serviceLocator} holds the
      * real service instances.
      */
+    @ElementMap(entry = "service", key = "interface", attribute = true, inline = true, required = false, keyType = Class.class, valueType = Object.class)
     Map<Class<?>, Object> services;
 
     public static final String PREFIX = Environment.class.getPackage().getName() + ".";
@@ -79,6 +79,7 @@ public class Environment {
     public static final String CONFIG_XML_NAME = "environment.xml";
 
     private Environment() {
+        self = this;
     }
 
     /**
@@ -110,8 +111,8 @@ public class Environment {
                 self.properties = new Properties();
 //              LOG.warn("no environment.properties available");
                 self.properties.put(KEY_CONFIG_PATH, System.getProperty("user.dir") + "/");
-                self.services = new Hashtable<Class<?>, Object>();
             }
+            self.services = new Hashtable<Class<?>, Object>();
         }
         return self;
     }
@@ -218,10 +219,13 @@ public class Environment {
     /**
      * delegates to {@link Messages#registerBundle(ResourceBundle, boolean)}
      * 
-     * @param bundle new bundle
+     * @param bundlePath new bundle
      * @param head whether to add the bundle on top or bottom.
      */
-    public static void registerBundle(ResourceBundle bundle, boolean head) {
+    public static void registerBundle(String bundlePath, boolean head) {
+        ResourceBundle bundle = ResourceBundle.getBundle(bundlePath,
+            Locale.getDefault(),
+            Thread.currentThread().getContextClassLoader());
         Messages.registerBundle(bundle, head);
     }
 
@@ -304,6 +308,15 @@ public class Environment {
         }
     }
 
+    /**
+     * loads a resource file through the environments classloader
+     * @param fileName resource
+     * @return inputstream
+     */
+    public static InputStream getResource(String fileName) {
+        return get(ClassLoader.class).getResourceAsStream(fileName);
+    }
+    
     @Persist
     protected void initSerialization() {
         /*
@@ -317,6 +330,7 @@ public class Environment {
                 || !BeanUtil.isSingleValueType(value.getClass()))
                 keyIt.remove();
         }
+        //TODO: sort it by key name
         Set<Class<?>> serviceKeys = services.keySet();
         for (Iterator<?> keyIt = serviceKeys.iterator(); keyIt.hasNext();) {
             Object key = (Object) keyIt.next();

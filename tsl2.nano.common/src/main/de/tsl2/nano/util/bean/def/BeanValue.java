@@ -9,6 +9,10 @@
  */
 package de.tsl2.nano.util.bean.def;
 
+import static de.tsl2.nano.util.bean.def.IBeanCollector.MODE_ALL;
+import static de.tsl2.nano.util.bean.def.IBeanCollector.MODE_ALL_SINGLE;
+import static de.tsl2.nano.util.bean.def.IPresentable.POSTFIX_SELECTOR;
+
 import java.lang.reflect.Method;
 import java.text.Format;
 import java.util.Collection;
@@ -17,6 +21,10 @@ import java.util.List;
 
 import org.apache.commons.logging.Log;
 
+import de.tsl2.nano.Environment;
+import de.tsl2.nano.action.CommonAction;
+import de.tsl2.nano.action.IAction;
+import de.tsl2.nano.collection.ListSet;
 import de.tsl2.nano.log.LogFactory;
 import de.tsl2.nano.messaging.ChangeEvent;
 import de.tsl2.nano.messaging.EventController;
@@ -33,7 +41,7 @@ import de.tsl2.nano.util.bean.ValueHolder;
  * @author Thomas Schneider
  * @version $Revision$
  */
-@SuppressWarnings({"rawtypes", "unchecked"})
+@SuppressWarnings({ "rawtypes", "unchecked" })
 public class BeanValue<T> extends AttributeDefinition<T> implements IValueDefinition<T> {
     /** serialVersionUID */
     private static final long serialVersionUID = 8690371851484504875L;
@@ -84,12 +92,16 @@ public class BeanValue<T> extends AttributeDefinition<T> implements IValueDefini
     public Class<T> getType() {
         if (isVirtual())
             return ((IValueAccess<T>) instance).getType();
-        else if (instance != null) {
-            //TODO: check, if really needed!
-            T value = getValue();
-            //don't use inner class infos or enum values
-            if (value != null && !value.getClass().isAnonymousClass() && value.getClass().getDeclaringClass() == null)
-                return (Class<T>) value.getClass();
+        else if (instance != null && Environment.get("value.use.instancetype", true)) {
+            try {
+                T value = getValue();
+                //don't use inner class infos or enum values
+                if (value != null && !value.getClass().isAnonymousClass()
+                    && value.getClass().getDeclaringClass() == null)
+                    return (Class<T>) value.getClass();
+            } catch (Exception e) {
+                LOG.warn("couldn't evaluate type through instance. using method-returntype instead. error was: " + e.toString());
+            }
         }
         return super.getType();
     }
@@ -103,7 +115,7 @@ public class BeanValue<T> extends AttributeDefinition<T> implements IValueDefini
             if (Collection.class.isAssignableFrom(getType())) {
                 T value = getValue();
                 if (value != null)
-                    this.format = new CollectionExpressionFormat<T>((Class<T>) getGenericType(), (Collection<T>)value);
+                    this.format = new CollectionExpressionFormat<T>((Class<T>) getGenericType(), (Collection<T>) value);
             }
         }
         return super.getFormat();
@@ -121,13 +133,14 @@ public class BeanValue<T> extends AttributeDefinition<T> implements IValueDefini
 
     /**
      * getValueText
+     * 
      * @return formatted value
      */
     public String getValueText() {
         T v = getValue();
         return v != null ? getFormat().format(v) : "";
     }
-    
+
     /**
      * setParsedValue
      * 
@@ -334,8 +347,72 @@ public class BeanValue<T> extends AttributeDefinition<T> implements IValueDefini
         return eventController;
     }
 
+    /** returns an optional action as finder/assigner - useful to select a new value */
+    public IAction<IBeanCollector<?, T>> getSelector() {
+        //TODO: move that to the attribute: IPresentable
+        return new SecureAction<IBeanCollector<?, T>>(getName() + POSTFIX_SELECTOR,
+            Environment.get("field.selector.text", "...")) {
+            @Override
+            public IBeanCollector<?, T> action() throws Exception {
+                BeanCollector<?, ?> beanCollector;
+                if (isMultiValue()) {
+                    Collection<T> collection = (Collection<T>) getValue();
+                    if (collection == null) {
+                        collection = new ListSet<T>();
+                        beanCollector = BeanCollector.getBeanCollector((Class<T>) getGenericType(), null, MODE_ALL);
+                    } else {
+                        beanCollector = BeanCollector.getBeanCollector((Class<T>) getGenericType(),
+                            collection,
+                            MODE_ALL);
+                    }
+                    setValue((T) collection);
+                    beanCollector.setSelectionProvider(new SelectionProvider(beanCollector.getCurrentData()));
+                } else {
+                    LinkedList<T> selection = new LinkedList<T>();
+                    selection.add(getValue());
+                    beanCollector = BeanCollector.getBeanCollector(getType(), selection, MODE_ALL_SINGLE);
+                    beanCollector.setSelectionProvider(new SelectionProvider(selection));
+                }
+                return (IBeanCollector<?, T>) beanCollector;
+            }
+        };
+    }
+
     @Override
     public String toString() {
         return (isVirtual() ? description : getName()) + "=" + getValue();
+    }
+
+    /**
+     * connects this attribute to a selector (see {@link #getSelector()} to assign values from a list.
+     * 
+     * @param parent the parent bean of this attribute (must be given as {@link #getParent()} not allways is filled.
+     * @return selector (see {@link #getSelector()}.
+     */
+    public IBeanCollector<?, ?> connectToSelector(BeanDefinition<?> parent) {
+        IAction<?> selector = getSelector();
+        final IBeanCollector<?, ?> collector = (IBeanCollector<?, ?>) selector.activate();
+        final ISelectionProvider<?> selectionProvider = collector.getSelectionProvider();
+        parent.connect(getName(), selectionProvider, new CommonAction<Object>() {
+            @Override
+            public Object action() throws Exception {
+                Collection s;
+                if (isMultiValue()) {
+                    Collection v = (Collection) getValue();
+                    s = selectionProvider.getValue();
+                    if (v == null)
+                        setValue((T) s);
+                    else {
+                        v.clear();
+                        v.addAll(s);
+                    }
+                } else {
+                    s = selectionProvider.getValue();
+                    setValue((T) selectionProvider.getFirstElement());
+                }
+                return s;
+            }
+        });
+        return collector;
     }
 }

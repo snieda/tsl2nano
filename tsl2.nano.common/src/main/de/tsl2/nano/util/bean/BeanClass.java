@@ -29,6 +29,8 @@ import java.util.TreeSet;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.simpleframework.xml.Attribute;
+import org.simpleframework.xml.Default;
+import org.simpleframework.xml.DefaultType;
 
 import de.tsl2.nano.action.CommonAction;
 import de.tsl2.nano.action.IAction;
@@ -45,6 +47,7 @@ import de.tsl2.nano.util.bean.def.BeanValue;
  * @version $Revision: 1.0 $
  * 
  */
+@Default(value = DefaultType.FIELD, required = false)
 public class BeanClass<T> implements Serializable {
     /** serialVersionUID */
     private static final long serialVersionUID = 8387513854853569951L;

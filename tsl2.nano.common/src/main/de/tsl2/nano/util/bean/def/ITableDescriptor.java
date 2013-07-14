@@ -35,4 +35,14 @@ public interface ITableDescriptor<T> {
      *  given object at columnIndex
      */
     public String getColumnText(T element, int columnIndex);
+
+    /**
+     * shiftSortIndexes
+     */
+
+    public void shiftSortIndexes();
+    /**
+     * sort
+     */
+    public void sort();
 }

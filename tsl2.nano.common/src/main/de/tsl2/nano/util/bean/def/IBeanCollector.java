@@ -52,6 +52,8 @@ public interface IBeanCollector<COLLECTIONTYPE extends Collection<T>, T> extends
      */
     public void addMode(int modebit);
     
+    public void removeMode(int modebit);
+    
     /**
      * @return Returns the beanFinder.
      */
@@ -110,5 +112,4 @@ public interface IBeanCollector<COLLECTIONTYPE extends Collection<T>, T> extends
      * @return search status as text to be used as summary/footer for the table
      */
     public String getSummary();
-
 }

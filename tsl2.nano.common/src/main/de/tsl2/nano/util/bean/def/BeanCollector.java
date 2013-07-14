@@ -14,23 +14,24 @@ import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.Comparator;
 import java.util.Iterator;
 import java.util.LinkedHashSet;
 import java.util.LinkedList;
 import java.util.List;
-import java.util.Map;
 
 import org.apache.commons.logging.Log;
 import org.simpleframework.xml.Default;
 import org.simpleframework.xml.DefaultType;
 import org.simpleframework.xml.ElementList;
+import org.simpleframework.xml.core.Commit;
 
 import tsl.StringUtil;
-
 import de.tsl2.nano.Environment;
 import de.tsl2.nano.Messages;
 import de.tsl2.nano.action.IAction;
 import de.tsl2.nano.collection.CollectionUtil;
+import de.tsl2.nano.collection.IPredicate;
 import de.tsl2.nano.exception.FormattedException;
 import de.tsl2.nano.exception.ForwardedException;
 import de.tsl2.nano.execution.Profiler;
@@ -48,7 +49,7 @@ import de.tsl2.nano.util.bean.BeanUtil;
  * @author Thomas Schneider
  * @version $Revision$
  */
-@SuppressWarnings({ "rawtypes", "unchecked" })
+@SuppressWarnings({ "rawtypes", "unchecked", "serial" })
 @Default(value = DefaultType.FIELD, required = false)
 public class BeanCollector<COLLECTIONTYPE extends Collection<T>, T> extends BeanDefinition<T> implements
         IBeanCollector<COLLECTIONTYPE, T> {
@@ -58,6 +59,8 @@ public class BeanCollector<COLLECTIONTYPE extends Collection<T>, T> extends Bean
     private static final Log LOG = LogFactory.getLog(BeanCollector.class);
 
     public static final String POSTFIX_COLLECTOR = ".collector";
+
+    public static final String KEY_COMMANDHANDLER = "bean.commandhandler";
 
     protected transient COLLECTIONTYPE collection;
     protected transient IBeanFinder<T, ?> beanFinder;
@@ -75,7 +78,7 @@ public class BeanCollector<COLLECTIONTYPE extends Collection<T>, T> extends Bean
      */
     protected transient IAction<COLLECTIONTYPE> searchAction;
     protected transient IAction<?> resetAction;
-    String searchStatus = Messages.getString("swartifex.searchdialog.nosearch");
+    String searchStatus = Messages.getString("tsl2nano.searchdialog.nosearch");
 
     /** whether to refresh data from beancontainer before opening edit-dialog */
     protected boolean reloadBean = true;
@@ -130,7 +133,7 @@ public class BeanCollector<COLLECTIONTYPE extends Collection<T>, T> extends Bean
      */
     public BeanCollector(IBeanFinder<T, Object> beanFinder, int workingMode) {
         super(beanFinder.getType());
-        init(beanFinder, workingMode);
+        init(null, beanFinder, workingMode);
     }
 
     /**
@@ -140,9 +143,9 @@ public class BeanCollector<COLLECTIONTYPE extends Collection<T>, T> extends Bean
      * @param workingMode one of {@link IBeanCollector#MODE_EDITABLE}, {@link IBeanCollector#MODE_CREATABLE} etc. Please
      *            see {@link IBeanCollector} for more modes.
      */
-    private void init(IBeanFinder<T, ?> beanFinder, int workingMode) {
-//        setName(Messages.getString("swartifex.list") + " " + getName());
-        this.collection = (COLLECTIONTYPE) new LinkedList<T>();
+    private void init(COLLECTIONTYPE collection, IBeanFinder<T, ?> beanFinder, int workingMode) {
+//        setName(Messages.getString("tsl2nano.list") + " " + getName());
+        this.collection = collection != null ? collection : (COLLECTIONTYPE) new LinkedList<T>();
         setBeanFinder(beanFinder);
         this.workingMode = workingMode;
 
@@ -168,7 +171,7 @@ public class BeanCollector<COLLECTIONTYPE extends Collection<T>, T> extends Bean
     private void readObject(java.io.ObjectInputStream in) throws IOException, ClassNotFoundException {
         //actions are transient - we reconstruct the default actions.
         in.defaultReadObject();
-        init(beanFinder, workingMode);
+        init(collection, beanFinder, workingMode);
     }
 
     /**
@@ -266,6 +269,20 @@ public class BeanCollector<COLLECTIONTYPE extends Collection<T>, T> extends Bean
         this.workingMode |= modebit;
     }
 
+    @Override
+    public void removeMode(int modebit) {
+        workingMode = NumberUtil.filterBits(workingMode, modebit);
+    }
+
+    /**
+     * getWorkingMode
+     * 
+     * @return
+     */
+    public int getWorkingMode() {
+        return workingMode;
+    }
+
     /**
      * getFirstSelectedElement
      * 
@@ -326,13 +343,7 @@ public class BeanCollector<COLLECTIONTYPE extends Collection<T>, T> extends Bean
      */
     @Override
     public Object editItem(Object bean) {
-        //TODO: use incubation class Environment to get an optional command handler/service
-//        final Map par = new HashMap<String, Object>();
-//        par.put("bean", wrapBean(bean));
-//        return WorkbenchUtil.executeCommand(OpenDialogCommandHandler.CMD_OPEN_DIALOG,
-//            OpenDialogCommandHandler.CMD_OPEN_DIALOG_PARAMETER,
-//            par);
-        return bean;
+        return getPresentationHelper().startUICommandHandler(bean);
     }
 
     /**
@@ -358,7 +369,7 @@ public class BeanCollector<COLLECTIONTYPE extends Collection<T>, T> extends Bean
         if (selectedItem != null) {
             try {
                 /*
-                 * we don't use the apache util to be compatible on all platforms (e.g. without java.bean package) - but the swartifex util may cause a classloader exception.
+                 * we don't use the apache util to be compatible on all platforms (e.g. without java.bean package) - but the tsl2nano util may cause a classloader exception.
                  */
                 final T cloneBean = (T) BeanUtil.clone(selectedItem);
                 //the id attribute of the selected bean must not be copied!!!
@@ -396,7 +407,7 @@ public class BeanCollector<COLLECTIONTYPE extends Collection<T>, T> extends Bean
             public Object action() throws Exception {
                 T newBean = createItem(getFirstSelectedElement());
                 if (newBean == null) {
-                    throw new FormattedException("swartifex.no_type_available");
+                    throw new FormattedException("tsl2nano.no_type_available");
                 }
                 final Object result = editItem(newBean);
                 if (!IAction.CANCELED.equals(result)) {
@@ -528,17 +539,30 @@ public class BeanCollector<COLLECTIONTYPE extends Collection<T>, T> extends Bean
     @Override
     public Collection<IPresentableColumn> getColumnDefinitions() {
         if (columnDefinitions == null) {
-            List<IAttributeDefinition<?>> attributes = getBeanAttributes();
+            final List<IAttributeDefinition<?>> attributes = getBeanAttributes();
             columnDefinitions = new ArrayList<IPresentableColumn>(attributes.size());
             int i = 0;
             for (IAttributeDefinition<?> attr : attributes) {
-                IColumn col = attr.getColumnDefinition();
+                IPresentableColumn col = attr.getColumnDefinition();
                 if (col == null) {
                     attr.setColumnDefinition(i, i, true, 100);
                     col = attr.getColumnDefinition();
+                } else {
+                    ValueColumn vc = (ValueColumn) col;
+                    if (vc.attributeDefinition == null)
+                        vc.attributeDefinition = attr;
                 }
                 columnDefinitions.add((IPresentableColumn) col);
                 i++;
+            }
+            if (Environment.get("collector.use.multiple.filter", true)) {
+                columnDefinitions = CollectionUtil.getFiltering(columnDefinitions,
+                    new IPredicate<IPresentableColumn>() {
+                        @Override
+                        public boolean eval(IPresentableColumn arg0) {
+                            return hasMode(MODE_SHOW_MULTIPLES) || !getAttribute(arg0.getName()).isMultiValue();
+                        }
+                    });
             }
         }
         return columnDefinitions;
@@ -575,6 +599,39 @@ public class BeanCollector<COLLECTIONTYPE extends Collection<T>, T> extends Bean
         return attribute.getFormat() != null ? attribute.getFormat().format(value) : value.toString();
     }
 
+    @Override
+    public void shiftSortIndexes() {
+        Collection<IPresentableColumn> columns = getColumnDefinitions();
+        for (IPresentableColumn c : columns) {
+            if (c.getSortIndex() != IPresentable.UNDEFINED)
+                ((ValueColumn)c).sortIndex++;
+        }
+    }
+
+    Integer[] getSortIndexes() {
+        Collection<IPresentableColumn> columns = getColumnDefinitions();
+        List<Integer> indexes = new ArrayList<Integer>(columns.size());
+        for (IPresentableColumn c : columns) {
+            indexes.set(c.getSortIndex(), c.getIndex());
+        }
+        return indexes.toArray(new Integer[0]);
+    }
+
+    @Override
+    public void sort() {
+        Integer[] sortIndexes = getSortIndexes();
+        for (int i = sortIndexes.length - 1; i >0 ; i--) {
+            Comparator<T> comparator = new Comparator<T>() {
+                @Override
+                public int compare(T o1, T o2) {
+                    
+                    return 0;
+                }
+            };
+            CollectionUtil.getSortedList(collection, comparator, getName(), false);
+        }
+    }
+    
     /**
      * {@inheritDoc}
      */
@@ -636,11 +693,11 @@ public class BeanCollector<COLLECTIONTYPE extends Collection<T>, T> extends Bean
             @Override
             public COLLECTIONTYPE action() throws Exception {
                 //TODO: fire refresh event
-                searchStatus = Messages.getFormattedString("swartifex.searchdialog.searchrunning");
+                searchStatus = Messages.getFormattedString("tsl2nano.searchdialog.searchrunning");
                 Environment.get(Profiler.class).starting(this, getName());
                 COLLECTIONTYPE result = (COLLECTIONTYPE) getBeanFinder().getData();
                 long time = Environment.get(Profiler.class).ending(this, getName());
-                searchStatus = Messages.getFormattedString("swartifex.searchdialog.searchresultdetails",
+                searchStatus = Messages.getFormattedString("tsl2nano.searchdialog.searchresultdetails",
                     result.size(),
                     DateUtil.getFormattedTimeStamp(),
                     DateUtil.getFormattedMinutes(time));
@@ -698,12 +755,10 @@ public class BeanCollector<COLLECTIONTYPE extends Collection<T>, T> extends Bean
      * @param workingMode working mode of desired collector (see {@link IBeanCollector} for available modes.
      * @return
      */
-    public static final <C extends Collection<I>, I extends Serializable> BeanCollector<C, I> getBeanCollector(Class<I> beanType,
+    public static final <C extends Collection<I>, I/* extends Serializable*/> BeanCollector<C, I> getBeanCollector(Class<I> beanType,
             Collection<I> collection,
             int workingMode) {
-        BeanDefinition<I> beandef = getBeanDefinition(beanType.getSimpleName() + POSTFIX_COLLECTOR,
-            beanType,
-            false);
+        BeanDefinition<I> beandef = getBeanDefinition(beanType.getSimpleName() + POSTFIX_COLLECTOR, beanType, false);
         return (BeanCollector<C, I>) createCollector(collection, workingMode, beandef);
     }
 
@@ -715,12 +770,14 @@ public class BeanCollector<COLLECTIONTYPE extends Collection<T>, T> extends Bean
      * @param beandef bean description
      * @return new created bean-collector holding given collection
      */
-    protected static <C extends Collection<I>, I extends Serializable> BeanCollector<C, I> createCollector(C collection,
+    protected static <C extends Collection<I>, I/* extends Serializable*/> BeanCollector<C, I> createCollector(C collection,
             int workingMode,
             BeanDefinition<I> beandef) {
         BeanCollector<C, I> bc = new BeanCollector<C, I>();
         copy(beandef, bc, "asString");
-        bc.init(new BeanFinder(beandef.getClazz()), workingMode);
+        bc.init(collection, new BeanFinder(beandef.getClazz()), workingMode);
+        //while the deserialization was done on BeanDefinition, we have to do this step manually
+        bc.initDeserializing();
         return bc;
     }
 
@@ -728,8 +785,18 @@ public class BeanCollector<COLLECTIONTYPE extends Collection<T>, T> extends Bean
     public String toString() {
         if (asString == null) {
             //empty search-beans are possible
-            asString = name != null ? Environment.translate("swartifex.list", false) + " " + StringUtil.substring(name, null, POSTFIX_COLLECTOR) : null;
+            asString = name != null ? Environment.translate("tsl2nano.list", false) + " "
+                + StringUtil.substring(name, null, POSTFIX_COLLECTOR) : null;
         }
         return asString;
+    }
+
+    @Commit
+    private void initDeserializing() {
+        if (columnDefinitions != null) {
+            for (IPresentableColumn c : columnDefinitions) {
+                ((ValueColumn) c).attributeDefinition = getAttribute(c.getName());
+            }
+        }
     }
 }

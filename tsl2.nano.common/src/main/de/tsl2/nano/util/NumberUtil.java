@@ -328,6 +328,20 @@ public class NumberUtil {
     }
 
     /**
+     * toggles (removes or adds) the given bitsToFilter from/to the given bit-field
+     * 
+     * @param field bit field
+     * @param bitsToFilter bits to remove or add
+     * @return toggled bit field
+     */
+    public static final int toggleBits(int field, int...bitsToFilter) {
+        for (int i = 0; i < bitsToFilter.length; i++) {
+            field = hasBit(field, bitsToFilter[i]) ? field - bitsToFilter[i] : field | bitsToFilter[i];
+        }
+        return field;
+    }
+    
+    /**
      * filters (removes) the given bitsToFilter from the given bit-field
      * 
      * @param field bit field
@@ -515,6 +529,6 @@ public class NumberUtil {
      */
     public static final <T extends Comparable<T>> void checkGreater(String name, T value, T min) {
         if (!isGreater(value, min))
-            throw new FormattedException("swartifex.valuesizefailure", new Object[] { name, min });
+            throw new FormattedException("tsl2nano.valuesizefailure", new Object[] { name, min });
     }
 }

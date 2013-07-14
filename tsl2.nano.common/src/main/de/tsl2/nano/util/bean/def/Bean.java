@@ -22,6 +22,7 @@ import java.util.Map;
 import java.util.Set;
 
 import de.tsl2.nano.Messages;
+import de.tsl2.nano.action.CommonAction;
 import de.tsl2.nano.action.IAction;
 import de.tsl2.nano.collection.MapUtil;
 import de.tsl2.nano.exception.FormattedException;
@@ -181,20 +182,6 @@ public class Bean<T> extends BeanDefinition<T> {
      * 
      * @param bean starting instance
      * @param path full relation path, separated by '.'
-     * @return attribute value or null
-     */
-    public Object getValue(String path) {
-        if (isVirtual())
-            return getAttribute(path).getValue();
-        else
-            return BeanClass.getValue(instance, path);
-    }
-
-    /**
-     * evaluate the value of the given bean attribute path
-     * 
-     * @param bean starting instance
-     * @param path full relation path
      * @return attribute value or null
      */
     public Object getValue(String... path) {
@@ -433,7 +420,7 @@ public class Bean<T> extends BeanDefinition<T> {
      * @param actionId action id (important for user permissions!)
      */
     protected SecureAction<T> createSaveAction(final Object bean, String actionId) {
-        final String saveLabel = Messages.getString("swartifex.save");
+        final String saveLabel = Messages.getString("tsl2nano.save");
 //        return new SecureAction(actionId, saveLabel, saveLabel, IAction.MODE_DLG_OK) {
 //            public Object action() throws Exception {
 //                return save(bean);
@@ -468,7 +455,7 @@ public class Bean<T> extends BeanDefinition<T> {
             newBean = BeanContainer.instance().save(bean);
         } catch (final RuntimeException e) {
             if (BeanContainer.isConstraintError(e)) {
-                throw new FormattedException("swartifex.impossible_create", new Object[] { /*Configuration.current()
+                throw new FormattedException("tsl2nano.impossible_create", new Object[] { /*Configuration.current()
                                                                                            .getDefaultFormatter()
                                                                                            .format(*/bean /*)*/});
             } else {

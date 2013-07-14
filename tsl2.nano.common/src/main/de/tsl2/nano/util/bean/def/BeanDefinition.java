@@ -34,7 +34,6 @@ import org.simpleframework.xml.core.Persist;
 import de.tsl2.nano.Environment;
 import de.tsl2.nano.action.IAction;
 import de.tsl2.nano.collection.CollectionUtil;
-import de.tsl2.nano.collection.FilteringIterator;
 import de.tsl2.nano.collection.IPredicate;
 import de.tsl2.nano.exception.FormattedException;
 import de.tsl2.nano.exception.ForwardedException;
@@ -55,7 +54,7 @@ import de.tsl2.nano.util.bean.ValueHolder;
  * @version $Revision$
  */
 @SuppressWarnings({ "rawtypes", "unchecked" })
-@Namespace(reference = "http://www.domain.com/beandef")
+@Namespace(reference = "beandef.xsd")
 @Default(value = DefaultType.FIELD, required = false)
 public class BeanDefinition<T> extends BeanClass<T> implements Serializable {
     /** serialVersionUID */
@@ -177,12 +176,16 @@ public class BeanDefinition<T> extends BeanClass<T> implements Serializable {
         /*
          * filter the result using a default filter by the presentation helper
          */
+        if (Environment.get("bean.use.beanpresentationhelper.filter", true)) {
         return CollectionUtil.getFiltering(attributes, new IPredicate<BeanAttribute>() {
             @Override
             public boolean eval(BeanAttribute arg0) {
                 return getPresentationHelper().isDefaultAttribute(arg0);
             }
         });
+        } else {
+            return attributes;
+        }
     }
 
     protected IAttributeDefinition createAttributeDefinition(String name) {
