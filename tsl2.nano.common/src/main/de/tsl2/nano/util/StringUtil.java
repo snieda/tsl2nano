@@ -250,7 +250,7 @@ public class StringUtil {
                 strBuilder.append((showLines ? " [" + i + "]: " : "") + array[i] + "\n");
             }
             if (maxLineCount < array.length) {
-                strBuilder.append(MessageFormat.format(Messages.getString("swartifex.more.elements"),
+                strBuilder.append(MessageFormat.format(Messages.getString("tsl2nano.more.elements"),
                     new Object[] { array.length - maxLineCount }));
             }
             result = strBuilder.toString();

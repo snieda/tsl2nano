@@ -380,14 +380,14 @@ public class BeanContainer implements IBeanContainer {
      * @return full action id
      */
     public static final String getActionId(Class<?> beanType, boolean packedInList, String actionName) {
-        final String type = beanType.getSimpleName().toLowerCase() + (packedInList ? Messages.getString("swartifex.list")
+        final String type = beanType.getSimpleName().toLowerCase() + (packedInList ? Messages.getString("tsl2nano.list")
             .toLowerCase()
             : "");
         return type + "." + actionName.toLowerCase();
     }
 
     /**
-     * will search for the actionId in the resource bundle - then in swartifex base bundle - if not found, the action
+     * will search for the actionId in the resource bundle - then in tsl2nano base bundle - if not found, the action
      * simple name will be returned
      * 
      * @param actionId full action id
@@ -400,7 +400,7 @@ public class BeanContainer implements IBeanContainer {
         final String actionSimpleName = actionId.substring(actionId.lastIndexOf(".") + 1);
         String text = Messages.getString(actionId + tooltip_postfix);
         if (Messages.unknown(text)) {
-            text = Messages.getString("swartifex." + actionSimpleName + tooltip_postfix);
+            text = Messages.getString("tsl2nano." + actionSimpleName + tooltip_postfix);
             if (Messages.unknown(text)) {
                 return actionSimpleName;
             } else if (tooltip) {
