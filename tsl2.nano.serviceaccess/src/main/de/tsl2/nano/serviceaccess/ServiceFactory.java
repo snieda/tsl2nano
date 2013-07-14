@@ -268,7 +268,7 @@ public class ServiceFactory {
      */
     public void checkPrincipal(Principal principal) {
         if (!hasPrincipal(principal)) {
-            final String msg = Messages.getFormattedString(Messages.getString("swartifex.login.noprincipal"),
+            final String msg = Messages.getFormattedString(Messages.getString("tsl2nano.login.noprincipal"),
                 new Object[] { getUserObject(), principal.getName() });
             throw new SecurityException(msg);
         }
@@ -420,7 +420,7 @@ public class ServiceFactory {
     public static void checkConnection() {
         if (!ServiceFactory.isInitialized()) {
             LOG.error("Server-Connection Lost! May be caused by Server-Restart or Instruction-Error (no previously call of ServiceFactory.createInstance(..))");
-            throw new FormattedException("swartifex.login.noconnection");
+            throw new FormattedException("tsl2nano.login.noconnection");
         }
     }
 

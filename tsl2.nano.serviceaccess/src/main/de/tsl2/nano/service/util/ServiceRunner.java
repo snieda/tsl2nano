@@ -40,7 +40,7 @@ import de.tsl2.nano.util.StringUtil;
  * the context is a map with objects to be compatible to Properties.
  * 
  * preconditions:
- *   - the swartifex 'project.properties' should be found on root classpath (perhaps add your shared-plugin)
+ *   - the tsl2nano 'project.properties' should be found on root classpath (perhaps add your shared-plugin)
  *   - the file-pathes (like jndi-file) defined in project.properties should be found
  *   - the appservers client libs should be found in classpath
  *   - the service interfaces should be found in classpath

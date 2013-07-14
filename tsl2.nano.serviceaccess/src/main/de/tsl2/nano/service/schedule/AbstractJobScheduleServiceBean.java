@@ -323,7 +323,7 @@ public abstract class AbstractJobScheduleServiceBean<RUNNABLE> implements
             Job runningJob = getRunningJob();
             if (runningJob != null) {
                 LOG.error("job-start canceled. no concurrent running jobs are allowed.\nPlease use argument 'stopOnConcurrent=false' if you want to allow concurrent running jobs!");
-                RuntimeException ex = new FormattedException("swartifex.concurrentfailure", new Object[] { job,
+                RuntimeException ex = new FormattedException("tsl2nano.concurrentfailure", new Object[] { job,
                     runningJob });
                 job.setLastException(ex);
                 throw ex;

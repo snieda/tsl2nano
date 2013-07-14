@@ -503,7 +503,7 @@ public class GenericServiceBean extends NamedQueryServiceBean implements IGeneri
     public <T> T findByExample(T exampleBean, Class... lazyRelations) {
         Collection<T> collection = findByExample(exampleBean, false);
         if (collection.size() > 1) {
-            throw new FormattedException("swartifex.multiple.items", new Object[] { exampleBean });
+            throw new FormattedException("tsl2nano.multiple.items", new Object[] { exampleBean });
         }
         collection = fillTree(collection, lazyRelations);
         return collection.size() > 0 ? collection.iterator().next() : null;
@@ -635,7 +635,7 @@ public class GenericServiceBean extends NamedQueryServiceBean implements IGeneri
     public Object findItemByQuery(String queryString, boolean nativeQuery, Object[] args, Class... lazyRelations) {
         Collection<?> collection = findByQuery(queryString, nativeQuery, args, lazyRelations);
         if (collection.size() > 1) {
-            throw new FormattedException("swartifex.multiple.items", new Object[] { StringUtil.fixString(queryString,
+            throw new FormattedException("tsl2nano.multiple.items", new Object[] { StringUtil.fixString(queryString,
                 25,
                 ' ',
                 true) });
@@ -710,7 +710,7 @@ public class GenericServiceBean extends NamedQueryServiceBean implements IGeneri
         BeanAttribute.getBeanAttribute(userEntity, userIdAttribute).setValue(transUser, userPrincipal.getName());
         final Collection<T> bcol = findByExample(transUser, true);
         if (bcol.size() != 1) {
-            throw new FormattedException("swartifex.multiple.items", new Object[] { userPrincipal.getName(),
+            throw new FormattedException("tsl2nano.multiple.items", new Object[] { userPrincipal.getName(),
                 userEntity,
                 userEntity });
         }

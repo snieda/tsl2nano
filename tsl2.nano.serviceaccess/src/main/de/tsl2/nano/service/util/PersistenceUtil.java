@@ -12,7 +12,7 @@ package de.tsl2.nano.service.util;
 
 /**
  * toplink specific helper class to resolve lazy instantiated relations. this class is no direct content of any
- * swartifex library, because it is toplink specific!
+ * tsl2nano library, because it is toplink specific!
  * 
  * toplink (oracle) specific and at the moment not needed. to re-animate this class, you have to add the library
  * 'toplink-essentials.jar' (in glassfish/lib) to your classpath.<br>

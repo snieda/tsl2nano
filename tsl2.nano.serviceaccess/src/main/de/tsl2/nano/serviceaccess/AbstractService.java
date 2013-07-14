@@ -102,7 +102,7 @@ public abstract class AbstractService {
 //		if (cause instanceof RuntimeException) {
 //			throw (RuntimeException) cause;
 //		}
-//		throw new FormattedException("swartifex.client.servererror", null,
+//		throw new FormattedException("tsl2nano.client.servererror", null,
 //				cause);
     }
 

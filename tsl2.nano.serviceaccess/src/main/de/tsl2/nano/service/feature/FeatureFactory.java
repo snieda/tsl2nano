@@ -229,14 +229,14 @@ public class FeatureFactory {
         String featurePathConstraint = properties.getProperty(KEY_INTERF_PACKAGE_PREFIX);
         if (featurePathConstraint != null) {
             if (!interfaze.getPackage().getName().startsWith(featurePathConstraint)) {
-                throw new FormattedException("swartifex.implementationerror",
+                throw new FormattedException("tsl2nano.implementationerror",
                     new Object[] { "Feature-Interface: " + interfaze.getName(),
                         "Please use only feature interfaces in packages starting with '" + featurePathConstraint + "'!" });
             }
         } else { //not defined? ==> default mechansim
             featurePathConstraint = "feature";
             if (!interfaze.getPackage().getName().contains(featurePathConstraint)) {
-                throw new FormattedException("swartifex.implementationerror",
+                throw new FormattedException("tsl2nano.implementationerror",
                     new Object[] { "Feature-Interface: " + interfaze.getName(),
                         "Please use only feature interfaces in packages containing the substring '" + featurePathConstraint
                             + "'!" });

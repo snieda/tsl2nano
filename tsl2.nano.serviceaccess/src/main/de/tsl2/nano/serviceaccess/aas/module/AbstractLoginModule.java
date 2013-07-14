@@ -239,9 +239,9 @@ public class AbstractLoginModule implements LoginModule {
             }
             password = null;
             if (!usernameCorrect) {
-                throw new FailedLoginException(Messages.getString("swartifex.login.error.user"));
+                throw new FailedLoginException(Messages.getString("tsl2nano.login.error.user"));
             } else {
-                throw new FailedLoginException(Messages.getString("swartifex.login.error.password"));
+                throw new FailedLoginException(Messages.getString("tsl2nano.login.error.password"));
             }
         }
     }
