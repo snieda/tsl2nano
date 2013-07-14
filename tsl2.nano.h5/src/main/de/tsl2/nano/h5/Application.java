@@ -14,6 +14,9 @@ import java.io.File;
 import java.io.IOException;
 import java.io.Serializable;
 import java.net.URL;
+import java.text.FieldPosition;
+import java.text.Format;
+import java.text.ParsePosition;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Iterator;
@@ -52,7 +55,6 @@ import de.tsl2.nano.util.bean.def.BeanCollector;
 import de.tsl2.nano.util.bean.def.BeanDefinition;
 import de.tsl2.nano.util.bean.def.BeanPresentationHelper;
 import de.tsl2.nano.util.bean.def.BeanValue;
-import de.tsl2.nano.util.bean.def.IAttributeDefinition;
 import de.tsl2.nano.util.bean.def.IBeanCollector;
 import de.tsl2.nano.util.bean.def.IPageBuilder;
 import de.tsl2.nano.util.bean.def.IPresentable;
@@ -329,30 +331,8 @@ public class Application extends NanoHTTPD {
                 } else {
                     if (p.endsWith(IPresentable.POSTFIX_SELECTOR)) {
                         String n = StringUtil.substring(p, null, IPresentable.POSTFIX_SELECTOR);
-                        final IAttributeDefinition<?> assignableAttribute = model.getAttribute(n);
-                        IAction<?> selector = model.getPresentationHelper().getSelector(assignableAttribute);
-                        IBeanCollector<?, ?> collector = (IBeanCollector<?, ?>) selector.activate();
-                        responseObject = collector;
-                        final ISelectionProvider<?> selectionProvider = collector.getSelectionProvider();
-                        model.connect(n, selectionProvider, new CommonAction<Object>() {
-                            @Override
-                            public Object action() throws Exception {
-                                if (assignableAttribute.isMultiValue()) {
-                                    Collection v = (Collection) ((IValueAccess) assignableAttribute).getValue();
-                                    Collection s = ((BeanCollector<?, ?>) model).getSelectionProvider().getValue();
-                                    if (v == null)
-                                        ((IValueAccess) assignableAttribute).setValue(s);
-                                    else {
-                                        v.clear();
-                                        v.addAll(s);
-                                    }
-                                } else
-                                    ((IValueAccess) assignableAttribute).setValue(((BeanCollector<?, ?>) model).getSelectionProvider()
-                                        .getFirstElement());
-                                return null;
-                            }
-                        });
-                        return responseObject;
+                        final BeanValue assignableAttribute = (BeanValue) model.getAttribute(n);
+                        responseObject = assignableAttribute.connectToSelector(model);
                     }
                 }
             }
@@ -369,7 +349,6 @@ public class Application extends NanoHTTPD {
         }
         return null;
     }
-
 
     protected boolean isCanceled(Properties parms) {
         return parms.containsKey(BTN_CANCEL);
@@ -389,6 +368,9 @@ public class Application extends NanoHTTPD {
         if (filterBean != null) {
             Bean<?> from = (Bean<?>) filterBean.getValueAsBean("from");
             Bean<?> to = (Bean<?>) filterBean.getValueAsBean("to");
+
+            from.getPresentationHelper().change(BeanPresentationHelper.PROP_DOVALIDATION, false);
+            to.getPresentationHelper().change(BeanPresentationHelper.PROP_DOVALIDATION, false);
 
             for (String p : parms.stringPropertyNames()) {
                 String rowName = StringUtil.substring(p, null, ".", true);
@@ -543,6 +525,8 @@ public class Application extends NanoHTTPD {
     }
 
     private static void initServices() {
+        Environment.registerBundle("de.tsl2.nano.messages", true);
+
         Html5Presentation pageBuilder = new Html5Presentation();
         Environment.addService(BeanPresentationHelper.class, pageBuilder);
         Environment.addService(IPageBuilder.class, new Html5Presentation());
@@ -572,10 +556,10 @@ public class Application extends NanoHTTPD {
     }
 
     private static Bean<?> createLogin() {
-        final Persistence persistence = Persistence.getCurrent();
+        final Persistence persistence = Persistence.current();
         Bean<?> login = new Bean(persistence);
         login.getPresentationHelper().change(BeanPresentationHelper.PROP_NULLABLE, false);
-        login.addAction(new SecureAction<Object>("swartifex.login.ok") {
+        login.addAction(new SecureAction<Object>("tsl2nano.login.ok") {
             @Override
             public Object action() throws Exception {
                 persistence.save();
@@ -602,19 +586,38 @@ public class Application extends NanoHTTPD {
                 List<BeanCollector> types = new ArrayList<BeanCollector>(beanClasses.size());
                 for (Class cls : beanClasses) {
                     LOG.debug("creating collector for: " + cls);
-                    types.add(new BeanCollector(cls, MODE_EDITABLE | MODE_CREATABLE
+                    BeanCollector collector = BeanCollector.getBeanCollector(cls, null, MODE_EDITABLE | MODE_CREATABLE
                         | MODE_MULTISELECTION
-                        | MODE_SEARCHABLE));
+                        | MODE_SEARCHABLE);
+//                    collector.setPresentationHelper(new Html5Presentation(collector));
+                    types.add(collector);
                 }
-                BeanCollector root = new BeanCollector(types, MODE_EDITABLE | MODE_SEARCHABLE);
+                BeanCollector root = new BeanCollector(BeanCollector.class, types, MODE_EDITABLE | MODE_SEARCHABLE);
                 root.setName(StringUtil.toFirstUpper(StringUtil.substring(persistence.getJarFile(), "/", ".jar", true)));
                 root.setAttributeFilter("name");
+                root.getAttribute("name").setFormat(new Format() {
+                    @Override
+                    public StringBuffer format(Object obj, StringBuffer toAppendTo, FieldPosition pos) {
+                        String name = StringUtil.substring((String) obj, null, BeanCollector.POSTFIX_COLLECTOR);
+                        toAppendTo.append(Environment.translate("tsl2nano.list", false) + " "
+                            + Environment.translate(name, true));
+                        pos.setEndIndex(1);
+                        return toAppendTo;
+                    }
+
+                    @Override
+                    public Object parseObject(String source, ParsePosition pos) {
+                        return null;
+                    }
+                });
                 return root;
             }
+
             @Override
             public String getImagePath() {
                 return "icons/open.png";
             }
+
             @Override
             public boolean isDefault() {
                 return true;

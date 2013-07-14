@@ -142,14 +142,14 @@ public class HtmlUtil {
     public static final String VAL_ALIGN_CENTER = "middle";
     public static final String VAL_ALIGN_RIGHT = "end";
 
-    public static final String BTN_ASSIGN = "swartifex.assign";
-    public static final String BTN_SUBMIT = "swartifex.save";
-    public static final String BTN_CANCEL = "swartifex.cancel";
+    public static final String BTN_ASSIGN = "tsl2nano.assign";
+    public static final String BTN_SUBMIT = "tsl2nano.save";
+    public static final String BTN_CANCEL = "tsl2nano.cancel";
     
-    public static final String BTN_SELECT_ALL = "swartifex.selectall";
-    public static final String BTN_DESELECT_ALL = "swartifex.deselectall";
-    public static final String BTN_PRINT = "swartifex.print";
-    public static final String BTN_EXPORT = "swartifex.export";
+    public static final String BTN_SELECT_ALL = "tsl2nano.selectall";
+    public static final String BTN_DESELECT_ALL = "tsl2nano.deselectall";
+    public static final String BTN_PRINT = "tsl2nano.print";
+    public static final String BTN_EXPORT = "tsl2nano.export";
 
     public static final String XML_TAG_START = "\\<.*\\>";
     
@@ -170,6 +170,13 @@ public class HtmlUtil {
         Element e = doc.createElement(tagName);
         if (content != null)
             e.setTextContent(content.toString());
+        appendAttributes(e, attributes);
+        parent.appendChild(e);
+        return e;
+    }
+
+    public static Element appendAttributes(Element e, String... attributes) {
+        Document doc = e.getOwnerDocument();
         for (int i = 0; i < attributes.length; i += 2) {
             //disabled flag attribute --> continue
             if (attributes[i] == null)
@@ -179,7 +186,6 @@ public class HtmlUtil {
                 attr.setValue(attributes[i + 1]);
             e.setAttributeNode(attr);
         }
-        parent.appendChild(e);
         return e;
     }
 

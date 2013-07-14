@@ -9,10 +9,12 @@
  */
 package de.tsl2.nano.h5;
 
-import static de.tsl2.nano.h5.HtmlUtil.*;
+import static de.tsl2.nano.h5.HtmlUtil.ALIGN_CENTER;
+import static de.tsl2.nano.h5.HtmlUtil.ALIGN_RIGHT;
 import static de.tsl2.nano.h5.HtmlUtil.ATTR_ACCESSKEY;
 import static de.tsl2.nano.h5.HtmlUtil.ATTR_ACTION;
 import static de.tsl2.nano.h5.HtmlUtil.ATTR_ALIGN;
+import static de.tsl2.nano.h5.HtmlUtil.ATTR_ALT;
 import static de.tsl2.nano.h5.HtmlUtil.ATTR_AUTOFOCUS;
 import static de.tsl2.nano.h5.HtmlUtil.ATTR_BGCOLOR;
 import static de.tsl2.nano.h5.HtmlUtil.ATTR_BORDER;
@@ -178,7 +180,7 @@ public class Html5Presentation<T> extends BeanPresentationHelper<T> implements I
 
         if (navigation.length > 0) {
             for (BeanDefinition<?> bean : navigation) {
-                appendElement((Element) parent, TAG_LINK, content("->" + bean.getName()), ATTR_HREF, bean.getName());
+                appendElement((Element) parent, TAG_LINK, content("->" + bean.toString()), ATTR_HREF, bean.getName());
             }
         }
 
@@ -202,6 +204,7 @@ public class Html5Presentation<T> extends BeanPresentationHelper<T> implements I
      */
     private void createBean(Element parent, Bean<?> bean, boolean interactive) {
         Element panel = createGrid(parent, "Eingabe-Dialog", bean.getPresentable().layout("layout.gridwidth", 3));
+        appendAttributes(panel, bean.getPresentable());
         Bean<T> vbean = (Bean<T>) bean;
         List<BeanValue<?>> beanValues = vbean.getBeanValues();
         for (BeanValue<?> beanValue : beanValues) {
@@ -230,20 +233,13 @@ public class Html5Presentation<T> extends BeanPresentationHelper<T> implements I
         /*
          * create the column header
          */
-        Collection<IPresentableColumn> colDefs = bean.getColumnDefinitions();
-        String[] cnames = new String[colDefs.size() + 1];
-        cnames[0] = Messages.getString("swartifex.row");
-        for (IColumn c : colDefs) {
-            int i = c.getIndex() + 1;
-            if (i > -1 && i < cnames.length)
-                cnames[i] = c.getDescription();
-            else
-                LOG.warn("the index " + i + " of column " + c + " is impossible");
-        }
+        String[] cnames = getColumnNames(bean.getColumnDefinitions());
         /*
          * show a search filter or/and fill the data
          */
         Element grid = createGrid(parent, "Table", false, cnames);
+        appendAttributes(grid, bean.getPresentable());
+
         bean.addMode(MODE_MULTISELECTION);
         if (interactive && bean.hasMode(IBeanCollector.MODE_SEARCHABLE)) {
             Collection<T> data = new LinkedList<T>(bean.getSearchPanelBeans());
@@ -254,6 +250,31 @@ public class Html5Presentation<T> extends BeanPresentationHelper<T> implements I
             createTableContent(grid, bean, bean.getBeanFinder().getData(), interactive);
 
         return grid;
+    }
+
+    /**
+     * getColumnNames
+     * @param colDefs
+     * @return
+     */
+    private String[] getColumnNames(Collection<IPresentableColumn> colDefs) {
+        String[] cnames = new String[colDefs.size() + 1];
+
+        cnames[0] = Messages.getString("tsl2nano.row");
+        for (IColumn c : colDefs) {
+            int i = c.getIndex() + 1;
+            if (i > -1 && i < cnames.length)
+                cnames[i] = c.getDescription();
+            else
+                LOG.warn("the index " + i + " of column " + c + " is impossible");
+        }
+        return cnames;
+    }
+
+    private void appendAttributes(Element grid, IPresentable p) {
+        HtmlUtil.appendAttributes(grid/*, ATTR_NAME, p.getLabel(), p.getDescription(), p.getType(), p.getStyle(), p.getEnabler(), p.getWidth(), p.getHeight()*/
+            , ATTR_BGCOLOR, convert(ATTR_BGCOLOR, p.getBackground())
+            , ATTR_COLOR, convert(ATTR_COLOR, p.getForeground())/*, p.getIcon()*/);
     }
 
     /**
@@ -283,10 +304,8 @@ public class Html5Presentation<T> extends BeanPresentationHelper<T> implements I
             else {
                 Collection<IPresentableColumn> colDefs = tableDescriptor.getColumnDefinitions();
                 String[] cells = new String[colDefs.size()];
-                int ci = 0;
-                for (Object c : colDefs) {
-                    cells[ci] = tableDescriptor.getColumnText((T) item, ci);
-                    ci++;
+                for (IPresentableColumn c : colDefs) {
+                    cells[c.getIndex()] = tableDescriptor.getColumnText((T) item, c.getIndex());
                 }
                 boolean isSelected = tableDescriptor.getSelectionProvider() != null ? tableDescriptor.getSelectionProvider()
                     .getValue()
@@ -314,17 +333,27 @@ public class Html5Presentation<T> extends BeanPresentationHelper<T> implements I
         Element cell = appendElement(row, TAG_CELL, ATTR_ALIGN, alignment);
         if (actions != null) {
             for (IAction a : actions) {
-                createAction(cell,
-                    a.getId(),
-                    a.getShortDescription(),
-                    null,
-                    a.getImagePath(),
-                    a.isDefault(),
-                    a.isEnabled(),
-                    a.getActionMode() != IAction.MODE_DLG_OK);
+                createAction(cell, a);
             }
         }
         return cell;
+    }
+
+    /**
+     * createAction
+     * @param cell
+     * @param a
+     * @return
+     */
+    private Element createAction(Element cell, IAction a) {
+        return createAction(cell,
+            a.getId(),
+            a.getShortDescription(),
+            null,
+            a.getImagePath(),
+            a.isDefault(),
+            a.isEnabled(),
+            a.getActionMode() != IAction.MODE_DLG_OK);
     }
 
     /**
@@ -338,7 +367,7 @@ public class Html5Presentation<T> extends BeanPresentationHelper<T> implements I
         Element panel = createActionPanel(form, model.getActions(), ALIGN_CENTER);
         if (model.isMultiValue() && ((BeanCollector) model).hasMode(MODE_ASSIGNABLE))
             createAction(panel, BTN_ASSIGN, "submit", "icons/links.png");
-        createAction(panel, IAction.CANCELED, "swartifex.close", null, "icons/stop.png", true, false, true);
+        createAction(panel, IAction.CANCELED, "tsl2nano.close", null, "icons/stop.png", true, false, true);
         return panel;
     }
 
@@ -431,6 +460,27 @@ public class Html5Presentation<T> extends BeanPresentationHelper<T> implements I
         Element colgroup = appendElement(table, TAG_ROW);
         for (int i = 0; i < columns.length; i++) {
             appendElement(colgroup, TAG_HEADERCELL, content(columns[i]));
+        }
+        return appendElement(table, TAG_TBODY);
+    }
+
+    Element createGrid(Element parent, String title, boolean border, IPresentableColumn... columns) {
+        Element table = appendElement(parent,
+            TAG_TABLE,
+            ATTR_BORDER,
+            border ? "1" : "0",
+            ATTR_FRAME,
+            "box",
+            ATTR_WIDTH,
+            VAL_100PERCENT,
+            ATTR_BGCOLOR,
+            COLOR_LIGHT_BLUE,
+            "sortable");
+        Element colgroup = appendElement(table, TAG_ROW);
+        for (int i = 0; i < columns.length; i++) {
+            IPresentableColumn c = columns[i];
+            Element th = appendElement(colgroup, TAG_HEADERCELL);
+            createAction(th, c.getName(), c.getDescription(), null);
         }
         return appendElement(table, TAG_TBODY);
     }
@@ -676,7 +726,7 @@ public class Html5Presentation<T> extends BeanPresentationHelper<T> implements I
             Element row = appendElement(createGrid(body, null, 3), TAG_ROW);
             Element c1 = appendElement(row, TAG_CELL);
             Element c2 = appendElement(row, TAG_CELL);
-            c1 = appendElement(c1, TAG_LINK, ATTR_HREF, "tsl2.nano.h5.html");
+            c1 = appendElement(c1, TAG_LINK, ATTR_HREF, "../nano.h5.html");
             appendElement(c1, TAG_IMAGE, ATTR_SRC, "icons/beanex-logo-micro.jpg");
             appendElement(c2, TAG_H3, content(title), ATTR_ALIGN, ALIGN_CENTER);
             if (interactive && bean != null) {
@@ -701,6 +751,21 @@ public class Html5Presentation<T> extends BeanPresentationHelper<T> implements I
     }
 
     protected static final StringBuilder content(String str) {
-        return new StringBuilder(str);
+        return str != null ? new StringBuilder(str) : EMPTY_CONTENT;
+    }
+    
+    protected static String convert(String name, Object value) {
+        if (value == null) {
+            return null;
+        } else if (name.equals(ATTR_COLOR) || name.equals(ATTR_BGCOLOR)) {
+            int[] c = (int[]) value;
+            StringBuilder s = new StringBuilder(6);
+            for (int i = 0; i < c.length; i++) {
+                s.append(StringUtil.toHexString(c.toString().getBytes()));
+            }
+            return s.toString();
+        } else {
+            return value.toString();
+        }
     }
 }
