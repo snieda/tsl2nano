@@ -270,6 +270,10 @@ public class Environment {
         return ((Format) formatter).format(obj);
     }
 
+    public static String getConfigPath(Class<?> type) {
+        return self().properties.getProperty(KEY_CONFIG_PATH) + type.getSimpleName().toLowerCase();
+    }
+
     public static String getConfigPath() {
         return self().properties.getProperty(KEY_CONFIG_PATH);
     }
