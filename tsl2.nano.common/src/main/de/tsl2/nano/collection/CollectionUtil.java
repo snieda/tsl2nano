@@ -489,7 +489,7 @@ public class CollectionUtil {
      * @param expression regular expression to be used as filter. the toString() methods of objects will be used to match against.
      * @return filtered collection
      */
-    public static final <I extends Iterable<T>, T extends Comparable<T>> I getFiltering(I src,
+    public static final <I extends Iterable<T>, T> I getFiltering(I src,
             final StringBuilder expression) {
         return FilteringIterator.getFilteringIterable(src, new IPredicate<T>() {
             @Override

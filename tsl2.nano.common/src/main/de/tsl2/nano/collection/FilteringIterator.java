@@ -85,12 +85,24 @@ public class FilteringIterator<E> implements Iterator<E> {
     @SuppressWarnings({ "unchecked", "rawtypes" })
     public static <I extends Iterable<T>, T> I getFilteringIterable(final I iterable, final IPredicate<T> predicate) {
         return (I) Proxy.newProxyInstance(Thread.currentThread().getContextClassLoader(), new BeanClass(iterable.getClass()).getInterfaces(), new InvocationHandler() {
+//          /** to avoid subsequent/recursive calls of 'size' */
+//          Iterator<T> iterator = null;
 
             @Override
             public Object invoke(Object proxy, Method method, Object[] args) throws Throwable {
                 Object result = method.invoke(iterable, args);
                 if (Iterator.class.isAssignableFrom(method.getReturnType()))
                     result = new FilteringIterator<T>(iterable, predicate);
+//              else if (iterator == null && method.getName().equals("size")) {
+//              iterator = new FilteringIterator<T>(iterable, predicate);
+//              int size = 0;
+//              while (iterator.hasNext()) {
+//                  iterator.next();
+//                  size++;
+//              }
+//              iterator = null;
+//              result = size;
+//          }
                 return result;
             }
         });
