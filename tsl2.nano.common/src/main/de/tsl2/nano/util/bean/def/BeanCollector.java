@@ -205,10 +205,10 @@ public class BeanCollector<COLLECTIONTYPE extends Collection<T>, T> extends Bean
             /*
              * to use the beancollectors collection, we wrap the given beanfinder
              */
+            @SuppressWarnings("unused")
             Object internalBeanFinder = new Serializable() {
                 boolean betweenFinderCreated = false;
 
-                @SuppressWarnings("unused")
                 //used by proxy!
                 Collection<T> getData() {
                     Collection<T> searchPanelBeans = getSearchPanelBeans();
@@ -226,6 +226,12 @@ public class BeanCollector<COLLECTIONTYPE extends Collection<T>, T> extends Bean
                         betweenFinderCreated = true;
                     }
                     return collection;
+                }
+                public Collection<T> previous() {
+                    return (collection = (COLLECTIONTYPE) beanFinder.previous());
+                }
+                public Collection<T> next() {
+                    return (collection = (COLLECTIONTYPE) beanFinder.next());
                 }
             };
             this.beanFinder = DelegatorProxy.delegator(IBeanFinder.class, internalBeanFinder, beanFinder);

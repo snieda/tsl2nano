@@ -973,6 +973,40 @@ public class BeanPresentationHelper<T> {
             if (bean.isMultiValue()) {
                 final BeanCollector<?, T> collector = (BeanCollector<?, T>) bean;
                 presActions.add(new SecureAction(bean.getClazz(),
+                    "back",
+                    IAction.MODE_UNDEFINED,
+                    false,
+                    "icons/back.png") {
+                    @Override
+                    public Object action() throws Exception {
+                        collector.getBeanFinder().previous();
+                        return bean;
+                    }
+
+                    @Override
+                    public boolean isEnabled() {
+                        return super.isEnabled() && collector.getCurrentData().size() > 0;
+                    }
+                });
+
+                presActions.add(new SecureAction(bean.getClazz(),
+                    "forward",
+                    IAction.MODE_UNDEFINED,
+                    false,
+                    "icons/forward.png") {
+                    @Override
+                    public Object action() throws Exception {
+                        collector.getBeanFinder().next();
+                        return bean;
+                    }
+
+                    @Override
+                    public boolean isEnabled() {
+                        return super.isEnabled() && collector.getCurrentData().size() > 0;
+                    }
+                });
+
+                presActions.add(new SecureAction(bean.getClazz(),
                     "switchrelations",
                     IAction.MODE_UNDEFINED,
                     false,
