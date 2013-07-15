@@ -47,11 +47,12 @@ public abstract class GenericBeanContainer extends BeanContainerUtil {
             @Override
             public Collection<?> action() {
                 Class entityType = (Class) parameter[0];
-                int maxResult = (Integer) parameter[1];
+                int startIndex = (Integer) parameter[1];
+                int maxResult = (Integer) parameter[2];
                 if (!new BeanClass(entityType).isAnnotationPresent(Entity.class)) {
                     return null;
                 }
-                return container.getService().findAll(entityType, maxResult);
+                return container.getService().findAll(entityType, startIndex, maxResult);
             }
         };
         IAction<Collection<?>> exampleFinder = new CommonAction<Collection<?>>() {
@@ -63,7 +64,7 @@ public abstract class GenericBeanContainer extends BeanContainerUtil {
         IAction<Collection<?>> betweenFinder = new CommonAction<Collection<?>>() {
             @Override
             public Collection<?> action() {
-                return container.getService().findBetween(parameter[0], parameter[1], true, (Integer) parameter[2]);
+                return container.getService().findBetween(parameter[0], parameter[1], true, (Integer) parameter[2], (Integer) parameter[3]);
             }
         };
         IAction<Collection<?>> queryFinder = new CommonAction<Collection<?>>() {

@@ -15,7 +15,6 @@ import static de.tsl2.nano.service.util.ServiceUtil.createExampleStatement;
 import static de.tsl2.nano.service.util.ServiceUtil.createStatement;
 import static de.tsl2.nano.service.util.ServiceUtil.getId;
 import static de.tsl2.nano.service.util.ServiceUtil.getIdName;
-import static de.tsl2.nano.service.util.ServiceUtil.getLogInfo;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -50,7 +49,7 @@ import de.tsl2.nano.util.bean.BeanClass;
  * 
  */
 @Stateless
-@SuppressWarnings({"rawtypes", "unchecked"})
+@SuppressWarnings({ "rawtypes", "unchecked" })
 public class GenericServiceBean extends NamedQueryServiceBean implements IGenericService, IGenericLocalService {
 
 //    private Map<Class<?>, Object> beanIdCache = new Hashtable<Class<?>, Object>();
@@ -58,12 +57,12 @@ public class GenericServiceBean extends NamedQueryServiceBean implements IGeneri
     /** {@inheritDoc} */
     @Override
     public <T> Collection<T> findAll(Class<T> beanType, Class... lazyRelations) {
-        return findAll(beanType, -1, lazyRelations);
+        return findAll(beanType, 0, -1, lazyRelations);
     }
 
     /** {@inheritDoc} */
     @Override
-    public <T> Collection<T> findAll(Class<T> beanType, int maxResult, Class... lazyRelations) {
+    public <T> Collection<T> findAll(Class<T> beanType, int startIndex, int maxResult, Class... lazyRelations) {
         checkContextSecurity();
         if (isVirtualEntity(beanType)) {
             if (isNamedQuery(beanType))
@@ -72,6 +71,7 @@ public class GenericServiceBean extends NamedQueryServiceBean implements IGeneri
         final StringBuffer qStr = createStatement(beanType);
         LOG.debug(qStr);
         Query query = entityManager.createQuery(qStr.toString());
+        query.setFirstResult(startIndex);
         query = query.setMaxResults(maxResult != -1 ? maxResult : getMaxResult());
         //a findAll should only be done on 'configuration' tables
         //QUESTION: why does the query perform poor on activated cache????
@@ -526,8 +526,8 @@ public class GenericServiceBean extends NamedQueryServiceBean implements IGeneri
 
     /** {@inheritDoc} */
     @Override
-    public <T> Collection<T> findBetween(T firstBean, T secondBean, boolean caseInsensitive, Class... lazyRelations) {
-        return findBetween(firstBean, secondBean, caseInsensitive, -1, lazyRelations);
+    public <T> Collection<T> findBetween(T firstBean, T secondBean, Class... lazyRelations) {
+        return findBetween(firstBean, secondBean, true, 0, -1, lazyRelations);
     }
 
     /** {@inheritDoc} */
@@ -535,6 +535,7 @@ public class GenericServiceBean extends NamedQueryServiceBean implements IGeneri
     public <T> Collection<T> findBetween(T firstBean,
             T secondBean,
             boolean caseInsensitive,
+            int startIndex,
             int maxResult,
             Class... lazyRelations) {
         checkContextSecurity();
@@ -547,6 +548,7 @@ public class GenericServiceBean extends NamedQueryServiceBean implements IGeneri
         StringBuffer qStr = new StringBuffer();
         Collection<?> parameter = createBetweenStatement(qStr, firstBean, secondBean, caseInsensitive);
         Query query = entityManager.createQuery(qStr.toString());
+        query.setFirstResult(startIndex);
         query = query.setMaxResults(maxResult != -1 ? maxResult : getMaxResult());
         query = setParameter(query, parameter);
         logTrace(query);

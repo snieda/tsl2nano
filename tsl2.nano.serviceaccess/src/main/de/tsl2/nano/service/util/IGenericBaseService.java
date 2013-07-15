@@ -29,6 +29,7 @@ import javax.security.auth.Subject;
  * @author TS
  * 
  */
+@SuppressWarnings("rawtypes")
 public interface IGenericBaseService extends INamedQueryService {
     /** find all beans of type beanType (statement cache will be used!) */
     public <T> Collection<T> findAll(Class<T> beanType, Class... lazyRelations);
@@ -42,7 +43,7 @@ public interface IGenericBaseService extends INamedQueryService {
      * @param lazyRelations (optional) pre-loaded lazy-relation types
      * @return filled collection with beans of type beantype
      */
-    public <T> Collection<T> findAll(Class<T> beanType, int maxResult, Class... lazyRelations);
+    public <T> Collection<T> findAll(Class<T> beanType, int startIndex, int maxResult, Class... lazyRelations);
 
     /**
      * find all beans of type beanType beeing members of holder. useful if your beanType has no access to the holder.
@@ -110,7 +111,7 @@ public interface IGenericBaseService extends INamedQueryService {
     public <T> T findById(Class<T> beanType, Object id, Class... lazyRelations);
 
     /** find all beans with same attributes (only single value attributes!) between first and second bean */
-    public <T> Collection<T> findBetween(T firstBean, T secondBean, boolean caseInsensitive, Class... lazyRelations);
+    public <T> Collection<T> findBetween(T firstBean, T secondBean, Class... lazyRelations);
 
     /**
      * finds all beans, having properties between firstBean and secondBean.
@@ -119,6 +120,7 @@ public interface IGenericBaseService extends INamedQueryService {
      * @param firstBean minimum bean
      * @param secondBean maximum bean
      * @param caseInsensitive whether to search strings case insensitive
+     * @param startIndex query start index
      * @param maxResult (optional: set -1 to use no definition) maximum result count
      * @param lazyRelations (optional) pre-loaded lazy-relation types
      * @return filled collection with beans of type T
@@ -126,6 +128,7 @@ public interface IGenericBaseService extends INamedQueryService {
     public <T> Collection<T> findBetween(T firstBean,
             T secondBean,
             boolean caseInsensitive,
+            int startIndex,
             int maxResult,
             Class... lazyRelations);
 

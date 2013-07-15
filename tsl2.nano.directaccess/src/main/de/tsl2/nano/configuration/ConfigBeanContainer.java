@@ -13,12 +13,9 @@ import java.io.Serializable;
 import java.util.HashMap;
 import java.util.Map;
 
-import javax.persistence.Entity;
-
 import de.tsl2.nano.persistence.GenericBeanContainer;
 import de.tsl2.nano.persistence.GenericLocalServiceBean;
 import de.tsl2.nano.service.util.IGenericService;
-import de.tsl2.nano.util.bean.BeanClass;
 import de.tsl2.nano.util.bean.BeanContainer;
 
 /**

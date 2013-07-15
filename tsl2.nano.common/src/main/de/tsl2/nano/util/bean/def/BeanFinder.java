@@ -122,10 +122,10 @@ public class BeanFinder<T, F> implements IBeanFinder<T, F>, Serializable {
      */
     public <S> Collection<T> superGetData(S fromFilter, S toFilter) {
         if (fromFilter == null || toFilter == null) {
-            return new LinkedList<T>(BeanContainer.instance().getBeans(getType(), getMaxResultCount()));
+            return new LinkedList<T>(BeanContainer.instance().getBeans(getType(), currentStartIndex, getMaxResultCount()));
         } else {
             //TODO: add currentStartIndex if available on getBeansBetween
-            return new LinkedList(BeanContainer.instance().getBeansBetween(fromFilter, toFilter, getMaxResultCount()));
+            return new LinkedList(BeanContainer.instance().getBeansBetween(fromFilter, toFilter, currentStartIndex, getMaxResultCount()));
         }
     }
 

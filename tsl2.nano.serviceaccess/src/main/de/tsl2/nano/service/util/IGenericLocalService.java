@@ -34,6 +34,7 @@ import javax.security.auth.Subject;
  * 
  */
 @Local
+@SuppressWarnings("rawtypes")
 public interface IGenericLocalService extends IQueryService, IBatchService {
     /** find all beans of type beanType (statement cache will be used!) */
     public <T> Collection<T> findAll(Class<T> beanType, Class... lazyRelations);
@@ -47,7 +48,7 @@ public interface IGenericLocalService extends IQueryService, IBatchService {
      * @param lazyRelations (optional) pre-loaded lazy-relation types
      * @return filled collection with beans of type beantype
      */
-    public <T> Collection<T> findAll(Class<T> beanType, int maxResult, Class... lazyRelations);
+    public <T> Collection<T> findAll(Class<T> beanType, int startIndex, int maxResult, Class... lazyRelations);
 
     /**
      * find all beans of type beanType beeing members of holder. useful if your beanType has no access to the holder.
@@ -115,7 +116,7 @@ public interface IGenericLocalService extends IQueryService, IBatchService {
     public <T> T findById(Class<T> beanType, Object id, Class... lazyRelations);
 
     /** find all beans with same attributes (only single value attributes!) between first and second bean */
-    public <T> Collection<T> findBetween(T firstBean, T secondBean, boolean caseInsensitive, Class... lazyRelations);
+    public <T> Collection<T> findBetween(T firstBean, T secondBean, Class... lazyRelations);
 
     /**
      * finds all beans, having properties between firstBean and secondBean.
@@ -131,6 +132,7 @@ public interface IGenericLocalService extends IQueryService, IBatchService {
     public <T> Collection<T> findBetween(T firstBean,
             T secondBean,
             boolean caseInsensitive,
+            int startIndex,
             int maxResult,
             Class... lazyRelations);
 

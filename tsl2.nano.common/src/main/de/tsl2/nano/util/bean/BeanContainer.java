@@ -264,8 +264,8 @@ public class BeanContainer implements IBeanContainer {
      * {@inheritDoc}
      */
     @Override
-    public <T> Collection<T> getBeans(Class<T> type, int maxResult) {
-        typeFinderAction.setParameter(new Object[] { type, maxResult });
+    public <T> Collection<T> getBeans(Class<T> type, int startIndex, int maxResult) {
+        typeFinderAction.setParameter(new Object[] { type, startIndex, maxResult });
         return (Collection<T>) typeFinderAction.activate();
     }
 
@@ -282,8 +282,8 @@ public class BeanContainer implements IBeanContainer {
      * {@inheritDoc}
      */
     @Override
-    public <T> Collection<T> getBeansBetween(T firstExampleBean, T secondExampleBean, int maxResult) {
-        betweenFinderAction.setParameter(new Object[] { firstExampleBean, secondExampleBean, maxResult });
+    public <T> Collection<T> getBeansBetween(T firstExampleBean, T secondExampleBean, int startIndex, int maxResult) {
+        betweenFinderAction.setParameter(new Object[] { firstExampleBean, secondExampleBean, startIndex, maxResult });
         return (Collection<T>) betweenFinderAction.activate();
     }
 

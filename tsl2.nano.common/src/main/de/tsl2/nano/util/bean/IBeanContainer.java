@@ -22,10 +22,11 @@ public interface IBeanContainer {
      * 
      * @param <T> bean type
      * @param type class of bean type
+     * @param startIndex (optional: set 0 as standard) used with maxresult to fetch data blocks
      * @param maxResult (optional: set -1 to use no definition) maximum result count
      * @return all beans of type <T> in container
      */
-    <T> Collection<T> getBeans(Class<T> type, int maxResult);
+    <T> Collection<T> getBeans(Class<T> type, int startIndex, int maxResult);
 
     /**
      * returns all beans that match the attributes of exampleBean
@@ -43,10 +44,11 @@ public interface IBeanContainer {
      * @param <T> bean type
      * @param firstBean minimal bean
      * @param secondBean maximum bean
+     * @param startIndex (optional: set 0 as standard) used with maxresult to fetch data blocks
      * @param maxResult (optional: set -1 to use no definition) maximum result count
      * @return matching beans
      */
-    public <T> Collection<T> getBeansBetween(T firstBean, T secondBean, int maxResult);
+    public <T> Collection<T> getBeansBetween(T firstBean, T secondBean, int startIndex, int maxResult);
 
     /**
      * getBeansByQuery

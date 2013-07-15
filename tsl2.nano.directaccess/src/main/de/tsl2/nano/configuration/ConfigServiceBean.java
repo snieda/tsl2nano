@@ -38,14 +38,14 @@ public class ConfigServiceBean implements IGenericService {
      */
     @Override
     public <T> Collection<T> findAll(Class<T> beanType, Class... lazyRelations) {
-        return findAll(beanType, Integer.MAX_VALUE, lazyRelations);
+        return findAll(beanType, 0, Integer.MAX_VALUE, lazyRelations);
     }
 
     /**
      * {@inheritDoc}
      */
     @Override
-    public <T> Collection<T> findAll(Class<T> beanType, int maxResult, Class... lazyRelations) {
+    public <T> Collection<T> findAll(Class<T> beanType, int startIndex, int maxResult, Class... lazyRelations) {
         throw new UnsupportedOperationException();
     }
 
@@ -110,8 +110,8 @@ public class ConfigServiceBean implements IGenericService {
      * {@inheritDoc}
      */
     @Override
-    public <T> Collection<T> findBetween(T firstBean, T secondBean, boolean caseInsensitive, Class... lazyRelations) {
-        return findBetween(firstBean, secondBean, caseInsensitive, -1, lazyRelations);
+    public <T> Collection<T> findBetween(T firstBean, T secondBean, Class... lazyRelations) {
+        return findBetween(firstBean, secondBean, true, 0, -1, lazyRelations);
     }
 
     /**
@@ -121,6 +121,7 @@ public class ConfigServiceBean implements IGenericService {
     public <T> Collection<T> findBetween(T firstBean,
             T secondBean,
             boolean caseInsensitive,
+            int startIndex,
             int maxResult,
             Class... lazyRelations) {
         if (firstBean instanceof BeanAttribute) {

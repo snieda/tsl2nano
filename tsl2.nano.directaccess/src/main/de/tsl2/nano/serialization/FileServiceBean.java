@@ -28,23 +28,23 @@ import de.tsl2.nano.util.FileUtil;
  * @author ts, Thomas Schneider
  * @version $Revision$
  */
-@SuppressWarnings("rawtypes")
+@SuppressWarnings({"rawtypes", "unchecked"})
 public class FileServiceBean implements IGenericService {
     Map<Class<?>, Collection<?>> entityCache = new Hashtable<Class<?>, Collection<?>>();
-    
+
     /**
      * {@inheritDoc}
      */
     @Override
     public <T> Collection<T> findAll(Class<T> beanType, Class... lazyRelations) {
-        return findAll(beanType, Integer.MAX_VALUE, lazyRelations);
+        return findAll(beanType, 0, Integer.MAX_VALUE, lazyRelations);
     }
 
     /**
      * {@inheritDoc}
      */
     @Override
-    public <T> Collection<T> findAll(Class<T> beanType, int maxResult, Class... lazyRelations) {
+    public <T> Collection<T> findAll(Class<T> beanType, int startIndex, int maxResult, Class... lazyRelations) {
         Collection<?> allEntities = entityCache.get(beanType);
         if (allEntities == null) {
             allEntities = (Collection<?>) FileUtil.load(Environment.getConfigPath(beanType) + ".dat");
@@ -103,7 +103,7 @@ public class FileServiceBean implements IGenericService {
     public <T> T findById(Class<T> beanType, Object id, Class... lazyRelations) {
         Collection<T> all = findAll(beanType);
         for (T bean : all) {
-            if (bean.hashCode() == (Integer)id) {
+            if (bean.hashCode() == (Integer) id) {
                 return bean;
             }
         }
@@ -114,7 +114,7 @@ public class FileServiceBean implements IGenericService {
      * {@inheritDoc}
      */
     @Override
-    public <T> Collection<T> findBetween(T firstBean, T secondBean, boolean caseInsensitive, Class... lazyRelations) {
+    public <T> Collection<T> findBetween(T firstBean, T secondBean, Class... lazyRelations) {
         //TODO: constrain result
         return (Collection<T>) findAll(firstBean.getClass());
     }
@@ -123,11 +123,9 @@ public class FileServiceBean implements IGenericService {
      * {@inheritDoc}
      */
     @Override
-    public <T> Collection<T> findBetween(T firstBean,
-            T secondBean,
-            boolean caseInsensitive,
-            int maxResult,
-            Class... lazyRelations) {
+    public <T> Collection<T> findBetween(T firstBean, T secondBean, boolean caseInsensitive, int startIndex,
+
+    int maxResult, Class... lazyRelations) {
         //TODO: constrain result
         return (Collection<T>) findAll(firstBean.getClass());
     }

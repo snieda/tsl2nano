@@ -18,7 +18,6 @@ import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.Id;
 import javax.persistence.JoinColumn;
-import javax.persistence.OneToMany;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -38,7 +37,7 @@ import de.tsl2.nano.util.bean.IAttributeDef;
  * @author Thomas Schneider, Thomas Schneider
  * @version $Revision$
  */
-@SuppressWarnings("unchecked")
+@SuppressWarnings({"rawtypes", "unchecked", "serial"})
 public class BeanContainerUtil {
     private static final Map<String, IAttributeDef> attrDefCache = new HashMap<String, IAttributeDef>();
 
@@ -60,11 +59,12 @@ public class BeanContainerUtil {
             @Override
             public Collection<?> action() {
                 final Class entityType = (Class) parameter[0];
-                final int maxResult = (Integer) parameter[1];
+                final int startIndex = (Integer) parameter[1];
+                final int maxResult = (Integer) parameter[2];
                 if (!new BeanClass(entityType).isAnnotationPresent(Entity.class)) {
                     return null;
                 }
-                return service.findAll(entityType, maxResult);
+                return service.findAll(entityType, startIndex, maxResult);
             }
         };
         final IAction<Collection<?>> exampleFinder = new CommonAction<Collection<?>>() {
@@ -76,7 +76,7 @@ public class BeanContainerUtil {
         final IAction<Collection<?>> betweenFinder = new CommonAction<Collection<?>>() {
             @Override
             public Collection<?> action() {
-                return service.findBetween(parameter[0], parameter[1], true, (Integer) parameter[2]);
+                return service.findBetween(parameter[0], parameter[1], true, (Integer)parameter[2], (Integer) parameter[3]);
             }
         };
         final IAction<Collection<?>> queryFinder = new CommonAction<Collection<?>>() {

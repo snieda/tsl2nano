@@ -177,7 +177,7 @@ public class BeanAssigner<T> {
             Class<DEST> destType,
             String idAttributeName,
             int maxCount) {
-        final Collection<SOURCE> allItems = BeanContainer.instance().getBeans(sourceType, maxCount);
+        final Collection<SOURCE> allItems = BeanContainer.instance().getBeans(sourceType, 0, maxCount);
         return getWrappedCollection(allItems, destType, idAttributeName, maxCount);
     }
 
