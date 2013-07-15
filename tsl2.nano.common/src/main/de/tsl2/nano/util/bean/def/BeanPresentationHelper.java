@@ -9,11 +9,8 @@
  */
 package de.tsl2.nano.util.bean.def;
 
-import static de.tsl2.nano.util.bean.def.IBeanCollector.MODE_ALL;
-import static de.tsl2.nano.util.bean.def.IBeanCollector.MODE_ALL_SINGLE;
 import static de.tsl2.nano.util.bean.def.IPresentable.ALIGN_LEFT;
 import static de.tsl2.nano.util.bean.def.IPresentable.ALIGN_RIGHT;
-import static de.tsl2.nano.util.bean.def.IPresentable.POSTFIX_SELECTOR;
 import static de.tsl2.nano.util.bean.def.IPresentable.STYLE_MULTI;
 import static de.tsl2.nano.util.bean.def.IPresentable.TYPE_DATE;
 import static de.tsl2.nano.util.bean.def.IPresentable.TYPE_INPUT;
@@ -25,7 +22,6 @@ import static de.tsl2.nano.util.bean.def.IPresentable.TYPE_TIME;
 import static de.tsl2.nano.util.bean.def.IPresentable.UNDEFINED;
 
 import java.io.File;
-import java.io.Serializable;
 import java.math.BigDecimal;
 import java.sql.Time;
 import java.sql.Timestamp;
@@ -45,11 +41,9 @@ import org.apache.commons.logging.Log;
 
 import tsl.FileUtil;
 import de.tsl2.nano.Environment;
-import de.tsl2.nano.action.CommonAction;
 import de.tsl2.nano.action.IAction;
 import de.tsl2.nano.action.IActivator;
 import de.tsl2.nano.collection.CollectionUtil;
-import de.tsl2.nano.collection.ListSet;
 import de.tsl2.nano.exception.FormattedException;
 import de.tsl2.nano.format.DefaultFormat;
 import de.tsl2.nano.format.GenericParser;
@@ -453,7 +447,7 @@ public class BeanPresentationHelper<T> {
      * @return validator (defining table columns)
      */
     protected <V> Collection<V> getAttributeRelations(BeanAttribute beanAttribute, Class<V> type, int maxResult) {
-        return BeanContainer.instance().getBeans(type, maxResult);
+        return BeanContainer.instance().getBeans(type, 0, maxResult);
     }
 
     /**
@@ -1082,6 +1076,8 @@ public class BeanPresentationHelper<T> {
                     Bean<?> configBean = Bean.getBean(BeanDefinition.getBeanDefinition(bean.getName()));
                     String[] writableAttributes = configBean.getAttributeNames(true);
                     configBean.setAttributeFilter(writableAttributes);
+//                    BeanClass beanClass = new BeanClass(bean.getClazz());
+//                    configBean.getAttribute("attributes").setRange(beanClass.getAttributes(false));
                     return configBean;
                 }
 
