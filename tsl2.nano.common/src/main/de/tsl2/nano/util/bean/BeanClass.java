@@ -816,4 +816,13 @@ public class BeanClass<T> implements Serializable {
             allInterfaces.addAll(Arrays.asList(superClass.getInterfaces()));
         return allInterfaces.toArray(new Class[0]);
     }
+    
+    /**
+     * useful on anonymous/inner classes
+     * @param cls class to analyse
+     * @return defining class - means on anonymous classes not the enclosing but the super class.
+     */
+    public static final Class<?> getDefiningClass(Class<?> cls) {
+        return cls.getEnclosingClass() != null ? cls.getSuperclass() : cls;
+    }
 }
