@@ -157,14 +157,19 @@ public class ValueColumn<T> implements IPresentableColumn, Serializable {
             actionSortColumn = new CommonAction<Object>(name, name, getDescription()) {
                 @Override
                 public Object action() throws Exception {
+                    collector.shiftSortIndexes();
                     sortIndex = 0;
                     isSortUpDirection = isSortUpDirection ? false: true;
-                    collector.shiftSortIndexes();
                     collector.sort();
                     return collector;
                 }
             };
         }
         return actionSortColumn;
+    }
+    
+    @Override
+    public String toString() {
+        return "column '" + name + "' at index " + columnIndex;
     }
 }

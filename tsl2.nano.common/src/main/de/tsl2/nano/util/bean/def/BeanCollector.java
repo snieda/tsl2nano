@@ -14,6 +14,7 @@ import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.Comparator;
 import java.util.Iterator;
 import java.util.LinkedHashSet;
@@ -227,9 +228,11 @@ public class BeanCollector<COLLECTIONTYPE extends Collection<T>, T> extends Bean
                     }
                     return collection;
                 }
+
                 public Collection<T> previous() {
                     return (collection = (COLLECTIONTYPE) beanFinder.previous());
                 }
+
                 public Collection<T> next() {
                     return (collection = (COLLECTIONTYPE) beanFinder.next());
                 }
@@ -610,15 +613,22 @@ public class BeanCollector<COLLECTIONTYPE extends Collection<T>, T> extends Bean
         Collection<IPresentableColumn> columns = getColumnDefinitions();
         for (IPresentableColumn c : columns) {
             if (c.getSortIndex() != IPresentable.UNDEFINED)
-                ((ValueColumn)c).sortIndex++;
+                ((ValueColumn) c).sortIndex++;
         }
     }
 
     Integer[] getSortIndexes() {
-        Collection<IPresentableColumn> columns = getColumnDefinitions();
+        List<IPresentableColumn> columns = (List<IPresentableColumn>) getColumnDefinitions();
+        Collections.sort(columns, new Comparator<IPresentableColumn>() {
+            @Override
+            public int compare(IPresentableColumn o1, IPresentableColumn o2) {
+                return Integer.valueOf(o1.getSortIndex()).compareTo(Integer.valueOf(o2.getSortIndex()));
+            }
+
+        });
         List<Integer> indexes = new ArrayList<Integer>(columns.size());
         for (IPresentableColumn c : columns) {
-            indexes.set(c.getSortIndex(), c.getIndex());
+            indexes.add(c.getIndex());
         }
         return indexes.toArray(new Integer[0]);
     }
@@ -626,18 +636,18 @@ public class BeanCollector<COLLECTIONTYPE extends Collection<T>, T> extends Bean
     @Override
     public void sort() {
         Integer[] sortIndexes = getSortIndexes();
-        for (int i = sortIndexes.length - 1; i >0 ; i--) {
+        for (int i = sortIndexes.length - 1; i > 0; i--) {
             Comparator<T> comparator = new Comparator<T>() {
                 @Override
                 public int compare(T o1, T o2) {
-                    
+
                     return 0;
                 }
             };
-            CollectionUtil.getSortedList(collection, comparator, getName(), false);
+            collection = (COLLECTIONTYPE) CollectionUtil.getSortedList(collection, comparator, getName(), false);
         }
     }
-    
+
     /**
      * {@inheritDoc}
      */
@@ -804,5 +814,19 @@ public class BeanCollector<COLLECTIONTYPE extends Collection<T>, T> extends Bean
                 ((ValueColumn) c).attributeDefinition = getAttribute(c.getName());
             }
         }
+    }
+
+    /**
+     * getColumnSortingActions
+     * 
+     * @return
+     */
+    public Collection<IAction<?>> getColumnSortingActions() {
+        Collection<IPresentableColumn> columns = getColumnDefinitions();
+        Collection<IAction<?>> actions = new ArrayList<IAction<?>>(columns.size());
+        for (IPresentableColumn c : columns) {
+            actions.add(c.getSortingAction(this));
+        }
+        return actions;
     }
 }

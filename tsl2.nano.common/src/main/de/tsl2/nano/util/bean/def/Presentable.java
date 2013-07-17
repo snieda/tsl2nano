@@ -12,6 +12,9 @@ package de.tsl2.nano.util.bean.def;
 import java.io.Serializable;
 import java.util.Map;
 
+import org.simpleframework.xml.Attribute;
+import org.simpleframework.xml.ElementArray;
+
 import de.tsl2.nano.Environment;
 import de.tsl2.nano.action.IActivator;
 import de.tsl2.nano.util.bean.BeanAttribute;
@@ -26,7 +29,9 @@ public class Presentable implements IPresentable, Serializable {
     /** serialVersionUID */
     private static final long serialVersionUID = -7970100238668263393L;
 
+    @Attribute
     int type = UNDEFINED;
+    @Attribute
     int style = UNDEFINED;
     String label;
     String description;
@@ -34,8 +39,11 @@ public class Presentable implements IPresentable, Serializable {
     Object layoutConstraints;
     boolean visible = true;
     transient IActivator enabler;
-    transient byte[] icon;
+    String icon;
+    
+    @ElementArray(required=false)
     int[] foreground;
+    @ElementArray(required=false)
     int[] background;
 
     public Presentable() {
@@ -116,7 +124,7 @@ public class Presentable implements IPresentable, Serializable {
      * {@inheritDoc}
      */
     @Override
-    public <T extends IPresentable> T  setPresentationDetails(int[] foreground, int[] background, byte[] icon) {
+    public <T extends IPresentable> T  setPresentationDetails(int[] foreground, int[] background, String icon) {
         this.foreground = foreground;
         this.background = background;
         this.icon = icon;
@@ -141,7 +149,7 @@ public class Presentable implements IPresentable, Serializable {
     /**
      * @return Returns the icon.
      */
-    public byte[] getIcon() {
+    public String getIcon() {
         return icon;
     }
 

@@ -14,7 +14,7 @@ import java.text.ParsePosition;
 
 /**
  * is able to format the given type to a string and to parse a string into an object of the given type. uses
- * {@link DefaultFormat} to format to a string and {@link FormatUtil} and {@link RegularExpressionFormat} to parse a
+ * {@link DefaultFormat} to format to a string and {@link FormatUtil} and {@link RegExpFormat} to parse a
  * string to an object.
  * 
  * @author Thomas Schneider
@@ -59,7 +59,7 @@ public class GenericParser<T> extends DefaultFormat {
         if (parsingFormat == null) {
 
             if (parsingPattern != null) {
-                parsingFormat = new RegularExpressionFormat(parsingPattern,
+                parsingFormat = new RegExpFormat(parsingPattern,
                     null,
                     0,
                     0,

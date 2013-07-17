@@ -61,15 +61,15 @@ import de.tsl2.nano.util.operation.IConverter;
  * @author ts 18.09.2008
  * @version $Revision: 1.0 $
  */
-public class RegularExpressionFormat extends Format {
+public class RegExpFormat extends Format {
     private static final long serialVersionUID = 1L;
-    private static final Log LOG = LogFactory.getLog(RegularExpressionFormat.class);
+    private static final Log LOG = LogFactory.getLog(RegExpFormat.class);
     private String pattern;
     private int regExpFlags;
     private int maxCharacterCount = -1;
     private transient Pattern compiledPattern;
     /** needed to format objects */
-    protected Format defaultFormatter = null;
+    protected transient Format defaultFormatter = null;
     /** default: the full regexp must be matched on format or parse! */
     boolean fullMatch = true;
     /** on default, this class is not able to parse a string to an object */
@@ -152,7 +152,7 @@ public class RegularExpressionFormat extends Format {
     /**
      * constructor to be de-serializable
      */
-    public RegularExpressionFormat() {
+    public RegExpFormat() {
         super();
     }
 
@@ -162,7 +162,7 @@ public class RegularExpressionFormat extends Format {
      * 
      * @param pattern regexp without length def.
      */
-    protected RegularExpressionFormat(String pattern) {
+    protected RegExpFormat(String pattern) {
         this(pattern, null, calcLength(pattern, null), 0);
     }
 
@@ -173,7 +173,7 @@ public class RegularExpressionFormat extends Format {
      * @param pattern regexp without length def.
      * @param init init string
      */
-    public RegularExpressionFormat(String pattern, String init) {
+    public RegExpFormat(String pattern, String init) {
         this(pattern, init, calcLength(pattern, init), 0);
     }
 
@@ -185,7 +185,7 @@ public class RegularExpressionFormat extends Format {
      * @param regExpFlags additional Flags for the regular expression
      * @see Pattern Pattern for Flags description
      */
-    public RegularExpressionFormat(String pattern, int maxCharacterCount, int regExpFlags) {
+    public RegExpFormat(String pattern, int maxCharacterCount, int regExpFlags) {
         this(pattern, null, maxCharacterCount, regExpFlags);
     }
 
@@ -196,7 +196,7 @@ public class RegularExpressionFormat extends Format {
      * @param maxCharacterCount maximum allowed count of characters
      * @see Pattern Pattern for Flags description
      */
-    public RegularExpressionFormat(String pattern, int maxCharacterCount) {
+    public RegExpFormat(String pattern, int maxCharacterCount) {
         this(pattern, null, maxCharacterCount, 0);
     }
 
@@ -208,7 +208,7 @@ public class RegularExpressionFormat extends Format {
      * @param regExpFlags additional Flags for the regular expression
      * @see Pattern Pattern for Flags description
      */
-    public RegularExpressionFormat(String pattern, String init, int maxCharacterCount, int regExpFlags) {
+    public RegExpFormat(String pattern, String init, int maxCharacterCount, int regExpFlags) {
         this(pattern, init, maxCharacterCount, regExpFlags, null);
     }
 
@@ -222,7 +222,7 @@ public class RegularExpressionFormat extends Format {
      * @param parser (optional) format instance to be set as default format and parser
      * @see Pattern Pattern for Flags description
      */
-    public RegularExpressionFormat(String pattern, String init, int maxCharacterCount, int regExpFlags, Format parser) {
+    public RegExpFormat(String pattern, String init, int maxCharacterCount, int regExpFlags, Format parser) {
         super();
         this.pattern = pattern;
         if (init != null) {
@@ -235,7 +235,7 @@ public class RegularExpressionFormat extends Format {
 
         this.maxCharacterCount = maxCharacterCount;
         this.regExpFlags = regExpFlags;
-        if (parser != null && !(parser instanceof RegularExpressionFormat)) {
+        if (parser != null && !(parser instanceof RegExpFormat)) {
             isAbleToParse = true;
         }
         this.defaultFormatter = parser;
@@ -494,9 +494,9 @@ public class RegularExpressionFormat extends Format {
      * 
      * @return new formatter for a currency
      */
-    public static RegularExpressionFormat createCurrencyRegExp() {
+    public static RegExpFormat createCurrencyRegExp() {
         final int dec = 11, fract = 2;
-        return new RegularExpressionFormat(numberWithGrouping(dec, fract, false) + getCurrencyPostfix(),
+        return new RegExpFormat(numberWithGrouping(dec, fract, false) + getCurrencyPostfix(),
             null,
             dec + fract + 3,//28082012ts: 1 -->3 to enable a number like 123456789 --> 123.456.789,00 €
             0,
@@ -508,9 +508,9 @@ public class RegularExpressionFormat extends Format {
      * 
      * @return new formatter for a currency
      */
-    public static RegularExpressionFormat createCurrencyNoSymbol() {
+    public static RegExpFormat createCurrencyNoSymbol() {
         final int dec = 11, fract = 2;
-        return new RegularExpressionFormat(numberWithGrouping(dec, fract, false) + "", null, dec + fract + 3,//28082012ts: 1 -->3 to enable a number like 123456789 --> 123.456.789,00 €
+        return new RegExpFormat(numberWithGrouping(dec, fract, false) + "", null, dec + fract + 3,//28082012ts: 1 -->3 to enable a number like 123456789 --> 123.456.789,00 €
             0,
             getCurrencyFormatNoSymbol());
     }
@@ -520,9 +520,9 @@ public class RegularExpressionFormat extends Format {
      * 
      * @return new formatter for the given number
      */
-    public static RegularExpressionFormat createCurrencyNoFraction() {
+    public static RegExpFormat createCurrencyNoFraction() {
         final int dec = 11, fract = 0;
-        return new RegularExpressionFormat(numberWithGrouping(dec - 2, fract, false) + getCurrencyPostfix(),
+        return new RegExpFormat(numberWithGrouping(dec - 2, fract, false) + getCurrencyPostfix(),
             null,
             dec + fract + 3,//28082012ts: 1 -->3 to enable a number like 123456789 --> 123.456.789,00 €
             0,
@@ -535,9 +535,9 @@ public class RegularExpressionFormat extends Format {
      * 
      * @return new formatter for a currency
      */
-    public static RegularExpressionFormat createBigCurrencyRegExp() {
+    public static RegExpFormat createBigCurrencyRegExp() {
         final int dec = 17, fract = 0;
-        return new RegularExpressionFormat(numberWithGrouping(dec - 2, fract, false) + getCurrencyPostfix(),
+        return new RegExpFormat(numberWithGrouping(dec - 2, fract, false) + getCurrencyPostfix(),
             null,
             dec + fract + 3,//28082012ts: 1 -->3 to enable a number like 123456789 --> 123.456.789,00 €
             0,
@@ -550,7 +550,7 @@ public class RegularExpressionFormat extends Format {
      * @param numberType type of number (having scale and precision)
      * @return new formatter
      */
-    public static RegularExpressionFormat createNumberRegExp(BigDecimal decimal) {
+    public static RegExpFormat createNumberRegExp(BigDecimal decimal) {
         assert decimal != null : "decimal must not be null!";
         //the scale is the scaled fraction digit count
         final int dec = decimal.scale();
@@ -562,7 +562,7 @@ public class RegularExpressionFormat extends Format {
     /**
      * delegates to {@link #createNumberRegExp(int, int, Class)}.
      */
-    public static RegularExpressionFormat createNumberRegExp(int dec, int fract) {
+    public static RegExpFormat createNumberRegExp(int dec, int fract) {
         return createNumberRegExp(dec, fract, null);
     }
 
@@ -574,8 +574,8 @@ public class RegularExpressionFormat extends Format {
      * @param type type of number (Integer, Double, BigDecimal, primitives..)
      * @return new formatter for the given number
      */
-    public static RegularExpressionFormat createNumberRegExp(int dec, int fract, Class type) {
-        return new RegularExpressionFormat(number(dec, fract), null, dec + fract + 1, 0, getDefaultNumberFormat(fract,
+    public static RegExpFormat createNumberRegExp(int dec, int fract, Class type) {
+        return new RegExpFormat(number(dec, fract), null, dec + fract + 1, 0, getDefaultNumberFormat(fract,
             type));
     }
 
@@ -586,8 +586,8 @@ public class RegularExpressionFormat extends Format {
      * @param alphaonly if true, only alpha numerics are allowed (but e.g. no spaces)
      * @return new formatter for the given text specifications
      */
-    public static RegularExpressionFormat createAlphaNumRegExp(int count, boolean alphaonly) {
-        return new RegularExpressionFormat(alphanum(count, alphaonly), count, 0);
+    public static RegExpFormat createAlphaNumRegExp(int count, boolean alphaonly) {
+        return new RegExpFormat(alphanum(count, alphaonly), count, 0);
     }
 
     /**
@@ -595,8 +595,8 @@ public class RegularExpressionFormat extends Format {
      * 
      * @return regexp for a german date
      */
-    public static RegularExpressionFormat createDateRegExp() {
-        RegularExpressionFormat regExp = new RegularExpressionFormat(FORMAT_DATE_DE, DateFormat.getDateInstance()
+    public static RegExpFormat createDateRegExp() {
+        RegExpFormat regExp = new RegExpFormat(FORMAT_DATE_DE, DateFormat.getDateInstance()
             .format(getInitialDate()), 10, 0, FormatUtil.getDefaultFormat(Date.class, true));
         return regExp;
     }
@@ -613,14 +613,14 @@ public class RegularExpressionFormat extends Format {
      * @return the formatter
      * @see Pattern Pattern for Flags description
      */
-    public static RegularExpressionFormat createPatternRegExp(String pattern,
+    public static RegExpFormat createPatternRegExp(String pattern,
             String init,
             int minLength,
             int maxLength,
             int regExpFlags) {
         assert minLength >= 0 : "minLength must be >= 0";
         assert maxLength >= minLength : "maxLength must be >= minLength";
-        return new RegularExpressionFormat(pattern + "{" + minLength + "," + maxLength + "}",
+        return new RegExpFormat(pattern + "{" + minLength + "," + maxLength + "}",
             init,
             maxLength,
             regExpFlags);
@@ -635,10 +635,10 @@ public class RegularExpressionFormat extends Format {
      * @return the formatter
      * @see Pattern Pattern for Flags description
      */
-    public static RegularExpressionFormat createLengthRegExp(int minLength, int maxLength, int regExpFlags) {
+    public static RegExpFormat createLengthRegExp(int minLength, int maxLength, int regExpFlags) {
         assert minLength >= 0 : "minLength must be >= 0";
         assert maxLength >= minLength : "maxLength must be >= minLength";
-        return new RegularExpressionFormat(".{" + minLength + "," + maxLength + "}", maxLength, regExpFlags);
+        return new RegExpFormat(".{" + minLength + "," + maxLength + "}", maxLength, regExpFlags);
     }
 
     /**
@@ -868,7 +868,7 @@ public class RegularExpressionFormat extends Format {
      * @return true, if format can create an object from string
      */
     public static boolean isAbleToParse(Format format) {
-        return !(format instanceof RegularExpressionFormat) || ((RegularExpressionFormat) format).isAbleToParse();
+        return !(format instanceof RegExpFormat) || ((RegExpFormat) format).isAbleToParse();
     }
 
     /**
@@ -884,14 +884,14 @@ public class RegularExpressionFormat extends Format {
     }
 
     /**
-     * convenience to check, if the given format is an instance of {@link RegularExpressionFormat} and
-     * {@link RegularExpressionFormat#isNumber} returns true.
+     * convenience to check, if the given format is an instance of {@link RegExpFormat} and
+     * {@link RegExpFormat#isNumber} returns true.
      * 
      * @param format format to evaluate
      * @return true, if format is - or contains - a number format
      */
     public static boolean isNumber(Format format) {
-        return (format instanceof NumberFormat) || (format instanceof RegularExpressionFormat && ((RegularExpressionFormat) format).isNumber());
+        return (format instanceof NumberFormat) || (format instanceof RegExpFormat && ((RegExpFormat) format).isNumber());
     }
 
     /**
@@ -995,7 +995,7 @@ public class RegularExpressionFormat extends Format {
     /**
      * delegates to {@link #getParser(Class, String, String, String, IConverter, boolean)} using @id attribute and cache.
      */
-    public static <TYPE> RegularExpressionFormat getParser(final Class<TYPE> type,
+    public static <TYPE> RegExpFormat getParser(final Class<TYPE> type,
             String pattern,
             final IConverter<String, Object> converter) {
         //workaround to have a simple instance for calling getIdAttribute(). poor performance - but works
@@ -1046,15 +1046,15 @@ public class RegularExpressionFormat extends Format {
      * @param converter (optional) converts a string to the attribute type (e.g.: the string '100 000 00000' will be
      *            converted to long 10000000000).
      * @param useCache if true, all loaded objects will be cached.
-     * @return new {@link RegularExpressionFormat}
+     * @return new {@link RegExpFormat}
      */
-    public static <TYPE> RegularExpressionFormat getParser(final Class<TYPE> type,
+    public static <TYPE> RegExpFormat getParser(final Class<TYPE> type,
             final String uniqueIdAttribute,
             String pattern,
             final String initMask,
             final IConverter<String, Object> converter,
             final boolean useCache) {
-        final RegularExpressionFormat format = new RegularExpressionFormat(pattern, initMask) {
+        final RegExpFormat format = new RegExpFormat(pattern, initMask) {
             final TYPE instance = new BeanClass<TYPE>(type).createInstance();
             final BeanAttribute attribute = BeanAttribute.getBeanAttribute(type, uniqueIdAttribute);
             final ReferenceMap cache = useCache ? new ReferenceMap(ReferenceMap.SOFT,

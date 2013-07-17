@@ -13,9 +13,8 @@ import java.lang.reflect.InvocationHandler;
 import java.lang.reflect.Method;
 import java.lang.reflect.Proxy;
 import java.util.Iterator;
-import java.util.LinkedList;
+import java.util.ListIterator;
 import java.util.Map;
-import java.util.Queue;
 
 import de.tsl2.nano.util.bean.BeanClass;
 
@@ -26,12 +25,13 @@ import de.tsl2.nano.util.bean.BeanClass;
  * @author Thomas Schneider
  * @version $Revision$
  */
-public class FilteringIterator<E> implements Iterator<E> {
+public class FilteringIterator<E> implements ListIterator<E> {
     Iterable<E> parent;
-    Queue<E> previewItems;
     Iterator<E> previewIt;
     IPredicate<E> predicate;
     int i = 0;
+    boolean previewing;
+    E item;
 
     /**
      * constructor
@@ -44,29 +44,103 @@ public class FilteringIterator<E> implements Iterator<E> {
         this.parent = parent;
         this.predicate = predicate;
         this.previewIt = parent.iterator();
-        this.previewItems = new LinkedList<E>();
     }
 
     @Override
     public boolean hasNext() {
-        if (previewItems.size() > 0)
-            return true;
+        return preview() != null;
+    }
+
+    private E preview() {
         while (previewIt.hasNext()) {
             E n = previewIt.next();
-            if (predicate.eval(n))
-                previewItems.add(n);
+            if (predicate.eval(n)) {
+                previewing = true;
+                i++;
+                return (item = n);
+            }
         }
-        return previewItems.size() > 0;
+        return null;
     }
 
     @Override
     public E next() {
-        return previewItems.poll();
+        if (!previewing)
+            preview();
+        previewing = false;
+        return item;
     }
 
     @Override
     public void remove() {
-        throw new UnsupportedOperationException();
+        previewIt.remove();
+    }
+
+    
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public boolean hasPrevious() {
+        return backview() != null;
+    }
+
+    private E backview() {
+        ListIterator<E> it = (ListIterator<E>) previewIt;
+        while (it.hasPrevious()) {
+            E n = it.previous();
+            if (predicate.eval(n)) {
+                previewing = true;
+                i--;
+                return (item = n);
+            }
+        }
+        return null;
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public E previous() {
+        if (!previewing)
+            backview();
+        previewing = false;
+        return item;
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public int nextIndex() {
+        preview();
+        return i;
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public int previousIndex() {
+        backview();
+        return i;
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public void set(E e) {
+        ((ListIterator<E>)previewIt).set(e);
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public void add(E e) {
+        ((ListIterator<E>)previewIt).add(e);
     }
 
     /**

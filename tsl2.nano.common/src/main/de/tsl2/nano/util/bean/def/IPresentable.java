@@ -52,8 +52,8 @@ public interface IPresentable extends Serializable {
     /** optional fixed pixel height (valuable through layout constraints) */
     int getHeight();
     
-    /** picture */
-    byte[] getIcon();
+    /** file name for icon */
+    String getIcon();
 
     /** foreground RGB color */
     int[] getForeground();
@@ -72,7 +72,7 @@ public interface IPresentable extends Serializable {
             String description);
 
     /** sets enhanced grafic properties. for further informations, see docs of getters. */
-    <T extends IPresentable> T setPresentationDetails(int[] foreground, int[] background, byte[] icon);
+    <T extends IPresentable> T setPresentationDetails(int[] foreground, int[] background, String icon);
 
     /** sets type */
     <T extends IPresentable> T setType(int type);
@@ -154,6 +154,18 @@ public interface IPresentable extends Serializable {
     public static final int ALIGN_TOP = 8;
     public static final int ALIGN_BOTTOM = 16;
     
+    public static final int[] COLOR_WHITE = new int[]{255, 255, 255};
+    public static final int[] COLOR_BLACK = new int[]{0, 0, 0};
+    public static final int[] COLOR_GRAY = new int[]{128, 128, 128};
+    public static final int[] COLOR_LGRAY = new int[]{192, 192, 192};
+    public static final int[] COLOR_RED = new int[]{255, 0, 0};
+    public static final int[] COLOR_GREEN = new int[]{0, 255, 0};
+    public static final int[] COLOR_BLUE = new int[]{0, 0, 255};
+    public static final int[] COLOR_LRED = new int[]{255, 64, 64};
+    public static final int[] COLOR_LGREEN = new int[]{64, 255, 64};
+    public static final int[] COLOR_LBLUE = new int[]{64, 64, 192};
+    public static final int[] COLOR_YELLOW = new int[]{255, 255, 0};
+
     public static final String POSTFIX_SELECTOR = ".selector";
     
     public static final IPresentable DEFAULT = new IPresentable() {
@@ -161,7 +173,7 @@ public interface IPresentable extends Serializable {
         private static final long serialVersionUID = 1L;
 
         @Override
-        public <T extends IPresentable> T  setPresentationDetails(int[] foreground, int[] background, byte[] icon) {
+        public <T extends IPresentable> T  setPresentationDetails(int[] foreground, int[] background, String icon) {
             throw new UnsupportedOperationException();
         }
 
@@ -208,7 +220,7 @@ public interface IPresentable extends Serializable {
         }
 
         @Override
-        public byte[] getIcon() {
+        public String getIcon() {
             return null;
         }
 
