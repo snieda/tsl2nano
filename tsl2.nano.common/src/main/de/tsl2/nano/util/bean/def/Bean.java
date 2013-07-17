@@ -349,7 +349,9 @@ public class Bean<T> extends BeanDefinition<T> {
     }
 
     /**
-     * sets a new object instance. override this method to initialize your bean.
+     * <p/>
+     * Attention: this implementation uses the {@link BeanValue} cache - means, that the new instance may resist inside
+     * that cache. override this method to initialize your bean.
      * 
      * @param type object type
      * @param constructorArgs object type constructor arguments
