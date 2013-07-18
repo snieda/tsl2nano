@@ -1,0 +1,148 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema" elementFormDefault="qualified" targetNamespace="beandef.xsd" xmlns:ns1="beandef.xsd">
+  <xs:element name="beanCollector">
+    <xs:complexType>
+      <xs:sequence>
+        <xs:element ref="ns1:presentable"/>
+        <xs:element ref="ns1:valueExpression"/>
+        <xs:element ref="ns1:isNested"/>
+        <xs:element ref="ns1:isdefault"/>
+        <xs:element maxOccurs="unbounded" ref="ns1:attribute"/>
+        <xs:element ref="ns1:workingMode"/>
+        <xs:element ref="ns1:searchStatus"/>
+        <xs:element ref="ns1:reloadBean"/>
+      </xs:sequence>
+      <xs:attribute name="clazz" use="required" type="xs:NCName"/>
+      <xs:attribute name="name" use="required" type="xs:NCName"/>
+    </xs:complexType>
+  </xs:element>
+  <xs:element name="presentable">
+    <xs:complexType>
+      <xs:sequence>
+        <xs:element ref="ns1:icon"/>
+        <xs:element ref="ns1:foreground"/>
+        <xs:element ref="ns1:background"/>
+      </xs:sequence>
+      <xs:attribute name="style" use="required" type="xs:integer"/>
+      <xs:attribute name="type" use="required" type="xs:integer"/>
+      <xs:attribute name="visible" use="required" type="xs:boolean"/>
+    </xs:complexType>
+  </xs:element>
+  <xs:element name="icon" type="xs:NCName"/>
+  <xs:element name="foreground">
+    <xs:complexType>
+      <xs:sequence>
+        <xs:element maxOccurs="unbounded" ref="ns1:int"/>
+      </xs:sequence>
+      <xs:attribute name="length" use="required" type="xs:integer"/>
+    </xs:complexType>
+  </xs:element>
+  <xs:element name="background">
+    <xs:complexType>
+      <xs:sequence>
+        <xs:element maxOccurs="unbounded" ref="ns1:int"/>
+      </xs:sequence>
+      <xs:attribute name="length" use="required" type="xs:integer"/>
+    </xs:complexType>
+  </xs:element>
+  <xs:element name="valueExpression">
+    <xs:complexType>
+      <xs:sequence>
+        <xs:element ref="ns1:expression"/>
+        <xs:element ref="ns1:type"/>
+        <xs:element ref="ns1:isPersistable"/>
+      </xs:sequence>
+    </xs:complexType>
+  </xs:element>
+  <xs:element name="expression" type="xs:string"/>
+  <xs:element name="type" type="xs:NCName"/>
+  <xs:element name="isPersistable" type="xs:boolean"/>
+  <xs:element name="isNested" type="xs:boolean"/>
+  <xs:element name="isdefault" type="xs:boolean"/>
+  <xs:element name="attribute">
+    <xs:complexType>
+      <xs:sequence>
+        <xs:element ref="ns1:attributeDefinition"/>
+      </xs:sequence>
+      <xs:attribute name="name" use="required" type="xs:NCName"/>
+    </xs:complexType>
+  </xs:element>
+  <xs:element name="attributeDefinition">
+    <xs:complexType>
+      <xs:sequence>
+        <xs:element ref="ns1:length"/>
+        <xs:element ref="ns1:scale"/>
+        <xs:element ref="ns1:precision"/>
+        <xs:element ref="ns1:nullable"/>
+        <xs:element ref="ns1:id"/>
+        <xs:sequence minOccurs="0">
+          <xs:element ref="ns1:format"/>
+          <xs:element ref="ns1:defaultValue"/>
+          <xs:element ref="ns1:description"/>
+          <xs:element ref="ns1:columnDefinition"/>
+        </xs:sequence>
+        <xs:element ref="ns1:doValidation"/>
+      </xs:sequence>
+      <xs:attribute name="declaringClass" use="required" type="xs:NCName"/>
+      <xs:attribute name="name" use="required" type="xs:NCName"/>
+    </xs:complexType>
+  </xs:element>
+  <xs:element name="length" type="xs:integer"/>
+  <xs:element name="scale" type="xs:integer"/>
+  <xs:element name="precision" type="xs:integer"/>
+  <xs:element name="nullable" type="xs:boolean"/>
+  <xs:element name="id" type="xs:boolean"/>
+  <xs:element name="format">
+    <xs:complexType>
+      <xs:sequence>
+        <xs:element ref="ns1:pattern"/>
+        <xs:element ref="ns1:parser"/>
+      </xs:sequence>
+      <xs:attribute name="class" use="required"/>
+      <xs:attribute name="fullMatch" use="required" type="xs:boolean"/>
+      <xs:attribute name="isAbleToParse" use="required" type="xs:boolean"/>
+      <xs:attribute name="maxCharacterCount" use="required" type="xs:integer"/>
+      <xs:attribute name="regExpFlags" use="required" type="xs:integer"/>
+    </xs:complexType>
+  </xs:element>
+  <xs:element name="pattern" type="xs:string"/>
+  <xs:element name="parser">
+    <xs:complexType>
+      <xs:attribute name="parsingType" use="required" type="xs:NCName"/>
+      <xs:attribute name="postfix" use="required"/>
+      <xs:attribute name="precision" use="required" type="xs:integer"/>
+    </xs:complexType>
+  </xs:element>
+  <xs:element name="defaultValue">
+    <xs:complexType>
+      <xs:simpleContent>
+        <xs:extension base="xs:integer">
+          <xs:attribute name="class" use="required" type="xs:NCName"/>
+        </xs:extension>
+      </xs:simpleContent>
+    </xs:complexType>
+  </xs:element>
+  <xs:element name="description" type="xs:NCName"/>
+  <xs:element name="columnDefinition">
+    <xs:complexType>
+      <xs:sequence>
+        <xs:element ref="ns1:name"/>
+        <xs:element ref="ns1:columnIndex"/>
+        <xs:element ref="ns1:sortIndex"/>
+        <xs:element ref="ns1:isSortUpDirection"/>
+        <xs:element ref="ns1:width"/>
+      </xs:sequence>
+      <xs:attribute name="class" use="required"/>
+    </xs:complexType>
+  </xs:element>
+  <xs:element name="name" type="xs:NCName"/>
+  <xs:element name="columnIndex" type="xs:integer"/>
+  <xs:element name="sortIndex" type="xs:integer"/>
+  <xs:element name="isSortUpDirection" type="xs:boolean"/>
+  <xs:element name="width" type="xs:integer"/>
+  <xs:element name="doValidation" type="xs:boolean"/>
+  <xs:element name="workingMode" type="xs:integer"/>
+  <xs:element name="searchStatus" type="xs:string"/>
+  <xs:element name="reloadBean" type="xs:boolean"/>
+  <xs:element name="int" type="xs:integer"/>
+</xs:schema>
