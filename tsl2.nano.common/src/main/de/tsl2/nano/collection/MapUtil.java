@@ -8,13 +8,16 @@
  */
 package de.tsl2.nano.collection;
 
+import java.lang.reflect.Array;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
+import java.util.LinkedHashSet;
 import java.util.Map;
 import java.util.Set;
 
 import de.tsl2.nano.exception.FormattedException;
 import de.tsl2.nano.util.StringUtil;
+import de.tsl2.nano.util.bean.BeanAttribute;
 import de.tsl2.nano.util.bean.BeanUtil;
 import de.tsl2.nano.util.bean.def.Bean;
 
@@ -82,15 +85,37 @@ public class MapUtil {
      * @param map map to flatten into an object array
      * @return array holding key-values
      */
-    public static Object[] asArray(Map<?, ?> map) {
-        Object[] result = new Object[map.size() * 2];
-        Set<?> keySet = map.keySet();
+    @SuppressWarnings("unchecked")
+    public static <K, V> V[] asArray(Map<K, V> map) {
+        Class<V> type;
+        try {
+            type = (Class<V>) BeanAttribute.getBeanAttribute(map.getClass(), "values").getGenericType();
+        } catch (Exception e) {
+            type = (Class<V>) Object.class;
+        }
+        V[] result = (V[]) Array.newInstance(type, map.size() * 2);
+        Set<K> keySet = map.keySet();
         int i=0;
-        for (Object key : keySet) {
-            result[i++] = key;
+        for (K key : keySet) {
+            result[i++] = (V)key;
             result[i++] = map.get(key);
         }
         return result;
+    }
+
+    /**
+     * removeAll
+     * @param src
+     * @param toRemove
+     * @return src
+     */
+    public static <K, V> Map<K, V> removeAll(Map<K, V> src, Map<K, V> toRemove) {
+        //don't know how it is possible, but without a new set instance, we get a concurrentmodificationexception
+        Set<K> keys = new LinkedHashSet<K>(toRemove.keySet());
+        for (K k : keys) {
+            src.remove(k);
+        }
+        return src;
     }
     
     /**

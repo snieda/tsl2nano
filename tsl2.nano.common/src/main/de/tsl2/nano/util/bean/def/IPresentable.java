@@ -93,6 +93,9 @@ public interface IPresentable extends Serializable {
     public <T extends IPresentable> T setVisible(boolean visible);
     
     /** convenience to evaluate layout/layoutconstraint properties (perhaps, if layout or layoutconstraints are maps) */
+    public String layout(String name);
+    
+    /** convenience to evaluate layout/layoutconstraint properties (perhaps, if layout or layoutconstraints are maps) */
     public <T> T layout(String name, T defaultValue);
     
     /** usable for all int definitions like type and style */
@@ -281,6 +284,11 @@ public interface IPresentable extends Serializable {
         
         @Override
         public <T extends IPresentable> T setVisible(boolean visible) {
+            throw new UnsupportedOperationException();
+        }
+
+        @Override
+        public String layout(String name) {
             throw new UnsupportedOperationException();
         }
 

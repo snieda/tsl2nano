@@ -9,6 +9,8 @@
  */
 package de.tsl2.nano.util.bean;
 
+import java.util.Date;
+
 /**
  * Extending to the java types, additional metadata informations through a database or annotations.
  * 
@@ -30,4 +32,7 @@ public interface IAttributeDef {
 
     /** should be true, if this attribute defines the id of the owning bean */
     boolean id();
+    
+    /** returns {@link Date}, {@link Time} or {@link Timestamp} depending on temporal type annotation - or null. */
+    Class<? extends Date> temporalType();
 }

@@ -13,6 +13,7 @@ import java.lang.reflect.InvocationHandler;
 import java.lang.reflect.Method;
 import java.lang.reflect.Proxy;
 import java.util.Iterator;
+import java.util.List;
 import java.util.ListIterator;
 import java.util.Map;
 
@@ -39,11 +40,12 @@ public class FilteringIterator<E> implements ListIterator<E> {
      * @param parent
      * @param predicate
      */
+    @SuppressWarnings({ "unchecked", "rawtypes" })
     public FilteringIterator(Iterable<E> parent, IPredicate<E> predicate) {
         super();
         this.parent = parent;
         this.predicate = predicate;
-        this.previewIt = parent.iterator();
+        this.previewIt = parent instanceof List ? ((List)parent).listIterator() : parent.iterator();
     }
 
     @Override

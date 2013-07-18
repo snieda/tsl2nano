@@ -13,6 +13,7 @@ import java.io.Serializable;
 import java.util.Map;
 
 import org.simpleframework.xml.Attribute;
+import org.simpleframework.xml.Element;
 import org.simpleframework.xml.ElementArray;
 
 import de.tsl2.nano.Environment;
@@ -25,6 +26,7 @@ import de.tsl2.nano.util.bean.BeanAttribute;
  * @author Thomas Schneider
  * @version $Revision$
  */
+@SuppressWarnings("unchecked")
 public class Presentable implements IPresentable, Serializable {
     /** serialVersionUID */
     private static final long serialVersionUID = -7970100238668263393L;
@@ -33,12 +35,18 @@ public class Presentable implements IPresentable, Serializable {
     int type = UNDEFINED;
     @Attribute
     int style = UNDEFINED;
+    @Element(required=false)
     String label;
+    @Element(required=false)
     String description;
+    @Element(required=false)
     Object layout;
+    @Element(required=false)
     Object layoutConstraints;
+    @Attribute
     boolean visible = true;
     transient IActivator enabler;
+    @Element(required=false)
     String icon;
     
     @ElementArray(required=false)
@@ -237,6 +245,10 @@ public class Presentable implements IPresentable, Serializable {
         return (T)this;
     }
 
+    public String layout(String name) {
+        return layout(name, null);
+    }
+    
     /**
      * {@inheritDoc}
      */

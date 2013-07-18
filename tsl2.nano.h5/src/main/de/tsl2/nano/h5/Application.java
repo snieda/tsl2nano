@@ -31,14 +31,13 @@ import org.apache.commons.logging.Log;
 
 import de.tsl2.nano.Environment;
 import de.tsl2.nano.Messages;
-import de.tsl2.nano.action.CommonAction;
 import de.tsl2.nano.action.IAction;
 import de.tsl2.nano.collection.CollectionUtil;
 import de.tsl2.nano.collection.ListSet;
 import de.tsl2.nano.exception.ForwardedException;
 import de.tsl2.nano.execution.Profiler;
 import de.tsl2.nano.execution.ScriptUtil;
-import de.tsl2.nano.format.RegularExpressionFormat;
+import de.tsl2.nano.format.RegExpFormat;
 import de.tsl2.nano.log.LogFactory;
 import de.tsl2.nano.persistence.HibernateBeanContainer;
 import de.tsl2.nano.persistence.Persistence;
@@ -58,8 +57,6 @@ import de.tsl2.nano.util.bean.def.BeanValue;
 import de.tsl2.nano.util.bean.def.IBeanCollector;
 import de.tsl2.nano.util.bean.def.IPageBuilder;
 import de.tsl2.nano.util.bean.def.IPresentable;
-import de.tsl2.nano.util.bean.def.ISelectionProvider;
-import de.tsl2.nano.util.bean.def.IValueAccess;
 import de.tsl2.nano.util.bean.def.SecureAction;
 import de.tsl2.nano.util.bean.def.SelectionProvider;
 
@@ -305,6 +302,9 @@ public class Application extends NanoHTTPD {
             if (model.getActions() != null)
                 actions.addAll(model.getActions());
             actions.addAll(model.getPresentationHelper().getPresentationActions());
+            if (model.isMultiValue()) {
+                actions.addAll(((BeanCollector) model).getColumnSortingActions());
+            }
         }
         if (actions != null) {
             for (Object k : parms.keySet()) {
@@ -399,7 +399,7 @@ public class Application extends NanoHTTPD {
         String v;
         for (String p : parms.stringPropertyNames()) {
             v = parms.getProperty(p);
-            if (v != null && v.matches(RegularExpressionFormat.FORMAT_DATE_SQL))
+            if (v != null && v.matches(RegExpFormat.FORMAT_DATE_SQL))
                 parms.setProperty(p, DateUtil.getFormattedDate(DateUtil.getDateSQL(v)));
         }
     }

@@ -27,7 +27,7 @@ public abstract class SecureAction<RETURNTYPE> extends CommonAction<RETURNTYPE> 
     /** serialVersionUID */
     private static final long serialVersionUID = 2212543928201596619L;
 
-    Log LOG = LogFactory.getLog(SecureAction.class);
+    private static final Log LOG = LogFactory.getLog(SecureAction.class);
 
     int actionMode;
     boolean allPermission = false;

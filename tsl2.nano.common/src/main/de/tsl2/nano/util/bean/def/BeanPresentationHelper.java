@@ -370,8 +370,8 @@ public class BeanPresentationHelper<T> {
                         : Environment.get("default.bigdecimal.length", 19);
                     int p = attribute.precision() != UNDEFINED ? attribute.precision()
                         : Environment.get("default.bigdecimal.precision", 4);
-                    
-                    String currencyPattern = Environment.get("value.currency.length.precision", "11,4");
+
+                    String currencyPattern = Environment.get("value.currency.length.precision", "11,2");
                     if (currencyPattern.equals(l + "," + p))
                         return RegExpFormat.createCurrencyRegExp();
                     else
@@ -389,10 +389,10 @@ public class BeanPresentationHelper<T> {
                 return RegExpFormat.createNumberRegExp(l, 0, type);
             }
         } else if (BeanClass.isAssignableFrom(Date.class, type)) {
-            if (BeanClass.isAssignableFrom(Timestamp.class, type))
-                regexp = RegExpFormat.createDateRegExp();
-            else if (BeanClass.isAssignableFrom(Time.class, type))
-                regexp = RegExpFormat.createDateRegExp();
+            if (BeanClass.isAssignableFrom(Timestamp.class, type) || (attribute.temporalType() != null && Timestamp.class.isAssignableFrom(attribute.temporalType())))
+                regexp = RegExpFormat.createDateTimeRegExp();
+            else if (BeanClass.isAssignableFrom(Time.class, type) || (attribute.temporalType() != null && Time.class.isAssignableFrom(attribute.temporalType())))
+                regexp = RegExpFormat.createTimeRegExp();
             else
                 regexp = RegExpFormat.createDateRegExp();
         } else if (BeanClass.isAssignableFrom(String.class, type)) {

@@ -48,6 +48,7 @@ import de.tsl2.nano.util.bean.def.BeanValue;
  * 
  */
 @Default(value = DefaultType.FIELD, required = false)
+@SuppressWarnings({"unchecked", "rawtypes"})
 public class BeanClass<T> implements Serializable {
     /** serialVersionUID */
     private static final long serialVersionUID = 8387513854853569951L;

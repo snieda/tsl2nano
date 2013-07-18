@@ -26,6 +26,7 @@ import org.simpleframework.xml.Default;
 import org.simpleframework.xml.DefaultType;
 import org.simpleframework.xml.ElementList;
 import org.simpleframework.xml.core.Commit;
+import org.simpleframework.xml.core.Persist;
 
 import tsl.StringUtil;
 import de.tsl2.nano.Environment;
@@ -167,15 +168,6 @@ public class BeanCollector<COLLECTIONTYPE extends Collection<T>, T> extends Bean
     }
 
     /**
-     * Extension for {@link Serializable}
-     */
-    private void readObject(java.io.ObjectInputStream in) throws IOException, ClassNotFoundException {
-        //actions are transient - we reconstruct the default actions.
-        in.defaultReadObject();
-        init(collection, beanFinder, workingMode);
-    }
-
-    /**
      * getBeanType
      * 
      * @return optional beanType (content type of collection)
@@ -247,6 +239,8 @@ public class BeanCollector<COLLECTIONTYPE extends Collection<T>, T> extends Bean
      * @return Returns the selectionProvider.
      */
     public ISelectionProvider<T> getSelectionProvider() {
+        if (selectionProvider == null)
+            selectionProvider = new SelectionProvider<T>(new LinkedList<T>());
         return selectionProvider;
     }
 
@@ -309,7 +303,7 @@ public class BeanCollector<COLLECTIONTYPE extends Collection<T>, T> extends Bean
      * 
      * @return tgrue, if at least one element was selected
      */
-    protected boolean hasSelection() {
+    public boolean hasSelection() {
         return getFirstSelectedElement() != null;
     }
 
@@ -318,11 +312,20 @@ public class BeanCollector<COLLECTIONTYPE extends Collection<T>, T> extends Bean
      * 
      * @param selected
      */
-    protected void setSelectedElement(T selected) {
+    public void setSelected(T... selected) {
         Collection<T> selection = getSelectionProvider().getValue();
         selection.clear();
-        if (selected != null)
-            selection.add(selected);
+        for (int i = 0; i < selected.length; i++) {
+            selection.add(selected[i]);
+        }
+    }
+
+    public void selectFirstElement() {
+        if (getSelectionProvider() == null || collection == null || collection.isEmpty()) {
+            LOG.warn("couldn't select first element - no data or selection-provider available yet!");
+            return;
+        }
+        setSelected(collection.iterator().next());
     }
 
     /**
@@ -424,7 +427,7 @@ public class BeanCollector<COLLECTIONTYPE extends Collection<T>, T> extends Bean
                     final COLLECTIONTYPE values = collection;
                     values.add(newBean);
                     refresh();
-                    setSelectedElement(newBean);
+                    setSelected(newBean);
                 }
 
                 return newBean;
@@ -465,7 +468,7 @@ public class BeanCollector<COLLECTIONTYPE extends Collection<T>, T> extends Bean
                     deleteItem(element);
                     values.remove(element);
                 }
-                setSelectedElement(null);
+                setSelected(null);
                 return null;
             }
 
@@ -586,12 +589,28 @@ public class BeanCollector<COLLECTIONTYPE extends Collection<T>, T> extends Bean
         this.columnDefinitions = columnDefinitions;
     }
 
+
+    private IPresentableColumn getColumn(int i) {
+        //try the fastest - all indexes as default
+        String name = getAttributeNames()[i];
+        IPresentableColumn column = getAttribute(name).getColumnDefinition();
+        if (column.getIndex() == i)
+            return column;
+        Collection<IPresentableColumn> colDefs = getColumnDefinitions();
+        for (IPresentableColumn c : colDefs) {
+            if (c.getIndex() == i)
+                return c;
+        }
+        return null;
+    }
+
     /**
      * {@inheritDoc}
      */
     @Override
     public String getColumnText(Object element, int columnIndex) {
-        IAttributeDefinition attribute = getAttribute(getAttributeNames()[columnIndex]);
+        IPresentableColumn column = getColumn(columnIndex);
+        IAttributeDefinition attribute = getAttribute(column.getName());
         if (element == null)
             return "";
         Object value;
@@ -605,7 +624,16 @@ public class BeanCollector<COLLECTIONTYPE extends Collection<T>, T> extends Bean
         }
         if (value == null)
             return "";
-        return attribute.getFormat() != null ? attribute.getFormat().format(value) : value.toString();
+        if (attribute.getFormat() != null) {
+            try {
+                return attribute.getFormat().format(value);
+            } catch (Exception e) {
+                // showing the existing values should not throw exceptions...
+                LOG.error(e);
+                return e.toString(); //"!" + value.toString() + "!";
+            }
+        }
+        return value.toString();
     }
 
     @Override
@@ -635,17 +663,23 @@ public class BeanCollector<COLLECTIONTYPE extends Collection<T>, T> extends Bean
 
     @Override
     public void sort() {
-        Integer[] sortIndexes = getSortIndexes();
-        for (int i = sortIndexes.length - 1; i > 0; i--) {
-            Comparator<T> comparator = new Comparator<T>() {
-                @Override
-                public int compare(T o1, T o2) {
-
-                    return 0;
+        final Integer[] sortIndexes = getSortIndexes();
+        Comparator<T> comparator = new Comparator<T>() {
+            @Override
+            public int compare(T o1, T o2) {
+                int c;
+                for (int i = 0; i < sortIndexes.length; i++) {
+                    c = getColumnText(o1, i).compareTo(getColumnText(o2, i));
+                    if (c != 0) {
+                        //TODO: check performance!
+                        c = getColumn(i).isSortUpDirection() ? c : -1 * c;
+                        return c;
+                    }
                 }
-            };
-            collection = (COLLECTIONTYPE) CollectionUtil.getSortedList(collection, comparator, getName(), false);
-        }
+                return 0;
+            }
+        };
+        collection = (COLLECTIONTYPE) CollectionUtil.getSortedList(collection, comparator, getName(), false);
     }
 
     /**
@@ -807,8 +841,30 @@ public class BeanCollector<COLLECTIONTYPE extends Collection<T>, T> extends Bean
         return asString;
     }
 
+    /**
+     * Extension for {@link Serializable}
+     */
+    private void readObject(java.io.ObjectInputStream in) throws IOException, ClassNotFoundException {
+        in.defaultReadObject();
+        initDeserialization();
+    }
+
+    /**
+     * Extension for {@link Serializable}
+     */
+    private void writeObject(java.io.ObjectOutputStream out) throws IOException {
+        initSerialization();
+        out.defaultWriteObject();
+    }
+
+    @Persist
+    protected void initSerialization() {
+        super.initSerialization();
+    }
+
     @Commit
-    private void initDeserializing() {
+    protected void initDeserializing() {
+        init(collection, beanFinder, workingMode);
         if (columnDefinitions != null) {
             for (IPresentableColumn c : columnDefinitions) {
                 ((ValueColumn) c).attributeDefinition = getAttribute(c.getName());
@@ -828,5 +884,9 @@ public class BeanCollector<COLLECTIONTYPE extends Collection<T>, T> extends Bean
             actions.add(c.getSortingAction(this));
         }
         return actions;
+    }
+
+    public void addColumnDefinition(String attributeName, int index, int sortIndex, boolean sortUpDirection, int width) {
+        getAttribute(attributeName).setColumnDefinition(index, sortIndex, sortUpDirection, width);
     }
 }

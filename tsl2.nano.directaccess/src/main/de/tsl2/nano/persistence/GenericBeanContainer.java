@@ -109,7 +109,7 @@ public abstract class GenericBeanContainer extends BeanContainerUtil {
         IAction permissionAction = new CommonAction() {
             @Override
             public Object action() {
-                return true;//BeanContainer.hasPermission(beanType, packedInList, (String) parameter[0]);
+                return hasPermission((String) parameter[0]);
             }
         };
         IAction persistableAction = new CommonAction() {
@@ -137,6 +137,10 @@ public abstract class GenericBeanContainer extends BeanContainerUtil {
             permissionAction,
             persistableAction,
             executeAction);
+    }
+
+    protected static Object hasPermission(String string) {
+        return true;
     }
 
     protected abstract IGenericService getService();

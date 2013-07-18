@@ -62,9 +62,9 @@ public class BeanDefinition<T> extends BeanClass<T> implements Serializable {
     private static final Log LOG = LogFactory.getLog(BeanDefinition.class);
     /** optional filter to constrain the available attributes - in the given order */
     protected transient String[] attributeFilter;
-    /** cached attribute values */
+    /** cached attribute values (directly a {@link LinkedHashMap} on type to get this map instance on deserialization */
     @ElementMap(entry = "attribute", key = "name", attribute = true, inline = true, valueType = AttributeDefinition.class, required = false)
-    protected Map<String, IAttributeDefinition<?>> attributeDefinitions;
+    protected LinkedHashMap<String, IAttributeDefinition<?>> attributeDefinitions;
     /** flag to define, that all attributes are evaluated and cached - for performance aspects */
     transient boolean allDefinitionsCached = false;
     /** naturalSortedAttributeNames used for performance in {@link #hasAttribute(String)} */
@@ -177,12 +177,12 @@ public class BeanDefinition<T> extends BeanClass<T> implements Serializable {
          * filter the result using a default filter by the presentation helper
          */
         if (Environment.get("bean.use.beanpresentationhelper.filter", true)) {
-        return CollectionUtil.getFiltering(attributes, new IPredicate<BeanAttribute>() {
-            @Override
-            public boolean eval(BeanAttribute arg0) {
-                return getPresentationHelper().isDefaultAttribute(arg0);
-            }
-        });
+            return CollectionUtil.getFiltering(attributes, new IPredicate<BeanAttribute>() {
+                @Override
+                public boolean eval(BeanAttribute arg0) {
+                    return getPresentationHelper().isDefaultAttribute(arg0);
+                }
+            });
         } else {
             return attributes;
         }
@@ -591,14 +591,15 @@ public class BeanDefinition<T> extends BeanClass<T> implements Serializable {
     }
 
     @Persist
-    private void initSerialization() {
-        //remove not-serializable actions
+    protected void initSerialization() {
+        //remove not-serializable or cycling actions
         if (actions != null && !Environment.get("strict.mode", false)) {
             for (Iterator<IAction> actionIt = actions.iterator(); actionIt.hasNext();) {
                 IAction a = (IAction) actionIt.next();
                 //on inline implementations check the parent class
-                if (a.getClass().getEnclosingClass() != null && !Serializable.class.isAssignableFrom(a.getClass()
-                    .getEnclosingClass())) {
+                if (a.getClass().getEnclosingClass() == BeanDefinition.this.getClass() || (a.getClass()
+                    .getEnclosingClass() != null && !Serializable.class.isAssignableFrom(a.getClass()
+                    .getEnclosingClass()))) {
                     LOG.warn("removing action " + a.getId() + " to do serialization");
                     actionIt.remove();
                 }
@@ -613,6 +614,10 @@ public class BeanDefinition<T> extends BeanClass<T> implements Serializable {
      */
     private void readObject(java.io.ObjectInputStream in) throws IOException, ClassNotFoundException {
         in.defaultReadObject();
+        initDeserialization();
+    }
+
+    protected void initDeserialization() {
         if (attributeDefinitions != null) {
             attributeFilter = attributeDefinitions.keySet().toArray(new String[0]);
             createNaturalSortedAttributeNames(attributeFilter);

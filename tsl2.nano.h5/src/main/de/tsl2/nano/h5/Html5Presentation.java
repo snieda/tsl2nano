@@ -78,6 +78,7 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Map;
 
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
@@ -90,8 +91,9 @@ import de.tsl2.nano.Environment;
 import de.tsl2.nano.Messages;
 import de.tsl2.nano.action.IAction;
 import de.tsl2.nano.collection.CollectionUtil;
+import de.tsl2.nano.collection.MapUtil;
 import de.tsl2.nano.exception.ForwardedException;
-import de.tsl2.nano.format.RegularExpressionFormat;
+import de.tsl2.nano.format.RegExpFormat;
 import de.tsl2.nano.log.LogFactory;
 import de.tsl2.nano.util.FileUtil;
 import de.tsl2.nano.util.NumberUtil;
@@ -108,6 +110,8 @@ import de.tsl2.nano.util.bean.def.IColumn;
 import de.tsl2.nano.util.bean.def.IPageBuilder;
 import de.tsl2.nano.util.bean.def.IPresentable;
 import de.tsl2.nano.util.bean.def.IPresentableColumn;
+import de.tsl2.nano.util.bean.def.SecureAction;
+import de.tsl2.nano.util.bean.def.ValueColumn;
 import de.tsl2.nano.util.bean.def.ValueExpressionFormat;
 
 /**
@@ -139,6 +143,36 @@ public class Html5Presentation<T> extends BeanPresentationHelper<T> implements I
         super(bean);
     }
 
+    @Override
+    public Collection<IAction> getPresentationActions() {
+        super.getPresentationActions();
+        
+        presActions.add(new SecureAction(bean.getClazz(),
+            "configure",
+            IAction.MODE_UNDEFINED,
+            false,
+            "icons/compose.png") {
+            @Override
+            public Object action() throws Exception {
+//                File configFileName = BeanDefinition.getDefinitionFile(bean.getName());
+//                String configFile = FileUtil.getFile(configFileName.getPath());
+//                return configFile != null ? configFile : "No configuration found (" + configFileName + ")";
+                Bean<?> configBean = Bean.getBean(BeanDefinition.getBeanDefinition(bean.getName()));
+                String[] writableAttributes = configBean.getAttributeNames(true);
+                configBean.setAttributeFilter(writableAttributes);
+//                ConfigBeanContainer
+//                BeanClass beanClass = new BeanClass(bean.getClazz());
+//                configBean.getAttribute("attributes").setRange(beanClass.getAttributes(false));
+                return configBean;
+            }
+
+            @Override
+            public boolean isEnabled() {
+                return true;
+            }
+        });
+        return presActions;
+    }
     /**
      * {@inheritDoc}
      */
@@ -231,13 +265,18 @@ public class Html5Presentation<T> extends BeanPresentationHelper<T> implements I
      */
     Element createCollector(Element parent, BeanCollector<Collection<T>, T> bean, boolean interactive) {
         /*
+         * workaround to enable buttons
+         */
+        bean.selectFirstElement();
+        
+        /*
          * create the column header
          */
-        String[] cnames = getColumnNames(bean.getColumnDefinitions());
-        /*
-         * show a search filter or/and fill the data
-         */
-        Element grid = createGrid(parent, "Table", false, cnames);
+        Element grid;
+        if (interactive)
+            grid = createGrid(parent, bean.toString(), false, bean);
+        else
+            grid = createGrid(parent, bean.toString(), false, getColumnNames(bean.getColumnDefinitions()));
         appendAttributes(grid, bean.getPresentable());
 
         bean.addMode(MODE_MULTISELECTION);
@@ -275,6 +314,13 @@ public class Html5Presentation<T> extends BeanPresentationHelper<T> implements I
         HtmlUtil.appendAttributes(grid/*, ATTR_NAME, p.getLabel(), p.getDescription(), p.getType(), p.getStyle(), p.getEnabler(), p.getWidth(), p.getHeight()*/
             , ATTR_BGCOLOR, convert(ATTR_BGCOLOR, p.getBackground())
             , ATTR_COLOR, convert(ATTR_COLOR, p.getForeground())/*, p.getIcon()*/);
+        
+        if (p.getLayout() instanceof Map) {
+            HtmlUtil.appendAttributes(grid, MapUtil.asArray((Map<String, String>) p.getLayout()));
+        }
+        if (p.getLayoutConstraints() instanceof Map) {
+            HtmlUtil.appendAttributes(grid, MapUtil.asArray((Map<String, String>) p.getLayoutConstraints()));
+        }
     }
 
     /**
@@ -311,6 +357,7 @@ public class Html5Presentation<T> extends BeanPresentationHelper<T> implements I
                     .getValue()
                     .contains(item)
                     : false;
+                //TODO: create addRow with full row informations to set colors etc.
                 addRow(grid, tableDescriptor.hasMode(MODE_MULTISELECTION) && interactive, isSelected, cells);
             }
         }
@@ -348,11 +395,11 @@ public class Html5Presentation<T> extends BeanPresentationHelper<T> implements I
     private Element createAction(Element cell, IAction a) {
         return createAction(cell,
             a.getId(),
-            a.getShortDescription(),
+            Environment.translate(a.getShortDescription(), true),
             null,
             a.getImagePath(),
-            a.isDefault(),
             a.isEnabled(),
+            a.isDefault(),
             a.getActionMode() != IAction.MODE_DLG_OK);
     }
 
@@ -413,12 +460,9 @@ public class Html5Presentation<T> extends BeanPresentationHelper<T> implements I
             type,
             ATTR_ACCESSKEY,
             shortCut,
-            "diabled",
-            enabled ? ATTR_DISABLED : VAL_FALSE,
-            ATTR_AUTOFOCUS,
+            enable(ATTR_DISABLED, !enabled),
             enable(ATTR_AUTOFOCUS, asDefault),
-            ATTR_FORMNOVALIDATE,
-            formnovalidate ? ATTR_FORMNOVALIDATE : VAL_FALSE);
+            enable(ATTR_FORMNOVALIDATE, formnovalidate));
         if (image != null) {
             appendElement(action, TAG_IMAGE, ATTR_SRC, image, ATTR_ALT, label);
         }
@@ -457,6 +501,7 @@ public class Html5Presentation<T> extends BeanPresentationHelper<T> implements I
             ATTR_BGCOLOR,
             COLOR_LIGHT_BLUE,
             "sortable");
+        appendElement(table, "caption", content(title));
         Element colgroup = appendElement(table, TAG_ROW);
         for (int i = 0; i < columns.length; i++) {
             appendElement(colgroup, TAG_HEADERCELL, content(columns[i]));
@@ -464,7 +509,7 @@ public class Html5Presentation<T> extends BeanPresentationHelper<T> implements I
         return appendElement(table, TAG_TBODY);
     }
 
-    Element createGrid(Element parent, String title, boolean border, IPresentableColumn... columns) {
+    Element createGrid(Element parent, String title, boolean border, BeanCollector<?, ?> collector) {
         Element table = appendElement(parent,
             TAG_TABLE,
             ATTR_BORDER,
@@ -476,11 +521,13 @@ public class Html5Presentation<T> extends BeanPresentationHelper<T> implements I
             ATTR_BGCOLOR,
             COLOR_LIGHT_BLUE,
             "sortable");
+        appendElement(table, "caption", content(title));
         Element colgroup = appendElement(table, TAG_ROW);
-        for (int i = 0; i < columns.length; i++) {
-            IPresentableColumn c = columns[i];
-            Element th = appendElement(colgroup, TAG_HEADERCELL);
-            createAction(th, c.getName(), c.getDescription(), null);
+        Collection<IPresentableColumn> columns = collector.getColumnDefinitions();
+        for (IPresentableColumn c : columns) {
+            Element th = appendElement(colgroup, TAG_HEADERCELL, "style", "-webkit-transform: scale(1.4);");
+            th = appendElement(th, "bold");
+            createAction(th, c.getSortingAction(collector));
         }
         return appendElement(table, TAG_TBODY);
     }
@@ -576,8 +623,7 @@ public class Html5Presentation<T> extends BeanPresentationHelper<T> implements I
         Element cell = appendElement(row, TAG_CELL);
         Element input;
         if (beanValue.getAllowedValues() == null) {
-            //TODO: create 'appendInput(...)
-            RegularExpressionFormat regexpFormat = beanValue.getFormat() instanceof RegularExpressionFormat ? (RegularExpressionFormat) beanValue.getFormat()
+            RegExpFormat regexpFormat = beanValue.getFormat() instanceof RegExpFormat ? (RegExpFormat) beanValue.getFormat()
                 : null;
             input = appendElement(cell,
                 TAG_INPUT,
@@ -608,6 +654,9 @@ public class Html5Presentation<T> extends BeanPresentationHelper<T> implements I
                 enable(ATTR_HIDDEN, !beanValue.getPresentation().isVisible()),
                 enable(ATTR_READONLY, !beanValue.getPresentation().getEnabler().isActive()),
                 enable(ATTR_REQUIRED, !beanValue.nullable()));
+            
+            appendAttributes(input, beanValue.getPresentation());
+            
             //create a finder button
             if (beanValue.getPresentation().getEnabler().isActive()) {
                 if (BeanContainer.isInitialized() && (BeanContainer.instance().isPersistable(beanValue.getType()) || beanValue.isMultiValue())) {
@@ -618,11 +667,12 @@ public class Html5Presentation<T> extends BeanPresentationHelper<T> implements I
                         null,
                         beanValue.hasWriteAccess(),
                         false,
-                        false);
+                        true);
                 }
             }
         } else {
             input = createSelectorField(cell, beanValue);
+            appendAttributes(input, beanValue.getPresentation());
         }
         if (beanValue.hasStatusError()) {
             row = appendElement(panel, TAG_ROW, ATTR_SPAN, "2");
@@ -645,7 +695,7 @@ public class Html5Presentation<T> extends BeanPresentationHelper<T> implements I
             ATTR_NAME,
             beanValue.getName(),
             ATTR_PATTERN,
-            (beanValue.getFormat() instanceof RegularExpressionFormat ? ((RegularExpressionFormat) beanValue.getFormat()).getPattern()
+            (beanValue.getFormat() instanceof RegExpFormat ? ((RegExpFormat) beanValue.getFormat()).getPattern()
                 : null),
             "tabindex",
             beanValue.getPresentation().layout("tabindex", ++currentTabIndex).toString(),

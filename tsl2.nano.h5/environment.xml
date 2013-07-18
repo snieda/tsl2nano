@@ -1,31 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <environment>
-   <property name="de.tsl2.nano.config.path">
-      <object class="java.lang.String">C:\idv\wjax\distribution\tsl-nano\tsl2.nano.h5\config/</object>
-   </property>
-   <property name="value.use.instancetype">
-      <object class="java.lang.Boolean">true</object>
-   </property>
-   <property name="beandef.usepersistent.cache">
-      <object class="java.lang.Boolean">true</object>
-   </property>
-   <property name="bean.use.beanpresentationhelper.filter">
-      <object class="java.lang.Boolean">true</object>
-   </property>
-   <property name="bean.best.attribute.maxlength">
-      <object class="java.lang.Integer">30</object>
-   </property>
-   <property name="collector.use.multiple.filter">
-      <object class="java.lang.Boolean">true</object>
-   </property>
-   <property name="bean.best.attribute.minlength">
-      <object class="java.lang.Integer">3</object>
-   </property>
-   <property name="field.min.multiline.length">
-      <object class="java.lang.Integer">100</object>
-   </property>
-   <property name="bean.best.attribute.type">
-      <object class="java.lang.Class">java.lang.String</object>
+   <property name="html5.http.method">
+      <object class="java.lang.String">post</object>
    </property>
    <property name="default.text.length">
       <object class="java.lang.Integer">100</object>
@@ -33,19 +9,49 @@
    <property name="default.attribute.id">
       <object class="java.lang.Boolean">true</object>
    </property>
-   <property name="use.applicationserver">
-      <object class="java.lang.Boolean">false</object>
+   <property name="beandef.usepersistent.cache">
+      <object class="java.lang.Boolean">true</object>
    </property>
-   <property name="html5.http.method">
-      <object class="java.lang.String">post</object>
+   <property name="collector.use.multiple.filter">
+      <object class="java.lang.Boolean">true</object>
    </property>
    <property name="bean.best.attribute.regexp">
       <object class="java.lang.String">.*(name|bezeichnung).*</object>
    </property>
-   <property name="default.attribute.multivalue">
+   <property name="use.applicationserver">
+      <object class="java.lang.Boolean">false</object>
+   </property>
+   <property name="field.min.multiline.length">
+      <object class="java.lang.Integer">100</object>
+   </property>
+   <property name="value.currency.length.precision">
+      <object class="java.lang.String">11,2</object>
+   </property>
+   <property name="bean.best.attribute.minlength">
+      <object class="java.lang.Integer">3</object>
+   </property>
+   <property name="bean.use.beanpresentationhelper.filter">
       <object class="java.lang.Boolean">true</object>
+   </property>
+   <property name="field.selector.text">
+      <object class="java.lang.String">...</object>
+   </property>
+   <property name="de.tsl2.nano.config.path">
+      <object class="java.lang.String">C:\idv\wjax\distribution\tsl-nano\tsl2.nano.h5\config/</object>
    </property>
    <property name="service.maxresult">
       <object class="java.lang.Integer">100</object>
+   </property>
+   <property name="value.use.instancetype">
+      <object class="java.lang.Boolean">true</object>
+   </property>
+   <property name="default.attribute.multivalue">
+      <object class="java.lang.Boolean">true</object>
+   </property>
+   <property name="bean.best.attribute.maxlength">
+      <object class="java.lang.Integer">30</object>
+   </property>
+   <property name="bean.best.attribute.type">
+      <object class="java.lang.Class">java.lang.String</object>
    </property>
 </environment>

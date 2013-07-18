@@ -138,7 +138,13 @@ public class BeanValue<T> extends AttributeDefinition<T> implements IValueDefini
      */
     public String getValueText() {
         T v = getValue();
-        return v != null ? getFormat().format(v) : "";
+        try {
+            return v != null ? getFormat().format(v) : "";
+        } catch (Exception e) {
+            LOG.warn(e);
+            status = isValid(v);
+            return v.toString();
+        }
     }
 
     /**

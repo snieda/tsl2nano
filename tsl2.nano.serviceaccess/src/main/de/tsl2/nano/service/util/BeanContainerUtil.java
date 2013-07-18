@@ -10,7 +10,10 @@
 package de.tsl2.nano.service.util;
 
 import java.lang.annotation.Annotation;
+import java.sql.Time;
+import java.sql.Timestamp;
 import java.util.Collection;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -18,6 +21,8 @@ import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.Id;
 import javax.persistence.JoinColumn;
+import javax.persistence.Temporal;
+import javax.persistence.TemporalType;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -209,6 +214,7 @@ public class BeanContainerUtil {
 //            final/*OneToMany*/Annotation oneToMany = BeanAttribute.getBeanAttribute(clazz, (String) attribute)
 //                .getAnnotation(OneToMany.class);
             final/*Id*/Annotation id = BeanAttribute.getBeanAttribute(clazz, attribute).getAnnotation(Id.class);
+            final/*Temporal*/Annotation temporal = BeanAttribute.getBeanAttribute(clazz, attribute).getAnnotation(Temporal.class);
             if (column == null) {
                 if (joinColumn != null) {
                     def = new IAttributeDef() {
@@ -242,6 +248,11 @@ public class BeanContainerUtil {
                         public boolean id() {
                             return id != null;
                         }
+                        
+                        @Override
+                        public Class<? extends Date> temporalType() {
+                            return null;
+                        }
                     };
                     attrDefCache.put(attrKey(clazz, attribute), def);
                     return def;
@@ -256,6 +267,7 @@ public class BeanContainerUtil {
                 Integer precision;
                 Integer length;
                 Boolean nullable;
+                Class<? extends Date> temporalType;
 
                 @Override
                 public int scale() {
@@ -293,6 +305,17 @@ public class BeanContainerUtil {
                 public boolean id() {
                     return id != null;
                 }
+                
+                @Override
+                public java.lang.Class<? extends java.util.Date> temporalType() {
+                    if (temporalType == null && temporal != null) {
+                        BeanClass temporalBC = new BeanClass(temporal.getClass());
+                        TemporalType t =  (TemporalType) temporalBC.callMethod(temporal, "value");
+                        temporalType = (Class<? extends Date>) (t.equals(TemporalType.DATE) ? Date.class
+                            : t.equals(TemporalType.TIME) ? Time.class : Timestamp.class);
+                    }
+                    return temporalType;
+                };
             };
             attrDefCache.put(attrKey(clazz, attribute), def);
             return def;

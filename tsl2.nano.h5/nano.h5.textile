@@ -5,14 +5,22 @@
 
 h2. Introduction
 
-generic html5 gui implementation, bound to swartfix-common bean-package. 
-goals: 
+generic html5 gui implementation, bound to swartfix-common bean-package.
+
+*Goals:* 
 * pure model implementation + plattform independency (works on android, too).
+* everything has a default - all defaults are configurable
 * full configurable (including standard bean behaviour and all entity behaviours)
 * implementation through simple java beans + optional bean presenters
 * navigates through given beans showing bean-lists and bean-detail dialogs.
 * prefills formatting, validation and presentation of relations
-* pure html-5
+* pure html-5 (no javascript)
+* data replication to work offline (not finished yet!)
+* interfaces: 
+** ddl-->beans through hibernate-tools
+** jpa-->bean through annotation evaluation
+** xsd-->bean (not finished yet!)
+** java-interface-->java-bean (mock through internal proxy, not finished yet!)
 
 Using the NanoHTTPD Server as base, this client application creates html surfaces, sending them through the integrated server to a html browser. Entry point is the file _application.html_ defining the browser request _http://localhost:8067_.
 
@@ -66,45 +74,46 @@ h2. TODOs
 ** (v) select all
 ** (v) deselect all
 * (v) Use Environment
+* (v) *Extend BeanContainer:*
+** (-) new action: 'getValueBetween()'
+** (v) extend all finders with start index (see maxresult) to have a result range
+** (v) beancollector with next() and previous() data (using 'start' index and 'maxresult')
 * (x) Application Menu: reset (--> caches, environment, navigation), restart, login, logout
-* refactore ScriptUtil: extract Ant calls
+* (x) default attribute names without @id field
+* (x) Nesting Beans
+* (x) Bean with Layout
 * Right-Alignments for Numbers
 * Problem on NanoHttp canceling button panel (sometimes)
 * Check for single selection
 * Check navigation (check input on button action like 'open' without selecting an item.
 * Styling (Collector, Details)
 * Show Progress-Page (using Statistics)
-* Html-Table:
-** Sorting-Header
-** Previous, Next
+* *Html-Table:*
+** (x) Sorting-Header
+** (v) Previous, Next
 ** Style
 ** up, down (for sorting values)
-* Flag: show one-to-many in table
 * If search result is only one element, select it
 * Searches on big data:
 ** first count data
-** checkbox to show only single values (or only ve-field of beans)
+** (x) checkbox to show one-to-many in table
 ** use thread to be interupted
-* (x) default attribute names without @id field
-* BeanPresenterHelper: test OptionsWrapper
-* (x) Nesting Beans
-* (x) Bean with Layout
 * internal export and view (replacing ant-like variables and showing the document)
 * generate const class from property file
-* extract api
 * create xsd in through CommonTest with trang.jar
 * add configuration action (html-tool to edit xml files)
-* extend BeanContainer:
-** new action: 'getValueBetween()'
-** extend all finders with start index (see maxresult) to have a result range
-* beancollector with next() and previous() data (using 'start' index and 'maxresult')
-* eval validation annotations
 * ConfigBeanContainer to configure BeanDefinition for special beans
+* *Nice-To-Have*
+** eval validation annotations
+** BeanPresenterHelper: test OptionsWrapper
 * *Refactoring:*
+** (v) RegularExpressionFormat ==> RegExpFormat
+** refactore ScriptUtil: extract Ant calls
 ** util.bean ==> bean
 ** nano.h5 ==> fullrelation
-** extract bean as project
+** extract bean-package as project
 ** file-access: use Environment.getResource() reading through jar or file system
+** extract api
 * *Interfaces:*
 ** java-interface-jar filled with BeanProxy to be used as mocks
 ** reading xsd through dom - creating beandefinitions (as xml)

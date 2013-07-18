@@ -9,7 +9,15 @@
  */
 package de.tsl2.nano.format;
 
+import static de.tsl2.nano.format.FormatUtil.getCurrencyFormat;
+import static de.tsl2.nano.format.FormatUtil.getCurrencyFormatNoFraction;
+import static de.tsl2.nano.format.FormatUtil.getCurrencyFormatNoSymbol;
+
+import java.io.IOException;
+import java.io.Serializable;
 import java.math.BigDecimal;
+import java.sql.Time;
+import java.sql.Timestamp;
 import java.text.DateFormat;
 import java.text.DecimalFormat;
 import java.text.DecimalFormatSymbols;
@@ -19,7 +27,6 @@ import java.text.NumberFormat;
 import java.text.ParseException;
 import java.text.ParsePosition;
 import java.util.Collection;
-import java.util.Currency;
 import java.util.Date;
 import java.util.Hashtable;
 import java.util.Locale;
@@ -30,9 +37,13 @@ import java.util.regex.Pattern;
 import org.apache.commons.collections.map.ReferenceMap;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.simpleframework.xml.Attribute;
+import org.simpleframework.xml.Element;
+import org.simpleframework.xml.ElementMap;
+import org.simpleframework.xml.core.Commit;
+import org.simpleframework.xml.core.Persist;
 
 import de.tsl2.nano.collection.MapUtil;
-import de.tsl2.nano.currency.CurrencyUtil;
 import de.tsl2.nano.exception.FormattedException;
 import de.tsl2.nano.util.DateUtil;
 import de.tsl2.nano.util.StringUtil;
@@ -48,7 +59,7 @@ import de.tsl2.nano.util.operation.IConverter;
  * if you only want to format or parse standard numbers or dates, then use the standard formatters like NumberFormat and
  * DateFormat.
  * 
- * This formatter is intended to be used to constrain or verify user input trough a input mask.
+ * This formatter is intended to be used to constrain or verify user input trough an input mask.
  * 
  * four standard expressions are available:
  * <ul>
@@ -61,18 +72,26 @@ import de.tsl2.nano.util.operation.IConverter;
  * @author ts 18.09.2008
  * @version $Revision: 1.0 $
  */
-public class RegExpFormat extends Format {
+@SuppressWarnings({"unchecked", "rawtypes"})
+public class RegExpFormat extends Format implements INumberFormatCheck {
     private static final long serialVersionUID = 1L;
     private static final Log LOG = LogFactory.getLog(RegExpFormat.class);
+    @Element(data=true)
     private String pattern;
+    @Attribute
     private int regExpFlags;
+    @Attribute
     private int maxCharacterCount = -1;
     private transient Pattern compiledPattern;
     /** needed to format objects */
-    protected transient Format defaultFormatter = null;
+    @Element(name="parser", required=false)
+    protected GenericParser<?> parser = null;
+    
     /** default: the full regexp must be matched on format or parse! */
+    @Attribute
     boolean fullMatch = true;
     /** on default, this class is not able to parse a string to an object */
+    @Attribute
     boolean isAbleToParse = false;
 
     public static final char DECIMAL_SEPARATOR = new DecimalFormatSymbols(Locale.getDefault()).getDecimalSeparator();
@@ -103,6 +122,8 @@ public class RegExpFormat extends Format {
     // TODO how to get the date format from locale? 
     public static final String FORMAT_DATE_SQL = "[1-2]\\d\\d\\d\\-[0-1]\\d\\-[0-3]\\d";
     public static final String FORMAT_DATE_DE = "[0-3]\\d\\.[0-1]\\d\\.[1-2]\\d\\d\\d";
+    public static final String FORMAT_TIME_DE = "[0-2]\\d\\:[0-5]\\d\\:[0-5]\\d";
+    public static final String FORMAT_DATETIME_DE = FORMAT_DATE_DE + " " + FORMAT_TIME_DE;
     public static final String FORMAT_NAME_ALPHA_DE = "[a-zA-Z‰ˆ¸ƒ÷‹ﬂ]+";
     public static final String FORMAT_NAME_ALPHA_EXT_DE = FORMAT_NAME_ALPHA_DE + PATTERN_SINGLE_BYTE_SPACE;
     public static final String FORMAT_NAME_ALPHA = "[a-zA-Z]*";
@@ -110,6 +131,7 @@ public class RegExpFormat extends Format {
     public static final String FORMAT_NUMBER = "[0-9]*";
 
     private static final Map<String, String> systemInitMap = new Hashtable<String, String>();
+    @ElementMap(attribute=true, inline=true, required=false, name="initmask", key="pattern")
     Map<String, String> initMap = null;
     static {
         try {
@@ -209,7 +231,7 @@ public class RegExpFormat extends Format {
      * @see Pattern Pattern for Flags description
      */
     public RegExpFormat(String pattern, String init, int maxCharacterCount, int regExpFlags) {
-        this(pattern, init, maxCharacterCount, regExpFlags, null);
+        this(pattern, init, maxCharacterCount, regExpFlags, (Format)null);
     }
 
     /**
@@ -237,8 +259,8 @@ public class RegExpFormat extends Format {
         this.regExpFlags = regExpFlags;
         if (parser != null && !(parser instanceof RegExpFormat)) {
             isAbleToParse = true;
+            this.parser = new GenericParser(parser);
         }
-        this.defaultFormatter = parser;
     }
 
     /**
@@ -303,10 +325,10 @@ public class RegExpFormat extends Format {
         if (obj instanceof String) {
             o = (String) obj;
         } else {
-            if (defaultFormatter == null) {
+            if (parser == null) {
                 setDefaultFormatter(obj);
             }
-            o = defaultFormatter.format(obj);
+            o = parser.format(obj);
         }
         if (compiledPattern == null) {
             compiledPattern = Pattern.compile(pattern, regExpFlags);
@@ -351,7 +373,7 @@ public class RegExpFormat extends Format {
         Object obj = null;
         if (matches) {
             try {
-                obj = defaultFormatter != null && isAbleToParse(defaultFormatter) ? defaultFormatter.parseObject(source + getParsingSuffix(defaultFormatter,
+                obj = parser != null && isAbleToParse(parser) ? parser.parseObject(source + getParsingSuffix(parser,
                     source))
                     : matcher.group();
             } catch (final ParseException e) {
@@ -367,7 +389,7 @@ public class RegExpFormat extends Format {
                 + ", fullmatch: "
                 + fullMatch
                 + ", defaultFormatter: "
-                + defaultFormatter
+                + parser
                 + ")");
         }
         return matches ? obj : null;
@@ -545,6 +567,35 @@ public class RegExpFormat extends Format {
     }
 
     /**
+     * getCurrencyPostfix
+     * 
+     * @return regexp for currency postfix
+     */
+    protected static final String getCurrencyPostfix() {
+        return getCurrencyPostfix(NumberFormat.getCurrencyInstance().getCurrency().getSymbol());
+    }
+
+    /**
+     * getCurrencyPostfix
+     * 
+     * @param locale currency locale
+     * @return regexp for currency postfix
+     */
+    protected static final String getCurrencyPostfix(Locale locale) {
+        return getCurrencyPostfix(NumberFormat.getCurrencyInstance(locale).getCurrency().getSymbol());
+    }
+
+    /**
+     * getCurrencyPostfix
+     * 
+     * @param symbol currency symbol
+     * @return regexp for currency postfix
+     */
+    protected static final String getCurrencyPostfix(String symbol) {
+        return "( " + symbol + "){0,1}";
+    }
+    
+    /**
      * creates a regular expresssion for the given type of number
      * 
      * @param numberType type of number (having scale and precision)
@@ -574,9 +625,9 @@ public class RegExpFormat extends Format {
      * @param type type of number (Integer, Double, BigDecimal, primitives..)
      * @return new formatter for the given number
      */
-    public static RegExpFormat createNumberRegExp(int dec, int fract, Class type) {
-        return new RegExpFormat(number(dec, fract), null, dec + fract + 1, 0, getDefaultNumberFormat(fract,
-            type));
+    public static RegExpFormat createNumberRegExp(int dec, int fract, Class<?> type) {
+        return new RegExpFormat(number(dec, fract), null, dec + fract + 1, 0, new GenericParser(
+            type, null, null, fract));
     }
 
     /**
@@ -598,6 +649,28 @@ public class RegExpFormat extends Format {
     public static RegExpFormat createDateRegExp() {
         RegExpFormat regExp = new RegExpFormat(FORMAT_DATE_DE, DateFormat.getDateInstance()
             .format(getInitialDate()), 10, 0, FormatUtil.getDefaultFormat(Date.class, true));
+        return regExp;
+    }
+
+    /**
+     * createDateRegExp
+     * 
+     * @return regexp for a german time
+     */
+    public static RegExpFormat createTimeRegExp() {
+        RegExpFormat regExp = new RegExpFormat(FORMAT_DATE_DE, DateFormat.getTimeInstance()
+            .format(getInitialDate()), 8, 0, FormatUtil.getDefaultFormat(Time.class, true));
+        return regExp;
+    }
+
+    /**
+     * createDateRegExp
+     * 
+     * @return regexp for a german date-time
+     */
+    public static RegExpFormat createDateTimeRegExp() {
+        RegExpFormat regExp = new RegExpFormat(FORMAT_DATETIME_DE, DateFormat.getDateTimeInstance()
+            .format(getInitialDate()), 19, 0, FormatUtil.getDefaultFormat(Timestamp.class, true));
         return regExp;
     }
 
@@ -655,14 +728,14 @@ public class RegExpFormat extends Format {
      * @return
      */
     public Format getDefaultFormatter() {
-        return defaultFormatter;
+        return parser;
     }
 
     /**
      * @param obj object to format with a new default formatter
      */
     protected void setDefaultFormatter(Object obj) {
-        this.defaultFormatter = FormatUtil.getDefaultFormat(obj, false);
+        this.parser = new GenericParser(FormatUtil.getDefaultFormat(obj, false), obj.getClass());
     }
 
     /**
@@ -872,15 +945,15 @@ public class RegExpFormat extends Format {
     }
 
     /**
-     * on default this method returns true, if the underlying {@link #defaultFormatter} is a {@link NumberFormat}.
+     * on default this method returns true, if the underlying {@link #parser} is a {@link NumberFormat}.
      * <p/>
-     * override this method if you have a {@link #defaultFormatter} that is not of type {@link NumberFormat} but you
+     * override this method if you have a {@link #parser} that is not of type {@link NumberFormat} but you
      * want a field to displayed like a number (e.g. in a table-column as right-alignment).
      * 
      * @return true, if this format instance asserts to be a number format
      */
     public boolean isNumber() {
-        return defaultFormatter instanceof NumberFormat;
+        return parser.isNumber();
     }
 
     /**
@@ -891,105 +964,7 @@ public class RegExpFormat extends Format {
      * @return true, if format is - or contains - a number format
      */
     public static boolean isNumber(Format format) {
-        return (format instanceof NumberFormat) || (format instanceof RegExpFormat && ((RegExpFormat) format).isNumber());
-    }
-
-    /**
-     * getCurrencyPostfix
-     * 
-     * @return regexp for currency postfix
-     */
-    protected static final String getCurrencyPostfix() {
-        return getCurrencyPostfix(NumberFormat.getCurrencyInstance().getCurrency().getSymbol());
-    }
-
-    /**
-     * getCurrencyPostfix
-     * 
-     * @param locale currency locale
-     * @return regexp for currency postfix
-     */
-    protected static final String getCurrencyPostfix(Locale locale) {
-        return getCurrencyPostfix(NumberFormat.getCurrencyInstance(locale).getCurrency().getSymbol());
-    }
-
-    /**
-     * getCurrencyPostfix
-     * 
-     * @param symbol currency symbol
-     * @return regexp for currency postfix
-     */
-    protected static final String getCurrencyPostfix(String symbol) {
-        return "( " + symbol + "){0,1}";
-    }
-
-    /**
-     * create a default number format. if precision is 0 or type is null, null will be returned
-     * 
-     * @param precision fraction digits
-     * @return number format or null
-     */
-    protected static final Format getDefaultNumberFormat(int precision, Class type) {
-        //if the type is null, we don't know which object is a result of parsing!
-        if (precision < 0 || type == null) {
-            return null;
-        }
-        //this definition MUST match the definition of FormatUtil.getDefaultFormat(..)
-        final Format numberFormat = FormatUtil.getDefaultFormat(type, true);
-
-        if (numberFormat instanceof DecimalFormat) {
-            DecimalFormat df = (DecimalFormat) numberFormat;
-            df.setMinimumFractionDigits(0);
-            df.setMaximumFractionDigits(precision);
-//        df.setGroupingUsed(false);
-//        if (BigDecimal.class.isAssignableFrom(type))
-//            df.setParseBigDecimal(true);
-        }
-        return numberFormat;
-    }
-
-    /**
-     * currency with currency default precision (normally:2). object types must be {@link BigDecimal}!
-     * 
-     * @return standard currency regular expression for current locale
-     */
-    public static final Format getCurrencyFormat() {
-        Currency c = NumberFormat.getCurrencyInstance().getCurrency();
-        return getCurrencyFormat(c.getCurrencyCode(), c.getDefaultFractionDigits());
-    }
-
-    /**
-     * currency with precision 0. object types must be {@link BigDecimal}!
-     * 
-     * @return number format
-     */
-    public static final Format getCurrencyFormatNoFraction() {
-        return getCurrencyFormat(NumberFormat.getCurrencyInstance().getCurrency().getCurrencyCode(), 0);
-    }
-
-    public static final Format getCurrencyFormatNoSymbol() {
-        return getCurrencyFormat(null, 2);
-    }
-
-    /**
-     * creates a NumberFormat for BigDecimals with currency code and fractionDigits. to get an historic currency, see
-     * {@link CurrencyUtil}.
-     * 
-     * @param currencyCode currency code (see {@link Currency#getInstance(String)} and {@link http
-     *            ://de.wikipedia.org/wiki/ISO_4217}.
-     * @param fractionDigits number of fraction digits (precision)
-     * @return new numberformat instance
-     */
-    public static final Format getCurrencyFormat(String currencyCode, int fractionDigits) {
-        final DecimalFormat numberFormat = (DecimalFormat) (currencyCode != null ? NumberFormat.getCurrencyInstance()
-            : NumberFormat.getInstance());
-        if (currencyCode != null)
-            numberFormat.setCurrency(Currency.getInstance(currencyCode));
-        numberFormat.setMinimumFractionDigits(fractionDigits);
-        numberFormat.setMaximumFractionDigits(fractionDigits);
-        numberFormat.setGroupingUsed(true);
-        numberFormat.setParseBigDecimal(true);
-        return numberFormat;
+        return (format instanceof NumberFormat) || (format instanceof INumberFormatCheck && ((INumberFormatCheck) format).isNumber());
     }
 
     /**
@@ -1103,4 +1078,32 @@ public class RegExpFormat extends Format {
         format.setAbleToParse(true);
         return format;
     }
+
+    /**
+     * Extension for {@link Serializable}
+     */
+    private void writeObject(java.io.ObjectOutputStream out) throws IOException {
+        initSerialization();
+        out.defaultWriteObject();
+    }
+
+    @Persist
+    private void initSerialization() {
+        //remove copied entries of systeminitmap
+        MapUtil.removeAll(initMap, systemInitMap);
+    }
+    
+    private void readObject(java.io.ObjectInputStream in) throws IOException, ClassNotFoundException {
+        in.defaultReadObject();
+        initDeserialization();
+    }
+
+    @Commit
+    private void initDeserialization() {
+        if (initMap == null)
+            initMap = new Hashtable<String, String>();
+        initMap.putAll(systemInitMap);
+    }
+
+
 }

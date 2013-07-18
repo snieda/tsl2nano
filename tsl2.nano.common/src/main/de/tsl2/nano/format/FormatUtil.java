@@ -20,17 +20,18 @@ import java.text.Format;
 import java.text.NumberFormat;
 import java.text.ParseException;
 import java.text.ParsePosition;
+import java.util.Currency;
 import java.util.Date;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
+import de.tsl2.nano.currency.CurrencyUtil;
 import de.tsl2.nano.exception.FormattedException;
 import de.tsl2.nano.execution.CompatibilityLayer;
 import de.tsl2.nano.util.NumberUtil;
 import de.tsl2.nano.util.StringUtil;
 import de.tsl2.nano.util.bean.BeanClass;
-import de.tsl2.nano.util.bean.PrimitiveUtil;
 
 /**
  * evaluates a {@link Format} for a given type or instance. used by validators, to check input.
@@ -107,7 +108,7 @@ public class FormatUtil {
                              */
                             if (df.getNegativePrefix().equals(source))
                                 source = source + "0";
-                            
+
                             pos.setIndex(source.length());
                             BigDecimal bigDecimal;
                             try {
@@ -228,4 +229,79 @@ public class FormatUtil {
         };
     }
 
+    /**
+     * create a default number format. if precision is 0 or type is null, null will be returned
+     * <p/>
+     * TODO: evaluate extended date! <br/>
+     * TODO: use prefix!
+     * 
+     * @param precision fraction digits
+     * @return number format or null
+     */
+    protected static final Format getDefaultExtendedFormat(Class<?> type, String prefix, String postfix, int precision) {
+        //if the type is null, we don't know which object is a result of parsing!
+        if (precision < 0 || type == null) {
+            return null;
+        }
+        final Format format;
+        if (postfix != null) {
+            format = getCurrencyFormat(postfix, precision);
+        } else {
+            //this definition MUST match the definition of FormatUtil.getDefaultFormat(..)
+            format = FormatUtil.getDefaultFormat(type, true);
+        }
+        if (format instanceof DecimalFormat) {
+            DecimalFormat df = (DecimalFormat) format;
+            df.setMinimumFractionDigits(0);
+            df.setMaximumFractionDigits(precision);
+//        df.setGroupingUsed(false);
+//        if (BigDecimal.class.isAssignableFrom(type))
+//            df.setParseBigDecimal(true);
+        }
+        return format;
+    }
+
+    /**
+     * currency with currency default precision (normally:2). object types must be {@link BigDecimal}!
+     * 
+     * @return standard currency regular expression for current locale
+     */
+    public static final Format getCurrencyFormat() {
+        Currency c = NumberFormat.getCurrencyInstance().getCurrency();
+        return getCurrencyFormat(c.getCurrencyCode(), c.getDefaultFractionDigits());
+    }
+
+    /**
+     * currency with precision 0. object types must be {@link BigDecimal}!
+     * 
+     * @return number format
+     */
+    public static final Format getCurrencyFormatNoFraction() {
+        return getCurrencyFormat(NumberFormat.getCurrencyInstance().getCurrency().getCurrencyCode(), 0);
+    }
+
+    public static final Format getCurrencyFormatNoSymbol() {
+        return getCurrencyFormat(null, 2);
+    }
+
+    /**
+     * creates a NumberFormat for BigDecimals with currency code and fractionDigits. to get an historic currency, see
+     * {@link CurrencyUtil}.
+     * 
+     * @param currencyCode currency code (see {@link Currency#getInstance(String)} and {@link http
+     *            ://de.wikipedia.org/wiki/ISO_4217}.
+     * @param fractionDigits number of fraction digits (precision)
+     * @return new numberformat instance
+     */
+    public static final Format getCurrencyFormat(String currencyCode, int fractionDigits) {
+        final DecimalFormat numberFormat = (DecimalFormat) (currencyCode != null ? NumberFormat.getCurrencyInstance()
+            : NumberFormat.getInstance());
+        if (currencyCode != null)
+            numberFormat.setCurrency(Currency.getInstance(currencyCode));
+        numberFormat.setMinimumFractionDigits(fractionDigits);
+        numberFormat.setMaximumFractionDigits(fractionDigits);
+        numberFormat.setGroupingUsed(true);
+        numberFormat.setParseBigDecimal(true);
+        return numberFormat;
+    }
 }

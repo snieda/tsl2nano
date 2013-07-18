@@ -15,6 +15,7 @@ import java.lang.reflect.Method;
 import java.text.Format;
 import java.text.ParseException;
 import java.util.Collection;
+import java.util.Date;
 import java.util.Map;
 
 import org.apache.commons.logging.Log;
@@ -34,13 +35,14 @@ import de.tsl2.nano.util.bean.BeanContainer;
 import de.tsl2.nano.util.bean.BeanUtil;
 import de.tsl2.nano.util.bean.IAttributeDef;
 import de.tsl2.nano.util.bean.PrimitiveUtil;
+
 /**
  * 
  * @author Thomas Schneider
  * @version $Revision$
  */
-@SuppressWarnings({"rawtypes", "unchecked"})
-@Default(value=DefaultType.FIELD, required=false)
+@SuppressWarnings({ "rawtypes", "unchecked" })
+@Default(value = DefaultType.FIELD, required = false)
 public class AttributeDefinition<T> extends BeanAttribute implements IAttributeDefinition<T> {
 
     /** serialVersionUID */
@@ -52,6 +54,7 @@ public class AttributeDefinition<T> extends BeanAttribute implements IAttributeD
     private int precision = UNDEFINED;
     private boolean nullable = true;
     private boolean id;
+    private Class<? extends Date> temporalType;
     protected Format format;
     protected T defaultValue;
     protected String description;
@@ -89,6 +92,7 @@ public class AttributeDefinition<T> extends BeanAttribute implements IAttributeD
                 setId(def.id());
                 setBasicDef(def.length(), def.nullable(), null, null, null);
                 setNumberDef(def.scale(), def.precision());
+                temporalType = def.temporalType();
             }
         }
         initDeserialization();
@@ -97,11 +101,11 @@ public class AttributeDefinition<T> extends BeanAttribute implements IAttributeD
     @Commit
     private void initDeserialization() {
         if (Enum.class.isAssignableFrom(getType()))
-            allowedValues = CollectionUtil.getEnumValues((Class<Enum>)getType());
+            allowedValues = CollectionUtil.getEnumValues((Class<Enum>) getType());
 
         status = IStatus.STATUS_OK;
     }
-    
+
     /**
      * setBasicDef
      * 
@@ -177,7 +181,6 @@ public class AttributeDefinition<T> extends BeanAttribute implements IAttributeD
         return this;
     }
 
-    
     /**
      * @return Returns the length.
      */
@@ -228,7 +231,6 @@ public class AttributeDefinition<T> extends BeanAttribute implements IAttributeD
         return scale;
     }
 
-    
     /**
      * @return Returns the precision.
      */
@@ -291,6 +293,14 @@ public class AttributeDefinition<T> extends BeanAttribute implements IAttributeD
      * {@inheritDoc}
      */
     @Override
+    public Class<? extends Date> temporalType() {
+        return temporalType;
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
     public Format getFormat() {
         if (format == null) {
             Class<T> type = getType();
@@ -337,22 +347,28 @@ public class AttributeDefinition<T> extends BeanAttribute implements IAttributeD
     public IStatus isValid(T value) {
         IStatus status = IStatus.STATUS_OK;
 
-        if (!nullable() && value == null) {
-            status = Status.illegalArgument(getId(), value, "not null");
-        } else if (value != null) {
-            if (!PrimitiveUtil.isAssignableFrom(getType(), value.getClass())) {
-                status = Status.illegalArgument(getId(), value, getType());
-            } else if (value instanceof String && parse((String) value) == null) {
-                status = Status.illegalArgument(getId(), value, "format '" + format + "'");
-            } else if (min != null && min.compareTo(value) > 0) {
-                status = Status.illegalArgument(getId(), value, " greater than " + min);
-            } else if (max != null && min.compareTo(value) > 0) {
-                status = Status.illegalArgument(getId(), value, " lower than " + max);
-            } else if (length > 0 && value.toString().length() > length) {
-                status = Status.illegalArgument(getId(), value, " a maximum-length of " + length);
+        try {
+            if (!nullable() && value == null) {
+                status = Status.illegalArgument(getId(), value, "not null");
+            } else if (value != null) {
+                if (!PrimitiveUtil.isAssignableFrom(getType(), value.getClass())) {
+                    status = Status.illegalArgument(getId(), value, getType());
+                } else if (value instanceof String && parse((String) value) == null) {
+                    status = Status.illegalArgument(getId(), value, "format '" + format + "'");
+                } else if (!(value instanceof String) && getFormat().format(value) == null) {
+                    status = Status.illegalArgument(getId(), value, "format '" + format + "'");
+                } else if (min != null && min.compareTo(value) > 0) {
+                    status = Status.illegalArgument(getId(), value, " greater than " + min);
+                } else if (max != null && min.compareTo(value) > 0) {
+                    status = Status.illegalArgument(getId(), value, " lower than " + max);
+                } else if (length > 0 && value.toString().length() > length) {
+                    status = Status.illegalArgument(getId(), value, " a maximum-length of " + length);
+                }
             }
+            //TODO: check numbers on scale and precision
+        } catch (Exception ex) {
+            status = Status.illegalArgument(getId(), value, ex);
         }
-        //TODO: check numbers on scale and precision
         if (!status.ok()) {
             LOG.warn(status);
         }

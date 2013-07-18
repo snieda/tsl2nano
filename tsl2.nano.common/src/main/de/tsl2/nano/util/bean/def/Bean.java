@@ -578,7 +578,7 @@ public class Bean<T> extends BeanDefinition<T> {
     protected static <I extends Serializable> Bean<I> createBean(I instance, BeanDefinition<I> beandef) {
         Bean<I> bean = new Bean<I>();
         copy(beandef, bean, "attributeDefinitions", "asString");
-        bean.attributeDefinitions = (Map<String, IAttributeDefinition<?>>) createValueDefintions(beandef.getAttributeDefinitions());
+        bean.attributeDefinitions = (LinkedHashMap<String, IAttributeDefinition<?>>) createValueDefintions(beandef.getAttributeDefinitions());
         bean.setInstance(instance);
         return bean;
     }
@@ -588,7 +588,7 @@ public class Bean<T> extends BeanDefinition<T> {
      * @param attributeDefinitions attributes to copy and enhance
      * @return new map holding value definitions
      */
-    protected static Map<String, ? extends IAttributeDefinition<?>> createValueDefintions(Map<String, IAttributeDefinition<?>> attributeDefinitions) {
+    protected static LinkedHashMap<String, ? extends IAttributeDefinition<?>> createValueDefintions(Map<String, IAttributeDefinition<?>> attributeDefinitions) {
         LinkedHashMap<String, IValueDefinition<?>> valueDefs = new LinkedHashMap<String, IValueDefinition<?>>(attributeDefinitions.size());
         try {
             for (IAttributeDefinition<?> attr : attributeDefinitions.values()) {
