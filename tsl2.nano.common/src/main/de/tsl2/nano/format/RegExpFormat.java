@@ -97,7 +97,7 @@ public class RegExpFormat extends Format implements INumberFormatCheck {
     public static final char DECIMAL_SEPARATOR = new DecimalFormatSymbols(Locale.getDefault()).getDecimalSeparator();
     public static final char GROUPING_SEPARATOR = new DecimalFormatSymbols(Locale.getDefault()).getGroupingSeparator();
     /** characters only to format an expression (like german date '01.01.2001' the dots) */
-    public static final String FORMAT_CHARACTERS = " .,;_/*#|-";
+    public static final String FORMAT_CHARACTERS = " .,;_/*#|-:";
 
     /** alphanumeric character with lowest ascii code (=32) */
     public static final char MIN_CHAR = ' ';
@@ -122,8 +122,8 @@ public class RegExpFormat extends Format implements INumberFormatCheck {
     // TODO how to get the date format from locale? 
     public static final String FORMAT_DATE_SQL = "[1-2]\\d\\d\\d\\-[0-1]\\d\\-[0-3]\\d";
     public static final String FORMAT_DATE_DE = "[0-3]\\d\\.[0-1]\\d\\.[1-2]\\d\\d\\d";
-    public static final String FORMAT_TIME_DE = "[0-2]\\d\\:[0-5]\\d\\:[0-5]\\d";
-    public static final String FORMAT_DATETIME_DE = FORMAT_DATE_DE + " " + FORMAT_TIME_DE;
+    public static final String FORMAT_TIME = "[0-2]\\d\\:[0-5]\\d\\:[0-5]\\d";
+    public static final String FORMAT_DATETIME_DE = FORMAT_DATE_DE + " " + FORMAT_TIME;
     public static final String FORMAT_NAME_ALPHA_DE = "[a-zA-Z‰ˆ¸ƒ÷‹ﬂ]+";
     public static final String FORMAT_NAME_ALPHA_EXT_DE = FORMAT_NAME_ALPHA_DE + PATTERN_SINGLE_BYTE_SPACE;
     public static final String FORMAT_NAME_ALPHA = "[a-zA-Z]*";
@@ -145,9 +145,13 @@ public class RegExpFormat extends Format implements INumberFormatCheck {
              */
             systemInitMap.put("31.1", DateFormat.getDateInstance(DateFormat.MEDIUM).format(getInitialDate_Nov()));
             /*
-             * standard german decimal number
+             * standard decimal number
              */
             systemInitMap.put(FORMAT_DECIMAL, "00" + DECIMAL_SEPARATOR + "00");
+            /*
+             * standard time
+             */
+            systemInitMap.put(FORMAT_TIME, "00:00:00");
         } catch (final Exception e) {
             throw new RuntimeException(e);
         }
@@ -322,6 +326,7 @@ public class RegExpFormat extends Format implements INumberFormatCheck {
     @Override
     public StringBuffer format(Object obj, StringBuffer toAppendTo, FieldPosition pos) {
         String o;
+        //first: do a standard formatting, before checking against the regular expression
         if (obj instanceof String) {
             o = (String) obj;
         } else {
@@ -333,6 +338,9 @@ public class RegExpFormat extends Format implements INumberFormatCheck {
         if (compiledPattern == null) {
             compiledPattern = Pattern.compile(pattern, regExpFlags);
         }
+        //second: fill separation characters
+        o = getTextFormatted(o);
+        //third: check against the regular expression
         final Matcher matcher = compiledPattern.matcher(o);
         final boolean matches = fullMatch ? matcher.matches() : matcher.find();
         if (matches) {
@@ -420,6 +428,7 @@ public class RegExpFormat extends Format implements INumberFormatCheck {
     }
 
     /**
+     * @deprecated: use {@link #numberWithGrouping(int, int, boolean)}
      * @see #number(int, int, boolean)
      */
     protected static final String number(int dec, int fract) {
@@ -427,6 +436,7 @@ public class RegExpFormat extends Format implements INumberFormatCheck {
     }
 
     /**
+     * @deprecated: use {@link #numberWithGrouping(int, int, boolean)}
      * @param dec count of decimals
      * @param fract count of fracts
      * @param fixed if true, fixed characters will be used.
@@ -626,7 +636,7 @@ public class RegExpFormat extends Format implements INumberFormatCheck {
      * @return new formatter for the given number
      */
     public static RegExpFormat createNumberRegExp(int dec, int fract, Class<?> type) {
-        return new RegExpFormat(number(dec, fract), null, dec + fract + 1, 0, new GenericParser(
+        return new RegExpFormat(numberWithGrouping(dec, fract, false), null, dec + fract + 1, 0, new GenericParser(
             type, null, null, fract));
     }
 
@@ -1089,8 +1099,11 @@ public class RegExpFormat extends Format implements INumberFormatCheck {
 
     @Persist
     private void initSerialization() {
-        //remove copied entries of systeminitmap
-        MapUtil.removeAll(initMap, systemInitMap);
+        //remove copied entries of systeminitmap - if it is not the systemInitMap itself!
+        if (initMap != systemInitMap)
+            MapUtil.removeAll(initMap, systemInitMap);
+        else
+            initMap = null;
     }
     
     private void readObject(java.io.ObjectInputStream in) throws IOException, ClassNotFoundException {
@@ -1102,6 +1115,7 @@ public class RegExpFormat extends Format implements INumberFormatCheck {
     private void initDeserialization() {
         if (initMap == null)
             initMap = new Hashtable<String, String>();
+        //TODO: this will overwrite configured data!!!
         initMap.putAll(systemInitMap);
     }
 

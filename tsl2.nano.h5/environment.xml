@@ -1,10 +1,22 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <environment>
+   <property name="Steuerfall.exort.file">
+      <object class="java.lang.String">C:\idv\wjax\distribution\tsl-nano\tsl2.nano.h5\config/Steuerfall.rtf</object>
+   </property>
+   <property name="Abstimmsumme.exort.file">
+      <object class="java.lang.String">C:\idv\wjax\distribution\tsl-nano\tsl2.nano.h5\config/Abstimmsumme.rtf</object>
+   </property>
    <property name="html5.http.method">
       <object class="java.lang.String">post</object>
    </property>
    <property name="default.text.length">
       <object class="java.lang.Integer">100</object>
+   </property>
+   <property name="KistAmt.exort.file">
+      <object class="java.lang.String">C:\idv\wjax\distribution\tsl-nano\tsl2.nano.h5\config/KistAmt.rtf</object>
+   </property>
+   <property name="Gruppe.exort.file">
+      <object class="java.lang.String">C:\idv\wjax\distribution\tsl-nano\tsl2.nano.h5\config/Gruppe.rtf</object>
    </property>
    <property name="default.attribute.id">
       <object class="java.lang.Boolean">true</object>
@@ -12,8 +24,14 @@
    <property name="beandef.usepersistent.cache">
       <object class="java.lang.Boolean">true</object>
    </property>
+   <property name="KistAmt.collector.exort.file">
+      <object class="java.lang.String">C:\idv\wjax\distribution\tsl-nano\tsl2.nano.h5\config/KistAmt.collector.rtf</object>
+   </property>
    <property name="collector.use.multiple.filter">
       <object class="java.lang.Boolean">true</object>
+   </property>
+   <property name="Abstimmsumme.collector.exort.file">
+      <object class="java.lang.String">C:\idv\wjax\distribution\tsl-nano\tsl2.nano.h5\config/Abstimmsumme.collector.rtf</object>
    </property>
    <property name="bean.best.attribute.regexp">
       <object class="java.lang.String">.*(name|bezeichnung).*</object>
@@ -24,8 +42,17 @@
    <property name="field.min.multiline.length">
       <object class="java.lang.Integer">100</object>
    </property>
+   <property name="Steuerfall.collector.exort.file">
+      <object class="java.lang.String">C:\idv\wjax\distribution\tsl-nano\tsl2.nano.h5\config/Steuerfall.collector.rtf</object>
+   </property>
+   <property name="Gruppe.collector.exort.file">
+      <object class="java.lang.String">C:\idv\wjax\distribution\tsl-nano\tsl2.nano.h5\config/Gruppe.collector.rtf</object>
+   </property>
    <property name="value.currency.length.precision">
       <object class="java.lang.String">11,2</object>
+   </property>
+   <property name="Kion-beans.exort.file">
+      <object class="java.lang.String">C:\idv\wjax\distribution\tsl-nano\tsl2.nano.h5\config/Kion-beans.rtf</object>
    </property>
    <property name="bean.best.attribute.minlength">
       <object class="java.lang.Integer">3</object>
@@ -36,14 +63,17 @@
    <property name="field.selector.text">
       <object class="java.lang.String">...</object>
    </property>
+   <property name="collector.use.extra.definition">
+      <object class="java.lang.Boolean">false</object>
+   </property>
    <property name="de.tsl2.nano.config.path">
       <object class="java.lang.String">C:\idv\wjax\distribution\tsl-nano\tsl2.nano.h5\config/</object>
    </property>
-   <property name="service.maxresult">
-      <object class="java.lang.Integer">100</object>
-   </property>
    <property name="value.use.instancetype">
       <object class="java.lang.Boolean">true</object>
+   </property>
+   <property name="service.maxresult">
+      <object class="java.lang.Integer">100</object>
    </property>
    <property name="default.attribute.multivalue">
       <object class="java.lang.Boolean">true</object>
@@ -53,5 +83,8 @@
    </property>
    <property name="bean.best.attribute.type">
       <object class="java.lang.Class">java.lang.String</object>
+   </property>
+   <property name="Persistence.exort.file">
+      <object class="java.lang.String">C:\idv\wjax\distribution\tsl-nano\tsl2.nano.h5\config/Persistence.rtf</object>
    </property>
 </environment>

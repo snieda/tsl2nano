@@ -98,8 +98,11 @@ public interface IPresentable extends Serializable {
     /** convenience to evaluate layout/layoutconstraint properties (perhaps, if layout or layoutconstraints are maps) */
     public <T> T layout(String name, T defaultValue);
     
-    /** usable for all int definitions like type and style */
+    /** usable for int definitions that are not bitfields */
     public static final int UNDEFINED = -1;
+
+    /** usable for all int definitions like bitfiels type and style */
+    public static final int UNSET = 0;
 
     /*
      * basic presentation types
@@ -199,12 +202,12 @@ public interface IPresentable extends Serializable {
 
         @Override
         public int getType() {
-            return UNDEFINED;
+            return UNSET;
         }
 
         @Override
         public int getStyle() {
-            return UNDEFINED;
+            return UNSET;
         }
 
         @Override

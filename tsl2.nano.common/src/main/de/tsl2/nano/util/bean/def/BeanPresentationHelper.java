@@ -9,8 +9,8 @@
  */
 package de.tsl2.nano.util.bean.def;
 
-import static de.tsl2.nano.util.bean.def.IPresentable.ALIGN_LEFT;
 import static de.tsl2.nano.util.bean.def.IPresentable.ALIGN_RIGHT;
+import static de.tsl2.nano.util.bean.def.IPresentable.*;
 import static de.tsl2.nano.util.bean.def.IPresentable.STYLE_MULTI;
 import static de.tsl2.nano.util.bean.def.IPresentable.TYPE_DATE;
 import static de.tsl2.nano.util.bean.def.IPresentable.TYPE_INPUT;
@@ -240,13 +240,20 @@ public class BeanPresentationHelper<T> {
         return beanValue;
     }
 
+    public int getDefaultHorizontalAlignment(IAttributeDefinition<?> beanAttribute) {
+        if (beanAttribute.length() == 1) {
+            return ALIGN_CENTER;
+        }
+        return getDefaultHorizontalAlignment((BeanAttribute) beanAttribute);
+    }
+
     public int getDefaultHorizontalAlignment(BeanAttribute beanAttribute) {
         int alignment;
         final Class<?> type = beanAttribute.getType();
         if (Number.class.isAssignableFrom(type)) {
             alignment = ALIGN_RIGHT;
         } else {
-            alignment = ALIGN_LEFT;
+            alignment = ALIGN_CENTER;
         }
         return alignment;
     }
@@ -1086,14 +1093,26 @@ public class BeanPresentationHelper<T> {
                 IAction.MODE_UNDEFINED,
                 false,
                 "icons/images_all.png") {
+                File exportFile = new File(Environment.get(bean.getName() + ".exort.file",
+                    Environment.getConfigPath() + bean.getName() + ".rtf"));
+
                 @Override
                 public Object action() throws Exception {
                     //TODO: file selection, and ant-variable insertion...
-                    File file = new File("mytest.rtf");
-                    String content = FileUtil.getFile(file.getPath());
+                    String content = FileUtil.getFile(exportFile.getPath());
                     content = StringUtil.insertProperties(content, BeanUtil.toValueMap(((Bean) bean).getInstance()));
-                    FileUtil.writeString(content, file.getParent() + ".new", false);
-                    return "document '" + file.getPath() + "' was filled with data of bean " + bean;
+                    FileUtil.writeString(content, exportFile.getParent() + ".new", false);
+                    return "document '" + exportFile.getPath() + "' was filled with data of bean " + bean;
+                }
+
+                @Override
+                public String getLongDescription() {
+                    return "exporting (see environment.properties) to: " + exportFile.getPath();
+                }
+
+                @Override
+                public boolean isEnabled() {
+                    return exportFile.canRead();
                 }
             });
 
@@ -1126,9 +1145,10 @@ public class BeanPresentationHelper<T> {
                 IAction.MODE_UNDEFINED,
                 false,
                 "icons/trust_unknown.png") {
+                String helpFileName = Environment.getConfigPath() + bean.getName().toLowerCase() + ".help.html";
+
                 @Override
                 public Object action() throws Exception {
-                    String helpFileName = Environment.getConfigPath() + bean.getName().toLowerCase() + ".help.html";
                     String helpFile = null;
                     if (new File(helpFileName).canRead())
                         helpFile = FileUtil.getFile(helpFileName);
@@ -1137,7 +1157,7 @@ public class BeanPresentationHelper<T> {
 
                 @Override
                 public boolean isEnabled() {
-                    return false;
+                    return new File(helpFileName).canRead();
                 }
             });
 

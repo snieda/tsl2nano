@@ -13,7 +13,7 @@ import java.io.Serializable;
 
 /**
  * status base construct - used by bean values on validation. no severity is defined. the status {@link #OK},
- * {@link #WARN} and {@link #ERROR} should fulfill a validation status.
+ * {@link #WARN} and {@link #ERROR} should fulfil a validation status.
  * 
  * @author Thomas Schneider
  * @version $Revision$

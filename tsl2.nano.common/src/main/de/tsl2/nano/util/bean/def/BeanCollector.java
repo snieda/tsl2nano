@@ -557,9 +557,10 @@ public class BeanCollector<COLLECTIONTYPE extends Collection<T>, T> extends Bean
             for (IAttributeDefinition<?> attr : attributes) {
                 IPresentableColumn col = attr.getColumnDefinition();
                 if (col == null) {
-                    attr.setColumnDefinition(i, i, true, 100);
+                    attr.setColumnDefinition(i, IPresentable.UNDEFINED, true, 100);
                     col = attr.getColumnDefinition();
                 } else {
+                    //if derived from deserialization, the cycling attributeDefinition is null
                     ValueColumn vc = (ValueColumn) col;
                     if (vc.attributeDefinition == null)
                         vc.attributeDefinition = attr;
@@ -568,11 +569,13 @@ public class BeanCollector<COLLECTIONTYPE extends Collection<T>, T> extends Bean
                 i++;
             }
             if (Environment.get("collector.use.multiple.filter", true)) {
+                //TODO: filtering ids, and invsisbles, too --> don't ask multiple-flag
                 columnDefinitions = CollectionUtil.getFiltering(columnDefinitions,
                     new IPredicate<IPresentableColumn>() {
                         @Override
                         public boolean eval(IPresentableColumn arg0) {
-                            return hasMode(MODE_SHOW_MULTIPLES) || !getAttribute(arg0.getName()).isMultiValue();
+                            return (arg0.getPresentable() == null || arg0.getPresentable().isVisible()) && hasMode(MODE_SHOW_MULTIPLES)
+                                || !getAttribute(arg0.getName()).isMultiValue();
                         }
                     });
             }
@@ -588,7 +591,6 @@ public class BeanCollector<COLLECTIONTYPE extends Collection<T>, T> extends Bean
     public void setColumnDefinitions(Collection<IPresentableColumn> columnDefinitions) {
         this.columnDefinitions = columnDefinitions;
     }
-
 
     private IPresentableColumn getColumn(int i) {
         //try the fastest - all indexes as default
@@ -630,7 +632,7 @@ public class BeanCollector<COLLECTIONTYPE extends Collection<T>, T> extends Bean
             } catch (Exception e) {
                 // showing the existing values should not throw exceptions...
                 LOG.error(e);
-                return e.toString(); //"!" + value.toString() + "!";
+                return Messages.TOKEN_MSG_NOTFOUND + e.toString() + Messages.TOKEN_MSG_NOTFOUND;
             }
         }
         return value.toString();
@@ -808,8 +810,15 @@ public class BeanCollector<COLLECTIONTYPE extends Collection<T>, T> extends Bean
     public static final <C extends Collection<I>, I/* extends Serializable*/> BeanCollector<C, I> getBeanCollector(Class<I> beanType,
             Collection<I> collection,
             int workingMode) {
-        BeanDefinition<I> beandef = getBeanDefinition(beanType.getSimpleName() + POSTFIX_COLLECTOR, beanType, false);
+        BeanDefinition<I> beandef = getBeanDefinition(beanType.getSimpleName() + (useExtraCollectorDefinition() ? POSTFIX_COLLECTOR
+            : ""),
+            beanType,
+            false);
         return (BeanCollector<C, I>) createCollector(collection, workingMode, beandef);
+    }
+
+    private static boolean useExtraCollectorDefinition() {
+        return Environment.get("collector.use.extra.definition", false);
     }
 
     /**
@@ -835,8 +844,9 @@ public class BeanCollector<COLLECTIONTYPE extends Collection<T>, T> extends Bean
     public String toString() {
         if (asString == null) {
             //empty search-beans are possible
-            asString = name != null ? Environment.translate("tsl2nano.list", false) + " "
-                + StringUtil.substring(name, null, POSTFIX_COLLECTOR) : null;
+            asString = name != null ? (useExtraCollectorDefinition() ? Environment.translate("tsl2nano.list", false) + " "
+                : "") + StringUtil.substring(name, null, POSTFIX_COLLECTOR)
+                : null;
         }
         return asString;
     }

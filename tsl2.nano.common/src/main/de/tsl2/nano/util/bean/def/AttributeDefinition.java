@@ -552,6 +552,7 @@ public class AttributeDefinition<T> extends BeanAttribute implements IAttributeD
      */
     public void setColumnDefinition(int index, int sortIndex, boolean sortUpDirection, int width) {
         this.columnDefinition = new ValueColumn(this, index, sortIndex, sortUpDirection, width);
+        this.columnDefinition.setPresentable(getPresentation());
     }
 
     /**

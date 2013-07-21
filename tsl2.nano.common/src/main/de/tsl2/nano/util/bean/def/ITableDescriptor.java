@@ -20,7 +20,7 @@ public interface ITableDescriptor<T> {
 
     /**
      * getColumnDefinitions
-     * @return all column definitions of that bean - while the columns itself may be defined inside the beanvalue.
+     * @return all visible column definitions of that bean - while the columns itself may be defined inside the beanvalue.
      */
     Collection<IPresentableColumn> getColumnDefinitions();
     

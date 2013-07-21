@@ -20,4 +20,11 @@ public interface IPageBuilder<PAGE, OUTPUT> {
      * @return page text
      */
     OUTPUT build(BeanDefinition<?> model, String message, boolean interactive, BeanDefinition<?>... navigation);
+
+    /**
+     * decorate a message
+     * @param message
+     * @return decorated 
+     */
+    OUTPUT decorate(String message);
 }

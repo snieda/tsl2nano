@@ -17,6 +17,8 @@ import java.util.Map;
 import java.util.Properties;
 import java.util.Set;
 
+import tsl.StringUtil;
+
 import de.tsl2.nano.Messages;
 import de.tsl2.nano.action.CommonAction;
 import de.tsl2.nano.action.IAction;
@@ -402,7 +404,7 @@ public class BeanContainer implements IBeanContainer {
         if (Messages.unknown(text)) {
             text = Messages.getString("tsl2nano." + actionSimpleName + tooltip_postfix);
             if (Messages.unknown(text)) {
-                return actionSimpleName;
+                return StringUtil.toFirstUpper(actionSimpleName);
             } else if (tooltip) {
                 return "";
             } else {

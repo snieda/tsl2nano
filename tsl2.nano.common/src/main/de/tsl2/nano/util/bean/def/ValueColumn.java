@@ -14,6 +14,7 @@ import static de.tsl2.nano.util.bean.def.IPresentable.UNDEFINED;
 import java.io.Serializable;
 import java.text.Format;
 
+import de.tsl2.nano.Messages;
 import de.tsl2.nano.action.CommonAction;
 import de.tsl2.nano.action.IAction;
 
@@ -154,7 +155,7 @@ public class ValueColumn<T> implements IPresentableColumn, Serializable {
     
     public IAction<?> getSortingAction(final IBeanCollector<?, ?> collector) {
         if (actionSortColumn == null) {
-            actionSortColumn = new CommonAction<Object>(name, name, getDescription()) {
+            actionSortColumn = new CommonAction<Object>(name, Messages.getStringOpt(name, true), getDescription()) {
                 @Override
                 public Object action() throws Exception {
                     collector.shiftSortIndexes();

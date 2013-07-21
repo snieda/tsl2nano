@@ -81,7 +81,7 @@ public class GenericParser<T> extends DefaultFormat implements INumberFormatChec
                 String sdfPattern = sdf.toPattern();
                 if (sdfPattern.contains("y") && sdfPattern.contains("s"))
                     parsingType = (Class<T>) Timestamp.class;
-                if (sdfPattern.contains("s"))
+                else if (sdfPattern.contains("s"))
                     parsingType = (Class<T>) Time.class;
                 else
                     parsingType = (Class<T>) Date.class;

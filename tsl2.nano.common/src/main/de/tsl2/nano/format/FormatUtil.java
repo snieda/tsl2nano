@@ -230,7 +230,7 @@ public class FormatUtil {
     }
 
     /**
-     * create a default number format. if precision is 0 or type is null, null will be returned
+     * create a default format. if precision is 0 or type is null, null will be returned
      * <p/>
      * TODO: evaluate extended date! <br/>
      * TODO: use prefix!
@@ -239,18 +239,17 @@ public class FormatUtil {
      * @return number format or null
      */
     protected static final Format getDefaultExtendedFormat(Class<?> type, String prefix, String postfix, int precision) {
-        //if the type is null, we don't know which object is a result of parsing!
-        if (precision < 0 || type == null) {
+        if (type == null) {
             return null;
         }
         final Format format;
-        if (postfix != null) {
+        if (precision >= 0 && postfix != null) {
             format = getCurrencyFormat(postfix, precision);
         } else {
             //this definition MUST match the definition of FormatUtil.getDefaultFormat(..)
             format = FormatUtil.getDefaultFormat(type, true);
         }
-        if (format instanceof DecimalFormat) {
+        if (precision >= 0 && format instanceof DecimalFormat) {
             DecimalFormat df = (DecimalFormat) format;
             df.setMinimumFractionDigits(0);
             df.setMaximumFractionDigits(precision);

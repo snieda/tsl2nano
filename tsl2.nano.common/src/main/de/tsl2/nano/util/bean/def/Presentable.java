@@ -32,9 +32,9 @@ public class Presentable implements IPresentable, Serializable {
     private static final long serialVersionUID = -7970100238668263393L;
 
     @Attribute
-    int type = UNDEFINED;
+    int type = UNSET;
     @Attribute
-    int style = UNDEFINED;
+    int style = UNSET;
     @Element(required=false)
     String label;
     @Element(required=false)
@@ -58,15 +58,17 @@ public class Presentable implements IPresentable, Serializable {
     }
     
     public Presentable(AttributeDefinition<?> attr) {
-        label = attr.getNameFU();
+        label = Environment.translate(attr.getName(), true);
         type = Environment.get(BeanPresentationHelper.class).getDefaultType(attr);
+        style = Environment.get(BeanPresentationHelper.class).getDefaultHorizontalAlignment((IAttributeDefinition<?>)attr);
         description = label;
         enabler = IActivator.ACTIVE;
     }
     
     public Presentable(BeanAttribute attr) {
-        label = attr.getNameFU();
+        label = Environment.translate(attr.getName(), true);
         type = Environment.get(BeanPresentationHelper.class).getDefaultType(attr);
+        style = Environment.get(BeanPresentationHelper.class).getDefaultHorizontalAlignment(attr);
         description = label;
         enabler = IActivator.ACTIVE;
     }

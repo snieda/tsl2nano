@@ -134,6 +134,7 @@ public class HtmlUtil {
     public static final String COLOR_LIGHT_GREEN = "#CCFFCC";
     public static final String COLOR_LIGHT_BLUE = "#CCCCFF";
     public static final String COLOR_LIGHT_GRAY = "#CCCCCC";
+    public static final String COLOR_YELLOW = "#CCCC00";
 
     public static final String VAL_100PERCENT = "100%";
     public static final String VAL_FALSE = Boolean.FALSE.toString();
@@ -142,6 +143,8 @@ public class HtmlUtil {
     public static final String VAL_ALIGN_CENTER = "middle";
     public static final String VAL_ALIGN_RIGHT = "end";
 
+    public static final String STYLE_TEXT_ALIGN = "text-algin";
+    
     public static final String BTN_ASSIGN = "tsl2nano.assign";
     public static final String BTN_SUBMIT = "tsl2nano.save";
     public static final String BTN_CANCEL = "tsl2nano.cancel";
@@ -201,6 +204,10 @@ public class HtmlUtil {
      */
     public static final String enable(String name, boolean enable) {
         return /*"name = " +*/ (enable ? name : null);
+    }
+    
+    public static final String style(String styleKey, String styleValue) {
+        return styleKey + ": " + styleValue;
     }
     
     public static String toString(Document doc) {

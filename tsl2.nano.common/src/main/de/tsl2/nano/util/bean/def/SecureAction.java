@@ -83,7 +83,7 @@ public abstract class SecureAction<RETURNTYPE> extends CommonAction<RETURNTYPE> 
             String shortDescription,
             String longDescription,
             int actionMode) {
-        super(id, Messages.getStringOpt(shortDescription), Messages.getStringOpt(longDescription));
+        super(id, Messages.getStringOpt(shortDescription, true), Messages.getStringOpt(longDescription));
         this.actionMode = actionMode;
         LOG.info("creating dialog action with action-id and permission-id: '" + id + "' and label '" + shortDescription);
     }

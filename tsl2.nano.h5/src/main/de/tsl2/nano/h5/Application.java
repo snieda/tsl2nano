@@ -12,6 +12,7 @@ import static de.tsl2.nano.util.bean.def.IBeanCollector.MODE_SEARCHABLE;
 
 import java.io.File;
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.Serializable;
 import java.net.URL;
 import java.text.FieldPosition;
@@ -34,6 +35,7 @@ import de.tsl2.nano.Messages;
 import de.tsl2.nano.action.IAction;
 import de.tsl2.nano.collection.CollectionUtil;
 import de.tsl2.nano.collection.ListSet;
+import de.tsl2.nano.collection.MapUtil;
 import de.tsl2.nano.exception.ForwardedException;
 import de.tsl2.nano.execution.Profiler;
 import de.tsl2.nano.execution.ScriptUtil;
@@ -58,7 +60,6 @@ import de.tsl2.nano.util.bean.def.IBeanCollector;
 import de.tsl2.nano.util.bean.def.IPageBuilder;
 import de.tsl2.nano.util.bean.def.IPresentable;
 import de.tsl2.nano.util.bean.def.SecureAction;
-import de.tsl2.nano.util.bean.def.SelectionProvider;
 
 /**
  * An Application of subclassing NanoHTTPD to make a custom HTTP server.
@@ -126,9 +127,11 @@ public class Application extends NanoHTTPD {
      * @param resultHtmlFile
      */
     protected void createStartPage(String resultHtmlFile) {
-        FileUtil.writeBytes(("<html><body><a href=\"http://localhost:" + port + "\">Start Application</a></body></html>").getBytes(),
-            resultHtmlFile,
-            false);
+        InputStream stream = Environment.getResource("start.template");
+        String startPage = String.valueOf(FileUtil.getFileData(stream, null));
+        startPage = StringUtil.insertProperties(startPage,
+            MapUtil.asMap("url", "http://localhost:" + port, "name", Environment.getName()));
+        FileUtil.writeBytes(startPage.getBytes(), resultHtmlFile, false);
     }
 
     /**
@@ -186,7 +189,7 @@ public class Application extends NanoHTTPD {
             }
         } catch (Exception e) {
             RuntimeException ex = ForwardedException.toRuntimeEx(e, true);
-            msg = refreshPage(ex.getMessage());
+            msg = refreshPage(builder.decorate(ex.getMessage()));
             response = new NanoHTTPD.Response(HTTP_BADREQUEST, MIME_HTML, msg);
         }
         //TODO: eliminate bug in NanoHTTPD not resetting uri...
@@ -436,8 +439,6 @@ public class Application extends NanoHTTPD {
      * @param parms user response
      */
     boolean provideSelection(BeanCollector c, Properties parms) {
-        if (c.getSelectionProvider() == null)
-            c.setSelectionProvider(new SelectionProvider(new LinkedList()));
         Collection<Object> elements = getSelectedElements(c, parms);
         c.getSelectionProvider().setValue(elements);
         return !c.getSelectionProvider().isEmpty();
@@ -525,12 +526,9 @@ public class Application extends NanoHTTPD {
     }
 
     private static void initServices() {
-        Environment.registerBundle("de.tsl2.nano.messages", true);
-
         Html5Presentation pageBuilder = new Html5Presentation();
         Environment.addService(BeanPresentationHelper.class, pageBuilder);
         Environment.addService(IPageBuilder.class, new Html5Presentation());
-        Environment.addService(Profiler.class, Profiler.si());
     }
 
     /**

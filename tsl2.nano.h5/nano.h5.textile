@@ -16,6 +16,7 @@ generic html5 gui implementation, bound to swartfix-common bean-package.
 * prefills formatting, validation and presentation of relations
 * pure html-5 (no javascript)
 * data replication to work offline (not finished yet!)
+* full key-navigation (shortcuts)
 * interfaces: 
 ** ddl-->beans through hibernate-tools
 ** jpa-->bean through annotation evaluation
@@ -121,3 +122,6 @@ h2. TODOs
 * *Replication / Offline*
 ** FileBeanContainer serializing all lists of all BeanCollectors
 ** GenericBeanContainer using filled FileBeanContainer re-attaching all serialized bean lists
+* Validate against Html5-xsd in debug mode
+* include LogicTable?
+* check starting application multiple times
