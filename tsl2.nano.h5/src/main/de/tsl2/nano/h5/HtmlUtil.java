@@ -143,7 +143,7 @@ public class HtmlUtil {
     public static final String VAL_ALIGN_CENTER = "middle";
     public static final String VAL_ALIGN_RIGHT = "end";
 
-    public static final String STYLE_TEXT_ALIGN = "text-algin";
+    public static final String STYLE_TEXT_ALIGN = "text-align";
     
     public static final String BTN_ASSIGN = "tsl2nano.assign";
     public static final String BTN_SUBMIT = "tsl2nano.save";

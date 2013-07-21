@@ -18,6 +18,7 @@ import java.text.Format;
 import java.text.NumberFormat;
 import java.text.ParsePosition;
 import java.text.SimpleDateFormat;
+import java.util.Currency;
 import java.util.Date;
 
 import org.simpleframework.xml.Attribute;
@@ -47,7 +48,7 @@ public class GenericParser<T> extends DefaultFormat implements INumberFormatChec
     /** prefix to start the format */
     @Attribute(required=false)
     private String prefix;
-    /** postfix (like a currency) to end the format */
+    /** postfix (at the moment only on currencies) to end the format */
     @Attribute(required=false)
     private String postfix;
 
@@ -140,6 +141,14 @@ public class GenericParser<T> extends DefaultFormat implements INumberFormatChec
         return getParsingFormat() instanceof NumberFormat;
     }
 
+    /**
+     * getPostfix
+     * @return
+     */
+    public String getPostfix() {
+        return Currency.getInstance(postfix).getSymbol();
+    }
+    
     @Override
     public StringBuffer format(Object obj, StringBuffer toAppendTo, FieldPosition pos) {
         return getParsingFormat() != null && obj != null ? getParsingFormat().format(obj, toAppendTo, pos) : super.format(obj, toAppendTo, pos);

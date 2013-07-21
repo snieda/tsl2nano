@@ -315,8 +315,10 @@ public class BeanCollector<COLLECTIONTYPE extends Collection<T>, T> extends Bean
     public void setSelected(T... selected) {
         Collection<T> selection = getSelectionProvider().getValue();
         selection.clear();
-        for (int i = 0; i < selected.length; i++) {
-            selection.add(selected[i]);
+        if (selected != null) {
+            for (int i = 0; i < selected.length; i++) {
+                selection.add(selected[i]);
+            }
         }
     }
 

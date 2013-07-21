@@ -26,7 +26,10 @@ import org.simpleframework.xml.DefaultType;
 import org.simpleframework.xml.ElementMap;
 import org.simpleframework.xml.core.Persist;
 
+import tsl.StringUtil;
+
 import de.tsl2.nano.execution.CompatibilityLayer;
+import de.tsl2.nano.execution.Profiler;
 import de.tsl2.nano.execution.XmlUtil;
 import de.tsl2.nano.format.DefaultFormat;
 import de.tsl2.nano.util.bean.BeanClass;
@@ -83,6 +86,15 @@ public class Environment {
     }
 
     /**
+     * getName
+     * @return
+     */
+    public static Object getName() {
+        return StringUtil.toFirstUpper(StringUtil.substring(self.getConfigPath(), File.separator, null, true)
+            .replace('/', ' '));
+    }
+
+    /**
      * provides services through their interface class.
      * 
      * @param <T> service type
@@ -113,6 +125,8 @@ public class Environment {
                 self.properties.put(KEY_CONFIG_PATH, System.getProperty("user.dir") + "/");
             }
             self.services = new Hashtable<Class<?>, Object>();
+            Environment.registerBundle("de.tsl2.nano.messages", true);
+            Environment.addService(Profiler.class, Profiler.si());
         }
         return self;
     }
@@ -131,9 +145,9 @@ public class Environment {
      * 
      * @param service service to add (should implement at least one interface.
      */
-    public static <T> void addService(T service) {
-        addService((Class<T>) (service.getClass().getInterfaces().length > 0 ? service.getClass().getInterfaces()[0]
-            : service.getClass()), service);
+    public static <T> T addService(T service) {
+        return addService((Class<T>) (service.getClass().getInterfaces().length > 0 ? service.getClass()
+            .getInterfaces()[0] : service.getClass()), service);
     }
 
     /**
@@ -141,8 +155,9 @@ public class Environment {
      * 
      * @param service service to add (should implement at least one interface.
      */
-    public static <T> void addService(Class<T> interfaze, T service) {
+    public static <T> T addService(Class<T> interfaze, T service) {
         services().put(interfaze, service);
+        return service;
     }
 
     /**
@@ -223,9 +238,8 @@ public class Environment {
      * @param head whether to add the bundle on top or bottom.
      */
     public static void registerBundle(String bundlePath, boolean head) {
-        ResourceBundle bundle = ResourceBundle.getBundle(bundlePath,
-            Locale.getDefault(),
-            Thread.currentThread().getContextClassLoader());
+        ResourceBundle bundle = ResourceBundle.getBundle(bundlePath, Locale.getDefault(), Thread.currentThread()
+            .getContextClassLoader());
         Messages.registerBundle(bundle, head);
     }
 
@@ -243,7 +257,7 @@ public class Environment {
             return Messages.getString((Enum<?>) key);
         else {
             if (optional)
-                return Messages.getStringOpt((String) key);
+                return Messages.getStringOpt((String) key, true);
             else
                 return Messages.getString((String) key);
         }
@@ -314,13 +328,17 @@ public class Environment {
 
     /**
      * loads a resource file through the environments classloader
+     * 
      * @param fileName resource
      * @return inputstream
      */
     public static InputStream getResource(String fileName) {
-        return get(ClassLoader.class).getResourceAsStream(fileName);
+        ClassLoader classLoader = (ClassLoader) self().services.get(ClassLoader.class);
+        if (classLoader == null)
+            classLoader = addService(Thread.currentThread().getContextClassLoader());
+        return classLoader.getResourceAsStream(fileName);
     }
-    
+
     @Persist
     protected void initSerialization() {
         /*

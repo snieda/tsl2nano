@@ -71,12 +71,12 @@ public class Status implements IStatus{
      * usable to create an error status with an illegal argument description
      * 
      * @param name attribute name
-     * @param value attribute value that envolves the error
+     * @param value attribute value that involves the error
      * @param assertion an assertion that was not fulfilled by the value.
      * @return new error status instance
      */
     public static Status illegalArgument(String name, Object value, Object assertion) {
-        return new Status(new IllegalArgumentException(MessageFormat.format("The value <{0}> of attribute \"{1}\" must fulfill {2}.",
+        return new Status(new IllegalArgumentException(MessageFormat.format("The value <{0}> of attribute \"{1}\" must fulfil {2}.",
             value,
             name,
             assertion)));

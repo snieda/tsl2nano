@@ -143,6 +143,8 @@ public class Presentable implements IPresentable, Serializable {
     
     @Override
     public IActivator getEnabler() {
+        if (enabler == null)
+            enabler = IActivator.ACTIVE;
         return enabler;
     }
 

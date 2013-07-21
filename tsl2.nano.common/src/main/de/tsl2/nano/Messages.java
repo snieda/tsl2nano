@@ -9,6 +9,8 @@ import java.util.ResourceBundle;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
+import tsl.StringUtil;
+
 /**
  * message bundle delegator (common in eclipse).
  * 
@@ -75,18 +77,35 @@ public class Messages {
     }
 
     /**
+     * markProblem
+     * @param key text to be wrapped
+     * @return {@link #TOKEN_MSG_NOTFOUND} + key + {@link #TOKEN_MSG_NOTFOUND}
+     */
+    public static String markProblem(String key) {
+        return TOKEN_MSG_NOTFOUND + key + TOKEN_MSG_NOTFOUND;
+    }
+    
+    /**
+     * delegates to {@link #getStringOpt(String, boolean)} with format = false.
+     */
+    public static String getStringOpt(String key) {
+        return getStringOpt(key, false);
+    }
+    
+    /**
      * optional translation. tries to get the translation from resoucebundle pool. if not found, the naming part of the
      * key will be returned.
      * 
      * @param key key
+     * @param format pre-format a key that wasn't found.
      * @return translated key , if found
      */
-    public static String getStringOpt(String key) {
+    public static String getStringOpt(String key, boolean format) {
         if (key.length() == 0) {
             return key;
         }
         String s = getString(key);
-        if (s.startsWith(TOKEN_MSG_NOTFOUND)) {
+        if (unknown(s)) {
             if (LOG.isTraceEnabled()) {
                 LOG.warn(key + " not found in messages.properties");
             }
@@ -94,6 +113,8 @@ public class Messages {
                 int i = key.lastIndexOf(".");
                 s = key.substring(i + 1);
             }
+            if (!s.contains("&") && format)
+                s = StringUtil.toFirstUpper(s);
         }
         return s;
     }
@@ -166,6 +187,13 @@ public class Messages {
     }
 
     /**
+     * simply delegates to {@link #unknown(String)}.
+     */
+    public static final boolean isMarkedAsProblem(String text) {
+        return unknown(text);
+    }
+    
+    /**
      * if a resource bundle key was not found (through {@link #getString(String)}, the key, surrounded with
      * {@link #TOKEN_MSG_NOTFOUND} will be returned as result. this result will be evaluated.
      * 
@@ -173,6 +201,6 @@ public class Messages {
      * @return true, if result contains {@link #TOKEN_MSG_NOTFOUND}.
      */
     public static final boolean unknown(String searchedKeyResult) {
-        return searchedKeyResult.startsWith(Messages.TOKEN_MSG_NOTFOUND);
+        return searchedKeyResult.startsWith(TOKEN_MSG_NOTFOUND) && searchedKeyResult.endsWith(TOKEN_MSG_NOTFOUND);
     }
 }

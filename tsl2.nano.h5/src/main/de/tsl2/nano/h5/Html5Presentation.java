@@ -9,7 +9,7 @@
  */
 package de.tsl2.nano.h5;
 
-import static de.tsl2.nano.h5.HtmlUtil.*;
+import static de.tsl2.nano.h5.HtmlUtil.ALIGN_CENTER;
 import static de.tsl2.nano.h5.HtmlUtil.ALIGN_RIGHT;
 import static de.tsl2.nano.h5.HtmlUtil.ATTR_ACCESSKEY;
 import static de.tsl2.nano.h5.HtmlUtil.ATTR_ACTION;
@@ -37,7 +37,7 @@ import static de.tsl2.nano.h5.HtmlUtil.ATTR_SELECTED;
 import static de.tsl2.nano.h5.HtmlUtil.ATTR_SIZE;
 import static de.tsl2.nano.h5.HtmlUtil.ATTR_SPAN;
 import static de.tsl2.nano.h5.HtmlUtil.ATTR_SRC;
-import static de.tsl2.nano.h5.HtmlUtil.ATTR_TEXT_ALIGN;
+import static de.tsl2.nano.h5.HtmlUtil.ATTR_STYLE;
 import static de.tsl2.nano.h5.HtmlUtil.ATTR_TITLE;
 import static de.tsl2.nano.h5.HtmlUtil.ATTR_TYPE;
 import static de.tsl2.nano.h5.HtmlUtil.ATTR_VALUE;
@@ -46,6 +46,7 @@ import static de.tsl2.nano.h5.HtmlUtil.BTN_ASSIGN;
 import static de.tsl2.nano.h5.HtmlUtil.COLOR_LIGHT_BLUE;
 import static de.tsl2.nano.h5.HtmlUtil.COLOR_LIGHT_GRAY;
 import static de.tsl2.nano.h5.HtmlUtil.COLOR_RED;
+import static de.tsl2.nano.h5.HtmlUtil.STYLE_TEXT_ALIGN;
 import static de.tsl2.nano.h5.HtmlUtil.TAG_BODY;
 import static de.tsl2.nano.h5.HtmlUtil.TAG_BUTTON;
 import static de.tsl2.nano.h5.HtmlUtil.TAG_CELL;
@@ -70,6 +71,7 @@ import static de.tsl2.nano.h5.HtmlUtil.VAL_ALIGN_LEFT;
 import static de.tsl2.nano.h5.HtmlUtil.VAL_ALIGN_RIGHT;
 import static de.tsl2.nano.h5.HtmlUtil.appendElement;
 import static de.tsl2.nano.h5.HtmlUtil.enable;
+import static de.tsl2.nano.h5.HtmlUtil.style;
 import static de.tsl2.nano.util.bean.def.IBeanCollector.MODE_ASSIGNABLE;
 import static de.tsl2.nano.util.bean.def.IBeanCollector.MODE_MULTISELECTION;
 
@@ -92,6 +94,7 @@ import de.tsl2.nano.action.IAction;
 import de.tsl2.nano.collection.CollectionUtil;
 import de.tsl2.nano.collection.MapUtil;
 import de.tsl2.nano.exception.ForwardedException;
+import de.tsl2.nano.format.GenericParser;
 import de.tsl2.nano.format.RegExpFormat;
 import de.tsl2.nano.log.LogFactory;
 import de.tsl2.nano.util.FileUtil;
@@ -104,13 +107,11 @@ import de.tsl2.nano.util.bean.def.BeanCollector;
 import de.tsl2.nano.util.bean.def.BeanDefinition;
 import de.tsl2.nano.util.bean.def.BeanPresentationHelper;
 import de.tsl2.nano.util.bean.def.BeanValue;
-import de.tsl2.nano.util.bean.def.IAttributeDefinition;
 import de.tsl2.nano.util.bean.def.IBeanCollector;
 import de.tsl2.nano.util.bean.def.IColumn;
 import de.tsl2.nano.util.bean.def.IPageBuilder;
 import de.tsl2.nano.util.bean.def.IPresentable;
 import de.tsl2.nano.util.bean.def.IPresentableColumn;
-import de.tsl2.nano.util.bean.def.IStatus;
 import de.tsl2.nano.util.bean.def.SecureAction;
 import de.tsl2.nano.util.bean.def.ValueExpressionFormat;
 
@@ -506,7 +507,8 @@ public class Html5Presentation<T> extends BeanPresentationHelper<T> implements I
             ATTR_BGCOLOR,
             COLOR_LIGHT_BLUE,
             "sortable");
-        appendElement(table, "caption", content(title));
+        if (Environment.get("html5.table.show.caption", false))
+            appendElement(table, "caption", content(title));
         Element colgroup = appendElement(table, TAG_ROW);
         for (int i = 0; i < columns.length; i++) {
             appendElement(colgroup, TAG_HEADERCELL, content(columns[i]));
@@ -526,7 +528,8 @@ public class Html5Presentation<T> extends BeanPresentationHelper<T> implements I
             ATTR_BGCOLOR,
             COLOR_LIGHT_BLUE,
             "sortable");
-        appendElement(table, "caption", content(title));
+        if (Environment.get("html5.table.show.caption", false))
+            appendElement(table, "caption", content(title));
         if (collector.getPresentable() != null)
             appendAttributes(table, collector.getPresentable());
         Element colgroup = appendElement(table, TAG_ROW);
@@ -645,15 +648,17 @@ public class Html5Presentation<T> extends BeanPresentationHelper<T> implements I
         if (beanValue.getAllowedValues() == null) {
             RegExpFormat regexpFormat = beanValue.getFormat() instanceof RegExpFormat ? (RegExpFormat) beanValue.getFormat()
                 : null;
+            String type = getType(beanValue);
             input = appendElement(cell,
                 TAG_INPUT,
+                /*content(getSuffix(regexpFormat)),*/
                 ATTR_TYPE,
-                getType(beanValue),
+                type,
                 ATTR_NAME,
                 beanValue.getName(),
                 ATTR_PATTERN,
                 regexpFormat != null ? regexpFormat.getPattern() : ".*",
-                ATTR_TEXT_ALIGN,
+                ATTR_STYLE,
                 getTextAlignmentAsStyle(beanValue.getPresentation().getStyle()),
                 ATTR_SIZE,/* 'width' doesn't work, so we set the displaying char-size */
                 "50",
@@ -666,7 +671,7 @@ public class Html5Presentation<T> extends BeanPresentationHelper<T> implements I
                 ATTR_MAXLENGTH,
                 (beanValue.length() > 0 ? String.valueOf(beanValue.length()) : String.valueOf(Integer.MAX_VALUE)),
                 ATTR_VALUE,
-                beanValue.getValueText(),
+                getValue(beanValue, type),
                 ATTR_TITLE,
                 beanValue.getDescription(),
                 "tabindex",
@@ -700,6 +705,23 @@ public class Html5Presentation<T> extends BeanPresentationHelper<T> implements I
             appendElement(row, TAG_CELL, content(beanValue.getStatus().message()));
         }
         return input;
+    }
+
+    private String getValue(BeanValue<?> beanValue, String type) {
+        IPresentable p = beanValue.getPresentation();
+        return type.startsWith("date") ? StringUtil.toString(beanValue.getValue()) : beanValue.getValueText();
+    }
+
+    private String getSuffix(RegExpFormat regexpFormat) {
+        return regexpFormat != null && regexpFormat.getDefaultFormatter() != null ? ((GenericParser) regexpFormat.getDefaultFormatter()).getPostfix()
+            : null;
+    }
+
+    private String getTextWithoutSuffix(String valueText, RegExpFormat regExpFormat) {
+        String suffix = getSuffix(regExpFormat);
+        if (suffix == null)
+            return valueText;
+        return StringUtil.substring(valueText, null, getSuffix(regExpFormat)).trim();
     }
 
     private String getTextAlignment(int style) {
@@ -750,6 +772,9 @@ public class Html5Presentation<T> extends BeanPresentationHelper<T> implements I
         case IPresentable.TYPE_OPTION:
             type = "checkbox";
             break;
+        case IPresentable.TYPE_DATE & IPresentable.TYPE_TIME:
+            type = "datetime";
+            break;
         case IPresentable.TYPE_DATE:
             type = "date";
             break;
@@ -757,8 +782,11 @@ public class Html5Presentation<T> extends BeanPresentationHelper<T> implements I
             type = "time";
             break;
         case IPresentable.TYPE_INPUT_NUMBER:
-            type = "number";
-            break;
+            //floatings are not supported in html input type=number
+            if (NumberUtil.isInteger(beanValue.getType())) {
+                type = "number";
+                break;
+            }
         case IPresentable.TYPE_INPUT_TEL:
             type = "tel";
             break;

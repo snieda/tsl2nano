@@ -189,7 +189,7 @@ public class Application extends NanoHTTPD {
             }
         } catch (Exception e) {
             RuntimeException ex = ForwardedException.toRuntimeEx(e, true);
-            msg = refreshPage(builder.decorate(ex.getMessage()));
+            msg = refreshPage(ex.getMessage());
             response = new NanoHTTPD.Response(HTTP_BADREQUEST, MIME_HTML, msg);
         }
         //TODO: eliminate bug in NanoHTTPD not resetting uri...
@@ -597,8 +597,7 @@ public class Application extends NanoHTTPD {
                     @Override
                     public StringBuffer format(Object obj, StringBuffer toAppendTo, FieldPosition pos) {
                         String name = StringUtil.substring((String) obj, null, BeanCollector.POSTFIX_COLLECTOR);
-                        toAppendTo.append(Environment.translate("tsl2nano.list", false) + " "
-                            + Environment.translate(name, true));
+                        toAppendTo.append(Environment.translate(name, true));
                         pos.setEndIndex(1);
                         return toAppendTo;
                     }

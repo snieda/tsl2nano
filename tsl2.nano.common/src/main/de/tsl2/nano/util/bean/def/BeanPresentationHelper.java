@@ -253,7 +253,7 @@ public class BeanPresentationHelper<T> {
         if (Number.class.isAssignableFrom(type)) {
             alignment = ALIGN_RIGHT;
         } else {
-            alignment = ALIGN_CENTER;
+            alignment = ALIGN_LEFT;
         }
         return alignment;
     }
@@ -339,7 +339,9 @@ public class BeanPresentationHelper<T> {
     public int getDefaultType(BeanAttribute attr) {
         int type = -1;
 
-        if (Time.class.isAssignableFrom(attr.getType())) {
+        if (Timestamp.class.isAssignableFrom(attr.getType())) {
+            type = TYPE_DATE & TYPE_TIME;
+        } else if (Time.class.isAssignableFrom(attr.getType())) {
             type = TYPE_TIME;
         } else if (Date.class.isAssignableFrom(attr.getType())) {
             type = TYPE_DATE;

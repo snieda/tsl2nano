@@ -12,6 +12,9 @@
    <property name="default.text.length">
       <object class="java.lang.Integer">100</object>
    </property>
+   <property name="html5.table.show.caption">
+      <object class="java.lang.Boolean">false</object>
+   </property>
    <property name="KistAmt.exort.file">
       <object class="java.lang.String">C:\idv\wjax\distribution\tsl-nano\tsl2.nano.h5\config/KistAmt.rtf</object>
    </property>
