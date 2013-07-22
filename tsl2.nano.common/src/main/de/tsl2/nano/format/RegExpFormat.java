@@ -72,11 +72,11 @@ import de.tsl2.nano.util.operation.IConverter;
  * @author ts 18.09.2008
  * @version $Revision: 1.0 $
  */
-@SuppressWarnings({"unchecked", "rawtypes"})
+@SuppressWarnings({ "unchecked", "rawtypes" })
 public class RegExpFormat extends Format implements INumberFormatCheck {
     private static final long serialVersionUID = 1L;
     private static final Log LOG = LogFactory.getLog(RegExpFormat.class);
-    @Element(data=true)
+    @Element(data = true)
     private String pattern;
     @Attribute
     private int regExpFlags;
@@ -84,9 +84,9 @@ public class RegExpFormat extends Format implements INumberFormatCheck {
     private int maxCharacterCount = -1;
     private transient Pattern compiledPattern;
     /** needed to format objects */
-    @Element(name="parser", required=false)
+    @Element(name = "parser", required = false)
     protected GenericParser<?> parser = null;
-    
+
     /** default: the full regexp must be matched on format or parse! */
     @Attribute
     boolean fullMatch = true;
@@ -131,7 +131,7 @@ public class RegExpFormat extends Format implements INumberFormatCheck {
     public static final String FORMAT_NUMBER = "[0-9]*";
 
     private static final Map<String, String> systemInitMap = new Hashtable<String, String>();
-    @ElementMap(attribute=true, inline=true, required=false, name="initmask", key="pattern")
+    @ElementMap(attribute = true, inline = true, required = false, name = "initmask", key = "pattern")
     Map<String, String> initMap = null;
     static {
         try {
@@ -235,7 +235,7 @@ public class RegExpFormat extends Format implements INumberFormatCheck {
      * @see Pattern Pattern for Flags description
      */
     public RegExpFormat(String pattern, String init, int maxCharacterCount, int regExpFlags) {
-        this(pattern, init, maxCharacterCount, regExpFlags, (Format)null);
+        this(pattern, init, maxCharacterCount, regExpFlags, (Format) null);
     }
 
     /**
@@ -263,7 +263,7 @@ public class RegExpFormat extends Format implements INumberFormatCheck {
         this.regExpFlags = regExpFlags;
         if (parser != null && !(parser instanceof RegExpFormat)) {
             isAbleToParse = true;
-            this.parser = new GenericParser(parser);
+            this.parser = (GenericParser<?>) (parser instanceof GenericParser ? parser : new GenericParser(parser));
         }
     }
 
@@ -382,8 +382,7 @@ public class RegExpFormat extends Format implements INumberFormatCheck {
         if (matches) {
             try {
                 obj = parser != null && isAbleToParse(parser) ? parser.parseObject(source + getParsingSuffix(parser,
-                    source))
-                    : matcher.group();
+                    source)) : matcher.group();
             } catch (final ParseException e) {
                 //            ForwardedException.forward(e);
                 LOG.error(e);
@@ -528,9 +527,7 @@ public class RegExpFormat extends Format implements INumberFormatCheck {
      */
     public static RegExpFormat createCurrencyRegExp() {
         final int dec = 11, fract = 2;
-        return new RegExpFormat(numberWithGrouping(dec, fract, false) + getCurrencyPostfix(),
-            null,
-            dec + fract + 3,//28082012ts: 1 -->3 to enable a number like 123456789 --> 123.456.789,00 €
+        return new RegExpFormat(numberWithGrouping(dec, fract, false) + getCurrencyPostfix(), null, dec + fract + 3,//28082012ts: 1 -->3 to enable a number like 123456789 --> 123.456.789,00 €
             0,
             getCurrencyFormat());
     }
@@ -604,7 +601,7 @@ public class RegExpFormat extends Format implements INumberFormatCheck {
     protected static final String getCurrencyPostfix(String symbol) {
         return "( " + symbol + "){0,1}";
     }
-    
+
     /**
      * creates a regular expresssion for the given type of number
      * 
@@ -636,8 +633,11 @@ public class RegExpFormat extends Format implements INumberFormatCheck {
      * @return new formatter for the given number
      */
     public static RegExpFormat createNumberRegExp(int dec, int fract, Class<?> type) {
-        return new RegExpFormat(numberWithGrouping(dec, fract, false), null, dec + fract + 1, 0, new GenericParser(
-            type, null, null, fract));
+        return new RegExpFormat(numberWithGrouping(dec, fract, false),
+            null,
+            dec + fract + 1,
+            0,
+            new GenericParser(type, null, null, fract));
     }
 
     /**
@@ -657,8 +657,11 @@ public class RegExpFormat extends Format implements INumberFormatCheck {
      * @return regexp for a german date
      */
     public static RegExpFormat createDateRegExp() {
-        RegExpFormat regExp = new RegExpFormat(FORMAT_DATE_DE, DateFormat.getDateInstance()
-            .format(getInitialDate()), 10, 0, FormatUtil.getDefaultFormat(Date.class, true));
+        RegExpFormat regExp = new RegExpFormat(FORMAT_DATE_DE,
+            DateFormat.getDateInstance().format(getInitialDate()),
+            10,
+            0,
+            new GenericParser(Date.class));
         return regExp;
     }
 
@@ -668,8 +671,11 @@ public class RegExpFormat extends Format implements INumberFormatCheck {
      * @return regexp for a german time
      */
     public static RegExpFormat createTimeRegExp() {
-        RegExpFormat regExp = new RegExpFormat(FORMAT_DATE_DE, DateFormat.getTimeInstance()
-            .format(getInitialDate()), 8, 0, FormatUtil.getDefaultFormat(Time.class, true));
+        RegExpFormat regExp = new RegExpFormat(FORMAT_DATE_DE,
+            DateFormat.getTimeInstance().format(getInitialDate()),
+            8,
+            0,
+            new GenericParser(Time.class));
         return regExp;
     }
 
@@ -680,7 +686,7 @@ public class RegExpFormat extends Format implements INumberFormatCheck {
      */
     public static RegExpFormat createDateTimeRegExp() {
         RegExpFormat regExp = new RegExpFormat(FORMAT_DATETIME_DE, DateFormat.getDateTimeInstance()
-            .format(getInitialDate()), 19, 0, FormatUtil.getDefaultFormat(Timestamp.class, true));
+            .format(getInitialDate()), 19, 0, new GenericParser(Timestamp.class));
         return regExp;
     }
 
@@ -703,10 +709,7 @@ public class RegExpFormat extends Format implements INumberFormatCheck {
             int regExpFlags) {
         assert minLength >= 0 : "minLength must be >= 0";
         assert maxLength >= minLength : "maxLength must be >= minLength";
-        return new RegExpFormat(pattern + "{" + minLength + "," + maxLength + "}",
-            init,
-            maxLength,
-            regExpFlags);
+        return new RegExpFormat(pattern + "{" + minLength + "," + maxLength + "}", init, maxLength, regExpFlags);
     }
 
     /**
@@ -925,6 +928,8 @@ public class RegExpFormat extends Format implements INumberFormatCheck {
      * @return empty or filled suffix
      */
     protected static String getParsingSuffix(Format format, String txt) {
+        if (format instanceof GenericParser)
+            format = ((GenericParser) format).getParsingFormat();
         //TODO: its a workaround to handle the currency format. use the positive/negative prefix and suffix
         if (format instanceof DecimalFormat) {
             final StringBuffer s = new StringBuffer();
@@ -957,8 +962,8 @@ public class RegExpFormat extends Format implements INumberFormatCheck {
     /**
      * on default this method returns true, if the underlying {@link #parser} is a {@link NumberFormat}.
      * <p/>
-     * override this method if you have a {@link #parser} that is not of type {@link NumberFormat} but you
-     * want a field to displayed like a number (e.g. in a table-column as right-alignment).
+     * override this method if you have a {@link #parser} that is not of type {@link NumberFormat} but you want a field
+     * to displayed like a number (e.g. in a table-column as right-alignment).
      * 
      * @return true, if this format instance asserts to be a number format
      */
@@ -978,7 +983,8 @@ public class RegExpFormat extends Format implements INumberFormatCheck {
     }
 
     /**
-     * delegates to {@link #getParser(Class, String, String, String, IConverter, boolean)} using @id attribute and cache.
+     * delegates to {@link #getParser(Class, String, String, String, IConverter, boolean)} using @id attribute and
+     * cache.
      */
     public static <TYPE> RegExpFormat getParser(final Class<TYPE> type,
             String pattern,
@@ -1100,12 +1106,12 @@ public class RegExpFormat extends Format implements INumberFormatCheck {
     @Persist
     private void initSerialization() {
         //remove copied entries of systeminitmap - if it is not the systemInitMap itself!
-        if (initMap != systemInitMap)
+        if (initMap != null && initMap != systemInitMap)
             MapUtil.removeAll(initMap, systemInitMap);
         else
             initMap = null;
     }
-    
+
     private void readObject(java.io.ObjectInputStream in) throws IOException, ClassNotFoundException {
         in.defaultReadObject();
         initDeserialization();
@@ -1118,6 +1124,5 @@ public class RegExpFormat extends Format implements INumberFormatCheck {
         //TODO: this will overwrite configured data!!!
         initMap.putAll(systemInitMap);
     }
-
 
 }

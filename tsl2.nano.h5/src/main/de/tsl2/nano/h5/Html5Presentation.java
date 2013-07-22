@@ -434,7 +434,7 @@ public class Html5Presentation<T> extends BeanPresentationHelper<T> implements I
      * @return html button element
      */
     Element createAction(Element cell, String id, String type, String image) {
-        return createAction(cell, id, id, type, image, true, false, false);
+        return createAction(cell, id, Environment.translate(id, true), type, image, true, false, false);
     }
 
     /**

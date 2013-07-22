@@ -194,6 +194,7 @@ public class ValueExpression<TYPE> implements IConverter<TYPE, String>, Serializ
         if (hasArguments) {
             Map<String, Object> valueMap = BeanUtil.toValueMap(fromValue, false, false, true, attributes);
             Object[] args = valueMap.values().toArray();
+            StringUtil.replaceNulls(args, false);
             //check for entity beans to resolve their format recursive through it's valueexpression
             preformatBeans(args);
             return isMessageFormat() ? MessageFormat.format(format, args) : String.format(format, args);

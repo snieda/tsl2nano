@@ -645,7 +645,10 @@ public class BeanCollector<COLLECTIONTYPE extends Collection<T>, T> extends Bean
         Collection<IPresentableColumn> columns = getColumnDefinitions();
         for (IPresentableColumn c : columns) {
             if (c.getSortIndex() != IPresentable.UNDEFINED)
-                ((ValueColumn) c).sortIndex++;
+                if (c.getSortIndex() < columns.size())
+                    ((ValueColumn) c).sortIndex++;
+                else
+                    ((ValueColumn) c).sortIndex = IPresentable.UNDEFINED;
         }
     }
 
@@ -671,12 +674,13 @@ public class BeanCollector<COLLECTIONTYPE extends Collection<T>, T> extends Bean
         Comparator<T> comparator = new Comparator<T>() {
             @Override
             public int compare(T o1, T o2) {
-                int c;
+                int ci, c;
                 for (int i = 0; i < sortIndexes.length; i++) {
-                    c = getColumnText(o1, i).compareTo(getColumnText(o2, i));
+                    ci = sortIndexes[i];
+                    c = getColumnText(o1, ci).compareTo(getColumnText(o2, ci));
                     if (c != 0) {
                         //TODO: check performance!
-                        c = getColumn(i).isSortUpDirection() ? c : -1 * c;
+                        c = getColumn(ci).isSortUpDirection() ? c : -1 * c;
                         return c;
                     }
                 }

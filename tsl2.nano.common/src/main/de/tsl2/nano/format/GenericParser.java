@@ -26,7 +26,7 @@ import org.simpleframework.xml.Attribute;
 /**
  * is able to format the given type to a string and to parse a string into an object of the given type. uses
  * {@link DefaultFormat} to format to a string and {@link FormatUtil} and {@link RegExpFormat} to parse a
- * string to an object.
+ * string to an object. is able to be xml-serialized.
  * 
  * @author Thomas Schneider
  * @version $Revision$
@@ -87,6 +87,9 @@ public class GenericParser<T> extends DefaultFormat implements INumberFormatChec
                 else
                     parsingType = (Class<T>) Date.class;
             }
+        } else {
+            if (type == null)
+                parsingType = (Class<T>) String.class;
         }
         if (format instanceof RegExpFormat) {
             parsingPattern = ((RegExpFormat)format).getPattern();

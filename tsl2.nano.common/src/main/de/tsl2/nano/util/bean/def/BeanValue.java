@@ -363,19 +363,16 @@ public class BeanValue<T> extends AttributeDefinition<T> implements IValueDefini
                 BeanCollector<?, ?> beanCollector;
                 if (isMultiValue()) {
                     Collection<T> collection = (Collection<T>) getValue();
-                    if (collection == null) {
+                    beanCollector = BeanCollector.getBeanCollector((Class<T>) getGenericType(), collection, MODE_ALL);
+                    if (collection == null)
                         collection = new ListSet<T>();
-                        beanCollector = BeanCollector.getBeanCollector((Class<T>) getGenericType(), null, MODE_ALL);
-                    } else {
-                        beanCollector = BeanCollector.getBeanCollector((Class<T>) getGenericType(),
-                            collection,
-                            MODE_ALL);
-                    }
                     setValue((T) collection);
                     beanCollector.setSelectionProvider(new SelectionProvider(beanCollector.getCurrentData()));
                 } else {
                     LinkedList<T> selection = new LinkedList<T>();
-                    selection.add(getValue());
+                    T v = getValue();
+                    if (v != null)
+                        selection.add(v);
                     beanCollector = BeanCollector.getBeanCollector(getType(), selection, MODE_ALL_SINGLE);
                     beanCollector.setSelectionProvider(new SelectionProvider(selection));
                 }

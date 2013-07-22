@@ -12,6 +12,7 @@ package de.tsl2.nano.util;
 import java.math.BigInteger;
 import java.security.MessageDigest;
 import java.text.MessageFormat;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.Map;
 import java.util.Properties;
@@ -507,5 +508,16 @@ public class StringUtil {
      */
     public static final String toHexString(byte[] bytes) {
         return new BigInteger(1, bytes).toString(16);
+    }
+    
+    /**
+     * checks, whether data is contained in c.
+     * @param entry to check
+     * @param c collection of available entries
+     * @return true, if data is equal to one of c.
+     */
+    public static final boolean in(String entry, String...c) {
+        assert c.length > 0 : "c must contain at least one element";
+        return Arrays.asList(c).contains(entry);
     }
 }
