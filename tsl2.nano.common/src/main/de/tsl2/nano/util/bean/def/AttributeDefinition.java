@@ -65,6 +65,8 @@ public class AttributeDefinition<T> extends BeanAttribute implements IAttributeD
     private IPresentable presentable;
     private IPresentableColumn columnDefinition;
     private boolean doValidation = true;
+    /** see {@link #composition()} */
+    private boolean composition;
 
     private static final Log LOG = LogFactory.getLog(AttributeDefinition.class);
 
@@ -93,6 +95,7 @@ public class AttributeDefinition<T> extends BeanAttribute implements IAttributeD
                 setBasicDef(def.length(), def.nullable(), null, null, null);
                 setNumberDef(def.scale(), def.precision());
                 temporalType = def.temporalType();
+                composition = def.composition();
             }
         }
         initDeserialization();
@@ -351,18 +354,19 @@ public class AttributeDefinition<T> extends BeanAttribute implements IAttributeD
             if (!nullable() && value == null) {
                 status = Status.illegalArgument(getId(), value, "not null");
             } else if (value != null) {
+                String fval = value instanceof String ? (String)value : getFormat().format(value);
                 if (!PrimitiveUtil.isAssignableFrom(getType(), value.getClass())) {
-                    status = Status.illegalArgument(getId(), value, getType());
-                } else if (value instanceof String && parse((String) value) == null) {
-                    status = Status.illegalArgument(getId(), value, "format '" + format + "'");
-                } else if (!(value instanceof String) && getFormat().format(value) == null) {
-                    status = Status.illegalArgument(getId(), value, "format '" + format + "'");
+                    status = Status.illegalArgument(getId(), fval, getType());
+                } else if (value instanceof String && parse(fval) == null) {
+                    status = Status.illegalArgument(getId(), fval, "format '" + format + "'");
+                } else if (!(value instanceof String) && fval == null) {
+                    status = Status.illegalArgument(getId(), fval, "format '" + format + "'");
                 } else if (min != null && min.compareTo(value) > 0) {
-                    status = Status.illegalArgument(getId(), value, " greater than " + min);
-                } else if (max != null && min.compareTo(value) > 0) {
-                    status = Status.illegalArgument(getId(), value, " lower than " + max);
-                } else if (length > 0 && value.toString().length() > length) {
-                    status = Status.illegalArgument(getId(), value, " a maximum-length of " + length);
+                    status = Status.illegalArgument(getId(), fval, " greater than " + min);
+                } else if (max != null && max.compareTo(value) < 0) {
+                    status = Status.illegalArgument(getId(), fval, " lower than " + max);
+                } else if (length > 0 && fval.length() > length) {
+                    status = Status.illegalArgument(getId(), fval, " a maximum-length of " + length);
                 }
             }
             //TODO: check numbers on scale and precision
@@ -567,6 +571,14 @@ public class AttributeDefinition<T> extends BeanAttribute implements IAttributeD
      */
     public void setDoValidation(boolean doValidation) {
         this.doValidation = doValidation;
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public boolean composition() {
+        return composition;
     }
 
 }

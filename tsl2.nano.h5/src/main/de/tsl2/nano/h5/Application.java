@@ -37,13 +37,13 @@ import de.tsl2.nano.collection.CollectionUtil;
 import de.tsl2.nano.collection.ListSet;
 import de.tsl2.nano.collection.MapUtil;
 import de.tsl2.nano.exception.ForwardedException;
-import de.tsl2.nano.execution.Profiler;
 import de.tsl2.nano.execution.ScriptUtil;
 import de.tsl2.nano.format.RegExpFormat;
 import de.tsl2.nano.log.LogFactory;
 import de.tsl2.nano.persistence.HibernateBeanContainer;
 import de.tsl2.nano.persistence.Persistence;
 import de.tsl2.nano.persistence.PersistenceClassLoader;
+import de.tsl2.nano.script.ScriptTool;
 import de.tsl2.nano.service.util.BeanContainerUtil;
 import de.tsl2.nano.util.DateUtil;
 import de.tsl2.nano.util.FileUtil;
@@ -291,9 +291,12 @@ public class Application extends NanoHTTPD {
                 if (!isCanceled(parms) && provideSelection((BeanCollector) model, parms)) {
                     if (isReturn(parms)) {
                         responseObject = null;
-                    } else {
+                    } else if (isOpenAction(parms, (BeanCollector) model)){
                         //normally, after a selection the navigation object will be hold on stack
-                        responseObject = model;
+                        if (Environment.get("application.edit.multiple", true))
+                            responseObject = putSelectionOnStack((BeanCollector) model);
+                        else
+                            responseObject = model;
                     }
                 }
             }
@@ -343,6 +346,22 @@ public class Application extends NanoHTTPD {
         return responseObject;
     }
 
+    private BeanDefinition<?> putSelectionOnStack(BeanCollector c) {
+        Collection selection = (Collection) c.getSelectionProvider().getValue();
+        BeanDefinition<?> firstElement = null;
+        BeanDefinition<?> bean;
+        for (Object object : selection) {
+            bean = (BeanDefinition<?>) (object instanceof BeanDefinition ? object : Bean.getBean((Serializable) object));
+            //don't add the first element, see behaviour in getNextModel()
+            if (firstElement != null) {
+                navigation.add(bean);
+            } else {
+                firstElement = bean;
+            }
+        }
+        return firstElement;
+    }
+
     private IAction<?> getAction(Collection<IAction> actions, String id) {
         if (actions != null) {
             for (IAction a : actions) {
@@ -361,6 +380,27 @@ public class Application extends NanoHTTPD {
         return isCanceled(parms) || parms.containsKey(BTN_ASSIGN) || parms.containsKey(BTN_SUBMIT);
     }
 
+    protected <T> boolean isOpenAction(Properties parms, BeanCollector<?, T> model) {
+        for (Object k : parms.keySet()) {
+            if (isOpenAction((String)k, model))
+                return true;
+        }
+        return false;
+    }
+
+    protected <T> boolean isOpenAction(String actionId, BeanCollector<?, T> model) {
+        return actionId.equals(BeanContainer.getActionId(model.getClazz(), true, "open"));
+    }
+
+
+    protected <T> boolean isSearchRequest(Properties parms, BeanCollector<?, T> model) {
+        for (Object k : parms.keySet()) {
+            if (isSearchRequest((String)k, model))
+                return true;
+        }
+        return false;
+    }
+
     protected <T> boolean isSearchRequest(String actionId, BeanCollector<?, T> model) {
         return actionId.equals(BeanContainer.getActionId(model.getClazz(), true, "search"));
     }
@@ -373,7 +413,11 @@ public class Application extends NanoHTTPD {
             Bean<?> to = (Bean<?>) filterBean.getValueAsBean("to");
 
             from.getPresentationHelper().change(BeanPresentationHelper.PROP_DOVALIDATION, false);
+            from.setAttributeFilter("name");
+            from.setName(null);
             to.getPresentationHelper().change(BeanPresentationHelper.PROP_DOVALIDATION, false);
+            to.setAttributeFilter("name");
+            to.setName(null);
 
             for (String p : parms.stringPropertyNames()) {
                 String rowName = StringUtil.substring(p, null, ".", true);
@@ -492,6 +536,8 @@ public class Application extends NanoHTTPD {
      */
     @SuppressWarnings("rawtypes")
     private void removeUnpersistedNewEntities(BeanCollector collector) {
+        if (!BeanContainer.instance().isPersistable(collector.getBeanFinder().getType()))
+            return;
         Collection currentData = collector.getCurrentData();
         for (Iterator iterator = currentData.iterator(); iterator.hasNext();) {
             Object item = iterator.next();
@@ -581,16 +627,30 @@ public class Application extends NanoHTTPD {
                 Environment.addService(IBeanContainer.class, BeanContainer.instance());
 
                 LOG.debug("creating collector for: ");
-                List<BeanCollector> types = new ArrayList<BeanCollector>(beanClasses.size());
+                List types = new ArrayList(beanClasses.size());
                 for (Class cls : beanClasses) {
                     LOG.debug("creating collector for: " + cls);
                     BeanCollector collector = BeanCollector.getBeanCollector(cls, null, MODE_EDITABLE | MODE_CREATABLE
                         | MODE_MULTISELECTION
-                        | MODE_SEARCHABLE);
+                        | MODE_SEARCHABLE, null);
 //                    collector.setPresentationHelper(new Html5Presentation(collector));
                     types.add(collector);
                 }
-                BeanCollector root = new BeanCollector(BeanCollector.class, types, MODE_EDITABLE | MODE_SEARCHABLE);
+                /*
+                 * Perhaps show the script tool to do direct sql or ant
+                 */
+                if (Environment.get("application.show.scripttool", true)) {
+                    ScriptTool tool = new ScriptTool();
+                    Bean beanTool = new Bean(tool);
+                    beanTool.setAttributeFilter("text", "result", "resourceFile", "selectionAction");
+                    beanTool.getAttribute("text").getPresentation().setType(IPresentable.TYPE_INPUT_MULTILINE);
+                    beanTool.getAttribute("result").getPresentation().setType(IPresentable.TYPE_TABLE);
+                    beanTool.getAttribute("sourceFile").getPresentation().setType(IPresentable.TYPE_ATTACHMENT);
+                    beanTool.getAttribute("selectedAction").setRange(tool.availableActions());
+                    beanTool.addAction(tool.runner());
+                    types.add(beanTool);
+                }
+                BeanCollector root = new BeanCollector(BeanCollector.class, types, MODE_EDITABLE | MODE_SEARCHABLE, null);
                 root.setName(StringUtil.toFirstUpper(StringUtil.substring(persistence.getJarFile(), "/", ".jar", true)));
                 root.setAttributeFilter("name");
                 root.getAttribute("name").setFormat(new Format() {

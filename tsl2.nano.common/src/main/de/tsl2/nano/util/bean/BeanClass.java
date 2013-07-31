@@ -34,6 +34,7 @@ import org.simpleframework.xml.DefaultType;
 
 import de.tsl2.nano.action.CommonAction;
 import de.tsl2.nano.action.IAction;
+import de.tsl2.nano.collection.ListSet;
 import de.tsl2.nano.exception.FormattedException;
 import de.tsl2.nano.exception.ForwardedException;
 import de.tsl2.nano.util.NumberUtil;
@@ -672,9 +673,29 @@ public class BeanClass<T> implements Serializable {
     }
 
     /**
+     * wraps all attributes having a collection as value into a new {@link ListSet} instance to unbind a {@link #clone()} instance.
+     * @param src instance to wrap the attribute values for
+     * @return the instance itself
+     */
+    public static <S> S createOwnCollectionInstances(S src) {
+        BeanClass<S> bc = new BeanClass(src.getClass());
+        List<BeanAttribute> attributes = bc.getAttributes();
+        for (BeanAttribute a : attributes) {
+            if (Collection.class.isAssignableFrom(a.getType())) {
+                Collection v = (Collection) a.getValue(src);
+                if (v != null) {
+                    LOG.debug("creating own collection instance for " + a.getName() + " with" + v.size() + " elements");
+                    a.setValue(src, new ListSet(v));
+                }
+            }
+        }
+        return src;
+    }
+    
+    /**
      * sets all attributes from src to the value of a new created instance (mostly null values). if no attributeNames
      * are defined, all source attributes will be copied.
-     * <p>
+     * <p>f
      * Warning: Works only, if src class provides a default constructor. not performance optimized!
      * 
      * @param src source bean

@@ -167,8 +167,12 @@ public class FilteringIterator<E> implements ListIterator<E> {
             @Override
             public Object invoke(Object proxy, Method method, Object[] args) throws Throwable {
                 Object result = method.invoke(iterable, args);
-                if (Iterator.class.isAssignableFrom(method.getReturnType()))
+                if (Iterator.class.isAssignableFrom(method.getReturnType())) {
                     result = new FilteringIterator<T>(iterable, predicate);
+                } else {
+                    result = method.invoke(iterable, args);
+                }
+                
 //              else if (iterator == null && method.getName().equals("size")) {
 //              iterator = new FilteringIterator<T>(iterable, predicate);
 //              int size = 0;
@@ -203,9 +207,11 @@ public class FilteringIterator<E> implements ListIterator<E> {
 
             @Override
             public Object invoke(Object proxy, Method method, Object[] args) throws Throwable {
-                Object result = method.invoke(map, args);
+                Object result;
                 if (method.getName().equals("keySet"))
                     result = new FilteringIterator<T>((Iterable<T>) map.keySet(), predicate);
+                else
+                    result = method.invoke(map, args);
                 return result;
             }
         });

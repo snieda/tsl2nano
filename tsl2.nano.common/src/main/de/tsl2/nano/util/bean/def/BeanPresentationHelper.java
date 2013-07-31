@@ -320,6 +320,10 @@ public class BeanPresentationHelper<T> {
     }
 
     public int getDefaultType(AttributeDefinition<?> attr) {
+        if (attr.temporalType() != null && Timestamp.class.isAssignableFrom(attr.temporalType()))
+            return IPresentable.TYPE_DATE | IPresentable.TYPE_TIME;
+        if (attr.temporalType() != null && Time.class.isAssignableFrom(attr.temporalType()))
+            return IPresentable.TYPE_TIME;
         int type = getDefaultType((BeanAttribute) attr);
         if (attr.length() > Environment.get("field.min.multiline.length", 100))
             type |= IPresentable.TYPE_INPUT_MULTILINE;
@@ -340,7 +344,7 @@ public class BeanPresentationHelper<T> {
         int type = -1;
 
         if (Timestamp.class.isAssignableFrom(attr.getType())) {
-            type = TYPE_DATE & TYPE_TIME;
+            type = TYPE_DATE | TYPE_TIME;
         } else if (Time.class.isAssignableFrom(attr.getType())) {
             type = TYPE_TIME;
         } else if (Date.class.isAssignableFrom(attr.getType())) {
@@ -980,60 +984,61 @@ public class BeanPresentationHelper<T> {
             presActions = new ArrayList<IAction>(10);
 
             if (bean.isMultiValue()) {
-                final BeanCollector<?, T> collector = (BeanCollector<?, T>) bean;
-                presActions.add(new SecureAction(bean.getClazz(),
-                    "back",
-                    IAction.MODE_UNDEFINED,
-                    false,
-                    "icons/back.png") {
-                    @Override
-                    public Object action() throws Exception {
-                        collector.getBeanFinder().previous();
-                        return bean;
-                    }
+                if (BeanContainer.instance().isPersistable(((BeanCollector) bean).getType())) {
+                    final BeanCollector<?, T> collector = (BeanCollector<?, T>) bean;
+                    presActions.add(new SecureAction(bean.getClazz(),
+                        "back",
+                        IAction.MODE_UNDEFINED,
+                        false,
+                        "icons/back.png") {
+                        @Override
+                        public Object action() throws Exception {
+                            collector.getBeanFinder().previous();
+                            return bean;
+                        }
 
-                    @Override
-                    public boolean isEnabled() {
-                        return super.isEnabled() && collector.getCurrentData().size() > 0;
-                    }
-                });
+                        @Override
+                        public boolean isEnabled() {
+                            return super.isEnabled() && collector.getCurrentData().size() > 0;
+                        }
+                    });
 
-                presActions.add(new SecureAction(bean.getClazz(),
-                    "forward",
-                    IAction.MODE_UNDEFINED,
-                    false,
-                    "icons/forward.png") {
-                    @Override
-                    public Object action() throws Exception {
-                        collector.getBeanFinder().next();
-                        return bean;
-                    }
+                    presActions.add(new SecureAction(bean.getClazz(),
+                        "forward",
+                        IAction.MODE_UNDEFINED,
+                        false,
+                        "icons/forward.png") {
+                        @Override
+                        public Object action() throws Exception {
+                            collector.getBeanFinder().next();
+                            return bean;
+                        }
 
-                    @Override
-                    public boolean isEnabled() {
-                        return super.isEnabled() && collector.getCurrentData().size() > 0;
-                    }
-                });
+                        @Override
+                        public boolean isEnabled() {
+                            return super.isEnabled() && collector.getCurrentData().size() > 0;
+                        }
+                    });
 
-                presActions.add(new SecureAction(bean.getClazz(),
-                    "switchrelations",
-                    IAction.MODE_UNDEFINED,
-                    false,
-                    "icons/links.png") {
-                    @Override
-                    public Object action() throws Exception {
-                        collector.setMode(NumberUtil.toggleBits(collector.getWorkingMode(),
-                            IBeanCollector.MODE_SHOW_MULTIPLES));
-                        collector.getSearchAction().activate();
-                        return bean;
-                    }
+                    presActions.add(new SecureAction(bean.getClazz(),
+                        "switchrelations",
+                        IAction.MODE_UNDEFINED,
+                        false,
+                        "icons/links.png") {
+                        @Override
+                        public Object action() throws Exception {
+                            collector.setMode(NumberUtil.toggleBits(collector.getWorkingMode(),
+                                IBeanCollector.MODE_SHOW_MULTIPLES));
+                            collector.getSearchAction().activate();
+                            return bean;
+                        }
 
-                    @Override
-                    public boolean isEnabled() {
-                        return super.isEnabled() && ((IBeanCollector<?, T>) bean).getCurrentData().size() > 0;
-                    }
-                });
-
+                        @Override
+                        public boolean isEnabled() {
+                            return super.isEnabled() && ((IBeanCollector<?, T>) bean).getCurrentData().size() > 0;
+                        }
+                    });
+                }
                 presActions.add(new SecureAction(bean.getClazz(),
                     "selectall",
                     IAction.MODE_UNDEFINED,

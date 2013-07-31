@@ -124,7 +124,6 @@ public class BeanFinder<T, F> implements IBeanFinder<T, F>, Serializable {
         if (fromFilter == null || toFilter == null) {
             return new LinkedList<T>(BeanContainer.instance().getBeans(getType(), currentStartIndex, getMaxResultCount()));
         } else {
-            //TODO: add currentStartIndex if available on getBeansBetween
             return new LinkedList(BeanContainer.instance().getBeansBetween(fromFilter, toFilter, currentStartIndex, getMaxResultCount()));
         }
     }

@@ -30,4 +30,5 @@ Bundle-ClassPath: .,
  lib/dom4j-1.6.1.jar,
  lib/javassist-3.12.0.GA.jar
 Export-Package: de.tsl2.nano.persistence,
+ de.tsl2.nano.script,
  org.hibernate

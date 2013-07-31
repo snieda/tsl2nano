@@ -341,6 +341,16 @@ public abstract class CommonAction<RETURNTYPE> implements IAction<RETURNTYPE>, S
         return keyStroke;
     }
 
+    @Override
+    public boolean equals(Object obj) {
+        return hashCode() == obj.hashCode();
+    }
+    
+    @Override
+    public int hashCode() {
+        return id.hashCode();
+    }
+    
     /**
      * {@inheritDoc}
      */

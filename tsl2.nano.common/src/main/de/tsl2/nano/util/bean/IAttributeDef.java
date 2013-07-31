@@ -32,7 +32,14 @@ public interface IAttributeDef {
 
     /** should be true, if this attribute defines the id of the owning bean */
     boolean id();
-    
+
     /** returns {@link Date}, {@link Time} or {@link Timestamp} depending on temporal type annotation - or null. */
     Class<? extends Date> temporalType();
+
+    /**
+     * like an uml composition, this attribute as one-to-many child can't exist without it's parent
+     * 
+     * @return true, if attribute cannot exist without it's parent bean.
+     */
+    boolean composition();
 }

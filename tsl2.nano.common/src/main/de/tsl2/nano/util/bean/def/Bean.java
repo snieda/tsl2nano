@@ -642,6 +642,12 @@ public class Bean<T> extends BeanDefinition<T> {
         }
     }
 
+    @Override
+    public void setName(String name) {
+        super.setName(name);
+        asString = null;
+    }
+    
     public String toStringDescription() {
         final Collection<BeanAttribute> attributes = getAttributes();
         final StringBuilder buf = new StringBuilder(attributes.size() * 15);

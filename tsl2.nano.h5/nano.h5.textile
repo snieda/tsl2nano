@@ -90,30 +90,32 @@ h2. TODOs
 * Styling (Collector, Details)
 * Show Progress-Page (using Statistics)
 * *Html-Table:*
-** (x) Sorting-Header
+** (v) Sorting-Header
 ** (v) Previous, Next
-** Style
+** Style (of sorting header etc.)
 ** up, down (for sorting values)
-* If search result is only one element, select it
-* Searches on big data:
+* (v) If search result is only one element, select it
+* *Searches on big data:*
 ** first count data
-** (x) checkbox to show one-to-many in table
+** (v) button to show one-to-many in table
 ** use thread to be interupted
-* internal export and view (replacing ant-like variables and showing the document)
+* (x) internal export and view (replacing ant-like variables and showing the document)
 * generate const class from property file
 * create xsd in through CommonTest with trang.jar
-* add configuration action (html-tool to edit xml files)
-* ConfigBeanContainer to configure BeanDefinition for special beans
+* (x) add configuration action (html-tool to edit xml files)
+** ConfigBeanContainer to configure BeanDefinition for special beans
 * *Nice-To-Have*
 ** eval validation annotations
 ** BeanPresenterHelper: test OptionsWrapper
+** min-search-field + button ==> max-search-field visible. standard: filtering with astericks
 * *Refactoring:*
 ** (v) RegularExpressionFormat ==> RegExpFormat
 ** refactore ScriptUtil: extract Ant calls
 ** util.bean ==> bean
 ** nano.h5 ==> fullrelation
 ** extract bean-package as project
-** file-access: use Environment.getResource() reading through jar or file system
+** refactore environment property names to use logic path-algorithm
+** (x) file-access: use Environment.getResource() reading through jar or file system
 ** extract api
 * *Interfaces:*
 ** java-interface-jar filled with BeanProxy to be used as mocks
@@ -125,3 +127,11 @@ h2. TODOs
 * Validate against Html5-xsd in debug mode
 * include LogicTable?
 * check starting application multiple times
+* (x) on multiple selection, put all selected elements to the stack
+* *Problem: creating a new element, copying an existing one, one-to-many connections will be lost*
+** depends on the datamodel: gruppe --> grupperolle(only for specific gruppe) --> rolle
+*** The new item has to be put to the list of it's parent container. This list has to be saved before the new item!
+*** The beancollector now holds a 
+* *Problem: Filtering on Entities doesn't work (findBetween is not able to do a between for 'entity-columns')*
+* *Problem: Filtering BeanCollectors of Entities doesn't work after sorting twice*
+* internationalization: english RegExpFormat, messages.properties

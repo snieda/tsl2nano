@@ -532,12 +532,12 @@ public class Html5Presentation<T> extends BeanPresentationHelper<T> implements I
             appendElement(table, "caption", content(title));
         if (collector.getPresentable() != null)
             appendAttributes(table, collector.getPresentable());
-        Element colgroup = appendElement(table, TAG_ROW);
+        Element colgroup = appendElement(table, TAG_ROW, ATTR_BORDER, "1");
         if (collector.hasMode(MODE_MULTISELECTION))
             appendElement(colgroup, TAG_HEADERCELL, content());
         Collection<IPresentableColumn> columns = collector.getColumnDefinitions();
         for (IPresentableColumn c : columns) {
-            Element th = appendElement(colgroup, TAG_HEADERCELL, "style", "-webkit-transform: scale(1.4);");
+            Element th = appendElement(colgroup, TAG_HEADERCELL, ATTR_BORDER, "1", "style", "-webkit-transform: scale(1.4);");
             createAction(th, c.getSortingAction(collector));
         }
         return appendElement(table, TAG_TBODY);
@@ -772,14 +772,14 @@ public class Html5Presentation<T> extends BeanPresentationHelper<T> implements I
         case IPresentable.TYPE_OPTION:
             type = "checkbox";
             break;
-        case IPresentable.TYPE_DATE & IPresentable.TYPE_TIME:
+        case IPresentable.TYPE_DATE | IPresentable.TYPE_TIME:
             type = "datetime";
-            break;
-        case IPresentable.TYPE_DATE:
-            type = "date";
             break;
         case IPresentable.TYPE_TIME:
             type = "time";
+            break;
+        case IPresentable.TYPE_DATE:
+            type = "date";
             break;
         case IPresentable.TYPE_INPUT_NUMBER:
             //floatings are not supported in html input type=number

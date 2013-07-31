@@ -328,6 +328,11 @@ public class CommonTest {
         Assert.assertEquals(Arrays.asList("Anton", "Berta", "Carsten0", "Carsten1"),
             CollectionUtil.getList(filteredBetween.iterator()));
 
+        //do it again
+        filteredBetween = CollectionUtil.getFilteringBetween(list, "Anton", "Carsten1");
+        Assert.assertEquals(Arrays.asList("Anton", "Berta", "Carsten0", "Carsten1"),
+            CollectionUtil.getList(filteredBetween.iterator()));
+
         //4. concatenation
         String[] concat = CollectionUtil.concat(String[].class, arr2, arr3);
         Assert.assertArrayEquals(new String[] { "Carsten1", "Carsten0", "Berta", "Anton" }, concat);
@@ -852,7 +857,7 @@ public class CommonTest {
         /*
          * create a full beancollector
          */
-        BeanCollector<Collection<TypeBean>,TypeBean> collector = BeanCollector.getBeanCollector(TypeBean.class, null, IBeanCollector.MODE_ALL);
+        BeanCollector<Collection<TypeBean>,TypeBean> collector = BeanCollector.getBeanCollector(TypeBean.class, null, IBeanCollector.MODE_ALL, null);
         p = collector.getPresentable();
         p.setStyle(UNDEFINED);
         p.setType(UNDEFINED);

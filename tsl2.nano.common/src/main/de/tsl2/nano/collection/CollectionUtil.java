@@ -556,7 +556,7 @@ public class CollectionUtil {
 
                 String sarg = arg0 != null ? ignoreCase && arg0.toString() != null ? arg0.toString().toUpperCase()
                     : arg0.toString() : null;
-                return (sarg == null && useNull) || ((sfrom == null || sarg.compareTo(sfrom) <= 0) && (sto == null || sarg.compareTo(sto) >= 0));
+                return (sarg == null && useNull) || ((sfrom == null || sarg.compareTo(sfrom) >= 0) && (sto == null || sarg.compareTo(sto) <= 0));
             }
         });
     }

@@ -103,7 +103,7 @@ public class BeanValue<T> extends AttributeDefinition<T> implements IValueDefini
                 LOG.warn("couldn't evaluate type through instance. using method-returntype instead. error was: " + e.toString());
             }
         }
-        return super.getType();
+        return (Class<T>) (temporalType() != null ? temporalType() : super.getType());
     }
 
     @Override
@@ -361,9 +361,10 @@ public class BeanValue<T> extends AttributeDefinition<T> implements IValueDefini
             @Override
             public IBeanCollector<?, T> action() throws Exception {
                 BeanCollector<?, ?> beanCollector;
+                Composition comp = composition() ? new Composition<T>(BeanValue.this) : null;
                 if (isMultiValue()) {
                     Collection<T> collection = (Collection<T>) getValue();
-                    beanCollector = BeanCollector.getBeanCollector((Class<T>) getGenericType(), collection, MODE_ALL);
+                    beanCollector = BeanCollector.getBeanCollector((Class<T>) getGenericType(), collection, MODE_ALL, comp);
                     if (collection == null)
                         collection = new ListSet<T>();
                     setValue((T) collection);
@@ -373,7 +374,7 @@ public class BeanValue<T> extends AttributeDefinition<T> implements IValueDefini
                     T v = getValue();
                     if (v != null)
                         selection.add(v);
-                    beanCollector = BeanCollector.getBeanCollector(getType(), selection, MODE_ALL_SINGLE);
+                    beanCollector = BeanCollector.getBeanCollector(getType(), selection, MODE_ALL_SINGLE, comp);
                     beanCollector.setSelectionProvider(new SelectionProvider(selection));
                 }
                 return (IBeanCollector<?, T>) beanCollector;

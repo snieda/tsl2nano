@@ -490,6 +490,26 @@ public class BeanDefinition<T> extends BeanClass<T> implements Serializable {
     }
 
     /**
+     * connects all attributes of given 'anotherBean' and it's 'beanInstance'. 'callback' will be called on any value
+     * change. see {@link #connect(String, IValueAccess, IAction)}.
+     * <p/>
+     * Attention: connections can only be done on values != null!
+     * 
+     * @param anotherBean bean to connect
+     * @param beanInstance bean instance
+     * @param callback action to start on change
+     */
+    public void connect(BeanDefinition<?> anotherBean, Object beanInstance, final IAction<?> callback) {
+        Map<String, IAttributeDefinition<?>> attributes = anotherBean.getAttributeDefinitions();
+        Object v;
+        for (IAttributeDefinition<?> attr : attributes.values()) {
+            v = attr.getValue(beanInstance);
+            if (v instanceof IValueAccess)
+                connect(attr.getName(), (IValueAccess<?>) attr.getValue(beanInstance), callback);
+        }
+    }
+
+    /**
      * isMultiValue
      * 
      * @return true, if bean class is assignable from {@link Collection}.
@@ -567,7 +587,7 @@ public class BeanDefinition<T> extends BeanClass<T> implements Serializable {
                     if (Environment.get("strict.mode", false))
                         ForwardedException.forward(e);
                     else
-                        LOG.warn("couldn' t load configuration " + xmlFile.getPath() + " for bean " + type, e);
+                        LOG.warn("couldn't load configuration " + xmlFile.getPath() + " for bean " + type, e);
                 }
             }
             if (beandef == null) {

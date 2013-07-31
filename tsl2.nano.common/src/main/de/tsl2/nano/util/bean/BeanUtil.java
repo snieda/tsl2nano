@@ -158,6 +158,14 @@ public class BeanUtil {
         return BeanClass.copyValues(src, dest, destValuesOnly);
     }
 
+
+    /**
+     * delegates to {@link BeanClass#createOwnCollectionInstances(Object)}.
+     */
+    public static <S> S createOwnCollectionInstances(S src) {
+        return BeanClass.createOwnCollectionInstances(src);
+    }
+
     /**
      * delegates to {@link BeanClass#resetValues(Object, String...)}.
      */
@@ -699,12 +707,8 @@ public class BeanUtil {
         try {
             String t;
             while ((ttype = st.nextToken()) != StreamTokenizer.TT_EOF) {
-                if (ttype == StreamTokenizer.TT_EOL) {
-                    if (st.lineno() > 1) {
-                        bean.newInstance();
-                    }
-                    filled = false;
-                } else { // --> full line, no other cases
+                if (ttype != StreamTokenizer.TT_EOL && st.sval.trim().length() > 0) {
+                    bean.newInstance();
                     int lastSep = 0;
                     for (final String attr : cols) {
                         final Point c = attributeColumns.get(attr);

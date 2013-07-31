@@ -15,12 +15,14 @@ import java.sql.Timestamp;
 import java.util.Collection;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.Id;
 import javax.persistence.JoinColumn;
+import javax.persistence.OneToMany;
 import javax.persistence.Temporal;
 import javax.persistence.TemporalType;
 
@@ -207,20 +209,22 @@ public class BeanContainerUtil {
                 + ", "
                 + attribute
                 + ")'");
-            final/*Column*/Annotation column = BeanAttribute.getBeanAttribute(clazz, attribute)
+            final BeanAttribute battr = BeanAttribute.getBeanAttribute(clazz, attribute);
+            final/*Column*/Annotation column = battr
                 .getAnnotation(Column.class);
-            final/*JoinColumn*/Annotation joinColumn = BeanAttribute.getBeanAttribute(clazz, attribute)
+            final/*JoinColumn*/Annotation joinColumn = battr
                 .getAnnotation(JoinColumn.class);
-//            final/*OneToMany*/Annotation oneToMany = BeanAttribute.getBeanAttribute(clazz, (String) attribute)
-//                .getAnnotation(OneToMany.class);
-            final/*Id*/Annotation id = BeanAttribute.getBeanAttribute(clazz, attribute).getAnnotation(Id.class);
-            final/*Temporal*/Annotation temporal = BeanAttribute.getBeanAttribute(clazz, attribute).getAnnotation(Temporal.class);
+            final/*OneToMany*/Annotation oneToMany = battr
+                .getAnnotation(OneToMany.class);
+            final/*Id*/Annotation id = battr.getAnnotation(Id.class);
+            final/*Temporal*/Annotation temporal = battr.getAnnotation(Temporal.class);
             if (column == null) {
                 if (joinColumn != null) {
                     def = new IAttributeDef() {
                         BeanClass joinColumnBC = new BeanClass(joinColumn.getClass());
                         Boolean nullable;
-
+                        Boolean composition;
+                        
                         @Override
                         public int scale() {
                             return -1;
@@ -252,6 +256,14 @@ public class BeanContainerUtil {
                         @Override
                         public Class<? extends Date> temporalType() {
                             return null;
+                        }
+                        
+                        @Override
+                        public boolean composition() {
+                            if (composition == null) {
+                                composition = oneToMany != null && !nullable;
+                            }
+                            return composition;
                         }
                     };
                     attrDefCache.put(attrKey(clazz, attribute), def);
@@ -315,7 +327,12 @@ public class BeanContainerUtil {
                             : t.equals(TemporalType.TIME) ? Time.class : Timestamp.class);
                     }
                     return temporalType;
-                };
+                }
+
+                @Override
+                public boolean composition() {
+                    return false;
+                }
             };
             attrDefCache.put(attrKey(clazz, attribute), def);
             return def;

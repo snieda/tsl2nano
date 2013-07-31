@@ -11,6 +11,7 @@ package de.tsl2.nano.script;
 
 import java.io.File;
 import java.io.PrintStream;
+import java.io.Serializable;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -35,14 +36,15 @@ import de.tsl2.nano.util.bean.def.BeanValue;
  * @version $Revision$
  */
 @SuppressWarnings({ "rawtypes", "serial" , "unchecked"})
-public class ScriptTool {
+public class ScriptTool implements Serializable {
     String sourceFile;
     IAction selectedAction;
     String text;
     Collection<?> result;
-
-    Collection<IAction> availableActions;
-    PrintStream systemout;
+    transient Collection<IAction> availableActions;
+    transient PrintStream systemout;
+    transient IAction<Collection<?>> runner;
+    
     /** ant script for several user defined targets. contains an sql target */
     final String ANTSCRIPTNAME = "antscripts.xml";
     final String ANTSCRIPTPROP = "antscripts.properties";
@@ -213,7 +215,7 @@ public class ScriptTool {
         String basedir = Environment.getConfigPath();
         File antscriptFile = new File(basedir + ANTSCRIPTNAME);
         if (!antscriptFile.exists()) {
-            URL antscriptOriginUrl = this.getClass().getClassLoader().getResource(ANTSCRIPTNAME);
+            URL antscriptOriginUrl = Environment.get(ClassLoader.class).getResource(ANTSCRIPTNAME);
             try {
                 FileUtils.copyURLToFile(antscriptOriginUrl, antscriptFile);
             } catch (Exception e) {
@@ -315,5 +317,18 @@ public class ScriptTool {
 
     public Collection<IAction> availableActions() {
         return availableActions;
+    }
+    
+    public IAction<Collection<?>> runner() {
+        if (runner == null) {
+            String id = "scipttool.go";
+            runner = new CommonAction(id, id, id) {
+                @Override
+                public Object action() throws Exception {
+                    return selectedAction != null ? selectedAction.activate() : null;
+                }
+            };
+        }
+        return runner;
     }
 }
