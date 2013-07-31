@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project name="beanbrowser.scripts" default="help" basedir=".">
+	<property file="antscripts.properties" />
+	<target name="help" description="help overview">
+		<echo message="please use one of these targets: sql"/>
+	</target>
+
+	<path id="stdpath">
+		<fileset dir="${basedir}">
+			<include name="**"/>
+		</fileset>
+	</path>
+	<path id="classpath">
+		<fileset dir="${basedir}">
+			<include name="**/*.jar"/>
+			<include name="**/*.class"/>
+		</fileset>
+	</path>
+	<target name="sql" description="starts sql scripts">
+		<sql classpathref="stdpath" encoding="Cp1252" driver="${jdbc.driver}" url="${jdbc.url}" userid="${jdbc.username}" password="${jdbc.password}" onerror="stop" autocommit="true">
+			<fileset dir="${dir}" includes="${includes}" />
+		</sql>
+	</target>
+
+	<target name="script" description="starts language scripts">
+		<script classpathref="classpath" language="${language}" src="${dir}/${includes}">
+			
+		</script>
+	</target>
+
+</project>
