@@ -19,8 +19,8 @@
 		</ant>
 
 		<ant antfile="../tsl2.nano.common/shell.xml" target="sh.copy">
-			<property name="sh.copy.srcdir" value="../../../wjax/distribution" />
-			<property name="sh.copy.destination" value="../../../wjax/distribution/target" />
+			<property name="sh.copy.srcdir" value="../" />
+			<property name="sh.copy.destination" value="../target" />
 			<property name="sh.copy.include" value="**/*.jar" />
 			<property name="sh.copy.flatten" value="true" />
 		</ant>
