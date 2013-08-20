@@ -89,7 +89,7 @@ public class Application extends NanoHTTPD {
     private static final int OFFSET_FILTERLINES = 2;
 
     public Application() throws IOException {
-        this(8067, Environment.get(IPageBuilder.class), new Stack<BeanDefinition<?>>());
+        this(Environment.get("http.port", 8067), Environment.get(IPageBuilder.class), new Stack<BeanDefinition<?>>());
     }
 
     public Application(int port, IPageBuilder<?, String> builder, Stack<BeanDefinition<?>> navigation) throws IOException {
@@ -554,7 +554,7 @@ public class Application extends NanoHTTPD {
     public static void main(String[] args) {
         //TODO: create an Argumentator
         try {
-            if (args.length == 1) {
+            if (args.length > 0) {
                 if (args[0].matches(".*(\\?|help|man)")) {
                     System.out.println("Please provide a path for application configurations!");
                     return;
@@ -562,6 +562,8 @@ public class Application extends NanoHTTPD {
                     System.setProperty(Environment.KEY_CONFIG_PATH, args[0]);
                     File file = new File(args[0]);
                     Environment.setProperty(Environment.KEY_CONFIG_PATH, file.getAbsolutePath() + "/");
+                    if (args.length > 1)
+                        Environment.setProperty("http.port", Integer.valueOf(args[1]));
                 }
             }
             initServices();
@@ -602,6 +604,8 @@ public class Application extends NanoHTTPD {
     private static Bean<?> createLogin() {
         final Persistence persistence = Persistence.current();
         Bean<?> login = new Bean(persistence);
+        login.removeAttributes("jdbcProperties");
+        login.getAttribute("jarFile").getPresentation().setType(IPresentable.TYPE_ATTACHMENT);
         login.getPresentationHelper().change(BeanPresentationHelper.PROP_NULLABLE, false);
         login.addAction(new SecureAction<Object>("tsl2nano.login.ok") {
             @Override
@@ -703,10 +707,16 @@ public class Application extends NanoHTTPD {
     }
 
     protected void reset() {
+        String configPath = Environment.get(Environment.KEY_CONFIG_PATH, "config");
+        int port =
+            Environment.get("http.port", 8067);
+
         navigation = null;
         response = null;
         model = null;
         Environment.reset();
+        Environment.setProperty(Environment.KEY_CONFIG_PATH, configPath);
+        Environment.setProperty("http.port", port);
         BeanDefinition.clearCache();
         BeanValue.clearCache();
         Thread.currentThread().setContextClassLoader(appstartClassloader);
