@@ -2,7 +2,7 @@
 <persistence version="2.0" xmlns="http://java.sun.com/xml/ns/persistence" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://java.sun.com/xml/ns/persistence       http://java.sun.com/xml/ns/persistence/persistence_2_0.xsd">
 <!-- <persistence xmlns="http://java.sun.com/xml/ns/persistence" version="1.0">  -->
 	<persistence-unit name="${persistence-unit}" transaction-type="${transaction-type}">
-		<provider>org.hibernate.ejb.HibernatePersistence</provider>
+		<provider>${provider}</provider>
 		<!-- JNDI name of the database resource to use -->
 		<!-- <jta-data-source>${jta-data-source}</jta-data-source> -->
 
@@ -31,14 +31,14 @@
 			
          	<!-- Hibernate End -->
 
-         	<!-- Glassfish Development with TopLink -->
-            <property name="toplink.jdbc.driver" value="oracle.jdbc.driver.OracleDriver"/>
-            <property name="toplink.jdbc.url" value="jdbc:oracle:thin:@localhost:1521:xe"/>
-            <property name="toplink.jdbc.user" value="ks"/>
-            <property name="toplink.jdbc.password" value="ksks"/>
+         	<!-- Glassfish Development with TopLink
+            <property name="toplink.jdbc.driver" value="${connection.driver_class}"/>
+            <property name="toplink.jdbc.url" value="${connection.url}"/>
+            <property name="toplink.jdbc.user" value="${connection.username}"/>
+            <property name="toplink.jdbc.password" value="${connection.password}"/>
             <property name="toplink.logging.level" value="FINE"/>
             <property name="toplink.weaving" value="false"/>
-            <property name="toplink.target-database" value="Oracle"/>
+            <property name="toplink.target-database" value="Oracle"/> -->
 			<!-- <property name="toplink.ddl-generation" value="drop-and-create-tables"/> -->
 			<!-- if you work with generated ids using sequences (used by AUTO mode, too), toplink
 			     needs the following database table:
