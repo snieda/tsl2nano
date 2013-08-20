@@ -22,6 +22,7 @@ import java.util.LinkedHashSet;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import org.apache.commons.logging.Log;
 import org.simpleframework.xml.Attribute;
@@ -141,6 +142,23 @@ public class BeanDefinition<T> extends BeanClass<T> implements Serializable {
     }
 
     /**
+     * removes the given standard-attributes from bean (given names must be contained in standard-bean-definition. not
+     * performance-optimized, because standard names have to be evaluated first!)
+     * 
+     * @param attributeNamesToRemove attributes to remove
+     */
+    public void removeAttributes(String... attributeNamesToRemove) {
+        ArrayList<String> names = new ArrayList<String>(Arrays.asList(getAttributeNames()));
+        int currentSize = names.size();
+        names.removeAll(Arrays.asList(attributeNamesToRemove));
+        if (names.size() + attributeNamesToRemove.length != currentSize)
+            throw FormattedException.implementationError("not all of given attributes were removed!",
+                attributeNamesToRemove,
+                getAttributeNames());
+        setAttributeFilter(names.toArray(new String[0]));
+    }
+
+    /**
      * @return Returns the {@link #isdefault}.
      */
     public boolean isDefault() {
@@ -167,6 +185,17 @@ public class BeanDefinition<T> extends BeanClass<T> implements Serializable {
                     v = createAttributeDefinition(attributeFilter[i]);
                 }
                 attributeDefinitions.put(attributeFilter[i], v);
+            }
+            //removed previously created attributes that are not contained in filter
+            if (attributeDefinitions != null) {
+                Set<String> allAttributes = attributeDefinitions.keySet();
+                if (allAttributes.size() != attributeFilter.length) {
+                    List<String> filterList = Arrays.asList(attributeFilter);
+                    for (String a : allAttributes) {
+                        if (!filterList.contains(a))
+                            attributeDefinitions.remove(a);
+                    }
+                }
             }
             createNaturalSortedAttributeNames(attributeFilter);
             allDefinitionsCached = true;

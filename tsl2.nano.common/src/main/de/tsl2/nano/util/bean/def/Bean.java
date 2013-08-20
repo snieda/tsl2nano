@@ -437,7 +437,10 @@ public class Bean<T> extends BeanDefinition<T> {
      * @return
      */
     public Object save() {
-        return save(instance);
+        if (CompositionFactory.persist(instance))
+            return instance;
+        else
+            return save(instance);
     }
 
     /**
@@ -698,7 +701,7 @@ class SaveAction<T> extends SecureAction<T> implements Serializable {
     }
 
     public T action() throws Exception {
-        return (T) bean.save(instance);
+        return (T) bean.save();
     }
     @Override
     public String getImagePath() {

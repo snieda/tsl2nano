@@ -361,7 +361,7 @@ public class BeanValue<T> extends AttributeDefinition<T> implements IValueDefini
             @Override
             public IBeanCollector<?, T> action() throws Exception {
                 BeanCollector<?, ?> beanCollector;
-                Composition comp = composition() ? new Composition<T>(BeanValue.this) : null;
+                Composition comp = composition() ? CompositionFactory.createComposition(BeanValue.this) : null;
                 if (isMultiValue()) {
                     Collection<T> collection = (Collection<T>) getValue();
                     beanCollector = BeanCollector.getBeanCollector((Class<T>) getGenericType(), collection, MODE_ALL, comp);

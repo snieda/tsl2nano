@@ -321,7 +321,7 @@ public class Environment {
         if (cl != null)
             Thread.currentThread().setContextClassLoader(cl);
         else {
-            addService(Thread.currentThread().getContextClassLoader());
+            addService(ClassLoader.class, Thread.currentThread().getContextClassLoader());
 //            get(Log.class).warn("no classloader defined!");
         }
     }

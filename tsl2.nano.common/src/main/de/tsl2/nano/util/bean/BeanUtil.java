@@ -179,11 +179,8 @@ public class BeanUtil {
      */
     @SuppressWarnings("unchecked")
     public static <T> T clone(T src) {
-        T newInstance;
         try {
-            newInstance = (T) src.getClass().newInstance();
-            BeanClass.copyValues(src, newInstance);
-            return newInstance;
+            return (T) BeanClass.copyValues(src, src.getClass().newInstance());
         } catch (Exception e) {
             ForwardedException.forward(e);
             return null;

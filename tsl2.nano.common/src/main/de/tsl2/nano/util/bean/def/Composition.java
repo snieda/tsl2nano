@@ -42,9 +42,8 @@ public class Composition<C> {
      * 
      * @param parent see {@link #parent}
      */
-    public Composition(BeanValue<C> parent) {
-        super();
-        this.parent = parent;
+    Composition(BeanValue<C> parent) {
+        this(parent, null);
     }
 
     /**
@@ -53,7 +52,7 @@ public class Composition<C> {
      * @param parent see {@link #parent}
      * @param target see {@link #target}
      */
-    public Composition(BeanValue<C> parent, BeanAttribute target) {
+    Composition(BeanValue<C> parent, BeanAttribute target) {
         super();
         this.parent = parent;
         this.target = target;
