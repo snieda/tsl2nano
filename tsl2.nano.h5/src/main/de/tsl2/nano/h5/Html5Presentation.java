@@ -802,6 +802,10 @@ public class Html5Presentation<T> extends BeanPresentationHelper<T> implements I
         case IPresentable.TYPE_INPUT_SEARCH:
             type = "search";
             break;
+        case IPresentable.TYPE_ATTACHMENT:
+            //on type = 'file' only the file-name is given (no path!)
+//            type = "file";
+//            break;
         default:
             type = "text";
             break;
