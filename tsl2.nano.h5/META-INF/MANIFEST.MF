@@ -15,4 +15,5 @@ Require-Bundle: de.tsl2.nano.common;bundle-version="0.0.2",
 Eclipse-BuddyPolicy: registered
 Bundle-ClassPath: .,
  bin/,
- config/simple-xml-2.7.jar
+ config/simple-xml-2.7.jar,
+ lib/hsqldb.jar

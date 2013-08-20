@@ -1,5 +1,5 @@
 Manifest-Version: 1.0
-Signature-Version: 0.0.2.B (19.10.2012)
+Signature-Version: 0.0.3.A (20.08.2013)
 Ant-Version: Apache Ant 1.7.1
 Created-By: Thomas Schneider
 Main-Class: de.tsl2.nano.classloader.JarClassLoader
@@ -22,38 +22,4 @@ Class-Path: ./
  jboss-ejb-api_3.1_spec.jar 
  jboss-interceptors-api_1.1_spec.jar 
  jboss-connector-api_1.5_spec.jar 
-Bundle-ManifestVersion: 2
-Bundle-Name: NanoFix Serviceaccess
-Bundle-SymbolicName: de.tsl2.nano.serviceaccess
-Bundle-Version: 0.0.2.B
-Bundle-Vendor: IDV-AG
-Bundle-RequiredExecutionEnvironment: JavaSE-1.6
-Require-Bundle: org.junit4;bundle-version="4.5.0",
- de.tsl2.nano.common;bundle-version="0.0.2"
-Eclipse-BuddyPolicy: registered
-Bundle-ClassPath: .,
- bin/,
- lib/hibernate-jpa-2.0-api.jar,
- lib/jboss-ejb-api_3.1_spec.jar,
- lib/jboss-interceptors-api_1.1_spec.jar,
- lib/jboss-connector-api_1.5_spec.jar,
- fs-connector/bin/
-Export-Package: de.tsl2.nano.resource.fs,
- de.tsl2.nano.resource.fs.impl,
- de.tsl2.nano.service.feature,
- de.tsl2.nano.service.schedule,
- de.tsl2.nano.service.util,
- de.tsl2.nano.service.util.batch,
- de.tsl2.nano.service.util.finder,
- de.tsl2.nano.serviceaccess,
- de.tsl2.nano.serviceaccess.aas,
- de.tsl2.nano.serviceaccess.aas.module,
- de.tsl2.nano.serviceaccess.aas.principal,
- javax.ejb,
- javax.ejb.embeddable,
- javax.ejb.spi,
- javax.interceptor,
- javax.persistence,
- javax.persistence.criteria,
- javax.persistence.metamodel,
- javax.persistence.spi
+ fs-connector.rar 
