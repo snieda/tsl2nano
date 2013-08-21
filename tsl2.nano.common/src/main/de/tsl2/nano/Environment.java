@@ -111,26 +111,31 @@ public class Environment {
 
     protected final static Environment self() {
         if (self == null) {
-            File configFile = new File(System.getProperty("user.dir") + "/" + CONFIG_XML_NAME);//new File(System.getProperty(KEY_CONFIG_PATH, System.getProperty("user.dir")));
-            if (configFile.canRead()) {
-                self = XmlUtil.loadXml(configFile.getPath(), Environment.class, new CompatibilityLayer(), false);
-                String configPath = getConfigPath();
-                if (!configPath.endsWith("/"))
-                    setProperty(KEY_CONFIG_PATH, configPath + "/");
-                new File(configPath).mkdirs();
-            } else {
-                self = new Environment();
-                self.properties = new Properties();
-//              LOG.warn("no environment.properties available");
-                self.properties.put(KEY_CONFIG_PATH, System.getProperty("user.dir") + "/");
-            }
-            self.services = new Hashtable<Class<?>, Object>();
-            Environment.registerBundle("de.tsl2.nano.messages", true);
-            Environment.addService(Profiler.class, Profiler.si());
+            create(System.getProperty(KEY_CONFIG_PATH, System.getProperty("user.dir")));
         }
         return self;
     }
 
+    public static void create(String dir) {
+        new File(dir).mkdirs();
+        File configFile = new File(dir + "/" + CONFIG_XML_NAME);//new File(System.getProperty(KEY_CONFIG_PATH, System.getProperty("user.dir")));
+        if (configFile.canRead()) {
+            self = XmlUtil.loadXml(configFile.getPath(), Environment.class, new CompatibilityLayer(), false);
+            String configPath = getConfigPath();
+            if (!configPath.endsWith("/"))
+                setProperty(KEY_CONFIG_PATH, configPath + "/");
+        } else {
+            self = new Environment();
+            self.properties = new Properties();
+//          LOG.warn("no environment.properties available");
+            self.properties.put(KEY_CONFIG_PATH, dir + "/");
+        }
+        self.services = new Hashtable<Class<?>, Object>();
+        registerBundle(PREFIX + "messages", true);
+        addService(Profiler.class, Profiler.si());
+        self.persist();
+    }
+    
     /**
      * provides all loaded services
      * 
@@ -310,7 +315,7 @@ public class Environment {
 //
 //        self().get(XmlUtil.class).saveXml(SERVICE_FILE_NAME, self().services);
 
-        self().get(XmlUtil.class).saveXml(CONFIG_XML_NAME, self());
+        self().get(XmlUtil.class).saveXml(getConfigPath() + CONFIG_XML_NAME, self());
     }
 
     /**
