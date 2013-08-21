@@ -82,7 +82,7 @@ public class Application extends NanoHTTPD {
     int port;
     Response response;
     ClassLoader appstartClassloader;
-    private static final Log LOG = LogFactory.getLog(Application.class);
+    private static Log LOG;
 
     private static final String DEGBUG_HTML_FILE = "application.html";
     private static final String START_PAGE = "Start";
@@ -185,7 +185,9 @@ public class Application extends NanoHTTPD {
                 }
                 response = new NanoHTTPD.Response(HTTP_OK, MIME_HTML, msg);
             } else {
-                //do nothing...
+                reset();
+                response = null;
+                return new NanoHTTPD.Response(HTTP_OK, MIME_HTML, "<a href=\"http://localhost:8069\">restart session</a>");
             }
         } catch (Exception e) {
             RuntimeException ex = ForwardedException.toRuntimeEx(e, true);
@@ -291,7 +293,7 @@ public class Application extends NanoHTTPD {
                 if (!isCanceled(parms) && provideSelection((BeanCollector) model, parms)) {
                     if (isReturn(parms)) {
                         responseObject = null;
-                    } else if (isOpenAction(parms, (BeanCollector) model)){
+                    } else if (isOpenAction(parms, (BeanCollector) model)) {
                         //normally, after a selection the navigation object will be hold on stack
                         if (Environment.get("application.edit.multiple", true))
                             responseObject = putSelectionOnStack((BeanCollector) model);
@@ -382,7 +384,7 @@ public class Application extends NanoHTTPD {
 
     protected <T> boolean isOpenAction(Properties parms, BeanCollector<?, T> model) {
         for (Object k : parms.keySet()) {
-            if (isOpenAction((String)k, model))
+            if (isOpenAction((String) k, model))
                 return true;
         }
         return false;
@@ -392,10 +394,9 @@ public class Application extends NanoHTTPD {
         return actionId.equals(BeanContainer.getActionId(model.getClazz(), true, "open"));
     }
 
-
     protected <T> boolean isSearchRequest(Properties parms, BeanCollector<?, T> model) {
         for (Object k : parms.keySet()) {
-            if (isSearchRequest((String)k, model))
+            if (isSearchRequest((String) k, model))
                 return true;
         }
         return false;
@@ -556,12 +557,12 @@ public class Application extends NanoHTTPD {
         try {
             if (args.length > 0) {
                 if (args[0].matches(".*(\\?|help|man)")) {
-                    System.out.println("Please provide a path for application configurations!");
+                    System.out.println("Please provide a path for application configurations (default: config) and optional a port number (default: 8067)!");
                     return;
                 } else {
                     System.setProperty(Environment.KEY_CONFIG_PATH, args[0]);
-                    File file = new File(args[0]);
-                    Environment.setProperty(Environment.KEY_CONFIG_PATH, file.getAbsolutePath() + "/");
+                    Environment.create(args[0]);
+                    LOG = LogFactory.getLog(Application.class);
                     if (args.length > 1)
                         Environment.setProperty("http.port", Integer.valueOf(args[1]));
                 }
@@ -654,7 +655,10 @@ public class Application extends NanoHTTPD {
                     beanTool.addAction(tool.runner());
                     types.add(beanTool);
                 }
-                BeanCollector root = new BeanCollector(BeanCollector.class, types, MODE_EDITABLE | MODE_SEARCHABLE, null);
+                BeanCollector root = new BeanCollector(BeanCollector.class,
+                    types,
+                    MODE_EDITABLE | MODE_SEARCHABLE,
+                    null);
                 root.setName(StringUtil.toFirstUpper(StringUtil.substring(persistence.getJarFile(), "/", ".jar", true)));
                 root.setAttributeFilter("name");
                 root.getAttribute("name").setFormat(new Format() {
@@ -708,8 +712,7 @@ public class Application extends NanoHTTPD {
 
     protected void reset() {
         String configPath = Environment.get(Environment.KEY_CONFIG_PATH, "config");
-        int port =
-            Environment.get("http.port", 8067);
+        int port = Environment.get("http.port", 8067);
 
         navigation = null;
         response = null;
