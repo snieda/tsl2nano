@@ -605,7 +605,7 @@ target: sh.delete
 		<!-- source-jar -->
 		<antcall target="sh.jar">
 			<param name="sh.jar.srcdir" value="${sh.build.basedir}" />
-			<param name="sh.jar.destination" value="${sh.build.basedir}/${sh.build.name}${sh.build.version}.src.jar" />
+			<param name="sh.jar.destination" value="${sh.build.basedir}/${sh.build.name}.${sh.build.version}.src.jar" />
 			<param name="sh.jar.exclude" value="**/*.class" />
 			<param name="sh.jar.exclude2" value="**/*.*ar" />
 			<param name="sh.jar.exclude3" value="**/*.zip" />
