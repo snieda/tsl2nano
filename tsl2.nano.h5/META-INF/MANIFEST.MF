@@ -4,6 +4,7 @@ Ant-Version: Apache Ant 1.6.2
 Created-By: Thomas Schneider
 Main-Class: de.tsl2.nano.h5.Application
 Class-Path: tsl2.nano.common.1.0.0.jar 
+ tsl2.nano.serviceaccess.1.0.0.jar 
  tsl2.nano.directaccess.0.0.1.jar 
  commons-logging-1.1.1.jar 
  commons-collections-3.2.1.jar 
