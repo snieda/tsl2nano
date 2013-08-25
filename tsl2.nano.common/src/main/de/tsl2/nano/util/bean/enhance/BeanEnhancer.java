@@ -28,8 +28,8 @@ import javassist.bytecode.MethodInfo;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
-import tsl.StringUtilBase;
 import de.tsl2.nano.exception.ForwardedException;
+import de.tsl2.nano.util.StringUtil;
 import de.tsl2.nano.util.bean.BeanClass;
 import de.tsl2.nano.util.bean.BeanProxy;
 import de.tsl2.nano.util.bean.BeanUtil;
@@ -246,7 +246,7 @@ public class BeanEnhancer<T> {
     }
 
     private static final String getMethodName(String prefix, String name) {
-        return prefix + StringUtilBase.toFirstUpper(name);
+        return prefix + StringUtil.toFirstUpper(name);
     }
     private static final String getClassName(Object o) {
         return o instanceof Class ? ((Class) o).getName() : o.getClass().getName();

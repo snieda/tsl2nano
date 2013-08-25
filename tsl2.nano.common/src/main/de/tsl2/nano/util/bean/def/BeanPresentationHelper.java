@@ -39,7 +39,6 @@ import java.util.SortedSet;
 
 import org.apache.commons.logging.Log;
 
-import tsl.FileUtil;
 import de.tsl2.nano.Environment;
 import de.tsl2.nano.action.IAction;
 import de.tsl2.nano.action.IActivator;
@@ -51,6 +50,7 @@ import de.tsl2.nano.format.RegExpFormat;
 import de.tsl2.nano.log.LogFactory;
 import de.tsl2.nano.messaging.ChangeEvent;
 import de.tsl2.nano.messaging.IListener;
+import de.tsl2.nano.util.FileUtil;
 import de.tsl2.nano.util.NumberUtil;
 import de.tsl2.nano.util.StringUtil;
 import de.tsl2.nano.util.bean.BeanAttribute;
@@ -1106,9 +1106,9 @@ public class BeanPresentationHelper<T> {
                 @Override
                 public Object action() throws Exception {
                     //TODO: file selection, and ant-variable insertion...
-                    String content = FileUtil.getFile(exportFile.getPath());
+                    String content = String.valueOf(FileUtil.getFileData(exportFile.getPath(), null));
                     content = StringUtil.insertProperties(content, BeanUtil.toValueMap(((Bean) bean).getInstance()));
-                    FileUtil.writeString(content, exportFile.getParent() + ".new", false);
+                    FileUtil.writeBytes(content.getBytes(), exportFile.getParent() + ".new", false);
                     return "document '" + exportFile.getPath() + "' was filled with data of bean " + bean;
                 }
 
@@ -1158,7 +1158,7 @@ public class BeanPresentationHelper<T> {
                 public Object action() throws Exception {
                     String helpFile = null;
                     if (new File(helpFileName).canRead())
-                        helpFile = FileUtil.getFile(helpFileName);
+                        helpFile = String.valueOf(FileUtil.getFileData(helpFileName, null));
                     return helpFile != null ? helpFile : "No help found (" + helpFileName + ")";
                 }
 

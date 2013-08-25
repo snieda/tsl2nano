@@ -22,8 +22,6 @@ import java.util.Set;
 import java.util.SortedSet;
 import java.util.TreeSet;
 
-import org.apache.commons.collections.CollectionUtils;
-import org.apache.commons.collections.Predicate;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
@@ -146,16 +144,6 @@ public class CollectionUtil {
      */
     public static <T> Collection<T> getFilteredCollection(Iterable<T> src, IPredicate<T> predicate) {
         return getList(getFiltering(src, predicate).iterator());
-    }
-
-    /**
-     * filterCollection
-     * 
-     * @param src full collection
-     * @param predicate filter
-     */
-    public static void filterCollection(Collection src, Predicate predicate) {
-        CollectionUtils.filter(src, predicate);
     }
 
     /**

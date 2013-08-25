@@ -9,7 +9,7 @@ import java.util.ResourceBundle;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
-import tsl.StringUtil;
+import de.tsl2.nano.util.StringUtil;
 
 /**
  * message bundle delegator (common in eclipse).

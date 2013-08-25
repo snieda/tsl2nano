@@ -23,9 +23,9 @@ import javax.xml.xpath.XPathConstants;
 import javax.xml.xpath.XPathExpression;
 import javax.xml.xpath.XPathFactory;
 
-import org.apache.velocity.Template;
-import org.apache.velocity.VelocityContext;
-import org.apache.velocity.app.VelocityEngine;
+//import org.apache.velocity.Template;
+//import org.apache.velocity.VelocityContext;
+//import org.apache.velocity.app.VelocityEngine;
 import org.simpleframework.xml.stream.Format;
 import org.w3c.dom.Document;
 import org.w3c.dom.Node;
@@ -69,21 +69,41 @@ public class XmlUtil {
      */
     public static void transform(String templateFile, String destFile, Properties p) {
         try {
-            VelocityEngine engine = new VelocityEngine(p);
-            engine.addProperty("resource.loader", "file, class, jar");
-            engine.addProperty("file.resource.loader.class",
+            /*
+             * to avoid a static dependency to velocity, we use the compatibility layer
+             */
+//            org.apache.velocity.app.VelocityEngine engine = new org.apache.velocity.app.VelocityEngine(p);
+//            engine.addProperty("resource.loader", "file, class, jar");
+//            engine.addProperty("file.resource.loader.class",
+//                "org.apache.velocity.runtime.resource.loader.FileResourceLoader");
+//            engine.addProperty("class.resource.loader.class",
+//                "org.apache.velocity.runtime.resource.loader.ClasspathResourceLoader");
+//            engine.addProperty("jar.resource.loader.class",
+//                "org.apache.velocity.runtime.resource.loader.JarResourceLoader");
+//            org.apache.velocity.VelocityContext context = new org.apache.velocity.VelocityContext(p);
+//            org.apache.velocity.Template template = engine.getTemplate(templateFile);
+            /*
+             * to avoid a static dependency to velocity, we use the compatibility layer
+             */
+            p.put("resource.loader", "file, class, jar");
+            p.put("file.resource.loader.class",
                 "org.apache.velocity.runtime.resource.loader.FileResourceLoader");
-            engine.addProperty("class.resource.loader.class",
+            p.put("class.resource.loader.class",
                 "org.apache.velocity.runtime.resource.loader.ClasspathResourceLoader");
-            engine.addProperty("jar.resource.loader.class",
+            p.put("jar.resource.loader.class",
                 "org.apache.velocity.runtime.resource.loader.JarResourceLoader");
-            VelocityContext context = new VelocityContext(p);
-            Template template = engine.getTemplate(templateFile);
+            
+            //this code is untested yet!!!
+            CompatibilityLayer layer = Environment.get(CompatibilityLayer.class);
+            Object engine = layer.runOptional("org.apache.velocity.app.VelocityEngine", "VelocityEngine", new Class[]{Properties.class}, p);
+            Object context = layer.runOptional("org.apache.velocity.VelocityContext", "VelocityContext", new Class[]{Properties.class}, p);
+            Object template = layer.runOptional(engine, "getTemplate", new Class[]{String.class}, templateFile);
+            
             final File dir = new File(destFile.substring(0, destFile.lastIndexOf("/")));
             dir.mkdirs();
             final BufferedWriter writer = new BufferedWriter(new FileWriter(destFile));
 
-            template.merge(context, writer);
+            layer.runOptional(template, "merge", layer.load("org.apache.velocity.VelocityContext", "java.io.BufferedWriter"), context, writer);
             writer.flush();
             writer.close();
         } catch (Exception e) {

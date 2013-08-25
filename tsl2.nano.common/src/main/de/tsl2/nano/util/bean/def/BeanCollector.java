@@ -28,7 +28,6 @@ import org.simpleframework.xml.ElementList;
 import org.simpleframework.xml.core.Commit;
 import org.simpleframework.xml.core.Persist;
 
-import tsl.StringUtil;
 import de.tsl2.nano.Environment;
 import de.tsl2.nano.Messages;
 import de.tsl2.nano.action.CommonAction;
@@ -42,6 +41,7 @@ import de.tsl2.nano.log.LogFactory;
 import de.tsl2.nano.util.DateUtil;
 import de.tsl2.nano.util.DelegatorProxy;
 import de.tsl2.nano.util.NumberUtil;
+import de.tsl2.nano.util.StringUtil;
 import de.tsl2.nano.util.bean.BeanAttribute;
 import de.tsl2.nano.util.bean.BeanContainer;
 import de.tsl2.nano.util.bean.BeanUtil;
@@ -662,7 +662,7 @@ public class BeanCollector<COLLECTIONTYPE extends Collection<T>, T> extends Bean
         //try the fastest - all indexes as default
         String name = getAttributeNames()[i];
         IPresentableColumn column = getAttribute(name).getColumnDefinition();
-        if (column.getIndex() == i)
+        if (column != null && column.getIndex() == i)
             return column;
         Collection<IPresentableColumn> colDefs = getColumnDefinitions();
         for (IPresentableColumn c : colDefs) {

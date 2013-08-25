@@ -12,8 +12,8 @@ package de.tsl2.nano.collection;
 import java.io.File;
 import java.util.Hashtable;
 
-import tsl.FileUtil;
 import de.tsl2.nano.exception.ForwardedException;
+import de.tsl2.nano.util.FileUtil;
 
 /**
  * simple base class for a stored object as singelton.

@@ -16,6 +16,7 @@ import java.util.Map;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
+import de.tsl2.nano.exception.ForwardedException;
 import de.tsl2.nano.util.bean.BeanClass;
 
 /**
@@ -106,6 +107,15 @@ public class CompatibilityLayer {
         }
     }
 
+    public Object runOptional(Object instance, String methodName, Class[] par, Object... args) {
+        try {
+            return BeanClass.call(instance, methodName, par, args);
+        } catch (Throwable e) {
+            LOG.warn("couldn't run given optional action: " + e);
+            return null;
+        }
+    }
+
     /**
      * storeCompatibilityAction
      * 
@@ -115,6 +125,23 @@ public class CompatibilityLayer {
     public void storeCompatibilityAction(Runnable action, Runnable defaultActionOnProblem) {
         LOG.info("storing compatibility problem - using default action instead in future!");
         runnerCache.put(action, defaultActionOnProblem);
+    }
+
+    /**
+     * pre loads the given classes. usable on calling {@link #runOptional(String, String, Class[], Object...)}
+     * @param classNames classes to load
+     * @return loaded classes - throws {@link RuntimeException} if failed.
+     */
+    public Class[] load(String... classNames) {
+        Class[] classes = new Class[classNames.length];
+        try {
+            for (int i = 0; i < classNames.length; i++) {
+                classes[i] = Thread.currentThread().getContextClassLoader().loadClass(classNames[i]);
+            }
+        } catch (ClassNotFoundException e) {
+            ForwardedException.forward(e);
+        }
+        return classes;
     }
 
     /**
