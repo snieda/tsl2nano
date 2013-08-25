@@ -5,31 +5,18 @@ Created-By: Thomas Schneider
 Main-Class: de.tsl2.nano.classloader.JarClassLoader
 Main-Arguments: de.tsl2.nano.execution.ScriptUtil ant shell.xml
 Class-Path: tsl2.nano.common.1.0.0.jar 
- de.tsl2.nano.common_0.0.2.B.jar 
+ tsl2.nano.serviceaccess.1.0.0.jar 
  commons-logging-1.1.1.jar 
  commons-collections-3.2.1.jar 
  commons-lang-2.4.jar 
  ant.jar ant-launcher.jar 
  ant-nodeps.jar
-Bundle-ManifestVersion: 2
-Bundle-Name: NanoFix Directaccess
-Bundle-SymbolicName: de.tsl2.nano.directaccess
-Bundle-Version: 0.0.1.A
-Bundle-RequiredExecutionEnvironment: JavaSE-1.6
-Require-Bundle: org.junit4;bundle-version="4.5.0",
- de.tsl2.nano.common;bundle-version="0.0.2",
- de.tsl2.nano.serviceaccess;bundle-version="0.0.2"
-Eclipse-BuddyPolicy: registered
-Bundle-ClassPath: .,
- bin/,
- lib/hibernate3.jar,
- lib/slf4j-api-1.6.1.jar,
- lib/jta-1.1.jar,
- lib/antlr-2.7.6.jar,
- lib/commons-collections-3.1.jar,
- lib/dom4j-1.6.1.jar,
- lib/javassist-3.12.0.GA.jar,
- lib/freemarker.jar
-Export-Package: de.tsl2.nano.persistence,
- de.tsl2.nano.script,
- org.hibernate
+ hibernate3.jar 
+ slf4j-api-1.6.1.jar 
+ jta-1.1.jar 
+ antlr-2.7.6.jar 
+ commons-collections-3.1.jar 
+ dom4j-1.6.1.jar 
+ javassist-3.12.0.GA.jar 
+ freemarker.jar 
+ 

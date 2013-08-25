@@ -12,19 +12,3 @@ Class-Path: tsl2.nano.common.1.0.0.jar
  commons-beanutils-1.8.0.jar 
  ant.jar ant-launcher.jar 
  ant-nodeps.jar
-Bundle-ManifestVersion: 2
-Bundle-Name: NanoFix Incubation
-Bundle-SymbolicName: de.tsl2.nano.incubation
-Bundle-Version: 0.0.1.A
-Bundle-RequiredExecutionEnvironment: JavaSE-1.6
-Require-Bundle: org.junit4;bundle-version="4.5.0",
- de.tsl2.nano.common;bundle-version="0.0.2"
-Eclipse-BuddyPolicy: registered
-Bundle-ClassPath: .,
- bin/
-Export-Package: de.tsl2.nano.incubation.test,
- de.tsl2.nano.incubation.vnet,
- de.tsl2.nano.incubation.vnet.neuron,
- de.tsl2.nano.incubation.vnet.routing,
- de.tsl2.nano.logictable,
- de.tsl2.nano.math.vector
