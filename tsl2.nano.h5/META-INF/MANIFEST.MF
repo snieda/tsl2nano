@@ -12,3 +12,4 @@ Class-Path: tsl2.nano.common.1.0.0.jar
  ant.jar 
  ant-launcher.jar 
  ant-nodeps.jar 
+ hsqldb.jar 

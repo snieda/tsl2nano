@@ -137,7 +137,8 @@ public class GenericLocalServiceBean extends GenericServiceBean {
          * GenericLocalServiceBean.class.getClassLoader().getResource("META-INF/persistence.xml");
          * so we have to 'extend' the classpath of the hibernate-lib
          */
-		Thread.currentThread().setContextClassLoader(Environment.get(ClassLoader.class));
+		Environment.assignClassloaderToCurrentThread();
+        LOG.info("current threads classloader: " + Thread.currentThread().getContextClassLoader());
         return Persistence.createEntityManagerFactory("genericPersistenceUnit").createEntityManager();
         // obtain the initial JNDI context
         // Context initCtx;

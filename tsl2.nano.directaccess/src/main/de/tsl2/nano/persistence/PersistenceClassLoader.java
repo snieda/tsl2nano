@@ -51,6 +51,12 @@ public class PersistenceClassLoader extends TransformingClassLoader {
         setTransformer(getPersitenceTransform());
     }
 
+    /**
+     * transforms the standard persistence file path {@link Persistence#FILE_PERSISTENCE_XML} to
+     * {@link Persistence#FILE_MYPERSISTENCE}.
+     * 
+     * @return path to transformed persistence-file: {@link Persistence#FILE_MYPERSISTENCE}
+     */
     ITransformer<String, String> getPersitenceTransform() {
         return new ITransformer<String, String>() {
             @Override

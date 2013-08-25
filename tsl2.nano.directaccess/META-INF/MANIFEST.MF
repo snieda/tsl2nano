@@ -11,6 +11,10 @@ Class-Path: tsl2.nano.common.1.0.0.jar
  commons-lang-2.4.jar 
  ant.jar ant-launcher.jar 
  ant-nodeps.jar
+ hibernate-jpa-2.0-api.jar 
+ jboss-ejb-api_3.1_spec.jar 
+ jboss-interceptors-api_1.1_spec.jar 
+ jboss-connector-api_1.5_spec.jar 
  hibernate3.jar 
  slf4j-api-1.6.1.jar 
  jta-1.1.jar 

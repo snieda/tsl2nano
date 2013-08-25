@@ -150,17 +150,17 @@ public class Application extends NanoHTTPD {
      */
     @Override
     public Response serve(String uri, String method, Properties header, Properties parms, Properties files) {
-        LOG.info(String.format("serving request:\n\turi: %s\n\tmethod: %s\n\theader: %s\n\tparms: %s\n\tfiles: %s",
-            uri,
-            method,
-            header,
-            parms,
-            files));
         String msg = "[undefined]";
         try {
             Environment.assignClassloaderToCurrentThread();
             if (method.equals("GET") && uri.contains("."))
                 return super.serve(uri, method, header, parms, files);
+            LOG.info(String.format("serving request:\n\turi: %s\n\tmethod: %s\n\theader: %s\n\tparms: %s\n\tfiles: %s",
+                uri,
+                method,
+                header,
+                parms,
+                files));
             //WORKAROUND for uri-problem
             String referer = header.getProperty("referer");
             if (parms.containsKey(IAction.CANCELED) || (method.equals("POST") && referer != null && uri.length() > 1 && referer.contains(uri)))
@@ -560,8 +560,9 @@ public class Application extends NanoHTTPD {
                     System.out.println("Please provide a path for application configurations (default: config) and optional a port number (default: 8067)!");
                     return;
                 } else {
-                    System.setProperty(Environment.KEY_CONFIG_PATH, args[0]);
-                    Environment.create(args[0]);
+                    String configPath = new File(args[0]).getAbsolutePath();
+                    System.setProperty(Environment.KEY_CONFIG_PATH, configPath + "/");
+                    Environment.create(configPath);
                     LOG = LogFactory.getLog(Application.class);
                     if (args.length > 1)
                         Environment.setProperty("http.port", Integer.valueOf(args[1]));
