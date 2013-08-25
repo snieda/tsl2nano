@@ -699,10 +699,10 @@ public class Application extends NanoHTTPD {
         Properties properties = new Properties();
         properties.setProperty(HIBREVNAME, Environment.getConfigPath() + HIBREVNAME);
 //    properties.setProperty("hbm.conf.xml", "hibernate.conf.xml");
-        properties.setProperty("server.db-config.file", Persistence.getPath(Persistence.FILE_JDBC_PROP_FILE));
+        properties.setProperty("server.db-config.file", Persistence.FILE_JDBC_PROP_FILE);
         properties.setProperty("dest.file", jarFile);
 
-        String plugin_dir = Environment.getConfigPath();
+        String plugin_dir = System.getProperty("user.dir");
         properties.setProperty("plugin.dir", new File(plugin_dir).getAbsolutePath());
         if (plugin_dir.endsWith(".jar/")) {
             properties.setProperty("plugin_isjar", Boolean.toString(true));
