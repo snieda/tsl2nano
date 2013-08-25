@@ -392,6 +392,13 @@ public class BeanClass<T> implements Serializable {
     }
 
     /**
+     * delegates to {@link #callMethod(Object, String, Class[], Object...)} - instance must not be null!
+     */
+    public static Object call(Object instance, String methodName, Class[] par, Object... args) {
+        return new BeanClass(instance.getClass()).callMethod(instance, methodName, par, args);
+    }
+    
+    /**
      * simple method reflection call
      * 
      * @param instance object
