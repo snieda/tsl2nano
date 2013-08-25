@@ -8,6 +8,7 @@
 	<property name="bean.jar.path" value="bean.jar" />
 	<property name="resources.dir" value="src/resources" />
 	<property name="resources.db.dir" value="${resources.dir}/db" />
+	<property name="server.db-config.file" value="jdbc-connection.properties" />
 	<property file="${server.db-config.file}" />
 
 	<!-- Hibernate properties -->
@@ -30,22 +31,22 @@
 	<target name="copy.plugin.libs" unless="plugin_isjar">
 		<!-- if it a jar-packed plugin in the eclipse dir, we unpack it -->
 		<copy todir="${lib.dir}" overwrite="false">
-			<fileset dir="${plugin.dir}/lib" includes="**"/>
+			<fileset dir="${plugin.dir}" includes="**"/>
 		</copy>
 	</target>
 	<target name="init" depends="mkdirs" description="create paths and libs">
 		<!-- only one of the following will be succeded -->
-		<antcall target="extract.plugin.libs" />
-		<antcall target="copy.plugin.libs" />
+		<!-- <antcall target="extract.plugin.libs" /> -->
+		<!-- <antcall target="copy.plugin.libs" /> -->
 		<!-- compiler -->
-		<path id="compiler.classpath" path="${env.JAVA_HOME}/lib/tools.jar" />
+		<path id="compiler.classpath" path="${env.java_home}/lib/tools.jar" />
 		<path id="project.classpath" >
 			<path refid="compiler.classpath" />
-			<fileset dir="${plugin.dir}/lib">
+			<fileset dir="${plugin.dir}">
 				<include name="**/*.jar" />
 				<!-- <exclude name="**/slf4j-api-1.6.1.jar" /> -->
 			</fileset>
-			<fileset dir="${lib.dir}">
+			<fileset dir="${basedir}">
 				<include name="**/*.jar" />
 				<!-- <exclude name="**/slf4j-api-1.6.1.jar" /> -->
 			</fileset>
@@ -57,7 +58,7 @@
 	<target name="hbm2ddl" description="create ddl statements">
 		<hibernatetool destdir="${basedir}">
 			<jdbcconfiguration packagename="${packagename}" revengfile="${hibernate.reveng.xml}" configurationfile="${hbm.conf.xml}" propertyfile="${server.db-config.file}" detectmanytomany="true" />
-			<hbm2ddl export="false" outputfilename="${resources.db.dir}/kion.ddl" format="true" />
+			<hbm2ddl export="false" outputfilename="${resources.db.dir}/bean.ddl" format="true" />
 		</hibernatetool>
 	</target>
 
@@ -81,23 +82,10 @@
 	<target name="create.bean.jar" depends="init" description="Create jar-file with bean classes">
 		<property name="dest.file" value="${bean.jar.path}" />
 		<antcall target="hbm2java" />
-		<echo message="compiler-path: ${env.JAVA_HOME}" />
+		<echo message="compiler-path: ${env.java_home}" />
 
-		<!-- WORKAROUND on ONE class -->
-		<replaceregexp flags="g">
-			<regexp pattern="public class Avtplausipruefung" />
-			<substitution expression="public class AvtPlausipruefung" />
-			<fileset dir="${src.dir}">
-				<include name="**/AvtPlausi*.java"/>
-			</fileset>
-		</replaceregexp>
-		<replaceregexp flags="g">
-			<regexp pattern="public Avtplausipruefung" />
-			<substitution expression="public AvtPlausipruefung" />
-			<fileset dir="${src.dir}">
-				<include name="**/AvtPlausi*.java"/>
-			</fileset>
-		</replaceregexp>
+		<!-- do some project-specific WORKAROUNDs -->
+		
 		<!-- WORKAROUND END -->
 		<javac classpathref="project.classpath" srcdir="${src.dir}" destdir="${bin.dir}" fork="true"/>
 		<jar destfile="${dest.file}">
