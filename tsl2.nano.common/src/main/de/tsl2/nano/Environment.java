@@ -121,13 +121,13 @@ public class Environment {
         if (configFile.canRead()) {
             self = XmlUtil.loadXml(configFile.getPath(), Environment.class, new CompatibilityLayer(), false);
             String configPath = getConfigPath();
-            if (!configPath.endsWith("/"))
+            if (!configPath.endsWith("/") && !configPath.endsWith("\\"))
                 setProperty(KEY_CONFIG_PATH, configPath + "/");
         } else {
             self = new Environment();
             self.properties = new Properties();
 //          LOG.warn("no environment.properties available");
-            self.properties.put(KEY_CONFIG_PATH, dir + "/");
+            self.properties.put(KEY_CONFIG_PATH, new File(dir).getAbsolutePath() + "/");
         }
         self.services = new Hashtable<Class<?>, Object>();
         registerBundle(PREFIX + "messages", true);

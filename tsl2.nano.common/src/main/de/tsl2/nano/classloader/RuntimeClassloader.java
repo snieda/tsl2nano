@@ -9,8 +9,10 @@
  */
 package de.tsl2.nano.classloader;
 
+import java.io.File;
 import java.io.Serializable;
 import java.net.MalformedURLException;
+import java.net.URI;
 import java.net.URL;
 import java.net.URLClassLoader;
 import java.net.URLStreamHandlerFactory;
@@ -93,7 +95,8 @@ public class RuntimeClassloader extends URLClassLoader {
      */
     public static URL getFileURL(String fileName) {
         try {
-            return new URL("file", "localhost", fileName);
+//            return new URL("file", "localhost", fileName);
+            return new File(fileName).toURI().toURL();
         } catch (final MalformedURLException e) {
             ForwardedException.forward(e);
             return null;

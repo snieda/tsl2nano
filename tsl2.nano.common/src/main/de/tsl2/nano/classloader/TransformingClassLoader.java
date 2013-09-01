@@ -56,12 +56,21 @@ public class TransformingClassLoader extends LibClassLoader {
     public Class<?> loadClass(String name) throws ClassNotFoundException {
         return super.loadClass(transformer.transform(name));
     }
+    
     /**
      * {@inheritDoc}
      */
     @Override
     public Enumeration<URL> getResources(String name) throws IOException {
         return super.getResources(transformer.transform(name));
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public URL getResource(String name) {
+        return super.getResource(transformer.transform(name));
     }
 
 }

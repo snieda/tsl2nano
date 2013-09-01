@@ -90,7 +90,9 @@ public class BeanValue<T> extends AttributeDefinition<T> implements IValueDefini
 
     @Override
     public Class<T> getType() {
-        if (isVirtual())
+        if (temporalType() != null)
+            return (Class<T>) temporalType();
+        else if (isVirtual())
             return ((IValueAccess<T>) instance).getType();
         else if (instance != null && Environment.get("value.use.instancetype", true)) {
             try {
@@ -103,7 +105,7 @@ public class BeanValue<T> extends AttributeDefinition<T> implements IValueDefini
                 LOG.warn("couldn't evaluate type through instance. using method-returntype instead. error was: " + e.toString());
             }
         }
-        return (Class<T>) (temporalType() != null ? temporalType() : super.getType());
+        return super.getType();
     }
 
     @Override

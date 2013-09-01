@@ -142,3 +142,16 @@ h2. TODOs
 * internationalization: english RegExpFormat, messages.properties
 * remove config path from environment (-->transient)
 * dynamic jar-loading inside used standard jars does not work without static entry in manifest
+* *hibernate-tools*:
+** configure to have generated IDs
+** read documentation
+* *Argo-UML 0.34*
+** how to create ddl from model
+* *PowerDesigner*
+** create ant-script:
+*** sql-statements with ddl
+*** hibtool hbm2java
+*** replace jdbc-connection-properties
+*** start nano.h5
+*** jmeter integration test
+

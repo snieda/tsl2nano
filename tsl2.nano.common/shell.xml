@@ -240,7 +240,7 @@ target: sh.delete
 	<target name="sh.stepover" description="${sh.stepover.description}">
 		<echo message="${sh.stepover.description}" />
 	</target>
-	
+
 	<target name="sh.find.files" unless="disable_sh.find.files" description="not implemented yet">
 		<fail message="not implemented. Overwrite in your build file" />
 	</target>
@@ -287,8 +287,13 @@ target: sh.delete
 	</target>
 
 	<target name="sh.sql" unless="disable_sh.sql" description="starts sql scripts">
-		<sql classpathref="stdpath" encoding="Cp1252" driver="${jdbc.driver}" url="${jdbc.url}" userid="${jdbc.username}" password="${jdbc.password}" onerror="stop" autocommit="true">
-			<fileset dir="${dir}" includes="${includes}" />
+		<!-- if not defined, use some defaults ... -->
+		<property name="sh.sql.dir" value="${basedir}" />
+		<property name="sh.sql.include" value="*.sql" />
+		<property name="sh.sql.exclude" value="EXCLUDING_EXPRESSION" />
+		<sql classpathref="sh.stdpath.id" encoding="Cp1252" driver="${jdbc.driver}" url="${jdbc.url}" userid="${jdbc.username}" password="${jdbc.password}"
+			onerror="stop" autocommit="true" print="true">
+			<fileset dir="${sh.sql.dir}" includes="${sh.sql.include}" excludes="${sh.sql.exclude}" />
 		</sql>
 	</target>
 
@@ -451,6 +456,28 @@ target: sh.delete
 		<property name="sh.java.classname" value="de.tsl2.nano.util.bean.BeanUtil" />
 		<antcall target="sh.java">
 		</antcall>
+	</target>
+
+	<!-- standard shell command -->
+	<target name="sh.exec">
+		<property name="sh.exec.dir" value="${basedir}" />
+		<exec dir="${sh.exec.dir}" command="${sh.exec.command}" />
+	</target>
+
+	<!-- windows specific call to cmd.exe -->
+	<target name="sh.exec.cmd">
+		<property name="sh.exec.cmd.dir" value="${basedir}" />
+		<property name="sh.exec.cmd.outputfile" value="${basedir}.log" />
+		<property name="sh.exec.cmd.resultproperty" value="${basedir}.result" />
+		<exec dir="${sh.exec.cmd.dir}" executable="cmd.exe" output="${sh.exec.cmd.outputfile}" resultproperty="${sh.exec.cmd.resultproperty}">
+			<arg value="/C" />
+			<arg value="${sh.exec.cmd.arg1}" />
+			<arg value="${sh.exec.cmd.arg2}" />
+			<arg value="${sh.exec.cmd.arg3}" />
+			<arg value="${sh.exec.cmd.arg4}" />
+			<arg value="${sh.exec.cmd.arg5}" />
+			<arg value="${sh.exec.cmd.arg6}" />
+		</exec>
 	</target>
 
 	<target name="sh.encode.base64" unless="disable_sh.encode.base64" description="encode perhaps a binary to base64-text">
