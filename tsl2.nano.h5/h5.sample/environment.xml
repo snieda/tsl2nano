@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<environment>
+   <property name="de.tsl2.nano.config.path">
+      <object class="java.lang.String">C:\idv\wjax\distribution\tsl-nano\target\h5.sample/</object>
+   </property>
+</environment>

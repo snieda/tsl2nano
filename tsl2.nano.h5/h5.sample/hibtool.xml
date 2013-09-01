@@ -1,0 +1,98 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project name="hibtool" basedir="." default="create.bean.jar">
+	<property name="plugin.dir" value="${basedir}/.." />
+	<property name="src.dir" value="generated-src" />
+	<property name="bin.dir" value="generated-bin" />
+	<property name="lib.dir" value="lib" />
+	<property name="packagename" value="org.anonymous.project" />
+	<property name="bean.jar.path" value="bean.jar" />
+	<property name="resources.dir" value="src/resources" />
+	<property name="resources.db.dir" value="${resources.dir}/db" />
+	<property name="server.db-config.file" value="jdbc-connection.properties" />
+	<property file="${server.db-config.file}" />
+
+	<!-- Hibernate properties -->
+	<property name="hbm.conf.xml" value="${basedir}/hibernate.cfg.xml" />
+	<!-- Environment -->
+	<property environment="env" />
+
+	<target name="mkdirs" description="create paths">
+		<mkdir dir="${src.dir}" />
+		<mkdir dir="${bin.dir}" />
+		<mkdir dir="${lib.dir}"/>
+	</target>
+	
+	<target name="extract.plugin.libs" if="plugin_isjar">
+		<!-- if it a jar-packed plugin in the eclipse dir, we unpack it -->
+		<unjar src="${plugin.dir}" dest="." overwrite="false">
+			<patternset includes="lib/**"/>
+		</unjar>
+	</target>
+	<target name="copy.plugin.libs" unless="plugin_isjar">
+		<!-- if it a jar-packed plugin in the eclipse dir, we unpack it -->
+		<copy todir="${lib.dir}" overwrite="false">
+			<fileset dir="${plugin.dir}" includes="**"/>
+		</copy>
+	</target>
+	<target name="init" depends="mkdirs" description="create paths and libs">
+		<!-- only one of the following will be succeded -->
+		<!-- <antcall target="extract.plugin.libs" /> -->
+		<!-- <antcall target="copy.plugin.libs" /> -->
+		<!-- compiler -->
+		<path id="compiler.classpath" path="${env.java_home}/lib/tools.jar" />
+		<path id="project.classpath" >
+			<path refid="compiler.classpath" />
+			<fileset dir="${plugin.dir}">
+				<include name="**/*.jar" />
+				<!-- <exclude name="**/slf4j-api-1.6.1.jar" /> -->
+			</fileset>
+			<fileset dir="${basedir}">
+				<include name="**/*.jar" />
+				<!-- <exclude name="**/slf4j-api-1.6.1.jar" /> -->
+			</fileset>
+		</path>
+
+		<taskdef name="hibernatetool" classname="org.hibernate.tool.ant.HibernateToolTask" classpathref="project.classpath" />
+	</target>
+
+	<target name="hbm2ddl" description="create ddl statements">
+		<hibernatetool destdir="${basedir}">
+			<jdbcconfiguration packagename="${packagename}" revengfile="${hibernate.reveng.xml}" configurationfile="${hbm.conf.xml}" propertyfile="${server.db-config.file}" detectmanytomany="true" />
+			<hbm2ddl export="false" outputfilename="${resources.db.dir}/bean.ddl" format="true" />
+		</hibernatetool>
+	</target>
+
+	<target name="hbm2java" description="Create java-bean classes">
+		<hibernatetool destdir="${basedir}">
+			<jdbcconfiguration packagename="${packagename}" propertyfile="${server.db-config.file}" detectmanytomany="true" />
+			<hbm2java destdir="${src.dir}" jdk5="true" ejb3="true" />
+		</hibernatetool>
+	</target>
+
+	<target name="hbm2doc" description="create doc for java bean classes">
+		<hibernatetool destdir="${basedir}">
+			<jdbcconfiguration packagename="${packagename}" revengfile="${hibernate.reveng.xml}" configurationfile="${hbm.conf.xml}" propertyfile="${server.db-config.file}" detectmanytomany="true" />
+			<hbm2doc destdir="doc" />
+		</hibernatetool>
+	</target>
+
+	<!-- ================================= 
+          target: create.bean.jar              
+         ================================= -->
+	<target name="create.bean.jar" depends="init" description="Create jar-file with bean classes">
+		<property name="dest.file" value="${bean.jar.path}" />
+		<antcall target="hbm2java" />
+		<echo message="compiler-path: ${env.java_home}" />
+
+		<!-- do some project-specific WORKAROUNDs -->
+		
+		<!-- WORKAROUND END -->
+		<javac classpathref="project.classpath" srcdir="${src.dir}" destdir="${bin.dir}" fork="true"/>
+		<jar destfile="${dest.file}">
+			<fileset dir="${bin.dir}">
+				<include name="**" />
+			</fileset>
+		</jar>
+	</target>
+
+</project>
