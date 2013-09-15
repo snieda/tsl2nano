@@ -1,0 +1,367 @@
+/*
+ * File: $HeadURL$
+ * Id  : $Id$
+ * 
+ * created by: Generated through velocity template (presenter.vm), IDV AG
+ * created on: ----/--/-- (not filled with property 'time' to simplify version-diffs)
+ * 
+ * ${copyright}
+ */
+package ${package};
+
+#define($attKey) KEY_${util.toUpperCase(${att.Name})}#end
+#define($attKeyTooltip) KEY_TOOLTIP_${util.toUpperCase(${att.Name})}#end
+#define($attName) ATTR_${util.toUpperCase(${att.Name})}#end
+
+import java.util.Collection;
+import java.util.Hashtable;
+import java.util.LinkedHashMap;
+import java.util.LinkedList;
+import java.util.Map;
+import java.util.List;
+
+import org.eclipse.core.databinding.observable.value.IObservableValue;
+import org.eclipse.jface.viewers.Viewer;
+import org.eclipse.swt.SWT;
+import org.eclipse.swt.layout.GridData;
+import org.eclipse.swt.graphics.Point;
+
+import ${class.Clazz.CanonicalName};
+import ${constClass};
+
+import de.idvag.swartifex.Messages;
+import de.idvag.swartifex.action.IAction;
+import de.idvag.swartifex.ui.presenter.IBeanController;
+import de.idvag.swartifex.ui.presenter.IBeanEditor;
+import de.idvag.swartifex.ui.presenter.IBeanLayout;
+import de.idvag.swartifex.ui.presenter.IBeanTableLayout;
+import de.idvag.swartifex.fielddescriptor.FieldDependency;
+import de.idvag.swartifex.fielddescriptor.FField;
+import de.idvag.swartifex.fielddescriptor.IComponentDescriptor;
+import de.idvag.swartifex.fielddescriptor.IFieldDescriptor;
+import de.idvag.swartifex.fielddescriptor.IFieldDependency;
+import de.idvag.swartifex.validator.MandatoryValidator;
+import de.idvag.swartifex.validator.AbstractValidator;
+import de.idvag.swartifex.validator.ObjectInListValidator;
+import de.idvag.swartifex.validator.ObjectInTableValidator;
+import de.idvag.swartifex.util.RegExpFormat;
+import de.idvag.swartifex.component.StructuredComponent;
+import de.idvag.swartifex.component.binding.Observables;
+
+/**
+ * Default presenter for bean ${class.Name}!
+ * <p>
+ * Extend this class to create a presenter for your special view. 
+ * <p>
+ * <b>Generated</b> do not modify!!!
+ *
+ * @author ts 22.11.2008
+ * @version $Revision$ 
+ */
+public class ${class.Name}UI implements ${class.Name}Const, IBeanEditor, IBeanLayout, IBeanTableLayout, IBeanController<${class.Name}> {
+    /** data bean */    
+    protected ${class.Name} data;
+    /** all editors to modify the data bean */
+    protected Map<String, IComponentDescriptor> editors;
+    /** all editor dependencies (dependencies between two editors) */
+    protected Map<String, IFieldDependency> dependencies;
+    /** all actions to create in a form for the given bean */
+    protected Collection<IAction> actions;
+    /** all visible columns, if the bean is shown in a list of a table */
+    protected Map<String, String> columns;
+    /** layoutConstraints */
+    protected Map<String, GridData> layoutConstraints;
+
+	/** filters all elements with the given attribute names */
+    protected Collection<String> attributeNameFilter;
+	/** inverts the filter */
+    protected boolean useInverseFilter = false;
+    
+    /**
+     * Constructor with specific bean data.
+     * 
+     * @param data bean instance
+     */
+    public ${class.Name}UI (${class.Name} data) {
+        this(data, new LinkedList<String>());
+    }
+
+    /**
+     * Constructor with specific bean data.
+     * 
+     * @param data bean instance
+     * @param attributeNameFilter attribute names to filter.
+     */
+    public ${class.Name}UI (${class.Name} data, Collection<String> attributeNameFilter) {
+        this(data, attributeNameFilter, false);
+    }
+
+    /**
+     * Constructor with specific bean data.
+     * 
+     * @param data bean instance
+     * @param attributeNameFilter attribute names to filter.
+     * @param useInversFilter if true, only elements, that are not contained in the filter will be shown.
+     */
+    public ${class.Name}UI (${class.Name} data, Collection<String> attributeNameFilter,
+            boolean useInversFilter) {
+        this.data = data;
+        columns = new LinkedHashMap<String, String>();
+        editors = new LinkedHashMap<String, IComponentDescriptor>();
+        dependencies = new LinkedHashMap<String, IFieldDependency>();
+        actions = new LinkedList<IAction>();
+        layoutConstraints = new LinkedHashMap<String, GridData>();
+        if (attributeNameFilter == null)
+        	attributeNameFilter = new LinkedList<String>();
+        this.attributeNameFilter = attributeNameFilter;
+        this.useInverseFilter = useInversFilter;
+        init(data);
+        //if an attribute filter was defined, use its order
+        if (!useInversFilter && attributeNameFilter instanceof List && ((List) attributeNameFilter).size() > 0)
+            swapToFilterOrder();
+    }
+
+    /**
+     * recreates the columns and editors map to use the order given by the attributeFilterNames. using a sortedmap
+     * doesn't work, so we have to recreate the map.
+     */
+    protected void swapToFilterOrder() {
+        LinkedHashMap<String, String> c = new LinkedHashMap<String, String>(columns.size());
+        // key, value --> value, key (the column keys are the column headers! the attributenames are optional values)
+        LinkedHashMap<String, String> c1 = new LinkedHashMap<String, String>(columns.size());
+        for (String col : columns.keySet()) {
+            c1.put(columns.get(col), col);
+        }
+        LinkedHashMap<String, IComponentDescriptor> e = new LinkedHashMap<String, IComponentDescriptor>(editors.size());
+        for (String attributeName : attributeNameFilter) {
+            String attributeKey = getAttributeKey(attributeName);
+            c.put(c1.get(attributeKey), attributeName);
+            e.put(attributeKey, editors.get(attributeKey));
+        }
+        columns = c;
+        editors = e;
+    }
+
+    /**
+     * usable to map the simple attribute name to the combined key string
+     * 
+     * @param attributeName attribute name
+     * @return key of attribute
+     */
+    private String getAttributeKey(String attributeName) {
+        String className = data != null ? data.getClass().getSimpleName() : getClass().getSimpleName().substring(0,
+            getClass().getSimpleName().length() - 2);
+        return BeanAttribute.toFirstLower(className) + "." + attributeName;
+    }
+
+    /**
+     * this method creates and fills all collections to provide all gui descriptions
+     * for the given bean.
+     * <P>
+     * Overwrite and "copy" initialization of the needed GUI components.<br>
+     * Also initialize your own "dependencies" and "actions".
+     *
+     * @param data the bean instance
+     * @see #editors
+     * @see #dependencies
+     * @see #actions
+     * @see #columns
+     */
+    protected void init(${class.Name} data) {
+    
+    //table informations
+#foreach( $att in $class.Attributes)    
+    if (!hideAttribute(${attName}))
+	    columns.put(Messages.getString(${attKey}), ${attName});
+#end
+
+    //editor descriptions
+    if (data != null) {
+#foreach( $att in $class.Attributes)    
+    if (!hideAttribute(${attName})) {
+	   IComponentDescriptor e = new FField(${attKey}, data, ${attName}, 
+	        	${util.getFormatter(${att})}, 
+	            Messages.getString(${attKey}), 
+	            SWT.NONE, Messages.getString(${attKeyTooltip}), 
+	            ${util.getEditorTypeString(${att})}, 
+	            ${util.getValidator(${att})}, 
+	            null, null, true, true);
+	    editors.put(${attKey}, e); 
+	    if (FField.isListType(e)) {
+	    	e.setValidator(evaluateRelations(e, null));
+//	        e.setDefaultValue(StructuredComponent.DEFAULT_FIRSTITEM);
+		}
+	}
+#end
+	}
+    }
+
+    /**
+     * Check if an attribute is hidden.
+     * 
+     * @param name attributename the attribute name
+     * @return true, if there is a filter (size>0) and it does not contain the given name
+     */
+    private boolean hideAttribute(String name) {
+        return (!useInverseFilter && attributeNameFilter.size() > 0 && !attributeNameFilter.contains(name))
+            || (useInverseFilter && attributeNameFilter.contains(name));
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    public Collection<IAction> getActions() {
+        return actions;
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    public Map<String, IFieldDependency> getEditorDependencies() {
+        return dependencies;
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    public Map<String, IComponentDescriptor> getEditors() {
+        return editors;
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    public IComponentDescriptor getAttributeEditor(String attributeName) {
+        return editors.get(attributeName);
+    }
+
+    /**
+     * Overwrite and return a proper {@link Viewer}.
+     *
+     * @param attributeName the attribute name
+     * @return always <code>null</code>
+     * @see de.idvag.swartifex.data.ui.IBeanLayout#getAttributeComponent(String)
+     */
+    public Viewer getAttributeComponent(String attributeName) {
+        return null;
+    }
+
+    /**
+     * Get the Layout constraints.
+     * 
+     * @return Returns the layoutConstraints.
+     */
+    public Map<String, ? extends Object> getLayoutConstraints() {
+        return layoutConstraints;
+    }
+
+    /**
+     * Overwrite and return a proper {@link GridData}.
+     * 
+     * @param attributeName the attribute name
+     * @return always <code>null</code>
+     * @see de.idvag.swartifex.data.ui.IBeanLayout#getAttributeLayout(String)
+     */
+    public GridData getAttributeLayout(String attributeName) {
+        return layoutConstraints.get(attributeName);
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    public Map<String, String> getColumnAttributes() {
+        return columns;
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    public Collection<IFieldDependency> getEditorDependencyValues() {
+        return getEditorDependencies().values();
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    public Collection<IComponentDescriptor> getEditorValues() {
+        return getEditors().values();
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    public Collection<String> getColumns() {
+        return getColumnAttributes().keySet();
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    public Map<String, Boolean> getColumnSort() {
+        return null;
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    public ${class.Name} getBean() {
+        return data;
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    public ${class.Name} save() {
+    	${util.get("PERSIST_INSTANCE")}
+    	return null;
+    }
+
+    /**
+     * Overwrite and implement this method to evaluate the list for the given editor.
+     * 
+     * @param editor editor of type list to evaluate the relations for.
+     * @param tableLayout optional instance of a bean table layout to define the table columns. 
+     * @return validator
+     */
+    protected AbstractValidator evaluateRelations(IComponentDescriptor editor, IBeanTableLayout tableLayout) {
+    	${util.get("INSTANTIATE_LAZY_RELATION")}
+        //OneToMany --> the relationObservable returns a collection
+        IObservableValue relationObservable = Observables.instance().getObservableValue(editor.getBean(),
+            editor.getBeanAttributeName());
+        //manyToOne --> call the service
+//        Class<?> type = (Class<?>) relationObservable.getValueType();
+//        if (!Collection.class.isAssignableFrom(type)) {
+//            if (!BeanUtil.isStandardType(type)) {
+//                IGenericService service = ServiceFactory.instance().getService(IGenericService.class);
+//                relationObservable = Observables.instance().getObservableValue(service.findAll(type));
+//            }
+//        }
+        //create the validator
+        if (FField.isDblClickType(editor)) {
+            if (tableLayout == null)
+                tableLayout = new IBeanTableLayout() {
+                    public Collection<String> getColumns() {
+                        return new LinkedList<String>();
+                    }
+
+                    public Map<String, Boolean> getColumnSort() {
+                        return new Hashtable<String, Boolean>();
+                    }
+
+                    public Map<String, String> getColumnAttributes() {
+                        return new Hashtable<String, String>();
+                    }
+                };
+            return new ObjectInTableValidator(editor.getID(), relationObservable, tableLayout.getColumnAttributes());
+        } else {
+            return new ObjectInListValidator(editor.getID(), relationObservable);
+        }
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    public Point getActionBounds() {
+        return null;
+    }
+}

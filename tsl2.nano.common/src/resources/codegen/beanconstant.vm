@@ -1,0 +1,45 @@
+/*
+ * File: $HeadURL$
+ * Id  : $Id$
+ * 
+ * created by: velocity template (${template}), IDV AG
+ * created on: ----/--/-- (not filled with property 'time' to simplify version-diffs)
+ * 
+ * ${copyright}
+ */
+package ${package};
+
+#define($attKey) KEY_${util.toUpperCase(${att.Name})}#end
+#define($attKeyTooltip) KEY_TOOLTIP_${util.toUpperCase(${att.Name})}#end
+#define($attName) ATTR_${util.toUpperCase(${att.Name})}#end
+/*
+ * Resource bundle preparation: copy this block to your resource bundle!
+ * 
+ * BLOCKSTART
+#foreach( $att in $class.Attributes)    
+${util.toFirstLowerCase(${class.Name})}.${att.Name}=${att.NameFU}
+${util.toFirstLowerCase(${class.Name})}.${att.Name}.tooltip=${att.NameFU} tooltip...
+#end
+ * BLOCKEND */
+
+/**
+ * Attribute and message label key definition for Bean class.
+ * <p>
+ * <b>Generated</b> do not modify!!!
+ *
+ * @author Generated through velocity template (beanconstant.vm), IDV AG
+ * @version $Revision$ 
+ */
+public interface ${class.Name}Const {
+
+#foreach( $att in $class.Attributes)    
+    /** key name of $att.Name in resource bundle */
+    public static final String ${attKey} = "${util.toFirstLowerCase(${class.Name})}.${att.Name}";
+    public static final String ${attKeyTooltip} = "${util.toFirstLowerCase(${class.Name})}.${att.Name}.tooltip";
+#end
+
+#foreach( $att in $class.Attributes)    
+    /** bean attribute $att.Name */
+    public static final String ${attName} = "${att.Name}";
+#end
+}

@@ -1,0 +1,172 @@
+/*
+ * File: $HeadURL$
+ * Id  : $Id$
+ * 
+ * created by: Generated through velocity template (presenter.vm), IDV AG
+ * created on: ----/--/-- (not filled with property 'time' to simplify version-diffs)
+ * 
+ * ${copyright}
+ */
+package ${package};
+
+#define($attKey) KEY_${util.toUpperCase(${att.Name})}#end
+#define($attKeyTooltip) KEY_TOOLTIP_${util.toUpperCase(${att.Name})}#end
+#define($attName) ATTR_${util.toUpperCase(${att.Name})}#end
+
+import java.util.Collection;
+import java.util.Hashtable;
+import java.util.LinkedHashMap;
+import java.util.LinkedList;
+import java.util.Map;
+import java.util.List;
+
+//import org.eclipse.core.databinding.observable.value.IObservableValue;
+import org.eclipse.jface.viewers.Viewer;
+import org.eclipse.swt.SWT;
+import org.eclipse.swt.layout.GridData;
+import org.eclipse.swt.graphics.Point;
+
+import ${class.Clazz.CanonicalName};
+import ${constClass};
+
+import de.idvag.swartifex.Messages;
+import de.idvag.swartifex.action.IAction;
+import de.idvag.swartifex.ui.presenter.DefaultPresenter;
+import de.idvag.swartifex.ui.presenter.IBeanController;
+import de.idvag.swartifex.ui.presenter.IBeanEditor;
+import de.idvag.swartifex.ui.presenter.IBeanLayout;
+import de.idvag.swartifex.ui.presenter.IBeanTableLayout;
+import de.idvag.swartifex.fielddescriptor.FieldDependency;
+import de.idvag.swartifex.fielddescriptor.FField;
+import de.idvag.swartifex.fielddescriptor.IComponentDescriptor;
+import de.idvag.swartifex.fielddescriptor.IFieldDescriptor;
+import de.idvag.swartifex.fielddescriptor.IFieldDependency;
+import de.idvag.swartifex.fielddescriptor.ListDescriptor;
+import de.idvag.swartifex.validator.MandatoryValidator;
+import de.idvag.swartifex.validator.AbstractValidator;
+import de.idvag.swartifex.validator.ObjectInListValidator;
+import de.idvag.swartifex.validator.ObjectInTableValidator;
+import de.idvag.swartifex.util.RegExpFormat;
+import de.idvag.swartifex.util.bean.BeanAttribute;
+import de.idvag.swartifex.component.StructuredComponent;
+import de.idvag.swartifex.component.binding.Observables;
+
+/**
+ * Default presenter for bean ${class.Name}!
+ * <p>
+ * Extend this class to create a presenter for your special view. 
+ * <p>
+ * <b>Generated</b> do not modify!!!
+ *
+ * No specific type will be used as generic to let the DefaultPresenter use a bean instance or its class!
+ * Please don't change that!
+ *
+ * @author ts 22.11.2008
+ * @version $Revision$ 
+ */
+public class ${class.Name}UI<T>  extends DefaultPresenter<T> implements ${class.Name}Const {
+    /**
+     * Constructor with specific bean data.
+     * 
+     * @param data bean instance
+     */
+    public ${class.Name}UI (T data) {
+        this(data, new LinkedList<String>());
+    }
+
+    /**
+     * Constructor with specific bean data.
+     * 
+     * @param data bean instance
+     * @param attributeNameFilter attribute names to filter.
+     */
+    public ${class.Name}UI (T data, Collection<String> attributeNameFilter) {
+        this(data, attributeNameFilter, false);
+    }
+
+    /**
+     * Constructor with specific bean data.
+     * 
+     * @param data bean instance
+     * @param attributeNameFilter attribute names to filter.
+     * @param useInversFilter if true, only elements, that are not contained in the filter will be shown.
+     */
+    public ${class.Name}UI (T data, Collection<String> attributeNameFilter,
+            boolean useInversFilter) {
+        super(data, attributeNameFilter, useInversFilter);
+        //if an attribute filter was defined, use its order
+        if (!useInversFilter && attributeNameFilter instanceof List && ((List) attributeNameFilter).size() > 0)
+            swapToFilterOrder();
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    protected void init(T data) {
+        //create table columns
+        createColumns(null);
+
+        //dependencies between editors
+        createDependencies(null);
+
+        //create editors
+        createEditors(null);
+
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    protected void createColumns(Collection<BeanAttribute> beanAttributes) {
+        listDescriptor = new ListDescriptor<T>();
+    //table informations
+#foreach( $att in $class.Attributes)    
+	    if (!hideAttribute(${attName}))
+		    listDescriptor.getColumnAttributes().put(Messages.getString(${attKey}), ${attName});
+#end
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    protected void createEditors(Collection<BeanAttribute> beanAttributes) {
+    //editor descriptions
+	    if (data != null) {
+#foreach( $att in $class.Attributes)    
+		    if (!hideAttribute(${attName})) {
+			   IComponentDescriptor e = new FField(${attKey}, data, ${attName}, 
+			        	${util.getFormatter(${att})}, 
+			            useLabel ? Messages.getString(${attKey}) : "", 
+			            getStyle(null), Messages.getString(${attKeyTooltip}), 
+			            ${util.getEditorTypeString(${att})}, 
+			            ${util.getValidator(${att})},
+			            null, null, true, true);
+			    editors.put(${attKey}, e); 
+			    if (FField.isListType(e)) {
+		//	        e.setDefaultValue(StructuredComponent.DEFAULT_FIRSTITEM);
+				}
+			}
+#end
+		}
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public T save() {
+    	${util.get("PERSIST_INSTANCE")}
+    	return super.save();
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    protected int getStyle(BeanAttribute beanAttribute) {
+        return SWT.NONE;
+    }
+}

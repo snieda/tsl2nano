@@ -1,0 +1,26 @@
+## This is an the velocity template
+## to generate a Java class
+import java.util.*;
+
+public class $class.Name {
+
+#foreach( $att in $class.Attributes)	
+	/** bean attribute $att.Name */
+	private $att.Type $att.Name;
+	
+	/**
+	 * read access method for $att.Name
+	 */
+	public $att.Type get$att.NameFU () {
+		return this.$att.Name;
+	}	
+	/**
+	 * write access method for $att.Name
+	 */
+	public void set$att.NameFU ($att.Type $att.Name) {
+		this.$att.Name = $att.Name;
+	}
+	
+#end
+}
+

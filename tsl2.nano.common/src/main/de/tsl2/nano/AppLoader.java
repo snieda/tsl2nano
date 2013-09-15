@@ -1,0 +1,192 @@
+/*
+ * File: $HeadURL$
+ * Id  : $Id$
+ * 
+ * created by: ts
+ * created on: 11.09.2013
+ * 
+ * Copyright: (c) Thomas Schneider 2013, all rights reserved
+ */
+package de.tsl2.nano;
+
+import java.io.File;
+import java.net.URL;
+import java.util.Map;
+
+import de.tsl2.nano.classloader.LibClassLoader;
+import de.tsl2.nano.classloader.NestedJarClassLoader;
+import de.tsl2.nano.collection.CollectionUtil;
+import de.tsl2.nano.collection.MapUtil;
+import de.tsl2.nano.util.bean.BeanClass;
+
+/**
+ * Provides an Application Starter with an own extended classloader and a convenience to handle call arguments (the
+ * {@link Argumentator}. The goal is to create the new classloader before loading any classes by the parent classloader.
+ * thats, why this class uses as less dependencies/imports as possible!
+ * <p/>
+ * Use:
+ * 
+ * <pre>
+ * - Extend the AppLoader and create the main method, creating a new instance of your extended loader and calling {@link #start(String[])}.
+ * - Override {@link #getManual()} to have a check and print of application usage
+ * - Override {@link #createEnvironment(Argumentator)} to interpret arguments and set application environment (see {@link Environment}).
+ * 
+ * Example:
+ * 
+ * public class Loader extends AppLoader {
+ *    public static void main(String[] args) {
+ *        new Loader().start("mypackagepath.MyMainClass", null, args);
+ *    }
+ * }
+ * </pre>
+ * 
+ * ATTENTION: your extension should do not more than that - to have as less dependencies as possible!
+ * 
+ * @author ts
+ * @version $Revision$
+ */
+public class AppLoader {
+
+    /**
+     * provides a map containing argument names (map-keys) and their description (map-values).
+     * 
+     * @return map describing all possible main application arguments. Used by {@link Argumentator}.
+     */
+    @SuppressWarnings("unchecked")
+    protected Map<String, String> getManual() {
+        return MapUtil.asMap("usage",
+            this.getClass().getSimpleName() + " [environment name or path] {<Main-Class>} [arguments]");
+    }
+
+    /**
+     * createEnvironment
+     * 
+     * @param environment environment name/path
+     * @param args console call arguments (see {@link Argumentator}) to be interpreted.
+     */
+    protected void createEnvironment(String environment, Argumentator args) {
+        System.setProperty(environment, environment + "/");
+        BeanClass.createBeanClass("de.tsl2.nano.Environment").callMethod(null,
+            "create",
+            new Class[] { String.class },
+            environment);
+//        Environment.create(environment);
+//        LOG = LogFactory.getLog(AppLoader.class);
+    }
+
+    /**
+     * extracts mainclass and environment from args and delegates to {@link #start(String, String, String[])}.
+     * 
+     * @param args main args
+     */
+    public void start(String[] args) {
+        String mainclass;
+        String environment;
+        String[] nargs;
+        if (args.length == 1) {
+            environment = "config";
+            mainclass = args[0];
+            nargs = new String[0];
+        } else {
+            environment = args[0];
+            mainclass = args[1];
+            nargs = new String[args.length - 2];
+            System.arraycopy(args, 2, nargs, 0, nargs.length);
+        }
+        start(mainclass, environment, nargs);
+    }
+
+    /**
+     * starts application loading. will be called by the static main method to work inside an extended class instance.
+     * 
+     * @param mainclass main-class to start it's main method with new classloader. must not be null!
+     * @param environment (optional, default: config) environment name or path
+     * @param args main args (must not be null!)
+     */
+    public void start(String mainclass, String environment, String[] args) {
+        /*
+         * check and use the AppLoaders main arguments
+         */
+        if (isHelpRequest(args)) {
+            printHelp();
+        }
+        if (environment == null) {
+            environment = args[0];
+            String[] nargs = new String[args.length - 1];
+            System.arraycopy(args, 1, nargs, 0, nargs.length);
+            args = nargs;
+        }
+
+        /*
+         * create the classloader to be used by the new application
+         */
+        provideClassloader(environment);
+
+        BeanClass<?> bc = BeanClass.createBeanClass(mainclass);
+
+        /*
+         * now, we can load the environment with properties and services
+         */
+        createEnvironment(environment, new Argumentator(bc.getName(), getManual(), args));
+        /*
+         * finally, the application will be started inside the
+         * new environment and classloader
+         */
+        bc.callMethod(null, "main", new Class[] { String[].class }, new Object[] { args });
+    }
+
+    /**
+     * isHelpRequest
+     * 
+     * @param args arguments to check
+     * @return true, if arguments describe a help request
+     */
+    protected boolean isHelpRequest(String[] args) {
+        return args.length == 0 || args[0].matches(".*(\\?|help|man)");
+    }
+
+    /**
+     * printHelp
+     * 
+     * @param args
+     */
+    protected void printHelp() {
+        Argumentator.printManual(getManual());
+    }
+
+    /**
+     * main - to be delegated by your extension
+     * 
+     * @param args console call arguments
+     */
+    public static void main(String[] args) {
+        new AppLoader().start(args);
+    }
+
+    /**
+     * creates and sets a new extended classloader for the current threads context
+     * 
+     * @param environment name/path to be added to the classloader
+     */
+    protected void provideClassloader(String environment) {
+        ClassLoader contextClassLoader = Thread.currentThread().getContextClassLoader();
+        NestedJarClassLoader nestedLoader = new NestedJarClassLoader((ClassLoader)null);
+        nestedLoader.addFile(System.getProperty("java.class.path"));
+        nestedLoader.addLibraryPath(new File(System.getProperty("user.dir")).getAbsolutePath());
+        nestedLoader.addLibraryPath(new File(environment).getAbsolutePath());
+        nestedLoader.startPathChecker(environment, 2000);
+        System.out.println("resetting current thread classloader " + contextClassLoader + " with " + nestedLoader);
+        Thread.currentThread().setContextClassLoader(nestedLoader);
+    }
+
+    /**
+     * convenience to insert new args to the given args
+     * 
+     * @param args standard arguments
+     * @param preArgs arguments to be inserted before.
+     * @return new String[] holding preArgs + args
+     */
+    protected String[] extendArgs(String[] args, String... preArgs) {
+        return CollectionUtil.concat(String[].class, preArgs, args);
+    }
+}
