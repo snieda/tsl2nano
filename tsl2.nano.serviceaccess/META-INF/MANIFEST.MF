@@ -21,5 +21,6 @@ Class-Path: ./
  hibernate-jpa-2.0-api.jar 
  jboss-ejb-api_3.1_spec.jar 
  jboss-interceptors-api_1.1_spec.jar 
- jboss-connector-api_1.5_spec.jar 
+ jboss-connector-api_1.5_spec.jar
+ jta-1.1.jar  
  fs-connector.rar 
