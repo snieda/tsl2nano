@@ -37,7 +37,8 @@ import de.tsl2.nano.collection.CollectionUtil;
 import de.tsl2.nano.collection.ListSet;
 import de.tsl2.nano.collection.MapUtil;
 import de.tsl2.nano.exception.ForwardedException;
-import de.tsl2.nano.execution.ScriptUtil;
+import de.tsl2.nano.execution.CompatibilityLayer;
+import de.tsl2.nano.execution.SystemUtil;
 import de.tsl2.nano.format.RegExpFormat;
 import de.tsl2.nano.log.LogFactory;
 import de.tsl2.nano.persistence.HibernateBeanContainer;
@@ -75,24 +76,25 @@ import de.tsl2.nano.util.bean.def.SecureAction;
  * </pre>
  */
 @SuppressWarnings({ "rawtypes", "unchecked" })
-public class Application extends NanoHTTPD {
+public class NanoH5 extends NanoHTTPD {
+    private static final Log LOG = LogFactory.getLog(NanoH5.class);
+    
     IPageBuilder<?, String> builder;
     Stack<BeanDefinition<?>> navigation = new Stack<BeanDefinition<?>>();
     BeanDefinition<?> model;
     int port;
     Response response;
     ClassLoader appstartClassloader;
-    private static Log LOG;
 
     private static final String DEGBUG_HTML_FILE = "application.html";
     private static final String START_PAGE = "Start";
     private static final int OFFSET_FILTERLINES = 2;
 
-    public Application() throws IOException {
+    public NanoH5() throws IOException {
         this(Environment.get("http.port", 8067), Environment.get(IPageBuilder.class), new Stack<BeanDefinition<?>>());
     }
 
-    public Application(int port, IPageBuilder<?, String> builder, Stack<BeanDefinition<?>> navigation) throws IOException {
+    public NanoH5(int port, IPageBuilder<?, String> builder, Stack<BeanDefinition<?>> navigation) throws IOException {
         super(port, new File(Environment.getConfigPath()));
         this.port = port;
         this.builder = builder;
@@ -109,11 +111,12 @@ public class Application extends NanoHTTPD {
      */
     public void start() {
         try {
+            ((LogFactory)LOG).setLogLevel(32);
             LOG.info(System.getProperties());
             createStartPage(DEGBUG_HTML_FILE);
             LOG.info("Listening on port " + port + ". Hit Enter to stop.\n");
             if (System.getProperty("os.name").startsWith("Windows"))
-                ScriptUtil.executeRegisteredWindowsPrg("application.html");
+                SystemUtil.executeRegisteredWindowsPrg("application.html");
             System.in.read();
         } catch (Exception ioe) {
             LOG.error("Couldn't start server:", ioe);
@@ -140,7 +143,7 @@ public class Application extends NanoHTTPD {
      * @param navigationModel new navigation model
      * @return application itself
      */
-    public Application setNavigationModel(Stack<BeanDefinition<?>> navigationModel) {
+    public NanoH5 setNavigationModel(Stack<BeanDefinition<?>> navigationModel) {
         navigation = navigationModel;
         return this;
     }
@@ -187,7 +190,9 @@ public class Application extends NanoHTTPD {
             } else {
                 reset();
                 response = null;
-                return new NanoHTTPD.Response(HTTP_OK, MIME_HTML, "<a href=\"http://localhost:8069\">restart session</a>");
+                return new NanoHTTPD.Response(HTTP_OK,
+                    MIME_HTML,
+                    "<a href=\"http://localhost:" + Environment.get("http.port", 8067) + "\">restart session</a>");
             }
         } catch (Exception e) {
             RuntimeException ex = ForwardedException.toRuntimeEx(e, true);
@@ -535,7 +540,6 @@ public class Application extends NanoHTTPD {
      * 
      * @param collector collector holding a canceled/transient instance.
      */
-    @SuppressWarnings("rawtypes")
     private void removeUnpersistedNewEntities(BeanCollector collector) {
         if (!BeanContainer.instance().isPersistable(collector.getBeanFinder().getType()))
             return;
@@ -553,23 +557,11 @@ public class Application extends NanoHTTPD {
      * @param args launching args
      */
     public static void main(String[] args) {
-        //TODO: create an Argumentator
         try {
-            if (args.length > 0) {
-                if (args[0].matches(".*(\\?|help|man)")) {
-                    System.out.println("Please provide a path for application configurations (default: config) and optional a port number (default: 8067)!");
-                    return;
-                } else {
-                    String configPath = new File(args[0]).getAbsolutePath();
-                    System.setProperty(Environment.KEY_CONFIG_PATH, configPath + "/");
-                    Environment.create(configPath);
-                    LOG = LogFactory.getLog(Application.class);
-                    if (args.length > 1)
-                        Environment.setProperty("http.port", Integer.valueOf(args[1]));
-                }
-            }
+            if (args.length > 0)
+                Environment.setProperty("http.port", Integer.valueOf(args[0]));
             initServices();
-            new Application().setNavigationModel(createGenericNavigationModel()).start();
+            new NanoH5().setNavigationModel(createGenericNavigationModel()).start();
         } catch (IOException e) {
             ForwardedException.forward(e);
         }
@@ -603,24 +595,28 @@ public class Application extends NanoHTTPD {
         return navigationModel;
     }
 
+    @SuppressWarnings({ "serial"})
     private static Bean<?> createLogin() {
         final Persistence persistence = Persistence.current();
         Bean<?> login = new Bean(persistence);
         login.removeAttributes("jdbcProperties");
         login.getAttribute("jarFile").getPresentation().setType(IPresentable.TYPE_ATTACHMENT);
         login.getPresentationHelper().change(BeanPresentationHelper.PROP_NULLABLE, false);
+        login.getPresentationHelper().change(BeanPresentationHelper.PROP_NULLABLE, true, "connectionPassword");
         login.addAction(new SecureAction<Object>("tsl2nano.login.ok") {
+
             @Override
             public Object action() throws Exception {
                 persistence.save();
-                if (!new File(persistence.getJarFile()).exists())
-                    generateJarFile(persistence.getJarFile());
 
                 PersistenceClassLoader runtimeClassloader = new PersistenceClassLoader(new URL[0],
                     Thread.currentThread().getContextClassLoader());
                 runtimeClassloader.addLibraryPath(Environment.getConfigPath());
                 Thread.currentThread().setContextClassLoader(runtimeClassloader);
                 Environment.addService(ClassLoader.class, runtimeClassloader);
+
+                if (!new File(persistence.getJarFile()).exists())
+                    generateJarFile(persistence.getJarFile());
 
                 List<Class> beanClasses = runtimeClassloader.loadBeanClasses(persistence.getJarFile(), null);
                 Environment.setProperty("loadedBeanTypes", beanClasses);
@@ -663,6 +659,9 @@ public class Application extends NanoHTTPD {
                 root.setName(StringUtil.toFirstUpper(StringUtil.substring(persistence.getJarFile(), "/", ".jar", true)));
                 root.setAttributeFilter("name");
                 root.getAttribute("name").setFormat(new Format() {
+                    /** serialVersionUID */
+                    private static final long serialVersionUID = 1725704131355509738L;
+
                     @Override
                     public StringBuffer format(Object obj, StringBuffer toAppendTo, FieldPosition pos) {
                         String name = StringUtil.substring((String) obj, null, BeanCollector.POSTFIX_COLLECTOR);
@@ -708,7 +707,10 @@ public class Application extends NanoHTTPD {
         if (plugin_dir.endsWith(".jar/")) {
             properties.setProperty("plugin_isjar", Boolean.toString(true));
         }
-        ScriptUtil.antbuild(Environment.getConfigPath() + "hibtool.xml", "create.bean.jar", properties, null);
+        Environment.get(CompatibilityLayer.class).runRegistered("ant",
+            Environment.getConfigPath() + HIBTOOLNAME,
+            "create.bean.jar",
+            properties);
     }
 
     protected void reset() {
