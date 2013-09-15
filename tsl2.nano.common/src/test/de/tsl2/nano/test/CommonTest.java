@@ -16,6 +16,7 @@ import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 
 import java.io.File;
+import java.io.Reader;
 import java.math.BigDecimal;
 import java.math.MathContext;
 import java.text.DateFormat;
@@ -38,7 +39,6 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Properties;
-import java.util.zip.ZipInputStream;
 
 import org.apache.commons.logging.Log;
 import org.junit.Assert;
@@ -49,7 +49,7 @@ import de.tsl2.nano.Environment;
 import de.tsl2.nano.action.CommonAction;
 import de.tsl2.nano.action.IAction;
 import de.tsl2.nano.action.IActivator;
-import de.tsl2.nano.classloader.JarClassLoader;
+import de.tsl2.nano.classloader.NestedJarClassLoader;
 import de.tsl2.nano.collection.ArrSegList;
 import de.tsl2.nano.collection.CollectionUtil;
 import de.tsl2.nano.collection.FloatArray;
@@ -80,7 +80,6 @@ import de.tsl2.nano.util.bean.def.BeanDefinition;
 import de.tsl2.nano.util.bean.def.CollectionExpressionFormat;
 import de.tsl2.nano.util.bean.def.IBeanCollector;
 import de.tsl2.nano.util.bean.def.IPresentable;
-import de.tsl2.nano.util.bean.def.IValueAccess;
 import de.tsl2.nano.util.bean.def.ValueExpression;
 import de.tsl2.nano.util.bean.def.ValueMatcher;
 import de.tsl2.nano.util.bean.enhance.BeanEnhancer;
@@ -93,6 +92,7 @@ import de.tsl2.nano.util.operation.OperableUnit;
  * @author Thomas Schneider
  * @version $Revision$
  */
+@SuppressWarnings({ "unchecked", "rawtypes", "serial" })
 public class CommonTest {
     private static final Log LOG = LogFactory.getLog(CommonTest.class);
 
@@ -574,6 +574,45 @@ public class CommonTest {
         TypeBean typeLine2 = new TypeBean();
         typeLine2.setPrimitiveShort((short) 1234);
         typeLine2.setPrimitiveLong(567890l);
+        typeLine2.setWeekdayEnum(WeekdayEnum.Tuesday);
+        assertTrue(BeanUtil.equals(resultIt.next(), typeLine2));
+
+        /*
+         * test it , using another separation string and an empty line at the end
+         */
+        //first, create an example file and test bean
+        testFile = "commontest-fromflatfile.txt";
+        s = "\"0123\",\"456789\",\"Monday\"\n\"1234\",\"567890\",\"Tuesday\"\n";
+        FileUtil.writeBytes(s.getBytes(), testFile, false);
+
+        //first, create an example file and test bean
+        testFile = "commontest-fromflatfile.txt";
+        s = "header\n\"0123\",\"456,789\",\"Monday\"\n\"1234\",\"567890\",\"Tuesday\"\n";
+        FileUtil.writeBytes(s.getBytes(), testFile, false);
+
+        //this reader will eliminate the " quotations!
+        Reader reader = FileUtil.getTransformingReader(FileUtil.getFile(testFile), ' ', ' ', true);
+        
+        //read it with fixed-columns
+        result = BeanUtil.fromFlatFile(reader,
+            "\",\"",
+            TypeBean.class,
+            null,
+            "primitiveShort",
+            "string",
+            "weekdayEnum");
+        assertTrue(result.size() == 2);
+
+        resultIt = result.iterator();
+        typeLine1 = new TypeBean();
+        typeLine1.setPrimitiveShort((short) 123);
+        typeLine1.setString("456,789");
+        typeLine1.setWeekdayEnum(WeekdayEnum.Monday);
+        assertTrue(BeanUtil.equals(resultIt.next(), typeLine1));
+
+        typeLine2 = new TypeBean();
+        typeLine2.setPrimitiveShort((short) 1234);
+        typeLine2.setString("567890");
         typeLine2.setWeekdayEnum(WeekdayEnum.Tuesday);
         assertTrue(BeanUtil.equals(resultIt.next(), typeLine2));
 
@@ -1134,15 +1173,15 @@ public class CommonTest {
     @Test
     public void testJarClassloader() {
         ClassLoader contextClassLoader = Thread.currentThread().getContextClassLoader();
-        JarClassLoader jarClassLoader = new JarClassLoader(contextClassLoader) {
+        NestedJarClassLoader jarClassLoader = new NestedJarClassLoader(contextClassLoader) {
             protected String getRootJarPath() {
-                return "../tsl2nano.architect/packages/plugins/de.tsl2.nano.common_0.0.2.B.jar";
+                return "../target/de.tsl2.nano.common_0.0.2.B.jar";
             }
-
-            @Override
-            protected ZipInputStream getJarInputStream(String jarName) {
-                return getExternalJarInputStream(jarName);
-            }
+//
+//            @Override
+//            protected ZipInputStream getJarInputStream(String jarName) {
+//                return getExternalJarInputStream(jarName);
+//            }
         };
     }
 
