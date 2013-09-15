@@ -14,7 +14,7 @@ import java.util.HashSet;
 import java.util.Set;
 
 import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import de.tsl2.nano.log.LogFactory;
 
 import de.tsl2.nano.messaging.EventController;
 import de.tsl2.nano.messaging.IListener;
