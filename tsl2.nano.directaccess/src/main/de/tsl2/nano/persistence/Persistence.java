@@ -312,7 +312,7 @@ public class Persistence implements Serializable {
         prop.put("hibernate.connection.driver_class", getConnectionDriverClass());
         prop.put("hibernate.connection.url", getConnectionUrl());
         prop.put("hibernate.connection.username", getConnectionUserName());
-        prop.put("hibernate.connection.password", getConnectionPassword());
+        prop.put("hibernate.connection.password", StringUtil.toString(getConnectionPassword()));
         prop.put("hibernate.default_schema", getDefaultSchema());
 
         prop.put("jdbc.dialect", getHibernateDialect());
@@ -320,7 +320,7 @@ public class Persistence implements Serializable {
         prop.put("jdbc.datasource", getDatasourceClass());
         prop.put("jdbc.url", getConnectionUrl());
         prop.put("jdbc.username", getConnectionUserName());
-        prop.put("jdbc.password", getConnectionPassword());
+        prop.put("jdbc.password", StringUtil.toString(getConnectionPassword()));
         prop.put("jdbc.database", "xe");
         prop.put("jdbc.port", "1521");
         prop.put("jdbc.scheme", getDefaultSchema());

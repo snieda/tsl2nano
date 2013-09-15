@@ -14,7 +14,7 @@ import java.net.URL;
 import java.util.Enumeration;
 
 import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import de.tsl2.nano.log.LogFactory;
 
 import de.tsl2.nano.classloader.LibClassLoader;
 import de.tsl2.nano.classloader.RuntimeClassloader;
@@ -37,7 +37,7 @@ public class PersistenceClassLoader extends TransformingClassLoader {
      */
     public PersistenceClassLoader(URL[] urls) {
         super(urls);
-        setTransformer(getPersitenceTransform());
+        setTransformer(getPersistenceTransform());
     }
 
     /**
@@ -48,7 +48,7 @@ public class PersistenceClassLoader extends TransformingClassLoader {
      */
     public PersistenceClassLoader(URL[] urls, ClassLoader parent) {
         super(urls, parent);
-        setTransformer(getPersitenceTransform());
+        setTransformer(getPersistenceTransform());
     }
 
     /**
@@ -57,7 +57,7 @@ public class PersistenceClassLoader extends TransformingClassLoader {
      * 
      * @return path to transformed persistence-file: {@link Persistence#FILE_MYPERSISTENCE}
      */
-    ITransformer<String, String> getPersitenceTransform() {
+    ITransformer<String, String> getPersistenceTransform() {
         return new ITransformer<String, String>() {
             @Override
             public String transform(String name) {

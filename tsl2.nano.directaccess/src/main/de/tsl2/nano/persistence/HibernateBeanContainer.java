@@ -9,20 +9,10 @@
  */
 package de.tsl2.nano.persistence;
 
-import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
 
-import javax.persistence.Entity;
-
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
-
-import de.tsl2.nano.action.CommonAction;
-import de.tsl2.nano.action.IAction;
-import de.tsl2.nano.service.util.BeanContainerUtil;
 import de.tsl2.nano.service.util.IGenericService;
-import de.tsl2.nano.util.bean.BeanClass;
 import de.tsl2.nano.util.bean.BeanContainer;
 
 /**

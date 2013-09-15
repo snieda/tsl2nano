@@ -5,7 +5,14 @@
 
 h2. Introduction
 
-This project/plugin extends the _tsl2nano.serviceaccess_ project to access the data without any application-server.
+This project/plugin extends the _tsl2nano.serviceaccess_ project to access the data without any application-server - but using an o/r mapper through jpa - with javax.persistence. It provides a BeanContainer to be used to get entities mapped by jpa. BeanContainers for detaching entities and storing them local are available. The ScriptTool may be used as a kind of sql/hql/ant tool.
+
+h2. Dependencies
+
+* tsl2.nano.serviceaccess
+* at least one o/r mapper like hibernate with all it's dependencies
+* for the ScirptTool, the standard ant libraries are needed.
+* to get a connection to a database (through javax.persistence), at least a database-driver library is needed.
 
 h2. developing and deploying
 

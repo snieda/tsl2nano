@@ -13,6 +13,7 @@ import java.util.Collection;
 import java.util.Hashtable;
 import java.util.List;
 import java.util.Map;
+import java.util.Properties;
 
 import javax.security.auth.Subject;
 
@@ -312,6 +313,11 @@ public class ConfigServiceBean implements IGenericService {
     @Override
     public <T> Part<T>[] findBatch(Part<T>... batchParts) {
         throw new UnsupportedOperationException();
+    }
+
+    @Override
+    public Properties getServerInfo() {
+        return System.getProperties();
     }
 
 }

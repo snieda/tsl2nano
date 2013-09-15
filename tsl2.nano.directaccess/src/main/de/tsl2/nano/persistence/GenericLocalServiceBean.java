@@ -10,7 +10,7 @@ import javax.persistence.EntityManager;
 import javax.persistence.Persistence;
 
 import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import de.tsl2.nano.log.LogFactory;
 
 import de.tsl2.nano.Environment;
 import de.tsl2.nano.exception.ForwardedException;
@@ -145,7 +145,7 @@ public class GenericLocalServiceBean extends GenericServiceBean {
         // try {
         // initCtx = new InitialContext();
         // EntityManagerFactory emf = (EntityManagerFactory) initCtx
-        // .lookup("java:comp/env/persistence/kionPersistenceUnit");
+        // .lookup("java:comp/env/persistence/genericPersistenceUnit");
         // // perform JNDI lookup to obtain entity manager factory
         // // use factory to obtain application-managed entity manager
         // entityManager = emf.createEntityManager();
