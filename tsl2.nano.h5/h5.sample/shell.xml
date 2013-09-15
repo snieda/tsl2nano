@@ -291,11 +291,34 @@ target: sh.delete
 		<property name="sh.sql.dir" value="${basedir}" />
 		<property name="sh.sql.include" value="*.sql" />
 		<property name="sh.sql.exclude" value="EXCLUDING_EXPRESSION" />
-		<sql classpathref="sh.stdpath.id" encoding="Cp1252" driver="${jdbc.driver}" url="${jdbc.url}" userid="${jdbc.username}" password="${jdbc.password}" onerror="stop" autocommit="true">
+		<sql classpathref="sh.stdpath.id" encoding="Cp1252" driver="${jdbc.driver}" url="${jdbc.url}" userid="${jdbc.username}" password="${jdbc.password}"
+			onerror="stop" autocommit="true" print="true">
 			<fileset dir="${sh.sql.dir}" includes="${sh.sql.include}" excludes="${sh.sql.exclude}" />
 		</sql>
 	</target>
 
+	<target name="sh.printinfo" description="prints some system informations to the standard output">
+		<echo>
+===========================================================
+starting ${ant.project.name}:
+	script: ${ant.file}
+	target: ${ant.project.invoked-targets}
+	encode: ${file.encoding}
+	dir   : ${user.dir}
+	base  : ${basedir}
+	time  : ${DSTAMP} ${TSTAMP}
+	user  : ${user.name}, home: ${user.home}
+	lang  : ${user.country}_${user.language}, encoding: ${sun.jnu.encoding}
+	java  : ${java.runtime.version}, ${java.home}
+	ant   : ${ant.home}
+	os    : ${os.name}, ${os.version} ${sun.os.patch.level} ${os.arch}
+	system: ${sun.cpu.isalist} ${sun.arch.data.model}
+===========================================================
+		</echo>
+		<!-- <echoproperties format="text"/> -->
+		
+	</target>
+	
 	<target name="sh.sleep" unless="disable_sh.sleep" description="sleeps for given milliseconds">
 		<echo message="sleeping for ${sh.sleep.milliseconds} milliseconds..." />
 		<sleep milliseconds="${sh.sleep.milliseconds}" />
@@ -583,7 +606,7 @@ target: sh.delete
 		</antcall>
 	</target>
 
-	<target name="sh.build" unless="disable_sh.build" description="do a standard java build">
+	<target name="sh.build" unless="disable_sh.build" depends="sh.printinfo" description="do a standard java build">
 		<!-- fallbacks -->
 		<property name="sh.build.basedir" value="${basedir}" />
 		<property name="sh.build.name" value="${sh.build.basedir}" />
