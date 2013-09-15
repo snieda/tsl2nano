@@ -24,5 +24,24 @@
 			<property name="sh.copy.include" value="**/*.jar" />
 			<property name="sh.copy.flatten" value="true" />
 		</ant>
+		
+		<!-- <ant antfile="../tsl2.nano.common/shell.xml" target="sh.jar">
+			<property name="sh.jar.srcdir" value="../" />
+			<property name="sh.copy.destination" value="../target" />
+			<property name="sh.copy.include" value="**/*.jar" />
+			<property name="sh.copy.flatten" value="true" />
+		</ant> -->
+		
+		<ant antfile="../tsl2.nano.common/shell.xml" target="sh.copy">
+			<property name="sh.copy.srcdir" value="../target" />
+			<property name="sh.copy.destination" value="../test.h5.sample" />
+			<property name="sh.copy.include" value="tsl2.nano.common*.jar" />
+		</ant>
+		
+		<ant antfile="../tsl2.nano.common/shell.xml" target="sh.exec.cmd">
+			<property name="sh.exec.cmd.dir" value="../test.h5.sample" />
+			<property name="sh.exec.cmd.arg1" value="start.bat" />
+		</ant>
+		
 	</target>
 </project>

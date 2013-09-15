@@ -5,16 +5,18 @@
 
 h2. Introduction
 
-generic html5 gui implementation, bound to swartfix-common bean-package.
+generic html5 gui implementation providing a model driven access (MDA), bound to tsl2.nano.common bean-package and tsl2.nano.serviceaccess and it's GenericService using the javax.persistence. It is possible to design a class or database model, exporting it and to start a build process resulting in a complete html application, providing a comfortable way to edit all entities and their relations.
 
 *Goals:* 
 * pure model implementation + plattform independency (works on android, too).
+* really small, having as less as possible static dependencies to other libraries
 * everything has a default - all defaults are configurable
 * full configurable (including standard bean behaviour and all entity behaviours)
 * implementation through simple java beans + optional bean presenters
-* navigates through given beans showing bean-lists and bean-detail dialogs.
+* navigates through given beans, showing bean-lists and bean-detail dialogs.
 * prefills formatting, validation and presentation of relations
 * pure html-5 (no javascript)
+* independent of a special o/r mapper. all o/r mappers supporting javax.persistence with an EntityManager are usable.
 * data replication to work offline (not finished yet!)
 * full key-navigation (shortcuts)
 * interfaces: 
@@ -39,9 +41,100 @@ h3. Third Party Libraries
 
 h2. Starting / Test
 
-Start the main method of class _Application_. Two entry-points are given:
-* _createGenericNavigationModel(String beanjar)_ is able to read a given jar file for serializable classes to be used as entities to browse.
-* a simple test implementation is provided (see _Application.createTestNavigationModel()_).
+The tsl2.nano.h5 framework can be started through it's jar _tsl2.nano.h5-xxxxx.jar. A start script _start.bat_ is available to do this in windows. Starting it, a given directory is used as a kind of workspace where you put all configuration and jar files into to be used. This jars may be ant, an o/r-mapper like hibernate with all dependencies. The configuration files are the environment.xml and all xml files describing the presentation of each entity bean.  Icons for all buttons and backgrounds are in the _icon_ folder. The main jar file can contain all dependent jar files (as described in the manifest file) or outside in the same directory as the main jar.
+
+A possible start configuratin would be:
+
+* nano.h5 main directory with:
+** tsl2.nano.h5-xxxx.jar containing all dependent jars as described in _Dependencies_
+** tsl.nano.common-xxxx.jar providing bootstrap loading with special classloaders
+** environment directory like the sample _h5.sample_
+
+h3. Dependencies
+
+h4. Static Dependencies (direct referenced by tsl2.nano)
+
+* simple-xml-2.7.jar
+
+h4. Dynamic Dependencies (used by tsl2.nano, but through compatibility-layer)
+
+* velocity-1.6-dep.jar 
+* junit-4.8.2.jar 
+* ant-launcher.jar 
+* ant.jar 
+* ant-nodeps.jar 
+* javassist-3.12.0.GA.jar
+
+h4. No Dependencies, but useful to do the work
+
+* jdbc database driver (like hsqldb.jar)
+* jpa o/r mapper (like hibernate, toplink or ormlite)
+* generator tool to create entity beans (like hibernate-tools)
+
+Hibernate 4 for example would have the following dependencies:
+
+* commons-collections-3.2.1.jar 
+* commons-logging-1.1.1.jar 
+* commons-beanutils-1.8.0.jar 
+* commons-io-1.3.2.jar 
+* commons-lang-2.4.jar 
+* commons-codec-1.6.jar 
+* dom4j-1.6.1.jar 
+* javassist-3.12.0.GA.jar
+* antlr.jar
+ 
+h3. A Sample Environment: h5.sample
+
+A sample environment is h5.sample, containing all icons, jars and configurations for a project. It may be used for other nano.h5 projects. It uses:
+
+* ant libraries to generate entitiy beans through hibernate-tools and the sample database
+* hibernate with all dependencies as o/r mapper
+* hibernate-tools
+* hsqldb.jar as jdbc driver for a hsqldb database
+* sample databae _timedb_
+* sample icons for all buttons
+
+Before you start nano.h5, you should start the sample hsqldb database:
+
+h5.sample/runServer.bat
+
+!doc/h5.sample.database.jpg!
+
+To start nano.h5 you have call it with following syntax:
+
+java -jar de.nano.h5.Loader [environment-path (default: config] [http-server-port (default: 8067)]
+
+If you start it on windows, a browser will be opened to show the initial screen:
+
+!doc/h5.sample.start.jpg!
+
+Now you can login to the sample database. It is full configurable, which o/r mapper and database should be used. After pressing Ok, a persistence.xml will be generated to be found by the javax.persistence implementation.
+
+!doc/h5.sample.persistence.jpg!
+
+All entities of the jar containing the entities will be listed. You can filter the list and select one or more to edit them. 
+
+!doc/h5.sample.entity-types.jpg!
+
+Then you will get a search page with a search filter and an empty list. Pushing the search-button will create the result list.
+
+!doc/h5.sample.entity-search.jpg!
+
+If you click a column header, the list will be sorted by this column - clicking to that column a second time, the sorting will be done in the other direction. The possible actions will be described in the next chapter.
+
+h3. Extending the Sample
+
+The file _h5.sample/environment.xml_ defines the application behaviour. For further informations read chapter _The Environment_.
+It is possible to change the presentation of each bean. Inside the directory _h5.sample/beandef_ all beans have configuration files to change their presentation and behaviour.
+
+h2. The Environment
+
+
+h2. Application and Page Actions
+
+h2. Model Driven Architecture (MDA)
+
+Creating an UML-Diagram with perhaps _ArgoUML_, or creating an ER-Diagram with f.e. _architect_ you may generate a ddl script. Nano.H5 provides an ant-script (_mda.xml_) to generate a hsqldb-database and generating entity beans through hibernate-tools for the given jdbc-connection.
 
 h2. Developing and Deploying
 
@@ -154,4 +247,8 @@ h2. TODOs
 *** replace jdbc-connection-properties
 *** start nano.h5
 *** jmeter integration test
-
+* *Dependencies*
+** (v) Log and LogFactory
+** (v) DefaultFormat: StandardToStringStyle and ToStringBuilder
+** StringUtil --> BeanUtil
+** (v) BeanClass --> StringUtil --> CollectionUtil --> DefaultFormat
