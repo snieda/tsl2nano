@@ -12,7 +12,7 @@ import java.util.Arrays;
 import java.util.List;
 
 import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import de.tsl2.nano.log.LogFactory;
 
 import de.tsl2.nano.Messages;
 import de.tsl2.nano.util.StringUtil;

@@ -144,6 +144,36 @@ public class StringUtil {
     }
 
     /**
+     * delegates to {@link #trim(StringBuilder, char)} walking through given characters in string (note: character-order
+     * is important!)
+     */
+    public static String trim(String src, String charactersToTrim) {
+        char[] carr = charactersToTrim.toCharArray();
+        StringBuilder sb = new StringBuilder(src);
+        for (int i = 0; i < carr.length; i++) {
+            trim(sb, carr[i]);
+        }
+        return sb.toString();
+    }
+
+    /**
+     * trims given character left/right for source string
+     * 
+     * @param src source to trim
+     * @param c character to be trimmed
+     */
+    public static void trim(StringBuilder src, char c) {
+        int i = 0;
+        //from start
+        while (i < src.length() && src.charAt(i) == c)
+            src.deleteCharAt(i++);
+        //at the end
+        i = src.length();
+        while (i > 0 && src.charAt(--i) == c)
+            src.deleteCharAt(i);
+    }
+
+     /**
      * replaces the first occurrenciy of expression in str with replacement. if nothing was found, nothing will be done.
      * 
      * @param str source
@@ -232,7 +262,7 @@ public class StringUtil {
      * @return string
      */
     public static String toFormattedString(Object o, int maxLineCount, boolean showLines) {
-        assert maxLineCount > 0 : "maxLength shouldn't be smaller than 0!";
+        maxLineCount = maxLineCount < 0 ? Integer.MAX_VALUE : maxLineCount;
         String result;
         if (o instanceof Map) {
             o = ((Map) o).entrySet();
@@ -266,7 +296,7 @@ public class StringUtil {
      * 
      * @param origin origin string
      * @param fixLength length of result
-     * @param fillChar fill char
+     * @param fillChar fill char. if -1, do only a cut to the max length!
      * @param rightFill whether to fill on left or right side
      * @return fix length string
      */
@@ -276,6 +306,8 @@ public class StringUtil {
         if (fillLength <= 0) {
             final int shiftRight = rightFill ? 0 : fillLength;
             return origin.substring(0 + shiftRight, fixLength + shiftRight);
+        } else if (fillChar == -1) {
+            return origin;
         }
         final StringBuffer fillString = new StringBuffer(fillLength);
         for (int i = 0; i < fillLength; i++) {

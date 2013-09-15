@@ -27,7 +27,7 @@ import java.util.Locale;
 import java.util.Map;
 
 import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import de.tsl2.nano.log.LogFactory;
 
 import de.tsl2.nano.collection.CollectionUtil;
 import de.tsl2.nano.collection.IPredicate;

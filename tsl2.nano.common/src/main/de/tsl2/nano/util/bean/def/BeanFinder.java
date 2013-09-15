@@ -14,7 +14,7 @@ import java.util.Collection;
 import java.util.LinkedList;
 
 import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import de.tsl2.nano.log.LogFactory;
 
 import de.tsl2.nano.Environment;
 import de.tsl2.nano.util.bean.BeanClass;

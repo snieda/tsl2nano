@@ -38,7 +38,6 @@ import java.util.Set;
 import java.util.UUID;
 
 import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 
 import de.tsl2.nano.Messages;
 import de.tsl2.nano.collection.CollectionUtil;
@@ -46,6 +45,7 @@ import de.tsl2.nano.exception.FormattedException;
 import de.tsl2.nano.exception.ForwardedException;
 import de.tsl2.nano.format.DefaultFormat;
 import de.tsl2.nano.format.FormatUtil;
+import de.tsl2.nano.log.LogFactory;
 import de.tsl2.nano.util.StringUtil;
 import de.tsl2.nano.util.bean.def.Bean;
 
@@ -56,6 +56,7 @@ import de.tsl2.nano.util.bean.def.Bean;
  * @author ts 05.03.2009
  * @version $Revision$
  */
+@SuppressWarnings({ "unchecked", "rawtypes" })
 public class BeanUtil {
     private static final Log LOG = LogFactory.getLog(BeanUtil.class);
     private static final List<String> STD_TYPE_PKGS;
@@ -132,6 +133,8 @@ public class BeanUtil {
 
     /**
      * delegates to {@link BeanClass#copy(Object, Object)}.
+     * <p/>
+     * to copy only not-null values, use {@link #addValues(Object, Object, String...)}.
      */
     public static <D> D copy(Object src, D dest, String... noCopy) {
         return BeanClass.copy(src, dest, noCopy);
@@ -139,12 +142,16 @@ public class BeanUtil {
 
     /**
      * delegates to {@link BeanClass#copyValues(Object, Object, String...)}.
+     * <p/>
+     * to copy only not-null values, use {@link #addValues(Object, Object, String...)}.
      */
     public static <D> D copyValues(Object src, D dest, String... attributeNames) {
         return BeanClass.copyValues(src, dest, false, attributeNames);
     }
 
     /**
+     * copies all not-null values to dest.
+     * <p/>
      * delegates to {@link BeanClass#copyValues(Object, Object, String...)}.
      */
     public static <D> D addValues(Object src, D dest, String... attributeNames) {
@@ -153,6 +160,8 @@ public class BeanUtil {
 
     /**
      * delegates to {@link BeanClass#copyValues(Object, Object, boolean)}.
+     * <p/>
+     * to copy only not-null values, use {@link #addValues(Object, Object, String...)}.
      */
     public static <D> D copyValues(Object src, D dest, boolean destValuesOnly) {
         return BeanClass.copyValues(src, dest, destValuesOnly);
@@ -177,7 +186,6 @@ public class BeanUtil {
      * delegates to {@link #copyValues(Object, Object, String...)}, creating a new instance and copying all values (no
      * deep copy! see {@link #copy(Object)}).
      */
-    @SuppressWarnings("unchecked")
     public static <T> T clone(T src) {
         try {
             return (T) BeanClass.copyValues(src, src.getClass().newInstance());
@@ -726,6 +734,9 @@ public class BeanUtil {
                             t = StringUtil.substring(st.sval, null, separation, lastSep);
                         }
                         lastSep += t.length() + (c != null ? 0 : separation.length());
+                        //at line end, no separation char will occur
+                        if (st.sval.length() < lastSep)
+                            lastSep = st.sval.length();
                         if (attr == null || attr.startsWith("null:")) {
                             LOG.info("ignoring line " + st.lineno()
                                 + ", token '"
@@ -734,16 +745,20 @@ public class BeanUtil {
                                 + (lastSep - t.length()));
                             continue;
                         }
+                        t = StringUtil.trim(t, "\"");
                         final String info = "reading line " + st.lineno() + ":'" + t + "' into " + rootInfo + attr;
                         try {
-                            final BeanAttribute beanAttribute = BeanAttribute.getBeanAttribute(rootType, attr);
-                            Format parser = formatCache.get(attr);
-                            if (parser == null) {
-                                parser = FormatUtil.getDefaultFormat(beanAttribute.getType(), true);
-                                formatCache.put(attr, parser);
+                            Object newValue = null;
+                            if (!StringUtil.isEmpty(t)) {
+                                final BeanAttribute beanAttribute = BeanAttribute.getBeanAttribute(rootType, attr);
+                                Format parser = formatCache.get(attr);
+                                if (parser == null) {
+                                    parser = FormatUtil.getDefaultFormat(beanAttribute.getType(), true);
+                                    formatCache.put(attr, parser);
+                                }
+                                newValue = parser.parseObject(t);
+                                bean.setValue(beanAttribute.getName(), newValue);
                             }
-                            final Object newValue = parser.parseObject(t);
-                            bean.setValue(beanAttribute.getName(), newValue);
                             LOG.info(info + "(" + newValue + ")");
                             filled = true;
                         } catch (final Exception e) {
@@ -763,6 +778,7 @@ public class BeanUtil {
         if (errors.size() > 0) {
             throw new FormattedException(StringUtil.toFormattedString(errors, 80, true));
         }
+        LOG.info("import finished - imported items: " + result.size() + " of type " + rootType.getSimpleName());
         return result;
     }
 

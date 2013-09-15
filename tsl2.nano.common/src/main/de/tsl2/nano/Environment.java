@@ -13,6 +13,7 @@ import java.io.File;
 import java.io.InputStream;
 import java.io.Serializable;
 import java.text.Format;
+import java.util.Date;
 import java.util.Hashtable;
 import java.util.Iterator;
 import java.util.Locale;
@@ -86,6 +87,7 @@ public class Environment {
 
     /**
      * getName
+     * 
      * @return
      */
     public static Object getName() {
@@ -108,6 +110,15 @@ public class Environment {
         return (T) services().get(service);
     }
 
+    /**
+     * isAvailable
+     * 
+     * @return true, if environment was already created
+     */
+    public final static boolean isAvailable() {
+        return self != null;
+    }
+
     protected final static Environment self() {
         if (self == null) {
             create(System.getProperty(KEY_CONFIG_PATH, System.getProperty("user.dir")));
@@ -116,10 +127,45 @@ public class Environment {
     }
 
     public static void create(String dir) {
+        String info = "\n===========================================================\n" + "creating environment "
+            + dir
+            + "\n"
+            + "    args  : ${sun.java.command}\n"
+            + "    dir   : ${user.dir}\n"
+            + "    time  : ${tstamp}\n"
+            + "    user  : ${user.name}, home: ${user.home}\n"
+            + "    lang  : ${user.country}_${user.language}, encoding: ${sun.jnu.encoding}\n"
+            + "    encode: ${file.encoding}\n"
+            + "    loader: ${main.context.classloader}\n"
+            + "    java  : ${java.runtime.version}, ${java.home}\n"
+            + "    os    : ${os.name}, ${os.version} ${sun.os.patch.level} ${os.arch}\n"
+            + "    system: ${sun.cpu.isalist} ${sun.arch.data.model}\n"
+            + "===========================================================";
+        Properties p = System.getProperties();
+        p.put("tstamp", new Date());
+        p.put("main.context.classloader", Thread.currentThread().getContextClassLoader());
+        System.out.println(StringUtil.insertProperties(info, p));
         new File(dir).mkdirs();
+
+        //provide some external functions as options for this framework
+        CompatibilityLayer layer = new CompatibilityLayer();
+        layer.registerMethod("ant",
+            "de.tsl2.nano.execution.ScriptUtil",
+            "ant",
+            true,
+            String.class,
+            String.class,
+            Properties.class);
+
+        layer.registerMethod("reflectionToString",
+            "de.tsl2.nano.format.ToStringBuilder",
+            "reflectionToString",
+            true,
+            Object.class);
+
         File configFile = new File(dir + "/" + CONFIG_XML_NAME);//new File(System.getProperty(KEY_CONFIG_PATH, System.getProperty("user.dir")));
         if (configFile.canRead()) {
-            self = XmlUtil.loadXml(configFile.getPath(), Environment.class, new CompatibilityLayer(), false);
+            self = XmlUtil.loadXml(configFile.getPath(), Environment.class, layer, false);
             String configPath = getConfigPath();
             if (!configPath.endsWith("/") && !configPath.endsWith("\\"))
                 setProperty(KEY_CONFIG_PATH, configPath + "/");
@@ -132,9 +178,10 @@ public class Environment {
         self.services = new Hashtable<Class<?>, Object>();
         registerBundle(PREFIX + "messages", true);
         addService(Profiler.class, Profiler.si());
-        self.persist();
+        addService(layer);
+//        self.persist();
     }
-    
+
     /**
      * provides all loaded services
      * 
@@ -365,4 +412,14 @@ public class Environment {
                 keyIt.remove();
         }
     }
+
+    protected void log(Object obj) {
+        System.out.println(obj);
+    }
+
+    protected void trace(Object obj) {
+        if (true)
+            log(obj);
+    }
+
 }

@@ -14,9 +14,10 @@ import java.util.Hashtable;
 import java.util.Map;
 
 import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import de.tsl2.nano.log.LogFactory;
 
 import de.tsl2.nano.exception.ForwardedException;
+import de.tsl2.nano.util.StringUtil;
 import de.tsl2.nano.util.bean.BeanClass;
 
 /**
@@ -33,6 +34,7 @@ public class CompatibilityLayer {
     private static final Log LOG = LogFactory.getLog(CompatibilityLayer.class);
 
     private Map<Runnable, Runnable> runnerCache;
+    private Map<String, Method> methodCache;
 
     /** to be run instead of original action */
     private static final Runnable EMPTY_RUNNER = new Runnable() {
@@ -54,6 +56,7 @@ public class CompatibilityLayer {
     public CompatibilityLayer() {
         super();
         runnerCache = new Hashtable<Runnable, Runnable>();
+        methodCache = new Hashtable<String, Method>();
     }
 
     /**
@@ -117,6 +120,38 @@ public class CompatibilityLayer {
     }
 
     /**
+     * enables predefinition of reflection calls.
+     * @param id unique name for method call (see {@link #runRegistered(String, Object...)})
+     * @param className full classpath
+     * @param methodName method name
+     * @param force if true, availability of given method wont be checked
+     * @param par methods parameter classes
+     */
+    public void registerMethod(String id, String className, String methodName, boolean force, Class... par) {
+        Method method = new Method(className, methodName, par);
+        if (force || isAvailable(className)) {
+            methodCache.put(id, method);
+            LOG.info("registering method '" + id + "': " + method);
+        } else {
+            LOG.warn("didn't register method '" + id + "': " + method);
+        }
+    }
+
+    /**
+     * let's call a with {@link #registerMethod(String, String, String, Class[], boolean)} predefined method.
+     * @param id method id (defined in {@link #registerMethod(String, String, String, Class[], boolean)})
+     * @param args call arguments (must match par in {@link #registerMethod(String, String, String, Class[], boolean)})
+     * @return call result
+     */
+    public Object runRegistered(String id, Object...args) {
+        Method m = methodCache.get(id);
+        if (m == null) {
+            throw new IllegalArgumentException("method " + id + " is not registered in compatibilitylayer!");
+        }
+        return runOptional(m.className, m.method, m.par, args);
+    }
+    
+    /**
      * storeCompatibilityAction
      * 
      * @param action
@@ -129,6 +164,7 @@ public class CompatibilityLayer {
 
     /**
      * pre loads the given classes. usable on calling {@link #runOptional(String, String, Class[], Object...)}
+     * 
      * @param classNames classes to load
      * @return loaded classes - throws {@link RuntimeException} if failed.
      */
@@ -156,7 +192,32 @@ public class CompatibilityLayer {
             Thread.currentThread().getContextClassLoader().loadClass(className);
             return true;
         } catch (ClassNotFoundException e) {
-            return false;
+            return true;
         }
+    }
+}
+
+@SuppressWarnings("rawtypes")
+class Method {
+    String className;
+    String method;
+    Class[] par;
+
+    /**
+     * constructor
+     * 
+     * @param className
+     * @param method
+     * @param par
+     */
+    public Method(String className, String method, Class... par) {
+        super();
+        this.className = className;
+        this.method = method;
+        this.par = par;
+    }
+    @Override
+    public String toString() {
+        return className + " => " + method + "(" + StringUtil.toString(par) + ")";
     }
 }

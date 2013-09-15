@@ -12,7 +12,6 @@ package de.tsl2.nano.classloader;
 import java.io.File;
 import java.io.Serializable;
 import java.net.MalformedURLException;
-import java.net.URI;
 import java.net.URL;
 import java.net.URLClassLoader;
 import java.net.URLStreamHandlerFactory;
@@ -38,7 +37,7 @@ import de.tsl2.nano.util.bean.BeanUtil;
  */
 public class RuntimeClassloader extends URLClassLoader {
     private static final Log LOG = LogFactory.getLog(RuntimeClassloader.class);
-
+    
     /**
      * constructor
      * 
@@ -109,7 +108,7 @@ public class RuntimeClassloader extends URLClassLoader {
      * @param beanjar bean jar file
      * @return bean types
      */
-    @SuppressWarnings("unchecked")
+    @SuppressWarnings({ "rawtypes" })
     public List<Class> loadBeanClasses(String beanjar, StringBuilder messages) {
         if (beanjar == null) {
             return new LinkedList<Class>();
@@ -186,5 +185,53 @@ public class RuntimeClassloader extends URLClassLoader {
             LOG.warn(messages);
         }
         return beanClasses;
+    }
+
+    /**
+     * startPathChecker NOT IMPLEMENTED YET!
+     * 
+     * @param path path to be checked for new jars to load on runtime.
+     * @param waitMillis milliseconds to wait between checks.
+     */
+    public void startPathChecker(final String path, final long waitMillis) {
+        Runnable pathChecker = new Runnable() {
+            File fPath = new File(path);
+            
+            @Override
+            public void run() {
+                while (true) {
+                    try {
+                        Thread.sleep(waitMillis);
+
+                        File changedFile = lastModifiedFile();
+                        if (changedFile != null && changedFile.lastModified() > System.currentTimeMillis() - waitMillis) {
+                            // TODO: implement unloading existing classes
+                            LOG.info("the file " + changedFile.getAbsolutePath() + " was changed");
+                            if (changedFile.getPath().endsWith(".jar"))
+                                addFile(changedFile.getAbsolutePath());
+                        }
+                    } catch (InterruptedException e) {
+                        ForwardedException.forward(e);
+                    }
+                }
+            }
+            
+            File lastModifiedFile() {
+                File[] files = fPath.listFiles();
+                File last = null;
+                for (int i = 0; i < files.length; i++) {
+                    if (last == null || files[i].lastModified() > last.lastModified());
+                    last = files[i];
+                }
+                return last;
+            }
+        };
+        Thread thread = new Thread(pathChecker);
+        thread.setDaemon(true);
+    }
+    
+    @Override
+    public String toString() {
+        return this.getClass().getName() + "(urls: " + getURLs().length + ")";
     }
 }

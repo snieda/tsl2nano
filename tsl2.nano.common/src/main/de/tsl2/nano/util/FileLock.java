@@ -15,7 +15,7 @@ import java.io.IOException;
 import java.nio.channels.FileChannel;
 
 import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import de.tsl2.nano.log.LogFactory;
 
 /**
  * Creates an exclusive lock using the NIO channel functionality.

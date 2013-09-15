@@ -12,7 +12,7 @@ package de.tsl2.nano.util.bean;
 import java.lang.reflect.Proxy;
 
 import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import de.tsl2.nano.log.LogFactory;
 
 import de.tsl2.nano.util.StringUtil;
 

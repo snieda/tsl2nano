@@ -13,7 +13,7 @@ import java.util.ResourceBundle;
 import java.util.StringTokenizer;
 
 import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import de.tsl2.nano.log.LogFactory;
 
 import de.tsl2.nano.Messages;
 import de.tsl2.nano.util.StringUtil;

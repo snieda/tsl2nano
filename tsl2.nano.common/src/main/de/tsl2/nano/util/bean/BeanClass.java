@@ -27,7 +27,7 @@ import java.util.SortedSet;
 import java.util.TreeSet;
 
 import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import de.tsl2.nano.log.LogFactory;
 import org.simpleframework.xml.Attribute;
 import org.simpleframework.xml.Default;
 import org.simpleframework.xml.DefaultType;
@@ -602,6 +602,7 @@ public class BeanClass<T> implements Serializable {
         if (classloader == null)
             classloader = Thread.currentThread().getContextClassLoader();
         try {
+            LOG.debug("loading class " + className + " through classloader " + classloader);
             return classloader.loadClass(className);
         } catch (Exception e) {
             ForwardedException.forward(e);

@@ -23,7 +23,7 @@ import java.util.List;
 import java.util.Locale;
 
 import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import de.tsl2.nano.log.LogFactory;
 
 import de.tsl2.nano.exception.FormattedException;
 import de.tsl2.nano.exception.ForwardedException;
@@ -315,6 +315,17 @@ public class NumberUtil {
      */
     public static final int highestOneBit(int decimal) {
         return Integer.highestOneBit(decimal);
+    }
+
+    /**
+     * highestBitPosition
+     * @param decimal number
+     * @return number of trailing zeros or -1 if zero.
+     */
+    public static final int highestBitPosition(int decimal) {
+        if (decimal == 0)
+            return -1;
+        return Integer.numberOfTrailingZeros(highestOneBit(decimal));
     }
 
     /**

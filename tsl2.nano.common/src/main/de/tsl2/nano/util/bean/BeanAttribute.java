@@ -17,7 +17,7 @@ import java.lang.reflect.Method;
 import java.lang.reflect.ParameterizedType;
 
 import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import de.tsl2.nano.log.LogFactory;
 import org.simpleframework.xml.Attribute;
 import org.simpleframework.xml.Default;
 import org.simpleframework.xml.DefaultType;

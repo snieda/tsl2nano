@@ -36,7 +36,7 @@ import java.util.regex.Pattern;
 
 import org.apache.commons.collections.map.ReferenceMap;
 import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import de.tsl2.nano.log.LogFactory;
 import org.simpleframework.xml.Attribute;
 import org.simpleframework.xml.Element;
 import org.simpleframework.xml.ElementMap;

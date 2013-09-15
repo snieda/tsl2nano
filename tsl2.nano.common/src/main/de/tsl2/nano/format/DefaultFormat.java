@@ -17,14 +17,16 @@ import java.text.ParsePosition;
 import java.util.Collection;
 import java.util.Date;
 
-import org.apache.commons.lang.builder.StandardToStringStyle;
-import org.apache.commons.lang.builder.ToStringBuilder;
 import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import de.tsl2.nano.log.LogFactory;
 
+import de.tsl2.nano.Environment;
 import de.tsl2.nano.Messages;
 import de.tsl2.nano.exception.FormattedException;
+import de.tsl2.nano.execution.CompatibilityLayer;
 import de.tsl2.nano.util.StringUtil;
+//import org.apache.commons.lang.builder.StandardToStringStyle;
+//import org.apache.commons.lang.builder.ToStringBuilder;
 
 /**
  * Default formatter for all objects used by all dynamicform components. Override this class to use special formatting
@@ -45,25 +47,10 @@ public class DefaultFormat extends Format {
 
     private static final Log LOG = LogFactory.getLog(DefaultFormat.class);
     
-    private static final StandardToStringStyle STYLE_TOSTRING = new StandardToStringStyle();
-    static {
-            STYLE_TOSTRING.setUseShortClassName(true);
-            STYLE_TOSTRING.setUseIdentityHashCode(false);
-            STYLE_TOSTRING.setArrayStart("[");
-            STYLE_TOSTRING.setArraySeparator(", ");
-            STYLE_TOSTRING.setArrayEnd("]");
-            STYLE_TOSTRING.setNullText("%NULL%");
-            STYLE_TOSTRING.setSizeStartText("%SIZE=");
-            STYLE_TOSTRING.setSizeEndText("%");
-            STYLE_TOSTRING.setSummaryObjectStartText("%");
-            STYLE_TOSTRING.setSummaryObjectEndText("%");
-        }
-    
     /**
      * constructor
      */
     public DefaultFormat() {
-        ToStringBuilder.setDefaultStyle(STYLE_TOSTRING);
     }
 
     /**
@@ -107,9 +94,10 @@ public class DefaultFormat extends Format {
 //            }
         } else {
             //pure objects, representing there instance id --> use reflection
-            if (!StringUtil.hasToString(obj)) {
+            CompatibilityLayer cl = Environment.get(CompatibilityLayer.class);
+            if (!StringUtil.hasToString(obj) && cl.isAvailable("tsl2.nano.format.ToStringBuilder")) {
                 try {
-                    result.append(StringUtil.toString(ToStringBuilder.reflectionToString(obj), 80));
+                    result.append(StringUtil.toString(cl.runRegistered("reflectionToString", obj), 80));
                 } catch (final Exception e) {
                     LOG.error("Error on calling ToStringBuilder.reflectionToString().\nPlease define a toString() in " + obj.getClass()
                         + ". Or extend the implementation of your DefaultFormat extension!",

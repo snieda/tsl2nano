@@ -24,7 +24,7 @@ import java.util.Currency;
 import java.util.Date;
 
 import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import de.tsl2.nano.log.LogFactory;
 
 import de.tsl2.nano.currency.CurrencyUtil;
 import de.tsl2.nano.exception.FormattedException;

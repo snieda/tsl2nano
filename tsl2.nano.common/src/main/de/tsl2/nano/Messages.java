@@ -7,7 +7,7 @@ import java.util.MissingResourceException;
 import java.util.ResourceBundle;
 
 import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import de.tsl2.nano.log.LogFactory;
 
 import de.tsl2.nano.util.StringUtil;
 

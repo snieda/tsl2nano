@@ -1183,12 +1183,13 @@ public class BeanPresentationHelper<T> {
                 }
             });
 
-            presActions.add(new SecureAction(bean.getClazz(), "dump", IAction.MODE_UNDEFINED, false, "icons/save.png") {
+            presActions.add(new SecureAction(bean.getClazz(), "shutdown", IAction.MODE_UNDEFINED, false, "icons/stop.png") {
                 @Override
                 public Object action() throws Exception {
                     Environment.persist();
                     BeanDefinition.dump();
-                    return "configuration saved. perhaps some application properties are lost. it is recommended to restart application!";
+                    Thread.currentThread().interrupt();
+                    return "configuration saved and HTTP-Session stopped!";
                 }
             });
         }

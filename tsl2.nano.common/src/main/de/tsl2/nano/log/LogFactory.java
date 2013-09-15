@@ -6,10 +6,9 @@ import java.util.Calendar;
 import java.util.HashMap;
 import java.util.Map;
 
-import de.tsl2.nano.Environment;
+//import de.tsl2.nano.Environment;
 import de.tsl2.nano.exception.ForwardedException;
-import de.tsl2.nano.execution.CompatibilityLayer;
-import de.tsl2.nano.util.DateUtil;
+//import de.tsl2.nano.execution.CompatibilityLayer;
 import de.tsl2.nano.util.NumberUtil;
 import de.tsl2.nano.util.StringUtil;
 
@@ -26,20 +25,22 @@ import de.tsl2.nano.util.StringUtil;
  * @version $Revision$
  */
 public abstract class LogFactory {
-    static final int INFO = 1;
-    static final int WARN = 2;
-    static final int ERROR = 4;
-    static final int FATAL = 8;
+    static final int FATAL = 1;
+    static final int ERROR = 2;
+    static final int WARN = 4;
+    static final int INFO = 8;
     static final int DEBUG = 16;
     static final int TRACE = 32;
 
     static int LOG_STANDARD = INFO | WARN | ERROR | FATAL;
     static int LOG_ALL = INFO | WARN | ERROR | FATAL | DEBUG | TRACE;
 
-    static final String[] STATE = new String[] { "info", "warn", "error", "fatal", "debug", "trace" };
+//    static final String[] STATETXT = new String[] { "info", "warn", "error", "fatal", "debug", "trace" };
+    static final String[] STATETXT = new String[] { "§", "§", "#", " ", "-", "-" };
 
     /** bit set of states to log. will be used in inner log class */
     static int statesToLog = LOG_STANDARD;
+    static int defaultPckLogLevel = NumberUtil.highestOneBit(statesToLog);
 
     /** a string formatting time, 'logClass', 'state', 'message' with {@link MessageFormat} */
     static String outputformat = "%1$td:%1$tm:%1$tY %1$tT %2$s [%3$16s]: %4$s";
@@ -81,6 +82,22 @@ public abstract class LogFactory {
         err = error;
     }
 
+    /**
+     * setLogLevel
+     * @param loglevel bit field: {@link #FATAL}, {@link #ERROR}, {@link #WARN}, {@link #INFO}, {@link #DEBUG},
+     *            {@link #TRACE}.
+     */
+    public static final void setLogLevel(int loglevel) {
+        statesToLog = loglevel;
+    }
+
+    /**
+     * setLogLevel
+     * 
+     * @param packagePath package path to set the log level for.
+     * @param loglevel bit field: {@link #FATAL}, {@link #ERROR}, {@link #WARN}, {@link #INFO}, {@link #DEBUG},
+     *            {@link #TRACE}.
+     */
     public static final void setLogLevel(String packagePath, int loglevel) {
         loglevels.put(packagePath, loglevel);
     }
@@ -92,20 +109,25 @@ public abstract class LogFactory {
 
     private static final boolean hasLogLevel(String path, int level) {
         if (!loglevels.containsKey(path))
-            return hasLogLevel(StringUtil.substring(path, null, ".", true), level);
+            if (path.indexOf('.') == -1) {
+                //TODO: create default path levels to enhance performance
+                return level <= defaultPckLogLevel;//minimum default level
+            } else {
+                return hasLogLevel(StringUtil.substring(path, null, ".", true), level);
+            }
         return loglevels.get(path) >= level;
     }
 
     private static final String state(int loglevel) {
-        return STATE[NumberUtil.highestOneBit(loglevel)];
+        return STATETXT[NumberUtil.highestBitPosition(loglevel)];
     }
 
     @SuppressWarnings({ "rawtypes" })
     public static final org.apache.commons.logging.Log getLog(final Class logClass) {
         //if an apache logger is available, we use it.
-        if (Environment.get(CompatibilityLayer.class).isAvailable(apacheLogFactory))
-            return (org.apache.commons.logging.Log) Environment.get(CompatibilityLayer.class)
-                .runOptional(apacheLogFactory, "getLog", new Class[] { Class.class }, logClass);
+//        if (Environment.isAvailable() && Environment.get(CompatibilityLayer.class).isAvailable(apacheLogFactory))
+//            return (org.apache.commons.logging.Log) Environment.get(CompatibilityLayer.class)
+//                .runOptional(apacheLogFactory, "getLog", new Class[] { Class.class }, logClass);
 
         return new org.apache.commons.logging.Log() {
 
@@ -196,14 +218,13 @@ public abstract class LogFactory {
         return NumberUtil.hasBit(statesToLog, state);
     }
 
-    
     private static final Exception STACKTRACER = new Exception();
-    
+
     protected static String getCaller() {
         StackTraceElement[] st = STACKTRACER.getStackTrace();
-        return st.length > 2 ? st[2].toString()  : "<unknown>";
+        return st.length > 2 ? st[2].toString() : "<unknown>";
     }
-    
+
     /**
      * simple delegate to {@link #log(Class, State, Object, Throwable)}
      */
@@ -223,7 +244,7 @@ public abstract class LogFactory {
      * your output.
      * 
      * @param logClass logging class
-     * @param state see {@link #STATE} and {@link #INFO}, {@link #WARN}, etc.
+     * @param state see {@link #STATETXT} and {@link #INFO}, {@link #WARN}, etc.
      * @param message text to log
      * @param ex (optional) exception to log
      */
@@ -233,7 +254,7 @@ public abstract class LogFactory {
                 //TODO: evaluate performance of predefined pattern in MessageFormat (MsgFormat)
                 out.println(String.format(outputformat,
                     Calendar.getInstance().getTime(),
-                    state,
+                    state(state),
                     logClass.getSimpleName(),
                     message));
             }

@@ -12,16 +12,20 @@ package de.tsl2.nano.util;
 import java.beans.XMLDecoder;
 import java.beans.XMLEncoder;
 import java.io.BufferedInputStream;
+import java.io.BufferedReader;
+import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
+import java.io.FilterReader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.io.OutputStream;
+import java.io.Reader;
 import java.io.Serializable;
 import java.text.DateFormat;
 import java.util.Date;
@@ -30,11 +34,14 @@ import java.util.List;
 import java.util.Properties;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
+import java.util.zip.ZipOutputStream;
 
 import org.apache.commons.codec.binary.Base64;
 import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import de.tsl2.nano.log.LogFactory;
 
+import tsl.Console;
+import de.tsl2.nano.collection.SegmentList;
 import de.tsl2.nano.exception.ForwardedException;
 
 /**
@@ -47,6 +54,23 @@ import de.tsl2.nano.exception.ForwardedException;
 public class FileUtil {
     static final Log LOG = LogFactory.getLog(FileUtil.class);
 
+    private static ZipInputStream getZipInputStream(String zipfile) {
+        final File zip = new File(zipfile);
+        if (!zip.exists()) {
+            LOG.warn("zip-file " + zipfile + " not existing!");
+            return null;
+        }
+        //open the source data file
+        FileInputStream fis;
+        try {
+            fis = new FileInputStream(zip);
+            return new ZipInputStream(fis);
+        } catch (FileNotFoundException e) {
+            ForwardedException.forward(e);
+            return null;
+        }
+    }
+
     /**
      * Returns a file array containing all filenames inside the given jar/zip file.
      * 
@@ -55,17 +79,13 @@ public class FileUtil {
      * @return
      */
     public static String[] readFileNamesFromZip(String zipfile, String filter) {
+        return readFileNamesFromZip(getZipInputStream(zipfile), filter);
+    }
+
+    public static String[] readFileNamesFromZip(ZipInputStream sourceStream, String filter) {
         filter = filter.replace("*", ".*");
         //open a zip-file
-        ZipInputStream sourceStream = null;
         try {
-            final File zip = new File(zipfile);
-            if (!zip.exists()) {
-                return null;
-            }
-            //open the source data file
-            final FileInputStream fis = new FileInputStream(zip);
-            sourceStream = new ZipInputStream(fis);
             //search sources
             final List files = new LinkedList();
             ZipEntry zipEntry = null;
@@ -86,6 +106,129 @@ public class FileUtil {
                     throw new RuntimeException(e);
                 }
             }
+        }
+    }
+
+    /**
+     * Returns the content of the given file inside the given zipfile.
+     * 
+     * @param zipfile
+     * @param file
+     * @return
+     */
+    public static byte[] readFromZip(String zipfile, String file) {
+        return readFromZip(getZipInputStream(zipfile), file);
+    }
+
+    public static byte[] readFromZip(ZipInputStream sourceStream, String file) {
+        //open a zip-file
+        ZipEntry zipEntry = null;
+        try {
+            //search source 
+            while ((zipEntry = sourceStream.getNextEntry()) != null) {
+                if (zipEntry.getName().equals(file)) {
+                    break;
+                } else {
+                    sourceStream.closeEntry();
+                }
+            }
+            if (zipEntry == null) {
+                return null;
+            }
+
+            //read source
+            return readBytes(sourceStream/*, zipEntry.getName(), (int) zipEntry.getSize()*/);
+        } catch (Exception ex) {
+            throw new RuntimeException(ex);
+        } finally {
+            if (sourceStream != null) {
+                try {
+                    sourceStream.close();
+                } catch (IOException e) {
+                    throw new RuntimeException(e);
+                }
+            }
+        }
+    }
+
+    //perhaps we can use it in future
+    private static byte[] readBytes(InputStream stream, String entryName, int len) throws IOException {
+        LOG.debug("loading stream-entry " + entryName + " with " + len + " bytes");
+        byte[] b;
+        int read = 0;
+        int offset = 0;
+        b = new byte[len];
+        do {
+            read = stream.read(b, offset, len - offset);
+            offset += read;
+        } while (read > 0);
+        return b;
+    }
+
+    private static byte[] readBytes(InputStream stream) throws IOException {
+        ByteArrayOutputStream baos = new ByteArrayOutputStream();
+        while (true) {
+            int b = stream.read();
+            if (b == -1)
+                break;
+            baos.write(b);
+        }
+        return baos.toByteArray();
+    }
+
+    /**
+     * Writes the given file with data to the given zipfile.
+     * 
+     * @param zipfile
+     * @param file
+     * @param data
+     */
+    public static void writeToZip(String zipfile, String file, String data) {
+        //open a zip-file
+        try {
+            File zip = new File(zipfile);
+            if (!zip.exists()) {
+                zip.getParentFile().mkdirs();
+                zip.createNewFile();
+            }
+            FileOutputStream fos = new FileOutputStream(zip);
+            ZipOutputStream targetStream = new ZipOutputStream(fos);
+            targetStream.setMethod(ZipOutputStream.DEFLATED);
+
+            //open the source data file
+            //FileInputStream fis = new FileInputStream(file);
+            //BufferedInputStream sourceStream = new BufferedInputStream(fis);
+
+            //create the zip entry
+            ZipEntry zipEntry = new ZipEntry(file);
+            targetStream.putNextEntry(zipEntry);
+
+            //read source and write the data to the zip output stream
+            /*  int DATA_BLOCK_SIZE = 1024;
+                byte[] data = new byte[DATA_BLOCK_SIZE];
+                int bCnt;
+                while((bCnt = sourceStream.read(data, 0, DATA_BLOCK_SIZE)) != -1)
+                {
+                    targetStream.write(data, 0, bCnt);
+                }
+            */
+            targetStream.write(data.getBytes());
+            targetStream.flush();
+
+            System.out.println("Writing into [" + zipfile
+                + "]:"
+                + zipEntry.getName()
+                + " ("
+                + zipEntry.getCompressedSize()
+                + " / "
+                + zipEntry.getSize()
+                + ")");
+            //close the zip entry and other open streams
+            targetStream.closeEntry();
+            targetStream.close();
+            //sourceStream.close();
+        } catch (Exception ex) {
+            Console.print(ex);
         }
     }
 
@@ -209,17 +352,15 @@ public class FileUtil {
     }
 
     /**
-     * saves properties to a  file..
+     * saves properties to a file..
      * 
      * @param resourceFile properties to load
      * @param p properties to save
      */
     public static void saveProperties(String resourceFile, Properties p) {
         try {
-            p.store(new FileOutputStream(new File(resourceFile)),
-                "generated at " + DateFormat.getDateTimeInstance().format(new Date())
-                    + " by user "
-                    + System.getProperty("user.name"));
+            p.store(new FileOutputStream(new File(resourceFile)), "generated at " + DateFormat.getDateTimeInstance()
+                .format(new Date()) + " by user " + System.getProperty("user.name"));
         } catch (Exception e) {
             ForwardedException.forward(e);
         }
@@ -390,6 +531,71 @@ public class FileUtil {
         } catch (final Exception ex) {
             throw new RuntimeException(ex);
         }
+    }
+
+    /**
+     * delegates to {@link #getTransformingReader(Reader, char, char)} using a buffered reader
+     */
+    public static Reader getTransformingReader(InputStream stream,
+            final char transform,
+            final char replace,
+            final boolean ignoreFirstLine) {
+        return getTransformingReader(new BufferedReader(new InputStreamReader(stream)),
+            transform,
+            replace,
+            ignoreFirstLine);
+    }
+
+    /**
+     * creates a reader that will replace each char that equals the transform character. usable to prefilter a file.
+     * <p/>
+     * to ignore quotations, read by a StringTokenizer (using reader.read()) you can call:<br>
+     * FileUtil.getTransformingReader(FileUtil.getFile(testFile), '\"', (char)0);
+     * 
+     * @param stream stream to read
+     * @param transform char to transform
+     * @param replace replacing transform character. if 0 the single char reading will ignore the transform characters.
+     * @return new reader instance
+     */
+    public static Reader getTransformingReader(Reader reader,
+            final char transform,
+            final char replace,
+            final boolean ignoreFirstLine) {
+        Reader r = new FilterReader(reader) {
+            boolean firstLineRead = false;
+
+            public int read(char[] cbuf, int off, int len) throws IOException {
+                if (ignoreFirstLine && !firstLineRead) {
+                    skipLine();
+                    firstLineRead = true;
+                }
+                int count = super.read(cbuf, off, len);
+
+                char[] carr = String.valueOf(cbuf).replace(transform, replace).toCharArray();
+                System.arraycopy(carr, 0, cbuf, 0, count);
+                return count;
+            }
+
+            @Override
+            public int read() throws IOException {
+                if (ignoreFirstLine && !firstLineRead) {
+                    skipLine();
+                    firstLineRead = true;
+                }
+                int c = super.read();
+                if (replace == 0) // ignore this char and read the next!
+                    return (char) c == transform ? super.read() : c;
+                else
+                    return (char) c == transform ? replace : c;
+            }
+
+            void skipLine() throws IOException {
+                int c;
+                while ((c = super.read()) != -1 && (char) c != '\n')
+                    ;
+            }
+        };
+        return r;
     }
 
     /**
