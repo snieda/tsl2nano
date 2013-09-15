@@ -10,6 +10,7 @@
 package de.tsl2.nano.service.util;
 
 import java.util.Collection;
+import java.util.LinkedList;
 import java.util.Properties;
 
 import javax.annotation.Resource;
@@ -19,7 +20,7 @@ import javax.persistence.PersistenceContext;
 import javax.persistence.Query;
 
 import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import de.tsl2.nano.log.LogFactory;
 
 import de.tsl2.nano.serviceaccess.ServiceFactory;
 import de.tsl2.nano.util.StringUtil;
@@ -30,7 +31,7 @@ import de.tsl2.nano.util.StringUtil;
  * @author ts, Thomas Schneider
  * @version $Revision$
  */
-abstract public class AbstractStatelessServiceBean {
+abstract public class AbstractStatelessServiceBean implements IStatelessService {
     static final Log LOG = LogFactory.getLog(AbstractStatelessServiceBean.class);
     static int DEFAULT_MAX_RESULT = 10000;
     static String DEFAULT_LAZY_RELATION_TYPE = "oneToMany";
@@ -129,6 +130,27 @@ abstract public class AbstractStatelessServiceBean {
         }
     }
 
+    /**
+     * only for tests - creates an empty server side factory.
+     */
+    @Override
+    public void initServerSideFactories() {
+        if (!ServiceFactory.isInitialized()) {
+            ServiceFactory.createInstance(this.getClass().getClassLoader());
+            ServiceFactory.instance().createSession(null,
+                null,
+                null,
+                new LinkedList<String>(),
+                new LinkedList<String>(),
+                null);
+        }
+    }
+
+    @Override
+    public Properties getServerInfo() {
+        return System.getProperties();
+    }
+    
     /**
      * helper to log a query with its parameters
      * 

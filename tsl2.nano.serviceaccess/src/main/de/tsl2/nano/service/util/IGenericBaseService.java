@@ -30,7 +30,7 @@ import javax.security.auth.Subject;
  * 
  */
 @SuppressWarnings("rawtypes")
-public interface IGenericBaseService extends INamedQueryService {
+public interface IGenericBaseService extends IStatelessService, INamedQueryService {
     /** find all beans of type beanType (statement cache will be used!) */
     public <T> Collection<T> findAll(Class<T> beanType, Class... lazyRelations);
 

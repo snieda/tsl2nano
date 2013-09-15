@@ -14,7 +14,7 @@ import static de.tsl2.nano.service.util.ServiceUtil.getLogInfo;
 import java.util.Collection;
 
 import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import de.tsl2.nano.log.LogFactory;
 
 import de.tsl2.nano.exception.FormattedException;
 

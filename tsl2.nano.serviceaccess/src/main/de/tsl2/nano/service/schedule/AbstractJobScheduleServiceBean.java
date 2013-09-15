@@ -32,7 +32,7 @@ import javax.ejb.TimerHandle;
 import javax.ejb.TimerService;
 
 import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import de.tsl2.nano.log.LogFactory;
 
 import de.tsl2.nano.collection.ListSet;
 import de.tsl2.nano.exception.FormattedException;

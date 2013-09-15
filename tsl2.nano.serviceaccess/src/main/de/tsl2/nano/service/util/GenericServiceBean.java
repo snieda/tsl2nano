@@ -719,21 +719,4 @@ public class GenericServiceBean extends NamedQueryServiceBean implements IGeneri
 
         return bcol.iterator().next();
     }
-
-    /**
-     * only for tests - creates an empty server side factory.
-     */
-    @Override
-    public void initServerSideFactories() {
-        if (!ServiceFactory.isInitialized()) {
-            ServiceFactory.createInstance(this.getClass().getClassLoader());
-            ServiceFactory.instance().createSession(null,
-                null,
-                null,
-                new LinkedList<String>(),
-                new LinkedList<String>(),
-                null);
-        }
-    }
-
 }

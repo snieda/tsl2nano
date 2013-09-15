@@ -31,7 +31,7 @@ import javax.persistence.JoinColumn;
 import javax.persistence.Query;
 
 import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import de.tsl2.nano.log.LogFactory;
 
 import de.tsl2.nano.exception.ForwardedException;
 import de.tsl2.nano.util.StringUtil;

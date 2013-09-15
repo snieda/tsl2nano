@@ -22,7 +22,7 @@ import javax.ejb.Stateless;
 import javax.resource.ResourceException;
 
 import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import de.tsl2.nano.log.LogFactory;
 
 import de.tsl2.nano.exception.ForwardedException;
 import de.tsl2.nano.resource.fs.FsConnection;

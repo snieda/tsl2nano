@@ -18,7 +18,7 @@ import javax.ejb.Timer;
 import javax.ejb.TimerHandle;
 
 import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import de.tsl2.nano.log.LogFactory;
 
 import de.tsl2.nano.util.bean.def.IStatus;
 import de.tsl2.nano.util.bean.def.SStatus;

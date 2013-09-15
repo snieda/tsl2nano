@@ -12,6 +12,7 @@ import java.io.FileReader;
 import java.io.IOException;
 import java.security.Principal;
 import java.util.Collection;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.Hashtable;
 import java.util.Map;
@@ -28,7 +29,7 @@ import javax.security.auth.callback.UnsupportedCallbackException;
 import javax.security.auth.login.LoginContext;
 
 import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import de.tsl2.nano.log.LogFactory;
 
 import de.tsl2.nano.Messages;
 import de.tsl2.nano.exception.FormattedException;
@@ -40,6 +41,7 @@ import de.tsl2.nano.service.util.batch.CachingBatchloader;
 import de.tsl2.nano.serviceaccess.aas.principal.Role;
 import de.tsl2.nano.serviceaccess.aas.principal.UserPrincipal;
 import de.tsl2.nano.util.FileUtil;
+import de.tsl2.nano.util.StringUtil;
 
 /**
  * the servicefactory will provide the current user and mandator, the server side session beans (packed into proxies)
@@ -369,6 +371,24 @@ public class ServiceFactory {
             Collection<String> userRoles,
             Collection<String> features,
             String featureInterfacePrefix) {
+        if (LOG.isDebugEnabled()) {
+            String info = "\n===========================================================\n"
+                + "application server properties:\n"
+                + "    args  : ${sun.java.command}\n"
+                + "    dir   : ${user.dir}\n"
+                + "    time  : ${tstamp}\n"
+                + "    user  : ${user.name}, home: ${user.home}\n"
+                + "    lang  : ${user.country}_${user.language}, encoding: ${sun.jnu.encoding}\n"
+                + "    encode: ${file.encoding}\n"
+                + "    java  : ${java.runtime.version}, ${java.home}\n"
+                + "    os    : ${os.name}, ${os.version} ${sun.os.patch.level} ${os.arch}\n"
+                + "    system: ${sun.cpu.isalist} ${sun.arch.data.model}\n"
+                + "===========================================================";
+            Properties p = ServiceFactory.getGenService().getServerInfo();
+            p.put("tstamp", new Date());
+            LOG.debug(StringUtil.insertProperties(info, p));
+        }
+
         LOG.info("initializing service-factory session (user:" + userObject
             + ", mandator:"
             + mandatorObject

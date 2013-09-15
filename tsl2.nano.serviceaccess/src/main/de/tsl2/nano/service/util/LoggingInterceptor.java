@@ -15,7 +15,7 @@ import javax.interceptor.AroundInvoke;
 import javax.interceptor.InvocationContext;
 
 import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import de.tsl2.nano.log.LogFactory;
 
 /**
  * A EJB 3.x interceptor useful for logging.

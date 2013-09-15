@@ -24,11 +24,12 @@ import javax.security.auth.login.LoginException;
 import javax.security.auth.spi.LoginModule;
 
 import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import de.tsl2.nano.log.LogFactory;
 
 import de.tsl2.nano.Messages;
 import de.tsl2.nano.serviceaccess.ServiceFactory;
 import de.tsl2.nano.serviceaccess.aas.principal.UserPrincipal;
+import de.tsl2.nano.util.StringUtil;
 
 /**
  * <h2>1. Authentication</h2>
@@ -88,7 +89,7 @@ public class AbstractLoginModule implements LoginModule {
 
     public static final String PROP_USER = "jaas.login.user";
     public static final String PROP_PASSWORD = "jaas.login.password";
-
+    private static final String ENCSUFFIX = "lkj sdf9872450nLJHG OUTWZ)(//&%!";
     // initial state
     protected Subject subject;
     private CallbackHandler callbackHandler;
@@ -188,6 +189,7 @@ public class AbstractLoginModule implements LoginModule {
         }
         password = new char[tmpPassword.length];
         System.arraycopy(tmpPassword, 0, password, 0, tmpPassword.length);
+        password = encode(password);
         ((PasswordCallback) callbacks[1]).clearPassword();
 
         //on password changing we need this
@@ -195,10 +197,12 @@ public class AbstractLoginModule implements LoginModule {
         if (tmpPassword != null) {
             password1 = new char[tmpPassword.length];
             System.arraycopy(tmpPassword, 0, password1, 0, tmpPassword.length);
+            password1 = encode(password1);
             tmpPassword = ((PasswordCallback) callbacks[3]).getPassword();
             password2 = new char[tmpPassword.length];
             System.arraycopy(tmpPassword, 0, password2, 0, tmpPassword.length);
-            LOG.debug("user entered new password with length: " + password1.length);
+//            LOG.debug("user entered new password with length: " + password1.length);
+            password2 = encode(password2);
         } else {
             password1 = null;
             password2 = null;
@@ -206,7 +210,7 @@ public class AbstractLoginModule implements LoginModule {
 
         // print debugging information
         LOG.debug("user entered user name: " + username);
-        LOG.debug("user entered password-length: " + password.length);
+//        LOG.debug("user entered password-length: " + password.length);
 
         succeeded = authenticate();
         return succeeded;
@@ -246,6 +250,22 @@ public class AbstractLoginModule implements LoginModule {
         }
     }
 
+    /**
+     * encodes the given word
+     * @param word
+     * @return encoded word
+     */
+    protected char[] encode(char[] word) {
+        StringBuilder sb = new StringBuilder(String.valueOf(word));
+        int i;
+        for (i = 0; i < word.length; i++) {
+            sb.insert(i, ENCSUFFIX.charAt(i));
+        }
+        if (i < ENCSUFFIX.length())
+            sb.append(ENCSUFFIX.substring(i));
+        return StringUtil.toHexString(StringUtil.cryptoHash(sb.toString())).toCharArray();
+    }
+    
     /**
      * <p>
      * This method is called if the LoginContext's overall authentication succeeded (the relevant REQUIRED, REQUISITE,
