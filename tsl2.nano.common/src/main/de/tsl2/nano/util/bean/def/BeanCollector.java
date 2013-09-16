@@ -45,6 +45,8 @@ import de.tsl2.nano.util.StringUtil;
 import de.tsl2.nano.util.bean.BeanAttribute;
 import de.tsl2.nano.util.bean.BeanContainer;
 import de.tsl2.nano.util.bean.BeanUtil;
+import de.tsl2.nano.util.bean.IAttributeDef;
+import de.tsl2.nano.util.bean.IBeanContainer;
 
 /**
  * see {@link IBeanCollector}. the collector inherits from {@link BeanDefinition}.
@@ -439,10 +441,17 @@ public class BeanCollector<COLLECTIONTYPE extends Collection<T>, T> extends Bean
                     composition.add(cloneBean);
                 }
 
-                //the id attribute of the selected bean must not be copied!!!
+                /*
+                 * the id attribute of the selected bean must not be copied!!!
+                 * we create an generated value for the id. if jpa annotation @GenerateValue
+                 * is present, it will overwrite this id.
+                 */
                 final BeanAttribute idAttribute = BeanContainer.getIdAttribute(cloneBean);
                 if (idAttribute != null) {
-                    idAttribute.setValue(cloneBean, null);
+                    IAttributeDef def = Environment.get(IBeanContainer.class).getAttributeDef(cloneBean,
+                        idAttribute.getName());
+                    idAttribute.setValue(cloneBean,
+                        StringUtil.fixString(BeanUtil.createUUID(), def.length(), ' ', true));
                 }
                 return cloneBean;
             } catch (final Exception e) {
@@ -876,6 +885,7 @@ public class BeanCollector<COLLECTIONTYPE extends Collection<T>, T> extends Bean
                 //TODO: fire refresh event
                 BeanUtil.resetValues(getBeanFinder().getFilterRange().getInstance().getFrom());
                 BeanUtil.resetValues(getBeanFinder().getFilterRange().getInstance().getTo());
+                setSelected();
                 return null;
             }
 
