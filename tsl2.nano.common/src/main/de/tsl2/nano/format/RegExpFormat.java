@@ -671,7 +671,7 @@ public class RegExpFormat extends Format implements INumberFormatCheck {
      * @return regexp for a german time
      */
     public static RegExpFormat createTimeRegExp() {
-        RegExpFormat regExp = new RegExpFormat(FORMAT_DATE_DE,
+        RegExpFormat regExp = new RegExpFormat(FORMAT_TIME,
             DateFormat.getTimeInstance().format(getInitialDate()),
             8,
             0,
