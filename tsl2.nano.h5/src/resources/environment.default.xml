@@ -1,0 +1,125 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- 
+	tsl2.nano.h5 environment configuration file.
+    created: Thomas Schneider / 15.09.2013 
+-->
+<environment>
+<!-- environment path. used for dynamic classloading and property files -->
+   <property name="de.tsl2.nano.config.path">
+      <object class="java.lang.String">C:\tsl-nano\tsl2.nano.h5\config/</object>
+   </property>
+<!-- -->
+   <property name="default.attribute.id">
+      <object class="java.lang.Boolean">true</object>
+   </property>
+<!-- normally, the collector uses the standard bean-definition. 
+     if false, extra collection xml-configuration files will be used. -->
+   <property name="collector.use.extra.definition">
+      <object class="java.lang.Boolean">false</object>
+   </property>
+<!-- normally, no application is used. the beancontainer and javax.persistence work on local entities.
+     if true, the ServiceFactory from serviceacces is usable - and own session-beans may be used.  -->
+   <property name="use.applicationserver">
+      <object class="java.lang.Boolean">false</object>
+   </property>
+<!-- default text field length -->
+   <property name="default.text.length">
+      <object class="java.lang.Integer">100</object>
+   </property>
+<!-- regular expression to define a criteria for selecting a beans best presentation attribute. 
+     used to present a bean through it's toString()-method.
+     there are four criterias for automatic presentation-attribute evaluation:
+	 - bean.best.attribute.regexp
+	 - bean.best.attribute.type
+	 - bean.best.attribute.minlength
+	 - bean.best.attribute.maxlength
+		
+	it is possible to define the presentation attribute by yourself through bean configuration.
+	see tag valueExpression.
+		-->
+   <property name="bean.best.attribute.regexp">
+      <object class="java.lang.String">.*(name|bezeichnung).*</object>
+   </property>
+<!-- best bean-presentation-attribute type - used to present a bean through it's toString()-method -->
+   <property name="bean.best.attribute.type">
+      <object class="java.lang.Class">java.lang.String</object>
+   </property>
+<!-- on automatic evaluation of a bean-presentation-attribute, the length of the bean.attribute
+     should be greater than minlength. -->
+   <property name="bean.best.attribute.minlength">
+      <object class="java.lang.Integer">3</object>
+<!-- on automatic evaluation of a bean-presentation-attribute, the length of the bean.attribute
+     should be lower than minlength. -->
+   <property name="bean.best.attribute.maxlength">
+      <object class="java.lang.Integer">30</object>
+   </property>
+   <!-- default text of a button that lets select an item --> 
+   <property name="field.selector.text">
+      <object class="java.lang.String">...</object>
+   </property>
+   <!-- html5 method: post or get-->
+   <property name="html5.http.method">
+      <object class="java.lang.String">post</object>
+   </property>
+   <!-- http-servers listening port. can be set as calling argument. -->
+   <property name="http.port">
+      <object class="java.lang.Integer">8067</object>
+   </property>
+   <!-- -->
+   <property name="application.edit.multiple">
+      <object class="java.lang.Boolean">true</object>
+   </property>
+   <!-- if an attributes number-definition (annotation) equals the value.currency.length.precision, 
+        the attribute will be presented as currency. -->
+   <property name="value.currency.length.precision">
+      <object class="java.lang.String">11,2</object>
+   </property>
+   <!-- whether the bean description should be read from xml-file. normally, this should be true,
+        to have full configurable beans. -->
+   <property name="beandef.usepersistent.cache">
+      <object class="java.lang.Boolean">true</object>
+   </property>
+   <!-- -->
+   <property name="bean.use.beanpresentationhelper.filter">
+      <object class="java.lang.Boolean">true</object>
+   </property>
+   <!-- where to show multivalue attributes (like lists) inside a search-result-table, too. -->
+   <property name="default.attribute.multivalue">
+      <object class="java.lang.Boolean">true</object>
+   </property>
+   <!-- -->
+   <property name="strict.mode">
+      <object class="java.lang.Boolean">false</object>
+   </property>
+   <!-- maximum count of lines in a search-table.
+        it is used as a range for browsing the search data (through buttons like previous, next), too. -->
+   <property name="service.maxresult">
+      <object class="java.lang.Integer">100</object>
+   </property>
+   <!-- whether to copy the selected bean on creating a new one. -->
+   <property name="collector.new.clone.selected">
+      <object class="java.lang.Boolean">true</object>
+   </property>
+   <!--  -->
+   <property name="collector.use.multiple.filter">
+      <object class="java.lang.Boolean">true</object>
+   </property>
+   <!-- as a additional tool, the scripttool (for hql, sql statements or ant scripts) can be shown inside the
+        initial bean type list. -->
+   <property name="application.show.scripttool">
+      <object class="java.lang.Boolean">true</object>
+   </property>
+   <!-- on automatic evaluation of an attribute type the current values instance will be used, too. -->
+   <property name="value.use.instancetype">
+      <object class="java.lang.Boolean">true</object>
+   </property>
+   <!-- on automatic attribute type evaluation, an attribute will be presented as multiline-text, if
+        it's length is at least field.min.multiline.length. -->
+   <property name="field.min.multiline.length">
+      <object class="java.lang.Integer">100</object>
+   </property>
+   <!-- whether a table (mostly search-tables) should show a caption (title). -->
+   <property name="html5.table.show.caption">
+      <object class="java.lang.Boolean">false</object>
+   </property>
+</environment>
