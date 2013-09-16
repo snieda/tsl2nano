@@ -252,3 +252,4 @@ h2. TODOs
 ** (v) DefaultFormat: StandardToStringStyle and ToStringBuilder
 ** StringUtil --> BeanUtil
 ** (v) BeanClass --> StringUtil --> CollectionUtil --> DefaultFormat
+* multiple type/format evaluation in BeanValue (new member for type?) Presentable and BeanPresentationHelper
