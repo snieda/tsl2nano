@@ -537,7 +537,12 @@ public class Html5Presentation<T> extends BeanPresentationHelper<T> implements I
             appendElement(colgroup, TAG_HEADERCELL, content());
         Collection<IPresentableColumn> columns = collector.getColumnDefinitions();
         for (IPresentableColumn c : columns) {
-            Element th = appendElement(colgroup, TAG_HEADERCELL, ATTR_BORDER, "1", "style", "-webkit-transform: scale(1.4);");
+            Element th = appendElement(colgroup,
+                TAG_HEADERCELL,
+                ATTR_BORDER,
+                "1",
+                "style",
+                "-webkit-transform: scale(1.4);");
             createAction(th, c.getSortingAction(collector));
         }
         return appendElement(table, TAG_TBODY);
@@ -602,6 +607,7 @@ public class Html5Presentation<T> extends BeanPresentationHelper<T> implements I
             appendElement(row, TAG_CELL, content(rowName));
         }
 
+        boolean focusSet = false;
         Collection<IPresentableColumn> colDefs = tableDescriptor.getColumnDefinitions();
         for (IPresentableColumn c : colDefs) {
             String value = tableDescriptor.getColumnText(element, c.getIndex());
@@ -617,7 +623,10 @@ public class Html5Presentation<T> extends BeanPresentationHelper<T> implements I
                 "tabindex",
                 ++currentTabIndex + "",
                 ATTR_VALUE,
-                value);
+                value,
+                enable(ATTR_AUTOFOCUS, !focusSet)
+                );
+            focusSet = true;
         }
         return row;
     }
@@ -834,7 +843,11 @@ public class Html5Presentation<T> extends BeanPresentationHelper<T> implements I
             Element c1 = appendElement(row, TAG_CELL);
             Element c2 = appendElement(row, TAG_CELL);
             c1 = appendElement(c1, TAG_LINK, ATTR_HREF, "../nano.h5.html");
-            appendElement(c1, TAG_IMAGE, ATTR_SRC, "icons/beanex-logo-micro.jpg");
+            appendElement(c1,
+                TAG_IMAGE,
+                content(Environment.getBuildInformations()),
+                ATTR_SRC,
+                "icons/beanex-logo-micro.jpg");
             appendElement(c2, TAG_H3, content(title), ATTR_ALIGN, ALIGN_CENTER);
             if (interactive && bean != null) {
                 Element c3 = appendElement(row, TAG_CELL, ATTR_ALIGN, ALIGN_RIGHT);
