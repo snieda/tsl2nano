@@ -606,6 +606,9 @@ starting ${ant.project.name}:
 		</antcall>
 	</target>
 
+	<!-- <target name="sh.build.timestamp">
+		<buildnumber file="${sh.build.property.file}"/>
+	</target>-->
 	<target name="sh.build" unless="disable_sh.build" depends="sh.printinfo" description="do a standard java build">
 		<!-- fallbacks -->
 		<property name="sh.build.basedir" value="${basedir}" />
@@ -615,6 +618,16 @@ starting ${ant.project.name}:
 		<property name="sh.build.lib" value="${sh.build.basedir}/lib" />
 		<property name="sh.build.bin" value="${sh.build.basedir}/bin" />
 		<property name="sh.build.debug" value="false" />
+		
+		<!-- store build informations to build.properties -->
+		<buildnumber file="${sh.build.basedir}/build.properties"/>
+		<propertyfile file="${sh.build.basedir}/build.properties">
+			<entry key="build.name" value="${sh.build.name}" />
+			<entry key="build.debug" value="${sh.build.debug}" />
+			<entry key="build.version" value="${sh.build.version}"/>
+			<entry key="build.time" value="${tstamp}"/>
+		</propertyfile>
+		
 		<antcall target="sh.compile">
 			<param name="sh.compile.srcdir" value="${sh.build.src}" />
 			<param name="sh.compile.bindir" value="${sh.build.bin}" />
