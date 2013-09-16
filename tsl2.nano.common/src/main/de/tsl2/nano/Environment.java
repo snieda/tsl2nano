@@ -10,6 +10,7 @@
 package de.tsl2.nano;
 
 import java.io.File;
+import java.io.IOException;
 import java.io.InputStream;
 import java.io.Serializable;
 import java.text.Format;
@@ -27,6 +28,7 @@ import org.simpleframework.xml.DefaultType;
 import org.simpleframework.xml.ElementMap;
 import org.simpleframework.xml.core.Persist;
 
+import de.tsl2.nano.exception.ForwardedException;
 import de.tsl2.nano.execution.CompatibilityLayer;
 import de.tsl2.nano.execution.Profiler;
 import de.tsl2.nano.execution.XmlUtil;
@@ -93,6 +95,33 @@ public class Environment {
     public static Object getName() {
         return StringUtil.toFirstUpper(StringUtil.substring(self.getConfigPath(), File.separator, null, true)
             .replace('/', ' '));
+    }
+
+    /**
+     * getBuildInformations
+     * 
+     * @return build informations read through build.properties in jar
+     */
+    public static String getBuildInformations() {
+        String buildInfo = (String) get("build.informations");
+        if (buildInfo == null) {
+            try {
+                Properties bi = new Properties();
+                bi.load(get(ClassLoader.class).getResourceAsStream("build.properties"));
+                buildInfo = bi.getProperty("build.name") + "-"
+                    + bi.getProperty("build.version")
+                    + "-"
+                    + bi.getProperty("build.number")
+                    + "-"
+                    + bi.getProperty("build.time")
+                    + ("true".equals(bi.getProperty("build.debug")) ? "-d" : "");
+                setProperty("build.informations", buildInfo);
+            } catch (IOException e) {
+                ForwardedException.forward(e);
+                return "<unknown build informations>";
+            }
+        }
+        return buildInfo;
     }
 
     /**
