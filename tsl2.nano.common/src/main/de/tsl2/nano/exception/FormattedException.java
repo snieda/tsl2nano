@@ -113,7 +113,7 @@ public class FormattedException extends RuntimeException {
 
     @Override
     public String toString() {
-        return super.toString() + " : " + Arrays.toString(messageParameter);
+        return super.toString() + "\n  args: " + Arrays.toString(messageParameter);
     }
 
     /**

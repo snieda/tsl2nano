@@ -111,7 +111,7 @@ public class NanoH5 extends NanoHTTPD {
      */
     public void start() {
         try {
-            ((LogFactory)LOG).setLogLevel(32);
+            LogFactory.setLogLevel(32);
             LOG.info(System.getProperties());
             createStartPage(DEGBUG_HTML_FILE);
             LOG.info("Listening on port " + port + ". Hit Enter to stop.\n");
