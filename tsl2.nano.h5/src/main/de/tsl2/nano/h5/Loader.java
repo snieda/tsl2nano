@@ -19,6 +19,6 @@ import de.tsl2.nano.AppLoader;
  */
 public class Loader extends AppLoader {
     public static void main(String[] args) {
-        new Loader().start("de.tsl2.nano.h5.NanoH5", null, args);
+        new Loader().start("de.tsl2.nano.h5.NanoH5", args);
     }
 }

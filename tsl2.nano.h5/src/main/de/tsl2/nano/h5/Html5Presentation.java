@@ -71,6 +71,7 @@ import static de.tsl2.nano.h5.HtmlUtil.VAL_ALIGN_LEFT;
 import static de.tsl2.nano.h5.HtmlUtil.VAL_ALIGN_RIGHT;
 import static de.tsl2.nano.h5.HtmlUtil.appendElement;
 import static de.tsl2.nano.h5.HtmlUtil.enable;
+import static de.tsl2.nano.h5.HtmlUtil.enableBoolean;
 import static de.tsl2.nano.h5.HtmlUtil.style;
 import static de.tsl2.nano.util.bean.def.IBeanCollector.MODE_ASSIGNABLE;
 import static de.tsl2.nano.util.bean.def.IBeanCollector.MODE_MULTISELECTION;
@@ -243,6 +244,7 @@ public class Html5Presentation<T> extends BeanPresentationHelper<T> implements I
         appendAttributes(panel, bean.getPresentable());
         Bean<T> vbean = (Bean<T>) bean;
         List<BeanValue<?>> beanValues = vbean.getBeanValues();
+        boolean firstFocused = false;
         for (BeanValue<?> beanValue : beanValues) {
             if (beanValue.isBean()) {
                 Bean<?> bv = (Bean<?>) beanValue.getInstance();
@@ -252,7 +254,11 @@ public class Html5Presentation<T> extends BeanPresentationHelper<T> implements I
                 else
                     vbean.setActions(bv.getActions());
             } else {
-                createField(panel, beanValue);
+                Element field = createField(panel, beanValue);
+                if (!firstFocused) {
+                    field.setAttribute(ATTR_AUTOFOCUS, ATTR_AUTOFOCUS);
+                    firstFocused = true;
+                }
             }
         }
     }
@@ -413,7 +419,14 @@ public class Html5Presentation<T> extends BeanPresentationHelper<T> implements I
     Element createBeanActions(Element form, BeanDefinition<?> model) {
         Element panel = createActionPanel(form, model.getActions(), ALIGN_CENTER);
         if (model.isMultiValue() && ((BeanCollector) model).hasMode(MODE_ASSIGNABLE))
-            createAction(panel, BTN_ASSIGN, "submit", "icons/links.png");
+            createAction(panel,
+                BTN_ASSIGN,
+                Messages.getStringOpt("tsl2nano.close", true),
+                "submit",
+                "icons/links.png",
+                true,
+                true,
+                false);
         createAction(panel,
             IAction.CANCELED,
             Messages.getStringOpt("tsl2nano.close", true),
@@ -467,8 +480,11 @@ public class Html5Presentation<T> extends BeanPresentationHelper<T> implements I
             ATTR_ACCESSKEY,
             shortCut,
             enable(ATTR_DISABLED, !enabled),
+            null,
+            enable(ATTR_FORMNOVALIDATE, formnovalidate),
+            null,
             enable(ATTR_AUTOFOCUS, asDefault),
-            enable(ATTR_FORMNOVALIDATE, formnovalidate));
+            null);
         if (image != null) {
             appendElement(action, TAG_IMAGE, ATTR_SRC, image, ATTR_ALT, label);
         }
@@ -624,8 +640,7 @@ public class Html5Presentation<T> extends BeanPresentationHelper<T> implements I
                 ++currentTabIndex + "",
                 ATTR_VALUE,
                 value,
-                enable(ATTR_AUTOFOCUS, !focusSet)
-                );
+                enable(ATTR_AUTOFOCUS, !focusSet));
             focusSet = true;
         }
         return row;

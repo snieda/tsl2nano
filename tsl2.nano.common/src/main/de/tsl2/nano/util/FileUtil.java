@@ -38,11 +38,9 @@ import java.util.zip.ZipOutputStream;
 
 import org.apache.commons.codec.binary.Base64;
 import org.apache.commons.logging.Log;
-import de.tsl2.nano.log.LogFactory;
 
-import tsl.Console;
-import de.tsl2.nano.collection.SegmentList;
 import de.tsl2.nano.exception.ForwardedException;
+import de.tsl2.nano.log.LogFactory;
 
 /**
  * file helper class.
@@ -167,11 +165,12 @@ public class FileUtil {
 
     private static byte[] readBytes(InputStream stream) throws IOException {
         ByteArrayOutputStream baos = new ByteArrayOutputStream();
+//        byte[] b = new byte[2048];
         while (true) {
-            int b = stream.read();
-            if (b == -1)
+            int r = stream.read();
+            if (r == -1)
                 break;
-            baos.write(b);
+            baos.write(r);
         }
         return baos.toByteArray();
     }
@@ -228,7 +227,8 @@ public class FileUtil {
             targetStream.close();
             //sourceStream.close();
         } catch (Exception ex) {
-            Console.print(ex);
+            LOG.error(ex);
+            ForwardedException.forward(ex);
         }
     }
 

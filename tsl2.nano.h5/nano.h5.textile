@@ -247,9 +247,12 @@ h2. TODOs
 *** replace jdbc-connection-properties
 *** start nano.h5
 *** jmeter integration test
+*** automated crud test (pushing search/new/delete buttons for all entity types), profiling and counting errors in log-file
 * *Dependencies*
 ** (v) Log and LogFactory
 ** (v) DefaultFormat: StandardToStringStyle and ToStringBuilder
 ** StringUtil --> BeanUtil
 ** (v) BeanClass --> StringUtil --> CollectionUtil --> DefaultFormat
 * multiple type/format evaluation in BeanValue (new member for type?) Presentable and BeanPresentationHelper
+* hibernate3 is - on special circumstances - not able to load fields with empty ('') strings
+* tooltips for buttons

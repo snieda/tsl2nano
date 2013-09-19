@@ -10,13 +10,15 @@
 package de.tsl2.nano;
 
 import java.io.File;
-import java.net.URL;
 import java.util.Map;
 
-import de.tsl2.nano.classloader.LibClassLoader;
+import org.apache.commons.logging.Log;
+
 import de.tsl2.nano.classloader.NestedJarClassLoader;
 import de.tsl2.nano.collection.CollectionUtil;
 import de.tsl2.nano.collection.MapUtil;
+import de.tsl2.nano.log.LogFactory;
+import de.tsl2.nano.util.StringUtil;
 import de.tsl2.nano.util.bean.BeanClass;
 
 /**
@@ -46,6 +48,7 @@ import de.tsl2.nano.util.bean.BeanClass;
  * @version $Revision$
  */
 public class AppLoader {
+    private static final Log LOG = LogFactory.getLog(AppLoader.class);
 
     /**
      * provides a map containing argument names (map-keys) and their description (map-values).
@@ -77,23 +80,38 @@ public class AppLoader {
     /**
      * extracts mainclass and environment from args and delegates to {@link #start(String, String, String[])}.
      * 
-     * @param args main args
+     * @param args main args (must not be null!)
      */
     public void start(String[] args) {
         String mainclass;
+        String mainmethod;
         String environment;
         String[] nargs;
         if (args.length == 1) {
             environment = "config";
             mainclass = args[0];
+            mainmethod = "main";
             nargs = new String[0];
         } else {
             environment = args[0];
             mainclass = args[1];
-            nargs = new String[args.length - 2];
-            System.arraycopy(args, 2, nargs, 0, nargs.length);
+            int processed = 2;
+            mainmethod = args.length > 2 ? args[processed++] : "main";
+
+            nargs = new String[args.length - processed];
+            System.arraycopy(args, processed, nargs, 0, nargs.length);
         }
-        start(mainclass, environment, nargs);
+        start(mainclass, mainmethod, environment, nargs);
+    }
+
+    /**
+     * delegates to {@link #start(String, String, String, String[])}
+     * 
+     * @param mainclass main-class to start it's main method with new classloader. must not be null!
+     * @param args main args (must not be null!)
+     */
+    public void start(String mainclass, String[] args) {
+        start(mainclass, null, null, args);
     }
 
     /**
@@ -103,7 +121,7 @@ public class AppLoader {
      * @param environment (optional, default: config) environment name or path
      * @param args main args (must not be null!)
      */
-    public void start(String mainclass, String environment, String[] args) {
+    public void start(String mainclass, String environment, String mainmethod, String[] args) {
         /*
          * check and use the AppLoaders main arguments
          */
@@ -117,6 +135,20 @@ public class AppLoader {
             args = nargs;
         }
 
+        if (mainmethod == null)
+            mainmethod = "main";
+
+        LOG.info("\n#############################################################" + "\nAppLoader preparing launch for:\n  mainclass : "
+            + mainclass
+            + "\n  mainmethod: "
+            + mainmethod
+            + "\n  args      : "
+            + StringUtil.toString(args, 200)
+            + "\n"
+            + "  environment: "
+            + environment
+            + "\n"
+            + "#############################################################\n");
         /*
          * create the classloader to be used by the new application
          */
@@ -132,7 +164,7 @@ public class AppLoader {
          * finally, the application will be started inside the
          * new environment and classloader
          */
-        bc.callMethod(null, "main", new Class[] { String[].class }, new Object[] { args });
+        bc.callMethod(null, mainmethod, new Class[] { String[].class }, new Object[] { args });
     }
 
     /**
@@ -170,9 +202,19 @@ public class AppLoader {
      */
     protected void provideClassloader(String environment) {
         ClassLoader contextClassLoader = Thread.currentThread().getContextClassLoader();
-        NestedJarClassLoader nestedLoader = new NestedJarClassLoader((ClassLoader)null);
-        nestedLoader.addFile(System.getProperty("java.class.path"));
-        nestedLoader.addLibraryPath(new File(System.getProperty("user.dir")).getAbsolutePath());
+        String classPath = System.getProperty("java.class.path");
+        /*
+         * there are two mechansims: loading from jar, or loading in an IDE from classpath.
+         * 1. loading from a jar-file, the previous classloader must not be given to the new one!
+         *    so we have to add the jar-file itself ('java.classpath') and the user.dir to the path.
+         * 2. loading from IDE-classpath, we have to use the parent classloader
+         */
+        ClassLoader cl = classPath.contains(";") ? contextClassLoader : null;
+        NestedJarClassLoader nestedLoader = new NestedJarClassLoader(cl);
+        if (cl == null) {
+            nestedLoader.addFile(System.getProperty("java.class.path"));
+            nestedLoader.addLibraryPath(new File(System.getProperty("user.dir")).getAbsolutePath());
+        }
         nestedLoader.addLibraryPath(new File(environment).getAbsolutePath());
         nestedLoader.startPathChecker(environment, 2000);
         System.out.println("resetting current thread classloader " + contextClassLoader + " with " + nestedLoader);

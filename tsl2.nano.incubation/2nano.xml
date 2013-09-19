@@ -18,30 +18,50 @@
 			<property name="refactore.property.file" value="${basedir}/project/distribute-h5.properties" />
 		</ant>
 
+		<antcall target="test.2nano" />
+	</target>
+
+	<!-- 
+		distribute all libs to target and start a test-project for h5
+	-->
+	<target name="test.2nano" unless="disable_test.2nano">
+		<property name="target.dir" value="../target" />
+		<property name="test.name" value="test.h5.sample" />
+		<property name="test.dir" value="${target.dir}/${test.name}" />
+
 		<ant antfile="../tsl2.nano.common/shell.xml" target="sh.copy">
 			<property name="sh.copy.srcdir" value="../" />
-			<property name="sh.copy.destination" value="../target" />
-			<property name="sh.copy.include" value="**/*.jar" />
+			<property name="sh.copy.destination" value="${target.dir}" />
+			<property name="sh.copy.include" value="tsl2.nano.*/**/*.jar" />
 			<property name="sh.copy.flatten" value="true" />
 		</ant>
-		
-		<!-- <ant antfile="../tsl2.nano.common/shell.xml" target="sh.jar">
-			<property name="sh.jar.srcdir" value="../" />
-			<property name="sh.copy.destination" value="../target" />
-			<property name="sh.copy.include" value="**/*.jar" />
-			<property name="sh.copy.flatten" value="true" />
-		</ant> -->
-		
+
 		<ant antfile="../tsl2.nano.common/shell.xml" target="sh.copy">
-			<property name="sh.copy.srcdir" value="../target" />
-			<property name="sh.copy.destination" value="../test.h5.sample" />
-			<property name="sh.copy.include" value="tsl2.nano.common*.jar" />
+			<property name="sh.copy.srcdir" value="${target.dir}" />
+			<property name="sh.copy.destination" value="${test.dir}" />
+			<property name="sh.copy.include" value="tsl2.nano.h5*.jar" />
+			<property name="sh.copy.exclude" value="*src.jar" />
 		</ant>
-		
+		<ant antfile="../tsl2.nano.common/shell.xml" target="sh.copy">
+			<property name="sh.copy.srcdir" value="${target.dir}" />
+			<property name="sh.copy.destination" value="${test.dir}" />
+			<property name="sh.copy.include" value="tsl2.nano.common*.jar" />
+			<property name="sh.copy.exclude" value="*src.jar" />
+		</ant>
+
+		<ant antfile="../tsl2.nano.common/shell.xml" target="sh.jar">
+			<property name="sh.jar.srcdir" value="${target.dir}" />
+			<property name="sh.jar.destination" value="${test.dir}/tsl2.nano.h5.0.0.1.jar" />
+			<property name="sh.jar.manifest" value="../tsl2.nano.h5/META-INF/MANIFEST.MF" />
+			<property name="sh.jar.include" value="*.jar" />
+			<property name="sh.jar.exclude" value="*src.jar" />
+			<property name="sh.jar.exclude2" value="common*.jar" />
+		</ant>
+
 		<ant antfile="../tsl2.nano.common/shell.xml" target="sh.exec.cmd">
-			<property name="sh.exec.cmd.dir" value="../test.h5.sample" />
+			<property name="sh.exec.cmd.dir" value="${test.dir}" />
 			<property name="sh.exec.cmd.arg1" value="start.bat" />
 		</ant>
-		
 	</target>
+	
 </project>

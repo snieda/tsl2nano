@@ -116,8 +116,7 @@ public class Environment {
                     + bi.getProperty("build.time")
                     + ("true".equals(bi.getProperty("build.debug")) ? "-d" : "");
                 setProperty("build.informations", buildInfo);
-            } catch (IOException e) {
-                ForwardedException.forward(e);
+            } catch (Exception e) {
                 return "<unknown build informations>";
             }
         }

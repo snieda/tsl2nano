@@ -199,10 +199,12 @@ public class RuntimeClassloader extends URLClassLoader {
             
             @Override
             public void run() {
+                LOG.info("running patch checker in thread " + Thread.currentThread());
                 while (true) {
                     try {
                         Thread.sleep(waitMillis);
 
+                        //TODO: enhance 'changedFile' evaluation
                         File changedFile = lastModifiedFile();
                         if (changedFile != null && changedFile.lastModified() > System.currentTimeMillis() - waitMillis) {
                             // TODO: implement unloading existing classes
@@ -211,6 +213,7 @@ public class RuntimeClassloader extends URLClassLoader {
                                 addFile(changedFile.getAbsolutePath());
                         }
                     } catch (InterruptedException e) {
+                        LOG.error(e);
                         ForwardedException.forward(e);
                     }
                 }
@@ -227,11 +230,13 @@ public class RuntimeClassloader extends URLClassLoader {
             }
         };
         Thread thread = new Thread(pathChecker);
+        thread.setPriority(Thread.MIN_PRIORITY);
         thread.setDaemon(true);
+        thread.start();
     }
     
     @Override
     public String toString() {
-        return this.getClass().getName() + "(urls: " + getURLs().length + ")";
+        return this.getClass().getName() + "[urls: " + getURLs().length + "]";
     }
 }

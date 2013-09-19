@@ -104,7 +104,7 @@ public class NestedJarClassLoader extends LibClassLoader {
         int i = name.lastIndexOf('.');
         if (i != -1) {
           String pkgname = name.substring(0, i);
-          Package pkg = this.getPackage(pkgname);
+          Package pkg = getPackage(pkgname);
           if (pkg == null) {
             URL pkgUrl = getResource(pkgname.replaceAll("\\.", "/").concat("/"));
             //TODO: load nested manifests
@@ -112,7 +112,7 @@ public class NestedJarClassLoader extends LibClassLoader {
             if (manifest != null) {
               definePackage(pkgname, manifest, pkgUrl);
             } else {
-              definePackage(pkgname, null, null, null, null, null, null, null);
+              definePackage(pkgname, null, null, null, null, null, null, pkgUrl);
             }
           }
         }
@@ -140,6 +140,8 @@ public class NestedJarClassLoader extends LibClassLoader {
                             + " bytes in "
                             + (System.currentTimeMillis() - startTime)
                             + "msecs");
+                        //TODO: for performance: put jar-file to top
+                        shiftToTop(nestedJars, i);
                         return bytes;
                     }
                 } catch (Throwable e) {
@@ -149,6 +151,15 @@ public class NestedJarClassLoader extends LibClassLoader {
             }
         }
         throw new ClassNotFoundException(name);
+    }
+
+    private void shiftToTop(Object[] arr, int i) {
+        Object obj = arr[i];
+        //system.arraycopy not possible
+        for (int j = i; j > 0; j--) {
+            arr[j] = arr[j-1];
+        }
+        arr[0] = obj;
     }
 
     String findNested(String name, boolean resource) {
@@ -242,6 +253,6 @@ public class NestedJarClassLoader extends LibClassLoader {
 
     @Override
     public String toString() {
-        return super.toString() + "(nested: " + (nestedJars != null ? nestedJars.length : 0);
+        return super.toString() + "[nested: " + (getNestedJars() != null ? nestedJars.length : 0) + "]";
     }
 }

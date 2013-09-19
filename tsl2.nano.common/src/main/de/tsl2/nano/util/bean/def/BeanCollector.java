@@ -69,6 +69,8 @@ public class BeanCollector<COLLECTIONTYPE extends Collection<T>, T> extends Bean
 
     /** static data or current data representation of this beancollector */
     protected transient COLLECTIONTYPE collection;
+    boolean isStaticCollection = false;
+    
     /** defines the data for this collector through it's getData() method */
     protected transient IBeanFinder<T, ?> beanFinder;
     /** holds the current selection */
@@ -130,6 +132,7 @@ public class BeanCollector<COLLECTIONTYPE extends Collection<T>, T> extends Bean
     public BeanCollector(Class<T> beanType, final COLLECTIONTYPE collection, int workingMode, Composition composition) {
         this(new BeanFinder<T, Object>(beanType), workingMode, composition);
         this.collection = collection;
+        this.isStaticCollection = collection != null;
     }
 
     /**
@@ -145,6 +148,7 @@ public class BeanCollector<COLLECTIONTYPE extends Collection<T>, T> extends Bean
     public BeanCollector(final COLLECTIONTYPE collection, int workingMode, Composition composition) {
         this(new BeanFinder(collection.iterator().next().getClass()), workingMode, composition);
         this.collection = collection;
+        this.isStaticCollection = collection != null;
     }
 
     /**
@@ -885,6 +889,8 @@ public class BeanCollector<COLLECTIONTYPE extends Collection<T>, T> extends Bean
                 //TODO: fire refresh event
                 BeanUtil.resetValues(getBeanFinder().getFilterRange().getInstance().getFrom());
                 BeanUtil.resetValues(getBeanFinder().getFilterRange().getInstance().getTo());
+                if (!isStaticCollection && collection != null)
+                    collection.clear();
                 setSelected();
                 return null;
             }

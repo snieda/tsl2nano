@@ -35,18 +35,18 @@ public class HtmlUtil {
     public static final String TAG_HTML = "html";
     public static final String TAG_HEAD = "head";
     public static final String TAG_BODY = "body";
-    
+
     public static final String TAG_H1 = "h1";
     public static final String TAG_H2 = "h2";
     public static final String TAG_H3 = "h3";
     public static final String TAG_H4 = "h4";
     public static final String TAG_H5 = "h5";
     public static final String TAG_H6 = "h6";
-    
+
     public static final String TAG_FORM = "form";
     public static final String ATTR_ACTION = "action";
     public static final String ATTR_METHOD = "method";
-    
+
     public static final String TAG_INPUT = "input";
     public static final String ATTR_TYPE = "type";
     public static final String ATTR_NAME = "name";
@@ -94,9 +94,9 @@ public class HtmlUtil {
     public static final String TAG_IMAGE = "img";
     public static final String ATTR_SRC = "src";
     public static final String ATTR_ALT = "alt";
-    
+
     public static final String TAG_BUTTON = "button";
-    
+
     /* 
      * Layout
      */
@@ -144,18 +144,18 @@ public class HtmlUtil {
     public static final String VAL_ALIGN_RIGHT = "end";
 
     public static final String STYLE_TEXT_ALIGN = "text-align";
-    
+
     public static final String BTN_ASSIGN = "tsl2nano.assign";
     public static final String BTN_SUBMIT = "tsl2nano.save";
     public static final String BTN_CANCEL = "tsl2nano.cancel";
-    
+
     public static final String BTN_SELECT_ALL = "tsl2nano.selectall";
     public static final String BTN_DESELECT_ALL = "tsl2nano.deselectall";
     public static final String BTN_PRINT = "tsl2nano.print";
     public static final String BTN_EXPORT = "tsl2nano.export";
 
     public static final String XML_TAG_START = "\\<.*\\>";
-    
+
     public static Element appendElements(Element parent, String... tagNames) {
         Document doc = parent.getOwnerDocument();
         for (int i = 0; i < tagNames.length; i++) {
@@ -178,6 +178,14 @@ public class HtmlUtil {
         return e;
     }
 
+    /**
+     * appends all given not-null attributes to the element.<br/>
+     * the order of attributes has to follow key1, value1, key2, value2, ...
+     * 
+     * @param e element to add the attributes
+     * @param attributes key/value pairs
+     * @return the given element
+     */
     public static Element appendAttributes(Element e, String... attributes) {
         Document doc = e.getOwnerDocument();
         for (int i = 0; i < attributes.length; i += 2) {
@@ -198,18 +206,28 @@ public class HtmlUtil {
 
     /**
      * usable to add an element attribute of type boolean. e.g.: formnovalidate='formnovalidate' or 'false'.
+     * 
      * @param name boolean attribute name
      * @param enable whether to activate the attribute
      * @return attribute name and value
      */
     public static final String enable(String name, boolean enable) {
-        return /*"name = " +*/ (enable ? name : null);
+        return /*"name = " +*/(enable ? name : null);
     }
-    
+
+    public static final String enableName(String name, boolean enable) {
+        return name + " = " + enable(name, enable);
+    }
+
+    public static final String enableBoolean(String name, boolean enable) {
+        boolean enabled = enable(name, enable) != null;
+        return name + " = " + enabled;
+    }
+
     public static final String style(String styleKey, String styleValue) {
         return styleKey + ": " + styleValue;
     }
-    
+
     public static String toString(Document doc) {
         //set up a transformer
         try {
@@ -231,6 +249,7 @@ public class HtmlUtil {
 
     /**
      * containsXml
+     * 
      * @param text text to search
      * @return true, if text contains at least one xml tag
      */

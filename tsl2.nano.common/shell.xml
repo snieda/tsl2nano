@@ -178,7 +178,7 @@ target: sh.copy
 		<attribute name="sh.copy.includeemptydirs" />
 		<sequential>
 			<mkdir dir="${sh.copy.destination}" />
-			<copy todir="${sh.copy.destination}" flatten="${sh.copy.flatten}" includeemptydirs="${sh.copy.includeemptydirs}">
+			<copy todir="${sh.copy.destination}" flatten="${sh.copy.flatten}" includeemptydirs="${sh.copy.includeemptydirs}" preservelastmodified="true">
 				<fileset dir="${sh.copy.srcdir}">
 					<include name="${sh.copy.include}" />
 					<exclude name="${sh.copy.exclude}" />
@@ -626,6 +626,8 @@ starting ${ant.project.name}:
 			<entry key="build.debug" value="${sh.build.debug}" />
 			<entry key="build.version" value="${sh.build.version}"/>
 			<entry key="build.time" value="${tstamp}"/>
+			<entry key="build.user" value="${user.name}"/>
+			<entry key="build.java" value="${java.runtime.version}"/>
 		</propertyfile>
 		
 		<antcall target="sh.compile">

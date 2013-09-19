@@ -939,9 +939,11 @@ public class BeanPresentationHelper<T> {
      */
     protected StringBuilder fillCollectorPresentation(StringBuilder str, String TAB, String CR) {
         String[] names = bean.getAttributeNames();
+        String n;
         for (int i = 0; i < names.length; i++) {
             IAttributeDefinition<?> attr = bean.getAttribute(names[i]);
-            str.append(attr.getColumnDefinition().getName() + TAB);
+            n = attr.getColumnDefinition() != null ? attr.getColumnDefinition().getName() : TAB;
+            str.append(n + TAB);
         }
         str.append(CR);
         BeanCollector<?, T> collector = (BeanCollector<?, T>) bean;
@@ -1183,7 +1185,11 @@ public class BeanPresentationHelper<T> {
                 }
             });
 
-            presActions.add(new SecureAction(bean.getClazz(), "shutdown", IAction.MODE_UNDEFINED, false, "icons/stop.png") {
+            presActions.add(new SecureAction(bean.getClazz(),
+                "shutdown",
+                IAction.MODE_UNDEFINED,
+                false,
+                "icons/stop.png") {
                 @Override
                 public Object action() throws Exception {
                     Environment.persist();
