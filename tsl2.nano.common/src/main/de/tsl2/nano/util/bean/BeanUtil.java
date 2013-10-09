@@ -493,8 +493,9 @@ public class BeanUtil {
             boolean onlySingleValues,
             boolean onlyFilteredAttributes,
             String... filterAttributes) {
-        final Bean<?> bean = Bean.getBean((Serializable) o);
-        bean.setAttributeFilter(filterAttributes);
+        final Bean bean = new Bean(o);//Bean.getBean((Serializable)o);
+        if (onlyFilteredAttributes && filterAttributes.length > 0)
+            bean.setAttributeFilter(filterAttributes);
         return bean.toValueMap(keyPrefix, onlySingleValues, onlyFilteredAttributes, filterAttributes);
     }
 
@@ -664,7 +665,7 @@ public class BeanUtil {
          */
         st.resetSyntax();
         st.wordChars(0x00, 0xFF);
-        st.quoteChar('\"');
+//        st.quoteChar('\"');
         st.whitespaceChars('\r', '\r');
         st.whitespaceChars('\n', '\n');
         st.eolIsSignificant(true);
@@ -673,7 +674,7 @@ public class BeanUtil {
 //            st.slashStarComments(true);
         int ttype = 0;
         final Class<T> rootType = bean.getClazz();
-        bean.newInstance();
+//        bean.newInstance();
         final Map<String, Exception> errors = new Hashtable<String, Exception>();
         final String rootInfo = rootType.getSimpleName() + ".";
         /*
@@ -834,6 +835,27 @@ public class BeanUtil {
             ForwardedException.forward(e);
             return false;
         }
+    }
+
+    /**
+     * creates a hashcode through all single-value attibutes of given bean instance
+     * @param bean instance to evaluate the hashcode for
+     * @param attributes (optional) attributes to be used for hashcode
+     * @return new hashcode for given bean instance
+     */
+    public static int hashCodeReflect(Object bean, String...attributes) {
+        final int prime = 31;
+        int result = 1;
+        BeanClass bc = new BeanClass(bean.getClass());
+        if (attributes == null) {
+            attributes = bc.getAttributeNames();
+        }
+        Object v;
+        for (int i = 0; i < attributes.length; i++) {
+            v = BeanClass.getValue(bean, attributes[i]);
+                result = prime * result + (v == null ? 0 : v.hashCode());
+        }
+        return result;
     }
 
 }

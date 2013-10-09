@@ -194,15 +194,15 @@ public class Environment {
         File configFile = new File(dir + "/" + CONFIG_XML_NAME);//new File(System.getProperty(KEY_CONFIG_PATH, System.getProperty("user.dir")));
         if (configFile.canRead()) {
             self = XmlUtil.loadXml(configFile.getPath(), Environment.class, layer, false);
-            String configPath = getConfigPath();
-            if (!configPath.endsWith("/") && !configPath.endsWith("\\"))
-                setProperty(KEY_CONFIG_PATH, configPath + "/");
+//            String configPath = getConfigPath();
+//            if (!configPath.endsWith("/") && !configPath.endsWith("\\"))
+//                setProperty(KEY_CONFIG_PATH, configPath + "/");
         } else {
             self = new Environment();
             self.properties = new Properties();
 //          LOG.warn("no environment.properties available");
-            self.properties.put(KEY_CONFIG_PATH, new File(dir).getAbsolutePath() + "/");
         }
+        self.properties.put(KEY_CONFIG_PATH, new File(dir).getAbsolutePath() + "/");
         self.services = new Hashtable<Class<?>, Object>();
         registerBundle(PREFIX + "messages", true);
         addService(Profiler.class, Profiler.si());
@@ -372,9 +372,9 @@ public class Environment {
     }
 
     /**
-     * persists (saves) the current environment
+     * persists (saves) the current environment. a reset will be done to reload the environment from saved file.
      */
-    public static void persist() {
+    public static void persistAndReload() {
 //        Properties properties = self().properties;
 //        Properties p = new Properties();
 //        Set<Object> keys = properties.keySet();
@@ -389,7 +389,10 @@ public class Environment {
 //
 //        self().get(XmlUtil.class).saveXml(SERVICE_FILE_NAME, self().services);
 
-        self().get(XmlUtil.class).saveXml(getConfigPath() + CONFIG_XML_NAME, self());
+        String configPath = getConfigPath();
+        self().get(XmlUtil.class).saveXml(configPath + CONFIG_XML_NAME, self());
+        reset();
+        create(configPath);
     }
 
     /**
@@ -420,6 +423,11 @@ public class Environment {
 
     @Persist
     protected void initSerialization() {
+        /*
+         * remove the environment path itself - should not reloaded
+         */
+        properties.remove(KEY_CONFIG_PATH);
+        
         /*
          * remove all not serialiable objects
          */

@@ -140,7 +140,7 @@ public class NestedJarClassLoader extends LibClassLoader {
                             + " bytes in "
                             + (System.currentTimeMillis() - startTime)
                             + "msecs");
-                        //TODO: for performance: put jar-file to top
+                        //for performance: put jar-file to top
                         shiftToTop(nestedJars, i);
                         return bytes;
                     }

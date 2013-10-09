@@ -19,7 +19,6 @@ import java.util.Collection;
 import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
-import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -36,6 +35,7 @@ import de.tsl2.nano.Environment;
 import de.tsl2.nano.action.IAction;
 import de.tsl2.nano.collection.CollectionUtil;
 import de.tsl2.nano.collection.IPredicate;
+import de.tsl2.nano.collection.ListSet;
 import de.tsl2.nano.exception.FormattedException;
 import de.tsl2.nano.exception.ForwardedException;
 import de.tsl2.nano.execution.XmlUtil;
@@ -106,7 +106,7 @@ public class BeanDefinition<T> extends BeanClass<T> implements Serializable {
     static final Object UNDEFINED = new Serializable() {
     };
 
-    private static final List<BeanDefinition> virtualBeanCache = new LinkedList<BeanDefinition>();
+    private static final List<BeanDefinition> virtualBeanCache = new ListSet<BeanDefinition>();
     private static final BeanDefinition volatileBean = new BeanDefinition(Object.class);
     private static boolean usePersistentCache = Environment.get("beandef.usepersistent.cache", true);
 
@@ -183,6 +183,8 @@ public class BeanDefinition<T> extends BeanClass<T> implements Serializable {
                 IAttributeDefinition v = getAttributeDefinitions().get(attributeFilter[i]);
                 if (v == null) {
                     v = createAttributeDefinition(attributeFilter[i]);
+                } else {//TODO: do we need this to reorder?
+                    attributeDefinitions.remove(attributeFilter[i]);
                 }
                 attributeDefinitions.put(attributeFilter[i], v);
             }
@@ -191,9 +193,9 @@ public class BeanDefinition<T> extends BeanClass<T> implements Serializable {
                 Set<String> allAttributes = attributeDefinitions.keySet();
                 if (allAttributes.size() != attributeFilter.length) {
                     List<String> filterList = Arrays.asList(attributeFilter);
-                    for (String a : allAttributes) {
-                        if (!filterList.contains(a))
-                            attributeDefinitions.remove(a);
+                    for (Iterator<String> it = allAttributes.iterator(); it.hasNext();) {
+                        if (!filterList.contains(it.next()))
+                            it.remove();
                     }
                 }
             }
@@ -532,7 +534,7 @@ public class BeanDefinition<T> extends BeanClass<T> implements Serializable {
         Map<String, IAttributeDefinition<?>> attributes = anotherBean.getAttributeDefinitions();
         Object v;
         for (IAttributeDefinition<?> attr : attributes.values()) {
-            v = attr.getValue(beanInstance);
+            v = attr instanceof IValueAccess ? ((IValueAccess)attr).getValue() : attr.getValue(beanInstance);
             if (v instanceof IValueAccess)
                 connect(attr.getName(), (IValueAccess<?>) attr.getValue(beanInstance), callback);
         }
@@ -639,6 +641,10 @@ public class BeanDefinition<T> extends BeanClass<T> implements Serializable {
         return beandef;
     }
 
+    public static void define(BeanDefinition beandef) {
+        virtualBeanCache.add(beandef);
+    }
+    
     @Persist
     protected void initSerialization() {
         //remove not-serializable or cycling actions

@@ -77,7 +77,8 @@ public class FileUtil {
      * @return
      */
     public static String[] readFileNamesFromZip(String zipfile, String filter) {
-        return readFileNamesFromZip(getZipInputStream(zipfile), filter);
+        ZipInputStream zipStream = getZipInputStream(zipfile);
+        return zipStream != null ? readFileNamesFromZip(zipStream, filter) : null;
     }
 
     public static String[] readFileNamesFromZip(ZipInputStream sourceStream, String filter) {

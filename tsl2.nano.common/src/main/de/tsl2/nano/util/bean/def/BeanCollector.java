@@ -70,7 +70,7 @@ public class BeanCollector<COLLECTIONTYPE extends Collection<T>, T> extends Bean
     /** static data or current data representation of this beancollector */
     protected transient COLLECTIONTYPE collection;
     boolean isStaticCollection = false;
-    
+
     /** defines the data for this collector through it's getData() method */
     protected transient IBeanFinder<T, ?> beanFinder;
     /** holds the current selection */
@@ -696,7 +696,8 @@ public class BeanCollector<COLLECTIONTYPE extends Collection<T>, T> extends Bean
             return "";
         Object value;
         try {
-            value = attribute.getValue(element);
+            value = attribute instanceof IValueDefinition ? ((IValueDefinition) attribute).getValue()
+                : attribute.getValue(element);
         } catch (Exception e) {
             LOG.warn("beancollector can't create a column text for column index " + columnIndex
                 + "! exception: "

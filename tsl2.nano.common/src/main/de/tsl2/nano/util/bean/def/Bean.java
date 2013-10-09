@@ -370,6 +370,9 @@ public class Bean<T> extends BeanDefinition<T> {
     Bean<T> replaceInstanceInAttributes(T instance2) {
         if (attributeDefinitions != null) {
             for (final IAttributeDefinition<?> a : attributeDefinitions.values()) {
+                //TODO: what to do with virtual values?
+                if (a instanceof IValueDefinition && ((IValueDefinition)a).isVirtual())
+                    continue;
                 ((BeanValue) a).setInstance(instance2);
             }
         }

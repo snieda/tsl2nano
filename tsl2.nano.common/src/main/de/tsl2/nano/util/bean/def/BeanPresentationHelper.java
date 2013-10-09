@@ -88,6 +88,8 @@ public class BeanPresentationHelper<T> {
     public static final String PROP_ALLOWED_VALUES = "allowedValues";
     public static final String PROP_NULLABLE = "nullable";
     public static final String PROP_DOVALIDATION = "doValidation";
+    public static final String PROP_LABEL = "label";
+    public static final String PROP_DESCRIPTION = "description";
 
     /*
      * IPresentables
@@ -232,7 +234,7 @@ public class BeanPresentationHelper<T> {
      */
     public AttributeDefinition addSpaceValue() {
         AttributeDefinition<T> beanValue = bean.addAttribute("space-" + System.currentTimeMillis(),
-            null,
+            "[space]",
             null,
             null,
             null);
@@ -1192,7 +1194,7 @@ public class BeanPresentationHelper<T> {
                 "icons/stop.png") {
                 @Override
                 public Object action() throws Exception {
-                    Environment.persist();
+                    Environment.persistAndReload();
                     BeanDefinition.dump();
                     Thread.currentThread().interrupt();
                     return "configuration saved and HTTP-Session stopped!";

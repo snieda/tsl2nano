@@ -27,6 +27,7 @@ import de.tsl2.nano.util.bean.def.Bean;
  * @author Thomas Schneider
  * @version $Revision$
  */
+@SuppressWarnings({ "unchecked", "rawtypes" })
 public class MapUtil {
     /**
      * Creates a map combining the header with its data informations. IMPORTANT: The column array and the attributeNames
@@ -80,12 +81,6 @@ public class MapUtil {
         return map;
     }
 
-    /**
-     * the contrary to {@link #asMap(Object...)}.
-     * @param map map to flatten into an object array
-     * @return array holding key-values
-     */
-    @SuppressWarnings("unchecked")
     public static <K, V> V[] asArray(Map<K, V> map) {
         Class<V> type;
         try {
@@ -93,18 +88,49 @@ public class MapUtil {
         } catch (Exception e) {
             type = (Class<V>) Object.class;
         }
-        V[] result = (V[]) Array.newInstance(type, map.size() * 2);
+        return asArray(map, type);
+    }
+
+    /**
+     * the contrary to {@link #asMap(Object...)}.
+     * 
+     * @param map map to be flatten into an object array
+     * @return array holding key-values
+     */
+    public static <K, V, V1 extends V> V1[] asArray(Map<K, V> map, Class<V1> type) {
+        V1[] result = (V1[]) Array.newInstance(type, map.size() * 2);
         Set<K> keySet = map.keySet();
-        int i=0;
+        int i = 0;
         for (K key : keySet) {
-            result[i++] = (V)key;
-            result[i++] = map.get(key);
+            result[i++] = (V1) key;
+            result[i++] = (V1) map.get(key);
+        }
+        return result;
+    }
+
+    /**
+     * the contrary to {@link #asMap(Object...)}. keys should be strings, values will be converted (through
+     * {@link #toString()} to strings.
+     * 
+     * @param map map to be flatten into an object array
+     * @return array holding key-values
+     */
+    public static <K, V> String[] asStringArray(Map<K, V> map) {
+        String[] result = (String[]) Array.newInstance(String.class, map.size() * 2);
+        Set<K> keySet = map.keySet();
+        int i = 0;
+        Object v;
+        for (K key : keySet) {
+            result[i++] = (String) key;
+            v = map.get(key);
+            result[i++] = v != null ? v.toString() : null ;
         }
         return result;
     }
 
     /**
      * removeAll
+     * 
      * @param src
      * @param toRemove
      * @return src
@@ -117,7 +143,7 @@ public class MapUtil {
         }
         return src;
     }
-    
+
     /**
      * toString represention of a map
      * 

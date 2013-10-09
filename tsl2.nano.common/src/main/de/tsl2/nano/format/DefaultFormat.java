@@ -18,13 +18,14 @@ import java.util.Collection;
 import java.util.Date;
 
 import org.apache.commons.logging.Log;
-import de.tsl2.nano.log.LogFactory;
 
 import de.tsl2.nano.Environment;
 import de.tsl2.nano.Messages;
 import de.tsl2.nano.exception.FormattedException;
 import de.tsl2.nano.execution.CompatibilityLayer;
+import de.tsl2.nano.log.LogFactory;
 import de.tsl2.nano.util.StringUtil;
+import de.tsl2.nano.util.bean.BeanUtil;
 //import org.apache.commons.lang.builder.StandardToStringStyle;
 //import org.apache.commons.lang.builder.ToStringBuilder;
 
@@ -95,7 +96,7 @@ public class DefaultFormat extends Format {
         } else {
             //pure objects, representing there instance id --> use reflection
             CompatibilityLayer cl = Environment.get(CompatibilityLayer.class);
-            if (!StringUtil.hasToString(obj) && cl.isAvailable("tsl2.nano.format.ToStringBuilder")) {
+            if (!BeanUtil.hasToString(obj) && cl.isAvailable("tsl2.nano.format.ToStringBuilder")) {
                 try {
                     result.append(StringUtil.toString(cl.runRegistered("reflectionToString", obj), 80));
                 } catch (final Exception e) {

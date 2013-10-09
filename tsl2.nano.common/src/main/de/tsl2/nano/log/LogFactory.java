@@ -19,7 +19,17 @@ import de.tsl2.nano.util.StringUtil;
  * <p/>
  * please overwrite {@link #log(Class, State, Object, Throwable)} to change the log output.
  * <p/>
- * TODO: add simple configuration (Map<package, logstate>) and serialization, read filename from system-properties
+ * <p/>
+ * to en-disable debugging or tracing on application start (not reading from configuration), set the system property
+ * 'tsl2.nano.log.level' to 'trace', 'debug' or 'warn'.
+ * 
+ * <pre>
+ * Example:
+ * java -Dtsl2.nano.log.level=debug ...
+ * </pre>
+ * 
+ * TODO: make singelton, add simple configuration (Map<package, logstate>) and serialization, read filename from
+ * system-properties
  * 
  * @author ts
  * @version $Revision$
@@ -32,7 +42,9 @@ public abstract class LogFactory {
     static final int DEBUG = 16;
     static final int TRACE = 32;
 
+    static int LOG_WARN = WARN | ERROR | FATAL;
     static int LOG_STANDARD = INFO | WARN | ERROR | FATAL;
+    static int LOG_DEBUG = INFO | WARN | ERROR | FATAL | DEBUG;
     static int LOG_ALL = INFO | WARN | ERROR | FATAL | DEBUG | TRACE;
 
 //    static final String[] STATETXT = new String[] { "info", "warn", "error", "fatal", "debug", "trace" };
@@ -55,6 +67,16 @@ public abstract class LogFactory {
     static PrintStream err = System.err;
 
     static final String apacheLogFactory = "org.apache.commons.logging.LogFactory";
+
+    static {
+        String logLevel = System.getProperty("tsl2.nano.log.level");
+        if ("trace".equals(logLevel))
+            statesToLog = LOG_ALL;
+        else if ("debug".equals(logLevel))
+            statesToLog = LOG_DEBUG;
+        else if ("warn".equals(logLevel))
+            statesToLog = LOG_WARN;
+    }
 
     public static final void initializeFileLogger(String fileName, int bitsetStatesToLog) {
         try {
@@ -84,6 +106,7 @@ public abstract class LogFactory {
 
     /**
      * setLogLevel
+     * 
      * @param loglevel bit field: {@link #FATAL}, {@link #ERROR}, {@link #WARN}, {@link #INFO}, {@link #DEBUG},
      *            {@link #TRACE}.
      */
@@ -111,7 +134,7 @@ public abstract class LogFactory {
         if (!loglevels.containsKey(path))
             if (path.indexOf('.') == -1) {
                 //TODO: create default path levels to enhance performance
-                return level <= defaultPckLogLevel;//minimum default level
+                return true;//level <= defaultPckLogLevel;//minimum default level
             } else {
                 return hasLogLevel(StringUtil.substring(path, null, ".", true), level);
             }

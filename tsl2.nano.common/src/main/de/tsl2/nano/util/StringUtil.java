@@ -187,13 +187,13 @@ public class StringUtil {
         }
     }
 
-    /**
-     * see {@link BeanUtil#hasToString(Object)}
-     */
-    public static boolean hasToString(Object obj) {
-        return BeanUtil.hasToString(obj);
-    }
-
+//    /**
+//     * see {@link BeanUtil#hasToString(Object)}
+//     */
+//    public static boolean hasToString(Object obj) {
+//        return BeanUtil.hasToString(obj);
+//    }
+//
     /**
      * isEmpty
      * @param text text to analyze
@@ -211,6 +211,15 @@ public class StringUtil {
      */
     public static final String toString(Object obj) {
         return obj != null ? obj.toString() : "";
+    }
+
+    /**
+     * asString
+     * @param obj obj to call toString() if not null
+     * @return obj.toString() or null
+     */
+    public static final String asString(Object obj) {
+        return obj != null ? obj.toString() : null;
     }
 
     /**
