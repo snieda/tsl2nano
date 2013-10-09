@@ -14,7 +14,7 @@ generic html5 gui implementation providing a model driven access (MDA), bound to
 * full configurable (including standard bean behaviour and all entity behaviours)
 * implementation through simple java beans + optional bean presenters
 * navigates through given beans, showing bean-lists and bean-detail dialogs.
-* prefills formatting, validation and presentation of relations
+* pre-defines formatting, validation and presentation of relations
 * pure html-5 (no javascript)
 * independent of a special o/r mapper. all o/r mappers supporting javax.persistence with an EntityManager are usable.
 * data replication to work offline (not finished yet!)
@@ -33,15 +33,17 @@ The data access is done by:
 * tsl2nano.serviceaccess
 * tsl2nano.directaccess
 
-It is possible to use a ejb container in an application server, but the default is set to use jpa directly on the client (using _tsl2nano.directaccess_).
+It is possible to use an ejb container in an application server, but the default is set to use jpa directly on the client (using _tsl2nano.directaccess_).
+
 h3. Third Party Libraries
 
 * "Jing-Trang xml2xsd-Generator":https://code.google.com/p/jing-trang/downloads/list
 * "SimpleXML xml serializer":http://simple.sourceforge.net/download/stream/doc/tutorial/tutorial.php
+* Serviceaccess using: jpa-api, connector-api, jta-api, ejb-api, interceptor-api
 
 h2. Starting / Test
 
-The tsl2.nano.h5 framework can be started through it's jar _tsl2.nano.h5-xxxxx.jar. A start script _start.bat_ is available to do this in windows. Starting it, a given directory is used as a kind of workspace where you put all configuration and jar files into to be used. This jars may be ant, an o/r-mapper like hibernate with all dependencies. The configuration files are the environment.xml and all xml files describing the presentation of each entity bean.  Icons for all buttons and backgrounds are in the _icon_ folder. The main jar file can contain all dependent jar files (as described in the manifest file) or outside in the same directory as the main jar.
+The tsl2.nano.h5 framework can be started through it's jar _tsl2.nano.h5-xxxxx.jar. A start script _run.bat_ is available to do this in windows. Starting it, a given directory is used as a kind of workspace where you put all configuration and jar files into to be used. This jars may be ant, an o/r-mapper like hibernate with all it's dependencies. The configuration files are the environment.xml and all xml files describing the presentation of each entity bean.  Icons for all buttons and backgrounds are in the _icon_ folder. The main jar file can contain all dependent jar files (as described in the manifest file) or outside in the same directory as the main jar.
 
 A possible start configuratin would be:
 
@@ -58,12 +60,10 @@ h4. Static Dependencies (direct referenced by tsl2.nano)
 
 h4. Dynamic Dependencies (used by tsl2.nano, but through compatibility-layer)
 
-* velocity-1.6-dep.jar 
-* junit-4.8.2.jar 
-* ant-launcher.jar 
-* ant.jar 
-* ant-nodeps.jar 
-* javassist-3.12.0.GA.jar
+* XmlUtil: velocity-1.6-dep.jar 
+* CommonTest: junit-4.8.2.jar 
+* AntUtil: ant-launcher.jar, ant.jar, ant-nodeps.jar 
+* BeanEnhancer: javassist-3.12.0.GA.jar
 
 h4. No Dependencies, but useful to do the work
 
@@ -108,7 +108,7 @@ If you start it on windows, a browser will be opened to show the initial screen:
 
 !doc/h5.sample.start.jpg!
 
-Now you can login to the sample database. It is full configurable, which o/r mapper and database should be used. After pressing Ok, a persistence.xml will be generated to be found by the javax.persistence implementation.
+Now you can login to the sample database. It is fully configurable, which o/r mapper and database should be used. After pressing Ok, a _persistence.xml_ will be generated to be found by the _javax.persistence_ implementation.
 
 !doc/h5.sample.persistence.jpg!
 
@@ -120,7 +120,7 @@ Then you will get a search page with a search filter and an empty list. Pushing 
 
 !doc/h5.sample.entity-search.jpg!
 
-If you click a column header, the list will be sorted by this column - clicking to that column a second time, the sorting will be done in the other direction. The possible actions will be described in the next chapter.
+If you click a column header, the list will be sorted by this column - clicking on that column a second time, the sorting will be done in the other direction. The possible actions will be described in the next chapter.
 
 h3. Extending the Sample
 
@@ -129,13 +129,48 @@ It is possible to change the presentation of each bean. Inside the directory _h5
 
 h2. The Environment
 
+Loading a Nano.h5 application will create and use an environment directory as workspace for it. Resources like icons, configuration xml-file and libraries will be put there - being on top of classpath.s
+
+A full list of configuration attributes can be found "here":src/resources/environment.default.xml
 
 h2. Application and Page Actions
 
-h2. Model Driven Architecture (MDA)
+On top of each html page you will see on the left side an application icon (clicking on it, it tries to load the help file nanoh5.html). On top right, all page-specific buttons are shown. The following list tries to describe them. They depend on the current type of bean. A bean list will have other buttons than a beans detail page.
+
+h3. Bean's search page top buttons
+
+* *select all*: will select all listed items to be accessed through 'open' or 'delete' buttons
+* *de-select all*: will de-select all listed items
+
+h3. All other page buttons (on the top)
+
+* *print*: shows a page with non-interactive presentation of the current page. use the browsers back-button to return to the application
+* *export*: shows a page with a pure text presentation like a csv file - to be copy/pasted into another file. use the browsers back-button to return to the application.
+* *document*: if configured in _environment.xml_, a text-file (a rtf-file is possible, too) can be search and replaced with key/values of the current page.
+* *configure*: ???
+* *help*: if a help html-file for the current page/bean can be found, it will be shown. use the browsers back-button to return to the application.
+* *refresh*: all configurations will be reloaded
+* *exit*: saves all current configuration values - creating files to be used to change properties - and stops the current user-session.
+* *configure*: goes into a configuration mode for the current page/bean.
+
+h3. Bean search and manipulation buttons
+
+* *search*: searches for all beans of the current type and filter.
+* *reset*: resets all search-filter fields and the result list
+* *open*: opens all selected beans. only active, if on page-creation at least one selected items is available.
+* *new*: creates a new item of the given type.
+* *delete*: deletes all selected items.
+
+h3. Bean detail buttons
+
+* *save*: saves the current bean.
+* *close*: closes the current page, returning to the last one without saving.
+
+h2. Model Driven Architecture (MDA))
+
+Nano.h5 provides mechanisms to create a full configurable application from a given database definition file (ddl).
 
 Creating an UML-Diagram with perhaps _ArgoUML_, or creating an ER-Diagram with f.e. _architect_ you may generate a ddl script. Nano.H5 provides an ant-script (_mda.xml_) to generate a hsqldb-database and generating entity beans through hibernate-tools for the given jdbc-connection.
-
 h2. Developing and Deploying
 
 * "Code Server":https://sourceforge.net/p/tsl2nano/code/ci/master/tree/tsl2.nano.common
@@ -153,10 +188,13 @@ h3. jar-library dependencies
 * velocity-1.6-dep.jar: XmlUtil.transform (using CompatibilityLayer)
 * TODO: describe all jars!
 
+h2. Model Driven Architecture (MDA)
+
 h2. Changelog
 
 | Version | Date | Description |
 | 0.0.1 | 06.07.2013 | First alpha Version
+| 0.0.2 | 21.09.2013 | First beta Version (full basic feature implementation)
 
 h2. TODOs
 
@@ -181,9 +219,9 @@ h2. TODOs
 * (x) default attribute names without @id field
 * (x) Nesting Beans
 * (x) Bean with Layout
-* Right-Alignments for Numbers
-* Problem on NanoHttp canceling button panel (sometimes)
-* Check for single selection
+* (v) Right-Alignments for Numbers
+* Problem on NanoHttp cancelling button panel (sometimes)
+* (-) Check for single selection
 * Check navigation (check input on button action like 'open' without selecting an item.
 * Styling (Collector, Details)
 * Show Progress-Page (using Statistics)
@@ -193,26 +231,32 @@ h2. TODOs
 ** Style (of sorting header etc.)
 ** up, down (for sorting values)
 * (v) If search result is only one element, select it
+* (v) *hibernate-tools*: (solved through beancollector.createNewItem() setting UUID
+** configure to have generated IDs
+** read documentation
 * *Searches on big data:*
 ** first count data
 ** (v) button to show one-to-many in table
 ** use thread to be interupted
 * (x) internal export and view (replacing ant-like variables and showing the document)
 * generate const class from property file
-* create xsd in through CommonTest with trang.jar
+* (x) create xsd through CommonTest with trang.jar
 * (x) add configuration action (html-tool to edit xml files)
 ** ConfigBeanContainer to configure BeanDefinition for special beans
 * *Nice-To-Have*
 ** eval validation annotations
 ** BeanPresenterHelper: test OptionsWrapper
 ** min-search-field + button ==> max-search-field visible. standard: filtering with astericks
+** add navigation to new sub-class of beandefinition
+** create wiki-logger
+** envolve logictable and/or tableprocessor
 * *Refactoring:*
 ** (v) RegularExpressionFormat ==> RegExpFormat
-** refactore ScriptUtil: extract Ant calls
+** (v) refactore ScriptUtil: extract Ant calls
 ** util.bean ==> bean
-** nano.h5 ==> fullrelation
 ** extract bean-package as project
-** refactore environment property names to use logic path-algorithm
+** nano.h5 ==> fullrelation
+** (?) refactore environment property names to use logic path-algorithm
 ** (x) file-access: use Environment.getResource() reading through jar or file system
 ** extract api
 * *Interfaces:*
@@ -226,33 +270,37 @@ h2. TODOs
 * include LogicTable?
 * check starting application multiple times
 * (x) on multiple selection, put all selected elements to the stack
-* *Problem: creating a new element, copying an existing one, one-to-many connections will be lost*
+* (v) *Problem: creating a new element, copying an existing one, one-to-many connections will be lost*
 ** depends on the datamodel: gruppe --> grupperolle(only for specific gruppe) --> rolle
 *** The new item has to be put to the list of it's parent container. This list has to be saved before the new item!
 *** The beancollector now holds a 
 * *Problem: Filtering on Entities doesn't work (findBetween is not able to do a between for 'entity-columns')*
 * *Problem: Filtering BeanCollectors of Entities doesn't work after sorting twice*
 * internationalization: english RegExpFormat, messages.properties
-* remove config path from environment (-->transient)
+* (x) remove config path from environment (-->transient)
 * dynamic jar-loading inside used standard jars does not work without static entry in manifest
-* *hibernate-tools*:
-** configure to have generated IDs
-** read documentation
 * *Argo-UML 0.34*
 ** how to create ddl from model
 * *PowerDesigner*
-** create ant-script:
+** (x) create ant-script:
 *** sql-statements with ddl
 *** hibtool hbm2java
 *** replace jdbc-connection-properties
-*** start nano.h5
+*** (v) start nano.h5
 *** jmeter integration test
 *** automated crud test (pushing search/new/delete buttons for all entity types), profiling and counting errors in log-file
 * *Dependencies*
 ** (v) Log and LogFactory
 ** (v) DefaultFormat: StandardToStringStyle and ToStringBuilder
-** StringUtil --> BeanUtil
+** (v) StringUtil --> BeanUtil
 ** (v) BeanClass --> StringUtil --> CollectionUtil --> DefaultFormat
 * multiple type/format evaluation in BeanValue (new member for type?) Presentable and BeanPresentationHelper
 * hibernate3 is - on special circumstances - not able to load fields with empty ('') strings
-* tooltips for buttons
+* (v) tooltips for buttons
+* (v) check running in java 7
+* permission configuration
+* waiting message - new thread, answering on finish (e.g. on generating)
+* provide last exception of log-file
+* (v) add java-compiler (tools.jar, 12MB) of jdk6
+* (v) create ide for sample project
+* extend layout-managment for nested beans
