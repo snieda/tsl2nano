@@ -15,6 +15,7 @@ import static de.tsl2.nano.service.util.ServiceUtil.addAndConditions;
 import static de.tsl2.nano.service.util.ServiceUtil.createStatement;
 import static de.tsl2.nano.service.util.ServiceUtil.getLogInfo;
 
+import java.lang.annotation.Annotation;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.math.BigDecimal;
@@ -22,6 +23,7 @@ import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.Collection;
 import java.util.Date;
+import java.util.HashSet;
 import java.util.LinkedList;
 
 import javax.persistence.Column;
@@ -898,6 +900,73 @@ public class ServiceUtil {
      */
     public static String addMaxRowCountToQuery(String originQuery, int maxresult) {
         return "select * from (" + originQuery + ") where rownum <= " + maxresult;
+    }
+
+    /**
+     * recursive method to find all occurrences of attributes annotated with 'annotation' having a value that equals
+     * 'value'.
+     * 
+     * @param bean bean to be searched through all it's attributes
+     * @param packagePrefix to filter classes to be checked
+     * @param annotation annotation type
+     * @param annotationValue can be null to search for null values
+     * @param match (optional)
+     * @param checkedInstances (optional)
+     * @return all matches
+     */
+    public static Collection findAnnotationInEntityTree(Object bean,
+            String packagePrefix,
+            Class<? extends Annotation> annotation,
+            Object annotationValue,
+            Collection match,
+            Collection checkedInstances) {
+        if (bean == null)
+            return match;
+        if (checkedInstances == null)
+            checkedInstances = new HashSet();
+        if (match == null)
+            match = new HashSet();
+        if (bean instanceof Collection) {
+            //loop over oneToMany collection ignoring lazyinit-exceptions
+            try {
+                Collection oneToMany = (Collection) bean;
+                for (Object b : oneToMany) {
+                    findAnnotationInEntityTree(b, packagePrefix, annotation, annotationValue, match, checkedInstances);
+                    return match;
+                }
+            } catch (Exception ex) {
+                LOG.debug(ex);
+                return match;
+            }
+        }
+        if (checkedInstances.contains(bean))
+            return match;
+        if (!bean.getClass().getPackage().getName().startsWith(packagePrefix))
+            return match;
+        LOG.debug("checking instance: " + bean);
+        BeanClass<?> beanClass = new BeanClass(bean.getClass());
+        Collection<BeanAttribute> ids = beanClass.findAttributes(annotation);
+        if (ids != null && ids.size() > 0)
+            if (ids.iterator().next().getValue(bean) == annotationValue || (annotationValue != null && annotationValue.equals(ids.iterator()
+                .next()))) {
+                LOG.info("matched value on bean: " + bean);
+                match.add(bean);
+            }
+        checkedInstances.add(bean);
+        for (BeanAttribute attr : beanClass.getAttributes()) {
+            findAnnotationInEntityTree(attr.getValue(bean),
+                packagePrefix,
+                annotation,
+                annotationValue,
+                match,
+                checkedInstances);
+        }
+        LOG.info("found matches for annotation " + annotation
+            + " with value "
+            + annotationValue
+            + "\n"
+            + StringUtil.toFormattedString(match, 200, true));
+        return match;
     }
 
 }
