@@ -25,13 +25,15 @@ generic html5 gui implementation providing a model driven access (MDA), bound to
 ** xsd-->bean (not finished yet!)
 ** java-interface-->java-bean (mock through internal proxy, not finished yet!)
 
-Using the NanoHTTPD Server as base, this client application creates html surfaces, sending them through the integrated server to a html browser. Entry point is the file _application.html_ defining the browser request _http://localhost:8067_.
+Using the _NanoHTTPD_ Server as base, this client application creates html surfaces, sending them through the integrated server to an html browser. Entry point is the file _application.html_ defining the browser request _http://localhost:8067_.
 
 It is not a real web-application platform but a simple way to use html5 as graphical user interface - in a standard client application.
 
+The base framework is "tsl2.nano.common":../tsl2.nano.common/nano.common.html.
+
 The data access is done by:
-* tsl2nano.serviceaccess
-* tsl2nano.directaccess
+* "tsl2.nano.serviceaccess":../tsl2.nano.serviceaccess/nano.serviceaccess.html
+* "tsl2.nano.directaccess":../tsl2.nano.directaccess/nano.directaccess.html
 
 It is possible to use an ejb container in an application server, but the default is set to use jpa directly on the client (using _tsl2nano.directaccess_).
 
@@ -100,10 +102,11 @@ h5.sample/runServer.bat
 
 !doc/h5.sample.database.jpg!
 
-To start nano.h5 you have call it with following syntax:
+To start nano.h5 you have to call it with following syntax:
 
 java -jar de.nano.h5.Loader [environment-path (default: config] [http-server-port (default: 8067)]
 
+this call is implemented inside the _start.bat_ script. Use that, if you are on windows.
 If you start it on windows, a browser will be opened to show the initial screen:
 
 !doc/h5.sample.start.jpg!
@@ -112,7 +115,7 @@ Now you can login to the sample database. It is fully configurable, which o/r ma
 
 !doc/h5.sample.persistence.jpg!
 
-All entities of the jar containing the entities will be listed. You can filter the list and select one or more to edit them. 
+All entities of the jar-file, containing the entities, will be listed. You can filter the list and select one or more to edit them. 
 
 !doc/h5.sample.entity-types.jpg!
 
@@ -120,16 +123,18 @@ Then you will get a search page with a search filter and an empty list. Pushing 
 
 !doc/h5.sample.entity-search.jpg!
 
-If you click a column header, the list will be sorted by this column - clicking on that column a second time, the sorting will be done in the other direction. The possible actions will be described in the next chapter.
+If you click a column header (here f.e. _comments_), the list will be sorted by this column - clicking on that column a second time, the sorting will be done in the other direction. The possible actions will be described in the next chapter.
 
 h3. Extending the Sample
 
 The file _h5.sample/environment.xml_ defines the application behaviour. For further informations read chapter _The Environment_.
-It is possible to change the presentation of each bean. Inside the directory _h5.sample/beandef_ all beans have configuration files to change their presentation and behaviour.
+It is possible to change the presentation of each bean. Inside the directory _h5.sample/beandef_ all beans have configuration files to change their presentation and behaviour. If the _beandef_ directory is empty, you can create the bean definitions by clicking on button 'exit' on the top left - this will save the current state and exits the application.
+
+It is possible to create an own java project to define own application and bean behaviour. This is described in chapter _Creating an own project_.
 
 h2. The Environment
 
-Loading a Nano.h5 application will create and use an environment directory as workspace for it. Resources like icons, configuration xml-file and libraries will be put there - being on top of classpath.s
+Loading a Nano.h5 application will create and use an environment directory as workspace for it. Resources like icons, configuration xml-file and libraries will be put there - being on top of classpath.
 
 A full list of configuration attributes can be found "here":src/resources/environment.default.xml
 
@@ -171,9 +176,10 @@ h2. Model Driven Architecture (MDA))
 Nano.h5 provides mechanisms to create a full configurable application from a given database definition file (ddl).
 
 Creating an UML-Diagram with perhaps _ArgoUML_, or creating an ER-Diagram with f.e. _architect_ you may generate a ddl script. Nano.H5 provides an ant-script (_mda.xml_) to generate a hsqldb-database and generating entity beans through hibernate-tools for the given jdbc-connection.
-h2. Developing and Deploying
 
-* "Code Server":https://sourceforge.net/p/tsl2nano/code/ci/master/tree/tsl2.nano.common
+h2. Developing, Deploying and Debugging
+
+* "tsl2.nano code server":https://sourceforge.net/p/tsl2nano/code/ci/master/tree/tsl2.nano.common
 
 If you change sources of this plugin, you should start ant script _eclipse-tsl2.nano.h5.xml_ with target _tsl2nano.eclipse.h5.export_ and after that the 'deploy' target of your main project.
 
@@ -183,12 +189,156 @@ Normally, you don't have to create html-pages by yourself, but if you are intere
 * "Webkompetenz":http://webkompetenz.wikidot.com/docs:html-handbuch
 * "Html5 Poster":http://www.xhtml-lab.com
 
+To analyse the html-page in your browser, for example in your Chrome-Browser, you can analyse components by mouse-right-click on _analyse element_ to debug and change the current bean presentation.
+
+
 h3. jar-library dependencies
 
 * velocity-1.6-dep.jar: XmlUtil.transform (using CompatibilityLayer)
 * TODO: describe all jars!
 
-h2. Model Driven Architecture (MDA)
+h2. Creating an own project
+
+_Nano.H5_ is based on the framework _tsl2.common_ and it's bean package. The bean package provides a generic and comfortable way to describe your user interface. If the standards of _Nano.H5_ doesn't fulfil your needs, you can develop own beans on top of _Nano.H5_ - without creating special gui-elements or interaction, this will be done by the framework - generating html-pages through the _BeanPresentation_ implementation. Of course, this implementation is extendable, too. Have a look at chapter _Dependencies_ to know, which jar-files you should copy to the environment directory (f.e. _h5.sample_).
+
+If you download and unpack _test.h5.sample_, you yield an eclipse project referencing the _tsl2.nano_ jar-files.
+
+File Structure:
+
+<pre>
+Auflistung der Ordnerpfade
+Volumeseriennummer : 0059E65C 9A6F:E968
+C:.
+|   .classpath
+|   .project
+|   application.html
+|   debug.log
+|   environment.xml
+|   h5.sample.log
+|   run.bat
+|   tree.txt
+|   tsl2.nano.common.1.0.0.jar
+|   tsl2.nano.h5.0.0.1.jar
+|   tsl2.nano.h5.default-resources.jar
+|   
++---h5.sample
+|   |   ant-launcher.jar
+|   |   ant-nodeps.jar
+|   |   ant.jar
+|   |   antlr-2.7.6.jar
+|   |   antscripts.properties
+|   |   antscripts.xml
+|   |   application.html
+|   |   commons-collections-3.2.1.jar
+|   |   commons-lang-2.4.jar
+|   |   dom4j-1.6.1.jar
+|   |   environment.xml
+|   |   freemarker.jar
+|   |   h5.sample.sql
+|   |   hibernate-tools-3.4.0.CR2.jar
+|   |   hibernate.reveng.xml
+|   |   hibernate3.jar
+|   |   hibtool.xml
+|   |   hsqldb.jar
+|   |   javassist-3.12.0.GA.jar
+|   |   jdbc-connection.properties
+|   |   jdbc-connection.properties.bak
+|   |   mda.bat
+|   |   mda.properties
+|   |   mda.xml
+|   |   mypersistence-bean.xml
+|   |   mypersistence-bean.xml.bak
+|   |   mypersistence.xml
+|   |   mypersistence.xml.bak
+|   |   ojdbc14_g.jar
+|   |   runServer.bat
+|   |   shell.xml
+|   |   slf4j-api-1.6.1.jar
+|   |   timedb.jar
+|   |   timedb.lck
+|   |   timedb.log
+|   |   timedb.properties
+|   |   timedb.script
+|   |   trang.jar
+|   |   tsl2.nano.h5.default-resources.jar
+|   |   
+|   +---beandef
+|   |       project.xml
+|   |       start.xml
+|   |       times.xml
+|   |       
+|   +---generated-bin
+|   |   \---my
+|   |       \---app
+|   |               Loader.class
+|   |               MyApp.class
+|   |               
+|   +---generated-src
+|   |   \---my
+|   |       \---app
+|   |               Loader.java
+|   |               MyApp.java
+|   |               
+|   \---META-INF
+|           persistence.xml
+|           
+|           
+\---META-INF
+        MANIFEST.MF
+</pre>
+
+The implementation _Loader.java_ and _MyApp.java_ provide an own entry for the application. The _Loader_ only tells java to load _MyApp_. _MyApp_ overwrites three methods. Only _createBeanCollectors_ defines own beans and an own navigation stack.
+
+Here is the implementation:
+
+*Loader*
+<pre>
+public class Loader extends AppLoader {
+    public static void main(String[] args) {
+        new Loader().start("my.app.MyApp", args);
+    }
+}
+</pre>
+
+
+*MyApp*
+<pre>
+public class MyApp extends NanoH5 {
+	public MyApp() throws IOException {
+	}
+	public MyApp(int port, IPageBuilder<?, String> builder,
+			Stack<BeanDefinition<?>> navigation) throws IOException {
+		super(port, builder, navigation);
+	}
+
+	@Override
+	protected BeanDefinition<?> createBeanCollectors(@SuppressWarnings("rawtypes") List<Class> beanClasses) {
+		/*
+		 * define own beans to present your entities another way
+		 */
+		Collection<Times> times = Environment.get(IBeanContainer.class).getBeans(Times.class, UNDEFINED, UNDEFINED);
+		
+		BeanCollector<Collection<Times>,Times> beanCollector = new BeanCollector<Collection<Times>, Times>(times, BeanCollector.MODE_ALL);
+		
+		AttributeDefinition space1 = beanCollector.getPresentationHelper().addSpaceValue();
+		beanCollector.setAttributeFilter("creation", "dbEnd", "pause", space1.getName(), "project", "comment");
+		//more fields on one line (one field has width 3)
+		beanCollector.getPresentable().setLayout(MapUtil.asMap(L_GRIDWIDTH, 12));
+		beanCollector.getAttribute("comment").getPresentation().setLayoutConstraints(MapUtil.asMap(ATTR_SPANCOL, 6, ATTR_BORDER, 1));
+		BeanDefinition.define(beanCollector);
+		
+		/*
+		 * define your own navigation stack
+		 */
+		return beanCollector;
+	}
+	
+    @SuppressWarnings("unchecked")
+	public static void main(String[] args) {
+        startApplication(MyApp.class, MapUtil.asMap(0, "http.port"), args);
+    }
+  }
+</pre>
 
 h2. Changelog
 
@@ -238,7 +388,7 @@ h2. TODOs
 ** first count data
 ** (v) button to show one-to-many in table
 ** use thread to be interupted
-* (x) internal export and view (replacing ant-like variables and showing the document)
+* (v) internal export and view (replacing ant-like variables and showing the document)
 * generate const class from property file
 * (x) create xsd through CommonTest with trang.jar
 * (x) add configuration action (html-tool to edit xml files)
@@ -269,7 +419,7 @@ h2. TODOs
 * Validate against Html5-xsd in debug mode
 * include LogicTable?
 * check starting application multiple times
-* (x) on multiple selection, put all selected elements to the stack
+* (v) on multiple selection, put all selected elements to the stack
 * (v) *Problem: creating a new element, copying an existing one, one-to-many connections will be lost*
 ** depends on the datamodel: gruppe --> grupperolle(only for specific gruppe) --> rolle
 *** The new item has to be put to the list of it's parent container. This list has to be saved before the new item!
@@ -282,10 +432,10 @@ h2. TODOs
 * *Argo-UML 0.34*
 ** how to create ddl from model
 * *PowerDesigner*
-** (x) create ant-script:
-*** sql-statements with ddl
-*** hibtool hbm2java
-*** replace jdbc-connection-properties
+** (v) create ant-script:
+*** (v) sql-statements with ddl
+*** (v) hibtool hbm2java
+*** (v) replace jdbc-connection-properties
 *** (v) start nano.h5
 *** jmeter integration test
 *** automated crud test (pushing search/new/delete buttons for all entity types), profiling and counting errors in log-file
@@ -303,4 +453,6 @@ h2. TODOs
 * provide last exception of log-file
 * (v) add java-compiler (tools.jar, 12MB) of jdk6
 * (v) create ide for sample project
-* extend layout-managment for nested beans
+* (-) extend layout-managment for nested beans <- extend your bean-definition with attributes of other beans.
+* mechanism to synchronize local and remote database - no serialization needed.
+
