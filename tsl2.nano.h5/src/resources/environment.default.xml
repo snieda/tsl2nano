@@ -10,7 +10,15 @@
    </property>
 <!-- -->
    <property name="default.attribute.id">
-      <object class="java.lang.Boolean">true</object>
+      <object class="java.lang.Boolean">false</object>
+   </property>
+<!-- whether to show multivalue attributes (like lists) inside a search-result-table, too. -->
+   <property name="default.attribute.multivalue">
+      <object class="java.lang.Boolean">false</object>
+   </property>
+<!-- -->
+   <property name="default.attribute.timestamp">
+      <object class="java.lang.Boolean">false</object>
    </property>
 <!-- normally, the collector uses the standard bean-definition. 
      if false, extra collection xml-configuration files will be used. -->
@@ -81,10 +89,6 @@
    </property>
    <!-- -->
    <property name="bean.use.beanpresentationhelper.filter">
-      <object class="java.lang.Boolean">true</object>
-   </property>
-   <!-- where to show multivalue attributes (like lists) inside a search-result-table, too. -->
-   <property name="default.attribute.multivalue">
       <object class="java.lang.Boolean">true</object>
    </property>
    <!-- -->
