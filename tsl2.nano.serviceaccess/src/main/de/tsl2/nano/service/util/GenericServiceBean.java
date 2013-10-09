@@ -71,7 +71,7 @@ public class GenericServiceBean extends NamedQueryServiceBean implements IGeneri
         final StringBuffer qStr = createStatement(beanType);
         LOG.debug(qStr);
         Query query = entityManager.createQuery(qStr.toString());
-        query.setFirstResult(startIndex);
+        query.setFirstResult(startIndex != -1 ? startIndex : 0);
         query = query.setMaxResults(maxResult != -1 ? maxResult : getMaxResult());
         //a findAll should only be done on 'configuration' tables
         //QUESTION: why does the query perform poor on activated cache????
