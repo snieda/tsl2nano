@@ -65,13 +65,17 @@
    <property name="field.selector.text">
       <object class="java.lang.String">...</object>
    </property>
-   <!-- html5 method: post or get-->
-   <property name="html5.http.method">
-      <object class="java.lang.String">post</object>
+   <!-- http-servers ip adress. -->
+   <property name="http.ip">
+      <object class="java.lang.String">localhost</object>
    </property>
    <!-- http-servers listening port. can be set as calling argument. -->
    <property name="http.port">
       <object class="java.lang.Integer">8067</object>
+   </property>
+   <!-- html5 method: post or get-->
+   <property name="html5.http.method">
+      <object class="java.lang.String">post</object>
    </property>
    <!-- -->
    <property name="application.edit.multiple">

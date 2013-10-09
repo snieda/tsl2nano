@@ -83,6 +83,7 @@ public class NanoH5 extends NanoHTTPD {
     IPageBuilder<?, String> builder;
     Stack<BeanDefinition<?>> navigation = new Stack<BeanDefinition<?>>();
     BeanDefinition<?> model;
+    String ip;
     int port;
     Response response;
     ClassLoader appstartClassloader;
@@ -143,8 +144,9 @@ public class NanoH5 extends NanoHTTPD {
     protected void createStartPage(String resultHtmlFile) {
         InputStream stream = Environment.getResource("start.template");
         String startPage = String.valueOf(FileUtil.getFileData(stream, null));
+        ip = Environment.get("http.ip", "localhost");
         startPage = StringUtil.insertProperties(startPage,
-            MapUtil.asMap("url", "http://localhost:" + port, "name", Environment.getName()));
+            MapUtil.asMap("url", "http://" + ip + ":" + port, "name", Environment.getName()));
         FileUtil.writeBytes(startPage.getBytes(), resultHtmlFile, false);
     }
 
@@ -203,7 +205,7 @@ public class NanoH5 extends NanoHTTPD {
                 response = null;
                 return new NanoHTTPD.Response(HTTP_OK,
                     MIME_HTML,
-                    "<a href=\"http://localhost:" + Environment.get("http.port", 8067) + "\">restart session</a>");
+                    "<a href=\"http://" + ip + ":" + Environment.get("http.port", 8067) + "\">restart session</a>");
             }
         } catch (Exception e) {
             RuntimeException ex = ForwardedException.toRuntimeEx(e, true);
@@ -765,13 +767,14 @@ public class NanoH5 extends NanoHTTPD {
 
     protected void reset() {
         String configPath = Environment.get(Environment.KEY_CONFIG_PATH, "config");
-        int port = Environment.get("http.port", 8067);
+//        int port = Environment.get("http.port", 8067);
 
         navigation = null;
         response = null;
         model = null;
         Environment.reset();
         Environment.setProperty(Environment.KEY_CONFIG_PATH, configPath);
+        Environment.setProperty("http.ip", ip);
         Environment.setProperty("http.port", port);
         BeanDefinition.clearCache();
         BeanValue.clearCache();

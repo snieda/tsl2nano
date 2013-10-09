@@ -10,7 +10,6 @@
 package de.tsl2.nano;
 
 import java.io.File;
-import java.io.IOException;
 import java.io.InputStream;
 import java.io.Serializable;
 import java.text.Format;
@@ -28,11 +27,11 @@ import org.simpleframework.xml.DefaultType;
 import org.simpleframework.xml.ElementMap;
 import org.simpleframework.xml.core.Persist;
 
-import de.tsl2.nano.exception.ForwardedException;
 import de.tsl2.nano.execution.CompatibilityLayer;
 import de.tsl2.nano.execution.Profiler;
 import de.tsl2.nano.execution.XmlUtil;
 import de.tsl2.nano.format.DefaultFormat;
+import de.tsl2.nano.util.NetUtil;
 import de.tsl2.nano.util.StringUtil;
 import de.tsl2.nano.util.bean.BeanClass;
 import de.tsl2.nano.util.bean.BeanUtil;
@@ -168,10 +167,12 @@ public class Environment {
             + "    java  : ${java.runtime.version}, ${java.home}\n"
             + "    os    : ${os.name}, ${os.version} ${sun.os.patch.level} ${os.arch}\n"
             + "    system: ${sun.cpu.isalist} ${sun.arch.data.model}\n"
+            + "    net-ip: ${inetadress.myip}\n"
             + "===========================================================";
         Properties p = System.getProperties();
         p.put("tstamp", new Date());
         p.put("main.context.classloader", Thread.currentThread().getContextClassLoader());
+            p.put("inetadress.myip", NetUtil.getMyIP());
         System.out.println(StringUtil.insertProperties(info, p));
         new File(dir).mkdirs();
 
@@ -427,7 +428,7 @@ public class Environment {
          * remove the environment path itself - should not reloaded
          */
         properties.remove(KEY_CONFIG_PATH);
-        
+
         /*
          * remove all not serialiable objects
          */
