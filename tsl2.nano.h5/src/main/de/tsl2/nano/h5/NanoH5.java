@@ -36,6 +36,7 @@ import de.tsl2.nano.action.IAction;
 import de.tsl2.nano.collection.CollectionUtil;
 import de.tsl2.nano.collection.ListSet;
 import de.tsl2.nano.collection.MapUtil;
+import de.tsl2.nano.exception.FormattedException;
 import de.tsl2.nano.exception.ForwardedException;
 import de.tsl2.nano.execution.CompatibilityLayer;
 import de.tsl2.nano.execution.SystemUtil;
@@ -78,7 +79,7 @@ import de.tsl2.nano.util.bean.def.SecureAction;
 @SuppressWarnings({ "rawtypes", "unchecked" })
 public class NanoH5 extends NanoHTTPD {
     private static final Log LOG = LogFactory.getLog(NanoH5.class);
-    
+
     IPageBuilder<?, String> builder;
     Stack<BeanDefinition<?>> navigation = new Stack<BeanDefinition<?>>();
     BeanDefinition<?> model;
@@ -97,9 +98,9 @@ public class NanoH5 extends NanoHTTPD {
     public NanoH5(int port, IPageBuilder<?, String> builder, Stack<BeanDefinition<?>> navigation) throws IOException {
         super(port, new File(Environment.getConfigPath()));
         this.port = port;
-        this.builder = builder;
+        this.builder = builder != null ? builder : createPageBuilder();
         this.navigation = navigation;
-        ResourceBundle bundle = ResourceBundle.getBundle(this.getClass().getPackage().getName() + ".messages",
+        ResourceBundle bundle = ResourceBundle.getBundle(NanoH5.class.getPackage().getName() + ".messages",
             Locale.getDefault(),
             Thread.currentThread().getContextClassLoader());
         Messages.registerBundle(bundle, false);
@@ -107,10 +108,20 @@ public class NanoH5 extends NanoHTTPD {
     }
 
     /**
+     * main
+     * @param args
+     */
+    public static void main(String[] args) {
+        startApplication(NanoH5.class, MapUtil.asMap(0, "http.port"), args);
+    }
+    
+    /**
      * starts application and shows initial html page
      */
+    @Override
     public void start() {
         try {
+            initialize();
             LogFactory.setLogLevel(32);
             LOG.info(System.getProperties());
             createStartPage(DEGBUG_HTML_FILE);
@@ -254,6 +265,14 @@ public class NanoH5 extends NanoHTTPD {
             beans[i] = navigation.get(i);
         }
         return beans;
+    }
+
+    
+    /**
+     * @return Returns the navigation.
+     */
+    public Stack<BeanDefinition<?>> getNavigation() {
+        return navigation;
     }
 
     /**
@@ -552,25 +571,21 @@ public class NanoH5 extends NanoHTTPD {
     }
 
     /**
-     * main entry
-     * 
-     * @param args launching args
+     * adds services for presentation and page-builder
      */
-    public static void main(String[] args) {
-        try {
-            if (args.length > 0)
-                Environment.setProperty("http.port", Integer.valueOf(args[0]));
-            initServices();
-            new NanoH5().setNavigationModel(createGenericNavigationModel()).start();
-        } catch (IOException e) {
-            ForwardedException.forward(e);
-        }
-    }
-
-    private static void initServices() {
+    protected IPageBuilder<?, String> createPageBuilder() {
         Html5Presentation pageBuilder = new Html5Presentation();
         Environment.addService(BeanPresentationHelper.class, pageBuilder);
-        Environment.addService(IPageBuilder.class, new Html5Presentation());
+        Environment.addService(IPageBuilder.class, pageBuilder);
+        return pageBuilder;
+    }
+
+    /**
+     * initialize navigation model and perhaps bean-definitions. overwrite this method if you create your extending
+     * application. this method will be called, before any bean types are loaded!
+     */
+    protected void initialize() {
+        setNavigationModel(createGenericNavigationModel());
     }
 
     /**
@@ -579,7 +594,7 @@ public class NanoH5 extends NanoHTTPD {
      * @param beanjar jar to resolve the desired entities from
      * @return navigation stack holding a beancollector for all entity classes inside beanjar
      */
-    private static Stack<BeanDefinition<?>> createGenericNavigationModel() {
+    protected Stack<BeanDefinition<?>> createGenericNavigationModel() {
 
         BeanContainer.initEmtpyServiceActions();
         /*
@@ -595,87 +610,36 @@ public class NanoH5 extends NanoHTTPD {
         return navigationModel;
     }
 
-    @SuppressWarnings({ "serial"})
-    private static Bean<?> createLogin() {
+    @SuppressWarnings({ "serial" })
+    private Bean<?> createLogin() {
         final Persistence persistence = Persistence.current();
         Bean<?> login = new Bean(persistence);
         login.removeAttributes("jdbcProperties");
         login.getAttribute("jarFile").getPresentation().setType(IPresentable.TYPE_ATTACHMENT);
+        login.getPresentationHelper().change(BeanPresentationHelper.PROP_DESCRIPTION,
+            Environment.translate("jarFile.tooltip", true),
+            "jarFile");
         login.getPresentationHelper().change(BeanPresentationHelper.PROP_NULLABLE, false);
         login.getPresentationHelper().change(BeanPresentationHelper.PROP_NULLABLE, true, "connectionPassword");
+
         login.addAction(new SecureAction<Object>("tsl2nano.login.ok") {
 
             @Override
             public Object action() throws Exception {
                 persistence.save();
 
+                //define a new classloader to access all beans of given jar-file
                 PersistenceClassLoader runtimeClassloader = new PersistenceClassLoader(new URL[0],
                     Thread.currentThread().getContextClassLoader());
                 runtimeClassloader.addLibraryPath(Environment.getConfigPath());
                 Thread.currentThread().setContextClassLoader(runtimeClassloader);
                 Environment.addService(ClassLoader.class, runtimeClassloader);
 
-                if (!new File(persistence.getJarFile()).exists())
-                    generateJarFile(persistence.getJarFile());
+                //load all beans from selected jar-file and provide them in a beancontainer
+                List<Class> beanClasses = createBeanContainer(persistence, runtimeClassloader);
 
-                List<Class> beanClasses = runtimeClassloader.loadBeanClasses(persistence.getJarFile(), null);
-                Environment.setProperty("loadedBeanTypes", beanClasses);
-
-                if (Environment.get("use.applicationserver", false))
-                    BeanContainerUtil.initGenericServices(runtimeClassloader);
-                else
-                    HibernateBeanContainer.initHibernateContainer(runtimeClassloader);
-
-                Environment.addService(IBeanContainer.class, BeanContainer.instance());
-
-                LOG.debug("creating collector for: ");
-                List types = new ArrayList(beanClasses.size());
-                for (Class cls : beanClasses) {
-                    LOG.debug("creating collector for: " + cls);
-                    BeanCollector collector = BeanCollector.getBeanCollector(cls, null, MODE_EDITABLE | MODE_CREATABLE
-                        | MODE_MULTISELECTION
-                        | MODE_SEARCHABLE, null);
-//                    collector.setPresentationHelper(new Html5Presentation(collector));
-                    types.add(collector);
-                }
-                /*
-                 * Perhaps show the script tool to do direct sql or ant
-                 */
-                if (Environment.get("application.show.scripttool", true)) {
-                    ScriptTool tool = new ScriptTool();
-                    Bean beanTool = new Bean(tool);
-                    beanTool.setAttributeFilter("text", "result", "resourceFile", "selectionAction");
-                    beanTool.getAttribute("text").getPresentation().setType(IPresentable.TYPE_INPUT_MULTILINE);
-                    beanTool.getAttribute("result").getPresentation().setType(IPresentable.TYPE_TABLE);
-                    beanTool.getAttribute("sourceFile").getPresentation().setType(IPresentable.TYPE_ATTACHMENT);
-                    beanTool.getAttribute("selectedAction").setRange(tool.availableActions());
-                    beanTool.addAction(tool.runner());
-                    types.add(beanTool);
-                }
-                BeanCollector root = new BeanCollector(BeanCollector.class,
-                    types,
-                    MODE_EDITABLE | MODE_SEARCHABLE,
-                    null);
-                root.setName(StringUtil.toFirstUpper(StringUtil.substring(persistence.getJarFile(), "/", ".jar", true)));
-                root.setAttributeFilter("name");
-                root.getAttribute("name").setFormat(new Format() {
-                    /** serialVersionUID */
-                    private static final long serialVersionUID = 1725704131355509738L;
-
-                    @Override
-                    public StringBuffer format(Object obj, StringBuffer toAppendTo, FieldPosition pos) {
-                        String name = StringUtil.substring((String) obj, null, BeanCollector.POSTFIX_COLLECTOR);
-                        toAppendTo.append(Environment.translate(name, true));
-                        pos.setEndIndex(1);
-                        return toAppendTo;
-                    }
-
-                    @Override
-                    public Object parseObject(String source, ParsePosition pos) {
-                        return null;
-                    }
-                });
-                return root;
+                //create navigation model holding all bean types on first page after login
+                return createBeanCollectors(beanClasses);
             }
 
             @Override
@@ -689,6 +653,92 @@ public class NanoH5 extends NanoHTTPD {
             }
         });
         return login;
+    }
+
+    /**
+     * after the creation of a new classloader and a beancontainer providing access to the new loaded bean types,
+     * this method creates entries for all bean-types to the navigation stack. overwrite this method to define own bean-collector handling.
+     * @param beanClasses new loaded bean types
+     * @return a root bean-collector holding all bean-type collectors.
+     */
+    protected BeanDefinition<?> createBeanCollectors(List<Class> beanClasses) {
+        LOG.debug("creating collector for: ");
+        List types = new ArrayList(beanClasses.size());
+        for (Class cls : beanClasses) {
+            LOG.debug("creating collector for: " + cls);
+            BeanCollector collector = BeanCollector.getBeanCollector(cls, null, MODE_EDITABLE | MODE_CREATABLE
+                | MODE_MULTISELECTION
+                | MODE_SEARCHABLE, null);
+//            collector.setPresentationHelper(new Html5Presentation(collector));
+            types.add(collector);
+        }
+        /*
+         * Perhaps show the script tool to do direct sql or ant
+         */
+        if (Environment.get("application.show.scripttool", true)) {
+            ScriptTool tool = new ScriptTool();
+            Bean beanTool = new Bean(tool);
+            beanTool.setAttributeFilter("text", "result", "resourceFile", "selectionAction");
+            beanTool.getAttribute("text").getPresentation().setType(IPresentable.TYPE_INPUT_MULTILINE);
+            beanTool.getAttribute("result").getPresentation().setType(IPresentable.TYPE_TABLE);
+            beanTool.getAttribute("sourceFile").getPresentation().setType(IPresentable.TYPE_ATTACHMENT);
+            beanTool.getAttribute("selectedAction").setRange(tool.availableActions());
+            beanTool.addAction(tool.runner());
+            types.add(beanTool);
+        }
+        BeanCollector root = new BeanCollector(BeanCollector.class,
+            types,
+            MODE_EDITABLE | MODE_SEARCHABLE,
+            null);
+        root.setName(StringUtil.toFirstUpper(StringUtil.substring(Persistence.current().getJarFile(), "/", ".jar", true)));
+        root.setAttributeFilter("name");
+        root.getAttribute("name").setFormat(new Format() {
+            /** serialVersionUID */
+            private static final long serialVersionUID = 1725704131355509738L;
+
+            @Override
+            public StringBuffer format(Object obj, StringBuffer toAppendTo, FieldPosition pos) {
+                String name = StringUtil.substring((String) obj, null, BeanCollector.POSTFIX_COLLECTOR);
+                toAppendTo.append(Environment.translate(name, true));
+                pos.setEndIndex(1);
+                return toAppendTo;
+            }
+
+            @Override
+            public Object parseObject(String source, ParsePosition pos) {
+                return null;
+            }
+        });
+        return root;
+    }
+
+    /**
+     * createBeanContainer
+     * @param persistence
+     * @param runtimeClassloader
+     * @return
+     */
+    protected List<Class> createBeanContainer(final Persistence persistence,
+            PersistenceClassLoader runtimeClassloader) {
+        if (!new File(persistence.getJarFile()).exists()) {
+            //TODO: show generation message before - get script exception from exception handler
+            generateJarFile(persistence.getJarFile());
+            if (!new File(persistence.getJarFile()).exists()) {
+                throw new FormattedException("Couldn't generate bean jar file '" + persistence.getJarFile()
+                    + "' through script hibtools.xml! Please see log file for exceptions.");
+            }
+        }
+
+        List<Class> beanClasses = runtimeClassloader.loadBeanClasses(persistence.getJarFile(), null);
+        Environment.setProperty("loadedBeanTypes", beanClasses);
+
+        if (Environment.get("use.applicationserver", false))
+            BeanContainerUtil.initGenericServices(runtimeClassloader);
+        else
+            HibernateBeanContainer.initHibernateContainer(runtimeClassloader);
+        Environment.addService(IBeanContainer.class, BeanContainer.instance());
+        
+        return beanClasses;
     }
 
     protected static void generateJarFile(String jarFile) {
@@ -726,7 +776,7 @@ public class NanoH5 extends NanoHTTPD {
         BeanDefinition.clearCache();
         BeanValue.clearCache();
         Thread.currentThread().setContextClassLoader(appstartClassloader);
-        initServices();
+        createPageBuilder();
         builder = Environment.get(IPageBuilder.class);
         setNavigationModel(createGenericNavigationModel());
     }

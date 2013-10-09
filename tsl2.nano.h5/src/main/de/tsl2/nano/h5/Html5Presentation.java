@@ -129,6 +129,8 @@ public class Html5Presentation<T> extends BeanPresentationHelper<T> implements I
 
     protected static final StringBuilder EMPTY_CONTENT = new StringBuilder();
 
+    public static final String L_GRIDWIDTH = "layout.gridwidth";
+
     /**
      * constructor
      */
@@ -240,11 +242,15 @@ public class Html5Presentation<T> extends BeanPresentationHelper<T> implements I
      * @param parent
      */
     private void createBean(Element parent, Bean<?> bean, boolean interactive) {
-        Element panel = createGrid(parent, "Eingabe-Dialog", bean.getPresentable().layout("layout.gridwidth", 3));
+        int columns = bean.getPresentable().layout(L_GRIDWIDTH, 3);
+        Element panel = createGrid(parent, Environment.translate("tsl2nano.input", false), columns);
         appendAttributes(panel, bean.getPresentable());
+        createLayout((Element) panel.getParentNode(), bean.getPresentable());
         Bean<T> vbean = (Bean<T>) bean;
         List<BeanValue<?>> beanValues = vbean.getBeanValues();
         boolean firstFocused = false;
+        int count = 0;
+        Element field = null;
         for (BeanValue<?> beanValue : beanValues) {
             if (beanValue.isBean()) {
                 Bean<?> bv = (Bean<?>) beanValue.getInstance();
@@ -254,7 +260,9 @@ public class Html5Presentation<T> extends BeanPresentationHelper<T> implements I
                 else
                     vbean.setActions(bv.getActions());
             } else {
-                Element field = createField(panel, beanValue);
+                Element fparent = (Element) (field == null || (++count % (columns / 3) == 0) ? panel
+                    : field.getParentNode().getParentNode());
+                field = createField(fparent, beanValue);
                 if (!firstFocused) {
                     field.setAttribute(ATTR_AUTOFOCUS, ATTR_AUTOFOCUS);
                     firstFocused = true;
@@ -331,7 +339,7 @@ public class Html5Presentation<T> extends BeanPresentationHelper<T> implements I
             convert(ATTR_COLOR, p.getForeground())/*, p.getIcon()*/);
 
         if (p.getLayout() instanceof Map) {
-            HtmlUtil.appendAttributes(grid, MapUtil.asArray((Map<String, String>) p.getLayout()));
+            HtmlUtil.appendAttributes(grid, MapUtil.asArray((Map<String, Object>) p.getLayout()));
         }
         if (p.getLayoutConstraints() instanceof Map) {
             HtmlUtil.appendAttributes(grid, MapUtil.asArray((Map<String, String>) p.getLayoutConstraints()));
@@ -402,6 +410,7 @@ public class Html5Presentation<T> extends BeanPresentationHelper<T> implements I
         return createAction(cell,
             a.getId(),
             a.getShortDescription(),
+            a.getLongDescription(),
             null,
             a.getImagePath(),
             a.isEnabled(),
@@ -418,23 +427,10 @@ public class Html5Presentation<T> extends BeanPresentationHelper<T> implements I
      */
     Element createBeanActions(Element form, BeanDefinition<?> model) {
         Element panel = createActionPanel(form, model.getActions(), ALIGN_CENTER);
+        String closeLabel = Messages.getStringOpt("tsl2nano.close", true);
         if (model.isMultiValue() && ((BeanCollector) model).hasMode(MODE_ASSIGNABLE))
-            createAction(panel,
-                BTN_ASSIGN,
-                Messages.getStringOpt("tsl2nano.close", true),
-                "submit",
-                "icons/links.png",
-                true,
-                true,
-                false);
-        createAction(panel,
-            IAction.CANCELED,
-            Messages.getStringOpt("tsl2nano.close", true),
-            null,
-            "icons/stop.png",
-            true,
-            false,
-            true);
+            createAction(panel, BTN_ASSIGN, closeLabel, closeLabel, "submit", "icons/links.png", true, true, false);
+        createAction(panel, IAction.CANCELED, closeLabel, closeLabel, null, "icons/stop.png", true, false, true);
         return panel;
     }
 
@@ -447,7 +443,8 @@ public class Html5Presentation<T> extends BeanPresentationHelper<T> implements I
      * @return html button element
      */
     Element createAction(Element cell, String id, String type, String image) {
-        return createAction(cell, id, Environment.translate(id, true), type, image, true, false, false);
+        String label = Environment.translate(id, true);
+        return createAction(cell, id, label, label, type, image, true, false, false);
     }
 
     /**
@@ -462,6 +459,7 @@ public class Html5Presentation<T> extends BeanPresentationHelper<T> implements I
     Element createAction(Element cell,
             String id,
             String label,
+            String tooltip,
             String type,
             String image,
             boolean enabled,
@@ -475,6 +473,8 @@ public class Html5Presentation<T> extends BeanPresentationHelper<T> implements I
             content(label),
             ATTR_NAME,
             id,
+            ATTR_TITLE,
+            tooltip,
             ATTR_TYPE,
             type,
             ATTR_ACCESSKEY,
@@ -655,8 +655,8 @@ public class Html5Presentation<T> extends BeanPresentationHelper<T> implements I
         return row;
     }
 
-    Element createField(Element panel, BeanValue<?> beanValue) {
-        Element row = appendElement(panel, TAG_ROW);
+    Element createField(Element parent, BeanValue<?> beanValue) {
+        Element row = parent.getNodeName().equals(TAG_ROW) ? parent : appendElement(parent, TAG_ROW);
         //first the label
         Element cellLabel = appendElement(row, TAG_CELL);
         appendElement(cellLabel,
@@ -668,6 +668,8 @@ public class Html5Presentation<T> extends BeanPresentationHelper<T> implements I
             enable(ATTR_REQUIRED, !beanValue.nullable()));
         //now the field itself
         Element cell = appendElement(row, TAG_CELL);
+        appendAttributes(cell, beanValue.getPresentation());
+        cell = createLayout(cell, beanValue.getPresentation());
         Element input;
         if (beanValue.getAllowedValues() == null) {
             RegExpFormat regexpFormat = beanValue.getFormat() instanceof RegExpFormat ? (RegExpFormat) beanValue.getFormat()
@@ -704,14 +706,13 @@ public class Html5Presentation<T> extends BeanPresentationHelper<T> implements I
                 enable(ATTR_READONLY, !beanValue.getPresentation().getEnabler().isActive()),
                 enable(ATTR_REQUIRED, !beanValue.nullable()));
 
-            appendAttributes(input, beanValue.getPresentation());
-
             //create a finder button
             if (beanValue.getPresentation().getEnabler().isActive()) {
                 if (BeanContainer.isInitialized() && (BeanContainer.instance().isPersistable(beanValue.getType()) || beanValue.isMultiValue())) {
                     createAction(cell,
                         beanValue.getName() + IPresentable.POSTFIX_SELECTOR,
                         "...",
+                        Environment.translate("tsl2nano.selection", true),
                         null,
                         null,
                         beanValue.hasWriteAccess(),
@@ -721,14 +722,27 @@ public class Html5Presentation<T> extends BeanPresentationHelper<T> implements I
             }
         } else {
             input = createSelectorField(cell, beanValue);
-            appendAttributes(input, beanValue.getPresentation());
         }
         if (beanValue.hasStatusError()) {
-            row = appendElement(panel, TAG_ROW, ATTR_SPAN, "2");
+            row = appendElement(parent, TAG_ROW, ATTR_SPAN, "2");
             appendElement(row, TAG_FONT, ATTR_SIZE, "-1", ATTR_COLOR, COLOR_RED);
             appendElement(row, TAG_CELL, content(beanValue.getStatus().message()));
         }
         return input;
+    }
+
+    /**
+     * createLayout
+     * 
+     * @param parent
+     * @param presentable
+     * @return
+     */
+    private Element createLayout(Element parent, IPresentable presentable) {
+        if (presentable.getLayout() instanceof Map) {
+            parent = appendElement(parent, TAG_TABLE, MapUtil.asStringArray((Map) presentable.getLayout()));
+        }
+        return parent;
     }
 
     private String getValue(BeanValue<?> beanValue, String type) {

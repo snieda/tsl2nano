@@ -23,6 +23,7 @@ import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 
 import de.tsl2.nano.exception.ForwardedException;
+import de.tsl2.nano.util.StringUtil;
 
 /**
  * defines html tag- and attribute-names und helper methods. android doesn't support the full w3c implementation like
@@ -123,6 +124,8 @@ public class HtmlUtil {
     public static final String ATTR_WIDTH = "width";
     public static final String ATTR_BGCOLOR = "bgcolor";
     public static final String ATTR_SPAN = "span";
+    public static final String ATTR_SPANCOL = "colspan";
+    public static final String ATTR_SPANROW = "rowspan";
 
     public static final String COLOR_WHITE = "#FFFFFF";
     public static final String COLOR_BLACK = "#000000";
@@ -186,15 +189,16 @@ public class HtmlUtil {
      * @param attributes key/value pairs
      * @return the given element
      */
-    public static Element appendAttributes(Element e, String... attributes) {
+    public static Element appendAttributes(Element e, Object... attributes) {
         Document doc = e.getOwnerDocument();
         for (int i = 0; i < attributes.length; i += 2) {
             //disabled flag attribute --> continue
             if (attributes[i] == null)
                 continue;
-            Attr attr = doc.createAttribute(attributes[i]);
-            if (i < attributes.length - 1)
-                attr.setValue(attributes[i + 1]);
+            Attr attr = doc.createAttribute((String)attributes[i]);
+            if (i < attributes.length - 1) {
+                attr.setValue(StringUtil.asString(attributes[i + 1]));
+            }
             e.setAttributeNode(attr);
         }
         return e;

@@ -25,6 +25,8 @@ import java.util.TimeZone;
 import java.io.ByteArrayOutputStream;
 import java.io.FileOutputStream;
 
+import de.tsl2.nano.Main;
+
 /**
  * A simple, tiny, nicely embeddable HTTP 1.0 (partially 1.1) server in Java
  *
@@ -68,7 +70,7 @@ import java.io.FileOutputStream;
  * See the end of the source file for distribution license
  * (Modified BSD licence)
  */
-public class NanoHTTPD
+public class NanoHTTPD extends Main
 {
 	// ==================================================
 	// API parts
