@@ -11,15 +11,18 @@ package de.tsl2.nano.util.bean.def;
 
 import java.io.IOException;
 import java.io.Serializable;
+import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Comparator;
+import java.util.Date;
 import java.util.Iterator;
 import java.util.LinkedHashSet;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Map;
 
 import org.apache.commons.logging.Log;
 import org.simpleframework.xml.Default;
@@ -456,6 +459,19 @@ public class BeanCollector<COLLECTIONTYPE extends Collection<T>, T> extends Bean
                         idAttribute.getName());
                     idAttribute.setValue(cloneBean,
                         StringUtil.fixString(BeanUtil.createUUID(), def.length(), ' ', true));
+                }
+                /*
+                 * if timestamp fields are not shown, generate new timestamps
+                 */
+                if (Environment.get("default.attribute.timestamp", false)) {
+                    Map<String, IAttributeDefinition<?>> attrs = getAttributeDefinitions();
+                    Timestamp ts = new Timestamp(System.currentTimeMillis());
+                    for (IAttributeDefinition<?> a : attrs.values()) {
+                        if (a instanceof IValueAccess)
+                        if (a.temporalType() != null && Timestamp.class.isAssignableFrom(a.temporalType())) {
+                            ((IValueAccess)a).setValue(ts);
+                        }
+                    }
                 }
                 return cloneBean;
             } catch (final Exception e) {
