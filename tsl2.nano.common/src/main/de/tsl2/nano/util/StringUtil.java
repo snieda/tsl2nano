@@ -315,8 +315,8 @@ public class StringUtil {
         if (fillLength <= 0) {
             final int shiftRight = rightFill ? 0 : fillLength;
             return origin.substring(0 + shiftRight, fixLength + shiftRight);
-        } else if (fillChar == -1) {
-            return origin;
+        } else if ((byte)fillChar == -1) {
+            return fixLength >= origin.length() ? origin : origin.substring(0, fixLength);
         }
         final StringBuffer fillString = new StringBuffer(fillLength);
         for (int i = 0; i < fillLength; i++) {
