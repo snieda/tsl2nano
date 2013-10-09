@@ -474,7 +474,7 @@ public class BeanPresentationHelper<T> {
     public boolean isDefaultAttribute(BeanAttribute attribute) {
         AttributeDefinition<?> attr = (AttributeDefinition<?>) attribute;
         return (Environment.get("default.attribute.id", false) || !attr.id()) && (Environment.get("default.attribute.multivalue",
-            false) || !attr.isMultiValue() && (Environment.get("default.attribute.timestamp", false) || attr.temporalType() == null || !Timestamp.class.isAssignableFrom(attr.temporalType())));
+            false) || !attr.isMultiValue()) && (Environment.get("default.attribute.timestamp", false) || attr.temporalType() == null || !Timestamp.class.isAssignableFrom(attr.temporalType()));
     }
 
     /**
