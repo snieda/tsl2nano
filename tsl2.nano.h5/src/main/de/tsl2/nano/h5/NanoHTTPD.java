@@ -441,6 +441,8 @@ public class NanoHTTPD extends Main
 					files.put("content", saveTmpFile( fbuf, 0, f.size()));
 
 				// Ok, now do the serve()
+				//11102013ts: provide the socket to work on sessions
+				header.put("socket", mySocket);
 				Response r = serve( uri, method, header, parms, files );
 				if ( r == null )
 					sendError( HTTP_INTERNALERROR, "SERVER INTERNAL ERROR: Serve() returned a null response." );

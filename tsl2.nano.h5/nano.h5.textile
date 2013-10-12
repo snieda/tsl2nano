@@ -171,6 +171,19 @@ h3. Bean detail buttons
 * *save*: saves the current bean.
 * *close*: closes the current page, returning to the last one without saving.
 
+h2. Networking Modes
+
+The _Nano.H5_ application can be started in different modes.
+
+* *Standard Single Access Mode:*
+** environment property _http.ip_ is *localhost*. no other network node is able to connect to the application. useable as a simple client/server application.
+* *Network Single Access Mode:*
+** environment property _http.ip_ is a network ip of your system. all network nodes are able to connect to the application of your system, using one environment and session. useable in an intranet to do some teamwork.
+** *Network Multiple Access Mode:*
+** environment property _http.ip_ is a network ip of your system. all network nodes are able to connect to the application of your system, using their own environment and session. may be used in an intranet.
+** *Network Multiple Security Mode:*
+** environment property _http.ip_ is a network ip of your system. all network nodes are able to connect to the application of your system, using their own environment and session working with ssl (under construction!). may be used in the internet.
+
 h2. Model Driven Architecture (MDA))
 
 Nano.h5 provides mechanisms to create a full configurable application from a given database definition file (ddl).
@@ -455,4 +468,5 @@ h2. TODOs
 * (v) create ide for sample project
 * (-) extend layout-managment for nested beans <- extend your bean-definition with attributes of other beans.
 * mechanism to synchronize local and remote database - no serialization needed.
+* failure: sorting numbers/currencies sorts as strings
 
