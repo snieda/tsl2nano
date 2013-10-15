@@ -38,12 +38,12 @@
  * File: $$HeadURL$$
  * Id  : $$Id$$
  * 
- * created by: ${user}, IDV AG
+ * created by: ${user}
  * created on: ${date}
  * 
- * Copyright: (c) IDV AG ${year}, all rights reserved
+ * Copyright: (c) Thomas Schneider ${year}, all rights reserved
  */</template><template autoinsert="false" context="typecomment_context" deleted="false" description="Comment for created types" enabled="true" id="org.eclipse.jdt.ui.text.codetemplates.typecomment" name="typecomment">/**
  * ${tags}
- * @author ${user}, IDV AG
+ * @author ${user}
  * @version $$Revision$$ 
  */</template></templates>
