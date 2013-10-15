@@ -2,18 +2,16 @@
  * File: $HeadURL$
  * Id  : $Id$
  * 
- * created by: ts
+ * created by: Thomas Schneider
  * created on: Apr 16, 2012
  * 
- * Copyright: (c) Thomas Schneider 2012, all rights reserved
+ * Copyright: (c) Thomas Schneider, all rights reserved
  */
 package de.tsl2.nano.currency;
 
 import java.io.File;
 import java.io.InputStreamReader;
 import java.math.BigDecimal;
-import java.math.MathContext;
-import java.math.RoundingMode;
 import java.text.Format;
 import java.text.MessageFormat;
 import java.text.NumberFormat;
@@ -27,7 +25,7 @@ import java.util.Locale;
 import java.util.Map;
 
 import org.apache.commons.logging.Log;
-import de.tsl2.nano.log.LogFactory;
+import org.apache.commons.logging.LogFactory;
 
 import de.tsl2.nano.collection.CollectionUtil;
 import de.tsl2.nano.collection.IPredicate;
@@ -43,7 +41,7 @@ import de.tsl2.nano.util.bean.BeanUtil;
  * <p/>
  * This class encapsulates and simplifies the use of historic currencies through {@link CurrencyUnit}s. The
  * {@link CurrencyUnit} wraps the standard {@link Currency} extending historizing and calculating aspects. The file
- * 'historical-currencies.csv' defines all historic currencies - the list is not complete! For a complete list, see
+ * 'historical-currencies.csv' should define all historic currencies - the list is not complete! For a complete list, see
  * http://de.wikipedia.org/wiki/ISO_4217.
  * 
  * @author ts
@@ -100,6 +98,22 @@ public class CurrencyUtil {
         return getCurrency(Locale.getDefault(), date);
     }
 
+    public static final CurrencyUnit getCurrencyUnit(final Currency c) {
+        if (c == null)
+            return null;
+        if (historicCurrencyUnits.isEmpty())
+            initializeCurrencyUnits();
+        Collection<CurrencyUnit> currencies = CollectionUtil.getFilteredCollection(historicCurrencyUnits,
+            new IPredicate<CurrencyUnit>() {
+                @Override
+                public boolean eval(CurrencyUnit arg0) {
+                    CurrencyUnit cu = (CurrencyUnit) arg0;
+                    return cu.getCurrencyCode().equals(c.getCurrencyCode());
+                }
+            });
+        return currencies.iterator().next();
+    }
+
     /**
      * getCurrency
      * 
@@ -113,12 +127,14 @@ public class CurrencyUtil {
         Collection<CurrencyUnit> currencies = CollectionUtil.getFilteredCollection(historicCurrencyUnits,
             new IPredicate<CurrencyUnit>() {
                 @Override
-                public boolean eval(CurrencyUnit cu) {
+                public boolean eval(CurrencyUnit arg0) {
+                    CurrencyUnit cu = (CurrencyUnit) arg0;
                     return cu.getCountryCode().equals(loc.getCountry()) && new Period(cu.getValidFrom(),
                         cu.getValidUntil()).contains(new Period(date, date));
                 }
             });
         if (currencies.size() == 0) {//no historical entry found - use standard currency
+            LOG.warn("no historical entry found for " + date + " -> using standard currency!");
             return getCurrency(loc);
         } else if (currencies.size() != 1) {
             LOG.warn("not exactly one currency found for " + loc + ", " + date);
@@ -127,26 +143,49 @@ public class CurrencyUtil {
     }
 
     /**
-     * convenience to get the value for the actual currency.
+     * convenience to get the value for the actual default currency (depends on current locale).
      * 
-     * @param value value
+     * @param value historic value
      * @param currencyDate date of value and its currency
-     * @return calculated value for the actual currency
+     * @return calculated and rounded value for the actual currency
      */
     public static BigDecimal getActualValue(float value, Date currencyDate) {
         return getActualValue(value, getCurrency(currencyDate));
     }
 
     /**
-     * calculates the value for the given (perhaps historic) unit to actual unit
+     * calculates the value for the given (perhaps historic) unit to actual default unit (depends on current locale).
+     * The result is round to the currencies default fraction digits. Please see hints of
+     * {@link BigDecimal#BigDecimal(double)} to see problems on construction with a double value.
      * 
-     * @param value number
+     * @param value historic value
      * @param unit currency unit
-     * @return actual value
+     * @return actual rounded value
      */
     public static BigDecimal getActualValue(float value, CurrencyUnit unit) {
-        return new BigDecimal(value * unit.getFactor(), new MathContext(unit.getCurrency().getDefaultFractionDigits(),
-            RoundingMode.HALF_UP));
+        BigDecimal bd = BigDecimal.valueOf((double)(value / unit.getFactor()));
+        return bd.setScale(unit.getCurrency().getDefaultFractionDigits(), BigDecimal.ROUND_HALF_UP);
+    }
+
+    /**
+     * convenience to get the factor from historic currency to actual currency (depends on current locale).
+     * 
+     * @param currencyDate date of value and its currency
+     * @return historic factor or null
+     */
+    public static final Double getFactor(Date historicCurrencyDate) {
+        return getFactor(Locale.getDefault(), historicCurrencyDate);
+    }
+
+    /**
+     * convenience to get the factor from historic currency to actual currency.
+     * 
+     * @param loc locale of currency
+     * @param currencyDate date of value and its currency
+     * @return historic factor or null
+     */
+    public static final Double getFactor(Locale loc, Date historicCurrencyDate) {
+        return getCurrency(loc, historicCurrencyDate).factor;
     }
 
     /**

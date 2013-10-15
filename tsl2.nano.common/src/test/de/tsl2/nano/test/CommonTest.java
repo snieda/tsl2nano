@@ -160,8 +160,8 @@ public class CommonTest {
         //works only on windows
         ScriptUtil.execute("cmd", "/C", "echo", "hello");
         //works only on windows
-//        ScriptUtil.execute("c:/Program Files (x86)/Adobe/Reader 10.0/Reader/AcroRd32.exe", "c:/idv/Kion/SVN-Eclipse-Einrichtung.pdf");
-//        ScriptUtil.executeRegisteredWindowsPrg("c:/idv/Kion/SVN-Eclipse-Einrichtung.pdf");
+//        ScriptUtil.execute("c:/Program Files (x86)/Adobe/Reader 10.0/Reader/AcroRd32.exe", "c:/eigen/SVN-Eclipse-Einrichtung.pdf");
+//        ScriptUtil.executeRegisteredWindowsPrg("c:/eigen/SVN-Eclipse-Einrichtung.pdf");
     }
 
     @Test
@@ -536,13 +536,18 @@ public class CommonTest {
         CurrencyUnit oldCurrency = CurrencyUtil.getCurrency(d);
         CurrencyUnit newCurrency = CurrencyUtil.getCurrency();
 
-        Assert.assertEquals(1.95583, oldCurrency.getFactor(), 0);
+        Double f = 1.95583d;
+        Assert.assertEquals(f, oldCurrency.getFactor(), 0);
         Assert.assertEquals("DEM", oldCurrency.getCurrencyCode());
         Assert.assertEquals("EUR", newCurrency.getCurrencyCode());
 
         DecimalFormat df = (DecimalFormat) DecimalFormat.getInstance();
         df.applyPattern("###,###,###.00 €");
         LOG.info(df.format(123456789));
+        
+        //test the factor and rounding mode
+        Assert.assertEquals(f, CurrencyUtil.getFactor(d));
+        Assert.assertEquals(new BigDecimal(51.13d, new MathContext(4)), CurrencyUtil.getActualValue(100f, d));
     }
 
     @Test
