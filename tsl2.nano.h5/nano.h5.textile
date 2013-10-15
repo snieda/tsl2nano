@@ -184,6 +184,14 @@ The _Nano.H5_ application can be started in different modes.
 ** *Network Multiple Security Mode:*
 ** environment property _http.ip_ is a network ip of your system. all network nodes are able to connect to the application of your system, using their own environment and session working with ssl (under construction!). may be used in the internet.
 
+h2. Security, Authorization and Permissions
+
+Permissions are set after connecting to the datasource through the persistence-unit. The permissions define activation of buttons and showing of fields.
+
+The application class _NanoH5_ has a method _createSubject()_ that defines a subject with a user-principal and it's roles, defined by permissions. If a file _permissions.xml_ is found, it will be used to fill the subject - if not, an admin-role with a wildcard-permission will permit anything!
+
+Permissions contain a name - perhaps ended by a wildcard - and comma separated actions (a wildcard is possible, too.
+
 h2. Model Driven Architecture (MDA))
 
 Nano.h5 provides mechanisms to create a full configurable application from a given database definition file (ddl).
@@ -461,7 +469,7 @@ h2. TODOs
 * hibernate3 is - on special circumstances - not able to load fields with empty ('') strings
 * (v) tooltips for buttons
 * (v) check running in java 7
-* permission configuration
+* (x) permission configuration
 * waiting message - new thread, answering on finish (e.g. on generating)
 * provide last exception of log-file
 * (v) add java-compiler (tools.jar, 12MB) of jdk6
