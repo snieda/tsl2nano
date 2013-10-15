@@ -113,9 +113,10 @@ public interface IBeanContainer {
      * hasPermission
      * 
      * @param roleName user role to check
+     * @param action action on role to be checked
      * @return true, if user has role
      */
-    Boolean hasPermission(String roleName);
+    Boolean hasPermission(String roleName, String action);
 
     /**
      * isEntity

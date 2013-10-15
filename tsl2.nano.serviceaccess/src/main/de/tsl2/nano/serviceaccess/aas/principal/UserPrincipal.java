@@ -42,6 +42,12 @@ package de.tsl2.nano.serviceaccess.aas.principal;
 
 import java.security.Principal;
 
+import org.simpleframework.xml.Attribute;
+import org.simpleframework.xml.Default;
+import org.simpleframework.xml.DefaultType;
+import org.simpleframework.xml.Element;
+import org.simpleframework.xml.Namespace;
+
 /**
  * <p>
  * This class implements the <code>Principal</code> interface and represents a user role.
@@ -56,12 +62,18 @@ import java.security.Principal;
  * @see java.security.Principal
  * @see javax.security.auth.Subject
  */
+@Namespace(reference = "permissions.xsd")
+@Default(value = DefaultType.FIELD, required = false)
 public class UserPrincipal implements Principal, java.io.Serializable {
     private static final long serialVersionUID = 1L;
     /**
      * @serial
      */
+    @Attribute
     private final String name;
+    @Element(required=false)
+    private final Object data;
+    
 
     /**
      * Create a Principal with a username.
@@ -71,12 +83,24 @@ public class UserPrincipal implements Principal, java.io.Serializable {
      * @exception NullPointerException if the <code>name</code> is <code>null</code>.
      */
     public UserPrincipal(String name) {
+        this(name, null);
+    }
+
+    
+    /**
+     * constructor
+     * @param name
+     * @param data
+     */
+    public UserPrincipal(String name, Object data) {
         if (name == null) {
             throw new NullPointerException("username must not be null!");
         }
 
         this.name = name;
+        this.data = data;
     }
+
 
     /**
      * Return the username for this <code>Principal</code>.
@@ -87,6 +111,12 @@ public class UserPrincipal implements Principal, java.io.Serializable {
     public String getName() {
         return name;
     }
+
+    
+    public Object getData() {
+        return data;
+    }
+
 
     /**
      * Return a string representation of this <code>Principal</code>.

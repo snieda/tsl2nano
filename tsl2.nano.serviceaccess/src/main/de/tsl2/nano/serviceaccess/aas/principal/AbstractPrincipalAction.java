@@ -28,6 +28,8 @@ import de.tsl2.nano.serviceaccess.ServiceFactory;
  * 
  */
 public abstract class AbstractPrincipalAction<RETURNTYPE> extends CommonAction<RETURNTYPE> {
+    /** serialVersionUID */
+    private static final long serialVersionUID = 2906676372188531019L;
     private static final Log LOG = LogFactory.getLog(AbstractPrincipalAction.class);
 
     public AbstractPrincipalAction() {
@@ -88,7 +90,7 @@ public abstract class AbstractPrincipalAction<RETURNTYPE> extends CommonAction<R
             // needs security policy entry "createAccessControlContext"
             final AccessControlContext accessControlContext = new AccessControlContext(AccessController.getContext(),
                 new SubjectDomainCombiner(ServiceFactory.instance().getSubject()));
-            accessControlContext.checkPermission(new ActionPermission(getId()));
+            accessControlContext.checkPermission(new APermission(getId()));
             // System.getSecurityManager().checkPermission(new
             // ActionPermission(getId()));
             return true;

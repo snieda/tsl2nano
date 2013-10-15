@@ -26,7 +26,10 @@ import javax.security.auth.spi.LoginModule;
 import org.apache.commons.logging.Log;
 import de.tsl2.nano.log.LogFactory;
 
+import de.tsl2.nano.Environment;
 import de.tsl2.nano.Messages;
+import de.tsl2.nano.serviceaccess.Authorization;
+import de.tsl2.nano.serviceaccess.IAuthorization;
 import de.tsl2.nano.serviceaccess.ServiceFactory;
 import de.tsl2.nano.serviceaccess.aas.principal.UserPrincipal;
 import de.tsl2.nano.util.StringUtil;
@@ -315,7 +318,10 @@ public class AbstractLoginModule implements LoginModule {
             subject.getPrincipals().add(userPrincipal);
         }
 
+        //deprecated: access to the user subject should be done through environment
         ServiceFactory.instance().setSubject(subject);
+        
+        Environment.addService(IAuthorization.class, new Authorization(subject));
         LOG.debug("added UserPrincipal to Subject");
     }
 

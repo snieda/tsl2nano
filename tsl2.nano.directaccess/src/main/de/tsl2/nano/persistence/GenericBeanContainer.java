@@ -15,10 +15,13 @@ import java.util.Map;
 
 import javax.persistence.Entity;
 
+import de.tsl2.nano.Environment;
 import de.tsl2.nano.action.CommonAction;
 import de.tsl2.nano.action.IAction;
 import de.tsl2.nano.service.util.BeanContainerUtil;
 import de.tsl2.nano.service.util.IGenericService;
+import de.tsl2.nano.serviceaccess.IAuthorization;
+import de.tsl2.nano.serviceaccess.aas.principal.APermission;
 import de.tsl2.nano.util.bean.BeanClass;
 import de.tsl2.nano.util.bean.BeanContainer;
 
@@ -109,7 +112,7 @@ public abstract class GenericBeanContainer extends BeanContainerUtil {
         IAction permissionAction = new CommonAction() {
             @Override
             public Object action() {
-                return hasPermission((String) parameter[0]);
+                return hasPermission((String) parameter[0], (String)(parameter.length > 1 ? parameter[1] : null));
             }
         };
         IAction persistableAction = new CommonAction() {
@@ -139,8 +142,8 @@ public abstract class GenericBeanContainer extends BeanContainerUtil {
             executeAction);
     }
 
-    protected static Object hasPermission(String string) {
-        return true;
+    protected static Object hasPermission(String name, String action) {
+        return new APermission(name, action).hasAccess(Environment.get(IAuthorization.class).getSubject());
     }
 
     protected abstract IGenericService getService();

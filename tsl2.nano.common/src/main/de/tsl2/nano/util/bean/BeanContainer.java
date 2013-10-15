@@ -307,8 +307,8 @@ public class BeanContainer implements IBeanContainer {
     }
 
     @Override
-    public Boolean hasPermission(String roleName) {
-        permissionAction.setParameter(new Object[] { roleName });
+    public Boolean hasPermission(String roleName, String action) {
+        permissionAction.setParameter(new Object[] { roleName, action });
         return (Boolean) permissionAction.activate();
     }
 
@@ -369,7 +369,7 @@ public class BeanContainer implements IBeanContainer {
      * @return true, if user has role for that action, false otherwise
      */
     public static final boolean hasPermission(Class<?> beanType, boolean packedInList, String actionName) {
-        return instance().hasPermission(getActionId(beanType, packedInList, actionName));
+        return instance().hasPermission(getActionId(beanType, packedInList, actionName), null);
     }
 
     /**

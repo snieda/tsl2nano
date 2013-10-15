@@ -23,7 +23,7 @@ import de.tsl2.nano.util.bean.BeanContainer;
  * @author Thomas Schneider, Thomas Schneider
  * @version $Revision$
  */
-@SuppressWarnings({"rawtypes", "unchecked", "serial"})
+@SuppressWarnings({"rawtypes"})
 public class HibernateBeanContainer extends GenericBeanContainer {
     protected Map properties = new HashMap();
     protected IGenericService service;

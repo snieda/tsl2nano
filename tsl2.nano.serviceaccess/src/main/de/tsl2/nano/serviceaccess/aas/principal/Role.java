@@ -10,7 +10,13 @@
 package de.tsl2.nano.serviceaccess.aas.principal;
 
 import java.io.Serializable;
+import java.security.BasicPermission;
 import java.security.Principal;
+import java.util.Arrays;
+import java.util.HashSet;
+import java.util.Set;
+
+import org.simpleframework.xml.ElementList;
 
 /**
  * user role principal
@@ -23,14 +29,21 @@ public class Role implements Principal, Serializable {
     private static final long serialVersionUID = -276482232395760912L;
     String name;
 
+    Set<BasicPermission> permissions;
+    
     /**
      * constructor
      * 
      * @param name role name
      */
     public Role(String name) {
+        this(name, new APermission[0]);
+    }
+
+    public Role(String name, APermission... permissions) {
         assert name != null : "name must not be null";
         this.name = name;
+        this.permissions = new HashSet<BasicPermission>(Arrays.asList(permissions));
     }
 
     /**
@@ -41,6 +54,18 @@ public class Role implements Principal, Serializable {
         return name;
     }
 
+    public Set<BasicPermission> getPermissions() {
+        return permissions;
+    }
+
+    public void setPermissions(Set<BasicPermission> permissions) {
+        this.permissions = permissions;
+    }
+
+    public void addPermission(BasicPermission permission) {
+        this.permissions.add(permission);
+    }
+    
     /**
      * Return a string representation of this <code>Principal</code>.
      * 

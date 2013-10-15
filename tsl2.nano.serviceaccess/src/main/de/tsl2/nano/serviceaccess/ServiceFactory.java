@@ -29,11 +29,10 @@ import javax.security.auth.callback.UnsupportedCallbackException;
 import javax.security.auth.login.LoginContext;
 
 import org.apache.commons.logging.Log;
-import de.tsl2.nano.log.LogFactory;
 
-import de.tsl2.nano.Messages;
 import de.tsl2.nano.exception.FormattedException;
 import de.tsl2.nano.exception.ForwardedException;
+import de.tsl2.nano.log.LogFactory;
 import de.tsl2.nano.service.feature.Feature;
 import de.tsl2.nano.service.feature.FeatureFactory;
 import de.tsl2.nano.service.util.IGenericService;
@@ -69,7 +68,8 @@ public class ServiceFactory {
     private Properties properties;
     private String jndi_prefix;
 
-    Subject subject;
+    private IAuthorization auth;
+    
     Map<? extends Object, Object> userProperties = new HashMap<String, Object>();
 
     ServiceLocator serviceLocator = null;
@@ -186,14 +186,14 @@ public class ServiceFactory {
      * @return the subject
      */
     public Subject getSubject() {
-        return subject;
+        return auth != null ? auth.getSubject() : null;
     }
 
     /**
      * @param subject the subject to set
      */
     public void setSubject(Subject subject) {
-        this.subject = subject;
+        auth = new Authorization(subject);
 
         /*
          * for server side checks (e.g. sessioncontext.getCallerPrincipal()), we have to add 
@@ -216,6 +216,26 @@ public class ServiceFactory {
         } catch (final Exception e) {
             ForwardedException.forward(e);
         }
+    }
+
+    /**
+     * hasRole
+     * 
+     * @param roleName
+     * @return true, if user has role
+     */
+    public boolean hasRole(String roleName) {
+        return hasPrincipal(new Role(roleName));
+    }
+
+    /**
+     * hasPrincipal
+     * 
+     * @param principal {@link Principal}
+     * @return true, if subject contains this principal
+     */
+    public boolean hasPrincipal(Principal principal) {
+        return auth != null ? auth.hasPrincipal(principal) : null;
     }
 
     /**
@@ -251,59 +271,6 @@ public class ServiceFactory {
      */
     public void setUserProperties(Map<? extends Object, Object> userProperties) {
         this.userProperties = userProperties;
-    }
-
-    /**
-     * hasRole
-     * 
-     * @param roleName
-     * @return true, if user has role
-     */
-    public boolean hasRole(String roleName) {
-        return hasPrincipal(new Role(roleName));
-    }
-
-    /**
-     * checkPrincipal, throws SecurityException if not
-     * 
-     * @param principal principal
-     */
-    public void checkPrincipal(Principal principal) {
-        if (!hasPrincipal(principal)) {
-            final String msg = Messages.getFormattedString(Messages.getString("tsl2nano.login.noprincipal"),
-                new Object[] { getUserObject(), principal.getName() });
-            throw new SecurityException(msg);
-        }
-    }
-
-    /**
-     * hasPrincipal
-     * 
-     * @param principal {@link Principal}
-     * @return true, if subject contains this principal
-     */
-    public boolean hasPrincipal(Principal principal) {
-        if (getSubject() == null) {
-            LOG.warn("ServiceFactory.hasPrincipal: no subject defined!");
-            return false;
-        }
-        final Set<? extends Principal> subjectPrincipals = getSubject().getPrincipals(principal.getClass());
-
-//        /*
-//         * if no principal was defined, the principal-permissions will be
-//         * switched off.
-//         */
-//        if (subjectPrincipals.isEmpty()) {
-//            LOG.warn("ServiceFactory.hasPrincipal: no principal of type " + principal.getClass().getSimpleName()
-//                + " was defined ==> permissions-system will be switched off for this type!");
-//            return true;
-//        }
-
-        final boolean hasPrincipal = subjectPrincipals.contains(principal);
-        if (!hasPrincipal) {
-            LOG.warn(principal.getClass().getSimpleName() + " was not set for: " + principal.getName());
-        }
-        return hasPrincipal;
     }
 
     /**
@@ -555,7 +522,7 @@ public class ServiceFactory {
         properties.clear();
         if (complete) {
             userProperties = null;
-            subject = null;
+            auth = null;
             services.clear();
             classLoader = null;
             CachingBatchloader.instance().reset();
