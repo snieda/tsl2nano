@@ -2,10 +2,10 @@
  * File: $HeadURL$
  * Id  : $Id$
  * 
- * created by: Thomas Schneider, Thomas Schneider, www.idv-ag.de
+ * created by: Thomas Schneider
  * created on: Sep 16, 2011
  * 
- * Copyright: (c) Thomas Schneider, www.idv-ag.de 2011, all rights reserved
+ * Copyright: (c) Thomas Schneider 2011, all rights reserved
  */
 package de.tsl2.nano.serviceaccess.test;
 
@@ -23,7 +23,7 @@ import de.tsl2.nano.service.util.IFileService;
  * 
  * TODO: solve nonserializable inputstream problem
  * 
- * @author Thomas Schneider, Thomas Schneider, www.idv-ag.de
+ * @author Thomas Schneider
  * @version $Revision$
  */
 public class FileServiceTest extends BaseServiceTest {

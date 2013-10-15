@@ -1,5 +1,5 @@
 *An implementation of EJBs FileSystemConnector*
-Authors: Erwin Guib IDV, Thomas Schneider IDV
+Authors: Erwin Guib, Thomas Schneider
 
 {toc}
 
@@ -58,7 +58,7 @@ content example of this deployed xml file:
         <jndi-name>kion/fsConnectionFactory</jndi-name>
         <rar-name>fs-connector.rar</rar-name>
         <connection-definition>
-             de.idv.resource.fs.FsConnectionFactory
+             de.tsl2.nano.resource.fs.FsConnectionFactory
         </connection-definition>
         <config-property name="rootDirPath"
                          type="java.lang.String">server</config-property>

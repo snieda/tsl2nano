@@ -34,12 +34,12 @@ h2. Features
 * ServiceUtil: some query helper methods
 * "BeanContainerUtil":src/main/de.tsl2.nano/service/util/BeanContainerUtil.java bridge for framework standard bean service actions (delegates to  GenericServiceBean)
 * "JobScheduleServiceBean":src/main/de.tsl2.nano/service/schedule/IJobScheduleService.java provides ejb 3.1 timer service access.
-* "FileSystem-Connector":fsconnector.html simple filesystem connector implementation. a simple "FileService":src/main/de.tsl2.nano/service/util/FileServiceBean.java simplifies the use. have a look at the junit-test "FileServiceTest":src/test/de/idvag/serviceaccess/test/FileServiceTest.java to see some use-cases.c
+* "FileSystem-Connector":fsconnector.html simple filesystem connector implementation. a simple "FileService":src/main/de.tsl2.nano/service/util/FileServiceBean.java simplifies the use. have a look at the junit-test "FileServiceTest":src/test/de/tsl2/nano/serviceaccess/test/FileServiceTest.java to see some use-cases.c
 * CachingBatchLoader: is able to load data in a block, doing minimal communication with the server. second feature is optional storing that loaded data providing it as cache for the application.
 
 h3. Quick Start
 
-To see, how to use the the services in the simpliest way, have a look at the test class "ServiceAccessTest":src/test/de/idvag/serviceaccess/test/ServiceAccessTest.java.
+To see, how to use the the services in the simpliest way, have a look at the test class "ServiceAccessTest":src/test/de/tsl2/nano/serviceaccess/test/ServiceAccessTest.java.
 
 h2. Initializing
 
@@ -70,7 +70,7 @@ Example:
 <pre>
 /**
  * 
- * @author Thomas Schneider, Thomas Schneider, www.idv-ag.de
+ * @author Thomas Schneider, Thomas Schneider
  * @version $Revision$
  */
 public class LoginModule extends AbstractLoginModule {
