@@ -2,7 +2,7 @@
  * File: $HeadURL$
  * Id  : $Id$
  * 
- * created by: velocity template (${template}), IDV AG
+ * created by: velocity template (${template})
  * created on: ----/--/-- (not filled with property 'time' to simplify version-diffs)
  * 
  * ${copyright}
@@ -27,7 +27,7 @@ ${util.toFirstLowerCase(${class.Name})}.${att.Name}.tooltip=${att.NameFU} toolti
  * <p>
  * <b>Generated</b> do not modify!!!
  *
- * @author Generated through velocity template (beanconstant.vm), IDV AG
+ * @author Generated through velocity template (beanconstant.vm)
  * @version $Revision$ 
  */
 public interface ${class.Name}Const {

@@ -2,7 +2,7 @@
  * File: $HeadURL$
  * Id  : $Id$
  * 
- * created by: Generated through velocity template (presenter.vm), IDV AG
+ * created by: Generated through velocity template (presenter.vm)
  * created on: ----/--/-- (not filled with property 'time' to simplify version-diffs)
  * 
  * ${copyright}
@@ -29,27 +29,27 @@ import org.eclipse.swt.graphics.Point;
 import ${class.Clazz.CanonicalName};
 import ${constClass};
 
-import de.idvag.swartifex.Messages;
-import de.idvag.swartifex.action.IAction;
-import de.idvag.swartifex.ui.presenter.DefaultPresenter;
-import de.idvag.swartifex.ui.presenter.IBeanController;
-import de.idvag.swartifex.ui.presenter.IBeanEditor;
-import de.idvag.swartifex.ui.presenter.IBeanLayout;
-import de.idvag.swartifex.ui.presenter.IBeanTableLayout;
-import de.idvag.swartifex.fielddescriptor.FieldDependency;
-import de.idvag.swartifex.fielddescriptor.FField;
-import de.idvag.swartifex.fielddescriptor.IComponentDescriptor;
-import de.idvag.swartifex.fielddescriptor.IFieldDescriptor;
-import de.idvag.swartifex.fielddescriptor.IFieldDependency;
-import de.idvag.swartifex.fielddescriptor.ListDescriptor;
-import de.idvag.swartifex.validator.MandatoryValidator;
-import de.idvag.swartifex.validator.AbstractValidator;
-import de.idvag.swartifex.validator.ObjectInListValidator;
-import de.idvag.swartifex.validator.ObjectInTableValidator;
-import de.idvag.swartifex.util.RegExpFormat;
-import de.idvag.swartifex.util.bean.BeanAttribute;
-import de.idvag.swartifex.component.StructuredComponent;
-import de.idvag.swartifex.component.binding.Observables;
+import de.tsl2.nano.Messages;
+import de.tsl2.nano.action.IAction;
+import de.tsl2.nano.ui.presenter.DefaultPresenter;
+import de.tsl2.nano.ui.presenter.IBeanController;
+import de.tsl2.nano.ui.presenter.IBeanEditor;
+import de.tsl2.nano.ui.presenter.IBeanLayout;
+import de.tsl2.nano.ui.presenter.IBeanTableLayout;
+import de.tsl2.nano.fielddescriptor.FieldDependency;
+import de.tsl2.nano.fielddescriptor.FField;
+import de.tsl2.nano.fielddescriptor.IComponentDescriptor;
+import de.tsl2.nano.fielddescriptor.IFieldDescriptor;
+import de.tsl2.nano.fielddescriptor.IFieldDependency;
+import de.tsl2.nano.fielddescriptor.ListDescriptor;
+import de.tsl2.nano.validator.MandatoryValidator;
+import de.tsl2.nano.validator.AbstractValidator;
+import de.tsl2.nano.validator.ObjectInListValidator;
+import de.tsl2.nano.validator.ObjectInTableValidator;
+import de.tsl2.nano.util.RegExpFormat;
+import de.tsl2.nano.util.bean.BeanAttribute;
+import de.tsl2.nano.component.StructuredComponent;
+import de.tsl2.nano.component.binding.Observables;
 
 /**
  * Default presenter for bean ${class.Name}!
