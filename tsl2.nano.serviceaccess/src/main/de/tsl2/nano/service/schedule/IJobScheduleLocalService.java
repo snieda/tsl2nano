@@ -2,10 +2,10 @@
  * File: $HeadURL$
  * Id  : $Id$
  * 
- * created by: Thomas Schneider, Thomas Schneider, www.idv-ag.de
+ * created by: Thomas Schneider
  * created on: Jan 11, 2012
  * 
- * Copyright: (c) Thomas Schneider, www.idv-ag.de 2012, all rights reserved
+ * Copyright: (c) Thomas Schneider 2012, all rights reserved
  */
 package de.tsl2.nano.service.schedule;
 
@@ -34,7 +34,7 @@ import de.tsl2.nano.execution.IRunnable;
  * This class is intended to start timers programmatically - not automatic. The automatic way would be to use the
  * Schedule(ScheduleExpression) annotation.
  * 
- * @author Thomas Schneider, Thomas Schneider, www.idv-ag.de
+ * @author Thomas Schneider
  * @version $Revision$
  */
 @Local

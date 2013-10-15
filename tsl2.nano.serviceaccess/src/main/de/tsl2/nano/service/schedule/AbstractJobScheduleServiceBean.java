@@ -2,10 +2,10 @@
  * File: $HeadURL$
  * Id  : $Id$
  * 
- * created by: Thomas Schneider, Thomas Schneider, www.idv-ag.de
+ * created by: Thomas Schneider
  * created on: Jan 11, 2012
  * 
- * Copyright: (c) Thomas Schneider, www.idv-ag.de 2012, all rights reserved
+ * Copyright: (c) Thomas Schneider, all rights reserved
  */
 package de.tsl2.nano.service.schedule;
 
@@ -15,7 +15,6 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Date;
-import java.util.LinkedHashSet;
 import java.util.LinkedList;
 
 import javax.annotation.PostConstruct;
@@ -32,7 +31,7 @@ import javax.ejb.TimerHandle;
 import javax.ejb.TimerService;
 
 import org.apache.commons.logging.Log;
-import de.tsl2.nano.log.LogFactory;
+import org.apache.commons.logging.LogFactory;
 
 import de.tsl2.nano.collection.ListSet;
 import de.tsl2.nano.exception.FormattedException;
@@ -43,7 +42,7 @@ import de.tsl2.nano.util.StringUtil;
 /**
  * see {@link IJobScheduleLocalService}.
  * 
- * @author Thomas Schneider, Thomas Schneider, www.idv-ag.de
+ * @author Thomas Schneider
  * @version $Revision$
  */
 @Singleton
@@ -52,8 +51,9 @@ public abstract class AbstractJobScheduleServiceBean<RUNNABLE> implements
         IJobScheduleService<RUNNABLE> {
     private static final Log LOG = LogFactory.getLog(AbstractJobScheduleServiceBean.class);
 
+    /** all current persisted jobs to read last start, stop and status */
     private Collection<Job<RUNNABLE>> jobs = new ArrayList<Job<RUNNABLE>>();
-    //TODO: serialize job-history
+    /** serialized job-history, containing all starts, stopps and status of all jobs - to be filtered */
     private Collection<JobHistoryEntry> jobHistory = new ListSet<JobHistoryEntry>();
     private static final String FILE_HISTORY = "jobhistory.ser";
 
@@ -62,6 +62,7 @@ public abstract class AbstractJobScheduleServiceBean<RUNNABLE> implements
     @Resource
     protected TimerService timerService;
 
+    @SuppressWarnings("unchecked")
     @PostConstruct
     protected void initializePersistedJobs() {
         Collection<Timer> timers = timerService.getTimers();
@@ -70,6 +71,9 @@ public abstract class AbstractJobScheduleServiceBean<RUNNABLE> implements
             if (timer.getInfo() instanceof Job) {
                 Job<RUNNABLE> job = (Job<RUNNABLE>) timer.getInfo();
                 job.setTimerHandle(timer);
+                //check for previous vm-crashes - then the job wasn't stopped
+                if (job.isRunning())
+                    job.setAsStopped(new Exception("job wasn't stopped regularly. Perhaps the server crashed while running!"));
                 jobs.add(job);
             }
         }
@@ -91,7 +95,7 @@ public abstract class AbstractJobScheduleServiceBean<RUNNABLE> implements
             boolean stopOnConcurrent,
             boolean expire,
             Collection<RUNNABLE> callbacks) {
-        Job job = initializeJob(name, callbacks, context, user, stopOnError, stopOnConcurrent);
+        Job<?> job = initializeJob(name, callbacks, context, user, stopOnError, stopOnConcurrent);
         Timer timer;
         if (expire) {
             timer = timerService.createSingleActionTimer(time, new TimerConfig(job, persistent));
@@ -106,7 +110,7 @@ public abstract class AbstractJobScheduleServiceBean<RUNNABLE> implements
      */
     @Override
     public TimerHandle createScheduleJob(String name, long time, boolean stopOnError, RUNNABLE... callbacks) {
-        Job job = initializeJob(name, Arrays.asList(callbacks), null, null, true, true);
+        Job<?> job = initializeJob(name, Arrays.asList(callbacks), null, null, true, true);
         final Timer timer = timerService.createTimer(time, job);
         return job.setTimerHandle(timer);
     }
@@ -131,8 +135,8 @@ public abstract class AbstractJobScheduleServiceBean<RUNNABLE> implements
             Serializable user,
             boolean stopOnError,
             boolean stopOnConcurrent,
-            RUNNABLE[] callbacks) {
-        Job job = initializeJob(name, Arrays.asList(callbacks), context, user, stopOnError, stopOnConcurrent);
+            RUNNABLE... callbacks) {
+        Job<?> job = initializeJob(name, Arrays.asList(callbacks), context, user, stopOnError, stopOnConcurrent);
         final Timer timer = timerService.createCalendarTimer(scheduleExpression, new TimerConfig(job, persistent));
         return job.setTimerHandle(timer);
     }
@@ -172,19 +176,21 @@ public abstract class AbstractJobScheduleServiceBean<RUNNABLE> implements
     }
 
     /**
-     * initializeTimer
+     * initializeJob
      * 
-     * @param callbacks
-     * @param stopOnError
-     * @param stopOnConcurrent
-     * @param timer
-     * @return timer handle
+     * @param name unique job name
+     * @param callbacks all runners to be started on timer expiration
+     * @param context the jobs context (used by the callback)
+     * @param user user that starts the job
+     * @param stopOnError whether to stop the job on any error
+     * @param stopOnConcurrent whether to avoid running more than one job parallel.
+     * @return
      * @throws IllegalStateException
      * @throws NoSuchObjectLocalException
      * @throws EJBException
      * @throws NoMoreTimeoutsException
      */
-    protected Job initializeJob(String name,
+    protected Job<RUNNABLE> initializeJob(String name,
             Collection<RUNNABLE> callbacks,
             Serializable context,
             Serializable user,
@@ -273,8 +279,8 @@ public abstract class AbstractJobScheduleServiceBean<RUNNABLE> implements
      * removes expired jobs
      */
     private void checkExpiredJobs() {
-        Collection<Job> expired = new LinkedList<Job>();
-        for (Job job : jobs) {
+        Collection<Job<?>> expired = new LinkedList<Job<?>>();
+        for (Job<?> job : jobs) {
             if (job.isExpired()) {
                 expired.add(job);
             }
@@ -292,7 +298,7 @@ public abstract class AbstractJobScheduleServiceBean<RUNNABLE> implements
     public Collection<String> getCurrentJobNames() {
         //because the timerHandle inside a job is not transferable, only the names will be evaluated.
         Collection<String> jobNames = new ArrayList<String>(jobs.size());
-        for (Job job : jobs) {
+        for (Job<?> job : jobs) {
             jobNames.add(job.getName());
         }
         return jobNames;
@@ -320,10 +326,10 @@ public abstract class AbstractJobScheduleServiceBean<RUNNABLE> implements
     protected void runJob(final Timer timer) {
         final Job<RUNNABLE> job = getJob(timer.getHandle());
         if (job.isStopOnConcurrent()) {
-            Job runningJob = getRunningJob();
+            Job<?> runningJob = getRunningJob();
             if (runningJob != null) {
                 LOG.error("job-start canceled. no concurrent running jobs are allowed.\nPlease use argument 'stopOnConcurrent=false' if you want to allow concurrent running jobs!");
-                RuntimeException ex = new FormattedException("tsl2nano.concurrentfailure", new Object[] { job,
+                RuntimeException ex = new FormattedException("swartifex.concurrentfailure", new Object[] { job,
                     runningJob });
                 job.setLastException(ex);
                 throw ex;
@@ -332,7 +338,7 @@ public abstract class AbstractJobScheduleServiceBean<RUNNABLE> implements
         /*
          * don't block the service.
          */
-        final AbstractJobScheduleServiceBean _this = this;
+        final AbstractJobScheduleServiceBean<RUNNABLE> _this = this;
         new Thread(new Runnable() {
             @Override
             public void run() {
@@ -340,7 +346,8 @@ public abstract class AbstractJobScheduleServiceBean<RUNNABLE> implements
                 for (final RUNNABLE runnable : job.getCallbacks()) {
                     try {
                         _this.run(runnable, job.getContext());
-                    } catch (final Exception ex) {
+                    } catch (final Throwable ex) {
+                        //if the jvm crashes, the job will never be stopped!
                         if (job.isStopOnError()) {
                             RuntimeException fwdEx = ForwardedException.toRuntimeEx(ex, true);
                             stopRun(timer, job, fwdEx);
@@ -357,14 +364,14 @@ public abstract class AbstractJobScheduleServiceBean<RUNNABLE> implements
     }
 
     /**
-     * will be called, to set new properties on the stopped job. this has to be done asynchron to let the timerservice
+     * will be called, to set new properties on the stopped job. this has to be done asynchrony to let the timerservice
      * refresh the timer instance after leaving the timeout method {@link #runJob(Timer)}.
      * 
      * @param timer timer of stopped job
      * @param job job to refresh informations on
      * @param ex (optional) error instance
      */
-    protected void stopRun(final Timer timer, final Job job, final Exception ex) {
+    protected void stopRun(final Timer timer, final Job<RUNNABLE> job, final Exception ex) {
         Runnable stopJob = new Runnable() {
             @Override
             public void run() {
@@ -372,20 +379,30 @@ public abstract class AbstractJobScheduleServiceBean<RUNNABLE> implements
                 try {
                     Thread.sleep(ex != null ? 500 : 100);
                 } catch (InterruptedException e) {
-                    ForwardedException.forward(e);
+                    LOG.warn("sleep before stoping job was interrupted: " + e);
+                } finally {
+                    job.setAsStopped(ex);
+                    addToHistory(job);
+                    //if job is expired, removed it from list
+                    if (getNextTimeout(timer) == null)
+                        jobs.remove(job);
+                    LOG.info("next run will be: " + getNextTimeout(timer));
                 }
-                job.setAsStopped(ex);
-                addToHistory(job);
-                //if job is expired, removed it from list
-                if (timer.getNextTimeout() == null)
-                    jobs.remove(job);
-                LOG.info("next run will be: " + timer.getNextTimeout());
             }
         };
         new Thread(stopJob, job.toString()).start();
     }
 
-    protected void addToHistory(Job job) {
+    protected Date getNextTimeout(Timer timer) {
+        try {
+            return timer.getNextTimeout();
+        } catch (Exception e) {
+            LOG.warn(e.toString());
+            return null;
+        }
+    }
+    
+    protected void addToHistory(Job<RUNNABLE> job) {
         jobHistory.add(new JobHistoryEntry(job));
         //backup to file-system (should be done through file-connector)
         FileUtil.save(FILE_HISTORY, (Serializable) jobHistory);
@@ -404,11 +421,30 @@ public abstract class AbstractJobScheduleServiceBean<RUNNABLE> implements
      * 
      * @return true, if another job is running.
      */
-    protected Job getRunningJob() {
+    protected Job<RUNNABLE> getRunningJob() {
         for (Job<RUNNABLE> job : jobs) {
             if (job.isRunning())
                 return job;
         }
+        return null;
+    }
+
+    /**
+     * unused yet...
+     * @param time time for next timeout
+     * @param interval period before and after 'time' to be valid for job 
+     * @return first job that has a next timeout at time +- interval
+     */
+    public Job<RUNNABLE> getJobAt(Date time, long interval) {
+        for (Job<RUNNABLE> job : getCurrentJobs()) {
+                Date nextTimeout = job.getTimerHandle().getTimer().getNextTimeout();
+                long differenceInMS = time.getTime() - nextTimeout.getTime();
+                // time between jobs is less than configured interval
+                if (differenceInMS > -interval && differenceInMS < interval) {
+                    LOG.debug("found job for time" + time + ": " + job);
+                    return job;
+                }
+            }
         return null;
     }
 
