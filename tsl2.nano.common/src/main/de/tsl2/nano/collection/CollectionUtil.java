@@ -189,6 +189,22 @@ public class CollectionUtil {
     }
 
     /**
+     * hasNoValues
+     * @param c collection to check
+     * @return true, if c is null or c.size() == 0 or all values are null.
+     */
+    public static boolean hasNoValues(Collection c) {
+        if (c == null || c.size() == 0)
+            return true;
+        
+        for (Object object : c) {
+            if (object != null)
+                return false;
+        }
+        return true;
+    }
+
+    /**
      * wrap source collection holding instances of type 'type' into a new collection - holding values given by
      * attributeName.
      * 
