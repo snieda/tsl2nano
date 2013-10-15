@@ -2,10 +2,10 @@
  * File: $HeadURL$
  * Id  : $Id$
  * 
- * created by: Thomas Schneider, Thomas Schneider, www.idv-ag.de
+ * created by: Thomas Schneider
  * created on: Sep 16, 2011
  * 
- * Copyright: (c) Thomas Schneider, www.idv-ag.de 2011, all rights reserved
+ * Copyright: (c) Thomas Schneider 2011, all rights reserved
  */
 package de.tsl2.nano.service.util;
 
@@ -31,7 +31,7 @@ import de.tsl2.nano.resource.fs.FsConnectionFactory;
 /**
  * file access as local and remote service. provides reading and writing files on server through j2ee file-connector.
  * 
- * @author Thomas Schneider, Thomas Schneider, www.idv-ag.de
+ * @author Thomas Schneider, Thomas Schneider
  * @version $Revision$
  */
 @Stateless

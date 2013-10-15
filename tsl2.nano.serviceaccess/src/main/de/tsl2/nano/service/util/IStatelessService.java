@@ -17,7 +17,7 @@ import javax.ejb.Remote;
 /**
  * provides base services. used by {@link IGenericService}.
  * 
- * @author ts, IDV AG
+ * @author Thomas Schneider
  * @version $Revision$
  */
 @Remote

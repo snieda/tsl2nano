@@ -2,10 +2,10 @@
  * File: $HeadURL$
  * Id  : $Id$
  * 
- * created by: Thomas Schneider, Thomas Schneider, www.idv-ag.de
+ * created by: Thomas Schneider
  * created on: Mar 18, 2010
  * 
- * Copyright: (c) Thomas Schneider, www.idv-ag.de 2010, all rights reserved
+ * Copyright: (c) Thomas Schneider 2010, all rights reserved
  */
 package de.tsl2.nano.service.util;
 
@@ -24,7 +24,7 @@ import de.tsl2.nano.resource.fs.FsConnectionFactory;
 /**
  * Local Services for server side file access through filesystem-connector.
  * 
- * @author Thomas Schneider, Thomas Schneider, www.idv-ag.de
+ * @author Thomas Schneider, Thomas Schneider
  * @version $Revision$
  */
 @Local

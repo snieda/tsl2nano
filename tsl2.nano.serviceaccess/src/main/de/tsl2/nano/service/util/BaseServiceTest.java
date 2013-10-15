@@ -2,10 +2,10 @@
  * File: $HeadURL$
  * Id  : $Id$
  * 
- * created by: Thomas Schneider, Thomas Schneider, www.idv-ag.de
+ * created by: Thomas Schneider
  * created on: Apr 26, 2010
  * 
- * Copyright: (c) Thomas Schneider, www.idv-ag.de 2010, all rights reserved
+ * Copyright: (c) Thomas Schneider 2010, all rights reserved
  */
 package de.tsl2.nano.service.util;
 
@@ -34,7 +34,7 @@ import de.tsl2.nano.serviceaccess.ServiceFactory;
  * the creation of your test data will be done by the {@link #createTestData(String)} method, if
  * {@link #CREATE_SPECIFIC_TESTDATA} is true.
  * 
- * @author Thomas Schneider, Thomas Schneider, www.idv-ag.de
+ * @author Thomas Schneider
  * @version $Revision$
  */
 public abstract class BaseServiceTest {
