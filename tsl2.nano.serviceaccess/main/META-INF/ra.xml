@@ -7,7 +7,7 @@
 	<eis-type>File System</eis-type>
 	<resourceadapter-version>1.0</resourceadapter-version>
 	<resourceadapter>
-		<resourceadapter-class>de.idv.resource.fs.impl.FsResourceAdapter</resourceadapter-class>
+		<resourceadapter-class>de.tsl2.nano.resource.fs.impl.FsResourceAdapter</resourceadapter-class>
 		<config-property>
 			<config-property-name>rootDirPath</config-property-name>
 			<config-property-type>java.lang.String</config-property-type>
@@ -15,16 +15,16 @@
 		</config-property>
 		<outbound-resourceadapter>
 			<connection-definition>
-				<managedconnectionfactory-class>de.idv.resource.fs.impl.FsManagedConnectionFactory</managedconnectionfactory-class>
+				<managedconnectionfactory-class>de.tsl2.nano.resource.fs.impl.FsManagedConnectionFactory</managedconnectionfactory-class>
 				<config-property>
 					<config-property-name>rootDirPath</config-property-name>
 					<config-property-type>java.lang.String</config-property-type>
 					<config-property-value>fs-connector</config-property-value>
 				</config-property>
-				<connectionfactory-interface>de.idv.resource.fs.FsConnectionFactory</connectionfactory-interface>
-				<connectionfactory-impl-class>de.idv.resource.fs.impl.FsConnectionFactoryImpl</connectionfactory-impl-class>
-				<connection-interface>de.idv.resource.fs.FsConnection</connection-interface>
-				<connection-impl-class>de.idv.resource.fs.impl.FsConnectionImpl</connection-impl-class>
+				<connectionfactory-interface>de.tsl2.nano.resource.fs.FsConnectionFactory</connectionfactory-interface>
+				<connectionfactory-impl-class>de.tsl2.nano.resource.fs.impl.FsConnectionFactoryImpl</connectionfactory-impl-class>
+				<connection-interface>de.tsl2.nano.resource.fs.FsConnection</connection-interface>
+				<connection-impl-class>de.tsl2.nano.resource.fs.impl.FsConnectionImpl</connection-impl-class>
 			</connection-definition>
 			<transaction-support>NoTransaction</transaction-support>
 			<reauthentication-support>true</reauthentication-support>

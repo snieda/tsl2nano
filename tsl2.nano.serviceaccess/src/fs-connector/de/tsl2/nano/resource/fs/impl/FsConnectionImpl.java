@@ -129,7 +129,7 @@ public class FsConnectionImpl implements FsConnection {
     }
 
     /**
-     * @see de.idv.resource.fs.FsConnection#getDirectoryEntries(java.lang.String)
+     * @see de.tsl2.nano.resource.fs.FsConnection#getDirectoryEntries(java.lang.String)
      */
     @Override
     public String[] getDirectoryEntries(String dirName) throws IOException {
