@@ -11,17 +11,22 @@ import java.io.InputStream;
 import java.net.InetAddress;
 import java.net.Socket;
 import java.net.URL;
+import java.security.Principal;
 import java.text.FieldPosition;
 import java.text.Format;
 import java.text.ParsePosition;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Properties;
 import java.util.ResourceBundle;
+import java.util.Set;
 import java.util.Stack;
+
+import javax.security.auth.Subject;
 
 import org.apache.commons.logging.Log;
 
@@ -31,12 +36,18 @@ import de.tsl2.nano.collection.MapUtil;
 import de.tsl2.nano.exception.FormattedException;
 import de.tsl2.nano.execution.CompatibilityLayer;
 import de.tsl2.nano.execution.SystemUtil;
+import de.tsl2.nano.execution.XmlUtil;
 import de.tsl2.nano.log.LogFactory;
 import de.tsl2.nano.persistence.HibernateBeanContainer;
 import de.tsl2.nano.persistence.Persistence;
 import de.tsl2.nano.persistence.PersistenceClassLoader;
 import de.tsl2.nano.script.ScriptTool;
 import de.tsl2.nano.service.util.BeanContainerUtil;
+import de.tsl2.nano.serviceaccess.Authorization;
+import de.tsl2.nano.serviceaccess.IAuthorization;
+import de.tsl2.nano.serviceaccess.aas.principal.APermission;
+import de.tsl2.nano.serviceaccess.aas.principal.Role;
+import de.tsl2.nano.serviceaccess.aas.principal.UserPrincipal;
 import de.tsl2.nano.util.FileUtil;
 import de.tsl2.nano.util.StringUtil;
 import de.tsl2.nano.util.bean.BeanContainer;
@@ -143,7 +154,7 @@ public class NanoH5 extends NanoHTTPD {
     public Response serve(String uri, String method, Properties header, Properties parms, Properties files) {
         if (method.equals("GET") && uri.contains("."))
             return super.serve(uri, method, header, parms, files);
-        InetAddress requestor = ((Socket)header.get("socket")).getInetAddress();
+        InetAddress requestor = ((Socket) header.get("socket")).getInetAddress();
         NanoH5Session session = sessions.get(requestor);
         if (session == null) {
             session = createSession(requestor);
@@ -154,10 +165,11 @@ public class NanoH5 extends NanoHTTPD {
     public Response createResponse(String msg) {
         return createResponse(HTTP_OK, MIME_HTML, msg);
     }
+
     public Response createResponse(String status, String type, String msg) {
         return new NanoHTTPD.Response(status, type, msg);
     }
-    
+
     /**
      * adds services for presentation and page-builder
      */
@@ -175,7 +187,10 @@ public class NanoH5 extends NanoHTTPD {
     protected NanoH5Session createSession(InetAddress inetAddress) {
         LOG.info("creating new session on socket: " + inetAddress);
         Stack<BeanDefinition<?>> navigationModel = createGenericNavigationModel();
-        NanoH5Session session = new NanoH5Session(this, inetAddress, navigationModel, Environment.get(ClassLoader.class));
+        NanoH5Session session = new NanoH5Session(this,
+            inetAddress,
+            navigationModel,
+            Environment.get(ClassLoader.class));
         sessions.put(inetAddress, session);
         return session;
     }
@@ -227,6 +242,9 @@ public class NanoH5 extends NanoHTTPD {
                 Thread.currentThread().setContextClassLoader(runtimeClassloader);
                 Environment.addService(ClassLoader.class, runtimeClassloader);
 
+                Subject subject = createSubject(persistence);
+                Environment.addService(IAuthorization.class, new Authorization(subject));
+
                 //load all beans from selected jar-file and provide them in a beancontainer
                 List<Class> beanClasses = createBeanContainer(persistence, runtimeClassloader);
 
@@ -245,6 +263,27 @@ public class NanoH5 extends NanoHTTPD {
             }
         });
         return login;
+    }
+
+    /**
+     * createSubject
+     * 
+     * @param persistence
+     * @return
+     */
+    private Subject createSubject(final Persistence persistence) {
+        Subject subject = new Subject();
+        String permissions = Environment.getConfigPath() + "permissons.xml";
+        if (new File(permissions).canRead()) {
+            Subject subjectDef = XmlUtil.loadXml(permissions, Subject.class);
+            subject.getPrincipals().addAll(subjectDef.getPrincipals());
+        } else {
+            //if no permission was defined, a wildcard for all permissions will be set.
+            subject.getPrincipals().add(new UserPrincipal(persistence.getConnectionUserName()));
+            subject.getPrincipals().add(new Role("admin", new APermission("*", "*")));
+            XmlUtil.saveXml(permissions, subject);
+        }
+        return subject;
     }
 
     /**
