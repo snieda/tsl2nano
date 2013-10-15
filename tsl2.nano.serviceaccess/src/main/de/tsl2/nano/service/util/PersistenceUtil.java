@@ -2,10 +2,10 @@
  * File: $HeadURL$
  * Id  : $Id$
  * 
- * created by: TS, IDV-AG
+ * created by: Thomas Schneider
  * created on: Jan 19, 2010
  * 
- * Copyright: (c) IDV-AG 2010, all rights reserved
+ * Copyright: (c) Thomas Schneider 2010, all rights reserved
  */
 package de.tsl2.nano.service.util;
 
@@ -17,7 +17,7 @@ package de.tsl2.nano.service.util;
  * toplink (oracle) specific and at the moment not needed. to re-animate this class, you have to add the library
  * 'toplink-essentials.jar' (in glassfish/lib) to your classpath.<br>
  * 
- * @author TS, IDV-AG
+ * @author Thomas Schneider
  * @version $Revision$
  * 
  */

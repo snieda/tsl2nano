@@ -2,18 +2,12 @@
  * File: $HeadURL$
  * Id  : $Id$
  * 
- * created by: Thomas Schneider, Thomas Schneider, www.idv-ag.de
+ * created by: Thomas Schneider
  * created on: Apr 13, 2010
  * 
- * Copyright: (c) Thomas Schneider, www.idv-ag.de 2010, all rights reserved
+ * Copyright: (c) Thomas Schneider 2010, all rights reserved
  */
 package de.tsl2.nano.service.util;
-
-import static de.tsl2.nano.service.util.ServiceUtil.OP_EQ;
-import static de.tsl2.nano.service.util.ServiceUtil.OP_LIKE;
-import static de.tsl2.nano.service.util.ServiceUtil.addAndConditions;
-import static de.tsl2.nano.service.util.ServiceUtil.createStatement;
-import static de.tsl2.nano.service.util.ServiceUtil.getLogInfo;
 
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Field;
@@ -33,9 +27,9 @@ import javax.persistence.JoinColumn;
 import javax.persistence.Query;
 
 import org.apache.commons.logging.Log;
-import de.tsl2.nano.log.LogFactory;
 
 import de.tsl2.nano.exception.ForwardedException;
+import de.tsl2.nano.log.LogFactory;
 import de.tsl2.nano.util.StringUtil;
 import de.tsl2.nano.util.bean.BeanAttribute;
 import de.tsl2.nano.util.bean.BeanClass;
@@ -45,7 +39,7 @@ import de.tsl2.nano.util.bean.IAttributeDef;
 /**
  * some utility functions to be used by services.
  * 
- * @author Thomas Schneider, Thomas Schneider, www.idv-ag.de
+ * @author Thomas Schneider
  * @version $Revision$
  */
 @SuppressWarnings({ "unchecked", "rawtypes" })
