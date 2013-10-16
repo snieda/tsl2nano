@@ -28,13 +28,13 @@ import javax.persistence.Query;
 
 import org.apache.commons.logging.Log;
 
+import de.tsl2.nano.bean.BeanAttribute;
+import de.tsl2.nano.bean.BeanClass;
+import de.tsl2.nano.bean.BeanUtil;
+import de.tsl2.nano.bean.IAttributeDef;
 import de.tsl2.nano.exception.ForwardedException;
 import de.tsl2.nano.log.LogFactory;
 import de.tsl2.nano.util.StringUtil;
-import de.tsl2.nano.util.bean.BeanAttribute;
-import de.tsl2.nano.util.bean.BeanClass;
-import de.tsl2.nano.util.bean.BeanUtil;
-import de.tsl2.nano.util.bean.IAttributeDef;
 
 /**
  * some utility functions to be used by services.

@@ -23,6 +23,7 @@ import org.junit.Before;
 import org.junit.Test;
 
 import de.tsl2.nano.action.IAction;
+import de.tsl2.nano.bean.BeanProxy;
 import de.tsl2.nano.collection.ListSet;
 import de.tsl2.nano.execution.Profiler;
 import de.tsl2.nano.service.feature.FeatureFactory;
@@ -38,7 +39,6 @@ import de.tsl2.nano.serviceaccess.aas.module.AbstractLoginModule;
 import de.tsl2.nano.serviceaccess.aas.principal.AbstractPrincipalAction;
 import de.tsl2.nano.test.TypeBean;
 import de.tsl2.nano.util.DateUtil;
-import de.tsl2.nano.util.bean.BeanProxy;
 import static de.tsl2.nano.service.util.finder.Finder.*;
 
 /*

@@ -9,6 +9,8 @@
  */
 package de.tsl2.nano.h5;
 
+import static de.tsl2.nano.bean.def.IBeanCollector.MODE_ASSIGNABLE;
+import static de.tsl2.nano.bean.def.IBeanCollector.MODE_MULTISELECTION;
 import static de.tsl2.nano.h5.HtmlUtil.ALIGN_CENTER;
 import static de.tsl2.nano.h5.HtmlUtil.ALIGN_RIGHT;
 import static de.tsl2.nano.h5.HtmlUtil.ATTR_ACCESSKEY;
@@ -73,8 +75,6 @@ import static de.tsl2.nano.h5.HtmlUtil.appendElement;
 import static de.tsl2.nano.h5.HtmlUtil.enable;
 import static de.tsl2.nano.h5.HtmlUtil.enableBoolean;
 import static de.tsl2.nano.h5.HtmlUtil.style;
-import static de.tsl2.nano.util.bean.def.IBeanCollector.MODE_ASSIGNABLE;
-import static de.tsl2.nano.util.bean.def.IBeanCollector.MODE_MULTISELECTION;
 
 import java.util.Arrays;
 import java.util.Collection;
@@ -92,6 +92,20 @@ import org.w3c.dom.Element;
 import de.tsl2.nano.Environment;
 import de.tsl2.nano.Messages;
 import de.tsl2.nano.action.IAction;
+import de.tsl2.nano.bean.BeanContainer;
+import de.tsl2.nano.bean.BeanUtil;
+import de.tsl2.nano.bean.def.Bean;
+import de.tsl2.nano.bean.def.BeanCollector;
+import de.tsl2.nano.bean.def.BeanDefinition;
+import de.tsl2.nano.bean.def.BeanPresentationHelper;
+import de.tsl2.nano.bean.def.BeanValue;
+import de.tsl2.nano.bean.def.IBeanCollector;
+import de.tsl2.nano.bean.def.IColumn;
+import de.tsl2.nano.bean.def.IPageBuilder;
+import de.tsl2.nano.bean.def.IPresentable;
+import de.tsl2.nano.bean.def.IPresentableColumn;
+import de.tsl2.nano.bean.def.SecureAction;
+import de.tsl2.nano.bean.def.ValueExpressionFormat;
 import de.tsl2.nano.collection.CollectionUtil;
 import de.tsl2.nano.collection.MapUtil;
 import de.tsl2.nano.exception.ForwardedException;
@@ -101,20 +115,6 @@ import de.tsl2.nano.log.LogFactory;
 import de.tsl2.nano.util.FileUtil;
 import de.tsl2.nano.util.NumberUtil;
 import de.tsl2.nano.util.StringUtil;
-import de.tsl2.nano.util.bean.BeanContainer;
-import de.tsl2.nano.util.bean.BeanUtil;
-import de.tsl2.nano.util.bean.def.Bean;
-import de.tsl2.nano.util.bean.def.BeanCollector;
-import de.tsl2.nano.util.bean.def.BeanDefinition;
-import de.tsl2.nano.util.bean.def.BeanPresentationHelper;
-import de.tsl2.nano.util.bean.def.BeanValue;
-import de.tsl2.nano.util.bean.def.IBeanCollector;
-import de.tsl2.nano.util.bean.def.IColumn;
-import de.tsl2.nano.util.bean.def.IPageBuilder;
-import de.tsl2.nano.util.bean.def.IPresentable;
-import de.tsl2.nano.util.bean.def.IPresentableColumn;
-import de.tsl2.nano.util.bean.def.SecureAction;
-import de.tsl2.nano.util.bean.def.ValueExpressionFormat;
 
 /**
  * is able to present a bean as an html page. main method is {@link #build(Element, String)}.

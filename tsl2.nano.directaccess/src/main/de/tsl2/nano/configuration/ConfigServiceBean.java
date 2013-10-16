@@ -17,11 +17,11 @@ import java.util.Properties;
 
 import javax.security.auth.Subject;
 
+import de.tsl2.nano.bean.BeanAttribute;
+import de.tsl2.nano.bean.def.Bean;
 import de.tsl2.nano.service.util.IGenericService;
 import de.tsl2.nano.service.util.batch.Part;
 import de.tsl2.nano.service.util.finder.AbstractFinder;
-import de.tsl2.nano.util.bean.BeanAttribute;
-import de.tsl2.nano.util.bean.def.Bean;
 
 /**
  * Configuration Service to configure bean types. only findBetween is implemented - only for the beanType

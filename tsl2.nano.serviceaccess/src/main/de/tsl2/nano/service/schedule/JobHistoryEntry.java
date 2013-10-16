@@ -13,7 +13,7 @@ import java.io.Serializable;
 import java.text.DateFormat;
 import java.util.Date;
 
-import de.tsl2.nano.util.bean.def.IStatus;
+import de.tsl2.nano.bean.def.IStatus;
 
 /**
  * Entry for a called job

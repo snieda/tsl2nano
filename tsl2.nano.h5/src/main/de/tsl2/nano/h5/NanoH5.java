@@ -1,9 +1,9 @@
 package de.tsl2.nano.h5;
 
-import static de.tsl2.nano.util.bean.def.IBeanCollector.MODE_CREATABLE;
-import static de.tsl2.nano.util.bean.def.IBeanCollector.MODE_EDITABLE;
-import static de.tsl2.nano.util.bean.def.IBeanCollector.MODE_MULTISELECTION;
-import static de.tsl2.nano.util.bean.def.IBeanCollector.MODE_SEARCHABLE;
+import static de.tsl2.nano.bean.def.IBeanCollector.MODE_CREATABLE;
+import static de.tsl2.nano.bean.def.IBeanCollector.MODE_EDITABLE;
+import static de.tsl2.nano.bean.def.IBeanCollector.MODE_MULTISELECTION;
+import static de.tsl2.nano.bean.def.IBeanCollector.MODE_SEARCHABLE;
 
 import java.io.File;
 import java.io.IOException;
@@ -32,6 +32,16 @@ import org.apache.commons.logging.Log;
 
 import de.tsl2.nano.Environment;
 import de.tsl2.nano.Messages;
+import de.tsl2.nano.bean.BeanContainer;
+import de.tsl2.nano.bean.IBeanContainer;
+import de.tsl2.nano.bean.def.Bean;
+import de.tsl2.nano.bean.def.BeanCollector;
+import de.tsl2.nano.bean.def.BeanDefinition;
+import de.tsl2.nano.bean.def.BeanPresentationHelper;
+import de.tsl2.nano.bean.def.BeanValue;
+import de.tsl2.nano.bean.def.IPageBuilder;
+import de.tsl2.nano.bean.def.IPresentable;
+import de.tsl2.nano.bean.def.SecureAction;
 import de.tsl2.nano.collection.MapUtil;
 import de.tsl2.nano.exception.FormattedException;
 import de.tsl2.nano.execution.CompatibilityLayer;
@@ -50,16 +60,6 @@ import de.tsl2.nano.serviceaccess.aas.principal.Role;
 import de.tsl2.nano.serviceaccess.aas.principal.UserPrincipal;
 import de.tsl2.nano.util.FileUtil;
 import de.tsl2.nano.util.StringUtil;
-import de.tsl2.nano.util.bean.BeanContainer;
-import de.tsl2.nano.util.bean.IBeanContainer;
-import de.tsl2.nano.util.bean.def.Bean;
-import de.tsl2.nano.util.bean.def.BeanCollector;
-import de.tsl2.nano.util.bean.def.BeanDefinition;
-import de.tsl2.nano.util.bean.def.BeanPresentationHelper;
-import de.tsl2.nano.util.bean.def.BeanValue;
-import de.tsl2.nano.util.bean.def.IPageBuilder;
-import de.tsl2.nano.util.bean.def.IPresentable;
-import de.tsl2.nano.util.bean.def.SecureAction;
 
 /**
  * An Application of subclassing NanoHTTPD to make a custom HTTP server.
@@ -242,8 +242,7 @@ public class NanoH5 extends NanoHTTPD {
                 Thread.currentThread().setContextClassLoader(runtimeClassloader);
                 Environment.addService(ClassLoader.class, runtimeClassloader);
 
-                Subject subject = createSubject(persistence);
-                Environment.addService(IAuthorization.class, new Authorization(subject));
+                createAuthorization(persistence);
 
                 //load all beans from selected jar-file and provide them in a beancontainer
                 List<Class> beanClasses = createBeanContainer(persistence, runtimeClassloader);
@@ -271,19 +270,9 @@ public class NanoH5 extends NanoHTTPD {
      * @param persistence
      * @return
      */
-    private Subject createSubject(final Persistence persistence) {
-        Subject subject = new Subject();
-        String permissions = Environment.getConfigPath() + "permissons.xml";
-        if (new File(permissions).canRead()) {
-            Subject subjectDef = XmlUtil.loadXml(permissions, Subject.class);
-            subject.getPrincipals().addAll(subjectDef.getPrincipals());
-        } else {
-            //if no permission was defined, a wildcard for all permissions will be set.
-            subject.getPrincipals().add(new UserPrincipal(persistence.getConnectionUserName()));
-            subject.getPrincipals().add(new Role("admin", new APermission("*", "*")));
-            XmlUtil.saveXml(permissions, subject);
-        }
-        return subject;
+    private void createAuthorization(final Persistence persistence) {
+        String userName = persistence.getConnectionUserName();
+        Environment.addService(IAuthorization.class, Authorization.create(userName, false));
     }
 
     /**

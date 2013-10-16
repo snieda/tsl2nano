@@ -475,7 +475,7 @@ starting ${ant.project.name}:
 	</macrodef>
 
 	<target name="sh.call.method" unless="disable_sh.method" description="calls a given java method">
-		<property name="sh.java.classname" value="de.tsl2.nano.util.bean.BeanUtil" />
+		<property name="sh.java.classname" value="de.tsl2.nano.bean.BeanUtil" />
 		<antcall target="sh.java">
 		</antcall>
 	</target>

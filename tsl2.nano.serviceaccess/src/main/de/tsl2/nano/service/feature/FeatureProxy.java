@@ -13,9 +13,9 @@ import java.lang.reflect.Method;
 import java.lang.reflect.Proxy;
 import java.security.Principal;
 
+import de.tsl2.nano.bean.BeanUtil;
 import de.tsl2.nano.serviceaccess.ServiceFactory;
 import de.tsl2.nano.serviceaccess.ServiceProxy;
-import de.tsl2.nano.util.bean.BeanUtil;
 
 /**
  * handles optional calls (features).<br>

@@ -12,10 +12,10 @@ package de.tsl2.nano.serialization;
 import java.util.HashMap;
 import java.util.Map;
 
+import de.tsl2.nano.bean.BeanContainer;
 import de.tsl2.nano.persistence.GenericBeanContainer;
 import de.tsl2.nano.persistence.GenericLocalServiceBean;
 import de.tsl2.nano.service.util.IGenericService;
-import de.tsl2.nano.util.bean.BeanContainer;
 
 /**
  * see {@link GenericLocalServiceBean}.

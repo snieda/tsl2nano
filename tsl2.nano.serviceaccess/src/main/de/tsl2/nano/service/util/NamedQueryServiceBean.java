@@ -21,10 +21,10 @@ import javax.persistence.NamedQuery;
 import javax.persistence.Query;
 import javax.persistence.Table;
 
+import de.tsl2.nano.bean.BeanAttribute;
+import de.tsl2.nano.bean.def.Bean;
 import de.tsl2.nano.exception.FormattedException;
 import de.tsl2.nano.util.StringUtil;
-import de.tsl2.nano.util.bean.BeanAttribute;
-import de.tsl2.nano.util.bean.def.Bean;
 import static de.tsl2.nano.service.util.ServiceUtil.*;
 
 /**

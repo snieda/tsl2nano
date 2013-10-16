@@ -31,6 +31,8 @@ import javax.ejb.TransactionAttributeType;
 import javax.persistence.Query;
 import javax.security.auth.Subject;
 
+import de.tsl2.nano.bean.BeanAttribute;
+import de.tsl2.nano.bean.BeanClass;
 import de.tsl2.nano.exception.FormattedException;
 import de.tsl2.nano.exception.ForwardedException;
 import de.tsl2.nano.service.util.batch.Part;
@@ -39,8 +41,6 @@ import de.tsl2.nano.service.util.finder.Finder;
 import de.tsl2.nano.serviceaccess.ServiceFactory;
 import de.tsl2.nano.serviceaccess.aas.principal.UserPrincipal;
 import de.tsl2.nano.util.StringUtil;
-import de.tsl2.nano.util.bean.BeanAttribute;
-import de.tsl2.nano.util.bean.BeanClass;
 
 /**
  * provides some basic service access methods to work with beans.

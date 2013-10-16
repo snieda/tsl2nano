@@ -30,12 +30,12 @@ import de.tsl2.nano.log.LogFactory;
 
 import de.tsl2.nano.action.CommonAction;
 import de.tsl2.nano.action.IAction;
+import de.tsl2.nano.bean.BeanAttribute;
+import de.tsl2.nano.bean.BeanClass;
+import de.tsl2.nano.bean.BeanContainer;
+import de.tsl2.nano.bean.IAttributeDef;
 import de.tsl2.nano.exception.ForwardedException;
 import de.tsl2.nano.serviceaccess.ServiceFactory;
-import de.tsl2.nano.util.bean.BeanAttribute;
-import de.tsl2.nano.util.bean.BeanClass;
-import de.tsl2.nano.util.bean.BeanContainer;
-import de.tsl2.nano.util.bean.IAttributeDef;
 
 /**
  * JPA 2.0 BeanContainer, using the stateless session bean {@link IGenericService}.

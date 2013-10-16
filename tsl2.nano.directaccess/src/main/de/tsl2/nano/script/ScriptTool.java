@@ -22,13 +22,13 @@ import org.apache.commons.io.FileUtils;
 import de.tsl2.nano.Environment;
 import de.tsl2.nano.action.CommonAction;
 import de.tsl2.nano.action.IAction;
+import de.tsl2.nano.bean.BeanContainer;
+import de.tsl2.nano.bean.def.BeanValue;
 import de.tsl2.nano.exception.ForwardedException;
 import de.tsl2.nano.execution.ScriptUtil;
 import de.tsl2.nano.persistence.Persistence;
 import de.tsl2.nano.util.FileUtil;
 import de.tsl2.nano.util.StringUtil;
-import de.tsl2.nano.util.bean.BeanContainer;
-import de.tsl2.nano.util.bean.def.BeanValue;
 
 /**
  * 

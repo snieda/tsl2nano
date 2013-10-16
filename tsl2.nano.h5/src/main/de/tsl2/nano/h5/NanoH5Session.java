@@ -9,6 +9,9 @@
  */
 package de.tsl2.nano.h5;
 
+import static de.tsl2.nano.bean.def.BeanPresentationHelper.KEY_FILTER_FROM_LABEL;
+import static de.tsl2.nano.bean.def.BeanPresentationHelper.KEY_FILTER_TO_LABEL;
+import static de.tsl2.nano.bean.def.IBeanCollector.MODE_SEARCHABLE;
 import static de.tsl2.nano.h5.HtmlUtil.BTN_ASSIGN;
 import static de.tsl2.nano.h5.HtmlUtil.BTN_CANCEL;
 import static de.tsl2.nano.h5.HtmlUtil.BTN_SUBMIT;
@@ -16,9 +19,6 @@ import static de.tsl2.nano.h5.NanoH5.OFFSET_FILTERLINES;
 import static de.tsl2.nano.h5.NanoH5.START_PAGE;
 import static de.tsl2.nano.h5.NanoHTTPD.HTTP_BADREQUEST;
 import static de.tsl2.nano.h5.NanoHTTPD.MIME_HTML;
-import static de.tsl2.nano.util.bean.def.BeanPresentationHelper.KEY_FILTER_FROM_LABEL;
-import static de.tsl2.nano.util.bean.def.BeanPresentationHelper.KEY_FILTER_TO_LABEL;
-import static de.tsl2.nano.util.bean.def.IBeanCollector.MODE_SEARCHABLE;
 
 import java.io.Serializable;
 import java.net.InetAddress;
@@ -33,6 +33,15 @@ import org.apache.commons.logging.Log;
 
 import de.tsl2.nano.Environment;
 import de.tsl2.nano.action.IAction;
+import de.tsl2.nano.bean.BeanContainer;
+import de.tsl2.nano.bean.def.Bean;
+import de.tsl2.nano.bean.def.BeanCollector;
+import de.tsl2.nano.bean.def.BeanDefinition;
+import de.tsl2.nano.bean.def.BeanPresentationHelper;
+import de.tsl2.nano.bean.def.BeanValue;
+import de.tsl2.nano.bean.def.IBeanCollector;
+import de.tsl2.nano.bean.def.IPageBuilder;
+import de.tsl2.nano.bean.def.IPresentable;
 import de.tsl2.nano.collection.CollectionUtil;
 import de.tsl2.nano.collection.ListSet;
 import de.tsl2.nano.exception.ForwardedException;
@@ -42,15 +51,6 @@ import de.tsl2.nano.log.LogFactory;
 import de.tsl2.nano.util.DateUtil;
 import de.tsl2.nano.util.NumberUtil;
 import de.tsl2.nano.util.StringUtil;
-import de.tsl2.nano.util.bean.BeanContainer;
-import de.tsl2.nano.util.bean.def.Bean;
-import de.tsl2.nano.util.bean.def.BeanCollector;
-import de.tsl2.nano.util.bean.def.BeanDefinition;
-import de.tsl2.nano.util.bean.def.BeanPresentationHelper;
-import de.tsl2.nano.util.bean.def.BeanValue;
-import de.tsl2.nano.util.bean.def.IBeanCollector;
-import de.tsl2.nano.util.bean.def.IPageBuilder;
-import de.tsl2.nano.util.bean.def.IPresentable;
 /**
  * 
  * @author Tom, Thomas Schneider
