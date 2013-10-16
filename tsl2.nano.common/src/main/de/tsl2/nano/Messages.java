@@ -70,7 +70,7 @@ public class Messages {
             try {
                 return bundle.getString(key);
             } catch (final MissingResourceException ignore) {
-                LOG.trace("resource key not found: " + key);
+//                LOG.trace("resource key not found: " + key);
             }
         }
         return TOKEN_MSG_NOTFOUND + key + TOKEN_MSG_NOTFOUND;
