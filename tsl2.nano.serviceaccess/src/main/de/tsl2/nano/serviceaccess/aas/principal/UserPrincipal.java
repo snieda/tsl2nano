@@ -70,10 +70,14 @@ public class UserPrincipal implements Principal, java.io.Serializable {
      * @serial
      */
     @Attribute
-    private final String name;
+    private String name;
     @Element(required=false)
-    private final Object data;
+    private Object data;
     
+
+    public UserPrincipal() {
+        this("<deserialized>", null);
+    }
 
     /**
      * Create a Principal with a username.

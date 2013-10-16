@@ -31,6 +31,10 @@ public class Role implements Principal, Serializable {
 
     Set<BasicPermission> permissions;
     
+    public Role() {
+        this("<deserialized>");
+    }
+    
     /**
      * constructor
      * 

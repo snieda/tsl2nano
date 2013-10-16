@@ -27,6 +27,10 @@ public class APermission extends BasicPermission {
 
     String actions;
     
+    public APermission() {
+        this("<deserialized>");
+    }
+    
     public APermission(String name) {
         super(name);
     }
