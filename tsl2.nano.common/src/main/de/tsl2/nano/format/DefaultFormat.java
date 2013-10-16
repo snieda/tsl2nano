@@ -21,13 +21,11 @@ import org.apache.commons.logging.Log;
 
 import de.tsl2.nano.Environment;
 import de.tsl2.nano.Messages;
+import de.tsl2.nano.bean.BeanUtil;
 import de.tsl2.nano.exception.FormattedException;
 import de.tsl2.nano.execution.CompatibilityLayer;
 import de.tsl2.nano.log.LogFactory;
 import de.tsl2.nano.util.StringUtil;
-import de.tsl2.nano.util.bean.BeanUtil;
-//import org.apache.commons.lang.builder.StandardToStringStyle;
-//import org.apache.commons.lang.builder.ToStringBuilder;
 
 /**
  * Default formatter for all objects used by all dynamicform components. Override this class to use special formatting

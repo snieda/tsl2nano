@@ -17,7 +17,7 @@ import java.util.List;
 import java.util.ListIterator;
 import java.util.Map;
 
-import de.tsl2.nano.util.bean.BeanClass;
+import de.tsl2.nano.bean.BeanClass;
 
 /**
  * Runtime filtering Iterator. Wraps the Iterator of the given collection. {@link #remove()} is not supported! Please

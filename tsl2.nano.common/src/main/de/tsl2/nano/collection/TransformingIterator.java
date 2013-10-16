@@ -15,7 +15,7 @@ import java.lang.reflect.Proxy;
 import java.util.Iterator;
 import java.util.Queue;
 
-import de.tsl2.nano.util.bean.BeanClass;
+import de.tsl2.nano.bean.BeanClass;
 
 /**
  * Runtime transforming Iterator. Wraps the Iterator of the given collection. {@link #remove()} is not supported! Please

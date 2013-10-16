@@ -15,10 +15,11 @@ import java.util.Arrays;
 import java.util.List;
 
 import org.apache.commons.logging.Log;
+
+import de.tsl2.nano.bean.BeanClass;
 import de.tsl2.nano.log.LogFactory;
 
 import de.tsl2.nano.util.StringUtil;
-import de.tsl2.nano.util.bean.BeanClass;
 
 /**
  * Defines a table of values. A header defines the columns. The header array shouldn't hold any null values! All rows

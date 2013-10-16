@@ -12,8 +12,8 @@ import org.apache.velocity.Template;
 import org.apache.velocity.VelocityContext;
 import org.apache.velocity.app.VelocityEngine;
 
+import de.tsl2.nano.bean.BeanClass;
 import de.tsl2.nano.exception.ForwardedException;
-import de.tsl2.nano.util.bean.BeanClass;
 
 /**
  * 

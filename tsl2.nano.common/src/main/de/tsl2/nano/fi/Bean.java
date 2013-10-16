@@ -11,9 +11,9 @@ package de.tsl2.nano.fi;
 
 import java.text.Format;
 
-import de.tsl2.nano.util.bean.def.AttributeDefinition;
-import de.tsl2.nano.util.bean.def.BeanValue;
-import de.tsl2.nano.util.bean.def.Presentable;
+import de.tsl2.nano.bean.def.AttributeDefinition;
+import de.tsl2.nano.bean.def.BeanValue;
+import de.tsl2.nano.bean.def.Presentable;
 
 
 /**
@@ -21,7 +21,7 @@ import de.tsl2.nano.util.bean.def.Presentable;
  * @author Thomas Schneider
  * @version $Revision$ 
  */
-public class Bean<T> extends de.tsl2.nano.util.bean.def.Bean<T> {
+public class Bean<T> extends de.tsl2.nano.bean.def.Bean<T> {
     AttributeDefinition<?> attrOnConstruction;
     
     /**

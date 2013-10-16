@@ -13,8 +13,8 @@ import java.lang.reflect.InvocationHandler;
 import java.lang.reflect.Method;
 import java.lang.reflect.Proxy;
 
+import de.tsl2.nano.bean.BeanClass;
 import de.tsl2.nano.execution.IRunnable;
-import de.tsl2.nano.util.bean.BeanClass;
 
 /**
  * simple proxy to enable aop like enhancement.

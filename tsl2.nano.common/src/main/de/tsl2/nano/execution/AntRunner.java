@@ -32,9 +32,9 @@ import org.apache.tools.ant.types.FileSet;
 import org.apache.tools.ant.types.resources.Files;
 import org.apache.tools.ant.types.selectors.FileSelector;
 
+import de.tsl2.nano.bean.BeanClass;
 import de.tsl2.nano.exception.ForwardedException;
 import de.tsl2.nano.util.StringUtil;
-import de.tsl2.nano.util.bean.BeanClass;
 
 /**
  * is able to run ant targets given by name and properties. If task is a {@link MatchingTask}, an array of

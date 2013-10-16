@@ -27,14 +27,14 @@ import org.simpleframework.xml.DefaultType;
 import org.simpleframework.xml.ElementMap;
 import org.simpleframework.xml.core.Persist;
 
+import de.tsl2.nano.bean.BeanClass;
+import de.tsl2.nano.bean.BeanUtil;
 import de.tsl2.nano.execution.CompatibilityLayer;
 import de.tsl2.nano.execution.Profiler;
 import de.tsl2.nano.execution.XmlUtil;
 import de.tsl2.nano.format.DefaultFormat;
 import de.tsl2.nano.util.NetUtil;
 import de.tsl2.nano.util.StringUtil;
-import de.tsl2.nano.util.bean.BeanClass;
-import de.tsl2.nano.util.bean.BeanUtil;
 
 /**
  * Generic Application-Environment. Providing:

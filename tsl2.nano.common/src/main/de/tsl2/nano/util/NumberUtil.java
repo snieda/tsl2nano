@@ -25,10 +25,10 @@ import java.util.Locale;
 import org.apache.commons.logging.Log;
 import de.tsl2.nano.log.LogFactory;
 
+import de.tsl2.nano.bean.BeanClass;
 import de.tsl2.nano.exception.FormattedException;
 import de.tsl2.nano.exception.ForwardedException;
 import de.tsl2.nano.format.FormatUtil;
-import de.tsl2.nano.util.bean.BeanClass;
 
 /**
  * Some utils for numbers and comparables

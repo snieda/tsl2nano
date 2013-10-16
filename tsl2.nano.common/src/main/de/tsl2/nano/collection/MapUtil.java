@@ -15,11 +15,11 @@ import java.util.LinkedHashSet;
 import java.util.Map;
 import java.util.Set;
 
+import de.tsl2.nano.bean.BeanAttribute;
+import de.tsl2.nano.bean.BeanUtil;
+import de.tsl2.nano.bean.def.Bean;
 import de.tsl2.nano.exception.FormattedException;
 import de.tsl2.nano.util.StringUtil;
-import de.tsl2.nano.util.bean.BeanAttribute;
-import de.tsl2.nano.util.bean.BeanUtil;
-import de.tsl2.nano.util.bean.def.Bean;
 
 /**
  * utilities for maps.

@@ -26,9 +26,9 @@ import org.apache.commons.logging.Log;
 import de.tsl2.nano.log.LogFactory;
 
 import de.tsl2.nano.action.IAction;
+import de.tsl2.nano.bean.BeanAttribute;
 import de.tsl2.nano.format.DefaultFormat;
 import de.tsl2.nano.util.NumberUtil;
-import de.tsl2.nano.util.bean.BeanAttribute;
 
 /**
  * some utility methods for collections

@@ -13,11 +13,12 @@ import java.util.ResourceBundle;
 import java.util.StringTokenizer;
 
 import org.apache.commons.logging.Log;
+
+import de.tsl2.nano.bean.BeanUtil;
 import de.tsl2.nano.log.LogFactory;
 
 import de.tsl2.nano.Messages;
 import de.tsl2.nano.util.StringUtil;
-import de.tsl2.nano.util.bean.BeanUtil;
 
 /**
  * For unchecked Exception handling. If you catch an exception and want to forward this exception in a runtime exception

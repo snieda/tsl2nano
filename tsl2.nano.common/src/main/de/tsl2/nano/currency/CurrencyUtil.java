@@ -27,12 +27,12 @@ import java.util.Map;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
+import de.tsl2.nano.bean.BeanUtil;
 import de.tsl2.nano.collection.CollectionUtil;
 import de.tsl2.nano.collection.IPredicate;
 import de.tsl2.nano.collection.MapUtil;
 import de.tsl2.nano.util.FileUtil;
 import de.tsl2.nano.util.Period;
-import de.tsl2.nano.util.bean.BeanUtil;
 
 /**
  * The jdk implementation (until 1.6) {@link Currency} does not provide needed features like giving historized currency

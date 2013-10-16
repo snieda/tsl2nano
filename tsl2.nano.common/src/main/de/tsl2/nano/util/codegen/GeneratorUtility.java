@@ -5,8 +5,8 @@ import java.util.Collection;
 import java.util.Date;
 import java.util.Properties;
 
-import de.tsl2.nano.util.bean.BeanAttribute;
-import de.tsl2.nano.util.bean.BeanUtil;
+import de.tsl2.nano.bean.BeanAttribute;
+import de.tsl2.nano.bean.BeanUtil;
 
 /**
  * helper class for {@linkplain ClassGenerator}

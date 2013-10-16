@@ -21,12 +21,12 @@ import java.util.List;
 
 import org.apache.commons.logging.Log;
 
+import de.tsl2.nano.bean.BeanUtil;
 import de.tsl2.nano.exception.FormattedException;
 import de.tsl2.nano.exception.ForwardedException;
 import de.tsl2.nano.log.LogFactory;
 import de.tsl2.nano.util.FileUtil;
 import de.tsl2.nano.util.StringUtil;
-import de.tsl2.nano.util.bean.BeanUtil;
 
 /**
  * provides dynamic classloading through extending classpath on runtime. use {@link #addURL(URL)} to enhance the

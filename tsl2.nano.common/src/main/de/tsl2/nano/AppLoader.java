@@ -14,12 +14,12 @@ import java.util.Map;
 
 import org.apache.commons.logging.Log;
 
+import de.tsl2.nano.bean.BeanClass;
 import de.tsl2.nano.classloader.NestedJarClassLoader;
 import de.tsl2.nano.collection.CollectionUtil;
 import de.tsl2.nano.collection.MapUtil;
 import de.tsl2.nano.log.LogFactory;
 import de.tsl2.nano.util.StringUtil;
-import de.tsl2.nano.util.bean.BeanClass;
 
 /**
  * Provides an Application Starter with an own extended classloader and a convenience to handle call arguments (the
