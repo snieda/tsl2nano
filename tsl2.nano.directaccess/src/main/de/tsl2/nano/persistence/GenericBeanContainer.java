@@ -18,12 +18,11 @@ import javax.persistence.Entity;
 import de.tsl2.nano.Environment;
 import de.tsl2.nano.action.CommonAction;
 import de.tsl2.nano.action.IAction;
+import de.tsl2.nano.bean.BeanClass;
+import de.tsl2.nano.bean.BeanContainer;
 import de.tsl2.nano.service.util.BeanContainerUtil;
 import de.tsl2.nano.service.util.IGenericService;
 import de.tsl2.nano.serviceaccess.IAuthorization;
-import de.tsl2.nano.serviceaccess.aas.principal.APermission;
-import de.tsl2.nano.util.bean.BeanClass;
-import de.tsl2.nano.util.bean.BeanContainer;
 
 /**
  * see {@link GenericLocalServiceBean}.
@@ -143,7 +142,7 @@ public abstract class GenericBeanContainer extends BeanContainerUtil {
     }
 
     protected static Object hasPermission(String name, String action) {
-        return new APermission(name, action).hasAccess(Environment.get(IAuthorization.class).getSubject());
+        return Environment.get(IAuthorization.class).hasAccess(name, action);
     }
 
     protected abstract IGenericService getService();

@@ -18,9 +18,10 @@ public interface IAuthorization {
      * hasRole
      * 
      * @param roleName
-     * @return true, if user has role
+     * @param action
+     * @return true, if user has permission to access role 'name' with action.
      */
-    boolean hasAccess(String name, String type);
+    boolean hasAccess(String name, String action);
 
     /**
      * getUserObject

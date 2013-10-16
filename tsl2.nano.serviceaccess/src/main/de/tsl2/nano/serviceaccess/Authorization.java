@@ -9,6 +9,7 @@
  */
 package de.tsl2.nano.serviceaccess;
 
+import java.io.File;
 import java.security.Principal;
 import java.util.Set;
 
@@ -16,8 +17,11 @@ import javax.security.auth.Subject;
 
 import org.apache.commons.logging.Log;
 
+import de.tsl2.nano.Environment;
 import de.tsl2.nano.Messages;
+import de.tsl2.nano.execution.XmlUtil;
 import de.tsl2.nano.log.LogFactory;
+import de.tsl2.nano.serviceaccess.aas.principal.APermission;
 import de.tsl2.nano.serviceaccess.aas.principal.Role;
 import de.tsl2.nano.serviceaccess.aas.principal.UserPrincipal;
 
@@ -41,6 +45,38 @@ public class Authorization implements IAuthorization {
         super();
         this.subject = subject;
         LOG.info("authorization with subject:\n" + subject);
+    }
+
+    /**
+     * creates a default authorization holding a subject with given user-principal. if secure is false, an admin-role
+     * holding a wildcard for all permissions will be added.
+     * 
+     * @param userName user for new subject
+     * @param secure if true, a wildcard for all permissions will be added.
+     * @return new authorization instance
+     */
+    public static Authorization create(String userName, boolean secure) {
+        Subject subject = new Subject();
+        String permissions = Environment.getConfigPath() + userName + "-permissons.xml";
+        if (new File(permissions).canRead()) {
+            Subject subjectDef = XmlUtil.loadXml(permissions, Subject.class);
+            subject.getPrincipals().addAll(subjectDef.getPrincipals());
+        } else {
+            //if no permission was defined, a wildcard for all permissions will be set.
+            subject.getPrincipals().add(new UserPrincipal(userName));
+            if (!secure)
+                subject.getPrincipals().add(new Role("admin", new APermission("*", "*")));
+            XmlUtil.saveXml(permissions, subject);
+        }
+        return new Authorization(subject);
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public boolean hasAccess(String name, String action) {
+        return new APermission(name, action).hasAccess(getSubject());
     }
 
     /**
@@ -109,11 +145,6 @@ public class Authorization implements IAuthorization {
     @Override
     public Subject getSubject() {
         return subject;
-    }
-
-    @Override
-    public boolean hasAccess(String name, String action) {
-        return true;
     }
 
     @Override
