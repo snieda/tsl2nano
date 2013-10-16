@@ -184,11 +184,11 @@ The _Nano.H5_ application can be started in different modes.
 ** *Network Multiple Security Mode:*
 ** environment property _http.ip_ is a network ip of your system. all network nodes are able to connect to the application of your system, using their own environment and session working with ssl (under construction!). may be used in the internet.
 
-h2. Security, Authorization and Permissions
+h2. Authorization, Rules and Permissions
 
-Permissions are set after connecting to the datasource through the persistence-unit. The permissions define activation of buttons and showing of fields.
+Permissions are set after connecting to the datasource through the persistence-unit. The permissions define activation of buttons and visiblity of fields.
 
-The application class _NanoH5_ has a method _createSubject()_ that defines a subject with a user-principal and it's roles, defined by permissions. If a file _permissions.xml_ is found, it will be used to fill the subject - if not, an admin-role with a wildcard-permission will permit anything!
+The application class _NanoH5_ has a method _createAuthorization()_ that defines a subject with a user-principal and it's roles, defined by permissions. If a file _[username]-permissions.xml_ is found, it will be used to fill the subject - if not, an admin-role with a wildcard-permission will permit anything!
 
 Permissions contain a name - perhaps ended by a wildcard - and comma separated actions (a wildcard is possible, too.
 
@@ -424,7 +424,7 @@ h2. TODOs
 * *Refactoring:*
 ** (v) RegularExpressionFormat ==> RegExpFormat
 ** (v) refactore ScriptUtil: extract Ant calls
-** util.bean ==> bean
+** (v) util.bean ==> bean
 ** extract bean-package as project
 ** nano.h5 ==> fullrelation
 ** (?) refactore environment property names to use logic path-algorithm
@@ -435,11 +435,12 @@ h2. TODOs
 ** reading xsd through dom - creating beandefinitions (as xml)
 ** BeanEnhancer enhancing Beans having only attributes with getters/setters
 * *Replication / Offline*
-** FileBeanContainer serializing all lists of all BeanCollectors
-** GenericBeanContainer using filled FileBeanContainer re-attaching all serialized bean lists
+** (-) FileBeanContainer serializing all lists of all BeanCollectors
+** (-) GenericBeanContainer using filled FileBeanContainer re-attaching all serialized bean lists
+** mechanism to synchronize local and remote database - no serialization needed.
 * Validate against Html5-xsd in debug mode
 * include LogicTable?
-* check starting application multiple times
+* (x) check starting application multiple times
 * (v) on multiple selection, put all selected elements to the stack
 * (v) *Problem: creating a new element, copying an existing one, one-to-many connections will be lost*
 ** depends on the datamodel: gruppe --> grupperolle(only for specific gruppe) --> rolle
@@ -475,6 +476,5 @@ h2. TODOs
 * (v) add java-compiler (tools.jar, 12MB) of jdk6
 * (v) create ide for sample project
 * (-) extend layout-managment for nested beans <- extend your bean-definition with attributes of other beans.
-* mechanism to synchronize local and remote database - no serialization needed.
 * failure: sorting numbers/currencies sorts as strings
 
