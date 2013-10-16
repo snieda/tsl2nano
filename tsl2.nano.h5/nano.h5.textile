@@ -14,11 +14,13 @@ generic html5 gui implementation providing a model driven access (MDA), bound to
 * full configurable (including standard bean behaviour and all entity behaviours)
 * implementation through simple java beans + optional bean presenters
 * navigates through given beans, showing bean-lists and bean-detail dialogs.
+* resolves all bean/entity relations to be browsed.
 * pre-defines formatting, validation and presentation of relations
 * pure html-5 (no javascript)
 * independent of a special o/r mapper. all o/r mappers supporting javax.persistence with an EntityManager are usable.
 * data replication to work offline (not finished yet!)
 * full key-navigation (shortcuts)
+* useable as standalone or web-service
 * interfaces: 
 ** ddl-->beans through hibernate-tools
 ** jpa-->bean through annotation evaluation

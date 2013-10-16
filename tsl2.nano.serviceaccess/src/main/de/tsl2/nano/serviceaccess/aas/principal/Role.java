@@ -16,6 +16,7 @@ import java.util.Arrays;
 import java.util.HashSet;
 import java.util.Set;
 
+import org.simpleframework.xml.Attribute;
 import org.simpleframework.xml.ElementList;
 
 /**
@@ -27,8 +28,10 @@ import org.simpleframework.xml.ElementList;
 public class Role implements Principal, Serializable {
     /** serialVersionUID */
     private static final long serialVersionUID = -276482232395760912L;
+    @Attribute
     String name;
 
+    @ElementList(inline=true, name="permission", type=BasicPermission.class)
     Set<BasicPermission> permissions;
     
     public Role() {
