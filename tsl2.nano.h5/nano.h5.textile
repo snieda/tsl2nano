@@ -186,13 +186,23 @@ The _Nano.H5_ application can be started in different modes.
 ** *Network Multiple Security Mode:*
 ** environment property _http.ip_ is a network ip of your system. all network nodes are able to connect to the application of your system, using their own environment and session working with ssl (under construction!). may be used in the internet.
 
-h2. Authorization, Rules and Permissions
+h2. Authorization, Roles and Permissions
 
-Permissions are set after connecting to the datasource through the persistence-unit. The permissions define activation of buttons and visiblity of fields.
+Permissions are set after connecting to the datasource through the persistence-unit. The permissions define activation of buttons and visiblity of fields. if all fields are invisible, no data and actions are available!
 
 The application class _NanoH5_ has a method _createAuthorization()_ that defines a subject with a user-principal and it's roles, defined by permissions. If a file _[username]-permissions.xml_ is found, it will be used to fill the subject - if not, an admin-role with a wildcard-permission will permit anything!
 
-Permissions contain a name - perhaps ended by a wildcard - and comma separated actions (a wildcard is possible, too.
+Permissions contain a name - perhaps ended by a wildcard - and comma separated actions (a wildcard is possible, too. The permissions work on actions and data. The _BeanContainer_ provides to ask for permissions: call _BeanContainer.instance().hasPermission(name, actions) to check access to a call or to any data. The _Enviroment provides access to the implementation of _IAuthorization_. Call _Environment.get(IAuthorization.class).hasAccess(name, actions) to check for permissions.
+
+The framework does all checks for you. But if you need extended access to authority informations, read the following details.
+
+*Permissions on actions*
+
+To check whether a user can access a button (action) you call the _hasAccess_ of IAuthorization or _hasPermission_ of BeanContainer with the id of the action. The second method parameter may be a wildcard (*) or _executable_.
+
+*Permissions on data*
+
+To check whether an entity should be accessed by the current user, you call the _hasAccess_ of IAuthorization or _hasPermission_ of BeanContainer with the class-name + toString() representation of the current object. The second method parameter tells whether to read or write the object.
 
 h2. Model Driven Architecture (MDA))
 
@@ -363,6 +373,18 @@ public class MyApp extends NanoH5 {
   }
 </pre>
 
+h2. Performance
+
+Generic features like authorization for actions and data, filtering of columns and field, loading bitmaps etc. may slow down the application performance. The following tips may increase the performance:
+
+set the following *environment.xml* properties:
+
+* disable check of data-permission: *check.permission.data=false*
+* set log-level to info: *default.log.level=8*
+* disable multiple field/column filter: *collector.use.multiple.filter=false*
+* get only 50 lines per search: *service.maxresult=50*
+* ???: *bean.use.beanpresentationhelper.filter=false*
+
 h2. Changelog
 
 | Version | Date | Description |
@@ -477,6 +499,8 @@ h2. TODOs
 * provide last exception of log-file
 * (v) add java-compiler (tools.jar, 12MB) of jdk6
 * (v) create ide for sample project
+* ( ) use actual h2 or hsqldb
 * (-) extend layout-managment for nested beans <- extend your bean-definition with attributes of other beans.
 * failure: sorting numbers/currencies sorts as strings
-
+* *generic navigation through hsql statements*
+* *bean navigation actions*

@@ -9,24 +9,20 @@ import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.InetAddress;
+import java.net.MalformedURLException;
 import java.net.Socket;
 import java.net.URL;
-import java.security.Principal;
 import java.text.FieldPosition;
 import java.text.Format;
 import java.text.ParsePosition;
 import java.util.ArrayList;
-import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Properties;
 import java.util.ResourceBundle;
-import java.util.Set;
 import java.util.Stack;
-
-import javax.security.auth.Subject;
 
 import org.apache.commons.logging.Log;
 
@@ -44,9 +40,9 @@ import de.tsl2.nano.bean.def.IPresentable;
 import de.tsl2.nano.bean.def.SecureAction;
 import de.tsl2.nano.collection.MapUtil;
 import de.tsl2.nano.exception.FormattedException;
+import de.tsl2.nano.exception.ForwardedException;
 import de.tsl2.nano.execution.CompatibilityLayer;
 import de.tsl2.nano.execution.SystemUtil;
-import de.tsl2.nano.execution.XmlUtil;
 import de.tsl2.nano.log.LogFactory;
 import de.tsl2.nano.persistence.HibernateBeanContainer;
 import de.tsl2.nano.persistence.Persistence;
@@ -55,9 +51,6 @@ import de.tsl2.nano.script.ScriptTool;
 import de.tsl2.nano.service.util.BeanContainerUtil;
 import de.tsl2.nano.serviceaccess.Authorization;
 import de.tsl2.nano.serviceaccess.IAuthorization;
-import de.tsl2.nano.serviceaccess.aas.principal.APermission;
-import de.tsl2.nano.serviceaccess.aas.principal.Role;
-import de.tsl2.nano.serviceaccess.aas.principal.UserPrincipal;
 import de.tsl2.nano.util.FileUtil;
 import de.tsl2.nano.util.StringUtil;
 
@@ -81,8 +74,7 @@ public class NanoH5 extends NanoHTTPD {
     Map<InetAddress, NanoH5Session> sessions;
 
     IPageBuilder<?, String> builder;
-    String ip;
-    int port;
+    URL serviceURL;
     ClassLoader appstartClassloader;
 
     private static final String DEGBUG_HTML_FILE = "application.html";
@@ -90,18 +82,19 @@ public class NanoH5 extends NanoHTTPD {
     static final int OFFSET_FILTERLINES = 2;
 
     public NanoH5() throws IOException {
-        this(Environment.get("http.port", 8067), Environment.get(IPageBuilder.class));
+        this(Environment.get("http.connection", "localhost:8067"), Environment.get(IPageBuilder.class));
     }
 
-    public NanoH5(int port, IPageBuilder<?, String> builder) throws IOException {
-        super(port, new File(Environment.getConfigPath()));
-        this.port = port;
+    public NanoH5(String serviceURL, IPageBuilder<?, String> builder) throws IOException {
+        super(getPort(serviceURL), new File(Environment.getConfigPath()));
+        this.serviceURL = getServiceURL(serviceURL);
         this.builder = builder != null ? builder : createPageBuilder();
         ResourceBundle bundle = ResourceBundle.getBundle(NanoH5.class.getPackage().getName() + ".messages",
             Locale.getDefault(),
             Thread.currentThread().getContextClassLoader());
         Messages.registerBundle(bundle, false);
         appstartClassloader = Thread.currentThread().getContextClassLoader();
+        Environment.addService(ClassLoader.class, appstartClassloader);
         sessions = new LinkedHashMap<InetAddress, NanoH5Session>();
     }
 
@@ -111,7 +104,7 @@ public class NanoH5 extends NanoHTTPD {
      * @param args
      */
     public static void main(String[] args) {
-        startApplication(NanoH5.class, MapUtil.asMap(0, "http.port"), args);
+        startApplication(NanoH5.class, MapUtil.asMap(0, "http.connection"), args);
     }
 
     /**
@@ -120,10 +113,10 @@ public class NanoH5 extends NanoHTTPD {
     @Override
     public void start() {
         try {
-            LogFactory.setLogLevel(32);
+            LogFactory.setLogLevel(LogFactory.LOG_ALL);
             LOG.info(System.getProperties());
             createStartPage(DEGBUG_HTML_FILE);
-            LOG.info("Listening on port " + port + ". Hit Enter to stop.\n");
+            LOG.info("Listening on port " + serviceURL.getPort() + ". Hit Enter to stop.\n");
             if (System.getProperty("os.name").startsWith("Windows"))
                 SystemUtil.executeRegisteredWindowsPrg("application.html");
             System.in.read();
@@ -131,6 +124,26 @@ public class NanoH5 extends NanoHTTPD {
             LOG.error("Couldn't start server:", ioe);
             System.exit(-1);
         }
+    }
+
+    public static URL getServiceURL(String serviceURLString) {
+        if (serviceURLString == null)
+            serviceURLString = Environment.get("service.url", "http://localhost:8067");
+        if (!serviceURLString.matches(".*[:][0-9]{4,4}"))
+            serviceURLString = "localhost:" + serviceURLString;
+        if (!serviceURLString.contains("://"))
+            serviceURLString = "http://" + serviceURLString;
+        URL serviceURL = null;
+        try {
+            serviceURL = new URL(serviceURLString);
+        } catch (MalformedURLException e) {
+            ForwardedException.forward(e);
+        }
+        return serviceURL;
+    }
+
+    public static int getPort(String serviceURL) {
+        return Integer.valueOf(StringUtil.substring(serviceURL, ":", null));
     }
 
     /**
@@ -141,9 +154,8 @@ public class NanoH5 extends NanoHTTPD {
     protected void createStartPage(String resultHtmlFile) {
         InputStream stream = Environment.getResource("start.template");
         String startPage = String.valueOf(FileUtil.getFileData(stream, null));
-        ip = Environment.get("http.ip", "localhost");
         startPage = StringUtil.insertProperties(startPage,
-            MapUtil.asMap("url", "http://" + ip + ":" + port, "name", Environment.getName()));
+            MapUtil.asMap("url", serviceURL, "name", Environment.getName()));
         FileUtil.writeBytes(startPage.getBytes(), resultHtmlFile, false);
     }
 
@@ -158,6 +170,13 @@ public class NanoH5 extends NanoHTTPD {
         NanoH5Session session = sessions.get(requestor);
         if (session == null) {
             session = createSession(requestor);
+            //on a new session, no parameter should be set
+            
+        } else {//perhaps session was interrupted/close but not removed
+            if (session.navigation == null || session.navigation.empty()) {
+                sessions.remove(session.inetAddress);
+                session = createSession(requestor);
+            }
         }
         return session.serve(uri, method, header, parms, files);
     }
@@ -388,8 +407,7 @@ public class NanoH5 extends NanoHTTPD {
         sessions.clear();
         Environment.reset();
         Environment.setProperty(Environment.KEY_CONFIG_PATH, configPath);
-        Environment.setProperty("http.ip", ip);
-        Environment.setProperty("http.port", port);
+        Environment.setProperty("http.serviceURL", serviceURL.toString());
         BeanDefinition.clearCache();
         BeanValue.clearCache();
         Thread.currentThread().setContextClassLoader(appstartClassloader);

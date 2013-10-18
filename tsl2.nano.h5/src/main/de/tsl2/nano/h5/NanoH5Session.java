@@ -61,7 +61,7 @@ public class NanoH5Session {
 
     NanoH5 server;
     IPageBuilder<?, String> builder;
-    Stack<BeanDefinition<?>> navigation = new Stack<BeanDefinition<?>>();
+    Stack<BeanDefinition<?>> navigation;
     BeanDefinition<?> model;
     Response response;
     ClassLoader sessionClassloader;
@@ -100,7 +100,7 @@ public class NanoH5Session {
                 files));
             //WORKAROUND for uri-problem
             String referer = header.getProperty("referer");
-            if (parms.containsKey(IAction.CANCELED)/* || (method.equals("POST") && referer != null && uri.length() > 1 && referer.contains(uri))*/)
+            if (parms.containsKey(IAction.CANCELED) || (method.equals("POST") && referer != null && uri.length() > 1 && referer.contains(uri)))
                 uri = "/";
             BeanDefinition<?> linkToModel = evalLinkToModel(uri);
             Object userResponse = null;
@@ -122,7 +122,7 @@ public class NanoH5Session {
                 }
                 response = server.createResponse(msg);
             } else {
-                return server.createResponse("<a href=\"http://" + Environment.get("http.ip", "localhost") + ":" + Environment.get("http.port", 8067) + "\">restart session</a>");
+                return server.createResponse("<a href=\"" + server.serviceURL + "\">restart session</a>");
             }
         } catch (Exception e) {
             RuntimeException ex = ForwardedException.toRuntimeEx(e, true);
@@ -150,11 +150,11 @@ public class NanoH5Session {
     private BeanDefinition<?> evalLinkToModel(String uri) {
         BeanDefinition<?> linkBean = null;
         String link = StringUtil.substring(uri, "/", null, true);
-        //reset-link clicked? recreate the navigation
-        if (link.equals(START_PAGE)) {
-            close();
-            return null;
-        }
+//        //reset-link clicked? recreate the navigation
+//        if (link.equals(START_PAGE)) {
+//            close();
+//            return null;
+//        }
         for (BeanDefinition<?> bean : navigation) {
             if (bean.getName().equals(link)) {
                 linkBean = bean;

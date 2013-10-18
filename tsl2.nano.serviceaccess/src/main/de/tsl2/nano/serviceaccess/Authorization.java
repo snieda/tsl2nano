@@ -76,7 +76,10 @@ public class Authorization implements IAuthorization {
      */
     @Override
     public boolean hasAccess(String name, String action) {
-        return new APermission(name, action).hasAccess(getSubject());
+        boolean p = new APermission(name, action).hasAccess(getSubject());
+        if (!p)
+            LOG.warn("permission for '" + name + "(" + action == null ? PERM_EXE : action + ") not availabe!");
+        return p;
     }
 
     /**

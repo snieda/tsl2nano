@@ -60,7 +60,7 @@
 
 		<ant antfile="../tsl2.nano.common/shell.xml" target="sh.exec.cmd">
 			<property name="sh.exec.cmd.dir" value="${test.dir}" />
-			<property name="sh.exec.cmd.arg1" value="start.bat" />
+			<property name="sh.exec.cmd.arg1" value="run.bat" />
 		</ant>
 	</target>
 	

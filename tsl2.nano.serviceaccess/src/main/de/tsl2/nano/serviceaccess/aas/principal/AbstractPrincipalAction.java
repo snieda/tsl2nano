@@ -90,7 +90,7 @@ public abstract class AbstractPrincipalAction<RETURNTYPE> extends CommonAction<R
             // needs security policy entry "createAccessControlContext"
             final AccessControlContext accessControlContext = new AccessControlContext(AccessController.getContext(),
                 new SubjectDomainCombiner(ServiceFactory.instance().getSubject()));
-            accessControlContext.checkPermission(new APermission(getId()));
+            accessControlContext.checkPermission(new APermission(getId(), null));
             // System.getSecurityManager().checkPermission(new
             // ActionPermission(getId()));
             return true;

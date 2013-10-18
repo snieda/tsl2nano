@@ -291,8 +291,7 @@ target: sh.delete
 		<property name="sh.sql.dir" value="${basedir}" />
 		<property name="sh.sql.include" value="*.sql" />
 		<property name="sh.sql.exclude" value="EXCLUDING_EXPRESSION" />
-		<sql classpathref="sh.stdpath.id" encoding="Cp1252" driver="${jdbc.driver}" url="${jdbc.url}" userid="${jdbc.username}" password="${jdbc.password}"
-			onerror="stop" autocommit="true" print="true">
+		<sql classpathref="sh.stdpath.id" encoding="Cp1252" driver="${jdbc.driver}" url="${jdbc.url}" userid="${jdbc.username}" password="${jdbc.password}" onerror="stop" autocommit="true" print="true">
 			<fileset dir="${sh.sql.dir}" includes="${sh.sql.include}" excludes="${sh.sql.exclude}" />
 		</sql>
 	</target>
@@ -315,10 +314,10 @@ starting ${ant.project.name}:
 	system: ${sun.cpu.isalist} ${sun.arch.data.model}
 ===========================================================
 		</echo>
-		<echoproperties format="text"/>
-		
+		<echoproperties format="text" />
+
 	</target>
-	
+
 	<target name="sh.sleep" unless="disable_sh.sleep" description="sleeps for given milliseconds">
 		<echo message="sleeping for ${sh.sleep.milliseconds} milliseconds..." />
 		<sleep milliseconds="${sh.sleep.milliseconds}" />
@@ -491,6 +490,12 @@ starting ${ant.project.name}:
 		<property name="sh.exec.cmd.dir" value="${basedir}" />
 		<property name="sh.exec.cmd.outputfile" value="${basedir}.log" />
 		<property name="sh.exec.cmd.resultproperty" value="${basedir}.result" />
+		<property name="sh.exec.cmd.arg1" value="" />
+		<property name="sh.exec.cmd.arg2" value="" />
+		<property name="sh.exec.cmd.arg3" value="" />
+		<property name="sh.exec.cmd.arg4" value="" />
+		<property name="sh.exec.cmd.arg5" value="" />
+		<property name="sh.exec.cmd.arg6" value="" />
 		<exec dir="${sh.exec.cmd.dir}" executable="cmd.exe" output="${sh.exec.cmd.outputfile}" resultproperty="${sh.exec.cmd.resultproperty}">
 			<arg value="/C" />
 			<arg value="${sh.exec.cmd.arg1}" />
@@ -618,18 +623,18 @@ starting ${ant.project.name}:
 		<property name="sh.build.lib" value="${sh.build.basedir}/lib" />
 		<property name="sh.build.bin" value="${sh.build.basedir}/bin" />
 		<property name="sh.build.debug" value="false" />
-		
+
 		<!-- store build informations to build.properties -->
-		<buildnumber file="${sh.build.basedir}/build.properties"/>
+		<buildnumber file="${sh.build.basedir}/build.properties" />
 		<propertyfile file="${sh.build.basedir}/build.properties">
 			<entry key="build.name" value="${sh.build.name}" />
 			<entry key="build.debug" value="${sh.build.debug}" />
-			<entry key="build.version" value="${sh.build.version}"/>
-			<entry key="build.time" value="${tstamp}"/>
-			<entry key="build.user" value="${user.name}"/>
-			<entry key="build.java" value="${java.runtime.version}"/>
+			<entry key="build.version" value="${sh.build.version}" />
+			<entry key="build.time" value="${tstamp}" />
+			<entry key="build.user" value="${user.name}" />
+			<entry key="build.java" value="${java.runtime.version}" />
 		</propertyfile>
-		
+
 		<antcall target="sh.compile">
 			<param name="sh.compile.srcdir" value="${sh.build.src}" />
 			<param name="sh.compile.bindir" value="${sh.build.bin}" />

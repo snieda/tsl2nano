@@ -14,6 +14,10 @@ import java.util.Set;
 
 import javax.security.auth.Subject;
 
+import org.simpleframework.xml.Attribute;
+
+import de.tsl2.nano.util.PrivateAccessor;
+
 
 /**
  * permission for actions e.g. of type {@linkplain de.tsl2.nano.action.IAction}.
@@ -25,22 +29,24 @@ public class APermission extends BasicPermission {
 
     private static final long serialVersionUID = 1L;
 
+    @Attribute(name="actions")
     String actions;
     
-    public APermission() {
-        this("<deserialized>");
-    }
-    
-    public APermission(String name) {
+    public APermission(@Attribute(name="name0") String name) {
         super(name);
     }
 
-    public APermission(String name, String actions) {
+    public APermission(@Attribute(name="name0") String name, @Attribute(name="actions") String actions) {
         super(name, actions);
         //actions will be ignored by super class
         this.actions = actions;
     }
 
+    @Attribute(name="name0")
+    public String getName0() {
+        return new PrivateAccessor<Permission>(this).call("getName", String.class);
+    }
+    
     @Override
     public void checkGuard(Object object) throws SecurityException {
         super.checkGuard(object);

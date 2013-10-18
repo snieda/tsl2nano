@@ -35,17 +35,17 @@ import de.tsl2.nano.util.StringUtil;
  * @version $Revision$
  */
 public abstract class LogFactory {
-    static final int FATAL = 1;
-    static final int ERROR = 2;
-    static final int WARN = 4;
-    static final int INFO = 8;
-    static final int DEBUG = 16;
-    static final int TRACE = 32;
+    public static final int FATAL = 1;
+    public static final int ERROR = 2;
+    public static final int WARN = 4;
+    public static final int INFO = 8;
+    public static final int DEBUG = 16;
+    public static final int TRACE = 32;
 
-    static int LOG_WARN = WARN | ERROR | FATAL;
-    static int LOG_STANDARD = INFO | WARN | ERROR | FATAL;
-    static int LOG_DEBUG = INFO | WARN | ERROR | FATAL | DEBUG;
-    static int LOG_ALL = INFO | WARN | ERROR | FATAL | DEBUG | TRACE;
+    public static final int LOG_WARN = WARN | ERROR | FATAL;
+    public static final int LOG_STANDARD = INFO | WARN | ERROR | FATAL;
+    public static final int LOG_DEBUG = INFO | WARN | ERROR | FATAL | DEBUG;
+    public static final int LOG_ALL = INFO | WARN | ERROR | FATAL | DEBUG | TRACE;
 
 //    static final String[] STATETXT = new String[] { "info", "warn", "error", "fatal", "debug", "trace" };
     static final String[] STATETXT = new String[] { "§", "§", "#", " ", "-", "-" };
@@ -275,14 +275,20 @@ public abstract class LogFactory {
         if (isEnabled(state) && hasLogLevel(logClass, state)) {
             if (message != null) {
                 //TODO: evaluate performance of predefined pattern in MessageFormat (MsgFormat)
-                out.println(String.format(outputformat,
+                String f = String.format(outputformat,
                     Calendar.getInstance().getTime(),
                     state(state),
                     logClass.getSimpleName(),
-                    message));
+                    message);
+                out.println(f);
+                if (out != System.out)
+                    System.out.println(f);
             }
-            if (ex != null)
+            if (ex != null) {
                 err.println(ex);
+                if (err != System.err)
+                    System.err.println(ex);
+            }
         }
     }
 }

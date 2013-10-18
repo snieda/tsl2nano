@@ -5,6 +5,10 @@ import java.security.Principal;
 import javax.security.auth.Subject;
 
 public interface IAuthorization {
+    public static final String PERM_READ = "read";
+    public static final String PERM_WRITE = "write";
+    public static final String PERM_EXE = "execute";
+    public static final String PERM_WILDCARD = "*";
 
     /**
      * checks the current user subject to have an authorization for given role. delegates to {@link #hasAccess(String, String)} with type EXECUTE

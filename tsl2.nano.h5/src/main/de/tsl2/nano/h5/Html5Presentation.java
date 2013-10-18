@@ -338,9 +338,9 @@ public class Html5Presentation<T> extends BeanPresentationHelper<T> implements I
             ATTR_COLOR,
             convert(ATTR_COLOR, p.getForeground())/*, p.getIcon()*/);
 
-        if (p.getLayout() instanceof Map) {
-            HtmlUtil.appendAttributes(grid, MapUtil.asArray((Map<String, Object>) p.getLayout()));
-        }
+//        if (p.getLayout() instanceof Map) {
+//            HtmlUtil.appendAttributes(grid, MapUtil.asArray((Map<String, Object>) p.getLayout()));
+//        }
         if (p.getLayoutConstraints() instanceof Map) {
             HtmlUtil.appendAttributes(grid, MapUtil.asArray((Map<String, String>) p.getLayoutConstraints()));
         }
@@ -387,10 +387,10 @@ public class Html5Presentation<T> extends BeanPresentationHelper<T> implements I
         return item instanceof BeanDefinition ? item.toString() : vef.format(item);
     }
 
-    private Element createActionPanel(Element parent, Collection<IAction> actions, String alignment) {
+    private Element createActionPanel(Element parent, Collection<IAction> actions, String...attributes) {
         Element panel = createGrid(parent, "Actions", actions != null ? 1 + actions.size() : 1);
         Element row = appendElement(panel, TAG_ROW);
-        Element cell = appendElement(row, TAG_CELL, ATTR_ALIGN, alignment);
+        Element cell = appendElement(row, TAG_CELL, attributes);
         if (actions != null) {
             for (IAction a : actions) {
                 createAction(cell, a);
@@ -426,7 +426,7 @@ public class Html5Presentation<T> extends BeanPresentationHelper<T> implements I
      * @return html table containing the buttons
      */
     Element createBeanActions(Element form, BeanDefinition<?> model) {
-        Element panel = createActionPanel(form, model.getActions(), ALIGN_CENTER);
+        Element panel = createActionPanel(form, model.getActions(), ATTR_ALIGN, ALIGN_CENTER);
         String closeLabel = Messages.getStringOpt("tsl2nano.close", true);
         if (model.isMultiValue() && ((BeanCollector) model).hasMode(MODE_ASSIGNABLE))
             createAction(panel, BTN_ASSIGN, closeLabel, closeLabel, "submit", "icons/links.png", true, true, false);
@@ -527,7 +527,7 @@ public class Html5Presentation<T> extends BeanPresentationHelper<T> implements I
             appendElement(table, "caption", content(title));
         Element colgroup = appendElement(table, TAG_ROW);
         for (int i = 0; i < columns.length; i++) {
-            appendElement(colgroup, TAG_HEADERCELL, content(columns[i]));
+            appendElement(colgroup, TAG_HEADERCELL, content(columns[i]), ATTR_BGCOLOR, COLOR_LIGHT_GRAY);
         }
         return appendElement(table, TAG_TBODY);
     }
@@ -558,7 +558,8 @@ public class Html5Presentation<T> extends BeanPresentationHelper<T> implements I
                 ATTR_BORDER,
                 "1",
                 "style",
-                "-webkit-transform: scale(1.4);");
+                "-webkit-transform: scale(1.2);"
+                , ATTR_BGCOLOR, COLOR_LIGHT_GRAY);
             createAction(th, c.getSortingAction(collector));
         }
         return appendElement(table, TAG_TBODY);
@@ -618,7 +619,7 @@ public class Html5Presentation<T> extends BeanPresentationHelper<T> implements I
      *         type: rowname.colname
      */
     Element addEditableRow(Element table, IBeanCollector<?, T> tableDescriptor, T element, String rowName) {
-        Element row = appendElement(table, TAG_ROW, ATTR_BGCOLOR, COLOR_LIGHT_GRAY);
+        Element row = appendElement(table, TAG_ROW, ATTR_BGCOLOR, COLOR_LIGHT_GRAY, ATTR_ALIGN, ALIGN_CENTER);
         if (rowName != null) {
             appendElement(row, TAG_CELL, content(rowName));
         }
@@ -663,13 +664,14 @@ public class Html5Presentation<T> extends BeanPresentationHelper<T> implements I
             TAG_FONT,
             content(beanValue.getDescription() + (beanValue.nullable() ? "" : " (*)")),
             ATTR_COLOR,
-            (String) BeanUtil.valueOf(beanValue.getPresentation().getBackground(), "#0000cc"),
+            (String) BeanUtil.valueOf(beanValue.getPresentation().getBackground(), Environment.get("default.value.color", "#0000cc")),
             enable(ATTR_HIDDEN, !beanValue.getPresentation().isVisible()),
             enable(ATTR_REQUIRED, !beanValue.nullable()));
-        //now the field itself
+        //create the layout and layout-constraints
         Element cell = appendElement(row, TAG_CELL);
-        appendAttributes(cell, beanValue.getPresentation());
+//        appendAttributes(cell, beanValue.getPresentation());
         cell = createLayout(cell, beanValue.getPresentation());
+        //now the field itself
         Element input;
         if (beanValue.getAllowedValues() == null) {
             RegExpFormat regexpFormat = beanValue.getFormat() instanceof RegExpFormat ? (RegExpFormat) beanValue.getFormat()
@@ -683,7 +685,7 @@ public class Html5Presentation<T> extends BeanPresentationHelper<T> implements I
                 ATTR_NAME,
                 beanValue.getName(),
                 ATTR_PATTERN,
-                regexpFormat != null ? regexpFormat.getPattern() : ".*",
+                regexpFormat != null ? regexpFormat.getPattern() : Environment.get("default.pattern.regexp", ".*"),
                 ATTR_STYLE,
                 getTextAlignmentAsStyle(beanValue.getPresentation().getStyle()),
                 ATTR_SIZE,/* 'width' doesn't work, so we set the displaying char-size */
@@ -886,7 +888,7 @@ public class Html5Presentation<T> extends BeanPresentationHelper<T> implements I
                     "?",
                     ATTR_METHOD,
                     Environment.get("html5.http.method", "post"));
-                createActionPanel(c3, getPresentationActions(), ALIGN_RIGHT);
+                createActionPanel(c3, getPresentationActions(), ATTR_ALIGN, ALIGN_RIGHT);
             }
             return body;
         } catch (ParserConfigurationException e) {

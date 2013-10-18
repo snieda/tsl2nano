@@ -177,7 +177,16 @@ public class BeanCollector<COLLECTIONTYPE extends Collection<T>, T> extends Bean
 //        setName(Messages.getString("tsl2nano.list") + " " + getName());
         this.collection = collection != null ? collection : (COLLECTIONTYPE) new LinkedList<T>();
         setBeanFinder(beanFinder);
-        this.workingMode = workingMode;
+        //TODO: the check for attribute can't be done here - perhaps attributes will be added later!
+//        if (getAttributeDefinitions().size() == 0) {
+//            LOG.warn("bean-collector without showing any attribute");
+//            this.workingMode = 0;
+//            searchStatus = Messages.getFormattedString("tsl2nano.login.noprincipal", "...", "...");
+//        } else {
+            this.workingMode = workingMode;
+//        }
+        if (collection != null)
+            searchStatus = Messages.getFormattedString("tsl2nano.searchdialog.searchresultcount", collection.size());
         this.composition = composition;
         if (composition != null && composition.getTargetType() == null) {
             if (hasMode(MODE_SEARCHABLE)) {
@@ -263,7 +272,20 @@ public class BeanCollector<COLLECTIONTYPE extends Collection<T>, T> extends Bean
                         collection = (COLLECTIONTYPE) CollectionUtil.getFilteringBetween(collection, from, (T) to, true);
                         betweenFinderCreated = true;
                     }
-                    return collection;
+                    /*
+                     * respect authorization/permissions
+                     */
+                    if (Environment.get("check.permission.data", true)) {
+                        return CollectionUtil.getFiltering(collection, new IPredicate<T>() {
+                            @Override
+                            public boolean eval(T arg0) {
+                                return getAttributeDefinitions().size() > 0 && BeanContainer.instance()
+                                    .hasPermission(arg0.getClass().getName() + arg0.toString(), "read");
+                            }
+                        });
+                    } else {
+                        return collection;
+                    }
                 }
 
                 public Collection<T> previous() {
@@ -468,9 +490,9 @@ public class BeanCollector<COLLECTIONTYPE extends Collection<T>, T> extends Bean
                     Timestamp ts = new Timestamp(System.currentTimeMillis());
                     for (IAttributeDefinition<?> a : attrs.values()) {
                         if (a instanceof IValueAccess)
-                        if (a.temporalType() != null && Timestamp.class.isAssignableFrom(a.temporalType())) {
-                            ((IValueAccess)a).setValue(ts);
-                        }
+                            if (a.temporalType() != null && Timestamp.class.isAssignableFrom(a.temporalType())) {
+                                ((IValueAccess) a).setValue(ts);
+                            }
                     }
                 }
                 return cloneBean;

@@ -69,7 +69,7 @@ public class Main {
             for (int i = 0; i < args.length; i++) {
                 String argName = argMapping.get(i);
                 if (argName != null)
-                    Environment.setProperty(argName, Integer.valueOf(args[i]));
+                    Environment.setProperty(argName, args[i]);
             }
         }
     }

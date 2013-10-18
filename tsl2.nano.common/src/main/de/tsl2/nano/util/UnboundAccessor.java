@@ -11,6 +11,7 @@ package de.tsl2.nano.util;
 
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
+import java.util.Hashtable;
 import java.util.Map;
 
 import de.tsl2.nano.exception.ForwardedException;
@@ -20,6 +21,18 @@ import de.tsl2.nano.exception.ForwardedException;
  * reflection to get fields and methods . To enhance performance, members and methods are cached for that instance. To
  * disable the member cache, call {@link #setMemberCache(Map)}.
  * 
+ * <pre>
+ * Simple Example:<br/>
+ * new UnboundAccessor<Permission>(this).member("myfieldname", String.class);
+ * <p/>
+ * Complex Example:<br/>
+ * ...
+ * pa new UnboundAccessor<Permission>(this);
+ * pa.registerMethod("mymethodname", new Class[]{String.class}, false);
+ * ...
+ * pa.call("mymethodname", "myparameter1");
+ * </pre>
+ * 
  * @author ts
  * @version $Revision$
  */
@@ -28,19 +41,37 @@ public class UnboundAccessor<T> {
     /** instance to access (not-)inherited members and methods (privates too) */
     T instance;
 
+    /** caches the access to member objects, if {@link #useMemberCache} is true */
     Map<String, Object> memberCache;
+    /** caches the access to method objects. */
     Map<String, Method> methodCache;
+    /** enables {@link #memberCache} cache. */
     boolean useMemberCache;
     static Object NULL = new Object();
 
     /**
-     * constructor
+     * {@link #useMemberCache} will be false.
      * 
-     * @param instance to be full accessible
+     * @param instance to be accessible through reflection
      */
     public UnboundAccessor(T instance) {
+        this(instance, false);
+    }
+    
+    /**
+     * constructor
+     * 
+     * @param instance to be accessible through reflection
+     * @param useMemberCache activate the {@link #memberCache}. see {@link #useMemberCache}. It is possible to activate
+     *            the {@link #memberCache} later through {@link #setMemberCache(Map)}.
+     */
+    public UnboundAccessor(T instance, boolean useMemberCache) {
         super();
         this.instance = instance;
+        this.useMemberCache = useMemberCache;
+        this.methodCache = new Hashtable<String, Method>();
+        if (useMemberCache)
+            this.memberCache = new Hashtable<String, Object>();
     }
 
     /**
@@ -60,11 +91,11 @@ public class UnboundAccessor<T> {
             Field f = getField(name);
             f.setAccessible(true);
             if (useMemberCache) {
-                M value = (M) f.get(this);
+                M value = (M) f.get(accessibleInstance());
                 memberCache.put(name, value != null ? value : NULL);
                 return value;
             } else {
-                return (M) f.get(this);
+                return (M) f.get(accessibleInstance());
             }
         } catch (Exception e) {
             ForwardedException.forward(e);
@@ -72,6 +103,22 @@ public class UnboundAccessor<T> {
         }
     }
 
+    /**
+     * this method returns the instance itself. extending classes may override this to return an object that will be more accessible than the instance itself (perhaps an instance of a super class).
+     * @param instance2 
+     * @return instance2 itself
+     */
+    protected Object accessibleInstance() {
+        return instance;
+    }
+
+    /**
+     * evaluates the desired field. see {@link Class#getField(String)}
+     * 
+     * @param name field name
+     * @return field
+     * @throws Exception if field not accessible
+     */
     protected Field getField(String name) throws Exception {
         return instance.getClass().getField(name);
     }
@@ -105,7 +152,7 @@ public class UnboundAccessor<T> {
         try {
             if (m == null)
                 m = registerMethod(name, par, true);
-            return (M) m.invoke(this, args);
+            return (M) m.invoke(instance, args);
         } catch (Exception e) {
             ForwardedException.forward(e);
             return null;
@@ -136,6 +183,14 @@ public class UnboundAccessor<T> {
         }
     }
 
+    /**
+     * evaluates the desired method. see {@link Class#getMethod(String, Class...)}
+     * 
+     * @param name method name
+     * @param method parameters
+     * @return method
+     * @throws Exception if method not accessible
+     */
     protected Method getMethod(String name, Class[] par) throws Exception {
         return instance.getClass().getMethod(name, par);
     }
@@ -145,6 +200,9 @@ public class UnboundAccessor<T> {
     }
 
     /**
+     * if you have already used members you can cache them here. {@link #useMemberCache} will be true to activate the
+     * {@link #memberCache}.
+     * 
      * @param memberCache The memberCache to set.
      */
     public void setMemberCache(Map<String, Object> memberCache) {
