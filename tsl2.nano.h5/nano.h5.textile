@@ -504,3 +504,4 @@ h2. TODOs
 * failure: sorting numbers/currencies sorts as strings
 * *generic navigation through hsql statements*
 * *bean navigation actions*
+* failure: presentable.layout --> simple-xml: Transform of class java.util.LinkedHashMap not supported
