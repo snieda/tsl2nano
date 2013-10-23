@@ -13,9 +13,6 @@ import java.io.Serializable;
 import java.util.HashSet;
 import java.util.Set;
 
-import org.apache.commons.logging.Log;
-import de.tsl2.nano.log.LogFactory;
-
 import de.tsl2.nano.messaging.EventController;
 import de.tsl2.nano.messaging.IListener;
 import de.tsl2.nano.util.StringUtil;
@@ -30,7 +27,7 @@ import de.tsl2.nano.util.StringUtil;
  * 
  * @param <T> type of {@link Node} content (=core)
  * @param <D> connection descriptor (on simple weighted connections, it would be Float)
- * @author Thomas Schneider, Thomas Schneider
+ * @author Thomas Schneider
  * @version $Revision$
  */
 public class Node<T extends IListener<Notification> & ILocatable & Serializable & Comparable<? super T>, D extends Comparable<? super D>> implements
