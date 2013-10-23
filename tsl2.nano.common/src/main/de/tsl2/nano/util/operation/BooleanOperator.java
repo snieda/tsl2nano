@@ -1,0 +1,84 @@
+/*
+ * File: $HeadURL$
+ * Id  : $Id$
+ * 
+ * created by: Tom
+ * created on: 22.10.2013
+ * 
+ * Copyright: (c) Thomas Schneider 2013, all rights reserved
+ */
+package de.tsl2.nano.util.operation;
+
+import java.text.FieldPosition;
+import java.text.Format;
+import java.text.ParsePosition;
+import java.util.HashMap;
+import java.util.Map;
+
+import de.tsl2.nano.action.CommonAction;
+import de.tsl2.nano.action.IAction;
+import de.tsl2.nano.util.StringUtil;
+
+/**
+ * Boolean Operator as a sample implementation of {@link Operator}. Is able to do boolean operations.
+ * 
+ * @author Tom
+ * @version $Revision$
+ */
+public class BooleanOperator extends SOperator<Boolean> {
+
+    /**
+     * constructor
+     */
+    public BooleanOperator() {
+        super();
+    }
+
+    /**
+     * constructor
+     * 
+     * @param values
+     */
+    public BooleanOperator(Map<CharSequence, Boolean> values) {
+        super(CharSequence.class, createConverter(), values);
+    }
+
+    protected static IConverter<CharSequence, Boolean> createConverter() {
+        @SuppressWarnings("serial")
+        Format fmt = new Format() {
+            @Override
+            public StringBuffer format(Object obj, StringBuffer toAppendTo, FieldPosition pos) {
+                return toAppendTo.append(((Boolean)obj).toString());
+            }
+
+            @Override
+            public Object parseObject(String source, ParsePosition pos) {
+                pos.setIndex(StringUtil.isEmpty(source) ? 1 : source.length());
+                return Boolean.valueOf(source);
+            }
+            
+        };
+        return new FromCharSequenceConverter<Boolean>(fmt);
+    }
+
+    /**
+     * define all possible operations. see {@link #operationDefs}
+     */
+    @SuppressWarnings("serial")
+    protected void createOperations() {
+        operationDefs = new HashMap<CharSequence, IAction<Boolean>>();
+        addOperation("&", new CommonAction<Boolean>() {
+            @Override
+            public Boolean action() throws Exception {
+                return (Boolean) parameter[0] & (Boolean) parameter[1];
+            }
+        });
+        addOperation("|", new CommonAction<Boolean>() {
+            @Override
+            public Boolean action() throws Exception {
+                return (Boolean) parameter[0] | (Boolean) parameter[1];
+            }
+        });
+    }
+
+}

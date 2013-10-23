@@ -84,8 +84,12 @@ import de.tsl2.nano.util.NumberUtil;
 import de.tsl2.nano.util.Period;
 import de.tsl2.nano.util.StringUtil;
 import de.tsl2.nano.util.operation.CRange;
+import de.tsl2.nano.util.operation.FromCharSequenceConverter;
 import de.tsl2.nano.util.operation.IConvertableUnit;
+import de.tsl2.nano.util.operation.IConverter;
+import de.tsl2.nano.util.operation.NumericOperator;
 import de.tsl2.nano.util.operation.OperableUnit;
+import de.tsl2.nano.util.operation.Operator;
 
 /**
  * 
@@ -1100,6 +1104,17 @@ public class CommonTest {
         assertTrue(!rangeOutside.contains(euro_100));
         assertTrue(!rangeOutside.intersects(euro_100, euro_100));
 
+    }
+
+    @Test
+    public void testNumericOperator() {
+        String f = "1+ ((x1 + x2)*3 + 4)+5";
+        BigDecimal x1 = new BigDecimal(8);
+        BigDecimal x2 = new BigDecimal(9);
+        Map<CharSequence, BigDecimal> values = new Hashtable<CharSequence, BigDecimal>();
+        values.put("x1", x1);
+        values.put("x2", x2);
+        Assert.assertEquals(new BigDecimal(61), new NumericOperator(values).eval(f));
     }
 
     @Test

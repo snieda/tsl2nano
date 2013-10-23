@@ -15,18 +15,19 @@ import java.text.ParseException;
 import de.tsl2.nano.exception.ForwardedException;
 
 /**
- * standard converter to convert an object into a string and vice versa - using a given {@link Format}.
+ * standard converter to convert an object into a string and vice versa - using a given {@link Format}. Does exactly the
+ * same as {@link FromCharSequenceConverter} but swaps the FROM, TO parameter.
  * 
  * @author Thomas Schneider
  * @version $Revision$
  */
-public class StrConverter<T> implements IConverter<T, String> {
+public class ToStrConverter<T> implements IConverter<T, String> {
     Format format;
     /**
      * constructor
      * @param format
      */
-    public StrConverter(Format format) {
+    public ToStrConverter(Format format) {
         super();
         this.format = format;
     }
