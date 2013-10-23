@@ -13,6 +13,9 @@ import java.io.Serializable;
 import java.math.BigDecimal;
 import java.sql.Time;
 import java.text.DateFormat;
+import java.text.DecimalFormat;
+import java.text.Format;
+import java.text.NumberFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
@@ -20,11 +23,14 @@ import java.util.Hashtable;
 import java.util.List;
 import java.util.Map;
 
+import javax.xml.stream.events.Characters;
+
 import junit.framework.Assert;
 
 import org.junit.Test;
 
 import de.tsl2.nano.Environment;
+import de.tsl2.nano.bean.def.BeanDefinition;
 import de.tsl2.nano.collection.TableList;
 import de.tsl2.nano.exception.ForwardedException;
 import de.tsl2.nano.execution.Profiler;
@@ -39,6 +45,7 @@ import de.tsl2.nano.incubation.vnet.ThreadingEventController;
 import de.tsl2.nano.incubation.vnet.neuron.VNeuron;
 import de.tsl2.nano.incubation.vnet.routing.Location;
 import de.tsl2.nano.incubation.vnet.routing.RoutingAStar;
+import de.tsl2.nano.incubation.vnet.workflow.VActivity;
 import de.tsl2.nano.logictable.DefaultHeader;
 import de.tsl2.nano.logictable.EquationSolver;
 import de.tsl2.nano.logictable.LogicTable;
@@ -46,6 +53,10 @@ import de.tsl2.nano.logictable.Structure;
 import de.tsl2.nano.messaging.EventController;
 import de.tsl2.nano.messaging.IListener;
 import de.tsl2.nano.util.StringUtil;
+import de.tsl2.nano.util.operation.FromCharSequenceConverter;
+import de.tsl2.nano.util.operation.IConverter;
+import de.tsl2.nano.util.operation.Operator;
+import de.tsl2.nano.util.operation.ToStrConverter;
 
 /**
  * basic tests for algorithms to be refactored to the project tsl2nano.common in future.
@@ -118,6 +129,40 @@ public class IncubationTest {
     }
 
     @Test
+    public void testVNetWithWorkflow() {
+//        class Act extends VActivity<String, BeanDefinition<?>> {
+//            @Override
+//            public BeanDefinition<?> action() throws Exception {
+//                return null;
+//            }
+//            @Override
+//            public boolean canActivate(Map parameter) {
+//                return expression.;
+//            }
+//            
+//        }
+//        Net<VActivity<String, BeanDefinition<?>>, Float> net = new Net<VActivity<String, BeanDefinition<?>>, Float>();
+////        net.setWorkParallel(false);
+//        Node<VActivity<String, BeanDefinition<?>>, Float> state0 = net.add(new VActivity("state0", "${A}&${B}", "C"));
+//        Node<VNeuron, Float> nHabe = net.addAndConnect(new VNeuron("habe"), nHunger.getCore(), -1f);
+//        net.addAndConnect(new VNeuron("ich"), nHabe.getCore(), -1f);
+//
+//        //create a callback for responses
+//        IListener<Notification> responseHandler = new IListener<Notification>() {
+//            @Override
+//            public synchronized void handleEvent(Notification event) {
+//                System.out.println("RESPONSE: " + event.getNotification());
+//            }
+//        };
+//
+//        //start input
+//        net.notify(new Notification("ich", 1f, null, responseHandler));
+//        net.notify(new Notification("hunger", 1f, null, responseHandler));
+//
+//        //should output: ich habe hunger
+    }
+
+    @Test
     public void testVNetWithRouting() {
         /*
          * kuerzeste Verbindung zwischen Wuerzburg und Saarbruecken.
@@ -170,18 +215,18 @@ public class IncubationTest {
          *  - check the results
          *  - check performance with profiler
          */
-        
+
         final Net<TCover<TRunner, Float>, Float> net = new Net<TCover<TRunner, Float>, Float>();
         Node<TCover<TRunner, Float>, Float> n = null;
         for (int i = 0; i < 8; i++) {
             n = net.add(new TCover<TRunner, Float>(new TRunner(), Float.valueOf(i)));
         }
-        
+
         /*
          * first: check monolithic performance
          */
         Profiler.si().stressTest("monolithic test", testcount, n.getCore().getContent());
-        
+
         /*
          * second: test with own observing
          */
@@ -200,20 +245,20 @@ public class IncubationTest {
         Profiler.si().stressTest("kanbanflow on 8 nodes", testcount, new Runnable() {
             @Override
             public void run() {
-                net.notifyIdles(new Notification(null, "working-test"), responseObserver, 10*1000, 100);
+                net.notifyIdles(new Notification(null, "working-test"), responseObserver, 10 * 1000, 100);
             }
         });
-        net.waitForIdle(60*1000);
-        
+        net.waitForIdle(60 * 1000);
+
         log("total test time: " + DateFormat.getTimeInstance().format(new Time(System.currentTimeMillis() - start)));
         log(net.dump());
-        
+
         /*
          * do the whole test calling a net convenience method
          */
         net.resetStatistics();
         Collection<Notification> notifications = new ArrayList<Notification>();
-        for (int i = 0; i<testcount; i++) {
+        for (int i = 0; i < testcount; i++) {
             notifications.add(new Notification(null, "working-test-" + i));
         }
         Collection<Object> result = net.notifyAndCollect(notifications, Object.class);
@@ -265,9 +310,8 @@ public class IncubationTest {
     }
 }
 
-class TCover<T extends Runnable & Serializable & Comparable<? super T>, D extends Comparable<? super D>> extends Cover<T, D> implements
-        ILocatable,
-        IListener<Notification> {
+class TCover<T extends Runnable & Serializable & Comparable<? super T>, D extends Comparable<? super D>> extends
+        Cover<T, D> implements ILocatable, IListener<Notification> {
 
     /** serialVersionUID */
     private static final long serialVersionUID = 1L;

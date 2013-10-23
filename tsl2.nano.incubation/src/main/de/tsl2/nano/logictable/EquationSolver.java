@@ -15,17 +15,17 @@ import java.util.Hashtable;
 import java.util.Map;
 
 import de.tsl2.nano.util.StringUtil;
+import de.tsl2.nano.util.operation.NumericOperator;
 
 /**
  * 
  * TODO: optimize performance (StringBuilder)
- * TODO: more abstract: variable open,close, operation
- * TODO: interface for math-exteded-functions
+ * TODO: use NumericOperator
  * 
- * @author Thomas Schneider, Thomas Schneider
+ * @author Thomas Schneider
  * @version $Revision$
  */
-public class EquationSolver {
+public class EquationSolver extends NumericOperator {
     static final String B_OPEN = "(";
     static final String B_CLOSE = ")";
     static final String BETWEEN = ":";
