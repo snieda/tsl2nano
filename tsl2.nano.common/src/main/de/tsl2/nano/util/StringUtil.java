@@ -200,7 +200,16 @@ public class StringUtil {
      * @return true, if object is null or empty
      */
     public static final boolean isEmpty(Object text) {
-        return text == null || text.toString().isEmpty();
+        return isEmpty(text, false);
+    }
+
+    /**
+     * isEmpty
+     * @param text text to analyze
+     * @return true, if object is null or empty
+     */
+    public static final boolean isEmpty(Object text, boolean trim) {
+        return text == null || (trim ? text.toString().trim().isEmpty() : text.toString().isEmpty());
     }
 
     /**
