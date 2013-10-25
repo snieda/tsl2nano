@@ -21,6 +21,8 @@ import de.tsl2.nano.util.StringUtil;
 
 /**
  * Boolean Operator as a sample implementation of {@link Operator}. Is able to do boolean operations.
+ * <p/>
+ * TODO: performance enhancing pre-check for evaluation (e.g.: A | B ==> if A is true, B can be ignored!)
  * 
  * @author Tom
  * @version $Revision$
@@ -48,7 +50,7 @@ public class BooleanOperator extends SOperator<Boolean> {
         Format fmt = new Format() {
             @Override
             public StringBuffer format(Object obj, StringBuffer toAppendTo, FieldPosition pos) {
-                return toAppendTo.append(((Boolean)obj).toString());
+                return toAppendTo.append(((Boolean) obj).toString());
             }
 
             @Override
@@ -56,7 +58,7 @@ public class BooleanOperator extends SOperator<Boolean> {
                 pos.setIndex(StringUtil.isEmpty(source) ? 1 : source.length());
                 return Boolean.valueOf(source);
             }
-            
+
         };
         return new FromCharSequenceConverter<Boolean>(fmt);
     }
@@ -66,6 +68,7 @@ public class BooleanOperator extends SOperator<Boolean> {
      */
     @SuppressWarnings("serial")
     protected void createOperations() {
+        syntax.put(KEY_OPERATION, "[!&|]");
         operationDefs = new HashMap<CharSequence, IAction<Boolean>>();
         addOperation("&", new CommonAction<Boolean>() {
             @Override

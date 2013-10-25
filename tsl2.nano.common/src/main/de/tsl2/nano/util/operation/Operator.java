@@ -9,6 +9,21 @@ import de.tsl2.nano.util.StringUtil;
 /**
  * Base class to execute any operations with terms having two operand and one operator. it is like a primitive parser
  * using regular expressions. may be used to implement equation-solvers etc.
+ * <p/>
+ * TODO: support for one-operand-operation (the second has a default value. e.g.: -10 = 0 - 10.
+ * <p/>
+ * Use:<br/>
+ * create an expression of type INPUT. create an Operator instance holding a converter (INPUT <==> OUTPUT) an provide
+ * values contained in your expression.
+ * <p/>
+ * Example:
+ * 
+ * <pre>
+ * if your operator is a numeric operator with INPUT type String and OUTPUT type Number:
+ * values.put("x1", 1);
+ * value.put("x2, 2);
+ * operator.eval("(x1 + x2) + 5") ==> (Number)8.
+ * </pre>
  * 
  * @param <INPUT> type of input to extract operations from
  * @param <OUTPUT> type of output as result.
@@ -39,6 +54,7 @@ public abstract class Operator<INPUT, OUTPUT> {
     public static final String KEY_OPERATION = "operation";
     public static final String KEY_OPERAND = "operand";
     public static final String KEY_EMPTY = "empty";
+    public static final String KEY_RESULT = "result";
 
     public Operator() {
         super();
@@ -78,10 +94,11 @@ public abstract class Operator<INPUT, OUTPUT> {
     }
 
     /**
-     * define all possible operations. see {@link #operationDefs}
+     * define all possible operations. see {@link #operationDefs}. should set value for {@link #KEY_OPERATION} in
+     * {@link #syntax}, too!
      */
     protected abstract void createOperations();
-    
+
     /**
      * helper to define an operation-definition
      * 
@@ -90,6 +107,15 @@ public abstract class Operator<INPUT, OUTPUT> {
      */
     protected void addOperation(INPUT operator, IAction<OUTPUT> operation) {
         operationDefs.put(operator, operation);
+    }
+
+    /**
+     * used to do a break if result already available
+     * 
+     * @return true, if result already available
+     */
+    protected boolean resultEstablished() {
+        return values.containsKey(KEY_RESULT);
     }
 
 //    public OUTPUT eval(INPUT expression) {
@@ -165,6 +191,11 @@ public abstract class Operator<INPUT, OUTPUT> {
      * @return result of operation
      */
     protected OUTPUT operate(INPUT term, Map<INPUT, OUTPUT> values) {
+        if (resultEstablished()) {
+            replace(term, term, syntax(KEY_EMPTY));
+            return values.get(KEY_RESULT);
+        }
+        
         Operation op = new Operation(term);
 
         /*
@@ -181,7 +212,9 @@ public abstract class Operator<INPUT, OUTPUT> {
             operation.setParameter(new Object[] { n1, n2 });
             result = operation.activate();
         } else {
-            throw new IllegalArgumentException(term.toString());
+            throw new IllegalArgumentException(term.toString() + " (operation should match:"
+                + syntax(KEY_OPERATION)
+                + ")");
         }
 
         //TODO: this should be deprecated because we should extract only pure terms!
@@ -222,6 +255,7 @@ public abstract class Operator<INPUT, OUTPUT> {
         // TODO backus-naur form?
         return "Operator(possible operations: " + StringUtil.toFormattedString(operationDefs, 1000);
     }
+
     /**
      * class holding a single operation
      * 
@@ -250,6 +284,7 @@ public abstract class Operator<INPUT, OUTPUT> {
          * @param mode one of {@link #MODE_INFIX}, {@link #MODE_PREFIX}, {@link #MODE_POSTFIX}.
          * @return array holding operation parameter
          */
+        @SuppressWarnings("unchecked")
         protected INPUT[] extractOperation(INPUT term, int mode) {
             //technical workaround, see #inputType
 //            INPUT[] OP = (INPUT[]) Array.newInstance(BeanUtil.getGenericType(this.getClass()), 3);

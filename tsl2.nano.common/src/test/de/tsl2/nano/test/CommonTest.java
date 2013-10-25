@@ -84,6 +84,7 @@ import de.tsl2.nano.util.NumberUtil;
 import de.tsl2.nano.util.Period;
 import de.tsl2.nano.util.StringUtil;
 import de.tsl2.nano.util.operation.CRange;
+import de.tsl2.nano.util.operation.ConditionOperator;
 import de.tsl2.nano.util.operation.FromCharSequenceConverter;
 import de.tsl2.nano.util.operation.IConvertableUnit;
 import de.tsl2.nano.util.operation.IConverter;
@@ -1115,6 +1116,31 @@ public class CommonTest {
         values.put("x1", x1);
         values.put("x2", x2);
         Assert.assertEquals(new BigDecimal(61), new NumericOperator(values).eval(f));
+    }
+
+    @Test
+    public void testConditionOperator() {
+        String f = "(A&B ) | C ? D : E";
+        
+        Map<CharSequence, Object> values = new Hashtable<CharSequence, Object>();
+        values.put("A", true);
+        values.put("C", true);
+        /*
+         * two condition value-possibilities: action or expression
+         */
+        values.put("D", new CommonAction<Object>() {
+            @Override
+            public Object action() throws Exception {
+                return "D";
+            }
+        });
+        Assert.assertEquals("D", new ConditionOperator(values).eval(f));
+        
+        values.remove(Operator.KEY_RESULT);
+        values.put("A", true);
+        values.put("C", false);
+        values.put("E", "E");
+        Assert.assertEquals("E", new ConditionOperator(values).eval(f));
     }
 
     @Test

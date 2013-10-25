@@ -19,6 +19,7 @@ import java.text.NumberFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.HashMap;
 import java.util.Hashtable;
 import java.util.List;
 import java.util.Map;
@@ -53,6 +54,8 @@ import de.tsl2.nano.logictable.Structure;
 import de.tsl2.nano.messaging.EventController;
 import de.tsl2.nano.messaging.IListener;
 import de.tsl2.nano.util.StringUtil;
+import de.tsl2.nano.util.operation.BooleanOperator;
+import de.tsl2.nano.util.operation.ConditionOperator;
 import de.tsl2.nano.util.operation.FromCharSequenceConverter;
 import de.tsl2.nano.util.operation.IConverter;
 import de.tsl2.nano.util.operation.Operator;
@@ -130,36 +133,52 @@ public class IncubationTest {
 
     @Test
     public void testVNetWithWorkflow() {
-//        class Act extends VActivity<String, BeanDefinition<?>> {
-//            @Override
-//            public BeanDefinition<?> action() throws Exception {
-//                return null;
-//            }
-//            @Override
-//            public boolean canActivate(Map parameter) {
-//                return expression.;
-//            }
-//            
-//        }
-//        Net<VActivity<String, BeanDefinition<?>>, Float> net = new Net<VActivity<String, BeanDefinition<?>>, Float>();
-////        net.setWorkParallel(false);
-//        Node<VActivity<String, BeanDefinition<?>>, Float> state0 = net.add(new VActivity("state0", "${A}&${B}", "C"));
-//        Node<VNeuron, Float> nHabe = net.addAndConnect(new VNeuron("habe"), nHunger.getCore(), -1f);
-//        net.addAndConnect(new VNeuron("ich"), nHabe.getCore(), -1f);
-//
-//        //create a callback for responses
-//        IListener<Notification> responseHandler = new IListener<Notification>() {
-//            @Override
-//            public synchronized void handleEvent(Notification event) {
-//                System.out.println("RESPONSE: " + event.getNotification());
-//            }
-//        };
-//
-//        //start input
-//        net.notify(new Notification("ich", 1f, null, responseHandler));
-//        net.notify(new Notification("hunger", 1f, null, responseHandler));
-//
-//        //should output: ich habe hunger
+        final Map<CharSequence, Object> state0Values = new HashMap<CharSequence, Object>();
+        state0Values.put("A", true);
+        state0Values.put("B", true);
+
+        class Act extends VActivity<String, String> {
+            ConditionOperator<Object> op = new ConditionOperator<Object>(state0Values);
+
+            public Act(String name, String condition, String expression) {
+                super(name, condition, expression);
+            }
+
+            @Override
+            public String action() throws Exception {
+                return (String) op.eval(expression);
+            }
+
+            @Override
+            public boolean canActivate(Map parameter) {
+                return (Boolean) op.eval(condition);
+            }
+
+        }
+        Net<VActivity<String, String>, Boolean> net = new Net<VActivity<String, String>, Boolean>();
+//        net.setWorkParallel(false);
+
+        Node<VActivity<String, String>, Boolean> state0 = net.add(new Act("state0", "A&B", "A&B?C:D"));
+        Node<VActivity<String, String>, Boolean> state1 = net.addAndConnect(new Act("state1", "C", "D"),
+            state0.getCore(),
+            true);
+        Node<VActivity<String, String>, Boolean> state2 = net.addAndConnect(new Act("state2", "D", "E"),
+            state1.getCore(),
+            true);
+
+        //create a callback for responses
+        IListener<Notification> responseHandler = new IListener<Notification>() {
+            @Override
+            public synchronized void handleEvent(Notification event) {
+                System.out.println("RESPONSE: " + event.getNotification());
+            }
+        };
+
+        //start input. don't set a query path, notification is always true, all items are linked
+        net.notify(new Notification(null, true, null, responseHandler));
+        net.notify(new Notification(null, true, null, responseHandler));
+
+        //should output: D
     }
 
     @Test
