@@ -21,7 +21,6 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import de.tsl2.nano.Messages;
-import de.tsl2.nano.bean.BeanUtil;
 import de.tsl2.nano.collection.CollectionUtil;
 import de.tsl2.nano.exception.ForwardedException;
 
