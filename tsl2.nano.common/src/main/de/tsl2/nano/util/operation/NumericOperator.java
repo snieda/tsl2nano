@@ -55,6 +55,8 @@ public class NumericOperator extends SOperator<BigDecimal> {
     @SuppressWarnings("serial")
     protected void createOperations() {
         syntax.put(KEY_OPERATION, "[-+*/%^]");
+//        syntax.put(KEY_DEFAULT_OPERAND, "0");
+//        syntax.put(KEY_DEFAULT_OPERATOR, "+");
         operationDefs = new HashMap<CharSequence, IAction<BigDecimal>>();
         addOperation("+", new CommonAction<BigDecimal>() {
             @Override

@@ -27,6 +27,7 @@ import java.text.NumberFormat;
 import java.text.ParseException;
 import java.text.ParsePosition;
 import java.util.Collection;
+import java.util.Currency;
 import java.util.Date;
 import java.util.Hashtable;
 import java.util.Locale;
@@ -47,6 +48,7 @@ import de.tsl2.nano.bean.BeanAttribute;
 import de.tsl2.nano.bean.BeanClass;
 import de.tsl2.nano.bean.BeanContainer;
 import de.tsl2.nano.collection.MapUtil;
+import de.tsl2.nano.currency.CurrencyUtil;
 import de.tsl2.nano.exception.FormattedException;
 import de.tsl2.nano.util.DateUtil;
 import de.tsl2.nano.util.StringUtil;
@@ -572,36 +574,6 @@ public class RegExpFormat extends Format implements INumberFormatCheck {
             0,
             getCurrencyFormat());
     }
-
-    /**
-     * getCurrencyPostfix
-     * 
-     * @return regexp for currency postfix
-     */
-    protected static final String getCurrencyPostfix() {
-        return getCurrencyPostfix(NumberFormat.getCurrencyInstance().getCurrency().getSymbol());
-    }
-
-    /**
-     * getCurrencyPostfix
-     * 
-     * @param locale currency locale
-     * @return regexp for currency postfix
-     */
-    protected static final String getCurrencyPostfix(Locale locale) {
-        return getCurrencyPostfix(NumberFormat.getCurrencyInstance(locale).getCurrency().getSymbol());
-    }
-
-    /**
-     * getCurrencyPostfix
-     * 
-     * @param symbol currency symbol
-     * @return regexp for currency postfix
-     */
-    protected static final String getCurrencyPostfix(String symbol) {
-        return "( " + symbol + "){0,1}";
-    }
-
     /**
      * creates a regular expresssion for the given type of number
      * 
@@ -980,6 +952,55 @@ public class RegExpFormat extends Format implements INumberFormatCheck {
      */
     public static boolean isNumber(Format format) {
         return (format instanceof NumberFormat) || (format instanceof INumberFormatCheck && ((INumberFormatCheck) format).isNumber());
+    }
+
+    /**
+     * getCurrencyPostfix
+     * 
+     * @return regexp for currency postfix
+     */
+    protected static final String getCurrencyPostfix() {
+        return getCurrencyPostfix(NumberFormat.getCurrencyInstance().getCurrency().getSymbol());
+    }
+
+    /**
+     * getCurrencyPostfix
+     * 
+     * @param locale currency locale
+     * @return regexp for currency postfix
+     */
+    protected static final String getCurrencyPostfix(Locale locale) {
+        return getCurrencyPostfix(NumberFormat.getCurrencyInstance(locale).getCurrency().getSymbol());
+    }
+
+    /**
+     * getCurrencyPostfix
+     * 
+     * @param symbol currency symbol
+     * @return regexp for currency postfix
+     */
+    protected static final String getCurrencyPostfix(String symbol) {
+        return "( " + symbol + "){0,1}";
+    }
+
+
+    /**
+     * currency with currency default precision (normally:2). object types must be {@link BigDecimal}!
+     * 
+     * @return standard currency regular expression for current locale
+     */
+    public static final Format getCurrencyFormat(Currency c) {
+        return CurrencyUtil.getFormat(c.getCurrencyCode(), c.getDefaultFractionDigits());
+    }
+
+    /**
+     * currency with currency default precision (normally:2). object types must be {@link BigDecimal}!
+     * 
+     * @return standard currency regular expression for current locale
+     */
+    public static final Format getCurrencyFormat() {
+        Currency c = NumberFormat.getCurrencyInstance().getCurrency();
+        return getCurrencyFormat(c);
     }
 
     /**

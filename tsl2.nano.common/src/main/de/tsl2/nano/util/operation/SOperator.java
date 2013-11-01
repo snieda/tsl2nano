@@ -21,7 +21,7 @@ import de.tsl2.nano.collection.MapUtil;
 import de.tsl2.nano.util.StringUtil;
 
 /**
- * Base  {@link Operator} for string expressions.
+ * Base {@link Operator} for string expressions.
  * 
  * @author Tom
  * @version $Revision$
@@ -36,9 +36,9 @@ public abstract class SOperator<T> extends Operator<CharSequence, T> {
         super();
     }
 
-    
     /**
      * constructor
+     * 
      * @param inputClass
      * @param converter
      * @param values
@@ -49,22 +49,17 @@ public abstract class SOperator<T> extends Operator<CharSequence, T> {
         super(inputClass, converter, values);
     }
 
-
     /**
      * default implementation. please override
      * 
      * @return map containing needed {@link #syntax}. see {@link #syntax(String)}.
      */
     protected Map<String, CharSequence> createSyntax() {
-        String open = "(", close = ")", term = "[^(\\)\\()]+";
+        String open = "(", close = ")";
         return MapUtil.asMap(KEY_BEGIN,
             open,
             KEY_END,
             close,
-            KEY_TERM_ENCLOSED,
-            "\\" + open + term + "\\" + close,
-            KEY_TERM,
-            term,
             KEY_BETWEEN,
             ":",
             KEY_CONCAT,
@@ -74,7 +69,17 @@ public abstract class SOperator<T> extends Operator<CharSequence, T> {
             KEY_OPERAND,
             "([a-zA-Z0-9]+)",
             KEY_EMPTY,
-            "");
+            ""/*,
+            KEY_DEFAULT_OPERAND,
+            "",
+            KEY_DEFAULT_OPERATOR,
+            ""*/);
+    }
+
+    protected void createTermSyntax() {
+        String term = "[^" + "\\" + syntax(KEY_END) + "\\" + syntax(KEY_BEGIN) + syntax(KEY_OPERATION).subSequence(1, syntax(KEY_OPERATION).length() - 2) + "]*" + syntax(KEY_OPERATION) + "\\s*" + syntax(KEY_OPERAND);
+        syntax.put(KEY_TERM, term);
+        syntax.put(KEY_TERM_ENCLOSED, "\\" + syntax(KEY_BEGIN) + "\\s*" + term + "\\s*" + "\\" + syntax(KEY_END));
     }
 
     @Override

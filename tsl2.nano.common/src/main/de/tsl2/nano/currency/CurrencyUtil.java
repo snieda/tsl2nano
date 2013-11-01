@@ -12,6 +12,7 @@ package de.tsl2.nano.currency;
 import java.io.File;
 import java.io.InputStreamReader;
 import java.math.BigDecimal;
+import java.text.DecimalFormat;
 import java.text.Format;
 import java.text.MessageFormat;
 import java.text.NumberFormat;
@@ -214,6 +215,45 @@ public class CurrencyUtil {
         return value != null ? MessageFormat.format("{0} {1}", value, currencySymbol) : "";
     }
 
+
+    /**
+     * creates a NumberFormat for BigDecimals with currency code and fractionDigits
+     * 
+     * @param currencyCode (optional) currency code (see {@link Currency#getInstance(String)} and {@link http
+     *            ://de.wikipedia.org/wiki/ISO_4217} - or null.
+     * @param fractionDigits number of fraction digits (precision)
+     * @return new numberformat instance
+     */
+    public static final NumberFormat getFormat(String currencyCode, int fractionDigits) {
+        final DecimalFormat numberFormat = (DecimalFormat) (currencyCode != null ? NumberFormat.getCurrencyInstance()
+            : NumberFormat.getInstance());
+        if (currencyCode != null)
+            numberFormat.setCurrency(Currency.getInstance(currencyCode));
+        numberFormat.setMinimumFractionDigits(fractionDigits);
+        numberFormat.setMaximumFractionDigits(fractionDigits);
+        numberFormat.setGroupingUsed(true);
+        numberFormat.setParseBigDecimal(true);
+        return numberFormat;
+    }
+
+    /**
+     * delegates to {@link #getFormat(Locale, Date)} with default locale
+     */
+    public static NumberFormat getFormat(Date historicCurrencyDate) {
+        return getFormat(Locale.getDefault(), historicCurrencyDate);
+    }
+    
+    /**
+     * formatter for given perhaps historic currency
+     * @param loc locale
+     * @param historicCurrencyDate date of currency
+     * @return formatter
+     */
+    public static NumberFormat getFormat(Locale loc, Date historicCurrencyDate) {
+        CurrencyUnit currency = getCurrency(loc, historicCurrencyDate);
+        return getFormat(currency.getCurrencyCode(), currency.getCurrency().getDefaultFractionDigits());
+    }
+    
     /**
      * initializeCurrencyUnits
      */

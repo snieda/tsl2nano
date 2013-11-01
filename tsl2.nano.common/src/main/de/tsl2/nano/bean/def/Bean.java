@@ -250,7 +250,7 @@ public class Bean<T> extends BeanDefinition<T> {
         getAttribute(name).changeHandler().addListener(listener);
     }
 
-    public AttributeDefinition addAttribute(String name,
+    public IAttributeDefinition<?> addAttribute(String name,
             int length,
             boolean nullable,
             Format format,

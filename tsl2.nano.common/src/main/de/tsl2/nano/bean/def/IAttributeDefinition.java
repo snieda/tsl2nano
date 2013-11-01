@@ -22,6 +22,9 @@ import de.tsl2.nano.bean.IAttributeDef;
  * @version $Revision$
  */
 public interface IAttributeDefinition<T> extends IAttributeDef, Serializable {
+    /** bean-class, holding the attribute */
+    Class<?> getDeclaringClass();
+    
     /** the attributes name */
     String getName();
     
@@ -112,4 +115,13 @@ public interface IAttributeDefinition<T> extends IAttributeDef, Serializable {
     IPresentableColumn getColumnDefinition();
     /** set definition for a column */
     void setColumnDefinition(int index, int sortIndex, boolean sortUpDirection, int width);
+
+    /**
+     * renames the attribute to be a relation from another bean. relation name parts are concatenated through '.'.
+     */
+    void setAsRelation(String string);
+
+    /** attribute relation separator (like 'myattr1.relationattr.nextrelationattr' */
+    public static final String REL_SEPARATOR = ".";
+    
 }

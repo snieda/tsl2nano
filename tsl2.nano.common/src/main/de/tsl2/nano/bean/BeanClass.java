@@ -27,7 +27,6 @@ import java.util.SortedSet;
 import java.util.TreeSet;
 
 import org.apache.commons.logging.Log;
-import de.tsl2.nano.log.LogFactory;
 import org.simpleframework.xml.Attribute;
 import org.simpleframework.xml.Default;
 import org.simpleframework.xml.DefaultType;
@@ -38,6 +37,7 @@ import de.tsl2.nano.bean.def.BeanValue;
 import de.tsl2.nano.collection.ListSet;
 import de.tsl2.nano.exception.FormattedException;
 import de.tsl2.nano.exception.ForwardedException;
+import de.tsl2.nano.log.LogFactory;
 import de.tsl2.nano.util.NumberUtil;
 import de.tsl2.nano.util.StringUtil;
 
@@ -585,7 +585,6 @@ public class BeanClass<T> implements Serializable {
      * @param className class for beanclass instance
      * @return new beanclass instance
      */
-    @SuppressWarnings({ "rawtypes", "unchecked" })
     public static BeanClass createBeanClass(String className, ClassLoader classLoader) {
         Class clazz = load(className, classLoader);
         return new BeanClass(clazz);
@@ -837,7 +836,6 @@ public class BeanClass<T> implements Serializable {
      * 
      * @return all interfaces of the class hierarchy.
      */
-    @SuppressWarnings("rawtypes")
     public Class[] getInterfaces() {
         Collection<Class> allInterfaces = new LinkedHashSet<Class>();
         allInterfaces.addAll(Arrays.asList(clazz.getInterfaces()));

@@ -69,6 +69,8 @@ public class BooleanOperator extends SOperator<Boolean> {
     @SuppressWarnings("serial")
     protected void createOperations() {
         syntax.put(KEY_OPERATION, "[!&|]");
+//        syntax.put(KEY_DEFAULT_OPERAND, "false");
+//        syntax.put(KEY_DEFAULT_OPERATOR, "|");
         operationDefs = new HashMap<CharSequence, IAction<Boolean>>();
         addOperation("&", new CommonAction<Boolean>() {
             @Override
@@ -80,6 +82,12 @@ public class BooleanOperator extends SOperator<Boolean> {
             @Override
             public Boolean action() throws Exception {
                 return (Boolean) parameter[0] | (Boolean) parameter[1];
+            }
+        });
+        addOperation("!", new CommonAction<Boolean>() {
+            @Override
+            public Boolean action() throws Exception {
+                return !(Boolean) parameter[1];
             }
         });
     }

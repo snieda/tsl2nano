@@ -104,6 +104,21 @@ public class UnboundAccessor<T> {
     }
 
     /**
+     * set a field/member value
+     * @param memberName member to change
+     * @param newValue new member value
+     */
+    public void set(String memberName, Object newValue) {
+        try {
+            Field f = getField(memberName);
+            f.setAccessible(true);
+            f.set(instance, newValue);
+        } catch (Exception e) {
+            ForwardedException.forward(e);
+        }
+    }
+    
+    /**
      * this method returns the instance itself. extending classes may override this to return an object that will be more accessible than the instance itself (perhaps an instance of a super class).
      * @param instance2 
      * @return instance2 itself

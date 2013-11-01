@@ -456,6 +456,19 @@ public class BeanPresentationHelper<T> {
     }
 
     /**
+     * override this method to define additional attributes for your bean. this implementation evaluates the id of the
+     * bean and return it's attributes if the id is another bean!
+     */
+    public void defineAdditionalAttributes() {
+        if (Environment.get("define.additional.attributes", true)) {
+            BeanAttribute id = BeanContainer.getIdAttribute(bean.getClazz());
+            if (id != null && !BeanUtil.isStandardType(id.getDeclaringClass()) && bean.hasAttribute(id.getName())) {
+                bean.combineRelationAttributes(id.getName());
+            }
+        }
+    }
+
+    /**
      * checks, if given attribute should be presented.
      * 
      * @param attribute attribute to check.
@@ -463,7 +476,7 @@ public class BeanPresentationHelper<T> {
      */
     public boolean isDefaultAttribute(BeanAttribute attribute) {
         AttributeDefinition<?> attr = (AttributeDefinition<?>) attribute;
-        return BeanContainer.instance().hasPermission(attribute.getId(), null) && (Environment.get("default.attribute.id",
+        return (BeanContainer.instance() == null || BeanContainer.instance().hasPermission(attribute.getId(), null)) && (Environment.get("default.attribute.id",
             false) || !attr.id())
             && (Environment.get("default.attribute.multivalue", false) || !attr.isMultiValue())
             && (Environment.get("default.attribute.timestamp", false) || attr.temporalType() == null || !Timestamp.class.isAssignableFrom(attr.temporalType()));
@@ -1119,30 +1132,30 @@ public class BeanPresentationHelper<T> {
                 }
             });
 
-            presActions.add(new SecureAction(bean.getClazz(),
-                "configure",
-                IAction.MODE_UNDEFINED,
-                false,
-                "icons/compose.png") {
-                @Override
-                public Object action() throws Exception {
-//                    File configFileName = BeanDefinition.getDefinitionFile(bean.getName());
-//                    String configFile = FileUtil.getFile(configFileName.getPath());
-//                    return configFile != null ? configFile : "No configuration found (" + configFileName + ")";
-                    Bean<?> configBean = Bean.getBean(BeanDefinition.getBeanDefinition(bean.getName()));
-                    String[] writableAttributes = configBean.getAttributeNames(true);
-                    configBean.setAttributeFilter(writableAttributes);
-//                    BeanClass beanClass = new BeanClass(bean.getClazz());
-//                    configBean.getAttribute("attributes").setRange(beanClass.getAttributes(false));
-                    return configBean;
-                }
-
-                @Override
-                public boolean isEnabled() {
-                    return false;
-                }
-            });
-
+//            presActions.add(new SecureAction(bean.getClazz(),
+//                "configure",
+//                IAction.MODE_UNDEFINED,
+//                false,
+//                "icons/compose.png") {
+//                @Override
+//                public Object action() throws Exception {
+////                    File configFileName = BeanDefinition.getDefinitionFile(bean.getName());
+////                    String configFile = FileUtil.getFile(configFileName.getPath());
+////                    return configFile != null ? configFile : "No configuration found (" + configFileName + ")";
+//                    Bean<?> configBean = Bean.getBean(BeanDefinition.getBeanDefinition(bean.getName()));
+//                    String[] writableAttributes = configBean.getAttributeNames(true);
+//                    configBean.setAttributeFilter(writableAttributes);
+////                    BeanClass beanClass = new BeanClass(bean.getClazz());
+////                    configBean.getAttribute("attributes").setRange(beanClass.getAttributes(false));
+//                    return configBean;
+//                }
+//
+//                @Override
+//                public boolean isEnabled() {
+//                    return false;
+//                }
+//            });
+//
             presActions.add(new SecureAction(bean.getClazz(),
                 "help",
                 IAction.MODE_UNDEFINED,

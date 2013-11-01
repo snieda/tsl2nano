@@ -387,7 +387,7 @@ public class Html5Presentation<T> extends BeanPresentationHelper<T> implements I
         return item instanceof BeanDefinition ? item.toString() : vef.format(item);
     }
 
-    private Element createActionPanel(Element parent, Collection<IAction> actions, String...attributes) {
+    private Element createActionPanel(Element parent, Collection<IAction> actions, String... attributes) {
         Element panel = createGrid(parent, "Actions", actions != null ? 1 + actions.size() : 1);
         Element row = appendElement(panel, TAG_ROW);
         Element cell = appendElement(row, TAG_CELL, attributes);
@@ -428,8 +428,10 @@ public class Html5Presentation<T> extends BeanPresentationHelper<T> implements I
     Element createBeanActions(Element form, BeanDefinition<?> model) {
         Element panel = createActionPanel(form, model.getActions(), ATTR_ALIGN, ALIGN_CENTER);
         String closeLabel = Messages.getStringOpt("tsl2nano.close", true);
-        if (model.isMultiValue() && ((BeanCollector) model).hasMode(MODE_ASSIGNABLE))
-            createAction(panel, BTN_ASSIGN, closeLabel, closeLabel, "submit", "icons/links.png", true, true, false);
+        if (model.isMultiValue() && ((BeanCollector) model).hasMode(MODE_ASSIGNABLE)) {
+            String assignLabel = Messages.getStringOpt("tsl2nano.assign", true);
+            createAction(panel, BTN_ASSIGN, assignLabel, assignLabel, "submit", "icons/links.png", true, true, false);
+        }
         createAction(panel, IAction.CANCELED, closeLabel, closeLabel, null, "icons/stop.png", true, false, true);
         return panel;
     }
@@ -558,8 +560,9 @@ public class Html5Presentation<T> extends BeanPresentationHelper<T> implements I
                 ATTR_BORDER,
                 "1",
                 "style",
-                "-webkit-transform: scale(1.2);"
-                , ATTR_BGCOLOR, COLOR_LIGHT_GRAY);
+                "-webkit-transform: scale(1.2);",
+                ATTR_BGCOLOR,
+                COLOR_LIGHT_GRAY);
             createAction(th, c.getSortingAction(collector));
         }
         return appendElement(table, TAG_TBODY);
@@ -664,12 +667,13 @@ public class Html5Presentation<T> extends BeanPresentationHelper<T> implements I
             TAG_FONT,
             content(beanValue.getDescription() + (beanValue.nullable() ? "" : " (*)")),
             ATTR_COLOR,
-            (String) BeanUtil.valueOf(beanValue.getPresentation().getBackground(), Environment.get("default.value.color", "#0000cc")),
+            (String) BeanUtil.valueOf(beanValue.getPresentation().getBackground(),
+                Environment.get("default.value.color", "#0000cc")),
             enable(ATTR_HIDDEN, !beanValue.getPresentation().isVisible()),
             enable(ATTR_REQUIRED, !beanValue.nullable()));
         //create the layout and layout-constraints
         Element cell = appendElement(row, TAG_CELL);
-//        appendAttributes(cell, beanValue.getPresentation());
+        cell = createLayoutConstraints(cell, beanValue.getPresentation());
         cell = createLayout(cell, beanValue.getPresentation());
         //now the field itself
         Element input;
@@ -725,6 +729,8 @@ public class Html5Presentation<T> extends BeanPresentationHelper<T> implements I
         } else {
             input = createSelectorField(cell, beanValue);
         }
+        appendAttributes(input, beanValue.getPresentation());
+
         if (beanValue.hasStatusError()) {
             row = appendElement(parent, TAG_ROW, ATTR_SPAN, "2");
             appendElement(row, TAG_FONT, ATTR_SIZE, "-1", ATTR_COLOR, COLOR_RED);
@@ -743,6 +749,20 @@ public class Html5Presentation<T> extends BeanPresentationHelper<T> implements I
     private Element createLayout(Element parent, IPresentable presentable) {
         if (presentable.getLayout() instanceof Map) {
             parent = appendElement(parent, TAG_TABLE, MapUtil.asStringArray((Map) presentable.getLayout()));
+        }
+        return parent;
+    }
+
+    /**
+     * createLayout
+     * 
+     * @param parent
+     * @param presentable
+     * @return
+     */
+    private Element createLayoutConstraints(Element parent, IPresentable p) {
+        if (p.getLayoutConstraints() instanceof Map) {
+            HtmlUtil.appendAttributes(parent, MapUtil.asArray((Map<String, String>) p.getLayoutConstraints()));
         }
         return parent;
     }

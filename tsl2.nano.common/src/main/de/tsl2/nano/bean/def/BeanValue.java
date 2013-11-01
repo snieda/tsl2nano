@@ -15,11 +15,14 @@ import static de.tsl2.nano.bean.def.IPresentable.POSTFIX_SELECTOR;
 
 import java.lang.reflect.Method;
 import java.text.Format;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.LinkedList;
 import java.util.List;
 
 import org.apache.commons.logging.Log;
+
+import tsl.StringUtil;
 
 import de.tsl2.nano.Environment;
 import de.tsl2.nano.action.CommonAction;
@@ -130,7 +133,10 @@ public class BeanValue<T> extends AttributeDefinition<T> implements IValueDefini
      */
     @Override
     public T getValue() {
-        return (T) getValue(instance);
+        if (isRelation())
+            return (T) getRelation(getName());
+        else
+            return (T) getValue(instance);
     }
 
     /**
@@ -186,16 +192,26 @@ public class BeanValue<T> extends AttributeDefinition<T> implements IValueDefini
         }
     }
 
-    /**
-     * get the beanvalue instance of the given attribute value. useful to walk through relations.
-     * 
-     * @param name attribute name
-     * @return bean value instance or null
-     */
     @Override
     public IValueDefinition getRelation(String name) {
-        final Object value = getValue();
-        return (IValueDefinition) (value == null ? null : getBeanValue(value, name));
+        return getRelation(instance, name.split("\\" + REL_SEPARATOR));
+    }
+
+    /**
+     * get the beanvalue instance of the given attribute value. useful to walk through relations (recursive!). will stop
+     * on the first relation having a value of null!
+     * 
+     * @param root root instance to start from
+     * @param chain of attribute names
+     * @return bean value or null
+     */
+    protected IValueDefinition getRelation(Object root, String... chain) {
+        assert chain.length > 0 : "chain must not be empty!";
+
+        BeanValue bv = root == null ? null : getBeanValue(root, chain[0]);
+        if (bv == null || chain.length == 1)
+            return (IValueDefinition) bv;
+        return getRelation(bv.getValue(), Arrays.copyOfRange(chain, 1, chain.length));
     }
 
     protected IAttributeDefinition createAttributeDefinition(String name) {
@@ -366,7 +382,10 @@ public class BeanValue<T> extends AttributeDefinition<T> implements IValueDefini
                 Composition comp = composition() ? CompositionFactory.createComposition(BeanValue.this) : null;
                 if (isMultiValue()) {
                     Collection<T> collection = (Collection<T>) getValue();
-                    beanCollector = BeanCollector.getBeanCollector((Class<T>) getGenericType(), collection, MODE_ALL, comp);
+                    beanCollector = BeanCollector.getBeanCollector((Class<T>) getGenericType(),
+                        collection,
+                        MODE_ALL,
+                        comp);
                     if (collection == null)
                         collection = new ListSet<T>();
                     setValue((T) collection);

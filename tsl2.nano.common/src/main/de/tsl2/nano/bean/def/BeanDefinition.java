@@ -35,6 +35,8 @@ import de.tsl2.nano.Environment;
 import de.tsl2.nano.action.IAction;
 import de.tsl2.nano.bean.BeanAttribute;
 import de.tsl2.nano.bean.BeanClass;
+import de.tsl2.nano.bean.BeanContainer;
+import de.tsl2.nano.bean.IAttributeDef;
 import de.tsl2.nano.bean.ValueHolder;
 import de.tsl2.nano.collection.CollectionUtil;
 import de.tsl2.nano.collection.IPredicate;
@@ -188,7 +190,7 @@ public class BeanDefinition<T> extends BeanClass<T> implements Serializable {
                 }
                 attributeDefinitions.put(attributeFilter[i], v);
             }
-            //removed previously created attributes that are not contained in filter
+            //remove previously created attributes that are not contained in filter
             if (attributeDefinitions != null) {
                 Set<String> allAttributes = attributeDefinitions.keySet();
                 if (allAttributes.size() != attributeFilter.length) {
@@ -204,6 +206,11 @@ public class BeanDefinition<T> extends BeanClass<T> implements Serializable {
         }
         //don't use the generic type H (Class<H>) to be compilable on standard jdk javac.
         ArrayList<BeanAttribute> attributes = new ArrayList<BeanAttribute>((Collection/*<? extends BeanAttribute>*/) getAttributeDefinitions().values());
+        /*
+         * create additional attributes - ignoring the filter
+         */
+        getPresentationHelper().defineAdditionalAttributes();
+        
         /*
          * filter the result using a default filter by the presentation helper
          */
@@ -221,6 +228,30 @@ public class BeanDefinition<T> extends BeanClass<T> implements Serializable {
 
     protected IAttributeDefinition createAttributeDefinition(String name) {
         return new AttributeDefinition<T>(BeanAttribute.getBeanAttribute(getClazz(), name).getAccessMethod());
+    }
+
+    /**
+     * delegates to {@link #combineRelationAttributes(IAttributeDefinition)}
+     */
+    void combineRelationAttributes(String relationAttributeName) {
+        combineRelationAttributes(getAttribute(relationAttributeName));
+    }
+
+    /**
+     * adds all attributes of the given bean relation (must be a bean attribute holding another bean).
+     * 
+     * @param relation relation bean attribute
+     */
+    void combineRelationAttributes(IAttributeDefinition<?> relation, String... attrNames) {
+        BeanDefinition<?> beanDefinition = getBeanDefinition(relation.getDeclaringClass());
+        List<String> filter = Arrays.asList(attrNames);
+        Collection<IAttributeDefinition<?>> attributes = beanDefinition.getAttributeDefinitions().values();
+        for (IAttributeDefinition<?> attr : attributes) {
+            if (filter.contains(attr.getName())) {
+                attr.setAsRelation(relation.getName() + "." + attr.getName());
+                addAttribute(attr);
+            }
+        }
     }
 
     /**
@@ -327,6 +358,7 @@ public class BeanDefinition<T> extends BeanClass<T> implements Serializable {
         ValueHolder v = new ValueHolder(value);
         BeanValue bv = BeanValue.getBeanValue(v, IValueAccess.ATTR_VALUE);
         bv.setBasicDef(-1, true, format, value, description != null ? description : name);
+        bv.setPresentation(presentation);
         getAttributeDefinitions().put(name, bv);
         //if no filter was defined, it will be prefilled in getAttributeNames()
         if (attributeFilter == null)
@@ -335,7 +367,6 @@ public class BeanDefinition<T> extends BeanClass<T> implements Serializable {
             attributeFilter = CollectionUtil.concat(new String[attributeFilter.length + 1],
                 attributeFilter,
                 new String[] { name });
-        bv.setPresentation(presentation);
         allDefinitionsCached = false;
         return bv;
     }
@@ -353,7 +384,7 @@ public class BeanDefinition<T> extends BeanClass<T> implements Serializable {
      * @param presentation
      * @return
      */
-    public AttributeDefinition addAttribute(Object instance,
+    public IAttributeDefinition<?> addAttribute(Object instance,
             String name,
             int length,
             boolean nullable,
@@ -364,16 +395,27 @@ public class BeanDefinition<T> extends BeanClass<T> implements Serializable {
         BeanValue bv = BeanValue.getBeanValue(instance, name);
         description = description != null ? description : name;
         bv.setBasicDef(length, nullable, format, defaultValue, description);
-        getAttributeDefinitions().put(description, bv);
+        bv.setPresentation(presentation);
+        return addAttribute(bv);
+    }
+
+    /**
+     * addAttribute
+     * 
+     * @param newAttribute
+     * @return
+     */
+    public IAttributeDefinition<?> addAttribute(IAttributeDefinition<?> newAttribute) {
+        getAttributeDefinitions().put(newAttribute.getDescription(), newAttribute);
+        //if no filter was defined, it will be prefilled in getAttributeNames()
         if (attributeFilter == null)
             attributeFilter = getAttributeNames();
         else
             attributeFilter = CollectionUtil.concat(new String[attributeFilter.length + 1],
                 attributeFilter,
                 new String[] { name });
-        bv.setPresentation(presentation);
         allDefinitionsCached = false;
-        return bv;
+        return newAttribute;
     }
 
     /**
@@ -534,7 +576,7 @@ public class BeanDefinition<T> extends BeanClass<T> implements Serializable {
         Map<String, IAttributeDefinition<?>> attributes = anotherBean.getAttributeDefinitions();
         Object v;
         for (IAttributeDefinition<?> attr : attributes.values()) {
-            v = attr instanceof IValueAccess ? ((IValueAccess)attr).getValue() : attr.getValue(beanInstance);
+            v = attr instanceof IValueAccess ? ((IValueAccess) attr).getValue() : attr.getValue(beanInstance);
             if (v instanceof IValueAccess)
                 connect(attr.getName(), (IValueAccess<?>) attr.getValue(beanInstance), callback);
         }
@@ -580,6 +622,10 @@ public class BeanDefinition<T> extends BeanClass<T> implements Serializable {
         return hashCode() == obj.hashCode();
     }
 
+    public BeanAttribute getIdAttribute() {
+        return BeanContainer.getIdAttribute(clazz);
+    }
+    
     /**
      * delegates to {@link #getBeanDefinition(String, Class, boolean)} with null and true.
      */
@@ -641,10 +687,17 @@ public class BeanDefinition<T> extends BeanClass<T> implements Serializable {
         return beandef;
     }
 
+    /**
+     * puts the given bean definition to the cache of source bean-definitions. means, if a new bean of an equal named
+     * bean definition will be created, it will inherit it's properties.<br/>
+     * Only if the application was shutdown, this bean definition will be saved for future use.
+     * 
+     * @param beandef bean defintion to be used as source definition for new beans.
+     */
     public static void define(BeanDefinition beandef) {
         virtualBeanCache.add(beandef);
     }
-    
+
     @Persist
     protected void initSerialization() {
         //remove not-serializable or cycling actions

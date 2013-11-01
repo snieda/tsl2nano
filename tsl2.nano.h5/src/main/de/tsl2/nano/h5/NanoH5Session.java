@@ -16,7 +16,6 @@ import static de.tsl2.nano.h5.HtmlUtil.BTN_ASSIGN;
 import static de.tsl2.nano.h5.HtmlUtil.BTN_CANCEL;
 import static de.tsl2.nano.h5.HtmlUtil.BTN_SUBMIT;
 import static de.tsl2.nano.h5.NanoH5.OFFSET_FILTERLINES;
-import static de.tsl2.nano.h5.NanoH5.START_PAGE;
 import static de.tsl2.nano.h5.NanoHTTPD.HTTP_BADREQUEST;
 import static de.tsl2.nano.h5.NanoHTTPD.MIME_HTML;
 

@@ -425,6 +425,21 @@ public class StringUtil {
         }
     }
 
+//    /**
+//     * extends {@link String#split(String)} to return at least src.
+//     * @param src source
+//     * @param regexp separator expression
+//     * @return splitted string, at least src
+//     */
+//    String[] split(Object src, String regexp) {
+//        String s = asString(src);
+//        String[] split = s.split(regexp);
+//        if (split.length == 0)
+//            return new String[]{s};
+//        else
+//            return split;
+//    }
+    
     /**
      * splits and formats an object.
      * 

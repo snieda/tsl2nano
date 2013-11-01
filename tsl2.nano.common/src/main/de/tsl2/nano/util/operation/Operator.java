@@ -54,6 +54,8 @@ public abstract class Operator<INPUT, OUTPUT> {
     public static final String KEY_OPERATION = "operation";
     public static final String KEY_OPERAND = "operand";
     public static final String KEY_EMPTY = "empty";
+//    public static final String KEY_DEFAULT_OPERAND = "default.operand";
+//    public static final String KEY_DEFAULT_OPERATOR = "default.operator";
     public static final String KEY_RESULT = "result";
 
     public Operator() {
@@ -74,6 +76,7 @@ public abstract class Operator<INPUT, OUTPUT> {
         this.values = values;
         syntax = createSyntax();
         createOperations();
+        createTermSyntax();
     }
 
     /**
@@ -99,6 +102,8 @@ public abstract class Operator<INPUT, OUTPUT> {
      */
     protected abstract void createOperations();
 
+    protected abstract void createTermSyntax();
+    
     /**
      * helper to define an operation-definition
      * 
@@ -135,12 +140,16 @@ public abstract class Operator<INPUT, OUTPUT> {
         INPUT t;
         while (true) {
             term = extract(expression, syntax(KEY_TERM_ENCLOSED));
-            if (isEmpty(term))
-                break;
+            if (isEmpty(term)) {
+                term = extract(expression, syntax(KEY_TERM));
+                if (isEmpty(term)) {
+                    break;
+                }
+            }
             t = extract(term, syntax(KEY_TERM));
             replace(expression, term, converter.from(operate(wrap(t), values)));
         }
-        return operate(expression, values);
+        return resultEstablished() ? values.get(KEY_RESULT) : converter.to(expression);
     }
 
     /**
@@ -195,16 +204,16 @@ public abstract class Operator<INPUT, OUTPUT> {
             replace(term, term, syntax(KEY_EMPTY));
             return values.get(KEY_RESULT);
         }
-        
+
         Operation op = new Operation(term);
 
         /*
          * the value map may contain any values - but the found value must have the right type!
          */
         OUTPUT n1 = values.get(op.o1());
-        n1 = n1 != null ? n1 : newOperand(op.o1());
+        n1 = n1 != null  || isEmpty(op.o2()) ? n1 : newOperand(op.o1());
         OUTPUT n2 = values.get(op.o2());
-        n2 = n2 != null ? n2 : newOperand(op.o2());
+        n2 = n2 != null || isEmpty(op.o2()) ? n2 : newOperand(op.o2());
 
         OUTPUT result;
         IAction<OUTPUT> operation = operationDefs.get(op.op());
@@ -301,6 +310,13 @@ public abstract class Operator<INPUT, OUTPUT> {
                 mode == MODE_INFIX ? sOpt : sOpd,
                 empty);
             OP[mode == MODE_POSTFIX ? 1 : 2] = extract(term, mode == MODE_POSTFIX ? sOpt : sOpd, empty);
+            
+//            //default first operand or/and default operator
+//            if (isEmpty(OP[0]))
+//                OP[0] = syntax(KEY_DEFAULT_OPERAND);
+//            if (isEmpty(OP[1]))
+//                OP[1] = syntax(KEY_DEFAULT_OPERATOR);
+            
             return OP;
         }
 

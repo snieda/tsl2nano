@@ -14,6 +14,7 @@ import static de.tsl2.nano.bean.def.IPresentable.UNDEFINED;
 import java.lang.reflect.Method;
 import java.text.Format;
 import java.text.ParseException;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.Date;
 import java.util.Map;
@@ -22,6 +23,8 @@ import org.apache.commons.logging.Log;
 import org.simpleframework.xml.Default;
 import org.simpleframework.xml.DefaultType;
 import org.simpleframework.xml.core.Commit;
+
+import tsl.StringUtil;
 
 import de.tsl2.nano.Environment;
 import de.tsl2.nano.action.IActivator;
@@ -35,6 +38,7 @@ import de.tsl2.nano.exception.FormattedException;
 import de.tsl2.nano.exception.ForwardedException;
 import de.tsl2.nano.log.LogFactory;
 import de.tsl2.nano.messaging.EventController;
+import de.tsl2.nano.util.PrivateAccessor;
 
 /**
  * 
@@ -581,4 +585,20 @@ public class AttributeDefinition<T> extends BeanAttribute implements IAttributeD
         return composition;
     }
 
+    @Override
+    public void setAsRelation(String relationChain) {
+        new PrivateAccessor<AttributeDefinition<T>>(this).set("name", relationChain);
+    }
+    
+    /**
+     * isRelation
+     * @return
+     */
+    public boolean isRelation() {
+        return isRelation(getName());
+    }
+    
+    public static boolean isRelation(String name) {
+        return name.contains(REL_SEPARATOR);
+    }
 }

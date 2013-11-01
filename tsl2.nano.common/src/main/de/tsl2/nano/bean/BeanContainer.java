@@ -416,15 +416,16 @@ public class BeanContainer implements IBeanContainer {
     /**
      * evaluates the given entities bean id. don't call that method, if the bean is not an ejb entity!
      * 
-     * @param bean entity bean to evaluate
+     * @param beanOrClass entity bean or type to evaluate
      * @return bean id attribute or null, if not existent
      */
-    public static BeanAttribute getIdAttribute(Object bean) {
-        assert bean != null && instance().isPersistable(bean.getClass()) : "bean must be a persistable entity bean instance!";
-        final BeanClass bc = new BeanClass(bean.getClass());
+    public static BeanAttribute getIdAttribute(Object beanOrClass) {
+        Class cls = (Class) (beanOrClass == null || beanOrClass instanceof Class ? beanOrClass : beanOrClass.getClass());
+        assert cls != null && instance().isPersistable(cls) : "bean must be a persistable entity bean instance!";
+        final BeanClass bc = new BeanClass(cls);
         final Collection<BeanAttribute> attributes = bc.getSingleValueAttributes();
         for (final BeanAttribute attr : attributes) {
-            final IAttributeDef attributeDef = BeanContainer.instance().getAttributeDef(bean, attr.getName());
+            final IAttributeDef attributeDef = BeanContainer.instance().getAttributeDef(cls, attr.getName());
             if (attributeDef != null && attributeDef.id()) {
                 return attr;
             }
