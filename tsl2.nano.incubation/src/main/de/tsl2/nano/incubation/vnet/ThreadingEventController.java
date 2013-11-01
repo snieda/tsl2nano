@@ -40,6 +40,7 @@ public class ThreadingEventController extends EventController {
         return new ThreadingEventController();
     }
 
+    @SuppressWarnings({ "unchecked", "rawtypes" })
     public void handle(final IListener l, final Object e) {
         executorService.execute(new Runnable() {
             public void run() {
