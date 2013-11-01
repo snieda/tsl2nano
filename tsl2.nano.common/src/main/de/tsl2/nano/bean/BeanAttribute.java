@@ -68,7 +68,7 @@ public class BeanAttribute implements Comparable<BeanAttribute>, Serializable {
 
     public static final String ATTR_ENUM_NAME = "name";
     public static final String REGEXP_ATTR_NAME = "[a-z][a-zA-Z0-9_]*";
-    
+
     private static final Log LOG = LogFactory.getLog(BeanAttribute.class);
 
     /**
@@ -107,8 +107,8 @@ public class BeanAttribute implements Comparable<BeanAttribute>, Serializable {
         try {
             return clazz.getMethod(methodName, EMPTY_CLS_ARG);
         } catch (final Exception e) {
-            methodName = PREFIX_BOOLEAN_READ_ACCESS + attributeName.substring(0, 1).toUpperCase()
-                + attributeName.substring(1);
+            methodName = PREFIX_BOOLEAN_READ_ACCESS + (attributeName.length() > 0 ? attributeName.substring(0, 1)
+                .toUpperCase() + attributeName.substring(1) : "");
             try {
                 return clazz.getMethod(methodName, EMPTY_CLS_ARG);
             } catch (final Exception e1) {
@@ -124,8 +124,8 @@ public class BeanAttribute implements Comparable<BeanAttribute>, Serializable {
     }
 
     private static final String getExpectedMethodName(String attributeName) {
-        return PREFIX_READ_ACCESS + attributeName.substring(0, 1).toUpperCase()
-                + attributeName.substring(1);
+        return PREFIX_READ_ACCESS + (attributeName.length() > 0 ? attributeName.substring(0, 1).toUpperCase() + attributeName.substring(1)
+            : "");
     }
 
     /**
@@ -275,20 +275,32 @@ public class BeanAttribute implements Comparable<BeanAttribute>, Serializable {
 
     /**
      * tries to get the generic type. if not defined, Object.class will be returned
+     * 
      * @return generic type of attribute, or Object.class
      */
     public Class<?> getGenericType() {
-        return getGenericType(0);
+        return getGenericType(readAccessMethod, 0);
     }
+
     /**
      * tries to get the generic type. if not defined, Object.class will be returned
+     * 
      * @return generic type of attribute, or Object.class
      */
     public Class<?> getGenericType(int typePos) {
-        Object genType = readAccessMethod.getGenericReturnType();
+        return getGenericType(readAccessMethod, typePos);
+    }
+
+    /**
+     * tries to get the generic type. if not defined, Object.class will be returned
+     * 
+     * @return generic type of attribute, or Object.class
+     */
+    public static Class<?> getGenericType(Method method, int typePos) {
+        Object genType = method.getGenericReturnType();
         if (genType instanceof ParameterizedType)
             genType = ((ParameterizedType) genType).getActualTypeArguments()[typePos];
-        return genType instanceof Class ? (Class<?>)genType : Object.class;
+        return genType instanceof Class ? (Class<?>) genType : Object.class;
     }
 
     /**
@@ -468,6 +480,7 @@ public class BeanAttribute implements Comparable<BeanAttribute>, Serializable {
         declaringClass = readAccessMethod.getDeclaringClass();
         name = getName(readAccessMethod);
     }
+
     /**
      * Extension for {@link Serializable}
      */
@@ -486,7 +499,7 @@ public class BeanAttribute implements Comparable<BeanAttribute>, Serializable {
         String n = decapitalize(method.getName().substring(3));
         return getExpectedMethodName(n).equals(method.getName());
     }
-    
+
 //    private void readObjectNoData() throws ObjectStreamException {
 //
 //    }

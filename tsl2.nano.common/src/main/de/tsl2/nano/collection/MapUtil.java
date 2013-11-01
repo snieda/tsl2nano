@@ -9,6 +9,7 @@
 package de.tsl2.nano.collection;
 
 import java.lang.reflect.Array;
+import java.lang.reflect.Method;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
@@ -84,7 +85,8 @@ public class MapUtil {
     public static <K, V> V[] asArray(Map<K, V> map) {
         Class<V> type;
         try {
-            type = (Class<V>) BeanAttribute.getBeanAttribute(map.getClass(), "values").getGenericType();
+            Method m = Map.class.getMethod("values", new Class[0]);
+            type = (Class<V>) BeanAttribute.getGenericType(m, 0);
         } catch (Exception e) {
             type = (Class<V>) Object.class;
         }
