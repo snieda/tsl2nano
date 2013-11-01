@@ -82,6 +82,9 @@ public class MapUtil {
         return map;
     }
 
+    /**
+     * delegates to {@link #asArray(Map, Class)} evaluating the generic type of the given map
+     */
     public static <K, V> V[] asArray(Map<K, V> map) {
         Class<V> type;
         try {
