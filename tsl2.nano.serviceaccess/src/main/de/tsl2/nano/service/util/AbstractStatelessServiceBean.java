@@ -35,9 +35,11 @@ abstract public class AbstractStatelessServiceBean implements IStatelessService 
     static final Log LOG = LogFactory.getLog(AbstractStatelessServiceBean.class);
     static int DEFAULT_MAX_RESULT = 10000;
     static String DEFAULT_LAZY_RELATION_TYPE = "oneToMany";
+    static int DEFAULT_MAX_RECURSION_LEVEL = 20;
 
     Integer maxresult;
     String lazyRelationType;
+    Integer maxrecursionlevel;
 
     private static boolean isSecurityDomainDefined = true;
 
@@ -208,6 +210,25 @@ abstract public class AbstractStatelessServiceBean implements IStatelessService 
             }
         }
         return lazyRelationType;
+    }
+
+    /**
+     * used as maximum for preloading lazy relations
+     * 
+     * @return max recursion level, read from serviceaccess.properties
+     */
+    protected int getMaxRecursionLevel() {
+        if (maxrecursionlevel == null) {
+            LOG.info("EntityManager:\n" + StringUtil.toFormattedString(entityManager.getProperties(), 50));
+            if (ServiceFactory.isInitialized()) {
+                final Properties properties = ServiceFactory.instance().getProperties();
+                maxrecursionlevel = Integer.valueOf(properties.getProperty("maxrecusionlevel", String.valueOf(DEFAULT_MAX_RECURSION_LEVEL)));
+            } else {
+                LOG.warn("servicefactory not initialized or maxrecusionlevel not defined, using default value: " + DEFAULT_MAX_RECURSION_LEVEL);
+                maxrecursionlevel = DEFAULT_MAX_RECURSION_LEVEL;
+            }
+        }
+        return maxrecursionlevel;
     }
 
     /**

@@ -27,6 +27,8 @@ import de.tsl2.nano.util.StringUtil;
 public class ServiceProxy<T> extends DefaultService implements InvocationHandler {
     /** delegate (real object) */
     protected T delegate;
+    /** sometimes (perhaps on schedulers) we don't want to log every call */
+    boolean doLog = true;
 
     /**
      * Constructor
@@ -105,6 +107,20 @@ public class ServiceProxy<T> extends DefaultService implements InvocationHandler
     }
 
     /**
+     * @return Returns the doLog.
+     */
+    public boolean isDoLog() {
+        return doLog;
+    }
+
+    /**
+     * @param doLog The doLog to set.
+     */
+    public void setDoLog(boolean doLog) {
+        this.doLog = doLog;
+    }
+
+    /**
      * toString
      * 
      * @see java.lang.Object#toString()
@@ -114,4 +130,13 @@ public class ServiceProxy<T> extends DefaultService implements InvocationHandler
         return "ServiceProxy: " + delegate.toString();
     }
 
+    /**
+     * convenience to turn off logging for the given service. see {@link #doLog} and {@link #setDoLog(boolean)}
+     * @param service
+     */
+    @SuppressWarnings("rawtypes")
+    public static final void dontLog(Object service) {
+        LOG.info("turning off logging for service " + service);
+        ((ServiceProxy)Proxy.getInvocationHandler((Proxy)service)).setDoLog(false);
+    }
 }

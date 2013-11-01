@@ -262,7 +262,7 @@ public class GenericServiceBean extends NamedQueryServiceBean implements IGeneri
                                     + recurseLevel
                                     + ", instantiated entities:"
                                     + instantiatedEntities.size());
-                                if (recurseLevel++ > MAX_RECURSLEVEL) {
+                                if (recurseLevel++ > getMaxRecursionLevel()) {
                                     throw new FormattedException("instantiateLazyRelationship: max recurs level " + MAX_RECURSLEVEL
                                         + " exceeded evaluating attribute "
                                         + beanAttribute.getName()
