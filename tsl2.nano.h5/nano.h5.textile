@@ -417,7 +417,7 @@ h2. TODOs
 * (v) Right-Alignments for Numbers
 * Problem on NanoHttp cancelling button panel (sometimes)
 * (-) Check for single selection
-* Check navigation (check input on button action like 'open' without selecting an item.
+* Check navigation (check input on button action like 'open' without selecting an item. At the moment it will return to the last bean)
 * Styling (Collector, Details)
 * Show Progress-Page (using Statistics)
 * *Html-Table:*
@@ -501,7 +501,13 @@ h2. TODOs
 * (v) create ide for sample project
 * ( ) use actual h2 or hsqldb
 * (-) extend layout-managment for nested beans <- extend your bean-definition with attributes of other beans.
-* failure: sorting numbers/currencies sorts as strings
-* *generic navigation through hsql statements*
-* *bean navigation actions*
-* failure: presentable.layout --> simple-xml: Transform of class java.util.LinkedHashMap not supported
+* (x) *generic navigation through hsql statements*
+* ( ) *bean navigation actions*
+* *ERRORS*
+** failure: presentable.layout --> simple-xml: Transform of class java.util.LinkedHashMap not supported
+** failure: sorting numbers/currencies sorts as strings
+** BeanPresentationHelper.defineAdditionalAttributes(): how to avoid javaassist class
+** presentation not written to xml
+* hibernate-tools generates id-beans like times-->timesid.
+** (x) check for *@Id* is no standard-java-type and environment.show.id.fields is true
+*** (x) BeanPresentationHelper fills all id-bean fields as virtuals to the main bean
