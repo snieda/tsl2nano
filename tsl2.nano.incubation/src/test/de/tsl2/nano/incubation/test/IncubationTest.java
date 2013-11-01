@@ -46,6 +46,7 @@ import de.tsl2.nano.incubation.vnet.ThreadingEventController;
 import de.tsl2.nano.incubation.vnet.neuron.VNeuron;
 import de.tsl2.nano.incubation.vnet.routing.Location;
 import de.tsl2.nano.incubation.vnet.routing.RoutingAStar;
+import de.tsl2.nano.incubation.vnet.workflow.ComparableMap;
 import de.tsl2.nano.incubation.vnet.workflow.VActivity;
 import de.tsl2.nano.logictable.DefaultHeader;
 import de.tsl2.nano.logictable.EquationSolver;
@@ -128,17 +129,24 @@ public class IncubationTest {
         net.notify(new Notification("ich", 1f, null, responseHandler));
         net.notify(new Notification("hunger", 1f, null, responseHandler));
 
+        //wait for all threads to complete
+        try {
+            Thread.sleep(2000);
+        } catch (InterruptedException e) {
+            ForwardedException.forward(e);
+        }
+        
         //should output: ich habe hunger
     }
 
     @Test
     public void testVNetWithWorkflow() {
-        final Map<CharSequence, Object> state0Values = new HashMap<CharSequence, Object>();
-        state0Values.put("A", true);
-        state0Values.put("B", true);
+        final ComparableMap<CharSequence, Object> state = new ComparableMap<CharSequence, Object>();
+        state.put("A", true);
+        state.put("B", true);
 
         class Act extends VActivity<String, String> {
-            ConditionOperator<Object> op = new ConditionOperator<Object>(state0Values);
+            ConditionOperator<Object> op = new ConditionOperator<Object>(state);
 
             public Act(String name, String condition, String expression) {
                 super(name, condition, expression);
@@ -155,16 +163,16 @@ public class IncubationTest {
             }
 
         }
-        Net<VActivity<String, String>, Boolean> net = new Net<VActivity<String, String>, Boolean>();
+        Net<VActivity<String, String>, ComparableMap<CharSequence, Object>> net = new Net<VActivity<String, String>, ComparableMap<CharSequence, Object>>();
 //        net.setWorkParallel(false);
 
-        Node<VActivity<String, String>, Boolean> state0 = net.add(new Act("state0", "A&B", "A&B?C:D"));
-        Node<VActivity<String, String>, Boolean> state1 = net.addAndConnect(new Act("state1", "C", "D"),
+        Node<VActivity<String, String>, ComparableMap<CharSequence, Object>> state0 = net.add(new Act("state0", "A&B", "A&B?C:D"));
+        Node<VActivity<String, String>, ComparableMap<CharSequence, Object>> state1 = net.addAndConnect(new Act("state1", "C", "D"),
             state0.getCore(),
-            true);
-        Node<VActivity<String, String>, Boolean> state2 = net.addAndConnect(new Act("state2", "D", "E"),
+            state);
+        Node<VActivity<String, String>, ComparableMap<CharSequence, Object>> state2 = net.addAndConnect(new Act("state2", "D", "E"),
             state1.getCore(),
-            true);
+            state);
 
         //create a callback for responses
         IListener<Notification> responseHandler = new IListener<Notification>() {
@@ -175,9 +183,15 @@ public class IncubationTest {
         };
 
         //start input. don't set a query path, notification is always true, all items are linked
-        net.notify(new Notification(null, true, null, responseHandler));
-        net.notify(new Notification(null, true, null, responseHandler));
+        net.notify(new Notification(null, state, null, responseHandler));
+//        net.notify(new Notification(null, true, null, responseHandler));
 
+        //wait for all threads to complete
+        try {
+            Thread.sleep(150000);
+        } catch (InterruptedException e) {
+            ForwardedException.forward(e);
+        }
         //should output: D
     }
 
