@@ -31,6 +31,9 @@ public abstract class VActivity<S, T> extends Activity<S, T> implements
     /** serialVersionUID */
     private static final long serialVersionUID = 7844715887456324364L;
 
+    /**
+     * constructor for xml-deserialization
+     */
     public VActivity() {
         init();
     }

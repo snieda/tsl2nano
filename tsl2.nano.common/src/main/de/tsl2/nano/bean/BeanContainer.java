@@ -114,72 +114,72 @@ public class BeanContainer implements IBeanContainer {
      * testing.
      */
     public static final void initEmtpyServiceActions() {
-        final IAction<Collection<?>> relationFinder = new CommonAction<Collection<?>>() {
+        final IAction<Collection<?>> relationFinder = new CommonAction<Collection<?>>("empty.service.relationFinder") {
             @Override
             public Collection<?> action() {
                 return null;//new LinkedList();
             }
         };
-        final IAction<Collection<?>> exampleFinder = new CommonAction<Collection<?>>() {
+        final IAction<Collection<?>> exampleFinder = new CommonAction<Collection<?>>("empty.service.exampleFinder") {
             @Override
             public Collection<?> action() {
                 return null;//new LinkedList();
             }
         };
-        final IAction<Collection<?>> betweenFinder = new CommonAction<Collection<?>>() {
+        final IAction<Collection<?>> betweenFinder = new CommonAction<Collection<?>>("empty.service.betweenFinder") {
             @Override
             public Collection<?> action() {
                 return null;//new LinkedList();
             }
         };
-        final IAction<Collection<?>> queryFinder = new CommonAction<Collection<?>>() {
+        final IAction<Collection<?>> queryFinder = new CommonAction<Collection<?>>("empty.service.queryFinder") {
             @Override
             public Collection<?> action() {
                 return null;//new LinkedList();
             }
         };
-        final IAction lazyRelationResolver = new CommonAction() {
+        final IAction lazyRelationResolver = new CommonAction("empty.service.lazyRelationResolver") {
             @Override
             public Object action() {
                 //do nothing, return the instance itself
                 return getParameter()[0];
             }
         };
-        final IAction saveAction = new CommonAction() {
+        final IAction saveAction = new CommonAction("empty.service.saveAction") {
             @Override
             public Object action() {
                 //do nothing, return the instance itself
                 return getParameter()[0];
             }
         };
-        final IAction deleteAction = new CommonAction() {
+        final IAction deleteAction = new CommonAction("empty.service.deleteAction") {
             @Override
             public Object action() {
                 //do nothing
                 return null;
             }
         };
-        final IAction<IAttributeDef> attrAction = new CommonAction<IAttributeDef>() {
+        final IAction<IAttributeDef> attrAction = new CommonAction<IAttributeDef>("empty.service.attrAction") {
             @Override
             public IAttributeDef action() {
                 //do nothing
                 return null;
             }
         };
-        final IAction permissionAction = new CommonAction() {
+        final IAction permissionAction = new CommonAction("empty.service.permissionAction") {
             @Override
             public Object action() {
                 //do nothing
                 return true;
             }
         };
-        final IAction persistableAction = new CommonAction() {
+        final IAction persistableAction = new CommonAction("empty.service.persistableAction") {
             @Override
             public Object action() {
                 return false;
             }
         };
-        final IAction<Integer> executeAction = new CommonAction<Integer>() {
+        final IAction<Integer> executeAction = new CommonAction<Integer>("empty.service.executeAction") {
             @Override
             public Integer action() {
                 return null;

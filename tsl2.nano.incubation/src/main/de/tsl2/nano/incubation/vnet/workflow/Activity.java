@@ -11,20 +11,33 @@ package de.tsl2.nano.incubation.vnet.workflow;
 
 import java.util.Map;
 
+import org.simpleframework.xml.Default;
+import org.simpleframework.xml.DefaultType;
+import org.simpleframework.xml.Element;
+
 import de.tsl2.nano.action.CommonAction;
 
 /**
  * 
+ * @param <S> input type for condition and expression
+ * @param <T> output type for action result
  * @author Tom, Thomas Schneider
  * @version $Revision$ 
  */
+@SuppressWarnings("rawtypes")
+@Default(value = DefaultType.FIELD, required = false)
 public abstract class Activity<S, T> extends CommonAction<T> {
     /** serialVersionUID */
     private static final long serialVersionUID = -4293912643879238202L;
 
+    @Element(required=true, type=String.class)
     protected S condition;
+    @Element(required=true, type=String.class)
     protected S expression;
     
+    /**
+     * constructor for xml-deserialization
+     */
     public Activity() {
     }
 

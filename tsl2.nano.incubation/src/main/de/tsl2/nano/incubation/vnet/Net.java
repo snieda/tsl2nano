@@ -124,6 +124,7 @@ public class Net<T extends IListener<Notification> & ILocatable & Serializable &
     public void notify(Notification notification) {
         Collection<Node<T, D>> nodes = elements.values();
         for (Node<T, D> n : nodes) {
+            //check, if node n has right path to be notified
             if (notification.notifiy((ILocatable) n))
                 n.notify(notification);
         }

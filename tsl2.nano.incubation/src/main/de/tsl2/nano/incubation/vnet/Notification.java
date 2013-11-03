@@ -120,7 +120,9 @@ public class Notification implements ILocatable {
     public void addResponse(String srcPath, Object aresponse) {
         if (response == null)
             response = new ConcurrentHashMap<String, Object>();
-        response.put(srcPath, aresponse);
+        //concurrenthashmap is not able to store null values!
+        if (aresponse != null)
+            response.put(srcPath, aresponse);
         if (responseController != null) {
             responseController.fireEvent(new Notification(srcPath, aresponse));
         }

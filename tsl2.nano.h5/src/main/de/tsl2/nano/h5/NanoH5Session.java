@@ -23,10 +23,8 @@ import java.io.Serializable;
 import java.net.InetAddress;
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.Properties;
-import java.util.Stack;
 
 import org.apache.commons.logging.Log;
 
@@ -38,7 +36,6 @@ import de.tsl2.nano.bean.def.BeanCollector;
 import de.tsl2.nano.bean.def.BeanDefinition;
 import de.tsl2.nano.bean.def.BeanPresentationHelper;
 import de.tsl2.nano.bean.def.BeanValue;
-import de.tsl2.nano.bean.def.IBeanCollector;
 import de.tsl2.nano.bean.def.IPageBuilder;
 import de.tsl2.nano.bean.def.IPresentable;
 import de.tsl2.nano.collection.CollectionUtil;
@@ -46,6 +43,7 @@ import de.tsl2.nano.collection.ListSet;
 import de.tsl2.nano.exception.ForwardedException;
 import de.tsl2.nano.format.RegExpFormat;
 import de.tsl2.nano.h5.NanoHTTPD.Response;
+import de.tsl2.nano.h5.navigation.IBeanNavigator;
 import de.tsl2.nano.log.LogFactory;
 import de.tsl2.nano.util.DateUtil;
 import de.tsl2.nano.util.NumberUtil;
@@ -55,13 +53,13 @@ import de.tsl2.nano.util.StringUtil;
  * @author Tom, Thomas Schneider
  * @version $Revision$ 
  */
+@SuppressWarnings({ "unchecked", "rawtypes" })
 public class NanoH5Session {
     private static final Log LOG = LogFactory.getLog(NanoH5Session.class);
 
     NanoH5 server;
     IPageBuilder<?, String> builder;
-    Stack<BeanDefinition<?>> navigation;
-    BeanDefinition<?> model;
+    IBeanNavigator nav;
     Response response;
     ClassLoader sessionClassloader;
     InetAddress inetAddress;
@@ -74,13 +72,13 @@ public class NanoH5Session {
      * @param appstartClassloader
      */
     public NanoH5Session(NanoH5 server,
-            InetAddress inetAddress, Stack<BeanDefinition<?>> navigation,
+            InetAddress inetAddress, IBeanNavigator navigator,
             ClassLoader appstartClassloader) {
         super();
         this.server = server;
         this.inetAddress = inetAddress;
         this.builder = server.builder;
-        this.navigation = navigation;
+        this.nav = navigator;
         this.sessionClassloader = appstartClassloader;
     }
 
@@ -101,7 +99,7 @@ public class NanoH5Session {
             String referer = header.getProperty("referer");
             if (parms.containsKey(IAction.CANCELED) || (method.equals("POST") && referer != null && uri.length() > 1 && referer.contains(uri)))
                 uri = "/";
-            BeanDefinition<?> linkToModel = evalLinkToModel(uri);
+            BeanDefinition<?> linkToModel = nav.fromUrl(uri);
             Object userResponse = null;
             //direct link to another page/bean
             //selection-link-number in beancollector
@@ -121,6 +119,7 @@ public class NanoH5Session {
                 }
                 response = server.createResponse(msg);
             } else {
+                close();
                 return server.createResponse("<a href=\"" + server.serviceURL + "\">restart session</a>");
             }
         } catch (Exception e) {
@@ -136,35 +135,12 @@ public class NanoH5Session {
 
     void close() {
         server.sessions.remove(inetAddress);
-        navigation = null;
-        model = null;
+        nav = null;
         response = null;
     }
-    /**
-     * evaluates, if a navigation item (bean) was clicked.
-     * 
-     * @param uri uri to analyze
-     * @return navigation bean or null
-     */
-    private BeanDefinition<?> evalLinkToModel(String uri) {
-        BeanDefinition<?> linkBean = null;
-        String link = StringUtil.substring(uri, "/", null, true);
-//        //reset-link clicked? recreate the navigation
-//        if (link.equals(START_PAGE)) {
-//            close();
-//            return null;
-//        }
-        for (BeanDefinition<?> bean : navigation) {
-            if (bean.getName().equals(link)) {
-                linkBean = bean;
-                break;
-            }
-        }
-        return linkBean;
-    }
-
+    
     private String refreshPage(String message) {
-        return builder.build(model, message, true);
+        return builder.build(nav.current(), message, true);
     }
 
     /**
@@ -175,28 +151,7 @@ public class NanoH5Session {
      * @return html string
      */
     private String getNextPage(Object returnCode) {
-        return builder.build(getNextModel(returnCode), "", true, getNavigationQueue());
-    }
-
-    /**
-     * navigation stack
-     * 
-     * @return current navigation queue wrapped into an object array
-     */
-    private BeanDefinition<?>[] getNavigationQueue() {
-        BeanDefinition<?>[] beans = new BeanDefinition[navigation.size()];
-        for (int i = 0; i < navigation.size(); i++) {
-            beans[i] = navigation.get(i);
-        }
-        return beans;
-    }
-
-    
-    /**
-     * @return Returns the navigation.
-     */
-    public Stack<BeanDefinition<?>> getNavigation() {
-        return navigation;
+        return builder.build(nav.next(returnCode), "", true, nav.toArray());
     }
 
     /**
@@ -204,7 +159,7 @@ public class NanoH5Session {
      * 
      * @param uri page uri
      * @param parms response parameter
-     * @param uriLinkNumber if model is a bean-collector, it is the selected element number
+     * @param uriLinkNumber if navigator.current() is a bean-collector, it is the selected element number
      * @return user response object. may be {@link IAction#CANCELED} any saved or selected object or null.
      */
     private Object processInput(String uri, Properties parms, Number uriLinkNumber) {
@@ -219,8 +174,8 @@ public class NanoH5Session {
         convertDates(parms);
 
         //refresh bean values
-        if (model instanceof Bean) {
-            Bean vmodel = (Bean) model;
+        if (nav.current() instanceof Bean) {
+            Bean vmodel = (Bean) nav.current();
             for (String p : parms.stringPropertyNames()) {
                 if (vmodel.hasAttribute(p)) {
                     vmodel.setParsedValue(p, parms.getProperty(p));
@@ -228,38 +183,38 @@ public class NanoH5Session {
             }
         }
         //follow links or fill selected items
-        if (model instanceof BeanCollector) {
+        if (nav.current() instanceof BeanCollector) {
             //follow given link
             if (uriLinkNumber != null) {
-                BeanCollector collector = (BeanCollector) model;
+                BeanCollector collector = (BeanCollector) nav.current();
                 Collection data = collector.getBeanFinder().getData();
                 ListSet listSet = CollectionUtil.asListSet(data);
                 //visible numbers starting with '1', but indexes starting with '0'
                 responseObject = new Bean(listSet.get(uriLinkNumber.intValue() - 1));
                 return responseObject;
             } else {
-                if (!isCanceled(parms) && provideSelection((BeanCollector) model, parms)) {
+                if (!isCanceled(parms) && provideSelection((BeanCollector) nav.current(), parms)) {
                     if (isReturn(parms)) {
                         responseObject = null;
-                    } else if (isOpenAction(parms, (BeanCollector) model)) {
+                    } else if (isOpenAction(parms, (BeanCollector) nav.current())) {
                         //normally, after a selection the navigation object will be hold on stack
                         if (Environment.get("application.edit.multiple", true))
-                            responseObject = putSelectionOnStack((BeanCollector) model);
+                            responseObject = putSelectionOnStack((BeanCollector) nav.current());
                         else
-                            responseObject = model;
+                            responseObject = nav.current();
                     }
                 }
             }
         }
         //start the actions
         Collection<IAction> actions = null;
-        if (model != null) {
+        if (nav.current() != null) {
             actions = new ArrayList<IAction>();
-            if (model.getActions() != null)
-                actions.addAll(model.getActions());
-            actions.addAll(model.getPresentationHelper().getPresentationActions());
-            if (model.isMultiValue()) {
-                actions.addAll(((BeanCollector) model).getColumnSortingActions());
+            if (nav.current().getActions() != null)
+                actions.addAll(nav.current().getActions());
+            actions.addAll(nav.current().getPresentationHelper().getPresentationActions());
+            if (nav.current().isMultiValue()) {
+                actions.addAll(((BeanCollector) nav.current()).getColumnSortingActions());
             }
         }
         if (actions != null) {
@@ -267,8 +222,8 @@ public class NanoH5Session {
                 String p = (String) k;
                 IAction<?> action = getAction(actions, p);
                 if (action != null) {
-                    if (model.isMultiValue() && isSearchRequest(action.getId(), (BeanCollector<?, ?>) model)) {
-                        responseObject = processSearchRequest(parms, (BeanCollector<?, ?>) model);
+                    if (nav.current().isMultiValue() && isSearchRequest(action.getId(), (BeanCollector<?, ?>) nav.current())) {
+                        responseObject = processSearchRequest(parms, (BeanCollector<?, ?>) nav.current());
                     } else {
                         /*
                          * submit/assign and cancel will not push a new element to the navigation stack!
@@ -278,7 +233,7 @@ public class NanoH5Session {
                         if (result != null && responseObject != IAction.CANCELED && !action.getId().endsWith("save")) {
                             responseObject = result;
                         } else if (action.getId().endsWith("reset")) {
-                            responseObject = model;
+                            responseObject = nav.current();
                         } else {
 //                        action.activate();
                             return responseObject;
@@ -287,8 +242,8 @@ public class NanoH5Session {
                 } else {
                     if (p.endsWith(IPresentable.POSTFIX_SELECTOR)) {
                         String n = StringUtil.substring(p, null, IPresentable.POSTFIX_SELECTOR);
-                        final BeanValue assignableAttribute = (BeanValue) model.getAttribute(n);
-                        responseObject = assignableAttribute.connectToSelector(model);
+                        final BeanValue assignableAttribute = (BeanValue) nav.current().getAttribute(n);
+                        responseObject = assignableAttribute.connectToSelector(nav.current());
                     }
                 }
             }
@@ -304,7 +259,7 @@ public class NanoH5Session {
             bean = (BeanDefinition<?>) (object instanceof BeanDefinition ? object : Bean.getBean((Serializable) object));
             //don't add the first element, see behaviour in getNextModel()
             if (firstElement != null) {
-                navigation.add(bean);
+                nav.add(bean);
             } else {
                 firstElement = bean;
             }
@@ -439,59 +394,4 @@ public class NanoH5Session {
 //        if (elements.size() > 0)
 //            navigation.push(new Bean(elements.iterator().next()));
     }
-
-    /**
-     * the next model may be a new bean model, if the response object is not null, not in the current navigation stack
-     * and not a cancel action.
-     * 
-     * @param userResponseObject result of {@link #processInput(String, Properties, Number)}
-     * @return next bean model or null
-     */
-    private BeanDefinition<?> getNextModel(Object userResponseObject) {
-        boolean isOnWork = false;
-        boolean goBack = userResponseObject == null || userResponseObject == IAction.CANCELED;
-        if (!goBack) {
-            BeanDefinition<?> userResponseBean = (BeanDefinition<?>) (userResponseObject instanceof BeanDefinition<?> ? userResponseObject
-                : Bean.getBean((Serializable) userResponseObject));
-            isOnWork = navigation.contains(userResponseBean);
-            if (!isOnWork) //--> go forward
-                return (model = navigation.push(userResponseBean));
-            else {
-                if (model != userResponseBean) {
-                    while (!userResponseBean.equals(navigation.peek()))
-                        navigation.pop();
-                    return model = navigation.peek();
-                }
-            }
-
-        }
-        //go back
-        if (!isOnWork && response != null)//checking to be not the first page
-            navigation.pop();
-
-        model = navigation.size() > 0 ? navigation.peek() : null;
-        //workaround for a canceled new action
-        if (userResponseObject == IAction.CANCELED && model instanceof IBeanCollector) {
-            removeUnpersistedNewEntities((BeanCollector) model);
-        }
-        return model;
-    }
-
-    /**
-     * workaround for 'new' action on a beancollector followed by a cancel action - means the new instance is added to
-     * the beancollector, but the cancel action has to remove the instance.
-     * 
-     * @param collector collector holding a canceled/transient instance.
-     */
-    private void removeUnpersistedNewEntities(BeanCollector collector) {
-        if (!BeanContainer.instance().isPersistable(collector.getBeanFinder().getType()))
-            return;
-        Collection currentData = collector.getCurrentData();
-        for (Iterator iterator = currentData.iterator(); iterator.hasNext();) {
-            Object item = iterator.next();
-            if (BeanContainer.isTransient(item))
-                iterator.remove();
-        }
-    }
-
 }

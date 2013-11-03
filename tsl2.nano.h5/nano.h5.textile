@@ -1,19 +1,20 @@
-*FullRelation H5*
+*FullRelation Nano.H5*
 <font size="-1">Autor: Thomas Schneider 2012</font>
 
 {toc}
 
 h2. Introduction
 
-generic html5 gui implementation providing a model driven access (MDA), bound to tsl2.nano.common bean-package and tsl2.nano.serviceaccess and it's GenericService using the javax.persistence. It is possible to design a class or database model, exporting it and to start a build process resulting in a complete html application, providing a comfortable way to edit all entities and their relations.
+Generic html5 gui implementation providing a model driven access (MDA), bound to __tsl2.nano.commons__ bean-package and __tsl2.nano.serviceaccess__ and it's __GenericService__ using __javax.persistence__. It is possible to design a class- or database-model, exporting it and to start a build process resulting in a complete html application, providing a comfortable way to edit all entities and their relations.
 
-*Goals:* 
+*Goals:*
 * pure model implementation + plattform independency (works on android, too).
 * really small, having as less as possible static dependencies to other libraries
 * everything has a default - all defaults are configurable
 * full configurable (including standard bean behaviour and all entity behaviours)
 * implementation through simple java beans + optional bean presenters
 * navigates through given beans, showing bean-lists and bean-detail dialogs.
+* navigation can be configurable workflow - or simply an entity browser 
 * resolves all bean/entity relations to be browsed.
 * pre-defines formatting, validation and presentation of relations
 * pure html-5 (no javascript)
@@ -44,6 +45,14 @@ h3. Third Party Libraries
 * "Jing-Trang xml2xsd-Generator":https://code.google.com/p/jing-trang/downloads/list
 * "SimpleXML xml serializer":http://simple.sourceforge.net/download/stream/doc/tutorial/tutorial.php
 * Serviceaccess using: jpa-api, connector-api, jta-api, ejb-api, interceptor-api
+
+h3. Architecture
+
+h4. Model Driven Architecture (MDA))
+
+Nano.h5 provides mechanisms to create a full configurable application from a given database definition file (ddl).
+
+Creating an UML-Diagram with perhaps _ArgoUML_, or creating an ER-Diagram with f.e. _architect_ you may generate a ddl script. Nano.H5 provides an ant-script (_mda.xml_) to generate a hsqldb-database and generating entity beans through hibernate-tools for the given jdbc-connection.
 
 h2. Starting / Test
 
@@ -204,11 +213,35 @@ To check whether a user can access a button (action) you call the _hasAccess_ of
 
 To check whether an entity should be accessed by the current user, you call the _hasAccess_ of IAuthorization or _hasPermission_ of BeanContainer with the class-name + toString() representation of the current object. The second method parameter tells whether to read or write the object.
 
-h2. Model Driven Architecture (MDA))
+h2. Navigation and Workflows
 
-Nano.h5 provides mechanisms to create a full configurable application from a given database definition file (ddl).
+A navigator will guide the user through his application session. Before/after each page, the navigator will evaluate the next bean to present. This may be list of entities or simply the details of an entity.
 
-Creating an UML-Diagram with perhaps _ArgoUML_, or creating an ER-Diagram with f.e. _architect_ you may generate a ddl script. Nano.H5 provides an ant-script (_mda.xml_) to generate a hsqldb-database and generating entity beans through hibernate-tools for the given jdbc-connection.
+The application can work on a simple navigation stack - a simple implementation is provided by the *EntityBrowser*. If a configuration file *workflow.xml* is found inside your environment-path, this workflow will be used, to navigate the user through his application session.
+
+h3. The EntityBrowser
+
+The EntityBrowser works on a Navigation-Stack, putting all available entity-types to the first bean-collector to be able to browse through all beans and data.
+
+h3. A configured Workflow
+
+If a configured workflow is available, this workflow will be used as navigator. 
+A workflow holds one or more activities defined by an enabling *condition* and an execution *expression*. After finishing a page, all activities will be checked for their entry/enabling condition. Only one *activity* should have a positive condition. This activity will be executed. The execution will be calling an EJB-QL given by the expression and returning the result of that query as next navigation bean.
+
+Example:<code>
+
+<?xml version="1.0" encoding="UTF-8"?>
+<workflow>
+   <activity>
+      <condition>project&amp;true</condition>
+      <expression>select t from Times t where t.project.id = :prjname</expression>
+      <query-parameter length="1">
+         <parameter>prjname</parameter>
+      </query-parameter>
+   </activity>
+</workflow>
+
+</code>
 
 h2. Developing, Deploying and Debugging
 
@@ -445,6 +478,7 @@ h2. TODOs
 ** add navigation to new sub-class of beandefinition
 ** create wiki-logger
 ** envolve logictable and/or tableprocessor
+** create GenericOperator from SOperator to read available Operations from xml.
 * *Refactoring:*
 ** (v) RegularExpressionFormat ==> RegExpFormat
 ** (v) refactore ScriptUtil: extract Ant calls

@@ -17,6 +17,7 @@ import java.text.Format;
 import java.text.ParsePosition;
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
@@ -43,6 +44,11 @@ import de.tsl2.nano.exception.FormattedException;
 import de.tsl2.nano.exception.ForwardedException;
 import de.tsl2.nano.execution.CompatibilityLayer;
 import de.tsl2.nano.execution.SystemUtil;
+import de.tsl2.nano.h5.navigation.BeanAct;
+import de.tsl2.nano.h5.navigation.EntityBrowser;
+import de.tsl2.nano.h5.navigation.IBeanNavigator;
+import de.tsl2.nano.h5.navigation.Parameter;
+import de.tsl2.nano.h5.navigation.Workflow;
 import de.tsl2.nano.log.LogFactory;
 import de.tsl2.nano.persistence.HibernateBeanContainer;
 import de.tsl2.nano.persistence.Persistence;
@@ -171,9 +177,9 @@ public class NanoH5 extends NanoHTTPD {
         if (session == null) {
             session = createSession(requestor);
             //on a new session, no parameter should be set
-            
+
         } else {//perhaps session was interrupted/close but not removed
-            if (session.navigation == null || session.navigation.empty()) {
+            if (session.nav == null || session.nav.isEmpty()) {
                 sessions.remove(session.inetAddress);
                 session = createSession(requestor);
             }
@@ -205,10 +211,9 @@ public class NanoH5 extends NanoHTTPD {
      */
     protected NanoH5Session createSession(InetAddress inetAddress) {
         LOG.info("creating new session on socket: " + inetAddress);
-        Stack<BeanDefinition<?>> navigationModel = createGenericNavigationModel();
         NanoH5Session session = new NanoH5Session(this,
             inetAddress,
-            navigationModel,
+            createGenericNavigationModel(),
             Environment.get(ClassLoader.class));
         sessions.put(inetAddress, session);
         return session;
@@ -220,20 +225,39 @@ public class NanoH5 extends NanoHTTPD {
      * @param beanjar jar to resolve the desired entities from
      * @return navigation stack holding a beancollector for all entity classes inside beanjar
      */
-    protected Stack<BeanDefinition<?>> createGenericNavigationModel() {
+    protected IBeanNavigator createGenericNavigationModel() {
 
         BeanContainer.initEmtpyServiceActions();
         /*
          * create the presentable navigation stack
          */
-        LOG.debug("creating navigation stack");
-
         Bean<?> login = createPersistenceUnit();
 
-        Stack<BeanDefinition<?>> navigationModel = new Stack<BeanDefinition<?>>();
-        navigationModel.push(Bean.getBean(START_PAGE));
-        navigationModel.push(login);
-        return navigationModel;
+        Workflow workflow = Environment.get(Workflow.class);
+        workflow.setLogin(login);
+        
+//        Sample Workflow
+//        LinkedList<BeanAct> acts = new LinkedList<BeanAct>();
+//        Parameter p = new Parameter();
+//        p.put("project", true);
+//        p.put("prjname", "test");
+//        acts.add(new BeanAct("timesByProject",
+//            "project&true",
+//            "select t from Times t where t.project.id = :prjname",
+//            p,
+//            "prjname"));
+//        workflow = new Workflow(acts);
+//        Environment.persist(workflow);
+//        
+        if (workflow == null || workflow.isEmpty()) {
+            LOG.debug("creating navigation stack");
+            Stack<BeanDefinition<?>> navigationModel = new Stack<BeanDefinition<?>>();
+            navigationModel.push(Bean.getBean(START_PAGE));
+            navigationModel.push(login);
+            return new EntityBrowser(navigationModel);
+        } else {
+            return workflow;
+        }
     }
 
     @SuppressWarnings({ "serial" })

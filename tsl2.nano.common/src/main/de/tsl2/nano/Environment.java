@@ -123,7 +123,8 @@ public class Environment {
     }
 
     /**
-     * provides services through their interface class.
+     * provides services through their interface class. if not existing, it tries to load it from xml. if not available,
+     * it tries to create it from default construction.
      * 
      * @param <T> service type
      * @param service interface of service
@@ -131,8 +132,14 @@ public class Environment {
      */
     public static <T> T get(Class<T> service) {
         Object s = services().get(service);
-        if (s == null && BeanClass.hasDefaultConstructor(service)) {
-            self().addService(BeanClass.createInstance(service));
+        if (s == null) {
+            String path = getConfigPath(service) + ".xml";
+            if (new File(path).canRead()) {
+                self().log("loading service from " + path);
+                self().addService(service, self().get(XmlUtil.class).loadXml(path, service));
+            } else if (BeanClass.hasDefaultConstructor(service)) {
+                self().addService(BeanClass.createInstance(service));
+            }
         }
         return (T) services().get(service);
     }
@@ -172,7 +179,7 @@ public class Environment {
         Properties p = System.getProperties();
         p.put("tstamp", new Date());
         p.put("main.context.classloader", Thread.currentThread().getContextClassLoader());
-            p.put("inetadress.myip", NetUtil.getMyIP());
+        p.put("inetadress.myip", NetUtil.getMyIP());
         System.out.println(StringUtil.insertProperties(info, p));
         new File(dir).mkdirs();
 
@@ -372,6 +379,14 @@ public class Environment {
         return self().properties.getProperty(KEY_CONFIG_PATH);
     }
 
+    /**
+     * persists the given object through configured xml persister.
+     * @param obj object to serialize to xml.
+     */
+    public static void persist(Object obj) {
+        self().get(XmlUtil.class).saveXml(getConfigPath(obj.getClass()) + ".xml", obj);
+    }
+    
     /**
      * persists (saves) the current environment. a reset will be done to reload the environment from saved file.
      */

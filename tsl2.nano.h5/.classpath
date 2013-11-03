@@ -9,5 +9,6 @@
 	<classpathentry combineaccessrules="false" kind="src" path="/tsl2.nano.directaccess"/>
 	<classpathentry combineaccessrules="false" kind="src" path="/tsl2.nano.common"/>
 	<classpathentry combineaccessrules="false" kind="src" path="/tsl2.nano.serviceaccess"/>
+	<classpathentry combineaccessrules="false" kind="src" path="/tsl2.nano.incubation"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>

@@ -159,13 +159,15 @@ public class IncubationTest {
 
             @Override
             public boolean canActivate(Map parameter) {
-                return (Boolean) op.eval(condition);
+                //sometimes we get a string out of eval, but sometimes a boolean. so we generalize it ;-)
+                return (Boolean) Boolean.valueOf(StringUtil.toString(op.eval(condition)));
             }
 
         }
         Net<VActivity<String, String>, ComparableMap<CharSequence, Object>> net = new Net<VActivity<String, String>, ComparableMap<CharSequence, Object>>();
 //        net.setWorkParallel(false);
 
+        //works without linking the states to each other, too!!
         Node<VActivity<String, String>, ComparableMap<CharSequence, Object>> state0 = net.add(new Act("state0", "A&B", "A&B?C:D"));
         Node<VActivity<String, String>, ComparableMap<CharSequence, Object>> state1 = net.addAndConnect(new Act("state1", "C", "D"),
             state0.getCore(),
@@ -179,6 +181,7 @@ public class IncubationTest {
             @Override
             public synchronized void handleEvent(Notification event) {
                 System.out.println("RESPONSE: " + event.getNotification());
+                Assert.assertEquals("C", event.getNotification());
             }
         };
 
@@ -188,11 +191,11 @@ public class IncubationTest {
 
         //wait for all threads to complete
         try {
-            Thread.sleep(150000);
+            Thread.sleep(2000);
         } catch (InterruptedException e) {
             ForwardedException.forward(e);
         }
-        //should output: D
+        //should output: C
     }
 
     @Test

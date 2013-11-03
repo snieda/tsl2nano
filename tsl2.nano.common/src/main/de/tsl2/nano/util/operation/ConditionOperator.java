@@ -46,7 +46,7 @@ public class ConditionOperator<T> extends SOperator<T> {
     public ConditionOperator(Map<CharSequence, T> values) {
         super(String.class, null, values);
         op = new BooleanOperator((Map<CharSequence, Boolean>) values);
-        operationDefs.putAll((Map<? extends CharSequence, ? extends IAction<T>>) op.operationDefs);
+//        operationDefs.putAll((Map<? extends CharSequence, ? extends IAction<T>>) op.operationDefs);
         converter = createConverter();
     }
 
@@ -60,7 +60,9 @@ public class ConditionOperator<T> extends SOperator<T> {
             @Override
             public Object parseObject(String source, ParsePosition pos) {
                 pos.setIndex(StringUtil.isEmpty(source) ? 1 : source.length());
-                return Boolean.valueOf(source);
+                Boolean b = Boolean.valueOf(source);
+                //check, if it's really a boolean. if not, return it without conversion.
+                return b.toString().equals(source) ? b : source;
             }
 
         };
@@ -93,6 +95,29 @@ public class ConditionOperator<T> extends SOperator<T> {
                 return executeIf((T) parameter[1], !result);
             }
         });
+        
+        /*
+         * re-use boolean operations
+         */
+        class BooleanOP extends CommonAction<T> {
+            String operator = "&";
+            public BooleanOP(String op) {
+                operator = op;
+            }
+            @Override
+            public T action() throws Exception {
+                boolean o1 = parameter[0] instanceof Boolean ? (Boolean) parameter[0]
+                    : op.converter.to((CharSequence) parameter[0]);
+                boolean o2 = parameter[1] instanceof Boolean ? (Boolean) parameter[1]
+                        : op.converter.to((CharSequence) parameter[1]);
+                IAction<T> operation = (IAction<T>) op.operationDefs.get(operator);
+                operation.setParameter(new Object[]{o1, o2});
+                return operation.activate();
+            }
+        };
+        addOperation("&", new BooleanOP("&"));
+        addOperation("|", new BooleanOP("|"));
+        addOperation("!", new BooleanOP("!"));
     }
 
     /**

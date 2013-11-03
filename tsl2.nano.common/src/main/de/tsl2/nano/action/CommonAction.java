@@ -52,6 +52,13 @@ public abstract class CommonAction<RETURNTYPE> implements IAction<RETURNTYPE>, S
 
     /**
      * @param id unique id
+     */
+    public CommonAction(String id) {
+        this(id, UNNAMED, UNNAMED);
+    }
+
+    /**
+     * @param id unique id
      * @param shortDescription name of the button (representing this action).
      * @param longDescription tooltip text of the button (representing this action).
      */

@@ -1,19 +1,24 @@
 package de.tsl2.nano.util.operation;
 
 import java.lang.reflect.Array;
+import java.util.HashMap;
 import java.util.Map;
+
+import org.simpleframework.xml.Default;
+import org.simpleframework.xml.DefaultType;
+import org.simpleframework.xml.ElementMap;
 
 import de.tsl2.nano.action.IAction;
 import de.tsl2.nano.util.StringUtil;
 
 /**
- * Base class to execute any operations with terms having two operand and one operator. it is like a primitive parser
+ * Base class to execute any operation with terms having two operands and one operator. it is like a primitive parser
  * using regular expressions. may be used to implement equation-solvers etc.
  * <p/>
  * TODO: support for one-operand-operation (the second has a default value. e.g.: -10 = 0 - 10.
  * <p/>
  * Use:<br/>
- * create an expression of type INPUT. create an Operator instance holding a converter (INPUT <==> OUTPUT) an provide
+ * create an expression of type INPUT. create an Operator instance holding a converter (INPUT <==> OUTPUT) and provide
  * values contained in your expression.
  * <p/>
  * Example:
@@ -30,6 +35,7 @@ import de.tsl2.nano.util.StringUtil;
  * @author Thomas Schneider
  * @version $Revision$
  */
+@Default(value = DefaultType.FIELD, required = false)
 public abstract class Operator<INPUT, OUTPUT> {
     /**
      * technical member while it's not possible to create an array out of a generic type. the
@@ -37,12 +43,14 @@ public abstract class Operator<INPUT, OUTPUT> {
      */
     Class<? extends INPUT> inputType;
     /** syntax defining special expression parts */
+    @ElementMap(inline=true)
     Map<String, INPUT> syntax;
     /** a map containing any values. values found by this solver must be of right type */
-    Map<INPUT, OUTPUT> values;
+    transient Map<INPUT, OUTPUT> values;
     /** converter to convert an operand to a result type and vice versa */
-    IConverter<INPUT, OUTPUT> converter;
+    transient IConverter<INPUT, OUTPUT> converter;
     /** holds all operations to be resolvable */
+    @ElementMap(inline=true, entry="operation")
     Map<INPUT, IAction<OUTPUT>> operationDefs;
 
     public static final String KEY_BEGIN = "begin";
@@ -103,7 +111,7 @@ public abstract class Operator<INPUT, OUTPUT> {
     protected abstract void createOperations();
 
     protected abstract void createTermSyntax();
-    
+
     /**
      * helper to define an operation-definition
      * 
@@ -123,9 +131,29 @@ public abstract class Operator<INPUT, OUTPUT> {
         return values.containsKey(KEY_RESULT);
     }
 
-//    public OUTPUT eval(INPUT expression) {
+    /**
+     * getValues
+     * @return values
+     */
+    public Map<INPUT, OUTPUT> getValues() {
+        return values;
+    }
+
+    //    public OUTPUT eval(INPUT expression) {
 //        return eval(new StringBuilder(expression.toString()));
 //    }
+    
+    
+    /**
+     * delegates to {@link #eval(Object)} filling the given values to {@link #values}.
+     */
+    public OUTPUT eval(INPUT expression, Map<INPUT, OUTPUT> v) {
+        if (values == null)
+            values = new HashMap<INPUT, OUTPUT>();
+        values.putAll(v);
+        return eval(expression);
+    }
+    
     /**
      * eval
      * 
@@ -211,7 +239,7 @@ public abstract class Operator<INPUT, OUTPUT> {
          * the value map may contain any values - but the found value must have the right type!
          */
         OUTPUT n1 = values.get(op.o1());
-        n1 = n1 != null  || isEmpty(op.o2()) ? n1 : newOperand(op.o1());
+        n1 = n1 != null || isEmpty(op.o2()) ? n1 : newOperand(op.o1());
         OUTPUT n2 = values.get(op.o2());
         n2 = n2 != null || isEmpty(op.o2()) ? n2 : newOperand(op.o2());
 
@@ -310,13 +338,13 @@ public abstract class Operator<INPUT, OUTPUT> {
                 mode == MODE_INFIX ? sOpt : sOpd,
                 empty);
             OP[mode == MODE_POSTFIX ? 1 : 2] = extract(term, mode == MODE_POSTFIX ? sOpt : sOpd, empty);
-            
+
 //            //default first operand or/and default operator
 //            if (isEmpty(OP[0]))
 //                OP[0] = syntax(KEY_DEFAULT_OPERAND);
 //            if (isEmpty(OP[1]))
 //                OP[1] = syntax(KEY_DEFAULT_OPERATOR);
-            
+
             return OP;
         }
 

@@ -22,7 +22,9 @@ import de.tsl2.nano.util.StringUtil;
 /**
  * Boolean Operator as a sample implementation of {@link Operator}. Is able to do boolean operations.
  * <p/>
- * TODO: performance enhancing pre-check for evaluation (e.g.: A | B ==> if A is true, B can be ignored!)
+ * TODO: performance enhancing pre-check for evaluation (e.g.: A | B ==> if A is true, B can be ignored!)<br/>
+ * TODO: XOR ==> !(A&B)&(A|B), NOT ==> (!A), EQUALS ==> (A&B)|!(A&B) <br/>
+ * TODO: Boolean with bits: TRUE=1, FALSE=0
  * 
  * @author Tom
  * @version $Revision$

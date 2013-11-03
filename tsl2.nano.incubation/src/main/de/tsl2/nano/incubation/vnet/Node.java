@@ -12,7 +12,9 @@ package de.tsl2.nano.incubation.vnet;
 import java.io.Serializable;
 import java.util.HashSet;
 import java.util.Set;
+import java.util.concurrent.atomic.AtomicInteger;
 
+import de.tsl2.nano.exception.ForwardedException;
 import de.tsl2.nano.messaging.EventController;
 import de.tsl2.nano.messaging.IListener;
 import de.tsl2.nano.util.StringUtil;
@@ -42,10 +44,10 @@ public class Node<T extends IListener<Notification> & ILocatable & Serializable 
     T core;
     /** connections to other nodes in a net */
     Set<Connection<T, D>> connections;
-    
+
     /** controller, handling notification events for other nodes */
     EventController controller;
-    private int status = 0;
+    private AtomicInteger status = new AtomicInteger(STATUS_IDLE);
     NodeStatistics statistics;
 
     private static final int STATUS_IDLE = 0;
@@ -63,7 +65,7 @@ public class Node<T extends IListener<Notification> & ILocatable & Serializable 
         super();
         controller = Net.createEventController();
         statistics = new NodeStatistics();
-        
+
         this.core = core;
         if (connections != null) {
             this.connections = connections;
@@ -138,55 +140,90 @@ public class Node<T extends IListener<Notification> & ILocatable & Serializable 
      */
     @Override
     public void handleEvent(Notification event) {
-        if (status > STATUS_NOTIFIED)
-            throw new IllegalAccessError("node " + this + " is already working!");
-        Net.log_("node " + core + " starts working on " + event + "...");
-        long start = System.currentTimeMillis();
+        waitToBeIdle();
         increaseStatus();
-        core.handleEvent(event);
-        long workingTime = System.currentTimeMillis() - start;
-        Net.log("work done on " + event + " in " + workingTime + " msecs");
-        statistics.addWorkingTime(workingTime);
-        
-        /*
-         * send the notification to all neighbours
-         * each connection has a different weight, the connection.handle() will handle that!
-         */
-        event.path = null;
-        controller.fireEvent(event);
-        setIdle();
+        Net.log_("node " + core + " starts working on " + event + "...");
+        try {
+            long start = System.currentTimeMillis();
+            core.handleEvent(event);
+            long workingTime = System.currentTimeMillis() - start;
+//        decreaseStatus();
+            Net.log("work done on " + event + " in " + workingTime + " msecs");
+            statistics.addWorkingTime(workingTime);
+
+            /*
+             * send the notification to all neighbours
+             * each connection has a different weight, the connection.handle() will handle that!
+             */
+            event.path = null;
+            controller.fireEvent(event);
+        } finally {
+            setIdle();
+        }
+    }
+
+    private void waitToBeIdle() {
+        long start = System.currentTimeMillis();
+        if (isWorking())
+            Net.log("waiting for working node " + this);
+        while (isWorking()) {
+            try {
+                Thread.sleep(100);
+            } catch (InterruptedException e) {
+                ForwardedException.forward(e);
+            }
+        }
+        Net.log("node " + this
+            + " is ready to working (after waiting for "
+            + (System.currentTimeMillis() - start)
+            + " msec");
     }
 
     /**
      * notify
+     * 
      * @param notification
      */
     public void notify(Notification notification) {
+        //sets the status to notified - the handle-runner will reset it to idle after finishing
         increaseStatus();
         controller.handle(this, notification);
     }
-    
+
     /**
      * @return Returns the idle.
      */
     public boolean isIdle() {
-        return status == STATUS_IDLE;
+        return status.get() == STATUS_IDLE;
+    }
+
+    /**
+     * @return Returns the idle.
+     */
+    public boolean isWorking() {
+        return status.get() >= STATUS_WORKING;
     }
 
     private void setIdle() {
-        this.status = STATUS_IDLE;
+        this.status.set(STATUS_IDLE);
     }
-    
+
     private void increaseStatus() {
-        if (status > STATUS_WORKING)
+        if (status.get() > STATUS_WORKING)
             throw new IllegalStateException();
-        status++;
+        status.incrementAndGet();
     }
-    
+
+    private void decreaseStatus() {
+        if (status.get() < STATUS_IDLE)
+            throw new IllegalStateException();
+        status.decrementAndGet();
+    }
+
     public NodeStatistics getStatistics() {
         return statistics;
     }
-    
+
     /**
      * {@inheritDoc}
      */
@@ -228,9 +265,9 @@ public class Node<T extends IListener<Notification> & ILocatable & Serializable 
     }
 
     public String dump() {
-        return toString() + " " +  statistics.toString() + ", connections: " + StringUtil.toString(connections, 200);
+        return toString() + " " + statistics.toString() + ", connections: " + StringUtil.toString(connections, 200);
     }
-    
+
     /**
      * {@inheritDoc}
      */

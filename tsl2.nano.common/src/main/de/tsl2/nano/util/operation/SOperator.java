@@ -9,19 +9,14 @@
  */
 package de.tsl2.nano.util.operation;
 
-import java.text.FieldPosition;
-import java.text.Format;
-import java.text.ParsePosition;
-import java.util.HashMap;
 import java.util.Map;
 
-import de.tsl2.nano.action.CommonAction;
-import de.tsl2.nano.action.IAction;
 import de.tsl2.nano.collection.MapUtil;
 import de.tsl2.nano.util.StringUtil;
 
 /**
- * Base {@link Operator} for string expressions.
+ * Base {@link Operator} for string expressions.<p/>
+ * TODO: create GenericOperator reading reflective operations from xml.
  * 
  * @author Tom
  * @version $Revision$
