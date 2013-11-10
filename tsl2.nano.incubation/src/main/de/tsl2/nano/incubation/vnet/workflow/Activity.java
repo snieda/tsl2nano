@@ -11,11 +11,13 @@ package de.tsl2.nano.incubation.vnet.workflow;
 
 import java.util.Map;
 
+import org.simpleframework.xml.Attribute;
 import org.simpleframework.xml.Default;
 import org.simpleframework.xml.DefaultType;
 import org.simpleframework.xml.Element;
 
 import de.tsl2.nano.action.CommonAction;
+import de.tsl2.nano.util.PrivateAccessor;
 
 /**
  * 
@@ -58,5 +60,21 @@ public abstract class Activity<S, T> extends CommonAction<T> {
         //TODO: check for natural order of values
         setParameter(parameter.values().toArray());
         return activate();
+    }
+    
+    @Attribute
+    public String getName() {
+        return getShortDescription();
+    }
+    
+    @SuppressWarnings("unchecked")
+    @Attribute
+    protected void setName(String name) {
+        new PrivateAccessor(this).set("shortDescription", name);
+    }
+    
+    @Override
+    public String toString() {
+        return getShortDescription();
     }
 }
