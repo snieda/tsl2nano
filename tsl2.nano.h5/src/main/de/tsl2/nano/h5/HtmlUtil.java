@@ -232,12 +232,18 @@ public class HtmlUtil {
         return styleKey + ": " + styleValue;
     }
 
+    /**
+     * creates an utf-8 string with indentation.
+     * @param doc document to transform to a string
+     * @return string
+     */
     public static String toString(Document doc) {
         //set up a transformer
         try {
             Transformer trans = TransformerFactory.newInstance().newTransformer();
             trans.setOutputProperty(OutputKeys.OMIT_XML_DECLARATION, "yes");
             trans.setOutputProperty(OutputKeys.INDENT, "yes");
+            trans.setOutputProperty(OutputKeys.ENCODING, "UTF-8");
 
             //create string from xml tree
             StringWriter sw = new StringWriter();
