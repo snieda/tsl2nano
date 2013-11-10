@@ -14,9 +14,11 @@ import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
 
+import org.simpleframework.xml.Attribute;
 import org.simpleframework.xml.ElementList;
 import org.simpleframework.xml.core.Commit;
 
+import de.tsl2.nano.Messages;
 import de.tsl2.nano.bean.def.Bean;
 import de.tsl2.nano.bean.def.BeanDefinition;
 import de.tsl2.nano.incubation.vnet.Net;
@@ -25,24 +27,27 @@ import de.tsl2.nano.util.StringUtil;
 
 /**
  * EJB-Query Navigator reading it's configuration from xml. The Navigator itself uses a parallel-working net
- * implementation on acitivities.
+ * implementation on activities.
  * 
  * @author Tom, Thomas Schneider
  * @version $Revision$
  */
 public class Workflow implements IBeanNavigator {
+    @Attribute
+    String name;
     transient Net<BeanAct, Parameter> net;
     @ElementList(entry = "activity", inline = true, required = true)
     Collection<BeanAct> activities;
     transient BeanDefinition<?> current;
     transient Map<String, BeanDefinition<?>> cache;
     transient Bean<?> login;
+    transient String asString;
 
     /**
      * constructor
      */
     public Workflow() {
-        this(null);
+        this(Messages.getString("unnamed"), null);
     }
 
     /**
@@ -50,8 +55,9 @@ public class Workflow implements IBeanNavigator {
      * 
      * @param activities
      */
-    public Workflow(Collection<BeanAct> activities) {
+    public Workflow(String name, Collection<BeanAct> activities) {
         super();
+        this.name = name;
         this.activities = activities;
         net = new Net<BeanAct, Parameter>();
         cache = new HashMap<String, BeanDefinition<?>>();
@@ -90,7 +96,7 @@ public class Workflow implements IBeanNavigator {
     @Override
     public BeanDefinition<?> next(Object userResponseObject) {
         if (current == null) {
-            current = login;
+            setCurrent(login);
         } else {
             Object entity = userResponseObject instanceof Bean ? ((Bean) userResponseObject).getInstance()
                 : userResponseObject;
@@ -99,11 +105,16 @@ public class Workflow implements IBeanNavigator {
             Notification n = new Notification(null, p);
             Collection<BeanDefinition> result = net.notifyAndCollect(Arrays.asList(n), BeanDefinition.class);
             //all results may be equal
-            current = result.isEmpty() ? null : result.iterator().next();
+            setCurrent(result.isEmpty() ? null : result.iterator().next());
         }
         return current;
     }
 
+    protected void setCurrent(BeanDefinition<?> newCurrent) {
+        this.current = newCurrent;
+        asString = null;
+    }
+    
     /**
      * {@inheritDoc}
      */
@@ -135,4 +146,16 @@ public class Workflow implements IBeanNavigator {
         net.addAll(activities);
     }
 
+    @Override
+    public String toString() {
+        if (asString == null) {
+            String acts = StringUtil.toString(activities, 300);
+            if (current != null) {
+                String c = current.toString();
+                acts.replace(c, "*" + c + "*");
+            }
+            asString = name + "(activities: " + acts + ")";
+        }
+        return asString;
+    }
 }
