@@ -203,14 +203,14 @@ public class BeanDefinition<T> extends BeanClass<T> implements Serializable {
             }
             createNaturalSortedAttributeNames(attributeFilter);
             allDefinitionsCached = true;
+            /*
+             * create additional attributes - ignoring the filter
+             */
+            getPresentationHelper().defineAdditionalAttributes();
+            
         }
         //don't use the generic type H (Class<H>) to be compilable on standard jdk javac.
         ArrayList<BeanAttribute> attributes = new ArrayList<BeanAttribute>((Collection/*<? extends BeanAttribute>*/) getAttributeDefinitions().values());
-        /*
-         * create additional attributes - ignoring the filter
-         */
-        getPresentationHelper().defineAdditionalAttributes();
-        
         /*
          * filter the result using a default filter by the presentation helper
          */
@@ -660,6 +660,7 @@ public class BeanDefinition<T> extends BeanClass<T> implements Serializable {
             if (usePersistentCache && xmlFile.canRead()) {
                 try {
                     beandef = (BeanDefinition<T>) XmlUtil.loadXml(xmlFile.getPath(), BeanDefinition.class);
+                    virtualBeanCache.add(beandef);
                 } catch (Exception e) {
                     if (Environment.get("strict.mode", false))
                         ForwardedException.forward(e);
@@ -670,6 +671,7 @@ public class BeanDefinition<T> extends BeanClass<T> implements Serializable {
             if (beandef == null) {
                 type = (Class<T>) (type == null ? UNDEFINED.getClass() : type);
                 beandef = new BeanDefinition<T>(type);
+                virtualBeanCache.add(beandef);
                 beandef.setName(name);
 //                if (fullInitStore)
 //                    if (true /*xmlFile.canWrite()*/) {
@@ -680,7 +682,6 @@ public class BeanDefinition<T> extends BeanClass<T> implements Serializable {
 //                    } else
 //                        LOG.warn("couldn't write bean-definition cache to: " + xmlFile.getPath());
             }
-            virtualBeanCache.add(beandef);
         } else {
             beandef = virtualBeanCache.get(i);
         }
