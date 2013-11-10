@@ -49,7 +49,7 @@ import de.tsl2.nano.util.StringUtil;
  * 
  */
 @Default(value = DefaultType.FIELD, required = false)
-@SuppressWarnings({"unchecked", "rawtypes"})
+@SuppressWarnings({ "unchecked", "rawtypes" })
 public class BeanClass<T> implements Serializable {
     /** serialVersionUID */
     private static final long serialVersionUID = 8387513854853569951L;
@@ -103,10 +103,7 @@ public class BeanClass<T> implements Serializable {
      * @return simple class name
      */
     public static final String getName(Class clazz) {
-        if (Proxy.isProxyClass(clazz)) {
-            clazz = clazz.getInterfaces()[0];
-        }
-        return clazz.getSimpleName();
+        return getDefiningClass(clazz).getSimpleName();
     }
 
     /**
@@ -397,7 +394,7 @@ public class BeanClass<T> implements Serializable {
     public static Object call(Object instance, String methodName, Class[] par, Object... args) {
         return new BeanClass(instance.getClass()).callMethod(instance, methodName, par, args);
     }
-    
+
     /**
      * simple method reflection call
      * 
@@ -680,7 +677,9 @@ public class BeanClass<T> implements Serializable {
     }
 
     /**
-     * wraps all attributes having a collection as value into a new {@link ListSet} instance to unbind a {@link #clone()} instance.
+     * wraps all attributes having a collection as value into a new {@link ListSet} instance to unbind a
+     * {@link #clone()} instance.
+     * 
      * @param src instance to wrap the attribute values for
      * @return the instance itself
      */
@@ -698,12 +697,12 @@ public class BeanClass<T> implements Serializable {
         }
         return src;
     }
-    
+
     /**
      * sets all attributes from src to the value of a new created instance (mostly null values). if no attributeNames
      * are defined, all source attributes will be copied.
-     * <p>f
-     * Warning: Works only, if src class provides a default constructor. not performance optimized!
+     * <p>
+     * f Warning: Works only, if src class provides a default constructor. not performance optimized!
      * 
      * @param src source bean
      * @param attributeNames (optional) fixed attribute names
@@ -844,13 +843,17 @@ public class BeanClass<T> implements Serializable {
             allInterfaces.addAll(Arrays.asList(superClass.getInterfaces()));
         return allInterfaces.toArray(new Class[0]);
     }
-    
+
     /**
-     * useful on anonymous/inner classes
+     * useful on anonymous/inner classes, proxies or bytecode-enhancing
+     * 
      * @param cls class to analyse
-     * @return defining class - means on anonymous classes not the enclosing but the super class.
+     * @return defining class - means on anonymous classes, proxies or enhancing it returns the the super class or
+     *         interface.
      */
     public static final Class<?> getDefiningClass(Class<?> cls) {
-        return cls.getEnclosingClass() != null ? cls.getSuperclass() : cls;
+        //TODO: how to check for enhancing class
+        return (cls.getEnclosingClass() != null || cls.getSimpleName().contains("$")) && cls.getSuperclass() != null ? getDefiningClass(cls.getSuperclass())
+            : Proxy.isProxyClass(cls) ? cls.getInterfaces()[0] : cls;
     }
 }
