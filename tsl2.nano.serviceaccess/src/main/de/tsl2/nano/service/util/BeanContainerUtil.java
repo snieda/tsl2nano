@@ -164,7 +164,7 @@ public class BeanContainerUtil {
      * @return true, if class is entity
      */
     public static boolean isPersistable(Class<?> beanClass) {
-        return new BeanClass(beanClass).isAnnotationPresent(Entity.class);
+        return new BeanClass(BeanClass.getDefiningClass(beanClass)).isAnnotationPresent(Entity.class);
     }
 
     /**
