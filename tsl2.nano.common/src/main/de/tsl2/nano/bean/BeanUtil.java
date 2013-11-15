@@ -41,6 +41,7 @@ import org.apache.commons.logging.Log;
 
 import de.tsl2.nano.Messages;
 import de.tsl2.nano.bean.def.Bean;
+import de.tsl2.nano.bean.def.BeanDefinition;
 import de.tsl2.nano.collection.CollectionUtil;
 import de.tsl2.nano.exception.FormattedException;
 import de.tsl2.nano.exception.ForwardedException;
@@ -461,10 +462,10 @@ public class BeanUtil {
             boolean onlySingleValues,
             boolean onlyFilterAttributes,
             String... filterAttributes) {
-        final Bean bean = new Bean(o);//Bean.getBean((Serializable)o);
+        final BeanDefinition beandef = BeanDefinition.getBeanDefinition(BeanClass.getDefiningClass(o.getClass()));
         if (onlyFilterAttributes && filterAttributes.length > 0)
-            bean.setAttributeFilter(filterAttributes);
-        return bean.toValueMap(useClassPrefix, onlySingleValues, onlyFilterAttributes, filterAttributes);
+            beandef.setAttributeFilter(filterAttributes);
+        return beandef.toValueMap(o, useClassPrefix, onlySingleValues, onlyFilterAttributes, filterAttributes);
     }
 
     /**
@@ -493,10 +494,10 @@ public class BeanUtil {
             boolean onlySingleValues,
             boolean onlyFilteredAttributes,
             String... filterAttributes) {
-        final Bean bean = new Bean(o);//Bean.getBean((Serializable)o);
+        final BeanDefinition beandef = BeanDefinition.getBeanDefinition(BeanClass.getDefiningClass(o.getClass()));
         if (onlyFilteredAttributes && filterAttributes.length > 0)
-            bean.setAttributeFilter(filterAttributes);
-        return bean.toValueMap(keyPrefix, onlySingleValues, onlyFilteredAttributes, filterAttributes);
+            beandef.setAttributeFilter(filterAttributes);
+        return beandef.toValueMap(o, keyPrefix, onlySingleValues, onlyFilteredAttributes, filterAttributes);
     }
 
     /**

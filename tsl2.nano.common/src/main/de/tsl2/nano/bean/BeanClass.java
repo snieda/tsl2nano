@@ -741,7 +741,7 @@ public class BeanClass<T> implements Serializable {
      */
     public static <D> D copy(Object src, D dest, String... noCopy) {
         if (LOG.isDebugEnabled()) {
-            LOG.debug("copying all" + " fields from "
+            LOG.debug("copying all fields from "
                 + src.getClass().getSimpleName()
                 + " to "
                 + dest.getClass().getSimpleName());

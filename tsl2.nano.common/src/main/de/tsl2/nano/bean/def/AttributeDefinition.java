@@ -90,7 +90,7 @@ public class AttributeDefinition<T> extends BeanAttribute implements IAttributeD
      * sets default properties through the {@link BeanContainer}, if available. These defaults may be read from
      * jpa-annotations.
      */
-    private void defineDefaults() {
+    protected void defineDefaults() {
         if (BeanContainer.isInitialized() && BeanContainer.instance().isPersistable(getDeclaringClass())) {
             IAttributeDef def = BeanContainer.instance().getAttributeDef(getDeclaringClass(), getName());
             if (def != null) {

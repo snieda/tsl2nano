@@ -16,6 +16,7 @@ import java.text.Format;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
@@ -44,6 +45,7 @@ import de.tsl2.nano.collection.ListSet;
 import de.tsl2.nano.exception.FormattedException;
 import de.tsl2.nano.exception.ForwardedException;
 import de.tsl2.nano.execution.XmlUtil;
+import de.tsl2.nano.format.DefaultFormat;
 import de.tsl2.nano.log.LogFactory;
 import de.tsl2.nano.messaging.ChangeEvent;
 import de.tsl2.nano.messaging.IListener;
@@ -898,6 +900,73 @@ public class BeanDefinition<T> extends BeanClass<T> implements Serializable {
      */
     public void setValueExpression(ValueExpression<T> valueExpression) {
         this.valueExpression = valueExpression;
+    }
+
+    /**
+     * fills a map with all bean-attribute-names and their values
+     * 
+     * @param useClassPrefix if true, the class-name will be used as prefix for the key
+     * @param onlySingleValues if true, collections will be ignored
+     * @param onlyFilterAttributes if true, all other than filterAttributes will be ignored
+     * @param filterAttributes attributes to be filtered (ignored, if onlyFilterAttributes)
+     * @return map filled with all attribute values
+     */
+    public Map<String, Object> toValueMap(Object instance, boolean useClassPrefix,
+            boolean onlySingleValues,
+            boolean onlyFilterAttributes,
+            String... filterAttributes) {
+        final String classPrefix = useClassPrefix ? BeanAttribute.toFirstLower(instance.getClass().getSimpleName()) + "."
+            : "";
+        return toValueMap(instance, classPrefix, onlySingleValues, onlyFilterAttributes, filterAttributes);
+    }
+
+    /**
+     * delegates to {@link #toValueMap(String, boolean, boolean, boolean, String...)} with formatted=false
+     */
+    public Map<String, Object> toValueMap(Object instance, String keyPrefix,
+            boolean onlySingleValues,
+            boolean onlyFilterAttributes,
+            String... filterAttributes) {
+        return toValueMap(instance, keyPrefix, onlySingleValues, false, onlyFilterAttributes, filterAttributes);
+    }
+
+    /**
+     * fills a map with all bean-attribute-names and their values. keys in alphabetic order.
+     * 
+     * @param keyPrefix to be used as prefix for the bean attribute name
+     * @param onlySingleValues if true, collections will be ignored
+     * @param formatted if true, not the values itself but the formatted values (strings) will be put. if no format was
+     *            defined, the {@link DefaultFormat} will be used
+     * @param onlyFilterAttributes if true, all other than filterAttributes will be ignored
+     * @param filterAttributes attributes to be filtered (ignored, if onlyFilterAttributes)
+     * @return map filled with all attribute values
+     */
+    public Map<String, Object> toValueMap(Object instance,
+        String keyPrefix,
+            boolean onlySingleValues,
+            boolean formatted,
+            boolean onlyFilteredAttributes,
+            String... filterAttributes) {
+        final List<BeanAttribute> attributes = onlySingleValues ? getSingleValueAttributes() : getAttributes();
+        if (filterAttributes.length == 0)
+            Collections.sort(attributes);
+        final Map<String, Object> map = new LinkedHashMap<String, Object>(attributes.size());
+        final List<String> filter = Arrays.asList(filterAttributes);
+        Object value;
+        for (final BeanAttribute beanAttribute : attributes) {
+            if ((onlyFilteredAttributes && filter.contains(beanAttribute.getName())) || (!onlyFilteredAttributes && !filter.contains(beanAttribute.getName()))) {
+                value = beanAttribute.getValue(instance);
+                if (formatted) {
+                    BeanValue<?> bv = (BeanValue<?>) beanAttribute;
+                    if (bv.getFormat() != null)
+                        value = bv.getFormat().format(value);
+                    else
+                        value = value != null ? value.toString() : "";
+                }
+                map.put(keyPrefix + beanAttribute.getName(), value);
+            }
+        }
+        return map;
     }
 
     /**
