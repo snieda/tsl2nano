@@ -13,6 +13,7 @@ import java.io.IOException;
 import java.io.Serializable;
 import java.text.MessageFormat;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.Formatter;
 import java.util.Map;
@@ -197,6 +198,12 @@ public class ValueExpression<TYPE> implements IConverter<TYPE, String>, Serializ
             StringUtil.replaceNulls(args, false);
             //check for entity beans to resolve their format recursive through it's valueexpression
             preformatBeans(args);
+            //if object 'fromValue' is empty or not filled, we fill questionmarks to the formatted text
+            if (args.length < attributes.length) {
+                Object[] arr = new Object[attributes.length];
+                Arrays.fill(arr, "?");
+                args = arr;
+            }
             return isMessageFormat() ? MessageFormat.format(format, args) : String.format(format, args);
         } else {
             return format;

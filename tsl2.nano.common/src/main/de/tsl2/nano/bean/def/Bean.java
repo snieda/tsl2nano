@@ -22,7 +22,6 @@ import java.util.Map;
 import java.util.Set;
 
 import de.tsl2.nano.Messages;
-import de.tsl2.nano.action.CommonAction;
 import de.tsl2.nano.action.IAction;
 import de.tsl2.nano.bean.BeanAttribute;
 import de.tsl2.nano.bean.BeanClass;
@@ -112,7 +111,7 @@ import de.tsl2.nano.util.StringUtil;
  * @author Thomas Schneider
  * @version $Revision$
  */
-@SuppressWarnings({"rawtypes", "unchecked"})
+@SuppressWarnings({ "rawtypes", "unchecked" })
 public class Bean<T> extends BeanDefinition<T> {
     /** serialVersionUID */
     private static final long serialVersionUID = 1192383647173369697L;
@@ -236,7 +235,7 @@ public class Bean<T> extends BeanDefinition<T> {
         Serializable value = (Serializable) attribute.getValue();
         if (value == null)
             return null;
-        Bean<?> bean = value instanceof Bean ? (Bean)value : getBean(value);
+        Bean<?> bean = value instanceof Bean ? (Bean) value : getBean(value);
         return bean;
     }
 
@@ -371,7 +370,7 @@ public class Bean<T> extends BeanDefinition<T> {
         if (attributeDefinitions != null) {
             for (final IAttributeDefinition<?> a : attributeDefinitions.values()) {
                 //TODO: what to do with virtual values?
-                if (a instanceof IValueDefinition && ((IValueDefinition)a).isVirtual())
+                if (a instanceof IValueDefinition && ((IValueDefinition) a).isVirtual())
                     continue;
                 ((BeanValue) a).setInstance(instance2);
             }
@@ -590,7 +589,9 @@ public class Bean<T> extends BeanDefinition<T> {
     }
 
     /**
-     * creates new enhanced value definitions from given attribute definitions. the values instance will be {@link BeanDefinition#UNDEFINED}.
+     * creates new enhanced value definitions from given attribute definitions. the values instance will be
+     * {@link BeanDefinition#UNDEFINED}.
+     * 
      * @param attributeDefinitions attributes to copy and enhance
      * @return new map holding value definitions
      */
@@ -617,16 +618,16 @@ public class Bean<T> extends BeanDefinition<T> {
      * @param keysAndValues key-value-pairs to be filled to the given instance
      * @return new created bean
      */
-    public static <I extends Serializable> Bean<I> getBean(I instanceOrName, Object...keysAndValues) {
+    public static <I extends Serializable> Bean<I> getBean(I instanceOrName, Object... keysAndValues) {
         Bean<I> bean = getBean(instanceOrName);
         Map map = MapUtil.asMap(keysAndValues);
         Set<String> keySet = map.keySet();
-        for (String key: keySet) {
+        for (String key : keySet) {
             bean.setValue(key, map.get(key));
         }
         return bean;
     }
-    
+
     /**
      * creates a bean with given instance or name. if you give a name, a virtual bean will be created and returned. if
      * you give an instance, a bean definition will be searched and copied to a new created bean.
@@ -639,7 +640,7 @@ public class Bean<T> extends BeanDefinition<T> {
         Bean<I> bean;
         if (instanceOrName instanceof String) {
             BeanDefinition<I> beandef = (BeanDefinition<I>) getBeanDefinition((String) instanceOrName);
-            bean = createBean((I)UNDEFINED, beandef);
+            bean = createBean((I) UNDEFINED, beandef);
             return bean;
         } else {
             BeanDefinition<I> beandef = getBeanDefinition((Class<I>) instanceOrName.getClass());
@@ -653,7 +654,7 @@ public class Bean<T> extends BeanDefinition<T> {
         super.setName(name);
         asString = null;
     }
-    
+
     public String toStringDescription() {
         final Collection<BeanAttribute> attributes = getAttributes();
         final StringBuilder buf = new StringBuilder(attributes.size() * 15);
@@ -683,7 +684,7 @@ public class Bean<T> extends BeanDefinition<T> {
  * @author Thomas Schneider
  * @version $Revision$
  */
-@SuppressWarnings({"unchecked"})
+@SuppressWarnings({ "unchecked" })
 class SaveAction<T> extends SecureAction<T> implements Serializable {
     /** serialVersionUID */
     private static final long serialVersionUID = -3009132079876910521L;
@@ -706,6 +707,7 @@ class SaveAction<T> extends SecureAction<T> implements Serializable {
     public T action() throws Exception {
         return (T) bean.save();
     }
+
     @Override
     public String getImagePath() {
         return "icons/save.png";

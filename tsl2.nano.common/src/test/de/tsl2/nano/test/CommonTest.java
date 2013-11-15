@@ -10,10 +10,7 @@
 package de.tsl2.nano.test;
 
 import static de.tsl2.nano.bean.def.IPresentable.UNDEFINED;
-import static org.junit.Assert.assertArrayEquals;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
+import static org.junit.Assert.*;
 
 import java.io.File;
 import java.io.Reader;
@@ -180,52 +177,52 @@ public class CommonTest {
     @Test
     public void testNumberUtil() throws Exception {
         Long fixLengthNumber = NumberUtil.fixLengthNumber(10l, 5, '0');
-        Assert.assertEquals((Long) 10000l, fixLengthNumber);
+        assertEquals((Long) 10000l, fixLengthNumber);
 
-        Assert.assertEquals(true, NumberUtil.isNegative(new BigDecimal(-10)));
-        Assert.assertEquals(false, NumberUtil.isPositive(new BigDecimal(-10)));
-        Assert.assertEquals(true, NumberUtil.isPositive(new BigDecimal(10)));
-        Assert.assertEquals(false, NumberUtil.isNegative(new BigDecimal(10)));
-        Assert.assertEquals(false, NumberUtil.isPositive(new BigDecimal(0)));
-        Assert.assertEquals(false, NumberUtil.isNegative(new BigDecimal(0)));
-        Assert.assertEquals(true, NumberUtil.isNotNegative(new BigDecimal(10)));
-        Assert.assertEquals(true, NumberUtil.isNotNegative(new BigDecimal(0)));
-        Assert.assertEquals(false, NumberUtil.isNotNegative(new BigDecimal(-10)));
-        Assert.assertEquals(false, NumberUtil.isZero(new BigDecimal(1)));
-        Assert.assertEquals(true, NumberUtil.isZero(new BigDecimal(0)));
+        assertEquals(true, NumberUtil.isNegative(new BigDecimal(-10)));
+        assertEquals(false, NumberUtil.isPositive(new BigDecimal(-10)));
+        assertEquals(true, NumberUtil.isPositive(new BigDecimal(10)));
+        assertEquals(false, NumberUtil.isNegative(new BigDecimal(10)));
+        assertEquals(false, NumberUtil.isPositive(new BigDecimal(0)));
+        assertEquals(false, NumberUtil.isNegative(new BigDecimal(0)));
+        assertEquals(true, NumberUtil.isNotNegative(new BigDecimal(10)));
+        assertEquals(true, NumberUtil.isNotNegative(new BigDecimal(0)));
+        assertEquals(false, NumberUtil.isNotNegative(new BigDecimal(-10)));
+        assertEquals(false, NumberUtil.isZero(new BigDecimal(1)));
+        assertEquals(true, NumberUtil.isZero(new BigDecimal(0)));
 
-        Assert.assertEquals(true, NumberUtil.isEmpty(null));
-        Assert.assertEquals(true, NumberUtil.isEmpty(BigDecimal.ZERO));
+        assertEquals(true, NumberUtil.isEmpty(null));
+        assertEquals(true, NumberUtil.isEmpty(BigDecimal.ZERO));
 
-        Assert.assertEquals(true, NumberUtil.isGreater(2f, 1.9f));
-        Assert.assertEquals(true, NumberUtil.isGreater(2, 1));
-        Assert.assertEquals(false, NumberUtil.isGreater(1.9f, 2f));
-        Assert.assertEquals(false, NumberUtil.isGreater(1, 2));
-        Assert.assertEquals(false, NumberUtil.isLower(2f, 1.9f));
-        Assert.assertEquals(false, NumberUtil.isLower(2, 1));
-        Assert.assertEquals(true, NumberUtil.isLower(1.9f, 2f));
-        Assert.assertEquals(true, NumberUtil.isLower(1, 2));
+        assertEquals(true, NumberUtil.isGreater(2f, 1.9f));
+        assertEquals(true, NumberUtil.isGreater(2, 1));
+        assertEquals(false, NumberUtil.isGreater(1.9f, 2f));
+        assertEquals(false, NumberUtil.isGreater(1, 2));
+        assertEquals(false, NumberUtil.isLower(2f, 1.9f));
+        assertEquals(false, NumberUtil.isLower(2, 1));
+        assertEquals(true, NumberUtil.isLower(1.9f, 2f));
+        assertEquals(true, NumberUtil.isLower(1, 2));
 
-        Assert.assertEquals(3, NumberUtil.getDelta(new BigDecimal(-1), new BigDecimal(2)), 0f);
-        Assert.assertEquals(true, NumberUtil.intersects(-1, 3, 2, 4));
-        Assert.assertEquals(true, NumberUtil.intersects(-1, 3, 3, 4));
-        Assert.assertEquals(false, NumberUtil.intersects(-1f, 3f, 3.1f, 4f));
-        Assert.assertEquals(false, NumberUtil.includes(-1, 3, 3, 4));
-        Assert.assertEquals(false, NumberUtil.includes(-1, 3, 2, 4));
-        Assert.assertEquals(true, NumberUtil.includes(-1, 3, 1, 2));
+        assertEquals(3, NumberUtil.getDelta(new BigDecimal(-1), new BigDecimal(2)), 0f);
+        assertEquals(true, NumberUtil.intersects(-1, 3, 2, 4));
+        assertEquals(true, NumberUtil.intersects(-1, 3, 3, 4));
+        assertEquals(false, NumberUtil.intersects(-1f, 3f, 3.1f, 4f));
+        assertEquals(false, NumberUtil.includes(-1, 3, 3, 4));
+        assertEquals(false, NumberUtil.includes(-1, 3, 2, 4));
+        assertEquals(true, NumberUtil.includes(-1, 3, 1, 2));
 
-        Assert.assertEquals(new BigDecimal(1), NumberUtil.extractNumber("1"));
-        Assert.assertEquals(new BigDecimal(1.1f, new MathContext(2)), NumberUtil.extractNumber("1,1"));
-        Assert.assertEquals(null, NumberUtil.extractNumber("x,1"));
-        Assert.assertEquals(null, NumberUtil.extractNumber("1,x"));
-        Assert.assertEquals(null, NumberUtil.extractNumber("100x"));
-        Assert.assertEquals(null, NumberUtil.extractNumber("xxx"));
-        Assert.assertEquals(null, NumberUtil.extractNumber(""));
+        assertEquals(new BigDecimal(1), NumberUtil.extractNumber("1"));
+        assertEquals(new BigDecimal(1.1f, new MathContext(2)), NumberUtil.extractNumber("1,1"));
+        assertEquals(null, NumberUtil.extractNumber("x,1"));
+        assertEquals(null, NumberUtil.extractNumber("1,x"));
+        assertEquals(null, NumberUtil.extractNumber("100x"));
+        assertEquals(null, NumberUtil.extractNumber("xxx"));
+        assertEquals(null, NumberUtil.extractNumber(""));
 
         //works only in locale de!
         BigDecimal bigDecimal = new BigDecimal(-999.99);
         bigDecimal = bigDecimal.setScale(2, BigDecimal.ROUND_HALF_UP);
-        Assert.assertEquals(bigDecimal, NumberUtil.getBigDecimal("-999,99"));
+        assertEquals(bigDecimal, NumberUtil.getBigDecimal("-999,99"));
 
         //comparator test
         List<String> textAndNumbers = Arrays.asList("", "-1.000,00", "-1.2",//on german notation it will be -12
@@ -264,33 +261,33 @@ public class CommonTest {
 
         //Bitfields
         int bitfield = 2 | 4;
-        Assert.assertEquals(true, NumberUtil.hasBit(bitfield, 2) && NumberUtil.hasBit(bitfield, 4));
-        Assert.assertEquals(false, NumberUtil.hasBit(bitfield, 1));
-        Assert.assertEquals(false, NumberUtil.hasBit(bitfield, 8));
+        assertEquals(true, NumberUtil.hasBit(bitfield, 2) && NumberUtil.hasBit(bitfield, 4));
+        assertEquals(false, NumberUtil.hasBit(bitfield, 1));
+        assertEquals(false, NumberUtil.hasBit(bitfield, 8));
 
-        Assert.assertEquals(4, NumberUtil.highestOneBit(bitfield));
-        Assert.assertEquals(8, NumberUtil.bitToDecimal(3));
+        assertEquals(4, NumberUtil.highestOneBit(bitfield));
+        assertEquals(8, NumberUtil.bitToDecimal(3));
 
-        Assert.assertEquals(0, NumberUtil.filterBits(bitfield, 1, 2, 4));
-        Assert.assertEquals(4, NumberUtil.filterBits(bitfield, 2));
-        Assert.assertEquals(2, NumberUtil.filterBits(bitfield, 4));
+        assertEquals(0, NumberUtil.filterBits(bitfield, 1, 2, 4));
+        assertEquals(4, NumberUtil.filterBits(bitfield, 2));
+        assertEquals(2, NumberUtil.filterBits(bitfield, 4));
 
-        Assert.assertEquals(4, NumberUtil.filterBitRange(bitfield, 0, 1));
-        Assert.assertEquals(0, NumberUtil.filterBitRange(bitfield, 1, 2));
-        Assert.assertEquals(2, NumberUtil.filterBitRange(bitfield, 2, 3));
-        Assert.assertEquals(6, NumberUtil.filterBitRange(bitfield, 3, 4));
+        assertEquals(4, NumberUtil.filterBitRange(bitfield, 0, 1));
+        assertEquals(0, NumberUtil.filterBitRange(bitfield, 1, 2));
+        assertEquals(2, NumberUtil.filterBitRange(bitfield, 2, 3));
+        assertEquals(6, NumberUtil.filterBitRange(bitfield, 3, 4));
 
-        Assert.assertEquals(0, NumberUtil.retainBits(bitfield, 0, 1));
-        Assert.assertEquals(2, NumberUtil.retainBits(bitfield, 1, 2));
-        Assert.assertEquals(6, NumberUtil.retainBits(bitfield, 2, 4));
-        Assert.assertEquals(4, NumberUtil.retainBits(bitfield, 4, 8));
+        assertEquals(0, NumberUtil.retainBits(bitfield, 0, 1));
+        assertEquals(2, NumberUtil.retainBits(bitfield, 1, 2));
+        assertEquals(6, NumberUtil.retainBits(bitfield, 2, 4));
+        assertEquals(4, NumberUtil.retainBits(bitfield, 4, 8));
 
         //simple math functions
-        Assert.assertEquals(3f, NumberUtil.getDelta(1.5f, 2f, 3f, 4.5f), 0f);
-        Assert.assertEquals(0f, NumberUtil.getDelta(1.5f, 1.5f), 0f);
-        Assert.assertEquals(1f, NumberUtil.getDeltaCompare(1.5f, 2f, 3f, 4.5f), 0f);
-        Assert.assertEquals(0f, NumberUtil.getDeltaCompare(1.5f, 1.5f), 0f);
-        Assert.assertEquals(new BigDecimal(10.0f), NumberUtil.add(1.5f, 2f, 3.5f, 3f).setScale(0));
+        assertEquals(3f, NumberUtil.getDelta(1.5f, 2f, 3f, 4.5f), 0f);
+        assertEquals(0f, NumberUtil.getDelta(1.5f, 1.5f), 0f);
+        assertEquals(1f, NumberUtil.getDeltaCompare(1.5f, 2f, 3f, 4.5f), 0f);
+        assertEquals(0f, NumberUtil.getDeltaCompare(1.5f, 1.5f), 0f);
+        assertEquals(new BigDecimal(10.0f), NumberUtil.add(1.5f, 2f, 3.5f, 3f).setScale(0));
 
 //        //duration: 1000 * 1000 seconds
 //        List store = new ArrayList<Integer>(1000);
@@ -312,11 +309,11 @@ public class CommonTest {
         String[] arr3 = new String[] { "Berta", "Anton" };
         String[] arr4 = new String[] { "1100", "11", "111", "101", "1" };
         List<String> list = CollectionUtil.asListCombined(arr1, arr2, arr3, arr4);
-        Assert.assertEquals(arr1.length + arr2.length + arr3.length + arr4.length, list.size());
+        assertEquals(arr1.length + arr2.length + arr3.length + arr4.length, list.size());
 
         //2. sorting the list for numbers and strings
         Collection<?> sortedList = CollectionUtil.getSortedList(list);
-        Assert.assertEquals(Arrays.asList("1",
+        assertEquals(Arrays.asList("1",
             "11",
             "101",
             "111",
@@ -330,17 +327,17 @@ public class CommonTest {
 
         //3. filtering data
         Collection<String> filteredBetween = CollectionUtil.getFilteringBetween(list, "Anton", "Carsten1");
-        Assert.assertEquals(Arrays.asList("Anton", "Berta", "Carsten0", "Carsten1"),
+        assertEquals(Arrays.asList("Anton", "Berta", "Carsten0", "Carsten1"),
             CollectionUtil.getList(filteredBetween.iterator()));
 
         //do it again
         filteredBetween = CollectionUtil.getFilteringBetween(list, "Anton", "Carsten1");
-        Assert.assertEquals(Arrays.asList("Anton", "Berta", "Carsten0", "Carsten1"),
+        assertEquals(Arrays.asList("Anton", "Berta", "Carsten0", "Carsten1"),
             CollectionUtil.getList(filteredBetween.iterator()));
 
         //4. concatenation
         String[] concat = CollectionUtil.concat(String[].class, arr2, arr3);
-        Assert.assertArrayEquals(new String[] { "Carsten1", "Carsten0", "Berta", "Anton" }, concat);
+        assertArrayEquals(new String[] { "Carsten1", "Carsten0", "Berta", "Anton" }, concat);
 
         //5. transforming data
         TypeBean tb1 = new TypeBean();
@@ -354,7 +351,7 @@ public class CommonTest {
                     return toTransform.string;
                 }
             });
-        Assert.assertEquals(Arrays.asList("Anton", "Berta"), CollectionUtil.getList(transforming.iterator()));
+        assertEquals(Arrays.asList("Anton", "Berta"), CollectionUtil.getList(transforming.iterator()));
     }
 
     @Test
@@ -478,6 +475,16 @@ public class CommonTest {
 //            //ok
 //            LOG.info(ex);
 //        }
+        
+        //testing quarters
+        Date d = DateUtil.getDate(2002, 1, 1);
+        assertEquals(1, DateUtil.getCurrentQuarter(d));
+        assertEquals(2, DateUtil.getNextQuarter(d));
+        assertEquals(d, DateUtil.getQuarter(2002, DateUtil.Q1));
+        
+        d = DateUtil.getQuarter(1900, DateUtil.Q4);
+        assertEquals(4, DateUtil.getCurrentQuarter(d));
+        assertEquals(1, DateUtil.getNextQuarter(d));
     }
 
     @Test
@@ -542,17 +549,17 @@ public class CommonTest {
         CurrencyUnit newCurrency = CurrencyUtil.getCurrency();
 
         Double f = 1.95583d;
-        Assert.assertEquals(f, oldCurrency.getFactor(), 0);
-        Assert.assertEquals("DEM", oldCurrency.getCurrencyCode());
-        Assert.assertEquals("EUR", newCurrency.getCurrencyCode());
+        assertEquals(f, oldCurrency.getFactor(), 0);
+        assertEquals("DEM", oldCurrency.getCurrencyCode());
+        assertEquals("EUR", newCurrency.getCurrencyCode());
 
         DecimalFormat df = (DecimalFormat) DecimalFormat.getInstance();
         df.applyPattern("###,###,###.00 €");
         LOG.info(df.format(123456789));
         
         //test the factor and rounding mode
-        Assert.assertEquals(f, CurrencyUtil.getFactor(d));
-        Assert.assertEquals(new BigDecimal(51.13d, new MathContext(4)), CurrencyUtil.getActualValue(100f, d));
+        assertEquals(f, CurrencyUtil.getFactor(d));
+        assertEquals(new BigDecimal(51.13d, new MathContext(4)), CurrencyUtil.getActualValue(100f, d));
     }
 
     @Test
@@ -754,7 +761,7 @@ public class CommonTest {
             0,
             true,
             50);
-        Assert.assertEquals(50, beanType.getAttribute("additionalColumn").getColumnDefinition().getWidth());
+        assertEquals(50, beanType.getAttribute("additionalColumn").getColumnDefinition().getWidth());
 
         /*
          * Bean, BeanValue, Listener and relations
@@ -1115,7 +1122,7 @@ public class CommonTest {
         Map<CharSequence, BigDecimal> values = new Hashtable<CharSequence, BigDecimal>();
         values.put("x1", x1);
         values.put("x2", x2);
-        Assert.assertEquals(new BigDecimal(61), new NumericOperator(values).eval(f));
+        assertEquals(new BigDecimal(61), new NumericOperator(values).eval(f));
     }
 
     @Test
@@ -1134,13 +1141,13 @@ public class CommonTest {
                 return "D";
             }
         });
-        Assert.assertEquals("D", new ConditionOperator(values).eval(f));
+        assertEquals("D", new ConditionOperator(values).eval(f));
         
         values.remove(Operator.KEY_RESULT);
         values.put("A", true);
         values.put("C", false);
         values.put("E", "E");
-        Assert.assertEquals("E", new ConditionOperator(values).eval(f));
+        assertEquals("E", new ConditionOperator(values).eval(f));
     }
 
     @Test

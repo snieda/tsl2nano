@@ -232,7 +232,7 @@ public class Period implements Comparable<Period>, Serializable {
         final Date end = getEnd() != null ? getEnd() : DateUtil.MAX_DATE;
         final Date pStart = period.getStart() != null ? period.getStart() : new Date(Long.MIN_VALUE);
         final Date pEnd = period.getEnd() != null ? period.getEnd() : DateUtil.MAX_DATE;
-        return !pEnd.before(start) && !pStart.after(end);
+        return !end.before(pStart) && !start.after(pEnd);
     }
 
     /**

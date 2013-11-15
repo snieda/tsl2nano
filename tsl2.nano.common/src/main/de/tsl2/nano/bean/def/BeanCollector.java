@@ -723,15 +723,10 @@ public class BeanCollector<COLLECTIONTYPE extends Collection<T>, T> extends Bean
         return null;
     }
 
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    public String getColumnText(Object element, int columnIndex) {
-        IPresentableColumn column = getColumn(columnIndex);
-        IAttributeDefinition attribute = getAttribute(column.getName());
+    public Object getColumnValue(Object element, int columnIndex) {
+        IAttributeDefinition attribute = getAttribute(getColumn(columnIndex).getName());
         if (element == null)
-            return "";
+            return null;
         Object value;
         try {
             value = attribute instanceof IValueDefinition ? ((IValueDefinition) attribute).getValue()
@@ -742,8 +737,19 @@ public class BeanCollector<COLLECTIONTYPE extends Collection<T>, T> extends Bean
                 + e.toString());
             value = null;
         }
+        return value;
+    }
+    
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public String getColumnText(Object element, int columnIndex) {
+        Object value = getColumnValue(element, columnIndex);
         if (value == null)
             return "";
+        IPresentableColumn column = getColumn(columnIndex);
+        IAttributeDefinition attribute = getAttribute(column.getName());
         if (attribute.getFormat() != null) {
             try {
                 return attribute.getFormat().format(value);
@@ -799,7 +805,8 @@ public class BeanCollector<COLLECTIONTYPE extends Collection<T>, T> extends Bean
                 int ci, c;
                 for (int i = 0; i < sortIndexes.length; i++) {
                     ci = sortIndexes[i];
-                    c = getColumnText(o1, ci).compareTo(getColumnText(o2, ci));
+//                    c = getColumnText(o1, ci).compareTo(getColumnText(o2, ci));
+                    c = BeanPresentationHelper.STRING_COMPARATOR.compare(getColumnValue(o1, ci), getColumnValue(o2, ci));
                     if (c != 0) {
                         //TODO: check performance!
                         c = getColumn(ci).isSortUpDirection() ? c : -1 * c;

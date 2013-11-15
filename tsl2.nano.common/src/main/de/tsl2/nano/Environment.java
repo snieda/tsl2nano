@@ -105,16 +105,21 @@ public class Environment {
         String buildInfo = (String) get("build.informations");
         if (buildInfo == null) {
             try {
-                Properties bi = new Properties();
-                bi.load(get(ClassLoader.class).getResourceAsStream("build.properties"));
-                buildInfo = bi.getProperty("build.name") + "-"
-                    + bi.getProperty("build.version")
-                    + "-"
-                    + bi.getProperty("build.number")
-                    + "-"
-                    + bi.getProperty("build.time")
-                    + ("true".equals(bi.getProperty("build.debug")) ? "-d" : "");
-                setProperty("build.informations", buildInfo);
+                InputStream biStream = get(ClassLoader.class).getResourceAsStream("build.properties");
+                if (biStream != null) {
+                    Properties bi = new Properties();
+                    bi.load(biStream);
+                    buildInfo = bi.getProperty("build.name") + "-"
+                        + bi.getProperty("build.version")
+                        + "-"
+                        + bi.getProperty("build.number")
+                        + "-"
+                        + bi.getProperty("build.time")
+                        + ("true".equals(bi.getProperty("build.debug")) ? "-d" : "");
+                    setProperty("build.informations", buildInfo);
+                } else {
+                    return "<unknown build informations>";
+                }
             } catch (Exception e) {
                 return "<unknown build informations>";
             }
@@ -381,12 +386,13 @@ public class Environment {
 
     /**
      * persists the given object through configured xml persister.
+     * 
      * @param obj object to serialize to xml.
      */
     public static void persist(Object obj) {
         self().get(XmlUtil.class).saveXml(getConfigPath(obj.getClass()) + ".xml", obj);
     }
-    
+
     /**
      * persists (saves) the current environment. a reset will be done to reload the environment from saved file.
      */

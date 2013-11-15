@@ -44,11 +44,13 @@ public final class DateUtil {
     public static final Date MIN_DATE = getDate(0, 0, 0);
     public static final Date MAX_DATE = getDate(9999, -1, -1);
 
-    /** 4 quarters beginnings */
-    static final Date Q1 = getDate(0, 1, 1);
-    static final Date Q2 = getDate(0, 4, 1);
-    static final Date Q3 = getDate(0, 7, 1);
-    static final Date Q4 = getDate(0, 10, 1);
+    /** 4 quarters beginnings without year */
+    public static final Date Q1 = getDate(0, 1, 1);
+    public static final Date Q2 = getDate(0, 4, 1);
+    public static final Date Q3 = getDate(0, 7, 1);
+    public static final Date Q4 = getDate(0, 10, 1);
+
+    static final Date[] QUARTERS = new Date[] { Q1, Q2, Q3, Q4 };
 
     /**
      * Default-Constructor
@@ -378,7 +380,7 @@ public final class DateUtil {
     public static String getFormattedMinutes(long time) {
         return MINUTE_FORMAT.format(new Date(time));
     }
-    
+
     /**
      * Formats a date to the default date-time-format
      * 
@@ -709,17 +711,17 @@ public final class DateUtil {
     }
 
     /**
-     * UNTESTED YET
-     * checks, if the given dateToCheck is between periodFrom and periodTo.
+     * UNTESTED YET checks, if the given dateToCheck is between periodFrom and periodTo.
+     * 
      * @param periodFrom period start
      * @param periodTo period end
      * @param dateToCheck date to be checked for period
      * @return true, if period contains dateToCheck
      */
     public static final boolean includes(Date periodFrom, Date periodTo, Date dateToCheck) {
-        return intersect(periodFrom, periodTo, dateToCheck, dateToCheck);
+        return new Period(periodFrom, periodTo).contains(new Period(dateToCheck, dateToCheck));
     }
-    
+
     /**
      * internal calendar instance to be used by all methods, resetting the calendars date/time and creating a new date
      * instance.
@@ -877,6 +879,33 @@ public final class DateUtil {
     }
 
     /**
+     * evaluates the quarter number of the given date
+     * 
+     * @param date date to analyze
+     * @return a number between 1 and 4
+     */
+    public static final int getCurrentQuarter(Date date) {
+        int i;
+        int year = getYear(date);
+        for (i = 0; i < QUARTERS.length - 1; i++) {
+            if (includes(getQuarter(year, QUARTERS[i]), getQuarter(year, QUARTERS[i + 1]), date))
+                break;
+        }
+        return i + 1;
+    }
+
+    /**
+     * evaluates the quarter number of the next quarter
+     * 
+     * @param date date to analyze
+     * @return a number between 1 and 4
+     */
+    public static final int getNextQuarter(Date date) {
+        int q = getCurrentQuarter(date);
+        return q == QUARTERS.length ? 0 : q + 1;
+    }
+
+    /**
      * getWeekNumber
      * 
      * @param date date
@@ -885,22 +914,24 @@ public final class DateUtil {
     public static final int getWeekOfYear(Date date) {
         return (getFieldOfDate(date, Calendar.DAY_OF_YEAR) / 7) + 1;
     }
-    
+
     /**
      * evaluates the min of all given dates
+     * 
      * @param dates dates to eval
      * @return min date
      */
-    public static final Date min(Date...dates) {
+    public static final Date min(Date... dates) {
         return NumberUtil.min(dates);
     }
-    
+
     /**
      * evaluates the max of all given dates
+     * 
      * @param dates dates to eval
      * @return max date
      */
-    public static final Date max(Date...dates) {
+    public static final Date max(Date... dates) {
         return NumberUtil.max(dates);
     }
 }

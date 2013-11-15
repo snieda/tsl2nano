@@ -127,7 +127,8 @@ public class BeanDefinition<T> extends BeanClass<T> implements Serializable {
      * @param beanClass
      */
     public BeanDefinition(Class<T> beanClass) {
-        super(beanClass);
+        super((Class<T>) (Environment.get("beandef.ignore.anonymous.fields", true) ? getDefiningClass(beanClass)
+            : beanClass));
         name = beanClass == UNDEFINED.getClass() ? "undefined" : super.getName();
     }
 
