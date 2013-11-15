@@ -569,6 +569,7 @@ h2. TODOs
 ** (x) check for *@Id* is no standard-java-type and environment.show.id.fields is true
 *** (x) BeanPresentationHelper fills all id-bean fields as virtuals to the main bean
 * on export, the filtered names (like id) are given --> nullpointer
+* performance/memory: create only specific bean/beanvalue instances for changed values - use definition-instances if possible.
 * *TESTS*
 ** test on android
 ** languages
