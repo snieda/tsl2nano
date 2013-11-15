@@ -1,27 +1,30 @@
 *FullRelation Nano.H5*
 <font size="-1">Autor: Thomas Schneider 2012</font>
 
-{toc}
+{toc:style=disc}
 
 h2. Introduction
 
-Generic html5 gui implementation providing a model driven access (MDA), bound to __tsl2.nano.commons__ bean-package and __tsl2.nano.serviceaccess__ and it's __GenericService__ using __javax.persistence__. It is possible to design a class- or database-model, exporting it and to start a build process resulting in a complete html application, providing a comfortable way to edit all entities and their relations.
+NanoH5 (or FullRelation) is an UI independent gui implementation framework providing a model driven design (MDA). It is bound to the app framework __tsl2.nano.commons__ and the jpa-service framework __tsl2.nano.serviceaccess__. It is possible to build a complete html5 application through a given class- or database-model.
 
 *Goals:*
 * pure model implementation + plattform independency (works on android, too).
-* really small, having as less as possible static dependencies to other libraries
-* everything has a default - all defaults are configurable
-* full configurable (including standard bean behaviour and all entity behaviours)
+* small, having as less as possible static dependencies to other libraries
+* everything has a default - all defaults are configurable (Convention over Configuration)
+* application, session and entity behaviours are configurable
 * implementation through simple java beans + optional bean presenters
+* you develop ui independent, but are able to use ui dependent extensions.
+* no new language to learn. knowing html5 allows to improve layout and styling.
 * navigates through given beans, showing bean-lists and bean-detail dialogs.
-* navigation can be configurable workflow - or simply an entity browser 
 * resolves all bean/entity relations to be browsed.
+* navigation can be a configurable workflow - or simply an entity browser 
 * pre-defines formatting, validation and presentation of relations
 * pure html-5 (no javascript)
 * independent of a special o/r mapper. all o/r mappers supporting javax.persistence with an EntityManager are usable.
 * data replication to work offline (not finished yet!)
 * full key-navigation (shortcuts)
-* useable as standalone or web-service
+* framework designs interfaces and provides extendable implementations
+* useable as standalone or web-service (with offline access)
 * interfaces: 
 ** ddl-->beans through hibernate-tools
 ** jpa-->bean through annotation evaluation
@@ -40,6 +43,17 @@ The data access is done by:
 
 It is possible to use an ejb container in an application server, but the default is set to use jpa directly on the client (using _tsl2nano.directaccess_).
 
+*Why?*
+
+The base frameworks are grown through input of two industrial projects. the first project had to build a software fully configurable through a database. The second was a financial project.
+
+*What this framework is not intended to be*
+
+* the web-application mode is not designed or tested for big data transfers or high network traffics.
+* at the moment, only parts of the nano frameworks are used in productive applications.
+* at the moment it is on construction - no garantee can be given for any function or feature.
+* no particular value is done for graphical design.
+
 h3. Third Party Libraries
 
 * "Jing-Trang xml2xsd-Generator":https://code.google.com/p/jing-trang/downloads/list
@@ -47,6 +61,8 @@ h3. Third Party Libraries
 * Serviceaccess using: jpa-api, connector-api, jta-api, ejb-api, interceptor-api
 
 h3. Architecture
+
+The architecture is defined by the application framework "tsl2.nano.common":../tsl2.nano.common/nano.common.html. The data and service layer is defined by "tsl2.nano.serviceaccess":../tsl2.nano.sericeaccess/nano.serviceaccess.html.
 
 h4. Model Driven Architecture (MDA))
 
@@ -418,6 +434,11 @@ set the following *environment.xml* properties:
 * get only 50 lines per search: *service.maxresult=50*
 * ???: *bean.use.beanpresentationhelper.filter=false*
 
+h2. Problems
+
+* Beans showing currencys with EURO can't be saved
+** Set the character encoding of your browser's current page to *UTF-8*. E.g. in Chrome: Menu=>Tools=>Enconding
+
 h2. Changelog
 
 | Version | Date | Description |
@@ -443,6 +464,19 @@ h2. TODOs
 ** (-) new action: 'getValueBetween()'
 ** (v) extend all finders with start index (see maxresult) to have a result range
 ** (v) beancollector with next() and previous() data (using 'start' index and 'maxresult')
+* (v) tooltips for buttons
+* (v) check running in java 7
+* (v) add java-compiler (tools.jar, 12MB) of jdk6
+* (v) create ide for sample project
+* (v) If search result is only one element, select it
+* (v) *hibernate-tools*: (solved through beancollector.createNewItem() setting UUID
+* (v) on multiple selection, put all selected elements to the stack
+* (v) *Problem: creating a new element, copying an existing one, one-to-many connections will be lost*
+* *Dependencies*
+** (v) Log and LogFactory
+** (v) DefaultFormat: StandardToStringStyle and ToStringBuilder
+** (v) StringUtil --> BeanUtil
+** (v) BeanClass --> StringUtil --> CollectionUtil --> DefaultFormat
 * (x) Application Menu: reset (--> caches, environment, navigation), restart, login, logout
 * (x) default attribute names without @id field
 * (x) Nesting Beans
@@ -458,10 +492,8 @@ h2. TODOs
 ** (v) Previous, Next
 ** Style (of sorting header etc.)
 ** up, down (for sorting values)
-* (v) If search result is only one element, select it
-* (v) *hibernate-tools*: (solved through beancollector.createNewItem() setting UUID
-** configure to have generated IDs
-** read documentation
+* configure to have generated IDs
+* read documentation
 * *Searches on big data:*
 ** first count data
 ** (v) button to show one-to-many in table
@@ -479,6 +511,7 @@ h2. TODOs
 ** create wiki-logger
 ** envolve logictable and/or tableprocessor
 ** create GenericOperator from SOperator to read available Operations from xml.
+** eval language per session
 * *Refactoring:*
 ** (v) RegularExpressionFormat ==> RegExpFormat
 ** (v) refactore ScriptUtil: extract Ant calls
@@ -499,8 +532,6 @@ h2. TODOs
 * Validate against Html5-xsd in debug mode
 * include LogicTable?
 * (x) check starting application multiple times
-* (v) on multiple selection, put all selected elements to the stack
-* (v) *Problem: creating a new element, copying an existing one, one-to-many connections will be lost*
 ** depends on the datamodel: gruppe --> grupperolle(only for specific gruppe) --> rolle
 *** The new item has to be put to the list of it's parent container. This list has to be saved before the new item!
 *** The beancollector now holds a 
@@ -519,29 +550,28 @@ h2. TODOs
 *** (v) start nano.h5
 *** jmeter integration test
 *** automated crud test (pushing search/new/delete buttons for all entity types), profiling and counting errors in log-file
-* *Dependencies*
-** (v) Log and LogFactory
-** (v) DefaultFormat: StandardToStringStyle and ToStringBuilder
-** (v) StringUtil --> BeanUtil
-** (v) BeanClass --> StringUtil --> CollectionUtil --> DefaultFormat
 * multiple type/format evaluation in BeanValue (new member for type?) Presentable and BeanPresentationHelper
-* hibernate3 is - on special circumstances - not able to load fields with empty ('') strings
-* (v) tooltips for buttons
-* (v) check running in java 7
 * (x) permission configuration
 * waiting message - new thread, answering on finish (e.g. on generating)
 * provide last exception of log-file
-* (v) add java-compiler (tools.jar, 12MB) of jdk6
-* (v) create ide for sample project
 * ( ) use actual h2 or hsqldb
 * (-) extend layout-managment for nested beans <- extend your bean-definition with attributes of other beans.
 * (x) *generic navigation through hsql statements*
 * ( ) *bean navigation actions*
 * *ERRORS*
+** hibernate3 is - on special circumstances - not able to load fields with empty ('') strings. This results in an __java.lang.StringIndexOutOfBoundsException: String index out of range: 0__
 ** failure: presentable.layout --> simple-xml: Transform of class java.util.LinkedHashMap not supported
 ** failure: sorting numbers/currencies sorts as strings
 ** BeanPresentationHelper.defineAdditionalAttributes(): how to avoid javaassist class
-** presentation not written to xml
+** presentation not written to xml --> see first failure
+** every bean gets a new beandef copy with copies of attributedefs --> attributedef evaluations for every bean!
 * hibernate-tools generates id-beans like times-->timesid.
 ** (x) check for *@Id* is no standard-java-type and environment.show.id.fields is true
 *** (x) BeanPresentationHelper fills all id-bean fields as virtuals to the main bean
+* on export, the filtered names (like id) are given --> nullpointer
+* *TESTS*
+** test on android
+** languages
+** on appserver
+
+{glossary}

@@ -234,7 +234,6 @@ public class NanoH5 extends NanoHTTPD {
         Bean<?> login = createPersistenceUnit();
 
         Workflow workflow = Environment.get(Workflow.class);
-        workflow.setLogin(login);
         
 //        Sample Workflow
 //        LinkedList<BeanAct> acts = new LinkedList<BeanAct>();
@@ -256,6 +255,7 @@ public class NanoH5 extends NanoHTTPD {
             navigationModel.push(login);
             return new EntityBrowser(navigationModel);
         } else {
+            workflow.setLogin(login);
             return workflow;
         }
     }

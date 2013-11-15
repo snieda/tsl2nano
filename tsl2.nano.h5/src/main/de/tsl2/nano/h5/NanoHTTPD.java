@@ -30,7 +30,7 @@ import de.tsl2.nano.Main;
 /**
  * A simple, tiny, nicely embeddable HTTP 1.0 (partially 1.1) server in Java
  *
- * <p> NanoHTTPD version 1.25,
+ * <p> NanoHTTPD version 1.27,
  * Copyright &copy; 2001,2005-2012 Jarno Elonen (elonen@iki.fi, http://iki.fi/elonen/)
  * and Copyright &copy; 2010 Konstantinos Togias (info@ktogias.gr, http://ktogias.gr)
  *
@@ -265,7 +265,7 @@ public class NanoHTTPD extends Main
 	 */
 	public static void main( String[] args )
 	{
-		myOut.println( "NanoHTTPD 1.25 (C) 2001,2005-2011 Jarno Elonen and (C) 2010 Konstantinos Togias\n" +
+                myOut.println( "NanoHTTPD 1.27 (C) 2001,2005-2013 Jarno Elonen and (C) 2010 Konstantinos Togias\n" +
 				"(Command line options: [-p port] [-d root-dir] [--licence])\n" );
 
 		// Defaults
@@ -324,10 +324,22 @@ public class NanoHTTPD extends Main
 				// Read the first 8192 bytes.
 				// The full header should fit in here.
 				// Apache's default header limit is 8KB.
-				int bufsize = 8192;
+                                // Do NOT assume that a single read will get the entire header at once!
+                                final int bufsize = 8192;
 				byte[] buf = new byte[bufsize];
-				int rlen = is.read(buf, 0, bufsize);
-				if (rlen <= 0) return;
+                                int splitbyte = 0;
+                                int rlen = 0;
+                                {
+                                        int read = is.read(buf, 0, bufsize);
+                                        while (read > 0)
+                                        {
+                                                rlen += read;
+                                                splitbyte = findHeaderEnd(buf, rlen);
+                                                if (splitbyte > 0)
+                                                        break;
+                                                read = is.read(buf, rlen, bufsize - rlen);
+                                        }
+                                }
 
 				// Create a BufferedReader for parsing the header.
 				ByteArrayInputStream hbis = new ByteArrayInputStream(buf, 0, rlen);
@@ -350,33 +362,20 @@ public class NanoHTTPD extends Main
 					catch (NumberFormatException ex) {}
 				}
 
-				// We are looking for the byte separating header from body.
-				// It must be the last byte of the first two sequential new lines.
-				int splitbyte = 0;
-				boolean sbfound = false;
-				while (splitbyte < rlen)
-				{
-					if (buf[splitbyte] == '\r' && buf[++splitbyte] == '\n' && buf[++splitbyte] == '\r' && buf[++splitbyte] == '\n') {
-						sbfound = true;
-						break;
-					}
-					splitbyte++;
-				}
-				splitbyte++;
-
 				// Write the part of body already read to ByteArrayOutputStream f
 				ByteArrayOutputStream f = new ByteArrayOutputStream();
-				if (splitbyte < rlen) f.write(buf, splitbyte, rlen-splitbyte);
+                                if (splitbyte < rlen)
+                                        f.write(buf, splitbyte, rlen-splitbyte);
 
 				// While Firefox sends on the first read all the data fitting
-				// our buffer, Chrome and Opera sends only the headers even if
-				// there is data for the body. So we do some magic here to find
+                                // our buffer, Chrome and Opera send only the headers even if
+                                // there is data for the body. We do some magic here to find
 				// out whether we have already consumed part of body, if we
 				// have reached the end of the data to be sent or we should
 				// expect the first byte of the body at the next read.
 				if (splitbyte < rlen)
-					size -= rlen - splitbyte +1;
-				else if (!sbfound || size == 0x7FFFFFFFFFFFFFFFl)
+                                        size -= rlen-splitbyte;
+                                else if (splitbyte==0 || size == 0x7FFFFFFFFFFFFFFFl)
 					size = 0;
 
 				// Now read all the body and write it to f
@@ -398,14 +397,18 @@ public class NanoHTTPD extends Main
 
 				// If the method is POST, there may be parameters
 				// in data section, too, read it:
-				if ( method.equalsIgnoreCase( "POST" ))
+				//13112013ts: nullpointer on method
+				if (method != null && method.equalsIgnoreCase( "POST" ))
 				{
 					String contentType = "";
 					String contentTypeHeader = header.getProperty("content-type");
-					StringTokenizer st = new StringTokenizer( contentTypeHeader , "; " );
+                                        StringTokenizer st = null;
+                                        if( contentTypeHeader != null) {
+                                                st = new StringTokenizer( contentTypeHeader , "; " );
 					if ( st.hasMoreTokens()) {
 						contentType = st.nextToken();
 					}
+                                        }
 
 					if (contentType.equalsIgnoreCase("multipart/form-data"))
 					{
@@ -437,7 +440,8 @@ public class NanoHTTPD extends Main
 					}
 				}
 
-				if ( method.equalsIgnoreCase( "PUT" ))
+                //13112013ts: nullpointer on method
+				if (method != null && method.equalsIgnoreCase( "PUT" ))
 					files.put("content", saveTmpFile( fbuf, 0, f.size()));
 
 				// Ok, now do the serve()
@@ -555,11 +559,11 @@ public class NanoHTTPD extends Main
 						{
 							sendError( HTTP_BADREQUEST, "BAD REQUEST: Content type is multipart/form-data but no content-disposition info found. Usage: GET /example/file.html" );
 						}
-						StringTokenizer st = new StringTokenizer( contentDisposition , "; " );
+                                                StringTokenizer st = new StringTokenizer( contentDisposition , ";" );
 						Properties disposition = new Properties();
 						while ( st.hasMoreTokens())
 						{
-							String token = st.nextToken();
+                                                        String token = st.nextToken().trim();
 							int p = token.indexOf( '=' );
 							if (p!=-1)
 								disposition.put( token.substring(0,p).trim().toLowerCase(), token.substring(p+1).trim());
@@ -606,6 +610,22 @@ public class NanoHTTPD extends Main
 		}
 
 		/**
+                 * Find byte index separating header from body.
+                 * It must be the last byte of the first two sequential new lines.
+                **/
+                private int findHeaderEnd(final byte[] buf, int rlen)
+                {
+                        int splitbyte = 0;
+                        while (splitbyte + 3 < rlen)
+                        {
+                                if (buf[splitbyte] == '\r' && buf[splitbyte + 1] == '\n' && buf[splitbyte + 2] == '\r' && buf[splitbyte + 3] == '\n')
+                                        return splitbyte + 4;
+                                splitbyte++;
+                        }
+                        return 0;
+                }
+
+                /**
 		 * Find the byte positions where multipart boundaries start.
 		**/
 		public int[] getBoundaryPositions(byte[] b, byte[] boundary)
@@ -690,25 +710,26 @@ public class NanoHTTPD extends Main
 		{
 			try
 			{
-				StringBuffer sb = new StringBuffer();
+                                ByteArrayOutputStream baos = new ByteArrayOutputStream();
 				for( int i=0; i<str.length(); i++ )
 				{
 					char c = str.charAt( i );
 					switch ( c )
 					{
 						case '+':
-							sb.append( ' ' );
+                                                        baos.write( (int)' ' );
 							break;
 						case '%':
-							sb.append((char)Integer.parseInt( str.substring(i+1,i+3), 16 ));
+                                                        baos.write(Integer.parseInt( str.substring(i+1,i+3), 16 ));
 							i += 2;
 							break;
 						default:
-							sb.append( c );
+                                                        baos.write( (int)c );
 							break;
 					}
 				}
-				return sb.toString();
+
+                                return new String( baos.toByteArray(), "UTF-8");
 			}
 			catch( Exception e )
 			{
@@ -738,6 +759,8 @@ public class NanoHTTPD extends Main
 				if ( sep >= 0 )
 					p.put( decodePercent( e.substring( 0, sep )).trim(),
 						   decodePercent( e.substring( sep+1 )));
+                                else
+                                        p.put( decodePercent( e ).trim(), "" );
 			}
 		}
 
@@ -829,9 +852,9 @@ public class NanoHTTPD extends Main
 				newUri += "%20";
 			else
 			{
-				newUri += URLEncoder.encode( tok );
+//				newUri += URLEncoder.encode( tok );
 				// For Java 1.4 you'll want to use this instead:
-				// try { newUri += URLEncoder.encode( tok, "UTF-8" ); } catch ( java.io.UnsupportedEncodingException uee ) {}
+				 try { newUri += URLEncoder.encode( tok, "UTF-8" ); } catch ( java.io.UnsupportedEncodingException uee ) {}
 			}
 		}
 		return newUri;
@@ -1001,6 +1024,8 @@ public class NanoHTTPD extends Main
 					{
 						res = new Response( HTTP_RANGE_NOT_SATISFIABLE, MIME_PLAINTEXT, "" );
 						res.addHeader( "Content-Range", "bytes 0-0/" + fileLen);
+                                                if ( mime.startsWith( "application/" ))
+                                                  res.addHeader( "Content-Disposition", "attachment; filename=\"" + f.getName() + "\"");
 						res.addHeader( "ETag", etag);
 					}
 					else
@@ -1019,6 +1044,8 @@ public class NanoHTTPD extends Main
 						res = new Response( HTTP_PARTIALCONTENT, mime, fis );
 						res.addHeader( "Content-Length", "" + dataLen);
 						res.addHeader( "Content-Range", "bytes " + startFrom + "-" + endAt + "/" + fileLen);
+                                                if ( mime.startsWith( "application/" ))
+                                                        res.addHeader( "Content-Disposition", "attachment; filename=\"" + f.getName() + "\"");
 						res.addHeader( "ETag", etag);
 					}
 				}
@@ -1030,6 +1057,8 @@ public class NanoHTTPD extends Main
 					{
 						res = new Response( HTTP_OK, mime, new FileInputStream( f ));
 						res.addHeader( "Content-Length", "" + fileLen);
+                                                if ( mime.startsWith( "application/" ))
+                                                        res.addHeader( "Content-Disposition", "attachment; filename=\"" + f.getName() + "\"");
 						res.addHeader( "ETag", etag);
 					}
 				}
@@ -1099,7 +1128,7 @@ public class NanoHTTPD extends Main
 	 * The distribution licence
 	 */
 	private static final String LICENCE =
-		"Copyright (C) 2001,2005-2011 by Jarno Elonen <elonen@iki.fi>\n"+
+                "Copyright (C) 2001,2005-2013 by Jarno Elonen <elonen@iki.fi>\n"+
 		"and Copyright (C) 2010 by Konstantinos Togias <info@ktogias.gr>\n"+
 		"\n"+
 		"Redistribution and use in source and binary forms, with or without\n"+
@@ -1125,4 +1154,3 @@ public class NanoHTTPD extends Main
 		"(INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE\n"+
 		"OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.";
 }
-

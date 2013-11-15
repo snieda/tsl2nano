@@ -241,8 +241,9 @@ public class HtmlUtil {
         //set up a transformer
         try {
             Transformer trans = TransformerFactory.newInstance().newTransformer();
-            trans.setOutputProperty(OutputKeys.OMIT_XML_DECLARATION, "yes");
+//            trans.setOutputProperty(OutputKeys.OMIT_XML_DECLARATION, "yes");
             trans.setOutputProperty(OutputKeys.INDENT, "yes");
+//            trans.setOutputProperty(OutputKeys.METHOD, "xml");
             trans.setOutputProperty(OutputKeys.ENCODING, "UTF-8");
 
             //create string from xml tree

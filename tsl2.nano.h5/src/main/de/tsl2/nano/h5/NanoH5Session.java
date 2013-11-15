@@ -173,15 +173,8 @@ public class NanoH5Session {
 
         convertDates(parms);
 
-        //refresh bean values
-        if (nav.current() instanceof Bean) {
-            Bean vmodel = (Bean) nav.current();
-            for (String p : parms.stringPropertyNames()) {
-                if (vmodel.hasAttribute(p)) {
-                    vmodel.setParsedValue(p, parms.getProperty(p));
-                }
-            }
-        }
+        refreshCurrentBeanValues(parms);
+        
         //follow links or fill selected items
         if (nav.current() instanceof BeanCollector) {
             //follow given link
@@ -249,6 +242,22 @@ public class NanoH5Session {
             }
         }
         return responseObject;
+    }
+
+    /**
+     * refreshCurrentBeanValues
+     * @param parms
+     */
+    private void refreshCurrentBeanValues(Properties parms) {
+        LOG.info("refreshing current bean values");
+        if (nav.current() instanceof Bean) {
+            Bean vmodel = (Bean) nav.current();
+            for (String p : parms.stringPropertyNames()) {
+                if (vmodel.hasAttribute(p)) {
+                    vmodel.setParsedValue(p, parms.getProperty(p));
+                }
+            }
+        }
     }
 
     private BeanDefinition<?> putSelectionOnStack(BeanCollector c) {
@@ -347,6 +356,7 @@ public class NanoH5Session {
      * @param parms
      */
     private void convertDates(Properties parms) {
+        LOG.info("converting dates");
         String v;
         for (String p : parms.stringPropertyNames()) {
             v = parms.getProperty(p);
