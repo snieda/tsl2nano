@@ -692,7 +692,7 @@ public class BeanCollector<COLLECTIONTYPE extends Collection<T>, T> extends Bean
                         @Override
                         public boolean eval(IPresentableColumn arg0) {
                             return (arg0.getPresentable() == null || arg0.getPresentable().isVisible()) && hasMode(MODE_SHOW_MULTIPLES)
-                                || !getAttribute(arg0.getName()).isMultiValue();
+                                || (getAttribute(arg0.getName()) != null && !getAttribute(arg0.getName()).isMultiValue());
                         }
                     });
             }
@@ -839,7 +839,7 @@ public class BeanCollector<COLLECTIONTYPE extends Collection<T>, T> extends Bean
                 List<T> rangeBeans = Arrays.asList((T) filterRange.getValue("from"), (T) filterRange.getValue("to"));
                 if (hasSearchRequestChanged == null) {
                     for (T rb : rangeBeans) {
-                        connect(Bean.getBean((Serializable) rb), rb, new CommonAction() {
+                        connect(Bean.getBean((Serializable) rb, false), rb, new CommonAction() {
                             @Override
                             public Object action() throws Exception {
                                 return hasSearchRequestChanged = true;

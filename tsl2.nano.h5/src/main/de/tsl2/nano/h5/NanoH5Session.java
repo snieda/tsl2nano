@@ -322,8 +322,8 @@ public class NanoH5Session {
         //fill the search values
         Bean<?> filterBean = model.getBeanFinder().getFilterRange();
         if (filterBean != null) {
-            Bean<?> from = (Bean<?>) filterBean.getValueAsBean("from");
-            Bean<?> to = (Bean<?>) filterBean.getValueAsBean("to");
+            Bean<?> from = (Bean<?>) filterBean.getValueAsBean("from", false);
+            Bean<?> to = (Bean<?>) filterBean.getValueAsBean("to", false);
 
             from.getPresentationHelper().change(BeanPresentationHelper.PROP_DOVALIDATION, false);
             from.setAttributeFilter("name");

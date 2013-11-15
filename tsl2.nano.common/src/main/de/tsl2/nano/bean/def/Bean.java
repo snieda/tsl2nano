@@ -21,6 +21,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import org.apache.commons.collections.map.ReferenceMap;
+
 import de.tsl2.nano.Messages;
 import de.tsl2.nano.action.IAction;
 import de.tsl2.nano.bean.BeanAttribute;
@@ -28,6 +30,7 @@ import de.tsl2.nano.bean.BeanClass;
 import de.tsl2.nano.bean.BeanContainer;
 import de.tsl2.nano.bean.BeanUtil;
 import de.tsl2.nano.collection.MapUtil;
+import de.tsl2.nano.collection.TimedReferenceMap;
 import de.tsl2.nano.exception.FormattedException;
 import de.tsl2.nano.exception.ForwardedException;
 import de.tsl2.nano.format.DefaultFormat;
@@ -121,6 +124,12 @@ public class Bean<T> extends BeanDefinition<T> {
 
     /** string representation. see {@link #toString()} */
     protected String asString;
+
+    /**
+     * hold beans only for a short time. this will enhance performance on loading a bean. holding beans to long will
+     * result in memory problems as the application may be used by many clients.
+     */
+    static final TimedReferenceMap<Bean> timedCache = new TimedReferenceMap<Bean>(ReferenceMap.WEAK, ReferenceMap.WEAK);
 
     /**
      * constructor to create a virtual bean - without an object instance. all attribute definitions must be done by
@@ -223,19 +232,26 @@ public class Bean<T> extends BeanDefinition<T> {
     }
 
     /**
+     * @see #getValueAsBean(String, boolean)
+     */
+    public BeanDefinition<?> getValueAsBean(String name) {
+        return getValueAsBean(name, true);
+    }
+    
+    /**
      * wraps the attribute value into a bean. the attribute has to be an entity.
      * 
      * @param name attribute name
      * @return new bean holding the attributes value.
      */
-    public BeanDefinition<?> getValueAsBean(String name) {
+    public BeanDefinition<?> getValueAsBean(String name, boolean cacheInstance) {
         IValueDefinition<?> attribute = getAttribute(name);
         if (BeanUtil.isStandardType(attribute.getType()) /*!BeanContainer.instance().isPersistable(attribute.getType())*/)
             throw new FormattedException("The attribute '" + name + "' is not a persistable bean");
         Serializable value = (Serializable) attribute.getValue();
         if (value == null)
             return null;
-        Bean<?> bean = value instanceof Bean ? (Bean) value : getBean(value);
+        Bean<?> bean = value instanceof Bean ? (Bean) value : getBean(value, cacheInstance);
         return bean;
     }
 
@@ -503,73 +519,7 @@ public class Bean<T> extends BeanDefinition<T> {
      * @return map filled with all attribute values
      */
     public Map<String, Object> toValueMap() {
-        return toValueMap(false, false, false);
-    }
-
-    /**
-     * fills a map with all bean-attribute-names and their values
-     * 
-     * @param useClassPrefix if true, the class-name will be used as prefix for the key
-     * @param onlySingleValues if true, collections will be ignored
-     * @param onlyFilterAttributes if true, all other than filterAttributes will be ignored
-     * @param filterAttributes attributes to be filtered (ignored, if onlyFilterAttributes)
-     * @return map filled with all attribute values
-     */
-    public Map<String, Object> toValueMap(boolean useClassPrefix,
-            boolean onlySingleValues,
-            boolean onlyFilterAttributes,
-            String... filterAttributes) {
-        final String classPrefix = useClassPrefix ? BeanAttribute.toFirstLower(instance.getClass().getSimpleName()) + "."
-            : "";
-        return toValueMap(classPrefix, onlySingleValues, onlyFilterAttributes, filterAttributes);
-    }
-
-    /**
-     * delegates to {@link #toValueMap(String, boolean, boolean, boolean, String...)} with formatted=false
-     */
-    public Map<String, Object> toValueMap(String keyPrefix,
-            boolean onlySingleValues,
-            boolean onlyFilterAttributes,
-            String... filterAttributes) {
-        return toValueMap(keyPrefix, onlySingleValues, false, onlyFilterAttributes, filterAttributes);
-    }
-
-    /**
-     * fills a map with all bean-attribute-names and their values. keys in alphabetic order.
-     * 
-     * @param keyPrefix to be used as prefix for the bean attribute name
-     * @param onlySingleValues if true, collections will be ignored
-     * @param formatted if true, not the values itself but the formatted values (strings) will be put. if no format was
-     *            defined, the {@link DefaultFormat} will be used
-     * @param onlyFilterAttributes if true, all other than filterAttributes will be ignored
-     * @param filterAttributes attributes to be filtered (ignored, if onlyFilterAttributes)
-     * @return map filled with all attribute values
-     */
-    public Map<String, Object> toValueMap(String keyPrefix,
-            boolean onlySingleValues,
-            boolean formatted,
-            boolean onlyFilteredAttributes,
-            String... filterAttributes) {
-        final List<BeanAttribute> attributes = onlySingleValues ? getSingleValueAttributes() : getAttributes();
-        if (filterAttributes.length == 0)
-            Collections.sort(attributes);
-        final Map<String, Object> map = new LinkedHashMap<String, Object>(attributes.size());
-        final List<String> filter = Arrays.asList(filterAttributes);
-        Object value;
-        for (final BeanAttribute beanAttribute : attributes) {
-            if ((onlyFilteredAttributes && filter.contains(beanAttribute.getName())) || (!onlyFilteredAttributes && !filter.contains(beanAttribute.getName()))) {
-                value = beanAttribute.getValue(instance);
-                if (formatted) {
-                    BeanValue<?> bv = (BeanValue<?>) beanAttribute;
-                    if (bv.getFormat() != null)
-                        value = bv.getFormat().format(value);
-                    else
-                        value = value != null ? value.toString() : "";
-                }
-                map.put(keyPrefix + beanAttribute.getName(), value);
-            }
-        }
-        return map;
+        return toValueMap(instance, false, false, false);
     }
 
     /**
@@ -599,7 +549,12 @@ public class Bean<T> extends BeanDefinition<T> {
         LinkedHashMap<String, IValueDefinition<?>> valueDefs = new LinkedHashMap<String, IValueDefinition<?>>(attributeDefinitions.size());
         try {
             for (IAttributeDefinition<?> attr : attributeDefinitions.values()) {
-                IValueDefinition valueDef = new BeanValue(UNDEFINED, Object.class.getMethod("getClass", new Class[0]));
+                IValueDefinition valueDef = new BeanValue(UNDEFINED, Object.class.getMethod("getClass", new Class[0])) {
+                    @Override
+                    protected void defineDefaults() {
+                        // don't set any defaults - we overwrite all members in the next step
+                    }
+                };
                 valueDefs.put(attr.getName(), copy(attr, valueDef));
             }
             return valueDefs;
@@ -629,6 +584,13 @@ public class Bean<T> extends BeanDefinition<T> {
     }
 
     /**
+     * @see #getBean(Serializable, boolean)
+     */
+    public static <I extends Serializable> Bean<I> getBean(I instanceOrName) {
+        return getBean(instanceOrName, true);
+    }
+    
+    /**
      * creates a bean with given instance or name. if you give a name, a virtual bean will be created and returned. if
      * you give an instance, a bean definition will be searched and copied to a new created bean.
      * 
@@ -636,8 +598,10 @@ public class Bean<T> extends BeanDefinition<T> {
      * @param instanceOrName an object or string (--> {@link #isVirtual()})
      * @return new created bean
      */
-    public static <I extends Serializable> Bean<I> getBean(I instanceOrName) {
-        Bean<I> bean;
+    public static <I extends Serializable> Bean<I> getBean(I instanceOrName, boolean cacheInstance) {
+        Bean<I> bean = (Bean<I>) timedCache.get(instanceOrName);
+        if (bean != null)
+            return bean;
         if (instanceOrName instanceof String) {
             BeanDefinition<I> beandef = (BeanDefinition<I>) getBeanDefinition((String) instanceOrName);
             bean = createBean((I) UNDEFINED, beandef);
@@ -645,6 +609,8 @@ public class Bean<T> extends BeanDefinition<T> {
         } else {
             BeanDefinition<I> beandef = getBeanDefinition((Class<I>) instanceOrName.getClass());
             bean = createBean(instanceOrName, beandef);
+            if (cacheInstance)
+                timedCache.put(instanceOrName, bean);
             return bean;
         }
     }
