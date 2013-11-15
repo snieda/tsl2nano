@@ -888,6 +888,10 @@ public class Html5Presentation<T> extends BeanPresentationHelper<T> implements I
             Document doc = factory.newDocumentBuilder().newDocument();
             Element html = doc.createElement(TAG_HTML);
             doc.appendChild(html);
+            
+            Element head = appendElement(html, "head");
+//            appendElement(head, "meta", "charset", "utf-8");
+            
             Element body = appendElement(html, TAG_BODY, "background", interactive ? "icons/spe.jpg" : null);
 
             Element row = appendElement(createGrid(body, null, 3), TAG_ROW);
