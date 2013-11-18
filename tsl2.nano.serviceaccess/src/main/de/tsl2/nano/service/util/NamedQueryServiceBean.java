@@ -9,6 +9,9 @@
  */
 package de.tsl2.nano.service.util;
 
+import static de.tsl2.nano.service.util.ServiceUtil.getId;
+import static de.tsl2.nano.service.util.ServiceUtil.getIdName;
+
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.UUID;
@@ -25,7 +28,6 @@ import de.tsl2.nano.bean.BeanAttribute;
 import de.tsl2.nano.bean.def.Bean;
 import de.tsl2.nano.exception.FormattedException;
 import de.tsl2.nano.util.StringUtil;
-import static de.tsl2.nano.service.util.ServiceUtil.*;
 
 /**
  * provides services to work on beans with named queries. used by {@link GenericServiceBean}.
@@ -50,7 +52,7 @@ public class NamedQueryServiceBean extends AbstractStatelessServiceBean implemen
             + namedQuery
             + "' with arguments: "
             + StringUtil.toString(args, 100));
-        Query query = entityManager.createNamedQuery(namedQuery);
+        Query query = connection().createNamedQuery(namedQuery);
         query = query.setMaxResults(getMaxResult());
         query = setParameter(query, Arrays.asList(args));
         logTrace(query);

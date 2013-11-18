@@ -132,6 +132,7 @@ public interface IGenericBaseService extends IStatelessService, INamedQueryServi
 
     /**
      * executes a given query. may contain create/alter/insert/update/delete statements.
+     * 
      * @param queryString may be a jpa-ql (nativeQuery=false!) or sql string (nativeQuery=true)
      * @param nativeQuery should only be true, if you use pure sql
      * @param args if your queryString contains parameters (represented by questionmarks ('?'), they will be
@@ -139,7 +140,7 @@ public interface IGenericBaseService extends IStatelessService, INamedQueryServi
      * @return count of changed rows
      */
     public int executeQuery(String queryString, boolean nativeQuery, Object[] args);
-    
+
     /**
      * find items by query. args are optional. if nativeQuery is true, a standard sql-query will be done
      * 
@@ -157,13 +158,21 @@ public interface IGenericBaseService extends IStatelessService, INamedQueryServi
      * 
      * @param queryString may be a jpa-ql (nativeQuery=false!) or sql string (nativeQuery=true)
      * @param nativeQuery should only be true, if you use pure sql
+     * @param startIndex (optional: set -1 to use no definition) normally 0. on paging it should be the pages*maxresult.
      * @param maxResult (optional: set -1 to use no definition) maximum result count
      * @param args if your queryString contains parameters (represented by questionmarks ('?'), they will be
      *            sequentially filled with the values of args
+     * @param hints (optional) hints like caching for special o/r mapper to be set on query.
      * @param lazyRelations (optional) one-to-many types to be filled before returning
      * @return result of query
      */
-    public Collection<?> findByQuery(String queryString, boolean nativeQuery, int maxresult, Object[] args, Class... lazyRelations);
+    public Collection<?> findByQuery(String queryString,
+            boolean nativeQuery,
+            int startIndex,
+            int maxresult,
+            Object[] args,
+            Map<String, ?> hints,
+            Class... lazyRelations);
 
     /**
      * find items by query. args are optional. if nativeQuery is true, a standard sql-query will be done
@@ -187,10 +196,11 @@ public interface IGenericBaseService extends IStatelessService, INamedQueryServi
     public Object findItemByQuery(String queryString, boolean nativeQuery, Object[] args, Class... lazyRelations);
 
     /**
-     * find one value by query - fast way to get a single value like through 'count(*)' without packing it to a bean. 
-     * BE SURE TO RETURN EXACTLY ONE VALUE! Little bit faster than {@link #findItemByQuery(String, boolean, Object[], Class...)}.
-     * args are optional. if nativeQuery is true, a standard sql-query will be done. for further
-     * informations, see {@link #findByQuery(String, boolean, Object[], Class...)}.
+     * find one value by query - fast way to get a single value like through 'count(*)' without packing it to a bean. BE
+     * SURE TO RETURN EXACTLY ONE VALUE! Little bit faster than
+     * {@link #findItemByQuery(String, boolean, Object[], Class...)}. args are optional. if nativeQuery is true, a
+     * standard sql-query will be done. for further informations, see
+     * {@link #findByQuery(String, boolean, Object[], Class...)}.
      */
     public Object findValueByQuery(String queryString, boolean nativeQuery, Object... args);
 
@@ -214,8 +224,11 @@ public interface IGenericBaseService extends IStatelessService, INamedQueryServi
 
     /** persists or merges the objects of the given collection - using one transaction. */
     public <T> Collection<T> persistCollection(Collection<T> beans, Class... lazyRelations);
-    
-    /** persists or merges the given objects - perhaps different entity types - and returns the new elements. Goal: doing that in one transaction! */
+
+    /**
+     * persists or merges the given objects - perhaps different entity types - and returns the new elements. Goal: doing
+     * that in one transaction!
+     */
     public Object[] persistAll(Object... beans);
 
     /** refreshes the given object - reloads it in the current transaction / session! */

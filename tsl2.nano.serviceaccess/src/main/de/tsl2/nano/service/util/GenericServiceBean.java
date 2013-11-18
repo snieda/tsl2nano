@@ -33,17 +33,27 @@ import javax.security.auth.Subject;
 
 import de.tsl2.nano.bean.BeanAttribute;
 import de.tsl2.nano.bean.BeanClass;
+import de.tsl2.nano.collection.MapUtil;
 import de.tsl2.nano.exception.FormattedException;
 import de.tsl2.nano.exception.ForwardedException;
 import de.tsl2.nano.service.util.batch.Part;
 import de.tsl2.nano.service.util.finder.AbstractFinder;
 import de.tsl2.nano.service.util.finder.Finder;
-import de.tsl2.nano.serviceaccess.ServiceFactory;
 import de.tsl2.nano.serviceaccess.aas.principal.UserPrincipal;
 import de.tsl2.nano.util.StringUtil;
 
 /**
- * provides some basic service access methods to work with beans.
+ * provides some common and batch service access methods to work with beans.
+ * <p/>
+ * Five base services are used by all others:<br/>
+ * {@link #findByQuery(String, boolean, int, int, Object[], Map, Class...)}<br/>
+ * {@link #findById(Class, Object, Class...)}<br/>
+ * {@link #instantiateLazyRelationship(Class, Object, String[], List)}<br/>
+ * {@link #persistNoTransaction(Object, boolean, boolean, Class...)}<br/>
+ * {@link #remove(Object)}<br/>
+ * {@link #executeQuery(String, boolean, Object[])}<br/>
+ * <p/>
+ * pro
  * 
  * @author TS
  * 
@@ -69,16 +79,13 @@ public class GenericServiceBean extends NamedQueryServiceBean implements IGeneri
                 return findByNamedQuery(beanType, getNamedQueryByArguments(beanType));
         }
         final StringBuffer qStr = createStatement(beanType);
-        LOG.debug(qStr);
-        Query query = entityManager.createQuery(qStr.toString());
-        query.setFirstResult(startIndex != -1 ? startIndex : 0);
-        query = query.setMaxResults(maxResult != -1 ? maxResult : getMaxResult());
+        Map<String, ?> hints = MapUtil.asMap("org.hibernate.cacheable",
+            Boolean.TRUE,
+            "org.hibernate.readOnly",
+            Boolean.TRUE);
         //a findAll should only be done on 'configuration' tables
         //QUESTION: why does the query perform poor on activated cache????
-        query.setHint("org.hibernate.cacheable", new Boolean(true));
-        query.setHint("org.hibernate.readOnly", new Boolean(true));
-        logTrace(query);
-        return fillTree(query.getResultList(), lazyRelations);
+        return (Collection<T>) findByQuery(qStr.toString(), false, startIndex, maxResult, null, hints, lazyRelations);
     }
 
     /** {@inheritDoc} */
@@ -87,12 +94,13 @@ public class GenericServiceBean extends NamedQueryServiceBean implements IGeneri
         checkContextSecurity();
         final StringBuffer qStr = createStatement(beanType);
         addMemberExpression(qStr, holder, beanType, attributeName);
-        LOG.debug(qStr);
-        Query query = entityManager.createQuery(qStr.toString());
-        query = query.setMaxResults(getMaxResult());
-        query.setParameter(1, getId(holder));
-        logTrace(query);
-        return fillTree(query.getResultList(), lazyRelations);
+        return (Collection<T>) findByQuery(qStr.toString(),
+            false,
+            0,
+            -1,
+            new Object[] { getId(holder) },
+            null,
+            lazyRelations);
     }
 
     /** {@inheritDoc} */
@@ -106,12 +114,13 @@ public class GenericServiceBean extends NamedQueryServiceBean implements IGeneri
             + idAttribute
             + " = ? and t1 member of t."
             + attributeName);
-        LOG.debug(qStr);
-        Query query = entityManager.createQuery(qStr.toString());
-        query = query.setMaxResults(getMaxResult());
-        query.setParameter(1, getId(member));
-        logTrace(query);
-        return fillTree(query.getResultList(), lazyRelations);
+        return (Collection<H>) findByQuery(qStr.toString(),
+            false,
+            0,
+            -1,
+            new Object[] { idAttribute },
+            null,
+            lazyRelations);
     }
 
     /** {@inheritDoc} */
@@ -131,7 +140,7 @@ public class GenericServiceBean extends NamedQueryServiceBean implements IGeneri
                 return result.size() > 0 ? result.iterator().next() : null;
             }
         }
-        final T bean = entityManager.find(beanType, id);
+        final T bean = connection().find(beanType, id);
 
         if (bean == null) {
             return null;
@@ -194,13 +203,11 @@ public class GenericServiceBean extends NamedQueryServiceBean implements IGeneri
     private final Collection<Object> instantiatedEntities = new LinkedHashSet<Object>();
 
     private void fillTree(Object bean, String[] attributes, List<Class> fillTypes) {
-        //TODO: to many checks through change-history. please clean.
         final Class<?> clazz = bean.getClass();
         Object relation;
         /*
          * do we use to instantiate non-collections? we do it to fulfill any mapping strategy.
          * the checkTypesOnly is used, if no attribute names were given
-         * TODO: include the commented code after distributing kion milestone 0.7.0.
          */
         boolean checkTypesOnly = false;
         if (attributes == null) {
@@ -391,15 +398,15 @@ public class GenericServiceBean extends NamedQueryServiceBean implements IGeneri
          */
         //WORKAOURND (for TopLink!): on new items with new relations it doesn't work
 //        if (getId(bean) == null)
-//            entityManager.persist(bean);
+//            connection().persist(bean);
 //        else
-        bean = entityManager.merge(bean);
+        bean = connection().merge(bean);
 
         if (flush) {
-            entityManager.flush(); // force the SQL insert and triggers to run
+            connection().flush(); // force the SQL insert and triggers to run
         }
         if (refreshBean) {
-            entityManager.refresh(bean); //re-read the state (after the trigger executes)
+            connection().refresh(bean); //re-read the state (after the trigger executes)
         }
         return fillTree(Arrays.asList(bean), lazyRelations).iterator().next();
         // } catch (Exception ex) {
@@ -417,7 +424,7 @@ public class GenericServiceBean extends NamedQueryServiceBean implements IGeneri
         for (final T bean : beans) {
             newBeans.add(persistNoTransaction(bean, false, false, lazyRelations));
         }
-        entityManager.flush();
+        connection().flush();
         return newBeans;
     }
 
@@ -428,7 +435,7 @@ public class GenericServiceBean extends NamedQueryServiceBean implements IGeneri
         for (int i = 0; i < newBeans.length; i++) {
             newBeans[i] = persistNoTransaction(beans[i], false, false);
         }
-        entityManager.flush();
+        connection().flush();
         return newBeans;
     }
 
@@ -449,9 +456,9 @@ public class GenericServiceBean extends NamedQueryServiceBean implements IGeneri
          * first: refresh the bean. perhaps it is loaded in a transaction that was marked as rollbackonly
          */
         bean = refresh(bean);
-//        bean = entityManager.merge(bean);
-        entityManager.remove(bean);
-        entityManager.flush(); // force the SQL insert and triggers to run
+//        bean = connection().merge(bean);
+        connection().remove(bean);
+        connection().flush(); // force the SQL insert and triggers to run
         // } catch (Exception ex) {
         // //catch it and throw a new one. otherwise, the server (toplink) will
         // //catch it prints only a warning. the client would only see a
@@ -476,12 +483,12 @@ public class GenericServiceBean extends NamedQueryServiceBean implements IGeneri
     @Override
     public <T> T refresh(T bean) {
         //the following works only, if bean was loaded in the current transaction
-        //entityManager.refresh(bean);
+        //connection().refresh(bean);
 
         /*
          * reloads the bean - to be loaded in the current transaction!
          */
-        return (T) entityManager.find(bean.getClass(), getId(bean));
+        return (T) connection().find(bean.getClass(), getId(bean));
     }
 
     /** {@inheritDoc} */
@@ -517,11 +524,7 @@ public class GenericServiceBean extends NamedQueryServiceBean implements IGeneri
         checkContextSecurity();
         StringBuffer qStr = new StringBuffer();
         final Collection<?> parameter = createExampleStatement(qStr, exampleBean, useLike, caseInsensitive);
-        Query query = entityManager.createQuery(qStr.toString());
-        query = query.setMaxResults(getMaxResult());
-        query = setParameter(query, parameter);
-        logTrace(query);
-        return fillTree(query.getResultList(), lazyRelations);
+        return (Collection<T>) findByQuery(qStr.toString(), false, 0, -1, parameter.toArray(), null, lazyRelations);
     }
 
     /** {@inheritDoc} */
@@ -547,66 +550,78 @@ public class GenericServiceBean extends NamedQueryServiceBean implements IGeneri
         }
         StringBuffer qStr = new StringBuffer();
         Collection<?> parameter = createBetweenStatement(qStr, firstBean, secondBean, caseInsensitive);
-        Query query = entityManager.createQuery(qStr.toString());
-        query.setFirstResult(startIndex);
-        query = query.setMaxResults(maxResult != -1 ? maxResult : getMaxResult());
-        query = setParameter(query, parameter);
-        logTrace(query);
-        return fillTree(query.getResultList(), lazyRelations);
+        return (Collection<T>) findByQuery(qStr.toString(),
+            false,
+            startIndex,
+            maxResult,
+            parameter.toArray(),
+            null,
+            lazyRelations);
     }
 
     /** {@inheritDoc} */
     @Override
     @TransactionAttribute(TransactionAttributeType.REQUIRED)
     public int executeQuery(String queryString, boolean nativeQuery, Object[] args) {
-        checkContextSecurity();
-        Query query;
-        LOG.debug(queryString);
-        if (nativeQuery) {
-            query = entityManager.createNativeQuery(queryString);
-        } else {
-            query = entityManager.createQuery(queryString);
-        }
-        if (args != null) {
-            for (int i = 0; i < args.length; i++) {
-                //parameters are 1-based!
-                query.setParameter(i + 1, args[i]);
-            }
-        }
-        logTrace(query);
+        Query query = createQuery(queryString, nativeQuery, 0, -1, null, args);
         return query.executeUpdate();
     }
 
     /** {@inheritDoc} */
     @Override
     public Collection<?> findByQuery(String queryString, boolean nativeQuery, Object[] args, Class... lazyRelations) {
-        return findByQuery(queryString, nativeQuery, -1, args, lazyRelations);
+        return findByQuery(queryString, nativeQuery, 0, -1, args, null, lazyRelations);
     }
 
     /** {@inheritDoc} */
     @Override
     public Collection<?> findByQuery(String queryString,
             boolean nativeQuery,
+            int startIndex,
             int maxResult,
             Object[] args,
+            Map<String, ?> hints,
             Class... lazyRelations) {
+        Query query = createQuery(queryString, nativeQuery, startIndex, maxResult, hints, args);
+        return fillTree(query.getResultList(), lazyRelations);
+    }
+
+    /**
+     * createQuery
+     * 
+     * @param queryString
+     * @param nativeQuery
+     * @param startIndex
+     * @param maxResult
+     * @param hints
+     * @return
+     */
+    protected Query createQuery(String queryString,
+            boolean nativeQuery,
+            int startIndex,
+            int maxResult,
+            Map<String, ?> hints,
+            Object... args) {
         checkContextSecurity();
-        Query query;
         LOG.debug(queryString);
+        Query query;
         if (nativeQuery) {
-            query = entityManager.createNativeQuery(queryString);
+            query = connection().createNativeQuery(queryString);
         } else {
-            query = entityManager.createQuery(queryString);
+            query = connection().createQuery(queryString);
         }
+        query = query.setFirstResult(startIndex != -1 ? startIndex : 0);
         query = query.setMaxResults(maxResult != -1 ? maxResult : getMaxResult());
-        if (args != null) {
+        query = ServiceUtil.setHints(query, hints);
+
+        if (args != null && args.length > 0) {
             if (ServiceUtil.useNamedParameters(queryString))
                 query = ServiceUtil.setNamedParameters(query, args);
             else
                 query = ServiceUtil.setParameters(query, args);
         }
         logTrace(query);
-        return fillTree(query.getResultList(), lazyRelations);
+        return query;
     }
 
     /**
@@ -614,19 +629,7 @@ public class GenericServiceBean extends NamedQueryServiceBean implements IGeneri
      */
     @Override
     public Object findValueByQuery(String queryString, boolean nativeQuery, Object... args) {
-        checkContextSecurity();
-        Query query;
-        LOG.debug(queryString);
-        if (nativeQuery) {
-            query = entityManager.createNativeQuery(queryString);
-        } else {
-            query = entityManager.createQuery(queryString);
-        }
-        if (ServiceUtil.useNamedParameters(queryString))
-            query = ServiceUtil.setNamedParameters(query, args);
-        else
-            query = ServiceUtil.setParameters(query, args);
-        logTrace(query);
+        Query query = createQuery(queryString, nativeQuery, 0, -1, null, args);
         return query.getSingleResult();
     }
 
@@ -652,20 +655,11 @@ public class GenericServiceBean extends NamedQueryServiceBean implements IGeneri
             boolean nativeQuery,
             Map<String, ?> args,
             Class... lazyRelations) {
-        checkContextSecurity();
-        Query query;
-        LOG.debug(queryString);
-        if (nativeQuery) {
-            query = entityManager.createNativeQuery(queryString);
-        } else {
-            query = entityManager.createQuery(queryString);
-        }
-        query = query.setMaxResults(getMaxResult());
+        Query query = createQuery(queryString, nativeQuery, 0, -1, null);
         final Set<String> nameSet = args.keySet();
         for (final String name : nameSet) {
             query.setParameter(name, args.get(name));
         }
-        logTrace(query);
         return fillTree(query.getResultList(), lazyRelations);
     }
 
@@ -677,11 +671,13 @@ public class GenericServiceBean extends NamedQueryServiceBean implements IGeneri
         LinkedList<Object> parameter = new LinkedList<Object>();
         LinkedList<Class<Object>> lazyRelations = new LinkedList<Class<Object>>();
         String qStr = Finder.createQuery(parameter, lazyRelations, finder);
-        Query query = entityManager.createQuery(qStr);
-        query = query.setMaxResults(getMaxResult());
-        query = setParameter(query, parameter);
-        logTrace(query);
-        return fillTree(query.getResultList(), lazyRelations.toArray(new Class[0]));
+        return (Collection<T>) findByQuery(qStr,
+            false,
+            0,
+            -1,
+            parameter.toArray(),
+            null,
+            lazyRelations.toArray(new Class[0]));
     }
 
     /**
@@ -710,13 +706,6 @@ public class GenericServiceBean extends NamedQueryServiceBean implements IGeneri
             ForwardedException.forward(e);
         }
         BeanAttribute.getBeanAttribute(userEntity, userIdAttribute).setValue(transUser, userPrincipal.getName());
-        final Collection<T> bcol = findByExample(transUser, true);
-        if (bcol.size() != 1) {
-            throw new FormattedException("tsl2nano.multiple.items", new Object[] { userPrincipal.getName(),
-                userEntity,
-                userEntity });
-        }
-
-        return bcol.iterator().next();
+        return findByExample(transUser);
     }
 }

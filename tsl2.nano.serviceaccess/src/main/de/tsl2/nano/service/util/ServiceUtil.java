@@ -19,6 +19,8 @@ import java.util.Collection;
 import java.util.Date;
 import java.util.HashSet;
 import java.util.LinkedList;
+import java.util.Map;
+import java.util.Set;
 
 import javax.persistence.Column;
 import javax.persistence.EntityManager;
@@ -880,6 +882,22 @@ public class ServiceUtil {
         if (args != null) {
             for (int i = 0; i < args.length; i++) {
                 query = query.setParameter("par" + (i + 1), args[i]);
+            }
+        }
+        return query;
+    }
+
+    /**
+     * setHints
+     * @param query to set hints for
+     * @param hints (optional) hints to set
+     * @return changed query
+     */
+    public static Query setHints(Query query, Map<String, ?> hints) {
+        if (hints != null) {
+            Set<String> keySet = hints.keySet();
+            for (String hint : keySet) {
+                query = query.setHint(hint, hints.get(hint));
             }
         }
         return query;

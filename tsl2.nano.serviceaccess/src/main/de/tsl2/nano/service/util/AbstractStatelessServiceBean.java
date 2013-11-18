@@ -55,6 +55,14 @@ abstract public class AbstractStatelessServiceBean implements IStatelessService 
     private SessionContext sessionContext;
 
     /**
+     * encapsulates the entity manager to be exchangable. don't call the entity manager directly!
+     * @return
+     */
+    public EntityManager connection() {
+        return entityManager;
+    }
+    
+    /**
      * in your business session beans you will use declarative security checks through annotations like
      * <code>@javax.annotation.security.RolesAllowed(IAktenService.ROLE_AKTE_SUCHEN)</code>. in generic services, you
      * will do dynamic security checks through the resource of the sessioncontext.
@@ -181,7 +189,7 @@ abstract public class AbstractStatelessServiceBean implements IStatelessService 
      */
     protected int getMaxResult() {
         if (maxresult == null) {
-            LOG.info("EntityManager:\n" + StringUtil.toFormattedString(entityManager.getProperties(), 50));
+            LOG.info("EntityManager:\n" + StringUtil.toFormattedString(connection().getProperties(), 50));
             if (ServiceFactory.isInitialized()) {
                 final Properties properties = ServiceFactory.instance().getProperties();
                 maxresult = Integer.valueOf(properties.getProperty("maxresult", String.valueOf(DEFAULT_MAX_RESULT)));
@@ -200,7 +208,7 @@ abstract public class AbstractStatelessServiceBean implements IStatelessService 
      */
     protected String getLazyRelationType() {
         if (lazyRelationType == null) {
-            LOG.info("EntityManager:\n" + StringUtil.toFormattedString(entityManager.getProperties(), 50));
+            LOG.info("EntityManager:\n" + StringUtil.toFormattedString(connection().getProperties(), 50));
             if (ServiceFactory.isInitialized()) {
                 final Properties properties = ServiceFactory.instance().getProperties();
                 maxresult = Integer.valueOf(properties.getProperty("lazyrelationtype", DEFAULT_LAZY_RELATION_TYPE));
@@ -219,7 +227,7 @@ abstract public class AbstractStatelessServiceBean implements IStatelessService 
      */
     protected int getMaxRecursionLevel() {
         if (maxrecursionlevel == null) {
-            LOG.info("EntityManager:\n" + StringUtil.toFormattedString(entityManager.getProperties(), 50));
+            LOG.info("EntityManager:\n" + StringUtil.toFormattedString(connection().getProperties(), 50));
             if (ServiceFactory.isInitialized()) {
                 final Properties properties = ServiceFactory.instance().getProperties();
                 maxrecursionlevel = Integer.valueOf(properties.getProperty("maxrecusionlevel", String.valueOf(DEFAULT_MAX_RECURSION_LEVEL)));
