@@ -1,4 +1,5 @@
 package de.tsl2.nano.persistence;
+
 /*
  * File: $HeadURL$
  * Id  : $Id$
@@ -8,7 +9,6 @@ package de.tsl2.nano.persistence;
  * 
  * Copyright: (c) Thomas Schneider 2011, all rights reserved
  */
-
 
 import java.io.File;
 import java.io.FileWriter;
@@ -48,6 +48,8 @@ public class Persistence implements Serializable {
     String port = "1521";
     String database = "xe";
 
+    private Replication replication;
+
     /** jdbc connection properties - used by ejb creator */
     public static final String FILE_JDBC_PROP_FILE = "jdbc-connection.properties";
     /** xml serialization of Persistence object */
@@ -57,7 +59,6 @@ public class Persistence implements Serializable {
     /** standard ejb path to load persistence unit */
     public static final String FILE_PERSISTENCE_XML = "META-INF/persistence.xml";
 
-    
     /**
      * constructor
      */
@@ -283,10 +284,19 @@ public class Persistence implements Serializable {
      * @throws IOException
      */
     public String save() throws IOException {
-        FileUtil.removeToBackup(getPath(Persistence.FILE_MYPERSISTENCE_BEAN));
-        FileUtil.saveXml(this, getPath(Persistence.FILE_MYPERSISTENCE_BEAN));
+        FileUtil.removeToBackup(getPath(getBeanFileName()));
+        FileUtil.saveXml(this, getPath(getBeanFileName()));
         saveJdbcProperties();
+        if (replication == null && Environment.get("use.database.replication", true)) {
+            replication = new Replication();
+        }
+        if (replication != null)
+            replication.save();
         return savePersistenceXml();
+    }
+
+    protected String getBeanFileName() {
+        return FILE_MYPERSISTENCE_BEAN;
     }
 
     /**
@@ -331,11 +341,28 @@ public class Persistence implements Serializable {
         /*
          * create the mypersistenc.xml
          */
-        InputStream stream = (InputStream) Thread.currentThread().getContextClassLoader()
+        InputStream stream = (InputStream) Thread.currentThread()
+            .getContextClassLoader()
             .getResource(Persistence.FILE_PERSISTENCE_XML)
             .getContent();
         String persistence_xml = String.copyValueOf(FileUtil.getFileData(stream, null));
         Map<String, Object> prop = new HashMap<String, Object>();
+        addPersistenceProperties(null, prop);
+
+        if (replication != null)
+            replication.addPersistenceProperties(this, prop);
+        persistence_xml = StringUtil.insertProperties(persistence_xml, prop);
+        FileUtil.removeToBackup(getPath(FILE_MYPERSISTENCE));
+        FileUtil.writeBytes(persistence_xml.getBytes(), getPath(FILE_MYPERSISTENCE), false);
+        return persistence_xml;
+    }
+
+    /**
+     * addPersistenceProperties
+     * 
+     * @param prop
+     */
+    void addPersistenceProperties(Persistence parent, Map<String, Object> prop) {
         prop.put("persistence-unit", getPersistenceUnit());
         prop.put("transaction-type", "RESOURCE_LOCAL");
         prop.put("provider", getProvider());
@@ -346,10 +373,6 @@ public class Persistence implements Serializable {
         prop.put("connection.url", getConnectionUrl());
         prop.put("connection.username", getConnectionUserName());
         prop.put("connection.password", getConnectionPassword());
-        persistence_xml = StringUtil.insertProperties(persistence_xml, prop);
-        FileUtil.removeToBackup(getPath(FILE_MYPERSISTENCE));
-        FileUtil.writeBytes(persistence_xml.getBytes(), getPath(FILE_MYPERSISTENCE), false);
-        return persistence_xml;
     }
 
     /**
@@ -377,9 +400,9 @@ public class Persistence implements Serializable {
      * @param beanjar
      * @return
      */
-    public static final boolean change(String beanjar) {
+    public final boolean change(String beanjar) {
         if (Persistence.exists()) {
-            Persistence persistence = (Persistence) FileUtil.loadXml(getPath(Persistence.FILE_MYPERSISTENCE_BEAN));
+            Persistence persistence = (Persistence) FileUtil.loadXml(getPath(getBeanFileName()));
             persistence.setJarFile(beanjar);
             try {
                 persistence.save();
@@ -389,6 +412,15 @@ public class Persistence implements Serializable {
             }
         }
         return false;
+    }
+
+    
+    public Replication getReplication() {
+        return replication;
+    }
+
+    public void setReplication(Replication replication) {
+        this.replication = replication;
     }
 
     /**

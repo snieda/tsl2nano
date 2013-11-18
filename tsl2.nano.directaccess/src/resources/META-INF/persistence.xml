@@ -53,4 +53,33 @@
          	<!-- Glassfish End -->
 		</properties>
 	</persistence-unit>
+	<persistence-unit name="replication" transaction-type="${replication.transaction-type}">
+		<provider>${replication.provider}</provider>
+		<!-- JNDI name of the database resource to use -->
+		<!-- <jta-data-source>${replication.jta-data-source}</jta-data-source> -->
+
+		<jar-file>${replication.jar-file}</jar-file>
+        <exclude-unlisted-classes>false</exclude-unlisted-classes>
+	    <shared-cache-mode>ENABLE_SELECTIVE</shared-cache-mode>
+
+		<properties>
+         	<!-- Hibernate Properties -->
+	        <property name="hibernate.connection.driver_class" value="${replication.driver_class}"/>
+	        <property name="hibernate.connection.username" value="${replication.username}"/>
+	        <property name="hibernate.connection.url" value="${replication.url}"/>
+	        <property name="hibernate.connection.password" value="${replication.password}"/>
+			<property name="hibernate.archive.autodetection" value="class"/>
+			<!-- <property name="hibernate.ejb.cfgfile" value="/hibernate.cfg.xml" /> -->
+			<property name="hibernate.dialect" value="${replication.dialect}" />
+			<property name="hibernate.hbm2ddl.auto" value="create"/>
+			<property name="hibernate.show_sql" value="true"/>
+			<!-- <property name="hibernate.cache.provider_class" value="org.hibernate.cache.EHCacheProvider"/> -->
+			<!-- <property name="hibernate.cache.use_second_level_cache" value="false"/> -->
+			<!-- <property name="hibernate.cache.use_query_cache" value="false"/> -->
+			<!-- <property name="hibernate.generate_statistics" value="false"/> -->
+			<property name="hibernate.connection.autocommit" value="true"/>
+			<property name="hibernate.cache.use_structured_entries" value="true"/>
+			<property name="hibernate.cache.use_second_level_cache" value="true"/>
+		</properties>
+	</persistence-unit>
 </persistence>

@@ -4,17 +4,20 @@
 package de.tsl2.nano.persistence;
 
 import java.io.File;
+import java.util.Arrays;
 import java.util.Collection;
+import java.util.LinkedList;
+import java.util.List;
 
 import javax.persistence.EntityManager;
 import javax.persistence.Persistence;
 
 import org.apache.commons.logging.Log;
-import de.tsl2.nano.log.LogFactory;
 
 import de.tsl2.nano.Environment;
 import de.tsl2.nano.exception.ForwardedException;
-import de.tsl2.nano.service.util.GenericServiceBean;
+import de.tsl2.nano.log.LogFactory;
+import de.tsl2.nano.service.util.IGenericBaseService;
 
 /**
  * This service is not a real session bean - but through the given {@link EntityManager} it is possible, to do the same
@@ -22,15 +25,14 @@ import de.tsl2.nano.service.util.GenericServiceBean;
  * 
  * @author Thomas Schneider
  */
-public class GenericLocalServiceBean extends GenericServiceBean {
+public class GenericLocalServiceBean extends GenericReplicatingServiceBean {
     private static final Log LOG = LogFactory.getLog(GenericLocalServiceBean.class);
 
     /**
-	 * 
-	 */
+     * default
+     */
     public GenericLocalServiceBean() {
-        super();
-        this.entityManager = createEntityManager();
+        this(createEntityManager("genericPersistenceUnit"));
     }
 
     /**
@@ -39,17 +41,16 @@ public class GenericLocalServiceBean extends GenericServiceBean {
      * @param entityManager persistence entity manager
      */
     public GenericLocalServiceBean(EntityManager entityManager) {
-        super();
-        this.entityManager = entityManager;
+        this(entityManager, Environment.get("use.database.replication", true));
     }
 
     /**
-     * getEntityManager
+     * constructor
      * 
      * @param entityManager persistence entity manager
      */
-    public EntityManager getEntityManager() {
-        return entityManager;
+    public GenericLocalServiceBean(EntityManager entityManager, boolean createReplication) {
+        super(entityManager, createReplication);
     }
 
     /**
@@ -66,13 +67,13 @@ public class GenericLocalServiceBean extends GenericServiceBean {
      */
     @Override
     public <T> Collection<T> persistCollection(Collection<T> beans, Class... lazyRelations) {
-        entityManager.getTransaction().begin();
+        connection().getTransaction().begin();
         try {
             Collection<T> persistCollection = super.persistCollection(beans);
-            entityManager.getTransaction().commit();
+            connection().getTransaction().commit();
             return persistCollection;
         } catch (Exception ex) {
-            entityManager.getTransaction().rollback();
+            connection().getTransaction().rollback();
             ForwardedException.forward(ex);
             return null;
         }
@@ -83,13 +84,13 @@ public class GenericLocalServiceBean extends GenericServiceBean {
      */
     @Override
     public <T> T persist(T bean, boolean refreshBean, boolean flush, Class... lazyRelations) {
-        entityManager.getTransaction().begin();
+        connection().getTransaction().begin();
         try {
             T refreshObject = super.persist(bean, refreshBean, flush);
-            entityManager.getTransaction().commit();
+            connection().getTransaction().commit();
             return refreshObject;
         } catch (Exception ex) {
-            entityManager.getTransaction().rollback();
+            connection().getTransaction().rollback();
             ForwardedException.forward(ex);
             return null;
         }
@@ -100,12 +101,12 @@ public class GenericLocalServiceBean extends GenericServiceBean {
      */
     @Override
     public void remove(Object bean) {
-        entityManager.getTransaction().begin();
+        connection().getTransaction().begin();
         try {
             super.remove(bean);
-            entityManager.getTransaction().commit();
+            connection().getTransaction().commit();
         } catch (Exception ex) {
-            entityManager.getTransaction().rollback();
+            connection().getTransaction().rollback();
             ForwardedException.forward(ex);
         }
     }
@@ -115,13 +116,13 @@ public class GenericLocalServiceBean extends GenericServiceBean {
      */
     @Override
     public int executeQuery(String queryString, boolean nativeQuery, Object[] args) {
-        entityManager.getTransaction().begin();
+        connection().getTransaction().begin();
         try {
             int count = super.executeQuery(queryString, nativeQuery, args);
-            entityManager.getTransaction().commit();
+            connection().getTransaction().commit();
             return count;
         } catch (Exception ex) {
-            entityManager.getTransaction().rollback();
+            connection().getTransaction().rollback();
             ForwardedException.forward(ex);
             return -1;
         }
@@ -130,16 +131,16 @@ public class GenericLocalServiceBean extends GenericServiceBean {
     /**
      * @return application context entity manager
      */
-    public static EntityManager createEntityManager() {
+    public static EntityManager createEntityManager(String persistenceUnitName) {
         LOG.info("current application path: " + new File(System.getProperty("user.dir")).getAbsolutePath());
         /*
          * the following resource must be found:
          * GenericLocalServiceBean.class.getClassLoader().getResource("META-INF/persistence.xml");
          * so we have to 'extend' the classpath of the hibernate-lib
          */
-		Environment.assignClassloaderToCurrentThread();
+        Environment.assignClassloaderToCurrentThread();
         LOG.info("current threads classloader: " + Thread.currentThread().getContextClassLoader());
-        return Persistence.createEntityManagerFactory("genericPersistenceUnit").createEntityManager();
+        return Persistence.createEntityManagerFactory(persistenceUnitName).createEntityManager();
         // obtain the initial JNDI context
         // Context initCtx;
         // try {

@@ -153,8 +153,10 @@ public class FileServiceBean implements IGenericService {
     @Override
     public Collection<?> findByQuery(String queryString,
             boolean nativeQuery,
+            int startIndex,
             int maxresult,
             Object[] args,
+            Map<String, ?> hints,
             Class... lazyRelations) {
         throw new UnsupportedOperationException();
     }

@@ -1,0 +1,5 @@
+CREATE SCHEMA PUBLIC AUTHORIZATION DBA
+CREATE USER ${replication.username} PASSWORD "${replication.password}"
+GRANT DBA TO ${replication.username}
+SET WRITE_DELAY 60
+SET SCHEMA PUBLIC
