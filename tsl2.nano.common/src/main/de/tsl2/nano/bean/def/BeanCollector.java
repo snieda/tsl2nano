@@ -19,6 +19,7 @@ import java.util.Collections;
 import java.util.Comparator;
 import java.util.Date;
 import java.util.Iterator;
+import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
 import java.util.LinkedList;
 import java.util.List;
@@ -692,7 +693,7 @@ public class BeanCollector<COLLECTIONTYPE extends Collection<T>, T> extends Bean
                         @Override
                         public boolean eval(IPresentableColumn arg0) {
                             return (arg0.getPresentable() == null || arg0.getPresentable().isVisible()) && hasMode(MODE_SHOW_MULTIPLES)
-                                || (getAttribute(arg0.getName()) != null && !getAttribute(arg0.getName()).isMultiValue());
+                                || (getAttribute(arg0.getName()) == null || !getAttribute(arg0.getName()).isMultiValue());
                         }
                     });
             }
@@ -1001,8 +1002,10 @@ public class BeanCollector<COLLECTIONTYPE extends Collection<T>, T> extends Bean
             BeanDefinition<I> beandef) {
         BeanCollector<C, I> bc = new BeanCollector<C, I>();
         copy(beandef, bc, "asString");
+        //use an own map instance to be independent of changes by other beans or beancollectors.
+        bc.attributeDefinitions = new LinkedHashMap<String, IAttributeDefinition<?>>(bc.attributeDefinitions);
         bc.init(collection, new BeanFinder(beandef.getClazz()), workingMode, composition);
-        //while the deserialization was done on BeanDefinition, we have to do this step manually
+        //while deserialization was done on BeanDefinition, we have to do this step manually
         bc.initDeserializing();
         return bc;
     }

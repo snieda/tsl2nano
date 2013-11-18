@@ -344,6 +344,10 @@ public class CollectionUtil {
         return copy;
     }
 
+    public static <T> T[] copy(T[] array) {
+        return Arrays.copyOf(array, array.length);
+    }
+    
     /**
      * concatenates the given arrays into a new array of type newType
      * 

@@ -23,12 +23,14 @@ import java.util.Set;
 
 import org.apache.commons.collections.map.ReferenceMap;
 
+import de.tsl2.nano.Environment;
 import de.tsl2.nano.Messages;
 import de.tsl2.nano.action.IAction;
 import de.tsl2.nano.bean.BeanAttribute;
 import de.tsl2.nano.bean.BeanClass;
 import de.tsl2.nano.bean.BeanContainer;
 import de.tsl2.nano.bean.BeanUtil;
+import de.tsl2.nano.collection.CollectionUtil;
 import de.tsl2.nano.collection.MapUtil;
 import de.tsl2.nano.collection.TimedReferenceMap;
 import de.tsl2.nano.exception.FormattedException;
@@ -532,8 +534,9 @@ public class Bean<T> extends BeanDefinition<T> {
      */
     protected static <I extends Serializable> Bean<I> createBean(I instance, BeanDefinition<I> beandef) {
         Bean<I> bean = new Bean<I>();
-        copy(beandef, bean, "attributeDefinitions", "asString");
-        bean.attributeDefinitions = (LinkedHashMap<String, IAttributeDefinition<?>>) createValueDefintions(beandef.getAttributeDefinitions());
+        copy(beandef, bean, "attributeFilter", "attributeDefinitions", "asString");
+        bean.attributeFilter = beandef.attributeFilter != null ? CollectionUtil.copy(beandef.attributeFilter) : null;
+        bean.attributeDefinitions = (LinkedHashMap<String, IAttributeDefinition<?>>) createValueDefinitions(beandef.getAttributeDefinitions());
         bean.setInstance(instance);
         return bean;
     }
@@ -545,7 +548,7 @@ public class Bean<T> extends BeanDefinition<T> {
      * @param attributeDefinitions attributes to copy and enhance
      * @return new map holding value definitions
      */
-    protected static LinkedHashMap<String, ? extends IAttributeDefinition<?>> createValueDefintions(Map<String, IAttributeDefinition<?>> attributeDefinitions) {
+    protected static LinkedHashMap<String, ? extends IAttributeDefinition<?>> createValueDefinitions(Map<String, IAttributeDefinition<?>> attributeDefinitions) {
         LinkedHashMap<String, IValueDefinition<?>> valueDefs = new LinkedHashMap<String, IValueDefinition<?>>(attributeDefinitions.size());
         try {
             for (IAttributeDefinition<?> attr : attributeDefinitions.values()) {
@@ -609,7 +612,7 @@ public class Bean<T> extends BeanDefinition<T> {
         } else {
             BeanDefinition<I> beandef = getBeanDefinition((Class<I>) instanceOrName.getClass());
             bean = createBean(instanceOrName, beandef);
-            if (cacheInstance)
+            if (cacheInstance && Environment.get("use.bean.cache", true))
                 timedCache.put(instanceOrName, bean);
             return bean;
         }
