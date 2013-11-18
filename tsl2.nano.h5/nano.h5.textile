@@ -21,6 +21,7 @@ NanoH5 (or FullRelation) is an UI independent gui implementation framework provi
 * pre-defines formatting, validation and presentation of relations
 * pure html-5 (no javascript)
 * independent of a special o/r mapper. all o/r mappers supporting javax.persistence with an EntityManager are usable.
+* simple database replication on user-loaded data - offline working possible
 * data replication to work offline (not finished yet!)
 * full key-navigation (shortcuts)
 * framework designs interfaces and provides extendable implementations
@@ -47,12 +48,30 @@ It is possible to use an ejb container in an application server, but the default
 
 The base frameworks are grown through input of two industrial projects. the first project had to build a software fully configurable through a database. The second was a financial project.
 
+project-environments:
+* windows-xp, windows-7, windows-terminal-server, ubuntu 12
+* oracle 11, hsqldb
+* glassfish 2.1, toplink
+* jboss-eap 6.1, hibernate
+
+*What is it for?*
+
 *What this framework is not intended to be*
 
 * the web-application mode is not designed or tested for big data transfers or high network traffics.
 * at the moment, only parts of the nano frameworks are used in productive applications.
 * at the moment it is on construction - no garantee can be given for any function or feature.
 * no particular value is done for graphical design.
+
+*Usable modes*
+
+* Client/Server application
+* Web application for small user-groups
+* Standalone or through connection to an application server
+* with or without local replication database
+* Usable as Entity-Browser configuring your data
+* Usable as full-configurable application
+* Usable as full-stack framework to develop model-driven applications
 
 h3. Third Party Libraries
 
@@ -258,6 +277,20 @@ Example:<code>
 </workflow>
 
 </code>
+
+h2. Database Replication - Working Offline
+
+NOT FINISHED YET
+
+It is possible to replicate the data loaded from remote database. The replication will be done through a second persistence-unit 'replication'. For each user an own local replication database will be created.
+
+The replication is done in it's own thread to avoid conflictions with the application. The O/R mapper will create all tables through bean informations. A special bean holds the information (time, id, change-type) about the changes done by the user. All data, loaded and edited by the current user will be replicated to a local database.
+
+The replication connection is configurable like the persistence-unit is. But at the moment, only the combination hsqldb and hibernate are tested - and it's only usable without application-server!
+
+At the moment the replication hsqldb database has to started manually.
+- database: replication
+- port: 9898
 
 h2. Developing, Deploying and Debugging
 
