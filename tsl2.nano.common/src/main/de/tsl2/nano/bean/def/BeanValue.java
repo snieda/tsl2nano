@@ -13,6 +13,7 @@ import static de.tsl2.nano.bean.def.IBeanCollector.MODE_ALL;
 import static de.tsl2.nano.bean.def.IBeanCollector.MODE_ALL_SINGLE;
 import static de.tsl2.nano.bean.def.IPresentable.POSTFIX_SELECTOR;
 
+import java.io.Serializable;
 import java.lang.reflect.Method;
 import java.text.Format;
 import java.util.Arrays;
@@ -28,6 +29,7 @@ import de.tsl2.nano.Environment;
 import de.tsl2.nano.action.CommonAction;
 import de.tsl2.nano.action.IAction;
 import de.tsl2.nano.bean.BeanAttribute;
+import de.tsl2.nano.bean.BeanClass;
 import de.tsl2.nano.bean.ValueHolder;
 import de.tsl2.nano.collection.ListSet;
 import de.tsl2.nano.log.LogFactory;
@@ -339,6 +341,17 @@ public class BeanValue<T> extends AttributeDefinition<T> implements IValueDefini
      */
     public boolean isBean() {
         return instance instanceof Bean;
+    }
+
+    /**
+     * see {@link BeanClass#getActions()} and {@link BeanDefinition#isSelectable()}
+     * @param beanValue attribute to evaluate
+     * @return true, if actions are defined
+     */
+    public static boolean isSelectable(BeanValue<?> beanValue) {
+        Object v = beanValue.getValue();
+        return v != null ? Bean.getBean((Serializable) v).isSelectable()
+            : BeanDefinition.getBeanDefinition(beanValue.getType()).isSelectable();
     }
 
     /**

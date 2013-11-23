@@ -177,8 +177,15 @@ public class Bean<T> extends BeanDefinition<T> {
 
     @Override
     public Collection<IAction> getActions() {
-        if (actions == null && BeanContainer.isInitialized() && BeanContainer.instance().isPersistable(clazz))
-            addDefaultSaveAction();
+        if (actions == null) {
+            if (!isVirtual()) {
+                if (instance != null)//perhaps an extended class has actions
+                    actions = BeanClass.getActions(instance.getClass(), null);
+                if (actions.size() == 0 && BeanContainer.isInitialized()
+                    && BeanContainer.instance().isPersistable(clazz))
+                    addDefaultSaveAction();
+            }
+        }
         return super.getActions();
     }
 
@@ -239,7 +246,7 @@ public class Bean<T> extends BeanDefinition<T> {
     public BeanDefinition<?> getValueAsBean(String name) {
         return getValueAsBean(name, true);
     }
-    
+
     /**
      * wraps the attribute value into a bean. the attribute has to be an entity.
      * 
@@ -592,7 +599,7 @@ public class Bean<T> extends BeanDefinition<T> {
     public static <I extends Serializable> Bean<I> getBean(I instanceOrName) {
         return getBean(instanceOrName, true);
     }
-    
+
     /**
      * creates a bean with given instance or name. if you give a name, a virtual bean will be created and returned. if
      * you give an instance, a bean definition will be searched and copied to a new created bean.

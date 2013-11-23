@@ -31,6 +31,7 @@ import org.simpleframework.xml.Attribute;
 import org.simpleframework.xml.Default;
 import org.simpleframework.xml.DefaultType;
 
+import de.tsl2.nano.Messages;
 import de.tsl2.nano.action.CommonAction;
 import de.tsl2.nano.action.IAction;
 import de.tsl2.nano.bean.def.BeanValue;
@@ -741,8 +742,7 @@ public class BeanClass<T> implements Serializable {
      */
     public static <D> D copy(Object src, D dest, String... noCopy) {
         if (LOG.isDebugEnabled()) {
-            LOG.debug("copying all fields from "
-                + src.getClass().getSimpleName()
+            LOG.debug("copying all fields from " + src.getClass().getSimpleName()
                 + " to "
                 + dest.getClass().getSimpleName());
         }
@@ -786,13 +786,27 @@ public class BeanClass<T> implements Serializable {
      * @return all methods (wrapped into actions) starting with 'action' and having no arguments.
      */
     public Collection<IAction> getActions() {
-        final Method[] methods = clazz.getMethods();
-        final Collection<IAction> actions = new ArrayList<IAction>();
+        return getActions(clazz, null);
+    }
+
+    /**
+     * getBeanActions
+     * 
+     * @param clazz class to analyze
+     * @param actions (optional) collection to be filled with actions
+     * @return all public methods (wrapped into actions) starting with 'action' and having no arguments.
+     */
+    public static Collection<IAction> getActions(Class<?> clazz, Collection<IAction> actions) {
+        final Method[] methods = getDefiningClass(clazz).getMethods();
+        if (actions == null)
+            actions = new ArrayList<IAction>();
         for (int i = 0; i < methods.length; i++) {
             if (methods[i].getName().startsWith(ACTION_PREFIX) && methods[i].getParameterTypes().length == 0) {
                 final Method m = methods[i];
                 final String name = m.getName().substring(ACTION_PREFIX.length());
-                actions.add(new CommonAction<Object>(m.toGenericString(), name, m.toGenericString()) {
+                actions.add(new CommonAction<Object>(m.toGenericString(),
+                    name,
+                    Messages.getStringOpt(m.toGenericString())) {
                     @Override
                     public Object action() throws Exception {
                         return m.invoke(getParameter()[0], new Object[0]);
@@ -813,6 +827,15 @@ public class BeanClass<T> implements Serializable {
      */
     public static boolean isAssignableFrom(Class<?> cls1, Class<?> cls2) {
         return PrimitiveUtil.isAssignableFrom(cls1, cls2);
+    }
+
+    /**
+     * isFinal
+     * 
+     * @return true, if given type is final
+     */
+    public boolean isFinal() {
+        return Modifier.isFinal(clazz.getModifiers());
     }
 
     /**

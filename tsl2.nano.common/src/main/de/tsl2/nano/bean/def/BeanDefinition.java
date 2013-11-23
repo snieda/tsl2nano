@@ -451,10 +451,22 @@ public class BeanDefinition<T> extends BeanClass<T> implements Serializable {
     }
 
     /**
+     * the bean is selectable, if it has at least one action to do on it.
+     * @return true, if an action was defined
+     */
+    public boolean isSelectable() {
+        return !isFinal() && getActions().size() > 0;
+    }
+    
+    /**
      * @return Returns the actions.
      */
     @Override
     public Collection<IAction> getActions() {
+        if (actions == null) {
+            //load entity actions (methods starting with 'action')
+            actions = super.getActions();
+        }
         return actions;
     }
 
