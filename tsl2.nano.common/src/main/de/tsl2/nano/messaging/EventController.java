@@ -11,7 +11,7 @@ package de.tsl2.nano.messaging;
 
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.Map;
 
 /**
@@ -22,6 +22,7 @@ import java.util.Map;
  * @author Thomas Schneider
  * @version $Revision$
  */
+@SuppressWarnings({"rawtypes", "unchecked"})
 public class EventController {
     /** all registered value change listeners */
 //    private Collection<IListener> listener;
@@ -37,7 +38,7 @@ public class EventController {
      */
     protected final <T> Collection<IListener> listener(Class<T> eventType) {
         if (listener == null) {
-            listener = new HashMap<Class, Collection<IListener>>();
+            listener = new LinkedHashMap<Class, Collection<IListener>>();
         }
 
         Class<?> type = onlyObjectListeners ? Object.class : eventType;
@@ -126,7 +127,8 @@ public class EventController {
      * @param e new event to be fired.
      */
     public void fireEvent(Object e) {
-        Collection<IListener> listeners = listener(e.getClass());
+        //use a copy of listeners to avoid problems on handlers removing listeners from the list.
+        Collection<IListener> listeners = new ArrayList(listener(e.getClass()));
         for (final IListener l : listeners) {
             handle(l, e);
         }
