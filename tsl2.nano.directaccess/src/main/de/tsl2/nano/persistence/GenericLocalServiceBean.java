@@ -4,10 +4,7 @@
 package de.tsl2.nano.persistence;
 
 import java.io.File;
-import java.util.Arrays;
 import java.util.Collection;
-import java.util.LinkedList;
-import java.util.List;
 
 import javax.persistence.EntityManager;
 import javax.persistence.Persistence;
@@ -17,7 +14,7 @@ import org.apache.commons.logging.Log;
 import de.tsl2.nano.Environment;
 import de.tsl2.nano.exception.ForwardedException;
 import de.tsl2.nano.log.LogFactory;
-import de.tsl2.nano.service.util.IGenericBaseService;
+import de.tsl2.nano.persistence.replication.GenericReplicatingServiceBean;
 
 /**
  * This service is not a real session bean - but through the given {@link EntityManager} it is possible, to do the same
@@ -25,6 +22,7 @@ import de.tsl2.nano.service.util.IGenericBaseService;
  * 
  * @author Thomas Schneider
  */
+@SuppressWarnings("rawtypes")
 public class GenericLocalServiceBean extends GenericReplicatingServiceBean {
     private static final Log LOG = LogFactory.getLog(GenericLocalServiceBean.class);
 
@@ -151,7 +149,6 @@ public class GenericLocalServiceBean extends GenericReplicatingServiceBean {
         // // use factory to obtain application-managed entity manager
         // entityManager = emf.createEntityManager();
         // } catch (NamingException e) {
-        // // TODO Auto-generated catch block
         // ForwardedException.forward(e);
         // }
     }

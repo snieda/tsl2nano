@@ -41,7 +41,7 @@ public class ConfigBeanContainer extends GenericBeanContainer {
         initContainer(new ConfigBeanContainer(), classloader);
     }
 
-    protected IGenericService getService() {
+    protected IGenericService getGenService() {
         if (service == null) {
             service = new ConfigServiceBean();
         }

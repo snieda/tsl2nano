@@ -40,7 +40,7 @@ public class FileBeanContainer extends GenericBeanContainer {
         initContainer(new FileBeanContainer(), classloader);
     }
 
-    protected IGenericService getService() {
+    protected IGenericService getGenService() {
         if (service == null) {
             service = new FileServiceBean();
         }

@@ -9,36 +9,35 @@
  */
 package de.tsl2.nano.persistence;
 
-import java.util.HashMap;
-import java.util.Map;
-
 import de.tsl2.nano.bean.BeanContainer;
 import de.tsl2.nano.service.util.IGenericService;
 
 /**
  * see {@link GenericLocalServiceBean}.
  * 
- *             initializes the {@link BeanContainer} singelton, to use a hibernate session.
+ * initializes the {@link BeanContainer} singelton, to use a jpa session.
  * 
- * @author Thomas Schneider, Thomas Schneider
+ * @author Thomas Schneider
  * @version $Revision$
  */
-@SuppressWarnings({"rawtypes"})
-public class HibernateBeanContainer extends GenericBeanContainer {
-    protected Map properties = new HashMap();
-    protected IGenericService service;
+public class GenericLocalBeanContainer extends GenericBeanContainer {
 
     /**
      * initializes the standard bean container to use GenericService methods. it creates an own servicefactory using the
      * given classloader
      * 
      * @param classloader loader to be used inside the own servicefactory instance.
+     * @param checkConnection if true, the generic service will be pre-loaded to check the connection
      */
-    public static void initHibernateContainer(ClassLoader classloader) {
-        initContainer(new HibernateBeanContainer(), classloader);
+    public static void initLocalContainer(ClassLoader classloader, boolean checkConnection) {
+        GenericLocalBeanContainer container = new GenericLocalBeanContainer();
+        if (checkConnection)// pre-load the service
+            ((GenericLocalServiceBean)container.getGenService()).checkConnection(true);
+
+        initContainer(container, classloader);
     }
 
-    protected IGenericService getService() {
+    protected IGenericService getGenService() {
         if (service == null) {
 //            EntityManager entityManager = (EntityManager) getSession(false);
 //            service = new GenericLocalServiceBean(entityManager);

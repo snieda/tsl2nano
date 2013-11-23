@@ -7,15 +7,12 @@
  * 
  * Copyright: (c) Thomas Schneider 2013, all rights reserved
  */
-package de.tsl2.nano.persistence;
+package de.tsl2.nano.persistence.replication;
 
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
-import java.net.InetAddress;
 import java.net.Socket;
-import java.net.UnknownHostException;
-import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.Executors;
 
@@ -23,6 +20,7 @@ import de.tsl2.nano.Environment;
 import de.tsl2.nano.exception.ForwardedException;
 import de.tsl2.nano.execution.CompatibilityLayer;
 import de.tsl2.nano.log.LogFactory;
+import de.tsl2.nano.persistence.Persistence;
 import de.tsl2.nano.util.FileUtil;
 import de.tsl2.nano.util.StringUtil;
 
@@ -40,7 +38,7 @@ public class Replication extends Persistence implements Runnable {
     public static final String FILE_REPLICATION_BEAN = "replication-bean.xml";
 
     Map<String, Object> p;
-    
+
     /**
      * constructor
      */
@@ -60,12 +58,21 @@ public class Replication extends Persistence implements Runnable {
         database = "replication";
     }
 
+    public static Replication current() {
+        if (Persistence.exists()) {
+            return (Replication) FileUtil.loadXml(getPath(FILE_REPLICATION_BEAN));
+        } else {
+            return new Replication();
+        }
+    }
+
     /**
      * addPersistenceProperties
      * 
      * @param prop
      */
-    void addPersistenceProperties(Persistence parent, Map<String, Object> prop) {
+    @Override
+    protected void addPersistenceProperties(Persistence parent, Map<String, Object> prop) {
         database = "replication-" + parent.getConnectionUserName();
         prop.put("replication-unit", "replication");
         prop.put("replication.transaction-type", "RESOURCE_LOCAL");
@@ -78,9 +85,9 @@ public class Replication extends Persistence implements Runnable {
         prop.put("replication.database", getDatabase());
         prop.put("replication.username", parent.getConnectionUserName());
         prop.put("replication.password", parent.getConnectionPassword());
-        
+
         p = prop;
-        
+
         if (Environment.get("use.database.replication", true)) {
             startReplicationThread();
         }
@@ -90,24 +97,31 @@ public class Replication extends Persistence implements Runnable {
     protected String getBeanFileName() {
         return FILE_REPLICATION_BEAN;
     }
-    
+
+    public Object actionOk() {
+        return this;
+    }
+
     public String save() throws IOException {
         FileUtil.removeToBackup(getPath(getBeanFileName()));
         FileUtil.saveXml(this, getPath(getBeanFileName()));
         return null;
     }
-    
+
     /**
      * startReplicationThread
      */
     private void startReplicationThread() {
         try {
             //first: check, if connection available
-            Socket socket = new Socket((String)null, Integer.valueOf(getPort()));
+            Socket socket = new Socket((String) null, Integer.valueOf(getPort()));
             socket.close();
-            LogFactory.getLog(Replication.class).warn("connection localhost:" + getPort() + " already in use. can't start the replication-database!");
+            LogFactory.getLog(Replication.class).warn("connection localhost:" + getPort()
+                + " already in use. can't start the replication-database!");
         } catch (Exception e) {
-            LogFactory.getLog(Replication.class).info("starting replication database '" + database + "' on port " + port);
+            LogFactory.getLog(Replication.class).info("starting replication database '" + database
+                + "' on port "
+                + port);
             Thread replicationRunner = Executors.defaultThreadFactory().newThread(this);
             replicationRunner.setName("replication-database");
             replicationRunner.setDaemon(true);
@@ -132,7 +146,7 @@ public class Replication extends Persistence implements Runnable {
                 //hsqldb needs user in uppercase
                 p.put("replication.username", p.get("replication.username").toString().toUpperCase());
                 p.put("replication.password", p.get("replication.password").toString().toUpperCase());
-                
+
                 //some properties are twice...
                 database_script = StringUtil.insertProperties(database_script, p);
                 database_script = StringUtil.insertProperties(database_script, p);
@@ -147,6 +161,13 @@ public class Replication extends Persistence implements Runnable {
         Environment.get(CompatibilityLayer.class).runOptional("org.hsqldb.Server",
             "main",
             new Class[] { String[].class },
-            new Object[]{new String[] { "-database", database, "-port", getPort(), "-silent", "false", "-trace", "true" }});
+            new Object[] { new String[] { "-database",
+                database,
+                "-port",
+                getPort(),
+                "-silent",
+                "false",
+                "-trace",
+                "true" } });
     }
 }

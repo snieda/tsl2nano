@@ -21,6 +21,7 @@ import java.util.Properties;
 
 import de.tsl2.nano.Environment;
 import de.tsl2.nano.exception.ForwardedException;
+import de.tsl2.nano.persistence.replication.Replication;
 import de.tsl2.nano.util.FileUtil;
 import de.tsl2.nano.util.StringUtil;
 
@@ -33,22 +34,22 @@ import de.tsl2.nano.util.StringUtil;
 public class Persistence implements Serializable {
     /** serialVersionUID */
     private static final long serialVersionUID = 2360829578078838714L;
-    String persistenceUnit = "genericPersistenceUnit";
-    String transactionType = "RESOURCE_LOCAL";
-    String provider = "org.hibernate.ejb.HibernatePersistence";
-    String jtaDataSource = "<UNDEFINED>";
-    String jarFile = "";
-    String connectionDriverClass = "oracle.jdbc.OracleDriver";
-    String connectionUrl = "jdbc:oracle:thin:@localhost:1521:xe";
-    String connectionUserName = "";
-    String connectionPassword = "";
-    String hibernateDialect = "org.hibernate.dialect.Oracle10gDialect";
-    String defaultSchema = "";
-    String datasourceClass = "oracle.jdbc.pool.OracleDataSource";
-    String port = "1521";
-    String database = "xe";
+    protected String persistenceUnit = "genericPersistenceUnit";
+    protected String transactionType = "RESOURCE_LOCAL";
+    protected String provider = "org.hibernate.ejb.HibernatePersistence";
+    protected String jtaDataSource = "<UNDEFINED>";
+    protected String jarFile = "";
+    protected String connectionDriverClass = "oracle.jdbc.OracleDriver";
+    protected String connectionUrl = "jdbc:oracle:thin:@localhost:1521:xe";
+    protected String connectionUserName = "";
+    protected String connectionPassword = "";
+    protected String hibernateDialect = "org.hibernate.dialect.Oracle10gDialect";
+    protected String defaultSchema = "";
+    protected String datasourceClass = "oracle.jdbc.pool.OracleDataSource";
+    protected String port = "1521";
+    protected String database = "xe";
 
-    private Replication replication;
+    private Persistence replication;
 
     /** jdbc connection properties - used by ejb creator */
     public static final String FILE_JDBC_PROP_FILE = "jdbc-connection.properties";
@@ -63,15 +64,15 @@ public class Persistence implements Serializable {
      * constructor
      */
     public Persistence() {
-        super();
+        this(null);
     }
 
     /**
      * constructor
      */
     public Persistence(String jarFile) {
-        super();
-        this.jarFile = jarFile;
+        if (jarFile != null)
+            this.jarFile = jarFile;
     }
 
     /**
@@ -287,11 +288,6 @@ public class Persistence implements Serializable {
         FileUtil.removeToBackup(getPath(getBeanFileName()));
         FileUtil.saveXml(this, getPath(getBeanFileName()));
         saveJdbcProperties();
-        if (replication == null && Environment.get("use.database.replication", true)) {
-            replication = new Replication();
-        }
-        if (replication != null)
-            replication.save();
         return savePersistenceXml();
     }
 
@@ -362,7 +358,7 @@ public class Persistence implements Serializable {
      * 
      * @param prop
      */
-    void addPersistenceProperties(Persistence parent, Map<String, Object> prop) {
+    protected void addPersistenceProperties(Persistence parent, Map<String, Object> prop) {
         prop.put("persistence-unit", getPersistenceUnit());
         prop.put("transaction-type", "RESOURCE_LOCAL");
         prop.put("provider", getProvider());
@@ -414,8 +410,7 @@ public class Persistence implements Serializable {
         return false;
     }
 
-    
-    public Replication getReplication() {
+    public Persistence getReplication() {
         return replication;
     }
 
@@ -423,6 +418,11 @@ public class Persistence implements Serializable {
         this.replication = replication;
     }
 
+    @Override
+    public String toString() {
+        return getPersistenceUnit() + "-->" + getConnectionUrl() + "-->" + getConnectionUserName();
+    }
+    
     /**
      * returns the full workspace path for the given file
      * 
@@ -439,10 +439,14 @@ public class Persistence implements Serializable {
      * @return loaded or created instance
      */
     public static Persistence current() {
+        Persistence p;
         if (Persistence.exists()) {
-            return (Persistence) FileUtil.loadXml(getPath(FILE_MYPERSISTENCE_BEAN));
+            p = (Persistence) FileUtil.loadXml(getPath(FILE_MYPERSISTENCE_BEAN));
         } else {
-            return new Persistence();
+            p = new Persistence();
         }
+        if (p.getReplication() == null && Environment.get("use.database.replication", true))
+            p.setReplication(new Replication());
+        return p;
     }
 }

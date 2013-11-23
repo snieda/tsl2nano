@@ -54,25 +54,25 @@ public abstract class GenericBeanContainer extends BeanContainerUtil {
                 if (!new BeanClass(entityType).isAnnotationPresent(Entity.class)) {
                     return null;
                 }
-                return container.getService().findAll(entityType, startIndex, maxResult);
+                return container.getGenService().findAll(entityType, startIndex, maxResult);
             }
         };
         IAction<Collection<?>> exampleFinder = new CommonAction<Collection<?>>() {
             @Override
             public Collection<?> action() {
-                return container.getService().findByExample(parameter[0], true);
+                return container.getGenService().findByExample(parameter[0], true);
             }
         };
         IAction<Collection<?>> betweenFinder = new CommonAction<Collection<?>>() {
             @Override
             public Collection<?> action() {
-                return container.getService().findBetween(parameter[0], parameter[1], true, (Integer) parameter[2], (Integer) parameter[3]);
+                return container.getGenService().findBetween(parameter[0], parameter[1], true, (Integer) parameter[2], (Integer) parameter[3]);
             }
         };
         IAction<Collection<?>> queryFinder = new CommonAction<Collection<?>>() {
             @Override
             public Collection<?> action() {
-                return container.getService().findByQuery((String) parameter[0],
+                return container.getGenService().findByQuery((String) parameter[0],
                     (Boolean) parameter[1],
                     (Object[]) parameter[2],
                     (Class[]) parameter[3]);
@@ -83,7 +83,7 @@ public abstract class GenericBeanContainer extends BeanContainerUtil {
             public Object action() {
                 //use the weak implementation of BeanClass to avoid classloader problems!
                 if (new BeanClass(parameter[0].getClass()).isAnnotationPresent(Entity.class)) {
-                    return container.getService().instantiateLazyRelationship(parameter[0]);
+                    return container.getGenService().instantiateLazyRelationship(parameter[0]);
                 } else {
                     return parameter[0];
                 }
@@ -92,13 +92,13 @@ public abstract class GenericBeanContainer extends BeanContainerUtil {
         IAction saveAction = new CommonAction() {
             @Override
             public Object action() {
-                return container.getService().persist(parameter[0]);
+                return container.getGenService().persist(parameter[0]);
             }
         };
         IAction deleteAction = new CommonAction() {
             @Override
             public Object action() {
-                container.getService().remove(parameter[0]);
+                container.getGenService().remove(parameter[0]);
                 return null;
             }
         };
@@ -123,7 +123,7 @@ public abstract class GenericBeanContainer extends BeanContainerUtil {
         final IAction<Integer> executeAction = new CommonAction<Integer>() {
             @Override
             public Integer action() {
-                return container.getService().executeQuery((String) parameter[0],
+                return container.getGenService().executeQuery((String) parameter[0],
                     (Boolean) parameter[1],
                     (Object[]) parameter[2]);
             }
@@ -145,7 +145,7 @@ public abstract class GenericBeanContainer extends BeanContainerUtil {
         return Environment.get(IAuthorization.class).hasAccess(name, action);
     }
 
-    protected abstract IGenericService getService();
+    protected abstract IGenericService getGenService();
     
     public Object get(Object key) {
         return properties.get(key);

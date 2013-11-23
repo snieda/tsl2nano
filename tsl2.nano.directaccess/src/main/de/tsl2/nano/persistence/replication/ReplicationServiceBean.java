@@ -7,9 +7,11 @@
  * 
  * Copyright: (c) Thomas Schneider 2013, all rights reserved
  */
-package de.tsl2.nano.persistence;
+package de.tsl2.nano.persistence.replication;
 
 import javax.persistence.EntityManager;
+
+import de.tsl2.nano.persistence.GenericLocalServiceBean;
 
 /**
  * Service for persistence-unit 'replication'

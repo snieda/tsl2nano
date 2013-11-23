@@ -7,10 +7,11 @@
  * 
  * Copyright: (c) Thomas Schneider 2013, all rights reserved
  */
-package de.tsl2.nano.persistence;
+package de.tsl2.nano.persistence.replication;
 
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
@@ -19,10 +20,13 @@ import java.util.concurrent.Executors;
 import javax.ejb.TransactionAttribute;
 import javax.ejb.TransactionAttributeType;
 import javax.persistence.EntityManager;
+import javax.persistence.metamodel.EntityType;
 
 import org.apache.commons.logging.Log;
 
-import de.tsl2.nano.Environment;
+import de.tsl2.nano.bean.BeanAttribute;
+import de.tsl2.nano.bean.BeanClass;
+import de.tsl2.nano.exception.ForwardedException;
 import de.tsl2.nano.log.LogFactory;
 import de.tsl2.nano.service.util.AbstractStatelessServiceBean;
 import de.tsl2.nano.service.util.GenericServiceBean;
@@ -47,15 +51,18 @@ import de.tsl2.nano.service.util.IGenericBaseService;
 public class GenericReplicatingServiceBean extends GenericServiceBean {
 
     protected List<IGenericBaseService> replicationServices;
+    protected IGenericBaseService replication;
+    protected boolean connected = true;
+    protected boolean collectReplications = false;
 
     private static final Log LOG = LogFactory.getLog(GenericReplicatingServiceBean.class);
-    
+
     /**
      * constructor
      */
     public GenericReplicatingServiceBean(EntityManager entityManager, boolean createReplication) {
         this(entityManager, createReplication ? createStandardReplication() : new LinkedList<IGenericBaseService>());
-        
+
     }
 
     /**
@@ -79,6 +86,21 @@ public class GenericReplicatingServiceBean extends GenericServiceBean {
         return Arrays.asList((IGenericBaseService) new ReplicationServiceBean());
     }
 
+    protected IGenericBaseService getAvailableReplication() {
+        if (replication == null) {
+            for (Iterator<IGenericBaseService> it = replicationServices.iterator(); it.hasNext();) {
+                IGenericBaseService r = it.next();
+                if (checkConnection(r, false)) {
+                    replication = r;
+                    it.remove();
+                    return replication;
+                }
+            }
+            throw new IllegalStateException("No connection available!");
+        }
+        return replication;
+    }
+
     /**
      * setting default entitymanager.
      * 
@@ -91,6 +113,29 @@ public class GenericReplicatingServiceBean extends GenericServiceBean {
     @Override
     public EntityManager connection() {
         return entityManager;
+    }
+
+    public boolean checkConnection(boolean throwException) {
+        return checkConnection(this, throwException);
+    }
+
+    /**
+     * checkConnection
+     * 
+     * @param service connection
+     * @param throwException if true, the exception will be forwarded
+     * @return true, if connection could be established
+     */
+    protected boolean checkConnection(IGenericBaseService service, boolean throwException) {
+        try {
+            //TODO: which select to do...?
+//            service.executeQuery("select now()", true, new Object[0]);
+            return connected = true;
+        } catch (Exception ex) {
+            if (throwException)
+                ForwardedException.forward(ex);
+            return connected = false;
+        }
     }
 
     protected void doForReplication(Runnable replicationJob) {
@@ -108,17 +153,28 @@ public class GenericReplicatingServiceBean extends GenericServiceBean {
             Object[] args,
             Map<String, ?> hints,
             Class... lazyRelations) {
-        // TODO Auto-generated method stub
-        final Collection<?> result = super.findByQuery(queryString, nativeQuery, startIndex, maxResult, args, hints, lazyRelations);
+        final Collection<?> result;
+        if (connected) {
+            result = super.findByQuery(queryString, nativeQuery, startIndex, maxResult, args, hints, lazyRelations);
 
-        //IMPROVE: how to encapsulate this loop?
-        for (final IGenericBaseService repService : replicationServices) {
-            doForReplication(new Runnable() {
-                @Override
-                public void run() {
-                    repService.persistCollection(result);
-                }
-            });
+            //IMPROVE: how to encapsulate this loop?
+            for (final IGenericBaseService repService : replicationServices) {
+                doForReplication(new Runnable() {
+                    @Override
+                    public void run() {
+                        repService.persistCollection(result);
+                    }
+                });
+            }
+        } else {
+            //TODO: impl. mode collect
+            result = getAvailableReplication().findByQuery(queryString,
+                nativeQuery,
+                startIndex,
+                maxResult,
+                args,
+                hints,
+                lazyRelations);
         }
         return result;
     }
@@ -135,7 +191,13 @@ public class GenericReplicatingServiceBean extends GenericServiceBean {
             doForReplication(new Runnable() {
                 @Override
                 public void run() {
-                    repService.persistNoTransaction(bean, refreshBean, flush, lazyRelations);
+                    repService.persist(bean);
+                    if (!connected) {
+                        EntityType<? extends Object> entity = connection().getMetamodel().entity(bean.getClass());
+                        String idName = entity.getId(bean.getClass()).getName();
+                        Object id = BeanClass.getValue(bean, idName);
+                        repService.persist(new ReplicationChange(entity.getName(), id));
+                    }
                 }
             });
         }
