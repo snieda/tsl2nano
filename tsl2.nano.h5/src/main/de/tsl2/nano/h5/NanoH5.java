@@ -50,7 +50,7 @@ import de.tsl2.nano.h5.navigation.IBeanNavigator;
 import de.tsl2.nano.h5.navigation.Parameter;
 import de.tsl2.nano.h5.navigation.Workflow;
 import de.tsl2.nano.log.LogFactory;
-import de.tsl2.nano.persistence.HibernateBeanContainer;
+import de.tsl2.nano.persistence.GenericLocalBeanContainer;
 import de.tsl2.nano.persistence.Persistence;
 import de.tsl2.nano.persistence.PersistenceClassLoader;
 import de.tsl2.nano.script.ScriptTool;
@@ -273,7 +273,7 @@ public class NanoH5 extends NanoHTTPD {
         login.getPresentationHelper().change(BeanPresentationHelper.PROP_NULLABLE, true, "connectionPassword");
 
         login.addAction(new SecureAction<Object>("tsl2nano.login.ok") {
-
+            //TODO: ref. to persistence class
             @Override
             public Object action() throws Exception {
                 persistence.save();
@@ -397,7 +397,8 @@ public class NanoH5 extends NanoHTTPD {
         if (Environment.get("use.applicationserver", false))
             BeanContainerUtil.initGenericServices(runtimeClassloader);
         else
-            HibernateBeanContainer.initHibernateContainer(runtimeClassloader);
+            GenericLocalBeanContainer.initLocalContainer(runtimeClassloader, Environment.get("check.connection.on.login", true));
+
         Environment.addService(IBeanContainer.class, BeanContainer.instance());
 
         return beanClasses;

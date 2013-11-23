@@ -714,7 +714,7 @@ public class Html5Presentation<T> extends BeanPresentationHelper<T> implements I
 
             //create a finder button
             if (beanValue.getPresentation().getEnabler().isActive()) {
-                if (BeanContainer.isInitialized() && (BeanContainer.instance().isPersistable(beanValue.getType()) || beanValue.isMultiValue())) {
+                if (BeanValue.isSelectable(beanValue)) {
                     createAction(cell,
                         beanValue.getName() + IPresentable.POSTFIX_SELECTOR,
                         "...",
