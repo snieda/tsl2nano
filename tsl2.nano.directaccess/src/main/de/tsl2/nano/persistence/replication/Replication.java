@@ -131,7 +131,8 @@ public class Replication extends Persistence implements Runnable {
 
     @Override
     public void run() {
-        String databaseFile = getPath((String) p.get("replication.database")) + ".script";
+        String databaseName = getPath((String) p.get("replication.database"));
+        String databaseFile = databaseName + ".script";
         if (!new File(databaseFile).exists()) {
             /*
              * create hsqldb database script
@@ -162,7 +163,7 @@ public class Replication extends Persistence implements Runnable {
             "main",
             new Class[] { String[].class },
             new Object[] { new String[] { "-database",
-                database,
+                databaseName,
                 "-port",
                 getPort(),
                 "-silent",

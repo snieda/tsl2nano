@@ -9,6 +9,7 @@
  */
 package de.tsl2.nano.persistence.replication;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Iterator;
@@ -20,12 +21,16 @@ import java.util.concurrent.Executors;
 import javax.ejb.TransactionAttribute;
 import javax.ejb.TransactionAttributeType;
 import javax.persistence.EntityManager;
+import javax.persistence.ManyToOne;
+import javax.persistence.OneToMany;
+import javax.persistence.OneToOne;
 import javax.persistence.metamodel.EntityType;
 
 import org.apache.commons.logging.Log;
 
 import de.tsl2.nano.bean.BeanAttribute;
 import de.tsl2.nano.bean.BeanClass;
+import de.tsl2.nano.bean.BeanContainer;
 import de.tsl2.nano.exception.ForwardedException;
 import de.tsl2.nano.log.LogFactory;
 import de.tsl2.nano.service.util.AbstractStatelessServiceBean;
@@ -162,7 +167,9 @@ public class GenericReplicatingServiceBean extends GenericServiceBean {
                 doForReplication(new Runnable() {
                     @Override
                     public void run() {
-                        repService.persistCollection(result);
+                        LinkedList<Object> rep = new LinkedList<Object>(result);
+                        addReplicationEntities(repService, rep, rep);
+                        repService.persistCollection(rep);
                     }
                 });
             }
@@ -177,6 +184,52 @@ public class GenericReplicatingServiceBean extends GenericServiceBean {
                 lazyRelations);
         }
         return result;
+    }
+
+    /**
+     * checks recursive the given list of objects to be replicated to the given service.
+     * 
+     * @param repService service to check the new replication objects
+     * @param reps objects to be checked if already persisted
+     */
+    @SuppressWarnings({ "rawtypes", "unchecked" })
+    protected void addReplicationEntities(IGenericBaseService repService, List<Object> reps, List<Object> container) {
+        Object loadedBean;
+        BeanClass bc;
+        ArrayList<Object> replications = new ArrayList<Object>(reps);
+        List<Object> myAttrValues = new LinkedList<Object>();
+        for (Object e : replications) {
+            bc = new BeanClass(e.getClass());
+            Collection<BeanAttribute> relationAttrs = bc.findAttributes(ManyToOne.class);
+            relationAttrs.addAll(bc.findAttributes(OneToOne.class));
+            myAttrValues.clear();
+            for (BeanAttribute attr : relationAttrs) {
+                Object attrValue = attr.getValue(e);
+                if (attrValue != null && !container.contains(attrValue)) {
+                    loadedBean = repService.refresh(attrValue);
+                    if (loadedBean == null)
+                        myAttrValues.add(attrValue);
+                }
+            }
+            addReplicationEntities(repService, myAttrValues, container);
+            container.addAll(0, myAttrValues);
+            
+            //do it for oneToMany again
+//            myAttrValues.clear();
+//            relationAttrs = bc.findAttributes(OneToMany.class);
+//            for (BeanAttribute attr : relationAttrs) {
+//                Collection<Object> oneToMany = (Collection<Object>) attr.getValue(e);
+//                for (Object item : oneToMany) {
+//                    if (item != null && !container.contains(item)) {
+//                        loadedBean = repService.refresh(item);
+//                        if (loadedBean == null)
+//                            myAttrValues.add(item);
+//                    }
+//                }
+//            }
+//            addReplicationEntities(repService, myAttrValues, container);
+//            container.addAll(0, myAttrValues);
+        }
     }
 
     @Override

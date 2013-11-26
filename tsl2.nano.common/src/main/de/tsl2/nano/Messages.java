@@ -106,9 +106,9 @@ public class Messages {
         }
         String s = getString(key);
         if (unknown(s)) {
-            if (LOG.isTraceEnabled()) {
-                LOG.warn(key + " not found in messages.properties");
-            }
+//            if (LOG.isTraceEnabled()) {
+//                LOG.warn(key + " not found in messages.properties");
+//            }
             if (!key.endsWith(".")) {
                 int i = key.lastIndexOf(".");
                 s = key.substring(i + 1);
