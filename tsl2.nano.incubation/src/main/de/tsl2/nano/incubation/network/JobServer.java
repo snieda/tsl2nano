@@ -118,6 +118,7 @@ public class JobServer implements Runnable, Closeable {
         return loadedCommands.containsKey(ip) && loadedCommands.get(ip).contains(command);
     }
 
+    @SuppressWarnings({ "rawtypes", "unchecked" })
     public <CONTEXT extends Serializable> Future<CONTEXT> execute(String name, Callable<CONTEXT> command) {
         Socket connection = getConnection();
         LOG.info("distributing new job '" + command + "' on target " + connection);
@@ -132,11 +133,7 @@ public class JobServer implements Runnable, Closeable {
             }
             o = new ObjectOutputStream(connection.getOutputStream());
             o.writeObject(new JobContext<CONTEXT>(name, command, cl, null));
-//            o.close();
-//            ObjectInputStream in = new ObjectInputStream(connection.getInputStream());
-//            FutureTask<CONTEXT> task = (FutureTask<CONTEXT>) in.readObject();
-//            in.close();
-            return new Work(connection);
+            return new Work(name, connection);
         } catch (Exception e) {
             ForwardedException.forward(e);
             FutureTask<CONTEXT> futureTask = new FutureTask<CONTEXT>(command);

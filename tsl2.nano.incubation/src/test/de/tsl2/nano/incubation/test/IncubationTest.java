@@ -30,6 +30,7 @@ import javax.xml.stream.events.Characters;
 
 import junit.framework.Assert;
 
+import org.apache.commons.logging.Log;
 import org.junit.Test;
 
 import de.tsl2.nano.Environment;
@@ -344,8 +345,9 @@ public class IncubationTest {
     @Test
     public void testJobServer() throws Exception {
         JobServer jobServer = new JobServer();
-        jobServer.executeWait("test", new TestJob(), 200);
+        String result = jobServer.executeWait("test", new TestJob(), 5000);
         jobServer.close();
+        Assert.assertNotNull(result);
     }
     
     static void log_(String msg) {
@@ -406,7 +408,12 @@ class TRunner implements Runnable, Serializable, Comparable<TRunner> {
 class TestJob implements Callable<String>, Serializable {
     @Override
     public String call() throws Exception {
-        LogFactory.getLog(this.getClass()).info("test-work done!");
+        Log log = LogFactory.getLog(this.getClass());
+        for (int i = 0; i < 10; i++) {
+            Thread.sleep(100);
+            log.info(".");
+        }
+        log.info("test-work done!");
         return "my-test-job";
     }
     

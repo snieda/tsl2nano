@@ -1,7 +1,10 @@
 package de.tsl2.nano.incubation.network;
 
 import java.io.Serializable;
+import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
+
+import de.tsl2.nano.exception.ForwardedException;
 
 /**
  * Objects of this class will be sent from {@link JobServer}s {@link Work} to the remote {@link Worker} to check the
@@ -80,8 +83,20 @@ public class Request implements Serializable {
         case CANCELED:
             response = task.isCancelled();
             break;
+        case RESULT:
+            try {
+                response = task.get();
+            } catch (Exception e) {
+                ForwardedException.forward(e);
+            }
+            break;
         default:
             break;
         }
+    }
+
+    @Override
+    public String toString() {
+        return "Request(" + type + ": " + (response != null ? response : "no response available") + ")";
     }
 }

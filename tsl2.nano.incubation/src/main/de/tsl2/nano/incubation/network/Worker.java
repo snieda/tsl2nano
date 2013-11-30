@@ -9,6 +9,7 @@
  */
 package de.tsl2.nano.incubation.network;
 
+import java.io.IOException;
 import java.io.ObjectOutputStream;
 import java.io.ObjectInputStream;
 import java.net.Socket;
@@ -53,19 +54,30 @@ public class Worker {
             }
             FutureTask task = new FutureTask(job.getCallable());
             executor.execute(task);
-            while (!task.isCancelled() && !task.isDone()) {
-                //get the request from client
-                stream = new ObjectInputStream(socket.getInputStream());
-                Request request = (Request) stream.readObject();
-                request.createResponse(task);
-                //send it back to the client
-                ObjectOutputStream out = new ObjectOutputStream(socket.getOutputStream());
-                out.writeObject(request);
-            }
-            LOG.info("finished job " + job);
-            socket.close();
+            response(socket, task);
         } catch (Exception e) {
             ForwardedException.forward(e);
+        }
+    }
+
+    /**
+     * blocks until task is done and requestor closes the connection
+     * @param socket connection
+     * @param task executed task
+     * @throws IOException
+     * @throws ClassNotFoundException
+     */
+    private void response(Socket socket, FutureTask task) throws IOException, ClassNotFoundException {
+        ObjectInputStream stream;
+        while (socket.isConnected() && !socket.isClosed()) {
+            //get the request from client
+            stream = new ObjectInputStream(socket.getInputStream());
+            Request request = (Request) stream.readObject();
+            request.createResponse(task);
+            //send it back to the client
+            LOG.debug("sending response " + request + " for job " + task);
+            ObjectOutputStream out = new ObjectOutputStream(socket.getOutputStream());
+            out.writeObject(request);
         }
     }
 }

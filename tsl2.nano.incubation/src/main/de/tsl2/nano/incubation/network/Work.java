@@ -13,6 +13,7 @@ import static de.tsl2.nano.incubation.network.Request.CANCEL;
 import static de.tsl2.nano.incubation.network.Request.CANCELED;
 import static de.tsl2.nano.incubation.network.Request.DONE;
 
+import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.net.Socket;
@@ -34,6 +35,7 @@ import de.tsl2.nano.log.LogFactory;
  */
 public class Work<CONTEXT> implements Future<CONTEXT> {
     private static final Log LOG = LogFactory.getLog(Work.class);
+    String name;
     Socket socket;
     CONTEXT result;
     boolean done;
@@ -41,9 +43,11 @@ public class Work<CONTEXT> implements Future<CONTEXT> {
     /**
      * constructor
      * 
+     * @param name
+     * 
      * @param socket
      */
-    public Work(Socket socket) {
+    public Work(String name, Socket socket) {
         super();
         this.socket = socket;
     }
@@ -60,11 +64,11 @@ public class Work<CONTEXT> implements Future<CONTEXT> {
 
     @Override
     public boolean isDone() {
-        return connected() ? (Boolean) send(DONE).getResponse() : done;
+        return connected() ? done = (Boolean) send(DONE).getResponse() : done;
     }
 
     private boolean connected() {
-        return socket.getChannel() != null && socket.getChannel().isOpen();
+        return socket.isConnected() && !socket.isClosed();
     }
 
     @SuppressWarnings("unchecked")
@@ -99,18 +103,34 @@ public class Work<CONTEXT> implements Future<CONTEXT> {
         long maxTime = unit.toMillis(timeout);
         try {
             while (System.currentTimeMillis() - startTime < maxTime) {
+                LOG.debug("checking task " + this + "...");
                 if (isDone()) {
-                    CONTEXT result = get();
-                    LOG.info("task returning context: " + result);
+                    result = get();
+                    LOG.info("task " + this + " returning context: " + result);
                     return result;
+                } else if (isCancelled()) {
+                    LOG.info("task " + this + " was canceled");
+                    return null;
                 }
                 Thread.sleep(200);
             }
         } catch (Exception e) {
             ForwardedException.forward(e);
+        } finally {
+            if (connected())
+                try {
+                    socket.close();
+                } catch (IOException e) {
+                    //no problem, may be socket will be closed later
+                    LOG.error(e);
+                }
         }
-        //unreachable
+        LOG.info("timeout reached for task " + this);
         return null;
     }
 
+    @Override
+    public String toString() {
+        return name + " working on station " + socket.getInetAddress();
+    }
 }
