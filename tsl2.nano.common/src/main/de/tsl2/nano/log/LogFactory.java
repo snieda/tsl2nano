@@ -3,8 +3,12 @@ package de.tsl2.nano.log;
 import java.io.PrintStream;
 import java.text.MessageFormat;
 import java.util.Calendar;
+import java.util.Collections;
 import java.util.HashMap;
+import java.util.LinkedList;
+import java.util.List;
 import java.util.Map;
+import java.util.concurrent.Executors;
 
 //import de.tsl2.nano.Environment;
 import de.tsl2.nano.exception.ForwardedException;
@@ -34,7 +38,19 @@ import de.tsl2.nano.util.StringUtil;
  * @author ts
  * @version $Revision$
  */
-public abstract class LogFactory {
+public abstract class LogFactory implements Runnable {
+    static LogFactory self;
+    List<String> loggingQueue = Collections.synchronizedList(new LinkedList<String>());
+
+    final Map<String, Integer> loglevels = new HashMap<String, Integer>();
+
+    PrintStream out = System.out;
+    PrintStream err = System.err;
+
+    /** a string formatting time, 'logClass', 'state', 'message' with {@link MessageFormat} */
+    String outputformat = "%1$td:%1$tm:%1$tY %1$tT %2$s [%3$16s]: %4$s";
+    final MsgFormat msgFormat = new MsgFormat(outputformat);
+
     public static final int FATAL = 1;
     public static final int ERROR = 2;
     public static final int WARN = 4;
@@ -51,57 +67,67 @@ public abstract class LogFactory {
     static final String[] STATETXT = new String[] { "§", "§", "#", " ", "-", "-" };
 
     /** bit set of states to log. will be used in inner log class */
-    static int statesToLog = LOG_STANDARD;
-    static int defaultPckLogLevel = NumberUtil.highestOneBit(statesToLog);
+    int statesToLog = LOG_STANDARD;
+    int defaultPckLogLevel = NumberUtil.highestOneBit(statesToLog);
 
-    /** a string formatting time, 'logClass', 'state', 'message' with {@link MessageFormat} */
-    static String outputformat = "%1$td:%1$tm:%1$tY %1$tT %2$s [%3$16s]: %4$s";
     /**
      * used for formatted logging using outputformat as pattern. see {@link #log(Class, State, Object, Throwable)}. (-->
      * performance)
      */
-    static final MsgFormat msgFormat = new MsgFormat(outputformat);
-    static final Map<String, Integer> loglevels = new HashMap<String, Integer>();
-
-    static PrintStream out = System.out;
-    static PrintStream err = System.err;
-
     static final String apacheLogFactory = "org.apache.commons.logging.LogFactory";
 
-    static {
-        String logLevel = System.getProperty("tsl2.nano.log.level");
-        if ("trace".equals(logLevel))
-            statesToLog = LOG_ALL;
-        else if ("debug".equals(logLevel))
-            statesToLog = LOG_DEBUG;
-        else if ("warn".equals(logLevel))
-            statesToLog = LOG_WARN;
+    /**
+     * singelton constructor
+     */
+    private LogFactory() {
+    }
+    
+    protected static LogFactory instance() {
+        if (self == null) {
+            self = new LogFactory() {
+            };
+            Thread logger = Executors.defaultThreadFactory().newThread(self);
+            logger.setName("logger");
+            logger.setPriority(Thread.MIN_PRIORITY);
+            logger.setDaemon(true);
+            logger.start();
+        }
+        return self;
     }
 
     public static final void initializeFileLogger(String fileName, int bitsetStatesToLog) {
         try {
             //TODO use PipeReader to write to console, too
-            out = new PrintStream(fileName);
-            err = out;
-            initializeLogger(outputformat, statesToLog, out, err);
+            initializeLogger(instance().outputformat, -1, instance().out, instance().err);
         } catch (Exception e) {
             ForwardedException.forward(e);
         }
     }
 
     public static final void initializeLogger(int bitsetStatesToLog) {
-        initializeLogger(outputformat, statesToLog, out, err);
+        initializeLogger(instance().outputformat, -1, instance().out, instance().err);
     }
 
     public static final void initializeLogger(String outputFormat,
             int bitsetStatesToLog,
             PrintStream output,
             PrintStream error) {
-        outputformat = outputFormat;
-        msgFormat.applyPattern(outputformat);
-        statesToLog = bitsetStatesToLog;
-        out = output;
-        err = error;
+        instance().outputformat = outputFormat;
+        instance().msgFormat.applyPattern(outputFormat);
+        instance().statesToLog = bitsetStatesToLog;
+        instance().out = output;
+        instance().err = error;
+        if (bitsetStatesToLog == -1) {
+            String logLevel = System.getProperty("tsl2.nano.log.level");
+            if ("trace".equals(logLevel))
+                instance().statesToLog = LOG_ALL;
+            else if ("debug".equals(logLevel))
+                instance().statesToLog = LOG_DEBUG;
+            else if ("warn".equals(logLevel))
+                instance().statesToLog = LOG_WARN;
+        } else {
+            instance().statesToLog = bitsetStatesToLog;
+        }
     }
 
     /**
@@ -111,7 +137,7 @@ public abstract class LogFactory {
      *            {@link #TRACE}.
      */
     public static final void setLogLevel(int loglevel) {
-        statesToLog = loglevel;
+        instance().statesToLog = loglevel;
     }
 
     /**
@@ -121,16 +147,16 @@ public abstract class LogFactory {
      * @param loglevel bit field: {@link #FATAL}, {@link #ERROR}, {@link #WARN}, {@link #INFO}, {@link #DEBUG},
      *            {@link #TRACE}.
      */
-    public static final void setLogLevel(String packagePath, int loglevel) {
+    public final void setLogLevel(String packagePath, int loglevel) {
         loglevels.put(packagePath, loglevel);
     }
 
-    private static final boolean hasLogLevel(Class<?> logClass, int level) {
+    private final boolean hasLogLevel(Class<?> logClass, int level) {
         String path = logClass.getPackage().getName();
         return hasLogLevel(path, level);
     }
 
-    private static final boolean hasLogLevel(String path, int level) {
+    private final boolean hasLogLevel(String path, int level) {
         if (!loglevels.containsKey(path))
             if (path.indexOf('.') == -1) {
                 //TODO: create default path levels to enhance performance
@@ -174,27 +200,27 @@ public abstract class LogFactory {
             }
 
             public boolean isWarnEnabled() {
-                return isEnabled(WARN);
+                return instance().isEnabled(WARN);
             }
 
             public boolean isTraceEnabled() {
-                return isEnabled(TRACE);
+                return instance().isEnabled(TRACE);
             }
 
             public boolean isInfoEnabled() {
-                return isEnabled(INFO);
+                return instance().isEnabled(INFO);
             }
 
             public boolean isFatalEnabled() {
-                return isEnabled(FATAL);
+                return instance().isEnabled(FATAL);
             }
 
             public boolean isErrorEnabled() {
-                return isEnabled(ERROR);
+                return instance().isEnabled(ERROR);
             }
 
             public boolean isDebugEnabled() {
-                return isEnabled(DEBUG);
+                return instance().isEnabled(DEBUG);
             }
 
             public void info(Object arg0, Throwable arg1) {
@@ -237,7 +263,7 @@ public abstract class LogFactory {
      * @param state
      * @return
      */
-    protected static boolean isEnabled(int state) {
+    protected boolean isEnabled(int state) {
         return NumberUtil.hasBit(statesToLog, state);
     }
 
@@ -262,6 +288,25 @@ public abstract class LogFactory {
         log(logClass, INFO, message, null);
     }
 
+    @Override
+    public void run() {
+        String txt;
+        while (true) {
+            if (loggingQueue.size() > 0) {
+                txt = loggingQueue.remove(0);
+                out.println(txt);
+                if (out != System.out)
+                    System.out.println(txt);
+            } else {
+                try {
+                    Thread.sleep(200);
+                } catch (InterruptedException e) {
+                    ForwardedException.forward(e);
+                }
+            }
+        }
+    }
+
     /**
      * main log method. simply logs to {@link System#out} and {@link System#err}. please override this method to change
      * your output.
@@ -272,23 +317,24 @@ public abstract class LogFactory {
      * @param ex (optional) exception to log
      */
     protected static void log(Class<?> logClass, int state, Object message, Throwable ex) {
-        if (isEnabled(state) && hasLogLevel(logClass, state)) {
+        final LogFactory factory = instance();
+        if (factory.isEnabled(state) && factory.hasLogLevel(logClass, state)) {
             if (message != null) {
                 //TODO: evaluate performance of predefined pattern in MessageFormat (MsgFormat)
-                String f = String.format(outputformat,
+                String f = String.format(factory.outputformat,
                     Calendar.getInstance().getTime(),
                     state(state),
                     logClass.getSimpleName(),
                     message);
-                out.println(f);
-                if (out != System.out)
-                    System.out.println(f);
+                factory.loggingQueue.add(f);
             }
+            //on errors, we don't use the queuing thread
             if (ex != null) {
-                err.println(ex);
-                if (err != System.err)
+                factory.err.println(ex);
+                if (factory.err != System.err)
                     System.err.println(ex);
             }
         }
     }
+
 }
