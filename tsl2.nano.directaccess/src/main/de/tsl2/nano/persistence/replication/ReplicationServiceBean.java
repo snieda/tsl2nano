@@ -9,8 +9,14 @@
  */
 package de.tsl2.nano.persistence.replication;
 
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Iterator;
+import java.util.LinkedHashSet;
+
 import javax.persistence.EntityManager;
 
+import de.tsl2.nano.exception.ForwardedException;
 import de.tsl2.nano.persistence.GenericLocalServiceBean;
 
 /**
@@ -36,4 +42,34 @@ public class ReplicationServiceBean extends GenericLocalServiceBean {
     public ReplicationServiceBean(EntityManager entityManager) {
         super(entityManager, false);
     }
+
+    /**
+     * this extension tries to persist new data from source db to this replication db. the method
+     * {@link #addReplicationEntities(de.tsl2.nano.service.util.IGenericBaseService, java.util.List, java.util.List)}
+     * inserts all unpersisted relations - but in an undefined order. so we have to trie to persist the collection for
+     * several times. if no element was persisted in one loop, the trial and error job stops.
+     */
+    @Override
+    public <T> Collection<T> persistCollection(Collection<T> beans, Class... lazyRelations) {
+//        connection().getTransaction().begin();
+        final Collection<T> newBeans = new LinkedHashSet<T>(beans.size());
+        int count = beans.size() + 1;
+        while (beans.size() > 0) {
+            count = beans.size();
+            for (Iterator<T> it = beans.iterator(); it.hasNext();) {
+                T bean = it.next();
+                try {
+                    newBeans.add(persist/*NoTransaction*/(bean));//, true, true));
+                    it.remove();
+                } catch (Exception ex) {
+                    //some relations weren't saved yet - we do that hoping to find it later in the list
+                }
+            }
+            if (count == beans.size())
+                throw new RuntimeException("Replication couldn't be done on " + beans);
+        }
+//        connection().getTransaction().commit();
+        return newBeans;
+    }
+
 }
