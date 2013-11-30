@@ -725,7 +725,9 @@ public class BeanCollector<COLLECTIONTYPE extends Collection<T>, T> extends Bean
     }
 
     public Object getColumnValue(Object element, int columnIndex) {
-        IAttributeDefinition attribute = getAttribute(getColumn(columnIndex).getName());
+        return getColumnValue(element, getAttribute(getColumn(columnIndex).getName()));
+    }
+    public <V> V getColumnValue(Object element, IAttributeDefinition<V> attribute) {
         if (element == null)
             return null;
         Object value;
@@ -733,24 +735,25 @@ public class BeanCollector<COLLECTIONTYPE extends Collection<T>, T> extends Bean
             value = attribute instanceof IValueDefinition ? ((IValueDefinition) attribute).getValue()
                 : attribute.getValue(element);
         } catch (Exception e) {
-            LOG.warn("beancollector can't create a column text for column index " + columnIndex
-                + "! exception: "
+            LOG.warn("beancollector can't create a column text for column '" + attribute.getName()
+                + "'! exception: "
                 + e.toString());
             value = null;
         }
-        return value;
+        return (V) value;
     }
     
+    @Override
+    public String getColumnText(Object element, int columnIndex) {
+        return getColumnText(element, getAttribute(getColumn(columnIndex).getName()));
+    }
     /**
      * {@inheritDoc}
      */
-    @Override
-    public String getColumnText(Object element, int columnIndex) {
-        Object value = getColumnValue(element, columnIndex);
+    public String getColumnText(Object element, IAttributeDefinition<?> attribute) {
+        Object value = getColumnValue(element, attribute);
         if (value == null)
             return "";
-        IPresentableColumn column = getColumn(columnIndex);
-        IAttributeDefinition attribute = getAttribute(column.getName());
         if (attribute.getFormat() != null) {
             try {
                 return attribute.getFormat().format(value);
