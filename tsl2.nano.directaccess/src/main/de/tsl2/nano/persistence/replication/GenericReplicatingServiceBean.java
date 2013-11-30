@@ -9,6 +9,7 @@
  */
 package de.tsl2.nano.persistence.replication;
 
+import java.lang.Thread.UncaughtExceptionHandler;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
@@ -28,6 +29,7 @@ import javax.persistence.metamodel.EntityType;
 
 import org.apache.commons.logging.Log;
 
+import de.tsl2.nano.Environment;
 import de.tsl2.nano.bean.BeanAttribute;
 import de.tsl2.nano.bean.BeanClass;
 import de.tsl2.nano.bean.BeanContainer;
@@ -147,6 +149,8 @@ public class GenericReplicatingServiceBean extends GenericServiceBean {
         LOG.debug("doing replication...");
         Thread rep = Executors.defaultThreadFactory().newThread(replicationJob);
         rep.setName("replication-service-job");
+        rep.setDaemon(true);
+        rep.setUncaughtExceptionHandler(Environment.get(UncaughtExceptionHandler.class));
         rep.start();
     }
 
