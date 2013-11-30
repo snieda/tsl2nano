@@ -40,6 +40,7 @@ import de.tsl2.nano.bean.def.IPageBuilder;
 import de.tsl2.nano.bean.def.IPresentable;
 import de.tsl2.nano.collection.CollectionUtil;
 import de.tsl2.nano.collection.ListSet;
+import de.tsl2.nano.exception.ExceptionHandler;
 import de.tsl2.nano.exception.ForwardedException;
 import de.tsl2.nano.format.RegExpFormat;
 import de.tsl2.nano.h5.NanoHTTPD.Response;
@@ -64,6 +65,8 @@ public class NanoH5Session {
     ClassLoader sessionClassloader;
     InetAddress inetAddress;
     
+    ExceptionHandler exceptionHandler;
+    
     /**
      * constructor
      * @param server
@@ -80,6 +83,7 @@ public class NanoH5Session {
         this.builder = server.builder;
         this.nav = navigator;
         this.sessionClassloader = appstartClassloader;
+        this.exceptionHandler = new ExceptionHandler();
     }
 
     /**
@@ -151,7 +155,11 @@ public class NanoH5Session {
      * @return html string
      */
     private String getNextPage(Object returnCode) {
-        return builder.build(nav.next(returnCode), "", true, nav.toArray());
+        String msg = "";
+        if (exceptionHandler.hasExceptions()) {
+            msg = StringUtil.toFormattedString(exceptionHandler.clearExceptions(), 200);
+        }
+        return builder.build(nav.next(returnCode), msg, true, nav.toArray());
     }
 
     /**
