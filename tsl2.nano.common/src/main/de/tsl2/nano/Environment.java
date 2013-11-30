@@ -12,6 +12,7 @@ package de.tsl2.nano;
 import java.io.File;
 import java.io.InputStream;
 import java.io.Serializable;
+import java.lang.Thread.UncaughtExceptionHandler;
 import java.text.Format;
 import java.util.Date;
 import java.util.Hashtable;
@@ -29,6 +30,7 @@ import org.simpleframework.xml.core.Persist;
 
 import de.tsl2.nano.bean.BeanClass;
 import de.tsl2.nano.bean.BeanUtil;
+import de.tsl2.nano.exception.ExceptionHandler;
 import de.tsl2.nano.execution.CompatibilityLayer;
 import de.tsl2.nano.execution.Profiler;
 import de.tsl2.nano.execution.XmlUtil;
@@ -219,6 +221,7 @@ public class Environment {
         self.services = new Hashtable<Class<?>, Object>();
         registerBundle(PREFIX + "messages", true);
         addService(Profiler.class, Profiler.si());
+        addService(UncaughtExceptionHandler.class, new ExceptionHandler());
         addService(layer);
 //        self.persist();
     }
@@ -479,5 +482,4 @@ public class Environment {
         if (true)
             log(obj);
     }
-
 }
