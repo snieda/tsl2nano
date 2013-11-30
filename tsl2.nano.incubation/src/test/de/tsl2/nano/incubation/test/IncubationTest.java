@@ -51,6 +51,7 @@ import de.tsl2.nano.incubation.vnet.routing.Location;
 import de.tsl2.nano.incubation.vnet.routing.RoutingAStar;
 import de.tsl2.nano.incubation.vnet.workflow.ComparableMap;
 import de.tsl2.nano.incubation.vnet.workflow.VActivity;
+import de.tsl2.nano.log.LogFactory;
 import de.tsl2.nano.logictable.DefaultHeader;
 import de.tsl2.nano.logictable.EquationSolver;
 import de.tsl2.nano.logictable.LogicTable;
@@ -405,7 +406,7 @@ class TRunner implements Runnable, Serializable, Comparable<TRunner> {
 class TestJob implements Callable<String>, Serializable {
     @Override
     public String call() throws Exception {
-        System.out.println("test-work done!");
+        LogFactory.getLog(this.getClass()).info("test-work done!");
         return "my-test-job";
     }
     

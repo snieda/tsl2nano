@@ -9,13 +9,10 @@
  */
 package de.tsl2.nano.incubation.network;
 
-import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
+import java.io.ObjectInputStream;
 import java.net.Socket;
-import java.net.URL;
-import java.net.URLClassLoader;
 import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
 import java.util.concurrent.FutureTask;
 
 import org.apache.commons.logging.Log;
@@ -47,6 +44,7 @@ public class Worker {
 
             //run the transferred job
             ObjectInputStream stream = new ObjectInputStream(socket.getInputStream());
+            LOG.info("reading socket input stream: " + stream.available() + " bytes");
             JobContext<?> job = (JobContext<?>) stream.readObject();
             LOG.info("doing job " + job);
             if (job.getClassLoader() != null) {

@@ -11,30 +11,25 @@ package de.tsl2.nano.incubation.network;
 
 import java.io.Closeable;
 import java.io.IOException;
-import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.io.Serializable;
 import java.net.ServerSocket;
 import java.net.Socket;
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.Callable;
-import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 import java.util.concurrent.FutureTask;
 import java.util.concurrent.TimeUnit;
-import java.util.concurrent.TimeoutException;
 
 import javax.net.ServerSocketFactory;
 
 import org.apache.commons.logging.Log;
-import org.apache.tools.ant.taskdefs.Classloader;
 
 import de.tsl2.nano.exception.ForwardedException;
 import de.tsl2.nano.log.LogFactory;
@@ -47,7 +42,7 @@ import de.tsl2.nano.log.LogFactory;
  */
 public class JobServer implements Runnable, Closeable {
     /** local thread pool */
-    private ExecutorService localExecutorService = Executors.newCachedThreadPool();
+    private transient ExecutorService localExecutorService = Executors.newCachedThreadPool();
     /** ip adresses of registered workstations */
     private Collection<String> availableWorkstations;
     /**
@@ -133,7 +128,7 @@ public class JobServer implements Runnable, Closeable {
             //don't send class (use urlclassloader on the other side) but send object to the remote host
             //TODO: perhaps, send current classloader? the urlclassloader would have to know, which jars and pathes to load!
             if (!isLoaded(connection.getInetAddress().getHostAddress(), command.getClass())) {
-//                cl = command.getClass().getClassLoader();
+                cl = new SerializableClassLoader(command.getClass().getClassLoader());
             }
             o = new ObjectOutputStream(connection.getOutputStream());
             o.writeObject(new JobContext<CONTEXT>(name, command, cl, null));
@@ -188,5 +183,24 @@ public class JobServer implements Runnable, Closeable {
         for (Socket socket : c) {
             socket.close();
         }
+    }
+}
+class SerializableClassLoader extends ClassLoader implements Serializable {
+    /** serialVersionUID */
+    private static final long serialVersionUID = -2466479262962610559L;
+
+    /**
+     * constructor
+     */
+    public SerializableClassLoader() {
+        super();
+    }
+
+    /**
+     * constructor
+     * @param parent
+     */
+    public SerializableClassLoader(ClassLoader parent) {
+        super(parent);
     }
 }
