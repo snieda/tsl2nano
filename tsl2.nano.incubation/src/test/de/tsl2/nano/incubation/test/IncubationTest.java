@@ -9,6 +9,7 @@
  */
 package de.tsl2.nano.incubation.test;
 
+import java.io.IOException;
 import java.io.Serializable;
 import java.math.BigDecimal;
 import java.sql.Time;
@@ -23,6 +24,7 @@ import java.util.HashMap;
 import java.util.Hashtable;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.Callable;
 
 import javax.xml.stream.events.Characters;
 
@@ -36,6 +38,7 @@ import de.tsl2.nano.collection.TableList;
 import de.tsl2.nano.exception.ForwardedException;
 import de.tsl2.nano.execution.Profiler;
 import de.tsl2.nano.format.DefaultFormat;
+import de.tsl2.nano.incubation.network.JobServer;
 import de.tsl2.nano.incubation.vnet.Connection;
 import de.tsl2.nano.incubation.vnet.Cover;
 import de.tsl2.nano.incubation.vnet.ILocatable;
@@ -337,6 +340,13 @@ public class IncubationTest {
         Assert.assertEquals(new BigDecimal(90), table.get(1, 1));
     }
 
+    @Test
+    public void testJobServer() throws Exception {
+        JobServer jobServer = new JobServer();
+        jobServer.executeWait("test", new TestJob(), 200);
+        jobServer.close();
+    }
+    
     static void log_(String msg) {
         System.out.print(msg);
     }
@@ -390,4 +400,13 @@ class TRunner implements Runnable, Serializable, Comparable<TRunner> {
     public String toString() {
         return "worker";
     }
+}
+
+class TestJob implements Callable<String>, Serializable {
+    @Override
+    public String call() throws Exception {
+        System.out.println("test-work done!");
+        return "my-test-job";
+    }
+    
 }
