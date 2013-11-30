@@ -61,7 +61,7 @@ public class Worker {
     }
 
     /**
-     * blocks until task is done and requestor closes the connection
+     * blocks until task is done and requester closes the connection
      * @param socket connection
      * @param task executed task
      * @throws IOException
@@ -70,7 +70,9 @@ public class Worker {
     private void response(Socket socket, FutureTask task) throws IOException, ClassNotFoundException {
         ObjectInputStream stream;
         while (socket.isConnected() && !socket.isClosed()) {
-            //get the request from client
+            /*
+             * get the request from client. if socket was closed from remote, an EOFEception will be thrown
+             */
             stream = new ObjectInputStream(socket.getInputStream());
             Request request = (Request) stream.readObject();
             request.createResponse(task);
