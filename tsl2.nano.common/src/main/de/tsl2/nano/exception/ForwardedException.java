@@ -67,7 +67,8 @@ public class ForwardedException extends FormattedException {
             Throwable cause = getCause();
             String message = super.getMessage();
             //on java exceptions append the class-name to the message
-            String causeMsg = isJavaException(cause) ? cause.toString() : cause.getMessage();
+            String causeMsg = isJavaException(cause) || cause.getMessage() == null ? cause.toString()
+                : cause.getMessage();
             boolean msgContainsCause = false;
             if (MESSAGE_FORWARDED.equals(messageKey)) {
                 current = cause;
