@@ -10,6 +10,7 @@ This project/plugin contains base technology implementations to be evaluated for
 * caching 
 * threading with VNet (vnet package with ThreadingEventController, testing neuralnet, routing) for further informations see class _Net_ in vnet package
 * networking: a jobserver is able to distribute logic (jobs) to registered workstations in a network
+* rule engine
 * bytecode enhancing (javassist + BeanEnhancer)
 * excel-like tables: Logictable
 * math vector libary
