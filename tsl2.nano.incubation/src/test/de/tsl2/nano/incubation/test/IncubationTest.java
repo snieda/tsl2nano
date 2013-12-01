@@ -35,11 +35,14 @@ import org.junit.Test;
 
 import de.tsl2.nano.Environment;
 import de.tsl2.nano.bean.def.BeanDefinition;
+import de.tsl2.nano.collection.MapUtil;
 import de.tsl2.nano.collection.TableList;
 import de.tsl2.nano.exception.ForwardedException;
 import de.tsl2.nano.execution.Profiler;
+import de.tsl2.nano.execution.XmlUtil;
 import de.tsl2.nano.format.DefaultFormat;
 import de.tsl2.nano.incubation.network.JobServer;
+import de.tsl2.nano.incubation.rules.TechRule;
 import de.tsl2.nano.incubation.vnet.Connection;
 import de.tsl2.nano.incubation.vnet.Cover;
 import de.tsl2.nano.incubation.vnet.ILocatable;
@@ -140,7 +143,7 @@ public class IncubationTest {
         } catch (InterruptedException e) {
             ForwardedException.forward(e);
         }
-        
+
         //should output: ich habe hunger
     }
 
@@ -173,11 +176,17 @@ public class IncubationTest {
 //        net.setWorkParallel(false);
 
         //works without linking the states to each other, too!!
-        Node<VActivity<String, String>, ComparableMap<CharSequence, Object>> state0 = net.add(new Act("state0", "A&B", "A&B?C:D"));
-        Node<VActivity<String, String>, ComparableMap<CharSequence, Object>> state1 = net.addAndConnect(new Act("state1", "C", "D"),
+        Node<VActivity<String, String>, ComparableMap<CharSequence, Object>> state0 = net.add(new Act("state0",
+            "A&B",
+            "A&B?C:D"));
+        Node<VActivity<String, String>, ComparableMap<CharSequence, Object>> state1 = net.addAndConnect(new Act("state1",
+            "C",
+            "D"),
             state0.getCore(),
             state);
-        Node<VActivity<String, String>, ComparableMap<CharSequence, Object>> state2 = net.addAndConnect(new Act("state2", "D", "E"),
+        Node<VActivity<String, String>, ComparableMap<CharSequence, Object>> state2 = net.addAndConnect(new Act("state2",
+            "D",
+            "E"),
             state1.getCore(),
             state);
 
@@ -349,7 +358,23 @@ public class IncubationTest {
         jobServer.close();
         Assert.assertNotNull(result);
     }
-    
+
+    @SuppressWarnings("unchecked")
+    @Test
+    public void testRules() throws Exception {
+        TechRule<BigDecimal> rule = new TechRule<BigDecimal>("test", "A ? (x1 + 1) : (x2 * 2)", MapUtil.asMap("A",
+            Boolean.class,
+            "x1",
+            BigDecimal.class,
+            "x2",
+            BigDecimal.class));
+        BigDecimal r1 = rule.execute(MapUtil.asMap("A", true, "x1", new BigDecimal(1), "x2", new BigDecimal(2)));
+        Assert.assertEquals(new BigDecimal(2), r1);
+        BigDecimal r2 = rule.execute(MapUtil.asMap("A", false, "x1", new BigDecimal(1), "x2", new BigDecimal(2)));
+        Assert.assertEquals(new BigDecimal(4), r2);
+        XmlUtil.saveXml("test.xml", rule);
+    }
+
     static void log_(String msg) {
         System.out.print(msg);
     }
@@ -416,5 +441,5 @@ class TestJob implements Callable<String>, Serializable {
         log.info("test-work done!");
         return "my-test-job";
     }
-    
+
 }
