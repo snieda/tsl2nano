@@ -379,6 +379,11 @@ public class Environment {
         return ((Format) formatter).format(obj);
     }
 
+    /**
+     * getConfigPath
+     * @param type type to evaluate simple file name from
+     * @return default environment directory + simple class name
+     */
     public static String getConfigPath(Class<?> type) {
         return self().properties.getProperty(KEY_CONFIG_PATH) + type.getSimpleName().toLowerCase();
     }
