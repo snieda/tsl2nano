@@ -33,7 +33,7 @@ public class ConditionOperator<T> extends SOperator<T> {
      * constructor
      */
     public ConditionOperator() {
-        super();
+        this(null);
     }
 
     /**
@@ -69,6 +69,7 @@ public class ConditionOperator<T> extends SOperator<T> {
         return new FromCharSequenceConverter<T>(fmt);
     }
 
+    @SuppressWarnings("rawtypes")
     @Override
     protected void createOperations() {
         syntax.put(KEY_OPERATION, "[!&|?:]");
@@ -95,29 +96,10 @@ public class ConditionOperator<T> extends SOperator<T> {
                 return executeIf((T) parameter[1], !result);
             }
         });
-        
-        /*
-         * re-use boolean operations
-         */
-        class BooleanOP extends CommonAction<T> {
-            String operator = "&";
-            public BooleanOP(String op) {
-                operator = op;
-            }
-            @Override
-            public T action() throws Exception {
-                boolean o1 = parameter[0] instanceof Boolean ? (Boolean) parameter[0]
-                    : op.converter.to((CharSequence) parameter[0]);
-                boolean o2 = parameter[1] instanceof Boolean ? (Boolean) parameter[1]
-                        : op.converter.to((CharSequence) parameter[1]);
-                IAction<T> operation = (IAction<T>) op.operationDefs.get(operator);
-                operation.setParameter(new Object[]{o1, o2});
-                return operation.activate();
-            }
-        };
-        addOperation("&", new BooleanOP("&"));
-        addOperation("|", new BooleanOP("|"));
-        addOperation("!", new BooleanOP("!"));
+
+        addOperation("&", new TypeOP(op, Boolean.class, "&"));
+        addOperation("|", new TypeOP(op, Boolean.class, "|"));
+        addOperation("!", new TypeOP(op, Boolean.class, "!"));
     }
 
     /**
@@ -142,5 +124,32 @@ public class ConditionOperator<T> extends SOperator<T> {
             result = Boolean.FALSE;
         }
         return (T) result;
+    }
+}
+
+/*
+ * re-use boolean operations
+ */
+class TypeOP<T> extends CommonAction<T> {
+    SOperator<T> op;
+    Class<T> type;
+    String sop = "&";
+
+    public TypeOP(SOperator<T> op, Class<T> type, String sop) {
+        this.op = op;
+        this.type = type;
+        this.sop = sop;
+    }
+
+    @SuppressWarnings("unchecked")
+    @Override
+    public T action() throws Exception {
+        T o1 = (T) (type.isAssignableFrom(parameter[0].getClass()) ? (T) parameter[0]
+            : op.converter.to((CharSequence) parameter[0]));
+        T o2 = (T) (type.isAssignableFrom(parameter[1].getClass()) ? (T) parameter[1]
+            : op.converter.to((CharSequence) parameter[1]));
+        IAction<T> operation = (IAction<T>) op.operationDefs.get(sop);
+        operation.setParameter(new Object[] { o1, o2 });
+        return operation.activate();
     }
 }

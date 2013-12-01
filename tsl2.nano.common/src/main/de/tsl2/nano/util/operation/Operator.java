@@ -67,7 +67,7 @@ public abstract class Operator<INPUT, OUTPUT> {
     public static final String KEY_RESULT = "result";
 
     public Operator() {
-        super();
+        this(null, null, null);
     }
 
     /**
@@ -79,9 +79,10 @@ public abstract class Operator<INPUT, OUTPUT> {
      */
     public Operator(Class<? extends INPUT> inputClass, IConverter<INPUT, OUTPUT> converter, Map<INPUT, OUTPUT> values) {
         super();
-        this.inputType = inputClass;
+        //the default type string may result in classcast exceptions
+        this.inputType = (Class<? extends INPUT>) (inputClass != null ? inputClass : String.class);
         this.converter = converter;
-        this.values = values;
+        this.values = values != null ? values : new HashMap<INPUT, OUTPUT>();
         syntax = createSyntax();
         createOperations();
         createTermSyntax();
@@ -139,6 +140,12 @@ public abstract class Operator<INPUT, OUTPUT> {
         return values;
     }
 
+    /**
+     * resets stored values - to do the next operation
+     */
+    public void reset() {
+        getValues().clear();
+    }
     //    public OUTPUT eval(INPUT expression) {
 //        return eval(new StringBuilder(expression.toString()));
 //    }
@@ -166,7 +173,7 @@ public abstract class Operator<INPUT, OUTPUT> {
         //extract all terms
         INPUT term;
         INPUT t;
-        while (true) {
+        while (!values.containsKey(KEY_RESULT)) {
             term = extract(expression, syntax(KEY_TERM_ENCLOSED));
             if (isEmpty(term)) {
                 term = extract(expression, syntax(KEY_TERM));

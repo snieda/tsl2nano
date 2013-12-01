@@ -31,7 +31,7 @@ public class NumericOperator extends SOperator<BigDecimal> {
      * constructor
      */
     public NumericOperator() {
-        super();
+        this(null);
     }
 
     /**
