@@ -45,6 +45,7 @@ import de.tsl2.nano.incubation.network.JobServer;
 import de.tsl2.nano.incubation.rules.Constraint;
 import de.tsl2.nano.incubation.rules.ParType;
 import de.tsl2.nano.incubation.rules.Rule;
+import de.tsl2.nano.incubation.rules.RulePool;
 import de.tsl2.nano.incubation.vnet.Connection;
 import de.tsl2.nano.incubation.vnet.Cover;
 import de.tsl2.nano.incubation.vnet.ILocatable;
@@ -381,10 +382,23 @@ public class IncubationTest {
             "x2",
             ParType.NUMBER));
         rule.addConstraint("x1", new Constraint(BigDecimal.class, new BigDecimal(0), new BigDecimal(1)));
-        rule.addConstraint("result", new Constraint(BigDecimal.class, new BigDecimal(3), new BigDecimal(4)));
         BigDecimal r2 = rule.execute(MapUtil.asMap("A", false, "x1", new BigDecimal(1), "x2", new BigDecimal(2)));
         Assert.assertEquals(new BigDecimal(4), r2);
         XmlUtil.saveXml("test.xml", rule);
+        
+        RulePool pool = new RulePool();
+        pool.addRule(rule.getName(), rule);
+        Environment.addService(pool);
+        Rule<BigDecimal> ruleWithImport = new Rule<BigDecimal>("test-import", "A ? 1 + §test : (x2 * 3)", MapUtil.asMap("A",
+            Boolean.class,
+            "x1",
+            BigDecimal.class,
+            "x2",
+            BigDecimal.class));
+        rule.addConstraint("result", new Constraint(BigDecimal.class, new BigDecimal(1), new BigDecimal(4)));
+        BigDecimal r3 = ruleWithImport.execute(MapUtil.asMap("A", true, "x1", new BigDecimal(1), "x2", new BigDecimal(2)));
+        Assert.assertEquals(new BigDecimal(3), r3);
+        XmlUtil.saveXml("test-import.xml", ruleWithImport);
     }
 
     static void log_(String msg) {

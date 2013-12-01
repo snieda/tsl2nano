@@ -26,6 +26,7 @@ NanoH5 (or FullRelation) is an UI independent gui implementation framework provi
 * full key-navigation (shortcuts)
 * framework designs interfaces and provides extendable implementations
 * useable as standalone or web-service (with offline access)
+* many features through nano.common like a rule engine, network executor etc.
 * interfaces: 
 ** ddl-->beans through hibernate-tools
 ** jpa-->bean through annotation evaluation

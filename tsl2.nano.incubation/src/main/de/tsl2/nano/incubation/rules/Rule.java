@@ -19,10 +19,40 @@ import org.simpleframework.xml.Element;
 import org.simpleframework.xml.ElementMap;
 import org.simpleframework.xml.core.Commit;
 
+import de.tsl2.nano.Environment;
+import de.tsl2.nano.util.StringUtil;
 import de.tsl2.nano.util.operation.NumericConditionOperator;
 import de.tsl2.nano.util.operation.Operator;
 
 /**
+ * rule engine using operators (see {@link Operator}) for numeric and boolean values. rules can reference other rules
+ * through using '§' + name.
+ * <p/>
+ * every rule defines parameters and an operation. the parameters will be checked against the arguments given on
+ * {@link #execute(Map)}. additionally, there may be constraints for value ranges. Example:
+ * 
+ * <pre>
+ * rule = new Rule&lt;BigDecimal&gt;(&quot;test&quot;, &quot;A ? (x1 + 1) : (x2 * 2)&quot;, MapUtil.asMap(&quot;A&quot;,
+ *     ParType.BOOLEAN,
+ *     &quot;x1&quot;,
+ *     ParType.NUMBER,
+ *     &quot;x2&quot;,
+ *     ParType.NUMBER));
+ * rule.addConstraint(&quot;x1&quot;, new Constraint(BigDecimal.class, new BigDecimal(0), new BigDecimal(1)));
+ * BigDecimal r2 = rule.execute(MapUtil.asMap(&quot;A&quot;, false, &quot;x1&quot;, new BigDecimal(1), &quot;x2&quot;, new BigDecimal(2)));
+ * 
+ * or
+ * 
+ *         Rule<BigDecimal> ruleWithImport = new Rule<BigDecimal>("test-import", "A ? 1 + §test : (x2 * 3)", MapUtil.asMap("A",
+ *             Boolean.class,
+ *             "x1",
+ *             BigDecimal.class,
+ *             "x2",
+ *             BigDecimal.class));
+ * 
+ * 
+ * 
+ * </pre>
  * 
  * @author Tom, Thomas Schneider
  * @version $Revision$
@@ -58,6 +88,28 @@ public class Rule<T> {
         this.parameter = parameter;
         this.operator = new NumericConditionOperator();
         createConstraints();
+        importSubRules();
+    }
+
+    /**
+     * @return Returns the name.
+     */
+    public String getName() {
+        return name;
+    }
+
+    protected void importSubRules() {
+        RulePool pool = Environment.get(RulePool.class);
+        String subRule;
+        while ((subRule = StringUtil.extract(operation, "§\\w+")).length() > 0) {
+            Rule<?> rule = pool.getRule(subRule.substring(1));
+            if (rule == null)
+                throw new IllegalArgumentException("Referenced rule " + subRule + " in " + this + " not found!");
+            operation = operation.replaceAll(subRule, "(" + rule.operation + ")");
+            parameter.putAll(rule.parameter);
+            //TODO: what to do with sub rule constraints?
+//            constraints.putAll(rule.constraints);
+        }
     }
 
     @SuppressWarnings("unchecked")
@@ -125,6 +177,7 @@ public class Rule<T> {
     @Commit
     private void initDeserializing() {
         createConstraints();
+        importSubRules();
     }
 
     @Override
@@ -134,6 +187,7 @@ public class Rule<T> {
 
     /**
      * addConstraint
+     * 
      * @param parameterName parameter name to add the constraint for
      * @param constraint new constraint
      */
