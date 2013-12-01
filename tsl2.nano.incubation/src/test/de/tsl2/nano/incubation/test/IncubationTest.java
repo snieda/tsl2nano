@@ -42,7 +42,9 @@ import de.tsl2.nano.execution.Profiler;
 import de.tsl2.nano.execution.XmlUtil;
 import de.tsl2.nano.format.DefaultFormat;
 import de.tsl2.nano.incubation.network.JobServer;
-import de.tsl2.nano.incubation.rules.TechRule;
+import de.tsl2.nano.incubation.rules.Constraint;
+import de.tsl2.nano.incubation.rules.ParType;
+import de.tsl2.nano.incubation.rules.Rule;
 import de.tsl2.nano.incubation.vnet.Connection;
 import de.tsl2.nano.incubation.vnet.Cover;
 import de.tsl2.nano.incubation.vnet.ILocatable;
@@ -362,7 +364,7 @@ public class IncubationTest {
     @SuppressWarnings("unchecked")
     @Test
     public void testRules() throws Exception {
-        TechRule<BigDecimal> rule = new TechRule<BigDecimal>("test", "A ? (x1 + 1) : (x2 * 2)", MapUtil.asMap("A",
+        Rule<BigDecimal> rule = new Rule<BigDecimal>("test", "A ? (x1 + 1) : (x2 * 2)", MapUtil.asMap("A",
             Boolean.class,
             "x1",
             BigDecimal.class,
@@ -370,6 +372,16 @@ public class IncubationTest {
             BigDecimal.class));
         BigDecimal r1 = rule.execute(MapUtil.asMap("A", true, "x1", new BigDecimal(1), "x2", new BigDecimal(2)));
         Assert.assertEquals(new BigDecimal(2), r1);
+        
+        //use simplified parameter definition
+        rule = new Rule<BigDecimal>("test", "A ? (x1 + 1) : (x2 * 2)", MapUtil.asMap("A",
+            ParType.BOOLEAN,
+            "x1",
+            ParType.NUMBER,
+            "x2",
+            ParType.NUMBER));
+        rule.addConstraint("x1", new Constraint(BigDecimal.class, new BigDecimal(0), new BigDecimal(1)));
+        rule.addConstraint("result", new Constraint(BigDecimal.class, new BigDecimal(3), new BigDecimal(4)));
         BigDecimal r2 = rule.execute(MapUtil.asMap("A", false, "x1", new BigDecimal(1), "x2", new BigDecimal(2)));
         Assert.assertEquals(new BigDecimal(4), r2);
         XmlUtil.saveXml("test.xml", rule);
