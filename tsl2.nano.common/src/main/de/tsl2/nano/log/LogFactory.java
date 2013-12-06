@@ -10,6 +10,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.Executors;
 
+import de.tsl2.nano.classloader.ThreadUtil;
 //import de.tsl2.nano.Environment;
 import de.tsl2.nano.exception.ForwardedException;
 //import de.tsl2.nano.execution.CompatibilityLayer;
@@ -86,11 +87,7 @@ public abstract class LogFactory implements Runnable {
         if (self == null) {
             self = new LogFactory() {
             };
-            Thread logger = Executors.defaultThreadFactory().newThread(self);
-            logger.setName("logger");
-            logger.setPriority(Thread.MIN_PRIORITY);
-            logger.setDaemon(true);
-            logger.start();
+            ThreadUtil.startDaemon("logger", self, true);
         }
         return self;
     }

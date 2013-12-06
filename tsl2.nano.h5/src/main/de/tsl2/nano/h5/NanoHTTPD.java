@@ -241,6 +241,7 @@ public class NanoHTTPD extends Main
 				}
 			});
 		//15092013ts: true --> false to don't stop if main has finished
+		myThread.setName("httpsession:"+port);
 		myThread.setDaemon( false );
 		myThread.start();
 	}

@@ -18,6 +18,7 @@ import java.net.URLStreamHandlerFactory;
 import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.concurrent.Executors;
 
 import org.apache.commons.logging.Log;
 
@@ -37,7 +38,7 @@ import de.tsl2.nano.util.StringUtil;
  */
 public class RuntimeClassloader extends URLClassLoader {
     private static final Log LOG = LogFactory.getLog(RuntimeClassloader.class);
-    
+
     /**
      * constructor
      * 
@@ -196,7 +197,7 @@ public class RuntimeClassloader extends URLClassLoader {
     public void startPathChecker(final String path, final long waitMillis) {
         Runnable pathChecker = new Runnable() {
             File fPath = new File(path);
-            
+
             @Override
             public void run() {
                 LOG.info("running patch checker in thread " + Thread.currentThread());
@@ -208,33 +209,31 @@ public class RuntimeClassloader extends URLClassLoader {
                         File changedFile = lastModifiedFile();
                         if (changedFile != null && changedFile.lastModified() > System.currentTimeMillis() - waitMillis) {
                             // TODO: implement unloading existing classes
-                            LOG.info("the file " + changedFile.getAbsolutePath() + " was changed");
-                            if (changedFile.getPath().endsWith(".jar"))
+                            if (changedFile.getPath().endsWith(".jar")) {
+                                LOG.info("loading " + changedFile.getAbsolutePath());
                                 addFile(changedFile.getAbsolutePath());
+                            }
                         }
                     } catch (InterruptedException e) {
                         LOG.error(e);
-                        ForwardedException.forward(e);
+//                        ForwardedException.forward(e);
                     }
                 }
             }
-            
+
             File lastModifiedFile() {
                 File[] files = fPath.listFiles();
                 File last = null;
                 for (int i = 0; i < files.length; i++) {
-                    if (last == null || files[i].lastModified() > last.lastModified());
-                    last = files[i];
+                    if (last == null || files[i].lastModified() > last.lastModified())
+                        last = files[i];
                 }
                 return last;
             }
         };
-        Thread thread = new Thread(pathChecker);
-        thread.setPriority(Thread.MIN_PRIORITY);
-        thread.setDaemon(true);
-        thread.start();
+        ThreadUtil.startDaemon("classloader-environment-path-checker", pathChecker, true);
     }
-    
+
     @Override
     public String toString() {
         return this.getClass().getName() + "[urls: " + getURLs().length + "]";
