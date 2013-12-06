@@ -24,6 +24,7 @@ import org.w3c.dom.Element;
 
 import de.tsl2.nano.exception.ForwardedException;
 import de.tsl2.nano.util.StringUtil;
+import de.tsl2.nano.util.Util;
 
 /**
  * defines html tag- and attribute-names und helper methods. android doesn't support the full w3c implementation like
@@ -197,7 +198,7 @@ public class HtmlUtil {
                 continue;
             Attr attr = doc.createAttribute((String)attributes[i]);
             if (i < attributes.length - 1) {
-                attr.setValue(StringUtil.asString(attributes[i + 1]));
+                attr.setValue(Util.asString(attributes[i + 1]));
             }
             e.setAttributeNode(attr);
         }
