@@ -231,7 +231,7 @@ public class RuntimeClassloader extends URLClassLoader {
                 return last;
             }
         };
-        ThreadUtil.startDaemon("classloader-environment-path-checker", pathChecker, true);
+        ThreadUtil.startDaemon("classloader-environment-path-checker", pathChecker);
     }
 
     @Override

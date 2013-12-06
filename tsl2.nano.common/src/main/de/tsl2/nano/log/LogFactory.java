@@ -87,7 +87,7 @@ public abstract class LogFactory implements Runnable {
         if (self == null) {
             self = new LogFactory() {
             };
-            ThreadUtil.startDaemon("logger", self, true);
+            ThreadUtil.startDaemon("logger", self);
         }
         return self;
     }

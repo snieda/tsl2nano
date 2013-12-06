@@ -9,7 +9,12 @@
  */
 package de.tsl2.nano.classloader;
 
+import java.lang.Thread.UncaughtExceptionHandler;
 import java.util.concurrent.Executors;
+
+import org.apache.commons.logging.Log;
+
+import de.tsl2.nano.log.LogFactory;
 
 /**
  * standard usage to create a daemon thread
@@ -18,6 +23,13 @@ import java.util.concurrent.Executors;
  * @version $Revision$
  */
 public class ThreadUtil {
+    private static final Log LOG = LogFactory.getLog(ThreadUtil.class);
+
+    public static Thread startDaemon(String name,
+            Runnable runtime) {
+        return startDaemon(name, runtime, true, null);
+    }
+    
     /**
      * starts the given runtime as daemon thread
      * 
@@ -25,9 +37,15 @@ public class ThreadUtil {
      * @param runtime
      * @param lowPriority
      */
-    public static Thread startDaemon(String name, Runnable runtime, boolean lowPriority) {
+    public static Thread startDaemon(String name,
+            Runnable runtime,
+            boolean lowPriority,
+            UncaughtExceptionHandler handler) {
+        LOG.info("starting thread " + name);
         Thread thread = Executors.defaultThreadFactory().newThread(runtime);
         thread.setName(name);
+        if (handler != null)
+            thread.setUncaughtExceptionHandler(handler);
         if (lowPriority)
             thread.setPriority(Thread.MIN_PRIORITY);
         thread.setDaemon(true);
