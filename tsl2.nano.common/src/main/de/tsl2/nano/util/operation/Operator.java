@@ -10,6 +10,7 @@ import org.simpleframework.xml.ElementMap;
 
 import de.tsl2.nano.action.IAction;
 import de.tsl2.nano.util.StringUtil;
+import de.tsl2.nano.util.parser.Parser;
 
 /**
  * Base class to execute any operation with terms having two operands and one operator. it is like a primitive parser
@@ -36,21 +37,21 @@ import de.tsl2.nano.util.StringUtil;
  * @version $Revision$
  */
 @Default(value = DefaultType.FIELD, required = false)
-public abstract class Operator<INPUT, OUTPUT> {
+public abstract class Operator<INPUT, OUTPUT> extends Parser<INPUT> {
     /**
      * technical member while it's not possible to create an array out of a generic type. the
      * BeanUtil.getGenericType(Class) can't solve that problem, too.
      */
     Class<? extends INPUT> inputType;
     /** syntax defining special expression parts */
-    @ElementMap(inline=true)
+    @ElementMap(inline = true)
     Map<String, INPUT> syntax;
     /** a map containing any values. values found by this solver must be of right type */
     transient Map<INPUT, OUTPUT> values;
     /** converter to convert an operand to a result type and vice versa */
     transient IConverter<INPUT, OUTPUT> converter;
     /** holds all operations to be resolvable */
-    @ElementMap(inline=true, entry="operation")
+    @ElementMap(inline = true, entry = "operation")
     Map<INPUT, IAction<OUTPUT>> operationDefs;
 
     public static final String KEY_BEGIN = "begin";
@@ -60,6 +61,7 @@ public abstract class Operator<INPUT, OUTPUT> {
     public static final String KEY_BETWEEN = "between";
     public static final String KEY_CONCAT = "concat";
     public static final String KEY_OPERATION = "operation";
+    public static final String KEY_HIGH_OPERATION = "high_operation";
     public static final String KEY_OPERAND = "operand";
     public static final String KEY_EMPTY = "empty";
 //    public static final String KEY_DEFAULT_OPERAND = "default.operand";
@@ -111,6 +113,9 @@ public abstract class Operator<INPUT, OUTPUT> {
      */
     protected abstract void createOperations();
 
+    /**
+     * defines the syntax of a term with given set of operators
+     */
     protected abstract void createTermSyntax();
 
     /**
@@ -134,6 +139,7 @@ public abstract class Operator<INPUT, OUTPUT> {
 
     /**
      * getValues
+     * 
      * @return values
      */
     public Map<INPUT, OUTPUT> getValues() {
@@ -146,11 +152,11 @@ public abstract class Operator<INPUT, OUTPUT> {
     public void reset() {
         getValues().clear();
     }
+
     //    public OUTPUT eval(INPUT expression) {
 //        return eval(new StringBuilder(expression.toString()));
 //    }
-    
-    
+
     /**
      * delegates to {@link #eval(Object)} filling the given values to {@link #values}.
      */
@@ -160,7 +166,7 @@ public abstract class Operator<INPUT, OUTPUT> {
         values.putAll(v);
         return eval(expression);
     }
-    
+
     /**
      * eval
      * 
@@ -170,6 +176,8 @@ public abstract class Operator<INPUT, OUTPUT> {
     public OUTPUT eval(INPUT expression) {
         //create an operable expression like a sequence
         expression = wrap(expression);
+        //enclose operations in brackets
+        expression = encloseInBrackets(expression);
         //extract all terms
         INPUT term;
         INPUT t;
@@ -184,47 +192,37 @@ public abstract class Operator<INPUT, OUTPUT> {
             t = extract(term, syntax(KEY_TERM));
             replace(expression, term, converter.from(operate(wrap(t), values)));
         }
-        return resultEstablished() ? values.get(KEY_RESULT) : converter.to(expression);
+
+        if (resultEstablished()) {
+            return values.get(KEY_RESULT);
+        } else {
+            INPUT operand = extract(expression, syntax.get(KEY_OPERAND));
+            OUTPUT result = values.get(operand);
+            return result != null ? result : converter.to(expression);
+        }
     }
 
-    /**
-     * isEmpty
-     * 
-     * @param term term to check
-     * @return true, if term is empty
-     */
-    protected boolean isEmpty(INPUT term) {
-        return StringUtil.isEmpty(term, true);
-    }
+//    protected abstract INPUT encloseInBrackets(INPUT expression);
 
     /**
-     * replace
+     * searches for not enclosed terms with a {@link #KEY_HIGH_OPERATION} to enclose it. Needed for math-operations like
+     * multiply, divide and pow
      * 
-     * @param src
-     * @param expression
-     * @param replace
+     * @param expression to inspect
+     * @return expression with enclosed high-operations
      */
-    protected abstract void replace(INPUT src, INPUT expression, INPUT replace);
-
-    /**
-     * should be overridden if you need a transformation. F.e., if your INPUT is CharSequence and you need a conversion
-     * from string to stringbuilder.
-     * 
-     * @param src source to be transformed/wrapped
-     * @return transformed/wrapped value
-     */
-    protected INPUT wrap(INPUT src) {
-        return src;
-    }
-
-    /**
-     * see {@link #wrap(Object)}.
-     * 
-     * @param src source to be re-transformed
-     * @return re-transformed/unwrapped value
-     */
-    protected INPUT unwrap(INPUT src) {
-        return src;
+    protected INPUT encloseInBrackets(INPUT expression) {
+        INPUT term = wrap(syntax.get(KEY_TERM));
+        replace(term, syntax.get(KEY_OPERATION), syntax.get(KEY_HIGH_OPERATION));
+        INPUT notEnclosed = concat(term, syntax.get(KEY_OPERATION), syntax.get(KEY_OPERAND));
+        INPUT highOp = syntax.get(KEY_HIGH_OPERATION);
+        INPUT toEnclose, t;
+        while (!isEmpty(toEnclose = extract(expression, notEnclosed))) {
+            t = extract(toEnclose, term);
+            if (extract(t, highOp) != null)
+                replace(expression, t, concat(syntax.get(KEY_BEGIN), t, syntax.get(KEY_END)));
+        }
+        return expression;
     }
 
     /**
@@ -274,21 +272,6 @@ public abstract class Operator<INPUT, OUTPUT> {
         }
         return result;
     }
-
-    private INPUT extract(INPUT source, INPUT regexp) {
-        return extract(source, regexp, null);
-    }
-
-    protected abstract INPUT extract(INPUT source, INPUT match, INPUT replacement);
-
-    /**
-     * concatenates given elements of type INPUT
-     * 
-     * @param input input array to concatenate. the array is of type Object as a technical workaround on auto-creating
-     *            an INPUT[].
-     * @return concatenation of input
-     */
-    protected abstract INPUT concat(Object... input);
 
     protected OUTPUT newOperand(INPUT expr) {
         return (OUTPUT) converter.to(expr);

@@ -12,7 +12,8 @@ package de.tsl2.nano.util.operation;
 import java.util.Map;
 
 import de.tsl2.nano.collection.MapUtil;
-import de.tsl2.nano.util.StringUtil;
+import de.tsl2.nano.util.Util;
+import de.tsl2.nano.util.parser.SParser;
 
 /**
  * Base {@link Operator} for string expressions.<p/>
@@ -23,7 +24,7 @@ import de.tsl2.nano.util.StringUtil;
  */
 @SuppressWarnings("unchecked")
 public abstract class SOperator<T> extends Operator<CharSequence, T> {
-
+    SParser parser = new SParser();
     /**
      * constructor
      */
@@ -72,36 +73,44 @@ public abstract class SOperator<T> extends Operator<CharSequence, T> {
     }
 
     protected void createTermSyntax() {
+        if (syntax.get(KEY_HIGH_OPERATION) == null)
+            syntax.put(KEY_HIGH_OPERATION, syntax.get(KEY_OPERATION));
         String term = "[^" + "\\" + syntax(KEY_END) + "\\" + syntax(KEY_BEGIN) + syntax(KEY_OPERATION).subSequence(1, syntax(KEY_OPERATION).length() - 2) + "]*" + syntax(KEY_OPERATION) + "\\s*" + syntax(KEY_OPERAND);
         syntax.put(KEY_TERM, term);
         syntax.put(KEY_TERM_ENCLOSED, "\\" + syntax(KEY_BEGIN) + "\\s*" + term + "\\s*" + "\\" + syntax(KEY_END));
     }
 
     @Override
-    protected void replace(CharSequence src, CharSequence expression, CharSequence replace) {
-        StringUtil.replace((StringBuilder) src, expression.toString(), replace.toString());
+    public void replace(CharSequence src, CharSequence expression, CharSequence replace) {
+        parser.replace(src, expression, replace);
     }
 
     @Override
-    protected CharSequence extract(CharSequence source, CharSequence match, CharSequence replacement) {
-        return StringUtil.extract(source, match.toString(), replacement != null ? replacement.toString() : null);
+    public CharSequence extract(CharSequence source, CharSequence match, CharSequence replacement) {
+        return parser.extract(source, match.toString(), replacement != null ? replacement.toString() : null);
     }
 
     @Override
-    protected CharSequence concat(Object... input) {
-        StringBuilder s = new StringBuilder();
-        for (int i = 0; i < input.length; i++) {
-            s.append(input[i]);
-        }
-        return s.toString();
+    public CharSequence subElement(CharSequence src, CharSequence begin, CharSequence end, boolean last) {
+        return parser.subElement(src.toString(), Util.asString(begin), Util.asString(end), last);
+    }
+    
+    @Override
+    public CharSequence subEnclosing(CharSequence src, CharSequence begin, CharSequence end) {
+        return parser.subEnclosing(src.toString(), Util.asString(begin), Util.asString(end));
+    }
+    
+    @Override
+    public CharSequence concat(Object... input) {
+        return parser.concat(input);
     }
 
     @Override
-    protected CharSequence wrap(CharSequence src) {
-        return new StringBuilder(src);
+    public CharSequence wrap(CharSequence src) {
+        return parser.wrap(src);
     }
 
-    protected CharSequence unwrap(CharSequence src) {
-        return src != null ? src.toString() : null;
+    public CharSequence unwrap(CharSequence src) {
+        return parser.unwrap(src);
     }
 }

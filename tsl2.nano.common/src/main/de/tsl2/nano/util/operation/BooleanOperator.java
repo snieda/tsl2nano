@@ -17,7 +17,7 @@ import java.util.Map;
 
 import de.tsl2.nano.action.CommonAction;
 import de.tsl2.nano.action.IAction;
-import de.tsl2.nano.util.StringUtil;
+import de.tsl2.nano.util.Util;
 
 /**
  * Boolean Operator as a sample implementation of {@link Operator}. Is able to do boolean operations.
@@ -57,7 +57,7 @@ public class BooleanOperator extends SOperator<Boolean> {
 
             @Override
             public Object parseObject(String source, ParsePosition pos) {
-                pos.setIndex(StringUtil.isEmpty(source) ? 1 : source.length());
+                pos.setIndex(Util.isEmpty(source) ? 1 : source.length());
                 return Boolean.valueOf(source);
             }
 

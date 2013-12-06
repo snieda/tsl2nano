@@ -28,6 +28,7 @@ import de.tsl2.nano.bean.BeanUtil;
 import de.tsl2.nano.exception.FormattedException;
 import de.tsl2.nano.log.LogFactory;
 import de.tsl2.nano.util.StringUtil;
+import de.tsl2.nano.util.Util;
 import de.tsl2.nano.util.operation.IConverter;
 
 /**
@@ -159,7 +160,7 @@ public class ValueExpression<TYPE> implements IConverter<TYPE, String>, Serializ
         if (type == null)
             throw FormattedException.implementationError("The conversion from string to object is only available, if the ValueExpression was created with a class type argument!",
                 "type is null");
-        if (StringUtil.isEmpty(toValue))
+        if (Util.isEmpty(toValue))
             return null;
         TYPE exampleBean = (TYPE) BeanClass.createInstance(type);
         //TODO: how-to extract the attribute-name information from expression?

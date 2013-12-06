@@ -10,12 +10,11 @@
 package de.tsl2.nano.bean.def;
 
 import java.text.FieldPosition;
-import java.text.Format;
 import java.text.ParsePosition;
 import java.util.ArrayList;
 import java.util.Collection;
 
-import de.tsl2.nano.util.StringUtil;
+import de.tsl2.nano.util.Util;
 
 /**
  * Format for collections of entities/beans - not implementing it's own toString(). The format packs the given type into a
@@ -81,7 +80,7 @@ public class CollectionExpressionFormat<T> extends ValueExpressionFormat<T> {
     public Object parseObject(String source, ParsePosition pos) {
         pos.setIndex(pos.getIndex() + 1);
         //don't create an empty collection if there are no values
-        if (StringUtil.isEmpty(source)) {
+        if (Util.isEmpty(source)) {
             if (collectionInstance != null)
                 collectionInstance.clear();
             return collectionInstance;

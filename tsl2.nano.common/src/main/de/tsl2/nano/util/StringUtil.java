@@ -10,9 +10,7 @@
 package de.tsl2.nano.util;
 
 import java.math.BigInteger;
-import java.security.MessageDigest;
 import java.text.MessageFormat;
-import java.util.Arrays;
 import java.util.Collection;
 import java.util.Map;
 import java.util.Properties;
@@ -43,20 +41,60 @@ public class StringUtil {
     }
 
     /**
+     * Does the same as substring, but considers outer encapsulating. means, it finds first match for 'from' it searches
+     * the last match for 'to'.
+     * @param constrain if true and from and to are not null, returns null if from or to was not found.
+     * @return outer enclosing match.
+     */
+    public static String subEnclosing(String data, String from, String to, boolean constrain) {
+        if (from == null && to == null)
+            return data;
+        else if (from == null)
+            return substring(data, from, to, true, true);
+        else if (to == null)
+            return substring(data, from, to, 0, true);
+        else {
+            int iFrom = data.indexOf(from);
+            int iTo = data.lastIndexOf(to);
+            if (constrain && iFrom == -1 || iTo == -1)
+                return null;
+            else
+                return data.substring(iFrom != -1 ? iFrom + from.length() : 0, iTo != -1 ? iTo : data.length());
+        }
+    }
+
+    /**
+     * delegates to {@link #substring(String, String, String, boolean)} with constrain = false
+     */
+    public static String substring(String data, String from, String to, boolean last) {
+        return substring(data, from, to, last, false);
+    }
+    
+    /**
      * Does the same as extract, but doesn't consider encapsulating (no regexp!).
      * 
      * @param last whether it searches with lastIndexOf(to).
      * @return
      */
-    public static String substring(String data, String from, String to, boolean last) {
+    public static String substring(String data, String from, String to, boolean last, boolean constrain) {
         int i = !last ? 0 : from != null ? data.lastIndexOf(from) : to != null ? data.lastIndexOf(to) : 0;
+        if (i < 0 && constrain)
+            return null;
         i = i == -1 ? 0 : i;
         if (from != null || i == 0)
-            return substring(data, from, to, i);
-        else // if 'last' is used for 'to', we return directly the substring
+            return substring(data, from, to, i, constrain);
+        else
+            // if 'last' is used for 'to', we return directly the substring
             return data.substring(0, i);
     }
 
+    /**
+     * delegates to {@link #substring(String, String, String, int, boolean)} with constrain = false
+     */
+    public static String substring(String data, String from, String to, int start) {
+        return substring(data, from, to, start, false);
+    }
+    
     /**
      * extracts from from (exclusive) to to, beginning at index start. doesn't consider encapsulating (no regexp!).
      * 
@@ -64,29 +102,40 @@ public class StringUtil {
      * @param from start-string
      * @param to end-string
      * @param start index
+     * @param constrain if true, null be returned if from or to couldn't be found
      * @return extracted substring
      */
-    public static String substring(String data, String from, String to, int start) {
+    public static String substring(String data, String from, String to, int start, boolean constrain) {
         if (from == null) {
             final int i = data.indexOf(to, start);
             if (i < 0) {
-                return data.substring(start);
+                if (constrain)
+                    return null;
+                else
+                    return data.substring(start);
             }
             return data.substring(start, i);
         } else if (to == null) {
             final int i = data.indexOf(from, start);
             if (i < 0) {
-                return data.substring(start);
+                if (constrain)
+                    return null;
+                else
+                    return data.substring(start);
             }
             return data.substring(i + from.length());
         } else {
             int i = data.indexOf(from, start);
             if (i < 0) {
+                if (constrain)
+                    return null;
                 from = "";//-->length = 0
                 i = start;
             }
             int j = data.indexOf(to, i + from.length() + 1);
             if (j < 0) {
+                if (constrain)
+                    return null;
                 j = data.length();
             }
             return data.substring(i + from.length(), j);
@@ -172,8 +221,8 @@ public class StringUtil {
             src.deleteCharAt(i);
     }
 
-     /**
-     * replaces the first occurrenciy of expression in str with replacement. if nothing was found, nothing will be done.
+    /**
+     * replaces all occurrences of expression in str with replacement. if nothing was found, nothing will be done.
      * 
      * @param str source
      * @param expression expression to find
@@ -186,31 +235,6 @@ public class StringUtil {
         }
     }
 
-//    /**
-//     * see {@link BeanUtil#hasToString(Object)}
-//     */
-//    public static boolean hasToString(Object obj) {
-//        return BeanUtil.hasToString(obj);
-//    }
-//
-    /**
-     * isEmpty
-     * @param text text to analyze
-     * @return true, if object is null or empty
-     */
-    public static final boolean isEmpty(Object text) {
-        return isEmpty(text, false);
-    }
-
-    /**
-     * isEmpty
-     * @param text text to analyze
-     * @return true, if object is null or empty
-     */
-    public static final boolean isEmpty(Object text, boolean trim) {
-        return text == null || (trim ? text.toString().trim().isEmpty() : text.toString().isEmpty());
-    }
-
     /**
      * calls toString() of obj object if not null, otherwise an empty string will be returned
      * 
@@ -219,15 +243,6 @@ public class StringUtil {
      */
     public static final String toString(Object obj) {
         return obj != null ? obj.toString() : "";
-    }
-
-    /**
-     * asString
-     * @param obj obj to call toString() if not null
-     * @return obj.toString() or null
-     */
-    public static final String asString(Object obj) {
-        return obj != null ? obj.toString() : null;
     }
 
     /**
@@ -323,7 +338,7 @@ public class StringUtil {
         if (fillLength <= 0) {
             final int shiftRight = rightFill ? 0 : fillLength;
             return origin.substring(0 + shiftRight, fixLength + shiftRight);
-        } else if ((byte)fillChar == -1) {
+        } else if ((byte) fillChar == -1) {
             return fixLength >= origin.length() ? origin : origin.substring(0, fixLength);
         }
         final StringBuffer fillString = new StringBuffer(fillLength);
@@ -439,7 +454,7 @@ public class StringUtil {
 //        else
 //            return split;
 //    }
-    
+
     /**
      * splits and formats an object.
      * 
@@ -502,7 +517,7 @@ public class StringUtil {
         }
         return result;
     }
-    
+
     /**
      * concats the given names into one string separated by 'sep'. if a name is null, it will be ignored.
      * 
@@ -550,15 +565,16 @@ public class StringUtil {
                 strs[i] = null;
         }
     }
-    
+
     /**
      * getCryptoHash
+     * 
      * @param data
      * @return
      */
     public static final byte[] cryptoHash(String data) {
         try {
-            return MessageDigest.getInstance("SHA").digest(data.getBytes("UTF-8"));
+            return Util.cryptoHash(data.getBytes("UTF-8"));
         } catch (Exception e) {
             ForwardedException.forward(e);
             return null;
@@ -567,21 +583,11 @@ public class StringUtil {
 
     /**
      * converts the given bytes to a hex string
+     * 
      * @param bytes bytes to convert
      * @return hex string
      */
     public static final String toHexString(byte[] bytes) {
         return new BigInteger(1, bytes).toString(16);
-    }
-    
-    /**
-     * checks, whether data is contained in c.
-     * @param entry to check
-     * @param c collection of available entries
-     * @return true, if data is equal to one of c.
-     */
-    public static final boolean in(String entry, String...c) {
-        assert c.length > 0 : "c must contain at least one element";
-        return Arrays.asList(c).contains(entry);
     }
 }

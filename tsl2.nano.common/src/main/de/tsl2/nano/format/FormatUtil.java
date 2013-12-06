@@ -24,14 +24,14 @@ import java.util.Currency;
 import java.util.Date;
 
 import org.apache.commons.logging.Log;
-import de.tsl2.nano.log.LogFactory;
 
 import de.tsl2.nano.bean.BeanClass;
 import de.tsl2.nano.currency.CurrencyUtil;
 import de.tsl2.nano.exception.FormattedException;
 import de.tsl2.nano.execution.CompatibilityLayer;
+import de.tsl2.nano.log.LogFactory;
 import de.tsl2.nano.util.NumberUtil;
-import de.tsl2.nano.util.StringUtil;
+import de.tsl2.nano.util.Util;
 
 /**
  * evaluates a {@link Format} for a given type or instance. used by validators, to check input.
@@ -156,7 +156,7 @@ public class FormatUtil {
                     @Override
                     public Object parseObject(String source, ParsePosition pos) {
                         pos.setIndex(source != null && source.length() > 0 ? source.length() : 1);
-                        return StringUtil.isEmpty(source) ? null : source;
+                        return Util.isEmpty(source) ? null : source;
                     }
 
                 };
@@ -169,8 +169,8 @@ public class FormatUtil {
 
                     @Override
                     public Object parseObject(String source, ParsePosition pos) {
-                        pos.setIndex(!StringUtil.isEmpty(source) ? source.length() : 1);
-                        return !StringUtil.isEmpty(source) ? Enum.valueOf(type, source) : null;
+                        pos.setIndex(!Util.isEmpty(source) ? source.length() : 1);
+                        return !Util.isEmpty(source) ? Enum.valueOf(type, source) : null;
                     }
 
                 };
@@ -183,8 +183,8 @@ public class FormatUtil {
 
                     @Override
                     public Object parseObject(String source, ParsePosition pos) {
-                        pos.setIndex(!StringUtil.isEmpty(source) ? source.length() : 1);
-                        return !StringUtil.isEmpty(source) ? BeanClass.createInstance(type, source) : null;
+                        pos.setIndex(!Util.isEmpty(source) ? source.length() : 1);
+                        return !Util.isEmpty(source) ? BeanClass.createInstance(type, source) : null;
                     }
 
                 };

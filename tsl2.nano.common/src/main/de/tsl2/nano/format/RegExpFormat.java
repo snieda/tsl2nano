@@ -9,7 +9,6 @@
  */
 package de.tsl2.nano.format;
 
-import static de.tsl2.nano.format.FormatUtil.getCurrencyFormat;
 import static de.tsl2.nano.format.FormatUtil.getCurrencyFormatNoFraction;
 import static de.tsl2.nano.format.FormatUtil.getCurrencyFormatNoSymbol;
 
@@ -37,7 +36,6 @@ import java.util.regex.Pattern;
 
 import org.apache.commons.collections.map.ReferenceMap;
 import org.apache.commons.logging.Log;
-import de.tsl2.nano.log.LogFactory;
 import org.simpleframework.xml.Attribute;
 import org.simpleframework.xml.Element;
 import org.simpleframework.xml.ElementMap;
@@ -50,8 +48,10 @@ import de.tsl2.nano.bean.BeanContainer;
 import de.tsl2.nano.collection.MapUtil;
 import de.tsl2.nano.currency.CurrencyUtil;
 import de.tsl2.nano.exception.FormattedException;
+import de.tsl2.nano.log.LogFactory;
 import de.tsl2.nano.util.DateUtil;
 import de.tsl2.nano.util.StringUtil;
+import de.tsl2.nano.util.Util;
 import de.tsl2.nano.util.operation.IConverter;
 
 /**
@@ -361,7 +361,7 @@ public class RegExpFormat extends Format implements INumberFormatCheck {
      */
     @Override
     public Object parseObject(String source, ParsePosition pos) {
-        if (StringUtil.isEmpty(source)) {
+        if (Util.isEmpty(source)) {
             // set the pos > 0, otherwise the calling method will throw a parseexception.
             pos.setIndex(1);
             return null;

@@ -16,17 +16,11 @@ import java.text.Format;
 import java.text.NumberFormat;
 import java.text.ParseException;
 import java.text.ParsePosition;
-import java.util.Arrays;
-import java.util.Collections;
 import java.util.Comparator;
-import java.util.List;
 import java.util.Locale;
 
-import org.apache.commons.logging.Log;
-import de.tsl2.nano.log.LogFactory;
 
 import de.tsl2.nano.bean.BeanClass;
-import de.tsl2.nano.exception.FormattedException;
 import de.tsl2.nano.exception.ForwardedException;
 import de.tsl2.nano.format.FormatUtil;
 
@@ -36,9 +30,7 @@ import de.tsl2.nano.format.FormatUtil;
  * @author Thomas Schneider
  * @version $Revision$
  */
-public class NumberUtil {
-    private static final Log LOG = LogFactory.getLog(NumberUtil.class);
-
+public class NumberUtil extends BitUtil {
     static DecimalFormat numberFormat;
     static {
         numberFormat = (DecimalFormat) NumberFormat.getNumberInstance();
@@ -133,26 +125,6 @@ public class NumberUtil {
     }
 
     /**
-     * evaluates the minimum of all values
-     * 
-     * @param values to compare
-     * @return the minimum
-     */
-    public static final <T extends Object & Comparable<? super T>> T min(T... values) {
-        return Collections.min(Arrays.asList(values));
-    }
-
-    /**
-     * evaluates the minimum of all values
-     * 
-     * @param values to compare
-     * @return the minimum
-     */
-    public static final <T extends Object & Comparable<? super T>> T max(T... values) {
-        return Collections.max(Arrays.asList(values));
-    }
-
-    /**
      * checks a number to be an instance and to have a value different from zero.
      * 
      * @param number number to check
@@ -173,49 +145,37 @@ public class NumberUtil {
     }
 
     /**
-     * evaluates the min and max and compares them with {@link Comparable#compareTo(Object)}. Be careful: The standard
-     * implementations of compareTo() will return only 1, 0 or -1 - not the delta value!
+     * checks all given numbers to be zero. if at least one value is not zero, it returns false.
      * 
-     * @param <T> comparable type
-     * @param values comparables
-     * @return the result of max.compareTo(min)
+     * @param numbers numbers to check
+     * @return true, if all numbers = 0
      */
-    public static final <T extends Object & Comparable<? super T>> int getDeltaCompare(T... values) {
-        List<T> v = Arrays.asList(values);
-        return Collections.max(v).compareTo(Collections.min(v));
-    }
-
-    public static final <T extends Number & Comparable<? super T>> float getDelta(T... values) {
-        List<T> v = Arrays.asList(values);
-        return Collections.max(v).floatValue() - Collections.min(v).floatValue();
-    }
-
-    /**
-     * intersects
-     * 
-     * @param <T> type of comparable values
-     * @param from1 first start
-     * @param to1 first end
-     * @param from2 second start
-     * @param to2 second end
-     * @return true, if first and second span intersect
-     */
-    public static final <T extends Object & Comparable<? super T>> boolean intersects(T from1, T to1, T from2, T to2) {
-        return from1.compareTo(to2) <= 0 && from2.compareTo(to1) <= 0;
+    public static final boolean isAllZero(BigDecimal... numbers) {
+        if (numbers.length == 0)
+            throw new IllegalArgumentException("At least one number has to be given!");
+        for (int i = 0; i < numbers.length; i++) {
+            if (BigDecimal.ZERO.compareTo(numbers[i]) != 0)
+                return false;
+        }
+        return true;
     }
 
     /**
-     * includes
-     * 
-     * @param <T> type of comparable values
-     * @param from1 first start
-     * @param to1 first end
-     * @param from2 second start
-     * @param to2 second end
-     * @return true, if first span includes second span
+     * hasEqualSigns
+     * @param numbers
+     * @return
      */
-    public static final <T extends Object & Comparable<? super T>> boolean includes(T from1, T to1, T from2, T to2) {
-        return from1.compareTo(from2) <= 0 && to1.compareTo(to2) >= 0;
+    public static final boolean hasEqualSigns(BigDecimal... numbers) {
+        checkParameterCount(numbers, 2);
+        int sign = 0, s;
+        for (int i = 0; i < numbers.length; i++) {
+            s = numbers[i].signum();
+            if (sign == 0 && s != 0)
+                sign = s;
+            if (s != 0 && sign != s)
+                return false;
+        }
+        return true;
     }
 
     /**
@@ -249,50 +209,6 @@ public class NumberUtil {
     }
 
     /**
-     * isLower
-     * 
-     * @param op1 operand one
-     * @param op2 operand two
-     * @return true, if op1 < op2
-     */
-    public static final <T extends Comparable<T>> boolean isLower(T op1, T op2) {
-        return op1.compareTo(op2) < 0;
-    }
-
-    /**
-     * isGreater
-     * 
-     * @param op1 operand one
-     * @param op2 operand two
-     * @return true, if op1 > op2
-     */
-    public static final <T extends Comparable<T>> boolean isGreater(T op1, T op2) {
-        return op1.compareTo(op2) > 0;
-    }
-
-    /**
-     * min
-     * 
-     * @param op1 operand one
-     * @param op2 operand two
-     * @return op1, if op1 < op2
-     */
-    public static final <T extends Comparable<T>> T min(T op1, T op2) {
-        return isLower(op1, op2) ? (T) op1 : op2;
-    }
-
-    /**
-     * max
-     * 
-     * @param op1 operand one
-     * @param op2 operand two
-     * @return op1, if op1 > op2
-     */
-    public static final <T extends Comparable<T>> T max(T op1, T op2) {
-        return isGreater(op1, op2) ? (T) op1 : op2;
-    }
-
-    /**
      * converts a string to a {@link BigDecimal}. the current {@link Locale} will be used!
      * 
      * @param numberAsString number as string (with pattern for current locale)
@@ -305,129 +221,6 @@ public class NumberUtil {
             ForwardedException.forward(e);
             return null;
         }
-    }
-
-    /**
-     * delegates to {@link Integer#highestOneBit(int)}
-     * 
-     * @param decimal decimal number containing bits
-     * @return highest bit in decimal number
-     */
-    public static final int highestOneBit(int decimal) {
-        return Integer.highestOneBit(decimal);
-    }
-
-    /**
-     * highestBitPosition
-     * @param decimal number
-     * @return number of trailing zeros or -1 if zero.
-     */
-    public static final int highestBitPosition(int decimal) {
-        if (decimal == 0)
-            return -1;
-        return Integer.numberOfTrailingZeros(highestOneBit(decimal));
-    }
-
-    /**
-     * bitToDecimal. to do the other direction (e.g. decimalToBit), call {@link #highestOneBit(int)}.
-     * 
-     * @param bit bit field to be converted into a decimal number
-     * @return decimal representation of given bit
-     */
-    public static final int bitToDecimal(int bit) {
-        return (int) 1 << bit;//Math.pow(2, bit);//Float.floatToIntBits(bit);
-    }
-
-    /**
-     * toggles (removes or adds) the given bitsToFilter from/to the given bit-field
-     * 
-     * @param field bit field
-     * @param bitsToFilter bits to remove or add
-     * @return toggled bit field
-     */
-    public static final int toggleBits(int field, int...bitsToFilter) {
-        for (int i = 0; i < bitsToFilter.length; i++) {
-            field = hasBit(field, bitsToFilter[i]) ? field - bitsToFilter[i] : field | bitsToFilter[i];
-        }
-        return field;
-    }
-    
-    /**
-     * filters (removes) the given bitsToFilter from the given bit-field
-     * 
-     * @param field bit field
-     * @param bitsToFilter bits to remove from bit field
-     * @return filtered bit field
-     */
-    public static final int filterBits(int field, int... bitsToFilter) {
-        for (int i = 0; i < bitsToFilter.length; i++) {
-            field = hasBit(field, bitsToFilter[i]) ? field - bitsToFilter[i] : field;
-        }
-        return field;
-    }
-
-    /**
-     * removes all bits between lowest bit and highest bit from given bit field.
-     * 
-     * @param field bit field
-     * @param low lowest bit to filter (eliminate). please provide only the bit position: e.g. 10 instead of 1 << 10.
-     * @param high highest bit to filter (eliminate). please provide only the bit position: e.g. 10 instead of 1 << 10.
-     * @return filtered bit field
-     */
-    public static final int filterBitRange(int field, int low, int high) {
-        for (int i = low; i <= high; i++) {
-            int b = 1 << i;
-            if (field < b)
-                break;
-            field = hasBit(field, b) ? field - b : field;
-        }
-        return field;
-    }
-
-    /**
-     * filters (retaines) the given bitsToFilter from the given bit-field. bitsToFilter should be bit values - not bit
-     * positions!
-     * 
-     * @param field bit field
-     * @param bitsToFilter bit values (no bit positions) to remove from bit field
-     * @return filtered bit field
-     */
-    public static final int retainBits(int field, int... bitsToFilter) {
-        int f = 0;
-        for (int i = 0; i < bitsToFilter.length; i++) {
-            f += hasBit(field, bitsToFilter[i]) ? bitsToFilter[i] : 0;
-        }
-        return f;
-    }
-
-    /**
-     * delegates to {@link #hasBit(int, int, boolean)} using oneOfThem=true.
-     */
-    public static final boolean hasBit(int bit, int... availableBits) {
-        int mask = 0;
-        for (int i = 0; i < availableBits.length; i++) {
-            mask |= availableBits[i];
-        }
-        return hasBit(mask, bit, true);
-    }
-
-    /**
-     * delegates to {@link #hasBit(int, int, boolean)} using oneOfThem=true.
-     */
-    public static final boolean hasBit(int mask, int bit) {
-        return hasBit(mask, bit, true);
-    }
-
-    /**
-     * evaluates whether the given number contains the bits of the given mask.
-     * 
-     * @param number number to evaluate
-     * @param mask - an OR combination of bits
-     * @param oneOfThem if true, only one of the given combination must be contained in the event to return true
-     * @return true, if number contains the given bits (mask).
-     */
-    public static final boolean hasBit(int mask, int number, boolean oneOfThem) {
-        return (number & mask) >= (oneOfThem ? 1/*=any*/: number);
     }
 
     /**
@@ -528,18 +321,5 @@ public class NumberUtil {
     public static boolean isFloating(Class<?> type) {
         return BeanClass.isAssignableFrom(Float.class, type) || BeanClass.isAssignableFrom(Double.class, type)
             || BeanClass.isAssignableFrom(BigDecimal.class, type);
-    }
-
-    /**
-     * checkGreater
-     * 
-     * @param <T> value type
-     * @param name value (field) name
-     * @param value value to check to be greater as minimum min
-     * @param min minimum value
-     */
-    public static final <T extends Comparable<T>> void checkGreater(String name, T value, T min) {
-        if (!isGreater(value, min))
-            throw new FormattedException("tsl2nano.valuesizefailure", new Object[] { name, min });
     }
 }

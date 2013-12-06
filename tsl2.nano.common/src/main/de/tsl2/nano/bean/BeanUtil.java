@@ -49,6 +49,7 @@ import de.tsl2.nano.format.DefaultFormat;
 import de.tsl2.nano.format.FormatUtil;
 import de.tsl2.nano.log.LogFactory;
 import de.tsl2.nano.util.StringUtil;
+import de.tsl2.nano.util.Util;
 
 /**
  * A Utility-Class for beans
@@ -751,7 +752,7 @@ public class BeanUtil {
                         final String info = "reading line " + st.lineno() + ":'" + t + "' into " + rootInfo + attr;
                         try {
                             Object newValue = null;
-                            if (!StringUtil.isEmpty(t)) {
+                            if (!Util.isEmpty(t)) {
                                 final BeanAttribute beanAttribute = BeanAttribute.getBeanAttribute(rootType, attr);
                                 Format parser = formatCache.get(attr);
                                 if (parser == null) {
