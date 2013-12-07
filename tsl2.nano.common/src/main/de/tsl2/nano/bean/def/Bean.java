@@ -182,7 +182,7 @@ public class Bean<T> extends BeanDefinition<T> {
                 if (instance != null)//perhaps an extended class has actions
                     actions = BeanClass.getActions(instance.getClass(), null);
                 if (actions.size() == 0 && BeanContainer.isInitialized()
-                    && BeanContainer.instance().isPersistable(clazz))
+                    && BeanContainer.instance().isPersistable(getDefiningClass(clazz)))
                     addDefaultSaveAction();
             }
         }

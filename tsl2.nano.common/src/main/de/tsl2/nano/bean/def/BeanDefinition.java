@@ -821,7 +821,7 @@ public class BeanDefinition<T> extends BeanClass<T> implements Serializable {
         setName(name);
         getAttributes();
         getAttributeNames();
-        getActions();
+//        getActions();
         getPresentable();
         getConnection("");
         getValueExpression();

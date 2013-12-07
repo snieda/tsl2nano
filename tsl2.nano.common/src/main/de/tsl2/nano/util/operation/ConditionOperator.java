@@ -15,6 +15,8 @@ import java.text.ParsePosition;
 import java.util.HashMap;
 import java.util.Map;
 
+import org.simpleframework.xml.core.Commit;
+
 import de.tsl2.nano.action.CommonAction;
 import de.tsl2.nano.action.IAction;
 import de.tsl2.nano.util.StringUtil;
@@ -28,7 +30,7 @@ import de.tsl2.nano.util.Util;
  */
 @SuppressWarnings({ "unchecked", "serial" })
 public class ConditionOperator<T> extends SOperator<T> {
-    BooleanOperator op;
+    private BooleanOperator op;
 
     public static final String KEY_THEN = "?";
     public static final String KEY_ELSE = ":";
@@ -56,6 +58,11 @@ public class ConditionOperator<T> extends SOperator<T> {
         converter = createConverter();
     }
 
+    protected BooleanOperator getOp() {
+        if (op == null)
+            op = new BooleanOperator((Map<CharSequence, Boolean>) values);
+        return op;
+    }
     protected IConverter<CharSequence, T> createConverter() {
         Format fmt = new Format() {
             @Override
@@ -103,9 +110,9 @@ public class ConditionOperator<T> extends SOperator<T> {
             }
         });
 
-        addOperation("&", new TypeOP(op, Boolean.class, "&"));
-        addOperation("|", new TypeOP(op, Boolean.class, "|"));
-        addOperation("!", new TypeOP(op, Boolean.class, "!"));
+        addOperation("&", new TypeOP(getOp(), Boolean.class, "&"));
+        addOperation("|", new TypeOP(getOp(), Boolean.class, "|"));
+        addOperation("!", new TypeOP(getOp(), Boolean.class, "!"));
     }
 
     /**

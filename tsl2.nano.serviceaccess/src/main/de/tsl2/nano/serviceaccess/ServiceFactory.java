@@ -109,6 +109,10 @@ public class ServiceFactory {
                 properties.put(KEY_JNDI_FILE, jndiFileName);
             } else {
                 properties = FileUtil.loadProperties("project.properties", classLoader);
+                if (properties.get(KEY_JNDI_FILE) == null) {
+                    LOG.info("no definition for " + KEY_JNDI_FILE + " found! using jndi.properties");
+                    properties.put(KEY_JNDI_FILE, "jndi.properties");
+                }
             }
             //loading server properties (directly from appserver start path)
             //IMPROVE: load it through a file connector

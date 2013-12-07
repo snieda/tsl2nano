@@ -226,7 +226,7 @@ public abstract class Operator<INPUT, OUTPUT> extends Parser<INPUT> {
     }
 
     /**
-     * main funtion to extract operation elements and to execute the operation.
+     * main function to extract operation elements and to execute the operation.
      * 
      * @param term term to analyse and execute
      * @param values pre-defined values

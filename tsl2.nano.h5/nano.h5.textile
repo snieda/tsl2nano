@@ -293,6 +293,23 @@ At the moment the replication hsqldb database has to started manually.
 - database: replication
 - port: 9898
 
+h2. Using an Applicationserver
+
+If you don't want to have a standalone appliation, you are able to use an application server like jboss. To do this you must have:
+* the *application servers client libraries* must be in your classpath. so copy them to your environment directory. with jboss eap 6.1 it would be _jboss-client.jar_.
+* of course, the *entity beans must be deployed* to that server perhaps in a  wraw  
+* create a *jndi.properties* file in your environment. with jboss this would look like the following:
+
+Example jndi for jboss eap 6.1:
+<pre>
+java.naming.factory.initial=org.jboss.naming.remote.client.InitialContextFactory
+java.naming.factory.url.pkgs=org.jboss.ejb.client.naming
+java.naming.provider.url=remote://localhost:4447
+java.naming.security.principal=<jndi-prefix>
+java.naming.security.credentials=<perhaps the application name>
+jboss.naming.client.ejb.context=true
+</pre>
+
 h2. Developing, Deploying and Debugging
 
 * "tsl2.nano code server":https://sourceforge.net/p/tsl2nano/code/ci/master/tree/tsl2.nano.common
@@ -429,24 +446,31 @@ public class MyApp extends NanoH5 {
 
 	@Override
 	protected BeanDefinition<?> createBeanCollectors(@SuppressWarnings("rawtypes") List<Class> beanClasses) {
-		/*
-		 * define own beans to present your entities another way
-		 */
-		Collection<Times> times = Environment.get(IBeanContainer.class).getBeans(Times.class, UNDEFINED, UNDEFINED);
-		
-		BeanCollector<Collection<Times>,Times> beanCollector = new BeanCollector<Collection<Times>, Times>(times, BeanCollector.MODE_ALL);
-		
-		AttributeDefinition space1 = beanCollector.getPresentationHelper().addSpaceValue();
-		beanCollector.setAttributeFilter("creation", "dbEnd", "pause", space1.getName(), "project", "comment");
-		//more fields on one line (one field has width 3)
-		beanCollector.getPresentable().setLayout(MapUtil.asMap(L_GRIDWIDTH, 12));
-		beanCollector.getAttribute("comment").getPresentation().setLayoutConstraints(MapUtil.asMap(ATTR_SPANCOL, 6, ATTR_BORDER, 1));
-		BeanDefinition.define(beanCollector);
-		
-		/*
-		 * define your own navigation stack
-		 */
-		return beanCollector;
+        /*
+         * define own beans to present your entities another way
+         */
+        Collection<Times> times = Environment.get(IBeanContainer.class).getBeans(Times.class, UNDEFINED, UNDEFINED);
+        BeanCollector<Collection<Times>, Times> beanCollector =
+            new BeanCollector<Collection<Times>, Times>(times, BeanCollector.MODE_ALL);
+        AttributeDefinition space1 = beanCollector.getPresentationHelper().addSpaceValue();
+        beanCollector.setAttributeFilter("creation", "dbEnd", "pause", space1.getName(), "project", "comment");
+        //more fields on one line (one field has grid-width 3)
+        beanCollector.getPresentable().setLayout(MapUtil.asMap(L_GRIDWIDTH, 12));
+        //let the field 'comment' grow to full width
+        beanCollector.getAttribute("comment").getPresentation()
+            .setLayoutConstraints(MapUtil.asMap(ATTR_SPANCOL, 11, ATTR_BORDER, 1, ATTR_SIZE, 150));
+        BeanDefinition.define(beanCollector);
+        /*
+         * use a rule with sub-rule
+         */
+        BigDecimal result =
+            (BigDecimal) Environment.get(RulePool.class).getRule("test-import")
+                .execute(MapUtil.asMap("A", true, "x1", 1, "x2", 2));
+        LOG.info("my test-import rule result:" + result);
+        /*
+         * define your own navigation stack
+         */
+        return beanCollector;
 	}
 	
     @SuppressWarnings("unchecked")
@@ -605,7 +629,9 @@ h2. TODOs
 * on export, the filtered names (like id) are given --> nullpointer
 * performance/memory: create only specific bean/beanvalue instances for changed values - use definition-instances if possible.
 * *TESTS*
-** test on android
+** (-) test on android
+*** no datasource for Sqlite available - apache BasicDatasource uses JavaBeans what is not usable on android
+*** ORMLite (4.47) not usable through persistence.xml because no EntityManagerFactory/EntityManager implementation available
 ** languages
 ** on appserver
 

@@ -17,13 +17,11 @@ import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
-import java.util.concurrent.Executors;
 
 import javax.ejb.TransactionAttribute;
 import javax.ejb.TransactionAttributeType;
 import javax.persistence.EntityManager;
 import javax.persistence.ManyToOne;
-import javax.persistence.OneToMany;
 import javax.persistence.OneToOne;
 import javax.persistence.metamodel.EntityType;
 
@@ -32,7 +30,7 @@ import org.apache.commons.logging.Log;
 import de.tsl2.nano.Environment;
 import de.tsl2.nano.bean.BeanAttribute;
 import de.tsl2.nano.bean.BeanClass;
-import de.tsl2.nano.bean.BeanContainer;
+import de.tsl2.nano.classloader.ThreadUtil;
 import de.tsl2.nano.exception.ForwardedException;
 import de.tsl2.nano.log.LogFactory;
 import de.tsl2.nano.service.util.AbstractStatelessServiceBean;
@@ -90,7 +88,15 @@ public class GenericReplicatingServiceBean extends GenericServiceBean {
      * @return list filled with service on persistence-unit 'replication'
      */
     protected static List<IGenericBaseService> createStandardReplication() {
-        return Arrays.asList((IGenericBaseService) new ReplicationServiceBean());
+        ReplicationServiceBean rep;
+        try {
+            rep = new ReplicationServiceBean();
+        } catch (Exception e) {
+            //Ok, continue without replication - this shouldn't break the application!
+            LOG.error("couldn't create standard replication", e);
+            return new ArrayList<IGenericBaseService>();
+        }
+        return Arrays.asList((IGenericBaseService) rep);
     }
 
     protected IGenericBaseService getAvailableReplication() {
@@ -103,7 +109,7 @@ public class GenericReplicatingServiceBean extends GenericServiceBean {
                     return replication;
                 }
             }
-            throw new IllegalStateException("No connection available!");
+            throw new IllegalStateException("No replication connection available!");
         }
         return replication;
     }
@@ -139,19 +145,17 @@ public class GenericReplicatingServiceBean extends GenericServiceBean {
 //            service.executeQuery("select now()", true, new Object[0]);
             return connected = true;
         } catch (Exception ex) {
-            if (throwException)
+//            //WORKAROUND for check
+//            String msg = ex.toString();
+//            boolean dbAnswer = msg != null && msg.contains("SQLException");
+            if (/*!dbAnswer && */throwException)
                 ForwardedException.forward(ex);
-            return connected = false;
+            return connected = false;//!dbAnswer;
         }
     }
 
     protected void doForReplication(Runnable replicationJob) {
-        LOG.debug("doing replication...");
-        Thread rep = Executors.defaultThreadFactory().newThread(replicationJob);
-        rep.setName("replication-service-job");
-        rep.setDaemon(true);
-        rep.setUncaughtExceptionHandler(Environment.get(UncaughtExceptionHandler.class));
-        rep.start();
+        ThreadUtil.startDaemon("replication-service-job", replicationJob, true, Environment.get(UncaughtExceptionHandler.class));
     }
 
     @Override

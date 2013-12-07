@@ -52,7 +52,7 @@ public class Authorization implements IAuthorization {
      * holding a wildcard for all permissions will be added.
      * 
      * @param userName user for new subject
-     * @param secure if true, a wildcard for all permissions will be added.
+     * @param secure if false, a wildcard for all permissions will be added.
      * @return new authorization instance
      */
     public static Authorization create(String userName, boolean secure) {

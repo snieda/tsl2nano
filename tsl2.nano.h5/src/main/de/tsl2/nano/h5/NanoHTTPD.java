@@ -26,6 +26,7 @@ import java.io.ByteArrayOutputStream;
 import java.io.FileOutputStream;
 
 import de.tsl2.nano.Main;
+import de.tsl2.nano.classloader.ThreadUtil;
 
 /**
  * A simple, tiny, nicely embeddable HTTP 1.0 (partially 1.1) server in Java
@@ -241,7 +242,7 @@ public class NanoHTTPD extends Main
 				}
 			});
 		//15092013ts: true --> false to don't stop if main has finished
-		myThread.setName("httpsession:"+port);
+		myThread.setName("nano-httpd-server:"+port);
 		myThread.setDaemon( false );
 		myThread.start();
 	}
@@ -310,9 +311,7 @@ public class NanoHTTPD extends Main
 		public HTTPSession( Socket s )
 		{
 			mySocket = s;
-			Thread t = new Thread( this );
-			t.setDaemon( true );
-			t.start();
+			ThreadUtil.startDaemon("nano-session:" + s, this);
 		}
 
 		public void run()
@@ -481,7 +480,8 @@ public class NanoHTTPD extends Main
 			try {
 				// Read the request line
 				String inLine = in.readLine();
-				if (inLine == null) return;
+				if (inLine == null)
+                    sendError( HTTP_BADREQUEST, "BAD REQUEST: Syntax error. Usage: GET /example/file.html" );
 				StringTokenizer st = new StringTokenizer( inLine );
 				if ( !st.hasMoreTokens())
 					sendError( HTTP_BADREQUEST, "BAD REQUEST: Syntax error. Usage: GET /example/file.html" );

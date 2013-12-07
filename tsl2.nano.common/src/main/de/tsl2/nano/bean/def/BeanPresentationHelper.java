@@ -1109,7 +1109,7 @@ public class BeanPresentationHelper<T> {
                 IAction.MODE_UNDEFINED,
                 false,
                 "icons/images_all.png") {
-                File exportFile = new File(Environment.get(bean.getName() + ".exort.file",
+                File exportFile = new File(Environment.get(bean.getName() + ".export.file",
                     Environment.getConfigPath() + bean.getName() + ".rtf"));
 
                 @Override

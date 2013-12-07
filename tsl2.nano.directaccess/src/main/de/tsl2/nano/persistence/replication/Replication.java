@@ -13,8 +13,11 @@ import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.Socket;
+import java.net.URL;
 import java.util.Map;
 import java.util.concurrent.Executors;
+
+import org.apache.commons.logging.Log;
 
 import de.tsl2.nano.Environment;
 import de.tsl2.nano.exception.ForwardedException;
@@ -34,6 +37,7 @@ public class Replication extends Persistence implements Runnable {
     /** serialVersionUID */
     private static final long serialVersionUID = 8157364611484654367L;
 
+    private static final Log LOG = LogFactory.getLog(Replication.class);
     /** xml serialization of Persistence object */
     public static final String FILE_REPLICATION_BEAN = "replication-bean.xml";
 
@@ -138,10 +142,16 @@ public class Replication extends Persistence implements Runnable {
              * create hsqldb database script
              */
             try {
-                InputStream stream = (InputStream) Thread.currentThread()
+                URL resource = Thread.currentThread()
                     .getContextClassLoader()
-                    .getResource("replication.script")
-                    .getContent();
+                    .getResource("replication.script");
+                //on nested jars, the resource may be unloadable...
+                if (resource == null) {
+                    LOG.error("unable to load replication.script ==> canceling replication!");
+                    return;
+                }
+                    
+                InputStream stream = (InputStream) resource.getContent();
                 String database_script = String.copyValueOf(FileUtil.getFileData(stream, null));
 
                 //hsqldb needs user in uppercase

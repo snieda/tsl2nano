@@ -9,14 +9,16 @@
  */
 package de.tsl2.nano.persistence.replication;
 
-import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Iterator;
 import java.util.LinkedHashSet;
 
 import javax.persistence.EntityManager;
 
-import de.tsl2.nano.exception.ForwardedException;
+import org.apache.commons.logging.Log;
+
+import de.tsl2.nano.bean.BeanUtil;
+import de.tsl2.nano.log.LogFactory;
 import de.tsl2.nano.persistence.GenericLocalServiceBean;
 
 /**
@@ -26,7 +28,8 @@ import de.tsl2.nano.persistence.GenericLocalServiceBean;
  * @version $Revision$
  */
 public class ReplicationServiceBean extends GenericLocalServiceBean {
-
+    private static final Log LOG = LogFactory.getLog(GenericLocalServiceBean.class);
+    
     /**
      * constructor
      */
@@ -62,14 +65,19 @@ public class ReplicationServiceBean extends GenericLocalServiceBean {
                     newBeans.add(persist/*NoTransaction*/(bean));//, true, true));
                     it.remove();
                 } catch (Exception ex) {
+                    LOG.error(ex.toString());
                     //some relations weren't saved yet - we do that hoping to find it later in the list
                 }
             }
             if (count == beans.size())
-                throw new RuntimeException("Replication couldn't be done on " + beans);
+                throw new RuntimeException("replication couldn't be done on " + beans);
         }
 //        connection().getTransaction().commit();
         return newBeans;
     }
 
+    @Override
+    public <T> T persistNoTransaction(T bean, boolean refreshBean, boolean flush, Class... lazyRelations) {
+        return super.persistNoTransaction(/*BeanUtil.copy(*/bean/*)*/, refreshBean, flush, lazyRelations);
+    }
 }
