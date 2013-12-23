@@ -92,7 +92,7 @@ public class Replication extends Persistence implements Runnable {
 
         p = prop;
 
-        if (Environment.get("use.database.replication", true)) {
+        if (Environment.get("use.database.replication", false)) {
             startReplicationThread();
         }
     }

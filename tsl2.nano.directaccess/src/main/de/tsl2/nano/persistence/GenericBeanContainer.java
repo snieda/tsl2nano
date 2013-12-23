@@ -44,6 +44,7 @@ public abstract class GenericBeanContainer extends BeanContainerUtil {
      * @param classloader loader to be used inside the own servicefactory instance.
      */
     public static void initContainer(final GenericBeanContainer container, ClassLoader classloader) {
+        Environment.addService(IGenericService.class, container.getGenService());
 
         IAction<Collection<?>> typeFinder = new CommonAction<Collection<?>>() {
             @Override
@@ -51,7 +52,7 @@ public abstract class GenericBeanContainer extends BeanContainerUtil {
                 Class entityType = (Class) parameter[0];
                 int startIndex = (Integer) parameter[1];
                 int maxResult = (Integer) parameter[2];
-                if (!new BeanClass(entityType).isAnnotationPresent(Entity.class)) {
+                if (!BeanClass.getBeanClass(entityType).isAnnotationPresent(Entity.class)) {
                     return null;
                 }
                 return container.getGenService().findAll(entityType, startIndex, maxResult);
@@ -82,7 +83,7 @@ public abstract class GenericBeanContainer extends BeanContainerUtil {
             @Override
             public Object action() {
                 //use the weak implementation of BeanClass to avoid classloader problems!
-                if (new BeanClass(parameter[0].getClass()).isAnnotationPresent(Entity.class)) {
+                if (BeanClass.getBeanClass(parameter[0].getClass()).isAnnotationPresent(Entity.class)) {
                     return container.getGenService().instantiateLazyRelationship(parameter[0]);
                 } else {
                     return parameter[0];

@@ -414,7 +414,7 @@ public class Persistence implements Serializable {
         return replication;
     }
 
-    public void setReplication(Replication replication) {
+    public void setReplication(Persistence replication) {
         this.replication = replication;
     }
 

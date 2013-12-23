@@ -207,7 +207,7 @@ public class GenericReplicatingServiceBean extends GenericServiceBean {
         ArrayList<Object> replications = new ArrayList<Object>(reps);
         List<Object> myAttrValues = new LinkedList<Object>();
         for (Object e : replications) {
-            bc = new BeanClass(e.getClass());
+            bc = BeanClass.getBeanClass(e.getClass());
             Collection<BeanAttribute> relationAttrs = bc.findAttributes(ManyToOne.class);
             relationAttrs.addAll(bc.findAttributes(OneToOne.class));
             myAttrValues.clear();
