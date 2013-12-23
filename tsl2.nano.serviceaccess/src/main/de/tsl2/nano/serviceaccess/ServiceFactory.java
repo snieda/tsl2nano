@@ -30,6 +30,7 @@ import javax.security.auth.login.LoginContext;
 
 import org.apache.commons.logging.Log;
 
+import de.tsl2.nano.Environment;
 import de.tsl2.nano.exception.FormattedException;
 import de.tsl2.nano.exception.ForwardedException;
 import de.tsl2.nano.log.LogFactory;
@@ -102,6 +103,7 @@ public class ServiceFactory {
     private ServiceFactory(ClassLoader classloader, String jndiFileName) {
         super();
         try {
+            //TODO: refactore to use environment.properties instead of project.properties!
             this.classLoader = classloader;
             //loading client properties
             if (jndiFileName != null) {
@@ -110,8 +112,10 @@ public class ServiceFactory {
             } else {
                 properties = FileUtil.loadProperties("project.properties", classLoader);
                 if (properties.get(KEY_JNDI_FILE) == null) {
-                    LOG.info("no definition for " + KEY_JNDI_FILE + " found! using jndi.properties");
-                    properties.put(KEY_JNDI_FILE, "jndi.properties");
+                    LOG.warn("no definition for " + KEY_JNDI_FILE + " found! using default: jndi.properties");
+                    //new: default jndi file and prefix
+                    properties.put(KEY_JNDI_FILE, Environment.get("applicationserver.jndi.file", "jndi.properties"));
+                    jndi_prefix = Environment.get("applicationserver.jndi.prefix", Environment.getName().toLowerCase().trim());
                 }
             }
             //loading server properties (directly from appserver start path)
@@ -123,7 +127,8 @@ public class ServiceFactory {
                 LOG.info("couldn't load optional properties from " + file.getAbsolutePath());
             }
             // set the default jndi prefix
-            jndi_prefix = properties.getProperty("project.name");
+            if (jndi_prefix == null)
+                jndi_prefix = properties.getProperty("project.name");
         } catch (final Exception e) {
             throw new RuntimeException(e);
         }

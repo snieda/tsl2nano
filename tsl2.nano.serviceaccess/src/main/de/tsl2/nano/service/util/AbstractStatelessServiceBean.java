@@ -18,6 +18,7 @@ import javax.ejb.SessionContext;
 import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
 import javax.persistence.Query;
+import javax.persistence.metamodel.EntityType;
 
 import org.apache.commons.logging.Log;
 import de.tsl2.nano.log.LogFactory;
@@ -56,12 +57,13 @@ abstract public class AbstractStatelessServiceBean implements IStatelessService 
 
     /**
      * encapsulates the entity manager to be exchangable. don't call the entity manager directly!
+     * 
      * @return
      */
     public EntityManager connection() {
         return entityManager;
     }
-    
+
     /**
      * in your business session beans you will use declarative security checks through annotations like
      * <code>@javax.annotation.security.RolesAllowed(IAktenService.ROLE_AKTE_SUCHEN)</code>. in generic services, you
@@ -89,6 +91,7 @@ abstract public class AbstractStatelessServiceBean implements IStatelessService 
      * <pre>
      * @SecurityDomain("client-login")
      * </pre>
+     * 
      * the principal classes should be available inside the servers lib path.
      */
     protected void checkContextSecurity() {
@@ -160,7 +163,7 @@ abstract public class AbstractStatelessServiceBean implements IStatelessService 
     public Properties getServerInfo() {
         return System.getProperties();
     }
-    
+
     /**
      * helper to log a query with its parameters
      * 
@@ -194,7 +197,8 @@ abstract public class AbstractStatelessServiceBean implements IStatelessService 
                 final Properties properties = ServiceFactory.instance().getProperties();
                 maxresult = Integer.valueOf(properties.getProperty("maxresult", String.valueOf(DEFAULT_MAX_RESULT)));
             } else {
-                LOG.warn("servicefactory not initialized or maxresult not defined, using default value: " + DEFAULT_MAX_RESULT);
+                LOG.warn("servicefactory not initialized or maxresult not defined, using default value: "
+                    + DEFAULT_MAX_RESULT);
                 maxresult = DEFAULT_MAX_RESULT;
             }
         }
@@ -213,7 +217,8 @@ abstract public class AbstractStatelessServiceBean implements IStatelessService 
                 final Properties properties = ServiceFactory.instance().getProperties();
                 maxresult = Integer.valueOf(properties.getProperty("lazyrelationtype", DEFAULT_LAZY_RELATION_TYPE));
             } else {
-                LOG.warn("servicefactory not initialized or maxresult not defined, using default value: " + DEFAULT_LAZY_RELATION_TYPE);
+                LOG.warn("servicefactory not initialized or maxresult not defined, using default value: "
+                    + DEFAULT_LAZY_RELATION_TYPE);
                 lazyRelationType = DEFAULT_LAZY_RELATION_TYPE;
             }
         }
@@ -230,9 +235,12 @@ abstract public class AbstractStatelessServiceBean implements IStatelessService 
             LOG.info("EntityManager:\n" + StringUtil.toFormattedString(connection().getProperties(), 50));
             if (ServiceFactory.isInitialized()) {
                 final Properties properties = ServiceFactory.instance().getProperties();
-                maxrecursionlevel = Integer.valueOf(properties.getProperty("maxrecusionlevel", String.valueOf(DEFAULT_MAX_RECURSION_LEVEL)));
+                maxrecursionlevel =
+                    Integer.valueOf(properties.getProperty("maxrecusionlevel",
+                        String.valueOf(DEFAULT_MAX_RECURSION_LEVEL)));
             } else {
-                LOG.warn("servicefactory not initialized or maxrecusionlevel not defined, using default value: " + DEFAULT_MAX_RECURSION_LEVEL);
+                LOG.warn("servicefactory not initialized or maxrecusionlevel not defined, using default value: "
+                    + DEFAULT_MAX_RECURSION_LEVEL);
                 maxrecursionlevel = DEFAULT_MAX_RECURSION_LEVEL;
             }
         }
@@ -247,4 +255,13 @@ abstract public class AbstractStatelessServiceBean implements IStatelessService 
     protected boolean isLazyLoadingOnlyOnOneToMany() {
         return getLazyRelationType().equals(DEFAULT_LAZY_RELATION_TYPE);
     }
+
+    /**
+     * getEntityTypes
+     * @return persistence-units entity types
+     */
+    public Collection<EntityType<?>> getEntityTypes() {
+        return entityManager.getEntityManagerFactory().getMetamodel().getEntities();
+    }
+
 }

@@ -14,6 +14,7 @@ import java.lang.reflect.Proxy;
 import java.lang.reflect.UndeclaredThrowableException;
 import java.security.PrivilegedAction;
 
+import de.tsl2.nano.Messages;
 import de.tsl2.nano.exception.FormattedException;
 import de.tsl2.nano.exception.ForwardedException;
 import de.tsl2.nano.util.StringUtil;
@@ -53,7 +54,7 @@ public class ServiceProxy<T> extends DefaultService implements InvocationHandler
         if (delegate == null || !interfaze.isAssignableFrom(delegate.getClass())) {
             throw new FormattedException("the delegate instance must implement the service interface!\ninterface: " + interfaze
                 + "\ndelegate: "
-                + String.valueOf(delegate)
+                + Messages.stripParameterBrackets(String.valueOf(delegate))
                 + "\n\nmostly the reason are missing appserver-client-libraries to your client.");
         }
         return (T) Proxy.newProxyInstance(classLoader, new Class[] { interfaze }, new ServiceProxy(delegate));

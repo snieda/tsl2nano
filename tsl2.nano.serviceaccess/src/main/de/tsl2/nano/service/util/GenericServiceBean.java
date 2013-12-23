@@ -211,7 +211,7 @@ public class GenericServiceBean extends NamedQueryServiceBean implements IGeneri
          */
         boolean checkTypesOnly = false;
         if (attributes == null) {
-            attributes = /*isLazyLoadingOnlyOnOneToMany() ? new BeanClass(clazz).getMultiValueAttributes() : */new BeanClass(clazz).getAttributeNames();
+            attributes = /*isLazyLoadingOnlyOnOneToMany() ? new BeanClass(clazz).getMultiValueAttributes() : */BeanClass.getBeanClass(clazz).getAttributeNames();
             if (fillTypes != null && fillTypes.size() > 0)
                 checkTypesOnly = true;
         }

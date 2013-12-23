@@ -15,14 +15,18 @@ import java.lang.reflect.Method;
 import java.math.BigDecimal;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.Date;
 import java.util.HashSet;
 import java.util.LinkedList;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
 import javax.persistence.Column;
+import javax.persistence.Entity;
 import javax.persistence.EntityManager;
 import javax.persistence.Id;
 import javax.persistence.JoinColumn;
@@ -150,7 +154,7 @@ public class ServiceUtil {
             and_cond = CLAUSE_WHERE;
         }
         final Class<?> clazz = valueBean.getClass();
-        final BeanClass bclazz = new BeanClass(clazz);
+        final BeanClass bclazz = BeanClass.getBeanClass(clazz);
         final Collection<BeanAttribute> attributes = bclazz.getSingleValueAttributes();
         final String prefix = "'";
         final String postfix = OP_LIKE.equals(operator) ? "%'" : "'";
@@ -166,7 +170,7 @@ public class ServiceUtil {
                 //on manyToOne mappings use the foreignkey column
                 boolean isManyToOne = false;
                 if (!BeanUtil.isStandardType(value.getClass())) {
-                    final Collection<BeanAttribute> foreignIdAttributes = new BeanClass(value.getClass()).findAttributes(Id.class);
+                    final Collection<BeanAttribute> foreignIdAttributes = BeanClass.getBeanClass(value.getClass()).findAttributes(Id.class);
                     if (foreignIdAttributes.size() > 0) {
                         final BeanAttribute foreignKey = foreignIdAttributes.iterator().next();
                         value = foreignKey.getValue(value);
@@ -263,7 +267,7 @@ public class ServiceUtil {
         }
         attrPrefix = attrPrefix == null ? SUBST_RESULTBEAN + "." : attrPrefix;
         final Class<?> clazz = valueBean.getClass();
-        final BeanClass bclazz = new BeanClass(clazz);
+        final BeanClass bclazz = BeanClass.getBeanClass(clazz);
         final Collection<BeanAttribute> attributes = bclazz.getSingleValueAttributes();
         Object value;
         for (final BeanAttribute beanAttribute : attributes) {
@@ -375,7 +379,7 @@ public class ServiceUtil {
         }
         attrPrefix = attrPrefix == null ? SUBST_RESULTBEAN + "." : attrPrefix;
         final Class<?> clazz = fromBean.getClass();
-        final BeanClass bclazz = new BeanClass(clazz);
+        final BeanClass bclazz = BeanClass.getBeanClass(clazz);
         final Collection<BeanAttribute> attributes = bclazz.getSingleValueAttributes();
         Object fromValue, toValue;
         String strValue;
@@ -666,7 +670,7 @@ public class ServiceUtil {
     }
 
     public static String getIdName(Object bean) {
-        final BeanClass bc = new BeanClass(bean.getClass());
+        final BeanClass bc = BeanClass.getBeanClass(bean.getClass());
         final Collection<BeanAttribute> attributes = bc.findAttributes(Id.class);
         if (attributes.size() > 0) {
             return attributes.iterator().next().getName();
@@ -710,7 +714,7 @@ public class ServiceUtil {
     @SuppressWarnings({ "unchecked", "rawtypes" })
     public static <T> void prepareStringValuesForBetween(T firstBean, T secondBean) {
         final Class<?> clazz = firstBean.getClass();
-        final BeanClass bclazz = new BeanClass(clazz);
+        final BeanClass bclazz = BeanClass.getBeanClass(clazz);
         final Collection<BeanAttribute> attributes = bclazz.getSingleValueAttributes();
         for (final BeanAttribute beanAttribute : attributes) {
             if (String.class.isAssignableFrom(beanAttribute.getType())) {
@@ -734,7 +738,7 @@ public class ServiceUtil {
      *            will be surrounded by "'".
      */
     public static void fillNullValues(Object bean, boolean maxValues, boolean useDatabaseFormat) {
-        final Collection<BeanAttribute> singleValueAttributes = new BeanClass(bean.getClass()).getSingleValueAttributes();
+        final Collection<BeanAttribute> singleValueAttributes = BeanClass.getBeanClass(bean.getClass()).getSingleValueAttributes();
         for (final BeanAttribute beanAttribute : singleValueAttributes) {
             if (beanAttribute.getValue(bean) != null) {
                 continue;
@@ -850,7 +854,7 @@ public class ServiceUtil {
      * @return true, if query contains standardized name parameters like :par1.
      */
     public static final boolean useNamedParameters(String query) {
-        return query.contains(":par1");
+        return !query.contains("?") || query.contains(":par1");
     }
 
     /**
@@ -956,7 +960,7 @@ public class ServiceUtil {
         if (!bean.getClass().getPackage().getName().startsWith(packagePrefix))
             return match;
         LOG.debug("checking instance: " + bean);
-        BeanClass<?> beanClass = new BeanClass(bean.getClass());
+        BeanClass<?> beanClass = BeanClass.getBeanClass(bean.getClass());
         Collection<BeanAttribute> ids = beanClass.findAttributes(annotation);
         if (ids != null && ids.size() > 0)
             if (ids.iterator().next().getValue(bean) == annotationValue || (annotationValue != null && annotationValue.equals(ids.iterator()
@@ -981,4 +985,89 @@ public class ServiceUtil {
         return match;
     }
 
+    /**
+     * see {@link #useNewInstances(Object, List, List)}
+     * @param tree entity tree to walk through
+     * @param newInstances new entity instances to be used
+     * @return count of changes
+     */
+    public static int useNewInstances(Object tree, Object... newInstances) {
+        List<Object> newEntities = Arrays.asList(newInstances);
+        ArrayList<Object> onwork = new ArrayList<Object>();
+        //first, check the new instance trees for themselves
+        for (int i = 0; i < newInstances.length; i++) {
+            if (newInstances[i] != null)
+                useNewInstances(newInstances[i], newEntities, onwork);
+        }
+        //now, do the main thing
+        return useNewInstances(tree, Arrays.asList(newInstances), onwork);
+    }
+
+    /**
+     * conveniences to copy new instance references into the given object tree. all entities inside the object tree that
+     * are equal to one of the newInstances will be overwritten with the reference of that new instance. this will avoid
+     * the following hibernate exception:
+     * 
+     * <pre>
+     *  java.lang.IllegalStateException: An entity copy was already assigned to a different entity.
+     * </pre>
+     * 
+     * Attention: in most cases it would be better to copy all values of the new instance copy to the old loaded
+     * instance!
+     * 
+     * @param tree root entity holding an entity tree
+     * @param newInstances new entity copies to be used in tree
+     * @return count of changes
+     */
+    public static int useNewInstances(Object tree, List<Object> newEntities, List<Object> onwork) {
+        int count = 0, i;
+        if (onwork.contains(tree))
+            return 0;
+        onwork.add(tree);
+        List<BeanAttribute> attributes = BeanClass.getBeanClass(tree.getClass()).getAttributes();
+        for (BeanAttribute attr : attributes) {
+            Object v = attr.getValue(tree);
+            if (v != null) {
+                try {
+                    if ((i = newEntities.indexOf(v)) != -1) {
+                        LOG.debug(attr.getId() + " referencing to new instance");
+                        attr.setValue(tree, newEntities.get(i));
+                        count++;
+                    } else {
+                        if (v instanceof Collection) {
+                            Collection collection = (Collection) v;
+                            if (collection.size() > 0 && isEntity(collection.iterator().next())) {
+                                for (Object object : collection) {
+                                    if ((i = newEntities.indexOf(object)) != -1) {
+                                        LOG.debug(attr.getId() + " referencing to new instance");
+                                        collection.remove(object);
+                                        collection.add(newEntities.get(i));
+                                        count++;
+                                    } else {
+                                        count += useNewInstances(object, newEntities, onwork);
+                                    }
+                                }
+                            }
+                        } else if (isEntity(v)) {
+                            count += useNewInstances(v, newEntities, onwork);
+                        }
+                    }
+                } catch (Exception ex) {
+                    //mostly a problem of lazy loading --> no problem
+                    LOG.trace(ex);
+                }
+            }
+        }
+        return count;
+    }
+
+    /**
+     * isEntity
+     * 
+     * @param value
+     * @return true, if class of value has annotation {@link Entity}
+     */
+    static boolean isEntity(Object value) {
+        return BeanClass.getBeanClass(value.getClass()).isAnnotationPresent(Entity.class);
+    }
 }

@@ -26,8 +26,8 @@ import javax.persistence.Temporal;
 import javax.persistence.TemporalType;
 
 import org.apache.commons.logging.Log;
-import de.tsl2.nano.log.LogFactory;
 
+import de.tsl2.nano.Environment;
 import de.tsl2.nano.action.CommonAction;
 import de.tsl2.nano.action.IAction;
 import de.tsl2.nano.bean.BeanAttribute;
@@ -35,6 +35,7 @@ import de.tsl2.nano.bean.BeanClass;
 import de.tsl2.nano.bean.BeanContainer;
 import de.tsl2.nano.bean.IAttributeDef;
 import de.tsl2.nano.exception.ForwardedException;
+import de.tsl2.nano.log.LogFactory;
 import de.tsl2.nano.serviceaccess.ServiceFactory;
 
 /**
@@ -43,7 +44,7 @@ import de.tsl2.nano.serviceaccess.ServiceFactory;
  * @author Thomas Schneider, Thomas Schneider
  * @version $Revision$
  */
-@SuppressWarnings({"rawtypes", "unchecked", "serial"})
+@SuppressWarnings({ "rawtypes", "unchecked", "serial" })
 public class BeanContainerUtil {
     private static final Map<String, IAttributeDef> attrDefCache = new HashMap<String, IAttributeDef>();
 
@@ -60,6 +61,7 @@ public class BeanContainerUtil {
             ServiceFactory.createInstance(classloader);
         }
         final IGenericService service = ServiceFactory.instance().getService(IGenericService.class);
+        Environment.addService(IGenericService.class, service);
 
         final IAction<Collection<?>> typeFinder = new CommonAction<Collection<?>>() {
             @Override
@@ -67,7 +69,7 @@ public class BeanContainerUtil {
                 final Class entityType = (Class) parameter[0];
                 final int startIndex = (Integer) parameter[1];
                 final int maxResult = (Integer) parameter[2];
-                if (!new BeanClass(entityType).isAnnotationPresent(Entity.class)) {
+                if (!BeanClass.getBeanClass(entityType).isAnnotationPresent(Entity.class)) {
                     return null;
                 }
                 return service.findAll(entityType, startIndex, maxResult);
@@ -82,7 +84,8 @@ public class BeanContainerUtil {
         final IAction<Collection<?>> betweenFinder = new CommonAction<Collection<?>>() {
             @Override
             public Collection<?> action() {
-                return service.findBetween(parameter[0], parameter[1], true, (Integer)parameter[2], (Integer) parameter[3]);
+                return service.findBetween(parameter[0], parameter[1], true, (Integer) parameter[2],
+                    (Integer) parameter[3]);
             }
         };
         final IAction<Collection<?>> queryFinder = new CommonAction<Collection<?>>() {
@@ -98,7 +101,7 @@ public class BeanContainerUtil {
             @Override
             public Object action() {
                 //use the weak implementation of BeanClass to avoid classloader problems!
-                if (new BeanClass(parameter[0].getClass()).isAnnotationPresent(Entity.class)) {
+                if (BeanClass.getBeanClass(parameter[0].getClass()).isAnnotationPresent(Entity.class)) {
                     return service.instantiateLazyRelationship(parameter[0]);
                 } else {
                     return parameter[0];
@@ -164,7 +167,7 @@ public class BeanContainerUtil {
      * @return true, if class is entity
      */
     public static boolean isPersistable(Class<?> beanClass) {
-        return new BeanClass(BeanClass.getDefiningClass(beanClass)).isAnnotationPresent(Entity.class);
+        return BeanClass.getBeanClass(BeanClass.getDefiningClass(beanClass)).isAnnotationPresent(Entity.class);
     }
 
     /**
@@ -220,10 +223,11 @@ public class BeanContainerUtil {
             if (column == null) {
                 if (joinColumn != null) {
                     def = new IAttributeDef() {
-                        BeanClass joinColumnBC = new BeanClass(joinColumn.getClass());
+                        BeanClass joinColumnBC = BeanClass.getBeanClass(joinColumn.getClass());
                         Boolean nullable;
                         Boolean composition;
-                        
+                        Class<? extends Date> temporalType;
+
                         @Override
                         public int scale() {
                             return -1;
@@ -251,12 +255,20 @@ public class BeanContainerUtil {
                         public boolean id() {
                             return id != null;
                         }
-                        
+
+                        @Override
+                        public boolean unique() {
+                            return false;
+                        }
+
                         @Override
                         public Class<? extends Date> temporalType() {
-                            return null;
+                            if (temporalType == null && temporal != null) {
+                                temporalType = getTemporalType(temporal);
+                            }
+                            return temporalType;
                         }
-                        
+
                         @Override
                         public boolean composition() {
                             if (composition == null) {
@@ -265,19 +277,64 @@ public class BeanContainerUtil {
                             return composition;
                         }
                     };
-                    attrDefCache.put(attrKey(clazz, attribute), def);
-                    return def;
+                } else {
+                    def = new IAttributeDef() {
+                        Class<? extends Date> temporalType;
+                        @Override
+                        public int scale() {
+                            return -1;
+                        }
+
+                        @Override
+                        public int precision() {
+                            return -1;
+                        }
+
+                        @Override
+                        public boolean nullable() {
+                            return true;
+                        }
+
+                        @Override
+                        public int length() {
+                            return -1;
+                        }
+
+                        @Override
+                        public boolean id() {
+                            return id != null;
+                        }
+
+                        @Override
+                        public boolean unique() {
+                            return false;
+                        }
+
+                        @Override
+                        public Class<? extends Date> temporalType() {
+                            if (temporalType == null && temporal != null) {
+                                temporalType = getTemporalType(temporal);
+                            }
+                            return temporalType;
+                        }
+
+                        @Override
+                        public boolean composition() {
+                            return false;
+                        }
+                    };
                 }
-                attrDefCache.put(attrKey(clazz, attribute), null);
-                return null;
+                attrDefCache.put(attrKey(clazz, attribute), def);
+                return def;
             }
 
             def = new IAttributeDef() {
-                BeanClass columnBC = new BeanClass(column.getClass());
+                BeanClass columnBC = BeanClass.getBeanClass(column.getClass());
                 Integer scale;
                 Integer precision;
                 Integer length;
                 Boolean nullable;
+                Boolean unique;
                 Class<? extends Date> temporalType;
 
                 @Override
@@ -316,14 +373,18 @@ public class BeanContainerUtil {
                 public boolean id() {
                     return id != null;
                 }
-                
+
+                @Override
+                public boolean unique() {
+                    if (unique == null)
+                        unique = (Boolean) columnBC.callMethod(column, "unique");
+                    return unique;
+                }
+
                 @Override
                 public java.lang.Class<? extends java.util.Date> temporalType() {
                     if (temporalType == null && temporal != null) {
-                        BeanClass temporalBC = new BeanClass(temporal.getClass());
-                        TemporalType t =  (TemporalType) temporalBC.callMethod(temporal, "value");
-                        temporalType = (Class<? extends Date>) (t.equals(TemporalType.DATE) ? Date.class
-                            : t.equals(TemporalType.TIME) ? Time.class : Timestamp.class);
+                        temporalType = getTemporalType(temporal);
                     }
                     return temporalType;
                 }
@@ -339,6 +400,18 @@ public class BeanContainerUtil {
             ForwardedException.forward(e);
             return null;
         }
+    }
+
+    /**
+     * getTemporalType
+     * 
+     * @param temporal
+     */
+    protected static Class<? extends Date> getTemporalType(final Annotation temporal) {
+        BeanClass temporalBC = BeanClass.getBeanClass(temporal.getClass());
+        TemporalType t = (TemporalType) temporalBC.callMethod(temporal, "value");
+        return (Class<? extends Date>) (t.equals(TemporalType.DATE) ? Date.class
+            : t.equals(TemporalType.TIME) ? Time.class : Timestamp.class);
     }
 
     private static final String attrKey(Class<?> clazz, String attribute) {
