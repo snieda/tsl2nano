@@ -234,8 +234,9 @@ public class NanoHTTPD extends Main
 				{
 					try
 					{
-						while( true )
+						while( true ) {
 							new HTTPSession( myServerSocket.accept());
+						}
 					}
 					catch ( IOException ioe )
 					{}
@@ -311,7 +312,8 @@ public class NanoHTTPD extends Main
 		public HTTPSession( Socket s )
 		{
 			mySocket = s;
-			ThreadUtil.startDaemon("nano-session:" + s, this);
+			//more than one thread will be opened per request: loading pictures from files
+			ThreadUtil.startDaemon("nano-session:" + s, this, false, null);
 		}
 
 		public void run()
