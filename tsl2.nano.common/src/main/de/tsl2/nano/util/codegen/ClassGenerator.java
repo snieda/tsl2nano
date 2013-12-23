@@ -172,7 +172,7 @@ public class ClassGenerator {
         //      assert modelFile.endsWith(".class") : "ClassGenerator.getModel(): The modelFile has to point to the package path of a java class file!";
         try {
             final Class clazz = classLoader.loadClass(modelFile);
-            return new BeanClass(clazz);
+            return BeanClass.getBeanClass(clazz);
         } catch (final ClassNotFoundException e) {
             throw new RuntimeException(e);
         }

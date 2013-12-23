@@ -42,4 +42,7 @@ public interface IAttributeDef {
      * @return true, if attribute cannot exist without it's parent bean.
      */
     boolean composition();
+    
+    /** whether this field should be unique */
+    boolean unique();
 }

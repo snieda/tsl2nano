@@ -72,7 +72,7 @@ public class TableList<H extends Comparable<H>, ID> {
                 header[i] = headerType.cast(String.valueOf(i));
             }
         } else {//--> default construction
-            BeanClass<H> bc = new BeanClass<H>(headerType);
+            BeanClass<H> bc = BeanClass.getBeanClass(headerType);
             for (int i = 0; i < header.length; i++) {
                 header[i] = (H) bc.createInstance();
             }

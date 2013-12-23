@@ -1067,7 +1067,7 @@ public class RegExpFormat extends Format implements INumberFormatCheck {
             final IConverter<String, Object> converter,
             final boolean useCache) {
         final RegExpFormat format = new RegExpFormat(pattern, initMask) {
-            final TYPE instance = new BeanClass<TYPE>(type).createInstance();
+            final TYPE instance = BeanClass.getBeanClass(type).createInstance();
             final BeanAttribute attribute = BeanAttribute.getBeanAttribute(type, uniqueIdAttribute);
             final ReferenceMap cache = useCache ? new ReferenceMap(ReferenceMap.SOFT,
                 org.apache.commons.collections.ReferenceMap.SOFT) : null;

@@ -537,8 +537,15 @@ public class BeanCollector<COLLECTIONTYPE extends Collection<T>, T> extends Bean
                 final Object result = editItem(newBean);
                 if (!IAction.CANCELED.equals(result)) {
                     newBean = (T) beanFinder.unwrapToSelectableBean(result);
+                    final T finalBean = newBean;
                     final COLLECTIONTYPE values = collection;
                     values.add(newBean);
+                    Bean.getBean((Serializable)newBean).attach(new Runnable() {
+                        @Override
+                        public void run() {
+                            values.remove(finalBean);
+                        }
+                    });
                     refresh();
                     setSelected(newBean);
                 }
@@ -745,7 +752,11 @@ public class BeanCollector<COLLECTIONTYPE extends Collection<T>, T> extends Bean
     
     @Override
     public String getColumnText(Object element, int columnIndex) {
-        return getColumnText(element, getAttribute(getColumn(columnIndex).getName()));
+        IPresentableColumn col = getColumn(columnIndex);
+        //column may be filtered (e.g. id-columns)
+        if (col == null)
+            return "";
+        return getColumnText(element, getAttribute(col.getName()));
     }
     /**
      * {@inheritDoc}
@@ -843,7 +854,8 @@ public class BeanCollector<COLLECTIONTYPE extends Collection<T>, T> extends Bean
                 List<T> rangeBeans = Arrays.asList((T) filterRange.getValue("from"), (T) filterRange.getValue("to"));
                 if (hasSearchRequestChanged == null) {
                     for (T rb : rangeBeans) {
-                        connect(Bean.getBean((Serializable) rb, false), rb, new CommonAction() {
+                        //we can't use the bean cache - if empty beans where stored they would be reused!
+                        connect(new Bean((Serializable) rb), rb, new CommonAction() {
                             @Override
                             public Object action() throws Exception {
                                 return hasSearchRequestChanged = true;

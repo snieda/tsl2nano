@@ -744,7 +744,7 @@ public class CommonTest {
             fail("didn't find the right annotation!");
         }
 
-        final BeanClass bclass = new BeanClass(TypeBean.class);
+        final BeanClass bclass = BeanClass.getBeanClass(TypeBean.class);
         if (bclass.findAttributes(Deprecated.class).size() != 2) {
             fail("didn't find the right annotations!");
         }
@@ -859,7 +859,7 @@ public class CommonTest {
         tb.setObject(map);
         FileUtil.saveXml(tb, Environment.getConfigPath() + "testmap.xml");
 
-        BeanClass bc = new BeanClass(TypeBean.class);
+        BeanClass bc = BeanClass.getBeanClass(TypeBean.class);
         FileUtil.saveXml(bc, Environment.getConfigPath() + "beanclass.xml");
 
         final BeanDefinition<TypeBean> beandef = BeanDefinition.getBeanDefinition(TypeBean.class);
@@ -957,7 +957,7 @@ public class CommonTest {
 
         Profiler.si().stressTest("beanutil", 100000000, new Runnable() {
             TypeBean p = null;
-            BeanClass bc = new BeanClass(TypeBean.class);
+            BeanClass bc = BeanClass.getBeanClass(TypeBean.class);
 
             public void run() {
                 p = (TypeBean) bc.createInstance();

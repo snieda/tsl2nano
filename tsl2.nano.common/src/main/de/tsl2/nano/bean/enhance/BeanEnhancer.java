@@ -262,7 +262,7 @@ public class BeanEnhancer<T> {
      */
     private static <T> T createInstance(T bean, CtClass cls) {
         try {
-            return (T) BeanUtil.copy(bean, new BeanClass(cls.toClass()).createInstance());
+            return (T) BeanUtil.copy(bean, BeanClass.getBeanClass(cls.toClass()).createInstance());
         } catch (Exception e) {
             ForwardedException.forward(e);
             return null;

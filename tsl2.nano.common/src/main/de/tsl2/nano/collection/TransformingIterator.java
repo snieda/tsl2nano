@@ -77,7 +77,7 @@ public class TransformingIterator<S, T> implements Iterator<T> {
     public static <I extends Iterable<T>, S, T> I getTransformingIterable(final Iterable<S> iterable,
             final ITransformer<S, T> transformer) {
         return (I) Proxy.newProxyInstance(Thread.currentThread().getContextClassLoader(),
-            new BeanClass(iterable.getClass()).getInterfaces(),
+            BeanClass.getBeanClass(iterable.getClass()).getInterfaces(),
             new InvocationHandler() {
 
                 @Override

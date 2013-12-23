@@ -12,9 +12,7 @@ package de.tsl2.nano.bean.def;
 import java.io.Serializable;
 import java.text.Format;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collection;
-import java.util.Collections;
 import java.util.LinkedHashMap;
 import java.util.LinkedList;
 import java.util.List;
@@ -35,7 +33,6 @@ import de.tsl2.nano.collection.MapUtil;
 import de.tsl2.nano.collection.TimedReferenceMap;
 import de.tsl2.nano.exception.FormattedException;
 import de.tsl2.nano.exception.ForwardedException;
-import de.tsl2.nano.format.DefaultFormat;
 import de.tsl2.nano.messaging.IListener;
 import de.tsl2.nano.util.StringUtil;
 
@@ -126,6 +123,8 @@ public class Bean<T> extends BeanDefinition<T> {
 
     /** string representation. see {@link #toString()} */
     protected String asString;
+    /** inner function to detach this bean from a beancollector */
+    private Runnable detacher;
 
     /**
      * hold beans only for a short time. this will enhance performance on loading a bean. holding beans to long will
@@ -282,7 +281,8 @@ public class Bean<T> extends BeanDefinition<T> {
             String description,
             IPresentable presentation) {
         if (instance.equals(UNDEFINED))
-            throw FormattedException.implementationError("this bean has no real instance. if you add bean-attributes, they must have own instances!",
+            throw FormattedException.implementationError(
+                "this bean has no real instance. if you add bean-attributes, they must have own instances!",
                 "undefined-instance");
         return addAttribute(instance, name, length, nullable, format, defaultValue, description, presentation);
     }
@@ -514,15 +514,6 @@ public class Bean<T> extends BeanDefinition<T> {
     }
 
     /**
-     * isPersistable
-     * 
-     * @return
-     */
-    public boolean isPersistable() {
-        return BeanContainer.instance().isPersistable(clazz);
-    }
-
-    /**
      * fills a map with all bean-attribute-names and their values
      * 
      * @return map filled with all attribute values
@@ -543,8 +534,13 @@ public class Bean<T> extends BeanDefinition<T> {
         Bean<I> bean = new Bean<I>();
         copy(beandef, bean, "attributeFilter", "attributeDefinitions", "asString");
         bean.attributeFilter = beandef.attributeFilter != null ? CollectionUtil.copy(beandef.attributeFilter) : null;
-        bean.attributeDefinitions = (LinkedHashMap<String, IAttributeDefinition<?>>) createValueDefinitions(beandef.getAttributeDefinitions());
+        bean.attributeDefinitions =
+            (LinkedHashMap<String, IAttributeDefinition<?>>) createValueDefinitions(beandef.getAttributeDefinitions());
         bean.setInstance(instance);
+
+        //give the new bean the chance to create actions...only if null
+        if (bean.actions != null && bean.actions.size() == 0)
+            bean.actions = null;
         return bean;
     }
 
@@ -556,7 +552,8 @@ public class Bean<T> extends BeanDefinition<T> {
      * @return new map holding value definitions
      */
     protected static LinkedHashMap<String, ? extends IAttributeDefinition<?>> createValueDefinitions(Map<String, IAttributeDefinition<?>> attributeDefinitions) {
-        LinkedHashMap<String, IValueDefinition<?>> valueDefs = new LinkedHashMap<String, IValueDefinition<?>>(attributeDefinitions.size());
+        LinkedHashMap<String, IValueDefinition<?>> valueDefs =
+            new LinkedHashMap<String, IValueDefinition<?>>(attributeDefinitions.size());
         try {
             for (IAttributeDefinition<?> attr : attributeDefinitions.values()) {
                 IValueDefinition valueDef = new BeanValue(UNDEFINED, Object.class.getMethod("getClass", new Class[0])) {
@@ -623,6 +620,28 @@ public class Bean<T> extends BeanDefinition<T> {
                 timedCache.put(instanceOrName, bean);
             return bean;
         }
+    }
+
+    /**
+     * attaches the given detacher
+     * 
+     * @param detacher
+     */
+    public void attach(Runnable detacher) {
+        this.detacher = detacher;
+    }
+
+    /**
+     * runs detacher and sets detacher to null
+     */
+    public boolean detach() {
+        timedCache.remove(this);
+        if (detacher != null) {
+            detacher.run();
+            detacher = null;
+            return true;
+        } else
+            return false;
     }
 
     @Override

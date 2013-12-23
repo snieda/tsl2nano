@@ -90,6 +90,9 @@ public interface IAttributeDefinition<T> extends IAttributeDef, Serializable {
     /** if parameter isId is true, the attribute will be handled as id-attribute for the owning bean */
     IAttributeDefinition<T> setId(boolean isId);
 
+    /** if parameter isUnique is true, the attribute will be handled as unique-attribute for the owning bean */
+    IAttributeDefinition<T> setUnique(boolean isUnique);
+
     /** define constraining text format. use RegularExpressionFormat to define a regexp pattern */
     IAttributeDefinition<T>  setFormat(Format format);
 

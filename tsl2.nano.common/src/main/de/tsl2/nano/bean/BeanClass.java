@@ -19,10 +19,12 @@ import java.lang.reflect.Proxy;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.Hashtable;
 import java.util.Iterator;
 import java.util.LinkedHashSet;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Map;
 import java.util.SortedSet;
 import java.util.TreeSet;
 
@@ -84,8 +86,18 @@ public class BeanClass<T> implements Serializable {
     /**
      * Constructor
      */
-    public BeanClass(Class<T> beanClass) {
+    protected BeanClass(Class<T> beanClass) {
         this.clazz = beanClass;
+    }
+
+    /**
+     * uses an internal cache through {@link CachedBeanClass} to perform on getting all attributes
+     * @param <C> bean type
+     * @param beanClass bean type
+     * @return new or cached instance
+     */
+    public static final <C> BeanClass<C> getBeanClass(Class<C> beanClass) {
+        return CachedBeanClass.getCachedBeanClass(beanClass);
     }
 
     /**
@@ -878,5 +890,66 @@ public class BeanClass<T> implements Serializable {
         //TODO: how to check for enhancing class
         return (cls.getEnclosingClass() != null || cls.getSimpleName().contains("$")) && cls.getSuperclass() != null ? getDefiningClass(cls.getSuperclass())
             : Proxy.isProxyClass(cls) ? cls.getInterfaces()[0] : cls;
+    }
+}
+
+
+/**
+ * this class is used by internal caching - while other extensions of {@link BeanClass} will cache their own attribute
+ * instances, this cache is intended to be used by internal helper methods like
+ * {@link #copyValues(Object, Object, boolean, String...)} etc.! this helper methods wont change the set of attributes!
+ * 
+ * @param <T> class defining the bean
+ * @author Thomas Schneider, IDV AG
+ * @version $Revision$
+ */
+class CachedBeanClass<T> extends BeanClass<T> {
+    private static final Log LOG = LogFactory.getLog(CachedBeanClass.class);
+    /** serialVersionUID */
+    private static final long serialVersionUID = -7034920800778017069L;
+
+    /** cached bean attributes */
+    private transient List<BeanAttribute> attributes;
+    /**
+     * stores the last call on {@link #getAttributes(boolean)}. if the next call differs, the list will be rebuilt.     * 
+     */
+    private transient boolean readAndWriteAttributes;
+
+    /** cache to avoid multiple calls on Class.getMethods() and creation of BeanAttribute instances */
+    @SuppressWarnings("rawtypes")
+    protected transient static final Map<Class, BeanClass> bcCache = new Hashtable<Class, BeanClass>();
+
+    protected CachedBeanClass(Class<T> beanClass) {
+        super(beanClass);
+    }
+
+    @SuppressWarnings({ "unchecked", "rawtypes" })
+    static final <C> BeanClass<C> getCachedBeanClass(Class<C> beanClass) {
+        BeanClass bc = bcCache.get(beanClass);
+        if (bc == null) {
+            bc = new CachedBeanClass(beanClass);
+            bcCache.put(beanClass, bc);
+            if (LOG.isDebugEnabled()) {
+                if (bcCache.size() % 1000 == 0)
+                    LOG.debug("internal beanclass cache has " + bcCache.size() + " elements");
+            }
+        }
+        return bc;
+    }
+
+    @Override
+    public List<BeanAttribute> getAttributes(boolean readAndWriteAccess) {
+        if (attributes == null || this.readAndWriteAttributes != readAndWriteAccess) {
+            attributes = super.getAttributes(this.readAndWriteAttributes = readAndWriteAccess);
+        }
+        return new ArrayList<BeanAttribute>(attributes);
+    }
+
+    /**
+     * clear cache
+     */
+    static final void clear() {
+        LOG.info("clearing beanclass cache of " + bcCache.size() + " elements");
+        bcCache.clear();
     }
 }

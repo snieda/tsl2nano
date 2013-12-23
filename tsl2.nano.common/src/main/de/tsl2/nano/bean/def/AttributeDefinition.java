@@ -58,6 +58,7 @@ public class AttributeDefinition<T> extends BeanAttribute implements IAttributeD
     private int precision = UNDEFINED;
     private boolean nullable = true;
     private boolean id;
+    private boolean unique;
     private Class<? extends Date> temporalType;
     protected Format format;
     protected T defaultValue;
@@ -96,6 +97,7 @@ public class AttributeDefinition<T> extends BeanAttribute implements IAttributeD
             if (def != null) {
                 LOG.debug("setting defaults from annotations for attribute: " + getName());
                 setId(def.id());
+                setUnique(def.unique());
                 setBasicDef(def.length(), def.nullable(), null, null, null);
                 setNumberDef(def.scale(), def.precision());
                 temporalType = def.temporalType();
@@ -176,6 +178,15 @@ public class AttributeDefinition<T> extends BeanAttribute implements IAttributeD
     @Override
     public IAttributeDefinition<T> setId(boolean isId) {
         this.id = isId;
+        return this;
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public IAttributeDefinition<T> setUnique(boolean isUnique) {
+        this.unique = isUnique;
         return this;
     }
 
@@ -296,6 +307,11 @@ public class AttributeDefinition<T> extends BeanAttribute implements IAttributeD
         return id;
     }
 
+    @Override
+    public boolean unique() {
+        return unique;
+    }
+
     /**
      * {@inheritDoc}
      */
@@ -395,7 +411,7 @@ public class AttributeDefinition<T> extends BeanAttribute implements IAttributeD
         T value = null;
         if (getFormat() != null)
             try {
-                //the parser will decide, how to handle emtpy/null values
+                //the parser will decide, how to handle empty/null values
                 value = (T) format.parseObject(source);
             } catch (ParseException e) {
                 ForwardedException.forward(e);

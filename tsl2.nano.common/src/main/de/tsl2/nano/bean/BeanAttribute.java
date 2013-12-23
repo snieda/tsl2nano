@@ -17,6 +17,8 @@ import java.lang.reflect.Method;
 import java.lang.reflect.ParameterizedType;
 
 import org.apache.commons.logging.Log;
+
+import de.tsl2.nano.Environment;
 import de.tsl2.nano.log.LogFactory;
 import org.simpleframework.xml.Attribute;
 import org.simpleframework.xml.Default;
@@ -124,8 +126,9 @@ public class BeanAttribute implements Comparable<BeanAttribute>, Serializable {
     }
 
     private static final String getExpectedMethodName(String attributeName) {
-        return PREFIX_READ_ACCESS + (attributeName.length() > 0 ? attributeName.substring(0, 1).toUpperCase() + attributeName.substring(1)
-            : "");
+        return PREFIX_READ_ACCESS
+            + (attributeName.length() > 0 ? attributeName.substring(0, 1).toUpperCase() + attributeName.substring(1)
+                : "");
     }
 
     /**
@@ -340,7 +343,8 @@ public class BeanAttribute implements Comparable<BeanAttribute>, Serializable {
         // see also BeanObservableValue.getPropertyDescriptor(Class beanClass, String propertyName)
         // means we have the special case where "string" starts with 2 uppercase characters 
         // => the first character is NOT decapitalized ...
-        return /*Introspector.*/decapitalize(string);
+        return Environment.get("bean.attribute.decapitalize", true) ? /*Introspector.*/decapitalize(string) : string
+            .substring(0, 1).toLowerCase() + string.substring(1);
     }
 
     /**

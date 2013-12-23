@@ -578,7 +578,8 @@ public final class DateUtil {
     }
 
     /**
-     * does expect the given date string to be an sql date (e.g. as result from datebase).
+     * does expect the given date string to be an sql date (yyyy-MM-dd, e.g. as result from database) - like the
+     * java.sql.Date does.
      * 
      * @param formattedString formatted sql-date-string
      * @return new date instance
@@ -590,6 +591,16 @@ public final class DateUtil {
             ForwardedException.forward(e);
             return null;
         }
+    }
+
+    /**
+     * returns the same format as would be done by java.sql.Date
+     * 
+     * @param date (optional) to format as sql date
+     * @return String with pattern yyyy-MM-dd or null if date is null
+     */
+    public static final String toSqlDateString(Date date) {
+        return date != null ? SQL_DATE_FORMAT.format(date) : null;
     }
 
     /**

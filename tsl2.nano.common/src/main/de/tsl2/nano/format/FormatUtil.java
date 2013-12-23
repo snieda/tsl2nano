@@ -22,10 +22,12 @@ import java.text.ParseException;
 import java.text.ParsePosition;
 import java.util.Currency;
 import java.util.Date;
+import java.util.List;
 
 import org.apache.commons.logging.Log;
 
 import de.tsl2.nano.bean.BeanClass;
+import de.tsl2.nano.collection.CollectionUtil;
 import de.tsl2.nano.currency.CurrencyUtil;
 import de.tsl2.nano.exception.FormattedException;
 import de.tsl2.nano.execution.CompatibilityLayer;
@@ -170,7 +172,28 @@ public class FormatUtil {
                     @Override
                     public Object parseObject(String source, ParsePosition pos) {
                         pos.setIndex(!Util.isEmpty(source) ? source.length() : 1);
-                        return !Util.isEmpty(source) ? Enum.valueOf(type, source) : null;
+                        return !Util.isEmpty(source) ? valueOf(type, source) : null;
+                    }
+
+                    private Object valueOf(Class<Enum> type, String source) {
+                        Enum e = null;
+                        try {
+                            e = Enum.valueOf(type, source);
+                        } catch (Exception ex) {
+                            //if the enum type defines toString() methods for it's values, the source may 
+                            //be this toString() presentation. to resolve it's real enum name we have to
+                            //check all enum toStrings.
+                            if (e == null) {
+                                List<Enum> enumValues = CollectionUtil.getEnumValues(type);
+                                for (Enum value : enumValues) {
+                                    if (value.toString().equals(source)) {
+                                        e = value;
+                                        break;
+                                    }
+                                }
+                            }
+                        }
+                        return e;
                     }
 
                 };
@@ -194,7 +217,10 @@ public class FormatUtil {
     }
 
     /**
-     * wrappes a checking format above the given one - to check the result of parsing to be equal to the source.
+     * @deprecated: use DateFormat.setLenient(false) instead
+     * 
+     *              wrappes a checking format above the given one - to check the result of parsing to be equal to the
+     *              source.
      * 
      * @param format origin format
      * @return wrapped checking format
@@ -216,17 +242,49 @@ public class FormatUtil {
 
             @Override
             public Object parseObject(String source, ParsePosition pos) {
-                Object jdkResult = mf.parseObject(source, pos);
-                /*
-                 * e.g.: java accepts any date values - rolling months and days.
-                 * we have to check value correctness - throwing exceptions
-                 */
-                if (source != null && !source.equals(format(jdkResult)))
-                    throw new FormattedException("tsl2nano.invalidvalue", new Object[] { source });
-                return jdkResult;
+                return checkParse(mf, null, pos, source);
             }
 
         };
+    }
+
+    /**
+     * parses the given source and checks the result through {@link #checkParse(Format, Object, ParsePosition, String)}
+     * if the parsing result is an instance of one of the given classesToCheck.
+     * 
+     * @param format to be used for parsing and checking against parsed format
+     * @param source source to be parsed
+     * @param classesToCheck the check will only be done on instances of them
+     * @return parsed object, null or throws any Exception if check failes
+     */
+    public static Object checkParse(Format format, String source, Class... classesToCheck) {
+        ParsePosition pos = new ParsePosition(0);
+        Object parseResult = format.parseObject(source, pos);
+        if (parseResult != null) {
+            boolean check = false;
+            for (int i = 0; i < classesToCheck.length; i++) {
+                if (parseResult.getClass().isAssignableFrom(classesToCheck[i])) {
+                    check = true;
+                    break;
+                }
+            }
+            if (check)
+                return checkParse(format, parseResult, pos, source);
+        }
+        return parseResult;
+    }
+
+    /**
+     * use that, if you don't want to have a fixed {@link DateFormat#isLenient()} = false.
+     * <p/>
+     * e.g.: java accepts any date values - rolling months and days. we have to check value correctness - throwing
+     * exceptions
+     */
+    protected static Object checkParse(Format format, Object parseResult, ParsePosition pos, String source) {
+        parseResult = parseResult != null ? parseResult : format.parseObject(source, pos);
+        if (source != null && !source.equals(format.format(parseResult)))
+            throw new FormattedException("swartifex.invalidvalue", new Object[] { source });
+        return parseResult;
     }
 
     /**
@@ -238,7 +296,11 @@ public class FormatUtil {
      * @param precision fraction digits
      * @return number format or null
      */
-    protected static final Format getDefaultExtendedFormat(Class<?> type, String prefix, String postfix, int precision) {
+    protected static final Format getDefaultExtendedFormat(Class<?> type,
+            String prefix,
+            String postfix,
+            int precision,
+            int scale) {
         if (type == null) {
             return null;
         }
@@ -251,7 +313,7 @@ public class FormatUtil {
         }
         if (precision >= 0 && format instanceof DecimalFormat) {
             DecimalFormat df = (DecimalFormat) format;
-            df.setMinimumFractionDigits(0);
+            df.setMinimumFractionDigits(scale);
             df.setMaximumFractionDigits(precision);
 //        df.setGroupingUsed(false);
 //        if (BigDecimal.class.isAssignableFrom(type))

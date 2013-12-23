@@ -22,10 +22,17 @@ import java.util.Collections;
 import java.util.Comparator;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.LinkedList;
+import java.util.List;
 import java.util.Map;
+import java.util.NavigableMap;
+import java.util.NavigableSet;
 import java.util.Properties;
+import java.util.Set;
+import java.util.SortedMap;
 import java.util.SortedSet;
+import java.util.TreeMap;
 
 import org.apache.commons.logging.Log;
 
@@ -49,6 +56,7 @@ import de.tsl2.nano.messaging.IListener;
 import de.tsl2.nano.util.FileUtil;
 import de.tsl2.nano.util.NumberUtil;
 import de.tsl2.nano.util.StringUtil;
+import de.tsl2.nano.util.Util;
 
 /**
  * class to provide presentation definitions for sets of attributes.
@@ -394,9 +402,11 @@ public class BeanPresentationHelper<T> {
                 return RegExpFormat.createNumberRegExp(l, 0, type);
             }
         } else if (BeanClass.isAssignableFrom(Date.class, type)) {
-            if (BeanClass.isAssignableFrom(Timestamp.class, type) || (attribute.temporalType() != null && Timestamp.class.isAssignableFrom(attribute.temporalType())))
+            if (BeanClass.isAssignableFrom(Timestamp.class, type)
+                || (attribute.temporalType() != null && Timestamp.class.isAssignableFrom(attribute.temporalType())))
                 regexp = RegExpFormat.createDateTimeRegExp();
-            else if (BeanClass.isAssignableFrom(Time.class, type) || (attribute.temporalType() != null && Time.class.isAssignableFrom(attribute.temporalType())))
+            else if (BeanClass.isAssignableFrom(Time.class, type)
+                || (attribute.temporalType() != null && Time.class.isAssignableFrom(attribute.temporalType())))
                 regexp = RegExpFormat.createTimeRegExp();
             else
                 regexp = RegExpFormat.createDateRegExp();
@@ -476,10 +486,12 @@ public class BeanPresentationHelper<T> {
      */
     public boolean isDefaultAttribute(BeanAttribute attribute) {
         AttributeDefinition<?> attr = (AttributeDefinition<?>) attribute;
-        return (BeanContainer.instance() == null || BeanContainer.instance().hasPermission(attribute.getId(), null)) && (Environment.get("default.attribute.id",
-            false) || !attr.id())
+        return (BeanContainer.instance() == null || BeanContainer.instance().hasPermission(attribute.getId(), null))
+            && (Environment.get("default.attribute.id",
+                false) || !attr.id())
             && (Environment.get("default.attribute.multivalue", false) || !attr.isMultiValue())
-            && (Environment.get("default.attribute.timestamp", false) || attr.temporalType() == null || !Timestamp.class.isAssignableFrom(attr.temporalType()));
+            && (Environment.get("default.attribute.timestamp", false) || attr.temporalType() == null || !Timestamp.class
+                .isAssignableFrom(attr.temporalType()));
     }
 
     /**
@@ -771,8 +783,10 @@ public class BeanPresentationHelper<T> {
         OptionsWrapper<E> enumWrapper;
         if (isMultiSelection) {
             if (!Collection.class.isAssignableFrom((Class<?>) attribute.getType())) {
-                throw new FormattedException("tsl2nano.implementationerror",
-                    new Object[] { "IPresentable.STYLE_MULTI",
+                throw new FormattedException(
+                    "tsl2nano.implementationerror",
+                    new Object[] {
+                        "IPresentable.STYLE_MULTI",
                         "If you define an EnumBooleanType with style IPresentable.STYLE_MULTI, you must have a bound bean attribute of type Collection!" });
             }
             enumWrapper = new MultiOptionsWrapper<E>(attribute, enumConstants);
@@ -890,29 +904,75 @@ public class BeanPresentationHelper<T> {
         if (bean.isDefault() && bean.getAttributeDefinitions().size() > 0) {
             Class<?> bestType = Environment.get("bean.best.attribute.type", String.class);
             String bestRegexp = Environment.get("bean.best.attribute.regexp", ".*(name|bezeichnung).*");
-            int bestminlength = Environment.get("bean.best.attribute.minlength", 3);
-            int bestmaxlength = Environment.get("bean.best.attribute.maxlength", 30);
+            int bestminlength = Environment.get("bean.best.attribute.minlength", 2);
+            int bestmaxlength = Environment.get("bean.best.attribute.maxlength", 50);
             String[] names = bean.getAttributeNames();
 
             /*
-             * create a map with matching levels and their attribute indexes
+             * create a map with matching levels and their attribute indexes.
              */
             int ml = 0;//matchinglevel: 5 criterias to match
-            Map<Integer, Integer> levels = new HashMap<Integer, Integer>(names.length);
+            NavigableMap<Integer, Integer> levels = new TreeMap<Integer, Integer>();
             for (int i = 0; i < names.length; i++) {
                 IAttributeDefinition attr = bean.getAttribute(names[i]);
-
-                ml = (1 << 5) * (!attr.nullable() ? 1 : 0);
-                ml |= (1 << 4) * (BeanClass.isAssignableFrom(bestType, attr.getType()) ? 1 : 0);
-                ml |= (1 << 3) * (names[i].matches(bestRegexp) ? 1 : 0);
-                ml |= (1 << 2) * (attr.length() == -1 || (attr.length() >= bestminlength && attr.length() <= bestmaxlength) ? 1
-                    : 0);
+                if (isDefaultAttribute((BeanAttribute) attr) && !attr.isMultiValue()) {
+                    ml = (1 << 7) * (attr.id() ? 1 : 0);
+                    ml |= (1 << 6) * (!attr.unique() ? 1 : 0);
+                    ml |= (1 << 5) * (!attr.nullable() ? 1 : 0);
+                    ml |= (1 << 4) * (BeanClass.isAssignableFrom(bestType, attr.getType()) ? 1 : 0);
+                    ml |= (1 << 3) * (names[i].matches(bestRegexp) ? 1 : 0);
+                    ml |=
+                        (1 << 2)
+                            * (attr.length() == -1
+                                || (attr.length() >= bestminlength && attr.length() <= bestmaxlength) ? 1
+                                : 0);
+                } else {
+                    ml = 0;
+                }
                 levels.put(ml, i);
+            }
+            /*
+             * we don't have direct access to the database, so we can't read the
+             * unique indexes. but the best matched attribute should be unique.
+             * we solve this loading a 'group by' looking for duplicated attributes.
+             */
+            NavigableSet<Integer> keySet = levels.descendingKeySet();
+            if (bean.isPersistable()) {
+                Collection<Long> grouping;
+                final String ALIAS = "XXX";
+                String query = "select max(count(" + ALIAS + ")) from " + bean.getName() + " group by " + ALIAS;
+                String q;
+                Long maxCount;
+                int i = 0;
+                try {
+                    for (Iterator<Integer> it = keySet.iterator(); it.hasNext();) {
+                        //check data to seam unique
+                        i = levels.get(it.next());
+                        q = query.replace(ALIAS, names[i]);
+                        grouping = BeanContainer.instance().getBeansByQuery(q, false, null);
+                        maxCount = grouping.iterator().next();
+                        if (Util.isEmpty(maxCount) || maxCount.intValue() < 2)
+                            break;
+                        it.remove();
+                    }
+                } catch (Exception ex) {
+                    BeanAttribute id = bean.getIdAttribute();
+                    LOG.warn("couldn't check attribute for unique data: " + bean.getName() + "." + names[i]
+                        + ". Using id-attribute " + id.getId(), ex);
+                    return id.getName();
+                }
+            }
+            if (levels.isEmpty()) {
+                BeanAttribute id = bean.getIdAttribute();
+                LOG.warn("No unique field as value-expression found for " + bean
+                    + " available fields: " + StringUtil.toString(names, 100)
+                    + ". Using id-attribute " + id.getId());
+                return id.getName();
             }
             /*
              * get the index of the highest matching level attribute
              */
-            return names[levels.get(Collections.max(levels.keySet()))];
+            return names[levels.get(keySet.first())];
         } else if (bean.getAttributeDefinitions().size() > 0) {
             return bean.getAttributeNames()[0];
         } else {
@@ -977,8 +1037,8 @@ public class BeanPresentationHelper<T> {
     protected StringBuilder fillBeanPresentation(StringBuilder str, final String TAB, final String CR) {
         String[] names = bean.getAttributeNames();
         for (int i = 0; i < names.length; i++) {
-            BeanValue<?> attr = (BeanValue<?>) bean.getAttribute(names[i]);
-            str.append(attr.getPresentation().getLabel() + TAB + attr.getValue() + CR);
+            IAttributeDefinition<?> attr = (IAttributeDefinition<?>) bean.getAttribute(names[i]);
+            str.append(attr.getPresentation().getLabel() + TAB + " ??? "/*attr.getValue(bean.get)*/+ CR);
         }
         return str;
     }
@@ -1090,19 +1150,21 @@ public class BeanPresentationHelper<T> {
                 });
             }
 
-            presActions.add(new SecureAction(bean.getClazz(), "print", IAction.MODE_UNDEFINED, false, "icons/print.png") {
-                @Override
-                public Object action() throws Exception {
-                    return Environment.get(IPageBuilder.class).build(bean, null, false);
-                }
-            });
+            presActions
+                .add(new SecureAction(bean.getClazz(), "print", IAction.MODE_UNDEFINED, false, "icons/print.png") {
+                    @Override
+                    public Object action() throws Exception {
+                        return Environment.get(IPageBuilder.class).build(bean, null, false);
+                    }
+                });
 
-            presActions.add(new SecureAction(bean.getClazz(), "export", IAction.MODE_UNDEFINED, false, "icons/view.png") {
-                @Override
-                public Object action() throws Exception {
-                    return getSimpleTextualPresentation();
-                }
-            });
+            presActions
+                .add(new SecureAction(bean.getClazz(), "export", IAction.MODE_UNDEFINED, false, "icons/view.png") {
+                    @Override
+                    public Object action() throws Exception {
+                        return getSimpleTextualPresentation();
+                    }
+                });
 
             presActions.add(new SecureAction(bean.getClazz(),
                 "document",
@@ -1199,7 +1261,7 @@ public class BeanPresentationHelper<T> {
                 "icons/stop.png") {
                 @Override
                 public Object action() throws Exception {
-                    Environment.persistAndReload();
+                    Environment.persist();
                     BeanDefinition.dump();
                     Thread.currentThread().interrupt();
                     return "configuration saved and HTTP-Session stopped!";

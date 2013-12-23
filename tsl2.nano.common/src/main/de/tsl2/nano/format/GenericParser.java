@@ -42,6 +42,9 @@ public class GenericParser<T> extends DefaultFormat implements INumberFormatChec
     @Attribute(required=false)
     protected String parsingPattern;
     private transient Format parsingFormat;
+    @Attribute(required=false)
+    /** scale, usable for numbers */
+    private int scale;
     /** precision, usable for numbers as precision or on dates for short/medium/long presentation */
     @Attribute(required=false)
     private int precision;
@@ -52,7 +55,6 @@ public class GenericParser<T> extends DefaultFormat implements INumberFormatChec
     @Attribute(required=false)
     private String postfix;
 
-    
     /**
      * constructor to be de-serializable
      */
@@ -69,6 +71,7 @@ public class GenericParser<T> extends DefaultFormat implements INumberFormatChec
         if (isNumber()) {
             NumberFormat numberFormat = (NumberFormat) format;
             precision = numberFormat.getMaximumFractionDigits();
+            scale = numberFormat.getMinimumFractionDigits();
             postfix = numberFormat.getCurrency().getCurrencyCode();
             if (type == null) {
                 if (numberFormat.isParseIntegerOnly())
@@ -128,9 +131,9 @@ public class GenericParser<T> extends DefaultFormat implements INumberFormatChec
                     null,
                     0,
                     0,
-                    FormatUtil.getDefaultExtendedFormat(parsingType, prefix, postfix, precision));
+                    FormatUtil.getDefaultExtendedFormat(parsingType, prefix, postfix, precision, scale));
             } else {
-                parsingFormat = FormatUtil.getDefaultExtendedFormat(parsingType, prefix, postfix, precision);
+                parsingFormat = FormatUtil.getDefaultExtendedFormat(parsingType, prefix, postfix, precision, scale);
             }
         }
         return parsingFormat;

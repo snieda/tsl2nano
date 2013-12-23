@@ -12,12 +12,9 @@ import java.util.MissingResourceException;
 import java.util.ResourceBundle;
 import java.util.StringTokenizer;
 
-import org.apache.commons.logging.Log;
-
-import de.tsl2.nano.bean.BeanUtil;
-import de.tsl2.nano.log.LogFactory;
-
+import de.tsl2.nano.Environment;
 import de.tsl2.nano.Messages;
+import de.tsl2.nano.bean.BeanUtil;
 import de.tsl2.nano.util.StringUtil;
 
 /**
@@ -34,7 +31,7 @@ public class ForwardedException extends FormattedException {
     private static final String MESSAGE_FORWARDED = "tsl2nano.forwarded";
     protected boolean isInsideGetLocalizedMessage = false;
 
-    private static final Log LOG = LogFactory.getLog(ForwardedException.class);
+//    private static final Log LOG = LogFactory.getLog(ForwardedException.class);
 
     /**
      * @param cause cause
@@ -49,6 +46,14 @@ public class ForwardedException extends FormattedException {
      */
     public ForwardedException(String message, Throwable cause) {
         super(message, null, cause);
+    }
+
+    /**
+     * @see java.lang.Throwable#getLocalizedMessage()
+     */
+    @Override
+    public String getLocalizedMessage() {
+        return getMessage();
     }
 
     /**
@@ -85,19 +90,19 @@ public class ForwardedException extends FormattedException {
             /*
              * don't show the message twice
              */
-            if (cause != null && cause == current) {
+            if (cause instanceof FormattedException && ((FormattedException)cause).myMessage.trim().equals(this.myMessage.trim())) {
                 cause = null;
             }
             if (message == null) {
                 final String msg = StringUtil.toFormattedString(current.toString(), MAX_MSG_LINECOUNT, false);
-                message = Messages.getFormattedString("tsl2nano.unknownerror", msg, current.getStackTrace()[0]);
+                message = Messages.getFormattedString("tsl2nano.unknownerror", msg, getStackTracePart(current));
             } else if (isJavaException(current)) {
-                message = Messages.getFormattedString("tsl2nano.runtimeerror", message, current.getStackTrace()[0]);
+                message = Messages.getFormattedString("tsl2nano.runtimeerror", message, getStackTracePart(current));
             }
             if (cause != null && causeMsg == null) {
-                causeMsg = Messages.getFormattedString("tsl2nano.unknownerror", cause, cause.getStackTrace()[0]);
+                causeMsg = Messages.getFormattedString("tsl2nano.unknownerror", cause, getStackTracePart(current));
             } else if (isJavaException(cause)) {
-                causeMsg = Messages.getFormattedString("tsl2nano.runtimeerror", cause, cause.getStackTrace()[0]);
+                causeMsg = Messages.getFormattedString("tsl2nano.runtimeerror", cause, getStackTracePart(current));
             }
             myMessage = getText(message);
             if (!msgContainsCause) {
@@ -109,49 +114,22 @@ public class ForwardedException extends FormattedException {
         return myMessage;
     }
 
-//    /**
-//     * @param current exception
-//     * @return true, if exception is a standard java runtime exception.
-//     */
-//    private boolean isJavaRuntimeException(Throwable current) {
-//        return (current instanceof RuntimeException) && isJavaException(current);
-//    }
-
+    protected String getStackTracePart(Throwable throwable) {
+        StackTraceElement[] stackTrace = throwable.getStackTrace();
+        StringBuffer buf = new StringBuffer();
+        int length = LOG.isDebugEnabled() ? Integer.MAX_VALUE : 1;
+        for (int i = 0; i < stackTrace.length; i++) {
+            buf.append(stackTrace[i] + "\n");
+        }
+        return buf.toString();
+    }
+    
     /**
      * @param current exception
      * @return true, if exception is a standard java exception.
      */
     private boolean isJavaException(Throwable current) {
         return current != null && BeanUtil.isStandardType(current.getClass());
-    }
-
-    /**
-     * @see java.lang.Throwable#getLocalizedMessage()
-     */
-    @Override
-    public String getLocalizedMessage() {
-//        if (LOG.isDebugEnabled()) {
-//            StringBuffer causeMessage = new StringBuffer();
-//            Throwable cause = getCause();
-//            while (cause != null) {
-//                //the invocationtargetexception is a forwarded exception with no message --> ignore it
-//                if (!(cause instanceof InvocationTargetException)) {
-//                    if (cause instanceof FormattedException) {
-//                        causeMessage.append(getText(cause.getMessage()));
-//                    } else {
-//                        causeMessage.append(getText(cause.toString()));
-//                    }
-//                    causeMessage.append("\n\n");
-//                }
-//                //the forwardedexception will handle stack trace, too!
-////            if (cause instanceof ForwardedException)
-////                break;
-//                cause = cause.getCause();
-//            }
-//            return getText(super.getMessage()) + "\n\n" + getText("tsl2nano.cause") + ":\n" + causeMessage;
-//        } else {
-        return getMessage();
-//        }
     }
 
     /**

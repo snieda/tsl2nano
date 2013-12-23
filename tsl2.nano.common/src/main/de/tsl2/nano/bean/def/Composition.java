@@ -122,7 +122,7 @@ public class Composition<C> {
      */
     @SuppressWarnings({"rawtypes", "unchecked"})
     public C createChild(Object target) {
-        BeanClass bc = new BeanClass(parent.getType());
+        BeanClass bc = BeanClass.getBeanClass(parent.getType());
         C child = (C) bc.createInstance();
         add(child, target);
         return child;

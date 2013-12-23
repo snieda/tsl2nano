@@ -68,7 +68,7 @@ public class AOPProxy<T> implements InvocationHandler {
      * @return
      */
     public static final <T> T createEnhancement(T instance, IRunnable<?> before, IRunnable<?> after, boolean proxyResult) {
-        return (T) Proxy.newProxyInstance(Thread.currentThread().getContextClassLoader(), new BeanClass(instance.getClass())
+        return (T) Proxy.newProxyInstance(Thread.currentThread().getContextClassLoader(), BeanClass.getBeanClass(instance.getClass())
             .getInterfaces(), new AOPProxy(instance, before, after, proxyResult));
     }
 }

@@ -113,7 +113,7 @@ public class AntRunner {
         final Set<Object> keySet = taskProperties.keySet();
         for (final Object key : keySet) {
             final String n = (String) key;
-            final BeanClass bc = new BeanClass(taskType);
+            final BeanClass bc = BeanClass.getBeanClass(taskType);
             bc.setValue(task, n, taskProperties.get(n));
         }
 

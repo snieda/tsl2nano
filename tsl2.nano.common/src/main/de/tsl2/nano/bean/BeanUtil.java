@@ -463,9 +463,14 @@ public class BeanUtil {
             boolean onlySingleValues,
             boolean onlyFilterAttributes,
             String... filterAttributes) {
-        final BeanDefinition beandef = BeanDefinition.getBeanDefinition(BeanClass.getDefiningClass(o.getClass()));
-        if (onlyFilterAttributes && filterAttributes.length > 0)
-            beandef.setAttributeFilter(filterAttributes);
+        BeanDefinition beandef;
+//        if (onlyFilterAttributes && filterAttributes.length > 0) {
+//            //attributes will be changed - so we have to use an own instance
+//            beandef = new BeanDefinition(BeanClass.getDefiningClass(o.getClass()));
+//            beandef.setAttributeFilter(filterAttributes);
+//        } else {
+            beandef = BeanDefinition.getBeanDefinition(BeanClass.getDefiningClass(o.getClass()));
+//        }
         return beandef.toValueMap(o, useClassPrefix, onlySingleValues, onlyFilterAttributes, filterAttributes);
     }
 
@@ -495,9 +500,14 @@ public class BeanUtil {
             boolean onlySingleValues,
             boolean onlyFilteredAttributes,
             String... filterAttributes) {
-        final BeanDefinition beandef = BeanDefinition.getBeanDefinition(BeanClass.getDefiningClass(o.getClass()));
-        if (onlyFilteredAttributes && filterAttributes.length > 0)
-            beandef.setAttributeFilter(filterAttributes);
+        BeanDefinition beandef = BeanDefinition.getBeanDefinition(BeanClass.getDefiningClass(o.getClass()));
+//        if (onlyFilteredAttributes && filterAttributes.length > 0) {
+//            //attributes will be changed - so we have to use an own instance
+//            beandef = new BeanDefinition(BeanClass.getDefiningClass(o.getClass()));
+//            beandef.setAttributeFilter(filterAttributes);
+//        } else {
+//            beandef = BeanDefinition.getBeanDefinition(BeanClass.getDefiningClass(o.getClass()));
+//        }
         return beandef.toValueMap(o, keyPrefix, onlySingleValues, onlyFilteredAttributes, filterAttributes);
     }
 

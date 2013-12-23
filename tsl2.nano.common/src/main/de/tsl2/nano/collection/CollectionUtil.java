@@ -41,6 +41,23 @@ public class CollectionUtil {
     private static final Log LOG = LogFactory.getLog(CollectionUtil.class);
 
     /**
+     * for generic purpose. normally you would implement 'new Object[] {o1, o2, ...}.
+     * 
+     * @param objects objects to pack into a typed array.
+     * @return new array holding the given objects.
+     */
+    public static final <T> T[] asArray(T... objects) {
+        Class<T> type = null;
+        for (int i = 0; i < objects.length; i++) {
+            if (objects[i] != null)
+                type = (Class<T>) objects[i].getClass();
+        }
+        if (type == null)
+            type = (Class<T>) Object.class;
+        return (T[]) Array.newInstance(type, objects.length);
+    }
+
+    /**
      * wrap an array into a collection. works on Object[] using Arrays.asList() and on primitive arrays with a simple
      * loop.
      * 
@@ -190,13 +207,14 @@ public class CollectionUtil {
 
     /**
      * hasNoValues
+     * 
      * @param c collection to check
      * @return true, if c is null or c.size() == 0 or all values are null.
      */
     public static boolean hasNoValues(Collection c) {
         if (c == null || c.size() == 0)
             return true;
-        
+
         for (Object object : c) {
             if (object != null)
                 return false;
@@ -347,7 +365,7 @@ public class CollectionUtil {
     public static <T> T[] copy(T[] array) {
         return Arrays.copyOf(array, array.length);
     }
-    
+
     /**
      * concatenates the given arrays into a new array of type newType
      * 
@@ -410,6 +428,45 @@ public class CollectionUtil {
     }
 
     /**
+     * iterates through next count elements and returns a new sublist containing them. useful for performance
+     * optimizations sending statements to a server. if you don't need a transformer you may use List.sublist(..)
+     * instead.
+     * <p/>
+     * Example:
+     * 
+     * <pre>
+     * Collection<MyEntity> myEntities = null;
+     * Iterator&lt;MySearchViewBean&gt; searchIt = akten.iterator();
+     * ITransformer&lt;MySearchViewBean, Long&gt; toNumbers = new ITransformer&lt;MySearchViewBean, Long&gt;() {
+     *     &#064;Override
+     *     public Long transform(MySearchViewBean arg0) {
+     *         return arg0.getSpecificNumber();
+     *     }
+     * };
+     * for (Collection&lt;Long&gt; specNumbers = CollectionUtil.next(searchIt, blockSize, toNumbers); searchIt.hasNext(); specNumbers = CollectionUtil.next(searchIt,
+     *     blockSize,
+     *     toNumbers)) {
+     *     myEntities = myService.getMyEntityBeans(specNumbers);
+     *     ...
+     * }
+     * 
+     * </pre>
+     * 
+     * @param <T> element type
+     * @param elements iterator on each next call this iterator should be the identical instance!
+     * @param count block size for. will be the size of the returned sub list
+     * @param transformer (optional) to transform the items of elements to the type T to be filled into the new list.
+     * @return sublist
+     */
+    public static final <S, T> Collection<T> next(Iterator<S> elements, int count, ITransformer<S, T> transformer) {
+        ArrayList<T> sublist = new ArrayList<T>(count);
+        for (int i = 0; i < count && elements.hasNext(); i++) {
+            sublist.add(transformer != null ? transformer.transform(elements.next()) : (T) elements.next());
+        }
+        return sublist;
+    }
+
+    /**
      * combines all given arrays into one list
      * 
      * @param <T> type of list content
@@ -468,6 +525,7 @@ public class CollectionUtil {
 
     /**
      * getFiltering
+     * 
      * @param src collection to filter
      * @param filter filter
      * @return filtering collection
@@ -478,15 +536,17 @@ public class CollectionUtil {
 
     /**
      * getFiltering
+     * 
      * @param src map to filter
      * @param filter key filter
      * @return filtering map
      */
-    public static final <I extends Map<S, T>, S, T extends Comparable<T>> I getFilteringMapKey(I src, IPredicate<T> filter) {
+    public static final <I extends Map<S, T>, S, T extends Comparable<T>> I getFilteringMapKey(I src,
+            IPredicate<T> filter) {
         return FilteringIterator.getFilteringMap(src, filter);
     }
 
-    /**
+/**
      * filters the given collection.
      * <p/>
      * Attention: if 'expression' changes afterwards, the collection iterator may change, too! If you
@@ -529,7 +589,8 @@ public class CollectionUtil {
         return FilteringIterator.getFilteringIterable(src, new IPredicate<T>() {
             @Override
             public boolean eval(T arg) {
-                return (arg == null && useNull) || ((from == null || arg.compareTo(from) >= 0) && (to == null || arg.compareTo(to) <= 0));
+                return (arg == null && useNull)
+                    || ((from == null || arg.compareTo(from) >= 0) && (to == null || arg.compareTo(to) <= 0));
             }
         });
     }
@@ -564,7 +625,8 @@ public class CollectionUtil {
 
                 String sarg = arg0 != null ? ignoreCase && arg0.toString() != null ? arg0.toString().toUpperCase()
                     : arg0.toString() : null;
-                return (sarg == null && useNull) || ((sfrom == null || sarg.compareTo(sfrom) >= 0) && (sto == null || sarg.compareTo(sto) <= 0));
+                return (sarg == null && useNull)
+                    || ((sfrom == null || sarg.compareTo(sfrom) >= 0) && (sto == null || sarg.compareTo(sto) <= 0));
             }
         });
     }

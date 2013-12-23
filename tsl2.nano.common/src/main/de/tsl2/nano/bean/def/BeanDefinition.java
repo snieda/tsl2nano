@@ -37,7 +37,6 @@ import de.tsl2.nano.action.IAction;
 import de.tsl2.nano.bean.BeanAttribute;
 import de.tsl2.nano.bean.BeanClass;
 import de.tsl2.nano.bean.BeanContainer;
-import de.tsl2.nano.bean.IAttributeDef;
 import de.tsl2.nano.bean.ValueHolder;
 import de.tsl2.nano.collection.CollectionUtil;
 import de.tsl2.nano.collection.IPredicate;
@@ -49,6 +48,7 @@ import de.tsl2.nano.format.DefaultFormat;
 import de.tsl2.nano.log.LogFactory;
 import de.tsl2.nano.messaging.ChangeEvent;
 import de.tsl2.nano.messaging.IListener;
+import de.tsl2.nano.util.FileUtil;
 
 /**
  * Holds all informations to define a bean as a container of bean-attributes. Uses {@link BeanClass} and
@@ -221,7 +221,7 @@ public class BeanDefinition<T> extends BeanClass<T> implements Serializable {
             return CollectionUtil.getFiltering(attributes, new IPredicate<BeanAttribute>() {
                 @Override
                 public boolean eval(BeanAttribute arg0) {
-                    return getPresentationHelper().isDefaultAttribute(arg0);
+                    return getPresentationHelper().isDefaultAttribute(arg0) || getValueExpression().isExpressionPart(arg0.getName());
                 }
             });
         } else {
@@ -451,11 +451,20 @@ public class BeanDefinition<T> extends BeanClass<T> implements Serializable {
     }
 
     /**
-     * the bean is selectable, if it has at least one action to do on it.
+     * isPersistable
+     * 
+     * @return
+     */
+    public boolean isPersistable() {
+        return BeanContainer.instance().isPersistable(clazz);
+    }
+    
+    /**
+     * the bean is selectable, if it has at least one action to do on it - or it is persistable.
      * @return true, if an action was defined
      */
     public boolean isSelectable() {
-        return !isFinal() && getActions().size() > 0;
+        return !isFinal() && (isMultiValue() || getActions().size() > 0 || isPersistable());
     }
     
     /**
@@ -625,7 +634,7 @@ public class BeanDefinition<T> extends BeanClass<T> implements Serializable {
 
     @Override
     public int hashCode() {
-        return name.hashCode();
+        return name != null ? name.hashCode() : super.hashCode();
     }
 
     @Override
@@ -759,7 +768,7 @@ public class BeanDefinition<T> extends BeanClass<T> implements Serializable {
     }
 
     protected static File getDefinitionFile(String name) {
-        return new File(Environment.getConfigPath() + "beandef/" + name.toLowerCase() + ".xml");
+        return new File(Environment.getConfigPath() + "beandef/" + FileUtil.getValidFileName(name.toLowerCase()) + ".xml");
     }
 
     public void saveDefinition() {

@@ -178,8 +178,12 @@ public class ValueExpression<TYPE> implements IConverter<TYPE, String>, Serializ
             }
         }
 
-        if (isPersistable) {
+        if (isPersistable) {//TODO: check for unique!
             Collection<TYPE> beansByExample = BeanContainer.instance().getBeansByExample(exampleBean);
+            if (beansByExample.size() > 1) {
+                LOG.error("string-to-object-parser: found more than one object:\n" + StringUtil.toFormattedString(beansByExample, 100, true));
+                throw new FormattedException("tsl2nano.multiple.items", new Object[]{toValue, type, type});
+            }
             return beansByExample.size() > 0 ? beansByExample.iterator().next() : null;
         } else {
             return exampleBean;
@@ -324,5 +328,14 @@ public class ValueExpression<TYPE> implements IConverter<TYPE, String>, Serializ
             j = toValue.indexOf(to) + to.length();
         }
         return splittedValues;
+    }
+    
+    /**
+     * isExpressionPart
+     * @param attribute attribute to check
+     * @return true, if given attribute is part of value expression
+     */
+    public boolean isExpressionPart(String attribute) {
+        return Arrays.asList(attributes).contains(attribute);
     }
 }

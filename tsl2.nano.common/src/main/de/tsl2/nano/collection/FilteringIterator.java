@@ -160,7 +160,7 @@ public class FilteringIterator<E> implements ListIterator<E> {
      */
     @SuppressWarnings({ "unchecked", "rawtypes" })
     public static <I extends Iterable<T>, T> I getFilteringIterable(final I iterable, final IPredicate<T> predicate) {
-        return (I) Proxy.newProxyInstance(Thread.currentThread().getContextClassLoader(), new BeanClass(iterable.getClass()).getInterfaces(), new InvocationHandler() {
+        return (I) Proxy.newProxyInstance(Thread.currentThread().getContextClassLoader(), BeanClass.getBeanClass(iterable.getClass()).getInterfaces(), new InvocationHandler() {
 //          /** to avoid subsequent/recursive calls of 'size' */
 //          Iterator<T> iterator = null;
 
@@ -203,7 +203,7 @@ public class FilteringIterator<E> implements ListIterator<E> {
      */
     @SuppressWarnings({ "unchecked", "rawtypes" })
     public static <I extends Map<S, T>, S, T> I getFilteringMap(final I map, final IPredicate<T> predicate) {
-        return (I) Proxy.newProxyInstance(Thread.currentThread().getContextClassLoader(), new BeanClass(map.getClass()).getInterfaces(), new InvocationHandler() {
+        return (I) Proxy.newProxyInstance(Thread.currentThread().getContextClassLoader(), BeanClass.getBeanClass(map.getClass()).getInterfaces(), new InvocationHandler() {
 
             @Override
             public Object invoke(Object proxy, Method method, Object[] args) throws Throwable {

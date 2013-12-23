@@ -10,6 +10,7 @@
 package de.tsl2.nano.collection;
 
 /**
+ * evaluates a true or false for a given object - useful for filtering.
  * 
  * @author Thomas Schneider
  * @version $Revision$ 
