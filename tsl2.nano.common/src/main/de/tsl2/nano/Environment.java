@@ -89,11 +89,11 @@ public class Environment {
     }
 
     /**
-     * getName
+     * environment name
      * 
-     * @return
+     * @return environment name - equal to the name of the configuration directory, defined in {@link #getConfigPath()}.
      */
-    public static Object getName() {
+    public static String getName() {
         return StringUtil.toFirstUpper(StringUtil.substring(self.getConfigPath(), File.separator, null, true)
             .replace('/', ' '));
     }
@@ -372,7 +372,9 @@ public class Environment {
             } else if (formatter instanceof String) {
                 formatter = BeanClass.createBeanClass((String) formatter).createInstance();
             } else {
-                throw new IllegalArgumentException("environments default formatter must be an instance of java.text.Format but is: " + formatter.getClass());
+                throw new IllegalArgumentException(
+                    "environments default formatter must be an instance of java.text.Format but is: "
+                        + formatter.getClass());
             }
             self().setProperty(KEY_DEFAULT_FORMAT, formatter);
         }
@@ -381,6 +383,7 @@ public class Environment {
 
     /**
      * getConfigPath
+     * 
      * @param type type to evaluate simple file name from
      * @return default environment directory + simple class name
      */
@@ -393,6 +396,21 @@ public class Environment {
     }
 
     /**
+     * getMainPackage
+     * 
+     * @return application main package (stored in 'application.main.package').
+     */
+    public static String getApplicationMainPackage() {
+        String pck = (String) get("application.main.package");
+        if (pck == null) {
+            pck = "org.nano." + getName().toLowerCase().trim();
+            self().log("WARNING: no 'application.main.package' defined in environment! using default: " + pck);
+            self().setProperty("application.main.package", pck);
+        }
+        return pck;
+    }
+
+    /**
      * persists the given object through configured xml persister.
      * 
      * @param obj object to serialize to xml.
@@ -402,9 +420,32 @@ public class Environment {
     }
 
     /**
+     * isPersisted
+     * @return true, if an environment was created on file system
+     */
+    public final static boolean isPersisted() {
+        return new File(getConfigPath() + CONFIG_XML_NAME).exists();
+    }
+    
+    /**
+     * persists the current environment - all transient properties and services will be lost!!!
+     */
+    public final static void persist() {
+        Properties tempProperties = new Properties();
+        tempProperties.putAll(self().properties);
+        Map<Class<?>, Object> tempServices = new Hashtable<Class<?>, Object>(services());
+
+        String configPath = getConfigPath();
+        self().get(XmlUtil.class).saveXml(configPath + CONFIG_XML_NAME, self());
+
+        services().putAll(tempServices);
+        self().properties.putAll(tempProperties);
+    }
+
+    /**
      * persists (saves) the current environment. a reset will be done to reload the environment from saved file.
      */
-    public static void persistAndReload() {
+    protected static void persistAndReload() {
 //        Properties properties = self().properties;
 //        Properties p = new Properties();
 //        Set<Object> keys = properties.keySet();
@@ -419,10 +460,9 @@ public class Environment {
 //
 //        self().get(XmlUtil.class).saveXml(SERVICE_FILE_NAME, self().services);
 
-        String configPath = getConfigPath();
-        self().get(XmlUtil.class).saveXml(configPath + CONFIG_XML_NAME, self());
+        persist();
         reset();
-        create(configPath);
+        create(getConfigPath());
     }
 
     /**
@@ -487,4 +527,5 @@ public class Environment {
         if (true)
             log(obj);
     }
+
 }

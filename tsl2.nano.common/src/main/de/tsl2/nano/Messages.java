@@ -186,6 +186,13 @@ public class Messages {
         return str.replaceAll("&", "");
     }
 
+    public static String stripParameterBrackets(String str) {
+        if (str == null) {
+            return str;
+        }
+        return str.replace('{', '[').replace('}', ']');
+    }
+
     /**
      * simply delegates to {@link #unknown(String)}.
      */
