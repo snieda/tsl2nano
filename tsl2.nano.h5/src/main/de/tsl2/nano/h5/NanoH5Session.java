@@ -49,10 +49,11 @@ import de.tsl2.nano.log.LogFactory;
 import de.tsl2.nano.util.DateUtil;
 import de.tsl2.nano.util.NumberUtil;
 import de.tsl2.nano.util.StringUtil;
+
 /**
  * 
  * @author Tom, Thomas Schneider
- * @version $Revision$ 
+ * @version $Revision$
  */
 @SuppressWarnings({ "unchecked", "rawtypes" })
 public class NanoH5Session {
@@ -64,13 +65,14 @@ public class NanoH5Session {
     Response response;
     ClassLoader sessionClassloader;
     InetAddress inetAddress;
-    
+
     ExceptionHandler exceptionHandler;
-    
+
     /**
      * constructor
+     * 
      * @param server
-     * @param inetAddress 
+     * @param inetAddress
      * @param navigation
      * @param appstartClassloader
      */
@@ -101,7 +103,8 @@ public class NanoH5Session {
                 files));
             //WORKAROUND for uri-problem
             String referer = header.getProperty("referer");
-            if (parms.containsKey(IAction.CANCELED) || (method.equals("POST") && referer != null && uri.length() > 1 && referer.contains(uri)))
+            if (parms.containsKey(IAction.CANCELED)
+                || (method.equals("POST") && referer != null && uri.length() > 1 && referer.contains(uri)))
                 uri = "/";
             BeanDefinition<?> linkToModel = nav.fromUrl(uri);
             Object userResponse = null;
@@ -142,7 +145,7 @@ public class NanoH5Session {
         nav = null;
         response = null;
     }
-    
+
     private String refreshPage(String message) {
         return builder.build(nav.current(), message, true);
     }
@@ -176,13 +179,18 @@ public class NanoH5Session {
 //            main(null);
 //        }
         Object responseObject = null;
-        if (parms.containsKey(IAction.CANCELED))
-            return IAction.CANCELED;
+        if (parms.containsKey(IAction.CANCELED)) {
+            //if a new object was cancelled, it must be removed
+            if (nav.current() != null && !nav.current().isMultiValue()) {
+                ((Bean) nav.current()).detach();
+                return IAction.CANCELED;
+            }
+        }
 
         convertDates(parms);
 
         refreshCurrentBeanValues(parms);
-        
+
         //follow links or fill selected items
         if (nav.current() instanceof BeanCollector) {
             //follow given link
@@ -223,7 +231,8 @@ public class NanoH5Session {
                 String p = (String) k;
                 IAction<?> action = getAction(actions, p);
                 if (action != null) {
-                    if (nav.current().isMultiValue() && isSearchRequest(action.getId(), (BeanCollector<?, ?>) nav.current())) {
+                    if (nav.current().isMultiValue()
+                        && isSearchRequest(action.getId(), (BeanCollector<?, ?>) nav.current())) {
                         responseObject = processSearchRequest(parms, (BeanCollector<?, ?>) nav.current());
                     } else {
                         /*
@@ -254,16 +263,32 @@ public class NanoH5Session {
 
     /**
      * refreshCurrentBeanValues
+     * 
      * @param parms
      */
     private void refreshCurrentBeanValues(Properties parms) {
         LOG.info("refreshing current bean values");
         if (nav.current() instanceof Bean) {
+            Collection<Exception> exceptions = new LinkedList<Exception>();
             Bean vmodel = (Bean) nav.current();
             for (String p : parms.stringPropertyNames()) {
                 if (vmodel.hasAttribute(p)) {
-                    vmodel.setParsedValue(p, parms.getProperty(p));
+                    try {
+                        vmodel.setParsedValue(p, parms.getProperty(p));
+                    } catch (Exception e) {
+                        exceptions.add(e);
+                    }
                 }
+            }
+            /*
+             * create one exception, holding all messages of thrown sub-exceptions
+             */
+            if (exceptions.size() > 0) {
+                StringBuffer buf = new StringBuffer();
+                for (Exception ex : exceptions) {
+                    buf.append(ex.getMessage() + "\n");
+                }
+                throw new ForwardedException(buf.toString(), exceptions.iterator().next());
             }
         }
     }
@@ -273,7 +298,8 @@ public class NanoH5Session {
         BeanDefinition<?> firstElement = null;
         BeanDefinition<?> bean;
         for (Object object : selection) {
-            bean = (BeanDefinition<?>) (object instanceof BeanDefinition ? object : Bean.getBean((Serializable) object));
+            bean =
+                (BeanDefinition<?>) (object instanceof BeanDefinition ? object : Bean.getBean((Serializable) object));
             //don't add the first element, see behaviour in getNextModel()
             if (firstElement != null) {
                 nav.add(bean);
@@ -333,19 +359,23 @@ public class NanoH5Session {
             Bean<?> from = (Bean<?>) filterBean.getValueAsBean("from", false);
             Bean<?> to = (Bean<?>) filterBean.getValueAsBean("to", false);
 
-            from.getPresentationHelper().change(BeanPresentationHelper.PROP_DOVALIDATION, false);
-            from.setAttributeFilter("name");
-            from.setName(null);
-            to.getPresentationHelper().change(BeanPresentationHelper.PROP_DOVALIDATION, false);
-            to.setAttributeFilter("name");
-            to.setName(null);
+            if (!from.getAttributeNames()[0].equals("name") || from.getAttributeNames().length != 1) {
+                from.getPresentationHelper().change(BeanPresentationHelper.PROP_DOVALIDATION, false);
+                from.setAttributeFilter("name");
+//            from.setName(null);
+                to.getPresentationHelper().change(BeanPresentationHelper.PROP_DOVALIDATION, false);
+                to.setAttributeFilter("name");
+//            to.setName(null);
+            }
 
             for (String p : parms.stringPropertyNames()) {
                 String rowName = StringUtil.substring(p, null, ".", true);
                 String colName = StringUtil.substring(p, ".", null, true);
-                if (from.getPresentationHelper().prop(KEY_FILTER_FROM_LABEL).equals(rowName) && from.hasAttribute(colName)) {
+                if (from.getPresentationHelper().prop(KEY_FILTER_FROM_LABEL).equals(rowName)
+                    && from.hasAttribute(colName)) {
                     from.setParsedValue(colName, parms.getProperty(p));
-                } else if (to.getPresentationHelper().prop(KEY_FILTER_TO_LABEL).equals(rowName) && to.hasAttribute(colName)) {
+                } else if (to.getPresentationHelper().prop(KEY_FILTER_TO_LABEL).equals(rowName)
+                    && to.hasAttribute(colName)) {
                     to.setParsedValue(colName, parms.getProperty(p));
                 } else if (from.hasAttribute(colName)) {
                     from.setParsedValue(colName, parms.getProperty(p));

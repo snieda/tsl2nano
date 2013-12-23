@@ -296,11 +296,17 @@ At the moment the replication hsqldb database has to started manually.
 h2. Using an Applicationserver
 
 If you don't want to have a standalone appliation, you are able to use an application server like jboss. To do this you must have:
+
 * the *application servers client libraries* must be in your classpath. so copy them to your environment directory. with jboss eap 6.1 it would be _jboss-client.jar_.
-* of course, the *entity beans must be deployed* to that server perhaps in a  wraw  
+* any entity beans and _remote interfaces_ of your ejb's should be in your classpath. so copy the jar holding them to your environement directory.
+* of course, the *entity beans must be deployed* to that server perhaps in a  war-file.
+* be sure to have *tsl2.nano.serviceaccess* packed into that war-file. the service *IGenericService is essential.
+* add environement property 'applicationserver.authentification.service' (default: __org.nano.[environment-name].service.remote.IUserService__) with service class name. 
+* add environment property 'applicationserver.authentification.method' (default: __login__) with service method to call. this method has to have two string-parameters for user and password. the method has to call _ServiceFactory.instance().createSession(userObject, mandatorObject, subject, userRoles, features, featureInterfacePrefix)_
+* on the login page input user and password
 * create a *jndi.properties* file in your environment. with jboss this would look like the following:
 
-Example jndi for jboss eap 6.1:
+*Example jndi for jboss eap 6.1*:
 <pre>
 java.naming.factory.initial=org.jboss.naming.remote.client.InitialContextFactory
 java.naming.factory.url.pkgs=org.jboss.ejb.client.naming
@@ -308,6 +314,34 @@ java.naming.provider.url=remote://localhost:4447
 java.naming.security.principal=<jndi-prefix>
 java.naming.security.credentials=<perhaps the application name>
 jboss.naming.client.ejb.context=true
+</pre>
+
+*Example authentication service method*:
+<pre>
+UserService.authenticate(String user, String password) {
+...
+    //fill the server side ServiceFactory
+    if (!ServiceFactory.isInitialized()) {
+        ServiceFactory.createInstance(this.getClass().getClassLoader());
+        //registriere shared und error messages
+        ResourceBundle bundle = ResourceBundle.getBundle("org.mycompany.myproject.shared_messages",
+            Locale.getDefault(),
+            this.getClass().getClassLoader());
+        Messages.registerBundle(bundle, false);
+        bundle = ResourceBundle.getBundle("org.mycompany.myproduct.error_messages",
+            Locale.getDefault(),
+            this.getClass().getClassLoader());
+        Messages.registerBundle(bundle, false);
+    }
+    
+    /*
+     * a user session will be created on server side.
+     */
+    final Collection<String> userRoles = new LinkedList<String>();
+    final Collection<String> mandatorFeatures = getMandatorFeatures();
+    ServiceFactory.instance().createSession(null, getMandant(), null, userRoles, mandatorFeatures, null);
+...
+}
 </pre>
 
 h2. Developing, Deploying and Debugging
@@ -619,7 +653,7 @@ h2. TODOs
 * *ERRORS*
 ** hibernate3 is - on special circumstances - not able to load fields with empty ('') strings. This results in an __java.lang.StringIndexOutOfBoundsException: String index out of range: 0__
 ** failure: presentable.layout --> simple-xml: Transform of class java.util.LinkedHashMap not supported
-** failure: sorting numbers/currencies sorts as strings
+** (v) failure: sorting numbers/currencies sorts as strings
 ** BeanPresentationHelper.defineAdditionalAttributes(): how to avoid javaassist class
 ** presentation not written to xml --> see first failure
 ** every bean gets a new beandef copy with copies of attributedefs --> attributedef evaluations for every bean!

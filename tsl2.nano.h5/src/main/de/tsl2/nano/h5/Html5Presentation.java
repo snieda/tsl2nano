@@ -78,6 +78,7 @@ import static de.tsl2.nano.h5.HtmlUtil.style;
 
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.Date;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
@@ -112,6 +113,7 @@ import de.tsl2.nano.exception.ForwardedException;
 import de.tsl2.nano.format.GenericParser;
 import de.tsl2.nano.format.RegExpFormat;
 import de.tsl2.nano.log.LogFactory;
+import de.tsl2.nano.util.DateUtil;
 import de.tsl2.nano.util.FileUtil;
 import de.tsl2.nano.util.NumberUtil;
 import de.tsl2.nano.util.StringUtil;
@@ -714,7 +716,7 @@ public class Html5Presentation<T> extends BeanPresentationHelper<T> implements I
 
             //create a finder button
             if (beanValue.getPresentation().getEnabler().isActive()) {
-                if (BeanValue.isSelectable(beanValue)) {
+                if (beanValue.isSelectable()) {
                     createAction(cell,
                         beanValue.getName() + IPresentable.POSTFIX_SELECTOR,
                         "...",
@@ -769,7 +771,7 @@ public class Html5Presentation<T> extends BeanPresentationHelper<T> implements I
 
     private String getValue(BeanValue<?> beanValue, String type) {
         IPresentable p = beanValue.getPresentation();
-        return type.startsWith("date") ? StringUtil.toString(beanValue.getValue()) : beanValue.getValueText();
+        return type.startsWith("date") ? StringUtil.toString(DateUtil.toSqlDateString((Date) beanValue.getValue())) : beanValue.getValueText();
     }
 
     private String getSuffix(RegExpFormat regexpFormat) {

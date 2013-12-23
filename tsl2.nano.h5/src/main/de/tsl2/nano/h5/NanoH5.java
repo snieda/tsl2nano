@@ -29,6 +29,7 @@ import org.apache.commons.logging.Log;
 
 import de.tsl2.nano.Environment;
 import de.tsl2.nano.Messages;
+import de.tsl2.nano.bean.BeanClass;
 import de.tsl2.nano.bean.BeanContainer;
 import de.tsl2.nano.bean.IBeanContainer;
 import de.tsl2.nano.bean.def.Bean;
@@ -55,8 +56,10 @@ import de.tsl2.nano.persistence.Persistence;
 import de.tsl2.nano.persistence.PersistenceClassLoader;
 import de.tsl2.nano.script.ScriptTool;
 import de.tsl2.nano.service.util.BeanContainerUtil;
+import de.tsl2.nano.service.util.IGenericService;
 import de.tsl2.nano.serviceaccess.Authorization;
 import de.tsl2.nano.serviceaccess.IAuthorization;
+import de.tsl2.nano.serviceaccess.ServiceFactory;
 import de.tsl2.nano.util.FileUtil;
 import de.tsl2.nano.util.StringUtil;
 
@@ -175,10 +178,9 @@ public class NanoH5 extends NanoHTTPD {
         InetAddress requestor = ((Socket) header.get("socket")).getInetAddress();
         NanoH5Session session = sessions.get(requestor);
         if (session == null) {
-            session = createSession(requestor);
             //on a new session, no parameter should be set
-
-        } else {//perhaps session was interrupted/close but not removed
+            session = createSession(requestor);
+        } else {//perhaps session was interrupted/closed but not removed
             if (session.nav == null || session.nav.isEmpty()) {
                 sessions.remove(session.inetAddress);
                 session = createSession(requestor);
@@ -234,7 +236,7 @@ public class NanoH5 extends NanoHTTPD {
         Bean<?> login = createPersistenceUnit();
 
         Workflow workflow = Environment.get(Workflow.class);
-        
+
 //        Sample Workflow
 //        LinkedList<BeanAct> acts = new LinkedList<BeanAct>();
 //        Parameter p = new Parameter();
@@ -271,6 +273,7 @@ public class NanoH5 extends NanoHTTPD {
             "jarFile");
         login.getPresentationHelper().change(BeanPresentationHelper.PROP_NULLABLE, false);
         login.getPresentationHelper().change(BeanPresentationHelper.PROP_NULLABLE, true, "connectionPassword");
+        login.getPresentationHelper().change(BeanPresentationHelper.PROP_NULLABLE, true, "replication");
 
         login.addAction(new SecureAction<Object>("tsl2nano.login.ok") {
             //TODO: ref. to persistence class
@@ -352,7 +355,8 @@ public class NanoH5 extends NanoHTTPD {
             types.add(beanTool);
         }
         BeanCollector root = new BeanCollector(BeanCollector.class, types, MODE_EDITABLE | MODE_SEARCHABLE, null);
-        root.setName(StringUtil.toFirstUpper(StringUtil.substring(Persistence.current().getJarFile(), "/", ".jar", true)));
+        root.setName(StringUtil.toFirstUpper(StringUtil
+            .substring(Persistence.current().getJarFile(), "/", ".jar", true)));
         root.setAttributeFilter("name");
         root.getAttribute("name").setFormat(new Format() {
             /** serialVersionUID */
@@ -371,6 +375,11 @@ public class NanoH5 extends NanoHTTPD {
                 return null;
             }
         });
+        //perhaps, create the first environment.xml
+        if (!Environment.isPersisted()) {
+            Environment.persist();
+            BeanDefinition.dump();
+        }
         return root;
     }
 
@@ -391,15 +400,27 @@ public class NanoH5 extends NanoHTTPD {
             }
         }
 
+        if (Environment.get("use.applicationserver", false)) {
+            ServiceFactory.createInstance(runtimeClassloader);
+            //a service has to load user object, roles and features project specific!
+            BeanClass authentication =
+                BeanClass.createBeanClass(Environment.get("applicationserver.authentification.service",
+                    Environment.getApplicationMainPackage() + ".service.remote.IUserService"));
+            Object authService = ServiceFactory.instance().getService(authentication.getClazz());
+            BeanClass.call(authService, Environment.get("applicationserver.authentification.method", "login"),
+                new Class[] {
+                    String.class, String.class }, persistence.getConnectionUserName(),
+                persistence.getConnectionPassword());
+//            ServiceFactory.instance().createSession(userObject, mandatorObject, subject, userRoles, features, featureInterfacePrefix)
+            BeanContainerUtil.initGenericServices(runtimeClassloader);
+        } else {
+            GenericLocalBeanContainer.initLocalContainer(runtimeClassloader,
+                Environment.get("check.connection.on.login", true));
+        }
+        Environment.addService(IBeanContainer.class, BeanContainer.instance());
+
         List<Class> beanClasses = runtimeClassloader.loadBeanClasses(persistence.getJarFile(), null);
         Environment.setProperty("loadedBeanTypes", beanClasses);
-
-        if (Environment.get("use.applicationserver", false))
-            BeanContainerUtil.initGenericServices(runtimeClassloader);
-        else
-            GenericLocalBeanContainer.initLocalContainer(runtimeClassloader, Environment.get("check.connection.on.login", true));
-
-        Environment.addService(IBeanContainer.class, BeanContainer.instance());
 
         return beanClasses;
     }
