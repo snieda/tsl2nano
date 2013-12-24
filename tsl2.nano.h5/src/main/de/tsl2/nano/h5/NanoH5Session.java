@@ -119,8 +119,8 @@ public class NanoH5Session {
                     userResponse = processInput(uri, parms, uriLinkNumber);
                 }
                 if (userResponse instanceof String && !userResponse.equals(IAction.CANCELED)) {
-                    if (!msg.contains("<html>"))
-                        msg = "<html><body><pre>" + userResponse + "</pre></body></html>";
+                    if (!HtmlUtil.containsHtml(msg))
+                        msg = HtmlUtil.createMessagePage((String) userResponse);
                 } else {
                     msg = getNextPage(userResponse);
                 }

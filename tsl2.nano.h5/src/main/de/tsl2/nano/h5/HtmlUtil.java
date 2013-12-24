@@ -159,6 +159,7 @@ public class HtmlUtil {
     public static final String BTN_EXPORT = "tsl2nano.export";
 
     public static final String XML_TAG_START = "\\<.*\\>";
+    public static final String END_TAG = "/";
 
     public static Element appendElements(Element parent, String... tagNames) {
         Document doc = parent.getOwnerDocument();
@@ -196,7 +197,7 @@ public class HtmlUtil {
             //disabled flag attribute --> continue
             if (attributes[i] == null)
                 continue;
-            Attr attr = doc.createAttribute((String)attributes[i]);
+            Attr attr = doc.createAttribute((String) attributes[i]);
             if (i < attributes.length - 1) {
                 attr.setValue(Util.asString(attributes[i + 1]));
             }
@@ -235,6 +236,7 @@ public class HtmlUtil {
 
     /**
      * creates an utf-8 string with indentation.
+     * 
      * @param doc document to transform to a string
      * @return string
      */
@@ -267,5 +269,15 @@ public class HtmlUtil {
      */
     public static boolean containsXml(String text) {
         return text.matches(".*" + XML_TAG_START + ".*");
+    }
+
+    public static boolean containsHtml(String text) {
+        return text.contains("<html>");
+    }
+    public static String createMessagePage(String msg) {
+        return "<html><body>" + createMessage(msg, COLOR_RED) + "</body></html>";
+    }
+    public static String createMessage(String msg, String color) {
+        return "<font color=\"" + color + "\"><pre>" + msg + "</pre></font>";
     }
 }

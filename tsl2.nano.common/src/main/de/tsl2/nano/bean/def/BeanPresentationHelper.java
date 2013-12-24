@@ -957,9 +957,14 @@ public class BeanPresentationHelper<T> {
                     }
                 } catch (Exception ex) {
                     BeanAttribute id = bean.getIdAttribute();
-                    LOG.warn("couldn't check attribute for unique data: " + bean.getName() + "." + names[i]
-                        + ". Using id-attribute " + id.getId(), ex);
-                    return id.getName();
+                    if (id != null) {
+                        LOG.warn("couldn't check attribute for unique data: " + bean.getName() + "." + names[i]
+                            + ". Using id-attribute " + id.getId(), ex);
+                        return id.getName();
+                    } else {
+                        LOG.warn("couldn't check attribute for unique data: " + bean.getName() + "." + names[i], ex);
+                        return names[i];
+                    }
                 }
             }
             if (levels.isEmpty()) {

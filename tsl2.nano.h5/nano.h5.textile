@@ -344,6 +344,24 @@ UserService.authenticate(String user, String password) {
 }
 </pre>
 
+h2. Generating your Entities
+
+It is possible to generate your entity beans through a tool like hibernate-tools. for an example have a look at the sample-project _nano.h5.sample_.
+
+If hibernate-tools creates your beans, it may create additional beans to use composed primary keys. To use them with _nano.h5_ you should extend these beans, to fill the id-bean from dependent entity fields. So, enhance the setter methods of this unique fields to fill the id-beans corresponding field, too.
+
+<pre>
+class MyBean {
+	@Id MyBeanId id;
+	@Column MyType myUniqueField;
+}
+
+class MyBeanId {
+	String field1;
+	String myUniqueFieldId;
+}
+</pre>
+
 h2. Developing, Deploying and Debugging
 
 * "tsl2.nano code server":https://sourceforge.net/p/tsl2nano/code/ci/master/tree/tsl2.nano.common

@@ -352,7 +352,7 @@ public class BeanValue<T> extends AttributeDefinition<T> implements IValueDefini
      */
     public boolean isSelectable() {
         Object v = getValue();
-        return v != null ? Bean.getBean((Serializable) v).isSelectable()
+        return v instanceof Serializable ? Bean.getBean((Serializable) v).isSelectable()
             : BeanDefinition.getBeanDefinition(getType()).isSelectable();
     }
 

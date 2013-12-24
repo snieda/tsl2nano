@@ -169,7 +169,6 @@ public class BeanUtil {
         return BeanClass.copyValues(src, dest, destValuesOnly);
     }
 
-
     /**
      * delegates to {@link BeanClass#createOwnCollectionInstances(Object)}.
      */
@@ -316,6 +315,14 @@ public class BeanUtil {
     }
 
     /**
+     * @see #isStandardType(Class) evaluating the given objects class
+     */
+    public static boolean isStandardType(Object object) {
+        return object instanceof Class ? isStandardType((Class)object) : object != null ? isStandardType(object.getClass())
+            : false;
+    }
+
+    /**
      * evaluates, if the given type is a basic data type like String, Date, Time, Number. If you have own, specific data
      * implementations, you are able to add their packages through {@link #addStandardTypePackages(String)} - but be
      * careful, this change will be used by the framework! Please see {@link #isStandardInterface(Class)}, too.
@@ -365,7 +372,8 @@ public class BeanUtil {
      * @return true, if type is a byte (or Byte) array, or simple Serializable interface.
      */
     public static boolean isByteStream(Class<?> type) {
-        return type.equals(Serializable.class) || (type.isArray() && (type.isAssignableFrom(Byte.class) || type.isAssignableFrom(Byte.class)));
+        return type.equals(Serializable.class)
+            || (type.isArray() && (type.isAssignableFrom(Byte.class) || type.isAssignableFrom(Byte.class)));
     }
 
     /**
@@ -420,7 +428,8 @@ public class BeanUtil {
      */
     public static Class<?> getGenericType(Class<?> clazz, String fieldName) {
         try {
-            return (Class<?>) ((ParameterizedType) clazz.getDeclaredField(fieldName).getGenericType()).getActualTypeArguments()[0];
+            return (Class<?>) ((ParameterizedType) clazz.getDeclaredField(fieldName).getGenericType())
+                .getActualTypeArguments()[0];
         } catch (Exception e) {
             ForwardedException.forward(e);
             return null;
@@ -469,7 +478,7 @@ public class BeanUtil {
 //            beandef = new BeanDefinition(BeanClass.getDefiningClass(o.getClass()));
 //            beandef.setAttributeFilter(filterAttributes);
 //        } else {
-            beandef = BeanDefinition.getBeanDefinition(BeanClass.getDefiningClass(o.getClass()));
+        beandef = BeanDefinition.getBeanDefinition(BeanClass.getDefiningClass(o.getClass()));
 //        }
         return beandef.toValueMap(o, useClassPrefix, onlySingleValues, onlyFilterAttributes, filterAttributes);
     }
@@ -665,8 +674,10 @@ public class BeanUtil {
                 }
             }
             if (!hasColumnIndexes)
-                throw FormattedException.implementationError("if you don't give a separation-character, you should give at least one column-index in your attribute-names",
-                    null);
+                throw FormattedException
+                    .implementationError(
+                        "if you don't give a separation-character, you should give at least one column-index in your attribute-names",
+                        null);
         }
 
         final Collection<T> result = new LinkedList<T>();
@@ -851,11 +862,12 @@ public class BeanUtil {
 
     /**
      * creates a hashcode through all single-value attibutes of given bean instance
+     * 
      * @param bean instance to evaluate the hashcode for
      * @param attributes (optional) attributes to be used for hashcode
      * @return new hashcode for given bean instance
      */
-    public static int hashCodeReflect(Object bean, String...attributes) {
+    public static int hashCodeReflect(Object bean, String... attributes) {
         final int prime = 31;
         int result = 1;
         BeanClass bc = new BeanClass(bean.getClass());
@@ -865,7 +877,7 @@ public class BeanUtil {
         Object v;
         for (int i = 0; i < attributes.length; i++) {
             v = BeanClass.getValue(bean, attributes[i]);
-                result = prime * result + (v == null ? 0 : v.hashCode());
+            result = prime * result + (v == null ? 0 : v.hashCode());
         }
         return result;
     }

@@ -594,7 +594,7 @@ public class Bean<T> extends BeanDefinition<T> {
      * @see #getBean(Serializable, boolean)
      */
     public static <I extends Serializable> Bean<I> getBean(I instanceOrName) {
-        return getBean(instanceOrName, true);
+        return getBean(instanceOrName, true/*!BeanUtil.isStandardType(instanceOrName)*/);
     }
 
     /**
