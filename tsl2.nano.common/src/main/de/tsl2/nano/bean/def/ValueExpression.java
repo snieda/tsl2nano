@@ -178,7 +178,7 @@ public class ValueExpression<TYPE> implements IConverter<TYPE, String>, Serializ
             }
         }
 
-        if (isPersistable) {//TODO: check for unique!
+        if (isPersistable) {//check for unique!
             Collection<TYPE> beansByExample = BeanContainer.instance().getBeansByExample(exampleBean);
             if (beansByExample.size() > 1) {
                 LOG.error("string-to-object-parser: found more than one object:\n" + StringUtil.toFormattedString(beansByExample, 100, true));
