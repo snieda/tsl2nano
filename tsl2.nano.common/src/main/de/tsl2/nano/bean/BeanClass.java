@@ -558,7 +558,7 @@ public class BeanClass<T> implements Serializable {
                 if (pars.length == args.length) {
                     for (int j = 0; j < args.length; j++) {
                         //if one argument type mismatches, we search for another constructor
-                        if (args[j] != null && !pars[j].isAssignableFrom(args[j].getClass())) {
+                        if (args[j] != null && !isAssignableFrom(pars[j], args[j].getClass())) {
                             pars = null;
                             break;
                         }
@@ -567,6 +567,7 @@ public class BeanClass<T> implements Serializable {
                         try {
                             constructors[i].setAccessible(true);
                             instance = (T) constructors[i].newInstance(args);
+                            break;
                         } catch (final Exception e) {
                             ForwardedException.forward(e);
                         }
