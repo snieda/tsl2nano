@@ -274,7 +274,16 @@ public class NanoH5Session {
             for (String p : parms.stringPropertyNames()) {
                 if (vmodel.hasAttribute(p)) {
                     try {
-                        vmodel.setParsedValue(p, parms.getProperty(p));
+                        /*
+                         * check, if input was changed - so, don't lose instances if unchanged
+                         * the oldString was sent to html-page - the newString returns from request
+                         */
+                        String oldString = Bean.getBean((Serializable)vmodel.getValue(p)).toString();
+                        String newString = parms.getProperty(p);
+                        if (oldString != null && !oldString.equals(newString))
+                            vmodel.setParsedValue(p, parms.getProperty(p));
+                        else
+                            LOG.debug("ignoring unchanged attribute " + vmodel.getAttribute(p));
                     } catch (Exception e) {
                         exceptions.add(e);
                     }
