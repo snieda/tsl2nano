@@ -142,9 +142,9 @@ public class FormatUtil {
 
                 };
             } else if (Time.class.isAssignableFrom(type)) {
-                f = DateFormat.getTimeInstance();
+                f = getTimeFormat(DateFormat.getTimeInstance(), Time.class);
             } else if (Timestamp.class.isAssignableFrom(type)) {
-                f = DateFormat.getDateTimeInstance();
+                f = getTimeFormat(DateFormat.getDateTimeInstance(), Timestamp.class);
             } else if (Date.class.isAssignableFrom(type)) {
                 f = getCheckedFormat(DateFormat.getDateInstance());
             } else if (String.class.isAssignableFrom(type)) {
@@ -216,6 +216,30 @@ public class FormatUtil {
         return f;
     }
 
+
+    /**
+     * getInstanceFormat
+     * @param format
+     * @param instanceType type to return as instance - the constructor must have one wrapping parameter
+     * @return new wrapped instance
+     */
+    protected static Format getTimeFormat(final Format format, final Class<?> instanceType) {
+        return new Format() {
+            Format mf = format;
+
+            @Override
+            public StringBuffer format(Object obj, StringBuffer toAppendTo, FieldPosition pos) {
+                return mf.format(obj, toAppendTo, pos);
+            }
+
+            @Override
+            public Object parseObject(String source, ParsePosition pos) {
+                Object parseObject = mf.parseObject(source, pos);
+                return parseObject != null ? BeanClass.createInstance(instanceType, ((Date)parseObject).getTime()) : null;
+            }
+
+        };
+    }
     /**
      * @deprecated: use DateFormat.setLenient(false) instead
      * 
