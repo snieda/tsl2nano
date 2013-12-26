@@ -244,7 +244,7 @@ public class Html5Presentation<T> extends BeanPresentationHelper<T> implements I
      * @param parent
      */
     private void createBean(Element parent, Bean<?> bean, boolean interactive) {
-        int columns = bean.getPresentable().layout(L_GRIDWIDTH, 3);
+        int columns = bean.getPresentable().layout(L_GRIDWIDTH, Environment.get("layout.default.columncount", 3));
         Element panel = createGrid(parent, Environment.translate("tsl2nano.input", false), columns);
         appendAttributes(panel, bean.getPresentable());
         createLayout((Element) panel.getParentNode(), bean.getPresentable());
@@ -387,6 +387,26 @@ public class Html5Presentation<T> extends BeanPresentationHelper<T> implements I
 
     public static <T> String toString(T item, ValueExpressionFormat<T> vef) {
         return item instanceof BeanDefinition ? item.toString() : vef.format(item);
+    }
+
+    /**
+     * creates an html5 menu - but most browser don't support the tag 'menu'
+     * @param parent
+     * @param name
+     * @param actions
+     * @param attributes
+     * @return
+     */
+    private Element createMenu(Element parent, String name, Collection<IAction> actions, String... attributes) {
+        Element menu = appendElement(parent, "menu", ATTR_TYPE, "toolbar");
+        Element list = appendElement(menu, "li");
+        Element sub = appendElement(list, "menu", "label", name);
+        if (actions != null) {
+            for (IAction a : actions) {
+                appendElement(sub, TAG_BUTTON, content(a.getShortDescription()), ATTR_TYPE, "button", "label", a.getShortDescription());
+            }
+        }
+        return menu;
     }
 
     private Element createActionPanel(Element parent, Collection<IAction> actions, String... attributes) {
@@ -714,12 +734,12 @@ public class Html5Presentation<T> extends BeanPresentationHelper<T> implements I
                 enable(ATTR_READONLY, !beanValue.getPresentation().getEnabler().isActive()),
                 enable(ATTR_REQUIRED, !beanValue.nullable()));
 
-            //create a finder button
             if (beanValue.getPresentation().getEnabler().isActive()) {
+                //create a finder button
                 if (beanValue.isSelectable()) {
                     createAction(cell,
                         beanValue.getName() + IPresentable.POSTFIX_SELECTOR,
-                        "...",
+                        Environment.translate("tsl2nano.finder.action.label", false),
                         Environment.translate("tsl2nano.selection", true),
                         null,
                         null,
@@ -915,6 +935,7 @@ public class Html5Presentation<T> extends BeanPresentationHelper<T> implements I
                     ATTR_METHOD,
                     Environment.get("html5.http.method", "post"));
                 createActionPanel(c3, getPresentationActions(), ATTR_ALIGN, ALIGN_RIGHT);
+//                createMenu(c3, "test", getPresentationActions(), ATTR_ALIGN, ALIGN_RIGHT);
             }
             return body;
         } catch (ParserConfigurationException e) {

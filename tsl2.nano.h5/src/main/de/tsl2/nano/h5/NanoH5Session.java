@@ -254,6 +254,10 @@ public class NanoH5Session {
                         String n = StringUtil.substring(p, null, IPresentable.POSTFIX_SELECTOR);
                         final BeanValue assignableAttribute = (BeanValue) nav.current().getAttribute(n);
                         responseObject = assignableAttribute.connectToSelector(nav.current());
+                    } else if (p.endsWith(IPresentable.POSTFIX_CREATOR)) {
+//                        String n = StringUtil.substring(p, null, IPresentable.POSTFIX_CREATOR);
+//                        final BeanValue assignableAttribute = (BeanValue) nav.current().getAttribute(n);
+//                        responseObject = assignableAttribute.connectToSelector(nav.current());
                     }
                 }
             }
@@ -278,10 +282,11 @@ public class NanoH5Session {
                          * check, if input was changed - so, don't lose instances if unchanged
                          * the oldString was sent to html-page - the newString returns from request
                          */
-                        String oldString = Bean.getBean((Serializable)vmodel.getValue(p)).toString();
+                        Object v = vmodel.getValue(p);
+                        String oldString = v != null ? Bean.getBean((Serializable) v).toString() : null;
                         String newString = parms.getProperty(p);
-                        if (oldString != null && !oldString.equals(newString))
-                            vmodel.setParsedValue(p, parms.getProperty(p));
+                        if (oldString == null || !oldString.equals(newString))
+                            vmodel.setParsedValue(p, newString);
                         else
                             LOG.debug("ignoring unchanged attribute " + vmodel.getAttribute(p));
                     } catch (Exception e) {
@@ -367,13 +372,15 @@ public class NanoH5Session {
         if (filterBean != null) {
             Bean<?> from = (Bean<?>) filterBean.getValueAsBean("from", false);
             Bean<?> to = (Bean<?>) filterBean.getValueAsBean("to", false);
-
-            if (!from.getAttributeNames()[0].equals("name") || from.getAttributeNames().length != 1) {
+            final String NAME = "name";
+            if (!from.getAttributeNames()[0].equals(NAME) || from.getAttributeNames().length != 1) {
                 from.getPresentationHelper().change(BeanPresentationHelper.PROP_DOVALIDATION, false);
-                from.setAttributeFilter("name");
+                if (from.hasAttribute(NAME))
+                    from.setAttributeFilter(NAME);
 //            from.setName(null);
                 to.getPresentationHelper().change(BeanPresentationHelper.PROP_DOVALIDATION, false);
-                to.setAttributeFilter("name");
+                if (to.hasAttribute(NAME))
+                    to.setAttributeFilter(NAME);
 //            to.setName(null);
             }
 
