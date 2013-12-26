@@ -106,17 +106,40 @@ public class BeanClass<T> implements Serializable {
      * @return simple class name
      */
     public String getName() {
-        return getName(clazz);
+        return getName(clazz, false);
     }
 
+    /**
+     * delegates to {@link #getName(Class, boolean)} with full = false
+     */
+    public static final String getName(Class clazz) {
+        return getName(clazz, false);
+    }
+    
     /**
      * returns the simple class name. if class is a proxy, we return the simple name of the first interface.
      * 
      * @param clazz normal class or proxy class
      * @return simple class name
      */
-    public static final String getName(Class clazz) {
-        return getDefiningClass(clazz).getSimpleName();
+    public static final String getName(Class clazz, boolean path) {
+        return path ? getDefiningClass(clazz).getName() : getDefiningClass(clazz).getSimpleName();
+    }
+
+    /**
+     * delegates to {@link #getPath(Class)}
+     */
+    public String getPath() {
+        return getPath(clazz);
+    }
+    
+    /**
+     * returns the package path of class.
+     * @param clazz normal class or proxy class
+     * @return simple class name
+     */
+    public static final String getPath(Class clazz) {
+        return getDefiningClass(clazz).getPackage().getName();
     }
 
     /**

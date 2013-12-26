@@ -250,6 +250,16 @@ public class FileUtil {
     }
 
     /**
+     * converts a class path string to a file path string. Example: java.lang.Class will be java/lang/Class
+     * 
+     * @param classPath
+     * @return file path of the given classPath
+     */
+    public static String getFilePath(String classPath) {
+        return classPath.replace('.', '/');
+    }
+
+    /**
      * guarantees existing the full path.
      * 
      * @param fileWithPath file with path

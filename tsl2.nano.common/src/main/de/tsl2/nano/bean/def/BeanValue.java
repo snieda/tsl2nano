@@ -30,6 +30,7 @@ import de.tsl2.nano.action.CommonAction;
 import de.tsl2.nano.action.IAction;
 import de.tsl2.nano.bean.BeanAttribute;
 import de.tsl2.nano.bean.BeanClass;
+import de.tsl2.nano.bean.BeanUtil;
 import de.tsl2.nano.bean.ValueHolder;
 import de.tsl2.nano.collection.ListSet;
 import de.tsl2.nano.exception.ForwardedException;
@@ -108,7 +109,8 @@ public class BeanValue<T> extends AttributeDefinition<T> implements IValueDefini
                     && value.getClass().getDeclaringClass() == null)
                     return (Class<T>) value.getClass();
             } catch (Exception e) {
-                LOG.warn("couldn't evaluate type through instance. using method-returntype instead. error was: " + e.toString());
+                LOG.warn("couldn't evaluate type through instance. using method-returntype instead. error was: "
+                    + e.toString());
             }
         }
         return super.getType();
@@ -346,17 +348,6 @@ public class BeanValue<T> extends AttributeDefinition<T> implements IValueDefini
     }
 
     /**
-     * see {@link BeanClass#getActions()} and {@link BeanDefinition#isSelectable()}
-     * @param beanValue attribute to evaluate
-     * @return true, if actions are defined
-     */
-    public boolean isSelectable() {
-        Object v = getValue();
-        return v instanceof Serializable ? Bean.getBean((Serializable) v).isSelectable()
-            : BeanDefinition.getBeanDefinition(getType()).isSelectable();
-    }
-
-    /**
      * the parent may be a bean definition, holding this attribute. setting this parent through {@link #setParent(Bean)}
      * will provide a bean-value-tree.
      * 
@@ -455,4 +446,5 @@ public class BeanValue<T> extends AttributeDefinition<T> implements IValueDefini
         });
         return collector;
     }
+
 }

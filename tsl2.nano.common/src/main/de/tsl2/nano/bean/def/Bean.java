@@ -180,8 +180,7 @@ public class Bean<T> extends BeanDefinition<T> {
             if (!isVirtual()) {
                 if (instance != null)//perhaps an extended class has actions
                     actions = BeanClass.getActions(instance.getClass(), null);
-                if (actions.size() == 0 && BeanContainer.isInitialized()
-                    && BeanContainer.instance().isPersistable(getDefiningClass(clazz)))
+                if (actions.size() == 0 && isSelectable())
                     addDefaultSaveAction();
             }
         }
@@ -449,7 +448,9 @@ public class Bean<T> extends BeanDefinition<T> {
      * @param actionId action id (important for user permissions!)
      */
     protected SecureAction<T> createSaveAction(final Object bean, String actionId) {
-        final String saveLabel = Messages.getString("tsl2nano.save");
+        final String saveLabel =
+            BeanContainer.isInitialized() && BeanContainer.instance().isPersistable(getDefiningClass(clazz)) ? Messages
+                .getString("tsl2nano.save") : Messages.getString("tsl2nano.assign");
 //        return new SecureAction(actionId, saveLabel, saveLabel, IAction.MODE_DLG_OK) {
 //            public Object action() throws Exception {
 //                return save(bean);
@@ -481,6 +482,9 @@ public class Bean<T> extends BeanDefinition<T> {
      *         won't be closed.
      */
     protected Object save(Object bean) {
+        if (!BeanContainer.isInitialized() || !BeanContainer.instance().isPersistable(getDefiningClass(clazz))) {
+            return bean;
+        }
         // do the save - fill the old bean with the new id value
         Object newBean;
         try {
@@ -700,7 +704,7 @@ class SaveAction<T> extends SecureAction<T> implements Serializable {
     }
 
     public T action() throws Exception {
-        return (T) bean.save();
+        return (T) bean.save(instance);
     }
 
     @Override

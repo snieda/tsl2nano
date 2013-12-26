@@ -37,6 +37,7 @@ import de.tsl2.nano.action.IAction;
 import de.tsl2.nano.bean.BeanAttribute;
 import de.tsl2.nano.bean.BeanClass;
 import de.tsl2.nano.bean.BeanContainer;
+import de.tsl2.nano.bean.BeanUtil;
 import de.tsl2.nano.bean.ValueHolder;
 import de.tsl2.nano.collection.CollectionUtil;
 import de.tsl2.nano.collection.IPredicate;
@@ -49,6 +50,7 @@ import de.tsl2.nano.log.LogFactory;
 import de.tsl2.nano.messaging.ChangeEvent;
 import de.tsl2.nano.messaging.IListener;
 import de.tsl2.nano.util.FileUtil;
+import de.tsl2.nano.util.Util;
 
 /**
  * Holds all informations to define a bean as a container of bean-attributes. Uses {@link BeanClass} and
@@ -464,9 +466,19 @@ public class BeanDefinition<T> extends BeanClass<T> implements Serializable {
      * @return true, if an action was defined
      */
     public boolean isSelectable() {
-        return !isFinal() && (isMultiValue() || getActions().size() > 0 || isPersistable());
+        return !isFinal() && (isMultiValue() || isCreatable() || isPersistable() || !Util.isEmpty(actions));
     }
     
+    /**
+     * isCreatable
+     * 
+     * @return true, if attribute is non-standard propriety object type having a public default constructor.
+     */
+    public boolean isCreatable() {
+        Class t = getDefiningClass(clazz);
+        return !BeanUtil.isStandardType(t) && BeanClass.hasDefaultConstructor(t);
+    }
+
     /**
      * @return Returns the actions.
      */
@@ -624,6 +636,13 @@ public class BeanDefinition<T> extends BeanClass<T> implements Serializable {
     }
 
     /**
+     * {@inheritDoc}
+     */
+    public String getNameAndPath() {
+        return (isVirtual() ? "" : getPath() + ".") + name;
+    }
+
+    /**
      * the bean name will only be used, if the bean has no instance (see {@link #isVirtual()}).
      * 
      * @param name bean name
@@ -675,8 +694,9 @@ public class BeanDefinition<T> extends BeanClass<T> implements Serializable {
      *            (not only a name) and can be serialized to a file.
      * @return bean definition, found in cache - or new beandef
      */
-    public static <T> BeanDefinition<T> getBeanDefinition(String name, Class<T> type, boolean fullInitStore) {
+    public static <T> BeanDefinition<T> getBeanDefinition(final String name, Class<T> type, boolean fullInitStore) {
         volatileBean.name = name;
+        //TODO: think about use a structure through package path on file system
         int i = virtualBeanCache.indexOf(volatileBean);
         BeanDefinition<T> beandef = null;
         if (i == -1) {
@@ -684,9 +704,15 @@ public class BeanDefinition<T> extends BeanClass<T> implements Serializable {
             if (usePersistentCache && xmlFile.canRead()) {
                 try {
                     beandef = (BeanDefinition<T>) XmlUtil.loadXml(xmlFile.getPath(), BeanDefinition.class);
-                    virtualBeanCache.add(beandef);
+                    //perhaps, the file defines another bean-name or bean-type
+                    if ((name == null || name.equals(beandef.getName()) && (type == null || type.equals(beandef.getClazz()))))
+                        virtualBeanCache.add(beandef);
+                    else {
+                        LOG.warn("the file " + xmlFile.getPath() + " doesn't define the bean with name '" + name + "' and type " + type);
+                        beandef = null;
+                    }
                 } catch (Exception e) {
-                    if (Environment.get("strict.mode", false))
+                    if (Environment.get("application.mode.strict", false))
                         ForwardedException.forward(e);
                     else
                         LOG.warn("couldn't load configuration " + xmlFile.getPath() + " for bean " + type, e);
@@ -768,7 +794,7 @@ public class BeanDefinition<T> extends BeanClass<T> implements Serializable {
     }
 
     protected static File getDefinitionFile(String name) {
-        return new File(Environment.getConfigPath() + "beandef/" + FileUtil.getValidFileName(name.toLowerCase()) + ".xml");
+        return new File(Environment.getConfigPath() + "beandef/" + FileUtil.getValidFileName(FileUtil.getFilePath(name).toLowerCase()) + ".xml");
     }
 
     public void saveDefinition() {

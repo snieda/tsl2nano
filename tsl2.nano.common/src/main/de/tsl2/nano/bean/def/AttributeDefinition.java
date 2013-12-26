@@ -11,6 +11,7 @@ package de.tsl2.nano.bean.def;
 
 import static de.tsl2.nano.bean.def.IPresentable.UNDEFINED;
 
+import java.io.Serializable;
 import java.lang.reflect.Method;
 import java.text.Format;
 import java.text.ParseException;
@@ -29,6 +30,7 @@ import tsl.StringUtil;
 import de.tsl2.nano.Environment;
 import de.tsl2.nano.action.IActivator;
 import de.tsl2.nano.bean.BeanAttribute;
+import de.tsl2.nano.bean.BeanClass;
 import de.tsl2.nano.bean.BeanContainer;
 import de.tsl2.nano.bean.BeanUtil;
 import de.tsl2.nano.bean.IAttributeDef;
@@ -361,6 +363,16 @@ public class AttributeDefinition<T> extends BeanAttribute implements IAttributeD
     @Override
     public boolean isMultiValue() {
         return Collection.class.isAssignableFrom(getType());
+    }
+
+    /**
+     * see {@link BeanClass#getActions()} and {@link BeanDefinition#isSelectable()}
+     * 
+     * @param beanValue attribute to evaluate
+     * @return true, if bean type is selectable
+     */
+    public boolean isSelectable() {
+        return BeanDefinition.getBeanDefinition(getType()).isSelectable();
     }
 
     /**

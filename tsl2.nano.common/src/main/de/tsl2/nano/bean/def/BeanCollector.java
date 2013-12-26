@@ -184,7 +184,7 @@ public class BeanCollector<COLLECTIONTYPE extends Collection<T>, T> extends Bean
 //            this.workingMode = 0;
 //            searchStatus = Messages.getFormattedString("tsl2nano.login.noprincipal", "...", "...");
 //        } else {
-            this.workingMode = workingMode;
+        this.workingMode = workingMode;
 //        }
         if (collection != null)
             searchStatus = Messages.getFormattedString("tsl2nano.searchdialog.searchresultcount", collection.size());
@@ -270,7 +270,8 @@ public class BeanCollector<COLLECTIONTYPE extends Collection<T>, T> extends Bean
                             }
                         }
                     } else if (!betweenFinderCreated) {
-                        collection = (COLLECTIONTYPE) CollectionUtil.getFilteringBetween(collection, from, (T) to, true);
+                        collection =
+                            (COLLECTIONTYPE) CollectionUtil.getFilteringBetween(collection, from, (T) to, true);
                         betweenFinderCreated = true;
                     }
                     /*
@@ -457,6 +458,7 @@ public class BeanCollector<COLLECTIONTYPE extends Collection<T>, T> extends Bean
      */
     @Override
     public T createItem(T selectedItem) {
+        final T newItem;
         if (selectedItem != null && Environment.get("collector.new.clone.selected", true)) {
             try {
                 /*
@@ -464,39 +466,8 @@ public class BeanCollector<COLLECTIONTYPE extends Collection<T>, T> extends Bean
                  * but the tsl2nano util may cause a classloader exception.
                  * we don't use a deep copy to avoid lazyloading problems
                  */
-                final T cloneBean = (T) BeanUtil.clone(selectedItem);
-                BeanUtil.createOwnCollectionInstances(cloneBean);
-                //assign the new item to the composition parent
-                if (composition != null) {
-                    composition.add(cloneBean);
-                }
-
-                /*
-                 * the id attribute of the selected bean must not be copied!!!
-                 * we create an generated value for the id. if jpa annotation @GenerateValue
-                 * is present, it will overwrite this id.
-                 */
-                final BeanAttribute idAttribute = BeanContainer.getIdAttribute(cloneBean);
-                if (idAttribute != null) {
-                    IAttributeDef def = Environment.get(IBeanContainer.class).getAttributeDef(cloneBean,
-                        idAttribute.getName());
-                    idAttribute.setValue(cloneBean,
-                        StringUtil.fixString(BeanUtil.createUUID(), def.length(), ' ', true));
-                }
-                /*
-                 * if timestamp fields are not shown, generate new timestamps
-                 */
-                if (Environment.get("default.attribute.timestamp", false)) {
-                    Map<String, IAttributeDefinition<?>> attrs = getAttributeDefinitions();
-                    Timestamp ts = new Timestamp(System.currentTimeMillis());
-                    for (IAttributeDefinition<?> a : attrs.values()) {
-                        if (a instanceof IValueAccess)
-                            if (a.temporalType() != null && Timestamp.class.isAssignableFrom(a.temporalType())) {
-                                ((IValueAccess) a).setValue(ts);
-                            }
-                    }
-                }
-                return cloneBean;
+                newItem = (T) BeanUtil.clone(selectedItem);
+                BeanUtil.createOwnCollectionInstances(newItem);
             } catch (final Exception e) {
                 ForwardedException.forward(e);
                 return null;
@@ -509,13 +480,38 @@ public class BeanCollector<COLLECTIONTYPE extends Collection<T>, T> extends Bean
                 LOG.warn("There is no information how to create a new bean - at least one stored bean instance must exist!");
                 return null;
             }
-            T newItem = BeanContainer.instance().createBean(getType());
-            //assign the new item to the composition parent
-            if (composition != null)
-                composition.add(newItem);
-
-            return newItem;
+            newItem = BeanContainer.instance().createBean(getType());
         }
+        //assign the new item to the composition parent
+        if (composition != null) {
+            composition.add(newItem);
+        }
+        /*
+         * if timestamp fields are not shown, generate new timestamps
+         */
+        if (Environment.get("default.attribute.timestamp", true)) {
+            Map<String, IAttributeDefinition<?>> attrs = getAttributeDefinitions();
+            Timestamp ts = new Timestamp(System.currentTimeMillis());
+            for (IAttributeDefinition<?> a : attrs.values()) {
+                if (a instanceof IValueAccess)
+                    if (a.temporalType() != null && Timestamp.class.isAssignableFrom(a.temporalType())) {
+                        ((IValueAccess) a).setValue(ts);
+                    }
+            }
+        }
+        /*
+         * the id attribute of the selected bean must not be copied!!!
+         * we create an generated value for the id. if jpa annotation @GenerateValue
+         * is present, it will overwrite this id.
+         */
+        final BeanAttribute idAttribute = BeanContainer.getIdAttribute(newItem);
+        if (idAttribute != null) {
+            IAttributeDef def = Environment.get(IBeanContainer.class).getAttributeDef(newItem,
+                idAttribute.getName());
+            idAttribute.setValue(newItem,
+                StringUtil.fixString(BeanUtil.createUUID(), def.length(), ' ', true));
+        }
+        return newItem;
     }
 
     /**
@@ -540,7 +536,7 @@ public class BeanCollector<COLLECTIONTYPE extends Collection<T>, T> extends Bean
                     final T finalBean = newBean;
                     final COLLECTIONTYPE values = collection;
                     values.add(newBean);
-                    Bean.getBean((Serializable)newBean).attach(new Runnable() {
+                    Bean.getBean((Serializable) newBean).attach(new Runnable() {
                         @Override
                         public void run() {
                             values.remove(finalBean);
@@ -699,8 +695,10 @@ public class BeanCollector<COLLECTIONTYPE extends Collection<T>, T> extends Bean
                     new IPredicate<IPresentableColumn>() {
                         @Override
                         public boolean eval(IPresentableColumn arg0) {
-                            return (arg0.getPresentable() == null || arg0.getPresentable().isVisible()) && hasMode(MODE_SHOW_MULTIPLES)
-                                || (getAttribute(arg0.getName()) == null || !getAttribute(arg0.getName()).isMultiValue());
+                            return (arg0.getPresentable() == null || arg0.getPresentable().isVisible())
+                                && hasMode(MODE_SHOW_MULTIPLES)
+                                || (getAttribute(arg0.getName()) == null || !getAttribute(arg0.getName())
+                                    .isMultiValue());
                         }
                     });
             }
@@ -734,6 +732,7 @@ public class BeanCollector<COLLECTIONTYPE extends Collection<T>, T> extends Bean
     public Object getColumnValue(Object element, int columnIndex) {
         return getColumnValue(element, getAttribute(getColumn(columnIndex).getName()));
     }
+
     public <V> V getColumnValue(Object element, IAttributeDefinition<V> attribute) {
         if (element == null)
             return null;
@@ -749,7 +748,7 @@ public class BeanCollector<COLLECTIONTYPE extends Collection<T>, T> extends Bean
         }
         return (V) value;
     }
-    
+
     @Override
     public String getColumnText(Object element, int columnIndex) {
         IPresentableColumn col = getColumn(columnIndex);
@@ -758,6 +757,7 @@ public class BeanCollector<COLLECTIONTYPE extends Collection<T>, T> extends Bean
             return "";
         return getColumnText(element, getAttribute(col.getName()));
     }
+
     /**
      * {@inheritDoc}
      */
@@ -821,7 +821,9 @@ public class BeanCollector<COLLECTIONTYPE extends Collection<T>, T> extends Bean
                 for (int i = 0; i < sortIndexes.length; i++) {
                     ci = sortIndexes[i];
 //                    c = getColumnText(o1, ci).compareTo(getColumnText(o2, ci));
-                    c = BeanPresentationHelper.STRING_COMPARATOR.compare(getColumnValue(o1, ci), getColumnValue(o2, ci));
+                    c =
+                        BeanPresentationHelper.STRING_COMPARATOR
+                            .compare(getColumnValue(o1, ci), getColumnValue(o2, ci));
                     if (c != 0) {
                         //TODO: check performance!
                         c = getColumn(ci).isSortUpDirection() ? c : -1 * c;
@@ -992,10 +994,11 @@ public class BeanCollector<COLLECTIONTYPE extends Collection<T>, T> extends Bean
             Collection<I> collection,
             int workingMode,
             Composition composition) {
-        BeanDefinition<I> beandef = getBeanDefinition(beanType.getSimpleName() + (useExtraCollectorDefinition() ? POSTFIX_COLLECTOR
-            : ""),
-            beanType,
-            false);
+        BeanDefinition<I> beandef =
+            getBeanDefinition(beanType.getSimpleName() + (useExtraCollectorDefinition() ? POSTFIX_COLLECTOR
+                : ""),
+                beanType,
+                false);
         return (BeanCollector<C, I>) createCollector(collection, workingMode, composition, beandef);
     }
 
@@ -1035,9 +1038,11 @@ public class BeanCollector<COLLECTIONTYPE extends Collection<T>, T> extends Bean
     public String toString() {
         if (asString == null && name != null) {
             //empty search-beans are possible
-            asString = (useExtraCollectorDefinition() ? Environment.translate("tsl2nano.list", false) + " " : "") + StringUtil.substring(name,
-                null,
-                POSTFIX_COLLECTOR);
+            asString =
+                (useExtraCollectorDefinition() ? Environment.translate("tsl2nano.list", false) + " " : "")
+                    + StringUtil.substring(name,
+                        null,
+                        POSTFIX_COLLECTOR);
         }
         return asString;
     }

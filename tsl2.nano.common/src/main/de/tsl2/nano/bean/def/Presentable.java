@@ -35,36 +35,37 @@ public class Presentable implements IPresentable, Serializable {
     int type = UNSET;
     @Attribute
     int style = UNSET;
-    @Element(required=false)
+    @Element(required = false)
     String label;
-    @Element(required=false)
+    @Element(required = false)
     String description;
-    @Element(required=false)
+    @Element(required = false)
     Object layout;
-    @Element(required=false)
+    @Element(required = false)
     Object layoutConstraints;
     @Attribute
     boolean visible = true;
     transient IActivator enabler;
-    @Element(required=false)
+    @Element(required = false)
     String icon;
-    
-    @ElementArray(required=false)
+
+    @ElementArray(required = false)
     int[] foreground;
-    @ElementArray(required=false)
+    @ElementArray(required = false)
     int[] background;
 
     public Presentable() {
     }
-    
+
     public Presentable(AttributeDefinition<?> attr) {
         label = Environment.translate(attr.getName(), true);
         type = Environment.get(BeanPresentationHelper.class).getDefaultType(attr);
-        style = Environment.get(BeanPresentationHelper.class).getDefaultHorizontalAlignment((IAttributeDefinition<?>)attr);
+        style =
+            Environment.get(BeanPresentationHelper.class).getDefaultHorizontalAlignment((IAttributeDefinition<?>) attr);
         description = label;
         enabler = IActivator.ACTIVE;
     }
-    
+
     public Presentable(BeanAttribute attr) {
         label = Environment.translate(attr.getName(), true);
         type = Environment.get(BeanPresentationHelper.class).getDefaultType(attr);
@@ -72,7 +73,7 @@ public class Presentable implements IPresentable, Serializable {
         description = label;
         enabler = IActivator.ACTIVE;
     }
-    
+
     /**
      * @return Returns the type.
      */
@@ -112,7 +113,7 @@ public class Presentable implements IPresentable, Serializable {
      * {@inheritDoc}
      */
     @Override
-    public <T extends IPresentable> T  setPresentation(String label,
+    public <T extends IPresentable> T setPresentation(String label,
             int type,
             int style,
             IActivator enabler,
@@ -134,13 +135,13 @@ public class Presentable implements IPresentable, Serializable {
      * {@inheritDoc}
      */
     @Override
-    public <T extends IPresentable> T  setPresentationDetails(int[] foreground, int[] background, String icon) {
+    public <T extends IPresentable> T setPresentationDetails(int[] foreground, int[] background, String icon) {
         this.foreground = foreground;
         this.background = background;
         this.icon = icon;
         return (T) this;
     }
-    
+
     @Override
     public IActivator getEnabler() {
         if (enabler == null)
@@ -199,7 +200,7 @@ public class Presentable implements IPresentable, Serializable {
      * {@inheritDoc}
      */
     @Override
-    public  IPresentable setType(int type) {
+    public IPresentable setType(int type) {
         this.type = type;
         return this;
     }
@@ -221,14 +222,14 @@ public class Presentable implements IPresentable, Serializable {
         this.layout = layout;
         return (T) this;
     }
-    
+
     /**
      * {@inheritDoc}
      */
     @Override
-    public <T extends IPresentable> T  setLayoutConstraints(Object layoutConstraints) {
+    public <T extends IPresentable> T setLayoutConstraints(Object layoutConstraints) {
         this.layoutConstraints = layoutConstraints;
-        return (T)this;
+        return (T) this;
     }
 
     /**
@@ -237,22 +238,22 @@ public class Presentable implements IPresentable, Serializable {
     @Override
     public <T extends IPresentable> T setEnabler(IActivator enabler) {
         this.enabler = enabler;
-        return (T)this;
+        return (T) this;
     }
-    
+
     /**
      * {@inheritDoc}
      */
     @Override
     public <T extends IPresentable> T setVisible(boolean visible) {
         this.visible = visible;
-        return (T)this;
+        return (T) this;
     }
 
     public String layout(String name) {
         return layout(name, null);
     }
-    
+
     /**
      * {@inheritDoc}
      */
@@ -260,11 +261,17 @@ public class Presentable implements IPresentable, Serializable {
     public <T> T layout(String name, T defaultValue) {
         T value = null;
         if (layout instanceof Map)
-            value = (T) ((Map)layout).get(name);
+            value = (T) ((Map) layout).get(name);
         if (value == null && layoutConstraints instanceof Map)
-            value = (T) ((Map)layoutConstraints).get(name);
+            value = (T) ((Map) layoutConstraints).get(name);
         if (value == null)
             value = defaultValue;
         return value;
+    }
+
+    @Override
+    public String toString() {
+        return getClass().getSimpleName() + "(" + label + ", type:" + type + ", style:" + style
+            + (visible ? ")" : ", invisible)");
     }
 }
