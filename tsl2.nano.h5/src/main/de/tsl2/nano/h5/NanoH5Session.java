@@ -254,10 +254,6 @@ public class NanoH5Session {
                         String n = StringUtil.substring(p, null, IPresentable.POSTFIX_SELECTOR);
                         final BeanValue assignableAttribute = (BeanValue) nav.current().getAttribute(n);
                         responseObject = assignableAttribute.connectToSelector(nav.current());
-                    } else if (p.endsWith(IPresentable.POSTFIX_CREATOR)) {
-//                        String n = StringUtil.substring(p, null, IPresentable.POSTFIX_CREATOR);
-//                        final BeanValue assignableAttribute = (BeanValue) nav.current().getAttribute(n);
-//                        responseObject = assignableAttribute.connectToSelector(nav.current());
                     }
                 }
             }
