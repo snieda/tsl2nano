@@ -107,7 +107,7 @@ public class Environment {
         String buildInfo = (String) get("build.informations");
         if (buildInfo == null) {
             try {
-                InputStream biStream = get(ClassLoader.class).getResourceAsStream("build.properties");
+                InputStream biStream = Environment.class.getClassLoader().getResourceAsStream("build.properties");
                 if (biStream != null) {
                     Properties bi = new Properties();
                     bi.load(biStream);
@@ -217,9 +217,12 @@ public class Environment {
             self.properties = new Properties();
 //          LOG.warn("no environment.properties available");
         }
+        getBuildInformations();
         self.properties.put(KEY_CONFIG_PATH, new File(dir).getAbsolutePath() + "/");
         self.services = new Hashtable<Class<?>, Object>();
         registerBundle(PREFIX + "messages", true);
+        if (new File("messages.properties").canRead())
+            registerBundle("messages", true);
         addService(Profiler.class, Profiler.si());
         addService(UncaughtExceptionHandler.class, new ExceptionHandler());
         addService(layer);
