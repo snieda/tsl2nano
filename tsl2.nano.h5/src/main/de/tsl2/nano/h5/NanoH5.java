@@ -29,6 +29,7 @@ import org.apache.commons.logging.Log;
 
 import de.tsl2.nano.Environment;
 import de.tsl2.nano.Messages;
+import de.tsl2.nano.action.IActivator;
 import de.tsl2.nano.bean.BeanClass;
 import de.tsl2.nano.bean.BeanContainer;
 import de.tsl2.nano.bean.IBeanContainer;
@@ -274,6 +275,12 @@ public class NanoH5 extends NanoHTTPD {
         login.getPresentationHelper().change(BeanPresentationHelper.PROP_NULLABLE, false);
         login.getPresentationHelper().change(BeanPresentationHelper.PROP_NULLABLE, true, "connectionPassword");
         login.getPresentationHelper().change(BeanPresentationHelper.PROP_NULLABLE, true, "replication");
+        login.getPresentationHelper().chg("replication", BeanPresentationHelper.PROP_ENABLER, new IActivator() {
+            @Override
+            public boolean isActive() {
+                return Environment.get("use.database.replication", false);
+            }
+        });
 
         login.addAction(new SecureAction<Object>("tsl2nano.login.ok") {
             //TODO: ref. to persistence class

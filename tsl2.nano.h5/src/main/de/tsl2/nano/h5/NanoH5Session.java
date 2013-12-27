@@ -129,7 +129,7 @@ public class NanoH5Session {
                 close();
                 return server.createResponse("<a href=\"" + server.serviceURL + "\">restart session</a>");
             }
-        } catch (Exception e) {
+        } catch (Throwable e /*respect errors like NoClassDefFound...the application should continue!*/) {
             RuntimeException ex = ForwardedException.toRuntimeEx(e, true);
             msg = refreshPage(ex.getMessage());
             response = server.createResponse(HTTP_BADREQUEST, MIME_HTML, msg);
