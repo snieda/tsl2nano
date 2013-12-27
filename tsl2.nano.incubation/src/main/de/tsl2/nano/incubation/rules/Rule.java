@@ -62,17 +62,19 @@ public class Rule<T> {
     String name;
     @ElementMap(entry = "parameter", attribute = true, inline = true, keyType = String.class, key = "name", valueType = ParType.class, value = "type")
     Map<String, ParType> parameter;
-    @ElementMap(entry = "constraint", attribute = true, inline = true, keyType = String.class, key = "name", valueType = Constraint.class, value = "constraint")
+    @ElementMap(entry = "constraint", attribute = true, inline = true, keyType = String.class, key = "name", value = "constraint", required=false)
     Map<String, Constraint<?>> constraints;
     transient NumericConditionOperator operator;
     @Element
     String operation;
 
+    /** the rule is initialized when all sub-rules are imported. see {@link #importSubRules()} */
+    boolean initialized;
+    
     /**
-     * constructor
+     * constructor only to be used by deserializing
      */
     public Rule() {
-        this(null, null, null);
     }
 
     /**
@@ -86,9 +88,7 @@ public class Rule<T> {
         this.name = name;
         this.operation = operation;
         this.parameter = parameter;
-        this.operator = new NumericConditionOperator();
-        createConstraints();
-        importSubRules();
+        initDeserializing();
     }
 
     /**
@@ -98,7 +98,10 @@ public class Rule<T> {
         return name;
     }
 
-    protected void importSubRules() {
+    /**
+     * importSubRules
+     */
+    void importSubRules() {
         RulePool pool = Environment.get(RulePool.class);
         String subRule;
         while ((subRule = StringUtil.extract(operation, "§\\w+")).length() > 0) {
@@ -110,10 +113,18 @@ public class Rule<T> {
             //TODO: what to do with sub rule constraints?
 //            constraints.putAll(rule.constraints);
         }
+        initialized = true;
     }
 
+    /**
+     * executes the given rule, checking the given arguments.
+     * @param arguments rule input
+     * @return evaluation result
+     */
     @SuppressWarnings("unchecked")
     public T execute(Map<CharSequence, T> arguments) {
+        if (!initialized)
+            importSubRules();
         checkArguments(arguments);
         operator.reset();
         T result = (T) operator.eval(operation, (Map<CharSequence, Object>) arguments);
@@ -176,6 +187,7 @@ public class Rule<T> {
 
     @Commit
     private void initDeserializing() {
+        this.operator = new NumericConditionOperator();
         createConstraints();
         importSubRules();
     }

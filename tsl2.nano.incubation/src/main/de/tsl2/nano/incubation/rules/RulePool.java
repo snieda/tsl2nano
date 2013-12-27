@@ -35,32 +35,60 @@ public class RulePool {
      */
     public RulePool() {
         super();
-        loadRules();
+    }
+    
+    private Map<String, Rule<?>> rules() {
+        if (rules == null) {
+            loadRules();
+        }
+        return rules;
     }
     
     private void loadRules() {
         rules = new HashMap<String, Rule<?>>();
-        String dirName = Environment.getConfigPath() + "rules/";
+        String dirName = getDirectory();
+        LOG.info("loading rules from " + dirName);
         File dir = new File(dirName);
         dir.mkdirs();
         File[] ruleFiles = dir.listFiles();
         Rule<?> rule;
         for (int i = 0; i < ruleFiles.length; i++) {
-            try {
-                rule = Environment.get(XmlUtil.class).loadXml(ruleFiles[i].getPath(), Rule.class);
-                rules.put(rule.name, rule);
-            } catch (Exception e) {
-                LOG.error(e);
-            }
+            loadRule(ruleFiles[i].getPath());
         }
     }
+
+    /**
+     * getDirectory
+     * @return
+     */
+    private String getDirectory() {
+        return Environment.getConfigPath() + "rules/";
+    }
+    
+    private Rule<?> loadRule(String path) {
+        try {
+            Rule<?> rule = Environment.get(XmlUtil.class).loadXml(path, Rule.class);
+            rules.put(rule.name, rule);
+            return rule;
+        } catch (Exception e) {
+            LOG.error(e);
+            return null;
+        }
+    }
+
     /**
      * getRule
      * @param name rule to find
      * @return rule or null
      */
     public Rule<?> getRule(String name) {
-        return rules.get(name);
+        Rule<?> rule = rules().get(name);
+        //perhaps not loaded (new or recursive)
+        return rule != null ? rule : loadRule(getFileName(name));
+    }
+
+    private String getFileName(String name) {
+        return name.endsWith(".xml") ? name : getDirectory() + name + ".xml";
     }
 
     /**
@@ -69,6 +97,13 @@ public class RulePool {
      * @param rule rule to add
      */
     public void addRule(String name, Rule<BigDecimal> rule) {
-        rules.put(name, rule);
+        rules().put(name, rule);
+    }
+    
+    /**
+     * reset
+     */
+    public void reset() {
+        rules = null;
     }
 }

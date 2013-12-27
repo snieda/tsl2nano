@@ -26,6 +26,12 @@ public class Constraint<T extends Comparable<T>> {
     @Element
     T max;
 
+    /**
+     * constructor
+     */
+    public Constraint() {
+    }
+    
     public Constraint(Class<T> type) {
         this(type, null, null);
     }

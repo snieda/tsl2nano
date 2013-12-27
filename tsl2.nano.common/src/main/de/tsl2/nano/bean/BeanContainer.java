@@ -381,7 +381,7 @@ public class BeanContainer implements IBeanContainer {
      * @return full action id
      */
     public static final String getActionId(Class<?> beanType, boolean packedInList, String actionName) {
-        final String type = beanType.getSimpleName().toLowerCase() + (packedInList ? Messages.getString("tsl2nano.list")
+        final String type = BeanClass.getName(beanType).toLowerCase() + (packedInList ? Messages.getString("tsl2nano.list")
             .toLowerCase()
             : "");
         return type + "." + actionName.toLowerCase();
