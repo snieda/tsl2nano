@@ -19,8 +19,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import org.apache.commons.collections.map.ReferenceMap;
-
 import de.tsl2.nano.Environment;
 import de.tsl2.nano.Messages;
 import de.tsl2.nano.action.IAction;
@@ -130,7 +128,7 @@ public class Bean<T> extends BeanDefinition<T> {
      * hold beans only for a short time. this will enhance performance on loading a bean. holding beans to long will
      * result in memory problems as the application may be used by many clients.
      */
-    static final TimedReferenceMap<Bean> timedCache = new TimedReferenceMap<Bean>(ReferenceMap.WEAK, ReferenceMap.WEAK);
+    static final TimedReferenceMap<Bean> timedCache = new TimedReferenceMap<Bean>();
 
     /**
      * constructor to create a virtual bean - without an object instance. all attribute definitions must be done by

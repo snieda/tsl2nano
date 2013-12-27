@@ -9,9 +9,6 @@
  */
 package de.tsl2.nano.collection;
 
-import org.apache.commons.collections.map.AbstractReferenceMap;
-import org.apache.commons.collections.map.ReferenceMap;
-
 /**
  * The {@link ReferenceMap} of apache commons is overwritten to add temporarily hard references. If a new object was
  * added (to a weak map), but a reference will be created some milliseconds later, the value may be garbage collected
@@ -26,76 +23,26 @@ import org.apache.commons.collections.map.ReferenceMap;
  * @author Thomas Schneider
  * @version $Revision$
  */
-public class TimedReferenceMap<T> extends ReferenceMap {
+public class TimedReferenceMap<V> extends ReferenceMap<Object, V> {
     /** serialVersionUID */
     private static final long serialVersionUID = -2946119815999384729L;
 
     /** hard references to be hold for a minimum time */
-    TimedReferences<T> timedReferences;
+    TimedReferences<V> timedReferences;
 
     /**
      * constructor
      */
     public TimedReferenceMap() {
-        super();
-        initTimedReferences();
+        this(true);
     }
-
+    
     /**
      * constructor
-     * 
-     * @param keyType type of key references. one of {@link AbstractReferenceMap#WEAK},
-     *            {@link AbstractReferenceMap#SOFT}, {@link AbstractReferenceMap#HARD}.
-     * @param valueType type of value references. one of {@link AbstractReferenceMap#WEAK},
-     *            {@link AbstractReferenceMap#SOFT}, {@link AbstractReferenceMap#HARD}.
-     * @param purgeValues
+     * @param weak
      */
-    public TimedReferenceMap(int keyType, int valueType, boolean purgeValues) {
-        super(keyType, valueType, purgeValues);
-        initTimedReferences();
-    }
-
-    /**
-     * constructor
-     * 
-     * @param keyType type of key references. one of {@link AbstractReferenceMap#WEAK},
-     *            {@link AbstractReferenceMap#SOFT}, {@link AbstractReferenceMap#HARD}.
-     * @param valueType type of value references. one of {@link AbstractReferenceMap#WEAK},
-     *            {@link AbstractReferenceMap#SOFT}, {@link AbstractReferenceMap#HARD}.
-     * @param capacity
-     * @param loadFactor
-     * @param purgeValues
-     */
-    public TimedReferenceMap(int keyType, int valueType, int capacity, float loadFactor, boolean purgeValues) {
-        super(keyType, valueType, capacity, loadFactor, purgeValues);
-        initTimedReferences();
-    }
-
-    /**
-     * constructor
-     * 
-     * @param keyType type of key references. one of {@link AbstractReferenceMap#WEAK},
-     *            {@link AbstractReferenceMap#SOFT}, {@link AbstractReferenceMap#HARD}.
-     * @param valueType type of value references. one of {@link AbstractReferenceMap#WEAK},
-     *            {@link AbstractReferenceMap#SOFT}, {@link AbstractReferenceMap#HARD}.
-     * @param capacity
-     * @param loadFactor
-     */
-    public TimedReferenceMap(int keyType, int valueType, int capacity, float loadFactor) {
-        super(keyType, valueType, capacity, loadFactor);
-        initTimedReferences();
-    }
-
-    /**
-     * constructor
-     * 
-     * @param keyType type of key references. one of {@link AbstractReferenceMap#WEAK},
-     *            {@link AbstractReferenceMap#SOFT}, {@link AbstractReferenceMap#HARD}.
-     * @param valueType type of value references. one of {@link AbstractReferenceMap#WEAK},
-     *            {@link AbstractReferenceMap#SOFT}, {@link AbstractReferenceMap#HARD}.
-     */
-    public TimedReferenceMap(int keyType, int valueType) {
-        super(keyType, valueType);
+    public TimedReferenceMap(boolean weak) {
+        super(weak);
         initTimedReferences();
     }
 
@@ -103,7 +50,7 @@ public class TimedReferenceMap<T> extends ReferenceMap {
      * initTimedReferences
      */
     void initTimedReferences() {
-        timedReferences = new TimedReferences<T>();
+        timedReferences = new TimedReferences<V>();
     }
 
     /**
@@ -126,9 +73,8 @@ public class TimedReferenceMap<T> extends ReferenceMap {
      * {@inheritDoc}
      */
     @Override
-    public Object put(Object key, Object value) {
-        timedReferences.add((T) value);
+    public V put(Object key, V value) {
+        timedReferences.add(value);
         return super.put(key, value);
     }
-
 }

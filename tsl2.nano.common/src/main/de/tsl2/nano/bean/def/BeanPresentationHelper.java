@@ -156,6 +156,24 @@ public class BeanPresentationHelper<T> {
     }
 
     /**
+     * change attribute with given key / values
+     * @param attributeName attribute to change
+     * @param keyValues properties to change
+     * @return the helper itself
+     */
+    public BeanPresentationHelper<T> chg(String attributeName, Object... keyValues) {
+        String n;
+        for (int i = 0; i < keyValues.length; i += 2) {
+            n = (String) keyValues[i];
+            boolean isPresProp = isPresentableProperty(n);
+            Object instance = isPresProp ? bean.getAttribute(attributeName).getPresentation()
+                : bean.getAttribute(attributeName);
+            BeanAttribute.getBeanAttribute(instance.getClass(), n).setValue(instance, keyValues[i + 1]);
+        }
+        return this;
+    }
+
+    /**
      * change
      * 
      * @param propertyName
