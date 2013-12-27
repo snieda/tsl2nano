@@ -11,20 +11,24 @@ package de.tsl2.nano.classloader;
 
 import java.io.File;
 import java.io.Serializable;
+import java.lang.Thread.UncaughtExceptionHandler;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.net.URLClassLoader;
 import java.net.URLStreamHandlerFactory;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.concurrent.Executors;
 
 import org.apache.commons.logging.Log;
 
+import de.tsl2.nano.Environment;
 import de.tsl2.nano.bean.BeanUtil;
 import de.tsl2.nano.exception.FormattedException;
 import de.tsl2.nano.exception.ForwardedException;
+import de.tsl2.nano.exception.Message;
 import de.tsl2.nano.log.LogFactory;
 import de.tsl2.nano.util.FileUtil;
 import de.tsl2.nano.util.StringUtil;
@@ -197,6 +201,7 @@ public class RuntimeClassloader extends URLClassLoader {
     public void startPathChecker(final String path, final long waitMillis) {
         Runnable pathChecker = new Runnable() {
             File fPath = new File(path);
+            File[] lastFiles;
 
             @Override
             public void run() {
@@ -205,13 +210,12 @@ public class RuntimeClassloader extends URLClassLoader {
                     try {
                         Thread.sleep(waitMillis);
 
-                        //TODO: enhance 'changedFile' evaluation
-                        File changedFile = lastModifiedFile();
-                        if (changedFile != null && changedFile.lastModified() > System.currentTimeMillis() - waitMillis) {
+                        List<File> changedFiles = lastModifiedFile();
+                        for (File file : changedFiles) {
                             // TODO: implement unloading existing classes
-                            if (changedFile.getPath().endsWith(".jar")) {
-                                LOG.info("loading " + changedFile.getAbsolutePath());
-                                addFile(changedFile.getAbsolutePath());
+                            if (file.getPath().endsWith(".jar")) {
+                                Message.send("New jar-file loaded: " + file.getAbsolutePath());
+                                addFile(file.getAbsolutePath());
                             }
                         }
                     } catch (InterruptedException e) {
@@ -221,14 +225,27 @@ public class RuntimeClassloader extends URLClassLoader {
                 }
             }
 
-            File lastModifiedFile() {
+            List<File> lastModifiedFile() {
                 File[] files = fPath.listFiles();
                 File last = null;
+                List<File> fileList;
+                if (lastFiles != null) {
+                    fileList = new ArrayList<File>(Arrays.asList(files));
+                    boolean changed = fileList.removeAll(Arrays.asList(lastFiles));
+                    if (changed && fileList.size() > 0) {
+                        lastFiles = files;
+                        return fileList;
+                    }
+                }
                 for (int i = 0; i < files.length; i++) {
                     if (last == null || files[i].lastModified() > last.lastModified())
                         last = files[i];
                 }
-                return last;
+                lastFiles = files;
+                fileList = new ArrayList<File>();
+                if (last.lastModified() > System.currentTimeMillis() - waitMillis)
+                    fileList.add(last);
+                return fileList;
             }
         };
         ThreadUtil.startDaemon("classloader-environment-path-checker", pathChecker);
