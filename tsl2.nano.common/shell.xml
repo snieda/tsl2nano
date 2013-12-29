@@ -625,8 +625,8 @@ starting ${ant.project.name}:
 		<property name="sh.build.debug" value="false" />
 
 		<!-- store build informations to build.properties -->
-		<buildnumber file="${sh.build.basedir}/build.properties" />
-		<propertyfile file="${sh.build.basedir}/build.properties">
+		<buildnumber file="${sh.build.basedir}/src/resources/build.properties" />
+		<propertyfile file="${sh.build.basedir}/src/resources/build.properties">
 			<entry key="build.name" value="${sh.build.name}" />
 			<entry key="build.debug" value="${sh.build.debug}" />
 			<entry key="build.version" value="${sh.build.version}" />
