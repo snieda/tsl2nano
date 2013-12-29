@@ -45,10 +45,10 @@ public final class DateUtil {
     public static final Date MAX_DATE = getDate(9999, -1, -1);
 
     /** 4 quarters beginnings without year */
-    public static final Date Q1 = getDate(0, 1, 1);
-    public static final Date Q2 = getDate(0, 4, 1);
-    public static final Date Q3 = getDate(0, 7, 1);
-    public static final Date Q4 = getDate(0, 10, 1);
+    public static final Date Q1 = getDate(9999, 1, 1);
+    public static final Date Q2 = getDate(9999, 4, 1);
+    public static final Date Q3 = getDate(9999, 7, 1);
+    public static final Date Q4 = getDate(9999, 10, 1);
 
     static final Date[] QUARTERS = new Date[] { Q1, Q2, Q3, Q4 };
 
@@ -899,7 +899,7 @@ public final class DateUtil {
         int i;
         int year = getYear(date);
         for (i = 0; i < QUARTERS.length - 1; i++) {
-            if (includes(getQuarter(year, QUARTERS[i]), getQuarter(year, QUARTERS[i + 1]), date))
+            if (includes(getQuarter(year, QUARTERS[i]), add(getQuarter(year, QUARTERS[i + 1]), Calendar.MILLISECOND, -1), date))
                 break;
         }
         return i + 1;
@@ -913,7 +913,7 @@ public final class DateUtil {
      */
     public static final int getNextQuarter(Date date) {
         int q = getCurrentQuarter(date);
-        return q == QUARTERS.length ? 0 : q + 1;
+        return q == QUARTERS.length ? 1 : q + 1;
     }
 
     /**

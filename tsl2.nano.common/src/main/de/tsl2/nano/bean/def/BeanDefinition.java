@@ -212,10 +212,11 @@ public class BeanDefinition<T> extends BeanClass<T> implements Serializable {
              * create additional attributes - ignoring the filter
              */
             getPresentationHelper().defineAdditionalAttributes();
-            
+
         }
         //don't use the generic type H (Class<H>) to be compilable on standard jdk javac.
-        ArrayList<BeanAttribute> attributes = new ArrayList<BeanAttribute>((Collection/*<? extends BeanAttribute>*/) getAttributeDefinitions().values());
+        ArrayList<BeanAttribute> attributes =
+            new ArrayList<BeanAttribute>((Collection/*<? extends BeanAttribute>*/) getAttributeDefinitions().values());
         /*
          * filter the result using a default filter by the presentation helper
          */
@@ -223,7 +224,8 @@ public class BeanDefinition<T> extends BeanClass<T> implements Serializable {
             return CollectionUtil.getFiltering(attributes, new IPredicate<BeanAttribute>() {
                 @Override
                 public boolean eval(BeanAttribute arg0) {
-                    return getPresentationHelper().isDefaultAttribute(arg0) || getValueExpression().isExpressionPart(arg0.getName());
+                    return getPresentationHelper().isDefaultAttribute(arg0)
+                        || getValueExpression().isExpressionPart(arg0.getName());
                 }
             });
         } else {
@@ -266,7 +268,8 @@ public class BeanDefinition<T> extends BeanClass<T> implements Serializable {
      * @return true, if this bean has no class defintino - the default constructor was called
      */
     public boolean isVirtual() {
-        return clazz.equals(UNDEFINED.getClass());
+        return clazz.equals(UNDEFINED.getClass())
+            || /*after deserialization it is only object */clazz.equals(Object.class);
     }
 
     public List<IAttributeDefinition<?>> getBeanAttributes() {
@@ -320,7 +323,7 @@ public class BeanDefinition<T> extends BeanClass<T> implements Serializable {
             else if (!isVirtual()) {
                 if (attributeDefinitions != null) {
                     attributeFilter = CollectionUtil.concat(String[].class,
-//                        attributeFilter,
+                        //                        attributeFilter,
                         attributeDefinitions.keySet().toArray(new String[0]));
                 } else {
                     attributeFilter = super.getAttributeNames(readAndWriteAccess);
@@ -458,17 +461,18 @@ public class BeanDefinition<T> extends BeanClass<T> implements Serializable {
      * @return
      */
     public boolean isPersistable() {
-        return BeanContainer.instance().isPersistable(clazz);
+        return BeanContainer.isInitialized() && BeanContainer.instance().isPersistable(clazz);
     }
-    
+
     /**
      * the bean is selectable, if it has at least one action to do on it - or it is persistable.
+     * 
      * @return true, if an action was defined
      */
     public boolean isSelectable() {
         return !isFinal() && (isMultiValue() || isCreatable() || isPersistable() || !Util.isEmpty(actions));
     }
-    
+
     /**
      * isCreatable
      * 
@@ -668,7 +672,7 @@ public class BeanDefinition<T> extends BeanClass<T> implements Serializable {
     public BeanAttribute getIdAttribute() {
         return BeanContainer.getIdAttribute(clazz);
     }
-    
+
     /**
      * delegates to {@link #getBeanDefinition(String, Class, boolean)} with null and true.
      */
@@ -705,10 +709,12 @@ public class BeanDefinition<T> extends BeanClass<T> implements Serializable {
                 try {
                     beandef = (BeanDefinition<T>) XmlUtil.loadXml(xmlFile.getPath(), BeanDefinition.class);
                     //perhaps, the file defines another bean-name or bean-type
-                    if ((name == null || name.equals(beandef.getName()) && (type == null || type.equals(beandef.getClazz()))))
+                    if ((name == null || name.equals(beandef.getName())
+                        && (type == null || type.equals(beandef.getClazz()))))
                         virtualBeanCache.add(beandef);
                     else {
-                        LOG.warn("the file " + xmlFile.getPath() + " doesn't define the bean with name '" + name + "' and type " + type);
+                        LOG.warn("the file " + xmlFile.getPath() + " doesn't define the bean with name '" + name
+                            + "' and type " + type);
                         beandef = null;
                     }
                 } catch (Exception e) {
@@ -794,7 +800,8 @@ public class BeanDefinition<T> extends BeanClass<T> implements Serializable {
     }
 
     protected static File getDefinitionFile(String name) {
-        return new File(Environment.getConfigPath() + "beandef/" + FileUtil.getValidFileName(FileUtil.getFilePath(name).toLowerCase()) + ".xml");
+        return new File(Environment.getConfigPath() + "beandef/"
+            + FileUtil.getValidFileName(FileUtil.getFilePath(name).toLowerCase()) + ".xml");
     }
 
     public void saveDefinition() {
@@ -962,8 +969,9 @@ public class BeanDefinition<T> extends BeanClass<T> implements Serializable {
             boolean onlySingleValues,
             boolean onlyFilterAttributes,
             String... filterAttributes) {
-        final String classPrefix = useClassPrefix ? BeanAttribute.toFirstLower(instance.getClass().getSimpleName()) + "."
-            : "";
+        final String classPrefix =
+            useClassPrefix ? BeanAttribute.toFirstLower(instance.getClass().getSimpleName()) + "."
+                : "";
         return toValueMap(instance, classPrefix, onlySingleValues, onlyFilterAttributes, filterAttributes);
     }
 
@@ -989,7 +997,7 @@ public class BeanDefinition<T> extends BeanClass<T> implements Serializable {
      * @return map filled with all attribute values
      */
     public Map<String, Object> toValueMap(Object instance,
-        String keyPrefix,
+            String keyPrefix,
             boolean onlySingleValues,
             boolean formatted,
             boolean onlyFilteredAttributes,
@@ -1001,7 +1009,8 @@ public class BeanDefinition<T> extends BeanClass<T> implements Serializable {
         final List<String> filter = Arrays.asList(filterAttributes);
         Object value;
         for (final BeanAttribute beanAttribute : attributes) {
-            if ((onlyFilteredAttributes && filter.contains(beanAttribute.getName())) || (!onlyFilteredAttributes && !filter.contains(beanAttribute.getName()))) {
+            if ((onlyFilteredAttributes && filter.contains(beanAttribute.getName()))
+                || (!onlyFilteredAttributes && !filter.contains(beanAttribute.getName()))) {
                 value = beanAttribute.getValue(instance);
                 if (formatted) {
                     BeanValue<?> bv = (BeanValue<?>) beanAttribute;

@@ -266,6 +266,18 @@ public class Environment {
     }
 
     /**
+     * deletes all config files. no reset on Environment will be done!
+     */
+    public static boolean deleteAllConfigFiles() {
+        File config = new File(getConfigPath());
+        boolean done = config.delete();
+        if (done) {
+            config.mkdirs();
+        }
+        return done;
+    }
+    
+    /**
      * fast convenience to get an environment property. see {@link #getProperties()} and {@link #getProperty(String)}.
      * 
      * @param key property key

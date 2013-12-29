@@ -63,6 +63,7 @@ public class ConditionOperator<T> extends SOperator<T> {
             op = new BooleanOperator((Map<CharSequence, Boolean>) values);
         return op;
     }
+
     protected IConverter<CharSequence, T> createConverter() {
         Format fmt = new Format() {
             @Override
@@ -145,11 +146,13 @@ public class ConditionOperator<T> extends SOperator<T> {
         if (!isEmpty(ifCond) && !ifCond.equals(expression)) {
             //perhaps extract the last expression before key_then
             CharSequence prefix = subElement(ifCond, null, syntax.get(KEY_BEGIN), true);
-            ifCond = subElement(ifCond, syntax.get(KEY_BEGIN), syntax.get(KEY_END), true);
-            if (prefix.equals(ifCond))
+            CharSequence ifCondSub = subElement(ifCond, syntax.get(KEY_BEGIN), syntax.get(KEY_END), true);
+            if (prefix.equals(ifCondSub))
                 prefix = syntax.get(KEY_EMPTY);
             //check and execute
-            boolean ifTrue = this.op.eval(ifCond, (Map<CharSequence, Boolean>) values);
+            boolean ifTrue = this.op.eval(ifCondSub, (Map<CharSequence, Boolean>) values);
+            if (!ifTrue)
+                ifTrue = this.op.eval(ifCond, (Map<CharSequence, Boolean>) values);
             return ifTrue
                 ? eval(concat(prefix, subEnclosing(expression, KEY_THEN, KEY_ELSE)))
                 : eval(concat(prefix, subEnclosing(expression, KEY_ELSE, null)));
@@ -179,11 +182,13 @@ class TypeOP<T> extends CommonAction<T> {
     @Override
     public T action() throws Exception {
         T o1 =
-            (T) (type.isAssignableFrom(parameter[0].getClass()) ? (T) parameter[0] : op.converter
-                .to((CharSequence) parameter[0]));
+            (T) (parameter[0] != null && type.isAssignableFrom(parameter[0].getClass()) ? (T) parameter[0]
+                : op.converter
+                    .to((CharSequence) parameter[0]));
         T o2 =
-            (T) (type.isAssignableFrom(parameter[1].getClass()) ? (T) parameter[1] : op.converter
-                .to((CharSequence) parameter[1]));
+            (T) (parameter[1] != null && type.isAssignableFrom(parameter[1].getClass()) ? (T) parameter[1]
+                : op.converter
+                    .to((CharSequence) parameter[1]));
         IAction<T> operation = (IAction<T>) op.operationDefs.get(sop);
         operation.setParameter(new Object[] { o1, o2 });
         return operation.activate();

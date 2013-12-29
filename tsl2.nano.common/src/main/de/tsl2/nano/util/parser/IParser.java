@@ -96,4 +96,10 @@ public interface IParser<INPUT> {
      * @return concatenation of input
      */
     INPUT concat(Object... input);
+    /**
+     * right and left trim
+     * @param totrim
+     * @return trimmed object
+     */
+    INPUT trim(INPUT totrim);
 }

@@ -102,6 +102,7 @@ public class CommonTest {
     public static void setUp() {
         Environment.setProperty(Environment.KEY_CONFIG_PATH, "test/");
 //        Environment.setProperty("strict.mode", true);
+        Environment.deleteAllConfigFiles();
     }
 
     @Test
@@ -482,7 +483,7 @@ public class CommonTest {
         assertEquals(2, DateUtil.getNextQuarter(d));
         assertEquals(d, DateUtil.getQuarter(2002, DateUtil.Q1));
         
-        d = DateUtil.getQuarter(1900, DateUtil.Q4);
+        d = DateUtil.getQuarter(1970, DateUtil.Q4);
         assertEquals(4, DateUtil.getCurrentQuarter(d));
         assertEquals(1, DateUtil.getNextQuarter(d));
     }
@@ -997,6 +998,7 @@ public class CommonTest {
         tb.setString("test");
         tb.setPrimitiveInt(1);
         tb.setPrimitiveShort((short) 2);
+        //TODO: check field-order after serializing/deserializing
         assertEquals("test-1==>2", ve.to(tb));
 
         tb = ve.from("test-1==>2");
@@ -1132,15 +1134,15 @@ public class CommonTest {
         Map<CharSequence, Object> values = new Hashtable<CharSequence, Object>();
         values.put("A", true);
         values.put("C", true);
-        /*
-         * two condition value-possibilities: action or expression
-         */
-        values.put("D", new CommonAction<Object>() {
-            @Override
-            public Object action() throws Exception {
-                return "D";
-            }
-        });
+//        /*
+//         * two condition value-possibilities: action or expression
+//         */
+//        values.put("D", new CommonAction<Object>() {
+//            @Override
+//            public Object action() throws Exception {
+//                return "DD";
+//            }
+//        });
         assertEquals("D", new ConditionOperator(values).eval(f));
         
         values.remove(Operator.KEY_RESULT);

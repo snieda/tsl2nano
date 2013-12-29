@@ -63,7 +63,7 @@ public abstract class SOperator<T> extends Operator<CharSequence, T> {
             KEY_OPERATION,
             "(.*)",
             KEY_OPERAND,
-            "([a-zA-Z0-9]+)",
+            "([a-zA-Z0-9.,]+)",
             KEY_EMPTY,
             ""/*,
             KEY_DEFAULT_OPERAND,
@@ -112,5 +112,10 @@ public abstract class SOperator<T> extends Operator<CharSequence, T> {
 
     public CharSequence unwrap(CharSequence src) {
         return parser.unwrap(src);
+    }
+    
+    @Override
+    public CharSequence trim(CharSequence totrim) {
+        return parser.trim(totrim);
     }
 }

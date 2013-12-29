@@ -57,4 +57,13 @@ public class SParser extends Parser<CharSequence> {
     public CharSequence unwrap(CharSequence src) {
         return src != null ? src.toString() : null;
     }
+    
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public CharSequence trim(CharSequence totrim) {
+        //TODO: it's only a workaround
+        return (CharSequence) totrim.toString().trim();
+    }
 }

@@ -9,6 +9,7 @@ import org.simpleframework.xml.DefaultType;
 import org.simpleframework.xml.ElementMap;
 
 import de.tsl2.nano.action.IAction;
+import de.tsl2.nano.collection.CollectionUtil;
 import de.tsl2.nano.util.StringUtil;
 import de.tsl2.nano.util.parser.Parser;
 
@@ -198,7 +199,9 @@ public abstract class Operator<INPUT, OUTPUT> extends Parser<INPUT> {
         } else {
             INPUT operand = extract(expression, syntax.get(KEY_OPERAND));
             OUTPUT result = values.get(operand);
-            return result != null ? result : converter.to(expression);
+            if (isEmpty(expression))
+                expression = operand;
+            return result != null ? result : converter.to(trim(expression));
         }
     }
 
@@ -329,6 +332,14 @@ public abstract class Operator<INPUT, OUTPUT> extends Parser<INPUT> {
                 empty);
             OP[mode == MODE_POSTFIX ? 1 : 2] = extract(term, mode == MODE_POSTFIX ? sOpt : sOpd, empty);
 
+            /*
+             * on INFIX without first operand, an operation like '!var' should 
+             * result in OP[0]="", OP[1]="!", OP[2]="var".
+             * so we have to swap the operands
+             */
+            if (mode == MODE_INFIX && isEmpty(OP[2])) {
+                CollectionUtil.swap(OP, 0, 2);
+            }
 //            //default first operand or/and default operator
 //            if (isEmpty(OP[0]))
 //                OP[0] = syntax(KEY_DEFAULT_OPERAND);

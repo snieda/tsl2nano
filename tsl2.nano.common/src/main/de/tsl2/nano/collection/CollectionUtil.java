@@ -643,4 +643,16 @@ public class CollectionUtil {
     public static final <I extends Iterable<T>, S, T> I getTransforming(Iterable<S> src, ITransformer<S, T> transformer) {
         return TransformingIterator.getTransformingIterable(src, transformer);
     }
+    
+    /**
+     * swaps two elements in an array
+     * @param array
+     * @param indexSwap1
+     * @param indexSwap2
+     */
+    public static final void swap(Object[] array, int indexSwap1, int indexSwap2) {
+        Object t = array[indexSwap1];
+        array[indexSwap1] = array[indexSwap2];
+        array[indexSwap2] = t;
+    }
 }
