@@ -42,7 +42,7 @@ public class Workflow implements IBeanNavigator {
     transient Map<String, BeanDefinition<?>> cache;
     transient Bean<?> login;
     transient String asString;
-
+    transient Parameter context = new Parameter();
     /**
      * constructor
      */
@@ -59,6 +59,7 @@ public class Workflow implements IBeanNavigator {
         super();
         this.name = name;
         this.activities = activities;
+        context = new Parameter();
         net = new Net<BeanAct, Parameter>();
         cache = new HashMap<String, BeanDefinition<?>>();
         if (activities != null)
@@ -100,9 +101,8 @@ public class Workflow implements IBeanNavigator {
         } else {
             Object entity = userResponseObject instanceof Bean ? ((Bean) userResponseObject).getInstance()
                 : userResponseObject;
-            Parameter p = new Parameter();
-            p.put("response", entity);
-            Notification n = new Notification(null, p);
+            context.put("response", entity);
+            Notification n = new Notification(null, context);
             Collection<BeanDefinition> result = net.notifyAndCollect(Arrays.asList(n), BeanDefinition.class);
             //all results may be equal
             setCurrent(result.isEmpty() ? null : result.iterator().next());

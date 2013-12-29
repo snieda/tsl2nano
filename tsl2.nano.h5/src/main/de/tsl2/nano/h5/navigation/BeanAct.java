@@ -38,15 +38,14 @@ import de.tsl2.nano.util.operation.Operator;
 @Default(value = DefaultType.FIELD, required = false)
 public class BeanAct extends Act<BeanDefinition<?>> {
     private static final Log LOG = LogFactory.getLog(BeanAct.class);
-    
+
     /** serialVersionUID */
     private static final long serialVersionUID = 5821178690873604621L;
 
     /** parNames parameter names for EBJ-QL. */
-    @ElementArray(name="query-parameter", entry="parameter")
+    @ElementArray(name = "query-parameter", entry = "parameter")
     String[] parNames;
 
-    
     /**
      * constructor
      */
@@ -72,16 +71,22 @@ public class BeanAct extends Act<BeanDefinition<?>> {
         this.parNames = parNames;
     }
 
+    @SuppressWarnings("unchecked")
     @Override
     public BeanDefinition<?> action() throws Exception {
         LOG.info("executing activity '" + getShortDescription() + "'");
+        parameter.put(getName() + ".activated", true);
         Collection<Object> entities = BeanContainer.instance().getBeansByQuery(expression, false, getArguments());
         if (entities == null || entities.isEmpty())
             return null;
         else if (entities.size() > 1) {
+            parameter.put(getName() + ".size", entities.size());
             return BeanCollector.getBeanCollector(null, entities, BeanCollector.MODE_ALL, null);
         } else {
-            return Bean.getBean((Serializable) entities.iterator().next());
+            Object e = entities.iterator().next();
+            parameter.put(getName() + ".size", entities.size());
+            parameter.put(getName(), e);
+            return Bean.getBean((Serializable) e);
         }
     }
 
@@ -94,7 +99,7 @@ public class BeanAct extends Act<BeanDefinition<?>> {
         Map<CharSequence, Object> values = op.getValues();
         Object args[] = new Object[parNames.length];
         for (int i = 0; i < parNames.length; i++) {
-            args[i] = values.get(parNames[i]);
+            args[i] = parameter.containsKey(parNames[i]) ? parameter.get(parNames[i]) : values.get(parNames[i]);
         }
         return args;
     }

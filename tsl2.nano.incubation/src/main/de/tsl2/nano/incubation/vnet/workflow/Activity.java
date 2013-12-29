@@ -37,6 +37,8 @@ public abstract class Activity<S, T> extends CommonAction<T> {
     @Element(required=true, type=String.class)
     protected S expression;
     
+    protected transient Map parameter;
+    
     /**
      * constructor for xml-deserialization
      */
@@ -57,6 +59,7 @@ public abstract class Activity<S, T> extends CommonAction<T> {
     public abstract boolean canActivate(Map parameter);
     
     public T activate(Map parameter) {
+        this.parameter = parameter;
         //TODO: check for natural order of values
         setParameter(parameter.values().toArray());
         return activate();

@@ -1,5 +1,5 @@
 *FullRelation Nano.H5*
-<font size="-1">Autor: Thomas Schneider 2012</font>
+<font size="-1">Autor: Thomas Schneider 2012-2014</font>
 
 {toc:style=disc}
 
@@ -27,7 +27,7 @@ NanoH5 (or FullRelation) is an UI independent gui implementation framework provi
 * framework designs interfaces and provides extendable implementations
 * useable as standalone or web-service (with offline access)
 * many features through nano.common like a rule engine, network executor etc.
-* interfaces: 
+* planned interfaces: 
 ** ddl-->beans through hibernate-tools
 ** jpa-->bean through annotation evaluation
 ** xsd-->bean (not finished yet!)
@@ -57,11 +57,13 @@ project-environments:
 
 *What is it for?*
 
+this software should provide a fast way to create a standard application through a database model. through a complete set of configuration possibilities, a user may fit this application for his requirements. respecting a small set of rules, a software-developer is able to extend that application to do more specifics.
+
 *What this framework is not intended to be*
 
 * the web-application mode is not designed or tested for big data transfers or high network traffics.
 * at the moment, only parts of the nano frameworks are used in productive applications.
-* at the moment it is on construction - no garantee can be given for any function or feature.
+* at the moment it is on construction - no guarantee can be given for any function or feature.
 * no particular value is done for graphical design.
 
 *Usable modes*
@@ -268,8 +270,8 @@ Example:<code>
 
 <?xml version="1.0" encoding="UTF-8"?>
 <workflow>
-   <activity>
-      <condition>project&amp;true</condition>
+   <activity name="times">
+      <condition>!times.activated</condition>
       <expression>select t from Times t where t.project.id = :prjname</expression>
       <query-parameter length="1">
          <parameter>prjname</parameter>
@@ -278,6 +280,16 @@ Example:<code>
 </workflow>
 
 </code>
+
+All parameters are stored and given by the workflow. The following parameters will be stored automatically:
+* *response* = {last user action name}
+* {activity-name}.size = count of entities found by your activity expression
+* {activity-name} = if your activity expression found exactly one entity, this entitiy will be referenced here.
+* {activity-name}.activated = true, if this activity was already activated
+
+Use that parameters for your activity condition.
+
+TODO: use bean-path to inspect condition expressions like 'times.type = F'.
 
 h2. Database Replication - Working Offline
 
@@ -543,8 +555,9 @@ set the following *environment.xml* properties:
 * disable multiple field/column filter: *collector.use.multiple.filter=false*
 * get only 50 lines per search: *service.maxresult=50*
 * ???: *bean.use.beanpresentationhelper.filter=false*
+* turn off replication: *use.database.replication = false*
 
-h2. Problems
+h2. Problems and Solutions
 
 * Beans showing currencys with EURO can't be saved
 ** Set the character encoding of your browser's current page to *UTF-8*. E.g. in Chrome: Menu=>Tools=>Enconding
@@ -553,7 +566,8 @@ h2. Changelog
 
 | Version | Date | Description |
 | 0.0.1 | 06.07.2013 | First alpha Version
-| 0.0.2 | 21.09.2013 | First beta Version (full basic feature implementation)
+| 0.0.2 | 21.09.2013 | beta Version (full basic feature implementation)
+| 0.0.3 | 01.01.2014 | beta Version (basic features + authorization + workflows + rules)
 
 h2. TODOs
 
@@ -680,6 +694,8 @@ h2. TODOs
 *** (x) BeanPresentationHelper fills all id-bean fields as virtuals to the main bean
 * on export, the filtered names (like id) are given --> nullpointer
 * performance/memory: create only specific bean/beanvalue instances for changed values - use definition-instances if possible.
+* field-order of bean-def may change after new compile --> serializing/deserialings will differ, see CommonTest
+
 * *TESTS*
 ** (-) test on android
 *** no datasource for Sqlite available - apache BasicDatasource uses JavaBeans what is not usable on android
