@@ -8,6 +8,10 @@
    <property name="de.tsl2.nano.config.path">
       <object class="java.lang.String">C:\tsl-nano\tsl2.nano.h5\config/</object>
    </property>
+<!-- default attribute formatters regexp pattern -->
+   <property name="default.pattern.regexp">
+      <object class="java.lang.String">.*</object>
+   </property>
 <!-- -->
    <property name="default.attribute.id">
       <object class="java.lang.Boolean">false</object>
@@ -55,11 +59,11 @@
 <!-- on automatic evaluation of a bean-presentation-attribute, the length of the bean.attribute
      should be greater than minlength. -->
    <property name="bean.best.attribute.minlength">
-      <object class="java.lang.Integer">3</object>
+      <object class="java.lang.Integer">2</object>
 <!-- on automatic evaluation of a bean-presentation-attribute, the length of the bean.attribute
      should be lower than minlength. -->
    <property name="bean.best.attribute.maxlength">
-      <object class="java.lang.Integer">30</object>
+      <object class="java.lang.Integer">50</object>
    </property>
    <!-- default text of a button that lets select an item --> 
    <property name="field.selector.text">
@@ -91,9 +95,24 @@
    <property name="bean.use.beanpresentationhelper.filter">
       <object class="java.lang.Boolean">true</object>
    </property>
+   <!-- whether the standard bean decapitalize should be used. some projects don't use
+        this standard-mechanism to create it's beans. they use lower cases on each fields
+        first name character. -->
+   <property name="bean.attribute.decapitalize">
+      <object class="java.lang.Boolean">true</object>
+   </property>
+   <!-- whether a bean-definition will ignore anonymous fields on attribute evaluation. -->
+   <property name="beandef.ignore.anonymous.fields">
+      <object class="java.lang.Boolean">true</object>
+   </property>
    <!-- -->
    <property name="strict.mode">
       <object class="java.lang.Boolean">false</object>
+   </property>
+   <!-- all fields of a bean will be presented in a grid with this columcount.
+        if the beans layout defines an own columncount, it will be used. -->
+   <property name="layout.default.columncount">
+      <object class="java.lang.Integer">3</object>
    </property>
    <!-- maximum count of lines in a search-table.
         it is used as a range for browsing the search data (through buttons like previous, next), too. -->
@@ -124,6 +143,37 @@
    </property>
    <!-- whether a table (mostly search-tables) should show a caption (title). -->
    <property name="html5.table.show.caption">
+      <object class="java.lang.Boolean">false</object>
+   </property>
+   <!-- whether to check permissions to see each fields data on creating a page.
+        turn this off to enhance performance on page-building. -->
+   <property name="check.permission.data">
+      <object class="java.lang.Boolean">true</object>
+   </property>
+   <!-- if true, the connection to the database will be checked directly after login -->
+   <property name="check.connection.on.login">
+      <object class="java.lang.Boolean">true</object>
+   </property>
+   <!-- attribute labels color -->
+   <property name="default.attribute.label.color">
+      <object class="java.lang.String">#0000cc</object>
+   </property>
+   <!-- if true, the method BeanPresenterHelper.defineAdditionalAttributes() will be used to add 
+        own, specific attributes. -->
+   <property name="define.additional.attributes">
+      <object class="java.lang.Boolean">true</object>
+   </property>
+   <!-- whether to cache each entity/bean  -->
+   <property name="use.bean.cache"
+      <object class="java.lang.Boolean">true</object>
+   </property>
+   <!-- http connection port -->
+   <property name="http.connection">
+      <object class="java.lang.String">8066</object>
+   </property>
+   <!-- if true, a local replication database will collect all remote data to work
+        offline. -->
+   <property name="use.database.replication">
       <object class="java.lang.Boolean">false</object>
    </property>
 </environment>

@@ -94,7 +94,7 @@ Creating an UML-Diagram with perhaps _ArgoUML_, or creating an ER-Diagram with f
 
 h2. Starting / Test
 
-The tsl2.nano.h5 framework can be started through it's jar _tsl2.nano.h5-xxxxx.jar. A start script _run.bat_ is available to do this in windows. Starting it, a given directory is used as a kind of workspace where you put all configuration and jar files into to be used. This jars may be ant, an o/r-mapper like hibernate with all it's dependencies. The configuration files are the environment.xml and all xml files describing the presentation of each entity bean.  Icons for all buttons and backgrounds are in the _icon_ folder. The main jar file can contain all dependent jar files (as described in the manifest file) or outside in the same directory as the main jar.
+The tsl2.nano.h5 framework can be started through it's jar _tsl2.nano.h5-xxxxx.jar_. A start script _run.bat_ is available to do this in windows. Starting it, a given directory is used as a kind of workspace where you put all configuration and jar files into to be used. This jars may be ant, an o/r-mapper like hibernate with all it's dependencies. The configuration files are the environment.xml and all xml files describing the presentation of each entity bean.  Icons for all buttons and backgrounds are in the _icon_ folder. The main jar file can contain all dependent jar files (as described in the manifest file) or outside in the same directory as the main jar.
 
 A possible start configuratin would be:
 
@@ -103,38 +103,11 @@ A possible start configuratin would be:
 ** tsl.nano.common-xxxx.jar providing bootstrap loading with special classloaders
 ** environment directory like the sample _h5.sample_
 
-h3. Dependencies
-
-h4. Static Dependencies (direct referenced by tsl2.nano)
-
-* simple-xml-2.7.jar
-
-h4. Dynamic Dependencies (used by tsl2.nano, but through compatibility-layer)
-
-* XmlUtil: velocity-1.6-dep.jar 
-* CommonTest: junit-4.8.2.jar 
-* AntUtil: ant-launcher.jar, ant.jar, ant-nodeps.jar 
-* BeanEnhancer: javassist-3.12.0.GA.jar
-
-h4. No Dependencies, but useful to do the work
-
-* jdbc database driver (like hsqldb.jar)
-* jpa o/r mapper (like hibernate, toplink or ormlite)
-* generator tool to create entity beans (like hibernate-tools)
-
-Hibernate 4 for example would have the following dependencies:
-
-* commons-collections-3.2.1.jar 
-* commons-logging-1.1.1.jar 
-* commons-beanutils-1.8.0.jar 
-* commons-io-1.3.2.jar 
-* commons-lang-2.4.jar 
-* commons-codec-1.6.jar 
-* dom4j-1.6.1.jar 
-* javassist-3.12.0.GA.jar
-* antlr.jar
+Normally, you will start with an example: download the file _h5.sample-hibernate-fulllibs-0.0.3.zip_ to have an example using lots of features of this project - you have a simple test database and are able to generate your bean jar, see a trivial application-extension, workflow, autorization and rule.
  
-h3. A Sample Environment: h5.sample
+Feel free to test, whether a database-connection of a project you know is working with nano.h5....
+
+h3. Sample Environment: h5.sample
 
 A sample environment is h5.sample, containing all icons, jars and configurations for a project. It may be used for other nano.h5 projects. It uses:
 
@@ -220,6 +193,37 @@ h3. Bean detail buttons
 * *save*: saves the current bean.
 * *close*: closes the current page, returning to the last one without saving.
 
+h3. Dependencies
+
+h4. Static Dependencies (direct referenced by tsl2.nano)
+
+* simple-xml-2.7.jar
+
+h4. Dynamic Dependencies (used by tsl2.nano, but through compatibility-layer)
+
+* XmlUtil: velocity-1.6-dep.jar 
+* CommonTest: junit-4.8.2.jar 
+* AntUtil: ant-launcher.jar, ant.jar, ant-nodeps.jar 
+* BeanEnhancer: javassist-3.12.0.GA.jar
+
+h4. No Dependencies, but useful to do the work
+
+* jdbc database driver (like hsqldb.jar)
+* jpa o/r mapper (like hibernate, toplink or ormlite)
+* generator tool to create entity beans (like hibernate-tools)
+
+Hibernate 4 for example would have the following dependencies:
+
+* commons-collections-3.2.1.jar 
+* commons-logging-1.1.1.jar 
+* commons-beanutils-1.8.0.jar 
+* commons-io-1.3.2.jar 
+* commons-lang-2.4.jar 
+* commons-codec-1.6.jar 
+* dom4j-1.6.1.jar 
+* javassist-3.12.0.GA.jar
+* antlr.jar
+ 
 h2. Networking Modes
 
 The _Nano.H5_ application can be started in different modes.
