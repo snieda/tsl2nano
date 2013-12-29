@@ -690,7 +690,7 @@ public class Html5Presentation<T> extends BeanPresentationHelper<T> implements I
             content(beanValue.getDescription() + (beanValue.nullable() ? "" : " (*)")),
             ATTR_COLOR,
             (String) BeanUtil.valueOf(beanValue.getPresentation().getBackground(),
-                Environment.get("default.value.color", "#0000cc")),
+                Environment.get("default.attribute.label.color", "#0000cc")),
             enable(ATTR_HIDDEN, !beanValue.getPresentation().isVisible()),
             enable(ATTR_REQUIRED, !beanValue.nullable()));
         //create the layout and layout-constraints
