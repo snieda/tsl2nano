@@ -9,10 +9,10 @@
  */
 package de.tsl2.nano.h5.navigation;
 
-import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Stack;
 
 import org.simpleframework.xml.Attribute;
 import org.simpleframework.xml.ElementList;
@@ -32,17 +32,17 @@ import de.tsl2.nano.util.StringUtil;
  * @author Tom, Thomas Schneider
  * @version $Revision$
  */
-public class Workflow implements IBeanNavigator {
+public class Workflow extends EntityBrowser {
     @Attribute
     String name;
     transient Net<BeanAct, Parameter> net;
     @ElementList(entry = "activity", inline = true, required = true)
     Collection<BeanAct> activities;
-    transient BeanDefinition<?> current;
     transient Map<String, BeanDefinition<?>> cache;
     transient Bean<?> login;
     transient String asString;
     transient Parameter context = new Parameter();
+
     /**
      * constructor
      */
@@ -56,7 +56,7 @@ public class Workflow implements IBeanNavigator {
      * @param activities
      */
     public Workflow(String name, Collection<BeanAct> activities) {
-        super();
+        super(new Stack<BeanDefinition<?>>());
         this.name = name;
         this.activities = activities;
         context = new Parameter();
@@ -79,15 +79,7 @@ public class Workflow implements IBeanNavigator {
      */
     @Override
     public boolean isEmpty() {
-        return activities == null || activities.isEmpty();
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    public BeanDefinition<?> current() {
-        return current;
+        return (activities == null || activities.isEmpty()) && navigation.isEmpty();
     }
 
     /**
@@ -96,16 +88,19 @@ public class Workflow implements IBeanNavigator {
     @SuppressWarnings("rawtypes")
     @Override
     public BeanDefinition<?> next(Object userResponseObject) {
+        BeanDefinition<?> fromStack;
         if (current == null) {
             setCurrent(login);
+        } else if (!super.isEmpty() && (fromStack = super.next(userResponseObject)) != null) {
+            return fromStack;
         } else {
             Object entity = userResponseObject instanceof Bean ? ((Bean) userResponseObject).getInstance()
                 : userResponseObject;
             context.put("response", entity);
             Notification n = new Notification(null, context);
-            Collection<BeanDefinition> result = net.notifyAndCollect(Arrays.asList(n), BeanDefinition.class);
-            //all results may be equal
+            Collection<BeanDefinition> result = net.notifyAndCollect(n, BeanDefinition.class);
             setCurrent(result.isEmpty() ? null : result.iterator().next());
+            navigation.addAll((Collection<? extends BeanDefinition<?>>) result);
         }
         return current;
     }
@@ -114,7 +109,7 @@ public class Workflow implements IBeanNavigator {
         this.current = newCurrent;
         asString = null;
     }
-    
+
     /**
      * {@inheritDoc}
      */

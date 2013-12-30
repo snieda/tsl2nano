@@ -14,6 +14,7 @@ import java.sql.Time;
 import java.text.DateFormat;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.LinkedList;
 import java.util.Map;
 import java.util.Set;
 import java.util.TreeMap;
@@ -131,6 +132,29 @@ public class Net<T extends IListener<Notification> & ILocatable & Serializable &
     }
 
     /**
+     * does the whole job. sends all notifications, waits until all nodes are ready, collects all results of all
+     * notifications and returns a result list.
+     * 
+     * @param <R> result type
+     * @param notifications notifications to send
+     * @param resultType type of notification results
+     * @return notification results
+     */
+    public <R> Collection<R> notifyAndCollect(Notification notification,
+            Class<R> resultType
+            ) {
+        log("==> starting notify and collect on " + notification);
+        long start = System.currentTimeMillis();
+        notify(notification);
+        waitForIdle(-1);
+        log("<== notifications ended in " + (System.currentTimeMillis() - start)
+            + " msecs (waiting cycles: "
+            + waitingCycles
+            + " msecs)");
+        return (Collection<R>) (notification.getResponse() != null ? notification.getResponse().values() : new LinkedList<R>());
+    }
+
+    /**
      * notifies only nodes that are idle. this method blocks the current thread until an idle node was found. the given
      * responseObserver will be informed, if the working node puts its result to the notification object.
      * <p/>
@@ -141,7 +165,7 @@ public class Net<T extends IListener<Notification> & ILocatable & Serializable &
      * @param timeout timeout for blocking the current thread - searching for the next idle node
      * @param waitTime thread sleeping time between iteration
      */
-    public void notifyIdles(Notification notification,
+    public void notifyFirstIdle(Notification notification,
             IListener<Notification> responseObserver,
             long timeout,
             long waitTime) {
@@ -179,7 +203,7 @@ public class Net<T extends IListener<Notification> & ILocatable & Serializable &
             long timeout,
             long waitTime) {
         for (Notification notification : notifications) {
-            notifyIdles(notification, responseObserver, timeout, waitTime);
+            notifyFirstIdle(notification, responseObserver, timeout, waitTime);
         }
     }
 
@@ -228,7 +252,9 @@ public class Net<T extends IListener<Notification> & ILocatable & Serializable &
      * @param resultType type of notification results
      * @return notification results
      */
-    public <R> Collection<R> notifyAndCollect(Collection<Notification> notifications, Class<R> resultType) {
+    public <R> Collection<R> notifyIdlesAndCollect(Collection<Notification> notifications,
+            Class<R> resultType
+            ) {
         log("==> starting notify and collect on " + notifications.size() + " notifications");
         long start = System.currentTimeMillis();
         Collection<R> results = new ArrayList<R>();

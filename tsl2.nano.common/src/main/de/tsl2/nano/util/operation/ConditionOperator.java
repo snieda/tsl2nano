@@ -15,8 +15,6 @@ import java.text.ParsePosition;
 import java.util.HashMap;
 import java.util.Map;
 
-import org.simpleframework.xml.core.Commit;
-
 import de.tsl2.nano.action.CommonAction;
 import de.tsl2.nano.action.IAction;
 import de.tsl2.nano.util.StringUtil;
@@ -60,7 +58,7 @@ public class ConditionOperator<T> extends SOperator<T> {
 
     protected BooleanOperator getOp() {
         if (op == null)
-            op = new BooleanOperator((Map<CharSequence, Boolean>) values);
+            op = new BooleanOperator((Map<CharSequence, Boolean>) getValues());
         return op;
     }
 
@@ -132,7 +130,7 @@ public class ConditionOperator<T> extends SOperator<T> {
                 result = op.eval((CharSequence) p);
             else
                 result = p;
-            values.put(KEY_RESULT, (T) result);
+            addValue(KEY_RESULT, (T) result);
         } else {
             //trick to overrule the compiler check
             result = Boolean.FALSE;
@@ -150,9 +148,9 @@ public class ConditionOperator<T> extends SOperator<T> {
             if (prefix.equals(ifCondSub))
                 prefix = syntax.get(KEY_EMPTY);
             //check and execute
-            boolean ifTrue = this.op.eval(ifCondSub, (Map<CharSequence, Boolean>) values);
+            boolean ifTrue = this.op.eval(ifCondSub, (Map<CharSequence, Boolean>) getValues());
             if (!ifTrue)
-                ifTrue = this.op.eval(ifCond, (Map<CharSequence, Boolean>) values);
+                ifTrue = this.op.eval(ifCond, (Map<CharSequence, Boolean>) getValues());
             return ifTrue
                 ? eval(concat(prefix, subEnclosing(expression, KEY_THEN, KEY_ELSE)))
                 : eval(concat(prefix, subEnclosing(expression, KEY_ELSE, null)));

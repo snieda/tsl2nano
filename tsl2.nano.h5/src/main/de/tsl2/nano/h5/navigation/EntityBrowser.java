@@ -29,8 +29,8 @@ import de.tsl2.nano.util.StringUtil;
  * @version $Revision$
  */
 public class EntityBrowser implements IBeanNavigator {
-    Stack<BeanDefinition<?>> navigation;
-    BeanDefinition<?> model;
+    transient protected Stack<BeanDefinition<?>> navigation;
+    transient protected BeanDefinition<?> current;
 
     /**
      * constructor
@@ -57,31 +57,31 @@ public class EntityBrowser implements IBeanNavigator {
                 : Bean.getBean((Serializable) userResponseObject));
             isOnWork = navigation.contains(userResponseBean);
             if (!isOnWork) //--> go forward
-                return (model = navigation.push(userResponseBean));
+                return (current = navigation.push(userResponseBean));
             else {
-                if (model != userResponseBean) {
+                if (current != userResponseBean) {
                     while (!userResponseBean.equals(navigation.peek()))
                         navigation.pop();
-                    return model = navigation.peek();
+                    return current = navigation.peek();
                 }
             }
 
         }
         //go back
-        if (!isOnWork && model != null)//checking to be not the first page
+        if (!isOnWork && current != null)//checking to be not the first page
             navigation.pop();
 
-        model = navigation.size() > 0 ? navigation.peek() : null;
+        current = navigation.size() > 0 ? navigation.peek() : null;
         //workaround for a canceled new action
-        if (userResponseObject == IAction.CANCELED && model instanceof IBeanCollector) {
-            removeUnpersistedNewEntities((BeanCollector) model);
+        if (userResponseObject == IAction.CANCELED && current instanceof IBeanCollector) {
+            removeUnpersistedNewEntities((BeanCollector) current);
         }
-        return model;
+        return current;
     }
 
     @Override
     public BeanDefinition<?> current() {
-        return model;
+        return current;
     }
 
     /**

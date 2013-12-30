@@ -18,6 +18,7 @@ import org.simpleframework.xml.Default;
 import org.simpleframework.xml.DefaultType;
 import org.simpleframework.xml.ElementArray;
 
+import de.tsl2.nano.bean.BeanClass;
 import de.tsl2.nano.bean.BeanContainer;
 import de.tsl2.nano.bean.def.Bean;
 import de.tsl2.nano.bean.def.BeanCollector;
@@ -25,6 +26,7 @@ import de.tsl2.nano.bean.def.BeanDefinition;
 import de.tsl2.nano.incubation.vnet.workflow.Act;
 import de.tsl2.nano.incubation.vnet.workflow.ComparableMap;
 import de.tsl2.nano.log.LogFactory;
+import de.tsl2.nano.util.StringUtil;
 import de.tsl2.nano.util.operation.ConditionOperator;
 import de.tsl2.nano.util.operation.Operator;
 
@@ -77,11 +79,12 @@ public class BeanAct extends Act<BeanDefinition<?>> {
         LOG.info("executing activity '" + getShortDescription() + "'");
         parameter.put(getName() + ".activated", true);
         Collection<Object> entities = BeanContainer.instance().getBeansByQuery(expression, false, getArguments());
-        if (entities == null || entities.isEmpty())
+        if (entities == null || entities.isEmpty()) {
+            parameter.put(getName() + ".size", 0);
             return null;
-        else if (entities.size() > 1) {
+        } else if (entities.size() > 1) {
             parameter.put(getName() + ".size", entities.size());
-            return BeanCollector.getBeanCollector(null, entities, BeanCollector.MODE_ALL, null);
+            return BeanCollector.getBeanCollector(entities, BeanCollector.MODE_ALL);
         } else {
             Object e = entities.iterator().next();
             parameter.put(getName() + ".size", entities.size());
@@ -98,9 +101,15 @@ public class BeanAct extends Act<BeanDefinition<?>> {
     protected Object[] getArguments() {
         Map<CharSequence, Object> values = op.getValues();
         Object args[] = new Object[parNames.length];
+        Object p;
         for (int i = 0; i < parNames.length; i++) {
-            args[i] = parameter.containsKey(parNames[i]) ? parameter.get(parNames[i]) : values.get(parNames[i]);
+            p = getParameter(parNames[i]);
+            args[i] = p != null ? p : values.get(parNames[i]);
         }
         return args;
+    }
+
+    protected Object getParameter(String name) {
+        return parameter.get(name);
     }
 }

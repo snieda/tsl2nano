@@ -17,7 +17,6 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Comparator;
-import java.util.Date;
 import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
@@ -980,6 +979,14 @@ public class BeanCollector<COLLECTIONTYPE extends Collection<T>, T> extends Bean
      */
     public void setCompositionParent(Composition composition) {
         this.composition = composition;
+    }
+
+    public static final <C extends Collection<I>, I/* extends Serializable*/> BeanCollector<C, I> getBeanCollector(
+            Collection<I> collection,
+            int workingMode) {
+        assert collection != null && collection.size() > 0 : "collection must contain at least one item";
+        return getBeanCollector((Class<I>)collection.iterator().next().getClass(), collection, workingMode,
+            null);
     }
 
     /**

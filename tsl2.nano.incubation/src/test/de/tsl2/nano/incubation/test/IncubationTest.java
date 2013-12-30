@@ -298,7 +298,7 @@ public class IncubationTest {
         Profiler.si().stressTest("kanbanflow on 8 nodes", testcount, new Runnable() {
             @Override
             public void run() {
-                net.notifyIdles(new Notification(null, "working-test"), responseObserver, 10 * 1000, 100);
+                net.notifyFirstIdle(new Notification(null, "working-test"), responseObserver, 10 * 1000, 100);
             }
         });
         net.waitForIdle(60 * 1000);
@@ -314,7 +314,7 @@ public class IncubationTest {
         for (int i = 0; i < testcount; i++) {
             notifications.add(new Notification(null, "working-test-" + i));
         }
-        Collection<Object> result = net.notifyAndCollect(notifications, Object.class);
+        Collection<Object> result = net.notifyIdlesAndCollect(notifications, Object.class);
         Assert.assertTrue(result.size() == testcount);
         log(StringUtil.toFormattedString(result, 10000, true));
         log(net.dump());

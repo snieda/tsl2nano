@@ -48,7 +48,7 @@ public abstract class Operator<INPUT, OUTPUT> extends Parser<INPUT> {
     @ElementMap(inline = true)
     Map<String, INPUT> syntax;
     /** a map containing any values. values found by this solver must be of right type */
-    transient Map<INPUT, OUTPUT> values;
+    private transient Map<INPUT, OUTPUT> values;
     /** converter to convert an operand to a result type and vice versa */
     transient IConverter<INPUT, OUTPUT> converter;
     /** holds all operations to be resolvable */
@@ -195,16 +195,34 @@ public abstract class Operator<INPUT, OUTPUT> extends Parser<INPUT> {
         }
 
         if (resultEstablished()) {
-            return values.get(KEY_RESULT);
+            return getValue(KEY_RESULT);
         } else {
             INPUT operand = extract(expression, syntax.get(KEY_OPERAND));
-            OUTPUT result = values.get(operand);
+            OUTPUT result = getValue(operand);
             if (isEmpty(expression))
                 expression = operand;
             return result != null ? result : converter.to(trim(expression));
         }
     }
 
+    /**
+     * gets a value - usable to fill values from value map. overwrite this method to do more...
+     * @param key values key
+     * @return value
+     */
+    protected OUTPUT getValue(Object key) {
+        return values.get(key);
+    }
+    
+    /**
+     * addValue
+     * @param key
+     * @param value
+     */
+    protected void addValue(INPUT key, OUTPUT value) {
+        getValues().put(key, value);
+    }
+    
 //    protected abstract INPUT encloseInBrackets(INPUT expression);
 
     /**
@@ -238,7 +256,7 @@ public abstract class Operator<INPUT, OUTPUT> extends Parser<INPUT> {
     protected OUTPUT operate(INPUT term, Map<INPUT, OUTPUT> values) {
         if (resultEstablished()) {
             replace(term, term, syntax(KEY_EMPTY));
-            return values.get(KEY_RESULT);
+            return getValue(KEY_RESULT);
         }
 
         Operation op = new Operation(term);
@@ -246,9 +264,9 @@ public abstract class Operator<INPUT, OUTPUT> extends Parser<INPUT> {
         /*
          * the value map may contain any values - but the found value must have the right type!
          */
-        OUTPUT n1 = values.get(op.o1());
+        OUTPUT n1 = getValue(op.o1());
         n1 = n1 != null || isEmpty(op.o2()) ? n1 : newOperand(op.o1());
-        OUTPUT n2 = values.get(op.o2());
+        OUTPUT n2 = getValue(op.o2());
         n2 = n2 != null || isEmpty(op.o2()) ? n2 : newOperand(op.o2());
 
         OUTPUT result;

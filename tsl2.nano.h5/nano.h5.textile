@@ -554,6 +554,7 @@ Generic features like authorization for actions and data, filtering of columns a
 
 set the following *environment.xml* properties:
 
+* extract all sub-jars from main jar 'nano.h5.xxx.jar'. nested jar loading is really slow.
 * disable check of data-permission: *check.permission.data=false*
 * set log-level to info: *default.log.level=8*
 * disable multiple field/column filter: *collector.use.multiple.filter=false*
