@@ -243,7 +243,7 @@ public class RuntimeClassloader extends URLClassLoader {
                 }
                 lastFiles = files;
                 fileList = new ArrayList<File>();
-                if (last.lastModified() > System.currentTimeMillis() - waitMillis)
+                if (last != null && last.lastModified() > System.currentTimeMillis() - waitMillis)
                     fileList.add(last);
                 return fileList;
             }

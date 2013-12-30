@@ -129,10 +129,14 @@ public class AppLoader {
             printHelp();
         }
         if (environment == null) {
+            if (args.length > 0) {
             environment = args[0];
             String[] nargs = new String[args.length - 1];
             System.arraycopy(args, 1, nargs, 0, nargs.length);
             args = nargs;
+            } else {
+                environment = "config";
+            }
         }
 
         if (mainmethod == null)
@@ -152,6 +156,7 @@ public class AppLoader {
         /*
          * create the classloader to be used by the new application
          */
+        new File(environment).mkdirs();
         provideClassloader(environment);
 
         BeanClass<?> bc = BeanClass.createBeanClass(mainclass);
