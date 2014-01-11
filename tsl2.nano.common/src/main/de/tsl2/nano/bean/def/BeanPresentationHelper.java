@@ -505,10 +505,10 @@ public class BeanPresentationHelper<T> {
     public boolean isDefaultAttribute(BeanAttribute attribute) {
         AttributeDefinition<?> attr = (AttributeDefinition<?>) attribute;
         return (BeanContainer.instance() == null || BeanContainer.instance().hasPermission(attribute.getId(), null))
-            && (Environment.get("default.attribute.id",
+            && (Environment.get("default.present.attribute.id",
                 false) || !attr.id())
-            && (Environment.get("default.attribute.multivalue", false) || !attr.isMultiValue())
-            && (Environment.get("default.attribute.timestamp", false) || attr.temporalType() == null || !Timestamp.class
+            && (Environment.get("default.present.attribute.multivalue", false) || !attr.isMultiValue())
+            && (Environment.get("default.present.attribute.timestamp", false) || attr.temporalType() == null || !Timestamp.class
                 .isAssignableFrom(attr.temporalType()));
     }
 
@@ -935,7 +935,7 @@ public class BeanPresentationHelper<T> {
                 IAttributeDefinition attr = bean.getAttribute(names[i]);
                 if (isDefaultAttribute((BeanAttribute) attr) && !attr.isMultiValue()) {
                     ml = (1 << 7) * (attr.id() ? 1 : 0);
-                    ml |= (1 << 6) * (!attr.unique() ? 1 : 0);
+                    ml |= (1 << 6) * (attr.unique() ? 1 : 0);
                     ml |= (1 << 5) * (!attr.nullable() ? 1 : 0);
                     ml |= (1 << 4) * (BeanClass.isAssignableFrom(bestType, attr.getType()) ? 1 : 0);
                     ml |= (1 << 3) * (names[i].matches(bestRegexp) ? 1 : 0);
@@ -1286,7 +1286,6 @@ public class BeanPresentationHelper<T> {
                 public Object action() throws Exception {
                     Environment.persist();
                     BeanDefinition.dump();
-                    Thread.currentThread().interrupt();
                     return "configuration saved and HTTP-Session stopped!";
                 }
             });
@@ -1304,5 +1303,27 @@ public class BeanPresentationHelper<T> {
     public <E> E startUICommandHandler(final E beanToEdit) {
         LOG.debug("beancollector.edit: no commandhandler defined in environment to edit a bean - doing nothing!");
         return beanToEdit;
+    }
+
+    /**
+     * createPresentable
+     * @return
+     */
+    public IPresentable createPresentable() {
+        return new Presentable();
+    }
+    
+    /**
+     * createPresentable
+     * @param attr
+     * @return
+     */
+    public IPresentable createPresentable(AttributeDefinition<?> attr) {
+        return new Presentable(attr);
+    }
+    
+    @Override
+    public String toString() {
+        return getClass().getSimpleName() + "(" + bean + ")";
     }
 }

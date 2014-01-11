@@ -177,7 +177,7 @@ public class Bean<T> extends BeanDefinition<T> {
         if (actions == null) {
             if (!isVirtual()) {
                 if (instance != null)//perhaps an extended class has actions
-                    actions = BeanClass.getActions(instance.getClass(), null);
+                    actions = BeanClass.getActions(instance.getClass(), null, new Object[] {instance});
                 if (actions.size() == 0 && isSelectable())
                     addDefaultSaveAction();
             }

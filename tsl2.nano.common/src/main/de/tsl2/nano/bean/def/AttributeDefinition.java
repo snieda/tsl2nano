@@ -15,7 +15,6 @@ import java.io.Serializable;
 import java.lang.reflect.Method;
 import java.text.Format;
 import java.text.ParseException;
-import java.util.Arrays;
 import java.util.Collection;
 import java.util.Date;
 import java.util.Map;
@@ -24,8 +23,6 @@ import org.apache.commons.logging.Log;
 import org.simpleframework.xml.Default;
 import org.simpleframework.xml.DefaultType;
 import org.simpleframework.xml.core.Commit;
-
-import tsl.StringUtil;
 
 import de.tsl2.nano.Environment;
 import de.tsl2.nano.action.IActivator;
@@ -79,9 +76,12 @@ public class AttributeDefinition<T> extends BeanAttribute implements IAttributeD
 
     /**
      * constructor to be serializable
+     * @throws SecurityException 
+     * @throws NoSuchMethodException 
      */
     protected AttributeDefinition() {
-        super();
+        super(UNDEFINEDMETHOD());
+        status = Status.STATUS_OK;
     }
 
     protected AttributeDefinition(Method readAccessMethod) {
@@ -89,6 +89,19 @@ public class AttributeDefinition<T> extends BeanAttribute implements IAttributeD
         defineDefaults();
     }
 
+    /**
+     * default readaccessmethod if default constructor was invoked
+     */
+    private static final Method UNDEFINEDMETHOD() {
+        try {
+            //get yourself
+            return AttributeDefinition.class.getDeclaredMethod("UNDEFINEDMETHOD", new Class[0]);
+        } catch (Exception e) {
+            ForwardedException.forward(e);
+            return null;
+        }
+    }
+    
     /**
      * sets default properties through the {@link BeanContainer}, if available. These defaults may be read from
      * jpa-annotations.
@@ -521,7 +534,7 @@ public class AttributeDefinition<T> extends BeanAttribute implements IAttributeD
     public IPresentable getPresentation() {
         //TODO: create presentation helper through MultipleInheritanceProxy
         if (presentable == null)
-            presentable = new Presentable(this);
+            presentable = Environment.get(BeanPresentationHelper.class).createPresentable(this);
         return presentable;
     }
 
@@ -546,8 +559,8 @@ public class AttributeDefinition<T> extends BeanAttribute implements IAttributeD
             final Map<String, Object> layout,
             final Map<String, Object> layoutConstraints,
             final String description) {
-        presentable = new Presentable();
-        presentable.setPresentation(label, type, style, enabler, visible, layout, layoutConstraints, description);
+        presentable = Environment.get(BeanPresentationHelper.class).createPresentable();
+        presentable.setPresentation(label, type, style, enabler, visible, (Serializable)layout, (Serializable)layoutConstraints, description);
         return presentable;
     }
 

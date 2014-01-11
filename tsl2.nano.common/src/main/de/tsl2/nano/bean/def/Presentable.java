@@ -40,9 +40,9 @@ public class Presentable implements IPresentable, Serializable {
     @Element(required = false)
     String description;
     @Element(required = false)
-    Object layout;
+    Serializable layout;
     @Element(required = false)
-    Object layoutConstraints;
+    Serializable layoutConstraints;
     @Attribute
     boolean visible = true;
     transient IActivator enabler;
@@ -63,7 +63,7 @@ public class Presentable implements IPresentable, Serializable {
         style =
             Environment.get(BeanPresentationHelper.class).getDefaultHorizontalAlignment((IAttributeDefinition<?>) attr);
         description = label;
-        enabler = IActivator.ACTIVE;
+        enabler = attr.hasWriteAccess() ? IActivator.ACTIVE : IActivator.INACTIVE;
     }
 
     public Presentable(BeanAttribute attr) {
@@ -98,14 +98,14 @@ public class Presentable implements IPresentable, Serializable {
     /**
      * @return Returns the layout.
      */
-    public Object getLayout() {
+    public Serializable getLayout() {
         return layout;
     }
 
     /**
      * @return Returns the layoutConstraints.
      */
-    public Object getLayoutConstraints() {
+    public Serializable getLayoutConstraints() {
         return layoutConstraints;
     }
 
@@ -118,8 +118,8 @@ public class Presentable implements IPresentable, Serializable {
             int style,
             IActivator enabler,
             boolean visible,
-            Object layout,
-            Object layoutConstraints,
+            Serializable layout,
+            Serializable layoutConstraints,
             String description) {
         this.label = label;
         this.type = type;
@@ -218,7 +218,7 @@ public class Presentable implements IPresentable, Serializable {
      * {@inheritDoc}
      */
     @Override
-    public <T extends IPresentable> T setLayout(Object layout) {
+    public <T extends IPresentable> T setLayout(Serializable layout) {
         this.layout = layout;
         return (T) this;
     }
@@ -227,7 +227,7 @@ public class Presentable implements IPresentable, Serializable {
      * {@inheritDoc}
      */
     @Override
-    public <T extends IPresentable> T setLayoutConstraints(Object layoutConstraints) {
+    public <T extends IPresentable> T setLayoutConstraints(Serializable layoutConstraints) {
         this.layoutConstraints = layoutConstraints;
         return (T) this;
     }

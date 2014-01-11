@@ -199,7 +199,8 @@ public class BeanCollector<COLLECTIONTYPE extends Collection<T>, T> extends Bean
         actions = new LinkedHashSet<IAction>();
         if (hasMode(MODE_SEARCHABLE)) {
             createSearchAction();
-            createResetAction();
+            if (getBeanFinder().getFilterRange() != null)
+                createResetAction();
         }
         if (hasMode(MODE_EDITABLE)) {
             createOpenAction();

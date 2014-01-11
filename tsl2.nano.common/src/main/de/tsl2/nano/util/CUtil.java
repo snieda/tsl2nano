@@ -29,6 +29,32 @@ public class CUtil extends Util {
     protected static final Log LOG = LogFactory.getLog(NumberUtil.class);
 
     /**
+     * includes check for nulls of o1 and o2.
+     * @param o1 object or null
+     * @param o2 object or null
+     * @return see {@link Comparable#compareTo(Object)}
+     */
+    public <T extends Object & Comparable<? super T>>int compareTo(T o1, T o2) {
+        return o1 == null ? o2 == null ? 0 : -1 : o2 == null ? 1 : o1.compareTo(o2);
+    }
+    
+    /**
+     * compareTo
+     * @param o
+     * @return
+     */
+    public <T extends Object & Comparable<? super T>>int compareTo(T... o) {
+        assert o.length % 2 == 0 : "array must contain object pairs";
+        int c;
+        for (int i = 0; i < o.length; i+=2) {
+            c = compareTo(o[i], o[i+1]);
+            if (c != 0)
+                return c;
+        }
+        return 0;
+    }
+    
+    /**
      * evaluates the minimum of all values
      * 
      * @param values to compare
@@ -61,6 +87,11 @@ public class CUtil extends Util {
         return Collections.max(v).compareTo(Collections.min(v));
     }
 
+    /**
+     * getDelta
+     * @param values
+     * @return
+     */
     public static final <T extends Number & Comparable<? super T>> float getDelta(T... values) {
         List<T> v = Arrays.asList(values);
         return Collections.max(v).floatValue() - Collections.min(v).floatValue();
@@ -156,9 +187,4 @@ public class CUtil extends Util {
         if (!isGreater(value, min))
             throw new FormattedException("tsl2nano.valuesizefailure", new Object[] { name, min });
     }
-
-    public CUtil() {
-        super();
-    }
-
 }

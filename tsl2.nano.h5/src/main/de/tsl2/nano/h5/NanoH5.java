@@ -17,7 +17,6 @@ import java.text.Format;
 import java.text.ParsePosition;
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
-import java.util.LinkedList;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
@@ -46,10 +45,8 @@ import de.tsl2.nano.exception.FormattedException;
 import de.tsl2.nano.exception.ForwardedException;
 import de.tsl2.nano.execution.CompatibilityLayer;
 import de.tsl2.nano.execution.SystemUtil;
-import de.tsl2.nano.h5.navigation.BeanAct;
 import de.tsl2.nano.h5.navigation.EntityBrowser;
 import de.tsl2.nano.h5.navigation.IBeanNavigator;
-import de.tsl2.nano.h5.navigation.Parameter;
 import de.tsl2.nano.h5.navigation.Workflow;
 import de.tsl2.nano.log.LogFactory;
 import de.tsl2.nano.persistence.GenericLocalBeanContainer;
@@ -57,7 +54,6 @@ import de.tsl2.nano.persistence.Persistence;
 import de.tsl2.nano.persistence.PersistenceClassLoader;
 import de.tsl2.nano.script.ScriptTool;
 import de.tsl2.nano.service.util.BeanContainerUtil;
-import de.tsl2.nano.service.util.IGenericService;
 import de.tsl2.nano.serviceaccess.Authorization;
 import de.tsl2.nano.serviceaccess.IAuthorization;
 import de.tsl2.nano.serviceaccess.ServiceFactory;
@@ -426,7 +422,9 @@ public class NanoH5 extends NanoHTTPD {
         }
         Environment.addService(IBeanContainer.class, BeanContainer.instance());
 
-        List<Class> beanClasses = runtimeClassloader.loadBeanClasses(persistence.getJarFile(), null);
+        List<Class> beanClasses =
+            runtimeClassloader.loadBeanClasses(persistence.getJarFile(),
+                Environment.get("bean.class.presentation.regexp", ".*"), null);
         Environment.setProperty("loadedBeanTypes", beanClasses);
 
         return beanClasses;

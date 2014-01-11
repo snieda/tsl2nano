@@ -106,15 +106,17 @@ public class RuntimeClassloader extends URLClassLoader {
             return null;
         }
     }
-
+    
     /**
      * adds the given file-path to the classloader and evaluates all bean classes from given jar
      * 
      * @param beanjar bean jar file
+     * @param regExp constraint for classes (class-name) to load
      * @return bean types
      */
     @SuppressWarnings({ "rawtypes" })
-    public List<Class> loadBeanClasses(String beanjar, StringBuilder messages) {
+    public List<Class> loadBeanClasses(String beanjar, String regExp, StringBuilder messages) {
+        final String CLS = ".class";
         if (beanjar == null) {
             return new LinkedList<Class>();
         }
@@ -126,7 +128,7 @@ public class RuntimeClassloader extends URLClassLoader {
         List<Class> beanClasses;
         String[] classNames;
         String p = null;
-        classNames = FileUtil.readFileNamesFromZip(beanjar, "*.class");
+        classNames = FileUtil.readFileNamesFromZip(beanjar, "*" + CLS);
         if (classNames == null) {
             throw new FormattedException("The given jar-file '" + beanjar + "' doesn't exist!");
         }
@@ -134,12 +136,16 @@ public class RuntimeClassloader extends URLClassLoader {
         beanClasses = new ArrayList<Class>(classNames.length);
         int loaderrors = 0;
         for (int i = 0; i < classNames.length; i++) {
-            if (classNames[i].endsWith(".class")) {
-                String className = StringUtil.substring(classNames[i], null, ".class");
+            if (classNames[i].endsWith(CLS)) {
+                String className = StringUtil.substring(classNames[i], null, CLS);
                 if (p != null) {
                     className = p + "." + className;
                 }
                 className = className.replace('/', '.');
+                if (!className.matches(regExp)) {
+                    LOG.trace("class " + className + " not matching regex '" + regExp + "'");
+                    continue;
+                }
                 LOG.info("loading class: " + className);
                 try {
                     Class<?> clazz = loadClass(className);

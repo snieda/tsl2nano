@@ -2,7 +2,7 @@
 <project name="model driven generator" default="do.all" basedir=".">
 	<property file="mda.properties" />
 	<target name="help" description="help overview">
-		<echo message="please use one of these targets: sql"/>
+		<echo message="please use one of these targets: do.all"/>
 	</target>
 
 	<path id="stdpath">
@@ -26,7 +26,7 @@
 				<property name="sh.exec.cmd.dir" value="${basedir}"/>
 				<property name="sh.exec.cmd.arg1" value="start"/>
 				<property name="sh.exec.cmd.arg2" value="runServer.bat"/>
-				<property name="sh.exec.cmd.arg3" value="${basedir}"/>
+				<property name="sh.exec.cmd.arg3" value="${dbname}"/>
 			</ant>
 			<sequential>
 				<property name="sh.sleep.milliseconds" value="3000" />
@@ -40,7 +40,8 @@
 				<ant antfile="shell.xml" target="sh.exec.cmd">
 					<property name="sh.exec.cmd.dir" value="${basedir}/.."/>
 					<property name="sh.exec.cmd.arg1" value="start"/>
-					<property name="sh.exec.cmd.arg2" value="start.bat"/>
+					<property name="sh.exec.cmd.arg2" value="run.bat"/>
+					<property name="sh.exec.cmd.arg3" value="${basedir}"/>
 				</ant>
 			</sequential>
 		</parallel>

@@ -421,7 +421,7 @@ public class BeanDefinition<T> extends BeanClass<T> implements Serializable {
         else
             attributeFilter = CollectionUtil.concat(new String[attributeFilter.length + 1],
                 attributeFilter,
-                new String[] { name });
+                new String[] { newAttribute.getName() });
         allDefinitionsCached = false;
         return newAttribute;
     }
@@ -465,12 +465,20 @@ public class BeanDefinition<T> extends BeanClass<T> implements Serializable {
     }
 
     /**
+     * isInterface
+     * @return
+     */
+    public boolean isInterface() {
+        return getDefiningClass(clazz).isInterface();
+    }
+    
+    /**
      * the bean is selectable, if it has at least one action to do on it - or it is persistable.
      * 
      * @return true, if an action was defined
      */
     public boolean isSelectable() {
-        return !isFinal() && (isMultiValue() || isCreatable() || isPersistable() || !Util.isEmpty(actions));
+        return !isFinal() && (isMultiValue() || isInterface() || isCreatable() || isPersistable() || !Util.isEmpty(actions));
     }
 
     /**
@@ -543,7 +551,7 @@ public class BeanDefinition<T> extends BeanClass<T> implements Serializable {
      */
     public IPresentable getPresentable() {
         if (presentable == null) {
-            presentable = new Presentable();
+            presentable = (Presentable) Environment.get(BeanPresentationHelper.class).createPresentable();
         }
         return presentable;
     }

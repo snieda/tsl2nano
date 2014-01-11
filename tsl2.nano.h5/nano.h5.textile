@@ -92,6 +92,14 @@ Nano.h5 provides mechanisms to create a full configurable application from a giv
 
 Creating an UML-Diagram with perhaps _ArgoUML_, or creating an ER-Diagram with f.e. _architect_ you may generate a ddl script. Nano.H5 provides an ant-script (_mda.xml_) to generate a hsqldb-database and generating entity beans through hibernate-tools for the given jdbc-connection.
 
+The other option would be to have an existing beans.jar ....
+
+##### Process Description
+* _Ant_ and _hibernate-tools_ has to be in your classpath or environment directory.
+* Use a tool like _ArgoUML_ or _architect_ to create an UML-Diagram 
+* Export the data model to a ddl file (sql statements to create the database). This file must be stored in the environment directory with extension _sql_ (e.g. timedb.sql).
+* start _mda.bat_ to generate the database from ddl file and creating beans.jar through hibernate tools.
+ 
 ## Starting / Test
 
 The tsl2.nano.h5 framework can be started through it's jar _tsl2.nano.h5-xxxxx.jar_. A start script _run.bat_ is available to do this in windows. Starting it, a given directory is used as a kind of workspace where you put all configuration and jar files into to be used. This jars may be ant, an o/r-mapper like hibernate with all it's dependencies. The configuration files are the environment.xml and all xml files describing the presentation of each entity bean.  Icons for all buttons and backgrounds are in the _icon_ folder. The main jar file can contain all dependent jar files (as described in the manifest file) or outside in the same directory as the main jar.
@@ -685,6 +693,7 @@ set the following *environment.xml* properties:
 * (x) *generic navigation through hsql statements*
 * ( ) *bean navigation actions*
 * *ERRORS*
+** hsqldb 1.8 is not able to do _select max(count(color)) from Colors group by color_
 ** hibernate3 is - on special circumstances - not able to load fields with empty ('') strings. This results in an __java.lang.StringIndexOutOfBoundsException: String index out of range: 0__
 ** failure: presentable.layout --> simple-xml: Transform of class java.util.LinkedHashMap not supported
 ** (v) failure: sorting numbers/currencies sorts as strings
@@ -699,6 +708,7 @@ set the following *environment.xml* properties:
 * field-order of bean-def may change after new compile --> serializing/deserialings will differ, see CommonTest
 
 * *TESTS*
+** ( ) test with multi values - using best id's
 ** (-) test on android
 *** no datasource for Sqlite available - apache BasicDatasource uses JavaBeans what is not usable on android
 *** ORMLite (4.47) not usable through persistence.xml because no EntityManagerFactory/EntityManager implementation available

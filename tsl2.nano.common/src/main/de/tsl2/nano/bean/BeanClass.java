@@ -832,7 +832,7 @@ public class BeanClass<T> implements Serializable {
      * @param actions (optional) collection to be filled with actions
      * @return all public methods (wrapped into actions) starting with 'action' and having no arguments.
      */
-    public static Collection<IAction> getActions(Class<?> clazz, Collection<IAction> actions) {
+    public static Collection<IAction> getActions(Class<?> clazz, Collection<IAction> actions, Object...parameters) {
         final Method[] methods = getDefiningClass(clazz).getMethods();
         if (actions == null)
             actions = new ArrayList<IAction>();
@@ -840,14 +840,16 @@ public class BeanClass<T> implements Serializable {
             if (methods[i].getName().startsWith(ACTION_PREFIX) && methods[i].getParameterTypes().length == 0) {
                 final Method m = methods[i];
                 final String name = m.getName().substring(ACTION_PREFIX.length());
-                actions.add(new CommonAction<Object>(m.toGenericString(),
-                    name,
-                    Messages.getStringOpt(m.toGenericString())) {
-                    @Override
-                    public Object action() throws Exception {
-                        return m.invoke(getParameter()[0], new Object[0]);
-                    }
-                });
+                CommonAction<Object> newAction = new CommonAction<Object>(m.toGenericString(),
+                        name,
+                        Messages.getStringOpt(m.toGenericString())) {
+                        @Override
+                        public Object action() throws Exception {
+                            return m.invoke(getParameter()[0], new Object[0]);
+                        }
+                    };
+                newAction.setParameter(parameters);
+                actions.add(newAction);
             }
         }
         return actions;

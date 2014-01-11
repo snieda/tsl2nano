@@ -21,6 +21,10 @@ import de.tsl2.nano.exception.ForwardedException;
  * @version $Revision$
  */
 public class Util {
+    
+    protected Util() {
+    }
+    
     /**
      * isAllNull
      * @param objects objects to check
@@ -146,5 +150,20 @@ public class Util {
     @SuppressWarnings("unchecked")
     public static <T> T value(Object object, T defaultValue) {
         return (T) (object != null ? object : defaultValue);
+    }
+    
+    
+    /**
+     * standard toString implementation
+     * @param cls root class
+     * @param members class members
+     * @return tostring representation
+     */
+    public static String toString(Class<?> cls, Object...members) {
+        StringBuilder buf = new StringBuilder(cls.getSimpleName() + "(" + members[0]);
+        for (int i = 1; i < members.length; i++) {
+            buf.append(", " + members[i]);
+        }
+        return buf.append(")").toString();
     }
 }

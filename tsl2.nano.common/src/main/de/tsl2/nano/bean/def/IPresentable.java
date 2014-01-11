@@ -40,11 +40,11 @@ public interface IPresentable extends Serializable {
 
     /** returns optional layout. if it is used as descriptor only, it is recommended to fill maps of type 
      * {@link Map<String, ?} to be transformable into the graphical information object. */
-    Object getLayout();
+    Serializable getLayout();
 
     /** returns optional layout constraintsif it is used as descriptor only, it is recommended to fill maps of type 
      * {@link Map<String, ?} to be transformable into the graphical information object. */
-    Object getLayoutConstraints();
+    Serializable getLayoutConstraints();
 
     /** optional fixed pixel with (valuable through layout constraints) */
     int getWidth();
@@ -67,8 +67,8 @@ public interface IPresentable extends Serializable {
             int style,
             IActivator enabler,
             boolean visible,
-            Object layout,
-            Object layoutConstraints,
+            Serializable layout,
+            Serializable layoutConstraints,
             String description);
 
     /** sets enhanced grafic properties. for further informations, see docs of getters. */
@@ -81,10 +81,10 @@ public interface IPresentable extends Serializable {
     <T extends IPresentable> T setStyle(int style);
 
     /** sets optional layout */
-    <T extends IPresentable> T setLayout(Object layout);
+    <T extends IPresentable> T setLayout(Serializable layout);
     
     /** sets optional layout constraints */
-    <T extends IPresentable> T setLayoutConstraints(Object layoutConstraints);
+    <T extends IPresentable> T setLayoutConstraints(Serializable layoutConstraints);
 
     /** sets an enabler. use {@link IActivator#INACTIVE} to totally disable an item */
     public <T extends IPresentable> T setEnabler(IActivator enabler);
@@ -189,8 +189,8 @@ public interface IPresentable extends Serializable {
                 int style,
                 IActivator enabler,
                 boolean visible,
-                Object layout,
-                Object layoutConstraints,
+                Serializable layout,
+                Serializable layoutConstraints,
                 String description) {
             throw new UnsupportedOperationException();
         }
@@ -211,12 +211,12 @@ public interface IPresentable extends Serializable {
         }
 
         @Override
-        public Object getLayoutConstraints() {
+        public Serializable getLayoutConstraints() {
             return null;
         }
 
         @Override
-        public Object getLayout() {
+        public Serializable getLayout() {
             return null;
         }
 
@@ -271,12 +271,12 @@ public interface IPresentable extends Serializable {
         }
 
         @Override
-        public <T extends IPresentable> T setLayout(Object layout) {
+        public <T extends IPresentable> T setLayout(Serializable layout) {
             throw new UnsupportedOperationException();
         }
 
         @Override
-        public <T extends IPresentable> T setLayoutConstraints(Object layoutConstraints) {
+        public <T extends IPresentable> T setLayoutConstraints(Serializable layoutConstraints) {
             throw new UnsupportedOperationException();
         }
         

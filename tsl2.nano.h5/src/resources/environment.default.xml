@@ -8,20 +8,24 @@
    <property name="de.tsl2.nano.config.path">
       <object class="java.lang.String">C:\tsl-nano\tsl2.nano.h5\config/</object>
    </property>
+<!-- bean-classes to present -->
+   <property name="bean.class.presentation.regexp">
+      <object class="java.lang.String">.*</object>
+   </property>
 <!-- default attribute formatters regexp pattern -->
-   <property name="default.pattern.regexp">
+   <property name="default.attribute.pattern.regexp">
       <object class="java.lang.String">.*</object>
    </property>
 <!-- -->
-   <property name="default.attribute.id">
+   <property name="default.present.attribute.id">
       <object class="java.lang.Boolean">false</object>
    </property>
 <!-- whether to show multivalue attributes (like lists) inside a search-result-table, too. -->
-   <property name="default.attribute.multivalue">
+   <property name="default.present.attribute.multivalue">
       <object class="java.lang.Boolean">false</object>
    </property>
 <!-- -->
-   <property name="default.attribute.timestamp">
+   <property name="default.present.attribute.timestamp">
       <object class="java.lang.Boolean">false</object>
    </property>
 <!-- normally, the collector uses the standard bean-definition. 
@@ -164,7 +168,7 @@
       <object class="java.lang.Boolean">true</object>
    </property>
    <!-- whether to cache each entity/bean  -->
-   <property name="use.bean.cache"
+   <property name="use.bean.cache">
       <object class="java.lang.Boolean">true</object>
    </property>
    <!-- http connection port -->

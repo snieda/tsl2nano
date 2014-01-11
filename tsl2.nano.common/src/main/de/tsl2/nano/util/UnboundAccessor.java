@@ -223,4 +223,9 @@ public class UnboundAccessor<T> {
     public void setMemberCache(Map<String, Object> memberCache) {
         this.memberCache = memberCache;
     }
+    
+    @Override
+    public String toString() {
+        return Util.toString(getClass(), instance);
+    }
 }

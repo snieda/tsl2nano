@@ -278,8 +278,12 @@ public class NanoH5Session {
                          * check, if input was changed - so, don't lose instances if unchanged
                          * the oldString was sent to html-page - the newString returns from request
                          */
-                        Object v = vmodel.getValue(p);
-                        String oldString = v != null ? Bean.getBean((Serializable) v).toString() : null;
+                        BeanValue bv = (BeanValue) vmodel.getAttribute(p);
+                        if (!Serializable.class.isAssignableFrom(bv.getType())) {
+                            LOG.debug("ignoring not-serializable attribute " + vmodel.getAttribute(p));
+                            continue;
+                        }
+                        String oldString = bv.getValueText();
                         String newString = parms.getProperty(p);
                         if (oldString == null || !oldString.equals(newString))
                             vmodel.setParsedValue(p, newString);

@@ -87,7 +87,7 @@ public class ValueExpression<TYPE> implements IConverter<TYPE, String>, Serializ
     transient boolean hasArguments;
 
     /** should be true, if {@link #type} is persistable (see {@link BeanContainer#isPersistable(Class)} */
-    boolean isPersistable = false;
+    transient boolean isPersistable = false;
 
     /**
      * constructor to be serializable
@@ -159,7 +159,7 @@ public class ValueExpression<TYPE> implements IConverter<TYPE, String>, Serializ
     public TYPE from(String toValue) {
         if (type == null)
             throw FormattedException.implementationError("The conversion from string to object is only available, if the ValueExpression was created with a class type argument!",
-                "type is null");
+                "type of value-expression '" + toString() + "' is null");
         if (Util.isEmpty(toValue))
             return null;
         TYPE exampleBean = (TYPE) BeanClass.createInstance(type);
@@ -331,11 +331,31 @@ public class ValueExpression<TYPE> implements IConverter<TYPE, String>, Serializ
     }
     
     /**
+     * @return Returns the expression.
+     */
+    public String getExpression() {
+        return expression;
+    }
+
+    /**
+     * @param expression The expression to set.
+     */
+    public void setExpression(String expression) {
+        this.expression = expression;
+        init(expression, type);
+    }
+
+    /**
      * isExpressionPart
      * @param attribute attribute to check
      * @return true, if given attribute is part of value expression
      */
     public boolean isExpressionPart(String attribute) {
         return Arrays.asList(attributes).contains(attribute);
+    }
+    
+    @Override
+    public String toString() {
+        return Util.toString(getClass(), expression);
     }
 }

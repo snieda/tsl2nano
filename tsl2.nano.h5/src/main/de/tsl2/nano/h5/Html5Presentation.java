@@ -11,7 +11,7 @@ package de.tsl2.nano.h5;
 
 import static de.tsl2.nano.bean.def.IBeanCollector.MODE_ASSIGNABLE;
 import static de.tsl2.nano.bean.def.IBeanCollector.MODE_MULTISELECTION;
-import static de.tsl2.nano.h5.HtmlUtil.ALIGN_CENTER;
+import static de.tsl2.nano.h5.HtmlUtil.*;
 import static de.tsl2.nano.h5.HtmlUtil.ALIGN_RIGHT;
 import static de.tsl2.nano.h5.HtmlUtil.ATTR_ACCESSKEY;
 import static de.tsl2.nano.h5.HtmlUtil.ATTR_ACTION;
@@ -76,6 +76,7 @@ import static de.tsl2.nano.h5.HtmlUtil.enable;
 import static de.tsl2.nano.h5.HtmlUtil.enableBoolean;
 import static de.tsl2.nano.h5.HtmlUtil.style;
 
+import java.io.Serializable;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Date;
@@ -93,8 +94,10 @@ import org.w3c.dom.Element;
 import de.tsl2.nano.Environment;
 import de.tsl2.nano.Messages;
 import de.tsl2.nano.action.IAction;
+import de.tsl2.nano.bean.BeanAttribute;
 import de.tsl2.nano.bean.BeanContainer;
 import de.tsl2.nano.bean.BeanUtil;
+import de.tsl2.nano.bean.def.AttributeDefinition;
 import de.tsl2.nano.bean.def.Bean;
 import de.tsl2.nano.bean.def.BeanCollector;
 import de.tsl2.nano.bean.def.BeanDefinition;
@@ -105,6 +108,7 @@ import de.tsl2.nano.bean.def.IColumn;
 import de.tsl2.nano.bean.def.IPageBuilder;
 import de.tsl2.nano.bean.def.IPresentable;
 import de.tsl2.nano.bean.def.IPresentableColumn;
+import de.tsl2.nano.bean.def.Presentable;
 import de.tsl2.nano.bean.def.SecureAction;
 import de.tsl2.nano.bean.def.ValueExpressionFormat;
 import de.tsl2.nano.collection.CollectionUtil;
@@ -160,16 +164,7 @@ public class Html5Presentation<T> extends BeanPresentationHelper<T> implements I
             "icons/compose.png") {
             @Override
             public Object action() throws Exception {
-//                File configFileName = BeanDefinition.getDefinitionFile(bean.getName());
-//                String configFile = FileUtil.getFile(configFileName.getPath());
-//                return configFile != null ? configFile : "No configuration found (" + configFileName + ")";
-                Bean<?> configBean = Bean.getBean(BeanDefinition.getBeanDefinition(bean.getName()));
-                String[] writableAttributes = configBean.getAttributeNames(true);
-                configBean.setAttributeFilter(writableAttributes);
-//                ConfigBeanContainer
-//                BeanClass beanClass = new BeanClass(bean.getClazz());
-//                configBean.getAttribute("attributes").setRange(beanClass.getAttributes(false));
-                return configBean;
+                return BeanConfigurator.create((Class<Serializable>)bean.getClazz());
             }
 
             @Override
@@ -246,7 +241,7 @@ public class Html5Presentation<T> extends BeanPresentationHelper<T> implements I
     private void createBean(Element parent, Bean<?> bean, boolean interactive) {
         int columns = bean.getPresentable().layout(L_GRIDWIDTH, Environment.get("layout.default.columncount", 3));
         Element panel = createGrid(parent, Environment.translate("tsl2nano.input", false), columns);
-        appendAttributes(panel, bean.getPresentable());
+        appendAttributes((Element) panel.getParentNode(), bean.getPresentable());
         createLayout((Element) panel.getParentNode(), bean.getPresentable());
         Bean<T> vbean = (Bean<T>) bean;
         List<BeanValue<?>> beanValues = vbean.getBeanValues();
@@ -336,13 +331,13 @@ public class Html5Presentation<T> extends BeanPresentationHelper<T> implements I
             ATTR_ALIGN,
             getTextAlignment(p.getStyle()),
             ATTR_BGCOLOR,
-            convert(ATTR_BGCOLOR, p.getBackground()),
+            convert(ATTR_BGCOLOR, p.getBackground(), COLOR_LIGHT_BLUE),
             ATTR_COLOR,
-            convert(ATTR_COLOR, p.getForeground())/*, p.getIcon()*/);
+            convert(ATTR_COLOR, p.getForeground(), COLOR_BLACK)/*, p.getIcon()*/);
 
-//        if (p.getLayout() instanceof Map) {
-//            HtmlUtil.appendAttributes(grid, MapUtil.asArray((Map<String, Object>) p.getLayout()));
-//        }
+        if (p.getLayout() instanceof Map) {
+            HtmlUtil.appendAttributes(grid, MapUtil.asArray((Map<String, Object>) p.getLayout()));
+        }
         if (p.getLayoutConstraints() instanceof Map) {
             HtmlUtil.appendAttributes(grid, MapUtil.asArray((Map<String, String>) p.getLayoutConstraints()));
         }
@@ -944,6 +939,45 @@ public class Html5Presentation<T> extends BeanPresentationHelper<T> implements I
         }
     }
 
+    @Override
+    public boolean isDefaultAttribute(BeanAttribute attribute) {
+        if (bean instanceof Bean && ((Bean)bean).getInstance() instanceof BeanConfigurator)
+            return true;
+        return super.isDefaultAttribute(attribute);
+    }
+    
+    @Override
+    public IPresentable createPresentable() {
+        return new Presentable() {
+            @Override
+            public int getWidth() {
+                String l = layout(ATTR_WIDTH);
+                return l != null ? Integer.valueOf(l) : UNDEFINED;
+            }
+            @Override
+            public int getHeight() {
+                String l = layout("???");
+                return l != null ? Integer.valueOf(l) : UNDEFINED;
+            }
+            
+        };
+    }
+    
+    @Override
+    public IPresentable createPresentable(AttributeDefinition<?> attr) {
+        return new Presentable(attr) {
+            @Override
+            public int getWidth() {
+                return Integer.valueOf(layout(ATTR_WIDTH));
+            }
+            @Override
+            public int getHeight() {
+                return Integer.valueOf(layout("???"));
+            }
+            
+        };
+    }
+    
     protected static final StringBuilder content() {
         return EMPTY_CONTENT;
     }
@@ -952,9 +986,9 @@ public class Html5Presentation<T> extends BeanPresentationHelper<T> implements I
         return str != null ? new StringBuilder(str) : EMPTY_CONTENT;
     }
 
-    protected static String convert(String name, Object value) {
+    protected static String convert(String name, Object value, String defaultValue) {
         if (value == null) {
-            return null;
+            return defaultValue;
         } else if (name.equals(ATTR_COLOR) || name.equals(ATTR_BGCOLOR)) {
             int[] c = (int[]) value;
             StringBuilder s = new StringBuilder(6);
