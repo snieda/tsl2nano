@@ -10,6 +10,7 @@
 package de.tsl2.nano.collection;
 
 import java.lang.reflect.InvocationHandler;
+import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.lang.reflect.Proxy;
 import java.util.Iterator;
@@ -33,7 +34,8 @@ public class FilteringIterator<E> implements ListIterator<E> {
     int i = 0;
     boolean previewing;
     E item;
-
+    int size = -1;
+    
     /**
      * constructor
      * 
@@ -45,7 +47,7 @@ public class FilteringIterator<E> implements ListIterator<E> {
         super();
         this.parent = parent;
         this.predicate = predicate;
-        this.previewIt = parent instanceof List ? ((List)parent).listIterator() : parent.iterator();
+        this.previewIt = parent instanceof List ? ((List) parent).listIterator() : parent.iterator();
     }
 
     @Override
@@ -62,6 +64,7 @@ public class FilteringIterator<E> implements ListIterator<E> {
                 return (item = n);
             }
         }
+        size = i;
         return null;
     }
 
@@ -75,10 +78,10 @@ public class FilteringIterator<E> implements ListIterator<E> {
 
     @Override
     public void remove() {
+        size--;
         previewIt.remove();
     }
 
-    
     /**
      * {@inheritDoc}
      */
@@ -134,7 +137,7 @@ public class FilteringIterator<E> implements ListIterator<E> {
      */
     @Override
     public void set(E e) {
-        ((ListIterator<E>)previewIt).set(e);
+        ((ListIterator<E>) previewIt).set(e);
     }
 
     /**
@@ -142,9 +145,43 @@ public class FilteringIterator<E> implements ListIterator<E> {
      */
     @Override
     public void add(E e) {
-        ((ListIterator<E>)previewIt).add(e);
+        if (size > 0)
+            size++;
+        ((ListIterator<E>) previewIt).add(e);
     }
 
+    /**
+     * on first call, the size has to be evaluated 
+     * @return size of iterable
+     */
+    @SuppressWarnings({ "rawtypes", "unchecked" })
+    protected int size() {
+        if (size < 0) {
+            size = 0;
+            Iterator iterator = new FilteringIterator(parent, predicate);
+            while (iterator.hasNext()) {
+                iterator.next();
+                size++;
+            }
+        }
+        return size;
+    }
+    
+    private static <I extends Iterable<T>, T> Object evalInvokation(final I iterable,
+            final IPredicate<T> predicate,
+            Method method,
+            Object[] args) throws IllegalAccessException, InvocationTargetException {
+        Object result;
+        if (Iterator.class.isAssignableFrom(method.getReturnType())) {
+            result = new FilteringIterator<T>(iterable, predicate);
+        } else if (method.getName().equals("size")) {
+            result = new FilteringIterator<T>(iterable, predicate).size();
+        } else {
+            result = method.invoke(iterable, args);
+        }
+        return result;
+    }
+    
     /**
      * creates a proxy using the given iterable instance. if an iterator is requested, the orginal iterator will be
      * wrapped into the {@link FilteringIterator}.
@@ -160,40 +197,21 @@ public class FilteringIterator<E> implements ListIterator<E> {
      */
     @SuppressWarnings({ "unchecked", "rawtypes" })
     public static <I extends Iterable<T>, T> I getFilteringIterable(final I iterable, final IPredicate<T> predicate) {
-        return (I) Proxy.newProxyInstance(Thread.currentThread().getContextClassLoader(), BeanClass.getBeanClass(iterable.getClass()).getInterfaces(), new InvocationHandler() {
-//          /** to avoid subsequent/recursive calls of 'size' */
-//          Iterator<T> iterator = null;
-
-            @Override
-            public Object invoke(Object proxy, Method method, Object[] args) throws Throwable {
-                Object result = method.invoke(iterable, args);
-                if (Iterator.class.isAssignableFrom(method.getReturnType())) {
-                    result = new FilteringIterator<T>(iterable, predicate);
-                } else {
-                    result = method.invoke(iterable, args);
+        return (I) Proxy.newProxyInstance(Thread.currentThread().getContextClassLoader(),
+            BeanClass.getBeanClass(iterable.getClass()).getInterfaces(), new InvocationHandler() {
+                @Override
+                public Object invoke(Object proxy, Method method, Object[] args) throws Throwable {
+                    return evalInvokation(iterable, predicate, method, args);
                 }
-                
-//              else if (iterator == null && method.getName().equals("size")) {
-//              iterator = new FilteringIterator<T>(iterable, predicate);
-//              int size = 0;
-//              while (iterator.hasNext()) {
-//                  iterator.next();
-//                  size++;
-//              }
-//              iterator = null;
-//              result = size;
-//          }
-                return result;
-            }
-        });
+            });
     }
-    
+
     /**
      * creates a proxy using the given map instance. if a key iterator is requested, the orginal iterator will be
      * wrapped into the {@link FilteringIterator}.
      * <p/>
-     * As the original instance will be preserved, all other methods like size(), contains() etc. will
-     * work on the un-filtered content!
+     * As the original instance will be preserved, all other methods like size(), contains() etc. will work on the
+     * un-filtered content!
      * 
      * @param <I> iterable type - mostly at least a collection
      * @param <T> member type of the iterable
@@ -201,19 +219,15 @@ public class FilteringIterator<E> implements ListIterator<E> {
      * @param predicate item filter/selector
      * @return proxy, providing the given iterable filtered through the given predicate.
      */
-    @SuppressWarnings({ "unchecked", "rawtypes" })
+    @SuppressWarnings({ "unchecked" })
     public static <I extends Map<S, T>, S, T> I getFilteringMap(final I map, final IPredicate<T> predicate) {
-        return (I) Proxy.newProxyInstance(Thread.currentThread().getContextClassLoader(), BeanClass.getBeanClass(map.getClass()).getInterfaces(), new InvocationHandler() {
+        return (I) Proxy.newProxyInstance(Thread.currentThread().getContextClassLoader(),
+            BeanClass.getBeanClass(map.getClass()).getInterfaces(), new InvocationHandler() {
 
-            @Override
-            public Object invoke(Object proxy, Method method, Object[] args) throws Throwable {
-                Object result;
-                if (method.getName().equals("keySet"))
-                    result = new FilteringIterator<T>((Iterable<T>) map.keySet(), predicate);
-                else
-                    result = method.invoke(map, args);
-                return result;
-            }
-        });
+                @Override
+                public Object invoke(Object proxy, Method method, Object[] args) throws Throwable {
+                    return evalInvokation((Iterable<T>)map.keySet(), predicate, method, args);
+                }
+            });
     }
 }

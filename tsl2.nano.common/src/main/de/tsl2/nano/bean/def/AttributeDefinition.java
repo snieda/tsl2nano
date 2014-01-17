@@ -80,7 +80,7 @@ public class AttributeDefinition<T> extends BeanAttribute implements IAttributeD
      * @throws NoSuchMethodException 
      */
     protected AttributeDefinition() {
-        super(UNDEFINEDMETHOD());
+        super();
         status = Status.STATUS_OK;
     }
 
@@ -375,7 +375,8 @@ public class AttributeDefinition<T> extends BeanAttribute implements IAttributeD
      */
     @Override
     public boolean isMultiValue() {
-        return Collection.class.isAssignableFrom(getType());
+        Class<?> type = getType();
+        return Collection.class.isAssignableFrom(type) || Map.class.isAssignableFrom(type);
     }
 
     /**

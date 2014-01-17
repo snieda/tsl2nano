@@ -44,6 +44,8 @@ public class MapExpressionFormat<T> extends ValueExpressionFormat<T> {
      */
     public MapExpressionFormat(Class<T> mapValueType) {
         super(mapValueType);
+        //TODO: is previously done in super construction -> performance
+        ve.setExpression("");
     }
 
     /**

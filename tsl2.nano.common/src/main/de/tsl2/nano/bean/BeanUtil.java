@@ -189,7 +189,7 @@ public class BeanUtil {
      */
     public static <T> T clone(T src) {
         try {
-            return (T) BeanClass.copyValues(src, src.getClass().newInstance());
+            return (T) BeanClass.copyValues(src, BeanClass.createInstance(src.getClass()));
         } catch (Exception e) {
             ForwardedException.forward(e);
             return null;
@@ -318,7 +318,8 @@ public class BeanUtil {
      * @see #isStandardType(Class) evaluating the given objects class
      */
     public static boolean isStandardType(Object object) {
-        return object instanceof Class ? isStandardType((Class)object) : object != null ? isStandardType(object.getClass())
+        return object instanceof Class ? isStandardType((Class) object) : object != null ? isStandardType(object
+            .getClass())
             : false;
     }
 
@@ -393,6 +394,16 @@ public class BeanUtil {
             }
         }
         return true;
+    }
+
+    /**
+     * evaluates the type name of the given instance
+     * @param instance instance or class
+     * @return simple class name or "null"
+     */
+    public static String getName(Object instance) {
+        return instance instanceof Class ? BeanClass.getName((Class) instance) : instance != null ? BeanClass
+            .getName(instance.getClass()) : "null";
     }
 
     /**

@@ -480,6 +480,7 @@ public class Bean<T> extends BeanDefinition<T> {
      *         won't be closed.
      */
     protected Object save(Object bean) {
+        //on not-persistable beans, the presentation layer has to handle the save or assignment
         if (!BeanContainer.isInitialized() || !BeanContainer.instance().isPersistable(getDefiningClass(clazz))) {
             return bean;
         }

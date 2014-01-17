@@ -160,6 +160,9 @@ public class ValueExpression<TYPE> implements IConverter<TYPE, String>, Serializ
         if (type == null)
             throw FormattedException.implementationError("The conversion from string to object is only available, if the ValueExpression was created with a class type argument!",
                 "type of value-expression '" + toString() + "' is null");
+        //if type is object we return the value itself - it's an instanceof Object
+        if (type.isAssignableFrom(Object.class))
+            return (TYPE) toValue;
         if (Util.isEmpty(toValue))
             return null;
         TYPE exampleBean = (TYPE) BeanClass.createInstance(type);
@@ -211,7 +214,7 @@ public class ValueExpression<TYPE> implements IConverter<TYPE, String>, Serializ
             }
             return isMessageFormat() ? MessageFormat.format(format, args) : String.format(format, args);
         } else {
-            return format;
+            return Util.asString(fromValue);
         }
     }
 

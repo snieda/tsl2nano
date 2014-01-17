@@ -42,6 +42,8 @@ import de.tsl2.nano.log.LogFactory;
  * 
  * </pre>
  * 
+ * To work directly on interface implementations, use {@link MultipleInheritanceProxy}.
+ * 
  * @author Thomas Schneider
  * @version $Revision$
  */
@@ -106,9 +108,24 @@ public class DelegatorProxy implements InvocationHandler, Serializable {
      * @param delegators
      * @return
      */
+    @SuppressWarnings("unchecked")
     public static final <T> T delegator(Class<T> proxyInterface, Object... delegators) {
-        return (T) Proxy.newProxyInstance(Thread.currentThread().getContextClassLoader(),
+        return ((T) Proxy.newProxyInstance(Thread.currentThread().getContextClassLoader(),
             new Class[] { proxyInterface },
+            new DelegatorProxy(delegators)));
+    }
+    /**
+     * delegator
+     * 
+     * @param <T>
+     * @param proxyInterfaces
+     * @param delegators
+     * @return
+     */
+    @SuppressWarnings("rawtypes")
+    public static final Object delegator(Class[] proxyInterfaces, Object... delegators) {
+        return Proxy.newProxyInstance(Thread.currentThread().getContextClassLoader(),
+            proxyInterfaces,
             new DelegatorProxy(delegators));
     }
 }

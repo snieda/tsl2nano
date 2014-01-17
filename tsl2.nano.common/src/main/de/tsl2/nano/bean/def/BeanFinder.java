@@ -138,7 +138,7 @@ public class BeanFinder<T, F> implements IBeanFinder<T, F>, Serializable {
                 rangeBean = new Bean<IRange<F>>(new Range<F>(from, to));
             } catch (Exception ex) {
                 //ok, we don't provide a range filter
-                LOG.info("BeanFinder wont provide a range filter:" + ex.toString());
+                LOG.warn("BeanFinder wont provide a range filter:" + ex.toString());
             }
         }
         return rangeBean;

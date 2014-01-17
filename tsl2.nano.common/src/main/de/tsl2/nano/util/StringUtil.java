@@ -272,7 +272,7 @@ public class StringUtil {
             result = String.valueOf(o);
         }
         maxLength -= postfix.length();
-        return result.length() > maxLength ? result.substring(0, maxLength) + postfix : result;
+        return result != null && result.length() > maxLength ? result.substring(0, maxLength) + postfix : result;
     }
 
     /**

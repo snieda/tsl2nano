@@ -321,7 +321,7 @@ public class BeanDefinition<T> extends BeanClass<T> implements Serializable {
             if (isVirtual() && attributeDefinitions != null)
                 attributeFilter = attributeDefinitions.keySet().toArray(new String[0]);
             else if (!isVirtual()) {
-                if (attributeDefinitions != null) {
+                if (allDefinitionsCached) {
                     attributeFilter = CollectionUtil.concat(String[].class,
                         //                        attributeFilter,
                         attributeDefinitions.keySet().toArray(new String[0]));
@@ -636,7 +636,7 @@ public class BeanDefinition<T> extends BeanClass<T> implements Serializable {
      * @return true, if bean class is assignable from {@link Collection}.
      */
     public boolean isMultiValue() {
-        return Collection.class.isAssignableFrom(clazz);
+        return Collection.class.isAssignableFrom(clazz) || Map.class.isAssignableFrom(clazz);
     }
 
     /**

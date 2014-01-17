@@ -18,8 +18,10 @@ import java.lang.reflect.Method;
 import java.text.Format;
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.LinkedHashMap;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Map;
 
 import org.apache.commons.logging.Log;
 
@@ -32,12 +34,16 @@ import de.tsl2.nano.bean.BeanAttribute;
 import de.tsl2.nano.bean.BeanClass;
 import de.tsl2.nano.bean.BeanUtil;
 import de.tsl2.nano.bean.ValueHolder;
+import de.tsl2.nano.collection.Entry;
 import de.tsl2.nano.collection.ListSet;
+import de.tsl2.nano.collection.MapEntrySet;
+import de.tsl2.nano.collection.MapUtil;
 import de.tsl2.nano.exception.ForwardedException;
 import de.tsl2.nano.log.LogFactory;
 import de.tsl2.nano.messaging.ChangeEvent;
 import de.tsl2.nano.messaging.EventController;
 import de.tsl2.nano.messaging.IListener;
+import de.tsl2.nano.util.PrivateAccessor;
 
 /**
  * BeanAttribute holding the bean instance, observers and exact attribute definitions - with validation.
@@ -387,14 +393,15 @@ public class BeanValue<T> extends AttributeDefinition<T> implements IValueDefini
                 BeanCollector<?, ?> beanCollector;
                 Composition comp = composition() ? CompositionFactory.createComposition(BeanValue.this) : null;
                 if (isMultiValue()) {
-                    Collection<T> collection = (Collection<T>) getValue();
-                    beanCollector = BeanCollector.getBeanCollector((Class<T>) getGenericType(),
+                    Selector<T> vsel = new Selector<T>(BeanValue.this);
+                    Collection<T> collection = vsel.getValueAsCollection();
+                    beanCollector = BeanCollector.getBeanCollector(vsel.getCollectionEntryType(),
                         collection,
                         MODE_ALL,
                         comp);
-                    if (collection == null)
-                        collection = new ListSet<T>();
-                    setValue((T) collection);
+                    if (collection == null) {
+                        vsel.createCollectionValue();
+                    }
                     beanCollector.setSelectionProvider(new SelectionProvider(beanCollector.getCurrentData()));
                 } else {
                     LinkedList<T> selection = new LinkedList<T>();
@@ -429,13 +436,15 @@ public class BeanValue<T> extends AttributeDefinition<T> implements IValueDefini
             public Object action() throws Exception {
                 Collection s;
                 if (isMultiValue()) {
-                    Collection v = (Collection) getValue();
+                    Selector<T> vsel = new Selector<T>(BeanValue.this);
+                    Collection v = vsel.getValueAsCollection();
                     s = selectionProvider.getValue();
                     if (v == null)
                         setValue((T) s);
                     else {
                         v.clear();
                         v.addAll(s);
+                        vsel.synchronize(v);
                     }
                 } else {
                     s = selectionProvider.getValue();
@@ -447,4 +456,63 @@ public class BeanValue<T> extends AttributeDefinition<T> implements IValueDefini
         return collector;
     }
 
+}
+
+/**
+ * handles a value type that is not a single value to be a collection or map
+ * 
+ * @param <T>
+ * @author Tom
+ * @version $Revision$
+ */
+@SuppressWarnings({ "unchecked", "rawtypes" })
+class Selector<T> {
+    IValueAccess<T> valueAccess;
+    Boolean isMap;
+
+    /**
+     * constructor
+     * 
+     * @param valueAccess
+     */
+    public Selector(IValueAccess<T> valueAccess) {
+        super();
+        this.valueAccess = valueAccess;
+    }
+
+    public void synchronize(Collection<T> current) {
+        if (isMap) {
+            ((MapEntrySet)current).map();
+        }
+    }
+
+    Class<T> getCollectionEntryType() {
+        checkForMap();
+        return (Class<T>) (isMap ? Entry.class : valueAccess instanceof BeanAttribute
+            ? ((BeanAttribute) valueAccess).getGenericType() : Object.class);
+    }
+
+    Collection<T> getValueAsCollection() {
+        Object v = valueAccess.getValue();
+        if (v instanceof Map) {
+            isMap = true;
+            return MapUtil.asEntrySetExtender((Map) v);
+        } else {
+            isMap = false;
+            return (Collection<T>) v;
+        }
+    }
+
+    void createCollectionValue() {
+        checkForMap();
+        if (isMap)
+            valueAccess.setValue((T) new LinkedHashMap());
+        else
+            valueAccess.setValue((T) new ListSet<T>());
+    }
+
+    void checkForMap() {
+        if (isMap == null)
+            getValueAsCollection();
+    }
 }

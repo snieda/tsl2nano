@@ -164,18 +164,22 @@ public class FileUtil {
         return b;
     }
 
-    private static byte[] readBytes(InputStream stream) throws IOException {
+    public static byte[] readBytes(InputStream stream) throws IOException {
         ByteArrayOutputStream baos = new ByteArrayOutputStream();
-//        byte[] b = new byte[2048];
-        while (true) {
-            int r = stream.read();
-            if (r == -1)
-                break;
-            baos.write(r);
-        }
-        return baos.toByteArray();
+        return readBytes(stream, new ByteArrayOutputStream()).toByteArray();
     }
 
+    public static <O extends OutputStream> O readBytes(InputStream stream, O output) throws IOException {
+//      byte[] b = new byte[2048];
+      while (true) {
+          int r = stream.read();
+          if (r == -1)
+              break;
+          output.write(r);
+      }
+      return output;
+    }
+    
     /**
      * Writes the given file with data to the given zipfile.
      * 

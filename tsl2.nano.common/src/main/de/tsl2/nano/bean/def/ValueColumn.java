@@ -164,6 +164,10 @@ public class ValueColumn<T> implements IPresentableColumn, Serializable {
                     collector.sort();
                     return collector;
                 }
+                @Override
+                public String getImagePath() {
+                    return imagePath != null ? imagePath : sortIndex == 0 ? isSortUpDirection ? "up.png" : "down.png" : "view.png";
+                }
             };
         }
         return actionSortColumn;

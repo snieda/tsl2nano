@@ -832,6 +832,7 @@ public class BeanClass<T> implements Serializable {
      * @param actions (optional) collection to be filled with actions
      * @return all public methods (wrapped into actions) starting with 'action' and having no arguments.
      */
+    @SuppressWarnings("serial")
     public static Collection<IAction> getActions(Class<?> clazz, Collection<IAction> actions, Object...parameters) {
         final Method[] methods = getDefiningClass(clazz).getMethods();
         if (actions == null)

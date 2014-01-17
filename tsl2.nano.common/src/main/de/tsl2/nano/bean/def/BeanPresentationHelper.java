@@ -157,6 +157,7 @@ public class BeanPresentationHelper<T> {
 
     /**
      * change attribute with given key / values
+     * 
      * @param attributeName attribute to change
      * @param keyValues properties to change
      * @return the helper itself
@@ -268,7 +269,9 @@ public class BeanPresentationHelper<T> {
     public int getDefaultHorizontalAlignment(BeanAttribute beanAttribute) {
         int alignment;
         final Class<?> type = beanAttribute.getType();
-        if (Number.class.isAssignableFrom(type)) {
+        if (beanAttribute instanceof IAttributeDefinition && ((IAttributeDefinition<?>) beanAttribute).length() == 1)
+            alignment = ALIGN_RIGHT;
+        else if (Number.class.isAssignableFrom(type)) {
             alignment = ALIGN_RIGHT;
         } else {
             alignment = ALIGN_LEFT;
@@ -1307,21 +1310,23 @@ public class BeanPresentationHelper<T> {
 
     /**
      * createPresentable
+     * 
      * @return
      */
     public IPresentable createPresentable() {
         return new Presentable();
     }
-    
+
     /**
      * createPresentable
+     * 
      * @param attr
      * @return
      */
     public IPresentable createPresentable(AttributeDefinition<?> attr) {
         return new Presentable(attr);
     }
-    
+
     @Override
     public String toString() {
         return getClass().getSimpleName() + "(" + bean + ")";

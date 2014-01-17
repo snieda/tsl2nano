@@ -22,6 +22,9 @@ import de.tsl2.nano.log.LogFactory;
  * simple proxy mechanism to enhance implemenations through additional interfaces and their delegates. the order of the
  * delegates will define the priority of the delegates. each delegate will be asked, if it implement the
  * interface-method.
+ * <p/>
+ * 
+ * To work on delegator not directly implementing this interfaces, use {@link DelegatorProxy}.
  * 
  * @author ts 26.02.2010
  * @version $Revision: 1.0 $

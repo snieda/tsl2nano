@@ -7,7 +7,7 @@
  * 
  * Copyright: (c) Thomas Schneider 2011, all rights reserved
  */
-package de.tsl2.nano.bean.def;
+package de.tsl2.nano.collection;
 
 import java.util.Collection;
 import java.util.HashMap;
@@ -74,7 +74,8 @@ public class NamedValue<T> extends ValueHolder<T> {
      * @param src to get the pairs from
      * @param dest to put the pairs to
      */
-    public static void putAll(Collection<NamedValue> src, Map<Object, Object> dest) {
+    @SuppressWarnings({ "unchecked", "rawtypes" })
+    public static void putAll(Collection<NamedValue> src, Map dest) {
         for (final NamedValue namedValue : src) {
             dest.put(namedValue.getName(), namedValue.getValue());
         }
@@ -86,8 +87,9 @@ public class NamedValue<T> extends ValueHolder<T> {
      * @param src to get the pairs from
      * @param dest to put the pairs to
      */
-    public static void putAll(Map<Object, Object> src, Collection<NamedValue> dest) {
-        final Set<Object> keySet = src.keySet();
+    @SuppressWarnings({ "rawtypes", "unchecked" })
+    public static void putAll(Map src, Collection<NamedValue> dest) {
+        final Set<?> keySet = src.keySet();
         for (final Object k : keySet) {
             dest.add(new NamedValue(k.toString(), src.get(k)));
         }

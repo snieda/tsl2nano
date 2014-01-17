@@ -10,6 +10,7 @@
 package de.tsl2.nano.bean.def;
 
 import java.io.Serializable;
+import java.util.LinkedHashMap;
 import java.util.Map;
 
 import org.simpleframework.xml.Attribute;
@@ -40,9 +41,9 @@ public class Presentable implements IPresentable, Serializable {
     @Element(required = false)
     String description;
     @Element(required = false)
-    Serializable layout;
+    protected Serializable layout;
     @Element(required = false)
-    Serializable layoutConstraints;
+    protected Serializable layoutConstraints;
     @Attribute
     boolean visible = true;
     transient IActivator enabler;
@@ -57,21 +58,12 @@ public class Presentable implements IPresentable, Serializable {
     public Presentable() {
     }
 
-    public Presentable(AttributeDefinition<?> attr) {
-        label = Environment.translate(attr.getName(), true);
-        type = Environment.get(BeanPresentationHelper.class).getDefaultType(attr);
-        style =
-            Environment.get(BeanPresentationHelper.class).getDefaultHorizontalAlignment((IAttributeDefinition<?>) attr);
-        description = label;
-        enabler = attr.hasWriteAccess() ? IActivator.ACTIVE : IActivator.INACTIVE;
-    }
-
     public Presentable(BeanAttribute attr) {
         label = Environment.translate(attr.getName(), true);
         type = Environment.get(BeanPresentationHelper.class).getDefaultType(attr);
         style = Environment.get(BeanPresentationHelper.class).getDefaultHorizontalAlignment(attr);
         description = label;
-        enabler = IActivator.ACTIVE;
+        enabler = attr.hasWriteAccess() ? IActivator.ACTIVE : IActivator.INACTIVE;
     }
 
     /**

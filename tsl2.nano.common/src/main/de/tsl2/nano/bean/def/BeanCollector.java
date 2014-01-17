@@ -199,7 +199,7 @@ public class BeanCollector<COLLECTIONTYPE extends Collection<T>, T> extends Bean
         actions = new LinkedHashSet<IAction>();
         if (hasMode(MODE_SEARCHABLE)) {
             createSearchAction();
-            if (getBeanFinder().getFilterRange() != null)
+            if (hasFilter())
                 createResetAction();
         }
         if (hasMode(MODE_EDITABLE)) {
@@ -377,6 +377,15 @@ public class BeanCollector<COLLECTIONTYPE extends Collection<T>, T> extends Bean
     }
 
     /**
+     * hasFilter
+     * 
+     * @return true, if bean-finder could create an filter-range instance
+     */
+    public boolean hasFilter() {
+        return getBeanFinder().getFilterRange() != null;
+    }
+
+    /**
      * hasSearchRequestChanged
      * 
      * @return true, if at least one value of range-bean from or to changed.
@@ -476,11 +485,13 @@ public class BeanCollector<COLLECTIONTYPE extends Collection<T>, T> extends Bean
             /*
              * there is no information how to create a new bean - at least one stored bean instance must exist!
              */
-            if (getType() != null && Collection.class.isAssignableFrom(getType())) {
+            Class<T> type = getType();
+            if (type != null && Collection.class.isAssignableFrom(type)) {
                 LOG.warn("There is no information how to create a new bean - at least one stored bean instance must exist!");
                 return null;
+            } else {
+                newItem = BeanContainer.instance().createBean(getType());
             }
-            newItem = BeanContainer.instance().createBean(getType());
         }
         //assign the new item to the composition parent
         if (composition != null) {
@@ -986,7 +997,7 @@ public class BeanCollector<COLLECTIONTYPE extends Collection<T>, T> extends Bean
             Collection<I> collection,
             int workingMode) {
         assert collection != null && collection.size() > 0 : "collection must contain at least one item";
-        return getBeanCollector((Class<I>)collection.iterator().next().getClass(), collection, workingMode,
+        return getBeanCollector((Class<I>) collection.iterator().next().getClass(), collection, workingMode,
             null);
     }
 

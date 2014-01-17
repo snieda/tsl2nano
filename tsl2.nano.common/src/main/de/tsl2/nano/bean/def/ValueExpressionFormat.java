@@ -13,6 +13,8 @@ import java.text.FieldPosition;
 import java.text.Format;
 import java.text.ParsePosition;
 
+import de.tsl2.nano.util.Util;
+
 /**
  * Format for entities/beans - not implementing it's own toString(). The format packs the given type into a
  * {@link BeanDefinition}, using the first attribute as output. See {@link ValueExpression} for further informations.
@@ -59,5 +61,9 @@ public class ValueExpressionFormat<T> extends Format {
         pos.setIndex(pos.getIndex() + 1);
         return ve.from(source);
     }
-
+    
+    @Override
+    public String toString() {
+        return Util.toString(getClass(), ve);
+    }
 }
