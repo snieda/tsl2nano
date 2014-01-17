@@ -1,6 +1,7 @@
 <html>
 <body>
-	<table width="100%" border=2><tr><td><h1 align="center" accesskey="s" style="">
+	<table width="100%" height="100%" border=2 style="background: radial-gradient(#9999FF, #000000);">
+	<tr><td><h1 align="center" accesskey="s" style="">
 		<a href="${url}"><img src="favicon.ico"><br />Start
 			${name}App</img></a>
 	</h1></td></tr></table>
