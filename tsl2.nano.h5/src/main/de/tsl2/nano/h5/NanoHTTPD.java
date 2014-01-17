@@ -1,9 +1,11 @@
 package de.tsl2.nano.h5;
 
+import java.io.BufferedOutputStream;
 import java.io.BufferedReader;
 import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.io.FileInputStream;
+import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
@@ -25,8 +27,10 @@ import java.util.TimeZone;
 import java.io.ByteArrayOutputStream;
 import java.io.FileOutputStream;
 
+import de.tsl2.nano.Environment;
 import de.tsl2.nano.Main;
 import de.tsl2.nano.classloader.ThreadUtil;
+import de.tsl2.nano.util.FileUtil;
 
 /**
  * A simple, tiny, nicely embeddable HTTP 1.0 (partially 1.1) server in Java
@@ -813,15 +817,20 @@ public class NanoHTTPD extends Main
 
 				if ( data != null )
 				{
-					int pending = data.available();	// This is to support partial sends, see serveFile()
-					byte[] buff = new byte[theBufferSize];
-					while (pending>0)
-					{
-						int read = data.read( buff, 0, ( (pending>theBufferSize) ?  theBufferSize : pending ));
-						if (read <= 0)	break;
-						out.write( buff, 0, read );
-						pending -= read;
-					}
+				    //12012014ts: reading not working on jar-inputstream
+				    BufferedOutputStream bout = new BufferedOutputStream(out);
+				    FileUtil.readBytes(data, bout);
+				    bout.flush();
+				    bout.close();
+//					int pending = data.available();	// This is to support partial sends, see serveFile()
+//					byte[] buff = new byte[theBufferSize];
+//					while (pending>0)
+//					{
+//						int read = data.read( buff, 0, ( (pending>theBufferSize) ?  theBufferSize : pending ));
+//						if (read <= 0)	break;
+//						out.write( buff, 0, read );
+//						pending -= read;
+//					}
 				}
 				out.flush();
 				out.close();
@@ -900,7 +909,8 @@ public class NanoHTTPD extends Main
 		}
 
 		File f = new File( homeDir, uri );
-		if ( res == null && !f.exists())
+		InputStream resource = Environment.getResource(uri.substring(1));
+		if ( res == null && !f.exists() && resource == null)
 			res = new Response( HTTP_NOTFOUND, MIME_PLAINTEXT,
 				"Error 404, file not found." );
 
@@ -1058,7 +1068,8 @@ public class NanoHTTPD extends Main
 						res = new Response( HTTP_NOTMODIFIED, mime, "");
 					else
 					{
-						res = new Response( HTTP_OK, mime, new FileInputStream( f ));
+                        //12012014ts: load from jar-resource
+						res = new Response( HTTP_OK, mime, getStream( f, resource));
 						res.addHeader( "Content-Length", "" + fileLen);
                                                 if ( mime.startsWith( "application/" ))
                                                         res.addHeader( "Content-Disposition", "attachment; filename=\"" + f.getName() + "\"");
@@ -1076,6 +1087,11 @@ public class NanoHTTPD extends Main
 		return res;
 	}
 
+    //12012014ts: load from jar-resource
+	InputStream getStream(File f, InputStream resource) throws FileNotFoundException {
+	    return f.exists() ? new FileInputStream(f) : resource;
+	}
+	
 	/**
 	 * Hashtable mapping (String)FILENAME_EXTENSION -> (String)MIME_TYPE
 	 */
