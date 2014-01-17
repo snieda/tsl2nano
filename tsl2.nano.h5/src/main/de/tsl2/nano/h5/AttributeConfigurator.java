@@ -38,10 +38,10 @@ public class AttributeConfigurator implements Serializable {
     AttributeDefinition<?> attr;
     PrivateAccessor<AttributeDefinition<?>> attrAccessor;
 
-    public AttributeConfigurator() {
-        this(BeanClass.createInstance(AttributeDefinition.class));
-    }
-
+//    public AttributeConfigurator() {
+//        this(BeanClass.createInstance(AttributeDefinition.class));
+//    }
+//
     /**
      * constructor
      * 
@@ -89,19 +89,19 @@ public class AttributeConfigurator implements Serializable {
         }
     }
 
-    public Object getMin() {
+    public Serializable getMin() {
         return attr.getMininum() != null ? attr.getFormat().format(attr.getMininum()) : null;
     }
 
-    public void setMin(Object min) {
+    public void setMin(Serializable min) {
         attrAccessor.set("min", min);
     }
 
-    public Object getMax() {
+    public Serializable getMax() {
         return attr.getMaxinum() != null ? attr.getFormat().format(attr.getMaxinum()) : null;
     }
 
-    public void setMax(Object max) {
+    public void setMax(Serializable max) {
         attrAccessor.set("max", max);
     }
 
@@ -111,8 +111,10 @@ public class AttributeConfigurator implements Serializable {
             return ((SimpleDateFormat) f).toPattern();
         else if (f instanceof NumberFormat)
             return ((DecimalFormat) f).toPattern();
-        else
+        else if (f instanceof RegExpFormat)
             return ((RegExpFormat) f).getPattern();
+        else
+            return f != null ? f.toString() : "";
     }
 
     public void setFormat(String format) {

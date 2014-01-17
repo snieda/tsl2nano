@@ -183,8 +183,8 @@ public class NanoH5Session {
             //if a new object was cancelled, it must be removed
             if (nav.current() != null && !nav.current().isMultiValue()) {
                 ((Bean) nav.current()).detach();
-                return IAction.CANCELED;
             }
+            return IAction.CANCELED;
         }
 
         convertDates(parms);
@@ -279,7 +279,12 @@ public class NanoH5Session {
                          * the oldString was sent to html-page - the newString returns from request
                          */
                         BeanValue bv = (BeanValue) vmodel.getAttribute(p);
-                        if (!Serializable.class.isAssignableFrom(bv.getType())) {
+                        Class<?> type = bv.getType();
+                        /*
+                         * if the type is object, the bean doesn't know exactly it's real type, so
+                         * we assume it should be serializable...
+                         */
+                        if (!Serializable.class.isAssignableFrom(type) && !Object.class.isAssignableFrom(type)) {
                             LOG.debug("ignoring not-serializable attribute " + vmodel.getAttribute(p));
                             continue;
                         }
@@ -436,7 +441,7 @@ public class NanoH5Session {
             if (selection != null && "on".equalsIgnoreCase(parms.getProperty(p))) {
                 //evaluate selected element to be used by an action
                 Object selectedBean = CollectionUtil.getList(data.iterator())
-                    .get(selection.intValue() - (c.hasMode(MODE_SEARCHABLE) ? OFFSET_FILTERLINES : 0));
+                    .get(selection.intValue() - (c.hasMode(MODE_SEARCHABLE) && c.hasFilter() ? OFFSET_FILTERLINES : 0));
                 selectedElements.add(selectedBean);
             }
         }

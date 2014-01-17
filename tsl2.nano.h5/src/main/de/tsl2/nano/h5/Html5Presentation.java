@@ -80,6 +80,8 @@ import java.io.Serializable;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Date;
+import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
@@ -164,7 +166,7 @@ public class Html5Presentation<T> extends BeanPresentationHelper<T> implements I
             "icons/compose.png") {
             @Override
             public Object action() throws Exception {
-                return BeanConfigurator.create((Class<Serializable>)bean.getClazz());
+                return BeanConfigurator.create((Class<Serializable>) bean.getClazz());
             }
 
             @Override
@@ -216,7 +218,7 @@ public class Html5Presentation<T> extends BeanPresentationHelper<T> implements I
 
         if (navigation.length > 0) {
             for (BeanDefinition<?> bean : navigation) {
-                appendElement((Element) parent, TAG_LINK, content("->" + bean.toString()), ATTR_HREF, bean.getName());
+                appendElement((Element) parent, TAG_LINK, content("->" + bean.toString()), ATTR_HREF, bean.getName(),ATTR_STYLE, "color: #FFFFFF;");
             }
         }
 
@@ -327,7 +329,7 @@ public class Html5Presentation<T> extends BeanPresentationHelper<T> implements I
 
     private void appendAttributes(Element grid, IPresentable p) {
         HtmlUtil.appendAttributes(grid/*, ATTR_NAME, p.getLabel(), p.getDescription(), p.getType(), p.getEnabler(), p.getWidth(), p.getHeight()*/
-        ,
+            ,
             ATTR_ALIGN,
             getTextAlignment(p.getStyle()),
             ATTR_BGCOLOR,
@@ -362,9 +364,10 @@ public class Html5Presentation<T> extends BeanPresentationHelper<T> implements I
             vef = new ValueExpressionFormat(data.iterator().next().getClass());
         }
         int i = 0;
+        boolean hasSearchFilter = tableDescriptor.getBeanFinder().getFilterRange() != null;
         currentTabIndex = data.size() > editableRowNumbers.length ? editableRowNumbers.length * -1 : 0;
         for (T item : data) {
-            if (editableRows.contains(i++))
+            if (hasSearchFilter && editableRows.contains(i++))
                 addEditableRow(grid, tableDescriptor, item, i == 1 ? prop(KEY_FILTER_FROM_LABEL)
                     : i == 2 ? prop(KEY_FILTER_TO_LABEL) : toString(item, vef));
             else {
@@ -386,6 +389,7 @@ public class Html5Presentation<T> extends BeanPresentationHelper<T> implements I
 
     /**
      * creates an html5 menu - but most browser don't support the tag 'menu'
+     * 
      * @param parent
      * @param name
      * @param actions
@@ -398,22 +402,30 @@ public class Html5Presentation<T> extends BeanPresentationHelper<T> implements I
         Element sub = appendElement(list, "menu", "label", name);
         if (actions != null) {
             for (IAction a : actions) {
-                appendElement(sub, TAG_BUTTON, content(a.getShortDescription()), ATTR_TYPE, "button", "label", a.getShortDescription());
+                appendElement(sub, TAG_BUTTON, content(a.getShortDescription()), ATTR_TYPE, "button", "label",
+                    a.getShortDescription());
             }
         }
         return menu;
     }
 
-    private Element createActionPanel(Element parent, Collection<IAction> actions, String... attributes) {
+    private Element createActionPanel(Element parent,
+            Collection<IAction> actions,
+            boolean showText,
+            String... attributes) {
         Element panel = createGrid(parent, "Actions", actions != null ? 1 + actions.size() : 1);
         Element row = appendElement(panel, TAG_ROW);
         Element cell = appendElement(row, TAG_CELL, attributes);
         if (actions != null) {
             for (IAction a : actions) {
-                createAction(cell, a);
+                createAction(cell, a, showText);
             }
         }
         return cell;
+    }
+
+    private Element createAction(Element cell, IAction a) {
+        return createAction(cell, a, true);
     }
 
     /**
@@ -423,13 +435,13 @@ public class Html5Presentation<T> extends BeanPresentationHelper<T> implements I
      * @param a
      * @return
      */
-    private Element createAction(Element cell, IAction a) {
+    private Element createAction(Element cell, IAction a, boolean showText) {
         return createAction(cell,
             a.getId(),
-            a.getShortDescription(),
+            showText ? a.getShortDescription() : null,
             a.getLongDescription(),
             null,
-            a.getImagePath(),
+            (a.getImagePath() != null ? a.getImagePath() : "icons/" + a.getShortDescription() + ".gif"),
             a.isEnabled(),
             a.isDefault(),
             a.getActionMode() != IAction.MODE_DLG_OK);
@@ -443,7 +455,7 @@ public class Html5Presentation<T> extends BeanPresentationHelper<T> implements I
      * @return html table containing the buttons
      */
     Element createBeanActions(Element form, BeanDefinition<?> model) {
-        Element panel = createActionPanel(form, model.getActions(), ATTR_ALIGN, ALIGN_CENTER);
+        Element panel = createActionPanel(form, model.getActions(), true, ATTR_ALIGN, ALIGN_CENTER);
         String closeLabel = Messages.getStringOpt("tsl2nano.close", true);
         if (model.isMultiValue() && ((BeanCollector) model).hasMode(MODE_ASSIGNABLE)) {
             String assignLabel = Messages.getStringOpt("tsl2nano.assign", true);
@@ -484,8 +496,9 @@ public class Html5Presentation<T> extends BeanPresentationHelper<T> implements I
             boolean enabled,
             boolean asDefault,
             boolean formnovalidate) {
-        int isc = label.indexOf('&') + 1;
-        String shortCut = label.substring(isc, isc + 1).toLowerCase();
+        String name = label != null ? label : tooltip;
+        int isc = name.indexOf('&') + 1;
+        String shortCut = name.substring(isc, isc + 1).toLowerCase();
         label = Messages.stripMnemonics(label);
         Element action = appendElement(cell,
             TAG_BUTTON,
@@ -695,8 +708,9 @@ public class Html5Presentation<T> extends BeanPresentationHelper<T> implements I
         //now the field itself
         Element input;
         if (beanValue.getAllowedValues() == null) {
-            RegExpFormat regexpFormat = beanValue.getFormat() instanceof RegExpFormat ? (RegExpFormat) beanValue.getFormat()
-                : null;
+            RegExpFormat regexpFormat =
+                beanValue.getFormat() instanceof RegExpFormat ? (RegExpFormat) beanValue.getFormat()
+                    : null;
             String type = getType(beanValue);
             input = appendElement(cell,
                 TAG_INPUT,
@@ -726,13 +740,14 @@ public class Html5Presentation<T> extends BeanPresentationHelper<T> implements I
                 "tabindex",
                 beanValue.getPresentation().layout("tabindex", ++currentTabIndex).toString(),
                 enable(ATTR_HIDDEN, !beanValue.getPresentation().isVisible()),
+                enable(ATTR_DISABLED, !beanValue.getPresentation().getEnabler().isActive()),
                 enable(ATTR_READONLY, !beanValue.getPresentation().getEnabler().isActive()),
                 enable(ATTR_REQUIRED, !beanValue.nullable()));
 
             if (beanValue.getPresentation().getEnabler().isActive()) {
                 //create a finder button
                 if (beanValue.isSelectable()) {
-                    createAction(cell,
+                    Element a = createAction(cell,
                         beanValue.getName() + IPresentable.POSTFIX_SELECTOR,
                         Environment.translate("tsl2nano.finder.action.label", false),
                         Environment.translate("tsl2nano.selection", true),
@@ -741,6 +756,8 @@ public class Html5Presentation<T> extends BeanPresentationHelper<T> implements I
                         beanValue.hasWriteAccess(),
                         false,
                         true);
+                    HtmlUtil.appendAttributes(a, "tabindex", String.valueOf(++currentTabIndex));
+
                 }
             }
         } else {
@@ -749,9 +766,10 @@ public class Html5Presentation<T> extends BeanPresentationHelper<T> implements I
         appendAttributes(input, beanValue.getPresentation());
 
         if (beanValue.hasStatusError()) {
-            row = appendElement(parent, TAG_ROW, ATTR_SPAN, "2");
+            row = appendElement(parent, TAG_ROW);
             appendElement(row, TAG_FONT, ATTR_SIZE, "-1", ATTR_COLOR, COLOR_RED);
-            appendElement(row, TAG_CELL, content(beanValue.getStatus().message()));
+//            appendElement(row, TAG_HEADERCELL, content(null));
+            appendElement(row, TAG_CELL, content(beanValue.getStatus().message()), ATTR_SPANCOL, "3");
         }
         return input;
     }
@@ -786,11 +804,13 @@ public class Html5Presentation<T> extends BeanPresentationHelper<T> implements I
 
     private String getValue(BeanValue<?> beanValue, String type) {
         IPresentable p = beanValue.getPresentation();
-        return type.startsWith("date") ? StringUtil.toString(DateUtil.toSqlDateString((Date) beanValue.getValue())) : beanValue.getValueText();
+        return type.startsWith("date") ? StringUtil.toString(DateUtil.toSqlDateString((Date) beanValue.getValue()))
+            : beanValue.getValueText();
     }
 
     private String getSuffix(RegExpFormat regexpFormat) {
-        return regexpFormat != null && regexpFormat.getDefaultFormatter() != null ? ((GenericParser) regexpFormat.getDefaultFormatter()).getPostfix()
+        return regexpFormat != null && regexpFormat.getDefaultFormatter() != null ? ((GenericParser) regexpFormat
+            .getDefaultFormatter()).getPostfix()
             : null;
     }
 
@@ -813,19 +833,21 @@ public class Html5Presentation<T> extends BeanPresentationHelper<T> implements I
     }
 
     Element createSelectorField(Element cell, BeanValue<?> beanValue) {
-        Element select = appendElement(cell,
-            TAG_SELECT,
-            ATTR_WIDTH,
-            VAL_100PERCENT,
-            ATTR_NAME,
-            beanValue.getName(),
-            ATTR_PATTERN,
-            (beanValue.getFormat() instanceof RegExpFormat ? ((RegExpFormat) beanValue.getFormat()).getPattern() : null),
-            "tabindex",
-            beanValue.getPresentation().layout("tabindex", ++currentTabIndex).toString(),
-            enable(ATTR_HIDDEN, !beanValue.getPresentation().isVisible()),
-            enable(ATTR_READONLY, !beanValue.getPresentation().getEnabler().isActive()),
-            enable(ATTR_REQUIRED, !beanValue.nullable()));
+        Element select =
+            appendElement(cell,
+                TAG_SELECT,
+                ATTR_WIDTH,
+                VAL_100PERCENT,
+                ATTR_NAME,
+                beanValue.getName(),
+                ATTR_PATTERN,
+                (beanValue.getFormat() instanceof RegExpFormat ? ((RegExpFormat) beanValue.getFormat()).getPattern()
+                    : null),
+                "tabindex",
+                beanValue.getPresentation().layout("tabindex", ++currentTabIndex).toString(),
+                enable(ATTR_HIDDEN, !beanValue.getPresentation().isVisible()),
+                enable(ATTR_READONLY, !beanValue.getPresentation().getEnabler().isActive()),
+                enable(ATTR_REQUIRED, !beanValue.nullable()));
         Collection<?> values = beanValue.getAllowedValues();
         Object selected = beanValue.getValue();
         for (Object v : values) {
@@ -905,11 +927,11 @@ public class Html5Presentation<T> extends BeanPresentationHelper<T> implements I
             Document doc = factory.newDocumentBuilder().newDocument();
             Element html = doc.createElement(TAG_HTML);
             doc.appendChild(html);
-            
+
             Element head = appendElement(html, "head");
 //            appendElement(head, "meta", "charset", "utf-8");
-            
-            Element body = appendElement(html, TAG_BODY, "background", interactive ? "icons/spe.jpg" : null);
+
+            Element body = appendElement(html, TAG_BODY, "background", interactive ? "icons/spe.jpg" : null, ATTR_STYLE, STYLE_BACKGROUND_RADIAL_GRADIENT);
 
             Element row = appendElement(createGrid(body, null, 3), TAG_ROW);
             Element c1 = appendElement(row, TAG_CELL);
@@ -929,7 +951,8 @@ public class Html5Presentation<T> extends BeanPresentationHelper<T> implements I
                     "?",
                     ATTR_METHOD,
                     Environment.get("html5.http.method", "post"));
-                createActionPanel(c3, getPresentationActions(), ATTR_ALIGN, ALIGN_RIGHT);
+                createActionPanel(c3, getPresentationActions(), Environment.get("html.show.header.button.text", true),
+                    ATTR_ALIGN, ALIGN_RIGHT);
 //                createMenu(c3, "test", getPresentationActions(), ATTR_ALIGN, ALIGN_RIGHT);
             }
             return body;
@@ -941,43 +964,21 @@ public class Html5Presentation<T> extends BeanPresentationHelper<T> implements I
 
     @Override
     public boolean isDefaultAttribute(BeanAttribute attribute) {
-        if (bean instanceof Bean && ((Bean)bean).getInstance() instanceof BeanConfigurator)
+        if (bean instanceof Bean && ((Bean) bean).getInstance() instanceof BeanConfigurator)
             return true;
         return super.isDefaultAttribute(attribute);
     }
-    
+
     @Override
     public IPresentable createPresentable() {
-        return new Presentable() {
-            @Override
-            public int getWidth() {
-                String l = layout(ATTR_WIDTH);
-                return l != null ? Integer.valueOf(l) : UNDEFINED;
-            }
-            @Override
-            public int getHeight() {
-                String l = layout("???");
-                return l != null ? Integer.valueOf(l) : UNDEFINED;
-            }
-            
-        };
+        return new Html5Presentable();
     }
-    
+
     @Override
     public IPresentable createPresentable(AttributeDefinition<?> attr) {
-        return new Presentable(attr) {
-            @Override
-            public int getWidth() {
-                return Integer.valueOf(layout(ATTR_WIDTH));
-            }
-            @Override
-            public int getHeight() {
-                return Integer.valueOf(layout("???"));
-            }
-            
-        };
+        return new Html5Presentable(attr);
     }
-    
+
     protected static final StringBuilder content() {
         return EMPTY_CONTENT;
     }
@@ -1005,5 +1006,69 @@ public class Html5Presentation<T> extends BeanPresentationHelper<T> implements I
         Element body = createHeader(message, false);
         createAction(body, IAction.CANCELED, "submit", "icons/back.png");
         return body.toString();
+    }
+}
+
+/**
+ * Hmtl5-specialized {@link de.tsl2.nano.bean.def.Presentable}. Not possible to be handled as inner class, because of
+ * xml-serialization.
+ * 
+ * @author Tom, Thomas Schneider
+ * @version $Revision$
+ */
+class Html5Presentable extends Presentable {
+    /** serialVersionUID */
+    private static final long serialVersionUID = 1L;
+
+    protected Html5Presentable() {
+    }
+
+    public Html5Presentable(AttributeDefinition<?> attr) {
+        super(attr);
+    }
+
+    @Override
+    public int getWidth() {
+        String w = layout(ATTR_WIDTH);
+        return w != null ? Integer.valueOf(w) : UNDEFINED;
+    }
+
+    @Override
+    public int getHeight() {
+        String h = layout(ATTR_HEIGHT);
+        return h != null ? Integer.valueOf(h) : UNDEFINED;
+    }
+
+    /**
+     * @return Returns the layout.
+     */
+    public HashMap<String, String> getLayout() {
+        if (layout == null) {
+            layout = Environment.get("default.layout", new LinkedHashMap<String, String>());
+//            ((HashMap) layout).put("testKey", "testValue");
+        }
+        return (HashMap<String, String>) layout;
+    }
+
+    //to have write-access, we need this setter
+    public <T extends IPresentable> T setLayout(HashMap<String, String> l) {
+        this.layout = l;
+        return (T) this;
+    }
+
+    /**
+     * @return Returns the layoutConstraints.
+     */
+    public HashMap<String, String> getLayoutConstraints() {
+        if (layoutConstraints == null) {
+            layoutConstraints = Environment.get("default.layoutconstaints", new LinkedHashMap<String, String>());
+        }
+        return (HashMap<String, String>) layoutConstraints;
+    }
+
+    //to have write-access, we need this setter
+    public <T extends IPresentable> T setLayoutConstraints(HashMap<String, String> lc) {
+        this.layoutConstraints = lc;
+        return (T) this;
     }
 }

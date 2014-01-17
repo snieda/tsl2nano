@@ -263,7 +263,8 @@ public class NanoH5 extends NanoHTTPD {
     private Bean<?> createPersistenceUnit() {
         final Persistence persistence = Persistence.current();
         Bean<?> login = new Bean(persistence);
-        login.removeAttributes("jdbcProperties");
+        if (Environment.get("default.present.attribute.multivalue", false))
+            login.removeAttributes("jdbcProperties");
         login.getAttribute("jarFile").getPresentation().setType(IPresentable.TYPE_ATTACHMENT);
         login.getPresentationHelper().change(BeanPresentationHelper.PROP_DESCRIPTION,
             Environment.translate("jarFile.tooltip", true),
@@ -278,6 +279,7 @@ public class NanoH5 extends NanoHTTPD {
             }
         });
 
+        ((Map)login.getPresentable().getLayoutConstraints()).put("style", "opacity: 0.9;");
         login.addAction(new SecureAction<Object>("tsl2nano.login.ok") {
             //TODO: ref. to persistence class
             @Override

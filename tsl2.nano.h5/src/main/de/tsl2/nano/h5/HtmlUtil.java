@@ -23,7 +23,6 @@ import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 
 import de.tsl2.nano.exception.ForwardedException;
-import de.tsl2.nano.util.StringUtil;
 import de.tsl2.nano.util.Util;
 
 /**
@@ -123,6 +122,7 @@ public class HtmlUtil {
     public static final String ATTR_FRAME = "frame";
     public static final String ATTR_BORDER = "border";
     public static final String ATTR_WIDTH = "width";
+    public static final String ATTR_HEIGHT = "height";
     public static final String ATTR_BGCOLOR = "bgcolor";
     public static final String ATTR_SPAN = "span";
     public static final String ATTR_SPANCOL = "colspan";
@@ -140,6 +140,8 @@ public class HtmlUtil {
     public static final String COLOR_LIGHT_GRAY = "#CCCCCC";
     public static final String COLOR_YELLOW = "#CCCC00";
 
+    public static final String STYLE_BACKGROUND_RADIAL_GRADIENT = "background: radial-gradient(#9999FF, #000000);";
+    
     public static final String VAL_100PERCENT = "100%";
     public static final String VAL_FALSE = Boolean.FALSE.toString();
     public static final String VAL_TRUE = Boolean.TRUE.toString();
