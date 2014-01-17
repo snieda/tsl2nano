@@ -84,24 +84,27 @@ public class PersistenceClassLoader extends TransformingClassLoader {
             }
         };
     }
-    
+
     @Override
-    public List<Class> loadBeanClasses(String beanjar, StringBuilder messages) {
+    public List<Class> loadBeanClasses(String beanjar, String regExp, StringBuilder messages) {
         if (Environment.get("use.applicationserver", false))
-            return super.loadBeanClasses(beanjar, messages);
+            return super.loadBeanClasses(beanjar, regExp, messages);
         else {//local through entity types should be faster
-            Collection<EntityType<?>> types = ((AbstractStatelessServiceBean)Environment.get(IGenericService.class)).getEntityTypes();
+            Collection<EntityType<?>> types =
+                ((AbstractStatelessServiceBean) Environment.get(IGenericService.class)).getEntityTypes();
             LOG.info("loading " + types.size() + " entity-types from entitymanagerfactory");
             List<Class> list = new ArrayList(types.size());
             for (EntityType t : types) {
-                LOG.debug("loading entity-type: " + t.getJavaType());
-                list.add(t.getJavaType());
+                if (t.getName().matches(regExp)) {
+                    LOG.debug("loading entity-type: " + t.getJavaType());
+                    list.add(t.getJavaType());
+                }
             }
             Collections.sort(list, new Comparator<Class>() {
                 @Override
                 public int compare(Class o1, Class o2) {
                     return o1.getSimpleName().compareTo(o2.getSimpleName());
-                } 
+                }
             });
             return list;
         }
