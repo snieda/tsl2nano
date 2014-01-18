@@ -214,7 +214,8 @@ public class ValueExpression<TYPE> implements IConverter<TYPE, String>, Serializ
             }
             return isMessageFormat() ? MessageFormat.format(format, args) : String.format(format, args);
         } else {
-            return Util.asString(fromValue);
+            //lazy workaround...
+            return !Util.isEmpty(format) && !format.equals("Object") ? format : Util.asString(fromValue);
         }
     }
 

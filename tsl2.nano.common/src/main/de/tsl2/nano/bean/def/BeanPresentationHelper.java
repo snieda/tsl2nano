@@ -508,10 +508,10 @@ public class BeanPresentationHelper<T> {
     public boolean isDefaultAttribute(BeanAttribute attribute) {
         AttributeDefinition<?> attr = (AttributeDefinition<?>) attribute;
         return (BeanContainer.instance() == null || BeanContainer.instance().hasPermission(attribute.getId(), null))
-            && (Environment.get("default.present.attribute.id",
+            && (matches("default.present.attribute.id",
                 false) || !attr.id())
-            && (Environment.get("default.present.attribute.multivalue", false) || !attr.isMultiValue())
-            && (Environment.get("default.present.attribute.timestamp", false) || attr.temporalType() == null || !Timestamp.class
+            && (matches("default.present.attribute.multivalue", true) || !attr.isMultiValue())
+            && (matches("default.present.attribute.timestamp", false) || attr.temporalType() == null || !Timestamp.class
                 .isAssignableFrom(attr.temporalType()));
     }
 
@@ -1308,6 +1308,11 @@ public class BeanPresentationHelper<T> {
         return beanToEdit;
     }
 
+
+    protected final boolean matches(String patternKey, boolean any) {
+        return bean.toString().matches(Environment.get(patternKey, any ? ".*" : "XXXXXXXXXX"));
+    }
+    
     /**
      * createPresentable
      * 

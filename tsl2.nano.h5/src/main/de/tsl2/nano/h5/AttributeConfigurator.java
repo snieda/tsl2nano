@@ -38,10 +38,10 @@ public class AttributeConfigurator implements Serializable {
     AttributeDefinition<?> attr;
     PrivateAccessor<AttributeDefinition<?>> attrAccessor;
 
-//    public AttributeConfigurator() {
-//        this(BeanClass.createInstance(AttributeDefinition.class));
-//    }
-//
+    public AttributeConfigurator() {
+        this(BeanClass.createInstance(AttributeDefinition.class));
+    }
+
     /**
      * constructor
      * 
