@@ -162,7 +162,8 @@ public class NanoH5 extends NanoHTTPD {
         String startPage = String.valueOf(FileUtil.getFileData(stream, null));
         startPage = StringUtil.insertProperties(startPage,
             MapUtil.asMap("url", serviceURL, "name", Environment.getName()));
-        FileUtil.writeBytes(startPage.getBytes(), resultHtmlFile, false);
+        FileUtil.writeBytes(Html5Presentation.createMessagePage("start.template", "Start " + Environment.getName() + "App", serviceURL)
+            .getBytes(), resultHtmlFile, false);
     }
 
     /**
@@ -170,7 +171,7 @@ public class NanoH5 extends NanoHTTPD {
      */
     @Override
     public Response serve(String uri, String method, Properties header, Properties parms, Properties files) {
-        if (method.equals("GET") && uri.contains("."))
+        if (method.equals("GET") && uri.contains(".") && !uri.contains(Html5Presentation.PREFIX_ACTION))
             return super.serve(uri, method, header, parms, files);
         InetAddress requestor = ((Socket) header.get("socket")).getInetAddress();
         NanoH5Session session = sessions.get(requestor);
@@ -279,7 +280,7 @@ public class NanoH5 extends NanoHTTPD {
             }
         });
 
-        ((Map)login.getPresentable().getLayoutConstraints()).put("style", "opacity: 0.9;");
+//        ((Map)login.getPresentable().getLayoutConstraints()).put("style", "opacity: 0.9;");
         login.addAction(new SecureAction<Object>("tsl2nano.login.ok") {
             //TODO: ref. to persistence class
             @Override

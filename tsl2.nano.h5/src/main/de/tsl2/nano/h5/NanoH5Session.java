@@ -23,8 +23,10 @@ import java.io.Serializable;
 import java.net.InetAddress;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.Properties;
+import java.util.Set;
 
 import org.apache.commons.logging.Log;
 
@@ -112,7 +114,8 @@ public class NanoH5Session {
             //selection-link-number in beancollector
             Number uriLinkNumber = linkToModel != null ? null : NumberUtil.extractNumber(uri.substring(1));
             //form-button clicked - or first page
-            if (!parms.isEmpty() || linkToModel != null || uriLinkNumber != null || response == null) {
+            if (!parms.isEmpty() || linkToModel != null || uriLinkNumber != null || response == null
+                || uri.contains(Html5Presentation.PREFIX_ACTION)) {
                 if (linkToModel != null) {
                     userResponse = linkToModel;
                 } else {
@@ -127,7 +130,8 @@ public class NanoH5Session {
                 response = server.createResponse(msg);
             } else {
                 close();
-                return server.createResponse("<a href=\"" + server.serviceURL + "\">restart session</a>");
+                return server.createResponse(Html5Presentation.createMessagePage("start.template",
+                    Environment.getName() + "<br/>" + "Restart Session", server.serviceURL));
             }
         } catch (Throwable e /*respect errors like NoClassDefFound...the application should continue!*/) {
             RuntimeException ex = ForwardedException.toRuntimeEx(e, true);
@@ -215,19 +219,25 @@ public class NanoH5Session {
                 }
             }
         }
-        //start the actions
+        //collect available actions
         Collection<IAction> actions = null;
         if (nav.current() != null) {
             actions = new ArrayList<IAction>();
             if (nav.current().getActions() != null)
                 actions.addAll(nav.current().getActions());
-            actions.addAll(nav.current().getPresentationHelper().getPresentationActions());
+            actions.addAll(nav.current().getPresentationHelper().getPageActions());
             if (nav.current().isMultiValue()) {
                 actions.addAll(((BeanCollector) nav.current()).getColumnSortingActions());
             }
         }
+        //start the actions
         if (actions != null) {
-            for (Object k : parms.keySet()) {
+            //respect action-call through menu-link (with method GET but starting with '!!!'
+            Set<Object> keySet = new HashSet<Object>();
+            if (uri.contains(Html5Presentation.PREFIX_ACTION))
+                keySet.add(StringUtil.substring(uri, Html5Presentation.PREFIX_ACTION, null));
+            keySet.addAll(parms.keySet());
+            for (Object k : keySet) {
                 String p = (String) k;
                 IAction<?> action = getAction(actions, p);
                 if (action != null) {

@@ -9,7 +9,18 @@
  */
 package de.tsl2.nano.bean.def;
 
-import static de.tsl2.nano.bean.def.IPresentable.*;
+import static de.tsl2.nano.bean.def.IPresentable.ALIGN_CENTER;
+import static de.tsl2.nano.bean.def.IPresentable.ALIGN_LEFT;
+import static de.tsl2.nano.bean.def.IPresentable.ALIGN_RIGHT;
+import static de.tsl2.nano.bean.def.IPresentable.STYLE_MULTI;
+import static de.tsl2.nano.bean.def.IPresentable.TYPE_DATE;
+import static de.tsl2.nano.bean.def.IPresentable.TYPE_INPUT;
+import static de.tsl2.nano.bean.def.IPresentable.TYPE_INPUT_NUMBER;
+import static de.tsl2.nano.bean.def.IPresentable.TYPE_OPTION;
+import static de.tsl2.nano.bean.def.IPresentable.TYPE_SELECTION;
+import static de.tsl2.nano.bean.def.IPresentable.TYPE_TABLE;
+import static de.tsl2.nano.bean.def.IPresentable.TYPE_TIME;
+import static de.tsl2.nano.bean.def.IPresentable.UNDEFINED;
 
 import java.io.File;
 import java.math.BigDecimal;
@@ -18,19 +29,13 @@ import java.sql.Timestamp;
 import java.text.Format;
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.Collections;
 import java.util.Comparator;
 import java.util.Date;
-import java.util.HashMap;
 import java.util.Iterator;
 import java.util.LinkedList;
-import java.util.List;
-import java.util.Map;
 import java.util.NavigableMap;
 import java.util.NavigableSet;
 import java.util.Properties;
-import java.util.Set;
-import java.util.SortedMap;
 import java.util.SortedSet;
 import java.util.TreeMap;
 
@@ -60,6 +65,8 @@ import de.tsl2.nano.util.Util;
 
 /**
  * class to provide presentation definitions for sets of attributes.
+ * <p/>
+ * should be overridden if you create an own application.
  * 
  * @author Thomas Schneider
  * @version $Revision$
@@ -69,7 +76,9 @@ public class BeanPresentationHelper<T> {
     private static final Log LOG = LogFactory.getLog(BeanPresentationHelper.class);
     protected BeanDefinition<T> bean;
     protected Properties config = new Properties();
-    protected Collection<IAction> presActions;
+    protected Collection<IAction> appActions;
+    protected Collection<IAction> sessionActions;
+    protected Collection<IAction> pageActions;
 
     /*
      * IAttributeDefinitions
@@ -1072,153 +1081,11 @@ public class BeanPresentationHelper<T> {
     /**
      * creates extended actions like 'print', 'help', 'export', 'select-all', 'deselect-all' etc.
      */
-    public Collection<IAction> getPresentationActions() {
-        if (presActions == null) {
+    public Collection<IAction> getApplicationActions() {
+        if (appActions == null) {
             if (bean == null)
                 return new LinkedList<IAction>();
-            presActions = new ArrayList<IAction>(10);
-
-            if (bean.isMultiValue()) {
-                if (BeanContainer.instance().isPersistable(((BeanCollector) bean).getType())) {
-                    final BeanCollector<?, T> collector = (BeanCollector<?, T>) bean;
-                    presActions.add(new SecureAction(bean.getClazz(),
-                        "back",
-                        IAction.MODE_UNDEFINED,
-                        false,
-                        "icons/back.png") {
-                        @Override
-                        public Object action() throws Exception {
-                            collector.getBeanFinder().previous();
-                            return bean;
-                        }
-
-                        @Override
-                        public boolean isEnabled() {
-                            return super.isEnabled() && collector.getCurrentData().size() > 0;
-                        }
-                    });
-
-                    presActions.add(new SecureAction(bean.getClazz(),
-                        "forward",
-                        IAction.MODE_UNDEFINED,
-                        false,
-                        "icons/forward.png") {
-                        @Override
-                        public Object action() throws Exception {
-                            collector.getBeanFinder().next();
-                            return bean;
-                        }
-
-                        @Override
-                        public boolean isEnabled() {
-                            return super.isEnabled() && collector.getCurrentData().size() > 0;
-                        }
-                    });
-
-                    presActions.add(new SecureAction(bean.getClazz(),
-                        "switchrelations",
-                        IAction.MODE_UNDEFINED,
-                        false,
-                        "icons/links.png") {
-                        @Override
-                        public Object action() throws Exception {
-                            collector.setMode(NumberUtil.toggleBits(collector.getWorkingMode(),
-                                IBeanCollector.MODE_SHOW_MULTIPLES));
-                            collector.getSearchAction().activate();
-                            return bean;
-                        }
-
-                        @Override
-                        public boolean isEnabled() {
-                            return super.isEnabled() && ((IBeanCollector<?, T>) bean).getCurrentData().size() > 0;
-                        }
-                    });
-                }
-                presActions.add(new SecureAction(bean.getClazz(),
-                    "selectall",
-                    IAction.MODE_UNDEFINED,
-                    false,
-                    "icons/cascade.png") {
-                    @Override
-                    public Object action() throws Exception {
-                        ISelectionProvider<T> selectionProvider = ((IBeanCollector<?, T>) bean).getSelectionProvider();
-                        if (selectionProvider != null) {
-                            selectionProvider.getValue().clear();
-                            selectionProvider.getValue().addAll(((IBeanCollector<?, T>) bean).getCurrentData());
-                        }
-                        return bean;
-                    }
-
-                    @Override
-                    public boolean isEnabled() {
-                        return super.isEnabled() && ((IBeanCollector<?, T>) bean).getCurrentData().size() > 0;
-                    }
-                });
-
-                presActions.add(new SecureAction(bean.getClazz(),
-                    "deselectall",
-                    IAction.MODE_UNDEFINED,
-                    false,
-                    "icons/new.png") {
-                    @Override
-                    public Object action() throws Exception {
-                        ISelectionProvider<T> selectionProvider = ((IBeanCollector<?, T>) bean).getSelectionProvider();
-                        if (selectionProvider != null) {
-                            selectionProvider.getValue().clear();
-                        }
-                        return bean;
-                    }
-
-                    @Override
-                    public boolean isEnabled() {
-                        return super.isEnabled() && ((IBeanCollector<?, T>) bean).getCurrentData().size() > 0;
-                    }
-                });
-            }
-
-            presActions
-                .add(new SecureAction(bean.getClazz(), "print", IAction.MODE_UNDEFINED, false, "icons/print.png") {
-                    @Override
-                    public Object action() throws Exception {
-                        return Environment.get(IPageBuilder.class).build(bean, null, false);
-                    }
-                });
-
-            presActions
-                .add(new SecureAction(bean.getClazz(), "export", IAction.MODE_UNDEFINED, false, "icons/view.png") {
-                    @Override
-                    public Object action() throws Exception {
-                        return getSimpleTextualPresentation();
-                    }
-                });
-
-            presActions.add(new SecureAction(bean.getClazz(),
-                "document",
-                IAction.MODE_UNDEFINED,
-                false,
-                "icons/images_all.png") {
-                File exportFile = new File(Environment.get(bean.getName() + ".export.file",
-                    Environment.getConfigPath() + bean.getName() + ".rtf"));
-
-                @Override
-                public Object action() throws Exception {
-                    //TODO: file selection, and ant-variable insertion...
-                    String content = String.valueOf(FileUtil.getFileData(exportFile.getPath(), null));
-                    content = StringUtil.insertProperties(content, BeanUtil.toValueMap(((Bean) bean).getInstance()));
-                    FileUtil.writeBytes(content.getBytes(), exportFile.getParent() + ".new", false);
-                    return "document '" + exportFile.getPath() + "' was filled with data of bean " + bean;
-                }
-
-                @Override
-                public String getLongDescription() {
-                    return "exporting (see environment.properties) to: " + exportFile.getPath();
-                }
-
-                @Override
-                public boolean isEnabled() {
-                    return exportFile.canRead();
-                }
-            });
+            appActions = new ArrayList<IAction>(10);
 
 //            presActions.add(new SecureAction(bean.getClazz(),
 //                "configure",
@@ -1244,7 +1111,7 @@ public class BeanPresentationHelper<T> {
 //                }
 //            });
 //
-            presActions.add(new SecureAction(bean.getClazz(),
+            appActions.add(new SecureAction(bean.getClazz(),
                 "help",
                 IAction.MODE_UNDEFINED,
                 false,
@@ -1265,7 +1132,7 @@ public class BeanPresentationHelper<T> {
                 }
             });
 
-            presActions.add(new SecureAction(bean.getClazz(),
+            appActions.add(new SecureAction(bean.getClazz(),
                 "refresh",
                 IAction.MODE_UNDEFINED,
                 false,
@@ -1280,7 +1147,7 @@ public class BeanPresentationHelper<T> {
                 }
             });
 
-            presActions.add(new SecureAction(bean.getClazz(),
+            appActions.add(new SecureAction(bean.getClazz(),
                 "shutdown",
                 IAction.MODE_UNDEFINED,
                 false,
@@ -1293,7 +1160,101 @@ public class BeanPresentationHelper<T> {
                 }
             });
         }
-        return presActions;
+        return appActions;
+    }
+
+    /**
+     * creates extended actions like 'print', 'help', 'export', 'select-all', 'deselect-all' etc.
+     */
+    public Collection<IAction> getSessionActions() {
+        if (sessionActions == null) {
+                if (bean == null)
+                    return new LinkedList<IAction>();
+                sessionActions = new ArrayList<IAction>(1);
+                sessionActions.add(new SecureAction(bean.getClazz(),
+                    "logout",
+                    IAction.MODE_UNDEFINED,
+                    false,
+                    "icons/turnoff.png") {
+                    @Override
+                    public Object action() throws Exception {
+                        Environment.persist();
+                        BeanDefinition.dump();
+                        return "user logged out!";
+                    }
+                });
+        }
+        return sessionActions;
+    }
+
+    /**
+     * creates extended actions like 'print', 'help', 'export', 'select-all', 'deselect-all' etc.
+     */
+    public Collection<IAction> getPageActions() {
+        if (pageActions == null) {
+            if (bean == null)
+                return new LinkedList<IAction>();
+            pageActions = new ArrayList<IAction>(10);
+
+            if (bean.isMultiValue()) {
+                if (BeanContainer.instance().isPersistable(((BeanCollector) bean).getType())) {
+                    final BeanCollector<?, T> collector = (BeanCollector<?, T>) bean;
+                    pageActions.add(new SecureAction(bean.getClazz(),
+                        "back",
+                        IAction.MODE_UNDEFINED,
+                        false,
+                        "icons/back.png") {
+                        @Override
+                        public Object action() throws Exception {
+                            collector.getBeanFinder().previous();
+                            return bean;
+                        }
+
+                        @Override
+                        public boolean isEnabled() {
+                            return super.isEnabled() && collector.getCurrentData().size() > 0;
+                        }
+                    });
+
+                    pageActions.add(new SecureAction(bean.getClazz(),
+                        "forward",
+                        IAction.MODE_UNDEFINED,
+                        false,
+                        "icons/forward.png") {
+                        @Override
+                        public Object action() throws Exception {
+                            collector.getBeanFinder().next();
+                            return bean;
+                        }
+
+                        @Override
+                        public boolean isEnabled() {
+                            return super.isEnabled() && collector.getCurrentData().size() > 0;
+                        }
+                    });
+
+                    pageActions.add(new SecureAction(bean.getClazz(),
+                        "switchrelations",
+                        IAction.MODE_UNDEFINED,
+                        false,
+                        "icons/links.png") {
+                        @Override
+                        public Object action() throws Exception {
+                            collector.setMode(NumberUtil.toggleBits(collector.getWorkingMode(),
+                                IBeanCollector.MODE_SHOW_MULTIPLES));
+                            collector.getSearchAction().activate();
+                            return bean;
+                        }
+
+                        @Override
+                        public boolean isEnabled() {
+                            return super.isEnabled() && ((IBeanCollector<?, T>) bean).getCurrentData().size() > 0;
+                        }
+                    });
+                }
+            }
+        }
+        return pageActions;
     }
 
     /**
@@ -1308,11 +1269,10 @@ public class BeanPresentationHelper<T> {
         return beanToEdit;
     }
 
-
     protected final boolean matches(String patternKey, boolean any) {
         return bean.toString().matches(Environment.get(patternKey, any ? ".*" : "XXXXXXXXXX"));
     }
-    
+
     /**
      * createPresentable
      * 

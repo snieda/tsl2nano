@@ -11,7 +11,7 @@ package de.tsl2.nano.h5;
 
 import static de.tsl2.nano.bean.def.IBeanCollector.MODE_ASSIGNABLE;
 import static de.tsl2.nano.bean.def.IBeanCollector.MODE_MULTISELECTION;
-import static de.tsl2.nano.h5.HtmlUtil.*;
+import static de.tsl2.nano.h5.HtmlUtil.ALIGN_CENTER;
 import static de.tsl2.nano.h5.HtmlUtil.ALIGN_RIGHT;
 import static de.tsl2.nano.h5.HtmlUtil.ATTR_ACCESSKEY;
 import static de.tsl2.nano.h5.HtmlUtil.ATTR_ACTION;
@@ -25,6 +25,7 @@ import static de.tsl2.nano.h5.HtmlUtil.ATTR_COLOR;
 import static de.tsl2.nano.h5.HtmlUtil.ATTR_DISABLED;
 import static de.tsl2.nano.h5.HtmlUtil.ATTR_FORMNOVALIDATE;
 import static de.tsl2.nano.h5.HtmlUtil.ATTR_FRAME;
+import static de.tsl2.nano.h5.HtmlUtil.ATTR_HEIGHT;
 import static de.tsl2.nano.h5.HtmlUtil.ATTR_HIDDEN;
 import static de.tsl2.nano.h5.HtmlUtil.ATTR_HREF;
 import static de.tsl2.nano.h5.HtmlUtil.ATTR_MAX;
@@ -37,7 +38,7 @@ import static de.tsl2.nano.h5.HtmlUtil.ATTR_READONLY;
 import static de.tsl2.nano.h5.HtmlUtil.ATTR_REQUIRED;
 import static de.tsl2.nano.h5.HtmlUtil.ATTR_SELECTED;
 import static de.tsl2.nano.h5.HtmlUtil.ATTR_SIZE;
-import static de.tsl2.nano.h5.HtmlUtil.ATTR_SPAN;
+import static de.tsl2.nano.h5.HtmlUtil.ATTR_SPANCOL;
 import static de.tsl2.nano.h5.HtmlUtil.ATTR_SRC;
 import static de.tsl2.nano.h5.HtmlUtil.ATTR_STYLE;
 import static de.tsl2.nano.h5.HtmlUtil.ATTR_TITLE;
@@ -45,9 +46,11 @@ import static de.tsl2.nano.h5.HtmlUtil.ATTR_TYPE;
 import static de.tsl2.nano.h5.HtmlUtil.ATTR_VALUE;
 import static de.tsl2.nano.h5.HtmlUtil.ATTR_WIDTH;
 import static de.tsl2.nano.h5.HtmlUtil.BTN_ASSIGN;
+import static de.tsl2.nano.h5.HtmlUtil.COLOR_BLACK;
 import static de.tsl2.nano.h5.HtmlUtil.COLOR_LIGHT_BLUE;
 import static de.tsl2.nano.h5.HtmlUtil.COLOR_LIGHT_GRAY;
 import static de.tsl2.nano.h5.HtmlUtil.COLOR_RED;
+import static de.tsl2.nano.h5.HtmlUtil.STYLE_BACKGROUND_RADIAL_GRADIENT;
 import static de.tsl2.nano.h5.HtmlUtil.STYLE_TEXT_ALIGN;
 import static de.tsl2.nano.h5.HtmlUtil.TAG_BODY;
 import static de.tsl2.nano.h5.HtmlUtil.TAG_BUTTON;
@@ -73,10 +76,12 @@ import static de.tsl2.nano.h5.HtmlUtil.VAL_ALIGN_LEFT;
 import static de.tsl2.nano.h5.HtmlUtil.VAL_ALIGN_RIGHT;
 import static de.tsl2.nano.h5.HtmlUtil.appendElement;
 import static de.tsl2.nano.h5.HtmlUtil.enable;
-import static de.tsl2.nano.h5.HtmlUtil.enableBoolean;
 import static de.tsl2.nano.h5.HtmlUtil.style;
 
+import java.io.File;
+import java.io.InputStream;
 import java.io.Serializable;
+import java.net.URL;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Date;
@@ -92,12 +97,12 @@ import javax.xml.parsers.ParserConfigurationException;
 import org.apache.commons.logging.Log;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
+import org.w3c.dom.NodeList;
 
 import de.tsl2.nano.Environment;
 import de.tsl2.nano.Messages;
 import de.tsl2.nano.action.IAction;
 import de.tsl2.nano.bean.BeanAttribute;
-import de.tsl2.nano.bean.BeanContainer;
 import de.tsl2.nano.bean.BeanUtil;
 import de.tsl2.nano.bean.def.AttributeDefinition;
 import de.tsl2.nano.bean.def.Bean;
@@ -130,6 +135,11 @@ import de.tsl2.nano.util.StringUtil;
  * @author Thomas Schneider, Thomas Schneider
  * @version $Revision$
  */
+/**
+ * @param <T>
+ * @author Tom, Thomas Schneider
+ * @version $Revision$
+ */
 @SuppressWarnings({ "unchecked", "rawtypes" })
 public class Html5Presentation<T> extends BeanPresentationHelper<T> implements IPageBuilder<Element, String> {
     protected transient int currentTabIndex;
@@ -138,6 +148,9 @@ public class Html5Presentation<T> extends BeanPresentationHelper<T> implements I
     protected static final StringBuilder EMPTY_CONTENT = new StringBuilder();
 
     public static final String L_GRIDWIDTH = "layout.gridwidth";
+
+    /** indicator for server to handle a link, that was got as link (method=GET) not as a file */
+    public static final String PREFIX_ACTION = "!!!";
 
     /**
      * constructor
@@ -156,10 +169,10 @@ public class Html5Presentation<T> extends BeanPresentationHelper<T> implements I
     }
 
     @Override
-    public Collection<IAction> getPresentationActions() {
-        super.getPresentationActions();
+    public Collection<IAction> getApplicationActions() {
+        super.getApplicationActions();
 
-        presActions.add(new SecureAction(bean.getClazz(),
+        appActions.add(new SecureAction(bean.getClazz(),
             "configure",
             IAction.MODE_UNDEFINED,
             false,
@@ -174,7 +187,7 @@ public class Html5Presentation<T> extends BeanPresentationHelper<T> implements I
                 return true;
             }
         });
-        return presActions;
+        return appActions;
     }
 
     /**
@@ -198,6 +211,119 @@ public class Html5Presentation<T> extends BeanPresentationHelper<T> implements I
         }
     }
 
+    Element createFormDocument(String name, boolean interactive) {
+        Element body = createHeader(name, interactive);
+        return appendElement(body,
+            TAG_FORM,
+            ATTR_ACTION,
+            "?",
+            ATTR_METHOD,
+            Environment.get("html5.http.method", "post"));
+    }
+
+    Element createHeader(String title, boolean interactive) {
+        DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
+        try {
+            /*
+             * try to read html-page from a template. if not existing, create header and
+             * body programatically 
+             */
+            Document doc;
+            Element body = null;
+            File metaFrame = new File(Environment.getConfigPath() + "css/meta-frame.html");
+            boolean useCSS = metaFrame.canRead();
+            if (useCSS) {
+                try {
+                    doc = factory.newDocumentBuilder().parse(metaFrame);
+                    NodeList childs = doc.getFirstChild().getChildNodes();
+                    for (int i = 0; i < childs.getLength(); i++) {
+                        if (childs.item(i).getNodeName().equals("body")) {
+                            body = (Element) childs.item(i);
+                            break;
+                        }
+                    }
+                    if (body == null)
+                        throw new IllegalStateException("error on loading file " + metaFrame.getAbsolutePath()
+                            + ": missing body tag!");
+                } catch (Exception e) {
+                    LOG.error("error on loading file " + metaFrame.getAbsolutePath());
+                    ForwardedException.forward(e);
+                    return null;
+                }
+            } else {
+                doc = factory.newDocumentBuilder().newDocument();
+                Element html = doc.createElement(TAG_HTML);
+                doc.appendChild(html);
+                body = createMetaAndBody(html, interactive);
+            }
+
+            Element row = appendElement(createGrid(body, null, 3), TAG_ROW);
+            Element c1 = appendElement(row, TAG_CELL);
+            Element c2 = appendElement(row, TAG_CELL);
+            c1 = appendElement(c1, TAG_LINK, ATTR_HREF, "../nano.h5.html");
+            appendElement(c1,
+                TAG_IMAGE,
+                content(Environment.getBuildInformations()),
+                ATTR_SRC,
+                "icons/beanex-logo-micro.jpg");
+            appendElement(c2, TAG_H3, content(title), ATTR_ALIGN, ALIGN_CENTER);
+            Element c3 = appendElement(row, TAG_CELL, ATTR_ALIGN, ALIGN_RIGHT);
+            if (interactive && bean != null) {
+                if (useCSS) {
+                    Element menu = createMenu(c3, "Menu");
+                    createSubMenu(menu, "Application", "iconic home", getApplicationActions());
+                    createSubMenu(menu, "Session", "iconic map-pin", getSessionActions());
+                    createSubMenu(menu, "Page", "iconic magnifying-glass", getPageActions());
+                } else {
+                    c3 = appendElement(c3,
+                        TAG_FORM,
+                        ATTR_ACTION,
+                        "?",
+                        ATTR_METHOD,
+                        Environment.get("html5.http.method", "post"));
+                    Collection<IAction> actions = getPageActions();
+                    actions.addAll(getApplicationActions());
+                    actions.addAll(getSessionActions());
+                    createActionPanel(c3, actions,
+                        Environment.get("html.show.header.button.text", true),
+                        ATTR_ALIGN, ALIGN_RIGHT);
+                }
+            }
+            return body;
+        } catch (ParserConfigurationException e) {
+            ForwardedException.forward(e);
+            return null;
+        }
+    }
+
+    private Element createMetaAndBody(Element html, boolean interactive) {
+        Element head = appendElement(html, "head");
+//        appendElement(head, "title", "nano h5 application");
+
+//      String template = "<link href='http://fonts.googleapis.com/css?family=Droid+Sans' rel='stylesheet' type='text/css'>"
+//  + "<meta charset=\"utf-8\">"
+//  + "<title>Pure CSS3 Menu</title>"
+//  + "<link href=\"style.css\" media=\"screen\" rel=\"stylesheet\" type=\"text/css\" />"
+//  + "<link href=\"iconic.css\" media=\"screen\" rel=\"stylesheet\" type=\"text/css\" />"
+//  + "<script src=\"prefix-free.js\"></script>";
+//      head.setTextContent(template);
+
+//        appendElement(head, "link", "href", "http://fonts.googleapis.com/css?family=Droid+Sans", "rel", "stylesheet",
+//            "type", "text/css");
+//        appendElement(head, "link", "href", "css/style.css", "media", "screen", "rel", "stylesheet", "type", "text/css");
+//        appendElement(head, "link", "href", "css/iconic.css", "media", "screen", "rel", "stylesheet", "type",
+//            "text/css");
+//        appendElement(head, "script", "src", "prefix-free.js");
+//        appendElement(head, "meta", "charset", "utf-8");
+
+        Element body =
+            appendElement(html, TAG_BODY);
+        if (!interactive)
+            HtmlUtil.appendAttributes(body, "background", "icons/spe.jpg", ATTR_STYLE,
+                STYLE_BACKGROUND_RADIAL_GRADIENT);
+        return body;
+    }
+
     /**
      * builds a full html document
      * 
@@ -218,7 +344,8 @@ public class Html5Presentation<T> extends BeanPresentationHelper<T> implements I
 
         if (navigation.length > 0) {
             for (BeanDefinition<?> bean : navigation) {
-                appendElement((Element) parent, TAG_LINK, content("->" + bean.toString()), ATTR_HREF, bean.getName(),ATTR_STYLE, "color: #FFFFFF;");
+                appendElement((Element) parent, TAG_LINK, content("->" + bean.toString()), ATTR_HREF, bean.getName(),
+                    ATTR_STYLE, "color: #FFFFFF;");
             }
         }
 
@@ -233,6 +360,13 @@ public class Html5Presentation<T> extends BeanPresentationHelper<T> implements I
             createFooter(((Element) parent).getOwnerDocument(), message);
         }
         return parent;
+    }
+
+    public static String createMessagePage(String templateName, String message, URL serviceURL) {
+        InputStream stream = Environment.getResource(templateName);
+        String startPage = String.valueOf(FileUtil.getFileData(stream, null));
+        return StringUtil.insertProperties(startPage,
+            MapUtil.asMap("url", serviceURL, "name", message));
     }
 
     /**
@@ -388,25 +522,50 @@ public class Html5Presentation<T> extends BeanPresentationHelper<T> implements I
     }
 
     /**
-     * creates an html5 menu - but most browser don't support the tag 'menu'
+     * creates a css3 specific menu. see {@link #createSubMenu(Element, String, Collection, String...)}.
      * 
-     * @param parent
-     * @param name
-     * @param actions
-     * @param attributes
-     * @return
+     * @param parent parent element
+     * @param name menu name
+     * @param attributes additional attributes
+     * @return menu root element
      */
-    private Element createMenu(Element parent, String name, Collection<IAction> actions, String... attributes) {
-        Element menu = appendElement(parent, "menu", ATTR_TYPE, "toolbar");
+    private Element createMenu(Element parent, String name, String... attributes) {
+        Element div = appendElement(parent, "div", "class", "wrap");
+        Element nav = appendElement(div, "nav");
+        return appendElement(nav, "ul", "class", "menu");
+    }
+
+    /**
+     * creates an html5 menu (most browser don't support the tag 'menu'). this implementation uses a specific css3-menu.
+     * 
+     * @param menu parent
+     * @param name submenu name
+     * @param actions menu items
+     * @param attributes additional attributes to be set on each menu-item
+     * @return sub-menu element
+     */
+    private Element createSubMenu(Element menu,
+            String name,
+            String icon,
+            Collection<IAction> actions,
+            String... attributes) {
         Element list = appendElement(menu, "li");
-        Element sub = appendElement(list, "menu", "label", name);
+        Element alink = appendElement(list, "a", content(name), ATTR_HREF, name);
+        Element span = appendElement(alink, "span", "class", icon);
+        Element sub = appendElement(span, "ul");
         if (actions != null) {
             for (IAction a : actions) {
-                appendElement(sub, TAG_BUTTON, content(a.getShortDescription()), ATTR_TYPE, "button", "label",
-                    a.getShortDescription());
+                Element li = appendElement(sub, "li");
+                appendElement(li, TAG_LINK, content(Messages.stripMnemonics(a.getShortDescription())),
+                    ATTR_HREF,
+                    PREFIX_ACTION + a.getId());
             }
         }
-        return menu;
+        return list;
+    }
+
+    private Element createMenuEnd(Element parent) {
+        return appendElement(parent, "div", "class", "clearfix");
     }
 
     private Element createActionPanel(Element parent,
@@ -521,16 +680,6 @@ public class Html5Presentation<T> extends BeanPresentationHelper<T> implements I
             appendElement(action, TAG_IMAGE, ATTR_SRC, image, ATTR_ALT, label);
         }
         return action;
-    }
-
-    Element createFormDocument(String name, boolean interactive) {
-        Element body = createHeader(name, interactive);
-        return appendElement(body,
-            TAG_FORM,
-            ATTR_ACTION,
-            "?",
-            ATTR_METHOD,
-            Environment.get("html5.http.method", "post"));
     }
 
     Element createGrid(Element parent, String title, int columns) {
@@ -712,6 +861,7 @@ public class Html5Presentation<T> extends BeanPresentationHelper<T> implements I
                 beanValue.getFormat() instanceof RegExpFormat ? (RegExpFormat) beanValue.getFormat()
                     : null;
             String type = getType(beanValue);
+            boolean isOption = "checkbox".equals(type);
             input = appendElement(cell,
                 TAG_INPUT,
                 /*content(getSuffix(regexpFormat)),*/
@@ -733,8 +883,8 @@ public class Html5Presentation<T> extends BeanPresentationHelper<T> implements I
                 StringUtil.toString(beanValue.getMaxinum()),
                 ATTR_MAXLENGTH,
                 (beanValue.length() > 0 ? String.valueOf(beanValue.length()) : String.valueOf(Integer.MAX_VALUE)),
-                ATTR_VALUE,
-                getValue(beanValue, type),
+                (isOption ? enable(ATTR_CHECKED, (Boolean) beanValue.getValue()) : ATTR_VALUE),
+                (isOption ? null : getValue(beanValue, type)),
                 ATTR_TITLE,
                 beanValue.getDescription(),
                 "tabindex",
@@ -913,53 +1063,12 @@ public class Html5Presentation<T> extends BeanPresentationHelper<T> implements I
     }
 
     Element createFooter(Document doc, String footer) {
-        Element body = (Element) doc.getFirstChild().getFirstChild();
+        Element body = (Element) ((NodeList) doc.getElementsByTagName("body")).item(0);
         Element table = createGrid(body, "Status", 1);
 
         Element preFooter = doc.createElement(TAG_PRE);
         preFooter.setTextContent(footer);
         return addRow(table, preFooter);
-    }
-
-    Element createHeader(String title, boolean interactive) {
-        DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
-        try {
-            Document doc = factory.newDocumentBuilder().newDocument();
-            Element html = doc.createElement(TAG_HTML);
-            doc.appendChild(html);
-
-            Element head = appendElement(html, "head");
-//            appendElement(head, "meta", "charset", "utf-8");
-
-            Element body = appendElement(html, TAG_BODY, "background", interactive ? "icons/spe.jpg" : null, ATTR_STYLE, STYLE_BACKGROUND_RADIAL_GRADIENT);
-
-            Element row = appendElement(createGrid(body, null, 3), TAG_ROW);
-            Element c1 = appendElement(row, TAG_CELL);
-            Element c2 = appendElement(row, TAG_CELL);
-            c1 = appendElement(c1, TAG_LINK, ATTR_HREF, "../nano.h5.html");
-            appendElement(c1,
-                TAG_IMAGE,
-                content(Environment.getBuildInformations()),
-                ATTR_SRC,
-                "icons/beanex-logo-micro.jpg");
-            appendElement(c2, TAG_H3, content(title), ATTR_ALIGN, ALIGN_CENTER);
-            if (interactive && bean != null) {
-                Element c3 = appendElement(row, TAG_CELL, ATTR_ALIGN, ALIGN_RIGHT);
-                c3 = appendElement(c3,
-                    TAG_FORM,
-                    ATTR_ACTION,
-                    "?",
-                    ATTR_METHOD,
-                    Environment.get("html5.http.method", "post"));
-                createActionPanel(c3, getPresentationActions(), Environment.get("html.show.header.button.text", true),
-                    ATTR_ALIGN, ALIGN_RIGHT);
-//                createMenu(c3, "test", getPresentationActions(), ATTR_ALIGN, ALIGN_RIGHT);
-            }
-            return body;
-        } catch (ParserConfigurationException e) {
-            ForwardedException.forward(e);
-            return null;
-        }
     }
 
     @Override

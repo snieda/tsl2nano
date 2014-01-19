@@ -1,5 +1,9 @@
 package de.tsl2.nano.bean.def;
 
+import java.util.Collection;
+
+import de.tsl2.nano.action.IAction;
+
 
 /**
  * a page builder should create a component representing the given bean.
@@ -9,6 +13,7 @@ package de.tsl2.nano.bean.def;
  * @author Thomas Schneider
  * @version $Revision$
  */
+@SuppressWarnings("rawtypes")
 public interface IPageBuilder<PAGE, OUTPUT> {
 
     /**
@@ -27,4 +32,20 @@ public interface IPageBuilder<PAGE, OUTPUT> {
      * @return decorated 
      */
     OUTPUT decorate(String message);
+    
+    /**
+     * creates extended actions like 'help', 'configure', 'exit' etc.
+     */
+    public Collection<IAction> getApplicationActions();
+    
+    /**
+     * creates extended actions like 'logout' etc.
+     */
+    public Collection<IAction> getSessionActions();
+    
+    /**
+     * creates extended actions like 'print', 'help', 'export', 'select-all', 'deselect-all' etc.
+     */
+    public Collection<IAction> getPageActions();
+    
 }
