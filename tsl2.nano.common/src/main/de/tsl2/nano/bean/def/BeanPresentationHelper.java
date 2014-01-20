@@ -1079,6 +1079,22 @@ public class BeanPresentationHelper<T> {
     }
 
     /**
+     * to be overwritten
+     * @param message
+     * @return the message itself
+     */
+    public String decorate(String message) {
+        return message;
+    }
+    
+    public void reset() {
+        Environment.reload();
+        BeanDefinition.clearCache();
+        Bean.clearCache();
+        BeanValue.clearCache();
+    }
+    
+    /**
      * creates extended actions like 'print', 'help', 'export', 'select-all', 'deselect-all' etc.
      */
     public Collection<IAction> getApplicationActions() {
@@ -1087,48 +1103,18 @@ public class BeanPresentationHelper<T> {
                 return new LinkedList<IAction>();
             appActions = new ArrayList<IAction>(10);
 
-//            presActions.add(new SecureAction(bean.getClazz(),
-//                "configure",
-//                IAction.MODE_UNDEFINED,
-//                false,
-//                "icons/compose.png") {
-//                @Override
-//                public Object action() throws Exception {
-////                    File configFileName = BeanDefinition.getDefinitionFile(bean.getName());
-////                    String configFile = FileUtil.getFile(configFileName.getPath());
-////                    return configFile != null ? configFile : "No configuration found (" + configFileName + ")";
-//                    Bean<?> configBean = Bean.getBean(BeanDefinition.getBeanDefinition(bean.getName()));
-//                    String[] writableAttributes = configBean.getAttributeNames(true);
-//                    configBean.setAttributeFilter(writableAttributes);
-////                    BeanClass beanClass = new BeanClass(bean.getClazz());
-////                    configBean.getAttribute("attributes").setRange(beanClass.getAttributes(false));
-//                    return configBean;
-//                }
-//
-//                @Override
-//                public boolean isEnabled() {
-//                    return false;
-//                }
-//            });
-//
             appActions.add(new SecureAction(bean.getClazz(),
-                "help",
+                "environment",
                 IAction.MODE_UNDEFINED,
                 false,
-                "icons/trust_unknown.png") {
-                String helpFileName = Environment.getConfigPath() + bean.getName().toLowerCase() + ".help.html";
-
+                "icons/edit.png") {
                 @Override
                 public Object action() throws Exception {
-                    String helpFile = null;
-                    if (new File(helpFileName).canRead())
-                        helpFile = String.valueOf(FileUtil.getFileData(helpFileName, null));
-                    return helpFile != null ? helpFile : "No help found (" + helpFileName + ")";
-                }
-
-                @Override
-                public boolean isEnabled() {
-                    return new File(helpFileName).canRead();
+                    Environment.reset();
+                    BeanDefinition.clearCache();
+                    Bean.clearCache();
+                    BeanValue.clearCache();
+                    return "./";
                 }
             });
 
@@ -1139,11 +1125,8 @@ public class BeanPresentationHelper<T> {
                 "icons/reload.png") {
                 @Override
                 public Object action() throws Exception {
-                    Environment.reset();
-                    BeanDefinition.clearCache();
-                    Bean.clearCache();
-                    BeanValue.clearCache();
-                    return "configuration refreshed";
+                    reset();
+                    return decorate("configuration refreshed");
                 }
             });
 
@@ -1156,7 +1139,7 @@ public class BeanPresentationHelper<T> {
                 public Object action() throws Exception {
                     Environment.persist();
                     BeanDefinition.dump();
-                    return "configuration saved and HTTP-Session stopped!";
+                    return decorate("configuration saved and HTTP-Session stopped!");
                 }
             });
         }
@@ -1180,7 +1163,7 @@ public class BeanPresentationHelper<T> {
                     public Object action() throws Exception {
                         Environment.persist();
                         BeanDefinition.dump();
-                        return "user logged out!";
+                        return decorate("user logged out!");
                     }
                 });
         }
@@ -1253,6 +1236,27 @@ public class BeanPresentationHelper<T> {
                     });
                 }
             }
+            pageActions.add(new SecureAction(bean.getClazz(),
+                "help",
+                IAction.MODE_UNDEFINED,
+                false,
+                "icons/trust_unknown.png") {
+                String helpFileName = Environment.getConfigPath() + bean.getName().toLowerCase() + ".help.html";
+
+                @Override
+                public Object action() throws Exception {
+                    String helpFile = null;
+                    if (new File(helpFileName).canRead())
+                        helpFile = String.valueOf(FileUtil.getFileData(helpFileName, null));
+                    return helpFile != null ? helpFile : decorate("No help found (" + helpFileName + ")");
+                }
+
+                @Override
+                public boolean isEnabled() {
+                    return new File(helpFileName).canRead();
+                }
+            });
+
         }
         return pageActions;
     }

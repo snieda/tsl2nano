@@ -168,6 +168,7 @@ public class Html5Presentation<T> extends BeanPresentationHelper<T> implements I
         super(bean);
     }
 
+    @SuppressWarnings("serial")
     @Override
     public Collection<IAction> getApplicationActions() {
         super.getApplicationActions();
@@ -190,6 +191,11 @@ public class Html5Presentation<T> extends BeanPresentationHelper<T> implements I
         return appActions;
     }
 
+    @Override
+    public void reset() {
+        super.reset();
+        
+    }
     /**
      * {@inheritDoc}
      */
@@ -200,7 +206,7 @@ public class Html5Presentation<T> extends BeanPresentationHelper<T> implements I
             Element form = model != null ? model.setPresentationHelper(new Html5Presentation(model)).createPage(null,
                 message,
                 interactive,
-                navigation) : createPage(null, "Leaving Application!", false, navigation);
+                navigation) : createPage(null, "Leaving Application!<br/>Restart", false, navigation);
 
             String html = HtmlUtil.toString(form.getOwnerDocument());
             if (LOG.isDebugEnabled())
@@ -226,7 +232,8 @@ public class Html5Presentation<T> extends BeanPresentationHelper<T> implements I
         try {
             /*
              * try to read html-page from a template. if not existing, create header and
-             * body programatically 
+             * body programatically.
+             * TODO: cache the page
              */
             Document doc;
             Element body = null;
@@ -362,6 +369,9 @@ public class Html5Presentation<T> extends BeanPresentationHelper<T> implements I
         return parent;
     }
 
+    public String createMessagePage(String message) {
+        return createMessagePage("message.template", message, null);
+    }
     public static String createMessagePage(String templateName, String message, URL serviceURL) {
         InputStream stream = Environment.getResource(templateName);
         String startPage = String.valueOf(FileUtil.getFileData(stream, null));
@@ -550,9 +560,9 @@ public class Html5Presentation<T> extends BeanPresentationHelper<T> implements I
             Collection<IAction> actions,
             String... attributes) {
         Element list = appendElement(menu, "li");
-        Element alink = appendElement(list, "a", content(name), ATTR_HREF, name);
+        Element alink = appendElement(list, TAG_LINK, content(name), ATTR_HREF, name);
         Element span = appendElement(alink, "span", "class", icon);
-        Element sub = appendElement(span, "ul");
+        Element sub = appendElement(list, "ul");
         if (actions != null) {
             for (IAction a : actions) {
                 Element li = appendElement(sub, "li");

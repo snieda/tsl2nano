@@ -226,6 +226,8 @@ public class NanoH5Session {
             if (nav.current().getActions() != null)
                 actions.addAll(nav.current().getActions());
             actions.addAll(nav.current().getPresentationHelper().getPageActions());
+            actions.addAll(nav.current().getPresentationHelper().getSessionActions());
+            actions.addAll(nav.current().getPresentationHelper().getApplicationActions());
             if (nav.current().isMultiValue()) {
                 actions.addAll(((BeanCollector) nav.current()).getColumnSortingActions());
             }
