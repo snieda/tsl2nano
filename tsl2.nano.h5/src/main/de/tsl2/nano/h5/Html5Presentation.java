@@ -194,8 +194,9 @@ public class Html5Presentation<T> extends BeanPresentationHelper<T> implements I
     @Override
     public void reset() {
         super.reset();
-        
+        //TODO: clear template cache
     }
+
     /**
      * {@inheritDoc}
      */
@@ -369,14 +370,11 @@ public class Html5Presentation<T> extends BeanPresentationHelper<T> implements I
         return parent;
     }
 
-    public String createMessagePage(String message) {
-        return createMessagePage("message.template", message, null);
-    }
     public static String createMessagePage(String templateName, String message, URL serviceURL) {
         InputStream stream = Environment.getResource(templateName);
         String startPage = String.valueOf(FileUtil.getFileData(stream, null));
         return StringUtil.insertProperties(startPage,
-            MapUtil.asMap("url", serviceURL, "name", message));
+            MapUtil.asMap("url", serviceURL, "text", message));
     }
 
     /**
@@ -387,8 +385,8 @@ public class Html5Presentation<T> extends BeanPresentationHelper<T> implements I
     private void createBean(Element parent, Bean<?> bean, boolean interactive) {
         int columns = bean.getPresentable().layout(L_GRIDWIDTH, Environment.get("layout.default.columncount", 3));
         Element panel = createGrid(parent, Environment.translate("tsl2nano.input", false), columns);
+        //set layout and constraints into the grid
         appendAttributes((Element) panel.getParentNode(), bean.getPresentable());
-        createLayout((Element) panel.getParentNode(), bean.getPresentable());
         Bean<T> vbean = (Bean<T>) bean;
         List<BeanValue<?>> beanValues = vbean.getBeanValues();
         boolean firstFocused = false;
@@ -484,6 +482,7 @@ public class Html5Presentation<T> extends BeanPresentationHelper<T> implements I
         if (p.getLayout() instanceof Map) {
             HtmlUtil.appendAttributes(grid, MapUtil.asArray((Map<String, Object>) p.getLayout()));
         }
+        //TODO: only layout-constraints should be set
         if (p.getLayoutConstraints() instanceof Map) {
             HtmlUtil.appendAttributes(grid, MapUtil.asArray((Map<String, String>) p.getLayoutConstraints()));
         }
@@ -559,8 +558,12 @@ public class Html5Presentation<T> extends BeanPresentationHelper<T> implements I
             String icon,
             Collection<IAction> actions,
             String... attributes) {
+        /*
+         * the main sub menu item will use the first action to link to...
+         */
         Element list = appendElement(menu, "li");
-        Element alink = appendElement(list, TAG_LINK, content(name), ATTR_HREF, name);
+        Element alink =
+            appendElement(list, TAG_LINK, content(name), ATTR_HREF, PREFIX_ACTION + actions.iterator().next().getId());
         Element span = appendElement(alink, "span", "class", icon);
         Element sub = appendElement(list, "ul");
         if (actions != null) {
@@ -1126,6 +1129,11 @@ public class Html5Presentation<T> extends BeanPresentationHelper<T> implements I
         createAction(body, IAction.CANCELED, "submit", "icons/back.png");
         return body.toString();
     }
+
+    @Override
+    public String page(String message) {
+        return createMessagePage("message.template", message, null);
+    }
 }
 
 /**
@@ -1161,16 +1169,16 @@ class Html5Presentable extends Presentable {
     /**
      * @return Returns the layout.
      */
-    public HashMap<String, String> getLayout() {
+    public LinkedHashMap<String, String> getLayout() {
         if (layout == null) {
+            //LinkedHashmap not supported by simple-xml
             layout = Environment.get("default.layout", new LinkedHashMap<String, String>());
-//            ((HashMap) layout).put("testKey", "testValue");
         }
-        return (HashMap<String, String>) layout;
+        return (LinkedHashMap<String, String>) layout;
     }
 
     //to have write-access, we need this setter
-    public <T extends IPresentable> T setLayout(HashMap<String, String> l) {
+    public <T extends IPresentable> T setLayout(LinkedHashMap<String, String> l) {
         this.layout = l;
         return (T) this;
     }
@@ -1178,15 +1186,16 @@ class Html5Presentable extends Presentable {
     /**
      * @return Returns the layoutConstraints.
      */
-    public HashMap<String, String> getLayoutConstraints() {
+    public LinkedHashMap<String, String> getLayoutConstraints() {
         if (layoutConstraints == null) {
+            //LinkedHashmap not supported by simple-xml
             layoutConstraints = Environment.get("default.layoutconstaints", new LinkedHashMap<String, String>());
         }
-        return (HashMap<String, String>) layoutConstraints;
+        return (LinkedHashMap<String, String>) layoutConstraints;
     }
 
     //to have write-access, we need this setter
-    public <T extends IPresentable> T setLayoutConstraints(HashMap<String, String> lc) {
+    public <T extends IPresentable> T setLayoutConstraints(LinkedHashMap<String, String> lc) {
         this.layoutConstraints = lc;
         return (T) this;
     }

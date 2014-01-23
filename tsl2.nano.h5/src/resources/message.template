@@ -2,7 +2,7 @@
 <body>
 	<table width="100%" height="100%" border=2 style="background: radial-gradient(#9999FF, #000000);">
 	<tr><td><h1 align="center" accesskey="s" style="" color=#FF2222>
-${message}<p/>
+${text}<p/>
 		<a href="${url}"><img src="favicon.ico"><br />Ok</img></a>
 	</h1></td></tr></table>
 </body>

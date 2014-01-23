@@ -27,6 +27,13 @@ public interface IPageBuilder<PAGE, OUTPUT> {
     OUTPUT build(BeanDefinition<?> model, String message, boolean interactive, BeanDefinition<?>... navigation);
 
     /**
+     * create a full page and decorate a message
+     * @param message
+     * @return new page with decorated message
+     */
+    OUTPUT page(String message);
+    
+    /**
      * decorate a message
      * @param message
      * @return decorated 

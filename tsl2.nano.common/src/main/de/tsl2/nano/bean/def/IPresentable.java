@@ -40,11 +40,11 @@ public interface IPresentable extends Serializable {
 
     /** returns optional layout. if it is used as descriptor only, it is recommended to fill maps of type 
      * {@link Map<String, ?} to be transformable into the graphical information object. */
-    Serializable getLayout();
+    <L extends Serializable> L getLayout();
 
     /** returns optional layout constraintsif it is used as descriptor only, it is recommended to fill maps of type 
      * {@link Map<String, ?} to be transformable into the graphical information object. */
-    Serializable getLayoutConstraints();
+    <L extends Serializable> L getLayoutConstraints();
 
     /** optional fixed pixel with (valuable through layout constraints) */
     int getWidth();
@@ -62,13 +62,13 @@ public interface IPresentable extends Serializable {
     int[] getBackground();
 
     /** sets standard presentable properties. for further informations, see docs of getters. */
-    <T extends IPresentable> T setPresentation(String label,
+    <L extends Serializable, T extends IPresentable> T setPresentation(String label,
             int type,
             int style,
             IActivator enabler,
             boolean visible,
-            Serializable layout,
-            Serializable layoutConstraints,
+            L layout,
+            L layoutConstraints,
             String description);
 
     /** sets enhanced grafic properties. for further informations, see docs of getters. */
@@ -81,10 +81,10 @@ public interface IPresentable extends Serializable {
     <T extends IPresentable> T setStyle(int style);
 
     /** sets optional layout */
-    <T extends IPresentable> T setLayout(Serializable layout);
+    <L extends Serializable, T extends IPresentable> T setLayout(L layout);
     
     /** sets optional layout constraints */
-    <T extends IPresentable> T setLayoutConstraints(Serializable layoutConstraints);
+    <L extends Serializable, T extends IPresentable> T setLayoutConstraints(L layoutConstraints);
 
     /** sets an enabler. use {@link IActivator#INACTIVE} to totally disable an item */
     public <T extends IPresentable> T setEnabler(IActivator enabler);
@@ -184,13 +184,13 @@ public interface IPresentable extends Serializable {
         }
 
         @Override
-        public <T extends IPresentable> T  setPresentation(String label,
+        public <L extends Serializable, T extends IPresentable> T  setPresentation(String label,
                 int type,
                 int style,
                 IActivator enabler,
                 boolean visible,
-                Serializable layout,
-                Serializable layoutConstraints,
+                L layout,
+                L layoutConstraints,
                 String description) {
             throw new UnsupportedOperationException();
         }
@@ -271,12 +271,12 @@ public interface IPresentable extends Serializable {
         }
 
         @Override
-        public <T extends IPresentable> T setLayout(Serializable layout) {
+        public <L extends Serializable, T extends IPresentable> T setLayout(L layout) {
             throw new UnsupportedOperationException();
         }
 
         @Override
-        public <T extends IPresentable> T setLayoutConstraints(Serializable layoutConstraints) {
+        public <L extends Serializable, T extends IPresentable> T setLayoutConstraints(L layoutConstraints) {
             throw new UnsupportedOperationException();
         }
         

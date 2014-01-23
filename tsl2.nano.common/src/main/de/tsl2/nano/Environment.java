@@ -266,7 +266,7 @@ public class Environment {
     }
 
     /**
-     * deletes all config files. no reset on Environment will be done!
+     * WARNING: deletes all config files. no reset on Environment will be done!
      */
     public static boolean deleteAllConfigFiles() {
         File config = new File(getConfigPath());
@@ -458,9 +458,9 @@ public class Environment {
     }
 
     /**
-     * persists (saves) the current environment. a reset will be done to reload the environment from saved file.
+     * reloads the current environment. a reset will be done to reload the environment from saved file.
      */
-    protected static void persistAndReload() {
+    public static void reload() {
 //        Properties properties = self().properties;
 //        Properties p = new Properties();
 //        Set<Object> keys = properties.keySet();
@@ -475,9 +475,15 @@ public class Environment {
 //
 //        self().get(XmlUtil.class).saveXml(SERVICE_FILE_NAME, self().services);
 
-        persist();
+        Properties tempProperties = new Properties();
+        tempProperties.putAll(self().properties);
+        Map<Class<?>, Object> tempServices = new Hashtable<Class<?>, Object>(services());
+        
         reset();
         create(getConfigPath());
+        
+        services().putAll(tempServices);
+        self().properties.putAll(tempProperties);
     }
 
     /**

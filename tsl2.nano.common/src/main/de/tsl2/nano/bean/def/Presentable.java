@@ -16,6 +16,7 @@ import java.util.Map;
 import org.simpleframework.xml.Attribute;
 import org.simpleframework.xml.Element;
 import org.simpleframework.xml.ElementArray;
+import org.simpleframework.xml.ElementMap;
 
 import de.tsl2.nano.Environment;
 import de.tsl2.nano.action.IActivator;
@@ -40,10 +41,12 @@ public class Presentable implements IPresentable, Serializable {
     String label;
     @Element(required = false)
     String description;
-    @Element(required = false)
-    protected Serializable layout;
-    @Element(required = false)
-    protected Serializable layoutConstraints;
+    //normally only serializable - but simple-xml has problems to serialize hashmaps, if they aren't directly declared.
+    @ElementMap(entry = "layout", key = "name", attribute = true, inline = true, valueType = String.class, required = false)
+    protected LinkedHashMap<String, String> layout;
+    //normally only serializable - but simple-xml has problems to serialize hashmaps, if they aren't directly declared.
+    @ElementMap(entry = "layoutconstraint", key = "name", attribute = true, inline = true, valueType = String.class, required = false)
+    protected LinkedHashMap<String, String> layoutConstraints;
     @Attribute
     boolean visible = true;
     transient IActivator enabler;
@@ -105,21 +108,21 @@ public class Presentable implements IPresentable, Serializable {
      * {@inheritDoc}
      */
     @Override
-    public <T extends IPresentable> T setPresentation(String label,
+    public <L extends Serializable, T extends IPresentable> T setPresentation(String label,
             int type,
             int style,
             IActivator enabler,
             boolean visible,
-            Serializable layout,
-            Serializable layoutConstraints,
+            L layout,
+            L layoutConstraints,
             String description) {
         this.label = label;
         this.type = type;
         this.style = style;
         this.enabler = enabler;
         this.visible = visible;
-        this.layout = layout;
-        this.layoutConstraints = layoutConstraints;
+        this.layout = (LinkedHashMap) layout;
+        this.layoutConstraints = (LinkedHashMap) layoutConstraints;
         return (T) this;
     }
 
@@ -210,8 +213,8 @@ public class Presentable implements IPresentable, Serializable {
      * {@inheritDoc}
      */
     @Override
-    public <T extends IPresentable> T setLayout(Serializable layout) {
-        this.layout = layout;
+    public <L extends Serializable, T extends IPresentable> T setLayout(L layout) {
+        this.layout = (LinkedHashMap) layout;
         return (T) this;
     }
 
@@ -219,8 +222,8 @@ public class Presentable implements IPresentable, Serializable {
      * {@inheritDoc}
      */
     @Override
-    public <T extends IPresentable> T setLayoutConstraints(Serializable layoutConstraints) {
-        this.layoutConstraints = layoutConstraints;
+    public <L extends Serializable, T extends IPresentable> T setLayoutConstraints(L layoutConstraints) {
+        this.layoutConstraints = (LinkedHashMap) layoutConstraints;
         return (T) this;
     }
 

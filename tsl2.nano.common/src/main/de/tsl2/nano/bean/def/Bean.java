@@ -615,16 +615,26 @@ public class Bean<T> extends BeanDefinition<T> {
         if (instanceOrName instanceof String) {
             BeanDefinition<I> beandef = (BeanDefinition<I>) getBeanDefinition((String) instanceOrName);
             bean = createBean((I) UNDEFINED, beandef);
-            return bean;
         } else {
             BeanDefinition<I> beandef = getBeanDefinition((Class<I>) instanceOrName.getClass());
             bean = createBean(instanceOrName, beandef);
-            if (cacheInstance && Environment.get("use.bean.cache", true))
-                timedCache.put(instanceOrName, bean);
-            return bean;
         }
+        
+        if (cacheInstance && Environment.get("use.bean.cache", true))
+            timedCache.put(instanceOrName, bean);
+        return bean;
     }
 
+    @Override
+    //not yet used on creation
+    protected void autoInit(String name) {
+        super.autoInit(name);
+        List<BeanValue<?>> beanValues = getBeanValues();
+        for (BeanValue<?> bv : beanValues) {
+            bv.getPresentation();
+            bv.getColumnDefinition();
+        }
+    }
     /**
      * attaches the given detacher
      * 

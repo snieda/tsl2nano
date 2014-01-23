@@ -1087,6 +1087,15 @@ public class BeanPresentationHelper<T> {
         return message;
     }
     
+    /**
+     * to be overwritten
+     * @param message
+     * @return the message itself
+     */
+    public String page(String message) {
+        return message;
+    }
+    
     public void reset() {
         Environment.reload();
         BeanDefinition.clearCache();
@@ -1110,10 +1119,6 @@ public class BeanPresentationHelper<T> {
                 "icons/edit.png") {
                 @Override
                 public Object action() throws Exception {
-                    Environment.reset();
-                    BeanDefinition.clearCache();
-                    Bean.clearCache();
-                    BeanValue.clearCache();
                     return "./";
                 }
             });
@@ -1126,7 +1131,7 @@ public class BeanPresentationHelper<T> {
                 @Override
                 public Object action() throws Exception {
                     reset();
-                    return decorate("configuration refreshed");
+                    return page("configuration refreshed");
                 }
             });
 
@@ -1139,7 +1144,7 @@ public class BeanPresentationHelper<T> {
                 public Object action() throws Exception {
                     Environment.persist();
                     BeanDefinition.dump();
-                    return decorate("configuration saved and HTTP-Session stopped!");
+                    return page("configuration saved and HTTP-Session stopped!");
                 }
             });
         }
@@ -1163,7 +1168,7 @@ public class BeanPresentationHelper<T> {
                     public Object action() throws Exception {
                         Environment.persist();
                         BeanDefinition.dump();
-                        return decorate("user logged out!");
+                        return page("user logged out!");
                     }
                 });
         }
@@ -1248,7 +1253,7 @@ public class BeanPresentationHelper<T> {
                     String helpFile = null;
                     if (new File(helpFileName).canRead())
                         helpFile = String.valueOf(FileUtil.getFileData(helpFileName, null));
-                    return helpFile != null ? helpFile : decorate("No help found (" + helpFileName + ")");
+                    return helpFile != null ? helpFile : page("No help found (" + helpFileName + ")");
                 }
 
                 @Override

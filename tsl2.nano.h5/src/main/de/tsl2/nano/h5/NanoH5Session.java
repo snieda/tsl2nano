@@ -91,7 +91,14 @@ public class NanoH5Session {
     }
 
     /**
-     * {@inheritDoc}
+     * main session serve method. requests of type 'GET' and file-links are handled by the application class (NanoH5).
+     * 
+     * @param uri url, name of a bean, or number of selected item in a beancollector
+     * @param method 'POST'
+     * @param header request header
+     * @param parms request
+     * @param files
+     * @return html response
      */
     public Response serve(String uri, String method, Properties header, Properties parms, Properties files) {
         String msg = "[undefined]";
@@ -122,8 +129,11 @@ public class NanoH5Session {
                     userResponse = processInput(uri, parms, uriLinkNumber);
                 }
                 if (userResponse instanceof String && !userResponse.equals(IAction.CANCELED)) {
-                    if (!HtmlUtil.containsHtml(msg))
-                        msg = HtmlUtil.createMessagePage((String) userResponse);
+                    msg = (String) userResponse;
+                    if (HtmlUtil.isURL(msg))
+                        return server.serve(msg, "GET", header, parms, files);
+                    else if (!HtmlUtil.containsHtml(msg))
+                        msg = HtmlUtil.createMessagePage(msg);
                 } else {
                     msg = getNextPage(userResponse);
                 }
@@ -142,6 +152,11 @@ public class NanoH5Session {
 //        header.clear();
 //        response.header.remove(uri);
         return response;
+    }
+
+    private boolean isURL(String msg) {
+        // TODO Auto-generated method stub
+        return false;
     }
 
     void close() {

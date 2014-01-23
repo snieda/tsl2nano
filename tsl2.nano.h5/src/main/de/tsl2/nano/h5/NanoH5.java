@@ -161,7 +161,7 @@ public class NanoH5 extends NanoHTTPD {
         InputStream stream = Environment.getResource("start.template");
         String startPage = String.valueOf(FileUtil.getFileData(stream, null));
         startPage = StringUtil.insertProperties(startPage,
-            MapUtil.asMap("url", serviceURL, "name", Environment.getName()));
+            MapUtil.asMap("url", serviceURL, "text", Environment.getName()));
         FileUtil.writeBytes(Html5Presentation.createMessagePage("start.template", "Start " + Environment.getName() + "App", serviceURL)
             .getBytes(), resultHtmlFile, false);
     }
@@ -171,7 +171,7 @@ public class NanoH5 extends NanoHTTPD {
      */
     @Override
     public Response serve(String uri, String method, Properties header, Properties parms, Properties files) {
-        if (method.equals("GET") && uri.contains(".") && !uri.contains(Html5Presentation.PREFIX_ACTION))
+        if (method.equals("GET") && HtmlUtil.isURL(uri) && !uri.contains(Html5Presentation.PREFIX_ACTION))
             return super.serve(uri, method, header, parms, files);
         InetAddress requestor = ((Socket) header.get("socket")).getInetAddress();
         NanoH5Session session = sessions.get(requestor);

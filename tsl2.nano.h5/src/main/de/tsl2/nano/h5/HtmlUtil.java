@@ -10,6 +10,8 @@
 package de.tsl2.nano.h5;
 
 import java.io.StringWriter;
+import java.net.URI;
+import java.net.URL;
 
 import javax.xml.transform.OutputKeys;
 import javax.xml.transform.Transformer;
@@ -263,6 +265,17 @@ public class HtmlUtil {
         }
     }
 
+    public static final boolean isURL(String str) {
+        if (str.isEmpty() || str.equals("/") || str.equals("/null"))
+            return false;
+        try {
+            URI.create(str);
+            return true;
+        } catch (Exception e) {
+            //ok, no url
+            return false;
+        }
+    }
     /**
      * containsXml
      * 
