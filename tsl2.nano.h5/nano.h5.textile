@@ -232,6 +232,17 @@ Hibernate 4 for example would have the following dependencies:
 * javassist-3.12.0.GA.jar
 * antlr.jar
  
+## Layout and Styling
+
+### Using CSS
+
+Html styles can be added through import of css files. On building each html page, the file *meta-frame.html* will be searched inside the environments *css* directory: css/meta-frame.html.
+The meta-frame.html defines the html header and an empty body. Inside the header you should define the css style files you want to be used. The style files must define a class *menu* through the tags *ul* and *li*. Then, each page will have a menu at the top - instead of a button panel.
+
+### Configuring Layout and Constraints
+
+Each bean and each bean-attribute can define a layout and layout-constraints through it's presentable object.
+
 ## Networking Modes
 
 The _Nano.H5_ application can be started in different modes.
