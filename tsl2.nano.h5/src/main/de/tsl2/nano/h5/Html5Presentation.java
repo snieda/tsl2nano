@@ -218,8 +218,8 @@ public class Html5Presentation<T> extends BeanPresentationHelper<T> implements I
         }
     }
 
-    Element createFormDocument(String name, boolean interactive) {
-        Element body = createHeader(name, interactive);
+    Element createFormDocument(String name, String image, boolean interactive) {
+        Element body = createHeader(name, image, interactive);
         return appendElement(body,
             TAG_FORM,
             ATTR_ACTION,
@@ -228,7 +228,7 @@ public class Html5Presentation<T> extends BeanPresentationHelper<T> implements I
             Environment.get("html5.http.method", "post"));
     }
 
-    Element createHeader(String title, boolean interactive) {
+    Element createHeader(String title, String image, boolean interactive) {
         DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
         try {
             /*
@@ -265,6 +265,12 @@ public class Html5Presentation<T> extends BeanPresentationHelper<T> implements I
                 body = createMetaAndBody(html, interactive);
             }
 
+            /*
+             * create the header elements:
+             * c1: left: App-Info with image
+             * c2: center: Page-Title with image
+             * c3: Page-Buttons
+             */
             Element row = appendElement(createGrid(body, null, 3), TAG_ROW);
             Element c1 = appendElement(row, TAG_CELL);
             Element c2 = appendElement(row, TAG_CELL);
@@ -274,7 +280,17 @@ public class Html5Presentation<T> extends BeanPresentationHelper<T> implements I
                 content(Environment.getBuildInformations()),
                 ATTR_SRC,
                 "icons/beanex-logo-micro.jpg");
-            appendElement(c2, TAG_H3, content(title), ATTR_ALIGN, ALIGN_CENTER);
+            
+            if (image != null) {
+                c2 = appendElement(c2, TAG_H3, content(), ATTR_ALIGN, ALIGN_CENTER);
+                appendElement(c2,
+                    TAG_IMAGE,
+                    content(title),
+                    ATTR_SRC,
+                    image);
+            } else {
+                c2 = appendElement(c2, TAG_H3, content(title), ATTR_ALIGN, ALIGN_CENTER);
+            }
             Element c3 = appendElement(row, TAG_CELL, ATTR_ALIGN, ALIGN_RIGHT);
             if (interactive && bean != null) {
                 if (useCSS) {
@@ -344,9 +360,9 @@ public class Html5Presentation<T> extends BeanPresentationHelper<T> implements I
         boolean isRoot = parent == null;
         if (isRoot) {
             if (bean == null) {
-                return createFormDocument(message, interactive);
+                return createFormDocument(message, null, interactive);
             } else {
-                parent = createFormDocument(bean.getName(), interactive);
+                parent = createFormDocument(bean.getName(), bean.getPresentable().getIcon(), interactive);
             }
         }
 
@@ -613,6 +629,7 @@ public class Html5Presentation<T> extends BeanPresentationHelper<T> implements I
             showText ? a.getShortDescription() : null,
             a.getLongDescription(),
             null,
+            a.getKeyStroke(),
             (a.getImagePath() != null ? a.getImagePath() : "icons/" + a.getShortDescription() + ".gif"),
             a.isEnabled(),
             a.isDefault(),
@@ -631,9 +648,10 @@ public class Html5Presentation<T> extends BeanPresentationHelper<T> implements I
         String closeLabel = Messages.getStringOpt("tsl2nano.close", true);
         if (model.isMultiValue() && ((BeanCollector) model).hasMode(MODE_ASSIGNABLE)) {
             String assignLabel = Messages.getStringOpt("tsl2nano.assign", true);
-            createAction(panel, BTN_ASSIGN, assignLabel, assignLabel, "submit", "icons/links.png", true, true, false);
+            createAction(panel, BTN_ASSIGN, assignLabel, assignLabel, "submit", null, "icons/links.png", true, true,
+                false);
         }
-        createAction(panel, IAction.CANCELED, closeLabel, closeLabel, null, "icons/stop.png", true, false, true);
+        createAction(panel, IAction.CANCELED, closeLabel, closeLabel, null, null, "icons/stop.png", true, false, true);
         return panel;
     }
 
@@ -647,7 +665,7 @@ public class Html5Presentation<T> extends BeanPresentationHelper<T> implements I
      */
     Element createAction(Element cell, String id, String type, String image) {
         String label = Environment.translate(id, true);
-        return createAction(cell, id, label, label, type, image, true, false, false);
+        return createAction(cell, id, label, label, type, null, image, true, false, false);
     }
 
     /**
@@ -664,14 +682,16 @@ public class Html5Presentation<T> extends BeanPresentationHelper<T> implements I
             String label,
             String tooltip,
             String type,
+            Object shortcut,
             String image,
             boolean enabled,
             boolean asDefault,
             boolean formnovalidate) {
         String name = label != null ? label : tooltip;
         int isc = name.indexOf('&') + 1;
-        String shortCut = name.substring(isc, isc + 1).toLowerCase();
+        String sc = shortcut != null ? shortcut.toString() : name.substring(isc, isc + 1).toLowerCase();
         label = Messages.stripMnemonics(label);
+        tooltip = tooltip + " (ALT+" + sc + ")";
         Element action = appendElement(cell,
             TAG_BUTTON,
             content(label),
@@ -682,7 +702,7 @@ public class Html5Presentation<T> extends BeanPresentationHelper<T> implements I
             ATTR_TYPE,
             type,
             ATTR_ACCESSKEY,
-            shortCut,
+            sc,
             enable(ATTR_DISABLED, !enabled),
             null,
             enable(ATTR_FORMNOVALIDATE, formnovalidate),
@@ -910,16 +930,18 @@ public class Html5Presentation<T> extends BeanPresentationHelper<T> implements I
             if (beanValue.getPresentation().getEnabler().isActive()) {
                 //create a finder button
                 if (beanValue.isSelectable()) {
+                    String shortcut = String.valueOf(++currentTabIndex);
                     Element a = createAction(cell,
                         beanValue.getName() + IPresentable.POSTFIX_SELECTOR,
                         Environment.translate("tsl2nano.finder.action.label", false),
                         Environment.translate("tsl2nano.selection", true),
-                        null,
+                        Environment.translate("tsl2nano.select", true),
+                        shortcut,
                         null,
                         beanValue.hasWriteAccess(),
                         false,
                         true);
-                    HtmlUtil.appendAttributes(a, "tabindex", String.valueOf(++currentTabIndex));
+                    HtmlUtil.appendAttributes(a, "tabindex", shortcut);
 
                 }
             }
@@ -1125,7 +1147,7 @@ public class Html5Presentation<T> extends BeanPresentationHelper<T> implements I
     }
 
     public String decorate(String message) {
-        Element body = createHeader(message, false);
+        Element body = createHeader(message, null, false);
         createAction(body, IAction.CANCELED, "submit", "icons/back.png");
         return body.toString();
     }

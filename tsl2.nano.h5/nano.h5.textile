@@ -243,6 +243,23 @@ The meta-frame.html defines the html header and an empty body. Inside the header
 
 Each bean and each bean-attribute can define a layout and layout-constraints through it's presentable object.
 
+TODO describe
+
+## Working on a page using the Keyboard
+
+The gui provides shortcuts/hotkeys for each button to activate. As html provides basic field tabbing (of course, that depends on your browser), it should be possible to work fast only with your keyboard.
+
+On entering a search-page, the _search_ button will have always the default-focus. If a search was done, the _open_ button will have the default-focus.
+
+On entering a detail-page, the _save_ button, if existing, will have the default-focus.
+
+### Actions and Buttons
+
+Each action is able to define a shortcut (keystroke). if not set, the default will be evaluated through the actions name. If that name contains a '&', the following character will be used as shortcut - if no '&' is contained and no keystroke was defined, the first character of the name will be used. E.g., if the name/label is "Clo&se", you have to hit _ALT+s_ to activate this action.
+
+### Tableheader Buttons
+
+Each table of beans will provide a table-header with Buttons to do up/down sorting (on first activation, up-sorting will be done, on second activation, down-sorting). On these Buttons we can't use the algorithm above to avoid shortcut collisions. These buttons will have shortcuts depending on their indexes. So, the first table-header column will be activated through a hit to _ALT+1_.
 ## Networking Modes
 
 The _Nano.H5_ application can be started in different modes.
