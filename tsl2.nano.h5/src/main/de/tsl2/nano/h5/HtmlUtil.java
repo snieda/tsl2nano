@@ -143,6 +143,7 @@ public class HtmlUtil {
     public static final String COLOR_YELLOW = "#CCCC00";
 
     public static final String STYLE_BACKGROUND_RADIAL_GRADIENT = "background: radial-gradient(#9999FF, #000000);";
+    public static final String STYLE_BACKGROUND_LIGHTGRAY = "background: #CCCCCC;";
     
     public static final String VAL_100PERCENT = "100%";
     public static final String VAL_FALSE = Boolean.FALSE.toString();

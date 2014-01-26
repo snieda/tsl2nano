@@ -7,9 +7,10 @@
  * 
  * Copyright: (c) Thomas Schneider 2014, all rights reserved
  */
-package de.tsl2.nano.h5;
+package de.tsl2.nano.h5.configuration;
 
 import java.io.Serializable;
+import java.lang.reflect.Proxy;
 import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.text.DecimalFormat;
@@ -17,13 +18,16 @@ import java.text.Format;
 import java.text.NumberFormat;
 import java.text.SimpleDateFormat;
 
+import de.tsl2.nano.action.IActivator;
 import de.tsl2.nano.bean.BeanClass;
 import de.tsl2.nano.bean.def.AttributeDefinition;
 import de.tsl2.nano.bean.def.IAttributeDefinition;
 import de.tsl2.nano.bean.def.IPresentable;
 import de.tsl2.nano.bean.def.IPresentableColumn;
 import de.tsl2.nano.format.RegExpFormat;
+import de.tsl2.nano.h5.Html5Presentation;
 import de.tsl2.nano.util.PrivateAccessor;
+import de.tsl2.nano.util.SetterExtenderPoxy;
 import de.tsl2.nano.util.Util;
 
 /**
@@ -37,6 +41,8 @@ public class AttributeConfigurator implements Serializable {
     private static final long serialVersionUID = 1L;
     AttributeDefinition<?> attr;
     PrivateAccessor<AttributeDefinition<?>> attrAccessor;
+
+    IIPresentable presentable;
 
     public AttributeConfigurator() {
         this(BeanClass.createInstance(AttributeDefinition.class));
@@ -126,15 +132,21 @@ public class AttributeConfigurator implements Serializable {
         else
             ((RegExpFormat) f).setPattern(format, null, attr.getLength(), 0);
     }
-    
-    public IPresentable getPresentation() {
-        return attr.getPresentation();
+
+    public IPresentable getPresentable() {
+        return  attr.getPresentation();
+//        if (presentable == null) {
+//            if (IPresentable.class.isAssignableFrom(attr.getDeclaringClass()))
+//                attr.getPresentation().setEnabler(IActivator.ACTIVE);
+//            presentable = SetterExtenderPoxy.setterExtender(IIPresentable.class, attr.getPresentation());
+//        }
+//        return presentable;
     }
 
-    public void setPresentation(IPresentable p) {
-        attrAccessor.set("presentable", p);
+    public void setPresentable(IPresentable p) {
+        attrAccessor.set("presentable", /*SetterExtenderPoxy.instanceOf((Proxy) */p/*)*/);
     }
-    
+
     public IPresentableColumn getColumnDefinition() {
         return attr.getColumnDefinition();
     }
@@ -142,7 +154,7 @@ public class AttributeConfigurator implements Serializable {
     public void setColumnDefinition(IPresentableColumn c) {
         attrAccessor.set("columnDefinition", c);
     }
-    
+
     public boolean isNullable() {
         return attr.isNullable();
     }

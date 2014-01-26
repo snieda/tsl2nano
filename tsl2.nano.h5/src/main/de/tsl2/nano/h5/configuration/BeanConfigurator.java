@@ -7,7 +7,7 @@
  * 
  * Copyright: (c) Thomas Schneider 2014, all rights reserved
  */
-package de.tsl2.nano.h5;
+package de.tsl2.nano.h5.configuration;
 
 import static de.tsl2.nano.h5.HtmlUtil.ATTR_BGCOLOR;
 import static de.tsl2.nano.h5.HtmlUtil.*;

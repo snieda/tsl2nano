@@ -263,7 +263,7 @@ public class NanoH5 extends NanoHTTPD {
     @SuppressWarnings({ "serial" })
     private Bean<?> createPersistenceUnit() {
         final Persistence persistence = Persistence.current();
-        Bean<?> login = new Bean(persistence);
+        Bean<?> login = Bean.getBean(persistence);
         if (login.toString().matches(Environment.get("default.present.attribute.multivalue", ".*")))
             login.removeAttributes("jdbcProperties");
         login.getAttribute("jarFile").getPresentation().setType(IPresentable.TYPE_ATTACHMENT);

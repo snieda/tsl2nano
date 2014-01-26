@@ -50,6 +50,7 @@ import static de.tsl2.nano.h5.HtmlUtil.COLOR_BLACK;
 import static de.tsl2.nano.h5.HtmlUtil.COLOR_LIGHT_BLUE;
 import static de.tsl2.nano.h5.HtmlUtil.COLOR_LIGHT_GRAY;
 import static de.tsl2.nano.h5.HtmlUtil.COLOR_RED;
+import static de.tsl2.nano.h5.HtmlUtil.STYLE_BACKGROUND_LIGHTGRAY;
 import static de.tsl2.nano.h5.HtmlUtil.STYLE_BACKGROUND_RADIAL_GRADIENT;
 import static de.tsl2.nano.h5.HtmlUtil.STYLE_TEXT_ALIGN;
 import static de.tsl2.nano.h5.HtmlUtil.TAG_BODY;
@@ -85,7 +86,6 @@ import java.net.URL;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Date;
-import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.LinkedList;
 import java.util.List;
@@ -103,6 +103,7 @@ import de.tsl2.nano.Environment;
 import de.tsl2.nano.Messages;
 import de.tsl2.nano.action.IAction;
 import de.tsl2.nano.bean.BeanAttribute;
+import de.tsl2.nano.bean.BeanClass;
 import de.tsl2.nano.bean.BeanUtil;
 import de.tsl2.nano.bean.def.AttributeDefinition;
 import de.tsl2.nano.bean.def.Bean;
@@ -123,6 +124,7 @@ import de.tsl2.nano.collection.MapUtil;
 import de.tsl2.nano.exception.ForwardedException;
 import de.tsl2.nano.format.GenericParser;
 import de.tsl2.nano.format.RegExpFormat;
+import de.tsl2.nano.h5.configuration.BeanConfigurator;
 import de.tsl2.nano.log.LogFactory;
 import de.tsl2.nano.util.DateUtil;
 import de.tsl2.nano.util.FileUtil;
@@ -369,7 +371,7 @@ public class Html5Presentation<T> extends BeanPresentationHelper<T> implements I
         if (navigation.length > 0) {
             for (BeanDefinition<?> bean : navigation) {
                 appendElement((Element) parent, TAG_LINK, content("->" + bean.toString()), ATTR_HREF, bean.getName(),
-                    ATTR_STYLE, "color: #FFFFFF;");
+                    ATTR_STYLE, "color: #BBBBBB;");
             }
         }
 
@@ -520,7 +522,7 @@ public class Html5Presentation<T> extends BeanPresentationHelper<T> implements I
         Collection<Integer> editableRows = Arrays.asList(editableRowNumbers);
         ValueExpressionFormat<T> vef = null;
         if (data.size() > 0 && editableRows.size() > 0) {
-            vef = new ValueExpressionFormat(data.iterator().next().getClass());
+            vef = new ValueExpressionFormat(BeanClass.getDefiningClass(data.iterator().next().getClass()));
         }
         int i = 0;
         boolean hasSearchFilter = tableDescriptor.getBeanFinder().getFilterRange() != null;
@@ -944,6 +946,8 @@ public class Html5Presentation<T> extends BeanPresentationHelper<T> implements I
                     HtmlUtil.appendAttributes(a, "tabindex", shortcut);
 
                 }
+            } else {//gray background on disabled
+                HtmlUtil.appendAttributes(input, ATTR_STYLE, STYLE_BACKGROUND_LIGHTGRAY);
             }
         } else {
             input = createSelectorField(cell, beanValue);
@@ -1220,5 +1224,54 @@ class Html5Presentable extends Presentable {
     public <T extends IPresentable> T setLayoutConstraints(LinkedHashMap<String, String> lc) {
         this.layoutConstraints = lc;
         return (T) this;
+    }
+
+    /**
+     * @param label The label to set.
+     */
+    void setLabel(String label) {
+        
+    }
+
+    /**
+     * @param description The description to set.
+     */
+    void setDescription(String description) {
+        
+    }
+
+    /**
+     * @param layout The layout to set.
+     */
+    void setLayout(LinkedHashMap<String, String> layout) {
+        
+    }
+
+    /**
+     * @param layoutConstraints The layoutConstraints to set.
+     */
+    void setLayoutConstraints(LinkedHashMap<String, String> layoutConstraints) {
+        
+    }
+
+    /**
+     * @param icon The icon to set.
+     */
+    void setIcon(String icon) {
+        
+    }
+
+    /**
+     * @param foreground The foreground to set.
+     */
+    void setForeground(int[] foreground) {
+        
+    }
+
+    /**
+     * @param background The background to set.
+     */
+    void setBackground(int[] background) {
+        
     }
 }
