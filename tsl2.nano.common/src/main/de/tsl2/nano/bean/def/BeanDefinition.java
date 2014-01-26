@@ -30,6 +30,7 @@ import org.simpleframework.xml.Default;
 import org.simpleframework.xml.DefaultType;
 import org.simpleframework.xml.ElementMap;
 import org.simpleframework.xml.Namespace;
+import org.simpleframework.xml.core.Commit;
 import org.simpleframework.xml.core.Persist;
 
 import de.tsl2.nano.Environment;
@@ -962,6 +963,11 @@ public class BeanDefinition<T> extends BeanClass<T> implements Serializable {
      */
     public void setValueExpression(ValueExpression<T> valueExpression) {
         this.valueExpression = valueExpression;
+    }
+
+    @Commit
+    private void initDeserializing() {
+        allDefinitionsCached = true;
     }
 
     /**
