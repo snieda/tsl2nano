@@ -75,6 +75,14 @@ public class UnboundAccessor<T> {
     }
 
     /**
+     * instance
+     * @return the unwrapped instance
+     */
+    public T instance() {
+        return instance;
+    }
+    
+    /**
      * returns any member of all super classes of {@link #instance}
      * 
      * @param name field name

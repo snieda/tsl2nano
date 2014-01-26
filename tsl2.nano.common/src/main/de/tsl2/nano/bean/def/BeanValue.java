@@ -113,7 +113,7 @@ public class BeanValue<T> extends AttributeDefinition<T> implements IValueDefini
                 //don't use inner class infos or enum values
                 if (value != null && !value.getClass().isAnonymousClass()
                     && value.getClass().getDeclaringClass() == null)
-                    return (Class<T>) value.getClass();
+                    return (Class<T>) BeanClass.getDefiningClass(value.getClass());
             } catch (Exception e) {
                 LOG.warn("couldn't evaluate type through instance. using method-returntype instead. error was: "
                     + e.toString());

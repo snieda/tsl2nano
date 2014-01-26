@@ -9,6 +9,12 @@
  */
 package de.tsl2.nano.bean.def;
 
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
+
+import de.tsl2.nano.bean.BeanAttribute;
+
 
 /**
  * description of a value group inside a bean. usable to create sub panel informations. you can define a full set of
@@ -22,18 +28,18 @@ public class ValueGroup extends Presentable {
     /** serialVersionUID */
     private static final long serialVersionUID = -6371693652730976950L;
     
-    String[] attributeNames;
+    List<String> attributes;
 
     /**
      * constructor to be serializable
      */
     protected ValueGroup() {
-        super();
+        this("");
     }
 
     public ValueGroup(String label, String... attributeNames) {
         this.label = label;
-        this.attributeNames = attributeNames;
+        this.attributes = new ArrayList<String>(Arrays.asList(attributeNames));
         type = TYPE_FORM;
     }
 
@@ -42,15 +48,30 @@ public class ValueGroup extends Presentable {
      * 
      * @return child attributes
      */
-    public String[] getAttributeNames() {
-        return attributeNames;
+    public List<String> getAttributeNames() {
+        return attributes;
     }
-
-    public String getFirstChildAttribute() {
-        return attributeNames[0];
+    
+    /**
+     * adds the given attribute
+     * @param name attribute name
+     */
+    public void add(String name) {
+        attributes.add(name);
     }
-
-    public String getLastChildAttribute() {
-        return attributeNames[attributeNames.length - 1];
+    
+    /**
+     * adds all bean attributes of the given attribute, that has to be an instance of another bean.
+     * @param nestingBean nesting attribute bean
+     */
+    public void addNesting(BeanAttribute attributeNestingBean, Object instance) {
+        Object value = attributeNestingBean.getValue(instance);
+        if (value != null) {
+            BeanDefinition<? extends Object> beanDefinition = BeanDefinition.getBeanDefinition(value.getClass());
+            String bname = beanDefinition.getName();
+            for (String attr : beanDefinition.getAttributeNames()) {
+                attributes.add(bname + "." + attr);
+            }
+        }
     }
 }

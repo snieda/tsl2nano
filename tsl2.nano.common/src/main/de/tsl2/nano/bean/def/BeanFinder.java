@@ -35,6 +35,9 @@ public class BeanFinder<T, F> implements IBeanFinder<T, F>, Serializable {
     Class<T> type;
     /** optional bean definition to present a search filter mask */
     Bean<IRange<F>> rangeBean;
+    /** if no {@link #rangeBean} can be created */
+    boolean noRangeBean;
+    
     /** optional detail bean definition to present a selected bean in a detailed mask */
     Bean<T> detailBean;
     transient int currentStartIndex = 0;
@@ -131,12 +134,13 @@ public class BeanFinder<T, F> implements IBeanFinder<T, F>, Serializable {
 
     @Override
     public Bean<IRange<F>> getFilterRange() {
-        if (rangeBean == null) {
+        if (rangeBean == null && !noRangeBean) {
             try {
                 F from = (F) BeanClass.createInstance(type);
                 F to = BeanUtil.clone(from);
                 rangeBean = new Bean<IRange<F>>(new Range<F>(from, to));
             } catch (Exception ex) {
+                noRangeBean = true;
                 //ok, we don't provide a range filter
                 LOG.warn("BeanFinder wont provide a range filter:" + ex.toString());
             }
@@ -151,6 +155,7 @@ public class BeanFinder<T, F> implements IBeanFinder<T, F>, Serializable {
      */
     public void setFilterRange(Bean<IRange<F>> rangeBean) {
         this.rangeBean = rangeBean;
+        noRangeBean = false;
     }
 
     /**
