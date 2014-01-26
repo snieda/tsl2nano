@@ -223,7 +223,7 @@ public class BeanContainer implements IBeanContainer {
                 bean = type.newInstance();
             }
             //to fulfil bindings on onetomany, we bind empty lists
-            final BeanClass clazz = new BeanClass(type);
+            final BeanClass clazz = BeanClass.getBeanClass(type);
             final Collection<BeanAttribute> multiValueAttributes = clazz.getMultiValueAttributes();
             for (final BeanAttribute beanAttribute : multiValueAttributes) {
                 if (Set.class.isAssignableFrom(beanAttribute.getType())) {

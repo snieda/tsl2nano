@@ -385,7 +385,7 @@ public class BeanUtil {
      * @return true, if all attributes are null.
      */
     public static boolean isEmpty(Object bean, String... filterAttributes) {
-        final BeanClass bc = new BeanClass(bean.getClass());
+        final BeanClass bc = BeanClass.getBeanClass(bean.getClass());
         final Collection<BeanAttribute> attributes = bc.getAttributes();
         final Collection ignore = Arrays.asList(filterAttributes);
         for (final BeanAttribute beanAttribute : attributes) {
@@ -881,7 +881,7 @@ public class BeanUtil {
     public static int hashCodeReflect(Object bean, String... attributes) {
         final int prime = 31;
         int result = 1;
-        BeanClass bc = new BeanClass(bean.getClass());
+        BeanClass bc = BeanClass.getBeanClass(bean.getClass());
         if (attributes == null) {
             attributes = bc.getAttributeNames();
         }

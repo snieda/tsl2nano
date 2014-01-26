@@ -92,6 +92,7 @@ public class BeanClass<T> implements Serializable {
 
     /**
      * uses an internal cache through {@link CachedBeanClass} to perform on getting all attributes
+     * 
      * @param <C> bean type
      * @param beanClass bean type
      * @return new or cached instance
@@ -115,7 +116,7 @@ public class BeanClass<T> implements Serializable {
     public static final String getName(Class clazz) {
         return getName(clazz, false);
     }
-    
+
     /**
      * returns the simple class name. if class is a proxy, we return the simple name of the first interface.
      * 
@@ -132,9 +133,10 @@ public class BeanClass<T> implements Serializable {
     public String getPath() {
         return getPath(clazz);
     }
-    
+
     /**
      * returns the package path of class.
+     * 
      * @param clazz normal class or proxy class
      * @return simple class name
      */
@@ -184,7 +186,8 @@ public class BeanClass<T> implements Serializable {
                 if (!readAndWriteAccess || hasWriteAccessMethod(allMethods[i])) {
                     BeanAttribute attr = new BeanAttribute(allMethods[i]);
                     //check, if attribute is BeanAttribute-compatible - but only if not boolean-type (because of get and is)
-                    if (isAssignableFrom(Boolean.class, allMethods[i].getReturnType()) || BeanAttribute.hasExpectedName(allMethods[i])) {
+                    if (isAssignableFrom(Boolean.class, allMethods[i].getReturnType())
+                        || BeanAttribute.hasExpectedName(allMethods[i])) {
                         beanAccessMethods.add(attr);
                         accessedMethods.add(allMethods[i].getName());
                     } else {
@@ -428,7 +431,7 @@ public class BeanClass<T> implements Serializable {
      * delegates to {@link #callMethod(Object, String, Class[], Object...)} - instance must not be null!
      */
     public static Object call(Object instance, String methodName, Class[] par, Object... args) {
-        return new BeanClass(instance.getClass()).callMethod(instance, methodName, par, args);
+        return BeanClass.getBeanClass(instance.getClass()).callMethod(instance, methodName, par, args);
     }
 
     /**
@@ -598,7 +601,8 @@ public class BeanClass<T> implements Serializable {
                 }
             }
             if (instance == null) {
-                throw FormattedException.implementationError("BeanClass could not create the desired instance of type " + clazz,
+                throw FormattedException.implementationError("BeanClass could not create the desired instance of type "
+                    + clazz,
                     args,
                     constructors);
             }
@@ -621,7 +625,7 @@ public class BeanClass<T> implements Serializable {
      */
     public static BeanClass createBeanClass(String className, ClassLoader classLoader) {
         Class clazz = load(className, classLoader);
-        return new BeanClass(clazz);
+        return BeanClass.getBeanClass(clazz);
     }
 
     /**
@@ -647,7 +651,7 @@ public class BeanClass<T> implements Serializable {
      * delegates to {@link #copyValues(Object, Object, String...)} using all destination attributes having a setter.
      */
     public static <D> D copyValues(Object src, D dest, boolean onlyDestAttributes) {
-        final BeanClass destClass = new BeanClass(dest.getClass());
+        final BeanClass destClass = BeanClass.getBeanClass(dest.getClass());
         String[] attributeNames = destClass.getAttributeNames(true);
         return copyValues(src, dest, attributeNames);
     }
@@ -676,7 +680,7 @@ public class BeanClass<T> implements Serializable {
     public static <D> D copyValues(Object src, D dest, boolean onlyIfNotNull, String... attributeNames) {
         int copied = 0;
         if (attributeNames.length == 0) {
-            final BeanClass srcClass = new BeanClass(src.getClass());
+            final BeanClass srcClass = BeanClass.getBeanClass(src.getClass());
             attributeNames = srcClass.getAttributeNames();
         }
         if (LOG.isDebugEnabled()) {
@@ -721,7 +725,7 @@ public class BeanClass<T> implements Serializable {
      * @return the instance itself
      */
     public static <S> S createOwnCollectionInstances(S src) {
-        BeanClass<S> bc = new BeanClass(src.getClass());
+        BeanClass<S> bc = (BeanClass<S>) BeanClass.getBeanClass(src.getClass());
         List<BeanAttribute> attributes = bc.getAttributes();
         for (BeanAttribute a : attributes) {
             if (Collection.class.isAssignableFrom(a.getType())) {
@@ -833,7 +837,7 @@ public class BeanClass<T> implements Serializable {
      * @return all public methods (wrapped into actions) starting with 'action' and having no arguments.
      */
     @SuppressWarnings("serial")
-    public static Collection<IAction> getActions(Class<?> clazz, Collection<IAction> actions, Object...parameters) {
+    public static Collection<IAction> getActions(Class<?> clazz, Collection<IAction> actions, Object... parameters) {
         final Method[] methods = getDefiningClass(clazz).getMethods();
         if (actions == null)
             actions = new ArrayList<IAction>();
@@ -842,13 +846,13 @@ public class BeanClass<T> implements Serializable {
                 final Method m = methods[i];
                 final String name = m.getName().substring(ACTION_PREFIX.length());
                 CommonAction<Object> newAction = new CommonAction<Object>(m.toGenericString(),
-                        name,
-                        Messages.getStringOpt(m.toGenericString())) {
-                        @Override
-                        public Object action() throws Exception {
-                            return m.invoke(getParameter()[0], new Object[0]);
-                        }
-                    };
+                    name,
+                    Messages.getStringOpt(m.toGenericString())) {
+                    @Override
+                    public Object action() throws Exception {
+                        return m.invoke(getParameter()[0], new Object[0]);
+                    }
+                };
                 newAction.setParameter(parameters);
                 actions.add(newAction);
             }
@@ -915,11 +919,11 @@ public class BeanClass<T> implements Serializable {
      */
     public static final Class<?> getDefiningClass(Class<?> cls) {
         //TODO: how to check for enhancing class
-        return (cls.getEnclosingClass() != null || cls.getSimpleName().contains("$")) && cls.getSuperclass() != null ? getDefiningClass(cls.getSuperclass())
-            : Proxy.isProxyClass(cls) ? cls.getInterfaces()[0] : cls;
+        return Proxy.isProxyClass(cls) ? cls.getInterfaces()[0] : (cls.getEnclosingClass() != null || cls
+            .getSimpleName().contains("$")) && cls.getSuperclass() != null ? getDefiningClass(cls.getSuperclass())
+            : cls;
     }
 }
-
 
 /**
  * this class is used by internal caching - while other extensions of {@link BeanClass} will cache their own attribute
@@ -938,7 +942,7 @@ class CachedBeanClass<T> extends BeanClass<T> {
     /** cached bean attributes */
     private transient List<BeanAttribute> attributes;
     /**
-     * stores the last call on {@link #getAttributes(boolean)}. if the next call differs, the list will be rebuilt.     * 
+     * stores the last call on {@link #getAttributes(boolean)}. if the next call differs, the list will be rebuilt. *
      */
     private transient boolean readAndWriteAttributes;
 
