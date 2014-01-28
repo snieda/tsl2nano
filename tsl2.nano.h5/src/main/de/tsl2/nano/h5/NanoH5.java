@@ -171,7 +171,7 @@ public class NanoH5 extends NanoHTTPD {
      */
     @Override
     public Response serve(String uri, String method, Properties header, Properties parms, Properties files) {
-        if (method.equals("GET") && HtmlUtil.isURL(uri) && !uri.contains(Html5Presentation.PREFIX_ACTION))
+        if (method.equals("GET") && HtmlUtil.isURL(uri) && !uri.contains(Html5Presentation.PREFIX_BEANREQUEST))
             return super.serve(uri, method, header, parms, files);
         InetAddress requestor = ((Socket) header.get("socket")).getInetAddress();
         NanoH5Session session = sessions.get(requestor);

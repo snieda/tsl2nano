@@ -83,12 +83,12 @@ import java.io.File;
 import java.io.InputStream;
 import java.io.Serializable;
 import java.net.URL;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Date;
 import java.util.LinkedHashMap;
 import java.util.LinkedList;
-import java.util.List;
 import java.util.Map;
 
 import javax.xml.parsers.DocumentBuilderFactory;
@@ -105,6 +105,7 @@ import de.tsl2.nano.action.IAction;
 import de.tsl2.nano.bean.BeanAttribute;
 import de.tsl2.nano.bean.BeanClass;
 import de.tsl2.nano.bean.BeanUtil;
+import de.tsl2.nano.bean.ValueHolder;
 import de.tsl2.nano.bean.def.AttributeDefinition;
 import de.tsl2.nano.bean.def.Bean;
 import de.tsl2.nano.bean.def.BeanCollector;
@@ -116,9 +117,11 @@ import de.tsl2.nano.bean.def.IColumn;
 import de.tsl2.nano.bean.def.IPageBuilder;
 import de.tsl2.nano.bean.def.IPresentable;
 import de.tsl2.nano.bean.def.IPresentableColumn;
+import de.tsl2.nano.bean.def.IValueAccess;
 import de.tsl2.nano.bean.def.Presentable;
 import de.tsl2.nano.bean.def.SecureAction;
 import de.tsl2.nano.bean.def.ValueExpressionFormat;
+import de.tsl2.nano.bean.def.ValueGroup;
 import de.tsl2.nano.collection.CollectionUtil;
 import de.tsl2.nano.collection.MapUtil;
 import de.tsl2.nano.exception.ForwardedException;
@@ -130,6 +133,7 @@ import de.tsl2.nano.util.DateUtil;
 import de.tsl2.nano.util.FileUtil;
 import de.tsl2.nano.util.NumberUtil;
 import de.tsl2.nano.util.StringUtil;
+import de.tsl2.nano.util.Util;
 
 /**
  * is able to present a bean as an html page. main method is {@link #build(Element, String)}.
@@ -151,8 +155,11 @@ public class Html5Presentation<T> extends BeanPresentationHelper<T> implements I
 
     public static final String L_GRIDWIDTH = "layout.gridwidth";
 
+    public static final String PREFIX_BEANREQUEST = "~~~";
     /** indicator for server to handle a link, that was got as link (method=GET) not as a file */
-    public static final String PREFIX_ACTION = "!!!";
+    public static final String PREFIX_ACTION = PREFIX_BEANREQUEST + "!!!";
+    /** indicator for server to handle a link, that was got as link (method=GET) not as a file */
+    public static final String PREFIX_BEANLINK = PREFIX_BEANREQUEST + "-->";
 
     /**
      * constructor
@@ -282,7 +289,7 @@ public class Html5Presentation<T> extends BeanPresentationHelper<T> implements I
                 content(Environment.getBuildInformations()),
                 ATTR_SRC,
                 "icons/beanex-logo-micro.jpg");
-            
+
             if (image != null) {
                 c2 = appendElement(c2, TAG_H3, content(), ATTR_ALIGN, ALIGN_CENTER);
                 appendElement(c2,
@@ -370,7 +377,7 @@ public class Html5Presentation<T> extends BeanPresentationHelper<T> implements I
 
         if (navigation.length > 0) {
             for (BeanDefinition<?> bean : navigation) {
-                appendElement((Element) parent, TAG_LINK, content("->" + bean.toString()), ATTR_HREF, bean.getName(),
+                appendElement((Element) parent, TAG_LINK, content("->" + bean.toString()), ATTR_HREF, PREFIX_BEANLINK + bean.getName(),
                     ATTR_STYLE, "color: #BBBBBB;");
             }
         }
@@ -401,27 +408,63 @@ public class Html5Presentation<T> extends BeanPresentationHelper<T> implements I
      * @param parent
      */
     private void createBean(Element parent, Bean<?> bean, boolean interactive) {
-        int columns = bean.getPresentable().layout(L_GRIDWIDTH, Environment.get("layout.default.columncount", 3));
+        Collection<ValueGroup> valueGroups = bean.getValueGroups();
+        if (Util.isEmpty(valueGroups))
+            createFieldPanel(parent, bean.getPresentable(), bean.getBeanValues(), bean.getActions(), interactive);
+        else {//work on value groups
+            Collection<IAction> noActions = new LinkedList<IAction>();
+            for (ValueGroup valueGroup : valueGroups) {
+                if (!valueGroup.isVisible())
+                    continue;
+                Collection<BeanValue<?>> beanValues =
+                    new ArrayList<BeanValue<?>>(valueGroup.getAttributes().size());
+                BeanValue bv;
+                for (String name : valueGroup.getAttributes().keySet()) {
+                    if (valueGroup.isDetail(name)) {
+                        if (bean.getAttribute(name).isMultiValue()) {
+                            bv =
+                                BeanValue.getBeanValue(
+                                    BeanCollector.createBeanCollectorHolder((Collection) bean.getValue(name),
+                                        IBeanCollector.MODE_ALL), ValueHolder.ATTR_VALUE);
+                            bv.setDescription(name);
+                        } else {
+                            bv = BeanValue.getBeanValue(Bean.getBean((Serializable) bean.getInstance()), name);
+                        }
+                    } else {
+                        bv = BeanValue.getBeanValue(bean.getInstance(), name);
+                    }
+                    beanValues.add(bv);
+                }
+                createFieldPanel(parent, valueGroup, beanValues, noActions, interactive);
+            }
+        }
+    }
+
+    private void createFieldPanel(Element parent,
+            IPresentable p,
+            Collection<BeanValue<?>> beanValues,
+            Collection<IAction> actions,
+            boolean interactive) {
+        int columns = p.layout(L_GRIDWIDTH, Environment.get("layout.default.columncount", 3));
         Element panel = createGrid(parent, Environment.translate("tsl2nano.input", false), columns);
         //set layout and constraints into the grid
-        appendAttributes((Element) panel.getParentNode(), bean.getPresentable());
-        Bean<T> vbean = (Bean<T>) bean;
-        List<BeanValue<?>> beanValues = vbean.getBeanValues();
+        appendAttributes((Element) panel.getParentNode(), p);
         boolean firstFocused = false;
         int count = 0;
         Element field = null;
         for (BeanValue<?> beanValue : beanValues) {
             if (beanValue.isBean()) {
                 Bean<?> bv = (Bean<?>) beanValue.getInstance();
-                bv.setPresentationHelper(new Html5Presentation()).createPage(parent, null, interactive);
-                if (vbean.getActions() != null)
-                    vbean.getActions().addAll(bv.getActions());
-                else
-                    vbean.setActions(bv.getActions());
+                bv.setPresentationHelper(new Html5Presentation(bv)).createPage(parent, bv.getName(), interactive);
+                actions.addAll(bv.getActions());
+            } else if (beanValue.isBeanCollector()) {
+                BeanCollector<?, ?> bv = (BeanCollector<?, ?>) ((IValueAccess) beanValue.getInstance()).getValue();
+                bv.setPresentationHelper(new Html5Presentation(bv)).createPage(parent, beanValue.getDescription(), interactive);
+                actions.addAll(bv.getActions());
             } else {
                 Element fparent = (Element) (field == null || (++count % (columns / 3) == 0) ? panel
                     : field.getParentNode().getParentNode());
-                field = createField(fparent, beanValue);
+                field = createField(fparent, beanValue, interactive);
                 if (!firstFocused) {
                     field.setAttribute(ATTR_AUTOFOCUS, ATTR_AUTOFOCUS);
                     firstFocused = true;
@@ -632,7 +675,7 @@ public class Html5Presentation<T> extends BeanPresentationHelper<T> implements I
             a.getLongDescription(),
             null,
             a.getKeyStroke(),
-            (a.getImagePath() != null ? a.getImagePath() : "icons/" + a.getShortDescription() + ".gif"),
+            (a.getImagePath() != null ? a.getImagePath() : "icons/" + a.getShortDescription().toLowerCase() + ".png"),
             a.isEnabled(),
             a.isDefault(),
             a.getActionMode() != IAction.MODE_DLG_OK);
@@ -873,7 +916,7 @@ public class Html5Presentation<T> extends BeanPresentationHelper<T> implements I
         return row;
     }
 
-    Element createField(Element parent, BeanValue<?> beanValue) {
+    Element createField(Element parent, BeanValue<?> beanValue, boolean interactive) {
         Element row = parent.getNodeName().equals(TAG_ROW) ? parent : appendElement(parent, TAG_ROW);
         //first the label
         Element cellLabel = appendElement(row, TAG_CELL);
@@ -925,29 +968,31 @@ public class Html5Presentation<T> extends BeanPresentationHelper<T> implements I
                 "tabindex",
                 beanValue.getPresentation().layout("tabindex", ++currentTabIndex).toString(),
                 enable(ATTR_HIDDEN, !beanValue.getPresentation().isVisible()),
-                enable(ATTR_DISABLED, !beanValue.getPresentation().getEnabler().isActive()),
-                enable(ATTR_READONLY, !beanValue.getPresentation().getEnabler().isActive()),
+                enable(ATTR_DISABLED, !interactive || !beanValue.getPresentation().getEnabler().isActive()),
+                enable(ATTR_READONLY, !interactive || !beanValue.getPresentation().getEnabler().isActive()),
                 enable(ATTR_REQUIRED, !beanValue.nullable()));
 
-            if (beanValue.getPresentation().getEnabler().isActive()) {
-                //create a finder button
-                if (beanValue.isSelectable()) {
-                    String shortcut = String.valueOf(++currentTabIndex);
-                    Element a = createAction(cell,
-                        beanValue.getName() + IPresentable.POSTFIX_SELECTOR,
-                        Environment.translate("tsl2nano.finder.action.label", false),
-                        Environment.translate("tsl2nano.selection", true),
-                        Environment.translate("tsl2nano.select", true),
-                        shortcut,
-                        null,
-                        beanValue.hasWriteAccess(),
-                        false,
-                        true);
-                    HtmlUtil.appendAttributes(a, "tabindex", shortcut);
+            if (interactive) {
+                if (beanValue.getPresentation().getEnabler().isActive()) {
+                    //create a finder button
+                    if (beanValue.isSelectable()) {
+                        String shortcut = String.valueOf(++currentTabIndex);
+                        Element a = createAction(cell,
+                            beanValue.getName() + IPresentable.POSTFIX_SELECTOR,
+                            Environment.translate("tsl2nano.finder.action.label", false),
+                            Environment.translate("tsl2nano.selection", true),
+                            Environment.translate("tsl2nano.select", true),
+                            shortcut,
+                            null,
+                            beanValue.hasWriteAccess(),
+                            false,
+                            true);
+                        HtmlUtil.appendAttributes(a, "tabindex", shortcut);
 
+                    }
+                } else {//gray background on disabled
+                    HtmlUtil.appendAttributes(input, ATTR_STYLE, STYLE_BACKGROUND_LIGHTGRAY);
                 }
-            } else {//gray background on disabled
-                HtmlUtil.appendAttributes(input, ATTR_STYLE, STYLE_BACKGROUND_LIGHTGRAY);
             }
         } else {
             input = createSelectorField(cell, beanValue);
@@ -1224,54 +1269,5 @@ class Html5Presentable extends Presentable {
     public <T extends IPresentable> T setLayoutConstraints(LinkedHashMap<String, String> lc) {
         this.layoutConstraints = lc;
         return (T) this;
-    }
-
-    /**
-     * @param label The label to set.
-     */
-    void setLabel(String label) {
-        
-    }
-
-    /**
-     * @param description The description to set.
-     */
-    void setDescription(String description) {
-        
-    }
-
-    /**
-     * @param layout The layout to set.
-     */
-    void setLayout(LinkedHashMap<String, String> layout) {
-        
-    }
-
-    /**
-     * @param layoutConstraints The layoutConstraints to set.
-     */
-    void setLayoutConstraints(LinkedHashMap<String, String> layoutConstraints) {
-        
-    }
-
-    /**
-     * @param icon The icon to set.
-     */
-    void setIcon(String icon) {
-        
-    }
-
-    /**
-     * @param foreground The foreground to set.
-     */
-    void setForeground(int[] foreground) {
-        
-    }
-
-    /**
-     * @param background The background to set.
-     */
-    void setBackground(int[] background) {
-        
     }
 }

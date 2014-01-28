@@ -115,14 +115,21 @@ public class NanoH5Session {
             if (parms.containsKey(IAction.CANCELED)
                 || (method.equals("POST") && referer != null && uri.length() > 1 && referer.contains(uri)))
                 uri = "/";
-            BeanDefinition<?> linkToModel = nav.fromUrl(uri);
+            //extract bean-specific prefix
+            BeanDefinition<?> linkToModel =
+                nav.fromUrl(StringUtil.substring(uri, Html5Presentation.PREFIX_BEANREQUEST, null));
             Object userResponse = null;
-            //direct link to another page/bean
-            //selection-link-number in beancollector
+            /*
+             * uri:
+             * - file-system links is already handled in parent class.
+             * - direct link to another page/bean
+             * - selection-link-number in beancollector
+             * - bean action of Html5PresentationHelper
+             */
             Number uriLinkNumber = linkToModel != null ? null : NumberUtil.extractNumber(uri.substring(1));
             //form-button clicked - or first page
             if (!parms.isEmpty() || linkToModel != null || uriLinkNumber != null || response == null
-                || uri.contains(Html5Presentation.PREFIX_ACTION)) {
+                || uri.contains(Html5Presentation.PREFIX_BEANREQUEST)) {
                 if (linkToModel != null) {
                     userResponse = linkToModel;
                 } else {

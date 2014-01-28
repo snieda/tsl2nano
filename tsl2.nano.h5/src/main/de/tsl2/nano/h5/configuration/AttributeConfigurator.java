@@ -22,6 +22,7 @@ import de.tsl2.nano.action.IActivator;
 import de.tsl2.nano.bean.BeanClass;
 import de.tsl2.nano.bean.def.AttributeDefinition;
 import de.tsl2.nano.bean.def.IAttributeDefinition;
+import de.tsl2.nano.bean.def.IIPresentable;
 import de.tsl2.nano.bean.def.IPresentable;
 import de.tsl2.nano.bean.def.IPresentableColumn;
 import de.tsl2.nano.format.RegExpFormat;

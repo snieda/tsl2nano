@@ -14,6 +14,7 @@ import static de.tsl2.nano.h5.HtmlUtil.*;
 
 import java.io.Serializable;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 
@@ -23,6 +24,7 @@ import de.tsl2.nano.bean.def.Bean;
 import de.tsl2.nano.bean.def.BeanDefinition;
 import de.tsl2.nano.bean.def.Presentable;
 import de.tsl2.nano.bean.def.ValueExpression;
+import de.tsl2.nano.bean.def.ValueGroup;
 import de.tsl2.nano.collection.MapUtil;
 import de.tsl2.nano.util.PrivateAccessor;
 import de.tsl2.nano.util.Util;
@@ -101,6 +103,22 @@ public class BeanConfigurator<T> implements Serializable {
         def.setPresentable(presentable);
     }
 
+
+    /**
+     * @return Returns the presentable.
+     */
+    @SuppressWarnings("unchecked")
+    public Collection<ValueGroup> getValueGroups() {
+        return defAccessor.member("valueGroups", Collection.class);
+    }
+
+    /**
+     * @param valueGroups The presentable to set.
+     */
+    public void setValueGroups(Collection<ValueGroup> valueGroups) {
+        defAccessor.set("valueGroups", valueGroups);
+    }
+    
     /**
      * @return Returns the name.
      */
