@@ -498,11 +498,15 @@ public class AttributeDefinition<T> extends BeanAttribute implements IAttributeD
      */
     @Override
     public String getDescription() {
-        if (description == null)
+        if (description == null && getName() != null)
             description = getNameFU();
         return description;
     }
 
+    public void setDescription(String description) {
+        this.description = description;
+    }
+    
     @Override
     public Collection<T> getAllowedValues() {
         return allowedValues;

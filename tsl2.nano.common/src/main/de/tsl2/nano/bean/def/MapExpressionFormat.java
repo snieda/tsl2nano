@@ -18,9 +18,11 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
 
+import de.tsl2.nano.util.Util;
+
 /**
- * Format for collections of entities/beans - not implementing it's own toString(). The format packs the given type into a
- * {@link BeanDefinition}, using the first attribute as output. See {@link ValueExpression} for further informations.
+ * Format for collections of entities/beans - not implementing it's own toString(). The format packs the given type into
+ * a {@link BeanDefinition}, using the first attribute as output. See {@link ValueExpression} for further informations.
  * 
  * @author Thomas Schneider
  * @version $Revision$
@@ -72,9 +74,11 @@ public class MapExpressionFormat<T> extends ValueExpressionFormat<T> {
         pos.setIndex(pos.getIndex() + 1);
         String[] s = source.split(DIV);
         Map<String, T> m = new HashMap<String, T>(s.length);
-        for (int i = 0; i < s.length; i++) {
-            String kv[] = s[i].split("=");
-            m.put(kv[0], ve.from(kv[1]));
+        if (!Util.isEmpty(source)) {
+            for (int i = 0; i < s.length; i++) {
+                String kv[] = s[i].split("=");
+                m.put(kv[0], ve.from(kv[1]));
+            }
         }
         return m;
     }

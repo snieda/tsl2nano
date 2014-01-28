@@ -21,9 +21,11 @@ import java.util.Map;
 import org.apache.commons.logging.Log;
 import org.simpleframework.xml.core.Commit;
 
+import de.tsl2.nano.Environment;
 import de.tsl2.nano.bean.BeanAttribute;
 import de.tsl2.nano.bean.BeanClass;
 import de.tsl2.nano.bean.BeanContainer;
+import de.tsl2.nano.bean.BeanProxy;
 import de.tsl2.nano.bean.BeanUtil;
 import de.tsl2.nano.exception.FormattedException;
 import de.tsl2.nano.log.LogFactory;
@@ -158,14 +160,20 @@ public class ValueExpression<TYPE> implements IConverter<TYPE, String>, Serializ
     @Override
     public TYPE from(String toValue) {
         if (type == null)
-            throw FormattedException.implementationError("The conversion from string to object is only available, if the ValueExpression was created with a class type argument!",
-                "type of value-expression '" + toString() + "' is null");
+            throw FormattedException
+                .implementationError(
+                    "The conversion from string to object is only available, if the ValueExpression was created with a class type argument!",
+                    "type of value-expression '" + toString() + "' is null");
         //if type is object we return the value itself - it's an instanceof Object
         if (type.isAssignableFrom(Object.class))
             return (TYPE) toValue;
         if (Util.isEmpty(toValue))
             return null;
-        TYPE exampleBean = (TYPE) BeanClass.createInstance(type);
+        TYPE exampleBean;
+        if (type.isInterface())
+            exampleBean = BeanProxy.createBeanImplementation(type, null, null, Environment.get(ClassLoader.class));
+        else
+            exampleBean = (TYPE) BeanClass.createInstance(type);
         //TODO: how-to extract the attribute-name information from expression?
         Bean<TYPE> b = (Bean<TYPE>) Bean.getBean((Serializable) exampleBean);
         String[] attributeValues = getAttributeValues(toValue);
@@ -174,7 +182,8 @@ public class ValueExpression<TYPE> implements IConverter<TYPE, String>, Serializ
             //if attribute is a relation, we resolve it
             if (BeanContainer.isInitialized() && BeanContainer.instance().isPersistable(attr
                 .getType())) {
-                Object v = BeanDefinition.getBeanDefinition(attr.getType()).getValueExpression().from(attributeValues[i]);
+                Object v =
+                    BeanDefinition.getBeanDefinition(attr.getType()).getValueExpression().from(attributeValues[i]);
                 b.setValue(attributes[i], v);
             } else {//here we are able to directly parse the string to a value
                 b.setParsedValue(attributes[i], attributeValues[i]);
@@ -184,8 +193,9 @@ public class ValueExpression<TYPE> implements IConverter<TYPE, String>, Serializ
         if (isPersistable) {//check for unique!
             Collection<TYPE> beansByExample = BeanContainer.instance().getBeansByExample(exampleBean);
             if (beansByExample.size() > 1) {
-                LOG.error("string-to-object-parser: found more than one object:\n" + StringUtil.toFormattedString(beansByExample, 100, true));
-                throw new FormattedException("tsl2nano.multiple.items", new Object[]{toValue, type, type});
+                LOG.error("string-to-object-parser: found more than one object:\n"
+                    + StringUtil.toFormattedString(beansByExample, 100, true));
+                throw new FormattedException("tsl2nano.multiple.items", new Object[] { toValue, type, type });
             }
             return beansByExample.size() > 0 ? beansByExample.iterator().next() : null;
         } else {
@@ -243,7 +253,8 @@ public class ValueExpression<TYPE> implements IConverter<TYPE, String>, Serializ
         int i = 1;
         String attrName;
         StringBuilder expr = new StringBuilder(expression);
-        while ((attrName = StringUtil.extract(expr, "%" + BeanAttribute.REGEXP_ATTR_NAME + "\\$", "%" + i + "$")).length() > 0) {
+        while ((attrName = StringUtil.extract(expr, "%" + BeanAttribute.REGEXP_ATTR_NAME + "\\$", "%" + i + "$"))
+            .length() > 0) {
             attributes.add(attrName.substring(1, attrName.length() - 1));
             i++;
         }
@@ -282,7 +293,8 @@ public class ValueExpression<TYPE> implements IConverter<TYPE, String>, Serializ
         int i = 0;
         String attrName;
         StringBuilder expr = new StringBuilder(expression);
-        while ((attrName = StringUtil.extract(expr, "\\{" + BeanAttribute.REGEXP_ATTR_NAME + "\\}", "{" + i + "}")).length() > 0) {
+        while ((attrName = StringUtil.extract(expr, "\\{" + BeanAttribute.REGEXP_ATTR_NAME + "\\}", "{" + i + "}"))
+            .length() > 0) {
             attributes.add(attrName.substring(1, attrName.length() - 1));
             i++;
         }
@@ -333,7 +345,7 @@ public class ValueExpression<TYPE> implements IConverter<TYPE, String>, Serializ
         }
         return splittedValues;
     }
-    
+
     /**
      * @return Returns the expression.
      */
@@ -351,13 +363,14 @@ public class ValueExpression<TYPE> implements IConverter<TYPE, String>, Serializ
 
     /**
      * isExpressionPart
+     * 
      * @param attribute attribute to check
      * @return true, if given attribute is part of value expression
      */
     public boolean isExpressionPart(String attribute) {
         return Arrays.asList(attributes).contains(attribute);
     }
-    
+
     @Override
     public String toString() {
         return Util.toString(getClass(), expression);

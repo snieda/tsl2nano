@@ -177,7 +177,7 @@ public class Bean<T> extends BeanDefinition<T> {
         if (actions == null) {
             if (!isVirtual()) {
                 if (instance != null)//perhaps an extended class has actions
-                    actions = BeanClass.getActions(instance.getClass(), null, new Object[] {instance});
+                    actions = BeanClass.getActions(instance.getClass(), null, new Object[] { instance });
                 if (actions.size() == 0 && isSelectable())
                     addDefaultSaveAction();
             }
@@ -342,31 +342,6 @@ public class Bean<T> extends BeanDefinition<T> {
         //workaround for collection generic
         Object result = getAttributes();
         return (List<BeanValue<?>>) result;
-    }
-
-    /**
-     * getValueGroups. see {@link #addValueGroup(String, String...)}
-     * 
-     * @return all value groups of this bean
-     */
-    public Collection<ValueGroup> getValueGroups() {
-        return valueGroups;
-    }
-
-    /**
-     * addValueGroup
-     * 
-     * @param label title of group
-     * @param attributeNames attributes contained in group. normally only the first and the last attribute name are
-     *            necessary.
-     * @return current bean instance
-     */
-    public ValueGroup addValueGroup(String label, String... attributeNames) {
-        if (valueGroups == null)
-            valueGroups = new LinkedList<ValueGroup>();
-        ValueGroup valueGroup = new ValueGroup(label, attributeNames);
-        valueGroups.add(valueGroup);
-        return valueGroup;
     }
 
     /**
@@ -619,7 +594,7 @@ public class Bean<T> extends BeanDefinition<T> {
             BeanDefinition<I> beandef = getBeanDefinition((Class<I>) instanceOrName.getClass());
             bean = createBean(instanceOrName, beandef);
         }
-        
+
         if (cacheInstance && Environment.get("use.bean.cache", true))
             timedCache.put(instanceOrName, bean);
         return bean;
@@ -635,6 +610,7 @@ public class Bean<T> extends BeanDefinition<T> {
             bv.getColumnDefinition();
         }
     }
+
     /**
      * attaches the given detacher
      * 

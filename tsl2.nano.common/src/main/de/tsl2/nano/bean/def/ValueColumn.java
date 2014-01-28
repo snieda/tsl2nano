@@ -166,7 +166,7 @@ public class ValueColumn<T> implements IPresentableColumn, Serializable {
                 }
                 @Override
                 public String getImagePath() {
-                    return imagePath != null ? imagePath : sortIndex == 0 ? isSortUpDirection ? "up.png" : "down.png" : "view.png";
+                    return imagePath != null ? imagePath : sortIndex == 0 ? isSortUpDirection ? "icons/up.png" : "icons/down.png" : "icons/updown.png";
                 }
                 @Override
                 public Object getKeyStroke() {

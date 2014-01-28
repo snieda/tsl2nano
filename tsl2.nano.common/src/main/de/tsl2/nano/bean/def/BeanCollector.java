@@ -40,6 +40,7 @@ import de.tsl2.nano.bean.BeanContainer;
 import de.tsl2.nano.bean.BeanUtil;
 import de.tsl2.nano.bean.IAttributeDef;
 import de.tsl2.nano.bean.IBeanContainer;
+import de.tsl2.nano.bean.ValueHolder;
 import de.tsl2.nano.collection.CollectionUtil;
 import de.tsl2.nano.collection.IPredicate;
 import de.tsl2.nano.exception.FormattedException;
@@ -1113,5 +1114,9 @@ public class BeanCollector<COLLECTIONTYPE extends Collection<T>, T> extends Bean
 
     public void addColumnDefinition(String attributeName, int index, int sortIndex, boolean sortUpDirection, int width) {
         getAttribute(attributeName).setColumnDefinition(index, sortIndex, sortUpDirection, width);
+    }
+    
+    public static <T> ValueHolder<BeanCollector<?, T>> createBeanCollectorHolder(Collection<T> instance, int mode) {
+        return new ValueHolder<BeanCollector<?, T>>(getBeanCollector(instance, mode));
     }
 }

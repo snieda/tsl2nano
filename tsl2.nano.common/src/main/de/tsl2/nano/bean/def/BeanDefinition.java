@@ -20,6 +20,7 @@ import java.util.Collections;
 import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -28,6 +29,7 @@ import org.apache.commons.logging.Log;
 import org.simpleframework.xml.Attribute;
 import org.simpleframework.xml.Default;
 import org.simpleframework.xml.DefaultType;
+import org.simpleframework.xml.ElementList;
 import org.simpleframework.xml.ElementMap;
 import org.simpleframework.xml.Namespace;
 import org.simpleframework.xml.core.Commit;
@@ -99,6 +101,7 @@ public class BeanDefinition<T> extends BeanClass<T> implements Serializable {
     /** optional constraints between attributes */
     protected BeanValueConditionChecker crossChecker;
     /** optional grouping informations */
+    @ElementList(inline = true, name = "group", type = ValueGroup.class, required = false)
     protected Collection<ValueGroup> valueGroups;
 
     protected boolean isNested;
@@ -467,19 +470,21 @@ public class BeanDefinition<T> extends BeanClass<T> implements Serializable {
 
     /**
      * isInterface
+     * 
      * @return
      */
     public boolean isInterface() {
         return getDefiningClass(clazz).isInterface();
     }
-    
+
     /**
      * the bean is selectable, if it has at least one action to do on it - or it is persistable.
      * 
      * @return true, if an action was defined
      */
     public boolean isSelectable() {
-        return !isFinal() && (isMultiValue() || isInterface() || isCreatable() || isPersistable() || !Util.isEmpty(actions));
+        return !isFinal()
+            && (isMultiValue() || isInterface() || isCreatable() || isPersistable() || !Util.isEmpty(actions));
     }
 
     /**
@@ -951,7 +956,7 @@ public class BeanDefinition<T> extends BeanClass<T> implements Serializable {
             if (presentingAttr != null)
                 valueExpression = new ValueExpression<T>("{" + presentingAttr + "}", getClazz());
             else
-                valueExpression = new ValueExpression<T>(getName(), clazz);
+                valueExpression = new ValueExpression<T>(getName(), getClazz());
         }
         return valueExpression;
     }
@@ -963,6 +968,31 @@ public class BeanDefinition<T> extends BeanClass<T> implements Serializable {
      */
     public void setValueExpression(ValueExpression<T> valueExpression) {
         this.valueExpression = valueExpression;
+    }
+
+    /**
+     * getValueGroups. see {@link #addValueGroup(String, String...)}
+     * 
+     * @return all value groups of this bean
+     */
+    public Collection<ValueGroup> getValueGroups() {
+        return valueGroups;
+    }
+
+    /**
+     * addValueGroup
+     * 
+     * @param label title of group
+     * @param attributeNames attributes contained in group. normally only the first and the last attribute name are
+     *            necessary.
+     * @return current bean instance
+     */
+    public ValueGroup addValueGroup(String label, String... attributeNames) {
+        if (valueGroups == null)
+            valueGroups = new LinkedList<ValueGroup>();
+        ValueGroup valueGroup = new ValueGroup(label, attributeNames);
+        valueGroups.add(valueGroup);
+        return valueGroup;
     }
 
     @Commit

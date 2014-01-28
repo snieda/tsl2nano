@@ -354,6 +354,15 @@ public class BeanValue<T> extends AttributeDefinition<T> implements IValueDefini
     }
 
     /**
+     * a beans value may be a bean-collector (stored as {@link #instance}).
+     * 
+     * @return true, if instance is of type {@link BeanCollector}
+     */
+    public boolean isBeanCollector() {
+        return (instance instanceof IValueAccess) && ((IValueAccess<?>)instance).getValue() instanceof BeanCollector;
+    }
+
+    /**
      * the parent may be a bean definition, holding this attribute. setting this parent through {@link #setParent(Bean)}
      * will provide a bean-value-tree.
      * 

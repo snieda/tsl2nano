@@ -945,7 +945,9 @@ public class BeanPresentationHelper<T> {
             NavigableMap<Integer, Integer> levels = new TreeMap<Integer, Integer>();
             for (int i = 0; i < names.length; i++) {
                 IAttributeDefinition attr = bean.getAttribute(names[i]);
-                if (isDefaultAttribute((BeanAttribute) attr) && !attr.isMultiValue()) {
+                if (attr.getType().isInterface() || !BeanClass.hasDefaultConstructor(attr.getType()))
+                    ml = 0;
+                else if (isDefaultAttribute((BeanAttribute) attr) && !attr.isMultiValue()) {
                     ml = (1 << 7) * (attr.id() ? 1 : 0);
                     ml |= (1 << 6) * (attr.unique() ? 1 : 0);
                     ml |= (1 << 5) * (!attr.nullable() ? 1 : 0);
@@ -996,13 +998,13 @@ public class BeanPresentationHelper<T> {
                         return names[i];
                     }
                 }
-            }
-            if (levels.isEmpty()) {
-                BeanAttribute id = bean.getIdAttribute();
-                LOG.warn("No unique field as value-expression found for " + bean
-                    + " available fields: " + StringUtil.toString(names, 100)
-                    + ". Using id-attribute " + id.getId());
-                return id.getName();
+                if (levels.isEmpty()) {
+                    BeanAttribute id = bean.getIdAttribute();
+                    LOG.warn("No unique field as value-expression found for " + bean
+                        + " available fields: " + StringUtil.toString(names, 100)
+                        + ". Using id-attribute " + id.getId());
+                    return id.getName();
+                }
             }
             /*
              * get the index of the highest matching level attribute
@@ -1010,6 +1012,8 @@ public class BeanPresentationHelper<T> {
             return names[levels.get(keySet.first())];
         } else if (bean.getAttributeDefinitions().size() > 0) {
             return bean.getAttributeNames()[0];
+        } else if (BeanUtil.hasToString(bean.getClazz())) {
+            return null;//TODO: -->toString()
         } else {
             return null;
         }

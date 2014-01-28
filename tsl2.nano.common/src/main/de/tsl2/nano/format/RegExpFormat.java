@@ -28,6 +28,7 @@ import java.text.ParsePosition;
 import java.util.Collection;
 import java.util.Currency;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.Hashtable;
 import java.util.Locale;
 import java.util.Map;
@@ -40,6 +41,7 @@ import org.simpleframework.xml.Attribute;
 import org.simpleframework.xml.Element;
 import org.simpleframework.xml.ElementMap;
 import org.simpleframework.xml.core.Commit;
+import org.simpleframework.xml.core.Complete;
 import org.simpleframework.xml.core.Persist;
 
 import de.tsl2.nano.bean.BeanAttribute;
@@ -280,6 +282,8 @@ public class RegExpFormat extends Format implements INumberFormatCheck {
     protected void init(String pattern, String init, int maxCharacterCount, int regExpFlags) {
         this.pattern = pattern;
         if (init != null) {
+            if (initMap == systemInitMap)
+                initMap = new HashMap<String, String>();
             initMap.put(pattern, init);
         }
         this.maxCharacterCount = maxCharacterCount;
@@ -1139,11 +1143,10 @@ public class RegExpFormat extends Format implements INumberFormatCheck {
     }
 
     @Commit
+    @Complete
     private void initDeserialization() {
         if (initMap == null)
-            initMap = new Hashtable<String, String>();
-        //TODO: this will overwrite configured data!!!
-        initMap.putAll(systemInitMap);
+            initMap = systemInitMap;
     }
 
 }

@@ -29,7 +29,7 @@ import de.tsl2.nano.bean.BeanAttribute;
  * @version $Revision$
  */
 @SuppressWarnings("unchecked")
-public class Presentable implements IPresentable, Serializable {
+public class Presentable implements IIPresentable, Serializable {
     /** serialVersionUID */
     private static final long serialVersionUID = -7970100238668263393L;
 
@@ -180,7 +180,7 @@ public class Presentable implements IPresentable, Serializable {
      */
     @Override
     public int getWidth() {
-        throw new UnsupportedOperationException();
+        return UNDEFINED;//throw new UnsupportedOperationException();
     }
 
     /**
@@ -188,7 +188,7 @@ public class Presentable implements IPresentable, Serializable {
      */
     @Override
     public int getHeight() {
-        throw new UnsupportedOperationException();
+        return UNDEFINED;//throw new UnsupportedOperationException();
     }
 
     /**
@@ -268,5 +268,40 @@ public class Presentable implements IPresentable, Serializable {
     public String toString() {
         return getClass().getSimpleName() + "(" + label + ", type:" + type + ", style:" + style
             + (visible ? ")" : ", invisible)");
+    }
+
+    @Override
+    public void setLabel(String label) {
+        this.label = label;
+    }
+
+    @Override
+    public void setDescription(String description) {
+        this.description = description;
+    }
+
+    @Override
+    public void setLayout(LinkedHashMap<String, String> layout) {
+        this.layout = layout;
+    }
+
+    @Override
+    public void setLayoutConstraints(LinkedHashMap<String, String> layoutConstraints) {
+        this.layoutConstraints = layoutConstraints;
+    }
+
+    @Override
+    public void setIcon(String icon) {
+        this.icon = icon;
+    }
+
+    @Override
+    public void setForeground(int[] foreground) {
+        this.foreground = foreground;
+    }
+
+    @Override
+    public void setBackground(int[] background) {
+        this.background = background;
     }
 }
