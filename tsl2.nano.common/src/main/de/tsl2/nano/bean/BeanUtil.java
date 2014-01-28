@@ -854,15 +854,21 @@ public class BeanUtil {
         }
     }
 
+    public static boolean hasToString(Object obj) {
+        return obj != null && hasToString(obj.getClass());
+    }
+    
     /**
      * checks, whether the class of the given object implements 'toString()' itself.
      * 
      * @param obj instance of class to evaluate
      * @return true, if class of object overrides toString()
      */
-    public static boolean hasToString(Object obj) {
+    public static boolean hasToString(Class cls) {
         try {
-            final Method method = obj.getClass().getMethod("toString", new Class[0]);
+            if (cls.isInterface())
+                return false;
+            final Method method = cls.getMethod("toString", new Class[0]);
             //pure objects, representating there instance id
             return !method.toString().equals(OBJ_TOSTRING);
         } catch (final Exception e) {

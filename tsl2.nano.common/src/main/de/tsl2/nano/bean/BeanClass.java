@@ -561,6 +561,8 @@ public class BeanClass<T> implements Serializable {
      */
     public static <T> T createInstance(Class<T> clazz, Object... args) {
         T instance = null;
+        if (clazz.isPrimitive())
+            clazz = PrimitiveUtil.getWrapper(clazz);
         if (args.length == 0) {//--> default constructor
             try {
                 Constructor<T> constructor = clazz.getConstructor(new Class[0]);

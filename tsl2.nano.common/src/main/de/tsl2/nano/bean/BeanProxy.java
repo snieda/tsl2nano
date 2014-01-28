@@ -109,11 +109,11 @@ public class BeanProxy implements InvocationHandler, Serializable {
      * @param attributes map of bean attributes for this bean implementation
      * @return implementation of the given interface.
      */
-    public static Object createBeanImplementation(Class<?> interfaze,
+    public static <T> T createBeanImplementation(Class<T> interfaze,
             Map<String, Object> attributes,
             Object delegate,
             ClassLoader classLoader) {
-        return Proxy.newProxyInstance(classLoader,
+        return (T) Proxy.newProxyInstance(classLoader,
             new Class[] { interfaze, BeanProperty.class },
             new BeanProxy(attributes, delegate));
     }

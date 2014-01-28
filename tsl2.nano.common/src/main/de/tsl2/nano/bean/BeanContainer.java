@@ -220,7 +220,7 @@ public class BeanContainer implements IBeanContainer {
                 bean = (T) BeanProxy.createBeanImplementation(type, null, null, Thread.currentThread()
                     .getContextClassLoader());
             } else {
-                bean = type.newInstance();
+                bean = BeanClass.createInstance(type);
             }
             //to fulfil bindings on onetomany, we bind empty lists
             final BeanClass clazz = BeanClass.getBeanClass(type);
