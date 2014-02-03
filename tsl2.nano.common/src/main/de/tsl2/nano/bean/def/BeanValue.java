@@ -62,7 +62,7 @@ public class BeanValue<T> extends AttributeDefinition<T> implements IValueDefini
     private static final Log LOG = LogFactory.getLog(BeanValue.class);
 
     transient Object instance;
-
+    transient Selector selector;
     Bean<?> parent;
 
     protected static final List<BeanValue> beanValueCache = new LinkedList<BeanValue>();
@@ -359,7 +359,7 @@ public class BeanValue<T> extends AttributeDefinition<T> implements IValueDefini
      * @return true, if instance is of type {@link BeanCollector}
      */
     public boolean isBeanCollector() {
-        return (instance instanceof IValueAccess) && ((IValueAccess<?>)instance).getValue() instanceof BeanCollector;
+        return (instance instanceof IValueAccess) && ((IValueAccess<?>) instance).getValue() instanceof BeanCollector;
     }
 
     /**
@@ -392,8 +392,14 @@ public class BeanValue<T> extends AttributeDefinition<T> implements IValueDefini
         return eventController;
     }
 
+    Selector<T> selector() {
+        if (selector == null)
+            selector = new Selector(this);
+        return selector;
+    }
+    
     /** returns an optional action as finder/assigner - useful to select a new value */
-    public IAction<IBeanCollector<?, T>> getSelector() {
+    public IAction<IBeanCollector<?, T>> getSelectorAction() {
         //TODO: move that to the attribute: IPresentable
         return new SecureAction<IBeanCollector<?, T>>(getName() + POSTFIX_SELECTOR,
             Environment.get("field.selector.text", "...")) {
@@ -402,7 +408,7 @@ public class BeanValue<T> extends AttributeDefinition<T> implements IValueDefini
                 BeanCollector<?, ?> beanCollector;
                 Composition comp = composition() ? CompositionFactory.createComposition(BeanValue.this) : null;
                 if (isMultiValue()) {
-                    Selector<T> vsel = new Selector<T>(BeanValue.this);
+                    Selector<T> vsel = selector();
                     Collection<T> collection = vsel.getValueAsCollection();
                     beanCollector = BeanCollector.getBeanCollector(vsel.getCollectionEntryType(),
                         collection,
@@ -431,27 +437,28 @@ public class BeanValue<T> extends AttributeDefinition<T> implements IValueDefini
     }
 
     /**
-     * connects this attribute to a selector (see {@link #getSelector()} to assign values from a list.
+     * connects this attribute to a selector (see {@link #getSelectorAction()} to assign values from a list.
      * 
      * @param parent the parent bean of this attribute (must be given as {@link #getParent()} not allways is filled.
-     * @return selector (see {@link #getSelector()}.
+     * @return selector (see {@link #getSelectorAction()}.
      */
     public IBeanCollector<?, ?> connectToSelector(BeanDefinition<?> parent) {
-        IAction<?> selector = getSelector();
-        final IBeanCollector<?, ?> collector = (IBeanCollector<?, ?>) selector.activate();
+        final IAction<?> selectorAction = getSelectorAction();
+        final IBeanCollector<?, ?> collector = (IBeanCollector<?, ?>) selectorAction.activate();
         final ISelectionProvider<?> selectionProvider = collector.getSelectionProvider();
         parent.connect(getName(), selectionProvider, new CommonAction<Object>() {
             @Override
             public Object action() throws Exception {
                 Collection s;
                 if (isMultiValue()) {
-                    Selector<T> vsel = new Selector<T>(BeanValue.this);
-                    Collection v = vsel.getValueAsCollection();
+                    Selector<T> vsel = selector();
+                    Collection v = vsel.cachedValue();
                     s = selectionProvider.getValue();
                     if (v == null)
                         setValue((T) s);
                     else {
-                        v.clear();
+                        if (!s.isEmpty())
+                            v.clear();
                         v.addAll(s);
                         vsel.synchronize(v);
                     }
@@ -464,7 +471,6 @@ public class BeanValue<T> extends AttributeDefinition<T> implements IValueDefini
         });
         return collector;
     }
-
 }
 
 /**
@@ -478,6 +484,7 @@ public class BeanValue<T> extends AttributeDefinition<T> implements IValueDefini
 class Selector<T> {
     IValueAccess<T> valueAccess;
     Boolean isMap;
+    Collection<T> cachedValue;
 
     /**
      * constructor
@@ -491,7 +498,7 @@ class Selector<T> {
 
     public void synchronize(Collection<T> current) {
         if (isMap) {
-            ((MapEntrySet)current).map();
+            ((MapEntrySet) current).map();
         }
     }
 
@@ -512,6 +519,12 @@ class Selector<T> {
         }
     }
 
+    Collection<T> cachedValue() {
+        if (cachedValue == null)
+            cachedValue = getValueAsCollection();
+        return cachedValue;
+    }
+    
     void createCollectionValue() {
         checkForMap();
         if (isMap)
@@ -522,6 +535,6 @@ class Selector<T> {
 
     void checkForMap() {
         if (isMap == null)
-            getValueAsCollection();
+            isMap = valueAccess.getValue() instanceof Map;
     }
 }
