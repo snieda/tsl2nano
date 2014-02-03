@@ -27,6 +27,7 @@ import de.tsl2.nano.bean.BeanClass;
 import de.tsl2.nano.bean.BeanContainer;
 import de.tsl2.nano.bean.BeanProxy;
 import de.tsl2.nano.bean.BeanUtil;
+import de.tsl2.nano.bean.PrimitiveUtil;
 import de.tsl2.nano.exception.FormattedException;
 import de.tsl2.nano.log.LogFactory;
 import de.tsl2.nano.util.StringUtil;
@@ -169,11 +170,7 @@ public class ValueExpression<TYPE> implements IConverter<TYPE, String>, Serializ
             return (TYPE) toValue;
         if (Util.isEmpty(toValue))
             return null;
-        TYPE exampleBean;
-        if (type.isInterface())
-            exampleBean = BeanProxy.createBeanImplementation(type, null, null, Environment.get(ClassLoader.class));
-        else
-            exampleBean = (TYPE) BeanClass.createInstance(type);
+        TYPE exampleBean = createInstance(toValue);
         //TODO: how-to extract the attribute-name information from expression?
         Bean<TYPE> b = (Bean<TYPE>) Bean.getBean((Serializable) exampleBean);
         String[] attributeValues = getAttributeValues(toValue);
@@ -201,6 +198,24 @@ public class ValueExpression<TYPE> implements IConverter<TYPE, String>, Serializ
         } else {
             return exampleBean;
         }
+    }
+
+    /**
+     * creates a new instance from 'toValue' (user-input).
+     * @param toValue
+     * @return
+     */
+    protected TYPE createInstance(String toValue) {
+        TYPE instance;
+        if (type.isInterface())
+            instance = BeanProxy.createBeanImplementation(type, null, null, Environment.get(ClassLoader.class));
+        else if (BeanUtil.isStandardType(type))
+            instance = PrimitiveUtil.create(type, toValue);
+        else if (BeanClass.hasStringConstructor(type))
+            instance = (TYPE) BeanClass.createInstance(type, toValue);
+        else
+            instance = (TYPE) BeanClass.createInstance(type);
+        return instance;
     }
 
     /**

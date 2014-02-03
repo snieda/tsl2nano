@@ -9,6 +9,7 @@
  */
 package de.tsl2.nano.bean;
 
+import java.text.ParseException;
 import java.util.Arrays;
 import java.util.Comparator;
 import java.util.Hashtable;
@@ -18,6 +19,9 @@ import org.apache.commons.logging.Log;
 import de.tsl2.nano.log.LogFactory;
 
 import de.tsl2.nano.exception.FormattedException;
+import de.tsl2.nano.exception.ForwardedException;
+import de.tsl2.nano.format.DefaultFormat;
+import de.tsl2.nano.format.FormatUtil;
 
 /**
  * handler for primitives and their immutable wrappers
@@ -62,6 +66,24 @@ public class PrimitiveUtil {
         Arrays.sort(wrappers, comparator);
     }
 
+    public static <T> T create(Class<T> type, String value) {
+        try {
+            return (T) FormatUtil.getDefaultFormat(type, true).parseObject(value);
+        } catch (ParseException e) {
+            ForwardedException.forward(e);
+            return null;
+        }
+    }
+    
+    /**
+     * isPrimitiveOrWrapper
+     * @param type
+     * @return true, if given type is primitive or wrapper.
+     */
+    public static boolean isPrimitiveOrWrapper(Class<?> type) {
+        return type.isPrimitive() || Arrays.binarySearch(wrappers, type) != -1;
+    }
+    
     /**
      * getPrimitive
      * 

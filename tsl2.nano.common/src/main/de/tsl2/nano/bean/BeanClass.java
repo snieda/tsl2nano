@@ -553,6 +553,20 @@ public class BeanClass<T> implements Serializable {
     }
 
     /**
+     * hasStringConstructor
+     * 
+     * @param clazz
+     * @return
+     */
+    public static boolean hasStringConstructor(Class<?> clazz) {
+        try {
+            return clazz.getDeclaredConstructor(new Class[]{String.class}) != null;
+        } catch (Exception e) {
+            return false;
+        }
+    }
+
+    /**
      * creates a new instance through the given arguments. if you don't call the default constructor, the performance
      * will go down on searching the right constructor.
      * 
