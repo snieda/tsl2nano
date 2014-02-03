@@ -140,11 +140,14 @@ public class Environment {
     public static <T> T get(Class<T> service) {
         Object s = services().get(service);
         if (s == null) {
+            self().log("no service found for " + service);
+            self().log("available services:\n" + StringUtil.toFormattedString(services(), 500, true));
             String path = getConfigPath(service) + ".xml";
             if (new File(path).canRead()) {
                 self().log("loading service from " + path);
                 self().addService(service, self().get(XmlUtil.class).loadXml(path, service));
             } else if (BeanClass.hasDefaultConstructor(service)) {
+                self().log("trying to create service " + service + " through default construction");
                 self().addService(BeanClass.createInstance(service));
             }
         }
