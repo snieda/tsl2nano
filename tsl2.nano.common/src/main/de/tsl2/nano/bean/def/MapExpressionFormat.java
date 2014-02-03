@@ -15,6 +15,7 @@ import java.text.ParsePosition;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Set;
 
@@ -73,7 +74,7 @@ public class MapExpressionFormat<T> extends ValueExpressionFormat<T> {
     public Object parseObject(String source, ParsePosition pos) {
         pos.setIndex(pos.getIndex() + 1);
         String[] s = source.split(DIV);
-        Map<String, T> m = new HashMap<String, T>(s.length);
+        Map<String, T> m = new LinkedHashMap<String, T>(s.length);
         if (!Util.isEmpty(source)) {
             for (int i = 0; i < s.length; i++) {
                 String kv[] = s[i].split("=");
