@@ -239,11 +239,21 @@ Hibernate 4 for example would have the following dependencies:
 Html styles can be added through import of css files. On building each html page, the file *meta-frame.html* will be searched inside the environments *css* directory: css/meta-frame.html.
 The meta-frame.html defines the html header and an empty body. Inside the header you should define the css style files you want to be used. The style files must define a class *menu* through the tags *ul* and *li*. Then, each page will have a menu at the top - instead of a button panel.
 
-### Configuring Layout and Constraints
+### Configuring Presentation, Layout and Constraints
 
-Each bean and each bean-attribute can define a layout and layout-constraints through it's presentable object.
+Each bean and each bean-attribute can define a layout and layout-constraints through it's presentable object. It is easy to do layout definitions programmatically through the BeanPresentationHelper, but in this chapter we describe only the xml configuration.
 
 TODO describe
+
+### Bean Presentation
+
+#### Multiple Value Relations
+
+#### Value Groups and Sub-Panels
+
+### Attribute Presentation
+
+## Showing calculated values through integrated rule engine
 
 ## Working on a page using the Keyboard
 
@@ -560,7 +570,19 @@ public class MyApp extends NanoH5 {
         //let the field 'comment' grow to full width
         beanCollector.getAttribute("comment").getPresentation()
             .setLayoutConstraints(MapUtil.asMap(ATTR_SPANCOL, 11, ATTR_BORDER, 1, ATTR_SIZE, 150));
+
+        /*
+         * using value-groups to show nested beans in sub-panels
+         */
+         bean.valueGroups = new LinkedList<ValueGroup>();
+         bean.valueGroups.add(new ValueGroup("test", bean.getAttributeNames()));
+         ValueGroup group = new ValueGroup("sub");
+         group.add("persons", true);
+         bean.valueGroups.add(group);
+
+		//save/serialize bean/beancollector definitions to xml        
         BeanDefinition.define(beanCollector);
+        
         /*
          * use a rule with sub-rule
          */
