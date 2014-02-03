@@ -24,6 +24,9 @@ public class Entry<K, V> implements Map.Entry<K, V>, Serializable {
     boolean sync;
     Map<K, V> map;
 
+    /**
+     * constructor no map connection available. {@link MapEntrySet} has to collect this entry on adding.
+     */
     public Entry() {
     }
 
@@ -54,7 +57,7 @@ public class Entry<K, V> implements Map.Entry<K, V>, Serializable {
     public void setKey(K key) {
         this.key = key;
     }
-    
+
     @Override
     public V getValue() {
         return value;
@@ -67,7 +70,7 @@ public class Entry<K, V> implements Map.Entry<K, V>, Serializable {
             map.put(key, value);
         return value;
     }
-    
+
     @Override
     public String toString() {
         return Util.toString(getClass(), key, value);
