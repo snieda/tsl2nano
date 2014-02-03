@@ -11,6 +11,7 @@ package de.tsl2.nano.bean.def;
 
 import java.io.IOException;
 import java.io.Serializable;
+import java.lang.reflect.Proxy;
 import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -42,7 +43,10 @@ import de.tsl2.nano.bean.IAttributeDef;
 import de.tsl2.nano.bean.IBeanContainer;
 import de.tsl2.nano.bean.ValueHolder;
 import de.tsl2.nano.collection.CollectionUtil;
+import de.tsl2.nano.collection.Entry;
+import de.tsl2.nano.collection.FilteringIterator;
 import de.tsl2.nano.collection.IPredicate;
+import de.tsl2.nano.collection.MapEntrySet;
 import de.tsl2.nano.exception.FormattedException;
 import de.tsl2.nano.exception.ForwardedException;
 import de.tsl2.nano.execution.Profiler;
@@ -490,6 +494,13 @@ public class BeanCollector<COLLECTIONTYPE extends Collection<T>, T> extends Bean
             if (type != null && Collection.class.isAssignableFrom(type)) {
                 LOG.warn("There is no information how to create a new bean - at least one stored bean instance must exist!");
                 return null;
+            } else if (Entry.class.isAssignableFrom(type)) {
+                // normally we would handled this inside the generic else block, but we need
+                // the generics key and value type informations
+                if (Proxy.isProxyClass(collection.getClass()))
+                    newItem = (T) ((MapEntrySet) (FilteringIterator.getIterable((Proxy) collection))).add(null, null);
+                else
+                    newItem = (T) ((MapEntrySet) (collection)).add(null, null);
             } else {
                 newItem = BeanContainer.instance().createBean(getType());
             }
@@ -868,7 +879,7 @@ public class BeanCollector<COLLECTIONTYPE extends Collection<T>, T> extends Bean
                 List<T> rangeBeans = Arrays.asList((T) filterRange.getValue("from"), (T) filterRange.getValue("to"));
                 if (hasSearchRequestChanged == null) {
                     for (T rb : rangeBeans) {
-                        //we can't use the bean cache - if empty beans where stored they would be reused!
+                        //we can't use the bean cache - if empty beans were stored they would be reused!
                         connect(new Bean((Serializable) rb), rb, new CommonAction() {
                             @Override
                             public Object action() throws Exception {
@@ -1115,7 +1126,7 @@ public class BeanCollector<COLLECTIONTYPE extends Collection<T>, T> extends Bean
     public void addColumnDefinition(String attributeName, int index, int sortIndex, boolean sortUpDirection, int width) {
         getAttribute(attributeName).setColumnDefinition(index, sortIndex, sortUpDirection, width);
     }
-    
+
     public static <T> ValueHolder<BeanCollector<?, T>> createBeanCollectorHolder(Collection<T> instance, int mode) {
         return new ValueHolder<BeanCollector<?, T>>(getBeanCollector(instance, mode));
     }
