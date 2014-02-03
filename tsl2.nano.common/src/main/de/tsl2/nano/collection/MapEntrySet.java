@@ -33,7 +33,7 @@ public class MapEntrySet<K, V> extends LinkedHashSet<Entry<K, V>> {
     private static final long serialVersionUID = -7564082533237090900L;
 
     Map<K, V> map;
-    boolean sync;
+    boolean sync = true;
     private boolean internal;
 
     public MapEntrySet(Map<K, V> map) {
@@ -41,7 +41,7 @@ public class MapEntrySet<K, V> extends LinkedHashSet<Entry<K, V>> {
         Set<Map.Entry<K, V>> entrySet = map.entrySet();
         internal = true;
         for (Map.Entry<K, V> entry : entrySet) {
-            add(new Entry(entry, sync, map));
+            add(new Entry<K, V>(entry, !sync, map));
         }
         internal = false;
     }
@@ -64,17 +64,18 @@ public class MapEntrySet<K, V> extends LinkedHashSet<Entry<K, V>> {
         if (e == null)
             return false;
         boolean result = super.add(e);
-        if (result && !internal && sync) {
+        if (result && e.getKey() != null && !internal && sync) {
             map.put(e.getKey(), e.getValue());
         }
         return result;
     }
 
+    @SuppressWarnings("rawtypes")
     @Override
     public boolean remove(Object o) {
         boolean result = super.remove(o);
         if (result && !internal && sync)
-            map.remove(((Map.Entry<K, V>) o).getKey());
+            map.remove(((Map.Entry) o).getKey());
         return result;
     }
 
@@ -87,4 +88,8 @@ public class MapEntrySet<K, V> extends LinkedHashSet<Entry<K, V>> {
         this.sync = sync;
     }
 
+    public Entry<K, V> add(K key, V value) {
+        Entry<K, V> e = new Entry<K, V>(key, value);
+        return add(e) ? e : null; 
+    }
 }
