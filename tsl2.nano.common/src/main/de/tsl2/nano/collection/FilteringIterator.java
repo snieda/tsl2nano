@@ -35,7 +35,7 @@ public class FilteringIterator<E> implements ListIterator<E> {
     boolean previewing;
     E item;
     int size = -1;
-    
+
     /**
      * constructor
      * 
@@ -151,7 +151,8 @@ public class FilteringIterator<E> implements ListIterator<E> {
     }
 
     /**
-     * on first call, the size has to be evaluated 
+     * on first call, the size has to be evaluated
+     * 
      * @return size of iterable
      */
     @SuppressWarnings({ "rawtypes", "unchecked" })
@@ -166,22 +167,21 @@ public class FilteringIterator<E> implements ListIterator<E> {
         }
         return size;
     }
-    
-    private static <I extends Iterable<T>, T> Object evalInvokation(final I iterable,
-            final IPredicate<T> predicate,
-            Method method,
-            Object[] args) throws IllegalAccessException, InvocationTargetException {
-        Object result;
-        if (Iterator.class.isAssignableFrom(method.getReturnType())) {
-            result = new FilteringIterator<T>(iterable, predicate);
-        } else if (method.getName().equals("size")) {
-            result = new FilteringIterator<T>(iterable, predicate).size();
-        } else {
-            result = method.invoke(iterable, args);
-        }
-        return result;
+
+    /**
+     * ONLY FOR FRAMEWORK-INTERNAL USE!
+     * <p/>
+     * if the given proxy has an invocation handler of type {@link FilteringIterator}, the internal used collection will
+     * be returned.
+     * 
+     * @param proxy proxy having an invocation handler of type {@link FilteringIterator}.
+     * @return internal collection
+     */
+    @SuppressWarnings("rawtypes")
+    public static Iterable getIterable(Proxy proxy) {
+        return ((IterableInvocationHandler)Proxy.getInvocationHandler(proxy)).getIterable();
     }
-    
+
     /**
      * creates a proxy using the given iterable instance. if an iterator is requested, the orginal iterator will be
      * wrapped into the {@link FilteringIterator}.
@@ -195,15 +195,11 @@ public class FilteringIterator<E> implements ListIterator<E> {
      * @param predicate item filter/selector
      * @return proxy, providing the given iterable filtered through the given predicate.
      */
-    @SuppressWarnings({ "unchecked", "rawtypes" })
+    @SuppressWarnings("unchecked")
     public static <I extends Iterable<T>, T> I getFilteringIterable(final I iterable, final IPredicate<T> predicate) {
         return (I) Proxy.newProxyInstance(Thread.currentThread().getContextClassLoader(),
-            BeanClass.getBeanClass(iterable.getClass()).getInterfaces(), new InvocationHandler() {
-                @Override
-                public Object invoke(Object proxy, Method method, Object[] args) throws Throwable {
-                    return evalInvokation(iterable, predicate, method, args);
-                }
-            });
+            BeanClass.getBeanClass(iterable.getClass()).getInterfaces(), new IterableInvocationHandler<I, T>(iterable,
+                predicate));
     }
 
     /**
@@ -222,12 +218,53 @@ public class FilteringIterator<E> implements ListIterator<E> {
     @SuppressWarnings({ "unchecked" })
     public static <I extends Map<S, T>, S, T> I getFilteringMap(final I map, final IPredicate<T> predicate) {
         return (I) Proxy.newProxyInstance(Thread.currentThread().getContextClassLoader(),
-            BeanClass.getBeanClass(map.getClass()).getInterfaces(), new InvocationHandler() {
+            BeanClass.getBeanClass(map.getClass()).getInterfaces(), new IterableInvocationHandler(map.keySet(),
+                predicate)
+            );
+    }
+}
 
-                @Override
-                public Object invoke(Object proxy, Method method, Object[] args) throws Throwable {
-                    return evalInvokation((Iterable<T>)map.keySet(), predicate, method, args);
-                }
-            });
+/**
+ * The invocation handler
+ * @param <I>
+ * @param <T>
+ * @author Tom
+ * @version $Revision$ 
+ */
+class IterableInvocationHandler<I extends Iterable<T>, T> implements InvocationHandler {
+    I iterable;
+    IPredicate<T> predicate;
+
+    @Override
+    public Object invoke(Object proxy, Method method, Object[] args) throws Throwable {
+        return evalInvokation(iterable, predicate, method, args);
+    }
+
+    /**
+     * constructor
+     */
+    public IterableInvocationHandler(final I iterable, final IPredicate<T> predicate) {
+        super();
+        this.iterable = iterable;
+        this.predicate = predicate;
+    }
+
+    public I getIterable() {
+        return iterable;
+    }
+    
+    private static <I extends Iterable<T>, T> Object evalInvokation(final I iterable,
+            final IPredicate<T> predicate,
+            Method method,
+            Object[] args) throws IllegalAccessException, InvocationTargetException {
+        Object result;
+        if (Iterator.class.isAssignableFrom(method.getReturnType())) {
+            result = new FilteringIterator<T>(iterable, predicate);
+        } else if (method.getName().equals("size")) {
+            result = new FilteringIterator<T>(iterable, predicate).size();
+        } else {
+            result = method.invoke(iterable, args);
+        }
+        return result;
     }
 }
