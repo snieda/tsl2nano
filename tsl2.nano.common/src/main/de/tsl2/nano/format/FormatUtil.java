@@ -162,6 +162,18 @@ public class FormatUtil {
                     }
 
                 };
+            } else if (Boolean.class.isAssignableFrom(type)) {
+                f = new Format() {
+                    @Override
+                    public StringBuffer format(Object obj, StringBuffer toAppendTo, FieldPosition pos) {
+                        return toAppendTo.append(((Boolean)obj).toString());
+                    }
+                    @Override
+                    public Object parseObject(String source, ParsePosition pos) {
+                        pos.setIndex(!Util.isEmpty(source) ? source.length() : 1);
+                        return !Util.isEmpty(source) ? Boolean.parseBoolean(source) : null;
+                    }
+                };
             } else if (Enum.class.isAssignableFrom(type)) {
                 f = new Format() {
                     @Override
