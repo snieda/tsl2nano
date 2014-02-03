@@ -18,6 +18,7 @@ import java.text.Format;
 import java.text.NumberFormat;
 import java.text.SimpleDateFormat;
 
+import de.tsl2.nano.Environment;
 import de.tsl2.nano.action.IActivator;
 import de.tsl2.nano.bean.BeanClass;
 import de.tsl2.nano.bean.def.AttributeDefinition;
@@ -45,8 +46,8 @@ public class AttributeConfigurator implements Serializable {
 
     IIPresentable presentable;
 
-    public AttributeConfigurator() {
-        this(BeanClass.createInstance(AttributeDefinition.class));
+    public AttributeConfigurator(String attributeName) {
+        this((AttributeDefinition<?>) Environment.get(BeanConfigurator.class).def.getAttribute(attributeName));
     }
 
     /**
@@ -135,7 +136,7 @@ public class AttributeConfigurator implements Serializable {
     }
 
     public IPresentable getPresentable() {
-        return  attr.getPresentation();
+        return attr.getPresentation();
 //        if (presentable == null) {
 //            if (IPresentable.class.isAssignableFrom(attr.getDeclaringClass()))
 //                attr.getPresentation().setEnabler(IActivator.ACTIVE);

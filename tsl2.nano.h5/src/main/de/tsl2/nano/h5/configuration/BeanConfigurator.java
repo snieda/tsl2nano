@@ -18,6 +18,7 @@ import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 
+import de.tsl2.nano.Environment;
 import de.tsl2.nano.bean.BeanAttribute;
 import de.tsl2.nano.bean.def.AttributeDefinition;
 import de.tsl2.nano.bean.def.Bean;
@@ -30,7 +31,8 @@ import de.tsl2.nano.util.PrivateAccessor;
 import de.tsl2.nano.util.Util;
 
 /**
- * wrapper class to handle presentation of a bean-definition.
+ * wrapper class to handle presentation of a bean-definition. at a time, only one BeanConfigurator is active. this
+ * instance will be registered to the environment to be usable as something like a singleton from outside.
  * 
  * @author Tom, Thomas Schneider
  * @version $Revision$
@@ -38,23 +40,27 @@ import de.tsl2.nano.util.Util;
 public class BeanConfigurator<T> implements Serializable {
     /** serialVersionUID */
     private static final long serialVersionUID = 1L;
-    private BeanDefinition<T> def;
+    BeanDefinition<T> def;
     private PrivateAccessor<BeanDefinition<?>> defAccessor;
-    
+
     /**
      * factory method to create a bean configurator for the given instance type.
+     * 
      * @param instance to evaluate the type and {@link BeanDefinition} for.
      * @return new bean configurator instance
      */
     @SuppressWarnings({ "unchecked", "rawtypes" })
-    public static <I  extends Serializable> Bean<BeanConfigurator<I>> create(Class<I> type) {
+    public static <I extends Serializable> Bean<BeanConfigurator<I>> create(Class<I> type) {
         //wrap the bean-def into a bean-configurator and pack it into an own bean
         BeanConfigurator<?> configurer = new BeanConfigurator(BeanDefinition.getBeanDefinition(type));
+        //register it to be used by creating new AttributeConfigurators 
+        Environment.addService(BeanConfigurator.class, configurer);
+
         Bean<?> configBean = Bean.getBean(configurer);
         configBean.getPresentable().setLayout((Serializable) MapUtil.asMap(ATTR_BGCOLOR, COLOR_LIGHT_GRAY));
         return (Bean<BeanConfigurator<I>>) configBean;
     }
-    
+
     /**
      * constructor
      * 
@@ -103,7 +109,6 @@ public class BeanConfigurator<T> implements Serializable {
         def.setPresentable(presentable);
     }
 
-
     /**
      * @return Returns the presentable.
      */
@@ -118,7 +123,7 @@ public class BeanConfigurator<T> implements Serializable {
     public void setValueGroups(Collection<ValueGroup> valueGroups) {
         defAccessor.set("valueGroups", valueGroups);
     }
-    
+
     /**
      * @return Returns the name.
      */
@@ -143,14 +148,16 @@ public class BeanConfigurator<T> implements Serializable {
     /**
      * saves the current bean configuration.<br/>
      * this method will trigger the bean-framework to provide an action to be presented as button in a gui.
+     * 
      * @return null
      */
     public Object actionSave() {
         def.saveDefinition();
+        Environment.removeService(BeanConfigurator.class);
         //return null to let the session-navigation return to the last element.
         return null;
     }
-    
+
     @Override
     public String toString() {
         return Util.toString(getClass(), def);
