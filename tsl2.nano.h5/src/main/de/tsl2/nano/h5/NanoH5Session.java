@@ -228,7 +228,9 @@ public class NanoH5Session {
                 responseObject = new Bean(listSet.get(uriLinkNumber.intValue() - 1));
                 return responseObject;
             } else {
-                if (!isCanceled(parms) && provideSelection((BeanCollector) nav.current(), parms)) {
+                if (!isCanceled(parms)
+                    && (isNewAction(parms, (BeanCollector) nav.current()) || provideSelection(
+                        (BeanCollector) nav.current(), parms))) {
                     if (isReturn(parms)) {
                         responseObject = null;
                     } else if (isOpenAction(parms, (BeanCollector) nav.current())) {
@@ -379,6 +381,18 @@ public class NanoH5Session {
 
     protected boolean isReturn(Properties parms) {
         return isCanceled(parms) || parms.containsKey(BTN_ASSIGN) || parms.containsKey(BTN_SUBMIT);
+    }
+
+    protected <T> boolean isNewAction(Properties parms, BeanCollector<?, T> model) {
+        for (Object k : parms.keySet()) {
+            if (isNewAction((String) k, model))
+                return true;
+        }
+        return false;
+    }
+
+    protected <T> boolean isNewAction(String actionId, BeanCollector<?, T> model) {
+        return actionId.equals(BeanContainer.getActionId(model.getClazz(), true, "new"));
     }
 
     protected <T> boolean isOpenAction(Properties parms, BeanCollector<?, T> model) {

@@ -27,6 +27,7 @@ import de.tsl2.nano.log.LogFactory;
 
 import de.tsl2.nano.action.IAction;
 import de.tsl2.nano.bean.BeanAttribute;
+import de.tsl2.nano.bean.BeanUtil;
 import de.tsl2.nano.format.DefaultFormat;
 import de.tsl2.nano.util.NumberUtil;
 
@@ -617,10 +618,14 @@ public class CollectionUtil {
             @Override
             public boolean eval(T arg0) {
                 // to be able to reuse the predicate, we can't do the calculations outside (which would be better for the  performance)
-                String sfrom = from != null ? ignoreCase && from.toString() != null ? from.toString().toUpperCase()
-                    : from.toString() : null;
-                String sto = to != null ? ignoreCase && to.toString() != null ? to.toString().toUpperCase()
-                    : to.toString() : null;
+                String sfrom =
+                    from != null && !BeanUtil.isEmpty(from) ? ignoreCase && from.toString() != null ? from.toString()
+                        .toUpperCase()
+                        : from.toString() : null;
+                String sto =
+                    to != null && !BeanUtil.isEmpty(to) ? ignoreCase && to.toString() != null ? to.toString()
+                        .toUpperCase()
+                        : to.toString() : null;
                 boolean useNull = from == null || to == null;
 
                 String sarg = arg0 != null ? ignoreCase && arg0.toString() != null ? arg0.toString().toUpperCase()
@@ -643,9 +648,10 @@ public class CollectionUtil {
     public static final <I extends Iterable<T>, S, T> I getTransforming(Iterable<S> src, ITransformer<S, T> transformer) {
         return TransformingIterator.getTransformingIterable(src, transformer);
     }
-    
+
     /**
      * swaps two elements in an array
+     * 
      * @param array
      * @param indexSwap1
      * @param indexSwap2

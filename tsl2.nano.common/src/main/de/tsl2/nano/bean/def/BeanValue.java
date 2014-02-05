@@ -457,8 +457,7 @@ public class BeanValue<T> extends AttributeDefinition<T> implements IValueDefini
                     if (v == null)
                         setValue((T) s);
                     else {
-                        if (!s.isEmpty())
-                            v.clear();
+                        v.clear();
                         v.addAll(s);
                         vsel.synchronize(v);
                     }

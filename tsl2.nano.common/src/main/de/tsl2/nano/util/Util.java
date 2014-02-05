@@ -162,7 +162,7 @@ public class Util {
     public static String toString(Class<?> cls, Object...members) {
         StringBuilder buf = new StringBuilder(cls.getSimpleName() + "(" + members[0]);
         for (int i = 1; i < members.length; i++) {
-            buf.append(", " + members[i]);
+            buf.append(", " + String.valueOf(members[i]));
         }
         return buf.append(")").toString();
     }

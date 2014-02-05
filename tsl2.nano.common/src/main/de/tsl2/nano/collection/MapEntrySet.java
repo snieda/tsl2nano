@@ -52,7 +52,7 @@ public class MapEntrySet<K, V> extends LinkedHashSet<Entry<K, V>> {
      * @return refreshed map - having all entries of this instance.
      */
     public Map<K, V> map() {
-        map.clear();
+//        map.clear();
         for (Map.Entry<K, V> e : this) {
             map.put(e.getKey(), e.getValue());
         }
