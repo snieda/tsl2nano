@@ -129,7 +129,7 @@ public class Authorization implements IAuthorization {
 
         final boolean hasPrincipal = subjectPrincipals.contains(principal);
         if (!hasPrincipal) {
-            LOG.warn(principal.getClass().getSimpleName() + " was not set for: " + principal.getName());
+            LOG.debug(principal.getClass().getSimpleName() + " was not set for: " + principal.getName());
         }
         return hasPrincipal;
     }

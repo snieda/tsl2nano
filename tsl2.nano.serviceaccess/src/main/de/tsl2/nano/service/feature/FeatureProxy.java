@@ -95,7 +95,7 @@ public class FeatureProxy<T> extends ServiceProxy<T> {
         final String featureName = getFeatureName();
         final Principal principal = new Feature(featureName);
         if (!ServiceFactory.instance().hasPrincipal(principal)) {
-            LOG.info("Feature not available: " + principal.getName());
+            LOG.trace("Feature not available: " + principal.getName());
             return false;
         }
         return true;

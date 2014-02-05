@@ -525,7 +525,7 @@ public class StringUtil {
      * @param names names to combine
      * @return all names (without nulls)
      */
-    public static final String concat(char[] sep, String... names) {
+    public static final String concat(char[] sep, Object... names) {
         final StringBuffer buf = new StringBuffer(names.length * 15);
         final String ssep = String.valueOf(sep);
         for (int i = 0; i < names.length; i++) {

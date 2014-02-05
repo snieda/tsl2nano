@@ -46,7 +46,7 @@ public class TableList<H extends Comparable<H>, ID> {
      * used by dumps
      */
     static final String DIV = "\t";
-    private static final String LF = "\r";
+    private static final String LF = "\n";
 
     /**
      * column headers will be of type String.  see {@link #TableList(Class, int)}
