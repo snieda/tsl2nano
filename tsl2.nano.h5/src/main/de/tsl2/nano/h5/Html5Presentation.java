@@ -118,6 +118,7 @@ import de.tsl2.nano.bean.def.IPageBuilder;
 import de.tsl2.nano.bean.def.IPresentable;
 import de.tsl2.nano.bean.def.IPresentableColumn;
 import de.tsl2.nano.bean.def.IValueAccess;
+import de.tsl2.nano.bean.def.IValueDefinition;
 import de.tsl2.nano.bean.def.Presentable;
 import de.tsl2.nano.bean.def.SecureAction;
 import de.tsl2.nano.bean.def.ValueExpressionFormat;
@@ -377,7 +378,8 @@ public class Html5Presentation<T> extends BeanPresentationHelper<T> implements I
 
         if (navigation.length > 0) {
             for (BeanDefinition<?> bean : navigation) {
-                appendElement((Element) parent, TAG_LINK, content("->" + bean.toString()), ATTR_HREF, PREFIX_BEANLINK + bean.getName(),
+                appendElement((Element) parent, TAG_LINK, content("->" + bean.toString()), ATTR_HREF, PREFIX_BEANLINK
+                    + bean.getName(),
                     ATTR_STYLE, "color: #BBBBBB;");
             }
         }
@@ -421,7 +423,11 @@ public class Html5Presentation<T> extends BeanPresentationHelper<T> implements I
                 BeanValue bv;
                 for (String name : valueGroup.getAttributes().keySet()) {
                     if (valueGroup.isDetail(name)) {
-                        if (bean.getAttribute(name).isMultiValue()) {
+                        IValueDefinition<?> attr = bean.getAttribute(name);
+                        if (attr == null)
+                            throw new IllegalArgumentException("bean-attribute " + name
+                                + ", defined in valuegroup not avaiable in bean " + bean);
+                        if (attr.isMultiValue()) {
                             bv =
                                 BeanValue.getBeanValue(
                                     BeanCollector.createBeanCollectorHolder((Collection) bean.getValue(name),
@@ -459,7 +465,8 @@ public class Html5Presentation<T> extends BeanPresentationHelper<T> implements I
                 actions.addAll(bv.getActions());
             } else if (beanValue.isBeanCollector()) {
                 BeanCollector<?, ?> bv = (BeanCollector<?, ?>) ((IValueAccess) beanValue.getInstance()).getValue();
-                bv.setPresentationHelper(new Html5Presentation(bv)).createPage(parent, beanValue.getDescription(), interactive);
+                bv.setPresentationHelper(new Html5Presentation(bv)).createPage(parent, beanValue.getDescription(),
+                    interactive);
                 actions.addAll(bv.getActions());
             } else {
                 Element fparent = (Element) (field == null || (++count % (columns / 3) == 0) ? panel
