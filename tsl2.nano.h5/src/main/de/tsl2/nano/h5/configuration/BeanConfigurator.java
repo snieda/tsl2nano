@@ -158,6 +158,11 @@ public class BeanConfigurator<T> implements Serializable {
         return null;
     }
 
+    public Object actionReset() {
+        def.deleteDefinition();
+        return null;
+    }
+    
     @Override
     public String toString() {
         return Util.toString(getClass(), def);

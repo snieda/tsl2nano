@@ -13,7 +13,6 @@ import static de.tsl2.nano.bean.def.IBeanCollector.MODE_ALL;
 import static de.tsl2.nano.bean.def.IBeanCollector.MODE_ALL_SINGLE;
 import static de.tsl2.nano.bean.def.IPresentable.POSTFIX_SELECTOR;
 
-import java.io.Serializable;
 import java.lang.reflect.Method;
 import java.text.Format;
 import java.util.Arrays;
@@ -25,14 +24,11 @@ import java.util.Map;
 
 import org.apache.commons.logging.Log;
 
-import tsl.StringUtil;
-
 import de.tsl2.nano.Environment;
 import de.tsl2.nano.action.CommonAction;
 import de.tsl2.nano.action.IAction;
 import de.tsl2.nano.bean.BeanAttribute;
 import de.tsl2.nano.bean.BeanClass;
-import de.tsl2.nano.bean.BeanUtil;
 import de.tsl2.nano.bean.ValueHolder;
 import de.tsl2.nano.collection.Entry;
 import de.tsl2.nano.collection.ListSet;
@@ -43,7 +39,6 @@ import de.tsl2.nano.log.LogFactory;
 import de.tsl2.nano.messaging.ChangeEvent;
 import de.tsl2.nano.messaging.EventController;
 import de.tsl2.nano.messaging.IListener;
-import de.tsl2.nano.util.PrivateAccessor;
 
 /**
  * BeanAttribute holding the bean instance, observers and exact attribute definitions - with validation.
@@ -63,7 +58,7 @@ public class BeanValue<T> extends AttributeDefinition<T> implements IValueDefini
 
     transient Object instance;
     transient Selector selector;
-    Bean<?> parent;
+    protected Bean<?> parent;
 
     protected static final List<BeanValue> beanValueCache = new LinkedList<BeanValue>();
 
@@ -292,8 +287,12 @@ public class BeanValue<T> extends AttributeDefinition<T> implements IValueDefini
      */
     @Override
     public String getName() {
-        if (isVirtual())
+        if (isVirtual()) {
+            if (description == null) {
+                description = toFirstUpper(super.getName());
+            }
             return description;
+        }
         else
             return super.getName();
     }

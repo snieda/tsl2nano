@@ -21,6 +21,7 @@ import de.tsl2.nano.bean.def.Bean;
 import de.tsl2.nano.bean.def.BeanCollector;
 import de.tsl2.nano.bean.def.BeanDefinition;
 import de.tsl2.nano.bean.def.IBeanCollector;
+import de.tsl2.nano.h5.Html5Presentation;
 import de.tsl2.nano.util.StringUtil;
 
 /**
@@ -122,7 +123,7 @@ public class EntityBrowser implements IBeanNavigator {
     @Override
     public BeanDefinition<?> fromUrl(String uri) {
         BeanDefinition<?> linkBean = null;
-        String link = StringUtil.substring(uri, "/", null, true);
+        String link = StringUtil.substring(uri, Html5Presentation.PREFIX_BEANLINK, null, true);
         for (BeanDefinition<?> bean : navigation) {
             if (bean.getName().equals(link)) {
                 linkBean = bean;

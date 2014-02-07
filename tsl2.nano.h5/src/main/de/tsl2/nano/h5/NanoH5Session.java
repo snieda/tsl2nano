@@ -116,8 +116,7 @@ public class NanoH5Session {
                 || (method.equals("POST") && referer != null && uri.length() > 1 && referer.contains(uri)))
                 uri = "/";
             //extract bean-specific prefix
-            BeanDefinition<?> linkToModel =
-                nav.fromUrl(StringUtil.substring(uri, Html5Presentation.PREFIX_BEANREQUEST, null));
+            BeanDefinition<?> linkToModel = nav.fromUrl(uri);
             Object userResponse = null;
             /*
              * uri:
@@ -159,11 +158,6 @@ public class NanoH5Session {
 //        header.clear();
 //        response.header.remove(uri);
         return response;
-    }
-
-    private boolean isURL(String msg) {
-        // TODO Auto-generated method stub
-        return false;
     }
 
     void close() {

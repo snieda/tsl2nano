@@ -125,10 +125,10 @@ public class Profiler {
 
         cal.setTimeInMillis(po.start);
         log("\n=============================================================================================================================");
-        log("==>> starting " + po.clazz
-            + "."
+        log("==>> starting " + po.clazz.getSimpleName()
+            + ": '"
             + name
-            + " at        "
+            + "' at "
             + sdf.format(cal.getTime())
             + " used mem: "
             + po.startMem
@@ -181,10 +181,10 @@ public class Profiler {
 
         cal.setTimeInMillis(po.end - po.start);
         log("\n=============================================================================================================================");
-        log("<<== ending   " + po.clazz
-            + "."
+        log("<<== ending   " + po.clazz.getSimpleName()
+            + ": '"
             + name
-            + " duration: "
+            + "' duration: "
             + sdf.format(cal.getTime())
             + " diff mem: "
             + (po.endMem - po.startMem)

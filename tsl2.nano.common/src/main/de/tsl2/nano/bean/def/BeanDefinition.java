@@ -872,11 +872,20 @@ public class BeanDefinition<T> extends BeanClass<T> implements Serializable {
         if (!usePersistentCache)
             return;
         for (BeanDefinition<?> beandef : virtualBeanCache) {
-            File file = getDefinitionFile(beandef.getName());
-            if (file.canWrite())
-                file.delete();
+            beandef.deleteDefinition();
         }
-        clearCache();
+    }
+
+    /**
+     * deleteDefinition
+     */
+    public void deleteDefinition() {
+        if (usePersistentCache) {
+        File file = getDefinitionFile(getName());
+        if (file.canWrite())
+            file.delete();
+        }
+        virtualBeanCache.remove(this); 
     }
 
     public static void clearCache() {

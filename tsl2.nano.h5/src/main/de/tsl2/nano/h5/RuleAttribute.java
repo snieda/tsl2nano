@@ -14,6 +14,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 import de.tsl2.nano.Environment;
+import de.tsl2.nano.bean.def.AttributeDefinition;
 import de.tsl2.nano.bean.def.Bean;
 import de.tsl2.nano.bean.def.BeanValue;
 import de.tsl2.nano.exception.ForwardedException;
@@ -21,7 +22,8 @@ import de.tsl2.nano.incubation.rules.Rule;
 import de.tsl2.nano.incubation.rules.RulePool;
 
 /**
- * Attribute providing the calculation of a {@link Rule}.
+ * Attribute providing the calculation of a {@link Rule}. This attribute can be connected to a 'real' bean-attribute to
+ * transfer the calculation value.
  * 
  * @author Tom, Thomas Schneider
  * @version $Revision$
@@ -32,27 +34,29 @@ public class RuleAttribute<T> extends BeanValue<T> {
     /** serialVersionUID */
     private static final long serialVersionUID = 5898135631911176804L;
 
-    Bean<?> parent;
     Class<T> type;
     Map<CharSequence, T> arguments;
-    
+    /** optional real attribute to set the value through this rule */
+    AttributeDefinition<T> connectedAttribute;
+
     /**
      * constructor
      */
     public RuleAttribute() {
         super();
     }
-    
+
     public RuleAttribute(Bean<?> parent, String ruleName) {
         this(parent, ruleName, (Class<T>) Object.class);
     }
-    
+
     /**
      * constructor
      */
     public RuleAttribute(Bean<?> parent, String ruleName, Class<T> type) {
         super(Environment.get(RulePool.class).getRule(ruleName), executionMethod());
-        arguments = new HashMap<CharSequence, T>();
+        this.parent = parent;
+        this.arguments = new HashMap<CharSequence, T>();
         this.type = type;
     }
 
@@ -64,20 +68,23 @@ public class RuleAttribute<T> extends BeanValue<T> {
             return null;
         }
     }
-    
+
     @Override
     public Class<T> getType() {
         return type;
     }
-    
+
     public Rule<T> getRule() {
         return (Rule<T>) getInstance();
     }
-    
+
     @Override
     public Object getValue(Object beanInstance) {
         try {
-            return readAccessMethod.invoke(beanInstance, refreshArguments());
+            Object result = readAccessMethod.invoke(beanInstance, refreshArguments());
+            if (connectedAttribute != null)
+                connectedAttribute.setValue(beanInstance, result);
+            return result;
         } catch (final Exception e) {
             ForwardedException.forward(e);
             return null;
@@ -101,5 +108,9 @@ public class RuleAttribute<T> extends BeanValue<T> {
      */
     protected void setArguments(Map<CharSequence, T> arguments) {
         this.arguments = arguments;
+    }
+
+    public void connectTo(AttributeDefinition<T> attribute) {
+        connectedAttribute = attribute;
     }
 }

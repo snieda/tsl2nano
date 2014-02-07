@@ -160,7 +160,7 @@ public class Html5Presentation<T> extends BeanPresentationHelper<T> implements I
     /** indicator for server to handle a link, that was got as link (method=GET) not as a file */
     public static final String PREFIX_ACTION = PREFIX_BEANREQUEST + "!!!";
     /** indicator for server to handle a link, that was got as link (method=GET) not as a file */
-    public static final String PREFIX_BEANLINK = PREFIX_BEANREQUEST + "-->";
+    public static final String PREFIX_BEANLINK = PREFIX_BEANREQUEST + "--)";
 
     /**
      * constructor
@@ -422,11 +422,13 @@ public class Html5Presentation<T> extends BeanPresentationHelper<T> implements I
                     new ArrayList<BeanValue<?>>(valueGroup.getAttributes().size());
                 BeanValue bv;
                 for (String name : valueGroup.getAttributes().keySet()) {
-                    if (valueGroup.isDetail(name)) {
-                        IValueDefinition<?> attr = bean.getAttribute(name);
-                        if (attr == null)
-                            throw new IllegalArgumentException("bean-attribute " + name
-                                + ", defined in valuegroup not avaiable in bean " + bean);
+                    IValueDefinition<?> attr = bean.getAttribute(name);
+                    if (attr == null)
+                        throw new IllegalArgumentException("bean-attribute " + name
+                            + ", defined in valuegroup not avaiable in bean " + bean);
+                    Object v = attr.getValue();
+
+                    if (valueGroup.isDetail(name) && v != null) {
                         if (attr.isMultiValue()) {
                             bv =
                                 BeanValue.getBeanValue(
@@ -434,7 +436,10 @@ public class Html5Presentation<T> extends BeanPresentationHelper<T> implements I
                                         IBeanCollector.MODE_ALL), ValueHolder.ATTR_VALUE);
                             bv.setDescription(name);
                         } else {
-                            bv = BeanValue.getBeanValue(Bean.getBean((Serializable) bean.getInstance()), name);
+                            bv =
+                                BeanValue.getBeanValue(
+                                    new ValueHolder(Bean.getBean((Serializable) bean.getValue(name))),
+                                    ValueHolder.ATTR_VALUE);
                         }
                     } else {
                         bv = BeanValue.getBeanValue(bean.getInstance(), name);
