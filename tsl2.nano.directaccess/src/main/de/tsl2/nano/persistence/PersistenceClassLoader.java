@@ -74,7 +74,7 @@ public class PersistenceClassLoader extends TransformingClassLoader {
         return new ITransformer<String, String>() {
             @Override
             public String transform(String name) {
-                if (name.contains(Persistence.FILE_PERSISTENCE_XML)) {
+                if (name != null && name.contains(Persistence.FILE_PERSISTENCE_XML)) {
                     LOG.info("manipulating url of " + name
                         + " ==> using file: "
                         + Persistence.getPath(Persistence.FILE_MYPERSISTENCE));
