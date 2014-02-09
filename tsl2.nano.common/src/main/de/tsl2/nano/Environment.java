@@ -35,7 +35,9 @@ import de.tsl2.nano.execution.CompatibilityLayer;
 import de.tsl2.nano.execution.Profiler;
 import de.tsl2.nano.execution.XmlUtil;
 import de.tsl2.nano.format.DefaultFormat;
+import de.tsl2.nano.log.LogFactory;
 import de.tsl2.nano.util.NetUtil;
+import de.tsl2.nano.util.PrivateAccessor;
 import de.tsl2.nano.util.StringUtil;
 
 /**
@@ -171,6 +173,9 @@ public class Environment {
     }
 
     public static void create(String dir) {
+        new File(dir).mkdirs();
+        LogFactory.setLogFactoryXml(dir + "/" + "logfactory.xml");
+        
         String info = "\n===========================================================\n" + "creating environment "
             + dir
             + "\n"
@@ -191,7 +196,6 @@ public class Environment {
         p.put("main.context.classloader", Thread.currentThread().getContextClassLoader());
         p.put("inetadress.myip", NetUtil.getMyIP());
         System.out.println(StringUtil.insertProperties(info, p));
-        new File(dir).mkdirs();
 
         //provide some external functions as options for this framework
         CompatibilityLayer layer = new CompatibilityLayer();
@@ -279,7 +283,7 @@ public class Environment {
         }
         return done;
     }
-    
+
     /**
      * fast convenience to get an environment property. see {@link #getProperties()} and {@link #getProperty(String)}.
      * 
@@ -298,7 +302,7 @@ public class Environment {
         }
         return value;
     }
-    
+
     /**
      * convenience to get an environment property
      * 
@@ -439,12 +443,13 @@ public class Environment {
 
     /**
      * isPersisted
+     * 
      * @return true, if an environment was created on file system
      */
     public final static boolean isPersisted() {
         return new File(getConfigPath() + CONFIG_XML_NAME).exists();
     }
-    
+
     /**
      * persists the current environment - all transient properties and services will be lost!!!
      */
@@ -481,10 +486,10 @@ public class Environment {
         Properties tempProperties = new Properties();
         tempProperties.putAll(self().properties);
         Map<Class<?>, Object> tempServices = new Hashtable<Class<?>, Object>(services());
-        
+
         reset();
         create(getConfigPath());
-        
+
         services().putAll(tempServices);
         self().properties.putAll(tempProperties);
     }

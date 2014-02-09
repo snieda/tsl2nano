@@ -160,31 +160,52 @@ public class XmlUtil {
         /*if (compLayer.isAvailable("javax.xml.bind.JAXB")) {
             return javax.xml.bind.JAXB.unmarshal(xmlFile, type);
         } else */if (compLayer.isAvailable("org.simpleframework.xml.core.Persister")) {
-            try {
-                if (assignClassloader)
-                    Environment.assignClassloaderToCurrentThread();
-                return new org.simpleframework.xml.core.Persister().read(type, new FileInputStream(new File(xmlFile)));
-            } catch (Exception e) {
-                ForwardedException.forward(e);
-                return null;
-            }
+            if (assignClassloader)
+                Environment.assignClassloaderToCurrentThread();
+            return loadSimpleXml_(xmlFile, type);
         } else {
             return (T) FileUtil.loadXml(xmlFile);
         }
     }
+
+    /**
+     * only for internal use
+     * @param xmlFile
+     * @param type
+     * @return
+     */
+    public static <T> T loadSimpleXml_(String xmlFile, Class<T> type) {
+        try {
+            return new org.simpleframework.xml.core.Persister().read(type, new FileInputStream(new File(xmlFile)));
+        } catch (Exception e) {
+            //don't use the ForwardedException.forward(), because the LogFactory is using this, too!
+            throw new RuntimeException(e);
+        }
+    }
+    
     public static final void saveXml(String xmlFile, Object obj) {
         CompatibilityLayer compLayer = Environment.get(CompatibilityLayer.class);
         //not available on android
         /*if (compLayer.isAvailable("javax.xml.bind.JAXB")) {
             javax.xml.bind.JAXB.marshal(obj, xmlFile);
         } else */if (compLayer.isAvailable("org.simpleframework.xml.core.Persister")) {
-            try {
-                new org.simpleframework.xml.core.Persister(new Format("<?xml version=\"1.0\" encoding=\"UTF-8\"?>")).write(obj, new File(xmlFile));
-            } catch (Exception e) {
-                ForwardedException.forward(e);
-            }
+            saveSimpleXml_(xmlFile, obj);
         } else {
             FileUtil.saveXml((Serializable)obj, xmlFile);
+        }
+    }
+
+    /**
+     * only for internal use
+     * @param xmlFile
+     * @param obj
+     */
+    public static void saveSimpleXml_(String xmlFile, Object obj) {
+        try {
+            new org.simpleframework.xml.core.Persister(new Format("<?xml version=\"1.0\" encoding=\"UTF-8\"?>")).write(obj, new File(xmlFile));
+        } catch (Exception e) {
+            //don't use the ForwardedException.forward(), because the LogFactory is using this, too!
+            throw new RuntimeException(e);
         }
     }
 }

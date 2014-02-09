@@ -1,18 +1,30 @@
 package de.tsl2.nano.log;
 
+import java.io.File;
+import java.io.IOException;
 import java.io.PrintStream;
+import java.io.Serializable;
 import java.text.MessageFormat;
+import java.util.Arrays;
 import java.util.Calendar;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
-import java.util.concurrent.Executors;
+
+import org.simpleframework.xml.Attribute;
+import org.simpleframework.xml.Default;
+import org.simpleframework.xml.DefaultType;
+import org.simpleframework.xml.Element;
+import org.simpleframework.xml.ElementMap;
+import org.simpleframework.xml.core.Commit;
+import org.simpleframework.xml.core.Persist;
 
 import de.tsl2.nano.classloader.ThreadUtil;
-//import de.tsl2.nano.Environment;
 import de.tsl2.nano.exception.ForwardedException;
+import de.tsl2.nano.execution.XmlUtil;
+import de.tsl2.nano.util.BitUtil;
 //import de.tsl2.nano.execution.CompatibilityLayer;
 import de.tsl2.nano.util.NumberUtil;
 import de.tsl2.nano.util.StringUtil;
@@ -39,18 +51,26 @@ import de.tsl2.nano.util.StringUtil;
  * @author ts
  * @version $Revision$
  */
-public abstract class LogFactory implements Runnable {
+//using SimpleXml it is not possible to use the abstract class with anonymous implementation!
+@Default(value = DefaultType.FIELD, required = false)
+public/*abstract*/class LogFactory implements Runnable, Serializable {
+    /** serialVersionUID */
+    private static final long serialVersionUID = -1548678560499335157L;
+
     static LogFactory self;
-    List<String> loggingQueue = Collections.synchronizedList(new LinkedList<String>());
+    transient List<String> loggingQueue = Collections.synchronizedList(new LinkedList<String>());
 
-    final Map<String, Integer> loglevels = new HashMap<String, Integer>();
+    @ElementMap(inline = true, name = "loglevel", data = true, key = "package", keyType = String.class, valueType = Integer.class, required = false)
+    Map<String, Integer> loglevels;
 
-    PrintStream out = System.out;
-    PrintStream err = System.err;
+    transient PrintStream out = System.out;
+    transient PrintStream err = System.err;
 
     /** a string formatting time, 'logClass', 'state', 'message' with {@link MessageFormat} */
+
+    @Element(data = true)
     String outputformat = "%1$td:%1$tm:%1$tY %1$tT %2$s [%3$16s]: %4$s";
-    final MsgFormat msgFormat = new MsgFormat(outputformat);
+    transient MsgFormat msgFormat;
 
     public static final int FATAL = 1;
     public static final int ERROR = 2;
@@ -64,12 +84,14 @@ public abstract class LogFactory implements Runnable {
     public static final int LOG_DEBUG = INFO | WARN | ERROR | FATAL | DEBUG;
     public static final int LOG_ALL = INFO | WARN | ERROR | FATAL | DEBUG | TRACE;
 
-//    static final String[] STATETXT = new String[] { "info", "warn", "error", "fatal", "debug", "trace" };
-    static final String[] STATETXT = new String[] { "§", "§", "#", " ", "-", "-" };
+    static final String[] STATEDESCRIPTION = new String[] { "info", "warn", "error", "fatal", "debug", "trace" };
+    static final String[] STATETXT = new String[] { "!", "§", "#", " ", "-", "=" };
 
     /** bit set of states to log. will be used in inner log class */
-    int statesToLog = LOG_STANDARD;
-    int defaultPckLogLevel = NumberUtil.highestOneBit(statesToLog);
+    @Attribute
+    String standard;
+    transient int statesToLog = LOG_STANDARD;
+    int defaultPckLogLevel;
 
     /**
      * used for formatted logging using outputformat as pattern. see {@link #log(Class, State, Object, Throwable)}. (-->
@@ -77,19 +99,49 @@ public abstract class LogFactory implements Runnable {
      */
     static final String apacheLogFactory = "org.apache.commons.logging.LogFactory";
 
+    static String logFactoryXml = "logfactory.xml";
+
     /**
      * singelton constructor
      */
     private LogFactory() {
     }
-    
+
     protected static LogFactory instance() {
         if (self == null) {
-            self = new LogFactory() {
-            };
+            /*
+             * while it not possible to use convenience method from other base classes,
+             * because the all use this logfactory, we have to create some not-nice code.
+             */
+            if (new File(logFactoryXml).canRead())
+                try {
+                    self = XmlUtil.loadSimpleXml_(logFactoryXml, LogFactory.class);
+                    if (self.loglevels == null)
+                        self.loglevels = new HashMap<String, Integer>();
+                } catch (Exception e) {
+                    //ok, we create the instance directly!
+                    e.printStackTrace();
+                }
+            if (self == null) {
+                self = new LogFactory() /* on abstract: {} */;
+                self.loglevels = new HashMap<String, Integer>();
+                self.msgFormat = new MsgFormat(self.outputformat);
+                self.defaultPckLogLevel = NumberUtil.highestOneBit(self.statesToLog);
+                XmlUtil.saveSimpleXml_(logFactoryXml, self);
+            }
             ThreadUtil.startDaemon("logger", self);
         }
         return self;
+    }
+
+    /**
+     * only for internal use! will reset the current singelton instance.
+     * 
+     * @param logConfiguration
+     */
+    public static void setLogFactoryXml(String logConfiguration) {
+        self = null;
+        logFactoryXml = logConfiguration;
     }
 
     public static final void initializeFileLogger(String fileName, int bitsetStatesToLog) {
@@ -125,6 +177,17 @@ public abstract class LogFactory implements Runnable {
         } else {
             instance().statesToLog = bitsetStatesToLog;
         }
+    }
+
+    @Persist
+    private void initSerialization() {
+        standard = description(statesToLog);
+    }
+
+    @Commit
+    private void initDeserializing() {
+        statesToLog = Arrays.asList(STATEDESCRIPTION).indexOf(standard);
+        statesToLog = BitUtil.bitToDecimal(statesToLog);
     }
 
     /**
@@ -166,6 +229,10 @@ public abstract class LogFactory implements Runnable {
 
     private static final String state(int loglevel) {
         return STATETXT[NumberUtil.highestBitPosition(loglevel)];
+    }
+
+    private static final String description(int loglevel) {
+        return STATEDESCRIPTION[NumberUtil.highestBitPosition(loglevel)];
     }
 
     @SuppressWarnings({ "rawtypes" })
@@ -287,10 +354,16 @@ public abstract class LogFactory implements Runnable {
 
     @Override
     public void run() {
-        String txt;
+        String txt, last = " ";
+        boolean filter;
         while (true) {
             if (loggingQueue.size() > 0) {
                 txt = loggingQueue.remove(0);
+                filter = txt.charAt(0) == last.charAt(0);
+                if (filter)
+                    txt = filterNews(txt, last);
+                else
+                    last = txt;
                 out.println(txt);
                 if (out != System.out)
                     System.out.println(txt);
@@ -302,6 +375,17 @@ public abstract class LogFactory implements Runnable {
                 }
             }
         }
+        
+    }
+
+    private String filterNews(String newText, String lastText) {
+        int i;
+        for (i = 0; i < newText.length(); i++) {
+            if (lastText.length() > i&& lastText.charAt(i) == newText.charAt(i))
+                continue;
+            break;
+        }
+        return newText.substring(i);
     }
 
     /**
