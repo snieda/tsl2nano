@@ -12,11 +12,13 @@ package de.tsl2.nano.service.util;
 import java.lang.annotation.Annotation;
 import java.sql.Time;
 import java.sql.Timestamp;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
 
+import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.Id;
@@ -34,9 +36,11 @@ import de.tsl2.nano.bean.BeanAttribute;
 import de.tsl2.nano.bean.BeanClass;
 import de.tsl2.nano.bean.BeanContainer;
 import de.tsl2.nano.bean.IAttributeDef;
+import de.tsl2.nano.collection.CollectionUtil;
 import de.tsl2.nano.exception.ForwardedException;
 import de.tsl2.nano.log.LogFactory;
 import de.tsl2.nano.serviceaccess.ServiceFactory;
+import de.tsl2.nano.util.Util;
 
 /**
  * JPA 2.0 BeanContainer, using the stateless session bean {@link IGenericService}.
@@ -226,6 +230,7 @@ public class BeanContainerUtil {
                         BeanClass joinColumnBC = BeanClass.getBeanClass(joinColumn.getClass());
                         Boolean nullable;
                         Boolean composition;
+                        Boolean cascading;
                         Class<? extends Date> temporalType;
 
                         @Override
@@ -272,7 +277,23 @@ public class BeanContainerUtil {
                         @Override
                         public boolean composition() {
                             if (composition == null) {
-                                composition = oneToMany != null && !nullable;
+                                composition = !nullable() && oneToMany != null;
+                            }
+                            return composition;
+                        }
+
+                        @Override
+                        public boolean cascading() {
+                            if (cascading == null) {
+                                // check for @OneToMany(cascade=CascadeType.ALL, orphanRemoval=true)
+                                if (composition()) {
+                                    CascadeType[] ctype = (CascadeType[]) BeanClass.call(oneToMany, "cascade");
+                                    cascading =
+                                        Util.contains(ctype, CascadeType.ALL, CascadeType.MERGE)
+                                            && (Boolean) BeanClass.call(oneToMany, "orphanRemoval");
+                                } else {
+                                    cascading = false;
+                                }
                             }
                             return composition;
                         }
@@ -280,6 +301,7 @@ public class BeanContainerUtil {
                 } else {
                     def = new IAttributeDef() {
                         Class<? extends Date> temporalType;
+
                         @Override
                         public int scale() {
                             return -1;
@@ -320,6 +342,10 @@ public class BeanContainerUtil {
 
                         @Override
                         public boolean composition() {
+                            return false;
+                        }
+                        @Override
+                        public boolean cascading() {
                             return false;
                         }
                     };
@@ -391,6 +417,10 @@ public class BeanContainerUtil {
 
                 @Override
                 public boolean composition() {
+                    return false;
+                }
+                @Override
+                public boolean cascading() {
                     return false;
                 }
             };
