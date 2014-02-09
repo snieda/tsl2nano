@@ -71,6 +71,8 @@ public class AttributeDefinition<T> extends BeanAttribute implements IAttributeD
     private boolean doValidation = true;
     /** see {@link #composition()} */
     private boolean composition;
+    /** see {@link #cascading()} */
+    private boolean cascading;
 
     private static final Log LOG = LogFactory.getLog(AttributeDefinition.class);
 
@@ -117,6 +119,7 @@ public class AttributeDefinition<T> extends BeanAttribute implements IAttributeD
                 setNumberDef(def.scale(), def.precision());
                 temporalType = def.temporalType();
                 composition = def.composition();
+                cascading = def.cascading();
             }
         }
         initDeserialization();
@@ -631,6 +634,11 @@ public class AttributeDefinition<T> extends BeanAttribute implements IAttributeD
         return composition;
     }
 
+    @Override
+    public boolean cascading() {
+        return cascading;
+    }
+    
     @Override
     public void setAsRelation(String relationChain) {
         new PrivateAccessor<AttributeDefinition<T>>(this).set("name", relationChain);

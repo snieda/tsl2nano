@@ -42,7 +42,15 @@ public interface IAttributeDef {
      * @return true, if attribute cannot exist without it's parent bean.
      */
     boolean composition();
-    
+
+    /**
+     * if attribute type is one-to-many (collection), jpa will persist this relation only, if cascading is activated
+     * (ALL,MERGE, orphanremoval).
+     * 
+     * @return true , if cascading is activated
+     */
+    boolean cascading();
+
     /** whether this field should be unique */
     boolean unique();
 }

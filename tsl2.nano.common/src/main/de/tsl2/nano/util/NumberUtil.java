@@ -19,7 +19,6 @@ import java.text.ParsePosition;
 import java.util.Comparator;
 import java.util.Locale;
 
-
 import de.tsl2.nano.bean.BeanClass;
 import de.tsl2.nano.exception.ForwardedException;
 import de.tsl2.nano.format.FormatUtil;
@@ -162,6 +161,7 @@ public class NumberUtil extends BitUtil {
 
     /**
      * hasEqualSigns
+     * 
      * @param numbers
      * @return
      */
@@ -297,6 +297,20 @@ public class NumberUtil extends BitUtil {
      */
     public static int getLocalUniqueInt() {
         return DateUtil.currentTimeSeconds();
+    }
+
+    /**
+     * checks the given string to be a number
+     * @param value
+     * @return if value is parseable to a number
+     */
+    public static boolean isNumber(String value) {
+        try {
+            return Integer.valueOf(value) != null;
+        } catch (NumberFormatException ex) {
+            //ok, not a number
+            return false;
+        }
     }
 
     /**

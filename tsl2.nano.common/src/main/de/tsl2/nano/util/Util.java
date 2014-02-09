@@ -21,12 +21,13 @@ import de.tsl2.nano.exception.ForwardedException;
  * @version $Revision$
  */
 public class Util {
-    
+
     protected Util() {
     }
-    
+
     /**
      * isAllNull
+     * 
      * @param objects objects to check
      * @return true, if all objects are null
      */
@@ -41,6 +42,7 @@ public class Util {
 
     /**
      * hasNull
+     * 
      * @param objects objects to check
      * @return true, if at least one object is null
      */
@@ -57,7 +59,7 @@ public class Util {
         if (objects == null || objects.length < i)
             throw new IllegalArgumentException("at least " + i + " parameter must be given!");
     }
-    
+
     /**
      * isEmpty
      * 
@@ -79,17 +81,41 @@ public class Util {
     }
 
     /**
-     * checks, whether data is contained in c.
+     * checks, whether entry is one of elements
      * 
      * @param entry to check
      * @param elements collection of available entries
      * @return true, if data is equal to one of c.
      */
-    public static final boolean in(Object entry, Object... elements) {
+    public static final <T> boolean in(T entry, T... elements) {
         checkParameterCount(elements, 1);
         return Arrays.asList(elements).contains(entry);
     }
 
+    /**
+     * checks whether data contains one of items
+     * @param data data to check
+     * @param items available items
+     * @return true, data contains one of items
+     */
+    public static final <T> boolean contains(T[] data, T... items) {
+        for (int i = 0; i < data.length; i++) {
+            if (in(data[i], items))
+                return true;
+        }
+        return false;
+    }
+
+    /**
+     * checks whether data contains one of items
+     * @param data data to check
+     * @param items available items
+     * @return true, data contains one of items
+     */
+    public static final <T> boolean containsAll(T[] data, T... items) {
+        return Arrays.asList(data).containsAll(Arrays.asList(items));
+    }
+    
     /**
      * asString
      * 
@@ -117,20 +143,22 @@ public class Util {
 
     /**
      * evaluates hashcode of all objects
+     * 
      * @param objects objects to check
      * @return combined hashcode
      */
-    public static int hashCode(Object...objects) {
+    public static int hashCode(Object... objects) {
         checkParameterCount(objects, 1);
         return Arrays.hashCode(objects);
     }
-    
+
     /**
      * checks, if all objects are equal
+     * 
      * @param objects objects to check
      * @return true, if all objects are equal
      */
-    public static boolean equals(Object...objects) {
+    public static boolean equals(Object... objects) {
         checkParameterCount(objects, 2);
         Object last = objects[0];
         for (Object o : objects) {
@@ -140,9 +168,10 @@ public class Util {
         }
         return true;
     }
-    
+
     /**
      * value
+     * 
      * @param objects object to check
      * @param defaultValue
      * @return object, or if null the defaultValue
@@ -151,15 +180,15 @@ public class Util {
     public static <T> T value(Object object, T defaultValue) {
         return (T) (object != null ? object : defaultValue);
     }
-    
-    
+
     /**
      * standard toString implementation
+     * 
      * @param cls root class
      * @param members class members
      * @return tostring representation
      */
-    public static String toString(Class<?> cls, Object...members) {
+    public static String toString(Class<?> cls, Object... members) {
         StringBuilder buf = new StringBuilder(cls.getSimpleName() + "(" + members[0]);
         for (int i = 1; i < members.length; i++) {
             buf.append(", " + String.valueOf(members[i]));

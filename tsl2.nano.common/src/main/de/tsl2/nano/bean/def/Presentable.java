@@ -21,6 +21,7 @@ import org.simpleframework.xml.ElementMap;
 import de.tsl2.nano.Environment;
 import de.tsl2.nano.action.IActivator;
 import de.tsl2.nano.bean.BeanAttribute;
+import de.tsl2.nano.bean.BeanContainer;
 
 /**
  * simple gui properties
@@ -63,10 +64,17 @@ public class Presentable implements IIPresentable, Serializable {
 
     public Presentable(BeanAttribute attr) {
         label = Environment.translate(attr.getName(), true);
-        type = Environment.get(BeanPresentationHelper.class).getDefaultType(attr);
-        style = Environment.get(BeanPresentationHelper.class).getDefaultHorizontalAlignment(attr);
+        BeanPresentationHelper<?> helper = Environment.get(BeanPresentationHelper.class);
+        type = helper.getDefaultType(attr);
+        style =
+            attr instanceof IAttributeDefinition ? helper.getDefaultHorizontalAlignment((IAttributeDefinition<?>) attr)
+                : helper.getDefaultHorizontalAlignment(attr);
         description = label;
-        enabler = attr.hasWriteAccess() ? IActivator.ACTIVE : IActivator.INACTIVE;
+        enabler =
+            attr.hasWriteAccess()
+                && (!BeanContainer.instance().isPersistable(attr.getType()) || !(attr instanceof IAttributeDefinition) || (!((IAttributeDefinition<?>) attr).isMultiValue() || ((IAttributeDefinition<?>) attr)
+                    .cascading()))
+                ? IActivator.ACTIVE : IActivator.INACTIVE;
     }
 
     /**
