@@ -58,6 +58,7 @@ import de.tsl2.nano.serviceaccess.Authorization;
 import de.tsl2.nano.serviceaccess.IAuthorization;
 import de.tsl2.nano.serviceaccess.ServiceFactory;
 import de.tsl2.nano.util.FileUtil;
+import de.tsl2.nano.util.NumberUtil;
 import de.tsl2.nano.util.StringUtil;
 
 /**
@@ -119,7 +120,7 @@ public class NanoH5 extends NanoHTTPD {
     @Override
     public void start() {
         try {
-            LogFactory.setLogLevel(LogFactory.LOG_ALL);
+//            LogFactory.setLogLevel(LogFactory.LOG_ALL);
             LOG.info(System.getProperties());
             createStartPage(DEGBUG_HTML_FILE);
             LOG.info("Listening on port " + serviceURL.getPort() + ". Hit Enter to stop.\n");
@@ -171,7 +172,7 @@ public class NanoH5 extends NanoHTTPD {
      */
     @Override
     public Response serve(String uri, String method, Properties header, Properties parms, Properties files) {
-        if (method.equals("GET") && HtmlUtil.isURL(uri) && !uri.contains(Html5Presentation.PREFIX_BEANREQUEST))
+        if (method.equals("GET") && !NumberUtil.isNumber(uri.substring(1)) && HtmlUtil.isURL(uri) && !uri.contains(Html5Presentation.PREFIX_BEANREQUEST))
             return super.serve(uri, method, header, parms, files);
         InetAddress requestor = ((Socket) header.get("socket")).getInetAddress();
         NanoH5Session session = sessions.get(requestor);
