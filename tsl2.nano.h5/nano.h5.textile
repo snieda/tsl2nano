@@ -251,6 +251,8 @@ TODO describe
 
 #### Value Groups and Sub-Panels
 
+#### Rule-Attributes
+
 ### Attribute Presentation
 
 ## Showing calculated values through integrated rule engine
@@ -750,6 +752,7 @@ set the following *environment.xml* properties:
 ** BeanPresentationHelper.defineAdditionalAttributes(): how to avoid javaassist class
 ** presentation not written to xml --> see first failure
 ** every bean gets a new beandef copy with copies of attributedefs --> attributedef evaluations for every bean!
+** one-to-many: if no cascade-type is defined,the attribute should not be editable! 
 * hibernate-tools generates id-beans like times-->timesid.
 ** (x) check for *@Id* is no standard-java-type and environment.show.id.fields is true
 *** (x) BeanPresentationHelper fills all id-bean fields as virtuals to the main bean
