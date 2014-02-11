@@ -1,7 +1,6 @@
 package de.tsl2.nano.log;
 
 import java.io.File;
-import java.io.IOException;
 import java.io.PrintStream;
 import java.io.Serializable;
 import java.text.MessageFormat;
@@ -84,14 +83,18 @@ public/*abstract*/class LogFactory implements Runnable, Serializable {
     public static final int LOG_DEBUG = INFO | WARN | ERROR | FATAL | DEBUG;
     public static final int LOG_ALL = INFO | WARN | ERROR | FATAL | DEBUG | TRACE;
 
-    static final String[] STATEDESCRIPTION = new String[] { "info", "warn", "error", "fatal", "debug", "trace" };
+    static final String[] STATEDESCRIPTION = new String[] { "fatal", "error", "warn", "info", "debug", "trace" };
     static final String[] STATETXT = new String[] { "!", "§", "#", " ", "-", "=" };
 
     /** bit set of states to log. will be used in inner log class */
     @Attribute
     String standard;
     transient int statesToLog = LOG_STANDARD;
-    int defaultPckLogLevel;
+    transient int defaultPckLogLevel;
+
+    /** whether to filter the output. means, it doesn't repeat last line elements */
+    @Attribute
+    private boolean useFilter = true;
 
     /**
      * used for formatted logging using outputformat as pattern. see {@link #log(Class, State, Object, Throwable)}. (-->
@@ -354,16 +357,22 @@ public/*abstract*/class LogFactory implements Runnable, Serializable {
 
     @Override
     public void run() {
-        String txt, last = " ";
-        boolean filter;
+        String txt, last = " ", text;
+        int filter, lastFilter = 0;
         while (true) {
             if (loggingQueue.size() > 0) {
-                txt = loggingQueue.remove(0);
-                filter = txt.charAt(0) == last.charAt(0);
-                if (filter)
-                    txt = filterNews(txt, last);
-                else
-                    last = txt;
+                text = loggingQueue.remove(0);
+                if (useFilter) {
+                    filter = filterIndex(text, last);
+                    if (filter < lastFilter) {
+                        filter = 0;
+                    }
+                    txt = filter > 0 ? "\t" + text.substring(filter) : text;
+                    lastFilter = filter;
+                    last = text;
+                } else {
+                    txt = text;
+                }
                 out.println(txt);
                 if (out != System.out)
                     System.out.println(txt);
@@ -375,17 +384,18 @@ public/*abstract*/class LogFactory implements Runnable, Serializable {
                 }
             }
         }
-        
+
     }
 
-    private String filterNews(String newText, String lastText) {
+    private int filterIndex(String newText, String lastText) {
         int i;
-        for (i = 0; i < newText.length(); i++) {
-            if (lastText.length() > i&& lastText.charAt(i) == newText.charAt(i))
+        int len = Math.min(newText.length(), lastText.length());
+        for (i = 0; i < len; i++) {
+            if (lastText.charAt(i) == newText.charAt(i))
                 continue;
             break;
         }
-        return newText.substring(i);
+        return i;
     }
 
     /**
