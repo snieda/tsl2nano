@@ -79,9 +79,9 @@ public class RuleAttribute<T> extends BeanValue<T> {
     }
 
     @Override
-    public Object getValue(Object beanInstance) {
+    public T getValue(Object beanInstance) {
         try {
-            Object result = readAccessMethod.invoke(beanInstance, refreshArguments());
+            T result = (T) readAccessMethod.invoke(beanInstance, refreshArguments());
             if (connectedAttribute != null)
                 connectedAttribute.setValue(beanInstance, result);
             return result;
