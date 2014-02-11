@@ -35,6 +35,7 @@ import de.tsl2.nano.action.IAction;
 import de.tsl2.nano.bean.BeanAttribute;
 import de.tsl2.nano.bean.BeanClass;
 import de.tsl2.nano.bean.BeanContainer;
+import de.tsl2.nano.bean.BeanUtil;
 import de.tsl2.nano.bean.IAttributeDef;
 import de.tsl2.nano.collection.CollectionUtil;
 import de.tsl2.nano.exception.ForwardedException;
@@ -229,9 +230,9 @@ public class BeanContainerUtil {
                     def = new IAttributeDef() {
                         BeanClass joinColumnBC = BeanClass.getBeanClass(joinColumn.getClass());
                         Boolean nullable;
+                        Class<? extends Date> temporalType;
                         Boolean composition;
                         Boolean cascading;
-                        Class<? extends Date> temporalType;
 
                         @Override
                         public int scale() {
@@ -286,7 +287,7 @@ public class BeanContainerUtil {
                         public boolean cascading() {
                             if (cascading == null) {
                                 // check for @OneToMany(cascade=CascadeType.ALL, orphanRemoval=true)
-                                if (composition()) {
+                                if (oneToMany != null) {
                                     CascadeType[] ctype = (CascadeType[]) BeanClass.call(oneToMany, "cascade");
                                     cascading =
                                         Util.contains(ctype, CascadeType.ALL, CascadeType.MERGE)
@@ -295,12 +296,14 @@ public class BeanContainerUtil {
                                     cascading = false;
                                 }
                             }
-                            return composition;
+                            return cascading;
                         }
                     };
-                } else {
+                } else {//column == null && joincolumn == null, if oneToMany == null, it may be not persistable!
                     def = new IAttributeDef() {
                         Class<? extends Date> temporalType;
+                        Boolean composition;
+                        Boolean cascading;
 
                         @Override
                         public int scale() {
@@ -342,88 +345,102 @@ public class BeanContainerUtil {
 
                         @Override
                         public boolean composition() {
-                            return false;
+                            if (composition == null) {
+                                composition = !nullable() && oneToMany != null;
+                            }
+                            return composition;
                         }
+
                         @Override
                         public boolean cascading() {
-                            return false;
+                            if (cascading == null) {
+                                // check for @OneToMany(cascade=CascadeType.ALL, orphanRemoval=true)
+                                if (oneToMany != null) {
+                                    CascadeType[] ctype = (CascadeType[]) BeanClass.call(oneToMany, "cascade");
+                                    cascading =
+                                        Util.contains(ctype, CascadeType.ALL, CascadeType.MERGE)
+                                            && (Boolean) BeanClass.call(oneToMany, "orphanRemoval");
+                                } else {//perhaps non-persistable attribute
+                                    cascading = !BeanUtil.isSingleValueType(battr.getType());
+                                }
+                            }
+                            return cascading;
                         }
                     };
                 }
-                attrDefCache.put(attrKey(clazz, attribute), def);
-                return def;
-            }
+            } else {//column != null
+                def = new IAttributeDef() {
+                    BeanClass columnBC = BeanClass.getBeanClass(column.getClass());
+                    Integer scale;
+                    Integer precision;
+                    Integer length;
+                    Boolean nullable;
+                    Boolean unique;
+                    Class<? extends Date> temporalType;
 
-            def = new IAttributeDef() {
-                BeanClass columnBC = BeanClass.getBeanClass(column.getClass());
-                Integer scale;
-                Integer precision;
-                Integer length;
-                Boolean nullable;
-                Boolean unique;
-                Class<? extends Date> temporalType;
-
-                @Override
-                public int scale() {
+                    @Override
+                    public int scale() {
 //                    return column.scale();
-                    if (scale == null)
-                        scale = (Integer) columnBC.callMethod(column, "scale");
-                    return scale;
-                }
-
-                @Override
-                public int precision() {
-//                    return column.precision();
-                    if (precision == null)
-                        precision = (Integer) columnBC.callMethod(column, "precision");
-                    return precision;
-                }
-
-                @Override
-                public boolean nullable() {
-//                    return column.nullable();
-                    if (nullable == null)
-                        nullable = (Boolean) columnBC.callMethod(column, "nullable");
-                    return nullable;
-                }
-
-                @Override
-                public int length() {
-//                    return column.length();
-                    if (length == null)
-                        length = (Integer) columnBC.callMethod(column, "length");
-                    return length;
-                }
-
-                @Override
-                public boolean id() {
-                    return id != null;
-                }
-
-                @Override
-                public boolean unique() {
-                    if (unique == null)
-                        unique = (Boolean) columnBC.callMethod(column, "unique");
-                    return unique;
-                }
-
-                @Override
-                public java.lang.Class<? extends java.util.Date> temporalType() {
-                    if (temporalType == null && temporal != null) {
-                        temporalType = getTemporalType(temporal);
+                        if (scale == null)
+                            scale = (Integer) columnBC.callMethod(column, "scale");
+                        return scale;
                     }
-                    return temporalType;
-                }
 
-                @Override
-                public boolean composition() {
-                    return false;
-                }
-                @Override
-                public boolean cascading() {
-                    return false;
-                }
-            };
+                    @Override
+                    public int precision() {
+//                    return column.precision();
+                        if (precision == null)
+                            precision = (Integer) columnBC.callMethod(column, "precision");
+                        return precision;
+                    }
+
+                    @Override
+                    public boolean nullable() {
+//                    return column.nullable();
+                        if (nullable == null)
+                            nullable = (Boolean) columnBC.callMethod(column, "nullable");
+                        return nullable;
+                    }
+
+                    @Override
+                    public int length() {
+//                    return column.length();
+                        if (length == null)
+                            length = (Integer) columnBC.callMethod(column, "length");
+                        return length;
+                    }
+
+                    @Override
+                    public boolean id() {
+                        return id != null;
+                    }
+
+                    @Override
+                    public boolean unique() {
+                        if (unique == null)
+                            unique = (Boolean) columnBC.callMethod(column, "unique");
+                        return unique;
+                    }
+
+                    @Override
+                    public java.lang.Class<? extends java.util.Date> temporalType() {
+                        if (temporalType == null && temporal != null) {
+                            temporalType = getTemporalType(temporal);
+                        }
+                        return temporalType;
+                    }
+
+                    @Override
+                    public boolean composition() {
+                        return false;
+                    }
+
+                    @Override
+                    public boolean cascading() {
+                        return false;
+                    }
+                };
+            }
             attrDefCache.put(attrKey(clazz, attribute), def);
             return def;
         } catch (final Exception e) {
