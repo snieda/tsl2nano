@@ -161,6 +161,11 @@ public class AttributeDefinition<T> extends BeanAttribute implements IAttributeD
         return this;
     }
 
+    @Override
+    public T getValue(Object beanInstance) {
+        return (T) super.getValue(beanInstance);
+    }
+    
     /**
      * setNumberDef
      * 

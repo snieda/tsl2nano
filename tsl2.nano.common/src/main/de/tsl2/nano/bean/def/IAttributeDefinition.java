@@ -33,7 +33,10 @@ public interface IAttributeDefinition<T> extends IAttributeDef, Serializable {
     
     /** evaluates the attribute value for the given bean instance. no generic type is given because the implementing 
      * base class BeanAttribute doesn't define that */
-    Object getValue(Object instance);
+    T getValue(Object instance);
+    
+    /** sets a new value for the given instance */
+    void setValue(Object instance, T value);
     
     /** the values class type */
     Class<T> getType();

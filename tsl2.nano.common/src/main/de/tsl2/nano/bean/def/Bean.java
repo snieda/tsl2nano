@@ -122,7 +122,7 @@ public class Bean<T> extends BeanDefinition<T> {
     /** string representation. see {@link #toString()} */
     protected String asString;
     /** inner function to detach this bean from a beancollector */
-    private Runnable detacher;
+    private IAction detacher;
 
     /**
      * hold beans only for a short time. this will enhance performance on loading a bean. holding beans to long will
@@ -438,10 +438,13 @@ public class Bean<T> extends BeanDefinition<T> {
      * @return
      */
     public Object save() {
+        Object result;
         if (CompositionFactory.persist(instance))
-            return instance;
+            result = instance;
         else
-            return save(instance);
+            result = save(instance);
+        detach();
+        return result;
     }
 
     /**
@@ -616,16 +619,17 @@ public class Bean<T> extends BeanDefinition<T> {
      * 
      * @param detacher
      */
-    public void attach(Runnable detacher) {
+    public void attach(IAction detacher) {
         this.detacher = detacher;
     }
 
     /**
      * runs detacher and sets detacher to null
      */
-    public boolean detach() {
+    public boolean detach(Object...arguments) {
         timedCache.remove(this);
         if (detacher != null) {
+            detacher.setParameter(arguments);
             detacher.run();
             detacher = null;
             return true;

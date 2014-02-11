@@ -22,6 +22,7 @@ import de.tsl2.nano.Environment;
 import de.tsl2.nano.action.IActivator;
 import de.tsl2.nano.bean.BeanAttribute;
 import de.tsl2.nano.bean.BeanContainer;
+import de.tsl2.nano.bean.BeanUtil;
 
 /**
  * simple gui properties
@@ -70,9 +71,15 @@ public class Presentable implements IIPresentable, Serializable {
             attr instanceof IAttributeDefinition ? helper.getDefaultHorizontalAlignment((IAttributeDefinition<?>) attr)
                 : helper.getDefaultHorizontalAlignment(attr);
         description = label;
+        /*
+         * to be enabled, the attribute must be 
+         * - writable through setter-method
+         * - not persistable or persistable and if it is a multi-value, cascading must be activated!
+         */
         enabler =
             attr.hasWriteAccess()
-                && (!BeanContainer.instance().isPersistable(attr.getType()) || !(attr instanceof IAttributeDefinition) || (!((IAttributeDefinition<?>) attr).isMultiValue() || ((IAttributeDefinition<?>) attr)
+                && (!BeanContainer.instance().isPersistable(attr.getDeclaringClass())
+                    || !(attr instanceof IAttributeDefinition) || (!((IAttributeDefinition<?>) attr).isMultiValue() || ((IAttributeDefinition<?>) attr)
                     .cascading()))
                 ? IActivator.ACTIVE : IActivator.INACTIVE;
     }

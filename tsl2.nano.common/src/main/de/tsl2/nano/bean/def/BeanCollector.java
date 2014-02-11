@@ -515,11 +515,14 @@ public class BeanCollector<COLLECTIONTYPE extends Collection<T>, T> extends Bean
         if (Environment.get("default.attribute.timestamp", true)) {
             Map<String, IAttributeDefinition<?>> attrs = getAttributeDefinitions();
             Timestamp ts = new Timestamp(System.currentTimeMillis());
-            for (IAttributeDefinition<?> a : attrs.values()) {
-                if (a instanceof IValueAccess)
-                    if (a.temporalType() != null && Timestamp.class.isAssignableFrom(a.temporalType())) {
+            for (IAttributeDefinition a : attrs.values()) {
+                if (a.temporalType() != null && Timestamp.class.isAssignableFrom(a.temporalType())) {
+                    if (a instanceof IValueAccess) {
                         ((IValueAccess) a).setValue(ts);
+                    } else {
+                        a.setValue(newItem, ts);
                     }
+                }
             }
         }
         /*
@@ -559,10 +562,14 @@ public class BeanCollector<COLLECTIONTYPE extends Collection<T>, T> extends Bean
                     final T finalBean = newBean;
                     final COLLECTIONTYPE values = collection;
                     values.add(newBean);
-                    Bean.getBean((Serializable) newBean).attach(new Runnable() {
+                    final Bean b = Bean.getBean((Serializable) newBean);
+                    b.attach(new CommonAction<Void>() {
                         @Override
-                        public void run() {
+                        public Void action() throws Exception {
                             values.remove(finalBean);
+                            if (!"remove".equals(getParameter(0)))
+                                values.add((T) b.getInstance());
+                            return null;
                         }
                     });
                     refresh();
