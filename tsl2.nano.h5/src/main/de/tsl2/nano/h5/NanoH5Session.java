@@ -202,7 +202,7 @@ public class NanoH5Session {
         if (parms.containsKey(IAction.CANCELED)) {
             //if a new object was cancelled, it must be removed
             if (nav.current() != null && !nav.current().isMultiValue()) {
-                ((Bean) nav.current()).detach();
+                ((Bean) nav.current()).detach("remove");
             }
             return IAction.CANCELED;
         }
@@ -223,7 +223,7 @@ public class NanoH5Session {
                 return responseObject;
             } else {
                 if (!isCanceled(parms)
-                    && (isNewAction(parms, (BeanCollector) nav.current()) || provideSelection(
+                    && (/*isNewAction(parms, (BeanCollector) nav.current()) || */provideSelection(
                         (BeanCollector) nav.current(), parms))) {
                     if (isReturn(parms)) {
                         responseObject = null;

@@ -37,7 +37,7 @@ Using the _NanoHTTPD_ Server as base, this client application creates html surfa
 
 It is not a real web-application platform but a simple way to use html5 as graphical user interface - in a standard client application.
 
-The base framework is [tsl2.nano.common](../tsl2.nano.common/nano.common.html).
+The base framework is [tsl2.nano.common](../tsl2.nano.common/nano.common.html). It is a full stack framework as simple and generic as possible - without dependencies to other libraries (except: simple-xml). 
 
 The data access is done by:
 * [tsl2.nano.serviceaccess](../tsl2.nano.serviceaccess/nano.serviceaccess.html)

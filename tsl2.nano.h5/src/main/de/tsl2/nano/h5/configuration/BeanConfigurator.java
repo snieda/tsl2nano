@@ -152,6 +152,7 @@ public class BeanConfigurator<T> implements Serializable {
      * @return null
      */
     public Object actionSave() {
+        defAccessor.set("isdefault", false);
         def.saveDefinition();
         Environment.removeService(BeanConfigurator.class);
         //return null to let the session-navigation return to the last element.
