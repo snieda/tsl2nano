@@ -320,11 +320,16 @@ public abstract class CommonAction<RETURNTYPE> implements IAction<RETURNTYPE>, S
         return parameter;
     }
 
+    @Override
+    public Object getParameter(int i) {
+        return parameter != null && parameter.length > i ? parameter[i] : null;
+    }
+    
     /**
      * @param parameter The parameter to set.
      */
     @Override
-    public void setParameter(Object[] parameter) {
+    public void setParameter(Object... parameter) {
         this.parameter = parameter;
     }
 

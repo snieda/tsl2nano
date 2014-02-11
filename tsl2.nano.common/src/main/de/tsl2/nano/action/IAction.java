@@ -113,11 +113,13 @@ public interface IAction<RETURNTYPE> extends Runnable {
      * @return optional call arguments for action.
      */
     Object[] getParameter();
+    
+    Object getParameter(int i);
 
     /**
      * @param parameter call arguments
      */
-    void setParameter(Object[] parameter);
+    void setParameter(Object... parameter);
 
     /**
      * action mode. e.g. on dialogs it is usable to define the buttons result type. see {@link #MODE_DLG_CANCEL},
