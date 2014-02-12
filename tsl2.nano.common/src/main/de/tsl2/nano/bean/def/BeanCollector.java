@@ -696,42 +696,61 @@ public class BeanCollector<COLLECTIONTYPE extends Collection<T>, T> extends Bean
             collection.add(newBean);
     }
 
+    @Override
+    public void setAttributeFilter(String... availableAttributes) {
+        super.setAttributeFilter(availableAttributes);
+        columnDefinitions = null;
+    }
+
     /**
      * {@inheritDoc}
      */
     @Override
     public Collection<IPresentableColumn> getColumnDefinitions() {
         if (columnDefinitions == null) {
-            final List<IAttributeDefinition<?>> attributes = getBeanAttributes();
-            columnDefinitions = new ArrayList<IPresentableColumn>(attributes.size());
-            int i = 0;
-            for (IAttributeDefinition<?> attr : attributes) {
-                IPresentableColumn col = attr.getColumnDefinition();
-                if (col == null) {
-                    attr.setColumnDefinition(i, IPresentable.UNDEFINED, true, 100);
-                    col = attr.getColumnDefinition();
-                } else {
-                    //if derived from deserialization, the cycling attributeDefinition is null
-                    ValueColumn vc = (ValueColumn) col;
-                    if (vc.attributeDefinition == null)
-                        vc.attributeDefinition = attr;
-                }
-                columnDefinitions.add((IPresentableColumn) col);
-                i++;
+            columnDefinitions = createColumnDefinitions(this, hasMode(MODE_SHOW_MULTIPLES));
+        }
+        return columnDefinitions;
+    }
+
+    /**
+     * createColumnDefinitions
+     * 
+     * @param def
+     * @param showMultiples
+     * @return
+     */
+    static <T> Collection<IPresentableColumn> createColumnDefinitions(final BeanDefinition<T> def,
+            final boolean showMultiples) {
+        final List<IAttributeDefinition<?>> attributes = def.getBeanAttributes();
+        Collection<IPresentableColumn> columnDefinitions = new ArrayList<IPresentableColumn>(attributes.size());
+        int i = 0;
+        for (IAttributeDefinition<?> attr : attributes) {
+            IPresentableColumn col = attr.getColumnDefinition();
+            if (col == null) {
+                attr.setColumnDefinition(i, IPresentable.UNDEFINED, true, 100);
+                col = attr.getColumnDefinition();
+            } else {
+                //if derived from deserialization, the cycling attributeDefinition is null
+                ValueColumn vc = (ValueColumn) col;
+                if (vc.attributeDefinition == null)
+                    vc.attributeDefinition = attr;
             }
-            if (Environment.get("collector.use.multiple.filter", true)) {
-                //TODO: filtering ids, and invsisbles, too --> don't ask multiple-flag
-                columnDefinitions = CollectionUtil.getFiltering(columnDefinitions,
-                    new IPredicate<IPresentableColumn>() {
-                        @Override
-                        public boolean eval(IPresentableColumn arg0) {
-                            return (arg0.getPresentable() == null || arg0.getPresentable().isVisible())
-                                && hasMode(MODE_SHOW_MULTIPLES)
-                                || (getAttribute(arg0.getName()) == null || !getAttribute(arg0.getName())
-                                    .isMultiValue());
-                        }
-                    });
-            }
+            columnDefinitions.add((IPresentableColumn) col);
+            i++;
+        }
+        if (Environment.get("collector.use.multiple.filter", true)) {
+            //TODO: filtering ids, and invisibles, too --> don't ask multiple-flag
+            columnDefinitions = CollectionUtil.getFiltering(columnDefinitions,
+                new IPredicate<IPresentableColumn>() {
+                    @Override
+                    public boolean eval(IPresentableColumn arg0) {
+                        return (arg0.getPresentable() == null || arg0.getPresentable().isVisible())
+                            && showMultiples
+                            || (def.getAttribute(arg0.getName()) == null || !def.getAttribute(arg0.getName())
+                                .isMultiValue());
+                    }
+                });
         }
         return columnDefinitions;
     }
@@ -747,10 +766,13 @@ public class BeanCollector<COLLECTIONTYPE extends Collection<T>, T> extends Bean
 
     private IPresentableColumn getColumn(int i) {
         //try the fastest - all indexes as default
-        String name = getAttributeNames()[i];
-        IPresentableColumn column = getAttribute(name).getColumnDefinition();
-        if (column != null && column.getIndex() == i)
-            return column;
+        String[] names = getAttributeNames();
+        if (names.length > i) {
+            String name = names[i];
+            IPresentableColumn column = getAttribute(name).getColumnDefinition();
+            if (column != null && column.getIndex() == i)
+                return column;
+        }
         Collection<IPresentableColumn> colDefs = getColumnDefinitions();
         for (IPresentableColumn c : colDefs) {
             if (c.getIndex() == i)

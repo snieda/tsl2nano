@@ -181,23 +181,26 @@ public class Html5Presentation<T> extends BeanPresentationHelper<T> implements I
     @SuppressWarnings("serial")
     @Override
     public Collection<IAction> getApplicationActions() {
+        boolean firstTime = appActions == null;
         super.getApplicationActions();
 
-        appActions.add(new SecureAction(bean.getClazz(),
-            "configure",
-            IAction.MODE_UNDEFINED,
-            false,
-            "icons/compose.png") {
-            @Override
-            public Object action() throws Exception {
-                return BeanConfigurator.create((Class<Serializable>) bean.getClazz());
-            }
+        if (firstTime) {
+            appActions.add(new SecureAction(bean.getClazz(),
+                "configure",
+                IAction.MODE_UNDEFINED,
+                false,
+                "icons/compose.png") {
+                @Override
+                public Object action() throws Exception {
+                    return BeanConfigurator.create((Class<Serializable>) bean.getClazz());
+                }
 
-            @Override
-            public boolean isEnabled() {
-                return true;
-            }
-        });
+                @Override
+                public boolean isEnabled() {
+                    return true;
+                }
+            });
+        }
         return appActions;
     }
 
@@ -214,10 +217,17 @@ public class Html5Presentation<T> extends BeanPresentationHelper<T> implements I
     public String build(BeanDefinition<?> model, String message, boolean interactive, BeanDefinition<?>... navigation) {
         try {
             currentTabIndex = 0;
-            Element form = model != null ? model.setPresentationHelper(new Html5Presentation(model)).createPage(null,
-                message,
-                interactive,
-                navigation) : createPage(null, "Leaving Application!<br/>Restart", false, navigation);
+            Element form;
+            if (model != null) {
+                if (!(model.getPresentationHelper() instanceof Html5Presentation))
+                    model.setPresentationHelper(new Html5Presentation(model));
+                form = ((Html5Presentation) model.getPresentationHelper()).createPage(null,
+                    message,
+                    interactive,
+                    navigation);
+            } else {
+                form = createPage(null, "Leaving Application!<br/>Restart", false, navigation);
+            }
 
             String html = HtmlUtil.toString(form.getOwnerDocument());
             if (LOG.isDebugEnabled())
@@ -315,7 +325,7 @@ public class Html5Presentation<T> extends BeanPresentationHelper<T> implements I
                         "?",
                         ATTR_METHOD,
                         Environment.get("html5.http.method", "post"));
-                    Collection<IAction> actions = getPageActions();
+                    Collection<IAction> actions = new ArrayList<IAction>(getPageActions());
                     actions.addAll(getApplicationActions());
                     actions.addAll(getSessionActions());
                     createActionPanel(c3, actions,
@@ -974,7 +984,7 @@ public class Html5Presentation<T> extends BeanPresentationHelper<T> implements I
                 ATTR_MAXLENGTH,
                 (beanValue.length() > 0 ? String.valueOf(beanValue.length()) : String.valueOf(Integer.MAX_VALUE)),
                 (isOption ? enable(ATTR_CHECKED, (Boolean) beanValue.getValue()) : ATTR_VALUE),
-                (isOption ? null : getValue(beanValue, type)),
+                (isOption ? "checked" : getValue(beanValue, type)),
                 ATTR_TITLE,
                 beanValue.getDescription(),
                 "tabindex",
@@ -1217,69 +1227,5 @@ public class Html5Presentation<T> extends BeanPresentationHelper<T> implements I
     public String page(String message) {
         return createMessagePage("message.template", message, null);
     }
-}
 
-/**
- * Hmtl5-specialized {@link de.tsl2.nano.bean.def.Presentable}. Not possible to be handled as inner class, because of
- * xml-serialization.
- * 
- * @author Tom, Thomas Schneider
- * @version $Revision$
- */
-class Html5Presentable extends Presentable {
-    /** serialVersionUID */
-    private static final long serialVersionUID = 1L;
-
-    protected Html5Presentable() {
-    }
-
-    public Html5Presentable(AttributeDefinition<?> attr) {
-        super(attr);
-    }
-
-    @Override
-    public int getWidth() {
-        String w = layout(ATTR_WIDTH);
-        return w != null ? Integer.valueOf(w) : UNDEFINED;
-    }
-
-    @Override
-    public int getHeight() {
-        String h = layout(ATTR_HEIGHT);
-        return h != null ? Integer.valueOf(h) : UNDEFINED;
-    }
-
-    /**
-     * @return Returns the layout.
-     */
-    public LinkedHashMap<String, String> getLayout() {
-        if (layout == null) {
-            //LinkedHashmap not supported by simple-xml
-            layout = Environment.get("default.layout", new LinkedHashMap<String, String>());
-        }
-        return (LinkedHashMap<String, String>) layout;
-    }
-
-    //to have write-access, we need this setter
-    public <T extends IPresentable> T setLayout(LinkedHashMap<String, String> l) {
-        this.layout = l;
-        return (T) this;
-    }
-
-    /**
-     * @return Returns the layoutConstraints.
-     */
-    public LinkedHashMap<String, String> getLayoutConstraints() {
-        if (layoutConstraints == null) {
-            //LinkedHashmap not supported by simple-xml
-            layoutConstraints = Environment.get("default.layoutconstaints", new LinkedHashMap<String, String>());
-        }
-        return (LinkedHashMap<String, String>) layoutConstraints;
-    }
-
-    //to have write-access, we need this setter
-    public <T extends IPresentable> T setLayoutConstraints(LinkedHashMap<String, String> lc) {
-        this.layoutConstraints = lc;
-        return (T) this;
-    }
 }

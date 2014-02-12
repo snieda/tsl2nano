@@ -881,11 +881,11 @@ public class BeanDefinition<T> extends BeanClass<T> implements Serializable {
      */
     public void deleteDefinition() {
         if (usePersistentCache) {
-        File file = getDefinitionFile(getName());
-        if (file.canWrite())
-            file.delete();
+            File file = getDefinitionFile(getName());
+            if (file.canWrite())
+                file.delete();
         }
-        virtualBeanCache.remove(this); 
+        virtualBeanCache.remove(this);
     }
 
     public static void clearCache() {
@@ -900,13 +900,18 @@ public class BeanDefinition<T> extends BeanClass<T> implements Serializable {
     protected void autoInit(String name) {
         LOG.debug("calling autoinit() for " + name);
         setName(name);
-        getAttributes();
+        List<IAttributeDefinition<?>> attributes = getBeanAttributes();
         getAttributeNames();
+        BeanCollector.createColumnDefinitions(this,
+            getPresentationHelper().matches("default.present.attribute.multivalue", true));
+        for (IAttributeDefinition<?> a : attributes) {
+            a.getPresentation();
+            a.getColumnDefinition();
+        }
 //        getActions();
         getPresentable();
         getConnection("");
         getValueExpression();
-        getPresentationHelper();
     }
 
     /**

@@ -10,7 +10,7 @@
 package de.tsl2.nano.h5.configuration;
 
 import static de.tsl2.nano.h5.HtmlUtil.ATTR_BGCOLOR;
-import static de.tsl2.nano.h5.HtmlUtil.*;
+import static de.tsl2.nano.h5.HtmlUtil.COLOR_LIGHT_GRAY;
 
 import java.io.Serializable;
 import java.util.ArrayList;
@@ -24,9 +24,12 @@ import de.tsl2.nano.bean.def.AttributeDefinition;
 import de.tsl2.nano.bean.def.Bean;
 import de.tsl2.nano.bean.def.BeanDefinition;
 import de.tsl2.nano.bean.def.Presentable;
+import de.tsl2.nano.bean.def.ValueColumn;
 import de.tsl2.nano.bean.def.ValueExpression;
 import de.tsl2.nano.bean.def.ValueGroup;
+import de.tsl2.nano.collection.Entry;
 import de.tsl2.nano.collection.MapUtil;
+import de.tsl2.nano.h5.Html5Presentable;
 import de.tsl2.nano.util.PrivateAccessor;
 import de.tsl2.nano.util.Util;
 
@@ -56,8 +59,38 @@ public class BeanConfigurator<T> implements Serializable {
         //register it to be used by creating new AttributeConfigurators 
         Environment.addService(BeanConfigurator.class, configurer);
 
+        //define the presentation
         Bean<?> configBean = Bean.getBean(configurer);
-        configBean.getPresentable().setLayout((Serializable) MapUtil.asMap(ATTR_BGCOLOR, COLOR_LIGHT_GRAY));
+
+        if (configBean.isDefault()) {
+            configBean.setAttributeFilter("name", "valueExpression", "presentable", "valueGroups", "attributes");
+            Serializable layout = (Serializable) MapUtil.asMap(ATTR_BGCOLOR, COLOR_LIGHT_GRAY);
+            configBean.getPresentable().setLayout(layout);
+
+            BeanDefinition<AttributeConfigurator> configAttr =
+                BeanDefinition.getBeanDefinition(AttributeConfigurator.class);
+            configAttr.setAttributeFilter("name", "description", "type", "length", "format", "min", "max",
+                "presentable", "columnDefinition");
+            configAttr.getPresentable().setLayout(layout);
+
+            BeanDefinition<Html5Presentable> configPres = BeanDefinition.getBeanDefinition(Html5Presentable.class);
+            configPres.setAttributeFilter("label", "description", "icon", "type", "style", "visible", "layout",
+                "layoutConstraints");
+            configPres.getPresentable().setLayout(layout);
+
+            BeanDefinition<ValueGroup> configValueGroup = BeanDefinition.getBeanDefinition(ValueGroup.class);
+            configValueGroup.setAttributeFilter("label", "description", "icon", "type", "style", "layout",
+                "layoutConstraints", "attributes");
+            configValueGroup.getPresentable().setLayout(layout);
+
+            BeanDefinition<ValueColumn> configColDef = BeanDefinition.getBeanDefinition(ValueColumn.class);
+            configColDef.setAttributeFilter("name", "description", "index", "sortIndex", "sortUpDirection", "format", "width");
+            configColDef.getPresentable().setLayout(layout);
+
+            BeanDefinition<Entry> configEntry = BeanDefinition.getBeanDefinition(Entry.class);
+            configEntry.setAttributeFilter("key", "value");
+            configEntry.getPresentable().setLayout(layout);
+        }
         return (Bean<BeanConfigurator<I>>) configBean;
     }
 
@@ -163,7 +196,7 @@ public class BeanConfigurator<T> implements Serializable {
         def.deleteDefinition();
         return null;
     }
-    
+
     @Override
     public String toString() {
         return Util.toString(getClass(), def);

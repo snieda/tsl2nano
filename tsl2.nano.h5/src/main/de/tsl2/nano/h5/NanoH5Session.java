@@ -150,6 +150,7 @@ public class NanoH5Session {
                     Environment.getName() + "<br/>" + "Restart Session", server.serviceURL));
             }
         } catch (Throwable e /*respect errors like NoClassDefFound...the application should continue!*/) {
+            LOG.error(e);
             RuntimeException ex = ForwardedException.toRuntimeEx(e, true);
             msg = refreshPage(ex.getMessage());
             response = server.createResponse(HTTP_BADREQUEST, MIME_HTML, msg);

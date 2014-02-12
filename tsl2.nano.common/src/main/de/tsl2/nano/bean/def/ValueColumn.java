@@ -94,6 +94,10 @@ public class ValueColumn<T> implements IPresentableColumn, Serializable {
         return columnIndex;
     }
 
+    public void setIndex(int index) {
+        columnIndex = index;
+    }
+    
     /**
      * {@inheritDoc}
      */
@@ -121,6 +125,10 @@ public class ValueColumn<T> implements IPresentableColumn, Serializable {
             return attributeDefinition.getPresentation().getWidth();
     }
 
+    public void setWidth(int width) {
+        this.width = width;
+    }
+    
     /**
      * {@inheritDoc}
      */
@@ -129,6 +137,10 @@ public class ValueColumn<T> implements IPresentableColumn, Serializable {
         return name;
     }
 
+    public void setName(String name) {
+        this.name = name;
+    }
+    
     /**
      * {@inheritDoc}
      */
