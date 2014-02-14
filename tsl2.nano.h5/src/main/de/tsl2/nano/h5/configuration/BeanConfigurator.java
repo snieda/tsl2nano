@@ -74,12 +74,12 @@ public class BeanConfigurator<T> implements Serializable {
             configAttr.getPresentable().setLayout(layout);
 
             BeanDefinition<Html5Presentable> configPres = BeanDefinition.getBeanDefinition(Html5Presentable.class);
-            configPres.setAttributeFilter("label", "description", "icon", "type", "style", "visible", "layout",
+            configPres.setAttributeFilter("label", "description", "icon", "type", "style", "visible", "width", "height", "layout",
                 "layoutConstraints");
             configPres.getPresentable().setLayout(layout);
 
             BeanDefinition<ValueGroup> configValueGroup = BeanDefinition.getBeanDefinition(ValueGroup.class);
-            configValueGroup.setAttributeFilter("label", "description", "icon", "type", "style", "layout",
+            configValueGroup.setAttributeFilter("label", "description", "icon", "type", "style", "width", "height", "layout",
                 "layoutConstraints", "attributes");
             configValueGroup.getPresentable().setLayout(layout);
 

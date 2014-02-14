@@ -357,6 +357,7 @@ public class Environment {
     public static void registerBundle(String bundlePath, boolean head) {
         ResourceBundle bundle = ResourceBundle.getBundle(bundlePath, Locale.getDefault(), Thread.currentThread()
             .getContextClassLoader());
+        self().log("registering resource bundle '" + bundlePath + "'");
         Messages.registerBundle(bundle, head);
     }
 

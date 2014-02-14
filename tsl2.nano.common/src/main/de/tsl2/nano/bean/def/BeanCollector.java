@@ -714,6 +714,23 @@ public class BeanCollector<COLLECTIONTYPE extends Collection<T>, T> extends Bean
     }
 
     /**
+     * getColumnDefinitionsIndexSorted
+     * 
+     * @return visible columns index-sorted
+     */
+    public List<IPresentableColumn> getColumnDefinitionsIndexSorted() {
+        List<IPresentableColumn> colDefs = new ArrayList<IPresentableColumn>(getColumnDefinitions());
+        IPresentableColumn c = null;
+        for (Iterator<IPresentableColumn> it = colDefs.iterator(); it.hasNext();) {
+            c = it.next();
+            if (!c.getPresentable().isVisible())
+                it.remove();
+        }
+        Collections.sort(colDefs);
+        return colDefs;
+    }
+
+    /**
      * createColumnDefinitions
      * 
      * @param def
@@ -762,6 +779,23 @@ public class BeanCollector<COLLECTIONTYPE extends Collection<T>, T> extends Bean
      */
     public void setColumnDefinitions(Collection<IPresentableColumn> columnDefinitions) {
         this.columnDefinitions = columnDefinitions;
+    }
+
+    /**
+     * evaluates the column-index sorted column descriptions
+     * 
+     * @return column labels to be presented as table header
+     */
+    public List<String> getColumnLabels() {
+        List<IPresentableColumn> colDefs = new ArrayList<IPresentableColumn>(getColumnDefinitions());
+        Collections.sort(colDefs);
+        List<String> cnames = new ArrayList<String>(colDefs.size());
+
+        for (IPresentableColumn c : colDefs) {
+            if (c.getPresentable().isVisible())
+                cnames.add(c.getDescription());
+        }
+        return cnames;
     }
 
     private IPresentableColumn getColumn(int i) {

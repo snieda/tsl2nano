@@ -1,7 +1,7 @@
 package de.tsl2.nano.h5;
 
 import static de.tsl2.nano.h5.HtmlUtil.ATTR_HEIGHT;
-import static de.tsl2.nano.h5.HtmlUtil.ATTR_WIDTH;
+import static de.tsl2.nano.h5.HtmlUtil.ATTR_SIZE;
 
 import java.util.LinkedHashMap;
 
@@ -9,9 +9,10 @@ import de.tsl2.nano.Environment;
 import de.tsl2.nano.bean.def.AttributeDefinition;
 import de.tsl2.nano.bean.def.IPresentable;
 import de.tsl2.nano.bean.def.Presentable;
+
 /**
- * Hmtl5-specialized {@link de.tsl2.nano.bean.def.Presentable}. Not possible to be handled as inner class, because
- * of xml-serialization.
+ * Hmtl5-specialized {@link de.tsl2.nano.bean.def.Presentable}. Not possible to be handled as inner class, because of
+ * xml-serialization.
  * 
  * @author Tom, Thomas Schneider
  * @version $Revision$
@@ -29,14 +30,28 @@ public class Html5Presentable extends Presentable {
 
     @Override
     public int getWidth() {
-        String w = layout(ATTR_WIDTH);
+        String w = layout(ATTR_SIZE);
         return w != null ? Integer.valueOf(w) : UNDEFINED;
+    }
+
+    public void setWidth(int width) {
+        if (width != UNDEFINED)
+            getLayout().put(ATTR_SIZE, String.valueOf(width));
+        else
+            getLayout().remove(ATTR_SIZE);
     }
 
     @Override
     public int getHeight() {
         String h = layout(ATTR_HEIGHT);
         return h != null ? Integer.valueOf(h) : UNDEFINED;
+    }
+
+    public void setHeight(int height) {
+        if (height != UNDEFINED)
+            getLayout().put(ATTR_HEIGHT, String.valueOf(height));
+        else
+            getLayout().remove(ATTR_HEIGHT);
     }
 
     /**

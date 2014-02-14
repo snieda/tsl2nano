@@ -18,7 +18,7 @@ import java.text.Format;
  * @author Thomas Schneider
  * @version $Revision$
  */
-public interface IColumn {
+public interface IColumn extends Comparable<IColumn> {
 
     /**
      * @return Returns the columnText.

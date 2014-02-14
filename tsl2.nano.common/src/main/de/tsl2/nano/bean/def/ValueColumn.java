@@ -193,4 +193,9 @@ public class ValueColumn<T> implements IPresentableColumn, Serializable {
     public String toString() {
         return "column '" + name + "' at index " + columnIndex;
     }
+
+    @Override
+    public int compareTo(IColumn o) {
+        return Integer.valueOf(getIndex()).compareTo(Integer.valueOf(o.getIndex()));
+    }
 }

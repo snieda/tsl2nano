@@ -25,9 +25,9 @@ import static de.tsl2.nano.h5.HtmlUtil.ATTR_COLOR;
 import static de.tsl2.nano.h5.HtmlUtil.ATTR_DISABLED;
 import static de.tsl2.nano.h5.HtmlUtil.ATTR_FORMNOVALIDATE;
 import static de.tsl2.nano.h5.HtmlUtil.ATTR_FRAME;
-import static de.tsl2.nano.h5.HtmlUtil.ATTR_HEIGHT;
 import static de.tsl2.nano.h5.HtmlUtil.ATTR_HIDDEN;
 import static de.tsl2.nano.h5.HtmlUtil.ATTR_HREF;
+import static de.tsl2.nano.h5.HtmlUtil.ATTR_ID;
 import static de.tsl2.nano.h5.HtmlUtil.ATTR_MAX;
 import static de.tsl2.nano.h5.HtmlUtil.ATTR_MAXLENGTH;
 import static de.tsl2.nano.h5.HtmlUtil.ATTR_METHOD;
@@ -87,8 +87,8 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Date;
-import java.util.LinkedHashMap;
 import java.util.LinkedList;
+import java.util.List;
 import java.util.Map;
 
 import javax.xml.parsers.DocumentBuilderFactory;
@@ -113,13 +113,11 @@ import de.tsl2.nano.bean.def.BeanDefinition;
 import de.tsl2.nano.bean.def.BeanPresentationHelper;
 import de.tsl2.nano.bean.def.BeanValue;
 import de.tsl2.nano.bean.def.IBeanCollector;
-import de.tsl2.nano.bean.def.IColumn;
 import de.tsl2.nano.bean.def.IPageBuilder;
 import de.tsl2.nano.bean.def.IPresentable;
 import de.tsl2.nano.bean.def.IPresentableColumn;
 import de.tsl2.nano.bean.def.IValueAccess;
 import de.tsl2.nano.bean.def.IValueDefinition;
-import de.tsl2.nano.bean.def.Presentable;
 import de.tsl2.nano.bean.def.SecureAction;
 import de.tsl2.nano.bean.def.ValueExpressionFormat;
 import de.tsl2.nano.bean.def.ValueGroup;
@@ -436,6 +434,10 @@ public class Html5Presentation<T> extends BeanPresentationHelper<T> implements I
                     if (attr == null)
                         throw new IllegalArgumentException("bean-attribute " + name
                             + ", defined in valuegroup not avaiable in bean " + bean);
+                    
+                    if (!attr.getPresentation().isVisible())
+                        continue;
+                    
                     Object v = attr.getValue();
 
                     if (valueGroup.isDetail(name) && v != null) {
@@ -474,6 +476,8 @@ public class Html5Presentation<T> extends BeanPresentationHelper<T> implements I
         int count = 0;
         Element field = null;
         for (BeanValue<?> beanValue : beanValues) {
+            if (!beanValue.getPresentation().isVisible())
+                continue;
             if (beanValue.isBean()) {
                 Bean<?> bv = (Bean<?>) beanValue.getInstance();
                 bv.setPresentationHelper(new Html5Presentation(bv)).createPage(parent, bv.getName(), interactive);
@@ -517,7 +521,7 @@ public class Html5Presentation<T> extends BeanPresentationHelper<T> implements I
         if (interactive)
             grid = createGrid(parent, bean.toString(), false, bean);
         else
-            grid = createGrid(parent, bean.toString(), false, getColumnNames(bean.getColumnDefinitions()));
+            grid = createGrid(parent, bean.toString(), false, getColumnNames(bean));
         appendAttributes(grid, bean.getPresentable());
 
         bean.addMode(MODE_MULTISELECTION);
@@ -538,18 +542,11 @@ public class Html5Presentation<T> extends BeanPresentationHelper<T> implements I
      * @param colDefs
      * @return
      */
-    private String[] getColumnNames(Collection<IPresentableColumn> colDefs) {
-        String[] cnames = new String[colDefs.size() + 1];
+    private String[] getColumnNames(BeanCollector<?, ?> collector) {
+        List<String> cnames = collector.getColumnLabels();
 
-        cnames[0] = Messages.getString("tsl2nano.row");
-        for (IColumn c : colDefs) {
-            int i = c.getIndex() + 1;
-            if (i > -1 && i < cnames.length)
-                cnames[i] = c.getDescription();
-            else
-                LOG.warn("the index " + i + " of column " + c + " is impossible");
-        }
-        return cnames;
+        cnames.add(0, Messages.getString("tsl2nano.row"));
+        return cnames.toArray(new String[0]);
     }
 
     private void appendAttributes(Element grid, IPresentable p) {
@@ -580,7 +577,7 @@ public class Html5Presentation<T> extends BeanPresentationHelper<T> implements I
      * @param editableRowNumbers 0-based row numbers to be editable
      */
     void createTableContent(Element grid,
-            IBeanCollector<?, T> tableDescriptor,
+            BeanCollector<?, T> tableDescriptor,
             Collection<T> data,
             boolean interactive,
             Integer... editableRowNumbers) {
@@ -832,7 +829,7 @@ public class Html5Presentation<T> extends BeanPresentationHelper<T> implements I
         Element colgroup = appendElement(table, TAG_ROW, ATTR_BORDER, "1");
         if (collector.hasMode(MODE_MULTISELECTION))
             appendElement(colgroup, TAG_HEADERCELL, content());
-        Collection<IPresentableColumn> columns = collector.getColumnDefinitions();
+        Collection<IPresentableColumn> columns = collector.getColumnDefinitionsIndexSorted();
         for (IPresentableColumn c : columns) {
             Element th = appendElement(colgroup,
                 TAG_HEADERCELL,
@@ -847,7 +844,7 @@ public class Html5Presentation<T> extends BeanPresentationHelper<T> implements I
         return appendElement(table, TAG_TBODY);
     }
 
-    protected Element addRow(Element grid, boolean multiSelection, IBeanCollector<?, T> tableDescriptor, T item) {
+    protected Element addRow(Element grid, boolean multiSelection, BeanCollector<?, T> tableDescriptor, T item) {
         boolean isSelected = tableDescriptor.getSelectionProvider() != null ? tableDescriptor.getSelectionProvider()
             .getValue()
             .contains(item) : false;
@@ -875,7 +872,7 @@ public class Html5Presentation<T> extends BeanPresentationHelper<T> implements I
                 "checkbox",
                 enable(ATTR_CHECKED, isSelected));
 
-        Collection<IPresentableColumn> colDefs = tableDescriptor.getColumnDefinitions();
+        Collection<IPresentableColumn> colDefs = tableDescriptor.getColumnDefinitionsIndexSorted();
         Element cell;
         String value;
         for (IPresentableColumn c : colDefs) {
@@ -900,14 +897,14 @@ public class Html5Presentation<T> extends BeanPresentationHelper<T> implements I
      * @return row element containing all column values of given element (=row item). all cells will have a name of
      *         type: rowname.colname
      */
-    Element addEditableRow(Element table, IBeanCollector<?, T> tableDescriptor, T element, String rowName) {
+    Element addEditableRow(Element table, BeanCollector<?, T> tableDescriptor, T element, String rowName) {
         Element row = appendElement(table, TAG_ROW, ATTR_BGCOLOR, COLOR_LIGHT_GRAY, ATTR_ALIGN, ALIGN_CENTER);
         if (rowName != null) {
             appendElement(row, TAG_CELL, content(rowName));
         }
 
         boolean focusSet = false;
-        Collection<IPresentableColumn> colDefs = tableDescriptor.getColumnDefinitions();
+        Collection<IPresentableColumn> colDefs = tableDescriptor.getColumnDefinitionsIndexSorted();
         for (IPresentableColumn c : colDefs) {
             String value = tableDescriptor.getColumnText(element, c.getIndex());
             Element cell0 = appendElement(row, TAG_CELL);
@@ -967,6 +964,8 @@ public class Html5Presentation<T> extends BeanPresentationHelper<T> implements I
                 /*content(getSuffix(regexpFormat)),*/
                 ATTR_TYPE,
                 type,
+                ATTR_ID,
+                beanValue.getId(),
                 ATTR_NAME,
                 beanValue.getName(),
                 ATTR_PATTERN,
@@ -1159,6 +1158,8 @@ public class Html5Presentation<T> extends BeanPresentationHelper<T> implements I
             break;
         case IPresentable.TYPE_ATTACHMENT:
             //on type = 'file' only the file-name is given (no path!)
+            //while it would be an upload button for the client system, it is not
+            //usable in nano.h5
 //            type = "file";
 //            break;
         default:

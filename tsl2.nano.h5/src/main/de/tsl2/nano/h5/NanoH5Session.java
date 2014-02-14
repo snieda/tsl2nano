@@ -141,6 +141,8 @@ public class NanoH5Session {
                     else if (!HtmlUtil.containsHtml(msg))
                         msg = HtmlUtil.createMessagePage(msg);
                 } else {
+                    if (userResponse instanceof BeanDefinition)
+                        ((BeanDefinition)userResponse).onActivation();
                     msg = getNextPage(userResponse);
                 }
                 response = server.createResponse(msg);

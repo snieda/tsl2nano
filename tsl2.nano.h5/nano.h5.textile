@@ -166,7 +166,14 @@ It is possible to create an own java project to define own application and bean 
 
 Loading a Nano.h5 application will create and use an environment directory as workspace for it. Resources like icons, configuration xml-file and libraries will be put there - being on top of classpath.
 
+Everything of your application will be accessible through this environment. It provides all system-/ application properties and all application services.
+
 A full list of configuration attributes can be found [here](src/resources/environment.default.xml)
+
+### Language and Translations
+
+The _messages.properties_ is the language file to translate every application specific text. You can overwrite it through putting your own file into the environment-directory with sub-directory _de/tsl2/nano/h5_. All bean or bean-attribute-names will be translated. 
+All framework specific and generic texts will be translated through the internal _de.tsl2.nano.messages.properties_.
 
 ## Application and Page Actions
 

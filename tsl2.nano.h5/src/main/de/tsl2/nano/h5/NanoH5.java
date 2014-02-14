@@ -96,10 +96,7 @@ public class NanoH5 extends NanoHTTPD {
         super(getPort(serviceURL), new File(Environment.getConfigPath()));
         this.serviceURL = getServiceURL(serviceURL);
         this.builder = builder != null ? builder : createPageBuilder();
-        ResourceBundle bundle = ResourceBundle.getBundle(NanoH5.class.getPackage().getName() + ".messages",
-            Locale.getDefault(),
-            Thread.currentThread().getContextClassLoader());
-        Messages.registerBundle(bundle, false);
+        Environment.registerBundle(NanoH5.class.getPackage().getName() + ".messages", true);
         appstartClassloader = Thread.currentThread().getContextClassLoader();
         Environment.addService(ClassLoader.class, appstartClassloader);
         sessions = new LinkedHashMap<InetAddress, NanoH5Session>();
@@ -252,7 +249,8 @@ public class NanoH5 extends NanoHTTPD {
         if (workflow == null || workflow.isEmpty()) {
             LOG.debug("creating navigation stack");
             Stack<BeanDefinition<?>> navigationModel = new Stack<BeanDefinition<?>>();
-            navigationModel.push(Bean.getBean(START_PAGE));
+            Bean<String> startPage = Bean.getBean(START_PAGE);
+            navigationModel.push(startPage);
             navigationModel.push(login);
             return new EntityBrowser(navigationModel);
         } else {
@@ -268,9 +266,10 @@ public class NanoH5 extends NanoHTTPD {
         if (login.toString().matches(Environment.get("default.present.attribute.multivalue", ".*")))
             login.removeAttributes("jdbcProperties");
         login.getAttribute("jarFile").getPresentation().setType(IPresentable.TYPE_ATTACHMENT);
-        login.getPresentationHelper().change(BeanPresentationHelper.PROP_DESCRIPTION,
-            Environment.translate("jarFile.tooltip", true),
-            "jarFile");
+        ((Html5Presentable)login.getAttribute("jarFile").getPresentation()).getLayoutConstraints().put("accept", ".jar");
+//        login.getPresentationHelper().change(BeanPresentationHelper.PROP_DESCRIPTION,
+//            Environment.translate("jarFile.tooltip", true),
+//            "jarFile");
         login.getPresentationHelper().change(BeanPresentationHelper.PROP_NULLABLE, false);
         login.getPresentationHelper().change(BeanPresentationHelper.PROP_NULLABLE, true, "connectionPassword");
         login.getPresentationHelper().change(BeanPresentationHelper.PROP_NULLABLE, true, "replication");

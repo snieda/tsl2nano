@@ -96,6 +96,12 @@ public class BeanDefinition<T> extends BeanClass<T> implements Serializable {
      */
     protected Collection<IAction> actions;
 
+    /**
+     * optional action names (must exist inside {@link #actions} to be started on each bean activation - normally
+     * through the gui implementation
+     */
+    protected String[] activationActionNames;
+
     /** optional attribute relations */
     protected Map<String, IAttributeDefinition<?>> connections;
     /** optional constraints between attributes */
@@ -138,6 +144,36 @@ public class BeanDefinition<T> extends BeanClass<T> implements Serializable {
         super((Class<T>) (Environment.get("beandef.ignore.anonymous.fields", true) ? getDefiningClass(beanClass)
             : beanClass));
         name = beanClass == UNDEFINED.getClass() ? "undefined" : super.getName();
+    }
+
+    /**
+     * optional actions to be executed on each activation of this bean. this method will be called internally on
+     * selecting the bean - this is done by a specialized gui implementation. see {@link #activationActionNames}.
+     * 
+     * see {@link #setActivationActionNames(String...)}. {@link #activationActionNames} and {@link #getActions()}.
+     */
+    public void onActivation() {
+        if (activationActionNames != null) {
+            for (int i = 0; i < activationActionNames.length; i++) {
+                getAction(activationActionNames[i]).activate();
+            }
+        }
+    }
+
+    /**
+     * @return Returns the activationActionNames.
+     */
+    protected String[] getActivationActionNames() {
+        return activationActionNames;
+    }
+
+    /**
+     * see {@link #activationActionNames} and {@link #activationActionNames}.
+     * 
+     * @param activationActionNames The activationActionNames to set.
+     */
+    protected void setActivationActionNames(String... activationActionNames) {
+        this.activationActionNames = activationActionNames;
     }
 
     /**
