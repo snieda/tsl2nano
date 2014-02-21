@@ -10,6 +10,7 @@
 package de.tsl2.nano.bean.def;
 
 /**
+ * combination of {@link IAttributeDefinition} and {@link IValueAccess}.
  * 
  * @author Thomas Schneider
  * @version $Revision$

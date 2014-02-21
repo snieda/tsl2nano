@@ -368,6 +368,13 @@ public class CollectionUtil {
     }
 
     /**
+     * delegates to {@link #concat(Class, Object[]...)}.
+     */
+    public static <T> T[] concat(T[]... arrays) {
+        return (T[]) concat(arrays[0].getClass(), arrays);
+    }
+    
+    /**
      * concatenates the given arrays into a new array of type newType
      * 
      * @param <T>
@@ -380,7 +387,7 @@ public class CollectionUtil {
         for (int i = 0; i < arrays.length; i++) {
             newLength += arrays[i].length;
         }
-        return concat((T[]) Array.newInstance(newType.getComponentType(), newLength), arrays);
+        return concatNew((T[]) Array.newInstance(newType.getComponentType(), newLength), arrays);
     }
 
     /**
@@ -392,7 +399,7 @@ public class CollectionUtil {
      * @param arrays arrays to copy/concatenate
      * @return return concatenation of arrays
      */
-    public static <T, U> T[] concat(T[] newArray, U[]... arrays) {
+    public static <T, U> T[] concatNew(T[] newArray, U[]... arrays) {
         int dest = 0;
         for (int i = 0; i < arrays.length; i++) {
             System.arraycopy(arrays[i], 0, newArray, dest, arrays[i].length);

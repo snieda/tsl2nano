@@ -841,6 +841,8 @@ public class BeanCollector<COLLECTIONTYPE extends Collection<T>, T> extends Bean
         //column may be filtered (e.g. id-columns)
         if (col == null)
             return "";
+        else if (col instanceof ValueColumn)
+            return getColumnText(element, ((ValueColumn)col).attributeDefinition);
         return getColumnText(element, getAttribute(col.getName()));
     }
 

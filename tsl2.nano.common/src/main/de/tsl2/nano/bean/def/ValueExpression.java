@@ -44,7 +44,7 @@ import de.tsl2.nano.util.operation.IConverter;
  * @author Thomas Schneider
  * @version $Revision$
  */
-public class ValueExpression<TYPE> implements IConverter<TYPE, String>, Serializable {
+public class ValueExpression<TYPE> implements IValueExpression<TYPE>, IConverter<TYPE, String>, Serializable {
     /** serialVersionUID */
     private static final long serialVersionUID = 9157362251663475852L;
     /** optional expression prefix to define the kind of expression */
@@ -201,7 +201,18 @@ public class ValueExpression<TYPE> implements IConverter<TYPE, String>, Serializ
     }
 
     /**
+     * implements the interface method {@link #getValue(Object)} by {@link IValueExpression} and delegates directly to
+     * {@link #from(String)} using object instance {@link #toString()} as value.
+     * thrown.
+     */
+    @Override
+    public TYPE getValue(Object instance) {
+        return from(Util.asString(instance));
+    }
+
+    /**
      * creates a new instance from 'toValue' (user-input).
+     * 
      * @param toValue
      * @return
      */
@@ -361,9 +372,14 @@ public class ValueExpression<TYPE> implements IConverter<TYPE, String>, Serializ
         return splittedValues;
     }
 
+    public Class<TYPE> getType() {
+        return type;
+    }
+
     /**
      * @return Returns the expression.
      */
+    @Override
     public String getExpression() {
         return expression;
     }
@@ -371,6 +387,7 @@ public class ValueExpression<TYPE> implements IConverter<TYPE, String>, Serializ
     /**
      * @param expression The expression to set.
      */
+    @Override
     public void setExpression(String expression) {
         this.expression = expression;
         init(expression, type);
@@ -389,5 +406,10 @@ public class ValueExpression<TYPE> implements IConverter<TYPE, String>, Serializ
     @Override
     public String toString() {
         return Util.toString(getClass(), expression);
+    }
+
+    @Override
+    public String getExpressionPattern() {
+        throw new UnsupportedOperationException();
     }
 }

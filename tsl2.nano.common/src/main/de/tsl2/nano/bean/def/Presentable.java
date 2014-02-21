@@ -78,7 +78,7 @@ public class Presentable implements IIPresentable, Serializable {
          */
         enabler =
             attr.hasWriteAccess()
-                && (!BeanContainer.instance().isPersistable(attr.getDeclaringClass())
+                && (!BeanContainer.isInitialized() || !BeanContainer.instance().isPersistable(attr.getDeclaringClass())
                     || !(attr instanceof IAttributeDefinition) || (!((IAttributeDefinition<?>) attr).isMultiValue() || ((IAttributeDefinition<?>) attr)
                     .cascading()))
                 ? IActivator.ACTIVE : IActivator.INACTIVE;

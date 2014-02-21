@@ -73,7 +73,7 @@ public class BeanDefinition<T> extends BeanClass<T> implements Serializable {
     /** optional filter to constrain the available attributes - in the given order */
     protected transient String[] attributeFilter;
     /** cached attribute values (directly a {@link LinkedHashMap} on type to get this map instance on deserialization */
-    @ElementMap(entry = "attribute", key = "name", attribute = true, inline = true, valueType = AttributeDefinition.class, required = false)
+    @ElementMap(entry = "attribute", key = "name", attribute = true, inline = true, value="attributeDefinition", valueType = AttributeExpression.class, required = false)
     protected LinkedHashMap<String, IAttributeDefinition<?>> attributeDefinitions;
     /** flag to define, that all attributes are evaluated and cached - for performance aspects */
     transient boolean allDefinitionsCached = false;
@@ -220,10 +220,18 @@ public class BeanDefinition<T> extends BeanClass<T> implements Serializable {
         if (!allDefinitionsCached) {
             if (attributeFilter == null) {
                 List<BeanAttribute> attributes = super.getAttributes(readAndWriteAccess);
-                attributeFilter = new String[attributes.size()];
+                attributeFilter =
+                    new String[attributes.size() + (attributeDefinitions != null ? attributeDefinitions.size() : 0)];
                 int i = 0;
                 for (BeanAttribute attr : attributes) {
                     attributeFilter[i++] = attr.getName();
+                }
+                //the already defined virtual attributes should not be lost!
+                if (attributeDefinitions != null) {
+                    Set<String> defs = attributeDefinitions.keySet();
+                    for (String name : defs) {
+                        attributeFilter[i++] = name;
+                    }
                 }
             }
             for (int i = 0; i < attributeFilter.length; i++) {
@@ -274,7 +282,7 @@ public class BeanDefinition<T> extends BeanClass<T> implements Serializable {
     }
 
     protected IAttributeDefinition createAttributeDefinition(String name) {
-        return new AttributeDefinition<T>(BeanAttribute.getBeanAttribute(getClazz(), name).getAccessMethod());
+        return new AttributeExpression<T>(BeanAttribute.getBeanAttribute(getClazz(), name).getAccessMethod());
     }
 
     /**
@@ -362,9 +370,7 @@ public class BeanDefinition<T> extends BeanClass<T> implements Serializable {
                 attributeFilter = attributeDefinitions.keySet().toArray(new String[0]);
             else if (!isVirtual()) {
                 if (allDefinitionsCached) {
-                    attributeFilter = CollectionUtil.concat(String[].class,
-                        //                        attributeFilter,
-                        attributeDefinitions.keySet().toArray(new String[0]));
+                    attributeFilter = attributeDefinitions.keySet().toArray(new String[0]);
                 } else {
                     attributeFilter = super.getAttributeNames(readAndWriteAccess);
                 }
@@ -389,6 +395,28 @@ public class BeanDefinition<T> extends BeanClass<T> implements Serializable {
 
     /**
      * creates a new attribute with value. internally, a new {@link ValueHolder} instance will be created to work on its
+     * {@link ValueHolder#getValue()} attribute. the value-expression will be added to work instead of the standard
+     * mechanism. see {@link AttributeDefinition#setExpression(String)}.
+     * 
+     * @param name desired name of the attribute
+     * @param value value expression to be used as attribute-value
+     * @param format (optional) regexp to constrain the value
+     * @param description (optional) description of this attribute. if null, the name will be used.
+     * @param presentation (optional) abstract presentation informations
+     * @return new added bean value
+     */
+    public <A> AttributeDefinition<A> addAttribute(String name,
+            IValueExpression<A> value,
+            Format format,
+            String description,
+            IPresentable presentation) {
+        AttributeDefinition attribute = addAttribute(name, (Object) value, format, description, presentation);
+        ((AttributeExpression<A>)attribute).setValueExpression(value);
+        return attribute;
+    }
+
+    /**
+     * creates a new attribute with value. internally, a new {@link ValueHolder} instance will be created to work on its
      * {@link ValueHolder#getValue()} attribute.
      * 
      * @param name desired name of the attribute
@@ -398,25 +426,16 @@ public class BeanDefinition<T> extends BeanClass<T> implements Serializable {
      * @param presentation (optional) abstract presentation informations
      * @return new add bean value
      */
-    public AttributeDefinition addAttribute(String name,
-            Object value,
+    public <A> AttributeDefinition<A> addAttribute(String name,
+            A value,
             Format format,
             String description,
             IPresentable presentation) {
-        ValueHolder v = new ValueHolder(value);
-        BeanValue bv = BeanValue.getBeanValue(v, IValueAccess.ATTR_VALUE);
-        bv.setBasicDef(-1, true, format, value, description != null ? description : name);
+        IValueAccess v = new ValueHolder(value);
+        BeanValue<A> bv = BeanValue.getBeanValue(v, IValueAccess.ATTR_VALUE);
+        bv.setBasicDef(-1, true, format, value instanceof IValueExpression ? null : value, description != null ? description : name);
         bv.setPresentation(presentation);
-        getAttributeDefinitions().put(name, bv);
-        //if no filter was defined, it will be prefilled in getAttributeNames()
-        if (attributeFilter == null)
-            attributeFilter = getAttributeNames();
-        else
-            attributeFilter = CollectionUtil.concat(new String[attributeFilter.length + 1],
-                attributeFilter,
-                new String[] { name });
-        allDefinitionsCached = false;
-        return bv;
+        return (AttributeDefinition<A>) addAttribute(name, bv);
     }
 
     /**
@@ -448,21 +467,32 @@ public class BeanDefinition<T> extends BeanClass<T> implements Serializable {
     }
 
     /**
+     * adds a new attribute to this definition
+     * 
+     * @param newAttribute attribute
+     * @return the new created attribute
+     */
+    public <A> IAttributeDefinition<A> addAttribute(IAttributeDefinition<A> newAttribute) {
+        return addAttribute(newAttribute.getName(), newAttribute);
+    }
+
+    /**
      * addAttribute
      * 
+     * @param name
      * @param newAttribute
      * @return
      */
-    public IAttributeDefinition<?> addAttribute(IAttributeDefinition<?> newAttribute) {
+    protected <A> IAttributeDefinition<A> addAttribute(String name, IAttributeDefinition<A> newAttribute) {
         getAttributeDefinitions().put(
             newAttribute.getName() != null ? newAttribute.getName() : newAttribute.getDescription(), newAttribute);
         //if no filter was defined, it will be prefilled in getAttributeNames()
         if (attributeFilter == null)
             attributeFilter = getAttributeNames();
         else
-            attributeFilter = CollectionUtil.concat(new String[attributeFilter.length + 1],
+            attributeFilter = CollectionUtil.concatNew(new String[attributeFilter.length + 1],
                 attributeFilter,
-                new String[] { newAttribute.getName() });
+                new String[] { name });
         allDefinitionsCached = false;
         return newAttribute;
     }
@@ -908,20 +938,26 @@ public class BeanDefinition<T> extends BeanClass<T> implements Serializable {
         if (!usePersistentCache)
             return;
         for (BeanDefinition<?> beandef : virtualBeanCache) {
-            beandef.deleteDefinition();
+            beandef.deleteDefinition(false);
         }
+        virtualBeanCache.clear();
+    }
+
+    public void deleteDefinition() {
+        deleteDefinition(true);
     }
 
     /**
      * deleteDefinition
      */
-    public void deleteDefinition() {
+    protected void deleteDefinition(boolean remove) {
         if (usePersistentCache) {
             File file = getDefinitionFile(getName());
             if (file.canWrite())
                 file.delete();
         }
-        virtualBeanCache.remove(this);
+        if (remove)
+            virtualBeanCache.remove(this);
     }
 
     public static void clearCache() {

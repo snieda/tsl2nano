@@ -13,14 +13,17 @@ import static de.tsl2.nano.bean.def.IBeanCollector.MODE_ALL;
 import static de.tsl2.nano.bean.def.IBeanCollector.MODE_ALL_SINGLE;
 import static de.tsl2.nano.bean.def.IPresentable.POSTFIX_SELECTOR;
 
+import java.io.Serializable;
 import java.lang.reflect.Method;
 import java.text.Format;
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import org.apache.commons.logging.Log;
 
@@ -29,6 +32,7 @@ import de.tsl2.nano.action.CommonAction;
 import de.tsl2.nano.action.IAction;
 import de.tsl2.nano.bean.BeanAttribute;
 import de.tsl2.nano.bean.BeanClass;
+import de.tsl2.nano.bean.BeanUtil;
 import de.tsl2.nano.bean.ValueHolder;
 import de.tsl2.nano.collection.Entry;
 import de.tsl2.nano.collection.ListSet;
@@ -50,7 +54,7 @@ import de.tsl2.nano.messaging.IListener;
  * @version $Revision$
  */
 @SuppressWarnings({ "rawtypes", "unchecked" })
-public class BeanValue<T> extends AttributeDefinition<T> implements IValueDefinition<T> {
+public class BeanValue<T> extends AttributeExpression<T> implements IValueDefinition<T> {
     /** serialVersionUID */
     private static final long serialVersionUID = 8690371851484504875L;
 
@@ -58,8 +62,9 @@ public class BeanValue<T> extends AttributeDefinition<T> implements IValueDefini
 
     transient Object instance;
     transient Selector selector;
-    protected Bean<?> parent;
+    protected transient Bean<?> parent;
 
+    /** a cache of all created beanvalues - if bean cache is not deaktivated */
     protected static final List<BeanValue> beanValueCache = new LinkedList<BeanValue>();
 
     /**
@@ -98,7 +103,10 @@ public class BeanValue<T> extends AttributeDefinition<T> implements IValueDefini
 
     @Override
     public Class<T> getType() {
-        if (temporalType() != null)
+        //if a value-expression was defined, the valueexpression-type has to be used!
+        if (getExpression() != null)
+            return super.getType();
+        else if (temporalType() != null)
             return (Class<T>) temporalType();
         else if (isVirtual())
             return ((IValueAccess<T>) instance).getType();
@@ -139,10 +147,10 @@ public class BeanValue<T> extends AttributeDefinition<T> implements IValueDefini
      */
     @Override
     public T getValue() {
-        if (isRelation())
-            return (T) getRelation(getName());
-        else
-            return (T) getValue(instance);
+//        if (isRelation())
+//            return (T) getRelation(getName());
+//        else
+        return (T) getValue(instance);
     }
 
     /**
@@ -199,12 +207,14 @@ public class BeanValue<T> extends AttributeDefinition<T> implements IValueDefini
         }
     }
 
+
     @Override
     public IValueDefinition getRelation(String name) {
-        return getRelation(instance, name.split("\\" + REL_SEPARATOR));
+        return getRelation(instance, ValuePath.splitChain(name));
     }
 
     /**
+     * TODO: check for duplication with ValueBean and BeanClass<br/>
      * get the beanvalue instance of the given attribute value. useful to walk through relations (recursive!). will stop
      * on the first relation having a value of null!
      * 
@@ -236,6 +246,7 @@ public class BeanValue<T> extends AttributeDefinition<T> implements IValueDefini
      * @return new bean value instance
      */
     public static final BeanValue getBeanValue(Object bean, String attributeName) {
+        //TODO: not performance optimized!
         final BeanAttribute attribute = getBeanAttribute(bean.getClass(), attributeName);
         BeanValue tbv = new BeanValue(bean, attribute.getAccessMethod());
         int i = beanValueCache.indexOf(tbv);
@@ -276,8 +287,13 @@ public class BeanValue<T> extends AttributeDefinition<T> implements IValueDefini
      */
     @Override
     public String getId() {
-        if (isVirtual() || description != null)
-            return description;
+        if (isVirtual()) {
+            if (description != null) {
+                return description;
+            } else {
+                return BeanUtil.createUUID();
+            }
+        }
         else
             return super.getId();
     }
@@ -365,10 +381,10 @@ public class BeanValue<T> extends AttributeDefinition<T> implements IValueDefini
      * the parent may be a bean definition, holding this attribute. setting this parent through {@link #setParent(Bean)}
      * will provide a bean-value-tree.
      * 
-     * @return Returns the parent or null, if undefined.
+     * @return Returns a given parent or the standard parent evaluated from instance.
      */
     public Bean<?> getParent() {
-        return parent;
+        return parent != null ? parent : Bean.getBean((Serializable) instance);
     }
 
     /**
@@ -396,7 +412,7 @@ public class BeanValue<T> extends AttributeDefinition<T> implements IValueDefini
             selector = new Selector(this);
         return selector;
     }
-    
+
     /** returns an optional action as finder/assigner - useful to select a new value */
     public IAction<IBeanCollector<?, T>> getSelectorAction() {
         //TODO: move that to the attribute: IPresentable
@@ -522,7 +538,7 @@ class Selector<T> {
             cachedValue = getValueAsCollection();
         return cachedValue;
     }
-    
+
     void createCollectionValue() {
         checkForMap();
         if (isMap)

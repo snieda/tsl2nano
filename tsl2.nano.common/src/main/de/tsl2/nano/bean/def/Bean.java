@@ -14,7 +14,6 @@ import java.text.Format;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.LinkedHashMap;
-import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -532,18 +531,25 @@ public class Bean<T> extends BeanDefinition<T> {
      * @param attributeDefinitions attributes to copy and enhance
      * @return new map holding value definitions
      */
-    protected static LinkedHashMap<String, ? extends IAttributeDefinition<?>> createValueDefinitions(Map<String, IAttributeDefinition<?>> attributeDefinitions) {
-        LinkedHashMap<String, IValueDefinition<?>> valueDefs =
-            new LinkedHashMap<String, IValueDefinition<?>>(attributeDefinitions.size());
+    @SuppressWarnings("serial")
+    protected static LinkedHashMap<String, ? extends IValueAccess<?>> createValueDefinitions(Map<String, IAttributeDefinition<?>> attributeDefinitions) {
+        LinkedHashMap<String, IValueAccess<?>> valueDefs =
+            new LinkedHashMap<String, IValueAccess<?>>(attributeDefinitions.size());
         try {
             for (IAttributeDefinition<?> attr : attributeDefinitions.values()) {
-                IValueDefinition valueDef = new BeanValue(UNDEFINED, Object.class.getMethod("getClass", new Class[0])) {
+                if (!(attr instanceof IValueAccess)) {//--> standard attribute-definition
+                //use any simple arguments - they will be overwritten on next line in copy(...)
+                IValueAccess valueDef = new BeanValue(UNDEFINED, AttributeDefinition.UNDEFINEDMETHOD) {
                     @Override
                     protected void defineDefaults() {
-                        // don't set any defaults - we overwrite all members in the next step
+                        // don't set any defaults - all  overwrite members in the next step
                     }
                 };
+                
                 valueDefs.put(attr.getName(), copy(attr, valueDef));
+                } else {//it is a specialized beanvalue like pathvalue or ruleattribute
+                    valueDefs.put(attr.getName(), (IValueAccess<?>) BeanUtil.clone(attr));
+                }
             }
             return valueDefs;
         } catch (Exception e) {

@@ -9,6 +9,8 @@
  */
 package de.tsl2.nano.util;
 
+import java.util.List;
+
 /**
  * Some utils for bits and comparables
  * 
@@ -16,6 +18,10 @@ package de.tsl2.nano.util;
  * @version $Revision$
  */
 public class BitUtil extends CUtil {
+
+    protected BitUtil() {
+        super();
+    }
 
     /**
      * delegates to {@link Integer#highestOneBit(int)}
@@ -29,6 +35,7 @@ public class BitUtil extends CUtil {
 
     /**
      * highestBitPosition
+     * 
      * @param decimal number
      * @return number of trailing zeros or -1 if zero.
      */
@@ -55,7 +62,7 @@ public class BitUtil extends CUtil {
      * @param bitsToFilter bits to remove or add
      * @return toggled bit field
      */
-    public static final int toggleBits(int field, int...bitsToFilter) {
+    public static final int toggleBits(int field, int... bitsToFilter) {
         for (int i = 0; i < bitsToFilter.length; i++) {
             field = hasBit(field, bitsToFilter[i]) ? field - bitsToFilter[i] : field | bitsToFilter[i];
         }
@@ -140,8 +147,72 @@ public class BitUtil extends CUtil {
         return (number & mask) >= (oneOfThem ? 1/*=any*/: number);
     }
 
-    public BitUtil() {
-        super();
+    /**
+     * reads all bits of given number and returns a bit field with length equal to the highest set bit. each bit that is
+     * contained is represented by 1 - all others with 0.
+     * 
+     * @param number number representing a bitfield
+     * @return array containing bits of number (values are 1 or 0)
+     */
+    public static final int[] bits(int number) {
+        int highestBit = highestBitPosition(number);
+        int[] bits = new int[highestBit];
+        for (int i = 0; i < highestBit; i++) {
+            bits[i] = hasBit(number, i) ? 1 : 0;
+        }
+        return bits;
     }
 
+    /**
+     * bit
+     * @param bool
+     * @return 1 or 0
+     */
+    public static final int bit(boolean bool) {
+        return bool ? 1 : 0;
+    }
+
+    /**
+     * transforms an int value to a boolean. all values > 0 are true - all others false;
+     * 
+     * @param value number
+     * @return true or false
+     */
+    public static final boolean bool(int value) {
+        return value > 0 ? true : false;
+    }
+
+    /**
+     * inverse function of {@link #description(int, List)}.
+     * 
+     * @param description comma-separated list of bit-names to be found on bitNames
+     * @param bitNames bit-positioned bit-names
+     * @return bit-field representing the given description
+     */
+    public static final int bits(String description, List<String> bitNames) {
+        String[] names = description.split(", ");
+        int bits = 0;
+        for (int i = 0; i < names.length; i++) {
+            bits += bitNames.indexOf(names[i]);
+        }
+        return bits;
+    }
+
+    /**
+     * inverse function of {@link #bits(String, List)}. generates a bit-field description for the given number through
+     * the given bitNames.
+     * 
+     * @param number bit-field
+     * @param bitNames bit-positioned bit-names
+     * @return bit-field description
+     */
+    public static final String description(int number, List<String> bitNames) {
+        int[] bits = bits(number);
+        StringBuilder description = new StringBuilder();
+        for (int i = 0; i < bits.length; i++) {
+            if (bool(bits[i]))
+                description.append(", " + bitNames.get(i));
+        }
+        return description.length() > 2 ? description.substring(2) : null;
+    }
 }

@@ -259,7 +259,7 @@ public class BeanPresentationHelper<T> {
      * @return created invisible bean value
      */
     public AttributeDefinition addSpaceValue() {
-        AttributeDefinition<T> beanValue = bean.addAttribute("space-" + System.currentTimeMillis(),
+        AttributeDefinition<String> beanValue = bean.addAttribute("space-" + System.currentTimeMillis(),
             "[space]",
             null,
             null,
@@ -982,7 +982,7 @@ public class BeanPresentationHelper<T> {
                         i = levels.get(it.next());
                         q = query.replace(ALIAS, names[i]);
                         grouping = BeanContainer.instance().getBeansByQuery(q, false, null);
-                        maxCount = grouping.iterator().next();
+                        maxCount = grouping.size() > 0  ? grouping.iterator().next() : null;
                         if (Util.isEmpty(maxCount) || maxCount.intValue() < 2)
                             break;
                         it.remove();

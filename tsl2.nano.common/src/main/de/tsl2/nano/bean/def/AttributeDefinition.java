@@ -32,6 +32,7 @@ import de.tsl2.nano.bean.BeanContainer;
 import de.tsl2.nano.bean.BeanUtil;
 import de.tsl2.nano.bean.IAttributeDef;
 import de.tsl2.nano.bean.PrimitiveUtil;
+import de.tsl2.nano.bean.ValueHolder;
 import de.tsl2.nano.collection.CollectionUtil;
 import de.tsl2.nano.exception.FormattedException;
 import de.tsl2.nano.exception.ForwardedException;
@@ -76,10 +77,14 @@ public class AttributeDefinition<T> extends BeanAttribute implements IAttributeD
 
     private static final Log LOG = LogFactory.getLog(AttributeDefinition.class);
 
+    /** internal definition to create a temporarily new beanvalue instance. */
+    static final Method UNDEFINEDMETHOD = UNDEFINEDMETHOD();
+
     /**
      * constructor to be serializable
-     * @throws SecurityException 
-     * @throws NoSuchMethodException 
+     * 
+     * @throws SecurityException
+     * @throws NoSuchMethodException
      */
     protected AttributeDefinition() {
         super();
@@ -103,7 +108,7 @@ public class AttributeDefinition<T> extends BeanAttribute implements IAttributeD
             return null;
         }
     }
-    
+
     /**
      * sets default properties through the {@link BeanContainer}, if available. These defaults may be read from
      * jpa-annotations.
@@ -161,11 +166,14 @@ public class AttributeDefinition<T> extends BeanAttribute implements IAttributeD
         return this;
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public T getValue(Object beanInstance) {
         return (T) super.getValue(beanInstance);
     }
-    
+
     /**
      * setNumberDef
      * 
@@ -408,7 +416,7 @@ public class AttributeDefinition<T> extends BeanAttribute implements IAttributeD
             if (!nullable() && value == null) {
                 status = Status.illegalArgument(getId(), value, "not null");
             } else if (value != null) {
-                String fval = value instanceof String ? (String)value : getFormat().format(value);
+                String fval = value instanceof String ? (String) value : getFormat().format(value);
                 if (!PrimitiveUtil.isAssignableFrom(getType(), value.getClass())) {
                     status = Status.illegalArgument(getId(), fval, getType());
                 } else if (value instanceof String && parse(fval) == null) {
@@ -514,7 +522,7 @@ public class AttributeDefinition<T> extends BeanAttribute implements IAttributeD
     public void setDescription(String description) {
         this.description = description;
     }
-    
+
     @Override
     public Collection<T> getAllowedValues() {
         return allowedValues;
@@ -536,6 +544,16 @@ public class AttributeDefinition<T> extends BeanAttribute implements IAttributeD
     @Override
     public IStatus getStatus() {
         return status;
+    }
+
+    /**
+     * if the bean instance is of type {@link ValueHolder}, the attribute is virtual - no special bean-attribute is
+     * available, the attribute name is always {@link ValueHolder#getValue()} .
+     * 
+     * @return true, if the declaring class is of type {@link IValueAccess}.
+     */
+    public boolean isVirtual() {
+        return readAccessMethod == null || IValueAccess.class.isAssignableFrom(readAccessMethod.getDeclaringClass());
     }
 
     /**
@@ -573,7 +591,8 @@ public class AttributeDefinition<T> extends BeanAttribute implements IAttributeD
             final Map<String, Object> layoutConstraints,
             final String description) {
         presentable = Environment.get(BeanPresentationHelper.class).createPresentable();
-        presentable.setPresentation(label, type, style, enabler, visible, (Serializable)layout, (Serializable)layoutConstraints, description);
+        presentable.setPresentation(label, type, style, enabler, visible, (Serializable) layout,
+            (Serializable) layoutConstraints, description);
         return presentable;
     }
 
@@ -643,21 +662,9 @@ public class AttributeDefinition<T> extends BeanAttribute implements IAttributeD
     public boolean cascading() {
         return cascading;
     }
-    
+
     @Override
     public void setAsRelation(String relationChain) {
         new PrivateAccessor<AttributeDefinition<T>>(this).set("name", relationChain);
-    }
-    
-    /**
-     * isRelation
-     * @return
-     */
-    public boolean isRelation() {
-        return isRelation(getName());
-    }
-    
-    public static boolean isRelation(String name) {
-        return name.contains(REL_SEPARATOR);
     }
 }
