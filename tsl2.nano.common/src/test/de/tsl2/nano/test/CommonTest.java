@@ -675,8 +675,10 @@ public class CommonTest {
         TypeBean tbm = new TypeBean();
         Object[] args = new Object[] { "string", "test", "primitiveInt", 2 };
         Bean.getBean(tbm, args);
-        assertArrayEquals(args, MapUtil.asArray(BeanUtil.toValueMap(tbm, false, false, true, "string", "primitiveInt")));
-        assertArrayEquals(args, MapUtil.asArray(BeanUtil.toValueMap(tbm,
+        
+        Map asMap = MapUtil.asMap(args);
+        assertTrue(BeanUtil.toValueMap(tbm, false, false, true, "string", "primitiveInt").values().containsAll(asMap.values()));
+        assertFalse(BeanUtil.toValueMap(tbm,
             "",
             false,
             false,
@@ -703,7 +705,7 @@ public class CommonTest {
             "collection",
             "arrayObject",
             "arrayPrimitive",
-            "weekdayEnum")));
+            "weekdayEnum").values().retainAll(asMap.values()));
 
         /*
           * the value-binding and value-matching

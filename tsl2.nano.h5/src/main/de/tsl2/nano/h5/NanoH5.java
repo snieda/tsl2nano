@@ -18,20 +18,18 @@ import java.text.ParsePosition;
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
-import java.util.Locale;
 import java.util.Map;
 import java.util.Properties;
-import java.util.ResourceBundle;
 import java.util.Stack;
 
 import org.apache.commons.logging.Log;
 
 import de.tsl2.nano.Environment;
-import de.tsl2.nano.Messages;
 import de.tsl2.nano.action.IActivator;
 import de.tsl2.nano.bean.BeanClass;
 import de.tsl2.nano.bean.BeanContainer;
 import de.tsl2.nano.bean.IBeanContainer;
+import de.tsl2.nano.bean.def.AttributeExpression;
 import de.tsl2.nano.bean.def.Bean;
 import de.tsl2.nano.bean.def.BeanCollector;
 import de.tsl2.nano.bean.def.BeanDefinition;
@@ -100,6 +98,7 @@ public class NanoH5 extends NanoHTTPD {
         appstartClassloader = Thread.currentThread().getContextClassLoader();
         Environment.addService(ClassLoader.class, appstartClassloader);
         sessions = new LinkedHashMap<InetAddress, NanoH5Session>();
+        AttributeExpression.registerExpression(new RuleExpression().getExpressionPattern(), RuleExpression.class);
     }
 
     /**

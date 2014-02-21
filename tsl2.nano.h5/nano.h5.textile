@@ -99,7 +99,19 @@ The other option would be to have an existing beans.jar ....
 * Use a tool like _ArgoUML_ or _architect_ to create an UML-Diagram 
 * Export the data model to a ddl file (sql statements to create the database). This file must be stored in the environment directory with extension _sql_ (e.g. timedb.sql).
 * start _mda.bat_ to generate the database from ddl file and creating beans.jar through hibernate tools.
- 
+
+#### Framework mechanisms - how to extend the framework
+
+##### Configuration through Serialization
+
+The environment and the beandefinition are the main constructs serializing it's properties to the file-system.
+...
+The _BeanDefinition_ expects only _AttributeDefinition_s from deserializings - to be more readable. This  means, that extensions of AttributeDefinition are not handled!
+
+##### Registered services and definitions through the environment
+
+TODO
+
 ## Starting / Test
 
 The tsl2.nano.h5 framework can be started through it's jar _tsl2.nano.h5-xxxxx.jar_. A start script _run.bat_ is available to do this in windows. Starting it, a given directory is used as a kind of workspace where you put all configuration and jar files into to be used. This jars may be ant, an o/r-mapper like hibernate with all it's dependencies. The configuration files are the environment.xml and all xml files describing the presentation of each entity bean.  Icons for all buttons and backgrounds are in the _icon_ folder. The main jar file can contain all dependent jar files (as described in the manifest file) or outside in the same directory as the main jar.
@@ -766,6 +778,11 @@ set the following *environment.xml* properties:
 * on export, the filtered names (like id) are given --> nullpointer
 * performance/memory: create only specific bean/beanvalue instances for changed values - use definition-instances if possible.
 * field-order of bean-def may change after new compile --> serializing/deserialings will differ, see CommonTest
+
+* Value class extends attributedefinition and beanvalue
+* RuleAttr --> RuleValue?
+* temp value registering through environment
+* all generic interfaces registered in environment (IAttributeDefinition, IBeanDefinition, IBeanContainer, ..) to be extendable
 
 * *TESTS*
 ** ( ) test with multi values - using best id's
