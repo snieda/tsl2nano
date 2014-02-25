@@ -97,7 +97,7 @@ public class ClassGenerator {
             engine.init();
             LOG.debug("ClassGenerator has initialized velocity template engine");
         } catch (final Exception e) {
-            throw new ForwardedException(e);
+            ForwardedException.forward(e);
         }
         //Velocity.setProperty( Velocity.RUNTIME_LOG_LOGSYSTEM, new Log());
     }
