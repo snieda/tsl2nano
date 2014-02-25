@@ -37,6 +37,7 @@ import org.apache.commons.logging.Log;
 import de.tsl2.nano.bean.BeanAttribute;
 import de.tsl2.nano.bean.BeanClass;
 import de.tsl2.nano.bean.BeanUtil;
+import de.tsl2.nano.bean.IAttribute;
 import de.tsl2.nano.bean.IAttributeDef;
 import de.tsl2.nano.exception.ForwardedException;
 import de.tsl2.nano.log.LogFactory;
@@ -685,7 +686,7 @@ public class ServiceUtil {
      * @param attr attribute
      * @return name of column
      */
-    public static String getColumnName(BeanAttribute attr) {
+    public static <T> String getColumnName(BeanAttribute<T> attr) {
         final Column c = attr.getAnnotation(Column.class);
         if (c != null) {
             return c.name();
@@ -738,8 +739,8 @@ public class ServiceUtil {
      *            will be surrounded by "'".
      */
     public static void fillNullValues(Object bean, boolean maxValues, boolean useDatabaseFormat) {
-        final Collection<BeanAttribute> singleValueAttributes = BeanClass.getBeanClass(bean.getClass()).getSingleValueAttributes();
-        for (final BeanAttribute beanAttribute : singleValueAttributes) {
+        final List<? extends IAttribute> singleValueAttributes = BeanClass.getBeanClass(bean.getClass()).getSingleValueAttributes();
+        for (final IAttribute beanAttribute : singleValueAttributes) {
             if (beanAttribute.getValue(bean) != null) {
                 continue;
             }
@@ -969,7 +970,7 @@ public class ServiceUtil {
                 match.add(bean);
             }
         checkedInstances.add(bean);
-        for (BeanAttribute attr : beanClass.getAttributes()) {
+        for (IAttribute<?> attr : beanClass.getAttributes()) {
             findAnnotationInEntityTree(attr.getValue(bean),
                 packagePrefix,
                 annotation,
@@ -1024,8 +1025,8 @@ public class ServiceUtil {
         if (onwork.contains(tree))
             return 0;
         onwork.add(tree);
-        List<BeanAttribute> attributes = BeanClass.getBeanClass(tree.getClass()).getAttributes();
-        for (BeanAttribute attr : attributes) {
+        List<? extends IAttribute> attributes = BeanClass.getBeanClass(tree.getClass()).getAttributes();
+        for (IAttribute attr : attributes) {
             Object v = attr.getValue(tree);
             if (v != null) {
                 try {
