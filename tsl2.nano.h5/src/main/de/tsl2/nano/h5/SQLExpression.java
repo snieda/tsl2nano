@@ -52,6 +52,6 @@ public class SQLExpression<T extends Serializable> extends RunnableExpression<T>
 
     @Override
     public String getName() {
-        return StringUtil.substring(expression, "select ", ",");
+        return StringUtil.substring(expression, "select ", "from");
     }
 }

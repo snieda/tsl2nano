@@ -10,6 +10,7 @@
 package de.tsl2.nano.h5;
 
 import java.io.Serializable;
+import java.util.HashMap;
 import java.util.Map;
 
 import org.simpleframework.xml.Attribute;
@@ -65,6 +66,8 @@ public class SQLRunner<RESULT> implements IPRunnable<RESULT, Map<String, Object>
 
     @Override
     public Map<String, ? extends Serializable> getParameter() {
+        if (parameter == null)
+            parameter = new HashMap<String, Serializable>();
         return parameter;
     }
 
