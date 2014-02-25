@@ -784,6 +784,18 @@ set the following *environment.xml* properties:
 * temp value registering through environment
 * all generic interfaces registered in environment (IAttributeDefinition, IBeanDefinition, IBeanContainer, ..) to be extendable
 
+* (v) refactore attribute-def-hierarchy: attributedefinition should not extend beanattribute. what to do with beanvalue?
+** how to fill virtual beans ? default-values may be checked with errors, serializings...?
+* AttributeConfiguration with value-expression
+* Views with expression as listing output
+** DirectSQL: SQL or HQL
+** TableProcessor
+** LogivView: LogicTable
+* JMeter as macro configuration
+* html-frames as perspective (left side: beans and views)
+* refactore ForwardedException. delete FormattedException. Stacktrace with member-info
+
+** 
 * *TESTS*
 ** ( ) test with multi values - using best id's
 ** (-) test on android
