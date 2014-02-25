@@ -8,13 +8,13 @@
  */
 package de.tsl2.nano.exception;
 
-import java.util.MissingResourceException;
-import java.util.ResourceBundle;
-import java.util.StringTokenizer;
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.UndeclaredThrowableException;
 
-import de.tsl2.nano.Environment;
+import org.apache.commons.logging.Log;
+
 import de.tsl2.nano.Messages;
-import de.tsl2.nano.bean.BeanUtil;
+import de.tsl2.nano.log.LogFactory;
 import de.tsl2.nano.util.StringUtil;
 
 /**
@@ -26,153 +26,95 @@ import de.tsl2.nano.util.StringUtil;
  * @author TS 28.01.2009
  * @version $Revision$
  */
-public class ForwardedException extends FormattedException {
+public class ForwardedException extends RuntimeException {
     private static final long serialVersionUID = 1L;
     private static final String MESSAGE_FORWARDED = "tsl2nano.forwarded";
-    protected boolean isInsideGetLocalizedMessage = false;
+    protected String localizedMessage;
 
-//    private static final Log LOG = LogFactory.getLog(ForwardedException.class);
+    private static final Log LOG = LogFactory.getLog(ForwardedException.class);
 
     /**
      * @param cause cause
      */
-    public ForwardedException(Throwable cause) {
-        super(MESSAGE_FORWARDED, null, cause);
+    protected ForwardedException(Throwable cause) {
+        super(MESSAGE_FORWARDED, cause);
     }
 
     /**
      * @param message text
      * @param cause cause
      */
-    public ForwardedException(String message, Throwable cause) {
-        super(message, null, cause);
+    public ForwardedException(String message, Throwable cause, Object... args) {
+        super(message, cause);
+        localizedMessage = Messages.getFormattedString(message, args);
+        LOG.error(localizedMessage, cause);
     }
 
+    public static ForwardedException illegalArgument(Object unknown, Object available) {
+        return new ForwardedException("tsl2nano.unknowntype", null, unknown, StringUtil.toFormattedString(available,
+            40, false));
+    }
+
+    public static ForwardedException illegalState(Object state, Object caller) {
+        return new ForwardedException("tsl2nano.illegalstate", null, state, StringUtil.toFormattedString(caller,
+            40, false));
+    }
+
+    @Override
+    public String getMessage() {
+        return getLocalizedMessage();
+    }
     /**
      * @see java.lang.Throwable#getLocalizedMessage()
      */
     @Override
     public String getLocalizedMessage() {
-        return getMessage();
-    }
-
-    /**
-     * @see java.lang.Throwable#getMessage()
-     */
-    @Override
-    public String getMessage() {
-        if (myMessage == null) {
-            if (getCause() == null) {
-                throw new FormattedException("tsl2nano.implementationerror",
-                    new Object[] { "cause=null",
-                        "ForwardedException must have a cause! Please use <FormattedException> to create a new RuntimeException" });
-            }
-            Throwable current = this;
-            final int MAX_MSG_LINECOUNT = 12;
-            Throwable cause = getCause();
-            String message = super.getMessage();
-            //on java exceptions append the class-name to the message
-            String causeMsg = isJavaException(cause) || cause.getMessage() == null ? cause.toString()
-                : cause.getMessage();
-            boolean msgContainsCause = false;
-            if (MESSAGE_FORWARDED.equals(messageKey)) {
-                current = cause;
-                cause = getRootCause();
-                message = StringUtil.toFormattedString(causeMsg, MAX_MSG_LINECOUNT, false);
-                causeMsg = getRootCause().getMessage();
-                if (message != null && !(cause == current)) {
-                    msgContainsCause = causeMsg != null && message.contains(causeMsg);
-                }
-                if (causeMsg != null && causeMsg.startsWith("!")) {
-                    causeMsg = getText(StringUtil.substring(causeMsg, "!", "!"));
-                }
-            }
-            /*
-             * don't show the message twice
-             */
-            if (cause instanceof FormattedException && ((FormattedException)cause).myMessage.trim().equals(this.myMessage.trim())) {
-                cause = null;
-            }
-            if (message == null) {
-                final String msg = StringUtil.toFormattedString(current.toString(), MAX_MSG_LINECOUNT, false);
-                message = Messages.getFormattedString("tsl2nano.unknownerror", msg, getStackTracePart(current));
-            } else if (isJavaException(current)) {
-                message = Messages.getFormattedString("tsl2nano.runtimeerror", message, getStackTracePart(current));
-            }
-            if (cause != null && causeMsg == null) {
-                causeMsg = Messages.getFormattedString("tsl2nano.unknownerror", cause, getStackTracePart(current));
-            } else if (isJavaException(cause)) {
-                causeMsg = Messages.getFormattedString("tsl2nano.runtimeerror", cause, getStackTracePart(current));
-            }
-            myMessage = getText(message);
-            if (!msgContainsCause) {
-                myMessage += (message != null && message.length() > 0 && cause != null && causeMsg.length() > 0 ? "\n\n" + getText("tsl2nano.cause")
-                    + "\n"
-                    : "") + (cause != null ? causeMsg : "");
-            }
+        Throwable rootCause = getRootCause(this);
+        if (isForwarded()) {
+            return rootCause != null ? getRootCause(this).getLocalizedMessage() : Messages
+                .getFormattedString("tsl2.nano.unknownerror", this.getClass(), getStackTracePart(this));
+        } else if (rootCause != null) {
+            return Messages.getFormattedString("tsl2nano.exception.text.with.cause", localizedMessage,
+                StringUtil.toString(rootCause), getStackTracePart(rootCause));
+        } else {
+            return Messages.getFormattedString("tsl2nano.exception.text", localizedMessage, getStackTracePart(this));
         }
-        return myMessage;
     }
 
     protected String getStackTracePart(Throwable throwable) {
         StackTraceElement[] stackTrace = throwable.getStackTrace();
         StringBuffer buf = new StringBuffer();
-        int length = LOG.isDebugEnabled() ? Integer.MAX_VALUE : 1;
-        for (int i = 0; i < stackTrace.length; i++) {
+        int length = LOG.isDebugEnabled() ? stackTrace.length : 1;
+        for (int i = 0; i < length; i++) {
             buf.append(stackTrace[i] + "\n");
         }
         return buf.toString();
     }
-    
+
     /**
-     * @param current exception
-     * @return true, if exception is a standard java exception.
+     * isForwarded
+     * 
+     * @return true, if this exception is only forwarded
      */
-    private boolean isJavaException(Throwable current) {
-        return current != null && BeanUtil.isStandardType(current.getClass());
+    public boolean isForwarded() {
+        return MESSAGE_FORWARDED.equals(super.getMessage());
     }
 
     /**
      * @return root cause (recursive)
      */
-    public Throwable getRootCause() {
-        Throwable cause = getCause();
-        if (cause != null) {
-            while (cause.getCause() != null) {
-                cause = cause.getCause();
-                if (cause.getCause() == null) {
-                    break;
-                }
+    public static Throwable getRootCause(Throwable ex) {
+        Throwable cause = ex.getCause();
+        if (cause == null) {
+            if (ex instanceof UndeclaredThrowableException) {
+                cause = ((UndeclaredThrowableException)ex).getUndeclaredThrowable();
+            } else if (ex instanceof InvocationTargetException) {
+                cause = ((InvocationTargetException)ex).getTargetException();
             }
-            return cause;
+            if (cause == null)
+                return ex;
         }
-        return this;
-    }
-
-    /**
-     * localizes each word
-     * 
-     * @param message text
-     * @return localized (by each word) message
-     */
-    protected String getText(String message, ResourceBundle bundle) {
-        String text = message;
-        if (bundle != null) {
-            final StringBuffer buf = new StringBuffer();
-            final StringTokenizer tokenizer = new StringTokenizer(message);
-            String w = null;
-            while (tokenizer.hasMoreTokens()) {
-                try {
-                    w = tokenizer.nextToken();
-                    buf.append(bundle.getString(w) + " ");
-                } catch (final MissingResourceException ex) {
-                    //Ok, not found, no problem!
-                    buf.append(w + " ");
-                }
-            }
-            text = buf.toString();
-        }
-        return super.getText(text);
+        return getRootCause(cause);
     }
 
     /**
