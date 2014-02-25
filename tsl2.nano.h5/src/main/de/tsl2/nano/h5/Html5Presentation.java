@@ -105,6 +105,7 @@ import de.tsl2.nano.action.IAction;
 import de.tsl2.nano.bean.BeanAttribute;
 import de.tsl2.nano.bean.BeanClass;
 import de.tsl2.nano.bean.BeanUtil;
+import de.tsl2.nano.bean.IAttribute;
 import de.tsl2.nano.bean.ValueHolder;
 import de.tsl2.nano.bean.def.AttributeDefinition;
 import de.tsl2.nano.bean.def.Bean;
@@ -1179,7 +1180,7 @@ public class Html5Presentation<T> extends BeanPresentationHelper<T> implements I
     }
 
     @Override
-    public boolean isDefaultAttribute(BeanAttribute attribute) {
+    public boolean isDefaultAttribute(IAttribute attribute) {
         if (bean instanceof Bean && ((Bean) bean).getInstance() instanceof BeanConfigurator)
             return true;
         return super.isDefaultAttribute(attribute);

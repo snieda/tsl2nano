@@ -142,7 +142,7 @@ public class NanoH5Session {
                         msg = HtmlUtil.createMessagePage(msg);
                 } else {
                     if (userResponse instanceof BeanDefinition)
-                        ((BeanDefinition)userResponse).onActivation();
+                        ((BeanDefinition) userResponse).onActivation();
                     msg = getNextPage(userResponse);
                 }
                 response = server.createResponse(msg);
@@ -417,39 +417,44 @@ public class NanoH5Session {
     }
 
     protected <T> BeanCollector<?, T> processSearchRequest(Properties parms, BeanCollector<?, T> model) {
-        //fill the search values
-        Bean<?> filterBean = model.getBeanFinder().getFilterRange();
-        if (filterBean != null) {
-            Bean<?> from = (Bean<?>) filterBean.getValueAsBean("from", false);
-            Bean<?> to = (Bean<?>) filterBean.getValueAsBean("to", false);
-            final String NAME = "name";
-            if (!from.getAttributeNames()[0].equals(NAME) || from.getAttributeNames().length != 1) {
-                from.getPresentationHelper().change(BeanPresentationHelper.PROP_DOVALIDATION, false);
-                if (from.hasAttribute(NAME))
-                    from.setAttributeFilter(NAME);
+//        try {
+            //fill the search values
+            Bean<?> filterBean = model.getBeanFinder().getFilterRange();
+            if (filterBean != null) {
+                Bean<?> from = (Bean<?>) filterBean.getValueAsBean("from", false);
+                Bean<?> to = (Bean<?>) filterBean.getValueAsBean("to", false);
+                final String NAME = "name";
+                if (!from.getAttributeNames()[0].equals(NAME) || from.getAttributeNames().length != 1) {
+                    from.getPresentationHelper().change(BeanPresentationHelper.PROP_DOVALIDATION, false);
+                    if (from.hasAttribute(NAME))
+                        from.setAttributeFilter(NAME);
 //            from.setName(null);
-                to.getPresentationHelper().change(BeanPresentationHelper.PROP_DOVALIDATION, false);
-                if (to.hasAttribute(NAME))
-                    to.setAttributeFilter(NAME);
+                    to.getPresentationHelper().change(BeanPresentationHelper.PROP_DOVALIDATION, false);
+                    if (to.hasAttribute(NAME))
+                        to.setAttributeFilter(NAME);
 //            to.setName(null);
-            }
-
-            for (String p : parms.stringPropertyNames()) {
-                String rowName = StringUtil.substring(p, null, ".", true);
-                String colName = StringUtil.substring(p, ".", null, true);
-                if (from.getPresentationHelper().prop(KEY_FILTER_FROM_LABEL).equals(rowName)
-                    && from.hasAttribute(colName)) {
-                    from.setParsedValue(colName, parms.getProperty(p));
-                } else if (to.getPresentationHelper().prop(KEY_FILTER_TO_LABEL).equals(rowName)
-                    && to.hasAttribute(colName)) {
-                    to.setParsedValue(colName, parms.getProperty(p));
-                } else if (from.hasAttribute(colName)) {
-                    from.setParsedValue(colName, parms.getProperty(p));
-                    to.setParsedValue(colName, parms.getProperty(p));
                 }
+
+                for (String p : parms.stringPropertyNames()) {
+                    String rowName = StringUtil.substring(p, null, ".", true);
+                    String colName = StringUtil.substring(p, ".", null, true);
+                    if (from.getPresentationHelper().prop(KEY_FILTER_FROM_LABEL).equals(rowName)
+                        && from.hasAttribute(colName) && from.getAttribute(colName).hasWriteAccess()) {
+                        from.setParsedValue(colName, parms.getProperty(p));
+                    } else if (to.getPresentationHelper().prop(KEY_FILTER_TO_LABEL).equals(rowName)
+                        && to.hasAttribute(colName) && to.getAttribute(colName).hasWriteAccess()) {
+                        to.setParsedValue(colName, parms.getProperty(p));
+                    } else if (from.hasAttribute(colName) && from.getAttribute(colName).hasWriteAccess()) {
+                        from.setParsedValue(colName, parms.getProperty(p));
+                        to.setParsedValue(colName, parms.getProperty(p));
+                    }
+                }
+                model.getSearchAction().activate();
             }
-            model.getSearchAction().activate();
-        }
+//        } catch (Exception ex) {
+//            //don't break the panel-creation - the full exception will be handled in main-session-routine.
+//            LOG.error("couldn' fill search-panel values", ex);
+//        }
         //a search request will show the same search panel again - but with filtered data.
         return model;
     }

@@ -29,7 +29,7 @@ import de.tsl2.nano.action.IActivator;
 import de.tsl2.nano.bean.BeanClass;
 import de.tsl2.nano.bean.BeanContainer;
 import de.tsl2.nano.bean.IBeanContainer;
-import de.tsl2.nano.bean.def.AttributeExpression;
+import de.tsl2.nano.bean.def.AbstractExpression;
 import de.tsl2.nano.bean.def.Bean;
 import de.tsl2.nano.bean.def.BeanCollector;
 import de.tsl2.nano.bean.def.BeanDefinition;
@@ -98,7 +98,8 @@ public class NanoH5 extends NanoHTTPD {
         appstartClassloader = Thread.currentThread().getContextClassLoader();
         Environment.addService(ClassLoader.class, appstartClassloader);
         sessions = new LinkedHashMap<InetAddress, NanoH5Session>();
-        AttributeExpression.registerExpression(new RuleExpression().getExpressionPattern(), RuleExpression.class);
+        AbstractExpression.registerExpression(new RuleExpression().getExpressionPattern(), RuleExpression.class);
+        AbstractExpression.registerExpression(new SQLExpression().getExpressionPattern(), SQLExpression.class);
     }
 
     /**
