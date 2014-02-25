@@ -17,11 +17,11 @@ import javax.ejb.Local;
 import javax.ejb.ScheduleExpression;
 import javax.ejb.TimerHandle;
 
-import de.tsl2.nano.execution.IRunnable;
+import de.tsl2.nano.execution.ICRunnable;
 
 /**
  * Generic ejb 3.1 job scheduler. is able to run (synchronized) a collection of {@link Runnable}s for the given
- * scheduleExpression. RUNNABLE is generic, to provide the use of other Runnable interfaces (like {@link IRunnable} to
+ * scheduleExpression. RUNNABLE is generic, to provide the use of other Runnable interfaces (like {@link ICRunnable} to
  * have the possibility to provide run arguments and return values. You should override the method calling the callback.
  * <p/>
  * If the ejb-container was stopped, not all informations are available. the jobs, last-start, last-stop, last-status

@@ -13,12 +13,12 @@ import java.io.Serializable;
 
 import javax.ejb.Singleton;
 
-import de.tsl2.nano.execution.IRunnable;
+import de.tsl2.nano.execution.ICRunnable;
 import de.tsl2.nano.serviceaccess.ServiceFactory;
 
 /**
  * 
- * implementation of {@link IJobScheduleLocalService} to call {@link IRunnable}s. the {@link IRunnable}s context will not
+ * implementation of {@link IJobScheduleLocalService} to call {@link ICRunnable}s. the {@link ICRunnable}s context will not
  * have a generic type definition to be simple.
  * 
  * @author Thomas Schneider, Thomas Schneider
@@ -27,16 +27,16 @@ import de.tsl2.nano.serviceaccess.ServiceFactory;
 @SuppressWarnings("rawtypes")
 @Singleton
 //@Startup
-public class JobScheduleServiceBean extends AbstractJobScheduleServiceBean<Class<IRunnable>> implements
-        IJobScheduleLocalService<Class<IRunnable>>, IJobScheduleService<Class<IRunnable>> {
+public class JobScheduleServiceBean extends AbstractJobScheduleServiceBean<Class<ICRunnable>> implements
+        IJobScheduleLocalService<Class<ICRunnable>>, IJobScheduleService<Class<ICRunnable>> {
 
     /**
      * {@inheritDoc}
      */
     @SuppressWarnings("unchecked")
     @Override
-    protected void run(Class<IRunnable> runnable, Serializable context) {
-        IRunnable service = ServiceFactory.instance().getService(runnable);
+    protected void run(Class<ICRunnable> runnable, Serializable context) {
+        ICRunnable service = ServiceFactory.instance().getService(runnable);
         service.run(context);
     }
 }
