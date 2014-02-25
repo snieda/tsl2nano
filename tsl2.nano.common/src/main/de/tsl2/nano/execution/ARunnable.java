@@ -12,13 +12,13 @@ package de.tsl2.nano.execution;
 import java.io.Serializable;
 
 /**
- * combines the two interfaces {@link IRunnable} and {@link Runnable} to implement {@link IRunnable}s usable by
+ * combines the two interfaces {@link ICRunnable} and {@link Runnable} to implement {@link ICRunnable}s usable by
  * {@link Thread}s.
  * 
  * @author Tom
  * @version $Revision$
  */
-public abstract class ARunnable<CONTEXT extends Serializable> implements IRunnable<CONTEXT>, Runnable {
+public abstract class ARunnable<CONTEXT extends Serializable> implements ICRunnable<CONTEXT>, Runnable {
     CONTEXT context;
     Object[] args;
     

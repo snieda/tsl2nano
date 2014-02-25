@@ -92,7 +92,7 @@ public class CompatibilityLayer {
      * @param action action to be started optionally
      * @return true, if action run without error.
      */
-    public <C extends Serializable> C runOptional(IRunnable<C> action, Object... args) {
+    public <C extends Serializable> C runOptional(ICRunnable<C> action, Object... args) {
         try {
             return action.run(null, args);
         } catch (Throwable e) {

@@ -15,7 +15,7 @@ import java.lang.reflect.Method;
 import java.util.Properties;
 
 /**
- * Simple java main runner for {@link IRunnable} implementations. Uses a {@link Properties} from file-load as arguments.
+ * Simple java main runner for {@link ICRunnable} implementations. Uses a {@link Properties} from file-load as arguments.
  * 
  * @author Thomas Schneider
  * @version $Revision$
@@ -23,7 +23,7 @@ import java.util.Properties;
 public class Runner {
     public static final void main(String[] args) throws Exception {
         if (args.length < 1) {
-            System.out.println("Please give at least the IRunnable to start!");
+            System.out.println("Please give at least the ICRunnable to start!");
             return;
         } else if (args.length < 2) {
             System.out.println("Please give property-file name as second parameter!");
@@ -34,7 +34,7 @@ public class Runner {
         for (int i = 0; i < args.length; i++) {
             p.setProperty("args" + i, args[i]);
         }
-        final Class<IRunnable<Properties>> rclass = (Class<IRunnable<Properties>>) Class.forName(args[0]);
+        final Class<ICRunnable<Properties>> rclass = (Class<ICRunnable<Properties>>) Class.forName(args[0]);
         final Method runMethod = rclass.getMethod("run", new Class[] { Object.class, Object[].class });
 
         log("starting " + runMethod + " with arguments: " + p);

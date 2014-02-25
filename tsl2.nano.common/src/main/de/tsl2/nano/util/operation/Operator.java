@@ -11,6 +11,7 @@ import org.simpleframework.xml.ElementMap;
 import de.tsl2.nano.action.IAction;
 import de.tsl2.nano.collection.CollectionUtil;
 import de.tsl2.nano.util.StringUtil;
+import de.tsl2.nano.util.Util;
 import de.tsl2.nano.util.parser.Parser;
 
 /**
@@ -175,54 +176,64 @@ public abstract class Operator<INPUT, OUTPUT> extends Parser<INPUT> {
      * @return
      */
     public OUTPUT eval(INPUT expression) {
-        //create an operable expression like a sequence
-        expression = wrap(expression);
-        //enclose operations in brackets
-        expression = encloseInBrackets(expression);
-        //extract all terms
-        INPUT term;
-        INPUT t;
-        while (!values.containsKey(KEY_RESULT)) {
-            term = extract(expression, syntax(KEY_TERM_ENCLOSED));
-            if (isEmpty(term)) {
-                term = extract(expression, syntax(KEY_TERM));
+        try {
+            //create an operable expression like a sequence
+            expression = wrap(expression);
+            //enclose operations in brackets
+            expression = encloseInBrackets(expression);
+            //extract all terms
+            INPUT term;
+            INPUT t;
+            while (!values.containsKey(KEY_RESULT)) {
+                term = extract(expression, syntax(KEY_TERM_ENCLOSED));
                 if (isEmpty(term)) {
-                    break;
+                    term = extract(expression, syntax(KEY_TERM));
+                    if (isEmpty(term)) {
+                        break;
+                    }
                 }
+                t = extract(term, syntax(KEY_TERM));
+                boolean finish = unwrap(expression).equals(term);
+                replace(expression, term, converter.from(operate(wrap(t), values)));
+                if (finish)
+                    break;
             }
-            t = extract(term, syntax(KEY_TERM));
-            replace(expression, term, converter.from(operate(wrap(t), values)));
-        }
 
-        if (resultEstablished()) {
-            return getValue(KEY_RESULT);
-        } else {
-            INPUT operand = extract(expression, syntax.get(KEY_OPERAND));
-            OUTPUT result = getValue(operand);
-            if (isEmpty(expression))
-                expression = operand;
-            return result != null ? result : converter.to(trim(expression));
+            if (resultEstablished()) {
+                return getValue(KEY_RESULT);
+            } else {
+                INPUT operand = extract(expression, syntax.get(KEY_OPERAND));
+                OUTPUT result = getValue(operand);
+                if (isEmpty(expression))
+                    expression = operand;
+                return result != null ? result : converter.to(trim(expression));
+            }
+        } catch (Exception ex) {
+            String msg = Util.toString(this.getClass(), "expression=" +expression, "value=", values);
+            throw new IllegalStateException("Error on evaluation of operation '" + msg + "'", ex);
         }
     }
 
     /**
      * gets a value - usable to fill values from value map. overwrite this method to do more...
+     * 
      * @param key values key
      * @return value
      */
     protected OUTPUT getValue(Object key) {
         return values.get(key);
     }
-    
+
     /**
      * addValue
+     * 
      * @param key
      * @param value
      */
     protected void addValue(INPUT key, OUTPUT value) {
         getValues().put(key, value);
     }
-    
+
 //    protected abstract INPUT encloseInBrackets(INPUT expression);
 
     /**

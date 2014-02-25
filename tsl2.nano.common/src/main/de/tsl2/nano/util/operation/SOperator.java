@@ -63,7 +63,7 @@ public abstract class SOperator<T> extends Operator<CharSequence, T> {
             KEY_OPERATION,
             "(.*)",
             KEY_OPERAND,
-            "([a-zA-Z0-9.,]+)",
+            "([-]?[a-zA-Z0-9.,]+)",
             KEY_EMPTY,
             ""/*,
             KEY_DEFAULT_OPERAND,
@@ -75,7 +75,7 @@ public abstract class SOperator<T> extends Operator<CharSequence, T> {
     protected void createTermSyntax() {
         if (syntax.get(KEY_HIGH_OPERATION) == null)
             syntax.put(KEY_HIGH_OPERATION, syntax.get(KEY_OPERATION));
-        String term = "[^" + "\\" + syntax(KEY_END) + "\\" + syntax(KEY_BEGIN) + syntax(KEY_OPERATION).subSequence(1, syntax(KEY_OPERATION).length() - 2) + "]*" + syntax(KEY_OPERATION) + "\\s*" + syntax(KEY_OPERAND);
+        String term = "[^" + "\\" + syntax(KEY_END) + "\\" + syntax(KEY_BEGIN) + syntax(KEY_HIGH_OPERATION).subSequence(1, syntax(KEY_HIGH_OPERATION).length() - 2) + "]*" + syntax(KEY_OPERATION) + "\\s*" + syntax(KEY_OPERAND);
         syntax.put(KEY_TERM, term);
         syntax.put(KEY_TERM_ENCLOSED, "\\" + syntax(KEY_BEGIN) + "\\s*" + term + "\\s*" + "\\" + syntax(KEY_END));
     }

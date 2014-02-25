@@ -14,7 +14,7 @@ import java.lang.reflect.Method;
 import java.lang.reflect.Proxy;
 
 import de.tsl2.nano.bean.BeanClass;
-import de.tsl2.nano.execution.IRunnable;
+import de.tsl2.nano.execution.ICRunnable;
 
 /**
  * simple proxy to enable aop like enhancement.
@@ -24,7 +24,7 @@ import de.tsl2.nano.execution.IRunnable;
  */
 public class AOPProxy<T> implements InvocationHandler {
     Object delegate;
-    IRunnable<?> before, after;
+    ICRunnable<?> before, after;
     boolean proxyResult;
 
     /**
@@ -35,7 +35,7 @@ public class AOPProxy<T> implements InvocationHandler {
      * @param after (optional) action to execute. will be run with arguments instance, method, and args - after executing the original method.
      * @param proxyResult whether to wrap the result into a new proxy (recursive).
      */
-    public AOPProxy(Object delegate, IRunnable<?> before, IRunnable<?> after, boolean proxyResult) {
+    public AOPProxy(Object delegate, ICRunnable<?> before, ICRunnable<?> after, boolean proxyResult) {
         this.delegate = delegate;
         this.before = before;
         this.after = after;
@@ -67,7 +67,7 @@ public class AOPProxy<T> implements InvocationHandler {
      * @param proxyResult whether to wrap the result into a new proxy (recursive).
      * @return
      */
-    public static final <T> T createEnhancement(T instance, IRunnable<?> before, IRunnable<?> after, boolean proxyResult) {
+    public static final <T> T createEnhancement(T instance, ICRunnable<?> before, ICRunnable<?> after, boolean proxyResult) {
         return (T) Proxy.newProxyInstance(Thread.currentThread().getContextClassLoader(), BeanClass.getBeanClass(instance.getClass())
             .getInterfaces(), new AOPProxy(instance, before, after, proxyResult));
     }

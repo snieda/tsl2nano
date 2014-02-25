@@ -9,6 +9,7 @@
  */
 package de.tsl2.nano.execution;
 
+import java.io.Serializable;
 
 /**
  * generic interface to start any runnable with a given context and returning the context as result. the standard
@@ -20,7 +21,7 @@ package de.tsl2.nano.execution;
  * @author Thomas Schneider
  * @version $Revision$
  */
-public interface IRunnable<RESULT, CONTEXT> {
+public interface ICRunnable<CONTEXT extends Serializable> {
     /**
      * starts the process
      * 
@@ -28,5 +29,5 @@ public interface IRunnable<RESULT, CONTEXT> {
      * @param extArgs optional extended arguments
      * @return refreshed context as result
      */
-    RESULT run(CONTEXT context, Object... extArgs);
+    CONTEXT run(CONTEXT context, Object... extArgs);
 }
