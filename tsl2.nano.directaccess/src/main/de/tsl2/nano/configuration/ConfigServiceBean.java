@@ -18,6 +18,7 @@ import java.util.Properties;
 import javax.security.auth.Subject;
 
 import de.tsl2.nano.bean.BeanAttribute;
+import de.tsl2.nano.bean.IAttribute;
 import de.tsl2.nano.bean.def.Bean;
 import de.tsl2.nano.service.util.IGenericService;
 import de.tsl2.nano.service.util.batch.Part;
@@ -118,6 +119,7 @@ public class ConfigServiceBean implements IGenericService {
     /**
      * {@inheritDoc}
      */
+    @SuppressWarnings("unchecked")
     @Override
     public <T> Collection<T> findBetween(T firstBean,
             T secondBean,
@@ -125,8 +127,8 @@ public class ConfigServiceBean implements IGenericService {
             int startIndex,
             int maxResult,
             Class... lazyRelations) {
-        if (firstBean instanceof BeanAttribute) {
-            Class declaringClass = ((BeanAttribute) firstBean).getDeclaringClass();
+        if (firstBean instanceof IAttribute) {
+            Class declaringClass = ((IAttribute) firstBean).getDeclaringClass();
             Bean bean = new Bean(declaringClass);
             return bean.getAttributes();
         }

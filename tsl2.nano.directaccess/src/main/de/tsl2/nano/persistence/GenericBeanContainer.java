@@ -79,6 +79,15 @@ public abstract class GenericBeanContainer extends BeanContainerUtil {
                     (Class[]) parameter[3]);
             }
         };
+        IAction<Collection<?>> queryMapFinder = new CommonAction<Collection<?>>() {
+            @Override
+            public Collection<?> action() {
+                return container.getGenService().findByQuery((String) parameter[0],
+                    (Boolean) parameter[1],
+                    (Map<String, Object>) parameter[2],
+                    (Class[]) parameter[3]);
+            }
+        };
         IAction lazyrelationResolver = new CommonAction() {
             @Override
             public Object action() {
@@ -136,6 +145,7 @@ public abstract class GenericBeanContainer extends BeanContainerUtil {
             exampleFinder,
             betweenFinder,
             queryFinder,
+            queryMapFinder,
             attrAction,
             permissionAction,
             persistableAction,

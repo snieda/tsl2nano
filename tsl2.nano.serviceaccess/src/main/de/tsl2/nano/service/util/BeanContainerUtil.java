@@ -102,6 +102,15 @@ public class BeanContainerUtil {
                     (Class[]) parameter[3]);
             }
         };
+        final IAction<Collection<?>> queryMapFinder = new CommonAction<Collection<?>>() {
+            @Override
+            public Collection<?> action() {
+                return service.findByQuery((String) parameter[0],
+                    (Boolean) parameter[1],
+                    (Map<String, Object>) parameter[2],
+                    (Class[]) parameter[3]);
+            }
+        };
         final IAction lazyrelationResolver = new CommonAction() {
             @Override
             public Object action() {
@@ -159,6 +168,7 @@ public class BeanContainerUtil {
             exampleFinder,
             betweenFinder,
             queryFinder,
+            queryMapFinder,
             attrAction,
             permissionAction,
             persistableAction,
