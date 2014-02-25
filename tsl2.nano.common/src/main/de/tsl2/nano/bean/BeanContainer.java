@@ -345,8 +345,8 @@ public class BeanContainer implements IBeanContainer {
      */
     @Override
     public <T> Collection<T> getBeansByQuery(String query, Boolean nativeQuery, Map<String, Object> par, Class... lazyRelations) {
-        queryAction.setParameter(new Object[] { query, nativeQuery, par, lazyRelations });
-        return (Collection<T>) queryAction.activate();
+        queryMapAction.setParameter(new Object[] { query, nativeQuery, par, lazyRelations });
+        return (Collection<T>) queryMapAction.activate();
     }
 
     /**
