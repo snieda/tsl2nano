@@ -9,8 +9,6 @@
  */
 package de.tsl2.nano.bean.def;
 
-import org.simpleframework.xml.Default;
-import org.simpleframework.xml.DefaultType;
 import org.simpleframework.xml.core.Commit;
 
 import de.tsl2.nano.bean.BeanClass;
@@ -23,8 +21,10 @@ import de.tsl2.nano.util.StringUtil;
  * @version $Revision$
  */
 @SuppressWarnings("unchecked")
-@Default(value = DefaultType.FIELD, required = false)
 public class PathExpression<T> extends AbstractExpression<T> implements IValueExpression<T> {
+    /** serialVersionUID */
+    private static final long serialVersionUID = -2355489779688683413L;
+
     transient String[] attributePath;
 
     /** attribute relation separator (like 'myattr1.relationattr.nextrelationattr' */
@@ -74,6 +74,11 @@ public class PathExpression<T> extends AbstractExpression<T> implements IValueEx
         return (T) BeanClass.getValue(instance, attributePath);
     }
 
+    @Override
+    public void setValue(Object instance, T value) {
+        throw new UnsupportedOperationException();
+    }
+    
     @Commit
     private void initDeserializing() {
         attributePath = splitChain(expression);
@@ -89,5 +94,10 @@ public class PathExpression<T> extends AbstractExpression<T> implements IValueEx
     @Override
     public String getExpressionPattern() {
         return ".*\\.*";
+    }
+    
+    @Override
+    public String getName() {
+        return expression.substring(expression.lastIndexOf(PATH_SEPARATOR) + 1);
     }
 }

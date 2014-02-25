@@ -9,6 +9,7 @@
 package de.tsl2.nano.bean;
 
 import java.util.Collection;
+import java.util.Map;
 
 /**
  * To be implemented by a bean container.
@@ -61,7 +62,18 @@ public interface IBeanContainer {
      * @return query result
      */
     public <T> Collection<T> getBeansByQuery(String query, Boolean nativeQuery, Object[] args, Class... lazyRelations);
-
+    
+    /**
+     * getBeansByQuery
+     * 
+     * @param <T> bean type
+     * @param query sql or ejb-ql
+     * @param nativeQuery if false, query must be pure sql, if true, query must be ejb-ql
+     * @param par query arguments
+     * @param lazyRelations optional types to preload
+     * @return query result
+     */
+    public <T> Collection<T> getBeansByQuery(String query, Boolean nativeQuery, Map<String, Object> par, Class... lazyRelations);
     /**
      * execute a statement changing structure or data (like insert, update, delete, create)
      * 

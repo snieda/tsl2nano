@@ -38,6 +38,7 @@ public class BeanContainer implements IBeanContainer {
     protected IAction<Collection<?>> exampleFinderAction = null;
     protected IAction<Collection<?>> betweenFinderAction = null;
     protected IAction<Collection<?>> queryAction = null;
+    protected IAction<Collection<?>> queryMapAction = null;
     protected IAction<?> lazyrelationInstantiateAction = null;
     protected IAction<?> saveAction = null;
     protected IAction<?> deleteAction = null;
@@ -91,6 +92,7 @@ public class BeanContainer implements IBeanContainer {
             IAction<Collection<?>> exampleFinder,
             IAction<Collection<?>> betweenFinder,
             IAction<Collection<?>> queryFinder,
+            IAction<Collection<?>> queryMapFinder,
             IAction<IAttributeDef> attrdefAction,
             IAction<Boolean> permissionAction,
             IAction<Boolean> persistableAction,
@@ -103,6 +105,7 @@ public class BeanContainer implements IBeanContainer {
         self.exampleFinderAction = exampleFinder;
         self.betweenFinderAction = betweenFinder;
         self.queryAction = queryFinder;
+        self.queryMapAction = queryMapFinder;
         self.attrdefAction = attrdefAction;
         self.permissionAction = permissionAction;
         self.persistableAction = persistableAction;
@@ -133,6 +136,12 @@ public class BeanContainer implements IBeanContainer {
             }
         };
         final IAction<Collection<?>> queryFinder = new CommonAction<Collection<?>>("empty.service.queryFinder") {
+            @Override
+            public Collection<?> action() {
+                return null;//new LinkedList();
+            }
+        };
+        final IAction<Collection<?>> queryMapFinder = new CommonAction<Collection<?>>("empty.service.queryMapFinder") {
             @Override
             public Collection<?> action() {
                 return null;//new LinkedList();
@@ -192,6 +201,7 @@ public class BeanContainer implements IBeanContainer {
             exampleFinder,
             betweenFinder,
             queryFinder,
+            queryMapFinder,
             attrAction,
             permissionAction,
             persistableAction,
@@ -327,6 +337,15 @@ public class BeanContainer implements IBeanContainer {
     @Override
     public <T> Collection<T> getBeansByQuery(String query, Boolean nativeQuery, Object[] args, Class... lazyRelations) {
         queryAction.setParameter(new Object[] { query, nativeQuery, args, lazyRelations });
+        return (Collection<T>) queryAction.activate();
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public <T> Collection<T> getBeansByQuery(String query, Boolean nativeQuery, Map<String, Object> par, Class... lazyRelations) {
+        queryAction.setParameter(new Object[] { query, nativeQuery, par, lazyRelations });
         return (Collection<T>) queryAction.activate();
     }
 

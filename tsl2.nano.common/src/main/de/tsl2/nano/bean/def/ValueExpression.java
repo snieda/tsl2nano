@@ -19,6 +19,7 @@ import java.util.Formatter;
 import java.util.Map;
 
 import org.apache.commons.logging.Log;
+import org.simpleframework.xml.Attribute;
 import org.simpleframework.xml.core.Commit;
 
 import de.tsl2.nano.Environment;
@@ -70,12 +71,14 @@ public class ValueExpression<TYPE> implements IValueExpression<TYPE>, IConverter
      * %birthday$TD
      * </pre>
      */
+    @Attribute
     String expression;
 
     /** format, the transformed expression */
     transient String format;
 
     /** only used to convert/parse from string to object */
+    @Attribute
     Class<TYPE> type;
     /** attributes, extracted from expression */
     transient String[] attributes;

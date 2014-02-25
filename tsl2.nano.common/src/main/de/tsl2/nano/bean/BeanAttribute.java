@@ -17,16 +17,16 @@ import java.lang.reflect.Method;
 import java.lang.reflect.ParameterizedType;
 
 import org.apache.commons.logging.Log;
-
-import de.tsl2.nano.Environment;
-import de.tsl2.nano.log.LogFactory;
 import org.simpleframework.xml.Attribute;
 import org.simpleframework.xml.Default;
 import org.simpleframework.xml.DefaultType;
 import org.simpleframework.xml.core.Commit;
 import org.simpleframework.xml.core.Persist;
 
+import de.tsl2.nano.Environment;
+import de.tsl2.nano.bean.def.IValueAccess;
 import de.tsl2.nano.exception.ForwardedException;
+import de.tsl2.nano.log.LogFactory;
 import de.tsl2.nano.util.StringUtil;
 
 /**
@@ -40,7 +40,8 @@ import de.tsl2.nano.util.StringUtil;
  * 
  */
 @Default(value = DefaultType.FIELD, required = false)
-public class BeanAttribute implements Comparable<BeanAttribute>, Serializable {
+@SuppressWarnings("rawtypes")
+public class BeanAttribute<T> implements IAttribute<T> {
     /** serialVersionUID */
     private static final long serialVersionUID = -5107086042716326477L;
 
@@ -188,7 +189,7 @@ public class BeanAttribute implements Comparable<BeanAttribute>, Serializable {
      * 
      * @param readAccessMethod getter method to evaluate this attribute
      */
-    protected BeanAttribute(Method readAccessMethod) {
+    public BeanAttribute(Method readAccessMethod) {
         super();
         this.readAccessMethod = readAccessMethod;
     }
@@ -205,10 +206,11 @@ public class BeanAttribute implements Comparable<BeanAttribute>, Serializable {
      * @param beanInstance bean
      * @return value of bean attribute for the given instance
      */
-    public Object getValue(Object beanInstance) {
+    @SuppressWarnings("unchecked")
+    public T getValue(Object beanInstance) {
         try {
             readAccessMethod.setAccessible(true);
-            return readAccessMethod.invoke(beanInstance, EMPTY_ARG);
+            return (T) readAccessMethod.invoke(beanInstance, EMPTY_ARG);
         } catch (final Exception e) {
             ForwardedException.forward(e);
             return null;
@@ -270,10 +272,11 @@ public class BeanAttribute implements Comparable<BeanAttribute>, Serializable {
     /**
      * @return type of attribute
      */
-    public Class<?> getType() {
+    @SuppressWarnings("unchecked")
+    public Class<T> getType() {
         if (readAccessMethod == null)
             initDeserializing();
-        return readAccessMethod.getReturnType();
+        return (Class<T>) readAccessMethod.getReturnType();
     }
 
     /**
@@ -378,7 +381,7 @@ public class BeanAttribute implements Comparable<BeanAttribute>, Serializable {
      * {@inheritDoc}
      */
     @Override
-    public int compareTo(BeanAttribute o) {
+    public int compareTo(IAttribute<T> o) {
         //if o is null, the error occurred before!
         return getName().compareTo(o.getName());
     }
@@ -402,12 +405,12 @@ public class BeanAttribute implements Comparable<BeanAttribute>, Serializable {
     /**
      * reads annotation from method or field
      * 
-     * @param <T> annotation
+     * @param <A> annotation
      * @param annotationType
      * @return annotation of given type or null
      */
-    public <T extends Annotation> T getAnnotation(Class<T> annotationType) {
-        final T methodAnn = getMethodAnnotation(annotationType);
+    public <A extends Annotation> A getAnnotation(Class<A> annotationType) {
+        final A methodAnn = getMethodAnnotation(annotationType);
         if (methodAnn != null) {
             return methodAnn;
         }
@@ -502,6 +505,14 @@ public class BeanAttribute implements Comparable<BeanAttribute>, Serializable {
     public static boolean hasExpectedName(Method method) {
         String n = decapitalize(method.getName().substring(3));
         return getExpectedMethodName(n).equals(method.getName());
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public boolean isVirtual() {
+        return IValueAccess.class.isAssignableFrom(getDeclaringClass());
     }
 
 //    private void readObjectNoData() throws ObjectStreamException {

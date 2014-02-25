@@ -20,9 +20,8 @@ import org.simpleframework.xml.ElementMap;
 
 import de.tsl2.nano.Environment;
 import de.tsl2.nano.action.IActivator;
-import de.tsl2.nano.bean.BeanAttribute;
 import de.tsl2.nano.bean.BeanContainer;
-import de.tsl2.nano.bean.BeanUtil;
+import de.tsl2.nano.bean.IAttribute;
 
 /**
  * simple gui properties
@@ -63,7 +62,7 @@ public class Presentable implements IIPresentable, Serializable {
     public Presentable() {
     }
 
-    public Presentable(BeanAttribute attr) {
+    public Presentable(IAttribute<?> attr) {
         label = Environment.translate(attr.getName(), true);
         BeanPresentationHelper<?> helper = Environment.get(BeanPresentationHelper.class);
         type = helper.getDefaultType(attr);

@@ -14,6 +14,7 @@ import java.util.LinkedHashMap;
 import org.simpleframework.xml.ElementMap;
 
 import de.tsl2.nano.bean.BeanAttribute;
+import de.tsl2.nano.bean.IAttribute;
 
 /**
  * description of a value group inside a bean. usable to create sub panel informations. you can define a full set of
@@ -103,7 +104,7 @@ public class ValueGroup extends Presentable {
      * 
      * @param nestingBean nesting attribute bean
      */
-    public void addNesting(Object instance, BeanAttribute attributeNestingBean) {
+    public void addNesting(Object instance, IAttribute<?> attributeNestingBean) {
         Object value = attributeNestingBean.getValue(instance);
         if (value != null) {
             BeanDefinition<? extends Object> beanDefinition = BeanDefinition.getBeanDefinition(value.getClass());

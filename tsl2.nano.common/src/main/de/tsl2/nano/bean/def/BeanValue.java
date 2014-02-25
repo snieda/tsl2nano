@@ -18,12 +18,10 @@ import java.lang.reflect.Method;
 import java.text.Format;
 import java.util.Arrays;
 import java.util.Collection;
-import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 
 import org.apache.commons.logging.Log;
 
@@ -33,6 +31,7 @@ import de.tsl2.nano.action.IAction;
 import de.tsl2.nano.bean.BeanAttribute;
 import de.tsl2.nano.bean.BeanClass;
 import de.tsl2.nano.bean.BeanUtil;
+import de.tsl2.nano.bean.IAttribute;
 import de.tsl2.nano.bean.ValueHolder;
 import de.tsl2.nano.collection.Entry;
 import de.tsl2.nano.collection.ListSet;
@@ -43,6 +42,7 @@ import de.tsl2.nano.log.LogFactory;
 import de.tsl2.nano.messaging.ChangeEvent;
 import de.tsl2.nano.messaging.EventController;
 import de.tsl2.nano.messaging.IListener;
+import de.tsl2.nano.util.StringUtil;
 
 /**
  * BeanAttribute holding the bean instance, observers and exact attribute definitions - with validation.
@@ -54,7 +54,7 @@ import de.tsl2.nano.messaging.IListener;
  * @version $Revision$
  */
 @SuppressWarnings({ "rawtypes", "unchecked" })
-public class BeanValue<T> extends AttributeExpression<T> implements IValueDefinition<T> {
+public class BeanValue<T> extends AttributeDefinition<T> implements IValueDefinition<T> {
     /** serialVersionUID */
     private static final long serialVersionUID = 8690371851484504875L;
 
@@ -72,6 +72,17 @@ public class BeanValue<T> extends AttributeExpression<T> implements IValueDefini
      */
     protected BeanValue() {
         super();
+    }
+
+    /**
+     * constructor
+     * 
+     * @param bean the instance to wrap and reflect
+     * @param attribute beanattribute or attribute-expression
+     */
+    public BeanValue(Object bean, IAttribute<T> attribute) {
+        super(attribute);
+        this.instance = bean;
     }
 
     /**
@@ -98,13 +109,16 @@ public class BeanValue<T> extends AttributeExpression<T> implements IValueDefini
      * @param beanInstance The bean to set.
      */
     void setInstance(Object beanInstance) {
+        if (isVirtualAccess() && beanInstance != null && !(beanInstance instanceof IValueAccess))
+            throw new IllegalArgumentException("instance of virtual attribute " + this
+                + " must be of type IValueAccess, but is: " + beanInstance);
         this.instance = beanInstance;
     }
 
     @Override
     public Class<T> getType() {
         //if a value-expression was defined, the valueexpression-type has to be used!
-        if (getExpression() != null)
+        if (attribute.isVirtual())
             return super.getType();
         else if (temporalType() != null)
             return (Class<T>) temporalType();
@@ -134,7 +148,8 @@ public class BeanValue<T> extends AttributeExpression<T> implements IValueDefini
             if (Collection.class.isAssignableFrom(getType())) {
                 T value = getValue();
                 if (value != null)
-                    this.format = new CollectionExpressionFormat<T>((Class<T>) getGenericType(), (Collection<T>) value);
+                    this.format =
+                        new CollectionExpressionFormat<T>((Class<T>) getGenericType(0), (Collection<T>) value);
             }
         }
         return super.getFormat();
@@ -147,9 +162,6 @@ public class BeanValue<T> extends AttributeExpression<T> implements IValueDefini
      */
     @Override
     public T getValue() {
-//        if (isRelation())
-//            return (T) getRelation(getName());
-//        else
         return (T) getValue(instance);
     }
 
@@ -207,7 +219,6 @@ public class BeanValue<T> extends AttributeExpression<T> implements IValueDefini
         }
     }
 
-
     @Override
     public IValueDefinition getRelation(String name) {
         return getRelation(instance, ValuePath.splitChain(name));
@@ -247,7 +258,7 @@ public class BeanValue<T> extends AttributeExpression<T> implements IValueDefini
      */
     public static final BeanValue getBeanValue(Object bean, String attributeName) {
         //TODO: not performance optimized!
-        final BeanAttribute attribute = getBeanAttribute(bean.getClass(), attributeName);
+        final BeanAttribute attribute = BeanAttribute.getBeanAttribute(bean.getClass(), attributeName);
         BeanValue tbv = new BeanValue(bean, attribute.getAccessMethod());
         int i = beanValueCache.indexOf(tbv);
         if (i != -1) {
@@ -305,7 +316,7 @@ public class BeanValue<T> extends AttributeExpression<T> implements IValueDefini
     public String getName() {
         if (isVirtual()) {
             if (description == null) {
-                description = toFirstUpper(super.getName());
+                description = StringUtil.toFirstUpper(super.getName());
             }
             return description;
         }
@@ -338,7 +349,7 @@ public class BeanValue<T> extends AttributeExpression<T> implements IValueDefini
      * {@inheritDoc}
      */
     @Override
-    public int compareTo(BeanAttribute o) {
+    public int compareTo(IAttribute<T> o) {
         //not really a compareTo...but a base for equals
         if (!(o instanceof BeanValue))
             return -1;
@@ -356,7 +367,7 @@ public class BeanValue<T> extends AttributeExpression<T> implements IValueDefini
      * @return true, if the instance is of type {@link ValueHolder}.
      */
     public boolean isVirtual() {
-        return instance instanceof IValueAccess;
+        return super.isVirtual() || instance instanceof IValueAccess;
     }
 
     /**
@@ -518,8 +529,12 @@ class Selector<T> {
 
     Class<T> getCollectionEntryType() {
         checkForMap();
-        return (Class<T>) (isMap ? Entry.class : valueAccess instanceof BeanAttribute
-            ? ((BeanAttribute) valueAccess).getGenericType() : Object.class);
+        return (Class<T>) (isMap ? Entry.class : getAttribute() instanceof BeanAttribute
+            ? ((BeanAttribute) getAttribute()).getGenericType() : Object.class);
+    }
+
+    IAttribute<T> getAttribute() {
+        return ((BeanValue) valueAccess).attribute;
     }
 
     Collection<T> getValueAsCollection() {

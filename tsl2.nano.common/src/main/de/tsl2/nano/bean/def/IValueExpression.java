@@ -9,8 +9,6 @@
  */
 package de.tsl2.nano.bean.def;
 
-import de.tsl2.nano.bean.BeanAttribute;
-
 /**
  * 
  * @author Tom

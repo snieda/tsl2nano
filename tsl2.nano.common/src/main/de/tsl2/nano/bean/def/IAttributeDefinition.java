@@ -14,6 +14,7 @@ import java.text.Format;
 import java.util.Collection;
 
 import de.tsl2.nano.bean.BeanAttribute;
+import de.tsl2.nano.bean.IAttribute;
 import de.tsl2.nano.bean.IAttributeDef;
 
 /**
@@ -22,27 +23,9 @@ import de.tsl2.nano.bean.IAttributeDef;
  * @author Thomas Schneider
  * @version $Revision$
  */
-public interface IAttributeDefinition<T> extends IAttributeDef, Serializable {
-    /** bean-class, holding the attribute */
-    Class<?> getDeclaringClass();
-
-    /** the attributes name */
-    String getName();
-
+public interface IAttributeDefinition<T> extends IAttribute<T>, IAttributeDef, Serializable {
     /** format-constraint for the attributes value */
     Format getFormat();
-
-    /**
-     * evaluates the attribute value for the given bean instance. no generic type is given because the implementing base
-     * class BeanAttribute doesn't define that
-     */
-    T getValue(Object instance);
-
-    /** sets a new value for the given instance */
-    void setValue(Object instance, T value);
-
-    /** the values class type */
-    Class<T> getType();
 
     /** checks, if the given value is valid for this attribute - should not throw an exception */
     IStatus isValid(T value);

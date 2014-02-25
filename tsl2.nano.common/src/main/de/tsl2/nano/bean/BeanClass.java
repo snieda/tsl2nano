@@ -52,7 +52,7 @@ import de.tsl2.nano.util.StringUtil;
  * 
  */
 @Default(value = DefaultType.FIELD, required = false)
-@SuppressWarnings({ "unchecked", "rawtypes" })
+@SuppressWarnings({ "unchecked", "rawtypes", "serial" })
 public class BeanClass<T> implements Serializable {
     /** serialVersionUID */
     private static final long serialVersionUID = 8387513854853569951L;
@@ -66,13 +66,13 @@ public class BeanClass<T> implements Serializable {
     protected static final IAction<Boolean> FILTER_SINGLEVALUE_ATTRIBUTES = new CommonAction<Boolean>() {
         @Override
         public Boolean action() throws Exception {
-            return BeanUtil.isSingleValueType(((BeanAttribute) getParameter()[0]).getType());
+            return BeanUtil.isSingleValueType(((IAttribute) getParameter()[0]).getType());
         }
     };
     protected static final IAction<Boolean> FILTER_MULTIVALUE_ATTRIBUTES = new CommonAction<Boolean>() {
         @Override
         public Boolean action() throws Exception {
-            return !BeanUtil.isSingleValueType(((BeanAttribute) getParameter()[0]).getType());
+            return !BeanUtil.isSingleValueType(((IAttribute) getParameter()[0]).getType());
         }
     };
 
@@ -156,7 +156,7 @@ public class BeanClass<T> implements Serializable {
      * 
      * @see #getAttributes(boolean)
      */
-    public List<BeanAttribute> getAttributes() {
+    public List<IAttribute> getAttributes() {
         return getAttributes(false);
     }
 
@@ -168,10 +168,10 @@ public class BeanClass<T> implements Serializable {
      * @param readAndWriteAccess if false, only a public read access method must be defined.
      * @return list of methods having at least an read access method.
      */
-    public List<BeanAttribute> getAttributes(boolean readAndWriteAccess) {
+    public List<IAttribute> getAttributes(boolean readAndWriteAccess) {
         final Method[] allMethods = clazz.getMethods();
         final LinkedList<String> accessedMethods = new LinkedList<String>();
-        final List<BeanAttribute> beanAccessMethods = new LinkedList<BeanAttribute>();
+        final List<IAttribute> beanAccessMethods = new LinkedList<IAttribute>();
         for (int i = 0; i < allMethods.length; i++) {
             if (allMethods[i].getParameterTypes().length == 0 && (allMethods[i].getName()
                 .startsWith(BeanAttribute.PREFIX_READ_ACCESS) || allMethods[i].getName()
@@ -209,8 +209,8 @@ public class BeanClass<T> implements Serializable {
      * @param readAndWriteAccess if false, only a public read access method must be defined.
      * @return list of methods having at least an read access method.
      */
-    public SortedSet<BeanAttribute> getSortedAttributes(boolean readAndWriteAccess) {
-        return new TreeSet<BeanAttribute>(getAttributes(readAndWriteAccess));
+    public SortedSet<IAttribute> getSortedAttributes(boolean readAndWriteAccess) {
+        return new TreeSet<IAttribute>(getAttributes(readAndWriteAccess));
     }
 
     /**
@@ -229,10 +229,10 @@ public class BeanClass<T> implements Serializable {
      * @return available attribute names
      */
     public String[] getAttributeNames(boolean readAndWriteAccess) {
-        final Collection<BeanAttribute> beanAttributes = getAttributes(readAndWriteAccess);
+        final Collection<IAttribute> beanAttributes = getAttributes(readAndWriteAccess);
         final String[] names = new String[beanAttributes.size()];
         int i = 0;
-        for (final BeanAttribute beanAttribute : beanAttributes) {
+        for (final IAttribute beanAttribute : beanAttributes) {
             names[i++] = beanAttribute.getName();
         }
         return names;
@@ -245,12 +245,12 @@ public class BeanClass<T> implements Serializable {
      * @param filter attribute filter
      * @return filtered attributes
      */
-    public List<BeanAttribute> getFilteredAttributes(IAction<Boolean> filter) {
-        final List<BeanAttribute> beanAttributes = getAttributes();
+    public List<IAttribute> getFilteredAttributes(IAction<Boolean> filter) {
+        final List<IAttribute> beanAttributes = getAttributes();
         final Object[] args = new Object[1];
         filter.setParameter(args);
-        for (final Iterator iterator = beanAttributes.iterator(); iterator.hasNext();) {
-            final BeanAttribute beanAttribute = (BeanAttribute) iterator.next();
+        for (final Iterator<IAttribute> iterator = beanAttributes.iterator(); iterator.hasNext();) {
+            final IAttribute beanAttribute = iterator.next();
             args[0] = beanAttribute;
             if (!filter.activate()) {
                 iterator.remove();
@@ -315,7 +315,7 @@ public class BeanClass<T> implements Serializable {
      * 
      * @return attributes
      */
-    public List<BeanAttribute> getSingleValueAttributes() {
+    public List<IAttribute> getSingleValueAttributes() {
         return getFilteredAttributes(FILTER_SINGLEVALUE_ATTRIBUTES);
     }
 
@@ -324,7 +324,7 @@ public class BeanClass<T> implements Serializable {
      * 
      * @return attributes
      */
-    public List<BeanAttribute> getMultiValueAttributes() {
+    public List<IAttribute> getMultiValueAttributes() {
         return getFilteredAttributes(FILTER_MULTIVALUE_ATTRIBUTES);
     }
 
@@ -624,7 +624,7 @@ public class BeanClass<T> implements Serializable {
                 throw FormattedException.implementationError("BeanClass could not create the desired instance of type "
                     + clazz,
                     args,
-                    constructors);
+                    (Object[])constructors);
             }
         }
         return instance;
@@ -746,8 +746,8 @@ public class BeanClass<T> implements Serializable {
      */
     public static <S> S createOwnCollectionInstances(S src) {
         BeanClass<S> bc = (BeanClass<S>) BeanClass.getBeanClass(src.getClass());
-        List<BeanAttribute> attributes = bc.getAttributes();
-        for (BeanAttribute a : attributes) {
+        List<IAttribute> attributes = bc.getAttributes();
+        for (IAttribute a : attributes) {
             if (Collection.class.isAssignableFrom(a.getType())) {
                 Collection v = (Collection) a.getValue(src);
                 if (v != null) {
@@ -954,27 +954,27 @@ public class BeanClass<T> implements Serializable {
  * @author Thomas Schneider, IDV AG
  * @version $Revision$
  */
+@SuppressWarnings("rawtypes")
 class CachedBeanClass<T> extends BeanClass<T> {
     private static final Log LOG = LogFactory.getLog(CachedBeanClass.class);
     /** serialVersionUID */
     private static final long serialVersionUID = -7034920800778017069L;
 
     /** cached bean attributes */
-    private transient List<BeanAttribute> attributes;
+    private transient List<IAttribute> attributes;
     /**
      * stores the last call on {@link #getAttributes(boolean)}. if the next call differs, the list will be rebuilt. *
      */
     private transient boolean readAndWriteAttributes;
 
     /** cache to avoid multiple calls on Class.getMethods() and creation of BeanAttribute instances */
-    @SuppressWarnings("rawtypes")
     protected transient static final Map<Class, BeanClass> bcCache = new Hashtable<Class, BeanClass>();
 
     protected CachedBeanClass(Class<T> beanClass) {
         super(beanClass);
     }
 
-    @SuppressWarnings({ "unchecked", "rawtypes" })
+    @SuppressWarnings({ "unchecked"})
     static final <C> BeanClass<C> getCachedBeanClass(Class<C> beanClass) {
         BeanClass bc = bcCache.get(beanClass);
         if (bc == null) {
@@ -989,11 +989,11 @@ class CachedBeanClass<T> extends BeanClass<T> {
     }
 
     @Override
-    public List<BeanAttribute> getAttributes(boolean readAndWriteAccess) {
+    public List<IAttribute> getAttributes(boolean readAndWriteAccess) {
         if (attributes == null || this.readAndWriteAttributes != readAndWriteAccess) {
             attributes = super.getAttributes(this.readAndWriteAttributes = readAndWriteAccess);
         }
-        return new ArrayList<BeanAttribute>(attributes);
+        return new ArrayList<IAttribute>(attributes);
     }
 
     /**

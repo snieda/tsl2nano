@@ -819,19 +819,34 @@ public class BeanCollector<COLLECTIONTYPE extends Collection<T>, T> extends Bean
         return getColumnValue(element, getAttribute(getColumn(columnIndex).getName()));
     }
 
+    /**
+     * delegates to {@link #getColumnValueEx(Object, IAttributeDefinition)} catching the exception.
+     * 
+     * @param element bean instance
+     * @param attribute bean attribute
+     * @return column value
+     */
     public <V> V getColumnValue(Object element, IAttributeDefinition<V> attribute) {
+        try {
+            return getColumnValueEx(element, attribute);
+        } catch (Exception e) {
+            LOG.error("beancollector can't create a column text for column '" + attribute.getName()
+                + "'!", e);
+            return null;
+        }
+    }
+
+    /**
+     * @param element bean instance
+     * @param attribute bean attribute
+     * @return column value
+     */
+    protected <V> V getColumnValueEx(Object element, IAttributeDefinition<V> attribute) {
         if (element == null)
             return null;
         Object value;
-        try {
-            value = attribute instanceof IValueDefinition ? ((IValueDefinition) attribute).getValue()
-                : attribute.getValue(element);
-        } catch (Exception e) {
-            LOG.warn("beancollector can't create a column text for column '" + attribute.getName()
-                + "'! exception: "
-                + e.toString());
-            value = null;
-        }
+        value = attribute instanceof IValueDefinition ? ((IValueDefinition) attribute).getValue()
+            : attribute.getValue(element);
         return (V) value;
     }
 
@@ -842,7 +857,7 @@ public class BeanCollector<COLLECTIONTYPE extends Collection<T>, T> extends Bean
         if (col == null)
             return "";
         else if (col instanceof ValueColumn)
-            return getColumnText(element, ((ValueColumn)col).attributeDefinition);
+            return getColumnText(element, ((ValueColumn) col).attributeDefinition);
         return getColumnText(element, getAttribute(col.getName()));
     }
 
@@ -850,17 +865,18 @@ public class BeanCollector<COLLECTIONTYPE extends Collection<T>, T> extends Bean
      * {@inheritDoc}
      */
     public String getColumnText(Object element, IAttributeDefinition<?> attribute) {
-        Object value = getColumnValue(element, attribute);
-        if (value == null)
-            return "";
-        if (attribute.getFormat() != null) {
-            try {
+        Object value;
+        try {
+            value = getColumnValueEx(element, attribute);
+            if (value == null)
+                return "";
+            if (attribute.getFormat() != null) {
                 return attribute.getFormat().format(value);
-            } catch (Exception e) {
-                // showing the existing values should not throw exceptions...
-                LOG.error(e);
-                return Messages.TOKEN_MSG_NOTFOUND + e.toString() + Messages.TOKEN_MSG_NOTFOUND;
             }
+        } catch (Exception e) {
+            // showing the existing values should not throw exceptions...
+            LOG.error(e);
+            return Messages.TOKEN_MSG_NOTFOUND + e.toString() + Messages.TOKEN_MSG_NOTFOUND;
         }
         return value.toString();
     }

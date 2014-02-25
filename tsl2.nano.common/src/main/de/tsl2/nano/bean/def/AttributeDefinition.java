@@ -20,8 +20,11 @@ import java.util.Date;
 import java.util.Map;
 
 import org.apache.commons.logging.Log;
+import org.simpleframework.xml.Attribute;
 import org.simpleframework.xml.Default;
 import org.simpleframework.xml.DefaultType;
+import org.simpleframework.xml.Element;
+import org.simpleframework.xml.ElementList;
 import org.simpleframework.xml.core.Commit;
 
 import de.tsl2.nano.Environment;
@@ -30,6 +33,7 @@ import de.tsl2.nano.bean.BeanAttribute;
 import de.tsl2.nano.bean.BeanClass;
 import de.tsl2.nano.bean.BeanContainer;
 import de.tsl2.nano.bean.BeanUtil;
+import de.tsl2.nano.bean.IAttribute;
 import de.tsl2.nano.bean.IAttributeDef;
 import de.tsl2.nano.bean.PrimitiveUtil;
 import de.tsl2.nano.bean.ValueHolder;
@@ -39,6 +43,7 @@ import de.tsl2.nano.exception.ForwardedException;
 import de.tsl2.nano.log.LogFactory;
 import de.tsl2.nano.messaging.EventController;
 import de.tsl2.nano.util.PrivateAccessor;
+import de.tsl2.nano.util.StringUtil;
 
 /**
  * 
@@ -47,11 +52,13 @@ import de.tsl2.nano.util.PrivateAccessor;
  */
 @SuppressWarnings({ "rawtypes", "unchecked" })
 @Default(value = DefaultType.FIELD, required = false)
-public class AttributeDefinition<T> extends BeanAttribute implements IAttributeDefinition<T> {
+public class AttributeDefinition<T> implements IAttributeDefinition<T> {
 
     /** serialVersionUID */
     private static final long serialVersionUID = 1403875731423120506L;
 
+    @Element(name = "declaring")
+    protected IAttribute<T> attribute;
     protected transient EventController eventController;
     private int length = UNDEFINED;
     private int scale = UNDEFINED;
@@ -66,8 +73,11 @@ public class AttributeDefinition<T> extends BeanAttribute implements IAttributeD
     protected transient IStatus status;
     private Comparable<T> min;
     private Comparable<T> max;
+    @ElementList(inline = true, entry = "value", required = false)
     private transient Collection<T> allowedValues;
+    @Element(type = Presentable.class, required = false)
     private IPresentable presentable;
+    @Element(type = ValueColumn.class, required = false)
     private IPresentableColumn columnDefinition;
     private boolean doValidation = true;
     /** see {@link #composition()} */
@@ -91,8 +101,19 @@ public class AttributeDefinition<T> extends BeanAttribute implements IAttributeD
         status = Status.STATUS_OK;
     }
 
+    /**
+     * constructor
+     * 
+     * @param attribute
+     */
+    protected AttributeDefinition(IAttribute<T> attribute) {
+        super();
+        this.attribute = attribute;
+    }
+
     protected AttributeDefinition(Method readAccessMethod) {
-        super(readAccessMethod);
+        super();
+        attribute = new BeanAttribute(readAccessMethod);
         defineDefaults();
     }
 
@@ -171,7 +192,14 @@ public class AttributeDefinition<T> extends BeanAttribute implements IAttributeD
      */
     @Override
     public T getValue(Object beanInstance) {
-        return (T) super.getValue(beanInstance);
+        try {
+            //using the default may result in problems on checking the value (e.g. in value-expression or isValue())
+            return /*beanInstance == null && isVirtualAccess() ? getDefault() : */attribute.getValue(beanInstance);
+        } catch (Exception ex) {
+            LOG.error("error evaluating value for attribute '" + getName() + "'", ex);
+            status = new Status(ex);
+            return null;
+        }
     }
 
     /**
@@ -359,7 +387,7 @@ public class AttributeDefinition<T> extends BeanAttribute implements IAttributeD
         if (format == null) {
             Class<T> type = getType();
             if (Collection.class.isAssignableFrom(type)) {
-                this.format = new CollectionExpressionFormat<T>((Class<T>) getGenericType());
+                this.format = new CollectionExpressionFormat<T>((Class<T>) getGenericType(0));
             } else if (Map.class.isAssignableFrom(type)) {
                 this.format = new MapExpressionFormat<T>((Class<T>) getGenericType(1));
             } else if (type.isEnum() || BeanUtil.isStandardType(type)) {
@@ -381,7 +409,17 @@ public class AttributeDefinition<T> extends BeanAttribute implements IAttributeD
      */
     @Override
     public Class<T> getType() {
-        return (Class<T>) super.getType();
+        return attribute.getType();
+    }
+
+    @Override
+    public Method getAccessMethod() {
+        return attribute.getAccessMethod();
+    }
+
+    protected Class<T> getGenericType(int pos) {
+        return (Class<T>) (getAccessMethod() != null ? BeanAttribute.getGenericType(getAccessMethod(), pos)
+            : Object.class);
     }
 
     /**
@@ -504,8 +542,8 @@ public class AttributeDefinition<T> extends BeanAttribute implements IAttributeD
      */
     @Override
     public T getDefault() {
-        if (defaultValue == null)
-            defaultValue = (T) readAccessMethod.getGenericReturnType();
+        if (defaultValue == null && getAccessMethod() != null)
+            defaultValue = (T) getAccessMethod().getGenericReturnType();
         return defaultValue;
     }
 
@@ -515,7 +553,7 @@ public class AttributeDefinition<T> extends BeanAttribute implements IAttributeD
     @Override
     public String getDescription() {
         if (description == null && getName() != null)
-            description = getNameFU();
+            description = StringUtil.toFirstUpper(getName());
         return description;
     }
 
@@ -553,7 +591,11 @@ public class AttributeDefinition<T> extends BeanAttribute implements IAttributeD
      * @return true, if the declaring class is of type {@link IValueAccess}.
      */
     public boolean isVirtual() {
-        return readAccessMethod == null || IValueAccess.class.isAssignableFrom(readAccessMethod.getDeclaringClass());
+        return attribute.isVirtual();
+    }
+
+    protected boolean isVirtualAccess() {
+        return isVirtual() && getAccessMethod() != null;
     }
 
     /**
@@ -667,4 +709,62 @@ public class AttributeDefinition<T> extends BeanAttribute implements IAttributeD
     public void setAsRelation(String relationChain) {
         new PrivateAccessor<AttributeDefinition<T>>(this).set("name", relationChain);
     }
+
+///////////////////////////////////////////////////////////////////////////////
+// Delegators to IAttribute
+///////////////////////////////////////////////////////////////////////////////
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public Class getDeclaringClass() {
+        return attribute.getDeclaringClass();
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public String getName() {
+        return attribute.getName();
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public void setValue(Object instance, T value) {
+        attribute.setValue(instance, value);
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public String getId() {
+        return attribute.getId();
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public boolean hasWriteAccess() {
+        return attribute.hasWriteAccess();
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public int compareTo(IAttribute<T> o) {
+        return attribute.compareTo(o);
+    }
+
+    @Override
+    public String toString() {
+        return attribute.toString();
+    }
+
 }

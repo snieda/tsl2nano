@@ -25,6 +25,7 @@ import de.tsl2.nano.bean.BeanAttribute;
 import de.tsl2.nano.bean.BeanClass;
 import de.tsl2.nano.bean.BeanContainer;
 import de.tsl2.nano.bean.BeanUtil;
+import de.tsl2.nano.bean.IAttribute;
 import de.tsl2.nano.collection.CollectionUtil;
 import de.tsl2.nano.collection.MapUtil;
 import de.tsl2.nano.collection.TimedReferenceMap;
@@ -277,9 +278,8 @@ public class Bean<T> extends BeanDefinition<T> {
             String description,
             IPresentable presentation) {
         if (instance.equals(UNDEFINED))
-            throw FormattedException.implementationError(
-                "this bean has no real instance. if you add bean-attributes, they must have own instances!",
-                "undefined-instance");
+            throw new IllegalStateException(
+                "this bean has no real instance (UNDEFINED). if you add bean-attributes, they must have own instances!");
         return addAttribute(instance, name, length, nullable, format, defaultValue, description, presentation);
     }
 
@@ -366,7 +366,7 @@ public class Bean<T> extends BeanDefinition<T> {
         if (attributeDefinitions != null) {
             for (final IAttributeDefinition<?> a : attributeDefinitions.values()) {
                 //TODO: what to do with virtual values?
-                if (a instanceof IValueDefinition && ((IValueDefinition) a).isVirtual())
+                if (a.isVirtual() && a.getAccessMethod() != null)
                     continue;
                 ((BeanValue) a).setInstance(instance2);
             }
@@ -537,19 +537,19 @@ public class Bean<T> extends BeanDefinition<T> {
             new LinkedHashMap<String, IValueAccess<?>>(attributeDefinitions.size());
         try {
             for (IAttributeDefinition<?> attr : attributeDefinitions.values()) {
-                if (!(attr instanceof IValueAccess)) {//--> standard attribute-definition
+//                if (!(attr instanceof IValueAccess)) {//--> standard attribute-definition
                 //use any simple arguments - they will be overwritten on next line in copy(...)
-                IValueAccess valueDef = new BeanValue(UNDEFINED, AttributeDefinition.UNDEFINEDMETHOD) {
-                    @Override
-                    protected void defineDefaults() {
-                        // don't set any defaults - all  overwrite members in the next step
-                    }
-                };
-                
+                IValueAccess valueDef = new BeanValue();/*UNDEFINED, AttributeDefinition.UNDEFINEDMETHOD) {
+                                                        @Override
+                                                        protected void defineDefaults() {
+                                                        // don't set any defaults - all  overwrite members in the next step
+                                                        }
+                                                        };*/
+
                 valueDefs.put(attr.getName(), copy(attr, valueDef));
-                } else {//it is a specialized beanvalue like pathvalue or ruleattribute
-                    valueDefs.put(attr.getName(), (IValueAccess<?>) BeanUtil.clone(attr));
-                }
+//                } else {//it is a specialized beanvalue like pathvalue or ruleattribute
+//                    valueDefs.put(attr.getName(), (IValueAccess<?>) BeanUtil.clone(attr));
+//                }
             }
             return valueDefs;
         } catch (Exception e) {
@@ -632,7 +632,7 @@ public class Bean<T> extends BeanDefinition<T> {
     /**
      * runs detacher and sets detacher to null
      */
-    public boolean detach(Object...arguments) {
+    public boolean detach(Object... arguments) {
         timedCache.remove(this);
         if (detacher != null) {
             detacher.setParameter(arguments);
@@ -650,10 +650,10 @@ public class Bean<T> extends BeanDefinition<T> {
     }
 
     public String toStringDescription() {
-        final Collection<BeanAttribute> attributes = getAttributes();
+        final Collection<? extends IAttribute> attributes = getAttributes();
         final StringBuilder buf = new StringBuilder(attributes.size() * 15);
         buf.append(getName() + " {");
-        for (final BeanAttribute beanAttribute : attributes) {
+        for (final IAttribute<T> beanAttribute : attributes) {
             if (beanAttribute instanceof BeanValue)
                 buf.append(beanAttribute.toString());
             else

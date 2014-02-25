@@ -41,6 +41,7 @@ import de.tsl2.nano.bean.BeanAttribute;
 import de.tsl2.nano.bean.BeanClass;
 import de.tsl2.nano.bean.BeanContainer;
 import de.tsl2.nano.bean.BeanUtil;
+import de.tsl2.nano.bean.IAttribute;
 import de.tsl2.nano.bean.ValueHolder;
 import de.tsl2.nano.collection.CollectionUtil;
 import de.tsl2.nano.collection.IPredicate;
@@ -73,7 +74,7 @@ public class BeanDefinition<T> extends BeanClass<T> implements Serializable {
     /** optional filter to constrain the available attributes - in the given order */
     protected transient String[] attributeFilter;
     /** cached attribute values (directly a {@link LinkedHashMap} on type to get this map instance on deserialization */
-    @ElementMap(entry = "attribute", key = "name", attribute = true, inline = true, value="attributeDefinition", valueType = AttributeExpression.class, required = false)
+    @ElementMap(entry = "attribute", key = "name", attribute = true, inline = true, value = "attributeDefinition", valueType = AttributeDefinition.class, required = false)
     protected LinkedHashMap<String, IAttributeDefinition<?>> attributeDefinitions;
     /** flag to define, that all attributes are evaluated and cached - for performance aspects */
     transient boolean allDefinitionsCached = false;
@@ -119,7 +120,7 @@ public class BeanDefinition<T> extends BeanClass<T> implements Serializable {
 
     /** used by virtual beans, having no object instance. TODO: will not work in different vm's */
     @SuppressWarnings("serial")
-    static final Object UNDEFINED = new Serializable() {
+    static final Serializable UNDEFINED = new Serializable() {
     };
 
     private static final List<BeanDefinition> virtualBeanCache = new ListSet<BeanDefinition>();
@@ -189,6 +190,15 @@ public class BeanDefinition<T> extends BeanClass<T> implements Serializable {
     }
 
     /**
+     * getDeclaringClass
+     * 
+     * @return
+     */
+    public Class<T> getDeclaringClass() {
+        return getClazz();
+    }
+
+    /**
      * removes the given standard-attributes from bean (given names must be contained in standard-bean-definition. not
      * performance-optimized, because standard names have to be evaluated first!)
      * 
@@ -216,14 +226,14 @@ public class BeanDefinition<T> extends BeanClass<T> implements Serializable {
      * {@inheritDoc}
      */
     @Override
-    public List<BeanAttribute> getAttributes(boolean readAndWriteAccess) {
+    public List<IAttribute> getAttributes(boolean readAndWriteAccess) {
         if (!allDefinitionsCached) {
             if (attributeFilter == null) {
-                List<BeanAttribute> attributes = super.getAttributes(readAndWriteAccess);
+                List<IAttribute> attributes = super.getAttributes(readAndWriteAccess);
                 attributeFilter =
                     new String[attributes.size() + (attributeDefinitions != null ? attributeDefinitions.size() : 0)];
                 int i = 0;
-                for (BeanAttribute attr : attributes) {
+                for (IAttribute attr : attributes) {
                     attributeFilter[i++] = attr.getName();
                 }
                 //the already defined virtual attributes should not be lost!
@@ -263,15 +273,15 @@ public class BeanDefinition<T> extends BeanClass<T> implements Serializable {
 
         }
         //don't use the generic type H (Class<H>) to be compilable on standard jdk javac.
-        ArrayList<BeanAttribute> attributes =
-            new ArrayList<BeanAttribute>((Collection/*<? extends BeanAttribute>*/) getAttributeDefinitions().values());
+        ArrayList<IAttribute> attributes =
+            new ArrayList<IAttribute>((Collection/*<? extends BeanAttribute>*/) getAttributeDefinitions().values());
         /*
          * filter the result using a default filter by the presentation helper
          */
         if (Environment.get("bean.use.beanpresentationhelper.filter", true)) {
-            return CollectionUtil.getFiltering(attributes, new IPredicate<BeanAttribute>() {
+            return CollectionUtil.getFiltering(attributes, new IPredicate<IAttribute>() {
                 @Override
-                public boolean eval(BeanAttribute arg0) {
+                public boolean eval(IAttribute arg0) {
                     return getPresentationHelper().isDefaultAttribute(arg0)
                         || getValueExpression().isExpressionPart(arg0.getName());
                 }
@@ -282,7 +292,7 @@ public class BeanDefinition<T> extends BeanClass<T> implements Serializable {
     }
 
     protected IAttributeDefinition createAttributeDefinition(String name) {
-        return new AttributeExpression<T>(BeanAttribute.getBeanAttribute(getClazz(), name).getAccessMethod());
+        return new AttributeDefinition<T>(BeanAttribute.getBeanAttribute(getClazz(), name).getAccessMethod());
     }
 
     /**
@@ -399,20 +409,20 @@ public class BeanDefinition<T> extends BeanClass<T> implements Serializable {
      * mechanism. see {@link AttributeDefinition#setExpression(String)}.
      * 
      * @param name desired name of the attribute
-     * @param value value expression to be used as attribute-value
+     * @param expression value expression to be used as attribute-value
      * @param format (optional) regexp to constrain the value
      * @param description (optional) description of this attribute. if null, the name will be used.
      * @param presentation (optional) abstract presentation informations
      * @return new added bean value
      */
     public <A> AttributeDefinition<A> addAttribute(String name,
-            IValueExpression<A> value,
-            Format format,
+            IAttribute<A> expression,
             String description,
             IPresentable presentation) {
-        AttributeDefinition attribute = addAttribute(name, (Object) value, format, description, presentation);
-        ((AttributeExpression<A>)attribute).setValueExpression(value);
-        return attribute;
+        AttributeDefinition<A> bv = new AttributeDefinition<A>(expression);
+        bv.setBasicDef(-1, true, null, null, description != null ? description : name);
+        bv.setPresentation(presentation);
+        return (AttributeDefinition<A>) addAttribute(name, bv);
     }
 
     /**
@@ -432,8 +442,8 @@ public class BeanDefinition<T> extends BeanClass<T> implements Serializable {
             String description,
             IPresentable presentation) {
         IValueAccess v = new ValueHolder(value);
-        BeanValue<A> bv = BeanValue.getBeanValue(v, IValueAccess.ATTR_VALUE);
-        bv.setBasicDef(-1, true, format, value instanceof IValueExpression ? null : value, description != null ? description : name);
+        BeanValue<A> bv = new BeanValue(v, new VAttribute(name));
+        bv.setBasicDef(-1, true, format, value, description != null ? description : name);
         bv.setPresentation(presentation);
         return (AttributeDefinition<A>) addAttribute(name, bv);
     }
@@ -817,7 +827,7 @@ public class BeanDefinition<T> extends BeanClass<T> implements Serializable {
                     if (Environment.get("application.mode.strict", false))
                         ForwardedException.forward(e);
                     else
-                        LOG.warn("couldn't load configuration " + xmlFile.getPath() + " for bean " + type, e);
+                        LOG.error("couldn't load configuration " + xmlFile.getPath() + " for bean " + type, e);
                 }
             }
             if (beandef == null) {
@@ -1148,16 +1158,18 @@ public class BeanDefinition<T> extends BeanClass<T> implements Serializable {
             boolean formatted,
             boolean onlyFilteredAttributes,
             String... filterAttributes) {
-        final List<BeanAttribute> attributes = onlySingleValues ? getSingleValueAttributes() : getAttributes();
+        final List<? extends IAttribute> attributes = onlySingleValues ? getSingleValueAttributes() : getAttributes();
         if (filterAttributes.length == 0)
             Collections.sort(attributes);
         final Map<String, Object> map = new LinkedHashMap<String, Object>(attributes.size());
         final List<String> filter = Arrays.asList(filterAttributes);
         Object value;
-        for (final BeanAttribute beanAttribute : attributes) {
+        for (final IAttribute<?> beanAttribute : attributes) {
             if ((onlyFilteredAttributes && filter.contains(beanAttribute.getName()))
                 || (!onlyFilteredAttributes && !filter.contains(beanAttribute.getName()))) {
-                value = beanAttribute.getValue(instance);
+                value =
+                    beanAttribute instanceof IValueAccess ? ((IValueAccess) beanAttribute).getValue() : beanAttribute
+                        .getValue(instance);
                 if (formatted) {
                     BeanValue<?> bv = (BeanValue<?>) beanAttribute;
                     if (bv.getFormat() != null)

@@ -48,6 +48,7 @@ import de.tsl2.nano.bean.BeanAttribute;
 import de.tsl2.nano.bean.BeanClass;
 import de.tsl2.nano.bean.BeanContainer;
 import de.tsl2.nano.bean.BeanUtil;
+import de.tsl2.nano.bean.IAttribute;
 import de.tsl2.nano.bean.IAttributeDef;
 import de.tsl2.nano.bean.ValueHolder;
 import de.tsl2.nano.collection.CollectionUtil;
@@ -272,10 +273,10 @@ public class BeanPresentationHelper<T> {
         if (beanAttribute.length() == 1) {
             return ALIGN_CENTER;
         }
-        return getDefaultHorizontalAlignment((BeanAttribute) beanAttribute);
+        return getDefaultHorizontalAlignment((IAttribute) beanAttribute);
     }
 
-    public int getDefaultHorizontalAlignment(BeanAttribute beanAttribute) {
+    public int getDefaultHorizontalAlignment(IAttribute beanAttribute) {
         int alignment;
         final Class<?> type = beanAttribute.getType();
         if (beanAttribute instanceof IAttributeDefinition && ((IAttributeDefinition<?>) beanAttribute).length() == 1)
@@ -306,7 +307,7 @@ public class BeanPresentationHelper<T> {
      * @param bean bean instance
      * @return format, if available or null
      */
-    protected Format getDefaultFormat(BeanAttribute attr, Object bean, int length, int scale, int precision) {
+    protected Format getDefaultFormat(IAttribute attr, Object bean, int length, int scale, int precision) {
         if (BigDecimal.class.isAssignableFrom(attr.getType())) {
             final BigDecimal v = (!(bean instanceof Class) ? (BigDecimal) attr.getValue(bean) : null);
             if (v != null) {
@@ -334,14 +335,14 @@ public class BeanPresentationHelper<T> {
     }
 
     /**
-     * tries to sort the given collection through the comparator, given by {@link #getComparator(BeanAttribute)}. if the
+     * tries to sort the given collection through the comparator, given by {@link #getComparator(IAttribute)}. if the
      * comparator or the collection is null, nothing will be done!
      * 
      * @param beanAttribute bean attribute, holding the collection
      * @param collection collection to sort
      * @return sorted list (new arraylist!) or the collection itself
      */
-    protected <V> Collection<V> getDefaultSortedList(BeanAttribute beanAttribute, Collection<V> collection) {
+    protected <V> Collection<V> getDefaultSortedList(IAttribute beanAttribute, Collection<V> collection) {
         //already sorted ==> return
         if (collection == null || collection instanceof SortedSet) {
             return collection;
@@ -354,7 +355,7 @@ public class BeanPresentationHelper<T> {
             return IPresentable.TYPE_DATE | IPresentable.TYPE_TIME;
         if (attr.temporalType() != null && Time.class.isAssignableFrom(attr.temporalType()))
             return IPresentable.TYPE_TIME;
-        int type = getDefaultType((BeanAttribute) attr);
+        int type = getDefaultType((IAttribute) attr);
         if (attr.length() > Environment.get("field.min.multiline.length", 100))
             type |= IPresentable.TYPE_INPUT_MULTILINE;
         return type;
@@ -370,7 +371,7 @@ public class BeanPresentationHelper<T> {
      * @param attr beanattribute to evaluate
      * @return the type-constant (e.g.: 'IFieldDescriptor.TYPE_LIST')
      */
-    public int getDefaultType(BeanAttribute attr) {
+    public int getDefaultType(IAttribute attr) {
         int type = -1;
 
         if (Timestamp.class.isAssignableFrom(attr.getType())) {
@@ -491,7 +492,7 @@ public class BeanPresentationHelper<T> {
      * @param type type to get relations for
      * @return validator (defining table columns)
      */
-    protected <V> Collection<V> getAttributeRelations(BeanAttribute beanAttribute, Class<V> type, int maxResult) {
+    protected <V> Collection<V> getAttributeRelations(IAttribute beanAttribute, Class<V> type, int maxResult) {
         return BeanContainer.instance().getBeans(type, 0, maxResult);
     }
 
@@ -514,7 +515,7 @@ public class BeanPresentationHelper<T> {
      * @param attribute attribute to check.
      * @return true, if attribute should be presented.
      */
-    public boolean isDefaultAttribute(BeanAttribute attribute) {
+    public boolean isDefaultAttribute(IAttribute attribute) {
         AttributeDefinition<?> attr = (AttributeDefinition<?>) attribute;
         return (BeanContainer.instance() == null || BeanContainer.instance().hasPermission(attribute.getId(), null))
             && (matches("default.present.attribute.id",
@@ -527,7 +528,7 @@ public class BeanPresentationHelper<T> {
     /**
      * {@inheritDoc}
      */
-    protected boolean isDefaultDuty(BeanAttribute beanAttribute, Object bean) {
+    protected boolean isDefaultDuty(IAttribute beanAttribute, Object bean) {
         final IAttributeDef attributeDef = BeanContainer.instance().getAttributeDef(bean, beanAttribute.getName());
         return attributeDef != null ? !attributeDef.nullable() : false;
     }
@@ -947,7 +948,7 @@ public class BeanPresentationHelper<T> {
                 IAttributeDefinition attr = bean.getAttribute(names[i]);
                 if (attr.getType().isInterface() || !BeanClass.hasDefaultConstructor(attr.getType()))
                     ml = 0;
-                else if (isDefaultAttribute((BeanAttribute) attr) && !attr.isMultiValue()) {
+                else if (isDefaultAttribute((IAttribute) attr) && !attr.isMultiValue()) {
                     ml = (1 << 7) * (attr.id() ? 1 : 0);
                     ml |= (1 << 6) * (attr.unique() ? 1 : 0);
                     ml |= (1 << 5) * (!attr.nullable() ? 1 : 0);
@@ -981,8 +982,8 @@ public class BeanPresentationHelper<T> {
                         //check data to seam unique
                         i = levels.get(it.next());
                         q = query.replace(ALIAS, names[i]);
-                        grouping = BeanContainer.instance().getBeansByQuery(q, false, null);
-                        maxCount = grouping.size() > 0  ? grouping.iterator().next() : null;
+                        grouping = BeanContainer.instance().getBeansByQuery(q, false, (Object[])null);
+                        maxCount = grouping.size() > 0 ? grouping.iterator().next() : null;
                         if (Util.isEmpty(maxCount) || maxCount.intValue() < 2)
                             break;
                         it.remove();
