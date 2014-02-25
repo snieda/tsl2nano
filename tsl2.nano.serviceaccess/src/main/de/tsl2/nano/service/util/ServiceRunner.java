@@ -19,7 +19,7 @@ import java.util.Map;
 import java.util.Properties;
 
 import de.tsl2.nano.exception.ForwardedException;
-import de.tsl2.nano.execution.IRunnable;
+import de.tsl2.nano.execution.ICRunnable;
 import de.tsl2.nano.execution.Runner;
 import de.tsl2.nano.serviceaccess.ServiceFactory;
 import de.tsl2.nano.util.StringUtil;
@@ -55,7 +55,7 @@ import de.tsl2.nano.util.StringUtil;
  * @author Thomas Schneider, Thomas Schneider
  * @version $Revision$
  */
-public class ServiceRunner extends BaseServiceTest implements IRunnable<HashMap<Object, Object>> {
+public class ServiceRunner extends BaseServiceTest implements ICRunnable<HashMap<Object, Object>> {
     Properties p;
     ArrayList<?> argList;
 

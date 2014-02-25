@@ -371,7 +371,7 @@ public class IncubationTest {
             BigDecimal.class,
             "x2",
             BigDecimal.class));
-        BigDecimal r1 = rule.execute(MapUtil.asMap("A", true, "x1", new BigDecimal(1), "x2", new BigDecimal(2)));
+        BigDecimal r1 = rule.run(MapUtil.asMap("A", true, "x1", new BigDecimal(1), "x2", new BigDecimal(2)));
         Assert.assertEquals(new BigDecimal(2), r1);
         
         //use simplified parameter definition
@@ -382,7 +382,7 @@ public class IncubationTest {
             "x2",
             ParType.NUMBER));
         rule.addConstraint("x1", new Constraint(BigDecimal.class, new BigDecimal(0), new BigDecimal(1)));
-        BigDecimal r2 = rule.execute(MapUtil.asMap("A", false, "x1", new BigDecimal(1), "x2", new BigDecimal(2)));
+        BigDecimal r2 = rule.run(MapUtil.asMap("A", false, "x1", new BigDecimal(1), "x2", new BigDecimal(2)));
         Assert.assertEquals(new BigDecimal(4), r2);
         XmlUtil.saveXml("test.xml", rule);
         
@@ -396,7 +396,7 @@ public class IncubationTest {
             "x2",
             BigDecimal.class));
         rule.addConstraint("result", new Constraint(BigDecimal.class, new BigDecimal(1), new BigDecimal(4)));
-        BigDecimal r3 = ruleWithImport.execute(MapUtil.asMap("A", true, "x1", new BigDecimal(1), "x2", new BigDecimal(2)));
+        BigDecimal r3 = ruleWithImport.run(MapUtil.asMap("A", true, "x1", new BigDecimal(1), "x2", new BigDecimal(2)));
         Assert.assertEquals(new BigDecimal(3), r3);
         XmlUtil.saveXml("test-import.xml", ruleWithImport);
     }

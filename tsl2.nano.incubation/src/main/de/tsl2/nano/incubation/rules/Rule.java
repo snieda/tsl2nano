@@ -9,6 +9,7 @@
  */
 package de.tsl2.nano.incubation.rules;
 
+import java.io.Serializable;
 import java.math.BigDecimal;
 import java.util.HashMap;
 import java.util.Map;
@@ -20,6 +21,7 @@ import org.simpleframework.xml.ElementMap;
 import org.simpleframework.xml.core.Commit;
 
 import de.tsl2.nano.Environment;
+import de.tsl2.nano.execution.IPRunnable;
 import de.tsl2.nano.util.StringUtil;
 import de.tsl2.nano.util.operation.NumericConditionOperator;
 import de.tsl2.nano.util.operation.Operator;
@@ -57,7 +59,7 @@ import de.tsl2.nano.util.operation.Operator;
  * @author Tom, Thomas Schneider
  * @version $Revision$
  */
-public class Rule<T> {
+public class Rule<T> implements IPRunnable<T, Map<String, Object>>{
     @Attribute
     String name;
     @ElementMap(entry = "parameter", attribute = true, inline = true, keyType = String.class, key = "name", valueType = ParType.class, value = "type")
@@ -122,12 +124,15 @@ public class Rule<T> {
      * @return evaluation result
      */
     @SuppressWarnings("unchecked")
-    public T execute(Map<CharSequence, T> arguments) {
+    @Override
+    public T run(Map<String, Object> arguments, Object... extArgs) {
         if (!initialized)
             importSubRules();
         checkArguments(arguments);
         operator.reset();
-        T result = (T) operator.eval(operation, (Map<CharSequence, Object>) arguments);
+        //in generics it is not possible to cast from Map(String,?) to Map(CharSequence, ?)
+        Object a = arguments;
+        T result = (T) operator.eval((CharSequence)operation, (Map<CharSequence, Object>) a);
         checkConstraint(Operator.KEY_RESULT, result);
         return result;
     }
@@ -137,10 +142,10 @@ public class Rule<T> {
      * 
      * @param arguments to be checked
      */
-    private void checkArguments(Map<CharSequence, T> arguments) {
-        Set<CharSequence> keySet = arguments.keySet();
+    public void checkArguments(Map<String, Object> arguments) {
+        Set<String> keySet = arguments.keySet();
         Set<String> defs = parameter.keySet();
-        for (CharSequence par : keySet) {
+        for (String par : keySet) {
             Object arg = arguments.get(par);
             if (!defs.contains(par))
                 throw new IllegalArgumentException(par + "=" + arg);
@@ -154,7 +159,7 @@ public class Rule<T> {
         if (constraints == null)
             constraints = new HashMap<String, Constraint<?>>();
         Set<String> pars = parameter.keySet();
-        for (String p : pars) {
+        for (CharSequence p : pars) {
             Object o = parameter.get(p);
             Class<?> cls = o instanceof Class ? (Class<?>) o : transform((ParType) o);
             Constraint constraint = constraints.get(p);
@@ -192,6 +197,15 @@ public class Rule<T> {
         importSubRules();
     }
 
+    /**
+     * getParameter
+     * @return defined rule parameters
+     */
+    @Override
+    public Map<String, ParType> getParameter() {
+        return parameter;
+    }
+    
     @Override
     public String toString() {
         return name + "{" + operation + "}";

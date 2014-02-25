@@ -31,7 +31,7 @@ public class Constraint<T extends Comparable<T>> {
      */
     public Constraint() {
     }
-    
+
     public Constraint(Class<T> type) {
         this(type, null, null);
     }
@@ -56,10 +56,12 @@ public class Constraint<T extends Comparable<T>> {
      * @param value to be checked
      */
     public void check(T value) {
-        if (value != null && !type.isAssignableFrom(value.getClass())) {
-            throw new ClassCastException("value " + value + " must be of type " + type);
-        } else if ((min != null && min.compareTo(value) > 0) || (max != null && max.compareTo(value) < 0)) {
-            throw new IllegalArgumentException("value " + value + " must be in range: " + min + " to " + max);
+        if (value != null) {
+            if (!type.isAssignableFrom(value.getClass())) {
+                throw new ClassCastException("value " + value + " must be of type " + type);
+            } else if ((min != null && min.compareTo(value) > 0) || (max != null && max.compareTo(value) < 0)) {
+                throw new IllegalArgumentException("value " + value + " must be in range: " + min + " to " + max);
+            }
         }
     }
 }
