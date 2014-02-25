@@ -10,7 +10,6 @@
 package de.tsl2.nano.h5.configuration;
 
 import java.io.Serializable;
-import java.lang.reflect.Proxy;
 import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.text.DecimalFormat;
@@ -19,17 +18,17 @@ import java.text.NumberFormat;
 import java.text.SimpleDateFormat;
 
 import de.tsl2.nano.Environment;
-import de.tsl2.nano.action.IActivator;
 import de.tsl2.nano.bean.BeanClass;
+import de.tsl2.nano.bean.IAttribute;
 import de.tsl2.nano.bean.def.AttributeDefinition;
 import de.tsl2.nano.bean.def.IAttributeDefinition;
 import de.tsl2.nano.bean.def.IIPresentable;
 import de.tsl2.nano.bean.def.IPresentable;
 import de.tsl2.nano.bean.def.IPresentableColumn;
+import de.tsl2.nano.bean.def.PathExpression;
+import de.tsl2.nano.bean.def.ValueExpressionFormat;
 import de.tsl2.nano.format.RegExpFormat;
-import de.tsl2.nano.h5.Html5Presentation;
 import de.tsl2.nano.util.PrivateAccessor;
-import de.tsl2.nano.util.SetterExtenderPoxy;
 import de.tsl2.nano.util.Util;
 
 /**
@@ -46,6 +45,10 @@ public class AttributeConfigurator implements Serializable {
 
     IIPresentable presentable;
 
+    public AttributeConfigurator() {
+        this(BeanClass.createInstance(AttributeDefinition.class, new PathExpression(Environment.get(BeanConfigurator.class).def.getClazz(), "attribute.path")));
+    }
+    
     public AttributeConfigurator(String attributeName) {
         this((AttributeDefinition<?>) Environment.get(BeanConfigurator.class).def.getAttribute(attributeName));
     }
@@ -131,6 +134,8 @@ public class AttributeConfigurator implements Serializable {
             ((SimpleDateFormat) f).applyPattern(format);
         else if (f instanceof NumberFormat)
             ((DecimalFormat) f).applyPattern(format);
+        else if (f instanceof ValueExpressionFormat)
+            ((ValueExpressionFormat)f).applyPattern(format);
         else
             ((RegExpFormat) f).setPattern(format, null, attr.getLength(), 0);
     }
@@ -155,6 +160,14 @@ public class AttributeConfigurator implements Serializable {
 
     public void setColumnDefinition(IPresentableColumn c) {
         attrAccessor.set("columnDefinition", c);
+    }
+
+    public IAttribute<?> getDeclaration() {
+        return attrAccessor.member("attribute", IAttribute.class);
+    }
+
+    public void setDeclaration(IAttribute<?> a) {
+        attrAccessor.set("attribute", a);
     }
 
     public boolean isNullable() {

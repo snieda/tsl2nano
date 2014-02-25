@@ -20,6 +20,7 @@ import java.util.Map;
 
 import de.tsl2.nano.Environment;
 import de.tsl2.nano.bean.BeanAttribute;
+import de.tsl2.nano.bean.IAttribute;
 import de.tsl2.nano.bean.def.AttributeDefinition;
 import de.tsl2.nano.bean.def.Bean;
 import de.tsl2.nano.bean.def.BeanDefinition;
@@ -70,7 +71,7 @@ public class BeanConfigurator<T> implements Serializable {
             BeanDefinition<AttributeConfigurator> configAttr =
                 BeanDefinition.getBeanDefinition(AttributeConfigurator.class);
             configAttr.setAttributeFilter("name", "description", "type", "length", "format", "min", "max",
-                "presentable", "columnDefinition");
+                "presentable", "columnDefinition", "declaration");
             configAttr.getPresentable().setLayout(layout);
 
             BeanDefinition<Html5Presentable> configPres = BeanDefinition.getBeanDefinition(Html5Presentable.class);
@@ -110,9 +111,9 @@ public class BeanConfigurator<T> implements Serializable {
      */
     public List<AttributeConfigurator> getAttributes() {
         //we know that there are attribute-defs inside!
-        List<BeanAttribute> attributes = def.getAttributes();
+        List<IAttribute> attributes = def.getAttributes();
         ArrayList<AttributeConfigurator> cattrs = new ArrayList<AttributeConfigurator>(attributes.size());
-        for (BeanAttribute a : attributes) {
+        for (IAttribute<?> a : attributes) {
             cattrs.add(new AttributeConfigurator((AttributeDefinition<?>) a));
         }
         return cattrs;
