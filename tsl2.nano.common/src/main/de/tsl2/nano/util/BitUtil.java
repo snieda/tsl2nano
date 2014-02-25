@@ -193,7 +193,7 @@ public class BitUtil extends CUtil {
         String[] names = description.split(", ");
         int bits = 0;
         for (int i = 0; i < names.length; i++) {
-            bits += bitNames.indexOf(names[i]);
+            bits += bitToDecimal(bitNames.indexOf(names[i]));
         }
         return bits;
     }
