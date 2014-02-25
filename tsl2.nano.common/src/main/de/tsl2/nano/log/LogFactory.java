@@ -189,8 +189,7 @@ public/*abstract*/class LogFactory implements Runnable, Serializable {
 
     @Commit
     private void initDeserializing() {
-        statesToLog = Arrays.asList(STATEDESCRIPTION).indexOf(standard);
-        statesToLog = BitUtil.bitToDecimal(statesToLog);
+        statesToLog = NumberUtil.bits(standard, Arrays.asList(STATEDESCRIPTION));
     }
 
     /**

@@ -23,6 +23,7 @@ import javax.xml.xpath.XPathConstants;
 import javax.xml.xpath.XPathExpression;
 import javax.xml.xpath.XPathFactory;
 
+import org.apache.commons.logging.Log;
 //import org.apache.velocity.Template;
 //import org.apache.velocity.VelocityContext;
 //import org.apache.velocity.app.VelocityEngine;
@@ -33,6 +34,7 @@ import org.w3c.dom.NodeList;
 
 import de.tsl2.nano.Environment;
 import de.tsl2.nano.exception.ForwardedException;
+import de.tsl2.nano.log.LogFactory;
 import de.tsl2.nano.util.FileUtil;
 
 /**
@@ -41,6 +43,7 @@ import de.tsl2.nano.util.FileUtil;
  * @version $Revision$
  */
 public class XmlUtil {
+    private static final Log LOG = LogFactory.getLog(XmlUtil.class);
     /**
      * transform
      * 
@@ -162,6 +165,7 @@ public class XmlUtil {
         } else */if (compLayer.isAvailable("org.simpleframework.xml.core.Persister")) {
             if (assignClassloader)
                 Environment.assignClassloaderToCurrentThread();
+            LOG.debug("loading type '" + type.getName() + "' from '" + xmlFile + "'");
             return loadSimpleXml_(xmlFile, type);
         } else {
             return (T) FileUtil.loadXml(xmlFile);
