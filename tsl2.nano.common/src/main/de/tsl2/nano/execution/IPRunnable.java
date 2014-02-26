@@ -17,7 +17,7 @@ import java.util.Map;
  * @author Tom
  * @version $Revision$ 
  */
-public interface IPRunnable<RESULT, CONTEXT extends Map<String, Object>> extends IRunnable<RESULT, CONTEXT> {
+public interface IPRunnable<RESULT, CONTEXT extends Map<String, Object>> extends IRunnable<RESULT, CONTEXT>, Serializable {
     /** @return name of runnable */
     String getName();
     /** defined parameter, to be checked (see {@link #checkArguments(Map)}) against given CONTEXT */

@@ -193,6 +193,7 @@ public class XmlUtil {
         /*if (compLayer.isAvailable("javax.xml.bind.JAXB")) {
             javax.xml.bind.JAXB.marshal(obj, xmlFile);
         } else */if (compLayer.isAvailable("org.simpleframework.xml.core.Persister")) {
+            LOG.debug("saving file '" + xmlFile + "' with object '" + obj + "'");
             saveSimpleXml_(xmlFile, obj);
         } else {
             FileUtil.saveXml((Serializable)obj, xmlFile);

@@ -16,6 +16,7 @@ import org.apache.commons.logging.Log;
 import de.tsl2.nano.Messages;
 import de.tsl2.nano.log.LogFactory;
 import de.tsl2.nano.util.StringUtil;
+import de.tsl2.nano.util.Util;
 
 /**
  * For unchecked Exception handling. If you catch an exception and want to forward this exception in a runtime exception
@@ -70,8 +71,8 @@ public class ForwardedException extends RuntimeException {
     @Override
     public String getLocalizedMessage() {
         Throwable rootCause = getRootCause(this);
-        if (isForwarded()) {
-            return rootCause != null ? getRootCause(this).getLocalizedMessage() : Messages
+        if (isForwarded() && (rootCause == null || !Util.isEmpty(rootCause.getLocalizedMessage()))) {
+            return rootCause != null ? rootCause.getLocalizedMessage() : Messages
                 .getFormattedString("tsl2.nano.unknownerror", this.getClass(), getStackTracePart(this));
         } else if (rootCause != null) {
             return Messages.getFormattedString("tsl2nano.exception.text.with.cause", localizedMessage,
