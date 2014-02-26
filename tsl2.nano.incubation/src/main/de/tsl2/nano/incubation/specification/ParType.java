@@ -7,7 +7,7 @@
  * 
  * Copyright: (c) Thomas Schneider 2013, all rights reserved
  */
-package de.tsl2.nano.incubation.rules;
+package de.tsl2.nano.incubation.specification;
 
 /**
  * Parameter types to simplify rule parameter definitions - especially on xml files.

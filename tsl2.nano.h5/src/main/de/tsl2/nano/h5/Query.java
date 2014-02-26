@@ -14,29 +14,35 @@ import java.util.HashMap;
 import java.util.Map;
 
 import org.simpleframework.xml.Attribute;
+import org.simpleframework.xml.Element;
 import org.simpleframework.xml.ElementMap;
 
 import de.tsl2.nano.bean.BeanContainer;
 import de.tsl2.nano.execution.IPRunnable;
+import de.tsl2.nano.util.StringUtil;
+import de.tsl2.nano.util.Util;
 
 /**
  * 
  * @author Tom, Thomas Schneider
  * @version $Revision$ 
  */
-public class SQLRunner<RESULT> implements IPRunnable<RESULT, Map<String, Object>> {
+public class Query<RESULT> implements IPRunnable<RESULT, Map<String, Object>> {
+    /** serialVersionUID */
+    private static final long serialVersionUID = -9199837113877884921L;
     @Attribute
     String name;
+    @Element(data=true)
     String query;
     @Attribute
     boolean nativeQuery;
-    @ElementMap(entry = "parameter", attribute = true, inline = true, keyType = String.class, key = "name", value = "type")
+    @ElementMap(entry = "parameter", attribute = true, inline = true, keyType = String.class, key = "name", value = "type", required=false)
     Map<String, ? extends Serializable> parameter;
     
     /**
      * constructor
      */
-    public SQLRunner() {
+    public Query() {
     }
 
     /**
@@ -45,7 +51,7 @@ public class SQLRunner<RESULT> implements IPRunnable<RESULT, Map<String, Object>
      * @param query
      * @param parameter
      */
-    public SQLRunner(String name, String query, boolean nativeQuery, Map<String, ? extends Serializable> parameter) {
+    public Query(String name, String query, boolean nativeQuery, Map<String, ? extends Serializable> parameter) {
         super();
         this.name = name;
         this.query = query;
@@ -66,8 +72,14 @@ public class SQLRunner<RESULT> implements IPRunnable<RESULT, Map<String, Object>
 
     @Override
     public Map<String, ? extends Serializable> getParameter() {
-        if (parameter == null)
+        if (parameter == null) {
             parameter = new HashMap<String, Serializable>();
+            String p;
+            StringBuilder q = new StringBuilder(query);
+            while ((!Util.isEmpty(p = StringUtil.extract(q, "[:]\\w+", "")))) {
+                parameter.put(p.substring(1), null);
+            }
+        }
         return parameter;
     }
 
@@ -76,4 +88,8 @@ public class SQLRunner<RESULT> implements IPRunnable<RESULT, Map<String, Object>
         // TODO implement (see Rule) - using select-statement-columns
     }
 
+    @Override
+    public String toString() {
+        return Util.toString(getClass(), name);
+    }
 }

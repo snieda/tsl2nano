@@ -7,9 +7,8 @@
  * 
  * Copyright: (c) Thomas Schneider 2013, all rights reserved
  */
-package de.tsl2.nano.incubation.rules;
+package de.tsl2.nano.incubation.specification.rules;
 
-import java.io.Serializable;
 import java.math.BigDecimal;
 import java.util.HashMap;
 import java.util.Map;
@@ -22,6 +21,8 @@ import org.simpleframework.xml.core.Commit;
 
 import de.tsl2.nano.Environment;
 import de.tsl2.nano.execution.IPRunnable;
+import de.tsl2.nano.incubation.specification.Constraint;
+import de.tsl2.nano.incubation.specification.ParType;
 import de.tsl2.nano.util.StringUtil;
 import de.tsl2.nano.util.operation.NumericConditionOperator;
 import de.tsl2.nano.util.operation.Operator;
@@ -64,7 +65,7 @@ public class Rule<T> implements IPRunnable<T, Map<String, Object>>{
     String name;
     @ElementMap(entry = "parameter", attribute = true, inline = true, keyType = String.class, key = "name", valueType = ParType.class, value = "type")
     Map<String, ParType> parameter;
-    @ElementMap(entry = "constraint", attribute = true, inline = true, keyType = String.class, key = "name", value = "constraint", required=false)
+    @ElementMap(entry = "constraint", attribute = true, inline = true, keyType = String.class, key = "name", value = "constraint", valueType = Constraint.class, required=false)
     Map<String, Constraint<?>> constraints;
     transient NumericConditionOperator operator;
     @Element
@@ -107,7 +108,7 @@ public class Rule<T> implements IPRunnable<T, Map<String, Object>>{
         RulePool pool = Environment.get(RulePool.class);
         String subRule;
         while ((subRule = StringUtil.extract(operation, "§\\w+")).length() > 0) {
-            Rule<?> rule = pool.getRule(subRule.substring(1));
+            Rule<?> rule = pool.get(subRule.substring(1));
             if (rule == null)
                 throw new IllegalArgumentException("Referenced rule " + subRule + " in " + this + " not found!");
             operation = operation.replaceAll(subRule, "(" + rule.operation + ")");
@@ -166,7 +167,7 @@ public class Rule<T> implements IPRunnable<T, Map<String, Object>>{
             if (constraint == null) {
                 constraint = new Constraint(cls);
             } else {
-                constraint.type = cls;
+                constraint.setType(cls);
             }
         }
     }

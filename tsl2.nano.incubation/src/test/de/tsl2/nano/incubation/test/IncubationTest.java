@@ -42,10 +42,11 @@ import de.tsl2.nano.execution.Profiler;
 import de.tsl2.nano.execution.XmlUtil;
 import de.tsl2.nano.format.DefaultFormat;
 import de.tsl2.nano.incubation.network.JobServer;
-import de.tsl2.nano.incubation.rules.Constraint;
-import de.tsl2.nano.incubation.rules.ParType;
-import de.tsl2.nano.incubation.rules.Rule;
-import de.tsl2.nano.incubation.rules.RulePool;
+import de.tsl2.nano.incubation.specification.Constraint;
+import de.tsl2.nano.incubation.specification.ParType;
+import de.tsl2.nano.incubation.specification.Pool;
+import de.tsl2.nano.incubation.specification.rules.Rule;
+import de.tsl2.nano.incubation.specification.rules.RulePool;
 import de.tsl2.nano.incubation.vnet.Connection;
 import de.tsl2.nano.incubation.vnet.Cover;
 import de.tsl2.nano.incubation.vnet.ILocatable;
@@ -386,8 +387,8 @@ public class IncubationTest {
         Assert.assertEquals(new BigDecimal(4), r2);
         XmlUtil.saveXml("test.xml", rule);
         
-        RulePool pool = new RulePool();
-        pool.addRule(rule.getName(), rule);
+        Pool pool = new RulePool();
+        pool.add(rule.getName(), rule);
         Environment.addService(pool);
         Rule<BigDecimal> ruleWithImport = new Rule<BigDecimal>("test-import", "A ? 1 + §test : (x2 * 3)", MapUtil.asMap("A",
             Boolean.class,

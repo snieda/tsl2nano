@@ -32,7 +32,7 @@ public abstract class RunnableExpression<T extends Serializable> extends Abstrac
     /** serialVersionUID */
     private static final long serialVersionUID = 8147165150625339935L;
 
-    /** rule to be executed with expression as ruleName */
+    /** runnable to be executed with expression */
     transient IPRunnable<T, Map<String, Object>> runnable;
 
     /** arguments for rule execution */
@@ -79,25 +79,17 @@ public abstract class RunnableExpression<T extends Serializable> extends Abstrac
                 Bean.getBean((Serializable) beanInstance).getAttribute(connectedAttribute).setValue(result);
             return result;
         } catch (final Exception e) {
-            ForwardedException.forward(new IllegalStateException("Rule '" + getName()
-                + "' with current arguments not executable!", e));
+            ForwardedException.forward(new IllegalStateException("Execution of '" + getName()
+                + "' with current arguments failed!", e));
             return null;
         }
     }
 
-    private Map<String, Object> refreshArguments(Object beanInstance) {
+    protected Map<String, Object> refreshArguments(Object beanInstance) {
         if (arguments == null)
             arguments = new HashMap<String, T>();
         arguments.putAll((Map<String, ? extends T>) BeanUtil.toValueMap(beanInstance, false,
             true, true, getRunnable().getParameter().keySet().toArray(new String[0])));
-        //transform dates to numbers
-        //TODO it's dirty - implement generic for different types
-        Set<String> keySet = arguments.keySet();
-        for (String charSequence : keySet) {
-            Object v = arguments.get(charSequence);
-            if (v instanceof Date)
-                arguments.put(charSequence, (T) new BigDecimal(((Date) v).getTime()));
-        }
         return (Map<String, Object>) arguments;
     }
 

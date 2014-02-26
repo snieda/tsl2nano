@@ -12,6 +12,7 @@ package de.tsl2.nano.h5;
 import java.io.Serializable;
 import java.util.Map;
 
+import de.tsl2.nano.Environment;
 import de.tsl2.nano.execution.IPRunnable;
 import de.tsl2.nano.util.StringUtil;
 
@@ -42,16 +43,16 @@ public class SQLExpression<T extends Serializable> extends RunnableExpression<T>
 
     @Override
     public String getExpressionPattern() {
-        return "select.*";
+        return "\\?.*";
     }
 
     @Override
     protected IPRunnable<T, Map<String, Object>> createRunnable() {
-        return new SQLRunner<T>(getName(), getExpression(), true, null);
+        return (IPRunnable<T, Map<String, Object>>) Environment.get(QueryPool.class).get(expression.substring(1));
     }
 
     @Override
     public String getName() {
-        return StringUtil.substring(expression, "select ", "from");
+        return expression.substring(1);
     }
 }

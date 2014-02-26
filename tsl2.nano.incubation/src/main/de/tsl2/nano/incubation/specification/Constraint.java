@@ -7,7 +7,7 @@
  * 
  * Copyright: (c) Thomas Schneider 2013, all rights reserved
  */
-package de.tsl2.nano.incubation.rules;
+package de.tsl2.nano.incubation.specification;
 
 import org.simpleframework.xml.Attribute;
 import org.simpleframework.xml.Element;
@@ -50,6 +50,14 @@ public class Constraint<T extends Comparable<T>> {
         this.max = max;
     }
 
+    /**
+     * setType
+     * @param type
+     */
+    public void setType(Class<T> type) {
+        this.type = type;
+    }
+    
     /**
      * check given value to be of right type and in range
      * 
