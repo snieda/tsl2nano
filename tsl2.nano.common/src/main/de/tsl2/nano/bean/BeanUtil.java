@@ -423,7 +423,10 @@ public class BeanUtil {
                 else
                     return null;
             }
-            return (Class<?>) ((ParameterizedType) genericType).getActualTypeArguments()[0];
+            Type type = ((ParameterizedType) genericType).getActualTypeArguments()[0];
+            if (type instanceof ParameterizedType)
+                return (Class<?>) ((ParameterizedType)type).getRawType();
+            return (Class<?>) type;
         } catch (Exception e) {
             ForwardedException.forward(e);
             return null;
