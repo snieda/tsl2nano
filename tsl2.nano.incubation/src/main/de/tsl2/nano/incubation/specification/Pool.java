@@ -100,7 +100,9 @@ public class Pool<T extends IPRunnable<?, ?>> {
      */
     public void add(String name, T runnable) {
         runnables().put(name, runnable);
-        Environment.get(XmlUtil.class).saveXml(getFileName(runnable.getName()), runnable);
+        String fileName = getFileName(runnable.getName());
+        LOG.info("adding runnable '" + name + "' and saving it to " + fileName);
+        Environment.get(XmlUtil.class).saveXml(fileName, runnable);
     }
 
     /**

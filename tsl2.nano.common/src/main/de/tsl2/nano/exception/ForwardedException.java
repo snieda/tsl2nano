@@ -39,6 +39,7 @@ public class ForwardedException extends RuntimeException {
      */
     protected ForwardedException(Throwable cause) {
         super(MESSAGE_FORWARDED, cause);
+        LOG.error(MESSAGE_FORWARDED, cause);
     }
 
     /**
@@ -139,12 +140,11 @@ public class ForwardedException extends RuntimeException {
      */
     public static RuntimeException toRuntimeEx(Throwable ex, boolean wrapToForwardedException) {
         if (ex instanceof RuntimeException) {
-            if (ex instanceof FormattedException) {
-                final FormattedException fe = (FormattedException) ex;
-                fe.logOnce();
-            } else {
+            if (!(ex instanceof ForwardedException)) {
                 if (wrapToForwardedException) {
                     ex = new ForwardedException(ex);
+                } else {
+                    LOG.error(MESSAGE_FORWARDED, ex);
                 }
             }
             return (RuntimeException) ex;

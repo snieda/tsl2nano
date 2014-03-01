@@ -54,6 +54,7 @@ import de.tsl2.nano.log.LogFactory;
 import de.tsl2.nano.messaging.ChangeEvent;
 import de.tsl2.nano.messaging.IListener;
 import de.tsl2.nano.util.FileUtil;
+import de.tsl2.nano.util.StringUtil;
 import de.tsl2.nano.util.Util;
 
 /**
@@ -111,18 +112,25 @@ public class BeanDefinition<T> extends BeanClass<T> implements Serializable {
     @ElementList(inline = true, name = "group", type = ValueGroup.class, required = false)
     protected Collection<ValueGroup> valueGroups;
 
+    @Attribute(required=false)
     protected boolean isNested;
     /**
      * this value is true, if the bean-definition was created through default algorithms - no attribute filter was
      * defined.
      */
+    @Attribute(required=false)
     protected boolean isdefault = true;
 
+    protected Extension extension;
+    
     /** used by virtual beans, having no object instance. TODO: will not work in different vm's */
     @SuppressWarnings("serial")
     static final Serializable UNDEFINED = new Serializable() {
     };
-
+    
+    public static final String PREFIX_VIRTUAL = "virtual.";
+    protected static final String POSTFIX_FILE_EXT = ".xml";
+    
     private static final List<BeanDefinition> virtualBeanCache = new ListSet<BeanDefinition>();
     private static final BeanDefinition volatileBean = new BeanDefinition(Object.class);
     private static boolean usePersistentCache = Environment.get("beandef.usepersistent.cache", true);
@@ -323,7 +331,7 @@ public class BeanDefinition<T> extends BeanClass<T> implements Serializable {
      * a bean is virtual, if no java class definition was given. all attribute definitions must be added manual by
      * calling {@link #addAttribute(Object, String, int, boolean, String, Object, String, IPresentable)} .
      * 
-     * @return true, if this bean has no class defintino - the default constructor was called
+     * @return true, if this bean has no class definition - the default constructor was called
      */
     public boolean isVirtual() {
         return clazz.equals(UNDEFINED.getClass())
@@ -814,6 +822,10 @@ public class BeanDefinition<T> extends BeanClass<T> implements Serializable {
             if (usePersistentCache && xmlFile.canRead()) {
                 try {
                     beandef = (BeanDefinition<T>) XmlUtil.loadXml(xmlFile.getPath(), BeanDefinition.class);
+                    //workaround for simple-xml not creating the desired root-extension-instance
+                    if (beandef.extension != null) {
+                        beandef = (BeanDefinition<T>) beandef.extension.to(beandef);
+                    }
                     //perhaps, the file defines another bean-name or bean-type
                     if ((name == null || name.equals(beandef.getName())
                         && (type == null || type.equals(beandef.getClazz()))))
@@ -863,12 +875,15 @@ public class BeanDefinition<T> extends BeanClass<T> implements Serializable {
 
     @Persist
     protected void initSerialization() {
+        extension = new Extension(this);
+        if (extension.isEmpty())
+            extension = null;
         //remove not-serializable or cycling actions
         if (actions != null && !Environment.get("strict.mode", false)) {
             for (Iterator<IAction> actionIt = actions.iterator(); actionIt.hasNext();) {
                 IAction a = (IAction) actionIt.next();
                 //on inline implementations check the parent class
-                if (a.getClass().getEnclosingClass() == BeanDefinition.this.getClass() || (a.getClass()
+                if (BeanDefinition.class.isAssignableFrom(a.getClass().getEnclosingClass()) || (a.getClass()
                     .getEnclosingClass() != null && !Serializable.class.isAssignableFrom(a.getClass()
                     .getEnclosingClass()))) {
                     LOG.warn("removing action " + a.getId() + " to do serialization");
@@ -888,6 +903,7 @@ public class BeanDefinition<T> extends BeanClass<T> implements Serializable {
         initDeserialization();
     }
 
+    @Commit
     protected void initDeserialization() {
         if (attributeDefinitions != null) {
             attributeFilter = attributeDefinitions.keySet().toArray(new String[0]);
@@ -905,15 +921,36 @@ public class BeanDefinition<T> extends BeanClass<T> implements Serializable {
         out.defaultWriteObject();
     }
 
+    public static String getDefinitionDirectory() {
+        return Environment.getConfigPath() + "beandef/";
+    }
+
     protected static File getDefinitionFile(String name) {
-        return new File(Environment.getConfigPath() + "beandef/"
-            + FileUtil.getValidFileName(FileUtil.getFilePath(name).toLowerCase()) + ".xml");
+        return new File(getDefinitionDirectory()
+            + FileUtil.getValidPathName(FileUtil.getFilePath(name).toLowerCase()) + POSTFIX_FILE_EXT);
     }
 
     public void saveDefinition() {
         saveBeanDefinition(getDefinitionFile(getName()));
     }
 
+    /**
+     * Load virtual BeanCollectors like QueryResult from directory.
+     * name-convention: beandef/virtual/*.xml
+     */
+    public static Collection<BeanDefinition<?>> loadVirtualDefinitions() {
+        File[] virtDefs = FileUtil.getFiles(getDefinitionDirectory() + PREFIX_VIRTUAL, ".*.xml");
+        if (virtDefs == null)
+            return new ArrayList<BeanDefinition<?>>();
+        Collection<BeanDefinition<?>> types = new ArrayList<BeanDefinition<?>>();
+        String name;
+        for (File file : virtDefs) {
+            name = StringUtil.substring(PREFIX_VIRTUAL + file.getName(), null, POSTFIX_FILE_EXT);
+            types.add(getBeanDefinition(name));
+        }
+        return types;
+    }
+    
     /**
      * persists cache
      */
@@ -937,7 +974,7 @@ public class BeanDefinition<T> extends BeanClass<T> implements Serializable {
                 if (Environment.get("strict.mode", false))
                     ForwardedException.forward(e);
                 else
-                    LOG.warn("couldn't save configuration " + xmlFile.getPath() + " for bean" + getClazz());
+                    LOG.warn("couldn't save configuration " + xmlFile.getPath() + " for bean" + getClazz(), e);
             }
     }
 
@@ -1105,11 +1142,6 @@ public class BeanDefinition<T> extends BeanClass<T> implements Serializable {
         ValueGroup valueGroup = new ValueGroup(label, attributeNames);
         valueGroups.add(valueGroup);
         return valueGroup;
-    }
-
-    @Commit
-    private void initDeserializing() {
-        allDefinitionsCached = true;
     }
 
     /**

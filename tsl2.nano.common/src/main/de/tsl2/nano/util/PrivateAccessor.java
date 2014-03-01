@@ -92,32 +92,4 @@ public class PrivateAccessor<T> extends UnboundAccessor<T> {
         }
     }
     
-    /**
-     * members
-     * @return all members of all instance class and all super-classes
-     */
-    public Map<String, Object> members() {
-        if (memberCache == null) {
-            useMemberCache = true;
-            setMemberCache(new HashMap<String, Object>());
-        }
-        return members(this.accessibleInstance().getClass());
-    }
-
-    /**
-     * members
-     * @param cls class to evaluate
-     * @return all members of given class and all super-classes
-     */
-    protected Map<String, Object> members(Class<? extends Object> cls) {
-        if (cls.getSuperclass() != null)
-            members(cls.getSuperclass());
-        Field[] fields = cls.getDeclaredFields();
-        for (Field field : fields) {
-            member(field.getName(), field.getType());
-        }
-        return memberCache;
-    }
-    
-    
 }

@@ -11,6 +11,8 @@ package de.tsl2.nano.bean;
 
 import java.io.Serializable;
 
+import org.simpleframework.xml.Attribute;
+
 import de.tsl2.nano.bean.def.IValueAccess;
 import de.tsl2.nano.messaging.EventController;
 import de.tsl2.nano.messaging.ChangeEvent;
@@ -26,19 +28,24 @@ public class ValueHolder<T> implements Serializable, IValueAccess<T> {
     private static final long serialVersionUID = 7453785034902931979L;
 
     T value;
+    @Attribute
     Class<T> type;
     transient EventController changeHandler;
+
+    public ValueHolder(T object) {
+        this(object, null);
+    }
 
     /**
      * constructor
      * 
      * @param object initial value
      */
-    public ValueHolder(T object) {
+    @SuppressWarnings("unchecked")
+    public ValueHolder(T object, Class<T> type) {
         super();
         this.value = object;
-        if (object != null)
-            type = (Class<T>) object.getClass();
+        this.type = type != null ? type : (Class<T>) (object != null ? object.getClass() : Object.class);
     }
 
     /**
@@ -70,13 +77,14 @@ public class ValueHolder<T> implements Serializable, IValueAccess<T> {
 
     /**
      * type
+     * 
      * @return type of value
      */
     @Override
     public Class<T> getType() {
         return type;
     }
-    
+
     /**
      * it is no getter to avoid being a bean attribute.
      * 

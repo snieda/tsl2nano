@@ -9,10 +9,16 @@
  */
 package de.tsl2.nano.util;
 
+import java.lang.annotation.Annotation;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
+import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.Hashtable;
+import java.util.List;
 import java.util.Map;
+
+import tsl.CollectionUtil;
 
 import de.tsl2.nano.exception.ForwardedException;
 
@@ -57,7 +63,7 @@ public class UnboundAccessor<T> {
     public UnboundAccessor(T instance) {
         this(instance, false);
     }
-    
+
     /**
      * constructor
      * 
@@ -76,12 +82,77 @@ public class UnboundAccessor<T> {
 
     /**
      * instance
+     * 
      * @return the unwrapped instance
      */
     public T instance() {
         return instance;
     }
-    
+
+    /**
+     * delegates to {@link #memberNames(List, Class, Annotation...)}.
+     * 
+     * @param havingAnnotations
+     * @return all members of accessing class - inclusive super-classes, having at least one the given annotation-types
+     */
+    public <A extends Annotation> List<String> memberNames(Class<A>... havingAnnotations) {
+        return memberNames(new ArrayList<String>(), accessibleInstance().getClass(), havingAnnotations);
+    }
+
+    protected <A extends Annotation> List<String> memberNames(List<String> memberNames,
+            Class<? extends Object> cls,
+            Class<A>... havingAnnotations) {
+        if (cls.getSuperclass() != null)
+            memberNames(memberNames, cls.getSuperclass(), havingAnnotations);
+        Field[] fields = cls.getDeclaredFields();
+        for (Field field : fields) {
+            Annotation[] annotations = field.getAnnotations();
+            Class[] annotationTypes = new Class[annotations.length];
+            for (int i = 0; i < annotations.length; i++) {
+                annotationTypes[i] = annotations[i].annotationType();
+            }
+            if (Util.contains(annotationTypes, havingAnnotations))
+                memberNames.add(field.getName());
+        }
+        return memberNames;
+    }
+
+    /**
+     * all member values (for debugging). delegates to {@link #members(Class)}.
+     * 
+     * @return all members of all instance class and all super-classes
+     */
+    public Map<String, Object> members() {
+        if (memberCache == null) {
+            useMemberCache = true;
+            setMemberCache(new HashMap<String, Object>());
+        }
+        return members(this.accessibleInstance().getClass());
+    }
+
+    /**
+     * all member values (for debugging)
+     * 
+     * @param cls class to evaluate
+     * @return all members of given class and all super-classes
+     */
+    protected Map<String, Object> members(Class<? extends Object> cls) {
+        if (cls.getSuperclass() != null)
+            members(cls.getSuperclass());
+        Field[] fields = cls.getDeclaredFields();
+        for (Field field : fields) {
+            member(field.getName(), field.getType());
+        }
+        return memberCache;
+    }
+
+    /**
+     * delegates to {@link #member(String, Class)} using type Object.
+     */
+    public Object member(String name) {
+        return member(name, Object.class);
+    }
+
     /**
      * returns any member of all super classes of {@link #instance}
      * 
@@ -113,6 +184,7 @@ public class UnboundAccessor<T> {
 
     /**
      * set a field/member value
+     * 
      * @param memberName member to change
      * @param newValue new member value
      */
@@ -121,14 +193,19 @@ public class UnboundAccessor<T> {
             Field f = getField(memberName);
             f.setAccessible(true);
             f.set(instance, newValue);
+            if (useMemberCache) {
+                memberCache.put(memberName, newValue != null ? newValue : NULL);
+            }
         } catch (Exception e) {
             ForwardedException.forward(e);
         }
     }
-    
+
     /**
-     * this method returns the instance itself. extending classes may override this to return an object that will be more accessible than the instance itself (perhaps an instance of a super class).
-     * @param instance2 
+     * this method returns the instance itself. extending classes may override this to return an object that will be
+     * more accessible than the instance itself (perhaps an instance of a super class).
+     * 
+     * @param instance2
      * @return instance2 itself
      */
     protected Object accessibleInstance() {
@@ -231,7 +308,7 @@ public class UnboundAccessor<T> {
     public void setMemberCache(Map<String, Object> memberCache) {
         this.memberCache = memberCache;
     }
-    
+
     @Override
     public String toString() {
         return Util.toString(getClass(), instance);

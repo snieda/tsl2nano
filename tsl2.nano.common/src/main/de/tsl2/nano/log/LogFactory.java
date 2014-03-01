@@ -420,9 +420,10 @@ public/*abstract*/class LogFactory implements Runnable, Serializable {
             }
             //on errors, we don't use the queuing thread
             if (ex != null) {
-                factory.err.println(ex);
-                if (factory.err != System.err)
-                    System.err.println(ex);
+                ex.printStackTrace(factory.err);
+                if (factory.err != System.err) {
+                    ex.printStackTrace(System.err);
+                }
             }
         }
     }

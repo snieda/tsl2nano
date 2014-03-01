@@ -29,6 +29,7 @@ import org.apache.commons.logging.Log;
 import org.simpleframework.xml.Default;
 import org.simpleframework.xml.DefaultType;
 import org.simpleframework.xml.ElementList;
+import org.simpleframework.xml.Transient;
 import org.simpleframework.xml.core.Commit;
 import org.simpleframework.xml.core.Persist;
 
@@ -50,6 +51,7 @@ import de.tsl2.nano.collection.MapEntrySet;
 import de.tsl2.nano.exception.FormattedException;
 import de.tsl2.nano.exception.ForwardedException;
 import de.tsl2.nano.execution.Profiler;
+import de.tsl2.nano.format.FormatUtil;
 import de.tsl2.nano.log.LogFactory;
 import de.tsl2.nano.util.DateUtil;
 import de.tsl2.nano.util.DelegatorProxy;
@@ -77,7 +79,7 @@ public class BeanCollector<COLLECTIONTYPE extends Collection<T>, T> extends Bean
 
     /** static data or current data representation of this beancollector */
     protected transient COLLECTIONTYPE collection;
-    boolean isStaticCollection = false;
+    transient boolean isStaticCollection = false;
 
     /** defines the data for this collector through it's getData() method */
     protected transient IBeanFinder<T, ?> beanFinder;
@@ -88,6 +90,7 @@ public class BeanCollector<COLLECTIONTYPE extends Collection<T>, T> extends Bean
      * holds the connection to the composition parent. if not null, the beancollector will work only on items having a
      * connection to this composition (uml-composition where childs can't exist without it's parent!).
      */
+    @Transient
     protected Composition composition;
 
     protected transient IAction<?> newAction;
@@ -97,28 +100,30 @@ public class BeanCollector<COLLECTIONTYPE extends Collection<T>, T> extends Bean
     protected transient IAction<?> openAction;
 
     /** defines the behaviour and the actions of the beancollector */
+    @Transient
     protected int workingMode = MODE_EDITABLE | MODE_CREATABLE | MODE_SEARCHABLE;
     /**
      * search panel instructions.
      */
     protected transient IAction<COLLECTIONTYPE> searchAction;
     protected transient IAction<?> resetAction;
-    String searchStatus = Messages.getString("tsl2nano.searchdialog.nosearch");
+    transient String searchStatus = Messages.getString("tsl2nano.searchdialog.nosearch");
 
     /** whether to refresh data from beancontainer before opening edit-dialog */
+    @Transient
     protected boolean reloadBean = true;
 
     @ElementList(name = "column", inline = true, required = false/*, type=ValueColumn.class*/)
-    private Collection<IPresentableColumn> columnDefinitions;
+    private transient Collection<IPresentableColumn> columnDefinitions;
 
     /** temporary variable to hold the {@link #toString()} output (--> performance) */
-    private String asString;
+    private transient String asString;
 
     /**
      * the beancollector should listen to any change of the search-panel (beanfinders range-bean) to know which action
      * should have the focus
      */
-    private Boolean hasSearchRequestChanged;
+    private transient Boolean hasSearchRequestChanged;
 
     /**
      * constructor. should only used by framework - for de-serialization.
@@ -137,15 +142,6 @@ public class BeanCollector<COLLECTIONTYPE extends Collection<T>, T> extends Bean
     /**
      * see constructor {@link #CollectionEditorBean(IBeanFinder, boolean, boolean, boolean)}.
      */
-    public BeanCollector(Class<T> beanType, final COLLECTIONTYPE collection, int workingMode, Composition composition) {
-        this(new BeanFinder<T, Object>(beanType), workingMode, composition);
-        this.collection = collection;
-        this.isStaticCollection = collection != null;
-    }
-
-    /**
-     * see constructor {@link #CollectionEditorBean(IBeanFinder, boolean, boolean, boolean)}.
-     */
     public BeanCollector(final COLLECTIONTYPE collection, int workingMode) {
         this(collection, workingMode, null);
     }
@@ -154,9 +150,18 @@ public class BeanCollector<COLLECTIONTYPE extends Collection<T>, T> extends Bean
      * see constructor {@link #CollectionEditorBean(IBeanFinder, boolean, boolean, boolean)}.
      */
     public BeanCollector(final COLLECTIONTYPE collection, int workingMode, Composition composition) {
-        this(new BeanFinder(collection.iterator().next().getClass()), workingMode, composition);
+        this((Class<T>) collection.iterator().next().getClass(), collection, workingMode, composition);
+    }
+
+    /**
+     * see constructor {@link #CollectionEditorBean(IBeanFinder, boolean, boolean, boolean)}.
+     */
+    public BeanCollector(Class<T> beanType, final COLLECTIONTYPE collection, int workingMode, Composition composition) {
+        this(new BeanFinder<T, Object>(beanType), workingMode, composition);
         this.collection = collection;
         this.isStaticCollection = collection != null;
+        if (isStaticCollection)
+            this.searchStatus = "";
     }
 
     /**
@@ -178,7 +183,10 @@ public class BeanCollector<COLLECTIONTYPE extends Collection<T>, T> extends Bean
      * @param workingMode one of {@link IBeanCollector#MODE_EDITABLE}, {@link IBeanCollector#MODE_CREATABLE} etc. Please
      *            see {@link IBeanCollector} for more modes.
      */
-    private void init(COLLECTIONTYPE collection, IBeanFinder<T, ?> beanFinder, int workingMode, Composition composition) {
+    protected void init(COLLECTIONTYPE collection,
+            IBeanFinder<T, ?> beanFinder,
+            int workingMode,
+            Composition composition) {
 //        setName(Messages.getString("tsl2nano.list") + " " + getName());
         this.collection = collection != null ? collection : (COLLECTIONTYPE) new LinkedList<T>();
         setBeanFinder(beanFinder);
@@ -262,7 +270,7 @@ public class BeanCollector<COLLECTIONTYPE extends Collection<T>, T> extends Bean
                 }
 
                 public Collection<T> getData(T from, Object to) {
-                    if (BeanContainer.isInitialized() && BeanContainer.instance().isPersistable(getType())) {
+                    if (!isStaticCollection) {
                         collection = (COLLECTIONTYPE) ((IBeanFinder<T, Object>) beanFinder).getData(from, to);
                         /*
                          * if it is a composition, all data has to be found in the compositions-parent-container
@@ -872,6 +880,8 @@ public class BeanCollector<COLLECTIONTYPE extends Collection<T>, T> extends Bean
                 return "";
             if (attribute.getFormat() != null) {
                 return attribute.getFormat().format(value);
+            } else {
+                FormatUtil.getDefaultFormat(value, false).format(value);
             }
         } catch (Exception e) {
             // showing the existing values should not throw exceptions...
@@ -1006,7 +1016,8 @@ public class BeanCollector<COLLECTIONTYPE extends Collection<T>, T> extends Bean
      * @return new created search action
      */
     protected IAction<COLLECTIONTYPE> createSearchAction() {
-        final String actionId = BeanContainer.getActionId(getType(), true, "search");
+        final String actionId =
+            isVirtual() ? getName() + ".search" : BeanContainer.getActionId(getType(), true, "search");
         searchAction = new SecureAction<COLLECTIONTYPE>(actionId,
             BeanContainer.getActionText(actionId, false),
             BeanContainer.getActionText(actionId, true),
@@ -1060,6 +1071,7 @@ public class BeanCollector<COLLECTIONTYPE extends Collection<T>, T> extends Bean
                 if (!isStaticCollection && collection != null)
                     collection.clear();
                 setSelected();
+                searchStatus = isStaticCollection ? "" : Messages.getString("tsl2nano.searchdialog.nosearch");
                 return null;
             }
 
@@ -1136,7 +1148,7 @@ public class BeanCollector<COLLECTIONTYPE extends Collection<T>, T> extends Bean
         bc.attributeDefinitions = new LinkedHashMap<String, IAttributeDefinition<?>>(bc.attributeDefinitions);
         bc.init(collection, new BeanFinder(beandef.getClazz()), workingMode, composition);
         //while deserialization was done on BeanDefinition, we have to do this step manually
-        bc.initDeserializing();
+        bc.initDeserialization();
         return bc;
     }
 
@@ -1175,13 +1187,8 @@ public class BeanCollector<COLLECTIONTYPE extends Collection<T>, T> extends Bean
         out.defaultWriteObject();
     }
 
-    @Persist
-    protected void initSerialization() {
-        super.initSerialization();
-    }
-
     @Commit
-    protected void initDeserializing() {
+    protected void initDeserialization() {
         init(collection, beanFinder, workingMode, composition);
         if (columnDefinitions != null) {
             for (IPresentableColumn c : columnDefinitions) {

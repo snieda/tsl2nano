@@ -30,6 +30,7 @@ import de.tsl2.nano.bean.BeanProxy;
 import de.tsl2.nano.bean.BeanUtil;
 import de.tsl2.nano.bean.PrimitiveUtil;
 import de.tsl2.nano.exception.FormattedException;
+import de.tsl2.nano.format.FormatUtil;
 import de.tsl2.nano.log.LogFactory;
 import de.tsl2.nano.util.StringUtil;
 import de.tsl2.nano.util.Util;
@@ -205,8 +206,7 @@ public class ValueExpression<TYPE> implements IValueExpression<TYPE>, IConverter
 
     /**
      * implements the interface method {@link #getValue(Object)} by {@link IValueExpression} and delegates directly to
-     * {@link #from(String)} using object instance {@link #toString()} as value.
-     * thrown.
+     * {@link #from(String)} using object instance {@link #toString()} as value. thrown.
      */
     @Override
     public TYPE getValue(Object instance) {
@@ -254,7 +254,8 @@ public class ValueExpression<TYPE> implements IValueExpression<TYPE>, IConverter
             return isMessageFormat() ? MessageFormat.format(format, args) : String.format(format, args);
         } else {
             //lazy workaround...
-            return !Util.isEmpty(format) && !format.equals("Object") ? format : Util.asString(fromValue);
+            return !Util.isEmpty(format) && !format.equals("Object") ? format : FormatUtil.getDefaultFormat(fromValue,
+                false).format(fromValue);//Util.asString(fromValue);
         }
     }
 

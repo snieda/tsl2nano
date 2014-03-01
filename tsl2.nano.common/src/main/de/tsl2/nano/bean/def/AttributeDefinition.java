@@ -106,7 +106,7 @@ public class AttributeDefinition<T> implements IAttributeDefinition<T> {
      * 
      * @param attribute
      */
-    protected AttributeDefinition(IAttribute<T> attribute) {
+    public AttributeDefinition(IAttribute<T> attribute) {
         super();
         this.attribute = attribute;
     }
@@ -440,7 +440,8 @@ public class AttributeDefinition<T> implements IAttributeDefinition<T> {
      * @return true, if bean type is selectable
      */
     public boolean isSelectable() {
-        return BeanDefinition.getBeanDefinition(getType()).isSelectable();
+        Class<T> type = getType();
+        return isMultiValue() || (!BeanUtil.isStandardType(type) && BeanDefinition.getBeanDefinition(type).isSelectable());
     }
 
     /**

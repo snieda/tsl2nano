@@ -6,6 +6,7 @@ import static de.tsl2.nano.bean.def.IBeanCollector.MODE_MULTISELECTION;
 import static de.tsl2.nano.bean.def.IBeanCollector.MODE_SEARCHABLE;
 
 import java.io.File;
+import java.io.FilenameFilter;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.InetAddress;
@@ -16,6 +17,7 @@ import java.text.FieldPosition;
 import java.text.Format;
 import java.text.ParsePosition;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -43,6 +45,8 @@ import de.tsl2.nano.exception.FormattedException;
 import de.tsl2.nano.exception.ForwardedException;
 import de.tsl2.nano.execution.CompatibilityLayer;
 import de.tsl2.nano.execution.SystemUtil;
+import de.tsl2.nano.h5.expression.RuleExpression;
+import de.tsl2.nano.h5.expression.SQLExpression;
 import de.tsl2.nano.h5.navigation.EntityBrowser;
 import de.tsl2.nano.h5.navigation.IBeanNavigator;
 import de.tsl2.nano.h5.navigation.Workflow;
@@ -346,6 +350,12 @@ public class NanoH5 extends NanoHTTPD {
 //            collector.setPresentationHelper(new Html5Presentation(collector));
             types.add(collector);
         }
+        /*
+         * Load virtual BeanCollectors like QueryResult from directory.
+         * name-convention: beandef/virtual/*.xml
+         */
+        types.addAll(BeanDefinition.loadVirtualDefinitions());
+        
         /*
          * Perhaps show the script tool to do direct sql or ant
          */

@@ -29,6 +29,7 @@ import de.tsl2.nano.util.operation.Range;
  * @author Thomas Schneider
  * @version $Revision$
  */
+@SuppressWarnings("unchecked")
 public class BeanFinder<T, F> implements IBeanFinder<T, F>, Serializable {
     /** serialVersionUID */
     private static final long serialVersionUID = -1270111762126889953L;
@@ -50,6 +51,7 @@ public class BeanFinder<T, F> implements IBeanFinder<T, F>, Serializable {
      */
     protected BeanFinder() {
         super();
+        type = (Class<T>) Serializable.class;
     }
 
     /**
@@ -70,6 +72,7 @@ public class BeanFinder<T, F> implements IBeanFinder<T, F>, Serializable {
     public BeanFinder(Bean<IRange<F>> rangeBean) {
         super();
         this.rangeBean = rangeBean;
+        type = (Class<T>) Serializable.class;
     }
 
     /**
@@ -198,5 +201,6 @@ public class BeanFinder<T, F> implements IBeanFinder<T, F>, Serializable {
      */
     @Override
     public void setMaxResultCount(int maxresult) {
+        this.maxResultCount = maxresult;
     }
 }

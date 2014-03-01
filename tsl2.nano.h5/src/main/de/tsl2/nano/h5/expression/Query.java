@@ -7,10 +7,12 @@
  * 
  * Copyright: (c) Thomas Schneider 2014, all rights reserved
  */
-package de.tsl2.nano.h5;
+package de.tsl2.nano.h5.expression;
 
 import java.io.Serializable;
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import org.simpleframework.xml.Attribute;
@@ -25,20 +27,21 @@ import de.tsl2.nano.util.Util;
 /**
  * 
  * @author Tom, Thomas Schneider
- * @version $Revision$ 
+ * @version $Revision$
  */
 public class Query<RESULT> implements IPRunnable<RESULT, Map<String, Object>> {
     /** serialVersionUID */
     private static final long serialVersionUID = -9199837113877884921L;
     @Attribute
     String name;
-    @Element(data=true)
+    @Element(data = true)
     String query;
     @Attribute
     boolean nativeQuery;
-    @ElementMap(entry = "parameter", attribute = true, inline = true, keyType = String.class, key = "name", value = "type", required=false)
+    @ElementMap(entry = "parameter", attribute = true, inline = true, keyType = String.class, key = "name", value = "type", required = false)
     Map<String, ? extends Serializable> parameter;
-    
+    private transient ArrayList<String> columnNames;
+
     /**
      * constructor
      */
@@ -47,6 +50,7 @@ public class Query<RESULT> implements IPRunnable<RESULT, Map<String, Object>> {
 
     /**
      * constructor
+     * 
      * @param name
      * @param query
      * @param parameter
@@ -81,6 +85,26 @@ public class Query<RESULT> implements IPRunnable<RESULT, Map<String, Object>> {
             }
         }
         return parameter;
+    }
+
+    /**
+     * evaluates the query's column names through the select-columns having an 'as' expression.
+     * <p/>
+     * e.g. 'select name, type as Type from...<br/>
+     * will have the column 'Type'.
+     * 
+     * @return
+     */
+    public List<String> getColumnNames() {
+        if (columnNames == null) {
+            columnNames = new ArrayList<String>();
+            String p;
+            StringBuilder q = new StringBuilder(query.toLowerCase());
+            while ((!Util.isEmpty(p = StringUtil.extract(q, "as \\w+", "")))) {
+                columnNames.add(p.substring(3));
+            }
+        }
+        return columnNames;
     }
 
     @Override

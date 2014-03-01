@@ -18,6 +18,7 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
+import java.io.FilenameFilter;
 import java.io.FilterReader;
 import java.io.IOException;
 import java.io.InputStream;
@@ -171,15 +172,15 @@ public class FileUtil {
 
     public static <O extends OutputStream> O readBytes(InputStream stream, O output) throws IOException {
 //      byte[] b = new byte[2048];
-      while (true) {
-          int r = stream.read();
-          if (r == -1)
-              break;
-          output.write(r);
-      }
-      return output;
+        while (true) {
+            int r = stream.read();
+            if (r == -1)
+                break;
+            output.write(r);
+        }
+        return output;
     }
-    
+
     /**
      * Writes the given file with data to the given zipfile.
      * 
@@ -509,6 +510,17 @@ public class FileUtil {
     }
 
     /**
+     * creates a valid file-path name (without spaces and other non-word characters). the difference to
+     * {@link #getValidFileName(String)} is, that slashes are valid.
+     * 
+     * @param originName name
+     * @return file name
+     */
+    public static String getValidPathName(String originName) {
+        return originName.replaceAll("[^a-zA-Z0-9-/._]", "_");
+    }
+
+    /**
      * getFileData
      * 
      * @param fileName
@@ -758,5 +770,21 @@ public class FileUtil {
         byte[] bytes = getFileBytes(fileName, null);
         byte[] base64 = Base64.decodeBase64(bytes);
         writeBytes(base64, fileName + ".base64decoded", false);
+    }
+
+    /**
+     * getFiles
+     * 
+     * @param dirPath directory to search files for
+     * @param regExFilename file name matching filter
+     * @return files of directory 'dirPath' matching 'regExFilename'
+     */
+    public static File[] getFiles(String dirPath, final String regExFilename) {
+        return new File(dirPath).listFiles(new FilenameFilter() {
+            @Override
+            public boolean accept(File dir, String name) {
+                return name.matches(regExFilename);
+            }
+        });
     }
 }

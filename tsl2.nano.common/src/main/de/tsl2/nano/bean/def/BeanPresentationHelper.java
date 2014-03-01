@@ -979,6 +979,8 @@ public class BeanPresentationHelper<T> {
                 int i = 0;
                 try {
                     for (Iterator<Integer> it = keySet.iterator(); it.hasNext();) {
+                        if (bean.getAttribute(names[i]).isVirtual())
+                            continue;
                         //check data to seam unique
                         i = levels.get(it.next());
                         q = query.replace(ALIAS, names[i]);
