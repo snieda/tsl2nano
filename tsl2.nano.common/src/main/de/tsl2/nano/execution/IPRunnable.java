@@ -22,6 +22,6 @@ public interface IPRunnable<RESULT, CONTEXT extends Map<String, Object>> extends
     String getName();
     /** defined parameter, to be checked (see {@link #checkArguments(Map)}) against given CONTEXT */
     Map<String, ? extends Serializable> getParameter();
-    /** check arguments against defined parameter */
-    void checkArguments(CONTEXT args);
+    /** check arguments against defined parameter and return only defined arguments */
+    CONTEXT checkedArguments(CONTEXT args, boolean strict);
 }

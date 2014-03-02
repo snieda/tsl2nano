@@ -16,5 +16,5 @@ package de.tsl2.nano.incubation.specification;
  * @version $Revision$
  */
 public enum ParType {
-    TEXT, BOOLEAN, NUMBER;
+    TEXT, BOOLEAN, NUMBER, DATE;
 }

@@ -9,19 +9,12 @@
  */
 package de.tsl2.nano.incubation.specification.rules;
 
-import java.math.BigDecimal;
-import java.util.HashMap;
 import java.util.Map;
-import java.util.Set;
 
-import org.simpleframework.xml.Attribute;
-import org.simpleframework.xml.Element;
-import org.simpleframework.xml.ElementMap;
 import org.simpleframework.xml.core.Commit;
 
 import de.tsl2.nano.Environment;
-import de.tsl2.nano.execution.IPRunnable;
-import de.tsl2.nano.incubation.specification.Constraint;
+import de.tsl2.nano.incubation.specification.AbstractRunnable;
 import de.tsl2.nano.incubation.specification.ParType;
 import de.tsl2.nano.util.StringUtil;
 import de.tsl2.nano.util.operation.NumericConditionOperator;
@@ -60,17 +53,11 @@ import de.tsl2.nano.util.operation.Operator;
  * @author Tom, Thomas Schneider
  * @version $Revision$
  */
-public class Rule<T> implements IPRunnable<T, Map<String, Object>>{
-    @Attribute
-    String name;
-    @ElementMap(entry = "parameter", attribute = true, inline = true, keyType = String.class, key = "name", valueType = ParType.class, value = "type")
-    Map<String, ParType> parameter;
-    @ElementMap(entry = "constraint", attribute = true, inline = true, keyType = String.class, key = "name", value = "constraint", valueType = Constraint.class, required=false)
-    Map<String, Constraint<?>> constraints;
+public class Rule<T> extends AbstractRunnable<T> {
+    /** serialVersionUID */
+    private static final long serialVersionUID = 8557708958880364123L;
+    
     transient NumericConditionOperator operator;
-    @Element
-    String operation;
-
     /** the rule is initialized when all sub-rules are imported. see {@link #importSubRules()} */
     boolean initialized;
     
@@ -87,18 +74,7 @@ public class Rule<T> implements IPRunnable<T, Map<String, Object>>{
      * @param parameter
      */
     public Rule(String name, String operation, Map<String, ParType> parameter) {
-        super();
-        this.name = name;
-        this.operation = operation;
-        this.parameter = parameter;
-        initDeserializing();
-    }
-
-    /**
-     * @return Returns the name.
-     */
-    public String getName() {
-        return name;
+        super(name, operation, parameter);
     }
 
     /**
@@ -129,7 +105,7 @@ public class Rule<T> implements IPRunnable<T, Map<String, Object>>{
     public T run(Map<String, Object> arguments, Object... extArgs) {
         if (!initialized)
             importSubRules();
-        checkArguments(arguments);
+        arguments = checkedArguments(arguments, Environment.get("application.mode.strict", false));
         operator.reset();
         //in generics it is not possible to cast from Map(String,?) to Map(CharSequence, ?)
         Object a = arguments;
@@ -138,87 +114,9 @@ public class Rule<T> implements IPRunnable<T, Map<String, Object>>{
         return result;
     }
 
-    /**
-     * checks arguments against defined parameter
-     * 
-     * @param arguments to be checked
-     */
-    public void checkArguments(Map<String, Object> arguments) {
-        Set<String> keySet = arguments.keySet();
-        Set<String> defs = parameter.keySet();
-        for (String par : keySet) {
-            Object arg = arguments.get(par);
-            if (!defs.contains(par))
-                throw new IllegalArgumentException(par + "=" + arg);
-            else
-                checkConstraint(par, arg);
-        }
-    }
-
-    @SuppressWarnings({ "rawtypes", "unchecked" })
-    private void createConstraints() {
-        if (constraints == null)
-            constraints = new HashMap<String, Constraint<?>>();
-        Set<String> pars = parameter.keySet();
-        for (CharSequence p : pars) {
-            Object o = parameter.get(p);
-            Class<?> cls = o instanceof Class ? (Class<?>) o : transform((ParType) o);
-            Constraint constraint = constraints.get(p);
-            if (constraint == null) {
-                constraint = new Constraint(cls);
-            } else {
-                constraint.setType(cls);
-            }
-        }
-    }
-
-    protected Class<?> transform(ParType t) {
-        switch (t) {
-        case TEXT:
-            return String.class;
-        case BOOLEAN:
-            return Boolean.class;
-        case NUMBER:
-            return BigDecimal.class;
-        }
-        return null;
-    }
-
-    @SuppressWarnings({ "rawtypes", "unchecked" })
-    private void checkConstraint(CharSequence par, Object arg) {
-        Constraint constraint = constraints.get(par);
-        if (constraint != null)
-            constraint.check((Comparable) arg);
-    }
-
     @Commit
     private void initDeserializing() {
         this.operator = new NumericConditionOperator();
-        createConstraints();
         importSubRules();
-    }
-
-    /**
-     * getParameter
-     * @return defined rule parameters
-     */
-    @Override
-    public Map<String, ParType> getParameter() {
-        return parameter;
-    }
-    
-    @Override
-    public String toString() {
-        return name + "{" + operation + "}";
-    }
-
-    /**
-     * addConstraint
-     * 
-     * @param parameterName parameter name to add the constraint for
-     * @param constraint new constraint
-     */
-    public void addConstraint(String parameterName, Constraint<?> constraint) {
-        constraints.put(parameterName, constraint);
     }
 }

@@ -32,6 +32,13 @@ public abstract class SecureAction<RETURNTYPE> extends CommonAction<RETURNTYPE> 
     int actionMode;
     boolean allPermission = false;
 
+    /**
+     * constructor
+     */
+    protected SecureAction() {
+        super();
+    }
+    
     public SecureAction(Class<?> prefix, String name, int actionMode, boolean isdefault, String imagePath) {
         super();
         this.id = BeanContainer.getActionId(prefix, true, name);

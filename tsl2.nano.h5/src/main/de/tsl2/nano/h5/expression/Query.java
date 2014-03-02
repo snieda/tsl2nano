@@ -108,8 +108,9 @@ public class Query<RESULT> implements IPRunnable<RESULT, Map<String, Object>> {
     }
 
     @Override
-    public void checkArguments(Map<String, Object> args) {
+    public Map<String, Object> checkedArguments(Map<String, Object> args, boolean strict) {
         // TODO implement (see Rule) - using select-statement-columns
+        return args;
     }
 
     @Override
