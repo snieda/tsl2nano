@@ -54,7 +54,7 @@ public class FeatureProxy<T> extends ServiceProxy<T> {
 
 //        this check has to done on class loading and newInstance
 //        if (delegate == null) {
-//            throw new FormattedException("FEATURE IMPLEMENTATION '" + featureName
+//            throw new ManagedException("FEATURE IMPLEMENTATION '" + featureName
 //                + "' IS NOT AVAILABLE! PLEASE CHECK YOUR INSTALLATION.");
 //        }
         LOG.info("=====> STARTING FEATURE '" + featureName + "'");

@@ -31,8 +31,8 @@ import javax.security.auth.login.LoginContext;
 import org.apache.commons.logging.Log;
 
 import de.tsl2.nano.Environment;
-import de.tsl2.nano.exception.FormattedException;
-import de.tsl2.nano.exception.ForwardedException;
+import de.tsl2.nano.exception.ManagedException;
+import de.tsl2.nano.exception.ManagedException;
 import de.tsl2.nano.log.LogFactory;
 import de.tsl2.nano.service.feature.Feature;
 import de.tsl2.nano.service.feature.FeatureFactory;
@@ -152,7 +152,7 @@ public class ServiceFactory {
         if (serviceLocator == null) {
             String jndiFile = properties.getProperty(KEY_JNDI_FILE);
             if (jndiFile == null)
-                throw new FormattedException("ServiceLocator couldn't find a value for key '" + KEY_JNDI_FILE
+                throw new ManagedException("ServiceLocator couldn't find a value for key '" + KEY_JNDI_FILE
                     + "' inside the application properties");
             serviceLocator = new ServiceLocator(classLoader, jndiFile);
         }
@@ -223,7 +223,7 @@ public class ServiceFactory {
                 getServiceLocator().getInitialContext().addToEnvironment(Context.SECURITY_PRINCIPAL, userPrincipal);
             }
         } catch (final Exception e) {
-            ForwardedException.forward(e);
+            ManagedException.forward(e);
         }
     }
 
@@ -416,7 +416,7 @@ public class ServiceFactory {
     public static void checkConnection() {
         if (!ServiceFactory.isInitialized()) {
             LOG.error("Server-Connection Lost! May be caused by Server-Restart or Instruction-Error (no previously call of ServiceFactory.createInstance(..))");
-            throw new FormattedException("tsl2nano.login.noconnection");
+            throw new ManagedException("tsl2nano.login.noconnection");
         }
     }
 
@@ -471,7 +471,7 @@ public class ServiceFactory {
             final LoginContext lc = new LoginContext(moduleName, callbackHandler);
             lc.login();
         } catch (final Exception e) {
-            ForwardedException.forward(e);
+            ManagedException.forward(e);
         }
     }
 
@@ -504,7 +504,7 @@ public class ServiceFactory {
             ServiceFactory.instance().logout();
             return true;
         } catch (final Exception e) {
-            ForwardedException.forward(e);
+            ManagedException.forward(e);
             return false;
         }
     }

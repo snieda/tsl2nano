@@ -16,7 +16,7 @@ import java.util.Collection;
 import org.apache.commons.logging.Log;
 import de.tsl2.nano.log.LogFactory;
 
-import de.tsl2.nano.exception.FormattedException;
+import de.tsl2.nano.exception.ManagedException;
 
 /**
  * Finder provider - usable for IQueryService.
@@ -24,6 +24,7 @@ import de.tsl2.nano.exception.FormattedException;
  * @author Thomas Schneider, Thomas Schneider
  * @version $Revision$
  */
+@SuppressWarnings({ "rawtypes", "unchecked" })
 public final class Finder {
     private static final Log LOG = LogFactory.getLog(Finder.class);
 
@@ -41,9 +42,9 @@ public final class Finder {
             Collection<Class<Object>> lazyRelations,
             FINDER... finder) {
         if (finder.length == 0)
-            throw FormattedException.implementationError("at least one finder must be defined!", "find()");
+            throw ManagedException.illegalState("at least one finder must be defined!", parameter);
         else if (finder[0].getResultType() == null)
-            throw FormattedException.implementationError("the first finder must define a resultType!", finder[0]);
+            throw ManagedException.illegalArgument(finder[0], "the first finder must define a resultType!");
         StringBuffer qStr = new StringBuffer();//createStatement(finder[0].getResultType());
         int maxResult = 0;
         for (int i = 0; i < finder.length; i++) {

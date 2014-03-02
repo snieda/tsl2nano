@@ -15,8 +15,8 @@ import java.lang.reflect.UndeclaredThrowableException;
 import java.security.PrivilegedAction;
 
 import de.tsl2.nano.Messages;
-import de.tsl2.nano.exception.FormattedException;
-import de.tsl2.nano.exception.ForwardedException;
+import de.tsl2.nano.exception.ManagedException;
+import de.tsl2.nano.exception.ManagedException;
 import de.tsl2.nano.util.StringUtil;
 
 /**
@@ -52,7 +52,7 @@ public class ServiceProxy<T> extends DefaultService implements InvocationHandler
      */
     public static <T> T createBeanImplementation(Class<T> interfaze, T delegate, ClassLoader classLoader) {
         if (delegate == null || !interfaze.isAssignableFrom(delegate.getClass())) {
-            throw new FormattedException("the delegate instance must implement the service interface!\ninterface: " + interfaze
+            throw new ManagedException("the delegate instance must implement the service interface!\ninterface: " + interfaze
                 + "\ndelegate: "
                 + Messages.stripParameterBrackets(String.valueOf(delegate))
                 + "\n\nmostly the reason are missing appserver-client-libraries to your client.");
@@ -92,7 +92,7 @@ public class ServiceProxy<T> extends DefaultService implements InvocationHandler
                     LOG.error("ServiceProxy has an invoking-problem on delegate:" + delegate
                         + "\n    TargetException: "
                         + t, t);
-                    return ForwardedException.forward(t);
+                    return ManagedException.forward(t);
                 }
             }
         });

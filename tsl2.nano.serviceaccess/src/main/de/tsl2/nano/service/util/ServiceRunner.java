@@ -18,7 +18,7 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Properties;
 
-import de.tsl2.nano.exception.ForwardedException;
+import de.tsl2.nano.exception.ManagedException;
 import de.tsl2.nano.execution.ICRunnable;
 import de.tsl2.nano.execution.Runner;
 import de.tsl2.nano.serviceaccess.ServiceFactory;
@@ -89,7 +89,7 @@ public class ServiceRunner extends BaseServiceTest implements ICRunnable<HashMap
             context.put("result", result);
             return context;
         } catch (final Exception e) {
-            ForwardedException.forward(e);
+            ManagedException.forward(e);
             return null;
         }
     }
@@ -116,7 +116,7 @@ public class ServiceRunner extends BaseServiceTest implements ICRunnable<HashMap
             final Method method = serviceInterface.getMethod(m, Runner.methodArgs(extArgs));
             return method.invoke(service, extArgs);
         } catch (final Exception e) {
-            ForwardedException.forward(e);
+            ManagedException.forward(e);
             return null;
         }
     }

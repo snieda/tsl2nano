@@ -26,7 +26,7 @@ import javax.persistence.Table;
 
 import de.tsl2.nano.bean.BeanAttribute;
 import de.tsl2.nano.bean.def.Bean;
-import de.tsl2.nano.exception.FormattedException;
+import de.tsl2.nano.exception.ManagedException;
 import de.tsl2.nano.util.StringUtil;
 
 /**
@@ -154,7 +154,7 @@ public class NamedQueryServiceBean extends AbstractStatelessServiceBean implemen
         case 2:
             return prefix + NAMEDQUERY_BETWEEN;
         default:
-            throw FormattedException.implementationError("evaluation of named queries only available for zero or one argument (findAll and findById)",
+            throw ManagedException.implementationError("evaluation of named queries only available for zero or one argument (findAll and findById)",
                 args);
         }
     }

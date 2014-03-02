@@ -14,7 +14,7 @@ import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.Map;
 
-import de.tsl2.nano.exception.FormattedException;
+import de.tsl2.nano.exception.ManagedException;
 import de.tsl2.nano.service.util.IGenericService;
 import de.tsl2.nano.service.util.finder.AbstractFinder;
 import de.tsl2.nano.serviceaccess.ServiceFactory;
@@ -128,7 +128,7 @@ public class CachingBatchloader {
             if (mode == MODE_AUTO)
                 execute();
             else
-                throw FormattedException.implementationError("the batch-loading wasn't started yet! you have to call 'execute' before getting the data",
+                throw ManagedException.implementationError("the batch-loading wasn't started yet! you have to call 'execute' before getting the data",
                     partId);
         }
         return (Collection<T>) (part != null ? part.getResult() : null);
@@ -148,7 +148,7 @@ public class CachingBatchloader {
             if (result.size() == 1)
                 return result.iterator().next();
             else
-                throw FormattedException.implementationError("the cache for " + type
+                throw ManagedException.implementationError("the cache for " + type
                     + "|"
                     + partId
                     + " is not a single result. the cache contains"
@@ -180,7 +180,7 @@ public class CachingBatchloader {
         }
         for (int i = 0; i < partIds.length; i++) {
             if (cache.remove(partIds[i]) == null)
-                throw FormattedException.implementationError("cache item couldn't be removed!",
+                throw ManagedException.implementationError("cache item couldn't be removed!",
                     partIds[i],
                     cache.keySet());
         }

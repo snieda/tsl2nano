@@ -33,8 +33,8 @@ import javax.ejb.TimerService;
 import org.apache.commons.logging.Log;
 
 import de.tsl2.nano.collection.ListSet;
-import de.tsl2.nano.exception.FormattedException;
-import de.tsl2.nano.exception.ForwardedException;
+import de.tsl2.nano.exception.ManagedException;
+import de.tsl2.nano.exception.ManagedException;
 import de.tsl2.nano.log.LogFactory;
 import de.tsl2.nano.util.FileUtil;
 import de.tsl2.nano.util.StringUtil;
@@ -200,7 +200,7 @@ public abstract class AbstractJobScheduleServiceBean<RUNNABLE> implements
             EJBException,
             NoMoreTimeoutsException {
         if (callbacks == null || callbacks.size() == 0) {
-            throw new FormattedException("list of callbacks is null or empty - cannot start the runJobs service");
+            throw new ManagedException("list of callbacks is null or empty - cannot start the runJobs service");
         }
         //timer.getHandle() is only callable on persisted timers!
         Job<RUNNABLE> job = new Job<RUNNABLE>(name, null, callbacks, context, user, stopOnError, stopOnConcurrent);
@@ -329,7 +329,7 @@ public abstract class AbstractJobScheduleServiceBean<RUNNABLE> implements
             Job<?> runningJob = getRunningJob();
             if (runningJob != null) {
                 LOG.error("job-start canceled. no concurrent running jobs are allowed.\nPlease use argument 'stopOnConcurrent=false' if you want to allow concurrent running jobs!");
-                RuntimeException ex = new FormattedException("swartifex.concurrentfailure", new Object[] { job,
+                RuntimeException ex = new ManagedException("swartifex.concurrentfailure", new Object[] { job,
                     runningJob });
                 job.setLastException(ex);
                 throw ex;
@@ -349,7 +349,7 @@ public abstract class AbstractJobScheduleServiceBean<RUNNABLE> implements
                     } catch (final Throwable ex) {
                         //if the jvm crashes, the job will never be stopped!
                         if (job.isStopOnError()) {
-                            RuntimeException fwdEx = ForwardedException.toRuntimeEx(ex, true);
+                            RuntimeException fwdEx = ManagedException.toRuntimeEx(ex, true);
                             stopRun(timer, job, fwdEx);
                             throw fwdEx;
                         } else {

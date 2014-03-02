@@ -34,8 +34,8 @@ import javax.security.auth.Subject;
 import de.tsl2.nano.bean.BeanAttribute;
 import de.tsl2.nano.bean.BeanClass;
 import de.tsl2.nano.collection.MapUtil;
-import de.tsl2.nano.exception.FormattedException;
-import de.tsl2.nano.exception.ForwardedException;
+import de.tsl2.nano.exception.ManagedException;
+import de.tsl2.nano.exception.ManagedException;
 import de.tsl2.nano.service.util.batch.Part;
 import de.tsl2.nano.service.util.finder.AbstractFinder;
 import de.tsl2.nano.service.util.finder.Finder;
@@ -270,7 +270,7 @@ public class GenericServiceBean extends NamedQueryServiceBean implements IGeneri
                                     + ", instantiated entities:"
                                     + instantiatedEntities.size());
                                 if (recurseLevel++ > getMaxRecursionLevel()) {
-                                    throw new FormattedException("instantiateLazyRelationship: max recurs level " + MAX_RECURSLEVEL
+                                    throw new ManagedException("instantiateLazyRelationship: max recurs level " + MAX_RECURSLEVEL
                                         + " exceeded evaluating attribute "
                                         + beanAttribute.getName()
                                         + ". Please check datamodel for cycles!\ninstantiated entities:\n"
@@ -284,7 +284,7 @@ public class GenericServiceBean extends NamedQueryServiceBean implements IGeneri
             }
         } catch (final Exception e) {
             LOG.error(e);
-            ForwardedException.forward(e);
+            ManagedException.forward(e);
         }
     }
 
@@ -326,7 +326,7 @@ public class GenericServiceBean extends NamedQueryServiceBean implements IGeneri
             + attributes);
         final T bean = findById(clazz, beanId);
         if (bean == null) {
-            throw new FormattedException("couldn''t find bean of type " + clazz
+            throw new ManagedException("couldn''t find bean of type " + clazz
                 + " with id: "
                 + beanId
                 + ".\nPossible causes are: null values on not-nullable attributes of that bean - or a relation!");
@@ -463,7 +463,7 @@ public class GenericServiceBean extends NamedQueryServiceBean implements IGeneri
         // //catch it and throw a new one. otherwise, the server (toplink) will
         // //catch it prints only a warning. the client would only see a
         // transaction exception
-        // throw new ForwardedException(ex);
+        // throw new ManagedException(ex);
         // }
     }
 
@@ -510,7 +510,7 @@ public class GenericServiceBean extends NamedQueryServiceBean implements IGeneri
     public <T> T findByExample(T exampleBean, Class... lazyRelations) {
         Collection<T> collection = findByExample(exampleBean, false);
         if (collection.size() > 1) {
-            throw new FormattedException("tsl2nano.multiple.items", new Object[] { exampleBean });
+            throw new ManagedException("tsl2nano.multiple.items", new Object[] { exampleBean });
         }
         collection = fillTree(collection, lazyRelations);
         return collection.size() > 0 ? collection.iterator().next() : null;
@@ -640,7 +640,7 @@ public class GenericServiceBean extends NamedQueryServiceBean implements IGeneri
     public Object findItemByQuery(String queryString, boolean nativeQuery, Object[] args, Class... lazyRelations) {
         Collection<?> collection = findByQuery(queryString, nativeQuery, args, lazyRelations);
         if (collection.size() > 1) {
-            throw new FormattedException("tsl2nano.multiple.items", new Object[] { StringUtil.fixString(queryString,
+            throw new ManagedException("tsl2nano.multiple.items", new Object[] { StringUtil.fixString(queryString,
                 25,
                 ' ',
                 true) });
@@ -703,7 +703,7 @@ public class GenericServiceBean extends NamedQueryServiceBean implements IGeneri
         try {
             transUser = userEntity.newInstance();
         } catch (final Exception e) {
-            ForwardedException.forward(e);
+            ManagedException.forward(e);
         }
         BeanAttribute.getBeanAttribute(userEntity, userIdAttribute).setValue(transUser, userPrincipal.getName());
         return findByExample(transUser);

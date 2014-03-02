@@ -39,7 +39,7 @@ import de.tsl2.nano.bean.BeanClass;
 import de.tsl2.nano.bean.BeanUtil;
 import de.tsl2.nano.bean.IAttribute;
 import de.tsl2.nano.bean.IAttributeDef;
-import de.tsl2.nano.exception.ForwardedException;
+import de.tsl2.nano.exception.ManagedException;
 import de.tsl2.nano.log.LogFactory;
 import de.tsl2.nano.util.StringUtil;
 
@@ -612,7 +612,7 @@ public class ServiceUtil {
                 LOG.debug("invoking bean-id on : " + m);
                 return m.invoke(bean, new Object[0]);
             } catch (final Exception e) {
-                ForwardedException.forward(e);
+                ManagedException.forward(e);
             }
         }
         //on a field?
@@ -628,7 +628,7 @@ public class ServiceUtil {
                 }
             } catch (final Exception e) {
                 LOG.error("The @Id field '" + f.getName() + " ' is not accessible!!!");
-                ForwardedException.forward(e);
+                ManagedException.forward(e);
             }
         }
         return null;
@@ -765,7 +765,7 @@ public class ServiceUtil {
                         newValue = beanAttribute.getType().getField(fieldName).get(null);
                     }
                 } catch (final Exception e) {
-                    ForwardedException.forward(e);
+                    ManagedException.forward(e);
                     return;
                 }
                 beanAttribute.setValue(bean, newValue);

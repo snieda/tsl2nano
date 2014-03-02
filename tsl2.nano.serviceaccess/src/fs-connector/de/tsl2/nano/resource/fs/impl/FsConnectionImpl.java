@@ -15,7 +15,7 @@ import java.io.InputStream;
 import org.apache.commons.logging.Log;
 import de.tsl2.nano.log.LogFactory;
 
-import de.tsl2.nano.exception.ForwardedException;
+import de.tsl2.nano.exception.ManagedException;
 import de.tsl2.nano.resource.fs.FsConnection;
 
 /**
@@ -60,7 +60,7 @@ public class FsConnectionImpl implements FsConnection {
             checkManagedConnection();
             managedCon.detachConnection(this);
         } catch (IOException e) {
-            ForwardedException.forward(e);
+            ManagedException.forward(e);
         }
     }
 

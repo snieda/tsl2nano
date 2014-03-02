@@ -16,7 +16,7 @@ import javax.security.auth.Subject;
 import org.apache.commons.logging.Log;
 import de.tsl2.nano.log.LogFactory;
 
-import de.tsl2.nano.exception.ForwardedException;
+import de.tsl2.nano.exception.ManagedException;
 
 /**
  * base service class. provides starting privileged actions with a security subject, logging and exception handling.
@@ -94,7 +94,7 @@ public abstract class AbstractService {
      * @throws RuntimeException always
      */
     private Exception handleException(Exception e) {
-        return (Exception) ForwardedException.forward(e);
+        return (Exception) ManagedException.forward(e);
 //		Throwable cause = e.getCause();
 //		if (cause == null) {
 //			cause = e;
@@ -102,7 +102,7 @@ public abstract class AbstractService {
 //		if (cause instanceof RuntimeException) {
 //			throw (RuntimeException) cause;
 //		}
-//		throw new FormattedException("tsl2nano.client.servererror", null,
+//		throw new ManagedException("tsl2nano.client.servererror", null,
 //				cause);
     }
 

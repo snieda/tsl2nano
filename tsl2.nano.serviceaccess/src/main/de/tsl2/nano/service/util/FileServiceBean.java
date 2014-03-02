@@ -24,7 +24,7 @@ import javax.resource.ResourceException;
 import org.apache.commons.logging.Log;
 import de.tsl2.nano.log.LogFactory;
 
-import de.tsl2.nano.exception.ForwardedException;
+import de.tsl2.nano.exception.ManagedException;
 import de.tsl2.nano.resource.fs.FsConnection;
 import de.tsl2.nano.resource.fs.FsConnectionFactory;
 
@@ -70,7 +70,7 @@ public class FileServiceBean implements IFileService, IFileLocalService {
             return new BufferedReader(new InputStreamReader(con.getInputStream(fileName)));
         } catch (final Exception e) {
             closeConnection();
-            ForwardedException.forward(e);
+            ManagedException.forward(e);
         }
         return null;
     }
@@ -88,7 +88,7 @@ public class FileServiceBean implements IFileService, IFileLocalService {
             inputStream.read(bytes, 0, bytes.length);
             return bytes;
         } catch (final Exception e) {
-            ForwardedException.forward(e);
+            ManagedException.forward(e);
         } finally {
             closeConnection();
         }
@@ -105,7 +105,7 @@ public class FileServiceBean implements IFileService, IFileLocalService {
             LOG.debug("renaming " + sourceName + " to file " + destinationName);
             con.rename(sourceName, destinationName);
         } catch (final Exception e) {
-            ForwardedException.forward(e);
+            ManagedException.forward(e);
         } finally {
             closeConnection();
         }
@@ -121,7 +121,7 @@ public class FileServiceBean implements IFileService, IFileLocalService {
             LOG.debug("writing " + data.available() + " bytes to file " + destFileName);
             con.writeFile(destFileName, data, overwrite);
         } catch (final Exception e) {
-            ForwardedException.forward(e);
+            ManagedException.forward(e);
         } finally {
             closeConnection();
         }
@@ -139,7 +139,7 @@ public class FileServiceBean implements IFileService, IFileLocalService {
             LOG.debug("writing " + data.length + " bytes to file " + destFileName);
             con.writeFile(destFileName, stream, overwrite);
         } catch (final Exception e) {
-            ForwardedException.forward(e);
+            ManagedException.forward(e);
         } finally {
             closeConnection();
         }
@@ -154,7 +154,7 @@ public class FileServiceBean implements IFileService, IFileLocalService {
             final FsConnection con = getConnection();
             con.delete(fileName);
         } catch (final Exception e) {
-            ForwardedException.forward(e);
+            ManagedException.forward(e);
         } finally {
             closeConnection();
         }
@@ -170,7 +170,7 @@ public class FileServiceBean implements IFileService, IFileLocalService {
             return con.exists(fileName);
         } catch (final Exception e) {
             closeConnection();
-            ForwardedException.forward(e);
+            ManagedException.forward(e);
         }
         return false;
     }
@@ -184,7 +184,7 @@ public class FileServiceBean implements IFileService, IFileLocalService {
             return getConnection().isDirectory(fileName);
         } catch (final Exception e) {
             closeConnection();
-            ForwardedException.forward(e);
+            ManagedException.forward(e);
             return false;
         }
     }
@@ -198,7 +198,7 @@ public class FileServiceBean implements IFileService, IFileLocalService {
             return getConnection().getDirectoryEntries(dirName);
         } catch (final Exception e) {
             closeConnection();
-            ForwardedException.forward(e);
+            ManagedException.forward(e);
             return null;
         }
     }

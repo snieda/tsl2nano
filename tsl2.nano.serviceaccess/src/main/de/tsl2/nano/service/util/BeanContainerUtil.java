@@ -38,7 +38,7 @@ import de.tsl2.nano.bean.BeanContainer;
 import de.tsl2.nano.bean.BeanUtil;
 import de.tsl2.nano.bean.IAttributeDef;
 import de.tsl2.nano.collection.CollectionUtil;
-import de.tsl2.nano.exception.ForwardedException;
+import de.tsl2.nano.exception.ManagedException;
 import de.tsl2.nano.log.LogFactory;
 import de.tsl2.nano.serviceaccess.ServiceFactory;
 import de.tsl2.nano.util.Util;
@@ -454,7 +454,7 @@ public class BeanContainerUtil {
             attrDefCache.put(attrKey(clazz, attribute), def);
             return def;
         } catch (final Exception e) {
-            ForwardedException.forward(e);
+            ManagedException.forward(e);
             return null;
         }
     }

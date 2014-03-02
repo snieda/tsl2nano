@@ -29,7 +29,7 @@ import com.j256.ormlite.dao.DaoManager;
 import com.j256.ormlite.jdbc.JdbcConnectionSource;
 import com.j256.ormlite.support.ConnectionSource;
 
-import de.tsl2.nano.exception.ForwardedException;
+import de.tsl2.nano.exception.ManagedException;
 import de.tsl2.nano.log.LogFactory;
 
 /**
@@ -54,7 +54,7 @@ public class EntityManager implements javax.persistence.EntityManager {
             connectionSource = new JdbcConnectionSource((String) props.get("jdbc.url"));
             LOG.info("New Entitymanager for ORMLite created");
         } catch (SQLException e) {
-            ForwardedException.forward(e);
+            ManagedException.forward(e);
         }
     }
 
@@ -62,7 +62,7 @@ public class EntityManager implements javax.persistence.EntityManager {
         try {
             return DaoManager.createDao(connectionSource, type);
         } catch (SQLException e) {
-            ForwardedException.forward(e);
+            ManagedException.forward(e);
             return null;
         }
     }
@@ -78,7 +78,7 @@ public class EntityManager implements javax.persistence.EntityManager {
         try {
             connectionSource.close();
         } catch (SQLException e) {
-            ForwardedException.forward(e);
+            ManagedException.forward(e);
         }
     }
 
@@ -146,7 +146,7 @@ public class EntityManager implements javax.persistence.EntityManager {
         try {
             dao(arg0).queryForId(arg1);
         } catch (SQLException e) {
-            ForwardedException.forward(e);
+            ManagedException.forward(e);
         }
         return null;
     }
@@ -257,7 +257,7 @@ public class EntityManager implements javax.persistence.EntityManager {
         try {
             dao(arg0.getClass()).commit(connectionSource.getReadWriteConnection());
         } catch (SQLException e) {
-            ForwardedException.forward(e);
+            ManagedException.forward(e);
         }        return null;
     }
 
@@ -295,7 +295,7 @@ public class EntityManager implements javax.persistence.EntityManager {
         try {
             dao(arg0.getClass()).deleteById(arg0);
         } catch (SQLException e) {
-            ForwardedException.forward(e);
+            ManagedException.forward(e);
         }
     }
 

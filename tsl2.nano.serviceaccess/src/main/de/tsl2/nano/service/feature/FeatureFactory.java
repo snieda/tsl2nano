@@ -17,8 +17,8 @@ import java.util.Properties;
 import org.apache.commons.logging.Log;
 import de.tsl2.nano.log.LogFactory;
 
-import de.tsl2.nano.exception.FormattedException;
-import de.tsl2.nano.exception.ForwardedException;
+import de.tsl2.nano.exception.ManagedException;
+import de.tsl2.nano.exception.ManagedException;
 import de.tsl2.nano.serviceaccess.ServiceFactory;
 
 /**
@@ -175,7 +175,7 @@ public class FeatureFactory {
             } catch (final ClassNotFoundException e) {
                 if (mustImplement) {
                     LOG.error("FeatureFactory couldn't load implementation class " + implClassName);
-                    ForwardedException.forward(e);
+                    ManagedException.forward(e);
                     return null;
                 } else {
                     clazz = null;
@@ -187,7 +187,7 @@ public class FeatureFactory {
                 try {
                     instance = clazz.newInstance();
                 } catch (final Exception e) {
-                    ForwardedException.forward(e);
+                    ManagedException.forward(e);
                 }
             }
             final T proxy = FeatureProxy.createBeanImplementation(interfaze, instance, classloader);
@@ -229,14 +229,14 @@ public class FeatureFactory {
         String featurePathConstraint = properties.getProperty(KEY_INTERF_PACKAGE_PREFIX);
         if (featurePathConstraint != null) {
             if (!interfaze.getPackage().getName().startsWith(featurePathConstraint)) {
-                throw new FormattedException("tsl2nano.implementationerror",
+                throw new ManagedException("tsl2nano.implementationerror",
                     new Object[] { "Feature-Interface: " + interfaze.getName(),
                         "Please use only feature interfaces in packages starting with '" + featurePathConstraint + "'!" });
             }
         } else { //not defined? ==> default mechansim
             featurePathConstraint = "feature";
             if (!interfaze.getPackage().getName().contains(featurePathConstraint)) {
-                throw new FormattedException("tsl2nano.implementationerror",
+                throw new ManagedException("tsl2nano.implementationerror",
                     new Object[] { "Feature-Interface: " + interfaze.getName(),
                         "Please use only feature interfaces in packages containing the substring '" + featurePathConstraint
                             + "'!" });
