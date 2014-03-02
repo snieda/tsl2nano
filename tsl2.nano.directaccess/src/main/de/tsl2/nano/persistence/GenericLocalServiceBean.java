@@ -12,7 +12,7 @@ import javax.persistence.Persistence;
 import org.apache.commons.logging.Log;
 
 import de.tsl2.nano.Environment;
-import de.tsl2.nano.exception.ForwardedException;
+import de.tsl2.nano.exception.ManagedException;
 import de.tsl2.nano.log.LogFactory;
 import de.tsl2.nano.persistence.replication.GenericReplicatingServiceBean;
 
@@ -72,7 +72,7 @@ public class GenericLocalServiceBean extends GenericReplicatingServiceBean {
             return persistCollection;
         } catch (Exception ex) {
             connection().getTransaction().rollback();
-            ForwardedException.forward(ex);
+            ManagedException.forward(ex);
             return null;
         }
     }
@@ -89,7 +89,7 @@ public class GenericLocalServiceBean extends GenericReplicatingServiceBean {
             return refreshObject;
         } catch (Exception ex) {
             connection().getTransaction().rollback();
-            ForwardedException.forward(ex);
+            ManagedException.forward(ex);
             return null;
         }
     }
@@ -105,7 +105,7 @@ public class GenericLocalServiceBean extends GenericReplicatingServiceBean {
             connection().getTransaction().commit();
         } catch (Exception ex) {
             connection().getTransaction().rollback();
-            ForwardedException.forward(ex);
+            ManagedException.forward(ex);
         }
     }
 
@@ -121,7 +121,7 @@ public class GenericLocalServiceBean extends GenericReplicatingServiceBean {
             return count;
         } catch (Exception ex) {
             connection().getTransaction().rollback();
-            ForwardedException.forward(ex);
+            ManagedException.forward(ex);
             return -1;
         }
     }
@@ -149,7 +149,7 @@ public class GenericLocalServiceBean extends GenericReplicatingServiceBean {
         // // use factory to obtain application-managed entity manager
         // entityManager = emf.createEntityManager();
         // } catch (NamingException e) {
-        // ForwardedException.forward(e);
+        // ManagedException.forward(e);
         // }
     }
 }

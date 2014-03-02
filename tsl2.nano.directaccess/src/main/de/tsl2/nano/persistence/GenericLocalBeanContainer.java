@@ -77,7 +77,7 @@ public class GenericLocalBeanContainer extends GenericBeanContainer {
 //                                cfg.addClass(clazz);
 //                            }
 //                        } catch (Exception ex) {
-//                            ForwardedException.forward(ex);
+//                            ManagedException.forward(ex);
 //                        }
 //                    }
 //                    put("configuration", cfg);
@@ -91,7 +91,7 @@ public class GenericLocalBeanContainer extends GenericBeanContainer {
 //                }
 //                put("session", session);
 //            } catch (Exception ex) {
-//                ForwardedException.forward(ex);
+//                ManagedException.forward(ex);
 //            }
 //        }
 //        return session;

@@ -20,7 +20,7 @@ import java.util.concurrent.Executors;
 import org.apache.commons.logging.Log;
 
 import de.tsl2.nano.Environment;
-import de.tsl2.nano.exception.ForwardedException;
+import de.tsl2.nano.exception.ManagedException;
 import de.tsl2.nano.execution.CompatibilityLayer;
 import de.tsl2.nano.log.LogFactory;
 import de.tsl2.nano.persistence.Persistence;
@@ -163,7 +163,7 @@ public class Replication extends Persistence implements Runnable {
                 database_script = StringUtil.insertProperties(database_script, p);
                 FileUtil.writeBytes(database_script.getBytes(), databaseFile, false);
             } catch (IOException e) {
-                ForwardedException.forward(e);
+                ManagedException.forward(e);
             }
         }
         /*

@@ -124,7 +124,7 @@ import de.tsl2.nano.bean.def.ValueExpressionFormat;
 import de.tsl2.nano.bean.def.ValueGroup;
 import de.tsl2.nano.collection.CollectionUtil;
 import de.tsl2.nano.collection.MapUtil;
-import de.tsl2.nano.exception.ForwardedException;
+import de.tsl2.nano.exception.ManagedException;
 import de.tsl2.nano.format.GenericParser;
 import de.tsl2.nano.format.RegExpFormat;
 import de.tsl2.nano.h5.configuration.BeanConfigurator;
@@ -233,7 +233,7 @@ public class Html5Presentation<T> extends BeanPresentationHelper<T> implements I
                 FileUtil.writeBytes(html.getBytes(), Environment.getConfigPath() + "html-server-response.html", false);
             return html;
         } catch (Exception ex) {
-            return HtmlUtil.createMessagePage(ForwardedException.toRuntimeEx(ex, true).getMessage());
+            return HtmlUtil.createMessagePage(ManagedException.toRuntimeEx(ex, true).getMessage());
         }
     }
 
@@ -274,7 +274,7 @@ public class Html5Presentation<T> extends BeanPresentationHelper<T> implements I
                             + ": missing body tag!");
                 } catch (Exception e) {
                     LOG.error("error on loading file " + metaFrame.getAbsolutePath());
-                    ForwardedException.forward(e);
+                    ManagedException.forward(e);
                     return null;
                 }
             } else {
@@ -334,7 +334,7 @@ public class Html5Presentation<T> extends BeanPresentationHelper<T> implements I
             }
             return body;
         } catch (ParserConfigurationException e) {
-            ForwardedException.forward(e);
+            ManagedException.forward(e);
             return null;
         }
     }

@@ -24,7 +24,7 @@ import de.tsl2.nano.action.CommonAction;
 import de.tsl2.nano.action.IAction;
 import de.tsl2.nano.bean.BeanContainer;
 import de.tsl2.nano.bean.def.BeanValue;
-import de.tsl2.nano.exception.ForwardedException;
+import de.tsl2.nano.exception.ManagedException;
 import de.tsl2.nano.execution.ScriptUtil;
 import de.tsl2.nano.persistence.Persistence;
 import de.tsl2.nano.util.FileUtil;
@@ -219,7 +219,7 @@ public class ScriptTool implements Serializable {
             try {
                 FileUtils.copyURLToFile(antscriptOriginUrl, antscriptFile);
             } catch (Exception e) {
-                ForwardedException.forward(e);
+                ManagedException.forward(e);
             }
         }
         File antscriptProp = new File(basedir + ANTSCRIPTPROP);
@@ -228,7 +228,7 @@ public class ScriptTool implements Serializable {
             try {
                 FileUtils.copyURLToFile(antscriptOriginUrl, antscriptProp);
             } catch (Exception e) {
-                ForwardedException.forward(e);
+                ManagedException.forward(e);
             }
         }
     }

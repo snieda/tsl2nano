@@ -20,7 +20,7 @@ import java.util.Map;
 import java.util.Properties;
 
 import de.tsl2.nano.Environment;
-import de.tsl2.nano.exception.ForwardedException;
+import de.tsl2.nano.exception.ManagedException;
 import de.tsl2.nano.persistence.replication.Replication;
 import de.tsl2.nano.util.FileUtil;
 import de.tsl2.nano.util.StringUtil;
@@ -404,7 +404,7 @@ public class Persistence implements Serializable {
                 persistence.save();
                 return true;
             } catch (IOException e) {
-                ForwardedException.forward(e);
+                ManagedException.forward(e);
             }
         }
         return false;

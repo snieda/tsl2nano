@@ -24,7 +24,7 @@ import org.w3c.dom.Attr;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 
-import de.tsl2.nano.exception.ForwardedException;
+import de.tsl2.nano.exception.ManagedException;
 import de.tsl2.nano.util.Util;
 
 /**
@@ -262,7 +262,7 @@ public class HtmlUtil {
             trans.transform(source, result);
             return sw.toString();
         } catch (TransformerException e) {
-            ForwardedException.forward(e);
+            ManagedException.forward(e);
             return null;
         }
     }

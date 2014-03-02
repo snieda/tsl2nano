@@ -19,7 +19,7 @@ import java.util.Set;
 import de.tsl2.nano.bean.BeanUtil;
 import de.tsl2.nano.bean.def.AbstractExpression;
 import de.tsl2.nano.bean.def.Bean;
-import de.tsl2.nano.exception.ForwardedException;
+import de.tsl2.nano.exception.ManagedException;
 import de.tsl2.nano.execution.IPRunnable;
 
 /**
@@ -79,7 +79,7 @@ public abstract class RunnableExpression<T extends Serializable> extends Abstrac
                 Bean.getBean((Serializable) beanInstance).getAttribute(connectedAttribute).setValue(result);
             return result;
         } catch (final Exception e) {
-            ForwardedException.forward(new IllegalStateException("Execution of '" + getName()
+            ManagedException.forward(new IllegalStateException("Execution of '" + getName()
                 + "' with current arguments failed!", e));
             return null;
         }

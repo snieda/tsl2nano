@@ -43,7 +43,7 @@ import de.tsl2.nano.bean.def.IPresentable;
 import de.tsl2.nano.collection.CollectionUtil;
 import de.tsl2.nano.collection.ListSet;
 import de.tsl2.nano.exception.ExceptionHandler;
-import de.tsl2.nano.exception.ForwardedException;
+import de.tsl2.nano.exception.ManagedException;
 import de.tsl2.nano.format.RegExpFormat;
 import de.tsl2.nano.h5.NanoHTTPD.Response;
 import de.tsl2.nano.h5.navigation.IBeanNavigator;
@@ -153,7 +153,7 @@ public class NanoH5Session {
             }
         } catch (Throwable e /*respect errors like NoClassDefFound...the application should continue!*/) {
             LOG.error(e);
-            RuntimeException ex = ForwardedException.toRuntimeEx(e, true);
+            RuntimeException ex = ManagedException.toRuntimeEx(e, true);
             msg = refreshPage(ex.getMessage());
             response = server.createResponse(HTTP_BADREQUEST, MIME_HTML, msg);
         }
@@ -340,7 +340,7 @@ public class NanoH5Session {
                 for (Exception ex : exceptions) {
                     buf.append(ex.getMessage() + "\n");
                 }
-                throw new ForwardedException(buf.toString(), exceptions.iterator().next());
+                throw new ManagedException(buf.toString(), exceptions.iterator().next());
             }
         }
     }

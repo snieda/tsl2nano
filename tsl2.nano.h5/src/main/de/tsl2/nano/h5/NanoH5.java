@@ -41,8 +41,8 @@ import de.tsl2.nano.bean.def.IPageBuilder;
 import de.tsl2.nano.bean.def.IPresentable;
 import de.tsl2.nano.bean.def.SecureAction;
 import de.tsl2.nano.collection.MapUtil;
-import de.tsl2.nano.exception.FormattedException;
-import de.tsl2.nano.exception.ForwardedException;
+import de.tsl2.nano.exception.ManagedException;
+import de.tsl2.nano.exception.ManagedException;
 import de.tsl2.nano.execution.CompatibilityLayer;
 import de.tsl2.nano.execution.SystemUtil;
 import de.tsl2.nano.h5.expression.RuleExpression;
@@ -145,7 +145,7 @@ public class NanoH5 extends NanoHTTPD {
         try {
             serviceURL = new URL(serviceURLString);
         } catch (MalformedURLException e) {
-            ForwardedException.forward(e);
+            ManagedException.forward(e);
         }
         return serviceURL;
     }
@@ -411,7 +411,7 @@ public class NanoH5 extends NanoHTTPD {
             //TODO: show generation message before - get script exception from exception handler
             generateJarFile(persistence.getJarFile());
             if (!new File(persistence.getJarFile()).exists()) {
-                throw new FormattedException("Couldn't generate bean jar file '" + persistence.getJarFile()
+                throw new ManagedException("Couldn't generate bean jar file '" + persistence.getJarFile()
                     + "' through script hibtools.xml! Please see log file for exceptions.");
             }
         }

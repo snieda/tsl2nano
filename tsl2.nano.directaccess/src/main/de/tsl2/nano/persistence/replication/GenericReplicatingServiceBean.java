@@ -31,7 +31,7 @@ import de.tsl2.nano.Environment;
 import de.tsl2.nano.bean.BeanAttribute;
 import de.tsl2.nano.bean.BeanClass;
 import de.tsl2.nano.classloader.ThreadUtil;
-import de.tsl2.nano.exception.ForwardedException;
+import de.tsl2.nano.exception.ManagedException;
 import de.tsl2.nano.log.LogFactory;
 import de.tsl2.nano.service.util.AbstractStatelessServiceBean;
 import de.tsl2.nano.service.util.GenericServiceBean;
@@ -149,7 +149,7 @@ public class GenericReplicatingServiceBean extends GenericServiceBean {
 //            String msg = ex.toString();
 //            boolean dbAnswer = msg != null && msg.contains("SQLException");
             if (/*!dbAnswer && */throwException)
-                ForwardedException.forward(ex);
+                ManagedException.forward(ex);
             return connected = false;//!dbAnswer;
         }
     }
