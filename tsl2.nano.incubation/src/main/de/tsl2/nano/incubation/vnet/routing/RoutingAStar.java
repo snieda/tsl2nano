@@ -9,7 +9,7 @@
  */
 package de.tsl2.nano.incubation.vnet.routing;
 
-import de.tsl2.nano.exception.ForwardedException;
+import de.tsl2.nano.exception.ManagedException;
 import de.tsl2.nano.incubation.vnet.Connection;
 import de.tsl2.nano.incubation.vnet.Node;
 
@@ -32,7 +32,7 @@ public class RoutingAStar extends AbstractRoutingAStar<Location, Float> {
         try {
             return currentNode.clone().connect(successor, f);
         } catch (CloneNotSupportedException e) {
-            ForwardedException.forward(e);
+            ManagedException.forward(e);
             return null;
         }
     }

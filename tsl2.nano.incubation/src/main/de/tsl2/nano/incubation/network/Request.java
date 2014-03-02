@@ -4,7 +4,7 @@ import java.io.Serializable;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
 
-import de.tsl2.nano.exception.ForwardedException;
+import de.tsl2.nano.exception.ManagedException;
 
 /**
  * Objects of this class will be sent from {@link JobServer}s {@link Work} to the remote {@link Worker} to check the
@@ -87,7 +87,7 @@ public class Request implements Serializable {
             try {
                 response = task.get();
             } catch (Exception e) {
-                ForwardedException.forward(e);
+                ManagedException.forward(e);
             }
             break;
         default:

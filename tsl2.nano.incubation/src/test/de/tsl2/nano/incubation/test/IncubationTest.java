@@ -37,7 +37,7 @@ import de.tsl2.nano.Environment;
 import de.tsl2.nano.bean.def.BeanDefinition;
 import de.tsl2.nano.collection.MapUtil;
 import de.tsl2.nano.collection.TableList;
-import de.tsl2.nano.exception.ForwardedException;
+import de.tsl2.nano.exception.ManagedException;
 import de.tsl2.nano.execution.Profiler;
 import de.tsl2.nano.execution.XmlUtil;
 import de.tsl2.nano.format.DefaultFormat;
@@ -98,7 +98,7 @@ public class IncubationTest {
                 try {
                     Thread.sleep(10);
                 } catch (InterruptedException e) {
-                    ForwardedException.forward(e);
+                    ManagedException.forward(e);
                 }
                 System.out.print('.');
             }
@@ -145,7 +145,7 @@ public class IncubationTest {
         try {
             Thread.sleep(2000);
         } catch (InterruptedException e) {
-            ForwardedException.forward(e);
+            ManagedException.forward(e);
         }
 
         //should output: ich habe hunger
@@ -211,7 +211,7 @@ public class IncubationTest {
         try {
             Thread.sleep(2000);
         } catch (InterruptedException e) {
-            ForwardedException.forward(e);
+            ManagedException.forward(e);
         }
         //should output: C
     }

@@ -14,7 +14,7 @@ import java.util.HashSet;
 import java.util.Set;
 import java.util.concurrent.atomic.AtomicInteger;
 
-import de.tsl2.nano.exception.ForwardedException;
+import de.tsl2.nano.exception.ManagedException;
 import de.tsl2.nano.messaging.EventController;
 import de.tsl2.nano.messaging.IListener;
 import de.tsl2.nano.util.StringUtil;
@@ -170,7 +170,7 @@ public class Node<T extends IListener<Notification> & ILocatable & Serializable 
             try {
                 Thread.sleep(100);
             } catch (InterruptedException e) {
-                ForwardedException.forward(e);
+                ManagedException.forward(e);
             }
         }
         Net.log("node " + this

@@ -31,7 +31,7 @@ import javax.net.ServerSocketFactory;
 
 import org.apache.commons.logging.Log;
 
-import de.tsl2.nano.exception.ForwardedException;
+import de.tsl2.nano.exception.ManagedException;
 import de.tsl2.nano.log.LogFactory;
 
 /**
@@ -92,7 +92,7 @@ public class JobServer implements Runnable, Closeable {
                     connections.put(ip, socket);
                     return socket;
                 } catch (Exception e) {
-                    ForwardedException.forward(e);
+                    ManagedException.forward(e);
                 }
             }
         }
@@ -135,7 +135,7 @@ public class JobServer implements Runnable, Closeable {
             o.writeObject(new JobContext<CONTEXT>(name, command, cl, null));
             return new Work(name, connection);
         } catch (Exception e) {
-            ForwardedException.forward(e);
+            ManagedException.forward(e);
             FutureTask<CONTEXT> futureTask = new FutureTask<CONTEXT>(command);
             return futureTask;
         }
@@ -152,7 +152,7 @@ public class JobServer implements Runnable, Closeable {
         try {
             return execute(name, command).get(timeout, TimeUnit.MILLISECONDS);
         } catch (Exception e) {
-            ForwardedException.forward(e);
+            ManagedException.forward(e);
             return null;
         }
     }
@@ -169,7 +169,7 @@ public class JobServer implements Runnable, Closeable {
                 new Worker(localExecutorService, serverSocket.accept());
             }
         } catch (Exception e) {
-            ForwardedException.forward(e);
+            ManagedException.forward(e);
         }
     }
 

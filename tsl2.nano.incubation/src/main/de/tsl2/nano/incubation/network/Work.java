@@ -24,7 +24,7 @@ import java.util.concurrent.TimeoutException;
 
 import org.apache.commons.logging.Log;
 
-import de.tsl2.nano.exception.ForwardedException;
+import de.tsl2.nano.exception.ManagedException;
 import de.tsl2.nano.log.LogFactory;
 
 /**
@@ -92,7 +92,7 @@ public class Work<CONTEXT> implements Future<CONTEXT> {
             ObjectInputStream in = new ObjectInputStream(socket.getInputStream());
             return (Request) in.readObject();
         } catch (Exception e) {
-            ForwardedException.forward(e);
+            ManagedException.forward(e);
         }
         return null;
     }
@@ -115,7 +115,7 @@ public class Work<CONTEXT> implements Future<CONTEXT> {
                 Thread.sleep(200);
             }
         } catch (Exception e) {
-            ForwardedException.forward(e);
+            ManagedException.forward(e);
         } finally {
             if (connected())
                 try {

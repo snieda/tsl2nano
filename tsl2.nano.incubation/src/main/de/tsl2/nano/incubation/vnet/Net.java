@@ -21,7 +21,7 @@ import java.util.TreeMap;
 
 import de.tsl2.nano.Environment;
 import de.tsl2.nano.collection.ListSet;
-import de.tsl2.nano.exception.ForwardedException;
+import de.tsl2.nano.exception.ManagedException;
 import de.tsl2.nano.messaging.EventController;
 import de.tsl2.nano.messaging.IListener;
 
@@ -184,7 +184,7 @@ public class Net<T extends IListener<Notification> & ILocatable & Serializable &
                 waitingCycles += waitTime;
                 Thread.sleep(waitTime);
             } catch (InterruptedException e) {
-                ForwardedException.forward(e);
+                ManagedException.forward(e);
             }
         }
         log(this.getClass(), "timeout of " + timeout + " exceeded");
@@ -237,7 +237,7 @@ public class Net<T extends IListener<Notification> & ILocatable & Serializable &
             try {
                 Thread.sleep(200);
             } catch (InterruptedException e) {
-                ForwardedException.forward(e);
+                ManagedException.forward(e);
             }
         }
         log(this.getClass(), "wait timeout of " + timeout + " msecs exceeded");

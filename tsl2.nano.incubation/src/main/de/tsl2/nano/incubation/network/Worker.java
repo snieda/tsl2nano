@@ -18,7 +18,7 @@ import java.util.concurrent.FutureTask;
 
 import org.apache.commons.logging.Log;
 
-import de.tsl2.nano.exception.ForwardedException;
+import de.tsl2.nano.exception.ManagedException;
 import de.tsl2.nano.log.LogFactory;
 
 /**
@@ -56,7 +56,7 @@ public class Worker {
             executor.execute(task);
             response(socket, task);
         } catch (Exception e) {
-            ForwardedException.forward(e);
+            ManagedException.forward(e);
         }
     }
 
