@@ -46,8 +46,8 @@ import de.tsl2.nano.bean.ValueHolder;
 import de.tsl2.nano.collection.CollectionUtil;
 import de.tsl2.nano.collection.IPredicate;
 import de.tsl2.nano.collection.ListSet;
-import de.tsl2.nano.exception.FormattedException;
-import de.tsl2.nano.exception.ForwardedException;
+import de.tsl2.nano.exception.ManagedException;
+import de.tsl2.nano.exception.ManagedException;
 import de.tsl2.nano.execution.XmlUtil;
 import de.tsl2.nano.format.DefaultFormat;
 import de.tsl2.nano.log.LogFactory;
@@ -217,7 +217,7 @@ public class BeanDefinition<T> extends BeanClass<T> implements Serializable {
         int currentSize = names.size();
         names.removeAll(Arrays.asList(attributeNamesToRemove));
         if (names.size() + attributeNamesToRemove.length != currentSize)
-            throw FormattedException.implementationError("not all of given attributes were removed!",
+            throw ManagedException.implementationError("not all of given attributes were removed!",
                 attributeNamesToRemove,
                 getAttributeNames());
         setAttributeFilter(names.toArray(new String[0]));
@@ -369,7 +369,7 @@ public class BeanDefinition<T> extends BeanClass<T> implements Serializable {
         IAttributeDefinition definition = getAttributeDefinitions().get(name);
         if (definition == null && !allDefinitionsCached) {
             if (isVirtual())
-                throw FormattedException.implementationError("The attribute " + name
+                throw ManagedException.implementationError("The attribute " + name
                     + " was not defined in this virtual bean!\nPlease define this attribute through addAttribute(...)",
                     name);
             definition = createAttributeDefinition(name);
@@ -837,7 +837,7 @@ public class BeanDefinition<T> extends BeanClass<T> implements Serializable {
                     }
                 } catch (Exception e) {
                     if (Environment.get("application.mode.strict", false))
-                        ForwardedException.forward(e);
+                        ManagedException.forward(e);
                     else
                         LOG.error("couldn't load configuration " + xmlFile.getPath() + " for bean " + type, e);
                 }
@@ -972,7 +972,7 @@ public class BeanDefinition<T> extends BeanClass<T> implements Serializable {
                 XmlUtil.saveXml(xmlFile.getPath(), this);
             } catch (Exception e) {
                 if (Environment.get("strict.mode", false))
-                    ForwardedException.forward(e);
+                    ManagedException.forward(e);
                 else
                     LOG.warn("couldn't save configuration " + xmlFile.getPath() + " for bean" + getClazz(), e);
             }

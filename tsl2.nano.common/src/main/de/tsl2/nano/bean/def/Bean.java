@@ -29,8 +29,8 @@ import de.tsl2.nano.bean.IAttribute;
 import de.tsl2.nano.collection.CollectionUtil;
 import de.tsl2.nano.collection.MapUtil;
 import de.tsl2.nano.collection.TimedReferenceMap;
-import de.tsl2.nano.exception.FormattedException;
-import de.tsl2.nano.exception.ForwardedException;
+import de.tsl2.nano.exception.ManagedException;
+import de.tsl2.nano.exception.ManagedException;
 import de.tsl2.nano.messaging.IListener;
 import de.tsl2.nano.util.StringUtil;
 
@@ -252,7 +252,7 @@ public class Bean<T> extends BeanDefinition<T> {
     public BeanDefinition<?> getValueAsBean(String name, boolean cacheInstance) {
         IValueDefinition<?> attribute = getAttribute(name);
         if (BeanUtil.isStandardType(attribute.getType()) /*!BeanContainer.instance().isPersistable(attribute.getType())*/)
-            throw new FormattedException("The attribute '" + name + "' is not a persistable bean");
+            throw new ManagedException("The attribute '" + name + "' is not a persistable bean");
         Serializable value = (Serializable) attribute.getValue();
         if (value == null)
             return null;
@@ -467,7 +467,7 @@ public class Bean<T> extends BeanDefinition<T> {
             newBean = BeanContainer.instance().save(bean);
         } catch (final RuntimeException e) {
             if (BeanContainer.isConstraintError(e)) {
-                throw new FormattedException("tsl2nano.impossible_create", new Object[] { /*Configuration.current()
+                throw new ManagedException("tsl2nano.impossible_create", new Object[] { /*Configuration.current()
                                                                                            .getDefaultFormatter()
                                                                                            .format(*/bean /*)*/});
             } else {
@@ -553,7 +553,7 @@ public class Bean<T> extends BeanDefinition<T> {
             }
             return valueDefs;
         } catch (Exception e) {
-            ForwardedException.forward(e);
+            ManagedException.forward(e);
             return null;
         }
     }

@@ -29,7 +29,7 @@ import org.apache.commons.logging.Log;
 import de.tsl2.nano.bean.BeanClass;
 import de.tsl2.nano.collection.CollectionUtil;
 import de.tsl2.nano.currency.CurrencyUtil;
-import de.tsl2.nano.exception.FormattedException;
+import de.tsl2.nano.exception.ManagedException;
 import de.tsl2.nano.execution.CompatibilityLayer;
 import de.tsl2.nano.log.LogFactory;
 import de.tsl2.nano.util.NumberUtil;
@@ -319,7 +319,7 @@ public class FormatUtil {
     protected static Object checkParse(Format format, Object parseResult, ParsePosition pos, String source) {
         parseResult = parseResult != null ? parseResult : format.parseObject(source, pos);
         if (source != null && !source.equals(format.format(parseResult)))
-            throw new FormattedException("swartifex.invalidvalue", new Object[] { source });
+            throw new ManagedException("swartifex.invalidvalue", new Object[] { source });
         return parseResult;
     }
 

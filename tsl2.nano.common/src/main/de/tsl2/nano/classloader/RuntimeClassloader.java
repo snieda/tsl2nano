@@ -26,8 +26,8 @@ import org.apache.commons.logging.Log;
 
 import de.tsl2.nano.Environment;
 import de.tsl2.nano.bean.BeanUtil;
-import de.tsl2.nano.exception.FormattedException;
-import de.tsl2.nano.exception.ForwardedException;
+import de.tsl2.nano.exception.ManagedException;
+import de.tsl2.nano.exception.ManagedException;
 import de.tsl2.nano.exception.Message;
 import de.tsl2.nano.log.LogFactory;
 import de.tsl2.nano.util.FileUtil;
@@ -102,7 +102,7 @@ public class RuntimeClassloader extends URLClassLoader {
 //            return new URL("file", "localhost", fileName);
             return new File(fileName).toURI().toURL();
         } catch (final MalformedURLException e) {
-            ForwardedException.forward(e);
+            ManagedException.forward(e);
             return null;
         }
     }
@@ -130,7 +130,7 @@ public class RuntimeClassloader extends URLClassLoader {
         String p = null;
         classNames = FileUtil.readFileNamesFromZip(beanjar, "*" + CLS);
         if (classNames == null) {
-            throw new FormattedException("The given jar-file '" + beanjar + "' doesn't exist!");
+            throw new ManagedException("The given jar-file '" + beanjar + "' doesn't exist!");
         }
 
         beanClasses = new ArrayList<Class>(classNames.length);
@@ -174,7 +174,7 @@ public class RuntimeClassloader extends URLClassLoader {
                 } catch (Throwable e) {
                     LOG.error(e.toString());
                     loaderrors++;
-//                    ForwardedException.forward(e);
+//                    ManagedException.forward(e);
                 }
             }
         }
@@ -226,7 +226,7 @@ public class RuntimeClassloader extends URLClassLoader {
                         }
                     } catch (InterruptedException e) {
                         LOG.error(e);
-//                        ForwardedException.forward(e);
+//                        ManagedException.forward(e);
                     }
                 }
             }

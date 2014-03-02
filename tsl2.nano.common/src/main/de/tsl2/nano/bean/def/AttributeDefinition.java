@@ -38,8 +38,8 @@ import de.tsl2.nano.bean.IAttributeDef;
 import de.tsl2.nano.bean.PrimitiveUtil;
 import de.tsl2.nano.bean.ValueHolder;
 import de.tsl2.nano.collection.CollectionUtil;
-import de.tsl2.nano.exception.FormattedException;
-import de.tsl2.nano.exception.ForwardedException;
+import de.tsl2.nano.exception.ManagedException;
+import de.tsl2.nano.exception.ManagedException;
 import de.tsl2.nano.log.LogFactory;
 import de.tsl2.nano.messaging.EventController;
 import de.tsl2.nano.util.PrivateAccessor;
@@ -125,7 +125,7 @@ public class AttributeDefinition<T> implements IAttributeDefinition<T> {
             //get yourself
             return AttributeDefinition.class.getDeclaredMethod("UNDEFINEDMETHOD", new Class[0]);
         } catch (Exception e) {
-            ForwardedException.forward(e);
+            ManagedException.forward(e);
             return null;
         }
     }
@@ -182,7 +182,7 @@ public class AttributeDefinition<T> implements IAttributeDefinition<T> {
         if (defaultValue != null && doValidation) {
             IStatus s = isValid(defaultValue);
             if (!s.ok())
-                throw new FormattedException(s.message());
+                throw new ManagedException(s.message());
         }
         return this;
     }
@@ -495,12 +495,12 @@ public class AttributeDefinition<T> implements IAttributeDefinition<T> {
                 //the parser will decide, how to handle empty/null values
                 value = (T) format.parseObject(source);
             } catch (ParseException e) {
-                ForwardedException.forward(e);
+                ManagedException.forward(e);
             }
         else if (String.class.isAssignableFrom(getType()))
             value = (T) source;
         else
-            throw new FormattedException("no format/parser available for field " + getName());
+            throw new ManagedException("no format/parser available for field " + getName());
         return value;
     }
 

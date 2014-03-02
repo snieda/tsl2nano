@@ -17,7 +17,7 @@ import javax.crypto.Cipher;
 import javax.crypto.KeyGenerator;
 import javax.crypto.spec.IvParameterSpec;
 
-import de.tsl2.nano.exception.ForwardedException;
+import de.tsl2.nano.exception.ManagedException;
 
 /**
  * symmetric en-/decryption
@@ -96,7 +96,7 @@ public class SymmetricCipher {
             try {
                 kg = KeyGenerator.getInstance("DES");
             } catch (final NoSuchAlgorithmException e) {
-                ForwardedException.forward(e);
+                ManagedException.forward(e);
                 return null;
             }
             kg.init(algKeySize); // 56 is the keysize. Fixed for DES

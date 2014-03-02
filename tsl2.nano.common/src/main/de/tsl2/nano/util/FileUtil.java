@@ -40,7 +40,7 @@ import java.util.zip.ZipOutputStream;
 import org.apache.commons.codec.binary.Base64;
 import org.apache.commons.logging.Log;
 
-import de.tsl2.nano.exception.ForwardedException;
+import de.tsl2.nano.exception.ManagedException;
 import de.tsl2.nano.log.LogFactory;
 
 /**
@@ -65,7 +65,7 @@ public class FileUtil {
             fis = new FileInputStream(zip);
             return new ZipInputStream(fis);
         } catch (FileNotFoundException e) {
-            ForwardedException.forward(e);
+            ManagedException.forward(e);
             return null;
         }
     }
@@ -234,7 +234,7 @@ public class FileUtil {
             //sourceStream.close();
         } catch (Exception ex) {
             LOG.error(ex);
-            ForwardedException.forward(ex);
+            ManagedException.forward(ex);
         }
     }
 
@@ -306,13 +306,13 @@ public class FileUtil {
             stream = new FileOutputStream(new File(fileName));
             saveXml(serializable, stream);
         } catch (final Exception e) {
-            ForwardedException.forward(e);
+            ManagedException.forward(e);
         } finally {
             if (stream != null)
                 try {
                     stream.close();
                 } catch (IOException e) {
-                    ForwardedException.forward(e);
+                    ManagedException.forward(e);
                 }
         }
     }
@@ -342,7 +342,7 @@ public class FileUtil {
         try {
             return loadXml(new FileInputStream(new File(fileName)));
         } catch (final Exception e) {
-            return ForwardedException.forward(e);
+            return ManagedException.forward(e);
         }
     }
 
@@ -362,7 +362,7 @@ public class FileUtil {
             properties.load(resource);
             return properties;
         } catch (final Exception e) {
-            ForwardedException.forward(e);
+            ManagedException.forward(e);
             return null;
         }
     }
@@ -378,7 +378,7 @@ public class FileUtil {
             p.store(new FileOutputStream(new File(resourceFile)), "generated at " + DateFormat.getDateTimeInstance()
                 .format(new Date()) + " by user " + System.getProperty("user.name"));
         } catch (Exception e) {
-            ForwardedException.forward(e);
+            ManagedException.forward(e);
         }
     }
 
@@ -389,7 +389,7 @@ public class FileUtil {
         try {
             return getResource(name, Thread.currentThread().getContextClassLoader());
         } catch (Exception e) {
-            ForwardedException.forward(e);
+            ManagedException.forward(e);
             return null;
         }
     }
@@ -406,7 +406,7 @@ public class FileUtil {
         try {
             return new FileInputStream(new File(name));
         } catch (final FileNotFoundException e) {
-            ForwardedException.forward(e);
+            ManagedException.forward(e);
             return null;
         }
     }
@@ -431,13 +431,13 @@ public class FileUtil {
             LOG.info(length + " Bytes read");
             return data;
         } catch (final Exception e) {
-            ForwardedException.forward(e);
+            ManagedException.forward(e);
         } finally {
             if (file != null) {
                 try {
                     file.close();
                 } catch (final IOException e) {
-                    ForwardedException.forward(e);
+                    ManagedException.forward(e);
                 }
             }
         }
@@ -453,14 +453,14 @@ public class FileUtil {
         try {
             out = new FileOutputStream(file, append);
         } catch (/*FileNotFound*/final Exception ex) {
-            ForwardedException.forward(ex);
+            ManagedException.forward(ex);
             return;
         }
         try {
             out.write(data);
             out.close();
         } catch (/*IO*/final Exception ex) {
-            ForwardedException.forward(ex);
+            ManagedException.forward(ex);
         }
     }
 
@@ -532,7 +532,7 @@ public class FileUtil {
             LOG.debug("reading file " + fileName);
             return getFileData(new FileInputStream(new File(fileName)), encoding);
         } catch (final FileNotFoundException e) {
-            ForwardedException.forward(e);
+            ManagedException.forward(e);
             return null;
         }
     }

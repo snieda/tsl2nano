@@ -21,7 +21,7 @@ import org.simpleframework.xml.core.Commit;
 import org.simpleframework.xml.core.Persist;
 
 import de.tsl2.nano.classloader.ThreadUtil;
-import de.tsl2.nano.exception.ForwardedException;
+import de.tsl2.nano.exception.ManagedException;
 import de.tsl2.nano.execution.XmlUtil;
 import de.tsl2.nano.util.BitUtil;
 //import de.tsl2.nano.execution.CompatibilityLayer;
@@ -152,7 +152,7 @@ public/*abstract*/class LogFactory implements Runnable, Serializable {
             //TODO use PipeReader to write to console, too
             initializeLogger(instance().outputformat, -1, instance().out, instance().err);
         } catch (Exception e) {
-            ForwardedException.forward(e);
+            ManagedException.forward(e);
         }
     }
 
@@ -379,7 +379,7 @@ public/*abstract*/class LogFactory implements Runnable, Serializable {
                 try {
                     Thread.sleep(200);
                 } catch (InterruptedException e) {
-                    ForwardedException.forward(e);
+                    ManagedException.forward(e);
                 }
             }
         }

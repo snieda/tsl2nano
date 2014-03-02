@@ -17,7 +17,7 @@ import org.apache.tools.ant.BuildListener;
 import org.apache.tools.ant.Project;
 import org.apache.tools.ant.ProjectHelper;
 
-import de.tsl2.nano.exception.ForwardedException;
+import de.tsl2.nano.exception.ManagedException;
 import de.tsl2.nano.util.FileUtil;
 import de.tsl2.nano.util.StringUtil;
 
@@ -117,7 +117,7 @@ public class ScriptUtil extends SystemUtil {
                     + StringUtil.toFormattedString(properties, 100));
             }
             p.fireBuildFinished(e);
-            ForwardedException.forward(e);
+            ManagedException.forward(e);
         }
     }
 

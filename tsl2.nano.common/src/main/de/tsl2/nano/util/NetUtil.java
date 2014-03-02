@@ -15,7 +15,7 @@ import java.net.SocketException;
 import java.net.UnknownHostException;
 import java.util.Enumeration;
 
-import de.tsl2.nano.exception.ForwardedException;
+import de.tsl2.nano.exception.ManagedException;
 
 /**
  * Some net utilities
@@ -35,7 +35,7 @@ public class NetUtil {
         try {
             return InetAddress.getLocalHost().getHostAddress();
         } catch (UnknownHostException e) {
-            ForwardedException.forward(e);
+            ManagedException.forward(e);
             return null;
         }
     }
@@ -62,7 +62,7 @@ public class NetUtil {
             }
             return getInetAdress();
         } catch (SocketException e) {
-            ForwardedException.forward(e);
+            ManagedException.forward(e);
             return null;
         }
     }
@@ -78,7 +78,7 @@ public class NetUtil {
 //        try {
 //            return StringUtil.toFormattedString(InetAddress.getAllByName(null), 100, true);
 //        } catch (UnknownHostException e) {
-//            ForwardedException.forward(e);
+//            ManagedException.forward(e);
 //            return null;
 //        }
         try {
@@ -96,7 +96,7 @@ public class NetUtil {
             }
             return str.toString();
         } catch (SocketException e) {
-            ForwardedException.forward(e);
+            ManagedException.forward(e);
             return null;
         }
     }

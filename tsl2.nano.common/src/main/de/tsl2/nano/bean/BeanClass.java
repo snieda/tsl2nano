@@ -38,8 +38,8 @@ import de.tsl2.nano.action.CommonAction;
 import de.tsl2.nano.action.IAction;
 import de.tsl2.nano.bean.def.BeanValue;
 import de.tsl2.nano.collection.ListSet;
-import de.tsl2.nano.exception.FormattedException;
-import de.tsl2.nano.exception.ForwardedException;
+import de.tsl2.nano.exception.ManagedException;
+import de.tsl2.nano.exception.ManagedException;
 import de.tsl2.nano.log.LogFactory;
 import de.tsl2.nano.util.NumberUtil;
 import de.tsl2.nano.util.StringUtil;
@@ -394,7 +394,7 @@ public class BeanClass<T> implements Serializable {
             field.setAccessible(true);
             return field.get(instance);
         } catch (Exception e) {
-            ForwardedException.forward(e);
+            ManagedException.forward(e);
             return null;
         }
     }
@@ -412,7 +412,7 @@ public class BeanClass<T> implements Serializable {
             field.setAccessible(true);
             field.set(instance, value);
         } catch (Exception e) {
-            ForwardedException.forward(e);
+            ManagedException.forward(e);
         }
     }
 
@@ -468,7 +468,7 @@ public class BeanClass<T> implements Serializable {
                 + StringUtil.toString(par, 80));
             return clazz.getMethod(methodName, par).invoke(instance, args);
         } catch (final Exception e) {
-            ForwardedException.forward(e);
+            ManagedException.forward(e);
             return null;
         }
     }
@@ -498,7 +498,7 @@ public class BeanClass<T> implements Serializable {
             try {
                 beanValue = BeanValue.getBeanValue(value, path[i]);
             } catch (final Exception ex) {
-                throw new ForwardedException("Error on attribute path '" + StringUtil.toString(path, 1000)
+                throw new ManagedException("Error on attribute path '" + StringUtil.toString(path, 1000)
                     + "'! Attribute '"
                     + path[i]
                     + "' not available!", ex);
@@ -528,7 +528,7 @@ public class BeanClass<T> implements Serializable {
             final Method method = clazz.getMethod(methodName, new Class[] { argType });
             method.invoke(instance, value);
         } catch (final Exception e) {
-            ForwardedException.forward(e);
+            ManagedException.forward(e);
         }
     }
 
@@ -594,7 +594,7 @@ public class BeanClass<T> implements Serializable {
                     constructor.setAccessible(true);
                     instance = constructor.newInstance();
                 } catch (final Exception e1) {
-                    ForwardedException.forward(e1);
+                    ManagedException.forward(e1);
                 }
             }
         } else {//searching for the right constructor
@@ -615,13 +615,13 @@ public class BeanClass<T> implements Serializable {
                             instance = (T) constructors[i].newInstance(args);
                             break;
                         } catch (final Exception e) {
-                            ForwardedException.forward(e);
+                            ManagedException.forward(e);
                         }
                     }
                 }
             }
             if (instance == null) {
-                throw FormattedException.implementationError("BeanClass could not create the desired instance of type "
+                throw ManagedException.implementationError("BeanClass could not create the desired instance of type "
                     + clazz,
                     args,
                     (Object[])constructors);
@@ -662,7 +662,7 @@ public class BeanClass<T> implements Serializable {
             LOG.debug("loading class " + className + " through classloader " + classloader);
             return classloader.loadClass(className);
         } catch (Exception e) {
-            ForwardedException.forward(e);
+            ManagedException.forward(e);
             return null;
         }
     }
@@ -833,7 +833,7 @@ public class BeanClass<T> implements Serializable {
                 LOG.debug(c + " fields copied");
             }
         } catch (Exception e) {
-            ForwardedException.forward(e);
+            ManagedException.forward(e);
         }
         return dest;
     }

@@ -6,7 +6,7 @@ import java.util.Scanner;
 import org.apache.commons.logging.Log;
 import de.tsl2.nano.log.LogFactory;
 
-import de.tsl2.nano.exception.ForwardedException;
+import de.tsl2.nano.exception.ManagedException;
 import de.tsl2.nano.util.StringUtil;
 
 public class SystemUtil {
@@ -40,7 +40,7 @@ public class SystemUtil {
             scanner.close();
             LOG.info("errorlevel: " + process.waitFor());
         } catch (final Exception e) {
-            ForwardedException.forward(e);
+            ManagedException.forward(e);
         }
         return process;
     }

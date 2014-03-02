@@ -22,7 +22,6 @@ import org.apache.commons.logging.Log;
 import de.tsl2.nano.Environment;
 import de.tsl2.nano.Messages;
 import de.tsl2.nano.bean.BeanUtil;
-import de.tsl2.nano.exception.FormattedException;
 import de.tsl2.nano.execution.CompatibilityLayer;
 import de.tsl2.nano.log.LogFactory;
 import de.tsl2.nano.util.StringUtil;
@@ -117,7 +116,6 @@ public class DefaultFormat extends Format {
      */
     @Override
     public Object parseObject(String source, ParsePosition pos) {
-        throw new FormattedException(FormattedException.MSG_NOT_IMPLEMENTED_YET, new Object[] { "parseObject",
-            this.getClass() });
+        throw new UnsupportedOperationException();
     }
 }

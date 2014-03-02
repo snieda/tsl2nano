@@ -31,7 +31,7 @@ import de.tsl2.nano.log.LogFactory;
 import de.tsl2.nano.bean.BeanClass;
 import de.tsl2.nano.bean.BeanProxy;
 import de.tsl2.nano.bean.BeanUtil;
-import de.tsl2.nano.exception.ForwardedException;
+import de.tsl2.nano.exception.ManagedException;
 import de.tsl2.nano.util.StringUtil;
 
 /**
@@ -127,7 +127,7 @@ public class BeanEnhancer<T> {
                 null,
                 Thread.currentThread().getContextClassLoader()) : createInstance(bean, cls);
         } catch (Exception e) {
-            ForwardedException.forward(e);
+            ManagedException.forward(e);
             return null;
         }
     }
@@ -154,7 +154,7 @@ public class BeanEnhancer<T> {
             }
             return createInstance(bean, cls);
         } catch (Exception ex) {
-            ForwardedException.forward(ex);
+            ManagedException.forward(ex);
             return null;
         }
     }
@@ -198,7 +198,7 @@ public class BeanEnhancer<T> {
 
             return createInstance(bean, cls);
         } catch (Exception ex) {
-            ForwardedException.forward(ex);
+            ManagedException.forward(ex);
             return null;
         }
     }
@@ -240,7 +240,7 @@ public class BeanEnhancer<T> {
             return BeanProxy.createBeanImplementation(cls.toClass(), values, null, Thread.currentThread()
                 .getContextClassLoader());
         } catch (Exception e) {
-            ForwardedException.forward(e);
+            ManagedException.forward(e);
             return null;
         }
     }
@@ -264,7 +264,7 @@ public class BeanEnhancer<T> {
         try {
             return (T) BeanUtil.copy(bean, BeanClass.getBeanClass(cls.toClass()).createInstance());
         } catch (Exception e) {
-            ForwardedException.forward(e);
+            ManagedException.forward(e);
             return null;
         }
     }
@@ -292,7 +292,7 @@ public class BeanEnhancer<T> {
             }
             cls.addMethod(ctMethod);
         } catch (Exception e) {
-            ForwardedException.forward(e);
+            ManagedException.forward(e);
         }
     }
 }

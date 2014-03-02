@@ -14,7 +14,7 @@ import java.lang.reflect.Method;
 import java.util.HashMap;
 import java.util.Map;
 
-import de.tsl2.nano.exception.ForwardedException;
+import de.tsl2.nano.exception.ManagedException;
 
 /**
  * Should only be used by framework developers</p> Some classes are not intended to be extended. Defining fields and
@@ -71,7 +71,7 @@ public class PrivateAccessor<T> extends UnboundAccessor<T> {
         } catch (NoSuchFieldException e) {
             if (cls.getSuperclass() != null)
                 return getField(cls.getSuperclass(), name);
-            ForwardedException.forward(e);
+            ManagedException.forward(e);
             return null;
         }
     }
@@ -87,7 +87,7 @@ public class PrivateAccessor<T> extends UnboundAccessor<T> {
         } catch (NoSuchMethodException e) {
             if (cls.getSuperclass() != null)
                 return getMethod(cls.getSuperclass(), name, par);
-            ForwardedException.forward(e);
+            ManagedException.forward(e);
             return null;
         }
     }

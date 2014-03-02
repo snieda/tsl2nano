@@ -52,7 +52,7 @@ import de.tsl2.nano.bean.IAttribute;
 import de.tsl2.nano.bean.IAttributeDef;
 import de.tsl2.nano.bean.ValueHolder;
 import de.tsl2.nano.collection.CollectionUtil;
-import de.tsl2.nano.exception.FormattedException;
+import de.tsl2.nano.exception.ManagedException;
 import de.tsl2.nano.format.DefaultFormat;
 import de.tsl2.nano.format.GenericParser;
 import de.tsl2.nano.format.RegExpFormat;
@@ -814,7 +814,7 @@ public class BeanPresentationHelper<T> {
         OptionsWrapper<E> enumWrapper;
         if (isMultiSelection) {
             if (!Collection.class.isAssignableFrom((Class<?>) attribute.getType())) {
-                throw new FormattedException(
+                throw new ManagedException(
                     "tsl2nano.implementationerror",
                     new Object[] {
                         "IPresentable.STYLE_MULTI",

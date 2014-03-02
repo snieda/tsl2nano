@@ -15,7 +15,7 @@ import java.util.Collection;
 import org.apache.commons.logging.Log;
 import de.tsl2.nano.log.LogFactory;
 
-import de.tsl2.nano.exception.ForwardedException;
+import de.tsl2.nano.exception.ManagedException;
 import de.tsl2.nano.util.StringUtil;
 
 /**
@@ -249,7 +249,7 @@ public abstract class CommonAction<RETURNTYPE> implements IAction<RETURNTYPE>, S
                     + StringUtil.toString(result, 30));
             }
         } catch (final Exception e) {
-            ForwardedException.forward(e);
+            ManagedException.forward(e);
         }
     }
 
@@ -270,7 +270,7 @@ public abstract class CommonAction<RETURNTYPE> implements IAction<RETURNTYPE>, S
     @Override
     public RETURNTYPE activate() {
 //        if (!isEnabled()) {
-//            FormattedException.implementationError("Aktion ist deaktiviert!", getShortDescription());
+//            ManagedException.implementationError("Aktion ist deaktiviert!", getShortDescription());
 //        }
         if (isSynchron()) {
             final Object lastCursor = setWaitCursor();

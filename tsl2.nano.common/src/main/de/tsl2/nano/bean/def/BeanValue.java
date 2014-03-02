@@ -37,7 +37,7 @@ import de.tsl2.nano.collection.Entry;
 import de.tsl2.nano.collection.ListSet;
 import de.tsl2.nano.collection.MapEntrySet;
 import de.tsl2.nano.collection.MapUtil;
-import de.tsl2.nano.exception.ForwardedException;
+import de.tsl2.nano.exception.ManagedException;
 import de.tsl2.nano.log.LogFactory;
 import de.tsl2.nano.messaging.ChangeEvent;
 import de.tsl2.nano.messaging.EventController;
@@ -195,7 +195,7 @@ public class BeanValue<T> extends AttributeDefinition<T> implements IValueDefini
         } catch (Exception ex) {
             //ok, don't set the new value!
 //            LOG.error(ex.toString());
-            ForwardedException.forward(ex);
+            ManagedException.forward(ex);
         }
         return null;
     }
@@ -283,7 +283,7 @@ public class BeanValue<T> extends AttributeDefinition<T> implements IValueDefini
      */
     public void bind(final BeanValue<T> anotherValue) {
 //        if (!getType().equals(anotherValue.getType()))
-//            FormattedException.implementationError("binding beanvalues must have the same type", anotherValue.getType());
+//            ManagedException.implementationError("binding beanvalues must have the same type", anotherValue.getType());
         changeHandler().addListener(new IListener<ChangeEvent>() {
             @Override
             public void handleEvent(ChangeEvent changeEvent) {

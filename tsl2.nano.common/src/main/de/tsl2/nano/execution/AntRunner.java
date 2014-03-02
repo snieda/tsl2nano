@@ -33,7 +33,7 @@ import org.apache.tools.ant.types.resources.Files;
 import org.apache.tools.ant.types.selectors.FileSelector;
 
 import de.tsl2.nano.bean.BeanClass;
-import de.tsl2.nano.exception.ForwardedException;
+import de.tsl2.nano.exception.ManagedException;
 import de.tsl2.nano.util.StringUtil;
 
 /**
@@ -96,7 +96,7 @@ public class AntRunner {
             taskType = Class.forName(TASK_PATH + "." + name);
             task = (Task) taskType.newInstance();
         } catch (final Exception e) {
-            ForwardedException.forward(e);
+            ManagedException.forward(e);
         }
         task.setProject(new Project());
         task.getProject().init();

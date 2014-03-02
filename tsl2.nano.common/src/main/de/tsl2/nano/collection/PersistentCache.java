@@ -15,7 +15,7 @@ import org.apache.commons.collections.map.ReferenceMap;
 import org.apache.commons.logging.Log;
 import de.tsl2.nano.log.LogFactory;
 
-import de.tsl2.nano.exception.ForwardedException;
+import de.tsl2.nano.exception.ManagedException;
 import de.tsl2.nano.util.FileUtil;
 
 /**
@@ -64,7 +64,7 @@ public class PersistentCache {
                 self.cache = (ReferenceMap) FileUtil.loadXml(cacheFilePath);
             }
         } catch (final Exception e) {
-            ForwardedException.forward(e);
+            ManagedException.forward(e);
         }
         return self;
     }
@@ -86,7 +86,7 @@ public class PersistentCache {
         try {
             FileUtil.saveXml(cache, cacheFilePath);
         } catch (final Exception e) {
-            ForwardedException.forward(e);
+            ManagedException.forward(e);
         }
         return result;
     }
@@ -99,7 +99,7 @@ public class PersistentCache {
         try {
             FileUtil.saveXml(cache, cacheFilePath);
         } catch (final Exception e) {
-            ForwardedException.forward(e);
+            ManagedException.forward(e);
         }
         return result;
     }

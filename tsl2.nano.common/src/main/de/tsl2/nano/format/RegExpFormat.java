@@ -49,7 +49,7 @@ import de.tsl2.nano.bean.BeanClass;
 import de.tsl2.nano.bean.BeanContainer;
 import de.tsl2.nano.collection.MapUtil;
 import de.tsl2.nano.currency.CurrencyUtil;
-import de.tsl2.nano.exception.FormattedException;
+import de.tsl2.nano.exception.ManagedException;
 import de.tsl2.nano.log.LogFactory;
 import de.tsl2.nano.util.DateUtil;
 import de.tsl2.nano.util.StringUtil;
@@ -305,7 +305,7 @@ public class RegExpFormat extends Format implements INumberFormatCheck {
         if (pattern.indexOf('{') == -1 && pattern.indexOf('[') == -1 && pattern.indexOf('(') == -1) {
             return pattern.length();
         }
-        throw new FormattedException("tsl2nano.implementationerror", new Object[] { pattern,
+        throw new ManagedException("tsl2nano.implementationerror", new Object[] { pattern,
             "only simple patterns without length definitions (like {0,5}) are allowed!" });
     }
 
@@ -352,7 +352,7 @@ public class RegExpFormat extends Format implements INumberFormatCheck {
         if (matches) {
             return toAppendTo.append(matcher.group());
         } else {
-            throw new FormattedException("tsl2nano.regexpfailure", new Object[] { o, pattern });
+            throw new ManagedException("tsl2nano.regexpfailure", new Object[] { o, pattern });
         }
     }
 
@@ -390,7 +390,7 @@ public class RegExpFormat extends Format implements INumberFormatCheck {
                 obj = parser != null && isAbleToParse(parser) ? parser.parseObject(source + getParsingSuffix(parser,
                     source)) : matcher.group();
             } catch (final ParseException e) {
-                //            ForwardedException.forward(e);
+                //            ManagedException.forward(e);
                 LOG.error(e);
             }
         } else {

@@ -12,7 +12,7 @@ package de.tsl2.nano.util;
 import java.security.MessageDigest;
 import java.util.Arrays;
 
-import de.tsl2.nano.exception.ForwardedException;
+import de.tsl2.nano.exception.ManagedException;
 
 /**
  * utils for general purpose on simple objects.
@@ -136,7 +136,7 @@ public class Util {
         try {
             return MessageDigest.getInstance("SHA").digest(data);
         } catch (Exception e) {
-            ForwardedException.forward(e);
+            ManagedException.forward(e);
             return null;
         }
     }

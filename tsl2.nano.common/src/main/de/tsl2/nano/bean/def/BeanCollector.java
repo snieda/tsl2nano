@@ -31,7 +31,6 @@ import org.simpleframework.xml.DefaultType;
 import org.simpleframework.xml.ElementList;
 import org.simpleframework.xml.Transient;
 import org.simpleframework.xml.core.Commit;
-import org.simpleframework.xml.core.Persist;
 
 import de.tsl2.nano.Environment;
 import de.tsl2.nano.Messages;
@@ -48,8 +47,7 @@ import de.tsl2.nano.collection.Entry;
 import de.tsl2.nano.collection.FilteringIterator;
 import de.tsl2.nano.collection.IPredicate;
 import de.tsl2.nano.collection.MapEntrySet;
-import de.tsl2.nano.exception.FormattedException;
-import de.tsl2.nano.exception.ForwardedException;
+import de.tsl2.nano.exception.ManagedException;
 import de.tsl2.nano.execution.Profiler;
 import de.tsl2.nano.format.FormatUtil;
 import de.tsl2.nano.log.LogFactory;
@@ -491,7 +489,7 @@ public class BeanCollector<COLLECTIONTYPE extends Collection<T>, T> extends Bean
                 newItem = (T) BeanUtil.clone(selectedItem);
                 BeanUtil.createOwnCollectionInstances(newItem);
             } catch (final Exception e) {
-                ForwardedException.forward(e);
+                ManagedException.forward(e);
                 return null;
             }
         } else {
@@ -562,7 +560,7 @@ public class BeanCollector<COLLECTIONTYPE extends Collection<T>, T> extends Bean
             public Object action() throws Exception {
                 T newBean = createItem(getFirstSelectedElement());
                 if (newBean == null) {
-                    throw new FormattedException("tsl2nano.no_type_available");
+                    throw new ManagedException("tsl2nano.no_type_available");
                 }
                 final Object result = editItem(newBean);
                 if (!IAction.CANCELED.equals(result)) {

@@ -20,7 +20,7 @@ import java.util.Comparator;
 import java.util.Locale;
 
 import de.tsl2.nano.bean.BeanClass;
-import de.tsl2.nano.exception.ForwardedException;
+import de.tsl2.nano.exception.ManagedException;
 import de.tsl2.nano.format.FormatUtil;
 
 /**
@@ -218,7 +218,7 @@ public class NumberUtil extends BitUtil {
         try {
             return (BigDecimal) FormatUtil.getDefaultFormat(BigDecimal.class, true).parseObject(numberAsString);
         } catch (final ParseException e) {
-            ForwardedException.forward(e);
+            ManagedException.forward(e);
             return null;
         }
     }

@@ -14,7 +14,7 @@ import java.security.KeyPair;
 import java.security.KeyPairGenerator;
 import java.security.NoSuchAlgorithmException;
 
-import de.tsl2.nano.exception.ForwardedException;
+import de.tsl2.nano.exception.ManagedException;
 
 /**
  * asymmetric (RSA) en-/decryption. @see {@link SymmetricCipher}.
@@ -65,7 +65,7 @@ public class AsymmetricCipher extends SymmetricCipher {
             try {
                 kpg = KeyPairGenerator.getInstance("RSA");
             } catch (final NoSuchAlgorithmException e) {
-                ForwardedException.forward(e);
+                ManagedException.forward(e);
                 return null;
             }
             kpg.initialize(algKeySize); // 512 is the keysize.

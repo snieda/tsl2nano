@@ -15,7 +15,7 @@ import java.util.Properties;
 import java.util.Set;
 
 import de.tsl2.nano.Environment;
-import de.tsl2.nano.exception.FormattedException;
+import de.tsl2.nano.exception.ManagedException;
 
 /**
  * Generic class to provide historized user input - perhaps for a text-field. Can be used for comboboxes to configure
@@ -56,7 +56,7 @@ public class HistorizedInputFactory extends Properties {
     public static final HistorizedInput instance(String name) {
         final HistorizedInput historizedInput = factoryMap.get(name);
         if (historizedInput == null) {
-            throw new FormattedException("please call the create-method before instance");
+            throw new ManagedException("please call the create-method before instance()");
         }
         return historizedInput;
     }
@@ -107,7 +107,7 @@ public class HistorizedInputFactory extends Properties {
     public static final boolean delete(String name) {
         final HistorizedInput<?> historizedInput = factoryMap.remove(name);
         if (historizedInput == null) {
-            throw new FormattedException("tsl2nano.implementationerror", new Object[] { name });
+            throw new ManagedException("tsl2nano.implementationerror", new Object[] { name });
         }
         return historizedInput.delete();
     }

@@ -22,7 +22,7 @@ import java.util.Set;
 import de.tsl2.nano.bean.BeanAttribute;
 import de.tsl2.nano.bean.BeanUtil;
 import de.tsl2.nano.bean.def.Bean;
-import de.tsl2.nano.exception.FormattedException;
+import de.tsl2.nano.exception.ManagedException;
 import de.tsl2.nano.util.StringUtil;
 
 /**
@@ -75,7 +75,7 @@ public class MapUtil {
      */
     public static Map asMap(Object... keysAndValues) {
         if (keysAndValues == null || keysAndValues.length % 2 == 1) {
-            throw FormattedException.implementationError(
+            throw ManagedException.implementationError(
                 "the 'keysAndValues' parameters must not be null and must contain pairs of keys and values!",
                 keysAndValues);
         }

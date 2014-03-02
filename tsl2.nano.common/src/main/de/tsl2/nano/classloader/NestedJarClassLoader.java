@@ -20,7 +20,7 @@ import java.util.zip.ZipInputStream;
 
 import org.apache.commons.logging.Log;
 
-import de.tsl2.nano.exception.ForwardedException;
+import de.tsl2.nano.exception.ManagedException;
 import de.tsl2.nano.log.LogFactory;
 import de.tsl2.nano.util.FileUtil;
 import de.tsl2.nano.util.StringUtil;
@@ -82,7 +82,7 @@ public class NestedJarClassLoader extends LibClassLoader {
 //                    return new URL(url);
 //                } catch (MalformedURLException e) {
 //                    LOG.error(e);
-//                    ForwardedException.forward(e);
+//                    ManagedException.forward(e);
 //                }
 //            }
 //        }
@@ -146,7 +146,7 @@ public class NestedJarClassLoader extends LibClassLoader {
                     }
                 } catch (Throwable e) {
                     LOG.error(e);
-                    ForwardedException.forward(e);
+                    ManagedException.forward(e);
                 }
             }
         }

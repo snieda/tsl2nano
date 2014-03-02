@@ -67,7 +67,7 @@ import de.tsl2.nano.collection.ITransformer;
 import de.tsl2.nano.collection.MapUtil;
 import de.tsl2.nano.currency.CurrencyUnit;
 import de.tsl2.nano.currency.CurrencyUtil;
-import de.tsl2.nano.exception.FormattedException;
+import de.tsl2.nano.exception.ManagedException;
 import de.tsl2.nano.execution.Profiler;
 import de.tsl2.nano.execution.ScriptUtil;
 import de.tsl2.nano.format.DefaultFormat;
@@ -397,7 +397,7 @@ public class CommonTest {
                 d = (Date) df.parseObject(invalid[i]);
                 if (d != null)
                     fail("parsing '" + invalid[i] + "' should fail!");
-            } catch (FormattedException ex) {
+            } catch (ManagedException ex) {
                 //ok, parsing should fail
             }
         }

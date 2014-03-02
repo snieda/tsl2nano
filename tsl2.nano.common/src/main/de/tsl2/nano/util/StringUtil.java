@@ -20,7 +20,7 @@ import java.util.regex.Pattern;
 
 import de.tsl2.nano.Messages;
 import de.tsl2.nano.collection.CollectionUtil;
-import de.tsl2.nano.exception.ForwardedException;
+import de.tsl2.nano.exception.ManagedException;
 
 /**
  * String helper class
@@ -576,7 +576,7 @@ public class StringUtil {
         try {
             return Util.cryptoHash(data.getBytes("UTF-8"));
         } catch (Exception e) {
-            ForwardedException.forward(e);
+            ManagedException.forward(e);
             return null;
         }
     }

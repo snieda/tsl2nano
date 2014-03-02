@@ -16,7 +16,7 @@ import java.util.Map;
 
 import de.tsl2.nano.action.IAction;
 import de.tsl2.nano.bean.def.BeanProperty;
-import de.tsl2.nano.exception.ForwardedException;
+import de.tsl2.nano.exception.ManagedException;
 import de.tsl2.nano.util.StringUtil;
 
 /**
@@ -61,7 +61,7 @@ public class BeanProxy implements InvocationHandler, Serializable {
             METHOD_SET_PROPERTY = BeanProperty.class.getMethod("setProperty",
                 new Class[] { String.class, Object.class });
         } catch (final Exception e) {
-            ForwardedException.forward(e);
+            ManagedException.forward(e);
         }
     }
 

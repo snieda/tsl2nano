@@ -25,7 +25,7 @@ import org.simpleframework.xml.core.Persist;
 
 import de.tsl2.nano.Environment;
 import de.tsl2.nano.bean.def.IValueAccess;
-import de.tsl2.nano.exception.ForwardedException;
+import de.tsl2.nano.exception.ManagedException;
 import de.tsl2.nano.log.LogFactory;
 import de.tsl2.nano.util.StringUtil;
 
@@ -116,7 +116,7 @@ public class BeanAttribute<T> implements IAttribute<T> {
                 return clazz.getMethod(methodName, EMPTY_CLS_ARG);
             } catch (final Exception e1) {
                 if (throwException)
-                    ForwardedException.forward(e);
+                    ManagedException.forward(e);
                 else
                     LOG.debug("No access method for attribute '" + attributeName
                         + "' available on class "
@@ -168,7 +168,7 @@ public class BeanAttribute<T> implements IAttribute<T> {
                     .getMethod(PREFIX_WRITE_ACCESS + toFirstUpper(attributeName),
                         new Class[] { readAccessMethod.getReturnType() });
             } catch (final SecurityException e) {
-                ForwardedException.forward(e);
+                ManagedException.forward(e);
                 return null;
             } catch (final NoSuchMethodException e) {
                 //ok --> no write acces method available!
@@ -212,7 +212,7 @@ public class BeanAttribute<T> implements IAttribute<T> {
             readAccessMethod.setAccessible(true);
             return (T) readAccessMethod.invoke(beanInstance, EMPTY_ARG);
         } catch (final Exception e) {
-            ForwardedException.forward(e);
+            ManagedException.forward(e);
             return null;
         }
     }
@@ -227,7 +227,7 @@ public class BeanAttribute<T> implements IAttribute<T> {
                 writeAccessMethod.setAccessible(true);
                 writeAccessMethod.invoke(beanInstance, new Object[] { value });
             } catch (final Exception e) {
-                ForwardedException.forward(e);
+                ManagedException.forward(e);
             }
         } else {
             LOG.warn("no write access for attribute value '" + getName() + "'! missing setter for: " + readAccessMethod);
@@ -458,7 +458,7 @@ public class BeanAttribute<T> implements IAttribute<T> {
             if (f == null) {
                 return null;
             } else {
-                ForwardedException.forward(e);
+                ManagedException.forward(e);
             }
         }
         //indirect access

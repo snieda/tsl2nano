@@ -16,7 +16,7 @@ import java.util.Calendar;
 import java.util.Date;
 import java.util.concurrent.TimeUnit;
 
-import de.tsl2.nano.exception.ForwardedException;
+import de.tsl2.nano.exception.ManagedException;
 
 /**
  * Utility-class for date and time operations
@@ -572,7 +572,7 @@ public final class DateUtil {
         try {
             return DEFAULT_DATE_FORMAT.parse(formattedString);
         } catch (final ParseException e) {
-            ForwardedException.forward(e);
+            ManagedException.forward(e);
             return null;
         }
     }
@@ -588,7 +588,7 @@ public final class DateUtil {
         try {
             return SQL_DATE_FORMAT.parse(formattedString);
         } catch (final ParseException e) {
-            ForwardedException.forward(e);
+            ManagedException.forward(e);
             return null;
         }
     }

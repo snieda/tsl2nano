@@ -13,7 +13,7 @@ import org.apache.velocity.VelocityContext;
 import org.apache.velocity.app.VelocityEngine;
 
 import de.tsl2.nano.bean.BeanClass;
-import de.tsl2.nano.exception.ForwardedException;
+import de.tsl2.nano.exception.ManagedException;
 
 /**
  * 
@@ -73,7 +73,7 @@ public class ClassGenerator {
         try {
             return instance((ClassGenerator) Class.forName(className).newInstance());
         } catch (final Exception e) {
-            ForwardedException.forward(e);
+            ManagedException.forward(e);
             return null;
         }
     }
@@ -97,7 +97,7 @@ public class ClassGenerator {
             engine.init();
             LOG.debug("ClassGenerator has initialized velocity template engine");
         } catch (final Exception e) {
-            ForwardedException.forward(e);
+            ManagedException.forward(e);
         }
         //Velocity.setProperty( Velocity.RUNTIME_LOG_LOGSYSTEM, new Log());
     }

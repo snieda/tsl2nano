@@ -33,7 +33,7 @@ import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 
 import de.tsl2.nano.Environment;
-import de.tsl2.nano.exception.ForwardedException;
+import de.tsl2.nano.exception.ManagedException;
 import de.tsl2.nano.log.LogFactory;
 import de.tsl2.nano.util.FileUtil;
 
@@ -110,7 +110,7 @@ public class XmlUtil {
             writer.flush();
             writer.close();
         } catch (Exception e) {
-            ForwardedException.forward(e);
+            ManagedException.forward(e);
         }
     }
 
@@ -149,7 +149,7 @@ public class XmlUtil {
                 return new String[]{String.valueOf(result)};
             }
         } catch (Exception e) {
-            ForwardedException.forward(e);
+            ManagedException.forward(e);
             return null;
         }
     }
@@ -182,7 +182,7 @@ public class XmlUtil {
         try {
             return new org.simpleframework.xml.core.Persister().read(type, new FileInputStream(new File(xmlFile)));
         } catch (Exception e) {
-            //don't use the ForwardedException.forward(), because the LogFactory is using this, too!
+            //don't use the ManagedException.forward(), because the LogFactory is using this, too!
             throw new RuntimeException(e);
         }
     }
@@ -209,7 +209,7 @@ public class XmlUtil {
         try {
             new org.simpleframework.xml.core.Persister(new Format("<?xml version=\"1.0\" encoding=\"UTF-8\"?>")).write(obj, new File(xmlFile));
         } catch (Exception e) {
-            //don't use the ForwardedException.forward(), because the LogFactory is using this, too!
+            //don't use the ManagedException.forward(), because the LogFactory is using this, too!
             throw new RuntimeException(e);
         }
     }

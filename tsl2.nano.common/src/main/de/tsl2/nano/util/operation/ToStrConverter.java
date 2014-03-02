@@ -12,7 +12,7 @@ package de.tsl2.nano.util.operation;
 import java.text.Format;
 import java.text.ParseException;
 
-import de.tsl2.nano.exception.ForwardedException;
+import de.tsl2.nano.exception.ManagedException;
 
 /**
  * standard converter to convert an object into a string and vice versa - using a given {@link Format}. Does exactly the
@@ -40,7 +40,7 @@ public class ToStrConverter<T> implements IConverter<T, String> {
         try {
             return (T) format.parseObject(toValue);
         } catch (ParseException e) {
-            ForwardedException.forward(e);
+            ManagedException.forward(e);
             return null;
         }
     }

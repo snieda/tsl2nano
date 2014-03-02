@@ -14,7 +14,7 @@ import java.util.Collection;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
-import de.tsl2.nano.exception.FormattedException;
+import de.tsl2.nano.exception.ManagedException;
 
 /**
  * condition checker.
@@ -74,7 +74,7 @@ public class BeanValueConditionChecker implements Serializable {
                 if (mustHaveValues != null) {
                     for (final BeanValue mhValue : mustHaveValues) {
                         if (mhValue.getValue() == null) {
-                            throw new FormattedException("tsl2nano.musthavefailure",
+                            throw new ManagedException("tsl2nano.musthavefailure",
                                 new Object[] { beanValue.getName(), mhValue.getName() });
                         }
                     }
@@ -89,7 +89,7 @@ public class BeanValueConditionChecker implements Serializable {
                 if (mustNotHaveValues != null) {
                     for (final BeanValue mnhValue : mustNotHaveValues) {
                         if (mnhValue.getValue() != null) {
-                            throw new FormattedException("tsl2nano.mustnothavefailure",
+                            throw new ManagedException("tsl2nano.mustnothavefailure",
                                 new Object[] { beanValue.getName(), mnhValue.getName() });
                         }
                     }

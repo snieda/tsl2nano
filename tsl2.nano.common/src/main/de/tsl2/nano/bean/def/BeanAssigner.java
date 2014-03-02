@@ -12,7 +12,7 @@ import de.tsl2.nano.bean.BeanAttribute;
 import de.tsl2.nano.bean.BeanContainer;
 import de.tsl2.nano.bean.BeanUtil;
 import de.tsl2.nano.collection.ListSet;
-import de.tsl2.nano.exception.FormattedException;
+import de.tsl2.nano.exception.ManagedException;
 import de.tsl2.nano.util.StringUtil;
 
 /**
@@ -87,7 +87,7 @@ public class BeanAssigner<T> {
     public void moveToDest(Collection<T> selectedSourceItems) {
         assert sourceItems.containsAll(selectedSourceItems);
         if (!(sourceItems.removeAll(selectedSourceItems))) {
-            throw new FormattedException("tsl2nano.unexpectederror", null);
+            throw new ManagedException("tsl2nano.unexpectederror", null);
         }
 
         destItems.addAll(selectedSourceItems);
@@ -101,7 +101,7 @@ public class BeanAssigner<T> {
     public void moveToSource(Collection<T> selectedDestItems) {
         assert destItems.containsAll(selectedDestItems);
         if (!(destItems.removeAll(selectedDestItems))) {
-            throw new FormattedException("tsl2nano.unexpectederror", null);
+            throw new ManagedException("tsl2nano.unexpectederror", null);
         }
 
         sourceItems.addAll(selectedDestItems);

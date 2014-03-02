@@ -12,7 +12,7 @@ package de.tsl2.nano.util.operation;
 import java.text.Format;
 import java.text.ParseException;
 
-import de.tsl2.nano.exception.ForwardedException;
+import de.tsl2.nano.exception.ManagedException;
 
 /**
  * standard converter to convert an object into a string and vice versa - using a given {@link Format}. Does mostly the
@@ -51,7 +51,7 @@ public class FromCharSequenceConverter<T> implements IConverter<CharSequence, T>
         try {
             return (T) format.parseObject(fromValue != null ? fromValue.toString() : null);
         } catch (ParseException e) {
-            ForwardedException.forward(e);
+            ManagedException.forward(e);
             return null;
         }
     }

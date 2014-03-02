@@ -29,7 +29,7 @@ import de.tsl2.nano.bean.BeanContainer;
 import de.tsl2.nano.bean.BeanProxy;
 import de.tsl2.nano.bean.BeanUtil;
 import de.tsl2.nano.bean.PrimitiveUtil;
-import de.tsl2.nano.exception.FormattedException;
+import de.tsl2.nano.exception.ManagedException;
 import de.tsl2.nano.format.FormatUtil;
 import de.tsl2.nano.log.LogFactory;
 import de.tsl2.nano.util.StringUtil;
@@ -165,7 +165,7 @@ public class ValueExpression<TYPE> implements IValueExpression<TYPE>, IConverter
     @Override
     public TYPE from(String toValue) {
         if (type == null)
-            throw FormattedException
+            throw ManagedException
                 .implementationError(
                     "The conversion from string to object is only available, if the ValueExpression was created with a class type argument!",
                     "type of value-expression '" + toString() + "' is null");
@@ -196,7 +196,7 @@ public class ValueExpression<TYPE> implements IValueExpression<TYPE>, IConverter
             if (beansByExample.size() > 1) {
                 LOG.error("string-to-object-parser: found more than one object:\n"
                     + StringUtil.toFormattedString(beansByExample, 100, true));
-                throw new FormattedException("tsl2nano.multiple.items", new Object[] { toValue, type, type });
+                throw new ManagedException("tsl2nano.multiple.items", new Object[] { toValue, type, type });
             }
             return beansByExample.size() > 0 ? beansByExample.iterator().next() : null;
         } else {

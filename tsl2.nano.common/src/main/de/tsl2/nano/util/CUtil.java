@@ -15,7 +15,7 @@ import java.util.List;
 
 import org.apache.commons.logging.Log;
 
-import de.tsl2.nano.exception.FormattedException;
+import de.tsl2.nano.exception.ManagedException;
 import de.tsl2.nano.log.LogFactory;
 
 /**
@@ -185,6 +185,6 @@ public class CUtil extends Util {
      */
     public static final <T extends Comparable<T>> void checkGreater(String name, T value, T min) {
         if (!isGreater(value, min))
-            throw new FormattedException("tsl2nano.valuesizefailure", new Object[] { name, min });
+            throw new ManagedException("tsl2nano.valuesizefailure", new Object[] { name, min });
     }
 }

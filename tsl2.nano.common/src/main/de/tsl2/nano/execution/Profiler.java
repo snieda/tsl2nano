@@ -20,7 +20,7 @@ import java.util.Map;
 import org.apache.commons.logging.Log;
 import de.tsl2.nano.log.LogFactory;
 
-import de.tsl2.nano.exception.ForwardedException;
+import de.tsl2.nano.exception.ManagedException;
 
 /**
  * simple performance and memory analyzer - to be usable by tests and debugging. use
@@ -91,7 +91,7 @@ public class Profiler {
             long j = workLoop(10000);
             return j;
         } catch (InterruptedException e) {
-            ForwardedException.forward(e);
+            ManagedException.forward(e);
             return -1;
         }
     }
@@ -375,7 +375,7 @@ class ProfilerObject implements Cloneable {
         try {
             return (ProfilerObject) cloneSrc.clone();
         } catch (CloneNotSupportedException e) {
-            ForwardedException.forward(e);
+            ManagedException.forward(e);
             return null;
         }
     }

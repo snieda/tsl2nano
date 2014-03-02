@@ -20,7 +20,7 @@ import java.util.Map;
 
 import tsl.CollectionUtil;
 
-import de.tsl2.nano.exception.ForwardedException;
+import de.tsl2.nano.exception.ManagedException;
 
 /**
  * Should only be used by framework developers</p> To be independent of other libraries you may use this class - using
@@ -177,7 +177,7 @@ public class UnboundAccessor<T> {
                 return (M) f.get(accessibleInstance());
             }
         } catch (Exception e) {
-            ForwardedException.forward(e);
+            ManagedException.forward(e);
             return null;
         }
     }
@@ -197,7 +197,7 @@ public class UnboundAccessor<T> {
                 memberCache.put(memberName, newValue != null ? newValue : NULL);
             }
         } catch (Exception e) {
-            ForwardedException.forward(e);
+            ManagedException.forward(e);
         }
     }
 
@@ -254,7 +254,7 @@ public class UnboundAccessor<T> {
                 m = registerMethod(name, par, true);
             return (M) m.invoke(instance, args);
         } catch (Exception e) {
-            ForwardedException.forward(e);
+            ManagedException.forward(e);
             return null;
         }
     }
@@ -278,7 +278,7 @@ public class UnboundAccessor<T> {
             methodCache.put(useParInMethodID ? getMethodID(name, par) : name, m);
             return m;
         } catch (Exception e) {
-            ForwardedException.forward(e);
+            ManagedException.forward(e);
             return null;
         }
     }

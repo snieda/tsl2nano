@@ -16,7 +16,7 @@ import java.util.Collection;
 import java.util.LinkedHashSet;
 import java.util.Properties;
 
-import de.tsl2.nano.exception.ForwardedException;
+import de.tsl2.nano.exception.ManagedException;
 import de.tsl2.nano.util.FileUtil;
 
 /**
@@ -53,7 +53,7 @@ public class HistorizedInput<T> extends Properties {
             try {
                 load(new FileReader(file));
             } catch (final Exception e) {
-                ForwardedException.forward(e);
+                ManagedException.forward(e);
             }
         }
     }
@@ -82,7 +82,7 @@ public class HistorizedInput<T> extends Properties {
                         list.add(itemType.getConstructor(new Class[] { String.class })
                             .newInstance(new Object[] { value }));
                     } catch (final Exception e) {
-                        ForwardedException.forward(e);
+                        ManagedException.forward(e);
                     }
                 } else {
                     //--> no more elements
@@ -129,11 +129,11 @@ public class HistorizedInput<T> extends Properties {
             if (!file.exists()) {
                 FileUtil.createPath(file.getPath());
 //                if (!file.createNewFile())
-//                    new FormattedException("couldn't store the given file");
+//                    new ManagedException("couldn't store the given file");
             }
             store(new FileWriter(file), "Created by class HistorizedInput (NanoFix)");
         } catch (final Exception e) {
-            ForwardedException.forward(e);
+            ManagedException.forward(e);
         }
     }
 

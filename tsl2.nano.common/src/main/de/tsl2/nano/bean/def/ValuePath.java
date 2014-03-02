@@ -17,7 +17,7 @@ import org.simpleframework.xml.DefaultType;
 import de.tsl2.nano.bean.BeanAttribute;
 import de.tsl2.nano.bean.BeanClass;
 import de.tsl2.nano.collection.CollectionUtil;
-import de.tsl2.nano.exception.ForwardedException;
+import de.tsl2.nano.exception.ManagedException;
 import de.tsl2.nano.messaging.EventController;
 
 /**
@@ -100,7 +100,7 @@ public class ValuePath<B, T> extends PathExpression<T> implements IValueAccess<T
         try {
             return ValuePath.class.getMethod(ATTR_VALUE, new Class[0]);
         } catch (Exception e) {
-            ForwardedException.forward(e);
+            ManagedException.forward(e);
             return null;
         }
     }

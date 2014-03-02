@@ -18,8 +18,8 @@ import java.util.Map;
 import org.apache.commons.logging.Log;
 import de.tsl2.nano.log.LogFactory;
 
-import de.tsl2.nano.exception.FormattedException;
-import de.tsl2.nano.exception.ForwardedException;
+import de.tsl2.nano.exception.ManagedException;
+import de.tsl2.nano.exception.ManagedException;
 import de.tsl2.nano.format.DefaultFormat;
 import de.tsl2.nano.format.FormatUtil;
 
@@ -70,7 +70,7 @@ public class PrimitiveUtil {
         try {
             return (T) FormatUtil.getDefaultFormat(type, true).parseObject(value);
         } catch (ParseException e) {
-            ForwardedException.forward(e);
+            ManagedException.forward(e);
             return null;
         }
     }
@@ -131,7 +131,7 @@ public class PrimitiveUtil {
         } else if (standardType.equals(void.class)) {
             return null;
         } else {
-            throw FormattedException.implementationError("only primitives are allowed!", standardType);
+            throw ManagedException.implementationError("only primitives are allowed!", standardType);
         }
     }
 

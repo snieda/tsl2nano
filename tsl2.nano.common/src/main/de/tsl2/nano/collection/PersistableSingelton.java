@@ -12,7 +12,7 @@ package de.tsl2.nano.collection;
 import java.io.File;
 import java.util.Hashtable;
 
-import de.tsl2.nano.exception.ForwardedException;
+import de.tsl2.nano.exception.ManagedException;
 import de.tsl2.nano.util.FileUtil;
 
 /**
@@ -79,7 +79,7 @@ public class PersistableSingelton extends Hashtable {
         try {
             FileUtil.saveXml(this, getStorePath());
         } catch (final Exception e) {
-            ForwardedException.forward(e);
+            ManagedException.forward(e);
         }
     }
 }

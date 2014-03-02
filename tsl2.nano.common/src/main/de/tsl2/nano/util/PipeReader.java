@@ -18,7 +18,7 @@ import java.io.PrintStream;
 
 import org.apache.commons.logging.Log;
 
-import de.tsl2.nano.exception.ForwardedException;
+import de.tsl2.nano.exception.ManagedException;
 import de.tsl2.nano.log.LogFactory;
 
 /**
@@ -72,7 +72,7 @@ public class PipeReader implements Runnable {
             this.po = new PipedOutputStream((PipedInputStream) pi);
             this.ps = new PrintStream(po);
         } catch (IOException e) {
-            ForwardedException.forward(e);
+            ManagedException.forward(e);
         }
     }
 
@@ -124,14 +124,14 @@ public class PipeReader implements Runnable {
                 Thread.sleep(200);
             }
         } catch (Exception e) {
-            ForwardedException.forward(e);
+            ManagedException.forward(e);
         } finally {
             try {
                 LOG.info("closing pipe: " + in + " --> " + out);
                 po.close();
                 pi.close();
             } catch (IOException e) {
-                ForwardedException.forward(e);
+                ManagedException.forward(e);
             }
         }
     }

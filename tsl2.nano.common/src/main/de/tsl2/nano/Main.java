@@ -11,7 +11,7 @@ package de.tsl2.nano;
 
 import java.util.Map;
 
-import de.tsl2.nano.exception.ForwardedException;
+import de.tsl2.nano.exception.ManagedException;
 
 /**
  * base class for application main. provides a generic main-method to instantiate an extension of {@link Main}. please
@@ -53,7 +53,7 @@ public class Main {
             Main main = (Main) application.getConstructor(new Class[0]).newInstance(new Object[0]);
             main.start();
         } catch (Exception e) {
-            ForwardedException.forward(e);
+            ManagedException.forward(e);
         }
     }
 

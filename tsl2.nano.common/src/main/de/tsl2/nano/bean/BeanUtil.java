@@ -43,8 +43,8 @@ import de.tsl2.nano.Messages;
 import de.tsl2.nano.bean.def.Bean;
 import de.tsl2.nano.bean.def.BeanDefinition;
 import de.tsl2.nano.collection.CollectionUtil;
-import de.tsl2.nano.exception.FormattedException;
-import de.tsl2.nano.exception.ForwardedException;
+import de.tsl2.nano.exception.ManagedException;
+import de.tsl2.nano.exception.ManagedException;
 import de.tsl2.nano.format.DefaultFormat;
 import de.tsl2.nano.format.FormatUtil;
 import de.tsl2.nano.log.LogFactory;
@@ -191,7 +191,7 @@ public class BeanUtil {
         try {
             return (T) BeanClass.copyValues(src, BeanClass.createInstance(src.getClass()));
         } catch (Exception e) {
-            ForwardedException.forward(e);
+            ManagedException.forward(e);
             return null;
         }
     }
@@ -207,7 +207,7 @@ public class BeanUtil {
             if (bean != null) {
                 LOG.warn("trying to serialize a non-serializeable object: " + bean.getClass().getName());
             }
-            return null;//throw new FormattedException("bean must implement serializeable!");
+            return null;//throw new ManagedException("bean must implement serializeable!");
         }
         return convertToByteArray(bean);
     }
@@ -228,7 +228,7 @@ public class BeanUtil {
             LOG.debug("serialized byte array for type " + bean.getClass() + " size: " + bos.size() + " bytes");
             return bos.toByteArray();
         } catch (final IOException ex) {
-            ForwardedException.forward(ex);
+            ManagedException.forward(ex);
             return null;
         }
 
@@ -273,7 +273,7 @@ public class BeanUtil {
             i.close();
             return object;
         } catch (final Exception ex) {
-            return ForwardedException.forward(ex);
+            return ManagedException.forward(ex);
         }
 
     }
@@ -428,7 +428,7 @@ public class BeanUtil {
                 return (Class<?>) ((ParameterizedType)type).getRawType();
             return (Class<?>) type;
         } catch (Exception e) {
-            ForwardedException.forward(e);
+            ManagedException.forward(e);
             return null;
         }
     }
@@ -445,7 +445,7 @@ public class BeanUtil {
             return (Class<?>) ((ParameterizedType) clazz.getDeclaredField(fieldName).getGenericType())
                 .getActualTypeArguments()[0];
         } catch (Exception e) {
-            ForwardedException.forward(e);
+            ManagedException.forward(e);
             return null;
         }
     }
@@ -576,7 +576,7 @@ public class BeanUtil {
         try {
             return fromFlatFile(new BufferedReader(new FileReader(new File(fileName))), rootType, null, attributeNames);
         } catch (final FileNotFoundException e) {
-            ForwardedException.forward(e);
+            ManagedException.forward(e);
             return null;
         }
     }
@@ -595,7 +595,7 @@ public class BeanUtil {
                 null,
                 attributeNames);
         } catch (final FileNotFoundException e) {
-            ForwardedException.forward(e);
+            ManagedException.forward(e);
             return null;
         }
     }
@@ -678,7 +678,7 @@ public class BeanUtil {
          * do some validation checks
          */
         if (attributeNames.length == 0)
-            throw FormattedException.implementationError("give at least one attribute-name to be filled!", null);
+            throw ManagedException.implementationError("give at least one attribute-name to be filled!", null);
         if (separation == null) {
             boolean hasColumnIndexes = false;
             for (String n : attributeNames) {
@@ -688,7 +688,7 @@ public class BeanUtil {
                 }
             }
             if (!hasColumnIndexes)
-                throw FormattedException
+                throw ManagedException
                     .implementationError(
                         "if you don't give a separation-character, you should give at least one column-index in your attribute-names",
                         null);
@@ -811,10 +811,10 @@ public class BeanUtil {
                 }
             }
         } catch (final Exception e) {
-            ForwardedException.forward(e);
+            ManagedException.forward(e);
         }
         if (errors.size() > 0) {
-            throw new FormattedException(StringUtil.toFormattedString(errors, 80, true));
+            throw new ManagedException(StringUtil.toFormattedString(errors, 80, true));
         }
         LOG.info("import finished - imported items: " + result.size() + " of type " + rootType.getSimpleName());
         return result;
@@ -853,7 +853,7 @@ public class BeanUtil {
         try {
             OBJ_TOSTRING = Object.class.getMethod("toString", new Class[0]).toString();
         } catch (final Exception e) {
-            ForwardedException.forward(e);
+            ManagedException.forward(e);
         }
     }
 
@@ -875,7 +875,7 @@ public class BeanUtil {
             //pure objects, representating there instance id
             return !method.toString().equals(OBJ_TOSTRING);
         } catch (final Exception e) {
-            ForwardedException.forward(e);
+            ManagedException.forward(e);
             return false;
         }
     }
