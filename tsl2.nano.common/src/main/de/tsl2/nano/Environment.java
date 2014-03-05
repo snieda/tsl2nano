@@ -175,7 +175,7 @@ public class Environment {
     public static void create(String dir) {
         new File(dir).mkdirs();
         LogFactory.setLogFactoryXml(dir + "/" + "logfactory.xml");
-        
+
         String info = "\n===========================================================\n" + "creating environment "
             + dir
             + "\n"
@@ -368,19 +368,28 @@ public class Environment {
      * 
      * @param key the bundle key
      * @param optional if true, a first-upper pure string will be returned, if not found inside any bundle
+     * @param args if given, optional has to be false to insert the arguments into the message
      * @return bundle value the translated value or the key itself if no translation is available
      */
-    public static String translate(Object key, boolean optional) {
+    public static String translate(Object key, boolean optional, Object... args) {
         if (key instanceof Enum)
             return Messages.getString((Enum<?>) key);
         else {
             if (optional)
                 return Messages.getStringOpt((String) key, true);
-            else
-                return Messages.getString((String) key);
+            else {
+                if (args.length > 0)
+                    return Messages.getFormattedString((String) key, args);
+                else
+                    return Messages.getString((String) key);
+            }
         }
     }
 
+//    public static String translate(String key, Object... args) {
+//        return Messages.getFormattedString((String) key, args);
+//    }
+//
     /**
      * formats the given object
      * 

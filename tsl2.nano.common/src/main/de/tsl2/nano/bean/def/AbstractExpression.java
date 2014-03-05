@@ -22,7 +22,7 @@ public abstract class AbstractExpression<T> implements IValueExpression<T>, IAtt
     @Attribute
     protected Class<?> declaringClass;
     /** attribute type */
-    @Attribute
+    @Attribute(required=false)
     protected Class<T> type;
     @Element(data=true)
     protected String expression;
@@ -62,10 +62,11 @@ public abstract class AbstractExpression<T> implements IValueExpression<T>, IAtt
     /**
      * {@inheritDoc}
      */
+    @SuppressWarnings("unchecked")
     @Override
     public Class<T> getType() {
         if (type == null)
-            type = (Class<T>) Object.class;
+            type = (Class<T>) BeanDefinition.UNDEFINED.getClass();
         return type;
     }
 

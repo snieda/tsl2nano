@@ -787,4 +787,26 @@ public class FileUtil {
             }
         });
     }
+    
+    /**
+     * getRelativePath
+     * @param file
+     * @return path relative to current user.dir (application start)
+     */
+    public static String getRelativePath(String file) {
+        return getRelativePath(file, System.getProperty("user.dir"));
+    }
+    
+    public static String getRelativePath(File file, String currentPath) {
+        return getRelativePath(file.getPath(), new File(currentPath).getPath());
+    }
+    
+    /**
+     * getRelativePath
+     * @param file
+     * @return path relative to current user.dir (application start)
+     */
+    public static String getRelativePath(String file, String currentPath) {
+        return StringUtil.substring(file, currentPath, null);
+    }
 }

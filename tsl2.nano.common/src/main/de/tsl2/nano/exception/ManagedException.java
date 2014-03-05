@@ -105,6 +105,7 @@ public class ManagedException extends RuntimeException {
     @Override
     public String getLocalizedMessage() {
         Throwable rootCause = getRootCause(this);
+        rootCause = rootCause == this ? null : rootCause;
         if (isForwarded() && (rootCause == null || !Util.isEmpty(rootCause.getLocalizedMessage()))) {
             return rootCause != null ? rootCause.getLocalizedMessage() : Messages
                 .getFormattedString("tsl2.nano.unknownerror", this.getClass(), getStackTracePart(this));

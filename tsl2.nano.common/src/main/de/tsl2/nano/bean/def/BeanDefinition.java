@@ -47,7 +47,6 @@ import de.tsl2.nano.collection.CollectionUtil;
 import de.tsl2.nano.collection.IPredicate;
 import de.tsl2.nano.collection.ListSet;
 import de.tsl2.nano.exception.ManagedException;
-import de.tsl2.nano.exception.ManagedException;
 import de.tsl2.nano.execution.XmlUtil;
 import de.tsl2.nano.format.DefaultFormat;
 import de.tsl2.nano.log.LogFactory;
@@ -112,25 +111,25 @@ public class BeanDefinition<T> extends BeanClass<T> implements Serializable {
     @ElementList(inline = true, name = "group", type = ValueGroup.class, required = false)
     protected Collection<ValueGroup> valueGroups;
 
-    @Attribute(required=false)
+    @Attribute(required = false)
     protected boolean isNested;
     /**
      * this value is true, if the bean-definition was created through default algorithms - no attribute filter was
      * defined.
      */
-    @Attribute(required=false)
+    @Attribute(required = false)
     protected boolean isdefault = true;
 
     protected Extension extension;
-    
+
     /** used by virtual beans, having no object instance. TODO: will not work in different vm's */
     @SuppressWarnings("serial")
     static final Serializable UNDEFINED = new Serializable() {
     };
-    
+
     public static final String PREFIX_VIRTUAL = "virtual.";
     protected static final String POSTFIX_FILE_EXT = ".xml";
-    
+
     private static final List<BeanDefinition> virtualBeanCache = new ListSet<BeanDefinition>();
     private static final BeanDefinition volatileBean = new BeanDefinition(Object.class);
     private static boolean usePersistentCache = Environment.get("beandef.usepersistent.cache", true);
@@ -503,7 +502,7 @@ public class BeanDefinition<T> extends BeanClass<T> implements Serializable {
      */
     protected <A> IAttributeDefinition<A> addAttribute(String name, IAttributeDefinition<A> newAttribute) {
         getAttributeDefinitions().put(
-            newAttribute.getName() != null ? newAttribute.getName() : newAttribute.getDescription(), newAttribute);
+            name/*newAttribute.getName() != null ? newAttribute.getName() : newAttribute.getDescription()*/, newAttribute);
         //if no filter was defined, it will be prefilled in getAttributeNames()
         if (attributeFilter == null)
             attributeFilter = getAttributeNames();
@@ -880,12 +879,13 @@ public class BeanDefinition<T> extends BeanClass<T> implements Serializable {
             extension = null;
         //remove not-serializable or cycling actions
         if (actions != null && !Environment.get("strict.mode", false)) {
+            Class<?> cls;
             for (Iterator<IAction> actionIt = actions.iterator(); actionIt.hasNext();) {
                 IAction a = (IAction) actionIt.next();
                 //on inline implementations check the parent class
-                if (BeanDefinition.class.isAssignableFrom(a.getClass().getEnclosingClass()) || (a.getClass()
-                    .getEnclosingClass() != null && !Serializable.class.isAssignableFrom(a.getClass()
-                    .getEnclosingClass()))) {
+                cls = a.getClass().getEnclosingClass();
+                if (cls != null && (BeanDefinition.class.isAssignableFrom(cls)
+                    || !Serializable.class.isAssignableFrom(cls))) {
                     LOG.warn("removing action " + a.getId() + " to do serialization");
                     actionIt.remove();
                 }
@@ -935,8 +935,7 @@ public class BeanDefinition<T> extends BeanClass<T> implements Serializable {
     }
 
     /**
-     * Load virtual BeanCollectors like QueryResult from directory.
-     * name-convention: beandef/virtual/*.xml
+     * Load virtual BeanCollectors like QueryResult from directory. name-convention: beandef/virtual/*.xml
      */
     public static Collection<BeanDefinition<?>> loadVirtualDefinitions() {
         File[] virtDefs = FileUtil.getFiles(getDefinitionDirectory() + PREFIX_VIRTUAL, ".*.xml");
@@ -950,7 +949,7 @@ public class BeanDefinition<T> extends BeanClass<T> implements Serializable {
         }
         return types;
     }
-    
+
     /**
      * persists cache
      */
@@ -1024,6 +1023,7 @@ public class BeanDefinition<T> extends BeanClass<T> implements Serializable {
         BeanCollector.createColumnDefinitions(this,
             getPresentationHelper().matches("default.present.attribute.multivalue", true));
         for (IAttributeDefinition<?> a : attributes) {
+            a.getFormat();
             a.getPresentation();
             a.getColumnDefinition();
         }

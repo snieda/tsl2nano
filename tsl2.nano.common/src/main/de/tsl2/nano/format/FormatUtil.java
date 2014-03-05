@@ -33,6 +33,7 @@ import de.tsl2.nano.exception.ManagedException;
 import de.tsl2.nano.execution.CompatibilityLayer;
 import de.tsl2.nano.log.LogFactory;
 import de.tsl2.nano.util.NumberUtil;
+import de.tsl2.nano.util.StringUtil;
 import de.tsl2.nano.util.Util;
 
 /**
@@ -213,7 +214,7 @@ public class FormatUtil {
                 f = new Format() {
                     @Override
                     public StringBuffer format(Object obj, StringBuffer toAppendTo, FieldPosition pos) {
-                        return toAppendTo.append(obj != null ? obj.toString() : "");
+                        return toAppendTo.append(obj != null ? StringUtil.toString(obj, 80) : "");
                     }
 
                     @Override

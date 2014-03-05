@@ -13,7 +13,6 @@ import java.io.Serializable;
 import java.text.Format;
 import java.util.Collection;
 
-import de.tsl2.nano.bean.BeanAttribute;
 import de.tsl2.nano.bean.IAttribute;
 import de.tsl2.nano.bean.IAttributeDef;
 
@@ -24,49 +23,32 @@ import de.tsl2.nano.bean.IAttributeDef;
  * @version $Revision$
  */
 public interface IAttributeDefinition<T> extends IAttribute<T>, IAttributeDef, Serializable {
+
     /** format-constraint for the attributes value */
     Format getFormat();
-
-    /** checks, if the given value is valid for this attribute - should not throw an exception */
-    IStatus isValid(T value);
-
-    /** default value for this attribute */
-    T getDefault();
-
+    
     /** description for the attribute */
     String getDescription();
-
-    /** returns the minimum value or null */
-    T getMininum();
-
-    /** returns the maximum value or null */
-    T getMaxinum();
-
-    /** returns the allowed values or null */
-    Collection<T> getAllowedValues();
 
     /**
      * @return whether the value type is a collection.
      */
     public boolean isMultiValue();
 
-    /** maximum length - useful on strings */
-    int getLength();
-
-    /** scale - useful for numbers of type BigDecimal */
-    int getScale();
-
-    /** precision - useful for numbers of type BigDecimal */
-    int getPrecision();
-
-    /** should return true, if attribute-value may be null */
-    boolean isNullable();
-
     /** should be true, if this attribute defines the id of the owning bean */
     boolean id();
 
+    /** checks, if the given value is valid for this attribute - should not throw an exception */
+    IStatus isValid(T value);
+
     /** define some basic attribute definitions */
     IAttributeDefinition<T> setBasicDef(int length, boolean nullable, Format format, T defaultValue, String description);
+
+    /** if parameter isId is true, the attribute will be handled as id-attribute for the owning bean */
+    IAttributeDefinition<T> setId(boolean isId);
+
+    /** if parameter isUnique is true, the attribute will be handled as unique-attribute for the owning bean */
+    IAttributeDefinition<T> setUnique(boolean isUnique);
 
     /** define number definitions - if the attribute is a number */
     IAttributeDefinition<T> setNumberDef(int scale, int precision);
@@ -79,12 +61,6 @@ public interface IAttributeDefinition<T> extends IAttribute<T>, IAttributeDef, S
      * method
      */
     IAttributeDefinition<T> setRange(Collection<T> allowedValues);
-
-    /** if parameter isId is true, the attribute will be handled as id-attribute for the owning bean */
-    IAttributeDefinition<T> setId(boolean isId);
-
-    /** if parameter isUnique is true, the attribute will be handled as unique-attribute for the owning bean */
-    IAttributeDefinition<T> setUnique(boolean isUnique);
 
     /** define constraining text format. use RegularExpressionFormat to define a regexp pattern */
     IAttributeDefinition<T> setFormat(Format format);
@@ -100,7 +76,6 @@ public interface IAttributeDefinition<T> extends IAttribute<T>, IAttributeDef, S
 
     /** define nullable */
     IAttributeDefinition<T> setNullable(boolean nullable);
-
     /** returns the current attribute value status (ok, warn or error) */
     IStatus getStatus();
 
@@ -113,6 +88,9 @@ public interface IAttributeDefinition<T> extends IAttribute<T>, IAttributeDef, S
     /** set definition for a column */
     void setColumnDefinition(int index, int sortIndex, boolean sortUpDirection, int width);
 
+    /** get attribute constraints */
+    IConstraint<T> getConstraint();
+    
     /**
      * renames the attribute to be a relation from another bean. relation name parts are concatenated through '.'.
      */

@@ -99,10 +99,10 @@ public interface IPresentable extends Serializable {
     public <T> T layout(String name, T defaultValue);
     
     /** usable for int definitions that are not bitfields */
-    public static final int UNDEFINED = -1;
+    public static final int UNDEFINED = IConstraint.UNDEFINED;
 
     /** usable for all int definitions like bitfiels type and style */
-    public static final int UNSET = 0;
+    public static final int UNSET = IConstraint.UNSET;
 
     /*
      * basic presentation types
@@ -135,7 +135,10 @@ public interface IPresentable extends Serializable {
     public static final int TYPE_FORM = 1 << 10;
     /** extended type to be used e.g. for an html field */
     public static final int TYPE_PAINT = 1 << 11;
+    /** text with carriage returns */
     public static final int TYPE_INPUT_MULTILINE = 1 << 12;
+    /** e.g. for database blobs to be shown directly */
+    public static final int TYPE_DATA = 1 << 13;
 
     /*
      * additional input types (see html5)

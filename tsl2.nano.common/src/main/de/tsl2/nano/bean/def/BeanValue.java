@@ -13,6 +13,7 @@ import static de.tsl2.nano.bean.def.IBeanCollector.MODE_ALL;
 import static de.tsl2.nano.bean.def.IBeanCollector.MODE_ALL_SINGLE;
 import static de.tsl2.nano.bean.def.IPresentable.POSTFIX_SELECTOR;
 
+import java.io.File;
 import java.io.Serializable;
 import java.lang.reflect.Method;
 import java.text.Format;
@@ -22,8 +23,11 @@ import java.util.LinkedHashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.UUID;
 
 import org.apache.commons.logging.Log;
+
+import tsl.FileUtil;
 
 import de.tsl2.nano.Environment;
 import de.tsl2.nano.action.CommonAction;
@@ -117,39 +121,43 @@ public class BeanValue<T> extends AttributeDefinition<T> implements IValueDefini
 
     @Override
     public Class<T> getType() {
-        //if a value-expression was defined, the valueexpression-type has to be used!
-        if (attribute.isVirtual())
-            return super.getType();
-        else if (temporalType() != null)
-            return (Class<T>) temporalType();
-        else if (isVirtual())
-            return ((IValueAccess<T>) instance).getType();
-        else if (instance != null && Environment.get("value.use.instancetype", true)) {
-            try {
-                T value = getValue();
-                //don't use inner class infos or enum values
-                if (value != null && !value.getClass().isAnonymousClass()
-                    && value.getClass().getDeclaringClass() == null)
-                    return (Class<T>) BeanClass.getDefiningClass(value.getClass());
-            } catch (Exception e) {
-                LOG.warn("couldn't evaluate type through instance. using method-returntype instead. error was: "
-                    + e.toString());
+        //TODO: set UNDEFINED instead of object
+        if (getConstraint().getType() == Object.class) {
+            //if a value-expression was defined, the valueexpression-type has to be used!
+            if (attribute.isVirtual())
+                getConstraint().setType(super.getType());
+            else if (temporalType() != null)
+                getConstraint().setType((Class<T>) temporalType());
+            else if (isVirtual())
+                getConstraint().setType(((IValueAccess<T>) instance).getType());
+            else if (instance != null && Environment.get("value.use.instancetype", true)) {
+                try {
+                    T value = getValue();
+                    //don't use inner class infos or enum values
+                    if (value != null && !value.getClass().isAnonymousClass()
+                        && value.getClass().getDeclaringClass() == null)
+                        getConstraint().setType((Class<T>) BeanClass.getDefiningClass(value.getClass()));
+                } catch (Exception e) {
+                    LOG.warn("couldn't evaluate type through instance. using method-returntype instead. error was: "
+                        + e.toString());
+                }
             }
+            getConstraint().setType(super.getType());
         }
-        return super.getType();
+        return getConstraint().getType();
     }
 
     @Override
     public Format getFormat() {
-        if (format == null) {
+        if (getConstraint().getFormat() == null) {
             /*
              * on jpa persistable collections, the origin instance has to be hold for orphan removals.
              */
             if (Collection.class.isAssignableFrom(getType())) {
                 T value = getValue();
                 if (value != null)
-                    this.format =
-                        new CollectionExpressionFormat<T>((Class<T>) getGenericType(0), (Collection<T>) value);
+                    getConstraint().setFormat(
+                        new CollectionExpressionFormat<T>((Class<T>) getGenericType(0), (Collection<T>) value));
             }
         }
         return super.getFormat();
@@ -179,6 +187,23 @@ public class BeanValue<T> extends AttributeDefinition<T> implements IValueDefini
             status = isValid(v);
             return v.toString();
         }
+    }
+
+    /**
+     * can be used, if for example a bean value is a byte-array to be used from outside (perhaps on an html-page loading
+     * an image). if the value is not a byte-array, it will be created through serialization. this byte-array will be
+     * saved (if not saved before) to a file inside a temp-directory of your environment.
+     * 
+     * @return temporary file-path of the current bean-value, saved as byte-array.
+     */
+    public File getValueFile() {
+        T v = getValue();
+        byte[] data = (byte[]) (v instanceof byte[] ? v : BeanUtil.serializeBean(v));
+        String fname = Environment.getConfigPath() + "temp/" + getId() + "-" + UUID.nameUUIDFromBytes(data);
+        File file = new File(fname);
+        if (!file.exists())
+            FileUtil.writeBytes(data, file.getPath(), false);
+        return file;
     }
 
     /**
@@ -314,7 +339,7 @@ public class BeanValue<T> extends AttributeDefinition<T> implements IValueDefini
      */
     @Override
     public String getName() {
-        if (isVirtual()) {
+        if (isVirtualAccess()) {
             if (description == null) {
                 description = StringUtil.toFirstUpper(super.getName());
             }

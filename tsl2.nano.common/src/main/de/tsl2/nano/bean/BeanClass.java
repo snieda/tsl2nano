@@ -39,10 +39,10 @@ import de.tsl2.nano.action.IAction;
 import de.tsl2.nano.bean.def.BeanValue;
 import de.tsl2.nano.collection.ListSet;
 import de.tsl2.nano.exception.ManagedException;
-import de.tsl2.nano.exception.ManagedException;
 import de.tsl2.nano.log.LogFactory;
 import de.tsl2.nano.util.NumberUtil;
 import de.tsl2.nano.util.StringUtil;
+import de.tsl2.nano.util.Util;
 
 /**
  * used to constrain a pojo class to its bean class properties.
@@ -169,6 +169,14 @@ public class BeanClass<T> implements Serializable {
      * @return list of methods having at least an read access method.
      */
     public List<IAttribute> getAttributes(boolean readAndWriteAccess) {
+        /*
+         * performance: extensions of BeanClass will not be stored in cache, so
+         * define a new cached-class to get the methods from there.
+         */
+        BeanClass cachedBC = CachedBeanClass.getCachedBeanClass(clazz);
+        if (cachedBC != null && cachedBC != this)
+            return cachedBC.getAttributes(readAndWriteAccess);
+        
         final Method[] allMethods = clazz.getMethods();
         final LinkedList<String> accessedMethods = new LinkedList<String>();
         final List<IAttribute> beanAccessMethods = new LinkedList<IAttribute>();
@@ -201,6 +209,15 @@ public class BeanClass<T> implements Serializable {
         return beanAccessMethods;
     }
 
+    IAttribute getAttribute(String name) {
+        List<IAttribute> attrs = getAttributes();
+        for (IAttribute a : attrs) {
+            if (a.getName().equals(name))
+                return a;
+        }
+        return null;
+    }
+    
     /**
      * returns all bean attributes wrapped into a sorted set.
      * 
@@ -942,6 +959,11 @@ public class BeanClass<T> implements Serializable {
         return Proxy.isProxyClass(cls) ? cls.getInterfaces()[0] : (cls.getEnclosingClass() != null || cls
             .getSimpleName().contains("$")) && cls.getSuperclass() != null ? getDefiningClass(cls.getSuperclass())
             : cls;
+    }
+    
+    @Override
+    public String toString() {
+        return Util.toString(this.getClass(), clazz);
     }
 }
 

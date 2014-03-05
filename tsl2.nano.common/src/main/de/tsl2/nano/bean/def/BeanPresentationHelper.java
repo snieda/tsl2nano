@@ -13,6 +13,7 @@ import static de.tsl2.nano.bean.def.IPresentable.ALIGN_CENTER;
 import static de.tsl2.nano.bean.def.IPresentable.ALIGN_LEFT;
 import static de.tsl2.nano.bean.def.IPresentable.ALIGN_RIGHT;
 import static de.tsl2.nano.bean.def.IPresentable.STYLE_MULTI;
+import static de.tsl2.nano.bean.def.IPresentable.TYPE_DATA;
 import static de.tsl2.nano.bean.def.IPresentable.TYPE_DATE;
 import static de.tsl2.nano.bean.def.IPresentable.TYPE_INPUT;
 import static de.tsl2.nano.bean.def.IPresentable.TYPE_INPUT_NUMBER;
@@ -165,6 +166,16 @@ public class BeanPresentationHelper<T> {
             || propertyName.equals(PROP_ENABLER);
     }
 
+    private static boolean isConstraintProperty(String propertyName) {
+        return propertyName.equals(PROP_ALLOWED_VALUES) || propertyName.equals(PROP_DEFAULT)
+            || propertyName.equals(PROP_FORMAT)
+            || propertyName.equals(PROP_LENGTH)
+            || propertyName.equals(PROP_MAX)
+            || propertyName.equals(PROP_MIN)
+            || propertyName.equals(PROP_NULLABLE)
+            || propertyName.equals(PROP_TYPE);
+    }
+
     /**
      * change attribute with given key / values
      * 
@@ -195,9 +206,12 @@ public class BeanPresentationHelper<T> {
     public BeanPresentationHelper<T> change(String propertyName, Object newValue, String... attributeNames) {
         attributeNames = attributeNames.length > 0 ? attributeNames : bean.getAttributeNames();
         boolean isPresProp = isPresentableProperty(propertyName);
+        boolean isConstrProp = isConstraintProperty(propertyName);
         for (int i = 0; i < attributeNames.length; i++) {
-            Object instance = isPresProp ? bean.getAttribute(attributeNames[i]).getPresentation()
-                : bean.getAttribute(attributeNames[i]);
+            Object instance =
+                isPresProp ? bean.getAttribute(attributeNames[i]).getPresentation()
+                    : isConstrProp ? bean.getAttribute(attributeNames[i]).getConstraint() : bean
+                        .getAttribute(attributeNames[i]);
             BeanAttribute.getBeanAttribute(instance.getClass(), propertyName).setValue(instance, newValue);
         }
         return this;
@@ -382,6 +396,8 @@ public class BeanPresentationHelper<T> {
             type = TYPE_DATE;
         } else if (Boolean.class.isAssignableFrom(attr.getType()) || boolean.class.isAssignableFrom(attr.getType())) {
             type = TYPE_OPTION;
+        } else if (attr.getType().isArray() && byte[].class.isAssignableFrom(attr.getType())) {//perhaps for blobs
+            type = TYPE_DATA;
         } else if (attr.getType().isArray() || Collection.class.isAssignableFrom(attr.getType())) {//complex type --> list
             type = TYPE_TABLE;
         } else if (BeanUtil.isStandardType(attr.getType())) {
@@ -984,7 +1000,7 @@ public class BeanPresentationHelper<T> {
                         //check data to seam unique
                         i = levels.get(it.next());
                         q = query.replace(ALIAS, names[i]);
-                        grouping = BeanContainer.instance().getBeansByQuery(q, false, (Object[])null);
+                        grouping = BeanContainer.instance().getBeansByQuery(q, false, (Object[]) null);
                         maxCount = grouping.size() > 0 ? grouping.iterator().next() : null;
                         if (Util.isEmpty(maxCount) || maxCount.intValue() < 2)
                             break;
@@ -1108,7 +1124,6 @@ public class BeanPresentationHelper<T> {
     public void reset() {
         Environment.reload();
         BeanDefinition.clearCache();
-        Bean.clearCache();
         BeanValue.clearCache();
     }
 

@@ -18,7 +18,10 @@ import java.text.MessageFormat;
  * @author Thomas Schneider
  * @version $Revision$
  */
-public class Status implements IStatus{
+public class Status implements IStatus {
+    /** serialVersionUID */
+    private static final long serialVersionUID = -7981328274166216957L;
+
     int status = OK;
     String msg = null;
     Throwable ex = null;
@@ -76,7 +79,7 @@ public class Status implements IStatus{
      * @return new error status instance
      */
     public static Status illegalArgument(String name, Object value, Object assertion) {
-        return new Status(new IllegalArgumentException(MessageFormat.format("The value <{0}> of attribute \"{1}\" must fulfil {2}.",
+        return new Status(new IllegalArgumentException(MessageFormat.format("tsl2nano.assertion.failed",
             value,
             name,
             assertion)));

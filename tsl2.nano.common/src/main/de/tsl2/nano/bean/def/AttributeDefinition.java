@@ -9,8 +9,6 @@
  */
 package de.tsl2.nano.bean.def;
 
-import static de.tsl2.nano.bean.def.IPresentable.UNDEFINED;
-
 import java.io.Serializable;
 import java.lang.reflect.Method;
 import java.text.Format;
@@ -24,7 +22,6 @@ import org.simpleframework.xml.Attribute;
 import org.simpleframework.xml.Default;
 import org.simpleframework.xml.DefaultType;
 import org.simpleframework.xml.Element;
-import org.simpleframework.xml.ElementList;
 import org.simpleframework.xml.core.Commit;
 
 import de.tsl2.nano.Environment;
@@ -35,10 +32,7 @@ import de.tsl2.nano.bean.BeanContainer;
 import de.tsl2.nano.bean.BeanUtil;
 import de.tsl2.nano.bean.IAttribute;
 import de.tsl2.nano.bean.IAttributeDef;
-import de.tsl2.nano.bean.PrimitiveUtil;
 import de.tsl2.nano.bean.ValueHolder;
-import de.tsl2.nano.collection.CollectionUtil;
-import de.tsl2.nano.exception.ManagedException;
 import de.tsl2.nano.exception.ManagedException;
 import de.tsl2.nano.log.LogFactory;
 import de.tsl2.nano.messaging.EventController;
@@ -60,29 +54,28 @@ public class AttributeDefinition<T> implements IAttributeDefinition<T> {
     @Element(name = "declaring")
     protected IAttribute<T> attribute;
     protected transient EventController eventController;
-    private int length = UNDEFINED;
-    private int scale = UNDEFINED;
-    private int precision = UNDEFINED;
-    private boolean nullable = true;
+    @Element(type = Constraint.class, required = false)
+    protected IConstraint<T> constraint;
+    @Attribute(required=false)
     private boolean id;
+    @Attribute(required=false)
     private boolean unique;
+    @Element(required = false)
     private Class<? extends Date> temporalType;
-    protected Format format;
-    protected T defaultValue;
+    @Element(required = false)
     protected String description;
     protected transient IStatus status;
-    private Comparable<T> min;
-    private Comparable<T> max;
-    @ElementList(inline = true, entry = "value", required = false)
-    private transient Collection<T> allowedValues;
     @Element(type = Presentable.class, required = false)
     private IPresentable presentable;
     @Element(type = ValueColumn.class, required = false)
     private IPresentableColumn columnDefinition;
+    @Element(required = false)
     private boolean doValidation = true;
     /** see {@link #composition()} */
+    @Attribute(required=false)
     private boolean composition;
     /** see {@link #cascading()} */
+    @Attribute(required=false)
     private boolean cascading;
 
     private static final Log LOG = LogFactory.getLog(AttributeDefinition.class);
@@ -109,6 +102,8 @@ public class AttributeDefinition<T> implements IAttributeDefinition<T> {
     public AttributeDefinition(IAttribute<T> attribute) {
         super();
         this.attribute = attribute;
+        if (attribute.getAccessMethod() != null)
+            defineDefaults();
     }
 
     protected AttributeDefinition(Method readAccessMethod) {
@@ -142,7 +137,7 @@ public class AttributeDefinition<T> implements IAttributeDefinition<T> {
                 setId(def.id());
                 setUnique(def.unique());
                 setBasicDef(def.length(), def.nullable(), null, null, null);
-                setNumberDef(def.scale(), def.precision());
+                getConstraint().setNumberDef(def.scale(), def.precision());
                 temporalType = def.temporalType();
                 composition = def.composition();
                 cascading = def.cascading();
@@ -153,12 +148,15 @@ public class AttributeDefinition<T> implements IAttributeDefinition<T> {
 
     @Commit
     private void initDeserialization() {
-        if (Enum.class.isAssignableFrom(getType()))
-            allowedValues = CollectionUtil.getEnumValues((Class<Enum>) getType());
-
         status = IStatus.STATUS_OK;
     }
 
+    public final IConstraint<T> getConstraint() {
+        if (constraint == null)
+            constraint = new Constraint();
+        return constraint;
+    }
+    
     /**
      * setBasicDef
      * 
@@ -174,16 +172,13 @@ public class AttributeDefinition<T> implements IAttributeDefinition<T> {
             Format format,
             T defaultValue,
             String description) {
-        this.length = length;
-        this.nullable = nullable;
-        this.format = format;
-        this.defaultValue = defaultValue;
-        this.description = description;
-        if (defaultValue != null && doValidation) {
-            IStatus s = isValid(defaultValue);
-            if (!s.ok())
-                throw new ManagedException(s.message());
+        try {
+            getConstraint().setBasicDef(length, nullable, format, defaultValue);
+        } catch (Exception e) {
+            if (doValidation)
+                ManagedException.forward(e);
         }
+        this.description = description;
         return this;
     }
 
@@ -200,35 +195,6 @@ public class AttributeDefinition<T> implements IAttributeDefinition<T> {
             status = new Status(ex);
             return null;
         }
-    }
-
-    /**
-     * setNumberDef
-     * 
-     * @param scale {@link #scale()}
-     * @param precision {@link #precision()}
-     */
-    @Override
-    public IAttributeDefinition<T> setNumberDef(int scale, int precision) {
-        this.scale = scale;
-        this.precision = precision;
-        return this;
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    public IAttributeDefinition<T> setRange(Comparable<T> min, Comparable<T> max) {
-        this.min = min;
-        this.max = max;
-        return this;
-    }
-
-    @Override
-    public IAttributeDefinition<T> setRange(Collection<T> allowedValues) {
-        this.allowedValues = allowedValues;
-        return this;
     }
 
     /**
@@ -253,51 +219,8 @@ public class AttributeDefinition<T> implements IAttributeDefinition<T> {
      * {@inheritDoc}
      */
     @Override
-    public IAttributeDefinition<T> setFormat(Format format) {
-        this.format = format;
-        return this;
-    }
-
-    /**
-     * @return Returns the length.
-     */
-    @Override
-    public int getLength() {
-        return length;
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    public IAttributeDefinition<T> setLength(int length) {
-        this.length = length;
-        return this;
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    @Override
     public int length() {
-        return length;
-    }
-
-    /**
-     * @return Returns the scale.
-     */
-    @Override
-    public int getScale() {
-        return scale;
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    public IAttributeDefinition<T> setScale(int scale) {
-        this.scale = scale;
-        return this;
+        return getConstraint().getLength();
     }
 
     /**
@@ -305,24 +228,7 @@ public class AttributeDefinition<T> implements IAttributeDefinition<T> {
      */
     @Override
     public int scale() {
-        return scale;
-    }
-
-    /**
-     * @return Returns the precision.
-     */
-    @Override
-    public int getPrecision() {
-        return precision;
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    public IAttributeDefinition<T> setPrecision(int precision) {
-        this.precision = precision;
-        return this;
+        return getConstraint().getScale();
     }
 
     /**
@@ -330,24 +236,7 @@ public class AttributeDefinition<T> implements IAttributeDefinition<T> {
      */
     @Override
     public int precision() {
-        return precision;
-    }
-
-    /**
-     * @return Returns the nullable.
-     */
-    @Override
-    public boolean isNullable() {
-        return nullable;
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    public IAttributeDefinition<T> setNullable(boolean nullable) {
-        this.nullable = nullable;
-        return this;
+        return getConstraint().getPrecision();
     }
 
     /**
@@ -355,7 +244,7 @@ public class AttributeDefinition<T> implements IAttributeDefinition<T> {
      */
     @Override
     public boolean nullable() {
-        return nullable;
+        return getConstraint().isNullable();
     }
 
     /**
@@ -384,24 +273,24 @@ public class AttributeDefinition<T> implements IAttributeDefinition<T> {
      */
     @Override
     public Format getFormat() {
-        if (format == null) {
+        if (getConstraint().getFormat() == null) {
             Class<T> type = getType();
             if (Collection.class.isAssignableFrom(type)) {
-                this.format = new CollectionExpressionFormat<T>((Class<T>) getGenericType(0));
+                getConstraint().setFormat(new CollectionExpressionFormat<T>((Class<T>) getGenericType(0)));
             } else if (Map.class.isAssignableFrom(type)) {
-                this.format = new MapExpressionFormat<T>((Class<T>) getGenericType(1));
+                getConstraint().setFormat(new MapExpressionFormat<T>((Class<T>) getGenericType(1)));
             } else if (type.isEnum() || BeanUtil.isStandardType(type)) {
 //                this.format = FormatUtil.getDefaultFormat(type, true);
 //                //not all types have default formats
 //                if (this.format == null) {
 //                    this.format = new GenericParser<T>(type);
 //                }
-                this.format = Environment.get(BeanPresentationHelper.class).getDefaultRegExpFormat(this);
+                getConstraint().setFormat(Environment.get(BeanPresentationHelper.class).getDefaultRegExpFormat(this));
             } else {
-                this.format = new ValueExpressionFormat<T>(type);
+                getConstraint().setFormat(new ValueExpressionFormat<T>(type));
             }
         }
-        return format;
+        return getConstraint().getFormat();
     }
 
     /**
@@ -449,35 +338,7 @@ public class AttributeDefinition<T> implements IAttributeDefinition<T> {
      */
     @Override
     public IStatus isValid(T value) {
-        IStatus status = IStatus.STATUS_OK;
-
-        try {
-            if (!nullable() && value == null) {
-                status = Status.illegalArgument(getId(), value, "not null");
-            } else if (value != null) {
-                String fval = value instanceof String ? (String) value : getFormat().format(value);
-                if (!PrimitiveUtil.isAssignableFrom(getType(), value.getClass())) {
-                    status = Status.illegalArgument(getId(), fval, getType());
-                } else if (value instanceof String && parse(fval) == null) {
-                    status = Status.illegalArgument(getId(), fval, "format '" + format + "'");
-                } else if (!(value instanceof String) && fval == null) {
-                    status = Status.illegalArgument(getId(), fval, "format '" + format + "'");
-                } else if (min != null && min.compareTo(value) > 0) {
-                    status = Status.illegalArgument(getId(), fval, " greater than " + min);
-                } else if (max != null && max.compareTo(value) < 0) {
-                    status = Status.illegalArgument(getId(), fval, " lower than " + max);
-                } else if (length > 0 && fval.length() > length) {
-                    status = Status.illegalArgument(getId(), fval, " a maximum-length of " + length);
-                }
-            }
-            //TODO: check numbers on scale and precision
-        } catch (Exception ex) {
-            status = Status.illegalArgument(getId(), value, ex);
-        }
-        if (!status.ok()) {
-            LOG.warn(status);
-        }
-        return status;
+        return getConstraint().checkStatus(getId(), value);
     }
 
     /**
@@ -493,7 +354,7 @@ public class AttributeDefinition<T> implements IAttributeDefinition<T> {
         if (getFormat() != null)
             try {
                 //the parser will decide, how to handle empty/null values
-                value = (T) format.parseObject(source);
+                value = (T) getFormat().parseObject(source);
             } catch (ParseException e) {
                 ManagedException.forward(e);
             }
@@ -502,22 +363,6 @@ public class AttributeDefinition<T> implements IAttributeDefinition<T> {
         else
             throw new ManagedException("no format/parser available for field " + getName());
         return value;
-    }
-
-    /**
-     * parse the given text - will not throw any exception.
-     * 
-     * @param text text to parse
-     * @return object yield from parsing given text - or null on any error
-     */
-    protected T parse(String text) {
-        try {
-            return getFormat() != null ? (T) format.parseObject(text) : null;
-        } catch (Exception e) {
-            LOG.warn(e.toString());
-            //do nothing - the null return value indicates the error
-            return null;
-        }
     }
 
     /**
@@ -541,11 +386,10 @@ public class AttributeDefinition<T> implements IAttributeDefinition<T> {
     /**
      * {@inheritDoc}
      */
-    @Override
     public T getDefault() {
-        if (defaultValue == null && getAccessMethod() != null)
-            defaultValue = (T) getAccessMethod().getGenericReturnType();
-        return defaultValue;
+        if (getConstraint().getDefault() == null && getAccessMethod() != null)
+            getConstraint().setDefault((T) getAccessMethod().getGenericReturnType());
+        return getConstraint().getDefault();
     }
 
     /**
@@ -562,19 +406,76 @@ public class AttributeDefinition<T> implements IAttributeDefinition<T> {
         this.description = description;
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
-    public Collection<T> getAllowedValues() {
-        return allowedValues;
+    public IAttributeDefinition<T> setNumberDef(int scale, int precision) {
+        getConstraint().setNumberDef(scale, precision);
+        return this;
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
-    public T getMininum() {
-        return (T) min;
+    public IAttributeDefinition<T> setRange(Comparable<T> min, Comparable<T> max) {
+        getConstraint().setRange(min, max);
+        return this;
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
-    public T getMaxinum() {
-        return (T) max;
+    public IAttributeDefinition<T> setRange(Collection<T> allowedValues) {
+        getConstraint().setRange(allowedValues);
+        return this;
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public IAttributeDefinition<T> setFormat(Format format) {
+        getConstraint().setFormat(format);
+        return this;
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public IAttributeDefinition<T> setLength(int length) {
+        getConstraint().setLength(length);
+        return this;
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public IAttributeDefinition<T> setScale(int scale) {
+        getConstraint().setScale(scale);
+        return this;
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public IAttributeDefinition<T> setPrecision(int precision) {
+        getConstraint().setPrecision(precision);
+        return this;
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public IAttributeDefinition<T> setNullable(boolean nullable) {
+        getConstraint().setNullable(nullable);
+        return this;
     }
 
     /**

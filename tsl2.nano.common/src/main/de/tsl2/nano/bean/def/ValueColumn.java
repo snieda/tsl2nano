@@ -14,6 +14,9 @@ import static de.tsl2.nano.bean.def.IPresentable.UNDEFINED;
 import java.io.Serializable;
 import java.text.Format;
 
+import org.simpleframework.xml.Attribute;
+import org.simpleframework.xml.Element;
+
 import de.tsl2.nano.Messages;
 import de.tsl2.nano.action.CommonAction;
 import de.tsl2.nano.action.IAction;
@@ -33,11 +36,17 @@ public class ValueColumn<T> implements IPresentableColumn, Serializable {
     transient IAction<?> actionSortColumn;
     
     /** attribute name to be identifiable */
+    @Attribute(required=false)
     String name;
+    @Attribute(required=false)
     int columnIndex;
+    @Attribute(required=false)
     int sortIndex;
+    @Attribute(required=false)
     boolean isSortUpDirection;
+    @Attribute(required=false)
     int width;
+    @Element(required=false)
     IPresentable presentable;
     
     /**

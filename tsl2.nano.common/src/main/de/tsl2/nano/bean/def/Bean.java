@@ -10,6 +10,7 @@
 package de.tsl2.nano.bean.def;
 
 import java.io.Serializable;
+import java.lang.reflect.Array;
 import java.text.Format;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -29,7 +30,6 @@ import de.tsl2.nano.bean.IAttribute;
 import de.tsl2.nano.collection.CollectionUtil;
 import de.tsl2.nano.collection.MapUtil;
 import de.tsl2.nano.collection.TimedReferenceMap;
-import de.tsl2.nano.exception.ManagedException;
 import de.tsl2.nano.exception.ManagedException;
 import de.tsl2.nano.messaging.IListener;
 import de.tsl2.nano.util.StringUtil;
@@ -599,6 +599,8 @@ public class Bean<T> extends BeanDefinition<T> {
         if (instanceOrName instanceof String) {
             BeanDefinition<I> beandef = (BeanDefinition<I>) getBeanDefinition((String) instanceOrName);
             bean = createBean((I) UNDEFINED, beandef);
+        } else if (instanceOrName.getClass().isArray()){
+            bean = createArrayBean(instanceOrName);
         } else {
             BeanDefinition<I> beandef = getBeanDefinition((Class<I>) instanceOrName.getClass());
             bean = createBean(instanceOrName, beandef);
@@ -620,6 +622,15 @@ public class Bean<T> extends BeanDefinition<T> {
         }
     }
 
+    private static Bean createArrayBean(Object array) {
+        int length = Array.getLength(array);
+        Bean bean = new Bean(array);
+        for (int i = 0; i < length; i++) {
+            bean.addAttribute(new BeanValue(bean, new ArrayValue(String.valueOf(i), i)));
+        }
+        return bean;
+    }
+    
     /**
      * attaches the given detacher
      * 

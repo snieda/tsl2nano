@@ -93,8 +93,17 @@ public class BeanAttribute<T> implements IAttribute<T> {
      * @return an instance of BeanAttribute with the given attributeName of clazz - or null (if throwException = false).
      */
     public static final BeanAttribute getBeanAttribute(Class<?> clazz, String attributeName, boolean throwException) {
-        Method method = getReadAccessMethod(clazz, attributeName, throwException);
-        return method != null ? new BeanAttribute(method) : null;
+        /*
+         * performance: extensions of BeanClass will not be stored in cache, so
+         * define a new cached-class to get the methods from there.
+         */
+        BeanClass cachedBC = CachedBeanClass.getCachedBeanClass(clazz);
+        if (cachedBC != null)
+            return (BeanAttribute) cachedBC.getAttribute(attributeName);
+        else {
+            Method method = getReadAccessMethod(clazz, attributeName, throwException);
+            return method != null ? new BeanAttribute(method) : null;
+        }
     }
 
     /**
