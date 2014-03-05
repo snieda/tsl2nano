@@ -1,7 +1,5 @@
 package de.tsl2.nano.service.util.finder;
 
-import static de.tsl2.nano.service.util.ServiceUtil.CLAUSE_AND;
-import static de.tsl2.nano.service.util.ServiceUtil.CLAUSE_WHERE;
 import static de.tsl2.nano.service.util.ServiceUtil.addBetweenConditions;
 
 import java.util.Collection;
