@@ -9,11 +9,14 @@
  */
 package de.tsl2.nano.incubation.specification.actions;
 
+import java.lang.reflect.Method;
+import java.util.LinkedHashMap;
 import java.util.Map;
 
 import org.simpleframework.xml.Attribute;
 
 import de.tsl2.nano.bean.BeanClass;
+import de.tsl2.nano.bean.def.Constraint;
 import de.tsl2.nano.incubation.specification.AbstractRunnable;
 import de.tsl2.nano.incubation.specification.ParType;
 
@@ -42,7 +45,7 @@ public class Action<T> extends AbstractRunnable<T> {
      * @param operation
      * @param parameter
      */
-    public Action(String name, Class<?> declaringClass, String operation, Map<String, ParType> parameter) {
+    public Action(String name, Class<?> declaringClass, String operation, LinkedHashMap<String, ParType> parameter) {
         super(name, operation, parameter);
         this.declaringClass = declaringClass;
     }
@@ -52,9 +55,21 @@ public class Action<T> extends AbstractRunnable<T> {
      * 
      * @param declaringClass
      */
-    public Action(Class<?> declaringClass) {
+    public Action(Method method) {
         super();
-        this.declaringClass = declaringClass;
+        this.declaringClass = method.getDeclaringClass();
+        this.operation = method.getName();
+        this.name = this.operation;
+        createParameter(method);
+        initDeserializing();
+    }
+
+    private void createParameter(Method method) {
+        Class<?>[] types = method.getParameterTypes();
+        parameter = new LinkedHashMap<String, ParType>();
+        for (int i = 0; i < types.length; i++) {
+            parameter.put("arg" + (i + 1), new ParType(types[i]));
+        }
     }
 
     @SuppressWarnings("unchecked")

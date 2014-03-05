@@ -1,8 +1,6 @@
 package de.tsl2.nano.incubation.specification;
 
-import java.math.BigDecimal;
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -14,8 +12,8 @@ import org.simpleframework.xml.Element;
 import org.simpleframework.xml.ElementMap;
 import org.simpleframework.xml.core.Commit;
 
+import de.tsl2.nano.bean.def.Constraint;
 import de.tsl2.nano.execution.IPRunnable;
-import de.tsl2.nano.util.operation.NumericConditionOperator;
 
 public abstract class AbstractRunnable<T> implements IPRunnable<T, Map<String, Object>> {
     /** serialVersionUID */
@@ -24,8 +22,8 @@ public abstract class AbstractRunnable<T> implements IPRunnable<T, Map<String, O
     @Attribute
     protected String name;
     @ElementMap(entry = "parameter", attribute = true, inline = true, keyType = String.class, key = "name", valueType = ParType.class, value = "type")
-    protected Map<String, ParType> parameter;
-    @ElementMap(entry = "constraint", attribute = true, inline = true, keyType = String.class, key = "name", value = "constraint", valueType = Constraint.class, required = false)
+    protected LinkedHashMap<String, ParType> parameter;
+    @ElementMap(entry = "constraint", attribute = true, inline = true, keyType = String.class, key = "name", value = "definition", valueType = Constraint.class, required = false)
     Map<String, Constraint<?>> constraints;
     @Element
     protected String operation;
@@ -40,7 +38,7 @@ public abstract class AbstractRunnable<T> implements IPRunnable<T, Map<String, O
      * @param operation
      * @param parameter
      */
-    public AbstractRunnable(String name, String operation, Map<String, ParType> parameter) {
+    public AbstractRunnable(String name, String operation, LinkedHashMap<String, ParType> parameter) {
         this.name = name;
         this.operation = operation;
         this.parameter = parameter;
@@ -80,8 +78,7 @@ public abstract class AbstractRunnable<T> implements IPRunnable<T, Map<String, O
             constraints = new HashMap<String, Constraint<?>>();
         Set<String> pars = parameter.keySet();
         for (CharSequence p : pars) {
-            Object o = parameter.get(p);
-            Class<?> cls = o instanceof Class ? (Class<?>) o : transform((ParType) o);
+            Class<?> cls = parameter.get(p).getType();
             Constraint constraint = constraints.get(p);
             if (constraint == null) {
                 constraint = new Constraint(cls);
@@ -91,25 +88,11 @@ public abstract class AbstractRunnable<T> implements IPRunnable<T, Map<String, O
         }
     }
 
-    protected Class<?> transform(ParType t) {
-        switch (t) {
-        case TEXT:
-            return String.class;
-        case BOOLEAN:
-            return Boolean.class;
-        case NUMBER:
-            return BigDecimal.class;
-        case DATE:
-            return Date.class;
-        }
-        return null;
-    }
-
     @SuppressWarnings({ "rawtypes", "unchecked" })
     protected void checkConstraint(CharSequence par, Object arg) {
         Constraint constraint = constraints.get(par);
         if (constraint != null)
-            constraint.check((Comparable) arg);
+            constraint.check(getName(), (Comparable) arg);
     }
 
     /**
@@ -133,7 +116,7 @@ public abstract class AbstractRunnable<T> implements IPRunnable<T, Map<String, O
             return new ArrayList<Class<?>>(0);
 
         for (ParType par : parameter.values()) {
-            pars.add(transform(par));
+            pars.add(par.getType());
         }
         return pars;
     }
@@ -154,7 +137,7 @@ public abstract class AbstractRunnable<T> implements IPRunnable<T, Map<String, O
     }
 
     @Commit
-    private void initDeserializing() {
+    protected void initDeserializing() {
         createConstraints();
     }
 }

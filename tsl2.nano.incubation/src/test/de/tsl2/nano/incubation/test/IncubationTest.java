@@ -22,6 +22,7 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.Hashtable;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.Callable;
@@ -35,6 +36,7 @@ import org.junit.Test;
 
 import de.tsl2.nano.Environment;
 import de.tsl2.nano.bean.def.BeanDefinition;
+import de.tsl2.nano.bean.def.Constraint;
 import de.tsl2.nano.collection.MapUtil;
 import de.tsl2.nano.collection.TableList;
 import de.tsl2.nano.exception.ManagedException;
@@ -42,7 +44,6 @@ import de.tsl2.nano.execution.Profiler;
 import de.tsl2.nano.execution.XmlUtil;
 import de.tsl2.nano.format.DefaultFormat;
 import de.tsl2.nano.incubation.network.JobServer;
-import de.tsl2.nano.incubation.specification.Constraint;
 import de.tsl2.nano.incubation.specification.ParType;
 import de.tsl2.nano.incubation.specification.Pool;
 import de.tsl2.nano.incubation.specification.rules.Rule;
@@ -366,7 +367,7 @@ public class IncubationTest {
     @SuppressWarnings("unchecked")
     @Test
     public void testRules() throws Exception {
-        Rule<BigDecimal> rule = new Rule<BigDecimal>("test", "A ? (x1 + 1) : (x2 * 2)", MapUtil.asMap("A",
+        Rule<BigDecimal> rule = new Rule<BigDecimal>("test", "A ? (x1 + 1) : (x2 * 2)", (LinkedHashMap<String, ParType>) MapUtil.asMap("A",
             Boolean.class,
             "x1",
             BigDecimal.class,
@@ -376,7 +377,7 @@ public class IncubationTest {
         Assert.assertEquals(new BigDecimal(2), r1);
         
         //use simplified parameter definition
-        rule = new Rule<BigDecimal>("test", "A ? (x1 + 1) : (x2 * 2)", MapUtil.asMap("A",
+        rule = new Rule<BigDecimal>("test", "A ? (x1 + 1) : (x2 * 2)", (LinkedHashMap<String, ParType>) MapUtil.asMap("A",
             ParType.BOOLEAN,
             "x1",
             ParType.NUMBER,
@@ -390,7 +391,7 @@ public class IncubationTest {
         Pool pool = new RulePool();
         pool.add(rule.getName(), rule);
         Environment.addService(pool);
-        Rule<BigDecimal> ruleWithImport = new Rule<BigDecimal>("test-import", "A ? 1 + §test : (x2 * 3)", MapUtil.asMap("A",
+        Rule<BigDecimal> ruleWithImport = new Rule<BigDecimal>("test-import", "A ? 1 + §test : (x2 * 3)", (LinkedHashMap<String, ParType>) MapUtil.asMap("A",
             Boolean.class,
             "x1",
             BigDecimal.class,

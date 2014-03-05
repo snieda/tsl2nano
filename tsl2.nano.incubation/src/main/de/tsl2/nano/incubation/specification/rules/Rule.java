@@ -9,6 +9,7 @@
  */
 package de.tsl2.nano.incubation.specification.rules;
 
+import java.util.LinkedHashMap;
 import java.util.Map;
 
 import org.simpleframework.xml.core.Commit;
@@ -56,7 +57,8 @@ import de.tsl2.nano.util.operation.Operator;
 public class Rule<T> extends AbstractRunnable<T> {
     /** serialVersionUID */
     private static final long serialVersionUID = 8557708958880364123L;
-    
+    public static final String KEY_RESULT = Operator.KEY_RESULT;
+
     transient NumericConditionOperator operator;
     /** the rule is initialized when all sub-rules are imported. see {@link #importSubRules()} */
     boolean initialized;
@@ -73,7 +75,7 @@ public class Rule<T> extends AbstractRunnable<T> {
      * @param operation
      * @param parameter
      */
-    public Rule(String name, String operation, Map<String, ParType> parameter) {
+    public Rule(String name, String operation, LinkedHashMap<String, ParType> parameter) {
         super(name, operation, parameter);
     }
 
@@ -115,7 +117,8 @@ public class Rule<T> extends AbstractRunnable<T> {
     }
 
     @Commit
-    private void initDeserializing() {
+    protected void initDeserializing() {
+        super.initDeserializing();
         this.operator = new NumericConditionOperator();
         importSubRules();
     }
