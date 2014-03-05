@@ -7,11 +7,14 @@
 
 NanoH5 (or FullRelation) is an UI independent gui implementation framework providing a model driven design (MDA). It is bound to the app framework __tsl2.nano.commons__ and the jpa-service framework __tsl2.nano.serviceaccess__. It is possible to build a complete html5 application through a given class- or database-model.
 
+- Everything will filled for you by defaults - presenting a full application getting a database connection
+- define it or implement it - all object-types have their representation as readable xml-file.
+
 ### Goals
 * pure model implementation + plattform independency (works on android, too).
 * small, having as less as possible static dependencies to other libraries
 * everything has a default - all defaults are configurable (Convention over Configuration)
-* application, session and entity behaviours are configurable
+* application, session and entity behaviors are configurable
 * implementation through simple java beans + optional bean presenters
 * you develop ui independent, but are able to use ui dependent extensions.
 * no new language to learn. knowing html5 allows to improve layout and styling.
@@ -20,13 +23,15 @@ NanoH5 (or FullRelation) is an UI independent gui implementation framework provi
 * navigation can be a configurable workflow - or simply an entity browser 
 * pre-defines formatting, validation and presentation of relations
 * pure html-5 (no javascript)
+* pure jpa - jpa-annotations are read to resolve attribute-presentation
 * independent of a special o/r mapper. all o/r mappers supporting javax.persistence with an EntityManager are usable.
 * simple database replication on user-loaded data - offline working possible
 * data replication to work offline (not finished yet!)
 * full key-navigation (shortcuts)
 * framework designs interfaces and provides extendable implementations
-* useable as standalone or web-service (with offline access)
-* many features through nano.common like a rule engine, network executor etc.
+* useable as standalone or web-service (with offline access), can connect to application-server or works standalone.
+* many features through nano.common, and nano.incubation like a rule, sql, action engine, network executor etc.
+* handling blobs of data (byte[]) to be presented in html
 * planned interfaces: 
 ** ddl-->beans through hibernate-tools
 ** jpa-->bean through annotation evaluation
@@ -107,6 +112,8 @@ The other option would be to have an existing beans.jar ....
 The environment and the beandefinition are the main constructs serializing it's properties to the file-system.
 ...
 The _BeanDefinition_ expects only _AttributeDefinition_s from deserializings - to be more readable. This  means, that extensions of AttributeDefinition are not handled!
+...
+On the data side, all collections are wrapped into an object of type _BeanCollector, single instances that are prepared to be presented are wrapped into an object of type _Bean_. All attributes of a _Bean_ are wrapped into _BeanValue_s. The _BeanCollector_ and the _Bean_ are extensions of _BeanDefinition_, handling the attributes. While the used xml-serializer _Simple-XML_ is not able to create the desired root instance through reading an xml (we have to define the instance type on calling simple-xml), extensions of a _BeanDefinition_ are handled through a special mechanism, implemented in the class _Extension_.
 
 ##### Registered services and definitions through the environment
 
