@@ -24,6 +24,7 @@ import de.tsl2.nano.bean.IAttribute;
 import de.tsl2.nano.bean.def.AttributeDefinition;
 import de.tsl2.nano.bean.def.Bean;
 import de.tsl2.nano.bean.def.BeanDefinition;
+import de.tsl2.nano.bean.def.Constraint;
 import de.tsl2.nano.bean.def.Presentable;
 import de.tsl2.nano.bean.def.ValueColumn;
 import de.tsl2.nano.bean.def.ValueExpression;
@@ -70,7 +71,7 @@ public class BeanConfigurator<T> implements Serializable {
 
             BeanDefinition<AttributeConfigurator> configAttr =
                 BeanDefinition.getBeanDefinition(AttributeConfigurator.class);
-            configAttr.setAttributeFilter("name", "description", "type", "length", "format", "min", "max",
+            configAttr.setAttributeFilter("name", "description", "type", "constraint"/*, "length", "format", "min", "max"*/,
                 "presentable", "columnDefinition", "declaration");
             configAttr.getPresentable().setLayout(layout);
 
@@ -87,6 +88,10 @@ public class BeanConfigurator<T> implements Serializable {
             BeanDefinition<ValueColumn> configColDef = BeanDefinition.getBeanDefinition(ValueColumn.class);
             configColDef.setAttributeFilter("name", "description", "index", "sortIndex", "sortUpDirection", "format", "width");
             configColDef.getPresentable().setLayout(layout);
+
+            BeanDefinition<Constraint> configConstraint = BeanDefinition.getBeanDefinition(Constraint.class);
+            configConstraint.setAttributeFilter("type", "minimum", "maximum", "format", "length", "scale", "precision", "nullable");
+            configConstraint.getPresentable().setLayout(layout);
 
             BeanDefinition<Entry> configEntry = BeanDefinition.getBeanDefinition(Entry.class);
             configEntry.setAttributeFilter("key", "value");

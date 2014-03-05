@@ -9,25 +9,30 @@
  */
 package de.tsl2.nano.h5;
 
+import java.util.LinkedHashMap;
+
 import org.simpleframework.xml.Attribute;
+import org.simpleframework.xml.core.Commit;
 
 import de.tsl2.nano.Environment;
+import de.tsl2.nano.Messages;
 import de.tsl2.nano.bean.BeanUtil;
 import de.tsl2.nano.bean.def.SecureAction;
+import de.tsl2.nano.exception.Message;
 import de.tsl2.nano.incubation.specification.actions.ActionPool;
 
 /**
  * 
  * @author Tom
- * @version $Revision$ 
+ * @version $Revision$
  */
 public class SpecifiedAction<RETURNTYPE> extends SecureAction<RETURNTYPE> {
     /** serialVersionUID */
     private static final long serialVersionUID = 6277309054654171553L;
-    
+
     @Attribute
     String name;
-    
+
     transient Object instance;
 
     /**
@@ -39,6 +44,7 @@ public class SpecifiedAction<RETURNTYPE> extends SecureAction<RETURNTYPE> {
 
     /**
      * constructor
+     * 
      * @param name
      * @param instance
      */
@@ -47,18 +53,33 @@ public class SpecifiedAction<RETURNTYPE> extends SecureAction<RETURNTYPE> {
         this.name = name;
         this.instance = instance;
     }
-    
+
     @SuppressWarnings("unchecked")
     @Override
     public RETURNTYPE action() throws Exception {
-        return (RETURNTYPE) Environment.get(ActionPool.class).get(name).run(BeanUtil.toValueMap(instance));
+        Object result = Environment.get(ActionPool.class).get(name)
+            .run(instance != null ? BeanUtil.toValueMap(instance) : new LinkedHashMap<String, Object>());
+        if (BeanUtil.isStandardType(result)) {
+            Message.send(Environment.translate("tsl2nano.result.information", false, getShortDescription(), result));
+            return null;
+        } else {
+            return (RETURNTYPE) result;
+        }
     }
 
     /**
      * setInstance
+     * 
      * @param instance
      */
     public void setInstance(Object instance) {
         this.instance = instance;
+    }
+
+    @Commit
+    private void initDesializing() {
+        this.id = this.name;
+        this.shortDescription = Environment.translate(this.name, true);
+        this.longDescription = this.shortDescription;
     }
 }

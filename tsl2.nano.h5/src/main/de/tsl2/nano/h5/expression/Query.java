@@ -74,6 +74,14 @@ public class Query<RESULT> implements IPRunnable<RESULT, Map<String, Object>> {
         return name;
     }
 
+    /**
+     * getQuery
+     * @return query
+     */
+    public String getQuery() {
+        return query;
+    }
+    
     @Override
     public Map<String, ? extends Serializable> getParameter() {
         if (parameter == null) {

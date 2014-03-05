@@ -435,10 +435,10 @@ public class Html5Presentation<T> extends BeanPresentationHelper<T> implements I
                     if (attr == null)
                         throw new IllegalArgumentException("bean-attribute " + name
                             + ", defined in valuegroup not avaiable in bean " + bean);
-                    
+
                     if (!attr.getPresentation().isVisible())
                         continue;
-                    
+
                     Object v = attr.getValue();
 
                     if (valueGroup.isDetail(name) && v != null) {
@@ -954,7 +954,13 @@ public class Html5Presentation<T> extends BeanPresentationHelper<T> implements I
         cell = createLayout(cell, beanValue.getPresentation());
         //now the field itself
         Element input;
-        if (beanValue.getAllowedValues() == null) {
+        if (beanValue.getPresentation().getType() == IPresentable.TYPE_DATA) {
+            input = appendElement(cell,
+                TAG_IMAGE,
+                ATTR_SRC,
+                FileUtil.getRelativePath(beanValue.getValueFile(), Environment.getConfigPath()));
+        }
+        else if (beanValue.getConstraint().getAllowedValues() == null) {
             RegExpFormat regexpFormat =
                 beanValue.getFormat() instanceof RegExpFormat ? (RegExpFormat) beanValue.getFormat()
                     : null;
@@ -978,9 +984,9 @@ public class Html5Presentation<T> extends BeanPresentationHelper<T> implements I
                 ATTR_WIDTH,
                 "250",
                 ATTR_MIN,
-                StringUtil.toString(beanValue.getMininum()),
+                StringUtil.toString(beanValue.getConstraint().getMinimum()),
                 ATTR_MAX,
-                StringUtil.toString(beanValue.getMaxinum()),
+                StringUtil.toString(beanValue.getConstraint().getMaximum()),
                 ATTR_MAXLENGTH,
                 (beanValue.length() > 0 ? String.valueOf(beanValue.length()) : String.valueOf(Integer.MAX_VALUE)),
                 (isOption ? enable(ATTR_CHECKED, (Boolean) beanValue.getValue()) : ATTR_VALUE),
@@ -1104,7 +1110,7 @@ public class Html5Presentation<T> extends BeanPresentationHelper<T> implements I
                 enable(ATTR_HIDDEN, !beanValue.getPresentation().isVisible()),
                 enable(ATTR_READONLY, !beanValue.getPresentation().getEnabler().isActive()),
                 enable(ATTR_REQUIRED, !beanValue.nullable()));
-        Collection<?> values = beanValue.getAllowedValues();
+        Collection<?> values = beanValue.getConstraint().getAllowedValues();
         Object selected = beanValue.getValue();
         for (Object v : values) {
             appendElement(select, TAG_OPTION, content(v.toString()), enable(ATTR_SELECTED, v.equals(selected)));
@@ -1157,6 +1163,8 @@ public class Html5Presentation<T> extends BeanPresentationHelper<T> implements I
         case IPresentable.TYPE_INPUT_SEARCH:
             type = "search";
             break;
+        case IPresentable.TYPE_DATA:
+            type = "img";
         case IPresentable.TYPE_ATTACHMENT:
             //on type = 'file' only the file-name is given (no path!)
             //while it would be an upload button for the client system, it is not

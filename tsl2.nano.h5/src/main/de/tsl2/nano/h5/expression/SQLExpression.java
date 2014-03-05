@@ -10,11 +10,13 @@
 package de.tsl2.nano.h5.expression;
 
 import java.io.Serializable;
+import java.util.Collection;
 import java.util.Map;
+
+import org.simpleframework.xml.core.Commit;
 
 import de.tsl2.nano.Environment;
 import de.tsl2.nano.execution.IPRunnable;
-import de.tsl2.nano.util.StringUtil;
 
 /**
  * Usable as attribute getting it's value through a give sql-query.
@@ -22,6 +24,7 @@ import de.tsl2.nano.util.StringUtil;
  * @author Tom, Thomas Schneider
  * @version $Revision$
  */
+@SuppressWarnings("unchecked")
 public class SQLExpression<T extends Serializable> extends RunnableExpression<T> {
     /** serialVersionUID */
     private static final long serialVersionUID = 4797735771490194926L;
@@ -29,9 +32,8 @@ public class SQLExpression<T extends Serializable> extends RunnableExpression<T>
     public SQLExpression() {
     }
 
-    @SuppressWarnings("unchecked")
     public SQLExpression(Class<?> argumentHolderClass, String query) {
-        this(argumentHolderClass, query, (Class<T>) Object.class);
+        this(argumentHolderClass, query, null);
     }
 
     /**
@@ -39,6 +41,24 @@ public class SQLExpression<T extends Serializable> extends RunnableExpression<T>
      */
     public SQLExpression(Class<?> argumentHolderClass, String query, Class<T> type) {
         super(argumentHolderClass, query, type);
+    }
+
+    @Override
+    public Class<T> getType() {
+        if (type == null) {
+            type = (Class<T>) getTypeFromQuery(((Query)createRunnable()).getQuery());
+        }
+        return type;
+    }
+    /**
+     * evaluates count of query-columns. if only one, return type Object.class, else return Collection.class
+     * 
+     * @param query to analyze
+     * @return query-result type.
+     */
+    private static Class<?> getTypeFromQuery(String query) {
+        //TODO: how to match that with 'from' at the end? (not working yet!)
+        return query.toLowerCase().matches("(?m)[^\\(']+[,][^\\)']+") ? Collection.class : Object.class;
     }
 
     @Override

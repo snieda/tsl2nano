@@ -20,6 +20,7 @@ import static de.tsl2.nano.h5.NanoHTTPD.HTTP_BADREQUEST;
 import static de.tsl2.nano.h5.NanoHTTPD.MIME_HTML;
 
 import java.io.Serializable;
+import java.lang.Thread.UncaughtExceptionHandler;
 import java.net.InetAddress;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -87,7 +88,8 @@ public class NanoH5Session {
         this.builder = server.builder;
         this.nav = navigator;
         this.sessionClassloader = appstartClassloader;
-        this.exceptionHandler = new ExceptionHandler();
+        this.exceptionHandler =
+            (ExceptionHandler) Environment.addService(UncaughtExceptionHandler.class, new ExceptionHandler());
     }
 
     /**

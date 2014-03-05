@@ -22,6 +22,7 @@ import de.tsl2.nano.bean.BeanClass;
 import de.tsl2.nano.bean.IAttribute;
 import de.tsl2.nano.bean.def.AttributeDefinition;
 import de.tsl2.nano.bean.def.IAttributeDefinition;
+import de.tsl2.nano.bean.def.IConstraint;
 import de.tsl2.nano.bean.def.IIPresentable;
 import de.tsl2.nano.bean.def.IPresentable;
 import de.tsl2.nano.bean.def.IPresentableColumn;
@@ -79,65 +80,77 @@ public class AttributeConfigurator implements Serializable {
         return attr.getType().getName();
     }
 
-    public BigDecimal getLength() {
-        return attr.scale() != 0 ? new BigDecimal(new BigInteger(String.valueOf(attr.length())), attr.scale())
-            : new BigDecimal(attr.length());
+//    public BigDecimal getLength() {
+//        return attr.scale() != 0 ? new BigDecimal(new BigInteger(String.valueOf(attr.length())), attr.scale())
+//            : new BigDecimal(attr.length());
+//    }
+//
+//    public void setLength(BigDecimal length) {
+//        if (length != null) {
+//            //TODO: define scale and prec
+//            float fract = length.floatValue() - length.intValue();
+//            int prec = length.precision();
+//            int scale = length.unscaledValue().intValue() / length.intValue();
+//            attrAccessor.set("length", length.intValue());
+//            attrAccessor.set("scale", scale);
+//            attrAccessor.set("precision", prec);
+//        } else {
+//            attrAccessor.set("length", IPresentable.UNDEFINED);
+//            attrAccessor.set("scale", IPresentable.UNDEFINED);
+//            attrAccessor.set("precision", IPresentable.UNDEFINED);
+//        }
+//    }
+//
+//    public Serializable getMin() {
+//        return attr.getConstraint().getMininum() != null ? attr.getFormat().format(attr.getConstraint().getMininum()) : null;
+//    }
+//
+//    public void setMin(Serializable min) {
+//        attrAccessor.set("min", min);
+//    }
+//
+//    public Serializable getMax() {
+//        return attr.getConstraint().getMaxinum() != null ? attr.getFormat().format(attr.getConstraint().getMaxinum()) : null;
+//    }
+//
+//    public void setMax(Serializable max) {
+//        attrAccessor.set("max", max);
+//    }
+//
+//    public String getFormat() {
+//        Format f = attr.getFormat();
+//        if (f instanceof SimpleDateFormat)
+//            return ((SimpleDateFormat) f).toPattern();
+//        else if (f instanceof NumberFormat)
+//            return ((DecimalFormat) f).toPattern();
+//        else if (f instanceof RegExpFormat)
+//            return ((RegExpFormat) f).getPattern();
+//        else
+//            return f != null ? f.toString() : "";
+//    }
+//
+//    public void setFormat(String format) {
+//        Format f = attr.getFormat();
+//        if (f instanceof SimpleDateFormat)
+//            ((SimpleDateFormat) f).applyPattern(format);
+//        else if (f instanceof NumberFormat)
+//            ((DecimalFormat) f).applyPattern(format);
+//        else if (f instanceof ValueExpressionFormat)
+//            ((ValueExpressionFormat)f).applyPattern(format);
+//        else
+//            ((RegExpFormat) f).setPattern(format, null, attr.getConstraint().getLength(), 0);
+//    }
+//
+//    public boolean isNullable() {
+//        return attr.getConstraint().isNullable();
+//    }
+//
+    public IConstraint<?> getConstraint() {
+        return attr.getConstraint();
     }
 
-    public void setLength(BigDecimal length) {
-        if (length != null) {
-            //TODO: define scale and prec
-            float fract = length.floatValue() - length.intValue();
-            int prec = length.precision();
-            int scale = length.unscaledValue().intValue() / length.intValue();
-            attrAccessor.set("length", length.intValue());
-            attrAccessor.set("scale", scale);
-            attrAccessor.set("precision", prec);
-        } else {
-            attrAccessor.set("length", IPresentable.UNDEFINED);
-            attrAccessor.set("scale", IPresentable.UNDEFINED);
-            attrAccessor.set("precision", IPresentable.UNDEFINED);
-        }
-    }
-
-    public Serializable getMin() {
-        return attr.getMininum() != null ? attr.getFormat().format(attr.getMininum()) : null;
-    }
-
-    public void setMin(Serializable min) {
-        attrAccessor.set("min", min);
-    }
-
-    public Serializable getMax() {
-        return attr.getMaxinum() != null ? attr.getFormat().format(attr.getMaxinum()) : null;
-    }
-
-    public void setMax(Serializable max) {
-        attrAccessor.set("max", max);
-    }
-
-    public String getFormat() {
-        Format f = attr.getFormat();
-        if (f instanceof SimpleDateFormat)
-            return ((SimpleDateFormat) f).toPattern();
-        else if (f instanceof NumberFormat)
-            return ((DecimalFormat) f).toPattern();
-        else if (f instanceof RegExpFormat)
-            return ((RegExpFormat) f).getPattern();
-        else
-            return f != null ? f.toString() : "";
-    }
-
-    public void setFormat(String format) {
-        Format f = attr.getFormat();
-        if (f instanceof SimpleDateFormat)
-            ((SimpleDateFormat) f).applyPattern(format);
-        else if (f instanceof NumberFormat)
-            ((DecimalFormat) f).applyPattern(format);
-        else if (f instanceof ValueExpressionFormat)
-            ((ValueExpressionFormat)f).applyPattern(format);
-        else
-            ((RegExpFormat) f).setPattern(format, null, attr.getLength(), 0);
+    public void setConstraint(IConstraint<?> c) {
+        attrAccessor.set("constraint", c);
     }
 
     public IPresentable getPresentable() {
@@ -168,10 +181,6 @@ public class AttributeConfigurator implements Serializable {
 
     public void setDeclaration(IAttribute<?> a) {
         attrAccessor.set("attribute", a);
-    }
-
-    public boolean isNullable() {
-        return attr.isNullable();
     }
 
     public boolean isDoValidation() {
