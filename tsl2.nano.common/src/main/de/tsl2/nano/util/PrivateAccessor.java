@@ -11,7 +11,6 @@ package de.tsl2.nano.util;
 
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
-import java.util.HashMap;
 import java.util.Map;
 
 import de.tsl2.nano.exception.ManagedException;

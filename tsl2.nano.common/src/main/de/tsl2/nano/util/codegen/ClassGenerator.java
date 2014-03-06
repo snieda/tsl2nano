@@ -7,13 +7,13 @@ import java.sql.Timestamp;
 import java.util.Properties;
 
 import org.apache.commons.logging.Log;
-import de.tsl2.nano.log.LogFactory;
 import org.apache.velocity.Template;
 import org.apache.velocity.VelocityContext;
 import org.apache.velocity.app.VelocityEngine;
 
 import de.tsl2.nano.bean.BeanClass;
 import de.tsl2.nano.exception.ManagedException;
+import de.tsl2.nano.log.LogFactory;
 
 /**
  * 

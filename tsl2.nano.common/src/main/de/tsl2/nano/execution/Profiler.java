@@ -18,9 +18,9 @@ import java.util.List;
 import java.util.Map;
 
 import org.apache.commons.logging.Log;
-import de.tsl2.nano.log.LogFactory;
 
 import de.tsl2.nano.exception.ManagedException;
+import de.tsl2.nano.log.LogFactory;
 
 /**
  * simple performance and memory analyzer - to be usable by tests and debugging. use

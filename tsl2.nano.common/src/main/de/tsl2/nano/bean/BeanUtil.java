@@ -44,7 +44,6 @@ import de.tsl2.nano.bean.def.Bean;
 import de.tsl2.nano.bean.def.BeanDefinition;
 import de.tsl2.nano.collection.CollectionUtil;
 import de.tsl2.nano.exception.ManagedException;
-import de.tsl2.nano.exception.ManagedException;
 import de.tsl2.nano.format.DefaultFormat;
 import de.tsl2.nano.format.FormatUtil;
 import de.tsl2.nano.log.LogFactory;

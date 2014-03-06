@@ -14,8 +14,8 @@ import java.io.Serializable;
 import org.simpleframework.xml.Attribute;
 
 import de.tsl2.nano.bean.def.IValueAccess;
-import de.tsl2.nano.messaging.EventController;
 import de.tsl2.nano.messaging.ChangeEvent;
+import de.tsl2.nano.messaging.EventController;
 
 /**
  * simple object holder to be used as synthetic bean attribute.

@@ -24,9 +24,6 @@ import javax.xml.xpath.XPathExpression;
 import javax.xml.xpath.XPathFactory;
 
 import org.apache.commons.logging.Log;
-//import org.apache.velocity.Template;
-//import org.apache.velocity.VelocityContext;
-//import org.apache.velocity.app.VelocityEngine;
 import org.simpleframework.xml.stream.Format;
 import org.w3c.dom.Document;
 import org.w3c.dom.Node;
@@ -36,6 +33,9 @@ import de.tsl2.nano.Environment;
 import de.tsl2.nano.exception.ManagedException;
 import de.tsl2.nano.log.LogFactory;
 import de.tsl2.nano.util.FileUtil;
+//import org.apache.velocity.Template;
+//import org.apache.velocity.VelocityContext;
+//import org.apache.velocity.app.VelocityEngine;
 
 /**
  * 

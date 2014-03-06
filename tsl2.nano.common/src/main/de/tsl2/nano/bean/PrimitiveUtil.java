@@ -12,16 +12,12 @@ package de.tsl2.nano.bean;
 import java.text.ParseException;
 import java.util.Arrays;
 import java.util.Comparator;
-import java.util.Hashtable;
-import java.util.Map;
 
 import org.apache.commons.logging.Log;
-import de.tsl2.nano.log.LogFactory;
 
 import de.tsl2.nano.exception.ManagedException;
-import de.tsl2.nano.exception.ManagedException;
-import de.tsl2.nano.format.DefaultFormat;
 import de.tsl2.nano.format.FormatUtil;
+import de.tsl2.nano.log.LogFactory;
 
 /**
  * handler for primitives and their immutable wrappers

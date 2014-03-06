@@ -18,7 +18,6 @@ import org.apache.commons.logging.Log;
 
 import de.tsl2.nano.bean.BeanClass;
 import de.tsl2.nano.log.LogFactory;
-
 import de.tsl2.nano.util.StringUtil;
 
 /**

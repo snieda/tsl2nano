@@ -14,9 +14,16 @@ package de.tsl2.nano.collection;
  * @author Tom
  * @version $Revision$ 
  */
-import java.lang.ref.*;
-import java.util.*;
 import java.io.Serializable;
+import java.lang.ref.Reference;
+import java.lang.ref.ReferenceQueue;
+import java.lang.ref.SoftReference;
+import java.lang.ref.WeakReference;
+import java.util.AbstractMap;
+import java.util.HashMap;
+import java.util.LinkedHashSet;
+import java.util.Map;
+import java.util.Set;
 
 public class ReferenceMap<K, V> extends AbstractMap<K, V>
         implements Serializable {

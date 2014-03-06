@@ -13,7 +13,6 @@ import java.util.LinkedHashMap;
 
 import org.simpleframework.xml.ElementMap;
 
-import de.tsl2.nano.bean.BeanAttribute;
 import de.tsl2.nano.bean.IAttribute;
 
 /**

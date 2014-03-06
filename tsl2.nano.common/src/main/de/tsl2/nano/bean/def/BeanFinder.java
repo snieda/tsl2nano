@@ -15,12 +15,11 @@ import java.util.LinkedList;
 
 import org.apache.commons.logging.Log;
 
+import de.tsl2.nano.Environment;
 import de.tsl2.nano.bean.BeanClass;
 import de.tsl2.nano.bean.BeanContainer;
 import de.tsl2.nano.bean.BeanUtil;
 import de.tsl2.nano.log.LogFactory;
-
-import de.tsl2.nano.Environment;
 import de.tsl2.nano.util.operation.IRange;
 import de.tsl2.nano.util.operation.Range;
 

@@ -6,13 +6,13 @@ import java.util.LinkedList;
 import java.util.UUID;
 
 import org.apache.commons.logging.Log;
-import de.tsl2.nano.log.LogFactory;
 
 import de.tsl2.nano.bean.BeanAttribute;
 import de.tsl2.nano.bean.BeanContainer;
 import de.tsl2.nano.bean.BeanUtil;
 import de.tsl2.nano.collection.ListSet;
 import de.tsl2.nano.exception.ManagedException;
+import de.tsl2.nano.log.LogFactory;
 import de.tsl2.nano.util.StringUtil;
 
 /**

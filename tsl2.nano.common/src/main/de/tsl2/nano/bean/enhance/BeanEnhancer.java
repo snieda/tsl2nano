@@ -9,7 +9,6 @@
  */
 package de.tsl2.nano.bean.enhance;
 
-import java.beans.MethodDescriptor;
 import java.lang.reflect.Method;
 import java.util.HashMap;
 import java.util.Map;
@@ -23,15 +22,14 @@ import javassist.CtMethod;
 import javassist.CtNewConstructor;
 import javassist.CtNewMethod;
 import javassist.bytecode.AccessFlag;
-import javassist.bytecode.MethodInfo;
 
 import org.apache.commons.logging.Log;
-import de.tsl2.nano.log.LogFactory;
 
 import de.tsl2.nano.bean.BeanClass;
 import de.tsl2.nano.bean.BeanProxy;
 import de.tsl2.nano.bean.BeanUtil;
 import de.tsl2.nano.exception.ManagedException;
+import de.tsl2.nano.log.LogFactory;
 import de.tsl2.nano.util.StringUtil;
 
 /**

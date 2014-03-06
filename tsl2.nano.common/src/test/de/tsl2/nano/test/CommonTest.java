@@ -10,7 +10,11 @@
 package de.tsl2.nano.test;
 
 import static de.tsl2.nano.bean.def.IPresentable.UNDEFINED;
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertArrayEquals;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
 
 import java.io.File;
 import java.io.Reader;
@@ -38,7 +42,6 @@ import java.util.Map;
 import java.util.Properties;
 
 import org.apache.commons.logging.Log;
-import org.junit.Assert;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
@@ -82,9 +85,7 @@ import de.tsl2.nano.util.Period;
 import de.tsl2.nano.util.StringUtil;
 import de.tsl2.nano.util.operation.CRange;
 import de.tsl2.nano.util.operation.ConditionOperator;
-import de.tsl2.nano.util.operation.FromCharSequenceConverter;
 import de.tsl2.nano.util.operation.IConvertableUnit;
-import de.tsl2.nano.util.operation.IConverter;
 import de.tsl2.nano.util.operation.NumericOperator;
 import de.tsl2.nano.util.operation.OperableUnit;
 import de.tsl2.nano.util.operation.Operator;

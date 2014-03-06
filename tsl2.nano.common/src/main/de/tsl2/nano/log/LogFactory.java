@@ -23,10 +23,9 @@ import org.simpleframework.xml.core.Persist;
 import de.tsl2.nano.classloader.ThreadUtil;
 import de.tsl2.nano.exception.ManagedException;
 import de.tsl2.nano.execution.XmlUtil;
-import de.tsl2.nano.util.BitUtil;
-//import de.tsl2.nano.execution.CompatibilityLayer;
 import de.tsl2.nano.util.NumberUtil;
 import de.tsl2.nano.util.StringUtil;
+//import de.tsl2.nano.execution.CompatibilityLayer;
 
 /**
  * simple logfactory implementation to enable use of common logging interfaces. useful if apache logging is not

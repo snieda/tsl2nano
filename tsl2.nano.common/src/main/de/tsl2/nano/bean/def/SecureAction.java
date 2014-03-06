@@ -10,12 +10,12 @@
 package de.tsl2.nano.bean.def;
 
 import org.apache.commons.logging.Log;
-import de.tsl2.nano.log.LogFactory;
 
 import de.tsl2.nano.Messages;
 import de.tsl2.nano.action.CommonAction;
 import de.tsl2.nano.action.IAction;
 import de.tsl2.nano.bean.BeanContainer;
+import de.tsl2.nano.log.LogFactory;
 
 /**
  * action with role-depended permission. action mode respects dialog OK and CANCEL results.

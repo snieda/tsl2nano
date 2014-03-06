@@ -11,7 +11,6 @@ package de.tsl2.nano.classloader;
 
 import java.io.File;
 import java.io.Serializable;
-import java.lang.Thread.UncaughtExceptionHandler;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.net.URLClassLoader;
@@ -20,13 +19,10 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.LinkedList;
 import java.util.List;
-import java.util.concurrent.Executors;
 
 import org.apache.commons.logging.Log;
 
-import de.tsl2.nano.Environment;
 import de.tsl2.nano.bean.BeanUtil;
-import de.tsl2.nano.exception.ManagedException;
 import de.tsl2.nano.exception.ManagedException;
 import de.tsl2.nano.exception.Message;
 import de.tsl2.nano.log.LogFactory;

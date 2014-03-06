@@ -18,8 +18,6 @@ import java.util.Hashtable;
 import java.util.List;
 import java.util.Map;
 
-import tsl.CollectionUtil;
-
 import de.tsl2.nano.exception.ManagedException;
 
 /**

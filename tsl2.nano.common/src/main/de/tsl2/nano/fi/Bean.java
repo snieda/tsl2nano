@@ -12,7 +12,6 @@ package de.tsl2.nano.fi;
 import java.text.Format;
 
 import de.tsl2.nano.bean.def.AttributeDefinition;
-import de.tsl2.nano.bean.def.BeanValue;
 import de.tsl2.nano.bean.def.Presentable;
 
 

@@ -18,7 +18,6 @@ import java.util.Properties;
 import java.util.Set;
 
 import org.apache.commons.logging.Log;
-import de.tsl2.nano.log.LogFactory;
 import org.apache.tools.ant.BuildListener;
 import org.apache.tools.ant.DefaultLogger;
 import org.apache.tools.ant.Location;
@@ -34,6 +33,7 @@ import org.apache.tools.ant.types.selectors.FileSelector;
 
 import de.tsl2.nano.bean.BeanClass;
 import de.tsl2.nano.exception.ManagedException;
+import de.tsl2.nano.log.LogFactory;
 import de.tsl2.nano.util.StringUtil;
 
 /**

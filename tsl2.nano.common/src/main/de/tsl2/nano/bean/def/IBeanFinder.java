@@ -12,7 +12,6 @@ package de.tsl2.nano.bean.def;
 import java.util.Collection;
 
 import de.tsl2.nano.util.operation.IRange;
-import de.tsl2.nano.util.operation.Range;
 
 /**
  * Evaluate< a constraint list of beans - to be shown f.e. in a search-dialog

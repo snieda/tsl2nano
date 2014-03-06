@@ -10,9 +10,9 @@
 package de.tsl2.nano.exception;
 
 import org.apache.commons.logging.Log;
-import de.tsl2.nano.log.LogFactory;
 
 import de.tsl2.nano.Messages;
+import de.tsl2.nano.log.LogFactory;
 
 /**
  * caller check to constrain the use of some internal public methods.
