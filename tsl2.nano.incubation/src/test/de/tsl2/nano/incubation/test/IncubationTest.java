@@ -9,25 +9,16 @@
  */
 package de.tsl2.nano.incubation.test;
 
-import java.io.IOException;
 import java.io.Serializable;
 import java.math.BigDecimal;
 import java.sql.Time;
 import java.text.DateFormat;
-import java.text.DecimalFormat;
-import java.text.Format;
-import java.text.NumberFormat;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collection;
-import java.util.HashMap;
 import java.util.Hashtable;
 import java.util.LinkedHashMap;
-import java.util.List;
 import java.util.Map;
 import java.util.concurrent.Callable;
-
-import javax.xml.stream.events.Characters;
 
 import junit.framework.Assert;
 
@@ -35,14 +26,12 @@ import org.apache.commons.logging.Log;
 import org.junit.Test;
 
 import de.tsl2.nano.Environment;
-import de.tsl2.nano.bean.def.BeanDefinition;
 import de.tsl2.nano.bean.def.Constraint;
 import de.tsl2.nano.collection.MapUtil;
 import de.tsl2.nano.collection.TableList;
 import de.tsl2.nano.exception.ManagedException;
 import de.tsl2.nano.execution.Profiler;
 import de.tsl2.nano.execution.XmlUtil;
-import de.tsl2.nano.format.DefaultFormat;
 import de.tsl2.nano.incubation.network.JobServer;
 import de.tsl2.nano.incubation.specification.ParType;
 import de.tsl2.nano.incubation.specification.Pool;
@@ -64,16 +53,10 @@ import de.tsl2.nano.log.LogFactory;
 import de.tsl2.nano.logictable.DefaultHeader;
 import de.tsl2.nano.logictable.EquationSolver;
 import de.tsl2.nano.logictable.LogicTable;
-import de.tsl2.nano.logictable.Structure;
 import de.tsl2.nano.messaging.EventController;
 import de.tsl2.nano.messaging.IListener;
 import de.tsl2.nano.util.StringUtil;
-import de.tsl2.nano.util.operation.BooleanOperator;
 import de.tsl2.nano.util.operation.ConditionOperator;
-import de.tsl2.nano.util.operation.FromCharSequenceConverter;
-import de.tsl2.nano.util.operation.IConverter;
-import de.tsl2.nano.util.operation.Operator;
-import de.tsl2.nano.util.operation.ToStrConverter;
 
 /**
  * basic tests for algorithms to be refactored to the project tsl2nano.common in future.

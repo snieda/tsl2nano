@@ -22,8 +22,8 @@ import javax.naming.NamingException;
 import javax.naming.NotContextException;
 
 import org.apache.commons.logging.Log;
-import de.tsl2.nano.log.LogFactory;
 
+import de.tsl2.nano.log.LogFactory;
 import de.tsl2.nano.util.FileUtil;
 import de.tsl2.nano.util.StringUtil;
 

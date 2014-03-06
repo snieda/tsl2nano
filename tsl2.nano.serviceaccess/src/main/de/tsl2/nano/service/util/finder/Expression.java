@@ -1,9 +1,7 @@
 package de.tsl2.nano.service.util.finder;
 
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
-import static de.tsl2.nano.service.util.ServiceUtil.*;
 
 /**
  * additional query finder. use that, if the standard finders don't match your constraints.

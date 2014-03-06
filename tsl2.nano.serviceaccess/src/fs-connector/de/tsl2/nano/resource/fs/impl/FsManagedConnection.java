@@ -34,8 +34,8 @@ import javax.transaction.xa.XAResource;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.logging.Log;
-import de.tsl2.nano.log.LogFactory;
 
+import de.tsl2.nano.log.LogFactory;
 import de.tsl2.nano.resource.fs.FsConnection;
 import de.tsl2.nano.resource.fs.FsConnectionFactory;
 

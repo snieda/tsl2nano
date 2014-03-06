@@ -20,8 +20,8 @@ import javax.resource.spi.ConnectionRequestInfo;
 import javax.resource.spi.ManagedConnectionFactory;
 
 import org.apache.commons.logging.Log;
-import de.tsl2.nano.log.LogFactory;
 
+import de.tsl2.nano.log.LogFactory;
 import de.tsl2.nano.resource.fs.FsConnection;
 import de.tsl2.nano.resource.fs.FsConnectionFactory;
 

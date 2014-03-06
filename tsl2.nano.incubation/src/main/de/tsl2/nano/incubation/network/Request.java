@@ -1,7 +1,6 @@
 package de.tsl2.nano.incubation.network;
 
 import java.io.Serializable;
-import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
 
 import de.tsl2.nano.exception.ManagedException;

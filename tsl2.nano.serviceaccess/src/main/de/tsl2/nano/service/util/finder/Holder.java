@@ -1,8 +1,9 @@
 package de.tsl2.nano.service.util.finder;
 
+import static de.tsl2.nano.service.util.ServiceUtil.addHolderExpression;
+
 import java.util.Arrays;
 import java.util.Collection;
-import static de.tsl2.nano.service.util.ServiceUtil.*;
 
 /**
  * holder finder

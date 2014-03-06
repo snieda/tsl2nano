@@ -16,11 +16,10 @@ import java.util.Properties;
 import java.util.Set;
 
 import org.apache.commons.logging.Log;
-import de.tsl2.nano.log.LogFactory;
 import org.junit.After;
-import org.junit.AfterClass;
 
 import de.tsl2.nano.execution.ScriptUtil;
+import de.tsl2.nano.log.LogFactory;
 import de.tsl2.nano.serviceaccess.ServiceFactory;
 
 /**

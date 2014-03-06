@@ -1,5 +1,18 @@
 package de.tsl2.nano.serviceaccess.test;
 
+import static de.tsl2.nano.service.util.finder.Finder.all;
+import static de.tsl2.nano.service.util.finder.Finder.and;
+import static de.tsl2.nano.service.util.finder.Finder.between;
+import static de.tsl2.nano.service.util.finder.Finder.example;
+import static de.tsl2.nano.service.util.finder.Finder.expression;
+import static de.tsl2.nano.service.util.finder.Finder.holder;
+import static de.tsl2.nano.service.util.finder.Finder.inSelection;
+import static de.tsl2.nano.service.util.finder.Finder.member;
+import static de.tsl2.nano.service.util.finder.Finder.not;
+import static de.tsl2.nano.service.util.finder.Finder.or;
+import static de.tsl2.nano.service.util.finder.Finder.orderBy;
+import static de.tsl2.nano.service.util.finder.Finder.union;
+
 import java.net.URL;
 import java.util.Arrays;
 import java.util.Collection;
@@ -13,7 +26,6 @@ import java.util.Set;
 import javax.ejb.ScheduleExpression;
 import javax.persistence.Column;
 import javax.persistence.Entity;
-import javax.persistence.EntityManager;
 import javax.persistence.Id;
 import javax.persistence.OneToMany;
 import javax.security.auth.login.LoginContext;
@@ -27,19 +39,14 @@ import de.tsl2.nano.bean.BeanProxy;
 import de.tsl2.nano.collection.ListSet;
 import de.tsl2.nano.execution.Profiler;
 import de.tsl2.nano.service.feature.FeatureFactory;
-import de.tsl2.nano.service.schedule.IJobScheduleLocalService;
 import de.tsl2.nano.service.schedule.IJobScheduleService;
-import de.tsl2.nano.service.util.GenericServiceBean;
 import de.tsl2.nano.service.util.ServiceUtil;
 import de.tsl2.nano.service.util.finder.Finder;
-import de.tsl2.nano.service.util.finder.InSelection;
 import de.tsl2.nano.serviceaccess.ServiceFactory;
 import de.tsl2.nano.serviceaccess.aas.ConsoleCallbackHandler;
 import de.tsl2.nano.serviceaccess.aas.module.AbstractLoginModule;
 import de.tsl2.nano.serviceaccess.aas.principal.AbstractPrincipalAction;
-import de.tsl2.nano.test.TypeBean;
 import de.tsl2.nano.util.DateUtil;
-import static de.tsl2.nano.service.util.finder.Finder.*;
 
 /*
  * Copyright © 2002-2008 Thomas Schneider

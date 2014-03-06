@@ -9,8 +9,8 @@
  */
 package de.tsl2.nano.incubation.specification;
 
-import java.util.HashMap;
 import java.io.File;
+import java.util.HashMap;
 import java.util.Map;
 
 import org.apache.commons.logging.Log;

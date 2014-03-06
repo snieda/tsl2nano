@@ -32,7 +32,6 @@ import org.apache.commons.logging.Log;
 
 import de.tsl2.nano.Environment;
 import de.tsl2.nano.exception.ManagedException;
-import de.tsl2.nano.exception.ManagedException;
 import de.tsl2.nano.log.LogFactory;
 import de.tsl2.nano.service.feature.Feature;
 import de.tsl2.nano.service.feature.FeatureFactory;

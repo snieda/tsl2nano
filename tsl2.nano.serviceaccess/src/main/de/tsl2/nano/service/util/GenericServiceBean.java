@@ -35,7 +35,6 @@ import de.tsl2.nano.bean.BeanAttribute;
 import de.tsl2.nano.bean.BeanClass;
 import de.tsl2.nano.collection.MapUtil;
 import de.tsl2.nano.exception.ManagedException;
-import de.tsl2.nano.exception.ManagedException;
 import de.tsl2.nano.service.util.batch.Part;
 import de.tsl2.nano.service.util.finder.AbstractFinder;
 import de.tsl2.nano.service.util.finder.Finder;

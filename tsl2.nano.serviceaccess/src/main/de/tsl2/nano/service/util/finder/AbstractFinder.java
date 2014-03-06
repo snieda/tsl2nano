@@ -1,5 +1,12 @@
 package de.tsl2.nano.service.util.finder;
 
+import static de.tsl2.nano.service.util.ServiceUtil.CLAUSE_AND;
+import static de.tsl2.nano.service.util.ServiceUtil.CLAUSE_NOT;
+import static de.tsl2.nano.service.util.ServiceUtil.CLAUSE_OR;
+import static de.tsl2.nano.service.util.ServiceUtil.CLAUSE_WHERE;
+import static de.tsl2.nano.service.util.ServiceUtil.SUBST_RESULTBEAN;
+import static de.tsl2.nano.service.util.ServiceUtil.createStatement;
+
 import java.io.Serializable;
 import java.util.Arrays;
 import java.util.Collection;
@@ -7,7 +14,6 @@ import java.util.List;
 
 import de.tsl2.nano.service.util.GenericServiceBean;
 import de.tsl2.nano.service.util.ServiceUtil;
-import static de.tsl2.nano.service.util.ServiceUtil.*;
 
 /**
  * Basic Finder

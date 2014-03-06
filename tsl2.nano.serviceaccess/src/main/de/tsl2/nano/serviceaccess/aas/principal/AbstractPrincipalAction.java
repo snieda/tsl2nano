@@ -15,10 +15,10 @@ import javax.security.auth.Subject;
 import javax.security.auth.SubjectDomainCombiner;
 
 import org.apache.commons.logging.Log;
-import de.tsl2.nano.log.LogFactory;
 
 import de.tsl2.nano.action.CommonAction;
 import de.tsl2.nano.action.IActivator;
+import de.tsl2.nano.log.LogFactory;
 import de.tsl2.nano.serviceaccess.ServiceFactory;
 
 /**

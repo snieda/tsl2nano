@@ -14,9 +14,9 @@ import java.util.Iterator;
 import javax.security.auth.Subject;
 
 import org.apache.commons.logging.Log;
-import de.tsl2.nano.log.LogFactory;
 
 import de.tsl2.nano.exception.ManagedException;
+import de.tsl2.nano.log.LogFactory;
 
 /**
  * base service class. provides starting privileged actions with a security subject, logging and exception handling.

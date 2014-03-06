@@ -13,7 +13,6 @@ import java.util.Collection;
 import java.util.LinkedHashMap;
 import java.util.LinkedList;
 import java.util.Map;
-import java.util.Properties;
 
 import javax.persistence.Cache;
 import javax.persistence.EntityManager;

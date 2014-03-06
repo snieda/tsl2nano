@@ -24,10 +24,10 @@ import javax.security.auth.login.LoginException;
 import javax.security.auth.spi.LoginModule;
 
 import org.apache.commons.logging.Log;
-import de.tsl2.nano.log.LogFactory;
 
 import de.tsl2.nano.Environment;
 import de.tsl2.nano.Messages;
+import de.tsl2.nano.log.LogFactory;
 import de.tsl2.nano.serviceaccess.Authorization;
 import de.tsl2.nano.serviceaccess.IAuthorization;
 import de.tsl2.nano.serviceaccess.ServiceFactory;

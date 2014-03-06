@@ -1,6 +1,7 @@
 package de.tsl2.nano.service.util.finder;
 
-import static de.tsl2.nano.service.util.ServiceUtil.*;
+import static de.tsl2.nano.service.util.ServiceUtil.OP_LIKE;
+import static de.tsl2.nano.service.util.ServiceUtil.addAndConditions;
 
 import java.util.Collection;
 

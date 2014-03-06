@@ -10,13 +10,14 @@
 package de.tsl2.nano.serviceaccess.test;
 
 import java.io.IOException;
+import java.nio.charset.MalformedInputException;
 
 import org.junit.BeforeClass;
 import org.junit.Test;
 
-//import sun.io.MalformedInputException;
 import de.tsl2.nano.service.util.BaseServiceTest;
 import de.tsl2.nano.service.util.IFileService;
+//import sun.io.MalformedInputException;
 
 /**
  * Tests for FileService

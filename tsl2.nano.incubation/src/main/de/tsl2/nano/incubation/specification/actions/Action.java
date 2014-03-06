@@ -16,7 +16,6 @@ import java.util.Map;
 import org.simpleframework.xml.Attribute;
 
 import de.tsl2.nano.bean.BeanClass;
-import de.tsl2.nano.bean.def.Constraint;
 import de.tsl2.nano.incubation.specification.AbstractRunnable;
 import de.tsl2.nano.incubation.specification.ParType;
 

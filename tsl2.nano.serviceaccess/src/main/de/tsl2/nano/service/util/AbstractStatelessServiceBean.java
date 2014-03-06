@@ -21,8 +21,8 @@ import javax.persistence.Query;
 import javax.persistence.metamodel.EntityType;
 
 import org.apache.commons.logging.Log;
-import de.tsl2.nano.log.LogFactory;
 
+import de.tsl2.nano.log.LogFactory;
 import de.tsl2.nano.serviceaccess.ServiceFactory;
 import de.tsl2.nano.util.StringUtil;
 

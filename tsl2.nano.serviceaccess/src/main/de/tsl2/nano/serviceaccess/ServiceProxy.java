@@ -16,7 +16,6 @@ import java.security.PrivilegedAction;
 
 import de.tsl2.nano.Messages;
 import de.tsl2.nano.exception.ManagedException;
-import de.tsl2.nano.exception.ManagedException;
 import de.tsl2.nano.util.StringUtil;
 
 /**

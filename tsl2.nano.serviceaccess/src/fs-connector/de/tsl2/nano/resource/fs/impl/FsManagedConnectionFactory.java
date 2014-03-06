@@ -24,8 +24,8 @@ import javax.resource.spi.ResourceAdapterAssociation;
 import javax.security.auth.Subject;
 
 import org.apache.commons.logging.Log;
-import de.tsl2.nano.log.LogFactory;
 
+import de.tsl2.nano.log.LogFactory;
 import de.tsl2.nano.resource.fs.FsConnectionFactory;
 
 /**

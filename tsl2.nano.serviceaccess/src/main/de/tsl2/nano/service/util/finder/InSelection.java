@@ -9,9 +9,10 @@
  */
 package de.tsl2.nano.service.util.finder;
 
+import static de.tsl2.nano.service.util.ServiceUtil.addInSelection;
+
 import java.util.Arrays;
 import java.util.Collection;
-import static de.tsl2.nano.service.util.ServiceUtil.*;
 
 /**
  * finder to load a collection of beans having attribute values that are contained in the given selection.
