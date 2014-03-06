@@ -16,6 +16,7 @@ import java.text.MessageFormat;
 import java.text.ParsePosition;
 import java.util.Collection;
 import java.util.Date;
+import java.util.Map;
 
 import org.apache.commons.logging.Log;
 
@@ -90,6 +91,8 @@ public class DefaultFormat extends Format {
 //            if (listObj.size() > 0) {
 //                    result.append(MessageFormat.format("{0}", new Object[] { obj }));
 //            }
+        } else if (obj.getClass().isArray() || obj instanceof Map) {
+            result.append(StringUtil.toString(obj, 80));
         } else {
             //pure objects, representing there instance id --> use reflection
             CompatibilityLayer cl = Environment.get(CompatibilityLayer.class);

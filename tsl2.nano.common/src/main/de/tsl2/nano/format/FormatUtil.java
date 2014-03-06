@@ -26,6 +26,7 @@ import java.util.List;
 
 import org.apache.commons.logging.Log;
 
+import de.tsl2.nano.Environment;
 import de.tsl2.nano.bean.BeanClass;
 import de.tsl2.nano.collection.CollectionUtil;
 import de.tsl2.nano.currency.CurrencyUtil;
@@ -214,7 +215,7 @@ public class FormatUtil {
                 f = new Format() {
                     @Override
                     public StringBuffer format(Object obj, StringBuffer toAppendTo, FieldPosition pos) {
-                        return toAppendTo.append(obj != null ? StringUtil.toString(obj, 80) : "");
+                        return toAppendTo.append(obj != null ? Environment.format(obj) : "");
                     }
 
                     @Override
