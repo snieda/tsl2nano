@@ -50,7 +50,7 @@ import de.tsl2.nano.util.DateUtil;
 
 /*
  * Copyright © 2002-2008 Thomas Schneider
- * Schwanthaler Strasse 69, 80336 München. Alle Rechte vorbehalten.
+ * Alle Rechte vorbehalten.
  * Weiterverbreitung, Benutzung, Vervielfältigung oder Offenlegung,
  * auch auszugsweise, nur mit Genehmigung.
  *

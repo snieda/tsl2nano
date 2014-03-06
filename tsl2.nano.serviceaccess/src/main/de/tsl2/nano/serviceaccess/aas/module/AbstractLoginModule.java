@@ -1,7 +1,7 @@
 /*
  * @(#)AbstractLoginModule.java	1.0 20.12.2009
  * Copyright © 2002-2008 Thomas Schneider
- * Schwanthaler Strasse 69, 80336 München. Alle Rechte vorbehalten.
+ * Alle Rechte vorbehalten.
  * Weiterverbreitung, Benutzung, Vervielfältigung oder Offenlegung,
  * auch auszugsweise, nur mit Genehmigung.
  *

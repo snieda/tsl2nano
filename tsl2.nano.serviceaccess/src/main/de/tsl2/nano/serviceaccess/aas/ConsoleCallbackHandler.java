@@ -1,5 +1,5 @@
 /*
- * Schwanthaler Strasse 69, 80336 München. Alle Rechte vorbehalten.
+ * Alle Rechte vorbehalten.
  * Copyright © 2002-2009 Thomas Schneider
  * Weiterverbreitung, Benutzung, Vervielfältigung oder Offenlegung,
  * auch auszugsweise, nur mit Genehmigung.
