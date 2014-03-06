@@ -856,7 +856,8 @@ public class Html5Presentation<T> extends BeanPresentationHelper<T> implements I
             "ondblclick",
             "location=this.getElementsByTagName('a')[0]",
             "tabindex",
-            ++currentTabIndex + "");
+            ++currentTabIndex + "",
+            ATTR_BGCOLOR, Bean.getBean((Serializable)item).getPresentable().layout(ATTR_BGCOLOR));
 
         //first cell: bean reference as link
         String length = String.valueOf(grid.getChildNodes().getLength() - 1);
