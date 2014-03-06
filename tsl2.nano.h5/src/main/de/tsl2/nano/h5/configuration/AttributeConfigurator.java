@@ -10,12 +10,6 @@
 package de.tsl2.nano.h5.configuration;
 
 import java.io.Serializable;
-import java.math.BigDecimal;
-import java.math.BigInteger;
-import java.text.DecimalFormat;
-import java.text.Format;
-import java.text.NumberFormat;
-import java.text.SimpleDateFormat;
 
 import de.tsl2.nano.Environment;
 import de.tsl2.nano.bean.BeanClass;
@@ -27,8 +21,6 @@ import de.tsl2.nano.bean.def.IIPresentable;
 import de.tsl2.nano.bean.def.IPresentable;
 import de.tsl2.nano.bean.def.IPresentableColumn;
 import de.tsl2.nano.bean.def.PathExpression;
-import de.tsl2.nano.bean.def.ValueExpressionFormat;
-import de.tsl2.nano.format.RegExpFormat;
 import de.tsl2.nano.util.PrivateAccessor;
 import de.tsl2.nano.util.Util;
 

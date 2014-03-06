@@ -19,7 +19,6 @@ import java.util.List;
 import java.util.Map;
 
 import de.tsl2.nano.Environment;
-import de.tsl2.nano.bean.BeanAttribute;
 import de.tsl2.nano.bean.IAttribute;
 import de.tsl2.nano.bean.def.AttributeDefinition;
 import de.tsl2.nano.bean.def.Bean;

@@ -102,7 +102,6 @@ import org.w3c.dom.NodeList;
 import de.tsl2.nano.Environment;
 import de.tsl2.nano.Messages;
 import de.tsl2.nano.action.IAction;
-import de.tsl2.nano.bean.BeanAttribute;
 import de.tsl2.nano.bean.BeanClass;
 import de.tsl2.nano.bean.BeanUtil;
 import de.tsl2.nano.bean.IAttribute;

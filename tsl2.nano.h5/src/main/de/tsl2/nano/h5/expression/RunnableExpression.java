@@ -10,11 +10,8 @@
 package de.tsl2.nano.h5.expression;
 
 import java.io.Serializable;
-import java.math.BigDecimal;
-import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.Set;
 
 import de.tsl2.nano.bean.BeanUtil;
 import de.tsl2.nano.bean.def.AbstractExpression;

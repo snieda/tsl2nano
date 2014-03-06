@@ -11,7 +11,6 @@ package de.tsl2.nano.h5;
 
 import java.io.StringWriter;
 import java.net.URI;
-import java.net.URL;
 
 import javax.xml.transform.OutputKeys;
 import javax.xml.transform.Transformer;
