@@ -397,11 +397,9 @@ public class Environment {
      * @return formatted object
      */
     public static String format(Object obj) {
-        Object formatter = get(KEY_DEFAULT_FORMAT);
+        Object formatter = get(KEY_DEFAULT_FORMAT, DefaultFormat.class.getName());
         if (!(formatter instanceof Format)) {
-            if (formatter == null) {
-                formatter = new DefaultFormat();
-            } else if (formatter instanceof String) {
+            if (formatter instanceof String) {
                 formatter = BeanClass.createBeanClass((String) formatter).createInstance();
             } else {
                 throw new IllegalArgumentException(
