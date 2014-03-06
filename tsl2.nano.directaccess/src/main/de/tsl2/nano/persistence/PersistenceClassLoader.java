@@ -9,30 +9,24 @@
  */
 package de.tsl2.nano.persistence;
 
-import java.io.IOException;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Comparator;
-import java.util.Enumeration;
 import java.util.List;
 
-import javax.persistence.EntityManagerFactory;
 import javax.persistence.metamodel.EntityType;
 
 import org.apache.commons.logging.Log;
 
 import de.tsl2.nano.Environment;
-import de.tsl2.nano.log.LogFactory;
-import de.tsl2.nano.service.util.AbstractStatelessServiceBean;
-import de.tsl2.nano.service.util.IGenericService;
-
-import de.tsl2.nano.bean.BeanContainer;
-import de.tsl2.nano.classloader.LibClassLoader;
 import de.tsl2.nano.classloader.RuntimeClassloader;
 import de.tsl2.nano.classloader.TransformingClassLoader;
 import de.tsl2.nano.collection.ITransformer;
+import de.tsl2.nano.log.LogFactory;
+import de.tsl2.nano.service.util.AbstractStatelessServiceBean;
+import de.tsl2.nano.service.util.IGenericService;
 
 /**
  * It is a {@link RuntimeClassloader}, manipulating the found persistence.xml

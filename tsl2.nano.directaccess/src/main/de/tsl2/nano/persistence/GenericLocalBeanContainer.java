@@ -9,7 +9,6 @@
  */
 package de.tsl2.nano.persistence;
 
-import de.tsl2.nano.Environment;
 import de.tsl2.nano.bean.BeanContainer;
 import de.tsl2.nano.service.util.IGenericService;
 
