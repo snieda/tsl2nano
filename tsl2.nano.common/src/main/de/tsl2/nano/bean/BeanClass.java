@@ -2,7 +2,7 @@
  * SVN-INFO: $Id: BeanClass.java,v 1.0 07.12.2008 11:36:00 15:03:02 ts Exp $ 
  * 
  * Copyright © 2002-2008 Thomas Schneider
- * Schwanthaler Strasse 69, 80336 München. Alle Rechte vorbehalten.
+ * Alle Rechte vorbehalten.
  * Weiterverbreitung, Benutzung, Vervielfältigung oder Offenlegung,
  * auch auszugsweise, nur mit Genehmigung.
  *
