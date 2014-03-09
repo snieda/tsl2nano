@@ -1,6 +1,7 @@
 package de.tsl2.nano.log;
 
 import java.io.File;
+import java.io.FileNotFoundException;
 import java.io.PrintStream;
 import java.io.Serializable;
 import java.text.MessageFormat;
@@ -68,6 +69,8 @@ public/*abstract*/class LogFactory implements Runnable, Serializable {
 
     @Element(data = true)
     String outputformat = "%1$td:%1$tm:%1$tY %1$tT %2$s [%3$16s]: %4$s";
+    @Element(required=false)
+    String outputFile = logOutputFile;
     transient MsgFormat msgFormat;
 
     public static final int FATAL = 1;
@@ -102,6 +105,7 @@ public/*abstract*/class LogFactory implements Runnable, Serializable {
     static final String apacheLogFactory = "org.apache.commons.logging.LogFactory";
 
     static String logFactoryXml = "logfactory.xml";
+    static String logOutputFile = "logfactory.log";
 
     /**
      * singelton constructor
@@ -120,16 +124,25 @@ public/*abstract*/class LogFactory implements Runnable, Serializable {
                     self = XmlUtil.loadSimpleXml_(logFactoryXml, LogFactory.class);
                     if (self.loglevels == null)
                         self.loglevels = new HashMap<String, Integer>();
-                } catch (Exception e) {
+                } catch (Throwable e) {//NoClassDefFound would be an error --> Throwable
                     //ok, we create the instance directly!
-                    e.printStackTrace();
+                    System.err.println(e);
+//                    e.printStackTrace();
                 }
             if (self == null) {
                 self = new LogFactory() /* on abstract: {} */;
                 self.loglevels = new HashMap<String, Integer>();
                 self.msgFormat = new MsgFormat(self.outputformat);
                 self.defaultPckLogLevel = NumberUtil.highestOneBit(self.statesToLog);
-                XmlUtil.saveSimpleXml_(logFactoryXml, self);
+                if (self.outputFile != null) {
+                    self.initPrintStream(self.outputFile);
+                }
+                try {
+                    XmlUtil.saveSimpleXml_(logFactoryXml, self);
+                } catch(Throwable ex) {//NoClassDefFound would be an error --> Throwable
+                    //ok, perhaps the simple-xml is loaded later
+                    log("error: LogFactory couldn't save xml properties");
+                }
             }
             ThreadUtil.startDaemon("logger", self);
         }
@@ -146,10 +159,20 @@ public/*abstract*/class LogFactory implements Runnable, Serializable {
         logFactoryXml = logConfiguration;
     }
 
+    /**
+     * only for internal use!
+     * 
+     * @param logConfiguration
+     */
+    public static void setLogFile(String logFilename) {
+        logOutputFile = logFilename;
+    }
+
     public static final void initializeFileLogger(String fileName, int bitsetStatesToLog) {
         try {
-            //TODO use PipeReader to write to console, too
-            initializeLogger(instance().outputformat, -1, instance().out, instance().err);
+            PrintStream fileOut = new PrintStream(fileName);
+            initializeLogger(instance().outputformat, -1, fileOut, fileOut);
+            self.outputFile = fileName;
         } catch (Exception e) {
             ManagedException.forward(e);
         }
@@ -189,6 +212,24 @@ public/*abstract*/class LogFactory implements Runnable, Serializable {
     @Commit
     private void initDeserializing() {
         statesToLog = NumberUtil.bits(standard, Arrays.asList(STATEDESCRIPTION));
+        if (outputFile != null) {
+            initPrintStream(outputFile);
+        }
+    }
+
+    /**
+     * initPrintStream
+     * @param outputFile 
+     */
+    private void initPrintStream(String outputFile) {
+        try {
+            PrintStream outFile = new PrintStream(outputFile);
+            out = outFile;
+            err = outFile;
+        } catch (FileNotFoundException e) {
+            //the logger shouldn't stop the application...
+            err.println(e);
+        }
     }
 
     /**
@@ -343,7 +384,7 @@ public/*abstract*/class LogFactory implements Runnable, Serializable {
      * simple delegate to {@link #log(Class, State, Object, Throwable)}
      */
     public static void log(Object message) {
-        log(null, INFO, message, null);
+        log(LogFactory.class, INFO, message, null);
     }
 
     /**

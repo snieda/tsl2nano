@@ -173,8 +173,9 @@ public class Environment {
 
     public static void create(String dir) {
         new File(dir).mkdirs();
+        LogFactory.setLogFile(dir + "/" + "logfactory.log");
         LogFactory.setLogFactoryXml(dir + "/" + "logfactory.xml");
-
+        
         String info = "\n===========================================================\n" + "creating environment "
             + dir
             + "\n"
