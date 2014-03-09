@@ -145,7 +145,7 @@ public class PrimitiveUtil {
             try {
                 if (cls1.isPrimitive() && !cls2.isPrimitive())
                     isassignable = cls1.isAssignableFrom(getPrimitive(cls2));
-                else if (cls2.isPrimitive() && cls2.isPrimitive())
+                else if (cls2.isPrimitive() && !cls1.isPrimitive())
                     isassignable = cls2.isAssignableFrom(getPrimitive(cls1));
             } catch (Exception ex) {
                 //do nothing - it was only a try...
