@@ -82,6 +82,7 @@ public class FileUtil {
         return zipStream != null ? readFileNamesFromZip(zipStream, filter) : null;
     }
 
+    @SuppressWarnings({ "rawtypes", "unchecked" })
     public static String[] readFileNamesFromZip(ZipInputStream sourceStream, String filter) {
         filter = filter.replace("*", ".*");
         //open a zip-file
@@ -166,7 +167,6 @@ public class FileUtil {
     }
 
     public static byte[] readBytes(InputStream stream) throws IOException {
-        ByteArrayOutputStream baos = new ByteArrayOutputStream();
         return readBytes(stream, new ByteArrayOutputStream()).toByteArray();
     }
 

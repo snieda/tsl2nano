@@ -19,7 +19,6 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import de.tsl2.nano.Messages;
-import de.tsl2.nano.collection.CollectionUtil;
 import de.tsl2.nano.exception.ManagedException;
 
 /**
@@ -29,6 +28,7 @@ import de.tsl2.nano.exception.ManagedException;
  * @version $Revision: 1.0 $
  * 
  */
+@SuppressWarnings("rawtypes")
 public class StringUtil {
     /** variable (like ant-variables) matching expression. e.g.: ${myvar} */
     public static final String VAR_REGEXP = "\\$\\{\\w+\\}";
@@ -260,7 +260,7 @@ public class StringUtil {
         String postfix = "...";
         String result;
         if (o != null && o.getClass().isArray()) {
-            o = CollectionUtil.asList(o);
+            o = Util.asList(o);
         }
         if (o instanceof Map) {
             o = ((Map) o).entrySet();

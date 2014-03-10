@@ -30,6 +30,7 @@ import de.tsl2.nano.bean.BeanUtil;
 import de.tsl2.nano.format.DefaultFormat;
 import de.tsl2.nano.log.LogFactory;
 import de.tsl2.nano.util.NumberUtil;
+import de.tsl2.nano.util.Util;
 
 /**
  * some utility methods for collections
@@ -66,22 +67,7 @@ public class CollectionUtil {
      * @return filled collection
      */
     public static Collection asList(Object array) {
-        assert array.getClass().isArray() : "array parameter must be an array!";
-        if (array instanceof Object[]) {
-            //the Arrays.asList() returns a fixed size list!
-            return Arrays.asList((Object[]) array);
-        }
-
-        /*
-         * on primitives, do it yourself
-         * Arrays.asList() needs a special array cast
-         */
-        final int length = Array.getLength(array);
-        final Collection c = new ArrayList(length);
-        for (int i = 0; i < length; i++) {
-            c.add(Array.get(array, i));
-        }
-        return c;
+        return Util.asList(array);
     }
 
     /**

@@ -9,8 +9,11 @@
  */
 package de.tsl2.nano.util;
 
+import java.lang.reflect.Array;
 import java.security.MessageDigest;
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collection;
 
 import de.tsl2.nano.exception.ManagedException;
 
@@ -94,6 +97,7 @@ public class Util {
 
     /**
      * checks whether data contains one of items
+     * 
      * @param data data to check
      * @param items available items
      * @return true, data contains one of items
@@ -108,6 +112,7 @@ public class Util {
 
     /**
      * checks whether data contains one of items
+     * 
      * @param data data to check
      * @param items available items
      * @return true, data contains one of items
@@ -115,7 +120,7 @@ public class Util {
     public static final <T> boolean containsAll(T[] data, T... items) {
         return Arrays.asList(data).containsAll(Arrays.asList(items));
     }
-    
+
     /**
      * asString
      * 
@@ -179,6 +184,36 @@ public class Util {
     @SuppressWarnings("unchecked")
     public static <T> T value(Object object, T defaultValue) {
         return (T) (object != null ? object : defaultValue);
+    }
+
+    /**
+     * wrap an array into a collection. works on Object[] using Arrays.asList() and on primitive arrays with a simple
+     * loop.
+     * <p/>
+     * Internal Information: As this method should be content of CollectionUtil, it is implemented here to be inside a
+     * core class.
+     * 
+     * @param array object that is an array
+     * @return filled collection
+     */
+    @SuppressWarnings({ "unchecked", "rawtypes" })
+    public static Collection asList(Object array) {
+        assert array.getClass().isArray() : "array parameter must be an array!";
+        if (array instanceof Object[]) {
+            //the Arrays.asList() returns a fixed size list!
+            return Arrays.asList((Object[]) array);
+        }
+
+        /*
+         * on primitives, do it yourself
+         * Arrays.asList() needs a special array cast
+         */
+        final int length = Array.getLength(array);
+        final Collection c = new ArrayList(length);
+        for (int i = 0; i < length; i++) {
+            c.add(Array.get(array, i));
+        }
+        return c;
     }
 
     /**

@@ -10,14 +10,13 @@
 package de.tsl2.nano;
 
 import java.io.File;
+import java.util.LinkedHashMap;
 import java.util.Map;
 
 import org.apache.commons.logging.Log;
 
 import de.tsl2.nano.bean.BeanClass;
 import de.tsl2.nano.classloader.NestedJarClassLoader;
-import de.tsl2.nano.collection.CollectionUtil;
-import de.tsl2.nano.collection.MapUtil;
 import de.tsl2.nano.log.LogFactory;
 import de.tsl2.nano.util.StringUtil;
 
@@ -55,10 +54,11 @@ public class AppLoader {
      * 
      * @return map describing all possible main application arguments. Used by {@link Argumentator}.
      */
-    @SuppressWarnings("unchecked")
     protected Map<String, String> getManual() {
-        return MapUtil.asMap("usage",
-            this.getClass().getSimpleName() + " [environment name or path] {<Main-Class>} [arguments]");
+        // don't use MapUtil.asMap() to use only core-classes
+        Map<String, String> map = new LinkedHashMap<String, String>();
+        map.put("usage", getClass().getSimpleName() + " [environment name or path] {<Main-Class>} [arguments]");
+        return map;
     }
 
     /**
@@ -130,10 +130,10 @@ public class AppLoader {
         }
         if (environment == null) {
             if (args.length > 0) {
-            environment = args[0];
-            String[] nargs = new String[args.length - 1];
-            System.arraycopy(args, 1, nargs, 0, nargs.length);
-            args = nargs;
+                environment = args[0];
+                String[] nargs = new String[args.length - 1];
+                System.arraycopy(args, 1, nargs, 0, nargs.length);
+                args = nargs;
             } else {
                 environment = "config";
             }
@@ -142,7 +142,8 @@ public class AppLoader {
         if (mainmethod == null)
             mainmethod = "main";
 
-        LOG.info("\n#############################################################" + "\nAppLoader preparing launch for:\n  mainclass : "
+        LOG.info("\n#############################################################"
+            + "\nAppLoader preparing launch for:\n  mainclass : "
             + mainclass
             + "\n  mainmethod: "
             + mainmethod
@@ -234,6 +235,10 @@ public class AppLoader {
      * @return new String[] holding preArgs + args
      */
     protected String[] extendArgs(String[] args, String... preArgs) {
-        return CollectionUtil.concat(String[].class, preArgs, args);
+        // don't use CollectionUtil.concat(String[].class, preArgs, args) to import only nano-core classes
+        String[] newArgs = new String[args.length + preArgs.length];
+        System.arraycopy(preArgs, 0, newArgs, 0, preArgs.length);
+        System.arraycopy(args, 0, newArgs, preArgs.length, args.length);
+        return newArgs;
     }
 }

@@ -24,9 +24,9 @@ import de.tsl2.nano.log.LogFactory;
  * @author Thomas Schneider
  * @version $Revision$
  */
-public class CUtil extends Util {
+public class CUtil extends ByteUtil {
 
-    protected static final Log LOG = LogFactory.getLog(NumberUtil.class);
+    protected static final Log LOG = LogFactory.getLog(CUtil.class);
 
     /**
      * includes check for nulls of o1 and o2.

@@ -197,7 +197,7 @@ public class BeanValue<T> extends AttributeDefinition<T> implements IValueDefini
      */
     public File getValueFile() {
         T v = getValue();
-        byte[] data = (byte[]) (v instanceof byte[] ? v : BeanUtil.serializeBean(v));
+        byte[] data = (byte[]) (v instanceof byte[] ? v : BeanUtil.serialize(v));
         String fname = Environment.getConfigPath() + "temp/" + getId() + "-" + UUID.nameUUIDFromBytes(data);
         File file = new File(fname);
         if (!file.exists())

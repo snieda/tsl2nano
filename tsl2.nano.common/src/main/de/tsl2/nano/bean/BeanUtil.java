@@ -47,6 +47,7 @@ import de.tsl2.nano.exception.ManagedException;
 import de.tsl2.nano.format.DefaultFormat;
 import de.tsl2.nano.format.FormatUtil;
 import de.tsl2.nano.log.LogFactory;
+import de.tsl2.nano.util.ByteUtil;
 import de.tsl2.nano.util.StringUtil;
 import de.tsl2.nano.util.Util;
 
@@ -58,7 +59,7 @@ import de.tsl2.nano.util.Util;
  * @version $Revision$
  */
 @SuppressWarnings({ "unchecked", "rawtypes" })
-public class BeanUtil {
+public class BeanUtil extends ByteUtil {
     private static final Log LOG = LogFactory.getLog(BeanUtil.class);
     private static final List<String> STD_TYPE_PKGS;
 
@@ -196,88 +197,6 @@ public class BeanUtil {
     }
 
     /**
-     * Serialization of a bean-object to a byte-array.
-     * 
-     * @param bean to serialize to byte array
-     * @return serialized bean
-     */
-    public static byte[] serializeBean(Object bean) {
-        if (!(bean instanceof Serializable)) {
-            if (bean != null) {
-                LOG.warn("trying to serialize a non-serializeable object: " + bean.getClass().getName());
-            }
-            return null;//throw new ManagedException("bean must implement serializeable!");
-        }
-        return convertToByteArray(bean);
-    }
-
-    /**
-     * Serialization of a bean object to a byte-array
-     * 
-     * @param bean to serialize to byte array
-     * @return serialized bean
-     */
-    private static byte[] convertToByteArray(Object bean) {
-        try {
-            LOG.debug("creating byte array through serializing object of type " + bean.getClass());
-            final ByteArrayOutputStream bos = new ByteArrayOutputStream();
-            final ObjectOutputStream o = new ObjectOutputStream(bos);
-            o.writeObject(bean);
-            o.close();
-            LOG.debug("serialized byte array for type " + bean.getClass() + " size: " + bos.size() + " bytes");
-            return bos.toByteArray();
-        } catch (final IOException ex) {
-            ManagedException.forward(ex);
-            return null;
-        }
-
-    }
-
-    private static Object convertToObject(byte[] bytes) {
-        return convertToObject(bytes, null);
-    }
-
-    /**
-     * deserialization of a byte-array
-     * 
-     * @param bytes to deserialize
-     * @return deserialized bean
-     */
-    private static Object convertToObject(byte[] bytes, final ClassLoader classLoader) {
-        try {
-            final ByteArrayInputStream bis = new ByteArrayInputStream(bytes);
-            final ObjectInputStream i;
-            /*
-             * if a classloader was given, we will use it - otherwise the native evaluated classloader will work.
-             */
-            if (classLoader != null) {
-                i = new ObjectInputStream(bis) {
-                    @Override
-                    protected Class<?> resolveClass(ObjectStreamClass desc) throws IOException, ClassNotFoundException {
-                        String name = desc.getName();
-                        try {
-                            return Class.forName(name, false, classLoader);
-                        } catch (Exception ex) {
-                            return super.resolveClass(desc);
-                        }
-                    }
-                };
-            } else {
-                i = new ObjectInputStream(bis);
-            }
-            /*
-             * now, do the standard things
-             */
-            final Object object = i.readObject();
-            i.close();
-            return object;
-        } catch (final Exception ex) {
-            return ManagedException.forward(ex);
-        }
-
-    }
-
-    /**
      * calls a method through reflection
      * 
      * @param clazz class to load
@@ -363,17 +282,6 @@ public class BeanUtil {
      */
     public static boolean isSingleValueType(Class<?> type) {
         return !(type.isArray() || Collection.class.isAssignableFrom(type) || Map.class.isAssignableFrom(type));
-    }
-
-    /**
-     * isByteStream
-     * 
-     * @param type class to analyse
-     * @return true, if type is a byte (or Byte) array, or simple Serializable interface.
-     */
-    public static boolean isByteStream(Class<?> type) {
-        return type.equals(Serializable.class)
-            || (type.isArray() && (type.isAssignableFrom(Byte.class) || type.isAssignableFrom(Byte.class)));
     }
 
     /**

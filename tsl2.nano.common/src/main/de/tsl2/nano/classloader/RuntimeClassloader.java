@@ -22,12 +22,13 @@ import java.util.List;
 
 import org.apache.commons.logging.Log;
 
-import de.tsl2.nano.bean.BeanUtil;
 import de.tsl2.nano.exception.ManagedException;
 import de.tsl2.nano.exception.Message;
 import de.tsl2.nano.log.LogFactory;
+import de.tsl2.nano.util.ByteUtil;
 import de.tsl2.nano.util.FileUtil;
 import de.tsl2.nano.util.StringUtil;
+//import de.tsl2.nano.bean.BeanUtil;
 
 /**
  * provides dynamic classloading through extending classpath on runtime. use {@link #addURL(URL)} to enhance the
@@ -162,7 +163,7 @@ public class RuntimeClassloader extends URLClassLoader {
                     /*
                      * check, if instances can be done and serialized!
                      */
-                    BeanUtil.serializeBean(clazz.newInstance());
+                    ByteUtil.serialize(clazz.newInstance());
                     /*
                      * ok, add it
                      */

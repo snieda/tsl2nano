@@ -9,8 +9,8 @@
  */
 package de.tsl2.nano.bean;
 
-import java.io.Serializable;
 import java.lang.annotation.Annotation;
+import java.io.Serializable;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
@@ -75,6 +75,9 @@ public class BeanClass<T> implements Serializable {
             return !BeanUtil.isSingleValueType(((IAttribute) getParameter()[0]).getType());
         }
     };
+
+    /** flag to indicate a code enhancing class */
+    public static final String ENHANCER_PREATTACHMENT = "$$";
 
     /**
      * constructor to be serializable
