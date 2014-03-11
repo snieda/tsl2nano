@@ -83,22 +83,33 @@ some internals:
 		<!-- fallbacks -->
 		<property name="sh.jar.srcdir" value="./" />
 		<property name="sh.jar.include" value="**" />
+		<property name="sh.jar.include2" value="INCLUDING_EXPRESSION" />
+		<property name="sh.jar.include3" value="INCLUDING_EXPRESSION" />
+		<property name="sh.jar.include4" value="INCLUDING_EXPRESSION" />
 		<property name="sh.jar.exclude" value="EXCLUDING_EXPRESSION" />
 		<property name="sh.jar.exclude2" value="EXCLUDING_EXPRESSION2" />
 		<property name="sh.jar.exclude3" value="EXCLUDING_EXPRESSION3" />
+		<property name="sh.jar.exclude4" value="EXCLUDING_EXPRESSION3" />
 		<property name="sh.jar.destination" value="${basedir}.jar" />
 		<property name="sh.jar.manifest" value="${basedir}/META-INF/MANIFEST.MF" />
 		<!-- start it -->
-		<sh.jar sh.jar.srcdir="${sh.jar.srcdir}" sh.jar.include="${sh.jar.include}" sh.jar.exclude="${sh.jar.exclude}" sh.jar.exclude2="${sh.jar.exclude2}" sh.jar.exclude3="${sh.jar.exclude3}" sh.jar.destination="${sh.jar.destination}" sh.jar.manifest="${sh.jar.manifest}" />
+		<sh.jar sh.jar.srcdir="${sh.jar.srcdir}" 
+				sh.jar.include="${sh.jar.include}" sh.jar.include2="${sh.jar.include2}" sh.jar.include3="${sh.jar.include3}" sh.jar.include4="${sh.jar.include4}" 
+				sh.jar.exclude="${sh.jar.exclude}" sh.jar.exclude2="${sh.jar.exclude2}" sh.jar.exclude3="${sh.jar.exclude3}" sh.jar.exclude4="${sh.jar.exclude4}" 
+				sh.jar.destination="${sh.jar.destination}" sh.jar.manifest="${sh.jar.manifest}" />
 	</target>
 
 	<!-- defining a macro to be able to call it multiple times -->
 	<macrodef name="sh.jar" description="packs files into a zip-encoded file">
 		<attribute name="sh.jar.srcdir" />
 		<attribute name="sh.jar.include" />
+		<attribute name="sh.jar.include2" />
+		<attribute name="sh.jar.include3" />
+		<attribute name="sh.jar.include4" />
 		<attribute name="sh.jar.exclude" />
 		<attribute name="sh.jar.exclude2" />
 		<attribute name="sh.jar.exclude3" />
+		<attribute name="sh.jar.exclude4" />
 		<attribute name="sh.jar.destination" />
 		<attribute name="sh.jar.manifest" />
 
@@ -106,9 +117,13 @@ some internals:
 			<jar destfile="@{sh.jar.destination}" manifest="${sh.jar.manifest}" update="true">
 				<fileset dir="@{sh.jar.srcdir}">
 					<include name="@{sh.jar.include}" />
+					<include name="@{sh.jar.include2}" />
+					<include name="@{sh.jar.include3}" />
+					<include name="@{sh.jar.include4}" />
 					<exclude name="@{sh.jar.exclude}" />
 					<exclude name="@{sh.jar.exclude2}" />
 					<exclude name="@{sh.jar.exclude3}" />
+					<exclude name="@{sh.jar.exclude4}" />
 				</fileset>
 			</jar>
 		</sequential>
@@ -509,14 +524,14 @@ starting ${ant.project.name}:
 
 	<target name="sh.encode.base64" unless="disable_sh.encode.base64" description="encode perhaps a binary to base64-text">
 		<antcall target="sh.call.method">
-			<param name="arg1" value="de.tsl2.nano.util.FileUtil" />
+			<param name="arg1" value="de.tsl2.nano.core.util.FileUtil" />
 			<param name="arg2" value="encodeBase64" />
 		</antcall>
 	</target>
 
 	<target name="sh.decode.base64" unless="disable_sh.decode_base64" description="decode a base64-text to its original form (perhaps binary)">
 		<antcall target="sh.call.method">
-			<param name="arg1" value="de.tsl2.nano.util.FileUtil" />
+			<param name="arg1" value="de.tsl2.nano.core.util.FileUtil" />
 			<param name="arg2" value="decodeBase64" />
 		</antcall>
 	</target>
@@ -586,7 +601,7 @@ starting ${ant.project.name}:
 		<!--		<property name="arg3" value="shell.xml" />
 		<property name="arg4" value="count(//target)" /> -->
 		<antcall target="sh.call.method">
-			<param name="arg1" value="de.tsl2.nano.execution.XmlUtil" />
+			<param name="arg1" value="de.tsl2.nano.core.util.XmlUtil" />
 			<param name="arg2" value="xpath" />
 			<param name="arg3" value="${sh.xml.xpath.file}" />
 			<param name="arg4" value="${sh.xml.xpath.expression}" />
@@ -605,7 +620,7 @@ starting ${ant.project.name}:
 	<target name="sh.xml.velocity" unless="disable_sh.velocity" description="do velocity transformations with template and object infos">
 		<property name="sh.xml.velocity.template" value="template.vm" />
 		<antcall target="sh.call.method">
-			<param name="arg1" value="de.tsl2.nano.execution.XmlUtil" />
+			<param name="arg1" value="de.tsl2.nano.core.util.XmlUtil" />
 			<param name="arg2" value="transform" />
 			<param name="arg3" value="${sh.xml.velocity.template}" />
 		</antcall>
