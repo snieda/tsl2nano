@@ -18,10 +18,10 @@ import org.simpleframework.xml.Element;
 import org.simpleframework.xml.ElementArray;
 import org.simpleframework.xml.ElementMap;
 
-import de.tsl2.nano.Environment;
-import de.tsl2.nano.action.IActivator;
+import de.tsl2.nano.action.IActivable;
 import de.tsl2.nano.bean.BeanContainer;
-import de.tsl2.nano.bean.IAttribute;
+import de.tsl2.nano.core.Environment;
+import de.tsl2.nano.core.cls.IAttribute;
 
 /**
  * simple gui properties
@@ -50,7 +50,7 @@ public class Presentable implements IIPresentable, Serializable {
     protected LinkedHashMap<String, String> layoutConstraints;
     @Attribute
     boolean visible = true;
-    transient IActivator enabler;
+    transient IActivable enabler;
     @Element(required = false)
     String icon;
 
@@ -80,7 +80,7 @@ public class Presentable implements IIPresentable, Serializable {
                 && (!BeanContainer.isInitialized() || !BeanContainer.instance().isPersistable(attr.getDeclaringClass())
                     || !(attr instanceof IAttributeDefinition) || (!((IAttributeDefinition<?>) attr).isMultiValue() || ((IAttributeDefinition<?>) attr)
                     .cascading()))
-                ? IActivator.ACTIVE : IActivator.INACTIVE;
+                ? IActivable.ACTIVE : IActivable.INACTIVE;
     }
 
     /**
@@ -125,7 +125,7 @@ public class Presentable implements IIPresentable, Serializable {
     public <L extends Serializable, T extends IPresentable> T setPresentation(String label,
             int type,
             int style,
-            IActivator enabler,
+            IActivable enabler,
             boolean visible,
             L layout,
             L layoutConstraints,
@@ -152,9 +152,9 @@ public class Presentable implements IIPresentable, Serializable {
     }
 
     @Override
-    public IActivator getEnabler() {
+    public IActivable getEnabler() {
         if (enabler == null)
-            enabler = IActivator.ACTIVE;
+            enabler = IActivable.ACTIVE;
         return enabler;
     }
 
@@ -245,7 +245,7 @@ public class Presentable implements IIPresentable, Serializable {
      * {@inheritDoc}
      */
     @Override
-    public <T extends IPresentable> T setEnabler(IActivator enabler) {
+    public <T extends IPresentable> T setEnabler(IActivable enabler) {
         this.enabler = enabler;
         return (T) this;
     }

@@ -12,6 +12,7 @@ package de.tsl2.nano.bean.def;
 import java.io.File;
 import java.io.IOException;
 import java.io.Serializable;
+import java.lang.reflect.Method;
 import java.text.Format;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -35,26 +36,29 @@ import org.simpleframework.xml.Namespace;
 import org.simpleframework.xml.core.Commit;
 import org.simpleframework.xml.core.Persist;
 
-import de.tsl2.nano.Environment;
+import de.tsl2.nano.action.CommonAction;
 import de.tsl2.nano.action.IAction;
-import de.tsl2.nano.bean.BeanAttribute;
-import de.tsl2.nano.bean.BeanClass;
 import de.tsl2.nano.bean.BeanContainer;
 import de.tsl2.nano.bean.BeanUtil;
-import de.tsl2.nano.bean.IAttribute;
+import de.tsl2.nano.bean.IValueAccess;
 import de.tsl2.nano.bean.ValueHolder;
 import de.tsl2.nano.collection.CollectionUtil;
-import de.tsl2.nano.collection.IPredicate;
 import de.tsl2.nano.collection.ListSet;
-import de.tsl2.nano.exception.ManagedException;
-import de.tsl2.nano.execution.XmlUtil;
+import de.tsl2.nano.core.Environment;
+import de.tsl2.nano.core.IPredicate;
+import de.tsl2.nano.core.ManagedException;
+import de.tsl2.nano.core.Messages;
+import de.tsl2.nano.core.cls.BeanAttribute;
+import de.tsl2.nano.core.cls.BeanClass;
+import de.tsl2.nano.core.cls.IAttribute;
+import de.tsl2.nano.core.log.LogFactory;
+import de.tsl2.nano.core.util.FileUtil;
+import de.tsl2.nano.core.util.StringUtil;
+import de.tsl2.nano.core.util.Util;
+import de.tsl2.nano.core.util.XmlUtil;
 import de.tsl2.nano.format.DefaultFormat;
-import de.tsl2.nano.log.LogFactory;
 import de.tsl2.nano.messaging.ChangeEvent;
 import de.tsl2.nano.messaging.IListener;
-import de.tsl2.nano.util.FileUtil;
-import de.tsl2.nano.util.StringUtil;
-import de.tsl2.nano.util.Util;
 
 /**
  * Holds all informations to define a bean as a container of bean-attributes. Uses {@link BeanClass} and
@@ -581,14 +585,55 @@ public class BeanDefinition<T> extends BeanClass<T> implements Serializable {
         return !BeanUtil.isStandardType(t) && BeanClass.hasDefaultConstructor(t);
     }
 
+    static final String ACTION_PREFIX = "action";
+
+    /**
+     * getBeanActions
+     * 
+     * @return all methods (wrapped into actions) starting with 'action' and having no arguments.
+     */
+    public Collection<IAction> getActionsByClass() {
+        return getActionsByClass(clazz, null);
+    }
+
+    /**
+     * getBeanActions
+     * 
+     * @param clazz class to analyze
+     * @param actions (optional) collection to be filled with actions
+     * @return all public methods (wrapped into actions) starting with 'action' and having no arguments.
+     */
+    @SuppressWarnings("serial")
+    public static Collection<IAction> getActionsByClass(Class<?> clazz, Collection<IAction> actions, Object... parameters) {
+        final Method[] methods = getDefiningClass(clazz).getMethods();
+        if (actions == null)
+            actions = new ArrayList<IAction>();
+        for (int i = 0; i < methods.length; i++) {
+            if (methods[i].getName().startsWith(ACTION_PREFIX) && methods[i].getParameterTypes().length == 0) {
+                final Method m = methods[i];
+                final String name = m.getName().substring(ACTION_PREFIX.length());
+                CommonAction<Object> newAction = new CommonAction<Object>(m.toGenericString(),
+                    name,
+                    Messages.getStringOpt(m.toGenericString())) {
+                    @Override
+                    public Object action() throws Exception {
+                        return m.invoke(getParameter()[0], new Object[0]);
+                    }
+                };
+                newAction.setParameter(parameters);
+                actions.add(newAction);
+            }
+        }
+        return actions;
+    }
+
     /**
      * @return Returns the actions.
      */
-    @Override
     public Collection<IAction> getActions() {
         if (actions == null) {
             //load entity actions (methods starting with 'action')
-            actions = super.getActions();
+            actions = getActionsByClass();
         }
         return actions;
     }

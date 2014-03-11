@@ -7,13 +7,13 @@ import java.util.UUID;
 
 import org.apache.commons.logging.Log;
 
-import de.tsl2.nano.bean.BeanAttribute;
 import de.tsl2.nano.bean.BeanContainer;
 import de.tsl2.nano.bean.BeanUtil;
 import de.tsl2.nano.collection.ListSet;
-import de.tsl2.nano.exception.ManagedException;
-import de.tsl2.nano.log.LogFactory;
-import de.tsl2.nano.util.StringUtil;
+import de.tsl2.nano.core.ManagedException;
+import de.tsl2.nano.core.cls.BeanAttribute;
+import de.tsl2.nano.core.log.LogFactory;
+import de.tsl2.nano.core.util.StringUtil;
 
 /**
  * simple bean assigner usable for two-list-selection. on construction, the elements contained in source and dest item

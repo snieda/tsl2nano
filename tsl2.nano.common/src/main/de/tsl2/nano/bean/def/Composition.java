@@ -12,8 +12,8 @@ package de.tsl2.nano.bean.def;
 import java.util.ArrayList;
 import java.util.Collection;
 
-import de.tsl2.nano.bean.BeanAttribute;
-import de.tsl2.nano.bean.BeanClass;
+import de.tsl2.nano.core.cls.BeanAttribute;
+import de.tsl2.nano.core.cls.BeanClass;
 
 /**
  * On relational models, a composition child (like the uml-composition) needs a connection to it's parent. If a new

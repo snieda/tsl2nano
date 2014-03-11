@@ -11,8 +11,8 @@ package de.tsl2.nano.bean.def;
 
 import org.simpleframework.xml.core.Commit;
 
-import de.tsl2.nano.bean.BeanClass;
-import de.tsl2.nano.util.StringUtil;
+import de.tsl2.nano.core.cls.BeanClass;
+import de.tsl2.nano.core.util.StringUtil;
 
 /**
  * resolves relations through a path to several beans/attributes

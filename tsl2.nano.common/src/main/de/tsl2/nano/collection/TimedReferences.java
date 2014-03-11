@@ -16,7 +16,7 @@ import java.util.Set;
 
 import org.apache.commons.logging.Log;
 
-import de.tsl2.nano.log.LogFactory;
+import de.tsl2.nano.core.log.LogFactory;
 
 /**
  * This map holds all new values for a short time after creation - to avoid being deleted to fast in

@@ -19,11 +19,11 @@ import org.simpleframework.xml.Element;
 import org.simpleframework.xml.ElementList;
 import org.simpleframework.xml.core.Commit;
 
-import de.tsl2.nano.bean.PrimitiveUtil;
 import de.tsl2.nano.collection.CollectionUtil;
-import de.tsl2.nano.exception.ManagedException;
-import de.tsl2.nano.log.LogFactory;
-import de.tsl2.nano.util.Util;
+import de.tsl2.nano.core.ManagedException;
+import de.tsl2.nano.core.cls.PrimitiveUtil;
+import de.tsl2.nano.core.log.LogFactory;
+import de.tsl2.nano.core.util.Util;
 
 /**
  * Checks constraints of a given value

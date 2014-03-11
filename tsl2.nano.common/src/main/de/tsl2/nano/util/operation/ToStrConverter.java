@@ -12,7 +12,7 @@ package de.tsl2.nano.util.operation;
 import java.text.Format;
 import java.text.ParseException;
 
-import de.tsl2.nano.exception.ManagedException;
+import de.tsl2.nano.core.ManagedException;
 
 /**
  * standard converter to convert an object into a string and vice versa - using a given {@link Format}. Does exactly the

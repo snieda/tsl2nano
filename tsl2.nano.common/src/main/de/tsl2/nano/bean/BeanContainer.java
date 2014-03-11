@@ -17,11 +17,13 @@ import java.util.Map;
 import java.util.Properties;
 import java.util.Set;
 
-import de.tsl2.nano.Messages;
 import de.tsl2.nano.action.CommonAction;
 import de.tsl2.nano.action.IAction;
-import de.tsl2.nano.exception.ManagedException;
-import de.tsl2.nano.util.StringUtil;
+import de.tsl2.nano.core.ManagedException;
+import de.tsl2.nano.core.Messages;
+import de.tsl2.nano.core.cls.BeanAttribute;
+import de.tsl2.nano.core.cls.BeanClass;
+import de.tsl2.nano.core.util.StringUtil;
 
 /**
  * class to be used as simple one instance bean container. initialize it with your service actions (through calls to

@@ -13,8 +13,8 @@ import java.io.Serializable;
 import java.text.Format;
 import java.util.Collection;
 
-import de.tsl2.nano.bean.IAttribute;
 import de.tsl2.nano.bean.IAttributeDef;
+import de.tsl2.nano.core.cls.IAttribute;
 
 /**
  * full bean attribute definition - to validate attribute value.

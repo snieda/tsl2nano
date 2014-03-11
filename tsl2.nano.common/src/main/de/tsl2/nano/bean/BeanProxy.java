@@ -16,8 +16,9 @@ import java.util.Map;
 
 import de.tsl2.nano.action.IAction;
 import de.tsl2.nano.bean.def.BeanProperty;
-import de.tsl2.nano.exception.ManagedException;
-import de.tsl2.nano.util.StringUtil;
+import de.tsl2.nano.core.ManagedException;
+import de.tsl2.nano.core.cls.BeanAttribute;
+import de.tsl2.nano.core.util.StringUtil;
 
 /**
  * simple bean proxy mechanism to avoid implementations of bean-mocks. holds all bean properties in a map, returning

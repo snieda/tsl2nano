@@ -13,7 +13,7 @@ import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.util.Map;
 
-import de.tsl2.nano.exception.ManagedException;
+import de.tsl2.nano.core.ManagedException;
 
 /**
  * Should only be used by framework developers</p> Some classes are not intended to be extended. Defining fields and

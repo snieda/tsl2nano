@@ -17,7 +17,7 @@ import java.util.LinkedList;
 
 import org.apache.commons.logging.Log;
 
-import de.tsl2.nano.log.LogFactory;
+import de.tsl2.nano.core.log.LogFactory;
 
 /**
  * simple proxy mechanism to enhance implemenations through additional interfaces and their delegates. the order of the

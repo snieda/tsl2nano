@@ -16,7 +16,7 @@ import java.lang.reflect.Proxy;
 
 import org.apache.commons.logging.Log;
 
-import de.tsl2.nano.log.LogFactory;
+import de.tsl2.nano.core.log.LogFactory;
 
 /**
  * generic delegator to be usable as base class for simple delegation implementations. the delegator doesn't have to

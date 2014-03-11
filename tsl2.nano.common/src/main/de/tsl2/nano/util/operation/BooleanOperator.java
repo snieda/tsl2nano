@@ -17,7 +17,7 @@ import java.util.Map;
 
 import de.tsl2.nano.action.CommonAction;
 import de.tsl2.nano.action.IAction;
-import de.tsl2.nano.util.Util;
+import de.tsl2.nano.core.util.Util;
 
 /**
  * Boolean Operator as a sample implementation of {@link Operator}. Is able to do boolean operations.

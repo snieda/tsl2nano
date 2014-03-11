@@ -29,7 +29,7 @@ import org.eclipse.swt.graphics.Point;
 import ${class.Clazz.CanonicalName};
 import ${constClass};
 
-import de.tsl2.nano.Messages;
+import de.tsl2.nano.core.Messages;
 import de.tsl2.nano.action.IAction;
 import de.tsl2.nano.ui.presenter.IBeanController;
 import de.tsl2.nano.ui.presenter.IBeanEditor;

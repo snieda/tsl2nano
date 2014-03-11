@@ -25,12 +25,13 @@ import java.util.TreeSet;
 import org.apache.commons.logging.Log;
 
 import de.tsl2.nano.action.IAction;
-import de.tsl2.nano.bean.BeanAttribute;
 import de.tsl2.nano.bean.BeanUtil;
+import de.tsl2.nano.core.IPredicate;
+import de.tsl2.nano.core.cls.BeanAttribute;
+import de.tsl2.nano.core.log.LogFactory;
+import de.tsl2.nano.core.util.Util;
 import de.tsl2.nano.format.DefaultFormat;
-import de.tsl2.nano.log.LogFactory;
 import de.tsl2.nano.util.NumberUtil;
-import de.tsl2.nano.util.Util;
 
 /**
  * some utility methods for collections

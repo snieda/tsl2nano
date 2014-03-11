@@ -17,9 +17,9 @@ import org.apache.tools.ant.BuildListener;
 import org.apache.tools.ant.Project;
 import org.apache.tools.ant.ProjectHelper;
 
-import de.tsl2.nano.exception.ManagedException;
-import de.tsl2.nano.util.FileUtil;
-import de.tsl2.nano.util.StringUtil;
+import de.tsl2.nano.core.ManagedException;
+import de.tsl2.nano.core.util.FileUtil;
+import de.tsl2.nano.core.util.StringUtil;
 
 /**
  * Util to start system executables
@@ -41,6 +41,8 @@ public class ScriptUtil extends SystemUtil {
             antbuild(filePath, target, properties, null);
             return true;
         } catch (final Exception e) {
+            //TODO: refactore: return boolean --> void
+            ManagedException.forward(e);
             return false;
         }
     }
@@ -60,7 +62,7 @@ public class ScriptUtil extends SystemUtil {
         p.setUserProperty("ant.file", buildFile.getAbsolutePath());
         //logging
         if (buildListener == null) {
-            buildListener = AntRunner.createSystemOutBuildListener();
+            buildListener = AntRunner.createLogfileBuildListener();
         }
         p.addBuildListener(buildListener);
         try {

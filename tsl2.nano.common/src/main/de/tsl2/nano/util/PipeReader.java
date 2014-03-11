@@ -18,8 +18,8 @@ import java.io.PrintStream;
 
 import org.apache.commons.logging.Log;
 
-import de.tsl2.nano.exception.ManagedException;
-import de.tsl2.nano.log.LogFactory;
+import de.tsl2.nano.core.ManagedException;
+import de.tsl2.nano.core.log.LogFactory;
 
 /**
  * Piped Stream connector. Is able to connect one or two streams with a pipe. For further informations, see

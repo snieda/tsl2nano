@@ -12,8 +12,8 @@ package de.tsl2.nano.collection;
 import java.io.File;
 import java.util.Hashtable;
 
-import de.tsl2.nano.exception.ManagedException;
-import de.tsl2.nano.util.FileUtil;
+import de.tsl2.nano.core.ManagedException;
+import de.tsl2.nano.core.util.FileUtil;
 
 /**
  * simple base class for a stored object as singelton.

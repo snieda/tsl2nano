@@ -11,6 +11,7 @@ package de.tsl2.nano.bean.def;
 
 import java.util.Arrays;
 
+import de.tsl2.nano.bean.IValueAccess;
 import de.tsl2.nano.messaging.ChangeEvent;
 import de.tsl2.nano.messaging.IListener;
 

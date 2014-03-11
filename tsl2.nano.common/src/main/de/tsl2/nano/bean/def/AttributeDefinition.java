@@ -24,20 +24,21 @@ import org.simpleframework.xml.DefaultType;
 import org.simpleframework.xml.Element;
 import org.simpleframework.xml.core.Commit;
 
-import de.tsl2.nano.Environment;
-import de.tsl2.nano.action.IActivator;
-import de.tsl2.nano.bean.BeanAttribute;
-import de.tsl2.nano.bean.BeanClass;
+import de.tsl2.nano.action.IActivable;
 import de.tsl2.nano.bean.BeanContainer;
 import de.tsl2.nano.bean.BeanUtil;
-import de.tsl2.nano.bean.IAttribute;
 import de.tsl2.nano.bean.IAttributeDef;
+import de.tsl2.nano.bean.IValueAccess;
 import de.tsl2.nano.bean.ValueHolder;
-import de.tsl2.nano.exception.ManagedException;
-import de.tsl2.nano.log.LogFactory;
+import de.tsl2.nano.core.Environment;
+import de.tsl2.nano.core.ManagedException;
+import de.tsl2.nano.core.cls.BeanAttribute;
+import de.tsl2.nano.core.cls.BeanClass;
+import de.tsl2.nano.core.cls.IAttribute;
+import de.tsl2.nano.core.log.LogFactory;
+import de.tsl2.nano.core.util.StringUtil;
 import de.tsl2.nano.messaging.EventController;
 import de.tsl2.nano.util.PrivateAccessor;
-import de.tsl2.nano.util.StringUtil;
 
 /**
  * 
@@ -529,7 +530,7 @@ public class AttributeDefinition<T> implements IAttributeDefinition<T> {
     public IPresentable setPresentation(final String label,
             final int type,
             final int style,
-            final IActivator enabler,
+            final IActivable enabler,
             final boolean visible,
             final Map<String, Object> layout,
             final Map<String, Object> layoutConstraints,

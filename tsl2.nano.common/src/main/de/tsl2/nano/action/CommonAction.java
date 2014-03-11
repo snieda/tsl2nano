@@ -14,9 +14,9 @@ import java.util.Collection;
 
 import org.apache.commons.logging.Log;
 
-import de.tsl2.nano.exception.ManagedException;
-import de.tsl2.nano.log.LogFactory;
-import de.tsl2.nano.util.StringUtil;
+import de.tsl2.nano.core.ManagedException;
+import de.tsl2.nano.core.log.LogFactory;
+import de.tsl2.nano.core.util.StringUtil;
 
 /**
  * @param <RETURNTYPE>
@@ -36,7 +36,7 @@ public abstract class CommonAction<RETURNTYPE> implements IAction<RETURNTYPE>, S
     protected Object keyStroke;
     RETURNTYPE result;
     protected Collection<String> receiverIDs;
-    protected IActivator enabler;
+    protected IActivable enabler;
     protected Object[] parameter;
     protected String imagePath;
     private static final Log LOG = LogFactory.getLog(CommonAction.class);
@@ -63,7 +63,7 @@ public abstract class CommonAction<RETURNTYPE> implements IAction<RETURNTYPE>, S
      * @param longDescription tooltip text of the button (representing this action).
      */
     public CommonAction(String id, String shortDescription, String longDescription) {
-        this(id, false, true, null, shortDescription, longDescription, true, (IActivator) null, null);
+        this(id, false, true, null, shortDescription, longDescription, true, (IActivable) null, null);
     }
 
     /**
@@ -72,7 +72,7 @@ public abstract class CommonAction<RETURNTYPE> implements IAction<RETURNTYPE>, S
      * @param longDescription tooltip text of the button (representing this action).
      * @param instance for an action enabler
      */
-    public CommonAction(String id, String shortDescription, String longDescription, IActivator actionEnabler) {
+    public CommonAction(String id, String shortDescription, String longDescription, IActivable actionEnabler) {
         this(id, false, true, null, shortDescription, longDescription, true, actionEnabler, null);
     }
 
@@ -86,7 +86,7 @@ public abstract class CommonAction<RETURNTYPE> implements IAction<RETURNTYPE>, S
     public CommonAction(String id,
             String shortDescription,
             String longDescription,
-            IActivator enabler,
+            IActivable enabler,
             Collection<String> receiverIDs) {
         this(id, false, true, null, shortDescription, longDescription, true, enabler, receiverIDs);
     }
@@ -109,7 +109,7 @@ public abstract class CommonAction<RETURNTYPE> implements IAction<RETURNTYPE>, S
             String shortDescription,
             String longDescription,
             boolean synchron,
-            IActivator actionEnabler,
+            IActivable actionEnabler,
             Collection<String> receiverIDs) {
         super();
         this.id = id;
@@ -151,14 +151,14 @@ public abstract class CommonAction<RETURNTYPE> implements IAction<RETURNTYPE>, S
     /**
      * @return Returns the enabler.
      */
-    public IActivator getEnabler() {
+    public IActivable getEnabler() {
         return enabler;
     }
 
     /**
      * @param enabler The enabler to set.
      */
-    public void setEnabler(IActivator enabler) {
+    public void setEnabler(IActivable enabler) {
         this.enabler = enabler;
     }
 

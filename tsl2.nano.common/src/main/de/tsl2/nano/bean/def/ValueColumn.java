@@ -17,9 +17,9 @@ import java.text.Format;
 import org.simpleframework.xml.Attribute;
 import org.simpleframework.xml.Element;
 
-import de.tsl2.nano.Messages;
 import de.tsl2.nano.action.CommonAction;
 import de.tsl2.nano.action.IAction;
+import de.tsl2.nano.core.Messages;
 
 /**
  * default implementation of {@link IColumn}. {@link IAttributeDefinition} needed as source information, see

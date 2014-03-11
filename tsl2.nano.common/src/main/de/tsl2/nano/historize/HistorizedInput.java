@@ -16,8 +16,8 @@ import java.util.Collection;
 import java.util.LinkedHashSet;
 import java.util.Properties;
 
-import de.tsl2.nano.exception.ManagedException;
-import de.tsl2.nano.util.FileUtil;
+import de.tsl2.nano.core.ManagedException;
+import de.tsl2.nano.core.util.FileUtil;
 
 /**
  * class to handle the historized entries.

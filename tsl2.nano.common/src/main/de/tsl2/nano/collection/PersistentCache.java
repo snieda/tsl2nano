@@ -14,9 +14,9 @@ import java.io.File;
 import org.apache.commons.collections.map.ReferenceMap;
 import org.apache.commons.logging.Log;
 
-import de.tsl2.nano.exception.ManagedException;
-import de.tsl2.nano.log.LogFactory;
-import de.tsl2.nano.util.FileUtil;
+import de.tsl2.nano.core.ManagedException;
+import de.tsl2.nano.core.log.LogFactory;
+import de.tsl2.nano.core.util.FileUtil;
 
 /**
  * application cache to store simple data. uses apache common {@link ReferenceMap} to avoid out-of-memory errors.

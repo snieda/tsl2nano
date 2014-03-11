@@ -13,8 +13,8 @@ import java.lang.reflect.Method;
 
 import org.simpleframework.xml.Attribute;
 
-import de.tsl2.nano.bean.IAttribute;
 import de.tsl2.nano.bean.ValueHolder;
+import de.tsl2.nano.core.cls.IAttribute;
 
 /**
  * 

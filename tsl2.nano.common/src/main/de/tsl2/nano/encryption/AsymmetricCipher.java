@@ -14,7 +14,7 @@ import java.security.KeyPair;
 import java.security.KeyPairGenerator;
 import java.security.NoSuchAlgorithmException;
 
-import de.tsl2.nano.exception.ManagedException;
+import de.tsl2.nano.core.ManagedException;
 
 /**
  * asymmetric (RSA) en-/decryption. @see {@link SymmetricCipher}.

@@ -18,7 +18,9 @@ import java.util.Hashtable;
 import java.util.List;
 import java.util.Map;
 
-import de.tsl2.nano.exception.ManagedException;
+import de.tsl2.nano.core.ManagedException;
+import de.tsl2.nano.core.util.StringUtil;
+import de.tsl2.nano.core.util.Util;
 
 /**
  * Should only be used by framework developers</p> To be independent of other libraries you may use this class - using

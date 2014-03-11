@@ -11,9 +11,9 @@ import org.apache.velocity.Template;
 import org.apache.velocity.VelocityContext;
 import org.apache.velocity.app.VelocityEngine;
 
-import de.tsl2.nano.bean.BeanClass;
-import de.tsl2.nano.exception.ManagedException;
-import de.tsl2.nano.log.LogFactory;
+import de.tsl2.nano.core.ManagedException;
+import de.tsl2.nano.core.cls.BeanClass;
+import de.tsl2.nano.core.log.LogFactory;
 
 /**
  * 

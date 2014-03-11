@@ -13,7 +13,8 @@ import java.lang.reflect.Method;
 
 import org.simpleframework.xml.Attribute;
 
-import de.tsl2.nano.bean.BeanAttribute;
+import de.tsl2.nano.bean.IValueAccess;
+import de.tsl2.nano.core.cls.BeanAttribute;
 
 /**
  * virtual attribute working on {@link IValueAccess#getValue()}.

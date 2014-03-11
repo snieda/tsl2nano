@@ -9,7 +9,7 @@
  */
 package de.tsl2.nano.util.parser;
 
-import de.tsl2.nano.util.Util;
+import de.tsl2.nano.core.util.Util;
 
 /**
  * 

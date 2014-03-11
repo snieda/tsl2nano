@@ -9,8 +9,8 @@
  */
 package de.tsl2.nano.util.parser;
 
-import de.tsl2.nano.util.StringUtil;
-import de.tsl2.nano.util.Util;
+import de.tsl2.nano.core.util.StringUtil;
+import de.tsl2.nano.core.util.Util;
 
 /**
  * Simple text parser as extension of generic parser {@link Parser}.

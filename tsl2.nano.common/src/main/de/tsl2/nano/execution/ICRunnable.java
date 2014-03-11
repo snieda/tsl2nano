@@ -21,13 +21,5 @@ import java.io.Serializable;
  * @author Thomas Schneider
  * @version $Revision$
  */
-public interface ICRunnable<CONTEXT extends Serializable> {
-    /**
-     * starts the process
-     * 
-     * @param context fix run arguments
-     * @param extArgs optional extended arguments
-     * @return refreshed context as result
-     */
-    CONTEXT run(CONTEXT context, Object... extArgs);
+public interface ICRunnable<CONTEXT extends Serializable> extends IRunnable<CONTEXT, CONTEXT> {
 }

@@ -3,7 +3,7 @@ package de.tsl2.nano.collection;
 import java.io.Serializable;
 import java.util.Map;
 
-import de.tsl2.nano.util.Util;
+import de.tsl2.nano.core.util.Util;
 
 /**
  * part of {@link MapEntrySet}. as the hashmap implementation doesn't make Map.Entry serializable, we have to write our

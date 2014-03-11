@@ -13,7 +13,7 @@ import java.text.FieldPosition;
 import java.text.Format;
 import java.text.ParsePosition;
 
-import de.tsl2.nano.util.Util;
+import de.tsl2.nano.core.util.Util;
 
 /**
  * Format for entities/beans - not implementing it's own toString(). The format packs the given type into a

@@ -13,7 +13,7 @@ import java.util.LinkedHashMap;
 
 import org.simpleframework.xml.ElementMap;
 
-import de.tsl2.nano.bean.IAttribute;
+import de.tsl2.nano.core.cls.IAttribute;
 
 /**
  * description of a value group inside a bean. usable to create sub panel informations. you can define a full set of

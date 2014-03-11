@@ -14,8 +14,8 @@ import java.util.Map;
 import java.util.Properties;
 import java.util.Set;
 
-import de.tsl2.nano.Environment;
-import de.tsl2.nano.exception.ManagedException;
+import de.tsl2.nano.core.Environment;
+import de.tsl2.nano.core.ManagedException;
 
 /**
  * Generic class to provide historized user input - perhaps for a text-field. Can be used for comboboxes to configure

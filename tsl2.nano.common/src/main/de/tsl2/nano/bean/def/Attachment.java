@@ -13,9 +13,10 @@ import java.lang.reflect.Method;
 
 import org.simpleframework.xml.Attribute;
 
-import de.tsl2.nano.bean.IAttribute;
+import de.tsl2.nano.bean.IValueAccess;
+import de.tsl2.nano.core.cls.IAttribute;
+import de.tsl2.nano.core.util.FileUtil;
 import de.tsl2.nano.messaging.EventController;
-import de.tsl2.nano.util.FileUtil;
 
 /**
  * byte[]-value from file-system.

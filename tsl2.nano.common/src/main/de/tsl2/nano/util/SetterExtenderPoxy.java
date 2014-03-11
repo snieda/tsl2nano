@@ -14,7 +14,8 @@ import java.lang.reflect.InvocationHandler;
 import java.lang.reflect.Method;
 import java.lang.reflect.Proxy;
 
-import de.tsl2.nano.bean.BeanClass;
+import de.tsl2.nano.core.cls.BeanClass;
+import de.tsl2.nano.core.util.StringUtil;
 
 /**
  * If you have an interface, providing only getters, but for full bean access, you need setter methods, you can provide

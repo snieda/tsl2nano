@@ -14,10 +14,11 @@ import java.lang.reflect.Method;
 import org.simpleframework.xml.Default;
 import org.simpleframework.xml.DefaultType;
 
-import de.tsl2.nano.bean.BeanAttribute;
-import de.tsl2.nano.bean.BeanClass;
+import de.tsl2.nano.bean.IValueAccess;
 import de.tsl2.nano.collection.CollectionUtil;
-import de.tsl2.nano.exception.ManagedException;
+import de.tsl2.nano.core.ManagedException;
+import de.tsl2.nano.core.cls.BeanAttribute;
+import de.tsl2.nano.core.cls.BeanClass;
 import de.tsl2.nano.messaging.EventController;
 
 /**

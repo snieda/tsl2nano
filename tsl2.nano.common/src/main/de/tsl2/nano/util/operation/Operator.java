@@ -10,8 +10,8 @@ import org.simpleframework.xml.ElementMap;
 
 import de.tsl2.nano.action.IAction;
 import de.tsl2.nano.collection.CollectionUtil;
-import de.tsl2.nano.util.StringUtil;
-import de.tsl2.nano.util.Util;
+import de.tsl2.nano.core.util.StringUtil;
+import de.tsl2.nano.core.util.Util;
 import de.tsl2.nano.util.parser.Parser;
 
 /**

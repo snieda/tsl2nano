@@ -28,24 +28,25 @@ import java.util.UUID;
 import org.apache.commons.logging.Log;
 
 import tsl.FileUtil;
-import de.tsl2.nano.Environment;
 import de.tsl2.nano.action.CommonAction;
 import de.tsl2.nano.action.IAction;
-import de.tsl2.nano.bean.BeanAttribute;
-import de.tsl2.nano.bean.BeanClass;
 import de.tsl2.nano.bean.BeanUtil;
-import de.tsl2.nano.bean.IAttribute;
+import de.tsl2.nano.bean.IValueAccess;
 import de.tsl2.nano.bean.ValueHolder;
 import de.tsl2.nano.collection.Entry;
 import de.tsl2.nano.collection.ListSet;
 import de.tsl2.nano.collection.MapEntrySet;
 import de.tsl2.nano.collection.MapUtil;
-import de.tsl2.nano.exception.ManagedException;
-import de.tsl2.nano.log.LogFactory;
+import de.tsl2.nano.core.Environment;
+import de.tsl2.nano.core.ManagedException;
+import de.tsl2.nano.core.cls.BeanAttribute;
+import de.tsl2.nano.core.cls.BeanClass;
+import de.tsl2.nano.core.cls.IAttribute;
+import de.tsl2.nano.core.log.LogFactory;
+import de.tsl2.nano.core.util.StringUtil;
 import de.tsl2.nano.messaging.ChangeEvent;
 import de.tsl2.nano.messaging.EventController;
 import de.tsl2.nano.messaging.IListener;
-import de.tsl2.nano.util.StringUtil;
 
 /**
  * BeanAttribute holding the bean instance, observers and exact attribute definitions - with validation.

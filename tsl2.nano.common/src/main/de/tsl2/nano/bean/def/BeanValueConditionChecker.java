@@ -14,7 +14,7 @@ import java.util.Collection;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
-import de.tsl2.nano.exception.ManagedException;
+import de.tsl2.nano.core.ManagedException;
 
 /**
  * condition checker.

@@ -17,8 +17,8 @@ import java.util.Map;
 
 import de.tsl2.nano.action.CommonAction;
 import de.tsl2.nano.action.IAction;
-import de.tsl2.nano.util.StringUtil;
-import de.tsl2.nano.util.Util;
+import de.tsl2.nano.core.util.StringUtil;
+import de.tsl2.nano.core.util.Util;
 
 /**
  * Input: string holding boolean expressions. conditional execution

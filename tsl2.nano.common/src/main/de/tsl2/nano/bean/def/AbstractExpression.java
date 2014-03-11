@@ -11,7 +11,7 @@ import org.simpleframework.xml.Default;
 import org.simpleframework.xml.DefaultType;
 import org.simpleframework.xml.Element;
 
-import de.tsl2.nano.bean.IAttribute;
+import de.tsl2.nano.core.cls.IAttribute;
 
 @Default(value = DefaultType.FIELD, required = false)
 public abstract class AbstractExpression<T> implements IValueExpression<T>, IAttribute<T>, Serializable {

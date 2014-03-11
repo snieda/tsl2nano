@@ -19,8 +19,8 @@ import org.simpleframework.xml.ElementMap;
 import org.simpleframework.xml.Transient;
 import org.simpleframework.xml.core.Commit;
 
-import de.tsl2.nano.bean.BeanClass;
 import de.tsl2.nano.bean.BeanUtil;
+import de.tsl2.nano.core.cls.BeanClass;
 import de.tsl2.nano.util.PrivateAccessor;
 import de.tsl2.nano.util.operation.IConverter;
 

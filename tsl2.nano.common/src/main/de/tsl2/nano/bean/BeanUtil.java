@@ -9,15 +9,9 @@
 package de.tsl2.nano.bean;
 
 import java.io.BufferedReader;
-import java.io.ByteArrayInputStream;
-import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileReader;
-import java.io.IOException;
-import java.io.ObjectInputStream;
-import java.io.ObjectOutputStream;
-import java.io.ObjectStreamClass;
 import java.io.Reader;
 import java.io.Serializable;
 import java.io.StreamTokenizer;
@@ -39,17 +33,22 @@ import java.util.UUID;
 
 import org.apache.commons.logging.Log;
 
-import de.tsl2.nano.Messages;
 import de.tsl2.nano.bean.def.Bean;
 import de.tsl2.nano.bean.def.BeanDefinition;
 import de.tsl2.nano.collection.CollectionUtil;
-import de.tsl2.nano.exception.ManagedException;
+import de.tsl2.nano.collection.ListSet;
+import de.tsl2.nano.core.ManagedException;
+import de.tsl2.nano.core.Messages;
+import de.tsl2.nano.core.cls.BeanAttribute;
+import de.tsl2.nano.core.cls.BeanClass;
+import de.tsl2.nano.core.cls.IAttribute;
+import de.tsl2.nano.core.cls.PrimitiveUtil;
+import de.tsl2.nano.core.log.LogFactory;
+import de.tsl2.nano.core.util.ByteUtil;
+import de.tsl2.nano.core.util.StringUtil;
+import de.tsl2.nano.core.util.Util;
 import de.tsl2.nano.format.DefaultFormat;
 import de.tsl2.nano.format.FormatUtil;
-import de.tsl2.nano.log.LogFactory;
-import de.tsl2.nano.util.ByteUtil;
-import de.tsl2.nano.util.StringUtil;
-import de.tsl2.nano.util.Util;
 
 /**
  * A Utility-Class for beans
@@ -170,10 +169,25 @@ public class BeanUtil extends ByteUtil {
     }
 
     /**
-     * delegates to {@link BeanClass#createOwnCollectionInstances(Object)}.
+     * wraps all attributes having a collection as value into a new {@link ListSet} instance to unbind a
+     * {@link #clone()} instance.
+     * 
+     * @param src instance to wrap the attribute values for
+     * @return the instance itself
      */
     public static <S> S createOwnCollectionInstances(S src) {
-        return BeanClass.createOwnCollectionInstances(src);
+        BeanClass<S> bc = (BeanClass<S>) BeanClass.getBeanClass(src.getClass());
+        List<IAttribute> attributes = bc.getAttributes();
+        for (IAttribute a : attributes) {
+            if (Collection.class.isAssignableFrom(a.getType())) {
+                Collection v = (Collection) a.getValue(src);
+                if (v != null) {
+                    LOG.debug("creating own collection instance for " + a.getName() + " with" + v.size() + " elements");
+                    a.setValue(src, new ListSet(v));
+                }
+            }
+        }
+        return src;
     }
 
     /**

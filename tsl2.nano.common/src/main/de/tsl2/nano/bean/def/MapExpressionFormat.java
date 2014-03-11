@@ -15,7 +15,7 @@ import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Set;
 
-import de.tsl2.nano.util.Util;
+import de.tsl2.nano.core.util.Util;
 
 /**
  * Format for collections of entities/beans - not implementing it's own toString(). The format packs the given type into

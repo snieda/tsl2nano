@@ -22,18 +22,18 @@ import org.apache.commons.logging.Log;
 import org.simpleframework.xml.Attribute;
 import org.simpleframework.xml.core.Commit;
 
-import de.tsl2.nano.Environment;
-import de.tsl2.nano.bean.BeanAttribute;
-import de.tsl2.nano.bean.BeanClass;
 import de.tsl2.nano.bean.BeanContainer;
 import de.tsl2.nano.bean.BeanProxy;
 import de.tsl2.nano.bean.BeanUtil;
-import de.tsl2.nano.bean.PrimitiveUtil;
-import de.tsl2.nano.exception.ManagedException;
+import de.tsl2.nano.core.Environment;
+import de.tsl2.nano.core.ManagedException;
+import de.tsl2.nano.core.cls.BeanAttribute;
+import de.tsl2.nano.core.cls.BeanClass;
+import de.tsl2.nano.core.cls.PrimitiveUtil;
+import de.tsl2.nano.core.log.LogFactory;
+import de.tsl2.nano.core.util.StringUtil;
+import de.tsl2.nano.core.util.Util;
 import de.tsl2.nano.format.FormatUtil;
-import de.tsl2.nano.log.LogFactory;
-import de.tsl2.nano.util.StringUtil;
-import de.tsl2.nano.util.Util;
 import de.tsl2.nano.util.operation.IConverter;
 
 /**

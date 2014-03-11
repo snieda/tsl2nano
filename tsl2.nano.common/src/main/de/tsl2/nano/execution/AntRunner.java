@@ -31,10 +31,10 @@ import org.apache.tools.ant.types.FileSet;
 import org.apache.tools.ant.types.resources.Files;
 import org.apache.tools.ant.types.selectors.FileSelector;
 
-import de.tsl2.nano.bean.BeanClass;
-import de.tsl2.nano.exception.ManagedException;
-import de.tsl2.nano.log.LogFactory;
-import de.tsl2.nano.util.StringUtil;
+import de.tsl2.nano.core.ManagedException;
+import de.tsl2.nano.core.cls.BeanClass;
+import de.tsl2.nano.core.log.LogFactory;
+import de.tsl2.nano.core.util.StringUtil;
 
 /**
  * is able to run ant targets given by name and properties. If task is a {@link MatchingTask}, an array of
@@ -104,7 +104,7 @@ public class AntRunner {
         task.setTaskName("AntRunner." + taskType);
         task.setOwningTarget(new Target());
         task.setLocation(new Location(System.getProperty("user.home")));
-        task.getProject().addBuildListener(createSystemOutBuildListener());
+        task.getProject().addBuildListener(createLogfileBuildListener());
         task.getProject().addBuildListener(createPipedAntBuildListener(new PipedOutputStream()));
 
         /*
@@ -158,10 +158,10 @@ public class AntRunner {
      * 
      * @return ant build listener
      */
-    public static BuildListener createSystemOutBuildListener() {
+    public static BuildListener createLogfileBuildListener() {
         final DefaultLogger consoleLogger = new DefaultLogger();
-        consoleLogger.setErrorPrintStream(System.err);
-        consoleLogger.setOutputPrintStream(System.out);
+        consoleLogger.setErrorPrintStream(LogFactory.getErr());
+        consoleLogger.setOutputPrintStream(LogFactory.getOut());
         consoleLogger.setMessageOutputLevel(true/*LOG.isDebugEnabled()*/? Project.MSG_DEBUG : Project.MSG_INFO);
         return consoleLogger;
     }

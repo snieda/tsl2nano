@@ -12,7 +12,7 @@ package de.tsl2.nano.util.operation;
 import java.util.Map;
 
 import de.tsl2.nano.collection.MapUtil;
-import de.tsl2.nano.util.Util;
+import de.tsl2.nano.core.util.Util;
 import de.tsl2.nano.util.parser.SParser;
 
 /**

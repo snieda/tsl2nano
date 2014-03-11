@@ -19,20 +19,21 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import de.tsl2.nano.Environment;
-import de.tsl2.nano.Messages;
 import de.tsl2.nano.action.IAction;
-import de.tsl2.nano.bean.BeanAttribute;
-import de.tsl2.nano.bean.BeanClass;
 import de.tsl2.nano.bean.BeanContainer;
 import de.tsl2.nano.bean.BeanUtil;
-import de.tsl2.nano.bean.IAttribute;
+import de.tsl2.nano.bean.IValueAccess;
 import de.tsl2.nano.collection.CollectionUtil;
 import de.tsl2.nano.collection.MapUtil;
 import de.tsl2.nano.collection.TimedReferenceMap;
-import de.tsl2.nano.exception.ManagedException;
+import de.tsl2.nano.core.Environment;
+import de.tsl2.nano.core.ManagedException;
+import de.tsl2.nano.core.Messages;
+import de.tsl2.nano.core.cls.BeanAttribute;
+import de.tsl2.nano.core.cls.BeanClass;
+import de.tsl2.nano.core.cls.IAttribute;
+import de.tsl2.nano.core.util.StringUtil;
 import de.tsl2.nano.messaging.IListener;
-import de.tsl2.nano.util.StringUtil;
 
 /**
  * full bean access with extended attribute definitions, registering observers, attribute validations etc.! uses bean
@@ -177,7 +178,7 @@ public class Bean<T> extends BeanDefinition<T> {
         if (actions == null) {
             if (!isVirtual()) {
                 if (instance != null)//perhaps an extended class has actions
-                    actions = BeanClass.getActions(instance.getClass(), null, new Object[] { instance });
+                    actions = getActionsByClass(instance.getClass(), null, new Object[] { instance });
                 if (actions.size() == 0 && isSelectable())
                     addDefaultSaveAction();
             }

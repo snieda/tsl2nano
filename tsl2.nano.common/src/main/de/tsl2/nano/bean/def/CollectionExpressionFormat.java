@@ -14,7 +14,7 @@ import java.text.ParsePosition;
 import java.util.ArrayList;
 import java.util.Collection;
 
-import de.tsl2.nano.util.Util;
+import de.tsl2.nano.core.util.Util;
 
 /**
  * Format for collections of entities/beans - not implementing it's own toString(). The format packs the given type into a

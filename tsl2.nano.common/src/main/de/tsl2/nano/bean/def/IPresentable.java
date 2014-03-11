@@ -11,7 +11,7 @@ package de.tsl2.nano.bean.def;
 
 import java.io.Serializable;
 
-import de.tsl2.nano.action.IActivator;
+import de.tsl2.nano.action.IActivable;
 
 /**
  * definitions to present a single value. extends and encapsulate the information of IAttributeDefinition.
@@ -27,7 +27,7 @@ public interface IPresentable extends Serializable {
     int getStyle();
 
     /** returns a dynamic enabler instance or null */
-    IActivator getEnabler();
+    IActivable getEnabler();
 
     /** returns true, if the field should be visible */
     boolean isVisible();
@@ -65,7 +65,7 @@ public interface IPresentable extends Serializable {
     <L extends Serializable, T extends IPresentable> T setPresentation(String label,
             int type,
             int style,
-            IActivator enabler,
+            IActivable enabler,
             boolean visible,
             L layout,
             L layoutConstraints,
@@ -86,8 +86,8 @@ public interface IPresentable extends Serializable {
     /** sets optional layout constraints */
     <L extends Serializable, T extends IPresentable> T setLayoutConstraints(L layoutConstraints);
 
-    /** sets an enabler. use {@link IActivator#INACTIVE} to totally disable an item */
-    public <T extends IPresentable> T setEnabler(IActivator enabler);
+    /** sets an enabler. use {@link IActivable#INACTIVE} to totally disable an item */
+    public <T extends IPresentable> T setEnabler(IActivable enabler);
     
     /** sets a visible flag */
     public <T extends IPresentable> T setVisible(boolean visible);
@@ -190,7 +190,7 @@ public interface IPresentable extends Serializable {
         public <L extends Serializable, T extends IPresentable> T  setPresentation(String label,
                 int type,
                 int style,
-                IActivator enabler,
+                IActivable enabler,
                 boolean visible,
                 L layout,
                 L layoutConstraints,
@@ -239,7 +239,7 @@ public interface IPresentable extends Serializable {
         }
 
         @Override
-        public IActivator getEnabler() {
+        public IActivable getEnabler() {
             return null;
         }
 
@@ -284,7 +284,7 @@ public interface IPresentable extends Serializable {
         }
         
         @Override
-        public <T extends IPresentable> T setEnabler(IActivator enabler) {
+        public <T extends IPresentable> T setEnabler(IActivable enabler) {
             throw new UnsupportedOperationException();
         }
         

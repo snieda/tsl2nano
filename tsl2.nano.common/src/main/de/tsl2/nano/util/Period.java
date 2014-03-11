@@ -14,6 +14,8 @@ import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.Date;
 
+import de.tsl2.nano.core.util.DateUtil;
+
 /**
  * A period is defined of a startDate and an endDate.
  * 

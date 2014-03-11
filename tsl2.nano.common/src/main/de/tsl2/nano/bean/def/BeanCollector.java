@@ -32,29 +32,30 @@ import org.simpleframework.xml.ElementList;
 import org.simpleframework.xml.Transient;
 import org.simpleframework.xml.core.Commit;
 
-import de.tsl2.nano.Environment;
-import de.tsl2.nano.Messages;
 import de.tsl2.nano.action.CommonAction;
 import de.tsl2.nano.action.IAction;
-import de.tsl2.nano.bean.BeanAttribute;
 import de.tsl2.nano.bean.BeanContainer;
 import de.tsl2.nano.bean.BeanUtil;
 import de.tsl2.nano.bean.IAttributeDef;
 import de.tsl2.nano.bean.IBeanContainer;
+import de.tsl2.nano.bean.IValueAccess;
 import de.tsl2.nano.bean.ValueHolder;
 import de.tsl2.nano.collection.CollectionUtil;
 import de.tsl2.nano.collection.Entry;
 import de.tsl2.nano.collection.FilteringIterator;
-import de.tsl2.nano.collection.IPredicate;
 import de.tsl2.nano.collection.MapEntrySet;
-import de.tsl2.nano.exception.ManagedException;
+import de.tsl2.nano.core.Environment;
+import de.tsl2.nano.core.IPredicate;
+import de.tsl2.nano.core.ManagedException;
+import de.tsl2.nano.core.Messages;
+import de.tsl2.nano.core.cls.BeanAttribute;
+import de.tsl2.nano.core.log.LogFactory;
+import de.tsl2.nano.core.util.DateUtil;
+import de.tsl2.nano.core.util.StringUtil;
 import de.tsl2.nano.execution.Profiler;
 import de.tsl2.nano.format.FormatUtil;
-import de.tsl2.nano.log.LogFactory;
-import de.tsl2.nano.util.DateUtil;
 import de.tsl2.nano.util.DelegatorProxy;
 import de.tsl2.nano.util.NumberUtil;
-import de.tsl2.nano.util.StringUtil;
 
 /**
  * see {@link IBeanCollector}. the collector inherits from {@link BeanDefinition}.

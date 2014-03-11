@@ -25,12 +25,12 @@ import javassist.bytecode.AccessFlag;
 
 import org.apache.commons.logging.Log;
 
-import de.tsl2.nano.bean.BeanClass;
 import de.tsl2.nano.bean.BeanProxy;
 import de.tsl2.nano.bean.BeanUtil;
-import de.tsl2.nano.exception.ManagedException;
-import de.tsl2.nano.log.LogFactory;
-import de.tsl2.nano.util.StringUtil;
+import de.tsl2.nano.core.ManagedException;
+import de.tsl2.nano.core.cls.BeanClass;
+import de.tsl2.nano.core.log.LogFactory;
+import de.tsl2.nano.core.util.StringUtil;
 
 /**
  * enhance bean to have getter/setter methods.

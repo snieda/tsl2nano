@@ -42,28 +42,29 @@ import java.util.TreeMap;
 
 import org.apache.commons.logging.Log;
 
-import de.tsl2.nano.Environment;
 import de.tsl2.nano.action.IAction;
-import de.tsl2.nano.action.IActivator;
-import de.tsl2.nano.bean.BeanAttribute;
-import de.tsl2.nano.bean.BeanClass;
+import de.tsl2.nano.action.IActivable;
 import de.tsl2.nano.bean.BeanContainer;
 import de.tsl2.nano.bean.BeanUtil;
-import de.tsl2.nano.bean.IAttribute;
 import de.tsl2.nano.bean.IAttributeDef;
+import de.tsl2.nano.bean.IValueAccess;
 import de.tsl2.nano.bean.ValueHolder;
 import de.tsl2.nano.collection.CollectionUtil;
-import de.tsl2.nano.exception.ManagedException;
+import de.tsl2.nano.core.Environment;
+import de.tsl2.nano.core.ManagedException;
+import de.tsl2.nano.core.cls.BeanAttribute;
+import de.tsl2.nano.core.cls.BeanClass;
+import de.tsl2.nano.core.cls.IAttribute;
+import de.tsl2.nano.core.log.LogFactory;
+import de.tsl2.nano.core.util.FileUtil;
+import de.tsl2.nano.core.util.StringUtil;
+import de.tsl2.nano.core.util.Util;
 import de.tsl2.nano.format.DefaultFormat;
 import de.tsl2.nano.format.GenericParser;
 import de.tsl2.nano.format.RegExpFormat;
-import de.tsl2.nano.log.LogFactory;
 import de.tsl2.nano.messaging.ChangeEvent;
 import de.tsl2.nano.messaging.IListener;
-import de.tsl2.nano.util.FileUtil;
 import de.tsl2.nano.util.NumberUtil;
-import de.tsl2.nano.util.StringUtil;
-import de.tsl2.nano.util.Util;
 
 /**
  * class to provide presentation definitions for sets of attributes.
@@ -659,12 +660,12 @@ public class BeanPresentationHelper<T> {
     }
 
     /**
-     * defines dynamic component enabling. see {@link IComponentDescriptor#setComponentEnabler(IActivator)}.
+     * defines dynamic component enabling. see {@link IComponentDescriptor#setComponentEnabler(IActivable)}.
      * 
      * @param a enabler to set
      * @param keys field keys to set enabler
      */
-    protected void setEnabler(IActivator a, String... keys) {
+    protected void setEnabler(IActivable a, String... keys) {
 //        if (keys.length == 0) {
 //            keys = getFieldKeysAsArray();
 //        }
@@ -746,7 +747,7 @@ public class BeanPresentationHelper<T> {
     /**
      * convenience method to set enable value for some fields. if no field names are given, all fields will be enabled.
      * 
-     * @param enabled if true, if field will not be disabled. please see {@link #setEnabler(IActivator, String...)} and
+     * @param enabled if true, if field will not be disabled. please see {@link #setEnabler(IActivable, String...)} and
      *            {@link #setEnabledVisibility(String, boolean, boolean)}.
      * @param keys field keys
      */
@@ -1096,7 +1097,7 @@ public class BeanPresentationHelper<T> {
         String[] names = bean.getAttributeNames();
         for (int i = 0; i < names.length; i++) {
             IAttributeDefinition<?> attr = (IAttributeDefinition<?>) bean.getAttribute(names[i]);
-            str.append(attr.getPresentation().getLabel() + TAB + " ??? "/*attr.getValue(bean.get)*/+ CR);
+            str.append(attr.getPresentation().getLabel() + TAB + ((BeanValue)attr).getValueText() + CR);
         }
         return str;
     }
