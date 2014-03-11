@@ -13,7 +13,7 @@ import java.io.Serializable;
 import java.util.Collection;
 import java.util.Map;
 
-import de.tsl2.nano.Environment;
+import de.tsl2.nano.core.Environment;
 import de.tsl2.nano.execution.IPRunnable;
 
 /**

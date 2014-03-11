@@ -18,8 +18,6 @@ import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 
-import de.tsl2.nano.Environment;
-import de.tsl2.nano.bean.IAttribute;
 import de.tsl2.nano.bean.def.AttributeDefinition;
 import de.tsl2.nano.bean.def.Bean;
 import de.tsl2.nano.bean.def.BeanDefinition;
@@ -30,9 +28,11 @@ import de.tsl2.nano.bean.def.ValueExpression;
 import de.tsl2.nano.bean.def.ValueGroup;
 import de.tsl2.nano.collection.Entry;
 import de.tsl2.nano.collection.MapUtil;
+import de.tsl2.nano.core.Environment;
+import de.tsl2.nano.core.cls.IAttribute;
+import de.tsl2.nano.core.util.Util;
 import de.tsl2.nano.h5.Html5Presentable;
 import de.tsl2.nano.util.PrivateAccessor;
-import de.tsl2.nano.util.Util;
 
 /**
  * wrapper class to handle presentation of a bean-definition. at a time, only one BeanConfigurator is active. this

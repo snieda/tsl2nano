@@ -20,9 +20,9 @@ import org.simpleframework.xml.Element;
 import org.simpleframework.xml.ElementMap;
 
 import de.tsl2.nano.bean.BeanContainer;
+import de.tsl2.nano.core.util.StringUtil;
+import de.tsl2.nano.core.util.Util;
 import de.tsl2.nano.execution.IPRunnable;
-import de.tsl2.nano.util.StringUtil;
-import de.tsl2.nano.util.Util;
 
 /**
  * 

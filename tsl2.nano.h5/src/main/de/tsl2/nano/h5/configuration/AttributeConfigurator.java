@@ -11,9 +11,6 @@ package de.tsl2.nano.h5.configuration;
 
 import java.io.Serializable;
 
-import de.tsl2.nano.Environment;
-import de.tsl2.nano.bean.BeanClass;
-import de.tsl2.nano.bean.IAttribute;
 import de.tsl2.nano.bean.def.AttributeDefinition;
 import de.tsl2.nano.bean.def.IAttributeDefinition;
 import de.tsl2.nano.bean.def.IConstraint;
@@ -21,8 +18,11 @@ import de.tsl2.nano.bean.def.IIPresentable;
 import de.tsl2.nano.bean.def.IPresentable;
 import de.tsl2.nano.bean.def.IPresentableColumn;
 import de.tsl2.nano.bean.def.PathExpression;
+import de.tsl2.nano.core.Environment;
+import de.tsl2.nano.core.cls.BeanClass;
+import de.tsl2.nano.core.cls.IAttribute;
+import de.tsl2.nano.core.util.Util;
 import de.tsl2.nano.util.PrivateAccessor;
-import de.tsl2.nano.util.Util;
 
 /**
  * Provides a specific set of Attribute members to configure.
@@ -149,7 +149,7 @@ public class AttributeConfigurator implements Serializable {
         return attr.getPresentation();
 //        if (presentable == null) {
 //            if (IPresentable.class.isAssignableFrom(attr.getDeclaringClass()))
-//                attr.getPresentation().setEnabler(IActivator.ACTIVE);
+//                attr.getPresentation().setEnabler(IActivable.ACTIVE);
 //            presentable = SetterExtenderPoxy.setterExtender(IIPresentable.class, attr.getPresentation());
 //        }
 //        return presentable;

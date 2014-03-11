@@ -21,12 +21,11 @@ import java.util.List;
 import java.util.Map;
 import java.util.Properties;
 import java.util.Stack;
+import java.util.zip.ZipInputStream;
 
 import org.apache.commons.logging.Log;
 
-import de.tsl2.nano.Environment;
-import de.tsl2.nano.action.IActivator;
-import de.tsl2.nano.bean.BeanClass;
+import de.tsl2.nano.action.IActivable;
 import de.tsl2.nano.bean.BeanContainer;
 import de.tsl2.nano.bean.IBeanContainer;
 import de.tsl2.nano.bean.def.AbstractExpression;
@@ -39,7 +38,13 @@ import de.tsl2.nano.bean.def.IPageBuilder;
 import de.tsl2.nano.bean.def.IPresentable;
 import de.tsl2.nano.bean.def.SecureAction;
 import de.tsl2.nano.collection.MapUtil;
-import de.tsl2.nano.exception.ManagedException;
+import de.tsl2.nano.core.Environment;
+import de.tsl2.nano.core.ManagedException;
+import de.tsl2.nano.core.cls.BeanClass;
+import de.tsl2.nano.core.log.LogFactory;
+import de.tsl2.nano.core.util.FileUtil;
+import de.tsl2.nano.core.util.StringUtil;
+import de.tsl2.nano.core.util.Util;
 import de.tsl2.nano.execution.CompatibilityLayer;
 import de.tsl2.nano.execution.SystemUtil;
 import de.tsl2.nano.h5.expression.RuleExpression;
@@ -47,7 +52,6 @@ import de.tsl2.nano.h5.expression.SQLExpression;
 import de.tsl2.nano.h5.navigation.EntityBrowser;
 import de.tsl2.nano.h5.navigation.IBeanNavigator;
 import de.tsl2.nano.h5.navigation.Workflow;
-import de.tsl2.nano.log.LogFactory;
 import de.tsl2.nano.persistence.GenericLocalBeanContainer;
 import de.tsl2.nano.persistence.Persistence;
 import de.tsl2.nano.persistence.PersistenceClassLoader;
@@ -56,9 +60,7 @@ import de.tsl2.nano.service.util.BeanContainerUtil;
 import de.tsl2.nano.serviceaccess.Authorization;
 import de.tsl2.nano.serviceaccess.IAuthorization;
 import de.tsl2.nano.serviceaccess.ServiceFactory;
-import de.tsl2.nano.util.FileUtil;
 import de.tsl2.nano.util.NumberUtil;
-import de.tsl2.nano.util.StringUtil;
 
 /**
  * An Application of subclassing NanoHTTPD to make a custom HTTP server.
@@ -121,9 +123,36 @@ public class NanoH5 extends NanoHTTPD {
 //            LogFactory.setLogLevel(LogFactory.LOG_ALL);
             LOG.info(System.getProperties());
             createStartPage(DEGBUG_HTML_FILE);
+            Environment.saveResourceToFileSystem("run.bat", "../run.bat");
+            Environment.saveResourceToFileSystem("mda.bat");
+            Environment.saveResourceToFileSystem("mda.xml");
+            Environment.saveResourceToFileSystem("mda.properties");
+            Environment.saveResourceToFileSystem("beandef.xsd");
+            Environment.saveResourceToFileSystem("favicon.ico", "../favicon.ico");
+            String dir = Environment.getConfigPath();
+            File icons = new File(dir + "icons");
+            if (!icons.exists()) {
+                ZipInputStream zipStream = FileUtil.getJarInputStream("tsl2.nano.h5.default-resources.jar");
+                String[] zipFiles = FileUtil.readFileNamesFromZip(zipStream, null, true);
+                //reopen it - the zipEntries are closed
+                zipStream = FileUtil.getJarInputStream("tsl2.nano.h5.default-resources.jar");
+                for (String file : zipFiles) {
+                    byte[] data = FileUtil.readFromZip(zipStream, file, false);
+                    if (data == null || data.length == 0) {
+                        new File(dir + file).mkdirs();
+                    } else {
+//                        new File(file).getParentFile().mkdirs();
+                        FileUtil.writeBytes(data, dir + file, false);
+                    }
+                }
+            }
+
             LOG.info("Listening on port " + serviceURL.getPort() + ". Hit Enter to stop.\n");
             if (System.getProperty("os.name").startsWith("Windows"))
                 SystemUtil.executeRegisteredWindowsPrg("application.html");
+            
+            myOut = LogFactory.getOut();
+            myErr = LogFactory.getErr();
             System.in.read();
         } catch (Exception ioe) {
             LOG.error("Couldn't start server:", ioe);
@@ -161,8 +190,9 @@ public class NanoH5 extends NanoHTTPD {
         String startPage = String.valueOf(FileUtil.getFileData(stream, null));
         startPage = StringUtil.insertProperties(startPage,
             MapUtil.asMap("url", serviceURL, "text", Environment.getName()));
-        FileUtil.writeBytes(Html5Presentation.createMessagePage("start.template", "Start " + Environment.getName() + "App", serviceURL)
-            .getBytes(), resultHtmlFile, false);
+        FileUtil.writeBytes(
+            Html5Presentation.createMessagePage("start.template", "Start " + Environment.getName() + "App", serviceURL)
+                .getBytes(), resultHtmlFile, false);
     }
 
     /**
@@ -170,7 +200,8 @@ public class NanoH5 extends NanoHTTPD {
      */
     @Override
     public Response serve(String uri, String method, Properties header, Properties parms, Properties files) {
-        if (method.equals("GET") && !NumberUtil.isNumber(uri.substring(1)) && HtmlUtil.isURL(uri) && !uri.contains(Html5Presentation.PREFIX_BEANREQUEST))
+        if (method.equals("GET") && !NumberUtil.isNumber(uri.substring(1)) && HtmlUtil.isURL(uri)
+            && !uri.contains(Html5Presentation.PREFIX_BEANREQUEST))
             return super.serve(uri, method, header, parms, files);
         InetAddress requestor = ((Socket) header.get("socket")).getInetAddress();
         NanoH5Session session = sessions.get(requestor);
@@ -267,14 +298,15 @@ public class NanoH5 extends NanoHTTPD {
         if (login.toString().matches(Environment.get("default.present.attribute.multivalue", ".*")))
             login.removeAttributes("jdbcProperties");
         login.getAttribute("jarFile").getPresentation().setType(IPresentable.TYPE_ATTACHMENT);
-        ((Html5Presentable)login.getAttribute("jarFile").getPresentation()).getLayoutConstraints().put("accept", ".jar");
+        ((Html5Presentable) login.getAttribute("jarFile").getPresentation()).getLayoutConstraints().put("accept",
+            ".jar");
 //        login.getPresentationHelper().change(BeanPresentationHelper.PROP_DESCRIPTION,
 //            Environment.translate("jarFile.tooltip", true),
 //            "jarFile");
         login.getPresentationHelper().change(BeanPresentationHelper.PROP_NULLABLE, false);
         login.getPresentationHelper().change(BeanPresentationHelper.PROP_NULLABLE, true, "connectionPassword");
         login.getPresentationHelper().change(BeanPresentationHelper.PROP_NULLABLE, true, "replication");
-        login.getPresentationHelper().chg("replication", BeanPresentationHelper.PROP_ENABLER, new IActivator() {
+        login.getPresentationHelper().chg("replication", BeanPresentationHelper.PROP_ENABLER, new IActivable() {
             @Override
             public boolean isActive() {
                 return Environment.get("use.database.replication", false);
@@ -352,11 +384,11 @@ public class NanoH5 extends NanoHTTPD {
          * name-convention: beandef/virtual/*.xml
          */
         types.addAll(BeanDefinition.loadVirtualDefinitions());
-        
+
         /*
          * Perhaps show the script tool to do direct sql or ant
          */
-        if (Environment.get("application.show.scripttool", true)) {
+        if (Environment.get("application.show.scripttool", false)) {
             ScriptTool tool = new ScriptTool();
             Bean beanTool = new Bean(tool);
             beanTool.setAttributeFilter("text", "result", "resourceFile", "selectionAction");
@@ -445,6 +477,8 @@ public class NanoH5 extends NanoHTTPD {
         final String HIBTOOLNAME = "hibtool.xml";
         /** hibernate reverse engeneer configuration */
         final String HIBREVNAME = "hibernate.reveng.xml";
+        Environment.saveResourceToFileSystem(HIBTOOLNAME);
+        Environment.saveResourceToFileSystem(HIBREVNAME);
         Properties properties = new Properties();
         properties.setProperty(HIBREVNAME, Environment.getConfigPath() + HIBREVNAME);
 //    properties.setProperty("hbm.conf.xml", "hibernate.conf.xml");

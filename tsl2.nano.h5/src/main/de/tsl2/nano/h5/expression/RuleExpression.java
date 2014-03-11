@@ -15,7 +15,7 @@ import java.util.Date;
 import java.util.Map;
 import java.util.Set;
 
-import de.tsl2.nano.Environment;
+import de.tsl2.nano.core.Environment;
 import de.tsl2.nano.execution.IPRunnable;
 import de.tsl2.nano.incubation.specification.rules.Rule;
 import de.tsl2.nano.incubation.specification.rules.RulePool;

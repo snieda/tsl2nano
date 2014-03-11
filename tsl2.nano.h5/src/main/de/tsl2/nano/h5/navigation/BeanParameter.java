@@ -9,8 +9,8 @@
  */
 package de.tsl2.nano.h5.navigation;
 
-import de.tsl2.nano.bean.BeanClass;
-import de.tsl2.nano.util.StringUtil;
+import de.tsl2.nano.core.cls.BeanClass;
+import de.tsl2.nano.core.util.StringUtil;
 
 /**
  * map of objects to be handled as beans. means, you are able to search for bean-paths inside this map.<p/>

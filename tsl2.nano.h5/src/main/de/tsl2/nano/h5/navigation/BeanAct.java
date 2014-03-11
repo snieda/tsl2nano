@@ -22,9 +22,9 @@ import de.tsl2.nano.bean.BeanContainer;
 import de.tsl2.nano.bean.def.Bean;
 import de.tsl2.nano.bean.def.BeanCollector;
 import de.tsl2.nano.bean.def.BeanDefinition;
+import de.tsl2.nano.core.log.LogFactory;
 import de.tsl2.nano.incubation.vnet.workflow.Act;
 import de.tsl2.nano.incubation.vnet.workflow.ComparableMap;
-import de.tsl2.nano.log.LogFactory;
 import de.tsl2.nano.util.operation.ConditionOperator;
 import de.tsl2.nano.util.operation.Operator;
 

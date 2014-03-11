@@ -5,10 +5,10 @@ import static de.tsl2.nano.h5.HtmlUtil.ATTR_SIZE;
 
 import java.util.LinkedHashMap;
 
-import de.tsl2.nano.Environment;
 import de.tsl2.nano.bean.def.AttributeDefinition;
 import de.tsl2.nano.bean.def.IPresentable;
 import de.tsl2.nano.bean.def.Presentable;
+import de.tsl2.nano.core.Environment;
 
 /**
  * Hmtl5-specialized {@link de.tsl2.nano.bean.def.Presentable}. Not possible to be handled as inner class, because of

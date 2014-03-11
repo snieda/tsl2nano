@@ -99,12 +99,9 @@ import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.NodeList;
 
-import de.tsl2.nano.Environment;
-import de.tsl2.nano.Messages;
 import de.tsl2.nano.action.IAction;
-import de.tsl2.nano.bean.BeanClass;
 import de.tsl2.nano.bean.BeanUtil;
-import de.tsl2.nano.bean.IAttribute;
+import de.tsl2.nano.bean.IValueAccess;
 import de.tsl2.nano.bean.ValueHolder;
 import de.tsl2.nano.bean.def.AttributeDefinition;
 import de.tsl2.nano.bean.def.Bean;
@@ -116,23 +113,26 @@ import de.tsl2.nano.bean.def.IBeanCollector;
 import de.tsl2.nano.bean.def.IPageBuilder;
 import de.tsl2.nano.bean.def.IPresentable;
 import de.tsl2.nano.bean.def.IPresentableColumn;
-import de.tsl2.nano.bean.def.IValueAccess;
 import de.tsl2.nano.bean.def.IValueDefinition;
 import de.tsl2.nano.bean.def.SecureAction;
 import de.tsl2.nano.bean.def.ValueExpressionFormat;
 import de.tsl2.nano.bean.def.ValueGroup;
 import de.tsl2.nano.collection.CollectionUtil;
 import de.tsl2.nano.collection.MapUtil;
-import de.tsl2.nano.exception.ManagedException;
+import de.tsl2.nano.core.Environment;
+import de.tsl2.nano.core.ManagedException;
+import de.tsl2.nano.core.Messages;
+import de.tsl2.nano.core.cls.BeanClass;
+import de.tsl2.nano.core.cls.IAttribute;
+import de.tsl2.nano.core.log.LogFactory;
+import de.tsl2.nano.core.util.DateUtil;
+import de.tsl2.nano.core.util.FileUtil;
+import de.tsl2.nano.core.util.StringUtil;
+import de.tsl2.nano.core.util.Util;
 import de.tsl2.nano.format.GenericParser;
 import de.tsl2.nano.format.RegExpFormat;
 import de.tsl2.nano.h5.configuration.BeanConfigurator;
-import de.tsl2.nano.log.LogFactory;
-import de.tsl2.nano.util.DateUtil;
-import de.tsl2.nano.util.FileUtil;
 import de.tsl2.nano.util.NumberUtil;
-import de.tsl2.nano.util.StringUtil;
-import de.tsl2.nano.util.Util;
 
 /**
  * is able to present a bean as an html page. main method is {@link #build(Element, String)}.
@@ -292,7 +292,10 @@ public class Html5Presentation<T> extends BeanPresentationHelper<T> implements I
             Element row = appendElement(createGrid(body, null, 3), TAG_ROW);
             Element c1 = appendElement(row, TAG_CELL);
             Element c2 = appendElement(row, TAG_CELL);
-            c1 = appendElement(c1, TAG_LINK, ATTR_HREF, "../nano.h5.html");
+            String localDoc = Environment.getConfigPath() + "nano.h5.html";
+            String docLink =
+                new File(localDoc).canRead() ? localDoc : "https://sourceforge.net/p/tsl2nano/wiki/Home/";
+            c1 = appendElement(c1, TAG_LINK, ATTR_HREF, docLink);
             appendElement(c1,
                 TAG_IMAGE,
                 content(Environment.getBuildInformations()),
@@ -857,7 +860,7 @@ public class Html5Presentation<T> extends BeanPresentationHelper<T> implements I
             "location=this.getElementsByTagName('a')[0]",
             "tabindex",
             ++currentTabIndex + "",
-            ATTR_BGCOLOR, Bean.getBean((Serializable)item).getPresentable().layout(ATTR_BGCOLOR));
+            ATTR_BGCOLOR, Bean.getBean((Serializable) item).getPresentable().layout(ATTR_BGCOLOR));
 
         //first cell: bean reference as link
         String length = String.valueOf(grid.getChildNodes().getLength() - 1);

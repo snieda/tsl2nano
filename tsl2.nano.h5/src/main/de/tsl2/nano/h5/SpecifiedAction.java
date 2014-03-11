@@ -14,10 +14,10 @@ import java.util.LinkedHashMap;
 import org.simpleframework.xml.Attribute;
 import org.simpleframework.xml.core.Commit;
 
-import de.tsl2.nano.Environment;
 import de.tsl2.nano.bean.BeanUtil;
 import de.tsl2.nano.bean.def.SecureAction;
-import de.tsl2.nano.exception.Message;
+import de.tsl2.nano.core.Environment;
+import de.tsl2.nano.core.exception.Message;
 import de.tsl2.nano.incubation.specification.actions.ActionPool;
 
 /**

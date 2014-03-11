@@ -16,7 +16,7 @@ import java.util.Map;
 import de.tsl2.nano.bean.BeanUtil;
 import de.tsl2.nano.bean.def.AbstractExpression;
 import de.tsl2.nano.bean.def.Bean;
-import de.tsl2.nano.exception.ManagedException;
+import de.tsl2.nano.core.ManagedException;
 import de.tsl2.nano.execution.IPRunnable;
 
 /**

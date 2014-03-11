@@ -18,12 +18,12 @@ import org.simpleframework.xml.Attribute;
 import org.simpleframework.xml.ElementList;
 import org.simpleframework.xml.core.Commit;
 
-import de.tsl2.nano.Messages;
 import de.tsl2.nano.bean.def.Bean;
 import de.tsl2.nano.bean.def.BeanDefinition;
+import de.tsl2.nano.core.Messages;
+import de.tsl2.nano.core.util.StringUtil;
 import de.tsl2.nano.incubation.vnet.Net;
 import de.tsl2.nano.incubation.vnet.Notification;
-import de.tsl2.nano.util.StringUtil;
 
 /**
  * EJB-Query Navigator reading it's configuration from xml. The Navigator itself uses a parallel-working net

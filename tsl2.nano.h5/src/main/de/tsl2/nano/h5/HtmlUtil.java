@@ -23,8 +23,8 @@ import org.w3c.dom.Attr;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 
-import de.tsl2.nano.exception.ManagedException;
-import de.tsl2.nano.util.Util;
+import de.tsl2.nano.core.ManagedException;
+import de.tsl2.nano.core.util.Util;
 
 /**
  * defines html tag- and attribute-names und helper methods. android doesn't support the full w3c implementation like

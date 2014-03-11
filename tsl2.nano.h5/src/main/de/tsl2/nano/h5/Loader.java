@@ -9,7 +9,7 @@
  */
 package de.tsl2.nano.h5;
 
-import de.tsl2.nano.AppLoader;
+import de.tsl2.nano.core.AppLoader;
 
 /**
  * Loader for {@link NanoH5}.
