@@ -14,10 +14,10 @@ import java.util.HashSet;
 import java.util.Set;
 import java.util.concurrent.atomic.AtomicInteger;
 
-import de.tsl2.nano.exception.ManagedException;
+import de.tsl2.nano.core.ManagedException;
+import de.tsl2.nano.core.util.StringUtil;
 import de.tsl2.nano.messaging.EventController;
 import de.tsl2.nano.messaging.IListener;
-import de.tsl2.nano.util.StringUtil;
 
 /**
  * Simple abstract network node to be filled with real objects (cores). the real objects will be registered to network

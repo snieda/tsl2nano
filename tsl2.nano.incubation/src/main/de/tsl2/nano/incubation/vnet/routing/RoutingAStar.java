@@ -9,7 +9,7 @@
  */
 package de.tsl2.nano.incubation.vnet.routing;
 
-import de.tsl2.nano.exception.ManagedException;
+import de.tsl2.nano.core.ManagedException;
 import de.tsl2.nano.incubation.vnet.Connection;
 import de.tsl2.nano.incubation.vnet.Node;
 

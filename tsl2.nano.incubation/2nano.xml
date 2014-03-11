@@ -30,7 +30,22 @@ to create a new application-version, do the following:
 			<property name="refactore.property.file" value="${basedir}/project/distribute-h5.properties" />
 		</ant>
 
+		<antcall target="core.2nano" />
 		<antcall target="test.2nano" />
+	</target>
+
+	<!-- 
+		extract core-classes of common into an own jar
+	-->
+	<target name="core.2nano" unless="disable_core.2nano">
+		<ant antfile="../tsl2.nano.common/shell.xml" target="sh.jar">
+			<property file="../tsl2.nano.common/src/resources/build.properties" />
+			<property name="sh.jar.srcdir" value="../tsl2.nano.common/bin" />
+			<property name="sh.jar.destination" value="${target.dir}/tsl2.nano.core.${build.version}.jar" />
+			<property name="sh.jar.manifest" value="../tsl2.nano.common/META-INF/MANIFEST.MF" />
+			<property name="sh.jar.include" value="**/core/**" />
+			<property name="sh.jar.include2" value="org/**" />
+		</ant>
 	</target>
 
 	<!-- 
@@ -54,11 +69,23 @@ to create a new application-version, do the following:
 			<property name="sh.copy.include" value="tsl2.nano.h5*.jar" />
 			<property name="sh.copy.exclude" value="*src.jar" />
 		</ant>
-		<ant antfile="../tsl2.nano.common/shell.xml" target="sh.copy">
-			<property name="sh.copy.srcdir" value="${target.dir}" />
-			<property name="sh.copy.destination" value="${test.dir}" />
-			<property name="sh.copy.include" value="tsl2.nano.common*.jar" />
-			<property name="sh.copy.exclude" value="*src.jar" />
+
+		<ant antfile="../tsl2.nano.common/shell.xml" target="sh.jar">
+			<property file="../tsl2.nano.h5/src/resources/build.properties" />
+			<property name="sh.jar.srcdir" value="../tsl2.nano.common/bin" />
+			<property name="sh.jar.destination" value="${test.dir}/tsl2.nano.h5.${build.version}.jar" />
+			<property name="sh.jar.manifest" value="../tsl2.nano.h5/META-INF/MANIFEST.MF" />
+			<property name="sh.jar.include" value="**/core/**" />
+			<property name="sh.jar.include2" value="org/**" />
+		</ant>
+
+		<ant antfile="../tsl2.nano.common/shell.xml" target="sh.jar">
+			<property file="../tsl2.nano.h5/src/resources/build.properties" />
+			<property name="sh.jar.srcdir" value="../tsl2.nano.directaccess/src/resources" />
+			<property name="sh.jar.destination" value="${test.dir}/tsl2.nano.h5.${build.version}.jar" />
+			<property name="sh.jar.manifest" value="../tsl2.nano.h5/META-INF/MANIFEST.MF" />
+			<property name="sh.jar.include" value="*.*" />
+			<property name="sh.jar.exclude" value="build.properties" />
 		</ant>
 
 		<ant antfile="../tsl2.nano.common/shell.xml" target="sh.jar">
@@ -66,9 +93,20 @@ to create a new application-version, do the following:
 			<property name="sh.jar.srcdir" value="${target.dir}" />
 			<property name="sh.jar.destination" value="${test.dir}/tsl2.nano.h5.${build.version}.jar" />
 			<property name="sh.jar.manifest" value="../tsl2.nano.h5/META-INF/MANIFEST.MF" />
-			<property name="sh.jar.include" value="*.jar" />
-			<property name="sh.jar.exclude" value="*src.jar" />
-			<property name="sh.jar.exclude2" value="common*.jar" />
+			<property name="sh.jar.include" value="tsl2*.jar" />
+			<property name="sh.jar.include2" value="*fs-connector*.jar" />
+			<property name="sh.jar.include3" value="*-api*.jar" />
+			<property name="sh.jar.include4" value="simple-xml*.jar" />
+			<property name="sh.jar.exclude" value="*tsl2.nano.core*.jar" />
+			<property name="sh.jar.exclude2" value="*src.jar" />
+		</ant>
+
+		<ant antfile="../tsl2.nano.common/shell.xml" target="sh.jar">
+			<property file="../tsl2.nano.h5/src/resources/build.properties" />
+			<property name="sh.jar.srcdir" value="${target.dir}" />
+			<property name="sh.jar.destination" value="${test.dir}/tsl2.nano.h5.${build.version}.jar" />
+			<property name="sh.jar.manifest" value="../tsl2.nano.h5/META-INF/MANIFEST.MF" />
+			<property name="sh.jar.include" value="jta*.jar" />
 		</ant>
 
 		<ant antfile="../tsl2.nano.common/shell.xml" target="sh.exec.cmd">
@@ -76,5 +114,5 @@ to create a new application-version, do the following:
 			<property name="sh.exec.cmd.arg1" value="run.bat h5.sample debug nopause" />
 		</ant>
 	</target>
-	
+
 </project>

@@ -19,9 +19,9 @@ import java.util.Map;
 import java.util.Set;
 import java.util.TreeMap;
 
-import de.tsl2.nano.Environment;
 import de.tsl2.nano.collection.ListSet;
-import de.tsl2.nano.exception.ManagedException;
+import de.tsl2.nano.core.Environment;
+import de.tsl2.nano.core.ManagedException;
 import de.tsl2.nano.messaging.EventController;
 import de.tsl2.nano.messaging.IListener;
 

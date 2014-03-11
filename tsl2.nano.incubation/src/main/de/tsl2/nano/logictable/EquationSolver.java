@@ -14,7 +14,7 @@ import java.text.NumberFormat;
 import java.util.Hashtable;
 import java.util.Map;
 
-import de.tsl2.nano.util.StringUtil;
+import de.tsl2.nano.core.util.StringUtil;
 import de.tsl2.nano.util.operation.NumericOperator;
 
 /**

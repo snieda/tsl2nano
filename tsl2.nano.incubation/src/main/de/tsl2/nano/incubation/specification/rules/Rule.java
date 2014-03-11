@@ -14,10 +14,10 @@ import java.util.Map;
 
 import org.simpleframework.xml.core.Commit;
 
-import de.tsl2.nano.Environment;
+import de.tsl2.nano.core.Environment;
+import de.tsl2.nano.core.util.StringUtil;
 import de.tsl2.nano.incubation.specification.AbstractRunnable;
 import de.tsl2.nano.incubation.specification.ParType;
-import de.tsl2.nano.util.StringUtil;
 import de.tsl2.nano.util.operation.NumericConditionOperator;
 import de.tsl2.nano.util.operation.Operator;
 

@@ -18,8 +18,8 @@ import java.util.concurrent.FutureTask;
 
 import org.apache.commons.logging.Log;
 
-import de.tsl2.nano.exception.ManagedException;
-import de.tsl2.nano.log.LogFactory;
+import de.tsl2.nano.core.ManagedException;
+import de.tsl2.nano.core.log.LogFactory;
 
 /**
  * 

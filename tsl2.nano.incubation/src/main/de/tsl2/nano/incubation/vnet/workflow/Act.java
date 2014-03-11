@@ -4,7 +4,7 @@ import java.util.Map;
 
 import org.simpleframework.xml.core.Commit;
 
-import de.tsl2.nano.util.StringUtil;
+import de.tsl2.nano.core.util.StringUtil;
 import de.tsl2.nano.util.operation.ConditionOperator;
 
 /**

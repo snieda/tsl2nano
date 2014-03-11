@@ -25,13 +25,15 @@ import junit.framework.Assert;
 import org.apache.commons.logging.Log;
 import org.junit.Test;
 
-import de.tsl2.nano.Environment;
 import de.tsl2.nano.bean.def.Constraint;
 import de.tsl2.nano.collection.MapUtil;
 import de.tsl2.nano.collection.TableList;
-import de.tsl2.nano.exception.ManagedException;
+import de.tsl2.nano.core.Environment;
+import de.tsl2.nano.core.ManagedException;
+import de.tsl2.nano.core.log.LogFactory;
+import de.tsl2.nano.core.util.StringUtil;
+import de.tsl2.nano.core.util.XmlUtil;
 import de.tsl2.nano.execution.Profiler;
-import de.tsl2.nano.execution.XmlUtil;
 import de.tsl2.nano.incubation.network.JobServer;
 import de.tsl2.nano.incubation.specification.ParType;
 import de.tsl2.nano.incubation.specification.Pool;
@@ -49,13 +51,11 @@ import de.tsl2.nano.incubation.vnet.routing.Location;
 import de.tsl2.nano.incubation.vnet.routing.RoutingAStar;
 import de.tsl2.nano.incubation.vnet.workflow.ComparableMap;
 import de.tsl2.nano.incubation.vnet.workflow.VActivity;
-import de.tsl2.nano.log.LogFactory;
 import de.tsl2.nano.logictable.DefaultHeader;
 import de.tsl2.nano.logictable.EquationSolver;
 import de.tsl2.nano.logictable.LogicTable;
 import de.tsl2.nano.messaging.EventController;
 import de.tsl2.nano.messaging.IListener;
-import de.tsl2.nano.util.StringUtil;
 import de.tsl2.nano.util.operation.ConditionOperator;
 
 /**

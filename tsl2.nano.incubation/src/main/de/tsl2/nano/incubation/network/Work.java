@@ -24,8 +24,8 @@ import java.util.concurrent.TimeoutException;
 
 import org.apache.commons.logging.Log;
 
-import de.tsl2.nano.exception.ManagedException;
-import de.tsl2.nano.log.LogFactory;
+import de.tsl2.nano.core.ManagedException;
+import de.tsl2.nano.core.log.LogFactory;
 
 /**
  * Is able to evaluate the current state of remote Job/Work executed through a {@link Worker}.

@@ -15,7 +15,7 @@ import java.util.Map;
 import java.util.Set;
 
 import de.tsl2.nano.collection.TableList;
-import de.tsl2.nano.util.StringUtil;
+import de.tsl2.nano.core.util.StringUtil;
 
 /**
  * An Extension of {@link TableList} providing logic expressions to be filled into cells like in excel.

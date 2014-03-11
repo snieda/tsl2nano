@@ -31,8 +31,8 @@ import javax.net.ServerSocketFactory;
 
 import org.apache.commons.logging.Log;
 
-import de.tsl2.nano.exception.ManagedException;
-import de.tsl2.nano.log.LogFactory;
+import de.tsl2.nano.core.ManagedException;
+import de.tsl2.nano.core.log.LogFactory;
 
 /**
  * Provides a mechanism to distribute jobs to other hosts - without manual installation of new classes and jars.
