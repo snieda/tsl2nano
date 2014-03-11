@@ -19,11 +19,11 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Properties;
 
-import de.tsl2.nano.Environment;
-import de.tsl2.nano.exception.ManagedException;
+import de.tsl2.nano.core.Environment;
+import de.tsl2.nano.core.ManagedException;
+import de.tsl2.nano.core.util.FileUtil;
+import de.tsl2.nano.core.util.StringUtil;
 import de.tsl2.nano.persistence.replication.Replication;
-import de.tsl2.nano.util.FileUtil;
-import de.tsl2.nano.util.StringUtil;
 
 /**
  * bean class to define the content of a persistence.xml and jdbc-connection.properties
@@ -445,7 +445,7 @@ public class Persistence implements Serializable {
         } else {
             p = new Persistence();
         }
-        if (p.getReplication() == null && Environment.get("use.database.replication", true))
+        if (p.getReplication() == null && Environment.get("use.database.replication", false))
             p.setReplication(new Replication());
         return p;
     }

@@ -12,23 +12,19 @@ package de.tsl2.nano.script;
 import java.io.File;
 import java.io.PrintStream;
 import java.io.Serializable;
-import java.net.URL;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Properties;
 
-import org.apache.commons.io.FileUtils;
-
-import de.tsl2.nano.Environment;
 import de.tsl2.nano.action.CommonAction;
 import de.tsl2.nano.action.IAction;
 import de.tsl2.nano.bean.BeanContainer;
 import de.tsl2.nano.bean.def.BeanValue;
-import de.tsl2.nano.exception.ManagedException;
+import de.tsl2.nano.core.Environment;
+import de.tsl2.nano.core.util.FileUtil;
+import de.tsl2.nano.core.util.StringUtil;
 import de.tsl2.nano.execution.ScriptUtil;
 import de.tsl2.nano.persistence.Persistence;
-import de.tsl2.nano.util.FileUtil;
-import de.tsl2.nano.util.StringUtil;
 
 /**
  * 
@@ -212,25 +208,8 @@ public class ScriptTool implements Serializable {
          * on first time, we copy the scripts like antscripts.xml
          * to the plugin-workspace. we do this to provide user changes on that files!
          */
-        String basedir = Environment.getConfigPath();
-        File antscriptFile = new File(basedir + ANTSCRIPTNAME);
-        if (!antscriptFile.exists()) {
-            URL antscriptOriginUrl = Environment.get(ClassLoader.class).getResource(ANTSCRIPTNAME);
-            try {
-                FileUtils.copyURLToFile(antscriptOriginUrl, antscriptFile);
-            } catch (Exception e) {
-                ManagedException.forward(e);
-            }
-        }
-        File antscriptProp = new File(basedir + ANTSCRIPTPROP);
-        if (!antscriptProp.exists()) {
-            URL antscriptOriginUrl = this.getClass().getClassLoader().getResource(ANTSCRIPTPROP);
-            try {
-                FileUtils.copyURLToFile(antscriptOriginUrl, antscriptProp);
-            } catch (Exception e) {
-                ManagedException.forward(e);
-            }
-        }
+        Environment.saveResourceToFileSystem(ANTSCRIPTNAME);
+        Environment.saveResourceToFileSystem(ANTSCRIPTPROP);
     }
 
     protected Object executeStatement(String strStmt, boolean pureSQL) throws Exception {

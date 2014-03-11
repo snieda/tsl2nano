@@ -17,9 +17,9 @@ import java.util.Properties;
 
 import javax.security.auth.Subject;
 
-import de.tsl2.nano.bean.BeanAttribute;
-import de.tsl2.nano.bean.IAttribute;
 import de.tsl2.nano.bean.def.Bean;
+import de.tsl2.nano.core.cls.BeanAttribute;
+import de.tsl2.nano.core.cls.IAttribute;
 import de.tsl2.nano.service.util.IGenericService;
 import de.tsl2.nano.service.util.batch.Part;
 import de.tsl2.nano.service.util.finder.AbstractFinder;

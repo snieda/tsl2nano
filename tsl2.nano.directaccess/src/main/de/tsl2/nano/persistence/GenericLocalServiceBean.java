@@ -11,9 +11,9 @@ import javax.persistence.Persistence;
 
 import org.apache.commons.logging.Log;
 
-import de.tsl2.nano.Environment;
-import de.tsl2.nano.exception.ManagedException;
-import de.tsl2.nano.log.LogFactory;
+import de.tsl2.nano.core.Environment;
+import de.tsl2.nano.core.ManagedException;
+import de.tsl2.nano.core.log.LogFactory;
 import de.tsl2.nano.persistence.replication.GenericReplicatingServiceBean;
 
 /**
@@ -39,7 +39,7 @@ public class GenericLocalServiceBean extends GenericReplicatingServiceBean {
      * @param entityManager persistence entity manager
      */
     public GenericLocalServiceBean(EntityManager entityManager) {
-        this(entityManager, Environment.get("use.database.replication", true));
+        this(entityManager, Environment.get("use.database.replication", false));
     }
 
     /**

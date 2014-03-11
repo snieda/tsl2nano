@@ -17,11 +17,11 @@ import java.util.Properties;
 
 import javax.security.auth.Subject;
 
-import de.tsl2.nano.Environment;
+import de.tsl2.nano.core.Environment;
+import de.tsl2.nano.core.util.FileUtil;
 import de.tsl2.nano.service.util.IGenericService;
 import de.tsl2.nano.service.util.batch.Part;
 import de.tsl2.nano.service.util.finder.AbstractFinder;
-import de.tsl2.nano.util.FileUtil;
 
 /**
  * Serialization Service for mocking or local storages. only some accessors are implemented

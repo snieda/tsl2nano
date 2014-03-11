@@ -25,7 +25,7 @@
 	<target name="extract.plugin.libs" if="plugin_isjar">
 		<!-- if it a jar-packed plugin in the eclipse dir, we unpack it -->
 		<unjar src="${plugin.dir}" dest="." overwrite="false">
-			<patternset includes="lib/**"/>
+			<patternset includes="${lib.dir}/**"/>
 		</unjar>
 	</target>
 	<target name="copy.plugin.libs" unless="plugin_isjar">

@@ -15,11 +15,11 @@ import java.util.Map;
 
 import javax.persistence.Entity;
 
-import de.tsl2.nano.Environment;
 import de.tsl2.nano.action.CommonAction;
 import de.tsl2.nano.action.IAction;
-import de.tsl2.nano.bean.BeanClass;
 import de.tsl2.nano.bean.BeanContainer;
+import de.tsl2.nano.core.Environment;
+import de.tsl2.nano.core.cls.BeanClass;
 import de.tsl2.nano.service.util.BeanContainerUtil;
 import de.tsl2.nano.service.util.IGenericService;
 import de.tsl2.nano.serviceaccess.IAuthorization;

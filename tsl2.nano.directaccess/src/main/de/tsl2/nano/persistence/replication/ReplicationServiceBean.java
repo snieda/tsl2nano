@@ -17,7 +17,7 @@ import javax.persistence.EntityManager;
 
 import org.apache.commons.logging.Log;
 
-import de.tsl2.nano.log.LogFactory;
+import de.tsl2.nano.core.log.LogFactory;
 import de.tsl2.nano.persistence.GenericLocalServiceBean;
 
 /**
