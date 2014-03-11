@@ -14,7 +14,7 @@ import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.Map;
 
-import de.tsl2.nano.exception.ManagedException;
+import de.tsl2.nano.core.ManagedException;
 import de.tsl2.nano.service.util.IGenericService;
 import de.tsl2.nano.service.util.finder.AbstractFinder;
 import de.tsl2.nano.serviceaccess.ServiceFactory;

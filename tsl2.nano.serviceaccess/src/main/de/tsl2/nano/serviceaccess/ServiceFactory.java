@@ -30,17 +30,17 @@ import javax.security.auth.login.LoginContext;
 
 import org.apache.commons.logging.Log;
 
-import de.tsl2.nano.Environment;
-import de.tsl2.nano.exception.ManagedException;
-import de.tsl2.nano.log.LogFactory;
+import de.tsl2.nano.core.Environment;
+import de.tsl2.nano.core.ManagedException;
+import de.tsl2.nano.core.log.LogFactory;
+import de.tsl2.nano.core.util.FileUtil;
+import de.tsl2.nano.core.util.StringUtil;
 import de.tsl2.nano.service.feature.Feature;
 import de.tsl2.nano.service.feature.FeatureFactory;
 import de.tsl2.nano.service.util.IGenericService;
 import de.tsl2.nano.service.util.batch.CachingBatchloader;
 import de.tsl2.nano.serviceaccess.aas.principal.Role;
 import de.tsl2.nano.serviceaccess.aas.principal.UserPrincipal;
-import de.tsl2.nano.util.FileUtil;
-import de.tsl2.nano.util.StringUtil;
 
 /**
  * the servicefactory will provide the current user and mandator, the server side session beans (packed into proxies)

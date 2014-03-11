@@ -31,15 +31,15 @@ import javax.ejb.TransactionAttributeType;
 import javax.persistence.Query;
 import javax.security.auth.Subject;
 
-import de.tsl2.nano.bean.BeanAttribute;
-import de.tsl2.nano.bean.BeanClass;
 import de.tsl2.nano.collection.MapUtil;
-import de.tsl2.nano.exception.ManagedException;
+import de.tsl2.nano.core.ManagedException;
+import de.tsl2.nano.core.cls.BeanAttribute;
+import de.tsl2.nano.core.cls.BeanClass;
+import de.tsl2.nano.core.util.StringUtil;
 import de.tsl2.nano.service.util.batch.Part;
 import de.tsl2.nano.service.util.finder.AbstractFinder;
 import de.tsl2.nano.service.util.finder.Finder;
 import de.tsl2.nano.serviceaccess.aas.principal.UserPrincipal;
-import de.tsl2.nano.util.StringUtil;
 
 /**
  * provides some common and batch service access methods to work with beans.

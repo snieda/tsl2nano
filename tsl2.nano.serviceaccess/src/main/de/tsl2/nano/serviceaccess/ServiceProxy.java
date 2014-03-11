@@ -14,9 +14,9 @@ import java.lang.reflect.Proxy;
 import java.lang.reflect.UndeclaredThrowableException;
 import java.security.PrivilegedAction;
 
-import de.tsl2.nano.Messages;
-import de.tsl2.nano.exception.ManagedException;
-import de.tsl2.nano.util.StringUtil;
+import de.tsl2.nano.core.ManagedException;
+import de.tsl2.nano.core.Messages;
+import de.tsl2.nano.core.util.StringUtil;
 
 /**
  * simple service proxy using the real service as a delegate.

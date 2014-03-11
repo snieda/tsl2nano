@@ -23,9 +23,9 @@ import javax.naming.NotContextException;
 
 import org.apache.commons.logging.Log;
 
-import de.tsl2.nano.log.LogFactory;
-import de.tsl2.nano.util.FileUtil;
-import de.tsl2.nano.util.StringUtil;
+import de.tsl2.nano.core.log.LogFactory;
+import de.tsl2.nano.core.util.FileUtil;
+import de.tsl2.nano.core.util.StringUtil;
 
 /**
  * Implementing the service locator pattern using the initial-context of ejb 3. initial context will be found through

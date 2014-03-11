@@ -15,8 +15,8 @@ import java.util.Collection;
 
 import org.apache.commons.logging.Log;
 
-import de.tsl2.nano.exception.ManagedException;
-import de.tsl2.nano.log.LogFactory;
+import de.tsl2.nano.core.ManagedException;
+import de.tsl2.nano.core.log.LogFactory;
 
 /**
  * Finder provider - usable for IQueryService.

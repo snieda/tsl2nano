@@ -18,8 +18,8 @@ import java.util.Set;
 import org.apache.commons.logging.Log;
 import org.junit.After;
 
+import de.tsl2.nano.core.log.LogFactory;
 import de.tsl2.nano.execution.ScriptUtil;
-import de.tsl2.nano.log.LogFactory;
 import de.tsl2.nano.serviceaccess.ServiceFactory;
 
 /**

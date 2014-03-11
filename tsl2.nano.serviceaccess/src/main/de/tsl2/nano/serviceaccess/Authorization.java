@@ -17,10 +17,10 @@ import javax.security.auth.Subject;
 
 import org.apache.commons.logging.Log;
 
-import de.tsl2.nano.Environment;
-import de.tsl2.nano.Messages;
-import de.tsl2.nano.execution.XmlUtil;
-import de.tsl2.nano.log.LogFactory;
+import de.tsl2.nano.core.Environment;
+import de.tsl2.nano.core.Messages;
+import de.tsl2.nano.core.log.LogFactory;
+import de.tsl2.nano.core.util.XmlUtil;
 import de.tsl2.nano.serviceaccess.aas.principal.APermission;
 import de.tsl2.nano.serviceaccess.aas.principal.Role;
 import de.tsl2.nano.serviceaccess.aas.principal.UserPrincipal;

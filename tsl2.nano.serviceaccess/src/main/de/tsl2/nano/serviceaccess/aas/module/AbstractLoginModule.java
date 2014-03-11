@@ -25,14 +25,14 @@ import javax.security.auth.spi.LoginModule;
 
 import org.apache.commons.logging.Log;
 
-import de.tsl2.nano.Environment;
-import de.tsl2.nano.Messages;
-import de.tsl2.nano.log.LogFactory;
+import de.tsl2.nano.core.Environment;
+import de.tsl2.nano.core.Messages;
+import de.tsl2.nano.core.log.LogFactory;
+import de.tsl2.nano.core.util.StringUtil;
 import de.tsl2.nano.serviceaccess.Authorization;
 import de.tsl2.nano.serviceaccess.IAuthorization;
 import de.tsl2.nano.serviceaccess.ServiceFactory;
 import de.tsl2.nano.serviceaccess.aas.principal.UserPrincipal;
-import de.tsl2.nano.util.StringUtil;
 
 /**
  * <h2>1. Authentication</h2>

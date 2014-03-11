@@ -21,7 +21,7 @@ import org.apache.commons.logging.Log;
 
 import de.tsl2.nano.bean.def.IStatus;
 import de.tsl2.nano.bean.def.SStatus;
-import de.tsl2.nano.log.LogFactory;
+import de.tsl2.nano.core.log.LogFactory;
 
 
 /**

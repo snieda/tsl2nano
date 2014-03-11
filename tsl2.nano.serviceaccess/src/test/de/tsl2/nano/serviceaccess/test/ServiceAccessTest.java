@@ -37,6 +37,7 @@ import org.junit.Test;
 import de.tsl2.nano.action.IAction;
 import de.tsl2.nano.bean.BeanProxy;
 import de.tsl2.nano.collection.ListSet;
+import de.tsl2.nano.core.util.DateUtil;
 import de.tsl2.nano.execution.Profiler;
 import de.tsl2.nano.service.feature.FeatureFactory;
 import de.tsl2.nano.service.schedule.IJobScheduleService;
@@ -46,7 +47,6 @@ import de.tsl2.nano.serviceaccess.ServiceFactory;
 import de.tsl2.nano.serviceaccess.aas.ConsoleCallbackHandler;
 import de.tsl2.nano.serviceaccess.aas.module.AbstractLoginModule;
 import de.tsl2.nano.serviceaccess.aas.principal.AbstractPrincipalAction;
-import de.tsl2.nano.util.DateUtil;
 
 /*
  * Copyright © 2002-2008 Thomas Schneider

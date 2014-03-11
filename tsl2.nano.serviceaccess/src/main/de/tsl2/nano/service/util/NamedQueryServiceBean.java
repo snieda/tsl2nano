@@ -24,10 +24,10 @@ import javax.persistence.NamedQuery;
 import javax.persistence.Query;
 import javax.persistence.Table;
 
-import de.tsl2.nano.bean.BeanAttribute;
 import de.tsl2.nano.bean.def.Bean;
-import de.tsl2.nano.exception.ManagedException;
-import de.tsl2.nano.util.StringUtil;
+import de.tsl2.nano.core.ManagedException;
+import de.tsl2.nano.core.cls.BeanAttribute;
+import de.tsl2.nano.core.util.StringUtil;
 
 /**
  * provides services to work on beans with named queries. used by {@link GenericServiceBean}.

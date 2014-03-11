@@ -28,18 +28,18 @@ import javax.persistence.TemporalType;
 
 import org.apache.commons.logging.Log;
 
-import de.tsl2.nano.Environment;
 import de.tsl2.nano.action.CommonAction;
 import de.tsl2.nano.action.IAction;
-import de.tsl2.nano.bean.BeanAttribute;
-import de.tsl2.nano.bean.BeanClass;
 import de.tsl2.nano.bean.BeanContainer;
 import de.tsl2.nano.bean.BeanUtil;
 import de.tsl2.nano.bean.IAttributeDef;
-import de.tsl2.nano.exception.ManagedException;
-import de.tsl2.nano.log.LogFactory;
+import de.tsl2.nano.core.Environment;
+import de.tsl2.nano.core.ManagedException;
+import de.tsl2.nano.core.cls.BeanAttribute;
+import de.tsl2.nano.core.cls.BeanClass;
+import de.tsl2.nano.core.log.LogFactory;
+import de.tsl2.nano.core.util.Util;
 import de.tsl2.nano.serviceaccess.ServiceFactory;
-import de.tsl2.nano.util.Util;
 
 /**
  * JPA 2.0 BeanContainer, using the stateless session bean {@link IGenericService}.

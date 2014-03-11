@@ -17,8 +17,8 @@ import javax.security.auth.SubjectDomainCombiner;
 import org.apache.commons.logging.Log;
 
 import de.tsl2.nano.action.CommonAction;
-import de.tsl2.nano.action.IActivator;
-import de.tsl2.nano.log.LogFactory;
+import de.tsl2.nano.action.IActivable;
+import de.tsl2.nano.core.log.LogFactory;
 import de.tsl2.nano.serviceaccess.ServiceFactory;
 
 /**
@@ -42,7 +42,7 @@ public abstract class AbstractPrincipalAction<RETURNTYPE> extends CommonAction<R
     public AbstractPrincipalAction(String id,
             String shortDescription,
             String longDescription,
-            IActivator enabler,
+            IActivable enabler,
             Collection<String> receiverIDs) {
         super(id, shortDescription, longDescription, enabler, receiverIDs);
     }
@@ -50,7 +50,7 @@ public abstract class AbstractPrincipalAction<RETURNTYPE> extends CommonAction<R
     /**
      * {@inheritDoc}
      */
-    public AbstractPrincipalAction(String id, String shortDescription, String longDescription, IActivator actionEnabler) {
+    public AbstractPrincipalAction(String id, String shortDescription, String longDescription, IActivable actionEnabler) {
         super(id, shortDescription, longDescription, actionEnabler);
     }
 
