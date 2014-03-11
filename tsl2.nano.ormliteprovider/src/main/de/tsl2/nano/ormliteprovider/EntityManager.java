@@ -29,8 +29,8 @@ import com.j256.ormlite.dao.DaoManager;
 import com.j256.ormlite.jdbc.JdbcConnectionSource;
 import com.j256.ormlite.support.ConnectionSource;
 
-import de.tsl2.nano.exception.ManagedException;
-import de.tsl2.nano.log.LogFactory;
+import de.tsl2.nano.core.ManagedException;
+import de.tsl2.nano.core.log.LogFactory;
 
 /**
  * 
