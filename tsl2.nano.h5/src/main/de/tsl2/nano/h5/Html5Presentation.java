@@ -1116,7 +1116,7 @@ public class Html5Presentation<T> extends BeanPresentationHelper<T> implements I
         Collection<?> values = beanValue.getConstraint().getAllowedValues();
         Object selected = beanValue.getValue();
         for (Object v : values) {
-            appendElement(select, TAG_OPTION, content(v.toString()), enable(ATTR_SELECTED, v.equals(selected)));
+            appendElement(select, TAG_OPTION, content(v.toString()), enable(ATTR_SELECTED, selected != null && v.equals(selected)));
         }
         return select;
     }
