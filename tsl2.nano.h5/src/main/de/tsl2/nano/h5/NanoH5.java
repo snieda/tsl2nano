@@ -12,6 +12,7 @@ import java.net.InetAddress;
 import java.net.MalformedURLException;
 import java.net.Socket;
 import java.net.URL;
+import java.nio.channels.FileChannel;
 import java.text.FieldPosition;
 import java.text.Format;
 import java.text.ParsePosition;
@@ -150,7 +151,7 @@ public class NanoH5 extends NanoHTTPD {
             LOG.info("Listening on port " + serviceURL.getPort() + ". Hit Enter to stop.\n");
             if (System.getProperty("os.name").startsWith("Windows"))
                 SystemUtil.executeRegisteredWindowsPrg("application.html");
-            
+
             myOut = LogFactory.getOut();
             myErr = LogFactory.getErr();
             System.in.read();
@@ -390,8 +391,8 @@ public class NanoH5 extends NanoHTTPD {
          */
         if (Environment.get("application.show.scripttool", false)) {
             ScriptTool tool = new ScriptTool();
-            Bean beanTool = new Bean(tool);
-            beanTool.setAttributeFilter("text", "result", "resourceFile", "selectionAction");
+            Bean beanTool = Bean.getBean(tool);
+            beanTool.setAttributeFilter("text", "sourceFile", "selectedAction", "result");
             beanTool.getAttribute("text").getPresentation().setType(IPresentable.TYPE_INPUT_MULTILINE);
             beanTool.getAttribute("result").getPresentation().setType(IPresentable.TYPE_TABLE);
             beanTool.getAttribute("sourceFile").getPresentation().setType(IPresentable.TYPE_ATTACHMENT);
@@ -436,13 +437,24 @@ public class NanoH5 extends NanoHTTPD {
      * @return
      */
     protected List<Class> createBeanContainer(final Persistence persistence, PersistenceClassLoader runtimeClassloader) {
-        if (!new File(persistence.getJarFile()).exists()) {
+        File selectedFile = new File(persistence.getJarFile());
+        String jarFile =
+            !selectedFile.isAbsolute() ? Environment.getConfigPath() + persistence.getJarFile()
+                : persistence.getJarFile();
+        if (!new File(jarFile).exists() && !selectedFile.isAbsolute()) {
             //TODO: show generation message before - get script exception from exception handler
-            generateJarFile(persistence.getJarFile());
-            if (!new File(persistence.getJarFile()).exists()) {
-                throw new ManagedException("Couldn't generate bean jar file '" + persistence.getJarFile()
+            generateJarFile(jarFile);
+            if (!new File(jarFile).exists()) {
+                throw new ManagedException("Couldn't generate bean jar file '" + jarFile
                     + "' through script hibtools.xml! Please see log file for exceptions.");
             }
+        } else if (selectedFile.isAbsolute()) {//copy it into the own classpath (to don't lock the file)
+            if (!selectedFile.exists())
+                throw new IllegalArgumentException(
+                    "If an absolute file-path is given, the file has to exist! If the file-path is relative and doesn't exist, it will be created/generated");
+            String envFile = Environment.getConfigPath() + selectedFile.getName();
+//            if (!new File(envFile).exists())
+            FileUtil.copy(selectedFile.getPath(), envFile);
         }
 
         if (Environment.get("use.applicationserver", false)) {
@@ -465,7 +477,7 @@ public class NanoH5 extends NanoHTTPD {
         Environment.addService(IBeanContainer.class, BeanContainer.instance());
 
         List<Class> beanClasses =
-            runtimeClassloader.loadBeanClasses(persistence.getJarFile(),
+            runtimeClassloader.loadBeanClasses(jarFile,
                 Environment.get("bean.class.presentation.regexp", ".*"), null);
         Environment.setProperty("loadedBeanTypes", beanClasses);
 
