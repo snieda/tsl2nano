@@ -81,6 +81,15 @@ to create a new application-version, do the following:
 
 		<ant antfile="../tsl2.nano.common/shell.xml" target="sh.jar">
 			<property file="../tsl2.nano.h5/src/resources/build.properties" />
+			<property name="sh.jar.srcdir" value="../tsl2.nano.common" />
+			<property name="sh.jar.destination" value="${test.dir}/tsl2.nano.h5.${build.version}.jar" />
+			<property name="sh.jar.manifest" value="../tsl2.nano.h5/META-INF/MANIFEST.MF" />
+			<property name="sh.jar.include" value="shell.xml" />
+			<property name="sh.jar.include2" value="runsh.bat" />
+		</ant>
+
+		<ant antfile="../tsl2.nano.common/shell.xml" target="sh.jar">
+			<property file="../tsl2.nano.h5/src/resources/build.properties" />
 			<property name="sh.jar.srcdir" value="../tsl2.nano.directaccess/src/resources" />
 			<property name="sh.jar.destination" value="${test.dir}/tsl2.nano.h5.${build.version}.jar" />
 			<property name="sh.jar.manifest" value="../tsl2.nano.h5/META-INF/MANIFEST.MF" />
@@ -99,6 +108,7 @@ to create a new application-version, do the following:
 			<property name="sh.jar.include4" value="simple-xml*.jar" />
 			<property name="sh.jar.exclude" value="*tsl2.nano.core*.jar" />
 			<property name="sh.jar.exclude2" value="*src.jar" />
+			<property name="sh.jar.exclude3" value="tsl2.nano.h5.0*.jar" />
 		</ant>
 
 		<ant antfile="../tsl2.nano.common/shell.xml" target="sh.jar">
