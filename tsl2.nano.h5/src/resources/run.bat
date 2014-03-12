@@ -9,9 +9,10 @@ rem   2. debug option
 rem   3. nopause option
 rem ##########################################################################
 
-if "%1"=="" (set PRJ=h5.sample) else (set PRJ=%1)
+if "%1"=="" (set PRJ=config) else (set PRJ=%1)
 if "%2"=="debug" (set DEBUG="-agentlib:jdwp=transport=dt_socket,address=8787,server=y,suspend=y")
 if "%2"=="debug" (set NANO_DEBUG=-Ddebug)
 rem set USERDIR=-Duser.dir=%PRJ%
-java  %USERDIR% %NANO_DEBUG% -Djava.awt.headless=true %DEBUG% -jar tsl2.nano.h5.0.0.4.jar %PRJ% 8070 >%PRJ%.log
+java  %USERDIR% %NANO_DEBUG% -Djava.awt.headless=true %DEBUG% -jar tsl2.nano.h5.0.0.4.jar %PRJ% 8070 
+REM >%PRJ%.log
 if not "%3"=="nopause" pause
