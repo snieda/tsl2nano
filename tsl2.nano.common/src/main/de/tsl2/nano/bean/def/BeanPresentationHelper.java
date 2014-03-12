@@ -535,11 +535,11 @@ public class BeanPresentationHelper<T> {
     public boolean isDefaultAttribute(IAttribute attribute) {
         AttributeDefinition<?> attr = (AttributeDefinition<?>) attribute;
         return (BeanContainer.instance() == null || BeanContainer.instance().hasPermission(attribute.getId(), null))
-            && (matches("default.present.attribute.id",
-                false) || !attr.id())
-            && (matches("default.present.attribute.multivalue", true) || !attr.isMultiValue())
-            && (matches("default.present.attribute.timestamp", false) || attr.temporalType() == null || !Timestamp.class
-                .isAssignableFrom(attr.temporalType()));
+            && (!attr.id() || matches("default.present.attribute.id",
+                false))
+            && (!attr.isMultiValue() || matches("default.present.attribute.multivalue", true))
+            && (attr.temporalType() == null || !Timestamp.class
+                .isAssignableFrom(attr.temporalType()) || matches("default.present.attribute.timestamp", false));
     }
 
     /**
@@ -965,7 +965,8 @@ public class BeanPresentationHelper<T> {
                 IAttributeDefinition attr = bean.getAttribute(names[i]);
                 if (attr.getType().isInterface() || !BeanClass.hasDefaultConstructor(attr.getType()))
                     ml = 0;
-                else if (isDefaultAttribute((IAttribute) attr) && !attr.isMultiValue()) {
+                //avoid stackoverflow checking if valueExpression was created already
+                else if (bean.valueExpression == null || isDefaultAttribute((IAttribute) attr) && !attr.isMultiValue()) {
                     ml = (1 << 7) * (attr.id() ? 1 : 0);
                     ml |= (1 << 6) * (attr.unique() ? 1 : 0);
                     ml |= (1 << 5) * (!attr.nullable() ? 1 : 0);

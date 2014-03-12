@@ -283,7 +283,7 @@ public class BeanValue<T> extends AttributeDefinition<T> implements IValueDefini
      */
     public static final BeanValue getBeanValue(Object bean, String attributeName) {
         //TODO: not performance optimized!
-        final BeanAttribute attribute = BeanAttribute.getBeanAttribute(bean.getClass(), attributeName);
+        final BeanAttribute attribute = BeanAttribute.getBeanAttribute(bean.getClass(), attributeName, true);
         BeanValue tbv = new BeanValue(bean, attribute.getAccessMethod());
         int i = beanValueCache.indexOf(tbv);
         if (i != -1) {
