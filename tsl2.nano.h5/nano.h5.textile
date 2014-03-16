@@ -113,7 +113,7 @@ The environment and the beandefinition are the main constructs serializing it's 
 ...
 The _BeanDefinition_ expects only _AttributeDefinition_s from deserializings - to be more readable. This  means, that extensions of AttributeDefinition are not handled!
 ...
-On the data side, all collections are wrapped into an object of type _BeanCollector, single instances that are prepared to be presented are wrapped into an object of type _Bean_. All attributes of a _Bean_ are wrapped into _BeanValue_s. The _BeanCollector_ and the _Bean_ are extensions of _BeanDefinition_, handling the attributes. While the used xml-serializer _Simple-XML_ is not able to create the desired root instance through reading an xml (we have to define the instance type on calling simple-xml), extensions of a _BeanDefinition_ are handled through a special mechanism, implemented in the class _Extension_.
+On the data side, all collections are wrapped into an object of type _BeanCollector_, single instances that are prepared to be presented are wrapped into an object of type _Bean_. All attributes of a _Bean_ are wrapped into _BeanValue_s. The _BeanCollector_ and the _Bean_ are extensions of _BeanDefinition_, handling the attributes. While the used xml-serializer _Simple-XML_ is not able to create the desired root instance through reading an xml (we have to define the instance type on calling simple-xml), extensions of a _BeanDefinition_ are handled through a special mechanism, implemented in the class _Extension_.
 
 ##### Registered services and definitions through the environment
 
@@ -267,9 +267,22 @@ The meta-frame.html defines the html header and an empty body. Inside the header
 
 ### Configuring Presentation, Layout and Constraints
 
-Each bean and each bean-attribute can define a layout and layout-constraints through it's presentable object. It is easy to do layout definitions programmatically through the BeanPresentationHelper, but in this chapter we describe only the xml configuration.
+Each bean and each bean-attribute can define a layout and layout-constraints through it's presentable object (see class _IPresentable_). It is easy to do layout definitions programmatically through the _BeanPresentationHelper_, but in this chapter we describe only the xml configuration.
 
 TODO describe
+
+### Bean-Collector Presentation
+
+A bean-collector shows a set of bean-instances. The collector is defined by a bean-type or directly by a collection of items. The bit-field _mode_ defines, which actions can be done on a bean-collector.
+
+Mode:
+* Searchable: a search and reset action can be done on that bean-collector
+* Filter: a table filter will be provided
+* Editable: an open action is available
+* Creatable: new and delete actions are available
+* Assignable: an assign action can assign the current selection to the previous edited bean.
+
+If an item was selected and opened, this item (a _Bean_) will be presented as detail in a new page.
 
 ### Bean Presentation
 
@@ -277,11 +290,15 @@ TODO describe
 
 #### Value Groups and Sub-Panels
 
-#### Rule-Attributes
-
 ### Attribute Presentation
 
-## Showing calculated values through integrated rule engine
+#### Rule-Attributes
+
+##### Showing calculated values through integrated rule engine
+
+#### Presenting data or media like images, audio, video
+
+If an attribute holds data of type _byte[]_, this may be presented as image or any other non-textual type. The default-mechanism will declare the attributes type as _TYPE_DATA_ which will save the attributes value to a temporary file to be sent through http to the client and shown as image - or if a special style was defined, as embed, object, audio, video, canvas or device - as known from _HTML5_ embedded content tags.
 
 ## Working on a page using the Keyboard
 
@@ -298,6 +315,7 @@ Each action is able to define a shortcut (keystroke). if not set, the default wi
 ### Tableheader Buttons
 
 Each table of beans will provide a table-header with Buttons to do up/down sorting (on first activation, up-sorting will be done, on second activation, down-sorting). On these Buttons we can't use the algorithm above to avoid shortcut collisions. These buttons will have shortcuts depending on their indexes. So, the first table-header column will be activated through a hit to _ALT+1_.
+
 ## Networking Modes
 
 The _Nano.H5_ application can be started in different modes.
