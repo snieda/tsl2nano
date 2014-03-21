@@ -18,7 +18,10 @@ import javax.persistence.EntityManager;
 import org.apache.commons.logging.Log;
 
 import de.tsl2.nano.core.log.LogFactory;
+import de.tsl2.nano.core.util.StringUtil;
 import de.tsl2.nano.persistence.GenericLocalServiceBean;
+import de.tsl2.nano.service.util.BeanContainerUtil;
+import de.tsl2.nano.service.util.ServiceUtil;
 
 /**
  * Service for persistence-unit 'replication'
@@ -48,7 +51,7 @@ public class ReplicationServiceBean extends GenericLocalServiceBean {
     /**
      * this extension tries to persist new data from source db to this replication db. the method
      * {@link #addReplicationEntities(de.tsl2.nano.service.util.IGenericBaseService, java.util.List, java.util.List)}
-     * inserts all unpersisted relations - but in an undefined order. so we have to trie to persist the collection for
+     * inserts all unpersisted relations - but in an undefined order. so we have to try to persist the collection for
      * several times. if no element was persisted in one loop, the trial and error job stops.
      */
     @Override
@@ -61,7 +64,16 @@ public class ReplicationServiceBean extends GenericLocalServiceBean {
             for (Iterator<T> it = beans.iterator(); it.hasNext();) {
                 T bean = it.next();
                 try {
-                    newBeans.add(persist/*NoTransaction*/(bean));//, true, true));
+                    Object id = ServiceUtil.getId(bean);
+                    bean = persist/*NoTransaction*/(bean);//, true, true));
+                    newBeans.add(bean);
+                    Object pid = ServiceUtil.getId(bean);
+                    //on @generatedvalue jpa will always create it's own id on new items
+                    if (id != null &&  !id.equals(pid)) {
+                        String entity = bean.getClass().getSimpleName();
+                        String idColumn = ServiceUtil.getIdName(bean);
+                        executeQuery("update " + entity + " set " + idColumn + " = ?1 where " + idColumn + " = ?2", true, new Object[]{id, pid});
+                    }
                     it.remove();
                 } catch (Exception ex) {
                     LOG.error(ex.toString());
@@ -69,7 +81,7 @@ public class ReplicationServiceBean extends GenericLocalServiceBean {
                 }
             }
             if (count == beans.size())
-                throw new RuntimeException("replication couldn't be done on " + beans);
+                throw new RuntimeException("replication couldn't be done on " + StringUtil.toString(beans, 300));
         }
 //        connection().getTransaction().commit();
         return newBeans;

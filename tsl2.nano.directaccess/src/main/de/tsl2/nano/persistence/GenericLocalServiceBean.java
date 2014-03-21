@@ -65,7 +65,7 @@ public class GenericLocalServiceBean extends GenericReplicatingServiceBean {
      */
     @Override
     public <T> Collection<T> persistCollection(Collection<T> beans, Class... lazyRelations) {
-        connection().getTransaction().begin();
+        requireTransaction();
         try {
             Collection<T> persistCollection = super.persistCollection(beans);
             connection().getTransaction().commit();
@@ -82,7 +82,7 @@ public class GenericLocalServiceBean extends GenericReplicatingServiceBean {
      */
     @Override
     public <T> T persist(T bean, boolean refreshBean, boolean flush, Class... lazyRelations) {
-        connection().getTransaction().begin();
+        requireTransaction();
         try {
             T refreshObject = super.persist(bean, refreshBean, flush);
             connection().getTransaction().commit();
@@ -99,7 +99,7 @@ public class GenericLocalServiceBean extends GenericReplicatingServiceBean {
      */
     @Override
     public void remove(Object bean) {
-        connection().getTransaction().begin();
+        requireTransaction();
         try {
             super.remove(bean);
             connection().getTransaction().commit();
@@ -114,7 +114,7 @@ public class GenericLocalServiceBean extends GenericReplicatingServiceBean {
      */
     @Override
     public int executeQuery(String queryString, boolean nativeQuery, Object[] args) {
-        connection().getTransaction().begin();
+        requireTransaction();
         try {
             int count = super.executeQuery(queryString, nativeQuery, args);
             connection().getTransaction().commit();
@@ -124,6 +124,18 @@ public class GenericLocalServiceBean extends GenericReplicatingServiceBean {
             ManagedException.forward(ex);
             return -1;
         }
+    }
+
+    /**
+     * requireTransaction
+     * @return true, if new transaction was created
+     */
+    private boolean requireTransaction() {
+        if (!connection().getTransaction().isActive()) {
+            connection().getTransaction().begin();
+            return true;
+        }
+        return false;
     }
 
     /**

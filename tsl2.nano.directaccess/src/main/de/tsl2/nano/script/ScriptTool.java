@@ -51,7 +51,7 @@ public class ScriptTool implements Serializable {
     public ScriptTool() {
         initAntScriptFile();
 
-        availableActions = new ArrayList<IAction>(1);
+        availableActions = new ArrayList<IAction>(8);
         IAction<?> a = new CommonAction<Object>("scripttool.sql.id", "Start Sql-Query", "Starts an sql statement") {
             @Override
             public Object action() throws Exception {
@@ -178,7 +178,7 @@ public class ScriptTool implements Serializable {
             public Object action() throws Exception {
                 char[] fileData = FileUtil.getFileData(getSourceFile(), null);
                 BeanValue.getBeanValue(scriptTool, "text").setValue(String.valueOf(fileData));
-                return "file '" + sourceFile + "' loaded";
+                return scriptTool;
             }
 
             @Override
@@ -300,8 +300,9 @@ public class ScriptTool implements Serializable {
     
     public IAction<Collection<?>> runner() {
         if (runner == null) {
-            String id = "scipttool.go";
-            runner = new CommonAction(id, id, id) {
+            String id = "scripttool.go";
+            String lbl = Environment.translate(id, true);
+            runner = new CommonAction(id, lbl, lbl) {
                 @Override
                 public Object action() throws Exception {
                     return selectedAction != null ? selectedAction.activate() : null;

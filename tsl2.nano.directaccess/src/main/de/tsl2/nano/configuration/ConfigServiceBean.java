@@ -299,7 +299,7 @@ public class ConfigServiceBean implements IGenericService {
      * {@inheritDoc}
      */
     @Override
-    public <T> Collection<T> findByNamedQuery(Class<T> beanType, String namedQuery, Object... args) {
+    public <T> Collection<T> findByNamedQuery(Class<T> beanType, String namedQuery, int maxResult, Object... args) {
         throw new UnsupportedOperationException();
     }
 

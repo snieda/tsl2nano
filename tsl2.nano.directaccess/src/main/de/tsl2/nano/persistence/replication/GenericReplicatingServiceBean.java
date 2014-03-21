@@ -105,7 +105,8 @@ public class GenericReplicatingServiceBean extends GenericServiceBean {
                 IGenericBaseService r = it.next();
                 if (checkConnection(r, false)) {
                     replication = r;
-                    it.remove();
+                    //TODO: do we really need this 'remove'? --> unsupportedoperation
+//                    it.remove();
                     return replication;
                 }
             }
@@ -177,6 +178,7 @@ public class GenericReplicatingServiceBean extends GenericServiceBean {
                     public void run() {
                         LinkedList<Object> rep = new LinkedList<Object>(result);
                         addReplicationEntities(repService, rep, rep);
+                        LOG.debug("trying to replicate " + rep.size() + " objects");
                         repService.persistCollection(rep);
                     }
                 });
