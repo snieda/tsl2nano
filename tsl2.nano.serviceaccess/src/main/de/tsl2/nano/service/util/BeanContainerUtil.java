@@ -20,6 +20,7 @@ import java.util.Map;
 import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
+import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
 import javax.persistence.JoinColumn;
 import javax.persistence.OneToMany;
@@ -181,6 +182,18 @@ public class BeanContainerUtil {
      */
     public static boolean isPersistable(Class<?> beanClass) {
         return BeanClass.getBeanClass(BeanClass.getDefiningClass(beanClass)).isAnnotationPresent(Entity.class);
+    }
+
+    /**
+     * checks, if given attribute is annotated with {@link GeneratedValue}.
+     * 
+     * @param beanClass
+     * @param attribute
+     * @return true, if attribute (field or method) is annotated with {@link GeneratedValue}.
+     */
+    public static boolean isGeneratedValue(Class<?> beanClass, String attribute) {
+        return BeanAttribute.getBeanAttribute(BeanClass.getDefiningClass(beanClass), attribute).getAnnotation(
+            GeneratedValue.class) != null;
     }
 
     /**

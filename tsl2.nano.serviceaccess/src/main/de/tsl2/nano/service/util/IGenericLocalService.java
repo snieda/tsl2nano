@@ -89,15 +89,4 @@ public interface IGenericLocalService extends IGenericBaseService, IQueryService
      */
     void initServerSideFactories();
 
-    /**
-     * used to work with named queries - on entities without table or view binding.
-     * 
-     * @param <T> virtual entity type
-     * @param beanType entity without table or view binding
-     * @param namedQuery named query (see annotation on given entity)
-     * @param args query arguments
-     * @return list of entities
-     */
-    <T> Collection<T> findByNamedQuery(Class<T> beanType, String namedQuery, Object... args);
-
 }

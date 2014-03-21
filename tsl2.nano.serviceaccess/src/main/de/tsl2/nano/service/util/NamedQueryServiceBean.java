@@ -42,7 +42,7 @@ public class NamedQueryServiceBean extends AbstractStatelessServiceBean implemen
      * {@inheritDoc}
      */
     @Override
-    public <T> Collection<T> findByNamedQuery(Class<T> beanType, String namedQuery, Object... args) {
+    public <T> Collection<T> findByNamedQuery(Class<T> beanType, String namedQuery, int maxResult, Object... args) {
         //if no full path was given, we fill it through the beanType
         if (!namedQuery.contains(".")) {
             namedQuery = getNamedQueryPrefix(beanType) + namedQuery;
@@ -53,7 +53,7 @@ public class NamedQueryServiceBean extends AbstractStatelessServiceBean implemen
             + "' with arguments: "
             + StringUtil.toString(args, 100));
         Query query = connection().createNamedQuery(namedQuery);
-        query = query.setMaxResults(getMaxResult());
+        query = query.setMaxResults(maxResult != -1 ? maxResult : getMaxResult());
         query = setParameter(query, Arrays.asList(args));
         logTrace(query);
         return query.getResultList();
@@ -83,7 +83,7 @@ public class NamedQueryServiceBean extends AbstractStatelessServiceBean implemen
             namedQuery = getNamedQueryPrefix(beanType) + NAMEDQUERY_INSERT;
         }
         final Bean b = new Bean(bean);
-        findByNamedQuery(beanType, namedQuery, b.getValues());
+        findByNamedQuery(beanType, namedQuery, -1, b.getValues());
         return bean;
     }
 
@@ -107,7 +107,7 @@ public class NamedQueryServiceBean extends AbstractStatelessServiceBean implemen
         } else {
             namedQuery = getNamedQueryPrefix(beanType) + NAMEDQUERY_DELETE;
         }
-        findByNamedQuery(beanType, namedQuery, id);
+        findByNamedQuery(beanType, namedQuery, -1, id);
     }
 
     /**

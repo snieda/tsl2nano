@@ -37,6 +37,6 @@ public interface INamedQueryService {
      * @param args query arguments
      * @return list of entities
      */
-    <T> Collection<T> findByNamedQuery(Class<T> beanType, String namedQuery, Object... args);
+    <T> Collection<T> findByNamedQuery(Class<T> beanType, String namedQuery, int maxResult, Object... args);
 
 }

@@ -75,7 +75,7 @@ public class GenericServiceBean extends NamedQueryServiceBean implements IGeneri
         checkContextSecurity();
         if (isVirtualEntity(beanType)) {
             if (isNamedQuery(beanType))
-                return findByNamedQuery(beanType, getNamedQueryByArguments(beanType));
+                return findByNamedQuery(beanType, getNamedQueryByArguments(beanType), maxResult);
         }
         final StringBuffer qStr = createStatement(beanType);
         Map<String, ?> hints = MapUtil.asMap("org.hibernate.cacheable",
@@ -128,7 +128,7 @@ public class GenericServiceBean extends NamedQueryServiceBean implements IGeneri
         checkContextSecurity();
         if (isVirtualEntity(beanType)) {
             if (isNamedQuery(beanType)) {
-                final Collection<T> result = findByNamedQuery(beanType, getNamedQueryByArguments(beanType, id), id);
+                final Collection<T> result = findByNamedQuery(beanType, getNamedQueryByArguments(beanType, id), -1, id);
                 if (result.size() > 1) {
                     LOG.warn("findById (" + beanType
                         + ", "
@@ -545,7 +545,7 @@ public class GenericServiceBean extends NamedQueryServiceBean implements IGeneri
             : secondBean != null ? secondBean.getClass() : null);
         if (isVirtualEntity(beanType)) {
             if (isNamedQuery(beanType))
-                return findByNamedQuery(beanType, getNamedQueryByArguments(beanType));
+                return findByNamedQuery(beanType, getNamedQueryByArguments(beanType), maxResult);
         }
         StringBuffer qStr = new StringBuffer();
         Collection<?> parameter = createBetweenStatement(qStr, firstBean, secondBean, caseInsensitive);
