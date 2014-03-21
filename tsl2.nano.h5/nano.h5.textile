@@ -156,7 +156,7 @@ To start nano.h5 you have to call it with following syntax:
 
 java -jar de.nano.h5.Loader [environment-path (default: config] [http-server-port (default: 8067)]
 
-this call is implemented inside the _start.bat_ script. Use that, if you are on windows.
+This call is implemented inside the _start.bat_ script. Use that, if you are on windows.
 If you start it on windows, a browser will be opened to show the initial screen:
 
 [[img src=doc/h5.sample.start.jpg]]
@@ -302,19 +302,29 @@ _QueryResult_s can be defined through the _ScriptTool_. There you can test your 
 
 The _Controller_ is an extension of _BeanCollector_ to present a collection of beans through their actions. Theses actions should be ease change-actions for attributes - like de- or increasing their values. This feature should be used for touch-screen applications.
 
-THIS FEATURE IS NOT USABLE YET!
-
 ### Bean Presentation
+
+...
 
 #### Multiple Value Relations
 
+...
+
 #### Value Groups and Sub-Panels
+
+...
 
 ### Attribute Presentation
 
+...
+
 #### Rule-Attributes
 
+...
+
 ##### Showing calculated values through integrated rule engine
+
+...
 
 #### Presenting data or media like images, audio, video
 
@@ -407,8 +417,6 @@ Use that parameters for your activity condition.
 TODO: use bean-path to inspect condition expressions like 'times.type = F'.
 
 ## Database Replication - Working Offline
-
-NOT FINISHED YET
 
 It is possible to replicate the data loaded from remote database. The replication will be done through a second persistence-unit 'replication'. For each user an own local replication database will be created.
 
