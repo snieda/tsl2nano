@@ -504,14 +504,14 @@ starting ${ant.project.name}:
 
 	<target name="sh.encode.base64" unless="disable_sh.encode.base64" description="encode perhaps a binary to base64-text">
 		<antcall target="sh.call.method">
-			<param name="arg1" value="de.tsl2.nano.util.FileUtil" />
+			<param name="arg1" value="de.tsl2.nano.core.util.FileUtil" />
 			<param name="arg2" value="encodeBase64" />
 		</antcall>
 	</target>
 
 	<target name="sh.decode.base64" unless="disable_sh.decode_base64" description="decode a base64-text to its original form (perhaps binary)">
 		<antcall target="sh.call.method">
-			<param name="arg1" value="de.tsl2.nano.util.FileUtil" />
+			<param name="arg1" value="de.tsl2.nano.core.util.FileUtil" />
 			<param name="arg2" value="decodeBase64" />
 		</antcall>
 	</target>
@@ -581,7 +581,7 @@ starting ${ant.project.name}:
 		<!--		<property name="arg3" value="shell.xml" />
 		<property name="arg4" value="count(//target)" /> -->
 		<antcall target="sh.call.method">
-			<param name="arg1" value="de.tsl2.nano.execution.XmlUtil" />
+			<param name="arg1" value="de.tsl2.nano.core.util.XmlUtil" />
 			<param name="arg2" value="xpath" />
 			<param name="arg3" value="${sh.xml.xpath.file}" />
 			<param name="arg4" value="${sh.xml.xpath.expression}" />
@@ -600,7 +600,7 @@ starting ${ant.project.name}:
 	<target name="sh.xml.velocity" unless="disable_sh.velocity" description="do velocity transformations with template and object infos">
 		<property name="sh.xml.velocity.template" value="template.vm" />
 		<antcall target="sh.call.method">
-			<param name="arg1" value="de.tsl2.nano.execution.XmlUtil" />
+			<param name="arg1" value="de.tsl2.nano.core.util.XmlUtil" />
 			<param name="arg2" value="transform" />
 			<param name="arg3" value="${sh.xml.velocity.template}" />
 		</antcall>
