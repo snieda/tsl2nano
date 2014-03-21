@@ -160,6 +160,16 @@ public class Bean<T> extends BeanDefinition<T> {
     }
 
     /**
+     * unique id for this bean. on persistable beans, it is defined by evaluating {@link #getIdAttribute()} on current instance.
+     * @return unique bean id
+     */
+    @Override
+    public Object getId() {
+        IAttribute idAttribute = getIdAttribute();
+        return idAttribute != null ? idAttribute.getValue(instance) : super.getId();
+    }
+    
+    /**
      * only to be used by framework for performance aspects.
      * 
      * @param instance
@@ -627,7 +637,7 @@ public class Bean<T> extends BeanDefinition<T> {
         int length = Array.getLength(array);
         Bean bean = new Bean(array);
         for (int i = 0; i < length; i++) {
-            bean.addAttribute(new BeanValue(bean, new ArrayValue(String.valueOf(i), i)));
+            bean.addAttribute(new BeanValue(bean.instance, new ArrayValue(String.valueOf(i), i)));
         }
         return bean;
     }

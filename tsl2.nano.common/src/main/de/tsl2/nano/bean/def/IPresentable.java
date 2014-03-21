@@ -86,6 +86,9 @@ public interface IPresentable extends Serializable {
     /** sets optional layout constraints */
     <L extends Serializable, T extends IPresentable> T setLayoutConstraints(L layoutConstraints);
 
+    /** add layout constraint element to the current layout constraints */
+    <T extends IPresentable> T addLayoutConstraints(String name, Object value);
+    
     /** sets an enabler. use {@link IActivable#INACTIVE} to totally disable an item */
     public <T extends IPresentable> T setEnabler(IActivable enabler);
     
@@ -151,18 +154,34 @@ public interface IPresentable extends Serializable {
     public static final int TYPE_INPUT_SEARCH = 1 << 20;
     public static final int TYPE_OPTION_RADIO = 1 << 21;
 
+    /** standard style */
     public static final int STYLE_SINGLE = 1;
+    /** to be used for e.g. multiline text (textarea), multiple selection, etc. */
     public static final int STYLE_MULTI = 2;
     
     /*
      * define some abstract alignments. on each gui system, you will need to convert the numbers
      */
-    public static final int ALIGN_LEFT= 1;
-    public static final int ALIGN_CENTER = 2;
-    public static final int ALIGN_RIGHT = 4;
-    public static final int ALIGN_TOP = 8;
-    public static final int ALIGN_BOTTOM = 16;
+    public static final int STYLE_ALIGN_LEFT = 4;
+    public static final int STYLE_ALIGN_CENTER = 8;
+    public static final int STYLE_ALIGN_RIGHT = 16;
+    public static final int STYLE_ALIGN_TOP = 32;
+    public static final int STYLE_ALIGN_BOTTOM = 64;
     
+    /*
+     * this styles are defined for html5 media tags
+     */
+    public static final int STYLE_DATA_IMG = 128;
+    public static final int STYLE_DATA_EMBED = 256;
+    public static final int STYLE_DATA_OBJECT = 1 << 10;
+    public static final int STYLE_DATA_CANVAS = 1 << 11;
+    public static final int STYLE_DATA_AUDIO = 1 << 12;
+    public static final int STYLE_DATA_VIDEO = 1 << 13;
+    public static final int STYLE_DATA_DEVICE = 1 << 14;
+
+    /*
+     * standard colors
+     */
     public static final int[] COLOR_WHITE = new int[]{255, 255, 255};
     public static final int[] COLOR_BLACK = new int[]{0, 0, 0};
     public static final int[] COLOR_GRAY = new int[]{128, 128, 128};
@@ -275,6 +294,15 @@ public interface IPresentable extends Serializable {
 
         @Override
         public <L extends Serializable, T extends IPresentable> T setLayout(L layout) {
+            throw new UnsupportedOperationException();
+        }
+
+        
+        /**
+         * {@inheritDoc}
+         */
+        @Override
+        public <T extends IPresentable> T addLayoutConstraints(String name, Object value) {
             throw new UnsupportedOperationException();
         }
 

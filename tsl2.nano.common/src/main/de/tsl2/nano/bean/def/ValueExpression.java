@@ -169,11 +169,12 @@ public class ValueExpression<TYPE> implements IValueExpression<TYPE>, IConverter
                 .implementationError(
                     "The conversion from string to object is only available, if the ValueExpression was created with a class type argument!",
                     "type of value-expression '" + toString() + "' is null");
+        if (Util.isEmpty(toValue))
+            return null;
         //if type is object we return the value itself - it's an instanceof Object
         if (type.isAssignableFrom(Object.class))
             return (TYPE) toValue;
-        if (Util.isEmpty(toValue))
-            return null;
+        
         TYPE exampleBean = createInstance(toValue);
         //TODO: how-to extract the attribute-name information from expression?
         Bean<TYPE> b = (Bean<TYPE>) Bean.getBean((Serializable) exampleBean);

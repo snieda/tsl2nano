@@ -14,6 +14,7 @@ import java.security.MessageDigest;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.Map;
 
 import de.tsl2.nano.core.ManagedException;
 
@@ -66,11 +67,14 @@ public class Util {
     /**
      * isEmpty
      * 
-     * @param object object to analyze
+     * @param obj object to analyze
      * @return true, if object is null or empty
      */
-    public static final boolean isEmpty(Object object) {
-        return isEmpty(object, false);
+    @SuppressWarnings("rawtypes")
+    public static final boolean isEmpty(Object obj) {
+        return isEmpty(obj, false) || (obj.getClass().isArray() && Array.getLength(obj) == 0)
+            || ((obj instanceof Collection) && ((Collection) obj).isEmpty())
+            || ((obj instanceof Map) && ((Map) obj).isEmpty());
     }
 
     /**
@@ -83,6 +87,21 @@ public class Util {
         return object == null || (trim ? object.toString().trim().isEmpty() : object.toString().isEmpty());
     }
 
+    /**
+     * delegates to {@link #isContainer(Class)}
+     */
+    public static final boolean isContainer(Object obj) {
+        return obj != null ? isContainer(obj.getClass()) : false;
+    }
+    /**
+     * isContainer
+     * @param cls
+     * @return true, if cls is a collection or map
+     */
+    public static final boolean isContainer(Class<?> cls) {
+        return /*cls.isArray() || */Collection.class.isAssignableFrom(cls) || Map.class.isAssignableFrom(cls);
+    }
+    
     /**
      * checks, whether entry is one of elements
      * 

@@ -69,6 +69,7 @@ public class Presentable implements IIPresentable, Serializable {
         style =
             attr instanceof IAttributeDefinition ? helper.getDefaultHorizontalAlignment((IAttributeDefinition<?>) attr)
                 : helper.getDefaultHorizontalAlignment(attr);
+        style |= helper.getDefaultStyle(attr);
         description = label;
         /*
          * to be enabled, the attribute must be 
@@ -304,6 +305,11 @@ public class Presentable implements IIPresentable, Serializable {
         this.layoutConstraints = layoutConstraints;
     }
 
+    @Override
+    public <T extends IPresentable> T addLayoutConstraints(String name, Object value) {
+        throw new UnsupportedOperationException();
+    }
+    
     @Override
     public void setIcon(String icon) {
         this.icon = icon;

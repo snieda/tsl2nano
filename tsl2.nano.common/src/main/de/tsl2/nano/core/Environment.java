@@ -430,6 +430,10 @@ public class Environment {
         return self().properties.getProperty(KEY_CONFIG_PATH);
     }
 
+    public static String getTempPath() {
+        return self().properties.getProperty(KEY_CONFIG_PATH) + "temp/";
+    }
+
     /**
      * getMainPackage
      * 

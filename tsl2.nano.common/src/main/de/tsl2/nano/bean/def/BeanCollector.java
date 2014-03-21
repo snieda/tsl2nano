@@ -52,6 +52,7 @@ import de.tsl2.nano.core.cls.BeanAttribute;
 import de.tsl2.nano.core.log.LogFactory;
 import de.tsl2.nano.core.util.DateUtil;
 import de.tsl2.nano.core.util.StringUtil;
+import de.tsl2.nano.core.util.Util;
 import de.tsl2.nano.execution.Profiler;
 import de.tsl2.nano.format.FormatUtil;
 import de.tsl2.nano.util.DelegatorProxy;
@@ -158,7 +159,7 @@ public class BeanCollector<COLLECTIONTYPE extends Collection<T>, T> extends Bean
     public BeanCollector(Class<T> beanType, final COLLECTIONTYPE collection, int workingMode, Composition composition) {
         this(new BeanFinder<T, Object>(beanType), workingMode, composition);
         this.collection = collection;
-        this.isStaticCollection = collection != null;
+        this.isStaticCollection = !Util.isEmpty(collection);
         if (isStaticCollection)
             this.searchStatus = "";
     }
@@ -187,6 +188,7 @@ public class BeanCollector<COLLECTIONTYPE extends Collection<T>, T> extends Bean
             int workingMode,
             Composition composition) {
 //        setName(Messages.getString("tsl2nano.list") + " " + getName());
+        this.isStaticCollection = !Util.isEmpty(collection);
         this.collection = collection != null ? collection : (COLLECTIONTYPE) new LinkedList<T>();
         setBeanFinder(beanFinder);
         //TODO: the check for attribute can't be done here - perhaps attributes will be added later!
@@ -234,6 +236,8 @@ public class BeanCollector<COLLECTIONTYPE extends Collection<T>, T> extends Bean
         if (beanFinder == null) {
             if (collection != null && collection.size() > 0) {
                 setBeanFinder(new BeanFinder((Class<T>) collection.iterator().next().getClass()));
+            } else {
+                setBeanFinder(new BeanFinder(super.getClazz()));
             }
         }
         return beanFinder.getType();
@@ -1118,10 +1122,12 @@ public class BeanCollector<COLLECTIONTYPE extends Collection<T>, T> extends Bean
             int workingMode,
             Composition composition) {
         BeanDefinition<I> beandef =
-            getBeanDefinition(beanType.getSimpleName() + (useExtraCollectorDefinition() ? POSTFIX_COLLECTOR
-                : ""),
-                beanType,
-                false);
+            (BeanDefinition<I>) (beanType.isArray() && !Util.isEmpty(collection) ? Bean
+                .getBean((Serializable) collection.iterator().next()) :
+                getBeanDefinition(beanType.getSimpleName() + (useExtraCollectorDefinition() ? POSTFIX_COLLECTOR
+                    : ""),
+                    beanType,
+                    false));
         return (BeanCollector<C, I>) createCollector(collection, workingMode, composition, beandef);
     }
 

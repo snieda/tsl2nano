@@ -95,7 +95,8 @@ public class FileUtil {
                 if (zipEntry.getName().matches(filter)) {
                     files.add(zipEntry.getName());
                 }
-                sourceStream.closeEntry();
+                if (closeStream)
+                    sourceStream.closeEntry();
             }
             return (String[]) files.toArray(new String[0]);
         } catch (final Exception ex) {
@@ -167,7 +168,34 @@ public class FileUtil {
             }
         }
     }
-
+    
+    /**
+     * extract given zipStream to destDir using regExFilter. not performance-optimized!
+     * @param zipStream
+     * @param destDir
+     * @param regExFilter
+     */
+    public static void extract(String zipFile, String destDir, String regExFilter) {
+        ZipInputStream zipStream = FileUtil.getJarInputStream(zipFile);
+        String[] zipFiles = FileUtil.readFileNamesFromZip(zipStream, regExFilter, true);
+        /*
+         * as the inflaterzipstream is not able to reset it's read-position, we have
+         * to reopen the zip-stream
+         */
+        zipStream = FileUtil.getJarInputStream(zipFile);
+        
+        //reopen it - the zipEntries are closed
+        for (String file : zipFiles) {
+            byte[] data = FileUtil.readFromZip(zipStream, file, false);
+            if (data == null || data.length == 0) {
+                new File(destDir + file).mkdirs();
+            } else if (!new File(destDir + file).exists()){
+                FileUtil.writeBytes(data, destDir + file, false);
+            }
+        }
+        
+    }
+    
     //perhaps we can use it in future
     private static byte[] readBytes(InputStream stream, String entryName, int len) throws IOException {
         LOG.debug("loading stream-entry " + entryName + " with " + len + " bytes");

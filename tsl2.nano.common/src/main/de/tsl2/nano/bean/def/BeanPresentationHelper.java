@@ -9,9 +9,9 @@
  */
 package de.tsl2.nano.bean.def;
 
-import static de.tsl2.nano.bean.def.IPresentable.ALIGN_CENTER;
-import static de.tsl2.nano.bean.def.IPresentable.ALIGN_LEFT;
-import static de.tsl2.nano.bean.def.IPresentable.ALIGN_RIGHT;
+import static de.tsl2.nano.bean.def.IPresentable.STYLE_ALIGN_CENTER;
+import static de.tsl2.nano.bean.def.IPresentable.STYLE_ALIGN_LEFT;
+import static de.tsl2.nano.bean.def.IPresentable.STYLE_ALIGN_RIGHT;
 import static de.tsl2.nano.bean.def.IPresentable.STYLE_MULTI;
 import static de.tsl2.nano.bean.def.IPresentable.TYPE_DATA;
 import static de.tsl2.nano.bean.def.IPresentable.TYPE_DATE;
@@ -286,7 +286,7 @@ public class BeanPresentationHelper<T> {
 
     public int getDefaultHorizontalAlignment(IAttributeDefinition<?> beanAttribute) {
         if (beanAttribute.length() == 1) {
-            return ALIGN_CENTER;
+            return STYLE_ALIGN_CENTER;
         }
         return getDefaultHorizontalAlignment((IAttribute) beanAttribute);
     }
@@ -295,11 +295,11 @@ public class BeanPresentationHelper<T> {
         int alignment;
         final Class<?> type = beanAttribute.getType();
         if (beanAttribute instanceof IAttributeDefinition && ((IAttributeDefinition<?>) beanAttribute).length() == 1)
-            alignment = ALIGN_RIGHT;
+            alignment = STYLE_ALIGN_RIGHT;
         else if (Number.class.isAssignableFrom(type)) {
-            alignment = ALIGN_RIGHT;
+            alignment = STYLE_ALIGN_RIGHT;
         } else {
-            alignment = ALIGN_LEFT;
+            alignment = STYLE_ALIGN_LEFT;
         }
         return alignment;
     }
@@ -384,7 +384,7 @@ public class BeanPresentationHelper<T> {
      * this method should only be used in a generating context.
      * 
      * @param attr beanattribute to evaluate
-     * @return the type-constant (e.g.: 'IFieldDescriptor.TYPE_LIST')
+     * @return the type-constant, defined by {@link IPresentable}.
      */
     public int getDefaultType(IAttribute attr) {
         int type = -1;
@@ -409,6 +409,21 @@ public class BeanPresentationHelper<T> {
             type = TYPE_SELECTION;
         }
         return type;
+    }
+
+    /**
+     * tries to evaluate a default style through attribute-properties. should be overwritten by specific
+     * implementations.
+     * 
+     * @param attr attribute to evaluate the style for
+     * @return any style defined by {@link IPresentable}.
+     */
+    public int getDefaultStyle(IAttribute attr) {
+        int style = 0;
+        if ((attr instanceof IAttributeDef)
+            && ((IAttributeDef) attr).length() > Environment.get("presentation.style.multi.min.length", 100))
+            style |= IPresentable.STYLE_MULTI;
+        return style;
     }
 
     /**
@@ -951,7 +966,7 @@ public class BeanPresentationHelper<T> {
     protected String getBestPresentationAttribute() {
         if (bean.isDefault() && bean.getAttributeDefinitions().size() > 0) {
             Class<?> bestType = Environment.get("bean.best.attribute.type", String.class);
-            String bestRegexp = Environment.get("bean.best.attribute.regexp", ".*(name|bezeichnung).*");
+            String bestRegexp = Environment.get("bean.best.attribute.regexp", ".*(name|bezeichnung|description|id).*");
             int bestminlength = Environment.get("bean.best.attribute.minlength", 2);
             int bestmaxlength = Environment.get("bean.best.attribute.maxlength", 50);
             String[] names = bean.getAttributeNames();
@@ -963,22 +978,33 @@ public class BeanPresentationHelper<T> {
             NavigableMap<Integer, Integer> levels = new TreeMap<Integer, Integer>();
             for (int i = 0; i < names.length; i++) {
                 IAttributeDefinition attr = bean.getAttribute(names[i]);
-                if (attr.getType().isInterface() || !BeanClass.hasDefaultConstructor(attr.getType()))
-                    ml = 0;
+                if (attr.getType().isInterface() || attr.isMultiValue()
+                    || !BeanClass.hasDefaultConstructor(attr.getType())
+                    || (!attr.isVirtual() && isGeneratedValue(bean.getDeclaringClass(), names[i])))
+                    ml = Integer.MIN_VALUE;
                 //avoid stackoverflow checking if valueExpression was created already
-                else if (bean.valueExpression == null || isDefaultAttribute((IAttribute) attr) && !attr.isMultiValue()) {
-                    ml = (1 << 7) * (attr.id() ? 1 : 0);
-                    ml |= (1 << 6) * (attr.unique() ? 1 : 0);
-                    ml |= (1 << 5) * (!attr.nullable() ? 1 : 0);
-                    ml |= (1 << 4) * (BeanClass.isAssignableFrom(bestType, attr.getType()) ? 1 : 0);
-                    ml |= (1 << 3) * (names[i].matches(bestRegexp) ? 1 : 0);
+                else if (bean.valueExpression == null || isDefaultAttribute((IAttribute) attr)) {
+                    ml = 0;
+                    ml = (1 << 10) * (attr.id() ? 1 : 0);
+                    ml |= (1 << 9) * (attr.unique() ? 1 : 0);
+                    ml |= (1 << 8) * (!attr.nullable() ? 1 : 0);
+                    ml |= (1 << 7) * (BeanClass.isAssignableFrom(bestType, attr.getType()) ? 1 : 0);
+                    ml |= (1 << 6) * (names[i].matches(bestRegexp) ? 1 : 0);
                     ml |=
-                        (1 << 2)
+                        (1 << 5)
                             * (attr.length() == -1
                                 || (attr.length() >= bestminlength && attr.length() <= bestmaxlength) ? 1
                                 : 0);
                 } else {
                     ml = 0;
+                }
+                /*
+                 * ml is the key - to be sorted in the treemap. if ml collates another entry,
+                 * we just increase it (lazy workaround). so, attributes with higher i win.
+                 */
+                if (ml != 0) {
+                    while (levels.containsKey(ml))
+                        ml++;
                 }
                 levels.put(ml, i);
             }
@@ -996,11 +1022,18 @@ public class BeanPresentationHelper<T> {
                 Long maxCount;
                 int i = 0;
                 try {
+                    IAttributeDefinition attr;
                     for (Iterator<Integer> it = keySet.iterator(); it.hasNext();) {
-                        if (bean.getAttribute(names[i]).isVirtual())
-                            continue;
                         //check data to seam unique
                         i = levels.get(it.next());
+                        attr = bean.getAttribute(names[i]);
+                        if (attr.nullable() || attr.isMultiValue()) {
+                            it.remove();
+                            continue;
+                        }
+                        //we don't check virtuals and uniques - they have to be correct
+                        if (attr.isVirtual() || attr.unique())
+                            break;
                         q = query.replace(ALIAS, names[i]);
                         grouping = BeanContainer.instance().getBeansByQuery(q, false, (Object[]) null);
                         maxCount = grouping.size() > 0 ? grouping.iterator().next() : null;
@@ -1009,7 +1042,7 @@ public class BeanPresentationHelper<T> {
                         it.remove();
                     }
                 } catch (Exception ex) {
-                    BeanAttribute id = bean.getIdAttribute();
+                    IAttribute id = bean.getIdAttribute();
                     if (id != null) {
                         LOG.warn("couldn't check attribute for unique data: " + bean.getName() + "." + names[i]
                             + ". Using id-attribute " + id.getId(), ex);
@@ -1020,11 +1053,17 @@ public class BeanPresentationHelper<T> {
                     }
                 }
                 if (levels.isEmpty()) {
-                    BeanAttribute id = bean.getIdAttribute();
-                    LOG.warn("No unique field as value-expression found for " + bean
-                        + " available fields: " + StringUtil.toString(names, 100)
-                        + ". Using id-attribute " + id.getId());
-                    return id.getName();
+                    IAttribute id = bean.getIdAttribute();
+                    String msg = "No unique field as value-expression found for " + bean
+                        + " available fields: " + StringUtil.toString(names, 100) + ". ";
+                    if (id != null) {
+                        LOG.warn(msg + "Using id-attribute " + id.getId());
+                        return id.getName();
+                    } else {
+                        LOG.warn(msg + "No id-attribute available. Using attribute : " + bean.getName() + "."
+                            + names[i]);
+                        return names[i];
+                    }
                 }
             }
             /*
@@ -1038,6 +1077,11 @@ public class BeanPresentationHelper<T> {
         } else {
             return null;
         }
+    }
+
+    private boolean isGeneratedValue(Class<T> declaringClass, String attribute) {
+        BeanClass bc = BeanClass.createBeanClass("javax.persistence.GeneratedValue");
+        return BeanAttribute.getBeanAttribute(declaringClass, attribute).getAnnotation(bc.getClazz()) != null;
     }
 
     /**
@@ -1098,7 +1142,7 @@ public class BeanPresentationHelper<T> {
         String[] names = bean.getAttributeNames();
         for (int i = 0; i < names.length; i++) {
             IAttributeDefinition<?> attr = (IAttributeDefinition<?>) bean.getAttribute(names[i]);
-            str.append(attr.getPresentation().getLabel() + TAB + ((BeanValue)attr).getValueText() + CR);
+            str.append(attr.getPresentation().getLabel() + TAB + ((BeanValue) attr).getValueText() + CR);
         }
         return str;
     }
@@ -1213,7 +1257,8 @@ public class BeanPresentationHelper<T> {
 
                         @Override
                         public boolean isEnabled() {
-                            return super.isEnabled() && collector.getCurrentData().size() > 0;
+                            return super.isEnabled() && !collector.isStaticCollection
+                                && collector.getCurrentData().size() > 0;
                         }
                     });
 
@@ -1230,7 +1275,8 @@ public class BeanPresentationHelper<T> {
 
                         @Override
                         public boolean isEnabled() {
-                            return super.isEnabled() && collector.getCurrentData().size() > 0;
+                            return super.isEnabled() && !collector.isStaticCollection
+                                && collector.getCurrentData().size() > 0;
                         }
                     });
                 }
@@ -1292,7 +1338,8 @@ public class BeanPresentationHelper<T> {
 
                     @Override
                     public boolean isEnabled() {
-                        return super.isEnabled() && ((IBeanCollector<?, T>) bean).getCurrentData().size() > 0;
+                        return super.isEnabled() && !bean.getDeclaringClass().isArray()
+                            && ((IBeanCollector<?, T>) bean).getCurrentData().size() > 0;
                     }
                 });
             }

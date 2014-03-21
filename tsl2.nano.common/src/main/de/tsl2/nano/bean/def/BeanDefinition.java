@@ -543,10 +543,6 @@ public class BeanDefinition<T> extends BeanClass<T> implements Serializable {
         getAttribute(name).setNumberDef(scale, precision);
     }
 
-    public void setId(String name) {
-        getAttribute(name).setId(true);
-    }
-
     /**
      * isPersistable
      * 
@@ -786,7 +782,7 @@ public class BeanDefinition<T> extends BeanClass<T> implements Serializable {
      * @return true, if bean class is assignable from {@link Collection}.
      */
     public boolean isMultiValue() {
-        return Collection.class.isAssignableFrom(clazz) || Map.class.isAssignableFrom(clazz);
+        return Util.isContainer(clazz);
     }
 
     /**
@@ -827,8 +823,14 @@ public class BeanDefinition<T> extends BeanClass<T> implements Serializable {
         return hashCode() == obj.hashCode();
     }
 
-    public BeanAttribute getIdAttribute() {
-        return BeanContainer.getIdAttribute(clazz);
+    public IAttribute getIdAttribute() {
+        //this was previously evaluated on each AttributeDefinition.defineDefaults()
+        Collection<IAttributeDefinition<?>> attrs = getAttributeDefinitions().values();
+        for (IAttributeDefinition<?> attr : attrs) {
+            if (attr.id())
+                return attr;
+        }
+        return null;
     }
 
     /**
@@ -995,6 +997,15 @@ public class BeanDefinition<T> extends BeanClass<T> implements Serializable {
         return types;
     }
 
+    /**
+     * saveVirtualDefinition
+     * @param name
+     */
+    public void saveVirtualDefinition(String name) {
+        setName(PREFIX_VIRTUAL + name);
+        saveDefinition();
+    }
+    
     /**
      * persists cache
      */
@@ -1276,6 +1287,14 @@ public class BeanDefinition<T> extends BeanClass<T> implements Serializable {
     @Override
     public String toString() {
         return getName();
+    }
+
+    public Object getId() {
+        return getName();
+    }
+
+    public void setIdAttribute(String name) {
+        getAttribute(name).setId(true);
     }
 
 }

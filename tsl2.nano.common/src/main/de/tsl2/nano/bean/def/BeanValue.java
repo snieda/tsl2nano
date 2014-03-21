@@ -44,6 +44,7 @@ import de.tsl2.nano.core.cls.BeanClass;
 import de.tsl2.nano.core.cls.IAttribute;
 import de.tsl2.nano.core.log.LogFactory;
 import de.tsl2.nano.core.util.StringUtil;
+import de.tsl2.nano.core.util.Util;
 import de.tsl2.nano.messaging.ChangeEvent;
 import de.tsl2.nano.messaging.EventController;
 import de.tsl2.nano.messaging.IListener;
@@ -199,7 +200,7 @@ public class BeanValue<T> extends AttributeDefinition<T> implements IValueDefini
     public File getValueFile() {
         T v = getValue();
         byte[] data = (byte[]) (v instanceof byte[] ? v : BeanUtil.serialize(v));
-        String fname = Environment.getConfigPath() + "temp/" + getId() + "-" + UUID.nameUUIDFromBytes(data);
+        String fname = Environment.getTempPath() + getId() + "-" + UUID.nameUUIDFromBytes(data);
         File file = new File(fname);
         if (!file.exists())
             FileUtil.writeBytes(data, file.getPath(), false);
@@ -214,7 +215,28 @@ public class BeanValue<T> extends AttributeDefinition<T> implements IValueDefini
      */
     public T setParsedValue(String source) {
         try {
-            T v = getParsedValue(source);
+            T v = null;
+            /* 
+             * if allowed values are defined, re-use their instances!
+             * it is not possible to move that block to value-expression,
+             * because value-expression doesn't have access to the attribute-definition!
+             */
+            if (!Util.isEmpty(source) && getConstraint().getAllowedValues() != null) {
+                String name;
+                for (Object allowed : getConstraint().getAllowedValues()) {
+                    name = Bean.getBean((Serializable) allowed).toString();
+                    if (name.equals(source)) {
+                        LOG.debug("recognition of selected value '" + name + "' successful!");
+                        v = (T) allowed;
+                        break;
+                    }
+                }
+                if (v == null)
+                    throw ManagedException.illegalArgument(source, getConstraint().getAllowedValues());
+            }
+            else {
+                v = getParsedValue(source);
+            }
             setValue(v);
             return v;
         } catch (Exception ex) {
