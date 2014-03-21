@@ -12,7 +12,6 @@ import java.net.InetAddress;
 import java.net.MalformedURLException;
 import java.net.Socket;
 import java.net.URL;
-import java.nio.channels.FileChannel;
 import java.text.FieldPosition;
 import java.text.Format;
 import java.text.ParsePosition;
@@ -22,10 +21,11 @@ import java.util.List;
 import java.util.Map;
 import java.util.Properties;
 import java.util.Stack;
-import java.util.zip.ZipInputStream;
 
 import org.apache.commons.logging.Log;
 
+import de.tsl2.nano.action.CommonAction;
+import de.tsl2.nano.action.IAction;
 import de.tsl2.nano.action.IActivable;
 import de.tsl2.nano.bean.BeanContainer;
 import de.tsl2.nano.bean.IBeanContainer;
@@ -45,9 +45,11 @@ import de.tsl2.nano.core.cls.BeanClass;
 import de.tsl2.nano.core.log.LogFactory;
 import de.tsl2.nano.core.util.FileUtil;
 import de.tsl2.nano.core.util.StringUtil;
-import de.tsl2.nano.core.util.Util;
 import de.tsl2.nano.execution.CompatibilityLayer;
 import de.tsl2.nano.execution.SystemUtil;
+import de.tsl2.nano.h5.configuration.BeanConfigurator;
+import de.tsl2.nano.h5.expression.Query;
+import de.tsl2.nano.h5.expression.QueryPool;
 import de.tsl2.nano.h5.expression.RuleExpression;
 import de.tsl2.nano.h5.expression.SQLExpression;
 import de.tsl2.nano.h5.navigation.EntityBrowser;
@@ -123,8 +125,9 @@ public class NanoH5 extends NanoHTTPD {
         try {
 //            LogFactory.setLogLevel(LogFactory.LOG_ALL);
             LOG.info(System.getProperties());
-            createStartPage(DEGBUG_HTML_FILE);
+            createStartPage();
             Environment.saveResourceToFileSystem("run.bat", "../run.bat");
+            Environment.saveResourceToFileSystem("shell.xml");
             Environment.saveResourceToFileSystem("mda.bat");
             Environment.saveResourceToFileSystem("mda.xml");
             Environment.saveResourceToFileSystem("mda.properties");
@@ -133,19 +136,7 @@ public class NanoH5 extends NanoHTTPD {
             String dir = Environment.getConfigPath();
             File icons = new File(dir + "icons");
             if (!icons.exists()) {
-                ZipInputStream zipStream = FileUtil.getJarInputStream("tsl2.nano.h5.default-resources.jar");
-                String[] zipFiles = FileUtil.readFileNamesFromZip(zipStream, null, true);
-                //reopen it - the zipEntries are closed
-                zipStream = FileUtil.getJarInputStream("tsl2.nano.h5.default-resources.jar");
-                for (String file : zipFiles) {
-                    byte[] data = FileUtil.readFromZip(zipStream, file, false);
-                    if (data == null || data.length == 0) {
-                        new File(dir + file).mkdirs();
-                    } else {
-//                        new File(file).getParentFile().mkdirs();
-                        FileUtil.writeBytes(data, dir + file, false);
-                    }
-                }
+                FileUtil.extract("tsl2.nano.h5.default-resources.jar", dir, null);
             }
 
             LOG.info("Listening on port " + serviceURL.getPort() + ". Hit Enter to stop.\n");
@@ -181,19 +172,23 @@ public class NanoH5 extends NanoHTTPD {
         return Integer.valueOf(StringUtil.substring(serviceURL, ":", null));
     }
 
+    protected String createStartPage() {
+        return createStartPage(DEGBUG_HTML_FILE);
+    }
+    
     /**
      * createStartPage
      * 
      * @param resultHtmlFile
      */
-    protected void createStartPage(String resultHtmlFile) {
+    protected String createStartPage(String resultHtmlFile) {
         InputStream stream = Environment.getResource("start.template");
         String startPage = String.valueOf(FileUtil.getFileData(stream, null));
         startPage = StringUtil.insertProperties(startPage,
             MapUtil.asMap("url", serviceURL, "text", Environment.getName()));
-        FileUtil.writeBytes(
-            Html5Presentation.createMessagePage("start.template", "Start " + Environment.getName() + "App", serviceURL)
-                .getBytes(), resultHtmlFile, false);
+        String page = Html5Presentation.createMessagePage("start.template", "Start " + Environment.getName() + "App", serviceURL);
+        FileUtil.writeBytes(page.getBytes(), resultHtmlFile, false);
+        return page;
     }
 
     /**
@@ -266,19 +261,6 @@ public class NanoH5 extends NanoHTTPD {
 
         Workflow workflow = Environment.get(Workflow.class);
 
-//        Sample Workflow
-//        LinkedList<BeanAct> acts = new LinkedList<BeanAct>();
-//        Parameter p = new Parameter();
-//        p.put("project", true);
-//        p.put("prjname", "test");
-//        acts.add(new BeanAct("timesByProject",
-//            "project&true",
-//            "select t from Times t where t.project.id = :prjname",
-//            p,
-//            "prjname"));
-//        workflow = new Workflow(acts);
-//        Environment.persist(workflow);
-//        
         if (workflow == null || workflow.isEmpty()) {
             LOG.debug("creating navigation stack");
             Stack<BeanDefinition<?>> navigationModel = new Stack<BeanDefinition<?>>();
@@ -369,6 +351,7 @@ public class NanoH5 extends NanoHTTPD {
      * @param beanClasses new loaded bean types
      * @return a root bean-collector holding all bean-type collectors.
      */
+    @SuppressWarnings("serial")
     protected BeanDefinition<?> createBeanCollectors(List<Class> beanClasses) {
         LOG.debug("creating collector for: ");
         List types = new ArrayList(beanClasses.size());
@@ -390,14 +373,37 @@ public class NanoH5 extends NanoHTTPD {
          * Perhaps show the script tool to do direct sql or ant
          */
         if (Environment.get("application.show.scripttool", false)) {
-            ScriptTool tool = new ScriptTool();
+            BeanConfigurator.defineAction(null);
+            final ScriptTool tool = new ScriptTool();
             Bean beanTool = Bean.getBean(tool);
-            beanTool.setAttributeFilter("text", "sourceFile", "selectedAction", "result");
+            beanTool.setAttributeFilter("sourceFile", "selectedAction", "text"/*, "result"*/);
             beanTool.getAttribute("text").getPresentation().setType(IPresentable.TYPE_INPUT_MULTILINE);
-            beanTool.getAttribute("result").getPresentation().setType(IPresentable.TYPE_TABLE);
+            beanTool.getAttribute("text").getConstraint().setLength(100000);
+            beanTool.getAttribute("text").getConstraint().setFormat(null/*RegExpFormat.createLengthRegExp(0, 100000, 0)*/);
+//            beanTool.getAttribute("result").getPresentation().setType(IPresentable.TYPE_TABLE);
             beanTool.getAttribute("sourceFile").getPresentation().setType(IPresentable.TYPE_ATTACHMENT);
             beanTool.getAttribute("selectedAction").setRange(tool.availableActions());
             beanTool.addAction(tool.runner());
+            
+            String id = "scripttool.define.query";
+            String lbl = Environment.translate(id, true);
+            IAction queryDefiner = new CommonAction(id, lbl, lbl) {
+                @Override
+                public Object action() throws Exception {
+                    String name = tool.getSourceFile().toLowerCase();
+                    Query query = new Query(name, tool.getText(), tool.getSelectedAction().getId().equals("scripttool.sql.id"), null);
+                    Environment.get(QueryPool.class).add(query.getName(), query);
+                    QueryResult qr = new QueryResult(query.getName());
+                    qr.setName(BeanDefinition.PREFIX_VIRTUAL + query.getName());
+                    qr.saveDefinition();
+                    return "New created specification-query: " + name;
+                }
+                @Override
+                public String getImagePath() {
+                    return "icons/save.png";
+                }
+            };
+            beanTool.addAction(queryDefiner);
             types.add(beanTool);
         }
         BeanCollector root = new BeanCollector(BeanCollector.class, types, MODE_EDITABLE | MODE_SEARCHABLE, null);
@@ -437,6 +443,12 @@ public class NanoH5 extends NanoHTTPD {
      * @return
      */
     protected List<Class> createBeanContainer(final Persistence persistence, PersistenceClassLoader runtimeClassloader) {
+        /*
+         * If a external jar-file was selected (-->absolute path), it will be copied
+         * If a relative jar-file-path is given, but the file doesn't exist, it will be generated
+         * On any circumstances: the jar-file has to be in the environments directory,
+         *    the persistence-units jar-file is always environment-dir + jar-filename --> found always through current classpath
+         */
         File selectedFile = new File(persistence.getJarFile());
         String jarFile =
             !selectedFile.isAbsolute() ? Environment.getConfigPath() + persistence.getJarFile()
@@ -452,9 +464,8 @@ public class NanoH5 extends NanoHTTPD {
             if (!selectedFile.exists())
                 throw new IllegalArgumentException(
                     "If an absolute file-path is given, the file has to exist! If the file-path is relative and doesn't exist, it will be created/generated");
-            String envFile = Environment.getConfigPath() + selectedFile.getName();
 //            if (!new File(envFile).exists())
-            FileUtil.copy(selectedFile.getPath(), envFile);
+            FileUtil.copy(selectedFile.getPath(), persistence.jarFileInEnvironment());
         }
 
         if (Environment.get("use.applicationserver", false)) {

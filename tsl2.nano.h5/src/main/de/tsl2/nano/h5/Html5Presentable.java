@@ -9,6 +9,7 @@ import de.tsl2.nano.bean.def.AttributeDefinition;
 import de.tsl2.nano.bean.def.IPresentable;
 import de.tsl2.nano.bean.def.Presentable;
 import de.tsl2.nano.core.Environment;
+import de.tsl2.nano.core.util.Util;
 
 /**
  * Hmtl5-specialized {@link de.tsl2.nano.bean.def.Presentable}. Not possible to be handled as inner class, because of
@@ -85,6 +86,12 @@ public class Html5Presentable extends Presentable {
     //to have write-access, we need this setter
     public <T extends IPresentable> T setLayoutConstraints(LinkedHashMap<String, String> lc) {
         this.layoutConstraints = lc;
+        return (T) this;
+    }
+    
+    @Override
+    public <T extends IPresentable> T addLayoutConstraints(String name, Object value) {
+        getLayoutConstraints().put(name, Util.asString(value));
         return (T) this;
     }
 }

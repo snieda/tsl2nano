@@ -22,6 +22,7 @@ import de.tsl2.nano.bean.def.BeanCollector;
 import de.tsl2.nano.bean.def.BeanDefinition;
 import de.tsl2.nano.bean.def.IBeanCollector;
 import de.tsl2.nano.core.util.StringUtil;
+import de.tsl2.nano.core.util.Util;
 import de.tsl2.nano.h5.Html5Presentation;
 
 /**
@@ -35,6 +36,7 @@ public class EntityBrowser implements IBeanNavigator {
 
     /**
      * constructor
+     * 
      * @param navigation
      */
     public EntityBrowser(Stack<BeanDefinition<?>> navigation) {
@@ -54,8 +56,11 @@ public class EntityBrowser implements IBeanNavigator {
         boolean isOnWork = false;
         boolean goBack = userResponseObject == null || userResponseObject == IAction.CANCELED;
         if (!goBack) {
-            BeanDefinition<?> userResponseBean = (BeanDefinition<?>) (userResponseObject instanceof BeanDefinition<?> ? userResponseObject
-                : Bean.getBean((Serializable) userResponseObject));
+            BeanDefinition<?> userResponseBean =
+                (BeanDefinition<?>) (userResponseObject instanceof BeanDefinition<?> ? userResponseObject
+                    : (Util.isContainer(userResponseObject)
+                        ? BeanCollector.getBeanCollector((Collection) userResponseObject, 0)
+                        : Bean.getBean((Serializable) userResponseObject)));
             isOnWork = navigation.contains(userResponseBean);
             if (!isOnWork) //--> go forward
                 return (current = navigation.push(userResponseBean));

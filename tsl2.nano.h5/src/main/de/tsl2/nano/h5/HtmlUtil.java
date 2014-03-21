@@ -69,6 +69,7 @@ public class HtmlUtil {
     public static final String ATTR_MAX = "max";
     public static final String ATTR_TEXT_ALIGN = "text-align";
     public static final String ATTR_FORMNOVALIDATE = "formnovalidate";
+    public static final String ATTR_FORMTARGET = "formtarget";
     public static final String ATTR_AUTOFOCUS = "autofocus";
 
     public static final String ATTR_TYPE_INPUT = "input";
@@ -84,6 +85,11 @@ public class HtmlUtil {
     public static final String ATTR_TYPE_PASSWORD = "password";
     public static final String ATTR_TYPE_SEARCH = "search";
 
+    public static final String TAG_TEXTAREA = "textarea";
+    public static final String ATTR_ROWS = "rows";
+    public static final String ATTR_COLS = "cols";
+    public static final String ATTR_WRAP = "wrap";
+
     public static final String TAG_SELECT = "select";
     public static final String TAG_OPTGROUP = "optgroup";
     public static final String TAG_OPTION = "option";
@@ -97,6 +103,13 @@ public class HtmlUtil {
     public static final String TAG_IMAGE = "img";
     public static final String ATTR_SRC = "src";
     public static final String ATTR_ALT = "alt";
+
+    public static final String TAG_AUDIO = "audio";
+    public static final String TAG_VIDEO = "video";
+    public static final String TAG_EMBED = "embed";
+    public static final String TAG_OBJECT = "object";
+    public static final String TAG_CANVAS = "canvas";
+    public static final String TAG_DEVICE = "device";
 
     public static final String TAG_BUTTON = "button";
 
@@ -163,6 +176,18 @@ public class HtmlUtil {
     public static final String BTN_PRINT = "tsl2nano.print";
     public static final String BTN_EXPORT = "tsl2nano.export";
 
+    //frame-ids to create a perspective
+    public static final String VAL_FRM_SELF = "_self";
+    public static final String VAL_FRM_BODY_TOP = "_top";
+    public static final String VAL_FRM_NEWTAB = "_blank";
+    public static final String VAL_FRM_PARENT = "_parent";
+    //unused yet!
+    public static final String VAL_FRM_CENTER = "FRAME_CENTER";
+    public static final String VAL_FRM_LEFT = "FRAME_LEFT";
+    public static final String VAL_FRM_RIGHT = "FRAME_RIGHT";
+    public static final String VAL_FRM_TOP = "FRAME_TOP";
+    public static final String VAL_FRM_BOTTOM = "FRAME_BOTTOM";
+    
     public static final String XML_TAG_START = "\\<.*\\>";
     public static final String END_TAG = "/";
 

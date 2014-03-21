@@ -38,6 +38,7 @@ import de.tsl2.nano.bean.def.BeanCollector;
 import de.tsl2.nano.bean.def.BeanDefinition;
 import de.tsl2.nano.bean.def.BeanPresentationHelper;
 import de.tsl2.nano.bean.def.BeanValue;
+import de.tsl2.nano.bean.def.IBeanCollector;
 import de.tsl2.nano.bean.def.IPageBuilder;
 import de.tsl2.nano.bean.def.IPresentable;
 import de.tsl2.nano.collection.CollectionUtil;
@@ -187,7 +188,8 @@ public class NanoH5Session {
         if (exceptionHandler.hasExceptions()) {
             msg = StringUtil.toFormattedString(exceptionHandler.clearExceptions(), 200);
         }
-        return builder.build(nav.next(returnCode), msg, true, nav.toArray());
+        BeanDefinition<?> model = nav.next(returnCode);
+        return model != null ? builder.build(model, msg, true, nav.toArray()) : server.createStartPage();
     }
 
     /**
@@ -216,6 +218,12 @@ public class NanoH5Session {
 
         refreshCurrentBeanValues(parms);
 
+        if (nav.current() instanceof Controller) {
+            Controller ctrl = (Controller) nav.current();
+            String actionName = (String) parms.keySet().iterator().next();
+            if (actionName != null && actionName.startsWith(Controller.PREFIX_CTRLACTION))
+                return ctrl.doAction(actionName);
+        }
         //follow links or fill selected items
         if (nav.current() instanceof BeanCollector) {
             //follow given link
@@ -415,7 +423,7 @@ public class NanoH5Session {
     }
 
     protected <T> boolean isSearchRequest(String actionId, BeanCollector<?, T> model) {
-        return actionId.equals(model.getSearchAction().getId());
+        return model.hasMode(IBeanCollector.MODE_SEARCHABLE) && actionId.equals(model.getSearchAction().getId());
     }
 
     protected <T> BeanCollector<?, T> processSearchRequest(Properties parms, BeanCollector<?, T> model) {

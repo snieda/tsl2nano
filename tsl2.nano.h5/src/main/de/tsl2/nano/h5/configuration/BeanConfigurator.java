@@ -18,6 +18,7 @@ import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 
+import de.tsl2.nano.action.CommonAction;
 import de.tsl2.nano.bean.def.AttributeDefinition;
 import de.tsl2.nano.bean.def.Bean;
 import de.tsl2.nano.bean.def.BeanDefinition;
@@ -92,11 +93,27 @@ public class BeanConfigurator<T> implements Serializable {
             configConstraint.setAttributeFilter("type", "minimum", "maximum", "format", "length", "scale", "precision", "nullable");
             configConstraint.getPresentable().setLayout(layout);
 
+            defineAction(layout);
+
             BeanDefinition<Entry> configEntry = BeanDefinition.getBeanDefinition(Entry.class);
             configEntry.setAttributeFilter("key", "value");
             configEntry.getPresentable().setLayout(layout);
         }
         return (Bean<BeanConfigurator<I>>) configBean;
+    }
+
+    /**
+     * defineAction
+     * @param layout
+     */
+    @SuppressWarnings("rawtypes")
+    public static void defineAction(Serializable layout) {
+        BeanDefinition<CommonAction> configAction = BeanDefinition.getBeanDefinition(CommonAction.class);
+        configAction.setAttributeFilter("id", "shortDescription", "longDescription", "keyStroke", "enabled", "default", "imagePath");
+        configAction.setIdAttribute("id");
+        configAction.setValueExpression(new ValueExpression<CommonAction>("{shortDescription}", CommonAction.class));
+        if (layout != null)
+            configAction.getPresentable().setLayout(layout);
     }
 
     /**

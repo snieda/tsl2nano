@@ -1,0 +1,88 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<persistence version="2.0" xmlns="http://java.sun.com/xml/ns/persistence" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://java.sun.com/xml/ns/persistence       http://java.sun.com/xml/ns/persistence/persistence_2_0.xsd">
+<!-- <persistence xmlns="http://java.sun.com/xml/ns/persistence" version="1.0">  -->
+	<persistence-unit name="genericPersistenceUnit" transaction-type="RESOURCE_LOCAL">
+		<provider>org.hibernate.ejb.HibernatePersistence</provider>
+		<!-- JNDI name of the database resource to use -->
+		<!-- <jta-data-source><UNDEFINED></jta-data-source> -->
+
+		<jar-file>C:\eigen\tsl2\tsl2-workspace\tsl2-nano\target\test.h5.sample\h5.sample/timedb.jar</jar-file>
+        <exclude-unlisted-classes>false</exclude-unlisted-classes>
+	    <shared-cache-mode>ENABLE_SELECTIVE</shared-cache-mode>
+
+		<properties>
+         	<!-- Hibernate Properties -->
+	        <property name="hibernate.connection.driver_class" value="org.hsqldb.jdbcDriver"/>
+	        <property name="hibernate.connection.username" value="time"/>
+	        <property name="hibernate.connection.url" value="jdbc:hsqldb:hsql://localhost:9003"/>
+	        <property name="hibernate.connection.password" value="time"/>
+			<property name="hibernate.dialect" value="org.hibernate.dialect.HSQLDialect" />
+			<property name="hibernate.archive.autodetection" value="class"/>
+			<!-- <property name="hibernate.ejb.cfgfile" value="/hibernate.cfg.xml" /> -->
+			<!-- <property name="hibernate.hbm2ddl.auto" value="create"/>  -->
+			<property name="hibernate.show_sql" value="true"/>
+			<property name="hibernate.format_sql" value="true"/>
+			<property name="hibernate.use_sql_comments" value="true"/>
+			<!-- <property name="hibernate.cache.provider_class" value="org.hibernate.cache.EHCacheProvider"/> -->
+			<!-- <property name="hibernate.cache.use_query_cache" value="true"/> -->
+			<!-- <property name="hibernate.cache.use_second_level_cache" value="true" /> -->
+			<property name="hibernate.cache.use_minimal_puts" value="true" />
+			<!-- <property name="hibernate.generate_statistics" value="true"/> -->
+			<property name="hibernate.cache.use_structured_entries" value="true"/>
+			<property name="hibernate.default_batch_fetch_size" value="500"/>
+			<property name="hibernate.jdbc.batch_size" value="50"/>
+			<!-- <property name="org.hibernate.FlushMode" value="commit" />  -->
+         	<!-- Hibernate End -->
+
+         	<!-- Glassfish Development with TopLink
+            <property name="toplink.jdbc.driver" value="${connection.driver_class}"/>
+            <property name="toplink.jdbc.url" value="${connection.url}"/>
+            <property name="toplink.jdbc.user" value="${connection.username}"/>
+            <property name="toplink.jdbc.password" value="${connection.password}"/>
+            <property name="toplink.logging.level" value="FINE"/>
+            <property name="toplink.weaving" value="false"/>
+            <property name="toplink.target-database" value="Oracle"/> -->
+			<!-- <property name="toplink.ddl-generation" value="drop-and-create-tables"/> -->
+			<!-- if you work with generated ids using sequences (used by AUTO mode, too), toplink
+			     needs the following database table:
+				CREATE TABLE SEQUENCE
+				(
+					SEQ_NAME	   	VARCHAR2(20),
+					SEQ_COUNT     	NUMBER(10)
+				)
+				;
+				INSERT INTO SEQUENCE VALUES ('SEQ_GEN',1);
+			      -->
+         	<!-- Glassfish End -->
+		</properties>
+	</persistence-unit>
+	<persistence-unit name="replication" transaction-type="RESOURCE_LOCAL">
+		<provider>org.hibernate.ejb.HibernatePersistence</provider>
+		<!-- JNDI name of the database resource to use -->
+		<!-- <jta-data-source><UNDEFINED></jta-data-source> -->
+
+		<jar-file>timedb.jar</jar-file>
+        <exclude-unlisted-classes>false</exclude-unlisted-classes>
+	    <shared-cache-mode>ENABLE_SELECTIVE</shared-cache-mode>
+
+		<properties>
+         	<!-- Hibernate Properties -->
+	        <property name="hibernate.connection.driver_class" value="org.hsqldb.jdbcDriver"/>
+	        <property name="hibernate.connection.username" value="time"/>
+	        <property name="hibernate.connection.url" value="jdbc:hsqldb:hsql://localhost:9898"/>
+	        <property name="hibernate.connection.password" value="time"/>
+			<property name="hibernate.archive.autodetection" value="class"/>
+			<!-- <property name="hibernate.ejb.cfgfile" value="/hibernate.cfg.xml" /> -->
+			<property name="hibernate.dialect" value="org.hibernate.dialect.HSQLDialect" />
+			<property name="hibernate.hbm2ddl.auto" value="create"/>
+			<property name="hibernate.show_sql" value="true"/>
+			<!-- <property name="hibernate.cache.provider_class" value="org.hibernate.cache.EHCacheProvider"/> -->
+			<!-- <property name="hibernate.cache.use_second_level_cache" value="false"/> -->
+			<!-- <property name="hibernate.cache.use_query_cache" value="false"/> -->
+			<!-- <property name="hibernate.generate_statistics" value="false"/> -->
+			<property name="hibernate.connection.autocommit" value="true"/>
+			<property name="hibernate.cache.use_structured_entries" value="true"/>
+			<property name="hibernate.cache.use_second_level_cache" value="true"/>
+		</properties>
+	</persistence-unit>
+</persistence>
