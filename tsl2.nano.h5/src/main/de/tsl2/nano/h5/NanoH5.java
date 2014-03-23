@@ -136,7 +136,12 @@ public class NanoH5 extends NanoHTTPD {
             String dir = Environment.getConfigPath();
             File icons = new File(dir + "icons");
             if (!icons.exists()) {
-                FileUtil.extract("tsl2.nano.h5.default-resources.jar", dir, null);
+                try {
+                    FileUtil.extract("tsl2.nano.h5.default-resources.jar", dir, null);
+                } catch (Exception ex) {
+                    //this shouldn't influence the application start!
+                    LOG.warn("couln't extract resources from internal file " + "tsl2.nano.h5.default-resources.jar", ex);
+                }
             }
 
             LOG.info("Listening on port " + serviceURL.getPort() + ". Hit Enter to stop.\n");
@@ -175,7 +180,7 @@ public class NanoH5 extends NanoHTTPD {
     protected String createStartPage() {
         return createStartPage(DEGBUG_HTML_FILE);
     }
-    
+
     /**
      * createStartPage
      * 
@@ -186,7 +191,8 @@ public class NanoH5 extends NanoHTTPD {
         String startPage = String.valueOf(FileUtil.getFileData(stream, null));
         startPage = StringUtil.insertProperties(startPage,
             MapUtil.asMap("url", serviceURL, "text", Environment.getName()));
-        String page = Html5Presentation.createMessagePage("start.template", "Start " + Environment.getName() + "App", serviceURL);
+        String page =
+            Html5Presentation.createMessagePage("start.template", "Start " + Environment.getName() + "App", serviceURL);
         FileUtil.writeBytes(page.getBytes(), resultHtmlFile, false);
         return page;
     }
@@ -379,25 +385,29 @@ public class NanoH5 extends NanoHTTPD {
             beanTool.setAttributeFilter("sourceFile", "selectedAction", "text"/*, "result"*/);
             beanTool.getAttribute("text").getPresentation().setType(IPresentable.TYPE_INPUT_MULTILINE);
             beanTool.getAttribute("text").getConstraint().setLength(100000);
-            beanTool.getAttribute("text").getConstraint().setFormat(null/*RegExpFormat.createLengthRegExp(0, 100000, 0)*/);
+            beanTool.getAttribute("text").getConstraint()
+                .setFormat(null/*RegExpFormat.createLengthRegExp(0, 100000, 0)*/);
 //            beanTool.getAttribute("result").getPresentation().setType(IPresentable.TYPE_TABLE);
             beanTool.getAttribute("sourceFile").getPresentation().setType(IPresentable.TYPE_ATTACHMENT);
             beanTool.getAttribute("selectedAction").setRange(tool.availableActions());
             beanTool.addAction(tool.runner());
-            
+
             String id = "scripttool.define.query";
             String lbl = Environment.translate(id, true);
             IAction queryDefiner = new CommonAction(id, lbl, lbl) {
                 @Override
                 public Object action() throws Exception {
                     String name = tool.getSourceFile().toLowerCase();
-                    Query query = new Query(name, tool.getText(), tool.getSelectedAction().getId().equals("scripttool.sql.id"), null);
+                    Query query =
+                        new Query(name, tool.getText(), tool.getSelectedAction().getId().equals("scripttool.sql.id"),
+                            null);
                     Environment.get(QueryPool.class).add(query.getName(), query);
                     QueryResult qr = new QueryResult(query.getName());
                     qr.setName(BeanDefinition.PREFIX_VIRTUAL + query.getName());
                     qr.saveDefinition();
                     return "New created specification-query: " + name;
                 }
+
                 @Override
                 public String getImagePath() {
                     return "icons/save.png";
