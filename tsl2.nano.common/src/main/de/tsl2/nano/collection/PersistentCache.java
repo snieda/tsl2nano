@@ -11,7 +11,6 @@ package de.tsl2.nano.collection;
 
 import java.io.File;
 
-import org.apache.commons.collections.map.ReferenceMap;
 import org.apache.commons.logging.Log;
 
 import de.tsl2.nano.core.ManagedException;
@@ -24,19 +23,18 @@ import de.tsl2.nano.core.util.FileUtil;
  * @author Thomas Schneider
  * @version $Revision$
  */
+@SuppressWarnings("rawtypes")
 public class PersistentCache {
     transient static PersistentCache self = null;
     transient static String cacheFilePath;
 
-    @SuppressWarnings("unchecked")
     ReferenceMap cache = null;
 
     private static final Log LOG = LogFactory.getLog(PersistentCache.class);
 
-    @SuppressWarnings("unchecked")
     private PersistentCache() {
         assert self == null : "don't call this constructor. only for internal use!";
-        cache = new ReferenceMap(ReferenceMap.SOFT, ReferenceMap.SOFT);
+        cache = new ReferenceMap();
     }
 
     /**
@@ -81,6 +79,7 @@ public class PersistentCache {
     /**
      * {@inheritDoc}
      */
+    @SuppressWarnings("unchecked")
     public Object put(Object key, Object value) {
         final Object result = cache.put(key, value);
         try {

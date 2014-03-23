@@ -35,7 +35,6 @@ import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import org.apache.commons.collections.map.ReferenceMap;
 import org.apache.commons.logging.Log;
 import org.simpleframework.xml.Attribute;
 import org.simpleframework.xml.Element;
@@ -46,6 +45,7 @@ import org.simpleframework.xml.core.Persist;
 
 import de.tsl2.nano.bean.BeanContainer;
 import de.tsl2.nano.collection.MapUtil;
+import de.tsl2.nano.collection.ReferenceMap;
 import de.tsl2.nano.core.ManagedException;
 import de.tsl2.nano.core.cls.BeanAttribute;
 import de.tsl2.nano.core.cls.BeanClass;
@@ -1071,10 +1071,11 @@ public class RegExpFormat extends Format implements INumberFormatCheck {
             final IConverter<String, Object> converter,
             final boolean useCache) {
         final RegExpFormat format = new RegExpFormat(pattern, initMask) {
+            /** serialVersionUID */
+            private static final long serialVersionUID = 1L;
             final TYPE instance = BeanClass.getBeanClass(type).createInstance();
             final BeanAttribute attribute = BeanAttribute.getBeanAttribute(type, uniqueIdAttribute);
-            final ReferenceMap cache = useCache ? new ReferenceMap(ReferenceMap.SOFT,
-                org.apache.commons.collections.ReferenceMap.SOFT) : null;
+            final ReferenceMap cache = useCache ? new ReferenceMap() : null;
 
             @Override
             public StringBuffer format(Object obj, StringBuffer toAppendTo, FieldPosition pos) {

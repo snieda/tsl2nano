@@ -3,21 +3,15 @@
 	<classpathentry kind="src" path="src/main"/>
 	<classpathentry kind="src" path="src/test"/>
 	<classpathentry kind="src" path="src/resources"/>
-	<classpathentry exported="true" kind="lib" path="lib/simple-xml-2.7.jar"/>
-	<classpathentry exported="true" kind="lib" path="lib/javassist-3.12.0.GA.jar"/>
-	<classpathentry exported="true" kind="lib" path="lib/commons-codec-1.6.jar"/>
-	<classpathentry exported="true" kind="lib" path="lib/dom4j-1.6.1.jar"/>
-	<classpathentry exported="true" kind="lib" path="lib/tslbase.jar" sourcepath="lib/tslbase_src.jar"/>
-	<classpathentry exported="true" kind="lib" path="lib/commons-beanutils-1.8.0.jar"/>
-	<classpathentry exported="true" kind="lib" path="lib/commons-io-1.3.2.jar"/>
-	<classpathentry exported="true" kind="lib" path="lib/commons-lang-2.4.jar"/>
-	<classpathentry exported="true" kind="lib" path="lib/ant-nodeps.jar"/>
-	<classpathentry exported="true" kind="lib" path="lib/ant-launcher.jar"/>
-	<classpathentry exported="true" kind="lib" path="lib/ant.jar"/>
-	<classpathentry exported="true" kind="lib" path="lib/junit-4.8.2.jar"/>
-	<classpathentry exported="true" kind="lib" path="lib/velocity-1.6-dep.jar"/>
-	<classpathentry exported="true" kind="lib" path="lib/commons-collections-3.2.1.jar"/>
-	<classpathentry exported="true" kind="lib" path="lib/commons-logging-1.1.1.jar"/>
 	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER"/>
+	<classpathentry exported="true" kind="lib" path="lib/simple-xml-2.7.jar"/>
+	<classpathentry kind="lib" path="lib-tools/ant-launcher.jar"/>
+	<classpathentry kind="lib" path="lib-tools/ant-nodeps.jar"/>
+	<classpathentry kind="lib" path="lib-tools/ant.jar"/>
+	<classpathentry kind="lib" path="lib-tools/javassist-3.12.0.GA.jar"/>
+	<classpathentry exported="true" kind="lib" path="lib-tools/junit-4.8.2.jar"/>
+	<classpathentry kind="lib" path="lib-tools/tslbase.jar"/>
+	<classpathentry kind="lib" path="lib-tools/velocity-1.6-dep.jar"/>
+	<classpathentry kind="lib" path="lib-tools/commons-codec-1.6.jar"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>

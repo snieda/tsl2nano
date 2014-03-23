@@ -1,5 +1,3 @@
 /bin
 /*.jar
-/config
-/leer
-/timedb
+/test
