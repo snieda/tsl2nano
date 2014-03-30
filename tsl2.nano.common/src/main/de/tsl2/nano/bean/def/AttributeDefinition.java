@@ -487,6 +487,12 @@ public class AttributeDefinition<T> implements IAttributeDefinition<T> {
         return status;
     }
 
+    /** see IVirtualDefinition#isRelation() */
+    @Override
+    public boolean isRelation() {
+        return BeanContainer.isInitialized() && BeanContainer.instance().isPersistable(getType());
+    }
+    
     /**
      * if the bean instance is of type {@link ValueHolder}, the attribute is virtual - no special bean-attribute is
      * available, the attribute name is always {@link ValueHolder#getValue()} .

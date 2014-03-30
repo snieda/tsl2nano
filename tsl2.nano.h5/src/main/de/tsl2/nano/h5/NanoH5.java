@@ -126,6 +126,7 @@ public class NanoH5 extends NanoHTTPD {
 //            LogFactory.setLogLevel(LogFactory.LOG_ALL);
             LOG.info(System.getProperties());
             createStartPage();
+            
             Environment.saveResourceToFileSystem("run.bat", "../run.bat");
             Environment.saveResourceToFileSystem("shell.xml");
             Environment.saveResourceToFileSystem("mda.bat");
@@ -140,7 +141,7 @@ public class NanoH5 extends NanoHTTPD {
                     FileUtil.extract("tsl2.nano.h5.default-resources.jar", dir, null);
                 } catch (Exception ex) {
                     //this shouldn't influence the application start!
-                    LOG.warn("couln't extract resources from internal file " + "tsl2.nano.h5.default-resources.jar", ex);
+                    LOG.warn("couldn't extract resources from internal file " + "tsl2.nano.h5.default-resources.jar", ex);
                 }
             }
 

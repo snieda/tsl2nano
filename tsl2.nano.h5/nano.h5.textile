@@ -9,9 +9,12 @@ NanoH5 (or FullRelation) is an UI independent gui implementation framework provi
 
 - Everything will be filled for you by defaults - presenting a full application getting a database connection
 - define it or implement it - all object-types have their representation as readable xml-file.
+- ...or just use it as intelligent bean-browser or entity-browser
+
+To do a quick-start, go to chapter _Starting / Test_.
 
 ### Goals
-* pure model implementation + plattform independency (works on android, too).
+* pure model implementation + plattform independency (should work on android, too).
 * small, having as less as possible static dependencies to other libraries
 * everything has a default - all defaults are configurable (Convention over Configuration)
 * application, session and entity behaviors are configurable
@@ -37,7 +40,7 @@ NanoH5 (or FullRelation) is an UI independent gui implementation framework provi
 ** xsd-->bean (not finished yet!)
 ** java-interface-->java-bean (mock through internal proxy, not finished yet!)
 
-Using the _NanoHTTPD_ Server as base, this client application creates html surfaces, sending them through the integrated server to an html browser. Entry point is the file _application.html_ defining the browser request _http://localhost:8067_.
+Using the _NanoHTTPD_ Server as base, this client application creates html surfaces, sending them through the integrated server to an html browser. Entry point is the file _application.html_ defining the browser request _http://localhost:8067_ (configurable ;-)).
 
 It is not a real web-application platform but a simple way to use html5 as graphical user interface - in a standard client application.
 
@@ -53,7 +56,7 @@ It is possible to use an ejb container in an application server, but the default
 
 The base frameworks are grown through input of two industrial projects. the first project had to build a software fully configurable through a database. The second was a financial project.
 
-project-environments:
+tested project-environments:
 * windows-xp, windows-7, windows-terminal-server, ubuntu 12
 * oracle 11, hsqldb
 * glassfish 2.1, toplink
@@ -61,7 +64,7 @@ project-environments:
 
 ### What is it for?
 
-this software should provide a fast way to create a standard application through a database model. through a complete set of configuration possibilities, a user may fit this application for his requirements. respecting a small set of rules, a software-developer is able to extend that application to do more specifics.
+this software should provide a fast way to create a standard application through a database (or class-) model. through a complete set of configuration possibilities, a user may fit this application for his requirements. respecting a small set of rules, a software-developer is able to extend that application to do more specifics.
 
 ### What this framework is not intended to be
 
@@ -80,11 +83,18 @@ this software should provide a fast way to create a standard application through
 * Usable as full-configurable application
 * Usable as full-stack framework to develop model-driven applications
 
+The _environment.xml_ in your current environment directory defines access-modes. F.e. _http.connection_ will define, if it is remote-accessible or not. For more informations, see [TODO].
+
 ### Third Party Libraries
 
-* [Jing-Trang xml2xsd-Generator](https://code.google.com/p/jing-trang/downloads/list)
+Direct dependencies exist to the following libararies (contained inside the _tsl2.nano.h5.x.x.x.jar_):
 * [SimpleXML xml serializer](http://simple.sourceforge.net/download/stream/doc/tutorial/tutorial.php)
 * Serviceaccess using: jpa-api, connector-api, jta-api, ejb-api, interceptor-api
+
+The following library was a helper to generate an xsd-file for the beandef-xml files.
+* [Jing-Trang xml2xsd-Generator](https://code.google.com/p/jing-trang/downloads/list)
+
+For more indirect dependencies, have a look at [TODO].
 
 ### Architecture
 
@@ -96,48 +106,80 @@ The architecture is defined by the application framework [tsl2.nano.common](../t
 
 Nano.h5 provides mechanisms to create a full configurable application from a given database definition file (ddl).
 
-Creating an UML-Diagram with perhaps _ArgoUML_, or creating an ER-Diagram with f.e. _architect_ you may generate a ddl script. Nano.H5 provides an ant-script (_mda.xml_) to generate a hsqldb-database and generating entity beans through hibernate-tools for the given jdbc-connection.
+Creating an UML-Diagram with perhaps _ArgoUML_, or creating an ER-Diagram with f.e. _architect_ you may generate a ddl (database-definition) script. Nano.H5 provides an ant-script (_mda.xml_) to generate an hsqldb-database generating entity beans through hibernate-tools (script: _hibtools.xml_) for the given jdbc-connection. The ant-scripts use hibernate-tools since there are no similar possibilities on other frameworks at the moment. 
 
-The other option would be to have an existing beans.jar ....
+The other option would be to have an existing _beans.jar_. This could be selected on the entry- or login-page of nano-h5. If you enter an absolute path for the attribute _JarFile_ inside the _Persistence_ page, this bean-file will be used to load the entity-classes. If you enter a relative path and the given file doesn't exist, it will be generated through hibernate-tools (if hibernate is in your environment!).
 
-##### Process Description
-* _Ant_ and _hibernate-tools_ has to be in your classpath or environment directory.
+##### Process Description (using hibernate-tools)
+
+* the jdbc-driver of your database, _ant_, _hibernate_ and _hibernate-tools_ have to be in your classpath or environment directory.
 * Use a tool like _ArgoUML_ or _architect_ to create an UML-Diagram 
 * Export the data model to a ddl file (sql statements to create the database). This file must be stored in the environment directory with extension _sql_ (e.g. timedb.sql).
-* start _mda.bat_ to generate the database from ddl file and creating beans.jar through hibernate tools.
+* start _mda.bat_ to generate the database from ddl file creating the beans-jar file through hibernate tools.
 
 #### Framework mechanisms - how to extend the framework
 
+If you connect/login to a persistence-layer/database for the first time, the framework tries to evaluate all bean-properties and attribute-properties. the order of attributes of each bean will be calculated through the implementation of _BeanPresentationHelper.getBestAttributeOrder()_. The best attribute to present the bean is done through _BeanPresentationHelper.getBestAttributeName()_.
+This methods are called only if _bean.use.beanpresentationhelper.filter_ is true - and use the following properties of _environment.xml_:
+
+* bean.best.attribute.type (default: String.class)
+* bean.best.attribute.regexp (default:.*(name|bezeichnung|description|id).*)
+* bean.best.attribute.minlength (default: 2)
+* bean.best.attribute.maxlength (default: 50)
+
+All formats, constraints and basic presentation-properties will be evaluated through the type and jpa-annotations of an attribute.
+
 ##### Configuration through Serialization
 
-The environment and the beandefinition are the main constructs serializing it's properties to the file-system.
+The environment and the bean-definitions are the main constructs serializing it's properties to the file-system.
 ...
 The _BeanDefinition_ expects only _AttributeDefinition_s from deserializings - to be more readable. This  means, that extensions of AttributeDefinition are not handled!
 ...
 On the data side, all collections are wrapped into an object of type _BeanCollector_, single instances that are prepared to be presented are wrapped into an object of type _Bean_. All attributes of a _Bean_ are wrapped into _BeanValue_s. The _BeanCollector_ and the _Bean_ are extensions of _BeanDefinition_, handling the attributes. While the used xml-serializer _Simple-XML_ is not able to create the desired root instance through reading an xml (we have to define the instance type on calling simple-xml), extensions of a _BeanDefinition_ are handled through a special mechanism, implemented in the class _Extension_.
 
+*Tip*: If you delete your environment.xml file, it will be re-created on next restart - all beandefinitions will be re-created, too.
+
 ##### Registered services and definitions through the environment
 
-TODO...
+The following services are registered through nano.h5 by default and should be acessed through the _Environment_ class, if you are developing own classes or extensions:
+
+* _IAuthorization_: provides access to check user privileges (e.g.: hasAccess(userName, actions))
+* _XmlUtil_: provides de-/serialization (default: simple-xml), xpath, velocity-generation (if found in environment!)
+* _Messages_: Resource-bundles for translations
+* _IGenericService_: access to entity-beans
+* _CompatibilityLayer_: indirect access to extern libararies (using reflection), 
+* _ClassLoader_: nano.h5 current classloader, containing all jars in your environment, including nested jars
+* _UncaughtExceptionHandler_: handling/provding exceptions and messages
+* _IPageBuilder_: implementation of the html5-building (here: _Html5Presentation_ as extension of _BeanPresentationHelper_)
+* _Profiler_: simple profiler to log simple performance aspects
 
 ## Starting / Test
 
-The tsl2.nano.h5 framework can be started through it's jar _tsl2.nano.h5-xxxxx.jar_. A start script _run.bat_ is available to do this in windows. Starting it, a given directory is used as a kind of workspace where you put all configuration and jar files into to be used. This jars may be ant, an o/r-mapper like hibernate with all it's dependencies. The configuration files are the environment.xml and all xml files describing the presentation of each entity bean.  Icons for all buttons and backgrounds are in the _icon_ folder. The main jar file can contain all dependent jar files (as described in the manifest file) or outside in the same directory as the main jar.
+### Quick-Start
 
-A possible start configuratin would be:
+* install a java jdk at [TODOleast version 1.7]. If you only install a java jre-version, the bean-jar file cannot be generated - then you have to select an existing one.
+* get the newest version of [TODOtsl2.nano.h5.x.y.z-hibernate.zip]
+* extract that zip-file anywhere
+* go into the extracted sub-directory _config_ and start the _Windows_-batch file _startServer.bat_. This will start the sample database.
+* start _tsl2.nano.h5-x.y.z.jar_ with double-click or through the _run.bat_ (simple call of: _java -jar tsl2.nano.h5-x.y.z.jar_)
+* if you are not on a _Windows_ system, start your internet browser with adress _localhost:8067_, or just do a double-click on the file _application.html_
+* In the center of the browser-page do a click on the centered link, starting with text 'Start...'
+* Do a login filling the user-name 'time' and password 'time' and clicking the Ok-Button.
+* After a while you will see all availabe entity-types to be browsable...
 
-* nano.h5 main directory with:
-** tsl2.nano.h5-xxxx.jar containing all dependent jars as described in _Dependencies_
-** tsl.nano.common-xxxx.jar providing bootstrap loading with special classloaders
-** environment directory like the sample _h5.sample_
+### Overview
 
-Normally, you will start with an example: download the file _h5.sample-hibernate-fulllibs-0.0.3.zip_ to have an example using lots of features of this project - you have a simple test database and are able to generate your bean jar, see a trivial application-extension, workflow, autorization and rule.
+The tsl2.nano.h5 framework can be started through it's jar _tsl2.nano.h5-xxxxx.jar_. A start script _run.bat_ (will be generated on first start) is available to do this in _Windows_. Starting it, a given directory is used as a kind of workspace where you put all configuration and jar files into - to be used. This jars may be ant, an o/r-mapper like hibernate with all it's dependencies. The configuration files are _the environment.xml_ and all xml files describing the presentation of each entity bean. Icons for all buttons and backgrounds are in the _icons_ folder. The main jar file can contain all dependent jar files (as described in the manifest file) or outside in the same directory as the main jar.
+
+On first start, the most important files will be created!
+
+Normally, you will start with an example: download the file _tsl2.nano.h5.x.y.z-hibernate.zip_ to have an example using lots of features of this project - you have a simple test database and are able to generate your bean jar, see a trivial application-extension, workflow, autorization and rule.
  
 Feel free to test, whether a database-connection of a project you know is working with nano.h5....
 
-### Sample Environment: h5.sample
+### Using the sample-content
 
-A sample environment is h5.sample, containing all icons, jars and configurations for a project. It may be used for other nano.h5 projects. It uses:
+A sample environment is contained in the _tsl2.nano.h5.x.y.z-hibernate.jar_ file, containing all icons, jars and configurations for a project. It may be used for other nano.h5 projects. It uses:
 
 * ant libraries to generate entitiy beans through hibernate-tools and the sample database
 * hibernate with all dependencies as o/r mapper
@@ -146,26 +188,29 @@ A sample environment is h5.sample, containing all icons, jars and configurations
 * sample databae _timedb_
 * sample icons for all buttons
 
-Before you start nano.h5, you should start the sample hsqldb database:
+Before you start _nano.h5_, you should start the sample hsqldb database:
 
-h5.sample/runServer.bat
+config/runServer.bat
 
 [[img src=doc/h5.sample.database.jpg]]
 
 To start nano.h5 you have to call it with following syntax:
 
-java -jar de.nano.h5.Loader [environment-path (default: config] [http-server-port (default: 8067)]
+java -jar tsl2.nano.h5.x.y.z.jar [environment-path (default: config] [http-server-port (default: 8067)]
 
-This call is implemented inside the _start.bat_ script. Use that, if you are on windows.
-If you start it on windows, a browser will be opened to show the initial screen:
+This call is implemented inside the _run.bat_ script. Use that, if you are on windows. But normally, nano-h5 should be runnable through a double-click on the jar file _tsl2.nano.h5.x.y.z.jar_.
+
+If you start it on _Windows_, a browser will be opened to show the initial screen:
 
 [[img src=doc/h5.sample.start.jpg]]
+
+If you are not on _Windows_, you should open an html-browser with file _application.html_.
 
 Now you can login to the sample database. It is fully configurable, which o/r mapper and database should be used. After pressing Ok, a _persistence.xml_ will be generated to be found by the _javax.persistence_ implementation.
 
 [[img src=doc/h5.sample.persistence.jpg]]
 
-All entities of the jar-file, containing the entities, will be listed. You can filter the list and select one or more to edit them. 
+All entities of the jar-file, containing the entities, will be listed. You can filter the list and select one or more to edit them.
 
 [[img src=doc/h5.sample.entity-types.jpg]]
 
@@ -173,22 +218,24 @@ Then you will get a search page with a search filter and an empty list. Pushing 
 
 [[img src=doc/h5.sample.entity-search.jpg]]
 
-If you click a column header (here f.e. _comments_), the list will be sorted by this column - clicking on that column a second time, the sorting will be done in the other direction. The possible actions will be described in the next chapter.
+If you click a column header (here f.e. _comments_), the list will be sorted by this column - clicking on that column a second time, the sorting will be done in the other direction. 
+
+The possible actions will be described in the chapter _Application and Page Actions_.
 
 ### Extending the Sample
 
-The file _h5.sample/environment.xml_ defines the application behaviour. For further informations read chapter _The Environment_.
-It is possible to change the presentation of each bean. Inside the directory _h5.sample/beandef_ all beans have configuration files to change their presentation and behaviour. If the _beandef_ directory is empty, you can create the bean definitions by clicking on button 'exit' on the top left - this will save the current state and exits the application.
+The file _environment.xml_ defines the application behaviour. For further informations read chapter _The Environment_.
+It is possible to change the presentation of each bean. Inside the environments directory _beandef_ all beans have configuration files to change their presentation and behaviour. If the file _environment.xml_ doesn't exist, the bean definitions will be created on next application start.
 
 It is possible to create an own java project to define own application and bean behaviour. This is described in chapter _Creating an own project_.
 
 ## The Environment
 
-Loading a Nano.h5 application will create and use an environment directory as workspace for it. Resources like icons, configuration xml-file and libraries will be put there - being on top of classpath.
+Loading a _Nano.h5_ application will create and use an environment directory as workspace for it. Resources like icons, configuration xml-file and libraries will be put there - being on top of classpath.
 
 Everything of your application will be accessible through this environment. It provides all system-/ application properties and all application services.
 
-A full list of configuration attributes can be found [here](src/resources/environment.default.xml)
+A description of all configuration attributes can be found [here](src/resources/environment.default.xml)
 
 ### Language and Translations
 
@@ -197,23 +244,25 @@ All framework specific and generic texts will be translated through the internal
 
 ## Application and Page Actions
 
-On top of each html page you will see on the left side an application icon (clicking on it, it tries to load the help file nanoh5.html). On top right, all page-specific buttons are shown. The following list tries to describe them. They depend on the current type of bean. A bean list will have other buttons than a beans detail page.
+On top of each html page you will see on the left side an application icon (clicking on it, it tries to load the help file from web). On top right, all page-specific buttons are shown. The following list tries to describe them. They depend on the current type of bean. A bean list will have other buttons than a beans detail page.
 
 ### Bean's search page top buttons
 
 * *select all*: will select all listed items to be accessed through 'open' or 'delete' buttons
 * *de-select all*: will de-select all listed items
+* *next page*: if a bean search filter results in more matches than shown in this result page, the next result items will be shown
+* *previous page*: if you walk through the result pages with *next-page*, you can go back until the first page.
+* *switch relations*: if your current bean-list or bean-detail contains one-to-many relations (f.e. persons have collection of adresses), they can be shown now. this may result in longer page-build times! clicking the button on the same page another time will turn off the one-to-many relations.
 
 ### All other page buttons (on the top)
 
 * *print*: shows a page with non-interactive presentation of the current page. use the browsers back-button to return to the application
 * *export*: shows a page with a pure text presentation like a csv file - to be copy/pasted into another file. use the browsers back-button to return to the application.
 * *document*: if configured in _environment.xml_, a text-file (a rtf-file is possible, too) can be search and replaced with key/values of the current page.
-* *configure*: ???
+* *configure*: opens a configuration page for the current bean. you are able to change the presentation text of this bean, all attributes to be presented - presentation properties like layout and layout constraints.
 * *help*: if a help html-file for the current page/bean can be found, it will be shown. use the browsers back-button to return to the application.
 * *refresh*: all configurations will be reloaded
-* *exit*: saves all current configuration values - creating files to be used to change properties - and stops the current user-session.
-* *configure*: goes into a configuration mode for the current page/bean.
+* *exit*: stops the current user-session.
 
 ### Bean search and manipulation buttons
 
@@ -259,20 +308,64 @@ Hibernate 4 for example would have the following dependencies:
 * javassist-3.12.0.GA.jar
 * antlr.jar
  
+## Runtime Configuration
+
 ## Specifying Rules, Queries and Actions to be used on Beans and Attributes
 
-To do a structured work on a usable specification, rules, queries and actions can be defined before implementing or configuring the presentation. This is done by creating these items as xml-files inside the environments _specifiation_ directory. To see how it works, hit the application button 'sample-codes' and have a look into the specification directory.
+To do a structured work on a usable specification, rules, queries and actions can be defined before implementing or configuring the presentation. This is done by creating these items as xml-files inside the environments _specifiation_ directory. To see how it works, hit the applications menu button 'sample-codes' and have a look into the specification directory.
+
+Example for a query:
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+<query name="personen" nativeQuery="false">
+   <query><![CDATA[select p from Person p]]></query>
+</query>
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+Example for an action, starting an ant-script:
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+<action name="ant" declaringClass="de.tsl2.nano.execution.ScriptUtil">
+   <parameter name="arg1">
+      <type javaType="java.lang.String"/>
+   </parameter>
+   <parameter name="arg2">
+      <type javaType="java.lang.String"/>
+   </parameter>
+   <parameter name="arg3">
+      <type javaType="java.util.Properties"/>
+   </parameter>
+   <constraint name="arg2">
+      <definition type="java.lang.String" nullable="true" length="-1">
+         <defaultValue class="java.lang.String">help</defaultValue>
+         <scale>-1</scale>
+         <precision>-1</precision>
+      </definition>
+   </constraint>
+   <constraint name="arg1">
+      <definition type="java.lang.String" nullable="true" length="-1">
+         <defaultValue class="java.lang.String">C:\eigen\tsl2\tsl2-workspace\tsl2-nano\target\test.h5.sample\h5.sample/antscripts.xml</defaultValue>
+         <scale>-1</scale>
+         <precision>-1</precision>
+      </definition>
+   </constraint>
+   <operation>ant</operation>
+</action>
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
 
 ## The _ScriptTool_
 
 After login, you are able to execute queries and scripts like ant-scripts. You have to enable it in your _environment.xml_ to see the _ScriptTool_ in the list of _BeanCollectors_.
 
+With _ScriptTool_ you can define and save queries which will be loaded on next start time as virtual beandefinition - means, it is inside the bean-type list.
+ 
 ## Layout and Styling
 
 ### Using CSS
 
-Html styles can be added through import of css files. On building each html page, the file *meta-frame.html* will be searched inside the environments *css* directory: css/meta-frame.html.
-The meta-frame.html defines the html header and an empty body. Inside the header you should define the css style files you want to be used. The style files must define a class *menu* through the tags *ul* and *li*. Then, each page will have a menu at the top - instead of a button panel.
+Html styles can be added through import of css files. On building each html page, the file *meta-frame.html* will be searched inside the environments *css* directory: _css/meta-frame.html_.
+The _meta-frame.html_ defines the html header and an empty body. Inside the header you should define the css style files you want to be used. The style files must define a class *menu* through the tags *ul* and *li*. Then, each page will have a menu at the top - instead of a button panel.
+
+An example is provided with _tsl2.nano.h5.x.y.z.jar_. After first start, a css directory will be created. To turn on the given css-styling, rename the file _meta-framex.html_ to _meta-frame.html_ This is only an example - not yet working perfectly!
 
 ### Configuring Presentation, Layout and Constraints
 
@@ -285,54 +378,192 @@ TODO describe
 A bean-collector shows a set of bean-instances. The collector is defined by a bean-type or directly by a collection of items. The bit-field _mode_ defines, which actions can be done on a bean-collector.
 
 Mode:
-* Searchable: a search and reset action can be done on that bean-collector
-* Filter: a table filter will be provided
-* Editable: an open action is available
-* Creatable: new and delete actions are available
-* Assignable: an assign action can assign the current selection to the previous edited bean.
+* _Searchable_: a search and reset action can be done on that bean-collector
+* _Filter_: a table filter will be provided
+* _Editable_: an open action is available
+* _Creatable_: new and delete actions are available
+* _Assignable_: an assign action can assign the current selection to the previous edited bean.
 
 If an item was selected and opened, this item (a _Bean_) will be presented as detail in a new page.
 
 #### direct queries through _QueryResult_
 
-To define direct sql or jpa-ql queries beside the standard mechanism though compiled beans you have the possibility to show list of values direct through _QueryResult_ which is an extension of _BeanCollector_.
+To define direct sql or jpa-ql queries beside the standard mechanism though compiled beans you have the possibility to show a list of values direct through _QueryResult_ which is an extension of _BeanCollector_.
 _QueryResult_s can be defined through the _ScriptTool_. There you can test your queries and save it as _QueryResult_. The _QueryResult_ will be loaded into the list of available bean-collector on next application start.
+ 
+Example:
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+<queryResult clazz="java.lang.Object" name="virtual.times-overview" isNested="false" isdefault="true" xmlns="beandef.xsd">
+   <extension declaringClass="de.tsl2.nano.h5.QueryResult">
+      <member name="queryName">
+         <object class="java.lang.String">times-overview</object>
+      </member>
+   </extension>
+</queryResult>
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+The examples queryName _times-overview_ has to exist in directory _specification/query_.
  
 #### direct controlling a set of beans through the _Controller_
 
 The _Controller_ is an extension of _BeanCollector_ to present a collection of beans through their actions. Theses actions should be ease change-actions for attributes - like de- or increasing their values. This feature should be used for touch-screen applications.
 
+To provide such a controller you can create an xml-file inside your environments _beandef/virtual_ directory. All beandefs inside the _virtual_ directory will be added to the bean-type list which is presented after login.
+
+Example:
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+<controller clazz="org.anonymous.project.Times" name="virtual.time-actions-controller" isNested="false" isdefault="true" xmlns="beandef.xsd">
+   <extension declaringClass="de.tsl2.nano.h5.Controller">
+      <member name="beanName">
+         <object class="java.lang.String">time-actions</object>
+      </member>
+   </extension>
+</controller>
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
 ### Bean Presentation
 
-...
+A bean - as container of it's attributes - will always be presented as detail page. 
 
-#### Multiple Value Relations
+[TODO screenshot]
 
-...
+A detail page presents the attributes of a bean as it is defined in it's bean-definition xml file. for more informations see chapter _Configuration through Serialization_.
 
 #### Value Groups and Sub-Panels
 
-...
+Optional a bean-definition can define value groups - a list of attributes - to be presented in its own panel.
+
+#### Multiple Value Relations
+
+Whether multiple value relations (one-to-many) are shown is defined inside the environments filter _default.present.attribute.multivalue_. The bean name must match the regex-filter.
 
 ### Attribute Presentation
 
-...
+The attributes are the most important and complex definitions. They contain the following sub-definitions:
+
+#### Attribute Declaration
+
+This is the most important attribute property. Normally it is standard bean-attribute, defined by the declaring class and the attribute name. The following declaration types are available:
+
+* bean-attribute: (default) the attribute value is defined by the declaring class and the attribute name (accessed through getter and setter methods)
+* virtual-attribute: the attribute value is any fixed value
+* value-expression: the attribute value is defined by an expression
+** path-expression: the expression is a path from a bean-attribute to another one - through one or more relations. expression example: _person.organization.name_.
+** rule-expression: the expression is an existing rule name.
+** sql-expression: the expression is an existing query name.
+
+#### Constraints
+
+The attribute constraint defines the
+
+* _type_: attributes java type
+* _nullable_: if the attributes value may be null (empty)
+* _format_: an attributes value has to match the formats expression to be valid
+* _length_: maximum length of input characters to be valid
+* _scale, precision_: scale and precision if attribute is of type number
+* _min, max, allowedValues_: the attributes value range. you may define a min and max range - or only a list of allowd values.
+
+#### Presentable
+
+These are generalized properties to define the presentation in any gui (graphical user interface, surface):
+
+* _type, style_: bit-field to define a gui specific user-input
+* _visible_: whether to show the attribute
+* _label_: a label for the attributes input field
+* _description_: an attribute description to be used f.e. as tooltip or title
+* _layout_: in nano.h5: a map of html5 attributes to be set for child elements, if attribute is a container
+* _layoutconstraints_: in nano.h5: a map of html5 attributes to be set for the attributes html element
+* _icon_: optional icon to be shown with that attribute
+
+#### Column-Definitions
+
+The column-definitions describe the beans presentation in bean-table with columns - as the bean-collector do.
+
+* _width_: column width
+* _columnIndex_: at which position this column is shown (number between 0 and bean-attribute-count
+* _sortIndex_: sort position, if multiple sort conditions are supported
+* _isSortUpDirection_: if true, the sorting direction is _up_, otherwise _down_
+* _presentable_: presentable properties like them in the attribute-constraints
 
 #### Rule-Attributes
 
-...
+Rule attributes are virtual attributes showing the result of a specified rule.
 
 ##### Showing calculated values through integrated rule engine
 
-...
+The integrated rule engine provides calculations of rules - optional calling sub-rules - having one or more input parameter and a result value after execution. Input parameter can be constraint through java-types and value-ranges.
+
+A rule calculates a combination of mathematical and conditioning expressions.
+
+Example: 
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+A1 & A2 ? ((x1 + x2) * $myrule2) : 0
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+Where A1, A2 are boolean values and x1, x2 numbers and myrule2 another referenced (using '§') rule.
+
+Example xml-file for a rule:
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+<rule name="test">
+   <parameter name="A">
+      <type>BOOLEAN</type>
+   </parameter>
+   <parameter name="x1">
+      <type>NUMBER</type>
+   </parameter>
+   <parameter name="x2">
+      <type>NUMBER</type>
+   </parameter>
+   <constraint name="result">
+      <definition type="java.math.BigDecimal" nullable="true" length="-1">
+         <min class="java.math.BigDecimal">0</min>
+         <max class="java.math.BigDecimal">10</max>
+         <scale>-1</scale>
+         <precision>-1</precision>
+      </definition>
+   </constraint>
+   <constraint name="x1">
+      <definition type="java.math.BigDecimal" nullable="true" length="-1">
+         <min class="java.math.BigDecimal">0</min>
+         <max class="java.math.BigDecimal">1</max>
+         <scale>-1</scale>
+         <precision>-1</precision>
+      </definition>
+   </constraint>
+   <operation>A ? (x1 + 1) : (x2 * 2)</operation>
+</rule>
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+Example for a rule using another sub-rule:
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+<rule name="test-import">
+   <parameter name="A">
+      <type>BOOLEAN</type>
+   </parameter>
+   <parameter name="x1">
+      <type>NUMBER</type>
+   </parameter>
+   <parameter name="x2">
+      <type>NUMBER</type>
+   </parameter>
+   <operation>A ? 1 + (A ? (x1 + 1) : (x2 * 2)) : §test</operation>
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 #### Presenting data or media like images, audio, video
 
-If an attribute holds data of type _byte[]_, this may be presented as image or any other non-textual type. The default-mechanism will declare the attributes type as _TYPE_DATA_ which will save the attributes value to a temporary file to be sent through http to the client and shown as image - or if a special style was defined, as embed, object, audio, video, canvas or device - as known from _HTML5_ embedded content tags.
+If an attribute holds data of type _byte[]_, it may be presented as image or any other non-textual type. The default-mechanism will declare the attributes type as _TYPE_DATA_ which will save the attributes value to a temporary file to be sent through http to the client and to be shown as image - or if a special style was defined, as _embed_, _object_, _audio_, _video_, _canvas_ or _device_ - as known from _HTML5_ embedded content tags.
 
+## Resolving _many-to-many_ constellations
+
+Mostly many-to-many constellations will be solved through an additional table in the middle.
+
+Bean1(*)-->(1)Middle(1)-->(*)Bean2
+
+_Nano.H5_ recognizes this constellations and solves the bindings through an internal mechanism called _composition_. For further informations see implementation of class _Composition_ and _BeanCollector_.
+  
 ## Working on a page using the Keyboard
 
-The gui provides shortcuts/hotkeys for each button to activate. As html provides basic field tabbing (of course, that depends on your browser), it should be possible to work fast only with your keyboard.
+The gui provides shortcuts/hotkeys for each button to activate. As html provides basic field tabbing (of course, that depends on your browser), it should be possible to work fast using your keyboard only. Each button/action shows its hotkey/shortcut through its tooltip. The tooltip is shown positioning your mouse (;-)) cursor on the element.
 
 On entering a search-page, the _search_ button will have always the default-focus. If a search was done, the _open_ button will have the default-focus.
 
@@ -344,7 +575,7 @@ Each action is able to define a shortcut (keystroke). if not set, the default wi
 
 ### Tableheader Buttons
 
-Each table of beans will provide a table-header with Buttons to do up/down sorting (on first activation, up-sorting will be done, on second activation, down-sorting). On these Buttons we can't use the algorithm above to avoid shortcut collisions. These buttons will have shortcuts depending on their indexes. So, the first table-header column will be activated through a hit to _ALT+1_.
+Each standard table of beans will provide a table-header with Buttons to do up/down sorting (on first activation, up-sorting will be done, on second activation, down-sorting). On these Buttons we can't use the algorithm above to avoid shortcut collisions. These buttons will have shortcuts depending on their indexes. So, the first table-header column will be activated through a hit to _ALT+1_.
 
 ## Networking Modes
 
@@ -394,13 +625,26 @@ A workflow holds one or more activities defined by an enabling *condition* and a
 
 Example:
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-<?xml version="1.0" encoding="UTF-8"?>
-<workflow>
-   <activity name="times">
-      <condition>!times.activated</condition>
+<workflow name="test.workflow">
+   <activity name="timesByProject">
+      <condition>project&amp;true</condition>
       <expression>select t from Times t where t.project.id = :prjname</expression>
       <query-parameter length="1">
          <parameter>prjname</parameter>
+      </query-parameter>
+   </activity>
+   <activity name="organisation">
+      <condition>!organisation.activated</condition>
+      <expression>select p from Organisation p where ? is null</expression>
+      <query-parameter length="1">
+         <parameter>prjname</parameter>
+      </query-parameter>
+   </activity>
+   <activity name="person">
+      <condition>organisation.activated &amp; (!person.activated)</condition>
+      <expression>select p from Person p where p.organisation = ?</expression>
+      <query-parameter length="1">
+         <parameter>organisation</parameter>
       </query-parameter>
    </activity>
 </workflow>
@@ -418,11 +662,11 @@ TODO: use bean-path to inspect condition expressions like 'times.type = F'.
 
 ## Database Replication - Working Offline
 
-It is possible to replicate the data loaded from remote database. The replication will be done through a second persistence-unit 'replication'. For each user an own local replication database will be created.
+It is possible to replicate the data loaded from a remote database. The environments property _use.database.replication_ must be true (default is false!). The replication will be done through a second persistence-unit 'replication' (see _mypersistence.xml_). For each user an own local replication database will be created.
 
-The replication is done in it's own thread to avoid conflictions with the application. The O/R mapper will create all tables through bean informations. A special bean holds the information (time, id, change-type) about the changes done by the user. All data, loaded and edited by the current user will be replicated to a local database.
+The replication is done in it's own thread to avoid conflictions with the application. The O/R mapper will create all tables through bean informations. A special bean holds the information (time, id, change-type) about the changes done by the user. All data, loaded and edited by the current user will be replicated to a local database. Of course the dependent data will be replicated, too, to have a valid datastore.
 
-The replication connection is configurable like the persistence-unit is. But at the moment, only the combination hsqldb and hibernate are tested - and it's only usable without application-server!
+The replication connection is configurable like the persistence-unit is. But at the moment, only the combination hsqldb and hibernate are tested - and it's only usable in standalone-mode - without application-server!
 
 The replications hsqldb database will be started internally.
 - database: replication-<user-name>
@@ -434,7 +678,7 @@ If you don't want to have a standalone appliation, you are able to use an applic
 
 * the *application servers client libraries* must be in your classpath. so copy them to your environment directory. with jboss eap 6.1 it would be _jboss-client.jar_.
 * any entity beans and _remote interfaces_ of your ejb's should be in your classpath. so copy the jar holding them to your environement directory.
-* of course, the *entity beans must be deployed* to that server perhaps in a  war-file.
+* of course, the *entity beans must be deployed* to that server perhaps in an ear or war-file.
 * be sure to have *tsl2.nano.serviceaccess* packed into that war-file. the service *IGenericService is essential.
 * add environement property 'applicationserver.authentification.service' (default: __org.nano.[environment-name].service.remote.IUserService__) with service class name. 
 * add environment property 'applicationserver.authentification.method' (default: __login__) with service method to call. this method has to have two string-parameters for user and password. the method has to call _ServiceFactory.instance().createSession(userObject, mandatorObject, subject, userRoles, features, featureInterfacePrefix)_
@@ -442,12 +686,14 @@ If you don't want to have a standalone appliation, you are able to use an applic
 * create a *jndi.properties* file in your environment. with jboss this would look like the following:
 
 ### Example jndi for jboss eap 6.1
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 	java.naming.factory.initial=org.jboss.naming.remote.client.InitialContextFactory
 	java.naming.factory.url.pkgs=org.jboss.ejb.client.naming
 	java.naming.provider.url=remote://localhost:4447
 	java.naming.security.principal=<jndi-prefix>
 	java.naming.security.credentials=<perhaps the application name>
 	jboss.naming.client.ejb.context=true
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 ### Example authentication service method
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -479,7 +725,7 @@ UserService.authenticate(String user, String password) {
 
 ## Generating your Entities
 
-It is possible to generate your entity beans through a tool like hibernate-tools. for an example have a look at the sample-project _nano.h5.sample_.
+It is possible to generate your entity beans through a tool like hibernate-tools. This is prepared in _Nano.H5_, for further informations see chapter _Model Driven Architecture (MDA))_.
 
 If hibernate-tools creates your beans, it may create additional beans to use composed primary keys. To use them with _nano.h5_ you should extend these beans, to fill the id-bean from dependent entity fields. So, enhance the setter methods of this unique fields to fill the id-beans corresponding field, too.
 
@@ -494,12 +740,16 @@ class MyBeanId {
 	String myUniqueFieldId;
 }
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-
+ 
 ## Developing, Deploying and Debugging
 
-* [tsl2.nano code server](https://sourceforge.net/p/tsl2nano/code/ci/master/tree/tsl2.nano.common)
+* [tsl2.nano code server](git://git.code.sf.net/p/tsl2nano/code tsl2nano-code)
 
-If you change sources of this plugin, you should start ant script _eclipse-tsl2.nano.h5.xml_ with target _tsl2nano.eclipse.h5.export_ and after that the 'deploy' target of your main project.
+If you change sources of a plugin, you should start ant script _2nano.xml_. This will generate all jars to a target directory and creates the product-version _tsl2.nano.h5.x.y.z.jar_ into the targets test directory _test.sample.h5_.
+
+The version is read from _build.properties_ of nano.h5.
+
+### Help on Html5
 
 Normally, you don't have to create html-pages by yourself, but if you are interested in html5, have a look at the following tutorials/references:
 * [W3C-Html5-Reference](http://www.w3.org/TR/2013/NOTE-html-markup-20130528/Overview.html)
@@ -517,95 +767,141 @@ To analyse the html-page in your browser, for example in your Chrome-Browser, yo
 
 ## Creating an own project
 
-_Nano.H5_ is based on the framework _tsl2.common_ and it's bean package. The bean package provides a generic and comfortable way to describe your user interface. If the standards of _Nano.H5_ doesn't fulfil your needs, you can develop own beans on top of _Nano.H5_ - without creating special gui-elements or interaction, this will be done by the framework - generating html-pages through the _BeanPresentation_ implementation. Of course, this implementation is extendable, too. Have a look at chapter _Dependencies_ to know, which jar-files you should copy to the environment directory (f.e. _h5.sample_).
+_Nano.H5_ is based on the framework _tsl2.common_ and it's bean package. The bean package provides a generic and comfortable way to describe your user interface. If the standards of _Nano.H5_ don't fulfil your needs, you can develop own beans on top of _Nano.H5_ - without creating special gui-elements or interaction, this will be done by the framework - generating html-pages through the _BeanPresentation_ implementation. Of course, this implementation is extendable, too. Have a look at chapter _Dependencies_ to know, which jar-files you should copy to the environment directory (f.e. _h5.sample_).
 
 If you download and unpack _test.h5.sample_, you yield an eclipse project referencing the _tsl2.nano_ jar-files.
 
 File Structure:
 
-<pre>
-Auflistung der Ordnerpfade
-Volumeseriennummer : 0059E65C 9A6F:E968
-C:.
-|   .classpath
-|   .project
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 |   application.html
-|   debug.log
-|   environment.xml
-|   h5.sample.log
+|   favicon.ico
 |   run.bat
-|   tree.txt
-|   tsl2.nano.common.1.0.0.jar
-|   tsl2.nano.h5.0.0.1.jar
-|   tsl2.nano.h5.default-resources.jar
+|   tsl2.nano.h5.0.0.4.jar
 |   
-+---h5.sample
-|   |   ant-launcher.jar
-|   |   ant-nodeps.jar
-|   |   ant.jar
-|   |   antlr-2.7.6.jar
-|   |   antscripts.properties
-|   |   antscripts.xml
-|   |   application.html
-|   |   commons-collections-3.2.1.jar
-|   |   commons-lang-2.4.jar
-|   |   dom4j-1.6.1.jar
-|   |   environment.xml
-|   |   freemarker.jar
-|   |   h5.sample.sql
-|   |   hibernate-tools-3.4.0.CR2.jar
-|   |   hibernate.reveng.xml
-|   |   hibernate3.jar
-|   |   hibtool.xml
-|   |   hsqldb.jar
-|   |   javassist-3.12.0.GA.jar
-|   |   jdbc-connection.properties
-|   |   jdbc-connection.properties.bak
-|   |   mda.bat
-|   |   mda.properties
-|   |   mda.xml
-|   |   mypersistence-bean.xml
-|   |   mypersistence-bean.xml.bak
-|   |   mypersistence.xml
-|   |   mypersistence.xml.bak
-|   |   ojdbc14_g.jar
-|   |   runServer.bat
-|   |   shell.xml
-|   |   slf4j-api-1.6.1.jar
-|   |   timedb.jar
-|   |   timedb.lck
-|   |   timedb.log
-|   |   timedb.properties
-|   |   timedb.script
-|   |   trang.jar
-|   |   tsl2.nano.h5.default-resources.jar
-|   |   
-|   +---beandef
-|   |       project.xml
-|   |       start.xml
-|   |       times.xml
-|   |       
-|   +---generated-bin
-|   |   \---my
-|   |       \---app
-|   |               Loader.class
-|   |               MyApp.class
-|   |               
-|   +---generated-src
-|   |   \---my
-|   |       \---app
-|   |               Loader.java
-|   |               MyApp.java
-|   |               
-|   \---META-INF
-|           persistence.xml
-|           
-|           
-\---META-INF
-        MANIFEST.MF
-</pre>
+\---config
+    |   ant-launcher.jar
+    |   ant-nodeps.jar
+    |   ant.jar
+    |   antlr-2.7.7.jar
+    |   beandef.xsd
+    |   bsh-core-2.0b4.jar
+    |   classmate-0.5.4.jar
+    |   commons-collections-3.2.1.jar
+    |   commons-logging-1.1.1.jar
+    |   dom4j-1.6.1.jar
+    |   environment.xml
+    |   freemarker.jar
+    |   hibernate-commons-annotations-4.0.1.Final.jar
+    |   hibernate-core-4.0.0.Final.jar
+    |   hibernate-entitymanager-4.0.0.Final.jar
+    |   hibernate-jpa-2.0-api-1.0.1.Final.jar
+    |   hibernate-tools-4.0.0-CR1.jar
+    |   hibernate.reveng.xml
+    |   hibtool.xml
+    |   hsqldb.jar
+    |   jandex-1.0.3.Final.jar
+    |   javassist-3.12.1.GA.jar
+    |   jboss-logging-3.1.0.CR2.jar
+    |   jboss-transaction-api_1.1_spec-1.0.0.Final.jar
+    |   jdbc-connection.properties
+    |   jtidy-r8-20060801.jar
+    |   log4j-1.2.15.jar
+    |   logfactory.log
+    |   logfactory.xml
+    |   mda.bat
+    |   mda.properties
+    |   mda.xml
+    |   mypersistence-bean.xml
+    |   mypersistence.xml
+    |   runServer.bat
+    |   shell.xml
+    |   slf4j-api-1.5.8.jar
+    |   slf4j-log4j12-1.5.8.jar
+    |   time-permissons.xml
+    |   timedb.jar
+    |   timedb.lck
+    |   timedb.log
+    |   timedb.properties
+    |   timedb.script
+    |   timedb.sql
+    |   tsl2.nano.common.1.1.0.jar
+    |   tsl2.nano.incubation.0.0.4.jar
+    |   
+    +---beandef
+    |       address.xml
+    |       bank.xml
+    |       changes.xml
+    |       classes.xml
+    |       colors.xml
+    |       comments.xml
+    |       customer.xml
+    |       holiday.xml
+    |       keys.xml
+    |       organisation.xml
+    |       persistence.xml
+    |       person.xml
+    |       personhistory.xml
+    |       personrhythm.xml
+    |       personrhythmid.xml
+    |       planconstraints.xml
+    |       project.xml
+    |       projectdetails.xml
+    |       projectstatus.xml
+    |       properties.xml
+    |       replication.xml
+    |       start.xml
+    |       times.xml
+    |       timesid.xml
+    |       types.xml
+    |       
+    +---css
+    |   |   meta-frame.html
+    |   |   ...css specific files...
+    +---generated-bin
+    |  ...all classes compiled from generated-src...   
+    +---generated-src
+    |   +---my
+    |   |   \---app
+    |   |           Loader.java
+    |   |           MyApp.java
+    |   |           
+    |   \---org
+    |       \---anonymous
+    |           \---project
+    |                   Address.java
+    |                   Bank.java
+    |                   Changes.java
+    |                   Classes.java
+    |                   Colors.java
+    |                   Comments.java
+    |                   Customer.java
+    |                   Holiday.java
+    |                   Keys.java
+    |                   Organisation.java
+    |                   Person.java
+    |                   Personhistory.java
+    |                   Personrhythm.java
+    |                   PersonrhythmId.java
+    |                   Planconstraints.java
+    |                   Project.java
+    |                   Projectdetails.java
+    |                   Projectstatus.java
+    |                   Properties.java
+    |                   PropertiesId.java
+    |                   Times.java
+    |                   TimesId.java
+    |                   Types.java
+    |                   
+    +---icons
+    | ...all icons used by buttons...
+    +---lib
+    \---META-INF
+            MANIFEST.MF
+            persistence.xml
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-The implementation _Loader.java_ and _MyApp.java_ provide an own entry for the application. The _Loader_ only tells java to load _MyApp_. _MyApp_ overwrites three methods. Only _createBeanCollectors_ defines own beans and an own navigation stack.
+The implementation _Loader.java_ and _MyApp.java_ provide an own entry for the sample application. The _Loader_ only tells java to load _MyApp_. _MyApp_ overwrites three methods. Only _createBeanCollectors_ defines own beans and an own navigation stack.
 
 Here is the implementation:
 
@@ -810,6 +1106,8 @@ public class MyApp extends NanoH5 {
 }
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
+The code above generates examples for all _nano.h5_ aspects. The generated xml-files are used in the specialized chapters as examples.
+
 ## Performance
 
 Generic features like authorization for actions and data, filtering of columns and field, loading bitmaps etc. may slow down the application performance. The following tips may increase the performance:
@@ -817,7 +1115,7 @@ Generic features like authorization for actions and data, filtering of columns a
 set the following *environment.xml* properties:
 
 * extract all sub-jars from main jar 'nano.h5.xxx.jar'. nested jar loading is really slow.
-* disable check of data-permission: *check.permission.data=false*
+* if you don't need data-permissions, disable check of data-permission: *check.permission.data=false*
 * set log-level to info: *default.log.level=8*
 * disable multiple field/column filter: *collector.use.multiple.filter=false*
 * get only 50 lines per search: *service.maxresult=50*
@@ -827,7 +1125,7 @@ set the following *environment.xml* properties:
 ## Problems and Solutions
 
 * Beans showing currencys with EURO can't be saved
-** Set the character encoding of your browser's current page to *UTF-8*. E.g. in Chrome: Menu=>Tools=>Enconding
+** Set the character encoding of your browser's current page to *UTF-8*. E.g. in Chrome: Menu=>Tools=>Encoding
 
 ## Changelog
 
@@ -835,6 +1133,7 @@ set the following *environment.xml* properties:
 | 0.0.1 | 06.07.2013 | First alpha Version
 | 0.0.2 | 21.09.2013 | beta Version (full basic feature implementation)
 | 0.0.3 | 01.01.2014 | beta Version (basic features + authorization + workflows + rules)
+| 0.0.4 | 20.03.2014 | full featured version (replication, attribute- and beandef-extensions QueryResult, RuleAttribute, many refactorings)
 
 ## TODOs
 
@@ -985,7 +1284,7 @@ set the following *environment.xml* properties:
 ** ( ) test with multi values - using best id's
 ** (-) test on android
 *** no datasource for Sqlite available - apache BasicDatasource uses JavaBeans what is not usable on android
-*** ORMLite (4.47) not usable through persistence.xml because no EntityManagerFactory/EntityManager implementation available
+*** ORMLite (4.48) not usable through persistence.xml because no EntityManagerFactory/EntityManager implementation available
 ** languages
 ** on appserver
 * extract apploader: common main, classloader, execution

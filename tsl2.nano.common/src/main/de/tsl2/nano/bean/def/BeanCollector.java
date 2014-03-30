@@ -49,6 +49,7 @@ import de.tsl2.nano.core.IPredicate;
 import de.tsl2.nano.core.ManagedException;
 import de.tsl2.nano.core.Messages;
 import de.tsl2.nano.core.cls.BeanAttribute;
+import de.tsl2.nano.core.exception.Message;
 import de.tsl2.nano.core.log.LogFactory;
 import de.tsl2.nano.core.util.DateUtil;
 import de.tsl2.nano.core.util.StringUtil;
@@ -188,7 +189,10 @@ public class BeanCollector<COLLECTIONTYPE extends Collection<T>, T> extends Bean
             int workingMode,
             Composition composition) {
 //        setName(Messages.getString("tsl2nano.list") + " " + getName());
-        this.isStaticCollection = !Util.isEmpty(collection);
+        this.isStaticCollection =
+            !Util.isEmpty(collection)
+                || (beanFinder != null && BeanContainer.isInitialized() && !BeanContainer.instance().isPersistable(
+                    beanFinder.getType()));
         this.collection = collection != null ? collection : (COLLECTIONTYPE) new LinkedList<T>();
         setBeanFinder(beanFinder);
         //TODO: the check for attribute can't be done here - perhaps attributes will be added later!
@@ -483,8 +487,10 @@ public class BeanCollector<COLLECTIONTYPE extends Collection<T>, T> extends Bean
      */
     @Override
     public T createItem(T selectedItem) {
-        final T newItem;
-        if (selectedItem != null && Environment.get("collector.new.clone.selected", true)) {
+        T newItem = null;
+        Class<T> type = getType();
+        if (selectedItem != null && Environment.get("collector.new.clone.selected", true)
+            && !(Entry.class.isAssignableFrom(type))) {
             try {
                 /*
                  * we don't use the apache util to be compatible on all platforms (e.g. without java.bean package)
@@ -494,14 +500,14 @@ public class BeanCollector<COLLECTIONTYPE extends Collection<T>, T> extends Bean
                 newItem = (T) BeanUtil.clone(selectedItem);
                 BeanUtil.createOwnCollectionInstances(newItem);
             } catch (final Exception e) {
-                ManagedException.forward(e);
-                return null;
+                LOG.error(e);
+                Message.send("Couldn't copy selected element!");
             }
-        } else {
+        } 
+        if (newItem == null) {
             /*
              * there is no information how to create a new bean - at least one stored bean instance must exist!
              */
-            Class<T> type = getType();
             if (type != null && Collection.class.isAssignableFrom(type)) {
                 LOG.warn("There is no information how to create a new bean - at least one stored bean instance must exist!");
                 return null;

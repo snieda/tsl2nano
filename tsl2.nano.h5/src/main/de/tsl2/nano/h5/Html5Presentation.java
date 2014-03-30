@@ -138,6 +138,7 @@ import de.tsl2.nano.core.util.Util;
 import de.tsl2.nano.format.GenericParser;
 import de.tsl2.nano.format.RegExpFormat;
 import de.tsl2.nano.h5.configuration.BeanConfigurator;
+import de.tsl2.nano.persistence.Persistence;
 import de.tsl2.nano.util.NumberUtil;
 
 /**
@@ -189,41 +190,45 @@ public class Html5Presentation<T> extends BeanPresentationHelper<T> implements I
         super.getApplicationActions();
 
         if (firstTime) {
-            appActions.add(new SecureAction(bean.getClazz(),
-                "configure",
-                IAction.MODE_UNDEFINED,
-                false,
-                "icons/compose.png") {
-                @Override
-                public Object action() throws Exception {
-                    return BeanConfigurator.create((Class<Serializable>) bean.getClazz());
-                }
+            if (bean instanceof Bean) {
+                appActions.add(new SecureAction(bean.getClazz(),
+                    "configure",
+                    IAction.MODE_UNDEFINED,
+                    false,
+                    "icons/compose.png") {
+                    @Override
+                    public Object action() throws Exception {
+                        return BeanConfigurator.create((Class<Serializable>) bean.getClazz());
+                    }
 
-                @Override
-                public boolean isEnabled() {
-                    return true;
-                }
-            });
-            appActions.add(new SecureAction(bean.getClazz(),
-                "sample-code",
-                IAction.MODE_UNDEFINED,
-                false,
-                "icons/images_all.png") {
-                @Override
-                public Object action() throws Exception {
-                    String dir = Environment.getConfigPath();
-                    //the common-jar will be used by ant-scripts...
-                    Environment.saveResourceToFileSystem("tsl2.nano.common.1.1.0.jar");
-                    Environment.saveResourceToFileSystem("tsl2.nano.incubation.0.0.4.jar");
-                    FileUtil.extract("tsl2.nano.h5.sample.jar", dir, null);
-                    return "Sample code and database created. Please re-start application!";
-                }
+                    @Override
+                    public boolean isEnabled() {
+                        return true;
+                    }
+                });
+            }
+            if (Persistence.class.isAssignableFrom(bean.getDeclaringClass())) {
+                appActions.add(new SecureAction(bean.getClazz(),
+                    "sample-code",
+                    IAction.MODE_UNDEFINED,
+                    false,
+                    "icons/images_all.png") {
+                    @Override
+                    public Object action() throws Exception {
+                        String dir = Environment.getConfigPath();
+                        //the common-jar will be used by ant-scripts...
+                        Environment.saveResourceToFileSystem("tsl2.nano.common.1.1.0.jar");
+                        Environment.saveResourceToFileSystem("tsl2.nano.incubation.0.0.4.jar");
+                        FileUtil.extract("tsl2.nano.h5.sample.jar", dir, null);
+                        return "Sample code and database created. Please re-start application!";
+                    }
 
-                @Override
-                public boolean isEnabled() {
-                    return true;
-                }
-            });
+                    @Override
+                    public boolean isEnabled() {
+                        return true;
+                    }
+                });
+            }
         }
         return appActions;
     }
@@ -567,6 +572,7 @@ public class Html5Presentation<T> extends BeanPresentationHelper<T> implements I
         /*
          * create the column header
          */
+        bean.addMode(MODE_MULTISELECTION);
         Element grid;
         if (interactive)
             grid = createGrid(parent, bean.toString(), false, bean);
@@ -574,7 +580,6 @@ public class Html5Presentation<T> extends BeanPresentationHelper<T> implements I
             grid = createGrid(parent, bean.toString(), false, getColumnNames(bean));
         appendAttributes(grid, bean.getPresentable());
 
-        bean.addMode(MODE_MULTISELECTION);
         if (interactive && bean.hasMode(IBeanCollector.MODE_SEARCHABLE)) {
             Collection<T> data = new LinkedList<T>(bean.getSearchPanelBeans());
             //this looks complicated, but if currentdata is a collection with a FilteringIterator, we need a copy of the filtered items!
@@ -767,7 +772,7 @@ public class Html5Presentation<T> extends BeanPresentationHelper<T> implements I
             a.getLongDescription(),
             null,
             a.getKeyStroke(),
-            (a.getImagePath() != null ? a.getImagePath() : "icons/" + StringUtil.substring(a.getId(), ".", null)
+            (a.getImagePath() != null ? a.getImagePath() : "icons/" + StringUtil.substring(a.getId(), ".", null, true)
                 + ".png"),
             a.isEnabled(),
             a.isDefault(),

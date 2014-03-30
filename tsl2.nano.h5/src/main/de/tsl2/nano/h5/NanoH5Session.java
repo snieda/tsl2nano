@@ -231,8 +231,8 @@ public class NanoH5Session {
                 BeanCollector collector = (BeanCollector) nav.current();
                 Collection data = collector.getBeanFinder().getData();
                 ListSet listSet = CollectionUtil.asListSet(data);
-                //visible numbers starting with '1', but indexes starting with '0'
-                responseObject = new Bean(listSet.get(uriLinkNumber.intValue() - 1));
+                responseObject =
+                    new Bean(listSet.get(uriLinkNumber.intValue() - (collector.hasFilter() ? 2 : 0)));
                 return responseObject;
             } else {
                 if (!isCanceled(parms)

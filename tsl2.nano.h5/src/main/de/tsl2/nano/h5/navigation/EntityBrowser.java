@@ -59,7 +59,7 @@ public class EntityBrowser implements IBeanNavigator {
             BeanDefinition<?> userResponseBean =
                 (BeanDefinition<?>) (userResponseObject instanceof BeanDefinition<?> ? userResponseObject
                     : (Util.isContainer(userResponseObject)
-                        ? BeanCollector.getBeanCollector((Collection) userResponseObject, 0)
+                        ? BeanCollector.getBeanCollector(Util.getContainer(userResponseObject), 0)
                         : Bean.getBean((Serializable) userResponseObject)));
             isOnWork = navigation.contains(userResponseBean);
             if (!isOnWork) //--> go forward

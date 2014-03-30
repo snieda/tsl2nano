@@ -33,10 +33,12 @@ import java.util.Collection;
 import java.util.Comparator;
 import java.util.Date;
 import java.util.Iterator;
+import java.util.LinkedHashSet;
 import java.util.LinkedList;
 import java.util.NavigableMap;
 import java.util.NavigableSet;
 import java.util.Properties;
+import java.util.Set;
 import java.util.SortedSet;
 import java.util.TreeMap;
 
@@ -957,6 +959,70 @@ public class BeanPresentationHelper<T> {
         }
     }
 
+    String[] getBestAttributeNames(String[] names) {
+        return getBestAttributeNames(names, getBestAttributeOrder(names).descendingMap().values());
+    }
+    
+    String[] getBestAttributeNames(String[] names, Collection<Integer> descendingIndexes) {
+        Set<String> ordered = new LinkedHashSet<String>();
+        for (Integer index : descendingIndexes) {
+            ordered.add(names[index]);
+        }
+        //be sure to add all names
+        for (int i = 0; i < names.length; i++) {
+            if (!ordered.contains(names[i]))
+                ordered.add(names[i]);
+        }
+        return ordered.toArray(new String[0]);
+    }
+
+    NavigableMap<Integer, Integer> getBestAttributeOrder(String[] names) {
+        Class<?> bestType = Environment.get("bean.best.attribute.type", String.class);
+        String bestRegexp = Environment.get("bean.best.attribute.regexp", ".*(name|bezeichnung|description|id).*");
+        int bestminlength = Environment.get("bean.best.attribute.minlength", 2);
+        int bestmaxlength = Environment.get("bean.best.attribute.maxlength", 50);
+
+        /*
+         * create a map with matching levels and their attribute indexes.
+         */
+        int ml = 0;//matchinglevel: 5 criterias to match
+        NavigableMap<Integer, Integer> levels = new TreeMap<Integer, Integer>();
+        for (int i = 0; i < names.length; i++) {
+            IAttributeDefinition attr = bean.getAttribute(names[i]);
+            if (attr.getType().isInterface() || attr.isMultiValue()
+                || !BeanClass.hasDefaultConstructor(attr.getType())
+                || (!attr.isVirtual() && isGeneratedValue(bean.getDeclaringClass(), names[i])))
+                ml = Integer.MIN_VALUE;
+            //avoid stackoverflow checking if valueExpression was created already
+            else if (bean.valueExpression == null || isDefaultAttribute((IAttribute) attr)) {
+                ml = 0;
+                ml = (1 << 11) * (attr.id() ? 1 : 0);
+                ml |= (1 << 10) * (attr.unique() ? 1 : 0);
+                ml |= (1 << 9) * (!attr.nullable() ? 1 : 0);
+                ml |= (1 << 8) * (!attr.isRelation() ? 1 : 0);
+                ml |= (1 << 7) * (BeanClass.isAssignableFrom(bestType, attr.getType()) ? 1 : 0);
+                ml |= (1 << 6) * (names[i].matches(bestRegexp) ? 1 : 0);
+                ml |=
+                    (1 << 5)
+                        * (attr.length() == -1
+                            || (attr.length() >= bestminlength && attr.length() <= bestmaxlength) ? 1
+                            : 0);
+            } else {
+                ml = 0;
+            }
+            /*
+             * ml is the key - to be sorted in the treemap. if ml collates another entry,
+             * we just increase it (lazy workaround). so, attributes with higher i win.
+             */
+            if (ml != 0) {
+                while (levels.containsKey(ml))
+                    ml++;
+            }
+            levels.put(ml, i);
+        }
+        return levels;
+    }
+
     /**
      * tries to evalute the best attribute as unique bean presenter. this algorithmus is used, if no attribute filter
      * (defining the attribute order) was defined.
@@ -965,49 +1031,11 @@ public class BeanPresentationHelper<T> {
      */
     protected String getBestPresentationAttribute() {
         if (bean.isDefault() && bean.getAttributeDefinitions().size() > 0) {
-            Class<?> bestType = Environment.get("bean.best.attribute.type", String.class);
-            String bestRegexp = Environment.get("bean.best.attribute.regexp", ".*(name|bezeichnung|description|id).*");
-            int bestminlength = Environment.get("bean.best.attribute.minlength", 2);
-            int bestmaxlength = Environment.get("bean.best.attribute.maxlength", 50);
             String[] names = bean.getAttributeNames();
-
-            /*
-             * create a map with matching levels and their attribute indexes.
-             */
-            int ml = 0;//matchinglevel: 5 criterias to match
-            NavigableMap<Integer, Integer> levels = new TreeMap<Integer, Integer>();
-            for (int i = 0; i < names.length; i++) {
-                IAttributeDefinition attr = bean.getAttribute(names[i]);
-                if (attr.getType().isInterface() || attr.isMultiValue()
-                    || !BeanClass.hasDefaultConstructor(attr.getType())
-                    || (!attr.isVirtual() && isGeneratedValue(bean.getDeclaringClass(), names[i])))
-                    ml = Integer.MIN_VALUE;
-                //avoid stackoverflow checking if valueExpression was created already
-                else if (bean.valueExpression == null || isDefaultAttribute((IAttribute) attr)) {
-                    ml = 0;
-                    ml = (1 << 10) * (attr.id() ? 1 : 0);
-                    ml |= (1 << 9) * (attr.unique() ? 1 : 0);
-                    ml |= (1 << 8) * (!attr.nullable() ? 1 : 0);
-                    ml |= (1 << 7) * (BeanClass.isAssignableFrom(bestType, attr.getType()) ? 1 : 0);
-                    ml |= (1 << 6) * (names[i].matches(bestRegexp) ? 1 : 0);
-                    ml |=
-                        (1 << 5)
-                            * (attr.length() == -1
-                                || (attr.length() >= bestminlength && attr.length() <= bestmaxlength) ? 1
-                                : 0);
-                } else {
-                    ml = 0;
-                }
-                /*
-                 * ml is the key - to be sorted in the treemap. if ml collates another entry,
-                 * we just increase it (lazy workaround). so, attributes with higher i win.
-                 */
-                if (ml != 0) {
-                    while (levels.containsKey(ml))
-                        ml++;
-                }
-                levels.put(ml, i);
-            }
+            NavigableMap<Integer, Integer> levels = getBestAttributeOrder(names);
+            bean.setAttributeFilter(getBestAttributeNames(names, levels.descendingMap().values()));
+            bean.isdefault = true;
+            
             /*
              * we don't have direct access to the database, so we can't read the
              * unique indexes. but the best matched attribute should be unique.

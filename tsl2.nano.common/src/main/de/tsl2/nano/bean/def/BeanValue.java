@@ -123,7 +123,7 @@ public class BeanValue<T> extends AttributeDefinition<T> implements IValueDefini
     @Override
     public Class<T> getType() {
         //TODO: set UNDEFINED instead of object
-        if (getConstraint().getType() == Object.class) {
+        if (getConstraint().getType() == Object.class || getConstraint().getType().isInterface()) {
             //if a value-expression was defined, the valueexpression-type has to be used!
             if (attribute.isVirtual())
                 getConstraint().setType(super.getType());
@@ -142,8 +142,9 @@ public class BeanValue<T> extends AttributeDefinition<T> implements IValueDefini
                     LOG.warn("couldn't evaluate type through instance. using method-returntype instead. error was: "
                         + e.toString());
                 }
+            } else {
+                getConstraint().setType(super.getType());
             }
-            getConstraint().setType(super.getType());
         }
         return getConstraint().getType();
     }

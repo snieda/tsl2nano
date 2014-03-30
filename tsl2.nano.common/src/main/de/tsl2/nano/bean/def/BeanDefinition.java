@@ -196,8 +196,14 @@ public class BeanDefinition<T> extends BeanClass<T> implements Serializable {
      */
     public void setAttributeFilter(String... availableAttributes) {
         this.attributeFilter = availableAttributes;
+        isdefault = false;
+        refreshAttributeDefinitions();
+    }
+
+    protected void refreshAttributeDefinitions() {
         allDefinitionsCached = false;
         isdefault = false;
+        getAttributes(false);
     }
 
     /**
@@ -506,7 +512,8 @@ public class BeanDefinition<T> extends BeanClass<T> implements Serializable {
      */
     protected <A> IAttributeDefinition<A> addAttribute(String name, IAttributeDefinition<A> newAttribute) {
         getAttributeDefinitions().put(
-            name/*newAttribute.getName() != null ? newAttribute.getName() : newAttribute.getDescription()*/, newAttribute);
+            name/*newAttribute.getName() != null ? newAttribute.getName() : newAttribute.getDescription()*/,
+            newAttribute);
         //if no filter was defined, it will be prefilled in getAttributeNames()
         if (attributeFilter == null)
             attributeFilter = getAttributeNames();
@@ -562,13 +569,15 @@ public class BeanDefinition<T> extends BeanClass<T> implements Serializable {
     }
 
     /**
-     * the bean is selectable, if it has at least one action to do on it - or it is persistable.
+     * the bean is selectable, if it has at least one action to do on it - or it has a default-constructor or is
+     * persistable.
      * 
      * @return true, if an action was defined
      */
     public boolean isSelectable() {
         return !isFinal()
-            && (isMultiValue() || isInterface() || isCreatable() || isPersistable() || !Util.isEmpty(actions));
+            && (isMultiValue() || isInterface() || isCreatable() || isPersistable()
+                || Map.Entry.class.isAssignableFrom(getClazz()) || !Util.isEmpty(actions));
     }
 
     /**
@@ -600,7 +609,9 @@ public class BeanDefinition<T> extends BeanClass<T> implements Serializable {
      * @return all public methods (wrapped into actions) starting with 'action' and having no arguments.
      */
     @SuppressWarnings("serial")
-    public static Collection<IAction> getActionsByClass(Class<?> clazz, Collection<IAction> actions, Object... parameters) {
+    public static Collection<IAction> getActionsByClass(Class<?> clazz,
+            Collection<IAction> actions,
+            Object... parameters) {
         final Method[] methods = getDefiningClass(clazz).getMethods();
         if (actions == null)
             actions = new ArrayList<IAction>();
@@ -999,13 +1010,14 @@ public class BeanDefinition<T> extends BeanClass<T> implements Serializable {
 
     /**
      * saveVirtualDefinition
+     * 
      * @param name
      */
     public void saveVirtualDefinition(String name) {
         setName(PREFIX_VIRTUAL + name);
         saveDefinition();
     }
-    
+
     /**
      * persists cache
      */

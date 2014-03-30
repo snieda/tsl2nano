@@ -16,6 +16,7 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.Map;
 
+import de.tsl2.nano.collection.MapUtil;
 import de.tsl2.nano.core.ManagedException;
 
 /**
@@ -93,15 +94,39 @@ public class Util {
     public static final boolean isContainer(Object obj) {
         return obj != null ? isContainer(obj.getClass()) : false;
     }
+
     /**
      * isContainer
+     * 
      * @param cls
      * @return true, if cls is a collection or map
      */
     public static final boolean isContainer(Class<?> cls) {
         return /*cls.isArray() || */Collection.class.isAssignableFrom(cls) || Map.class.isAssignableFrom(cls);
     }
-    
+
+    /**
+     * if {@link #isContainer(Object)} returns true, obj is an array, collection or map. this method returns a
+     * collection where obj is wrapped into.
+     * 
+     * @param obj
+     * @return
+     */
+    @SuppressWarnings({ "unchecked", "rawtypes" })
+    public static final Collection<?> getContainer(Object obj) {
+        if (obj == null)
+            return null;
+        Class<?> cls = obj.getClass();
+        if (cls.isArray())
+            return asList(obj);
+        else if (Collection.class.isAssignableFrom(cls))
+            return (Collection<?>) obj;
+        else if (Map.class.isAssignableFrom(cls))
+            return MapUtil.asEntrySetExtender((Map) obj);
+        else
+            throw new ManagedException(obj + " is not a container!");
+    }
+
     /**
      * checks, whether entry is one of elements
      * 

@@ -10,4 +10,5 @@
 <stringAttribute key="org.eclipse.jdt.launching.PROGRAM_ARGUMENTS" value="timedb 8066"/>
 <stringAttribute key="org.eclipse.jdt.launching.PROJECT_ATTR" value="tsl2.nano.h5"/>
 <stringAttribute key="org.eclipse.jdt.launching.VM_ARGUMENTS" value="-Dtsl2.nano.log.level=trace"/>
+<stringAttribute key="org.eclipse.jdt.launching.WORKING_DIRECTORY" value="${workspace_loc:tsl2.nano.h5}/test"/>
 </launchConfiguration>

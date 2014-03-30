@@ -35,6 +35,9 @@ public interface IAttributeDefinition<T> extends IAttribute<T>, IAttributeDef, S
      */
     public boolean isMultiValue();
 
+    /** returns true, if this attribute is a relation (foreign key) to another bean */
+    boolean isRelation();
+    
     /** should be true, if this attribute defines the id of the owning bean */
     boolean id();
 
