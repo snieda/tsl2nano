@@ -321,4 +321,8 @@ public class HtmlUtil {
     public static String createMessage(String msg, String color) {
         return "<font color=\"" + color + "\"><pre>" + msg + "</pre></font>";
     }
+
+    public static boolean isHtml(String asString) {
+        return asString != null && (asString.contains("</") || asString.contains("/>"));
+    }
 }

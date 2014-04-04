@@ -5,16 +5,16 @@
 
 ## Introduction
 
-NanoH5 (or FullRelation) is an UI independent gui implementation framework providing a model driven design (MDA). It is bound to the app framework __tsl2.nano.commons__ and the jpa-service framework __tsl2.nano.serviceaccess__. It is possible to build a complete html5 application through a given class- or database-model.
+NanoH5 (or FullRelation) is an UI independent gui implementation framework providing a model driven design (MDA). It is bound to the app framework __tsl2.nano.commons__ and the jpa-service framework __tsl2.nano.serviceaccess__. It is possible to build a complete html5 application through a given class- or database-model. An Html5 presentation layer is provided as default.
 
 - Everything will be filled for you by defaults - presenting a full application getting a database connection
 - define it or implement it - all object-types have their representation as readable xml-file.
 - ...or just use it as intelligent bean-browser or entity-browser
 
-To do a quick-start, go to chapter _Starting / Test_.
+To do a *quick-start*, go to chapter _Starting / Test_.
 
 ### Goals
-* pure model implementation + plattform independency (should work on android, too).
+* pure model implementation + platform independency (should work on android, too).
 * small, having as less as possible static dependencies to other libraries
 * everything has a default - all defaults are configurable (Convention over Configuration)
 * application, session and entity behaviors are configurable
@@ -35,10 +35,8 @@ To do a quick-start, go to chapter _Starting / Test_.
 * many features through nano.common, and nano.incubation like a rule, sql, action engine, network executor etc.
 * handling blobs of data (byte[]) to be presented in html as picture, audio, video or object.
 * planned interfaces: 
-** ddl-->beans through hibernate-tools
-** jpa-->bean through annotation evaluation
-** xsd-->bean (not finished yet!)
-** java-interface-->java-bean (mock through internal proxy, not finished yet!)
+** xsd-->bean
+** java-interface-->java-bean (mock through internal proxy)
 
 Using the _NanoHTTPD_ Server as base, this client application creates html surfaces, sending them through the integrated server to an html browser. Entry point is the file _application.html_ defining the browser request _http://localhost:8067_ (configurable ;-)).
 
@@ -83,7 +81,7 @@ this software should provide a fast way to create a standard application through
 * Usable as full-configurable application
 * Usable as full-stack framework to develop model-driven applications
 
-The _environment.xml_ in your current environment directory defines access-modes. F.e. _http.connection_ will define, if it is remote-accessible or not. For more informations, see [TODO].
+The _environment.xml_ in your current environment directory defines access-modes. F.e. _http.connection_ will define, if it is remote-accessible or not. For more informations, see chapter _The Environment_.
 
 ### Third Party Libraries
 
@@ -94,7 +92,7 @@ Direct dependencies exist to the following libararies (contained inside the _tsl
 The following library was a helper to generate an xsd-file for the beandef-xml files.
 * [Jing-Trang xml2xsd-Generator](https://code.google.com/p/jing-trang/downloads/list)
 
-For more indirect dependencies, have a look at [TODO].
+For more indirect dependencies, have a look at chapter _Dependencies_.
 
 ### Architecture
 
@@ -118,6 +116,14 @@ The other option would be to have an existing _beans.jar_. This could be selecte
 * start _mda.bat_ to generate the database from ddl file creating the beans-jar file through hibernate tools.
 
 #### Framework mechanisms - how to extend the framework
+
+##### What is a Bean?
+
+In java a bean is a type/class defined by attributes (=properties). These attributes are readable through getter-methods ('get' + attribute-name) and changeable through setter methods ('set' + attribute-name).
+
+_Nano.H5_ tries to change coppling between beans and attributes. A bean, defined by it's compiled class can have additional attributes to be presented. JPA annotations are interpreted to constrain the  java-bean attributes and an additional presentation interface defines the layout of beans and attributes.
+
+##### Which bean attributes should be presented on default
 
 If you connect/login to a persistence-layer/database for the first time, the framework tries to evaluate all bean-properties and attribute-properties. the order of attributes of each bean will be calculated through the implementation of _BeanPresentationHelper.getBestAttributeOrder()_. The best attribute to present the bean is done through _BeanPresentationHelper.getBestAttributeName()_.
 This methods are called only if _bean.use.beanpresentationhelper.filter_ is true - and use the following properties of _environment.xml_:
@@ -369,7 +375,7 @@ An example is provided with _tsl2.nano.h5.x.y.z.jar_. After first start, a css d
 
 ### Configuring Presentation, Layout and Constraints
 
-Each bean and each bean-attribute can define a layout and layout-constraints through it's presentable object (see class _IPresentable_). It is easy to do layout definitions programmatically through the _BeanPresentationHelper_, but in this chapter we describe only the xml configuration.
+Each bean and each bean-attribute can define a layout and layout-constraints through it's presentable object (see class _IPresentable_). It is easy to do layout definitions programmatically through the _BeanPresentationHelper_, but in this chapter we describe only the xml configuration. Help on programmatical configurations, see chapter _Programmatical configuration_. Inside the application (on runtime), there is a _BeanConfigurator_ providing to edit your _BeanDefinition_s as administrator. 
 
 TODO describe
 
@@ -428,6 +434,10 @@ A bean - as container of it's attributes - will always be presented as detail pa
 [TODO screenshot]
 
 A detail page presents the attributes of a bean as it is defined in it's bean-definition xml file. for more informations see chapter _Configuration through Serialization_.
+
+#### Value Expressions
+
+Each bean and attribute can be presented by and created by a text expression. On beans, this expression (called _ValueExpresion_) should contain at least one bean-attribute (perhaps the id, but if another attribute is more readable but unique, you would prefer this). These _ValueExpression_ will be used to present a bean in a list, or if it used as relation in another bean. The creation through a string works only, if the bean provides a default-constructor and the attributes in the expression have setter-methods.
 
 #### Value Groups and Sub-Panels
 
@@ -552,6 +562,25 @@ Example for a rule using another sub-rule:
 #### Presenting data or media like images, audio, video
 
 If an attribute holds data of type _byte[]_, it may be presented as image or any other non-textual type. The default-mechanism will declare the attributes type as _TYPE_DATA_ which will save the attributes value to a temporary file to be sent through http to the client and to be shown as image - or if a special style was defined, as _embed_, _object_, _audio_, _video_, _canvas_ or _device_ - as known from _HTML5_ embedded content tags.
+
+## Changing Layouts through the _BeanConfigurator_
+
+The chapter before described the structure of all definitions. _Nano.H5_ provides an administration tool inside the application to do some configurations on runtime. If you are inside the detail-page of a bean, there is an action 'Configuration' on your headers button-group. If you activate it, you are inside a configuration mode, letting you change layout and styling of the current bean.
+
+[TODO: png]
+
+The value-expression defines the presentation of the current bean-definition. Inside the brackets there are any characters + several attribute-names to be present a bean-value.
+F.e., if you have a bean _Person_ with attributes _id_ and _name_, but want to show only the name of a person in a list, you define: _{name}_.
+
+### Presentable
+
+Inside the _Presentable_ configuration, you are able to change f.e. the layout of a bean. F.e. you can add a border through it's layout-constraints:
+
+[TODO png]
+
+which result in
+
+[TODO png]
 
 ## Resolving _many-to-many_ constellations
 
@@ -939,7 +968,34 @@ public class MyApp extends NanoH5 {
     @Override
     @SuppressWarnings("rawtypes")
     protected BeanDefinition<?> createBeanCollectors(List<Class> beanClasses) {
+        
 
+        /*
+         * create your own bean collectors as described in the next chapter
+         */
+
+		//...
+		
+        /*
+         * define your own navigation stack
+         */
+        return beanCollector;
+    }
+
+    @SuppressWarnings("unchecked")
+    public static void main(String[] args) {
+        startApplication(MyApp.class, MapUtil.asMap(0, "http.connection"), args);
+    }
+}
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+## Programmatical configuration
+
+The next code pieces generate examples for all _nano.h5_ aspects. The generated xml-files are used in the specialized chapters as examples. You can put them all together in _MyApp.createBeanCollectors(..)_.
+
+### Creating a workflow
+
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
     /*
      * Sample Workflow with three activities
      */
@@ -968,7 +1024,11 @@ public class MyApp extends NanoH5 {
             "organisation"));
         Workflow workflow = new Workflow("test.workflow", acts);
         Environment.persist(workflow);
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
+### Creating a rule with sub-rule
+
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
         /*
          * use a rule with sub-rule
          */
@@ -991,7 +1051,11 @@ public class MyApp extends NanoH5 {
                 .run(MapUtil.asMap("A", true, "x1", new BigDecimal(1), "x2", new BigDecimal(2)));
 
         LOG.info("my test-import rule result:" + result);
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
+### Defining a query
+
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
         /*
          * define a query
          */
@@ -1002,6 +1066,11 @@ public class MyApp extends NanoH5 {
         QueryPool queryPool = Environment.get(QueryPool.class);
         queryPool.add(query.getName(), query);
 
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+### Defining an action
+
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
         /*
          * define an action
          */
@@ -1015,7 +1084,10 @@ public class MyApp extends NanoH5 {
         a.addConstraint("arg1", new Constraint<String>(Environment.getConfigPath() + "antscripts.xml"));
         a.addConstraint("arg2", new Constraint<String>("help"));
         Environment.get(ActionPool.class).add("ant", a);
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
+### Defining a Controller as Collector of Actions of a Bean
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
         /*
          * define a Controller as Collector of Actions of a Bean
          */
@@ -1039,7 +1111,10 @@ public class MyApp extends NanoH5 {
         });
         timeActionBean.saveDefinition();
         controller.saveVirtualDefinition(timeActionBean.getName()+ "-controller");
-        
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+### Defining a specific bean-collector presenting a query (SQL or JPA-QL)
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
         /*
          * define a specific bean-collector presenting a query (SQL or JPA-QL)
          */
@@ -1052,7 +1127,10 @@ public class MyApp extends NanoH5 {
 
         QueryResult qr = new QueryResult<>(query.getName());
         qr.saveVirtualDefinition(query.getName());
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
+### Defining own beans to present your entities another way
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
         /*
          * define own beans to present your entities another way
          */
@@ -1093,20 +1171,8 @@ public class MyApp extends NanoH5 {
         BeanDefinition.define(beanCollector);
         beanCollector.saveDefinition();
 
-        /*
-         * define your own navigation stack
-         */
-        return beanCollector;
-    }
 
-    @SuppressWarnings("unchecked")
-    public static void main(String[] args) {
-        startApplication(MyApp.class, MapUtil.asMap(0, "http.connection"), args);
-    }
-}
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-
-The code above generates examples for all _nano.h5_ aspects. The generated xml-files are used in the specialized chapters as examples.
 
 ## Performance
 
@@ -1122,10 +1188,15 @@ set the following *environment.xml* properties:
 * ???: *bean.use.beanpresentationhelper.filter=false*
 * turn off replication: *use.database.replication = false*
 
-## Problems and Solutions
+## Known Problems and some Solutions
 
 * Beans showing currencys with EURO can't be saved
 ** Set the character encoding of your browser's current page to *UTF-8*. E.g. in Chrome: Menu=>Tools=>Encoding
+* no datasource for Sqlite available - apache BasicDatasource uses JavaBeans what is not usable on android
+* ORMLite (4.48) not usable through persistence.xml because no EntityManagerFactory/EntityManager implementation available
+* hsqldb 1.8 is not able to do _select max(count(color)) from Colors group by color_
+* hibernate3 is - on special circumstances - not able to load fields with empty ('') strings. This results in an __java.lang.StringIndexOutOfBoundsException: String index out of range: 0__
+* hibernate4 is not able to generate correct case-sensitive class-names if table-names contain '_'. Example: SYS_TABLE will result in class _SysTable_, but variables try to declare _Systable_.
 
 ## Changelog
 
@@ -1226,9 +1297,9 @@ set the following *environment.xml* properties:
 *** The new item has to be put to the list of it's parent container. This list has to be saved before the new item!
 *** The beancollector now holds a 
 * *Problem: Filtering on Entities doesn't work (findBetween is not able to do a between for 'entity-columns')*
-* *Problem: Filtering BeanCollectors of Entities doesn't work after sorting twice*
-* internationalization: english RegExpFormat, messages.properties
-* (x) remove config path from environment (-->transient)
+* *(v) Problem: Filtering BeanCollectors of Entities doesn't work after sorting twice*
+* ( ) internationalization: english RegExpFormat on date, date-time
+* (v) remove config path from environment (-->transient)
 * dynamic jar-loading inside used standard jars does not work without static entry in manifest
 * *Argo-UML 0.34*
 ** how to create ddl from model
@@ -1283,8 +1354,7 @@ set the following *environment.xml* properties:
 * *TESTS*
 ** ( ) test with multi values - using best id's
 ** (-) test on android
-*** no datasource for Sqlite available - apache BasicDatasource uses JavaBeans what is not usable on android
-*** ORMLite (4.48) not usable through persistence.xml because no EntityManagerFactory/EntityManager implementation available
+
 ** languages
 ** on appserver
 * extract apploader: common main, classloader, execution

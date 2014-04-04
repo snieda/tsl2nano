@@ -15,8 +15,8 @@ import java.util.Map;
 
 import org.apache.commons.logging.Log;
 
-import de.tsl2.nano.core.cls.BeanClass;
 import de.tsl2.nano.core.classloader.NestedJarClassLoader;
+import de.tsl2.nano.core.cls.BeanClass;
 import de.tsl2.nano.core.log.LogFactory;
 import de.tsl2.nano.core.util.StringUtil;
 
@@ -88,7 +88,7 @@ public class AppLoader {
         String environment;
         String[] nargs;
         if (args.length == 1) {
-            environment = "config";
+            environment = getFileSystemPrefix() + "config";
             mainclass = args[0];
             mainmethod = "main";
             nargs = new String[0];
@@ -135,7 +135,7 @@ public class AppLoader {
                 System.arraycopy(args, 1, nargs, 0, nargs.length);
                 args = nargs;
             } else {
-                environment = "config";
+                environment = getFileSystemPrefix() + "config";
             }
         }
 
@@ -210,16 +210,16 @@ public class AppLoader {
         ClassLoader contextClassLoader = Thread.currentThread().getContextClassLoader();
         String classPath = System.getProperty("java.class.path");
         /*
-         * there are two mechansims: loading from jar, or loading in an IDE from classpath.
+         * there are two mechanisms: loading from jar, or loading in an IDE from classpath.
          * 1. loading from a jar-file, the previous classloader must not be given to the new one!
          *    so we have to add the jar-file itself ('java.classpath') and the user.dir to the path.
          * 2. loading from IDE-classpath, we have to use the parent classloader
          */
-        ClassLoader cl = classPath.contains(";") ? contextClassLoader : null;
+        ClassLoader cl = classPath.contains(";") || isDalvik() ? contextClassLoader : null;
         NestedJarClassLoader nestedLoader = new NestedJarClassLoader(cl);
         if (cl == null) {
             nestedLoader.addFile(classPath);
-            String configDir = System.getProperty("user.dir") + "/" + environment +"/";
+            String configDir = System.getProperty("user.dir") + "/" + environment + "/";
             nestedLoader.addLibraryPath(new File(configDir).getAbsolutePath());
         }
         nestedLoader.addLibraryPath(new File(environment).getAbsolutePath());
@@ -241,5 +241,24 @@ public class AppLoader {
         System.arraycopy(preArgs, 0, newArgs, 0, preArgs.length);
         System.arraycopy(args, 0, newArgs, preArgs.length, args.length);
         return newArgs;
+    }
+
+    private String getFileSystemPrefix() {
+        //on dalvik systems, the  MainActivity.onCreate() should set the syste property
+        return isDalvik() ? System.getProperty("android.sdcard.path", "/mnt/sdcard/") : isUnixFS() ? "/opt/" : "";
+    }
+
+    /**
+     * isDalvik
+     * 
+     * @return true if this app is started on android
+     */
+    public static final boolean isDalvik() {
+        return System.getProperty("java.vm.specification.name").startsWith("Dalvik");
+    }
+
+    public static final boolean isUnixFS() {
+        //TODO: eval the real file-system
+        return File.pathSeparatorChar == ':';
     }
 }

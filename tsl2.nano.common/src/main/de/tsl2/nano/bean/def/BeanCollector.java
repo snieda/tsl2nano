@@ -1037,11 +1037,8 @@ public class BeanCollector<COLLECTIONTYPE extends Collection<T>, T> extends Bean
                 searchStatus = Messages.getFormattedString("tsl2nano.searchdialog.searchrunning");
                 Environment.get(Profiler.class).starting(this, getName());
                 COLLECTIONTYPE result = (COLLECTIONTYPE) getBeanFinder().getData();
-                long time = Environment.get(Profiler.class).ending(this, getName());
-                searchStatus = Messages.getFormattedString("tsl2nano.searchdialog.searchresultdetails",
-                    result.size(),
-                    DateUtil.getFormattedTimeStamp(),
-                    DateUtil.getFormattedMinutes(time));
+                searchStatus = Messages.getFormattedString("tsl2nano.searchdialog.searchresultcount",
+                    result.size());
                 if (openAction != null)
                     openAction.setDefault(true);
                 return result;

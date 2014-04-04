@@ -567,7 +567,8 @@ public class FileUtil {
      * @return file name
      */
     public static String getValidFileName(String originName) {
-        return originName.replaceAll("[^a-zA-Z0-9-._]", "_");
+        String name = originName.replaceAll("[^a-zA-Z0-9-._]", "_");
+        return name.length() > 128 ? name.substring(0, 128) : name;
     }
 
     /**
@@ -578,7 +579,8 @@ public class FileUtil {
      * @return file name
      */
     public static String getValidPathName(String originName) {
-        return originName.replaceAll("[^a-zA-Z0-9-/._]", "_");
+        String name = originName.replaceAll("[^a-zA-Z0-9-/._]", "_");
+        return name.length() > 128 ? name.substring(0, 128) : name;
     }
 
     /**

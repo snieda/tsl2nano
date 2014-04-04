@@ -228,6 +228,7 @@ public class Environment {
         }
         getBuildInformations();
         self.properties.put(KEY_CONFIG_PATH, new File(dir).getAbsolutePath() + "/");
+        new File(self.getTempPath()).mkdir();
         self.services = new Hashtable<Class<?>, Object>();
         registerBundle(PREFIX + "messages", true);
         if (new File("messages.properties").canRead())

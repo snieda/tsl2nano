@@ -16,6 +16,7 @@ import java.text.FieldPosition;
 import java.text.Format;
 import java.text.ParsePosition;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -42,7 +43,9 @@ import de.tsl2.nano.collection.MapUtil;
 import de.tsl2.nano.core.Environment;
 import de.tsl2.nano.core.ManagedException;
 import de.tsl2.nano.core.cls.BeanClass;
+import de.tsl2.nano.core.exception.Message;
 import de.tsl2.nano.core.log.LogFactory;
+import de.tsl2.nano.core.util.DateUtil;
 import de.tsl2.nano.core.util.FileUtil;
 import de.tsl2.nano.core.util.StringUtil;
 import de.tsl2.nano.execution.CompatibilityLayer;
@@ -126,7 +129,7 @@ public class NanoH5 extends NanoHTTPD {
 //            LogFactory.setLogLevel(LogFactory.LOG_ALL);
             LOG.info(System.getProperties());
             createStartPage();
-            
+
             Environment.saveResourceToFileSystem("run.bat", "../run.bat");
             Environment.saveResourceToFileSystem("shell.xml");
             Environment.saveResourceToFileSystem("mda.bat");
@@ -141,7 +144,8 @@ public class NanoH5 extends NanoHTTPD {
                     FileUtil.extract("tsl2.nano.h5.default-resources.jar", dir, null);
                 } catch (Exception ex) {
                     //this shouldn't influence the application start!
-                    LOG.warn("couldn't extract resources from internal file " + "tsl2.nano.h5.default-resources.jar", ex);
+                    LOG.warn("couldn't extract resources from internal file " + "tsl2.nano.h5.default-resources.jar",
+                        ex);
                 }
             }
 
@@ -206,6 +210,7 @@ public class NanoH5 extends NanoHTTPD {
         if (method.equals("GET") && !NumberUtil.isNumber(uri.substring(1)) && HtmlUtil.isURL(uri)
             && !uri.contains(Html5Presentation.PREFIX_BEANREQUEST))
             return super.serve(uri, method, header, parms, files);
+        long startTime = System.currentTimeMillis();
         InetAddress requestor = ((Socket) header.get("socket")).getInetAddress();
         NanoH5Session session = sessions.get(requestor);
         if (session == null) {
@@ -217,6 +222,7 @@ public class NanoH5 extends NanoHTTPD {
                 session = createSession(requestor);
             }
         }
+        session.startTime = startTime;
         return session.serve(uri, method, header, parms, files);
     }
 
@@ -381,7 +387,7 @@ public class NanoH5 extends NanoHTTPD {
          */
         if (Environment.get("application.show.scripttool", false)) {
             BeanConfigurator.defineAction(null);
-            final ScriptTool tool = new ScriptTool();
+            final ScriptTool tool = ScriptTool.createInstance();
             Bean beanTool = Bean.getBean(tool);
             beanTool.setAttributeFilter("sourceFile", "selectedAction", "text"/*, "result"*/);
             beanTool.getAttribute("text").getPresentation().setType(IPresentable.TYPE_INPUT_MULTILINE);
@@ -398,7 +404,9 @@ public class NanoH5 extends NanoHTTPD {
             IAction queryDefiner = new CommonAction(id, lbl, lbl) {
                 @Override
                 public Object action() throws Exception {
-                    String name = tool.getSourceFile().toLowerCase();
+                    String name =
+                        tool.getSourceFile() != null ? tool.getSourceFile().toLowerCase() : FileUtil
+                            .getValidFileName(tool.getText());
                     Query query =
                         new Query(name, tool.getText(), tool.getSelectedAction().getId().equals("scripttool.sql.id"),
                             null);
@@ -465,6 +473,8 @@ public class NanoH5 extends NanoHTTPD {
             !selectedFile.isAbsolute() ? Environment.getConfigPath() + persistence.getJarFile()
                 : persistence.getJarFile();
         if (!new File(jarFile).exists() && !selectedFile.isAbsolute()) {
+            //ant-scripts can't use the nested jars. but normal beans shouldn't have dependencies to simple-xml.
+            Environment.saveResourceToFileSystem("simple-xml-2.7.jar");
             //TODO: show generation message before - get script exception from exception handler
             generateJarFile(jarFile);
             if (!new File(jarFile).exists()) {

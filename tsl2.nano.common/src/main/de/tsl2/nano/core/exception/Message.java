@@ -9,6 +9,8 @@
  */
 package de.tsl2.nano.core.exception;
 
+import java.lang.Thread.UncaughtExceptionHandler;
+
 import org.apache.commons.logging.Log;
 
 import de.tsl2.nano.core.log.LogFactory;
@@ -40,11 +42,20 @@ public class Message extends RuntimeException {
         return new StackTraceElement[0];
     }
 
+    public static final void send(String message) {
+        send(Thread.getDefaultUncaughtExceptionHandler(), message);
+    }
+    
     /**
      * sends the given message to the current uncaught exception handler
      * @param message
      */
-    public static final void send(String message) {
-        Thread.getDefaultUncaughtExceptionHandler().uncaughtException(Thread.currentThread(), new Message(message));
+    public static final void send(UncaughtExceptionHandler exceptionHandler, String message) {
+        exceptionHandler.uncaughtException(Thread.currentThread(), new Message(message));
+    }
+    
+    @Override
+    public String toString() {
+        return getMessage();
     }
 }

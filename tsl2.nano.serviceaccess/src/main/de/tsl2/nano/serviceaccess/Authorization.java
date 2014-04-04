@@ -21,6 +21,7 @@ import de.tsl2.nano.core.Environment;
 import de.tsl2.nano.core.Messages;
 import de.tsl2.nano.core.log.LogFactory;
 import de.tsl2.nano.core.util.XmlUtil;
+import de.tsl2.nano.format.DefaultFormat;
 import de.tsl2.nano.serviceaccess.aas.principal.APermission;
 import de.tsl2.nano.serviceaccess.aas.principal.Role;
 import de.tsl2.nano.serviceaccess.aas.principal.UserPrincipal;
@@ -139,7 +140,8 @@ public class Authorization implements IAuthorization {
      */
     @Override
     public Object getUser() {
-        return subject != null ? subject.getPrincipals(UserPrincipal.class).iterator().next().getData() : null;
+        UserPrincipal principal = subject != null ? subject.getPrincipals(UserPrincipal.class).iterator().next() : null;
+        return principal != null && principal.getData() != null ? Environment.format(principal.getData()) : principal.getName();
     }
 
     /**

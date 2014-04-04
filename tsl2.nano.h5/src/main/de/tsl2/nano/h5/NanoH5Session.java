@@ -24,6 +24,7 @@ import java.lang.Thread.UncaughtExceptionHandler;
 import java.net.InetAddress;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Date;
 import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.Properties;
@@ -46,12 +47,14 @@ import de.tsl2.nano.collection.ListSet;
 import de.tsl2.nano.core.Environment;
 import de.tsl2.nano.core.ManagedException;
 import de.tsl2.nano.core.exception.ExceptionHandler;
+import de.tsl2.nano.core.exception.Message;
 import de.tsl2.nano.core.log.LogFactory;
 import de.tsl2.nano.core.util.DateUtil;
 import de.tsl2.nano.core.util.StringUtil;
 import de.tsl2.nano.format.RegExpFormat;
 import de.tsl2.nano.h5.NanoHTTPD.Response;
 import de.tsl2.nano.h5.navigation.IBeanNavigator;
+import de.tsl2.nano.serviceaccess.IAuthorization;
 import de.tsl2.nano.util.NumberUtil;
 
 /**
@@ -71,6 +74,9 @@ public class NanoH5Session {
     InetAddress inetAddress;
 
     ExceptionHandler exceptionHandler;
+
+    /** for profiling in status-line */
+    long startTime;
 
     /**
      * constructor
@@ -146,6 +152,8 @@ public class NanoH5Session {
                 } else {
                     if (userResponse instanceof BeanDefinition)
                         ((BeanDefinition) userResponse).onActivation();
+                    if (!exceptionHandler.hasExceptions())
+                        Message.send(exceptionHandler, createStatusText(startTime));
                     msg = getNextPage(userResponse);
                 }
                 response = server.createResponse(msg);
@@ -157,7 +165,7 @@ public class NanoH5Session {
         } catch (Throwable e /*respect errors like NoClassDefFound...the application should continue!*/) {
             LOG.error(e);
             RuntimeException ex = ManagedException.toRuntimeEx(e, true);
-            msg = refreshPage(ex.getMessage());
+            msg = refreshPage(ex);
             response = server.createResponse(HTTP_BADREQUEST, MIME_HTML, msg);
         }
         //TODO: eliminate bug in NanoHTTPD not resetting uri...
@@ -172,7 +180,17 @@ public class NanoH5Session {
         response = null;
     }
 
-    private String refreshPage(String message) {
+    String createStatusText(long startTime) {
+        String user =
+            Environment.get(IAuthorization.class) != null ? Environment.translate("tsl2nano.login.user", true) + ": "
+                + Environment.get(IAuthorization.class).getUser() + ", " : "";
+        return user + Environment.translate("tsl2nano.time", true)
+            + ": " + DateUtil.getFormattedDateTime(new Date()) + ", "
+            + Environment.translate("tsl2nano.duration", true) + ": "
+            + DateUtil.getFormattedMinutes(System.currentTimeMillis() - startTime) + " min";
+    }
+
+    private String refreshPage(Object message) {
         return builder.build(nav.current(), message, true);
     }
 
@@ -186,7 +204,7 @@ public class NanoH5Session {
     private String getNextPage(Object returnCode) {
         String msg = "";
         if (exceptionHandler.hasExceptions()) {
-            msg = StringUtil.toFormattedString(exceptionHandler.clearExceptions(), 200);
+            msg = StringUtil.toFormattedString(exceptionHandler.clearExceptions(), 200, false);
         }
         BeanDefinition<?> model = nav.next(returnCode);
         return model != null ? builder.build(model, msg, true, nav.toArray()) : server.createStartPage();

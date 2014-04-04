@@ -67,7 +67,7 @@ public/*abstract*/class LogFactory implements Runnable, Serializable {
     /** a string formatting time, 'logClass', 'state', 'message' with {@link MessageFormat} */
 
     @Element(data = true)
-    String outputformat = "%1$td:%1$tm:%1$tY %1$tT %2$s [%3$16s]: %4$s";
+    String outputformat = "%1$td.%1$tm.%1$tY %1$tT %2$s [%3$16s]: %4$s";
     @Element(required=false)
     String outputFile = logOutputFile;
     transient MsgFormat msgFormat;
@@ -159,6 +159,14 @@ public/*abstract*/class LogFactory implements Runnable, Serializable {
         logFactoryXml = logConfiguration;
     }
 
+    /**
+     * only for internal use
+     * @return logfile name
+     */
+    public static String getLogFileName() {
+        return self.outputFile;
+    }
+    
     /**
      * only for internal use!
      * 

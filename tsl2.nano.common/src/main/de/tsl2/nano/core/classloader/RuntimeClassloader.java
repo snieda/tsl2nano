@@ -207,7 +207,7 @@ public class RuntimeClassloader extends URLClassLoader {
 
             @Override
             public void run() {
-                LOG.info("running patch checker in thread " + Thread.currentThread());
+                LOG.info("running path checker in thread " + Thread.currentThread());
                 while (true) {
                     try {
                         Thread.sleep(waitMillis);
@@ -220,7 +220,7 @@ public class RuntimeClassloader extends URLClassLoader {
                                 addFile(file.getAbsolutePath());
                             }
                         }
-                    } catch (InterruptedException e) {
+                    } catch (Exception e) {
                         LOG.error(e);
 //                        ManagedException.forward(e);
                     }

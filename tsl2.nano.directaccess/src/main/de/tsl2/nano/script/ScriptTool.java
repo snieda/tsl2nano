@@ -36,7 +36,7 @@ public class ScriptTool implements Serializable {
     String sourceFile;
     IAction selectedAction;
     String text;
-    Collection<?> result;
+    transient Collection<?> result;
     transient Collection<IAction> availableActions;
     transient PrintStream systemout;
     transient IAction<Collection<?>> runner;
@@ -44,12 +44,29 @@ public class ScriptTool implements Serializable {
     /** ant script for several user defined targets. contains an sql target */
     final String ANTSCRIPTNAME = "antscripts.xml";
     final String ANTSCRIPTPROP = "antscripts.properties";
-
+    static final String SERIALIZED_SCRIPTOOL = Environment.getTempPath() + ScriptTool.class.getSimpleName().toLowerCase();
+    
+    public static ScriptTool createInstance() {
+        File file = new File(SERIALIZED_SCRIPTOOL);
+        if (file.canRead()) {
+            ScriptTool tool = (ScriptTool) FileUtil.load(SERIALIZED_SCRIPTOOL);
+            tool.initAntScriptFile();
+            tool.initActions();
+            return tool;
+        }
+        else
+            return new ScriptTool();
+    }
+    
     /**
      * constructor
      */
-    public ScriptTool() {
+    protected ScriptTool() {
         initAntScriptFile();
+        initActions();
+    }
+
+    private void initActions() {
 
         availableActions = new ArrayList<IAction>(8);
         IAction<?> a = new CommonAction<Object>("scripttool.sql.id", "Start Sql-Query", "Starts an sql statement") {
@@ -305,6 +322,7 @@ public class ScriptTool implements Serializable {
             runner = new CommonAction(id, lbl, lbl) {
                 @Override
                 public Object action() throws Exception {
+                    FileUtil.save(SERIALIZED_SCRIPTOOL, ScriptTool.this);
                     return selectedAction != null ? selectedAction.activate() : null;
                 }
             };

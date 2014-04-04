@@ -24,7 +24,7 @@ public interface IPageBuilder<PAGE, OUTPUT> {
      * @param navigation (optional) navigation objects
      * @return page text
      */
-    OUTPUT build(BeanDefinition<?> model, String message, boolean interactive, BeanDefinition<?>... navigation);
+    OUTPUT build(BeanDefinition<?> model, Object message, boolean interactive, BeanDefinition<?>... navigation);
 
     /**
      * create a full page and decorate a message

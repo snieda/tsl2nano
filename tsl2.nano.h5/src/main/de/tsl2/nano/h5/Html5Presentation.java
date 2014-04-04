@@ -11,7 +11,7 @@ package de.tsl2.nano.h5;
 
 import static de.tsl2.nano.bean.def.IBeanCollector.MODE_ASSIGNABLE;
 import static de.tsl2.nano.bean.def.IBeanCollector.MODE_MULTISELECTION;
-import static de.tsl2.nano.h5.HtmlUtil.ALIGN_CENTER;
+import static de.tsl2.nano.h5.HtmlUtil.*;
 import static de.tsl2.nano.h5.HtmlUtil.ALIGN_RIGHT;
 import static de.tsl2.nano.h5.HtmlUtil.ATTR_ACCESSKEY;
 import static de.tsl2.nano.h5.HtmlUtil.ATTR_ACTION;
@@ -243,7 +243,7 @@ public class Html5Presentation<T> extends BeanPresentationHelper<T> implements I
      * {@inheritDoc}
      */
     @Override
-    public String build(BeanDefinition<?> model, String message, boolean interactive, BeanDefinition<?>... navigation) {
+    public String build(BeanDefinition<?> model, Object message, boolean interactive, BeanDefinition<?>... navigation) {
         try {
             currentTabIndex = 0;
             Element form;
@@ -320,7 +320,7 @@ public class Html5Presentation<T> extends BeanPresentationHelper<T> implements I
              * c2: center: Page-Title with image
              * c3: Page-Buttons
              */
-            Element row = appendElement(createGrid(body, null, 3), TAG_ROW);
+            Element row = appendElement(createGrid(body, "page.header.table", null, 3), TAG_ROW);
             Element c1 = appendElement(row, TAG_CELL);
             Element c2 = appendElement(row, TAG_CELL);
             String localDoc = Environment.getConfigPath() + "nano.h5.html";
@@ -373,28 +373,11 @@ public class Html5Presentation<T> extends BeanPresentationHelper<T> implements I
     }
 
     private Element createMetaAndBody(Element html, String title, boolean interactive) {
-        Element head = appendElement(html, "head");
-//        appendElement(head, "title", "nano h5 application");
-
-//      String template = "<link href='http://fonts.googleapis.com/css?family=Droid+Sans' rel='stylesheet' type='text/css'>"
-//  + "<meta charset=\"utf-8\">"
-//  + "<title>Pure CSS3 Menu</title>"
-//  + "<link href=\"style.css\" media=\"screen\" rel=\"stylesheet\" type=\"text/css\" />"
-//  + "<link href=\"iconic.css\" media=\"screen\" rel=\"stylesheet\" type=\"text/css\" />"
-//  + "<script src=\"prefix-free.js\"></script>";
-//      head.setTextContent(template);
-
-//        appendElement(head, "link", "href", "http://fonts.googleapis.com/css?family=Droid+Sans", "rel", "stylesheet",
-//            "type", "text/css");
-//        appendElement(head, "link", "href", "css/style.css", "media", "screen", "rel", "stylesheet", "type", "text/css");
-//        appendElement(head, "link", "href", "css/iconic.css", "media", "screen", "rel", "stylesheet", "type",
-//            "text/css");
-//        appendElement(head, "script", "src", "prefix-free.js");
-//        appendElement(head, "meta", "charset", "utf-8");
+        appendElement(html, TAG_HEAD, ATTR_TITLE, "Nano-H5 Application");
 
         Element body =
             appendElement(html, TAG_BODY, ATTR_ID, title);
-        if (!interactive)
+        if (interactive)
             HtmlUtil.appendAttributes(body, "background", "icons/spe.jpg", ATTR_STYLE,
                 STYLE_BACKGROUND_RADIAL_GRADIENT);
         return body;
@@ -408,21 +391,23 @@ public class Html5Presentation<T> extends BeanPresentationHelper<T> implements I
      * @param interactive if false, no buttons and edit fields are shown
      * @return html document
      */
-    public Element createPage(Element parent, String message, boolean interactive, BeanDefinition<?>... navigation) {
+    public Element createPage(Element parent, Object message, boolean interactive, BeanDefinition<?>... navigation) {
         boolean isRoot = parent == null;
         if (isRoot) {
             if (bean == null) {
-                return createFormDocument(message, null, interactive);
+                return createFormDocument(message.toString(), null, interactive);
             } else {
                 parent = createFormDocument(bean.getName(), bean.getPresentable().getIcon(), interactive);
             }
         }
 
         if (navigation.length > 0) {
+            Element link;
             for (BeanDefinition<?> bean : navigation) {
-                appendElement((Element) parent, TAG_LINK, content("->" + bean.toString()), ATTR_HREF, PREFIX_BEANLINK
+                link = appendElement(parent, TAG_LINK, ATTR_HREF, PREFIX_BEANLINK
                     + bean.getName(),
-                    ATTR_STYLE, "color: #BBBBBB;");
+                    ATTR_STYLE, "color: #AAAAAA;");
+                appendElement(link, TAG_IMAGE, content(bean.toString()), ATTR_SRC, "icons/forward.png");
             }
         }
 
@@ -524,7 +509,7 @@ public class Html5Presentation<T> extends BeanPresentationHelper<T> implements I
             Collection<IAction> actions,
             boolean interactive) {
         int columns = p.layout(L_GRIDWIDTH, Environment.get("layout.default.columncount", 3));
-        Element panel = createGrid(parent, Environment.translate("tsl2nano.input", false), columns);
+        Element panel = createGrid(parent, Environment.translate("tsl2nano.input", false), "field.panel", columns);
         //set layout and constraints into the grid
         appendAttributes((Element) panel.getParentNode(), p);
         boolean firstFocused = false;
@@ -577,7 +562,7 @@ public class Html5Presentation<T> extends BeanPresentationHelper<T> implements I
         if (interactive)
             grid = createGrid(parent, bean.toString(), false, bean);
         else
-            grid = createGrid(parent, bean.toString(), false, getColumnNames(bean));
+            grid = createGrid(parent, bean.toString(), "collector.table", false, getColumnNames(bean));
         appendAttributes(grid, bean.getPresentable());
 
         if (interactive && bean.hasMode(IBeanCollector.MODE_SEARCHABLE)) {
@@ -743,7 +728,7 @@ public class Html5Presentation<T> extends BeanPresentationHelper<T> implements I
             Collection<IAction> actions,
             boolean showText,
             String... attributes) {
-        Element panel = createGrid(parent, "Actions", actions != null ? 1 + actions.size() : 1);
+        Element panel = createGrid(parent, "Actions", "action.panel", actions != null ? 1 + actions.size() : 1);
         Element row = appendElement(panel, TAG_ROW);
         Element cell = appendElement(row, TAG_CELL, attributes);
         if (actions != null) {
@@ -862,21 +847,23 @@ public class Html5Presentation<T> extends BeanPresentationHelper<T> implements I
         return action;
     }
 
-    Element createGrid(Element parent, String title, int columns) {
-        return createGrid(parent, title, columns, false);
+    Element createGrid(Element parent, String title, String id, int columns) {
+        return createGrid(parent, title, id, columns, false);
     }
 
-    Element createGrid(Element parent, String title, int columns, boolean border) {
+    Element createGrid(Element parent, String title, String id, int columns, boolean border) {
         String c[] = new String[columns];
         Arrays.fill(c, "");
-        return createGrid(parent, title, border, c);
+        return createGrid(parent, title, id, border, c);
     }
 
-    Element createGrid(Element parent, String title, boolean border, String... columns) {
+    Element createGrid(Element parent, String title, String id, boolean border, String... columns) {
         Element table = appendElement(parent,
             TAG_TABLE,
             ATTR_BORDER,
             border ? "1" : "0",
+            ATTR_ID,
+            id,
             ATTR_FRAME,
             "box",
             ATTR_WIDTH,
@@ -1334,12 +1321,36 @@ public class Html5Presentation<T> extends BeanPresentationHelper<T> implements I
         return type;
     }
 
-    Element createFooter(Document doc, String footer) {
+    Element createFooter(Document doc, Object footer) {
         Element body = (Element) ((NodeList) doc.getElementsByTagName("body")).item(0);
-        Element table = createGrid(body, "Status", 1);
+        Element table = createGrid(body, "Status", "page.footer.table", 1);
 
-        Element preFooter = doc.createElement(TAG_PRE);
-        preFooter.setTextContent(footer);
+        Element preFooter;
+        if (footer instanceof Throwable) {
+            Element details = doc.createElement(TAG_LINK);
+            details.setAttribute(ATTR_HREF, new File(LogFactory.getLogFileName()).getAbsolutePath());
+            details.setTextContent(Environment.translate("tsl2nano.exception", true));
+            addRow(table, details);
+            preFooter = doc.createElement(TAG_PRE);
+            preFooter.setTextContent(((Throwable) footer).getMessage());
+        } else {
+            String strFooter = Util.asString(footer);
+            if (strFooter != null && !HtmlUtil.isHtml(strFooter)) {
+                String[] split = strFooter.split("([:,=] )|[\t\n]");
+                preFooter = doc.createElement(TAG_SPAN);
+                boolean isKey;
+                for (int i = 0; i < split.length; i++) {
+                    isKey = i % 2 == 0;
+                    if (isKey)
+                        appendElement(preFooter, TAG_IMAGE, ATTR_SRC, "icons/properties.png");
+                    appendElement(preFooter, isKey ? "b" : "i", content(split[i] + "  "), ATTR_COLOR, isKey ? COLOR_BLUE
+                        : COLOR_BLACK);
+                }
+            } else {
+                preFooter = doc.createElement(TAG_SPAN);
+                preFooter.setNodeValue(strFooter);
+            }
+        }
         return addRow(table, preFooter);
     }
 
