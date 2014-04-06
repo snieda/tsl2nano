@@ -48,6 +48,7 @@ import de.tsl2.nano.core.util.StringUtil;
  */
 public class AppLoader {
     private static final Log LOG = LogFactory.getLog(AppLoader.class);
+    private static boolean nestingJar;
 
     /**
      * provides a map containing argument names (map-keys) and their description (map-values).
@@ -219,8 +220,9 @@ public class AppLoader {
         NestedJarClassLoader nestedLoader = new NestedJarClassLoader(cl);
         if (cl == null) {
             nestedLoader.addFile(classPath);
-            String configDir = System.getProperty("user.dir") + "/" + environment + "/";
-            nestedLoader.addLibraryPath(new File(configDir).getAbsolutePath());
+//            String configDir = System.getProperty("user.dir") + "/" + environment + "/";
+//            nestedLoader.addLibraryPath(new File(configDir).getAbsolutePath());
+            nestingJar = true;
         }
         nestedLoader.addLibraryPath(new File(environment).getAbsolutePath());
         nestedLoader.startPathChecker(environment, 2000);
@@ -260,5 +262,9 @@ public class AppLoader {
     public static final boolean isUnixFS() {
         //TODO: eval the real file-system
         return File.pathSeparatorChar == ':';
+    }
+    
+    public static boolean isNestingJar() {
+        return nestingJar;
     }
 }

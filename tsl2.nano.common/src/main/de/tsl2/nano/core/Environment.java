@@ -177,7 +177,7 @@ public class Environment {
         new File(dir).mkdirs();
         LogFactory.setLogFile(dir + "/" + "logfactory.log");
         LogFactory.setLogFactoryXml(dir + "/" + "logfactory.xml");
-        
+
         String info = "\n===========================================================\n" + "creating environment "
             + dir
             + "\n"
@@ -538,12 +538,21 @@ public class Environment {
         return classLoader.getResourceAsStream(fileName);
     }
 
-    public static final boolean saveResourceToFileSystem(String resourceName) {
-        return saveResourceToFileSystem(resourceName, resourceName);
-    }
-    
     /**
-     * saves the resource (contained in your jar) to the file-system into the {@link #getConfigPath()} - only if not done yet.
+     * saveResourceToFileSystem
+     * 
+     * @param resourceName any resource nested in application jar
+     * @return true, if resource was saved. if application wasn't started from jar (perhaps in an ide), it returns
+     *         always false.
+     */
+    public static final boolean saveResourceToFileSystem(String resourceName) {
+        return AppLoader.isNestingJar() ? saveResourceToFileSystem(resourceName, resourceName) : false;
+    }
+
+    /**
+     * saves the resource (contained in your jar) to the file-system into the {@link #getConfigPath()} - only if not
+     * done yet.
+     * 
      * @param resourceName resource name
      * @return true if new file was created
      */
@@ -560,7 +569,7 @@ public class Environment {
         }
         return false;
     }
-    
+
     @Persist
     protected void initSerialization() {
         /*

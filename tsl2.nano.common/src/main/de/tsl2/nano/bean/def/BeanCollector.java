@@ -100,7 +100,7 @@ public class BeanCollector<COLLECTIONTYPE extends Collection<T>, T> extends Bean
     /** the extending class has to set an instance for the ok action to set it as default button */
     protected transient IAction<?> openAction;
 
-    /** defines the behaviour and the actions of the beancollector */
+    /** defines the behavior and the actions of the beancollector */
     @Transient
     protected int workingMode = MODE_EDITABLE | MODE_CREATABLE | MODE_SEARCHABLE;
     /**

@@ -1087,6 +1087,7 @@ public class BeanDefinition<T> extends BeanClass<T> implements Serializable {
         LOG.debug("calling autoinit() for " + name);
         setName(name);
         List<IAttributeDefinition<?>> attributes = getBeanAttributes();
+        getValueExpression();
         getAttributeNames();
         BeanCollector.createColumnDefinitions(this,
             getPresentationHelper().matches("default.present.attribute.multivalue", true));
