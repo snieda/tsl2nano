@@ -19,6 +19,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import org.apache.commons.logging.Log;
+
 import de.tsl2.nano.action.IAction;
 import de.tsl2.nano.bean.BeanContainer;
 import de.tsl2.nano.bean.BeanUtil;
@@ -32,6 +34,7 @@ import de.tsl2.nano.core.Messages;
 import de.tsl2.nano.core.cls.BeanAttribute;
 import de.tsl2.nano.core.cls.BeanClass;
 import de.tsl2.nano.core.cls.IAttribute;
+import de.tsl2.nano.core.log.LogFactory;
 import de.tsl2.nano.core.util.StringUtil;
 import de.tsl2.nano.messaging.IListener;
 
@@ -117,6 +120,8 @@ public class Bean<T> extends BeanDefinition<T> {
     /** serialVersionUID */
     private static final long serialVersionUID = 1192383647173369697L;
 
+    private static final Log LOG = LogFactory.getLog(Bean.class);
+    
     /** java object instance to evaluate the attributes for - may be null on virtual beans */
     protected T instance;
 
@@ -651,6 +656,21 @@ public class Bean<T> extends BeanDefinition<T> {
         this.detacher = detacher;
     }
 
+    /**
+     * cleans all bean relevant caches (BeanClass, BeanValue, BeanDefinition, Bean).
+     * @return amount of cleared objects.
+     */
+    public static int clearCache() {
+        int cleared = BeanValue.clearCache();
+        cleared += BeanClass.clearCache();
+        cleared += BeanDefinition.clearCache();
+        if (timedCache != null) {
+            cleared += timedCache.size();
+            LOG.info("clearing beanclass cache of " + cleared + " elements");
+            timedCache.clear();
+        }
+        return cleared;
+    }
     /**
      * runs detacher and sets detacher to null
      */

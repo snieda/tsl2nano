@@ -53,6 +53,7 @@ import de.tsl2.nano.bean.IValueAccess;
 import de.tsl2.nano.bean.ValueHolder;
 import de.tsl2.nano.collection.CollectionUtil;
 import de.tsl2.nano.core.Environment;
+import de.tsl2.nano.core.ISession;
 import de.tsl2.nano.core.ManagedException;
 import de.tsl2.nano.core.cls.BeanAttribute;
 import de.tsl2.nano.core.cls.BeanClass;
@@ -1196,17 +1197,20 @@ public class BeanPresentationHelper<T> {
     }
 
     public void reset() {
+        Bean.clearCache();
         Environment.reload();
-        BeanDefinition.clearCache();
-        BeanValue.clearCache();
     }
 
+    protected boolean isRootBean() {
+        return bean != null && BeanCollector.class.isAssignableFrom(bean.getDeclaringClass());
+    }
+    
     /**
      * creates extended actions like 'print', 'help', 'export', 'select-all', 'deselect-all' etc.
      */
-    public Collection<IAction> getApplicationActions() {
+    public Collection<IAction> getApplicationActions(ISession session) {
         if (appActions == null) {
-            if (bean == null)
+            if (bean == null || session == null)
                 return new LinkedList<IAction>();
             appActions = new ArrayList<IAction>(10);
 
@@ -1218,6 +1222,10 @@ public class BeanPresentationHelper<T> {
                 @Override
                 public Object action() throws Exception {
                     return "./";
+                }
+                @Override
+                public boolean isEnabled() {
+                    return super.isEnabled() && isRootBean();
                 }
             });
 
@@ -1231,6 +1239,10 @@ public class BeanPresentationHelper<T> {
                     reset();
                     return page("configuration refreshed");
                 }
+                @Override
+                    public boolean isEnabled() {
+                        return super.isEnabled() && isRootBean();
+                    }
             });
         }
         return appActions;
@@ -1239,9 +1251,9 @@ public class BeanPresentationHelper<T> {
     /**
      * creates extended actions like 'print', 'help', 'export', 'select-all', 'deselect-all' etc.
      */
-    public Collection<IAction> getSessionActions() {
+    public Collection<IAction> getSessionActions(final ISession session) {
         if (sessionActions == null) {
-            if (bean == null)
+            if (bean == null || session.getUserAuthorization() == null)
                 return new LinkedList<IAction>();
             sessionActions = new ArrayList<IAction>(1);
             sessionActions.add(new SecureAction(bean.getClazz(),
@@ -1251,8 +1263,9 @@ public class BeanPresentationHelper<T> {
                 "icons/turnoff.png") {
                 @Override
                 public Object action() throws Exception {
-                    Environment.persist();
-                    BeanDefinition.dump();
+//                    Environment.persist();
+//                    BeanDefinition.dump();
+                    session.close();
                     return page("user logged out!");
                 }
             });
@@ -1375,7 +1388,7 @@ public class BeanPresentationHelper<T> {
                 .add(new SecureAction(bean.getClazz(), "print", IAction.MODE_UNDEFINED, false, "icons/print.png") {
                     @Override
                     public Object action() throws Exception {
-                        return Environment.get(IPageBuilder.class).build(bean, null, false);
+                        return Environment.get(IPageBuilder.class).build(null, bean, null, false);
                     }
                 });
 

@@ -45,6 +45,8 @@ import de.tsl2.nano.bean.def.IPresentable;
 import de.tsl2.nano.collection.CollectionUtil;
 import de.tsl2.nano.collection.ListSet;
 import de.tsl2.nano.core.Environment;
+import de.tsl2.nano.core.ISession;
+import de.tsl2.nano.core.Main;
 import de.tsl2.nano.core.ManagedException;
 import de.tsl2.nano.core.exception.ExceptionHandler;
 import de.tsl2.nano.core.exception.Message;
@@ -54,6 +56,7 @@ import de.tsl2.nano.core.util.StringUtil;
 import de.tsl2.nano.format.RegExpFormat;
 import de.tsl2.nano.h5.NanoHTTPD.Response;
 import de.tsl2.nano.h5.navigation.IBeanNavigator;
+import de.tsl2.nano.persistence.Persistence;
 import de.tsl2.nano.serviceaccess.IAuthorization;
 import de.tsl2.nano.util.NumberUtil;
 
@@ -63,7 +66,7 @@ import de.tsl2.nano.util.NumberUtil;
  * @version $Revision$
  */
 @SuppressWarnings({ "unchecked", "rawtypes" })
-public class NanoH5Session {
+public class NanoH5Session implements ISession {
     private static final Log LOG = LogFactory.getLog(NanoH5Session.class);
 
     NanoH5 server;
@@ -75,8 +78,13 @@ public class NanoH5Session {
 
     ExceptionHandler exceptionHandler;
 
-    /** for profiling in status-line */
+    /** for profiling in status-line (current work-time) */
     long startTime;
+
+    /** session start */
+    private long sessionStart;
+
+    private IAuthorization authorization;
 
     /**
      * constructor
@@ -85,10 +93,11 @@ public class NanoH5Session {
      * @param inetAddress
      * @param navigation
      * @param appstartClassloader
+     * @param authorization
      */
     public NanoH5Session(NanoH5 server,
             InetAddress inetAddress, IBeanNavigator navigator,
-            ClassLoader appstartClassloader) {
+            ClassLoader appstartClassloader, IAuthorization authorization) {
         super();
         this.server = server;
         this.inetAddress = inetAddress;
@@ -97,8 +106,19 @@ public class NanoH5Session {
         this.sessionClassloader = appstartClassloader;
         this.exceptionHandler =
             (ExceptionHandler) Environment.addService(UncaughtExceptionHandler.class, new ExceptionHandler());
+        this.authorization = authorization;
+        this.sessionStart = System.currentTimeMillis();
     }
 
+    /**
+     * setAuthorization
+     * @param authorization
+     */
+    @Override
+    public void setUserAuthorization(Object authorization) {
+        this.authorization = (IAuthorization) authorization;
+    }
+    
     /**
      * main session serve method. requests of type 'GET' and file-links are handled by the application class (NanoH5).
      * 
@@ -174,7 +194,8 @@ public class NanoH5Session {
         return response;
     }
 
-    void close() {
+    @Override
+    public void close() {
         server.sessions.remove(inetAddress);
         nav = null;
         response = null;
@@ -182,16 +203,18 @@ public class NanoH5Session {
 
     String createStatusText(long startTime) {
         String user =
-            Environment.get(IAuthorization.class) != null ? Environment.translate("tsl2nano.login.user", true) + ": "
-                + Environment.get(IAuthorization.class).getUser() + ", " : "";
-        return user + Environment.translate("tsl2nano.time", true)
+            authorization != null ? Environment.translate("tsl2nano.login.user", true) + ": "
+                + authorization.getUser() + ", " + "Online: "
+                + DateUtil.getFormattedMinutes(getDuration()) + " min, " : "";
+        return user
+            + Environment.translate("tsl2nano.time", true)
             + ": " + DateUtil.getFormattedDateTime(new Date()) + ", "
             + Environment.translate("tsl2nano.duration", true) + ": "
             + DateUtil.getFormattedMinutes(System.currentTimeMillis() - startTime) + " min";
     }
 
     private String refreshPage(Object message) {
-        return builder.build(nav.current(), message, true);
+        return builder.build(this, nav.current(), message, true);
     }
 
     /**
@@ -207,7 +230,7 @@ public class NanoH5Session {
             msg = StringUtil.toFormattedString(exceptionHandler.clearExceptions(), 200, false);
         }
         BeanDefinition<?> model = nav.next(returnCode);
-        return model != null ? builder.build(model, msg, true, nav.toArray()) : server.createStartPage();
+        return model != null ? builder.build(this, model, msg, true, nav.toArray()) : server.createStartPage();
     }
 
     /**
@@ -275,8 +298,8 @@ public class NanoH5Session {
             if (nav.current().getActions() != null)
                 actions.addAll(nav.current().getActions());
             actions.addAll(nav.current().getPresentationHelper().getPageActions());
-            actions.addAll(nav.current().getPresentationHelper().getSessionActions());
-            actions.addAll(nav.current().getPresentationHelper().getApplicationActions());
+            actions.addAll(nav.current().getPresentationHelper().getSessionActions(this));
+            actions.addAll(nav.current().getPresentationHelper().getApplicationActions(this));
             if (nav.current().isMultiValue()) {
                 actions.addAll(((BeanCollector) nav.current()).getColumnSortingActions());
             }
@@ -303,6 +326,8 @@ public class NanoH5Session {
                         Object result = action.activate();
                         if (result != null && responseObject != IAction.CANCELED && !action.getId().endsWith("save")) {
                             responseObject = result;
+                            if (nav.current() instanceof Bean && ((Bean)nav.current()).getInstance() instanceof Persistence)
+                                authorization = Environment.get(IAuthorization.class);
                         } else if (action.getId().endsWith("reset")) {
                             responseObject = nav.current();
                         } else {
@@ -540,5 +565,35 @@ public class NanoH5Session {
 //
 //        if (elements.size() > 0)
 //            navigation.push(new Bean(elements.iterator().next()));
+    }
+
+    @Override
+    public Object getId() {
+        return inetAddress;
+    }
+
+    @Override
+    public ClassLoader getSessionClassLoader() {
+        return sessionClassloader;
+    }
+
+    @Override
+    public UncaughtExceptionHandler getExceptionHandler() {
+        return exceptionHandler;
+    }
+
+    @Override
+    public long getDuration() {
+        return System.currentTimeMillis() - sessionStart;
+    }
+
+    @Override
+    public Main getApplication() {
+        return server;
+    }
+
+    @Override
+    public IAuthorization getUserAuthorization() {
+        return authorization;
     }
 }

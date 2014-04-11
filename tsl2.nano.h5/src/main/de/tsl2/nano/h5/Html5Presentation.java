@@ -11,7 +11,7 @@ package de.tsl2.nano.h5;
 
 import static de.tsl2.nano.bean.def.IBeanCollector.MODE_ASSIGNABLE;
 import static de.tsl2.nano.bean.def.IBeanCollector.MODE_MULTISELECTION;
-import static de.tsl2.nano.h5.HtmlUtil.*;
+import static de.tsl2.nano.h5.HtmlUtil.ALIGN_CENTER;
 import static de.tsl2.nano.h5.HtmlUtil.ALIGN_RIGHT;
 import static de.tsl2.nano.h5.HtmlUtil.ATTR_ACCESSKEY;
 import static de.tsl2.nano.h5.HtmlUtil.ATTR_ACTION;
@@ -50,6 +50,7 @@ import static de.tsl2.nano.h5.HtmlUtil.ATTR_VALUE;
 import static de.tsl2.nano.h5.HtmlUtil.ATTR_WIDTH;
 import static de.tsl2.nano.h5.HtmlUtil.BTN_ASSIGN;
 import static de.tsl2.nano.h5.HtmlUtil.COLOR_BLACK;
+import static de.tsl2.nano.h5.HtmlUtil.COLOR_BLUE;
 import static de.tsl2.nano.h5.HtmlUtil.COLOR_LIGHT_BLUE;
 import static de.tsl2.nano.h5.HtmlUtil.COLOR_LIGHT_GRAY;
 import static de.tsl2.nano.h5.HtmlUtil.COLOR_RED;
@@ -62,6 +63,7 @@ import static de.tsl2.nano.h5.HtmlUtil.TAG_CELL;
 import static de.tsl2.nano.h5.HtmlUtil.TAG_FONT;
 import static de.tsl2.nano.h5.HtmlUtil.TAG_FORM;
 import static de.tsl2.nano.h5.HtmlUtil.TAG_H3;
+import static de.tsl2.nano.h5.HtmlUtil.TAG_HEAD;
 import static de.tsl2.nano.h5.HtmlUtil.TAG_HEADERCELL;
 import static de.tsl2.nano.h5.HtmlUtil.TAG_HTML;
 import static de.tsl2.nano.h5.HtmlUtil.TAG_IMAGE;
@@ -104,6 +106,7 @@ import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.NodeList;
 
+import de.tsl2.nano.action.CommonAction;
 import de.tsl2.nano.action.IAction;
 import de.tsl2.nano.bean.BeanUtil;
 import de.tsl2.nano.bean.IValueAccess;
@@ -125,6 +128,7 @@ import de.tsl2.nano.bean.def.ValueGroup;
 import de.tsl2.nano.collection.CollectionUtil;
 import de.tsl2.nano.collection.MapUtil;
 import de.tsl2.nano.core.Environment;
+import de.tsl2.nano.core.ISession;
 import de.tsl2.nano.core.ManagedException;
 import de.tsl2.nano.core.Messages;
 import de.tsl2.nano.core.cls.BeanClass;
@@ -138,7 +142,10 @@ import de.tsl2.nano.core.util.Util;
 import de.tsl2.nano.format.GenericParser;
 import de.tsl2.nano.format.RegExpFormat;
 import de.tsl2.nano.h5.configuration.BeanConfigurator;
+import de.tsl2.nano.h5.expression.Query;
+import de.tsl2.nano.h5.expression.QueryPool;
 import de.tsl2.nano.persistence.Persistence;
+import de.tsl2.nano.script.ScriptTool;
 import de.tsl2.nano.util.NumberUtil;
 
 /**
@@ -185,12 +192,12 @@ public class Html5Presentation<T> extends BeanPresentationHelper<T> implements I
 
     @SuppressWarnings("serial")
     @Override
-    public Collection<IAction> getApplicationActions() {
+    public Collection<IAction> getApplicationActions(ISession session) {
         boolean firstTime = appActions == null;
-        super.getApplicationActions();
+        super.getApplicationActions(session);
 
         if (firstTime) {
-            if (bean instanceof Bean) {
+            if (bean instanceof Bean && !isBeanConfiguration()) {
                 appActions.add(new SecureAction(bean.getClazz(),
                     "configure",
                     IAction.MODE_UNDEFINED,
@@ -200,14 +207,65 @@ public class Html5Presentation<T> extends BeanPresentationHelper<T> implements I
                     public Object action() throws Exception {
                         return BeanConfigurator.create((Class<Serializable>) bean.getClazz());
                     }
-
-                    @Override
-                    public boolean isEnabled() {
-                        return true;
-                    }
                 });
             }
-            if (Persistence.class.isAssignableFrom(bean.getDeclaringClass())) {
+            if (isRootBean()) {
+                appActions.add(new SecureAction(bean.getClazz(),
+                    "Scripttool",
+                    IAction.MODE_UNDEFINED,
+                    false,
+                    "icons/go.png") {
+                    Bean beanTool;
+
+                    @Override
+                    public Object action() throws Exception {
+                        /*
+                         * show the script tool to do direct sql or ant
+                         */
+                        if (beanTool == null) {
+                            BeanConfigurator.defineAction(null);
+                            final ScriptTool tool = ScriptTool.createInstance();
+                            beanTool = Bean.getBean(tool);
+                            beanTool.setAttributeFilter("sourceFile", "selectedAction", "text"/*, "result"*/);
+                            beanTool.getAttribute("text").getPresentation().setType(IPresentable.TYPE_INPUT_MULTILINE);
+                            beanTool.getAttribute("text").getConstraint().setLength(100000);
+                            beanTool.getAttribute("text").getConstraint()
+                                .setFormat(null/*RegExpFormat.createLengthRegExp(0, 100000, 0)*/);
+//                        beanTool.getAttribute("result").getPresentation().setType(IPresentable.TYPE_TABLE);
+                            beanTool.getAttribute("sourceFile").getPresentation().setType(IPresentable.TYPE_ATTACHMENT);
+                            beanTool.getAttribute("selectedAction").setRange(tool.availableActions());
+                            beanTool.addAction(tool.runner());
+
+                            String id = "scripttool.define.query";
+                            String lbl = Environment.translate(id, true);
+                            IAction queryDefiner = new CommonAction(id, lbl, lbl) {
+                                @Override
+                                public Object action() throws Exception {
+                                    String name =
+                                        tool.getSourceFile() != null ? tool.getSourceFile().toLowerCase() : FileUtil
+                                            .getValidFileName(tool.getText());
+                                    Query query =
+                                        new Query(name, tool.getText(), tool.getSelectedAction().getId()
+                                            .equals("scripttool.sql.id"),
+                                            null);
+                                    Environment.get(QueryPool.class).add(query.getName(), query);
+                                    QueryResult qr = new QueryResult(query.getName());
+                                    qr.setName(BeanDefinition.PREFIX_VIRTUAL + query.getName());
+                                    qr.saveDefinition();
+                                    return "New created specification-query: " + name;
+                                }
+
+                                @Override
+                                public String getImagePath() {
+                                    return "icons/save.png";
+                                }
+                            };
+                            beanTool.addAction(queryDefiner);
+                        }
+                        return beanTool;
+                    }
+                });
+
                 appActions.add(new SecureAction(bean.getClazz(),
                     "sample-code",
                     IAction.MODE_UNDEFINED,
@@ -221,11 +279,6 @@ public class Html5Presentation<T> extends BeanPresentationHelper<T> implements I
                         Environment.saveResourceToFileSystem("tsl2.nano.incubation.0.0.4.jar");
                         FileUtil.extract("tsl2.nano.h5.sample.jar", dir, null);
                         return "Sample code and database created. Please re-start application!";
-                    }
-
-                    @Override
-                    public boolean isEnabled() {
-                        return true;
                     }
                 });
             }
@@ -243,19 +296,23 @@ public class Html5Presentation<T> extends BeanPresentationHelper<T> implements I
      * {@inheritDoc}
      */
     @Override
-    public String build(BeanDefinition<?> model, Object message, boolean interactive, BeanDefinition<?>... navigation) {
+    public String build(ISession session,
+            BeanDefinition<?> model,
+            Object message,
+            boolean interactive,
+            BeanDefinition<?>... navigation) {
         try {
             currentTabIndex = 0;
             Element form;
             if (model != null) {
                 if (!(model.getPresentationHelper() instanceof Html5Presentation))
                     model.setPresentationHelper(new Html5Presentation(model));
-                form = ((Html5Presentation) model.getPresentationHelper()).createPage(null,
+                form = ((Html5Presentation) model.getPresentationHelper()).createPage(session, null,
                     message,
                     interactive,
                     navigation);
             } else {
-                form = createPage(null, "Leaving Application!<br/>Restart", false, navigation);
+                form = createPage(session, null, "Leaving Application!<br/>Restart", false, navigation);
             }
 
             String html = HtmlUtil.toString(form.getOwnerDocument());
@@ -267,8 +324,8 @@ public class Html5Presentation<T> extends BeanPresentationHelper<T> implements I
         }
     }
 
-    Element createFormDocument(String name, String image, boolean interactive) {
-        Element body = createHeader(name, image, interactive);
+    Element createFormDocument(ISession session, String name, String image, boolean interactive) {
+        Element body = createHeader(session, name, image, interactive);
         return appendElement(body,
             TAG_FORM,
             ATTR_ACTION,
@@ -277,7 +334,7 @@ public class Html5Presentation<T> extends BeanPresentationHelper<T> implements I
             Environment.get("html5.http.method", "post"));
     }
 
-    Element createHeader(String title, String image, boolean interactive) {
+    Element createHeader(ISession session, String title, String image, boolean interactive) {
         DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
         try {
             /*
@@ -347,8 +404,8 @@ public class Html5Presentation<T> extends BeanPresentationHelper<T> implements I
             if (interactive && bean != null) {
                 if (useCSS) {
                     Element menu = createMenu(c3, "Menu");
-                    createSubMenu(menu, "Application", "iconic home", getApplicationActions());
-                    createSubMenu(menu, "Session", "iconic map-pin", getSessionActions());
+                    createSubMenu(menu, "Application", "iconic home", getApplicationActions(session));
+                    createSubMenu(menu, "Session", "iconic map-pin", getSessionActions(session));
                     createSubMenu(menu, "Page", "iconic magnifying-glass", getPageActions());
                 } else {
                     c3 = appendElement(c3,
@@ -358,8 +415,8 @@ public class Html5Presentation<T> extends BeanPresentationHelper<T> implements I
                         ATTR_METHOD,
                         Environment.get("html5.http.method", "post"));
                     Collection<IAction> actions = new ArrayList<IAction>(getPageActions());
-                    actions.addAll(getApplicationActions());
-                    actions.addAll(getSessionActions());
+                    actions.addAll(getApplicationActions(session));
+                    actions.addAll(getSessionActions(session));
                     createActionPanel(c3, actions,
                         Environment.get("html.show.header.button.text", true),
                         ATTR_ALIGN, ALIGN_RIGHT);
@@ -386,18 +443,24 @@ public class Html5Presentation<T> extends BeanPresentationHelper<T> implements I
     /**
      * builds a full html document
      * 
+     * @param session
+     * 
      * @param parent (optional) parent element to place itself into
      * @param message (optional) status message to be presented at bottom
      * @param interactive if false, no buttons and edit fields are shown
      * @return html document
      */
-    public Element createPage(Element parent, Object message, boolean interactive, BeanDefinition<?>... navigation) {
+    public Element createPage(ISession session,
+            Element parent,
+            Object message,
+            boolean interactive,
+            BeanDefinition<?>... navigation) {
         boolean isRoot = parent == null;
         if (isRoot) {
             if (bean == null) {
-                return createFormDocument(message.toString(), null, interactive);
+                return createFormDocument(session, message.toString(), null, interactive);
             } else {
-                parent = createFormDocument(bean.getName(), bean.getPresentable().getIcon(), interactive);
+                parent = createFormDocument(session, bean.getName(), bean.getPresentable().getIcon(), interactive);
             }
         }
 
@@ -520,11 +583,12 @@ public class Html5Presentation<T> extends BeanPresentationHelper<T> implements I
                 continue;
             if (beanValue.isBean()) {
                 Bean<?> bv = (Bean<?>) beanValue.getInstance();
-                bv.setPresentationHelper(new Html5Presentation(bv)).createPage(parent, bv.getName(), interactive);
+                bv.setPresentationHelper(new Html5Presentation(bv)).createPage(null, parent, bv.getName(), interactive);
                 actions.addAll(bv.getActions());
             } else if (beanValue.isBeanCollector()) {
                 BeanCollector<?, ?> bv = (BeanCollector<?, ?>) ((IValueAccess) beanValue.getInstance()).getValue();
-                bv.setPresentationHelper(new Html5Presentation(bv)).createPage(parent, beanValue.getDescription(),
+                bv.setPresentationHelper(new Html5Presentation(bv)).createPage(null, parent,
+                    beanValue.getDescription(),
                     interactive);
                 actions.addAll(bv.getActions());
             } else {
@@ -1048,14 +1112,16 @@ public class Html5Presentation<T> extends BeanPresentationHelper<T> implements I
         Element row = parent.getNodeName().equals(TAG_ROW) ? parent : appendElement(parent, TAG_ROW);
         //first the label
         Element cellLabel = appendElement(row, TAG_CELL);
-        appendElement(cellLabel,
-            TAG_FONT,
-            content(beanValue.getDescription() + (beanValue.nullable() ? "" : " (*)")),
-            ATTR_COLOR,
-            (String) BeanUtil.valueOf(beanValue.getPresentation().getBackground(),
-                Environment.get("default.attribute.label.color", "#0000cc")),
-            enable(ATTR_HIDDEN, !p.isVisible()),
-            enable(ATTR_REQUIRED, !beanValue.nullable()));
+        if (beanValue.getDescription() != null) {
+            appendElement(cellLabel,
+                TAG_FONT,
+                content(beanValue.getDescription() + (beanValue.nullable() ? "" : " (*)")),
+                ATTR_COLOR,
+                (String) BeanUtil.valueOf(beanValue.getPresentation().getBackground(),
+                    Environment.get("default.attribute.label.color", "#0000cc")),
+                enable(ATTR_HIDDEN, !p.isVisible()),
+                enable(ATTR_REQUIRED, !beanValue.nullable()));
+        }
         //create the layout and layout-constraints
         Element cell = appendElement(row, TAG_CELL);
         cell = createLayoutConstraints(cell, p);
@@ -1343,7 +1409,8 @@ public class Html5Presentation<T> extends BeanPresentationHelper<T> implements I
                     isKey = i % 2 == 0;
                     if (isKey)
                         appendElement(preFooter, TAG_IMAGE, ATTR_SRC, "icons/properties.png");
-                    appendElement(preFooter, isKey ? "b" : "i", content(split[i] + "  "), ATTR_COLOR, isKey ? COLOR_BLUE
+                    appendElement(preFooter, isKey ? "b" : "i", content(split[i] + "  "), ATTR_COLOR, isKey
+                        ? COLOR_BLUE
                         : COLOR_BLACK);
                 }
             } else {
@@ -1356,9 +1423,13 @@ public class Html5Presentation<T> extends BeanPresentationHelper<T> implements I
 
     @Override
     public boolean isDefaultAttribute(IAttribute attribute) {
-        if (bean instanceof Bean && ((Bean) bean).getInstance() instanceof BeanConfigurator)
+        if (isBeanConfiguration())
             return true;
         return super.isDefaultAttribute(attribute);
+    }
+
+    private boolean isBeanConfiguration() {
+        return bean instanceof Bean && ((Bean) bean).getInstance() instanceof BeanConfigurator;
     }
 
     @Override
@@ -1395,7 +1466,7 @@ public class Html5Presentation<T> extends BeanPresentationHelper<T> implements I
     }
 
     public String decorate(String message) {
-        Element body = createHeader(message, null, false);
+        Element body = createHeader(null, message, null, false);
         createAction(body, IAction.CANCELED, "submit", "icons/back.png");
         return body.toString();
     }

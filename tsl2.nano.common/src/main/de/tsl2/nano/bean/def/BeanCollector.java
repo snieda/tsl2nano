@@ -503,7 +503,7 @@ public class BeanCollector<COLLECTIONTYPE extends Collection<T>, T> extends Bean
                 LOG.error(e);
                 Message.send("Couldn't copy selected element!");
             }
-        } 
+        }
         if (newItem == null) {
             /*
              * there is no information how to create a new bean - at least one stored bean instance must exist!
@@ -1107,7 +1107,8 @@ public class BeanCollector<COLLECTIONTYPE extends Collection<T>, T> extends Bean
     public static final <C extends Collection<I>, I/* extends Serializable*/> BeanCollector<C, I> getBeanCollector(
             Collection<I> collection,
             int workingMode) {
-        assert collection != null && collection.size() > 0 : "collection must contain at least one item";
+        ManagedException.assertion(collection != null && collection.size() > 0,
+            "collection is empty but must contain at least one item");
         return getBeanCollector((Class<I>) collection.iterator().next().getClass(), collection, workingMode,
             null);
     }

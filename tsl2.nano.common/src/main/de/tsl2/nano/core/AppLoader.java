@@ -16,6 +16,7 @@ import java.util.Map;
 import org.apache.commons.logging.Log;
 
 import de.tsl2.nano.core.classloader.NestedJarClassLoader;
+import de.tsl2.nano.core.classloader.ThreadUtil;
 import de.tsl2.nano.core.cls.BeanClass;
 import de.tsl2.nano.core.log.LogFactory;
 import de.tsl2.nano.core.util.StringUtil;
@@ -47,9 +48,10 @@ import de.tsl2.nano.core.util.StringUtil;
  * @version $Revision$
  */
 public class AppLoader {
-    private static final Log LOG = LogFactory.getLog(AppLoader.class);
-    private static boolean nestingJar;
+    private static Log LOG = LogFactory.getLog(AppLoader.class);
 
+    private static final String KEY_ISNESTEDJAR = "nano.apploader.isnestedjar";
+    
     /**
      * provides a map containing argument names (map-keys) and their description (map-values).
      * 
@@ -167,6 +169,25 @@ public class AppLoader {
          * now, we can load the environment with properties and services
          */
         createEnvironment(environment, new Argumentator(bc.getName(), getManual(), args));
+
+        /*
+         * prepare cleaning the Apploader
+         */
+        ThreadUtil.startDaemon("apploader-clean", new Runnable() {
+            @Override
+            public void run() {
+                try {
+                    Thread.sleep(10000);
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                } finally {
+                    LOG = null;
+                    //stop old logfactory instance
+                    LogFactory.stop();
+                }
+            }
+        });
+
         /*
          * finally, the application will be started inside the
          * new environment and classloader
@@ -222,7 +243,9 @@ public class AppLoader {
             nestedLoader.addFile(classPath);
 //            String configDir = System.getProperty("user.dir") + "/" + environment + "/";
 //            nestedLoader.addLibraryPath(new File(configDir).getAbsolutePath());
-            nestingJar = true;
+            System.setProperty(KEY_ISNESTEDJAR, Boolean.toString(true));
+        } else {
+            System.setProperty(KEY_ISNESTEDJAR, Boolean.toString(false));
         }
         nestedLoader.addLibraryPath(new File(environment).getAbsolutePath());
         nestedLoader.startPathChecker(environment, 2000);
@@ -263,8 +286,8 @@ public class AppLoader {
         //TODO: eval the real file-system
         return File.pathSeparatorChar == ':';
     }
-    
+
     public static boolean isNestingJar() {
-        return nestingJar;
+        return Boolean.getBoolean(KEY_ISNESTEDJAR);
     }
 }

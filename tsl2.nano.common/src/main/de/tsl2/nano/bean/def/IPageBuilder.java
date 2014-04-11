@@ -3,6 +3,7 @@ package de.tsl2.nano.bean.def;
 import java.util.Collection;
 
 import de.tsl2.nano.action.IAction;
+import de.tsl2.nano.core.ISession;
 
 
 /**
@@ -24,7 +25,7 @@ public interface IPageBuilder<PAGE, OUTPUT> {
      * @param navigation (optional) navigation objects
      * @return page text
      */
-    OUTPUT build(BeanDefinition<?> model, Object message, boolean interactive, BeanDefinition<?>... navigation);
+    OUTPUT build(ISession session, BeanDefinition<?> model, Object message, boolean interactive, BeanDefinition<?>... navigation);
 
     /**
      * create a full page and decorate a message
@@ -43,12 +44,12 @@ public interface IPageBuilder<PAGE, OUTPUT> {
     /**
      * creates extended actions like 'help', 'configure', 'exit' etc.
      */
-    public Collection<IAction> getApplicationActions();
+    public Collection<IAction> getApplicationActions(ISession session);
     
     /**
      * creates extended actions like 'logout' etc.
      */
-    public Collection<IAction> getSessionActions();
+    public Collection<IAction> getSessionActions(ISession session);
     
     /**
      * creates extended actions like 'print', 'help', 'export', 'select-all', 'deselect-all' etc.

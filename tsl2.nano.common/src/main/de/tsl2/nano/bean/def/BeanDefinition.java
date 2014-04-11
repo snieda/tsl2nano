@@ -1074,8 +1074,11 @@ public class BeanDefinition<T> extends BeanClass<T> implements Serializable {
             virtualBeanCache.remove(this);
     }
 
-    public static void clearCache() {
+    public static int clearCache() {
+        int cleared = virtualBeanCache.size();
+        LOG.info("clearing bean-definition cache of " + cleared + " elements");
         virtualBeanCache.clear();
+        return cleared;
     }
 
     /**
@@ -1099,7 +1102,8 @@ public class BeanDefinition<T> extends BeanClass<T> implements Serializable {
 //        getActions();
         getPresentable();
         getConnection("");
-        getValueExpression();
+        if (usePersistentCache)
+            saveDefinition();
     }
 
     /**

@@ -400,8 +400,19 @@ public class BeanClass<T> implements Serializable {
      * @return field value
      */
     public Object getField(T instance, String fieldName) {
+        return getField(instance, fieldName, false);
+    }
+    
+    /**
+     * getField
+     * 
+     * @param instance object instance having the field
+     * @param fieldName fields name
+     * @return field value
+     */
+    public Object getField(T instance, String fieldName, boolean declared) {
         try {
-            Field field = clazz.getField(fieldName);
+            Field field = declared ? clazz.getDeclaredField(fieldName) : clazz.getField(fieldName);
             field.setAccessible(true);
             return field.get(instance);
         } catch (Exception e) {
@@ -418,8 +429,19 @@ public class BeanClass<T> implements Serializable {
      * @param value fields new value
      */
     public void setField(T instance, String fieldName, Object value) {
+        setField(instance, fieldName, value, false);
+    }
+    
+    /**
+     * setField
+     * 
+     * @param instance object instance having the field
+     * @param fieldName fields name
+     * @param value fields new value
+     */
+    public void setField(T instance, String fieldName, Object value, boolean declared) {
         try {
-            Field field = clazz.getField(fieldName);
+            Field field = declared ? clazz.getDeclaredField(fieldName) : clazz.getField(fieldName);
             field.setAccessible(true);
             field.set(instance, value);
         } catch (Exception e) {
@@ -894,6 +916,14 @@ public class BeanClass<T> implements Serializable {
             .getSimpleName().contains("$")) && cls.getSuperclass() != null ? getDefiningClass(cls.getSuperclass())
             : cls;
     }
+
+    /**
+     * delegating to {@link CachedBeanClass#clear()}
+     * @return amount of cleared objects
+     */
+    protected static int clearCache() {
+        return CachedBeanClass.clear();
+    }
     
     @Override
     public String toString() {
@@ -955,8 +985,10 @@ class CachedBeanClass<T> extends BeanClass<T> {
     /**
      * clear cache
      */
-    static final void clear() {
-        LOG.info("clearing beanclass cache of " + bcCache.size() + " elements");
+    static final int clear() {
+        int cleared = bcCache.size();
+        LOG.info("clearing beanclass cache of " + cleared + " elements");
         bcCache.clear();
+        return cleared;
     }
 }

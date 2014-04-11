@@ -550,6 +550,16 @@ public class Environment {
     }
 
     /**
+     * copies the existing file in environment to the temp dir.
+     * 
+     * @param environmentFile
+     */
+    public static final void saveBackup(String environmentFile) {
+        FileUtil.copy(getConfigPath() + environmentFile,
+            getTempPath() + environmentFile + "." + System.currentTimeMillis());
+    }
+
+    /**
      * saves the resource (contained in your jar) to the file-system into the {@link #getConfigPath()} - only if not
      * done yet.
      * 

@@ -149,6 +149,11 @@ public/*abstract*/class LogFactory implements Runnable, Serializable {
         return self;
     }
 
+    public static void stop() {
+        //this will stop the thread, too.
+        self = null;
+    }
+ 
     /**
      * only for internal use! will reset the current singelton instance.
      * 
@@ -420,7 +425,7 @@ public/*abstract*/class LogFactory implements Runnable, Serializable {
     public void run() {
         String txt, last = " ", text;
         int filter, lastFilter = 0;
-        while (true) {
+        while (LogFactory.self != null || loggingQueue.size() > 0) {
             if (loggingQueue.size() > 0) {
                 text = loggingQueue.remove(0);
                 if (useFilter) {

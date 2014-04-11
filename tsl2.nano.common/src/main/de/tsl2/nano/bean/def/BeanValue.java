@@ -320,8 +320,11 @@ public class BeanValue<T> extends AttributeDefinition<T> implements IValueDefini
     /**
      * clears cache of already created bean values.
      */
-    public static final void clearCache() {
+    public static final int clearCache() {
+        int cleared = beanValueCache.size();
+        LOG.info("clearing beanvalue cache of " + cleared + " elements");
         beanValueCache.clear();
+        return cleared;
     }
 
     /**

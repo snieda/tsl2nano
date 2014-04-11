@@ -253,7 +253,7 @@ public class NanoH5 extends NanoHTTPD {
         NanoH5Session session = new NanoH5Session(this,
             inetAddress,
             createGenericNavigationModel(),
-            Environment.get(ClassLoader.class));
+            Environment.get(ClassLoader.class), null);
         sessions.put(inetAddress, session);
         return session;
     }
@@ -338,6 +338,11 @@ public class NanoH5 extends NanoHTTPD {
             }
 
             @Override
+            public boolean isEnabled() {
+                return true;
+            }
+            
+            @Override
             public boolean isDefault() {
                 return true;
             }
@@ -382,49 +387,6 @@ public class NanoH5 extends NanoHTTPD {
          */
         types.addAll(BeanDefinition.loadVirtualDefinitions());
 
-        /*
-         * Perhaps show the script tool to do direct sql or ant
-         */
-        if (Environment.get("application.show.scripttool", false)) {
-            BeanConfigurator.defineAction(null);
-            final ScriptTool tool = ScriptTool.createInstance();
-            Bean beanTool = Bean.getBean(tool);
-            beanTool.setAttributeFilter("sourceFile", "selectedAction", "text"/*, "result"*/);
-            beanTool.getAttribute("text").getPresentation().setType(IPresentable.TYPE_INPUT_MULTILINE);
-            beanTool.getAttribute("text").getConstraint().setLength(100000);
-            beanTool.getAttribute("text").getConstraint()
-                .setFormat(null/*RegExpFormat.createLengthRegExp(0, 100000, 0)*/);
-//            beanTool.getAttribute("result").getPresentation().setType(IPresentable.TYPE_TABLE);
-            beanTool.getAttribute("sourceFile").getPresentation().setType(IPresentable.TYPE_ATTACHMENT);
-            beanTool.getAttribute("selectedAction").setRange(tool.availableActions());
-            beanTool.addAction(tool.runner());
-
-            String id = "scripttool.define.query";
-            String lbl = Environment.translate(id, true);
-            IAction queryDefiner = new CommonAction(id, lbl, lbl) {
-                @Override
-                public Object action() throws Exception {
-                    String name =
-                        tool.getSourceFile() != null ? tool.getSourceFile().toLowerCase() : FileUtil
-                            .getValidFileName(tool.getText());
-                    Query query =
-                        new Query(name, tool.getText(), tool.getSelectedAction().getId().equals("scripttool.sql.id"),
-                            null);
-                    Environment.get(QueryPool.class).add(query.getName(), query);
-                    QueryResult qr = new QueryResult(query.getName());
-                    qr.setName(BeanDefinition.PREFIX_VIRTUAL + query.getName());
-                    qr.saveDefinition();
-                    return "New created specification-query: " + name;
-                }
-
-                @Override
-                public String getImagePath() {
-                    return "icons/save.png";
-                }
-            };
-            beanTool.addAction(queryDefiner);
-            types.add(beanTool);
-        }
         BeanCollector root = new BeanCollector(BeanCollector.class, types, MODE_EDITABLE | MODE_SEARCHABLE, null);
         root.setName(StringUtil.toFirstUpper(StringUtil
             .substring(Persistence.current().getJarFile(), "/", ".jar", true)));
@@ -547,8 +509,7 @@ public class NanoH5 extends NanoHTTPD {
         Environment.reset();
         Environment.setProperty(Environment.KEY_CONFIG_PATH, configPath);
         Environment.setProperty("http.serviceURL", serviceURL.toString());
-        BeanDefinition.clearCache();
-        BeanValue.clearCache();
+        Bean.clearCache();
         Thread.currentThread().setContextClassLoader(appstartClassloader);
         createPageBuilder();
         builder = Environment.get(IPageBuilder.class);
