@@ -22,6 +22,7 @@ import de.tsl2.nano.action.CommonAction;
 import de.tsl2.nano.bean.def.AttributeDefinition;
 import de.tsl2.nano.bean.def.Bean;
 import de.tsl2.nano.bean.def.BeanDefinition;
+import de.tsl2.nano.bean.def.CollectionExpressionFormat;
 import de.tsl2.nano.bean.def.Constraint;
 import de.tsl2.nano.bean.def.Presentable;
 import de.tsl2.nano.bean.def.ValueColumn;
@@ -68,36 +69,47 @@ public class BeanConfigurator<T> implements Serializable {
             configBean.setAttributeFilter("name", "valueExpression", "presentable", "valueGroups", "attributes");
             Serializable layout = (Serializable) MapUtil.asMap(ATTR_BGCOLOR, COLOR_LIGHT_GRAY);
             configBean.getPresentable().setLayout(layout);
+            ((CollectionExpressionFormat)configBean.getAttribute("attributes").getFormat()).getValueExpression().setExpression("{name}");
 
             BeanDefinition<AttributeConfigurator> configAttr =
                 BeanDefinition.getBeanDefinition(AttributeConfigurator.class);
             configAttr.setAttributeFilter("name", "description", "type", "constraint"/*, "length", "format", "min", "max"*/,
                 "presentable", "columnDefinition", "declaration");
             configAttr.getPresentable().setLayout(layout);
-
+            configAttr.setValueExpression(new ValueExpression("{name}", AttributeConfigurator.class));
+            configAttr.saveDefinition();
+//            BeanDefinition.getBeanDefinition(configBean.getAttribute("attributes").getType()).setValueExpression(new CollectionExpressionFormat<AttributeConfigurator>(AttributeConfigurator.class));
+            
             BeanDefinition<Html5Presentable> configPres = BeanDefinition.getBeanDefinition(Html5Presentable.class);
             configPres.setAttributeFilter("label", "description", "icon", "type", "style", "visible", "width", "height", "layout",
                 "layoutConstraints");
             configPres.getPresentable().setLayout(layout);
-
+            configPres.saveDefinition();
+            
             BeanDefinition<ValueGroup> configValueGroup = BeanDefinition.getBeanDefinition(ValueGroup.class);
             configValueGroup.setAttributeFilter("label", "description", "icon", "type", "style", "width", "height", "layout",
                 "layoutConstraints", "attributes");
             configValueGroup.getPresentable().setLayout(layout);
-
+            configValueGroup.saveDefinition();
+            
             BeanDefinition<ValueColumn> configColDef = BeanDefinition.getBeanDefinition(ValueColumn.class);
             configColDef.setAttributeFilter("name", "description", "index", "sortIndex", "sortUpDirection", "format", "width");
             configColDef.getPresentable().setLayout(layout);
-
+            configColDef.saveDefinition();
+            
             BeanDefinition<Constraint> configConstraint = BeanDefinition.getBeanDefinition(Constraint.class);
             configConstraint.setAttributeFilter("type", "minimum", "maximum", "format", "length", "scale", "precision", "nullable");
             configConstraint.getPresentable().setLayout(layout);
+            configConstraint.saveDefinition();
 
             defineAction(layout);
 
             BeanDefinition<Entry> configEntry = BeanDefinition.getBeanDefinition(Entry.class);
             configEntry.setAttributeFilter("key", "value");
             configEntry.getPresentable().setLayout(layout);
+            configEntry.saveDefinition();
+            
+            configBean.saveDefinition();
         }
         return (Bean<BeanConfigurator<I>>) configBean;
     }

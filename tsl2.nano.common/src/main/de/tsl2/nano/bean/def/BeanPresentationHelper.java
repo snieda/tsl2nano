@@ -493,7 +493,6 @@ public class BeanPresentationHelper<T> {
      * @param bean bean instance (normally the presenters bean)
      * @return empty or filled collection
      */
-    @SuppressWarnings({ "rawtypes", "unchecked" })
     protected <V> Collection<V> getDefaultAllowedValues(AttributeDefinition<V> beanAttribute) {
         //TODO: move that to the attribute: IPresentable
         //OneToMany --> the relationObservable returns a collection

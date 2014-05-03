@@ -112,13 +112,14 @@ public class NanoH5Session implements ISession {
 
     /**
      * setAuthorization
+     * 
      * @param authorization
      */
     @Override
     public void setUserAuthorization(Object authorization) {
         this.authorization = (IAuthorization) authorization;
     }
-    
+
     /**
      * main session serve method. requests of type 'GET' and file-links are handled by the application class (NanoH5).
      * 
@@ -209,7 +210,7 @@ public class NanoH5Session implements ISession {
         return user
             + Environment.translate("tsl2nano.time", true)
             + ": " + DateUtil.getFormattedDateTime(new Date()) + ", "
-            + Environment.translate("tsl2nano.duration", true) + ": "
+            + Environment.translate("tsl2nano.request", true) + ": "
             + DateUtil.getFormattedMinutes(System.currentTimeMillis() - startTime) + " min";
     }
 
@@ -294,18 +295,17 @@ public class NanoH5Session implements ISession {
         //collect available actions
         Collection<IAction> actions = null;
         if (nav.current() != null) {
+            BeanDefinition<?> c = nav.current();
             actions = new ArrayList<IAction>();
             if (nav.current().getActions() != null)
-                actions.addAll(nav.current().getActions());
-            actions.addAll(nav.current().getPresentationHelper().getPageActions());
-            actions.addAll(nav.current().getPresentationHelper().getSessionActions(this));
-            actions.addAll(nav.current().getPresentationHelper().getApplicationActions(this));
-            if (nav.current().isMultiValue()) {
-                actions.addAll(((BeanCollector) nav.current()).getColumnSortingActions());
+                actions.addAll(c.getActions());
+            actions.addAll(c.getPresentationHelper().getPageActions());
+            actions.addAll(c.getPresentationHelper().getSessionActions(this));
+            actions.addAll(c.getPresentationHelper().getApplicationActions(this));
+            if (c.isMultiValue()) {
+                actions.addAll(((BeanCollector) c).getColumnSortingActions());
             }
-        }
-        //start the actions
-        if (actions != null) {
+            //start the actions
             //respect action-call through menu-link (with method GET but starting with '!!!'
             Set<Object> keySet = new HashSet<Object>();
             if (uri.contains(Html5Presentation.PREFIX_ACTION))
@@ -315,9 +315,9 @@ public class NanoH5Session implements ISession {
                 String p = (String) k;
                 IAction<?> action = getAction(actions, p);
                 if (action != null) {
-                    if (nav.current().isMultiValue()
-                        && isSearchRequest(action.getId(), (BeanCollector<?, ?>) nav.current())) {
-                        responseObject = processSearchRequest(parms, (BeanCollector<?, ?>) nav.current());
+                    if (c.isMultiValue()
+                        && isSearchRequest(action.getId(), (BeanCollector<?, ?>) c)) {
+                        responseObject = processSearchRequest(parms, (BeanCollector<?, ?>) c);
                     } else {
                         /*
                          * submit/assign and cancel will not push a new element to the navigation stack!
@@ -326,20 +326,21 @@ public class NanoH5Session implements ISession {
                         Object result = action.activate();
                         if (result != null && responseObject != IAction.CANCELED && !action.getId().endsWith("save")) {
                             responseObject = result;
-                            if (nav.current() instanceof Bean && ((Bean)nav.current()).getInstance() instanceof Persistence)
+                            if (c instanceof Bean
+                                && ((Bean) c).getInstance() instanceof Persistence)
                                 authorization = Environment.get(IAuthorization.class);
                         } else if (action.getId().endsWith("reset")) {
-                            responseObject = nav.current();
+                            responseObject = c;
                         } else {
-//                        action.activate();
+//                            action.activate();
                             return responseObject;
                         }
                     }
                 } else {
                     if (p.endsWith(IPresentable.POSTFIX_SELECTOR)) {
                         String n = StringUtil.substring(p, null, IPresentable.POSTFIX_SELECTOR);
-                        final BeanValue assignableAttribute = (BeanValue) nav.current().getAttribute(n);
-                        responseObject = assignableAttribute.connectToSelector(nav.current());
+                        final BeanValue assignableAttribute = (BeanValue) c.getAttribute(n);
+                        responseObject = assignableAttribute.connectToSelector(c);
                     }
                 }
             }

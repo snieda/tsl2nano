@@ -341,7 +341,7 @@ public class NanoH5 extends NanoHTTPD {
             public boolean isEnabled() {
                 return true;
             }
-            
+
             @Override
             public boolean isDefault() {
                 return true;
@@ -389,7 +389,7 @@ public class NanoH5 extends NanoHTTPD {
 
         BeanCollector root = new BeanCollector(BeanCollector.class, types, MODE_EDITABLE | MODE_SEARCHABLE, null);
         root.setName(StringUtil.toFirstUpper(StringUtil
-            .substring(Persistence.current().getJarFile(), "/", ".jar", true)));
+            .substring(Persistence.current().getJarFile().replace("\\", "/"), "/", ".jar", true)));
         root.setAttributeFilter("name");
         root.getAttribute("name").setFormat(new Format() {
             /** serialVersionUID */

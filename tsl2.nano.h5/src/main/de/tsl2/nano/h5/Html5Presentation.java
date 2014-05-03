@@ -11,7 +11,7 @@ package de.tsl2.nano.h5;
 
 import static de.tsl2.nano.bean.def.IBeanCollector.MODE_ASSIGNABLE;
 import static de.tsl2.nano.bean.def.IBeanCollector.MODE_MULTISELECTION;
-import static de.tsl2.nano.h5.HtmlUtil.ALIGN_CENTER;
+import static de.tsl2.nano.h5.HtmlUtil.*;
 import static de.tsl2.nano.h5.HtmlUtil.ALIGN_RIGHT;
 import static de.tsl2.nano.h5.HtmlUtil.ATTR_ACCESSKEY;
 import static de.tsl2.nano.h5.HtmlUtil.ATTR_ACTION;
@@ -83,6 +83,7 @@ import static de.tsl2.nano.h5.HtmlUtil.VAL_ALIGN_LEFT;
 import static de.tsl2.nano.h5.HtmlUtil.VAL_ALIGN_RIGHT;
 import static de.tsl2.nano.h5.HtmlUtil.VAL_FRM_SELF;
 import static de.tsl2.nano.h5.HtmlUtil.appendElement;
+import static de.tsl2.nano.h5.HtmlUtil.appendElements;
 import static de.tsl2.nano.h5.HtmlUtil.enable;
 import static de.tsl2.nano.h5.HtmlUtil.style;
 
@@ -144,7 +145,6 @@ import de.tsl2.nano.format.RegExpFormat;
 import de.tsl2.nano.h5.configuration.BeanConfigurator;
 import de.tsl2.nano.h5.expression.Query;
 import de.tsl2.nano.h5.expression.QueryPool;
-import de.tsl2.nano.persistence.Persistence;
 import de.tsl2.nano.script.ScriptTool;
 import de.tsl2.nano.util.NumberUtil;
 
@@ -572,6 +572,7 @@ public class Html5Presentation<T> extends BeanPresentationHelper<T> implements I
             Collection<IAction> actions,
             boolean interactive) {
         int columns = p.layout(L_GRIDWIDTH, Environment.get("layout.default.columncount", 3));
+        parent = interactive ? createExpandable(parent, p.getDescription()) : parent;
         Element panel = createGrid(parent, Environment.translate("tsl2nano.input", false), "field.panel", columns);
         //set layout and constraints into the grid
         appendAttributes((Element) panel.getParentNode(), p);
@@ -592,8 +593,8 @@ public class Html5Presentation<T> extends BeanPresentationHelper<T> implements I
                     interactive);
                 actions.addAll(bv.getActions());
             } else {
-                Element fparent = (Element) (field == null || (++count % (columns / 3) == 0) ? panel
-                    : field.getParentNode().getParentNode());
+                Element fparent = (Element) (field == null || ((++count * 3) % (columns) == 0) ? panel
+                    : getRow(field));
                 field = createField(fparent, beanValue, interactive);
                 if (!firstFocused) {
                     field.setAttribute(ATTR_AUTOFOCUS, ATTR_AUTOFOCUS);
@@ -601,6 +602,15 @@ public class Html5Presentation<T> extends BeanPresentationHelper<T> implements I
                 }
             }
         }
+    }
+
+    private Element createExpandable(Element parent, String title) {
+        parent = appendElement(parent, "summary", content(title), ATTR_STYLE, "color: #AAAAAA;");
+        return appendElement(parent, "details", "open");
+    }
+
+    private Element getRow(Element field) {
+        return (Element) field.getParentNode().getParentNode().getParentNode();
     }
 
     /**
@@ -622,6 +632,7 @@ public class Html5Presentation<T> extends BeanPresentationHelper<T> implements I
          * create the column header
          */
         bean.addMode(MODE_MULTISELECTION);
+        parent = interactive ? createExpandable(parent, bean.getPresentable().getDescription()) : parent;
         Element grid;
         if (interactive)
             grid = createGrid(parent, bean.toString(), false, bean);
@@ -1109,7 +1120,8 @@ public class Html5Presentation<T> extends BeanPresentationHelper<T> implements I
 
     Element createField(Element parent, BeanValue<?> beanValue, boolean interactive) {
         IPresentable p = beanValue.getPresentation();
-        Element row = parent.getNodeName().equals(TAG_ROW) ? parent : appendElement(parent, TAG_ROW);
+        Element row =
+            parent.getNodeName().equals(TAG_ROW) ? parent : appendElement(parent, TAG_ROW);
         //first the label
         Element cellLabel = appendElement(row, TAG_CELL);
         if (beanValue.getDescription() != null) {
@@ -1135,7 +1147,7 @@ public class Html5Presentation<T> extends BeanPresentationHelper<T> implements I
                 beanValue.getFormat() instanceof RegExpFormat ? (RegExpFormat) beanValue.getFormat()
                     : null;
             String type = getType(beanValue);
-            boolean multiLineText = p.getType() == IPresentable.TYPE_INPUT_MULTILINE;
+            boolean multiLineText = isMultiline(p);
             boolean isOption = "checkbox".equals(type);
             input = appendElement(cell,
                 multiLineText ? TAG_TEXTAREA : TAG_INPUT,
@@ -1163,7 +1175,7 @@ public class Html5Presentation<T> extends BeanPresentationHelper<T> implements I
                 (isOption ? enable(ATTR_CHECKED, (Boolean) beanValue.getValue()) : ATTR_VALUE),
                 (isOption ? "checked" : getValue(beanValue, type)),
                 ATTR_TITLE,
-                beanValue.getDescription(),
+                beanValue.getDescription() + (LOG.isDebugEnabled() ? "\n\n" + beanValue.toDebugString() : ""),
                 "tabindex",
                 p.layout("tabindex", ++currentTabIndex).toString(),
                 enable(ATTR_HIDDEN, !p.isVisible()),
@@ -1269,10 +1281,15 @@ public class Html5Presentation<T> extends BeanPresentationHelper<T> implements I
     private String getValue(BeanValue<?> beanValue, String type) {
         IPresentable p = beanValue.getPresentation();
         //multi-line text will provide the text in the tags content - not the value (text may be to long)
-        if (p.getType() == IPresentable.TYPE_INPUT_MULTILINE || BitUtil.hasBit(p.getStyle(), IPresentable.STYLE_MULTI))
+        if (isMultiline(p))
             return "";
         return type.startsWith("date") ? StringUtil.toString(DateUtil.toSqlDateString((Date) beanValue.getValue()))
             : beanValue.getValueText();
+    }
+
+    private boolean isMultiline(IPresentable p) {
+        return p.getType() == IPresentable.TYPE_INPUT_MULTILINE
+            || BitUtil.hasBit(p.getStyle(), IPresentable.STYLE_MULTI);
     }
 
     private String getSuffix(RegExpFormat regexpFormat) {
@@ -1319,9 +1336,17 @@ public class Html5Presentation<T> extends BeanPresentationHelper<T> implements I
                 enable(ATTR_REQUIRED, !beanValue.nullable()));
         Collection<?> values = beanValue.getConstraint().getAllowedValues();
         Object selected = beanValue.getValue();
+        String content, id;
         for (Object v : values) {
-            Bean<Serializable> bv = Bean.getBean((Serializable) v);
-            appendElement(select, TAG_OPTION, content(bv.toString()), ATTR_ID, bv.getId().toString(),
+            if (v.getClass().isEnum()) {
+                content = Environment.translate(v.toString(), true);
+                id = content;
+            } else {
+                Bean<Serializable> bv = Bean.getBean((Serializable) v);
+                content = bv.toString();
+                id = bv.getId().toString();
+            }
+            appendElement(select, TAG_OPTION, content(content), ATTR_ID, id,
                 enable(ATTR_SELECTED, selected != null && v.equals(selected)));
         }
         return select;

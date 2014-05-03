@@ -70,4 +70,18 @@ public class ValueExpressionFormat<T> extends Format {
     public String toString() {
         return Util.toString(getClass(), ve);
     }
+
+    /**
+     * @return Returns the ve.
+     */
+    public ValueExpression<T> getValueExpression() {
+        return ve;
+    }
+
+    /**
+     * @param ve The ve to set.
+     */
+    public void setValueExpression(ValueExpression<T> ve) {
+        this.ve = ve;
+    }
 }

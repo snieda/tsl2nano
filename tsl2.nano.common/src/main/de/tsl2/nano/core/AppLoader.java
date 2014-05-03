@@ -270,7 +270,7 @@ public class AppLoader {
 
     private String getFileSystemPrefix() {
         //on dalvik systems, the  MainActivity.onCreate() should set the syste property
-        return isDalvik() ? System.getProperty("android.sdcard.path", "/mnt/sdcard/") : isUnixFS() ? "/opt/" : "";
+        return isDalvik() ? System.getProperty("android.sdcard.path", "/mnt/sdcard/") : isUnixFS() && new File("/opt").canWrite() ? "/opt/" : "";
     }
 
     /**

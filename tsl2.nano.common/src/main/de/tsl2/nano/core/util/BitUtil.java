@@ -190,7 +190,7 @@ public class BitUtil extends CUtil {
      * @return bit-field representing the given description
      */
     public static final int bits(String description, List<String> bitNames) {
-        String[] names = description.split(", ");
+        String[] names = description.split(",[\\s]*");
         int bits = 0;
         for (int i = 0; i < names.length; i++) {
             bits += bitToDecimal(bitNames.indexOf(names[i]));

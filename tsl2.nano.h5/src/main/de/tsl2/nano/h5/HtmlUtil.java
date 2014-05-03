@@ -199,6 +199,15 @@ public class HtmlUtil {
         return parent;
     }
 
+    public static Element embedElements(Element parent, String... tagNames) {
+        Document doc = parent.getOwnerDocument();
+        Element p = parent;
+        for (int i = 0; i < tagNames.length; i++) {
+            p = (Element) p.appendChild(doc.createElement(tagNames[i]));
+        }
+        return p;
+    }
+
     public static Element appendElement(Element parent, String tagName, String... attributes) {
         return appendElement(parent, tagName, null, attributes);
     }

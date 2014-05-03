@@ -37,6 +37,7 @@ import de.tsl2.nano.core.cls.BeanClass;
 import de.tsl2.nano.core.cls.IAttribute;
 import de.tsl2.nano.core.log.LogFactory;
 import de.tsl2.nano.core.util.StringUtil;
+import de.tsl2.nano.core.util.Util;
 import de.tsl2.nano.messaging.EventController;
 import de.tsl2.nano.util.PrivateAccessor;
 
@@ -57,9 +58,9 @@ public class AttributeDefinition<T> implements IAttributeDefinition<T> {
     protected transient EventController eventController;
     @Element(type = Constraint.class, required = false)
     protected IConstraint<T> constraint;
-    @Attribute(required=false)
+    @Attribute(required = false)
     private boolean id;
-    @Attribute(required=false)
+    @Attribute(required = false)
     private boolean unique;
     @Element(required = false)
     private Class<? extends Date> temporalType;
@@ -73,10 +74,10 @@ public class AttributeDefinition<T> implements IAttributeDefinition<T> {
     @Element(required = false)
     private boolean doValidation = true;
     /** see {@link #composition()} */
-    @Attribute(required=false)
+    @Attribute(required = false)
     private boolean composition;
     /** see {@link #cascading()} */
-    @Attribute(required=false)
+    @Attribute(required = false)
     private boolean cascading;
 
     private static final Log LOG = LogFactory.getLog(AttributeDefinition.class);
@@ -154,10 +155,10 @@ public class AttributeDefinition<T> implements IAttributeDefinition<T> {
 
     public final IConstraint<T> getConstraint() {
         if (constraint == null)
-            constraint = new Constraint();
+            constraint = new Constraint(BeanClass.getDefiningClass(attribute.getType()));
         return constraint;
     }
-    
+
     /**
      * setBasicDef
      * 
@@ -331,7 +332,8 @@ public class AttributeDefinition<T> implements IAttributeDefinition<T> {
      */
     public boolean isSelectable() {
         Class<T> type = getType();
-        return isMultiValue() || (!BeanUtil.isStandardType(type) && BeanDefinition.getBeanDefinition(type).isSelectable());
+        return isMultiValue()
+            || (!BeanUtil.isStandardType(type) && BeanDefinition.getBeanDefinition(type).isSelectable());
     }
 
     /**
@@ -492,7 +494,7 @@ public class AttributeDefinition<T> implements IAttributeDefinition<T> {
     public boolean isRelation() {
         return BeanContainer.isInitialized() && BeanContainer.instance().isPersistable(getType());
     }
-    
+
     /**
      * if the bean instance is of type {@link ValueHolder}, the attribute is virtual - no special bean-attribute is
      * available, the attribute name is always {@link ValueHolder#getValue()} .
@@ -676,4 +678,11 @@ public class AttributeDefinition<T> implements IAttributeDefinition<T> {
         return attribute.toString();
     }
 
+    public String toDebugString() {
+        return Util.toString(getClass(), "declaringClass: " + getType(), "temporal-type: " + temporalType, "name: "
+            + getName(),
+            "id: " + id, "unique: " + unique, "cascading: " + cascading, "composition: " + composition, "\nattribute: " + attribute, "\nstatus: "
+                + status, "\nconstraints: "
+                + constraint, "\npresentable: " + presentable);
+    }
 }

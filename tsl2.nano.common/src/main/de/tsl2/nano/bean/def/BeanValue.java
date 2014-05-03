@@ -222,7 +222,7 @@ public class BeanValue<T> extends AttributeDefinition<T> implements IValueDefini
              * it is not possible to move that block to value-expression,
              * because value-expression doesn't have access to the attribute-definition!
              */
-            if (!Util.isEmpty(source) && getConstraint().getAllowedValues() != null) {
+            if (!Util.isEmpty(source) && getConstraint().getAllowedValues() != null && !getConstraint().getType().isEnum()) {
                 String name;
                 for (Object allowed : getConstraint().getAllowedValues()) {
                     name = Bean.getBean((Serializable) allowed).toString();
@@ -234,8 +234,7 @@ public class BeanValue<T> extends AttributeDefinition<T> implements IValueDefini
                 }
                 if (v == null)
                     throw ManagedException.illegalArgument(source, getConstraint().getAllowedValues());
-            }
-            else {
+            } else {
                 v = getParsedValue(source);
             }
             setValue(v);

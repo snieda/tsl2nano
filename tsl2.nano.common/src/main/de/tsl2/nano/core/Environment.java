@@ -87,6 +87,8 @@ public class Environment {
 
     public static final String CONFIG_XML_NAME = "environment.xml";
 
+    static final String DEF_PATHSEPRATOR = "/";
+    
     private Environment() {
         self = this;
     }
@@ -97,8 +99,10 @@ public class Environment {
      * @return environment name - equal to the name of the configuration directory, defined in {@link #getConfigPath()}.
      */
     public static String getName() {
-        return StringUtil.toFirstUpper(StringUtil.substring(self.getConfigPath(), File.separator, null, true)
-            .replace('/', ' '));
+        String path = self.getConfigPath().replace(File.separator, DEF_PATHSEPRATOR);
+        if (path.lastIndexOf(DEF_PATHSEPRATOR) == path.length() - 1)
+            path = path.substring(0, path.length() - 1);
+        return StringUtil.toFirstUpper(StringUtil.substring(path, DEF_PATHSEPRATOR, null, true));
     }
 
     /**
@@ -181,6 +185,7 @@ public class Environment {
         String info = "\n===========================================================\n" + "creating environment "
             + dir
             + "\n"
+            + "    build : ${build.info}\n"
             + "    args  : ${sun.java.command}\n"
             + "    dir   : ${user.dir}\n"
             + "    time  : ${tstamp}\n"
@@ -197,7 +202,6 @@ public class Environment {
         p.put("tstamp", new Date());
         p.put("main.context.classloader", Thread.currentThread().getContextClassLoader());
         p.put("inetadress.myip", NetUtil.getMyIP());
-        System.out.println(StringUtil.insertProperties(info, p));
 
         //provide some external functions as options for this framework
         CompatibilityLayer layer = new CompatibilityLayer();
@@ -226,7 +230,10 @@ public class Environment {
             self.properties = new Properties();
 //          LOG.warn("no environment.properties available");
         }
-        getBuildInformations();
+        p.put("build.info", getBuildInformations());
+        info = StringUtil.insertProperties(info, p);
+        LogFactory.log(info);
+        
         self.properties.put(KEY_CONFIG_PATH, new File(dir).getAbsolutePath() + "/");
         new File(self.getTempPath()).mkdir();
         self.services = new Hashtable<Class<?>, Object>();
@@ -424,7 +431,7 @@ public class Environment {
      * @return default environment directory + simple class name
      */
     public static String getConfigPath(Class<?> type) {
-        return self().properties.getProperty(KEY_CONFIG_PATH) + type.getSimpleName().toLowerCase();
+        return getConfigPath() + type.getSimpleName().toLowerCase();
     }
 
     public static String getConfigPath() {
@@ -432,7 +439,7 @@ public class Environment {
     }
 
     public static String getTempPath() {
-        return self().properties.getProperty(KEY_CONFIG_PATH) + "temp/";
+        return getConfigPath() + "temp/";
     }
 
     /**

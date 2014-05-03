@@ -22,6 +22,7 @@ import de.tsl2.nano.action.IActivable;
 import de.tsl2.nano.bean.BeanContainer;
 import de.tsl2.nano.core.Environment;
 import de.tsl2.nano.core.cls.IAttribute;
+import de.tsl2.nano.core.util.Util;
 
 /**
  * simple gui properties
@@ -281,8 +282,10 @@ public class Presentable implements IIPresentable, Serializable {
 
     @Override
     public String toString() {
-        return getClass().getSimpleName() + "(" + label + ", type:" + type + ", style:" + style
-            + (visible ? ")" : ", invisible)");
+        return Util.toString(getClass(), label, "type:" + type, "style:" + style
+            , (visible ? "visible" : "invisible)")
+            , (enabler != null && enabler.isActive() ? "enabled" : "disabled")
+            , "icon: " + icon);
     }
 
     @Override
@@ -309,7 +312,7 @@ public class Presentable implements IIPresentable, Serializable {
     public <T extends IPresentable> T addLayoutConstraints(String name, Object value) {
         throw new UnsupportedOperationException();
     }
-    
+
     @Override
     public void setIcon(String icon) {
         this.icon = icon;

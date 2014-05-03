@@ -11,7 +11,10 @@ package de.tsl2.nano.bean.def;
 
 import java.io.Serializable;
 import java.text.Format;
+import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
+import java.util.LinkedList;
 
 import org.apache.commons.logging.Log;
 import org.simpleframework.xml.Attribute;
@@ -84,9 +87,8 @@ public class Constraint<T> implements IConstraint<T>, Serializable {
      */
     public Constraint(Class<T> type, Comparable<T> min, Comparable<T> max) {
         super();
-        this.type = type;
-        this.min = min;
-        this.max = max;
+        setType(type);
+        setRange(min, max);
     }
 
     /**
@@ -266,9 +268,12 @@ public class Constraint<T> implements IConstraint<T>, Serializable {
     }
 
     /** define maximum length */
+    @SuppressWarnings("rawtypes")
     @Override
     public <C extends IConstraint<T>> C setType(Class<T> type) {
         this.type = type;
+        if (type.isEnum())
+            setRange(CollectionUtil.getEnumValues((Class<Enum>) type));
         return (C) this;
     }
 
@@ -342,6 +347,11 @@ public class Constraint<T> implements IConstraint<T>, Serializable {
 
     @Override
     public String toString() {
-        return Util.toString(this.getClass(), type, ", range:" + min + " - " + max);
+        Object _min = min != null ? min : (!Util.isEmpty(allowedValues) ? allowedValues.iterator().next() : null);
+        Object _max =
+            max != null ? max : (!Util.isEmpty(allowedValues) ? new LinkedList<T>(allowedValues).getLast() : null);
+        return Util.toString(this.getClass(), type, "length: " + length, "mandatory: " + !nullable, "\n\trange: " + _min
+            + (allowedValues != null ? " ... " : " - ") + _max,
+            "\n\tformat: " + format);
     }
 }

@@ -1197,6 +1197,10 @@ set the following *environment.xml* properties:
 * hsqldb 1.8 is not able to do _select max(count(color)) from Colors group by color_
 * hibernate3 is - on special circumstances - not able to load fields with empty ('') strings. This results in an __java.lang.StringIndexOutOfBoundsException: String index out of range: 0__
 * hibernate4 is not able to generate correct case-sensitive class-names if table-names contain '_'. Example: SYS_TABLE will result in class _SysTable_, but variables try to declare _Systable_.
+* If an Enum value overwrites a method (like _toString()_), the declaring class of this value is anonymous. serializing it through simple-xml will write the class with postfix perhaps _$1_. This can't  be de-serialized through simple-xml.
+* Some array types can't be de-serialized through simple-xml.
+* a field holding a collection is not enabled
+** on oneToMany relations a cascading type must be given to be enabled
 
 ## Changelog
 
@@ -1358,5 +1362,12 @@ set the following *environment.xml* properties:
 ** languages
 ** on appserver
 * extract apploader: common main, classloader, execution
+
+* speichern von Konfigurationen mit nullpointer in privateaccessor
+* spalten-layout tag: section (landscape, portrait)
+* detail hintergrund-bild
+*  ve mit ? ???
+* konfig format
+* Expectable-Data?
 
 [GLOSSARY]
