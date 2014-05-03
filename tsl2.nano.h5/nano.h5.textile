@@ -778,6 +778,10 @@ If you change sources of a plugin, you should start ant script _2nano.xml_. This
 
 The version is read from _build.properties_ of nano.h5.
 
+### Debugging
+
+To debug your app or just the framework, you should enhance the logging output. Edit the file _logfactory.xml_ and add the text _debug_ to the attribute _standard_ of tag _logfactory_. This will enhance not only the logging output but the details of the tooltips of each html-field.
+
 ### Help on Html5
 
 Normally, you don't have to create html-pages by yourself, but if you are interested in html5, have a look at the following tutorials/references:
