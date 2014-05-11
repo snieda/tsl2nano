@@ -17,7 +17,7 @@ import javax.ejb.Local;
 import javax.ejb.ScheduleExpression;
 import javax.ejb.TimerHandle;
 
-import de.tsl2.nano.execution.ICRunnable;
+import de.tsl2.nano.core.execution.ICRunnable;
 
 /**
  * Generic ejb 3.1 job scheduler. is able to run (synchronized) a collection of {@link Runnable}s for the given

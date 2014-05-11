@@ -14,7 +14,7 @@ NanoH5 (or FullRelation) is an UI independent gui implementation framework provi
 To do a *quick-start*, go to chapter _Starting / Test_.
 
 ### Goals
-* pure model implementation + platform independency (should work on android, too).
+* pure model implementation + platform independency (works on android, too).
 * small, having as less as possible static dependencies to other libraries
 * everything has a default - all defaults are configurable (Convention over Configuration)
 * application, session and entity behaviors are configurable
@@ -93,6 +93,22 @@ The following library was a helper to generate an xsd-file for the beandef-xml f
 * [Jing-Trang xml2xsd-Generator](https://code.google.com/p/jing-trang/downloads/list)
 
 For more indirect dependencies, have a look at chapter _Dependencies_.
+
+#### JPA Persistence-Providers
+
+At the moment, tested with JPA 2.0 providers, the following providers are known to implement *javax.persistence.spi.PersistenceProvider*:
+
+* Hibernate  : _org.hibernate.ejb.HibernatePersistence_
+* OpenJPA    : _org.apache.openjpa.persistence.PersistenceProviderImpl_
+* EclipseLink: _org.eclipse.persistence.jpa.PersistenceProvider_
+* TopLink    : _oracle.toplink.essentials.PersistenceProvider_
+* Acme Pers. : _com.acme.persistence_
+* DataNucleus: _org.datanucleus.api.jpa.PersistenceProviderImpl_
+
+Other smaller frameworks provide only access to JPA-Annotations without providing an EntityManager:
+
+* ORMLite
+* EBean
 
 ### Architecture
 
@@ -299,7 +315,7 @@ On top of each html page you will see on the left side an application icon (clic
 #### No Dependencies, but useful to do the work
 
 * jdbc database driver (like hsqldb.jar)
-* jpa o/r mapper (like hibernate, toplink or ormlite)
+* jpa o/r mapper (like hibernate, toplink, eclipselink, openjpa or ormlite)
 * generator tool to create entity beans (like hibernate-tools)
 
 Hibernate 4 for example would have the following dependencies:
@@ -1191,6 +1207,20 @@ set the following *environment.xml* properties:
 * get only 50 lines per search: *service.maxresult=50*
 * ???: *bean.use.beanpresentationhelper.filter=false*
 * turn off replication: *use.database.replication = false*
+
+## Android
+
+The _nano.h5_ framework works on android systems, too. But upto this time I coudn't find a proper O/R mapper supporting full JPA 2.0 and providing an EntityManager through an persistence.xml file.
+
+The O/R mappers *EBean* and *ORMLite* are able to work on JPA-annotations, but no *javax.persistence.EntityManager* was implemented. So, the nano.h5 framework is useless on android systems at this moment.
+
+Other restrictions on android:
+* all libraries in your environment directory must contain dex-classes. you can't simply add a standard library without transforming it to *dalvik classes*.
+* ant wont work, so
+** as hibernate doesn't work on android too, *hibernate-tools* as bean-jar generator is not usable.
+* on android an error occurs creating an xml-file for authorization. perhaps an empty authorization file will be created resulting in an error on next application start.
+* adding eclipse-link to the apk file results in error: _Unable to execute dex: method ID not in [0, 0xffff]: 65536_
+**  Your project is too large. You have to many methods. There can only be 65536 methods per application. see here https://code.google.com/p/android/issues/detail?id=7147#c6
 
 ## Known Problems and some Solutions
 

@@ -29,6 +29,7 @@ import de.tsl2.nano.core.Environment;
 import de.tsl2.nano.core.Messages;
 import de.tsl2.nano.core.log.LogFactory;
 import de.tsl2.nano.core.util.StringUtil;
+import de.tsl2.nano.core.util.Util;
 import de.tsl2.nano.serviceaccess.Authorization;
 import de.tsl2.nano.serviceaccess.IAuthorization;
 import de.tsl2.nano.serviceaccess.ServiceFactory;
@@ -313,6 +314,8 @@ public class AbstractLoginModule implements LoginModule {
      * override this method to set the user roles!
      */
     protected void authorize() {
+        if (Util.isEmpty(username))
+            return;
         userPrincipal = new UserPrincipal(username);
         if (!subject.getPrincipals().contains(userPrincipal)) {
             subject.getPrincipals().add(userPrincipal);

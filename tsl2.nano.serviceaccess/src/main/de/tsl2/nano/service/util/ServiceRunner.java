@@ -19,8 +19,8 @@ import java.util.Map;
 import java.util.Properties;
 
 import de.tsl2.nano.core.ManagedException;
+import de.tsl2.nano.core.execution.ICRunnable;
 import de.tsl2.nano.core.util.StringUtil;
-import de.tsl2.nano.execution.ICRunnable;
 import de.tsl2.nano.execution.Runner;
 import de.tsl2.nano.serviceaccess.ServiceFactory;
 

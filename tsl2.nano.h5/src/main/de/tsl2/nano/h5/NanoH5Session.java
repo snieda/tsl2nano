@@ -53,6 +53,7 @@ import de.tsl2.nano.core.exception.Message;
 import de.tsl2.nano.core.log.LogFactory;
 import de.tsl2.nano.core.util.DateUtil;
 import de.tsl2.nano.core.util.StringUtil;
+import de.tsl2.nano.execution.Profiler;
 import de.tsl2.nano.format.RegExpFormat;
 import de.tsl2.nano.h5.NanoHTTPD.Response;
 import de.tsl2.nano.h5.navigation.IBeanNavigator;
@@ -211,7 +212,8 @@ public class NanoH5Session implements ISession {
             + Environment.translate("tsl2nano.time", true)
             + ": " + DateUtil.getFormattedDateTime(new Date()) + ", "
             + Environment.translate("tsl2nano.request", true) + ": "
-            + DateUtil.getFormattedMinutes(System.currentTimeMillis() - startTime) + " min";
+            + DateUtil.getFormattedMinutes(System.currentTimeMillis() - startTime) + " min"
+            + (LOG.isDebugEnabled() ? ", " + "Memory: " + (Profiler.getUsedMem() / (1024*1024)) + " MB" : "");
     }
 
     private String refreshPage(Object message) {

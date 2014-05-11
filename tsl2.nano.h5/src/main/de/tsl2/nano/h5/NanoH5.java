@@ -16,7 +16,6 @@ import java.text.FieldPosition;
 import java.text.Format;
 import java.text.ParsePosition;
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -25,8 +24,6 @@ import java.util.Stack;
 
 import org.apache.commons.logging.Log;
 
-import de.tsl2.nano.action.CommonAction;
-import de.tsl2.nano.action.IAction;
 import de.tsl2.nano.action.IActivable;
 import de.tsl2.nano.bean.BeanContainer;
 import de.tsl2.nano.bean.IBeanContainer;
@@ -35,24 +32,19 @@ import de.tsl2.nano.bean.def.Bean;
 import de.tsl2.nano.bean.def.BeanCollector;
 import de.tsl2.nano.bean.def.BeanDefinition;
 import de.tsl2.nano.bean.def.BeanPresentationHelper;
-import de.tsl2.nano.bean.def.BeanValue;
 import de.tsl2.nano.bean.def.IPageBuilder;
 import de.tsl2.nano.bean.def.IPresentable;
 import de.tsl2.nano.bean.def.SecureAction;
 import de.tsl2.nano.collection.MapUtil;
+import de.tsl2.nano.core.AppLoader;
 import de.tsl2.nano.core.Environment;
 import de.tsl2.nano.core.ManagedException;
 import de.tsl2.nano.core.cls.BeanClass;
-import de.tsl2.nano.core.exception.Message;
+import de.tsl2.nano.core.execution.CompatibilityLayer;
 import de.tsl2.nano.core.log.LogFactory;
-import de.tsl2.nano.core.util.DateUtil;
 import de.tsl2.nano.core.util.FileUtil;
 import de.tsl2.nano.core.util.StringUtil;
-import de.tsl2.nano.execution.CompatibilityLayer;
 import de.tsl2.nano.execution.SystemUtil;
-import de.tsl2.nano.h5.configuration.BeanConfigurator;
-import de.tsl2.nano.h5.expression.Query;
-import de.tsl2.nano.h5.expression.QueryPool;
 import de.tsl2.nano.h5.expression.RuleExpression;
 import de.tsl2.nano.h5.expression.SQLExpression;
 import de.tsl2.nano.h5.navigation.EntityBrowser;
@@ -61,7 +53,6 @@ import de.tsl2.nano.h5.navigation.Workflow;
 import de.tsl2.nano.persistence.GenericLocalBeanContainer;
 import de.tsl2.nano.persistence.Persistence;
 import de.tsl2.nano.persistence.PersistenceClassLoader;
-import de.tsl2.nano.script.ScriptTool;
 import de.tsl2.nano.service.util.BeanContainerUtil;
 import de.tsl2.nano.serviceaccess.Authorization;
 import de.tsl2.nano.serviceaccess.IAuthorization;
@@ -91,7 +82,7 @@ public class NanoH5 extends NanoHTTPD {
     URL serviceURL;
     ClassLoader appstartClassloader;
 
-    private static final String DEGBUG_HTML_FILE = "application.html";
+    private static final String DEGBUG_HTML_FILE = AppLoader.getFileSystemPrefix() + "application.html";
     static final String START_PAGE = "Start";
     static final int OFFSET_FILTERLINES = 2;
 
@@ -440,8 +431,10 @@ public class NanoH5 extends NanoHTTPD {
             //TODO: show generation message before - get script exception from exception handler
             generateJarFile(jarFile);
             if (!new File(jarFile).exists()) {
-                throw new ManagedException("Couldn't generate bean jar file '" + jarFile
-                    + "' through script hibtools.xml! Please see log file for exceptions.");
+                throw new ManagedException(
+                    "Couldn't generate bean jar file '"
+                        + jarFile
+                        + "' through script hibtools.xml! Please see log file for exceptions.\nAs alternative you may select an existing bean-jar file in field \"JarFile\"");
             }
         } else if (selectedFile.isAbsolute()) {//copy it into the own classpath (to don't lock the file)
             if (!selectedFile.exists())

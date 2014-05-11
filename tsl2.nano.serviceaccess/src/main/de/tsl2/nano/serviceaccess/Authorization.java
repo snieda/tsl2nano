@@ -21,7 +21,6 @@ import de.tsl2.nano.core.Environment;
 import de.tsl2.nano.core.Messages;
 import de.tsl2.nano.core.log.LogFactory;
 import de.tsl2.nano.core.util.XmlUtil;
-import de.tsl2.nano.format.DefaultFormat;
 import de.tsl2.nano.serviceaccess.aas.principal.APermission;
 import de.tsl2.nano.serviceaccess.aas.principal.Role;
 import de.tsl2.nano.serviceaccess.aas.principal.UserPrincipal;
@@ -67,7 +66,11 @@ public class Authorization implements IAuthorization {
             subject.getPrincipals().add(new UserPrincipal(userName));
             if (!secure)
                 subject.getPrincipals().add(new Role("admin", new APermission("*", "*")));
-            XmlUtil.saveXml(permissions, subject);
+            try {
+                XmlUtil.saveXml(permissions, subject);
+            } catch (Exception e) {
+                LOG.error("Couldn't save authorization info in file '" + permissions + "'", e);
+            }
         }
         return new Authorization(subject);
     }

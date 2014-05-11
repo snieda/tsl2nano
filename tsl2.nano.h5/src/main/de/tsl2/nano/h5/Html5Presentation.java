@@ -11,7 +11,7 @@ package de.tsl2.nano.h5;
 
 import static de.tsl2.nano.bean.def.IBeanCollector.MODE_ASSIGNABLE;
 import static de.tsl2.nano.bean.def.IBeanCollector.MODE_MULTISELECTION;
-import static de.tsl2.nano.h5.HtmlUtil.*;
+import static de.tsl2.nano.h5.HtmlUtil.ALIGN_CENTER;
 import static de.tsl2.nano.h5.HtmlUtil.ALIGN_RIGHT;
 import static de.tsl2.nano.h5.HtmlUtil.ATTR_ACCESSKEY;
 import static de.tsl2.nano.h5.HtmlUtil.ATTR_ACTION;
@@ -83,7 +83,6 @@ import static de.tsl2.nano.h5.HtmlUtil.VAL_ALIGN_LEFT;
 import static de.tsl2.nano.h5.HtmlUtil.VAL_ALIGN_RIGHT;
 import static de.tsl2.nano.h5.HtmlUtil.VAL_FRM_SELF;
 import static de.tsl2.nano.h5.HtmlUtil.appendElement;
-import static de.tsl2.nano.h5.HtmlUtil.appendElements;
 import static de.tsl2.nano.h5.HtmlUtil.enable;
 import static de.tsl2.nano.h5.HtmlUtil.style;
 
@@ -377,7 +376,7 @@ public class Html5Presentation<T> extends BeanPresentationHelper<T> implements I
              * c2: center: Page-Title with image
              * c3: Page-Buttons
              */
-            Element row = appendElement(createGrid(body, "page.header.table", null, 3), TAG_ROW);
+            Element row = appendElement(createGrid(body, "page.header.table", "page.header.table", 3), TAG_ROW);
             Element c1 = appendElement(row, TAG_CELL);
             Element c2 = appendElement(row, TAG_CELL);
             String localDoc = Environment.getConfigPath() + "nano.h5.html";
@@ -433,7 +432,7 @@ public class Html5Presentation<T> extends BeanPresentationHelper<T> implements I
         appendElement(html, TAG_HEAD, ATTR_TITLE, "Nano-H5 Application");
 
         Element body =
-            appendElement(html, TAG_BODY, ATTR_ID, title);
+            appendElement(html, TAG_BODY, ATTR_ID, (!Util.isEmpty(title, true) ? title: "body"));
         if (interactive)
             HtmlUtil.appendAttributes(body, "background", "icons/spe.jpg", ATTR_STYLE,
                 STYLE_BACKGROUND_RADIAL_GRADIENT);
@@ -904,7 +903,7 @@ public class Html5Presentation<T> extends BeanPresentationHelper<T> implements I
             id,
             ATTR_TITLE,
             tooltip,
-            ATTR_TYPE,
+            enable(ATTR_TYPE, type != null),
             type,
             ATTR_ACCESSKEY,
             sc,
@@ -1175,7 +1174,7 @@ public class Html5Presentation<T> extends BeanPresentationHelper<T> implements I
                 (isOption ? enable(ATTR_CHECKED, (Boolean) beanValue.getValue()) : ATTR_VALUE),
                 (isOption ? "checked" : getValue(beanValue, type)),
                 ATTR_TITLE,
-                beanValue.getDescription() + (LOG.isDebugEnabled() ? "\n\n" + beanValue.toDebugString() : ""),
+                beanValue.getDescription() + (LOG.isDebugEnabled() ? "\n\n" + "<![CDATA[" + beanValue.toDebugString() + "]]>" : ""),
                 "tabindex",
                 p.layout("tabindex", ++currentTabIndex).toString(),
                 enable(ATTR_HIDDEN, !p.isVisible()),

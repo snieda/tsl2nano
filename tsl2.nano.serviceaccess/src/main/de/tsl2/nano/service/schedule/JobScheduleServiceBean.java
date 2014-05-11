@@ -13,7 +13,7 @@ import java.io.Serializable;
 
 import javax.ejb.Singleton;
 
-import de.tsl2.nano.execution.ICRunnable;
+import de.tsl2.nano.core.execution.ICRunnable;
 import de.tsl2.nano.serviceaccess.ServiceFactory;
 
 /**

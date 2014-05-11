@@ -22,6 +22,8 @@ import javax.xml.transform.stream.StreamResult;
 import org.w3c.dom.Attr;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
+import org.w3c.dom.Node;
+import org.w3c.dom.NodeList;
 
 import de.tsl2.nano.core.ManagedException;
 import de.tsl2.nano.core.util.Util;
@@ -157,7 +159,7 @@ public class HtmlUtil {
 
     public static final String STYLE_BACKGROUND_RADIAL_GRADIENT = "background: radial-gradient(#9999FF, #000000);";
     public static final String STYLE_BACKGROUND_LIGHTGRAY = "background: #CCCCCC;";
-    
+
     public static final String VAL_100PERCENT = "100%";
     public static final String VAL_FALSE = Boolean.FALSE.toString();
     public static final String VAL_TRUE = Boolean.TRUE.toString();
@@ -187,7 +189,7 @@ public class HtmlUtil {
     public static final String VAL_FRM_RIGHT = "FRAME_RIGHT";
     public static final String VAL_FRM_TOP = "FRAME_TOP";
     public static final String VAL_FRM_BOTTOM = "FRAME_BOTTOM";
-    
+
     public static final String XML_TAG_START = "\\<.*\\>";
     public static final String END_TAG = "/";
 
@@ -237,7 +239,7 @@ public class HtmlUtil {
             if (attributes[i] == null)
                 continue;
             Attr attr = doc.createAttribute((String) attributes[i]);
-            if (i < attributes.length - 1) {
+            if (i < attributes.length - 1 && attributes[i+1] != null) {
                 attr.setValue(Util.asString(attributes[i + 1]));
             }
             e.setAttributeNode(attr);
@@ -291,12 +293,35 @@ public class HtmlUtil {
             //create string from xml tree
             StringWriter sw = new StringWriter();
             StreamResult result = new StreamResult(sw);
+            //on android systems we have problems on null-nodes
+            deleteNullNode(doc.getDocumentElement());
             DOMSource source = new DOMSource(doc);
             trans.transform(source, result);
             return sw.toString();
         } catch (TransformerException e) {
             ManagedException.forward(e);
             return null;
+        }
+    }
+
+    /**
+     * workaround for android-problem on empty nodes. deleteNullNode
+     * 
+     * @param root
+     */
+    public static void deleteNullNode(Node root)
+    {
+        NodeList nl = root.getChildNodes();
+        for (int i = 0; i < nl.getLength(); i++)
+        {
+            if (nl.item(i).getNodeType() == Node.TEXT_NODE && nl.item(i).getNodeValue() == null)
+            {
+                nl.item(i).getParentNode().removeChild(nl.item(i));
+            }
+            else
+            {
+                deleteNullNode(nl.item(i));
+            }
         }
     }
 
@@ -311,6 +336,7 @@ public class HtmlUtil {
             return false;
         }
     }
+
     /**
      * containsXml
      * 
@@ -324,14 +350,20 @@ public class HtmlUtil {
     public static boolean containsHtml(String text) {
         return text.contains("<html>");
     }
+
     public static String createMessagePage(String msg) {
         return "<html><body>" + createMessage(msg, COLOR_RED) + "</body></html>";
     }
+
     public static String createMessage(String msg, String color) {
         return "<font color=\"" + color + "\"><pre>" + msg + "</pre></font>";
     }
 
     public static boolean isHtml(String asString) {
         return asString != null && (asString.contains("</") || asString.contains("/>"));
+    }
+    
+    public static String cdata(String data) {
+        return "<![CDATA[" + data + "]]>";
     }
 }
