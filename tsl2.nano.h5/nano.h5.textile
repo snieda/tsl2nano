@@ -1239,10 +1239,11 @@ Other restrictions on android:
 ## Changelog
 
 | Version | Date | Description |
-| 0.0.1 | 06.07.2013 | First alpha Version
-| 0.0.2 | 21.09.2013 | beta Version (full basic feature implementation)
-| 0.0.3 | 01.01.2014 | beta Version (basic features + authorization + workflows + rules)
-| 0.0.4 | 20.03.2014 | full featured version (replication, attribute- and beandef-extensions QueryResult, RuleAttribute, many refactorings)
+| 0.0.1 | 06.07.2013 | First alpha Version |
+| 0.0.2 | 21.09.2013 | beta Version (full basic feature implementation) |
+| 0.0.3 | 01.01.2014 | beta Version (basic features + authorization + workflows + rules) |
+| 0.0.4 | 20.03.2014 | full featured version (replication, attribute- and beandef-extensions QueryResult, RuleAttribute, many refactorings) |
+| 0.0.4b | 11.05.2014 | lots of corrections, partially working on android |
 
 ## TODOs
 
