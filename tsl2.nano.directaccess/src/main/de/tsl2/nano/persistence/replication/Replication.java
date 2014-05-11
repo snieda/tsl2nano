@@ -21,10 +21,11 @@ import org.apache.commons.logging.Log;
 
 import de.tsl2.nano.core.Environment;
 import de.tsl2.nano.core.ManagedException;
+import de.tsl2.nano.core.execution.CompatibilityLayer;
 import de.tsl2.nano.core.log.LogFactory;
 import de.tsl2.nano.core.util.FileUtil;
 import de.tsl2.nano.core.util.StringUtil;
-import de.tsl2.nano.execution.CompatibilityLayer;
+import de.tsl2.nano.core.util.XmlUtil;
 import de.tsl2.nano.persistence.Persistence;
 
 /**
@@ -62,9 +63,11 @@ public class Replication extends Persistence implements Runnable {
         database = "replication";
     }
 
+    @SuppressWarnings("static-access")
     public static Replication current() {
         if (Persistence.exists()) {
-            return (Replication) FileUtil.loadXml(getPath(FILE_REPLICATION_BEAN));
+            return Environment.get(XmlUtil.class).loadXml(getPath(FILE_MYPERSISTENCE_BEAN),
+                Replication.class);
         } else {
             return new Replication();
         }
@@ -76,7 +79,7 @@ public class Replication extends Persistence implements Runnable {
      * @param prop
      */
     @Override
-    protected void addPersistenceProperties(Persistence parent, Map<String, Object> prop) {
+    public void addPersistenceProperties(Persistence parent, Map<String, Object> prop) {
         database = "replication-" + parent.getConnectionUserName();
         prop.put("replication-unit", "replication");
         prop.put("replication.transaction-type", "RESOURCE_LOCAL");
@@ -108,7 +111,7 @@ public class Replication extends Persistence implements Runnable {
 
     public String save() throws IOException {
         FileUtil.removeToBackup(getPath(getBeanFileName()));
-        FileUtil.saveXml(this, getPath(getBeanFileName()));
+        Environment.get(XmlUtil.class).saveXml(getPath(getBeanFileName()), this);
         return null;
     }
 

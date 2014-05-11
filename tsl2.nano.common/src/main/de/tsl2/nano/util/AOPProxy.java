@@ -14,7 +14,7 @@ import java.lang.reflect.Method;
 import java.lang.reflect.Proxy;
 
 import de.tsl2.nano.core.cls.BeanClass;
-import de.tsl2.nano.execution.ICRunnable;
+import de.tsl2.nano.core.execution.ICRunnable;
 
 /**
  * simple proxy to enable aop like enhancement.

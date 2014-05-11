@@ -16,6 +16,8 @@ import java.util.Collections;
 import java.util.Comparator;
 import java.util.Set;
 
+import de.tsl2.nano.core.ManagedException;
+
 /**
  * The Set interface is a subgroup of the List interface - but they are distinguished in all implementations. sometimes,
  * on f.e. eclipse databdinding, you have to select your base implementation to work on sets or lists. This class
@@ -30,22 +32,7 @@ import java.util.Set;
 public class ListSet<E> extends ArrayList<E> implements Set<E> {
     /** serialVersionUID */
     private static final long serialVersionUID = -8997546499166739440L;
-    transient Comparator<E> comp = new Comparator() {
-
-        @Override
-        public int compare(Object o1, Object o2) {
-            if (o1 == null) {
-                return -1;
-            } else if (o2 == null) {
-                return 1;
-            } else if (o1.equals(o2)) {
-                return 0;
-            } else {
-                return (o1.toString().compareTo(o2.toString()));
-            }
-        }
-
-    };
+    transient Comparator<E> comp;
 
     /**
      * constructor
@@ -57,7 +44,7 @@ public class ListSet<E> extends ArrayList<E> implements Set<E> {
     /**
      * constructor - does not respect, that items may be equal
      */
-    public ListSet(E...items) {
+    public ListSet(E... items) {
         super(Arrays.asList(items));
     }
 
@@ -79,6 +66,41 @@ public class ListSet<E> extends ArrayList<E> implements Set<E> {
         super(initialCapacity);
     }
 
+    protected Comparator<E> comp() {
+        if (comp == null) {
+            comp = new Comparator<E>() {
+
+                @Override
+                public int compare(Object o1, Object o2) {
+                    if (o1 == null) {
+                        return -1;
+                    } else if (o2 == null) {
+                        return 1;
+                    } else if (o1.equals(o2)) {
+                        return 0;
+                    } else {
+                        return (o1.toString().compareTo(o2.toString()));
+                    }
+                }
+
+            };
+        }
+        return comp;
+    }
+
+    /**
+     * if your items don't implement {@link Comparable} and your don't want to use the default comparator provided by
+     * {@link #comp()} you can set your own - used by finding duplette through binary-search in
+     * {@link #removeDuplette(Object)}.
+     * 
+     * @param comp special comparator.
+     */
+    public void setComparator(Comparator<E> comp) {
+        if (this.comp != null)
+            ManagedException.illegalState(comp, this);
+        this.comp = comp;
+    }
+
     /**
      * {@inheritDoc}
      */
@@ -94,7 +116,7 @@ public class ListSet<E> extends ArrayList<E> implements Set<E> {
      * @param e
      */
     protected void removeDuplette(E e) {
-        final int i = Collections.binarySearch(this, e, comp);
+        final int i = Collections.binarySearch(this, e, comp());
         if (i > -1) {
             remove(i);
         }

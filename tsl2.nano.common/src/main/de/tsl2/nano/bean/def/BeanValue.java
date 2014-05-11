@@ -27,7 +27,6 @@ import java.util.UUID;
 
 import org.apache.commons.logging.Log;
 
-import tsl.FileUtil;
 import de.tsl2.nano.action.CommonAction;
 import de.tsl2.nano.action.IAction;
 import de.tsl2.nano.bean.BeanUtil;
@@ -43,6 +42,7 @@ import de.tsl2.nano.core.cls.BeanAttribute;
 import de.tsl2.nano.core.cls.BeanClass;
 import de.tsl2.nano.core.cls.IAttribute;
 import de.tsl2.nano.core.log.LogFactory;
+import de.tsl2.nano.core.util.FileUtil;
 import de.tsl2.nano.core.util.StringUtil;
 import de.tsl2.nano.core.util.Util;
 import de.tsl2.nano.messaging.ChangeEvent;

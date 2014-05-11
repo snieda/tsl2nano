@@ -27,12 +27,12 @@ import de.tsl2.nano.serviceaccess.IAuthorization;
 /**
  * see {@link GenericLocalServiceBean}.
  * 
- *             initializes the {@link BeanContainer} singelton, to use a hibernate session.
+ * initializes the {@link BeanContainer} singelton, to use an JPA-EntityManager provided by persistence-implementation.
  * 
  * @author Thomas Schneider, Thomas Schneider
  * @version $Revision$
  */
-@SuppressWarnings({"rawtypes", "unchecked", "serial"})
+@SuppressWarnings({ "rawtypes", "unchecked", "serial" })
 public abstract class GenericBeanContainer extends BeanContainerUtil {
     protected Map properties = new HashMap();
     protected IGenericService service;
@@ -67,7 +67,8 @@ public abstract class GenericBeanContainer extends BeanContainerUtil {
         IAction<Collection<?>> betweenFinder = new CommonAction<Collection<?>>() {
             @Override
             public Collection<?> action() {
-                return container.getGenService().findBetween(parameter[0], parameter[1], true, (Integer) parameter[2], (Integer) parameter[3]);
+                return container.getGenService().findBetween(parameter[0], parameter[1], true, (Integer) parameter[2],
+                    (Integer) parameter[3]);
             }
         };
         IAction<Collection<?>> queryFinder = new CommonAction<Collection<?>>() {
@@ -121,7 +122,7 @@ public abstract class GenericBeanContainer extends BeanContainerUtil {
         IAction permissionAction = new CommonAction() {
             @Override
             public Object action() {
-                return hasPermission((String) parameter[0], (String)(parameter.length > 1 ? parameter[1] : null));
+                return hasPermission((String) parameter[0], (String) (parameter.length > 1 ? parameter[1] : null));
             }
         };
         IAction persistableAction = new CommonAction() {
@@ -157,7 +158,7 @@ public abstract class GenericBeanContainer extends BeanContainerUtil {
     }
 
     protected abstract IGenericService getGenService();
-    
+
     public Object get(Object key) {
         return properties.get(key);
     }

@@ -14,6 +14,8 @@ import java.io.FileReader;
 import java.lang.reflect.Method;
 import java.util.Properties;
 
+import de.tsl2.nano.core.execution.ICRunnable;
+
 /**
  * Simple java main runner for {@link ICRunnable} implementations. Uses a {@link Properties} from file-load as arguments.
  * 

@@ -30,10 +30,10 @@ import de.tsl2.nano.collection.CollectionUtil;
 import de.tsl2.nano.core.Environment;
 import de.tsl2.nano.core.ManagedException;
 import de.tsl2.nano.core.cls.BeanClass;
+import de.tsl2.nano.core.execution.CompatibilityLayer;
 import de.tsl2.nano.core.log.LogFactory;
 import de.tsl2.nano.core.util.Util;
 import de.tsl2.nano.currency.CurrencyUtil;
-import de.tsl2.nano.execution.CompatibilityLayer;
 import de.tsl2.nano.util.NumberUtil;
 
 /**

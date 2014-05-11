@@ -13,12 +13,14 @@ import java.io.File;
 
 import org.apache.commons.logging.Log;
 
+import de.tsl2.nano.core.Environment;
 import de.tsl2.nano.core.ManagedException;
 import de.tsl2.nano.core.log.LogFactory;
 import de.tsl2.nano.core.util.FileUtil;
+import de.tsl2.nano.core.util.XmlUtil;
 
 /**
- * application cache to store simple data. uses apache common {@link ReferenceMap} to avoid out-of-memory errors.
+ * application cache to store simple data. uses an own {@link ReferenceMap} with weak keys to avoid out-of-memory errors.
  * 
  * @author Thomas Schneider
  * @version $Revision$
@@ -53,13 +55,14 @@ public class PersistentCache {
      * @param cachePath path without file name
      * @return new created instance
      */
+    @SuppressWarnings("static-access")
     public static PersistentCache createInstance(String cachePath) {
         assert self == null : "cache already initialized!";
         self = new PersistentCache();
         cacheFilePath = cachePath + "/tsl2nano-persistentcache.xml";
         try {
             if (new File(cacheFilePath).exists()) {
-                self.cache = (ReferenceMap) FileUtil.loadXml(cacheFilePath);
+                self.cache = Environment.get(XmlUtil.class).loadXml(cacheFilePath, ReferenceMap.class);
             }
         } catch (final Exception e) {
             ManagedException.forward(e);
@@ -79,11 +82,11 @@ public class PersistentCache {
     /**
      * {@inheritDoc}
      */
-    @SuppressWarnings("unchecked")
+    @SuppressWarnings({ "unchecked", "static-access" })
     public Object put(Object key, Object value) {
         final Object result = cache.put(key, value);
         try {
-            FileUtil.saveXml(cache, cacheFilePath);
+            Environment.get(XmlUtil.class).saveXml(cacheFilePath, cache);
         } catch (final Exception e) {
             ManagedException.forward(e);
         }
@@ -96,7 +99,7 @@ public class PersistentCache {
     public Object remove(Object key) {
         final Object result = cache.remove(key);
         try {
-            FileUtil.saveXml(cache, cacheFilePath);
+            Environment.get(XmlUtil.class).saveXml(cacheFilePath, cache);
         } catch (final Exception e) {
             ManagedException.forward(e);
         }

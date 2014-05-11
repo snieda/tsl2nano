@@ -12,6 +12,8 @@ package de.tsl2.nano.execution;
 import java.io.Serializable;
 import java.util.Map;
 
+import de.tsl2.nano.core.execution.IRunnable;
+
 /**
  * 
  * @author Tom

@@ -11,6 +11,8 @@ package de.tsl2.nano.execution;
 
 import java.io.Serializable;
 
+import de.tsl2.nano.core.execution.ICRunnable;
+
 /**
  * combines the two interfaces {@link ICRunnable} and {@link Runnable} to implement {@link ICRunnable}s usable by
  * {@link Thread}s.

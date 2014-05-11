@@ -3,6 +3,15 @@
 <!-- <persistence xmlns="http://java.sun.com/xml/ns/persistence" version="1.0">  -->
 	<persistence-unit name="${persistence-unit}" transaction-type="${transaction-type}">
 		<provider>${provider}</provider>
+		<!-- known providers (implementing javax.persistence.spi.PersistenceProvider):
+		Hibernate  : org.hibernate.ejb.HibernatePersistence 
+		OpenJPA    : org.apache.openjpa.persistence.PersistenceProviderImpl
+		EclipseLink: org.eclipse.persistence.jpa.PersistenceProvider
+		TopLink    : oracle.toplink.essentials.PersistenceProvider
+		Acme Pers. : com.acme.persistence
+		DataNucleus: org.datanucleus.api.jpa.PersistenceProviderImpl
+		 -->
+		 
 		<!-- JNDI name of the database resource to use -->
 		<!-- <jta-data-source>${jta-data-source}</jta-data-source> -->
 
@@ -34,14 +43,27 @@
 			<!-- <property name="org.hibernate.FlushMode" value="commit" />  -->
          	<!-- Hibernate End -->
 
-         	<!-- Glassfish Development with TopLink
+			<!-- Eclipse-Link and DataNucleus -->
+			<property name="javax.persistence.jdbc.driver" value="${connection.driver_class}"/>
+	        <property name="javax.persistence.jdbc.user" value="${connection.username}"/>
+	        <property name="javax.persistence.jdbc.url" value="${connection.url}"/>
+	        <property name="javax.persistence.jdbc.password" value="${connection.password}"/>
+	        
+	        <!-- OpenJPA -->
+	        <property name="openjpa.ConnectionURL" value="${connection.url}"/>
+		    <property name="openjpa.ConnectionDriverName" value="${connection.driver_class}"/>
+		    <property name="openjpa.ConnectionUserName" value="${connection.username}"/>
+		    <property name="openjpa.ConnectionPassword" value="${connection.password}"/>
+		    <property name="openjpa.Log" value="DefaultLevel=WARN, Tool=INFO"/>
+		    
+         	<!-- TopLink -->
             <property name="toplink.jdbc.driver" value="${connection.driver_class}"/>
             <property name="toplink.jdbc.url" value="${connection.url}"/>
             <property name="toplink.jdbc.user" value="${connection.username}"/>
             <property name="toplink.jdbc.password" value="${connection.password}"/>
             <property name="toplink.logging.level" value="FINE"/>
             <property name="toplink.weaving" value="false"/>
-            <property name="toplink.target-database" value="Oracle"/> -->
+            <property name="toplink.target-database" value="Oracle"/>
 			<!-- <property name="toplink.ddl-generation" value="drop-and-create-tables"/> -->
 			<!-- if you work with generated ids using sequences (used by AUTO mode, too), toplink
 			     needs the following database table:

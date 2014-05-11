@@ -14,8 +14,11 @@ import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.Date;
+import java.util.LinkedList;
+import java.util.List;
 import java.util.concurrent.TimeUnit;
 
+import de.tsl2.nano.collection.ListSet;
 import de.tsl2.nano.core.ManagedException;
 import de.tsl2.nano.util.NumberUtil;
 import de.tsl2.nano.util.Period;
@@ -918,6 +921,19 @@ public final class DateUtil {
         return q == QUARTERS.length ? 1 : q + 1;
     }
 
+    /**
+     * getQuarters
+     * @param dates dates to evaluate quarters for
+     * @return unique list of quarters, given by dates
+     */
+    public static final List<Date> getQuarters(Date...dates) {
+        List<Date> quarters = new ListSet<Date>();
+        for (int i = 0; i < dates.length; i++) {
+            quarters.add(getQuarter(getYear(dates[i]), QUARTERS[getCurrentQuarter(dates[i]) - 1]));
+        }
+        return quarters;
+    }
+    
     /**
      * getWeekNumber
      * 

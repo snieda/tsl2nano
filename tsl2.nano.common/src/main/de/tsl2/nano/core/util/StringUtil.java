@@ -43,6 +43,7 @@ public class StringUtil {
     /**
      * Does the same as substring, but considers outer encapsulating. means, it finds first match for 'from' it searches
      * the last match for 'to'.
+     * 
      * @param constrain if true and from and to are not null, returns null if from or to was not found.
      * @return outer enclosing match.
      */
@@ -69,7 +70,7 @@ public class StringUtil {
     public static String substring(String data, String from, String to, boolean last) {
         return substring(data, from, to, last, false);
     }
-    
+
     /**
      * Does the same as extract, but doesn't consider encapsulating (no regexp!).
      * 
@@ -94,7 +95,7 @@ public class StringUtil {
     public static String substring(String data, String from, String to, int start) {
         return substring(data, from, to, start, false);
     }
-    
+
     /**
      * extracts from from (exclusive) to to, beginning at index start. doesn't consider encapsulating (no regexp!).
      * 
@@ -389,16 +390,16 @@ public class StringUtil {
      */
     public static String insertProperties(String text, Map<? extends Object, Object> properties) {
         int i = 0;
+        Object value;
+        String vname;
         final StringBuffer t = new StringBuffer(text);
         final Set<? extends Object> keySet = properties.keySet();
         for (final Object name : keySet) {
-            final String vname = "${" + name + "}";
-            i = t.indexOf(vname);
-            if (i == -1) {
-                continue;
+            vname = "${" + name + "}";
+            while ((i = t.indexOf(vname)) != -1) {
+                value = properties.get(name);
+                t.replace(i, i + vname.length(), String.valueOf(value));
             }
-            final Object value = properties.get(name);
-            t.replace(i, i + vname.length(), String.valueOf(value));
         }
         return t.toString();
     }

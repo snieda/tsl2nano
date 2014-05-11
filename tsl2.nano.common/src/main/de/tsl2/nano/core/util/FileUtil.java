@@ -64,7 +64,7 @@ public class FileUtil {
         FileInputStream fis;
         try {
             fis = new FileInputStream(zip);
-            return new ZipInputStream(fis);
+            return new ZipInputStream(new BufferedInputStream(fis));
         } catch (FileNotFoundException e) {
             ManagedException.forward(e);
             return null;
@@ -215,11 +215,8 @@ public class FileUtil {
     }
 
     public static <O extends OutputStream> O readBytes(InputStream stream, O output) throws IOException {
-//      byte[] b = new byte[2048];
-        while (true) {
-            int r = stream.read();
-            if (r == -1)
-                break;
+        int r;
+        while ((r = stream.read()) != -1) {
             output.write(r);
         }
         return output;

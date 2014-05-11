@@ -23,9 +23,9 @@ import org.apache.commons.logging.Log;
 import de.tsl2.nano.bean.BeanUtil;
 import de.tsl2.nano.core.Environment;
 import de.tsl2.nano.core.Messages;
+import de.tsl2.nano.core.execution.CompatibilityLayer;
 import de.tsl2.nano.core.log.LogFactory;
 import de.tsl2.nano.core.util.StringUtil;
-import de.tsl2.nano.execution.CompatibilityLayer;
 
 /**
  * Default formatter for all objects used by all dynamicform components. Override this class to use special formatting

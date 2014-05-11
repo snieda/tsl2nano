@@ -150,6 +150,7 @@ public class GenericLocalServiceBean extends GenericReplicatingServiceBean {
          */
         Environment.assignClassloaderToCurrentThread();
         LOG.info("current threads classloader: " + Thread.currentThread().getContextClassLoader());
+        
         return Persistence.createEntityManagerFactory(persistenceUnitName).createEntityManager();
         // obtain the initial JNDI context
         // Context initCtx;

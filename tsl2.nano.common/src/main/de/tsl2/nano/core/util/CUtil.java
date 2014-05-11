@@ -30,30 +30,32 @@ public class CUtil extends ByteUtil {
 
     /**
      * includes check for nulls of o1 and o2.
+     * 
      * @param o1 object or null
      * @param o2 object or null
      * @return see {@link Comparable#compareTo(Object)}
      */
-    public <T extends Object & Comparable<? super T>>int compareTo(T o1, T o2) {
+    public <T extends Object & Comparable<? super T>> int compareTo(T o1, T o2) {
         return o1 == null ? o2 == null ? 0 : -1 : o2 == null ? 1 : o1.compareTo(o2);
     }
-    
+
     /**
      * compareTo
+     * 
      * @param o
      * @return
      */
-    public <T extends Object & Comparable<? super T>>int compareTo(T... o) {
+    public <T extends Object & Comparable<? super T>> int compareTo(T... o) {
         assert o.length % 2 == 0 : "array must contain object pairs";
         int c;
-        for (int i = 0; i < o.length; i+=2) {
-            c = compareTo(o[i], o[i+1]);
+        for (int i = 0; i < o.length; i += 2) {
+            c = compareTo(o[i], o[i + 1]);
             if (c != 0)
                 return c;
         }
         return 0;
     }
-    
+
     /**
      * evaluates the minimum of all values
      * 
@@ -89,6 +91,7 @@ public class CUtil extends ByteUtil {
 
     /**
      * getDelta
+     * 
      * @param values
      * @return
      */
@@ -111,8 +114,8 @@ public class CUtil extends ByteUtil {
             T to1,
             T from2,
             T to2) {
-                return from1.compareTo(to2) <= 0 && from2.compareTo(to1) <= 0;
-            }
+        return from1.compareTo(to2) <= 0 && from2.compareTo(to1) <= 0;
+    }
 
     /**
      * includes
@@ -128,8 +131,21 @@ public class CUtil extends ByteUtil {
             T to1,
             T from2,
             T to2) {
-                return from1.compareTo(from2) <= 0 && to1.compareTo(to2) >= 0;
-            }
+        return from1.compareTo(from2) <= 0 && to1.compareTo(to2) >= 0;
+    }
+
+    /**
+     * between
+     * 
+     * @param src value to check
+     * @param from min-value
+     * @param to max-value
+     * @return
+     */
+    public static final <T extends Object & Comparable<? super T>> boolean between(T src,
+            T from, T to) {
+        return from.compareTo(src) <= 0 && to.compareTo(src) >= 0;
+    }
 
     /**
      * isLower

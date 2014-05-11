@@ -12,8 +12,10 @@ package de.tsl2.nano.collection;
 import java.io.File;
 import java.util.Hashtable;
 
+import de.tsl2.nano.core.Environment;
 import de.tsl2.nano.core.ManagedException;
 import de.tsl2.nano.core.util.FileUtil;
+import de.tsl2.nano.core.util.XmlUtil;
 
 /**
  * simple base class for a stored object as singelton.
@@ -46,7 +48,7 @@ public class PersistableSingelton extends Hashtable {
         if (self == null) {
             final File f = new File(getStorePath());
             if (f.exists()) {
-                self = (PersistableSingelton) FileUtil.load(getStorePath());
+                self = Environment.get(XmlUtil.class).loadXml(getStorePath(), PersistableSingelton.class);
             } else {
                 self = new PersistableSingelton();
             }
@@ -77,7 +79,7 @@ public class PersistableSingelton extends Hashtable {
      */
     public void save() {
         try {
-            FileUtil.saveXml(this, getStorePath());
+            Environment.get(XmlUtil.class).saveXml(getStorePath(), this);
         } catch (final Exception e) {
             ManagedException.forward(e);
         }

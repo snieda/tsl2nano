@@ -7,10 +7,10 @@
  * 
  * Copyright: (c) Thomas Schneider 2013, all rights reserved
  */
-package de.tsl2.nano.execution;
+package de.tsl2.nano.core.execution;
 
-import java.util.Hashtable;
 import java.io.Serializable;
+import java.util.Hashtable;
 import java.util.Map;
 
 import org.apache.commons.logging.Log;
@@ -30,6 +30,7 @@ import de.tsl2.nano.core.util.StringUtil;
  * @author Thomas Schneider
  * @version $Revision$
  */
+@SuppressWarnings("rawtypes")
 public class CompatibilityLayer {
     private static final Log LOG = LogFactory.getLog(CompatibilityLayer.class);
 
@@ -192,7 +193,7 @@ public class CompatibilityLayer {
             Thread.currentThread().getContextClassLoader().loadClass(className);
             return true;
         } catch (ClassNotFoundException e) {
-            return true;
+            return false;
         }
     }
 }

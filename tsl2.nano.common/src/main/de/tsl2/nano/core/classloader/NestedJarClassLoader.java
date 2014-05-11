@@ -9,6 +9,7 @@
  */
 package de.tsl2.nano.core.classloader;
 
+import java.io.File;
 import java.io.InputStream;
 import java.net.URL;
 import java.net.URLStreamHandlerFactory;
@@ -95,6 +96,8 @@ public class NestedJarClassLoader extends LibClassLoader {
         } catch (ClassNotFoundException e) {
             return findClassInNestedJar(name);
         } catch (NoClassDefFoundError e) {
+            return null;
+        } catch (NullPointerException e) {
             return null;
         }
     }
@@ -186,7 +189,7 @@ public class NestedJarClassLoader extends LibClassLoader {
     private String[] getNestedJars() {
         if (hasRootJar && nestedJars == null) {
             String rootPath = getRootJarPath();
-            if (rootPath != null) {
+            if (rootPath != null && new File(rootPath).isFile()) {
                 hasRootJar = true;
                 nestedJars = getNestedJars(rootPath);
                 LOG.info("current jar: " + rootPath

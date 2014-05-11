@@ -145,7 +145,7 @@ public class Profiler {
      * 
      * @return used = (total - free)
      */
-    private static final long getUsedMem() {
+    public static final long getUsedMem() {
         return Runtime.getRuntime().totalMemory() - Runtime.getRuntime().freeMemory();
     }
 

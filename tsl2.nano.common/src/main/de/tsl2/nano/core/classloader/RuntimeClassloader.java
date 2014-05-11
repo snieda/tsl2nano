@@ -15,6 +15,10 @@ import java.net.MalformedURLException;
 import java.net.URL;
 import java.net.URLClassLoader;
 import java.net.URLStreamHandlerFactory;
+import java.security.AllPermission;
+import java.security.CodeSource;
+import java.security.PermissionCollection;
+import java.security.Permissions;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.LinkedList;
@@ -69,6 +73,21 @@ public class RuntimeClassloader extends URLClassLoader {
         super(urls, parent, factory);
     }
 
+    @Override
+    protected PermissionCollection getPermissions(CodeSource codesource) {
+        //Workaround for NullPoiner in URLClassLoader in Dalvik Maschine (Android)
+        PermissionCollection permissions;
+        try {
+            permissions = super.getPermissions(codesource);
+        } catch (Exception ex) {
+            LOG.error("error on calling super.getPermissions() - now setting AllPermissions ;-)", ex);
+            permissions = new Permissions();
+            //TODO: check the real needed permissions
+            permissions.add(new AllPermission());
+        }
+        return permissions;
+    }
+
     /**
      * {@inheritDoc}
      */
@@ -102,7 +121,7 @@ public class RuntimeClassloader extends URLClassLoader {
             return null;
         }
     }
-    
+
     /**
      * adds the given file-path to the classloader and evaluates all bean classes from given jar
      * 
