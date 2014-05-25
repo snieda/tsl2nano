@@ -9,5 +9,6 @@
 	<classpathentry combineaccessrules="false" kind="src" path="/tsl2.nano.common"/>
 	<classpathentry combineaccessrules="false" kind="src" path="/tsl2.nano.serviceaccess"/>
 	<classpathentry combineaccessrules="false" kind="src" path="/tsl2.nano.incubation"/>
+	<classpathentry kind="lib" path="lib/avaje-ebeanorm-3.3.2.jar"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>

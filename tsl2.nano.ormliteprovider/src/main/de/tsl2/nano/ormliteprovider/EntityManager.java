@@ -2,25 +2,19 @@
  * File: $HeadURL$
  * Id  : $Id$
  * 
- * created by: ts
- * created on: 08.09.2013
+ * created by: Tom
+ * created on: 13.05.2014
  * 
- * Copyright: (c) Thomas Schneider 2013, all rights reserved
+ * Copyright: (c) Thomas Schneider 2014, all rights reserved
  */
 package de.tsl2.nano.ormliteprovider;
 
 import java.sql.SQLException;
+import java.util.LinkedHashMap;
+import java.util.List;
 import java.util.Map;
 
-import javax.persistence.EntityManagerFactory;
-import javax.persistence.EntityTransaction;
-import javax.persistence.FlushModeType;
-import javax.persistence.LockModeType;
-import javax.persistence.Query;
 import javax.persistence.TypedQuery;
-import javax.persistence.criteria.CriteriaBuilder;
-import javax.persistence.criteria.CriteriaQuery;
-import javax.persistence.metamodel.Metamodel;
 
 import org.apache.commons.logging.Log;
 
@@ -31,114 +25,68 @@ import com.j256.ormlite.support.ConnectionSource;
 
 import de.tsl2.nano.core.ManagedException;
 import de.tsl2.nano.core.log.LogFactory;
+import de.tsl2.nano.core.util.StringUtil;
+import de.tsl2.nano.persistence.provider.NanoEntityManagerFactory;
 
 /**
+ * reduced OrmLite jpa persistence-provider extending {@link NanoEntityManagerFactory}.
  * 
- * @author ts
+ * @author Tom
  * @version $Revision$
  */
-public class EntityManager implements javax.persistence.EntityManager {
-    Map props;
-    ConnectionSource connectionSource;
+@SuppressWarnings({ "rawtypes", "unchecked" })
+public class EntityManager extends NanoEntityManagerFactory.AbstractEntityManager {
     private static final Log LOG = LogFactory.getLog(EntityManager.class);
 
+    ConnectionSource connectionSource;
+
+    public EntityManager() {
+        this(new LinkedHashMap());
+    }
+    
     /**
      * constructor
      * 
      * @param props
      */
     public EntityManager(Map props) {
-        super();
-        this.props = props;
+        NanoEntityManagerFactory.instance().super(props);
         try {
-            connectionSource = new JdbcConnectionSource((String) props.get("jdbc.url"));
+            connectionSource =
+                new JdbcConnectionSource((String) props.get("jdbc.url"), (String) props.get("jdbc.user"),
+                    (String) props.get("jdbc.passwd"));
             LOG.info("New Entitymanager for ORMLite created");
         } catch (SQLException e) {
             ManagedException.forward(e);
         }
     }
 
-    private final <T> Dao<Class<T>, Object> dao(Class<T> type) {
-        try {
-            return DaoManager.createDao(connectionSource, type);
-        } catch (SQLException e) {
-            ManagedException.forward(e);
-            return null;
-        }
-    }
-    
     @Override
-    public void clear() {
-        // TODO Auto-generated method stub
+    public <X> TypedQuery<X> createQuery(final String qstr, final Class<X> type) {
+        return NanoEntityManagerFactory.instance().new AbstractQuery() {
+            @Override
+            public List getResultList() {
+                try {
+                    Class t = type;
+                    if (type == null || Object.class.isAssignableFrom(type))
+                        t = evaluateResultType(qstr);
+                    return dao(t).queryRaw(qstr).getResults();
+                } catch (SQLException e) {
+                    ManagedException.forward(e);
+                    return null;
+                }
+            }
 
-    }
-
-    @Override
-    public void close() {
-        try {
-            connectionSource.close();
-        } catch (SQLException e) {
-            ManagedException.forward(e);
-        }
-    }
-
-    @Override
-    public boolean contains(Object arg0) {
-        return false;
-    }
-
-    @Override
-    public Query createNamedQuery(String arg0) {
-        // TODO Auto-generated method stub
-        return null;
-    }
-
-    @Override
-    public <T> TypedQuery<T> createNamedQuery(String arg0, Class<T> arg1) {
-        // TODO Auto-generated method stub
-        return null;
-    }
-
-    @Override
-    public Query createNativeQuery(String arg0) {
-        // TODO Auto-generated method stub
-        return null;
-    }
-
-    @Override
-    public Query createNativeQuery(String arg0, Class arg1) {
-        // TODO Auto-generated method stub
-        return null;
-    }
-
-    @Override
-    public Query createNativeQuery(String arg0, String arg1) {
-        // TODO Auto-generated method stub
-        return null;
-    }
-
-    @Override
-    public Query createQuery(String arg0) {
-        // TODO Auto-generated method stub
-        return null;
-    }
-
-    @Override
-    public <T> TypedQuery<T> createQuery(CriteriaQuery<T> arg0) {
-        // TODO Auto-generated method stub
-        return null;
-    }
-
-    @Override
-    public <T> TypedQuery<T> createQuery(String arg0, Class<T> arg1) {
-        // TODO Auto-generated method stub
-        return null;
-    }
-
-    @Override
-    public void detach(Object arg0) {
-        // TODO Auto-generated method stub
-
+            @Override
+            public int executeUpdate() {
+                try {
+                    return dao(type).updateRaw(qstr);
+                } catch (SQLException e) {
+                    ManagedException.forward(e);
+                    return -1;
+                }
+            }
+        };
     }
 
     @Override
@@ -152,142 +100,13 @@ public class EntityManager implements javax.persistence.EntityManager {
     }
 
     @Override
-    public <T> T find(Class<T> arg0, Object arg1, Map<String, Object> arg2) {
-        // TODO Auto-generated method stub
-        return null;
-    }
-
-    @Override
-    public <T> T find(Class<T> arg0, Object arg1, LockModeType arg2) {
-        // TODO Auto-generated method stub
-        return null;
-    }
-
-    @Override
-    public <T> T find(Class<T> arg0, Object arg1, LockModeType arg2, Map<String, Object> arg3) {
-        // TODO Auto-generated method stub
-        return null;
-    }
-
-    @Override
-    public void flush() {
-        // TODO Auto-generated method stub
-
-    }
-
-    @Override
-    public CriteriaBuilder getCriteriaBuilder() {
-        // TODO Auto-generated method stub
-        return null;
-    }
-
-    @Override
-    public Object getDelegate() {
-        // TODO Auto-generated method stub
-        return null;
-    }
-
-    @Override
-    public EntityManagerFactory getEntityManagerFactory() {
-        // TODO Auto-generated method stub
-        return null;
-    }
-
-    @Override
-    public FlushModeType getFlushMode() {
-        // TODO Auto-generated method stub
-        return null;
-    }
-
-    @Override
-    public LockModeType getLockMode(Object arg0) {
-        // TODO Auto-generated method stub
-        return null;
-    }
-
-    @Override
-    public Metamodel getMetamodel() {
-        // TODO Auto-generated method stub
-        return null;
-    }
-
-    @Override
-    public Map<String, Object> getProperties() {
-        // TODO Auto-generated method stub
-        return null;
-    }
-
-    @Override
-    public <T> T getReference(Class<T> arg0, Object arg1) {
-        // TODO Auto-generated method stub
-        return null;
-    }
-
-    @Override
-    public EntityTransaction getTransaction() {
-        // TODO Auto-generated method stub
-        return null;
-    }
-
-    @Override
-    public boolean isOpen() {
-        return connectionSource.isOpen();
-    }
-
-    @Override
-    public void joinTransaction() {
-        // TODO Auto-generated method stub
-
-    }
-
-    @Override
-    public void lock(Object arg0, LockModeType arg1) {
-        // TODO Auto-generated method stub
-
-    }
-
-    @Override
-    public void lock(Object arg0, LockModeType arg1, Map<String, Object> arg2) {
-        // TODO Auto-generated method stub
-
-    }
-
-    @Override
     public <T> T merge(T arg0) {
         try {
             dao(arg0.getClass()).commit(connectionSource.getReadWriteConnection());
         } catch (SQLException e) {
             ManagedException.forward(e);
-        }        return null;
-    }
-
-    @Override
-    public void persist(Object arg0) {
-        merge(arg0);
-    }
-
-    @Override
-    public void refresh(Object arg0) {
-        // TODO Auto-generated method stub
-
-    }
-
-    @Override
-    public void refresh(Object arg0, Map<String, Object> arg1) {
-        // TODO Auto-generated method stub
-
-    }
-
-    @Override
-    public void refresh(Object arg0, LockModeType arg1) {
-        // TODO Auto-generated method stub
-
-    }
-
-    @Override
-    public void refresh(Object arg0, LockModeType arg1, Map<String, Object> arg2) {
-        // TODO Auto-generated method stub
-
+        }
+        return null;
     }
 
     @Override
@@ -300,21 +119,65 @@ public class EntityManager implements javax.persistence.EntityManager {
     }
 
     @Override
-    public void setFlushMode(FlushModeType arg0) {
-        // TODO Auto-generated method stub
-
+    public void detach(Object arg0) {
+        Dao dao = dao(arg0.getClass());
+        try {
+            dao.getObjectCache().remove(arg0.getClass(), dao.extractId(arg0));
+        } catch (SQLException e) {
+            ManagedException.forward(e);
+        }
     }
 
     @Override
-    public void setProperty(String arg0, Object arg1) {
-        // TODO Auto-generated method stub
-
+    public void refresh(Object arg0) {
+        Dao dao = dao(arg0.getClass());
+        try {
+            dao.refresh(arg0);
+        } catch (SQLException e) {
+            ManagedException.forward(e);
+        }
     }
 
     @Override
-    public <T> T unwrap(Class<T> arg0) {
-        // TODO Auto-generated method stub
-        return null;
+    public boolean isOpen() {
+        return connectionSource.isOpen();
+    }
+
+    @Override
+    public void close() {
+        try {
+            connectionSource.close();
+        } catch (SQLException e) {
+            ManagedException.forward(e);
+        }
+    }
+
+    @Override
+    public boolean contains(Object arg0) {
+        Dao dao = dao(arg0.getClass());
+        try {
+            return dao.getObjectCache().get(arg0.getClass(), dao.extractId(arg0)) != null;
+        } catch (SQLException e) {
+            ManagedException.forward(e);
+            return false;
+        }
+    }
+
+    @Override
+    public void clear() {
+        DaoManager.clearCache();
+    }
+
+    private final <T> Dao dao(Class<T> type) {
+        try {
+            Dao dao = DaoManager.lookupDao(connectionSource, type);
+            if (dao == null)
+                dao = DaoManager.createDao(connectionSource, type);
+            return dao;
+        } catch (Exception e) {
+            ManagedException.forward(e);
+            return null;
+        }
     }
 
 }

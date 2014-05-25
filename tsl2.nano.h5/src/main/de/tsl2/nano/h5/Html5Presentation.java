@@ -127,6 +127,7 @@ import de.tsl2.nano.bean.def.ValueExpressionFormat;
 import de.tsl2.nano.bean.def.ValueGroup;
 import de.tsl2.nano.collection.CollectionUtil;
 import de.tsl2.nano.collection.MapUtil;
+import de.tsl2.nano.core.AppLoader;
 import de.tsl2.nano.core.Environment;
 import de.tsl2.nano.core.ISession;
 import de.tsl2.nano.core.ManagedException;
@@ -274,8 +275,8 @@ public class Html5Presentation<T> extends BeanPresentationHelper<T> implements I
                     public Object action() throws Exception {
                         String dir = Environment.getConfigPath();
                         //the common-jar will be used by ant-scripts...
-                        Environment.saveResourceToFileSystem("tsl2.nano.common.1.1.0.jar");
-                        Environment.saveResourceToFileSystem("tsl2.nano.incubation.0.0.4.jar");
+                        Environment.saveResourceToFileSystem(NanoH5.JAR_COMMON);
+                        Environment.saveResourceToFileSystem(NanoH5.JAR_INCUBATION);
                         FileUtil.extract("tsl2.nano.h5.sample.jar", dir, null);
                         return "Sample code and database created. Please re-start application!";
                     }
@@ -432,7 +433,7 @@ public class Html5Presentation<T> extends BeanPresentationHelper<T> implements I
         appendElement(html, TAG_HEAD, ATTR_TITLE, "Nano-H5 Application");
 
         Element body =
-            appendElement(html, TAG_BODY, ATTR_ID, (!Util.isEmpty(title, true) ? title: "body"));
+            appendElement(html, TAG_BODY, ATTR_ID, (!Util.isEmpty(title, true) ? title : "body"));
         if (interactive)
             HtmlUtil.appendAttributes(body, "background", "icons/spe.jpg", ATTR_STYLE,
                 STYLE_BACKGROUND_RADIAL_GRADIENT);
@@ -570,7 +571,13 @@ public class Html5Presentation<T> extends BeanPresentationHelper<T> implements I
             Collection<BeanValue<?>> beanValues,
             Collection<IAction> actions,
             boolean interactive) {
-        int columns = p.layout(L_GRIDWIDTH, Environment.get("layout.default.columncount", 3));
+        int maxrows = Environment.get("layout.default.maxrowcount", 25);
+        int maxcols =
+            p.layout(L_GRIDWIDTH, Environment.get("layout.default.columncount", (AppLoader.isDalvik() ? 3 : 9)));
+
+        int columns = (int) Math.ceil(beanValues.size() / (float) maxrows) * 3;
+        columns = columns > maxcols ? maxcols : columns;
+
         parent = interactive ? createExpandable(parent, p.getDescription()) : parent;
         Element panel = createGrid(parent, Environment.translate("tsl2nano.input", false), "field.panel", columns);
         //set layout and constraints into the grid
@@ -1148,39 +1155,42 @@ public class Html5Presentation<T> extends BeanPresentationHelper<T> implements I
             String type = getType(beanValue);
             boolean multiLineText = isMultiline(p);
             boolean isOption = "checkbox".equals(type);
-            input = appendElement(cell,
-                multiLineText ? TAG_TEXTAREA : TAG_INPUT,
-                /*content(getSuffix(regexpFormat)),*/
-                ATTR_TYPE,
-                type,
-                ATTR_ID,
-                beanValue.getId(),
-                ATTR_NAME,
-                beanValue.getName(),
-                ATTR_PATTERN,
-                regexpFormat != null ? regexpFormat.getPattern() : Environment.get("default.pattern.regexp", ".*"),
-                ATTR_STYLE,
-                getTextAlignmentAsStyle(p.getStyle()),
-                ATTR_SIZE,/* 'width' doesn't work, so we set the displaying char-size */
-                "50",
-                ATTR_WIDTH,
-                "250",
-                ATTR_MIN,
-                StringUtil.toString(beanValue.getConstraint().getMinimum()),
-                ATTR_MAX,
-                StringUtil.toString(beanValue.getConstraint().getMaximum()),
-                ATTR_MAXLENGTH,
-                (beanValue.length() > 0 ? String.valueOf(beanValue.length()) : String.valueOf(Integer.MAX_VALUE)),
-                (isOption ? enable(ATTR_CHECKED, (Boolean) beanValue.getValue()) : ATTR_VALUE),
-                (isOption ? "checked" : getValue(beanValue, type)),
-                ATTR_TITLE,
-                beanValue.getDescription() + (LOG.isDebugEnabled() ? "\n\n" + "<![CDATA[" + beanValue.toDebugString() + "]]>" : ""),
-                "tabindex",
-                p.layout("tabindex", ++currentTabIndex).toString(),
-                enable(ATTR_HIDDEN, !p.isVisible()),
-                enable(ATTR_DISABLED, !interactive || !p.getEnabler().isActive()),
-                enable(ATTR_READONLY, !interactive || !p.getEnabler().isActive()),
-                enable(ATTR_REQUIRED, !beanValue.nullable()));
+            input =
+                appendElement(
+                    cell,
+                    multiLineText ? TAG_TEXTAREA : TAG_INPUT,
+                    /*content(getSuffix(regexpFormat)),*/
+                    ATTR_TYPE,
+                    type,
+                    ATTR_ID,
+                    beanValue.getId(),
+                    ATTR_NAME,
+                    beanValue.getName(),
+                    ATTR_PATTERN,
+                    regexpFormat != null ? regexpFormat.getPattern() : Environment.get("default.pattern.regexp", ".*"),
+                    ATTR_STYLE,
+                    getTextAlignmentAsStyle(p.getStyle()),
+                    ATTR_SIZE,/* 'width' doesn't work, so we set the displaying char-size */
+                    "50",
+                    ATTR_WIDTH,
+                    "250",
+                    ATTR_MIN,
+                    StringUtil.toString(beanValue.getConstraint().getMinimum()),
+                    ATTR_MAX,
+                    StringUtil.toString(beanValue.getConstraint().getMaximum()),
+                    ATTR_MAXLENGTH,
+                    (beanValue.length() > 0 ? String.valueOf(beanValue.length()) : String.valueOf(Integer.MAX_VALUE)),
+                    (isOption ? enable(ATTR_CHECKED, (Boolean) beanValue.getValue()) : ATTR_VALUE),
+                    (isOption ? "checked" : getValue(beanValue, type)),
+                    ATTR_TITLE,
+                    beanValue.getDescription()
+                        + (LOG.isDebugEnabled() ? "\n\n" + "<![CDATA[" + beanValue.toDebugString() + "]]>" : ""),
+                    "tabindex",
+                    p.layout("tabindex", ++currentTabIndex).toString(),
+                    enable(ATTR_HIDDEN, !p.isVisible()),
+                    enable(ATTR_DISABLED, !interactive || !p.getEnabler().isActive()),
+                    enable(ATTR_READONLY, !interactive || !p.getEnabler().isActive()),
+                    enable(ATTR_REQUIRED, !beanValue.nullable()));
 
             if (multiLineText) {
                 HtmlUtil.appendAttributes(input, ATTR_ROWS, p.layout("rows", "5"), ATTR_COLS, p.layout("cols", "50"),

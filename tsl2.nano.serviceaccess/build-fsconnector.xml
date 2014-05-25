@@ -1,14 +1,16 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
 <project basedir="." default="usage" name="fs_connector">
 	<property name="bdir" value="../tsl2.nano.serviceaccess" />
-	<property name="module.name" value="fs-connector" />
+	<property name="module.name" value="tsl2.nano.fs-connector-client" />
 	<property name="src.dir" value="${bdir}/src/fs-connector" />
 	<property name="bin.dir" value="${bdir}/fs-connector/bin" />
 	<!-- <import file="../kion.shared/src/resources/project.properties" /> -->
-	<import file="../tsl2nano.common/common.xml" />
+	<import file="../tsl2.nano.common/common.xml" />
 
 	<!-- <import file="../kion.${appserver.name}/build-jboss.xml" /> -->
 
+	<property name="server.deploy.dir" value="${bdir}/${target.dir}" />
+	
 	<target name="usage" depends="common.usage">
 		<echo>Targets:
 	deploy.fsconnector           - deploy the RAR to ${kion.server.dir}
@@ -22,11 +24,11 @@
 			</fileset>
 		</path>
 		<path id="common.lib.path">
-			<fileset dir="../tsl2nano.common/lib">
+			<fileset dir="../tsl2.nano.common/lib">
 				<include name="**/*.jar"/>
 			</fileset>
 		</path>
-		<dirset dir="../tsl2nano.common/bin" />
+		<dirset dir="../tsl2.nano.common/bin" />
 	</path>
 	
 	<target name="mkdirs" description="creates bin and dist directories">
@@ -52,13 +54,13 @@
 			<metainf dir="${src.dir}/META-INF" />
 			<fileset dir="${bin.dir}" />
 			<fileset file="${bdir}/${target.dir}/${module.name}.properties" />
-			<fileset dir="../tsl2nano.common/lib">
+			<fileset dir="../tsl2.nano.common/lib">
 				<include name="commons-io-*.jar"/>
 				<include name="commons-logging-*.jar"/>
 				<exclude name="*sources.jar"/>
 			</fileset>
 		</jar>
-		<jar destfile="${bdir}/${dist.dir}/fs-connector-client.jar" manifest="${bdir}/${target.dir}/MANIFEST.MF">
+		<jar destfile="${bdir}/${dist.dir}/${module.name}.jar" manifest="${bdir}/${target.dir}/MANIFEST.MF">
 			<fileset dir="${bin.dir}" includes="**/*.class" />
 		</jar>
 	</target>

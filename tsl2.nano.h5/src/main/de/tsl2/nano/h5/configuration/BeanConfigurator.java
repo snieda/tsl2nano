@@ -18,9 +18,12 @@ import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 
+import tsl.ui.INavigator;
+
 import de.tsl2.nano.action.CommonAction;
 import de.tsl2.nano.bean.def.AttributeDefinition;
 import de.tsl2.nano.bean.def.Bean;
+import de.tsl2.nano.bean.def.BeanCollector;
 import de.tsl2.nano.bean.def.BeanDefinition;
 import de.tsl2.nano.bean.def.CollectionExpressionFormat;
 import de.tsl2.nano.bean.def.Constraint;
@@ -34,6 +37,7 @@ import de.tsl2.nano.core.Environment;
 import de.tsl2.nano.core.cls.IAttribute;
 import de.tsl2.nano.core.util.Util;
 import de.tsl2.nano.h5.Html5Presentable;
+import de.tsl2.nano.h5.navigation.Workflow;
 import de.tsl2.nano.util.PrivateAccessor;
 
 /**
@@ -222,12 +226,25 @@ public class BeanConfigurator<T> implements Serializable {
         defAccessor.set("isdefault", false);
         def.saveDefinition();
         Environment.removeService(BeanConfigurator.class);
+        
+        /*
+         * refresh all beans
+         */
+        Bean.clearCache();
+
         //return null to let the session-navigation return to the last element.
         return null;
     }
 
     public Object actionReset() {
+        defAccessor.set("isdefault", true);
         def.deleteDefinition();
+        Environment.removeService(BeanConfigurator.class);
+        /*
+         * refresh all beans
+         */
+        Bean.clearCache();
+
         return null;
     }
 

@@ -64,6 +64,14 @@ tested project-environments:
 
 this software should provide a fast way to create a standard application through a database (or class-) model. through a complete set of configuration possibilities, a user may fit this application for his requirements. respecting a small set of rules, a software-developer is able to extend that application to do more specifics.
 
+#### It is a full stack framework, but you can use it for other simple use cases:
+* as an entity browser or editor
+* as an JPQL or SQL statement tester with the integrated *ScriptTool*
+* as a test base to check your model on different jpa persistence providers like *hibernate*, *elcipselink*, *openjpa* and *datanucleus*. you can switch between them with three mouseclicks.
+* as a quick solution to generate your entity beans through the given database connection and to test that model.
+
+...all available without any application server!
+
 ### What this framework is not intended to be
 
 * the web-application mode is not designed or tested for big data transfers or high network traffics.
@@ -98,17 +106,19 @@ For more indirect dependencies, have a look at chapter _Dependencies_.
 
 At the moment, tested with JPA 2.0 providers, the following providers are known to implement *javax.persistence.spi.PersistenceProvider*:
 
-* Hibernate  : _org.hibernate.ejb.HibernatePersistence_
-* OpenJPA    : _org.apache.openjpa.persistence.PersistenceProviderImpl_
-* EclipseLink: _org.eclipse.persistence.jpa.PersistenceProvider_
-* TopLink    : _oracle.toplink.essentials.PersistenceProvider_
-* Acme Pers. : _com.acme.persistence_
-* DataNucleus: _org.datanucleus.api.jpa.PersistenceProviderImpl_
+* [Hibernate  ]: _org.hibernate.ejb.HibernatePersistence_
+* [OpenJPA    ]: http://openjpa.apache.org: _org.apache.openjpa.persistence.PersistenceProviderImpl_
+* [EclipseLink]: http://www.eclipse.org/eclipselink _org.eclipse.persistence.jpa.PersistenceProvider_
+* [TopLink    ]: _oracle.toplink.essentials.PersistenceProvider_
+* [Acme Pers. ]: _com.acme.persistence_
+* [DataNucleus]: http://www.datanucleus.org/ _org.datanucleus.api.jpa.PersistenceProviderImpl_
 
 Other smaller frameworks provide only access to JPA-Annotations without providing an EntityManager:
 
-* ORMLite
-* EBean
+* [ORMLite]: http://ormlite.com
+* [EBean  ]: http://www.avaje.org
+
+A summary of lightweight ORM tools can be read here: ftp://ftp.informatik.uni-stuttgart.de/pub/library/medoc.ustuttgart_fi/FACH-0147/FACH-0147.pdf
 
 ### Architecture
 
@@ -174,6 +184,12 @@ The following services are registered through nano.h5 by default and should be a
 * _UncaughtExceptionHandler_: handling/provding exceptions and messages
 * _IPageBuilder_: implementation of the html5-building (here: _Html5Presentation_ as extension of _BeanPresentationHelper_)
 * _Profiler_: simple profiler to log simple performance aspects
+
+The following service may be set to override the default mechanisms:
+* IConnector: defines the login/authentification. On default, the NanoH5 main instance is providing that through an Persistence instance.
+* Workflow: defines the navigation stack. On default a simple entity browser is used.
+* IGenericService: generic service to modify/query beans from
+* EntityManager: will be invoked into the GenericeService implementation. On default, the _javax.persistence_ will be used by calling _Persistence.createEntityManagerFactory(persistenceUnitName).createEntityManager()_. If the desired orm framework doesn't provide a javax.persistence implementation, a simple _EntityManager_ implementation can be set (see project _tsl2.nano.directaccess_ class tsl2.nano.persistence.provider.NanoEntityManagerFactory).
 
 ## Starting / Test
 
@@ -722,9 +738,9 @@ The replications hsqldb database will be started internally.
 If you don't want to have a standalone appliation, you are able to use an application server like jboss. To do this you must have:
 
 * the *application servers client libraries* must be in your classpath. so copy them to your environment directory. with jboss eap 6.1 it would be _jboss-client.jar_.
-* any entity beans and _remote interfaces_ of your ejb's should be in your classpath. so copy the jar holding them to your environement directory.
+* any entity beans and _remote interfaces_ of your ejb's should be in your classpath. so copy the jar holding them to your environment directory.
 * of course, the *entity beans must be deployed* to that server perhaps in an ear or war-file.
-* be sure to have *tsl2.nano.serviceaccess* packed into that war-file. the service *IGenericService is essential.
+* be sure to have *tsl2.nano.serviceaccess* packed into that ear/war-file. the service *IGenericService is essential.
 * add environement property 'applicationserver.authentification.service' (default: __org.nano.[environment-name].service.remote.IUserService__) with service class name. 
 * add environment property 'applicationserver.authentification.method' (default: __login__) with service method to call. this method has to have two string-parameters for user and password. the method has to call _ServiceFactory.instance().createSession(userObject, mandatorObject, subject, userRoles, features, featureInterfacePrefix)_
 * on the login page input user and password
@@ -813,6 +829,15 @@ To analyse the html-page in your browser, for example in your Chrome-Browser, yo
 
 * velocity-1.6-dep.jar: XmlUtil.transform (using CompatibilityLayer)
 * TODO: describe all jars!
+
+### Creating a new _NanoH5_ version
+
+Change the following files, if you change a version number of any nano project:
+* tsl2.nano.incubation/projects/*.properties
+* tsl2.nano.h5/src/resources/build.properties
+* tsl2.nano.h5/src/resources/run.bat
+
+Run the script tsl2.nano.incubation/2nano.xml. un-comment the first entry of _refactore.clean_ before.
 
 ## Creating an own project
 
@@ -1212,7 +1237,14 @@ set the following *environment.xml* properties:
 
 The _nano.h5_ framework works on android systems, too. But upto this time I coudn't find a proper O/R mapper supporting full JPA 2.0 and providing an EntityManager through an persistence.xml file.
 
-The O/R mappers *EBean* and *ORMLite* are able to work on JPA-annotations, but no *javax.persistence.EntityManager* was implemented. So, the nano.h5 framework is useless on android systems at this moment.
+The O/R mappers *EBean* and *ORMLite* are able to work on JPA-annotations, but no *javax.persistence.EntityManagerFactory* was implemented. The standard jpa persistence providers use libraries that don't work on android - or they have to many methods which causes the exception:
+
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+Dex Loader] Unable to execute dex: method ID not in [0, 0xffff]: 65536 
+Conversion to Dalvik format failed: Unable to execute dex: method ID not in [0, 0xffff]: 65536
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+So, the nano.h5 framework is useless on android systems at this moment.
 
 Other restrictions on android:
 * all libraries in your environment directory must contain dex-classes. you can't simply add a standard library without transforming it to *dalvik classes*.
@@ -1235,6 +1267,16 @@ Other restrictions on android:
 * Some array types can't be de-serialized through simple-xml.
 * a field holding a collection is not enabled
 ** on oneToMany relations a cascading type must be given to be enabled
+* jpa-providers:
+** eclipse-link: nullpointer on java.net.URL on loading persistence.xml
+*** eclipseLink loads the METAINF/persistence.xml through another classloader. the bean-jar file will be searched from META-INF/ parent directory
+*** use prefix '!' to define, that no environment-prefix will be added. E.g. '!mybeans.jar'.
+*** persistable fields of type Date have to annotate a temporal type 
+** datanucleus: metamodel has to be statically generated and compiled before
+** openjpa: all jar-file names are invalid:
+*** openjpa needs the beans jar file packed into the main jar file! 
+*** dynamic class enhancement must be enabled (see https://openjpa.apache.org/builds/2.2.2/apache-openjpa/docs/ref_guide_pc_enhance.html)! start the jvm with option: _-javaagent:[path-to-extraced-openjpa-zip-file]/openjpa-2.x.x.jar_
+*** openjpa properties: https://openjpa.apache.org/builds/2.2.2/apache-openjpa/docs/ref_guide_conf_openjpa.html
 
 ## Changelog
 
@@ -1244,6 +1286,7 @@ Other restrictions on android:
 | 0.0.3 | 01.01.2014 | beta Version (basic features + authorization + workflows + rules) |
 | 0.0.4 | 20.03.2014 | full featured version (replication, attribute- and beandef-extensions QueryResult, RuleAttribute, many refactorings) |
 | 0.0.4b | 11.05.2014 | lots of corrections, partially working on android |
+| 0.0.4c | 25.05.2014 | classloader transformation changed to enable loading persistence.xml through EclipseLink and OpenJPA |
 
 ## TODOs
 
@@ -1389,20 +1432,22 @@ Other restrictions on android:
 * JMeter as macro configuration
 * html-frames as perspective (left side: beans and views)
 * refactore ForwardedException. delete FormattedException. Stacktrace with member-info
-
+* ParseObject <-- Bean(Map)
 * *TESTS*
 ** ( ) test with multi values - using best id's
 ** (-) test on android
 
 ** languages
 ** on appserver
-* extract apploader: common main, classloader, execution
 
-* speichern von Konfigurationen mit nullpointer in privateaccessor
-* spalten-layout tag: section (landscape, portrait)
+* spalten-layout tag: section (landscape, portrait), max-rowcount
 * detail hintergrund-bild
 *  ve mit ? ???
 * konfig format
 * Expectable-Data?
+* TAGs: bean2html, entity2html, bean2gui, entity2gui, jpa2gui, jpa2html, jpa persistence provider, openjpa, hibernate, datanucleus, eclipselink, data-editor, data-sheet, entity browser, jpa2, framework
+* use maven to get the desired jars in environment directory (Environment.loadExternalDependencies)
+
+* extrahieren der jars ueber konstanten
 
 [GLOSSARY]
