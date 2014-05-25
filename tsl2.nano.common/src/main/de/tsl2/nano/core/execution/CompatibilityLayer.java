@@ -17,6 +17,7 @@ import org.apache.commons.logging.Log;
 
 import de.tsl2.nano.core.ManagedException;
 import de.tsl2.nano.core.cls.BeanClass;
+import de.tsl2.nano.core.exception.Message;
 import de.tsl2.nano.core.log.LogFactory;
 import de.tsl2.nano.core.util.StringUtil;
 
@@ -98,6 +99,7 @@ public class CompatibilityLayer {
             return action.run(null, args);
         } catch (Throwable e) {
             LOG.warn("couldn't run given optional action: " + e);
+            Message.send(e.toString());
             return null;
         }
     }
@@ -107,6 +109,7 @@ public class CompatibilityLayer {
             return BeanClass.createBeanClass(className).callMethod(null, methodName, par, args);
         } catch (Throwable e) {
             LOG.warn("couldn't run given optional action: " + e);
+            Message.send(e.toString());
             return null;
         }
     }
@@ -115,6 +118,7 @@ public class CompatibilityLayer {
         try {
             return BeanClass.call(instance, methodName, par, args);
         } catch (Throwable e) {
+            Message.send(e.toString());
             LOG.warn("couldn't run given optional action: " + e);
             return null;
         }

@@ -36,6 +36,7 @@ import de.tsl2.nano.core.log.LogFactory;
 import de.tsl2.nano.service.util.AbstractStatelessServiceBean;
 import de.tsl2.nano.service.util.GenericServiceBean;
 import de.tsl2.nano.service.util.IGenericBaseService;
+import de.tsl2.nano.serviceaccess.IAuthorization;
 
 /**
  * NOT FINISHED YET!
@@ -142,8 +143,13 @@ public class GenericReplicatingServiceBean extends GenericServiceBean {
      */
     protected boolean checkConnection(IGenericBaseService service, boolean throwException) {
         try {
-            //TODO: which select to do...?
+            //TODO: which statement to do...?
 //            service.executeQuery("select now()", true, new Object[0]);
+            /*
+             * while there is no current transaction, the 'commit' should do nothing ;-)
+             */
+            service.executeQuery("commit"/* + "grant select on " + Environment.get(IAuthorization.class).getUser()*/,
+                true, new Object[0]);
             return connected = true;
         } catch (Exception ex) {
 //            //WORKAROUND for check
@@ -156,7 +162,8 @@ public class GenericReplicatingServiceBean extends GenericServiceBean {
     }
 
     protected void doForReplication(Runnable replicationJob) {
-        ThreadUtil.startDaemon("replication-service-job", replicationJob, true, Environment.get(UncaughtExceptionHandler.class));
+        ThreadUtil.startDaemon("replication-service-job", replicationJob, true,
+            Environment.get(UncaughtExceptionHandler.class));
     }
 
     @Override
@@ -223,7 +230,7 @@ public class GenericReplicatingServiceBean extends GenericServiceBean {
             }
             addReplicationEntities(repService, myAttrValues, container);
             container.addAll(0, myAttrValues);
-            
+
             //do it for oneToMany again
 //            myAttrValues.clear();
 //            relationAttrs = bc.findAttributes(OneToMany.class);

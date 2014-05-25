@@ -151,6 +151,17 @@ public class GenericLocalServiceBean extends GenericReplicatingServiceBean {
         Environment.assignClassloaderToCurrentThread();
         LOG.info("current threads classloader: " + Thread.currentThread().getContextClassLoader());
         
+//        LOG.info(StringUtil.toFormattedString(BeanClass.call(Persistence.class, "getProviders"), 100));
+        
+        /*
+         * if an orm tool has no javax.persistence provider implementation, it is possible to invoke through
+         * setting it as service in the Environment
+         */
+        EntityManager entityManager = Environment.get(EntityManager.class);
+        if (entityManager != null) {
+            LOG.info("using a spezialized (not through javax.persistence) entitymanager: " + entityManager);
+            return entityManager;
+        }
         return Persistence.createEntityManagerFactory(persistenceUnitName).createEntityManager();
         // obtain the initial JNDI context
         // Context initCtx;

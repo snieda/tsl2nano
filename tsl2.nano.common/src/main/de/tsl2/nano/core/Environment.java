@@ -14,10 +14,15 @@ import java.io.FileOutputStream;
 import java.io.InputStream;
 import java.io.Serializable;
 import java.lang.Thread.UncaughtExceptionHandler;
+import java.net.URLClassLoader;
 import java.text.Format;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collection;
 import java.util.Date;
 import java.util.Hashtable;
 import java.util.Iterator;
+import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Properties;
@@ -30,6 +35,7 @@ import org.simpleframework.xml.ElementMap;
 import org.simpleframework.xml.core.Persist;
 
 import de.tsl2.nano.bean.BeanUtil;
+import de.tsl2.nano.core.classloader.NestedJarClassLoader;
 import de.tsl2.nano.core.cls.BeanClass;
 import de.tsl2.nano.core.exception.ExceptionHandler;
 import de.tsl2.nano.core.execution.CompatibilityLayer;
@@ -87,8 +93,10 @@ public class Environment {
 
     public static final String CONFIG_XML_NAME = "environment.xml";
 
+    public static final String KEY_BUILDINFO = "tsl2.nano.build.informations";
+
     static final String DEF_PATHSEPRATOR = "/";
-    
+
     private Environment() {
         self = this;
     }
@@ -111,7 +119,7 @@ public class Environment {
      * @return build informations read through build.properties in jar
      */
     public static String getBuildInformations() {
-        String buildInfo = (String) get("build.informations");
+        String buildInfo = System.getProperty(KEY_BUILDINFO);
         if (buildInfo == null) {
             try {
                 InputStream biStream = Environment.class.getClassLoader().getResourceAsStream("build.properties");
@@ -125,7 +133,8 @@ public class Environment {
                         + "-"
                         + bi.getProperty("build.time")
                         + ("true".equals(bi.getProperty("build.debug")) ? "-d" : "");
-                    setProperty("build.informations", buildInfo);
+                    System.setProperty(KEY_BUILDINFO, buildInfo);
+                    System.getProperties().putAll(bi);
                 } else {
                     return "<unknown build informations>";
                 }
@@ -172,7 +181,7 @@ public class Environment {
 
     protected final static Environment self() {
         if (self == null) {
-            create(System.getProperty(KEY_CONFIG_PATH, System.getProperty("user.dir")));
+            create(System.getProperty(KEY_CONFIG_PATH, System.getProperty("user.dir").replace('\\', '/')));
         }
         return self;
     }
@@ -233,8 +242,8 @@ public class Environment {
         p.put("build.info", getBuildInformations());
         info = StringUtil.insertProperties(info, p);
         LogFactory.log(info);
-        
-        self.properties.put(KEY_CONFIG_PATH, new File(dir).getAbsolutePath() + "/");
+
+        self.properties.put(KEY_CONFIG_PATH, new File(dir).getAbsolutePath().replace("\\", "/") + "/");
         new File(self.getTempPath()).mkdir();
         self.services = new Hashtable<Class<?>, Object>();
         registerBundle(PREFIX + "messages", true);
@@ -553,6 +562,9 @@ public class Environment {
      *         always false.
      */
     public static final boolean saveResourceToFileSystem(String resourceName) {
+        //put build informations into system-properties
+        getBuildInformations();
+        resourceName = System.getProperty(resourceName, resourceName);
         return AppLoader.isNestingJar() ? saveResourceToFileSystem(resourceName, resourceName) : false;
     }
 
@@ -576,15 +588,61 @@ public class Environment {
     public static final boolean saveResourceToFileSystem(String resourceName, String fileName) {
         File file = new File(getConfigPath() + fileName);
         if (!file.exists()) {
-            InputStream antscriptOrigin = get(ClassLoader.class).getResourceAsStream(resourceName);
+            InputStream res = get(ClassLoader.class).getResourceAsStream(resourceName);
             try {
-                FileUtil.write(antscriptOrigin, new FileOutputStream(file), true);
+                if (res == null /*|| res.available() <= 0*/)
+                    throw new IllegalStateException("the resource '" + resourceName
+                        + "' of our main-jar-file is not available or empty!");
+                FileUtil.write(res, new FileOutputStream(file), true);
                 return true;
             } catch (Exception e) {
                 ManagedException.forward(e);
             }
         }
         return false;
+    }
+
+    /**
+     * tries to interpret the given dependency names and to load them perhaps through an internet-repository (like with
+     * maven).
+     * 
+     * @param dependencyNames names including the organisation/product name to be extracted.
+     * @return any loader information
+     */
+    public static final Object loadDependencies(boolean extractFromNames, String... dependencyNames) {
+        String info = "dynamic loading of external dependencies through internet-repository not yet supported!";
+        dependencyNames = getExtractedNames(dependencyNames);
+
+        //evaluate already loaded jars (no classcast possible --> using reflection!)
+        String[] nestedJars = (String[]) BeanClass.call(Thread.currentThread().getContextClassLoader().getParent(), "getNestedJars");
+        File[] environmentJars = FileUtil.getFiles(getConfigPath(), ".*[.]jar");
+        Collection<String> availableJars = new ArrayList<String>(nestedJars.length + environmentJars.length);
+        availableJars.addAll(Arrays.asList(nestedJars));
+        for (int i = 0; i < environmentJars.length; i++) {
+            availableJars.add(environmentJars[i].getName());
+        }
+
+//        loadDependencies();
+
+        //check given dependencies
+        List<String> unresolvedDependencies = new ArrayList<String>(dependencyNames.length);
+        for (int i = 0; i < dependencyNames.length; i++) {
+            if (!availableJars.contains(dependencyNames[i])) {
+                unresolvedDependencies.add(dependencyNames[i]);
+            }
+        }
+        if (unresolvedDependencies.size() > 0) {
+            throw new IllegalStateException("The following dependencies couldn't be resolved:\n"
+                + StringUtil.toFormattedString(unresolvedDependencies, 100, true));
+        }
+
+        self().log(info);
+        return info;
+    }
+
+    private static String[] getExtractedNames(String[] dependencyNames) {
+        // TODO Auto-generated method stub
+        return dependencyNames;
     }
 
     @Persist

@@ -85,7 +85,7 @@ public class Util {
      * @return true, if object is null or empty
      */
     public static final boolean isEmpty(Object object, boolean trim) {
-        return object == null || (trim ? object.toString().trim().isEmpty() : object.toString().isEmpty());
+        return object == null || object.toString() == null || (trim ? object.toString().trim().isEmpty() : object.toString().isEmpty());
     }
 
     /**

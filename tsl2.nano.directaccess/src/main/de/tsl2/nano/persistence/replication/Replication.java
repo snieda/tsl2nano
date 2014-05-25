@@ -66,7 +66,7 @@ public class Replication extends Persistence implements Runnable {
     @SuppressWarnings("static-access")
     public static Replication current() {
         if (Persistence.exists()) {
-            return Environment.get(XmlUtil.class).loadXml(getPath(FILE_MYPERSISTENCE_BEAN),
+            return Environment.get(XmlUtil.class).loadXml(getPath(FILE_PERSISTENCE_BEAN),
                 Replication.class);
         } else {
             return new Replication();

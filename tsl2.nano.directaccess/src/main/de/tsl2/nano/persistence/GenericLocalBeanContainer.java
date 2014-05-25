@@ -10,6 +10,7 @@
 package de.tsl2.nano.persistence;
 
 import de.tsl2.nano.bean.BeanContainer;
+import de.tsl2.nano.core.Environment;
 import de.tsl2.nano.service.util.IGenericService;
 
 /**
@@ -32,16 +33,21 @@ public class GenericLocalBeanContainer extends GenericBeanContainer {
     public static void initLocalContainer(ClassLoader classloader, boolean checkConnection) {
         GenericLocalBeanContainer container = new GenericLocalBeanContainer();
         if (checkConnection)// pre-load the service
-            ((GenericLocalServiceBean)container.getGenService()).checkConnection(true);
+            ((GenericLocalServiceBean) container.getGenService()).checkConnection(true);
 
         initContainer(container, classloader);
     }
 
     protected IGenericService getGenService() {
         if (service == null) {
+            IGenericService s = Environment.get(IGenericService.class);
+            if (s != null) {
+                service = s;
+            } else {
 //            EntityManager entityManager = (EntityManager) getSession(false);
 //            service = new GenericLocalServiceBean(entityManager);
-            service = new GenericLocalServiceBean();
+                service = new GenericLocalServiceBean();
+            }
         }
         return service;
     }

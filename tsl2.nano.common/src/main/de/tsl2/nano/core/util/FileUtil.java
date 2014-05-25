@@ -28,6 +28,7 @@ import java.io.ObjectOutputStream;
 import java.io.OutputStream;
 import java.io.Reader;
 import java.io.Serializable;
+import java.net.URI;
 import java.net.URL;
 import java.text.DateFormat;
 import java.util.Date;
@@ -876,6 +877,28 @@ public class FileUtil {
      * @return path relative to current user.dir (application start)
      */
     public static String getRelativePath(String file, String currentPath) {
-        return StringUtil.substring(file, currentPath, null);
+        String relpath = StringUtil.substring(replaceWindowsSeparator(file), replaceWindowsSeparator(currentPath), null);
+        return File.separatorChar == '\\' && relpath.startsWith("/") ? relpath.substring(1) : relpath;
+    }
+    
+    public static final String replaceWindowsSeparator(String path) {
+        return path.replace(File.separatorChar, '/');
+    }
+    /**
+     * checks if given path exists. if path is an URI, the URI will be checked
+     * @param pathOrURL
+     * @return true, if file or URL exists
+     */
+    public static File getURIFile(String pathOrURL) {
+        return new File(URI.create(replaceWindowsSeparator(pathOrURL)).getSchemeSpecificPart());
+    }
+    
+    public static InputStream getURLStream(String url) {
+        try {
+            return URI.create(url).toURL().openStream();
+        } catch (Exception e) {
+            ManagedException.forward(e);
+            return null;
+        }
     }
 }

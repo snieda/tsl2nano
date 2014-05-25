@@ -16,6 +16,7 @@ import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
 
+import javax.persistence.EntityManager;
 import javax.persistence.metamodel.EntityType;
 
 import org.apache.commons.logging.Log;
@@ -68,20 +69,24 @@ public class PersistenceClassLoader extends TransformingClassLoader {
         return new ITransformer<String, String>() {
             @Override
             public String transform(String name) {
-                if (name != null && name.contains(Persistence.FILE_PERSISTENCE_XML)) {
-                    LOG.info("manipulating url of " + name
-                        + " ==> using file: "
-                        + Persistence.getPath(Persistence.FILE_MYPERSISTENCE));
-                    name = Persistence.FILE_MYPERSISTENCE;
-                }
+                /*
+                 * as eclipselink uses another classloader this transformation doesn't work there.
+                 */
+//                if (name != null && name.contains(Persistence.FILE_PERSISTENCE_XML)) {
+//                    LOG.info("manipulating url of " + name
+//                        + " ==> using file: "
+//                        + Persistence.getPath(Persistence.FILE_MYPERSISTENCE));
+//                    name = Persistence.FILE_MYPERSISTENCE;
+//                }
                 return name;
             }
         };
     }
 
+    @SuppressWarnings({ "rawtypes", "unchecked" })
     @Override
     public List<Class> loadBeanClasses(String beanjar, String regExp, StringBuilder messages) {
-        if (Environment.get("use.applicationserver", false))
+        if (Environment.get("use.applicationserver", false) || Environment.get(EntityManager.class) != null)
             return super.loadBeanClasses(beanjar, regExp, messages);
         else {//local through entity types should be faster
             Collection<EntityType<?>> types =

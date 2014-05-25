@@ -50,11 +50,14 @@
 	        <property name="javax.persistence.jdbc.password" value="${connection.password}"/>
 	        
 	        <!-- OpenJPA -->
-	        <property name="openjpa.ConnectionURL" value="${connection.url}"/>
+	        <!-- <property name="openjpa.ConnectionURL" value="${connection.url}"/>
 		    <property name="openjpa.ConnectionDriverName" value="${connection.driver_class}"/>
 		    <property name="openjpa.ConnectionUserName" value="${connection.username}"/>
-		    <property name="openjpa.ConnectionPassword" value="${connection.password}"/>
+		    <property name="openjpa.ConnectionPassword" value="${connection.password}"/> -->
+		    
 		    <property name="openjpa.Log" value="DefaultLevel=WARN, Tool=INFO"/>
+			<property name="openjpa.RuntimeUnenhancedClasses" value="supported"/>
+			<property name="openjpa.DynamicEnhancementAgent" value="true" />
 		    
          	<!-- TopLink -->
             <property name="toplink.jdbc.driver" value="${connection.driver_class}"/>

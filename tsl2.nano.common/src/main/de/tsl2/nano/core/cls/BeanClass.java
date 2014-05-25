@@ -460,6 +460,10 @@ public class BeanClass<T> implements Serializable {
         return callMethod(instance, methodName, new Class[0], new Object[0]);
     }
 
+    public static Object call(Class<?> type, String staticMethodName) {
+        return BeanClass.getBeanClass(type).callMethod(null, staticMethodName, new Class[0]);
+    }
+
     public static Object call(Object instance, String methodName) {
         return BeanClass.getBeanClass(instance.getClass()).callMethod(instance, methodName, new Class[0]);
     }
@@ -607,6 +611,10 @@ public class BeanClass<T> implements Serializable {
         }
     }
 
+    public static <T> T createInstance(String clsName, Object... args) {
+        return (T) createInstance(load(clsName, null), args);
+    }
+    
     /**
      * creates a new instance through the given arguments. if you don't call the default constructor, the performance
      * will go down on searching the right constructor.

@@ -32,7 +32,7 @@ import de.tsl2.nano.core.util.StringUtil;
  * @author ts
  * @version $Revision$
  */
-public class NestedJarClassLoader extends LibClassLoader {
+public class NestedJarClassLoader extends LibClassLoader implements Cloneable {
     private static final Log LOG = LogFactory.getLog(NestedJarClassLoader.class);
 
     /** hasRootJar, initial true to start evaluation! */
@@ -186,7 +186,7 @@ public class NestedJarClassLoader extends LibClassLoader {
         return rootPath.contains(";") ? null : rootPath;
     }
 
-    private String[] getNestedJars() {
+    public String[] getNestedJars() {
         if (hasRootJar && nestedJars == null) {
             String rootPath = getRootJarPath();
             if (rootPath != null && new File(rootPath).isFile()) {
@@ -258,5 +258,10 @@ public class NestedJarClassLoader extends LibClassLoader {
     @Override
     public String toString() {
         return super.toString() + "[nested: " + (getNestedJars() != null ? nestedJars.length : 0) + "]";
+    }
+    
+    @Override
+    public Object clone() throws CloneNotSupportedException {
+        return super.clone();
     }
 }

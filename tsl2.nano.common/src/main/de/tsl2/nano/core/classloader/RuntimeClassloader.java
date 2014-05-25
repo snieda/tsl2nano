@@ -93,7 +93,7 @@ public class RuntimeClassloader extends URLClassLoader {
      */
     @Override
     public void addURL(URL url) {
-        LOG.info("adding '" + url + " to classpath");
+        LOG.info("adding '" + url + "' to classpath");
         super.addURL(url);
     }
 

@@ -205,7 +205,17 @@ public class XmlUtil {
     public static void saveSimpleXml_(String xmlFile, Object obj) {
         try {
             new org.simpleframework.xml.core.Persister(new Format("<?xml version=\"1.0\" encoding=\"UTF-8\"?>")).write(obj, new File(xmlFile));
+            //workaround for empty files
+            if (FileUtil.getFile(xmlFile).available() == 0)
+                new File(xmlFile).delete();
         } catch (Exception e) {
+            //as simple-xml doesn't delete corrupt created files, we move it to temp
+            File file = new File(xmlFile);
+            if (file.exists()) {
+                File temp = new File(xmlFile + ".failed");
+                if (!temp.exists() || temp.delete())
+                    file.renameTo(temp);
+            }
             //don't use the ManagedException.forward(), because the LogFactory is using this, too!
             throw new RuntimeException(e);
         }

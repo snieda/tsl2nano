@@ -231,7 +231,7 @@ public class ScriptTool implements Serializable {
 
     protected Object executeStatement(String strStmt, boolean pureSQL) throws Exception {
         //jpa access
-        if (StringUtil.findRegExp(strStmt.toLowerCase(), "(insert|update|delete|create)\\s.*", 0) == null) {
+        if (StringUtil.findRegExp(strStmt.toLowerCase(), "^\\s*select", 0) != null) {
             return BeanContainer.instance().getBeansByQuery(strStmt, pureSQL, new Object[0]);
         } else {
 //            if (pureSQL) {

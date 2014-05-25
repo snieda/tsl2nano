@@ -617,6 +617,8 @@ public class Bean<T> extends BeanDefinition<T> {
             bean = createBean((I) UNDEFINED, beandef);
         } else if (instanceOrName.getClass().isArray()){
             bean = createArrayBean(instanceOrName);
+        } else if (Map.class.isAssignableFrom(instanceOrName.getClass())) {
+            bean = createMapBean(instanceOrName);
         } else {
             BeanDefinition<I> beandef = getBeanDefinition((Class<I>) instanceOrName.getClass());
             bean = createBean(instanceOrName, beandef);
@@ -643,6 +645,16 @@ public class Bean<T> extends BeanDefinition<T> {
         Bean bean = new Bean(array);
         for (int i = 0; i < length; i++) {
             bean.addAttribute(new BeanValue(bean.instance, new ArrayValue(String.valueOf(i), i)));
+        }
+        return bean;
+    }
+    
+    private static Bean createMapBean(Object mapInstance) {
+        Map map = (Map) mapInstance;
+        Bean bean = new Bean(map);
+        Set keySet = map.keySet();
+        for (Object k : keySet) {
+            bean.addAttribute(new BeanValue(bean.instance, new MapValue(map.get(k).toString())));
         }
         return bean;
     }

@@ -15,6 +15,12 @@ import java.util.Map;
 import de.tsl2.nano.core.util.StringUtil;
 
 /**
+ * Usable to structure e.g. command line arguments.
+ * <p/>
+ * Standard-Format:<br/>
+ * - key-value pairs separated by '='<br/>
+ * - options starting with '-'<br/>
+ * - a manual map can be given to validate the arguments and print a help message.<br/>
  * 
  * @author ts
  * @version $Revision$
@@ -25,9 +31,10 @@ public class Argumentator {
 
     //TODO: use dynamic syntax
     String syntax = "-+/=?";
-    
+
     /**
      * constructor
+     * 
      * @param name program name
      * @param man manual
      * @param args program arguments
@@ -37,6 +44,11 @@ public class Argumentator {
         defineArgs(man, args);
     }
 
+    /**
+     * structures and stores the given args to a map
+     * @param man
+     * @param args
+     */
     private void defineArgs(Map<String, String> man, String[] args) {
         argMap = new LinkedHashMap<String, Object>();
         String n;
@@ -63,7 +75,13 @@ public class Argumentator {
             argMap.put(n, v);
         }
     }
-    
+
+    /**
+     * checks a given value against the manual
+     * @param name
+     * @param value
+     * @param man
+     */
     private void check(String name, Object value, Map<String, String> man) {
         if (man == null)
             return;
@@ -73,31 +91,51 @@ public class Argumentator {
             throw new IllegalArgumentException(rule);
     }
 
+    /**
+     * hasOption
+     * @param name
+     * @return true, if given key was activate as option
+     */
     public boolean hasOption(String name) {
         Object option = consume(name);
-        return option instanceof Boolean && ((Boolean)option).booleanValue();
+        return option instanceof Boolean && ((Boolean) option).booleanValue();
     }
-    
+
+    /**
+     * isSet
+     * @param name
+     * @return true, if given key was set.
+     */
     public boolean isSet(String name) {
         return consume(name) != null;
     }
-    
+
     public Object consume(String name) {
         return argMap.get(name);
     }
+
     @SuppressWarnings("unchecked")
     public <T> T consume(String name, T defaultValue) {
         T v = (T) consume(name);
         return v != null ? v : defaultValue;
     }
-    
+
+    /**
+     * iterate through args
+     * @return next argument value
+     */
     public Object next() {
         return consume(argMap.keySet().iterator().next());
     }
-    
+
+    /**
+     * printManual
+     * @param man manual to be logged
+     */
     public static void printManual(Map<String, String> man) {
         log(StringUtil.toFormattedString(man, -1, false));
     }
+
     private static void log(Object msg) {
         System.out.println(msg);
     }
