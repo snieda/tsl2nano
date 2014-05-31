@@ -9,13 +9,18 @@
  */
 package de.tsl2.nano.core.util;
 
-import java.net.NetworkInterface;
+import java.io.File;
 import java.net.InetAddress;
+import java.net.NetworkInterface;
 import java.net.SocketException;
+import java.net.URL;
 import java.net.UnknownHostException;
 import java.util.Enumeration;
 
+import org.apache.commons.logging.Log;
+
 import de.tsl2.nano.core.ManagedException;
+import de.tsl2.nano.core.log.LogFactory;
 
 /**
  * Some net utilities
@@ -24,7 +29,8 @@ import de.tsl2.nano.core.ManagedException;
  * @version $Revision$
  */
 public class NetUtil {
-
+    private static final Log LOG = LogFactory.getLog(NetUtil.class);
+    
     /**
      * getMyIPAdress
      * 
@@ -96,6 +102,34 @@ public class NetUtil {
             }
             return str.toString();
         } catch (SocketException e) {
+            ManagedException.forward(e);
+            return null;
+        }
+    }
+    
+    /**
+     * downloads the given strUrl if a network connection is available
+     * 
+     * @param name name of strUrl - simply for logging informations
+     * @param strUrl network url to load
+     * @param destDir local destination directory
+     * @param flat if true, the file of that url will be put directly to the environment directory. otherwise the full
+     *            path will be stored to the environment.
+     * @param overwrite if true, existing files will be overwritten
+     * @return downloaded local file 
+     */
+    public static File download(String name, String strUrl, String destDir, boolean flat, boolean overwrite) {
+        try {
+            URL url = new URL(strUrl);
+            String fileName = destDir + (flat ? new File(url.getFile()).getName() : url.getFile());
+            File file = new File(fileName);
+            if (overwrite || !file.exists()) {
+                file.getParentFile().mkdirs();
+                LOG.info("downloading " + name + " from: " + url.toString());
+                FileUtil.write(url.openStream(), fileName);
+            }
+            return file;
+        } catch (Exception e) {
             ManagedException.forward(e);
             return null;
         }
