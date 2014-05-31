@@ -25,6 +25,7 @@ import de.tsl2.nano.core.Environment;
 import de.tsl2.nano.core.ManagedException;
 import de.tsl2.nano.core.log.LogFactory;
 import de.tsl2.nano.core.util.FileUtil;
+import de.tsl2.nano.core.util.NetUtil;
 import de.tsl2.nano.core.util.StringUtil;
 import de.tsl2.nano.core.util.Util;
 import de.tsl2.nano.execution.SystemUtil;
@@ -86,15 +87,15 @@ public class JarResolver {
             props.load(Environment.getResource("jarresolver.properties"));
             String updateUrl = props.getProperty(URL_UPDATE_PROPERTIES);
             if (updateUrl != null) {
-                try{
-                LOG.info("updating jarresolver.properties through " + updateUrl);
-                download("jarresolver.properties", updateUrl, true);
-                } catch(Exception ex) {
+                try {
+                    LOG.info("updating jarresolver.properties through " + updateUrl);
+                    download("jarresolver.properties", updateUrl, true, true);
+                } catch (Exception ex) {
                     //no problem - perhaps no network connection
                     LOG.warn("couldn't update jarresolver.properties from " + updateUrl);
                 }
             }
-                
+
         } catch (IOException e) {
             ManagedException.forward(e);
         }
@@ -151,7 +152,7 @@ public class JarResolver {
     }
 
     private void loadMvn() {
-        File mvnFile = download("maven", (String) props.get(URL_MVN_DOWNLOAD), false);
+        File mvnFile = download("maven", (String) props.get(URL_MVN_DOWNLOAD), false, false);
         mvnRoot = mvnFile.getParent();
         String extractedName = mvnRoot + "/" + StringUtil.substring(mvnFile.getName(), null, "-bin.zip");
         if (!new File(extractedName + "/bin").exists())
@@ -159,23 +160,20 @@ public class JarResolver {
         mvnRoot = extractedName;
     }
 
-    protected File download(String name, String strUrl, boolean overwrite) {
-        try {
-            URL url = new URL(strUrl);
+    /**
+     * downloads the given strUrl if a network connection is available
+     * 
+     * @param name name of strUrl - simply for logging informations
+     * @param strUrl network url to load
+     * @param flat if true, the file of that url will be put directly to the environment directory. otherwise the full
+     *            path will be stored to the environment.
+     * @param overwrite if true, existing files will be overwritten
+     * @return downloaded local file 
+     */
+    protected File download(String name, String strUrl, boolean flat, boolean overwrite) {
             basedir = props.getProperty(DIR_LOCALREPOSITORY);
             basedir = !Util.isEmpty(basedir) ? basedir : Environment.getConfigPath();
-            String fileName = basedir + url.getFile();
-            File file = new File(fileName);
-            if (overwrite || !file.exists()) {
-                file.getParentFile().mkdirs();
-                LOG.info("downloading " + name + " from: " + url.toString());
-                FileUtil.write(url.openStream(), fileName);
-            }
-            return file;
-        } catch (Exception e) {
-            ManagedException.forward(e);
-            return null;
-        }
+            return NetUtil.download(name, strUrl, basedir, flat, overwrite);
     }
 
     /**
