@@ -1,0 +1,12 @@
+Manifest-Version: 1.0
+Signature-Version: 0.0.1 (07.03.2014)
+Ant-Version: Apache Ant 1.7.1
+Created-By: Thomas Schneider
+Main-Class: de.tsl2.nano.core.AppLoader
+Main-Arguments: de.tsl2.nano.execution.ScriptUtil ant shell.xml
+Class-Path: tsl2.nano.common.1.1.0.jar 
+ tsl2.nano.serviceaccess.1.0.1.jar 
+ ant.jar ant-launcher.jar 
+ ant-nodeps.jar
+ avaje-ebeanorm-3.3.2.jar
+
