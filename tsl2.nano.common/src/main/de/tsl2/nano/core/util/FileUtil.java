@@ -176,7 +176,7 @@ public class FileUtil {
      * @param destDir
      * @param regExFilter
      */
-    public static void extract(String zipFile, String destDir, String regExFilter) {
+    public static void extractNestedZip(String zipFile, String destDir, String regExFilter) {
         ZipInputStream zipStream = FileUtil.getJarInputStream(zipFile);
         String[] zipFiles = FileUtil.readFileNamesFromZip(zipStream, regExFilter, true);
         /*
@@ -184,6 +184,33 @@ public class FileUtil {
          * to reopen the zip-stream
          */
         zipStream = FileUtil.getJarInputStream(zipFile);
+        
+        //reopen it - the zipEntries are closed
+        for (String file : zipFiles) {
+            byte[] data = FileUtil.readFromZip(zipStream, file, false);
+            if (data == null || data.length == 0) {
+                new File(destDir + file).mkdirs();
+            } else if (!new File(destDir + file).exists()){
+                FileUtil.writeBytes(data, destDir + file, false);
+            }
+        }
+        
+    }
+    
+    /**
+     * extract given zipStream to destDir using regExFilter. not performance-optimized!
+     * @param zipStream
+     * @param destDir
+     * @param regExFilter
+     */
+    public static void extract(String zipFile, String destDir, String regExFilter) {
+        ZipInputStream zipStream = FileUtil.getZipInputStream(zipFile);
+        String[] zipFiles = FileUtil.readFileNamesFromZip(zipStream, regExFilter, true);
+        /*
+         * as the inflaterzipstream is not able to reset it's read-position, we have
+         * to reopen the zip-stream
+         */
+        zipStream = FileUtil.getZipInputStream(zipFile);
         
         //reopen it - the zipEntries are closed
         for (String file : zipFiles) {
@@ -703,6 +730,24 @@ public class FileUtil {
         }
     }
 
+    /**
+     * write given input stream to given file
+     * @param in stream
+     * @param fileName file to write the input stream into
+     */
+    public static void write(InputStream in, String fileName) {
+        try {
+            write(in, new FileOutputStream(new File(fileName)), true);
+        } catch (FileNotFoundException e) {
+            ManagedException.forward(e);
+        }
+    }
+    /**
+     * write
+     * @param in
+     * @param out
+     * @param closeStreams
+     */
     public static void write(InputStream in, OutputStream out, boolean closeStreams) {
         final byte[] buf = new byte[1024];
         int len;

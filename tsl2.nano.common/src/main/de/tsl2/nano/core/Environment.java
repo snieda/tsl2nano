@@ -609,20 +609,19 @@ public class Environment {
      * @param dependencyNames names including the organisation/product name to be extracted.
      * @return any loader information
      */
-    public static final Object loadDependencies(boolean extractFromNames, String... dependencyNames) {
-        String info = "dynamic loading of external dependencies through internet-repository not yet supported!";
-        dependencyNames = getExtractedNames(dependencyNames);
+    public static final Object loadDependencies(String... dependencyNames) {
 
-        //evaluate already loaded jars (no classcast possible --> using reflection!)
-        String[] nestedJars = (String[]) BeanClass.call(Thread.currentThread().getContextClassLoader().getParent(), "getNestedJars");
+        //evaluate already loaded jars (no class-cast possible --> using reflection!)
+        String[] nestedJars =
+            (String[]) BeanClass.call(Thread.currentThread().getContextClassLoader().getParent(), "getNestedJars");
         File[] environmentJars = FileUtil.getFiles(getConfigPath(), ".*[.]jar");
-        Collection<String> availableJars = new ArrayList<String>(nestedJars.length + environmentJars.length);
-        availableJars.addAll(Arrays.asList(nestedJars));
+        Collection<String> availableJars =
+            new ArrayList<String>((nestedJars != null ? nestedJars.length : 0) + environmentJars.length);
+        if (nestedJars != null)
+            availableJars.addAll(Arrays.asList(nestedJars));
         for (int i = 0; i < environmentJars.length; i++) {
             availableJars.add(environmentJars[i].getName());
         }
-
-//        loadDependencies();
 
         //check given dependencies
         List<String> unresolvedDependencies = new ArrayList<String>(dependencyNames.length);
@@ -632,17 +631,17 @@ public class Environment {
             }
         }
         if (unresolvedDependencies.size() > 0) {
-            throw new IllegalStateException("The following dependencies couldn't be resolved:\n"
-                + StringUtil.toFormattedString(unresolvedDependencies, 100, true));
+            //load the dependencies through maven, if available
+            String clsJarResolver = "de.tsl2.nano.jarresolver.JarResolver";
+            if (get(CompatibilityLayer.class).isAvailable(clsJarResolver))
+                get(CompatibilityLayer.class).run(clsJarResolver, "main", new Class[] { String[].class },
+                    new Object[] { dependencyNames });
+            else
+                throw new IllegalStateException("The following dependencies couldn't be resolved:\n"
+                    + StringUtil.toFormattedString(unresolvedDependencies, 100, true));
         }
 
-        self().log(info);
-        return info;
-    }
-
-    private static String[] getExtractedNames(String[] dependencyNames) {
-        // TODO Auto-generated method stub
-        return dependencyNames;
+        return "dependency loading successfull";
     }
 
     @Persist

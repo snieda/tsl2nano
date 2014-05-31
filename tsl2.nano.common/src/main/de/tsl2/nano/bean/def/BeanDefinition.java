@@ -1102,7 +1102,7 @@ public class BeanDefinition<T> extends BeanClass<T> implements Serializable {
 //        getActions();
         getPresentable();
         getConnection("");
-        if (usePersistentCache)
+        if (usePersistentCache && !getClazz().isArray()/*simple-xml is not able to deserialize arrays*/)
             saveDefinition();
     }
 

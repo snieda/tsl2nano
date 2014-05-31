@@ -34,7 +34,11 @@ import java.util.UUID;
 import org.apache.commons.logging.Log;
 
 import de.tsl2.nano.bean.def.Bean;
+import de.tsl2.nano.bean.def.BeanCollector;
 import de.tsl2.nano.bean.def.BeanDefinition;
+import de.tsl2.nano.bean.def.BeanValue;
+import de.tsl2.nano.bean.def.IAttributeDefinition;
+import de.tsl2.nano.bean.def.IValueDefinition;
 import de.tsl2.nano.collection.CollectionUtil;
 import de.tsl2.nano.collection.ListSet;
 import de.tsl2.nano.core.ManagedException;
@@ -319,6 +323,7 @@ public class BeanUtil extends ByteUtil {
 
     /**
      * evaluates the type name of the given instance
+     * 
      * @param instance instance or class
      * @return simple class name or "null"
      */
@@ -346,7 +351,7 @@ public class BeanUtil extends ByteUtil {
             }
             Type type = ((ParameterizedType) genericType).getActualTypeArguments()[0];
             if (type instanceof ParameterizedType)
-                return (Class<?>) ((ParameterizedType)type).getRawType();
+                return (Class<?>) ((ParameterizedType) type).getRawType();
             return (Class<?>) type;
         } catch (Exception e) {
             ManagedException.forward(e);
@@ -742,6 +747,71 @@ public class BeanUtil extends ByteUtil {
     }
 
     /**
+     * delegates to {@link #present(BeanCollector, String, String, String, String, String, String, String, String)}.
+     */
+    public static String presentAsCSV(BeanCollector collector) {
+        return present(collector, "", "", "", "\n", "", ",", null, null);
+    }
+
+    /**
+     * delegates to {@link #present(BeanCollector, String, String, String, String, String, String, String, String)}.
+     */
+    public static String presentAsTabSheet(BeanCollector collector) {
+        return present(collector, "", "", "", "\n", "", "\t", null, null);
+    }
+
+    /**
+     * creates a simple html-table as presentation for the given collector.
+     * @param collector
+     * @return see {@link #present(BeanCollector, String, String, String, String, String, String, String, String)}
+     */
+    public static String presentAsHtmlTable(BeanCollector collector) {
+        return present(collector, "<table>\n", "</table>", "<tr>", "</tr>\n", "<td>", "\"</td>", "", ": <div/>\"");
+    }
+
+    /**
+     * creates a string representing all items with all attributes of the given beancollector (holding a collection of
+     * items).
+     * <p/>
+     * All parameters without nameBegin and nameEnd must not be null!
+     * 
+     * @param collector holding a list - defining the attribute presentation.
+     * @param header text header
+     * @param footer text footer
+     * @param rowBegin text on a new line
+     * @param rowEnd text on line end
+     * @param colBegin text on new column
+     * @param colEnd text on column end
+     * @param nameBegin (optional) if not null, starting text of a fields name. if null, no field name will be presented
+     * @param nameEnd (optional) if not null, ending text of a fields name. if null, no field name will be presented
+     * @return string presentation of given collector
+     */
+    public static String present(BeanCollector collector,
+            String header,
+            String footer,
+            String rowBegin,
+            String rowEnd,
+            String colBegin,
+            String colEnd,
+            String nameBegin,
+            String nameEnd) {
+        Collection c = collector.getCurrentData();
+        List<IAttributeDefinition> attributes = collector.getBeanAttributes();
+        StringBuilder buf = new StringBuilder(c.size() * attributes.size() * 30 + 100);
+        buf.append(header);
+        for (Object o : c) {
+            buf.append(rowBegin);
+            for (IAttributeDefinition a : attributes) {
+                buf.append(colBegin + (nameBegin != null && nameEnd != null ? nameBegin + a.getName() + nameEnd : "")
+                    + collector.getColumnText(o, a) + colEnd);
+            }
+            buf.append(rowEnd);
+        }
+        buf.append(footer);
+        return buf.toString();
+    }
+
+    /**
      * simple delegation to {@link #valueOf(Object, Object)}.
      */
     public static final <T> T defaultValue(T value, T defaultIfNull) {
@@ -781,7 +851,7 @@ public class BeanUtil extends ByteUtil {
     public static boolean hasToString(Object obj) {
         return obj != null && hasToString(obj.getClass());
     }
-    
+
     /**
      * checks, whether the class of the given object implements 'toString()' itself.
      * 

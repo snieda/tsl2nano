@@ -752,6 +752,11 @@ public class CommonTest {
         if (bclass.findAttributes(Deprecated.class).size() != 2) {
             fail("didn't find the right annotations!");
         }
+        
+        //test the export functions - but con't check that automatically!
+        BeanCollector<Collection<TypeBean>,TypeBean> collector = BeanCollector.getBeanCollector(Arrays.asList(bean, bean2), 0);
+        System.out.println(BeanUtil.presentAsCSV(collector));
+        System.out.println(BeanUtil.presentAsHtmlTable(collector));
     }
 
     @Test

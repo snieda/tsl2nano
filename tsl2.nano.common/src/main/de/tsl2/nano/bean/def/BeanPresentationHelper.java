@@ -1108,7 +1108,13 @@ public class BeanPresentationHelper<T> {
     }
 
     private boolean isGeneratedValue(Class<T> declaringClass, String attribute) {
-        BeanClass bc = BeanClass.createBeanClass("javax.persistence.GeneratedValue");
+        BeanClass bc;
+        try {
+            bc = BeanClass.createBeanClass("javax.persistence.GeneratedValue");
+        } catch (Exception e) {
+            //so, the given class didn't trigger to load GeneratedValue before --> there is no generated value!
+            return false;
+        }
         return BeanAttribute.getBeanAttribute(declaringClass, attribute).getAnnotation(bc.getClazz()) != null;
     }
 

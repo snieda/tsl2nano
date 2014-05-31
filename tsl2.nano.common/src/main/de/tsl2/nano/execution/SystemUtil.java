@@ -14,6 +14,15 @@ public class SystemUtil {
     protected static final Log LOG = LogFactory.getLog(ScriptUtil.class);
 
     /**
+     * executes given command in directory command[0].getParentFile().
+     * @param command
+     * @return
+     */
+    public static final Process execute(String... command) {
+        return execute(new File(command[0]).getParentFile(), command);
+    }
+    
+    /**
      * execute system call - waiting for process to end - and logging its console output.<br>
      * example: <code>ScriptUtil.execute("cmd", "/C", "echo", "hello");</code>
      * <p>
@@ -21,16 +30,15 @@ public class SystemUtil {
      * 
      * @param command command with arguments
      */
-    public static final Process execute(String... command) {
-        final File scripFile = new File(command[0]);
+    public static final Process execute(File directory, String... command) {
         final ProcessBuilder processBuilder = new ProcessBuilder(command);
-        processBuilder.directory(scripFile.getParentFile());
+        processBuilder.directory(directory);
         Process process = null;
         try {
             LOG.info("starting process with command: " + StringUtil.toString(command, 500)
-                + "\ndir: "
+                + "\n\tdir: "
                 + processBuilder.directory()
-                + "\nenv: "
+                + "\n\tenv: "
                 + processBuilder.environment());
             process = processBuilder.start();
             final Scanner scanner = new Scanner(process.getInputStream());

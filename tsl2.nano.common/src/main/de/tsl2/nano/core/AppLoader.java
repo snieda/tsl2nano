@@ -239,6 +239,7 @@ public class AppLoader {
          */
         ClassLoader cl = classPath.contains(";") || isDalvik() ? contextClassLoader : null;
         NestedJarClassLoader nestedLoader = new NestedJarClassLoader(cl);
+        nestedLoader.addLibraryPath(new File(environment).getAbsolutePath());
         if (cl == null) {
             nestedLoader.addFile(classPath);
 //            String configDir = System.getProperty("user.dir") + "/" + environment + "/";
@@ -247,7 +248,6 @@ public class AppLoader {
         } else {
             System.setProperty(KEY_ISNESTEDJAR, Boolean.toString(false));
         }
-        nestedLoader.addLibraryPath(new File(environment).getAbsolutePath());
         nestedLoader.startPathChecker(environment, 2000);
         System.out.println("resetting current thread classloader " + contextClassLoader + " with " + nestedLoader);
         Thread.currentThread().setContextClassLoader(nestedLoader);

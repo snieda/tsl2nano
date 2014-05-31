@@ -104,6 +104,15 @@ public class CompatibilityLayer {
         }
     }
 
+    public Object run(String className, String methodName, Class[] par, Object... args) {
+        try {
+            return BeanClass.createBeanClass(className).callMethod(null, methodName, par, args);
+        } catch (Throwable e) {
+            ManagedException.forward(e);
+            return null;
+        }
+    }
+
     public Object runOptional(String className, String methodName, Class[] par, Object... args) {
         try {
             return BeanClass.createBeanClass(className).callMethod(null, methodName, par, args);
