@@ -31,6 +31,14 @@ to create a new application-version, do the following:
 		</ant>
 
 		<ant antfile="project-distribute.xml">
+			<property name="refactore.property.file" value="${basedir}/project/distribute-ebeanprovider.properties" />
+		</ant>
+
+		<ant antfile="project-distribute.xml">
+			<property name="refactore.property.file" value="${basedir}/project/distribute-jarresolver.properties" />
+		</ant>
+
+		<ant antfile="project-distribute.xml">
 			<property name="refactore.property.file" value="${basedir}/project/distribute-h5.properties" />
 		</ant>
 
@@ -114,9 +122,17 @@ to create a new application-version, do the following:
 			<property name="sh.jar.srcdir" value="../tsl2.nano.directaccess/src/resources" />
 			<property name="sh.jar.destination" value="${test.dir}/tsl2.nano.h5.${build.version}.jar" />
 			<property name="sh.jar.manifest" value="../tsl2.nano.h5/META-INF/MANIFEST.MF" />
-			<property name="sh.jar.include" value="*.*" />
+			<property name="sh.jar.include" value="**" />
 			<property name="sh.jar.exclude" value="build.properties" />
-			<property name="sh.jar.exclude2" value="sample" />
+		</ant>
+
+		<ant antfile="../tsl2.nano.common/shell.xml" target="sh.jar">
+			<property file="../tsl2.nano.h5/src/resources/build.properties" />
+			<property name="sh.jar.srcdir" value="../tsl2.nano.jarresolver/src/resources" />
+			<property name="sh.jar.destination" value="${test.dir}/tsl2.nano.h5.${build.version}.jar" />
+			<property name="sh.jar.manifest" value="../tsl2.nano.h5/META-INF/MANIFEST.MF" />
+			<property name="sh.jar.include" value="**" />
+			<property name="sh.jar.exclude" value="build.properties" />
 		</ant>
 
 		<ant antfile="../tsl2.nano.common/shell.xml" target="sh.jar">
@@ -138,7 +154,7 @@ to create a new application-version, do the following:
 			<property name="sh.jar.srcdir" value="${target.dir}" />
 			<property name="sh.jar.destination" value="${test.dir}/tsl2.nano.h5.${build.version}.jar" />
 			<property name="sh.jar.manifest" value="../tsl2.nano.h5/META-INF/MANIFEST.MF" />
-			<property name="sh.jar.include" value="slf4j-api-1.6.*.jar" />
+			<property name="sh.jar.include" value="slf4j-api-1.7.*.jar" />
 		</ant>
 		
 		<ant antfile="../tsl2.nano.common/shell.xml" target="sh.exec.cmd">
