@@ -41,15 +41,15 @@ public class Persistence implements Serializable {
     protected String provider = "org.hibernate.ejb.HibernatePersistence";
     protected String jtaDataSource = "<UNDEFINED>";
     protected String jarFile = "beans.jar";
-    protected String connectionDriverClass = "oracle.jdbc.OracleDriver";
-    protected String connectionUrl = "jdbc:oracle:thin:@localhost:1521:xe";
+    protected String connectionDriverClass = "org.hsqldb.jdbcDriver";
+    protected String connectionUrl = "jdbc:hsqldb:hsql://localhost:9003";
     protected String connectionUserName = "";
     protected String connectionPassword = "";
-    protected String hibernateDialect = "org.hibernate.dialect.Oracle10gDialect";
+    protected String hibernateDialect = "org.hibernate.dialect.HSQLDialect";
     protected String defaultSchema = "";
-    protected String datasourceClass = "oracle.jdbc.pool.OracleDataSource";
-    protected String port = "1521";
-    protected String database = "xe";
+    protected String datasourceClass = "org.hsqldb.jdbc.jdbcDataSource";
+    protected String port = "9003";
+    protected String database = "";
     private Persistence replication;
 
     /** jdbc connection properties - used by ejb creator */
@@ -325,6 +325,8 @@ public class Persistence implements Serializable {
         put(prop, "hibernate.connection.password", getConnectionPassword());
         put(prop, "hibernate.default_schema", getDefaultSchema());
 
+        put(prop, "jpa.beansjar", jarFileInEnvironment());
+        
         put(prop, "jdbc.dialect", getHibernateDialect());
         put(prop, "jdbc.driver", getConnectionDriverClass());
         put(prop, "jdbc.datasource", getDatasourceClass());

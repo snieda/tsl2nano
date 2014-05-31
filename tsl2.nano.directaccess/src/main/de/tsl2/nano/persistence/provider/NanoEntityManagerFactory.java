@@ -9,9 +9,11 @@
  */
 package de.tsl2.nano.persistence.provider;
 
+import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Collection;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.LinkedList;
@@ -61,6 +63,8 @@ import de.tsl2.nano.core.util.StringUtil;
  * @version $Revision$
  */
 public class NanoEntityManagerFactory implements javax.persistence.EntityManagerFactory {
+    private static final Log LOG = LogFactory.getLog(NanoEntityManagerFactory.class);
+    
     Collection<EntityManager> ems;
     Map<String, Object> props;
     EntityTransaction dummyTransaction;
@@ -72,6 +76,7 @@ public class NanoEntityManagerFactory implements javax.persistence.EntityManager
      */
 
     NanoEntityManagerFactory() {
+        LOG.debug("creating spimplified entitymanagerfactory: " + this);
         ems = new LinkedList<EntityManager>();
         props = new LinkedHashMap<String, Object>();
         dummyTransaction = new NTransaction();
@@ -85,6 +90,7 @@ public class NanoEntityManagerFactory implements javax.persistence.EntityManager
 
     @Override
     public void close() {
+        LOG.debug("closing entitymanagerfactory: " + this);
         for (EntityManager em : ems) {
             em.close();
         }
@@ -106,6 +112,7 @@ public class NanoEntityManagerFactory implements javax.persistence.EntityManager
      * @param clsEntityManagerImpl class to be loaded and used to create an {@link EntityManager}.
      * @return special {@link EntityManager}
      */
+    @SuppressWarnings({ "unchecked", "rawtypes" })
     public EntityManager createEntityManager(String clsEntityManagerImpl, Map props) {
         this.props.putAll(props);
         setEntityManagerImpl(clsEntityManagerImpl);
@@ -113,8 +120,11 @@ public class NanoEntityManagerFactory implements javax.persistence.EntityManager
     }
 
     @Override
+    @SuppressWarnings({ "rawtypes" })
     public EntityManager createEntityManager(Map arg0) {
-        EntityManager em = (EntityManager) BeanClass.createInstance((String) arg0.get(EM_IMPLEMENTATION), arg0);
+        String clsEM = (String) arg0.get(EM_IMPLEMENTATION);
+        LOG.info("creating entity manager: " + clsEM);
+        EntityManager em = (EntityManager) BeanClass.createInstance(clsEM, arg0);
         ems.add(em);
         return em;
     }
@@ -337,11 +347,11 @@ public class NanoEntityManagerFactory implements javax.persistence.EntityManager
      */
     @SuppressWarnings({ "rawtypes", "unchecked" })
     public abstract class AbstractQuery<X> implements TypedQuery<X> {
-        EntityManager em;
-        Map<String, Object> props;
-        Map<String, Parameter> parameter;
-        int first = 0;
-        int max = -1;
+        protected EntityManager em;
+        protected Map<String, Object> props = new HashMap<String, Object>();
+        protected Map<String, Parameter> parameter = new HashMap<String, Parameter>();
+        protected int first = 0;
+        protected int max = -1;
 
         FlushModeType flushModeType = FlushModeType.AUTO;
         LockModeType lockModeType = LockModeType.OPTIMISTIC;
@@ -523,7 +533,7 @@ public class NanoEntityManagerFactory implements javax.persistence.EntityManager
          */
         protected Class<X> evaluateResultType(String qstr) {
             //TODO: not-complete evaluation
-            String clsName = StringUtil.substring(qstr, "select t from ", " t");
+            String clsName = StringUtil.substring(qstr, "from ", " t");
             Collection<Class> beanTypes = Environment.get("loadedBeanTypes", null);
             for (Class t : beanTypes) {
                 if (t.getSimpleName().equals(clsName))
@@ -532,6 +542,27 @@ public class NanoEntityManagerFactory implements javax.persistence.EntityManager
             throw new IllegalArgumentException("The result type is not evaluable through the given select: " +qstr);
         }
 
+        protected String toNativeSQL(String jpqlStatement) {
+            //not-complete: only transforming: t --> t.*
+            return jpqlStatement.replaceAll("select t\\s", "select t.* ");
+        }
+        
+        protected Object getNParameter(String key) {
+            return ((NParameter)parameter.get(key)).getValue();
+        }
+        
+        /**
+         * getParameterValues
+         * @return all parameter values
+         */
+        protected Collection getNParameterValues() {
+            Set<String> keys = parameter.keySet();
+            List pars = new ArrayList(parameter.size());
+            for (String k : keys) {
+                pars.add(getNParameter(k));
+            }
+            return pars;
+        }
     }
 
     /**
@@ -542,11 +573,11 @@ public class NanoEntityManagerFactory implements javax.persistence.EntityManager
      * @version $Revision$
      */
     public class NParameter<T> implements Parameter<T> {
-        String name;
-        Class<T> type;
-        TemporalType temporalType;
-        Integer position;
-        T value;
+        protected String name;
+        protected Class<T> type;
+        protected TemporalType temporalType;
+        protected Integer position;
+        protected T value;
 
         /**
          * constructor
@@ -630,7 +661,7 @@ public class NanoEntityManagerFactory implements javax.persistence.EntityManager
     public class NTransaction implements EntityTransaction {
         private final Log LOG = LogFactory.getLog(NTransaction.class);
 
-        boolean rollbackOnly;
+        protected boolean rollbackOnly;
 
         @Override
         public void commit() {

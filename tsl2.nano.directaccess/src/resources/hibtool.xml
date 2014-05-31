@@ -65,7 +65,7 @@
 	<target name="hbm2java" description="Create java-bean classes">
 		<hibernatetool destdir="${basedir}">
 			<jdbcconfiguration packagename="${packagename}" propertyfile="${server.db-config.file}" detectmanytomany="true" />
-			<hbm2java destdir="${src.dir}" jdk5="true" ejb3="true" />
+			<hbm2java destdir="${src.dir}" jdk5="true" ejb3="true"/>
 		</hibernatetool>
 	</target>
 
