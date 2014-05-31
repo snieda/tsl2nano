@@ -10,22 +10,29 @@
 package de.tsl2.nano.ormliteprovider;
 
 import java.sql.SQLException;
+import java.util.Collection;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import javax.persistence.TypedQuery;
 
 import org.apache.commons.logging.Log;
 
+import com.j256.ormlite.dao.BaseDaoImpl;
 import com.j256.ormlite.dao.Dao;
 import com.j256.ormlite.dao.DaoManager;
 import com.j256.ormlite.jdbc.JdbcConnectionSource;
+import com.j256.ormlite.stmt.PreparedQuery;
+import com.j256.ormlite.stmt.mapped.MappedPreparedStmt;
 import com.j256.ormlite.support.ConnectionSource;
+import com.j256.ormlite.table.TableInfo;
 
 import de.tsl2.nano.core.ManagedException;
 import de.tsl2.nano.core.log.LogFactory;
 import de.tsl2.nano.core.util.StringUtil;
+import de.tsl2.nano.core.util.Util;
 import de.tsl2.nano.persistence.provider.NanoEntityManagerFactory;
 
 /**
@@ -43,7 +50,7 @@ public class EntityManager extends NanoEntityManagerFactory.AbstractEntityManage
     public EntityManager() {
         this(new LinkedHashMap());
     }
-    
+
     /**
      * constructor
      * 
@@ -53,8 +60,8 @@ public class EntityManager extends NanoEntityManagerFactory.AbstractEntityManage
         NanoEntityManagerFactory.instance().super(props);
         try {
             connectionSource =
-                new JdbcConnectionSource((String) props.get("jdbc.url"), (String) props.get("jdbc.user"),
-                    (String) props.get("jdbc.passwd"));
+                new JdbcConnectionSource((String) props.get("jdbc.url"), (String) props.get("jdbc.username"),
+                    (String) props.get("jdbc.password"));
             LOG.info("New Entitymanager for ORMLite created");
         } catch (SQLException e) {
             ManagedException.forward(e);
@@ -70,7 +77,12 @@ public class EntityManager extends NanoEntityManagerFactory.AbstractEntityManage
                     Class t = type;
                     if (type == null || Object.class.isAssignableFrom(type))
                         t = evaluateResultType(qstr);
-                    return dao(t).queryRaw(qstr).getResults();
+                    TableInfo tableInfo = new TableInfo(connectionSource, (BaseDaoImpl) dao(t), t);
+//                    PreparedQuery preparedQuery =
+//                        new MappedPreparedStmt(tableInfo, toNativeSQL(qstr), argFieldTypes, resultFieldTypes,
+//                            argHolders, 100, t);
+//                    return dao(t).query(preparedQuery);
+                    return dao(t).queryRaw(toNativeSQL(qstr), getValuesAsStrings()).getResults();
                 } catch (SQLException e) {
                     ManagedException.forward(e);
                     return null;
@@ -80,11 +92,21 @@ public class EntityManager extends NanoEntityManagerFactory.AbstractEntityManage
             @Override
             public int executeUpdate() {
                 try {
-                    return dao(type).updateRaw(qstr);
+                    return dao(type).updateRaw(qstr, getValuesAsStrings());
                 } catch (SQLException e) {
                     ManagedException.forward(e);
                     return -1;
                 }
+            }
+
+            protected String[] getValuesAsStrings() {
+                Collection values = super.getNParameterValues();
+                String[] result = new String[values.size()];
+                int i = 0;
+                for (Object object : values) {
+                    result[i++] = Util.asString(object);
+                }
+                return result;
             }
         };
     }
@@ -102,7 +124,7 @@ public class EntityManager extends NanoEntityManagerFactory.AbstractEntityManage
     @Override
     public <T> T merge(T arg0) {
         try {
-            dao(arg0.getClass()).commit(connectionSource.getReadWriteConnection());
+            dao(arg0.getClass()).createOrUpdate(arg0);
         } catch (SQLException e) {
             ManagedException.forward(e);
         }

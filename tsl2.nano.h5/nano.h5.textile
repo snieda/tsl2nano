@@ -33,6 +33,7 @@ To do a *quick-start*, go to chapter _Starting / Test_.
 * framework designs interfaces and provides extendable implementations
 * useable as standalone or web-service (with offline access), can connect to application-server or works standalone.
 * many features through nano.common, and nano.incubation like a rule, sql, action engine, network executor etc.
+* resolves all external (jdbc-drivers, etc.) jar-dependencies on runtime on an available network connection
 * handling blobs of data (byte[]) to be presented in html as picture, audio, video or object.
 * planned interfaces: 
 ** xsd-->bean
@@ -113,10 +114,12 @@ At the moment, tested with JPA 2.0 providers, the following providers are known 
 * [Acme Pers. ]: _com.acme.persistence_
 * [DataNucleus]: http://www.datanucleus.org/ _org.datanucleus.api.jpa.PersistenceProviderImpl_
 
-Other smaller frameworks provide only access to JPA-Annotations without providing an EntityManager:
+Other smaller frameworks provide only access to JPA-Annotations without providing an EntityManager and JP-QL:
 
-* [ORMLite]: http://ormlite.com
-* [EBean  ]: http://www.avaje.org
+* [ORMLite]: http://ormlite.com _de.tsl2.nano.ormliteprovider.EntityManager_
+* [EBean  ]: http://www.avaje.org _de.tsl2.nano.ebeanprovider.EntityManager_
+
+this ORM tools don't implement a jpa-persistenc-provider, but the libraries _tsl2.nano.ormliteprovider_ and _de.tsl2.nano.ebeanprovider_ extend the puristic base implementation of _NanoEntityManagerFactory_. Only native-SQL (no JP-QL) is available! As _tsl2.nano_ works on JP-QL, some simple transformations to native SQL are done by that EntityManager. These ORM-Tools are provided to have lightweight alternativs for mobile systems like Android.
 
 A summary of lightweight ORM tools can be read here: ftp://ftp.informatik.uni-stuttgart.de/pub/library/medoc.ustuttgart_fi/FACH-0147/FACH-0147.pdf
 
@@ -317,18 +320,33 @@ On top of each html page you will see on the left side an application icon (clic
 
 ### Dependencies
 
-#### Static Dependencies (direct referenced by tsl2.nano)
+While the _tsl2.nano_ framework has only a static dependency to simple-xml, using datbase-connections, bean or ddl generation will result in additional dependencies to other libraries. It's easy to add these libraries putting them into the environment path - they will be load on runtime, too. If you have a network connection, the _tsl2.nano_ framework tries to resolve the dependencies for you.
+
+#### The Jar-Resolver
+
+The _JarResolver_ is able to resolve dependencies on runtime through a network connection using maven. It knows some important classes (driver, persistence-provider etc.) and their depending jar-files.
+
+*Features*
+
+* installs maven by itself (through a network connection)
+* transforms known class names (with package) to known jar-dependencies
+* creates dynamically a pom.xml holding all dependencies
+* loads all given dependencies through maven to the current path
+
+#### Framework dependencies
+
+Static Dependencies (direct referenced by tsl2.nano):
 
 * simple-xml-2.7.jar
 
-#### Dynamic Dependencies (used by tsl2.nano, but through compatibility-layer)
+##### Dynamic Dependencies (used by tsl2.nano, but through compatibility-layer)
 
 * XmlUtil: velocity-1.6-dep.jar 
 * CommonTest: junit-4.8.2.jar 
 * AntUtil: ant-launcher.jar, ant.jar, ant-nodeps.jar 
 * BeanEnhancer: javassist-3.12.0.GA.jar
 
-#### No Dependencies, but useful to do the work
+##### No Dependencies, but useful to do the work
 
 * jdbc database driver (like hsqldb.jar)
 * jpa o/r mapper (like hibernate, toplink, eclipselink, openjpa or ormlite)
@@ -1263,6 +1281,7 @@ Other restrictions on android:
 * hsqldb 1.8 is not able to do _select max(count(color)) from Colors group by color_
 * hibernate3 is - on special circumstances - not able to load fields with empty ('') strings. This results in an __java.lang.StringIndexOutOfBoundsException: String index out of range: 0__
 * hibernate4 is not able to generate correct case-sensitive class-names if table-names contain '_'. Example: SYS_TABLE will result in class _SysTable_, but variables try to declare _Systable_.
+* hibernate-tools 4 needs slf4j-api-1.6.1.jar! other slf4j libraries will result in problems.
 * If an Enum value overwrites a method (like _toString()_), the declaring class of this value is anonymous. serializing it through simple-xml will write the class with postfix perhaps _$1_. This can't  be de-serialized through simple-xml.
 * Some array types can't be de-serialized through simple-xml.
 * a field holding a collection is not enabled
@@ -1272,11 +1291,16 @@ Other restrictions on android:
 *** eclipseLink loads the METAINF/persistence.xml through another classloader. the bean-jar file will be searched from META-INF/ parent directory
 *** use prefix '!' to define, that no environment-prefix will be added. E.g. '!mybeans.jar'.
 *** persistable fields of type Date have to annotate a temporal type 
-** datanucleus: metamodel has to be statically generated and compiled before
+** datanucleus: metamodel has to be statically generated and compiled before. this is done automatically on compiling the beans if the datanucleus libraries are present.
 ** openjpa: all jar-file names are invalid:
 *** openjpa needs the beans jar file packed into the main jar file! 
 *** dynamic class enhancement must be enabled (see https://openjpa.apache.org/builds/2.2.2/apache-openjpa/docs/ref_guide_pc_enhance.html)! start the jvm with option: _-javaagent:[path-to-extraced-openjpa-zip-file]/openjpa-2.x.x.jar_
 *** openjpa properties: https://openjpa.apache.org/builds/2.2.2/apache-openjpa/docs/ref_guide_conf_openjpa.html
+** ebean 3.3.2: "is not an enhanced entity bean. Subclassing is not longer supported in Ebean"
+*** ebean versions after 2.8.1 don't support DynamicProxies any more. enhancing has to be done statically through maven-builds.
+** ebean 2.8.1: "@OneToMany MUST have Cascade.PERSIST or Cascade.ALL because this is a unidirectional relationship"
+** ormlite: "Generated-id field 'myID' in MyEntity can't be type STRING.  Must be one of: INTEGER INTEGER_OBJ LONG LONG_OBJ UUID"
+** ormlite: "No fields have a DatabaseField annotation in class org.anonymous.project.Address"
 
 ## Changelog
 
@@ -1287,6 +1311,7 @@ Other restrictions on android:
 | 0.0.4 | 20.03.2014 | full featured version (replication, attribute- and beandef-extensions QueryResult, RuleAttribute, many refactorings) |
 | 0.0.4b | 11.05.2014 | lots of corrections, partially working on android |
 | 0.0.4c | 25.05.2014 | classloader transformation changed to enable loading persistence.xml through EclipseLink and OpenJPA |
+| 0.0.5 | 01.06.2014 | supporting non-jpa-persistence-providers like ebean, ormlite through NanoEntityManagerFactory |
 
 ## TODOs
 
@@ -1320,6 +1345,7 @@ Other restrictions on android:
 ** (v) DefaultFormat: StandardToStringStyle and ToStringBuilder
 ** (v) StringUtil --> BeanUtil
 ** (v) BeanClass --> StringUtil --> CollectionUtil --> DefaultFormat
+* (v) extract jars through constants
 * (x) Application Menu: reset (--> caches, environment, navigation), restart, login, logout
 * (x) default attribute names without @id field
 * (x) Nesting Beans
@@ -1445,9 +1471,9 @@ Other restrictions on android:
 *  ve mit ? ???
 * konfig format
 * Expectable-Data?
-* TAGs: bean2html, entity2html, bean2gui, entity2gui, jpa2gui, jpa2html, jpa persistence provider, openjpa, hibernate, datanucleus, eclipselink, data-editor, data-sheet, entity browser, jpa2, framework
-* use maven to get the desired jars in environment directory (Environment.loadExternalDependencies)
+* TAGs: grud, crud2gui, crud2html, bean2html, entity2html, bean2gui, entity2gui, jpa2gui, jpa2html, jpa persistence provider, openjpa, hibernate, datanucleus, eclipselink, data-editor, data-sheet, entity browser, jpa2, full stack framework, orm, o/r mapper
 
-* extrahieren der jars ueber konstanten
+* ebean uses an own query language but is able to 'parse' an ansi sql statement
+* ormlite needs field-annotations - while hibernate-tools only create property/method annotations
 
 [GLOSSARY]

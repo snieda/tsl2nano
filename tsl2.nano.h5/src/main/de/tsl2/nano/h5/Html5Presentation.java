@@ -277,7 +277,7 @@ public class Html5Presentation<T> extends BeanPresentationHelper<T> implements I
                         //the common-jar will be used by ant-scripts...
                         Environment.saveResourceToFileSystem(NanoH5.JAR_COMMON);
                         Environment.saveResourceToFileSystem(NanoH5.JAR_INCUBATION);
-                        FileUtil.extract("tsl2.nano.h5.sample.jar", dir, null);
+                        FileUtil.extractNestedZip("tsl2.nano.h5.sample.jar", dir, null);
                         return "Sample code and database created. Please re-start application!";
                     }
                 });

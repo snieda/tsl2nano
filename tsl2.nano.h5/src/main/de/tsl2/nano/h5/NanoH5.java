@@ -143,7 +143,7 @@ public class NanoH5 extends NanoHTTPD implements IConnector<Persistence> {
             File icons = new File(dir + "icons");
             if (!icons.exists()) {
                 try {
-                    FileUtil.extract("tsl2.nano.h5.default-resources.jar", dir, null);
+                    FileUtil.extractNestedZip("tsl2.nano.h5.default-resources.jar", dir, null);
                 } catch (Exception ex) {
                     //this shouldn't influence the application start!
                     LOG.warn("couldn't extract resources from internal file " + "tsl2.nano.h5.default-resources.jar",
@@ -473,6 +473,7 @@ public class NanoH5 extends NanoHTTPD implements IConnector<Persistence> {
          * perhaps provide directly an EntityManager
          */
         if (!Environment.get("use.applicationserver", false)) {
+            Environment.loadDependencies(persistence.getProvider());
             Class[] provider = Environment.get(CompatibilityLayer.class).load(persistence.getProvider());
             if (NanoEntityManagerFactory.AbstractEntityManager.class.isAssignableFrom(provider[0])) {
                 useJPAPersistenceProvider = false;
@@ -500,7 +501,7 @@ public class NanoH5 extends NanoHTTPD implements IConnector<Persistence> {
             Environment.saveResourceToFileSystem(JAR_COMMON);
             Environment.saveResourceToFileSystem(JAR_DIRECTACCESS);
             Environment.saveResourceToFileSystem(JAR_SERVICEACCESS);
-            Environment.loadDependencies(false, "ant.jar", "ant-launcher.jar", "ant-nodeps.jar");
+            Environment.loadDependencies("ant-1.7.0.jar", "org.hibernate.tool.ant.HibernateToolTask");
 
             //TODO: show generation message before - get script exception from exception handler
             generateJarFile(jarFile);
@@ -537,8 +538,10 @@ public class NanoH5 extends NanoHTTPD implements IConnector<Persistence> {
 //            ServiceFactory.instance().createSession(userObject, mandatorObject, subject, userRoles, features, featureInterfacePrefix)
             BeanContainerUtil.initGenericServices(runtimeClassloader);
         } else {
+            Environment.loadDependencies(persistence.getConnectionDriverClass(),
+                persistence.getDatasourceClass(), persistence.getProvider());
             GenericLocalBeanContainer.initLocalContainer(runtimeClassloader,
-                useJPAPersistenceProvider && Environment.get("check.connection.on.login", true));
+                useJPAPersistenceProvider && Environment.get("check.connection.on.login", false));
         }
         Environment.addService(IBeanContainer.class, BeanContainer.instance());
 
