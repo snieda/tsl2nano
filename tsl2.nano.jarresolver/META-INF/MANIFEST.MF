@@ -1,0 +1,7 @@
+Manifest-Version: 1.0
+Signature-Version: 0.0.1 (07.03.2014)
+Ant-Version: Apache Ant 1.7.1
+Created-By: Thomas Schneider
+Main-Class: de.tsl2.nano.jarresolver.JarResolver
+Main-Arguments: ant
+Class-Path: tsl2.nano.common.1.1.1.jar 

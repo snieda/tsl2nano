@@ -1,0 +1,208 @@
+/*
+ * File: $HeadURL$
+ * Id  : $Id$
+ * 
+ * created by: Tom
+ * created on: 28.05.2014
+ * 
+ * Copyright: (c) Thomas Schneider 2014, all rights reserved
+ */
+package de.tsl2.nano.jarresolver;
+
+import java.io.File;
+import java.io.IOException;
+import java.io.InputStream;
+import java.net.URL;
+import java.util.Collection;
+import java.util.LinkedList;
+import java.util.Map;
+import java.util.Properties;
+
+import org.apache.commons.logging.Log;
+
+import de.tsl2.nano.collection.MapUtil;
+import de.tsl2.nano.core.Environment;
+import de.tsl2.nano.core.ManagedException;
+import de.tsl2.nano.core.log.LogFactory;
+import de.tsl2.nano.core.util.FileUtil;
+import de.tsl2.nano.core.util.StringUtil;
+import de.tsl2.nano.core.util.Util;
+import de.tsl2.nano.execution.SystemUtil;
+
+/**
+ * Resolves all given dependencies defined in jarresolver.properties or through main args. Uses maven - downloading
+ * maven, creating a dynamic pom.xml and downloading the dependencies through maven.
+ * 
+ * <pre>
+ * Features:
+ * - installs maven by itself (through an internet connection)
+ * - transforms known class names (with package) to known jar-dependencies
+ * - creates dynamically a pom.xml holding all dependencies
+ * - loads all given dependencies through maven to the current path
+ * 
+ * Example:
+ *  JarResolver.main("ant-1.7.0", "org.hsqldb.jdbcDriver");
+ *  
+ * In the example you see, that you are able to mix jar-names and class-names. If you use a class-name, JarResolver will 
+ * resolve the default jar-version for you.
+ * </pre>
+ * 
+ * @author Tom
+ * @version $Revision$
+ */
+public class JarResolver {
+    private static final Log LOG = LogFactory.getLog(JarResolver.class);
+
+    Properties props;
+    String mvnRoot;
+    String basedir;
+
+    /*
+     * for a description of these constants, see jarresolver.properties
+     */
+    static final String URL_UPDATE_PROPERTIES = "default.update.url";
+
+    static final String URL_MVN_DOWNLOAD = "mvn.download.url";
+    static final String URL_MVN_REPOSITORY = "mvn.repository.url";
+    static final String DIR_LOCALREPOSITORY = "dir.local.repository";
+    static final String TMP_POM = "pom.template";
+
+    static final String JAR_DEPENDENCIES = "jar.dependencies";
+    static final String TMP_DEPENDENCY = "dependency.template";
+    static final String KEY_GROUPID = "groupId";
+    static final String KEY_ARTIFACTID = "artifactId";
+    static final String KEY_VERSION = "version";
+    /** version numbers from '-0.0' to '-999.999.999Z' */
+    static final String REGEX_VERSION = "-\\d{1,3}[.]\\d{1,3}[.]\\d{0,3}[a-zA-Z]?";
+
+    static final String PRE_PACKAGE = "PACKAGE.";
+
+    /**
+     * constructor
+     */
+    public JarResolver() {
+        props = new Properties();
+        try {
+            props.load(Environment.getResource("jarresolver.properties"));
+            String updateUrl = props.getProperty(URL_UPDATE_PROPERTIES);
+            if (updateUrl != null) {
+                try{
+                LOG.info("updating jarresolver.properties through " + updateUrl);
+                download("jarresolver.properties", updateUrl, true);
+                } catch(Exception ex) {
+                    //no problem - perhaps no network connection
+                    LOG.warn("couldn't update jarresolver.properties from " + updateUrl);
+                }
+            }
+                
+        } catch (IOException e) {
+            ManagedException.forward(e);
+        }
+    }
+
+    public Collection<String> start() {
+        LinkedList<String> fnames = new LinkedList<String>();
+
+        loadMvn();
+        createMvnScript();
+        loadDependencies();
+
+        return fnames;
+    }
+
+    private void loadDependencies() {
+        System.setProperty("M2_HOME", mvnRoot);
+        SystemUtil.execute(new File(basedir), mvnRoot + "/bin/mvn.bat", "install");
+    }
+
+    private void createMvnScript() {
+        LOG.info("creating mavens pom.xml");
+        InputStream stream = Environment.getResource(TMP_POM);
+        String pom = String.valueOf(FileUtil.getFileData(stream, "UTF-8"));
+
+        Properties p = new Properties();
+        p.putAll(props);
+        p.put("dependencies", createDependencyInformation());
+        pom = StringUtil.insertProperties(pom, p);
+        FileUtil.writeBytes(pom.getBytes(), basedir + "pom.xml", false);
+    }
+
+    @SuppressWarnings({ "rawtypes", "unchecked" })
+    private String createDependencyInformation() {
+        InputStream stream = Environment.getResource(TMP_DEPENDENCY);
+        String dependency = String.valueOf(FileUtil.getFileData(stream, "UTF-8"));
+
+        String depStr = (String) props.get(JAR_DEPENDENCIES);
+        if (Util.isEmpty(depStr))
+            throw new IllegalArgumentException("no dependencies defined --> nothing to do!");
+        String[] deps = depStr.split(",\\s*");
+        StringBuilder buf = new StringBuilder(deps.length * (dependency.length() + 20));
+        Map p;
+        String groupId, artifactId, version;
+        for (int i = 0; i < deps.length; i++) {
+            LOG.info("creating dependency '" + deps[i] + "'");
+            version = StringUtil.extract(deps[i], REGEX_VERSION);
+            groupId = artifactId = StringUtil.substring(deps[i], null, version);
+            version = !Util.isEmpty(version) ? version.substring(1) : version;
+            p = MapUtil.asMap(KEY_GROUPID, groupId, KEY_ARTIFACTID, artifactId, KEY_VERSION, version);
+            buf.append(StringUtil.insertProperties(dependency, p));
+        }
+        return buf.toString();
+    }
+
+    private void loadMvn() {
+        File mvnFile = download("maven", (String) props.get(URL_MVN_DOWNLOAD), false);
+        mvnRoot = mvnFile.getParent();
+        String extractedName = mvnRoot + "/" + StringUtil.substring(mvnFile.getName(), null, "-bin.zip");
+        if (!new File(extractedName + "/bin").exists())
+            FileUtil.extract(mvnFile.getPath(), mvnRoot + "/", ".*");
+        mvnRoot = extractedName;
+    }
+
+    protected File download(String name, String strUrl, boolean overwrite) {
+        try {
+            URL url = new URL(strUrl);
+            basedir = props.getProperty(DIR_LOCALREPOSITORY);
+            basedir = !Util.isEmpty(basedir) ? basedir : Environment.getConfigPath();
+            String fileName = basedir + url.getFile();
+            File file = new File(fileName);
+            if (overwrite || !file.exists()) {
+                file.getParentFile().mkdirs();
+                LOG.info("downloading " + name + " from: " + url.toString());
+                FileUtil.write(url.openStream(), fileName);
+            }
+            return file;
+        } catch (Exception e) {
+            ManagedException.forward(e);
+            return null;
+        }
+    }
+
+    /**
+     * main
+     * 
+     * @param args dependency names
+     */
+    public static void main(String[] args) {
+        JarResolver jr = new JarResolver();
+
+        if (args.length > 0) {
+            String jars = (String) jr.props.get(JAR_DEPENDENCIES);
+            StringBuilder buf = new StringBuilder(jars != null ? jars : "");
+            String pck;
+            for (int i = 0; i < args.length; i++) {
+                //if the parameter is a known package name, fill all dependent jar-files
+                pck = jr.props.getProperty(PRE_PACKAGE + args[i]);
+                if (pck != null)
+                    args[i] = pck;
+                buf.append("," + args[i]);
+            }
+            jars = buf.toString();
+            if (jars.startsWith(","))
+                jars = jars.substring(1);
+            jr.props.setProperty(JAR_DEPENDENCIES, jars);
+        }
+
+        jr.start();
+    }
+}
