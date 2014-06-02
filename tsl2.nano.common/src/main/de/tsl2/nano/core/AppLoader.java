@@ -15,7 +15,7 @@ import java.util.Map;
 
 import org.apache.commons.logging.Log;
 
-import de.tsl2.nano.core.classloader.NestedJarClassLoader;
+import de.tsl2.nano.core.classloader.NetworkClassLoader;
 import de.tsl2.nano.core.classloader.ThreadUtil;
 import de.tsl2.nano.core.cls.BeanClass;
 import de.tsl2.nano.core.log.LogFactory;
@@ -238,8 +238,7 @@ public class AppLoader {
          * 2. loading from IDE-classpath, we have to use the parent classloader
          */
         ClassLoader cl = classPath.contains(";") || isDalvik() ? contextClassLoader : null;
-        NestedJarClassLoader nestedLoader = new NestedJarClassLoader(cl);
-        nestedLoader.addLibraryPath(new File(environment).getAbsolutePath());
+        NetworkClassLoader nestedLoader = new NetworkClassLoader(cl);
         if (cl == null) {
             nestedLoader.addFile(classPath);
 //            String configDir = System.getProperty("user.dir") + "/" + environment + "/";
@@ -248,6 +247,7 @@ public class AppLoader {
         } else {
             System.setProperty(KEY_ISNESTEDJAR, Boolean.toString(false));
         }
+        nestedLoader.addLibraryPath(new File(environment).getAbsolutePath());
         nestedLoader.startPathChecker(environment, 2000);
         System.out.println("resetting current thread classloader " + contextClassLoader + " with " + nestedLoader);
         Thread.currentThread().setContextClassLoader(nestedLoader);

@@ -8,7 +8,7 @@
   <packaging>jar</packaging>
   <version>1.0.0</version>
   <name>${name}</name>
-  <url>${https://sourceforge.net/projects/tsl2nano}</url>
+  <url>http://sourceforge.net/projects/tsl2nano</url>
   <dependencies>
   ${dependencies}
   </dependencies>
@@ -16,7 +16,7 @@
     <repository>
       <id>first-url</id>
       <name>first-url</name>
-      <url>${mvn.repository.url.1}http://repo.maven.apache.org/maven2</url>
+      <url>${mvn.repository.url.1}</url>
     </repository>
     <repository>
       <id>second-url</id>

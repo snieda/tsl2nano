@@ -15,6 +15,7 @@ import java.util.Collection;
 import org.apache.commons.logging.Log;
 
 import de.tsl2.nano.core.ManagedException;
+import de.tsl2.nano.core.classloader.ThreadUtil;
 import de.tsl2.nano.core.log.LogFactory;
 import de.tsl2.nano.core.util.StringUtil;
 
@@ -281,7 +282,7 @@ public abstract class CommonAction<RETURNTYPE> implements IAction<RETURNTYPE>, S
             }
         } else {// asynchron
             result = null;
-            new Thread(this).start();
+            ThreadUtil.startDaemon(getId(), this);
         }
         return result;
     }

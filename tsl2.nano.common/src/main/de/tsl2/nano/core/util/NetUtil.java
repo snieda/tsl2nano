@@ -23,14 +23,14 @@ import de.tsl2.nano.core.ManagedException;
 import de.tsl2.nano.core.log.LogFactory;
 
 /**
- * Some net utilities
+ * Some network utilities
  * 
  * @author Tom
  * @version $Revision$
  */
 public class NetUtil {
     private static final Log LOG = LogFactory.getLog(NetUtil.class);
-    
+
     /**
      * getMyIPAdress
      * 
@@ -61,12 +61,15 @@ public class NetUtil {
                 Enumeration<InetAddress> inetAdresses = ni.getInetAddresses();
                 while (inetAdresses.hasMoreElements()) {
                     InetAddress inetAddress = inetAdresses.nextElement();
-                    if (inetAddress.isAnyLocalAddress() || inetAddress.isLinkLocalAddress() || inetAddress.isMulticastAddress())
+                    if (inetAddress.isAnyLocalAddress()
+                        || inetAddress.isLinkLocalAddress()
+                        || inetAddress.isSiteLocalAddress()
+                        || inetAddress.isMulticastAddress())
                         continue;
-                        return inetAddress.getHostAddress();
+                    return inetAddress.getHostAddress();
                 }
             }
-            return getInetAdress();
+            return /*InetAddress.getLoopbackAddress().getHostAddress();*/getInetAdress();
         } catch (SocketException e) {
             ManagedException.forward(e);
             return null;
@@ -106,7 +109,7 @@ public class NetUtil {
             return null;
         }
     }
-    
+
     /**
      * downloads the given strUrl if a network connection is available
      * 
@@ -116,7 +119,7 @@ public class NetUtil {
      * @param flat if true, the file of that url will be put directly to the environment directory. otherwise the full
      *            path will be stored to the environment.
      * @param overwrite if true, existing files will be overwritten
-     * @return downloaded local file 
+     * @return downloaded local file
      */
     public static File download(String name, String strUrl, String destDir, boolean flat, boolean overwrite) {
         try {
@@ -133,5 +136,14 @@ public class NetUtil {
             ManagedException.forward(e);
             return null;
         }
+    }
+
+    /**
+     * hasNetworkConnection
+     * 
+     * @return true, if this system is connected to a network
+     */
+    public static final boolean isOnline() {
+        return !getMyIP().equals(InetAddress.getLoopbackAddress().getHostAddress());
     }
 }

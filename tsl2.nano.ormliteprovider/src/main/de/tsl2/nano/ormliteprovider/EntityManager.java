@@ -77,7 +77,7 @@ public class EntityManager extends NanoEntityManagerFactory.AbstractEntityManage
                     Class t = type;
                     if (type == null || Object.class.isAssignableFrom(type))
                         t = evaluateResultType(qstr);
-                    TableInfo tableInfo = new TableInfo(connectionSource, (BaseDaoImpl) dao(t), t);
+//                    TableInfo tableInfo = new TableInfo(connectionSource, (BaseDaoImpl) dao(t), t);
 //                    PreparedQuery preparedQuery =
 //                        new MappedPreparedStmt(tableInfo, toNativeSQL(qstr), argFieldTypes, resultFieldTypes,
 //                            argHolders, 100, t);

@@ -12,11 +12,9 @@ package de.tsl2.nano.jarresolver;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
-import java.net.URL;
-import java.util.Collection;
-import java.util.LinkedList;
 import java.util.Map;
 import java.util.Properties;
+import java.util.Set;
 
 import org.apache.commons.logging.Log;
 
@@ -73,8 +71,8 @@ public class JarResolver {
     static final String KEY_GROUPID = "groupId";
     static final String KEY_ARTIFACTID = "artifactId";
     static final String KEY_VERSION = "version";
-    /** version numbers from '-0.0' to '-999.999.999Z' */
-    static final String REGEX_VERSION = "-\\d{1,3}[.]\\d{1,3}[.]\\d{0,3}[a-zA-Z]?";
+    /** version numbers from '-0.0' to '-999.999.999.Description' */
+    static final String REGEX_VERSION = "-\\d{1,3}[.]\\d{1,3}[.]\\d{0,3}[.-]?[a-zA-Z]*";
 
     static final String PRE_PACKAGE = "PACKAGE.";
 
@@ -101,14 +99,22 @@ public class JarResolver {
         }
     }
 
-    public Collection<String> start() {
-        LinkedList<String> fnames = new LinkedList<String>();
+    /**
+     * does the whole work
+     * 
+     * @param deps dependency or package names
+     * @return information string about resolved dependencies
+     */
+    public String start(String... deps) {
+        if (deps != null && deps.length > 0) {
+            prepareDependencies(deps);
+        }
 
         loadMvn();
         createMvnScript();
         loadDependencies();
 
-        return fnames;
+        return props.getProperty(JAR_DEPENDENCIES);
     }
 
     private void loadDependencies() {
@@ -143,8 +149,20 @@ public class JarResolver {
         for (int i = 0; i < deps.length; i++) {
             LOG.info("creating dependency '" + deps[i] + "'");
             version = StringUtil.extract(deps[i], REGEX_VERSION);
-            groupId = artifactId = StringUtil.substring(deps[i], null, version);
-            version = !Util.isEmpty(version) ? version.substring(1) : version;
+            //version should not be an empty string
+            if (Util.isEmpty(version))
+                version = null;
+            if (deps[i].contains("/")) {
+                groupId = StringUtil.substring(deps[i], null, "/");
+                artifactId = StringUtil.substring(deps[i], "/", version);
+            } else {
+                artifactId = StringUtil.substring(deps[i], null, version);
+                groupId = findPackage(deps[i], true);
+                //if no definition was found, try it with the artifactID itself
+                if (groupId == null)
+                    groupId = artifactId;
+            }
+            version = !Util.isEmpty(version) ? version.substring(1) : "RELEASE";
             p = MapUtil.asMap(KEY_GROUPID, groupId, KEY_ARTIFACTID, artifactId, KEY_VERSION, version);
             buf.append(StringUtil.insertProperties(dependency, p));
         }
@@ -168,12 +186,68 @@ public class JarResolver {
      * @param flat if true, the file of that url will be put directly to the environment directory. otherwise the full
      *            path will be stored to the environment.
      * @param overwrite if true, existing files will be overwritten
-     * @return downloaded local file 
+     * @return downloaded local file
      */
     protected File download(String name, String strUrl, boolean flat, boolean overwrite) {
-            basedir = props.getProperty(DIR_LOCALREPOSITORY);
-            basedir = !Util.isEmpty(basedir) ? basedir : Environment.getConfigPath();
-            return NetUtil.download(name, strUrl, basedir, flat, overwrite);
+        basedir = props.getProperty(DIR_LOCALREPOSITORY);
+        basedir = !Util.isEmpty(basedir) ? basedir : Environment.getConfigPath();
+        return NetUtil.download(name, strUrl, basedir, flat, overwrite);
+    }
+
+    /**
+     * combines dependencies from property file with start arguments and stores it back to the property
+     * {@link #JAR_DEPENDENCIES}.
+     * 
+     * @param deps start arguments
+     */
+    private void prepareDependencies(String... deps) {
+        String jars = (String) props.get(JAR_DEPENDENCIES);
+        StringBuilder buf = new StringBuilder(jars != null ? jars : "");
+        String pck;
+        for (int i = 0; i < deps.length; i++) {
+            //if the parameter is a known package name, fill all dependent jar-files
+            pck = findPackage(deps[i], false);
+            if (pck != null)
+                deps[i] = pck;
+            buf.append("," + deps[i]);
+        }
+        jars = buf.toString();
+        if (jars.startsWith(","))
+            jars = jars.substring(1);
+        props.setProperty(JAR_DEPENDENCIES, jars);
+    }
+
+    private String findPackageByArtifactId(String artifactId) {
+        Set<Object> keySet = props.keySet();
+        String key;
+        for (Object k : keySet) {
+            key = (String) k;
+            if (props.getProperty(key).equals(artifactId))
+                return StringUtil.substring(key, PRE_PACKAGE, null);
+        }
+        return null;
+    }
+
+    /**
+     * recursive finder of package definitions. searches for the given dependency name in the properties starting with
+     * {@link #PRE_PACKAGE}. If packageKey is true, the property key will be returned, otherwise the property value (the
+     * dependency/artifact name).
+     * 
+     * @param dependency package path
+     * @param packageKey whether to return the key or value
+     * @return found dependency entry (key or value)
+     */
+    private String findPackage(String dependency, boolean packageKey) {
+        String pck = props.getProperty(PRE_PACKAGE + dependency);
+        if (pck != null)
+            return packageKey ? dependency : pck;
+        else if (dependency.contains("."))
+            //search for parts of given package
+            return findPackage(StringUtil.substring(dependency, null, ".", true), packageKey);
+        else if (props.values().contains(dependency))
+            return findPackageByArtifactId(dependency);
+        else
+            return null;
     }
 
     /**
@@ -182,25 +256,7 @@ public class JarResolver {
      * @param args dependency names
      */
     public static void main(String[] args) {
-        JarResolver jr = new JarResolver();
-
-        if (args.length > 0) {
-            String jars = (String) jr.props.get(JAR_DEPENDENCIES);
-            StringBuilder buf = new StringBuilder(jars != null ? jars : "");
-            String pck;
-            for (int i = 0; i < args.length; i++) {
-                //if the parameter is a known package name, fill all dependent jar-files
-                pck = jr.props.getProperty(PRE_PACKAGE + args[i]);
-                if (pck != null)
-                    args[i] = pck;
-                buf.append("," + args[i]);
-            }
-            jars = buf.toString();
-            if (jars.startsWith(","))
-                jars = jars.substring(1);
-            jr.props.setProperty(JAR_DEPENDENCIES, jars);
-        }
-
-        jr.start();
+        new JarResolver().start(args);
     }
+
 }

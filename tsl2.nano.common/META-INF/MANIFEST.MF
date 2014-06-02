@@ -1,21 +1,10 @@
 Manifest-Version: 1.0
-Created-By: Thomas Schneider
 Signature-Version: 0.0.2 (07.03.2014)
+Ant-Version: Apache Ant 1.7.1
+Created-By: Thomas Schneider
 Main-Class: de.tsl2.nano.core.AppLoader
 Main-Arguments: de.tsl2.nano.execution.ScriptUtil ant shell.xml
-Class-Path: ./ 
- commons-collections-3.2.1.jar 
- commons-logging-1.1.1.jar 
- velocity-1.6-dep.jar 
- junit-4.8.2.jar 
- ant-launcher.jar 
- ant.jar 
- ant-nodeps.jar 
- commons-beanutils-1.8.0.jar 
- commons-io-1.3.2.jar 
- commons-lang-2.4.jar 
- tslbase.jar 
- dom4j-1.6.1.jar 
- commons-codec-1.6.jar 
- javassist-3.12.0.GA.jar 
- simple-xml-2.7.jar 
+Class-Path: tsl2.nano.common.1.1.0.jar commons-logging-1.1.1.jar commo
+ ns-collections-3.2.1.jar commons-lang-2.4.jar commons-beanutils-1.8.0
+ .jar ant.jar ant-launcher.jar ant-nodeps.jar
+

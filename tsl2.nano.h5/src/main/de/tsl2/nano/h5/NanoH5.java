@@ -473,7 +473,7 @@ public class NanoH5 extends NanoHTTPD implements IConnector<Persistence> {
          * perhaps provide directly an EntityManager
          */
         if (!Environment.get("use.applicationserver", false)) {
-            Environment.loadDependencies(persistence.getProvider());
+//            Environment.loadDependencies(persistence.getProvider());
             Class[] provider = Environment.get(CompatibilityLayer.class).load(persistence.getProvider());
             if (NanoEntityManagerFactory.AbstractEntityManager.class.isAssignableFrom(provider[0])) {
                 useJPAPersistenceProvider = false;
@@ -501,7 +501,7 @@ public class NanoH5 extends NanoHTTPD implements IConnector<Persistence> {
             Environment.saveResourceToFileSystem(JAR_COMMON);
             Environment.saveResourceToFileSystem(JAR_DIRECTACCESS);
             Environment.saveResourceToFileSystem(JAR_SERVICEACCESS);
-            Environment.loadDependencies("ant-1.7.0.jar", "org.hibernate.tool.ant.HibernateToolTask");
+            Environment.loadDependencies("org.apache.tools.ant", "org.hibernate.tool");
 
             //TODO: show generation message before - get script exception from exception handler
             generateJarFile(jarFile);

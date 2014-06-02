@@ -6,12 +6,17 @@
  - starts that runnable to be debuggable from remote
  
 to create a new application-version, do the following:
- - change build.version of all build.properties
+ - change build.version of all build*.properties
  - change MANIFEST.MF of all projects
  - change run.bat to start jar with new version number
 ========================================================================= -->
 <project default="distribute.2nano" name="distrubute.2nano">
+	<property name="target.dir" value="../target" />
+	<property name="test.name" value="test.h5.sample" />
+	<property name="test.dir" value="${target.dir}/${test.name}" />
+
 	<target name="distribute.2nano">
+		<!-- cleaning will remove all files from project origin!!! -->
 		<!-- <property name="refactore.clean" value="true" /> -->
 		<property name="sh.compile.classpath2" value="../tsl2.nano.common" />
 		<ant antfile="project-distribute.xml">
@@ -52,7 +57,7 @@ to create a new application-version, do the following:
 	-->
 	<target name="core.2nano" unless="disable_core.2nano">
 		<ant antfile="../tsl2.nano.common/shell.xml" target="sh.jar">
-			<property file="../tsl2.nano.common/src/resources/build.properties" />
+			<property file="../tsl2.nano.common/src/resources/build-tsl2.nano.common.properties" />
 			<property name="sh.jar.srcdir" value="../tsl2.nano.common/bin" />
 			<property name="sh.jar.destination" value="${target.dir}/tsl2.nano.core.${build.version}.jar" />
 			<property name="sh.jar.manifest" value="../tsl2.nano.common/META-INF/MANIFEST.MF" />
@@ -66,7 +71,7 @@ to create a new application-version, do the following:
 	-->
 	<target name="sample.2nano" unless="disable_sample.2nano">
 		<ant antfile="../tsl2.nano.common/shell.xml" target="sh.jar">
-			<property file="../tsl2.nano.h5/src/resources/build.properties" />
+			<property file="../tsl2.nano.h5/src/resources/build-tsl2.nano.h5.properties" />
 			<property name="sh.jar.srcdir" value="../target/test.h5.sample/h5.sample" />
 			<property name="sh.jar.destination" value="${target.dir}/tsl2.nano.h5.sample.jar" />
 			<property name="sh.jar.include" value="generated*/**/my/**" />
@@ -81,9 +86,6 @@ to create a new application-version, do the following:
 		distribute all libs to target and start a test-project for h5
 	-->
 	<target name="test.2nano" unless="disable_test.2nano">
-		<property name="target.dir" value="../target" />
-		<property name="test.name" value="test.h5.sample" />
-		<property name="test.dir" value="${target.dir}/${test.name}" />
 
 		<ant antfile="../tsl2.nano.common/shell.xml" target="sh.copy">
 			<property name="sh.copy.srcdir" value="../" />
@@ -100,7 +102,7 @@ to create a new application-version, do the following:
 		</ant>
 
 		<ant antfile="../tsl2.nano.common/shell.xml" target="sh.jar">
-			<property file="../tsl2.nano.h5/src/resources/build.properties" />
+			<property file="../tsl2.nano.h5/src/resources/build-tsl2.nano.h5.properties" />
 			<property name="sh.jar.srcdir" value="../tsl2.nano.common/bin" />
 			<property name="sh.jar.destination" value="${test.dir}/tsl2.nano.h5.${build.version}.jar" />
 			<property name="sh.jar.manifest" value="../tsl2.nano.h5/META-INF/MANIFEST.MF" />
@@ -109,7 +111,7 @@ to create a new application-version, do the following:
 		</ant>
 
 		<ant antfile="../tsl2.nano.common/shell.xml" target="sh.jar">
-			<property file="../tsl2.nano.h5/src/resources/build.properties" />
+			<property file="../tsl2.nano.h5/src/resources/build-tsl2.nano.h5.properties" />
 			<property name="sh.jar.srcdir" value="../tsl2.nano.common" />
 			<property name="sh.jar.destination" value="${test.dir}/tsl2.nano.h5.${build.version}.jar" />
 			<property name="sh.jar.manifest" value="../tsl2.nano.h5/META-INF/MANIFEST.MF" />
@@ -118,25 +120,25 @@ to create a new application-version, do the following:
 		</ant>
 
 		<ant antfile="../tsl2.nano.common/shell.xml" target="sh.jar">
-			<property file="../tsl2.nano.h5/src/resources/build.properties" />
+			<property file="../tsl2.nano.h5/src/resources/build-tsl2.nano.h5.properties" />
 			<property name="sh.jar.srcdir" value="../tsl2.nano.directaccess/src/resources" />
 			<property name="sh.jar.destination" value="${test.dir}/tsl2.nano.h5.${build.version}.jar" />
 			<property name="sh.jar.manifest" value="../tsl2.nano.h5/META-INF/MANIFEST.MF" />
 			<property name="sh.jar.include" value="**" />
-			<property name="sh.jar.exclude" value="build.properties" />
+			<property name="sh.jar.exclude" value="build-tsl2.nano.h5.propertiess" />
 		</ant>
 
 		<ant antfile="../tsl2.nano.common/shell.xml" target="sh.jar">
-			<property file="../tsl2.nano.h5/src/resources/build.properties" />
+			<property file="../tsl2.nano.h5/src/resources/build-tsl2.nano.h5.properties" />
 			<property name="sh.jar.srcdir" value="../tsl2.nano.jarresolver/src/resources" />
 			<property name="sh.jar.destination" value="${test.dir}/tsl2.nano.h5.${build.version}.jar" />
 			<property name="sh.jar.manifest" value="../tsl2.nano.h5/META-INF/MANIFEST.MF" />
 			<property name="sh.jar.include" value="**" />
-			<property name="sh.jar.exclude" value="build.properties" />
+			<property name="sh.jar.exclude" value="build*.propertiess" />
 		</ant>
 
 		<ant antfile="../tsl2.nano.common/shell.xml" target="sh.jar">
-			<property file="../tsl2.nano.h5/src/resources/build.properties" />
+			<property file="../tsl2.nano.h5/src/resources/build-tsl2.nano.h5.properties" />
 			<property name="sh.jar.srcdir" value="${target.dir}" />
 			<property name="sh.jar.destination" value="${test.dir}/tsl2.nano.h5.${build.version}.jar" />
 			<property name="sh.jar.manifest" value="../tsl2.nano.h5/META-INF/MANIFEST.MF" />
@@ -150,7 +152,7 @@ to create a new application-version, do the following:
 		</ant>
 
 		<ant antfile="../tsl2.nano.common/shell.xml" target="sh.jar">
-			<property file="../tsl2.nano.h5/src/resources/build.properties" />
+			<property file="../tsl2.nano.h5/src/resources/build-tsl2.nano.h5.properties" />
 			<property name="sh.jar.srcdir" value="${target.dir}" />
 			<property name="sh.jar.destination" value="${test.dir}/tsl2.nano.h5.${build.version}.jar" />
 			<property name="sh.jar.manifest" value="../tsl2.nano.h5/META-INF/MANIFEST.MF" />

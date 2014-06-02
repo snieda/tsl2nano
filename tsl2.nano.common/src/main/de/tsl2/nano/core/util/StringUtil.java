@@ -49,7 +49,7 @@ public class StringUtil {
      */
     public static String subEnclosing(String data, String from, String to, boolean constrain) {
         if (from == null && to == null)
-            return data;
+            return constrain ? null : data;
         else if (from == null)
             return substring(data, from, to, true, true);
         else if (to == null)
@@ -103,10 +103,12 @@ public class StringUtil {
      * @param from start-string
      * @param to end-string
      * @param start index
-     * @param constrain if true, null be returned if from or to couldn't be found
+     * @param constrain if true, null will be returned if from or to couldn't be found
      * @return extracted substring
      */
     public static String substring(String data, String from, String to, int start, boolean constrain) {
+        if (from == null && to == null)
+            return constrain ? null : data;
         if (from == null) {
             final int i = data.indexOf(to, start);
             if (i < 0) {

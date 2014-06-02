@@ -14,7 +14,6 @@ import java.io.FileOutputStream;
 import java.io.InputStream;
 import java.io.Serializable;
 import java.lang.Thread.UncaughtExceptionHandler;
-import java.net.URLClassLoader;
 import java.text.Format;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -35,7 +34,6 @@ import org.simpleframework.xml.ElementMap;
 import org.simpleframework.xml.core.Persist;
 
 import de.tsl2.nano.bean.BeanUtil;
-import de.tsl2.nano.core.classloader.NestedJarClassLoader;
 import de.tsl2.nano.core.cls.BeanClass;
 import de.tsl2.nano.core.exception.ExceptionHandler;
 import de.tsl2.nano.core.execution.CompatibilityLayer;
@@ -122,7 +120,8 @@ public class Environment {
         String buildInfo = System.getProperty(KEY_BUILDINFO);
         if (buildInfo == null) {
             try {
-                InputStream biStream = Environment.class.getClassLoader().getResourceAsStream("build.properties");
+                InputStream biStream =
+                    Environment.class.getClassLoader().getResourceAsStream("build-tsl2.nano.h5.properties");
                 if (biStream != null) {
                     Properties bi = new Properties();
                     bi.load(biStream);
@@ -633,7 +632,8 @@ public class Environment {
         if (unresolvedDependencies.size() > 0) {
             //load the dependencies through maven, if available
             String clsJarResolver = "de.tsl2.nano.jarresolver.JarResolver";
-            if (get(CompatibilityLayer.class).isAvailable(clsJarResolver))
+            if (get("classloader.usenetwork.loader", true) && NetUtil.isOnline()
+                && get(CompatibilityLayer.class).isAvailable(clsJarResolver))
                 get(CompatibilityLayer.class).run(clsJarResolver, "main", new Class[] { String[].class },
                     new Object[] { dependencyNames });
             else
