@@ -44,11 +44,9 @@
 			<path refid="compiler.classpath" />
 			<fileset dir="${plugin.dir}">
 				<include name="**/*.jar" />
-				<!-- <exclude name="**/slf4j-api-1.6.1.jar" /> -->
 			</fileset>
 			<fileset dir="${basedir}">
 				<include name="**/*.jar" />
-				<!-- <exclude name="**/slf4j-api-1.6.1.jar" /> -->
 			</fileset>
 		</path>
 
