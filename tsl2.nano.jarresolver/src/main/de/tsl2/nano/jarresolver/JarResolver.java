@@ -44,6 +44,8 @@ import de.tsl2.nano.execution.SystemUtil;
  *  
  * In the example you see, that you are able to mix jar-names and class-names. If you use a class-name, JarResolver will 
  * resolve the default jar-version for you.
+ * 
+ * For more informations, read comments on 'jarresolver.properties'.
  * </pre>
  * 
  * @author Tom
@@ -75,7 +77,8 @@ public class JarResolver {
     static final String REGEX_VERSION = "-\\d{1,3}[.]\\d{1,3}[.]\\d{0,3}[.-]?[a-zA-Z]*";
 
     static final String PRE_PACKAGE = "PACKAGE.";
-
+    static final String PACKAGE_EXCEPTION = "package.exception.regex";
+    
     /**
      * constructor
      */
@@ -109,7 +112,6 @@ public class JarResolver {
         if (deps != null && deps.length > 0) {
             prepareDependencies(deps);
         }
-
         loadMvn();
         createMvnScript();
         loadDependencies();
@@ -136,13 +138,10 @@ public class JarResolver {
 
     @SuppressWarnings({ "rawtypes", "unchecked" })
     private String createDependencyInformation() {
+        String[] deps = getDependencies();
         InputStream stream = Environment.getResource(TMP_DEPENDENCY);
         String dependency = String.valueOf(FileUtil.getFileData(stream, "UTF-8"));
 
-        String depStr = (String) props.get(JAR_DEPENDENCIES);
-        if (Util.isEmpty(depStr))
-            throw new IllegalArgumentException("no dependencies defined --> nothing to do!");
-        String[] deps = depStr.split(",\\s*");
         StringBuilder buf = new StringBuilder(deps.length * (dependency.length() + 20));
         Map p;
         String groupId, artifactId, version;
@@ -167,6 +166,13 @@ public class JarResolver {
             buf.append(StringUtil.insertProperties(dependency, p));
         }
         return buf.toString();
+    }
+
+    private String[] getDependencies() {
+        String depStr = (String) props.get(JAR_DEPENDENCIES);
+        if (Util.isEmpty(depStr))
+            throw new IllegalArgumentException("no dependencies defined --> nothing to do!");
+        return depStr.split(",\\s*");
     }
 
     private void loadMvn() {
@@ -197,6 +203,8 @@ public class JarResolver {
     /**
      * combines dependencies from property file with start arguments and stores it back to the property
      * {@link #JAR_DEPENDENCIES}.
+     * <p/>
+     * removes all packages matching the package-exception expression (package that should not be loaded through maven).
      * 
      * @param deps start arguments
      */
@@ -209,8 +217,13 @@ public class JarResolver {
             pck = findPackage(deps[i], false);
             if (pck != null)
                 deps[i] = pck;
-            buf.append("," + deps[i]);
+            if (!deps[i].matches(PACKAGE_EXCEPTION))
+                buf.append("," + deps[i]);
         }
+        
+        if (buf.length() == 0)
+            throw new IllegalArgumentException("no dependencies defined --> nothing to do!");
+
         jars = buf.toString();
         if (jars.startsWith(","))
             jars = jars.substring(1);
@@ -222,7 +235,7 @@ public class JarResolver {
         String key;
         for (Object k : keySet) {
             key = (String) k;
-            if (props.getProperty(key).equals(artifactId))
+            if (key.startsWith(PRE_PACKAGE) && props.getProperty(key).equals(artifactId))
                 return StringUtil.substring(key, PRE_PACKAGE, null);
         }
         return null;

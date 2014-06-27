@@ -157,6 +157,7 @@ to create a new application-version, do the following:
 			<property name="sh.jar.destination" value="${test.dir}/tsl2.nano.h5.${build.version}.jar" />
 			<property name="sh.jar.manifest" value="../tsl2.nano.h5/META-INF/MANIFEST.MF" />
 			<property name="sh.jar.include" value="slf4j-api-1.7.*.jar" />
+			<property name="sh.jar.include" value="java_websocket.jar" />
 		</ant>
 		
 		<ant antfile="../tsl2.nano.common/shell.xml" target="sh.exec.cmd">
