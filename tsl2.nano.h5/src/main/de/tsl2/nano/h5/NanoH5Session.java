@@ -22,6 +22,8 @@ import static de.tsl2.nano.h5.NanoHTTPD.MIME_HTML;
 import java.io.Serializable;
 import java.lang.Thread.UncaughtExceptionHandler;
 import java.net.InetAddress;
+import java.net.InetSocketAddress;
+import java.net.URL;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Date;
@@ -50,13 +52,15 @@ import de.tsl2.nano.core.Main;
 import de.tsl2.nano.core.ManagedException;
 import de.tsl2.nano.core.exception.ExceptionHandler;
 import de.tsl2.nano.core.exception.Message;
+import de.tsl2.nano.core.execution.Profiler;
 import de.tsl2.nano.core.log.LogFactory;
 import de.tsl2.nano.core.util.DateUtil;
 import de.tsl2.nano.core.util.StringUtil;
-import de.tsl2.nano.execution.Profiler;
 import de.tsl2.nano.format.RegExpFormat;
 import de.tsl2.nano.h5.NanoHTTPD.Response;
 import de.tsl2.nano.h5.navigation.IBeanNavigator;
+import de.tsl2.nano.h5.websocket.NanoWebSocketServer;
+import de.tsl2.nano.h5.websocket.WebSocketExceptionHandler;
 import de.tsl2.nano.persistence.Persistence;
 import de.tsl2.nano.serviceaccess.IAuthorization;
 import de.tsl2.nano.util.NumberUtil;
@@ -105,8 +109,18 @@ public class NanoH5Session implements ISession {
         this.builder = server.builder;
         this.nav = navigator;
         this.sessionClassloader = appstartClassloader;
-        this.exceptionHandler =
-            (ExceptionHandler) Environment.addService(UncaughtExceptionHandler.class, new ExceptionHandler());
+        if (Environment.get("use.websocket", true)) {
+            URL url = NanoH5.getServiceURL(null);
+            NanoWebSocketServer socketServer =
+                new NanoWebSocketServer(new InetSocketAddress(url.getHost(), Environment.get("websocket.port", 8099)));
+            this.exceptionHandler =
+                (ExceptionHandler) Environment.addService(UncaughtExceptionHandler.class,
+                    new WebSocketExceptionHandler(socketServer));
+            socketServer.start();
+        } else {
+            this.exceptionHandler =
+                (ExceptionHandler) Environment.addService(UncaughtExceptionHandler.class, new ExceptionHandler());
+        }
         this.authorization = authorization;
         this.sessionStart = System.currentTimeMillis();
     }
@@ -188,6 +202,7 @@ public class NanoH5Session implements ISession {
             LOG.error(e);
             RuntimeException ex = ManagedException.toRuntimeEx(e, true);
             msg = refreshPage(ex);
+            Message.send(exceptionHandler, ex.toString());
             response = server.createResponse(HTTP_BADREQUEST, MIME_HTML, msg);
         }
         //TODO: eliminate bug in NanoHTTPD not resetting uri...
@@ -213,7 +228,7 @@ public class NanoH5Session implements ISession {
             + ": " + DateUtil.getFormattedDateTime(new Date()) + ", "
             + Environment.translate("tsl2nano.request", true) + ": "
             + DateUtil.getFormattedMinutes(System.currentTimeMillis() - startTime) + " min"
-            + (LOG.isDebugEnabled() ? ", " + "Memory: " + (Profiler.getUsedMem() / (1024*1024)) + " MB" : "");
+            + (LOG.isDebugEnabled() ? ", " + "Memory: " + (Profiler.getUsedMem() / (1024 * 1024)) + " MB" : "");
     }
 
     private String refreshPage(Object message) {

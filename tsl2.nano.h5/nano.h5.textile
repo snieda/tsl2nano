@@ -1472,6 +1472,7 @@ Other restrictions on android:
 * konfig format
 * Expectable-Data?
 * TAGs: grud, crud2gui, crud2html, bean2html, entity2html, bean2gui, entity2gui, jpa2gui, jpa2html, jpa persistence provider, openjpa, hibernate, datanucleus, eclipselink, data-editor, data-sheet, entity browser, jpa2, full stack framework, orm, o/r mapper
+* perhaps use findjar.com before invoking maven-repository
 
 * ebean uses an own query language but is able to 'parse' an ansi sql statement
 * ormlite needs field-annotations - while hibernate-tools only create property/method annotations

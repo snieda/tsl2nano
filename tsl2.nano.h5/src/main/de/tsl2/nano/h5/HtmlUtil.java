@@ -115,6 +115,9 @@ public class HtmlUtil {
 
     public static final String TAG_BUTTON = "button";
 
+    public static final String TAG_SCRIPT = "script";
+    public static final String ATTR_TYPE_JS = "text/javascript";
+
     /* 
      * Layout
      */

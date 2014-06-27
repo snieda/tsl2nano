@@ -1,0 +1,39 @@
+
+var socket = new WebSocket('ws://${websocket.server.ip}:${websocket.server.port}');
+console.log('websocket created:' + socket);
+
+socket.onopen = function () {
+  console.log('websocket connected');
+  socket.send('websocket connected');
+};
+
+socket.onerror = function (error) {
+  console.log('websocket error ' + error);
+};
+
+// Log messages from the server
+socket.onmessage = function (e) {
+  console.log('showing message ' + e);
+	document.getElementById('${websocket.element.id}').appendChild(
+            document.createTextNode(' \t' + e.data)
+        );
+};
+
+socket.onclose = function (e) {
+  console.log('websocket closed! code: ' + e.code + ', reason: \'' + e.reason + '\'');
+};
+
+
+/*
+// Sending canvas ImageData as ArrayBuffer
+var img = canvas_context.getImageData(0, 0, 400, 320);
+var binary = new Uint8Array(img.data.length);
+for (var i = 0; i < img.data.length; i++) {
+  binary[i] = img.data[i];
+}
+socket.send(binary.buffer);
+
+// Sending file as Blob
+var file = document.querySelector('input[type="file"]').files[0];
+socket.send(file);
+*/		

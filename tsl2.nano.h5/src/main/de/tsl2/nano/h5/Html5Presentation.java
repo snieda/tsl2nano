@@ -11,7 +11,7 @@ package de.tsl2.nano.h5;
 
 import static de.tsl2.nano.bean.def.IBeanCollector.MODE_ASSIGNABLE;
 import static de.tsl2.nano.bean.def.IBeanCollector.MODE_MULTISELECTION;
-import static de.tsl2.nano.h5.HtmlUtil.ALIGN_CENTER;
+import static de.tsl2.nano.h5.HtmlUtil.*;
 import static de.tsl2.nano.h5.HtmlUtil.ALIGN_RIGHT;
 import static de.tsl2.nano.h5.HtmlUtil.ATTR_ACCESSKEY;
 import static de.tsl2.nano.h5.HtmlUtil.ATTR_ACTION;
@@ -97,6 +97,7 @@ import java.util.Date;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.Properties;
 
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
@@ -430,14 +431,45 @@ public class Html5Presentation<T> extends BeanPresentationHelper<T> implements I
     }
 
     private Element createMetaAndBody(Element html, String title, boolean interactive) {
-        appendElement(html, TAG_HEAD, ATTR_TITLE, "Nano-H5 Application");
+        Element head = appendElement(html, TAG_HEAD, ATTR_TITLE, "Nano-H5 Application");
 
+        /*
+         * WebSocket integration
+         */
+        createWebSocket(head, "footer");
+
+        /*
+         * The body
+         */
         Element body =
             appendElement(html, TAG_BODY, ATTR_ID, (!Util.isEmpty(title, true) ? title : "body"));
         if (interactive)
             HtmlUtil.appendAttributes(body, "background", "icons/spe.jpg", ATTR_STYLE,
                 STYLE_BACKGROUND_RADIAL_GRADIENT);
         return body;
+    }
+
+    /**
+     * createWebSocket
+     * 
+     * @param parent
+     */
+    private void createWebSocket(Element parent, String elementId) {
+        if (Environment.get("use.websocket", true)) {
+            InputStream jsStream = Environment.getResource("websocket.client.js.template");
+            String js = String.valueOf(FileUtil.getFileData(jsStream, "UTF-8"));
+
+            Element script = appendElement(parent, TAG_SCRIPT, ATTR_TYPE, ATTR_TYPE_JS);
+
+            Properties p = new Properties();
+            p.putAll(Environment.getProperties());
+            URL url = NanoH5.getServiceURL(null);
+            p.put("websocket.server.ip", url.getHost());
+            p.put("websocket.server.port", Environment.get("websocket.port", 8099));
+            p.put("websocket.element.id", elementId);
+            script.appendChild(script.getOwnerDocument().createTextNode(
+                StringUtil.insertProperties(js, p)));
+        }
     }
 
     /**
@@ -1438,6 +1470,7 @@ public class Html5Presentation<T> extends BeanPresentationHelper<T> implements I
             if (strFooter != null && !HtmlUtil.isHtml(strFooter)) {
                 String[] split = strFooter.split("([:,=] )|[\t\n]");
                 preFooter = doc.createElement(TAG_SPAN);
+                preFooter.setAttribute(ATTR_ID, "footer");
                 boolean isKey;
                 for (int i = 0; i < split.length; i++) {
                     isKey = i % 2 == 0;
@@ -1447,6 +1480,7 @@ public class Html5Presentation<T> extends BeanPresentationHelper<T> implements I
                         ? COLOR_BLUE
                         : COLOR_BLACK);
                 }
+                appendElement(preFooter, TAG_IMAGE, ATTR_SRC, "icons/properties.png");
             } else {
                 preFooter = doc.createElement(TAG_SPAN);
                 preFooter.setNodeValue(strFooter);

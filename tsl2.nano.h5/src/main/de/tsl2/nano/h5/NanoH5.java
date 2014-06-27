@@ -8,7 +8,9 @@ import static de.tsl2.nano.bean.def.IBeanCollector.MODE_SEARCHABLE;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
+import java.lang.Thread.UncaughtExceptionHandler;
 import java.net.InetAddress;
+import java.net.InetSocketAddress;
 import java.net.MalformedURLException;
 import java.net.Socket;
 import java.net.URL;
@@ -26,6 +28,10 @@ import javax.persistence.EntityManager;
 import javax.persistence.EntityManagerFactory;
 
 import org.apache.commons.logging.Log;
+import org.java_websocket.WebSocketAdapter;
+import org.java_websocket.client.DefaultSSLWebSocketClientFactory;
+import org.java_websocket.server.DefaultSSLWebSocketServerFactory;
+import org.java_websocket.server.WebSocketServer.WebSocketServerFactory;
 
 import de.tsl2.nano.action.IActivable;
 import de.tsl2.nano.bean.BeanContainer;
@@ -43,6 +49,7 @@ import de.tsl2.nano.core.AppLoader;
 import de.tsl2.nano.core.Environment;
 import de.tsl2.nano.core.ManagedException;
 import de.tsl2.nano.core.cls.BeanClass;
+import de.tsl2.nano.core.exception.Message;
 import de.tsl2.nano.core.execution.CompatibilityLayer;
 import de.tsl2.nano.core.log.LogFactory;
 import de.tsl2.nano.core.util.FileUtil;
@@ -53,6 +60,7 @@ import de.tsl2.nano.h5.expression.SQLExpression;
 import de.tsl2.nano.h5.navigation.EntityBrowser;
 import de.tsl2.nano.h5.navigation.IBeanNavigator;
 import de.tsl2.nano.h5.navigation.Workflow;
+import de.tsl2.nano.h5.websocket.NanoWebSocketServer;
 import de.tsl2.nano.persistence.GenericLocalBeanContainer;
 import de.tsl2.nano.persistence.Persistence;
 import de.tsl2.nano.persistence.PersistenceClassLoader;
@@ -96,6 +104,8 @@ public class NanoH5 extends NanoHTTPD implements IConnector<Persistence> {
     private static final String DEBUG_HTML_FILE = AppLoader.getFileSystemPrefix() + "application.html";
     static final String START_PAGE = "Start";
     static final int OFFSET_FILTERLINES = 2;
+
+    private static final String BEAN_GENERATION_PACKAGENAME = "bean.generation.packagename";
 
     public NanoH5() throws IOException {
         this(Environment.get("http.connection", "localhost:8067"), Environment.get(IPageBuilder.class));
@@ -414,6 +424,7 @@ public class NanoH5 extends NanoHTTPD implements IConnector<Persistence> {
      */
     @SuppressWarnings("serial")
     protected BeanDefinition<?> createBeanCollectors(List<Class> beanClasses) {
+        Message.send("loading bean collectors for " + beanClasses.size() + " types");
         LOG.debug("creating collector for: ");
         List types = new ArrayList(beanClasses.size());
         for (Class cls : beanClasses) {
@@ -490,25 +501,35 @@ public class NanoH5 extends NanoHTTPD implements IConnector<Persistence> {
          * On any circumstances: the jar-file has to be in the environments directory,
          *    the persistence-units jar-file is always environment-dir + jar-filename --> found always through current classpath
          */
-//        if (URI.create(persistence.getJarFile()).)
-        File selectedFile = FileUtil.getURIFile(persistence.getJarFile());
-        String jarFile =
-            !selectedFile.isAbsolute() ? Environment.getConfigPath() + selectedFile.getPath()
-                : selectedFile.getPath();
-        if (!new File(jarFile).exists() && !selectedFile.isAbsolute()) {
+        /*
+         * we have to check, if it is an URL, an absolute file path or a relative file path.
+         * 1. URL: extract file path from URL
+         * 2. absolute file path: copy the file to environment location
+         * 3. relative: perfect ;-)
+         */
+        String jarName = persistence.getJarFile();
+        File selectedFile = new File(jarName);
+        boolean isAbsolutePath = selectedFile.isAbsolute();
+        selectedFile =
+            isAbsolutePath ? selectedFile : new File(Environment.getConfigPath()
+                + FileUtil.getURIFile(jarName).getPath());
+        jarName = selectedFile.getPath();
+        if (!selectedFile.exists() && !isAbsolutePath) {
             //ant-scripts can't use the nested jars. but normal beans shouldn't have dependencies to simple-xml.
             Environment.saveResourceToFileSystem(JAR_SIMPLEXML);
             Environment.saveResourceToFileSystem(JAR_COMMON);
             Environment.saveResourceToFileSystem(JAR_DIRECTACCESS);
             Environment.saveResourceToFileSystem(JAR_SERVICEACCESS);
-            Environment.loadDependencies("org.apache.tools.ant", "org.hibernate.tool");
+
+            Environment.loadClassDependencies("org.apache.tools.ant.taskdefs.Taskdef",
+                "org.hibernate.tool.ant.HibernateToolTask", persistence.getConnectionDriverClass());
 
             //TODO: show generation message before - get script exception from exception handler
-            generateJarFile(jarFile);
-            if (!new File(jarFile).exists()) {
+            generateJarFile(jarName);
+            if (!new File(jarName).exists()) {
                 throw new ManagedException(
                     "Couldn't generate bean jar file '"
-                        + jarFile
+                        + jarName
                         + "' through ant-script hibtools.xml! Please see log file for exceptions. Possible errors are:\n"
                         + "\t- no ant jar files (ant.jar, ant-launcher.jar, ant-nodeps.jar) in your environment directory\n"
                         + "\t- no hibernate jar files in your environment directory\n"
@@ -516,7 +537,7 @@ public class NanoH5 extends NanoHTTPD implements IConnector<Persistence> {
                         + "\t- your java is an JRE instead of a full JDK (needed to compile the generated classes!)\n"
                         + "\nAs alternative you may select an existing bean-jar file (-->no generation needed!) in field \"JarFile\"");
             }
-        } else if (selectedFile.isAbsolute()) {//copy it into the own classpath (to don't lock the file)
+        } else if (isAbsolutePath) {//copy it into the own classpath (to don't lock the file)
             if (!selectedFile.exists())
                 throw new IllegalArgumentException(
                     "If an absolute file-path is given, the file has to exist! If the file-path is relative and doesn't exist, it will be created/generated");
@@ -538,7 +559,7 @@ public class NanoH5 extends NanoHTTPD implements IConnector<Persistence> {
 //            ServiceFactory.instance().createSession(userObject, mandatorObject, subject, userRoles, features, featureInterfacePrefix)
             BeanContainerUtil.initGenericServices(runtimeClassloader);
         } else {
-            Environment.loadDependencies(persistence.getConnectionDriverClass(),
+            Environment.loadClassDependencies(persistence.getConnectionDriverClass(),
                 persistence.getDatasourceClass(), persistence.getProvider());
             GenericLocalBeanContainer.initLocalContainer(runtimeClassloader,
                 useJPAPersistenceProvider && Environment.get("check.connection.on.login", false));
@@ -546,7 +567,7 @@ public class NanoH5 extends NanoHTTPD implements IConnector<Persistence> {
         Environment.addService(IBeanContainer.class, BeanContainer.instance());
 
         List<Class> beanClasses =
-            runtimeClassloader.loadBeanClasses(jarFile,
+            runtimeClassloader.loadBeanClasses(jarName,
                 Environment.get("bean.class.presentation.regexp", ".*"), null);
         Environment.setProperty("loadedBeanTypes", beanClasses);
 
@@ -565,12 +586,13 @@ public class NanoH5 extends NanoHTTPD implements IConnector<Persistence> {
 //    properties.setProperty("hbm.conf.xml", "hibernate.conf.xml");
         properties.setProperty("server.db-config.file", Persistence.FILE_JDBC_PROP_FILE);
         properties.setProperty("dest.file", jarFile);
-
+        properties.setProperty(BEAN_GENERATION_PACKAGENAME, Environment.get(BEAN_GENERATION_PACKAGENAME, "org.anonymous.project"));
         String plugin_dir = System.getProperty("user.dir");
         properties.setProperty("plugin.dir", new File(plugin_dir).getAbsolutePath());
         if (plugin_dir.endsWith(".jar/")) {
             properties.setProperty("plugin_isjar", Boolean.toString(true));
         }
+        Message.send("starting generation of '" + jarFile + "' through script " + HIBTOOLNAME);
         Environment.get(CompatibilityLayer.class).runRegistered("ant",
             Environment.getConfigPath() + HIBTOOLNAME,
             "create.bean.jar",
