@@ -46,8 +46,7 @@ public class WebSocketExceptionHandler extends ExceptionHandler {
         super.uncaughtException(t, e);
         Set<WebSocket> connections = socket.connections();
         for (WebSocket webSocket : connections) {
-//            socket.onMessage(webSocket, e.getMessage());
-            webSocket.send(e.getMessage());
+            socket.onMessage(webSocket, e.getMessage());
         }
     }
 }
