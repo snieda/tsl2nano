@@ -36,13 +36,14 @@ import org.simpleframework.xml.core.Persist;
 import de.tsl2.nano.bean.BeanUtil;
 import de.tsl2.nano.core.cls.BeanClass;
 import de.tsl2.nano.core.exception.ExceptionHandler;
+import de.tsl2.nano.core.exception.Message;
 import de.tsl2.nano.core.execution.CompatibilityLayer;
+import de.tsl2.nano.core.execution.Profiler;
 import de.tsl2.nano.core.log.LogFactory;
 import de.tsl2.nano.core.util.FileUtil;
 import de.tsl2.nano.core.util.NetUtil;
 import de.tsl2.nano.core.util.StringUtil;
 import de.tsl2.nano.core.util.XmlUtil;
-import de.tsl2.nano.execution.Profiler;
 import de.tsl2.nano.format.DefaultFormat;
 
 /**
@@ -83,6 +84,7 @@ public class Environment {
     @ElementMap(entry = "service", key = "interface", attribute = true, inline = true, required = false, keyType = Class.class, valueType = Object.class)
     Map<Class<?>, Object> services;
 
+    public static final String FRAMEWORK = "de.tsl2.nano";
     public static final String PREFIX = Environment.class.getPackage().getName() + ".";
 
     public static final String KEY_SYS_BASEDIR = PREFIX + ".basedir";
@@ -196,7 +198,7 @@ public class Environment {
             + "    build : ${build.info}\n"
             + "    args  : ${sun.java.command}\n"
             + "    dir   : ${user.dir}\n"
-            + "    time  : ${tstamp}\n"
+            + "    time  : ${nano.tstamp}\n"
             + "    user  : ${user.name}, home: ${user.home}\n"
             + "    lang  : ${user.country}_${user.language}, encoding: ${sun.jnu.encoding}\n"
             + "    encode: ${file.encoding}\n"
@@ -206,8 +208,8 @@ public class Environment {
             + "    system: ${sun.cpu.isalist} ${sun.arch.data.model}\n"
             + "    net-ip: ${inetadress.myip}\n"
             + "===========================================================";
-        Properties p = System.getProperties();
-        p.put("tstamp", new Date());
+        Properties p = new Properties(System.getProperties());
+        p.put("nano.tstamp", new Date());
         p.put("main.context.classloader", Thread.currentThread().getContextClassLoader());
         p.put("inetadress.myip", NetUtil.getMyIP());
 
@@ -465,6 +467,10 @@ public class Environment {
         return pck;
     }
 
+    public static <T> T load(String name, Class<T> type) {
+        return self().get(XmlUtil.class).loadXml(getConfigPath(type) + ".xml", type);
+    }
+
     /**
      * persists the given object through configured xml persister.
      * 
@@ -602,14 +608,13 @@ public class Environment {
     }
 
     /**
-     * tries to interpret the given dependency names and to load them perhaps through an internet-repository (like with
-     * maven).
+     * searches for the given jar-file names in current classloader and to loads them perhaps through an
+     * internet-repository (like with maven).
      * 
-     * @param dependencyNames names including the organisation/product name to be extracted.
+     * @param dependencyNames jar-file names to check.
      * @return any loader information
      */
-    public static final Object loadDependencies(String... dependencyNames) {
-
+    public static final Object loadJarDependencies(String... dependencyNames) {
         //evaluate already loaded jars (no class-cast possible --> using reflection!)
         String[] nestedJars =
             (String[]) BeanClass.call(Thread.currentThread().getContextClassLoader().getParent(), "getNestedJars");
@@ -630,17 +635,56 @@ public class Environment {
             }
         }
         if (unresolvedDependencies.size() > 0) {
-            //load the dependencies through maven, if available
-            String clsJarResolver = "de.tsl2.nano.jarresolver.JarResolver";
-            if (get("classloader.usenetwork.loader", true) && NetUtil.isOnline()
-                && get(CompatibilityLayer.class).isAvailable(clsJarResolver))
-                get(CompatibilityLayer.class).run(clsJarResolver, "main", new Class[] { String[].class },
-                    new Object[] { dependencyNames });
-            else
-                throw new IllegalStateException("The following dependencies couldn't be resolved:\n"
-                    + StringUtil.toFormattedString(unresolvedDependencies, 100, true));
+            return loadDependencies(unresolvedDependencies.toArray(new String[0]));
         }
+        return "nothing to do!";
+    }
 
+    public static final Object loadClassDependencies(String... dependencyNames) {
+        CompatibilityLayer cl = get(CompatibilityLayer.class);
+        //check given dependencies
+        List<String> unresolvedDependencies = new ArrayList<String>(dependencyNames.length);
+        for (int i = 0; i < dependencyNames.length; i++) {
+            if (!cl.isAvailable(dependencyNames[i])) {
+                unresolvedDependencies.add(dependencyNames[i]);
+            }
+        }
+        if (unresolvedDependencies.size() > 0) {
+            return loadDependencies(unresolvedDependencies.toArray(new String[0]));
+        }
+        return "nothing to do!";
+    }
+
+    /**
+     * tries to interpret the given dependency names and to load them perhaps through an internet-repository (like with
+     * maven).
+     * 
+     * @param dependencyNames names including the organisation/product name to be extracted.
+     * @return any loader information, or null, if nothing was done.
+     */
+    public static final Object loadDependencies(String... dependencyNames) {
+        //check for own framework dependencies
+        boolean foreignDependencies = false;
+        for (int i = 0; i < dependencyNames.length; i++) {
+            if (!dependencyNames[i].startsWith(FRAMEWORK)) {
+                foreignDependencies = true;
+                break;
+            }
+        }
+        if (!foreignDependencies)
+            return null;
+        //load the dependencies through maven, if available
+        String clsJarResolver = "de.tsl2.nano.jarresolver.JarResolver";
+        if (get("classloader.usenetwork.loader", true) && NetUtil.isOnline()
+            && get(CompatibilityLayer.class).isAvailable(clsJarResolver)) {
+            Message
+                .send("downloading unresolved dependencies: " + StringUtil.toString(dependencyNames, 300));
+            get(CompatibilityLayer.class).run(clsJarResolver, "main", new Class[] { String[].class },
+                new Object[] { dependencyNames });
+        } else {
+            throw new IllegalStateException("The following dependencies couldn't be resolved:\n"
+                + StringUtil.toFormattedString(dependencyNames, 100, true));
+        }
         return "dependency loading successfull";
     }
 

@@ -161,7 +161,7 @@ public class AppLoader {
          * create the classloader to be used by the new application
          */
         new File(environment).mkdirs();
-        provideClassloader(environment);
+        NetworkClassLoader networkClassLoader = provideClassloader(environment);
 
         BeanClass<?> bc = BeanClass.createBeanClass(mainclass);
 
@@ -169,6 +169,11 @@ public class AppLoader {
          * now, we can load the environment with properties and services
          */
         createEnvironment(environment, new Argumentator(bc.getName(), getManual(), args));
+
+        /*
+         * start the jar path checker thread
+         */
+        networkClassLoader.startPathChecker(environment, Environment.get("jar.checker.deltatime", 1000));
 
         /*
          * prepare cleaning the Apploader
@@ -228,7 +233,7 @@ public class AppLoader {
      * 
      * @param environment name/path to be added to the classloader
      */
-    protected void provideClassloader(String environment) {
+    protected NetworkClassLoader provideClassloader(String environment) {
         ClassLoader contextClassLoader = Thread.currentThread().getContextClassLoader();
         String classPath = System.getProperty("java.class.path");
         /*
@@ -248,9 +253,9 @@ public class AppLoader {
             System.setProperty(KEY_ISNESTEDJAR, Boolean.toString(false));
         }
         nestedLoader.addLibraryPath(new File(environment).getAbsolutePath());
-        nestedLoader.startPathChecker(environment, 2000);
         System.out.println("resetting current thread classloader " + contextClassLoader + " with " + nestedLoader);
         Thread.currentThread().setContextClassLoader(nestedLoader);
+        return nestedLoader;
     }
 
     /**

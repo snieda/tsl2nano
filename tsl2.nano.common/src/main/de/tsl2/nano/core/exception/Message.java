@@ -51,7 +51,10 @@ public class Message extends RuntimeException {
      * @param message
      */
     public static final void send(UncaughtExceptionHandler exceptionHandler, String message) {
-        exceptionHandler.uncaughtException(Thread.currentThread(), new Message(message));
+        if (exceptionHandler != null)
+            exceptionHandler.uncaughtException(Thread.currentThread(), new Message(message));
+        else
+            LOG.info(message);
     }
     
     @Override

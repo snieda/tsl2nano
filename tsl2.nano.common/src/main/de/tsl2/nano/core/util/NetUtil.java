@@ -31,6 +31,11 @@ import de.tsl2.nano.core.log.LogFactory;
 public class NetUtil {
     private static final Log LOG = LogFactory.getLog(NetUtil.class);
 
+    private static boolean isonline;
+    private static final long deltaOnlineCheck = Integer.valueOf(System
+        .getProperty("netutil.delta.onlinecheck", "5000"));
+    private static long lastOnlineCheck = Long.MAX_VALUE;
+
     /**
      * getMyIPAdress
      * 
@@ -144,6 +149,10 @@ public class NetUtil {
      * @return true, if this system is connected to a network
      */
     public static final boolean isOnline() {
-        return !getMyIP().equals(InetAddress.getLoopbackAddress().getHostAddress());
+        if (lastOnlineCheck - System.currentTimeMillis() > deltaOnlineCheck) {
+            lastOnlineCheck = System.currentTimeMillis();
+            isonline = !getMyIP().equals(InetAddress.getLoopbackAddress().getHostAddress());
+        }
+        return isonline;
     }
 }

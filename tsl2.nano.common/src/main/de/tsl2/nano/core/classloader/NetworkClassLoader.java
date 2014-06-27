@@ -9,12 +9,15 @@
  */
 package de.tsl2.nano.core.classloader;
 
+import java.io.File;
 import java.net.URL;
 import java.net.URLStreamHandlerFactory;
-import java.util.LinkedList;
+import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 
 import de.tsl2.nano.core.Environment;
+import de.tsl2.nano.core.util.FileUtil;
 
 /**
  * Loads unresolved classes from network-connection through a maven repository.
@@ -23,7 +26,15 @@ import de.tsl2.nano.core.Environment;
  * @version $Revision$
  */
 public class NetworkClassLoader extends NestedJarClassLoader {
-    static final List<String> unresolveables = new LinkedList<String>();
+    static final List<String> unresolveables = new ArrayList<String>();
+    
+    static final String FILENAME_UNRESOLVEABLES = "network.classloader.unresolvables";
+    
+    /**
+     * environment config path. as it is not possible to use the type Environment.class itself (import class is loaded
+     * by AppLoader, but a new Environment was created), we use this variable instead.
+     */
+    String environment;
 
     /**
      * constructor
@@ -64,6 +75,21 @@ public class NetworkClassLoader extends NestedJarClassLoader {
         super(urls, parent);
     }
 
+    @SuppressWarnings("unchecked")
+    @Override
+    public void addLibraryPath(String path) {
+        super.addLibraryPath(path);
+
+        //only for the first time we load the persisted ignore list
+        if (environment == null || !environment.equals(path)) {
+            File persistedList = new File(path + "/" + FILENAME_UNRESOLVEABLES);
+            if (persistedList.canRead()) {
+                unresolveables.addAll((Collection<? extends String>) FileUtil.load(persistedList.getPath()));
+            }
+        }
+        environment = path;
+    }
+
     @Override
     public Class<?> findClass(String name) throws ClassNotFoundException {
         try {
@@ -72,10 +98,14 @@ public class NetworkClassLoader extends NestedJarClassLoader {
             //try it again after loading it from network
             if (!unresolveables.contains(name)) {
                 try {
-                    Environment.loadDependencies(name);
+                    if (Environment.loadDependencies(name) != null) {
+                        //reload jar-files from environment
+                        addLibraryPath(environment);
+                    }
                     return super.findClass(name);
                 } catch (Exception e2) {
                     unresolveables.add(name);
+                    FileUtil.save(environment + "/" + FILENAME_UNRESOLVEABLES, unresolveables);
                     //throw the origin exception!
                     throw e;
                 }
