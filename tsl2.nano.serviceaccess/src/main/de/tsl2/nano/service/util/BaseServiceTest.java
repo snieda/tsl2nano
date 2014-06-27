@@ -9,9 +9,9 @@
  */
 package de.tsl2.nano.service.util;
 
+import java.io.Serializable;
 import java.util.HashSet;
 import java.util.LinkedHashSet;
-import java.util.LinkedList;
 import java.util.Properties;
 import java.util.Set;
 
@@ -36,38 +36,13 @@ import de.tsl2.nano.serviceaccess.ServiceFactory;
  * @author Thomas Schneider
  * @version $Revision$
  */
-public abstract class BaseServiceTest {
+public abstract class BaseServiceTest extends RemoteServiceRunner<Serializable> {
     protected static final Log LOG = LogFactory.getLog(BaseServiceTest.class);
     /** should be used to ask before creating the test data in setUp() */
     protected static final boolean CREATE_SPECIFIC_TESTDATA = false;
 
     /** collection of entities, created through this test and to be removed after test */
     static Set<Object> entitiesToDestroy;
-
-    /**
-     * mini service locator. overwrite this method, if you want to login to a special user, to get the roles, the user
-     * entity and the mandator entity. another way would be to create the service inside your setUp method. to do a real
-     * login, use the method {@linkplain ServiceFactory#login(String, ClassLoader, String, String)}.
-     * 
-     * @param <T> service type
-     * @param serviceInterface service
-     * @return service implementation
-     */
-    protected static <T> T getService(Class<T> serviceInterface) {
-        if (!ServiceFactory.isInitialized()) {
-            ServiceFactory.createInstance(BaseServiceTest.class.getClassLoader());
-            ServiceFactory.instance().createSession(null,
-                null,
-                null,
-                new LinkedList<String>(),
-                new LinkedList<String>(),
-                null);
-
-            //init the server side
-            ServiceFactory.getGenService().initServerSideFactories();
-        }
-        return ServiceFactory.instance().getService(serviceInterface);
-    }
 
     /**
      * starts the ant build of this project and the target given by name. the ant script will recreate the local test

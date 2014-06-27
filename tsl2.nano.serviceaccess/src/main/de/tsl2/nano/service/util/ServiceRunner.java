@@ -121,23 +121,23 @@ public class ServiceRunner extends BaseServiceTest implements ICRunnable<HashMap
         }
     }
 
-    /**
-     * main methode zum starten eines anwendungsfalles
-     * 
-     * @param args schnittstelle vom type {@link IAnwendungsfall}.
-     * @throws Exception bei fehler...
-     */
-    public static final void main(String args[]) throws Exception {
-        if (args.length == 0) {
-            log("Please provide the path to a properties file, the username and passwd");
-            return;
-        }
-        final HashMap<Object, Object> result = new ServiceRunner().run(new HashMap<Object, Object>(), args);
-        log(StringUtil.toFormattedString(result, -1, true));
-    }
-
-    protected static final void log(String msg) {
-        // perhaps no LOGGER available ==> system.out
-        System.out.println(msg);
-    }
+//    /**
+//     * main methode zum starten eines anwendungsfalles
+//     * 
+//     * @param args schnittstelle vom type {@link IAnwendungsfall}.
+//     * @throws Exception bei fehler...
+//     */
+//    public static final void main(String args[]) throws Exception {
+//        if (args.length == 0) {
+//            log("Please provide the path to a properties file, the username and passwd");
+//            return;
+//        }
+//        final HashMap<Object, Object> result = new ServiceRunner().run(new HashMap<Object, Object>(), args);
+//        log(StringUtil.toFormattedString(result, -1, true));
+//    }
+//
+//    protected static final void log(String msg) {
+//        // perhaps no LOGGER available ==> system.out
+//        System.out.println(msg);
+//    }
 }

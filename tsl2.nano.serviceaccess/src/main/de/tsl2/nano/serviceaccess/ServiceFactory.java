@@ -7,14 +7,14 @@
  */
 package de.tsl2.nano.serviceaccess;
 
-import java.io.File;
-import java.io.FileReader;
 import java.io.IOException;
 import java.security.Principal;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Hashtable;
+import java.util.LinkedList;
 import java.util.Map;
 import java.util.Properties;
 import java.util.Set;
@@ -52,8 +52,9 @@ import de.tsl2.nano.serviceaccess.aas.principal.UserPrincipal;
  * recommended to use the convenience method {@link #createSession(Object, Object, Subject, Collection, Collection)} to
  * initialize all objects to be used as user session, too.
  * <p>
- * the property file <code>project.properties</code> must be present on base path - to load 'jndi.file.name'. an
- * optional property file 'serviceacces.properties' will be loaded if available - to be used by services itself.
+ * to provide additional properties, use system properties. standard jndi-properties will be found in jndi.properties in
+ * classpath. e.g. the 'jndi.prefix' (default: java:module) could be set - or a special name service of jboss etc.<br/>
+ * For further informations, see {@link ServiceLocator}.
  * <p/>
  * it is possible to store server-side application specific content into the properties of the service factory.
  * <p/>
@@ -62,15 +63,14 @@ import de.tsl2.nano.serviceaccess.aas.principal.UserPrincipal;
  * @author TS
  */
 public class ServiceFactory {
-    //TODO: extend common-Service
     protected static final Log LOG = LogFactory.getLog(ServiceFactory.class);
     /** project and serviceaccess properties */
     private Properties properties;
-    private String jndi_prefix;
+    private String jndiPrefix;
 
     private IAuthorization auth;
     
-    Map<? extends Object, Object> userProperties = new HashMap<String, Object>();
+    Map<? extends Object, Object> userProperties = Collections.synchronizedMap(new HashMap<String, Object>());
 
     ServiceLocator serviceLocator = null;
 
@@ -84,8 +84,8 @@ public class ServiceFactory {
 
     private ClassLoader classLoader = null;
 
-    /** key name for the jndi file name - inside the project.properties */
-    private static final String KEY_JNDI_FILE = "jndi.file.name";
+    /** key name for the jndi-prefix */
+    public static final String KEY_JNDI_PREFIX = "serviceaccess.jndi.prefix";
     /** flag to avoid using of jndi - e.g. for testing purposes */
     public static final String NO_JNDI = ServiceLocator.NO_JNDI;
     /** user properties key name for the user object */
@@ -99,35 +99,19 @@ public class ServiceFactory {
      * @param classloader project classloader
      * @param jndiFileName (optional) jndi file name
      */
-    private ServiceFactory(ClassLoader classloader, String jndiFileName) {
+    private ServiceFactory(ClassLoader classloader) {
         super();
         try {
-            //TODO: refactore to use environment.properties instead of project.properties!
             this.classLoader = classloader;
-            //loading client properties
-            if (jndiFileName != null) {
-                properties = new Properties();
-                properties.put(KEY_JNDI_FILE, jndiFileName);
-            } else {
-                properties = FileUtil.loadProperties("project.properties", classLoader);
-                if (properties.get(KEY_JNDI_FILE) == null) {
-                    LOG.warn("no definition for " + KEY_JNDI_FILE + " found! using default: jndi.properties");
-                    //new: default jndi file and prefix
-                    properties.put(KEY_JNDI_FILE, Environment.get("applicationserver.jndi.file", "jndi.properties"));
-                    jndi_prefix = Environment.get("applicationserver.jndi.prefix", Environment.getName().toLowerCase().trim());
-                }
-            }
-            //loading server properties (directly from appserver start path)
-            //IMPROVE: load it through a file connector
-            final File file = new File("serviceaccess.properties");
+            properties = System.getProperties();
+            //loading server properties (from class-path)
             try {
-                properties.load(new FileReader(file));
+                properties.load(FileUtil.getResource("serviceaccess.properties", classloader));
             } catch (final Exception e) {
-                LOG.info("couldn't load optional properties from " + file.getAbsolutePath());
+                LOG.info("couldn't load optional properties from serviceaccess.properties in classpath");
             }
             // set the default jndi prefix
-            if (jndi_prefix == null)
-                jndi_prefix = properties.getProperty("project.name");
+            jndiPrefix = properties.getProperty(KEY_JNDI_PREFIX, Environment.getName().toLowerCase().trim());
         } catch (final Exception e) {
             throw new RuntimeException(e);
         }
@@ -149,11 +133,7 @@ public class ServiceFactory {
      */
     protected ServiceLocator getServiceLocator() {
         if (serviceLocator == null) {
-            String jndiFile = properties.getProperty(KEY_JNDI_FILE);
-            if (jndiFile == null)
-                throw new ManagedException("ServiceLocator couldn't find a value for key '" + KEY_JNDI_FILE
-                    + "' inside the application properties");
-            serviceLocator = new ServiceLocator(classLoader, jndiFile);
+            serviceLocator = new ServiceLocator(classLoader, properties);
         }
         return serviceLocator;
     }
@@ -167,7 +147,7 @@ public class ServiceFactory {
      * @return service instance
      */
     public <T> T getService(Class<T> serviceClass) {
-        return getService(jndi_prefix, serviceClass);
+        return getService(jndiPrefix, serviceClass);
     }
 
     /**
@@ -311,20 +291,18 @@ public class ServiceFactory {
      * 
      * @param classLoader the classLoader to set
      */
-    public static void createInstance(ClassLoader classLoader) {
-        createInstance(classLoader, null);
+    public static void create(ClassLoader classLoader) {
+        createInstance(classLoader);
+        instance().createSession(null, null, null, new LinkedList<String>(), new LinkedList<String>(), null);
     }
 
     /**
      * must be called before using the singelton {@link #instance()}.
      * 
      * @param classLoader the classLoader to set
-     * @param jndiFileName (optional) if null, the name will be loaded through property file 'project.properties'. if
-     *            {@link #NO_JNDI}, no jndi-context will be used - you should provide services through
-     *            {@link #setInitialServices(Map)}.
      */
-    public static void createInstance(ClassLoader classLoader, String jndiFileName) {
-        self = new ServiceFactory(classLoader, jndiFileName);
+    public static void createInstance(ClassLoader classLoader) {
+        self = new ServiceFactory(classLoader);
         LOG.info("ServiceFactory singelton instance assigned: " + self);
     }
 
@@ -533,6 +511,7 @@ public class ServiceFactory {
             auth = null;
             services.clear();
             classLoader = null;
+            serviceLocator = null;
             CachingBatchloader.instance().reset();
             self = null;
         }

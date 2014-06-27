@@ -37,8 +37,8 @@ import org.junit.Test;
 import de.tsl2.nano.action.IAction;
 import de.tsl2.nano.bean.BeanProxy;
 import de.tsl2.nano.collection.ListSet;
+import de.tsl2.nano.core.execution.Profiler;
 import de.tsl2.nano.core.util.DateUtil;
-import de.tsl2.nano.execution.Profiler;
 import de.tsl2.nano.service.feature.FeatureFactory;
 import de.tsl2.nano.service.schedule.IJobScheduleService;
 import de.tsl2.nano.service.util.ServiceUtil;
@@ -73,7 +73,8 @@ public class ServiceAccessTest {
         // "testclient");
         // Thread.currentThread().setContextClassLoader(
         // new ExternPluginClassloader());
-        ServiceFactory.createInstance(ServiceAccessTest.class.getClassLoader(), ServiceFactory.NO_JNDI);
+        System.setProperty(ServiceFactory.NO_JNDI, Boolean.toString(true));
+        ServiceFactory.createInstance(ServiceAccessTest.class.getClassLoader());
 
         //works only in development-environment with bin-dir!
         final URL jaasUrl = this.getClass().getClassLoader().getResource("jaas-login.config");

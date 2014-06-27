@@ -19,11 +19,12 @@ import de.tsl2.nano.core.Messages;
 import de.tsl2.nano.core.util.StringUtil;
 
 /**
- * simple service proxy using the real service as a delegate.
+ * simple secure service proxy using the real service as a delegate, wrapping each call into a {@link PrivilegedAction}.
  * 
  * @author ts 15.12.2008
  * @version $Revision: 1.0 $
  */
+@SuppressWarnings({ "unchecked", "rawtypes" })
 public class ServiceProxy<T> extends DefaultService implements InvocationHandler {
     /** delegate (real object) */
     protected T delegate;
@@ -66,7 +67,6 @@ public class ServiceProxy<T> extends DefaultService implements InvocationHandler
      * @see java.lang.reflect.InvocationHandler#invoke(java.lang.Object, java.lang.reflect.Method, java.lang.Object[])
      */
     @Override
-    @SuppressWarnings("unchecked")
     public Object invoke(Object proxy, final Method method, final Object[] args) throws Throwable {
         return doAs(getSubject(), new PrivilegedAction() {
             @Override

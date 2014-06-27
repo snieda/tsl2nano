@@ -353,7 +353,7 @@ public abstract class AbstractJobScheduleServiceBean<RUNNABLE> implements
                             throw fwdEx;
                         } else {
                             job.setLastException(ex);
-                            LOG.error("continuning after error:" + ex.toString(), ex);
+                            LOG.error("continuing after error:" + ex.toString(), ex);
                         }
                     }
                 }
