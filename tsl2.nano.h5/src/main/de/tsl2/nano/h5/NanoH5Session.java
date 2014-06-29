@@ -236,7 +236,8 @@ public class NanoH5Session implements ISession {
             + ": " + DateUtil.getFormattedDateTime(new Date()) + ", "
             + Environment.translate("tsl2nano.request", true) + ": "
             + DateUtil.getFormattedMinutes(System.currentTimeMillis() - startTime) + " min"
-            + (LOG.isDebugEnabled() ? ", " + "Memory: " + (Profiler.getUsedMem() / (1024 * 1024)) + " MB" : "");
+            + (LOG.isDebugEnabled() ? ", " + "Memory: " + (Profiler.getUsedMem() / (1024 * 1024)) + " MB" : "")
+        + (LOG.isDebugEnabled() ? ", " + "working sessions: " + server.sessions.size() : "");
     }
 
     private String refreshPage(Object message) {

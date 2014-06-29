@@ -14,9 +14,10 @@ socket.onerror = function (error) {
 // Log messages from the server
 socket.onmessage = function (e) {
   console.log('showing message ' + e);
-  document.getElementById('${websocket.element.id}').childNodes[0].nodeValue = ' \t' + e.data;
   if (e.data == 'submit')
 	document.getElementById('progressbar').removeAttribute('hidden');
+  else
+    document.getElementById('${websocket.element.id}').childNodes[0].nodeValue = ' \t' + e.data;
 };
 
 socket.onclose = function (e) {

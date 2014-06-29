@@ -678,7 +678,8 @@ public class Environment {
         if (get("classloader.usenetwork.loader", true) && NetUtil.isOnline()
             && get(CompatibilityLayer.class).isAvailable(clsJarResolver)) {
             Message
-                .send("downloading unresolved dependencies: " + StringUtil.toString(dependencyNames, 300));
+                .send(Thread.currentThread().getUncaughtExceptionHandler(), "downloading unresolved dependencies: "
+                    + StringUtil.toString(dependencyNames, 300));
             get(CompatibilityLayer.class).run(clsJarResolver, "main", new Class[] { String[].class },
                 new Object[] { dependencyNames });
         } else {
