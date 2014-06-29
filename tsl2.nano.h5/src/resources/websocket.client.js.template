@@ -14,9 +14,9 @@ socket.onerror = function (error) {
 // Log messages from the server
 socket.onmessage = function (e) {
   console.log('showing message ' + e);
-	document.getElementById('${websocket.element.id}').appendChild(
-            document.createTextNode(' \t' + e.data)
-        );
+  document.getElementById('${websocket.element.id}').childNodes[0].nodeValue = ' \t' + e.data;
+  if (e.data == 'submit')
+	document.getElementById('progressbar').removeAttribute('hidden');
 };
 
 socket.onclose = function (e) {

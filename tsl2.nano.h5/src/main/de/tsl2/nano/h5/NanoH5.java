@@ -33,6 +33,7 @@ import org.java_websocket.client.DefaultSSLWebSocketClientFactory;
 import org.java_websocket.server.DefaultSSLWebSocketServerFactory;
 import org.java_websocket.server.WebSocketServer.WebSocketServerFactory;
 
+import de.tsl2.nano.action.IAction;
 import de.tsl2.nano.action.IActivable;
 import de.tsl2.nano.bean.BeanContainer;
 import de.tsl2.nano.bean.IBeanContainer;
@@ -51,6 +52,7 @@ import de.tsl2.nano.core.ManagedException;
 import de.tsl2.nano.core.cls.BeanClass;
 import de.tsl2.nano.core.exception.Message;
 import de.tsl2.nano.core.execution.CompatibilityLayer;
+import de.tsl2.nano.core.execution.Profiler;
 import de.tsl2.nano.core.log.LogFactory;
 import de.tsl2.nano.core.util.FileUtil;
 import de.tsl2.nano.core.util.StringUtil;
@@ -347,11 +349,16 @@ public class NanoH5 extends NanoHTTPD implements IConnector<Persistence> {
         });
 
 //        ((Map)login.getPresentable().getLayoutConstraints()).put("style", "opacity: 0.9;");
-        login.addAction(new SecureAction<Object>("tsl2nano.login.ok") {
+        IAction<Object> loginAction = new SecureAction<Object>("tsl2nano.login.ok") {
             //TODO: ref. to persistence class
             @Override
             public Object action() throws Exception {
                 persistence.save();
+//                for (int i = 0; i < 100; i++) {
+//                    Thread.sleep(1000);
+//                    Message.send("" +i);
+//                }
+                    
                 return connect(persistence);
             }
 
@@ -366,10 +373,17 @@ public class NanoH5 extends NanoHTTPD implements IConnector<Persistence> {
             }
 
             @Override
+            public boolean isSynchron() {
+                //TODO: for long term use, it's asynchron
+                return true;//TODO: check if beans.jar readable and if authorization profile existent;
+            }
+            
+            @Override
             public boolean isDefault() {
                 return true;
             }
-        });
+        };
+        login.addAction(loginAction);
         return login;
     }
 

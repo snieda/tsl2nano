@@ -9,19 +9,26 @@ import de.tsl2.nano.core.ManagedException;
 import de.tsl2.nano.core.log.LogFactory;
 import de.tsl2.nano.core.util.StringUtil;
 
+/**
+ * provides some simple os execution utitilies.
+ * 
+ * @author Tom
+ * @version $Revision$
+ */
 public class SystemUtil {
 
     protected static final Log LOG = LogFactory.getLog(ScriptUtil.class);
 
     /**
      * executes given command in directory command[0].getParentFile().
+     * 
      * @param command
      * @return
      */
     public static final Process execute(String... command) {
         return execute(new File(command[0]).getParentFile(), command);
     }
-    
+
     /**
      * execute system call - waiting for process to end - and logging its console output.<br>
      * example: <code>ScriptUtil.execute("cmd", "/C", "echo", "hello");</code>

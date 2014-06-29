@@ -78,6 +78,7 @@ public class JarResolver {
 
     static final String PRE_PACKAGE = "PACKAGE.";
     static final String PACKAGE_EXCEPTION = "package.exception.regex";
+    static final String ONLY_LOAD_DEFINED = "only.load.defined.packages";
     
     /**
      * constructor
@@ -209,15 +210,21 @@ public class JarResolver {
      * @param deps start arguments
      */
     private void prepareDependencies(String... deps) {
-        String jars = (String) props.get(JAR_DEPENDENCIES);
+        String jars = props.getProperty(JAR_DEPENDENCIES);
+        Boolean onlyLoadDefined = Boolean.valueOf(props.getProperty(ONLY_LOAD_DEFINED));
         StringBuilder buf = new StringBuilder(jars != null ? jars : "");
         String pck;
+        boolean addIt;
         for (int i = 0; i < deps.length; i++) {
             //if the parameter is a known package name, fill all dependent jar-files
             pck = findPackage(deps[i], false);
-            if (pck != null)
+            if (pck != null) {
                 deps[i] = pck;
-            if (!deps[i].matches(PACKAGE_EXCEPTION))
+                addIt = true;
+            } else  {
+                addIt = !onlyLoadDefined;
+            }
+            if (addIt && !deps[i].matches(PACKAGE_EXCEPTION))
                 buf.append("," + deps[i]);
         }
         

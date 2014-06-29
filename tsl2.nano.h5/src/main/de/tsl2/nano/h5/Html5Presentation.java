@@ -135,6 +135,7 @@ import de.tsl2.nano.core.ManagedException;
 import de.tsl2.nano.core.Messages;
 import de.tsl2.nano.core.cls.BeanClass;
 import de.tsl2.nano.core.cls.IAttribute;
+import de.tsl2.nano.core.exception.Message;
 import de.tsl2.nano.core.log.LogFactory;
 import de.tsl2.nano.core.util.BitUtil;
 import de.tsl2.nano.core.util.DateUtil;
@@ -175,6 +176,8 @@ public class Html5Presentation<T> extends BeanPresentationHelper<T> implements I
     /** indicator for server to handle a link, that was got as link (method=GET) not as a file */
     public static final String PREFIX_BEANLINK = PREFIX_BEANREQUEST + "--)";
 
+    final String MSG_FOOTER = "progress";
+    
     /**
      * constructor
      */
@@ -436,7 +439,7 @@ public class Html5Presentation<T> extends BeanPresentationHelper<T> implements I
         /*
          * WebSocket integration
          */
-        createWebSocket(head, "footer");
+        createWebSocket(head, MSG_FOOTER);
 
         /*
          * The body
@@ -1486,6 +1489,14 @@ public class Html5Presentation<T> extends BeanPresentationHelper<T> implements I
                 preFooter.setNodeValue(strFooter);
             }
         }
+        
+        //append progress bar for websocket messsages
+//            Element progress = doc.createElement("progress");
+            appendElement(preFooter, "progress", ATTR_ID, "progressbar", "hidden", "true");
+            appendElement(preFooter, TAG_SPAN, content(" \tinitializing..."), ATTR_ID, MSG_FOOTER);
+//            appendElement(progress, TAG_SPAN, content("0"), ATTR_STYLE, "position:relative");
+//            HtmlUtil.appendAttributes(progress, "max", "100", "value", "0%", ATTR_STYLE, "position:relative");
+            
         return addRow(table, preFooter);
     }
 

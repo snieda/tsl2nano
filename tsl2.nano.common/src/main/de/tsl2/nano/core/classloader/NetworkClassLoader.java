@@ -16,20 +16,29 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 
+import org.apache.commons.logging.Log;
+
 import de.tsl2.nano.core.Environment;
+import de.tsl2.nano.core.log.LogFactory;
 import de.tsl2.nano.core.util.FileUtil;
+import de.tsl2.nano.core.util.StringUtil;
 
 /**
- * Loads unresolved classes from network-connection through a maven repository.
+ * Loads unresolved classes from network-connection through a maven repository. All classes that cannot be found through
+ * maven are cached in {@link #unresolveables}.
  * 
  * @author Tom
  * @version $Revision$
  */
 public class NetworkClassLoader extends NestedJarClassLoader {
+    private static final Log LOG = LogFactory.getLog(NetworkClassLoader.class);
+    
+    /** persistent cache for classes that couldn't be loaded through network. */
     static final List<String> unresolveables = new ArrayList<String>();
-    
+
+    /** filename for persistent cache of {@link #unresolveables}. */
     static final String FILENAME_UNRESOLVEABLES = "network.classloader.unresolvables";
-    
+
     /**
      * environment config path. as it is not possible to use the type Environment.class itself (import class is loaded
      * by AppLoader, but a new Environment was created), we use this variable instead.
@@ -85,6 +94,7 @@ public class NetworkClassLoader extends NestedJarClassLoader {
             File persistedList = new File(path + "/" + FILENAME_UNRESOLVEABLES);
             if (persistedList.canRead()) {
                 unresolveables.addAll((Collection<? extends String>) FileUtil.load(persistedList.getPath()));
+                LOG.info("unresolvable class-packages are:\n\t" + unresolveables);
             }
         }
         environment = path;
@@ -96,7 +106,8 @@ public class NetworkClassLoader extends NestedJarClassLoader {
             return super.findClass(name);
         } catch (ClassNotFoundException e) {
             //try it again after loading it from network
-            if (!unresolveables.contains(name)) {
+            String pckName = getPackageName(name);
+            if (!unresolveables.contains(pckName)) {
                 try {
                     if (Environment.loadDependencies(name) != null) {
                         //reload jar-files from environment
@@ -104,7 +115,8 @@ public class NetworkClassLoader extends NestedJarClassLoader {
                     }
                     return super.findClass(name);
                 } catch (Exception e2) {
-                    unresolveables.add(name);
+                    LOG.warn("couldn't load class " + name);
+                    unresolveables.add(pckName);
                     FileUtil.save(environment + "/" + FILENAME_UNRESOLVEABLES, unresolveables);
                     //throw the origin exception!
                     throw e;
@@ -113,5 +125,9 @@ public class NetworkClassLoader extends NestedJarClassLoader {
                 throw e;
             }
         }
+    }
+
+    private String getPackageName(String name) {
+        return StringUtil.substring(name, null, ".", true);
     }
 }

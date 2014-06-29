@@ -58,6 +58,7 @@ import de.tsl2.nano.core.ManagedException;
 import de.tsl2.nano.core.cls.BeanAttribute;
 import de.tsl2.nano.core.cls.BeanClass;
 import de.tsl2.nano.core.cls.IAttribute;
+import de.tsl2.nano.core.exception.Message;
 import de.tsl2.nano.core.log.LogFactory;
 import de.tsl2.nano.core.util.FileUtil;
 import de.tsl2.nano.core.util.StringUtil;
@@ -1031,6 +1032,7 @@ public class BeanPresentationHelper<T> {
      */
     protected String getBestPresentationAttribute() {
         if (bean.isDefault() && bean.getAttributeDefinitions().size() > 0) {
+            Message.send("evaluating best attribute presentation for entity '" + bean.getName());
             String[] names = bean.getAttributeNames();
             NavigableMap<Integer, Integer> levels = getBestAttributeOrder(names);
             bean.setAttributeFilter(getBestAttributeNames(names, levels.descendingMap().values()));

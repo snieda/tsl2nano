@@ -13,6 +13,7 @@ import java.lang.Thread.UncaughtExceptionHandler;
 
 import org.apache.commons.logging.Log;
 
+import de.tsl2.nano.core.Environment;
 import de.tsl2.nano.core.log.LogFactory;
 
 /**
@@ -43,7 +44,8 @@ public class Message extends RuntimeException {
     }
 
     public static final void send(String message) {
-        send(Thread.getDefaultUncaughtExceptionHandler(), message);
+//        send(Thread.getDefaultUncaughtExceptionHandler(), message);
+        send(Environment.get(UncaughtExceptionHandler.class), message);
     }
     
     /**

@@ -45,6 +45,7 @@ public class ExceptionHandler implements UncaughtExceptionHandler {
 
     @Override
     public void uncaughtException(Thread t, Throwable e) {
+        //TODO: eval the sessions thread
         exceptions.add(e);
     }
 

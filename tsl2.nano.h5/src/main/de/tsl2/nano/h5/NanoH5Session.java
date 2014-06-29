@@ -109,6 +109,15 @@ public class NanoH5Session implements ISession {
         this.builder = server.builder;
         this.nav = navigator;
         this.sessionClassloader = appstartClassloader;
+        createExceptionHandler();
+        this.authorization = authorization;
+        this.sessionStart = System.currentTimeMillis();
+    }
+
+    /**
+     * createExceptionHandler
+     */
+    private void createExceptionHandler() {
         if (Environment.get("use.websocket", true)) {
             URL url = NanoH5.getServiceURL(null);
             NanoWebSocketServer socketServer =
@@ -121,8 +130,7 @@ public class NanoH5Session implements ISession {
             this.exceptionHandler =
                 (ExceptionHandler) Environment.addService(UncaughtExceptionHandler.class, new ExceptionHandler());
         }
-        this.authorization = authorization;
-        this.sessionStart = System.currentTimeMillis();
+        Thread.currentThread().setUncaughtExceptionHandler(exceptionHandler);
     }
 
     /**
@@ -336,11 +344,20 @@ public class NanoH5Session implements ISession {
                         && isSearchRequest(action.getId(), (BeanCollector<?, ?>) c)) {
                         responseObject = processSearchRequest(parms, (BeanCollector<?, ?>) c);
                     } else {
+                        //send this information to the client to show a progress bar.
+                        Message.send("submit");
                         /*
                          * submit/assign and cancel will not push a new element to the navigation stack!
                          * TODO: refactore access to names ('reset' and 'save')
                          */
                         Object result = action.activate();
+                        
+                        /*
+                         * if action is asynchron, it's a long term action showing the same page again
+                         * with progress informations
+                         */
+//                        if (action.isSynchron())
+//                            throw new Message("starting long term request:\t" + action.getShortDescription());
                         if (result != null && responseObject != IAction.CANCELED && !action.getId().endsWith("save")) {
                             responseObject = result;
                             if (c instanceof Bean
