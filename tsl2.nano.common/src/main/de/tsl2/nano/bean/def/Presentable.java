@@ -55,6 +55,9 @@ public class Presentable implements IIPresentable, Serializable {
     @Element(required = false)
     String icon;
 
+    @Element(required = false)
+    IInputAssist<?> inputAssist;
+
     @ElementArray(required = false)
     int[] foreground;
     @ElementArray(required = false)
@@ -83,6 +86,12 @@ public class Presentable implements IIPresentable, Serializable {
                     || !(attr instanceof IAttributeDefinition) || (!((IAttributeDefinition<?>) attr).isMultiValue() || ((IAttributeDefinition<?>) attr)
                     .cascading()))
                 ? IActivable.ACTIVE : IActivable.INACTIVE;
+
+        if (attr.hasWriteAccess() && attr instanceof IAttributeDefinition && Environment.get("use.inputassist", true)) {
+            IAttributeDefinition<?> a = (IAttributeDefinition<?>) attr;
+            if (a.isRelation())
+                setInputAssist(new DefaultInputAssist(a));
+        }
     }
 
     /**
@@ -326,5 +335,19 @@ public class Presentable implements IIPresentable, Serializable {
     @Override
     public void setBackground(int[] background) {
         this.background = background;
+    }
+
+    /**
+     * @return Returns the inputAssist.
+     */
+    public IInputAssist<?> getInputAssist() {
+        return inputAssist;
+    }
+
+    /**
+     * @param inputAssist The inputAssist to set.
+     */
+    public void setInputAssist(IInputAssist<?> inputAssist) {
+        this.inputAssist = inputAssist;
     }
 }

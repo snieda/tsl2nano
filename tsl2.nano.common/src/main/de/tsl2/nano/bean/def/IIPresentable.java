@@ -54,4 +54,9 @@ public interface IIPresentable extends IPresentable, Serializable {
      * @param background The background to set.
      */
     void setBackground(int[] background);
+    
+    /**
+     * @param inputAssist the inputAssist to set.
+     */
+    void setInputAssist(IInputAssist<?> inputAssist);
 }

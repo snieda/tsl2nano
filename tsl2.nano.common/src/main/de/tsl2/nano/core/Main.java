@@ -31,6 +31,13 @@ import java.util.Map;
 public class Main {
 
     /**
+     * constructor
+     */
+    public Main() {
+        Environment.addService(Main.class, this);
+    }
+    
+    /**
      * main entry
      * 
      * @param args launching args

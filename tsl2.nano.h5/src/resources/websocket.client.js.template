@@ -1,40 +1,180 @@
+/*
+ * javascript websocket-client implementation for nano.h5 (cr Thomas Schneider / 2014) 
+ */
 
-var socket = new WebSocket('ws://${websocket.server.ip}:${websocket.server.port}');
+/**
+ * websocket client implementation.
+ */
+var socket = new WebSocket(
+		'ws://${websocket.server.ip}:${websocket.server.port}');
 console.log('websocket created:' + socket);
 
-socket.onopen = function () {
-  console.log('websocket connected');
-  socket.send('websocket connected');
+socket.onopen = function() {
+	console.log('connecting websocket');
+	// socket.send('websocket connected');
 };
 
-socket.onerror = function (error) {
-  console.log('websocket error ' + error);
+socket.onerror = function(error) {
+	console.log('websocket error ' + error);
 };
 
-// Log messages from the server
-socket.onmessage = function (e) {
-  console.log('showing message ' + e);
-  if (e.data == 'submit')
-	document.getElementById('progressbar').removeAttribute('hidden');
-  else
-    document.getElementById('${websocket.element.id}').childNodes[0].nodeValue = ' \t' + e.data;
+/**
+ * print messages from server, or fill input-assist options
+ */
+socket.onmessage = function(e) {
+	console.log('handling message \'' + e.data + '\'');
+	if (e.data == 'submit')
+		document.getElementById('progressbar').removeAttribute('hidden');
+	else if (e.data.indexOf('/inputassist') == 0) {
+		fillInputOptions(e.data);
+	} else if (e.data.indexOf('/dependency') == 0) {
+			refreshdependency(e.data);
+	} else if (e.data.indexOf('/attachment') == 0) {
+		//TODO: impl.
+	} else
+		showStatusMessage(e.data);
 };
 
-socket.onclose = function (e) {
-  console.log('websocket closed! code: ' + e.code + ', reason: \'' + e.reason + '\'');
+socket.onclose = function(e) {
+	console.log('websocket closed! code: ' + e.code + ', reason: \'' + e.reason
+			+ '\'');
 };
-
 
 /*
-// Sending canvas ImageData as ArrayBuffer
-var img = canvas_context.getImageData(0, 0, 400, 320);
-var binary = new Uint8Array(img.data.length);
-for (var i = 0; i < img.data.length; i++) {
-  binary[i] = img.data[i];
-}
-socket.send(binary.buffer);
+ * // Sending canvas ImageData as ArrayBuffer var img =
+ * canvas_context.getImageData(0, 0, 400, 320); var binary = new
+ * Uint8Array(img.data.length); for (var i = 0; i < img.data.length; i++) {
+ * binary[i] = img.data[i]; } socket.send(binary.buffer);
+ *  // Sending file as Blob var file =
+ * document.querySelector('input[type="file"]').files[0]; socket.send(file);
+ */
 
-// Sending file as Blob
-var file = document.querySelector('input[type="file"]').files[0];
-socket.send(file);
-*/		
+/**
+ * prints the given status message to the status line
+ */
+function showStatusMessage(msg) {
+	console.log("showing status message: " + msg);
+	document.getElementById('${websocket.element.id}').childNodes[0].nodeValue = ' \t'
+			+ msg;
+}
+
+/**
+ * each field having an InputAssist implementation will call this function on
+ * 'onkeypress'.
+ */
+function inputassist(e) {
+	var code;
+	if (e.keyCode)
+		code = e.keyCode;
+	else if (e.which)
+		code = e.which;
+	var text = e.srcElement.value + String.fromCharCode(code);
+	var request = createMessage('inputassist', e.srcElement.id, text);
+	console.log('sending input-assist request: \'' + request + '\'');
+	socket.send(request);
+}
+
+/**
+ * will be called, if websocket-server returns with a response like:
+ * 
+ * @fieldID:value1,value2,...
+ */
+function fillInputOptions(msg) {
+	showStatusMessage('input-assist-response: ' + msg);
+	var id = getId(msg);
+	var value = getValue(msg);
+	var list = value.substring(1, value.length - 1);
+	console.log('creating input assist for ' + id + ' with elements: ' + list);
+
+	// first, we remove the last input-assist
+	var e = document.getElementById(id);
+	// e.nextSibling.setAttribute('hidden', 'true');
+	e = e.parentNode;
+	var lastSelect = e.getElementsByTagName('select');
+	if (lastSelect.length > 0)
+		e.removeChild(lastSelect[0]);
+
+	// now, the new options should be filled
+	var select = e.appendChild(document.createElement('select'));
+	select.setAttribute('name', id);
+	//TODO: some browser wont react on some event-types, so we use several types
+	select.setAttribute('onselect', 'inputassistselect(event)');
+	select.setAttribute('oninput', 'inputassistselect(event)');
+	select.setAttribute('onchange', 'inputassistselect(event)');
+	select.setAttribute('onkeypress', 'inputassistselect(event)');
+	var items = list.split(',');
+	var option;
+	for ( var i = 0; i < items.length; i++) {
+		console.log('creating option \'' + items[i] + '\'');
+		option = select.appendChild(document.createElement('option'));
+		option.setAttribute('value', items[i]);
+//		select.setAttribute('onclick', 'inputassistselect(event)');
+		option.appendChild(document.createTextNode(items[i]));
+	}
+}
+
+function getTarget(msg) {
+	return msg.substring(1, msg.indexOf('@'));
+}
+
+function getId(msg) {
+	return msg.substring(msg.indexOf('@') + 1, msg.indexOf(':'));
+}
+
+function getValue(msg) {
+	return msg.substring(msg.indexOf(':') + 1);
+}
+
+function createMessage(target, id, value) {
+	return '/' + target + '@' + id + ':' + value;
+}
+/**
+ * after an input-assist request and the following the server response,
+ * a selection list was provided for the user. if the user selects an item
+ * of this list, the selected item value should be transferred to the input field
+ * and the selection-element should be removed.
+ */
+function inputassistselect(e) {
+	console.log('transerring selected value \'' + e.srcElement.value + '\' to element: ' + e.srcElement.name);
+	var inputelement = document.getElementById(e.srcElement.name);
+	//setAttribute doesn't work here (on chrome), so we set the value directly.
+	inputelement.setAttribute('value', e.srcElement.value);
+	inputelement.value = e.srcElement.value;
+	
+	e.srcElement.parentNode.removeChild(e.srcElement);
+}
+
+/**
+ * if an attribute has change listeners, the server will evaluate the new values for that listeners,
+ * calling refreshdependency() for each listener to refresh it's value on client side.
+ */
+function evaluatedependencies(e) {
+	var msg = createMessage('dependency', e.srcElement.id, e.data);
+	showStatusMessage(msg);
+	socket.send(msg);
+}
+
+/**
+ * if dependency-listeners are defined for value changes on an input field,
+ * the server will inform these for the changes.
+ */
+function refreshdependency(msg) {
+	showStatusMessage('refreshing dependency: ' + msg);
+	var id = getId(msg);
+	var value = getValue(msg);
+	
+	document.getElementById(id).value = value;
+}
+
+/**
+ * sends a selected file to the server
+ */
+function transferattachment(src) {
+	 // Sending file as Blob 
+	var file = document.querySelector('input[type="file"]').files[0];
+	showStatusMessage('sending attachment: ' + file.name);
+	//first send the file name
+	socket.send(createMessage('attachment', src.id, file.name));
+	//now, send the bytes
+	socket.send(file);
+}

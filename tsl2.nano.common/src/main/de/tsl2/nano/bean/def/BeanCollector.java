@@ -34,6 +34,7 @@ import org.simpleframework.xml.core.Commit;
 
 import de.tsl2.nano.action.CommonAction;
 import de.tsl2.nano.action.IAction;
+import de.tsl2.nano.action.IActivable;
 import de.tsl2.nano.bean.BeanContainer;
 import de.tsl2.nano.bean.BeanUtil;
 import de.tsl2.nano.bean.IAttributeDef;
@@ -725,7 +726,12 @@ public class BeanCollector<COLLECTIONTYPE extends Collection<T>, T> extends Bean
     @Override
     public Collection<IPresentableColumn> getColumnDefinitions() {
         if (columnDefinitions == null) {
-            columnDefinitions = createColumnDefinitions(this, hasMode(MODE_SHOW_MULTIPLES));
+            columnDefinitions = createColumnDefinitions(this, new IActivable() {
+                @Override
+                public boolean isActive() {
+                    return hasMode(MODE_SHOW_MULTIPLES);
+                }
+            });
         }
         return columnDefinitions;
     }
@@ -754,8 +760,7 @@ public class BeanCollector<COLLECTIONTYPE extends Collection<T>, T> extends Bean
      * @param showMultiples
      * @return
      */
-    static <T> Collection<IPresentableColumn> createColumnDefinitions(final BeanDefinition<T> def,
-            final boolean showMultiples) {
+    static <T> Collection<IPresentableColumn> createColumnDefinitions(final BeanDefinition<T> def, final IActivable showMultiples) {
         final List<IAttributeDefinition<?>> attributes = def.getBeanAttributes();
         Collection<IPresentableColumn> columnDefinitions = new ArrayList<IPresentableColumn>(attributes.size());
         int i = 0;
@@ -780,7 +785,7 @@ public class BeanCollector<COLLECTIONTYPE extends Collection<T>, T> extends Bean
                     @Override
                     public boolean eval(IPresentableColumn arg0) {
                         return (arg0.getPresentable() == null || arg0.getPresentable().isVisible())
-                            && showMultiples
+                            && showMultiples.isActive()
                             || (def.getAttribute(arg0.getName()) == null || !def.getAttribute(arg0.getName())
                                 .isMultiValue());
                     }

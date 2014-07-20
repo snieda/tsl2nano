@@ -21,6 +21,8 @@ import org.simpleframework.xml.Attribute;
 import org.simpleframework.xml.Element;
 import org.simpleframework.xml.ElementList;
 import org.simpleframework.xml.core.Commit;
+import org.simpleframework.xml.core.Complete;
+import org.simpleframework.xml.core.Persist;
 
 import de.tsl2.nano.collection.CollectionUtil;
 import de.tsl2.nano.core.ManagedException;
@@ -339,6 +341,21 @@ public class Constraint<T> implements IConstraint<T>, Serializable {
         return status;
     }
 
+    @Persist
+    private void initSerialization() {
+        //simple-xml has problems on deserializing anonymous classes
+        if (format != null && format.getClass().isAnonymousClass())
+            format = null;
+        //the enum values should not be persisted
+        if (Enum.class.isAssignableFrom(getType()))
+            allowedValues = null;
+    }
+    
+    @Complete
+    private void afterSerialization() {
+        initDeserialization();
+    }
+    
     @Commit
     private void initDeserialization() {
         if (Enum.class.isAssignableFrom(getType()))

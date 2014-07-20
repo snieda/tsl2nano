@@ -222,7 +222,8 @@ public class BeanValue<T> extends AttributeDefinition<T> implements IValueDefini
              * it is not possible to move that block to value-expression,
              * because value-expression doesn't have access to the attribute-definition!
              */
-            if (!Util.isEmpty(source) && getConstraint().getAllowedValues() != null && !getConstraint().getType().isEnum()) {
+            if (!Util.isEmpty(source) && getConstraint().getAllowedValues() != null
+                && !getConstraint().getType().isEnum()) {
                 String name;
                 for (Object allowed : getConstraint().getAllowedValues()) {
                     name = Bean.getBean((Serializable) allowed).toString();
@@ -458,14 +459,13 @@ public class BeanValue<T> extends AttributeDefinition<T> implements IValueDefini
     }
 
     /**
-     * {@inheritDoc}
+     * as {@link #getId()} returns an identifier for the beans attribute, this id is an identifier for the value of the
+     * beans attribute - a combination of it's parent bean-id and the attribute name.
+     * 
+     * @return bean-value identifier
      */
-    @Override
-    public EventController changeHandler() {
-        if (eventController == null) {
-            eventController = new EventController();
-        }
-        return eventController;
+    public String getValueId() {
+        return parent != null ? parent.getName() + "." + parent.getId() + "." + getName(): getId(); 
     }
 
     Selector<T> selector() {

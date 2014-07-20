@@ -208,7 +208,8 @@ public class Environment {
             + "    system: ${sun.cpu.isalist} ${sun.arch.data.model}\n"
             + "    net-ip: ${inetadress.myip}\n"
             + "===========================================================";
-        Properties p = new Properties(System.getProperties());
+        Properties p = new Properties();
+        p.putAll(System.getProperties());
         p.put("nano.tstamp", new Date());
         p.put("main.context.classloader", Thread.currentThread().getContextClassLoader());
         p.put("inetadress.myip", NetUtil.getMyIP());
@@ -255,6 +256,8 @@ public class Environment {
         Thread.setDefaultUncaughtExceptionHandler(exceptionHandler);
         addService(UncaughtExceptionHandler.class, exceptionHandler);
         addService(layer);
+        //add frameworks beandef classes as standard-types
+//        BeanUtil.addStandardTypePackages("de.tsl2.nano.bean.def");
 //        self.persist();
     }
 
@@ -678,7 +681,7 @@ public class Environment {
         if (get("classloader.usenetwork.loader", true) && NetUtil.isOnline()
             && get(CompatibilityLayer.class).isAvailable(clsJarResolver)) {
             Message
-                .send(Thread.currentThread().getUncaughtExceptionHandler(), "downloading unresolved dependencies: "
+                .send("downloading unresolved dependencies: "
                     + StringUtil.toString(dependencyNames, 300));
             get(CompatibilityLayer.class).run(clsJarResolver, "main", new Class[] { String[].class },
                 new Object[] { dependencyNames });

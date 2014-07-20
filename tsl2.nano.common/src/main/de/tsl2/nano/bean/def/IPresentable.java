@@ -101,6 +101,11 @@ public interface IPresentable extends Serializable {
     /** convenience to evaluate layout/layoutconstraint properties (perhaps, if layout or layoutconstraints are maps) */
     public <T> T layout(String name, T defaultValue);
     
+    /**
+     * @return {@link IInputAssist} or null.
+     */
+    IInputAssist<?> getInputAssist();
+    
     /** usable for int definitions that are not bitfields */
     public static final int UNDEFINED = IConstraint.UNDEFINED;
 
@@ -331,5 +336,8 @@ public interface IPresentable extends Serializable {
             throw new UnsupportedOperationException();
         }
 
+        public IInputAssist<?> getInputAssist() {
+            return null;
+        }
     };
 }

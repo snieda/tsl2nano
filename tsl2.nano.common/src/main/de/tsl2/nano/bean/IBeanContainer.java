@@ -39,6 +39,15 @@ public interface IBeanContainer {
     public <T> Collection<T> getBeansByExample(T exampleBean);
 
     /**
+     * returns all beans that match the attributes of exampleBean
+     * 
+     * @param <T> bean type
+     * @param exampleBean example bean with optional filled attributes
+     * @return matching beans
+     */
+    public <T> Collection<T> getBeansByExample(T exampleBean, Boolean useLike);
+
+    /**
      * returns all beans that match the range of firstBean and secondBean. if firstBean equals secondBean, it is a
      * simple findByExample.
      * 

@@ -22,7 +22,7 @@ import java.util.List;
  * @version $Revision$
  */
 public class ExceptionHandler implements UncaughtExceptionHandler {
-    List<Throwable> exceptions;
+    protected List<Throwable> exceptions;
 
     /**
      * constructor

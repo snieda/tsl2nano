@@ -14,6 +14,7 @@ import java.util.Set;
 import org.java_websocket.WebSocket;
 
 import de.tsl2.nano.core.exception.ExceptionHandler;
+import de.tsl2.nano.h5.NanoH5Session;
 
 /**
  * ExceptionHandler sending all exceptions/message through the given websocket connection.
@@ -43,10 +44,13 @@ public class WebSocketExceptionHandler extends ExceptionHandler {
 
     @Override
     public void uncaughtException(Thread t, Throwable e) {
-        super.uncaughtException(t, e);
-        Set<WebSocket> connections = socket.connections();
-        for (WebSocket webSocket : connections) {
-            socket.onMessage(webSocket, e.getMessage());
+        if (e.getMessage() != null && e.getMessage().startsWith(NanoH5Session.PREFIX_STATUS_LINE))
+            super.uncaughtException(t, e);
+        else {
+            Set<WebSocket> connections = socket.connections();
+            for (WebSocket webSocket : connections) {
+                webSocket.send(e.getMessage());
+            }
         }
     }
 }

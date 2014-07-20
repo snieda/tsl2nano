@@ -1,6 +1,10 @@
 **FullRelation Nano.H5**
 <font size="-1">&copy; Thomas Schneider 2012-2014</font>
 
+<meta-tag>
+crud, grud, crud2gui, crud2html, bean2html, entity2html, bean2gui, entity2gui, jpa2gui, jpa2html, jpa persistence provider, openjpa, hibernate, datanucleus, eclipselink, data-editor, data-sheet, entity browser, jpa2, full stack framework, orm, o/r mapper
+</meta-tag>
+
 [TOC]
 
 ## Introduction
@@ -25,7 +29,8 @@ To do a *quick-start*, go to chapter _Starting / Test_.
 * resolves all bean/entity relations to be browsed.
 * navigation can be a configurable workflow - or simply an entity browser 
 * pre-defines formatting, validation and presentation of relations
-* pure html-5 (no javascript)
+* pure html-5 (no javascript - except for websockts)
+* using websockets to show status messages, input-assist and dependency field refresing
 * pure jpa - jpa-annotations are read to resolve attribute-presentation
 * independent of a special o/r mapper. all o/r mappers supporting javax.persistence with an EntityManager are usable.
 * simple database replication on user-loaded data - offline working possible
@@ -425,7 +430,31 @@ An example is provided with _tsl2.nano.h5.x.y.z.jar_. After first start, a css d
 
 ### Configuring Presentation, Layout and Constraints
 
+#### Overview styles for Application, BeanCollectors and Beans
+
+The environment properties provide a fast way to define the applications page style. Change the entry _application.page.style_ to use a custom background - perhaps a picture or a color. This must be an html5 css style expression.
+
+Example setting a radial gradient background color:
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+   <property name="application.page.style">
+      <object class="java.lang.String">background: radial-gradient(#9999FF, #000000);</object>
+   </property>
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+Example setting a simple background image:
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+   <property name="application.page.style">
+      <object class="java.lang.String">background-image: url(icons/spe.jpg); background: transparent;</object>
+   </property>
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+The same can be done for a bean-collector, defining the property _beancollector.grid.style_ and for bean-details with _bean.grid.style_.
+
+#### Collectors, Beans and Attributes
+
 Each bean and each bean-attribute can define a layout and layout-constraints through it's presentable object (see class _IPresentable_). It is easy to do layout definitions programmatically through the _BeanPresentationHelper_, but in this chapter we describe only the xml configuration. Help on programmatical configurations, see chapter _Programmatical configuration_. Inside the application (on runtime), there is a _BeanConfigurator_ providing to edit your _BeanDefinition_s as administrator. 
+
+Setting the layout for beans or attributes may often be done through setting their styles. Be carefull with this, while this overwrite framework-styles. The best way is, to have a look at the html source to see, which style was set before.
 
 TODO describe
 
@@ -819,7 +848,81 @@ class MyBeanId {
 	String myUniqueFieldId;
 }
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
- 
+
+## Rich Client GUI interactions through WebSockets 
+
+The use of websockets and their internal javascripts is optional. Nano.h5 provides four mechanisms to use websockets:
+
+1. as application message service: providing status messages from main application 
+2. as input assist: supporting the user with available values
+3. as dependency listener: refreshing other dependent values after change a fields value
+4. as file attachment transferrer: providing to transfer local content to the server
+The main exception handler is connected to a WebSocketServer. All messages, sent through __Message.send(msg)__ are transferred to all connected child sessions. After getting the 'submit' event, a progress bar is shown.
+
+### The applications message service
+
+After user request - for example a forms submit - the application is doing some work with interaction to other servers like an application-server or a database. This may take long times, so the websocket connection is a comfortable way to show working status messages - with text and progressbar.
+
+### Attributes input assist to show available values
+
+Each attribute having an input-assist instance (on persistable attributes it is a DefaultInputAssist instance) tries to provide an input-assistance through the websocket connection. This is done through the NanoWebSocketServer combined with the WebSocketExceptionHandler.
+
+### Dependency listeners to re-calculate their values after changing a source value
+
+To refresh dependent values after changing a special value, do the following:
+* create a new class, implementing _WebSocketDependencyListener.evaluate()_
+* add an instance of this dependency listener to the special values change-handler.
+
+Example: creating a dependency listener
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+        BeanDefinition b = BeanDefinition.getBeanDefinition(org.anonymous.project.Person);
+        ((AttributeDefinition)b.getAttribute("organisation")).changeHandler().addListener(new WebSocketDependencyListener() {
+
+            @Override
+            protected Object evaluate(Object source) {
+                attributeID = "person.shortname";
+                return "my-refreshed-value";
+            }
+        });
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+### Transferring local file attachments
+
+Simply set your beans attribute type to be an attachment. The client will use file-selector to select your file. After selecting the file, this file will be sent to the application and the bean can access this file, stored inside the environments temp path.
+
+Example:
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    BeanDefinition b = BeanDefinition.getBeanDefinition(MyEntity.class);
+	((AttributeDefinition)b.getAttribute("my-attribute-name")).getPresentation().setType(IPresentable.TYPE_ATTACHMENT);
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+### Technical details: How it works
+
+there is a template file _websocket.client.js.template_ that will be filled and embedded into the response html. some of the declared functions are called by event handlers of input fields of this html. So, if someone changes the method names of that template, he has to change the dependent environment properties, defining this function names.
+
+Example environment-property:
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+websocket.inputassist.function=inputassist(event)
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+so this function has to be implemented inside the template script:
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+...
+function inputassist(e) {
+	var code;
+	if (e.keyCode) 
+		code = e.keyCode;
+	else if (e.which) 
+		code = e.which;
+	var text = e.srcElement.value + String.fromCharCode(code);
+	var request = '@' + e.srcElement.id + ':' + text;
+	console.log('sending input-assist request: \'' + request + '\'');
+	socket.send(request);
+}
+...
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+As you can see, all messages that will change attribute properties
 ## Developing, Deploying and Debugging
 
 * [tsl2.nano code server](git://git.code.sf.net/p/tsl2nano/code tsl2nano-code)
@@ -1274,6 +1377,15 @@ Other restrictions on android:
 
 ## Known Problems and some Solutions
 
+* Performance going down:
+** to low memory for jvm:
+*** enhance the maximum vm memory on start: change run.bat and add option '-Xmx1024m' on line starting with 'java'
+** non-persistable entities (annotated as @Entity, but not bound to any database table) are loading slow
+*** remove that beans from bean list view: create a regular expression hiding that entities for property 'bean.class.presentation.regexp' in environment.xml (Example: _^(?!(.*MyBean1)|(.*MyBean2)).*_).
+** class-loading is slow through nested jar loading
+*** extract all jar-files from tsl2.nano.h5.xxx.jar and copy them into the environments directory.
+** persistence provider has problems on specific beans:
+*** use another persistence provider
 * Beans showing currencys with EURO can't be saved
 ** Set the character encoding of your browser's current page to *UTF-8*. E.g. in Chrome: Menu=>Tools=>Encoding
 * no datasource for Sqlite available - apache BasicDatasource uses JavaBeans what is not usable on android
@@ -1312,6 +1424,8 @@ Other restrictions on android:
 | 0.0.4b | 11.05.2014 | lots of corrections, partially working on android |
 | 0.0.4c | 25.05.2014 | classloader transformation changed to enable loading persistence.xml through EclipseLink and OpenJPA |
 | 0.0.5 | 01.06.2014 | supporting non-jpa-persistence-providers like ebean, ormlite through NanoEntityManagerFactory |
+| 0.1.0 | 29.06.2014 | supporting non-jpa-persistence-providers like ebean, ormlite through NanoEntityManagerFactory |
+| 0.6.0 | 13.07.2014 | using websockets to support rich client gui interactions |
 
 ## TODOs
 
@@ -1470,11 +1584,17 @@ Other restrictions on android:
 * detail hintergrund-bild
 *  ve mit ? ???
 * konfig format
-* Expectable-Data?
-* TAGs: grud, crud2gui, crud2html, bean2html, entity2html, bean2gui, entity2gui, jpa2gui, jpa2html, jpa persistence provider, openjpa, hibernate, datanucleus, eclipselink, data-editor, data-sheet, entity browser, jpa2, full stack framework, orm, o/r mapper
+* Expectable-Data? Convention-Master-Developer?
+* TAGs: crud, grud, crud2gui, crud2html, bean2html, entity2html, bean2gui, entity2gui, jpa2gui, jpa2html, jpa persistence provider, openjpa, hibernate, datanucleus, eclipselink, data-editor, data-sheet, entity browser, jpa2, full stack framework, orm, o/r mapper
 * perhaps use findjar.com before invoking maven-repository
+* in jdk1.7 it is possible to close a classloader (unlocking and reloading jar-files is now possible). but the URLClassLoader doesn't use this mechanism yet.
+* NetworkClassLoader should recognize resources (e.g. for loggers) to avoid reloading from network every time.
 
 * ebean uses an own query language but is able to 'parse' an ansi sql statement
 * ormlite needs field-annotations - while hibernate-tools only create property/method annotations
+
+* problems on event 'onchange' with value = 'function() {...}' on attachments
+* problems on de/-serializing 'EventController'
+* create uml documentation (websockets, bean-package)
 
 [GLOSSARY]

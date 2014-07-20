@@ -9,10 +9,17 @@
  */
 package de.tsl2.nano.messaging;
 
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.LinkedHashMap;
 import java.util.Map;
+
+import org.simpleframework.xml.Default;
+import org.simpleframework.xml.DefaultType;
+import org.simpleframework.xml.ElementMap;
+
+import de.tsl2.nano.bean.def.AttributeDefinition;
 
 /**
  * manages bean typed or untyped events. registers {@link IListener}s and fires {@link ChangeEvent} or other events to
@@ -23,13 +30,15 @@ import java.util.Map;
  * @version $Revision$
  */
 @SuppressWarnings({"rawtypes", "unchecked"})
-public class EventController {
+@Default(value = DefaultType.FIELD, required = false)
+public class EventController implements Serializable {
+    /** serialVersionUID */
+    private static final long serialVersionUID = 1L;
+    
     /** all registered value change listeners */
-//    private Collection<IListener> listener;
-    private Map<Class, Collection<IListener>> listener;
-
-    /** true, if only object-event-type listeners where registered */
-    boolean onlyObjectListeners = true;
+    @ElementMap(entry = "listener", key = "type", attribute = true, inline = true, value = "attributeListener", valueType = IListener.class, required = false)
+    //TODO: remove transient if you found a workaround on simple-xml problem with map(collection).
+    transient Map<Class, Collection<IListener>> listener;
 
     /**
      * internal access method to guarantee a listener collection instance
@@ -41,13 +50,17 @@ public class EventController {
             listener = new LinkedHashMap<Class, Collection<IListener>>();
         }
 
-        Class<?> type = onlyObjectListeners ? Object.class : eventType;
+        Class<?> type = onlyObjectListeners() ? Object.class : eventType;
         Collection<IListener> typedListener = listener.get(type);
         if (typedListener == null) {
             typedListener = new ArrayList<IListener>();
             listener.put(type, typedListener);
         }
         return typedListener;
+    }
+
+    private boolean onlyObjectListeners() {
+        return !hasListeners() || listener.size() == 1 && listener.keySet().iterator().next().equals(Object.class);
     }
 
     /**
@@ -77,8 +90,6 @@ public class EventController {
      *            {@link #addListener(IListener)}.
      */
     public <T> void addListener(IListener<T> l, Class<T> eventType) {
-        if (onlyObjectListeners && !eventType.isAssignableFrom(Object.class))
-            onlyObjectListeners = false;
         listener(eventType).add(l);
     }
 
@@ -152,6 +163,14 @@ public class EventController {
             listener.clear();
             listener = null;
         }
-        onlyObjectListeners = true;
+    }
+    
+    /**
+     * getListeners
+     * @param type listener type to evaluate
+     * @return copy of typed listeners
+     */
+    public Collection<IListener> getListeners(Class eventType) {
+        return new ArrayList<IListener>(listener(eventType));
     }
 }

@@ -18,9 +18,12 @@ import java.lang.Thread.UncaughtExceptionHandler;
  * @version $Revision$
  */
 public interface ISession {
-    /** @return identifier of this session - perhaps the inetadress */
+    /** @return identifier of this session - perhaps the inetadress + user */
     Object getId();
 
+    /** @return non-unique data context */
+    Object getContext();
+    
     /** @return user authorization implementation */
     Object getUserAuthorization();
     
@@ -41,4 +44,10 @@ public interface ISession {
 
     /** sets the user authorization */
     void setUserAuthorization(Object authorization);
+    
+    /** return the websocket-server port for this session */
+    int getWebsocketPort();
+    
+    /** return the current working object */
+    Object getWorkingObject();
 }

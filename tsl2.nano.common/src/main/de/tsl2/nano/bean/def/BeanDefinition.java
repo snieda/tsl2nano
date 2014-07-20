@@ -38,6 +38,7 @@ import org.simpleframework.xml.core.Persist;
 
 import de.tsl2.nano.action.CommonAction;
 import de.tsl2.nano.action.IAction;
+import de.tsl2.nano.action.IActivable;
 import de.tsl2.nano.bean.BeanContainer;
 import de.tsl2.nano.bean.BeanUtil;
 import de.tsl2.nano.bean.IValueAccess;
@@ -1023,7 +1024,9 @@ public class BeanDefinition<T> extends BeanClass<T> implements Serializable {
      */
     public static void dump() {
         for (BeanDefinition<?> bd : virtualBeanCache) {
-            bd.saveDefinition();
+            if (!BeanUtil.isStandardType(bd.clazz)) {
+                bd.saveDefinition();
+            }
         }
     }
 
@@ -1092,8 +1095,12 @@ public class BeanDefinition<T> extends BeanClass<T> implements Serializable {
         List<IAttributeDefinition<?>> attributes = getBeanAttributes();
         getValueExpression();
         getAttributeNames();
-        BeanCollector.createColumnDefinitions(this,
-            getPresentationHelper().matches("default.present.attribute.multivalue", true));
+        BeanCollector.createColumnDefinitions(this, new IActivable() {
+            @Override
+            public boolean isActive() {
+                return getPresentationHelper().matches("default.present.attribute.multivalue", true);
+            }
+        });
         for (IAttributeDefinition<?> a : attributes) {
             a.getFormat();
             a.getPresentation();
@@ -1102,8 +1109,14 @@ public class BeanDefinition<T> extends BeanClass<T> implements Serializable {
 //        getActions();
         getPresentable();
         getConnection("");
-        if (usePersistentCache && !getClazz().isArray()/*simple-xml is not able to deserialize arrays*/)
+        if (isSaveable())
             saveDefinition();
+    }
+
+    private final boolean isSaveable() {
+        String clsName = clazz.getName();
+        return usePersistentCache && !clsName.startsWith("java") && !clazz.getName().startsWith(Environment.FRAMEWORK)
+            && !getClazz().isArray()/*simple-xml is not able to deserialize arrays*/;
     }
 
     /**

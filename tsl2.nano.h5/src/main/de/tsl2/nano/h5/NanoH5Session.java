@@ -55,6 +55,7 @@ import de.tsl2.nano.core.exception.Message;
 import de.tsl2.nano.core.execution.Profiler;
 import de.tsl2.nano.core.log.LogFactory;
 import de.tsl2.nano.core.util.DateUtil;
+import de.tsl2.nano.core.util.NetUtil;
 import de.tsl2.nano.core.util.StringUtil;
 import de.tsl2.nano.format.RegExpFormat;
 import de.tsl2.nano.h5.NanoHTTPD.Response;
@@ -66,6 +67,7 @@ import de.tsl2.nano.serviceaccess.IAuthorization;
 import de.tsl2.nano.util.NumberUtil;
 
 /**
+ * user session for nano.h5 server
  * 
  * @author Tom, Thomas Schneider
  * @version $Revision$
@@ -76,11 +78,22 @@ public class NanoH5Session implements ISession {
 
     NanoH5 server;
     IPageBuilder<?, String> builder;
+    /** workflow or bean navigator */
     IBeanNavigator nav;
+    /** html response */
     Response response;
+    /** concatencation of database-name+schema+beans.jar */
+    String context;
+    
+    /** sessions classloader */
     ClassLoader sessionClassloader;
+    /** requests user internet adress */
     InetAddress inetAddress;
 
+    /** port of websocket, if used */
+    int websocketPort;
+    
+    /** sessions exceptionHandler */
     ExceptionHandler exceptionHandler;
 
     /** for profiling in status-line (current work-time) */
@@ -90,6 +103,8 @@ public class NanoH5Session implements ISession {
     private long sessionStart;
 
     private IAuthorization authorization;
+    
+    public static final String PREFIX_STATUS_LINE = "@";
 
     /**
      * constructor
@@ -102,7 +117,7 @@ public class NanoH5Session implements ISession {
      */
     public NanoH5Session(NanoH5 server,
             InetAddress inetAddress, IBeanNavigator navigator,
-            ClassLoader appstartClassloader, IAuthorization authorization) {
+            ClassLoader appstartClassloader, IAuthorization authorization, String context) {
         super();
         this.server = server;
         this.inetAddress = inetAddress;
@@ -111,6 +126,7 @@ public class NanoH5Session implements ISession {
         this.sessionClassloader = appstartClassloader;
         createExceptionHandler();
         this.authorization = authorization;
+        this.context = context;
         this.sessionStart = System.currentTimeMillis();
     }
 
@@ -119,9 +135,9 @@ public class NanoH5Session implements ISession {
      */
     private void createExceptionHandler() {
         if (Environment.get("use.websocket", true)) {
-            URL url = NanoH5.getServiceURL(null);
             NanoWebSocketServer socketServer =
-                new NanoWebSocketServer(new InetSocketAddress(url.getHost(), Environment.get("websocket.port", 8099)));
+                new NanoWebSocketServer(this, createSocketAddress());
+            websocketPort = socketServer.getPort();
             this.exceptionHandler =
                 (ExceptionHandler) Environment.addService(UncaughtExceptionHandler.class,
                     new WebSocketExceptionHandler(socketServer));
@@ -131,6 +147,12 @@ public class NanoH5Session implements ISession {
                 (ExceptionHandler) Environment.addService(UncaughtExceptionHandler.class, new ExceptionHandler());
         }
         Thread.currentThread().setUncaughtExceptionHandler(exceptionHandler);
+    }
+
+    private InetSocketAddress createSocketAddress() {
+        URL url = NanoH5.getServiceURL(null);
+        //workaround - see doc of NetUtil.getFreePort()
+        return new InetSocketAddress(url.getHost(), NetUtil.getFreePort());
     }
 
     /**
@@ -231,13 +253,13 @@ public class NanoH5Session implements ISession {
             authorization != null ? Environment.translate("tsl2nano.login.user", true) + ": "
                 + authorization.getUser() + ", " + "Online: "
                 + DateUtil.getFormattedMinutes(getDuration()) + " min, " : "";
-        return user
+        return PREFIX_STATUS_LINE + user
             + Environment.translate("tsl2nano.time", true)
             + ": " + DateUtil.getFormattedDateTime(new Date()) + ", "
             + Environment.translate("tsl2nano.request", true) + ": "
             + DateUtil.getFormattedMinutes(System.currentTimeMillis() - startTime) + " min"
             + (LOG.isDebugEnabled() ? ", " + "Memory: " + (Profiler.getUsedMem() / (1024 * 1024)) + " MB" : "")
-        + (LOG.isDebugEnabled() ? ", " + "working sessions: " + server.sessions.size() : "");
+            + (LOG.isDebugEnabled() ? ", " + "working sessions: " + server.sessions.size() : "");
     }
 
     private String refreshPage(Object message) {
@@ -343,16 +365,20 @@ public class NanoH5Session implements ISession {
                 if (action != null) {
                     if (c.isMultiValue()
                         && isSearchRequest(action.getId(), (BeanCollector<?, ?>) c)) {
+                        Message.send(Environment.translate("tsl2nano.starting", true) + " "
+                            + action.getShortDescription() + " ...");
                         responseObject = processSearchRequest(parms, (BeanCollector<?, ?>) c);
                     } else {
                         //send this information to the client to show a progress bar.
                         Message.send("submit");
+                        Message.send(Environment.translate("tsl2nano.starting", true) + " "
+                                + action.getShortDescription() + " ...");
                         /*
                          * submit/assign and cancel will not push a new element to the navigation stack!
                          * TODO: refactore access to names ('reset' and 'save')
                          */
                         Object result = action.activate();
-                        
+
                         /*
                          * if action is asynchron, it's a long term action showing the same page again
                          * with progress informations
@@ -605,9 +631,14 @@ public class NanoH5Session implements ISession {
 
     @Override
     public Object getId() {
-        return inetAddress;
+        return inetAddress.getHostName() + "&" + authorization.getUser();
     }
 
+    @Override
+    public Object getContext() {
+        return context;
+    }
+    
     @Override
     public ClassLoader getSessionClassLoader() {
         return sessionClassloader;
@@ -631,5 +662,17 @@ public class NanoH5Session implements ISession {
     @Override
     public IAuthorization getUserAuthorization() {
         return authorization;
+    }
+    
+    public Object getWorkingObject() {
+        return nav.current();
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public int getWebsocketPort() {
+        return websocketPort;
     }
 }

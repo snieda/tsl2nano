@@ -175,6 +175,27 @@ public class ValueExpression<TYPE> implements IValueExpression<TYPE>, IConverter
         if (type.isAssignableFrom(Object.class))
             return (TYPE) toValue;
         
+        TYPE exampleBean = createExampleBean(toValue);
+
+        if (isPersistable) {//check for unique!
+            Collection<TYPE> beansByExample = BeanContainer.instance().getBeansByExample(exampleBean);
+            if (beansByExample.size() > 1) {
+                LOG.error("string-to-object-parser: found more than one object:\n"
+                    + StringUtil.toFormattedString(beansByExample, 100, true));
+                throw new ManagedException("tsl2nano.multiple.items", new Object[] { toValue, type, type });
+            }
+            return beansByExample.size() > 0 ? beansByExample.iterator().next() : null;
+        } else {
+            return exampleBean;
+        }
+    }
+
+    /**
+     * createExampleBean
+     * @param toValue
+     * @return example bean holding attributes given by toValue
+     */
+    public TYPE createExampleBean(String toValue) {
         TYPE exampleBean = createInstance(toValue);
         //TODO: how-to extract the attribute-name information from expression?
         Bean<TYPE> b = (Bean<TYPE>) Bean.getBean((Serializable) exampleBean);
@@ -191,18 +212,7 @@ public class ValueExpression<TYPE> implements IValueExpression<TYPE>, IConverter
                 b.setParsedValue(attributes[i], attributeValues[i]);
             }
         }
-
-        if (isPersistable) {//check for unique!
-            Collection<TYPE> beansByExample = BeanContainer.instance().getBeansByExample(exampleBean);
-            if (beansByExample.size() > 1) {
-                LOG.error("string-to-object-parser: found more than one object:\n"
-                    + StringUtil.toFormattedString(beansByExample, 100, true));
-                throw new ManagedException("tsl2nano.multiple.items", new Object[] { toValue, type, type });
-            }
-            return beansByExample.size() > 0 ? beansByExample.iterator().next() : null;
-        } else {
-            return exampleBean;
-        }
+        return exampleBean;
     }
 
     /**

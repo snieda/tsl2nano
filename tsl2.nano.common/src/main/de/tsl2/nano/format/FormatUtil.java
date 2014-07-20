@@ -25,6 +25,8 @@ import java.util.Date;
 import java.util.List;
 
 import org.apache.commons.logging.Log;
+import org.simpleframework.xml.Default;
+import org.simpleframework.xml.DefaultType;
 
 import de.tsl2.nano.collection.CollectionUtil;
 import de.tsl2.nano.core.Environment;
@@ -197,13 +199,7 @@ public class FormatUtil {
                             //be this toString() presentation. to resolve it's real enum name we have to
                             //check all enum toStrings.
                             if (e == null) {
-                                List<Enum> enumValues = CollectionUtil.getEnumValues(type);
-                                for (Enum value : enumValues) {
-                                    if (value.toString().equals(source)) {
-                                        e = value;
-                                        break;
-                                    }
-                                }
+                                e = CollectionUtil.findEnum(type, source);
                             }
                         }
                         return e;

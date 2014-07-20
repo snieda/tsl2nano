@@ -424,9 +424,11 @@ public class BeanPresentationHelper<T> {
      */
     public int getDefaultStyle(IAttribute attr) {
         int style = 0;
-        if ((attr instanceof IAttributeDef)
-            && ((IAttributeDef) attr).length() > Environment.get("presentation.style.multi.min.length", 100))
-            style |= IPresentable.STYLE_MULTI;
+        if (attr instanceof IAttributeDef) {
+            IAttributeDef def = (IAttributeDef) attr;
+            if (def.length() > Environment.get("field.style.multi.min.length", 100) && def.precision() == -1)
+                style |= IPresentable.STYLE_MULTI;
+        }
         return style;
     }
 
@@ -963,7 +965,7 @@ public class BeanPresentationHelper<T> {
     String[] getBestAttributeNames(String[] names) {
         return getBestAttributeNames(names, getBestAttributeOrder(names).descendingMap().values());
     }
-    
+
     String[] getBestAttributeNames(String[] names, Collection<Integer> descendingIndexes) {
         Set<String> ordered = new LinkedHashSet<String>();
         for (Integer index : descendingIndexes) {
@@ -1032,12 +1034,12 @@ public class BeanPresentationHelper<T> {
      */
     protected String getBestPresentationAttribute() {
         if (bean.isDefault() && bean.getAttributeDefinitions().size() > 0) {
-            Message.send("evaluating best attribute presentation for entity '" + bean.getName());
+            Message.send("evaluating best attribute presentation for entity '" + bean.getName() + "'");
             String[] names = bean.getAttributeNames();
             NavigableMap<Integer, Integer> levels = getBestAttributeOrder(names);
             bean.setAttributeFilter(getBestAttributeNames(names, levels.descendingMap().values()));
             bean.isdefault = true;
-            
+
             /*
              * we don't have direct access to the database, so we can't read the
              * unique indexes. but the best matched attribute should be unique.
@@ -1211,7 +1213,7 @@ public class BeanPresentationHelper<T> {
     protected boolean isRootBean() {
         return bean != null && BeanCollector.class.isAssignableFrom(bean.getDeclaringClass());
     }
-    
+
     /**
      * creates extended actions like 'print', 'help', 'export', 'select-all', 'deselect-all' etc.
      */
@@ -1230,6 +1232,7 @@ public class BeanPresentationHelper<T> {
                 public Object action() throws Exception {
                     return "./";
                 }
+
                 @Override
                 public boolean isEnabled() {
                     return super.isEnabled() && isRootBean();
@@ -1246,10 +1249,11 @@ public class BeanPresentationHelper<T> {
                     reset();
                     return page("configuration refreshed");
                 }
+
                 @Override
-                    public boolean isEnabled() {
-                        return super.isEnabled() && isRootBean();
-                    }
+                public boolean isEnabled() {
+                    return super.isEnabled() && isRootBean();
+                }
             });
         }
         return appActions;

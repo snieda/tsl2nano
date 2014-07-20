@@ -360,7 +360,7 @@ public class CollectionUtil {
     public static <T> T[] concat(T[]... arrays) {
         return (T[]) concat(arrays[0].getClass(), arrays);
     }
-    
+
     /**
      * concatenates the given arrays into a new array of type newType
      * 
@@ -482,6 +482,24 @@ public class CollectionUtil {
      */
     public static final <E extends Enum<E>> List<E> getEnumValues(Class<E> enumClass) {
         return Arrays.asList(enumClass.getEnumConstants());
+    }
+
+    /**
+     * finds an enum value through a given enum.toString() value
+     * 
+     * @param enumClass enum
+     * @param enumToString enums value toString()
+     */
+    public static final <E extends Enum<E>> E findEnum(Class<E> enumClass, String enumToString) {
+        if (Util.isEmpty(enumToString))
+            return null;
+        E[] enumConstants = enumClass.getEnumConstants();
+        enumToString = enumToString.toLowerCase();
+        for (E e : enumConstants) {
+            if (e.toString().toLowerCase().equals(enumToString))
+                return e;
+        }
+        throw new IllegalArgumentException(enumToString + " can't be found as enum of " + enumClass);
     }
 
     /**

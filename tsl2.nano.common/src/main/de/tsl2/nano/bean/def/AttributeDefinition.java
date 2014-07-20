@@ -38,7 +38,9 @@ import de.tsl2.nano.core.cls.IAttribute;
 import de.tsl2.nano.core.log.LogFactory;
 import de.tsl2.nano.core.util.StringUtil;
 import de.tsl2.nano.core.util.Util;
+import de.tsl2.nano.format.FormatUtil;
 import de.tsl2.nano.messaging.EventController;
+import de.tsl2.nano.messaging.IListener;
 import de.tsl2.nano.util.PrivateAccessor;
 
 /**
@@ -55,7 +57,7 @@ public class AttributeDefinition<T> implements IAttributeDefinition<T> {
 
     @Element(name = "declaring")
     protected IAttribute<T> attribute;
-    protected transient EventController eventController;
+    protected EventController eventController;
     @Element(type = Constraint.class, required = false)
     protected IConstraint<T> constraint;
     @Attribute(required = false)
@@ -151,6 +153,20 @@ public class AttributeDefinition<T> implements IAttributeDefinition<T> {
     @Commit
     private void initDeserialization() {
         status = IStatus.STATUS_OK;
+        if (presentable != null && presentable.getInputAssist() != null)
+            presentable.getInputAssist().setAttribute((IAttributeDefinition) this);
+        //provide dependency listeners their attribute-definition
+        if (hasListeners()) {
+            BeanDefinition beandef = BeanDefinition.getBeanDefinition(getDeclaringClass());
+            Collection<IListener> listener = changeHandler().getListeners(Object.class);
+            for (IListener l : listener) {
+                if (l instanceof AbstractDependencyListener) {
+                    AbstractDependencyListener<?> dl = (AbstractDependencyListener<?>) l;
+                    String name = StringUtil.substring(dl.attributeID, ".", null);
+                    dl.setAttribute((AttributeDefinition) beandef.getAttribute(name));
+                }
+            }
+        }
     }
 
     public final IConstraint<T> getConstraint() {
@@ -281,7 +297,9 @@ public class AttributeDefinition<T> implements IAttributeDefinition<T> {
                 getConstraint().setFormat(new CollectionExpressionFormat<T>((Class<T>) getGenericType(0)));
             } else if (Map.class.isAssignableFrom(type)) {
                 getConstraint().setFormat(new MapExpressionFormat<T>((Class<T>) getGenericType(1)));
-            } else if (type.isEnum() || BeanUtil.isStandardType(type)) {
+            } else if (type.isEnum()) {
+                getConstraint().setFormat(FormatUtil.getDefaultFormat(type, true));
+            } else if (BeanUtil.isStandardType(type)) {
 //                this.format = FormatUtil.getDefaultFormat(type, true);
 //                //not all types have default formats
 //                if (this.format == null) {
@@ -666,6 +684,25 @@ public class AttributeDefinition<T> implements IAttributeDefinition<T> {
     }
 
     /**
+     * looks for registered change handlers without creating an {@link EventController} instance.
+     * 
+     * @return
+     */
+    public boolean hasListeners() {
+        return eventController != null && eventController.hasListeners();
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    public EventController changeHandler() {
+        if (eventController == null) {
+            eventController = new EventController();
+        }
+        return eventController;
+    }
+
+    /**
      * {@inheritDoc}
      */
     @Override
@@ -681,7 +718,8 @@ public class AttributeDefinition<T> implements IAttributeDefinition<T> {
     public String toDebugString() {
         return Util.toString(getClass(), "declaringClass: " + getType(), "temporal-type: " + temporalType, "name: "
             + getName(),
-            "id: " + id, "unique: " + unique, "cascading: " + cascading, "composition: " + composition, "\nattribute: " + attribute, "\nstatus: "
+            "id: " + id, "unique: " + unique, "cascading: " + cascading, "composition: " + composition, "\nattribute: "
+                + attribute, "\nstatus: "
                 + status, "\nconstraints: "
                 + constraint, "\npresentable: " + presentable);
     }

@@ -61,7 +61,11 @@ public abstract class GenericBeanContainer extends BeanContainerUtil {
         IAction<Collection<?>> exampleFinder = new CommonAction<Collection<?>>() {
             @Override
             public Collection<?> action() {
-                return container.getGenService().findByExample(parameter[0], true);
+                boolean useLike = parameter[1] instanceof Boolean && ((Boolean) parameter[1]);
+                if (useLike)
+                    return container.getGenService().findByExampleLike(parameter[0], true);
+                else
+                    return container.getGenService().findByExample(parameter[0], true);
             }
         };
         IAction<Collection<?>> betweenFinder = new CommonAction<Collection<?>>() {

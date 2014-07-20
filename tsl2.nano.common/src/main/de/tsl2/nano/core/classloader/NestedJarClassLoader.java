@@ -10,12 +10,16 @@
 package de.tsl2.nano.core.classloader;
 
 import java.io.File;
+import java.io.IOException;
 import java.io.InputStream;
 import java.net.URL;
 import java.net.URLStreamHandlerFactory;
 import java.util.Enumeration;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.jar.Attributes;
 import java.util.jar.Manifest;
+import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
 
 import org.apache.commons.logging.Log;
@@ -38,6 +42,7 @@ public class NestedJarClassLoader extends LibClassLoader implements Cloneable {
     /** hasRootJar, initial true to start evaluation! */
     boolean hasRootJar = true;
 
+    Map<String, ZipStream> jarFileStreams;
     String[] nestedJars;
 
     public NestedJarClassLoader(ClassLoader parent) {
@@ -107,20 +112,20 @@ public class NestedJarClassLoader extends LibClassLoader implements Cloneable {
         // perhaps create package
         int i = name.lastIndexOf('.');
         if (i != -1) {
-          String pkgname = name.substring(0, i);
-          Package pkg = getPackage(pkgname);
-          if (pkg == null) {
-            URL pkgUrl = getResource(pkgname.replaceAll("\\.", "/").concat("/"));
-            //TODO: load nested manifests
-            Manifest manifest = null;//this.manifests.get(nestedJarPath);
-            if (manifest != null) {
-              definePackage(pkgname, manifest, pkgUrl);
-            } else {
-              definePackage(pkgname, null, null, null, null, null, null, pkgUrl);
+            String pkgname = name.substring(0, i);
+            Package pkg = getPackage(pkgname);
+            if (pkg == null) {
+                URL pkgUrl = getResource(pkgname.replaceAll("\\.", "/").concat("/"));
+                //TODO: load nested manifests
+                Manifest manifest = null;//this.manifests.get(nestedJarPath);
+                if (manifest != null) {
+                    definePackage(pkgname, manifest, pkgUrl);
+                } else {
+                    definePackage(pkgname, null, null, null, null, null, null, pkgUrl);
+                }
             }
-          }
         }
-        
+
         return defineClass(name, bytes, 0, bytes.length);
 
     }
@@ -133,8 +138,8 @@ public class NestedJarClassLoader extends LibClassLoader implements Cloneable {
             final String path = getFileName(name);
             for (int i = 0; i < nestedJars.length; i++) {
                 try {
-                    ZipInputStream zipStream = getJarInputStream(nestedJars[i]);
-                    byte[] bytes = FileUtil.readFromZip(zipStream, path);
+                    ZipStream zipStream = getJarInputStream(nestedJars[i]);
+                    byte[] bytes = zipStream.getFile(path);
                     if (bytes != null) {
                         LOG.debug("loaded " + nestedJars[i]
                             + " -> "
@@ -161,25 +166,25 @@ public class NestedJarClassLoader extends LibClassLoader implements Cloneable {
         Object obj = arr[i];
         //system.arraycopy not possible
         for (int j = i; j > 0; j--) {
-            arr[j] = arr[j-1];
+            arr[j] = arr[j - 1];
         }
         arr[0] = obj;
     }
 
-    String findNested(String name, boolean resource) {
-        LOG.debug("searching for " + name);
-        String[] nestedJars = getNestedJars();
-        if (nestedJars != null) {
-            final String path = resource ? name : getFileName(name);
-            for (int i = 0; i < nestedJars.length; i++) {
-                ZipInputStream zipStream = getJarInputStream(nestedJars[i]);
-                String[] result = FileUtil.readFileNamesFromZip(zipStream, path, true);
-                if (result != null && result.length > 0)
-                    return result[0];
-            }
-        }
-        return null;
-    }
+//    String findNested(String name, boolean resource) {
+//        LOG.debug("searching for " + name);
+//        String[] nestedJars = getNestedJars();
+//        if (nestedJars != null) {
+//            final String path = resource ? name : getFileName(name);
+//            for (int i = 0; i < nestedJars.length; i++) {
+//                ZipInputStream zipStream = getJarInputStream(nestedJars[i]);
+//                String[] result = FileUtil.readFileNamesFromZip(zipStream, path, true);
+//                if (result != null && result.length > 0)
+//                    return result[0];
+//            }
+//        }
+//        return null;
+//    }
 
     protected String getRootJarPath() {
         String rootPath = System.getProperty("java.class.path");
@@ -197,6 +202,7 @@ public class NestedJarClassLoader extends LibClassLoader implements Cloneable {
                     + StringUtil.toFormattedString(nestedJars, -1, true));
                 if (LOG.isDebugEnabled())
                     readManifest();
+                this.jarFileStreams = new HashMap<String, ZipStream>(nestedJars.length);
             } else {
                 hasRootJar = false;
                 LOG.info("application not launched through jar-file. No nested jar files to load.");
@@ -239,9 +245,12 @@ public class NestedJarClassLoader extends LibClassLoader implements Cloneable {
      * @param jarName
      * @return
      */
-    protected ZipInputStream getJarInputStream(String jarName) {
-        InputStream jarStream = this.getResourceAsStream(jarName);
-        ZipInputStream zipStream = new ZipInputStream(jarStream);
+    protected ZipStream getJarInputStream(String jarName) {
+        ZipStream zipStream = jarFileStreams.get(jarName);
+        if (zipStream == null) {
+            zipStream = new ZipStream(this, jarName);
+            jarFileStreams.put(jarName, zipStream);
+        }
         return zipStream;
     }
 
@@ -259,9 +268,79 @@ public class NestedJarClassLoader extends LibClassLoader implements Cloneable {
     public String toString() {
         return super.toString() + "[nested: " + (getNestedJars() != null ? nestedJars.length : 0) + "]";
     }
-    
+
     @Override
     public Object clone() throws CloneNotSupportedException {
         return super.clone();
     }
+}
+
+/**
+ * encapsulated caching zip-reader to enhance performance on preloading file bytes
+ * 
+ * @author Tom
+ * @version $Revision$
+ */
+class ZipStream {
+    ZipInputStream zipStream;
+    Map<String, byte[]> zipEntryBytes;
+
+    ZipStream(ClassLoader cl, String jarName) {
+        super();
+        zipEntryBytes = new HashMap<String, byte[]>();
+        InputStream jarStream = cl.getResourceAsStream(jarName);
+        zipStream = new ZipInputStream(jarStream);
+    }
+
+    /**
+     * @return Returns the zipStream.
+     */
+    ZipInputStream getZipStream() {
+        return zipStream;
+    }
+
+    byte[] getFile(String fileName) {
+        byte[] entryBytes = zipEntryBytes.get(fileName);
+        if (entryBytes == null) {
+            if (zipStream == null)
+                return null;
+            else
+                return readFromZip(fileName);
+        }
+        zipEntryBytes.remove(entryBytes);
+        return entryBytes;
+    }
+
+    //as we don't close the streams, we can't use FileUtil
+    public byte[] readFromZip(String file) {
+        //open a zip-file
+        ZipEntry zipEntry = null;
+        try {
+            //search source 
+            while ((zipEntry = zipStream.getNextEntry()) != null) {
+                if (zipEntry.getName().equals(file)) {
+                    break;
+                } else {
+                    zipEntryBytes.put(zipEntry.getName(), FileUtil.readBytes(zipStream));
+                }
+            }
+            if (zipEntry == null) {
+                if (zipStream != null) {
+                    try {
+                        zipStream.close();
+                        zipStream = null;
+                    } catch (IOException e) {
+                        throw new RuntimeException(e);
+                    }
+                }
+                return null;
+            }
+
+            //read source
+            return FileUtil.readBytes(zipStream);
+        } catch (Exception ex) {
+            throw new RuntimeException(ex);
+        }
+    }
+
 }

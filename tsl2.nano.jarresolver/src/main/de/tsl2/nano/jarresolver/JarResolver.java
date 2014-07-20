@@ -91,7 +91,7 @@ public class JarResolver {
             if (updateUrl != null) {
                 try {
                     LOG.info("updating jarresolver.properties through " + updateUrl);
-                    download("jarresolver.properties", updateUrl, true, true);
+                    download(updateUrl, true, true);
                 } catch (Exception ex) {
                     //no problem - perhaps no network connection
                     LOG.warn("couldn't update jarresolver.properties from " + updateUrl);
@@ -177,7 +177,7 @@ public class JarResolver {
     }
 
     private void loadMvn() {
-        File mvnFile = download("maven", (String) props.get(URL_MVN_DOWNLOAD), false, false);
+        File mvnFile = download((String) props.get(URL_MVN_DOWNLOAD), false, false);
         mvnRoot = mvnFile.getParent();
         String extractedName = mvnRoot + "/" + StringUtil.substring(mvnFile.getName(), null, "-bin.zip");
         if (!new File(extractedName + "/bin").exists())
@@ -188,17 +188,16 @@ public class JarResolver {
     /**
      * downloads the given strUrl if a network connection is available
      * 
-     * @param name name of strUrl - simply for logging informations
      * @param strUrl network url to load
      * @param flat if true, the file of that url will be put directly to the environment directory. otherwise the full
      *            path will be stored to the environment.
      * @param overwrite if true, existing files will be overwritten
      * @return downloaded local file
      */
-    protected File download(String name, String strUrl, boolean flat, boolean overwrite) {
+    protected File download(String strUrl, boolean flat, boolean overwrite) {
         basedir = props.getProperty(DIR_LOCALREPOSITORY);
         basedir = !Util.isEmpty(basedir) ? basedir : Environment.getConfigPath();
-        return NetUtil.download(name, strUrl, basedir, flat, overwrite);
+        return NetUtil.download(strUrl, basedir, flat, overwrite);
     }
 
     /**

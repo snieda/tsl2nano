@@ -38,16 +38,19 @@ import de.tsl2.nano.action.IActivable;
 import de.tsl2.nano.bean.BeanContainer;
 import de.tsl2.nano.bean.IBeanContainer;
 import de.tsl2.nano.bean.def.AbstractExpression;
+import de.tsl2.nano.bean.def.AttributeDefinition;
 import de.tsl2.nano.bean.def.Bean;
 import de.tsl2.nano.bean.def.BeanCollector;
 import de.tsl2.nano.bean.def.BeanDefinition;
 import de.tsl2.nano.bean.def.BeanPresentationHelper;
+import de.tsl2.nano.bean.def.BeanValue;
 import de.tsl2.nano.bean.def.IPageBuilder;
 import de.tsl2.nano.bean.def.IPresentable;
 import de.tsl2.nano.bean.def.SecureAction;
 import de.tsl2.nano.collection.MapUtil;
 import de.tsl2.nano.core.AppLoader;
 import de.tsl2.nano.core.Environment;
+import de.tsl2.nano.core.Main;
 import de.tsl2.nano.core.ManagedException;
 import de.tsl2.nano.core.cls.BeanClass;
 import de.tsl2.nano.core.exception.Message;
@@ -63,6 +66,7 @@ import de.tsl2.nano.h5.navigation.EntityBrowser;
 import de.tsl2.nano.h5.navigation.IBeanNavigator;
 import de.tsl2.nano.h5.navigation.Workflow;
 import de.tsl2.nano.h5.websocket.NanoWebSocketServer;
+import de.tsl2.nano.h5.websocket.WebSocketDependencyListener;
 import de.tsl2.nano.persistence.GenericLocalBeanContainer;
 import de.tsl2.nano.persistence.Persistence;
 import de.tsl2.nano.persistence.PersistenceClassLoader;
@@ -71,6 +75,7 @@ import de.tsl2.nano.service.util.BeanContainerUtil;
 import de.tsl2.nano.serviceaccess.Authorization;
 import de.tsl2.nano.serviceaccess.IAuthorization;
 import de.tsl2.nano.serviceaccess.ServiceFactory;
+import de.tsl2.nano.serviceaccess.test.ServiceAccessTest.Person;
 import de.tsl2.nano.util.NumberUtil;
 
 /**
@@ -267,9 +272,18 @@ public class NanoH5 extends NanoHTTPD implements IConnector<Persistence> {
         NanoH5Session session = new NanoH5Session(this,
             inetAddress,
             createGenericNavigationModel(),
-            Environment.get(ClassLoader.class), null);
+            Environment.get(ClassLoader.class), null, createSesionContext());
         sessions.put(inetAddress, session);
         return session;
+    }
+
+    /**
+     * createSesionContext
+     * @return data specific context name
+     */
+    private String createSesionContext() {
+        Persistence p = Persistence.current();
+        return p.getDatabase() + "." + p.getDefaultSchema() + "." + p.getJarFile();
     }
 
     /**
@@ -358,7 +372,7 @@ public class NanoH5 extends NanoHTTPD implements IConnector<Persistence> {
 //                    Thread.sleep(1000);
 //                    Message.send("" +i);
 //                }
-                    
+
                 return connect(persistence);
             }
 
@@ -377,7 +391,7 @@ public class NanoH5 extends NanoHTTPD implements IConnector<Persistence> {
                 //TODO: for long term use, it's asynchron
                 return true;//TODO: check if beans.jar readable and if authorization profile existent;
             }
-            
+
             @Override
             public boolean isDefault() {
                 return true;
@@ -425,6 +439,7 @@ public class NanoH5 extends NanoHTTPD implements IConnector<Persistence> {
      */
     private void createAuthorization(final Persistence persistence) {
         String userName = persistence.getConnectionUserName();
+        Message.send("creating authorization for " + userName);
         Environment.addService(IAuthorization.class, Authorization.create(userName, false));
     }
 
@@ -492,6 +507,7 @@ public class NanoH5 extends NanoHTTPD implements IConnector<Persistence> {
      * @return
      */
     protected List<Class> createBeanContainer(final Persistence persistence, PersistenceClassLoader runtimeClassloader) {
+        Message.send("creating bean-container for " + persistence.getJarFile());
         boolean useJPAPersistenceProvider = true;
         /* 
          * check, whether a real/existing jpa-persistence-provider was selected.
@@ -524,9 +540,21 @@ public class NanoH5 extends NanoHTTPD implements IConnector<Persistence> {
         String jarName = persistence.getJarFile();
         File selectedFile = new File(jarName);
         boolean isAbsolutePath = selectedFile.isAbsolute();
-        selectedFile =
-            isAbsolutePath ? selectedFile : new File(Environment.getConfigPath()
-                + FileUtil.getURIFile(jarName).getPath());
+        /* 
+         * new: absolute is not possible if sent as attachment from browser-client.
+         * first we look for an attachment inside the temp dir, then look at the
+         * standard environment path.
+         */
+        if (!isAbsolutePath) {
+            String attachmentJarName = NanoWebSocketServer.getAttachmentFilename(persistence, "jarFile", jarName);
+            File attFile = new File(attachmentJarName);
+            if (attFile.canRead()) {
+                FileUtil.copy(attFile.getPath(), persistence.jarFileInEnvironment());
+            }
+            selectedFile =
+                    new File(Environment.getConfigPath()
+                        + FileUtil.getURIFile(jarName).getPath());
+        }
         jarName = selectedFile.getPath();
         if (!selectedFile.exists() && !isAbsolutePath) {
             //ant-scripts can't use the nested jars. but normal beans shouldn't have dependencies to simple-xml.
@@ -600,7 +628,8 @@ public class NanoH5 extends NanoHTTPD implements IConnector<Persistence> {
 //    properties.setProperty("hbm.conf.xml", "hibernate.conf.xml");
         properties.setProperty("server.db-config.file", Persistence.FILE_JDBC_PROP_FILE);
         properties.setProperty("dest.file", jarFile);
-        properties.setProperty(BEAN_GENERATION_PACKAGENAME, Environment.get(BEAN_GENERATION_PACKAGENAME, "org.anonymous.project"));
+        properties.setProperty(BEAN_GENERATION_PACKAGENAME,
+            Environment.get(BEAN_GENERATION_PACKAGENAME, "org.anonymous.project"));
         String plugin_dir = System.getProperty("user.dir");
         properties.setProperty("plugin.dir", new File(plugin_dir).getAbsolutePath());
         if (plugin_dir.endsWith(".jar/")) {

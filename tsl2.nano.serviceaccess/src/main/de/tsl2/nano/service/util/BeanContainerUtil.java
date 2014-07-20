@@ -82,7 +82,11 @@ public class BeanContainerUtil {
         final IAction<Collection<?>> exampleFinder = new CommonAction<Collection<?>>() {
             @Override
             public Collection<?> action() {
-                return service.findByExample(parameter[0], true);
+                boolean useLike = parameter[1] instanceof Boolean && ((Boolean) parameter[1]);
+                if (useLike)
+                    return service.findByExampleLike(parameter[0], true);
+                else
+                    return service.findByExample(parameter[0], true);
             }
         };
         final IAction<Collection<?>> betweenFinder = new CommonAction<Collection<?>>() {

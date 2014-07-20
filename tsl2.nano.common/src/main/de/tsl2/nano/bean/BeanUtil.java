@@ -57,7 +57,6 @@ import de.tsl2.nano.format.FormatUtil;
 /**
  * A Utility-Class for beans
  * 
- * @author ds 05.03.2009
  * @author ts 05.03.2009
  * @version $Revision$
  */

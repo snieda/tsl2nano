@@ -3,6 +3,7 @@ package de.tsl2.nano.h5;
 import static de.tsl2.nano.h5.HtmlUtil.ATTR_HEIGHT;
 import static de.tsl2.nano.h5.HtmlUtil.ATTR_SIZE;
 
+import java.io.Serializable;
 import java.util.LinkedHashMap;
 
 import de.tsl2.nano.bean.def.AttributeDefinition;
@@ -18,6 +19,7 @@ import de.tsl2.nano.core.util.Util;
  * @author Tom, Thomas Schneider
  * @version $Revision$
  */
+@SuppressWarnings({ "unchecked"})
 public class Html5Presentable extends Presentable {
     /** serialVersionUID */
     private static final long serialVersionUID = 1L;
@@ -67,8 +69,8 @@ public class Html5Presentable extends Presentable {
     }
 
     //to have write-access, we need this setter
-    public <T extends IPresentable> T setLayout(LinkedHashMap<String, String> l) {
-        this.layout = l;
+    public <L extends Serializable, T extends IPresentable> T setLayout(L l) {
+        this.layout = (LinkedHashMap<String, String>)l;
         return (T) this;
     }
 
@@ -84,11 +86,11 @@ public class Html5Presentable extends Presentable {
     }
 
     //to have write-access, we need this setter
-    public <T extends IPresentable> T setLayoutConstraints(LinkedHashMap<String, String> lc) {
-        this.layoutConstraints = lc;
+    public <L extends Serializable, T extends IPresentable> T setLayoutConstraints(L lc) {
+        this.layoutConstraints = (LinkedHashMap<String, String>)lc;
         return (T) this;
     }
-    
+
     @Override
     public <T extends IPresentable> T addLayoutConstraints(String name, Object value) {
         getLayoutConstraints().put(name, Util.asString(value));

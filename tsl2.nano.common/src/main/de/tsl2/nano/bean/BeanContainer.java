@@ -287,7 +287,15 @@ public class BeanContainer implements IBeanContainer {
      */
     @Override
     public <T> Collection<T> getBeansByExample(T exampleBean) {
-        exampleFinderAction.setParameter(new Object[] { exampleBean });
+        return getBeansByExample(exampleBean, false);
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public <T> Collection<T> getBeansByExample(T exampleBean, Boolean useLike) {
+        exampleFinderAction.setParameter(new Object[] { exampleBean, useLike });
         return (Collection<T>) exampleFinderAction.activate();
     }
 

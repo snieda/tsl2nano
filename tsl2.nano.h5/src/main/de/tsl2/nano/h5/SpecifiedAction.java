@@ -21,6 +21,7 @@ import de.tsl2.nano.core.exception.Message;
 import de.tsl2.nano.incubation.specification.actions.ActionPool;
 
 /**
+ * action defined in action pool
  * 
  * @author Tom
  * @version $Revision$

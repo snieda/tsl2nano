@@ -147,6 +147,7 @@ public class HtmlUtil {
     public static final String ATTR_SPAN = "span";
     public static final String ATTR_SPANCOL = "colspan";
     public static final String ATTR_SPANROW = "rowspan";
+    public static final String ATTR_HEADERS = "header";
 
     public static final String COLOR_WHITE = "#FFFFFF";
     public static final String COLOR_BLACK = "#000000";
@@ -193,6 +194,15 @@ public class HtmlUtil {
     public static final String VAL_FRM_TOP = "FRAME_TOP";
     public static final String VAL_FRM_BOTTOM = "FRAME_BOTTOM";
 
+    public static final String VAL_OPAC = "opacity:1.0;";
+    public static final String VAL_OPACITY_0_5 = "opacity:0.5;";
+    public static final String VAL_OPACITY_0_6 = "opacity:0.6;";
+    public static final String VAL_OPACITY_0_7 = "opacity:0.7;";
+    public static final String VAL_OPACITY_0_8 = "opacity:0.8;";
+    public static final String VAL_OPACITY_0_9 = "opacity:0.9;";
+    public static final String VAL_TRANSPARENT_INHERIT = "opacity:0.0;";
+    public static final String VAL_TRANSPARENT = "background-color: transparent;";
+    
     public static final String XML_TAG_START = "\\<.*\\>";
     public static final String END_TAG = "/";
 
