@@ -103,7 +103,7 @@ public interface IGenericBaseService extends IStatelessService, INamedQueryServi
     public <T> Collection<T> findByExample(T exampleBean, boolean caseInsensitive, Class... lazyRelations);
 
     /** find all beans with similar (like) attributes (only single value attributes!) as exampleBean */
-    public <T> Collection<T> findByExampleLike(T exampleBean, boolean caseInsensitive, Class... lazyRelations);
+    public <T> Collection<T> findByExampleLike(T exampleBean, boolean caseInsensitive, int startIndex, int maxResult, Class... lazyRelations);
 
     /** find bean with given id */
     public <T> T findById(Class<T> beanType, Object id, Class... lazyRelations);

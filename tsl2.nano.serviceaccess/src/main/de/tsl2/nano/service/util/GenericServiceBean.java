@@ -210,7 +210,9 @@ public class GenericServiceBean extends NamedQueryServiceBean implements IGeneri
          */
         boolean checkTypesOnly = false;
         if (attributes == null) {
-            attributes = /*isLazyLoadingOnlyOnOneToMany() ? new BeanClass(clazz).getMultiValueAttributes() : */BeanClass.getBeanClass(clazz).getAttributeNames();
+            attributes =
+                /*isLazyLoadingOnlyOnOneToMany() ? new BeanClass(clazz).getMultiValueAttributes() : */BeanClass
+                    .getBeanClass(clazz).getAttributeNames();
             if (fillTypes != null && fillTypes.size() > 0)
                 checkTypesOnly = true;
         }
@@ -254,7 +256,8 @@ public class GenericServiceBean extends NamedQueryServiceBean implements IGeneri
                         relation.hashCode();
                         relationType = beanAttribute.getType();
                     }
-                    if ((fillTypes != null && fillTypes.contains(relationType)) && BeanContainerUtil.isPersistable(relationType)) {
+                    if ((fillTypes != null && fillTypes.contains(relationType))
+                        && BeanContainerUtil.isPersistable(relationType)) {
                         for (final Object item : relationSet) {
                             if (instantiatedEntities.contains(item)) {
                                 continue;
@@ -269,7 +272,8 @@ public class GenericServiceBean extends NamedQueryServiceBean implements IGeneri
                                     + ", instantiated entities:"
                                     + instantiatedEntities.size());
                                 if (recurseLevel++ > getMaxRecursionLevel()) {
-                                    throw new ManagedException("instantiateLazyRelationship: max recurs level " + MAX_RECURSLEVEL
+                                    throw new ManagedException("instantiateLazyRelationship: max recurs level "
+                                        + MAX_RECURSLEVEL
                                         + " exceeded evaluating attribute "
                                         + beanAttribute.getName()
                                         + ". Please check datamodel for cycles!\ninstantiated entities:\n"
@@ -493,13 +497,17 @@ public class GenericServiceBean extends NamedQueryServiceBean implements IGeneri
     /** {@inheritDoc} */
     @Override
     public <T> Collection<T> findByExample(T exampleBean, boolean caseInsensitive, Class... lazyRelations) {
-        return findByExample(exampleBean, caseInsensitive, false, lazyRelations);
+        return findByExample(exampleBean, caseInsensitive, false, 0, -1, lazyRelations);
     }
 
     /** {@inheritDoc} */
     @Override
-    public <T> Collection<T> findByExampleLike(T exampleBean, boolean caseInsensitive, Class... lazyRelations) {
-        return findByExample(exampleBean, caseInsensitive, true, lazyRelations);
+    public <T> Collection<T> findByExampleLike(T exampleBean,
+            boolean caseInsensitive,
+            int startIndex,
+            int maxResult,
+            Class... lazyRelations) {
+        return findByExample(exampleBean, caseInsensitive, true, startIndex, maxResult, lazyRelations);
     }
 
     /**
@@ -519,11 +527,14 @@ public class GenericServiceBean extends NamedQueryServiceBean implements IGeneri
     public <T> Collection<T> findByExample(T exampleBean,
             boolean caseInsensitive,
             boolean useLike,
+            int startIndex,
+            int maxResult,
             Class... lazyRelations) {
         checkContextSecurity();
         StringBuffer qStr = new StringBuffer();
         final Collection<?> parameter = createExampleStatement(qStr, exampleBean, useLike, caseInsensitive);
-        return (Collection<T>) findByQuery(qStr.toString(), false, 0, -1, parameter.toArray(), null, lazyRelations);
+        return (Collection<T>) findByQuery(qStr.toString(), false, startIndex, maxResult, parameter.toArray(), null,
+            lazyRelations);
     }
 
     /** {@inheritDoc} */

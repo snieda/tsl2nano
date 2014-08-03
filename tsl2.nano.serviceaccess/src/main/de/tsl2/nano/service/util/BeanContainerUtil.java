@@ -84,7 +84,8 @@ public class BeanContainerUtil {
             public Collection<?> action() {
                 boolean useLike = parameter[1] instanceof Boolean && ((Boolean) parameter[1]);
                 if (useLike)
-                    return service.findByExampleLike(parameter[0], true);
+                    return service.findByExampleLike(parameter[0], true, (Integer) parameter[2],
+                        (Integer) parameter[3]);
                 else
                     return service.findByExample(parameter[0], true);
             }
@@ -258,7 +259,8 @@ public class BeanContainerUtil {
                         Class<? extends Date> temporalType;
                         Boolean composition;
                         Boolean cascading;
-
+                        Boolean generatedValue;
+                        
                         @Override
                         public int scale() {
                             return -1;
@@ -323,12 +325,19 @@ public class BeanContainerUtil {
                             }
                             return cascading;
                         }
+                        @Override
+                        public boolean generatedValue() {
+                            if (generatedValue == null)
+                                generatedValue = isGeneratedValue(clazz, attribute);
+                            return generatedValue;
+                        }
                     };
                 } else {//column == null && joincolumn == null, if oneToMany == null, it may be not persistable!
                     def = new IAttributeDef() {
                         Class<? extends Date> temporalType;
                         Boolean composition;
                         Boolean cascading;
+                        Boolean generatedValue;
 
                         @Override
                         public int scale() {
@@ -391,6 +400,12 @@ public class BeanContainerUtil {
                             }
                             return cascading;
                         }
+                        @Override
+                        public boolean generatedValue() {
+                            if (generatedValue == null)
+                                generatedValue = isGeneratedValue(clazz, attribute);
+                            return generatedValue;
+                        }
                     };
                 }
             } else {//column != null
@@ -402,6 +417,7 @@ public class BeanContainerUtil {
                     Boolean nullable;
                     Boolean unique;
                     Class<? extends Date> temporalType;
+                    Boolean generatedValue;
 
                     @Override
                     public int scale() {
@@ -463,6 +479,12 @@ public class BeanContainerUtil {
                     @Override
                     public boolean cascading() {
                         return false;
+                    }
+                    @Override
+                    public boolean generatedValue() {
+                        if (generatedValue == null)
+                            generatedValue = isGeneratedValue(clazz, attribute);
+                        return generatedValue;
                     }
                 };
             }

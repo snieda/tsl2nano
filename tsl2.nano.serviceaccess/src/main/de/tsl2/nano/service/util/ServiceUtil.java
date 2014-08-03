@@ -171,7 +171,8 @@ public class ServiceUtil {
                 //on manyToOne mappings use the foreignkey column
                 boolean isManyToOne = false;
                 if (!BeanUtil.isStandardType(value.getClass())) {
-                    final Collection<BeanAttribute> foreignIdAttributes = BeanClass.getBeanClass(value.getClass()).findAttributes(Id.class);
+                    final Collection<BeanAttribute> foreignIdAttributes =
+                        BeanClass.getBeanClass(value.getClass()).findAttributes(Id.class);
                     if (foreignIdAttributes.size() > 0) {
                         final BeanAttribute foreignKey = foreignIdAttributes.iterator().next();
                         value = foreignKey.getValue(value);
@@ -185,10 +186,12 @@ public class ServiceUtil {
                     if (isLikeValue) {
                         strValue = strValue.replace('*', '%');
                     } else {
-                        if (operator.equals(OP_GE) || operator.equals(OP_GT)) {
-                            strValue = StringUtil.fixString(strValue, attributeDef.length(), '0', true);
-                        } else if (operator.equals(OP_LE) || operator.equals(OP_LT)) {
-                            strValue = StringUtil.fixString(strValue, attributeDef.length(), 'z', true);
+                        if (attributeDef.length() > 0) {
+                            if (operator.equals(OP_GE) || operator.equals(OP_GT)) {
+                                strValue = StringUtil.fixString(strValue, attributeDef.length(), '0', true);
+                            } else if (operator.equals(OP_LE) || operator.equals(OP_LT)) {
+                                strValue = StringUtil.fixString(strValue, attributeDef.length(), 'z', true);
+                            }
                         }
                     }
                     qStr.append(and_cond + "LOWER(t."
@@ -305,7 +308,8 @@ public class ServiceUtil {
                         strValue = strValue.replace('*', '%');
                     } else {
                         if (operator.equals(OP_GE) || operator.equals(OP_GT)) {
-                            strValue = StringUtil.fixString(strValue, attributeDef.length(), '0', true);
+                            if (attributeDef.length() > 0)
+                                strValue = StringUtil.fixString(strValue, attributeDef.length(), '0', true);
                             /*
                              * the between mechanism (e.g.: between abc000 and abczzz) doesn't respect the full match!
                              * so we have to add an and-condition (with brackets!) to the full match with EQUAL.
@@ -314,7 +318,8 @@ public class ServiceUtil {
                             and_cond = CLAUSE_OR;
                             parameter.add(caseInsensitive ? ((String) value).toLowerCase() : (String) value);
                         } else if (operator.equals(OP_LE) || operator.equals(OP_LT)) {
-                            strValue = StringUtil.fixString(strValue, attributeDef.length(), 'z', true);
+                            if (attributeDef.length() > 0)
+                                strValue = StringUtil.fixString(strValue, attributeDef.length(), 'z', true);
                             bracket_close = BRACKET_CLOSE;
                         }
                     }
@@ -395,7 +400,8 @@ public class ServiceUtil {
                     continue;
                 }
                 //recursive entity-attributes on transient objects
-                if (BeanContainerUtil.isPersistable(beanAttribute.getType()) && ((fromValue != null && getId(fromValue) == null) || (toValue != null && getId(toValue) == null))) {
+                if (BeanContainerUtil.isPersistable(beanAttribute.getType())
+                    && ((fromValue != null && getId(fromValue) == null) || (toValue != null && getId(toValue) == null))) {
                     addBetweenConditions(qStr, attrPrefix + name + ".", fromValue, toValue, parameter, caseInsensitive);
                     qStr.append("\n");
                     and_cond = CLAUSE_AND;
@@ -415,7 +421,8 @@ public class ServiceUtil {
                     if (fromValue instanceof String) {
                         strValue = fromValue != null ? (caseInsensitive ? fromValue.toString().toLowerCase()
                             : fromValue.toString()) : "";
-                        strValue = StringUtil.fixString(strValue, attributeDef.length(), '0', true);
+                        if (attributeDef.length() > 0)
+                            strValue = StringUtil.fixString(strValue, attributeDef.length(), '0', true);
                         qStr.append(and_cond + bracket_open + varName + OP_EQ + VALUE_PH);
                         and_cond = CLAUSE_OR;
                         bracket_open = "";
@@ -439,7 +446,8 @@ public class ServiceUtil {
                     if (toValue instanceof String) {
                         strValue = toValue != null ? (caseInsensitive ? toValue.toString().toLowerCase()
                             : toValue.toString()) : "";
-                        strValue = StringUtil.fixString(strValue, attributeDef.length(), 'z', true);
+                        if (attributeDef.length() > 0)
+                            strValue = StringUtil.fixString(strValue, attributeDef.length(), 'z', true);
                         toValue = strValue;
                     }
                     if (toValue != null) {
@@ -739,7 +747,8 @@ public class ServiceUtil {
      *            will be surrounded by "'".
      */
     public static void fillNullValues(Object bean, boolean maxValues, boolean useDatabaseFormat) {
-        final List<? extends IAttribute> singleValueAttributes = BeanClass.getBeanClass(bean.getClass()).getSingleValueAttributes();
+        final List<? extends IAttribute> singleValueAttributes =
+            BeanClass.getBeanClass(bean.getClass()).getSingleValueAttributes();
         for (final IAttribute beanAttribute : singleValueAttributes) {
             if (beanAttribute.getValue(bean) != null) {
                 continue;
@@ -894,6 +903,7 @@ public class ServiceUtil {
 
     /**
      * setHints
+     * 
      * @param query to set hints for
      * @param hints (optional) hints to set
      * @return changed query
@@ -964,8 +974,9 @@ public class ServiceUtil {
         BeanClass<?> beanClass = BeanClass.getBeanClass(bean.getClass());
         Collection<BeanAttribute> ids = beanClass.findAttributes(annotation);
         if (ids != null && ids.size() > 0)
-            if (ids.iterator().next().getValue(bean) == annotationValue || (annotationValue != null && annotationValue.equals(ids.iterator()
-                .next()))) {
+            if (ids.iterator().next().getValue(bean) == annotationValue
+                || (annotationValue != null && annotationValue.equals(ids.iterator()
+                    .next()))) {
                 LOG.info("matched value on bean: " + bean);
                 match.add(bean);
             }
@@ -988,6 +999,7 @@ public class ServiceUtil {
 
     /**
      * see {@link #useNewInstances(Object, List, List)}
+     * 
      * @param tree entity tree to walk through
      * @param newInstances new entity instances to be used
      * @return count of changes
