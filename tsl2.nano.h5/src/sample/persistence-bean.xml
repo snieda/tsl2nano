@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<persistence>
+   <persistenceUnit>genericPersistenceUnit</persistenceUnit>
+   <transactionType>RESOURCE_LOCAL</transactionType>
+   <provider>org.hibernate.ejb.HibernatePersistence</provider>
+   <jtaDataSource>&lt;UNDEFINED&gt;</jtaDataSource>
+   <jarFile>beans.jar</jarFile>
+   <connectionDriverClass>org.hsqldb.jdbcDriver</connectionDriverClass>
+   <connectionUrl>jdbc:hsqldb:hsql://localhost:9003</connectionUrl>
+   <connectionUserName>TIME</connectionUserName>
+   <connectionPassword>TIME</connectionPassword>
+   <hibernateDialect>org.hibernate.dialect.HSQLDialect</hibernateDialect>
+   <defaultSchema>PUBLIC</defaultSchema>
+   <datasourceClass>org.hsqldb.jdbc.jdbcDataSource</datasourceClass>
+   <port>9003</port>
+   <database>timedb</database>
+</persistence>

@@ -73,8 +73,8 @@ public class JarResolver {
     static final String KEY_GROUPID = "groupId";
     static final String KEY_ARTIFACTID = "artifactId";
     static final String KEY_VERSION = "version";
-    /** version numbers from '-0.0' to '-999.999.999.Description' */
-    static final String REGEX_VERSION = "-\\d{1,3}[.]\\d{1,3}[.]\\d{0,3}[.-]?[a-zA-Z]*";
+    /** version numbers from '-0.0' to '-999.999.999.999.999.Description' */
+    static final String REGEX_VERSION = "-\\d{1,3}([.]\\d{1,3}){1,3}[.]\\d{0,3}[.-]?[a-zA-Z]*";
 
     static final String PRE_PACKAGE = "PACKAGE.";
     static final String PACKAGE_EXCEPTION = "package.exception.regex";

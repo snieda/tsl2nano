@@ -1,9 +1,11 @@
 **FullRelation Nano.H5**
 <font size="-1">&copy; Thomas Schneider 2012-2014</font>
 
+<p hidden>
 <meta-tag>
 crud, grud, crud2gui, crud2html, bean2html, entity2html, bean2gui, entity2gui, jpa2gui, jpa2html, jpa persistence provider, openjpa, hibernate, datanucleus, eclipselink, data-editor, data-sheet, entity browser, jpa2, full stack framework, orm, o/r mapper
 </meta-tag>
+</p>
 
 [TOC]
 
@@ -132,7 +134,7 @@ A summary of lightweight ORM tools can be read here: ftp://ftp.informatik.uni-st
 
 The architecture is defined by the application framework [tsl2.nano.common](../tsl2.nano.common/nano.common.html). The data and service layer is defined by [tsl2.nano.serviceaccess](../tsl2.nano.sericeaccess/nano.serviceaccess.html).
 
-[[img src=doc/nano-h5-overview.png]]
+[[img src=nano-h5-overview.png]]
 
 #### Model Driven Architecture (MDA))
 
@@ -238,7 +240,7 @@ Before you start _nano.h5_, you should start the sample hsqldb database:
 
 config/runServer.bat
 
-[[img src=doc/h5.sample.database.jpg]]
+[[img src=h5.sample.database.jpg]]
 
 To start nano.h5 you have to call it with following syntax:
 
@@ -248,21 +250,21 @@ This call is implemented inside the _run.bat_ script. Use that, if you are on wi
 
 If you start it on _Windows_, a browser will be opened to show the initial screen:
 
-[[img src=doc/h5.sample.start.jpg]]
+[[img src=h5.sample.start.jpg]]
 
 If you are not on _Windows_, you should open an html-browser with file _application.html_.
 
 Now you can login to the sample database. It is fully configurable, which o/r mapper and database should be used. After pressing Ok, a _persistence.xml_ will be generated to be found by the _javax.persistence_ implementation.
 
-[[img src=doc/h5.sample.persistence.jpg]]
+[[img src=h5.sample.persistence.jpg]]
 
 All entities of the jar-file, containing the entities, will be listed. You can filter the list and select one or more to edit them.
 
-[[img src=doc/h5.sample.entity-types.jpg]]
+[[img src=h5.sample.entity-types.jpg]]
 
 Then you will get a search page with a search filter and an empty list. Pushing the search-button will create the result list.
 
-[[img src=doc/h5.sample.entity-search.jpg]]
+[[img src=h5.sample.entity-search.jpg]]
 
 If you click a column header (here f.e. _comments_), the list will be sorted by this column - clicking on that column a second time, the sorting will be done in the other direction. 
 
@@ -376,6 +378,7 @@ Hibernate 4 for example would have the following dependencies:
 To do a structured work on a usable specification, rules, queries and actions can be defined before implementing or configuring the presentation. This is done by creating these items as xml-files inside the environments _specifiation_ directory. To see how it works, hit the applications menu button 'sample-codes' and have a look into the specification directory.
 
 Example for a query:
+
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 <query name="personen" nativeQuery="false">
    <query><![CDATA[select p from Person p]]></query>
@@ -383,6 +386,7 @@ Example for a query:
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 Example for an action, starting an ant-script:
+
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 <action name="ant" declaringClass="de.tsl2.nano.execution.ScriptUtil">
    <parameter name="arg1">
@@ -435,6 +439,7 @@ An example is provided with _tsl2.nano.h5.x.y.z.jar_. After first start, a css d
 The environment properties provide a fast way to define the applications page style. Change the entry _application.page.style_ to use a custom background - perhaps a picture or a color. This must be an html5 css style expression.
 
 Example setting a radial gradient background color:
+
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
    <property name="application.page.style">
       <object class="java.lang.String">background: radial-gradient(#9999FF, #000000);</object>
@@ -442,6 +447,7 @@ Example setting a radial gradient background color:
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 Example setting a simple background image:
+
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
    <property name="application.page.style">
       <object class="java.lang.String">background-image: url(icons/spe.jpg); background: transparent;</object>
@@ -477,6 +483,7 @@ To define direct sql or jpa-ql queries beside the standard mechanism though comp
 _QueryResult_s can be defined through the _ScriptTool_. There you can test your queries and save it as _QueryResult_. The _QueryResult_ will be loaded into the list of available bean-collector on next application start.
  
 Example:
+
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 <queryResult clazz="java.lang.Object" name="virtual.times-overview" isNested="false" isdefault="true" xmlns="beandef.xsd">
    <extension declaringClass="de.tsl2.nano.h5.QueryResult">
@@ -496,6 +503,7 @@ The _Controller_ is an extension of _BeanCollector_ to present a collection of b
 To provide such a controller you can create an xml-file inside your environments _beandef/virtual_ directory. All beandefs inside the _virtual_ directory will be added to the bean-type list which is presented after login.
 
 Example:
+
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 <controller clazz="org.anonymous.project.Times" name="virtual.time-actions-controller" isNested="false" isdefault="true" xmlns="beandef.xsd">
    <extension declaringClass="de.tsl2.nano.h5.Controller">
@@ -585,6 +593,7 @@ The integrated rule engine provides calculations of rules - optional calling sub
 A rule calculates a combination of mathematical and conditioning expressions.
 
 Example: 
+
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 A1 & A2 ? ((x1 + x2) * $myrule2) : 0
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -592,6 +601,7 @@ A1 & A2 ? ((x1 + x2) * $myrule2) : 0
 Where A1, A2 are boolean values and x1, x2 numbers and myrule2 another referenced (using '§') rule.
 
 Example xml-file for a rule:
+
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 <rule name="test">
    <parameter name="A">
@@ -624,6 +634,7 @@ Example xml-file for a rule:
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 Example for a rule using another sub-rule:
+
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 <rule name="test-import">
    <parameter name="A">
@@ -732,6 +743,7 @@ If a configured workflow is available, this workflow will be used as navigator.
 A workflow holds one or more activities defined by an enabling *condition* and an execution *expression*. After finishing a page, all activities will be checked for their entry/enabling condition. Only one *activity* should have a positive condition. This activity will be executed. The execution will be calling an EJB-QL given by the expression and returning the result of that query as next navigation bean.
 
 Example:
+
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 <workflow name="test.workflow">
    <activity name="timesByProject">
@@ -794,6 +806,7 @@ If you don't want to have a standalone appliation, you are able to use an applic
 * create a *jndi.properties* file in your environment. with jboss this would look like the following:
 
 ### Example jndi for jboss eap 6.1
+
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 	java.naming.factory.initial=org.jboss.naming.remote.client.InitialContextFactory
 	java.naming.factory.url.pkgs=org.jboss.ejb.client.naming
@@ -804,6 +817,7 @@ If you don't want to have a standalone appliation, you are able to use an applic
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 ### Example authentication service method
+
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 UserService.authenticate(String user, String password) {
 ...
@@ -874,16 +888,17 @@ To refresh dependent values after changing a special value, do the following:
 * add an instance of this dependency listener to the special values change-handler.
 
 Example: creating a dependency listener
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-        BeanDefinition b = BeanDefinition.getBeanDefinition(org.anonymous.project.Person);
-        ((AttributeDefinition)b.getAttribute("organisation")).changeHandler().addListener(new WebSocketDependencyListener() {
 
-            @Override
-            protected Object evaluate(Object source) {
-                attributeID = "person.shortname";
-                return "my-refreshed-value";
-            }
-        });
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+BeanDefinition b = BeanDefinition.getBeanDefinition(org.anonymous.project.Person);
+((AttributeDefinition)b.getAttribute("organisation")).changeHandler().addListener(new WebSocketDependencyListener() {
+
+    @Override
+    protected Object evaluate(Object source) {
+        attributeID = "person.shortname";
+        return "my-refreshed-value";
+    }
+});
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 ### Transferring local file attachments
@@ -891,9 +906,10 @@ Example: creating a dependency listener
 Simply set your beans attribute type to be an attachment. The client will use file-selector to select your file. After selecting the file, this file will be sent to the application and the bean can access this file, stored inside the environments temp path.
 
 Example:
+
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-    BeanDefinition b = BeanDefinition.getBeanDefinition(MyEntity.class);
-	((AttributeDefinition)b.getAttribute("my-attribute-name")).getPresentation().setType(IPresentable.TYPE_ATTACHMENT);
+BeanDefinition b = BeanDefinition.getBeanDefinition(MyEntity.class);
+((AttributeDefinition)b.getAttribute("my-attribute-name")).getPresentation().setType(IPresentable.TYPE_ATTACHMENT);
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 ### Technical details: How it works
@@ -901,11 +917,13 @@ Example:
 there is a template file _websocket.client.js.template_ that will be filled and embedded into the response html. some of the declared functions are called by event handlers of input fields of this html. So, if someone changes the method names of that template, he has to change the dependent environment properties, defining this function names.
 
 Example environment-property:
+
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 websocket.inputassist.function=inputassist(event)
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 so this function has to be implemented inside the template script:
+
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 ...
 function inputassist(e) {
@@ -922,7 +940,8 @@ function inputassist(e) {
 ...
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-As you can see, all messages that will change attribute properties
+As you can see, all messages will change attribute properties.
+
 ## Developing, Deploying and Debugging
 
 * [tsl2.nano code server](git://git.code.sf.net/p/tsl2nano/code tsl2nano-code)
@@ -935,16 +954,22 @@ The version is read from _build.properties_ of nano.h5.
 
 To debug your app or just the framework, you should enhance the logging output. Edit the file _logfactory.xml_ and add the text _debug_ to the attribute _standard_ of tag _logfactory_. This will enhance not only the logging output but the details of the tooltips of each html-field.
 
+It is possible to enhance the logging level as start parameter, too. add the parameter *-Dtsl2.nano.log.level=debug*.
+
+### Testing
+
+To start the application in test mode, add the parameter *-Dtsl2.nano.test=true*. This will change the behaviour of creating new items. on test mode, all duty fields will be filled with default values to enable test engines save new entities without user input.
+
 ### Help on Html5
 
 Normally, you don't have to create html-pages by yourself, but if you are interested in html5, have a look at the following tutorials/references:
+
 * [W3C-Html5-Reference](http://www.w3.org/TR/2013/NOTE-html-markup-20130528/Overview.html)
 * [Html-5.com](http://www.html-5.com/index.html)
 * [Webkompetenz](http://webkompetenz.wikidot.com/docs:html-handbuch)
 * [Html5 Poster](http://www.xhtml-lab.com)
 
 To analyse the html-page in your browser, for example in your Chrome-Browser, you can analyse components by mouse-right-click on _analyse element_ to debug and change the current bean presentation.
-
 
 ### jar-library dependencies
 
@@ -1101,6 +1126,7 @@ The implementation _Loader.java_ and _MyApp.java_ provide an own entry for the s
 Here is the implementation:
 
 *Loader*
+
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 public class Loader extends AppLoader {
     public static void main(String[] args) {
@@ -1111,6 +1137,7 @@ public class Loader extends AppLoader {
 
 
 *MyApp*
+
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 public class MyApp extends NanoH5 {
     private static final Log LOG = LogFactory.getLog(MyApp.class);
@@ -1162,181 +1189,181 @@ The next code pieces generate examples for all _nano.h5_ aspects. The generated 
 ### Creating a workflow
 
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-    /*
-     * Sample Workflow with three activities
-     */
-        LinkedList<BeanAct> acts = new LinkedList<BeanAct>();
-        Parameter p = new Parameter();
-        p.put("project", true);
-        p.put("prjname", "test");
-        acts.add(new BeanAct("timesByProject",
-            "project&true",
-            "select t from Times t where t.project.id = :prjname",
-            p,
-            "prjname"));
-        p = new Parameter();
-        p.put("prjname", "test");
-        acts.add(new BeanAct("organisation",
-            "!organisation.activated",
-            "select p from Organisation p where ? is null",
-            p,
-            "prjname"));
-        p = new Parameter();
-        p.put("organisation", "test");
-        acts.add(new BeanAct("person",
-            "organisation.activated & (!person.activated)",
-            "select p from Person p where p.organisation = ?",
-            p,
-            "organisation"));
-        Workflow workflow = new Workflow("test.workflow", acts);
-        Environment.persist(workflow);
+/*
+ * Sample Workflow with three activities
+ */
+    LinkedList<BeanAct> acts = new LinkedList<BeanAct>();
+    Parameter p = new Parameter();
+    p.put("project", true);
+    p.put("prjname", "test");
+    acts.add(new BeanAct("timesByProject",
+        "project&true",
+        "select t from Times t where t.project.id = :prjname",
+        p,
+        "prjname"));
+    p = new Parameter();
+    p.put("prjname", "test");
+    acts.add(new BeanAct("organisation",
+        "!organisation.activated",
+        "select p from Organisation p where ? is null",
+        p,
+        "prjname"));
+    p = new Parameter();
+    p.put("organisation", "test");
+    acts.add(new BeanAct("person",
+        "organisation.activated & (!person.activated)",
+        "select p from Person p where p.organisation = ?",
+        p,
+        "organisation"));
+    Workflow workflow = new Workflow("test.workflow", acts);
+    Environment.persist(workflow);
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 ### Creating a rule with sub-rule
 
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-        /*
-         * use a rule with sub-rule
-         */
-        LinkedHashMap<String, ParType> par = new LinkedHashMap<String, ParType>();
-        par.put("A", ParType.BOOLEAN);
-        par.put("x1", ParType.NUMBER);
-        par.put("x2", ParType.NUMBER);
-        Rule<BigDecimal> testRule = new Rule<BigDecimal>("test", "A ? (x1 + 1) : (x2 * 2)", par);
-        testRule.addConstraint("x1", new Constraint<BigDecimal>(BigDecimal.class, BigDecimal.ZERO, BigDecimal.ONE));
-        testRule.addConstraint(Rule.KEY_RESULT, new Constraint<BigDecimal>(BigDecimal.class, BigDecimal.ZERO,
-            BigDecimal.TEN));
-        Environment.get(RulePool.class).add("test", testRule);
+    /*
+     * use a rule with sub-rule
+     */
+    LinkedHashMap<String, ParType> par = new LinkedHashMap<String, ParType>();
+    par.put("A", ParType.BOOLEAN);
+    par.put("x1", ParType.NUMBER);
+    par.put("x2", ParType.NUMBER);
+    Rule<BigDecimal> testRule = new Rule<BigDecimal>("test", "A ? (x1 + 1) : (x2 * 2)", par);
+    testRule.addConstraint("x1", new Constraint<BigDecimal>(BigDecimal.class, BigDecimal.ZERO, BigDecimal.ONE));
+    testRule.addConstraint(Rule.KEY_RESULT, new Constraint<BigDecimal>(BigDecimal.class, BigDecimal.ZERO,
+        BigDecimal.TEN));
+    Environment.get(RulePool.class).add("test", testRule);
 
-        //another rule to test sub-rule-imports
-        Environment.get(RulePool.class).add("test-import",
-            new Rule<BigDecimal>("test-import", "A ? 1 + §test : (x2 * 3)", par));
+    //another rule to test sub-rule-imports
+    Environment.get(RulePool.class).add("test-import",
+        new Rule<BigDecimal>("test-import", "A ? 1 + §test : (x2 * 3)", par));
 
-        BigDecimal result =
-            (BigDecimal) Environment.get(RulePool.class).get("test-import")
-                .run(MapUtil.asMap("A", true, "x1", new BigDecimal(1), "x2", new BigDecimal(2)));
+    BigDecimal result =
+        (BigDecimal) Environment.get(RulePool.class).get("test-import")
+            .run(MapUtil.asMap("A", true, "x1", new BigDecimal(1), "x2", new BigDecimal(2)));
 
-        LOG.info("my test-import rule result:" + result);
+    LOG.info("my test-import rule result:" + result);
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 ### Defining a query
 
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-        /*
-         * define a query
-         */
-        String qstr = "select db_begin from times t where t.db_end = :dbEnd";
+    /*
+     * define a query
+     */
+    String qstr = "select db_begin from times t where t.db_end = :dbEnd";
 
-        HashMap<String, Serializable> par1 = new HashMap<>();
-        Query<Object> query = new Query<>("times.begin", qstr, true, par1);
-        QueryPool queryPool = Environment.get(QueryPool.class);
-        queryPool.add(query.getName(), query);
+    HashMap<String, Serializable> par1 = new HashMap<>();
+    Query<Object> query = new Query<>("times.begin", qstr, true, par1);
+    QueryPool queryPool = Environment.get(QueryPool.class);
+    queryPool.add(query.getName(), query);
 
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 ### Defining an action
 
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-        /*
-         * define an action
-         */
-        Method antCaller = null;
-        try {
-            antCaller = ScriptUtil.class.getMethod("ant", new Class[] { String.class, String.class, Properties.class });
-        } catch (Exception e) {
-            ManagedException.forward(e);
-        }
-        Action<Object> a = new Action<>(antCaller);
-        a.addConstraint("arg1", new Constraint<String>(Environment.getConfigPath() + "antscripts.xml"));
-        a.addConstraint("arg2", new Constraint<String>("help"));
-        Environment.get(ActionPool.class).add("ant", a);
+    /*
+     * define an action
+     */
+    Method antCaller = null;
+    try {
+        antCaller = ScriptUtil.class.getMethod("ant", new Class[] { String.class, String.class, Properties.class });
+    } catch (Exception e) {
+        ManagedException.forward(e);
+    }
+    Action<Object> a = new Action<>(antCaller);
+    a.addConstraint("arg1", new Constraint<String>(Environment.getConfigPath() + "antscripts.xml"));
+    a.addConstraint("arg2", new Constraint<String>("help"));
+    Environment.get(ActionPool.class).add("ant", a);
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 ### Defining a Controller as Collector of Actions of a Bean
+
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-        /*
-         * define a Controller as Collector of Actions of a Bean
-         */
-        final BeanDefinition timeActionBean = new BeanDefinition(Times.class);
-        timeActionBean.setName("time-actions");
-        BeanDefinition.define(timeActionBean);
-        final Controller controller = new Controller(timeActionBean, IBeanCollector.MODE_SEARCHABLE);
-        timeActionBean.getActions().clear();
-        timeActionBean.addAction(new SecureAction("times.actions.one.hour.add", "+1") {
-            @Override
-            public Object action() throws Exception {
-//                this.shortDescription = 
-                return controller;
-            }
-        });
-        timeActionBean.addAction(new SecureAction("times.actions.one.hour.subtract", "-1") {
-            @Override
-            public Object action() throws Exception {
-                return controller;
-            }
-        });
-        timeActionBean.saveDefinition();
-        controller.saveVirtualDefinition(timeActionBean.getName()+ "-controller");
+    /*
+     * define a Controller as Collector of Actions of a Bean
+     */
+    final BeanDefinition timeActionBean = new BeanDefinition(Times.class);
+    timeActionBean.setName("time-actions");
+    BeanDefinition.define(timeActionBean);
+    final Controller controller = new Controller(timeActionBean, IBeanCollector.MODE_SEARCHABLE);
+    timeActionBean.getActions().clear();
+    timeActionBean.addAction(new SecureAction("times.actions.one.hour.add", "+1") {
+        @Override
+        public Object action() throws Exception {
+            //this.shortDescription = 
+            return controller;
+        }
+    });
+    timeActionBean.addAction(new SecureAction("times.actions.one.hour.subtract", "-1") {
+        @Override
+        public Object action() throws Exception {
+            return controller;
+        }
+    });
+    timeActionBean.saveDefinition();
+    controller.saveVirtualDefinition(timeActionBean.getName()+ "-controller");
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 ### Defining a specific bean-collector presenting a query (SQL or JPA-QL)
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-        /*
-         * define a specific bean-collector presenting a query (SQL or JPA-QL)
-         */
-        qstr = "\nselect t.day as Day, p.name as Project t.dbbegin as Begin, t.dbend as End, t.pause as Pause\n"
-            + "from times t join project p on p.id = times.projid\n"
-            + "where 1 = 1\n";
+    /*
+     * define a specific bean-collector presenting a query (SQL or JPA-QL)
+     */
+    qstr = "\nselect t.day as Day, p.name as Project t.dbbegin as Begin, t.dbend as End, t.pause as Pause\n"
+        + "from times t join project p on p.id = times.projid\n"
+        + "where 1 = 1\n";
 
-        query = new Query<>("times-overview", qstr, true, null);
-        queryPool.add(query.getName(), query);
+    query = new Query<>("times-overview", qstr, true, null);
+    queryPool.add(query.getName(), query);
 
-        QueryResult qr = new QueryResult<>(query.getName());
-        qr.saveVirtualDefinition(query.getName());
+    QueryResult qr = new QueryResult<>(query.getName());
+    qr.saveVirtualDefinition(query.getName());
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 ### Defining own beans to present your entities another way
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-        /*
-         * define own beans to present your entities another way
-         */
-        Collection<Times> times = Environment.get(IBeanContainer.class).getBeans(Times.class, UNDEFINED, UNDEFINED);
+    /*
+     * define own beans to present your entities another way
+     */
+    Collection<Times> times = Environment.get(IBeanContainer.class).getBeans(Times.class, UNDEFINED, UNDEFINED);
 
-        BeanCollector<Collection<Times>, Times> beanCollector =
-            new BeanCollector<Collection<Times>, Times>(times, BeanCollector.MODE_ALL);
+    BeanCollector<Collection<Times>, Times> beanCollector =
+        new BeanCollector<Collection<Times>, Times>(times, BeanCollector.MODE_ALL);
 
-        AttributeDefinition space1 = beanCollector.getPresentationHelper().addSpaceValue();
-        beanCollector.addAttribute("path-test", new PathExpression<>(Times.class, "id.dbBegin"), null, null);
-        beanCollector.addAttribute("rule-test", new RuleExpression<>(Times.class, "§test-import"), null, null);
-        beanCollector
-            .addAttribute(
-                "sql-test",
-                new SQLExpression<>(
-                    Times.class,
-                    "?" + query.getName(), Object[].class),
-                null, null);
-        beanCollector.addAttribute("virtual-test", "I'm virtual", null, null, null);
-        beanCollector.addAttribute("picture", new Attachment("picture", Environment.getConfigPath()
-            + "/icons/attach.png"), null, null);
-        beanCollector.setAttributeFilter("path-test", "creation", "dbEnd", "pause", space1.getName(), "project",
-            "comment");
-        //more fields on one line (one field has grid-width 3)
-        beanCollector.getPresentable().setLayout((Serializable) MapUtil.asMap(L_GRIDWIDTH, 12));
-        //let the field 'comment' grow to full width
-        beanCollector.getAttribute("comment").getPresentation()
-            .setLayoutConstraints((Serializable) MapUtil.asMap(ATTR_SPANCOL, 11, ATTR_BORDER, 1, ATTR_SIZE, 150));
+    AttributeDefinition space1 = beanCollector.getPresentationHelper().addSpaceValue();
+    beanCollector.addAttribute("path-test", new PathExpression<>(Times.class, "id.dbBegin"), null, null);
+    beanCollector.addAttribute("rule-test", new RuleExpression<>(Times.class, "§test-import"), null, null);
+    beanCollector
+        .addAttribute(
+            "sql-test",
+            new SQLExpression<>(
+                Times.class,
+                "?" + query.getName(), Object[].class),
+            null, null);
+    beanCollector.addAttribute("virtual-test", "I'm virtual", null, null, null);
+    beanCollector.addAttribute("picture", new Attachment("picture", Environment.getConfigPath()
+        + "/icons/attach.png"), null, null);
+    beanCollector.setAttributeFilter("path-test", "creation", "dbEnd", "pause", space1.getName(), "project",
+        "comment");
+    //more fields on one line (one field has grid-width 3)
+    beanCollector.getPresentable().setLayout((Serializable) MapUtil.asMap(L_GRIDWIDTH, 12));
+    //let the field 'comment' grow to full width
+    beanCollector.getAttribute("comment").getPresentation()
+        .setLayoutConstraints((Serializable) MapUtil.asMap(ATTR_SPANCOL, 11, ATTR_BORDER, 1, ATTR_SIZE, 150));
 
-        /*
-         * add a specified action
-         */
-        beanCollector.addAction(new SpecifiedAction<>("ant", null));
+    /*
+     * add a specified action
+     */
+    beanCollector.addAction(new SpecifiedAction<>("ant", null));
 
-        /*
-         * save it as beandef
-         */
-        BeanDefinition.define(beanCollector);
-        beanCollector.saveDefinition();
-
+    /*
+     * save it as beandef
+     */
+    BeanDefinition.define(beanCollector);
+    beanCollector.saveDefinition();
 
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
@@ -1596,5 +1623,6 @@ Other restrictions on android:
 * problems on event 'onchange' with value = 'function() {...}' on attachments
 * problems on de/-serializing 'EventController'
 * create uml documentation (websockets, bean-package)
+* changing beandefs value expression will not change attributes value expressions.
 
 [GLOSSARY]

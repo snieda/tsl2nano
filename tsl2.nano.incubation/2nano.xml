@@ -70,7 +70,7 @@ to create a new application-version, do the following:
 		create jar for small sample-codes
 	-->
 	<target name="sample.2nano" unless="disable_sample.2nano">
-		<ant antfile="../tsl2.nano.common/shell.xml" target="sh.jar">
+	<!--	<ant antfile="../tsl2.nano.common/shell.xml" target="sh.jar">
 			<property file="../tsl2.nano.h5/src/resources/build-tsl2.nano.h5.properties" />
 			<property name="sh.jar.srcdir" value="../target/test.h5.sample/h5.sample" />
 			<property name="sh.jar.destination" value="${target.dir}/tsl2.nano.h5.sample.jar" />
@@ -78,6 +78,12 @@ to create a new application-version, do the following:
 			<property name="sh.jar.include2" value="mypersistence*.xml" />
 			<property name="sh.jar.include3" value="runServer.bat" />
 			<property name="sh.jar.include4" value="timedb.s*" />
+		</ant> -->
+		<ant antfile="../tsl2.nano.common/shell.xml" target="sh.jar">
+			<property file="../tsl2.nano.h5/src/resources/build-tsl2.nano.h5.properties" />
+			<property name="sh.jar.srcdir" value="../tsl2.nano.h5/src/sample" />
+			<property name="sh.jar.destination" value="${target.dir}/tsl2.nano.h5.sample.jar" />
+			<property name="sh.jar.exclude" value="old" />
 		</ant>
 	</target>
 
@@ -86,14 +92,12 @@ to create a new application-version, do the following:
 		distribute all libs to target and start a test-project for h5
 	-->
 	<target name="test.2nano" unless="disable_test.2nano">
-
 		<ant antfile="../tsl2.nano.common/shell.xml" target="sh.copy">
 			<property name="sh.copy.srcdir" value="../" />
 			<property name="sh.copy.destination" value="${target.dir}" />
 			<property name="sh.copy.include" value="tsl2.nano.*/**/*.jar" />
 			<property name="sh.copy.flatten" value="true" />
 		</ant>
-
 		<ant antfile="../tsl2.nano.common/shell.xml" target="sh.copy">
 			<property name="sh.copy.srcdir" value="${target.dir}" />
 			<property name="sh.copy.destination" value="${test.dir}" />
@@ -160,6 +164,12 @@ to create a new application-version, do the following:
 			<property name="sh.jar.include" value="java_websocket.jar" />
 		</ant>
 		
+		<ant antfile="../tsl2.nano.common/shell.xml" target="sh.copy">
+			<property name="sh.copy.srcdir" value="../tsl2.nano.h5/src/resources" />
+			<property name="sh.copy.destination" value="${test.dir}" />
+			<property name="sh.copy.include" value="run.bat" />
+		</ant>
+
 		<ant antfile="../tsl2.nano.common/shell.xml" target="sh.exec.cmd">
 			<property name="sh.exec.cmd.dir" value="${test.dir}" />
 			<property name="sh.exec.cmd.arg1" value="run.bat h5.sample debug nopause" />

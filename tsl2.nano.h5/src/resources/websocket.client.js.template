@@ -96,7 +96,7 @@ function fillInputOptions(msg) {
 
 	// now, the new options should be filled
 	var select = e.appendChild(document.createElement('select'));
-	select.setAttribute('name', id);
+	select.setAttribute('name', id + '.select');
 	//TODO: some browser wont react on some event-types, so we use several types
 	select.setAttribute('onselect', 'inputassistselect(event)');
 	select.setAttribute('oninput', 'inputassistselect(event)');
@@ -111,6 +111,10 @@ function fillInputOptions(msg) {
 //		select.setAttribute('onclick', 'inputassistselect(event)');
 		option.appendChild(document.createTextNode(items[i]));
 	}
+	
+	//if only one item was found - set the value to the input field
+	if (items.length == 1)
+		document.getElementById(id).value = items[0];
 }
 
 function getTarget(msg) {

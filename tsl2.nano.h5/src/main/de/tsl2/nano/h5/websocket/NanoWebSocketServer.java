@@ -20,14 +20,18 @@ import org.java_websocket.handshake.ClientHandshake;
 import org.java_websocket.server.WebSocketServer;
 
 import de.tsl2.nano.bean.def.Bean;
+import de.tsl2.nano.bean.def.BeanCollector;
+import de.tsl2.nano.bean.def.BeanDefinition;
 import de.tsl2.nano.bean.def.BeanValue;
 import de.tsl2.nano.bean.def.IValueDefinition;
+import de.tsl2.nano.bean.def.ValueExpression;
 import de.tsl2.nano.core.Environment;
 import de.tsl2.nano.core.ISession;
 import de.tsl2.nano.core.log.LogFactory;
 import de.tsl2.nano.core.util.FileUtil;
 import de.tsl2.nano.core.util.StringUtil;
 import de.tsl2.nano.core.util.Util;
+import de.tsl2.nano.h5.configuration.BeanConfigurator;
 import de.tsl2.nano.persistence.Persistence;
 
 /**
@@ -77,39 +81,6 @@ public class NanoWebSocketServer extends WebSocketServer {
         LOG.info("websocket-server created: " + address);
     }
 
-//    /**
-//     * constructor
-//     * 
-//     * @param address
-//     * @param decoders
-//     */
-//    public NanoWebSocketServer(InetSocketAddress address, int decoders) {
-//        super(address, decoders);
-//        
-//        LOG.info("websocket-server created: " + address);
-//    }
-//
-//    /**
-//     * constructor
-//     * 
-//     * @param address
-//     * @param drafts
-//     */
-//    public NanoWebSocketServer(InetSocketAddress address, List<Draft> drafts) {
-//        super(address, drafts);
-//    }
-//
-//    /**
-//     * constructor
-//     * 
-//     * @param arg0
-//     * @param arg1
-//     * @param arg2
-//     */
-//    public NanoWebSocketServer(InetSocketAddress arg0, int arg1, List<Draft> arg2) {
-//        super(arg0, arg1, arg2);
-//    }
-//
     /**
      * {@inheritDoc}
      */
@@ -130,9 +101,13 @@ public class NanoWebSocketServer extends WebSocketServer {
     /**
      * {@inheritDoc}
      */
+    @SuppressWarnings("rawtypes")
     @Override
     public void onMessage(WebSocket conn, String msg) {
         LOG.debug("receiving message: '" + msg + "' from " + conn);
+        //if we are in configuration mode, do nothing
+        if (Environment.get(BeanConfigurator.class) != null)
+            return;
         //to be secure, no file is saved on wrong name
         attachment_info = null;
 
@@ -140,16 +115,19 @@ public class NanoWebSocketServer extends WebSocketServer {
         String target = getTarget(msg);
         String id = getId(msg);
         String value = getValue(msg);
-        Bean<?> bean = getCurrentBean(id);
+        BeanDefinition<?> beandef = getCurrentBean(id);
         String attr = StringUtil.substring(id, ".", null, true);
-        IValueDefinition attribute = bean.getAttribute(attr);
-        if (bean != null) {
+        if (beandef != null) {
             switch (target) {
             case TARGET_INPUTASSIST:
-                Collection<?> availableValues = attribute.getPresentation().getInputAssist().availableValues(value);
+                ValueExpression ve =
+                    beandef instanceof Bean ? beandef.getAttribute(attr).getValueExpression()
+                        : beandef.getValueExpression();
+                Collection<?> availableValues = ve.availableValues(value);
                 conn.send(createMessage(target, id, availableValues));
                 break;
             case TARGET_DEPENDENCY:
+                IValueDefinition attribute = ((Bean) beandef).getAttribute(attr);
                 //to take effect, use dependency listners
                 attribute.changeHandler().fireEvent(value);
                 break;
@@ -179,7 +157,8 @@ public class NanoWebSocketServer extends WebSocketServer {
         String id = getId(attachment_info);
         String attrName = StringUtil.substring(id, ".", null, true);
         String name = getValue(attachment_info);
-        String fileName = getAttachmentFilename(getCurrentBean(id).getInstance(), attrName, name);
+        Bean<?> bean = (Bean<?>) getCurrentBean(id);
+        String fileName = getAttachmentFilename(bean.getInstance(), attrName, name);
         FileUtil.writeBytes(message.array(),
             fileName,
             false);
@@ -201,13 +180,13 @@ public class NanoWebSocketServer extends WebSocketServer {
                 + Util.asString(value));
     }
 
-    private Bean<?> getCurrentBean(String id) {
+    private BeanDefinition<?> getCurrentBean(String id) {
         boolean isLoginPersistence = id.startsWith(Persistence.class.getSimpleName().toLowerCase());
-        Bean<?> currentBean;
+        BeanDefinition<?> currentBean;
         if (isLoginPersistence) {
             currentBean = Bean.getBean(Persistence.current());
         } else {
-            currentBean = (Bean<?>) session.getWorkingObject();
+            currentBean = (BeanDefinition<?>) session.getWorkingObject();
         }
         return currentBean;
     }
