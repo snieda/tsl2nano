@@ -16,6 +16,7 @@ import java.text.ParseException;
 import java.util.Collection;
 import java.util.Date;
 import java.util.Map;
+import java.util.UUID;
 
 import org.apache.commons.logging.Log;
 import org.simpleframework.xml.Attribute;
@@ -41,6 +42,7 @@ import de.tsl2.nano.core.util.Util;
 import de.tsl2.nano.format.FormatUtil;
 import de.tsl2.nano.messaging.EventController;
 import de.tsl2.nano.messaging.IListener;
+import de.tsl2.nano.util.NumberUtil;
 import de.tsl2.nano.util.PrivateAccessor;
 
 /**
@@ -81,6 +83,9 @@ public class AttributeDefinition<T> implements IAttributeDefinition<T> {
     /** see {@link #cascading()} */
     @Attribute(required = false)
     private boolean cascading;
+    /** see {@link #generatedValue()} */
+    @Attribute(required = false)
+    private boolean generatedValue;
 
     private static final Log LOG = LogFactory.getLog(AttributeDefinition.class);
 
@@ -145,6 +150,7 @@ public class AttributeDefinition<T> implements IAttributeDefinition<T> {
                 temporalType = def.temporalType();
                 composition = def.composition();
                 cascading = def.cascading();
+                generatedValue = def.generatedValue();
             }
         }
         initDeserialization();
@@ -153,8 +159,9 @@ public class AttributeDefinition<T> implements IAttributeDefinition<T> {
     @Commit
     private void initDeserialization() {
         status = IStatus.STATUS_OK;
-        if (presentable != null && presentable.getInputAssist() != null)
-            presentable.getInputAssist().setAttribute((IAttributeDefinition) this);
+        if (getColumnDefinition() != null && getColumnDefinition() instanceof ValueColumn)
+            ((ValueColumn) getColumnDefinition()).attributeDefinition = this;
+
         //provide dependency listeners their attribute-definition
         if (hasListeners()) {
             BeanDefinition beandef = BeanDefinition.getBeanDefinition(getDeclaringClass());
@@ -294,7 +301,7 @@ public class AttributeDefinition<T> implements IAttributeDefinition<T> {
         if (getConstraint().getFormat() == null) {
             Class<T> type = getType();
             if (Collection.class.isAssignableFrom(type)) {
-                getConstraint().setFormat(new CollectionExpressionFormat<T>((Class<T>) getGenericType(0)));
+                getConstraint().setFormat(new CollectionExpressionTypeFormat<T>((Class<T>) getGenericType(0)));
             } else if (Map.class.isAssignableFrom(type)) {
                 getConstraint().setFormat(new MapExpressionFormat<T>((Class<T>) getGenericType(1)));
             } else if (type.isEnum()) {
@@ -307,10 +314,16 @@ public class AttributeDefinition<T> implements IAttributeDefinition<T> {
 //                }
                 getConstraint().setFormat(Environment.get(BeanPresentationHelper.class).getDefaultRegExpFormat(this));
             } else {
-                getConstraint().setFormat(new ValueExpressionFormat<T>(type));
+                getConstraint().setFormat(new ValueExpressionTypeFormat<T>(type));
             }
         }
         return getConstraint().getFormat();
+    }
+
+    @Override
+    public ValueExpression<T> getValueExpression() {
+        Format f = getFormat();
+        return f instanceof ValueExpressionFormat ? ((ValueExpressionFormat) f).getValueExpression() : null;
     }
 
     /**
@@ -408,8 +421,29 @@ public class AttributeDefinition<T> implements IAttributeDefinition<T> {
      * {@inheritDoc}
      */
     public T getDefault() {
-        if (getConstraint().getDefault() == null && getAccessMethod() != null)
-            getConstraint().setDefault((T) getAccessMethod().getGenericReturnType());
+        IConstraint<T> c = getConstraint();
+        if (c.getDefault() == null && getAccessMethod() != null && !c.isNullable() && !generatedValue()
+            && Environment.get("attribute.use.default", true)) {
+            Object genType = getAccessMethod().getGenericReturnType();
+            if (genType instanceof Class) {
+                Class<T> gtype = (Class<T>) genType;
+                if (BeanUtil.isStandardType(gtype)) {
+                    if (BeanClass.hasDefaultConstructor(gtype))
+                        getConstraint().setDefault((T) BeanClass.createInstance(gtype));
+                }
+            } else if (NumberUtil.isNumber(getType())) {
+                getConstraint().setDefault((T) NumberUtil.getDefaultInstance((Class<Number>) getType()));
+            } else if (Environment.isTestMode()) {
+                /*
+                 * to create new entities without user input, these fields are filled on test mode
+                 */
+                if (CharSequence.class.isAssignableFrom(getType())) {
+                    c.setDefault((T) ("Y" + UUID.randomUUID().toString().substring(0, c.getLength() - 1)));
+                } else if (BeanContainer.instance().isPersistable(getType())) {
+                    c.setDefault((T) BeanContainer.instance().getBeans(getType(), 0, 1));
+                }
+            }
+        }
         return getConstraint().getDefault();
     }
 
@@ -632,6 +666,11 @@ public class AttributeDefinition<T> implements IAttributeDefinition<T> {
     @Override
     public boolean cascading() {
         return cascading;
+    }
+
+    @Override
+    public boolean generatedValue() {
+        return generatedValue;
     }
 
     @Override

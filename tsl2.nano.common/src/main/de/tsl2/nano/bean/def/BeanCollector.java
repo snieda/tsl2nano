@@ -50,10 +50,10 @@ import de.tsl2.nano.core.IPredicate;
 import de.tsl2.nano.core.ManagedException;
 import de.tsl2.nano.core.Messages;
 import de.tsl2.nano.core.cls.BeanAttribute;
+import de.tsl2.nano.core.cls.BeanClass;
 import de.tsl2.nano.core.exception.Message;
 import de.tsl2.nano.core.execution.Profiler;
 import de.tsl2.nano.core.log.LogFactory;
-import de.tsl2.nano.core.util.DateUtil;
 import de.tsl2.nano.core.util.StringUtil;
 import de.tsl2.nano.core.util.Util;
 import de.tsl2.nano.format.FormatUtil;
@@ -77,11 +77,13 @@ public class BeanCollector<COLLECTIONTYPE extends Collection<T>, T> extends Bean
 
     public static final String POSTFIX_COLLECTOR = ".collector";
 
+    public static final String POSTFIX_QUICKSEARCH = "quicksearch";
+
     public static final String KEY_COMMANDHANDLER = "bean.commandhandler";
 
     /** static data or current data representation of this beancollector */
     protected transient COLLECTIONTYPE collection;
-    transient boolean isStaticCollection = false;
+    protected transient boolean isStaticCollection = false;
 
     /** defines the data for this collector through it's getData() method */
     protected transient IBeanFinder<T, ?> beanFinder;
@@ -108,6 +110,7 @@ public class BeanCollector<COLLECTIONTYPE extends Collection<T>, T> extends Bean
      * search panel instructions.
      */
     protected transient IAction<COLLECTIONTYPE> searchAction;
+    protected transient IAction<COLLECTIONTYPE> quickSearchAction;
     protected transient IAction<?> resetAction;
     transient String searchStatus = Messages.getString("tsl2nano.searchdialog.nosearch");
 
@@ -161,8 +164,7 @@ public class BeanCollector<COLLECTIONTYPE extends Collection<T>, T> extends Bean
     public BeanCollector(Class<T> beanType, final COLLECTIONTYPE collection, int workingMode, Composition composition) {
         this(new BeanFinder<T, Object>(beanType), workingMode, composition);
         this.collection = collection;
-        this.isStaticCollection = !Util.isEmpty(collection);
-        if (isStaticCollection)
+        if (isStaticCollection || !hasMode(MODE_SEARCHABLE))
             this.searchStatus = "";
     }
 
@@ -190,10 +192,8 @@ public class BeanCollector<COLLECTIONTYPE extends Collection<T>, T> extends Bean
             int workingMode,
             Composition composition) {
 //        setName(Messages.getString("tsl2nano.list") + " " + getName());
-        this.isStaticCollection =
-            !Util.isEmpty(collection)
-                || (beanFinder != null && BeanContainer.isInitialized() && !BeanContainer.instance().isPersistable(
-                    beanFinder.getType()));
+        this.isStaticCollection = !Util.isEmpty(collection) ||
+            beanFinder == null || (!isPersistable());
         this.collection = collection != null ? collection : (COLLECTIONTYPE) new LinkedList<T>();
         setBeanFinder(beanFinder);
         //TODO: the check for attribute can't be done here - perhaps attributes will be added later!
@@ -204,8 +204,9 @@ public class BeanCollector<COLLECTIONTYPE extends Collection<T>, T> extends Bean
 //        } else {
         this.workingMode = workingMode;
 //        }
-        if (collection != null)
-            searchStatus = Messages.getFormattedString("tsl2nano.searchdialog.searchresultcount", collection.size());
+        if (isStaticCollection)
+            searchStatus =
+                Messages.getFormattedString("tsl2nano.searchdialog.searchresultcount", this.collection.size());
         this.composition = composition;
         if (composition != null && composition.getTargetType() == null) {
             if (hasMode(MODE_SEARCHABLE)) {
@@ -248,6 +249,11 @@ public class BeanCollector<COLLECTIONTYPE extends Collection<T>, T> extends Bean
         return beanFinder.getType();
     }
 
+    @Override
+    public boolean isPersistable() {
+        return BeanContainer.isInitialized() && BeanContainer.instance().isPersistable(getType());
+    }
+
     /**
      * {@inheritDoc}
      */
@@ -267,18 +273,23 @@ public class BeanCollector<COLLECTIONTYPE extends Collection<T>, T> extends Bean
             @SuppressWarnings("unused")
             Object internalBeanFinder = new Serializable() {
                 boolean betweenFinderCreated = false;
+                String lastExpression = null;
 
                 //used by proxy!
                 Collection<T> getData() {
-                    Collection<T> searchPanelBeans = getSearchPanelBeans();
-                    Iterator<T> it = searchPanelBeans.iterator();
-                    T from = searchPanelBeans.size() > 0 ? it.next() : null;
-                    T to = searchPanelBeans.size() > 1 ? it.next() : null;
-                    return (COLLECTIONTYPE) getData(from, to);
+                    if (lastExpression != null) {
+                        return getData(lastExpression);
+                    } else {
+                        Collection<T> searchPanelBeans = getSearchPanelBeans();
+                        Iterator<T> it = searchPanelBeans.iterator();
+                        T from = searchPanelBeans.size() > 0 ? it.next() : null;
+                        T to = searchPanelBeans.size() > 1 ? it.next() : null;
+                        return (COLLECTIONTYPE) getData(from, to);
+                    }
                 }
 
                 public Collection<T> getData(T from, Object to) {
-                    if (!isStaticCollection) {
+                    if (!isStaticCollection || isPersistable()) {
                         collection = (COLLECTIONTYPE) ((IBeanFinder<T, Object>) beanFinder).getData(from, to);
                         /*
                          * if it is a composition, all data has to be found in the compositions-parent-container
@@ -298,6 +309,23 @@ public class BeanCollector<COLLECTIONTYPE extends Collection<T>, T> extends Bean
                     /*
                      * respect authorization/permissions
                      */
+                    return authorized(collection);
+                }
+
+                public Collection<T> getData(String expression) {
+                    if (!isStaticCollection) {
+                        collection =
+                            (COLLECTIONTYPE) getValueExpression().matchingObjects(expression);
+                    } else if (!betweenFinderCreated) {
+                        collection =
+                            (COLLECTIONTYPE) CollectionUtil.getFiltering(collection, new StringBuilder(expression));
+                        betweenFinderCreated = true;
+                    }
+                    Collections.sort((List) collection, getValueExpression().getComparator());
+                    return authorized(collection);
+                }
+
+                private Collection<T> authorized(COLLECTIONTYPE collection) {
                     if (Environment.get("check.permission.data", true)) {
                         return CollectionUtil.getFiltering(collection, new IPredicate<T>() {
                             @Override
@@ -490,11 +518,15 @@ public class BeanCollector<COLLECTIONTYPE extends Collection<T>, T> extends Bean
     public T createItem(T selectedItem) {
         T newItem = null;
         Class<T> type = getType();
-        if (selectedItem != null && Environment.get("collector.new.clone.selected", true)
+        /*
+         * do a copy of the selected element (only if exactly one element was selected) and the property was set.
+         */
+        if (selectedItem != null && getSelectionProvider() != null && getSelectionProvider().getValue().size() == 1
+            && Environment.get("collector.new.clone.selected", true)
             && !(Entry.class.isAssignableFrom(type))) {
             try {
                 /*
-                 * we don't use the apache util to be compatible on all platforms (e.g. without java.bean package)
+                 * we don't use the apache util to be compatible on all platforms (e.g. without java.bean package like the dalvik vm)
                  * but the tsl2nano util may cause a classloader exception.
                  * we don't use a deep copy to avoid lazyloading problems
                  */
@@ -522,10 +554,7 @@ public class BeanCollector<COLLECTIONTYPE extends Collection<T>, T> extends Bean
             } else {
                 newItem = BeanContainer.instance().createBean(getType());
             }
-        }
-        //assign the new item to the composition parent
-        if (composition != null) {
-            composition.add(newItem);
+            setDefaultValues(newItem);
         }
         /*
          * if timestamp fields are not shown, generate new timestamps
@@ -545,15 +574,23 @@ public class BeanCollector<COLLECTIONTYPE extends Collection<T>, T> extends Bean
         }
         /*
          * the id attribute of the selected bean must not be copied!!!
-         * we create an generated value for the id. if jpa annotation @GenerateValue
+         * we create a generated value for the id. if jpa annotation @GenerateValue
          * is present, it will overwrite this id.
          */
         final BeanAttribute idAttribute = BeanContainer.getIdAttribute(newItem);
         if (idAttribute != null) {
             IAttributeDef def = Environment.get(IBeanContainer.class).getAttributeDef(newItem,
                 idAttribute.getName());
-            idAttribute.setValue(newItem,
-                StringUtil.fixString(BeanUtil.createUUID(), def.length(), ' ', true));
+            idAttribute.setValue(newItem, composition != null ?
+                StringUtil.fixString(BeanUtil.createUUID(), (def.length() > -1 ? def.length() : 0), ' ', true) : null);
+        }
+
+        /*
+         * assign the new item to the composition parent. this should be done last, 
+         * because of the equals/hash difference to existing items.
+         */
+        if (composition != null) {
+            composition.add(newItem);
         }
         return newItem;
     }
@@ -585,13 +622,16 @@ public class BeanCollector<COLLECTIONTYPE extends Collection<T>, T> extends Bean
                         @Override
                         public Void action() throws Exception {
                             values.remove(finalBean);
-                            if (!"remove".equals(getParameter(0)))
+                            getSelectionProvider().getValue().remove(finalBean);
+                            if (!"remove".equals(getParameter(0))) {
                                 values.add((T) b.getInstance());
+                                getSelectionProvider().getValue().add((T) b.getInstance());
+                            }
                             return null;
                         }
                     });
                     refresh();
-                    setSelected(newBean);
+                    getSelectionProvider().getValue().add(newBean);
                 }
 
                 return newBean;
@@ -742,15 +782,17 @@ public class BeanCollector<COLLECTIONTYPE extends Collection<T>, T> extends Bean
      * @return visible columns index-sorted
      */
     public List<IPresentableColumn> getColumnDefinitionsIndexSorted() {
-        List<IPresentableColumn> colDefs = new ArrayList<IPresentableColumn>(getColumnDefinitions());
+        Collection<IPresentableColumn> colDefs = getColumnDefinitions();
+        List<IPresentableColumn> colDefCopy = new ArrayList<IPresentableColumn>(colDefs.size());
         IPresentableColumn c = null;
+        //we have to use the iterator to get the filtered data!
         for (Iterator<IPresentableColumn> it = colDefs.iterator(); it.hasNext();) {
             c = it.next();
-            if (!c.getPresentable().isVisible())
-                it.remove();
+            if (c.getPresentable().isVisible())
+                colDefCopy.add(c);
         }
-        Collections.sort(colDefs);
-        return colDefs;
+        Collections.sort(colDefCopy);
+        return colDefCopy;
     }
 
     /**
@@ -760,7 +802,8 @@ public class BeanCollector<COLLECTIONTYPE extends Collection<T>, T> extends Bean
      * @param showMultiples
      * @return
      */
-    static <T> Collection<IPresentableColumn> createColumnDefinitions(final BeanDefinition<T> def, final IActivable showMultiples) {
+    static <T> Collection<IPresentableColumn> createColumnDefinitions(final BeanDefinition<T> def,
+            final IActivable showMultiples) {
         final List<IAttributeDefinition<?>> attributes = def.getBeanAttributes();
         Collection<IPresentableColumn> columnDefinitions = new ArrayList<IPresentableColumn>(attributes.size());
         int i = 0;
@@ -1064,6 +1107,47 @@ public class BeanCollector<COLLECTIONTYPE extends Collection<T>, T> extends Bean
     }
 
     /**
+     * getQuickSearchAction
+     * 
+     * @return search action for value expressions
+     */
+    public IAction<COLLECTIONTYPE> getQuickSearchAction() {
+        if (quickSearchAction == null) {
+            final String actionId =
+                isVirtual() ? getName() + "." + POSTFIX_QUICKSEARCH : BeanContainer.getActionId(getType(), true,
+                    POSTFIX_QUICKSEARCH);
+            quickSearchAction = new SecureAction<COLLECTIONTYPE>(actionId,
+                "",
+                BeanContainer.getActionText(actionId, true),
+                IAction.MODE_UNDEFINED) {
+                @Override
+                public COLLECTIONTYPE action() throws Exception {
+                    //TODO: fire refresh event
+                    searchStatus = Messages.getFormattedString("tsl2nano.searchdialog.searchrunning");
+                    Environment.get(Profiler.class).starting(this, getName());
+                    COLLECTIONTYPE result = (COLLECTIONTYPE) getBeanFinder().getData((String) getParameter(0));
+                    searchStatus = Messages.getFormattedString("tsl2nano.searchdialog.searchresultcount",
+                        result.size());
+                    if (openAction != null)
+                        openAction.setDefault(true);
+                    return result;
+                }
+
+                @Override
+                public boolean isDefault() {
+                    return isEnabled() && (!hasSelection() || hasSearchRequestChanged());
+                }
+
+                @Override
+                public String getImagePath() {
+                    return "icons/find.png";
+                }
+            };
+        }
+        return quickSearchAction;
+    }
+
+    /**
      * createResetAction
      * 
      * @return new created reset action
@@ -1082,7 +1166,9 @@ public class BeanCollector<COLLECTIONTYPE extends Collection<T>, T> extends Bean
                 if (!isStaticCollection && collection != null)
                     collection.clear();
                 setSelected();
-                searchStatus = isStaticCollection ? "" : Messages.getString("tsl2nano.searchdialog.nosearch");
+                searchStatus =
+                    isStaticCollection || !hasMode(MODE_SEARCHABLE) ? "" : Messages
+                        .getString("tsl2nano.searchdialog.nosearch");
                 return null;
             }
 
@@ -1114,7 +1200,8 @@ public class BeanCollector<COLLECTIONTYPE extends Collection<T>, T> extends Bean
             int workingMode) {
         ManagedException.assertion(collection != null && collection.size() > 0,
             "collection is empty but must contain at least one item");
-        return getBeanCollector((Class<I>) collection.iterator().next().getClass(), collection, workingMode,
+        return getBeanCollector((Class<I>) BeanClass.getDefiningClass(collection.iterator().next().getClass()),
+            collection, workingMode,
             null);
     }
 

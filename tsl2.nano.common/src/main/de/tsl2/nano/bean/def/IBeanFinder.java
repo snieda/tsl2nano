@@ -43,6 +43,13 @@ public interface IBeanFinder<T, F> {
     Collection<T> getData();
 
     /**
+     * evaluates the data through a given expression using the beans {@link ValueExpression}.
+     * @param valueExpression
+     * @return collection of data
+     */
+    Collection<T> getData(String valueExpression);
+    
+    /**
      * delegates to {@link #getData(Object, Object)} using {@link #getFilterRange()} - for the next {@link #getMaxResultCount()} items.
      * 
      * @return result of {@link #getData(Object, Object)}

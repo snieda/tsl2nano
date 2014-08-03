@@ -25,6 +25,7 @@ import de.tsl2.nano.core.util.Util;
 public class ValueExpressionFormat<T> extends Format {
     /** serialVersionUID */
     private static final long serialVersionUID = -3040338597603039966L;
+    /** don't use this variable directly. use {@link #ve()} instead. */
     ValueExpression<T> ve;
 
     /**
@@ -41,16 +42,16 @@ public class ValueExpressionFormat<T> extends Format {
      */
     public ValueExpressionFormat(Class<T> type) {
         super();
-        ve = BeanDefinition.getBeanDefinition(type).getValueExpression();
-    }
+        ve = BeanDefinition.getBeanDefinition(type).getValueExpression();    }
 
     /**
      * {@inheritDoc}
      */
+    @SuppressWarnings("unchecked")
     @Override
     public StringBuffer format(Object obj, StringBuffer toAppendTo, FieldPosition pos) {
         pos.setEndIndex(pos.getBeginIndex() + 1);
-        return toAppendTo.append(ve.to((T) obj));
+        return toAppendTo.append(ve().to((T) obj));
     }
 
     /**
@@ -59,23 +60,27 @@ public class ValueExpressionFormat<T> extends Format {
     @Override
     public Object parseObject(String source, ParsePosition pos) {
         pos.setIndex(pos.getIndex() + 1);
-        return ve.from(source);
+        return ve().from(source);
     }
     
     public void applyPattern(String pattern) {
-        ve.setExpression(pattern);
+        ve().setExpression(pattern);
+    }
+    
+    ValueExpression<T> ve() {
+        return ve;
     }
     
     @Override
     public String toString() {
-        return Util.toString(getClass(), ve);
+        return Util.toString(getClass(), ve());
     }
 
     /**
      * @return Returns the ve.
      */
     public ValueExpression<T> getValueExpression() {
-        return ve;
+        return ve();
     }
 
     /**

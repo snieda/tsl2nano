@@ -22,7 +22,7 @@ import de.tsl2.nano.core.cls.BeanClass;
  * Example: Customer(1)==>(*)Adress. But the adress cannot exist without it's parent, the customer.
  * <p/>
  * If a relation model needs to resolve a connection of type: Group (*) ==> (*) Player, a new table 'PlayersGroup'
- * should be created: Group (*) ==> (1) PlayersGroup (1) ==> (*) Player. The the #target is required to resolve this
+ * should be created: Group (*) ==> (1) PlayersGroup (1) ==> (*) Player. The #target is required to resolve this
  * many-to-many relation. In this example, the members are:<br/>
  * parent = Group<br/>
  * child = PlayersGroup<br/>
@@ -35,7 +35,7 @@ public class Composition<C> {
     /** parent-to-child attribute, holding the parent instance */
     BeanValue<C> parent;
     /** child-to-target attribute definition */ 
-    BeanAttribute target;
+    BeanAttribute<?> target;
 
     /**
      * constructor
@@ -52,7 +52,7 @@ public class Composition<C> {
      * @param parent see {@link #parent}
      * @param target see {@link #target}
      */
-    Composition(BeanValue<C> parent, BeanAttribute target) {
+    Composition(BeanValue<C> parent, BeanAttribute<?> target) {
         super();
         this.parent = parent;
         this.target = target;
@@ -69,6 +69,7 @@ public class Composition<C> {
      * getParentContainer
      * @return parents container holding the child items
      */
+    @SuppressWarnings("unchecked")
     protected Collection<C> getParentContainer() {
         return (Collection<C>)parent.getValue();
     }

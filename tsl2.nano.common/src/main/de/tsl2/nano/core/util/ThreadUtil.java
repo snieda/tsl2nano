@@ -7,7 +7,7 @@
  * 
  * Copyright: (c) Thomas Schneider 2013, all rights reserved
  */
-package de.tsl2.nano.core.classloader;
+package de.tsl2.nano.core.util;
 
 import java.lang.Thread.UncaughtExceptionHandler;
 import java.util.concurrent.Executors;
@@ -52,4 +52,20 @@ public class ThreadUtil {
         thread.start();
         return thread;
     }
+    
+//    public static <T> T runOnThreadWithResult(String threadName, Runnable runnable, T[] resultHolder) {
+//        //find the thread
+//        Thread t;
+//        ThreadGroup group = Thread.currentThread().getThreadGroup();
+//        Thread[] allThreads = new Thread[Thread.activeCount()];
+//        group.enumerate(allThreads);
+//        for (int i = 0; i < allThreads.length; i++) {
+//            if (allThreads[i].getName().equals(threadName)) {
+//                t = allThreads[i];
+//                break;
+//            }
+//        }
+//        
+//        t.set
+//    }
 }

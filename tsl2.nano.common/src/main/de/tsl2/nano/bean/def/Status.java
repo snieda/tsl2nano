@@ -11,6 +11,8 @@ package de.tsl2.nano.bean.def;
 
 import java.text.MessageFormat;
 
+import de.tsl2.nano.core.Environment;
+
 /**
  * default implementation of {@link IStatus} for a status of type warning or error. if you want to create a ok-status
  * use {@link IStatus#STATUS_OK}.
@@ -79,7 +81,7 @@ public class Status implements IStatus {
      * @return new error status instance
      */
     public static Status illegalArgument(String name, Object value, Object assertion) {
-        return new Status(new IllegalArgumentException(MessageFormat.format("tsl2nano.assertion.failed",
+        return new Status(new IllegalArgumentException(Environment.translate("tsl2nano.assertion.failed", true,
             value,
             name,
             assertion)));

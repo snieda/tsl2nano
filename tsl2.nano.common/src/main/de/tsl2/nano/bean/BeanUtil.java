@@ -53,6 +53,7 @@ import de.tsl2.nano.core.util.StringUtil;
 import de.tsl2.nano.core.util.Util;
 import de.tsl2.nano.format.DefaultFormat;
 import de.tsl2.nano.format.FormatUtil;
+import de.tsl2.nano.util.PrivateAccessor;
 
 /**
  * A Utility-Class for beans
@@ -211,6 +212,15 @@ public class BeanUtil extends ByteUtil {
             ManagedException.forward(e);
             return null;
         }
+    }
+
+    /**
+     * calls the internal {@link Object#clone()} method.
+     * @param src source to copy
+     * @return copied object
+     */
+    public static <T> T cloneObject(T src) {
+        return (T) new PrivateAccessor<T>(src).call("clone", null);
     }
 
     /**

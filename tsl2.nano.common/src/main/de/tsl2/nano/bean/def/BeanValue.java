@@ -465,7 +465,7 @@ public class BeanValue<T> extends AttributeDefinition<T> implements IValueDefini
      * @return bean-value identifier
      */
     public String getValueId() {
-        return parent != null ? parent.getName() + "." + parent.getId() + "." + getName(): getId(); 
+        return parent != null ? parent.getName() + "." + parent.getId() + "." + getName() : getId();
     }
 
     Selector<T> selector() {
@@ -533,8 +533,11 @@ public class BeanValue<T> extends AttributeDefinition<T> implements IValueDefini
                     if (v == null)
                         setValue((T) s);
                     else {
-                        v.clear();
-                        v.addAll(s);
+                        //fill values - only if not the same reference!
+                        if (v != s) {
+                            v.clear();
+                            v.addAll(s);
+                        }
                         vsel.synchronize(v);
                     }
                 } else {

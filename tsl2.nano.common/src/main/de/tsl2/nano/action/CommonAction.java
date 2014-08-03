@@ -15,9 +15,9 @@ import java.util.Collection;
 import org.apache.commons.logging.Log;
 
 import de.tsl2.nano.core.ManagedException;
-import de.tsl2.nano.core.classloader.ThreadUtil;
 import de.tsl2.nano.core.log.LogFactory;
 import de.tsl2.nano.core.util.StringUtil;
+import de.tsl2.nano.core.util.ThreadUtil;
 
 /**
  * @param <RETURNTYPE>

@@ -174,6 +174,13 @@ public class BeanDefinition<T> extends BeanClass<T> implements Serializable {
     }
 
     /**
+     * callback method to be invoked by framework to do some cleanups, if this bean loses it's focus without any action.
+     */
+    public void onDeactivation() {
+
+    }
+
+    /**
      * @return Returns the activationActionNames.
      */
     protected String[] getActivationActionNames() {
@@ -885,7 +892,7 @@ public class BeanDefinition<T> extends BeanClass<T> implements Serializable {
                         beandef = (BeanDefinition<T>) beandef.extension.to(beandef);
                     }
                     //perhaps, the file defines another bean-name or bean-type
-                    if ((name == null || name.equals(beandef.getName())
+                    if ((name == null || name.equalsIgnoreCase(beandef.getName())
                         && (type == null || type.equals(beandef.getClazz()))))
                         virtualBeanCache.add(beandef);
                     else {
@@ -1230,6 +1237,18 @@ public class BeanDefinition<T> extends BeanClass<T> implements Serializable {
         return valueGroup;
     }
 
+    /**
+     * fills all attributes with their default values - if defined.
+     * @param instance bean instance to set the values on
+     */
+    public void setDefaultValues(Object instance) {
+        List<IAttribute> attributes = getAttributes();
+        for (IAttribute a : attributes) {
+            if (a instanceof AttributeDefinition)
+                a.setValue(instance, ((AttributeDefinition)a).getDefault());
+        }
+    }
+    
     /**
      * fills a map with all bean-attribute-names and their values
      * 

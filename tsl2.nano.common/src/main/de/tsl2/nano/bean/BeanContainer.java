@@ -287,15 +287,15 @@ public class BeanContainer implements IBeanContainer {
      */
     @Override
     public <T> Collection<T> getBeansByExample(T exampleBean) {
-        return getBeansByExample(exampleBean, false);
+        return getBeansByExample(exampleBean, false, 0, Integer.MAX_VALUE );
     }
 
     /**
      * {@inheritDoc}
      */
     @Override
-    public <T> Collection<T> getBeansByExample(T exampleBean, Boolean useLike) {
-        exampleFinderAction.setParameter(new Object[] { exampleBean, useLike });
+    public <T> Collection<T> getBeansByExample(T exampleBean, Boolean useLike, int startIndex, int maxResult) {
+        exampleFinderAction.setParameter(new Object[] { exampleBean, useLike, startIndex, maxResult  });
         return (Collection<T>) exampleFinderAction.activate();
     }
 

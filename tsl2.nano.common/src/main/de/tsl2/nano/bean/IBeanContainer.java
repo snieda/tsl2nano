@@ -43,9 +43,11 @@ public interface IBeanContainer {
      * 
      * @param <T> bean type
      * @param exampleBean example bean with optional filled attributes
+     * @param startIndex (optional: set 0 as standard) used with maxresult to fetch data blocks
+     * @param maxResult (optional: set -1 to use no definition) maximum result count
      * @return matching beans
      */
-    public <T> Collection<T> getBeansByExample(T exampleBean, Boolean useLike);
+    public <T> Collection<T> getBeansByExample(T exampleBean, Boolean useLike, int startIndex, int maxResult );
 
     /**
      * returns all beans that match the range of firstBean and secondBean. if firstBean equals secondBean, it is a

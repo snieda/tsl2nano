@@ -17,7 +17,7 @@ import de.tsl2.nano.core.util.StringUtil;
  */
 public class SystemUtil {
 
-    protected static final Log LOG = LogFactory.getLog(ScriptUtil.class);
+    protected static final Log LOG = LogFactory.getLog(SystemUtil.class);
 
     /**
      * executes given command in directory command[0].getParentFile().
@@ -45,8 +45,8 @@ public class SystemUtil {
             LOG.info("starting process with command: " + StringUtil.toString(command, 500)
                 + "\n\tdir: "
                 + processBuilder.directory()
-                + "\n\tenv: "
-                + processBuilder.environment());
+                + (LOG.isDebugEnabled() ? "\n\tenv: "
+                + processBuilder.environment(): ""));
             process = processBuilder.start();
             final Scanner scanner = new Scanner(process.getInputStream());
             while (scanner.hasNextLine()) {

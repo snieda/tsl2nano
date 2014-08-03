@@ -53,4 +53,7 @@ public interface IAttributeDef {
 
     /** whether this field should be unique */
     boolean unique();
+
+    /** if an id attribute is a generated value */
+    boolean generatedValue();
 }

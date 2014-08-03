@@ -32,6 +32,7 @@ import de.tsl2.nano.core.log.LogFactory;
 import de.tsl2.nano.core.util.ByteUtil;
 import de.tsl2.nano.core.util.FileUtil;
 import de.tsl2.nano.core.util.StringUtil;
+import de.tsl2.nano.core.util.ThreadUtil;
 
 /**
  * provides dynamic classloading through extending classpath on runtime. use {@link #addURL(URL)} to enhance the
@@ -214,7 +215,7 @@ public class RuntimeClassloader extends URLClassLoader {
     }
 
     /**
-     * startPathChecker NOT IMPLEMENTED YET!
+     * startPathChecker!
      * 
      * @param path path to be checked for new jars to load on runtime.
      * @param waitMillis milliseconds to wait between checks.

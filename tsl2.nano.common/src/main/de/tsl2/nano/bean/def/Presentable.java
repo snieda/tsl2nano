@@ -51,12 +51,10 @@ public class Presentable implements IIPresentable, Serializable {
     protected LinkedHashMap<String, String> layoutConstraints;
     @Attribute
     boolean visible = true;
-    transient IActivable enabler;
+    @Element(required = false)
+    IActivable enabler;
     @Element(required = false)
     String icon;
-
-    @Element(required = false)
-    IInputAssist<?> inputAssist;
 
     @ElementArray(required = false)
     int[] foreground;
@@ -81,17 +79,11 @@ public class Presentable implements IIPresentable, Serializable {
          * - not persistable or persistable and if it is a multi-value, cascading must be activated!
          */
         enabler =
-            attr.hasWriteAccess()
+            attr.hasWriteAccess() && !(attr instanceof IAttributeDefinition && ((IAttributeDefinition)attr).generatedValue())
                 && (!BeanContainer.isInitialized() || !BeanContainer.instance().isPersistable(attr.getDeclaringClass())
                     || !(attr instanceof IAttributeDefinition) || (!((IAttributeDefinition<?>) attr).isMultiValue() || ((IAttributeDefinition<?>) attr)
                     .cascading()))
                 ? IActivable.ACTIVE : IActivable.INACTIVE;
-
-        if (attr.hasWriteAccess() && attr instanceof IAttributeDefinition && Environment.get("use.inputassist", true)) {
-            IAttributeDefinition<?> a = (IAttributeDefinition<?>) attr;
-            if (a.isRelation())
-                setInputAssist(new DefaultInputAssist(a));
-        }
     }
 
     /**
@@ -335,19 +327,5 @@ public class Presentable implements IIPresentable, Serializable {
     @Override
     public void setBackground(int[] background) {
         this.background = background;
-    }
-
-    /**
-     * @return Returns the inputAssist.
-     */
-    public IInputAssist<?> getInputAssist() {
-        return inputAssist;
-    }
-
-    /**
-     * @param inputAssist The inputAssist to set.
-     */
-    public void setInputAssist(IInputAssist<?> inputAssist) {
-        this.inputAssist = inputAssist;
     }
 }

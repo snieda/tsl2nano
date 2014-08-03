@@ -15,6 +15,7 @@ import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.Comparator;
 import java.util.Formatter;
 import java.util.Map;
 
@@ -46,7 +47,11 @@ import de.tsl2.nano.util.operation.IConverter;
  * @author Thomas Schneider
  * @version $Revision$
  */
-public class ValueExpression<TYPE> implements IValueExpression<TYPE>, IConverter<TYPE, String>, Serializable {
+public class ValueExpression<TYPE> implements
+        IValueExpression<TYPE>,
+        IConverter<TYPE, String>,
+        IInputAssist<TYPE>,
+        Serializable {
     /** serialVersionUID */
     private static final long serialVersionUID = 9157362251663475852L;
     /** optional expression prefix to define the kind of expression */
@@ -95,6 +100,8 @@ public class ValueExpression<TYPE> implements IValueExpression<TYPE>, IConverter
 
     /** should be true, if {@link #type} is persistable (see {@link BeanContainer#isPersistable(Class)} */
     transient boolean isPersistable = false;
+
+    transient Comparator<TYPE> comparator;
 
     /**
      * constructor to be serializable
@@ -174,7 +181,7 @@ public class ValueExpression<TYPE> implements IValueExpression<TYPE>, IConverter
         //if type is object we return the value itself - it's an instanceof Object
         if (type.isAssignableFrom(Object.class))
             return (TYPE) toValue;
-        
+
         TYPE exampleBean = createExampleBean(toValue);
 
         if (isPersistable) {//check for unique!
@@ -192,6 +199,7 @@ public class ValueExpression<TYPE> implements IValueExpression<TYPE>, IConverter
 
     /**
      * createExampleBean
+     * 
      * @param toValue
      * @return example bean holding attributes given by toValue
      */
@@ -212,7 +220,7 @@ public class ValueExpression<TYPE> implements IValueExpression<TYPE>, IConverter
                 b.setParsedValue(attributes[i], attributeValues[i]);
             }
         }
-        return exampleBean;
+        return b.instance;
     }
 
     /**
@@ -252,7 +260,7 @@ public class ValueExpression<TYPE> implements IValueExpression<TYPE>, IConverter
             return "";
         if (hasArguments) {
             Map<String, Object> valueMap = BeanUtil.toValueMap(fromValue, false, false, true, attributes);
-            Object[] args = valueMap.values().toArray();
+            Object[] args = mapToAttributeOrder(valueMap);
             StringUtil.replaceNulls(args, false);
             //check for entity beans to resolve their format recursive through it's valueexpression
             preformatBeans(args);
@@ -268,6 +276,14 @@ public class ValueExpression<TYPE> implements IValueExpression<TYPE>, IConverter
             return !Util.isEmpty(format) && !format.equals("Object") ? format : FormatUtil.getDefaultFormat(fromValue,
                 false).format(fromValue);//Util.asString(fromValue);
         }
+    }
+
+    private Object[] mapToAttributeOrder(Map<String, Object> valueMap) {
+        Object[] mapped = new Object[attributes.length];
+        for (int i = 0; i < attributes.length; i++) {
+            mapped[i] = valueMap.get(attributes[i]);
+        }
+        return mapped;
     }
 
     protected void preformatBeans(Object[] args) {
@@ -426,5 +442,44 @@ public class ValueExpression<TYPE> implements IValueExpression<TYPE>, IConverter
     @Override
     public String getExpressionPattern() {
         throw new UnsupportedOperationException();
+    }
+
+    @Override
+    public Collection<TYPE> matchingObjects(Object prefix) {
+        String input = Util.asString(prefix).trim() + "*";
+        TYPE exampleBean = createExampleBean(input);
+        Collection<TYPE> values =
+            BeanContainer.instance().getBeansByExample(exampleBean, true, 0,
+                Environment.get("websocket.intputassist.maxitemcount", 20));
+        return values;
+    }
+
+    @Override
+    public Collection<String> availableValues(Object prefix) {
+        Collection<TYPE> values = matchingObjects(prefix);
+        Collection<String> result = new ArrayList<String>(values.size());
+        if (values.size() > 0) {
+            for (TYPE t : values) {
+                result.add(to(t));
+            }
+        }
+        return result;
+    }
+
+    /**
+     * getComparator
+     * 
+     * @return comparator through value expression strings
+     */
+    public Comparator<TYPE> getComparator() {
+        if (comparator == null) {
+            comparator = new Comparator<TYPE>() {
+                @Override
+                public int compare(TYPE o1, TYPE o2) {
+                    return to(o1).compareTo(to(o2));
+                }
+            };
+        }
+        return comparator;
     }
 }

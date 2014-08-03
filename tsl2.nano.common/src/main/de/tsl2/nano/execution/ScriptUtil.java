@@ -92,9 +92,7 @@ public class ScriptUtil extends SystemUtil {
                 + "\ntarget: "
                 + target
                 + "\nbasedir: "
-                + p.getBaseDir()
-                + "\nproperties:\n"
-                + StringUtil.toFormattedString(properties, 100));
+                + p.getBaseDir());
             if (LOG.isDebugEnabled()) {
                 LOG.debug("\ncoreloader: " + p.getCoreLoader()
                     + "\nexecutor: "

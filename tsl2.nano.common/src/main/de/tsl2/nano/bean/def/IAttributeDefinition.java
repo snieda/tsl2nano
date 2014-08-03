@@ -30,6 +30,8 @@ public interface IAttributeDefinition<T> extends IAttribute<T>, IAttributeDef, S
     /** description for the attribute */
     String getDescription();
 
+    ValueExpression<T> getValueExpression();
+    
     /**
      * @return whether the value type is a collection.
      */

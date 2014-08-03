@@ -22,9 +22,9 @@ import org.simpleframework.xml.core.Commit;
 import org.simpleframework.xml.core.Persist;
 
 import de.tsl2.nano.core.ManagedException;
-import de.tsl2.nano.core.classloader.ThreadUtil;
 import de.tsl2.nano.core.util.BitUtil;
 import de.tsl2.nano.core.util.StringUtil;
+import de.tsl2.nano.core.util.ThreadUtil;
 import de.tsl2.nano.core.util.XmlUtil;
 
 /**

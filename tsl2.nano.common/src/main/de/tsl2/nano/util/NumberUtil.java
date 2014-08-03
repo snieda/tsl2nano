@@ -339,4 +339,13 @@ public class NumberUtil extends BitUtil {
         return BeanClass.isAssignableFrom(Float.class, type) || BeanClass.isAssignableFrom(Double.class, type)
             || BeanClass.isAssignableFrom(BigDecimal.class, type);
     }
+    
+    /**
+     * getDefaultInstance
+     * @param numberType
+     * @return default instance (value=0) of the given number type
+     */
+    public static <T extends Number> T getDefaultInstance(Class<T> numberType) {
+        return BeanClass.createInstance(numberType, 0);
+    }
 }

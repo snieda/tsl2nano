@@ -95,6 +95,8 @@ public class Environment {
 
     public static final String KEY_BUILDINFO = "tsl2.nano.build.informations";
 
+    private static final String KEY_TESTMODE = "tsl2.nano.test";
+    
     static final String DEF_PATHSEPRATOR = "/";
 
     private Environment() {
@@ -562,6 +564,13 @@ public class Environment {
         return classLoader.getResourceAsStream(fileName);
     }
 
+    public static final boolean extractResourceToDir(String resourceName, String destinationDir) {
+        //put build informations into system-properties
+        getBuildInformations();
+        resourceName = System.getProperty(resourceName, resourceName);
+        return AppLoader.isNestingJar() ? extractResource(resourceName, destinationDir + resourceName) : false;
+    }
+    
     /**
      * saveResourceToFileSystem
      * 
@@ -569,11 +578,11 @@ public class Environment {
      * @return true, if resource was saved. if application wasn't started from jar (perhaps in an ide), it returns
      *         always false.
      */
-    public static final boolean saveResourceToFileSystem(String resourceName) {
+    public static final boolean extractResource(String resourceName) {
         //put build informations into system-properties
         getBuildInformations();
         resourceName = System.getProperty(resourceName, resourceName);
-        return AppLoader.isNestingJar() ? saveResourceToFileSystem(resourceName, resourceName) : false;
+        return AppLoader.isNestingJar() ? extractResource(resourceName, resourceName) : false;
     }
 
     /**
@@ -593,8 +602,9 @@ public class Environment {
      * @param resourceName resource name
      * @return true if new file was created
      */
-    public static final boolean saveResourceToFileSystem(String resourceName, String fileName) {
-        File file = new File(getConfigPath() + fileName);
+    public static final boolean extractResource(String resourceName, String fileName) {
+        File destFile = new File(fileName);
+        File file = destFile.isAbsolute() ? destFile : new File(getConfigPath() + fileName);
         if (!file.exists()) {
             InputStream res = get(ClassLoader.class).getResourceAsStream(resourceName);
             try {
@@ -692,6 +702,10 @@ public class Environment {
         return "dependency loading successfull";
     }
 
+    public static boolean isTestMode() {
+        return Boolean.getBoolean(KEY_TESTMODE);
+    }
+    
     @Persist
     protected void initSerialization() {
         /*

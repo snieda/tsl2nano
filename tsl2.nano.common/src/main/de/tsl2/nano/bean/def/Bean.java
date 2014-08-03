@@ -121,7 +121,7 @@ public class Bean<T> extends BeanDefinition<T> {
     private static final long serialVersionUID = 1192383647173369697L;
 
     private static final Log LOG = LogFactory.getLog(Bean.class);
-    
+
     /** java object instance to evaluate the attributes for - may be null on virtual beans */
     protected T instance;
 
@@ -165,7 +165,9 @@ public class Bean<T> extends BeanDefinition<T> {
     }
 
     /**
-     * unique id for this bean. on persistable beans, it is defined by evaluating {@link #getIdAttribute()} on current instance.
+     * unique id for this bean. on persistable beans, it is defined by evaluating {@link #getIdAttribute()} on current
+     * instance.
+     * 
      * @return unique bean id
      */
     @Override
@@ -173,7 +175,7 @@ public class Bean<T> extends BeanDefinition<T> {
         IAttribute idAttribute = getIdAttribute();
         return idAttribute != null ? idAttribute.getValue(instance) : super.getId();
     }
-    
+
     /**
      * only to be used by framework for performance aspects.
      * 
@@ -615,12 +617,13 @@ public class Bean<T> extends BeanDefinition<T> {
         if (instanceOrName instanceof String) {
             BeanDefinition<I> beandef = (BeanDefinition<I>) getBeanDefinition((String) instanceOrName);
             bean = createBean((I) UNDEFINED, beandef);
-        } else if (instanceOrName.getClass().isArray()){
+        } else if (instanceOrName.getClass().isArray()) {
             bean = createArrayBean(instanceOrName);
         } else if (Map.class.isAssignableFrom(instanceOrName.getClass())) {
             bean = createMapBean(instanceOrName);
         } else {
-            BeanDefinition<I> beandef = getBeanDefinition((Class<I>) instanceOrName.getClass());
+            BeanDefinition<I> beandef =
+                getBeanDefinition((Class<I>) BeanClass.getDefiningClass(instanceOrName.getClass()));
             bean = createBean(instanceOrName, beandef);
         }
 
@@ -648,7 +651,7 @@ public class Bean<T> extends BeanDefinition<T> {
         }
         return bean;
     }
-    
+
     private static Bean createMapBean(Object mapInstance) {
         Map map = (Map) mapInstance;
         Bean bean = new Bean(map);
@@ -658,7 +661,7 @@ public class Bean<T> extends BeanDefinition<T> {
         }
         return bean;
     }
-    
+
     /**
      * attaches the given detacher
      * 
@@ -670,6 +673,7 @@ public class Bean<T> extends BeanDefinition<T> {
 
     /**
      * cleans all bean relevant caches (BeanClass, BeanValue, BeanDefinition, Bean).
+     * 
      * @return amount of cleared objects.
      */
     public static int clearCache() {
@@ -683,8 +687,19 @@ public class Bean<T> extends BeanDefinition<T> {
         }
         return cleared;
     }
+
+    @Override
+    public void onDeactivation() {
+        super.onDeactivation();
+        //if a new object was cancelled, it must be removed
+        if (!isMultiValue()) {
+            detach("remove");
+        }
+    }
+
     /**
-     * runs detacher and sets detacher to null
+     * runs detacher and sets detacher to null. if arguments equals 'remove' this bean will be removed from a parent
+     * list.
      */
     public boolean detach(Object... arguments) {
         timedCache.remove(this);
@@ -753,7 +768,7 @@ class SaveAction<T> extends SecureAction<T> implements Serializable {
     }
 
     public T action() throws Exception {
-        return (T) bean.save(instance);
+        return (T) bean.save();
     }
 
     @Override

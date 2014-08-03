@@ -8,6 +8,10 @@
  */
 package de.tsl2.nano.action;
 
+import java.io.Serializable;
+
+import org.simpleframework.xml.Attribute;
+
 /**
  * Implementors of this interface provide the possibility to check if a component should be active or not. will be used
  * as callback by the tsl2nano framework.
@@ -15,7 +19,7 @@ package de.tsl2.nano.action;
  * @author ts 06.03.2009
  * @version $Revision$
  */
-public interface IActivable {
+public interface IActivable extends Serializable {
 
     /**
      * used as callback by framework to check for activation/enabling. may be called more than one time for refreshings.
@@ -27,9 +31,15 @@ public interface IActivable {
 
     /** {@link #isActive()} will return always true */
     public static final IActivable ACTIVE = new IActivable() {
+        /** serialVersionUID */
+        private static final long serialVersionUID = -8362817368656975730L;
+        //workaround to have at least one member for simple-xml to serialize
+        @Attribute
+        boolean active = true;
+        
         @Override
         public boolean isActive() {
-            return true;
+            return active;
         }
         @Override
         public String toString() {
@@ -39,9 +49,15 @@ public interface IActivable {
 
     /** {@link #isActive()} will return always false */
     public static final IActivable INACTIVE = new IActivable() {
+        /** serialVersionUID */
+        private static final long serialVersionUID = 5470534334831173886L;
+        //workaround to have at least one member for simple-xml to serialize
+        @Attribute
+        boolean active = false;
+        
         @Override
         public boolean isActive() {
-            return false;
+            return active;
         }
         @Override
         public String toString() {

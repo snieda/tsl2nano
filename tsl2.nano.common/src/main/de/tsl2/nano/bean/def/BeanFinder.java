@@ -11,7 +11,9 @@ package de.tsl2.nano.bean.def;
 
 import java.io.Serializable;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.LinkedList;
+import java.util.List;
 
 import org.apache.commons.logging.Log;
 
@@ -37,6 +39,8 @@ public class BeanFinder<T, F> implements IBeanFinder<T, F>, Serializable {
     Bean<IRange<F>> rangeBean;
     /** if no {@link #rangeBean} can be created */
     boolean noRangeBean;
+
+    transient String lastExpression = null;
 
     /** optional detail bean definition to present a selected bean in a detailed mask */
     Bean<T> detailBean;
@@ -87,6 +91,7 @@ public class BeanFinder<T, F> implements IBeanFinder<T, F>, Serializable {
      */
     @Override
     public Collection<T> getData(F fromFilter, F toFilter) {
+        lastExpression = null;
         return superGetData(fromFilter, toFilter);
     }
 
@@ -95,10 +100,20 @@ public class BeanFinder<T, F> implements IBeanFinder<T, F>, Serializable {
      */
     @Override
     public Collection<T> getData() {
-        Bean<IRange<F>> range = getFilterRange();
-        F from = range != null ? range.getInstance().getFrom() : null;
-        F to = range != null ? range.getInstance().getTo() : null;
-        return getData(from, to);
+        if (lastExpression != null) {
+            return getData(lastExpression);
+        } else {
+            Bean<IRange<F>> range = getFilterRange();
+            F from = range != null ? range.getInstance().getFrom() : null;
+            F to = range != null ? range.getInstance().getTo() : null;
+            return getData(from, to);
+        }
+    }
+
+    @Override
+    public Collection<T> getData(String valueExpression) {
+        lastExpression = valueExpression;
+        return null;
     }
 
     /**
@@ -125,13 +140,18 @@ public class BeanFinder<T, F> implements IBeanFinder<T, F>, Serializable {
      * (inline in views or dialogs) and the functional method {@link #superGetData(Object, Object)}. don't call or
      * override this method - it should only be called by the framework.
      */
+    @SuppressWarnings("rawtypes")
     public <S> Collection<T> superGetData(S fromFilter, S toFilter) {
         if (fromFilter == null || toFilter == null) {
-            return new LinkedList<T>(BeanContainer.instance().getBeans(getType(), currentStartIndex,
+            List<T> result = new LinkedList<T>(BeanContainer.instance().getBeans(getType(), currentStartIndex,
                 getMaxResultCount()));
+            Collections.sort(result, BeanDefinition.getBeanDefinition(type).getValueExpression().getComparator());
+            return result;
         } else {
-            return new LinkedList(BeanContainer.instance().getBeansBetween(fromFilter, toFilter, currentStartIndex,
+            List<T> result = new LinkedList(BeanContainer.instance().getBeansBetween(fromFilter, toFilter, currentStartIndex,
                 getMaxResultCount()));
+            Collections.sort(result, BeanDefinition.getBeanDefinition(type).getValueExpression().getComparator());
+            return result;
         }
     }
 
@@ -164,6 +184,7 @@ public class BeanFinder<T, F> implements IBeanFinder<T, F>, Serializable {
     public void setFilterRange(Bean<IRange<F>> rangeBean) {
         this.rangeBean = rangeBean;
         noRangeBean = false;
+        lastExpression = null;
     }
 
     /**
