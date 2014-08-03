@@ -225,8 +225,8 @@ public class ScriptTool implements Serializable {
          * on first time, we copy the scripts like antscripts.xml
          * to the plugin-workspace. we do this to provide user changes on that files!
          */
-        Environment.saveResourceToFileSystem(ANTSCRIPTNAME);
-        Environment.saveResourceToFileSystem(ANTSCRIPTPROP);
+        Environment.extractResource(ANTSCRIPTNAME);
+        Environment.extractResource(ANTSCRIPTPROP);
     }
 
     protected Object executeStatement(String strStmt, boolean pureSQL) throws Exception {

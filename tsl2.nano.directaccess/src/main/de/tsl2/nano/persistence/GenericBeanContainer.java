@@ -63,7 +63,8 @@ public abstract class GenericBeanContainer extends BeanContainerUtil {
             public Collection<?> action() {
                 boolean useLike = parameter[1] instanceof Boolean && ((Boolean) parameter[1]);
                 if (useLike)
-                    return container.getGenService().findByExampleLike(parameter[0], true);
+                    return container.getGenService().findByExampleLike(parameter[0], true, (Integer) parameter[2],
+                        (Integer) parameter[3]);
                 else
                     return container.getGenService().findByExample(parameter[0], true);
             }

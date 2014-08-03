@@ -29,7 +29,7 @@ import de.tsl2.nano.service.util.finder.AbstractFinder;
  * @author ts, Thomas Schneider
  * @version $Revision$
  */
-@SuppressWarnings({"rawtypes", "unchecked"})
+@SuppressWarnings({ "rawtypes", "unchecked" })
 public class FileServiceBean implements IGenericService {
     Map<Class<?>, Collection<?>> entityCache = new Hashtable<Class<?>, Collection<?>>();
 
@@ -92,9 +92,13 @@ public class FileServiceBean implements IGenericService {
      * {@inheritDoc}
      */
     @Override
-    public <T> Collection<T> findByExampleLike(T exampleBean, boolean caseInsensitive, Class... lazyRelations) {
+    public <T> Collection<T> findByExampleLike(T exampleBean,
+            boolean caseInsensitive,
+            int startIndex,
+            int maxResult,
+            Class... lazyRelations) {
         //TODO: constrain result
-        return (Collection<T>) findAll(exampleBean.getClass());
+        return (Collection<T>) findAll(exampleBean.getClass(), startIndex, maxResult);
     }
 
     /**
@@ -126,7 +130,7 @@ public class FileServiceBean implements IGenericService {
     @Override
     public <T> Collection<T> findBetween(T firstBean, T secondBean, boolean caseInsensitive, int startIndex,
 
-    int maxResult, Class... lazyRelations) {
+            int maxResult, Class... lazyRelations) {
         //TODO: constrain result
         return (Collection<T>) findAll(firstBean.getClass());
     }

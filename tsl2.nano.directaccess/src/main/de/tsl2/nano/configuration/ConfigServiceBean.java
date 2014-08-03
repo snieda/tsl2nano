@@ -89,9 +89,9 @@ public class ConfigServiceBean implements IGenericService {
      * {@inheritDoc}
      */
     @Override
-    public <T> Collection<T> findByExampleLike(T exampleBean, boolean caseInsensitive, Class... lazyRelations) {
+    public <T> Collection<T> findByExampleLike(T exampleBean, boolean caseInsensitive, int startIndex, int maxResult, Class... lazyRelations) {
         //TODO: constrain result
-        return (Collection<T>) findAll(exampleBean.getClass());
+        return (Collection<T>) findAll(exampleBean.getClass(), startIndex, maxResult);
     }
 
     /**

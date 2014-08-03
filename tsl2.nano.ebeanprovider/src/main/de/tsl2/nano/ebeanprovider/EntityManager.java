@@ -60,7 +60,7 @@ public class EntityManager extends NanoEntityManagerFactory.AbstractEntityManage
     public EntityManager(Map props) {
         NanoEntityManagerFactory.instance().super(props);
         final String ebeanTemplate = "ebean.properties.tml";
-        Environment.saveResourceToFileSystem(ebeanTemplate);
+        Environment.extractResource(ebeanTemplate);
         Properties ep = new Properties();
         try {
             ep.load(FileUtil.getFile(Environment.getConfigPath() + ebeanTemplate));

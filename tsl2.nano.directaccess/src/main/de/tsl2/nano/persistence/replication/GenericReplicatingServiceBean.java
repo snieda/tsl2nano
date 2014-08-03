@@ -29,10 +29,10 @@ import org.apache.commons.logging.Log;
 
 import de.tsl2.nano.core.Environment;
 import de.tsl2.nano.core.ManagedException;
-import de.tsl2.nano.core.classloader.ThreadUtil;
 import de.tsl2.nano.core.cls.BeanAttribute;
 import de.tsl2.nano.core.cls.BeanClass;
 import de.tsl2.nano.core.log.LogFactory;
+import de.tsl2.nano.core.util.ThreadUtil;
 import de.tsl2.nano.service.util.AbstractStatelessServiceBean;
 import de.tsl2.nano.service.util.GenericServiceBean;
 import de.tsl2.nano.service.util.IGenericBaseService;
