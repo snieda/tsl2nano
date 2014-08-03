@@ -27,6 +27,7 @@ import static de.tsl2.nano.h5.HtmlUtil.ATTR_DISABLED;
 import static de.tsl2.nano.h5.HtmlUtil.ATTR_FORMNOVALIDATE;
 import static de.tsl2.nano.h5.HtmlUtil.ATTR_FORMTARGET;
 import static de.tsl2.nano.h5.HtmlUtil.ATTR_FRAME;
+import static de.tsl2.nano.h5.HtmlUtil.ATTR_HEADERS;
 import static de.tsl2.nano.h5.HtmlUtil.ATTR_HIDDEN;
 import static de.tsl2.nano.h5.HtmlUtil.ATTR_HREF;
 import static de.tsl2.nano.h5.HtmlUtil.ATTR_ID;
@@ -46,6 +47,8 @@ import static de.tsl2.nano.h5.HtmlUtil.ATTR_SRC;
 import static de.tsl2.nano.h5.HtmlUtil.ATTR_STYLE;
 import static de.tsl2.nano.h5.HtmlUtil.ATTR_TITLE;
 import static de.tsl2.nano.h5.HtmlUtil.ATTR_TYPE;
+import static de.tsl2.nano.h5.HtmlUtil.ATTR_TYPE_JS;
+import static de.tsl2.nano.h5.HtmlUtil.ATTR_TYPE_SEARCH;
 import static de.tsl2.nano.h5.HtmlUtil.ATTR_VALUE;
 import static de.tsl2.nano.h5.HtmlUtil.ATTR_WIDTH;
 import static de.tsl2.nano.h5.HtmlUtil.BTN_ASSIGN;
@@ -54,12 +57,14 @@ import static de.tsl2.nano.h5.HtmlUtil.COLOR_BLUE;
 import static de.tsl2.nano.h5.HtmlUtil.COLOR_LIGHT_BLUE;
 import static de.tsl2.nano.h5.HtmlUtil.COLOR_LIGHT_GRAY;
 import static de.tsl2.nano.h5.HtmlUtil.COLOR_RED;
+import static de.tsl2.nano.h5.HtmlUtil.COLOR_WHITE;
 import static de.tsl2.nano.h5.HtmlUtil.STYLE_BACKGROUND_LIGHTGRAY;
 import static de.tsl2.nano.h5.HtmlUtil.STYLE_BACKGROUND_RADIAL_GRADIENT;
 import static de.tsl2.nano.h5.HtmlUtil.STYLE_TEXT_ALIGN;
 import static de.tsl2.nano.h5.HtmlUtil.TAG_BODY;
 import static de.tsl2.nano.h5.HtmlUtil.TAG_BUTTON;
 import static de.tsl2.nano.h5.HtmlUtil.TAG_CELL;
+import static de.tsl2.nano.h5.HtmlUtil.TAG_DIV;
 import static de.tsl2.nano.h5.HtmlUtil.TAG_FONT;
 import static de.tsl2.nano.h5.HtmlUtil.TAG_FORM;
 import static de.tsl2.nano.h5.HtmlUtil.TAG_H3;
@@ -72,6 +77,7 @@ import static de.tsl2.nano.h5.HtmlUtil.TAG_LINK;
 import static de.tsl2.nano.h5.HtmlUtil.TAG_OPTION;
 import static de.tsl2.nano.h5.HtmlUtil.TAG_PRE;
 import static de.tsl2.nano.h5.HtmlUtil.TAG_ROW;
+import static de.tsl2.nano.h5.HtmlUtil.TAG_SCRIPT;
 import static de.tsl2.nano.h5.HtmlUtil.TAG_SELECT;
 import static de.tsl2.nano.h5.HtmlUtil.TAG_SPAN;
 import static de.tsl2.nano.h5.HtmlUtil.TAG_TABLE;
@@ -82,6 +88,8 @@ import static de.tsl2.nano.h5.HtmlUtil.VAL_ALIGN_CENTER;
 import static de.tsl2.nano.h5.HtmlUtil.VAL_ALIGN_LEFT;
 import static de.tsl2.nano.h5.HtmlUtil.VAL_ALIGN_RIGHT;
 import static de.tsl2.nano.h5.HtmlUtil.VAL_FRM_SELF;
+import static de.tsl2.nano.h5.HtmlUtil.VAL_OPAC;
+import static de.tsl2.nano.h5.HtmlUtil.VAL_TRANSPARENT;
 import static de.tsl2.nano.h5.HtmlUtil.appendElement;
 import static de.tsl2.nano.h5.HtmlUtil.enable;
 import static de.tsl2.nano.h5.HtmlUtil.style;
@@ -113,7 +121,6 @@ import de.tsl2.nano.action.IAction;
 import de.tsl2.nano.bean.BeanUtil;
 import de.tsl2.nano.bean.IValueAccess;
 import de.tsl2.nano.bean.ValueHolder;
-import de.tsl2.nano.bean.def.Attachment;
 import de.tsl2.nano.bean.def.AttributeDefinition;
 import de.tsl2.nano.bean.def.Bean;
 import de.tsl2.nano.bean.def.BeanCollector;
@@ -137,7 +144,6 @@ import de.tsl2.nano.core.ManagedException;
 import de.tsl2.nano.core.Messages;
 import de.tsl2.nano.core.cls.BeanClass;
 import de.tsl2.nano.core.cls.IAttribute;
-import de.tsl2.nano.core.exception.Message;
 import de.tsl2.nano.core.log.LogFactory;
 import de.tsl2.nano.core.util.BitUtil;
 import de.tsl2.nano.core.util.DateUtil;
@@ -177,6 +183,8 @@ public class Html5Presentation<T> extends BeanPresentationHelper<T> implements I
     public static final String PREFIX_ACTION = PREFIX_BEANREQUEST + "!!!";
     /** indicator for server to handle a link, that was got as link (method=GET) not as a file */
     public static final String PREFIX_BEANLINK = PREFIX_BEANREQUEST + "--)";
+
+    public static final String ID_QUICKSEARCH_FIELD = "field.quicksearch";
 
     final String MSG_FOOTER = "progress";
 
@@ -249,7 +257,7 @@ public class Html5Presentation<T> extends BeanPresentationHelper<T> implements I
                                 public Object action() throws Exception {
                                     String name =
                                         tool.getSourceFile() != null ? tool.getSourceFile().toLowerCase() : FileUtil
-                                            .getValidFileName(tool.getText());
+                                            .getValidFileName(tool.getText().replace('.', '_'));
                                     Query query =
                                         new Query(name, tool.getText(), tool.getSelectedAction().getId()
                                             .equals("scripttool.sql.id"),
@@ -279,12 +287,14 @@ public class Html5Presentation<T> extends BeanPresentationHelper<T> implements I
                     "icons/images_all.png") {
                     @Override
                     public Object action() throws Exception {
-                        String dir = Environment.getConfigPath();
+                        String dir = System.getProperty("user.dir") + "/sample/";
+                        new File(dir).mkdirs();
                         //the common-jar will be used by ant-scripts...
-                        Environment.saveResourceToFileSystem(NanoH5.JAR_COMMON);
-                        Environment.saveResourceToFileSystem(NanoH5.JAR_INCUBATION);
+                        Environment.extractResourceToDir(NanoH5.JAR_COMMON, dir);
+                        Environment.extractResourceToDir(NanoH5.JAR_INCUBATION, dir);
                         FileUtil.extractNestedZip("tsl2.nano.h5.sample.jar", dir, null);
-                        return "Sample code and database created. Please re-start application!";
+                        FileUtil.writeBytes("call run.bat sample 8070".getBytes(), System.getProperty("user.dir") + "/sample.bat", false);
+                        return "Sample code and database created.\nPlease replace 'tsl2.nano.h5.jar/META-INF/MANIFEST.MF' with 'sample/META-INF/MANIFEST.MF' and start the new sample batch file...";
                     }
                 });
             }
@@ -334,6 +344,8 @@ public class Html5Presentation<T> extends BeanPresentationHelper<T> implements I
         Element body = createHeader(session, name, image, interactive);
         return appendElement(body,
             TAG_FORM,
+            ATTR_ID,
+            "page.form",
             ATTR_ACTION,
             "?",
             ATTR_METHOD,
@@ -410,9 +422,12 @@ public class Html5Presentation<T> extends BeanPresentationHelper<T> implements I
             if (interactive && bean != null) {
                 if (useCSS) {
                     Element menu = createMenu(c3, "Menu");
-                    createSubMenu(menu, "Application", "iconic home", getApplicationActions(session));
-                    createSubMenu(menu, "Session", "iconic map-pin", getSessionActions(session));
-                    createSubMenu(menu, "Page", "iconic magnifying-glass", getPageActions());
+                    createSubMenu(menu, Environment.translate("tsl2nano.application", true), "iconic home",
+                        getApplicationActions(session));
+                    createSubMenu(menu, Environment.translate("tsl2nano.session", true), "iconic map-pin",
+                        getSessionActions(session));
+                    createSubMenu(menu, Environment.translate("tsl2nano.page", true), "iconic magnifying-glass",
+                        getPageActions());
                 } else {
                     c3 = appendElement(c3,
                         TAG_FORM,
@@ -445,7 +460,8 @@ public class Html5Presentation<T> extends BeanPresentationHelper<T> implements I
         /*
          * WebSocket integration
          */
-        createWebSocket(session, head, MSG_FOOTER);
+        if (interactive)
+            createWebSocket(session, head, MSG_FOOTER);
 
         /*
          * The body
@@ -509,7 +525,8 @@ public class Html5Presentation<T> extends BeanPresentationHelper<T> implements I
             }
         }
 
-        if (navigation.length > 0) {
+        //navigation bar
+        if (interactive && navigation.length > 0) {
             Element link;
             for (BeanDefinition<?> bean : navigation) {
                 link = appendElement(parent, TAG_LINK, ATTR_HREF, PREFIX_BEANLINK
@@ -527,9 +544,10 @@ public class Html5Presentation<T> extends BeanPresentationHelper<T> implements I
             createBean(parent, (Bean<?>) bean, interactive);
         }
         if (isRoot) {
-            if (interactive)
+            if (interactive) {
                 createBeanActions((Element) parent, bean);
-            createFooter(((Element) parent).getOwnerDocument(), message);
+                createFooter(((Element) parent).getOwnerDocument(), message);
+            }
         }
         return parent;
     }
@@ -545,7 +563,7 @@ public class Html5Presentation<T> extends BeanPresentationHelper<T> implements I
             VAL_100PERCENT,
             ATTR_BGCOLOR,
             COLOR_LIGHT_BLUE,
-            "sortable");
+            enable("sortable", true));
 //        if (Environment.get("html5.table.show.caption", false))
 //            appendElement(table, "caption", content(title));
         if (controller.getPresentable() != null)
@@ -658,7 +676,7 @@ public class Html5Presentation<T> extends BeanPresentationHelper<T> implements I
     }
 
     private Element createExpandable(Element parent, String title) {
-        parent = appendElement(parent, "details", "open");
+        parent = appendElement(parent, "details", enable("open", true));
         appendElement(parent, "summary", content(title), ATTR_ALIGN, "left", ATTR_STYLE, "color: #6666FF;");
         return parent;
     }
@@ -683,6 +701,12 @@ public class Html5Presentation<T> extends BeanPresentationHelper<T> implements I
             bean.selectFirstElement();
 
         /*
+         * append a quick search panel
+         */
+        if (interactive)
+            createQuickSearchPanel(parent, bean.getValueExpression().getExpression(), bean.getQuickSearchAction());
+
+        /*
          * create the column header
          */
         bean.addMode(MODE_MULTISELECTION);
@@ -693,8 +717,9 @@ public class Html5Presentation<T> extends BeanPresentationHelper<T> implements I
         else
             grid = createGrid(parent, bean.toString(), "collector.table", false, getColumnNames(bean));
         //fallback: setting style from environment-properties
-        HtmlUtil.appendAttributes(grid, ATTR_STYLE, Environment.get("beancollector.grid.style", "background: transparent, border: 10"));
-        
+        HtmlUtil.appendAttributes(grid, ATTR_STYLE,
+            Environment.get("beancollector.grid.style", "background: transparent, border: 10"));
+
         appendAttributes(grid, bean.getPresentable());
 
         if (interactive && bean.hasMode(IBeanCollector.MODE_SEARCHABLE)) {
@@ -706,6 +731,19 @@ public class Html5Presentation<T> extends BeanPresentationHelper<T> implements I
             createTableContent(grid, bean, bean.getBeanFinder().getData(), interactive);
 
         return grid;
+    }
+
+    private void createQuickSearchPanel(Element parent, String tooltip, IAction<?> action) {
+//        parent = appendElement(parent, TAG_FORM);
+        parent = appendElement(parent, TAG_DIV, ATTR_ALIGN, VAL_ALIGN_RIGHT);
+        Element input =
+            appendElement(parent, TAG_INPUT, ATTR_ID, ID_QUICKSEARCH_FIELD, ATTR_NAME, ID_QUICKSEARCH_FIELD, ATTR_TYPE,
+                ATTR_TYPE_SEARCH, ATTR_TITLE, tooltip, "tabindex", ++currentTabIndex + "");
+        if (Environment.get("websocket.use.inputassist", true)) {
+            HtmlUtil.appendAttributes(input, "onkeypress",
+                Environment.get("websocket.inputassist.function", "inputassist(event)"));
+        }
+        createAction(parent, action);
     }
 
     /**
@@ -775,7 +813,7 @@ public class Html5Presentation<T> extends BeanPresentationHelper<T> implements I
             TAG_CELL,
             content(tableDescriptor.getSummary()),
             "colspan",
-            String.valueOf(tableDescriptor.getColumnDefinitions().size() + 1));
+            String.valueOf(tableDescriptor.getColumnDefinitions().size() + 1), ATTR_BGCOLOR, COLOR_LIGHT_GRAY);
     }
 
     /**
@@ -949,7 +987,11 @@ public class Html5Presentation<T> extends BeanPresentationHelper<T> implements I
             boolean formnovalidate) {
         String name = label != null ? label : tooltip;
         int isc = name.indexOf('&') + 1;
-        String sc = shortcut != null ? shortcut.toString() : name.substring(isc, isc + 1).toLowerCase();
+        String sc;
+        if (shortcut != null)
+            sc = shortcut.toString();
+        else
+            sc = isc > 0 ? name.substring(isc, isc + 1).toLowerCase() : "?";
         label = Messages.stripMnemonics(label);
         tooltip = tooltip + " (ALT+" + sc + ")";
         Element action = appendElement(cell,
@@ -1004,7 +1046,7 @@ public class Html5Presentation<T> extends BeanPresentationHelper<T> implements I
             VAL_100PERCENT,
             ATTR_BGCOLOR,
             COLOR_LIGHT_BLUE,
-            "sortable");
+            enable("sortable", true));
         if (Environment.get("html5.table.show.caption", false))
             appendElement(table, "caption", content(title));
         Element head = appendElement(table, "thead");
@@ -1028,7 +1070,7 @@ public class Html5Presentation<T> extends BeanPresentationHelper<T> implements I
             COLOR_LIGHT_BLUE,*/
             ATTR_STYLE,
             VAL_TRANSPARENT,
-            "sortable");
+            enable("sortable", true));
         if (Environment.get("html5.table.show.caption", false))
             appendElement(table, "caption", content(title));
         Element head = appendElement(table, "thead");
@@ -1098,7 +1140,9 @@ public class Html5Presentation<T> extends BeanPresentationHelper<T> implements I
         for (IPresentableColumn c : colDefs) {
             value = tableDescriptor.getColumnText((T) item, c.getIndex());
             cell =
-                appendElement(row, TAG_CELL, content(value), ATTR_TITLE, itemBean.toString() + ": " + c.getName(), ATTR_HEADERS, c.getIndex() + ":" + c.getName(), ATTR_ID,
+                appendElement(row, TAG_CELL, content(value), ATTR_TITLE,
+                    itemBean.toString() + ": " + Environment.translate(c.getName(), true),
+                    ATTR_HEADERS, c.getIndex() + ":" + c.getName(), ATTR_ID,
                     tableDescriptor.getId() + "[" + currentTabIndex
                         + ", " + c.getIndex() + "]");
             if (c.getPresentable() != null)
@@ -1130,7 +1174,7 @@ public class Html5Presentation<T> extends BeanPresentationHelper<T> implements I
         Collection<IPresentableColumn> colDefs = tableDescriptor.getColumnDefinitionsIndexSorted();
         for (IPresentableColumn c : colDefs) {
             String value = tableDescriptor.getColumnText(element, c.getIndex());
-            Element cell0 = appendElement(row, TAG_CELL, ATTR_STYLE, VAL_OPAC);
+            Element cell0 = appendElement(row, TAG_CELL);
             Element cell = appendElement(cell0, TAG_SPAN);
             appendElement(cell,
                 TAG_INPUT,
@@ -1140,11 +1184,9 @@ public class Html5Presentation<T> extends BeanPresentationHelper<T> implements I
                 ATTR_NAME,
                 rowName + "." + c.getName(),
                 ATTR_TYPE,
-                "search",
+                ATTR_TYPE_SEARCH,
                 ATTR_BGCOLOR,
                 COLOR_WHITE,
-                ATTR_STYLE,
-                VAL_OPAC,
                 "tabindex",
                 ++currentTabIndex + "",
                 ATTR_VALUE,
@@ -1197,14 +1239,17 @@ public class Html5Presentation<T> extends BeanPresentationHelper<T> implements I
         //first the label
         Element cellLabel = appendElement(row, TAG_CELL);
         if (beanValue.getDescription() != null) {
+            if (p.getIcon() != null) {
+                appendElement(cellLabel, TAG_IMAGE, ATTR_SRC, p.getIcon());
+            }
             appendElement(cellLabel,
                 TAG_FONT,
-                content(beanValue.getDescription() + (beanValue.nullable() ? "" : " (*)")),
+                content(beanValue.getDescription() + (beanValue.nullable() ? "" : beanValue.generatedValue() ? " (!)" : " (*)")),
                 ATTR_COLOR,
-                (String) BeanUtil.valueOf(beanValue.getPresentation().getBackground(),
+                (String) BeanUtil.valueOf(p.getBackground(),
                     Environment.get("default.attribute.label.color", "#0000cc")),
-                enable(ATTR_HIDDEN, !p.isVisible()),
-                enable(ATTR_REQUIRED, !beanValue.nullable()));
+                enableFlag(ATTR_HIDDEN, !p.isVisible()),
+                enableFlag(ATTR_REQUIRED, !beanValue.nullable() && !beanValue.generatedValue()));
         }
         //create the layout and layout-constraints
         Element cell = appendElement(row, TAG_CELL);
@@ -1253,10 +1298,10 @@ public class Html5Presentation<T> extends BeanPresentationHelper<T> implements I
                         + (LOG.isDebugEnabled() ? "\n\n" + "<![CDATA[" + beanValue.toDebugString() + "]]>" : ""),
                     "tabindex",
                     p.layout("tabindex", ++currentTabIndex).toString(),
-                    enable(ATTR_HIDDEN, !p.isVisible()),
-                    enable(ATTR_DISABLED, !interactive || !p.getEnabler().isActive()),
-                    enable(ATTR_READONLY, !interactive || !p.getEnabler().isActive()),
-                    enable(ATTR_REQUIRED, !beanValue.nullable()));
+                    enableFlag(ATTR_HIDDEN, !p.isVisible()),
+                    enableFlag(ATTR_DISABLED, !interactive || !p.getEnabler().isActive()),
+                    enableFlag(ATTR_READONLY, !interactive || !p.getEnabler().isActive()),
+                    enableFlag(ATTR_REQUIRED, !beanValue.nullable() && !beanValue.generatedValue()));
 
             if (multiLineText) {
                 HtmlUtil.appendAttributes(input, ATTR_ROWS, p.layout("rows", "5"), ATTR_COLS, p.layout("cols", "50"),
@@ -1272,7 +1317,7 @@ public class Html5Presentation<T> extends BeanPresentationHelper<T> implements I
                             beanValue.getName() + IPresentable.POSTFIX_SELECTOR,
                             Environment.translate("tsl2nano.finder.action.label", false),
                             Environment.translate("tsl2nano.selection", true),
-                            Environment.translate("tsl2nano.select", true),
+                            null,
                             shortcut,
                             null,
                             beanValue.hasWriteAccess(),
@@ -1282,7 +1327,7 @@ public class Html5Presentation<T> extends BeanPresentationHelper<T> implements I
 
                     }
                     //perhaps create an input assist listener
-                    if (p.getInputAssist() != null) {
+                    if (beanValue.getValueExpression() != null && Environment.get("websocket.use.inputassist", true)) {
                         HtmlUtil.appendAttributes(input, "onkeypress",
                             Environment.get("websocket.inputassist.function", "inputassist(event)"));
                     }
@@ -1443,9 +1488,9 @@ public class Html5Presentation<T> extends BeanPresentationHelper<T> implements I
                     : null),
                 "tabindex",
                 beanValue.getPresentation().layout("tabindex", ++currentTabIndex).toString(),
-                enable(ATTR_HIDDEN, !beanValue.getPresentation().isVisible()),
-                enable(ATTR_READONLY, !beanValue.getPresentation().getEnabler().isActive()),
-                enable(ATTR_REQUIRED, !beanValue.nullable()));
+                enableFlag(ATTR_HIDDEN, !beanValue.getPresentation().isVisible()),
+                enableFlag(ATTR_READONLY, !beanValue.getPresentation().getEnabler().isActive()),
+                enableFlag(ATTR_REQUIRED, !beanValue.nullable()));
         Collection<?> values = beanValue.getConstraint().getAllowedValues();
         Object selected = beanValue.getValue();
         String content, id;

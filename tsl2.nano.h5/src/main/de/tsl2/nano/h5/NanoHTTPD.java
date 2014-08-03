@@ -28,8 +28,8 @@ import java.util.Vector;
 
 import de.tsl2.nano.core.Environment;
 import de.tsl2.nano.core.Main;
-import de.tsl2.nano.core.classloader.ThreadUtil;
 import de.tsl2.nano.core.util.FileUtil;
+import de.tsl2.nano.core.util.ThreadUtil;
 
 /**
  * A simple, tiny, nicely embeddable HTTP 1.0 (partially 1.1) server in Java

@@ -59,6 +59,7 @@ import de.tsl2.nano.core.util.NetUtil;
 import de.tsl2.nano.core.util.StringUtil;
 import de.tsl2.nano.format.RegExpFormat;
 import de.tsl2.nano.h5.NanoHTTPD.Response;
+import de.tsl2.nano.h5.configuration.BeanConfigurator;
 import de.tsl2.nano.h5.navigation.IBeanNavigator;
 import de.tsl2.nano.h5.websocket.NanoWebSocketServer;
 import de.tsl2.nano.h5.websocket.WebSocketExceptionHandler;
@@ -84,7 +85,7 @@ public class NanoH5Session implements ISession {
     Response response;
     /** concatencation of database-name+schema+beans.jar */
     String context;
-    
+
     /** sessions classloader */
     ClassLoader sessionClassloader;
     /** requests user internet adress */
@@ -92,7 +93,7 @@ public class NanoH5Session implements ISession {
 
     /** port of websocket, if used */
     int websocketPort;
-    
+
     /** sessions exceptionHandler */
     ExceptionHandler exceptionHandler;
 
@@ -103,7 +104,7 @@ public class NanoH5Session implements ISession {
     private long sessionStart;
 
     private IAuthorization authorization;
-    
+
     public static final String PREFIX_STATUS_LINE = "@";
 
     /**
@@ -246,6 +247,10 @@ public class NanoH5Session implements ISession {
         server.sessions.remove(inetAddress);
         nav = null;
         response = null;
+        authorization = null;
+        builder = null;
+        authorization = null;
+        sessionClassloader = null;
     }
 
     String createStatusText(long startTime) {
@@ -297,9 +302,15 @@ public class NanoH5Session implements ISession {
 //        }
         Object responseObject = null;
         if (parms.containsKey(IAction.CANCELED)) {
-            //if a new object was cancelled, it must be removed
-            if (nav.current() != null && !nav.current().isMultiValue()) {
-                ((Bean) nav.current()).detach("remove");
+            if (nav.current() != null) {
+                ((BeanDefinition) nav.current()).onDeactivation();
+
+                //perhaps remove configuration bean
+                BeanConfigurator configurator = Environment.get(BeanConfigurator.class);
+                if (configurator != null
+                    && ((BeanDefinition) nav.current()).getDeclaringClass().equals(BeanConfigurator.class)) {
+                    Environment.removeService(BeanConfigurator.class);
+                }
             }
             return IAction.CANCELED;
         }
@@ -321,8 +332,11 @@ public class NanoH5Session implements ISession {
                 BeanCollector collector = (BeanCollector) nav.current();
                 Collection data = collector.getBeanFinder().getData();
                 ListSet listSet = CollectionUtil.asListSet(data);
-                responseObject =
-                    new Bean(listSet.get(uriLinkNumber.intValue() - (collector.hasFilter() ? 2 : 0)));
+                Object selectedItem =
+                    listSet.get(uriLinkNumber.intValue()
+                        - (collector.hasMode(MODE_SEARCHABLE) && collector.hasFilter() ? 2 : 0));
+                boolean isTypeList = BeanCollector.class.isAssignableFrom(collector.getClazz());
+                responseObject = isTypeList ? selectedItem : Bean.getBean((Serializable) selectedItem);
                 return responseObject;
             } else {
                 if (!isCanceled(parms)
@@ -352,6 +366,7 @@ public class NanoH5Session implements ISession {
             actions.addAll(c.getPresentationHelper().getApplicationActions(this));
             if (c.isMultiValue()) {
                 actions.addAll(((BeanCollector) c).getColumnSortingActions());
+                actions.add(((BeanCollector) c).getQuickSearchAction());
             }
             //start the actions
             //respect action-call through menu-link (with method GET but starting with '!!!'
@@ -363,16 +378,17 @@ public class NanoH5Session implements ISession {
                 String p = (String) k;
                 IAction<?> action = getAction(actions, p);
                 if (action != null) {
-                    if (c.isMultiValue()
+                    //send this information to the client to show a progress bar.
+                    Message.send("submit");
+                    Message.send(Environment.translate("tsl2nano.starting", true) + " "
+                        + action.getShortDescription() + " ...");
+                    if (c.isMultiValue() && action.getId().endsWith(BeanCollector.POSTFIX_QUICKSEARCH)) {
+                        action.setParameter(parms.get(Html5Presentation.ID_QUICKSEARCH_FIELD));
+                        responseObject = action.activate();
+                    } else if (c.isMultiValue()
                         && isSearchRequest(action.getId(), (BeanCollector<?, ?>) c)) {
-                        Message.send(Environment.translate("tsl2nano.starting", true) + " "
-                            + action.getShortDescription() + " ...");
                         responseObject = processSearchRequest(parms, (BeanCollector<?, ?>) c);
                     } else {
-                        //send this information to the client to show a progress bar.
-                        Message.send("submit");
-                        Message.send(Environment.translate("tsl2nano.starting", true) + " "
-                                + action.getShortDescription() + " ...");
                         /*
                          * submit/assign and cancel will not push a new element to the navigation stack!
                          * TODO: refactore access to names ('reset' and 'save')
@@ -397,11 +413,13 @@ public class NanoH5Session implements ISession {
                             return responseObject;
                         }
                     }
+                    break;
                 } else {
                     if (p.endsWith(IPresentable.POSTFIX_SELECTOR)) {
                         String n = StringUtil.substring(p, null, IPresentable.POSTFIX_SELECTOR);
                         final BeanValue assignableAttribute = (BeanValue) c.getAttribute(n);
                         responseObject = assignableAttribute.connectToSelector(c);
+                        break;
                     }
                 }
             }
@@ -638,7 +656,7 @@ public class NanoH5Session implements ISession {
     public Object getContext() {
         return context;
     }
-    
+
     @Override
     public ClassLoader getSessionClassLoader() {
         return sessionClassloader;
@@ -663,7 +681,7 @@ public class NanoH5Session implements ISession {
     public IAuthorization getUserAuthorization() {
         return authorization;
     }
-    
+
     public Object getWorkingObject() {
         return nav.current();
     }

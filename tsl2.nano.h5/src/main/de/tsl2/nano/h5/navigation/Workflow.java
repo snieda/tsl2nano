@@ -9,6 +9,7 @@
  */
 package de.tsl2.nano.h5.navigation;
 
+import java.io.Serializable;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
@@ -16,9 +17,11 @@ import java.util.Stack;
 
 import org.simpleframework.xml.Attribute;
 import org.simpleframework.xml.ElementList;
+import org.simpleframework.xml.Transient;
 import org.simpleframework.xml.core.Commit;
 
 import de.tsl2.nano.bean.def.Bean;
+import de.tsl2.nano.bean.def.BeanCollector;
 import de.tsl2.nano.bean.def.BeanDefinition;
 import de.tsl2.nano.core.Messages;
 import de.tsl2.nano.core.util.StringUtil;
@@ -32,16 +35,18 @@ import de.tsl2.nano.incubation.vnet.Notification;
  * @author Tom, Thomas Schneider
  * @version $Revision$
  */
-public class Workflow extends EntityBrowser {
+public class Workflow extends EntityBrowser implements Serializable, Cloneable {
+    /** serialVersionUID */
+    private static final long serialVersionUID = 4073303598764074543L;
     @Attribute
     String name;
-    transient Net<BeanAct, Parameter> net;
+    @Transient Net<BeanAct, Parameter> net;
     @ElementList(entry = "activity", inline = true, required = true)
     Collection<BeanAct> activities;
-    transient Map<String, BeanDefinition<?>> cache;
-    transient Bean<?> login;
-    transient String asString;
-    transient Parameter context = new Parameter();
+    @Transient Map<String, BeanDefinition<?>> cache;
+    @Transient Bean<?> login;
+    @Transient String asString;
+    @Transient Parameter context = new Parameter();
 
     /**
      * constructor
@@ -94,8 +99,13 @@ public class Workflow extends EntityBrowser {
         } else if (!super.isEmpty() && (fromStack = super.next(userResponseObject)) != null) {
             return fromStack;
         } else {
-            Object entity = userResponseObject instanceof Bean ? ((Bean) userResponseObject).getInstance()
-                : userResponseObject;
+            Object entity =
+                userResponseObject instanceof Bean ? ((Bean) userResponseObject).getInstance()
+                    : userResponseObject instanceof BeanCollector ? ((BeanCollector) userResponseObject)
+                        .getCurrentData() : userResponseObject;
+            /*
+             * send the response to the net of beanacts to evaluate the next navigation pages
+             */
             context.put("response", entity);
             Notification n = new Notification(null, context);
             Collection<BeanDefinition> result = net.notifyAndCollect(n, BeanDefinition.class);
@@ -141,6 +151,11 @@ public class Workflow extends EntityBrowser {
         net.addAll(activities);
     }
 
+    @Override
+    public Workflow clone() throws CloneNotSupportedException {
+        return new Workflow(name, activities);
+    }
+    
     @Override
     public String toString() {
         if (asString == null) {

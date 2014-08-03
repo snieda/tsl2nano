@@ -36,6 +36,7 @@ import org.java_websocket.server.WebSocketServer.WebSocketServerFactory;
 import de.tsl2.nano.action.IAction;
 import de.tsl2.nano.action.IActivable;
 import de.tsl2.nano.bean.BeanContainer;
+import de.tsl2.nano.bean.BeanUtil;
 import de.tsl2.nano.bean.IBeanContainer;
 import de.tsl2.nano.bean.def.AbstractExpression;
 import de.tsl2.nano.bean.def.AttributeDefinition;
@@ -47,6 +48,7 @@ import de.tsl2.nano.bean.def.BeanValue;
 import de.tsl2.nano.bean.def.IPageBuilder;
 import de.tsl2.nano.bean.def.IPresentable;
 import de.tsl2.nano.bean.def.SecureAction;
+import de.tsl2.nano.bean.def.ValueExpression;
 import de.tsl2.nano.collection.MapUtil;
 import de.tsl2.nano.core.AppLoader;
 import de.tsl2.nano.core.Environment;
@@ -149,13 +151,13 @@ public class NanoH5 extends NanoHTTPD implements IConnector<Persistence> {
             LOG.info(System.getProperties());
             createStartPage();
 
-            Environment.saveResourceToFileSystem("run.bat", "../run.bat");
-            Environment.saveResourceToFileSystem("shell.xml");
-            Environment.saveResourceToFileSystem("mda.bat");
-            Environment.saveResourceToFileSystem("mda.xml");
-            Environment.saveResourceToFileSystem("mda.properties");
-            Environment.saveResourceToFileSystem("beandef.xsd");
-            Environment.saveResourceToFileSystem("favicon.ico", "../favicon.ico");
+            Environment.extractResourceToDir("run.bat", "../");
+            Environment.extractResource("shell.xml");
+            Environment.extractResource("mda.bat");
+            Environment.extractResource("mda.xml");
+            Environment.extractResource("mda.properties");
+            Environment.extractResource("beandef.xsd");
+            Environment.extractResourceToDir("favicon.ico", "../");
             String dir = Environment.getConfigPath();
             File icons = new File(dir + "icons");
             if (!icons.exists()) {
@@ -216,7 +218,8 @@ public class NanoH5 extends NanoHTTPD implements IConnector<Persistence> {
         startPage = StringUtil.insertProperties(startPage,
             MapUtil.asMap("url", serviceURL, "text", Environment.getName()));
         String page =
-            Html5Presentation.createMessagePage("start.template", "Start " + Environment.getName() + "App", serviceURL);
+            Html5Presentation.createMessagePage("start.template", Environment.translate("tsl2nano.start", true) + " "
+                + Environment.getName(), serviceURL);
         FileUtil.writeBytes(page.getBytes(), resultHtmlFile, false);
         return page;
     }
@@ -237,6 +240,7 @@ public class NanoH5 extends NanoHTTPD implements IConnector<Persistence> {
             session = createSession(requestor);
         } else {//perhaps session was interrupted/closed but not removed
             if (session.nav == null || session.nav.isEmpty()) {
+                session.close();
                 sessions.remove(session.inetAddress);
                 session = createSession(requestor);
             }
@@ -269,16 +273,23 @@ public class NanoH5 extends NanoHTTPD implements IConnector<Persistence> {
      */
     protected NanoH5Session createSession(InetAddress inetAddress) {
         LOG.info("creating new session on socket: " + inetAddress);
-        NanoH5Session session = new NanoH5Session(this,
-            inetAddress,
-            createGenericNavigationModel(),
-            Environment.get(ClassLoader.class), null, createSesionContext());
-        sessions.put(inetAddress, session);
-        return session;
+        try {
+            NanoH5Session session = new NanoH5Session(this,
+                inetAddress,
+                createGenericNavigationModel(),
+                Environment.get(ClassLoader.class), null, createSesionContext());
+            sessions.put(inetAddress, session);
+            return session;
+        } catch (Throwable e) {
+            //to avoid an application halt without error message, we catch all to re-throw and log.
+            ManagedException.forward(e);
+            return null;
+        }
     }
 
     /**
      * createSesionContext
+     * 
      * @return data specific context name
      */
     private String createSesionContext() {
@@ -320,6 +331,12 @@ public class NanoH5 extends NanoHTTPD implements IConnector<Persistence> {
             }
             return new EntityBrowser(navigationModel);
         } else {
+            //create a copy for the new session
+            try {
+                workflow = workflow.clone();
+            } catch (CloneNotSupportedException e) {
+                ManagedException.forward(e);
+            }
             if (Environment.get("use.gui.login", true)) {
                 workflow.setLogin(login);
             } else {
@@ -343,6 +360,7 @@ public class NanoH5 extends NanoHTTPD implements IConnector<Persistence> {
                 "connectionDriverClass", "jarFile", "provider", "datasourceClass", "jtaDataSource", "transactionType",
                 "persistenceUnit", "hibernateDialect", "database", "defaultSchema", "port", "replication",
                 "jdbcProperties");
+            login.setValueExpression(new ValueExpression<Persistence>("{connectionUrl}"));
         }
         if (login.toString().matches(Environment.get("default.present.attribute.multivalue", ".*")))
             login.removeAttributes("jdbcProperties");
@@ -552,16 +570,16 @@ public class NanoH5 extends NanoHTTPD implements IConnector<Persistence> {
                 FileUtil.copy(attFile.getPath(), persistence.jarFileInEnvironment());
             }
             selectedFile =
-                    new File(Environment.getConfigPath()
-                        + FileUtil.getURIFile(jarName).getPath());
+                new File(Environment.getConfigPath()
+                    + FileUtil.getURIFile(jarName).getPath());
         }
         jarName = selectedFile.getPath();
         if (!selectedFile.exists() && !isAbsolutePath) {
             //ant-scripts can't use the nested jars. but normal beans shouldn't have dependencies to simple-xml.
-            Environment.saveResourceToFileSystem(JAR_SIMPLEXML);
-            Environment.saveResourceToFileSystem(JAR_COMMON);
-            Environment.saveResourceToFileSystem(JAR_DIRECTACCESS);
-            Environment.saveResourceToFileSystem(JAR_SERVICEACCESS);
+            Environment.extractResource(JAR_SIMPLEXML);
+            Environment.extractResource(JAR_COMMON);
+            Environment.extractResource(JAR_DIRECTACCESS);
+            Environment.extractResource(JAR_SERVICEACCESS);
 
             Environment.loadClassDependencies("org.apache.tools.ant.taskdefs.Taskdef",
                 "org.hibernate.tool.ant.HibernateToolTask", persistence.getConnectionDriverClass());
@@ -621,8 +639,8 @@ public class NanoH5 extends NanoHTTPD implements IConnector<Persistence> {
         final String HIBTOOLNAME = "hibtool.xml";
         /** hibernate reverse engeneer configuration */
         final String HIBREVNAME = "hibernate.reveng.xml";
-        Environment.saveResourceToFileSystem(HIBTOOLNAME);
-        Environment.saveResourceToFileSystem(HIBREVNAME);
+        Environment.extractResource(HIBTOOLNAME);
+        Environment.extractResource(HIBREVNAME);
         Properties properties = new Properties();
         properties.setProperty(HIBREVNAME, Environment.getConfigPath() + HIBREVNAME);
 //    properties.setProperty("hbm.conf.xml", "hibernate.conf.xml");

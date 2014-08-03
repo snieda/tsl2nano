@@ -79,14 +79,18 @@ public class BeanAct extends Act<BeanDefinition<?>> {
         Collection<Object> entities = BeanContainer.instance().getBeansByQuery(expression, false, getArguments());
         if (entities == null || entities.isEmpty()) {
             parameter.put(getName() + ".size", 0);
+            LOG.info("activity returned with context:\n\t" + parameter);
             return null;
         } else if (entities.size() > 1) {
             parameter.put(getName() + ".size", entities.size());
+            parameter.put(getName(), entities);
+            LOG.info("activity returned with context:\n\t" + parameter);
             return BeanCollector.getBeanCollector(entities, BeanCollector.MODE_ALL);
         } else {
             Object e = entities.iterator().next();
             parameter.put(getName() + ".size", entities.size());
             parameter.put(getName(), e);
+            LOG.info("activity returned with context:\n\t" + parameter);
             return Bean.getBean((Serializable) e);
         }
     }

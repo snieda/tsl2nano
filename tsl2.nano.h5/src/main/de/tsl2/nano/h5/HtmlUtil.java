@@ -26,6 +26,7 @@ import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 
 import de.tsl2.nano.core.ManagedException;
+import de.tsl2.nano.core.util.StringUtil;
 import de.tsl2.nano.core.util.Util;
 
 /**
@@ -50,6 +51,9 @@ public class HtmlUtil {
     public static final String TAG_FORM = "form";
     public static final String ATTR_ACTION = "action";
     public static final String ATTR_METHOD = "method";
+
+    public static final String TAG_DIV = "div";
+    public static final String TAG_STYLE = "style";
 
     public static final String TAG_INPUT = "input";
     public static final String ATTR_TYPE = "type";
@@ -205,6 +209,8 @@ public class HtmlUtil {
     
     public static final String XML_TAG_START = "\\<.*\\>";
     public static final String END_TAG = "/";
+    public static final String PRE_ATTRIBUTE_FLAG = "FLAG:";
+    
 
     public static Element appendElements(Element parent, String... tagNames) {
         Document doc = parent.getOwnerDocument();
@@ -247,13 +253,21 @@ public class HtmlUtil {
      */
     public static Element appendAttributes(Element e, Object... attributes) {
         Document doc = e.getOwnerDocument();
-        for (int i = 0; i < attributes.length; i += 2) {
+        for (int i = 0; i < attributes.length; i++) {
             //disabled flag attribute --> continue
             if (attributes[i] == null)
                 continue;
-            Attr attr = doc.createAttribute((String) attributes[i]);
-            if (i < attributes.length - 1 && attributes[i+1] != null) {
-                attr.setValue(Util.asString(attributes[i + 1]));
+            String attrName = (String) attributes[i];
+            Attr attr = null;
+            if (attrName.startsWith(PRE_ATTRIBUTE_FLAG)) {
+                attrName = StringUtil.substring(attrName, PRE_ATTRIBUTE_FLAG, null);
+                attr = doc.createAttribute(attrName);
+            } else if (i < attributes.length - 1 && attributes[i+1] != null) {
+                attr = doc.createAttribute(attrName);
+                attr.setValue(Util.asString(attributes[++i]));
+            } else {
+                //if it is a flag and it's the last attribute
+                attr = doc.createAttribute(attrName);
             }
             e.setAttributeNode(attr);
         }
@@ -273,6 +287,10 @@ public class HtmlUtil {
      */
     public static final String enable(String name, boolean enable) {
         return /*"name = " +*/(enable ? name : null);
+    }
+
+    public static final String enableFlag(String name, boolean enable) {
+        return /*"name = " +*/(enable ? PRE_ATTRIBUTE_FLAG + name : null);
     }
 
     public static final String enableName(String name, boolean enable) {

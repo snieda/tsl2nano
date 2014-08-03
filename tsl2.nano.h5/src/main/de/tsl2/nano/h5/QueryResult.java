@@ -95,5 +95,6 @@ public class QueryResult<COLLECTIONTYPE extends Collection<T>, T> extends BeanCo
             }
         };
         init(null, beanFinder, MODE_SEARCHABLE, null);
+        isStaticCollection = false;
     }
 }
