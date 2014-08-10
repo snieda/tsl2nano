@@ -456,9 +456,10 @@ public class Bean<T> extends BeanDefinition<T> {
      */
     public Object save() {
         Object result;
-        if (CompositionFactory.persist(instance))
-            result = instance;
-        else
+        if (CompositionFactory.persist(instance)) {
+            //refresh the bean!
+            result = BeanContainer.instance().getBeansByExample(instance).iterator().next();
+        } else
             result = save(instance);
         detach();
         return result;
@@ -530,7 +531,7 @@ public class Bean<T> extends BeanDefinition<T> {
      */
     protected static <I extends Serializable> Bean<I> createBean(I instance, BeanDefinition<I> beandef) {
         Bean<I> bean = new Bean<I>();
-        copy(beandef, bean, "attributeFilter", "attributeDefinitions", "asString");
+        copy(beandef, bean, "attributeFilter", "attributeDefinitions", "asString", "presentationHelper");
         bean.attributeFilter = beandef.attributeFilter != null ? CollectionUtil.copy(beandef.attributeFilter) : null;
         bean.attributeDefinitions =
             (LinkedHashMap<String, IAttributeDefinition<?>>) createValueDefinitions(beandef.getAttributeDefinitions());
@@ -563,8 +564,9 @@ public class Bean<T> extends BeanDefinition<T> {
                                                         // don't set any defaults - all  overwrite members in the next step
                                                         }
                                                         };*/
-
-                valueDefs.put(attr.getName(), copy(attr, valueDef));
+                valueDef = copy(attr, valueDef);
+                BeanValue.beanValueCache.add((BeanValue) valueDef);
+                valueDefs.put(attr.getName(), valueDef);
 //                } else {//it is a specialized beanvalue like pathvalue or ruleattribute
 //                    valueDefs.put(attr.getName(), (IValueAccess<?>) BeanUtil.clone(attr));
 //                }

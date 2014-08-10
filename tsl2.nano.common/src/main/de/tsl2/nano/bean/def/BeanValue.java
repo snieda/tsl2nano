@@ -71,6 +71,7 @@ public class BeanValue<T> extends AttributeDefinition<T> implements IValueDefini
 
     /** a cache of all created beanvalues - if bean cache is not deaktivated */
     protected static final List<BeanValue> beanValueCache = new LinkedList<BeanValue>();
+    protected static final BeanValue searchBV = new BeanValue();
 
     /**
      * constructor to be serializable
@@ -88,6 +89,7 @@ public class BeanValue<T> extends AttributeDefinition<T> implements IValueDefini
     public BeanValue(Object bean, IAttribute<T> attribute) {
         super(attribute);
         this.instance = bean;
+        beanValueCache.add(this);
     }
 
     /**
@@ -96,7 +98,7 @@ public class BeanValue<T> extends AttributeDefinition<T> implements IValueDefini
      * @param bean the instance to wrap and reflect
      * @param readAccessMethod getter-method defining the beans attribute
      */
-    public BeanValue(Object bean, Method readAccessMethod) {
+    protected BeanValue(Object bean, Method readAccessMethod) {
         super(readAccessMethod);
         this.instance = bean;
     }
@@ -259,6 +261,8 @@ public class BeanValue<T> extends AttributeDefinition<T> implements IValueDefini
         final ChangeEvent event = new ChangeEvent(this, false, false, oldValue, value);
         changeHandler().fireEvent(event);
         if (!event.breakEvent) {
+            if (LOG.isDebugEnabled())
+                LOG.debug("setting new value for attribute '" + getName() + "': " + value);
             setValue(instance, value);
             if (isDoValidation())
                 status = isValid(value);
@@ -298,25 +302,33 @@ public class BeanValue<T> extends AttributeDefinition<T> implements IValueDefini
      * creates a new bean value or - if existing in cache, reuses an already created bean value with that bean-instance
      * and attributename.
      * <p/>
-     * TODO: optimize performance using a temp BeanValue instance and extracting readAccessMethod. getBeanValue
      * 
      * @param bean bean instance
      * @param attributeName attribute definition
      * @return new bean value instance
      */
     public static final BeanValue getBeanValue(Object bean, String attributeName) {
-        //TODO: not performance optimized!
         final BeanAttribute attribute = BeanAttribute.getBeanAttribute(bean.getClass(), attributeName, true);
-        BeanValue tbv = new BeanValue(bean, attribute.getAccessMethod());
-        int i = beanValueCache.indexOf(tbv);
+        searchBV.instance = bean;
+        searchBV.attribute = attribute;
+        int i = beanValueCache.indexOf(searchBV);
         if (i != -1) {
             return beanValueCache.get(i);
         } else {
+            BeanValue tbv = new BeanValue(bean, attribute.getAccessMethod());
             beanValueCache.add(tbv);
             return tbv;
         }
     }
 
+    /**
+     * removes this bean value from internal cache
+     * @return result of {@link List#remove(Object)}
+     */
+    public boolean removeFromCache() {
+        return beanValueCache.remove(this);
+    }
+    
     /**
      * clears cache of already created bean values.
      */
@@ -541,10 +553,21 @@ public class BeanValue<T> extends AttributeDefinition<T> implements IValueDefini
                         vsel.synchronize(v);
                     }
                 } else {
-                    s = selectionProvider.getValue();
-                    setValue((T) selectionProvider.getFirstElement());
+                    /*
+                     * perhaps this action was called by a change-handler before change,
+                     * then the first parameter should provide the new value. the selectionProvider
+                     * has not the new value, yet.
+                     */
+                    
+                    s = (Collection) (parameter[0] != null ? parameter[0] : selectionProvider.getValue());
+                    setValue(s.isEmpty() ? null : (T) s.iterator().next());
+//                    setValue((T) selectionProvider.getFirstElement());
                 }
                 return s;
+            }
+            @Override
+            public boolean isDefault() {
+                return true;
             }
         });
         return collector;

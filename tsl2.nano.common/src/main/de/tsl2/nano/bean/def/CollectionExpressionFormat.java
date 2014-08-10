@@ -11,9 +11,9 @@ package de.tsl2.nano.bean.def;
 
 import java.text.FieldPosition;
 import java.text.ParsePosition;
-import java.util.ArrayList;
 import java.util.Collection;
 
+import de.tsl2.nano.collection.ListSet;
 import de.tsl2.nano.core.util.Util;
 
 /**
@@ -109,7 +109,7 @@ public class CollectionExpressionFormat<T> extends ValueExpressionFormat<T> {
             return collectionInstance;
         }
         String[] s = source.split(DIV);
-        Collection<T> c = collectionInstance != null ? collectionInstance : new ArrayList<T>(s.length);
+        Collection<T> c = collectionInstance != null ? collectionInstance : new ListSet<T>(s.length);
         c.clear();
         for (int i = 0; i < s.length; i++) {
             c.add(ve.from(s[i]));

@@ -96,7 +96,7 @@ public class Environment {
     public static final String KEY_BUILDINFO = "tsl2.nano.build.informations";
 
     private static final String KEY_TESTMODE = "tsl2.nano.test";
-    
+
     static final String DEF_PATHSEPRATOR = "/";
 
     private Environment() {
@@ -403,14 +403,12 @@ public class Environment {
         if (key instanceof Enum)
             return Messages.getString((Enum<?>) key);
         else {
-            if (optional)
+            if (optional && args.length == 0)
                 return Messages.getStringOpt((String) key, true);
-            else {
-                if (args.length > 0)
-                    return Messages.getFormattedString((String) key, args);
-                else
-                    return Messages.getString((String) key);
-            }
+            else if (args.length > 0)
+                return Messages.getFormattedString((String) key, args);
+            else
+                return Messages.getString((String) key);
         }
     }
 
@@ -570,7 +568,7 @@ public class Environment {
         resourceName = System.getProperty(resourceName, resourceName);
         return AppLoader.isNestingJar() ? extractResource(resourceName, destinationDir + resourceName) : false;
     }
-    
+
     /**
      * saveResourceToFileSystem
      * 
@@ -705,7 +703,7 @@ public class Environment {
     public static boolean isTestMode() {
         return Boolean.getBoolean(KEY_TESTMODE);
     }
-    
+
     @Persist
     protected void initSerialization() {
         /*

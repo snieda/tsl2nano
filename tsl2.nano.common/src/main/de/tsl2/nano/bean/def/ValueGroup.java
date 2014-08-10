@@ -13,6 +13,7 @@ import java.util.LinkedHashMap;
 
 import org.simpleframework.xml.ElementMap;
 
+import de.tsl2.nano.action.IActivable;
 import de.tsl2.nano.core.cls.IAttribute;
 
 /**
@@ -35,16 +36,18 @@ public class ValueGroup extends Presentable {
      * constructor to be serializable
      */
     protected ValueGroup() {
-        this("");
+        this("", true);
     }
 
-    public ValueGroup(String label, String... attributeNames) {
+    public ValueGroup(String label, Boolean open, String... attributeNames) {
         this.label = label;
+        this.description = label;
         attributes = new LinkedHashMap<String, Boolean>();
         for (int i = 0; i < attributeNames.length; i++) {
             add(attributeNames[i]);
         }
-        add("country", true);
+        if (!open)
+            setEnabler(IActivable.INACTIVE);
         type = TYPE_FORM;
     }
 

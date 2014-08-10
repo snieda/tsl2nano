@@ -453,7 +453,10 @@ public class AttributeDefinition<T> implements IAttributeDefinition<T> {
     @Override
     public String getDescription() {
         if (description == null && getName() != null)
-            description = StringUtil.toFirstUpper(getName());
+            if (getPresentation() != null)
+                description = getPresentation().getDescription();
+            else
+                description = StringUtil.toFirstUpper(getName());
         return description;
     }
 
@@ -739,6 +742,16 @@ public class AttributeDefinition<T> implements IAttributeDefinition<T> {
             eventController = new EventController();
         }
         return eventController;
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        return hashCode() == obj.hashCode();
+    }
+
+    @Override
+    public int hashCode() {
+        return attribute.hashCode();
     }
 
     /**

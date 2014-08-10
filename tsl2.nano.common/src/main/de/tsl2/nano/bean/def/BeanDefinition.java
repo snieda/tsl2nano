@@ -109,7 +109,7 @@ public class BeanDefinition<T> extends BeanClass<T> implements Serializable {
     protected String[] activationActionNames;
 
     /** optional attribute relations */
-    protected Map<String, IAttributeDefinition<?>> connections;
+    protected boolean isconnected;
     /** optional constraints between attributes */
     protected BeanValueConditionChecker crossChecker;
     /** optional grouping informations */
@@ -718,7 +718,7 @@ public class BeanDefinition<T> extends BeanClass<T> implements Serializable {
      */
     public <PH extends BeanPresentationHelper<T>> PH getPresentationHelper() {
         if (presentationHelper == null)
-            presentationHelper = new BeanPresentationHelper<T>(this);
+            presentationHelper = Environment.get(BeanPresentationHelper.class).createHelper(this);
         return (PH) presentationHelper;
     }
 
@@ -729,20 +729,6 @@ public class BeanDefinition<T> extends BeanClass<T> implements Serializable {
         presentationHelper.init(this);
         this.presentationHelper = presentationHelper;
         return presentationHelper;
-    }
-
-    /**
-     * all foreign attributes, connected to an own attribute through
-     * {@link #connect(String, IAttributeDefinition, IAction)} are accessible through this method.
-     * 
-     * @param name foreign attribute name
-     * @return foreign attribute or null
-     */
-    public IAttributeDefinition<?> getConnection(String name) {
-        if (connections != null) {
-            return connections.get(name);
-        }
-        return null;
     }
 
     public void connect(final String attrName, IValueAccess<?> valueToConnect, final IAction<?> callback) {
@@ -766,10 +752,11 @@ public class BeanDefinition<T> extends BeanClass<T> implements Serializable {
             boolean afterChanging) {
         valueToConnect.changeHandler().addListener(
             new ValueConnection(this, attrName, valueToConnect, callback, afterChanging));
+        isconnected = true;
     }
 
     public void connect(BeanDefinition<?> anotherBean, Object beanInstance, final IAction<?> callback) {
-        connect(anotherBean, beanInstance, callback, false);
+        connect(anotherBean, beanInstance, callback, true);
     }
 
     /**
@@ -1115,7 +1102,6 @@ public class BeanDefinition<T> extends BeanClass<T> implements Serializable {
         }
 //        getActions();
         getPresentable();
-        getConnection("");
         if (isSaveable())
             saveDefinition();
     }
@@ -1225,14 +1211,15 @@ public class BeanDefinition<T> extends BeanClass<T> implements Serializable {
      * addValueGroup
      * 
      * @param label title of group
+     * @param open whether to show/expand this group
      * @param attributeNames attributes contained in group. normally only the first and the last attribute name are
      *            necessary.
      * @return current bean instance
      */
-    public ValueGroup addValueGroup(String label, String... attributeNames) {
+    public ValueGroup addValueGroup(String label, Boolean open, String... attributeNames) {
         if (valueGroups == null)
             valueGroups = new LinkedList<ValueGroup>();
-        ValueGroup valueGroup = new ValueGroup(label, attributeNames);
+        ValueGroup valueGroup = new ValueGroup(label, open, attributeNames);
         valueGroups.add(valueGroup);
         return valueGroup;
     }
@@ -1373,15 +1360,16 @@ class ValueConnection implements IListener<ChangeEvent>, Serializable {
         this.bean = bean;
         this.name = name;
         this.valueToConnect = valueToConnect;
-        this.callback = callback;
         this.afterChanging = afterChanging;
+        this.callback = callback;
     }
 
     @Override
     public void handleEvent(ChangeEvent changeEvent) {
         if (changeEvent.hasChanged == afterChanging) {
-            final Object value = BeanDefinition.getValue(name);
-            ((IValueAccess<?>) bean.getAttribute(name)).changeHandler().fireValueChange(bean, value, value, false);
+//            final Object value = BeanDefinition.getValue(bean, name);
+//            ((IValueAccess<?>) bean.getAttribute(name)).changeHandler().fireValueChange(bean, value, value, false);
+            callback.setParameter(changeEvent.newValue);
             callback.activate();
         }
     }

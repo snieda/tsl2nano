@@ -508,7 +508,8 @@ public class BeanCollector<COLLECTIONTYPE extends Collection<T>, T> extends Bean
      */
     @Override
     public void deleteItem(T item) {
-        BeanContainer.instance().delete(item);
+        if (!CompositionFactory.delete(item))
+            BeanContainer.instance().delete(item);
     }
 
     /**
@@ -581,8 +582,9 @@ public class BeanCollector<COLLECTIONTYPE extends Collection<T>, T> extends Bean
         if (idAttribute != null) {
             IAttributeDef def = Environment.get(IBeanContainer.class).getAttributeDef(newItem,
                 idAttribute.getName());
-            idAttribute.setValue(newItem, composition != null ?
-                StringUtil.fixString(BeanUtil.createUUID(), (def.length() > -1 ? def.length() : 0), ' ', true) : null);
+            idAttribute.setValue(newItem, /*composition != null ?
+                                          StringUtil.fixString(BeanUtil.createUUID(), (def.length() > -1 ? def.length() : 0), ' ', true) : */
+                null);
         }
 
         /*
@@ -730,7 +732,7 @@ public class BeanCollector<COLLECTIONTYPE extends Collection<T>, T> extends Bean
 
             @Override
             public boolean isDefault() {
-                return isEnabled();
+                return isEnabled()/* && !isconnected*/;
             }
 
             @Override
@@ -1244,7 +1246,7 @@ public class BeanCollector<COLLECTIONTYPE extends Collection<T>, T> extends Bean
             Composition composition,
             BeanDefinition<I> beandef) {
         BeanCollector<C, I> bc = new BeanCollector<C, I>();
-        copy(beandef, bc, "asString");
+        copy(beandef, bc, "asString", "presentationHelper");
         //use an own map instance to be independent of changes by other beans or beancollectors.
         bc.attributeDefinitions = new LinkedHashMap<String, IAttributeDefinition<?>>(bc.attributeDefinitions);
         bc.init(collection, new BeanFinder(beandef.getClazz()), workingMode, composition);

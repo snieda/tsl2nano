@@ -18,6 +18,7 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
+import java.io.FileReader;
 import java.io.FilenameFilter;
 import java.io.FilterReader;
 import java.io.IOException;
@@ -415,6 +416,22 @@ public class FileUtil {
         }
     }
 
+    
+    public static Properties loadPropertiesFromFile(String resourceFile) {
+        File f = new File(resourceFile);
+        if (!f.canRead())
+            return null;
+        final Properties properties = new Properties();
+        try {
+            LOG.info("loading resource: " + resourceFile);
+            properties.load(new FileReader(f));
+            return properties;
+        } catch (final Exception e) {
+            ManagedException.forward(e);
+            return null;
+        }
+    }
+
     /**
      * loads a property file through main application plugin.
      * 
@@ -423,8 +440,10 @@ public class FileUtil {
      * @return filled properties
      */
     public static Properties loadProperties(String resourceFile, ClassLoader classLoader) {
+        if (classLoader == null)
+            classLoader = Thread.currentThread().getContextClassLoader();
         Thread.currentThread().setContextClassLoader(classLoader);
-        final InputStream resource = Thread.currentThread().getContextClassLoader().getResourceAsStream(resourceFile);
+        final InputStream resource = classLoader.getResourceAsStream(resourceFile);
         final Properties properties = new Properties();
         try {
             LOG.info("loading resource: " + resourceFile);

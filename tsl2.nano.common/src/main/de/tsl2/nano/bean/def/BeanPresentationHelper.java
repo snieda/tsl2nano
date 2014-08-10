@@ -71,7 +71,8 @@ import de.tsl2.nano.messaging.IListener;
 import de.tsl2.nano.util.NumberUtil;
 
 /**
- * class to provide presentation definitions for sets of attributes.
+ * class to provide presentation definitions/algorithms for sets of attributes. this class holds only its parent
+ * extension of {@link BeanDefinition} and caches some actions. don't put members and properties to your extension!
  * <p/>
  * should be overridden if you create an own application.
  * 
@@ -1296,7 +1297,7 @@ public class BeanPresentationHelper<T> {
             if (bean.isMultiValue()) {
                 final BeanCollector<?, T> collector = (BeanCollector<?, T>) bean;
                 if (BeanContainer.instance().isPersistable(collector.getType())) {
-                    pageActions.add(new SecureAction(bean.getClazz(),
+                    pageActions.add(new SecureAction(collector.getClazz(),
                         "back",
                         IAction.MODE_UNDEFINED,
                         false,
@@ -1304,7 +1305,7 @@ public class BeanPresentationHelper<T> {
                         @Override
                         public Object action() throws Exception {
                             collector.getBeanFinder().previous();
-                            return bean;
+                            return collector;
                         }
 
                         @Override
@@ -1314,7 +1315,7 @@ public class BeanPresentationHelper<T> {
                         }
                     });
 
-                    pageActions.add(new SecureAction(bean.getClazz(),
+                    pageActions.add(new SecureAction(collector.getClazz(),
                         "forward",
                         IAction.MODE_UNDEFINED,
                         false,
@@ -1322,7 +1323,7 @@ public class BeanPresentationHelper<T> {
                         @Override
                         public Object action() throws Exception {
                             collector.getBeanFinder().next();
-                            return bean;
+                            return collector;
                         }
 
                         @Override
@@ -1332,7 +1333,7 @@ public class BeanPresentationHelper<T> {
                         }
                     });
                 }
-                pageActions.add(new SecureAction(bean.getClazz(),
+                pageActions.add(new SecureAction(collector.getClazz(),
                     "selectall",
                     IAction.MODE_UNDEFINED,
                     false,
@@ -1340,21 +1341,21 @@ public class BeanPresentationHelper<T> {
                     @Override
                     public Object action() throws Exception {
                         ISelectionProvider<T> selectionProvider =
-                            ((IBeanCollector<?, T>) bean).getSelectionProvider();
+                            collector.getSelectionProvider();
                         if (selectionProvider != null) {
                             selectionProvider.getValue().clear();
-                            selectionProvider.getValue().addAll(((IBeanCollector<?, T>) bean).getCurrentData());
+                            selectionProvider.getValue().addAll(collector.getCurrentData());
                         }
-                        return bean;
+                        return collector;
                     }
 
                     @Override
                     public boolean isEnabled() {
-                        return super.isEnabled() && ((IBeanCollector<?, T>) bean).getCurrentData().size() > 0;
+                        return super.isEnabled() && collector.getCurrentData().size() > 0;
                     }
                 });
 
-                pageActions.add(new SecureAction(bean.getClazz(),
+                pageActions.add(new SecureAction(collector.getClazz(),
                     "deselectall",
                     IAction.MODE_UNDEFINED,
                     false,
@@ -1362,20 +1363,20 @@ public class BeanPresentationHelper<T> {
                     @Override
                     public Object action() throws Exception {
                         ISelectionProvider<T> selectionProvider =
-                            ((IBeanCollector<?, T>) bean).getSelectionProvider();
+                            collector.getSelectionProvider();
                         if (selectionProvider != null) {
                             selectionProvider.getValue().clear();
                         }
-                        return bean;
+                        return collector;
                     }
 
                     @Override
                     public boolean isEnabled() {
-                        return super.isEnabled() && ((IBeanCollector<?, T>) bean).getCurrentData().size() > 0;
+                        return super.isEnabled() && collector.getCurrentData().size() > 0;
                     }
                 });
 
-                pageActions.add(new SecureAction(bean.getClazz(),
+                pageActions.add(new SecureAction(collector.getClazz(),
                     "switchrelations",
                     IAction.MODE_UNDEFINED,
                     false,
@@ -1385,13 +1386,13 @@ public class BeanPresentationHelper<T> {
                         collector.setMode(NumberUtil.toggleBits(collector.getWorkingMode(),
                             IBeanCollector.MODE_SHOW_MULTIPLES));
                         collector.getSearchAction().activate();
-                        return bean;
+                        return collector;
                     }
 
                     @Override
                     public boolean isEnabled() {
-                        return super.isEnabled() && !bean.getDeclaringClass().isArray()
-                            && ((IBeanCollector<?, T>) bean).getCurrentData().size() > 0;
+                        return super.isEnabled() && !collector.getDeclaringClass().isArray()
+                            && collector.getCurrentData().size() > 0;
                     }
                 });
             }
@@ -1477,9 +1478,13 @@ public class BeanPresentationHelper<T> {
     }
 
     protected final boolean matches(String patternKey, boolean any) {
-        return bean.toString().matches(Environment.get(patternKey, any ? ".*" : "XXXXXXXXXX"));
+        return bean.getName().matches(Environment.get(patternKey, any ? ".*" : "XXXXXXXXXX"));
     }
 
+    public BeanPresentationHelper createHelper(BeanDefinition def) {
+        return new BeanPresentationHelper(def);
+    }
+    
     /**
      * createPresentable
      * 

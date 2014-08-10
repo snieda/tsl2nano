@@ -21,6 +21,7 @@ import org.simpleframework.xml.ElementMap;
 import de.tsl2.nano.action.IActivable;
 import de.tsl2.nano.bean.BeanContainer;
 import de.tsl2.nano.core.Environment;
+import de.tsl2.nano.core.Messages;
 import de.tsl2.nano.core.cls.IAttribute;
 import de.tsl2.nano.core.util.Util;
 
@@ -65,14 +66,16 @@ public class Presentable implements IIPresentable, Serializable {
     }
 
     public Presentable(IAttribute<?> attr) {
-        label = Environment.translate(attr.getName(), true);
+        label = Environment.translate(attr.getId(), true);
         BeanPresentationHelper<?> helper = Environment.get(BeanPresentationHelper.class);
         type = helper.getDefaultType(attr);
         style =
             attr instanceof IAttributeDefinition ? helper.getDefaultHorizontalAlignment((IAttributeDefinition<?>) attr)
                 : helper.getDefaultHorizontalAlignment(attr);
         style |= helper.getDefaultStyle(attr);
-        description = label;
+        description = Environment.translate(attr.getId() + Messages.POSTFIX_TOOLTIP, false);
+        if (description.startsWith(Messages.TOKEN_MSG_NOTFOUND))
+            description = label;
         /*
          * to be enabled, the attribute must be 
          * - writable through setter-method
@@ -285,7 +288,7 @@ public class Presentable implements IIPresentable, Serializable {
     public String toString() {
         return Util.toString(getClass(), label, "type:" + type, "style:" + style
             , (visible ? "visible" : "invisible)")
-            , (enabler != null && enabler.isActive() ? "enabled" : "disabled")
+            , (enabler == null || enabler.isActive() ? "enabled" : "disabled")
             , "icon: " + icon);
     }
 

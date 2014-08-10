@@ -63,7 +63,25 @@ public class CompositionFactory {
     public static final boolean persist(Object compChild) {
         for (Composition<?> c : instance().allCompositions) {
             if (contains(c, compChild)/*c.getParentContainer().contains(compChild)*/) {
-                BeanContainer.instance().save(c.parent.getInstance());
+                c.parent.setInstance(BeanContainer.instance().save(c.parent.getInstance()));
+                return instance().allCompositions.remove(c);
+            }
+        }
+        return false;
+    }
+    
+    /**
+     * searches the given child in the composition cache and removes the child from it's parent. the composition
+     * will be removed from cache.
+     * 
+     * @param compChild child to persist
+     * @return true, if child was found and persisted, otherwise false
+     */
+    public static final boolean delete(Object compChild) {
+        for (Composition<?> c : instance().allCompositions) {
+            if (contains(c, compChild)/*c.getParentContainer().contains(compChild)*/) {
+                c.getParentContainer().remove(compChild);
+                c.parent.setInstance(BeanContainer.instance().save(c.parent.getInstance()));
                 return instance().allCompositions.remove(c);
             }
         }
