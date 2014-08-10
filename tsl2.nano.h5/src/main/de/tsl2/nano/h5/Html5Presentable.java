@@ -19,11 +19,12 @@ import de.tsl2.nano.core.util.Util;
  * @author Tom, Thomas Schneider
  * @version $Revision$
  */
-@SuppressWarnings({ "unchecked"})
+@SuppressWarnings({ "unchecked" })
 public class Html5Presentable extends Presentable {
     /** serialVersionUID */
     private static final long serialVersionUID = 1L;
 
+    private static final LinkedHashMap<String, String> DEFAULT_HASHMAP = new LinkedHashMap<String, String>();
     protected Html5Presentable() {
     }
 
@@ -63,14 +64,14 @@ public class Html5Presentable extends Presentable {
     public LinkedHashMap<String, String> getLayout() {
         if (layout == null) {
             //LinkedHashmap not supported by simple-xml
-            layout = Environment.get("default.layout", new LinkedHashMap<String, String>());
+            layout = new LinkedHashMap<>(Environment.get("default.layout", DEFAULT_HASHMAP));
         }
         return (LinkedHashMap<String, String>) layout;
     }
 
     //to have write-access, we need this setter
     public <L extends Serializable, T extends IPresentable> T setLayout(L l) {
-        this.layout = (LinkedHashMap<String, String>)l;
+        this.layout = (LinkedHashMap<String, String>) l;
         return (T) this;
     }
 
@@ -80,14 +81,15 @@ public class Html5Presentable extends Presentable {
     public LinkedHashMap<String, String> getLayoutConstraints() {
         if (layoutConstraints == null) {
             //LinkedHashmap not supported by simple-xml
-            layoutConstraints = Environment.get("default.layoutconstaints", new LinkedHashMap<String, String>());
+            layoutConstraints =
+                new LinkedHashMap<>(Environment.get("default.layoutconstaints", DEFAULT_HASHMAP));
         }
         return (LinkedHashMap<String, String>) layoutConstraints;
     }
 
     //to have write-access, we need this setter
     public <L extends Serializable, T extends IPresentable> T setLayoutConstraints(L lc) {
-        this.layoutConstraints = (LinkedHashMap<String, String>)lc;
+        this.layoutConstraints = (LinkedHashMap<String, String>) lc;
         return (T) this;
     }
 

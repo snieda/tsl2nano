@@ -65,7 +65,6 @@ import static de.tsl2.nano.h5.HtmlUtil.TAG_BODY;
 import static de.tsl2.nano.h5.HtmlUtil.TAG_BUTTON;
 import static de.tsl2.nano.h5.HtmlUtil.TAG_CELL;
 import static de.tsl2.nano.h5.HtmlUtil.TAG_DIV;
-import static de.tsl2.nano.h5.HtmlUtil.TAG_FONT;
 import static de.tsl2.nano.h5.HtmlUtil.TAG_FORM;
 import static de.tsl2.nano.h5.HtmlUtil.TAG_H3;
 import static de.tsl2.nano.h5.HtmlUtil.TAG_HEAD;
@@ -92,6 +91,7 @@ import static de.tsl2.nano.h5.HtmlUtil.VAL_OPAC;
 import static de.tsl2.nano.h5.HtmlUtil.VAL_TRANSPARENT;
 import static de.tsl2.nano.h5.HtmlUtil.appendElement;
 import static de.tsl2.nano.h5.HtmlUtil.enable;
+import static de.tsl2.nano.h5.HtmlUtil.enableFlag;
 import static de.tsl2.nano.h5.HtmlUtil.style;
 
 import java.io.File;
@@ -127,6 +127,7 @@ import de.tsl2.nano.bean.def.BeanCollector;
 import de.tsl2.nano.bean.def.BeanDefinition;
 import de.tsl2.nano.bean.def.BeanPresentationHelper;
 import de.tsl2.nano.bean.def.BeanValue;
+import de.tsl2.nano.bean.def.IAttributeDefinition;
 import de.tsl2.nano.bean.def.IBeanCollector;
 import de.tsl2.nano.bean.def.IPageBuilder;
 import de.tsl2.nano.bean.def.IPresentable;
@@ -280,23 +281,6 @@ public class Html5Presentation<T> extends BeanPresentationHelper<T> implements I
                     }
                 });
 
-                appActions.add(new SecureAction(bean.getClazz(),
-                    "sample-code",
-                    IAction.MODE_UNDEFINED,
-                    false,
-                    "icons/images_all.png") {
-                    @Override
-                    public Object action() throws Exception {
-                        String dir = System.getProperty("user.dir") + "/sample/";
-                        new File(dir).mkdirs();
-                        //the common-jar will be used by ant-scripts...
-                        Environment.extractResourceToDir(NanoH5.JAR_COMMON, dir);
-                        Environment.extractResourceToDir(NanoH5.JAR_INCUBATION, dir);
-                        FileUtil.extractNestedZip("tsl2.nano.h5.sample.jar", dir, null);
-                        FileUtil.writeBytes("call run.bat sample 8070".getBytes(), System.getProperty("user.dir") + "/sample.bat", false);
-                        return "Sample code and database created.\nPlease replace 'tsl2.nano.h5.jar/META-INF/MANIFEST.MF' with 'sample/META-INF/MANIFEST.MF' and start the new sample batch file...";
-                    }
-                });
             }
         }
         return appActions;
@@ -321,8 +305,9 @@ public class Html5Presentation<T> extends BeanPresentationHelper<T> implements I
             currentTabIndex = 0;
             Element form;
             if (model != null) {
+                //TODO: don't forget the old presentation instance
                 if (!(model.getPresentationHelper() instanceof Html5Presentation))
-                    model.setPresentationHelper(new Html5Presentation(model));
+                    model.setPresentationHelper(createHelper(model));
                 form = ((Html5Presentation) model.getPresentationHelper()).createPage(session, null,
                     message,
                     interactive,
@@ -435,7 +420,7 @@ public class Html5Presentation<T> extends BeanPresentationHelper<T> implements I
                         "?",
                         ATTR_METHOD,
                         Environment.get("html5.http.method", "post"));
-                    c3 = createExpandable(c3, "Menu");
+                    c3 = createExpandable(c3, "Menu", true);
                     Collection<IAction> actions = new ArrayList<IAction>(getPageActions());
                     actions.addAll(getApplicationActions(session));
                     actions.addAll(getSessionActions(session));
@@ -536,23 +521,24 @@ public class Html5Presentation<T> extends BeanPresentationHelper<T> implements I
             }
         }
 
+        Element panel;
         if (bean instanceof Controller) {
-            createController(parent, (Controller) bean, interactive);
+            panel = createController(parent, (Controller) bean, interactive);
         } else if (bean instanceof BeanCollector) {
-            createCollector(parent, (BeanCollector) bean, interactive);
+            panel = createCollector(parent, (BeanCollector) bean, interactive);
         } else {
-            createBean(parent, (Bean<?>) bean, interactive);
+            panel = createBean(parent, (Bean<?>) bean, interactive);
         }
         if (isRoot) {
             if (interactive) {
-                createBeanActions((Element) parent, bean);
+                createBeanActions(panel, bean);
                 createFooter(((Element) parent).getOwnerDocument(), message);
             }
         }
         return parent;
     }
 
-    private void createController(Element parent, Controller controller, boolean interactive) {
+    private Element createController(Element parent, Controller controller, boolean interactive) {
         Element table = appendElement(parent,
             TAG_TABLE,
             /*            ATTR_BORDER,
@@ -569,6 +555,7 @@ public class Html5Presentation<T> extends BeanPresentationHelper<T> implements I
         if (controller.getPresentable() != null)
             appendAttributes(table, controller.getPresentable());
         createActionTableContent(table, controller, controller.getBeanFinder().getData());
+        return table;
     }
 
     public static String createMessagePage(String templateName, String message, URL serviceURL) {
@@ -583,11 +570,12 @@ public class Html5Presentation<T> extends BeanPresentationHelper<T> implements I
      * 
      * @param parent
      */
-    private void createBean(Element parent, Bean<?> bean, boolean interactive) {
+    private Element createBean(Element parent, Bean<?> bean, boolean interactive) {
         Collection<ValueGroup> valueGroups = bean.getValueGroups();
         if (Util.isEmpty(valueGroups))
-            createFieldPanel(parent, bean.getPresentable(), bean.getBeanValues(), bean.getActions(), interactive);
+            return createFieldPanel(parent, bean.getPresentable(), bean.getBeanValues(), bean.getActions(), interactive);
         else {//work on value groups
+            parent = appendElement(parent, TAG_DIV);
             Collection<IAction> noActions = new LinkedList<IAction>();
             for (ValueGroup valueGroup : valueGroups) {
                 if (!valueGroup.isVisible())
@@ -626,10 +614,11 @@ public class Html5Presentation<T> extends BeanPresentationHelper<T> implements I
                 }
                 createFieldPanel(parent, valueGroup, beanValues, noActions, interactive);
             }
+            return parent;
         }
     }
 
-    private void createFieldPanel(Element parent,
+    private Element createFieldPanel(Element parent,
             IPresentable p,
             Collection<BeanValue<?>> beanValues,
             Collection<IAction> actions,
@@ -641,7 +630,7 @@ public class Html5Presentation<T> extends BeanPresentationHelper<T> implements I
         int columns = (int) Math.ceil(beanValues.size() / (float) maxrows) * 3;
         columns = columns > maxcols ? maxcols : columns;
 
-        parent = interactive ? createExpandable(parent, p.getDescription()) : parent;
+        parent = interactive ? createExpandable(parent, p.getDescription(), p.getEnabler().isActive()) : parent;
         Element panel = createGrid(parent, Environment.translate("tsl2nano.input", false), "field.panel", columns);
         //fallback: setting style from environment-properties
         HtmlUtil.appendAttributes(panel, ATTR_STYLE, Environment.get("bean.grid.style", "background: transparent"));
@@ -655,11 +644,11 @@ public class Html5Presentation<T> extends BeanPresentationHelper<T> implements I
                 continue;
             if (beanValue.isBean()) {
                 Bean<?> bv = (Bean<?>) beanValue.getInstance();
-                bv.setPresentationHelper(new Html5Presentation(bv)).createPage(null, parent, bv.getName(), interactive);
+                ((Html5Presentation) bv.getPresentationHelper()).createPage(null, parent, bv.getName(), interactive);
                 actions.addAll(bv.getActions());
             } else if (beanValue.isBeanCollector()) {
                 BeanCollector<?, ?> bv = (BeanCollector<?, ?>) ((IValueAccess) beanValue.getInstance()).getValue();
-                bv.setPresentationHelper(new Html5Presentation(bv)).createPage(null, parent,
+                ((Html5Presentation) bv.getPresentationHelper()).createPage(null, parent,
                     beanValue.getDescription(),
                     interactive);
                 actions.addAll(bv.getActions());
@@ -673,11 +662,12 @@ public class Html5Presentation<T> extends BeanPresentationHelper<T> implements I
                 }
             }
         }
+        return panel;
     }
 
-    private Element createExpandable(Element parent, String title) {
-        parent = appendElement(parent, "details", enable("open", true));
-        appendElement(parent, "summary", content(title), ATTR_ALIGN, "left", ATTR_STYLE, "color: #6666FF;");
+    private Element createExpandable(Element parent, String title, boolean open) {
+        parent = appendElement(parent, "details", enable("open", open));
+        appendElement(parent, "summary", content(title), ATTR_ALIGN, ALIGN_LEFT, ATTR_STYLE, "color: #6666FF;");
         return parent;
     }
 
@@ -710,7 +700,9 @@ public class Html5Presentation<T> extends BeanPresentationHelper<T> implements I
          * create the column header
          */
         bean.addMode(MODE_MULTISELECTION);
-        parent = interactive ? createExpandable(parent, bean.getPresentable().getDescription()) : parent;
+        parent =
+            interactive ? createExpandable(parent, bean.getPresentable().getDescription(), bean.getPresentable()
+                .getEnabler().isActive()) : parent;
         Element grid;
         if (interactive)
             grid = createGrid(parent, bean.toString(), false, bean);
@@ -760,12 +752,15 @@ public class Html5Presentation<T> extends BeanPresentationHelper<T> implements I
     }
 
     private void appendAttributes(Element grid, IPresentable p) {
+        appendAttributes(grid, COLOR_LIGHT_BLUE, p);
+    }
+    private void appendAttributes(Element grid, String parentBGColor, IPresentable p) {
         HtmlUtil.appendAttributes(grid/*, ATTR_NAME, p.getLabel(), p.getDescription(), p.getType(), p.getEnabler(), p.getWidth(), p.getHeight()*/
             ,
             ATTR_ALIGN,
             getTextAlignment(p.getStyle()),
             ATTR_BGCOLOR,
-            convert(ATTR_BGCOLOR, p.getBackground(), COLOR_LIGHT_BLUE),
+            convert(ATTR_BGCOLOR, p.getBackground(), parentBGColor),
             ATTR_COLOR,
             convert(ATTR_COLOR, p.getForeground(), COLOR_BLACK)/*, p.getIcon()*/);
 
@@ -1044,6 +1039,8 @@ public class Html5Presentation<T> extends BeanPresentationHelper<T> implements I
             "box",
             ATTR_WIDTH,
             VAL_100PERCENT,
+            ATTR_ALIGN,
+            ALIGN_CENTER,
             ATTR_BGCOLOR,
             COLOR_LIGHT_BLUE,
             enable("sortable", true));
@@ -1104,6 +1101,9 @@ public class Html5Presentation<T> extends BeanPresentationHelper<T> implements I
             .contains(item) : false;
 
         Bean<Serializable> itemBean = Bean.getBean((Serializable) item);
+        String rowBGColor =
+            grid.getChildNodes().getLength() % 2 == 0 ? itemBean.getPresentable().layout(ATTR_BGCOLOR) : dark(itemBean
+                .getPresentable().layout(ATTR_BGCOLOR));
         Element row =
             appendElement(grid,
                 TAG_ROW,
@@ -1118,7 +1118,7 @@ public class Html5Presentation<T> extends BeanPresentationHelper<T> implements I
                 ++currentTabIndex + "",
                 ATTR_FORMTARGET,
                 VAL_FRM_SELF,
-                ATTR_BGCOLOR, itemBean.getPresentable().layout(ATTR_BGCOLOR));
+                ATTR_BGCOLOR, rowBGColor);
 
         //first cell: bean reference as link
         String length = String.valueOf(grid.getChildNodes().getLength() - 1);
@@ -1146,11 +1146,16 @@ public class Html5Presentation<T> extends BeanPresentationHelper<T> implements I
                     tableDescriptor.getId() + "[" + currentTabIndex
                         + ", " + c.getIndex() + "]");
             if (c.getPresentable() != null)
-                appendAttributes(cell, c.getPresentable());
+                appendAttributes(cell, rowBGColor, c.getPresentable());
             if (Messages.isMarkedAsProblem(value))
                 HtmlUtil.appendAttributes(cell, ATTR_COLOR, COLOR_RED);
         }
         return row;
+    }
+
+    private String dark(String color) {
+        //TODO: calculate lighter or darker color
+        return COLOR_LIGHTER_BLUE;
     }
 
     /**
@@ -1237,19 +1242,21 @@ public class Html5Presentation<T> extends BeanPresentationHelper<T> implements I
         Element row =
             parent.getNodeName().equals(TAG_ROW) ? parent : appendElement(parent, TAG_ROW, ATTR_STYLE, VAL_OPAC);
         //first the label
-        Element cellLabel = appendElement(row, TAG_CELL);
-        if (beanValue.getDescription() != null) {
+        if (p.getLabel() != null) {
+            Element cellLabel = appendElement(row, TAG_CELL, content(p.getLabel()
+                + (beanValue.nullable() ? "" : beanValue.generatedValue() ? " (!)" : " (*)")), ATTR_ID,
+                beanValue.getId() + ".label",
+                ATTR_WIDTH,
+                Environment.get("default.attribute.label.width", "250"), ATTR_STYLE, style(STYLE_FONT_COLOR,
+                    (String) BeanUtil.valueOf(p.getForeground(),
+                        Environment.get("default.attribute.label.color", "#0000cc"))),
+                enableFlag(ATTR_HIDDEN, !p.isVisible()),
+                enableFlag(ATTR_REQUIRED, !beanValue.nullable() && !beanValue.generatedValue()));
             if (p.getIcon() != null) {
                 appendElement(cellLabel, TAG_IMAGE, ATTR_SRC, p.getIcon());
             }
-            appendElement(cellLabel,
-                TAG_FONT,
-                content(beanValue.getDescription() + (beanValue.nullable() ? "" : beanValue.generatedValue() ? " (!)" : " (*)")),
-                ATTR_COLOR,
-                (String) BeanUtil.valueOf(p.getBackground(),
-                    Environment.get("default.attribute.label.color", "#0000cc")),
-                enableFlag(ATTR_HIDDEN, !p.isVisible()),
-                enableFlag(ATTR_REQUIRED, !beanValue.nullable() && !beanValue.generatedValue()));
+        } else {//create an empty label
+            appendElement(row, TAG_CELL);
         }
         //create the layout and layout-constraints
         Element cell = appendElement(row, TAG_CELL);
@@ -1294,7 +1301,7 @@ public class Html5Presentation<T> extends BeanPresentationHelper<T> implements I
                     (isOption ? enable(ATTR_CHECKED, (Boolean) beanValue.getValue()) : ATTR_VALUE),
                     (isOption ? "checked" : getValue(beanValue, type)),
                     ATTR_TITLE,
-                    beanValue.getDescription()
+                    p.getDescription()
                         + (LOG.isDebugEnabled() ? "\n\n" + "<![CDATA[" + beanValue.toDebugString() + "]]>" : ""),
                     "tabindex",
                     p.layout("tabindex", ++currentTabIndex).toString(),
@@ -1374,9 +1381,9 @@ public class Html5Presentation<T> extends BeanPresentationHelper<T> implements I
 
         if (beanValue.hasStatusError()) {
             row = appendElement(parent, TAG_ROW);
-            appendElement(row, TAG_FONT, ATTR_SIZE, "-1", ATTR_COLOR, COLOR_RED);
 //            appendElement(row, TAG_HEADERCELL, content(null));
-            appendElement(row, TAG_CELL, content(beanValue.getStatus().message()), ATTR_SPANCOL, "3");
+            appendElement(row, TAG_CELL, content(beanValue.getStatus().message()), ATTR_SPANCOL, "3", ATTR_SIZE, "-1",
+                ATTR_STYLE, style(STYLE_FONT_COLOR, COLOR_RED));
         }
         return input;
     }
@@ -1486,6 +1493,8 @@ public class Html5Presentation<T> extends BeanPresentationHelper<T> implements I
                 ATTR_PATTERN,
                 (beanValue.getFormat() instanceof RegExpFormat ? ((RegExpFormat) beanValue.getFormat()).getPattern()
                     : null),
+                ATTR_TITLE,
+                beanValue.getPresentation().getDescription(),
                 "tabindex",
                 beanValue.getPresentation().layout("tabindex", ++currentTabIndex).toString(),
                 enableFlag(ATTR_HIDDEN, !beanValue.getPresentation().isVisible()),
@@ -1493,18 +1502,20 @@ public class Html5Presentation<T> extends BeanPresentationHelper<T> implements I
                 enableFlag(ATTR_REQUIRED, !beanValue.nullable()));
         Collection<?> values = beanValue.getConstraint().getAllowedValues();
         Object selected = beanValue.getValue();
-        String content, id;
+        String content, id, description;
         boolean isEnum = beanValue.getType().isEnum();
         for (Object v : values) {
             if (isEnum) {
                 content = Environment.translate(v.toString(), true);
                 id = content;
+                description = Environment.translate(v.toString() + Messages.POSTFIX_TOOLTIP, true);
             } else {
                 Bean<Serializable> bv = Bean.getBean((Serializable) v);
                 content = bv.toString();
                 id = bv.getId().toString();
+                description = bv.getPresentable().getDescription();
             }
-            appendElement(select, TAG_OPTION, content(content), ATTR_ID, id,
+            appendElement(select, TAG_OPTION, content(content), ATTR_ID, id, ATTR_TITLE, description,
                 enable(ATTR_SELECTED, selected != null && v.equals(selected)));
         }
         return select;
@@ -1624,13 +1635,30 @@ public class Html5Presentation<T> extends BeanPresentationHelper<T> implements I
         return bean instanceof Bean && ((Bean) bean).getInstance() instanceof BeanConfigurator;
     }
 
+    public void createSampleEnvironment() {
+        String dir = System.getProperty("user.dir") + "/sample/";
+        new File(dir).mkdirs();
+        //the common-jar will be used by ant-scripts...
+        Environment.extractResourceToDir(NanoH5.JAR_COMMON, dir);
+        Environment.extractResourceToDir(NanoH5.JAR_INCUBATION, dir);
+        FileUtil.extractNestedZip("tsl2.nano.h5.sample.jar", dir, null);
+        FileUtil.writeBytes("call run.bat sample 8070".getBytes(), System.getProperty("user.dir")
+            + "/sample.bat", false);
+        //"Sample code and database created.\nPlease replace 'tsl2.nano.h5.jar/META-INF/MANIFEST.MF' with 'sample/META-INF/MANIFEST.MF' and start the new sample batch file...";
+    }
+    
     @Override
-    public IPresentable createPresentable() {
+    public Html5Presentation createHelper(BeanDefinition def) {
+        return new Html5Presentation<>(def);
+    }
+
+    @Override
+    public Html5Presentable createPresentable() {
         return new Html5Presentable();
     }
 
     @Override
-    public IPresentable createPresentable(AttributeDefinition<?> attr) {
+    public Html5Presentable createPresentable(AttributeDefinition<?> attr) {
         return new Html5Presentable(attr);
     }
 

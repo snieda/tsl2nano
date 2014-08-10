@@ -8,9 +8,7 @@ import static de.tsl2.nano.bean.def.IBeanCollector.MODE_SEARCHABLE;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
-import java.lang.Thread.UncaughtExceptionHandler;
 import java.net.InetAddress;
-import java.net.InetSocketAddress;
 import java.net.MalformedURLException;
 import java.net.Socket;
 import java.net.URL;
@@ -25,39 +23,24 @@ import java.util.Properties;
 import java.util.Stack;
 
 import javax.persistence.EntityManager;
-import javax.persistence.EntityManagerFactory;
 
 import org.apache.commons.logging.Log;
-import org.java_websocket.WebSocketAdapter;
-import org.java_websocket.client.DefaultSSLWebSocketClientFactory;
-import org.java_websocket.server.DefaultSSLWebSocketServerFactory;
-import org.java_websocket.server.WebSocketServer.WebSocketServerFactory;
 
-import de.tsl2.nano.action.IAction;
-import de.tsl2.nano.action.IActivable;
 import de.tsl2.nano.bean.BeanContainer;
-import de.tsl2.nano.bean.BeanUtil;
 import de.tsl2.nano.bean.IBeanContainer;
 import de.tsl2.nano.bean.def.AbstractExpression;
-import de.tsl2.nano.bean.def.AttributeDefinition;
 import de.tsl2.nano.bean.def.Bean;
 import de.tsl2.nano.bean.def.BeanCollector;
 import de.tsl2.nano.bean.def.BeanDefinition;
 import de.tsl2.nano.bean.def.BeanPresentationHelper;
-import de.tsl2.nano.bean.def.BeanValue;
 import de.tsl2.nano.bean.def.IPageBuilder;
-import de.tsl2.nano.bean.def.IPresentable;
-import de.tsl2.nano.bean.def.SecureAction;
-import de.tsl2.nano.bean.def.ValueExpression;
 import de.tsl2.nano.collection.MapUtil;
 import de.tsl2.nano.core.AppLoader;
 import de.tsl2.nano.core.Environment;
-import de.tsl2.nano.core.Main;
 import de.tsl2.nano.core.ManagedException;
 import de.tsl2.nano.core.cls.BeanClass;
 import de.tsl2.nano.core.exception.Message;
 import de.tsl2.nano.core.execution.CompatibilityLayer;
-import de.tsl2.nano.core.execution.Profiler;
 import de.tsl2.nano.core.log.LogFactory;
 import de.tsl2.nano.core.util.FileUtil;
 import de.tsl2.nano.core.util.StringUtil;
@@ -68,7 +51,6 @@ import de.tsl2.nano.h5.navigation.EntityBrowser;
 import de.tsl2.nano.h5.navigation.IBeanNavigator;
 import de.tsl2.nano.h5.navigation.Workflow;
 import de.tsl2.nano.h5.websocket.NanoWebSocketServer;
-import de.tsl2.nano.h5.websocket.WebSocketDependencyListener;
 import de.tsl2.nano.persistence.GenericLocalBeanContainer;
 import de.tsl2.nano.persistence.Persistence;
 import de.tsl2.nano.persistence.PersistenceClassLoader;
@@ -77,7 +59,6 @@ import de.tsl2.nano.service.util.BeanContainerUtil;
 import de.tsl2.nano.serviceaccess.Authorization;
 import de.tsl2.nano.serviceaccess.IAuthorization;
 import de.tsl2.nano.serviceaccess.ServiceFactory;
-import de.tsl2.nano.serviceaccess.test.ServiceAccessTest.Person;
 import de.tsl2.nano.util.NumberUtil;
 
 /**
@@ -168,6 +149,10 @@ public class NanoH5 extends NanoHTTPD implements IConnector<Persistence> {
                     LOG.warn("couldn't extract resources from internal file " + "tsl2.nano.h5.default-resources.jar",
                         ex);
                 }
+                /*
+                 * on first start, extract the sample files
+                 */
+                ((Html5Presentation)Environment.get(BeanPresentationHelper.class)).createSampleEnvironment();
             }
 
             LOG.info("Listening on port " + serviceURL.getPort() + ". Hit Enter to stop.\n");
@@ -351,71 +336,9 @@ public class NanoH5 extends NanoHTTPD implements IConnector<Persistence> {
         return createPersistenceUnit().getInstance();
     }
 
-    @SuppressWarnings({ "serial" })
     private Bean<Persistence> createPersistenceUnit() {
         final Persistence persistence = Persistence.current();
-        Bean<Persistence> login = Bean.getBean(persistence);
-        if (login.isDefault()) {
-            login.setAttributeFilter("connectionUserName", "connectionPassword", "connectionUrl",
-                "connectionDriverClass", "jarFile", "provider", "datasourceClass", "jtaDataSource", "transactionType",
-                "persistenceUnit", "hibernateDialect", "database", "defaultSchema", "port", "replication",
-                "jdbcProperties");
-            login.setValueExpression(new ValueExpression<Persistence>("{connectionUrl}"));
-        }
-        if (login.toString().matches(Environment.get("default.present.attribute.multivalue", ".*")))
-            login.removeAttributes("jdbcProperties");
-        login.getAttribute("jarFile").getPresentation().setType(IPresentable.TYPE_ATTACHMENT);
-        ((Html5Presentable) login.getAttribute("jarFile").getPresentation()).getLayoutConstraints().put("accept",
-            ".jar");
-//        login.getPresentationHelper().change(BeanPresentationHelper.PROP_DESCRIPTION,
-//            Environment.translate("jarFile.tooltip", true),
-//            "jarFile");
-        login.getPresentationHelper().change(BeanPresentationHelper.PROP_NULLABLE, false);
-        login.getPresentationHelper().change(BeanPresentationHelper.PROP_NULLABLE, true, "connectionPassword");
-        login.getPresentationHelper().change(BeanPresentationHelper.PROP_NULLABLE, true, "replication");
-        login.getPresentationHelper().chg("replication", BeanPresentationHelper.PROP_ENABLER, new IActivable() {
-            @Override
-            public boolean isActive() {
-                return Environment.get("use.database.replication", false);
-            }
-        });
-
-//        ((Map)login.getPresentable().getLayoutConstraints()).put("style", "opacity: 0.9;");
-        IAction<Object> loginAction = new SecureAction<Object>("tsl2nano.login.ok") {
-            //TODO: ref. to persistence class
-            @Override
-            public Object action() throws Exception {
-                persistence.save();
-//                for (int i = 0; i < 100; i++) {
-//                    Thread.sleep(1000);
-//                    Message.send("" +i);
-//                }
-
-                return connect(persistence);
-            }
-
-            @Override
-            public String getImagePath() {
-                return "icons/open.png";
-            }
-
-            @Override
-            public boolean isEnabled() {
-                return true;
-            }
-
-            @Override
-            public boolean isSynchron() {
-                //TODO: for long term use, it's asynchron
-                return true;//TODO: check if beans.jar readable and if authorization profile existent;
-            }
-
-            @Override
-            public boolean isDefault() {
-                return true;
-            }
-        };
-        login.addAction(loginAction);
+        final Bean<Persistence> login = PersistenceUI.createPersistenceUI(persistence, this);
         return login;
     }
 

@@ -181,13 +181,13 @@ public class NanoWebSocketServer extends WebSocketServer {
     }
 
     private BeanDefinition<?> getCurrentBean(String id) {
-        boolean isLoginPersistence = id.startsWith(Persistence.class.getSimpleName().toLowerCase());
-        BeanDefinition<?> currentBean;
-        if (isLoginPersistence) {
-            currentBean = Bean.getBean(Persistence.current());
-        } else {
-            currentBean = (BeanDefinition<?>) session.getWorkingObject();
-        }
+//        boolean isLoginPersistence = id.startsWith(Persistence.class.getSimpleName().toLowerCase());
+//        BeanDefinition<?> currentBean;
+//        if (isLoginPersistence) {
+//            currentBean = Bean.getBean(Persistence.current());
+//        } else {
+            BeanDefinition<?> currentBean = (BeanDefinition<?>) session.getWorkingObject();
+//        }
         return currentBean;
     }
 

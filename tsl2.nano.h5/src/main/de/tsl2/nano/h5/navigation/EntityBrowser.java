@@ -34,9 +34,6 @@ public class EntityBrowser implements IBeanNavigator {
     transient protected Stack<BeanDefinition<?>> navigation;
     transient protected BeanDefinition<?> current;
 
-    protected EntityBrowser() {
-    }
-    
     /**
      * constructor
      * 

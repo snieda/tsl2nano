@@ -46,8 +46,8 @@ public abstract class WebSocketDependencyListener<T> extends AbstractDependencyL
     /**
      * evaluates a new value for it's attribute through a changed depending value.
      * 
-     * @param source value of another attribute
+     * @param value source value of another attribute
      * @return new value
      */
-    abstract protected T evaluate(Object source);
+    abstract protected T evaluate(Object value);
 }

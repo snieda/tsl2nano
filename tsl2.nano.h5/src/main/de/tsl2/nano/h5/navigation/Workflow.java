@@ -35,9 +35,7 @@ import de.tsl2.nano.incubation.vnet.Notification;
  * @author Tom, Thomas Schneider
  * @version $Revision$
  */
-public class Workflow extends EntityBrowser implements Serializable, Cloneable {
-    /** serialVersionUID */
-    private static final long serialVersionUID = 4073303598764074543L;
+public class Workflow extends EntityBrowser implements Cloneable {
     @Attribute
     String name;
     @Transient Net<BeanAct, Parameter> net;

@@ -9,9 +9,14 @@
  */
 package de.tsl2.nano.h5;
 
+import java.io.StringReader;
 import java.io.StringWriter;
 import java.net.URI;
+import java.util.Iterator;
 
+import javax.xml.parsers.DocumentBuilder;
+import javax.xml.parsers.DocumentBuilderFactory;
+import javax.xml.parsers.ParserConfigurationException;
 import javax.xml.transform.OutputKeys;
 import javax.xml.transform.Transformer;
 import javax.xml.transform.TransformerException;
@@ -19,6 +24,8 @@ import javax.xml.transform.TransformerFactory;
 import javax.xml.transform.dom.DOMSource;
 import javax.xml.transform.stream.StreamResult;
 
+import org.xml.sax.InputSource;
+import org.apache.commons.logging.Log;
 import org.w3c.dom.Attr;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
@@ -26,6 +33,7 @@ import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 
 import de.tsl2.nano.core.ManagedException;
+import de.tsl2.nano.core.log.LogFactory;
 import de.tsl2.nano.core.util.StringUtil;
 import de.tsl2.nano.core.util.Util;
 
@@ -37,6 +45,8 @@ import de.tsl2.nano.core.util.Util;
  * @version $Revision$
  */
 public class HtmlUtil {
+    private static final Log LOG = LogFactory.getLog(HtmlUtil.class);
+
     public static final String TAG_HTML = "html";
     public static final String TAG_HEAD = "head";
     public static final String TAG_BODY = "body";
@@ -130,10 +140,12 @@ public class HtmlUtil {
     public static final String ATTR_ALIGN = "align";
     public static final String ALIGN_CENTER = "center";
     public static final String ALIGN_RIGHT = "end";
+    public static final String ALIGN_LEFT = "left";
     public static final String TAG_PRE = "pre";
 
     public static final String TAG_SPAN = "span";
-    public static final String TAG_FONT = "font";
+    //the font tag is not supported in html5
+//    public static final String TAG_FONT = "font";
     public static final String ATTR_COLOR = "color";
 
     public static final String TAG_TABLE = "table";
@@ -162,11 +174,16 @@ public class HtmlUtil {
     public static final String COLOR_LIGHT_RED = "#FFCCCC";
     public static final String COLOR_LIGHT_GREEN = "#CCFFCC";
     public static final String COLOR_LIGHT_BLUE = "#CCCCFF";
+    public static final String COLOR_LIGHTER_BLUE = "#DDDDFF";
     public static final String COLOR_LIGHT_GRAY = "#CCCCCC";
     public static final String COLOR_YELLOW = "#CCCC00";
 
+    /** static styles */
     public static final String STYLE_BACKGROUND_RADIAL_GRADIENT = "background: radial-gradient(#9999FF, #000000);";
     public static final String STYLE_BACKGROUND_LIGHTGRAY = "background: #CCCCCC;";
+    /** dynamic styles. use method {@link #style(String, String)} to set styles! */
+    public static final String STYLE_TEXT_ALIGN = "text-align";
+    public static final String STYLE_FONT_COLOR = "color";
 
     public static final String VAL_100PERCENT = "100%";
     public static final String VAL_FALSE = Boolean.FALSE.toString();
@@ -174,8 +191,6 @@ public class HtmlUtil {
     public static final String VAL_ALIGN_LEFT = "start";
     public static final String VAL_ALIGN_CENTER = "middle";
     public static final String VAL_ALIGN_RIGHT = "end";
-
-    public static final String STYLE_TEXT_ALIGN = "text-align";
 
     public static final String BTN_ASSIGN = "tsl2nano.assign";
     public static final String BTN_SUBMIT = "tsl2nano.save";
@@ -206,11 +221,10 @@ public class HtmlUtil {
     public static final String VAL_OPACITY_0_9 = "opacity:0.9;";
     public static final String VAL_TRANSPARENT_INHERIT = "opacity:0.0;";
     public static final String VAL_TRANSPARENT = "background-color: transparent;";
-    
+
     public static final String XML_TAG_START = "\\<.*\\>";
     public static final String END_TAG = "/";
     public static final String PRE_ATTRIBUTE_FLAG = "FLAG:";
-    
 
     public static Element appendElements(Element parent, String... tagNames) {
         Document doc = parent.getOwnerDocument();
@@ -236,11 +250,61 @@ public class HtmlUtil {
     public static Element appendElement(Element parent, String tagName, StringBuilder content, String... attributes) {
         Document doc = parent.getOwnerDocument();
         Element e = doc.createElement(tagName);
-        if (content != null)
-            e.setTextContent(content.toString());
+        if (content != null) {
+            String c = content.toString();
+            if (isHtml(c))
+                appendNodesFromText(e, c);
+            else
+                e.setTextContent(c);
+        }
         appendAttributes(e, attributes);
         parent.appendChild(e);
         return e;
+    }
+
+    /**
+     * appendNodesFromText
+     * 
+     * @param e element to add new nodes
+     * @param text to be parsed into nodes to be appended to the given element
+     */
+    public static void appendNodesFromText(Element e, String text) {
+        try {
+            LOG.info("trying to parse text into html:" + text);
+            /*
+             * 1. if the text contains literals outside of its tags, they have to
+             *    be wrapped into symbolic tags.
+             * 2. if there are more than one tag, create a root tag
+             */
+            final String BEG = begin(TAG_SPAN), END = end(TAG_SPAN);
+            String prefix = StringUtil.substring(text, null, "<");
+            if (!Util.isEmpty(prefix))
+                text = text.replace(prefix, BEG + prefix + END);
+            String postfix = StringUtil.substring(text, ">", null, true);
+            if (!Util.isEmpty(postfix))
+                text = text.replace(postfix, BEG + postfix + END);
+            
+            text = BEG + text + END;
+            
+            /*
+             * now, parse the text
+             */
+            DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
+            DocumentBuilder builder = factory.newDocumentBuilder();
+            InputSource is = new InputSource(new StringReader(text));
+            Document d = builder.parse(is);
+
+            /*
+             * fill the parsed nodes into our document
+             */
+            Document doc = e.getOwnerDocument();
+            NodeList childNodes = d.getChildNodes();
+            for (int i = 0; i < childNodes.getLength(); i++) {
+                e.appendChild(doc.adoptNode(childNodes.item(i)));
+            }
+        } catch (Exception e1) {
+            ManagedException.forward(e1);
+        }
     }
 
     /**
@@ -262,7 +326,7 @@ public class HtmlUtil {
             if (attrName.startsWith(PRE_ATTRIBUTE_FLAG)) {
                 attrName = StringUtil.substring(attrName, PRE_ATTRIBUTE_FLAG, null);
                 attr = doc.createAttribute(attrName);
-            } else if (i < attributes.length - 1 && attributes[i+1] != null) {
+            } else if (i < attributes.length - 1 && attributes[i + 1] != null) {
                 attr = doc.createAttribute(attrName);
                 attr.setValue(Util.asString(attributes[++i]));
             } else {
@@ -393,8 +457,15 @@ public class HtmlUtil {
     public static boolean isHtml(String asString) {
         return asString != null && (asString.contains("</") || asString.contains("/>"));
     }
-    
+
     public static String cdata(String data) {
         return "<![CDATA[" + data + "]]>";
+    }
+    
+    public static String begin(String tagName) {
+        return "<" + tagName + ">";
+    }
+    public static String end(String tagName) {
+        return "</" + tagName + ">";
     }
 }

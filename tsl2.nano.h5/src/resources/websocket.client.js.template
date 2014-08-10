@@ -153,7 +153,7 @@ function inputassistselect(e) {
  * calling refreshdependency() for each listener to refresh it's value on client side.
  */
 function evaluatedependencies(e) {
-	var msg = createMessage('dependency', e.srcElement.id, e.data);
+	var msg = createMessage('dependency', e.srcElement.id, e.srcElement.value);
 	showStatusMessage(msg);
 	socket.send(msg);
 }
@@ -166,8 +166,8 @@ function refreshdependency(msg) {
 	showStatusMessage('refreshing dependency: ' + msg);
 	var id = getId(msg);
 	var value = getValue(msg);
-	
-	document.getElementById(id).value = value;
+	if (value != null)
+		document.getElementById(id).value = value;
 }
 
 /**
