@@ -26,6 +26,7 @@ import java.util.Map;
 import java.util.Set;
 
 import javax.persistence.Column;
+import javax.persistence.EmbeddedId;
 import javax.persistence.Entity;
 import javax.persistence.EntityManager;
 import javax.persistence.Id;
@@ -648,6 +649,9 @@ public class ServiceUtil {
             if (m.isAnnotationPresent(javax.persistence.Id.class)) {
                 LOG.debug("invoking bean-id on : " + m);
                 return m;
+            } else if (m.isAnnotationPresent(EmbeddedId.class)) {
+                LOG.debug("invoking bean-embedded-id on : " + m);
+                return m;
             }
         }
         return null;
@@ -657,6 +661,8 @@ public class ServiceUtil {
         final Field[] fields = bean.getClass().getDeclaredFields();
         for (final Field f : fields) {
             if (f.isAnnotationPresent(javax.persistence.Id.class)) {
+                return f;
+            } else if (f.isAnnotationPresent(EmbeddedId.class)) {
                 return f;
             }
         }
@@ -672,7 +678,9 @@ public class ServiceUtil {
         for (final Field f : fields) {
             if (f.isAnnotationPresent(javax.persistence.Id.class)) {
                 return f;
-            }
+            } else if (f.isAnnotationPresent(EmbeddedId.class)) {
+                    return f;
+                }
         }
         Class superClass = clazz.getSuperclass();
         return superClass != null ? getSuperIdField(superClass) : null;
@@ -680,11 +688,15 @@ public class ServiceUtil {
 
     public static String getIdName(Object bean) {
         final BeanClass bc = BeanClass.getBeanClass(bean.getClass());
-        final Collection<BeanAttribute> attributes = bc.findAttributes(Id.class);
+        Collection<BeanAttribute> attributes = bc.findAttributes(Id.class);
         if (attributes.size() > 0) {
             return attributes.iterator().next().getName();
         } else {
-            return null;
+            attributes = bc.findAttributes(EmbeddedId.class);
+            if (attributes.size() > 0) {
+                return attributes.iterator().next().getName();
+            } else
+                return null;
         }
     }
 
@@ -720,7 +732,6 @@ public class ServiceUtil {
      * @param firstBean min range
      * @param secondBean max range
      */
-    @SuppressWarnings({ "unchecked", "rawtypes" })
     public static <T> void prepareStringValuesForBetween(T firstBean, T secondBean) {
         final Class<?> clazz = firstBean.getClass();
         final BeanClass bclazz = BeanClass.getBeanClass(clazz);

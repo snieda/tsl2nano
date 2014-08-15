@@ -9,6 +9,7 @@
  */
 package de.tsl2.nano.service.util;
 
+import java.io.Serializable;
 import java.lang.annotation.Annotation;
 import java.sql.Time;
 import java.sql.Timestamp;
@@ -19,10 +20,12 @@ import java.util.Map;
 
 import javax.persistence.CascadeType;
 import javax.persistence.Column;
+import javax.persistence.EmbeddedId;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
 import javax.persistence.JoinColumn;
+import javax.persistence.MapsId;
 import javax.persistence.OneToMany;
 import javax.persistence.Temporal;
 import javax.persistence.TemporalType;
@@ -34,6 +37,9 @@ import de.tsl2.nano.action.IAction;
 import de.tsl2.nano.bean.BeanContainer;
 import de.tsl2.nano.bean.BeanUtil;
 import de.tsl2.nano.bean.IAttributeDef;
+import de.tsl2.nano.bean.def.Bean;
+import de.tsl2.nano.bean.def.IAttributeDefinition;
+import de.tsl2.nano.bean.def.IValueDefinition;
 import de.tsl2.nano.core.Environment;
 import de.tsl2.nano.core.ManagedException;
 import de.tsl2.nano.core.cls.BeanAttribute;
@@ -249,7 +255,9 @@ public class BeanContainerUtil {
                 .getAnnotation(JoinColumn.class);
             final/*OneToMany*/Annotation oneToMany = battr
                 .getAnnotation(OneToMany.class);
-            final/*Id*/Annotation id = battr.getAnnotation(Id.class);
+            /*Id*/Annotation id0 = battr.getAnnotation(Id.class);
+            /*Id*/Annotation id1 = battr.getAnnotation(EmbeddedId.class);
+            final/*Id*/Annotation id = id0 != null ? id0 : id1 != null ? id1 : battr.getAnnotation(MapsId.class);
             final/*Temporal*/Annotation temporal = battr.getAnnotation(Temporal.class);
             if (column == null) {
                 if (joinColumn != null) {
@@ -260,7 +268,7 @@ public class BeanContainerUtil {
                         Boolean composition;
                         Boolean cascading;
                         Boolean generatedValue;
-                        
+
                         @Override
                         public int scale() {
                             return -1;
@@ -325,6 +333,7 @@ public class BeanContainerUtil {
                             }
                             return cascading;
                         }
+
                         @Override
                         public boolean generatedValue() {
                             if (generatedValue == null)
@@ -400,6 +409,7 @@ public class BeanContainerUtil {
                             }
                             return cascading;
                         }
+
                         @Override
                         public boolean generatedValue() {
                             if (generatedValue == null)
@@ -480,6 +490,7 @@ public class BeanContainerUtil {
                     public boolean cascading() {
                         return false;
                     }
+
                     @Override
                     public boolean generatedValue() {
                         if (generatedValue == null)
@@ -518,5 +529,83 @@ public class BeanContainerUtil {
     public static final void clear() {
         LOG.info("removing " + attrDefCache.size() + " cached IAttrDefinitions");
         attrDefCache.clear();
+    }
+
+    /**
+     * On a database with real IDs (not generated synthetic IDs), these IDs are composition of one or more fields. An
+     * entity generation tool like hibernate creates embedded composite id objects that are not synchronized with
+     * changes on the standard fields of this entity.
+     * <p/>
+     * Example:
+     * 
+     * <pre>
+     * &#064;Entity
+     * class Person {
+     *     &#064;Id
+     *     PersonID id;
+     *     &#064;JoinColumn(COLUMNNAME)
+     *     Organization org;
+     * 
+     *     &#064;Embedded
+     *     class PersonID {
+     *         String name;
+     *         &#064;Column(COLUMNNAME)
+     *         String orgid;
+     *     }
+     * }
+     * 
+     * If attribute 'org' gets another reference, this change should be done on 'PersonID.orgid', too.
+     * </pre>
+     * 
+     * TODO: create a performance optimized solution
+     * 
+     * @param entity entity having a composite id to be synchronized with value changes on other attributes
+     * @param attributeNames attributes to synchronize. if no attributeName is given, all attributeNames of the entity
+     *            will be synchronized.
+     */
+    public static void synchronizeEmbeddedCompositeID(Serializable entity, String... attributeNames) {
+        /*
+         * get the entities id to check, whether synchronization has to be done.
+         */
+        Bean<Serializable> bean = Bean.getBean(entity);
+        Serializable id = (Serializable) bean.getId();
+        // a composite key is not a standard type like String or Number
+        if (BeanUtil.isStandardType(id))
+            return;
+
+        if (attributeNames.length == 0)
+            attributeNames = bean.getAttributeNames();
+
+        for (int i = 0; i < attributeNames.length; i++) {
+            /*
+             * get the JoinColumn name - the database foreign key name
+             */
+            BeanAttribute attribute = BeanAttribute.getBeanAttribute(bean.getDeclaringClass(), attributeNames[i]);
+            JoinColumn jc = (JoinColumn) attribute.getAnnotation(JoinColumn.class);
+
+            if (jc != null) {
+                /*
+                 * check the id object to have an attribute with a column annotation with same foreign key
+                 */
+                Bean idBean = Bean.getBean(id);
+                String[] idAttrNames = idBean.getAttributeNames();
+                BeanAttribute idAttr;
+                Column c;
+                Object valueObject, value;
+                for (int j = 0; j < idAttrNames.length; j++) {
+                    idAttr = BeanAttribute.getBeanAttribute(idBean.getDeclaringClass(), idAttrNames[j]);
+                    c = (Column) idAttr.getAnnotation(Column.class);
+                    if (c != null && c.name().equals(jc.name())) {
+                        valueObject = attribute.getValue(entity);
+                        if (valueObject != null)
+                            value = Bean.getBean((Serializable)valueObject).getId();
+                        else
+                            value = null;
+                        //TODO: shell we do a check against the types?
+                        idAttr.setValue(id, value);
+                    }
+                }
+            }
+        }
     }
 }
