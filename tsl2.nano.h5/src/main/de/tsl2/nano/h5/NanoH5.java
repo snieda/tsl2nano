@@ -434,6 +434,7 @@ public class NanoH5 extends NanoHTTPD implements IConnector<Persistence> {
         });
         //perhaps, create the first environment.xml
         if (!Environment.isPersisted()) {
+            Environment.setAutopersist(true);
             Environment.persist();
             BeanDefinition.dump();
         }

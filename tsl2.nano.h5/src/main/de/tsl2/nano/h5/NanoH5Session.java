@@ -29,6 +29,7 @@ import java.util.Collection;
 import java.util.Date;
 import java.util.HashSet;
 import java.util.LinkedList;
+import java.util.List;
 import java.util.Properties;
 import java.util.Set;
 
@@ -57,6 +58,7 @@ import de.tsl2.nano.core.log.LogFactory;
 import de.tsl2.nano.core.util.DateUtil;
 import de.tsl2.nano.core.util.NetUtil;
 import de.tsl2.nano.core.util.StringUtil;
+import de.tsl2.nano.core.util.Util;
 import de.tsl2.nano.format.RegExpFormat;
 import de.tsl2.nano.h5.NanoHTTPD.Response;
 import de.tsl2.nano.h5.configuration.BeanConfigurator;
@@ -64,6 +66,7 @@ import de.tsl2.nano.h5.navigation.IBeanNavigator;
 import de.tsl2.nano.h5.websocket.NanoWebSocketServer;
 import de.tsl2.nano.h5.websocket.WebSocketExceptionHandler;
 import de.tsl2.nano.persistence.Persistence;
+import de.tsl2.nano.service.util.BeanContainerUtil;
 import de.tsl2.nano.serviceaccess.IAuthorization;
 import de.tsl2.nano.util.NumberUtil;
 
@@ -97,6 +100,9 @@ public class NanoH5Session implements ISession {
     /** sessions exceptionHandler */
     ExceptionHandler exceptionHandler;
 
+    /** logs all user actions to be given on error-handling */
+    List<String> actionLog;
+
     /** for profiling in status-line (current work-time) */
     long startTime;
 
@@ -126,6 +132,7 @@ public class NanoH5Session implements ISession {
         this.nav = navigator;
         this.sessionClassloader = appstartClassloader;
         createExceptionHandler();
+        this.actionLog = new LinkedList<>();
         this.authorization = authorization;
         this.context = context;
         this.sessionStart = System.currentTimeMillis();
@@ -231,10 +238,19 @@ public class NanoH5Session implements ISession {
             }
         } catch (Throwable e /*respect errors like NoClassDefFound...the application should continue!*/) {
             LOG.error(e);
-            RuntimeException ex = ManagedException.toRuntimeEx(e, true);
+            ManagedException ex = (ManagedException) new ManagedException(e) {
+                @Override
+                public String getMessage() {
+                    return super.getMessage() + "\n\nAction-Stack:\n"
+                        + StringUtil.toFormattedString(actionLog, 1000, true);
+                }
+            };
             msg = refreshPage(ex);
             Message.send(exceptionHandler, ex.toString());
             response = server.createResponse(HTTP_BADREQUEST, MIME_HTML, msg);
+            actionLog.clear();
+            //don't forget that there was an exception. to be seen on the next exception ;-)
+            logaction(ex.toString(), parms);
         }
         //TODO: eliminate bug in NanoHTTPD not resetting uri...
 //        header.clear();
@@ -302,6 +318,7 @@ public class NanoH5Session implements ISession {
 //        }
         Object responseObject = null;
         if (parms.containsKey(IAction.CANCELED)) {
+            logaction(IAction.CANCELED, null);
             if (nav.current() != null) {
                 ((BeanDefinition) nav.current()).onDeactivation();
 
@@ -353,6 +370,12 @@ public class NanoH5Session implements ISession {
                     }
                 }
             }
+        } else if (nav.current() instanceof Bean) {//detail bean
+            //on database models with composite-ids, these ids should be synchronized with standard values.
+            Bean bean = (Bean) nav.current();
+            if (bean.isPersistable()) {
+                BeanContainerUtil.synchronizeEmbeddedCompositeID((Serializable) bean.getInstance());
+            }
         }
         //collect available actions
         Collection<IAction> actions = null;
@@ -378,6 +401,7 @@ public class NanoH5Session implements ISession {
                 String p = (String) k;
                 IAction<?> action = getAction(actions, p);
                 if (action != null) {
+                    logaction(action, parms);
                     //send this information to the client to show a progress bar.
                     Message.send("submit");
                     Message.send(Environment.translate("tsl2nano.starting", true) + " "
@@ -416,6 +440,7 @@ public class NanoH5Session implements ISession {
                     break;
                 } else {
                     if (p.endsWith(IPresentable.POSTFIX_SELECTOR)) {
+                        logaction(p, null);
                         String n = StringUtil.substring(p, null, IPresentable.POSTFIX_SELECTOR);
                         final BeanValue assignableAttribute = (BeanValue) c.getAttribute(n);
                         responseObject = assignableAttribute.connectToSelector(c);
@@ -425,6 +450,15 @@ public class NanoH5Session implements ISession {
             }
         }
         return responseObject;
+    }
+
+    private void logaction(IAction<?> action, Properties parameter) {
+        logaction(action.getId(), parameter);
+    }
+
+    private void logaction(String id, Properties p) {
+        actionLog.add(DateUtil.getFormattedTimeStamp() + " ==> " + id + " (" + nav.current() + ")"
+            + (!Util.isEmpty(p) ? "\n\t" + p : ""));
     }
 
     /**
@@ -680,6 +714,11 @@ public class NanoH5Session implements ISession {
     @Override
     public IAuthorization getUserAuthorization() {
         return authorization;
+    }
+
+    @Override
+    public Object[] getNavigationStack() {
+        return nav.toArray();
     }
 
     public Object getWorkingObject() {

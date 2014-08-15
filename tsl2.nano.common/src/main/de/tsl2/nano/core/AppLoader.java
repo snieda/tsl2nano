@@ -125,6 +125,7 @@ public class AppLoader {
      * @param args main args (must not be null!)
      */
     public void start(String mainclass, String environment, String mainmethod, String[] args) {
+        try {
         /*
          * check and use the AppLoaders main arguments
          */
@@ -198,6 +199,10 @@ public class AppLoader {
          * new environment and classloader
          */
         bc.callMethod(null, mainmethod, new Class[] { String[].class }, new Object[] { args });
+        } catch (Throwable ex) {
+            //main exception catching: log the exception before exiting!
+            ex.printStackTrace();
+        }
     }
 
     /**

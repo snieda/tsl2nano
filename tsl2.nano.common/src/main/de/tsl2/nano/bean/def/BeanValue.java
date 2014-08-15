@@ -495,12 +495,13 @@ public class BeanValue<T> extends AttributeDefinition<T> implements IValueDefini
             public IBeanCollector<?, T> action() throws Exception {
                 BeanCollector<?, ?> beanCollector;
                 Composition comp = composition() ? CompositionFactory.createComposition(BeanValue.this) : null;
+                boolean enabled = BeanValue.this.getPresentation().getEnabler().isActive();
                 if (isMultiValue()) {
                     Selector<T> vsel = selector();
                     Collection<T> collection = vsel.getValueAsCollection();
                     beanCollector = BeanCollector.getBeanCollector(vsel.getCollectionEntryType(),
                         collection,
-                        MODE_ALL,
+                        enabled ? MODE_ALL : 0,
                         comp);
                     if (collection == null) {
                         vsel.createCollectionValue();
@@ -511,7 +512,7 @@ public class BeanValue<T> extends AttributeDefinition<T> implements IValueDefini
                     T v = getValue();
                     if (v != null)
                         selection.add(v);
-                    beanCollector = BeanCollector.getBeanCollector(getType(), selection, MODE_ALL_SINGLE, comp);
+                    beanCollector = BeanCollector.getBeanCollector(getType(), selection, enabled ? MODE_ALL_SINGLE : 0, comp);
                     beanCollector.setSelectionProvider(new SelectionProvider(selection));
                 }
                 return (IBeanCollector<?, T>) beanCollector;

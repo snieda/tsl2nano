@@ -32,7 +32,7 @@ import de.tsl2.nano.core.util.StringUtil;
  */
 public class NetworkClassLoader extends NestedJarClassLoader {
     private static final Log LOG = LogFactory.getLog(NetworkClassLoader.class);
-    
+
     /** persistent cache for classes that couldn't be loaded through network. */
     static final List<String> unresolveables = new ArrayList<String>();
 
@@ -109,7 +109,7 @@ public class NetworkClassLoader extends NestedJarClassLoader {
             String pckName = getPackageName(name);
             if (!unresolveables.contains(pckName)) {
                 try {
-                    if (Environment.loadDependencies(name) != null) {
+                    if (isClassName(name) && Environment.loadDependencies(name) != null) {
                         //reload jar-files from environment
                         addLibraryPath(environment);
                     }
@@ -125,6 +125,16 @@ public class NetworkClassLoader extends NestedJarClassLoader {
                 throw e;
             }
         }
+    }
+
+    /**
+     * checks for minimal name conventions to avoid dependency loading on non-classes like resources.
+     * 
+     * @param name name to check
+     * @return true, if at least one package is given and class name starts with upper case
+     */
+    private boolean isClassName(String name) {
+        return name.matches(".*[.][A-Z]\\w*");
     }
 
     private String getPackageName(String name) {

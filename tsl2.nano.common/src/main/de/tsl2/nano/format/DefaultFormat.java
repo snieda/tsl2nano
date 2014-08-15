@@ -19,6 +19,7 @@ import java.util.Date;
 import java.util.Map;
 
 import org.apache.commons.logging.Log;
+import org.simpleframework.xml.Attribute;
 
 import de.tsl2.nano.bean.BeanUtil;
 import de.tsl2.nano.core.Environment;
@@ -45,6 +46,9 @@ public class DefaultFormat extends Format {
     private static final long serialVersionUID = -2809606292844082233L;
 
     private static final Log LOG = LogFactory.getLog(DefaultFormat.class);
+    
+    @Attribute(required=false) //workaround for simple-xml to have at least one field!
+    Boolean empty;
     
     /**
      * constructor

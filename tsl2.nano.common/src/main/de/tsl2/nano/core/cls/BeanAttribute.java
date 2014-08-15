@@ -231,12 +231,14 @@ public class BeanAttribute<T> implements IAttribute<T> {
      */
     public void setValue(Object beanInstance, Object value) {
         if (hasWriteAccess()) {
-            try {
-                writeAccessMethod.setAccessible(true);
-                writeAccessMethod.invoke(beanInstance, new Object[] { value });
-            } catch (final Exception e) {
-                ManagedException.forward(e);
-            }
+            //on primitive it is not possible to set a null value - we ignore setValue(null)
+            if (!(getType().isPrimitive() && value == null))
+                try {
+                    writeAccessMethod.setAccessible(true);
+                    writeAccessMethod.invoke(beanInstance, new Object[] { value });
+                } catch (final Exception e) {
+                    ManagedException.forward(e);
+                }
         } else {
             LOG.warn("no write access for attribute value '" + getName() + "'! missing setter for: " + readAccessMethod);
         }
@@ -408,6 +410,28 @@ public class BeanAttribute<T> implements IAttribute<T> {
     @Override
     public boolean equals(Object obj) {
         return hashCode() == obj.hashCode();
+    }
+
+    /**
+     * soft evaluation of annotation values. uses reflection instead of direct calls on annotation properties.
+     * <p/>
+     * evaluates annotation values (on field or method) and returns an object array holding the annotation values in the
+     * same order like the member names where given
+     * 
+     * @param annotationClass type of annotation to be found
+     * @param memberNames annotation members to evaluate the values for
+     * @return values of given member names or null, if no annotation of given type was found
+     */
+    public <A extends Annotation> Object[] getAnnotationValues(Class<A> annotationClass, String... memberNames) {
+        A a = getAnnotation(annotationClass);
+        if (a == null)
+            return null;
+        BeanClass bc = BeanClass.getBeanClass(a.getClass());
+        Object[] values = new Object[memberNames.length];
+        for (int i = 0; i < memberNames.length; i++) {
+            values[i] = bc.callMethod(a, memberNames[i]);
+        }
+        return values;
     }
 
     /**

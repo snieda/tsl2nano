@@ -35,6 +35,7 @@ import java.util.Date;
 import java.util.Iterator;
 import java.util.LinkedHashSet;
 import java.util.LinkedList;
+import java.util.List;
 import java.util.NavigableMap;
 import java.util.NavigableSet;
 import java.util.Properties;
@@ -370,13 +371,13 @@ public class BeanPresentationHelper<T> {
         return CollectionUtil.getSortedList(collection, STRING_COMPARATOR, beanAttribute.getName(), false);
     }
 
-    public int getDefaultType(AttributeDefinition<?> attr) {
+    public int getDefaultType(IAttributeDefinition<?> attr) {
         if (attr.temporalType() != null && Timestamp.class.isAssignableFrom(attr.temporalType()))
             return IPresentable.TYPE_DATE | IPresentable.TYPE_TIME;
         if (attr.temporalType() != null && Time.class.isAssignableFrom(attr.temporalType()))
             return IPresentable.TYPE_TIME;
         int type = getDefaultType((IAttribute) attr);
-        if (attr.length() > Environment.get("field.min.multiline.length", 100))
+        if (attr.length() > Environment.get("field.min.multiline.length", 100) || attr.isMultiValue())
             type |= IPresentable.TYPE_INPUT_MULTILINE;
         return type;
     }
@@ -993,10 +994,14 @@ public class BeanPresentationHelper<T> {
         NavigableMap<Integer, Integer> levels = new TreeMap<Integer, Integer>();
         for (int i = 0; i < names.length; i++) {
             IAttributeDefinition attr = bean.getAttribute(names[i]);
-            if (attr.getType().isInterface() || attr.isMultiValue()
-                || !BeanClass.hasDefaultConstructor(attr.getType())
-                || (!attr.isVirtual() && isGeneratedValue(bean.getDeclaringClass(), names[i])))
+            if (attr.isMultiValue()) //always the multivalues at the end!
                 ml = Integer.MIN_VALUE;
+            else if (attr.getType().isInterface()
+                || (!BeanUtil.isStandardType(attr.getType()) && !BeanClass.hasDefaultConstructor(attr.getType()))
+                || (!attr.isVirtual() && isGeneratedValue(bean.getDeclaringClass(), names[i])))
+                ml = Short.MIN_VALUE;
+            else if (attr.getConstraint().getPrecision() > 0)
+                ml = Byte.MIN_VALUE;
             //avoid stackoverflow checking if valueExpression was created already
             else if (bean.valueExpression == null || isDefaultAttribute((IAttribute) attr)) {
                 ml = 0;
@@ -1213,6 +1218,33 @@ public class BeanPresentationHelper<T> {
 
     protected boolean isRootBean() {
         return bean != null && BeanCollector.class.isAssignableFrom(bean.getDeclaringClass());
+    }
+
+    /**
+     * tries to set values from navigation/history queue to this new bean - created by BeanCollector.createItem().
+     * 
+     * @param session current session
+     */
+    protected void addSessionValues(ISession session) {
+        if (bean.getId() != null)
+            throw new IllegalStateException("this method should only be called on new/transient objects! bean:" + bean);
+        Bean b = (Bean) bean;
+
+        List<BeanValue> beanValues = b.getBeanValues();
+        BeanDefinition[] navigation = (BeanDefinition[]) session.getNavigationStack();
+        for (int i = 0; i < navigation.length; i++) {
+            if (navigation[i].isPersistable() && !navigation[i].isMultiValue()) {
+                Object instance = ((Bean)navigation[i]).getInstance();
+                Class<?> type = navigation[i].getDeclaringClass();
+                
+                for (BeanValue bv : beanValues) {
+                    if (type.isAssignableFrom(bv.getType()) && !bv.composition() && !bv.isMultiValue() && !bv.id() && bv.isSelectable()
+                        && !bv.getConstraint().isNullable()) {
+                        bv.setValue(instance);
+                    }
+                }
+            }
+        }
     }
 
     /**
@@ -1484,7 +1516,7 @@ public class BeanPresentationHelper<T> {
     public BeanPresentationHelper createHelper(BeanDefinition def) {
         return new BeanPresentationHelper(def);
     }
-    
+
     /**
      * createPresentable
      * 

@@ -367,7 +367,7 @@ public class HtmlUtil {
     }
 
     public static final String style(String styleKey, String styleValue) {
-        return styleKey + ": " + styleValue;
+        return styleKey + ": " + styleValue + ";";
     }
 
     /**

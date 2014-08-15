@@ -68,7 +68,7 @@ public class ValueExpression<TYPE> implements
      * Example using {@link MessageFormat}:
      * 
      * <pre>
-     * { birthday, date, medium }
+     * {birthday}, {date}, {medium}
      * </pre>
      * 
      * Example using {@link Formatter}:
@@ -197,13 +197,18 @@ public class ValueExpression<TYPE> implements
         }
     }
 
+    public TYPE createExampleBean(String toValue) {
+        return createExampleBean(toValue, false);
+    }
+
     /**
      * createExampleBean
      * 
      * @param toValue
+     * @param addSearchPostfix if true, an '*' will be added on attributes of type {@link CharSequence}.
      * @return example bean holding attributes given by toValue
      */
-    public TYPE createExampleBean(String toValue) {
+    public TYPE createExampleBean(String toValue, boolean addSearchPostfix) {
         TYPE exampleBean = createInstance(toValue);
         //TODO: how-to extract the attribute-name information from expression?
         Bean<TYPE> b = (Bean<TYPE>) Bean.getBean((Serializable) exampleBean);
@@ -217,7 +222,12 @@ public class ValueExpression<TYPE> implements
                     BeanDefinition.getBeanDefinition(attr.getType()).getValueExpression().from(attributeValues[i]);
                 b.setValue(attributes[i], v);
             } else {//here we are able to directly parse the string to a value
-                b.setParsedValue(attributes[i], attributeValues[i]);
+                b.setParsedValue(
+                    attributes[i],
+                    attributeValues[i]
+                        + (addSearchPostfix
+                            && (attr.getType() == null || CharSequence.class.isAssignableFrom(attr.getType())) ? "*"
+                            : ""));
             }
         }
         return b.instance;
@@ -446,8 +456,8 @@ public class ValueExpression<TYPE> implements
 
     @Override
     public Collection<TYPE> matchingObjects(Object prefix) {
-        String input = Util.asString(prefix).trim() + "*";
-        TYPE exampleBean = createExampleBean(input);
+        String input = Util.asString(prefix).trim();
+        TYPE exampleBean = createExampleBean(input, true);
         Collection<TYPE> values =
             BeanContainer.instance().getBeansByExample(exampleBean, true, 0,
                 Environment.get("websocket.intputassist.maxitemcount", 20));

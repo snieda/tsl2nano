@@ -21,6 +21,7 @@ import java.util.Locale;
 
 import de.tsl2.nano.core.ManagedException;
 import de.tsl2.nano.core.cls.BeanClass;
+import de.tsl2.nano.core.cls.PrimitiveUtil;
 import de.tsl2.nano.core.util.BitUtil;
 import de.tsl2.nano.core.util.DateUtil;
 import de.tsl2.nano.core.util.StringUtil;
@@ -346,6 +347,6 @@ public class NumberUtil extends BitUtil {
      * @return default instance (value=0) of the given number type
      */
     public static <T extends Number> T getDefaultInstance(Class<T> numberType) {
-        return BeanClass.createInstance(numberType, 0);
+        return numberType.isPrimitive() ? PrimitiveUtil.getDefaultValue(numberType) : BeanClass.createInstance(numberType, 0);
     }
 }

@@ -538,6 +538,25 @@ public class StringUtil {
         return buf.length() > sep.length ? buf.substring(0, buf.length() - sep.length) : buf.toString();
     }
 
+    /**
+     * concats the given names into one string, while each name is wrapped into 'wrap'.
+     * {@link MessageFormat#format(String, Object...)} is used, so wrap should contain at least '{0}'.if a name is null,
+     * it will be ignored.
+     * 
+     * @param wrap name wrapper. e.g.: '${{0}}'
+     * @param names names to combine
+     * @return all names (without nulls)
+     */
+    public static final String concatWrap(char[] wrap, Object... names) {
+        final StringBuffer buf = new StringBuffer(names.length * 15);
+        final String wwrap = String.valueOf(wrap);
+        for (int i = 0; i < names.length; i++) {
+            if (names[i] != null)
+                buf.append(MessageFormat.format(wwrap, names[i]));
+        }
+        return buf.toString();
+    }
+
     public static final String findRegExp(String text, String regex, int start) {
         final Matcher matcher = Pattern.compile(regex).matcher(text);
         return matcher.find(start) ? matcher.group() : null;

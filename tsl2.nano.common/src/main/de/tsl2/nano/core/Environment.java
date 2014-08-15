@@ -27,6 +27,7 @@ import java.util.Map;
 import java.util.Properties;
 import java.util.ResourceBundle;
 import java.util.Set;
+import java.util.TreeMap;
 
 import org.simpleframework.xml.Default;
 import org.simpleframework.xml.DefaultType;
@@ -74,8 +75,9 @@ public class Environment {
 //    Log LOG = LogFactory.getLog(Environment.class);
 
     private static Environment self;
+    @SuppressWarnings("rawtypes")
     @ElementMap(entry = "property", key = "name", attribute = true, inline = true, required = false, keyType = String.class, valueType = Object.class)
-    private Properties properties;
+    private TreeMap properties;
 
     /**
      * holds all already loaded services - but wrapped into {@link ServiceProxy}. the {@link #serviceLocator} holds the
@@ -84,6 +86,9 @@ public class Environment {
     @ElementMap(entry = "service", key = "interface", attribute = true, inline = true, required = false, keyType = Class.class, valueType = Object.class)
     Map<Class<?>, Object> services;
 
+    /** if true, this environment will be persisted on any change. */
+    transient boolean autopersist = false;
+    
     public static final String FRAMEWORK = "de.tsl2.nano";
     public static final String PREFIX = Environment.class.getPackage().getName() + ".";
 
@@ -189,6 +194,7 @@ public class Environment {
         return self;
     }
 
+    @SuppressWarnings("rawtypes")
     public static void create(String dir) {
         new File(dir).mkdirs();
         LogFactory.setLogFile(dir + "/" + "logfactory.log");
@@ -240,7 +246,7 @@ public class Environment {
 //                setProperty(KEY_CONFIG_PATH, configPath + "/");
         } else {
             self = new Environment();
-            self.properties = new Properties();
+            self.properties = new TreeMap();
 //          LOG.warn("no environment.properties available");
         }
         p.put("build.info", getBuildInformations());
@@ -251,7 +257,7 @@ public class Environment {
         new File(self.getTempPath()).mkdir();
         self.services = new Hashtable<Class<?>, Object>();
         registerBundle(PREFIX + "messages", true);
-        if (new File("messages.properties").canRead())
+        if (new File(getConfigPath() + "messages.properties").canRead())
             registerBundle("messages", true);
         addService(Profiler.class, Profiler.si());
         ExceptionHandler exceptionHandler = new ExceptionHandler();
@@ -338,13 +344,14 @@ public class Environment {
      * @return property value
      */
     public static String getProperty(String key) {
-        return self().properties.getProperty(key);
+        return (String) self().properties.get(key);
     }
 
     /**
      * @return Returns the properties.
      */
-    public static Properties getProperties() {
+    @SuppressWarnings("rawtypes")
+    public static Map getProperties() {
         return self().properties;
     }
 
@@ -356,15 +363,17 @@ public class Environment {
      */
     public static void setProperty(String key, Object value) {
         self().properties.put(key, value);
-//        FileUtil.saveProperties(CONFIG_FILE_NAME, self().properties);
+        if (self().autopersist)
+            self().persist();
     }
 
     /**
      * @param properties The properties to set.
      */
-    public static void setProperties(Properties properties) {
-        self().properties = properties;
-//        FileUtil.saveProperties(CONFIG_FILE_NAME, self().properties);
+    public static void setProperties(Map properties) {
+//        self().properties = properties;
+        if (self().autopersist)
+            self().persist();
     }
 
     /**
@@ -448,7 +457,7 @@ public class Environment {
     }
 
     public static String getConfigPath() {
-        return self().properties.getProperty(KEY_CONFIG_PATH);
+        return getProperty(KEY_CONFIG_PATH);
     }
 
     public static String getTempPath() {
@@ -475,6 +484,20 @@ public class Environment {
     }
 
     /**
+     * @return Returns the autopersist.
+     */
+    public static final boolean isAutopersist() {
+        return self().autopersist;
+    }
+
+    /**
+     * @param autopersist The autopersist to set.
+     */
+    public static final void setAutopersist(boolean autopersist) {
+        self().autopersist = autopersist;
+    }
+
+    /**
      * persists the given object through configured xml persister.
      * 
      * @param obj object to serialize to xml.
@@ -496,6 +519,7 @@ public class Environment {
      * persists the current environment - all transient properties and services will be lost!!!
      */
     public final static void persist() {
+        //save backup while some key/values will be removed if not serializable
         Properties tempProperties = new Properties();
         tempProperties.putAll(self().properties);
         Map<Class<?>, Object> tempServices = new Hashtable<Class<?>, Object>(services());
@@ -707,29 +731,47 @@ public class Environment {
     @Persist
     protected void initSerialization() {
         /*
-         * remove the environment path itself - should not reloaded
+         * remove the environment path itself - should not be reloaded
          */
         properties.remove(KEY_CONFIG_PATH);
 
         /*
-         * remove all not serialiable objects
+         * remove all not-serializable objects
          */
         Set<Object> keySet = properties.keySet();
         for (Iterator<?> keyIt = keySet.iterator(); keyIt.hasNext();) {
             Object key = (Object) keyIt.next();
             Object value = properties.get(key);
-            if (value != null && !Serializable.class.isAssignableFrom(value.getClass())
-                || !BeanUtil.isSingleValueType(value.getClass()))
+            if (isNotSerializable(value)
+                || !BeanUtil.isSingleValueType(value.getClass())) {
+                log("removing property '" + key
+                    + "' from serialization while its value is not serializable or doesn't have a default constructor!");
                 keyIt.remove();
+            }
         }
-        //TODO: sort it by key name
         Set<Class<?>> serviceKeys = services.keySet();
         for (Iterator<?> keyIt = serviceKeys.iterator(); keyIt.hasNext();) {
             Object key = (Object) keyIt.next();
             Object value = services.get(key);
-            if (value != null && !Serializable.class.isAssignableFrom(value.getClass()))
+            if (isNotSerializable(value)) {
+                log("removing service '" + key
+                    + "' from serialization while its value is not serializable or doesn't have a default constructor!");
                 keyIt.remove();
+            }
         }
+    }
+
+    /**
+     * Serializable must be implemented and a default constructor must be present. simple-xml needs at least one non
+     * transient field!
+     * 
+     * @param value
+     * @return
+     */
+    private boolean isNotSerializable(Object value) {
+        return value != null
+            && (!Serializable.class.isAssignableFrom(value.getClass()) || (!BeanUtil.isStandardType(value) && !BeanClass
+                .hasDefaultConstructor(value.getClass())));
     }
 
     protected void log(Object obj) {

@@ -431,16 +431,24 @@ public class AttributeDefinition<T> implements IAttributeDefinition<T> {
                     if (BeanClass.hasDefaultConstructor(gtype))
                         getConstraint().setDefault((T) BeanClass.createInstance(gtype));
                 }
-            } else if (NumberUtil.isNumber(getType())) {
-                getConstraint().setDefault((T) NumberUtil.getDefaultInstance((Class<Number>) getType()));
-            } else if (Environment.isTestMode()) {
-                /*
-                 * to create new entities without user input, these fields are filled on test mode
-                 */
-                if (CharSequence.class.isAssignableFrom(getType())) {
-                    c.setDefault((T) ("Y" + UUID.randomUUID().toString().substring(0, c.getLength() - 1)));
-                } else if (BeanContainer.instance().isPersistable(getType())) {
-                    c.setDefault((T) BeanContainer.instance().getBeans(getType(), 0, 1));
+            }
+            if (c.getDefault() == null) {
+                if (NumberUtil.isNumber(getType())) {
+                    getConstraint().setDefault((T) NumberUtil.getDefaultInstance((Class<Number>) getType()));
+                } else if (Environment.isTestMode()) {
+                    /*
+                     * to create new entities without user input, these fields are filled on test mode
+                     */
+                    if (CharSequence.class.isAssignableFrom(getType())) {
+                        c.setDefault((T) ("Y" + UUID.randomUUID().toString().substring(0, c.getLength() - 1)));
+                    } else if (BeanContainer.instance().isPersistable(getType())) {
+                        Collection<T> beans = BeanContainer.instance().getBeans(getType(), 0, 1);
+                        if (isMultiValue()) {
+                            c.setDefault((T) beans);
+                        } else if (beans.size() > 0){
+                            c.setDefault(beans.iterator().next());
+                        }
+                    }
                 }
             }
         }

@@ -48,6 +48,12 @@ public interface ISession {
     /** return the websocket-server port for this session */
     int getWebsocketPort();
     
+    /**
+     * getNavigationStack
+     * @return array of working objects in the sessions stack.
+     */
+    Object[] getNavigationStack();
+    
     /** return the current working object */
     Object getWorkingObject();
 }

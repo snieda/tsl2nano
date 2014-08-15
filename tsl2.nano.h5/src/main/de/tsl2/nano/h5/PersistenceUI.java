@@ -277,6 +277,7 @@ public class PersistenceUI {
 //            "jarFile");
         login.getPresentationHelper().change(BeanPresentationHelper.PROP_NULLABLE, false);
         login.getPresentationHelper().change(BeanPresentationHelper.PROP_NULLABLE, true, "connectionPassword");
+        login.getPresentationHelper().change(BeanPresentationHelper.PROP_NULLABLE, true, "jarFile");
         login.getPresentationHelper().change(BeanPresentationHelper.PROP_NULLABLE, true, "replication");
         login.getPresentationHelper().chg("replication", BeanPresentationHelper.PROP_ENABLER, new IActivable() {
             @Override
@@ -312,6 +313,10 @@ public class PersistenceUI {
             @Override
             public boolean isDefault() {
                 return true;
+            }
+            @Override
+            public int getActionMode() {
+                return MODE_DLG_OK;
             }
         };
         login.addAction(loginAction);

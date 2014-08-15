@@ -19,7 +19,16 @@ NanoH5 (or FullRelation) is an UI independent gui implementation framework provi
 
 To do a *quick-start*, go to chapter _Starting / Test_.
 
-### Goals
+### What does it for you?
+
+* it starts a generic application with default mechanisms and configurations to present data in html5
+* it provides all needed libraries for you - independent of the database and jpa-persistence tool you use
+* it creates all jpa-entities for you
+* all entities are configured and presented in a most reasonable way - but easily to be enhanced by you
+* data is searchable and editable in a comfortable way, can be prepared to be printed and exported
+* it provides several working modes: single standalone app, network/multi-user and/or access to an application-server
+ 
+### Technical Goals
 * pure model implementation + platform independency (works on android, too).
 * small, having as less as possible static dependencies to other libraries
 * everything has a default - all defaults are configurable (Convention over Configuration)
@@ -317,12 +326,12 @@ On top of each html page you will see on the left side an application icon (clic
 * *search*: searches for all beans of the current type and filter.
 * *reset*: resets all search-filter fields and the result list
 * *open*: opens all selected beans. only active, if on page-creation at least one selected items is available.
-* *new*: creates a new item of the given type.
+* *new*: creates a new item of the given type. default values found by configuration will set - navigation history values will be set, too. 
 * *delete*: deletes all selected items.
 
 ### Bean detail buttons
 
-* *save*: saves the current bean.
+* *save*: saves/persists the current bean.
 * *close*: closes the current page, returning to the last one without saving.
 
 ### Dependencies
@@ -524,7 +533,27 @@ A detail page presents the attributes of a bean as it is defined in it's bean-de
 
 #### Value Expressions
 
-Each bean and attribute can be presented by and created by a text expression. On beans, this expression (called _ValueExpresion_) should contain at least one bean-attribute (perhaps the id, but if another attribute is more readable but unique, you would prefer this). These _ValueExpression_ will be used to present a bean in a list, or if it used as relation in another bean. The creation through a string works only, if the bean provides a default-constructor and the attributes in the expression have setter-methods.
+Each bean and attribute can be presented by and created by a text expression. On beans, this expression (called _ValueExpression_) should contain at least one bean-attribute (perhaps the id, but if another attribute is more readable but unique, you would prefer this). These _ValueExpression_ will be used to present a bean in a list, or if it is used as relation in another bean. The creation through a string works only, if the bean provides a default-constructor and the attributes in the expression have setter-methods.
+
+Two kinds of expressions are possible:
+
+##### Standard _java.text.MessageFormat_ expression
+
+Example:
+
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+{forename}, {name}, {birthday}/{birthcity}
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+##### C-like _printf_ expression
+
+TODO: explain
+
+Example:
+
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+%birthday$TD
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 #### Value Groups and Sub-Panels
 

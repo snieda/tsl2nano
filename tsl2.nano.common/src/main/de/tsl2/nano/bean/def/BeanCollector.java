@@ -289,7 +289,7 @@ public class BeanCollector<COLLECTIONTYPE extends Collection<T>, T> extends Bean
                 }
 
                 public Collection<T> getData(T from, Object to) {
-                    if (!isStaticCollection || isPersistable()) {
+                    if (!isStaticCollection || (isPersistable() && composition == null)) {
                         collection = (COLLECTIONTYPE) ((IBeanFinder<T, Object>) beanFinder).getData(from, to);
                         /*
                          * if it is a composition, all data has to be found in the compositions-parent-container
@@ -546,7 +546,7 @@ public class BeanCollector<COLLECTIONTYPE extends Collection<T>, T> extends Bean
                 LOG.warn("There is no information how to create a new bean - at least one stored bean instance must exist!");
                 return null;
             } else if (Entry.class.isAssignableFrom(type)) {
-                // normally we would handled this inside the generic else block, but we need
+                // normally we would handle this inside the generic else block, but we need
                 // the generics key and value type informations
                 if (Proxy.isProxyClass(collection.getClass()))
                     newItem = (T) ((MapEntrySet) (FilteringIterator.getIterable((Proxy) collection))).add(null, null);

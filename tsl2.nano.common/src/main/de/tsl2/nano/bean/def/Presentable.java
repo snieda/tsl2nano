@@ -31,7 +31,7 @@ import de.tsl2.nano.core.util.Util;
  * @author Thomas Schneider
  * @version $Revision$
  */
-@SuppressWarnings("unchecked")
+@SuppressWarnings({ "unchecked", "rawtypes" })
 public class Presentable implements IIPresentable, Serializable {
     /** serialVersionUID */
     private static final long serialVersionUID = -7970100238668263393L;
@@ -66,12 +66,12 @@ public class Presentable implements IIPresentable, Serializable {
     }
 
     public Presentable(IAttribute<?> attr) {
+        IAttributeDefinition def = (IAttributeDefinition) (attr instanceof IAttributeDefinition ? attr : null);
         label = Environment.translate(attr.getId(), true);
         BeanPresentationHelper<?> helper = Environment.get(BeanPresentationHelper.class);
-        type = helper.getDefaultType(attr);
-        style =
-            attr instanceof IAttributeDefinition ? helper.getDefaultHorizontalAlignment((IAttributeDefinition<?>) attr)
-                : helper.getDefaultHorizontalAlignment(attr);
+        type = def != null ? helper.getDefaultType(def) : helper.getDefaultType(attr);
+        style = def != null ?
+            helper.getDefaultHorizontalAlignment(def) : helper.getDefaultHorizontalAlignment(attr);
         style |= helper.getDefaultStyle(attr);
         description = Environment.translate(attr.getId() + Messages.POSTFIX_TOOLTIP, false);
         if (description.startsWith(Messages.TOKEN_MSG_NOTFOUND))
@@ -82,9 +82,10 @@ public class Presentable implements IIPresentable, Serializable {
          * - not persistable or persistable and if it is a multi-value, cascading must be activated!
          */
         enabler =
-            attr.hasWriteAccess() && !(attr instanceof IAttributeDefinition && ((IAttributeDefinition)attr).generatedValue())
+            attr.hasWriteAccess()
+                && !(def != null && def.generatedValue())
                 && (!BeanContainer.isInitialized() || !BeanContainer.instance().isPersistable(attr.getDeclaringClass())
-                    || !(attr instanceof IAttributeDefinition) || (!((IAttributeDefinition<?>) attr).isMultiValue() || ((IAttributeDefinition<?>) attr)
+                    || !(def != null) || (!def.isMultiValue() || def
                     .cascading()))
                 ? IActivable.ACTIVE : IActivable.INACTIVE;
     }

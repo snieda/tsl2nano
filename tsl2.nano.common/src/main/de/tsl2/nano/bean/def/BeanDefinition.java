@@ -10,6 +10,7 @@
 package de.tsl2.nano.bean.def;
 
 import java.io.File;
+import java.io.FileReader;
 import java.io.IOException;
 import java.io.Serializable;
 import java.lang.reflect.Method;
@@ -18,13 +19,16 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.Enumeration;
 import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.Properties;
 import java.util.Set;
+import java.util.TreeSet;
 
 import org.apache.commons.logging.Log;
 import org.simpleframework.xml.Attribute;
@@ -626,8 +630,9 @@ public class BeanDefinition<T> extends BeanClass<T> implements Serializable {
         for (int i = 0; i < methods.length; i++) {
             if (methods[i].getName().startsWith(ACTION_PREFIX) && methods[i].getParameterTypes().length == 0) {
                 final Method m = methods[i];
+                final String cls = m.getDeclaringClass().getSimpleName().toLowerCase();
                 final String name = m.getName().substring(ACTION_PREFIX.length());
-                CommonAction<Object> newAction = new CommonAction<Object>(m.toGenericString(),
+                CommonAction<Object> newAction = new CommonAction<Object>(cls + "." + name.toLowerCase(),
                     name,
                     Messages.getStringOpt(m.toGenericString())) {
                     @Override
@@ -984,7 +989,49 @@ public class BeanDefinition<T> extends BeanClass<T> implements Serializable {
     }
 
     public void saveDefinition() {
+        saveResourceEntries();
         saveBeanDefinition(getDefinitionFile(getName()));
+    }
+
+    /**
+     * generates resource entries for each attribute+tooltip and each action to be edited later.
+     */
+    private void saveResourceEntries() {
+        String rc = Environment.getConfigPath() + "messages.properties";
+        File rcFile = new File(rc);
+        //create a sorted property map
+        Properties p = new Properties() {
+            @Override
+            public synchronized Enumeration<Object> keys() {
+                return Collections.enumeration(new TreeSet<Object>(super.keySet()));
+            }
+        };
+        if (rcFile.canRead()) {
+            try {
+                p.load(new FileReader(rcFile));
+            } catch (Exception e) {
+                ManagedException.forward(e);
+            }
+        }
+        p.put(getId(), getName());
+        Collection<IAttributeDefinition<?>> attributes = getAttributeDefinitions().values();
+        String id;
+        for (IAttributeDefinition<?> a : attributes) {
+            id = a.getId();
+            if (Environment.translate(id, false).startsWith(Messages.TOKEN_MSG_NOTFOUND)) {
+                p.put(id, a.getPresentation().getLabel());
+                p.put(id + Messages.POSTFIX_TOOLTIP, a.getPresentation().getLabel());
+            }
+        }
+        Collection<IAction> actions = getActions();
+        for (IAction a : actions) {
+            id = a.getId();
+            if (Environment.translate(id, false).startsWith(Messages.TOKEN_MSG_NOTFOUND)) {
+                p.put(a.getId(), a.getShortDescription());
+                p.put(a.getId() + Messages.POSTFIX_TOOLTIP, a.getShortDescription());
+            }
+        }
+        FileUtil.saveProperties(rcFile.getPath(), p);
     }
 
     /**
@@ -1226,16 +1273,17 @@ public class BeanDefinition<T> extends BeanClass<T> implements Serializable {
 
     /**
      * fills all attributes with their default values - if defined.
+     * 
      * @param instance bean instance to set the values on
      */
     public void setDefaultValues(Object instance) {
         List<IAttribute> attributes = getAttributes();
         for (IAttribute a : attributes) {
             if (a instanceof AttributeDefinition)
-                a.setValue(instance, ((AttributeDefinition)a).getDefault());
+                a.setValue(instance, ((AttributeDefinition) a).getDefault());
         }
     }
-    
+
     /**
      * fills a map with all bean-attribute-names and their values
      * 

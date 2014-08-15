@@ -49,7 +49,7 @@ import de.tsl2.nano.core.util.Util;
  * 
  */
 @Default(value = DefaultType.FIELD, required = false)
-@SuppressWarnings({ "unchecked", "rawtypes"})
+@SuppressWarnings({ "unchecked", "rawtypes" })
 public class BeanClass<T> implements Serializable {
     /** serialVersionUID */
     private static final long serialVersionUID = 8387513854853569951L;
@@ -176,7 +176,7 @@ public class BeanClass<T> implements Serializable {
         BeanClass cachedBC = CachedBeanClass.getCachedBeanClass(clazz);
         if (cachedBC != null && cachedBC != this)
             return cachedBC.getAttributes(readAndWriteAccess);
-        
+
         final Method[] allMethods = clazz.getMethods();
         final LinkedList<String> accessedMethods = new LinkedList<String>();
         final List<IAttribute> beanAccessMethods = new LinkedList<IAttribute>();
@@ -217,7 +217,7 @@ public class BeanClass<T> implements Serializable {
         }
         return null;
     }
-    
+
     /**
      * returns all bean attributes wrapped into a sorted set.
      * 
@@ -362,6 +362,28 @@ public class BeanClass<T> implements Serializable {
     }
 
     /**
+     * soft evaluation of annotation values. uses reflection instead of direct calls on annotation properties.
+     * <p/>
+     * evaluates annotation values and returns an object array holding the annotation values in the same order like the
+     * member names where given
+     * 
+     * @param annotationClass type of annotation to be found
+     * @param memberNames annotation members to evaluate the values for
+     * @return values of given member names or null, if no annotation of given type was found
+     */
+    public <A extends Annotation> Object[] getAnnotationValues(Class<A> annotationClass, String... memberNames) {
+        Class a = getAnnotation(annotationClass);
+        if (a == null)
+            return null;
+        BeanClass bc = BeanClass.getBeanClass(a);
+        Object[] values = new Object[memberNames.length];
+        for (int i = 0; i < memberNames.length; i++) {
+            values[i] = bc.callMethod(a, memberNames[i]);
+        }
+        return values;
+    }
+
+    /**
      * asks for the given annotation. this is a 'soft' implementation, means: will not use objects reference, but
      * class.getName(). so, different classloaders will not be respected!
      * 
@@ -402,7 +424,7 @@ public class BeanClass<T> implements Serializable {
     public Object getField(T instance, String fieldName) {
         return getField(instance, fieldName, false);
     }
-    
+
     /**
      * getField
      * 
@@ -431,7 +453,7 @@ public class BeanClass<T> implements Serializable {
     public void setField(T instance, String fieldName, Object value) {
         setField(instance, fieldName, value, false);
     }
-    
+
     /**
      * setField
      * 
@@ -605,7 +627,7 @@ public class BeanClass<T> implements Serializable {
      */
     public static boolean hasStringConstructor(Class<?> clazz) {
         try {
-            return clazz.getDeclaredConstructor(new Class[]{String.class}) != null;
+            return clazz.getDeclaredConstructor(new Class[] { String.class }) != null;
         } catch (Exception e) {
             return false;
         }
@@ -614,7 +636,7 @@ public class BeanClass<T> implements Serializable {
     public static <T> T createInstance(String clsName, Object... args) {
         return (T) createInstance(load(clsName, null), args);
     }
-    
+
     /**
      * creates a new instance through the given arguments. if you don't call the default constructor, the performance
      * will go down on searching the right constructor.
@@ -669,7 +691,7 @@ public class BeanClass<T> implements Serializable {
                 throw ManagedException.implementationError("BeanClass could not create the desired instance of type "
                     + clazz,
                     args,
-                    (Object[])constructors);
+                    (Object[]) constructors);
             }
         }
         return instance;
@@ -927,12 +949,13 @@ public class BeanClass<T> implements Serializable {
 
     /**
      * delegating to {@link CachedBeanClass#clear()}
+     * 
      * @return amount of cleared objects
      */
     protected static int clearCache() {
         return CachedBeanClass.clear();
     }
-    
+
     @Override
     public String toString() {
         return Util.toString(this.getClass(), clazz);
@@ -968,7 +991,7 @@ class CachedBeanClass<T> extends BeanClass<T> {
         super(beanClass);
     }
 
-    @SuppressWarnings({ "unchecked"})
+    @SuppressWarnings({ "unchecked" })
     static final <C> BeanClass<C> getCachedBeanClass(Class<C> beanClass) {
         BeanClass bc = bcCache.get(beanClass);
         if (bc == null) {
