@@ -1480,7 +1480,7 @@ public class Html5Presentation<T> extends BeanPresentationHelper<T> implements I
                             else
                                 throw new IllegalStateException("attachment of attribute '" + beanValue.getValueId()
                                     + "' has to be of type byte[], ByteBuffer or String!");
-                            FileUtil.writeBytes(bytes, beanValue.getValueId(), false);
+                            FileUtil.writeBytes(bytes, Environment.getTempPath() + beanValue.getValueId(), false);
                         }
                     }
 //                    }
@@ -1754,15 +1754,20 @@ public class Html5Presentation<T> extends BeanPresentationHelper<T> implements I
     }
 
     public void createSampleEnvironment() {
-        String dir = System.getProperty("user.dir") + "/sample/";
-        new File(dir).mkdirs();
-        //the common-jar will be used by ant-scripts...
-        Environment.extractResourceToDir(NanoH5.JAR_COMMON, dir);
-        Environment.extractResourceToDir(NanoH5.JAR_INCUBATION, dir);
-        FileUtil.extractNestedZip("tsl2.nano.h5.sample.jar", dir, null);
-        FileUtil.writeBytes("call run.bat sample 8070".getBytes(), System.getProperty("user.dir")
-            + "/sample.bat", false);
-        //"Sample code and database created.\nPlease replace 'tsl2.nano.h5.jar/META-INF/MANIFEST.MF' with 'sample/META-INF/MANIFEST.MF' and start the new sample batch file...";
+        try {
+            String dir = System.getProperty("user.dir") + "/sample/";
+            new File(dir).mkdirs();
+            //the common-jar will be used by ant-scripts...
+            Environment.extractResourceToDir(NanoH5.JAR_COMMON, dir);
+            Environment.extractResourceToDir(NanoH5.JAR_INCUBATION, dir);
+            FileUtil.extractNestedZip("tsl2.nano.h5.sample.jar", dir, null);
+            FileUtil.writeBytes("call run.bat sample 8070".getBytes(), System.getProperty("user.dir")
+                + "/sample.bat", false);
+            //"Sample code and database created.\nPlease replace 'tsl2.nano.h5.jar/META-INF/MANIFEST.MF' with 'sample/META-INF/MANIFEST.MF' and start the new sample batch file...";
+        } catch (Exception ex) {
+            //while this only extracts some sample files, it should not break the application flow
+            LOG.warn(ex);
+        }
     }
 
     @Override
