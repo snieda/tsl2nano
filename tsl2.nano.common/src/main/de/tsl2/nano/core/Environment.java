@@ -11,6 +11,7 @@ package de.tsl2.nano.core;
 
 import java.io.File;
 import java.io.FileOutputStream;
+import java.io.FileReader;
 import java.io.InputStream;
 import java.io.Serializable;
 import java.lang.Thread.UncaughtExceptionHandler;
@@ -18,7 +19,9 @@ import java.text.Format;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.Date;
+import java.util.Enumeration;
 import java.util.Hashtable;
 import java.util.Iterator;
 import java.util.List;
@@ -28,6 +31,7 @@ import java.util.Properties;
 import java.util.ResourceBundle;
 import java.util.Set;
 import java.util.TreeMap;
+import java.util.TreeSet;
 
 import org.simpleframework.xml.Default;
 import org.simpleframework.xml.DefaultType;
@@ -586,6 +590,31 @@ public class Environment {
         return classLoader.getResourceAsStream(fileName);
     }
 
+    /**
+     * loads a properties file (only from environment directory!) with a default key sorting.
+     * @param fileName property file to load
+     * @return loaded or new properties
+     */
+    public static Properties getSortedProperties(String fileName) {
+        String rc = Environment.getConfigPath() + fileName;
+        File rcFile = new File(rc);
+        //create a sorted property map
+        Properties p = new Properties() {
+            @Override
+            public synchronized Enumeration<Object> keys() {
+                return Collections.enumeration(new TreeSet<Object>(super.keySet()));
+            }
+        };
+        if (rcFile.canRead()) {
+            try {
+                p.load(new FileReader(rcFile));
+            } catch (Exception e) {
+                ManagedException.forward(e);
+            }
+        }
+        return p;
+    }
+    
     public static final boolean extractResourceToDir(String resourceName, String destinationDir) {
         //put build informations into system-properties
         getBuildInformations();
