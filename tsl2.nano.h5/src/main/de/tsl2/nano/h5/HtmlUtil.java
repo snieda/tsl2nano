@@ -68,6 +68,7 @@ public class HtmlUtil {
     public static final String TAG_INPUT = "input";
     public static final String ATTR_TYPE = "type";
     public static final String ATTR_ID = "id";
+    public static final String ATTR_CLASS = "class";
     public static final String ATTR_NAME = "name";
     public static final String ATTR_VALUE = "value";
     public static final String ATTR_PATTERN = "pattern";

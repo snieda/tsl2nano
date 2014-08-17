@@ -17,6 +17,7 @@ import org.simpleframework.xml.Attribute;
 import org.simpleframework.xml.Element;
 import org.simpleframework.xml.ElementArray;
 import org.simpleframework.xml.ElementMap;
+import org.simpleframework.xml.core.Commit;
 
 import de.tsl2.nano.action.IActivable;
 import de.tsl2.nano.bean.BeanContainer;
@@ -331,5 +332,14 @@ public class Presentable implements IIPresentable, Serializable {
     @Override
     public void setBackground(int[] background) {
         this.background = background;
+    }
+
+    @Commit
+    protected void initDesialization() {
+        //try to translate after first loading
+        if (description != null && description.equals(label))
+            description = Environment.translate(label + Messages.POSTFIX_TOOLTIP, true);
+        if (label != null)
+            label = Environment.translate(label, true);
     }
 }

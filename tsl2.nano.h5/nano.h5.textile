@@ -299,6 +299,12 @@ A description of all configuration attributes can be found [here](src/resources/
 The _messages.properties_ is the language file to translate every application specific text. You can overwrite it through putting your own file into the environment-directory with sub-directory _de/tsl2/nano/h5_. All bean or bean-attribute-names will be translated. 
 All framework specific and generic texts will be translated through the internal _de.tsl2.nano.messages.properties_.
 
+The environments file _messages.properties_ generated on new beans provides default entries for all available fields and actions. Change it to define other translations (will be done since you change the bean-definition names in the xml files directly. It is possible to add html tags like:
+
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+myfieldid=<a href=another-url.html>my-translation</a>
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
 ## Application and Page Actions
 
 On top of each html page you will see on the left side an application icon (clicking on it, it tries to load the help file from web). On top right, all page-specific buttons are shown. The following list tries to describe them. They depend on the current type of bean. A bean list will have other buttons than a beans detail page.
@@ -750,7 +756,9 @@ Permissions are set after connecting to the datasource through the persistence-u
 
 The application class _NanoH5_ has a method _createAuthorization()_ that defines a subject with a user-principal and it's roles, defined by permissions. If a file _[username]-permissions.xml_ is found, it will be used to fill the subject - if not, an admin-role with a wildcard-permission will permit anything!
 
-Permissions contain a name - perhaps ended by a wildcard - and comma separated actions (a wildcard is possible, too. The permissions work on actions and data. The _BeanContainer_ provides to ask for permissions: call _BeanContainer.instance().hasPermission(name, actions) to check access to a call or to any data. The _Enviroment provides access to the implementation of _IAuthorization_. Call _Environment.get(IAuthorization.class).hasAccess(name, actions) to check for permissions.
+Permissions contain a name - perhaps ended by a wildcard - and comma separated actions (a wildcard is possible, too. The permissions work on actions and data. The _BeanContainer_ provides to ask for permissions: call _BeanContainer.instance().hasPermission(name, actions) to check access to a call or to any data. The _Environment_ provides access to the implementation of _IAuthorization_. Call _Environment.get(IAuthorization.class).hasAccess(name, actions) to check for permissions.
+
+To define special permissions for a user, change the content of the file _[username]-permissions.xml_ and use the translation resourcebundle _messages.properties_ to find the field and action names to fill in.
 
 The framework does all checks for you. But if you need extended access to authority informations, read the following details.
 

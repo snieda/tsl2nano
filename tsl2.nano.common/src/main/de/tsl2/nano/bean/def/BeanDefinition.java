@@ -10,7 +10,6 @@
 package de.tsl2.nano.bean.def;
 
 import java.io.File;
-import java.io.FileReader;
 import java.io.IOException;
 import java.io.Serializable;
 import java.lang.reflect.Method;
@@ -19,7 +18,6 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
-import java.util.Enumeration;
 import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
@@ -28,7 +26,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Properties;
 import java.util.Set;
-import java.util.TreeSet;
 
 import org.apache.commons.logging.Log;
 import org.simpleframework.xml.Attribute;
@@ -993,26 +990,14 @@ public class BeanDefinition<T> extends BeanClass<T> implements Serializable {
         saveBeanDefinition(getDefinitionFile(getName()));
     }
 
+    private void saveResourceEntries() {
+        String name = "messages.properties";
+        saveResourceEntries(Environment.getSortedProperties(name), name);
+    }
     /**
      * generates resource entries for each attribute+tooltip and each action to be edited later.
      */
-    private void saveResourceEntries() {
-        String rc = Environment.getConfigPath() + "messages.properties";
-        File rcFile = new File(rc);
-        //create a sorted property map
-        Properties p = new Properties() {
-            @Override
-            public synchronized Enumeration<Object> keys() {
-                return Collections.enumeration(new TreeSet<Object>(super.keySet()));
-            }
-        };
-        if (rcFile.canRead()) {
-            try {
-                p.load(new FileReader(rcFile));
-            } catch (Exception e) {
-                ManagedException.forward(e);
-            }
-        }
+    private void saveResourceEntries(Properties p, String fileName) {
         p.put(getId(), getName());
         Collection<IAttributeDefinition<?>> attributes = getAttributeDefinitions().values();
         String id;
@@ -1031,7 +1016,7 @@ public class BeanDefinition<T> extends BeanClass<T> implements Serializable {
                 p.put(a.getId() + Messages.POSTFIX_TOOLTIP, a.getShortDescription());
             }
         }
-        FileUtil.saveProperties(rcFile.getPath(), p);
+        FileUtil.saveProperties(fileName, p);
     }
 
     /**
