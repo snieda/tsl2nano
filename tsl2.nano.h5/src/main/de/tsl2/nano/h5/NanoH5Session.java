@@ -284,7 +284,7 @@ public class NanoH5Session implements ISession {
     }
 
     private String refreshPage(Object message) {
-        return builder.build(this, nav.current(), message, true);
+        return builder.build(this, nav.current(), message, true, nav.toArray());
     }
 
     /**

@@ -281,9 +281,8 @@ public class BeanContainerUtil {
 
                         @Override
                         public boolean nullable() {
-                            //return manyToOne.optional();
                             if (nullable == null)
-                                nullable = (Boolean) joinColumnBC.callMethod(joinColumn, "nullable");
+                                nullable = oneToMany == null && (Boolean) joinColumnBC.callMethod(joinColumn, "nullable");
                             return nullable;
                         }
 
@@ -313,7 +312,8 @@ public class BeanContainerUtil {
                         @Override
                         public boolean composition() {
                             if (composition == null) {
-                                composition = !nullable() && oneToMany != null;
+                                //nullable() would only return true, if oneToMany is null!
+                                composition = !(Boolean) joinColumnBC.callMethod(joinColumn, "nullable") && oneToMany != null;
                             }
                             return composition;
                         }
@@ -570,7 +570,7 @@ public class BeanContainerUtil {
         Bean<Serializable> bean = Bean.getBean(entity);
         Serializable id = (Serializable) bean.getId();
         // a composite key is not a standard type like String or Number
-        if (BeanUtil.isStandardType(id))
+        if (id == null || BeanUtil.isStandardType(id))
             return;
 
         if (attributeNames.length == 0)

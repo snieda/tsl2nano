@@ -27,7 +27,7 @@ import java.util.List;
 import org.apache.commons.logging.Log;
 
 import de.tsl2.nano.core.ManagedException;
-import de.tsl2.nano.core.exception.Message;
+import de.tsl2.nano.core.cls.BeanClass;
 import de.tsl2.nano.core.log.LogFactory;
 import de.tsl2.nano.core.util.ByteUtil;
 import de.tsl2.nano.core.util.FileUtil;
@@ -224,6 +224,8 @@ public class RuntimeClassloader extends URLClassLoader {
         Runnable pathChecker = new Runnable() {
             File fPath = new File(path);
             File[] lastFiles;
+            @SuppressWarnings("rawtypes")
+            BeanClass bc = BeanClass.createBeanClass("de.tsl2.nano.core.exception.Message");
 
             @Override
             public void run() {
@@ -236,7 +238,9 @@ public class RuntimeClassloader extends URLClassLoader {
                         for (File file : changedFiles) {
                             // TODO: implement unloading existing classes
                             if (file.getPath().endsWith(".jar")) {
-                                Message.send("New jar-file loaded: " + file.getAbsolutePath());
+                                //don't use the previous classloader to get 'Message'.
+                                bc.callMethod(null, "send", new Class[] { String.class }, "New jar-file loaded: "
+                                    + file.getAbsolutePath());
                                 addFile(file.getAbsolutePath());
                             }
                         }

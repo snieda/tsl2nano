@@ -81,8 +81,19 @@ public class Status implements IStatus {
      * @return new error status instance
      */
     public static Status illegalArgument(String name, Object value, Object assertion) {
+        /* 
+         * the toString() conversion should not break the application flow.
+         * if a PersistentSet is not initialized but already serialized, the toString()
+         * would throw a LazyInitializationException
+         */
+        String strValue;
+        try {
+            strValue = String.valueOf(value);
+        } catch (Exception ex) {
+            strValue = (value != null ? value.getClass() : "null") + ": " + ex.toString();
+        }
         return new Status(new IllegalArgumentException(Environment.translate("tsl2nano.assertion.failed", true,
-            value,
+            strValue,
             name,
             assertion)));
     }

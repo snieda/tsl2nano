@@ -39,6 +39,7 @@ import org.simpleframework.xml.ElementMap;
 import org.simpleframework.xml.core.Persist;
 
 import de.tsl2.nano.bean.BeanUtil;
+import de.tsl2.nano.collection.MapUtil;
 import de.tsl2.nano.core.cls.BeanClass;
 import de.tsl2.nano.core.exception.ExceptionHandler;
 import de.tsl2.nano.core.exception.Message;
@@ -539,27 +540,19 @@ public class Environment {
      * reloads the current environment. a reset will be done to reload the environment from saved file.
      */
     public static void reload() {
-//        Properties properties = self().properties;
-//        Properties p = new Properties();
-//        Set<Object> keys = properties.keySet();
-//        for (Object k : keys) {
-//            p.put(k, properties.get(k));
-//        }
-//        try {
-//            FileUtil.saveProperties(CONFIG_FILE_NAME, p);
-//        } catch (Exception e) {
-//            get(Log.class).warn(e);
-//        }
-//
-//        self().get(XmlUtil.class).saveXml(SERVICE_FILE_NAME, self().services);
-
+        String envDir = getConfigPath();
         Properties tempProperties = new Properties();
         tempProperties.putAll(self().properties);
         Map<Class<?>, Object> tempServices = new Hashtable<Class<?>, Object>(services());
 
         reset();
-        create(getConfigPath());
+        create(envDir);
 
+        //don't overwrite the new values
+        MapUtil.removeAll(tempProperties, self().properties);
+        MapUtil.removeAll(tempServices, self().services());
+        
+        //add the not existing old values (programmatically added and not persisted!)
         services().putAll(tempServices);
         self().properties.putAll(tempProperties);
     }

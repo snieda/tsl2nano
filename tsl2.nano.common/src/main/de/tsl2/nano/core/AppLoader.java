@@ -51,7 +51,7 @@ public class AppLoader {
     private static Log LOG = LogFactory.getLog(AppLoader.class);
 
     private static final String KEY_ISNESTEDJAR = "nano.apploader.isnestedjar";
-    
+
     /**
      * provides a map containing argument names (map-keys) and their description (map-values).
      * 
@@ -126,79 +126,83 @@ public class AppLoader {
      */
     public void start(String mainclass, String environment, String mainmethod, String[] args) {
         try {
-        /*
-         * check and use the AppLoaders main arguments
-         */
-        if (isHelpRequest(args)) {
-            printHelp();
-        }
-        if (environment == null) {
-            if (args.length > 0) {
-                environment = args[0];
-                String[] nargs = new String[args.length - 1];
-                System.arraycopy(args, 1, nargs, 0, nargs.length);
-                args = nargs;
-            } else {
-                environment = getFileSystemPrefix() + "config";
+            /*
+             * check and use the AppLoaders main arguments
+             */
+            if (isHelpRequest(args)) {
+                printHelp();
             }
-        }
-
-        if (mainmethod == null)
-            mainmethod = "main";
-
-        LOG.info("\n#############################################################"
-            + "\nAppLoader preparing launch for:\n  mainclass : "
-            + mainclass
-            + "\n  mainmethod: "
-            + mainmethod
-            + "\n  args      : "
-            + StringUtil.toString(args, 200)
-            + "\n"
-            + "  environment: "
-            + environment
-            + "\n"
-            + "#############################################################\n");
-        /*
-         * create the classloader to be used by the new application
-         */
-        new File(environment).mkdirs();
-        NetworkClassLoader networkClassLoader = provideClassloader(environment);
-
-        BeanClass<?> bc = BeanClass.createBeanClass(mainclass);
-
-        /*
-         * now, we can load the environment with properties and services
-         */
-        createEnvironment(environment, new Argumentator(bc.getName(), getManual(), args));
-
-        /*
-         * start the jar path checker thread
-         */
-        networkClassLoader.startPathChecker(environment, Environment.get("jar.checker.deltatime", 1000));
-
-        /*
-         * prepare cleaning the Apploader
-         */
-        ThreadUtil.startDaemon("apploader-clean", new Runnable() {
-            @Override
-            public void run() {
-                try {
-                    Thread.sleep(10000);
-                } catch (InterruptedException e) {
-                    e.printStackTrace();
-                } finally {
-                    LOG = null;
-                    //stop old logfactory instance
-                    LogFactory.stop();
+            if (environment == null) {
+                if (args.length > 0) {
+                    environment = args[0];
+                    String[] nargs = new String[args.length - 1];
+                    System.arraycopy(args, 1, nargs, 0, nargs.length);
+                    args = nargs;
+                } else {
+                    environment = getFileSystemPrefix() + "config";
                 }
             }
-        });
 
-        /*
-         * finally, the application will be started inside the
-         * new environment and classloader
-         */
-        bc.callMethod(null, mainmethod, new Class[] { String[].class }, new Object[] { args });
+            if (mainmethod == null)
+                mainmethod = "main";
+
+            LogFactory.setLogFile(environment + "/apploader.log");
+            LOG.info("\n#############################################################"
+                + "\nAppLoader preparing launch for:\n  mainclass : "
+                + mainclass
+                + "\n  mainmethod: "
+                + mainmethod
+                + "\n  args      : "
+                + StringUtil.toString(args, 200)
+                + "\n"
+                + "  environment: "
+                + environment
+                + "\n"
+                + "#############################################################\n");
+            /*
+             * create the classloader to be used by the new application
+             */
+            new File(environment).mkdirs();
+            NetworkClassLoader networkClassLoader = provideClassloader(environment);
+
+            BeanClass<?> bc = BeanClass.createBeanClass(mainclass);
+
+            /*
+             * now, we can load the environment with properties and services
+             */
+            createEnvironment(environment, new Argumentator(bc.getName(), getManual(), args));
+
+            /*
+             * start the jar path checker thread
+             */
+            //don't use the wrong classloaders Environment!
+            int deltaTime = (Integer) BeanClass.createBeanClass(Environment.class.getName()).callMethod(null, "get",
+                new Class[] { String.class, Object.class }, "jar.checker.deltatime", 1000);
+            networkClassLoader.startPathChecker(environment, deltaTime);
+
+            /*
+             * prepare cleaning the Apploader
+             */
+            ThreadUtil.startDaemon("apploader-clean", new Runnable() {
+                @Override
+                public void run() {
+                    try {
+                        Thread.sleep(10000);
+                    } catch (InterruptedException e) {
+                        e.printStackTrace();
+                    } finally {
+                        LOG = null;
+                        //stop old logfactory instance
+                        LogFactory.stop();
+                    }
+                }
+            });
+
+            /*
+             * finally, the application will be started inside the
+             * new environment and classloader
+             */
+            bc.callMethod(null, mainmethod, new Class[] { String[].class }, new Object[] { args });
         } catch (Throwable ex) {
             //main exception catching: log the exception before exiting!
             ex.printStackTrace();
@@ -280,7 +284,8 @@ public class AppLoader {
 
     public static String getFileSystemPrefix() {
         //on dalvik systems, the  MainActivity.onCreate() should set the syste property
-        return isDalvik() ? System.getProperty("android.sdcard.path", "/mnt/sdcard/") : isUnixFS() && new File("/opt").canWrite() ? "/opt/" : "";
+        return isDalvik() ? System.getProperty("android.sdcard.path", "/mnt/sdcard/") : isUnixFS()
+            && new File("/opt").canWrite() ? "/opt/" : "";
     }
 
     /**

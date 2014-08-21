@@ -119,7 +119,7 @@ public class ManagedException extends RuntimeException {
     protected String getStackTracePart(Throwable throwable) {
         StackTraceElement[] stackTrace = throwable.getStackTrace();
         StringBuffer buf = new StringBuffer();
-        int length = LOG.isDebugEnabled() ? stackTrace.length : 1;
+        int length = LOG.isDebugEnabled() || stackTrace.length < 1 ? stackTrace.length : 1;
         for (int i = 0; i < length; i++) {
             buf.append(stackTrace[i] + "\n");
         }

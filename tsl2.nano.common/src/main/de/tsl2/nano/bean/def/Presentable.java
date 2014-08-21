@@ -75,7 +75,7 @@ public class Presentable implements IIPresentable, Serializable {
             helper.getDefaultHorizontalAlignment(def) : helper.getDefaultHorizontalAlignment(attr);
         style |= helper.getDefaultStyle(attr);
         description = Environment.translate(attr.getId() + Messages.POSTFIX_TOOLTIP, false);
-        if (description.startsWith(Messages.TOKEN_MSG_NOTFOUND))
+        if (description == null || description.startsWith(Messages.TOKEN_MSG_NOTFOUND))
             description = label;
         /*
          * to be enabled, the attribute must be 
@@ -337,8 +337,11 @@ public class Presentable implements IIPresentable, Serializable {
     @Commit
     protected void initDesialization() {
         //try to translate after first loading
-        if (description != null && description.equals(label))
-            description = Environment.translate(label + Messages.POSTFIX_TOOLTIP, true);
+        if (description != null && description.equals(label)) {
+            String d = Environment.translate(label + Messages.POSTFIX_TOOLTIP, false);
+            if (d != null && !d.startsWith(Messages.TOKEN_MSG_NOTFOUND))
+                description = d;
+        }
         if (label != null)
             label = Environment.translate(label, true);
     }

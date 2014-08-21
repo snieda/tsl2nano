@@ -1016,7 +1016,7 @@ public class BeanDefinition<T> extends BeanClass<T> implements Serializable {
                 p.put(a.getId() + Messages.POSTFIX_TOOLTIP, a.getShortDescription());
             }
         }
-        FileUtil.saveProperties(fileName, p);
+        FileUtil.saveProperties(Environment.getConfigPath() + fileName, p);
     }
 
     /**

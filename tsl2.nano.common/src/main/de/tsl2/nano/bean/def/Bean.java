@@ -456,12 +456,15 @@ public class Bean<T> extends BeanDefinition<T> {
      */
     public Object save() {
         Object result;
-        if (CompositionFactory.persist(instance)) {
-            //refresh the bean!
-            result = BeanContainer.instance().getBeansByExample(instance).iterator().next();
-        } else
-            result = save(instance);
-        detach();
+        try {
+            if (CompositionFactory.persist(instance)) {
+                //refresh the bean!
+                result = BeanContainer.instance().getBeansByExample(instance).iterator().next();
+            } else
+                result = save(instance);
+        } finally {
+            detach();
+        }
         return result;
     }
 

@@ -305,6 +305,7 @@ public class NumberUtil extends BitUtil {
 
     /**
      * checks the given string to be a number
+     * 
      * @param value
      * @return if value is parseable to a number
      */
@@ -340,13 +341,16 @@ public class NumberUtil extends BitUtil {
         return BeanClass.isAssignableFrom(Float.class, type) || BeanClass.isAssignableFrom(Double.class, type)
             || BeanClass.isAssignableFrom(BigDecimal.class, type);
     }
-    
+
     /**
      * getDefaultInstance
+     * 
      * @param numberType
      * @return default instance (value=0) of the given number type
      */
     public static <T extends Number> T getDefaultInstance(Class<T> numberType) {
-        return numberType.isPrimitive() ? PrimitiveUtil.getDefaultValue(numberType) : BeanClass.createInstance(numberType, 0);
+        //to respect all number types we do the step through the string converter
+        return numberType.isPrimitive() ? PrimitiveUtil.getDefaultValue(numberType) : BeanClass.createInstance(
+            numberType, String.valueOf(0));
     }
 }

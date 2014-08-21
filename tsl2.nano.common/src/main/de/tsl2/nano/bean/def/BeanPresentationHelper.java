@@ -1279,7 +1279,7 @@ public class BeanPresentationHelper<T> {
                 "icons/reload.png") {
                 @Override
                 public Object action() throws Exception {
-                    reset();
+                    Environment.get(BeanPresentationHelper.class).reset();
                     return page("configuration refreshed");
                 }
 

@@ -51,6 +51,7 @@ import de.tsl2.nano.core.ManagedException;
 import de.tsl2.nano.core.Messages;
 import de.tsl2.nano.core.cls.BeanAttribute;
 import de.tsl2.nano.core.cls.BeanClass;
+import de.tsl2.nano.core.cls.IAttribute;
 import de.tsl2.nano.core.exception.Message;
 import de.tsl2.nano.core.execution.Profiler;
 import de.tsl2.nano.core.log.LogFactory;
@@ -561,15 +562,19 @@ public class BeanCollector<COLLECTIONTYPE extends Collection<T>, T> extends Bean
          * if timestamp fields are not shown, generate new timestamps
          */
         if (Environment.get("default.attribute.timestamp", true)) {
-            Map<String, IAttributeDefinition<?>> attrs = getAttributeDefinitions();
+            //respect all attributes
+            BeanClass<T> bc = BeanClass.getBeanClass(getDeclaringClass());
+            List<IAttribute> attrs = bc.getAttributes();
+//            Map<String, IAttributeDefinition<?>> attrs = getAttributeDefinitions();
             Timestamp ts = new Timestamp(System.currentTimeMillis());
-            for (IAttributeDefinition a : attrs.values()) {
-                if (a.temporalType() != null && Timestamp.class.isAssignableFrom(a.temporalType())) {
-                    if (a instanceof IValueAccess) {
-                        ((IValueAccess) a).setValue(ts);
-                    } else {
+            for (IAttribute a : attrs) {
+                IAttributeDef def = BeanContainer.instance().getAttributeDef(newItem, a.getName());
+                if (!def.nullable() && def.temporalType() != null && Timestamp.class.isAssignableFrom(def.temporalType())) {
+//                    if (a instanceof IValueAccess) {
+//                        ((IValueAccess) a).setValue(ts);
+//                    } else {
                         a.setValue(newItem, ts);
-                    }
+//                    }
                 }
             }
         }
@@ -623,11 +628,26 @@ public class BeanCollector<COLLECTIONTYPE extends Collection<T>, T> extends Bean
                     b.attach(new CommonAction<Void>() {
                         @Override
                         public Void action() throws Exception {
-                            values.remove(finalBean);
+                            if (!values.remove(finalBean)) {
+                                /*
+                                 * Workaround for a HashSet on Beans with changing hashcodes.
+                                 * Here we use equals() instead of hashcode()
+                                 */
+                                for (Iterator it = values.iterator(); it.hasNext();) {
+                                    if (it.next().equals(finalBean))
+                                        it.remove();
+                                }
+                            }
                             getSelectionProvider().getValue().remove(finalBean);
+                            //on an error after persisting the new persisted bean may be already added
+                            values.remove(b.getInstance());
+                            getSelectionProvider().getValue().remove(b.getInstance());
                             if (!"remove".equals(getParameter(0))) {
                                 values.add((T) b.getInstance());
                                 getSelectionProvider().getValue().add((T) b.getInstance());
+                            } else {
+                                if (composition != null)
+                                    composition.remove(finalBean);
                             }
                             return null;
                         }

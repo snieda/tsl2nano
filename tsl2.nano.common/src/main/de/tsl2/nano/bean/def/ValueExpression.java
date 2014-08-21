@@ -270,6 +270,9 @@ public class ValueExpression<TYPE> implements
             return "";
         if (hasArguments) {
             Map<String, Object> valueMap = BeanUtil.toValueMap(fromValue, false, false, true, attributes);
+            if (valueMap.size() == 0) {
+                return "?" + Util.asString(fromValue) + "?";
+            }
             Object[] args = mapToAttributeOrder(valueMap);
             StringUtil.replaceNulls(args, false);
             //check for entity beans to resolve their format recursive through it's valueexpression
@@ -283,9 +286,13 @@ public class ValueExpression<TYPE> implements
             return isMessageFormat() ? MessageFormat.format(format, args) : String.format(format, args);
         } else {
             //lazy workaround...
-            return !Util.isEmpty(format) && !format.equals("Object") ? format : FormatUtil.getDefaultFormat(fromValue,
-                false).format(fromValue);//Util.asString(fromValue);
+            return getWorkaroundFormat(fromValue);
         }
+    }
+
+    private String getWorkaroundFormat(TYPE fromValue) {
+        return !Util.isEmpty(format) && !format.equals("Object") ? format : FormatUtil.getDefaultFormat(fromValue,
+            false).format(fromValue);//Util.asString(fromValue);
     }
 
     private Object[] mapToAttributeOrder(Map<String, Object> valueMap) {

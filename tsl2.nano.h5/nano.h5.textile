@@ -1456,6 +1456,8 @@ Other restrictions on android:
 *** extract all jar-files from tsl2.nano.h5.xxx.jar and copy them into the environments directory.
 ** persistence provider has problems on specific beans:
 *** use another persistence provider
+* bean attributes have wrong default properties read from jpa annotations
+** if your beans don't decapitalize names the standard way, field names not be found. E.g. a name like MYName should decapitalized like this: MYName (not mYName!, see _Introspector.decapitalize(String name)_). If your beans can't be changed, you can switch the environment property _bean.attribute.decapitalize_ to _false_.
 * Beans showing currencys with EURO can't be saved
 ** Set the character encoding of your browser's current page to *UTF-8*. E.g. in Chrome: Menu=>Tools=>Encoding
 * no datasource for Sqlite available - apache BasicDatasource uses JavaBeans what is not usable on android

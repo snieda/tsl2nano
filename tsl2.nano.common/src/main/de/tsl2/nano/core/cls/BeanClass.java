@@ -633,8 +633,27 @@ public class BeanClass<T> implements Serializable {
         }
     }
 
+    /**
+     * delegates to {@link #createInstance(Class, Object...)} using {@link #load(String, ClassLoader)}.
+     */
     public static <T> T createInstance(String clsName, Object... args) {
         return (T) createInstance(load(clsName, null), args);
+    }
+
+    /**
+     * creating a new instance of clsName. searches the constructor inside the declared constructors of that class.
+     * 
+     * @param parmTypes constructor parameter types
+     * @param args constructor arguments
+     * @return
+     */
+    public static <T> T createInstance(String clsName, Class[] parmTypes, Object... args) {
+        try {
+            return (T) load(clsName, null).getDeclaredConstructor(parmTypes).newInstance(args);
+        } catch (Exception e) {
+            ManagedException.forward(e);
+            return null;
+        }
     }
 
     /**

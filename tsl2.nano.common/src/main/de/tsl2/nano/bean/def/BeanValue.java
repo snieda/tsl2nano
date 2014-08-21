@@ -189,7 +189,17 @@ public class BeanValue<T> extends AttributeDefinition<T> implements IValueDefini
         } catch (Exception e) {
             LOG.warn(e);
             status = isValid(v);
-            return v.toString();
+            /* 
+             * the toString() conversion should not break the application flow.
+             * if a PersistentSet is not initialized but already serialized, the toString()
+             * would throw a LazyInitializationException
+             */
+            try {
+                return v.toString();
+            } catch (Exception e1) {
+                Bean.clearCache();
+                return v.getClass() + ": " + e.toString();
+            }
         }
     }
 
@@ -323,12 +333,13 @@ public class BeanValue<T> extends AttributeDefinition<T> implements IValueDefini
 
     /**
      * removes this bean value from internal cache
+     * 
      * @return result of {@link List#remove(Object)}
      */
     public boolean removeFromCache() {
         return beanValueCache.remove(this);
     }
-    
+
     /**
      * clears cache of already created bean values.
      */
@@ -512,7 +523,8 @@ public class BeanValue<T> extends AttributeDefinition<T> implements IValueDefini
                     T v = getValue();
                     if (v != null)
                         selection.add(v);
-                    beanCollector = BeanCollector.getBeanCollector(getType(), selection, enabled ? MODE_ALL_SINGLE : 0, comp);
+                    beanCollector =
+                        BeanCollector.getBeanCollector(getType(), selection, enabled ? MODE_ALL_SINGLE : 0, comp);
                     beanCollector.setSelectionProvider(new SelectionProvider(selection));
                 }
                 return (IBeanCollector<?, T>) beanCollector;
@@ -559,13 +571,14 @@ public class BeanValue<T> extends AttributeDefinition<T> implements IValueDefini
                      * then the first parameter should provide the new value. the selectionProvider
                      * has not the new value, yet.
                      */
-                    
+
                     s = (Collection) (parameter[0] != null ? parameter[0] : selectionProvider.getValue());
                     setValue(s.isEmpty() ? null : (T) s.iterator().next());
 //                    setValue((T) selectionProvider.getFirstElement());
                 }
                 return s;
             }
+
             @Override
             public boolean isDefault() {
                 return true;

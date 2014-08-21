@@ -134,7 +134,7 @@ public class NetworkClassLoader extends NestedJarClassLoader {
      * @return true, if at least one package is given and class name starts with upper case
      */
     private boolean isClassName(String name) {
-        return name.matches(".*[.][A-Z]\\w*");
+        return name.matches(".*[.][A-Z]\\w*[a-zA-Z]$");
     }
 
     private String getPackageName(String name) {
