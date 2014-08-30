@@ -282,7 +282,7 @@ public class BeanContainerUtil {
                         @Override
                         public boolean nullable() {
                             if (nullable == null)
-                                nullable = oneToMany == null && (Boolean) joinColumnBC.callMethod(joinColumn, "nullable");
+                                nullable = oneToMany != null || (Boolean) joinColumnBC.callMethod(joinColumn, "nullable");
                             return nullable;
                         }
 
@@ -449,7 +449,7 @@ public class BeanContainerUtil {
                     public boolean nullable() {
 //                    return column.nullable();
                         if (nullable == null)
-                            nullable = (Boolean) columnBC.callMethod(column, "nullable");
+                            nullable = oneToMany != null || (Boolean) columnBC.callMethod(column, "nullable");
                         return nullable;
                     }
 
