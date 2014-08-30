@@ -720,7 +720,18 @@ Mostly many-to-many constellations will be solved through an additional table in
 Bean1(*)-->(1)Middle(1)-->(*)Bean2
 
 _Nano.H5_ recognizes this constellations and solves the bindings through an internal mechanism called _composition_. For further informations see implementation of class _Composition_ and _BeanCollector_.
-  
+
+### Resolving Compositions
+
+_Nano.h5_ recognizes a _composition_ through the following jpa annotations of a bean attribute:
+
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+@OneToMany(...)
+@JoinColumn(...nullable=false)
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+If the relation is uni-directional, the child bean is not persistable by itself. _Nano.h5_ will present no _save_ button but an _assign_ button. So, changes will be persisted only on the parent bean.
+
 ## Working on a page using the Keyboard
 
 The gui provides shortcuts/hotkeys for each button to activate. As html provides basic field tabbing (of course, that depends on your browser), it should be possible to work fast using your keyboard only. Each button/action shows its hotkey/shortcut through its tooltip. The tooltip is shown positioning your mouse (;-)) cursor on the element.
@@ -1672,9 +1683,24 @@ Other restrictions on android:
 
 * *TODO*
 * wenn übernehmen aktiv, diesen button als default deklarieren
-* löschen: navigations-fehler
+* (?) löschen: navigations-fehler
 * collector mehrfach verwendet --> nav nicht als set
-* jpa: was, wenn collection-joincolumn nullable = false?
+* (v) jpa: was, wenn collection-joincolumn nullable = false? <== composition!
+* (v) persist von composition-kette
+* (v) ve von composition darf nicht id sein - da bei neu-anlage erst mit parent erstellt
+* (v) enum.toString() mit Punkten (siehe Festsetzungsmethode)
+* löschen von transientem und persistentem composite läuft manchmal schief!
+* deaktivieren von neuen composites zeigt nicht erwünschtes ergebnis an
+* verwende incubation-rule in constraint (-->check())
+* verwende incubation-rule in bean (-->check())
+* attribute +isSearchable?
+* lose kopplung von apache fop?
+* *Refactorings:*
+** AttributeDefinition --> Attribute
+** BeanValue --> Value
+** Bean --> AttributeContainer
+** Bean soll BeanDefinition referenzieren und nicht erben
+** Value soll Attribute referenzieren und nicht erben
 
 h3. list of data-sources: 
 
