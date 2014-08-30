@@ -38,11 +38,14 @@ public abstract class WebSocketDependencyListener<T> extends AbstractDependencyL
 
     @Override
     public void handleEvent(Object source) {
-        T value = evaluate(source);
+        sendValue(attributeID, propertyName, evaluate(source));
+    }
+
+    public static void sendValue(String attributeID, String propertyName, Object value) {
         String msg = NanoWebSocketServer.createMessage(NanoWebSocketServer.TARGET_DEPENDENCY, attributeID, value);
         Message.send(msg);
     }
-
+    
     /**
      * evaluates a new value for it's attribute through a changed depending value.
      * 
