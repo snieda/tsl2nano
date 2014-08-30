@@ -1421,7 +1421,7 @@ public class Html5Presentation<T> extends BeanPresentationHelper<T> implements I
                     p.layout("tabindex", ++tabIndex).toString(),
                     enableFlag(ATTR_HIDDEN, !p.isVisible()),
                     enableFlag(ATTR_DISABLED, !interactive || !p.getEnabler().isActive()),
-                    enableFlag(ATTR_READONLY, !interactive || !p.getEnabler().isActive()),
+                    enableFlag(ATTR_READONLY, !interactive || !p.getEnabler().isActive() || beanValue.composition()),
                     enableFlag(ATTR_REQUIRED, !beanValue.nullable() && !beanValue.generatedValue()));
 
             if (multiLineText) {
@@ -1620,7 +1620,8 @@ public class Html5Presentation<T> extends BeanPresentationHelper<T> implements I
         boolean isEnum = beanValue.getType().isEnum();
         for (Object v : values) {
             if (isEnum) {
-                content = Environment.translate(v.toString(), true);
+                String translation = Environment.translate(v.toString(), false);
+                content = translation != null && !translation.startsWith(Messages.TOKEN_MSG_NOTFOUND) ? translation : v.toString();
                 id = content;
                 description = Environment.translate(v.toString() + Messages.POSTFIX_TOOLTIP, true);
             } else {

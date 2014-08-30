@@ -55,6 +55,7 @@ public class Statistic<COLLECTIONTYPE extends Collection<T>, T> extends BeanColl
         setMode(0);
         columnNames = new LinkedList<String>();
         collection = (COLLECTIONTYPE) create(beanType, columnNames);
+        isStaticCollection = true;
     }
 
     @Override

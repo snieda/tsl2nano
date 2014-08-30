@@ -675,6 +675,8 @@ public class NanoH5Session implements ISession {
     boolean provideSelection(BeanCollector c, Properties parms) {
         Collection<Object> elements = getSelectedElements(c, parms);
         c.getSelectionProvider().setValue(elements);
+        if (c.getComposition() != null)
+            c.getCurrentData().retainAll(elements);
         return !c.getSelectionProvider().isEmpty();
 //
 //        if (elements.size() > 0)
