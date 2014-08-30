@@ -405,7 +405,7 @@ public class AttributeDefinition<T> implements IAttributeDefinition<T> {
      * @return true, if has status.error != null
      */
     public boolean hasStatusError() {
-        return status.error() != null;
+        return status != null && status.error() != null;
     }
 
     /**

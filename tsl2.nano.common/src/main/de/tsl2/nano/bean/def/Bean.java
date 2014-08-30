@@ -332,6 +332,10 @@ public class Bean<T> extends BeanDefinition<T> {
         }
         if (crossChecker != null)
             crossChecker.check();
+        //TODO: refactore incubation rule to be usable here...
+//        if (rule != null) {
+//            RulePool.get(rule).run(...);
+//        }
     }
 
     public void addCrossValueChecker(BeanValue checkBean,
@@ -439,13 +443,9 @@ public class Bean<T> extends BeanDefinition<T> {
      */
     protected SecureAction<T> createSaveAction(final Object bean, String actionId) {
         final String saveLabel =
-            BeanContainer.isInitialized() && BeanContainer.instance().isPersistable(getDefiningClass(clazz)) ? Messages
+            BeanContainer.isInitialized() && BeanContainer.instance().isPersistable(getDefiningClass(clazz))
+                && !CompositionFactory.contains(bean) ? Messages
                 .getString("tsl2nano.save") : Messages.getString("tsl2nano.assign");
-//        return new SecureAction(actionId, saveLabel, saveLabel, IAction.MODE_DLG_OK) {
-//            public Object action() throws Exception {
-//                return save(bean);
-//            }
-//        };
         return new SaveAction(this, bean, actionId, saveLabel, saveLabel, IAction.MODE_DLG_OK);
     }
 
@@ -457,13 +457,14 @@ public class Bean<T> extends BeanDefinition<T> {
     public Object save() {
         Object result;
         try {
-            if (CompositionFactory.persist(instance)) {
+            if (CompositionFactory.markToPersist(instance)) {
                 //refresh the bean!
-                result = BeanContainer.instance().getBeansByExample(instance).iterator().next();
+//                result = BeanContainer.instance().getBeansByExample(instance).iterator().next();
+                result = instance;
             } else
                 result = save(instance);
         } finally {
-            detach();
+//            detach();
         }
         return result;
     }

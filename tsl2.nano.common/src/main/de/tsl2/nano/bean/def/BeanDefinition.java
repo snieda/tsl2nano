@@ -113,6 +113,8 @@ public class BeanDefinition<T> extends BeanClass<T> implements Serializable {
     protected boolean isconnected;
     /** optional constraints between attributes */
     protected BeanValueConditionChecker crossChecker;
+    /** optional rule name to do constraint checking between attributes */
+    protected String rule;
     /** optional grouping informations */
     @ElementList(inline = true, name = "group", type = ValueGroup.class, required = false)
     protected Collection<ValueGroup> valueGroups;

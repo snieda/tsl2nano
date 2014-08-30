@@ -1234,11 +1234,12 @@ public class BeanPresentationHelper<T> {
         BeanDefinition[] navigation = (BeanDefinition[]) session.getNavigationStack();
         for (int i = 0; i < navigation.length; i++) {
             if (navigation[i].isPersistable() && !navigation[i].isMultiValue()) {
-                Object instance = ((Bean)navigation[i]).getInstance();
+                Object instance = ((Bean) navigation[i]).getInstance();
                 Class<?> type = navigation[i].getDeclaringClass();
-                
+
                 for (BeanValue bv : beanValues) {
-                    if (type.isAssignableFrom(bv.getType()) && !bv.composition() && !bv.isMultiValue() && !bv.id() && bv.isSelectable()
+                    if (type.isAssignableFrom(bv.getType()) && !bv.composition() && !bv.isMultiValue() && !bv.id()
+                        && bv.isSelectable()
                         && !bv.getConstraint().isNullable()) {
                         bv.setValue(instance);
                     }
@@ -1423,7 +1424,8 @@ public class BeanPresentationHelper<T> {
 
                     @Override
                     public boolean isEnabled() {
-                        return super.isEnabled() && !collector.getDeclaringClass().isArray()
+                        return super.isEnabled() && collector.hasMode(IBeanCollector.MODE_SEARCHABLE)
+                            && !collector.getDeclaringClass().isArray()
                             && collector.getCurrentData().size() > 0;
                     }
                 });

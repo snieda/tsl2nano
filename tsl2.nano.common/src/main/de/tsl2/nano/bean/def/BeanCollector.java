@@ -255,6 +255,23 @@ public class BeanCollector<COLLECTIONTYPE extends Collection<T>, T> extends Bean
         return BeanContainer.isInitialized() && BeanContainer.instance().isPersistable(getType());
     }
 
+    @Override
+    public void onActivation() {
+        super.onActivation();
+    }
+
+    @Override
+    public void onDeactivation() {
+        super.onDeactivation();
+        /*
+         * if a bean-collector was left through cancel, new created compositions must be removed!
+         */
+        if (composition != null)
+            for (T instance : collection) {
+                Bean.getBean((Serializable) instance).onDeactivation();
+            }
+    }
+
     /**
      * {@inheritDoc}
      */
@@ -509,7 +526,7 @@ public class BeanCollector<COLLECTIONTYPE extends Collection<T>, T> extends Bean
      */
     @Override
     public void deleteItem(T item) {
-        if (!CompositionFactory.delete(item))
+        if (!CompositionFactory.markToPersist(item) && Bean.getBean((Serializable) item).getId() != null)
             BeanContainer.instance().delete(item);
     }
 
@@ -569,11 +586,12 @@ public class BeanCollector<COLLECTIONTYPE extends Collection<T>, T> extends Bean
             Timestamp ts = new Timestamp(System.currentTimeMillis());
             for (IAttribute a : attrs) {
                 IAttributeDef def = BeanContainer.instance().getAttributeDef(newItem, a.getName());
-                if (!def.nullable() && def.temporalType() != null && Timestamp.class.isAssignableFrom(def.temporalType())) {
+                if (!def.nullable() && def.temporalType() != null
+                    && Timestamp.class.isAssignableFrom(def.temporalType())) {
 //                    if (a instanceof IValueAccess) {
 //                        ((IValueAccess) a).setValue(ts);
 //                    } else {
-                        a.setValue(newItem, ts);
+                    a.setValue(newItem, ts);
 //                    }
                 }
             }
@@ -1208,6 +1226,14 @@ public class BeanCollector<COLLECTIONTYPE extends Collection<T>, T> extends Bean
         return searchStatus;
     }
 
+    /**
+     * getComposition
+     * @return
+     */
+    public Composition getComposition() {
+        return composition;
+    }
+    
     /**
      * setCompositionParent
      * 
