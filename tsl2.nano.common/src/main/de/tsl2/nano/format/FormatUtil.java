@@ -22,11 +22,8 @@ import java.text.ParseException;
 import java.text.ParsePosition;
 import java.util.Currency;
 import java.util.Date;
-import java.util.List;
 
 import org.apache.commons.logging.Log;
-import org.simpleframework.xml.Default;
-import org.simpleframework.xml.DefaultType;
 
 import de.tsl2.nano.collection.CollectionUtil;
 import de.tsl2.nano.core.Environment;
@@ -43,6 +40,7 @@ import de.tsl2.nano.util.NumberUtil;
  * 
  * @author TS
  */
+@SuppressWarnings({"rawtypes", "serial"})
 public class FormatUtil {
     private static final Log LOG = LogFactory.getLog(FormatUtil.class);
 
