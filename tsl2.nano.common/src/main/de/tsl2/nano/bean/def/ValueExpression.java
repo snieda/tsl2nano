@@ -140,6 +140,7 @@ public class ValueExpression<TYPE> implements
         isPersistable = type != null && BeanContainer.isInitialized() && BeanContainer.instance().isPersistable(type);
         isMessageFormat = !expression.startsWith(PREFIX_PRINTF_FORMAT);
         if (isMessageFormat()) {
+            //ok, thats not 'hinreichend'
             hasArguments = expression.contains("{") && expression.contains("}");
             attributes = extractAttributeNamesMF(expression);
             if (type != null) {
@@ -147,6 +148,7 @@ public class ValueExpression<TYPE> implements
                 this.type = type;
             }
         } else {
+            //ok, thats not 'hinreichend'
             hasArguments = expression.contains("%") && expression.contains("$");
             expression = expression.substring(PREFIX_PRINTF_FORMAT.length());
             attributes = extractAttributeNames(expression);
@@ -283,7 +285,12 @@ public class ValueExpression<TYPE> implements
                 Arrays.fill(arr, "?");
                 args = arr;
             }
-            return isMessageFormat() ? MessageFormat.format(format, args) : String.format(format, args);
+            String txt = isMessageFormat() ? MessageFormat.format(format, args) : String.format(format, args);
+            /*
+             * workaround for new instances of composite beans, having a value expression of its id attribute.
+             * this would result in an empty string on new instances.
+             */
+            return txt.isEmpty() ? "[new: " + fromValue + "]"  : txt;
         } else {
             //lazy workaround...
             return getWorkaroundFormat(fromValue);
