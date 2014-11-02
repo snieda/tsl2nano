@@ -18,6 +18,7 @@ import de.tsl2.nano.core.Environment;
 import de.tsl2.nano.core.util.StringUtil;
 import de.tsl2.nano.incubation.specification.AbstractRunnable;
 import de.tsl2.nano.incubation.specification.ParType;
+import de.tsl2.nano.util.operation.Function;
 import de.tsl2.nano.util.operation.NumericConditionOperator;
 import de.tsl2.nano.util.operation.Operator;
 
@@ -60,6 +61,7 @@ public class Rule<T> extends AbstractRunnable<T> {
     public static final String KEY_RESULT = Operator.KEY_RESULT;
 
     transient NumericConditionOperator operator;
+    
     /** the rule is initialized when all sub-rules are imported. see {@link #importSubRules()} */
     boolean initialized;
     
@@ -111,14 +113,19 @@ public class Rule<T> extends AbstractRunnable<T> {
         operator.reset();
         //in generics it is not possible to cast from Map(String,?) to Map(CharSequence, ?)
         Object a = arguments;
+        
+        
+        //calculate the numeric and boolean operations
         T result = (T) operator.eval((CharSequence)operation, (Map<CharSequence, Object>) a);
         checkConstraint(Operator.KEY_RESULT, result);
         return result;
     }
 
+    @SuppressWarnings("unchecked")
     @Commit
     protected void initDeserializing() {
         super.initDeserializing();
+        //TODO: should we enable configuring the numeric operator through xml?
         this.operator = new NumericConditionOperator();
         importSubRules();
     }

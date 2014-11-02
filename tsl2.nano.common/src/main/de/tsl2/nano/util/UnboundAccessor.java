@@ -202,6 +202,22 @@ public class UnboundAccessor<T> {
     }
 
     /**
+     * typeOf
+     * 
+     * @param name
+     * @return
+     */
+    public Class typeOf(String name) {
+        try {
+            Field f = getField(name);
+            return f != null ? f.getType() : getMethod(name, new Class[0]).getReturnType();
+        } catch (Exception e) {
+            ManagedException.forward(e);
+            return null;
+        }
+    }
+
+    /**
      * this method returns the instance itself. extending classes may override this to return an object that will be
      * more accessible than the instance itself (perhaps an instance of a super class).
      * 

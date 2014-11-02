@@ -74,7 +74,7 @@ import de.tsl2.nano.util.NumberUtil;
  * </pre>
  */
 @SuppressWarnings({ "rawtypes", "unchecked" })
-public class NanoH5 extends NanoHTTPD implements IConnector<Persistence> {
+public class NanoH5 extends NanoHTTPD implements ISystemConnector<Persistence> {
     private static final Log LOG = LogFactory.getLog(NanoH5.class);
 
     public static final String JAR_COMMON = "tsl2.nano.common.jar";
@@ -294,9 +294,9 @@ public class NanoH5 extends NanoHTTPD implements IConnector<Persistence> {
         /*
          * create the presentable navigation stack
          */
-        IConnector conn = Environment.get(IConnector.class);
+        ISystemConnector conn = Environment.get(ISystemConnector.class);
         if (conn == null)
-            conn = Environment.addService(IConnector.class, this);
+            conn = Environment.addService(ISystemConnector.class, this);
 
         Bean login = Bean.getBean(conn.createConnectionInfo());
 
@@ -360,6 +360,11 @@ public class NanoH5 extends NanoHTTPD implements IConnector<Persistence> {
         return createBeanCollectors(beanClasses);
     }
 
+    @Override
+    public void disconnect(Persistence connectionEnd) {
+        //nothing to clean
+    }
+    
     protected ClassLoader rootClassloader() {
         return appstartClassloader;
 //        try {

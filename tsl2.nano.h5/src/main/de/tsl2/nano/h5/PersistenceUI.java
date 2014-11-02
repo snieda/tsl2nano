@@ -48,7 +48,7 @@ public class PersistenceUI {
      */
     @SuppressWarnings({ "serial" })
     public static Bean<Persistence> createPersistenceUI(final Persistence persistence,
-            final IConnector<Persistence> connector) {
+            final ISystemConnector<Persistence> connector) {
         final Bean<Persistence> login = Bean.getBean(persistence);
         if (login.isDefault()) {
             login.setAttributeFilter("connectionUserName", "connectionPassword", "connectionUrl", "jarFile",

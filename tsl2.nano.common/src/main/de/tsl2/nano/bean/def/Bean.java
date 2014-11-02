@@ -24,6 +24,7 @@ import org.apache.commons.logging.Log;
 import de.tsl2.nano.action.IAction;
 import de.tsl2.nano.bean.BeanContainer;
 import de.tsl2.nano.bean.BeanUtil;
+import de.tsl2.nano.bean.IConnector;
 import de.tsl2.nano.bean.IValueAccess;
 import de.tsl2.nano.collection.CollectionUtil;
 import de.tsl2.nano.collection.MapUtil;
@@ -541,6 +542,11 @@ public class Bean<T> extends BeanDefinition<T> {
             (LinkedHashMap<String, IAttributeDefinition<?>>) createValueDefinitions(beandef.getAttributeDefinitions());
         bean.setInstance(instance);
 
+        if (bean.getPlugins() != null) {
+            for (IConnector p : bean.getPlugins()) {
+                p.connect(bean);
+            }
+        }
         //give the new bean the chance to create actions...only if null
         if (bean.actions != null && bean.actions.size() == 0)
             bean.actions = null;
@@ -570,6 +576,12 @@ public class Bean<T> extends BeanDefinition<T> {
                                                         };*/
                 valueDef = copy(attr, valueDef);
                 BeanValue.beanValueCache.add((BeanValue) valueDef);
+                if (valueDef instanceof IPluggable) {
+                    Collection<IConnector> plugins = ((IPluggable)valueDef).getPlugins();
+                    for (IConnector p : plugins) {
+                        p.connect(valueDef);
+                    }
+                }
                 valueDefs.put(attr.getName(), valueDef);
 //                } else {//it is a specialized beanvalue like pathvalue or ruleattribute
 //                    valueDefs.put(attr.getName(), (IValueAccess<?>) BeanUtil.clone(attr));

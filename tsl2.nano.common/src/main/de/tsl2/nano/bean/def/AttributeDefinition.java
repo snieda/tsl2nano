@@ -15,6 +15,7 @@ import java.text.Format;
 import java.text.ParseException;
 import java.util.Collection;
 import java.util.Date;
+import java.util.LinkedList;
 import java.util.Map;
 import java.util.UUID;
 
@@ -23,12 +24,15 @@ import org.simpleframework.xml.Attribute;
 import org.simpleframework.xml.Default;
 import org.simpleframework.xml.DefaultType;
 import org.simpleframework.xml.Element;
+import org.simpleframework.xml.ElementList;
 import org.simpleframework.xml.core.Commit;
+import org.simpleframework.xml.core.Persist;
 
 import de.tsl2.nano.action.IActivable;
 import de.tsl2.nano.bean.BeanContainer;
 import de.tsl2.nano.bean.BeanUtil;
 import de.tsl2.nano.bean.IAttributeDef;
+import de.tsl2.nano.bean.IConnector;
 import de.tsl2.nano.bean.IValueAccess;
 import de.tsl2.nano.bean.ValueHolder;
 import de.tsl2.nano.core.Environment;
@@ -86,6 +90,12 @@ public class AttributeDefinition<T> implements IAttributeDefinition<T> {
     /** see {@link #generatedValue()} */
     @Attribute(required = false)
     private boolean generatedValue;
+
+    /**
+     * optional plugins.
+     */
+    @ElementList(inline = true, entry = "plugin", required = false)
+    protected Collection<IConnector<AttributeDefinition>> plugins;
 
     private static final Log LOG = LogFactory.getLog(AttributeDefinition.class);
 
@@ -156,6 +166,17 @@ public class AttributeDefinition<T> implements IAttributeDefinition<T> {
         initDeserialization();
     }
 
+    @Persist
+    private void initSerialization() {
+        //disconnect from beandefinition to be serializable
+        if (plugins != null) {
+            for (IConnector p : plugins) {
+                LOG.info("disconnecting plugin " + p + " from " + this);
+                p.disconnect(this);
+            }
+        }
+    }
+
     @Commit
     private void initDeserialization() {
         status = IStatus.STATUS_OK;
@@ -172,6 +193,13 @@ public class AttributeDefinition<T> implements IAttributeDefinition<T> {
                     String name = StringUtil.substring(dl.attributeID, ".", null);
                     dl.setAttribute((AttributeDefinition) beandef.getAttribute(name));
                 }
+            }
+        }
+        //connect optional plugins
+        if (plugins != null) {
+            for (IConnector p : plugins) {
+                LOG.info("connecting plugin " + p + " to " + this);
+                p.connect(this);
             }
         }
     }
@@ -445,7 +473,7 @@ public class AttributeDefinition<T> implements IAttributeDefinition<T> {
                         Collection<T> beans = BeanContainer.instance().getBeans(getType(), 0, 1);
                         if (isMultiValue()) {
                             c.setDefault((T) beans);
-                        } else if (beans.size() > 0){
+                        } else if (beans.size() > 0) {
                             c.setDefault(beans.iterator().next());
                         }
                     }
@@ -687,6 +715,40 @@ public class AttributeDefinition<T> implements IAttributeDefinition<T> {
     @Override
     public void setAsRelation(String relationChain) {
         new PrivateAccessor<AttributeDefinition<T>>(this).set("name", relationChain);
+    }
+
+    /**
+     * @return Returns the plugins.
+     */
+    public Collection<IConnector<AttributeDefinition>> getPlugins() {
+        return plugins;
+    }
+
+    /**
+     * @param plugin The plugin to add.
+     */
+    public void addPlugin(IConnector<AttributeDefinition> plugin) {
+        if (plugins == null)
+            plugins = new LinkedList<IConnector<AttributeDefinition>>();
+        LOG.info("connecting plugin " + plugin + " to " + this);
+        plugin.connect(this);
+        plugins.add(plugin);
+    }
+
+    /**
+     * removePlugin
+     * 
+     * @param plugin to remove
+     * @return true, if plugin was removed
+     */
+    public boolean removePlugin(IConnector<AttributeDefinition> plugin) {
+        if (plugins == null) {
+            LOG.warn("plugin " + plugin + " can't be removed. no plugins available yet!");
+            return false;
+        }
+        LOG.info("disconnecting plugin " + plugin + " from " + this);
+        plugin.disconnect(this);
+        return plugins.remove(plugin);
     }
 
 ///////////////////////////////////////////////////////////////////////////////

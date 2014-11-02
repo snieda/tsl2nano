@@ -53,6 +53,9 @@ public class Presentable implements IIPresentable, Serializable {
     protected LinkedHashMap<String, String> layoutConstraints;
     @Attribute
     boolean visible = true;
+    @Attribute
+    boolean searchable = true;
+    
     @Element(required = false)
     IActivable enabler;
     @Element(required = false)
@@ -169,6 +172,14 @@ public class Presentable implements IIPresentable, Serializable {
     @Override
     public boolean isVisible() {
         return visible;
+    }
+
+    /**
+     * @return Returns the searchable.
+     */
+    @Override
+    public boolean isSearchable() {
+        return searchable;
     }
 
     @Override

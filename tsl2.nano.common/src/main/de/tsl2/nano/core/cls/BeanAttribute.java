@@ -159,6 +159,10 @@ public class BeanAttribute<T> implements IAttribute<T> {
         return readAccessMethod;
     }
 
+    public static final boolean isGetterMethod(Method method) {
+        return method.getName().startsWith(PREFIX_READ_ACCESS) || method.getName().startsWith(PREFIX_BOOLEAN_READ_ACCESS);
+    }
+    
     /**
      * searches for the write access method belonging to the given read access method.
      * 
@@ -167,8 +171,7 @@ public class BeanAttribute<T> implements IAttribute<T> {
      */
     Method getWriteAccessMethod(Method readAccessMethod) {
         if (writeAccessMethod == null) {
-            assert readAccessMethod.getName().startsWith(PREFIX_READ_ACCESS) || readAccessMethod.getName()
-                .startsWith(PREFIX_BOOLEAN_READ_ACCESS) : "method has to start with " + PREFIX_READ_ACCESS;
+            assert isGetterMethod(readAccessMethod) : "method has to start with " + PREFIX_READ_ACCESS;
             //use the generic name through readAccessMethod, because extension may override getName() returning a presentation name.
             final String attributeName = getName(readAccessMethod);
             try {

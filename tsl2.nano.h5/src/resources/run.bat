@@ -17,7 +17,7 @@ if "%3"=="test" (set NANO_TEST=-Dtsl2.nano.test=true)
 if "%3"=="nopause" (set NOPAUSE=nopause)
 rem set USERDIR=-Duser.dir=%PRJ%
 rem @start javaw
-java  %USERDIR% %NANO_DEBUG%  -Xmx512m -Djava.awt.headless=true %DEBUG% -jar tsl2.nano.h5.0.6.0.jar %PRJ% %PORT% 
+java  %USERDIR% %NANO_DEBUG%  -Xmx512m -Djava.awt.headless=true %DEBUG% -jar tsl2.nano.h5.0.7.0.jar %PRJ% %PORT% 
 REM -agentpath:C:/idv/visualvm_138/profiler/lib/deployed/jdk16/windows/profilerinterface.dll=C:\idv\visualvm_138\profiler\lib,5140
 REM >%PRJ%.log
 if not "%NOPAUSE%"=="nopause" pause

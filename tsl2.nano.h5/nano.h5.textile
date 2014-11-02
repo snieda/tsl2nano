@@ -388,6 +388,55 @@ Hibernate 4 for example would have the following dependencies:
  
 ## Runtime Configuration
 
+## Extensions of a BeanDefinition  / Presentation
+
+The _Extension_ is a workaround for de-/serializings through _simple-xml_. While you must know the type of your deserializing root element,
+it is not possible, to load any class-extensions.
+
+This class can be used as member of your base-class. after deserializing you can create the desired extension
+instance through informations of this extension-instance.
+<p/>
+
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+USE:
+
+- mark all extending members with annotation {@link Transient} (not with javas keyword 'transient')
+- on serialization of your extension class, call {@link #Extension(Object)} in your method annotated with {@link Commit}.
+    {AT}Persist
+    protected void initSerialization() {
+        extension = new Extension(this);
+        if (extension.isEmpty())
+            extension = null;
+    }
+- on de-serialization, call {@link #to(Object)} getting the desired instance.
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+ 
+## Plugins inside a BeanDefinition or AttributeDefinition
+
+Plugins can be added to the beandefinition or an attribute-definition. A plugin must implement the interface _IConnector_ with its method _connect(connectionEnd)_. This method will be called after deserialization - so you can do anything with all properties of a bean instance.
+
+Your plugin implementation must provide the following:
+* implementation of IConnector
+* serializable
+* must have a default constructor
+
+Example with plugin implementation 'RuleCover':
+
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+<attributeDefinition ...>
+...
+   <plugin class="de.tsl2.nano.h5.RuleCover">
+		<rule for-property="constraint.nullable" name="specification-rule-name" />
+   </plugin>
+</attributeDefinition>
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+Example for programmatically adding plugins:
+
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+	myattribute.addPlugin(myPlugin);
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
 ## Specifying Rules, Queries and Actions to be used on Beans and Attributes
 
 To do a structured work on a usable specification, rules, queries and actions can be defined before implementing or configuring the presentation. This is done by creating these items as xml-files inside the environments _specifiation_ directory. To see how it works, hit the applications menu button 'sample-codes' and have a look into the specification directory.
@@ -431,6 +480,31 @@ Example for an action, starting an ant-script:
 </action>
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
+This action can be referenced in your presentation beandef:
+
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+<beanDefinition ...>
+...
+      <action class="de.tsl2.nano.h5.SpecifiedAction" name="ant" />
+</beanDefinition>
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+This action will be shown as button in your beansdefs detail view.
+
+### The rule cover
+
+The rule cover is a plugin-mechanism to override fix values of beandefinition properties through the dynamic evaluation of referenced specification rules.
+ 
+Example, referencing a rule for a property of your beandefinition:
+
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+<beanDefinition ...>
+...
+   <plugin class="de.tsl2.nano.h5.RuleCover">
+		<rule for-property="constraint.nullable" name="specification-rule-name" />
+   </plugin>
+</beanDefinition>
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 ## The _ScriptTool_
 
@@ -513,7 +587,7 @@ The examples queryName _times-overview_ has to exist in directory _specification
  
 #### direct controlling a set of beans through the _Controller_
 
-The _Controller_ is an extension of _BeanCollector_ to present a collection of beans through their actions. These actions should be ease change-actions for attributes - like de- or increasing their values. This feature should be used for touch-screen applications.
+The _Controller_ is an extension of _BeanCollector_ to present a collection of beans through their actions. These actions should be simple change-actions for attributes - like de- or increasing their values. This feature should be used for touch-screen applications.
 
 To provide such a controller you can create an xml-file inside your environments _beandef/virtual_ directory. All beandefs inside the _virtual_ directory will be added to the bean-type list which is presented after login.
 
@@ -1509,6 +1583,7 @@ Other restrictions on android:
 | 0.0.5 | 01.06.2014 | supporting non-jpa-persistence-providers like ebean, ormlite through NanoEntityManagerFactory |
 | 0.1.0 | 29.06.2014 | supporting non-jpa-persistence-providers like ebean, ormlite through NanoEntityManagerFactory |
 | 0.6.0 | 13.07.2014 | using websockets to support rich client gui interactions |
+| 0.7.0 | 01.11.2014 | new plugin interface on beandefintions (path changed to 'presentation'). specified rules and actions are 						pluggable into beandef or attributedef now. |
 
 ## TODOs
 
@@ -1653,8 +1728,8 @@ Other restrictions on android:
 ** TableProcessor
 ** LogivView: LogicTable
 * JMeter as macro configuration
-* html-frames as perspective (left side: beans and views)
-* refactore ForwardedException. delete FormattedException. Stacktrace with member-info
+* (-) html-frames as perspective (left side: beans and views)
+* (v) refactore ForwardedException. delete FormattedException. Stacktrace with member-info
 * ParseObject <-- Bean(Map)
 * *TESTS*
 ** ( ) test with multi values - using best id's
@@ -1691,10 +1766,16 @@ Other restrictions on android:
 * (v) enum.toString() mit Punkten (siehe Festsetzungsmethode)
 * löschen von transientem und persistentem composite läuft manchmal schief!
 * deaktivieren von neuen composites zeigt nicht erwünschtes ergebnis an
-* verwende incubation-rule in constraint (-->check())
-* verwende incubation-rule in bean (-->check())
-* attribute +isSearchable?
+* (v) verwende incubation-rule in constraint (-->check())
+* (v) verwende incubation-rule in bean (-->check())
+* (v) attribute.presentable +isSearchable
 * lose kopplung von apache fop?
+* Verwendung von sourceforges Admin/MySQL Webhosting
+* Untersuche Verwendung von sourceforge VHost (tsl2-nano.org)
+* declaration over programmation
+* print-Verzeichnis: Suche nach jrxml und xsl-fo
+* rule-definition: Zur Anbindung anderer rule-engines
+
 * *Refactorings:*
 ** AttributeDefinition --> Attribute
 ** BeanValue --> Value

@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<rule name="test-import">
+   <parameter name="A">
+      <type>BOOLEAN</type>
+   </parameter>
+   <parameter name="x1">
+      <type>NUMBER</type>
+   </parameter>
+   <parameter name="x2">
+      <type>NUMBER</type>
+   </parameter>
+   <operation>A ? 1 + (A ? (x1 + 1) : (x2 * 2)) : (x2 * 3)</operation>
+</rule>

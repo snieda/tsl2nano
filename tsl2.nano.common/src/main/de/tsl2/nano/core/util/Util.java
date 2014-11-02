@@ -11,6 +11,7 @@ package de.tsl2.nano.core.util;
 
 import java.lang.reflect.Array;
 import java.security.MessageDigest;
+import java.text.ParseException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
@@ -18,6 +19,8 @@ import java.util.Map;
 
 import de.tsl2.nano.collection.MapUtil;
 import de.tsl2.nano.core.ManagedException;
+import de.tsl2.nano.core.cls.PrimitiveUtil;
+import de.tsl2.nano.format.FormatUtil;
 
 /**
  * utils for general purpose on simple objects.
@@ -85,7 +88,8 @@ public class Util {
      * @return true, if object is null or empty
      */
     public static final boolean isEmpty(Object object, boolean trim) {
-        return object == null || object.toString() == null || (trim ? object.toString().trim().isEmpty() : object.toString().isEmpty());
+        return object == null || object.toString() == null
+            || (trim ? object.toString().trim().isEmpty() : object.toString().isEmpty());
     }
 
     /**
@@ -258,6 +262,44 @@ public class Util {
             c.add(Array.get(array, i));
         }
         return c;
+    }
+
+    /**
+     * converts the given value to the given type. this is done by parsing the toString() representation --> slow
+     * performance!
+     * 
+     * @param type type of new value
+     * @param value value to convert
+     * @return to type converted value
+     */
+    public static Object convert(Class type, Object value) {
+        if (value == null)
+            return type.isPrimitive() ? PrimitiveUtil.getDefaultValue(type) : null;
+        try {
+            //TODO: howto bypass javas autoboxing on primitives?
+//            if (type.isPrimitive())
+//                return PrimitiveUtil.asPrimitive((Double)value);
+//            else
+                return FormatUtil.getDefaultFormat(type, true).parseObject(value.toString());
+        } catch (ParseException e) {
+            ManagedException.forward(e);
+            return null;
+        }
+    }
+
+    /**
+     * converts an array of values to the given type. this is done by parsing the toString() representation of the items
+     * --> slow performance.
+     * 
+     * @param type
+     * @param items
+     * @return
+     */
+    public static Object[] convertAll(Class type, Object... items) {
+        for (int i = 0; i < items.length; i++) {
+            items[i] = convert(type, items[i]);
+        }
+        return items;
     }
 
     /**

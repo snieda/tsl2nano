@@ -29,6 +29,7 @@ import de.tsl2.nano.bean.BeanUtil;
 import de.tsl2.nano.core.IPredicate;
 import de.tsl2.nano.core.cls.BeanAttribute;
 import de.tsl2.nano.core.log.LogFactory;
+import de.tsl2.nano.core.util.StringUtil;
 import de.tsl2.nano.core.util.Util;
 import de.tsl2.nano.format.DefaultFormat;
 import de.tsl2.nano.util.NumberUtil;
@@ -634,10 +635,14 @@ public class CollectionUtil {
                     from != null && !BeanUtil.isEmpty(from) ? ignoreCase && from.toString() != null ? from.toString()
                         .toUpperCase()
                         : from.toString() : null;
+                if (StringUtil.STR_ANY.equals(sfrom))
+                    sfrom = null;
                 String sto =
                     to != null && !BeanUtil.isEmpty(to) ? ignoreCase && to.toString() != null ? to.toString()
                         .toUpperCase()
                         : to.toString() : null;
+                if (StringUtil.STR_ANY.equals(sto))
+                    sto = null;
                 boolean useNull = from == null || to == null;
 
                 String sarg = arg0 != null ? ignoreCase && arg0.toString() != null ? arg0.toString().toUpperCase()

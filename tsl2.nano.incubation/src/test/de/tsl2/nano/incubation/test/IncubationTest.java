@@ -30,6 +30,7 @@ import de.tsl2.nano.collection.MapUtil;
 import de.tsl2.nano.collection.TableList;
 import de.tsl2.nano.core.Environment;
 import de.tsl2.nano.core.ManagedException;
+import de.tsl2.nano.core.cls.BeanClass;
 import de.tsl2.nano.core.execution.Profiler;
 import de.tsl2.nano.core.log.LogFactory;
 import de.tsl2.nano.core.util.StringUtil;
@@ -57,6 +58,7 @@ import de.tsl2.nano.logictable.LogicTable;
 import de.tsl2.nano.messaging.EventController;
 import de.tsl2.nano.messaging.IListener;
 import de.tsl2.nano.util.operation.ConditionOperator;
+import de.tsl2.nano.util.operation.Function;
 
 /**
  * basic tests for algorithms to be refactored to the project tsl2nano.common in future.
@@ -329,6 +331,13 @@ public class IncubationTest {
         values.put("x2", x2);
         Assert.assertEquals(new BigDecimal(61), new EquationSolver(null, values).eval(f));
     }
+    
+    @Test
+    public void testFunction() {
+        Function<Number> function = BeanClass.createInstance(Function.class);
+        Number result = function.eval("min(pow(x1,x2), 3)", MapUtil.asMap("x1", 2d, "x2", 2d));
+        log(result.toString());
+    }
 
     @Test
     public void testLogicTable() {
@@ -350,12 +359,12 @@ public class IncubationTest {
     @SuppressWarnings("unchecked")
     @Test
     public void testRules() throws Exception {
-        Rule<BigDecimal> rule = new Rule<BigDecimal>("test", "A ? (x1 + 1) : (x2 * 2)", (LinkedHashMap<String, ParType>) MapUtil.asMap("A",
-            Boolean.class,
+        Rule<BigDecimal> rule = new Rule<BigDecimal>("test", "A ? (pow(x1, x2) + 1) : (x2 * 2)", (LinkedHashMap<String, ParType>) MapUtil.asMap("A",
+            ParType.BOOLEAN,
             "x1",
-            BigDecimal.class,
+            ParType.NUMBER,
             "x2",
-            BigDecimal.class));
+            ParType.NUMBER));
         BigDecimal r1 = rule.run(MapUtil.asMap("A", true, "x1", new BigDecimal(1), "x2", new BigDecimal(2)));
         Assert.assertEquals(new BigDecimal(2), r1);
         
@@ -375,11 +384,11 @@ public class IncubationTest {
         pool.add(rule.getName(), rule);
         Environment.addService(pool);
         Rule<BigDecimal> ruleWithImport = new Rule<BigDecimal>("test-import", "A ? 1 + §test : (x2 * 3)", (LinkedHashMap<String, ParType>) MapUtil.asMap("A",
-            Boolean.class,
+            ParType.BOOLEAN,
             "x1",
-            BigDecimal.class,
+            ParType.NUMBER,
             "x2",
-            BigDecimal.class));
+            ParType.NUMBER));
         rule.addConstraint("result", new Constraint(BigDecimal.class, new BigDecimal(1), new BigDecimal(4)));
         BigDecimal r3 = ruleWithImport.run(MapUtil.asMap("A", true, "x1", new BigDecimal(1), "x2", new BigDecimal(2)));
         Assert.assertEquals(new BigDecimal(3), r3);

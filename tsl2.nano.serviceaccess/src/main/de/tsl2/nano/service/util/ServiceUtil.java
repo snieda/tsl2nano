@@ -329,7 +329,7 @@ public class ServiceUtil {
                 } else if (isManyToOne && value instanceof String) {
                     qStr.append(and_cond + attrPrefix + name + OP_EQ + VALUE_PH);
                 } else {// if no string, like is not possible
-                    final String op = OP_LIKE.equals(operator) ? OP_EQ : operator;
+                    final String op = OP_LIKE.equals(operator) ? OP_GE : operator;
                     qStr.append(and_cond + attrPrefix + name + op + VALUE_PH);
                 }
                 parameter.add(value);

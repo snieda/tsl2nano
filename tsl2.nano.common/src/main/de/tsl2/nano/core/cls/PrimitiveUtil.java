@@ -9,6 +9,7 @@
  */
 package de.tsl2.nano.core.cls;
 
+import java.math.BigDecimal;
 import java.text.ParseException;
 import java.util.Arrays;
 import java.util.Comparator;
@@ -27,7 +28,7 @@ import de.tsl2.nano.format.FormatUtil;
  */
 public class PrimitiveUtil {
     private static final Log LOG = LogFactory.getLog(PrimitiveUtil.class);
-    
+
     static final Class[] primitives;
     static final Class[] wrappers;
     static final SimpleClassComparator comparator;
@@ -70,32 +71,38 @@ public class PrimitiveUtil {
             return null;
         }
     }
-    
+
     /**
      * isPrimitiveOrWrapper
+     * 
      * @param type
      * @return true, if given type is primitive or wrapper.
      */
     public static boolean isPrimitiveOrWrapper(Class<?> type) {
         return type.isPrimitive() || Arrays.binarySearch(wrappers, type) != -1;
     }
-    
+
     /**
      * getPrimitive
      * 
-     * @param <T>
      * @param immutableWrapper
-     * @return
+     * @return the primitive class for the given wrapper type or the given type itself, if not found as primitive.
      */
     public static <T> Class<T> getPrimitive(Class<T> immutableWrapper) {
         int i = Arrays.binarySearch(wrappers, immutableWrapper, comparator);
-        return primitives[i];
+        return i != -1 ? primitives[i] : immutableWrapper;
     }
 
+    /**
+     * getWrapper
+     * 
+     * @param primitive primitive type
+     * @return the wrapper class for the given primitive type or the given type itself, if not found as wrapper.
+     */
     public static <T> Class<T> getWrapper(Class<T> primitive) {
-        assert primitive.isPrimitive() : "The given class " + primitive + " must be a primitive!";
+//        assert primitive.isPrimitive() : "The given class " + primitive + " must be a primitive!";
         int i = Arrays.binarySearch(primitives, primitive, comparator);
-        return wrappers[i];
+        return i != -1 ? wrappers[i] : primitive;
     }
 
     /**
@@ -155,6 +162,51 @@ public class PrimitiveUtil {
         return isassignable;
     }
 
+    /**
+     * WARNING: JAVAs autoboxing converts the primitive into a wrapping instance again, if you assign the result to an
+     * object!
+     * <p/>
+     * normally, java uses its auto-boxing to convert internally. but calling methods through reflection need exact
+     * argument types!
+     * 
+     * @param o wrapped instance to be unwrapped to a primitive value
+     * @return primitive value
+     */
+    public static short asPrimitive(Short o) {
+        return o.shortValue();
+    }
+
+    public static int asPrimitive(Integer o) {
+        return o.intValue();
+    }
+
+    public static long asPrimitive(Long o) {
+        return o.longValue();
+    }
+
+    public static float asPrimitive(Float o) {
+        return o.floatValue();
+    }
+
+    public static double asPrimitive(Double o) {
+        return o.doubleValue();
+    }
+
+    public static double asPrimitive(BigDecimal o) {
+        return o.doubleValue();
+    }
+
+    public static boolean asPrimitive(Boolean o) {
+        return o.booleanValue();
+    }
+
+    public static char asPrimitive(Character o) {
+        return ((Character) o).charValue();
+    }
+
+    public static byte asPrimitive(Byte o) {
+        return o.byteValue();
+    }
 }
 
 class SimpleClassComparator implements Comparator<Class> {
@@ -162,5 +214,5 @@ class SimpleClassComparator implements Comparator<Class> {
     public int compare(Class o1, Class o2) {
         return o1.getSimpleName().compareTo(o2.getSimpleName());
     }
-    
+
 }

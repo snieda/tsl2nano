@@ -11,6 +11,7 @@ package de.tsl2.nano.h5;
 
 import java.io.Serializable;
 
+import de.tsl2.nano.bean.IConnector;
 import de.tsl2.nano.bean.def.BeanDefinition;
 
 /**
@@ -19,7 +20,7 @@ import de.tsl2.nano.bean.def.BeanDefinition;
  * @author Tom, Thomas Schneider
  * @version $Revision$
  */
-public interface IConnector<PERSISTENCE extends Serializable> {
+public interface ISystemConnector<PERSISTENCE extends Serializable> extends IConnector<PERSISTENCE> {
     /**
      * getAuthentificationBean
      * 

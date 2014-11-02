@@ -4,12 +4,14 @@ import java.lang.reflect.Array;
 import java.util.HashMap;
 import java.util.Map;
 
+import org.apache.commons.logging.Log;
 import org.simpleframework.xml.Default;
 import org.simpleframework.xml.DefaultType;
 import org.simpleframework.xml.ElementMap;
 
 import de.tsl2.nano.action.IAction;
 import de.tsl2.nano.collection.CollectionUtil;
+import de.tsl2.nano.core.log.LogFactory;
 import de.tsl2.nano.core.util.StringUtil;
 import de.tsl2.nano.core.util.Util;
 import de.tsl2.nano.util.parser.Parser;
@@ -40,6 +42,8 @@ import de.tsl2.nano.util.parser.Parser;
  */
 @Default(value = DefaultType.FIELD, required = false)
 public abstract class Operator<INPUT, OUTPUT> extends Parser<INPUT> {
+    private static final Log LOG = LogFactory.getLog(Operator.class);
+
     /**
      * technical member while it's not possible to create an array out of a generic type. the
      * BeanUtil.getGenericType(Class) can't solve that problem, too.
@@ -181,6 +185,13 @@ public abstract class Operator<INPUT, OUTPUT> extends Parser<INPUT> {
             expression = wrap(expression);
             //enclose operations in brackets
             expression = encloseInBrackets(expression);
+
+            if (LOG.isDebugEnabled()) {
+                String log = "\n-------------------------------------------------------------------------------\n"
+                    + "  OPERATION: " + expression + "\n"
+                    + "  PARAMETER: " + values + "\n";
+                LOG.debug(log);
+            }
             //extract all terms
             INPUT term;
             INPUT t;
@@ -199,17 +210,25 @@ public abstract class Operator<INPUT, OUTPUT> extends Parser<INPUT> {
                     break;
             }
 
+            OUTPUT result;
             if (resultEstablished()) {
-                return getValue(KEY_RESULT);
+                result = getValue(KEY_RESULT);
             } else {
                 INPUT operand = extract(expression, syntax.get(KEY_OPERAND));
-                OUTPUT result = getValue(operand);
+                result = getValue(operand);
                 if (isEmpty(expression))
                     expression = operand;
-                return result != null ? result : converter.to(trim(expression));
+                result = result != null ? result : converter.to(trim(expression));
             }
+            if (LOG.isDebugEnabled()) {
+                String log =
+                    "  RESULT: " + result + "\n"
+                        + "-------------------------------------------------------------------------------\n";
+                LOG.debug(log);
+            }
+            return result;
         } catch (Exception ex) {
-            String msg = Util.toString(this.getClass(), "expression=" +expression, "value=", values);
+            String msg = Util.toString(this.getClass(), "expression=" + expression, "value=", values);
             throw new IllegalStateException("Error on evaluation of operation '" + msg + "'", ex);
         }
     }

@@ -32,7 +32,7 @@ import de.tsl2.nano.messaging.IListener;
  * path-expression to address the handlers and a response map to store each response. All connected nodes will be
  * informed through the messaging system {@link ThreadingEventController}. All connected nodes must implement the
  * {@link IListener} interface to react on notifications and changes.<br/>
- * the goal is a fast paraellel working net without using javas thread synchronization.
+ * the goal is a fast parallel working net without using javas thread synchronization.
  * <p/>
  * the elements/nodes of that net are hold in a {@link TreeMap} - always having the same order.
  * <p/>

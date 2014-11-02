@@ -482,8 +482,8 @@ public class BeanClass<T> implements Serializable {
         return callMethod(instance, methodName, new Class[0], new Object[0]);
     }
 
-    public static Object call(Class<?> type, String staticMethodName) {
-        return BeanClass.getBeanClass(type).callMethod(null, staticMethodName, new Class[0]);
+    public static Object call(Class<?> type, String staticMethodName, boolean usePrimitives, Object... args) {
+        return BeanClass.getBeanClass(type).callMethod(null, staticMethodName, null, usePrimitives, args);
     }
 
     public static Object call(Object instance, String methodName) {
@@ -497,23 +497,29 @@ public class BeanClass<T> implements Serializable {
         return BeanClass.getBeanClass(instance.getClass()).callMethod(instance, methodName, par, args);
     }
 
+    public Object callMethod(Object instance, String methodName, Class[] par, Object... args) {
+        return callMethod(instance, methodName, par, false, args);
+    }
+    
     /**
      * simple method reflection call
      * 
      * @param instance object
      * @param methodName method name to call
      * @param par (optional, if null, args-classes will be used) method parameter
+     * @param usePrimitives if par is null and usePrimitives is true, all evaluated parameters will primitives if
+     *            possible!
      * @param args method argument objects
      * @return method call result
      */
-    public Object callMethod(Object instance, String methodName, Class[] par, Object... args) {
+    public Object callMethod(Object instance, String methodName, Class[] par, boolean usePrimitives, Object... args) {
         //if par is null we try to fill through the objects
         //but no object should be null!
         if (par == null) {
             par = new Class[args.length];
             for (int i = 0; i < args.length; i++) {
                 if (args[i] != null) {
-                    par[i] = args[i].getClass();
+                    par[i] = usePrimitives ? PrimitiveUtil.getPrimitive(args[i].getClass()) : args[i].getClass();
                 } else {
                     par[i] = Object.class;
                 }
@@ -789,8 +795,8 @@ public class BeanClass<T> implements Serializable {
             final BeanClass srcClass = BeanClass.getBeanClass(src.getClass());
             attributeNames = srcClass.getAttributeNames();
         }
-        if (LOG.isDebugEnabled()) {
-            LOG.debug("copying " + attributeNames.length
+        if (LOG.isTraceEnabled()) {
+            LOG.trace("copying " + attributeNames.length
                 + " attributes from "
                 + src.getClass().getSimpleName()
                 + " to "
@@ -865,8 +871,8 @@ public class BeanClass<T> implements Serializable {
      * @return destination object
      */
     public static <D> D copy(Object src, D dest, String... noCopy) {
-        if (LOG.isDebugEnabled()) {
-            LOG.debug("copying all fields from " + src.getClass().getSimpleName()
+        if (LOG.isTraceEnabled()) {
+            LOG.trace("copying all fields from " + src.getClass().getSimpleName()
                 + " to "
                 + dest.getClass().getSimpleName());
         }
@@ -893,8 +899,8 @@ public class BeanClass<T> implements Serializable {
                     }
                 }
             }
-            if (LOG.isDebugEnabled()) {
-                LOG.debug(c + " fields copied");
+            if (LOG.isTraceEnabled()) {
+                LOG.trace(c + " fields copied");
             }
         } catch (Exception e) {
             ManagedException.forward(e);

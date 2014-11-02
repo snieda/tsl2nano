@@ -25,6 +25,7 @@ import de.tsl2.nano.core.cls.PrimitiveUtil;
 import de.tsl2.nano.core.util.BitUtil;
 import de.tsl2.nano.core.util.DateUtil;
 import de.tsl2.nano.core.util.StringUtil;
+import de.tsl2.nano.core.util.Util;
 import de.tsl2.nano.format.FormatUtil;
 
 /**
@@ -353,4 +354,5 @@ public class NumberUtil extends BitUtil {
         return numberType.isPrimitive() ? PrimitiveUtil.getDefaultValue(numberType) : BeanClass.createInstance(
             numberType, String.valueOf(0));
     }
+
 }

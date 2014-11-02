@@ -42,6 +42,7 @@ import de.tsl2.nano.action.IAction;
 import de.tsl2.nano.action.IActivable;
 import de.tsl2.nano.bean.BeanContainer;
 import de.tsl2.nano.bean.BeanUtil;
+import de.tsl2.nano.bean.IConnector;
 import de.tsl2.nano.bean.IValueAccess;
 import de.tsl2.nano.bean.ValueHolder;
 import de.tsl2.nano.collection.CollectionUtil;
@@ -73,7 +74,7 @@ import de.tsl2.nano.messaging.IListener;
 @SuppressWarnings({ "rawtypes", "unchecked" })
 @Namespace(reference = "beandef.xsd")
 @Default(value = DefaultType.FIELD, required = false)
-public class BeanDefinition<T> extends BeanClass<T> implements Serializable {
+public class BeanDefinition<T> extends BeanClass<T> implements IPluggable<BeanDefinition>, Serializable {
     /** serialVersionUID */
     private static final long serialVersionUID = -1110193041263724431L;
     private static final Log LOG = LogFactory.getLog(BeanDefinition.class);
@@ -94,6 +95,13 @@ public class BeanDefinition<T> extends BeanClass<T> implements Serializable {
     @Attribute
     protected String name;
 
+    /**
+     * optional plugins - like rule names to cover properties of this beandefinition. perhaps you cover the value of property
+     * 'constraint.visible' with a rule defined in your specification.
+     */
+    @ElementList(inline = true, entry = "plugin", required = false)
+    protected Collection<IConnector<BeanDefinition>> plugins;
+
     /** should be able to create a representable string for the given instance */
     protected ValueExpression<T> valueExpression;
 
@@ -101,6 +109,7 @@ public class BeanDefinition<T> extends BeanClass<T> implements Serializable {
      * optional bean actions. not serialized because most actions will be defined inline - so the containing class would
      * have to be serializable, too.
      */
+    @ElementList(inline = true, entry = "action", required = false)
     protected Collection<IAction> actions;
 
     /**
@@ -113,10 +122,8 @@ public class BeanDefinition<T> extends BeanClass<T> implements Serializable {
     protected boolean isconnected;
     /** optional constraints between attributes */
     protected BeanValueConditionChecker crossChecker;
-    /** optional rule name to do constraint checking between attributes */
-    protected String rule;
     /** optional grouping informations */
-    @ElementList(inline = true, name = "group", type = ValueGroup.class, required = false)
+    @ElementList(inline = true, entry = "group", type = ValueGroup.class, required = false)
     protected Collection<ValueGroup> valueGroups;
 
     @Attribute(required = false)
@@ -159,7 +166,7 @@ public class BeanDefinition<T> extends BeanClass<T> implements Serializable {
     public BeanDefinition(Class<T> beanClass) {
         super((Class<T>) (Environment.get("beandef.ignore.anonymous.fields", true) ? getDefiningClass(beanClass)
             : beanClass));
-        name = beanClass == UNDEFINED.getClass() ? "undefined" : super.getName();
+        name = beanClass == UNDEFINED.getClass() ? /*"undefined"*/ StringUtil.STR_ANY : super.getName();
     }
 
     /**
@@ -892,6 +899,16 @@ public class BeanDefinition<T> extends BeanClass<T> implements Serializable {
                         beandef = null;
                     }
                 } catch (Exception e) {
+                    if (xmlFile.canWrite()) {
+                        try {
+                            if (!xmlFile.renameTo(new File(xmlFile.getPath() + ".failed")))
+                                LOG.warn("couldn't rename failed beandefinition-file '" + xmlFile + "' to '" + xmlFile
+                                    + ".failed' !");
+                        } catch (Exception ex) {
+                            LOG.error("couldn't rename failed beandefinition-file '" + xmlFile + "' to '" + xmlFile
+                                + ".failed' !", ex);
+                        }
+                    }
                     if (Environment.get("application.mode.strict", false))
                         ManagedException.forward(e);
                     else
@@ -950,6 +967,13 @@ public class BeanDefinition<T> extends BeanClass<T> implements Serializable {
             if (actions.isEmpty())
                 actions = null;
         }
+        //disconnect from beandefinition to be serializable
+        if (plugins != null) {
+            for (IConnector p : plugins) {
+                LOG.info("disconnecting plugin " + p + " from " + this);
+                p.disconnect(this);
+            }
+        }
     }
 
     /**
@@ -967,6 +991,20 @@ public class BeanDefinition<T> extends BeanClass<T> implements Serializable {
             createNaturalSortedAttributeNames(attributeFilter);
             allDefinitionsCached = true;
         }
+        if (actions != null) {
+            for (IAction a : actions) {
+                if (a instanceof IConnector) {
+                    ((IConnector) a).connect(this);
+                }
+            }
+        }
+        //connect optional plugins
+        if (plugins != null) {
+            for (IConnector p : plugins) {
+                LOG.info("connecting plugin " + p + " to " + this);
+                p.connect(this);
+            }
+        }
     }
 
     /**
@@ -979,7 +1017,7 @@ public class BeanDefinition<T> extends BeanClass<T> implements Serializable {
     }
 
     public static String getDefinitionDirectory() {
-        return Environment.getConfigPath() + "beandef/";
+        return Environment.getConfigPath() + "presentation/";
     }
 
     protected static File getDefinitionFile(String name) {
@@ -996,6 +1034,7 @@ public class BeanDefinition<T> extends BeanClass<T> implements Serializable {
         String name = "messages.properties";
         saveResourceEntries(Environment.getSortedProperties(name), name);
     }
+
     /**
      * generates resource entries for each attribute+tooltip and each action to be edited later.
      */
@@ -1207,6 +1246,40 @@ public class BeanDefinition<T> extends BeanClass<T> implements Serializable {
             return getNestingField(p, keyStruct);
         }
         return getAttribute(keyStructure[0]);
+    }
+
+    /**
+     * @return Returns the plugins.
+     */
+    public Collection<IConnector<BeanDefinition>> getPlugins() {
+        return plugins;
+    }
+
+    /**
+     * @param plugin The plugin to add.
+     */
+    public void addPlugin(IConnector<BeanDefinition> plugin) {
+        if (plugins == null)
+            plugins = new LinkedList<IConnector<BeanDefinition>>();
+        LOG.info("connecting plugin " + plugin + " to " + this);
+        plugin.connect(this);
+        plugins.add(plugin);
+    }
+
+    /**
+     * removePlugin
+     * 
+     * @param plugin to remove
+     * @return true, if plugin was removed
+     */
+    public boolean removePlugin(IConnector<BeanDefinition> plugin) {
+        if (plugins == null) {
+            LOG.warn("plugin " + plugin + " can't be removed. no plugins available yet!");
+            return false;
+        }
+        LOG.info("disconnecting plugin " + plugin + " from " + this);
+        plugin.disconnect(this);
+        return plugins.remove(plugin);
     }
 
     /**

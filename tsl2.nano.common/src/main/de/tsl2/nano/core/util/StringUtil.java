@@ -32,6 +32,7 @@ import de.tsl2.nano.core.Messages;
 public class StringUtil {
     /** variable (like ant-variables) matching expression. e.g.: ${myvar} */
     public static final String VAR_REGEXP = "\\$\\{\\w+\\}";
+    public static final String STR_ANY = "*";
 
     /**
      * @see #substring(String, String, String, int)
@@ -418,7 +419,8 @@ public class StringUtil {
      * 
      * @param source source string. if it is an instanceof StringBuilder, the replacement can work.
      * @param regexp pattern
-     * @param replacement (optional) all occurrencies of regexp will be replaced in source (only if StringBuilder!).
+     * @param replacement (optional) all occurrences of regexp will be replaced in source (only if source is of type
+     *            StringBuilder!).
      * @return part of source or empty string
      */
     public static String extract(CharSequence source, String regexp, String replacement) {

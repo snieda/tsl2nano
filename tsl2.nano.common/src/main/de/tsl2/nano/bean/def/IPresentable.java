@@ -32,6 +32,9 @@ public interface IPresentable extends Serializable {
     /** returns true, if the field should be visible */
     boolean isVisible();
 
+    /** returns true, if this instance should be presented in a search mask */
+    boolean isSearchable();
+    
     /** returns the label or title */
     String getLabel();
 
@@ -220,6 +223,11 @@ public interface IPresentable extends Serializable {
         @Override
         public boolean isVisible() {
             return true;
+        }
+
+        @Override
+        public boolean isSearchable() {
+            return false;
         }
 
         @Override

@@ -152,7 +152,7 @@ public class NetUtil {
     /**
      * UNTESTED YET!
      * 
-     * @param socket connection to sent the data to
+     * @param socket connection to send the data to
      * @param url data location
      */
     public static void upload(Socket socket, String name, String strUrl) {

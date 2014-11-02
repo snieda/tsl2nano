@@ -155,8 +155,17 @@ public class ConditionOperator<T> extends SOperator<T> {
                 ? eval(concat(prefix, subEnclosing(expression, KEY_THEN, KEY_ELSE)))
                 : eval(concat(prefix, subEnclosing(expression, KEY_ELSE, null)));
         } else {
-            return super.eval(expression);
+            return super.eval(precalc(expression));
         }
+    }
+
+    /**
+     * may do some pre calculations. override this method to do them.
+     * @param expression expression to be prepared
+     * @return result of pre calculations
+     */
+    protected CharSequence precalc(CharSequence expression) {
+        return expression;
     }
 }
 

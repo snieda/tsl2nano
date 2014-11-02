@@ -17,7 +17,7 @@ import de.tsl2.nano.core.cls.BeanClass;
 import de.tsl2.nano.core.execution.ICRunnable;
 
 /**
- * simple proxy to enable aop like enhancement.
+ * simple proxy to enable aop-like enhancement.
  * 
  * @author Thomas Schneider
  * @version $Revision$

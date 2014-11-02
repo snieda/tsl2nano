@@ -1,0 +1,22 @@
+02.11.2014 22:29:26 - [      ThreadUtil]: starting thread logger
+	CompatibilityLayer]: registering method 'ant': de.tsl2.nano.execution.ScriptUtil => ant([Ljava.lang.Class;@c6fc84)
+	reflectionToString': de.tsl2.nano.format.ToStringBuilder => reflectionToString([Ljava.lang.Class;@13f704e)
+02.11.2014 22:29:26 - [      LogFactory]: 
+===========================================================
+creating environment C:/eigen/tsl2/tsl2-workspace/tsl2-nano/tsl2.nano.incubation
+    build : <unknown build informations>
+    args  : org.eclipse.jdt.internal.junit.runner.RemoteTestRunner -version 3 -port 59690 -testLoaderClass org.eclipse.jdt.internal.junit4.runner.JUnit4TestLoader -loaderpluginname org.eclipse.jdt.junit4.runtime -test de.tsl2.nano.incubation.test.IncubationTest:testRules
+    dir   : C:\eigen\tsl2\tsl2-workspace\tsl2-nano\tsl2.nano.incubation
+    time  : Sun Nov 02 22:29:24 CET 2014
+    user  : Tom, home: C:\Users\Tom
+    lang  : DE_de, encoding: Cp1252
+    encode: Cp1252
+    loader: sun.misc.Launcher$AppClassLoader@126f304
+    java  : 1.7.0_40-b43, C:\Program Files (x86)\Java\jdk1.7.0_40\jre
+    os    : Windows 8, 6.2  x86
+    system: pentium_pro+mmx pentium_pro pentium+mmx pentium i486 i386 i86 32
+    net-ip: 192.168.178.21
+===========================================================
+	  Function]: pow(x1, x2) = 1 [with {A=true, x2=2, x1=1}]
+	    Pool]: loading rule(s) from C:/eigen/tsl2/tsl2-workspace/tsl2-nano/tsl2.nano.incubation/specification/rule/
+	adding runnable 'test' and saving it to C:/eigen/tsl2/tsl2-workspace/tsl2-nano/tsl2.nano.incubation/specification/rule/test.xml

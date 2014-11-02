@@ -15,6 +15,7 @@ import org.simpleframework.xml.Attribute;
 import org.simpleframework.xml.core.Commit;
 
 import de.tsl2.nano.bean.BeanUtil;
+import de.tsl2.nano.bean.IConnector;
 import de.tsl2.nano.bean.def.SecureAction;
 import de.tsl2.nano.core.Environment;
 import de.tsl2.nano.core.exception.Message;
@@ -26,7 +27,7 @@ import de.tsl2.nano.incubation.specification.actions.ActionPool;
  * @author Tom
  * @version $Revision$
  */
-public class SpecifiedAction<RETURNTYPE> extends SecureAction<RETURNTYPE> {
+public class SpecifiedAction<RETURNTYPE> extends SecureAction<RETURNTYPE> implements IConnector<Object> {
     /** serialVersionUID */
     private static final long serialVersionUID = 6277309054654171553L;
 
@@ -72,10 +73,17 @@ public class SpecifiedAction<RETURNTYPE> extends SecureAction<RETURNTYPE> {
      * 
      * @param instance
      */
-    public void setInstance(Object instance) {
+    @Override
+    public Object connect(Object instance) {
         this.instance = instance;
+        return this;
     }
 
+    @Override
+    public void disconnect(Object connectionEnd) {
+        //nothing to clean..
+    }
+    
     @Commit
     private void initDesializing() {
         this.id = this.name;

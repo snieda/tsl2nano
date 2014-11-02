@@ -12,6 +12,7 @@ import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.Executors;
 
 import org.simpleframework.xml.Attribute;
 import org.simpleframework.xml.Default;
@@ -68,7 +69,7 @@ public/*abstract*/class LogFactory implements Runnable, Serializable {
 
     @Element(data = true)
     String outputformat = "%1$td.%1$tm.%1$tY %1$tT %2$s [%3$16s]: %4$s";
-    @Element(required=false)
+    @Element(required = false)
     String outputFile = logOutputFile;
     transient MsgFormat msgFormat;
 
@@ -139,12 +140,23 @@ public/*abstract*/class LogFactory implements Runnable, Serializable {
                 }
                 try {
                     XmlUtil.saveSimpleXml_(logFactoryXml, self);
-                } catch(Throwable ex) {//NoClassDefFound would be an error --> Throwable
+                } catch (Throwable ex) {//NoClassDefFound would be an error --> Throwable
                     //ok, perhaps the simple-xml is loaded later
                     log("error: LogFactory couldn't save xml properties");
                 }
             }
-            ThreadUtil.startDaemon("logger", self);
+            final Thread worker = ThreadUtil.startDaemon("logger", self);
+            //TODO: implement
+            Runtime.getRuntime().addShutdownHook(Executors.defaultThreadFactory().newThread(new Runnable() {
+                @Override
+                public void run() {
+                    try {
+                        worker.interrupt();
+                    } catch (Throwable t) {
+                        // ignore
+                    }
+                }
+            }));
         }
         return self;
     }
@@ -153,7 +165,7 @@ public/*abstract*/class LogFactory implements Runnable, Serializable {
         //this will stop the thread, too.
         self = null;
     }
- 
+
     /**
      * only for internal use! will reset the current singelton instance.
      * 
@@ -166,12 +178,13 @@ public/*abstract*/class LogFactory implements Runnable, Serializable {
 
     /**
      * only for internal use
+     * 
      * @return logfile name
      */
     public static String getLogFileName() {
         return self.outputFile;
     }
-    
+
     /**
      * only for internal use!
      * 
@@ -183,6 +196,7 @@ public/*abstract*/class LogFactory implements Runnable, Serializable {
 
     public static final void initializeFileLogger(String fileName, int bitsetStatesToLog) {
         try {
+            //create the print-stream with autoflush = false
             PrintStream fileOut = new PrintStream(fileName);
             initializeLogger(instance().outputformat, -1, fileOut, fileOut);
             self.outputFile = fileName;
@@ -246,7 +260,8 @@ public/*abstract*/class LogFactory implements Runnable, Serializable {
 
     /**
      * initPrintStream
-     * @param outputFile 
+     * 
+     * @param outputFile
      */
     private void initPrintStream(String outputFile) {
         try {
@@ -425,29 +440,33 @@ public/*abstract*/class LogFactory implements Runnable, Serializable {
     public void run() {
         String txt, last = " ", text;
         int filter, lastFilter = 0;
-        while (LogFactory.self != null || loggingQueue.size() > 0) {
-            if (loggingQueue.size() > 0) {
-                text = loggingQueue.remove(0);
-                if (useFilter) {
-                    filter = filterIndex(text, last);
-                    if (filter < lastFilter) {
-                        filter = 0;
+        while (LogFactory.self != null) {
+            try {
+                while (loggingQueue.size() > 0) {
+                    text = loggingQueue.remove(0);
+                    if (useFilter) {
+                        filter = filterIndex(text, last);
+                        if (filter < lastFilter) {
+                            filter = 0;
+                        }
+                        txt = filter > 0 ? "\t" + text.substring(filter) : text;
+                        lastFilter = filter;
+                        last = text;
+                    } else {
+                        txt = text;
                     }
-                    txt = filter > 0 ? "\t" + text.substring(filter) : text;
-                    lastFilter = filter;
-                    last = text;
-                } else {
-                    txt = text;
+                    out.println(txt);
+                    if (out != System.out) {
+                        System.out.println(txt);
+                    }
                 }
-                out.println(txt);
-                if (out != System.out)
-                    System.out.println(txt);
-            } else {
-                try {
-                    Thread.sleep(200);
-                } catch (InterruptedException e) {
-                    ManagedException.forward(e);
+                Thread.sleep(200);
+            } catch (InterruptedException e) {
+                if (out != null && !out.equals(System.out)) {
+                    out.flush();
+                    out.close();
                 }
+                ManagedException.forward(e);
             }
         }
 
@@ -478,6 +497,7 @@ public/*abstract*/class LogFactory implements Runnable, Serializable {
         if (factory.isEnabled(state) && factory.hasLogLevel(logClass, state)) {
             if (message != null) {
                 //TODO: evaluate performance of predefined pattern in MessageFormat (MsgFormat)
+                // is there a fast way doing the formatting inside the other thread?
                 String f = String.format(factory.outputformat,
                     Calendar.getInstance().getTime(),
                     state(state),

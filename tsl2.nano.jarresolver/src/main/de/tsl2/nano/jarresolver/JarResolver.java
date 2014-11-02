@@ -12,6 +12,7 @@ package de.tsl2.nano.jarresolver;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.Collection;
 import java.util.Map;
 import java.util.Properties;
 import java.util.Set;
@@ -218,7 +219,8 @@ public class JarResolver {
             //if the parameter is a known package name, fill all dependent jar-files
             pck = findPackage(deps[i], false);
             if (pck != null) {
-                deps[i] = pck;
+                //if groupId only found through another artifact-definition, add this dep-name
+                deps[i] = pck.endsWith("/") ? pck + deps[i] : pck;
                 addIt = true;
             } else  {
                 addIt = !onlyLoadDefined;
@@ -263,12 +265,38 @@ public class JarResolver {
         else if (dependency.contains("."))
             //search for parts of given package
             return findPackage(StringUtil.substring(dependency, null, ".", true), packageKey);
+        else if (dependency.contains("-"))
+            //search for parts of given package
+            return findPackage(StringUtil.substring(dependency, null, "-", true), packageKey);
         else if (props.values().contains(dependency))
             return findPackageByArtifactId(dependency);
         else
-            return null;
+            return (pck = findGroupId(dependency)) != null ? pck + "/" : null;
     }
 
+    /**
+     * find the group id through another artifact id definition.
+     * @param artifactIdPart part of an artifactid
+     * @return group id name or null
+     */
+    private String findGroupId(String artifactIdPart) {
+        Collection<Object> packs = props.values();
+        String a, pkg;
+        for (Object p : packs) {
+            a = (String) p;
+            if (a.contains(artifactIdPart)) {
+                pkg = findPackageByArtifactId(a);
+                if (pkg != null) {
+                    if (a.contains("/"))
+                        return StringUtil.substring(a, null, "/");
+                    else
+                        return StringUtil.substring(pkg, PRE_PACKAGE, null);
+                }
+            }
+        }
+        return null;
+    }
+    
     /**
      * main
      * 

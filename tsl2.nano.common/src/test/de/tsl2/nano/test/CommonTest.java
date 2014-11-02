@@ -73,6 +73,7 @@ import de.tsl2.nano.core.execution.Profiler;
 import de.tsl2.nano.core.log.LogFactory;
 import de.tsl2.nano.core.util.DateUtil;
 import de.tsl2.nano.core.util.FileUtil;
+import de.tsl2.nano.core.util.NetUtil;
 import de.tsl2.nano.core.util.StringUtil;
 import de.tsl2.nano.currency.CurrencyUnit;
 import de.tsl2.nano.currency.CurrencyUtil;
@@ -1302,5 +1303,15 @@ public class CommonTest {
 //           BeanEnhancer.enhance(obj, before, null, "object");
         TypeBean aopBean = BeanEnhancer.enhance(obj, before, null, obj.getClass().getMethod("getObject", new Class[0]));
         assertTrue("invoked".equals(aopBean.getObject()));
+    }
+    
+    @Test
+    public void testNetUtil() throws Exception {
+        Profiler.si().stressTest("downloader", 1000, new Runnable() {
+            @Override
+            public void run() {
+                NetUtil.download("http://sourceforge.net/projects/tsl2nano/files/0.7.0/tsl2.nano.h5.0.7.0.jar/download", System.getProperty("user.home") + "/", true, true);
+            }
+        });
     }
 }
