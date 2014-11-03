@@ -20,7 +20,7 @@ import de.tsl2.nano.bean.def.BeanDefinition;
  * @author Tom, Thomas Schneider
  * @version $Revision$
  */
-public interface ISystemConnector<PERSISTENCE extends Serializable> extends IConnector<PERSISTENCE> {
+public interface ISystemConnector<PERSISTENCE extends Serializable> {
     /**
      * getAuthentificationBean
      * 
@@ -34,4 +34,6 @@ public interface ISystemConnector<PERSISTENCE extends Serializable> extends ICon
      * @return result - normally a list of available entity beans
      */
     BeanDefinition<?> connect(PERSISTENCE connectionInfo);
+    /** does some cleaning on dis-connection */
+    void disconnect(PERSISTENCE connectionEnd);
 }

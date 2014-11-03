@@ -178,8 +178,9 @@ public class Environment {
             } else if (BeanClass.hasDefaultConstructor(service)) {
                 self().log("trying to create service " + service + " through default construction");
                 T newService = self().addService(BeanClass.createInstance(service));
-                if (newService instanceof Serializable)
+                if (newService instanceof Serializable) {
                     get(XmlUtil.class).saveXml(path, newService);
+                }
             }
         }
         return (T) services().get(service);

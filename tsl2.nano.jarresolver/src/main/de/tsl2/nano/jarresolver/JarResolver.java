@@ -123,7 +123,9 @@ public class JarResolver {
 
     private void loadDependencies() {
         System.setProperty("M2_HOME", mvnRoot);
-        SystemUtil.execute(new File(basedir), mvnRoot + "/bin/mvn.bat", "install");
+        Process process = SystemUtil.execute(new File(basedir), mvnRoot + "/bin/mvn.bat", "install");
+        if (process.exitValue() != 0)
+        LOG.error("Process returned with: " + process.exitValue());
     }
 
     private void createMvnScript() {
@@ -303,7 +305,11 @@ public class JarResolver {
      * @param args dependency names
      */
     public static void main(String[] args) {
-        new JarResolver().start(args);
+        try {
+            new JarResolver().start(args);
+        } catch (Exception e) {
+            LOG.error(e);
+        }
     }
 
 }

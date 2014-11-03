@@ -150,11 +150,7 @@ public/*abstract*/class LogFactory implements Runnable, Serializable {
             Runtime.getRuntime().addShutdownHook(Executors.defaultThreadFactory().newThread(new Runnable() {
                 @Override
                 public void run() {
-                    try {
-                        worker.interrupt();
-                    } catch (Throwable t) {
-                        // ignore
-                    }
+                        self.logMessages();
                 }
             }));
         }
@@ -438,38 +434,41 @@ public/*abstract*/class LogFactory implements Runnable, Serializable {
 
     @Override
     public void run() {
-        String txt, last = " ", text;
-        int filter, lastFilter = 0;
         while (LogFactory.self != null) {
             try {
-                while (loggingQueue.size() > 0) {
-                    text = loggingQueue.remove(0);
-                    if (useFilter) {
-                        filter = filterIndex(text, last);
-                        if (filter < lastFilter) {
-                            filter = 0;
-                        }
-                        txt = filter > 0 ? "\t" + text.substring(filter) : text;
-                        lastFilter = filter;
-                        last = text;
-                    } else {
-                        txt = text;
-                    }
-                    out.println(txt);
-                    if (out != System.out) {
-                        System.out.println(txt);
-                    }
-                }
+                logMessages();
                 Thread.sleep(200);
             } catch (InterruptedException e) {
-                if (out != null && !out.equals(System.out)) {
-                    out.flush();
-                    out.close();
-                }
-                ManagedException.forward(e);
+                out.println(e.toString());
             }
         }
-
+        logMessages();
+        if (out != null && !out.equals(System.out)) {
+            out.flush();
+            out.close();
+        }
+    }
+    void logMessages() {
+        String txt, last = " ", text;
+        int filter, lastFilter = 0;
+        while (loggingQueue.size() > 0) {
+            text = loggingQueue.remove(0);
+            if (useFilter) {
+                filter = filterIndex(text, last);
+                if (filter < lastFilter) {
+                    filter = 0;
+                }
+                txt = filter > 0 ? "\t" + text.substring(filter) : text;
+                lastFilter = filter;
+                last = text;
+            } else {
+                txt = text;
+            }
+            out.println(txt);
+            if (out != System.out) {
+                System.out.println(txt);
+            }
+        }
     }
 
     private int filterIndex(String newText, String lastText) {

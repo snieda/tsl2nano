@@ -3,10 +3,10 @@
   xsi:schemaLocation="http://maven.apache.org/POM/4.0.0
                       http://maven.apache.org/xsd/maven-4.0.0.xsd">
   <modelVersion>4.0.0</modelVersion>
-  <groupId>tsl2.nano</groupId>
-  <artifactId>tsl2.nano.jarresolver.process</artifactId>
+  <groupId>tsl2.nano.jarresolver</groupId>
+  <artifactId>${name}</artifactId>
   <packaging>jar</packaging>
-  <version>1.0.0</version>
+  <version>-</version>
   <name>${name}</name>
   <url>http://sourceforge.net/projects/tsl2nano</url>
   <dependencies>
