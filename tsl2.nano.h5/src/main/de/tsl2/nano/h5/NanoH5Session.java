@@ -19,6 +19,7 @@ import static de.tsl2.nano.h5.NanoH5.OFFSET_FILTERLINES;
 import static de.tsl2.nano.h5.NanoHTTPD.HTTP_BADREQUEST;
 import static de.tsl2.nano.h5.NanoHTTPD.MIME_HTML;
 
+import java.io.IOException;
 import java.io.Serializable;
 import java.lang.Thread.UncaughtExceptionHandler;
 import java.net.InetAddress;
@@ -32,8 +33,10 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Properties;
 import java.util.Set;
+import java.util.concurrent.Executors;
 
 import org.apache.commons.logging.Log;
+import org.java_websocket.WebSocket;
 
 import de.tsl2.nano.action.IAction;
 import de.tsl2.nano.bean.BeanContainer;
@@ -143,13 +146,30 @@ public class NanoH5Session implements ISession {
      */
     private void createExceptionHandler() {
         if (Environment.get("use.websocket", true)) {
-            NanoWebSocketServer socketServer =
+            final NanoWebSocketServer socketServer =
                 new NanoWebSocketServer(this, createSocketAddress());
             websocketPort = socketServer.getPort();
             this.exceptionHandler =
                 (ExceptionHandler) Environment.addService(UncaughtExceptionHandler.class,
                     new WebSocketExceptionHandler(socketServer));
             socketServer.start();
+            
+            Runtime.getRuntime().addShutdownHook(Executors.defaultThreadFactory().newThread(new Runnable() {
+                @Override
+                public void run() {
+                    try {
+                        Set<WebSocket> sockets = socketServer.connections();
+                        for (WebSocket webSocket : sockets) {
+                            webSocket.send(" === APPLICATION STOPPED! === ");
+//                            Message.send("APPLICATION STOPPED!");
+                            
+                        }
+                        socketServer.stop();
+                    } catch (Exception e) {
+                        LOG.error(e);
+                    }
+                }
+            }));
         } else {
             this.exceptionHandler =
                 (ExceptionHandler) Environment.addService(UncaughtExceptionHandler.class, new ExceptionHandler());

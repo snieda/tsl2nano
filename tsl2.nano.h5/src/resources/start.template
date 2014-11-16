@@ -1,6 +1,10 @@
-<html>
+<html manifest="tsl2nano-appcache.mf">
+<style>
+@-webkit-keyframes fade {0%{opacity: 0;} 100% {opacity: 1;}} @-moz-keyframes fade {0%{opacity: 0;} 100% {opacity: 1;}} @-o-keyframes fade {0%{opacity: 0;} 100% {opacity: 1;}} @keyframes fade {0%{opacity: 0;} 100% {opacity: 1;}} 
+</style>
 <body>
-	<table width="100%" height="100%" border="2" style="background: radial-gradient(#9999FF, #000000);">
+	<table width="100%" height="100%" border="2" style="background: radial-gradient(#9999FF, #000000);
+-webkit-animation: fade 1s; -webkit-animation-fill-mode: both; -moz-animation: fade 1s; -moz-animation-fill-mode: both; -o-animation: fade 1s; -o-animation-fill-mode: both; animation: fade 1s; animation-fill-mode: both;">
 	<tr><td><h1 align="center" accesskey="s" style="">
 		<a href="${url}"><img src="favicon.ico"><br />${text}</img></a>
 	</h1></td></tr></table>

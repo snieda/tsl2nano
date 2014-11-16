@@ -3,7 +3,7 @@
 
 <p hidden>
 <meta-tag>
-crud, grud, crud2gui, crud2html, bean2html, entity2html, bean2gui, entity2gui, jpa2gui, jpa2html, jpa persistence provider, openjpa, hibernate, datanucleus, eclipselink, data-editor, data-sheet, entity browser, jpa2, full stack framework, orm, o/r mapper
+crud, grud, crud2gui, crud2html, bean2html, entity2html, bean2gui, entity2gui, jpa2gui, jpa2html, jpa persistence provider, openjpa, hibernate, datanucleus, eclipselink, toplink, batoo, ormlite, ebean, data-editor, data-sheet, entity browser, jpa2, full stack framework, orm, o/r mapper
 </meta-tag>
 </p>
 
@@ -13,7 +13,7 @@ crud, grud, crud2gui, crud2html, bean2html, entity2html, bean2gui, entity2gui, j
 
 NanoH5 (or FullRelation) is an UI independent gui implementation framework providing a model driven design (MDA). It is bound to the app framework __tsl2.nano.commons__ and the jpa-service framework __tsl2.nano.serviceaccess__. It is possible to build a complete html5 application through a given class- or database-model. An Html5 presentation layer is provided as default.
 
-- Everything will be filled for you by defaults - presenting a full application getting a database connection
+- Everything will be filled for you by defaults - presenting a full application getting a database connection through any persistence provider (jpa 2.x)
 - define it or implement it - all object-types have their representation as readable xml-file.
 - ...or just use it as intelligent bean-browser or entity-browser
 
@@ -23,11 +23,11 @@ To do a *quick-start*, go to chapter _Starting / Test_.
 
 * it starts a generic application with default mechanisms and configurations to present data in html5
 * it provides all needed libraries for you - independent of the database and jpa-persistence tool you use
-* it creates all jpa-entities for you
+* it creates all jpa-entities for you (of course, you can use your own!)
 * all entities are configured and presented in a most reasonable way - but easily to be enhanced by you
-* data is searchable and editable in a comfortable way, can be prepared to be printed and exported
+* data is searchable and editable in a comfortable way - can be prepared to be printed and exported
 * it provides several working modes: single standalone app, network/multi-user and/or access to an application-server
- 
+
 ### Technical Goals
 * pure model implementation + platform independency (works on android, too).
 * small, having as less as possible static dependencies to other libraries
@@ -65,7 +65,7 @@ The data access is done by:
 * [tsl2.nano.serviceaccess](../tsl2.nano.serviceaccess/nano.serviceaccess.html)
 * [tsl2.nano.directaccess](../tsl2.nano.directaccess/nano.directaccess.html)
 
-It is possible to use an ejb container in an application server, but the default is set to use jpa directly on the client (using _tsl2nano.directaccess_).
+It is possible to use an ejb container in an application server, but the default is set to use jpa (through any persistence provider) directly on the client (using _tsl2nano.directaccess_).
 
 ### Why?
 
@@ -82,9 +82,10 @@ tested project-environments:
 this software should provide a fast way to create a standard application through a database (or class-) model. through a complete set of configuration possibilities, a user may fit this application for his requirements. respecting a small set of rules, a software-developer is able to extend that application to do more specifics.
 
 #### It is a full stack framework, but you can use it for other simple use cases:
+
 * as an entity browser or editor
 * as an JPQL or SQL statement tester with the integrated *ScriptTool*
-* as a test base to check your model on different jpa persistence providers like *hibernate*, *elcipselink*, *openjpa* and *datanucleus*. you can switch between them with three mouseclicks.
+* as a test base to check your model on different jpa persistence providers like *hibernate*, *elcipselink*, *openjpa*, *datanucleus* or *batoo*. you can switch between them with three mouseclicks.
 * as a quick solution to generate your entity beans through the given database connection and to test that model.
 
 ...all available without any application server!
@@ -124,18 +125,20 @@ For more indirect dependencies, have a look at chapter _Dependencies_.
 At the moment, tested with JPA 2.0 providers, the following providers are known to implement *javax.persistence.spi.PersistenceProvider*:
 
 * [Hibernate  ]: _org.hibernate.ejb.HibernatePersistence_
-* [OpenJPA    ]: http://openjpa.apache.org: _org.apache.openjpa.persistence.PersistenceProviderImpl_
+* [OpenJPA    ]: http://openjpa.apache.org: _org.apache.openjpa.persistence.PersistenceProviderImpl_. For further informations on reverse engineering see http://openjpa.apache.org/builds/2.3.0/apidocs/ or http://openjpa.apache.org/builds/2.2.1/apache-openjpa/docs/ref_guide_pc_reverse.html.
 * [EclipseLink]: http://www.eclipse.org/eclipselink _org.eclipse.persistence.jpa.PersistenceProvider_
 * [TopLink    ]: _oracle.toplink.essentials.PersistenceProvider_
 * [Acme Pers. ]: _com.acme.persistence_
 * [DataNucleus]: http://www.datanucleus.org/ _org.datanucleus.api.jpa.PersistenceProviderImpl_
+* [Batoo-JPA  ]: http://batoo.org _org.batoo.jpa.core.BatooPersistenceProvider_
 
 Other smaller frameworks provide only access to JPA-Annotations without providing an EntityManager and JP-QL:
 
 * [ORMLite]: http://ormlite.com _de.tsl2.nano.ormliteprovider.EntityManager_
+** only field annotations, no OneToMany
 * [EBean  ]: http://www.avaje.org _de.tsl2.nano.ebeanprovider.EntityManager_
 
-this ORM tools don't implement a jpa-persistenc-provider, but the libraries _tsl2.nano.ormliteprovider_ and _de.tsl2.nano.ebeanprovider_ extend the puristic base implementation of _NanoEntityManagerFactory_. Only native-SQL (no JP-QL) is available! As _tsl2.nano_ works on JP-QL, some simple transformations to native SQL are done by that EntityManager. These ORM-Tools are provided to have lightweight alternativs for mobile systems like Android.
+this ORM tools don't implement a jpa-persistenc-provider, but the libraries _tsl2.nano.ormliteprovider_ and _de.tsl2.nano.ebeanprovider_ extend the puristic base implementation of _NanoEntityManagerFactory_. Only native-SQL (no JP-QL) is available! As _tsl2.nano_ works on JP-QL, some simple transformations to native SQL are done by that EntityManager. These ORM-Tools are provided to have lightweight alternatives for mobile systems like Android.
 
 A summary of lightweight ORM tools can be read here: ftp://ftp.informatik.uni-stuttgart.de/pub/library/medoc.ustuttgart_fi/FACH-0147/FACH-0147.pdf
 
@@ -149,7 +152,7 @@ The architecture is defined by the application framework [tsl2.nano.common](../t
 
 Nano.h5 provides mechanisms to create a full configurable application from a given database definition file (ddl).
 
-Creating an UML-Diagram with perhaps _ArgoUML_, or creating an ER-Diagram with f.e. _architect_ you may generate a ddl (database-definition) script. Nano.H5 provides an ant-script (_mda.xml_) to generate an hsqldb-database generating entity beans through hibernate-tools (script: _hibtools.xml_) for the given jdbc-connection. The ant-scripts use hibernate-tools since there are no similar possibilities on other frameworks at the moment. 
+Creating an UML-Diagram with perhaps _ArgoUML_, or creating an ER-Diagram with f.e. _architect_ you may generate a ddl (database-definition) script. Nano.H5 provides an ant-script (_mda.xml_) to generate an hsqldb-database generating entity beans through hibernate-tools or openjpa (script: _reverse-eng.xml_) for the given jdbc-connection. The ant-scripts use hibernate-tools or openjpa since there are no similar possibilities on other frameworks at the moment. We prefer the reverse engineering on _openjpa_ because there are lots of options to be set.
 
 The other option would be to have an existing _beans.jar_. This could be selected on the entry- or login-page of nano-h5. If you enter an absolute path for the attribute _JarFile_ inside the _Persistence_ page, this bean-file will be used to load the entity-classes. If you enter a relative path and the given file doesn't exist, it will be generated through hibernate-tools (if hibernate is in your environment!).
 
@@ -205,7 +208,7 @@ The following services are registered through nano.h5 by default and should be a
 * _Profiler_: simple profiler to log simple performance aspects
 
 The following service may be set to override the default mechanisms:
-* IConnector: defines the login/authentification. On default, the NanoH5 main instance is providing that through an Persistence instance.
+* IConnector: defines the login/authentication. On default, the NanoH5 main instance is providing that through an Persistence instance.
 * Workflow: defines the navigation stack. On default a simple entity browser is used.
 * IGenericService: generic service to modify/query beans from
 * EntityManager: will be invoked into the GenericeService implementation. On default, the _javax.persistence_ will be used by calling _Persistence.createEntityManagerFactory(persistenceUnitName).createEntityManager()_. If the desired orm framework doesn't provide a javax.persistence implementation, a simple _EntityManager_ implementation can be set (see project _tsl2.nano.directaccess_ class tsl2.nano.persistence.provider.NanoEntityManagerFactory).
@@ -371,8 +374,8 @@ Static Dependencies (direct referenced by tsl2.nano):
 ##### No Dependencies, but useful to do the work
 
 * jdbc database driver (like hsqldb.jar)
-* jpa o/r mapper (like hibernate, toplink, eclipselink, openjpa or ormlite)
-* generator tool to create entity beans (like hibernate-tools)
+* jpa o/r mapper (like hibernate, toplink, eclipselink, openjpa, batoo-jpa, ormlite or ebean)
+* generator tool to create entity beans (like hibernate-tools or openjpa)
 
 Hibernate 4 for example would have the following dependencies:
 
@@ -544,6 +547,8 @@ Example setting a simple background image:
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 The same can be done for a bean-collector, defining the property _beancollector.grid.style_ and for bean-details with _bean.grid.style_.
+
+*Tip:* Use [CSS3Generator](css3generator.com) to prepare your css styles.
 
 #### Collectors, Beans and Attributes
 
@@ -928,8 +933,8 @@ If you don't want to have a standalone appliation, you are able to use an applic
 * any entity beans and _remote interfaces_ of your ejb's should be in your classpath. so copy the jar holding them to your environment directory.
 * of course, the *entity beans must be deployed* to that server perhaps in an ear or war-file.
 * be sure to have *tsl2.nano.serviceaccess* packed into that ear/war-file. the service *IGenericService is essential.
-* add environement property 'applicationserver.authentification.service' (default: __org.nano.[environment-name].service.remote.IUserService__) with service class name. 
-* add environment property 'applicationserver.authentification.method' (default: __login__) with service method to call. this method has to have two string-parameters for user and password. the method has to call _ServiceFactory.instance().createSession(userObject, mandatorObject, subject, userRoles, features, featureInterfacePrefix)_
+* add environement property 'applicationserver.authentication.service' (default: __org.nano.[environment-name].service.remote.IUserService__) with service class name. 
+* add environment property 'applicationserver.authentication.method' (default: __login__) with service method to call. this method has to have two string-parameters for user and password. the method has to call _ServiceFactory.instance().createSession(userObject, mandatorObject, subject, userRoles, features, featureInterfacePrefix)_
 * on the login page input user and password
 * create a *jndi.properties* file in your environment. with jboss this would look like the following:
 
@@ -975,7 +980,7 @@ UserService.authenticate(String user, String password) {
 
 ## Generating your Entities
 
-It is possible to generate your entity beans through a tool like hibernate-tools. This is prepared in _Nano.H5_, for further informations see chapter _Model Driven Architecture (MDA))_.
+It is possible to generate your entity beans through a tool like hibernate-tools or openjpa. This is prepared in _Nano.H5_, for further informations see chapter _Model Driven Architecture (MDA))_.
 
 If hibernate-tools creates your beans, it may create additional beans to use composed primary keys. To use them with _nano.h5_ you should extend these beans, to fill the id-bean from dependent entity fields. So, enhance the setter methods of this unique fields to fill the id-beans corresponding field, too.
 
@@ -1525,7 +1530,7 @@ So, the nano.h5 framework is useless on android systems at this moment.
 Other restrictions on android:
 * all libraries in your environment directory must contain dex-classes. you can't simply add a standard library without transforming it to *dalvik classes*.
 * ant wont work, so
-** as hibernate doesn't work on android too, *hibernate-tools* as bean-jar generator is not usable.
+** as hibernate doesn't work on android too, *hibernate-tools* as bean-jar generator is not usable. The same problem exists on openjpa!
 * on android an error occurs creating an xml-file for authorization. perhaps an empty authorization file will be created resulting in an error on next application start.
 * adding eclipse-link to the apk file results in error: _Unable to execute dex: method ID not in [0, 0xffff]: 65536_
 **  Your project is too large. You have to many methods. There can only be 65536 methods per application. see here https://code.google.com/p/android/issues/detail?id=7147#c6
@@ -1558,15 +1563,16 @@ Other restrictions on android:
 * jpa-providers:
 ** eclipse-link: nullpointer on java.net.URL on loading persistence.xml
 *** eclipseLink loads the METAINF/persistence.xml through another classloader. the bean-jar file will be searched from META-INF/ parent directory
-*** use prefix '!' to define, that no environment-prefix will be added. E.g. '!mybeans.jar'.
+*** use prefix '!' to define, that no environment-prefix will be added. E.g. '!mybeans.jar'. to enable text-input on jarfile property, change environments 'login.jarfile.fileselector' to false.
 *** persistable fields of type Date have to annotate a temporal type 
 ** datanucleus: metamodel has to be statically generated and compiled before. this is done automatically on compiling the beans if the datanucleus libraries are present.
 ** openjpa: all jar-file names are invalid:
-*** openjpa needs the beans jar file packed into the main jar file! 
+*** openjpa needs the beans jar file packed into the main jar file!
 *** dynamic class enhancement must be enabled (see https://openjpa.apache.org/builds/2.2.2/apache-openjpa/docs/ref_guide_pc_enhance.html)! start the jvm with option: _-javaagent:[path-to-extraced-openjpa-zip-file]/openjpa-2.x.x.jar_
 *** openjpa properties: https://openjpa.apache.org/builds/2.2.2/apache-openjpa/docs/ref_guide_conf_openjpa.html
 ** ebean 3.3.2: "is not an enhanced entity bean. Subclassing is not longer supported in Ebean"
 *** ebean versions after 2.8.1 don't support DynamicProxies any more. enhancing has to be done statically through maven-builds.
+** batoo-jpa: the jar-file has to have a protocol prefix like 'file:' (e.g.: file:./mybeans.jar). to enable text-input on jarfile property, change environments 'login.jarfile.fileselector' to false.
 ** ebean 2.8.1: "@OneToMany MUST have Cascade.PERSIST or Cascade.ALL because this is a unidirectional relationship"
 ** ormlite: "Generated-id field 'myID' in MyEntity can't be type STRING.  Must be one of: INTEGER INTEGER_OBJ LONG LONG_OBJ UUID"
 ** ormlite: "No fields have a DatabaseField annotation in class org.anonymous.project.Address"
@@ -1583,7 +1589,9 @@ Other restrictions on android:
 | 0.0.5 | 01.06.2014 | supporting non-jpa-persistence-providers like ebean, ormlite through NanoEntityManagerFactory |
 | 0.1.0 | 29.06.2014 | supporting non-jpa-persistence-providers like ebean, ormlite through NanoEntityManagerFactory |
 | 0.6.0 | 13.07.2014 | using websockets to support rich client gui interactions |
-| 0.7.0 | 01.11.2014 | new plugin interface on beandefintions (path changed to 'presentation'). specified rules and actions are 						pluggable into beandef or attributedef now. |
+| 0.7.0a | 01.11.2014 | new plugin interface on beandefintions (path changed to 'presentation'). specified rules and actions are 						pluggable into beandef or attributedef now. |
+| 0.7.0b | 09.11.2014 | gui fading, offline message, web-cache through manifest, testing batoo-jpa |
+| 0.7.0c | 15.11.2014 | reverse-engineering with openjpa support, jar resolving enhanced |
 
 ## TODOs
 
@@ -1746,7 +1754,7 @@ Other restrictions on android:
 * TAGs: crud, grud, crud2gui, crud2html, bean2html, entity2html, bean2gui, entity2gui, jpa2gui, jpa2html, jpa persistence provider, openjpa, hibernate, datanucleus, eclipselink, data-editor, data-sheet, entity browser, jpa2, full stack framework, orm, o/r mapper
 * perhaps use findjar.com before invoking maven-repository
 * in jdk1.7 it is possible to close a classloader (unlocking and reloading jar-files is now possible). but the URLClassLoader doesn't use this mechanism yet.
-* NetworkClassLoader should recognize resources (e.g. for loggers) to avoid reloading from network every time.
+* (v) NetworkClassLoader should recognize resources (e.g. for loggers) to avoid reloading from network every time.
 
 * ebean uses an own query language but is able to 'parse' an ansi sql statement
 * ormlite needs field-annotations - while hibernate-tools only create property/method annotations
@@ -1775,6 +1783,10 @@ Other restrictions on android:
 * declaration over programmation
 * print-Verzeichnis: Suche nach jrxml und xsl-fo
 * rule-definition: Zur Anbindung anderer rule-engines
+* (v) fade-in, fade-out
+* (v) show if application was stopped
+* (x) show message if offline
+* where to use instrumentation agents?
 
 * *Refactorings:*
 ** AttributeDefinition --> Attribute

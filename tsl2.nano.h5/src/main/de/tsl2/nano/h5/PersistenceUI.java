@@ -9,6 +9,7 @@
  */
 package de.tsl2.nano.h5;
 
+import java.util.Arrays;
 import java.util.Properties;
 
 import de.tsl2.nano.action.IAction;
@@ -46,14 +47,14 @@ public class PersistenceUI {
      * @param persistence
      * @return
      */
-    @SuppressWarnings({ "serial" })
+    @SuppressWarnings({ "serial", "unchecked" })
     public static Bean<Persistence> createPersistenceUI(final Persistence persistence,
             final ISystemConnector<Persistence> connector) {
         final Bean<Persistence> login = Bean.getBean(persistence);
         if (login.isDefault()) {
             login.setAttributeFilter("connectionUserName", "connectionPassword", "connectionUrl", "jarFile",
                 "connectionDriverClass", "provider", "datasourceClass", "jtaDataSource", "transactionType",
-                "persistenceUnit", "hibernateDialect", "database", "defaultSchema", "port", "replication",
+                "persistenceUnit", "hibernateDialect", "database", "defaultSchema", "port", "generator", "replication",
                 "jdbcProperties");
             login.setValueExpression(new ValueExpression<Persistence>("{connectionUrl}"));
 
@@ -76,7 +77,7 @@ public class PersistenceUI {
                 props.setProperty("DRIVER_jdbc.mysql", "com.mysql.jdbc.Driver");
                 props.setProperty("DRIVER_jdbc.jtds.sqlserver", "net.sourceforge.jtds.jdbc.Driver");
                 props.setProperty("DRIVER_jdbc.firebirdsql", "jaybird-jdk17");
-                
+
                 props.setProperty("DATASOURCE_jdbc.oracle", "oracle.jdbc.pool.OracleDataSource");
                 props.setProperty("DATASOURCE_jdbc.hsqldb", "org.hsqldb.jdbc.JDBCDataSource");
                 props.setProperty("DATASOURCE_jdbc.sybase", "com.sybase.jdbc2.jdbc.SybDataSource");
@@ -87,7 +88,7 @@ public class PersistenceUI {
                 props.setProperty("DATASOURCE_com.mysql.jdbc", "mysql/mysql-connector-java");
                 props.setProperty("DATASOURCE_net.sourceforge.jtds", "jtds");
                 props.setProperty("DATASOURCE_org.firebirdsql.jdbc", "jaybird-jdk17");
-                
+
                 props.setProperty("DIALECT_jdbc.oracle", "org.hibernate.dialect.Oracle10gDialect");
                 props.setProperty("DIALECT_jdbc.db2", "org.hibernate.dialect.DB2Dialect");
                 props.setProperty("DIALECT_jdbc.derby", "org.hibernate.dialect.DerbyDialect");
@@ -104,25 +105,25 @@ public class PersistenceUI {
                 FileUtil.saveProperties(pfile, props);
             }
             final Properties p = props;
-//            login
-//                .getAttribute("connectionUserName")
-//                .changeHandler()
-//                .addListener(
-//                    new WebSocketDependencyListener<String>((AttributeDefinition<String>) login
-//                        .getAttribute("defaultSchema")) {
-//                        @Override
-//                        public String evaluate(Object value) {
-//                            Object userName = Util.asString(value);
-//                            String eval = null;
-//                            if (userName != null) {
-//                                if (value != null && value.toString().contains("hsqldb"))
-//                                    eval = "PUBLIC";
-//                                else
-//                                    eval = userName.toString().toUpperCase();
-//                            }
-//                            return eval;
-//                        }
-//                    });
+            login
+                .getAttribute("connectionUserName")
+                .changeHandler()
+                .addListener(
+                    new WebSocketDependencyListener<String>((AttributeDefinition<String>) login
+                        .getAttribute("defaultSchema")) {
+                        @Override
+                        public String evaluate(Object value) {
+                            Object userName = Util.asString(value);
+                            String eval = null;
+                            if (userName != null && Util.isEmpty(login.getAttribute("defaultSchema"))) {
+                                if (value != null && value.toString().contains("hsqldb"))
+                                    eval = "PUBLIC";
+                                else
+                                    eval = userName.toString().toUpperCase();
+                            }
+                            return eval;
+                        }
+                    });
             login
                 .getAttribute("connectionUrl")
                 .changeHandler()
@@ -265,16 +266,21 @@ public class PersistenceUI {
             login.addValueGroup("details   ", false, "connectionDriverClass", "provider", "datasourceClass",
                 "jtaDataSource",
                 "transactionType",
-                "persistenceUnit", "hibernateDialect", "database", "defaultSchema", "port", "replication");
+                "persistenceUnit", "hibernateDialect", "database", "defaultSchema", "port", "generator", "replication");
         }
         if (login.toString().matches(Environment.get("default.present.attribute.multivalue", ".*")))
             login.removeAttributes("jdbcProperties");
-        login.getAttribute("jarFile").getPresentation().setType(IPresentable.TYPE_ATTACHMENT);
-        ((Html5Presentable) login.getAttribute("jarFile").getPresentation()).getLayoutConstraints().put("accept",
-            ".jar");
-//        login.getPresentationHelper().change(BeanPresentationHelper.PROP_DESCRIPTION,
-//            Environment.translate("jarFile.tooltip", true),
-//            "jarFile");
+        if (Environment.get("login.jarfile.fileselector", true)) {
+            login.getAttribute("jarFile").getPresentation().setType(IPresentable.TYPE_ATTACHMENT);
+            ((Html5Presentable) login.getAttribute("jarFile").getPresentation()).getLayoutConstraints().put("accept",
+                ".jar");
+        }
+        login.getAttribute("generator").setRange(Arrays.asList(Persistence.GEN_HIBERNATE, Persistence.GEN_OPENJPA));
+        
+        login.getPresentationHelper().change(BeanPresentationHelper.PROP_DESCRIPTION,
+            Environment.translate("jarFile.tooltip", true),
+            "jarFile");
+        
         login.getPresentationHelper().change(BeanPresentationHelper.PROP_NULLABLE, false);
         login.getPresentationHelper().change(BeanPresentationHelper.PROP_NULLABLE, true, "connectionPassword");
         login.getPresentationHelper().change(BeanPresentationHelper.PROP_NULLABLE, true, "jarFile");
@@ -314,6 +320,7 @@ public class PersistenceUI {
             public boolean isDefault() {
                 return true;
             }
+
             @Override
             public int getActionMode() {
                 return MODE_DLG_OK;

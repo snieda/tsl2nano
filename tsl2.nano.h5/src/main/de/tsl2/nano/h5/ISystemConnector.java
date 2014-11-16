@@ -22,9 +22,9 @@ import de.tsl2.nano.bean.def.BeanDefinition;
  */
 public interface ISystemConnector<PERSISTENCE extends Serializable> {
     /**
-     * getAuthentificationBean
+     * getAuthenticationBean
      * 
-     * @return authentification bean
+     * @return authentication bean
      */
     PERSISTENCE createConnectionInfo();
 

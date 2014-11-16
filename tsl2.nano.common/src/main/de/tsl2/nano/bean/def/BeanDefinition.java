@@ -96,8 +96,8 @@ public class BeanDefinition<T> extends BeanClass<T> implements IPluggable<BeanDe
     protected String name;
 
     /**
-     * optional plugins - like rule names to cover properties of this beandefinition. perhaps you cover the value of property
-     * 'constraint.visible' with a rule defined in your specification.
+     * optional plugins - like rule names to cover properties of this beandefinition. perhaps you cover the value of
+     * property 'constraint.visible' with a rule defined in your specification.
      */
     @ElementList(inline = true, entry = "plugin", required = false)
     protected Collection<IConnector<BeanDefinition>> plugins;
@@ -166,7 +166,7 @@ public class BeanDefinition<T> extends BeanClass<T> implements IPluggable<BeanDe
     public BeanDefinition(Class<T> beanClass) {
         super((Class<T>) (Environment.get("beandef.ignore.anonymous.fields", true) ? getDefiningClass(beanClass)
             : beanClass));
-        name = beanClass == UNDEFINED.getClass() ? /*"undefined"*/ StringUtil.STR_ANY : super.getName();
+        name = beanClass == UNDEFINED.getClass() ? /*"undefined"*/StringUtil.STR_ANY : super.getName();
     }
 
     /**
@@ -394,13 +394,21 @@ public class BeanDefinition<T> extends BeanClass<T> implements IPluggable<BeanDe
      */
     public IAttributeDefinition getAttribute(String name) {
         IAttributeDefinition definition = getAttributeDefinitions().get(name);
-        if (definition == null && !allDefinitionsCached) {
-            if (isVirtual())
-                throw ManagedException.implementationError("The attribute " + name
-                    + " was not defined in this virtual bean!\nPlease define this attribute through addAttribute(...)",
-                    name);
-            definition = createAttributeDefinition(name);
-            attributeDefinitions.put(name, definition);
+        if (definition == null) {
+            if (!allDefinitionsCached) {
+                if (isVirtual()) {
+                    throw ManagedException
+                        .implementationError(
+                            "The attribute "
+                                + name
+                                + " was not defined in this virtual bean!\nPlease define this attribute through addAttribute(...)",
+                            name);
+                }
+                definition = createAttributeDefinition(name);
+                attributeDefinitions.put(name, definition);
+            } else {
+                throw new IllegalArgumentException("The attribute '" + name + "' is not defined in bean " + this);
+            }
         }
         return definition;
     }

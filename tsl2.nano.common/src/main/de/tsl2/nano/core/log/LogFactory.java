@@ -7,12 +7,11 @@ import java.io.Serializable;
 import java.text.MessageFormat;
 import java.util.Arrays;
 import java.util.Calendar;
-import java.util.Collections;
 import java.util.HashMap;
-import java.util.LinkedList;
-import java.util.List;
 import java.util.Map;
+import java.util.Queue;
 import java.util.concurrent.Executors;
+import java.util.concurrent.LinkedBlockingQueue;
 
 import org.simpleframework.xml.Attribute;
 import org.simpleframework.xml.Default;
@@ -57,8 +56,9 @@ public/*abstract*/class LogFactory implements Runnable, Serializable {
     private static final long serialVersionUID = -1548678560499335157L;
 
     static LogFactory self;
-    transient List<String> loggingQueue = Collections.synchronizedList(new LinkedList<String>());
-
+    transient Queue<String> loggingQueue;
+    Integer queueCapacity = Integer.MAX_VALUE;
+    
     @ElementMap(attribute = true, inline = true, entry = "loglevel", key = "package", keyType = String.class, value = "level", valueType = Integer.class, required = false)
     Map<String, Integer> loglevels;
 
@@ -131,6 +131,7 @@ public/*abstract*/class LogFactory implements Runnable, Serializable {
                 }
             if (self == null) {
                 self = new LogFactory() /* on abstract: {} */;
+                self.loggingQueue = new LinkedBlockingQueue<String>(self.queueCapacity);
                 self.loglevels = new HashMap<String, Integer>();
                 self.loglevels.put("de.tsl2.nano.core", LOG_ALL);
                 self.msgFormat = new MsgFormat(self.outputformat);
@@ -146,7 +147,6 @@ public/*abstract*/class LogFactory implements Runnable, Serializable {
                 }
             }
             final Thread worker = ThreadUtil.startDaemon("logger", self);
-            //TODO: implement
             Runtime.getRuntime().addShutdownHook(Executors.defaultThreadFactory().newThread(new Runnable() {
                 @Override
                 public void run() {
@@ -249,6 +249,7 @@ public/*abstract*/class LogFactory implements Runnable, Serializable {
     @Commit
     private void initDeserializing() {
         statesToLog = BitUtil.bits(standard, Arrays.asList(STATEDESCRIPTION));
+        loggingQueue = new LinkedBlockingQueue<String>(queueCapacity);
         if (outputFile != null) {
             initPrintStream(outputFile);
         }
@@ -451,8 +452,7 @@ public/*abstract*/class LogFactory implements Runnable, Serializable {
     void logMessages() {
         String txt, last = " ", text;
         int filter, lastFilter = 0;
-        while (loggingQueue.size() > 0) {
-            text = loggingQueue.remove(0);
+        while ((text = loggingQueue.poll()) != null) {
             if (useFilter) {
                 filter = filterIndex(text, last);
                 if (filter < lastFilter) {

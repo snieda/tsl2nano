@@ -1,0 +1,59 @@
+CACHE MANIFEST
+# 2014-11-11:v3
+
+# Explicitly cached 'master entries'.
+CACHE:
+/favicon.ico
+/css/style.css
+/css/meta-frame.html
+/icons/about.png
+/icons/apply.png
+/icons/attach.png
+/icons/back.png
+/icons/beanex-logo-micro.jpg
+/icons/beanex-logo-mini.jpg
+/icons/beanex-logo-small.jpg
+/icons/beanex-logo.jpg
+/icons/blocked.png
+/icons/cascade.png
+/icons/compose.png
+/icons/down.png
+/icons/favicon.ico
+/icons/find.png
+/icons/forward.png
+/icons/full_screen.png
+/icons/go.png
+/icons/goback.png
+/icons/icons.txt
+/icons/images_all.png
+/icons/links.png
+/icons/mail_attachment.png
+/icons/new.png
+/icons/open.png
+/icons/point-green.png
+/icons/point-red.png
+/icons/point-yellow.png
+/icons/print.png
+/icons/properties.png
+/icons/reload.png
+/icons/save.png
+/icons/search.png
+/icons/spe.jpg
+/icons/stop.png
+/icons/throbber-red.gif
+/icons/trash.png
+/icons/trust_unknown.png
+/icons/turnoff.png
+/icons/up.png
+/icons/upload.png
+/icons/view.png
+/icons/widget.png
+/icons/wrench.png
+/icons/zoom.png
+	
+# Resources that require the user to be online.
+#NETWORK:
+#*
+
+#FALLBACK:
+#*.html /offline.html

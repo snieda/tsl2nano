@@ -79,6 +79,24 @@ some internals:
 		<dirset dir="./" />
 	</path>
 
+	<!-- add properties on runtime through user input -->
+	<target name="sh.input" unless="${sh.input.name}">
+		<property name="sh.input.default" value="" />
+		<input message="${sh.input.name}: " addProperty="${sh.input.name}" defaultvalue="${sh.input.default}" />
+	</target>
+	<!--	<target name="sh.input" unless="${sh.input.name}">
+		<property name="sh.input.default" value="" />
+		<sh.input sh.input.name="${sh.input.name}" sh.input.default="${sh.input.default}" />
+	</target>
+	<macrodef name="sh.input" description="asks for user input to set property if not set yet.">
+		<attribute name="sh.input.name" />
+		<attribute name="sh.input.default"/>
+		<sequential>
+			<input message="@{sh.input.name}: " addProperty="@{sh.input.name}" defaultvalue="@{sh.input.default}" />
+			<echo message="@{sh.input.name} = ${@{sh.input.name}}" />
+		</sequential>
+	</macrodef>
+-->
 	<target name="sh.jar" unless="disable_sh.jar" description="packs files into a zip-encoded file">
 		<!-- fallbacks -->
 		<property name="sh.jar.srcdir" value="./" />
@@ -93,10 +111,7 @@ some internals:
 		<property name="sh.jar.destination" value="${basedir}.jar" />
 		<property name="sh.jar.manifest" value="${basedir}/META-INF/MANIFEST.MF" />
 		<!-- start it -->
-		<sh.jar sh.jar.srcdir="${sh.jar.srcdir}" 
-				sh.jar.include="${sh.jar.include}" sh.jar.include2="${sh.jar.include2}" sh.jar.include3="${sh.jar.include3}" sh.jar.include4="${sh.jar.include4}" 
-				sh.jar.exclude="${sh.jar.exclude}" sh.jar.exclude2="${sh.jar.exclude2}" sh.jar.exclude3="${sh.jar.exclude3}" sh.jar.exclude4="${sh.jar.exclude4}" 
-				sh.jar.destination="${sh.jar.destination}" sh.jar.manifest="${sh.jar.manifest}" />
+		<sh.jar sh.jar.srcdir="${sh.jar.srcdir}" sh.jar.include="${sh.jar.include}" sh.jar.include2="${sh.jar.include2}" sh.jar.include3="${sh.jar.include3}" sh.jar.include4="${sh.jar.include4}" sh.jar.exclude="${sh.jar.exclude}" sh.jar.exclude2="${sh.jar.exclude2}" sh.jar.exclude3="${sh.jar.exclude3}" sh.jar.exclude4="${sh.jar.exclude4}" sh.jar.destination="${sh.jar.destination}" sh.jar.manifest="${sh.jar.manifest}" />
 	</target>
 
 	<!-- defining a macro to be able to call it multiple times -->
@@ -488,14 +503,14 @@ starting ${ant.project.name}:
 		</sequential>
 	</macrodef>
 
-	<target name="sh.call.method" unless="disable_sh.method" description="calls a given java method">
+	<target name="sh.call.method" unless="disable_sh.call.method" description="calls a given java method">
 		<property name="sh.java.classname" value="de.tsl2.nano.bean.BeanUtil" />
 		<antcall target="sh.java">
 		</antcall>
 	</target>
 
 	<!-- standard shell command -->
-	<target name="sh.exec">
+	<target name="sh.exec" unless="disable_sh.exec">
 		<property name="sh.exec.dir" value="${basedir}" />
 		<exec dir="${sh.exec.dir}" command="${sh.exec.command}" />
 	</target>
@@ -624,6 +639,101 @@ starting ${ant.project.name}:
 			<param name="arg2" value="transform" />
 			<param name="arg3" value="${sh.xml.velocity.template}" />
 		</antcall>
+	</target>
+
+	<target name="sh.foreach" unless="disable_sh.foreach" description="executes a shell command for a given fileset">
+		<!-- fallbacks -->
+		<antcall target="sh.input">
+			<param name="sh.input.name" value="sh.foreach.command" />
+		</antcall>
+		<echo message="sh.foreach.command: ${sh.foreach.command}" />
+		<property name="sh.foreach.dir" value="${basedir}" />
+		<property name="sh.foreach.type" value="file" />
+		<property name="sh.foreach.output" value="foreach.log" />
+		<property name="sh.foreach.arg1" value="" />
+		<property name="sh.foreach.arg2" value="" />
+		<property name="sh.foreach.arg3" value="" />
+		<property name="sh.foreach.arg4" value="" />
+		<property name="sh.foreach.arg5" value="" />
+		<property name="sh.foreach.arg6" value="" />
+		<property name="sh.foreach.include" value="**" />
+		<property name="sh.foreach.include2" value="INCLUDING_EXPRESSION" />
+		<property name="sh.foreach.include3" value="INCLUDING_EXPRESSION" />
+		<property name="sh.foreach.include4" value="INCLUDING_EXPRESSION" />
+		<property name="sh.foreach.exclude" value="EXCLUDING_EXPRESSION" />
+		<property name="sh.foreach.exclude2" value="EXCLUDING_EXPRESSION2" />
+		<property name="sh.foreach.exclude3" value="EXCLUDING_EXPRESSION3" />
+		<property name="sh.foreach.exclude4" value="EXCLUDING_EXPRESSION3" />
+		<echo>writing output to: ${sh.foreach.output}</echo>
+		<!-- start it -->
+		<sh.foreach sh.foreach.dir="${sh.foreach.dir}" sh.foreach.command="${sh.foreach.command}" sh.foreach.type="${sh.foreach.type}" sh.foreach.output="${sh.foreach.output}" sh.foreach.arg1="${sh.foreach.arg1}" sh.foreach.arg2="${sh.foreach.arg2}" sh.foreach.arg3="${sh.foreach.arg3}" sh.foreach.arg4="${sh.foreach.arg4}" sh.foreach.arg5="${sh.foreach.arg5}" sh.foreach.arg6="${sh.foreach.arg6}" sh.foreach.include="${sh.foreach.include}" sh.foreach.include2="${sh.foreach.include2}" sh.foreach.include3="${sh.foreach.include3}" sh.foreach.include4="${sh.foreach.include4}" sh.foreach.exclude="${sh.foreach.exclude}" sh.foreach.exclude2="${sh.foreach.exclude2}" sh.foreach.exclude3="${sh.foreach.exclude3}" sh.foreach.exclude4="${sh.foreach.exclude4}" />
+	</target>
+
+	<!-- defining a macro to be able to call it multiple times -->
+	<macrodef name="sh.foreach" description="executes a shell command for a given fileset">
+		<attribute name="sh.foreach.dir" />
+		<attribute name="sh.foreach.command" />
+		<attribute name="sh.foreach.type" />
+		<attribute name="sh.foreach.output" />
+		<attribute name="sh.foreach.arg1" />
+		<attribute name="sh.foreach.arg2" />
+		<attribute name="sh.foreach.arg3" />
+		<attribute name="sh.foreach.arg4" />
+		<attribute name="sh.foreach.arg5" />
+		<attribute name="sh.foreach.arg6" />
+		<attribute name="sh.foreach.include" />
+		<attribute name="sh.foreach.include2" />
+		<attribute name="sh.foreach.include3" />
+		<attribute name="sh.foreach.include4" />
+		<attribute name="sh.foreach.exclude" />
+		<attribute name="sh.foreach.exclude2" />
+		<attribute name="sh.foreach.exclude3" />
+		<attribute name="sh.foreach.exclude4" />
+
+		<sequential>
+			<apply executable="@{sh.foreach.command}" type="@{sh.foreach.type}" logerror="true" output="@{sh.foreach.output}">
+				<arg value="@{sh.foreach.arg1}" />
+				<arg value="@{sh.foreach.arg2}" />
+				<arg value="@{sh.foreach.arg3}" />
+				<arg value="@{sh.foreach.arg4}" />
+				<arg value="@{sh.foreach.arg5}" />
+				<arg value="@{sh.foreach.arg6}" />
+				<srcfile />
+				<fileset dir="@{sh.foreach.dir}">
+					<include name="@{sh.foreach.include}" />
+					<include name="@{sh.foreach.include2}" />
+					<include name="@{sh.foreach.include3}" />
+					<include name="@{sh.foreach.include4}" />
+					<exclude name="@{sh.foreach.exclude}" />
+					<exclude name="@{sh.foreach.exclude2}" />
+					<exclude name="@{sh.foreach.exclude3}" />
+					<exclude name="@{sh.foreach.exclude4}" />
+				</fileset>
+			</apply>
+		</sequential>
+	</macrodef>
+
+	<target name="sh.disassemble">
+		<antcall target="sh.foreach">
+			<param name="sh.foreach.command" value="javap" />
+			<param name="sh.foreach.arg1" value="-v" />
+			<param name="sh.foreach.arg2" value="-c" />
+			<param name="sh.foreach.arg3" value="-p" />
+			<param name="sh.foreach.arg4" value="-constants" />
+			<param name="sh.foreach.include" value="**/*.class" />
+			<param name="sh.foreach.output" value="disassemble.txt" />
+		</antcall>
+		<!--		<apply executable="javap" type="file" logerror="true" output="disassemble.txt">
+			<arg value="-v"/>
+			<arg value="-c"/>
+			<arg value="-p"/>
+			<arg value="-constants"/>
+			<srcfile/>
+			<fileset dir="${basedir}">
+				<include name="**/*.class"/>
+			</fileset>
+		</apply>
+		-->
 	</target>
 
 	<!-- <target name="sh.build.timestamp">

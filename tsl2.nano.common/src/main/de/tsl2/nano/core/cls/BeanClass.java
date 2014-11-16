@@ -500,7 +500,7 @@ public class BeanClass<T> implements Serializable {
     public Object callMethod(Object instance, String methodName, Class[] par, Object... args) {
         return callMethod(instance, methodName, par, false, args);
     }
-    
+
     /**
      * simple method reflection call
      * 
@@ -967,9 +967,31 @@ public class BeanClass<T> implements Serializable {
      */
     public static final Class<?> getDefiningClass(Class<?> cls) {
         //TODO: how to check for enhancing class
-        return Proxy.isProxyClass(cls) ? cls.getInterfaces()[0] : (cls.getEnclosingClass() != null || cls
-            .getSimpleName().contains("$")) && cls.getSuperclass() != null ? getDefiningClass(cls.getSuperclass())
-            : cls;
+        return cls.isEnum() ? cls : Proxy.isProxyClass(cls) ? cls.getInterfaces()[0]
+            : (cls.getEnclosingClass() != null || cls
+                .getSimpleName().contains("$")) && cls.getSuperclass() != null ? getDefiningClass(cls.getSuperclass())
+                : cls;
+    }
+
+    /**
+     * checks for minimal name conventions to avoid dependency loading on non-classes like resources.
+     * 
+     * @param name name to check
+     * @return true, if at least one package is given and class name starts with upper case - and contains letters or
+     *         numbers (no enhanced or member/anonymous classes).
+     */
+    public static boolean isPublicClassName(String name) {
+        return name.matches("([a-zA-Z0-9_]+[.])+[A-Z]\\w*[a-zA-Z0-9]$");
+    }
+
+    /**
+     * getPackageName
+     * 
+     * @param name full class name
+     * @return first part of class name
+     */
+    public static String getPackageName(String name) {
+        return StringUtil.substring(name, null, ".", true);
     }
 
     /**

@@ -480,7 +480,9 @@ public class Html5Presentation<T> extends BeanPresentationHelper<T> implements I
     }
 
     private Element createMetaAndBody(ISession session, Element html, String title, boolean interactive) {
-        Element head = appendElement(html, TAG_HEAD, ATTR_TITLE, "Nano-H5 Application");
+        appendElement(html, ATTR_STYLE, content(CSS_BACKGROUND_FADING_KEYFRAMES));
+        HtmlUtil.appendAttributes(html, "manifest", Environment.get("html.manifest.file", "tsl2nano-appcache.mf"));
+        Element head = appendElement(html, TAG_HEAD, ATTR_TITLE, "Nano-H5 Application: " + title);
 
         appendElement(head, "meta", "name", "author", "content", "tsl2.nano.h5 (by Thomas Schneider/2013)");
 //        appendElement(head, "link", "rel", "stylesheet", "href", "css/style.css");
@@ -497,9 +499,9 @@ public class Html5Presentation<T> extends BeanPresentationHelper<T> implements I
         Element body =
             appendElement(html, TAG_BODY, ATTR_ID, (!Util.isEmpty(title, true) ? title : "body"));
         if (interactive) {
-            String style = Environment.get("application.page.style", STYLE_BACKGROUND_RADIAL_GRADIENT);
+            String style = Environment.get("application.page.style", STYLE_BACKGROUND_RADIAL_GRADIENT + STYLE_BACKGROUND_FADING_KEYFRAMES);
             HtmlUtil.appendAttributes(body, /*"background", "icons/spe.jpg", */ATTR_STYLE,
-                style);
+                style, "ononline", "showStatusMessage('ONLINE')", "onoffline", "showStatusMessage('-- OFFLINE --')");
         }
         return body;
     }

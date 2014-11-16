@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<project name="hibtool" basedir="." default="create.bean.jar">
+<project name="reverse-eng" basedir="." default="create.bean.jar">
 	<property name="plugin.dir" value="${basedir}/.." />
 	<property name="src.dir" value="generated-src" />
 	<property name="bin.dir" value="generated-bin" />
@@ -11,6 +11,11 @@
 	<property name="server.db-config.file" value="jdbc-connection.properties" />
 	<property file="${server.db-config.file}" />
 
+	<!-- FALLBACK: generator to use:
+		1. hibernate-tools: 'hibernate-tools'
+		2. openjpa        : 'openjpa-reverse-eng' -->
+	<property name="generator" value="openjpa-reverse-eng" />
+
 	<!-- Hibernate properties -->
 	<property name="hbm.conf.xml" value="${basedir}/hibernate.cfg.xml" />
 	<!-- Environment -->
@@ -19,19 +24,19 @@
 	<target name="mkdirs" description="create paths">
 		<mkdir dir="${src.dir}" />
 		<mkdir dir="${bin.dir}" />
-		<mkdir dir="${lib.dir}"/>
+		<mkdir dir="${lib.dir}" />
 	</target>
-	
+
 	<target name="extract.plugin.libs" if="plugin_isjar">
 		<!-- if it a jar-packed plugin in the eclipse dir, we unpack it -->
 		<unjar src="${plugin.dir}" dest="." overwrite="false">
-			<patternset includes="${lib.dir}/**"/>
+			<patternset includes="${lib.dir}/**" />
 		</unjar>
 	</target>
 	<target name="copy.plugin.libs" unless="plugin_isjar">
 		<!-- if it a jar-packed plugin in the eclipse dir, we unpack it -->
 		<copy todir="${lib.dir}" overwrite="false">
-			<fileset dir="${plugin.dir}" includes="**"/>
+			<fileset dir="${plugin.dir}" includes="**" />
 		</copy>
 	</target>
 	<target name="init" depends="mkdirs" description="create paths and libs">
@@ -40,7 +45,9 @@
 		<!-- <antcall target="copy.plugin.libs" /> -->
 		<!-- compiler -->
 		<path id="compiler.classpath" path="${env.java_home}/lib/tools.jar" />
-		<path id="project.classpath" >
+		<path id="project.classpath">
+			<path path="./" /><!-- to find resources like META-INF -->
+			<path path="${bin.dir}" />
 			<path refid="compiler.classpath" />
 			<fileset dir="${plugin.dir}">
 				<include name="**/*.jar" />
@@ -49,44 +56,111 @@
 				<include name="**/*.jar" />
 			</fileset>
 		</path>
+	</target>
 
+	<target name="inithbm" depends="init">
 		<taskdef name="hibernatetool" classname="org.hibernate.tool.ant.HibernateToolTask" classpathref="project.classpath" />
 	</target>
 
-	<target name="hbm2ddl" description="create ddl statements">
+	<target name="hbm2ddl" depends="inithbm" description="create ddl statements">
 		<hibernatetool destdir="${basedir}">
 			<jdbcconfiguration packagename="${packagename}" revengfile="${hibernate.reveng.xml}" configurationfile="${hbm.conf.xml}" propertyfile="${server.db-config.file}" detectmanytomany="true" />
 			<hbm2ddl export="false" outputfilename="${resources.db.dir}/bean.ddl" format="true" />
 		</hibernatetool>
 	</target>
 
-	<target name="hbm2java" description="Create java-bean classes">
+	<target name="hbm2java" depends="inithbm" description="Create java-bean classes">
 		<hibernatetool destdir="${basedir}">
 			<jdbcconfiguration packagename="${packagename}" propertyfile="${server.db-config.file}" detectmanytomany="true" />
-			<hbm2java destdir="${src.dir}" jdk5="true" ejb3="true"/>
+			<hbm2java destdir="${src.dir}" jdk5="true" ejb3="true" />
 		</hibernatetool>
 	</target>
 
-	<target name="hbm2doc" description="create doc for java bean classes">
+	<target name="hbm2doc" depends="inithbm" description="create doc for java bean classes">
 		<hibernatetool destdir="${basedir}">
 			<jdbcconfiguration packagename="${packagename}" revengfile="${hibernate.reveng.xml}" configurationfile="${hbm.conf.xml}" propertyfile="${server.db-config.file}" detectmanytomany="true" />
 			<hbm2doc destdir="doc" />
 		</hibernatetool>
 	</target>
 
+	<target name="hibernate-tools" depends="hbm2java, hbm2ddl, hbm2doc">
+	</target>
+	
+	<!-- ================================= 
+          target: openjpa-reverse-engineering              
+         ================================= -->
+	<target name="openjpa-reverse-eng" depends="init">
+<!--		<taskdef name="reversemappingtool" classname="org.apache.openjpa.jdbc.ant.ReverseMappingToolTask" classpathref="project.classpath" />
+		<reversemappingtool package="${packagename}" directory="${src.dir}" metadata="none" generateAnnotations="true">
+			 <config propertiesFile="META-INF/persistence.xml" />
+		</reversemappingtool> -->
+		<antcall target="schematool" />
+		<antcall target="openjpa-reverse-engineering" />
+	</target>
+
+
+	<target name="openjpa-reverse-engineering">
+		<exec command="java">
+			<arg value="-cp" />
+			<arg value="*" />
+			<arg value="org.apache.openjpa.jdbc.meta.ReverseMappingTool" />
+			<arg value="-directory" />
+			<arg value="generated-src" />
+			<arg value="-accessType" />
+			<arg value="fields" />
+			<arg value="-useGenericCollections" />
+			<arg value="true" />
+			<arg value="-package" />
+			<arg value="org.yourproject.model" />
+			<arg value="-metadata" />
+			<arg value="none" />
+			<arg value="-annotations" />
+			<arg value="true" />
+			<arg value="-innerIdentityClasses" />
+			<arg value="false" />
+			<arg value="-useBuiltinIdentityClass" />
+			<arg value="false" />
+			<arg value="-primaryKeyOnJoin" />
+			<arg value="false" />
+			<arg value="schema.xml" />
+		</exec>
+	</target>
+
+		<target name="schematool">
+		<exec command="java">
+			<arg value="-cp" />
+			<arg value="*" />
+			<arg value="org.apache.openjpa.jdbc.schema.SchemaTool" />
+			<!--<arg value="-schema" />
+			<arg value="PUBLIC" /> -->
+			<arg value="-a" />
+			<arg value="reflect" />
+			<arg value="-f" />
+			<arg value="schema.xml" />
+		</exec>
+	</target>
+	
 	<!-- ================================= 
           target: create.bean.jar              
          ================================= -->
 	<target name="create.bean.jar" depends="init" description="Create jar-file with bean classes">
 		<property name="dest.file" value="${bean.jar.path}" />
-		<antcall target="hbm2java" />
+		<antcall target="${generator}" />
+		<!-- hbm2java or openjpa-reverse-eng -->
 		<echo message="compiler-path: ${env.java_home}" />
 
 		<!-- do some project-specific WORKAROUNDs -->
-		
+
 		<!-- WORKAROUND END -->
-		<javac classpathref="project.classpath" srcdir="${src.dir}" destdir="${bin.dir}" fork="true"/>
-		<jar destfile="${dest.file}">
+		<javac classpathref="project.classpath" srcdir="${src.dir}" destdir="${bin.dir}" fork="true" failonerror="true" />
+		
+		<!-- check, if any class file was created (while jar.whenempty doesn't seem to work) -->
+		<available property="class.file.exists">
+			<filepath path="${bin.dir}" />
+		</available>
+		<fail unless="class.file.exists"/>
+		
+		<jar destfile="${dest.file}" whenempty="fail" >
 			<fileset dir="${bin.dir}">
 				<include name="**" />
 			</fileset>

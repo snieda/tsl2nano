@@ -148,7 +148,7 @@ public class GenericReplicatingServiceBean extends GenericServiceBean {
             /*
              * while there is no current transaction, the 'commit' should do nothing ;-)
              */
-            service.executeQuery("commit"/* + "grant select on " + Environment.get(IAuthorization.class).getUser()*/,
+            service.executeQuery(Environment.get("connection.check.sql", "commit")/* + "grant select on " + Environment.get(IAuthorization.class).getUser()*/,
                 true, new Object[0]);
             return connected = true;
         } catch (Exception ex) {

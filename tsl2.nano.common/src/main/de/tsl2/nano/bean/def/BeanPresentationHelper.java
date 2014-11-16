@@ -56,6 +56,7 @@ import de.tsl2.nano.collection.CollectionUtil;
 import de.tsl2.nano.core.Environment;
 import de.tsl2.nano.core.ISession;
 import de.tsl2.nano.core.ManagedException;
+import de.tsl2.nano.core.classloader.NetworkClassLoader;
 import de.tsl2.nano.core.cls.BeanAttribute;
 import de.tsl2.nano.core.cls.BeanClass;
 import de.tsl2.nano.core.cls.IAttribute;
@@ -1213,6 +1214,7 @@ public class BeanPresentationHelper<T> {
 
     public void reset() {
         Bean.clearCache();
+        NetworkClassLoader.resetUnresolvedClasses(Environment.getConfigPath());
         Environment.reload();
     }
 

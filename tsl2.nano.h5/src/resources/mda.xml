@@ -35,7 +35,7 @@
 					<!-- <property name="sh.sql.include" value="h5.sample.sql"/> -->
 				</ant>
 				
-				<ant antfile="hibtool.xml" />
+				<ant antfile="reverse-eng.xml" />
 				
 				<ant antfile="shell.xml" target="sh.exec.cmd">
 					<property name="sh.exec.cmd.dir" value="${basedir}/.."/>

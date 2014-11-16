@@ -180,7 +180,14 @@ public class HtmlUtil {
     public static final String COLOR_YELLOW = "#CCCC00";
 
     /** static styles */
-    public static final String STYLE_BACKGROUND_RADIAL_GRADIENT = "background: radial-gradient(#9999FF, #000000);";
+    public static final String STYLE_BACKGROUND_RADIAL_GRADIENT =
+        "background: radial-gradient(#9999FF, #000000);";
+    public static final String STYLE_BACKGROUND_FADING_TRANSITION =
+            "-webkit-transition: background 2.5s ease-in-out; -moz-transition: background 2.5s ease-in-out; -ms-transition: background 2.5s ease-in-out; -o-transition: background 2.5s ease-in-out; transition: background 2.5s ease-in-out;";
+    public static final String STYLE_BACKGROUND_FADING_KEYFRAMES =
+            "-webkit-animation: fade 1s; -webkit-animation-fill-mode: both; -moz-animation: fade 1s; -moz-animation-fill-mode: both; -o-animation: fade 1s; -o-animation-fill-mode: both; animation: fade 1s; animation-fill-mode: both;";
+    public static final String CSS_BACKGROUND_FADING_KEYFRAMES =
+            "@-webkit-keyframes fade {0%{opacity: 0;} 100% {opacity: 1;}} @-moz-keyframes fade {0%{opacity: 0;} 100% {opacity: 1;}} @-o-keyframes fade {0%{opacity: 0;} 100% {opacity: 1;}} @keyframes fade {0%{opacity: 0;} 100% {opacity: 1;}} ";
     public static final String STYLE_BACKGROUND_LIGHTGRAY = "background: #CCCCCC;";
     /** dynamic styles. use method {@link #style(String, String)} to set styles! */
     public static final String STYLE_TEXT_ALIGN = "text-align";
@@ -284,9 +291,9 @@ public class HtmlUtil {
             String postfix = StringUtil.substring(text, ">", null, true);
             if (!Util.isEmpty(postfix))
                 text = text.replace(postfix, BEG + postfix + END);
-            
+
             text = BEG + text + END;
-            
+
             /*
              * now, parse the text
              */
@@ -462,10 +469,11 @@ public class HtmlUtil {
     public static String cdata(String data) {
         return "<![CDATA[" + data + "]]>";
     }
-    
+
     public static String begin(String tagName) {
         return "<" + tagName + ">";
     }
+
     public static String end(String tagName) {
         return "</" + tagName + ">";
     }

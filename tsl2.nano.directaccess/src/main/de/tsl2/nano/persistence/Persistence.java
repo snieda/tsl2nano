@@ -51,7 +51,9 @@ public class Persistence implements Serializable {
     protected String port = "9003";
     protected String database = "";
     private Persistence replication;
-
+    /** One of 'hbm2java' or 'openjpa-reverse-eng' */
+    private String generator = GEN_OPENJPA;
+    
     /** jdbc connection properties - used by ejb creator */
     public static final String FILE_JDBC_PROP_FILE = "jdbc-connection.properties";
     /** xml serialization of Persistence object */
@@ -61,6 +63,8 @@ public class Persistence implements Serializable {
     /** standard ejb path to load persistence unit */
     public static final String FILE_PERSISTENCE_XML = "META-INF/persistence.xml";
 
+    public static final String GEN_HIBERNATE = "hibernate-tools";
+    public static final String GEN_OPENJPA = "openjpa-reverse-eng";
     /**
      * constructor
      */
@@ -324,6 +328,16 @@ public class Persistence implements Serializable {
         put(prop, "hibernate.connection.username", getConnectionUserName());
         put(prop, "hibernate.connection.password", getConnectionPassword());
         put(prop, "hibernate.default_schema", getDefaultSchema());
+        
+        //WORKAROUND FUER OPENJPA REVERSE ENGENINEERING
+        put(prop, "openjpa.provider", "org.apache.openjpa.persistence.PersistenceProviderImpl");
+        
+        put(prop, "javax.persistence.provider", getProvider());
+        put(prop, "javax.persistence.jdbc.driver", getConnectionDriverClass());
+        put(prop, "javax.persistence.jdbc.driver", getConnectionDriverClass());
+        put(prop, "javax.persistence.jdbc.user", getConnectionUserName());
+        put(prop, "javax.persistence.jdbc.url", getConnectionUrl());
+        put(prop, "javax.persistence.jdbc.password", getConnectionPassword());
 
         put(prop, "jpa.beansjar", jarFileInEnvironment());
         
@@ -376,7 +390,7 @@ public class Persistence implements Serializable {
         put(prop, "transaction-type", "RESOURCE_LOCAL");
         put(prop, "provider", getProvider());
 
-        put(prop, "jar-file", jarFileInEnvironment());
+        put(prop, "jar-file", "file:./" + jarFileInEnvironment());
         put(prop, "jta-data-source", getJtaDataSource());
         put(prop, "hibernate.dialect", getHibernateDialect());
         put(prop, "connection.driver_class", getConnectionDriverClass());
@@ -443,6 +457,21 @@ public class Persistence implements Serializable {
 
     public void setReplication(Persistence replication) {
         this.replication = replication;
+    }
+
+    
+    /**
+     * @return Returns the generator.
+     */
+    public String getGenerator() {
+        return generator;
+    }
+
+    /**
+     * @param generator The generator to set. One of 'hbm2java' or 'openjpa-reverse-eng'
+     */
+    public void setGenerator(String generator) {
+        this.generator = generator;
     }
 
     @Override

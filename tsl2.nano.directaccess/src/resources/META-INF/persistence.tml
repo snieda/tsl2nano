@@ -10,6 +10,7 @@
 		TopLink    : oracle.toplink.essentials.PersistenceProvider
 		Acme Pers. : com.acme.persistence
 		DataNucleus: org.datanucleus.api.jpa.PersistenceProviderImpl
+		BatooJPA   : org.batoo.jpa.core.BatooPersistenceProvider
 		 -->
 		 
 		<!-- JNDI name of the database resource to use -->
@@ -43,7 +44,7 @@
 			<!-- <property name="org.hibernate.FlushMode" value="commit" />  -->
          	<!-- Hibernate End -->
 
-			<!-- Eclipse-Link and DataNucleus -->
+			<!-- Eclipse-Link, OpenJPA and DataNucleus -->
 			<property name="javax.persistence.jdbc.driver" value="${connection.driver_class}"/>
 	        <property name="javax.persistence.jdbc.user" value="${connection.username}"/>
 	        <property name="javax.persistence.jdbc.url" value="${connection.url}"/>

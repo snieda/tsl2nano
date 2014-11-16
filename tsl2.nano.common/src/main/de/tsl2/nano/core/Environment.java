@@ -511,7 +511,16 @@ public class Environment {
      * @param obj object to serialize to xml.
      */
     public static void persist(Object obj) {
-        self().get(XmlUtil.class).saveXml(getConfigPath(obj.getClass()) + ".xml", obj);
+        persist(obj.getClass() + ".xml", obj);
+    }
+
+    /**
+     * persists the given object through configured xml persister.
+     * 
+     * @param obj object to serialize to xml.
+     */
+    public static void persist(String name, Object obj) {
+        self().get(XmlUtil.class).saveXml(name + ".xml", obj);
     }
 
     /**

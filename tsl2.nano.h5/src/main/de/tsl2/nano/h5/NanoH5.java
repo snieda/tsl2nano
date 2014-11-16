@@ -138,6 +138,7 @@ public class NanoH5 extends NanoHTTPD implements ISystemConnector<Persistence> {
             Environment.extractResource("mda.xml");
             Environment.extractResource("mda.properties");
             Environment.extractResource("beandef.xsd");
+            Environment.extractResource("tsl2nano-appcache.mf");
             Environment.extractResourceToDir("favicon.ico", "../");
             String dir = Environment.getConfigPath();
             File icons = new File(dir + "icons");
@@ -152,7 +153,7 @@ public class NanoH5 extends NanoHTTPD implements ISystemConnector<Persistence> {
                 /*
                  * on first start, extract the sample files
                  */
-                ((Html5Presentation)Environment.get(BeanPresentationHelper.class)).createSampleEnvironment();
+                ((Html5Presentation) Environment.get(BeanPresentationHelper.class)).createSampleEnvironment();
             }
 
             LOG.info("Listening on port " + serviceURL.getPort() + ". Hit Enter to stop.\n");
@@ -217,6 +218,7 @@ public class NanoH5 extends NanoHTTPD implements ISystemConnector<Persistence> {
         if (method.equals("GET") && !NumberUtil.isNumber(uri.substring(1)) && HtmlUtil.isURL(uri)
             && !uri.contains(Html5Presentation.PREFIX_BEANREQUEST))
             return super.serve(uri, method, header, parms, files);
+
         long startTime = System.currentTimeMillis();
         InetAddress requestor = ((Socket) header.get("socket")).getInetAddress();
         NanoH5Session session = sessions.get(requestor);
@@ -224,7 +226,11 @@ public class NanoH5 extends NanoHTTPD implements ISystemConnector<Persistence> {
             //on a new session, no parameter should be set
             session = createSession(requestor);
         } else {//perhaps session was interrupted/closed but not removed
-            if (session.nav == null || session.nav.isEmpty()) {
+            //WORKAROUND: may occur on cached pages
+            if (method.equals("GET") && uri.length() < 2 && parms.size() == 0) {
+                LOG.debug("reloading cached page...");
+                return session.response;
+            } else if (session.nav == null || session.nav.isEmpty()) {
                 session.close();
                 sessions.remove(session.inetAddress);
                 session = createSession(requestor);
@@ -364,7 +370,7 @@ public class NanoH5 extends NanoHTTPD implements ISystemConnector<Persistence> {
     public void disconnect(Persistence connectionEnd) {
         //nothing to clean
     }
-    
+
     protected ClassLoader rootClassloader() {
         return appstartClassloader;
 //        try {
@@ -439,10 +445,10 @@ public class NanoH5 extends NanoHTTPD implements ISystemConnector<Persistence> {
         });
         //perhaps, create the first environment.xml
         if (!Environment.isPersisted()) {
-            Environment.setAutopersist(true);
             Environment.persist();
             BeanDefinition.dump();
         }
+        Environment.setAutopersist(true);
         return root;
     }
 
@@ -510,18 +516,24 @@ public class NanoH5 extends NanoHTTPD implements ISystemConnector<Persistence> {
             Environment.extractResource(JAR_DIRECTACCESS);
             Environment.extractResource(JAR_SERVICEACCESS);
 
+            String generatorTask; 
+            if (persistence.getGenerator().equals(Persistence.GEN_HIBERNATE)) {
+                generatorTask = "org.hibernate.tool.ant.HibernateToolTask"; 
+            } else {
+                generatorTask = "org.apache.openjpa.jdbc.ant.ReverseMappingToolTask"; 
+            }    
             Environment.loadClassDependencies("org.apache.tools.ant.taskdefs.Taskdef",
-                "org.hibernate.tool.ant.HibernateToolTask", persistence.getConnectionDriverClass());
-
+                generatorTask, persistence.getConnectionDriverClass());
+            
             //TODO: show generation message before - get script exception from exception handler
-            generateJarFile(jarName);
+            generateJarFile(jarName, persistence.getGenerator());
             if (!new File(jarName).exists()) {
                 throw new ManagedException(
                     "Couldn't generate bean jar file '"
                         + jarName
-                        + "' through ant-script hibtools.xml! Please see log file for exceptions. Possible errors are:\n"
+                        + "' through ant-script 'reverse-eng.xml'! Please see log file for exceptions. Possible errors are:\n"
                         + "\t- no ant jar files (ant.jar, ant-launcher.jar, ant-nodeps.jar) in your environment directory\n"
-                        + "\t- no hibernate jar files in your environment directory\n"
+                        + "\t- no hibernate or open-jpa jar files in your environment directory\n"
                         + "\t- no jdbc-driver-jar file for the given 'ConnectionDriverClass' in your environment directory\n"
                         + "\t- your java is an JRE instead of a full JDK (needed to compile the generated classes!)\n"
                         + "\nAs alternative you may select an existing bean-jar file (-->no generation needed!) in field \"JarFile\"");
@@ -538,10 +550,10 @@ public class NanoH5 extends NanoHTTPD implements ISystemConnector<Persistence> {
             ServiceFactory.createInstance(runtimeClassloader);
             //a service has to load user object, roles and features project specific!
             BeanClass authentication =
-                BeanClass.createBeanClass(Environment.get("applicationserver.authentification.service",
+                BeanClass.createBeanClass(Environment.get("applicationserver.authentication.service",
                     Environment.getApplicationMainPackage() + ".service.remote.IUserService"));
             Object authService = ServiceFactory.instance().getService(authentication.getClazz());
-            BeanClass.call(authService, Environment.get("applicationserver.authentification.method", "login"),
+            BeanClass.call(authService, Environment.get("applicationserver.authentication.method", "login"),
                 new Class[] {
                     String.class, String.class }, persistence.getConnectionUserName(),
                 persistence.getConnectionPassword());
@@ -551,7 +563,7 @@ public class NanoH5 extends NanoHTTPD implements ISystemConnector<Persistence> {
             Environment.loadClassDependencies(persistence.getConnectionDriverClass(),
                 persistence.getDatasourceClass(), persistence.getProvider());
             GenericLocalBeanContainer.initLocalContainer(runtimeClassloader,
-                useJPAPersistenceProvider && Environment.get("check.connection.on.login", false));
+                useJPAPersistenceProvider && Environment.get("connection.check.on.login", false));
         }
         Environment.addService(IBeanContainer.class, BeanContainer.instance());
 
@@ -563,18 +575,19 @@ public class NanoH5 extends NanoHTTPD implements ISystemConnector<Persistence> {
         return beanClasses;
     }
 
-    protected static void generateJarFile(String jarFile) {
+    protected static void generateJarFile(String jarFile, String generator) {
         /** ant script to start the hibernatetool 'hbm2java' */
-        final String HIBTOOLNAME = "hibtool.xml";
+        final String REVERSE_ENG_SCRIPT = "reverse-eng.xml";
         /** hibernate reverse engeneer configuration */
         final String HIBREVNAME = "hibernate.reveng.xml";
-        Environment.extractResource(HIBTOOLNAME);
+        Environment.extractResource(REVERSE_ENG_SCRIPT);
         Environment.extractResource(HIBREVNAME);
         Properties properties = new Properties();
         properties.setProperty(HIBREVNAME, Environment.getConfigPath() + HIBREVNAME);
 //    properties.setProperty("hbm.conf.xml", "hibernate.conf.xml");
         properties.setProperty("server.db-config.file", Persistence.FILE_JDBC_PROP_FILE);
         properties.setProperty("dest.file", jarFile);
+        properties.setProperty("generator", generator);
         properties.setProperty(BEAN_GENERATION_PACKAGENAME,
             Environment.get(BEAN_GENERATION_PACKAGENAME, "org.anonymous.project"));
         String plugin_dir = System.getProperty("user.dir");
@@ -582,9 +595,12 @@ public class NanoH5 extends NanoHTTPD implements ISystemConnector<Persistence> {
         if (plugin_dir.endsWith(".jar/")) {
             properties.setProperty("plugin_isjar", Boolean.toString(true));
         }
-        Message.send("starting generation of '" + jarFile + "' through script " + HIBTOOLNAME);
+        Message.send("starting generation of '" + jarFile + "' through script " + REVERSE_ENG_SCRIPT);
+        //If no environment was saved before, we should do it now!
+        Environment.persist();
+        
         Environment.get(CompatibilityLayer.class).runRegistered("ant",
-            Environment.getConfigPath() + HIBTOOLNAME,
+            Environment.getConfigPath() + REVERSE_ENG_SCRIPT,
             "create.bean.jar",
             properties);
     }

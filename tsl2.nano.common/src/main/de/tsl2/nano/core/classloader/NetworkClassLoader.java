@@ -19,9 +19,11 @@ import java.util.List;
 import org.apache.commons.logging.Log;
 
 import de.tsl2.nano.core.Environment;
+import de.tsl2.nano.core.cls.BeanClass;
 import de.tsl2.nano.core.log.LogFactory;
 import de.tsl2.nano.core.util.FileUtil;
 import de.tsl2.nano.core.util.StringUtil;
+import de.tsl2.nano.core.util.XmlUtil;
 
 /**
  * Loads unresolved classes from network-connection through a maven repository. All classes that cannot be found through
@@ -92,8 +94,10 @@ public class NetworkClassLoader extends NestedJarClassLoader {
         //only for the first time we load the persisted ignore list
         if (environment == null || !environment.equals(path)) {
             File persistedList = new File(path + "/" + FILENAME_UNRESOLVEABLES);
-            if (persistedList.canRead()) {
-                unresolveables.addAll((Collection<? extends String>) FileUtil.load(persistedList.getPath()));
+            if (Environment.isAvailable() && Environment.get("networkclassloader.reload.unresolved", false)
+                && persistedList.canRead()) {
+                unresolveables.addAll((Collection<? extends String>) Environment.load(FILENAME_UNRESOLVEABLES,
+                    ArrayList.class));
                 LOG.info("unresolvable class-packages are:\n\t" + unresolveables);
             }
         }
@@ -106,38 +110,34 @@ public class NetworkClassLoader extends NestedJarClassLoader {
             return super.findClass(name);
         } catch (ClassNotFoundException e) {
             //try it again after loading it from network
-            String pckName = getPackageName(name);
+            String pckName = BeanClass.getPackageName(name);
             if (!unresolveables.contains(pckName)) {
                 try {
-                    if (isClassName(name) && Environment.loadDependencies(name) != null) {
+                    if (BeanClass.isPublicClassName(name) && Environment.isAvailable()
+                        && Environment.loadDependencies(name) != null) {
                         //reload jar-files from environment
                         addLibraryPath(environment);
+                        return super.findClass(name);
                     }
-                    return super.findClass(name);
+
                 } catch (Exception e2) {
-                    LOG.warn("couldn't load class " + name);
+                    LOG.warn("couldn't load class " + name, e);
                     unresolveables.add(pckName);
-                    FileUtil.save(environment + "/" + FILENAME_UNRESOLVEABLES, unresolveables);
-                    //throw the origin exception!
-                    throw e;
+                    Environment.persist(unresolveables);
                 }
-            } else {
-                throw e;
             }
+            //throw the origin exception!
+            throw e;
         }
     }
 
     /**
-     * checks for minimal name conventions to avoid dependency loading on non-classes like resources.
+     * resetUnresolvedClasses
      * 
-     * @param name name to check
-     * @return true, if at least one package is given and class name starts with upper case
+     * @return true, if file could be deleted
      */
-    private boolean isClassName(String name) {
-        return name.matches(".*[.][A-Z]\\w*[a-zA-Z]$");
-    }
-
-    private String getPackageName(String name) {
-        return StringUtil.substring(name, null, ".", true);
+    public static boolean resetUnresolvedClasses(String path) {
+        unresolveables.clear();
+        return new File(path + FILENAME_UNRESOLVEABLES).delete();
     }
 }

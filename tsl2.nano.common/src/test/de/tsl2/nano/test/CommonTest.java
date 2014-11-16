@@ -670,6 +670,22 @@ public class CommonTest {
     }
 
     @Test
+    public void testBeanClass() throws Exception {
+        String cls = "org.company123.my123product.My_ClassName";
+        assertTrue(BeanClass.isPublicClassName(cls));
+        assertEquals("org.company123.my123product", BeanClass.getPackageName(cls));
+        
+        String nocls = "org.company123.my123product.resource";
+        assertFalse(BeanClass.isPublicClassName(nocls));
+        
+        nocls = "org.company123.my123product.My_ClassName$1";
+        assertFalse(BeanClass.isPublicClassName(nocls));
+
+        nocls = "nix";
+        assertFalse(BeanClass.isPublicClassName(nocls));
+    }
+    
+    @Test
     public void testBeanUtils() throws Exception {
         /*
          * toValueMap
