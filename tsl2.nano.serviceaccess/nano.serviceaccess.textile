@@ -5,7 +5,7 @@
 
 h2. Introduction
 
-This project provides implementations to access services through a "servicefactory":src/main/de.tsl2.nano/serviceaccess/ServiceFactory.java. The JAAS is used to do authentification and authorization (see: "here":src/main/de.tsl2.nano/serviceaccess/aas/module/AbstractLoginModule.java). A feature-mechanism provides the possibility to do optional calls to feature-implementations. The GenericService provides comfortable functions to evaluate data through jpa.
+This project provides implementations to access services through a "servicefactory":src/main/de.tsl2.nano/serviceaccess/ServiceFactory.java. The JAAS is used to do authentication and authorization (see: "here":src/main/de.tsl2.nano/serviceaccess/aas/module/AbstractLoginModule.java). A feature-mechanism provides the possibility to do optional calls to feature-implementations. The GenericService provides comfortable functions to evaluate data through jpa.
 
 For further informations, see here: 
 * "Java Sun Tutorial":http://java.sun.com/j2se/1.4.2/docs/guide/security/jaas/tutorials/GeneralAcnAndAzn.html

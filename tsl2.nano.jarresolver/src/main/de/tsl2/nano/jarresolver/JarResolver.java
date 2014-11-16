@@ -22,6 +22,7 @@ import org.apache.commons.logging.Log;
 import de.tsl2.nano.collection.MapUtil;
 import de.tsl2.nano.core.Environment;
 import de.tsl2.nano.core.ManagedException;
+import de.tsl2.nano.core.cls.BeanClass;
 import de.tsl2.nano.core.log.LogFactory;
 import de.tsl2.nano.core.util.FileUtil;
 import de.tsl2.nano.core.util.NetUtil;
@@ -47,6 +48,17 @@ import de.tsl2.nano.execution.SystemUtil;
  * resolve the default jar-version for you.
  * 
  * For more informations, read comments on 'jarresolver.properties'.
+ * 
+ * ALGORITHM:
+ * 1. class name
+ *   a. try to find the package (starting with PACKAGE)
+ *   b. if not found, try to find it through a part of a package, cutting the rest (at least two parts must retain e.g. org.company)
+ *   c. if not found, use the first two parts as groupId and the third part as artifactId (e.g.: org.company/product)
+ * 2. artifact name
+ *   a. find the package path through all PACKAGE values
+ *   b. if not found, cut last part concatenated through '-' and try to find PACKAGE value again. if found, use that as groupId.
+ *   c. if not found, use artifact name as group name
+ *   
  * </pre>
  * 
  * @author Tom
@@ -162,8 +174,16 @@ public class JarResolver {
                 artifactId = StringUtil.substring(deps[i], null, version);
                 groupId = findPackage(deps[i], true);
                 //if no definition was found, try it with the artifactID itself
-                if (groupId == null)
-                    groupId = artifactId;
+                if (groupId == null) {
+                    //if artifactId is a class-name itself, try to extract the third part of the package (org.company.product....)
+                    if (BeanClass.isPublicClassName(artifactId)) {
+                        String cls = artifactId;
+                        artifactId = StringUtil.substring(StringUtil.substring(cls, ".", null), ".", ".");
+                        groupId = StringUtil.substring(cls, null, "." + artifactId);
+                    } else {
+                        groupId = artifactId;
+                    }
+                }
             }
             version = !Util.isEmpty(version) ? version.substring(1) : "RELEASE";
             p = MapUtil.asMap(KEY_GROUPID, groupId, KEY_ARTIFACTID, artifactId, KEY_VERSION, version);
@@ -264,7 +284,7 @@ public class JarResolver {
         String pck = props.getProperty(PRE_PACKAGE + dependency);
         if (pck != null)
             return packageKey ? dependency : pck;
-        else if (dependency.contains("."))
+        else if (dependency.indexOf(".") != dependency.lastIndexOf("."))//package path with at least two parts!
             //search for parts of given package
             return findPackage(StringUtil.substring(dependency, null, ".", true), packageKey);
         else if (dependency.contains("-"))
@@ -273,7 +293,7 @@ public class JarResolver {
         else if (props.values().contains(dependency))
             return findPackageByArtifactId(dependency);
         else
-            return (pck = findGroupId(dependency)) != null ? pck + "/" : null;
+            return (pck = findGroupId(dependency)) != null ? pck + (!packageKey ? "/" : "") : null;
     }
 
     /**

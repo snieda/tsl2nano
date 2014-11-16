@@ -197,6 +197,7 @@ public class EntityManager extends NanoEntityManagerFactory.AbstractEntityManage
                 dao = DaoManager.createDao(connectionSource, type);
             return dao;
         } catch (Exception e) {
+            LOG.warn("Did you annotate properties instead of fields? ORMLite is not able to read property (get*) annotations!");
             ManagedException.forward(e);
             return null;
         }
