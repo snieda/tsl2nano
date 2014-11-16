@@ -105,25 +105,25 @@ public class PersistenceUI {
                 FileUtil.saveProperties(pfile, props);
             }
             final Properties p = props;
-            login
-                .getAttribute("connectionUserName")
-                .changeHandler()
-                .addListener(
-                    new WebSocketDependencyListener<String>((AttributeDefinition<String>) login
-                        .getAttribute("defaultSchema")) {
-                        @Override
-                        public String evaluate(Object value) {
-                            Object userName = Util.asString(value);
-                            String eval = null;
-                            if (userName != null && Util.isEmpty(login.getAttribute("defaultSchema"))) {
-                                if (value != null && value.toString().contains("hsqldb"))
-                                    eval = "PUBLIC";
-                                else
-                                    eval = userName.toString().toUpperCase();
-                            }
-                            return eval;
-                        }
-                    });
+//            login
+//                .getAttribute("connectionUserName")
+//                .changeHandler()
+//                .addListener(
+//                    new WebSocketDependencyListener<String>((AttributeDefinition<String>) login
+//                        .getAttribute("defaultSchema")) {
+//                        @Override
+//                        public String evaluate(Object value) {
+//                            Object userName = Util.asString(value);
+//                            String eval = null;
+//                            if (userName != null && Util.isEmpty(login.getAttribute("defaultSchema"))) {
+//                                if (value != null && value.toString().contains("hsqldb"))
+//                                    eval = "PUBLIC";
+//                                else
+//                                    eval = userName.toString().toUpperCase();
+//                            }
+//                            return eval;
+//                        }
+//                    });
             login
                 .getAttribute("connectionUrl")
                 .changeHandler()

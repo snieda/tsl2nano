@@ -46,7 +46,8 @@
 		<!-- compiler -->
 		<path id="compiler.classpath" path="${env.java_home}/lib/tools.jar" />
 		<path id="project.classpath">
-			<path path="./" /><!-- to find resources like META-INF -->
+			<path path="./" />
+			<!-- to find resources like META-INF -->
 			<path path="${bin.dir}" />
 			<path refid="compiler.classpath" />
 			<fileset dir="${plugin.dir}">
@@ -85,12 +86,12 @@
 
 	<target name="hibernate-tools" depends="hbm2java, hbm2ddl, hbm2doc">
 	</target>
-	
+
 	<!-- ================================= 
           target: openjpa-reverse-engineering              
          ================================= -->
 	<target name="openjpa-reverse-eng" depends="init">
-<!--		<taskdef name="reversemappingtool" classname="org.apache.openjpa.jdbc.ant.ReverseMappingToolTask" classpathref="project.classpath" />
+		<!--		<taskdef name="reversemappingtool" classname="org.apache.openjpa.jdbc.ant.ReverseMappingToolTask" classpathref="project.classpath" />
 		<reversemappingtool package="${packagename}" directory="${src.dir}" metadata="none" generateAnnotations="true">
 			 <config propertiesFile="META-INF/persistence.xml" />
 		</reversemappingtool> -->
@@ -98,9 +99,8 @@
 		<antcall target="openjpa-reverse-engineering" />
 	</target>
 
-
 	<target name="openjpa-reverse-engineering">
-		<exec command="java">
+		<exec executable="java">
 			<arg value="-cp" />
 			<arg value="*" />
 			<arg value="org.apache.openjpa.jdbc.meta.ReverseMappingTool" />
@@ -126,8 +126,8 @@
 		</exec>
 	</target>
 
-		<target name="schematool">
-		<exec command="java">
+	<target name="schematool">
+		<exec executable="java">
 			<arg value="-cp" />
 			<arg value="*" />
 			<arg value="org.apache.openjpa.jdbc.schema.SchemaTool" />
@@ -139,7 +139,7 @@
 			<arg value="schema.xml" />
 		</exec>
 	</target>
-	
+
 	<!-- ================================= 
           target: create.bean.jar              
          ================================= -->
@@ -153,14 +153,14 @@
 
 		<!-- WORKAROUND END -->
 		<javac classpathref="project.classpath" srcdir="${src.dir}" destdir="${bin.dir}" fork="true" failonerror="true" />
-		
+
 		<!-- check, if any class file was created (while jar.whenempty doesn't seem to work) -->
 		<available property="class.file.exists">
 			<filepath path="${bin.dir}" />
 		</available>
-		<fail unless="class.file.exists"/>
-		
-		<jar destfile="${dest.file}" whenempty="fail" >
+		<fail unless="class.file.exists" />
+
+		<jar destfile="${dest.file}" whenempty="fail">
 			<fileset dir="${bin.dir}">
 				<include name="**" />
 			</fileset>

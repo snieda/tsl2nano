@@ -60,6 +60,7 @@ public class Persistence implements Serializable {
     public static final String FILE_PERSISTENCE_BEAN = "persistence-bean.xml";
     /** persistence template file name */
     public static final String FILE_PERSISTENCE_TML = "META-INF/persistence.tml";
+    public static final String FILE_PERSISTENCE_NOREP_TML = "META-INF/persistence-noreplication.tml";
     /** standard ejb path to load persistence unit */
     public static final String FILE_PERSISTENCE_XML = "META-INF/persistence.xml";
 
@@ -363,7 +364,7 @@ public class Persistence implements Serializable {
          */
         InputStream stream = (InputStream) Thread.currentThread()
             .getContextClassLoader()
-            .getResource(Persistence.FILE_PERSISTENCE_TML)
+            .getResource(Util.isEmpty(getReplication()) ? FILE_PERSISTENCE_NOREP_TML : FILE_PERSISTENCE_TML)
             .getContent();
         String persistence_xml = String.copyValueOf(FileUtil.getFileData(stream, null));
         Map<String, Object> prop = new HashMap<String, Object>();
