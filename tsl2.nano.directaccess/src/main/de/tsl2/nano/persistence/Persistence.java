@@ -52,7 +52,7 @@ public class Persistence implements Serializable {
     protected String database = "";
     private Persistence replication;
     /** One of 'hbm2java' or 'openjpa-reverse-eng' */
-    private String generator = GEN_OPENJPA;
+    private String generator = GEN_HIBERNATE;
     
     /** jdbc connection properties - used by ejb creator */
     public static final String FILE_JDBC_PROP_FILE = "jdbc-connection.properties";

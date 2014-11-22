@@ -526,7 +526,7 @@ public class NanoH5 extends NanoHTTPD implements ISystemConnector<Persistence> {
                 generatorTask, persistence.getConnectionDriverClass());
             
             //TODO: show generation message before - get script exception from exception handler
-            generateJarFile(jarName, persistence.getGenerator());
+            generateJarFile(jarName, persistence.getGenerator(), persistence.getDefaultSchema());
             if (!new File(jarName).exists()) {
                 throw new ManagedException(
                     "Couldn't generate bean jar file '"
@@ -575,7 +575,7 @@ public class NanoH5 extends NanoHTTPD implements ISystemConnector<Persistence> {
         return beanClasses;
     }
 
-    protected static void generateJarFile(String jarFile, String generator) {
+    protected static void generateJarFile(String jarFile, String generator, String schema) {
         /** ant script to start the hibernatetool 'hbm2java' */
         final String REVERSE_ENG_SCRIPT = "reverse-eng.xml";
         /** hibernate reverse engeneer configuration */
@@ -588,6 +588,7 @@ public class NanoH5 extends NanoHTTPD implements ISystemConnector<Persistence> {
         properties.setProperty("server.db-config.file", Persistence.FILE_JDBC_PROP_FILE);
         properties.setProperty("dest.file", jarFile);
         properties.setProperty("generator", generator);
+        properties.setProperty("schema", schema);
         properties.setProperty(BEAN_GENERATION_PACKAGENAME,
             Environment.get(BEAN_GENERATION_PACKAGENAME, "org.anonymous.project"));
         String plugin_dir = System.getProperty("user.dir");

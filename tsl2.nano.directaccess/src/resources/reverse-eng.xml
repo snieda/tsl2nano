@@ -1,4 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
+<!-- This reverse engineering script provides targets for hibernate-tools and openjpa -->
 <project name="reverse-eng" basedir="." default="create.bean.jar">
 	<property name="plugin.dir" value="${basedir}/.." />
 	<property name="src.dir" value="generated-src" />
@@ -9,6 +10,7 @@
 	<property name="resources.dir" value="src/resources" />
 	<property name="resources.db.dir" value="${resources.dir}/db" />
 	<property name="server.db-config.file" value="jdbc-connection.properties" />
+	<property name="schema" value="PUBLIC" />
 	<property file="${server.db-config.file}" />
 
 	<!-- FALLBACK: generator to use:
@@ -96,6 +98,9 @@
 			 <config propertiesFile="META-INF/persistence.xml" />
 		</reversemappingtool> -->
 		<antcall target="schematool" />
+		<!-- do some project-specific WORKAROUNDs -->
+
+		<!-- WORKAROUND END -->
 		<antcall target="openjpa-reverse-engineering" />
 	</target>
 
@@ -111,7 +116,7 @@
 			<arg value="-useGenericCollections" />
 			<arg value="true" />
 			<arg value="-package" />
-			<arg value="org.yourproject.model" />
+			<arg value="${packagename}" />
 			<arg value="-metadata" />
 			<arg value="none" />
 			<arg value="-annotations" />
@@ -122,7 +127,7 @@
 			<arg value="false" />
 			<arg value="-primaryKeyOnJoin" />
 			<arg value="false" />
-			<arg value="schema.xml" />
+			<arg value="${schema}-schema.xml" />
 		</exec>
 	</target>
 
@@ -131,12 +136,12 @@
 			<arg value="-cp" />
 			<arg value="*" />
 			<arg value="org.apache.openjpa.jdbc.schema.SchemaTool" />
-			<!--<arg value="-schema" />
-			<arg value="PUBLIC" /> -->
+			<arg value="-schema" />
+			<arg value="${schema}" />
 			<arg value="-a" />
 			<arg value="reflect" />
 			<arg value="-f" />
-			<arg value="schema.xml" />
+			<arg value="${schema}-schema.xml" />
 		</exec>
 	</target>
 
@@ -155,8 +160,12 @@
 		<javac classpathref="project.classpath" srcdir="${src.dir}" destdir="${bin.dir}" fork="true" failonerror="true" />
 
 		<!-- check, if any class file was created (while jar.whenempty doesn't seem to work) -->
-		<available property="class.file.exists">
-			<filepath path="${bin.dir}" />
+		<available property="class.file.exists" classname="**/*.class">
+			<filepath path="${bin.dir}">
+				<fileset dir="./">
+					<include name="**/*.class" />
+				</fileset>
+			</filepath>
 		</available>
 		<fail unless="class.file.exists" />
 
