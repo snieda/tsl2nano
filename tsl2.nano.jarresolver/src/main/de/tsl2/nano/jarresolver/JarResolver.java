@@ -58,7 +58,7 @@ import de.tsl2.nano.execution.SystemUtil;
  *   a. find the package path through all PACKAGE values
  *   b. if not found, cut last part concatenated through '-' and try to find PACKAGE value again. if found, use that as groupId.
  *   c. if not found, use artifact name as group name
- *   
+ * 
  * </pre>
  * 
  * @author Tom
@@ -92,7 +92,7 @@ public class JarResolver {
     static final String PRE_PACKAGE = "PACKAGE.";
     static final String PACKAGE_EXCEPTION = "package.exception.regex";
     static final String ONLY_LOAD_DEFINED = "only.load.defined.packages";
-    
+
     /**
      * constructor
      */
@@ -137,7 +137,7 @@ public class JarResolver {
         System.setProperty("M2_HOME", mvnRoot);
         Process process = SystemUtil.execute(new File(basedir), mvnRoot + "/bin/mvn.bat", "install");
         if (process.exitValue() != 0)
-        LOG.error("Process returned with: " + process.exitValue());
+            LOG.error("Process returned with: " + process.exitValue());
     }
 
     private void createMvnScript() {
@@ -177,9 +177,19 @@ public class JarResolver {
                 if (groupId == null) {
                     //if artifactId is a class-name itself, try to extract the third part of the package (org.company.product....)
                     if (BeanClass.isPublicClassName(artifactId)) {
-                        String cls = artifactId;
-                        artifactId = StringUtil.substring(StringUtil.substring(cls, ".", null), ".", ".");
-                        groupId = StringUtil.substring(cls, null, "." + artifactId);
+                        if (Boolean.valueOf(props.getProperty("use.findjar.on.unknown", "true"))) {
+                            String jarName = findJarOnline(artifactId);
+                            if (jarName != null) {
+                                artifactId = StringUtil.extract(jarName, "\\w+");
+                                if (!Util.isEmpty(artifactId))
+                                    groupId = artifactId;
+                            }
+                        }
+                        if (groupId == null) {//try it yourself
+                            String cls = artifactId;
+                            artifactId = StringUtil.substring(StringUtil.substring(cls, ".", null), ".", ".");
+                            groupId = StringUtil.substring(cls, null, "." + artifactId);
+                        }
                     } else {
                         groupId = artifactId;
                     }
@@ -244,13 +254,13 @@ public class JarResolver {
                 //if groupId only found through another artifact-definition, add this dep-name
                 deps[i] = pck.endsWith("/") ? pck + deps[i] : pck;
                 addIt = true;
-            } else  {
+            } else {
                 addIt = !onlyLoadDefined;
             }
             if (addIt && !deps[i].matches(PACKAGE_EXCEPTION))
                 buf.append("," + deps[i]);
         }
-        
+
         if (buf.length() == 0)
             throw new IllegalArgumentException("no dependencies defined --> nothing to do!");
 
@@ -277,17 +287,22 @@ public class JarResolver {
      * dependency/artifact name).
      * 
      * @param dependency package path
-     * @param packageKey whether to return the key or value
+     * @param packageKey whether to return the key or value. on true, return value!
      * @return found dependency entry (key or value)
      */
     private String findPackage(String dependency, boolean packageKey) {
         String pck = props.getProperty(PRE_PACKAGE + dependency);
         if (pck != null)
             return packageKey ? dependency : pck;
-        else if (dependency.indexOf(".") != dependency.lastIndexOf("."))//package path with at least two parts!
-            //search for parts of given package
-            return findPackage(StringUtil.substring(dependency, null, ".", true), packageKey);
-        else if (dependency.contains("-"))
+        else if (dependency.indexOf(".") != dependency.lastIndexOf(".")) {
+            String part = StringUtil.substring(dependency, null, ".", true);
+            pck = findPackage(part, packageKey);
+            /*
+             * this is a generic search. perhaps we search for 'org.apache' and get 'org.apache.ant'.
+             * but our dependency is org.apache.log4j. so we have to check that again!
+             */
+            return pck != null && dependency.contains(StringUtil.substring(pck, null, "/", true)) ? pck : null;
+        } else if (dependency.contains("-"))
             //search for parts of given package
             return findPackage(StringUtil.substring(dependency, null, "-", true), packageKey);
         else if (props.values().contains(dependency))
@@ -298,6 +313,7 @@ public class JarResolver {
 
     /**
      * find the group id through another artifact id definition.
+     * 
      * @param artifactIdPart part of an artifactid
      * @return group id name or null
      */
@@ -318,7 +334,57 @@ public class JarResolver {
         }
         return null;
     }
-    
+
+    /**
+     * tries to find the given package name through www.findjars.com.
+     * 
+     * @param pck package name
+     * @return jar-file name or null
+     */
+    public String findJarOnline(String pck) {
+        String content = NetUtil.get("http://findjar.com" + "/class/" + pck.replace(".", "/"));
+        //try to use that jar file where the a part of the package name could be found
+        String jarName = null;
+        final String ID_NAMEPART = "$MYNAMEPARTEXPRESSION$";
+        final String JAR_REGEX = "[a-zA-Z0-9_.-]*" + ID_NAMEPART + "[a-zA-Z0-9_.-]*" + "\\.jar";
+        String[] pckParts = pck.split("\\.");
+        int i = pckParts.length;
+        while (i > 0 && Util.isEmpty(jarName)) {
+            jarName = StringUtil.extract(content, JAR_REGEX.replace(ID_NAMEPART, pckParts[--i]));
+        }
+        //OK, then take anyone
+        if (Util.isEmpty(jarName)) {
+            final String JAR_REGEX0 = "[a-zA-Z0-9_.-]+" + "\\.jar";
+            jarName = StringUtil.extract(content, JAR_REGEX0);
+        }
+        LOG.info("findjar.com found '" + jarName + "' for class '" + pck);
+        return Util.isEmpty(jarName) ? null : jarName;
+    }
+
+    /**
+     * UNUSED YET! ...is there any usecase?...
+     * <p/>
+     * tries to find a class for the given package name through www.findjars.com.
+     * 
+     * @param pck package name
+     * @return full class name or null
+     */
+    public String findClassOnline(String pck) {
+        String content = NetUtil.get("http://findjar.com" + "/index.x?query=" + toURIParameter(pck));
+        String jarName = StringUtil.extract(content, "[a-zA-Z0-9_.-]+\\.jar");
+        return Util.isEmpty(jarName) ? null : jarName;
+    }
+
+    private String toURIParameter(String pck) {
+        String[] pckParts = pck.split("\\.");
+        String PAR_ALIAS = "%2F";
+        StringBuilder buf = new StringBuilder(pck.length() + pckParts.length * PAR_ALIAS.length());
+        for (String s : pckParts) {
+            buf.append(s + PAR_ALIAS);
+        }
+        return buf.substring(0, buf.length() - PAR_ALIAS.length());
+    }
+
     /**
      * main
      * 
