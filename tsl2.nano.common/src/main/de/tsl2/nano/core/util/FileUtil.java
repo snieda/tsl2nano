@@ -648,8 +648,8 @@ public class FileUtil {
      * getFileData
      * 
      * @param strFile
-     * @param encoding
-     * @return
+     * @param encoding (optional)
+     * @return content
      */
     public static synchronized char[] getFileData(InputStream stream, String encoding) {
         InputStreamReader file;

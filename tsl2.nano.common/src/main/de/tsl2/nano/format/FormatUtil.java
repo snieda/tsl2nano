@@ -314,7 +314,7 @@ public class FormatUtil {
     protected static Object checkParse(Format format, Object parseResult, ParsePosition pos, String source) {
         parseResult = parseResult != null ? parseResult : format.parseObject(source, pos);
         if (source != null && !source.equals(format.format(parseResult)))
-            throw new ManagedException("swartifex.invalidvalue", new Object[] { source });
+            throw new ManagedException("tsl2nano.invalidvalue", new Object[] { source });
         return parseResult;
     }
 

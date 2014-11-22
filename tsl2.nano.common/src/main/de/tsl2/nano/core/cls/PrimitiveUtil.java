@@ -79,7 +79,7 @@ public class PrimitiveUtil {
      * @return true, if given type is primitive or wrapper.
      */
     public static boolean isPrimitiveOrWrapper(Class<?> type) {
-        return type.isPrimitive() || Arrays.binarySearch(wrappers, type) != -1;
+        return type.isPrimitive() || Arrays.binarySearch(wrappers, type) >= 0;
     }
 
     /**
@@ -90,7 +90,7 @@ public class PrimitiveUtil {
      */
     public static <T> Class<T> getPrimitive(Class<T> immutableWrapper) {
         int i = Arrays.binarySearch(wrappers, immutableWrapper, comparator);
-        return i != -1 ? primitives[i] : immutableWrapper;
+        return i >= 0 ? primitives[i] : immutableWrapper;
     }
 
     /**
@@ -102,7 +102,7 @@ public class PrimitiveUtil {
     public static <T> Class<T> getWrapper(Class<T> primitive) {
 //        assert primitive.isPrimitive() : "The given class " + primitive + " must be a primitive!";
         int i = Arrays.binarySearch(primitives, primitive, comparator);
-        return i != -1 ? wrappers[i] : primitive;
+        return i >= 0 ? wrappers[i] : primitive;
     }
 
     /**

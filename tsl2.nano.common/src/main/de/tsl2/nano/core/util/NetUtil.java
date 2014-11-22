@@ -19,7 +19,6 @@ import java.net.Socket;
 import java.net.SocketException;
 import java.net.URL;
 import java.net.UnknownHostException;
-import java.util.Collection;
 import java.util.Enumeration;
 
 import org.apache.commons.logging.Log;
@@ -73,12 +72,12 @@ public class NetUtil {
                     InetAddress inetAddress = inetAdresses.nextElement();
                     if (inetAddress.isAnyLocalAddress()
                         || inetAddress.isLinkLocalAddress()
-//                        || inetAddress.isSiteLocalAddress()
+                        //                        || inetAddress.isSiteLocalAddress()
                         || inetAddress.isMulticastAddress())
                         continue;
                     //TODO: how to check for VPN connections?
-                        if (inetAddress.isReachable(2000))
-                            return inetAddress.getHostAddress();
+                    if (inetAddress.isReachable(2000))
+                        return inetAddress.getHostAddress();
                 }
             }
             return InetAddress.getLoopbackAddress().getHostAddress();//getInetAdress();
@@ -117,6 +116,25 @@ public class NetUtil {
             }
             return str.toString();
         } catch (SocketException e) {
+            ManagedException.forward(e);
+            return null;
+        }
+    }
+
+    /**
+     * simply returns the response of the given url request
+     * 
+     * @param strUrl
+     * @return content as string
+     */
+    public static String get(String strUrl) {
+        try {
+            LOG.debug("starting request: " + strUrl);
+            String response = String.valueOf(FileUtil.getFileData(new URL(strUrl).openStream(), null));
+            if (LOG.isDebugEnabled())
+                LOG.debug("response: " + StringUtil.toString(response, 100));
+            return response;
+        } catch (Exception e) {
             ManagedException.forward(e);
             return null;
         }

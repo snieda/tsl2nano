@@ -293,7 +293,7 @@ public/*abstract*/class LogFactory implements Runnable, Serializable {
     }
 
     private final boolean hasLogLevel(Class<?> logClass, int level) {
-        String path = logClass.getPackage().getName();
+        String path = logClass.getPackage() != null ? logClass.getPackage().getName() : "";
         return hasLogLevel(path, level);
     }
 

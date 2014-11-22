@@ -209,7 +209,7 @@ public class BeanClass<T> implements Serializable {
         return beanAccessMethods;
     }
 
-    IAttribute getAttribute(String name) {
+    public IAttribute getAttribute(String name) {
         List<IAttribute> attrs = getAttributes();
         for (IAttribute a : attrs) {
             if (a.getName().equals(name))
@@ -589,16 +589,22 @@ public class BeanClass<T> implements Serializable {
      * @param value new attribute value
      */
     public void setValue(T instance, String attributeName, Object value) {
-        final String methodName = BeanAttribute.PREFIX_WRITE_ACCESS + attributeName.substring(0, 1).toUpperCase()
-            + attributeName.substring(1);
-        final Class<?> argType = value != null ? value.getClass() : Object.class;
-        try {
-            LOG.debug("calling " + methodName + "(" + value + ")");
-            final Method method = clazz.getMethod(methodName, new Class[] { argType });
-            method.invoke(instance, value);
-        } catch (final Exception e) {
-            ManagedException.forward(e);
-        }
+        getAttribute(attributeName).setValue(instance, value);
+//        final String methodName = BeanAttribute.PREFIX_WRITE_ACCESS + attributeName.substring(0, 1).toUpperCase()
+//            + attributeName.substring(1);
+//        final Class<?> argType = value != null ? value.getClass() : Object.class;
+//        try {
+//            LOG.debug("calling " + methodName + "(" + value + ")");
+//            final Method method = clazz.getDeclaredMethod(methodName, new Class[] { argType });
+//            method.invoke(instance, value);
+//        } catch (final Exception e) {
+//            try {
+//                final Method method = clazz.getMethod(methodName, new Class[] { argType });
+//                method.invoke(instance, value);
+//            } catch (Exception e1) {
+//                ManagedException.forward(e);
+//            }
+//        }
     }
 
     /**
@@ -1015,7 +1021,7 @@ public class BeanClass<T> implements Serializable {
  * {@link #copyValues(Object, Object, boolean, String...)} etc.! this helper methods wont change the set of attributes!
  * 
  * @param <T> class defining the bean
- * @author Thomas Schneider, IDV AG
+ * @author Thomas Schneider
  * @version $Revision$
  */
 @SuppressWarnings("rawtypes")
