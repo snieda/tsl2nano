@@ -20,22 +20,31 @@ import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.concurrent.Callable;
 
-import junit.framework.Assert;
+import static junit.framework.Assert.*;
 
 import org.apache.commons.logging.Log;
 import org.junit.Test;
 
+import de.tsl2.nano.bean.BeanUtil;
+import de.tsl2.nano.bean.IValueAccess;
+import de.tsl2.nano.bean.def.Bean;
 import de.tsl2.nano.bean.def.Constraint;
 import de.tsl2.nano.collection.MapUtil;
 import de.tsl2.nano.collection.TableList;
 import de.tsl2.nano.core.Environment;
 import de.tsl2.nano.core.ManagedException;
 import de.tsl2.nano.core.cls.BeanClass;
+import de.tsl2.nano.core.cls.IAttribute;
 import de.tsl2.nano.core.execution.Profiler;
 import de.tsl2.nano.core.log.LogFactory;
 import de.tsl2.nano.core.util.StringUtil;
 import de.tsl2.nano.core.util.XmlUtil;
 import de.tsl2.nano.incubation.network.JobServer;
+import de.tsl2.nano.incubation.repeat.IChange;
+import de.tsl2.nano.incubation.repeat.ICommand;
+import de.tsl2.nano.incubation.repeat.impl.AChange;
+import de.tsl2.nano.incubation.repeat.impl.ACommand;
+import de.tsl2.nano.incubation.repeat.impl.CommandManager;
 import de.tsl2.nano.incubation.specification.ParType;
 import de.tsl2.nano.incubation.specification.Pool;
 import de.tsl2.nano.incubation.specification.rules.Rule;
@@ -57,6 +66,7 @@ import de.tsl2.nano.logictable.EquationSolver;
 import de.tsl2.nano.logictable.LogicTable;
 import de.tsl2.nano.messaging.EventController;
 import de.tsl2.nano.messaging.IListener;
+import de.tsl2.nano.test.TypeBean;
 import de.tsl2.nano.util.operation.ConditionOperator;
 import de.tsl2.nano.util.operation.Function;
 
@@ -66,6 +76,7 @@ import de.tsl2.nano.util.operation.Function;
  * @author Thomas Schneider, Thomas Schneider
  * @version $Revision$
  */
+@SuppressWarnings({ "unchecked", "rawtypes", "serial" })
 public class IncubationTest {
 
     @Test
@@ -162,30 +173,33 @@ public class IncubationTest {
             }
 
         }
-        Net<VActivity<String, String>, ComparableMap<CharSequence, Object>> net = new Net<VActivity<String, String>, ComparableMap<CharSequence, Object>>();
+        Net<VActivity<String, String>, ComparableMap<CharSequence, Object>> net =
+            new Net<VActivity<String, String>, ComparableMap<CharSequence, Object>>();
 //        net.setWorkParallel(false);
 
         //works without linking the states to each other, too!!
         Node<VActivity<String, String>, ComparableMap<CharSequence, Object>> state0 = net.add(new Act("state0",
             "A&B",
             "A&B?C:D"));
-        Node<VActivity<String, String>, ComparableMap<CharSequence, Object>> state1 = net.addAndConnect(new Act("state1",
-            "C",
-            "D"),
-            state0.getCore(),
-            state);
-        Node<VActivity<String, String>, ComparableMap<CharSequence, Object>> state2 = net.addAndConnect(new Act("state2",
-            "D",
-            "E"),
-            state1.getCore(),
-            state);
+        Node<VActivity<String, String>, ComparableMap<CharSequence, Object>> state1 =
+            net.addAndConnect(new Act("state1",
+                "C",
+                "D"),
+                state0.getCore(),
+                state);
+        Node<VActivity<String, String>, ComparableMap<CharSequence, Object>> state2 =
+            net.addAndConnect(new Act("state2",
+                "D",
+                "E"),
+                state1.getCore(),
+                state);
 
         //create a callback for responses
         IListener<Notification> responseHandler = new IListener<Notification>() {
             @Override
             public synchronized void handleEvent(Notification event) {
                 System.out.println("RESPONSE: " + event.getNotification());
-                Assert.assertEquals("C", event.getNotification());
+                assertEquals("C", event.getNotification());
             }
         };
 
@@ -231,17 +245,17 @@ public class IncubationTest {
         RoutingAStar routing = new RoutingAStar();
         Connection<Location, Float> route = routing.route(saarbruecken, wuerzburg);
         if (route == null)
-            Assert.fail("No route found for " + saarbruecken + " --> " + wuerzburg);
+            fail("No route found for " + saarbruecken + " --> " + wuerzburg);
         else {
             Node<Location, Float>[] shortestWay = new Node[] { kaiserslautern, frankfurt, wuerzburg };
             Collection<Connection<Location, Float>> navigation = routing.navigate(saarbruecken, route, null);
             log("Navigation: " + navigation);
             int i = 0;
             if (navigation.size() < shortestWay.length)
-                Assert.fail("navigation incomplete");
+                fail("navigation incomplete");
             for (Connection<Location, Float> connection : navigation) {
                 if (!connection.getDestination().equals(shortestWay[i++]))
-                    Assert.fail("Routing didn't find shortest Way!");
+                    fail("Routing didn't find shortest Way!");
             }
         }
     }
@@ -302,7 +316,7 @@ public class IncubationTest {
             notifications.add(new Notification(null, "working-test-" + i));
         }
         Collection<Object> result = net.notifyIdlesAndCollect(notifications, Object.class);
-        Assert.assertTrue(result.size() == testcount);
+        assertTrue(result.size() == testcount);
         log(StringUtil.toFormattedString(result, 10000, true));
         log(net.dump());
     }
@@ -329,9 +343,9 @@ public class IncubationTest {
         Map<String, Object> values = new Hashtable<String, Object>();
         values.put("x1", x1);
         values.put("x2", x2);
-        Assert.assertEquals(new BigDecimal(61), new EquationSolver(null, values).eval(f));
+        assertEquals(new BigDecimal(61), new EquationSolver(null, values).eval(f));
     }
-    
+
     @Test
     public void testFunction() {
         Function<Number> function = BeanClass.createInstance(Function.class);
@@ -345,7 +359,7 @@ public class IncubationTest {
         table.set(0, 0, new BigDecimal(10));
         table.set(1, 0, new BigDecimal(9));
         table.set(1, 1, "=A1 * A2");
-        Assert.assertEquals(new BigDecimal(90), table.get(1, 1));
+        assertEquals(new BigDecimal(90), table.get(1, 1));
     }
 
     @Test
@@ -353,48 +367,145 @@ public class IncubationTest {
         JobServer jobServer = new JobServer();
         String result = jobServer.executeWait("test", new TestJob(), 5000);
         jobServer.close();
-        Assert.assertNotNull(result);
+        assertNotNull(result);
     }
 
-    @SuppressWarnings("unchecked")
     @Test
     public void testRules() throws Exception {
-        Rule<BigDecimal> rule = new Rule<BigDecimal>("test", "A ? (pow(x1, x2) + 1) : (x2 * 2)", (LinkedHashMap<String, ParType>) MapUtil.asMap("A",
-            ParType.BOOLEAN,
-            "x1",
-            ParType.NUMBER,
-            "x2",
-            ParType.NUMBER));
+        Rule<BigDecimal> rule =
+            new Rule<BigDecimal>("test", "A ? (pow(x1, x2) + 1) : (x2 * 2)",
+                (LinkedHashMap<String, ParType>) MapUtil.asMap("A",
+                    ParType.BOOLEAN,
+                    "x1",
+                    ParType.NUMBER,
+                    "x2",
+                    ParType.NUMBER));
         BigDecimal r1 = rule.run(MapUtil.asMap("A", true, "x1", new BigDecimal(1), "x2", new BigDecimal(2)));
-        Assert.assertEquals(new BigDecimal(2), r1);
-        
+        assertEquals(new BigDecimal(2), r1);
+
         //use simplified parameter definition
-        rule = new Rule<BigDecimal>("test", "A ? (x1 + 1) : (x2 * 2)", (LinkedHashMap<String, ParType>) MapUtil.asMap("A",
-            ParType.BOOLEAN,
-            "x1",
-            ParType.NUMBER,
-            "x2",
-            ParType.NUMBER));
+        rule =
+            new Rule<BigDecimal>("test", "A ? (x1 + 1) : (x2 * 2)", (LinkedHashMap<String, ParType>) MapUtil.asMap("A",
+                ParType.BOOLEAN,
+                "x1",
+                ParType.NUMBER,
+                "x2",
+                ParType.NUMBER));
         rule.addConstraint("x1", new Constraint(BigDecimal.class, new BigDecimal(0), new BigDecimal(1)));
         BigDecimal r2 = rule.run(MapUtil.asMap("A", false, "x1", new BigDecimal(1), "x2", new BigDecimal(2)));
-        Assert.assertEquals(new BigDecimal(4), r2);
+        assertEquals(new BigDecimal(4), r2);
         XmlUtil.saveXml("test.xml", rule);
-        
+
         Pool pool = new RulePool();
         pool.add(rule.getName(), rule);
         Environment.addService(pool);
-        Rule<BigDecimal> ruleWithImport = new Rule<BigDecimal>("test-import", "A ? 1 + §test : (x2 * 3)", (LinkedHashMap<String, ParType>) MapUtil.asMap("A",
-            ParType.BOOLEAN,
-            "x1",
-            ParType.NUMBER,
-            "x2",
-            ParType.NUMBER));
+        Rule<BigDecimal> ruleWithImport =
+            new Rule<BigDecimal>("test-import", "A ? 1 + §test : (x2 * 3)",
+                (LinkedHashMap<String, ParType>) MapUtil.asMap("A",
+                    ParType.BOOLEAN,
+                    "x1",
+                    ParType.NUMBER,
+                    "x2",
+                    ParType.NUMBER));
         rule.addConstraint("result", new Constraint(BigDecimal.class, new BigDecimal(1), new BigDecimal(4)));
         BigDecimal r3 = ruleWithImport.run(MapUtil.asMap("A", true, "x1", new BigDecimal(1), "x2", new BigDecimal(2)));
-        Assert.assertEquals(new BigDecimal(3), r3);
+        assertEquals(new BigDecimal(3), r3);
         XmlUtil.saveXml("test-import.xml", ruleWithImport);
     }
 
+    @Test
+    public void testUndoRedo() throws Exception {
+        /*
+         * tests a simple regxp replacer
+         * - item is a regexp
+         * - old is the old text, found by regexp
+         * - new is the new replaced text
+         */
+        StringBuilder text = new StringBuilder("A and B are not C");
+        Command a = new Command(text, new AChange("(A[0-9]*)", "A", "A1"));
+        Command b = new Command(text, new AChange("(B[0-9]*)", "B", "B1"));
+        Command c = new Command(text, new AChange("(C[0-9]*)", "C", "C1"));
+        undoRedo(a, b, c);
+    }
+    
+    @Test
+    public void testUndoRedoWithEntity() throws Exception {
+        EBean tbean = new EBean();
+        ECommand a = new ECommand(null, new AChange(null, null, tbean));
+        ECommand b = new ECommand(tbean, new AChange("string", null, "astring"));
+        ECommand c = new ECommand(tbean, new AChange("immutableInteger", null, 100));
+        ECommand d = new ECommand(tbean, new AChange(null, tbean, null));
+        undoRedo(b, c);
+        
+        //construction and deletion
+        CommandManager commandManager = new CommandManager(10);
+        assertEquals(a.getContext(), null);
+        commandManager.doIt(a);
+        assertEquals(a.getContext(), tbean);
+        commandManager.doIt(d);
+        assertEquals(a.getContext(), null);
+        commandManager.undo();
+        assertEquals(a.getContext(), tbean);
+        commandManager.redo();
+        assertEquals(a.getContext(), null);
+    }
+    
+    public <CONTEXT> void undoRedo(ICommand<CONTEXT>...cmds) throws Exception {
+        CommandManager cmdManager = new CommandManager();
+        
+        CONTEXT context = cmds[0].getContext();
+        CONTEXT origin = BeanUtil.copy(context);
+        log("origin : " + origin);
+        
+        cmdManager.doIt(cmds);
+        
+        CONTEXT changed = BeanUtil.copy(context);
+        log("changed: " + changed);
+        
+        assertTrue(cmdManager.canUndo());
+        assertFalse(cmdManager.canRedo());
+        
+        cmdManager.undo();
+        cmdManager.undo();
+        cmdManager.undo();
+
+        assertFalse(cmdManager.canUndo());
+        assertTrue(cmdManager.canRedo());
+        
+        log("text   : " + BeanUtil.copy(context));
+        assertEquals(origin, context);
+        
+        cmdManager.redo();
+        cmdManager.redo();
+        cmdManager.redo();
+
+        assertTrue(cmdManager.canUndo());
+        assertFalse(cmdManager.canRedo());
+        
+        log("re-done: " + context);
+        assertEquals(changed, context);
+    }
+
+    @Test
+    public void testMacro() throws Exception {
+        CommandManager cmdManager = new CommandManager();
+        
+        EBean tbean = new EBean();
+        ECommand a = new ECommand(null, new AChange(null, null, tbean));
+        ECommand b = new ECommand(tbean, new AChange("string", null, "astring"));
+        ECommand c = new ECommand(tbean, new AChange("immutableInteger", null, 100));
+        ECommand d = new ECommand(tbean, new AChange(null, tbean, null));
+        
+        cmdManager.getRecorder().record("test.record");
+        cmdManager.doIt(a, b, c, d);
+        cmdManager.getRecorder().stop();
+        
+        EBean mbean = new EBean();
+        //now, redo that with on another context object --> macro replay!
+        assertEquals(4, cmdManager.getRecorder().play("test.record", mbean));
+        assertEquals(tbean, mbean);
+    }
+    
     static void log_(String msg) {
         System.out.print(msg);
     }
@@ -451,6 +562,9 @@ class TRunner implements Runnable, Serializable, Comparable<TRunner> {
 }
 
 class TestJob implements Callable<String>, Serializable {
+    /** serialVersionUID */
+    private static final long serialVersionUID = 7470280926655017926L;
+
     @Override
     public String call() throws Exception {
         Log log = LogFactory.getLog(this.getClass());
@@ -462,4 +576,64 @@ class TestJob implements Callable<String>, Serializable {
         return "my-test-job";
     }
 
+}
+
+/**
+ * test command doing a simple text replacing
+ */
+class Command extends ACommand<StringBuilder> {
+
+    public Command(StringBuilder context, IChange... changes) {
+        super(context, changes);
+    }
+
+    @Override
+    public void runWith(IChange... changes) {
+        for (int i = 0; i < changes.length; i++) {
+            String item = (String) changes[i].getItem();
+            String old = StringUtil.toString((String) changes[i].getOld());
+            String neW = StringUtil.toString((String) changes[i].getNew());
+            StringUtil.extract(getContext(), item != null ? item : old, neW);
+        }
+    }
+
+}
+/**
+ * test command doing a simple text replacing
+ */
+@SuppressWarnings({ "unchecked"})
+class ECommand extends ACommand<Serializable> {
+
+    public ECommand(Serializable context, IChange... changes) {
+        super(context, changes);
+    }
+
+    @Override
+    public void runWith(IChange... changes) {
+        for (int i = 0; i < changes.length; i++) {
+            if (changes[i].getItem() != null) {
+                //while the context can change on item=null, we have to do it inside the loop
+                Class<?> type = getContext().getClass();
+                BeanClass<Serializable> b = (BeanClass<Serializable>) BeanClass.getBeanClass(type);
+                b.setValue(getContext(), (String) changes[i].getItem(), changes[i].getNew());
+            } else {
+                setContext((Serializable) changes[i].getNew());
+            }
+        }
+    }
+
+}
+
+class EBean extends TypeBean {
+    /** serialVersionUID */
+    private static final long serialVersionUID = 2662724418006121099L;
+
+    public boolean equals(Object obj) {
+        return BeanUtil.equals(BeanUtil.serialize(this), BeanUtil.serialize(obj));
+    }
+    
+    @Override
+    public String toString() {
+        return getString() + getImmutableInteger();//new String(BeanUtil.serialize(this));
+    }
 }
