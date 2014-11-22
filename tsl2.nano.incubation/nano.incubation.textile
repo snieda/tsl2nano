@@ -7,7 +7,8 @@ h2. Introduction
 
 This project/plugin contains base technology implementations to be evaluated for future use in _tsl2nano.common_
 
-* caching 
+* caching
+* undo/redo + macros
 * threading with VNet (vnet package with ThreadingEventController, testing neuralnet, routing) for further informations see class _Net_ in vnet package
 * networking: a jobserver is able to distribute logic (jobs) to registered workstations in a network
 * rule engine
@@ -21,4 +22,4 @@ This project/plugin contains base technology implementations to be evaluated for
 
 h2. developing and deploying
 
-If you change sources of this plugin, you should start ant script _eclipse-tsl2.nano.incubation.xml_ with target _tsl2nano.eclipse.incubation.export_ and after that the 'deploy' target of your main project.
+If you change sources of this plugin, you should start ant script _2nano.xml_.

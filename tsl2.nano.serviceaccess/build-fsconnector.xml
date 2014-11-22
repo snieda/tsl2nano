@@ -4,16 +4,16 @@
 	<property name="module.name" value="tsl2.nano.fs-connector-client" />
 	<property name="src.dir" value="${bdir}/src/fs-connector" />
 	<property name="bin.dir" value="${bdir}/fs-connector/bin" />
-	<!-- <import file="../kion.shared/src/resources/project.properties" /> -->
+	<!-- <import file="../myproject.shared/src/resources/project.properties" /> -->
 	<import file="../tsl2.nano.common/common.xml" />
 
-	<!-- <import file="../kion.${appserver.name}/build-jboss.xml" /> -->
+	<!-- <import file="../myproject.${appserver.name}/build-jboss.xml" /> -->
 
 	<property name="server.deploy.dir" value="${bdir}/${target.dir}" />
 	
 	<target name="usage" depends="common.usage">
 		<echo>Targets:
-	deploy.fsconnector           - deploy the RAR to ${kion.server.dir}
+	deploy.fsconnector           - deploy the RAR to ${myproject.server.dir}
 		</echo>
 	</target>
 

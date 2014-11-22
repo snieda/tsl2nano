@@ -23,7 +23,7 @@ h2. Using the connector in your service
 
 Define a fsConnection-factory resource in your service:
 <pre>
-@Resource(mappedName="java:kion/fsConnectionFactory")
+@Resource(mappedName="java:myproject/fsConnectionFactory")
 FsConnectionFactory fsConnectionFactory;
 </pre>
 
@@ -55,7 +55,7 @@ content example of this deployed xml file:
 -->
 <connection-factories>
     <no-tx-connection-factory>
-        <jndi-name>kion/fsConnectionFactory</jndi-name>
+        <jndi-name>mypoject/fsConnectionFactory</jndi-name>
         <rar-name>fs-connector.rar</rar-name>
         <connection-definition>
              de.tsl2.nano.resource.fs.FsConnectionFactory
@@ -81,7 +81,7 @@ public class FileServiceBean implements IFileService, IFileLocalService {
 
     private static final Log logger = LogFactory.getLog(FileServiceBean.class);
 
-    @Resource(mappedName = "java:kion/fsConnectionFactory")
+    @Resource(mappedName = "java:myproject/fsConnectionFactory")
     FsConnectionFactory fsConnectionFactory;
 
     /**

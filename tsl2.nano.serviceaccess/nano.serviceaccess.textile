@@ -554,11 +554,11 @@ to use the GenericService, you should add a session to your ejb-jar.xml file:
 	<enterprise-beans>
 		<session>
 			<ejb-name>GenericServiceBean</ejb-name>
-			<mapped-name>kion/IGenericService</mapped-name>
+			<mapped-name>myproject/IGenericService</mapped-name>
 			<ejb-class>de.tsl2.nano.service.util.GenericServiceBean</ejb-class>
 			<session-type>Stateless</session-type>
 			<ejb-local-ref>
-				<ejb-ref-name>kion/IGenericLocalService</ejb-ref-name>
+				<ejb-ref-name>myproject/IGenericLocalService</ejb-ref-name>
 				<local>de.tsl2.nano.service.util.IGenericLocalService</local>
 			</ejb-local-ref>
 			<persistence-unit-ref>
@@ -570,8 +570,8 @@ to use the GenericService, you should add a session to your ejb-jar.xml file:
 			-->
 			<!--
 				<persistence-context-ref>
-				<persistence-context-ref-name>persistence/kionPersistenceUnit</persistence-context-ref-name>
-				<persistence-unit-name>../kion-services.jar#kionPersistenceUnit</persistence-unit-name>
+				<persistence-context-ref-name>persistence/myprojectPersistenceUnit</persistence-context-ref-name>
+				<persistence-unit-name>../myproject-services.jar#myprojectPersistenceUnit</persistence-unit-name>
 				</persistence-context-ref>
 			-->
 		</session>
@@ -588,15 +588,15 @@ h4. Howto include the GenericService in your project
 <pre>
 	<session>
 		<ejb-name>JobScheduleServiceBean</ejb-name>
-		<mapped-name>kion/IJobScheduleService</mapped-name>
+		<mapped-name>myproject/IJobScheduleService</mapped-name>
 		<ejb-class>de.tsl2.nano.service.schedule.JobScheduleServiceBean</ejb-class>
 		<session-type>Singleton</session-type>
 		<ejb-local-ref>
-			<ejb-ref-name>kion/IJobScheduleLocalService</ejb-ref-name>
+			<ejb-ref-name>myproject/IJobScheduleLocalService</ejb-ref-name>
 			<local>de.tsl2.nano.service.schedule.IJobScheduleLocalService</local>
 		</ejb-local-ref>
 		<persistence-unit-ref>
-			<persistence-unit-ref-name>../kion-services.jar#kionPersistenceUnit</persistence-unit-ref-name>
+			<persistence-unit-ref-name>../myproject-services.jar#myprojectPersistenceUnit</persistence-unit-ref-name>
 		</persistence-unit-ref>
 	</session>
 </pre>
@@ -769,6 +769,6 @@ Now, you can access the beans through the generic service method 'findByNamedQue
 h2. developing and deploying
 
 If you change sources of this plugin, you should start the following ant scripts: 
-* _eclipse-tsl2.nano.serviceaccess.xml_ with target _tsl2nano.eclipse.serviceaccess.export_ (Please be sure to use the same jre-runtime as your eclipse-workspace - otherwise nothing will be done!).
+* _2nano.xml_ with target _distrubute.2nano_.
 * the 'deploy' target of your main project.
-* perhaps an additional script to distribute the new libraray to a project-specific library-plugin. in _kion2plus_ it is _tsl2.nano.plugins_. In _kion2plus_ you run _kion/distribute-tsl2nano-plugins.xml_ with target _copy.tsl2nano.plugins_.
+* perhaps an additional script to distribute the new libraray to a project-specific library-plugin.

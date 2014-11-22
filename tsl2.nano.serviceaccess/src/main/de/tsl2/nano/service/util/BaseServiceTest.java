@@ -53,7 +53,7 @@ public abstract class BaseServiceTest extends RemoteServiceRunner<Serializable> 
     protected static void createTestData(String name) {
         if (CREATE_SPECIFIC_TESTDATA) {
             final Properties p = new Properties();
-            p.put("kion.junit.name", name);
+            p.put("myproject.junit.name", name);
             ScriptUtil.ant("build-server.xml", "create.db.junit", p);
         } else {
             LOG.info("CREATE_SPECIFIC_TESTDATA=FALSE ==> createTestData '" + name + "' ignored");

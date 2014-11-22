@@ -18,4 +18,4 @@ h2. Dependencies
 
 h2. developing and deploying
 
-If you change sources of this plugin, you should start ant script _eclipse-tsl2.nano.directaccess.xml_ with target _tsl2nano.eclipse.directaccess.export_ and after that the 'deploy' target of your main project.
+If you change sources of this plugin, you should start ant script _2nano.xml_ with target _distrubute.2nano_ and after that the 'deploy' target of your main project.

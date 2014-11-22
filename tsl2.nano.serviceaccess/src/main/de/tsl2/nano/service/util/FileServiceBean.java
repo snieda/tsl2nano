@@ -41,7 +41,7 @@ public class FileServiceBean implements IFileService, IFileLocalService {
 
     private static final Log LOG = LogFactory.getLog(FileServiceBean.class);
 
-    @Resource(mappedName = "java:kion/fsConnectionFactory")
+    @Resource(mappedName = "java:myproject/fsConnectionFactory")
     FsConnectionFactory fsConnectionFactory;
 
     FsConnection con = null;

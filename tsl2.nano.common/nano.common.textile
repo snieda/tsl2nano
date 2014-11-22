@@ -49,6 +49,5 @@ h2. ToDos
 h2. Deployment
 
 If you change sources of this plugin, you should start the following ant scripts: 
-* _eclipse-tsl2.nano.common.xml_ with target _tsl2nano.eclipse.common.export_ (Please be sure to use the same jre-runtime as your eclipse-workspace - otherwise nothing will be done!).
-* the 'deploy' target of your main project.
+* _2nano.xml_ with target _distrubute.2nano_.
 

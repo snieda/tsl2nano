@@ -45,7 +45,7 @@ import de.tsl2.nano.serviceaccess.ServiceFactory;
  *   - the appservers client libs should be found in classpath
  *   - the service interfaces should be found in classpath
  *   - the given loginmodule must be given as java-start-argument:
- *     e.g. -Djava.security.auth.login.config=kion/config/jaas-login.config
+ *     e.g. -Djava.security.auth.login.config=myproject/config/jaas-login.config
  *     
  * test:
  *   a testable servicerunner.properties is available on project-root-path

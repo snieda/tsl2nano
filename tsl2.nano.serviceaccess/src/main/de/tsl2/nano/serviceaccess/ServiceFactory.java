@@ -422,7 +422,7 @@ public class ServiceFactory {
     /**
      * does an automated jaas-login without GUI. be sure to have set the property:<br>
      * "java.security.auth.login.config".<br>
-     * e.g.: System.setProperty("java.security.auth.login.config", "../kion/config/jaas-login.config");
+     * e.g.: System.setProperty("java.security.auth.login.config", "../myproject/config/jaas-login.config");
      * <p>
      * 
      * the specific LoginModule must be found through the classloader!
@@ -455,7 +455,7 @@ public class ServiceFactory {
     /**
      * does an automated jaas-logout without GUI. be sure to have set the property:<br>
      * "java.security.auth.login.config".<br>
-     * e.g.: System.setProperty("java.security.auth.login.config", "../kion/config/jaas-login.config");
+     * e.g.: System.setProperty("java.security.auth.login.config", "../myproject/config/jaas-login.config");
      * <p>
      * 
      * the specific LoginModule must be found through the classloader!
