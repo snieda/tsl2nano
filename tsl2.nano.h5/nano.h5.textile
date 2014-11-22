@@ -996,6 +996,26 @@ class MyBeanId {
 }
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
+There are other tools to generate your entities:
+
+* Netbeans provide a generating plugin
+* "Eclipse Dali"http://www.eclipse.org/webtools/dali/ on WTP package
+* "Telosys-Tools":http://tools.telosys.org/ (includes an eclipse plugin)
+* "MinuteProject":http://minuteproject.wikispaces.com/JPA2
+* Kodo (probably now integrated into openjpa)
+
+But these tools are not supported and discussed in _Nano.H5_
+
+### Reverse engineering with OpenJPA
+
+As on hibernate-tools it is difficult to set properties, openjpa provides lots of properties to assign the generation process for your project. The ant script _reverse-eng.xml_ shows some of these properties.
+
+Some hints:
+* don't define more than one persistence-unit in your persistence.xml
+* constrain the _schema_ otherwise all schemats will be respected
+* the provider should be set to _org.apache.openjpa.persistence.PersistenceProviderImpl_
+* openjpa-2.3.0 is not able to find/generate primary keys --> no class can be generated! Please use snapshots of 2.4.0
+
 ## Rich Client GUI interactions through WebSockets 
 
 The use of websockets and their internal javascripts is optional. Nano.h5 provides four mechanisms to use websockets:
@@ -1787,6 +1807,15 @@ Other restrictions on android:
 * (v) show if application was stopped
 * (x) show message if offline
 * where to use instrumentation agents?
+* evaluate reverse tools:
+** DBRE http://docs.spring.io/spring-roo/reference/html/base-dbre.html
+** Kodo (now integrated in OpenJPA?)
+* create jars for:
+** weltjar (getjar, NetworkingClassloader, main with instrumentation and input)
+** schalentier (ant + shell.xml + tsl2nano.common)
+** wähler: menuitem
+** verteiler: vNet
+* UNDO, MARCRO
 
 * *Refactorings:*
 ** AttributeDefinition --> Attribute
