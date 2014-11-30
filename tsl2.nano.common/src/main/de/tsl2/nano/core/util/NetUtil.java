@@ -13,13 +13,22 @@ import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.InetAddress;
+import java.net.InetSocketAddress;
+import java.net.MalformedURLException;
 import java.net.NetworkInterface;
 import java.net.ServerSocket;
 import java.net.Socket;
 import java.net.SocketException;
+import java.net.URI;
 import java.net.URL;
 import java.net.UnknownHostException;
+import java.util.Collection;
 import java.util.Enumeration;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Map;
+import java.util.Properties;
+import java.util.Set;
 
 import org.apache.commons.logging.Log;
 
@@ -33,6 +42,8 @@ import de.tsl2.nano.core.log.LogFactory;
  * @version $Revision$
  */
 public class NetUtil {
+    static final String URL_STANDARDFILENAME = "index.html";
+
     private static final Log LOG = LogFactory.getLog(NetUtil.class);
 
     private static boolean isonline;
@@ -130,7 +141,7 @@ public class NetUtil {
     public static String get(String strUrl) {
         try {
             LOG.debug("starting request: " + strUrl);
-            String response = String.valueOf(FileUtil.getFileData(new URL(strUrl).openStream(), null));
+            String response = String.valueOf(FileUtil.getFileData(url(strUrl).openStream(), null));
             if (LOG.isDebugEnabled())
                 LOG.debug("response: " + StringUtil.toString(response, 100));
             return response;
@@ -141,19 +152,75 @@ public class NetUtil {
     }
 
     /**
+     * getURLStream
+     * 
+     * @param url
+     * @return
+     */
+    public static InputStream getURLStream(String url) {
+        try {
+            return URI.create(url).toURL().openStream();
+        } catch (Exception e) {
+            ManagedException.forward(e);
+            return null;
+        }
+    }
+
+    /**
+     * delegates ot {@link #download(URL, String, boolean, boolean)}
+     */
+    public static File download(String strUrl, String destDir, boolean flat, boolean overwrite) {
+        return download(url(strUrl), destDir, flat, overwrite);
+    }
+
+    public static final URL url(String surl) {
+        return url(surl, null);
+    }
+
+    /**
+     * convenience to get an url object. if no scheme/protocol is given, 'http://' will be used!
+     * 
+     * @param surl
+     * @param parent (optional) parent of surl (like 'http://' or 'http://my.website.com/')
+     * @return URL object through surl
+     */
+    public static final URL url(String surl, String parent) {
+        URI uri = URI.create(surl);
+        try {
+            if (surl.startsWith("//"))
+                return new URL("http:" + surl);
+            if (uri.getScheme() == null) {
+                if (parent == null || uri.getHost() != null)
+                    parent = "http://";
+                else {
+                    if (URI.create(parent).getScheme() == null)
+                        parent = "http://" + parent;
+                }
+                if (parent.endsWith("/") && surl.startsWith("/"))
+                    surl = surl.substring(1);
+                return new URL(parent + surl);
+            } else {
+                return uri.toURL();
+            }
+        } catch (MalformedURLException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    /**
      * downloads the given strUrl if a network connection is available
      * 
-     * @param strUrl network url to load
+     * @param url network url to load
      * @param destDir local destination directory
      * @param flat if true, the file of that url will be put directly to the environment directory. otherwise the full
      *            path will be stored to the environment.
      * @param overwrite if true, existing files will be overwritten
      * @return downloaded local file
      */
-    public static File download(String strUrl, String destDir, boolean flat, boolean overwrite) {
+    public static File download(URL url, String destDir, boolean flat, boolean overwrite) {
         try {
-            URL url = new URL(strUrl);
-            String fileName = destDir + (flat ? new File(url.getFile()).getName() : url.getFile());
+            String fileName = flat ? new File(url.getFile()).getName() : getFileName(url);
+            fileName = (destDir.endsWith("/") ? destDir : destDir + "/") + fileName;
             File file = new File(fileName);
             if (overwrite || !file.exists()) {
                 file.getParentFile().mkdirs();
@@ -162,9 +229,19 @@ public class NetUtil {
             }
             return file;
         } catch (Exception e) {
-            ManagedException.forward(e);
-            return null;
+            throw ManagedException.toRuntimeEx(e, false, false);
         }
+    }
+
+    static String getFileName(URL url) {
+        String f = url.getFile();
+        return Util.isEmpty(f) ? NetUtil.URL_STANDARDFILENAME : FileUtil.getValidFileName(f);
+    }
+
+    public static void wcopy(String url, String dir, String include, String exclude) {
+        LOG.info("==> starting downloading site: " + url + " to directory: " + dir);
+        new WCopy(url).get(url, dir, include, exclude, false);
+        LOG.info("<== finished downloading site: " + url + " to directory: " + dir);
     }
 
     /**
@@ -224,4 +301,201 @@ public class NetUtil {
         }
 
     }
+
+    /**
+     * NOT IMPLEMENTED YET! getNetworkHosts
+     * 
+     * @return
+     */
+    static List<InetAddress> getNetworkHosts() {
+        //TODO: implement
+        LinkedList<InetAddress> list = new LinkedList<InetAddress>();
+        try {
+            list.add(InetAddress.getLocalHost());
+        } catch (UnknownHostException e) {
+            ManagedException.forward(e);
+        }
+        return list;
+    }
+
+    /**
+     * delegates to {@link #scan(int, int, InetAddress...)} for one ip and one port. returns true, if given socket is
+     * connectable.
+     */
+    public static boolean isOpen(InetAddress ip, int port) {
+        return scan(ip, port, port).get(new InetSocketAddress(ip, port)).equals(Boolean.TRUE);
+    }
+
+    /**
+     * delegates to {@link #scan(int, int, InetAddress...)} for the given ip.
+     */
+    public static Map<InetSocketAddress, Boolean> scan(InetAddress ip, int minPort, int maxPort) {
+        return scan(minPort, maxPort, ip);
+    }
+
+    public static Map<InetSocketAddress, Boolean> scans(int minPort, int maxPort, String... ips) {
+        InetAddress[] nips = new InetAddress[ips.length];
+        for (int i = 0; i < ips.length; i++) {
+            try {
+                nips[i] = InetAddress.getByName(ips[i]);
+            } catch (UnknownHostException e) {
+                ManagedException.forward(e);
+            }
+        }
+        return scan(minPort, maxPort, nips);
+    }
+
+    /**
+     * port scan
+     * 
+     * @param minPort minimum port number
+     * @param maxPort maximum port number
+     * @param ips network hosts to scan
+     */
+    public static Map<InetSocketAddress, Boolean> scan(int minPort, int maxPort, InetAddress... ips) {
+        if (ips.length == 0) {
+            ips = getNetworkHosts().toArray(new InetAddress[0]);
+        }
+        Properties props =
+            FileUtil.loadProperties(
+                NetUtil.class.getPackage().getName().replace(".", "/") + "/networkports.properties", null);
+
+        int timeout = 200;
+        Worker<InetSocketAddress, Boolean> worker =
+            ConcurrentUtil
+                .createParallelWorker("portscan", Thread.MIN_PRIORITY, InetSocketAddress.class, Boolean.class);
+        Map<InetSocketAddress, Boolean> result = worker.getResult();
+        for (int i = 0; i < ips.length; i++) {
+            for (int p = minPort; p < maxPort; p++) {
+                worker.run(new PortScan(new InetSocketAddress(ips[i], p), timeout, result));
+            }
+        }
+        result = worker.waitForJobs(timeout);
+        StringBuilder buf = new StringBuilder(result.size() * 30);
+        buf.append("========== network-port-scanning finished ================\n");
+        buf.append("open ports:\n");
+        Set<InetSocketAddress> ns = result.keySet();
+        for (InetSocketAddress a : ns) {
+            if (Boolean.TRUE.equals(result.get(a)))
+                buf.append(a + "\t: " + props.getProperty(String.valueOf(a.getPort())));
+        }
+        LOG.info(buf);
+        return result;
+    }
+}
+
+class PortScan implements Runnable {
+    private static final Log LOG = LogFactory.getLog(PortScan.class);
+    InetSocketAddress socketAddress;
+    int timeout;
+    boolean isOpen;
+    Map<InetSocketAddress, Boolean> result;
+
+    public PortScan(InetSocketAddress socketAddress, Map<InetSocketAddress, Boolean> result) {
+        this(socketAddress, 200, result);
+    }
+
+    /**
+     * constructor
+     * 
+     * @param result
+     * @param ip
+     * @param port
+     */
+    public PortScan(InetSocketAddress socketAddress, int timeout, Map<InetSocketAddress, Boolean> result) {
+        super();
+        this.socketAddress = socketAddress;
+        this.timeout = timeout;
+        this.result = result;
+    }
+
+    @Override
+    public void run() {
+        try {
+            Socket socket = new Socket();
+            socket.connect(socketAddress, timeout);
+            socket.close();
+            result.put(socketAddress, true);
+            LOG.info(socketAddress.getHostString() + "(" + socketAddress.getHostName() + "):" + socketAddress.getPort()
+                + " is open");
+        } catch (Exception ex) {
+            //Ok, not open
+            result.put(socketAddress, false);
+        }
+    }
+}
+
+class WCopy {
+    private static final Log LOG = LogFactory.getLog(WCopy.class);
+    URL site;
+    List<URL> requestedURLs;
+
+    /**
+     * constructor
+     * 
+     * @param url
+     */
+    public WCopy(String url) {
+        super();
+        this.site = NetUtil.url(url);
+        requestedURLs = new LinkedList<URL>();
+    }
+
+    public void get(String url, String destDir, String include, String exclude, boolean overwrite) {
+        get(NetUtil.url(url), destDir, include, exclude, overwrite);
+    }
+
+    public void get(URL url, String destDir, String include, String exclude, boolean overwrite) {
+        File file;
+        try {
+            file = NetUtil.download(url, destDir, false, !requestedURLs.contains(url) && overwrite);
+        } catch (Exception e) {
+            LOG.error(e.toString());
+            return;
+        }
+        if (requestedURLs.contains(url))
+            return;
+        URL[] urls = evaluateUrls(file, site);
+        requestedURLs.add(url);
+        for (URL u : urls) {
+            if (isLocal(u) && (include == null || u.getPath().matches(include))
+                && (exclude == null || !u.getPath().matches(exclude))) {
+                get(u.toString(), destDir, include, exclude, overwrite);
+            }
+        }
+    }
+
+    private boolean isLocal(URL u) {
+        return site.getHost().equals(u.getHost());
+    }
+
+    private static URL[] evaluateUrls(File file, URL site) {
+        char[] data = FileUtil.getFileData(file.getPath(), null);
+        Collection<URL> urls = new LinkedList<URL>();
+        StringBuilder txt = new StringBuilder(String.valueOf(data));
+        StringBuilder buf = new StringBuilder(file.getPath() + ":");
+        URL url = null;
+        String u;
+        int index = 0;
+        while (index < txt.length() && (!Util.isEmpty(u =
+            StringUtil.extract(txt, "(?:(href|src|content)\\s*\\=\\s*\")(.)+(?:\")", null, index)))) {
+            u = StringUtil.substring(u, "\"", "\"");
+            index = txt.indexOf(u, index) + u.length();
+            try {
+                url = NetUtil.url(u, site.getHost());
+                urls.add(url);
+                if (LOG.isDebugEnabled())
+                    buf.append("\n\t--> " + url);
+                //replace url with a local file name
+                StringUtil.replace(txt, u, NetUtil.getFileName(url));
+            } catch (Exception e) {
+                LOG.debug(e.toString());
+                index += 4;
+            }
+        }
+        if (LOG.isDebugEnabled())
+            LOG.debug(buf.toString());
+        return urls.toArray(new URL[0]);
+    }
+
 }

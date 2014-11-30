@@ -24,7 +24,7 @@ import org.simpleframework.xml.core.Persist;
 import de.tsl2.nano.core.ManagedException;
 import de.tsl2.nano.core.util.BitUtil;
 import de.tsl2.nano.core.util.StringUtil;
-import de.tsl2.nano.core.util.ThreadUtil;
+import de.tsl2.nano.core.util.ConcurrentUtil;
 import de.tsl2.nano.core.util.XmlUtil;
 
 /**
@@ -146,7 +146,7 @@ public/*abstract*/class LogFactory implements Runnable, Serializable {
                     log("error: LogFactory couldn't save xml properties");
                 }
             }
-            final Thread worker = ThreadUtil.startDaemon("logger", self);
+            final Thread worker = ConcurrentUtil.startDaemon("logger", self);
             Runtime.getRuntime().addShutdownHook(Executors.defaultThreadFactory().newThread(new Runnable() {
                 @Override
                 public void run() {

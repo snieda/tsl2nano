@@ -35,12 +35,17 @@ public class ManagedException extends RuntimeException {
 
     private static final Log LOG = LogFactory.getLog(ManagedException.class);
 
+    protected ManagedException(Throwable cause) {
+        this(cause, true);
+    }
+    
     /**
      * @param cause cause
      */
-    protected ManagedException(Throwable cause) {
+    protected ManagedException(Throwable cause, boolean logNow) {
         super(MESSAGE_FORWARDED, cause);
-        LOG.error(MESSAGE_FORWARDED, cause);
+        if (logNow)
+            LOG.error(MESSAGE_FORWARDED, cause);
     }
 
     public ManagedException(String message, Object... args) {
@@ -166,7 +171,7 @@ public class ManagedException extends RuntimeException {
      *         convenience on calling!
      */
     public static Throwable forward(Throwable ex) {
-        throw toRuntimeEx(ex, false);
+        throw toRuntimeEx(ex, false, true);
     }
 
     /**
@@ -176,18 +181,18 @@ public class ManagedException extends RuntimeException {
      * @param wrapToForwardedException if true, an existing runtime exception will be wrapped into a ManagedException
      * @return runtime exception
      */
-    public static RuntimeException toRuntimeEx(Throwable ex, boolean wrapToForwardedException) {
+    public static RuntimeException toRuntimeEx(Throwable ex, boolean wrapToForwardedException, boolean logNow) {
         if (ex instanceof RuntimeException) {
             if (!(ex instanceof ManagedException)) {
                 if (wrapToForwardedException) {
-                    ex = new ManagedException(ex);
+                    ex = new ManagedException(ex, logNow);
                 } else {
                     LOG.error(MESSAGE_FORWARDED, ex);
                 }
             }
             return (RuntimeException) ex;
         } else {
-            return new ManagedException(ex);
+            return new ManagedException(ex, logNow);
         }
     }
 }

@@ -19,7 +19,7 @@ import de.tsl2.nano.core.classloader.NetworkClassLoader;
 import de.tsl2.nano.core.cls.BeanClass;
 import de.tsl2.nano.core.log.LogFactory;
 import de.tsl2.nano.core.util.StringUtil;
-import de.tsl2.nano.core.util.ThreadUtil;
+import de.tsl2.nano.core.util.ConcurrentUtil;
 
 /**
  * Provides an Application Starter with an own extended classloader and a convenience to handle call arguments (the
@@ -183,7 +183,7 @@ public class AppLoader {
             /*
              * prepare cleaning the Apploader
              */
-            ThreadUtil.startDaemon("apploader-clean", new Runnable() {
+            ConcurrentUtil.startDaemon("apploader-clean", new Runnable() {
                 @Override
                 public void run() {
                     try {

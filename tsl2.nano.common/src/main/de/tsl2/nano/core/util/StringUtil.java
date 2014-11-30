@@ -225,6 +225,10 @@ public class StringUtil {
             src.deleteCharAt(i);
     }
 
+    public static void replace(StringBuilder str, String expression, String replacement) {
+        replace(str, expression, replacement, 0);
+    }
+
     /**
      * replaces all occurrences of expression in str with replacement. if nothing was found, nothing will be done.
      * 
@@ -232,8 +236,8 @@ public class StringUtil {
      * @param expression expression to find
      * @param replacement replacement
      */
-    public static void replace(StringBuilder str, String expression, String replacement) {
-        int i = str.indexOf(expression);
+    public static void replace(StringBuilder str, String expression, String replacement, int start) {
+        int i = str.indexOf(expression, start);
         if (i != -1) {
             str.replace(i, i + expression.length(), replacement);
         }
@@ -414,6 +418,10 @@ public class StringUtil {
         return extract(source, regexp, null);
     }
 
+    public static String extract(CharSequence source, String regexp, String replacement) {
+        return extract(source, regexp, replacement, 0);
+    }
+    
     /**
      * extract regular expression
      * 
@@ -421,17 +429,18 @@ public class StringUtil {
      * @param regexp pattern
      * @param replacement (optional) all occurrences of regexp will be replaced in source (only if source is of type
      *            StringBuilder!).
+     * @param start start index to search and/or replace
      * @return part of source or empty string
      */
-    public static String extract(CharSequence source, String regexp, String replacement) {
+    public static String extract(CharSequence source, String regexp, String replacement, int start) {
         final Pattern p = Pattern.compile(regexp);
         final Matcher m = p.matcher(source);
-        if (m.find()) {
+        if (m.find(start)) {
             String result = m.group();
             if (replacement != null) {
                 if (source instanceof StringBuilder) {
                     StringBuilder sb = (StringBuilder) source;
-                    replace(sb, result, replacement);
+                    replace(sb, result, replacement, start);
                 }
 //                if (source instanceof StringBuffer) {
 //                    StringBuffer sb = (StringBuffer) source;

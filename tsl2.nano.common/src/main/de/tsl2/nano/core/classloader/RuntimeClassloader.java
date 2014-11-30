@@ -32,7 +32,7 @@ import de.tsl2.nano.core.log.LogFactory;
 import de.tsl2.nano.core.util.ByteUtil;
 import de.tsl2.nano.core.util.FileUtil;
 import de.tsl2.nano.core.util.StringUtil;
-import de.tsl2.nano.core.util.ThreadUtil;
+import de.tsl2.nano.core.util.ConcurrentUtil;
 
 /**
  * provides dynamic classloading through extending classpath on runtime. use {@link #addURL(URL)} to enhance the
@@ -274,7 +274,7 @@ public class RuntimeClassloader extends URLClassLoader {
                 return fileList;
             }
         };
-        ThreadUtil.startDaemon("classloader-environment-path-checker", pathChecker);
+        ConcurrentUtil.startDaemon("classloader-environment-path-checker", pathChecker);
     }
 
     @Override

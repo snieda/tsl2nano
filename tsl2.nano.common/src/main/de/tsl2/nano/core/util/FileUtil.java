@@ -44,6 +44,7 @@ import org.apache.commons.codec.binary.Base64;
 import org.apache.commons.logging.Log;
 
 import de.tsl2.nano.core.ManagedException;
+import de.tsl2.nano.core.execution.IRunnable;
 import de.tsl2.nano.core.log.LogFactory;
 
 /**
@@ -140,6 +141,7 @@ public class FileUtil {
     public static byte[] readFromZip(ZipInputStream sourceStream, String file) {
         return readFromZip(sourceStream, file, true);
     }
+
     public static byte[] readFromZip(ZipInputStream sourceStream, String file, boolean closeStream) {
         //open a zip-file
         ZipEntry zipEntry = null;
@@ -170,9 +172,10 @@ public class FileUtil {
             }
         }
     }
-    
+
     /**
      * extract given zipStream to destDir using regExFilter. not performance-optimized!
+     * 
      * @param zipStream
      * @param destDir
      * @param regExFilter
@@ -185,21 +188,22 @@ public class FileUtil {
          * to reopen the zip-stream
          */
         zipStream = FileUtil.getJarInputStream(zipFile);
-        
+
         //reopen it - the zipEntries are closed
         for (String file : zipFiles) {
             byte[] data = FileUtil.readFromZip(zipStream, file, false);
             if (data == null || data.length == 0) {
                 new File(destDir + file).mkdirs();
-            } else if (!new File(destDir + file).exists()){
+            } else if (!new File(destDir + file).exists()) {
                 FileUtil.writeBytes(data, destDir + file, false);
             }
         }
-        
+
     }
-    
+
     /**
      * extract given zipStream to destDir using regExFilter. not performance-optimized!
+     * 
      * @param zipStream
      * @param destDir
      * @param regExFilter
@@ -212,19 +216,19 @@ public class FileUtil {
          * to reopen the zip-stream
          */
         zipStream = FileUtil.getZipInputStream(zipFile);
-        
+
         //reopen it - the zipEntries are closed
         for (String file : zipFiles) {
             byte[] data = FileUtil.readFromZip(zipStream, file, false);
             if (data == null || data.length == 0) {
                 new File(destDir + file).mkdirs();
-            } else if (!new File(destDir + file).exists()){
+            } else if (!new File(destDir + file).exists()) {
                 FileUtil.writeBytes(data, destDir + file, false);
             }
         }
-        
+
     }
-    
+
     //perhaps we can use it in future
     private static byte[] readBytes(InputStream stream, String entryName, int len) throws IOException {
         LOG.debug("loading stream-entry " + entryName + " with " + len + " bytes");
@@ -416,7 +420,6 @@ public class FileUtil {
         }
     }
 
-    
     public static Properties loadPropertiesFromFile(String resourceFile) {
         File f = new File(resourceFile);
         if (!f.canRead())
@@ -444,6 +447,8 @@ public class FileUtil {
             classLoader = Thread.currentThread().getContextClassLoader();
         Thread.currentThread().setContextClassLoader(classLoader);
         final InputStream resource = classLoader.getResourceAsStream(resourceFile);
+        if (resource == null)
+            throw new IllegalArgumentException("file: " + resourceFile + " not found");
         final Properties properties = new Properties();
         try {
             LOG.info("loading resource: " + resourceFile);
@@ -498,9 +503,14 @@ public class FileUtil {
      * @param url url to save
      * @param fileName urls backup file name
      */
-    public static final void saveResourceToFileSystem(URL url, String fileName) {
+    public static final void saveResourceToFileSystem(URL url, final String fileName) {
         try {
-            write((InputStream) url.getContent(), new FileOutputStream(fileName), true);
+            write((InputStream) url.getContent(), new FileOutputStream(fileName) {
+                @Override
+                public String toString() {
+                    return fileName;
+                }
+            }, true);
         } catch (IOException e) {
             //this copy-process should not break the application
             LOG.error(e);
@@ -533,7 +543,7 @@ public class FileUtil {
             final byte data[] = new byte[length];
             file.read(data);
             file.close();
-            LOG.info(length + " Bytes read");
+            LOG.info(ByteUtil.amount(length));
             return data;
         } catch (final Exception e) {
             ManagedException.forward(e);
@@ -553,7 +563,7 @@ public class FileUtil {
      * Write 'data' into the file 'file' and perhaps appends it (if append==true)
      */
     public static void writeBytes(byte[] data, String file, boolean append) {
-        LOG.info("writing " + data.length + " bytes into file " + file);
+        LOG.info("writing " + ByteUtil.amount(data.length) + " into file " + file);
         FileOutputStream out = null;
         try {
             out = new FileOutputStream(file, append);
@@ -634,10 +644,15 @@ public class FileUtil {
      * @param encoding
      * @return
      */
-    public static synchronized char[] getFileData(String fileName, String encoding) {
+    public static synchronized char[] getFileData(final String fileName, String encoding) {
         try {
             LOG.debug("reading file " + fileName);
-            return getFileData(new FileInputStream(new File(fileName)), encoding);
+            return getFileData(new FileInputStream(new File(fileName)) {
+                @Override
+                public String toString() {
+                    return fileName;
+                }
+            }, encoding);
         } catch (final FileNotFoundException e) {
             ManagedException.forward(e);
             return null;
@@ -660,7 +675,7 @@ public class FileUtil {
             final char data[] = new char[length];
             file.read(data);
             file.close();
-            LOG.info(length + " bytes read");
+            LOG.info(ByteUtil.amount(length) + " read from stream " + stream);
             return data;
         } catch (final Exception ex) {
             throw new RuntimeException(ex);
@@ -751,18 +766,26 @@ public class FileUtil {
 
     /**
      * write given input stream to given file
+     * 
      * @param in stream
      * @param fileName file to write the input stream into
      */
-    public static void write(InputStream in, String fileName) {
+    public static void write(InputStream in, final String fileName) {
         try {
-            write(in, new FileOutputStream(new File(fileName)), true);
+            write(in, new FileOutputStream(new File(fileName)) {
+                @Override
+                public String toString() {
+                    return fileName;
+                }
+            }, true);
         } catch (FileNotFoundException e) {
             ManagedException.forward(e);
         }
     }
+
     /**
      * write
+     * 
      * @param in
      * @param out
      * @param closeStreams
@@ -771,9 +794,12 @@ public class FileUtil {
         final byte[] buf = new byte[1024];
         int len;
         try {
+            long count = 0;
             while ((len = in.read(buf)) > 0) {
                 out.write(buf, 0, len);
+                count+=len;
             }
+            LOG.info(ByteUtil.amount(count) + " written to " + out);
         } catch (IOException e) {
             ManagedException.forward(e);
         } finally {
@@ -921,6 +947,37 @@ public class FileUtil {
     }
 
     /**
+     * action for {@link #forEach(String, String, IRunnable)}
+     */
+    public static final IRunnable<Object, File> DO_DELETE = new IRunnable<Object, File>() {
+        @Override
+        public Object run(File context, Object... extArgs) {
+            return context.delete();
+        }
+    };
+
+    /**
+     * starts the given action for the matching file set.
+     * 
+     * @param dirPath root path to work on
+     * @param regExFilename regular expression for file name that must be matched to start the action on that file.
+     * @param action action on a matching file
+     * @return files that matched the regular expression.
+     */
+    public static File[] forEach(String dirPath, final String regExFilename, final IRunnable<Object, File> action) {
+        return new File(dirPath).listFiles(new FilenameFilter() {
+            @Override
+            public boolean accept(File dir, String name) {
+                boolean accept = name.matches(regExFilename);
+                if (accept) {
+                    action.run(new File(dir.getPath() + "/" + name));
+                }
+                return accept;
+            }
+        });
+    }
+
+    /**
      * getRelativePath
      * 
      * @param file
@@ -941,28 +998,26 @@ public class FileUtil {
      * @return path relative to current user.dir (application start)
      */
     public static String getRelativePath(String file, String currentPath) {
-        String relpath = StringUtil.substring(replaceWindowsSeparator(file), replaceWindowsSeparator(currentPath), null);
+        String relpath =
+            StringUtil.substring(replaceWindowsSeparator(file), replaceWindowsSeparator(currentPath), null);
         return File.separatorChar == '\\' && relpath.startsWith("/") ? relpath.substring(1) : relpath;
     }
-    
+
     public static final String replaceWindowsSeparator(String path) {
         return path.replace(File.separatorChar, '/');
     }
+
     /**
      * checks if given path exists. if path is an URI, the URI will be checked
+     * 
      * @param pathOrURL
      * @return true, if file or URL exists
      */
     public static File getURIFile(String pathOrURL) {
         return new File(URI.create(replaceWindowsSeparator(pathOrURL)).getSchemeSpecificPart());
     }
-    
+
     public static InputStream getURLStream(String url) {
-        try {
-            return URI.create(url).toURL().openStream();
-        } catch (Exception e) {
-            ManagedException.forward(e);
-            return null;
-        }
+        return NetUtil.getURLStream(url);
     }
 }

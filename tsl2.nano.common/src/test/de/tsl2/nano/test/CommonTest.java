@@ -1322,12 +1322,23 @@ public class CommonTest {
     }
     
     @Test
-    public void testNetUtil() throws Exception {
+    public void testNetUtilDownload() throws Exception {
         Profiler.si().stressTest("downloader", 1000, new Runnable() {
             @Override
             public void run() {
                 NetUtil.download("http://sourceforge.net/projects/tsl2nano/files/0.7.0/tsl2.nano.h5.0.7.0.jar/download", System.getProperty("user.home") + "/", true, true);
             }
         });
+    }
+    @Test
+    public void testNetUtilScan() throws Exception {
+        //not a real test - only to see it working!
+        NetUtil.scans(0, 10000);
+    }
+    
+    @Test
+    public void testWCopy() throws Exception {
+        //not a real test - only to see it working!
+        NetUtil.wcopy("http://mobile.chefkoch.de", "test/", null, null);
     }
 }

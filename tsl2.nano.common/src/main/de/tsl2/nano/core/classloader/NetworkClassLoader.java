@@ -116,7 +116,10 @@ public class NetworkClassLoader extends NestedJarClassLoader {
                         return super.findClass(name);
                     }
                 } catch (Exception e2) {
-                    LOG.warn("couldn't load class " + name, e2);
+                    if (LOG.isDebugEnabled())
+                        LOG.warn("couldn't load class " + name, e2);
+                    else
+                        LOG.warn("couldn't load class " + name);
                     unresolveables.add(pckName);
                     FileUtil.save(environment + "/" + FILENAME_UNRESOLVEABLES, unresolveables);
                 }
@@ -128,6 +131,7 @@ public class NetworkClassLoader extends NestedJarClassLoader {
 
     /**
      * resetUnresolvedClasses
+     * 
      * @return true, if file could be deleted
      */
     public static boolean resetUnresolvedClasses(String path) {
