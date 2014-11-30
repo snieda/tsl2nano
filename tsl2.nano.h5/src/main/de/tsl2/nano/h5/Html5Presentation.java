@@ -360,7 +360,7 @@ public class Html5Presentation<T> extends BeanPresentationHelper<T> implements I
                 FileUtil.writeBytes(html.getBytes(), Environment.getConfigPath() + "html-server-response.html", false);
             return html;
         } catch (Exception ex) {
-            return HtmlUtil.createMessagePage(ManagedException.toRuntimeEx(ex, true).getMessage());
+            return HtmlUtil.createMessagePage(ManagedException.toRuntimeEx(ex, true, true).getMessage());
         }
     }
 

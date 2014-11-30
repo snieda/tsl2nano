@@ -32,7 +32,7 @@ import de.tsl2.nano.core.ManagedException;
 import de.tsl2.nano.core.cls.BeanAttribute;
 import de.tsl2.nano.core.cls.BeanClass;
 import de.tsl2.nano.core.log.LogFactory;
-import de.tsl2.nano.core.util.ThreadUtil;
+import de.tsl2.nano.core.util.ConcurrentUtil;
 import de.tsl2.nano.service.util.AbstractStatelessServiceBean;
 import de.tsl2.nano.service.util.GenericServiceBean;
 import de.tsl2.nano.service.util.IGenericBaseService;
@@ -162,7 +162,7 @@ public class GenericReplicatingServiceBean extends GenericServiceBean {
     }
 
     protected void doForReplication(Runnable replicationJob) {
-        ThreadUtil.startDaemon("replication-service-job", replicationJob, true,
+        ConcurrentUtil.startDaemon("replication-service-job", replicationJob, true,
             Environment.get(UncaughtExceptionHandler.class));
     }
 

@@ -348,7 +348,7 @@ public abstract class AbstractJobScheduleServiceBean<RUNNABLE> implements
                     } catch (final Throwable ex) {
                         //if the jvm crashes, the job will never be stopped!
                         if (job.isStopOnError()) {
-                            RuntimeException fwdEx = ManagedException.toRuntimeEx(ex, true);
+                            RuntimeException fwdEx = ManagedException.toRuntimeEx(ex, true, true);
                             stopRun(timer, job, fwdEx);
                             throw fwdEx;
                         } else {

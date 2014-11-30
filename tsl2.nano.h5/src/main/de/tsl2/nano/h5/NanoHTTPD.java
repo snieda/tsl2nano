@@ -29,7 +29,7 @@ import java.util.Vector;
 import de.tsl2.nano.core.Environment;
 import de.tsl2.nano.core.Main;
 import de.tsl2.nano.core.util.FileUtil;
-import de.tsl2.nano.core.util.ThreadUtil;
+import de.tsl2.nano.core.util.ConcurrentUtil;
 
 /**
  * A simple, tiny, nicely embeddable HTTP 1.0 (partially 1.1) server in Java
@@ -316,7 +316,7 @@ public class NanoHTTPD extends Main
 		{
 			mySocket = s;
 			//more than one thread will be opened per request: loading pictures from files
-			ThreadUtil.startDaemon("nano-session:" + s, this, false, null);
+			ConcurrentUtil.startDaemon("nano-session:" + s, this, false, null);
 		}
 
 		public void run()
