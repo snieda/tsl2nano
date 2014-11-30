@@ -27,7 +27,7 @@ import static junit.framework.Assert.*;
  */
 public class JarResolverTest {
     private static final Log LOG = LogFactory.getLog(JarResolverTest.class);
-    
+
     private static final String BASEDIR = "./";
 
     @BeforeClass
@@ -48,38 +48,47 @@ public class JarResolverTest {
         //positive real tests
         assertTrue(download("org.apache.log4j.config.PropertyGetter", "log4j.*.jar"));
         assertTrue(download("log4j", "log4j.*.jar"));
+        assertTrue(download("org.apache.tools.ant.launch.Locator", "ant.*.jar"));
 
         //negative tests
         try {
-            download("org.anonymous123.product23.TestClass", null);
-            fail("this package shouldn't be found!");
+            assertFalse(download("org.anonymous123.product23.TestClass", null));
+//            fail("this package shouldn't be found!");
         } catch (Exception ex) {
             //Ok - shouldn't be found
         }
         try {
-            download("org.apache.product23.TestClass", null);
-            fail("this package shouldn't be found!");
+            assertFalse(download("org.apache.product23.TestClass", null));
+//            fail("this package shouldn't be found!");
         } catch (Exception ex) {
             //Ok - shouldn't be found
         }
+        
+        FileUtil.forEach("./", "(dist|target|temp, action)", FileUtil.DO_DELETE);
     }
 
     /**
      * download
      */
     private boolean download(String pckOrName, String jarName) {
+        if (jarName != null)
+            FileUtil.forEach("./", jarName, FileUtil.DO_DELETE);
         new JarResolver().start(new String[] { pckOrName });
         return jarName != null ? loaded(jarName) : false;
     }
 
     /**
-     * checks, if one of the given file was really stored/downloaded.
+     * checks, if one of the given file was really stored/downloaded - and deletes that file.
      * 
      * @param string
      * @return
      */
-    private boolean loaded(String string) {
-        return FileUtil.getFiles(BASEDIR, "log4j.*.jar").length > 0;
+    private boolean loaded(String name) {
+        boolean found = FileUtil.getFiles(BASEDIR, name).length > 0;
+        if (found) {
+            FileUtil.forEach("./", name, FileUtil.DO_DELETE);
+        }
+        return found;
     }
 
     @Test
@@ -88,7 +97,7 @@ public class JarResolverTest {
         LOG.info("jar-file: " + jarName);
         assertTrue(StringUtil.extract(jarName, "\\w+").equals("log4j"));
     }
-    
+
     @AfterClass
     public static void tearDown() {
         //TODO: delete all loaded jars

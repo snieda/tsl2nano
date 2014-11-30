@@ -299,9 +299,10 @@ public class JarResolver {
             pck = findPackage(part, packageKey);
             /*
              * this is a generic search. perhaps we search for 'org.apache' and get 'org.apache.ant'.
-             * but our dependency is org.apache.log4j. so we have to check that again!
+             * but our dependency is org.apache.log4j. so we have to check that again - only if we 
+             * are searching on the values (packageKey = true)!
              */
-            return pck != null && dependency.contains(StringUtil.substring(pck, null, "/", true)) ? pck : null;
+            return pck != null && (!packageKey || dependency.contains(StringUtil.substring(pck, null, "/", true))) ? pck : null;
         } else if (dependency.contains("-"))
             //search for parts of given package
             return findPackage(StringUtil.substring(dependency, null, "-", true), packageKey);
