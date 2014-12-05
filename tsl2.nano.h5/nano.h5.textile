@@ -1590,6 +1590,9 @@ Other restrictions on android:
 *** openjpa needs the beans jar file packed into the main jar file!
 *** dynamic class enhancement must be enabled (see https://openjpa.apache.org/builds/2.2.2/apache-openjpa/docs/ref_guide_pc_enhance.html)! start the jvm with option: _-javaagent:[path-to-extraced-openjpa-zip-file]/openjpa-2.x.x.jar_
 *** openjpa properties: https://openjpa.apache.org/builds/2.2.2/apache-openjpa/docs/ref_guide_conf_openjpa.html
+** openjpa schema-tool does not create schema.xml for hsqldb:
+*** in persistence.tml <property name="openjpa.jdbc.DBDictionary" value="hsql(SupportsSchemaForGetTables=false)" /> hinzufuegen
+*** see http://openjpa.apache.org/builds/2.3.0/apache-openjpa/docs/ref_guide_dbsetup_dbsupport.html
 ** ebean 3.3.2: "is not an enhanced entity bean. Subclassing is not longer supported in Ebean"
 *** ebean versions after 2.8.1 don't support DynamicProxies any more. enhancing has to be done statically through maven-builds.
 ** batoo-jpa: the jar-file has to have a protocol prefix like 'file:' (e.g.: file:./mybeans.jar). to enable text-input on jarfile property, change environments 'login.jarfile.fileselector' to false.
@@ -1823,6 +1826,8 @@ Other restrictions on android:
 ** Bean --> AttributeContainer
 ** Bean soll BeanDefinition referenzieren und nicht erben
 ** Value soll Attribute referenzieren und nicht erben
+
+* *mybook: wcopy + concat files(date) + fop:xhtml2fo.xsl*
 
 h3. list of data-sources: 
 

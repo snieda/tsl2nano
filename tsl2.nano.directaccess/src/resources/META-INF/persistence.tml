@@ -58,6 +58,7 @@
 		    <property name="openjpa.Log" value="DefaultLevel=INFO, Runtime=INFO, Tool=TRACE"/>
 			<property name="openjpa.RuntimeUnenhancedClasses" value="supported"/>
 			<property name="openjpa.DynamicEnhancementAgent" value="true" />
+			<!-- <property name="openjpa.jdbc.DBDictionary" value="hsql(SupportsSchemaForGetTables=false)" /> -->
 		    
          	<!-- TopLink -->
             <property name="toplink.jdbc.driver" value="${connection.driver_class}"/>

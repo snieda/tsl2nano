@@ -86,7 +86,7 @@
 		</hibernatetool>
 	</target>
 
-	<target name="hibernate-tools" depends="hbm2java, hbm2ddl, hbm2doc">
+	<target name="hibernate-tools" depends="hbm2java">
 	</target>
 
 	<!-- ================================= 
@@ -138,6 +138,10 @@
 			<arg value="org.apache.openjpa.jdbc.schema.SchemaTool" />
 			<arg value="-schema" />
 			<arg value="${schema}" />
+<!--			<arg value="-readSchema" />
+			<arg value="true" />
+			<arg value="-primaryKeys" />
+			<arg value="true" /> -->
 			<arg value="-a" />
 			<arg value="reflect" />
 			<arg value="-f" />
