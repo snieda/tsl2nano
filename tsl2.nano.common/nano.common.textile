@@ -29,6 +29,10 @@ h2. Features
 * *enhanced classloaders*
 * *enhanced runner* definitions
 * *application loader* working with own extended classloader (with dynamic classloader on runtime - loading classes of jars inside a jar) 
+* en-/decryption
+* printing, from xml through jasper or fop (see XmlUtil and PrintUtil)
+* generic undo/redo and macros (see incubation/repeat)
+* net utils to do downloads, uploads, port scans and wget
 
 h2. The AppLoader and the Environment
 

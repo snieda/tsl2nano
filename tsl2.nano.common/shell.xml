@@ -109,7 +109,7 @@ some internals:
 		<property name="sh.jar.exclude3" value="EXCLUDING_EXPRESSION3" />
 		<property name="sh.jar.exclude4" value="EXCLUDING_EXPRESSION3" />
 		<property name="sh.jar.destination" value="${basedir}.jar" />
-		<property name="sh.jar.manifest" value="${basedir}/META-INF/MANIFEST.MF" />
+		<property name="sh.jar.manifest" value="${sh.java.manifest.file}" />
 		<!-- start it -->
 		<sh.jar sh.jar.srcdir="${sh.jar.srcdir}" sh.jar.include="${sh.jar.include}" sh.jar.include2="${sh.jar.include2}" sh.jar.include3="${sh.jar.include3}" sh.jar.include4="${sh.jar.include4}" sh.jar.exclude="${sh.jar.exclude}" sh.jar.exclude2="${sh.jar.exclude2}" sh.jar.exclude3="${sh.jar.exclude3}" sh.jar.exclude4="${sh.jar.exclude4}" sh.jar.destination="${sh.jar.destination}" sh.jar.manifest="${sh.jar.manifest}" />
 	</target>
@@ -266,6 +266,16 @@ target: sh.delete
 		<antcall target="sh.delete" />
 	</target>
 
+	<!-- concats a set of files into one file -->
+	<target name="sh.concat">
+		<concat destfile="${sh.concat.destfile}">
+			<fileset dir="${sh.concat.dir}">
+				<include name="${sh.concat.include}" />
+				<exclude name="${sh.concat.exclude}" />
+			</fileset>
+		</concat>
+	</target>
+
 	<!-- Workaround for checks, if a task should be started -->
 	<target name="sh.stepover" description="${sh.stepover.description}">
 		<echo message="${sh.stepover.description}" />
@@ -351,6 +361,18 @@ starting ${ant.project.name}:
 	<target name="sh.sleep" unless="disable_sh.sleep" description="sleeps for given milliseconds">
 		<echo message="sleeping for ${sh.sleep.milliseconds} milliseconds..." />
 		<sleep milliseconds="${sh.sleep.milliseconds}" />
+	</target>
+
+	<target name="sh.clean" unless="disable_sh.clean" description="cleans all binaries">
+		<!-- fallbacks -->
+		<property name="sh.clean.basedir" value="${basedir}" />
+		<property name="sh.clean.bin.dir" value="${sh.java.bin.dir}" />
+		<property name="sh.clean.target.dir" value="${sh.java.target.dir}" />
+		<echo message="cleaning ${sh.clean.bin.dir} and ${sh.clean.target.dir}" />
+		<delete dir="${sh.clean.basedir}">
+			<fileset dir="${sh.clean.bin.dir}" />
+			<fileset dir="${sh.clean.target.dir}" />
+		</delete>
 	</target>
 
 	<target name="sh.compile" unless="disable_sh.compile" description="compiles java sources to class files">
@@ -551,6 +573,65 @@ starting ${ant.project.name}:
 		</antcall>
 	</target>
 
+	<!--
+		will create xsd files from java beans.
+		please define the following variables:
+		  - bin.dir: reference to binary path
+		  - src.gen.dir: destination directory
+		  - print.base.class: class file to generate xsd from
+	-->
+	<target name="sh.jaxb.schemagen">
+		<echo message="basedir: ${basedir}" />
+		<echo message="schema-class: ${bin.dir}/${print.base.class}" />
+		<echo message="output-path: ${src.gen.dir}" />
+		<!-- workaround for schemagen.exe bug on java.home path containing spaces -->
+		<exec dir="${sh.java.bin.dir}" executable="cmd.exe">
+			<arg value="/C" />
+			<arg value="echo" />
+			<arg value="subst" />
+			<arg value="y:" />
+			<arg value="${java.home}\.." />
+			<arg value=">schemagen.bat" />
+		</exec>
+		<exec dir="${sh.java.bin.dir}" executable="cmd.exe">
+			<arg value="/C" />
+			<arg value="echo" />
+			<arg value="y:\bin\schemagen.exe" />
+			<arg value="%1" />
+			<arg value="%2" />
+			<arg value="%3" />
+			<arg value="%4" />
+			<arg value="%5" />
+			<arg value="%6" />
+			<arg value=">>schemagen.bat" />
+		</exec>
+		<exec dir="${sh.java.bin.dir}" executable="cmd.exe">
+			<arg value="/C" />
+			<arg value="echo" />
+			<arg value="subst" />
+			<arg value="y:" />
+			<arg value="/D" />
+			<arg value=">>schemagen.bat" />
+		</exec>
+
+		<exec dir="${sh.java.bin.dir}" executable="cmd.exe">
+			<arg value="/C" />
+			<arg value="schemagen.bat" />
+			<!--			<arg value="cp" />
+			<arg value="./" /> -->
+			<arg value="-d" />
+			<arg value="${sh.java.gen.dir}" />
+			<arg value="${sh.jaxb.schemagen.classname}" />
+		</exec>
+	</target>
+
+	<!--
+		create java bean classes from xsd (through JAXB)
+	-->
+	<target name="jaxb.xjc">
+		<exec dir="${sh.java.res.dir}" command="xjc -d ${sh.java.gen.dir} ${sh.jaxb.xjc.classname}.xsd" />
+	</target>
+
 	<!-- THE CODE BELOW IS UNTESTED YET -->
 
 	<target name="sh.mail" unless="disable_sh.mail" description="send mail with attachments">
@@ -575,7 +656,15 @@ starting ${ant.project.name}:
 		</mail>
 	</target>
 	<target name="sh.junit" unless="disable_sh.junit" description="do junit test on given fileset">
-		<junit>
+		<!-- fallbacks -->
+		<property name="sh.junit.dir" value="${sh.java.test.dir}" />
+		<property name="sh.junit.target.dir" value="${sh.java.target.dir}" />
+		<property name="sh.junit.filter" value="**/*Test.java" />
+		<junit printsummary="on">
+			<fileset dir="${sh.junit.dir">
+				<include name="${sh.junit.filter}" />
+			</fileset>
+			<test todir="${sh.junit.target.dir}" />
 		</junit>
 	</target>
 
@@ -743,7 +832,7 @@ starting ${ant.project.name}:
 		<!-- fallbacks -->
 		<property name="sh.build.basedir" value="${basedir}" />
 		<property name="sh.build.name" value="${sh.build.basedir}" />
-		<property name="sh.build.version" value="-${tstamp}" />
+		<property name="sh.build.version" value="${sh.java.build.version}-${tstamp}" />
 		<property name="sh.build.src" value="${sh.build.basedir}/src/main" />
 		<property name="sh.build.lib" value="${sh.build.basedir}/lib" />
 		<property name="sh.build.bin" value="${sh.build.basedir}/bin" />
@@ -760,6 +849,7 @@ starting ${ant.project.name}:
 			<entry key="build.java" value="${java.runtime.version}" />
 		</propertyfile>
 
+		<!-- create binaries -->
 		<antcall target="sh.compile">
 			<param name="sh.compile.srcdir" value="${sh.build.src}" />
 			<param name="sh.compile.bindir" value="${sh.build.bin}" />
@@ -788,6 +878,7 @@ starting ${ant.project.name}:
 			<param name="sh.wiki.srcdir" value="${sh.build.basedir}" />
 			<param name="sh.wiki.include" value="**/*.textile" />
 		</antcall> -->
+
 		<antcall target="sh.jar">
 			<param name="sh.jar.srcdir" value="${sh.build.bin}" />
 			<param name="sh.jar.destination" value="${sh.build.basedir}/${sh.build.name}.${sh.build.version}.jar" />
@@ -804,5 +895,9 @@ starting ${ant.project.name}:
 			<param name="sh.jar.exclude2" value="**/*.*ar" />
 			<param name="sh.jar.exclude3" value="**/*.zip" />
 		</antcall>
+	</target>
+
+	<!-- calls the sh.build target after clean, runs junit tests -->
+	<target name="sh.build.full" depends="sh.clean, sh.build, sh.junit">
 	</target>
 </project>

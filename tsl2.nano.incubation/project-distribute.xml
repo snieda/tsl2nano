@@ -84,7 +84,7 @@
 	</target>
 
 	<target name="refactore.build" if="refactore.build">
-		<ant antfile="${shell}" target="sh.build">
+		<ant antfile="${shell}" target="sh.build.full">
 			<property name="sh.build.basedir" value="${refactore.path}" />
 			<property name="sh.build.name" value="${refactore.name}" />
 			<!-- setting properties inside the ant file tag will overwrite previous settings!

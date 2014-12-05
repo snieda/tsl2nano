@@ -13,5 +13,7 @@
 	<classpathentry exported="true" kind="lib" path="lib-tools/tslbase.jar"/>
 	<classpathentry exported="true" kind="lib" path="lib-tools/velocity-1.6-dep.jar"/>
 	<classpathentry exported="true" kind="lib" path="lib-tools/commons-codec-1.6.jar"/>
+	<classpathentry kind="lib" path="lib-tools/fop-1.1.jar"/>
+	<classpathentry kind="lib" path="lib-tools/jasperreports-6.0.0.jar"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>
