@@ -71,6 +71,7 @@ import de.tsl2.nano.core.cls.BeanAttribute;
 import de.tsl2.nano.core.cls.BeanClass;
 import de.tsl2.nano.core.execution.Profiler;
 import de.tsl2.nano.core.log.LogFactory;
+import de.tsl2.nano.core.util.Crypt;
 import de.tsl2.nano.core.util.DateUtil;
 import de.tsl2.nano.core.util.FileUtil;
 import de.tsl2.nano.core.util.NetUtil;
@@ -1340,5 +1341,18 @@ public class CommonTest {
     public void testWCopy() throws Exception {
         //not a real test - only to see it working!
         NetUtil.wcopy("http://mobile.chefkoch.de", "test/", null, null);
+    }
+    @Test
+    public void testCrypt() throws Exception {
+        String txt = "test1234";
+        Crypt.main(new String[0]);
+        Crypt.main(new String[]{"", "DES", txt});
+        Crypt.main(new String[]{"", "AES", txt});
+        Crypt.main(new String[]{"", Crypt.ALGO_DES, txt});
+        Crypt.main(new String[]{"", Crypt.ALGO_AES, txt});
+        Crypt.main(new String[]{"0123456", Crypt.ALGO_PBEWithMD5AndDES, txt});
+        //not available on standard jdk:
+//        Crypt.main(new String[]{"0123456", Crypt.ALGO_PBEWithHmacSHA1AndDESede, txt});
+//        Crypt.main(new String[]{"0123456", Crypt.ALGO_PBEWithSHAAndAES, txt});
     }
 }

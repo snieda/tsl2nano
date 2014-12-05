@@ -10,20 +10,41 @@
 package de.tsl2.nano.core.util;
 
 import java.io.BufferedWriter;
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileInputStream;
+import java.io.FileNotFoundException;
 import java.io.FileWriter;
+import java.io.IOException;
+import java.io.InputStream;
 import java.io.Serializable;
+import java.sql.Connection;
+import java.util.HashMap;
+import java.util.LinkedHashMap;
+import java.util.Map;
 import java.util.Properties;
 
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
+import javax.xml.transform.Result;
+import javax.xml.transform.Transformer;
+import javax.xml.transform.TransformerFactory;
+import javax.xml.transform.sax.SAXResult;
+import javax.xml.transform.stream.StreamSource;
 import javax.xml.xpath.XPath;
 import javax.xml.xpath.XPathConstants;
-import javax.xml.xpath.XPathExpression;
 import javax.xml.xpath.XPathFactory;
 
+import net.sf.jasperreports.engine.JasperCompileManager;
+import net.sf.jasperreports.engine.JasperExportManager;
+import net.sf.jasperreports.engine.JasperFillManager;
+import net.sf.jasperreports.engine.JasperPrint;
+
 import org.apache.commons.logging.Log;
+import org.apache.fop.apps.FOUserAgent;
+import org.apache.fop.apps.Fop;
+import org.apache.fop.apps.FopFactory;
 import org.simpleframework.xml.stream.Format;
 import org.w3c.dom.Document;
 import org.w3c.dom.Node;
@@ -35,12 +56,21 @@ import de.tsl2.nano.core.execution.CompatibilityLayer;
 import de.tsl2.nano.core.log.LogFactory;
 
 /**
+ * provides convenience methods for:
+ * 
+ * <pre>
+ * - de-/serializing xml through jaxb, simple-xml and xml-api
+ * - xpath
+ * - velocity transformations (to generate source code etc.)
+ * - apache fop transformations (to create printable formats like pcl, pdf, rtf, jpg, etc.)
+ * </pre>
  * 
  * @author Thomas Schneider
  * @version $Revision$
  */
 public class XmlUtil {
     private static final Log LOG = LogFactory.getLog(XmlUtil.class);
+
     /**
      * transform
      * 
@@ -92,18 +122,23 @@ public class XmlUtil {
                 "org.apache.velocity.runtime.resource.loader.ClasspathResourceLoader");
             p.put("jar.resource.loader.class",
                 "org.apache.velocity.runtime.resource.loader.JarResourceLoader");
-            
+
             //this code is untested yet!!!
             CompatibilityLayer layer = Environment.get(CompatibilityLayer.class);
-            Object engine = layer.runOptional("org.apache.velocity.app.VelocityEngine", "VelocityEngine", new Class[]{Properties.class}, p);
-            Object context = layer.runOptional("org.apache.velocity.VelocityContext", "VelocityContext", new Class[]{Properties.class}, p);
-            Object template = layer.runOptional(engine, "getTemplate", new Class[]{String.class}, templateFile);
-            
+            Object engine =
+                layer.runOptional("org.apache.velocity.app.VelocityEngine", "VelocityEngine",
+                    new Class[] { Properties.class }, p);
+            Object context =
+                layer.runOptional("org.apache.velocity.VelocityContext", "VelocityContext",
+                    new Class[] { Properties.class }, p);
+            Object template = layer.runOptional(engine, "getTemplate", new Class[] { String.class }, templateFile);
+
             final File dir = new File(destFile.substring(0, destFile.lastIndexOf("/")));
             dir.mkdirs();
             final BufferedWriter writer = new BufferedWriter(new FileWriter(destFile));
 
-            layer.runOptional(template, "merge", layer.load("org.apache.velocity.VelocityContext", "java.io.BufferedWriter"), context, writer);
+            layer.runOptional(template, "merge",
+                layer.load("org.apache.velocity.VelocityContext", "java.io.BufferedWriter"), context, writer);
             writer.flush();
             writer.close();
         } catch (Exception e) {
@@ -112,50 +147,217 @@ public class XmlUtil {
     }
 
     /**
-     * xpath
+     * Druckt eine xml-Datei über apache fop (version 1.1) in ein angegebenes mime-ausgabe format - entweder in eine
+     * Datei oder direkt an den Drucker.
+     * <p/>
+     * Alle verwendbaren Ausgabe-Formate sind hier einzusehen: {@link org.apache.xmlgraphics.util.MimeConstants}.
      * 
-     * @param xmlFile
-     * @param xpath
-     * @return
+     * <pre>
+     * application/pdf
+     * application/postscript
+     * application/postscript
+     * application/x-pcl
+     * application/vnd.hp-PCL
+     * application/x-afp
+     * application/vnd.ibm.modcap
+     * image/x-afp+fs10
+     * image/x-afp+fs11
+     * image/x-afp+fs45
+     * image/x-afp+goca
+     * text/plain
+     * application/rtf
+     * text/richtext
+     * text/rtf
+     * application/mif
+     * image/svg+xml
+     * image/gif
+     * image/png
+     * image/jpeg
+     * image/tiff
+     * text/xsl
+     * image/x-emf
+     * </pre>
+     * 
+     * @author Thomas Schneider
      */
-    public static String[] xpath(String xmlFile, String xpath) {
-//        SAXParserFactory.newInstance();
-        XPath xPath = XPathFactory.newInstance().newXPath();
-        DocumentBuilderFactory domFactory = DocumentBuilderFactory.newInstance();
+    static byte[] fop(File srcFile, String mimeType, File xsltFile) {
         try {
-            domFactory.setNamespaceAware(true);
-            DocumentBuilder builder = domFactory.newDocumentBuilder();
-            Document doc = builder.parse(xmlFile);
+            StreamSource source = new StreamSource(srcFile);
+            // creation of transform source
+            StreamSource transformSource = new StreamSource(xsltFile);
+            // create an instance of fop factory
+            FopFactory fopFactory = FopFactory.newInstance();
+            // a user agent is needed for transformation
+            FOUserAgent foUserAgent = fopFactory.newFOUserAgent();
+            // to store output
+            ByteArrayOutputStream outStream = new ByteArrayOutputStream();
 
-            XPathExpression expr = xPath.compile(xpath);
-            //on standard expressions, a node-set will be returned
-            try {
-                NodeList nodes = (NodeList) expr.evaluate(doc, XPathConstants.NODESET);
-                String[] res = new String[nodes.getLength()];
-                Node n;
-                for (int i = 0; i < nodes.getLength(); i++) {
-                    n = nodes.item(i);
-                    res[i] = (n.getNodeValue() != null ? n.getNodeValue() : n.getTextContent());
-                    System.out.println(res[i]);
-                }
-                return res;
-            } catch(Exception  ex) {
-                //on e.g. count expressions, no node-set but a string will be returned
-                String result = (String) expr.evaluate(doc, XPathConstants.STRING);
-                System.out.println(result);
-                return new String[]{String.valueOf(result)};
-            }
+            Transformer xslfoTransformer = TransformerFactory.newInstance().newTransformer(transformSource);
+            // Construct fop with desired output format
+            Fop fop = fopFactory.newFop(mimeType, foUserAgent, outStream);
+
+            // ignore xsd informations in fo:root
+            fopFactory
+                .ignoreNamespace("http://www.w3.org/2001/XMLSchema-instance");
+
+            // Resulting SAX events (the generated FO)
+            // must be piped through to FOP
+            Result res = new SAXResult(fop.getDefaultHandler());
+
+            // Start XSLT transformation and FOP processing
+            // everything will happen here..
+            LOG.info("STARTE TRANSFORMATION...");
+            xslfoTransformer.transform(source, res);
+            LOG.info("TRANSFORMATION BEENDET...");
+            return outStream.toByteArray();
         } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    /**
+     * delegates to {@link #jasperReport(String, boolean, boolean, Map, Connection)}
+     */
+    public void jasperReport(String srcName, String outputFilename) throws Exception {
+        LOG.info("creating jasper report " + srcName);
+        byte[] stream = jasperReport(srcName, false, false, null, null);
+        FileUtil.write(new ByteArrayInputStream(stream), outputFilename);
+        LOG.info("jasper report " + srcName + " written to " + outputFilename);
+    }
+
+    /**
+     * jasperReport. for further informations, see http://www.tutorialspoint.com/jasper_reports/jasper_quick_guide.htm.
+     * @param srcName xml/jrxml or jasper file to be read. if it is an xml/jrxml, the flag compile should be true.
+     * @param compile
+     * @param xml if true, report will be written to xml - otherwise to pdf
+     * @param parameter (optional) extended parameters for jasper
+     * @param connection (optional) database connection if needed
+     * @return exported bytes to be saved or printed
+     */
+    @SuppressWarnings({ "unchecked", "rawtypes" })
+    public byte[] jasperReport(String srcName, boolean compile, boolean xml, Map parameter, Connection connection) {
+        InputStream inputStream = null;
+        try {
+            if (parameter == null) {
+                parameter = new HashMap();
+            }
+
+            inputStream = FileUtil.getFile(srcName);
+
+            if (compile) {
+                LOG.debug("Compiling report..");
+                ByteArrayOutputStream templateOutputStream = new ByteArrayOutputStream();
+                JasperCompileManager.compileReportToStream(inputStream, templateOutputStream);
+                inputStream = new ByteArrayInputStream(templateOutputStream.toByteArray());
+            }
+            JasperPrint print = JasperFillManager.fillReport(inputStream, parameter, connection);
+            ByteArrayOutputStream arrayOutputStream = new ByteArrayOutputStream();
+            
+            LOG.debug("Exporting..");
+            if (xml)
+                JasperExportManager.exportReportToXmlStream(print, arrayOutputStream);
+            else
+                JasperExportManager.exportReportToPdfStream(print, arrayOutputStream);
+            return arrayOutputStream.toByteArray();
+        } catch (Exception e) {
+            ManagedException.forward(e);
+            return null;
+        } finally {
+            if (inputStream != null)
+                try {
+                    inputStream.close();
+                } catch (IOException e) {
+                    ManagedException.forward(e);
+                }
+        }
+    }
+
+    /**
+     * delegates to {@link #xpath(String, InputStream, Class)}
+     */
+    public static <RESULTTYPE> RESULTTYPE xpath(String expression,
+            String fileName, Class<RESULTTYPE> resultType) {
+        try {
+            return xpath(expression, new FileInputStream(new File(fileName)), resultType);
+        } catch (FileNotFoundException e) {
             ManagedException.forward(e);
             return null;
         }
     }
-    
+
+    /**
+     * evaluates an xpath expression and returns its result
+     * 
+     * @param expression xpath expression
+     * @param stream input stream (mostly a FileInputStream)
+     * @param resultType result type to be returned. One of: {@link Map}, {@link Node}, {@link Number}, {@link Boolean},
+     *            {@link String}.
+     * @return result depending on the result type. if Map was specified, all result nodes and their child-nodes will be
+     *         put to the result map.
+     */
+    @SuppressWarnings({ "unchecked" })
+    private static <RESULTTYPE> RESULTTYPE xpath(String expression,
+            InputStream stream, Class<RESULTTYPE> resultType) {
+        DocumentBuilder builder;
+        try {
+            builder = DocumentBuilderFactory.newInstance().newDocumentBuilder();
+            Document xmlDocument = builder.parse(stream);
+
+            XPath xPath = XPathFactory.newInstance().newXPath();
+            // read a nodelist using xpath
+            if (resultType == null || Map.class.isAssignableFrom(resultType)) {
+                NodeList nodes = (NodeList) xPath.compile(expression).evaluate(
+                    xmlDocument, XPathConstants.NODESET);
+                Map<String, Object> result = new LinkedHashMap<String, Object>();
+                for (int i = 0; i < nodes.getLength(); i++) {
+                    Node n = nodes.item(i);
+                    add(n, result);
+                }
+                return (RESULTTYPE) result;
+            } else if (Node.class.isAssignableFrom(resultType)) {
+                return (RESULTTYPE) xPath.compile(expression).evaluate(xmlDocument, XPathConstants.NODE);
+            } else if (Boolean.class.isAssignableFrom(resultType)) {
+                return (RESULTTYPE) xPath.compile(expression).evaluate(xmlDocument, XPathConstants.BOOLEAN);
+            } else if (Number.class.isAssignableFrom(resultType)) {
+                return (RESULTTYPE) xPath.compile(expression).evaluate(xmlDocument, XPathConstants.NUMBER);
+            } else if (String.class.isAssignableFrom(resultType)) {
+                return (RESULTTYPE) xPath.compile(expression).evaluate(xmlDocument);
+            } else {
+                throw new IllegalArgumentException(
+                    "resulttype must be one of: Map, org.w3c.dom.Node, Boolean, Number, String or null!");
+            }
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    /**
+     * recursive nodes and child-nodes will be put to the given result map
+     * 
+     * @param n node to put its properties to the reuslt map
+     * @param result
+     */
+    private static void add(Node n, Map<String, Object> result) {
+        NodeList children = n.getChildNodes();
+        if (children.getLength() > 0) {
+            for (int i = 0; i < children.getLength(); i++) {
+                add(children.item(i), result);
+            }
+        } else {
+            Object v = n.getNodeValue();
+            result.put(n.getParentNode().getNodeName(), v != null ? v : n.getTextContent());
+        }
+    }
+
     public static final <T> T loadXml(String xmlFile, Class<T> type) {
         return loadXml(xmlFile, type, Environment.get(CompatibilityLayer.class), true);
     }
+
     @SuppressWarnings("unchecked")
-    public static final <T> T loadXml(String xmlFile, Class<T> type, CompatibilityLayer compLayer, boolean assignClassloader) {
+    public static final <T> T loadXml(String xmlFile,
+            Class<T> type,
+            CompatibilityLayer compLayer,
+            boolean assignClassloader) {
         //not available on android
         /*if (compLayer.isAvailable("javax.xml.bind.JAXB")) {
             return javax.xml.bind.JAXB.unmarshal(xmlFile, type);
@@ -171,6 +373,7 @@ public class XmlUtil {
 
     /**
      * only for internal use
+     * 
      * @param xmlFile
      * @param type
      * @return
@@ -183,7 +386,7 @@ public class XmlUtil {
             throw new RuntimeException(e);
         }
     }
-    
+
     public static final void saveXml(String xmlFile, Object obj) {
         CompatibilityLayer compLayer = Environment.get(CompatibilityLayer.class);
         //not available on android
@@ -193,18 +396,20 @@ public class XmlUtil {
             LOG.debug("saving file '" + xmlFile + "' with object '" + obj + "'");
             saveSimpleXml_(xmlFile, obj);
         } else {
-            FileUtil.saveXml((Serializable)obj, xmlFile);
+            FileUtil.saveXml((Serializable) obj, xmlFile);
         }
     }
 
     /**
      * only for internal use
+     * 
      * @param xmlFile
      * @param obj
      */
     public static void saveSimpleXml_(String xmlFile, Object obj) {
         try {
-            new org.simpleframework.xml.core.Persister(new Format("<?xml version=\"1.0\" encoding=\"UTF-8\"?>")).write(obj, new File(xmlFile));
+            new org.simpleframework.xml.core.Persister(new Format("<?xml version=\"1.0\" encoding=\"UTF-8\"?>")).write(
+                obj, new File(xmlFile));
             //workaround for empty files
             if (FileUtil.getFile(xmlFile).available() == 0)
                 new File(xmlFile).delete();

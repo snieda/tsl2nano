@@ -1,0 +1,4 @@
+<ant 
+<copy todir="${deployed_jre_dir}">
+  <fileset dir="${system_jre_dir}" excludesfile="jre_excludes.properties" 
+</copy>

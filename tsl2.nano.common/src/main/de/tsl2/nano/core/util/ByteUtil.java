@@ -12,6 +12,7 @@ package de.tsl2.nano.core.util;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.io.ObjectStreamClass;
@@ -126,5 +127,14 @@ public class ByteUtil extends Util {
      */
     public static final String amount(long c) {
         return c > 1200000000 ? (c / (1024*1024*1024)) + "GB" : c > 1200000 ? (c / (1024 * 1024)) + "MB" : c > 1200 ? (c / 1024) + "KB" : c + "b";
+    }
+    
+    /**
+     * getInputStream
+     * @param data
+     * @return
+     */
+    public static final InputStream getInputStream(byte[] data) {
+        return new ByteArrayInputStream(data);
     }
 }
