@@ -11,6 +11,7 @@ to create a new application-version, do the following:
  - change run.bat to start jar with new version number
 ========================================================================= -->
 <project default="distribute.2nano" name="distrubute.2nano">
+	<property file="../tsl2.nano.common/shell.properties" />
 	<property name="target.dir" value="../target" />
 	<property name="test.name" value="test.h5.sample" />
 	<property name="test.dir" value="${target.dir}/${test.name}" />
