@@ -73,7 +73,7 @@ import de.tsl2.nano.util.operation.Function;
 /**
  * basic tests for algorithms to be refactored to the project tsl2nano.common in future.
  * 
- * @author Thomas Schneider, Thomas Schneider
+ * @author Thomas Schneider
  * @version $Revision$
  */
 @SuppressWarnings({ "unchecked", "rawtypes", "serial" })

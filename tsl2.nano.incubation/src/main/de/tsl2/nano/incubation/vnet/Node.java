@@ -174,7 +174,7 @@ public class Node<T extends IListener<Notification> & ILocatable & Serializable 
             }
         }
         Net.log("node " + this
-            + " is ready to working (after waiting for "
+            + " is ready to work (after waiting for "
             + (System.currentTimeMillis() - start)
             + " msec");
     }
