@@ -235,7 +235,7 @@ public class NetUtil {
 
     static String getFileName(URL url) {
         String f = url.getFile();
-        return Util.isEmpty(f) ? NetUtil.URL_STANDARDFILENAME : FileUtil.getValidFileName(f);
+        return Util.isEmpty(f) ? NetUtil.URL_STANDARDFILENAME : FileUtil.getValidPathName(f);
     }
 
     public static void wcopy(String url, String dir, String include, String exclude) {
