@@ -1,0 +1,61 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project default="all" name="analysis">
+
+	<!--  Allgemeine Konfiguration -->
+	<target name="all" depends="findbugs,pmd,cpd,checkstyle" />
+
+	<path id="ana.java.src.path">
+		<fileset id="ana.java.src.dir" dir="..">
+			<include name="**/*.java" />
+		</fileset>
+	</path>
+
+	<!-- Findbugs -->
+	<property name="findbugs.home" value="ci/findbugs" />
+	<path id="findbugs-jar">
+		<pathelement path="${findbugs.home}/findbugs-ant.jar" />
+	</path>
+	<taskdef name="findbugs" classname="edu.umd.cs.findbugs.anttask.FindBugsTask" classpathref="findbugs-jar" />
+	<target name="findbugs">
+		<findbugs home="${findbugs.home}" output="xml:withMessages" outputFile="ci/findbugs.xml">
+			<sourcePath path="../${project.name}/src/main" />
+			<class location="../${project.name}/bin" />
+		</findbugs>
+	</target>
+
+
+	<!-- PMD -->
+	<path id="pmd.classpath">
+		<pathelement location="${build}" />
+		<fileset dir="ci/pmd">
+			<include name="*.jar" />
+		</fileset>
+	</path>
+	<taskdef name="pmd" classname="net.sourceforge.pmd.ant.PMDTask" classpathref="pmd.classpath" />
+	<target name="pmd">
+		<pmd rulesetfiles="rulesets/favorites.xml">
+			<formatter type="xml" toFile="ci/pmd.xml" />
+			<fileset refid="ana.java.src.dir" />
+		</pmd>
+	</target>
+
+
+	<!-- CPD -->
+	<taskdef name="cpd" classname="net.sourceforge.pmd.cpd.CPDTask" classpathref="pmd.classpath" />
+	<target name="cpd">
+		<cpd minimumTokenCount="100" ignoreLiterals="true" encoding="ISO-8859-15" format="xml" language="java" outputFile="ci/cpd.xml">
+			<fileset refid="ana.java.src.dir" />
+		</cpd>
+	</target>
+
+
+	<!-- Checkstyle -->
+	<taskdef resource="checkstyletask.properties" classpath="ci/checkstyle/checkstyle-5.3-all.jar" />
+	<target name="checkstyle">
+		<checkstyle config="ci/checkstyle/sun_checks.xml" failOnViolation="false">
+			<fileset refid="ana.java.src.dir" />
+			<formatter type="xml" toFile="ci/checkstyle.xml" />
+		</checkstyle>
+	</target>
+
+</project>

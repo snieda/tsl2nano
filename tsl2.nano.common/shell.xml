@@ -17,7 +17,7 @@ some internals:
  - all system environment and java vars will be accessed through
    namespace 'sh'. e.g. srcdir will be sh.srcdir
  - it is possible to set properties in shell.properties
- - it is possible to disable targets with 'disable_' + target-name
+ - it is possible to disable targets with 'sh.disable' + target-name
    this enables condition-like working.
  - standard classpath will be the current dir including all files
  - if vars are not defined, default values will be used:
@@ -39,7 +39,7 @@ some internals:
 		<format property="tstamp" pattern="yyyyMMdd-HHmm" />
 	</tstamp>
 
-	<target name="help" description="help overview" unless="disable_help">
+	<target name="help" description="help overview" unless="sh.disable.help">
 		<!-- <echoproperties/> -->
 		<echo message="@{description}">
 		</echo>
@@ -56,7 +56,7 @@ some internals:
 		jaxb.schemagen
 		-->
 	</target>
-	<target name="man" unless="disable_man">
+	<target name="man" unless="sh.disable.man">
 		<antcall target="sh.xml.xpath">
 			<param name="sh.xml.xpath.file" value="${basedir}/shell.xml" />
 			<param name="sh.xml.xpath.expression" value="//target/@concat(//target/@name,': ',//target/@description)" />
@@ -97,7 +97,7 @@ some internals:
 		</sequential>
 	</macrodef>
 -->
-	<target name="sh.jar" unless="disable_sh.jar" description="packs files into a zip-encoded file">
+	<target name="sh.jar" unless="sh.disable.jar" description="packs files into a zip-encoded file">
 		<!-- fallbacks -->
 		<property name="sh.jar.srcdir" value="./" />
 		<property name="sh.jar.include" value="**" />
@@ -110,6 +110,7 @@ some internals:
 		<property name="sh.jar.exclude4" value="EXCLUDING_EXPRESSION3" />
 		<property name="sh.jar.destination" value="${basedir}.jar" />
 		<property name="sh.jar.manifest" value="${sh.java.manifest.file}" />
+
 		<!-- start it -->
 		<sh.jar sh.jar.srcdir="${sh.jar.srcdir}" sh.jar.include="${sh.jar.include}" sh.jar.include2="${sh.jar.include2}" sh.jar.include3="${sh.jar.include3}" sh.jar.include4="${sh.jar.include4}" sh.jar.exclude="${sh.jar.exclude}" sh.jar.exclude2="${sh.jar.exclude2}" sh.jar.exclude3="${sh.jar.exclude3}" sh.jar.exclude4="${sh.jar.exclude4}" sh.jar.destination="${sh.jar.destination}" sh.jar.manifest="${sh.jar.manifest}" />
 	</target>
@@ -129,7 +130,7 @@ some internals:
 		<attribute name="sh.jar.manifest" />
 
 		<sequential>
-			<jar destfile="@{sh.jar.destination}" manifest="${sh.jar.manifest}" update="true">
+			<jar destfile="@{sh.jar.destination}" manifest="@{sh.jar.manifest}" update="true">
 				<fileset dir="@{sh.jar.srcdir}">
 					<include name="@{sh.jar.include}" />
 					<include name="@{sh.jar.include2}" />
@@ -151,7 +152,7 @@ some internals:
 	     -     unjar.include    : expr. for packed files to include (if not defined, all is inlcluded)
 	     -     unjar.exclude    : expr. for packed files to exclude (if not defined, nothing is excluded)
 	-->
-	<target name="sh.unjar" unless="disable_sh.unjar" description="unpacks a zip-encoded file">
+	<target name="sh.unjar" unless="sh.disable.unjar" description="unpacks a zip-encoded file">
 		<!-- if not defined, use some defaults ... -->
 		<property name="sh.unjar.srcdir" value="${basedir}" />
 		<property name="sh.unjar.destination" value="${sh.unjar.srcdir}" />
@@ -186,7 +187,7 @@ target: sh.copy
 	     -     copy.include    : expr. for files to include (if not defined, all is inlcluded)
 	     -     copy.exclude    : expr. for files to exclude (if not defined, nothing is excluded)
 	</description>
-	<target name="sh.copy" unless="disable_sh.copy" description="copies a given fileset to a directory">
+	<target name="sh.copy" unless="sh.disable.copy" description="copies a given fileset to a directory">
 		<!-- if not defined, use some defaults ... -->
 		<property name="sh.copy.srcdir" value="${basedir}" />
 		<property name="sh.copy.destination" value="${user.home}/sh.copy" />
@@ -225,7 +226,7 @@ target: sh.delete
 	     -     delete.include    : expr. for files to include (if not defined, all is inlcluded)
 	     -     delete.exclude    : expr. for files to exclude (if not defined, nothing is excluded)
 	</description>
-	<target name="sh.delete" unless="disable_sh.delete" description="deletes a given fileset">
+	<target name="sh.delete" unless="sh.disable.delete" description="deletes a given fileset">
 		<!-- if not defined, use some defaults ... -->
 		<property name="sh.delete.srcdir" value="${basedir}" />
 		<property name="sh.delete.include" value="**" />
@@ -250,14 +251,14 @@ target: sh.delete
 	</macrodef>
 
 	<!-- does a check, if src and dest are equal - then move will not be called! -->
-	<target name="sh.move" unless="disable_sh.move" description="copies and deletes directory">
+	<target name="sh.move" unless="sh.disable.move" description="copies and deletes directory">
 		<property name="sh.stepover.description" value="steping over task move because sh.move.srcdir and sh.move.destination are equal!" />
 		<condition property="sh.antcall.target.name" value="sh.stepover" else="sh.move.internal">
 			<equals arg1="${sh.move.srcdir}" arg2="${sh.move.destination}" />
 		</condition>
 		<antcall target="${sh.antcall.target.name}" />
 	</target>
-	<target name="sh.move.internal" unless="disable_sh.move" description="copies and deletes directory">
+	<target name="sh.move.internal" unless="sh.disable.move" description="copies and deletes directory">
 		<property name="sh.copy.srcdir" value="${sh.move.srcdir}" />
 		<property name="sh.copy.destination" value="${sh.move.destination}" />
 		<antcall target="sh.copy" />
@@ -281,11 +282,11 @@ target: sh.delete
 		<echo message="${sh.stepover.description}" />
 	</target>
 
-	<target name="sh.find.files" unless="disable_sh.find.files" description="not implemented yet">
+	<target name="sh.find.files" unless="sh.disable.find.files" description="not implemented yet">
 		<fail message="not implemented. Overwrite in your build file" />
 	</target>
 
-	<target name="sh.regexp.replace" unless="disable_sh.regexp.replace" description="does a search/replace on given regexp and fileset">
+	<target name="sh.regexp.replace" unless="sh.disable.regexp.replace" description="does a search/replace on given regexp and fileset">
 		<!-- if not defined, use some defaults ... -->
 		<property name="sh.regexp.srcdir" value="${basedir}" />
 		<property name="sh.regexp.include" value="**" />
@@ -314,7 +315,7 @@ target: sh.delete
 		</sequential>
 	</macrodef>
 
-	<target name="sh.ftp" unless="disable_sh.ftp" description="starts an ftp session to get/put files to given host">
+	<target name="sh.ftp" unless="sh.disable.ftp" description="starts an ftp session to get/put files to given host">
 		<ftp action="${sh.ftp.action}" binary="${sh.ftp.binary}" port="${sh.ftp.port}" password="${sh.ftp.passwd}" server="${sh.ftp.server}" userid="${sh.ftp.user}">
 			<fileset dir="${sh.ftp.dir}">
 				<include name="${sh.ftp.include}" />
@@ -322,11 +323,11 @@ target: sh.delete
 		</ftp>
 	</target>
 
-	<target name="sh.script" unless="disable_sh.script" description="starts language scripts">
+	<target name="sh.script" unless="sh.disable.script" description="starts language scripts">
 		<script classpathref="sh.classpath.id" language="${sh.script.language}" src="${sh.script.dir}/${sh.script.includes}" />
 	</target>
 
-	<target name="sh.sql" unless="disable_sh.sql" description="starts sql scripts">
+	<target name="sh.sql" unless="sh.disable.sql" description="starts sql scripts">
 		<!-- if not defined, use some defaults ... -->
 		<property name="sh.sql.dir" value="${basedir}" />
 		<property name="sh.sql.include" value="*.sql" />
@@ -358,24 +359,40 @@ starting ${ant.project.name}:
 
 	</target>
 
-	<target name="sh.sleep" unless="disable_sh.sleep" description="sleeps for given milliseconds">
+	<target name="sh.sleep" unless="sh.disable.sleep" description="sleeps for given milliseconds">
 		<echo message="sleeping for ${sh.sleep.milliseconds} milliseconds..." />
 		<sleep milliseconds="${sh.sleep.milliseconds}" />
 	</target>
 
-	<target name="sh.clean" unless="disable_sh.clean" description="cleans all binaries">
+	<target name="sh.init" unless="sh.disable.init" description="creates all java project directories">
+		<mkdir dir="${sh.java.lib.dir}" />
+		<mkdir dir="${sh.java.bin.dir}" />
+		<mkdir dir="${sh.java.target.dir}" />
+	</target>
+	
+	<target name="sh.clean" unless="sh.disable.clean" depends="sh.init" description="cleans all binaries">
 		<!-- fallbacks -->
 		<property name="sh.clean.basedir" value="${basedir}" />
 		<property name="sh.clean.bin.dir" value="${sh.java.bin.dir}" />
 		<property name="sh.clean.target.dir" value="${sh.java.target.dir}" />
 		<echo message="cleaning ${sh.clean.bin.dir} and ${sh.clean.target.dir}" />
-		<delete dir="${sh.clean.basedir}">
-			<fileset dir="${sh.clean.bin.dir}" />
-			<fileset dir="${sh.clean.target.dir}" />
-		</delete>
+		<sh.clean sh.clean.basedir="${sh.clean.basedir}" sh.clean.bin.dir="${sh.clean.bin.dir}" sh.clean.target.dir="${sh.clean.target.dir}" />
 	</target>
 
-	<target name="sh.compile" unless="disable_sh.compile" description="compiles java sources to class files">
+	<!-- defining a macro to be able to call it multiple times -->
+	<macrodef name="sh.clean" description="cleans all binaries">
+		<attribute name="sh.clean.basedir" />
+		<attribute name="sh.clean.bin.dir" />
+		<attribute name="sh.clean.target.dir" />
+		<sequential>
+			<delete>
+				<fileset dir="@{sh.clean.bin.dir}" />
+				<fileset dir="@{sh.clean.target.dir}" />
+			</delete>
+		</sequential>
+	</macrodef>
+
+	<target name="sh.compile" unless="sh.disable.compile" description="compiles java sources to class files">
 		<!-- if not defined, use some defaults ... -->
 		<property name="sh.compile.include" value="**" />
 		<property name="sh.compile.exclude" value="EXCLUDING_EXPRESSION" />
@@ -390,8 +407,10 @@ starting ${ant.project.name}:
 		<property name="sh.compile.classpath4" value="${sh.compile.classpath}" />
 		<property name="sh.compile.debug" value="false" />
 		<property name="sh.compile.cargs" value="-nowarn" />
+		<property name="sh.compile.encoding" value="${sh.java.encoding}" />
+		
 		<!-- start it -->
-		<sh.compile sh.compile.srcdir="${sh.compile.srcdir}" sh.compile.srcdir2="${sh.compile.srcdir2}" sh.compile.srcdir3="${sh.compile.srcdir3}" sh.compile.srcdir4="${sh.compile.srcdir4}" sh.compile.include="${sh.compile.include}" sh.compile.exclude="${sh.compile.exclude}" sh.compile.bindir="${sh.compile.bindir}" sh.compile.classpath="${sh.compile.classpath}" sh.compile.classpath2="${sh.compile.classpath2}" sh.compile.classpath3="${sh.compile.classpath3}" sh.compile.classpath4="${sh.compile.classpath4}" sh.compile.debug="${sh.compile.debug}" sh.compile.extdirs="${sh.compile.extdirs}" sh.compile.cargs="${sh.compile.cargs}" />
+		<sh.compile sh.compile.srcdir="${sh.compile.srcdir}" sh.compile.srcdir2="${sh.compile.srcdir2}" sh.compile.srcdir3="${sh.compile.srcdir3}" sh.compile.srcdir4="${sh.compile.srcdir4}" sh.compile.include="${sh.compile.include}" sh.compile.exclude="${sh.compile.exclude}" sh.compile.bindir="${sh.compile.bindir}" sh.compile.classpath="${sh.compile.classpath}" sh.compile.classpath2="${sh.compile.classpath2}" sh.compile.classpath3="${sh.compile.classpath3}" sh.compile.classpath4="${sh.compile.classpath4}" sh.compile.debug="${sh.compile.debug}" sh.compile.extdirs="${sh.compile.extdirs}" sh.compile.cargs="${sh.compile.cargs}" sh.compile.encoding="${sh.compile.encoding}" />
 	</target>
 
 	<!-- defining a macro to be able to call it multiple times -->
@@ -410,6 +429,7 @@ starting ${ant.project.name}:
 		<attribute name="sh.compile.extdirs" />
 		<attribute name="sh.compile.cargs" />
 		<attribute name="sh.compile.debug" />
+		<attribute name="sh.compile.encoding" />
 		<sequential>
 			<mkdir dir="@{sh.compile.bindir}" />
 			<!-- 'optimize is true, if debug is false and vice versa -->
@@ -418,7 +438,7 @@ starting ${ant.project.name}:
 			</condition>
 			<property name="optimize" value="true" />
 
-			<javac destdir="@{sh.compile.bindir}" listfiles="@{sh.compile.debug}" depend="true" debuglevel="lines,vars,source" verbose="@{sh.compile.debug}" nowarn="true" optimize="${optimize}" debug="@{sh.compile.debug}" extdirs="@{sh.compile.extdirs}">
+			<javac destdir="@{sh.compile.bindir}" listfiles="@{sh.compile.debug}" depend="true" debuglevel="lines,vars,source" verbose="@{sh.compile.debug}" nowarn="true" optimize="${optimize}" debug="@{sh.compile.debug}" extdirs="@{sh.compile.extdirs}" encoding="@{sh.compile.encoding}">
 				<classpath>
 					<fileset dir="@{sh.compile.classpath}">
 						<include name="**/*.jar" />
@@ -448,7 +468,7 @@ starting ${ant.project.name}:
 		</sequential>
 	</macrodef>
 
-	<target name="sh.java" unless="disable_sh.java" description="starts a given java main method (default: junit)">
+	<target name="sh.java" unless="sh.disable.java" description="starts a given java main method (default: junit)">
 		<!-- if not defined, use some defaults ... -->
 		<property name="sh.java.bindir" value="bin" />
 		<property name="sh.java.classpath" value="lib" />
@@ -525,14 +545,14 @@ starting ${ant.project.name}:
 		</sequential>
 	</macrodef>
 
-	<target name="sh.call.method" unless="disable_sh.call.method" description="calls a given java method">
+	<target name="sh.call.method" unless="sh.disable.call.method" description="calls a given java method">
 		<property name="sh.java.classname" value="de.tsl2.nano.bean.BeanUtil" />
 		<antcall target="sh.java">
 		</antcall>
 	</target>
 
 	<!-- standard shell command -->
-	<target name="sh.exec" unless="disable_sh.exec">
+	<target name="sh.exec" unless="sh.disable.exec">
 		<property name="sh.exec.dir" value="${basedir}" />
 		<exec dir="${sh.exec.dir}" command="${sh.exec.command}" />
 	</target>
@@ -559,14 +579,14 @@ starting ${ant.project.name}:
 		</exec>
 	</target>
 
-	<target name="sh.encode.base64" unless="disable_sh.encode.base64" description="encode perhaps a binary to base64-text">
+	<target name="sh.encode.base64" unless="sh.disable.encode.base64" description="encode perhaps a binary to base64-text">
 		<antcall target="sh.call.method">
 			<param name="arg1" value="de.tsl2.nano.core.util.FileUtil" />
 			<param name="arg2" value="encodeBase64" />
 		</antcall>
 	</target>
 
-	<target name="sh.decode.base64" unless="disable_sh.decode_base64" description="decode a base64-text to its original form (perhaps binary)">
+	<target name="sh.decode.base64" unless="sh.disable.decode_base64" description="decode a base64-text to its original form (perhaps binary)">
 		<antcall target="sh.call.method">
 			<param name="arg1" value="de.tsl2.nano.core.util.FileUtil" />
 			<param name="arg2" value="decodeBase64" />
@@ -632,9 +652,56 @@ starting ${ant.project.name}:
 		<exec dir="${sh.java.res.dir}" command="xjc -d ${sh.java.gen.dir} ${sh.jaxb.xjc.classname}.xsd" />
 	</target>
 
+	<target name="sh.junit" unless="sh.disable.junit" description="do junit test on given fileset">
+		<!-- fallbacks -->
+		<property name="sh.junit.test.dir" value="${sh.java.test.dir}" />
+		<property name="sh.junit.target.dir" value="${sh.java.target.dir}" />
+		<property name="sh.junit.include" value="**/*Test.java" />
+		
+		<mkdir dir="${sh.junit.target.dir}/junit/report"/>
+		<sh.junit sh.junit.test.dir="${sh.junit.test.dir}" sh.junit.target.dir="${sh.junit.target.dir}" sh.junit.include="${sh.junit.include}" />
+	</target>
+
+	<macrodef name="sh.junit">
+		<attribute name="sh.junit.test.dir" />
+		<attribute name="sh.junit.target.dir" />
+		<attribute name="sh.junit.include" />
+		<sequential>
+			<!-- if not defined ... use fallback -->
+			<echo message="doing junit on ${basedir}" />
+			<property name="junittest.exclude" value="**/BaseServiceTest.java" />
+			<junit fork="false" printsummary="true" showoutput="true">
+				<classpath>
+					<fileset dir="${basedir}/../">
+						<include name="**/*.jar" />
+						<include name="**/target/*.jar" />
+					</fileset>
+				</classpath>
+				<formatter type="xml" />
+				<batchtest todir="${sh.junit.target.dir}">
+					<fileset dir="@{sh.junit.test.dir}">
+						<include name="@{sh.junit.include}" />
+						<include name="**/*JUnit.java" />
+						<exclude name="${junittest.exclude}" />
+					</fileset>
+				</batchtest>
+			</junit>
+			<junitreport todir="${sh.junit.target.dir}/junit" tofile="testsuite.xml">
+				<fileset dir="${sh.junit.target.dir}/junit">
+					<include name="TEST*.xml" />
+				</fileset>
+				<report format="frames" todir="${sh.junit.target.dir}/junit/report" />
+			</junitreport>
+			<antcall target="sh.exec">
+				<param name="sh.exec.dir" value="${sh.junit.target.dir}/junit/report" />
+				<param name="sh.exec.command" value="index.html" />
+			</antcall>
+		</sequential>
+	</macrodef>
+
 	<!-- THE CODE BELOW IS UNTESTED YET -->
 
-	<target name="sh.mail" unless="disable_sh.mail" description="send mail with attachments">
+	<target name="sh.mail" unless="sh.disable.mail" description="send mail with attachments">
 		<property name="sh.mail.user" value="testuser" />
 		<property name="sh.mail.subject" value="shell-test" />
 		<property name="sh.mail.host" value="mail.yahoo.com" />
@@ -655,20 +722,8 @@ starting ${ant.project.name}:
 			</fileset>
 		</mail>
 	</target>
-	<target name="sh.junit" unless="disable_sh.junit" description="do junit test on given fileset">
-		<!-- fallbacks -->
-		<property name="sh.junit.dir" value="${sh.java.test.dir}" />
-		<property name="sh.junit.target.dir" value="${sh.java.target.dir}" />
-		<property name="sh.junit.filter" value="**/*Test.java" />
-		<junit printsummary="on">
-			<fileset dir="${sh.junit.dir">
-				<include name="${sh.junit.filter}" />
-			</fileset>
-			<test todir="${sh.junit.target.dir}" />
-		</junit>
-	</target>
 
-	<target name="sh.telnet" unless="disable_sh.telnet" description="open a telnet session and read/write data">
+	<target name="sh.telnet" unless="sh.disable.telnet" description="open a telnet session and read/write data">
 		<property name="sh.telnet.server" value="localhost" />
 		<property name="sh.telnet.port" value="8080" />
 		<property name="sh.telnet.user" value="anonymous" />
@@ -677,7 +732,7 @@ starting ${ant.project.name}:
 		</telnet>
 	</target>
 
-	<target name="sh.wiki" unless="disable_sh.wiki" description="create html from textile-wiki">
+	<target name="sh.wiki" unless="sh.disable.wiki" description="create html from textile-wiki">
 		<property name="sh.wiki.dir" value="${basedir}" />
 		<property name="sh.wiki.include" value="**/*.textile" />
 		<property name="sh.wiki.exclude" value="EXCLUDE" />
@@ -689,7 +744,7 @@ starting ${ant.project.name}:
 		</wikitext-to-html>
 	</target>
 
-	<target name="sh.xml.validate" unless="disable_sh.validate" description="validate an xml file">
+	<target name="sh.xml.validate" unless="sh.disable.validate" description="validate an xml file">
 		<property name="sh.xml.validate.srcdir" value="${basedir}" />
 		<property name="sh.xml.validate.include" value="**" />
 		<property name="sh.xml.validate.exclude" value="EXCLUDEEXPRESSION" />
@@ -701,7 +756,7 @@ starting ${ant.project.name}:
 		</xmlvalidate>
 	</target>
 
-	<target name="sh.xml.xpath" unless="disable_sh.xml.xpath" description="do an xpath query">
+	<target name="sh.xml.xpath" unless="sh.disable.xml.xpath" description="do an xpath query">
 		<!--		<property name="arg3" value="shell.xml" />
 		<property name="arg4" value="count(//target)" /> -->
 		<antcall target="sh.call.method">
@@ -712,7 +767,7 @@ starting ${ant.project.name}:
 		</antcall>
 	</target>
 
-	<target name="sh.xml.xslt" unless="disable_sh.xslt" description="do xsl transformations on xml files">
+	<target name="sh.xml.xslt" unless="sh.disable.xslt" description="do xsl transformations on xml files">
 		<property name="sh.xml.xslt.style" value="transform.xsl" />
 		<property name="sh.xml.xslt.dir" value="${basedir}" />
 		<property name="sh.xml.xslt.include" value="**/*.xml" />
@@ -721,7 +776,7 @@ starting ${ant.project.name}:
 		</xslt>
 	</target>
 
-	<target name="sh.xml.velocity" unless="disable_sh.velocity" description="do velocity transformations with template and object infos">
+	<target name="sh.xml.velocity" unless="sh.disable.velocity" description="do velocity transformations with template and object infos">
 		<property name="sh.xml.velocity.template" value="template.vm" />
 		<antcall target="sh.call.method">
 			<param name="arg1" value="de.tsl2.nano.core.util.XmlUtil" />
@@ -730,7 +785,7 @@ starting ${ant.project.name}:
 		</antcall>
 	</target>
 
-	<target name="sh.foreach" unless="disable_sh.foreach" description="executes a shell command for a given fileset">
+	<target name="sh.foreach" unless="sh.disable.foreach" description="executes a shell command for a given fileset">
 		<!-- fallbacks -->
 		<antcall target="sh.input">
 			<param name="sh.input.name" value="sh.foreach.command" />
@@ -828,7 +883,7 @@ starting ${ant.project.name}:
 	<!-- <target name="sh.build.timestamp">
 		<buildnumber file="${sh.build.property.file}"/>
 	</target>-->
-	<target name="sh.build" unless="disable_sh.build" depends="sh.printinfo" description="do a standard java build">
+	<target name="sh.build" unless="sh.disable.build" depends="sh.printinfo" description="do a standard java build">
 		<!-- fallbacks -->
 		<property name="sh.build.basedir" value="${basedir}" />
 		<property name="sh.build.name" value="${sh.build.basedir}" />
@@ -898,6 +953,6 @@ starting ${ant.project.name}:
 	</target>
 
 	<!-- calls the sh.build target after clean, runs junit tests -->
-	<target name="sh.build.full" depends="sh.clean, sh.build, sh.junit">
+	<target name="sh.build.full" depends="sh.clean, sh.compile, sh.build, sh.junit">
 	</target>
 </project>
