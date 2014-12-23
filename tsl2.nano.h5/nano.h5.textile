@@ -1555,6 +1555,42 @@ Other restrictions on android:
 * adding eclipse-link to the apk file results in error: _Unable to execute dex: method ID not in [0, 0xffff]: 65536_
 **  Your project is too large. You have to many methods. There can only be 65536 methods per application. see here https://code.google.com/p/android/issues/detail?id=7147#c6
 
+## Tutorials
+
+### Starting from beginning with a new project
+
+#### Creating a new data model
+
+##### Introduction
+
+I've looked for free solutions to create a data model through a java application - or better through an online html5 application. UML-2 using stereotypes to define entity relationship informations would be my first selection. ArgoUML 0.34 is such a java application - but since its development was stopped, i preferred another tool, that is directly done to create ER models: The SQL Power Architect: http://www.sqlpower.ca/page/download?fileName=http://download.sqlpower.ca/architect/1.0.7/community.
+All the found online tools have constraints, so they are not usable in a free way:
+
+Here is a list of currently available browser solutions to create model graphs:
+
+* https://wiki.postgresql.org/wiki/Community_Guide_to_PostgreSQL_GUI_Tools
+** http://www.jrromero.net/tools/jsUML2
+** Gliffy
+** Creatly.com
+** Diagram.ly
+** LucidChart
+** MxGraph (jGraph)
+
+##### The Model
+
+* Please downlad SQL Power Architect from http://www.sqlpower.ca/page/download?fileName=http://download.sqlpower.ca/architect/1.0.7/community.
+* After extracting it and starting the architect.jar file, you can directly start modelling through a click on right mouse button and selecting 'new table'.
+* Create your model (using 'T' for a new table and 'C' for a new column)
+* Hit Menu 'Create SQL Script' using the defaults and saving the shown sql script into your tsl2.nano.h5 environment directory 'anyway' with name 'anyway.sql'.
+* Go into this environment directory and start the script 'mda' with parameter 'anyway'.
+
+TODO
+
+
+
+
+
+
 ## Known Problems and some Solutions
 
 * Performance going down:
@@ -1819,6 +1855,10 @@ Other restrictions on android:
 ** wähler: menuitem
 ** verteiler: vNet
 * UNDO, MARCRO
+* avoid dump of bean PersistenceUI$8 < simple-xml exception
+* create shell like main()-methods on util classes
+** getjar, crypt, print, net, XmlUtil, currencyUtil, ByteUtil, Profiler, ConcurrentUtil, SchedulerUtil, GeneratorUtility, NumericConditionedOperator
+** ScriptTool/Util, RulePool, neuron, routing, workflow, equationsolver, vector3d
 
 * *Refactorings:*
 ** AttributeDefinition --> Attribute
@@ -1828,6 +1868,17 @@ Other restrictions on android:
 ** Value soll Attribute referenzieren und nicht erben
 
 * *mybook: wcopy + concat files(date) + fop:xhtml2fo.xsl*
+
+h3. Tools
+
+h4. invader
+
+Source: collection of strings
+Transf: action to transform source-string
+swap  : whether to swap keys and values
+Dest  : property map with: source-string=transformation
+Trial : action on each dest-key, checking if action-result equals key-value
+      : distributing the work to many stations
 
 h3. list of data-sources: 
 

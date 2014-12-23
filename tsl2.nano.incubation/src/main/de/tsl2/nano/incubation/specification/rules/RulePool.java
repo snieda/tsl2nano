@@ -11,9 +11,6 @@ package de.tsl2.nano.incubation.specification.rules;
 
 import de.tsl2.nano.incubation.specification.Pool;
 
-
-
-
 /**
  * Holds all defined rules. Reading existing rules from directory.
  * 
