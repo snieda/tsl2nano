@@ -29,7 +29,7 @@
 			<property name="hibernate.dialect" value="${hibernate.dialect}" />
 			<property name="hibernate.archive.autodetection" value="class"/>
 			<!-- <property name="hibernate.ejb.cfgfile" value="/hibernate.cfg.xml" /> -->
-			<!-- <property name="hibernate.hbm2ddl.auto" value="create"/>  -->
+			<property name="hibernate.hbm2ddl.auto" value="${autoddl}"/>
 			<property name="hibernate.show_sql" value="true"/>
 			<property name="hibernate.format_sql" value="true"/>
 			<property name="hibernate.use_sql_comments" value="true"/>
@@ -56,6 +56,7 @@
 		    <property name="openjpa.ConnectionUserName" value="${connection.username}"/>
 		    <property name="openjpa.ConnectionPassword" value="${connection.password}"/> -->
 		    
+		    <property name="openjpa.jdbc.SynchronizeMappings" value="${autoddl}"/>
 		    <property name="openjpa.Log" value="DefaultLevel=INFO, Runtime=INFO, Tool=TRACE"/>
 			<property name="openjpa.RuntimeUnenhancedClasses" value="supported"/>
 			<property name="openjpa.DynamicEnhancementAgent" value="true" />
@@ -66,9 +67,10 @@
             <property name="toplink.jdbc.user" value="${connection.username}"/>
             <property name="toplink.jdbc.password" value="${connection.password}"/>
             <property name="toplink.logging.level" value="FINE"/>
-            <property name="toplink.weaving" value="false"/>
+            <!-- lazy fetching of OneToMany and OneToOne -->
+            <property name="toplink.weaving" value="true"/>
             <property name="toplink.target-database" value="Oracle"/>
-			<!-- <property name="toplink.ddl-generation" value="drop-and-create-tables"/> -->
+			<property name="toplink.ddl-generation" value="${autoddl}"/>
 			<!-- if you work with generated ids using sequences (used by AUTO mode, too), toplink
 			     needs the following database table:
 				CREATE TABLE SEQUENCE

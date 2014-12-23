@@ -41,8 +41,8 @@ public class Persistence implements Serializable {
     protected String provider = "org.hibernate.ejb.HibernatePersistence";
     protected String jtaDataSource = "<UNDEFINED>";
     protected String jarFile = "beans.jar";
-    protected String connectionDriverClass = "org.hsqldb.jdbcDriver";
-    protected String connectionUrl = "jdbc:hsqldb:hsql://localhost:9003";
+    protected String connectionDriverClass = STD_LOCAL_DATABASE_DRIVER;
+    protected String connectionUrl = STD_LOCAL_DATABASE_URL;
     protected String connectionUserName = "";
     protected String connectionPassword = "";
     protected String hibernateDialect = "org.hibernate.dialect.HSQLDialect";
@@ -53,7 +53,8 @@ public class Persistence implements Serializable {
     private Persistence replication;
     /** One of 'hbm2java' or 'openjpa-reverse-eng' */
     private String generator = GEN_HIBERNATE;
-    
+    /** whether to enable auto-ddl creation of the current provider. possible values: false, validate, update, create, create-drop */
+    private String autoddl = "false";
     /** jdbc connection properties - used by ejb creator */
     public static final String FILE_JDBC_PROP_FILE = "jdbc-connection.properties";
     /** xml serialization of Persistence object */
@@ -66,6 +67,10 @@ public class Persistence implements Serializable {
 
     public static final String GEN_HIBERNATE = "hibernate-tools";
     public static final String GEN_OPENJPA = "openjpa-reverse-eng";
+    
+    public static final String STD_LOCAL_DATABASE_DRIVER = "org.hsqldb.jdbcDriver";
+    public static final String STD_LOCAL_DATABASE_URL = "jdbc:hsqldb:hsql://localhost:9003";
+    
     /**
      * constructor
      */
@@ -332,6 +337,8 @@ public class Persistence implements Serializable {
         
         //WORKAROUND FUER OPENJPA REVERSE ENGENINEERING
         put(prop, "openjpa.provider", "org.apache.openjpa.persistence.PersistenceProviderImpl");
+
+        put(prop, "autoddl", getAutoddl());
         
         put(prop, "javax.persistence.provider", getProvider());
         put(prop, "javax.persistence.jdbc.driver", getConnectionDriverClass());
@@ -348,8 +355,8 @@ public class Persistence implements Serializable {
         put(prop, "jdbc.url", getConnectionUrl());
         put(prop, "jdbc.username", getConnectionUserName());
         put(prop, "jdbc.password", getConnectionPassword());
-        put(prop, "jdbc.database", "xe");
-        put(prop, "jdbc.port", "1521");
+        put(prop, "jdbc.database", database);
+        put(prop, "jdbc.port", port);
         put(prop, "jdbc.scheme", getDefaultSchema());
         return prop;
     }
@@ -398,6 +405,7 @@ public class Persistence implements Serializable {
         put(prop, "connection.url", getConnectionUrl());
         put(prop, "connection.username", getConnectionUserName());
         put(prop, "connection.password", getConnectionPassword());
+        put(prop, "autoddl", getAutoddl());
     }
 
     /**
@@ -473,6 +481,43 @@ public class Persistence implements Serializable {
      */
     public void setGenerator(String generator) {
         this.generator = generator;
+    }
+
+    /**
+     * @return Returns the autoddl.
+     */
+    public String getAutoddl() {
+        if (provider.contains("toplink")) {
+            if (autoddl.equals("false"))
+                return "none";
+            else if (autoddl.equals("validate"))
+                return "none";
+            else if (autoddl.equals("update"))
+                return "create-tables";
+            else if (autoddl.equals("create"))
+                return "create-tables";
+            else if (autoddl.equals("create-drop"))
+                return "drop-and-create-tables";
+        } else if (provider.contains("openjpa")) {
+            if (autoddl.equals("false"))
+                return "false";
+            else if (autoddl.equals("validate"))
+                return "false";
+            else if (autoddl.equals("update"))
+                return "buildSchema(ForeignKeys=true";
+            else if (autoddl.equals("create"))
+                return "buildSchema(ForeignKeys=true";
+            else if (autoddl.equals("create-drop"))
+                return "buildSchema(ForeignKeys=true";
+        }
+        return autoddl;
+    }
+
+    /**
+     * @param autoddl The autoddl to set.
+     */
+    public void setAutoddl(String autoddl) {
+        this.autoddl = autoddl;
     }
 
     @Override
