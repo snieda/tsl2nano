@@ -19,6 +19,16 @@
 	<target name="do.all" description="creates database from ddl and entity beans from jdbc-connection">
 		<property file="jdbc-connection.properties"/>
 	
+		<echo file="runServer.bat">
+java -cp * org.hsqldb.Server -database ${jdbc.database} -port ${jdbc.port} -silent false -trace true %1 %2 %3 %4 %5 %6 %7 %8 %9
+		</echo>
+		
+		<echo file="createuser.sql">
+CREATE USER ${jdbc.username} PASSWORD ${jdbc.password}
+CREATE SCHEMA ${jdbc.scheme} AUTHORIZATION DBA
+SET SCHEMA ${jdbc.scheme}
+		</echo>
+		
 	<!-- start the database with name ${basedir} -->
 	
 		<parallel>
@@ -26,11 +36,16 @@
 				<property name="sh.exec.cmd.dir" value="${basedir}"/>
 				<property name="sh.exec.cmd.arg1" value="start"/>
 				<property name="sh.exec.cmd.arg2" value="runServer.bat"/>
-				<property name="sh.exec.cmd.arg3" value="${dbname}"/>
 			</ant>
 			<sequential>
 				<property name="sh.sleep.milliseconds" value="3000" />
 				<ant antfile="shell.xml" target="sh.sleep"/>
+				<ant antfile="shell.xml" target="sh.sql">
+					property name="sh.sql.include" value="*drop*.sql"/>
+				</ant>
+				<ant antfile="shell.xml" target="sh.sql">
+					property name="sh.sql.include" value="createuser.sql"/>
+				</ant>
 				<ant antfile="shell.xml" target="sh.sql">
 					<!-- <property name="sh.sql.include" value="h5.sample.sql"/> -->
 				</ant>
