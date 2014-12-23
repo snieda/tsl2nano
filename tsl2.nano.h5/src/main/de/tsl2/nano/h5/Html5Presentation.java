@@ -11,7 +11,8 @@ package de.tsl2.nano.h5;
 
 import static de.tsl2.nano.bean.def.IBeanCollector.MODE_ASSIGNABLE;
 import static de.tsl2.nano.bean.def.IBeanCollector.MODE_MULTISELECTION;
-import static de.tsl2.nano.h5.HtmlUtil.*;
+import static de.tsl2.nano.h5.HtmlUtil.ALIGN_CENTER;
+import static de.tsl2.nano.h5.HtmlUtil.ALIGN_LEFT;
 import static de.tsl2.nano.h5.HtmlUtil.ALIGN_RIGHT;
 import static de.tsl2.nano.h5.HtmlUtil.ATTR_ACCESSKEY;
 import static de.tsl2.nano.h5.HtmlUtil.ATTR_ACTION;
@@ -21,6 +22,7 @@ import static de.tsl2.nano.h5.HtmlUtil.ATTR_AUTOFOCUS;
 import static de.tsl2.nano.h5.HtmlUtil.ATTR_BGCOLOR;
 import static de.tsl2.nano.h5.HtmlUtil.ATTR_BORDER;
 import static de.tsl2.nano.h5.HtmlUtil.ATTR_CHECKED;
+import static de.tsl2.nano.h5.HtmlUtil.ATTR_CLASS;
 import static de.tsl2.nano.h5.HtmlUtil.ATTR_COLOR;
 import static de.tsl2.nano.h5.HtmlUtil.ATTR_COLS;
 import static de.tsl2.nano.h5.HtmlUtil.ATTR_DISABLED;
@@ -54,12 +56,16 @@ import static de.tsl2.nano.h5.HtmlUtil.ATTR_WIDTH;
 import static de.tsl2.nano.h5.HtmlUtil.BTN_ASSIGN;
 import static de.tsl2.nano.h5.HtmlUtil.COLOR_BLACK;
 import static de.tsl2.nano.h5.HtmlUtil.COLOR_BLUE;
+import static de.tsl2.nano.h5.HtmlUtil.COLOR_LIGHTER_BLUE;
 import static de.tsl2.nano.h5.HtmlUtil.COLOR_LIGHT_BLUE;
 import static de.tsl2.nano.h5.HtmlUtil.COLOR_LIGHT_GRAY;
 import static de.tsl2.nano.h5.HtmlUtil.COLOR_RED;
 import static de.tsl2.nano.h5.HtmlUtil.COLOR_WHITE;
+import static de.tsl2.nano.h5.HtmlUtil.CSS_BACKGROUND_FADING_KEYFRAMES;
+import static de.tsl2.nano.h5.HtmlUtil.STYLE_BACKGROUND_FADING_KEYFRAMES;
 import static de.tsl2.nano.h5.HtmlUtil.STYLE_BACKGROUND_LIGHTGRAY;
 import static de.tsl2.nano.h5.HtmlUtil.STYLE_BACKGROUND_RADIAL_GRADIENT;
+import static de.tsl2.nano.h5.HtmlUtil.STYLE_FONT_COLOR;
 import static de.tsl2.nano.h5.HtmlUtil.STYLE_TEXT_ALIGN;
 import static de.tsl2.nano.h5.HtmlUtil.TAG_BODY;
 import static de.tsl2.nano.h5.HtmlUtil.TAG_BUTTON;
@@ -87,7 +93,6 @@ import static de.tsl2.nano.h5.HtmlUtil.VAL_ALIGN_CENTER;
 import static de.tsl2.nano.h5.HtmlUtil.VAL_ALIGN_LEFT;
 import static de.tsl2.nano.h5.HtmlUtil.VAL_ALIGN_RIGHT;
 import static de.tsl2.nano.h5.HtmlUtil.VAL_FRM_SELF;
-import static de.tsl2.nano.h5.HtmlUtil.VAL_OPAC;
 import static de.tsl2.nano.h5.HtmlUtil.VAL_TRANSPARENT;
 import static de.tsl2.nano.h5.HtmlUtil.appendElement;
 import static de.tsl2.nano.h5.HtmlUtil.enable;
@@ -103,12 +108,10 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Date;
-import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Properties;
-import java.util.Set;
 
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
@@ -129,7 +132,6 @@ import de.tsl2.nano.bean.def.BeanCollector;
 import de.tsl2.nano.bean.def.BeanDefinition;
 import de.tsl2.nano.bean.def.BeanPresentationHelper;
 import de.tsl2.nano.bean.def.BeanValue;
-import de.tsl2.nano.bean.def.IAttributeDefinition;
 import de.tsl2.nano.bean.def.IBeanCollector;
 import de.tsl2.nano.bean.def.IPageBuilder;
 import de.tsl2.nano.bean.def.IPresentable;
@@ -273,6 +275,8 @@ public class Html5Presentation<T> extends BeanPresentationHelper<T> implements I
                                     String name =
                                         tool.getSourceFile() != null ? tool.getSourceFile().toLowerCase() : FileUtil
                                             .getValidFileName(tool.getText().replace('.', '_'));
+                                    //some file-systems may have problems on longer file names!
+                                    name = StringUtil.cut(name, 64);
                                     Query query =
                                         new Query(name, tool.getText(), tool.getSelectedAction().getId()
                                             .equals("scripttool.sql.id"),
@@ -499,7 +503,9 @@ public class Html5Presentation<T> extends BeanPresentationHelper<T> implements I
         Element body =
             appendElement(html, TAG_BODY, ATTR_ID, (!Util.isEmpty(title, true) ? title : "body"));
         if (interactive) {
-            String style = Environment.get("application.page.style", STYLE_BACKGROUND_RADIAL_GRADIENT + STYLE_BACKGROUND_FADING_KEYFRAMES);
+            String style =
+                Environment.get("application.page.style", STYLE_BACKGROUND_RADIAL_GRADIENT
+                    + STYLE_BACKGROUND_FADING_KEYFRAMES);
             HtmlUtil.appendAttributes(body, /*"background", "icons/spe.jpg", */ATTR_STYLE,
                 style, "ononline", "showStatusMessage('ONLINE')", "onoffline", "showStatusMessage('-- OFFLINE --')");
         }
@@ -1231,16 +1237,28 @@ public class Html5Presentation<T> extends BeanPresentationHelper<T> implements I
         Collection<IPresentableColumn> colDefs = tableDescriptor.getColumnDefinitionsIndexSorted();
         Element cell;
         String value;
-        for (IPresentableColumn c : colDefs) {
-            value = tableDescriptor.getColumnText((T) item, c.getIndex());
+        if (colDefs.size() > 0) {
+            for (IPresentableColumn c : colDefs) {
+                value = tableDescriptor.getColumnText((T) item, c.getIndex());
+                cell =
+                    appendElement(row, TAG_CELL, content(value), ATTR_TITLE,
+                        itemBean.toString() + ": " + Environment.translate(c.getName(), true),
+                        ATTR_HEADERS, c.getIndex() + ":" + c.getName(), ATTR_ID,
+                        tableDescriptor.getId() + "[" + tabIndex
+                            + ", " + c.getIndex() + "]");
+                if (c.getPresentable() != null)
+                    appendAttributes(cell, rowBackground, c.getPresentable(), false);
+                if (Messages.isMarkedAsProblem(value))
+                    HtmlUtil.appendAttributes(cell, ATTR_COLOR, COLOR_RED);
+            }
+        } else {//don't show only an empty entry!
+            value = StringUtil.toString(item, Integer.MAX_VALUE);
             cell =
                 appendElement(row, TAG_CELL, content(value), ATTR_TITLE,
-                    itemBean.toString() + ": " + Environment.translate(c.getName(), true),
-                    ATTR_HEADERS, c.getIndex() + ":" + c.getName(), ATTR_ID,
+                    itemBean.hashCode() + ": " + Environment.translate("toString", true),
+                    ATTR_HEADERS, "0: toString", ATTR_ID,
                     tableDescriptor.getId() + "[" + tabIndex
-                        + ", " + c.getIndex() + "]");
-            if (c.getPresentable() != null)
-                appendAttributes(cell, rowBackground, c.getPresentable(), false);
+                        + ", 0" + "]");
             if (Messages.isMarkedAsProblem(value))
                 HtmlUtil.appendAttributes(cell, ATTR_COLOR, COLOR_RED);
         }
@@ -1623,7 +1641,9 @@ public class Html5Presentation<T> extends BeanPresentationHelper<T> implements I
         for (Object v : values) {
             if (isEnum) {
                 String translation = Environment.translate(v.toString(), false);
-                content = translation != null && !translation.startsWith(Messages.TOKEN_MSG_NOTFOUND) ? translation : v.toString();
+                content =
+                    translation != null && !translation.startsWith(Messages.TOKEN_MSG_NOTFOUND) ? translation : v
+                        .toString();
                 id = content;
                 description = Environment.translate(v.toString() + Messages.POSTFIX_TOOLTIP, true);
             } else {

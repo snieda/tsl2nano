@@ -367,7 +367,7 @@ public class NanoH5Session implements ISession {
             //follow given link
             if (uriLinkNumber != null) {
                 BeanCollector collector = (BeanCollector) nav.current();
-                Collection data = collector.getBeanFinder().getData();
+                Collection data = collector.getCurrentData();
                 ListSet listSet = CollectionUtil.asListSet(data);
                 Object selectedItem =
                     listSet.get(uriLinkNumber.intValue()

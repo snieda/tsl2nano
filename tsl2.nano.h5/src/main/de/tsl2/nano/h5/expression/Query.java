@@ -76,12 +76,13 @@ public class Query<RESULT> implements IPRunnable<RESULT, Map<String, Object>> {
 
     /**
      * getQuery
+     * 
      * @return query
      */
     public String getQuery() {
         return query;
     }
-    
+
     @Override
     public Map<String, ? extends Serializable> getParameter() {
         if (parameter == null) {
@@ -107,9 +108,11 @@ public class Query<RESULT> implements IPRunnable<RESULT, Map<String, Object>> {
         if (columnNames == null) {
             columnNames = new ArrayList<String>();
             String p;
-            StringBuilder q = new StringBuilder(query.toLowerCase());
-            while ((!Util.isEmpty(p = StringUtil.extract(q, "as \\w+", "")))) {
-                columnNames.add(p.substring(3));
+            String select = StringUtil.substring(query.toLowerCase(), "select", "from");
+            StringBuilder q = new StringBuilder(select);
+            while ((!Util.isEmpty(p = StringUtil.extract(q, "(^|\\,)\\s*([^\\s,]+)(\\s+as\\s+([\\w]+))?", "")))) {
+                columnNames.add(p.contains("as ") ? StringUtil.substring(p, "as ", null) : StringUtil.substring(p, ".",
+                    null));
             }
         }
         return columnNames;
