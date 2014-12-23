@@ -54,7 +54,7 @@ public class PersistenceUI {
         if (login.isDefault()) {
             login.setAttributeFilter("connectionUserName", "connectionPassword", "connectionUrl", "jarFile",
                 "connectionDriverClass", "provider", "datasourceClass", "jtaDataSource", "transactionType",
-                "persistenceUnit", "hibernateDialect", "database", "defaultSchema", "port", "generator", "replication",
+                "persistenceUnit", "hibernateDialect", "database", "defaultSchema", "port", "generator", "autoddl", "replication",
                 "jdbcProperties");
             login.setValueExpression(new ValueExpression<Persistence>("{connectionUrl}"));
 
@@ -266,7 +266,7 @@ public class PersistenceUI {
             login.addValueGroup("details   ", false, "connectionDriverClass", "provider", "datasourceClass",
                 "jtaDataSource",
                 "transactionType",
-                "persistenceUnit", "hibernateDialect", "database", "defaultSchema", "port", "generator", "replication");
+                "persistenceUnit", "hibernateDialect", "database", "defaultSchema", "port", "generator", "autoddl", "replication");
         }
         if (login.toString().matches(Environment.get("default.present.attribute.multivalue", ".*")))
             login.removeAttributes("jdbcProperties");
@@ -276,6 +276,7 @@ public class PersistenceUI {
                 ".jar");
         }
         login.getAttribute("generator").setRange(Arrays.asList(Persistence.GEN_HIBERNATE, Persistence.GEN_OPENJPA));
+        login.getAttribute("autoddl").setRange(Arrays.asList("false", "validate", "update", "create", "create-drop"));
         
         login.getPresentationHelper().change(BeanPresentationHelper.PROP_DESCRIPTION,
             Environment.translate("jarFile.tooltip", true),
