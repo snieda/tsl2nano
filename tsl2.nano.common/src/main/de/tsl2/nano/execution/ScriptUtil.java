@@ -47,6 +47,10 @@ public class ScriptUtil extends SystemUtil {
         }
     }
 
+    public static final void antbuild(String filePath, String target, Properties properties) {
+        antbuild(filePath, target, properties, null);
+    }
+    
     public static final void antbuild(String filePath, String target, Properties properties, BuildListener buildListener) {
 //        for (Object key : properties.keySet()) {
 //            System.setProperty(key.toString(), properties.getProperty(key.toString()));

@@ -332,6 +332,13 @@ public class StringUtil {
     }
 
     /**
+     * delegates to {@link #fixString(String, int, char, boolean)}.
+     */
+    public static String fixString(int fixLength, char fillChar) {
+        return fixString("", fixLength, fillChar, true);
+    }
+
+    /**
      * fills the given origin string on the left or right side with the given fill-chars to have the given fix-length.
      * 
      * @param origin origin string
@@ -421,7 +428,7 @@ public class StringUtil {
     public static String extract(CharSequence source, String regexp, String replacement) {
         return extract(source, regexp, replacement, 0);
     }
-    
+
     /**
      * extract regular expression
      * 
@@ -493,6 +500,8 @@ public class StringUtil {
         final StringBuffer buf = new StringBuffer(s.length() + betweenFiller.length() * splitIndexes.length);
         int lastIndex = 0;
         for (int i = 0; i < splitIndexes.length; i++) {
+            if (s.length() < splitIndexes[i])
+                break;
             buf.append(s.substring(lastIndex, splitIndexes[i]) + betweenFiller);
             lastIndex = splitIndexes[i];
         }
@@ -600,14 +609,24 @@ public class StringUtil {
     }
 
     /**
-     * getCryptoHash
-     * 
-     * @param data
-     * @return
+     * delegates to {@link Util#cryptoHash(byte[])}
      */
     public static final byte[] cryptoHash(String data) {
+        return Util.cryptoHash(data.getBytes());
+    }
+
+    /**
+     * creates a hash for the given data. use {@link #toHexString(byte[])} to convert the result to a more readable
+     * string.
+     * 
+     * @param data data to hash
+     * @param algorithm one of MD2, MD5, SHA, SHA-1, SHA-256, SHA-384, SHA-512
+     * @param length result length
+     * @return hashed data encoded with UTF-8
+     */
+    public static final byte[] cryptoHash(String data, String algorithm, int length) {
         try {
-            return Util.cryptoHash(data.getBytes("UTF-8"));
+            return Util.cryptoHash(data.getBytes("UTF-8"), algorithm, length);
         } catch (Exception e) {
             ManagedException.forward(e);
             return null;
@@ -622,5 +641,17 @@ public class StringUtil {
      */
     public static final String toHexString(byte[] bytes) {
         return new BigInteger(1, bytes).toString(16);
+    }
+
+    /**
+     * cuts the given string to have a maximum length of maxLength characters.
+     * 
+     * @param name source
+     * @param maxLength max length
+     * @return new cut string.
+     */
+    @SuppressWarnings("unchecked")
+    public static <T extends CharSequence> T cut(T name, int maxLength) {
+        return (T) (name.length() > maxLength ? name.subSequence(0, maxLength) : name);
     }
 }

@@ -32,7 +32,12 @@ import java.io.Serializable;
 import java.net.URI;
 import java.net.URL;
 import java.text.DateFormat;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.Date;
+import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Properties;
@@ -46,6 +51,7 @@ import org.apache.commons.logging.Log;
 import de.tsl2.nano.core.ManagedException;
 import de.tsl2.nano.core.execution.IRunnable;
 import de.tsl2.nano.core.log.LogFactory;
+import de.tsl2.nano.core.util.FileUtil.FileDetail;
 
 /**
  * file helper class.
@@ -56,6 +62,12 @@ import de.tsl2.nano.core.log.LogFactory;
  */
 public class FileUtil {
     static final Log LOG = LogFactory.getLog(FileUtil.class);
+
+    enum FileDetail {
+        name,
+        date,
+        size;
+    };
 
     private static ZipInputStream getZipInputStream(String zipfile) {
         final File zip = new File(zipfile);
@@ -797,7 +809,7 @@ public class FileUtil {
             long count = 0;
             while ((len = in.read(buf)) > 0) {
                 out.write(buf, 0, len);
-                count+=len;
+                count += len;
             }
             LOG.info(ByteUtil.amount(count) + " written to " + out);
         } catch (IOException e) {
@@ -931,6 +943,76 @@ public class FileUtil {
     }
 
     /**
+     * delegates to {@link #getFileset(String, String, FileDetail, boolean)}.
+     */
+    public static List<File> getFileset(String dir, String include) {
+        return getFileset(dir, include, null, true);
+    }
+    /**
+     * ant-like fileset. returns all files matching the given include expression.
+     * 
+     * @param dir base directory to start from
+     * @param include expression to be matched by file name
+     * @return all files, matching the given include expression.
+     */
+    public static List<File> getFileset(String dir, String include, FileDetail sortBy, boolean sortUp) {
+        return getTreeFiles(dir, transformAntToRegEx(include), sortBy, sortUp);
+    }
+
+    /**
+     * delegates to {@link #getTreeFiles(String, String, FileDetail, boolean)}.
+     */
+    public static List<File> getTreeFiles(String basePath,
+            final String regExFilename) {
+        return getTreeFiles(basePath, regExFilename, null, true);
+    }
+
+    /**
+     * walks through the file tree, starting from basePath, collecting all files, that matches the given regExFilename.
+     * 
+     * @param basePath starting dir
+     * @param regExFilename regular expression for the file name. Must not contain windows path separators: '\'. Please
+     *            use '/' of java and linux!
+     * @return all files in tree, matching regExFilename
+     */
+    @SuppressWarnings("rawtypes")
+    public static List<File> getTreeFiles(String basePath,
+            final String regExFilename,
+            FileDetail sortBy,
+            boolean sortUp) {
+        LinkedList<File> result = new LinkedList<File>();
+        try {
+            getTreeFiles(basePath, basePath, regExFilename, result);
+            if (sortBy != null)
+                Collections.sort(result, new FileComparator(sortBy, sortUp));
+            LOG.debug("fileset(" + basePath + regExFilename + " --> " + StringUtil.toString(result, 200));
+            return result;
+        } catch (Exception e) {
+            ManagedException.forward(e);
+            return null;
+        }
+    }
+
+    static Collection<File> getTreeFiles(String basePath, String path, String regExFilename, Collection<File> result) throws Exception {
+        File dir = new File(path);
+        File[] files = dir.listFiles();
+        if (files == null)
+            throw new IllegalArgumentException("'" + path + "' is not a directory");
+        String pattern =
+            "\\Q" + new File(basePath).getCanonicalPath() + "\\E"
+                + regExFilename.replace("/", "\\Q" + File.separator + "\\E");
+
+        for (File file : files) {
+            if (file.getCanonicalPath().matches(pattern))
+                result.add(file);
+            //no else-if, a directory can match, too. --> recursion
+            if (file.isDirectory())
+                getTreeFiles(basePath, file.getPath(), regExFilename, result);
+        }
+        return result;
+    }
+
+    /**
      * getFiles
      * 
      * @param dirPath directory to search files for
@@ -944,6 +1026,47 @@ public class FileUtil {
                 return name.matches(regExFilename);
             }
         });
+    }
+
+    /**
+     * transforms a given ant file-filter to a regular-expression. <br/>
+     * Example (please replace the plus with star):
+     * 
+     * <pre>
+     * ++/+.jar --> .+/+.jar
+     * </pre>
+     * 
+     * @param antFileFilter
+     * @return regular expression
+     */
+    public static final String transformAntToRegEx(String antFileFilter) {
+        return antFileFilter.replace("**", ".*").replaceAll("([^.])\\*", "$1.*");
+    }
+
+    /**
+     * delegates to {@link #forTree(String, String, IRunnable, Comparator)}.
+     */
+    public static <T> Iterable<T> forTree(String dirPath, final String include, final IRunnable<T, File> action) {
+        return forTree(dirPath, include, action, null);
+    }
+    
+    /**
+     * evaluates all files in dirPath matching include pattern.
+     * 
+     * @param dirPath base directory
+     * @param include ant fileset include pattern.
+     * @param action action to be done for each matching file in tree.
+     * @return collected results of all calls of action.
+     */
+    public static <T> Iterable<T> forTree(String dirPath, final String include, final IRunnable<T, File> action, Comparator<File> sorter) {
+        List<File> files = getFileset(dirPath, include);
+        if (sorter != null)
+            Collections.sort(files, sorter);
+        Collection<T> result = new ArrayList<T>();
+        for (File file : files) {
+            result.add(action.run(file));
+        }
+        return result;
     }
 
     /**
@@ -1020,4 +1143,36 @@ public class FileUtil {
     public static InputStream getURLStream(String url) {
         return NetUtil.getURLStream(url);
     }
+}
+
+class FileComparator implements Comparator<File> {
+    FileDetail sortDetail;
+    boolean sortUp;
+
+    /**
+     * constructor
+     * 
+     * @param sortDetail
+     * @param sortUp
+     */
+    public FileComparator(FileDetail sortDetail, boolean sortUp) {
+        super();
+        this.sortDetail = sortDetail;
+        this.sortUp = sortUp;
+    }
+
+    @Override
+    public int compare(File o1, File o2) {
+        int direction = (sortUp ? 1 : -1);
+        switch (sortDetail) {
+        case name:
+            return direction * o1.getName().compareTo(o2.getName());
+        case date:
+            return direction * Long.valueOf(o1.lastModified()).compareTo(Long.valueOf(o2.lastModified()));
+        case size:
+            return direction * Long.valueOf(o1.length()).compareTo(Long.valueOf(o2.length()));
+        }
+        throw new IllegalArgumentException(sortDetail + " not allowed!");
+    }
+
 }

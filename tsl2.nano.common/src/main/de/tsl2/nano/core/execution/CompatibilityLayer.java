@@ -152,7 +152,7 @@ public class CompatibilityLayer {
     }
 
     /**
-     * let's call a with {@link #registerMethod(String, String, String, Class[], boolean)} predefined method.
+     * let's call a predefined method with {@link #registerMethod(String, String, String, Class[], boolean)}.
      * @param id method id (defined in {@link #registerMethod(String, String, String, Class[], boolean)})
      * @param args call arguments (must match par in {@link #registerMethod(String, String, String, Class[], boolean)})
      * @return call result

@@ -15,6 +15,7 @@ import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.io.InputStream;
@@ -146,6 +147,14 @@ public class XmlUtil {
         }
     }
 
+    /**
+     * delegates to {@link #fop(File, String, File)} and writes the result to the file srcFile + mimeType
+     */
+    static void ffop(File srcFile, String mimeType, File xsltFile) {
+        String destFile = srcFile.getPath() + "." + StringUtil.substring(mimeType, "/", null);
+        FileUtil.writeBytes(fop(srcFile, mimeType, xsltFile), destFile, false);
+    }
+    
     /**
      * Druckt eine xml-Datei über apache fop (version 1.1) in ein angegebenes mime-ausgabe format - entweder in eine
      * Datei oder direkt an den Drucker.

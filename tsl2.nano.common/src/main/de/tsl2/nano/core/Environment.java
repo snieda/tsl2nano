@@ -33,6 +33,7 @@ import java.util.Set;
 import java.util.TreeMap;
 import java.util.TreeSet;
 
+import org.apache.tools.ant.BuildListener;
 import org.simpleframework.xml.Default;
 import org.simpleframework.xml.DefaultType;
 import org.simpleframework.xml.ElementMap;
@@ -233,6 +234,14 @@ public class Environment {
         //provide some external functions as options for this framework
         CompatibilityLayer layer = new CompatibilityLayer();
         layer.registerMethod("ant",
+            "de.tsl2.nano.execution.ScriptUtil",
+            "ant",
+            true,
+            String.class,
+            String.class,
+            Properties.class);
+
+        layer.registerMethod("antbuild",
             "de.tsl2.nano.execution.ScriptUtil",
             "ant",
             true,

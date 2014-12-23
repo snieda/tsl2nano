@@ -129,6 +129,12 @@ public class Messages {
     public static String getFormattedString(String key, Object... parameter) {
         String text = getString(key);
         if (parameter != null) {
+            String a;
+            for (int i = 0; i < parameter.length; i++) {
+                a = parameter[i] != null ? getString(String.valueOf(parameter[i])) : null;
+                if (a != null)
+                    parameter[i] = a;
+            }
             text = MessageFormat.format(text, parameter);
         }
         return text;

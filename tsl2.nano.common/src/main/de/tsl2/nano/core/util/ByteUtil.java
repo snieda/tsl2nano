@@ -11,26 +11,35 @@ package de.tsl2.nano.core.util;
 
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
+import java.io.File;
+import java.io.FilenameFilter;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.io.ObjectStreamClass;
+import java.io.PipedInputStream;
+import java.io.PipedOutputStream;
+import java.io.PrintStream;
 import java.io.Serializable;
+import java.util.LinkedList;
+import java.util.List;
 
 import org.apache.commons.logging.Log;
 
 import de.tsl2.nano.core.ManagedException;
+import de.tsl2.nano.core.execution.IRunnable;
 import de.tsl2.nano.core.log.LogFactory;
 
 /**
  * some utils for byte-arrays
+ * 
  * @author Tom
- * @version $Revision$ 
+ * @version $Revision$
  */
 public class ByteUtil extends Util {
     protected static final Log LOG = LogFactory.getLog(ByteUtil.class);
-    
+
     /**
      * isByteStream
      * 
@@ -122,19 +131,81 @@ public class ByteUtil extends Util {
 
     /**
      * amount
+     * 
      * @param c count of bytes
      * @return string representating the given amount of bytes
      */
     public static final String amount(long c) {
-        return c > 1200000000 ? (c / (1024*1024*1024)) + "GB" : c > 1200000 ? (c / (1024 * 1024)) + "MB" : c > 1200 ? (c / 1024) + "KB" : c + "b";
+        return c > 1200000000 ? (c / (1024 * 1024 * 1024)) + "GB" : c > 1200000 ? (c / (1024 * 1024)) + "MB" : c > 1200
+            ? (c / 1024) + "KB" : c + "b";
     }
-    
+
     /**
      * getInputStream
+     * 
      * @param data
-     * @return
+     * @return all bytes packed into an input stream
      */
     public static final InputStream getInputStream(byte[] data) {
         return new ByteArrayInputStream(data);
     }
+
+    /**
+     * toByteArray
+     * 
+     * @param stream
+     * @return all bytes of given stream
+     */
+    public static final byte[] toByteArray(InputStream stream) {
+        try {
+            return FileUtil.readBytes(stream);
+        } catch (IOException e) {
+            ManagedException.forward(e);
+            return null;
+        }
+    }
+
+    /**
+     * @return piped stream
+     */
+    public static PrintStream getPipe() {
+        return getPipe(new PipedInputStream());
+    }
+
+    /**
+     * @param in input stream
+     * @return piped stream
+     */
+    public static PrintStream getPipe(PipedInputStream in) {
+        try {
+            return new PrintStream(new PipedOutputStream(in));
+        } catch (IOException e) {
+            ManagedException.forward(e);
+            return null;
+        }
+    }
+
+    /**
+     * reads the full input stream and calls the given tranformation action with each byte array of length bufferlength.
+     * <p/>
+     * Tip: to have a result for the caller of this function, your action could write to a print stream that can be
+     * piped and read from the connected piped input stream. the foreach function doesn't return a value because to
+     * avoid memory problems.
+     * 
+     * @param stream to read
+     * @param bufferlength byte array length that will be read per loop and sent to the given ation
+     * @param action action to be done for each byte array.
+     */
+    public static void forEach(InputStream stream, int bufferlength, final IRunnable<Object, byte[]> action) {
+        byte[] buffer = new byte[bufferlength];
+        try {
+            while (stream.available() > 0) {
+                stream.read(buffer);
+                action.run(buffer);
+            }
+        } catch (IOException e) {
+            ManagedException.forward(e);
+        }
+    }
+
 }

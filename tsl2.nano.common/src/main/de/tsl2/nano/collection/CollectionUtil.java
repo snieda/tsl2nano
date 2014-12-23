@@ -8,6 +8,12 @@
  */
 package de.tsl2.nano.collection;
 
+import java.io.BufferedWriter;
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.FileWriter;
+import java.io.IOException;
+import java.io.Writer;
 import java.lang.reflect.Array;
 import java.text.Format;
 import java.util.ArrayList;
@@ -16,17 +22,21 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.Iterator;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.Scanner;
 import java.util.Set;
 import java.util.SortedSet;
 import java.util.TreeSet;
+import java.util.regex.Pattern;
 
 import org.apache.commons.logging.Log;
 
 import de.tsl2.nano.action.IAction;
 import de.tsl2.nano.bean.BeanUtil;
 import de.tsl2.nano.core.IPredicate;
+import de.tsl2.nano.core.ManagedException;
 import de.tsl2.nano.core.cls.BeanAttribute;
 import de.tsl2.nano.core.log.LogFactory;
 import de.tsl2.nano.core.util.StringUtil;
@@ -316,6 +326,10 @@ public class CollectionUtil {
         }
     }
 
+    public static <T, U> T[] copyOfRange(U[] original, int from, int to) {
+        return (T[]) copyOfRange(original, from, to, original.getClass());
+    }
+    
     /**
      * Simple copy of Arrays.copyOfRange() of jdk1.6 to avoid dependency to jdk1.6
      * <p/>
@@ -677,5 +691,46 @@ public class CollectionUtil {
         Object t = array[indexSwap1];
         array[indexSwap1] = array[indexSwap2];
         array[indexSwap2] = t;
+    }
+
+    /**
+     * loads a simple collection from file
+     * @param file file to be loaded
+     * @param delimiter (optional) split regular expression (e.g.:\\s)
+     * @return loaded collection
+     */
+    public static Collection load(String file, String delimiter) {
+        try {
+            Scanner sc = new Scanner(new File(file));
+            if (delimiter != null)
+                sc.useDelimiter(delimiter);
+            Collection c = new LinkedList<String>();
+            while (sc.hasNext()) {
+                c.add(sc.next());
+            }
+            sc.close();
+            return c;
+        } catch (Exception e) {
+            ManagedException.forward(e);
+            return null;
+        }
+    }
+
+    /**
+     * writes the given collection as simple file. each collection item is divided by div.
+     * @param file file to write
+     * @param delimiter item divider
+     * @param collection collection to save
+     */
+    public static void write(String file, String delimiter, Collection collection) {
+        try {
+            Writer w = new FileWriter(file);
+            for (Object i : collection) {
+                w.append(i + delimiter);
+            }
+            w.close();
+        } catch (Exception e) {
+            ManagedException.forward(e);
+        }
     }
 }

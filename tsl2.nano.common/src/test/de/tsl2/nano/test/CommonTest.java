@@ -176,6 +176,13 @@ public class CommonTest {
         if (!fileName.equals("A_____bstimm-SummeID______123__")) {
             fail("getValidFileName() didn't work");
         }
+        
+        Collection<File> files = FileUtil.getTreeFiles("./", ".*/resources");
+        assertTrue(files.size() == 1 && files.iterator().next().getName().equals("resources"));
+        
+        files = FileUtil.getFileset("./", "**/resources/**/*class.vm");
+        assertTrue(files.size() == 1 && files.iterator().next().getName().equals("beanclass.vm"));
+        
     }
 
     @Test
@@ -1345,12 +1352,16 @@ public class CommonTest {
     @Test
     public void testCrypt() throws Exception {
         String txt = "test1234";
+        FileUtil.writeBytes(txt.getBytes(), "testfile.txt", false);
+        
         Crypt.main(new String[0]);
         Crypt.main(new String[]{"", "DES", txt});
         Crypt.main(new String[]{"", "AES", txt});
         Crypt.main(new String[]{"", Crypt.ALGO_DES, txt});
         Crypt.main(new String[]{"", Crypt.ALGO_AES, txt});
         Crypt.main(new String[]{"0123456", Crypt.ALGO_PBEWithMD5AndDES, txt});
+        Crypt.main(new String[]{"0123456", Crypt.ALGO_PBEWithMD5AndDES, "-file:testfile.txt", "-include:\\w+"});
+        Crypt.main(new String[]{"0123456", Crypt.ALGO_PBEWithMD5AndDES, "-file:testfile.txt", "-base64", "-include:\\w+"});
         //not available on standard jdk:
 //        Crypt.main(new String[]{"0123456", Crypt.ALGO_PBEWithHmacSHA1AndDESede, txt});
 //        Crypt.main(new String[]{"0123456", Crypt.ALGO_PBEWithSHAAndAES, txt});

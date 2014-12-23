@@ -13,6 +13,7 @@ import java.io.Serializable;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Field;
+import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
 import java.lang.reflect.Proxy;
@@ -25,6 +26,7 @@ import java.util.LinkedHashSet;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.SortedSet;
 import java.util.TreeSet;
 
@@ -99,6 +101,40 @@ public class BeanClass<T> implements Serializable {
      */
     public static final <C> BeanClass<C> getBeanClass(Class<C> beanClass) {
         return CachedBeanClass.getCachedBeanClass(beanClass);
+    }
+
+    /**
+     * convenience delegating to {@link #getField(Object, String)}.
+     * 
+     * @param cls class holding the static field
+     * @param staticFieldName static field of cls
+     * @return instance of static field
+     */
+    public static final Object getStatic(Class<?> cls, String staticFieldName) {
+        return CachedBeanClass.getCachedBeanClass(cls).getField(null, staticFieldName);
+    }
+
+    /**
+     * getFieldNames
+     * 
+     * @param type field type
+     * @return all field names of class hierarchy that are of the given type.
+     */
+    public String[] getFieldNames(Class<?> type, boolean staticOnly) {
+        Set<String> names = new LinkedHashSet<String>();
+        Field[] fields = clazz.getFields();
+        for (int i = 0; i < fields.length; i++) {
+            if (type.isAssignableFrom(fields[i].getType())
+                && (!staticOnly || Modifier.isStatic(fields[i].getModifiers())))
+                names.add(fields[i].getName());
+        }
+        fields = clazz.getDeclaredFields();
+        for (int i = 0; i < fields.length; i++) {
+            if (type.isAssignableFrom(fields[i].getType())
+                && (!staticOnly || Modifier.isStatic(fields[i].getModifiers())))
+                names.add(fields[i].getName());
+        }
+        return names.toArray(new String[0]);
     }
 
     /**
@@ -532,6 +568,13 @@ public class BeanClass<T> implements Serializable {
                 + " with parameters:"
                 + StringUtil.toString(par, 80));
             return clazz.getMethod(methodName, par).invoke(instance, args);
+        } catch (NoSuchMethodException e1) {
+            try {
+                return clazz.getDeclaredMethod(methodName, par).invoke(instance, args);
+            } catch (Exception e2) {
+                ManagedException.forward(e1);
+                return null;
+            }
         } catch (final Exception e) {
             ManagedException.forward(e);
             return null;

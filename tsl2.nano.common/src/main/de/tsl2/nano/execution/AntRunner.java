@@ -159,11 +159,7 @@ public class AntRunner {
      * @return ant build listener
      */
     public static BuildListener createLogfileBuildListener() {
-        final DefaultLogger consoleLogger = new DefaultLogger();
-        consoleLogger.setErrorPrintStream(LogFactory.getErr());
-        consoleLogger.setOutputPrintStream(LogFactory.getOut());
-        consoleLogger.setMessageOutputLevel(true/*LOG.isDebugEnabled()*/? Project.MSG_DEBUG : Project.MSG_INFO);
-        return consoleLogger;
+        return createBuildListener(LogFactory.getOut(), LogFactory.getErr());
     }
 
     /**
@@ -173,11 +169,16 @@ public class AntRunner {
      * @return ant build listener
      */
     public static BuildListener createPipedAntBuildListener(PipedOutputStream pipedOutputStream) {
-        final DefaultLogger consoleLogger = new DefaultLogger();
         final PrintStream printStream = new PrintStream(pipedOutputStream);
-        consoleLogger.setErrorPrintStream(new PrintStream(printStream));
-        consoleLogger.setOutputPrintStream(printStream);
+        return createBuildListener(printStream, new PrintStream(printStream));
+    }
+
+    public static BuildListener createBuildListener(PrintStream out, PrintStream err) {
+        final DefaultLogger consoleLogger = new DefaultLogger();
+        consoleLogger.setOutputPrintStream(out);
+        consoleLogger.setErrorPrintStream(err);
         consoleLogger.setMessageOutputLevel(true/*LOG.isDebugEnabled()*/? Project.MSG_DEBUG : Project.MSG_INFO);
         return consoleLogger;
     }
+
 }

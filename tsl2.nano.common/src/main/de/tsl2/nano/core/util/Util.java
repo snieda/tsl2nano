@@ -9,17 +9,21 @@
  */
 package de.tsl2.nano.core.util;
 
+import java.io.File;
+import java.io.FilenameFilter;
 import java.lang.reflect.Array;
 import java.security.MessageDigest;
 import java.text.ParseException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.Iterator;
 import java.util.Map;
 
 import de.tsl2.nano.collection.MapUtil;
 import de.tsl2.nano.core.ManagedException;
 import de.tsl2.nano.core.cls.PrimitiveUtil;
+import de.tsl2.nano.core.execution.IRunnable;
 import de.tsl2.nano.format.FormatUtil;
 
 /**
@@ -180,14 +184,23 @@ public class Util {
     }
 
     /**
-     * getCryptoHash
-     * 
-     * @param data
-     * @return
+     * delegates to {@link #cryptoHash(byte[], String)} using SHA and length of 32.
      */
     public static final byte[] cryptoHash(byte[] data) {
+        return cryptoHash(data, "SHA", 32);
+    }
+    
+    /**
+     * creates a hash for the given data. use {@link StringUtil#toHexString(byte[])} to convert the result to a more readable
+     * string.
+     * 
+     * @param data data to hash
+     * @param algorithm one of MD2, MD5, SHA, SHA-1, SHA-256, SHA-384, SHA-512
+     * @return hashed data encoded with UTF-8
+     */
+    public static final byte[] cryptoHash(byte[] data, String algorithm, int length) {
         try {
-            return MessageDigest.getInstance("SHA").digest(data);
+            return MessageDigest.getInstance(algorithm).digest(data);
         } catch (Exception e) {
             ManagedException.forward(e);
             return null;
@@ -280,7 +293,7 @@ public class Util {
 //            if (type.isPrimitive())
 //                return PrimitiveUtil.asPrimitive((Double)value);
 //            else
-                return FormatUtil.getDefaultFormat(type, true).parseObject(value.toString());
+            return FormatUtil.getDefaultFormat(type, true).parseObject(value.toString());
         } catch (ParseException e) {
             ManagedException.forward(e);
             return null;
@@ -300,6 +313,37 @@ public class Util {
             items[i] = convert(type, items[i]);
         }
         return items;
+    }
+
+    /**
+     * does a conditional for-loop for you. loops over the given iterable sources, executes the given action if the
+     * source elements string representation matches the given regex expression.
+     * <p/>
+     * NOTE: it's possible to use recursion, if your iterable items contain iterables itself.
+     * 
+     * @param items items to be looped over
+     * @param regEx regular expression to be checked against all iterable items.
+     * @param action action to be done on a matching source item.
+     * @return all results of executed actions that matched the regular expression.
+     */
+    public static <S, T> Iterable<T> forEach(Iterable<S> items, final String regEx, final IRunnable<T, S> action) {
+        Collection<T> result = new ArrayList<T>(); //no size through iterable available!
+        return forEach(items, regEx, result, action);
+    }
+
+    private static <S, T> Iterable<T> forEach(Iterable<S> items,
+            final String regEx,
+            Collection<T> result,
+            final IRunnable<T, S> action) {
+        for (S i : items) {
+            //recursive
+            if (i instanceof Iterable)
+                forEach((Iterable<S>) i, regEx, result, action);
+            //do the job
+            if (String.valueOf(i).matches(regEx))
+                result.add(action.run(i));
+        }
+        return result;
     }
 
     /**

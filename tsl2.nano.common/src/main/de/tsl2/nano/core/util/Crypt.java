@@ -1,5 +1,8 @@
 package de.tsl2.nano.core.util;
 
+import java.io.BufferedInputStream;
+import java.io.IOException;
+import java.io.InputStream;
 import java.io.UnsupportedEncodingException;
 import java.security.Key;
 import java.security.Provider;
@@ -7,9 +10,13 @@ import java.security.SecureRandom;
 import java.security.Security;
 import java.security.spec.AlgorithmParameterSpec;
 
+import javax.crypto.BadPaddingException;
 import javax.crypto.Cipher;
+import javax.crypto.CipherInputStream;
+import javax.crypto.IllegalBlockSizeException;
 import javax.crypto.KeyGenerator;
 import javax.crypto.SecretKeyFactory;
+import javax.crypto.ShortBufferException;
 import javax.crypto.spec.IvParameterSpec;
 import javax.crypto.spec.PBEKeySpec;
 import javax.crypto.spec.PBEParameterSpec;
@@ -40,9 +47,31 @@ import de.tsl2.nano.core.log.LogFactory;
  * - PBE ( {@link PBEKeySpec} + PBEParameterSpec)
  * </pre>
  * 
+ * <pre>
+ * Every implementation of the Java platform is required to support the following standard Cipher transformations with the keysizes in parentheses:
+ * AES/CBC/NoPadding (128)
+ * AES/CBC/PKCS5Padding (128)
+ * AES/ECB/NoPadding (128)
+ * AES/ECB/PKCS5Padding (128)
+ * DES/CBC/NoPadding (56)
+ * DES/CBC/PKCS5Padding (56)
+ * DES/ECB/NoPadding (56)
+ * DES/ECB/PKCS5Padding (56)
+ * DESede/CBC/NoPadding (168)
+ * DESede/CBC/PKCS5Padding (168)
+ * DESede/ECB/NoPadding (168)
+ * DESede/ECB/PKCS5Padding (168)
+ * RSA/ECB/PKCS1Padding (1024, 2048)
+ * RSA/ECB/OAEPWithSHA-1AndMGF1Padding (1024, 2048)
+ * RSA/ECB/OAEPWithSHA-256AndMGF1Padding (1024, 2048)
+ * These transformations are described in the Cipher section of the Java Cryptography Architecture Standard Algorithm Name Documentation. Consult the release documentation for your implementation to see if any other transformations are supported.
+ * </pre>
+ * 
  * for further informations about available algorithms, see <a
  * href="http://docs.oracle.com/javase/7/docs/technotes/guides/security/StandardNames.html#Cipher" /> <br/>
  * <a href="http://docs.oracle.com/javase/7/docs/technotes/guides/security/crypto/CryptoSpec.html" />
+ * <p/>
+ * TODO: don't fix the encoding to UTF-8. use the system property
  * 
  * @author Tom
  * @version $Revision$
@@ -54,6 +83,7 @@ public class Crypt {
     private String algorithm;
     private boolean useBASE64;
     private AlgorithmParameterSpec paramSpec;
+
     public static final String ENCODE_UTF8 = "UTF-8";
     public static final String ALGO_DES = "DES/ECB/PKCS5Padding";
     public static final String ALGO_AES = "AES/CBC/PKCS5Padding";
@@ -87,10 +117,14 @@ public class Crypt {
     }
 
     public Crypt(byte[] pwd, String algorithm) {
-        this(pwd == null || pwd.length == 0 ? generateRandomKey(algorithm) : isPBE(algorithm) ? generatePBEKey(
-            toCharArray(pwd), algorithm) : generateSecretKey(pwd, algorithm),
+        this(generateKey(pwd, algorithm),
             algorithm,
             ENCODE_UTF8, true);
+    }
+
+    static Key generateKey(byte[] pwd, String algorithm) {
+        return pwd == null || pwd.length == 0 ? generateRandomKey(algorithm) : isPBE(algorithm) ? generatePBEKey(
+            toCharArray(pwd), algorithm) : generateSecretKey(pwd, algorithm);
     }
 
     private static char[] toCharArray(byte[] pwd) {
@@ -206,6 +240,54 @@ public class Crypt {
     }
 
     /**
+     * encryption is delegated to {@link #encrypt(byte[], Key, AlgorithmParameterSpec, String, String, boolean)}
+     * 
+     * @param stream byte stream
+     * @param contentExpression regular expression to evaluate which bytes should be encrypted.
+     * @return encrypted stream
+     */
+    public InputStream encrypt(InputStream stream,
+            String contentExpression) {
+        try {
+            return new CipherInputStream(stream, cipher(algorithm, Cipher.ENCRYPT_MODE, key, paramSpec)) {
+//                BASE64Encoder encoder = new BASE64Encoder();
+                @Override
+                public int read(byte[] arg0, int arg1, int arg2) throws IOException {
+                    int l = super.read(arg0, arg1, arg2);
+//                    encoder.encode(
+                    return l;
+                }
+            };
+        } catch (Exception e) {
+            ManagedException.forward(e);
+            return null;
+        }
+    }
+
+    /**
+     * decryption is delegated to {@link #decrypt(String, Key, AlgorithmParameterSpec, String, String, boolean)}
+     * 
+     * @param stream byte stream
+     * @param contentExpression regular expression to evaluate which bytes should be encrypted.
+     * @return decrypted stream
+     */
+    public InputStream decrypt(InputStream stream,
+            String contentExpression) {
+        try {
+            return new CipherInputStream(stream, cipher(algorithm, Cipher.DECRYPT_MODE, key, paramSpec)) {
+                @Override
+                public int read(byte[] arg0, int arg1, int arg2) throws IOException {
+                    int l = super.read(arg0, arg1, arg2);
+                    return l;
+                }
+            };
+        } catch (Exception e) {
+            ManagedException.forward(e);
+            return null;
+        }
+    }
+
+    /**
      * encrypts data using {@link #key()}, {@link #algorithm}, {@link #encoding} - delegating to
      * {@link #encrypt(byte[], Key, String)}.
      * 
@@ -214,11 +296,24 @@ public class Crypt {
      */
     public String encrypt(String data) {
         try {
-            return encrypt(data.getBytes(encoding), key(), paramSpec, algorithm, encoding, useBASE64);
+            return encrypt(data.getBytes(encoding), key(), paramSpec, algorithm, encoding, useBASE64, 0, data.length());
         } catch (UnsupportedEncodingException e) {
             ManagedException.forward(e);
             return null;
         }
+    }
+
+    public static String encrypt(String data,
+            String key,
+            String algorithm) {
+        return encrypt(data.getBytes(), generateKey(key.getBytes(), algorithm), createParamSpec(algorithm),
+            algorithm, ENCODE_UTF8, true, 0, data.length());
+    }
+
+    static String encrypt(byte[] data,
+            Key key,
+            String algorithm) {
+        return encrypt(data, key, createParamSpec(algorithm), algorithm, ENCODE_UTF8, true, 0, data.length);
     }
 
     static String encrypt(byte[] data,
@@ -226,19 +321,25 @@ public class Crypt {
             AlgorithmParameterSpec paramSpec,
             String algorithm,
             String encoding,
-            boolean useBASE64) {
+            boolean useBASE64,
+            int offset,
+            int length) {
         try {
 
             // encrypt using the cypher
-            byte[] raw = cipher(algorithm, Cipher.ENCRYPT_MODE, key, paramSpec).doFinal(data);
+            byte[] raw = cipher(algorithm, Cipher.ENCRYPT_MODE, key, paramSpec).doFinal(data, offset, length);
 
             // converts to base64 for easier display.
-            return useBASE64 ? new BASE64Encoder().encode(raw) : new String(raw, encoding);
+            return useBASE64 ? encodeBase64(raw) : new String(raw, encoding);
         } catch (Exception e) {
             ManagedException.forward(e);
             return null;
         }
 
+    }
+
+    static String encodeBase64(byte[] raw) {
+        return new BASE64Encoder().encode(raw);
     }
 
     static Cipher cipher(String algorithm, int mode, Key key, AlgorithmParameterSpec spec) throws Exception {
@@ -254,7 +355,21 @@ public class Crypt {
      * @return decrypted string
      */
     public String decrypt(String encrypted) {
-        return decrypt(encrypted, key, paramSpec, algorithm, encoding, useBASE64);
+        return decrypt(encrypted, key, paramSpec, algorithm, encoding, useBASE64, 0, encrypted.length());
+    }
+
+    public static String decrypt(String encrypted,
+            String key,
+            String algorithm) {
+        return decrypt(encrypted, generateKey(key.getBytes(), algorithm), createParamSpec(algorithm), algorithm,
+            ENCODE_UTF8, true, 0, encrypted.length());
+    }
+
+    static String decrypt(String encrypted,
+            Key key,
+            AlgorithmParameterSpec paramSpec,
+            String algorithm) {
+        return decrypt(encrypted, key, paramSpec, algorithm, ENCODE_UTF8, true, 0, encrypted.length());
     }
 
     static String decrypt(String encrypted,
@@ -262,14 +377,18 @@ public class Crypt {
             AlgorithmParameterSpec paramSpec,
             String algorithm,
             String encoding,
-            boolean useBASE64) {
+            boolean useBASE64,
+            int offset,
+            int length) {
 
         try {
             //decode the BASE64 coded message
-            byte[] raw = useBASE64 ? new BASE64Decoder().decodeBuffer(encrypted) : encrypted.getBytes(encoding);
+            byte[] raw = useBASE64 ? decodeBase64(encrypted) : encrypted.getBytes(encoding);
 
+            //TODO: check the offset
+            length = length > raw.length ? raw.length : length;
             //decode the message
-            byte[] bytes = cipher(algorithm, Cipher.DECRYPT_MODE, key, paramSpec).doFinal(raw);
+            byte[] bytes = cipher(algorithm, Cipher.DECRYPT_MODE, key, paramSpec).doFinal(raw, offset, length);
 
             //converts the decoded message to a String
             return new String(bytes, encoding);
@@ -279,27 +398,82 @@ public class Crypt {
         }
     }
 
+    static byte[] decodeBase64(String encrypted) {
+        try {
+            return new BASE64Decoder().decodeBuffer(encrypted);
+        } catch (IOException e) {
+            ManagedException.forward(e);
+            return null;
+        }
+    }
+
+    private static final void log(String txt) {
+        System.out.println(txt);
+    }
+
+    static <T> T getData(String arg, Class<T> type) {
+        if (arg.startsWith("-file:")) {
+            arg = getFileName(arg);
+            if (InputStream.class.isAssignableFrom(type))
+                return (T) FileUtil.getFile(arg);
+            else if (String.class.isAssignableFrom(type))
+                return (T) new String(FileUtil.getFileBytes(arg, null));
+            else
+                throw new IllegalArgumentException(type + " not allowed!");
+        } else
+            return (T) arg;
+    }
+
+    static String getFileName(String arg) {
+        return StringUtil.substring(arg, "-file:", null);
+    }
+
     /**
      * 
      * @param args
      */
     public static void main(String[] args) {
-        if (args.length == 3) {
+        if (args.length == 4 && args[0].equals("hash")) {
+            log(args[2]
+                + ":"
+                + StringUtil.toHexString(StringUtil.cryptoHash(getData(args[3], String.class), args[2],
+                    Integer.valueOf(args[1]))));
+        } else if (args.length >= 3) {
             Crypt c = new Crypt(args[0].getBytes(), args[1]);
             String txt = args[2];
-            System.out.println("encrypted:" + (txt = c.encrypt(txt)));
-            System.out.println("decrypted:" + c.decrypt(txt));
-        } else {
-            System.out.println("usage: Crypt <key> <ALGORITHM> <text>");
-            System.out.println("  example: Crypt mYpASsWord AES meintext");
-            System.out.println("  algorithms are:");
-            System.out
-                .println(
-                "  AES,AESWrap,ARCFOUR,Blowfish,CCM,DES,DESede,DESedeWrap,ECIES,GCM,PBEWith<digest>And<encryption>,RC2,RC4,RC5,RSA");
-            System.out.println("  providers are:\n" + Crypt.providers());
-            System.out
-                .println("  for further informations see: http://docs.oracle.com/javase/7/docs/technotes/guides/security/StandardNames.html#Cipher");
-        }
+            if (txt.startsWith("-file:")) {
+                boolean base64 = args.length > 3 ? args[3].equals("-base64") : false;
+                int ii = base64 ? 4 : 3;
+                String include = args.length > ii ? args[ii] : null;
+                InputStream stream = c.encrypt(getData(txt, InputStream.class), include);
+                if (base64) { //TODO: would it be possible with a stream, not a byte array <-- performance ?
+                    byte[] bytes = encodeBase64(ByteUtil.toByteArray(stream)).getBytes();
+                    FileUtil.writeBytes(bytes, getFileName(txt) + ".encrypted", false);
 
+                    stream = c.decrypt(ByteUtil.getInputStream(decodeBase64(new String(bytes))), include);
+                    FileUtil.write(stream, getFileName(txt) + ".decrypted");
+                } else {
+                    FileUtil.write(stream, getFileName(txt) + ".encrypted");
+
+                    stream = c.decrypt(getData(txt + ".encrypted", InputStream.class), include);
+                    FileUtil.write(stream, getFileName(txt) + ".decrypted");
+                }
+            } else {
+                log("encrypted:" + (txt = c.encrypt(txt)));
+                log("decrypted:" + c.decrypt(txt));
+            }
+        } else {
+            log("usage: Crypt <key|'hash' length> <ALGORITHM> <text|-file:filname [-base64] [-include:regexp]>");
+            log("  example 1: Crypt mYpASsWord AES meintext");
+            log("  example 2: Crypt hash 32 MD5 meintext");
+            log("  example 3: Crypt mYpASsWord AES -file:meintextfile.txt");
+            log("  example 4: Crypt mYpASsWord AES -file:meintextfile.txt -base64 -include:[^;]+");
+            log("  algorithms are:");
+            log(
+            "  AES,AESWrap,ARCFOUR,Blowfish,CCM,DES,DESede,DESedeWrap,ECIES,GCM,PBEWith<digest>And<encryption>,RC2,RC4,RC5,RSA\n"
+                + "  Hash: MD2, MD5, SHA, SHA-1, SHA-256, SHA-384, SHA-512");
+            log("  providers are:\n" + Crypt.providers());
+            log("  for further informations see: http://docs.oracle.com/javase/7/docs/technotes/guides/security/StandardNames.html#Cipher");
+        }
     }
 }

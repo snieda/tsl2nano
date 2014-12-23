@@ -57,13 +57,23 @@ public class NetUtil {
      * @return result of {@link InetAddress#getLocalHost()}. if you have more than one network interface, it may not be
      *         the desired one.
      */
-    public static String getInetAdress() {
+    public static InetAddress getInetAddress() {
         try {
-            return InetAddress.getLocalHost().getHostAddress();
+            return InetAddress.getLocalHost();
         } catch (UnknownHostException e) {
             ManagedException.forward(e);
             return null;
         }
+    }
+
+    /**
+     * getMyIPAdress
+     * 
+     * @return result of {@link InetAddress#getLocalHost()}. if you have more than one network interface, it may not be
+     *         the desired one.
+     */
+    public static String getLocalhost() {
+        return getInetAddress().getHostAddress();
     }
 
     /**

@@ -84,7 +84,7 @@ public class BeanDefinition<T> extends BeanClass<T> implements IPluggable<BeanDe
     @ElementMap(entry = "attribute", key = "name", attribute = true, inline = true, value = "attributeDefinition", valueType = AttributeDefinition.class, required = false)
     protected LinkedHashMap<String, IAttributeDefinition<?>> attributeDefinitions;
     /** flag to define, that all attributes are evaluated and cached - for performance aspects */
-    transient boolean allDefinitionsCached = false;
+    transient protected boolean allDefinitionsCached = false;
     /** naturalSortedAttributeNames used for performance in {@link #hasAttribute(String)} */
     transient String[] naturalSortedAttributeNames;
     /** optional presentation informations */

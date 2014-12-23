@@ -130,7 +130,7 @@ public class AppLoader {
              * check and use the AppLoaders main arguments
              */
             if (isHelpRequest(args)) {
-                printHelp();
+                printHelp(mainclass);
             }
             if (environment == null) {
                 if (args.length > 0) {
@@ -221,11 +221,12 @@ public class AppLoader {
 
     /**
      * printHelp
+     * @param name 
      * 
      * @param args
      */
-    protected void printHelp() {
-        Argumentator.printManual(getManual());
+    protected void printHelp(String name) {
+        Argumentator.printManual(name, getManual(), System.out, 80);
     }
 
     /**
