@@ -75,68 +75,6 @@ public class BeanUtil extends ByteUtil {
     };
 
     /**
-     * Compares two Bean-Objects by serializing them comparing their equivalent byte-arrays.
-     * <p/>
-     * Condition: the comparable objects need to implement the Serializable-interface and have to be from the same
-     * class.
-     * 
-     * @param bean1 first bean
-     * @param bean2 second bean
-     * @return true if both bean-objects are equal
-     */
-    public static boolean equals(Object bean1, Object bean2) {
-        if (bean1 == bean2) {
-            return true;
-        }
-        if ((bean1 == null) || (bean2 == null)) {
-            return false;
-        }
-
-        if (!(bean1 instanceof Serializable)) {
-            return false;
-        }
-        if (!(bean2 instanceof Serializable)) {
-            return false;
-        }
-
-        if (!bean1.getClass().equals(bean2.getClass())) {
-            return false;
-        }
-        if (bean1.equals(bean2))
-            return true;
-
-        return equals(convertToByteArray(bean1), convertToByteArray(bean2));
-
-    }
-
-    /**
-     * Equals to serialized bean-object as byte-arrays.
-     * 
-     * @param bean1 first bean
-     * @param bean2 second bean
-     * @return true if both bean-objects are equal
-     */
-    public static boolean equals(byte[] bean1, byte[] bean2) {
-        return Arrays.equals(bean1, bean2);
-    }
-
-    /**
-     * copy serializing bean - doing a deep copy. may fail, if classloader (the current threads loader) is unable to
-     * load nested classes.
-     * <p/>
-     * to copy only values, have a look at {@link BeanClass#copyValues(Object, Object, String...)} and
-     * {@link #clone(Object)}.
-     * 
-     * @param <T> serializable bean
-     * @return new instance
-     */
-    @SuppressWarnings("unchecked")
-    public static <T> T copy(T bean) {
-        final byte[] ser = convertToByteArray(bean);
-        return (T) convertToObject(ser, Thread.currentThread().getContextClassLoader());
-    }
-
-    /**
      * delegates to {@link BeanClass#copy(Object, Object)}.
      * <p/>
      * to copy only not-null values, use {@link #addValues(Object, Object, String...)}.

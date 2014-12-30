@@ -59,7 +59,8 @@ public class Argumentator {
     String name;
     /** args of a main call */
     Properties argMap;
-
+    int consumed = 0;
+    
     //TODO: use dynamic syntax
     String syntax = "-+/=?";
 
@@ -95,29 +96,47 @@ public class Argumentator {
         String p[];
         boolean isOption;
         for (int i = 0; i < args.length; i++) {
-            isOption = args[i].startsWith("-");
-            String arg = isOption ? args[i].substring(1) : args[i];
-            p = arg.split("=");
-            if (isOption) {
-                n = p[0];
-                v = p.length > 1 ? p[1] : Boolean.TRUE;
-            } else {
-                if (p.length == 1) {
-                    n = String.valueOf(i);
-                    v = p[0];
-                } else {
+            if (args[i] != null) {//nulls will be ignored!
+                isOption = args[i].startsWith("-");
+                String arg = isOption ? args[i].substring(1) : args[i];
+                p = arg.split("=");
+                if (isOption) {
                     n = p[0];
-                    v = p[1];
+                    v = p.length > 1 ? p[1] : Boolean.TRUE;
+                } else {
+                    if (p.length == 1) {
+                        n = String.valueOf(i + 1);
+                        v = p[0];
+                    } else {
+                        n = p[0];
+                        v = p[1];
+                    }
                 }
+                check(n, v, man);
+                argMap.put(n, v);
             }
-            check(n, v, man);
-            argMap.put(n, v);
         }
         return argMap;
     }
 
     public Properties getArgMap() {
         return argMap;
+    }
+
+    public String get(String key) {
+        return get(key, ++consumed);
+    }
+    
+    /**
+     * provides the desired keys value. if not stored by 'key=value', the alternative arg index will be used.
+     * 
+     * @param key property key
+     * @param alternativeArgIndex one-based argument index
+     * @return keys or indexed value
+     */
+    public String get(String key, int alternativeArgIndex) {
+        String v = argMap.getProperty(key);
+        return v != null ? v : argMap.getProperty(String.valueOf(alternativeArgIndex));
     }
 
     public boolean check(PrintStream out) {
@@ -129,6 +148,7 @@ public class Argumentator {
                 return false;
             }
         }
+        consumed = 0;
         return true;
     }
 
@@ -166,7 +186,7 @@ public class Argumentator {
      * @return true, if given key was set.
      */
     public boolean isSet(String name) {
-        return consume(name) != null;
+        return get(name) != null;
     }
 
     public Object consume(String name) {

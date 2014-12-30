@@ -11,10 +11,8 @@ package de.tsl2.nano.core.util;
 
 import java.io.File;
 import java.io.FileReader;
-import java.io.IOException;
 import java.io.InputStream;
 import java.io.PipedInputStream;
-import java.io.PipedOutputStream;
 import java.io.PrintStream;
 import java.util.Collection;
 import java.util.HashMap;

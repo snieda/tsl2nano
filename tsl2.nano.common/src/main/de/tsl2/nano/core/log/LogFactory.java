@@ -62,6 +62,7 @@ public/*abstract*/class LogFactory implements Runnable, Serializable {
     @ElementMap(attribute = true, inline = true, entry = "loglevel", key = "package", keyType = String.class, value = "level", valueType = Integer.class, required = false)
     Map<String, Integer> loglevels;
 
+    static boolean printToConsole = true;
     transient PrintStream out = System.out;
     transient PrintStream err = System.err;
 
@@ -233,6 +234,15 @@ public/*abstract*/class LogFactory implements Runnable, Serializable {
     public static PrintStream getOut() {
         return self.out;
     }
+    
+    public static synchronized boolean isPrintToConsole() {
+        return printToConsole;
+    }
+    
+    public static synchronized void setPrintToConsole(boolean toStandard) {
+        printToConsole = toStandard;
+    }
+    
 
     /**
      * @return Returns the err.
@@ -465,7 +475,7 @@ public/*abstract*/class LogFactory implements Runnable, Serializable {
                 txt = text;
             }
             out.println(txt);
-            if (out != System.out) {
+            if (isPrintToConsole() && out != System.out) {
                 System.out.println(txt);
             }
         }

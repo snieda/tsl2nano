@@ -11,6 +11,7 @@ package de.tsl2.nano.bean.def;
 
 import java.text.Format;
 import java.util.Collection;
+import java.util.Map;
 
 import org.simpleframework.xml.Attribute;
 import org.simpleframework.xml.Element;
@@ -19,8 +20,11 @@ import org.simpleframework.xml.core.Commit;
 import org.simpleframework.xml.core.Complete;
 import org.simpleframework.xml.core.Persist;
 
+import de.tsl2.nano.bean.BeanUtil;
 import de.tsl2.nano.collection.CollectionUtil;
 import de.tsl2.nano.core.ManagedException;
+import de.tsl2.nano.format.FormatUtil;
+import de.tsl2.nano.format.GenericParser;
 
 /**
  * Checks constraints of a given value
@@ -253,6 +257,26 @@ public class Constraint<T> extends AbstractConstraint<T> implements IConstraint<
         return format;
     }
 
+    public static <T, G> Format createFormat(Class<T> type) {
+        Format format = null;
+        if (Collection.class.isAssignableFrom(type)) {
+//            format = new CollectionExpressionTypeFormat<T>((Class<T>) generic);
+        } else if (Map.class.isAssignableFrom(type)) {
+//            format = new MapExpressionFormat<T>((Class<T>) generic);
+        } else if (type.isEnum()) {
+            format = FormatUtil.getDefaultFormat(type, true);
+        } else if (BeanUtil.isStandardType(type)) {
+            format = FormatUtil.getDefaultFormat(type, true);
+            //not all types have default formats
+            if (format == null) {
+                format = new GenericParser<T>(type);
+            }
+        } else {
+//                setFormat(new ValueExpressionTypeFormat<T>(type));
+        }
+        return format;
+    }
+
     @Override
     public Class<T> getType() {
         if (type == null)
@@ -279,15 +303,17 @@ public class Constraint<T> extends AbstractConstraint<T> implements IConstraint<
         if (Enum.class.isAssignableFrom(getType()))
             allowedValues = null;
     }
-    
+
     @Complete
     private void afterSerialization() {
         initDeserialization();
     }
-    
+
     @Commit
     private void initDeserialization() {
         if (Enum.class.isAssignableFrom(getType()))
             allowedValues = CollectionUtil.getEnumValues((Class<Enum>) getType());
+        if (format == null)
+            format = createFormat(getType());
     }
 }

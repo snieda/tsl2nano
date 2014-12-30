@@ -209,11 +209,14 @@ public class PrintUtil {
 
     private static void logInfo(DocPrintJob job, DocAttributeSet das,
             PrintService ps) {
-        LOG.info(toString(das.toArray())
-            + (job != null ? toString(job.getAttributes().toArray()) : "")
-            + toString(ps.getAttributes().toArray())
-            + toString(ps.getSupportedDocFlavors())
-            + toString(ps.getSupportedAttributeCategories()));
+        String info = toString(das.toArray())
+                + (job != null ? toString(job.getAttributes().toArray()) : "")
+                + toString(ps.getAttributes().toArray())
+                + toString(ps.getSupportedDocFlavors())
+                + toString(ps.getSupportedAttributeCategories());
+        LOG.info(info);
+        if (!LogFactory.isPrintToConsole())
+            System.out.println(info);
     }
 
     private static PrintJobListener getPrintJobListener() {
@@ -309,7 +312,7 @@ public class PrintUtil {
         man.put("papersize", Argumentator.staticNames(MediaSizeName.class, MediaSizeName.class));
         man.put("jobname", "job name to be shown by the printers job and as document name");
         man.put("mimetype", Argumentator.staticNames(MimeConstants.class, String.class));
-        man.put("quality", "print quaility. " + PrintQuality.class);
+        man.put("quality", Argumentator.staticNames(PrintQuality.class, PrintQuality.class));
         man.put("priority", "value between 1 and 100");
         man.put("pageranges", "page to print. e.g. '1-2;5-6;8-12'");
         man.put("xsltfile", "apache fop transformation file. then, the source file has to be an xml data file to be transformed by fop transformation");
@@ -321,35 +324,34 @@ public class PrintUtil {
     }
 
     public static void main(String[] args) {
-        Argumentator argumentator = new Argumentator("print", getManual(), args);
-        if (argumentator.check(System.out)) {
-            Properties am = argumentator.getArgMap();
-            String source = am.getProperty("source");
-            String printer = am.getProperty("printer");
-            String ps = am.getProperty("papersize");
+        Argumentator am = new Argumentator("print", getManual(), args);
+        if (am.check(System.out)) {
+            String source = am.get("source");
+            String printer = am.get("printer");
+            String ps = am.get("papersize");
             MediaSizeName paper = (MediaSizeName) BeanClass.getStatic(MediaSizeName.class, ps);
-            PrintQuality quality = (PrintQuality) BeanClass.getStatic(PrintQuality.class, am.getProperty("quality"));
-            Integer priority = Integer.valueOf(am.getProperty("priority"));
+            PrintQuality quality = (PrintQuality) BeanClass.getStatic(PrintQuality.class, am.get("quality"));
+            Integer priority = Integer.valueOf(am.get("priority"));
             int[][] pageranges = null;//am.get("pageranges");
             InputStream stream;
             if (source.equals("printer-info")) {//simple printer info
                 print("printer-info", printer, (InputStream)null);
                 return;
             } else if (source.endsWith(".xml")) {//fop transformation
-                File xsltFile = new File(am.getProperty("xsltfile"));
-                stream = ByteUtil.getInputStream(XmlUtil.fop(new File(source), am.getProperty("mimetype"), xsltFile));
+                File xsltFile = new File(am.get("xsltfile"));
+                stream = ByteUtil.getInputStream(XmlUtil.fop(new File(source), am.get("mimetype"), xsltFile));
             } else if (source.contains("*")){//fileset
                 List<File> fileset = FileUtil.getFileset("./", source);
                 for (File file : fileset) {
                     stream = FileUtil.getFile(file.getPath());
-                    print(am.getProperty("jobname"), printer, stream, am.getProperty("mimetype"), am.getProperty("username"),
+                    print(am.get("jobname"), printer, stream, am.get("mimetype"), am.get("username"),
                         paper, quality, priority, pageranges);
                 }
                 return;
             } else {
                 stream = FileUtil.getFile(source);
             }
-            print(am.getProperty("jobname"), printer, stream, am.getProperty("mimetype"), am.getProperty("username"),
+            print(am.get("jobname"), printer, stream, am.get("mimetype"), am.get("username"),
                 paper, quality, priority, pageranges);
         }
     }

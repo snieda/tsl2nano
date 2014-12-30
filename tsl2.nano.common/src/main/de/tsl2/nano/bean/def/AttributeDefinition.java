@@ -335,11 +335,6 @@ public class AttributeDefinition<T> implements IAttributeDefinition<T> {
             } else if (type.isEnum()) {
                 getConstraint().setFormat(FormatUtil.getDefaultFormat(type, true));
             } else if (BeanUtil.isStandardType(type)) {
-//                this.format = FormatUtil.getDefaultFormat(type, true);
-//                //not all types have default formats
-//                if (this.format == null) {
-//                    this.format = new GenericParser<T>(type);
-//                }
                 getConstraint().setFormat(Environment.get(BeanPresentationHelper.class).getDefaultRegExpFormat(this));
             } else {
                 getConstraint().setFormat(new ValueExpressionTypeFormat<T>(type));

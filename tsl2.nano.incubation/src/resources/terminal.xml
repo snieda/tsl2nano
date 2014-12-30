@@ -1,0 +1,205 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<terminal name="terminal.xml" width="79" height="10" style="1">
+   <root class="de.tsl2.nano.incubation.terminal.Tree" name="Toolbox" type="Tree">
+      <item class="de.tsl2.nano.incubation.terminal.Tree" name="Printing" type="Tree">
+         <item class="de.tsl2.nano.incubation.terminal.Input" name="source" type="Input">
+            <constraints type="java.lang.String" nullable="true" length="-1">
+               <scale>-1</scale>
+               <precision>-1</precision>
+            </constraints>
+            <value class="java.lang.String">printer-info</value>
+         </item>
+         <item class="de.tsl2.nano.incubation.terminal.Input" name="printer" type="Input">
+            <constraints type="java.lang.String" nullable="true" length="-1">
+               <scale>-1</scale>
+               <precision>-1</precision>
+            </constraints>
+            <value class="java.lang.String">PDFCreator</value>
+         </item>
+         <item class="de.tsl2.nano.incubation.terminal.Input" name="jobname" type="Input">
+            <constraints type="java.lang.String" nullable="true" length="-1">
+               <scale>-1</scale>
+               <precision>-1</precision>
+            </constraints>
+            <value class="java.lang.String">test</value>
+         </item>
+         <item class="de.tsl2.nano.incubation.terminal.Input" name="mimetype" type="Input">
+            <constraints type="java.lang.String" nullable="true" length="-1">
+               <scale>-1</scale>
+               <precision>-1</precision>
+            </constraints>
+            <value class="java.lang.String">MIME_PCL</value>
+         </item>
+         <item class="de.tsl2.nano.incubation.terminal.Input" name="papersize" type="Input">
+            <constraints type="java.lang.String" nullable="true" length="-1">
+               <scale>-1</scale>
+               <precision>-1</precision>
+            </constraints>
+            <value class="java.lang.String">ISO_A4</value>
+         </item>
+         <item class="de.tsl2.nano.incubation.terminal.Input" name="quality" type="Input">
+            <constraints type="java.lang.String" nullable="true" length="-1">
+               <scale>-1</scale>
+               <precision>-1</precision>
+            </constraints>
+            <value class="java.lang.String">NORMAL</value>
+         </item>
+         <item class="de.tsl2.nano.incubation.terminal.Input" name="priority" type="Input">
+            <constraints type="java.lang.String" nullable="true" length="-1">
+               <scale>-1</scale>
+               <precision>-1</precision>
+            </constraints>
+            <value class="java.lang.String">1</value>
+         </item>
+         <item class="de.tsl2.nano.incubation.terminal.Input" name="xsltfile" type="Input">
+            <constraints type="java.lang.String" nullable="true" length="-1">
+               <scale>-1</scale>
+               <precision>-1</precision>
+            </constraints>
+            <value class="java.lang.String">test.xsl</value>
+         </item>
+         <item class="de.tsl2.nano.incubation.terminal.Input" name="username" type="Input">
+            <constraints type="java.lang.String" nullable="true" length="-1">
+               <scale>-1</scale>
+               <precision>-1</precision>
+            </constraints>
+         </item>
+         <item class="de.tsl2.nano.incubation.terminal.MainAction" name="print" type="Action">
+            <mainClass>de.tsl2.nano.core.util.PrintUtil</mainClass>
+            <method>main</method>
+            <argNames length="9">
+               <string>source</string>
+               <string>printer</string>
+               <string>papersize</string>
+               <string>quality</string>
+               <string>priority</string>
+               <string>xsltfile</string>
+               <string>mimetype</string>
+               <string>jobname</string>
+               <string>username</string>
+            </argNames>
+         </item>
+      </item>
+      <item class="de.tsl2.nano.incubation.terminal.Tree" name="Crypt" type="Tree">
+         <item class="de.tsl2.nano.incubation.terminal.Input" name="password" type="Input">
+            <constraints type="java.lang.String" nullable="true" length="-1">
+               <scale>-1</scale>
+               <precision>-1</precision>
+            </constraints>
+         </item>
+         <item class="de.tsl2.nano.incubation.terminal.Input" name="algorithm" type="Input">
+            <constraints type="java.lang.String" nullable="true" length="-1">
+               <scale>-1</scale>
+               <precision>-1</precision>
+            </constraints>
+            <value class="java.lang.String">AES</value>
+         </item>
+         <item class="de.tsl2.nano.incubation.terminal.Input" name="text" type="Input">
+            <constraints type="java.lang.String" nullable="true" length="-1">
+               <scale>-1</scale>
+               <precision>-1</precision>
+            </constraints>
+         </item>
+         <item class="de.tsl2.nano.incubation.terminal.Input" name="base64" type="Input">
+            <constraints type="java.lang.Boolean" nullable="true" length="-1">
+               <scale>-1</scale>
+               <precision>-1</precision>
+            </constraints>
+            <value class="java.lang.Boolean">true</value>
+         </item>
+         <item class="de.tsl2.nano.incubation.terminal.Input" name="include" type="Input">
+            <constraints type="java.lang.String" nullable="true" length="-1">
+               <scale>-1</scale>
+               <precision>-1</precision>
+            </constraints>
+            <value class="java.lang.String">.*</value>
+         </item>
+         <item class="de.tsl2.nano.incubation.terminal.MainAction" name="Crypt" type="Action">
+            <mainClass>de.tsl2.nano.core.util.Crypt</mainClass>
+            <method>main</method>
+            <argNames length="5">
+               <string>password</string>
+               <string>algorithm</string>
+               <string>text</string>
+               <string>base64</string>
+               <string>include</string>
+            </argNames>
+         </item>
+      </item>
+      <item class="de.tsl2.nano.incubation.terminal.Tree" name="Net" type="Tree">
+         <item class="de.tsl2.nano.incubation.terminal.Tree" name="Scan" type="Tree">
+            <item class="de.tsl2.nano.incubation.terminal.Input" name="ip" type="Input">
+               <constraints type="java.lang.String" nullable="true" length="-1">
+                  <scale>-1</scale>
+                  <precision>-1</precision>
+               </constraints>
+               <value class="java.lang.String">192.168.178.21</value>
+            </item>
+            <item class="de.tsl2.nano.incubation.terminal.Input" name="lowest-port" type="Input">
+               <constraints type="java.lang.Integer" nullable="true" length="-1">
+                  <scale>-1</scale>
+                  <precision>-1</precision>
+               </constraints>
+               <value class="java.lang.Integer">0</value>
+            </item>
+            <item class="de.tsl2.nano.incubation.terminal.Input" name="highest-port" type="Input">
+               <constraints type="java.lang.Integer" nullable="true" length="-1">
+                  <scale>-1</scale>
+                  <precision>-1</precision>
+               </constraints>
+               <value class="java.lang.Integer">100</value>
+            </item>
+            <item class="de.tsl2.nano.incubation.terminal.Action" name="scans" type="Action">
+               <mainClass>de.tsl2.nano.core.util.NetUtil</mainClass>
+               <method>scans</method>
+               <argNames length="3">
+                  <string>lowest-port</string>
+                  <string>highest-port</string>
+                  <string>ip</string>
+               </argNames>
+            </item>
+         </item>
+         <item class="de.tsl2.nano.incubation.terminal.Tree" name="WCopy" type="Tree">
+            <item class="de.tsl2.nano.incubation.terminal.Input" name="url" type="Input">
+               <constraints type="java.lang.String" nullable="true" length="-1">
+                  <scale>-1</scale>
+                  <precision>-1</precision>
+               </constraints>
+            </item>
+            <item class="de.tsl2.nano.incubation.terminal.Input" name="dir" type="Input">
+               <constraints type="java.lang.String" nullable="true" length="-1">
+                  <scale>-1</scale>
+                  <precision>-1</precision>
+               </constraints>
+            </item>
+            <item class="de.tsl2.nano.incubation.terminal.Input" name="include" type="Input">
+               <constraints type="java.lang.String" nullable="true" length="-1">
+                  <scale>-1</scale>
+                  <precision>-1</precision>
+               </constraints>
+            </item>
+            <item class="de.tsl2.nano.incubation.terminal.Input" name="exclude" type="Input">
+               <constraints type="java.lang.String" nullable="true" length="-1">
+                  <scale>-1</scale>
+                  <precision>-1</precision>
+               </constraints>
+            </item>
+            <item class="de.tsl2.nano.incubation.terminal.Action" name="wcopy" type="Action">
+               <mainClass>de.tsl2.nano.core.util.NetUtil</mainClass>
+               <method>wcopy</method>
+               <argNames length="4">
+                  <string>url</string>
+                  <string>dir</string>
+                  <string>include</string>
+                  <string>exclude</string>
+               </argNames>
+            </item>
+         </item>
+         <item class="de.tsl2.nano.incubation.terminal.Action" name="getNetInfo" type="Action">
+            <mainClass>de.tsl2.nano.core.util.NetUtil</mainClass>
+            <method>getNetInfo</method>
+            <argNames length="0"/>
+         </item>
+      </item>
+   </root>
+</terminal>

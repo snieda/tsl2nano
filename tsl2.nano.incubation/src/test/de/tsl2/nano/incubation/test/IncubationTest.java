@@ -9,6 +9,13 @@
  */
 package de.tsl2.nano.incubation.test;
 
+import static junit.framework.Assert.assertEquals;
+import static junit.framework.Assert.assertFalse;
+import static junit.framework.Assert.assertNotNull;
+import static junit.framework.Assert.assertTrue;
+import static junit.framework.Assert.fail;
+
+import java.io.InputStream;
 import java.io.Serializable;
 import java.math.BigDecimal;
 import java.sql.Time;
@@ -18,25 +25,29 @@ import java.util.Collection;
 import java.util.Hashtable;
 import java.util.LinkedHashMap;
 import java.util.Map;
+import java.util.Properties;
 import java.util.concurrent.Callable;
-
-import static junit.framework.Assert.*;
 
 import org.apache.commons.logging.Log;
 import org.junit.Test;
 
 import de.tsl2.nano.bean.BeanUtil;
-import de.tsl2.nano.bean.IValueAccess;
-import de.tsl2.nano.bean.def.Bean;
 import de.tsl2.nano.bean.def.Constraint;
 import de.tsl2.nano.collection.MapUtil;
 import de.tsl2.nano.collection.TableList;
 import de.tsl2.nano.core.Environment;
+import de.tsl2.nano.core.Finished;
 import de.tsl2.nano.core.ManagedException;
 import de.tsl2.nano.core.cls.BeanClass;
-import de.tsl2.nano.core.cls.IAttribute;
+import de.tsl2.nano.core.execution.IRunnable;
 import de.tsl2.nano.core.execution.Profiler;
 import de.tsl2.nano.core.log.LogFactory;
+import de.tsl2.nano.core.util.ByteUtil;
+import de.tsl2.nano.core.util.Crypt;
+import de.tsl2.nano.core.util.FileUtil;
+import de.tsl2.nano.core.util.NetUtil;
+import de.tsl2.nano.core.util.Permutator;
+import de.tsl2.nano.core.util.PrintUtil;
 import de.tsl2.nano.core.util.StringUtil;
 import de.tsl2.nano.core.util.XmlUtil;
 import de.tsl2.nano.incubation.network.JobServer;
@@ -49,6 +60,14 @@ import de.tsl2.nano.incubation.specification.ParType;
 import de.tsl2.nano.incubation.specification.Pool;
 import de.tsl2.nano.incubation.specification.rules.Rule;
 import de.tsl2.nano.incubation.specification.rules.RulePool;
+import de.tsl2.nano.incubation.terminal.Action;
+import de.tsl2.nano.incubation.terminal.IItem;
+import de.tsl2.nano.incubation.terminal.Input;
+import de.tsl2.nano.incubation.terminal.MainAction;
+import de.tsl2.nano.incubation.terminal.Option;
+import de.tsl2.nano.incubation.terminal.Terminal;
+import de.tsl2.nano.incubation.terminal.TerminalAdmin;
+import de.tsl2.nano.incubation.terminal.Tree;
 import de.tsl2.nano.incubation.vnet.Connection;
 import de.tsl2.nano.incubation.vnet.Cover;
 import de.tsl2.nano.incubation.vnet.ILocatable;
@@ -427,7 +446,7 @@ public class IncubationTest {
         Command c = new Command(text, new AChange("(C[0-9]*)", "C", "C1"));
         undoRedo(a, b, c);
     }
-    
+
     @Test
     public void testUndoRedoWithEntity() throws Exception {
         EBean tbean = new EBean();
@@ -436,7 +455,7 @@ public class IncubationTest {
         ECommand c = new ECommand(tbean, new AChange("immutableInteger", null, 100));
         ECommand d = new ECommand(tbean, new AChange(null, tbean, null));
         undoRedo(b, c);
-        
+
         //construction and deletion
         CommandManager commandManager = new CommandManager(10);
         assertEquals(a.getContext(), null);
@@ -449,39 +468,39 @@ public class IncubationTest {
         commandManager.redo();
         assertEquals(a.getContext(), null);
     }
-    
-    public <CONTEXT> void undoRedo(ICommand<CONTEXT>...cmds) throws Exception {
+
+    public <CONTEXT> void undoRedo(ICommand<CONTEXT>... cmds) throws Exception {
         CommandManager cmdManager = new CommandManager();
-        
+
         CONTEXT context = cmds[0].getContext();
         CONTEXT origin = BeanUtil.copy(context);
         log("origin : " + origin);
-        
+
         cmdManager.doIt(cmds);
-        
+
         CONTEXT changed = BeanUtil.copy(context);
         log("changed: " + changed);
-        
+
         assertTrue(cmdManager.canUndo());
         assertFalse(cmdManager.canRedo());
-        
+
         cmdManager.undo();
         cmdManager.undo();
         cmdManager.undo();
 
         assertFalse(cmdManager.canUndo());
         assertTrue(cmdManager.canRedo());
-        
+
         log("text   : " + BeanUtil.copy(context));
         assertEquals(origin, context);
-        
+
         cmdManager.redo();
         cmdManager.redo();
         cmdManager.redo();
 
         assertTrue(cmdManager.canUndo());
         assertFalse(cmdManager.canRedo());
-        
+
         log("re-done: " + context);
         assertEquals(changed, context);
     }
@@ -489,29 +508,152 @@ public class IncubationTest {
     @Test
     public void testMacro() throws Exception {
         CommandManager cmdManager = new CommandManager();
-        
+
         EBean tbean = new EBean();
         ECommand a = new ECommand(null, new AChange(null, null, tbean));
         ECommand b = new ECommand(tbean, new AChange("string", null, "astring"));
         ECommand c = new ECommand(tbean, new AChange("immutableInteger", null, 100));
         ECommand d = new ECommand(tbean, new AChange(null, tbean, null));
-        
+
         cmdManager.getRecorder().record("test.record");
         cmdManager.doIt(a, b, c, d);
         cmdManager.getRecorder().stop();
-        
+
         EBean mbean = new EBean();
         //now, redo that with on another context object --> macro replay!
         assertEquals(4, cmdManager.getRecorder().play("test.record", mbean));
         assertEquals(tbean, mbean);
     }
-    
+
+    @Test
+    public void testInvader() throws Exception {
+        final Map p = MapUtil.asMap("data", "Meier", "algorithm", Crypt.ALGO_PBEWithMD5AndDES);
+        final String transformer =
+            "transformer=\"de.tsl2.nano.core.util.Crypt encrypt ${data} ${password} ${algorithm}\"";
+        final String backward = "backward=\"de.tsl2.nano.core.util.Crypt decrypt ${data} ${password} ${algorithm}\"";
+
+        int len = 7;
+        Permutator perm = new Permutator(len);
+        InputStream in = perm.permute();
+        try {
+            ByteUtil.forEach(in, len, new IRunnable<Object, byte[]>() {
+                @Override
+                public Object run(byte[] context, Object... extArgs) {
+                    p.put("password", new String(context));
+                    String t = StringUtil.insertProperties(transformer, p);
+                    String b = StringUtil.insertProperties(backward, p);
+
+                    Permutator.main(new String[] { "source=deutsche-namen.txt", t, b });
+                    return null;
+                }
+            });
+        } catch (Finished f) {
+            log(f.getMessage());
+        }
+    }
+
+//    @Test
+//    public void testTerminal() throws Exception {
+//        Tree root = new Tree("selection1", null, new ArrayList<IItem>(), null);
+//        root.add(new Option("option1", null, false, "Option 1"));
+//        root.add(new Option("option2", null, false, "Option 2"));
+//        root.add(new Option("option3", null, false, "Option 3"));
+//        root.add(new Input<Object>("input1", null, "Input 1", null));
+//        root.add(new Action("action1", null, new SRunnable(), "Action 1"));
+//
+//        InputStream in = ByteUtil.getInputStream("1\n2\n3\n4\n5\n\n".getBytes());
+//        new Terminal(root, in, System.out, 79, 10, 1).run();
+//
+//        Terminal.main(new String[] { Terminal.DEFAULT_NAME });
+//
+//        //admin console
+//        Terminal.main(new String[] { Terminal.DEFAULT_NAME, TerminalAdmin.ADMIN });
+//    }
+//
+    @Test
+    public void testTerminalTools() throws Exception {
+        Tree root = new Tree("Toolbox", "Helpful Utilities");
+
+        Tree printing = new Tree("Printing", null);
+        printing.add(new Input("source", "printer-info", "file to print - or only a printer info"));
+        printing.add(new Input("printer", "PDFCreator", "printer to use"));
+        printing.add(new Input("jobname", "tsl2nano", "print job name"));
+        printing.add(new Input("mimetype", "MIME_PCL", "mime type"));
+        printing.add(new Input("papersize", "ISO_A4", "paper size"));
+        printing.add(new Input("quality", "NORMAL", "print quality"));
+        printing.add(new Input("priority", "1", "print priority (1-100)"));
+        printing.add(new Input("xsltfile", "test.xsl", "xsl-fo transformation file to do a apache fop"));
+        printing.add(new Input("username", null, "user name to be used by the printer"));
+        printing
+            .add(new MainAction("print", PrintUtil.class, "source", "printer", "papersize", "quality", "priority", "xsltfile", "mimetype", "jobname", "username"));
+        root.add(printing);
+
+        Tree crypt = new Tree("Crypt", null);
+        crypt.add(new Input("password", null, "password for encryption - if needed by algorithm"));
+        crypt.add(new Input("algorithm", "PBEWithMD5AndDES", "encryption algorithm"));
+        crypt.add(new Input("text", null, "text to be encrypted. if it starts with 'file:' the file will be read"));
+        crypt.add(new Input("base64", true, "whether base64 encoding should be used"));
+        crypt.add(new Input("include", ".*", "regular expression to constrain text parts to be encrypted"));
+        crypt
+            .add(new MainAction(Crypt.class, "password", "algorithm", "text", "base64", "include"));
+        root.add(crypt);
+
+//        Tree getjar = new Tree("getJar", null);
+//        getjar.add(new Input("name", null, "name, jar-file or class package to load with dependenies from web"));
+//        getjar.add(new MainAction(BeanClass.createBeanClass("de.tsl2.nano.jarresolver.JarResolver", null).getClazz(), "name"));
+//        root.add(getjar);
+//
+        Tree net = new Tree("Net", null);
+        Tree scan = new Tree("Scan", null);
+        net.add(scan);
+        scan.add(new Input("ip", NetUtil.getMyIP(), "internet address to be scanned"));
+        scan.add(new Input("lowest-port", 0, "lowest port to be scanned"));
+        scan.add(new Input("highest-port", 100, "highest port to be scanned"));
+        scan.add(new Action(NetUtil.class, "scans", "lowest-port", "highest-port", "ip"));
+        Tree wcopy = new Tree("WCopy", null);
+        net.add(wcopy);
+        wcopy.add(new Input("url", null, "url to get files from"));
+        wcopy.add(new Input("dir", null, "local directory to save the downloaded files"));
+        wcopy.add(new Input("include", null, "regular expression for files to download"));
+        wcopy.add(new Input("exclude", null, "regular exression for files to be filtered"));
+        wcopy.add(new Action(NetUtil.class, "wcopy", "url", "dir", "include", "exclude"));
+
+        net.add(new Action(NetUtil.class, "getNetInfo"));
+        root.add(net);
+
+        InputStream in = Terminal.createBatchStream("Printing", "jobname", "test", "print", ":quit");
+        new Terminal(root, in, System.out, 79, 10, 1).run();
+
+        Terminal.main(new String[] { Terminal.DEFAULT_NAME });
+
+        FileUtil.copy(Terminal.DEFAULT_NAME, "src/resources/" + Terminal.DEFAULT_NAME);
+        
+        //admin console
+        Terminal.main(new String[] { Terminal.DEFAULT_NAME, TerminalAdmin.ADMIN });
+    }
+
+    @Test
+    public void testTerminalAdmin() throws Exception {
+        //admin console
+        Terminal.main(new String[] { Terminal.DEFAULT_NAME, TerminalAdmin.ADMIN });
+    }
+
     static void log_(String msg) {
         System.out.print(msg);
     }
 
     static void log(String msg) {
         System.out.println(msg);
+    }
+}
+
+class SRunnable implements IRunnable<String, Properties>, Serializable {
+    /** serialVersionUID */
+    private static final long serialVersionUID = 1L;
+
+    @Override
+    public String run(Properties context, Object... extArgs) {
+        return context.toString();
     }
 }
 
@@ -598,10 +740,11 @@ class Command extends ACommand<StringBuilder> {
     }
 
 }
+
 /**
  * test command doing a simple text replacing
  */
-@SuppressWarnings({ "unchecked"})
+@SuppressWarnings({ "unchecked" })
 class ECommand extends ACommand<Serializable> {
 
     public ECommand(Serializable context, IChange... changes) {
@@ -631,7 +774,7 @@ class EBean extends TypeBean {
     public boolean equals(Object obj) {
         return BeanUtil.equals(BeanUtil.serialize(this), BeanUtil.serialize(obj));
     }
-    
+
     @Override
     public String toString() {
         return getString() + getImmutableInteger();//new String(BeanUtil.serialize(this));
