@@ -99,7 +99,7 @@ public class CompatibilityLayer {
             return action.run(null, args);
         } catch (Throwable e) {
             LOG.warn("couldn't run given optional action: " + e);
-            Message.send(e.toString());
+            Message.send(e);
             return null;
         }
     }
@@ -118,7 +118,7 @@ public class CompatibilityLayer {
             return BeanClass.createBeanClass(className).callMethod(null, methodName, par, args);
         } catch (Throwable e) {
             LOG.warn("couldn't run given optional action: " + e);
-            Message.send(e.toString());
+            Message.send(e);
             return null;
         }
     }
@@ -127,7 +127,7 @@ public class CompatibilityLayer {
         try {
             return BeanClass.call(instance, methodName, par, args);
         } catch (Throwable e) {
-            Message.send(e.toString());
+            Message.send(e);
             LOG.warn("couldn't run given optional action: " + e);
             return null;
         }

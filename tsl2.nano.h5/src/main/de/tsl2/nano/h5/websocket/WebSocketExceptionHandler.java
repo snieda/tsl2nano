@@ -46,11 +46,11 @@ public class WebSocketExceptionHandler extends ExceptionHandler {
     public void uncaughtException(Thread t, Throwable e) {
         if (e.getMessage() != null && e.getMessage().startsWith(NanoH5Session.PREFIX_STATUS_LINE))
             super.uncaughtException(t, e);
-        else {
+//        else {
             Set<WebSocket> connections = socket.connections();
             for (WebSocket webSocket : connections) {
                 webSocket.send(e.getMessage());
             }
-        }
+//        }
     }
 }

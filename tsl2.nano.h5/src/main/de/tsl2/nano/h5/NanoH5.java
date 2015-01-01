@@ -8,6 +8,7 @@ import static de.tsl2.nano.bean.def.IBeanCollector.MODE_SEARCHABLE;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
+import java.lang.Thread.UncaughtExceptionHandler;
 import java.net.InetAddress;
 import java.net.MalformedURLException;
 import java.net.Socket;
@@ -518,10 +519,9 @@ public class NanoH5 extends NanoHTTPD implements ISystemConnector<Persistence> {
             if (isNewDatabase(persistence)) {
                 generateDatabase(persistence);
             }
-            //TODO: show generation message before - get script exception from exception handler
-            generateJarFile(jarName, persistence.getGenerator(), persistence.getDefaultSchema());
-
-            if (!new File(jarName).exists()) {
+            Boolean generationComplete = generateJarFile(jarName, persistence.getGenerator(), persistence.getDefaultSchema());
+            //return value may be null or false
+            if (!Boolean.TRUE.equals(generationComplete) || !new File(jarName).exists()) {
                 throw new ManagedException(
                     "Couldn't generate bean jar file '"
                         + jarName
@@ -530,7 +530,8 @@ public class NanoH5 extends NanoHTTPD implements ISystemConnector<Persistence> {
                         + "\t- no hibernate or open-jpa jar files in your environment directory\n"
                         + "\t- no jdbc-driver-jar file for the given 'ConnectionDriverClass' in your environment directory\n"
                         + "\t- your java is an JRE instead of a full JDK (needed to compile the generated classes!)\n"
-                        + "\nAs alternative you may select an existing bean-jar file (-->no generation needed!) in field \"JarFile\"");
+                        + "\nAs alternative you may select an existing bean-jar file (-->no generation needed!) in field \"JarFile\"\n\n"
+                        + Environment.get(UncaughtExceptionHandler.class).toString());
             }
         } else if (isAbsolutePath) {//copy it into the own classpath (to don't lock the file)
             if (!selectedFile.exists())
@@ -605,10 +606,10 @@ public class NanoH5 extends NanoHTTPD implements ISystemConnector<Persistence> {
         Environment.get(CompatibilityLayer.class).runRegistered("ant",
             Environment.getConfigPath() + "mda.xml",
             "do.all",
-            new Properties(), null);
+            new Properties());
     }
 
-    protected static void generateJarFile(String jarFile, String generator, String schema) {
+    protected static Boolean generateJarFile(String jarFile, String generator, String schema) {
         /** ant script to start the hibernatetool 'hbm2java' */
         final String REVERSE_ENG_SCRIPT = "reverse-eng.xml";
         /** hibernate reverse engeneer configuration */
@@ -633,10 +634,10 @@ public class NanoH5 extends NanoHTTPD implements ISystemConnector<Persistence> {
         //If no environment was saved before, we should do it now!
         Environment.persist();
 
-        Environment.get(CompatibilityLayer.class).runRegistered("ant",
+        return (Boolean) Environment.get(CompatibilityLayer.class).runRegistered("ant",
             Environment.getConfigPath() + REVERSE_ENG_SCRIPT,
             "create.bean.jar",
-            properties, null);
+            properties);
     }
 
     protected void reset() {

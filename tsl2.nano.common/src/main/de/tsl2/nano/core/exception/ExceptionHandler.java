@@ -15,6 +15,9 @@ import java.util.Collections;
 import java.util.LinkedList;
 import java.util.List;
 
+import de.tsl2.nano.core.util.StringUtil;
+import de.tsl2.nano.core.util.Util;
+
 /**
  * simple exception handler to be used by several threads.
  * 
@@ -70,5 +73,10 @@ public class ExceptionHandler implements UncaughtExceptionHandler {
 
     public boolean hasExceptions() {
         return exceptions.size() > 0;
+    }
+    
+    @Override
+    public String toString() {
+        return super.toString() + (hasExceptions() ? ":\n" + StringUtil.toFormattedString(getExceptions(), -1) : "");
     }
 }

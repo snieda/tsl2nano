@@ -6,6 +6,7 @@
 	<property name="bin.dir" value="generated-bin" />
 	<property name="lib.dir" value="lib" />
 	<property name="packagename" value="org.anonymous.project" />
+	<property name="packagepath" value="org/anonymous/project" />
 	<property name="bean.jar.path" value="bean.jar" />
 	<property name="resources.dir" value="src/resources" />
 	<property name="resources.db.dir" value="${resources.dir}/db" />
@@ -164,14 +165,8 @@
 		<javac classpathref="project.classpath" srcdir="${src.dir}" destdir="${bin.dir}" fork="true" failonerror="true" />
 
 		<!-- check, if any class file was created (while jar.whenempty doesn't seem to work) -->
-		<available property="class.file.exists" classname="**/*.class">
-			<filepath path="${bin.dir}">
-				<fileset dir="./">
-					<include name="**/*.class" />
-				</fileset>
-			</filepath>
-		</available>
-		<fail unless="class.file.exists" />
+		<available property="compiled.successful" type="dir" file="${bin.dir}/${packagepath}" />
+		<fail unless="compiled.successful" />
 
 		<jar destfile="${dest.file}" whenempty="fail">
 			<fileset dir="${bin.dir}">

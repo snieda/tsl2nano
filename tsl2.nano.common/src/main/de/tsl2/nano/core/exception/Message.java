@@ -15,6 +15,7 @@ import java.nio.ByteBuffer;
 import org.apache.commons.logging.Log;
 
 import de.tsl2.nano.core.Environment;
+import de.tsl2.nano.core.ManagedException;
 import de.tsl2.nano.core.log.LogFactory;
 
 /**
@@ -59,6 +60,11 @@ public class Message extends RuntimeException {
         return new StackTraceElement[0];
     }
 
+    public static final void send(Throwable msgHolder) {
+        //the @ is a prefix to be shown as message on the client
+        send("@" + ManagedException.toRuntimeEx(msgHolder, false, false).getMessage());
+    }
+    
     public static final void send(String message) {
         //TODO: why the current thread doesn't have the right handler? using
         //      the environment will create problems on multi-sessions!
@@ -81,7 +87,7 @@ public class Message extends RuntimeException {
     public static final void send(UncaughtExceptionHandler exceptionHandler, Object message) {
         if (exceptionHandler != null)
             exceptionHandler.uncaughtException(Thread.currentThread(), message instanceof ByteBuffer ? new Message(
-                (ByteBuffer) message) : new Message((String) message));
+                (ByteBuffer) message) : new Message(String.valueOf(message)));
         else
             LOG.info(message);
     }

@@ -131,7 +131,7 @@ public class Messages {
         if (parameter != null) {
             String a;
             for (int i = 0; i < parameter.length; i++) {
-                a = parameter[i] != null ? getString(String.valueOf(parameter[i])) : null;
+                a = parameter[i] != null ? getStringOpt(String.valueOf(parameter[i])) : null;
                 if (a != null)
                     parameter[i] = a;
             }

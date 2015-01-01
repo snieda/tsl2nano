@@ -105,25 +105,44 @@ public class PersistenceUI {
                 FileUtil.saveProperties(pfile, props);
             }
             final Properties p = props;
-//            login
-//                .getAttribute("connectionUserName")
-//                .changeHandler()
-//                .addListener(
-//                    new WebSocketDependencyListener<String>((AttributeDefinition<String>) login
-//                        .getAttribute("defaultSchema")) {
-//                        @Override
-//                        public String evaluate(Object value) {
-//                            Object userName = Util.asString(value);
-//                            String eval = null;
-//                            if (userName != null && Util.isEmpty(login.getAttribute("defaultSchema"))) {
-//                                if (value != null && value.toString().contains("hsqldb"))
-//                                    eval = "PUBLIC";
-//                                else
-//                                    eval = userName.toString().toUpperCase();
-//                            }
-//                            return eval;
-//                        }
-//                    });
+            //refresh the default schema to be asked by the username listener
+            String ds = (String) login.getValue("defaultSchema");
+            final StringBuilder defaultSchema = ds != null ? new StringBuilder(ds) : new StringBuilder();
+            login
+                .getAttribute("defaultSchema")
+                .changeHandler()
+                .addListener(
+                    new WebSocketDependencyListener<String>((AttributeDefinition<String>) login
+                        .getAttribute("defaultSchema")) {
+                        @Override
+                        public String evaluate(Object value) {
+                            String eval = StringUtil.toString(value);
+                            defaultSchema.delete(0, defaultSchema.length());
+                            if (value != null)
+                                defaultSchema.append(eval);
+                            return eval;
+                        }
+                    });
+            login
+            .getAttribute("connectionUserName")
+            .changeHandler()
+            .addListener(
+                new WebSocketDependencyListener<String>((AttributeDefinition<String>) login
+                    .getAttribute("defaultSchema")) {
+                    @Override
+                    public String evaluate(Object value) {
+                        Object userName = Util.asString(value);
+                        String eval = null;
+                        if (userName != null && Util.isEmpty(defaultSchema)) {
+                            if (value != null && value.toString().contains("hsqldb"))
+                                eval = "PUBLIC";
+                            else
+                                eval = userName.toString().toUpperCase();
+                            defaultSchema.replace(0, defaultSchema.length(), eval);
+                        }
+                        return eval;
+                    }
+                });
             login
                 .getAttribute("connectionUrl")
                 .changeHandler()

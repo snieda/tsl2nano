@@ -161,9 +161,9 @@ class Worker<INPUT, OUTPUT> {
      * @return result of worker jobs
      */
     public Map<INPUT, OUTPUT> waitForJobs(long timeout) {
-        LOG.info("========== " + name + " waiting for " + count++ + " jobs ================\n");
+        LOG.info("========== " + name + " waiting for " + count + " jobs ================\n");
         long start = System.currentTimeMillis();
-        while (start + timeout < System.currentTimeMillis()) {
+        while ((result.size() < count) && (start + timeout < System.currentTimeMillis())) {
             ConcurrentUtil.sleep(idle);
         }
         LOG.info("========== " + name + " has finished all jobs ================\n");

@@ -41,10 +41,10 @@ SET SCHEMA ${jdbc.scheme}
 				<property name="sh.sleep.milliseconds" value="3000" />
 				<ant antfile="shell.xml" target="sh.sleep"/>
 				<ant antfile="shell.xml" target="sh.sql">
-					property name="sh.sql.include" value="*drop*.sql"/>
+					<property name="sh.sql.include" value="*drop*.sql"/>
 				</ant>
 				<ant antfile="shell.xml" target="sh.sql">
-					property name="sh.sql.include" value="createuser.sql"/>
+					<property name="sh.sql.include" value="createuser.sql"/>
 				</ant>
 				<ant antfile="shell.xml" target="sh.sql">
 					<!-- <property name="sh.sql.include" value="h5.sample.sql"/> -->

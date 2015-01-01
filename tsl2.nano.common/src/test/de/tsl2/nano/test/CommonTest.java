@@ -20,6 +20,7 @@ import java.io.File;
 import java.io.Reader;
 import java.math.BigDecimal;
 import java.math.MathContext;
+import java.net.InetAddress;
 import java.text.DateFormat;
 import java.text.DecimalFormat;
 import java.text.Format;
@@ -1340,12 +1341,14 @@ public class CommonTest {
     }
     @Test
     public void testNetUtilScan() throws Exception {
+        //check for exception only
+        NetUtil.isOpen(InetAddress.getByName("localhost"), 666);
         //not a real test - only to see it working!
         NetUtil.scans(0, 10000);
     }
     
     @Test
-    public void testWCopy() throws Exception {
+    public void testNetUtilWCopy() throws Exception {
         //not a real test - only to see it working!
         NetUtil.wcopy("http://mobile.chefkoch.de", "test/", null, null);
     }

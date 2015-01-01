@@ -40,7 +40,7 @@ public class ScriptUtil extends SystemUtil {
         try {
             antbuild(filePath, target, properties, null);
             return true;
-        } catch (final Exception e) {
+        } catch (final Throwable e) {
             //TODO: refactore: return boolean --> void
             ManagedException.forward(e);
             return false;

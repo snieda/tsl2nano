@@ -333,7 +333,7 @@ public class NetUtil {
      * connectable.
      */
     public static boolean isOpen(InetAddress ip, int port) {
-        return scan(ip, port, port).get(new InetSocketAddress(ip, port)).equals(Boolean.TRUE);
+        return Boolean.TRUE.equals(scan(ip, port, port).get(new InetSocketAddress(ip, port)));
     }
 
     /**
@@ -376,11 +376,11 @@ public class NetUtil {
                 .createParallelWorker("portscan", Thread.MIN_PRIORITY, InetSocketAddress.class, Boolean.class);
         Map<InetSocketAddress, Boolean> result = worker.getResult();
         for (int i = 0; i < ips.length; i++) {
-            for (int p = minPort; p < maxPort; p++) {
+            for (int p = minPort; p <= maxPort; p++) {
                 worker.run(new PortScan(new InetSocketAddress(ips[i], p), timeout, result));
             }
         }
-        result = worker.waitForJobs(timeout);
+        result = worker.waitForJobs(timeout * 4);
         StringBuilder buf = new StringBuilder(result.size() * 30);
         buf.append("========== network-port-scanning finished ================\n");
         buf.append("open ports:\n");
