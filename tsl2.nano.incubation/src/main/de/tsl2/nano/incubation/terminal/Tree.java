@@ -9,6 +9,8 @@
  */
 package de.tsl2.nano.incubation.terminal;
 
+import java.io.InputStream;
+import java.io.PrintStream;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Properties;
@@ -20,6 +22,7 @@ import org.simpleframework.xml.core.Commit;
 import de.tsl2.nano.bean.def.IConstraint;
 import de.tsl2.nano.collection.CollectionUtil;
 import de.tsl2.nano.core.util.StringUtil;
+import de.tsl2.nano.core.util.Util;
 
 /**
  * 
@@ -32,10 +35,9 @@ public class Tree<T> extends AItem<List<T>> implements ITree<T> {
     /** serialVersionUID */
     private static final long serialVersionUID = -3656677742608173033L;
 
-    
     @ElementList(type = AItem.class, inline = true, entry = "item", required = false)
     List<IItem<T>> nodes;
-    
+
     transient private boolean isactive;
     boolean multiple = true;
 
@@ -72,7 +74,7 @@ public class Tree<T> extends AItem<List<T>> implements ITree<T> {
     public List<IItem<T>> getNodes() {
         return nodes;
     }
-    
+
     @Override
     protected void initConstraints(IConstraint<List<T>> constraints) {
     }
@@ -104,7 +106,7 @@ public class Tree<T> extends AItem<List<T>> implements ITree<T> {
     @Override
     public String ask() {
         isactive = true;
-        return "Please enter a number between 1 and " + getNodes().size();
+        return "Please enter a number between 1 and " + getNodes().size() + POSTFIX_QUESTION;
     }
 
     /**
@@ -112,7 +114,9 @@ public class Tree<T> extends AItem<List<T>> implements ITree<T> {
      */
     @SuppressWarnings("unchecked")
     @Override
-    public IItem react(IItem caller, String input, Properties env) {
+    public IItem react(IItem caller, String input, InputStream in, PrintStream out, Properties env) {
+        if (Util.isEmpty(input))
+            return getParent();
         IItem next = null;
         if (input.matches("\\d+")) {
             //input: one-based index
@@ -126,10 +130,12 @@ public class Tree<T> extends AItem<List<T>> implements ITree<T> {
                     break;
                 }
             }
+            if (next == null)
+                throw new IllegalArgumentException(input + " is not a known value!");
         }
         IItem nextnext = null;
         if (!next.isEditable()) {
-            nextnext = next.react(this, null, env);
+            nextnext = next.react(this, null, in, out, env);
         }
         if (multiple)
             getValue().add((T) next.getValue());
@@ -156,7 +162,7 @@ public class Tree<T> extends AItem<List<T>> implements ITree<T> {
     public void setMultiple(boolean multiple) {
         this.multiple = multiple;
     }
-    
+
     @Commit
     private void initDeserialization() {
         //fill yourself as parent for all children
@@ -169,13 +175,25 @@ public class Tree<T> extends AItem<List<T>> implements ITree<T> {
      * {@inheritDoc}
      */
     @Override
-    public String toString() {
+    public String getDescription(boolean full) {
         if (isactive) {
             List<IItem<T>> list = getNodes();
             StringBuilder buf = new StringBuilder(list.size() * 60);
             int i = 0;
+            //evaluate key string length for formatted output
+            int kl = 0;
+            for (IItem<T> t : list) {
+                kl = Math.max(kl, t.getPresentationPrefix().length() + translate(t.getName()).length());
+            }
+            kl++;
+            //print the child item list
+            int s = String.valueOf(list.size()).length() + 1;
             for (IItem t : list) {
-                buf.append(" " + ++i + "." + t.toString());
+//                buf.append(" " + ++i + "." + t.toString());
+                buf.append(StringUtil.fixString(String.valueOf(++i), s, ' ', false) + "."
+                    + StringUtil.fixString(t.getPresentationPrefix() + translate(t.getName()), kl, ' ', true)
+                    + (t.getType().equals(Type.Tree) ? "" : POSTFIX_QUESTION + (full ? t.getDescription(full) : StringUtil.toString(t.getValue(), 50)))
+                    + "\n");
             }
             return buf.toString();
         } else {

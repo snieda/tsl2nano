@@ -9,7 +9,10 @@
  */
 package de.tsl2.nano.incubation.terminal;
 
+import java.io.InputStream;
+import java.io.PrintStream;
 import java.util.Properties;
+import java.util.Scanner;
 
 import org.simpleframework.xml.Element;
 import org.simpleframework.xml.ElementArray;
@@ -32,6 +35,8 @@ public class Action<T> extends AItem<T> {
 
     /** serialVersionUID */
     private static final long serialVersionUID = 5286326570932592363L;
+
+    public static final String KEY_ENV = "ENVIRONMENT";
 
     @Element
     Class<?> mainClass;
@@ -67,7 +72,7 @@ public class Action<T> extends AItem<T> {
         for (int i = 0; i < argNames.length; i++) {
             v = context.getProperty(argNames[i]);
             if (v != null)
-                p.put("arg" + i, v);
+                p.put("arg" + (i+1), v);
             cls[i] = v != null ? v.getClass() : String.class;
         }
         IRunnable<T, Properties> runner = null;
@@ -88,11 +93,13 @@ public class Action<T> extends AItem<T> {
      * {@inheritDoc}
      */
     @Override
-    public IItem react(IItem caller, String input, Properties env) {
+    public IItem react(IItem caller, String input, InputStream in, PrintStream out, Properties env) {
         try {
             LogFactory.setPrintToConsole(true);
             value = run(env);
             changed = true;
+            //let us see the result
+            new Scanner(in).nextLine();
         } finally {
             LogFactory.setPrintToConsole(false);
         }

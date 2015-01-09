@@ -199,13 +199,10 @@ public class Terminal implements IItemHandler, Serializable {
 
     @Override
     public void printScreen(IItem item, PrintStream out) {
-        out.print(TextTerminal.getTextFrame(
-            item.getName() + " (value: "
-                + StringUtil.toString(item.getValue(), width - (item.getName().length() + 12)).replace('\n', ' ')
-                + ")", style, width, true));
+        out.print(TextTerminal.getTextFrame(item.toString(), style, width, true));
         String question = item.ask();
         printScreen(
-            item.toString() + "\n " + Messages.getStringOpt("tsl2nano.description") + ":\n " + item.getDescription(),
+            item.getDescription(false),
             out, question);
     }
 
@@ -219,9 +216,9 @@ public class Terminal implements IItemHandler, Serializable {
         while ((i = s.indexOf("\n", l + 1)) < s.length() && i != -1) {
             if (i - l > width - 2)
                 i = l + width - 2;
-            if (++lines >= height) {
+            if (++lines > height) {
                 out.print(getTextFrame(s.substring(page, i), style, width, false));
-                out.print("Please hit enter for the next page:");
+                out.print(">>> PLEASE HIT ENTER FOR THE NEXT PAGE <<<");
                 page = i + 1;
                 lines = 0;
                 if (!isInBatchMode())
@@ -232,12 +229,12 @@ public class Terminal implements IItemHandler, Serializable {
             l = i;
         }
         //print the rest
-        if (lines > 1 && lines < height) {
+        if (lines > 1 && lines <= height) {
             screen = s.substring(page, s.length());
             screen += StringUtil.fixString(height - lines, ' ').replace(" ", " \n");
             out.print(getTextFrame(screen, style, width, false));
         }
-        out.print(question + ": ");
+        out.print(question);
     }
 
     public static String translate(String name) {
@@ -253,30 +250,25 @@ public class Terminal implements IItemHandler, Serializable {
             printScreen(item, out);
             String input = nextLine(in);
             //to see the input in batch mode
-            if (!Util.isEmpty(input)) {
-                if (input.startsWith(KEY_COMMAND)) {
-                    if (isCommand(input, KEY_HELP)) {
-                        printScreen(getHelp(), out, "");
-                    } else if (isCommand(input, KEY_PROPERTIES)) {
-                        System.getProperties().list(out);
-                    } else if (isCommand(input, KEY_SAVE)) {
-                        save();
-                    } else if (isCommand(input, KEY_QUIT)) {
-                        throw new Finished("terminal stopped");
-                    }
-                    nextLine(in);
-                    serve(item, in, out, env);
+            if (!Util.isEmpty(input) && input.startsWith(KEY_COMMAND)) {
+                if (isCommand(input, KEY_HELP)) {
+                    printScreen(getHelp(), out, "");
+                    printScreen(item.getDescription(true), out, "");
+                } else if (isCommand(input, KEY_PROPERTIES)) {
+                    System.getProperties().list(out);
+                } else if (isCommand(input, KEY_SAVE)) {
+                    save();
+                } else if (isCommand(input, KEY_QUIT)) {
+                    throw new Finished("terminal stopped");
                 } else {
-//                    put(item);
-                    IItem next = item.react(item, input, env);
-                    //let us see the result
-                    if (item.getType().equals(Type.Action)) {
-                        nextLine(in);
-                    }
-
-                    if (next != null) {
-                        serve(next, in, out, env);
-                    }
+                    throw new IllegalArgumentException(input + " is not a known command!");
+                }
+                nextLine(in);
+                serve(item, in, out, env);
+            } else {
+                IItem next = item.react(item, input, in, out, env);
+                if (next != null) {
+                    serve(next, in, out, env);
                 }
             }
         } catch (Finished ex) {

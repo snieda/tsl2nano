@@ -9,6 +9,8 @@
  */
 package de.tsl2.nano.incubation.terminal;
 
+import java.io.InputStream;
+import java.io.PrintStream;
 import java.io.Serializable;
 import java.util.Properties;
 
@@ -43,7 +45,7 @@ public interface IItem<T> {
     /** provides a question text for the user */
     String ask();
     /** will be called after user input. @returns the next item to provide */
-    IItem react(IItem caller, String input, Properties env);
+    IItem react(IItem caller, String input, InputStream in, PrintStream out, Properties env);
     /** @return true, if item was edited */
     boolean isChanged();
     /** @return true, if this item should be editable by user input.
@@ -59,7 +61,7 @@ public interface IItem<T> {
     /** shows informations like edited, duty, type of input.*/
     String getPresentationPrefix();
     /** item description to be used as user help */
-    String getDescription();
+    String getDescription(boolean full);
 }
 
 enum Type implements Serializable {

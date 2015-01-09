@@ -1,5 +1,7 @@
 package de.tsl2.nano.incubation.terminal;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Properties;
 
 import de.tsl2.nano.core.ManagedException;
@@ -26,11 +28,14 @@ public class MainAction<T> extends Action<T> {
     @Override
     @SuppressWarnings({ "rawtypes", "unchecked" })
     T run(Properties context) {
-        String[] args = new String[argNames.length];
-        for (int i = 0; i < args.length; i++) {
-            args[i] = context.getProperty(argNames[i]);
+        List<String> argList = new ArrayList<String>(argNames.length);
+        String a;
+        for (int i = 0; i < argNames.length; i++) {
+            a = context.getProperty(argNames[i]);
+            if (a != null)
+                argList.add(a);
         }
-        context.put("arg1", args);
+        context.put("arg1", argList.toArray(new String[0]));
         if (runner == null) {
             try {
                 runner = new de.tsl2.nano.incubation.specification.actions.Action(mainClass.getMethod("main",
@@ -40,5 +45,12 @@ public class MainAction<T> extends Action<T> {
             }
         }
         return runner.run(context);
+    }
+    
+    @Override
+    public String getDescription(boolean full) {
+        //print the main help screen
+        run(new Properties());
+        return super.getDescription(full);
     }
 }

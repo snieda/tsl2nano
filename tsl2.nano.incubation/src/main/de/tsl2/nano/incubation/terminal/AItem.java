@@ -9,6 +9,8 @@
  */
 package de.tsl2.nano.incubation.terminal;
 
+import java.io.InputStream;
+import java.io.PrintStream;
 import java.io.Serializable;
 import java.text.ParseException;
 import java.util.Properties;
@@ -22,6 +24,7 @@ import de.tsl2.nano.core.ManagedException;
 import de.tsl2.nano.core.Messages;
 import de.tsl2.nano.core.cls.BeanAttribute;
 import de.tsl2.nano.core.util.StringUtil;
+import de.tsl2.nano.core.util.Util;
 
 /**
  * 
@@ -47,7 +50,8 @@ public class AItem<T> implements IItem<T>, Serializable {
     private String description;
 
     static final int PREFIX = 1;
-
+    static final String POSTFIX_QUESTION = ": ";
+    
     /**
      * constructor
      */
@@ -136,17 +140,21 @@ public class AItem<T> implements IItem<T>, Serializable {
         } else if (constraints.getAllowedValues() != null) {
             ask += " as one of: " + StringUtil.toString(constraints.getAllowedValues(), 60);
         }
-        return ask;
+        return ask + POSTFIX_QUESTION;
     }
 
     /**
      * {@inheritDoc}
      */
+    @SuppressWarnings({ "unchecked", "rawtypes" })
     @Override
-    public IItem react(IItem caller, String input, Properties env) {
+    public IItem react(IItem caller, String input, InputStream in, PrintStream out, Properties env) {
         try {
             setValue((T) getConstraints().getFormat().parseObject(input));
-            env.put(getName(), getValue());
+            if (!Util.isEmpty(input))
+                env.put(getName(), getValue());
+            else
+                env.remove(getName());
             changed = true;
         } catch (ParseException e) {
             ManagedException.forward(e);
@@ -184,7 +192,7 @@ public class AItem<T> implements IItem<T>, Serializable {
      * {@inheritDoc}
      */
     @Override
-    public String getDescription() {
+    public String getDescription(boolean full) {
         if (description == null)
             description = getConstraints() != null ? getConstraints().toString() : name;
         return description;
@@ -219,6 +227,6 @@ public class AItem<T> implements IItem<T>, Serializable {
      */
     @Override
     public String toString() {
-        return getPresentationPrefix() + translate(name) + ": " + value + "\n";
+        return getPresentationPrefix() + translate(name) + POSTFIX_QUESTION + value + "\n";
     }
 }

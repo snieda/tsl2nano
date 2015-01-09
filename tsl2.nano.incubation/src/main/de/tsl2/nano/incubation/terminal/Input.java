@@ -9,7 +9,13 @@
  */
 package de.tsl2.nano.incubation.terminal;
 
+import java.io.InputStream;
+import java.io.PrintStream;
+import java.util.Properties;
+
 import de.tsl2.nano.bean.def.IConstraint;
+import de.tsl2.nano.core.util.StringUtil;
+import de.tsl2.nano.core.util.Util;
 
 /**
  * 
@@ -49,6 +55,18 @@ public class Input<T> extends AItem<T> {
         getConstraints().setNullable(nullable);
     }
 
+    @Override
+    public IItem react(IItem caller, String input, InputStream in, PrintStream out, Properties env) {
+        if (Util.isEmpty(input))
+            input = StringUtil.toString(getValue());
+        return super.react(caller, input, in, out, env);
+    }
+    
+    @Override
+    public String ask() {
+        return StringUtil.substring(super.ask(), null, POSTFIX_QUESTION) + " (" + getValue() + ")" + POSTFIX_QUESTION;
+    }
+    
     /**
      * {@inheritDoc}
      */
