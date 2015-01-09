@@ -28,7 +28,7 @@ public class Runner {
             System.out.println("Please give at least the ICRunnable to start!");
             return;
         } else if (args.length < 2) {
-            System.out.println("Please give property-file name as second parameter!");
+            System.out.println("Please give a property-file name as second parameter!");
             return;
         }
         final Properties p = new Properties();

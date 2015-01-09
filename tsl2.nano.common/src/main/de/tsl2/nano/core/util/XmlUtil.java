@@ -284,6 +284,19 @@ public class XmlUtil {
     /**
      * delegates to {@link #xpath(String, InputStream, Class)}
      */
+    public static String xpath(String expression,
+            String fileName) {
+        try {
+            return xpath(expression, new FileInputStream(new File(fileName)), String.class);
+        } catch (FileNotFoundException e) {
+            ManagedException.forward(e);
+            return null;
+        }
+    }
+
+    /**
+     * delegates to {@link #xpath(String, InputStream, Class)}
+     */
     public static <RESULTTYPE> RESULTTYPE xpath(String expression,
             String fileName, Class<RESULTTYPE> resultType) {
         try {

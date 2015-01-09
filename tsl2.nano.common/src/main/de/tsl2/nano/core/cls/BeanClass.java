@@ -458,7 +458,16 @@ public class BeanClass<T> implements Serializable {
      * @return field value
      */
     public Object getField(T instance, String fieldName) {
-        return getField(instance, fieldName, false);
+        try {
+            return getField(instance, fieldName, false);
+        } catch (Exception e) {
+            try {
+                return getField(instance, fieldName, true);
+            } catch (Exception e1) {
+                ManagedException.forward(e1);
+                return null;
+            }
+        }
     }
 
     /**

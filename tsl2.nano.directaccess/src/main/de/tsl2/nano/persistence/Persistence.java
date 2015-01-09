@@ -487,7 +487,7 @@ public class Persistence implements Serializable {
      * @return Returns the autoddl.
      */
     public String getAutoddl() {
-        if (provider.contains("toplink")) {
+        if (provider.contains("toplink") || provider.contains("eclipselink")) {
             if (autoddl.equals("false"))
                 return "none";
             else if (autoddl.equals("validate"))

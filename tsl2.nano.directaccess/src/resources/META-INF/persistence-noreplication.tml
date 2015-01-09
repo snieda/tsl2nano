@@ -61,6 +61,9 @@
 			<property name="openjpa.RuntimeUnenhancedClasses" value="supported"/>
 			<property name="openjpa.DynamicEnhancementAgent" value="true" />
 		    
+         	<!-- EclipseLink -->
+			<property name="eclipselink.ddl-generation"      value="${autoddl}" />
+					    
          	<!-- TopLink -->
             <property name="toplink.jdbc.driver" value="${connection.driver_class}"/>
             <property name="toplink.jdbc.url" value="${connection.url}"/>

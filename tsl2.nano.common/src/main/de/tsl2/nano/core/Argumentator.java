@@ -60,7 +60,7 @@ public class Argumentator {
     /** args of a main call */
     Properties argMap;
     int consumed = 0;
-    
+
     //TODO: use dynamic syntax
     String syntax = "-+/=?";
 
@@ -126,7 +126,7 @@ public class Argumentator {
     public String get(String key) {
         return get(key, ++consumed);
     }
-    
+
     /**
      * provides the desired keys value. if not stored by 'key=value', the alternative arg index will be used.
      * 
@@ -209,14 +209,31 @@ public class Argumentator {
     }
 
     /**
-     * convenience to evaluate all sta
+     * convenience to evaluate all static field names (constants) of a class
      * 
-     * @param cls
-     * @param fieldType
-     * @return
+     * @param cls class to evaluate
+     * @param fieldType constant type
+     * @return string containing all static field values of given type.
      */
     public static final String staticNames(Class<?> cls, Class<?> fieldType) {
         return StringUtil.toString(BeanClass.getBeanClass(cls).getFieldNames(fieldType, true), Integer.MAX_VALUE);
+    }
+
+    /**
+     * evaluates all static field names through {@link #staticNames(Class, Class)} and fills their values to a string.
+     * 
+     * @param cls class to evaluate
+     * @param fieldType constant type
+     * @return string containing all static field names of given type.
+     */
+    public static final String staticValues(Class<?> cls, Class<?> fieldType) {
+        BeanClass<?> bc = BeanClass.getBeanClass(cls);
+        String[] names = bc.getFieldNames(fieldType, true);
+        StringBuilder buf = new StringBuilder(names.length * 10);
+        for (int i = 0; i < names.length; i++) {
+            buf.append(BeanClass.getStatic(cls, names[i]) + " ");
+        }
+        return buf.toString();
     }
 
     public void printManual() {
@@ -253,7 +270,7 @@ public class Argumentator {
                 buf.append("\nEXAMPLES:\n");
             }
             buf.append(StringUtil.fixString(k, kw, ' ', true) + ": ");
-            buf.append(StringUtil.split(man.get(k), newlinetab, w, w1 * 2, w1 * 3, w1 * 4, w1 * 5, w1 * 6, w1 * 7,
+            buf.append(StringUtil.split(man.get(k), newlinetab, w1, w1 * 2, w1 * 3, w1 * 4, w1 * 5, w1 * 6, w1 * 7,
                 w1 * 8, w1 * 9, w1 * 10) + "\n");
         }
         buf.append(StringUtil.fixString("", width, '-', true) + "\n");

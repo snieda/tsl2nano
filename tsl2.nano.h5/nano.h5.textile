@@ -1857,7 +1857,7 @@ TODO
 * UNDO, MARCRO
 * avoid dump of bean PersistenceUI$8 < simple-xml exception
 * create shell like main()-methods on util classes
-** getjar, crypt, print, net, XmlUtil, currencyUtil, ByteUtil, Profiler, ConcurrentUtil, SchedulerUtil, GeneratorUtility, NumericConditionedOperator
+** getjar, crypt, print, net, XmlUtil, currencyUtil, ByteUtil, Profiler, ConcurrentUtil, SchedulerUtil, GeneratorUtility, NumericConditionOperator
 ** ScriptTool/Util, RulePool, neuron, routing, workflow, equationsolver, vector3d
 
 * *Refactorings:*
@@ -1869,9 +1869,16 @@ TODO
 
 * *mybook: wcopy + concat files(date) + fop:xhtml2fo.xsl*
 
+* MDA Steps
+** use any tool to create an uml class diagram with persistent stereotypes and export an xmi file
+** generate a ddl file from xmi through xsl transformation
+** generate java class files through the ddl file with hibernate or openjpa
+** use tsl2nano to have a full application through the generated model
+*** adapt the standard gui-design (xml-files) of tsl2nano to fit your requirements
+
 h3. Tools
 
-h4. invader
+h4. Permutator
 
 Source: collection of strings
 Transf: action to transform source-string

@@ -115,7 +115,7 @@ public class PrintUtil {
      * @param username (optional) user-name to be used by the printer
      * @param paperSize (optional) something like {@link MediaSizeName#ISO_A4}.
      * @param quality (optional) quality one of enum {@link PrintQuality}
-     * @param priority(optional) priority number between 1 and 100. if lower than 1, it will be ignored!
+     * @param priority (optional) priority number between 1 and 100. if lower than 1, it will be ignored!
      * @param pageranges (optional) pageranges pages to be printed
      * @return the started print job
      */
@@ -131,13 +131,13 @@ public class PrintUtil {
         HashPrintRequestAttributeSet pras = new HashPrintRequestAttributeSet();
         //sometimes, the user name will not be set
         if (username != null)
-            pras.add(new RequestingUserName(System.getProperty("user.name"), Locale
+            pras.add(new RequestingUserName(username, Locale
                 .getDefault()));
         if (paperSize != null) //ISO_A4, ...
             pras.add(paperSize);
         if (priority > 0)
             pras.add(new JobPriority(priority));//1-100
-        if (pageranges.length > 0)
+        if (pageranges != null && pageranges.length > 0)
             pras.add(new PageRanges(pageranges));
         if (quality != null)
             pras.add(quality);
@@ -188,7 +188,7 @@ public class PrintUtil {
             logInfo(null, das, ps);
             return null;
         }
-            
+
         DocPrintJob job = ps.createPrintJob();
         Doc doc = new SimpleDoc(stream, docFlavor, das);
         job.addPrintJobListener(getPrintJobListener());
@@ -210,10 +210,10 @@ public class PrintUtil {
     private static void logInfo(DocPrintJob job, DocAttributeSet das,
             PrintService ps) {
         String info = toString(das.toArray())
-                + (job != null ? toString(job.getAttributes().toArray()) : "")
-                + toString(ps.getAttributes().toArray())
-                + toString(ps.getSupportedDocFlavors())
-                + toString(ps.getSupportedAttributeCategories());
+            + (job != null ? toString(job.getAttributes().toArray()) : "")
+            + toString(ps.getAttributes().toArray())
+            + toString(ps.getSupportedDocFlavors())
+            + toString(ps.getSupportedAttributeCategories());
         LOG.info(info);
         if (!LogFactory.isPrintToConsole())
             System.out.println(info);
@@ -260,28 +260,30 @@ public class PrintUtil {
     public static PrintService getPrintService(String printerName,
             INPUT_STREAM docFlavor, DocAttributeSet das) {
         PrintService ps = null;
-        if (printerName != null) {
-            PrintService[] services = PrintServiceLookup.lookupPrintServices(
-                docFlavor, das);
-            StringBuilder info = new StringBuilder();
-            for (int i = 0; i < services.length; i++) {
-                info.append("\n\t" + services[i].getName());
-                if (services[i].getName().equals(printerName)) {
-                    ps = services[i];
-                    break;
-                }
+        PrintService[] services = PrintServiceLookup.lookupPrintServices(
+            docFlavor, das);
+        StringBuilder info = new StringBuilder();
+        for (int i = 0; i < services.length; i++) {
+            info.append("\n\t" + services[i].getName());
+            if (services[i].getName().equals(printerName)) {
+                ps = services[i];
+                break;
             }
-            if (ps == null) {
+        }
+        if (ps == null) {
+            if (printerName != null) {
                 throw new IllegalArgumentException(
                     "The printer '"
-                        + printerName
-                        + "' is not available for doc-flavor '"
-                        + docFlavor.toString()
+                        + printerName + "' is not available"
+                        + (docFlavor != null ? " for doc-flavor '"
+                            + docFlavor.toString() : "")
                         + "'. Please set printerName=null to use the default-printer or select one of:"
                         + info + "\n");
+            } else {
+                LOG.info("available printers are:" + info);
+                ps = PrintServiceLookup.lookupDefaultPrintService();
+                LOG.info("\nusing default printer: " + ps.getName());
             }
-        } else {
-            ps = PrintServiceLookup.lookupDefaultPrintService();
         }
         return ps;
     }
@@ -311,11 +313,13 @@ public class PrintUtil {
             "printer name to send the stream to. if printer name is the only argument, all printers properties will be shown");
         man.put("papersize", Argumentator.staticNames(MediaSizeName.class, MediaSizeName.class));
         man.put("jobname", "job name to be shown by the printers job and as document name");
-        man.put("mimetype", Argumentator.staticNames(MimeConstants.class, String.class));
+        man.put("mimetype", Argumentator.staticValues(MimeConstants.class, String.class));
         man.put("quality", Argumentator.staticNames(PrintQuality.class, PrintQuality.class));
         man.put("priority", "value between 1 and 100");
         man.put("pageranges", "page to print. e.g. '1-2;5-6;8-12'");
-        man.put("xsltfile", "apache fop transformation file. then, the source file has to be an xml data file to be transformed by fop transformation");
+        man.put(
+            "xsltfile",
+            "apache fop transformation file. then, the source file has to be an xml data file to be transformed by fop transformation");
         man.put("example-1", "print source=printer-info");
         man.put("example-2", "print source=printer-info printer=PDFCreator");
         man.put("example-3", "print source=myfile.pdf printer=PDFCreator");
@@ -328,19 +332,42 @@ public class PrintUtil {
         if (am.check(System.out)) {
             String source = am.get("source");
             String printer = am.get("printer");
+            String jobname = am.get("jobname");
+            if (jobname == null)
+                jobname = source;
             String ps = am.get("papersize");
-            MediaSizeName paper = (MediaSizeName) BeanClass.getStatic(MediaSizeName.class, ps);
-            PrintQuality quality = (PrintQuality) BeanClass.getStatic(PrintQuality.class, am.get("quality"));
-            Integer priority = Integer.valueOf(am.get("priority"));
+            MediaSizeName paper = null;
+            if (ps != null)
+                paper = (MediaSizeName) BeanClass.getStatic(MediaSizeName.class, ps);
+            PrintQuality quality = null;
+            String qual = am.get("quality");
+            if (qual != null)
+                quality = (PrintQuality) BeanClass.getStatic(PrintQuality.class, qual);
+            Integer priority;
+            String prio = am.get("priority");
+            priority = prio != null ? Integer.valueOf(prio) : 0;
             int[][] pageranges = null;//am.get("pageranges");
             InputStream stream;
             if (source.equals("printer-info")) {//simple printer info
-                print("printer-info", printer, (InputStream)null);
+                print("printer-info", printer, (InputStream) null);
                 return;
             } else if (source.endsWith(".xml")) {//fop transformation
-                File xsltFile = new File(am.get("xsltfile"));
-                stream = ByteUtil.getInputStream(XmlUtil.fop(new File(source), am.get("mimetype"), xsltFile));
-            } else if (source.contains("*")){//fileset
+                String xslt = am.get("xsltfile");
+                if (xslt == null)
+                    throw new IllegalArgumentException(
+                        "if source is an xml file, an xslt-transformation file has to be given!");
+                File xsltFile = new File(xslt);
+                String mimeType = am.get("mimetype");
+                if (mimeType == null)
+                    mimeType = "application/pdf";
+                if (source.contains("*"))
+                    throw new IllegalArgumentException(
+                        "doing an apache fop transformation, no file filter is allowed. please provide an explicit file name!");
+                byte[] fop = XmlUtil.fop(new File(source), mimeType, xsltFile);
+                //write the output to a file for e.g. debugging
+                FileUtil.writeBytes(fop, source + "." + StringUtil.substring(mimeType, "/", null), false);
+                stream = ByteUtil.getInputStream(fop);
+            } else if (source.contains("*")) {//fileset
                 List<File> fileset = FileUtil.getFileset("./", source);
                 for (File file : fileset) {
                     stream = FileUtil.getFile(file.getPath());
@@ -351,7 +378,7 @@ public class PrintUtil {
             } else {
                 stream = FileUtil.getFile(source);
             }
-            print(am.get("jobname"), printer, stream, am.get("mimetype"), am.get("username"),
+            print(jobname, printer, stream, am.get("mimetype"), am.get("username"),
                 paper, quality, priority, pageranges);
         }
     }

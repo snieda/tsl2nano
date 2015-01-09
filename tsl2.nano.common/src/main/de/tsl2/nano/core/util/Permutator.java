@@ -125,7 +125,7 @@ public class Permutator {
      * </pre>
      */
     public static final void main(String[] args) {
-        Argumentator ator = new Argumentator("invader", getManual(), args);
+        Argumentator ator = new Argumentator("permutator", getManual(), args);
         Object t;
         if (ator.check(System.out)) {
             String source = ator.consume("source", "");
