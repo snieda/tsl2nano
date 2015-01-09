@@ -287,8 +287,11 @@ public class ServiceUtil {
                 //recursive entity-attributes on transient objects
                 if (BeanContainerUtil.isPersistable(beanAttribute.getType()) && getId(value) == null) {
                     addAndConditions(qStr, attrPrefix + name + ".", value, operator, parameter, caseInsensitive);
-                    qStr.append("\n");
-                    and_cond = CLAUSE_AND;
+                    //the relations can have only null values, so that no where/and clause may be added
+                    if (qStr.toString().contains(CLAUSE_WHERE)) {
+                        qStr.append("\n");
+                        and_cond = CLAUSE_AND;
+                    }
                     continue;
                 }
                 //on manyToOne mappings use the foreignkey column
@@ -679,8 +682,8 @@ public class ServiceUtil {
             if (f.isAnnotationPresent(javax.persistence.Id.class)) {
                 return f;
             } else if (f.isAnnotationPresent(EmbeddedId.class)) {
-                    return f;
-                }
+                return f;
+            }
         }
         Class superClass = clazz.getSuperclass();
         return superClass != null ? getSuperIdField(superClass) : null;
