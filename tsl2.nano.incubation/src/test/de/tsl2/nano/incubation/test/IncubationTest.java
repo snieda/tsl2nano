@@ -598,8 +598,24 @@ public class IncubationTest {
             .add(new MainAction(Crypt.class, "password", "algorithm", "text", "base64", "include"));
         root.add(crypt);
 
+        Tree perm = new Tree("Permutator", null);
+        perm.add(new Input("source", null, "source collection"));
+        perm.add(new Input("transformer", null, "transforming action"));
+        perm.add(new Input("swap", null, "whether to swap key and values in destination-map"));
+        perm.add(new Input("backward", null, "action to do a back-transformation for each keys value"));
+        perm
+            .add(new MainAction(Permutator.class, "source", "transformer", "swap", "backward"));
+        root.add(perm);
+
+        Tree xml = new Tree("Xml", null);
+        xml.add(new Input("source", null, "source file"));
+        xml.add(new Input("expression", null, "xpath expression"));
+        xml.add(new Action(XmlUtil.class, "transform", "source", Action.KEY_ENV));
+        xml.add(new Action(XmlUtil.class, "xpath", "expression", "source"));
+        root.add(xml);
+
 //        Tree getjar = new Tree("getJar", null);
-//        getjar.add(new Input("name", null, "name, jar-file or class package to load with dependenies from web"));
+//        getjar.add(new Input("name", null, "name, jar-file or class package to load with dependencies from web"));
 //        getjar.add(new MainAction(BeanClass.createBeanClass("de.tsl2.nano.jarresolver.JarResolver", null).getClazz(), "name"));
 //        root.add(getjar);
 //
@@ -622,7 +638,7 @@ public class IncubationTest {
         root.add(net);
 
         InputStream in = Terminal.createBatchStream("Printing", "jobname", "test", "print", ":quit");
-        new Terminal(root, in, System.out, 79, 10, 1).run();
+        new Terminal(root, in, System.out, 79, 22, 1).run();
 
         Terminal.main(new String[] { Terminal.DEFAULT_NAME });
 

@@ -17,6 +17,7 @@ import java.text.FieldPosition;
 import java.text.Format;
 import java.text.ParsePosition;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -593,7 +594,7 @@ public class NanoH5 extends NanoHTTPD implements ISystemConnector<Persistence> {
             int p = Integer.valueOf(persistence.getPort());
             //TODO: eval if url on localhost
             String url = persistence.getConnectionUrl();
-            return persistence.getConnectionDriverClass().equals(Persistence.STD_LOCAL_DATABASE_DRIVER)
+            return Arrays.asList(persistence.STD_LOCAL_DATABASE_DRIVERS).contains(persistence.getConnectionDriverClass())
                 && (url.contains("localhost") || url.contains("127.0.0.1"))
                 && !NetUtil.isOpen(NetUtil.getInetAddress(), p);
         }

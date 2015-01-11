@@ -1651,6 +1651,7 @@ TODO
 | 0.7.0a | 01.11.2014 | new plugin interface on beandefintions (path changed to 'presentation'). specified rules and actions are 						pluggable into beandef or attributedef now. |
 | 0.7.0b | 09.11.2014 | gui fading, offline message, web-cache through manifest, testing batoo-jpa |
 | 0.7.0c | 15.11.2014 | reverse-engineering with openjpa support, jar resolving enhanced |
+| 0.7.0d | 11.01.2015 | auto creating new databases through an equal named sql file |
 
 ## TODOs
 

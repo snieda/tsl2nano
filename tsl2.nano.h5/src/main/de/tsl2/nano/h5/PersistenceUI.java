@@ -68,7 +68,7 @@ public class PersistenceUI {
                 props.setProperty("DRIVER_jdbc.odbc", "sun.jdbc.odbc.JdbcOdbcDriver");
                 props.setProperty("DRIVER_jdbc.oracle", "oracle.jdbc.OracleDriver");
                 props.setProperty("DRIVER_jdbc.db2", "com.ibm.db2.jcc.DB2Driver");
-                props.setProperty("DRIVER_jdbc.hsqldb", "org.hsqldb.jdbc.JDBCDriver");
+                props.setProperty("DRIVER_jdbc.hsqldb", persistence.STD_LOCAL_DATABASE_DRIVER);
                 props.setProperty("DRIVER_jdbc.h2", "org.h2.jdbcDriver");
                 props.setProperty("DRIVER_jdbc.sybase", "com.sybase.jdbc2.jdbc.SybDriver");
                 props.setProperty("DRIVER_jdbc.derby", "derbyclient");
@@ -112,8 +112,7 @@ public class PersistenceUI {
                 .getAttribute("defaultSchema")
                 .changeHandler()
                 .addListener(
-                    new WebSocketDependencyListener<String>((AttributeDefinition<String>) login
-                        .getAttribute("defaultSchema")) {
+                    new WebSocketDependencyListener<String>() {
                         @Override
                         public String evaluate(Object value) {
                             String eval = StringUtil.toString(value);
@@ -132,13 +131,15 @@ public class PersistenceUI {
                     @Override
                     public String evaluate(Object value) {
                         Object userName = Util.asString(value);
-                        String eval = null;
+                        String eval;
                         if (userName != null && Util.isEmpty(defaultSchema)) {
                             if (value != null && value.toString().contains("hsqldb"))
                                 eval = "PUBLIC";
                             else
                                 eval = userName.toString().toUpperCase();
                             defaultSchema.replace(0, defaultSchema.length(), eval);
+                        } else {
+                            eval = defaultSchema.toString();
                         }
                         return eval;
                     }
@@ -213,7 +214,8 @@ public class PersistenceUI {
                                     return StringUtil.substring(database, ":", null, true);
                                 }
                             }
-                            return null;
+                            //fallback
+                            return persistence.getDatabase();
                         }
                     });
             login
