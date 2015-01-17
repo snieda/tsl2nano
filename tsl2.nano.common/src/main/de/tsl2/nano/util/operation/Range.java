@@ -1,6 +1,11 @@
 package de.tsl2.nano.util.operation;
 
 import java.io.Serializable;
+import java.util.List;
+
+import de.tsl2.nano.core.cls.BeanClass;
+import de.tsl2.nano.core.cls.IAttribute;
+import de.tsl2.nano.core.cls.PrimitiveUtil;
 
 
 /**
@@ -46,4 +51,31 @@ public class Range<T> implements IRange<T>, Serializable {
         return to;
     }
 
+    /**
+     * evaluates all primitive attributes of the given instance type and sets minimum values for them
+     * @param instance range instance
+     */
+    @SuppressWarnings({ "unchecked", "rawtypes" })
+    public static void setPrimitiveMinValues(Object instance) {
+        BeanClass<? extends Object> cls = BeanClass.getBeanClass(instance.getClass());
+        List<IAttribute> attributes = cls.getAttributes();
+        for (IAttribute a : attributes) {
+            if (a.getType().isPrimitive())
+                a.setValue(instance, PrimitiveUtil.getMinimumValue(a.getType()));
+        }
+    }
+
+    /**
+     * evaluates all primitive attributes of the given instance type and sets maximum values for them
+     * @param instance range instance
+     */
+    @SuppressWarnings({ "unchecked", "rawtypes" })
+    public static void setPrimitiveMaxValues(Object instance) {
+        BeanClass<? extends Object> cls = BeanClass.getBeanClass(instance.getClass());
+        List<IAttribute> attributes = cls.getAttributes();
+        for (IAttribute a : attributes) {
+            if (a.getType().isPrimitive())
+                a.setValue(instance, PrimitiveUtil.getMaximumValue(a.getType()));
+        }
+    }
 }

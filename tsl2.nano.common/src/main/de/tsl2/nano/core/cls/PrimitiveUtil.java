@@ -139,6 +139,30 @@ public class PrimitiveUtil {
     }
 
     /**
+     * returns the minimum value of the given primitive
+     * 
+     * @param <T> primitive type
+     * @param standardType primitive type
+     * @return minimum value for given type
+     */
+    public static <T> T getMinimumValue(Class<T> standardType) {
+        assert standardType.isPrimitive() : "standardType must be a primitive, but is:" + standardType;
+        return BeanClass.getBeanClass(standardType).createInstance(BeanClass.getStatic(standardType, "MIN_VALUE"));
+    }
+
+    /**
+     * returns the minimum value of the given primitive
+     * 
+     * @param <T> primitive type
+     * @param standardType primitive type
+     * @return minimum value for given type
+     */
+    public static <T> T getMaximumValue(Class<T> standardType) {
+        assert standardType.isPrimitive() : "standardType must be a primitive, but is:" + standardType;
+        return BeanClass.getBeanClass(standardType).createInstance(BeanClass.getStatic(standardType, "MAX_VALUE"));
+    }
+
+    /**
      * extends the {@link Class#isAssignableFrom(Class)} to check for primitives and their immutables
      * 
      * @param cls1 to be assignable from cls2

@@ -463,7 +463,7 @@ public class Bean<T> extends BeanDefinition<T> {
 //                result = BeanContainer.instance().getBeansByExample(instance).iterator().next();
                 result = instance;
             } else
-                result = save(instance);
+                result = /*setInstance(*/save(instance)/*)*/;
         } finally {
 //            detach();
         }
@@ -786,7 +786,7 @@ class SaveAction<T> extends SecureAction<T> implements Serializable {
     }
 
     public T action() throws Exception {
-        return (T) bean.save();
+        return (T) bean.save(instance);
     }
 
     @Override

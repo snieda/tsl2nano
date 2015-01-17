@@ -378,8 +378,11 @@ public class BeanPresentationHelper<T> {
         if (attr.temporalType() != null && Time.class.isAssignableFrom(attr.temporalType()))
             return IPresentable.TYPE_TIME;
         int type = getDefaultType((IAttribute) attr);
-        if (attr.length() > Environment.get("field.min.multiline.length", 100) || attr.isMultiValue())
-            type |= IPresentable.TYPE_INPUT_MULTILINE;
+        if (!NumberUtil.hasBit(type, IPresentable.TYPE_OPTION)
+            && !NumberUtil.hasBit(type, IPresentable.TYPE_INPUT_NUMBER)) {
+            if (attr.length() > Environment.get("field.min.multiline.length", 100) || attr.isMultiValue())
+                type |= IPresentable.TYPE_INPUT_MULTILINE;
+        }
         return type;
     }
 
@@ -410,7 +413,7 @@ public class BeanPresentationHelper<T> {
             type = TYPE_TABLE;
         } else if (BeanUtil.isStandardType(attr.getType())) {
             type = TYPE_INPUT;
-            if (Number.class.isAssignableFrom(attr.getType()))
+            if (NumberUtil.isNumber(attr.getType()))
                 type |= TYPE_INPUT_NUMBER;
         } else {//complex type --> combo box list
             type = TYPE_SELECTION;

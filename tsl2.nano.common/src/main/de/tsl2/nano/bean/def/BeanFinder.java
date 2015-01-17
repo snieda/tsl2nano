@@ -164,7 +164,9 @@ public class BeanFinder<T, F> implements IBeanFinder<T, F>, Serializable {
                     noRangeBean = true;
                 } else {
                     F from = (F) BeanClass.createInstance(type);
+                    Range.setPrimitiveMinValues(from);
                     F to = BeanUtil.clone(from);
+                    Range.setPrimitiveMaxValues(to);
                     rangeBean = new Bean<IRange<F>>(new Range<F>(from, to));
                 }
             } catch (Exception ex) {
