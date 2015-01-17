@@ -19,6 +19,7 @@ import java.util.Properties;
 import de.tsl2.nano.action.CommonAction;
 import de.tsl2.nano.action.IAction;
 import de.tsl2.nano.bean.BeanContainer;
+import de.tsl2.nano.bean.BeanUtil;
 import de.tsl2.nano.bean.def.BeanValue;
 import de.tsl2.nano.core.Environment;
 import de.tsl2.nano.core.util.FileUtil;
@@ -232,7 +233,17 @@ public class ScriptTool implements Serializable {
     protected Object executeStatement(String strStmt, boolean pureSQL) throws Exception {
         //jpa access
         if (StringUtil.findRegExp(strStmt.toLowerCase(), "^\\s*select", 0) != null) {
-            return BeanContainer.instance().getBeansByQuery(strStmt, pureSQL, new Object[0]);
+            Object result = BeanContainer.instance().getBeansByQuery(strStmt, pureSQL, new Object[0]);
+            //if result is only a single value, return this single value
+            if (result instanceof Collection) {
+                Collection c = (Collection) result;
+                if (c.size() == 1) {
+                    Object singleObject = c.iterator().next();
+                    if (BeanUtil.isStandardType(singleObject))
+                        return singleObject;
+                }
+            }
+            return result;
         } else {
 //            if (pureSQL) {
 //                //standard jdbc access
