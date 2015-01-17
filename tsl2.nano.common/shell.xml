@@ -329,13 +329,56 @@ target: sh.delete
 
 	<target name="sh.sql" unless="sh.disable.sql" description="starts sql scripts">
 		<!-- if not defined, use some defaults ... -->
+		<property name="sh.sql.driver" value="${jdbc.driver}" />
+		<property name="sh.sql.url" value="${jdbc.url}" />
+		<property name="sh.sql.userid" value="${jdbc.username}" />
+		<property name="sh.sql.password" value="${jdbc.password}" />
 		<property name="sh.sql.dir" value="${basedir}" />
 		<property name="sh.sql.include" value="*.sql" />
+		<property name="sh.sql.include2" value="INCLUDING_EXPRESSION" />
+		<property name="sh.sql.include3" value="INCLUDING_EXPRESSION" />
+		<property name="sh.sql.include4" value="INCLUDING_EXPRESSION" />
 		<property name="sh.sql.exclude" value="EXCLUDING_EXPRESSION" />
-		<sql classpathref="sh.stdpath.id" encoding="Cp1252" driver="${jdbc.driver}" url="${jdbc.url}" userid="${jdbc.username}" password="${jdbc.password}" onerror="stop" autocommit="true" print="true">
-			<fileset dir="${sh.sql.dir}" includes="${sh.sql.include}" excludes="${sh.sql.exclude}" />
-		</sql>
+		<property name="sh.sql.exclude2" value="EXCLUDING_EXPRESSION" />
+		<property name="sh.sql.exclude3" value="EXCLUDING_EXPRESSION" />
+		<property name="sh.sql.exclude4" value="EXCLUDING_EXPRESSION" />
+		<property name="sh.sql.onerror" value="abort" />
+		<property name="sh.sql.encoding" value="Cp1252" />
+		<!-- start it -->
+		<sh.sql sh.sql.driver="${sh.sql.driver}" sh.sql.url="${sh.sql.url}" sh.sql.userid="${sh.sql.userid}" sh.sql.password="${sh.sql.password}" sh.sql.include="${sh.sql.include}" sh.sql.include2="${sh.sql.include2}" sh.sql.include3="${sh.sql.include3}" sh.sql.include4="${sh.sql.include4}" sh.sql.exclude="${sh.sql.exclude}" sh.sql.exclude2="${sh.sql.exclude2}" sh.sql.exclude3="${sh.sql.exclude3}" sh.sql.exclude4="${sh.sql.exclude4}" sh.sql.onerror="${sh.sql.onerror}" sh.sql.encoding="${sh.sql.encoding}" />
 	</target>
+
+	<!-- defining a macro to be able to call it multiple times -->
+	<macrodef name="sh.sql" description="runs sql scripts on given fileset">
+		<attribute name="sh.sql.driver" />
+		<attribute name="sh.sql.url" />
+		<attribute name="sh.sql.userid" />
+		<attribute name="sh.sql.password" />
+		<attribute name="sh.sql.include" />
+		<attribute name="sh.sql.include2" />
+		<attribute name="sh.sql.include3" />
+		<attribute name="sh.sql.include4" />
+		<attribute name="sh.sql.exclude" />
+		<attribute name="sh.sql.exclude2" />
+		<attribute name="sh.sql.exclude3" />
+		<attribute name="sh.sql.exclude4" />
+		<attribute name="sh.sql.onerror" />
+		<attribute name="sh.sql.encoding" />
+		<sequential>
+			<sql classpathref="sh.stdpath.id" encoding="@{sh.sql.encoding}" driver="@{sh.sql.driver}" url="@{sh.sql.url}" userid="@{sh.sql.userid}" password="@{sh.sql.password}" onerror="@{sh.sql.onerror}" autocommit="true" print="true">
+				<fileset dir="${sh.sql.dir}">
+					<include name="@{sh.sql.include}" />
+					<include name="@{sh.sql.include2}" />
+					<include name="@{sh.sql.include3}" />
+					<include name="@{sh.sql.include4}" />
+					<exclude name="@{sh.sql.exclude}" />
+					<exclude name="@{sh.sql.exclude2}" />
+					<exclude name="@{sh.sql.exclude3}" />
+					<exclude name="@{sh.sql.exclude4}" />
+				</fileset>
+			</sql>
+		</sequential>
+	</macrodef>
 
 	<target name="sh.printinfo" description="prints some system informations to the standard output">
 		<echo>
@@ -369,7 +412,7 @@ starting ${ant.project.name}:
 		<mkdir dir="${sh.java.bin.dir}" />
 		<mkdir dir="${sh.java.target.dir}" />
 	</target>
-	
+
 	<target name="sh.clean" unless="sh.disable.clean" depends="sh.init" description="cleans all binaries">
 		<!-- fallbacks -->
 		<property name="sh.clean.basedir" value="${basedir}" />
@@ -408,7 +451,7 @@ starting ${ant.project.name}:
 		<property name="sh.compile.debug" value="false" />
 		<property name="sh.compile.cargs" value="-nowarn" />
 		<property name="sh.compile.encoding" value="${sh.java.encoding}" />
-		
+
 		<!-- start it -->
 		<sh.compile sh.compile.srcdir="${sh.compile.srcdir}" sh.compile.srcdir2="${sh.compile.srcdir2}" sh.compile.srcdir3="${sh.compile.srcdir3}" sh.compile.srcdir4="${sh.compile.srcdir4}" sh.compile.include="${sh.compile.include}" sh.compile.exclude="${sh.compile.exclude}" sh.compile.bindir="${sh.compile.bindir}" sh.compile.classpath="${sh.compile.classpath}" sh.compile.classpath2="${sh.compile.classpath2}" sh.compile.classpath3="${sh.compile.classpath3}" sh.compile.classpath4="${sh.compile.classpath4}" sh.compile.debug="${sh.compile.debug}" sh.compile.extdirs="${sh.compile.extdirs}" sh.compile.cargs="${sh.compile.cargs}" sh.compile.encoding="${sh.compile.encoding}" />
 	</target>
@@ -657,8 +700,8 @@ starting ${ant.project.name}:
 		<property name="sh.junit.test.dir" value="${sh.java.test.dir}" />
 		<property name="sh.junit.target.dir" value="${sh.java.target.dir}" />
 		<property name="sh.junit.include" value="**/*Test.java" />
-		
-		<mkdir dir="${sh.junit.target.dir}/junit/report"/>
+
+		<mkdir dir="${sh.junit.target.dir}/junit/report" />
 		<sh.junit sh.junit.test.dir="${sh.junit.test.dir}" sh.junit.target.dir="${sh.junit.target.dir}" sh.junit.include="${sh.junit.include}" />
 	</target>
 
