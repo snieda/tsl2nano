@@ -299,7 +299,7 @@ A description of all configuration attributes can be found [here](src/resources/
 
 ### Language and Translations
 
-The _messages.properties_ is the language file to translate every application specific text. You can overwrite it through putting your own file into the environment-directory with sub-directory _de/tsl2/nano/h5_. All bean or bean-attribute-names will be translated. 
+The _messages.properties_ is the language file to translate every application specific text. You can overwrite it through putting your own file into the environment-directory. All bean or bean-attribute-names will be translated - if no presentation xml file are present. To define a german translation, you would create the file _messages_de.properties_ to the environment-dirctory.
 All framework specific and generic texts will be translated through the internal _de.tsl2.nano.messages.properties_.
 
 The environments file _messages.properties_ generated on new beans provides default entries for all available fields and actions. Change it to define other translations (will be done since you change the bean-definition names in the xml files directly. It is possible to add html tags like:
@@ -1847,17 +1847,18 @@ TODO
 * (v) show if application was stopped
 * (x) show message if offline
 * where to use instrumentation agents?
-* evaluate reverse tools:
+* how to ignore unset primitive search attributes?
+* *evaluate reverse tools:*
 ** DBRE http://docs.spring.io/spring-roo/reference/html/base-dbre.html
 ** Kodo (now integrated in OpenJPA?)
-* create jars for:
+* *create jars for:*
 ** weltjar (getjar, NetworkingClassloader, main with instrumentation and input)
 ** schalentier (ant + shell.xml + tsl2nano.common)
 ** wähler: menuitem
 ** verteiler: vNet
 * UNDO, MARCRO
 * avoid dump of bean PersistenceUI$8 < simple-xml exception
-* create shell like main()-methods on util classes
+* *create shell like main()-methods on util classes*
 ** getjar, crypt, print, net, XmlUtil, currencyUtil, ByteUtil, Profiler, ConcurrentUtil, SchedulerUtil, GeneratorUtility, NumericConditionOperator
 ** ScriptTool/Util, RulePool, neuron, routing, workflow, equationsolver, vector3d
 
@@ -1876,6 +1877,7 @@ TODO
 ** generate java class files through the ddl file with hibernate or openjpa
 ** use tsl2nano to have a full application through the generated model
 *** adapt the standard gui-design (xml-files) of tsl2nano to fit your requirements
+* Note: *xmi2ddl.xls* no script found
 
 h3. Tools
 
