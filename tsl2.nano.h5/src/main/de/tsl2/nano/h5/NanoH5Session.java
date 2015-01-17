@@ -504,7 +504,7 @@ public class NanoH5Session implements ISession {
                          * if the type is object, the bean doesn't know exactly it's real type, so
                          * we assume it should be serializable...
                          */
-                        if (!Serializable.class.isAssignableFrom(type) && !Object.class.isAssignableFrom(type)) {
+                        if (!type.isPrimitive() && !Serializable.class.isAssignableFrom(type) && !Object.class.isAssignableFrom(type)) {
                             LOG.debug("ignoring not-serializable attribute " + vmodel.getAttribute(p));
                             continue;
                         }

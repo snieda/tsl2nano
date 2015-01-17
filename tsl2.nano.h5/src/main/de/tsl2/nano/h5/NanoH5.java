@@ -68,7 +68,9 @@ import de.tsl2.nano.util.NumberUtil;
 /**
  * An Application of subclassing NanoHTTPD to make a custom HTTP server.
  * 
- * <pre * TODO: * - Bean-->
+ * <pre>
+ * TODO: 
+ * - Bean-->
  * BeanValue-->getColumnDefinition() --> Table(columns)
  * - PageBuilder --> Bean.Presentable
  * - Navigation
@@ -233,13 +235,13 @@ public class NanoH5 extends NanoHTTPD implements ISystemConnector<Persistence> {
             session = createSession(requestor);
         } else {//perhaps session was interrupted/closed but not removed
             //WORKAROUND: may occur on cached pages
-            if (method.equals("GET") && parms.size() == 0 && (uri.length() < 2 || header.get("referer") == null)) {
-                LOG.debug("reloading cached page...");
-                return session.response;
-            } else if (session.nav == null || session.nav.isEmpty()) {
+            if (session.nav == null || session.nav.isEmpty()) {
                 session.close();
                 sessions.remove(session.inetAddress);
                 session = createSession(requestor);
+            } else if (method.equals("GET") && parms.size() == 0 && (uri.length() < 2 || header.get("referer") == null)) {
+                LOG.debug("reloading cached page...");
+                return session.response;
             }
         }
         session.startTime = startTime;
@@ -520,7 +522,8 @@ public class NanoH5 extends NanoHTTPD implements ISystemConnector<Persistence> {
             if (isNewDatabase(persistence)) {
                 generateDatabase(persistence);
             }
-            Boolean generationComplete = generateJarFile(jarName, persistence.getGenerator(), persistence.getDefaultSchema());
+            Boolean generationComplete =
+                generateJarFile(jarName, persistence.getGenerator(), persistence.getDefaultSchema());
             //return value may be null or false
             if (!Boolean.TRUE.equals(generationComplete) || !new File(jarName).exists()) {
                 throw new ManagedException(
@@ -594,7 +597,8 @@ public class NanoH5 extends NanoHTTPD implements ISystemConnector<Persistence> {
             int p = Integer.valueOf(persistence.getPort());
             //TODO: eval if url on localhost
             String url = persistence.getConnectionUrl();
-            return Arrays.asList(persistence.STD_LOCAL_DATABASE_DRIVERS).contains(persistence.getConnectionDriverClass())
+            return Arrays.asList(persistence.STD_LOCAL_DATABASE_DRIVERS).contains(
+                persistence.getConnectionDriverClass())
                 && (url.contains("localhost") || url.contains("127.0.0.1"))
                 && !NetUtil.isOpen(NetUtil.getInetAddress(), p);
         }
@@ -604,10 +608,13 @@ public class NanoH5 extends NanoHTTPD implements ISystemConnector<Persistence> {
     private void generateDatabase(Persistence persistence) {
         Message.send("creating new database " + persistence.getDatabase() + " for url "
             + persistence.getConnectionUrl());
+        Properties p = new Properties();
+        //give mda.xml the information to don't start nano.h5
+        p.put("nano.h5.running", "true");
         Environment.get(CompatibilityLayer.class).runRegistered("ant",
             Environment.getConfigPath() + "mda.xml",
             "do.all",
-            new Properties());
+            p);
     }
 
     protected static Boolean generateJarFile(String jarFile, String generator, String schema) {

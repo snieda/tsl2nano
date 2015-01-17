@@ -433,7 +433,7 @@ public class HtmlUtil {
             return false;
         try {
             URI.create(str);
-            return true;
+            return str.contains(".") || str.contains("/");
         } catch (Exception e) {
             //ok, no url
             return false;
