@@ -31,10 +31,12 @@ import javax.ejb.TransactionAttributeType;
 import javax.persistence.Query;
 import javax.security.auth.Subject;
 
+import de.tsl2.nano.bean.def.Diff;
 import de.tsl2.nano.collection.MapUtil;
 import de.tsl2.nano.core.ManagedException;
 import de.tsl2.nano.core.cls.BeanAttribute;
 import de.tsl2.nano.core.cls.BeanClass;
+import de.tsl2.nano.core.log.LogFactory;
 import de.tsl2.nano.core.util.StringUtil;
 import de.tsl2.nano.service.util.batch.Part;
 import de.tsl2.nano.service.util.finder.AbstractFinder;
@@ -403,15 +405,17 @@ public class GenericServiceBean extends NamedQueryServiceBean implements IGeneri
 //        if (getId(bean) == null)
 //            connection().persist(bean);
 //        else
-        bean = connection().merge(bean);
+        T newbean = connection().merge(bean);
 
         if (flush) {
             connection().flush(); // force the SQL insert and triggers to run
         }
         if (refreshBean) {
-            connection().refresh(bean); //re-read the state (after the trigger executes)
+            connection().refresh(newbean); //re-read the state (after the trigger executes)
         }
-        return fillTree(Arrays.asList(bean), lazyRelations).iterator().next();
+        if (LOG.isDebugEnabled())
+            LOG.debug(new Diff(bean, newbean).toString());
+        return fillTree(Arrays.asList(newbean), lazyRelations).iterator().next();
         // } catch (Exception ex) {
         // //catch it and throw a new one. otherwise, the server (toplink) will
         // //catch it prints only a warning. the client would only see a
