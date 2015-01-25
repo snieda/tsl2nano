@@ -279,7 +279,8 @@ public class ServiceUtil {
             final IAttributeDef attributeDef = BeanContainerUtil.getAttributeDefinitions(beanAttribute);
             if (attributeDef != null) {//only attributes with column-defs will be used!
                 final String name = beanAttribute.getName();//getColumnName(beanAttribute);
-                final String varName = caseInsensitive ? "LOWER(" + attrPrefix + name + ") " : attrPrefix + name + " ";
+                final boolean isString = CharSequence.class.isAssignableFrom(beanAttribute.getType());
+                final String varName = caseInsensitive && isString ? "LOWER(" + attrPrefix + name + ") " : attrPrefix + name + " ";
                 value = beanAttribute.getValue(valueBean);
                 if (value == null) {
                     continue;
@@ -397,7 +398,8 @@ public class ServiceUtil {
             final IAttributeDef attributeDef = BeanContainerUtil.getAttributeDefinitions(beanAttribute);
             if (attributeDef != null) {//only attributes with column-defs will be used!
                 final String name = beanAttribute.getName();//getColumnName(beanAttribute);
-                final String varName = caseInsensitive ? "LOWER(" + attrPrefix + name + ") " : attrPrefix + name + " ";
+                final boolean isString = CharSequence.class.isAssignableFrom(beanAttribute.getType());
+                final String varName = caseInsensitive && isString ? "LOWER(" + attrPrefix + name + ") " : attrPrefix + name + " ";
                 fromValue = beanAttribute.getValue(fromBean);
                 toValue = beanAttribute.getValue(toBean);
                 if (fromValue == null && toValue == null) {
