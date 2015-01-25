@@ -10,14 +10,15 @@
 package de.tsl2.nano.incubation.vnet;
 
 import java.io.Serializable;
-import java.util.HashSet;
-import java.util.Set;
+import java.util.LinkedList;
+import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import de.tsl2.nano.core.ManagedException;
 import de.tsl2.nano.core.util.StringUtil;
 import de.tsl2.nano.messaging.EventController;
 import de.tsl2.nano.messaging.IListener;
+import de.tsl2.nano.structure.IConnection;
 
 /**
  * Simple abstract network node to be filled with real objects (cores). the real objects will be registered to network
@@ -32,7 +33,8 @@ import de.tsl2.nano.messaging.IListener;
  * @author Thomas Schneider
  * @version $Revision$
  */
-public class Node<T extends IListener<Notification> & ILocatable & Serializable & Comparable<? super T>, D extends Comparable<? super D>> implements
+public class Node<T extends IListener<Notification> & ILocatable & Serializable & Comparable<? super T>, D extends Comparable<? super D>> extends
+        de.tsl2.nano.structure.ANode<T, D> implements
         IListener<Notification>,
         ILocatable,
         Comparable<Node<T, D>>,
@@ -40,13 +42,7 @@ public class Node<T extends IListener<Notification> & ILocatable & Serializable 
         Serializable {
     /** serialVersionUID */
     private static final long serialVersionUID = 3229162660341988123L;
-    /** the nodes real object */
-    T core;
-    /** connections to other nodes in a net */
-    Set<Connection<T, D>> connections;
 
-    /** controller, handling notification events for other nodes */
-    EventController controller;
     private AtomicInteger status = new AtomicInteger(STATUS_IDLE);
     NodeStatistics statistics;
 
@@ -61,7 +57,8 @@ public class Node<T extends IListener<Notification> & ILocatable & Serializable 
      * @param core {@link #core}
      * @param connections {@link #connections}
      */
-    public Node(T core, Set<Connection<T, D>> connections) {
+    @SuppressWarnings("rawtypes")
+    public Node(T core, List<IConnection<T, D>> connections) {
         super();
         controller = Net.createEventController();
         statistics = new NodeStatistics();
@@ -69,55 +66,12 @@ public class Node<T extends IListener<Notification> & ILocatable & Serializable 
         this.core = core;
         if (connections != null) {
             this.connections = connections;
-            for (Connection<T, D> connection : connections) {
-                controller.addListener(connection);
+            for (IConnection<T, D> connection : connections) {
+                controller.addListener((IListener) connection);
             }
         } else {
-            this.connections = new HashSet<Connection<T, D>>();
+            this.connections = new LinkedList<IConnection<T, D>>();
         }
-    }
-
-    /**
-     * @return Returns the {@link #core}.
-     */
-    public T getCore() {
-        return core;
-    }
-
-    /**
-     * @return Returns the {@link #connections}.
-     */
-    public Set<Connection<T, D>> getConnections() {
-        return connections;
-    }
-
-    /**
-     * getConnection
-     * 
-     * @param destination
-     * @return
-     */
-    public Connection<T, D> getConnection(Node<T, D> destination) {
-        for (Connection<T, D> c : getConnections()) {
-            if (c.getDestination().equals(destination))
-                return c;
-        }
-        return null;
-    }
-
-    /**
-     * connect
-     * 
-     * @param destination node to connect to
-     * @param descriptor connection description
-     * @return new created connection
-     */
-    public Connection<T, D> connect(Node<T, D> destination, D descriptor) {
-        getController().addListener(destination);
-
-        Connection<T, D> connection = new Connection<T, D>(destination, descriptor);
-        connections.add(connection);
-        return connection;
     }
 
     /**
@@ -259,7 +213,7 @@ public class Node<T extends IListener<Notification> & ILocatable & Serializable 
     @Override
     public Node<T, D> clone() throws CloneNotSupportedException {
         Node<T, D> c = (Node<T, D>) super.clone();
-        c.connections = new HashSet<Connection<T, D>>(connections);
+        c.connections = new LinkedList<IConnection<T, D>>(connections);
         c.core = core;
         return c;
     }

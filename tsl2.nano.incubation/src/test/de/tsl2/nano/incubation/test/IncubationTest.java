@@ -61,15 +61,11 @@ import de.tsl2.nano.incubation.specification.Pool;
 import de.tsl2.nano.incubation.specification.rules.Rule;
 import de.tsl2.nano.incubation.specification.rules.RulePool;
 import de.tsl2.nano.incubation.terminal.Action;
-import de.tsl2.nano.incubation.terminal.IItem;
 import de.tsl2.nano.incubation.terminal.Input;
 import de.tsl2.nano.incubation.terminal.MainAction;
-import de.tsl2.nano.incubation.terminal.Option;
 import de.tsl2.nano.incubation.terminal.Terminal;
 import de.tsl2.nano.incubation.terminal.TerminalAdmin;
 import de.tsl2.nano.incubation.terminal.Tree;
-import de.tsl2.nano.incubation.vnet.Connection;
-import de.tsl2.nano.incubation.vnet.Cover;
 import de.tsl2.nano.incubation.vnet.ILocatable;
 import de.tsl2.nano.incubation.vnet.Net;
 import de.tsl2.nano.incubation.vnet.Node;
@@ -85,6 +81,8 @@ import de.tsl2.nano.logictable.EquationSolver;
 import de.tsl2.nano.logictable.LogicTable;
 import de.tsl2.nano.messaging.EventController;
 import de.tsl2.nano.messaging.IListener;
+import de.tsl2.nano.structure.Cover;
+import de.tsl2.nano.structure.IConnection;
 import de.tsl2.nano.test.TypeBean;
 import de.tsl2.nano.util.operation.ConditionOperator;
 import de.tsl2.nano.util.operation.Function;
@@ -262,17 +260,17 @@ public class IncubationTest {
         ludwigshafen.connect(wuerzburg, 183f);
 
         RoutingAStar routing = new RoutingAStar();
-        Connection<Location, Float> route = routing.route(saarbruecken, wuerzburg);
+        IConnection<Location, Float> route = routing.route(saarbruecken, wuerzburg);
         if (route == null)
             fail("No route found for " + saarbruecken + " --> " + wuerzburg);
         else {
             Node<Location, Float>[] shortestWay = new Node[] { kaiserslautern, frankfurt, wuerzburg };
-            Collection<Connection<Location, Float>> navigation = routing.navigate(saarbruecken, route, null);
+            Collection<IConnection<Location, Float>> navigation = routing.navigate(saarbruecken, route, null);
             log("Navigation: " + navigation);
             int i = 0;
             if (navigation.size() < shortestWay.length)
                 fail("navigation incomplete");
-            for (Connection<Location, Float> connection : navigation) {
+            for (IConnection<Location, Float> connection : navigation) {
                 if (!connection.getDestination().equals(shortestWay[i++]))
                     fail("Routing didn't find shortest Way!");
             }
@@ -585,7 +583,8 @@ public class IncubationTest {
         printing.add(new Input("xsltfile", "test.xsl", "xsl-fo transformation file to do a apache fop"));
         printing.add(new Input("username", null, "user name to be used by the printer"));
         printing
-            .add(new MainAction("print", PrintUtil.class, "source", "printer", "papersize", "quality", "priority", "xsltfile", "mimetype", "jobname", "username"));
+            .add(new MainAction("print", PrintUtil.class, "source", "printer", "papersize", "quality", "priority",
+                "xsltfile", "mimetype", "jobname", "username"));
         root.add(printing);
 
         Tree crypt = new Tree("Crypt", null);
@@ -643,7 +642,7 @@ public class IncubationTest {
         Terminal.main(new String[] { Terminal.DEFAULT_NAME });
 
         FileUtil.copy(Terminal.DEFAULT_NAME, "src/resources/" + Terminal.DEFAULT_NAME);
-        
+
         //admin console
         Terminal.main(new String[] { Terminal.DEFAULT_NAME, TerminalAdmin.ADMIN });
     }

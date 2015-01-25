@@ -16,7 +16,6 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.LinkedList;
 import java.util.Map;
-import java.util.Set;
 import java.util.TreeMap;
 
 import de.tsl2.nano.collection.ListSet;
@@ -24,6 +23,7 @@ import de.tsl2.nano.core.Environment;
 import de.tsl2.nano.core.ManagedException;
 import de.tsl2.nano.messaging.EventController;
 import de.tsl2.nano.messaging.IListener;
+import de.tsl2.nano.structure.IConnection;
 
 /**
  * provides a virtual net with {@link Node}s having {@link Connection}s to several other {@link Node}s. Each
@@ -99,9 +99,10 @@ public class Net<T extends IListener<Notification> & ILocatable & Serializable &
      * @param connectionDescriptor connection description
      * @return new created node
      */
+    @SuppressWarnings("unchecked")
     public Node<T, D> addAndConnect(T newNodeCore, T connection, D connectionDescriptor) {
         Node<T, D> node = new Node<T, D>(newNodeCore,
-            (Set<Connection<T, D>>) new ListSet<Connection<T, D>>(new Connection<T, D>(getNode(connection),
+            new ListSet<IConnection<T, D>>(new Connection<T, D>(getNode(connection),
                 connectionDescriptor)));
         elements.put(node.getPath(), node);
         return node;
@@ -151,7 +152,8 @@ public class Net<T extends IListener<Notification> & ILocatable & Serializable &
             + " msecs (waiting cycles: "
             + waitingCycles
             + " msecs)");
-        return (Collection<R>) (notification.getResponse() != null ? notification.getResponse().values() : new LinkedList<R>());
+        return (Collection<R>) (notification.getResponse() != null ? notification.getResponse().values()
+            : new LinkedList<R>());
     }
 
     /**

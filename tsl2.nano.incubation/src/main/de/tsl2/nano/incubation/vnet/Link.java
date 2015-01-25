@@ -11,6 +11,8 @@ package de.tsl2.nano.incubation.vnet;
 
 import java.io.Serializable;
 
+import de.tsl2.nano.structure.Cover;
+
 /**
  * Technical base definition to link an item to a {@link #getDestination()}. The link properties are defined by the
  * {@link #descriptor}. May be used as base for Wrappers, Pointers or Connections.

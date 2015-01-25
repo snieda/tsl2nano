@@ -9,6 +9,8 @@ crud, grud, crud2gui, crud2html, bean2html, entity2html, bean2gui, entity2gui, j
 
 [TOC]
 
+[[project_screenshots]]
+
 ## Introduction
 
 NanoH5 (or FullRelation) is an UI independent gui implementation framework providing a model driven design (MDA). It is bound to the app framework __tsl2.nano.commons__ and the jpa-service framework __tsl2.nano.serviceaccess__. It is possible to build a complete html5 application through a given class- or database-model. An Html5 presentation layer is provided as default.
@@ -52,8 +54,8 @@ To do a *quick-start*, go to chapter _Starting / Test_.
 * resolves all external (jdbc-drivers, etc.) jar-dependencies on runtime on an available network connection
 * handling blobs of data (byte[]) to be presented in html as picture, audio, video or object.
 * planned interfaces: 
-** xsd-->bean
-** java-interface-->java-bean (mock through internal proxy)
+	* xsd-->bean
+	* java-interface-->java-bean (mock through internal proxy)
 
 Using the _NanoHTTPD_ Server as base, this client application creates html surfaces, sending them through the integrated server to an html browser. Entry point is the file _application.html_ defining the browser request _http://localhost:8067_ (configurable ;-)).
 
@@ -135,7 +137,7 @@ At the moment, tested with JPA 2.0 providers, the following providers are known 
 Other smaller frameworks provide only access to JPA-Annotations without providing an EntityManager and JP-QL:
 
 * [ORMLite]: http://ormlite.com _de.tsl2.nano.ormliteprovider.EntityManager_
-** only field annotations, no OneToMany
+	* only field annotations, no OneToMany
 * [EBean  ]: http://www.avaje.org _de.tsl2.nano.ebeanprovider.EntityManager_
 
 this ORM tools don't implement a jpa-persistenc-provider, but the libraries _tsl2.nano.ormliteprovider_ and _de.tsl2.nano.ebeanprovider_ extend the puristic base implementation of _NanoEntityManagerFactory_. Only native-SQL (no JP-QL) is available! As _tsl2.nano_ works on JP-QL, some simple transformations to native SQL are done by that EntityManager. These ORM-Tools are provided to have lightweight alternatives for mobile systems like Android.
@@ -660,14 +662,59 @@ persistence.connectionUrl=<a href="http://www.databasedrivers.com/jdbc/">Databas
 
 #### Attribute Declaration
 
-This is the most important attribute property. Normally it is standard bean-attribute, defined by the declaring class and the attribute name. The following declaration types are available:
+This is the most important attribute property. Normally it is a standard bean-attribute, defined by the declaring class and the attribute name. The following declaration types are available:
 
 * bean-attribute: (default) the attribute value is defined by the declaring class and the attribute name (accessed through getter and setter methods)
 * virtual-attribute: the attribute value is any fixed value
 * value-expression: the attribute value is defined by an expression
-** path-expression: the expression is a path from a bean-attribute to another one - through one or more relations. expression example: _person.organization.name_.
-** rule-expression: the expression is an existing rule name.
-** sql-expression: the expression is an existing query name.
+	* path-expression: the expression is a path from a bean-attribute to another one - through one or more relations. expression example: _person.organization.name_.
+	* rule-expression: the expression is an existing rule name.
+	* sql-expression: the expression is an existing query name.
+
+Example for an attribute through a relation path:
+
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+   <attribute name="path-test">
+      <attributeDefinition id="false" unique="false" composition="false" cascading="false" generatedValue="false">
+         <declaring class="de.tsl2.nano.bean.def.PathExpression" declaringClass="org.anonymous.project.Times" type="java.lang.Object">
+            <expression><![CDATA[id.dbBegin]]></expression>
+         </declaring>
+         <constraint type="java.lang.Object" nullable="true" length="-1">
+            <scale>-1</scale>
+            <precision>-1</precision>
+         </constraint>
+         <description>path-test</description>
+         <presentable class="de.tsl2.nano.h5.Html5Presentable" type="2" style="4" visible="true" searchable="true">
+            <label>DbBegin</label>
+            <description>DbBegin</description>
+            <enabler class="de.tsl2.nano.action.IActivable$2" active="false"/>
+         </presentable>
+         <doValidation>true</doValidation>
+      </attributeDefinition>
+   </attribute>
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+Example for a virtual attribute:
+
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+   <attribute name="space-1421869962419">
+      <attributeDefinition class="de.tsl2.nano.bean.def.BeanValue" id="false" unique="false" composition="false" cascading="false" generatedValue="false">
+         <declaring class="de.tsl2.nano.bean.def.VAttribute" declaringClass="de.tsl2.nano.bean.IValueAccess" name="value" virtualName="space-1421869962419"/>
+         <constraint type="java.lang.Object" nullable="true" length="-1">
+            <defaultValue class="java.lang.String">[space]</defaultValue>
+            <scale>-1</scale>
+            <precision>-1</precision>
+         </constraint>
+         <description>space-1421869962419</description>
+         <presentable class="de.tsl2.nano.h5.Html5Presentable" type="2" style="4" visible="false" searchable="true">
+            <label>Space-1421869962419</label>
+            <description>Space-1421869962419</description>
+            <enabler class="de.tsl2.nano.action.IActivable$1" active="true"/>
+         </presentable>
+         <doValidation>true</doValidation>
+      </attributeDefinition>
+   </attribute>
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 #### Constraints
 
@@ -691,6 +738,29 @@ These are generalized properties to define the presentation in any gui (graphica
 * _layout_: in nano.h5: a map of html5 attributes to be set for child elements, if attribute is a container
 * _layoutconstraints_: in nano.h5: a map of html5 attributes to be set for the attributes html element
 * _icon_: optional icon to be shown with that attribute
+
+Example for some layoutconstraints:
+
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+   <attribute name="comment">
+      <attributeDefinition id="false" unique="false" composition="false" cascading="false" generatedValue="false">
+         <declaring class="de.tsl2.nano.core.cls.BeanAttribute" declaringClass="org.anonymous.project.Times" name="comment"/>
+         <constraint type="java.lang.String" nullable="true" length="128">
+            <scale>0</scale>
+            <precision>0</precision>
+         </constraint>
+         <presentable class="de.tsl2.nano.h5.Html5Presentable" type="4097" style="4" visible="true" searchable="true">
+            <label>Comment</label>
+            <description>Comment</description>
+            <layoutconstraint name="colspan">11</layoutconstraint>
+            <layoutconstraint name="border">1</layoutconstraint>
+            <layoutconstraint name="size">150</layoutconstraint>
+            <enabler class="de.tsl2.nano.action.IActivable$1" active="true"/>
+         </presentable>
+         <doValidation>true</doValidation>
+      </attributeDefinition>
+   </attribute>
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 #### Column-Definitions
 
@@ -832,13 +902,13 @@ Each standard table of beans will provide a table-header with Buttons to do up/d
 The _Nano.H5_ application can be started in different modes.
 
 * *Standard Single Access Mode:*
-** environment property _http.ip_ is *localhost*. no other network node is able to connect to the application. useable as a simple client/server application.
+	* environment property _http.ip_ is *localhost*. no other network node is able to connect to the application. useable as a simple client/server application.
 * *Network Single Access Mode:*
-** environment property _http.ip_ is a network ip of your system. all network nodes are able to connect to the application of your system, using one environment and session. useable in an intranet to do some teamwork.
-** *Network Multiple Access Mode:*
-** environment property _http.ip_ is a network ip of your system. all network nodes are able to connect to the application of your system, using their own environment and session. may be used in an intranet.
-** *Network Multiple Security Mode:*
-** environment property _http.ip_ is a network ip of your system. all network nodes are able to connect to the application of your system, using their own environment and session working with ssl (under construction!). may be used in the internet.
+	* environment property _http.ip_ is a network ip of your system. all network nodes are able to connect to the application of your system, using one environment and session. useable in an intranet to do some teamwork.
+	* *Network Multiple Access Mode:*
+	* environment property _http.ip_ is a network ip of your system. all network nodes are able to connect to the application of your system, using their own environment and session. may be used in an intranet.
+	* *Network Multiple Security Mode:*
+	* environment property _http.ip_ is a network ip of your system. all network nodes are able to connect to the application of your system, using their own environment and session working with ssl (under construction!). may be used in the internet.
 
 ## Authorization, Roles and Permissions
 
@@ -1550,10 +1620,10 @@ So, the nano.h5 framework is useless on android systems at this moment.
 Other restrictions on android:
 * all libraries in your environment directory must contain dex-classes. you can't simply add a standard library without transforming it to *dalvik classes*.
 * ant wont work, so
-** as hibernate doesn't work on android too, *hibernate-tools* as bean-jar generator is not usable. The same problem exists on openjpa!
+	* as hibernate doesn't work on android too, *hibernate-tools* as bean-jar generator is not usable. The same problem exists on openjpa!
 * on android an error occurs creating an xml-file for authorization. perhaps an empty authorization file will be created resulting in an error on next application start.
 * adding eclipse-link to the apk file results in error: _Unable to execute dex: method ID not in [0, 0xffff]: 65536_
-**  Your project is too large. You have to many methods. There can only be 65536 methods per application. see here https://code.google.com/p/android/issues/detail?id=7147#c6
+	*  Your project is too large. You have to many methods. There can only be 65536 methods per application. see here https://code.google.com/p/android/issues/detail?id=7147#c6
 
 ## Tutorials
 
@@ -1569,12 +1639,12 @@ All the found online tools have constraints, so they are not usable in a free wa
 Here is a list of currently available browser solutions to create model graphs:
 
 * https://wiki.postgresql.org/wiki/Community_Guide_to_PostgreSQL_GUI_Tools
-** http://www.jrromero.net/tools/jsUML2
-** Gliffy
-** Creatly.com
-** Diagram.ly
-** LucidChart
-** MxGraph (jGraph)
+	* http://www.jrromero.net/tools/jsUML2
+	* Gliffy
+	* Creatly.com
+	* Diagram.ly
+	* LucidChart
+	* MxGraph (jGraph)
 
 ##### The Model
 
@@ -1594,18 +1664,18 @@ TODO
 ## Known Problems and some Solutions
 
 * Performance going down:
-** to low memory for jvm:
-*** enhance the maximum vm memory on start: change run.bat and add option '-Xmx1024m' on line starting with 'java'
-** non-persistable entities (annotated as @Entity, but not bound to any database table) are loading slow
-*** remove that beans from bean list view: create a regular expression hiding that entities for property 'bean.class.presentation.regexp' in environment.xml (Example: _^(?!(.*MyBean1)|(.*MyBean2)).*_).
-** class-loading is slow through nested jar loading
-*** extract all jar-files from tsl2.nano.h5.xxx.jar and copy them into the environments directory.
-** persistence provider has problems on specific beans:
-*** use another persistence provider
+	* to low memory for jvm:
+		* enhance the maximum vm memory on start: change run.bat and add option '-Xmx1024m' on line starting with 'java'
+	* non-persistable entities (annotated as @Entity, but not bound to any database table) are loading slow
+		* remove that beans from bean list view: create a regular expression hiding that entities for property 'bean.class.presentation.regexp' in environment.xml (Example: _^(?!(.*MyBean1)|(.*MyBean2)).*_).
+	* class-loading is slow through nested jar loading
+		* extract all jar-files from tsl2.nano.h5.xxx.jar and copy them into the environments directory.
+	* persistence provider has problems on specific beans:
+		* use another persistence provider
 * bean attributes have wrong default properties read from jpa annotations
-** if your beans don't decapitalize names the standard way, field names not be found. E.g. a name like MYName should decapitalized like this: MYName (not mYName!, see _Introspector.decapitalize(String name)_). If your beans can't be changed, you can switch the environment property _bean.attribute.decapitalize_ to _false_.
+	* if your beans don't decapitalize names the standard way, field names not be found. E.g. a name like MYName should decapitalized like this: MYName (not mYName!, see _Introspector.decapitalize(String name)_). If your beans can't be changed, you can switch the environment property _bean.attribute.decapitalize_ to _false_.
 * Beans showing currencys with EURO can't be saved
-** Set the character encoding of your browser's current page to *UTF-8*. E.g. in Chrome: Menu=>Tools=>Encoding
+	* Set the character encoding of your browser's current page to *UTF-8*. E.g. in Chrome: Menu=>Tools=>Encoding
 * no datasource for Sqlite available - apache BasicDatasource uses JavaBeans what is not usable on android
 * ORMLite (4.48) not usable through persistence.xml because no EntityManagerFactory/EntityManager implementation available
 * hsqldb 1.8 is not able to do _select max(count(color)) from Colors group by color_
@@ -1615,44 +1685,45 @@ TODO
 * If an Enum value overwrites a method (like _toString()_), the declaring class of this value is anonymous. serializing it through simple-xml will write the class with postfix perhaps _$1_. This can't  be de-serialized through simple-xml.
 * Some array types can't be de-serialized through simple-xml.
 * a field holding a collection is not enabled
-** on oneToMany relations a cascading type must be given to be enabled
+	* on oneToMany relations a cascading type must be given to be enabled
 * jpa-providers:
-** eclipse-link: nullpointer on java.net.URL on loading persistence.xml
-*** eclipseLink loads the METAINF/persistence.xml through another classloader. the bean-jar file will be searched from META-INF/ parent directory
-*** use prefix '!' to define, that no environment-prefix will be added. E.g. '!mybeans.jar'. to enable text-input on jarfile property, change environments 'login.jarfile.fileselector' to false.
-*** persistable fields of type Date have to annotate a temporal type 
-** datanucleus: metamodel has to be statically generated and compiled before. this is done automatically on compiling the beans if the datanucleus libraries are present.
-** openjpa: all jar-file names are invalid:
-*** openjpa needs the beans jar file packed into the main jar file!
-*** dynamic class enhancement must be enabled (see https://openjpa.apache.org/builds/2.2.2/apache-openjpa/docs/ref_guide_pc_enhance.html)! start the jvm with option: _-javaagent:[path-to-extraced-openjpa-zip-file]/openjpa-2.x.x.jar_
-*** openjpa properties: https://openjpa.apache.org/builds/2.2.2/apache-openjpa/docs/ref_guide_conf_openjpa.html
-** openjpa schema-tool does not create schema.xml for hsqldb:
-*** in persistence.tml <property name="openjpa.jdbc.DBDictionary" value="hsql(SupportsSchemaForGetTables=false)" /> hinzufuegen
-*** see http://openjpa.apache.org/builds/2.3.0/apache-openjpa/docs/ref_guide_dbsetup_dbsupport.html
-** ebean 3.3.2: "is not an enhanced entity bean. Subclassing is not longer supported in Ebean"
-*** ebean versions after 2.8.1 don't support DynamicProxies any more. enhancing has to be done statically through maven-builds.
-** batoo-jpa: the jar-file has to have a protocol prefix like 'file:' (e.g.: file:./mybeans.jar). to enable text-input on jarfile property, change environments 'login.jarfile.fileselector' to false.
-** ebean 2.8.1: "@OneToMany MUST have Cascade.PERSIST or Cascade.ALL because this is a unidirectional relationship"
-** ormlite: "Generated-id field 'myID' in MyEntity can't be type STRING.  Must be one of: INTEGER INTEGER_OBJ LONG LONG_OBJ UUID"
-** ormlite: "No fields have a DatabaseField annotation in class org.anonymous.project.Address"
+	* eclipse-link: nullpointer on java.net.URL on loading persistence.xml
+		* eclipseLink loads the METAINF/persistence.xml through another classloader. the bean-jar file will be searched from META-INF/ parent directory
+		* use prefix '!' to define, that no environment-prefix will be added. E.g. '!mybeans.jar'. to enable text-input on jarfile property, change environments 'login.jarfile.fileselector' to false.
+		* persistable fields of type Date have to annotate a temporal type 
+	* datanucleus: metamodel has to be statically generated and compiled before. this is done automatically on compiling the beans if the datanucleus libraries are present.
+	* openjpa: all jar-file names are invalid:
+		* openjpa needs the beans jar file packed into the main jar file!
+		* dynamic class enhancement must be enabled (see https://openjpa.apache.org/builds/2.2.2/apache-openjpa/docs/ref_guide_pc_enhance.html)! start the jvm with option: _-javaagent:[path-to-extraced-openjpa-zip-file]/openjpa-2.x.x.jar_
+		* openjpa properties: https://openjpa.apache.org/builds/2.2.2/apache-openjpa/docs/ref_guide_conf_openjpa.html
+	* openjpa schema-tool does not create schema.xml for hsqldb:
+		* in persistence.tml <property name="openjpa.jdbc.DBDictionary" value="hsql(SupportsSchemaForGetTables=false)" /> hinzufuegen
+		* see http://openjpa.apache.org/builds/2.3.0/apache-openjpa/docs/ref_guide_dbsetup_dbsupport.html
+	* ebean 3.3.2: "is not an enhanced entity bean. Subclassing is not longer supported in Ebean"
+		* ebean versions after 2.8.1 don't support DynamicProxies any more. enhancing has to be done statically through maven-builds.
+	* batoo-jpa: the jar-file has to have a protocol prefix like 'file:' (e.g.: file:./mybeans.jar). to enable text-input on jarfile property, change environments 'login.jarfile.fileselector' to false.
+	* ebean 2.8.1: "@OneToMany MUST have Cascade.PERSIST or Cascade.ALL because this is a unidirectional relationship"
+	* ormlite: "Generated-id field 'myID' in MyEntity can't be type STRING.  Must be one of: INTEGER INTEGER_OBJ LONG LONG_OBJ UUID"
+	* ormlite: "No fields have a DatabaseField annotation in class org.anonymous.project.Address"
 
 ## Changelog
 
-| Version | Date | Description |
-| 0.0.1 | 06.07.2013 | First alpha Version |
-| 0.0.2 | 21.09.2013 | beta Version (full basic feature implementation) |
-| 0.0.3 | 01.01.2014 | beta Version (basic features + authorization + workflows + rules) |
-| 0.0.4 | 20.03.2014 | full featured version (replication, attribute- and beandef-extensions QueryResult, RuleAttribute, many refactorings) |
-| 0.0.4b | 11.05.2014 | lots of corrections, partially working on android |
-| 0.0.4c | 25.05.2014 | classloader transformation changed to enable loading persistence.xml through EclipseLink and OpenJPA |
-| 0.0.5 | 01.06.2014 | supporting non-jpa-persistence-providers like ebean, ormlite through NanoEntityManagerFactory |
-| 0.1.0 | 29.06.2014 | supporting non-jpa-persistence-providers like ebean, ormlite through NanoEntityManagerFactory |
-| 0.6.0 | 13.07.2014 | using websockets to support rich client gui interactions |
-| 0.7.0a | 01.11.2014 | new plugin interface on beandefintions (path changed to 'presentation'). specified rules and actions are 						pluggable into beandef or attributedef now. |
-| 0.7.0b | 09.11.2014 | gui fading, offline message, web-cache through manifest, testing batoo-jpa |
-| 0.7.0c | 15.11.2014 | reverse-engineering with openjpa support, jar resolving enhanced |
-| 0.7.0d | 11.01.2015 | auto creating new databases through an equal named sql file |
-
+ Version | Date | Description
+ ------- | ---- | -----------
+ 0.0.1 | 06.07.2013 | First alpha Version
+ 0.0.2 | 21.09.2013 | beta Version (full basic feature implementation)
+ 0.0.3 | 01.01.2014 | beta Version (basic features + authorization + workflows + rules)
+ 0.0.4 | 20.03.2014 | full featured version (replication, attribute- and beandef-extensions QueryResult, RuleAttribute, many refactorings)
+ 0.0.4b | 11.05.2014 | lots of corrections, partially working on android
+ 0.0.4c | 25.05.2014 | classloader transformation changed to enable loading persistence.xml through EclipseLink and OpenJPA
+ 0.0.5 | 01.06.2014 | supporting non-jpa-persistence-providers like ebean, ormlite through NanoEntityManagerFactory
+ 0.1.0 | 29.06.2014 | supporting non-jpa-persistence-providers like ebean, ormlite through NanoEntityManagerFactory
+ 0.6.0 | 13.07.2014 | using websockets to support rich client gui interactions
+ 0.7.0a | 01.11.2014 | new plugin interface on beandefintions (path changed to 'presentation'). specified rules and actions are 						pluggable into beandef or attributedef now.
+ 0.7.0b | 09.11.2014 | gui fading, offline message, web-cache through manifest, testing batoo-jpa
+ 0.7.0c | 15.11.2014 | reverse-engineering with openjpa support, jar resolving enhanced
+ 0.7.0d | 11.01.2015 | auto creating new databases through an equal named sql file
+ 
 ## TODOs
 
 * (v) BeanCollector.createItem() --> replace common BeanUtils call to be able to run on android
@@ -1663,15 +1734,15 @@ TODO
 * (v) visible icons read by page
 * (v) Button-Panel for
 * (v) Use Xml-Configuration for BeanDefinitions
-** (v) Print
-** (v) Export
-** (v) select all
-** (v) deselect all
+	* (v) Print
+	* (v) Export
+	* (v) select all
+	* (v) deselect all
 * (v) Use Environment
 * (v) *Extend BeanContainer:*
-** (-) new action: 'getValueBetween()'
-** (v) extend all finders with start index (see maxresult) to have a result range
-** (v) beancollector with next() and previous() data (using 'start' index and 'maxresult')
+	* (-) new action: 'getValueBetween()'
+	* (v) extend all finders with start index (see maxresult) to have a result range
+	* (v) beancollector with next() and previous() data (using 'start' index and 'maxresult')
 * (v) tooltips for buttons
 * (v) check running in java 7
 * (v) add java-compiler (tools.jar, 12MB) of jdk6
@@ -1681,10 +1752,10 @@ TODO
 * (v) on multiple selection, put all selected elements to the stack
 * (v) *Problem: creating a new element, copying an existing one, one-to-many connections will be lost*
 * *Dependencies*
-** (v) Log and LogFactory
-** (v) DefaultFormat: StandardToStringStyle and ToStringBuilder
-** (v) StringUtil --> BeanUtil
-** (v) BeanClass --> StringUtil --> CollectionUtil --> DefaultFormat
+	* (v) Log and LogFactory
+	* (v) DefaultFormat: StandardToStringStyle and ToStringBuilder
+	* (v) StringUtil --> BeanUtil
+	* (v) BeanClass --> StringUtil --> CollectionUtil --> DefaultFormat
 * (v) extract jars through constants
 * (x) Application Menu: reset (--> caches, environment, navigation), restart, login, logout
 * (x) default attribute names without @id field
@@ -1697,68 +1768,68 @@ TODO
 * Styling (Collector, Details)
 * Show Progress-Page (using Statistics)
 * *Html-Table:*
-** (v) Sorting-Header
-** (v) Previous, Next
-** Style (of sorting header etc.)
-** up, down (for sorting values)
+	* (v) Sorting-Header
+	* (v) Previous, Next
+	* Style (of sorting header etc.)
+	* up, down (for sorting values)
 * configure to have generated IDs
 * read documentation
 * *Searches on big data:*
-** first count data
-** (v) button to show one-to-many in table
-** use thread to be interupted
+	* first count data
+	* (v) button to show one-to-many in table
+	* use thread to be interupted
 * (v) internal export and view (replacing ant-like variables and showing the document)
 * generate const class from property file
 * (x) create xsd through CommonTest with trang.jar
 * (x) add configuration action (html-tool to edit xml files)
-** ConfigBeanContainer to configure BeanDefinition for special beans
+	* ConfigBeanContainer to configure BeanDefinition for special beans
 * *Nice-To-Have*
-** eval validation annotations
-** BeanPresenterHelper: test OptionsWrapper
-** min-search-field + button ==> max-search-field visible. standard: filtering with astericks
-** add navigation to new sub-class of beandefinition
-** create wiki-logger
-** envolve logictable and/or tableprocessor
-** create GenericOperator from SOperator to read available Operations from xml.
-** eval language per session
+	* eval validation annotations
+	* BeanPresenterHelper: test OptionsWrapper
+	* min-search-field + button ==> max-search-field visible. standard: filtering with astericks
+	* add navigation to new sub-class of beandefinition
+	* create wiki-logger
+	* envolve logictable and/or tableprocessor
+	* create GenericOperator from SOperator to read available Operations from xml.
+	* eval language per session
 * *Refactoring:*
-** (v) RegularExpressionFormat ==> RegExpFormat
-** (v) refactore ScriptUtil: extract Ant calls
-** (v) util.bean ==> bean
-** extract bean-package as project
-** nano.h5 ==> fullrelation
-** (?) refactore environment property names to use logic path-algorithm
-** (x) file-access: use Environment.getResource() reading through jar or file system
-** extract api
+	* (v) RegularExpressionFormat ==> RegExpFormat
+	* (v) refactore ScriptUtil: extract Ant calls
+	* (v) util.bean ==> bean
+	* extract bean-package as project
+	* nano.h5 ==> fullrelation
+	* (?) refactore environment property names to use logic path-algorithm
+	* (x) file-access: use Environment.getResource() reading through jar or file system
+	* extract api
 * *Interfaces:*
-** java-interface-jar filled with BeanProxy to be used as mocks
-** reading xsd through dom - creating beandefinitions (as xml)
-** BeanEnhancer enhancing Beans having only attributes with getters/setters
+	* java-interface-jar filled with BeanProxy to be used as mocks
+	* reading xsd through dom - creating beandefinitions (as xml)
+	* BeanEnhancer enhancing Beans having only attributes with getters/setters
 * *Replication / Offline*
-** (-) FileBeanContainer serializing all lists of all BeanCollectors
-** (-) GenericBeanContainer using filled FileBeanContainer re-attaching all serialized bean lists
-** mechanism to synchronize local and remote database - no serialization needed.
+	* (-) FileBeanContainer serializing all lists of all BeanCollectors
+	* (-) GenericBeanContainer using filled FileBeanContainer re-attaching all serialized bean lists
+	* mechanism to synchronize local and remote database - no serialization needed.
 * Validate against Html5-xsd in debug mode
 * include LogicTable?
 * (x) check starting application multiple times
-** depends on the datamodel: gruppe --> grupperolle(only for specific gruppe) --> rolle
-*** The new item has to be put to the list of it's parent container. This list has to be saved before the new item!
-*** The beancollector now holds a 
+	* depends on the datamodel: gruppe --> grupperolle(only for specific gruppe) --> rolle
+		* The new item has to be put to the list of it's parent container. This list has to be saved before the new item!
+		* The beancollector now holds a 
 * *Problem: Filtering on Entities doesn't work (findBetween is not able to do a between for 'entity-columns')*
 * *(v) Problem: Filtering BeanCollectors of Entities doesn't work after sorting twice*
 * ( ) internationalization: english RegExpFormat on date, date-time
 * (v) remove config path from environment (-->transient)
 * dynamic jar-loading inside used standard jars does not work without static entry in manifest
 * *Argo-UML 0.34*
-** how to create ddl from model
+	* how to create ddl from model
 * *PowerDesigner*
-** (v) create ant-script:
-*** (v) sql-statements with ddl
-*** (v) hibtool hbm2java
-*** (v) replace jdbc-connection-properties
-*** (v) start nano.h5
-*** jmeter integration test
-*** automated crud test (pushing search/new/delete buttons for all entity types), profiling and counting errors in log-file
+	* (v) create ant-script:
+		* (v) sql-statements with ddl
+		* (v) hibtool hbm2java
+		* (v) replace jdbc-connection-properties
+		* (v) start nano.h5
+		* jmeter integration test
+		* automated crud test (pushing search/new/delete buttons for all entity types), profiling and counting errors in log-file
 * multiple type/format evaluation in BeanValue (new member for type?) Presentable and BeanPresentationHelper
 * (x) permission configuration
 * waiting message - new thread, answering on finish (e.g. on generating)
@@ -1768,17 +1839,17 @@ TODO
 * (x) *generic navigation through hsql statements*
 * ( ) *bean navigation actions*
 * *ERRORS*
-** hsqldb 1.8 is not able to do _select max(count(color)) from Colors group by color_
-** hibernate3 is - on special circumstances - not able to load fields with empty ('') strings. This results in an __java.lang.StringIndexOutOfBoundsException: String index out of range: 0__
-** failure: presentable.layout --> simple-xml: Transform of class java.util.LinkedHashMap not supported
-** (v) failure: sorting numbers/currencies sorts as strings
-** BeanPresentationHelper.defineAdditionalAttributes(): how to avoid javaassist class
-** presentation not written to xml --> see first failure
-** every bean gets a new beandef copy with copies of attributedefs --> attributedef evaluations for every bean!
-** one-to-many: if no cascade-type is defined,the attribute should not be editable! 
+	* hsqldb 1.8 is not able to do _select max(count(color)) from Colors group by color_
+	* hibernate3 is - on special circumstances - not able to load fields with empty ('') strings. This results in an __java.lang.StringIndexOutOfBoundsException: String index out of range: 0__
+	* failure: presentable.layout --> simple-xml: Transform of class java.util.LinkedHashMap not supported
+	* (v) failure: sorting numbers/currencies sorts as strings
+	* BeanPresentationHelper.defineAdditionalAttributes(): how to avoid javaassist class
+	* presentation not written to xml --> see first failure
+	* every bean gets a new beandef copy with copies of attributedefs --> attributedef evaluations for every bean!
+	* one-to-many: if no cascade-type is defined,the attribute should not be editable! 
 * hibernate-tools generates id-beans like times-->timesid.
-** (x) check for *@Id* is no standard-java-type and environment.show.id.fields is true
-*** (x) BeanPresentationHelper fills all id-bean fields as virtuals to the main bean
+	* (x) check for *@Id* is no standard-java-type and environment.show.id.fields is true
+		* (x) BeanPresentationHelper fills all id-bean fields as virtuals to the main bean
 * on export, the filtered names (like id) are given --> nullpointer
 * performance/memory: create only specific bean/beanvalue instances for changed values - use definition-instances if possible.
 * field-order of bean-def may change after new compile --> serializing/deserialings will differ, see CommonTest
@@ -1789,22 +1860,22 @@ TODO
 * all generic interfaces registered in environment (IAttributeDefinition, IBeanDefinition, IBeanContainer, ..) to be extendable
 
 * (v) refactore attribute-def-hierarchy: attributedefinition should not extend beanattribute. what to do with beanvalue?
-** how to fill virtual beans ? default-values may be checked with errors, serializings...?
+	* how to fill virtual beans ? default-values may be checked with errors, serializings...?
 * AttributeConfiguration with value-expression
 * Views with expression as listing output
-** DirectSQL: SQL or HQL
-** TableProcessor
-** LogivView: LogicTable
+	* DirectSQL: SQL or HQL
+	* TableProcessor
+	* LogivView: LogicTable
 * JMeter as macro configuration
 * (-) html-frames as perspective (left side: beans and views)
 * (v) refactore ForwardedException. delete FormattedException. Stacktrace with member-info
 * ParseObject <-- Bean(Map)
 * *TESTS*
-** ( ) test with multi values - using best id's
-** (-) test on android
+	* ( ) test with multi values - using best id's
+	* (-) test on android
 
-** languages
-** on appserver
+	* languages
+	* on appserver
 
 * spalten-layout tag: section (landscape, portrait), max-rowcount
 * detail hintergrund-bild
@@ -1847,36 +1918,37 @@ TODO
 * (v) show if application was stopped
 * (x) show message if offline
 * where to use instrumentation agents?
-* how to ignore unset primitive search attributes?
+* (v) how to ignore unset primitive search attributes?
+* add database-logging to genericservice (if exist 'Log'-Table: user: action, bean-diff old and new)
 * *evaluate reverse tools:*
-** DBRE http://docs.spring.io/spring-roo/reference/html/base-dbre.html
-** Kodo (now integrated in OpenJPA?)
+	* DBRE http://docs.spring.io/spring-roo/reference/html/base-dbre.html
+	* Kodo (now integrated in OpenJPA?)
 * *create jars for:*
-** weltjar (getjar, NetworkingClassloader, main with instrumentation and input)
-** schalentier (ant + shell.xml + tsl2nano.common)
-** wähler: menuitem
-** verteiler: vNet
+	* weltjar (getjar, NetworkingClassloader, main with instrumentation and input)
+	* schalentier (ant + shell.xml + tsl2nano.common)
+	* wähler: menuitem
+	* verteiler: vNet
 * UNDO, MARCRO
 * avoid dump of bean PersistenceUI$8 < simple-xml exception
 * *create shell like main()-methods on util classes*
-** getjar, crypt, print, net, XmlUtil, currencyUtil, ByteUtil, Profiler, ConcurrentUtil, SchedulerUtil, GeneratorUtility, NumericConditionOperator
-** ScriptTool/Util, RulePool, neuron, routing, workflow, equationsolver, vector3d
+	* getjar, crypt, print, net, XmlUtil, currencyUtil, ByteUtil, Profiler, ConcurrentUtil, SchedulerUtil, GeneratorUtility, NumericConditionOperator
+	* ScriptTool/Util, RulePool, neuron, routing, workflow, equationsolver, vector3d
 
 * *Refactorings:*
-** AttributeDefinition --> Attribute
-** BeanValue --> Value
-** Bean --> AttributeContainer
-** Bean soll BeanDefinition referenzieren und nicht erben
-** Value soll Attribute referenzieren und nicht erben
+	* AttributeDefinition --> Attribute
+	* BeanValue --> Value
+	* Bean --> AttributeContainer
+	* Bean soll BeanDefinition referenzieren und nicht erben
+	* Value soll Attribute referenzieren und nicht erben
 
 * *mybook: wcopy + concat files(date) + fop:xhtml2fo.xsl*
 
 * MDA Steps
-** use any tool to create an uml class diagram with persistent stereotypes and export an xmi file
-** generate a ddl file from xmi through xsl transformation
-** generate java class files through the ddl file with hibernate or openjpa
-** use tsl2nano to have a full application through the generated model
-*** adapt the standard gui-design (xml-files) of tsl2nano to fit your requirements
+	* use any tool to create an uml class diagram with persistent stereotypes and export an xmi file
+	* generate a ddl file from xmi through xsl transformation
+	* generate java class files through the ddl file with hibernate or openjpa
+	* use tsl2nano to have a full application through the generated model
+		* adapt the standard gui-design (xml-files) of tsl2nano to fit your requirements
 * Note: *xmi2ddl.xls* no script found
 
 h3. Tools
@@ -1998,3 +2070,6 @@ com.sybase.jdbc2.jdbc.SybDriver
 
 
 [GLOSSARY]
+
+Etc:Connection-->IConnection(core, descriptor)
+Net:Connection-->Link-->Cover(content, descriptor)

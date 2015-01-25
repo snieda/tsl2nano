@@ -13,6 +13,7 @@ import java.io.Serializable;
 
 import de.tsl2.nano.messaging.EventController;
 import de.tsl2.nano.messaging.IListener;
+import de.tsl2.nano.structure.IConnection;
 
 /**
  * a connection is used as a one-direction link from a source-node to a destination-node. the source-node may have a set
@@ -27,7 +28,7 @@ import de.tsl2.nano.messaging.IListener;
  * @version $Revision$
  */
 public class Connection<T extends IListener<Notification> & ILocatable & Serializable & Comparable<? super T>, D extends Comparable<? super D>> extends
-        Link<Node<T, D>, D> implements IListener<Notification>, ILocatable {
+        Link<Node<T, D>, D> implements IListener<Notification>, ILocatable, IConnection<T, D> {
     /** serialVersionUID */
     private static final long serialVersionUID = 1981668952548892244L;
 

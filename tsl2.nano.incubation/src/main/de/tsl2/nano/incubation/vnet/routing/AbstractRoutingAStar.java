@@ -13,16 +13,20 @@ import java.io.Serializable;
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.LinkedList;
+import java.util.List;
 import java.util.PriorityQueue;
 import java.util.Set;
 
 import de.tsl2.nano.incubation.vnet.Connection;
-import de.tsl2.nano.incubation.vnet.Cover;
 import de.tsl2.nano.incubation.vnet.ILocatable;
 import de.tsl2.nano.incubation.vnet.Link;
 import de.tsl2.nano.incubation.vnet.Node;
 import de.tsl2.nano.incubation.vnet.Notification;
 import de.tsl2.nano.messaging.IListener;
+import de.tsl2.nano.structure.ANode;
+import de.tsl2.nano.structure.Cover;
+import de.tsl2.nano.structure.IConnection;
+import de.tsl2.nano.structure.INode;
 
 /**
  * Implementation of A*-Algorithm like http://de.wikipedia.org/wiki/A*-Algorithmus.
@@ -56,7 +60,7 @@ public abstract class AbstractRoutingAStar<T extends IListener<Notification> & I
      * @param destination
      * @return
      */
-    public Connection<T, D> route(Node<T, D> start, Node<T, D> destination) {
+    public IConnection<T, D> route(Node<T, D> start, Node<T, D> destination) {
         Connection<T, D> currentConnection, route;
         // Initialisierung der Open List, die Closed List ist noch leer
         // (die Priorität bzw. der f Wert des Startknotens ist unerheblich)
@@ -99,10 +103,10 @@ public abstract class AbstractRoutingAStar<T extends IListener<Notification> & I
     void expandNode(Connection<T, D> currentConnection, Node<T, D> destination) {
         // distance f
         float f, g, tentative_g;
-        Set<Connection<T, D>> nextConnections = currentConnection.getDestination().getConnections();
+        List<IConnection<T, D>> nextConnections = currentConnection.getDestination().getConnections();
         Node<T, D> successor;
-        for (Connection<T, D> con : nextConnections) {
-            successor = con.getDestination();
+        for (IConnection<T, D> con : nextConnections) {
+            successor = (Node<T, D>) con.getDestination();
             log_("\t--> " + successor);
             // wenn der Nachfolgeknoten bereits auf der Closed List ist - tue nichts
             if (closedlist.contains(con)) {
@@ -110,12 +114,12 @@ public abstract class AbstractRoutingAStar<T extends IListener<Notification> & I
             }
             // g Wert für den neuen Weg berechnen: g Wert des Vorgängers plus
             // die Kosten der gerade benutzten Kante
-            g = g(con);
+            g = g((Connection<T, D>) con);
             tentative_g = g(currentConnection) + g;
             log_("\t g + c = " + tentative_g);
             // wenn der Nachfolgeknoten bereits auf der Open List ist,
             // aber der neue Weg nicht besser ist als der alte - tue nichts
-            if (openlist.contains(new Link(con, g)) && tentative_g >= g) {
+            if (openlist.contains(new Link((Serializable) con, g)) && tentative_g >= g) {
                 continue;
             }
             // Vorgängerzeiger setzen und g Wert merken
@@ -128,25 +132,26 @@ public abstract class AbstractRoutingAStar<T extends IListener<Notification> & I
 //         } else {
 //             openlist.add(successor, f);
 //         }
-            Connection<T, D> next = connect(currentConnection.getDestination(), con.getDestination(), g);
+            Connection<T, D> next =
+                (Connection<T, D>) connect(currentConnection.getDestination(), (Node<T, D>) con.getDestination(), g);
             Link<Connection<T, D>, Float> weightedConnection = new Link<Connection<T, D>, Float>(next, f);
             openlist.remove(weightedConnection);
             openlist.add(weightedConnection);
         }
     }
 
-    public Collection<Connection<T, D>> navigate(Node<T, D> start,
-            Connection<T, D> route,
-            Collection<Connection<T, D>> currentTrack) {
+    public Collection<IConnection<T, D>> navigate(INode<T, D> start,
+            IConnection<T, D> route,
+            Collection<IConnection<T, D>> currentTrack) {
         if (currentTrack == null)
-            currentTrack = new LinkedList<Connection<T, D>>();
-        Connection<T, D> realConnection = start.getConnection(route.getDestination());
+            currentTrack = new LinkedList<IConnection<T, D>>();
+        IConnection<T, D> realConnection = ((ANode<T, D>) start).getConnection(route.getDestination());
         currentTrack.add(realConnection);
-        Set<Connection<T, D>> connections = route.getDestination().getConnections();
+        List<IConnection<T, D>> connections = route.getDestination().getConnections();
         if (connections.size() == 0) {
             return currentTrack;
         } else if (connections.size() >= 1) {
-            Connection<T, D> c = connections.iterator().next();
+            IConnection<T, D> c = connections.iterator().next();
             return navigate(realConnection.getDestination(), c, currentTrack);
         } else {
 //            return currentTrack;
@@ -161,7 +166,7 @@ public abstract class AbstractRoutingAStar<T extends IListener<Notification> & I
      * @param currentNode
      * @param f
      */
-    protected abstract Connection<T, D> connect(Node<T, D> successor, Node<T, D> currentNode, float f);
+    protected abstract IConnection<T, D> connect(Node<T, D> successor, Node<T, D> currentNode, float f);
 
     /**
      * direct distance to destination
