@@ -28,6 +28,13 @@ public abstract class AbstractExpression<T> implements IValueExpression<T>, IAtt
     protected String expression;
 
     /**
+     * should be the same as used in beans attribute definitions. if undefined, the last part of the expression will be
+     * used.
+     */
+    //@Attribute
+    protected transient String name;
+
+    /**
      * framework extensions can register own value-expression extensions. this extensions will be used on calling
      * {@link #setExpression(String)}. the extensions must have a constuctor with two arguments: Class declaringClass,
      * String expression.
@@ -90,6 +97,7 @@ public abstract class AbstractExpression<T> implements IValueExpression<T>, IAtt
             throw new IllegalArgumentException("The expression '" + valueExpression
                 + "' has to match the regular expression '" + getExpressionPattern() + "'");
         this.expression = valueExpression;
+        this.name = null;
     }
 
     /**
@@ -123,9 +131,16 @@ public abstract class AbstractExpression<T> implements IValueExpression<T>, IAtt
      */
     @Override
     public String getName() {
+        if (name == null)
+            name = expression;
         return expression;
     }
 
+    @Override
+    public void setName(String name) {
+        this.name = name;
+    }
+    
     /**
      * {@inheritDoc}
      */

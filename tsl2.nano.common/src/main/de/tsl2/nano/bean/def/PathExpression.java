@@ -9,6 +9,11 @@
  */
 package de.tsl2.nano.bean.def;
 
+import java.io.Serializable;
+
+import javax.smartcardio.ATR;
+
+import org.simpleframework.xml.Attribute;
 import org.simpleframework.xml.core.Commit;
 
 import de.tsl2.nano.core.cls.BeanClass;
@@ -76,9 +81,15 @@ public class PathExpression<T> extends AbstractExpression<T> implements IValueEx
 
     @Override
     public void setValue(Object instance, T value) {
-        throw new UnsupportedOperationException();
+        Object v = value;
+        for (int i = 0; i < attributePath.length - 1; i++) {
+            v = BeanClass.getValue(v, attributePath[i]);
+            if (v == null)
+                throw new IllegalStateException("couldn't set value " + value + " for attribute " + this +". please set a value for " + attributePath[i] + " first!"); 
+        }
+        Bean.getBean((Serializable)v).setValue(attributePath[attributePath.length - 1], value);
     }
-    
+
     @Commit
     private void initDeserializing() {
         attributePath = splitChain(expression);
@@ -89,15 +100,27 @@ public class PathExpression<T> extends AbstractExpression<T> implements IValueEx
     }
 
     /**
+     * 
      * {@inheritDoc}
      */
     @Override
     public String getExpressionPattern() {
         return ".*\\.*";
     }
-    
+
     @Override
     public String getName() {
-        return expression.substring(expression.lastIndexOf(PATH_SEPARATOR) + 1);
+        if (name == null)
+            name = expression.substring(expression.lastIndexOf(PATH_SEPARATOR) + 1);
+        return name;
+    }
+
+    /**
+     * setName
+     * 
+     * @param name see {@link #name}
+     */
+    public void setName(String name) {
+        this.name = name;
     }
 }

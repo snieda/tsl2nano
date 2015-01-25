@@ -13,7 +13,6 @@ import java.io.Serializable;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Field;
-import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
 import java.lang.reflect.Proxy;
@@ -36,6 +35,7 @@ import org.simpleframework.xml.Default;
 import org.simpleframework.xml.DefaultType;
 
 import de.tsl2.nano.bean.BeanUtil;
+import de.tsl2.nano.collection.CollectionUtil;
 import de.tsl2.nano.core.IPredicate;
 import de.tsl2.nano.core.ManagedException;
 import de.tsl2.nano.core.log.LogFactory;
@@ -612,8 +612,25 @@ public class BeanClass<T> implements Serializable {
         Object value = bean;
         for (int i = 0; i < path.length; i++) {
             try {
-                //don't use the performance enhanced BeanValue.getBeanValue in cause dependency-cycles
-                value = getBeanValue(value, path[i]);
+                if (value instanceof Iterable) {
+                    int p;
+                    String sp = StringUtil.substring(path[i], "[", "]", false, true);
+                    if ("first".equalsIgnoreCase(sp)) {
+                        p = 0;
+                    } else if ("last".equalsIgnoreCase(sp)) {
+                        p = -1;
+                    } else if (sp != null) {
+                        p = Integer.valueOf(sp);
+                    } else
+                        p = 0;
+                    value = CollectionUtil.get((Iterable) value, p);
+                } else if (value instanceof Map) {
+                    String key = StringUtil.substring(path[i], "[", "]");
+                    value = ((Map)value).get(key);
+                } else {
+                    //don't use the performance enhanced BeanValue.getBeanValue in cause dependency-cycles
+                    value = getBeanValue(value, path[i]);
+                }
             } catch (final Exception ex) {
                 throw new ManagedException("Error on attribute path '" + StringUtil.toString(path, 1000)
                     + "'! Attribute '"

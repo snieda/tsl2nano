@@ -846,7 +846,7 @@ public class BeanCollector<COLLECTIONTYPE extends Collection<T>, T> extends Bean
             final IActivable showMultiples) {
         final List<IAttributeDefinition<?>> attributes = def.getBeanAttributes();
         Collection<IPresentableColumn> columnDefinitions = new ArrayList<IPresentableColumn>(attributes.size());
-        int i = 0;
+        int i = getMaxColumnIndex(attributes);
         for (IAttributeDefinition<?> attr : attributes) {
             IPresentableColumn col = attr.getColumnDefinition();
             if (col == null) {
@@ -875,6 +875,14 @@ public class BeanCollector<COLLECTIONTYPE extends Collection<T>, T> extends Bean
                 });
         }
         return columnDefinitions;
+    }
+
+    private static int getMaxColumnIndex(List<IAttributeDefinition<?>> attributes) {
+        int i = 0;
+        for (IAttributeDefinition<?> a : attributes) {
+            i = Math.max(i, a.getColumnDefinition() != null ? a.getColumnDefinition().getIndex() : 0);
+        }
+        return 0;
     }
 
     /**

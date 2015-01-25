@@ -65,6 +65,11 @@ public class Attachment implements IValueAccess<byte[]>, IAttribute<byte[]> {
     }
 
     @Override
+    public void setName(String name) {
+        this.name = name;
+    }
+    
+    @Override
     public byte[] getValue(Object instance) {
         if (data == null)
             data = FileUtil.getFileBytes(file, null);

@@ -10,8 +10,21 @@
 package de.tsl2.nano.util.codegen;
 
 /**
- * ON CONSTRUCTION: find bijective encoding.
+ * Generates an interface with integer constants (hashed keys) to be used to get resource values. saves ram-space using
+ * integers instead of full string keys. provides type-safed access to property values.
+ * <p/>
+ * ON CONSTRUCTION:
  * 
+ * <pre>
+ * - (generate key/values to property file (from bean-attribute informations))
+ * - load key/values from property file.
+ * - map them into a Map[Integer, Object] where the integers are the hashes of the keys. 
+ * - generate an interface for that property file with: 
+ *   public static final Integer [key-as-constant-name]=[hash(key)];
+ *   
+ *   These constants can then be used to get the mapped values:
+ *      myresourceBundle.getString([generated-interface].[key-name-as-constant-name]);
+ * </pre>
  * 
  * @author Thomas Schneider
  * @version $Revision$

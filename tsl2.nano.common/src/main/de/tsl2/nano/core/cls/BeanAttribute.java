@@ -254,6 +254,11 @@ public class BeanAttribute<T> implements IAttribute<T> {
         return getName(readAccessMethod);
     }
 
+    @Override
+    public void setName(String name) {
+        throw new IllegalStateException("beanattribute name cannot be changed. this is only supported on virtual attributes");
+    }
+    
     /**
      * @param readAccessMethod getter method
      * @return attribute name

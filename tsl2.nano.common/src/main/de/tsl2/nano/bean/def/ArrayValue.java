@@ -69,6 +69,11 @@ public class ArrayValue<T> implements IValueAccess<T>, IAttribute<T> {
     }
 
     @Override
+    public void setName(String name) {
+        this.name = name;
+    }
+    
+    @Override
     public T getValue(Object instance) {
         return (T) ((Object[]) instance)[index];
     }

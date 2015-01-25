@@ -8,11 +8,8 @@
  */
 package de.tsl2.nano.collection;
 
-import java.io.BufferedWriter;
 import java.io.File;
-import java.io.FileNotFoundException;
 import java.io.FileWriter;
-import java.io.IOException;
 import java.io.Writer;
 import java.lang.reflect.Array;
 import java.text.Format;
@@ -29,9 +26,9 @@ import java.util.Scanner;
 import java.util.Set;
 import java.util.SortedSet;
 import java.util.TreeSet;
-import java.util.regex.Pattern;
 
 import org.apache.commons.logging.Log;
+import org.apache.tools.ant.util.CollectionUtils;
 
 import de.tsl2.nano.action.IAction;
 import de.tsl2.nano.bean.BeanUtil;
@@ -326,10 +323,10 @@ public class CollectionUtil {
         }
     }
 
-    public static <T, U> T[] copyOfRange(U[] original, int from, int to) {
+    public static <T> T[] copyOfRange(T[] original, int from, int to) {
         return (T[]) copyOfRange(original, from, to, original.getClass());
     }
-    
+
     /**
      * Simple copy of Arrays.copyOfRange() of jdk1.6 to avoid dependency to jdk1.6
      * <p/>
@@ -695,6 +692,7 @@ public class CollectionUtil {
 
     /**
      * loads a simple collection from file
+     * 
      * @param file file to be loaded
      * @param delimiter (optional) split regular expression (e.g.:\\s)
      * @return loaded collection
@@ -718,6 +716,7 @@ public class CollectionUtil {
 
     /**
      * writes the given collection as simple file. each collection item is divided by div.
+     * 
      * @param file file to write
      * @param delimiter item divider
      * @param collection collection to save
@@ -731,6 +730,31 @@ public class CollectionUtil {
             w.close();
         } catch (Exception e) {
             ManagedException.forward(e);
+        }
+    }
+
+    /**
+     * walks through a given iterable until position (=index) and returns that value.
+     * 
+     * @param iterable source
+     * @param position index or -1, if you want the last item
+     * @return value at position
+     */
+    public static <T> T get(Iterable<T> iterable, int position) {
+        if (iterable instanceof List)
+            return ((List<T>) iterable).get(position);
+        else {
+            int i = 0;
+            T item = null;
+            for (T t : iterable) {
+                if (i++ == position)
+                    return t;
+                item = t;
+            }
+            if (position == -1)
+                return item;
+            
+            throw new IllegalArgumentException("position must be between 0 and " + i);
         }
     }
 }

@@ -995,6 +995,20 @@ public class BeanDefinition<T> extends BeanClass<T> implements IPluggable<BeanDe
     @Commit
     protected void initDeserialization() {
         if (attributeDefinitions != null) {
+            /* 
+             * check attribute-definition names and the attribute names themself.
+             * they should be equal to avoid problems on column definitions.
+             */
+            Set<String> keys = attributeDefinitions.keySet();
+            for (String k : keys) {
+                IAttribute a = attributeDefinitions.get(k);
+                if (!a.getName().equals(k)) {
+                    LOG.warn("attribute-definition name '" + k + "' differs from its attribute name '" + a.getName() + "'");
+                    if (a.isVirtual()) {
+                        a.setName(k);
+                    }
+                }
+            }
             attributeFilter = attributeDefinitions.keySet().toArray(new String[0]);
             createNaturalSortedAttributeNames(attributeFilter);
             allDefinitionsCached = true;

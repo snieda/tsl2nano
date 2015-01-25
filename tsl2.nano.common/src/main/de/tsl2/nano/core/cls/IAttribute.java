@@ -64,4 +64,10 @@ public interface IAttribute<T> extends Comparable<IAttribute<T>>, Serializable {
      */
     boolean isVirtual();
 
+    /**
+     * usable on virtual attributes to be defined by a parent.
+     * @param name name that is defined by a parent.
+     */
+    void setName(String name);
+
 }

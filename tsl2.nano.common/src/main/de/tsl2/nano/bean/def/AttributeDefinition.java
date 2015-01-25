@@ -766,6 +766,13 @@ public class AttributeDefinition<T> implements IAttributeDefinition<T> {
         return attribute.getName();
     }
 
+    @Override
+    public void setName(String name) {
+        if (!isVirtual())
+            throw new IllegalStateException("name cannot be changed on non-virtual (=fixed) attributes!");
+        attribute.setName(name);
+    }
+    
     /**
      * {@inheritDoc}
      */

@@ -147,7 +147,9 @@ public class PrimitiveUtil {
      */
     public static <T> T getMinimumValue(Class<T> standardType) {
         assert standardType.isPrimitive() : "standardType must be a primitive, but is:" + standardType;
-        return BeanClass.getBeanClass(standardType).createInstance(BeanClass.getStatic(standardType, "MIN_VALUE"));
+        Class<T> t = getWrapper(standardType);
+        return (T) (Boolean.class.isAssignableFrom(t) ? Boolean.FALSE : BeanClass.getBeanClass(t).createInstance(
+            BeanClass.getStatic(t, "MIN_VALUE")));
     }
 
     /**
@@ -159,7 +161,9 @@ public class PrimitiveUtil {
      */
     public static <T> T getMaximumValue(Class<T> standardType) {
         assert standardType.isPrimitive() : "standardType must be a primitive, but is:" + standardType;
-        return BeanClass.getBeanClass(standardType).createInstance(BeanClass.getStatic(standardType, "MAX_VALUE"));
+        Class<T> t = getWrapper(standardType);
+        return (T) (Boolean.class.isAssignableFrom(t) ? Boolean.TRUE : BeanClass.getBeanClass(t).createInstance(
+            BeanClass.getStatic(t, "MAX_VALUE")));
     }
 
     /**

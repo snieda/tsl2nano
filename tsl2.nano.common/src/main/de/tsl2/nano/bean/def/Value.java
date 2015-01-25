@@ -58,6 +58,11 @@ public class Value<T> extends ValueHolder<T> implements IAttribute<T> {
     }
 
     @Override
+    public void setName(String name) {
+        this.name = name;
+    }
+    
+    @Override
     public T getValue(Object instance) {
         return getValue();
     }

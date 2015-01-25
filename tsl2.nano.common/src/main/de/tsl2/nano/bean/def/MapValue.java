@@ -68,6 +68,11 @@ public class MapValue<T> implements IValueAccess<T>, IAttribute<T> {
     }
 
     @Override
+    public void setName(String name) {
+        this.name = name;
+    }
+    
+    @Override
     public T getValue(Object instance) {
         return (T) ((Map) instance).get(name);
     }
