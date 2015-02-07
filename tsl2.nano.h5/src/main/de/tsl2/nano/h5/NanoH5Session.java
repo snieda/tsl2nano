@@ -409,7 +409,7 @@ public class NanoH5Session implements ISession {
             actions = new ArrayList<IAction>();
             if (nav.current().getActions() != null)
                 actions.addAll(c.getActions());
-            actions.addAll(c.getPresentationHelper().getPageActions());
+            actions.addAll(c.getPresentationHelper().getPageActions(this));
             actions.addAll(c.getPresentationHelper().getSessionActions(this));
             actions.addAll(c.getPresentationHelper().getApplicationActions(this));
             if (c.isMultiValue()) {

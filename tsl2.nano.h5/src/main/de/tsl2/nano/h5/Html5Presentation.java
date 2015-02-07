@@ -308,9 +308,9 @@ public class Html5Presentation<T> extends BeanPresentationHelper<T> implements I
 
     @SuppressWarnings("serial")
     @Override
-    public Collection<IAction> getPageActions() {
+    public Collection<IAction> getPageActions(ISession session) {
         boolean firstTime = pageActions == null;
-        super.getPageActions();
+        super.getPageActions(session);
 
         if (firstTime && bean.isMultiValue()) {
             pageActions.add(new SecureAction(bean.getClazz(),
@@ -458,7 +458,7 @@ public class Html5Presentation<T> extends BeanPresentationHelper<T> implements I
                     createSubMenu(menu, Environment.translate("tsl2nano.session", true), "iconic map-pin",
                         getSessionActions(session));
                     createSubMenu(menu, Environment.translate("tsl2nano.page", true), "iconic magnifying-glass",
-                        getPageActions());
+                        getPageActions(session));
                 } else {
                     //fallback: setting style from environment-properties
                     HtmlUtil.appendAttributes((Element) c3.getParentNode(), ATTR_STYLE,
@@ -470,7 +470,7 @@ public class Html5Presentation<T> extends BeanPresentationHelper<T> implements I
                         ATTR_METHOD,
                         Environment.get("html5.http.method", "post"));
                     c3 = createExpandable(c3, "Menu", true);
-                    Collection<IAction> actions = new ArrayList<IAction>(getPageActions());
+                    Collection<IAction> actions = new ArrayList<IAction>(getPageActions(session));
                     actions.addAll(getApplicationActions(session));
                     actions.addAll(getSessionActions(session));
                     createActionPanel(c3, actions,
@@ -598,7 +598,7 @@ public class Html5Presentation<T> extends BeanPresentationHelper<T> implements I
             //prefill a new bean with the current navigation stack objects
             if (bean.getId() == null)
                 addSessionValues(session);
-            panel = createBean(panel, (Bean<?>) bean, interactive, fullwidth);
+            panel = createBean(session, panel, (Bean<?>) bean, interactive, fullwidth);
         }
         if (isRoot) {
             if (interactive) {
@@ -660,10 +660,10 @@ public class Html5Presentation<T> extends BeanPresentationHelper<T> implements I
      * 
      * @param parent
      */
-    private Element createBean(Element parent, Bean<?> bean, boolean interactive, boolean fullwidth) {
+    private Element createBean(ISession session, Element parent, Bean<?> bean, boolean interactive, boolean fullwidth) {
         Collection<ValueGroup> valueGroups = bean.getValueGroups();
         if (Util.isEmpty(valueGroups))
-            return createFieldPanel(parent, bean.getPresentable(), bean.getBeanValues(), bean.getActions(),
+            return createFieldPanel(session, parent, bean.getPresentable(), bean.getBeanValues(), bean.getActions(),
                 interactive, fullwidth);
         else {//work on value groups
 //            parent = appendElement(parent, TAG_DIV);
@@ -703,13 +703,13 @@ public class Html5Presentation<T> extends BeanPresentationHelper<T> implements I
                     }
                     beanValues.add(bv);
                 }
-                createFieldPanel(parent, valueGroup, beanValues, noActions, interactive, fullwidth);
+                createFieldPanel(session, parent, valueGroup, beanValues, noActions, interactive, fullwidth);
             }
             return parent;
         }
     }
 
-    private Element createFieldPanel(Element parent,
+    private Element createFieldPanel(ISession session, Element parent,
             IPresentable p,
             Collection<BeanValue<?>> beanValues,
             Collection<IAction> actions,
@@ -737,7 +737,7 @@ public class Html5Presentation<T> extends BeanPresentationHelper<T> implements I
                 continue;
             if (beanValue.isBean()) {
                 Bean<?> bv = (Bean<?>) beanValue.getInstance();
-                ((Html5Presentation) bv.getPresentationHelper()).createPage(null, parent, bv.getName(), interactive);
+                ((Html5Presentation) bv.getPresentationHelper()).createPage(session, parent, bv.getName(), interactive);
                 actions.addAll(bv.getActions());
             } else if (beanValue.isBeanCollector()) {
                 BeanCollector<?, ?> bv = (BeanCollector<?, ?>) ((IValueAccess) beanValue.getInstance()).getValue();
@@ -1214,8 +1214,8 @@ public class Html5Presentation<T> extends BeanPresentationHelper<T> implements I
                 "1",
                 ATTR_WIDTH,
                 Presentable.asText(c.getWidth()),
-                "style",
-                "-webkit-transform: scale(1.2);",
+//                "style",
+//                "-webkit-transform: scale(1.2);",
                 ATTR_BGCOLOR,
                 COLOR_LIGHT_GRAY);
             if (c.getPresentable() != null)

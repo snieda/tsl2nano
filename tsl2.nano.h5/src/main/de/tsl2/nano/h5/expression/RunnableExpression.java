@@ -16,10 +16,12 @@ import java.util.Map;
 import de.tsl2.nano.bean.BeanUtil;
 import de.tsl2.nano.bean.def.AbstractExpression;
 import de.tsl2.nano.bean.def.Bean;
+import de.tsl2.nano.collection.MapUtil;
 import de.tsl2.nano.core.ManagedException;
 import de.tsl2.nano.execution.IPRunnable;
 
 /**
+ * base for all expression runners
  * 
  * @author Tom, Thomas Schneider
  * @version $Revision$
@@ -35,7 +37,7 @@ public abstract class RunnableExpression<T extends Serializable> extends Abstrac
     /** arguments for rule execution */
     transient Map<String, T> arguments;
 
-    /** optional real attribute to set the value through this rule */
+    /** optional real attribute (result-attribute) to set the value through this rule result */
     String connectedAttribute;
 
     /**
@@ -85,8 +87,18 @@ public abstract class RunnableExpression<T extends Serializable> extends Abstrac
     protected Map<String, Object> refreshArguments(Object beanInstance) {
         if (arguments == null)
             arguments = new HashMap<String, T>();
-        arguments.putAll((Map<String, ? extends T>) BeanUtil.toValueMap(beanInstance, false,
-            true, true, getRunnable().getParameter().keySet().toArray(new String[0])));
+        if (beanInstance == null)
+            return (Map<String, Object>) arguments;
+        Map<String, ? extends Serializable> p = getRunnable().getParameter();
+        if (beanInstance instanceof Map)
+            arguments.putAll((Map<? extends String, ? extends T>) beanInstance);
+        else
+            arguments.putAll((Map<String, ? extends T>) BeanUtil.toValueMap(beanInstance, false,
+                true, true, (p != null ? p.keySet().toArray(new String[0]) : null)));
+        
+        //TODO: not performance-optimized: do the filtering before
+        MapUtil.retainAll(arguments, p.keySet());
+        
         return (Map<String, Object>) arguments;
     }
 

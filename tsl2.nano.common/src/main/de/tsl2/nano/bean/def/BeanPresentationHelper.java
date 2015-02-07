@@ -1361,12 +1361,14 @@ public class BeanPresentationHelper<T> {
     /**
      * creates extended actions like 'print', 'help', 'export', 'select-all', 'deselect-all' etc.
      */
-    public Collection<IAction> getPageActions() {
+    public Collection<IAction> getPageActions(ISession session) {
+        final ValueHolder<ISession> vsession = new ValueHolder<ISession>(session);
         if (pageActions == null) {
             if (bean == null)
                 return new LinkedList<IAction>();
             pageActions = new ArrayList<IAction>(10);
 
+            vsession.setValue(session);
             if (bean.isMultiValue()) {
                 final BeanCollector<?, T> collector = (BeanCollector<?, T>) bean;
                 if (BeanContainer.instance().isPersistable(collector.getType())) {
@@ -1474,7 +1476,7 @@ public class BeanPresentationHelper<T> {
                 .add(new SecureAction(bean.getClazz(), "print", IAction.MODE_UNDEFINED, false, "icons/print.png") {
                     @Override
                     public Object action() throws Exception {
-                        return Environment.get(IPageBuilder.class).build(null, bean, null, false);
+                        return Environment.get(IPageBuilder.class).build(vsession.getValue(), bean, null, false);
                     }
                 });
 
@@ -1554,6 +1556,8 @@ public class BeanPresentationHelper<T> {
                 }
             });
 
+        } else {
+            vsession.setValue(session);
         }
         return pageActions;
     }

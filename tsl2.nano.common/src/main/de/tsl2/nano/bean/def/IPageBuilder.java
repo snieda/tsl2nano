@@ -54,6 +54,6 @@ public interface IPageBuilder<PAGE, OUTPUT> {
     /**
      * creates extended actions like 'print', 'help', 'export', 'select-all', 'deselect-all' etc.
      */
-    public Collection<IAction> getPageActions();
+    public Collection<IAction> getPageActions(ISession session);
     
 }
