@@ -10,6 +10,7 @@ import org.apache.commons.logging.Log;
 
 import de.tsl2.nano.core.log.LogFactory;
 import de.tsl2.nano.core.util.StringUtil;
+import de.tsl2.nano.util.PrivateAccessor;
 
 /**
  * message bundle delegator (common in eclipse).
@@ -63,9 +64,19 @@ public class Messages {
             return "!null-key!";
         }
         //key seems already to be translated. 
-        if (key.contains(" ")) {
+        if (!key.matches("[\\w\\d_.-]*")) {
             return key;
         }
+        String entry = find(key);
+        return entry != null ? entry : markProblem(key);
+    }
+
+    /**
+     * find
+     * @param key key to search for
+     * @return key-value found in the first registered bundle or null if not found.
+     */
+    public static String find(String key) {
         for (final ResourceBundle bundle : BUNDLE_LIST) {
             try {
                 return bundle.getString(key);
@@ -73,7 +84,7 @@ public class Messages {
 //                LOG.trace("resource key not found: " + key);
             }
         }
-        return TOKEN_MSG_NOTFOUND + key + TOKEN_MSG_NOTFOUND;
+        return null;
     }
 
     /**
@@ -207,6 +218,15 @@ public class Messages {
     }
     
     /**
+     * hasKey
+     * @param key key to search
+     * @return true, if key was found in one of the registered bundles
+     */
+    public static boolean hasKey(String key) {
+        return find(key) != null;
+    }
+    
+    /**
      * if a resource bundle key was not found (through {@link #getString(String)}, the key, surrounded with
      * {@link #TOKEN_MSG_NOTFOUND} will be returned as result. this result will be evaluated.
      * 
@@ -215,5 +235,15 @@ public class Messages {
      */
     public static final boolean unknown(String searchedKeyResult) {
         return searchedKeyResult.startsWith(TOKEN_MSG_NOTFOUND) && searchedKeyResult.endsWith(TOKEN_MSG_NOTFOUND);
+    }
+    
+    /**
+     * reloads all cached resouce bundles
+     */
+    public static final void reload() {
+        ResourceBundle.clearCache();
+        for (int i = 0; i< BUNDLE_LIST.size(); i++) {
+            BUNDLE_LIST.set(i, ResourceBundle.getBundle((String) new PrivateAccessor<ResourceBundle>(BUNDLE_LIST.get(i)).member("name")));
+        }
     }
 }

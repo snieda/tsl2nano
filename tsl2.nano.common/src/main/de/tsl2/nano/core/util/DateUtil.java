@@ -904,7 +904,8 @@ public final class DateUtil {
         int i;
         int year = getYear(date);
         for (i = 0; i < QUARTERS.length - 1; i++) {
-            if (includes(getQuarter(year, QUARTERS[i]), add(getQuarter(year, QUARTERS[i + 1]), Calendar.MILLISECOND, -1), date))
+            if (includes(getQuarter(year, QUARTERS[i]),
+                add(getQuarter(year, QUARTERS[i + 1]), Calendar.MILLISECOND, -1), date))
                 break;
         }
         return i + 1;
@@ -923,17 +924,18 @@ public final class DateUtil {
 
     /**
      * getQuarters
+     * 
      * @param dates dates to evaluate quarters for
      * @return unique list of quarters, given by dates
      */
-    public static final List<Date> getQuarters(Date...dates) {
+    public static final List<Date> getQuarters(Date... dates) {
         List<Date> quarters = new ListSet<Date>();
         for (int i = 0; i < dates.length; i++) {
             quarters.add(getQuarter(getYear(dates[i]), QUARTERS[getCurrentQuarter(dates[i]) - 1]));
         }
         return quarters;
     }
-    
+
     /**
      * getWeekNumber
      * 
@@ -962,5 +964,17 @@ public final class DateUtil {
      */
     public static final Date max(Date... dates) {
         return NumberUtil.max(dates);
+    }
+
+    /**
+     * cuts all millis from 1970 until the current year. this could be done trough using a date of 1970, too. usable to
+     * assign a unique value to an int. but be carefull: each year costs 365 * 24 * 3600 * 1000 milliseconds. after 3
+     * weeks, the {@link Integer#MAX_VALUE} is reached.
+     * 
+     * @param timeInMillis
+     * @return millis without year information
+     */
+    public static final int getMillisWithoutYear(long timeInMillis) {
+        return (int) timeInMillis - (getYear(getToday()) * 365 * 24 * 3600 * 1000);
     }
 }

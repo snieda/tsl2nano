@@ -33,9 +33,6 @@ public class ValuePath<B, T> extends PathExpression<T> implements IValueAccess<T
     transient B instance;
     transient EventController eventController;
 
-    /** attribute relation separator (like 'myattr1.relationattr.nextrelationattr' */
-    public static final String PATH_SEPARATOR = ".";
-
     protected ValuePath() {
     }
 

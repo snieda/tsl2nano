@@ -646,7 +646,8 @@ public class BeanDefinition<T> extends BeanClass<T> implements IPluggable<BeanDe
                 final Method m = methods[i];
                 final String cls = m.getDeclaringClass().getSimpleName().toLowerCase();
                 final String name = m.getName().substring(ACTION_PREFIX.length());
-                CommonAction<Object> newAction = new CommonAction<Object>(cls + "." + name.toLowerCase(),
+                final String id = cls + "." + name.toLowerCase();
+                CommonAction<Object> newAction = new CommonAction<Object>(id,
                     name,
                     Messages.getStringOpt(m.toGenericString())) {
                     @Override
@@ -654,6 +655,9 @@ public class BeanDefinition<T> extends BeanClass<T> implements IPluggable<BeanDe
                         return m.invoke(getParameter()[0], new Object[0]);
                     }
                 };
+                String imagePath = id + ".icon";
+                if (Messages.hasKey(imagePath))
+                    newAction.setImagePath(Messages.getString(imagePath));
                 newAction.setParameter(parameters);
                 actions.add(newAction);
             }
@@ -1366,6 +1370,10 @@ public class BeanDefinition<T> extends BeanClass<T> implements IPluggable<BeanDe
         }
     }
 
+    public Map<String, Object> toValueMap(Map<String, Object> properties) {
+        throw new UnsupportedOperationException();
+    }
+    
     /**
      * fills a map with all bean-attribute-names and their values
      * 

@@ -268,6 +268,6 @@ public class MyApp extends NanoH5 {
 
     @SuppressWarnings("unchecked")
     public static void main(String[] args) {
-        startApplication(MyApp.class, MapUtil.asMap(0, "http.connection"), args);
+        startApplication(MyApp.class, MapUtil.asMap(0, "service.url"), args);
     }
 }

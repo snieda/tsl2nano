@@ -518,12 +518,12 @@ public class Bean<T> extends BeanDefinition<T> {
     }
 
     /**
-     * fills a map with all bean-attribute-names and their values
-     * 
+     * fills a map with all bean-attribute-names and their values.
+     * @param properties will be ignored (is only inherited)
      * @return map filled with all attribute values
      */
-    public Map<String, Object> toValueMap() {
-        return toValueMap(instance, false, false, false);
+    public Map<String, Object> toValueMap(Map<String, Object> properties) {
+        return toValueMap(instance, true, false, false);
     }
 
     /**
@@ -695,6 +695,7 @@ public class Bean<T> extends BeanDefinition<T> {
      * @return amount of cleared objects.
      */
     public static int clearCache() {
+        CompositionFactory.clearCache();
         int cleared = BeanValue.clearCache();
         cleared += BeanClass.clearCache();
         cleared += BeanDefinition.clearCache();

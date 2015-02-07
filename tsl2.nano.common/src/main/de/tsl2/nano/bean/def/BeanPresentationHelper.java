@@ -29,6 +29,7 @@ import java.sql.Time;
 import java.sql.Timestamp;
 import java.text.Format;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.Comparator;
 import java.util.Date;
@@ -36,9 +37,11 @@ import java.util.Iterator;
 import java.util.LinkedHashSet;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Map;
 import java.util.NavigableMap;
 import java.util.NavigableSet;
 import java.util.Properties;
+import java.util.ResourceBundle;
 import java.util.Set;
 import java.util.SortedSet;
 import java.util.TreeMap;
@@ -53,6 +56,8 @@ import de.tsl2.nano.bean.IAttributeDef;
 import de.tsl2.nano.bean.IValueAccess;
 import de.tsl2.nano.bean.ValueHolder;
 import de.tsl2.nano.collection.CollectionUtil;
+import de.tsl2.nano.collection.PersistableSingelton;
+import de.tsl2.nano.collection.PersistentCache;
 import de.tsl2.nano.core.Environment;
 import de.tsl2.nano.core.ISession;
 import de.tsl2.nano.core.ManagedException;
@@ -156,8 +161,8 @@ public class BeanPresentationHelper<T> {
         this.bean = bean;
         config.setProperty(KEY_STR_TRUE, "J");
         config.setProperty(KEY_STR_FALSE, "N");
-        config.setProperty(KEY_FILTER_FROM_LABEL, "min");
-        config.setProperty(KEY_FILTER_TO_LABEL, "max");
+        config.setProperty(KEY_FILTER_FROM_LABEL, "&le;");
+        config.setProperty(KEY_FILTER_TO_LABEL, "&ge;");
     }
 
     public Object value(String name) {
@@ -989,7 +994,7 @@ public class BeanPresentationHelper<T> {
         Class<?> bestType = Environment.get("bean.best.attribute.type", String.class);
         String bestRegexp = Environment.get("bean.best.attribute.regexp", ".*(name|bezeichnung|description|id).*");
         int bestminlength = Environment.get("bean.best.attribute.minlength", 2);
-        int bestmaxlength = Environment.get("bean.best.attribute.maxlength", 50);
+        int bestmaxlength = Environment.get("bean.best.attribute.maxlength", 99);
 
         /*
          * create a map with matching levels and their attribute indexes.
@@ -1009,8 +1014,7 @@ public class BeanPresentationHelper<T> {
             //avoid stackoverflow checking if valueExpression was created already
             else if (bean.valueExpression == null || isDefaultAttribute((IAttribute) attr)) {
                 ml = 0;
-                ml = (1 << 11) * (attr.id() ? 1 : 0);
-                ml |= (1 << 10) * (attr.unique() ? 1 : 0);
+                ml = (1 << 10) * (attr.id() || attr.unique() ? 1 : 0);
                 ml |= (1 << 9) * (!attr.nullable() ? 1 : 0);
                 ml |= (1 << 8) * (!attr.isRelation() ? 1 : 0);
                 ml |= (1 << 7) * (BeanClass.isAssignableFrom(bestType, attr.getType()) ? 1 : 0);
@@ -1056,7 +1060,10 @@ public class BeanPresentationHelper<T> {
              * we solve this loading a 'group by' looking for duplicated attributes.
              */
             NavigableSet<Integer> keySet = levels.descendingKeySet();
-            if (bean.isPersistable()) {
+            if (bean.isPersistable()
+                && ((Number) BeanContainer.instance()
+                    .getBeansByQuery("select count(*) from " + bean.getName(), true, new Object[0]).iterator().next())
+                    .intValue() == 0) {
                 Collection<Long> grouping;
                 final String ALIAS = "XXX";
                 String query = "select max(count(" + ALIAS + ")) from " + bean.getName() + " group by " + ALIAS;
@@ -1201,8 +1208,8 @@ public class BeanPresentationHelper<T> {
      * @param message
      * @return the message itself
      */
-    public String decorate(String message) {
-        return message;
+    public String decorate(String title, String content) {
+        return title + "\n\n" + content;
     }
 
     /**
@@ -1216,6 +1223,7 @@ public class BeanPresentationHelper<T> {
     }
 
     public void reset() {
+        BeanContainer.reset();
         Bean.clearCache();
         NetworkClassLoader.resetUnresolvedClasses(Environment.getConfigPath());
         Environment.reload();
@@ -1225,22 +1233,26 @@ public class BeanPresentationHelper<T> {
         return bean != null && BeanCollector.class.isAssignableFrom(bean.getDeclaringClass());
     }
 
+    protected void addSessionValues(ISession session) {
+        //do the Object-casting trick to cast from List<Object> to List<BeanDefinition>
+        addSessionValues((List<BeanDefinition>)(Object)Arrays.asList(session.getNavigationStack()));
+    }
+    
     /**
      * tries to set values from navigation/history queue to this new bean - created by BeanCollector.createItem().
      * 
      * @param session current session
      */
-    protected void addSessionValues(ISession session) {
+    protected void addSessionValues(List<BeanDefinition> sessionValues) {
         if (bean.getId() != null)
             throw new IllegalStateException("this method should only be called on new/transient objects! bean:" + bean);
         Bean b = (Bean) bean;
 
         List<BeanValue> beanValues = b.getBeanValues();
-        BeanDefinition[] navigation = (BeanDefinition[]) session.getNavigationStack();
-        for (int i = 0; i < navigation.length; i++) {
-            if (navigation[i].isPersistable() && !navigation[i].isMultiValue()) {
-                Object instance = ((Bean) navigation[i]).getInstance();
-                Class<?> type = navigation[i].getDeclaringClass();
+        for (int i = 0; i < sessionValues.size(); i++) {
+            if (sessionValues.get(i).isPersistable() && !sessionValues.get(i).isMultiValue()) {
+                Object instance = ((Bean) sessionValues.get(i)).getInstance();
+                Class<?> type = sessionValues.get(i).getDeclaringClass();
 
                 for (BeanValue bv : beanValues) {
                     if (type.isAssignableFrom(bv.getType()) && !bv.composition() && !bv.isMultiValue() && !bv.id()
@@ -1301,11 +1313,32 @@ public class BeanPresentationHelper<T> {
     /**
      * creates extended actions like 'print', 'help', 'export', 'select-all', 'deselect-all' etc.
      */
-    public Collection<IAction> getSessionActions(final ISession session) {
+    public Collection<IAction> getSessionActions(ISession session) {
+        /* 
+         * caching the session-actions would store the final session on this helper 
+         * of a session independent bean. means, if another session uses this bean, it uses 
+         * this helper and its cached actions, too. so we use a value holder setting the session 
+         * on each call.
+         */
+        final ValueHolder<ISession> vsession = new ValueHolder<ISession>(session);
         if (sessionActions == null) {
             if (bean == null || session.getUserAuthorization() == null)
                 return new LinkedList<IAction>();
-            sessionActions = new ArrayList<IAction>(1);
+            vsession.setValue(session);
+            sessionActions = new ArrayList<IAction>(2);
+            if (session.getContext() instanceof Collection) {
+                sessionActions.add(new SecureAction(bean.getClazz(),
+                    "memorize",
+                    IAction.MODE_UNDEFINED,
+                    false,
+                    "icons/apply.png") {
+                    @Override
+                    public Object action() throws Exception {
+                        ((Collection) vsession.getValue().getContext()).add(bean);
+                        return bean;
+                    }
+                });
+            }
             sessionActions.add(new SecureAction(bean.getClazz(),
                 "logout",
                 IAction.MODE_UNDEFINED,
@@ -1315,10 +1348,12 @@ public class BeanPresentationHelper<T> {
                 public Object action() throws Exception {
 //                    Environment.persist();
 //                    BeanDefinition.dump();
-                    session.close();
+                    vsession.getValue().close();
                     return page("user logged out!");
                 }
             });
+        } else {
+            vsession.setValue(session);
         }
         return sessionActions;
     }
@@ -1456,26 +1491,34 @@ public class BeanPresentationHelper<T> {
                 IAction.MODE_UNDEFINED,
                 false,
                 "icons/images_all.png") {
-                File exportFile = new File(Environment.get(bean.getName() + ".export.file",
-                    Environment.getConfigPath() + bean.getName() + ".rtf"));
+                String exportFileName = Environment.get(bean.getName() + ".export.file",
+                    Environment.getConfigPathRel() + bean.getName() + ".rtf");
+                File exportFile = new File(exportFileName);
 
                 @Override
                 public Object action() throws Exception {
                     //TODO: file selection, and ant-variable insertion...
-                    String content = String.valueOf(FileUtil.getFileData(exportFile.getPath(), null));
-                    content = StringUtil.insertProperties(content, BeanUtil.toValueMap(((Bean) bean).getInstance()));
-                    FileUtil.writeBytes(content.getBytes(), exportFile.getParent() + ".new", false);
-                    return "document '" + exportFile.getPath() + "' was filled with data of bean " + bean;
+                    String var_start = Environment.get("export.var.start", "##");
+                    String var_end = Environment.get("export.var.end", "##");
+                    String content = String.valueOf(FileUtil.getFileData(exportFileName, null));
+                    content =
+                        StringUtil.insertProperties(content, BeanUtil.toValueMap(((Bean) bean).getInstance()),
+                            var_start, var_end);
+                    String newFileName = FileUtil.getUniqueFileName(exportFileName);
+                    FileUtil.writeBytes(content.getBytes(), newFileName, false);
+                    String url = Environment.get("service.url") + "/" + newFileName;
+                    return decorate(url, url);
                 }
 
                 @Override
                 public String getLongDescription() {
-                    return "exporting (see environment.properties) to: " + exportFile.getPath();
+                    return "exporting (see environment.properties, variable names are starting and ending with §§) to: "
+                        + exportFileName;
                 }
 
                 @Override
                 public boolean isEnabled() {
-                    return exportFile.canRead();
+                    return bean instanceof Bean && exportFile.canRead();
                 }
             });
 
@@ -1484,19 +1527,30 @@ public class BeanPresentationHelper<T> {
                 IAction.MODE_UNDEFINED,
                 false,
                 "icons/trust_unknown.png") {
-                String helpFileName = Environment.getConfigPath() + bean.getName().toLowerCase() + ".help.html";
+                final String helpFile = Environment.getConfigPathRel() + bean.getName().toLowerCase() + ".help.";
+                final File htmlFile = new File(helpFile + "html");
+                final File pdfFile = new File(helpFile + "pdf");
+                final String tooltip = htmlFile.getPath() + " or " + pdfFile.getPath();
 
                 @Override
                 public Object action() throws Exception {
-                    String helpFile = null;
-                    if (new File(helpFileName).canRead())
-                        helpFile = String.valueOf(FileUtil.getFileData(helpFileName, null));
-                    return helpFile != null ? helpFile : page("No help found (" + helpFileName + ")");
+                    if (htmlFile.canRead())
+                        return String.valueOf(FileUtil.getFileData(htmlFile.getPath(), null));
+                    else if (pdfFile.canRead()) {
+                        String url = Environment.get("service.url") + "/" + helpFile + "pdf";
+                        return /*url;//*/decorate(url, url);
+                    } else
+                        return page("No help found (" + tooltip + ")");
+                }
+
+                @Override
+                public String getLongDescription() {
+                    return tooltip;
                 }
 
                 @Override
                 public boolean isEnabled() {
-                    return new File(helpFileName).canRead();
+                    return htmlFile.canRead() || pdfFile.canRead();
                 }
             });
 
@@ -1541,6 +1595,19 @@ public class BeanPresentationHelper<T> {
      */
     public IPresentable createPresentable(AttributeDefinition<?> attr) {
         return new Presentable(attr);
+    }
+
+    /**
+     * generatedValue
+     * 
+     * @param attribute to be checked
+     * @return true, if attribute is annotated as generated value or if environment "value.id.fill.uuid" is true and the
+     *         type is string or number.
+     */
+    public static final boolean isGeneratedValue(IAttributeDefinition<?> attribute) {
+        return attribute.generatedValue()
+            || (attribute.id() && Environment.get("value.id.fill.uuid", true) && (String.class
+                .isAssignableFrom(attribute.getType()) || NumberUtil.isNumber(attribute.getType())));
     }
 
     @Override

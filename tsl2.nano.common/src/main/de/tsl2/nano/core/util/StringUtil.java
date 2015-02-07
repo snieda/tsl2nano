@@ -31,7 +31,7 @@ import de.tsl2.nano.core.Messages;
 @SuppressWarnings("rawtypes")
 public class StringUtil {
     /** variable (like ant-variables) matching expression. e.g.: ${myvar} */
-    public static final String VAR_REGEXP = "\\$\\{\\w+\\}";
+    public static final String VAR_REGEXP = "\\$\\{[\\w._-]+\\}";
     public static final String STR_ANY = "*";
 
     /**
@@ -395,6 +395,13 @@ public class StringUtil {
     }
 
     /**
+     * delegates to {@link #insertProperties(String, Map, String, String)} using standard ant syntax.
+     */
+    public static String insertProperties(String text, Map<? extends Object, Object> properties) {
+        return insertProperties(text, properties, "${", "}");
+    }
+    
+    /**
      * text variables (starting with ${ and ending with }), will be replaced by the given properties (Map<Obbject,
      * Object> because of {@link Properties}).
      * 
@@ -402,14 +409,14 @@ public class StringUtil {
      * @param properties insertables
      * @return text with insertions
      */
-    public static String insertProperties(String text, Map<? extends Object, Object> properties) {
+    public static String insertProperties(String text, Map<? extends Object, Object> properties, String key_prefix, String key_postfix) {
         int i = 0;
         Object value;
         String vname;
         final StringBuffer t = new StringBuffer(text);
         final Set<? extends Object> keySet = properties.keySet();
         for (final Object name : keySet) {
-            vname = "${" + name + "}";
+            vname = key_prefix + name + key_postfix;
             while ((i = t.indexOf(vname)) != -1) {
                 value = properties.get(name);
                 t.replace(i, i + vname.length(), String.valueOf(value));

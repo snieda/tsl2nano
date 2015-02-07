@@ -135,4 +135,11 @@ public class CompositionFactory {
         }
         return false;
     }
+
+    /**
+     * clearCache
+     */
+    public static void clearCache() {
+        self = null;
+    }
 }

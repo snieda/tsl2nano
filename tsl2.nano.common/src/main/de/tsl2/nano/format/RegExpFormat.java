@@ -1134,7 +1134,7 @@ public class RegExpFormat extends Format implements INumberFormatCheck {
     private void initSerialization() {
         //remove copied entries of systeminitmap - if it is not the systemInitMap itself!
         if (initMap != null && initMap != systemInitMap)
-            MapUtil.removeAll(initMap, systemInitMap);
+            MapUtil.removeAll(initMap, systemInitMap.keySet());
         else
             initMap = null;
     }

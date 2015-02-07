@@ -9,9 +9,11 @@
  */
 package de.tsl2.nano.util.codegen;
 
+import de.tsl2.nano.core.util.StringUtil;
+
 /**
- * Generates an interface with integer constants (hashed keys) to be used to get resource values. saves ram-space using
- * integers instead of full string keys. provides type-safed access to property values.
+ * Generates an interface with integer constants (hashed keys or simple sequence) to be used to get resource values.
+ * saves ram-space using integers instead of full string keys. provides type-safed access to property values.
  * <p/>
  * ON CONSTRUCTION:
  * 
@@ -36,7 +38,6 @@ public class PropertiesAsConstantsGenerator extends ClassGenerator {
      */
     @Override
     protected Object getModel(String modelFile, ClassLoader classLoader) {
-        // TODO Auto-generated method stub
         return super.getModel(modelFile, classLoader);
     }
 
@@ -45,41 +46,11 @@ public class PropertiesAsConstantsGenerator extends ClassGenerator {
      */
     @Override
     protected String getDefaultDestinationFile(String modelFile) {
-        // TODO Auto-generated method stub
-        return super.getDefaultDestinationFile(modelFile);
-    }
-
-    static final int encode(String propKey) {
-//        return propKey.hashCode();
-        char val[] = propKey.toCharArray();
-        int h = 0;
-        int len = val.length;
-        for (int i = 0; i < len; i++) {
-            h = 31 * h + val[i];
-            System.out.println(val[i] + "(" + (int) val[i] + ") ==>" + h);
-        }
-        return h;
-    }
-
-    static final String decode(int h) {
-        if (h == 0)
-            return "";
-        //encoding must be bijective to be decoded - not possible with standard hashcode
-        char c[] = new char[h / 31];
-        for (int i = c.length - 1; i >= 0; i--) {
-            c[i] = (char) (h % 31);
-            h -= c[i];
-        }
-//        for (int i = 0; i < len; i++) {
-//            h = 31*h + val[off++];
-//        }
-        return String.valueOf(c);
+        modelFile = modelFile.replace('.', '/');
+        modelFile = StringUtil.substring(modelFile, null, "/", true);
+        return "src/gen/" + modelFile + ".java";
     }
 
     public static final void main(String args[]) {
-        String t = "abc";
-        int h = encode(t);
-        System.out.println(t + "-->" + h);
-        System.out.println("decoded:" + decode(h));
     }
 }

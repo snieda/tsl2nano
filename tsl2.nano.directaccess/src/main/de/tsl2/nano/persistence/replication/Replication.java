@@ -42,7 +42,7 @@ public class Replication extends Persistence implements Runnable {
     /** xml serialization of Persistence object */
     public static final String FILE_REPLICATION_BEAN = "replication-bean.xml";
 
-    Map<String, Object> p;
+    transient Map<String, Object> p;
 
     /**
      * constructor

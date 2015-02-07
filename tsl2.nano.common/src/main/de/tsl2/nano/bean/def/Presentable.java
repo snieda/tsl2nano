@@ -66,20 +66,23 @@ public class Presentable implements IIPresentable, Serializable {
     @ElementArray(required = false)
     int[] background;
 
+    /** needed for instances that wont be serialized */
+    private transient boolean initialized;
+
     public Presentable() {
     }
 
     public Presentable(IAttribute<?> attr) {
         IAttributeDefinition def = (IAttributeDefinition) (attr instanceof IAttributeDefinition ? attr : null);
-        label = Environment.translate(attr.getId(), true);
+        //translation will be done in initDeserialization()
+        label = attr.getId();//!Messages.hasKey(attr.getId()) ? Environment.translate(attr.getId(), true) : attr.getId();
+        description = label;
+        
         BeanPresentationHelper<?> helper = Environment.get(BeanPresentationHelper.class);
         type = def != null ? helper.getDefaultType(def) : helper.getDefaultType(attr);
         style = def != null ?
             helper.getDefaultHorizontalAlignment(def) : helper.getDefaultHorizontalAlignment(attr);
         style |= helper.getDefaultStyle(attr);
-        description = Environment.translate(attr.getId() + Messages.POSTFIX_TOOLTIP, false);
-        if (description == null || description.startsWith(Messages.TOKEN_MSG_NOTFOUND))
-            description = label;
         /*
          * to be enabled, the attribute must be 
          * - writable through setter-method
@@ -87,7 +90,7 @@ public class Presentable implements IIPresentable, Serializable {
          */
         enabler =
             attr.hasWriteAccess()
-                && !(def != null && def.generatedValue())
+                && !(def != null && BeanPresentationHelper.isGeneratedValue(def))
                 && (!BeanContainer.isInitialized() || !BeanContainer.instance().isPersistable(attr.getDeclaringClass())
                     || !(def != null) || (!def.isMultiValue() || def
                     .cascading()))
@@ -112,6 +115,8 @@ public class Presentable implements IIPresentable, Serializable {
      * @return Returns the description.
      */
     public String getDescription() {
+        if (!initialized)
+            initDeserialization();
         return description;
     }
 
@@ -184,6 +189,8 @@ public class Presentable implements IIPresentable, Serializable {
 
     @Override
     public String getLabel() {
+        if (!initialized)
+            initDeserialization();
         return label;
     }
 
@@ -346,7 +353,7 @@ public class Presentable implements IIPresentable, Serializable {
     }
 
     @Commit
-    protected void initDesialization() {
+    protected void initDeserialization() {
         //try to translate after first loading
         if (description != null && description.equals(label)) {
             String d = Environment.translate(label + Messages.POSTFIX_TOOLTIP, false);
@@ -355,5 +362,10 @@ public class Presentable implements IIPresentable, Serializable {
         }
         if (label != null)
             label = Environment.translate(label, true);
+        initialized = true;
+    }
+    
+    public static final String asText(int value) {
+        return value == UNDEFINED ? null : String.valueOf(value);
     }
 }

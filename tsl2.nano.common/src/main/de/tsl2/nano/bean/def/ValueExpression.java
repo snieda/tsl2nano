@@ -172,6 +172,14 @@ public class ValueExpression<TYPE> implements
      * {@inheritDoc}
      */
     @Override
+    public String getName() {
+        return expression;
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
     public TYPE from(String toValue) {
         if (type == null)
             throw ManagedException
@@ -314,8 +322,20 @@ public class ValueExpression<TYPE> implements
         if (!BeanContainer.isInitialized())
             return;
         for (int i = 0; i < args.length; i++) {
-            if (args[i] != null && BeanContainer.instance().isPersistable(args[i].getClass()))
-                args[i] = Bean.getBean((Serializable) args[i]).toString();
+            if (args[i] != null) {
+                if (BeanContainer.instance().isPersistable(args[i].getClass()))
+                    args[i] = Bean.getBean((Serializable) args[i]).toString();
+                else if (args[i] instanceof Collection) {
+                    Collection<?> c = (Collection<?>) args[i];
+                    if (c.size() > 0 && BeanContainer.instance().isPersistable(c.iterator().next().getClass())) {
+                        StringBuilder buf = new StringBuilder();
+                        for (Object obj : c) {
+                            buf.append(Bean.getBean((Serializable) obj).toString() + ";");
+                        }
+                        args[i] = buf.toString();
+                    }
+                }
+            }
         }
     }
 

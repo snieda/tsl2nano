@@ -9,8 +9,8 @@
  */
 package de.tsl2.nano.bean;
 
-import java.util.Collection;
 import java.util.LinkedHashMap;
+import java.util.Collection;
 import java.util.LinkedHashSet;
 import java.util.LinkedList;
 import java.util.Map;
@@ -487,4 +487,7 @@ public class BeanContainer implements IBeanContainer {
 //        Collection<T> result;
 //        
 //    }
+    public static void reset() {
+        self = null;
+    }
 }

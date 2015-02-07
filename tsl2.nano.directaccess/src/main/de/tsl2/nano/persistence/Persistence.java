@@ -43,13 +43,13 @@ public class Persistence implements Serializable {
     protected String jarFile = "beans.jar";
     protected String connectionDriverClass = STD_LOCAL_DATABASE_DRIVER;
     protected String connectionUrl = STD_LOCAL_DATABASE_URL;
-    protected String connectionUserName = "";
+    protected String connectionUserName = "SA";
     protected String connectionPassword = "";
     protected String hibernateDialect = "org.hibernate.dialect.HSQLDialect";
     protected String defaultSchema = "";
-    protected String datasourceClass = "org.hsqldb.jdbc.jdbcDataSource";
+    protected String datasourceClass = "org.hsqldb.jdbc.JDBCDataSource";
     protected String port = "9003";
-    protected String database = "";
+    protected String database = "anyway";
     private Persistence replication;
     /** One of 'hbm2java' or 'openjpa-reverse-eng' */
     private String generator = GEN_HIBERNATE;

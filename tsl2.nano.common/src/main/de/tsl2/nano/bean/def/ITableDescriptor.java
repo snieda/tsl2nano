@@ -37,6 +37,15 @@ public interface ITableDescriptor<T> {
     public String getColumnText(T element, int columnIndex);
 
     /**
+     * Returns the label text for the given column-summary of the given element.
+     *
+     * @param columnIndex the zero-based index of the column in which the label appears
+     * @return String or or <code>null</code> if there is no text for the 
+     *  given object at columnIndex
+     */
+    public String getSummaryText(Object context, int columnIndex);
+    
+    /**
      * shiftSortIndexes
      */
 

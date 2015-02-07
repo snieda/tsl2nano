@@ -18,6 +18,7 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Comparator;
+import java.util.HashMap;
 import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
@@ -55,6 +56,7 @@ import de.tsl2.nano.core.cls.IAttribute;
 import de.tsl2.nano.core.exception.Message;
 import de.tsl2.nano.core.execution.Profiler;
 import de.tsl2.nano.core.log.LogFactory;
+import de.tsl2.nano.core.util.DateUtil;
 import de.tsl2.nano.core.util.StringUtil;
 import de.tsl2.nano.core.util.Util;
 import de.tsl2.nano.format.FormatUtil;
@@ -258,6 +260,16 @@ public class BeanCollector<COLLECTIONTYPE extends Collection<T>, T> extends Bean
     @Override
     public void onActivation() {
         super.onActivation();
+        Collection<IPresentableColumn> columns = getColumnDefinitions();
+        boolean dosearch = false;
+        for (IPresentableColumn c : columns) {
+            if (c.getMinSearchValue() != null || c.getMaxSearchValue() != null) {
+                dosearch = true;
+                break;
+            }
+        }
+        if (dosearch)
+            getBeanFinder().getData();
     }
 
     @Override
@@ -603,11 +615,29 @@ public class BeanCollector<COLLECTIONTYPE extends Collection<T>, T> extends Bean
          */
         final BeanAttribute idAttribute = BeanContainer.getIdAttribute(newItem);
         if (idAttribute != null) {
-            IAttributeDef def = Environment.get(IBeanContainer.class).getAttributeDef(newItem,
-                idAttribute.getName());
-            idAttribute.setValue(newItem, /*composition != null ?
-                                          StringUtil.fixString(BeanUtil.createUUID(), (def.length() > -1 ? def.length() : 0), ' ', true) : */
-                null);
+            Object value = null;
+            if (Environment.get("value.id.fill.uuid", true)) {
+                if (String.class.isAssignableFrom(idAttribute.getType())) {
+                    IAttributeDef def = Environment.get(IBeanContainer.class).getAttributeDef(newItem,
+                        idAttribute.getName());
+                    //TODO: through string cut, the uuid may not be unique
+                    value =
+                        StringUtil.fixString(BeanUtil.createUUID(), (def.length() > -1 ? def.length() : 0), ' ', true);
+                } else if (NumberUtil.isNumber(idAttribute.getType())) {
+                    //subtract the years from 1970 to 2015 to be castable to an int
+                    //TODO: use a more unique value
+                    if (Environment.get("value.id.use.timestamp", false)) {
+                        value = System.currentTimeMillis();
+                        if (NumberUtil.isInteger(idAttribute.getType()))
+                            value = DateUtil.getMillisWithoutYear((Long) value);
+                    } else {
+                        value = Environment.counter("value.id.counter.start", 1);
+                    }
+                } else {
+                    LOG.warn("the id-attribute " + idAttribute + " can't be assigned to a generated value!");
+                }
+            }
+            idAttribute.setValue(newItem, value);
         }
 
         /*
@@ -850,7 +880,7 @@ public class BeanCollector<COLLECTIONTYPE extends Collection<T>, T> extends Bean
         for (IAttributeDefinition<?> attr : attributes) {
             IPresentableColumn col = attr.getColumnDefinition();
             if (col == null) {
-                attr.setColumnDefinition(i, IPresentable.UNDEFINED, true, 100);
+                attr.setColumnDefinition(++i, IPresentable.UNDEFINED, true, IPresentable.UNDEFINED);
                 col = attr.getColumnDefinition();
             } else {
                 //if derived from deserialization, the cycling attributeDefinition is null
@@ -859,7 +889,6 @@ public class BeanCollector<COLLECTIONTYPE extends Collection<T>, T> extends Bean
                     vc.attributeDefinition = attr;
             }
             columnDefinitions.add((IPresentableColumn) col);
-            i++;
         }
         if (Environment.get("collector.use.multiple.filter", true)) {
             //TODO: filtering ids, and invisibles, too --> don't ask multiple-flag
@@ -882,7 +911,7 @@ public class BeanCollector<COLLECTIONTYPE extends Collection<T>, T> extends Bean
         for (IAttributeDefinition<?> a : attributes) {
             i = Math.max(i, a.getColumnDefinition() != null ? a.getColumnDefinition().getIndex() : 0);
         }
-        return 0;
+        return i;
     }
 
     /**
@@ -972,6 +1001,31 @@ public class BeanCollector<COLLECTIONTYPE extends Collection<T>, T> extends Bean
         else if (col instanceof ValueColumn)
             return getColumnText(element, ((ValueColumn) col).attributeDefinition);
         return getColumnText(element, getAttribute(col.getName()));
+    }
+
+    @Override
+    public String getSummaryText(Object contextParameter, int columnIndex) {
+        IPresentableColumn col = getColumn(columnIndex);
+        //column may be filtered (e.g. id-columns)
+        if (col != null) {
+            if (col.getSummary() != null) {
+                Object value = col.getSummary().getValue(contextParameter);
+                return value != null ? col.getSummary().getName() + ": " + value.toString() : "";
+            } else if (col.isStandardSummary() && NumberUtil.isNumber(getAttribute(col.getName()).getType())) {
+                double result = 0;
+                for (T item : collection) {
+                    Bean b = Bean.getBean((Serializable) item);
+                    Number v = (Number) b.getValue(col.getName());
+                    if (v != null)
+                        result += v.doubleValue();
+                }
+                return Environment.translate("tsl2nano.total", true) + ": "
+                    + getAttribute(col.getName()).getFormat().format(result);
+            } else {
+                return "";
+            }
+        }
+        return "";
     }
 
     /**
@@ -1072,7 +1126,9 @@ public class BeanCollector<COLLECTIONTYPE extends Collection<T>, T> extends Bean
         if (getBeanFinder() != null) {
             Bean<?> filterRange = getBeanFinder().getFilterRange();
             if (hasMode(MODE_SEARCHABLE) && filterRange != null) {
-                List<T> rangeBeans = Arrays.asList((T) filterRange.getValue("from"), (T) filterRange.getValue("to"));
+                T from = (T) filterRange.getValue("from");
+                T to = (T) filterRange.getValue("to");
+                List<T> rangeBeans = Arrays.asList(from, to);
                 if (hasSearchRequestChanged == null) {
                     for (T rb : rangeBeans) {
                         //we can't use the bean cache - if empty beans were stored they would be reused!
@@ -1083,7 +1139,14 @@ public class BeanCollector<COLLECTIONTYPE extends Collection<T>, T> extends Bean
                             }
                         });
                     }
-                    ;
+                    //assign fixed search ranges
+                    Collection<IPresentableColumn> columns = getColumnDefinitions();
+                    for (IPresentableColumn c : columns) {
+                        if (c.getMinSearchValue() != null)
+                            BeanClass.getBeanClass(getType()).setValue(from, c.getName(), c.getMinSearchValue());
+                        if (c.getMaxSearchValue() != null)
+                            BeanClass.getBeanClass(getType()).setValue(to, c.getName(), c.getMaxSearchValue());
+                    }
                 }
                 return rangeBeans;
             } else
@@ -1236,12 +1299,13 @@ public class BeanCollector<COLLECTIONTYPE extends Collection<T>, T> extends Bean
 
     /**
      * getComposition
+     * 
      * @return
      */
     public Composition getComposition() {
         return composition;
     }
-    
+
     /**
      * setCompositionParent
      * 
@@ -1313,6 +1377,28 @@ public class BeanCollector<COLLECTIONTYPE extends Collection<T>, T> extends Bean
     public void setName(String name) {
         super.setName(name);
         asString = null;
+    }
+
+    @Override
+    public Map<String, Object> toValueMap(Map<String, Object> properties) {
+        Map<String, Object> result = new HashMap<String, Object>();
+        String name = BeanAttribute.toFirstLower(getName());
+        //first the search values
+        if (hasFilter()) {
+            Collection<T> s = getSearchPanelBeans();
+            Iterator<T> it = s.iterator();
+            toValueMap(it.next(), name + ".search.from.", false, false);
+            toValueMap(it.next(), name + ".search.to.", false, false);
+        }
+        //then the summary columns (only the standard calculation while no session parameters are available!)
+        Collection<IPresentableColumn> cols = getColumnDefinitions();
+        for (IPresentableColumn c : cols) {
+            if (c.isStandardSummary() || c.getSummary() != null)
+                result.put(getAttribute(c.getName()).getId() + ".summary", getSummaryText(properties, c.getIndex()));
+        }
+        //and the row count
+        result.put(name + ".search.count", collection.size());
+        return result;
     }
 
     @Override

@@ -143,4 +143,11 @@ public class PersistentCache {
             createInstance(System.getProperty("user.home"));
         }
     }
+
+    /**
+     * clearCache
+     */
+    public static void clearCache() {
+        self = null;
+    }
 }

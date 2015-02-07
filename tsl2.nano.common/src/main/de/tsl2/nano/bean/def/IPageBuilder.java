@@ -39,7 +39,7 @@ public interface IPageBuilder<PAGE, OUTPUT> {
      * @param message
      * @return decorated 
      */
-    OUTPUT decorate(String message);
+    OUTPUT decorate(String title, String message);
     
     /**
      * creates extended actions like 'help', 'configure', 'exit' etc.

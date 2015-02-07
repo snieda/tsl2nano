@@ -354,6 +354,10 @@ public abstract class CommonAction<RETURNTYPE> implements IAction<RETURNTYPE>, S
         return keyStroke;
     }
 
+    public void setImagePath(String imagePath) {
+        this.imagePath = imagePath;
+    }
+    
     @Override
     public boolean equals(Object obj) {
         return hashCode() == obj.hashCode();

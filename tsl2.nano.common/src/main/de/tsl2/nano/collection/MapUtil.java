@@ -138,15 +138,32 @@ public class MapUtil {
     }
 
     /**
-     * removeAll
+     * remove all elements from src that are contained in toRemove
      * 
-     * @param src
-     * @param toRemove
-     * @return src
+     * @param src to change
+     * @param toRemove to be evaluated
+     * @return changed src map
      */
-    public static <K, V> Map<K, V> removeAll(Map<K, V> src, Map<K, V> toRemove) {
+    public static <K, V> Map<K, V> removeAll(Map<K, V> src, Collection<K> toRemove) {
         //don't know how it is possible, but without a new set instance, we get a concurrentmodificationexception
-        Set<K> keys = new LinkedHashSet<K>(toRemove.keySet());
+        Set<K> keys = new LinkedHashSet<K>(toRemove);
+        for (K k : keys) {
+            src.remove(k);
+        }
+        return src;
+    }
+
+    /**
+     * retain all elements in src that are contained in toRetain. all other will be removed. 
+     * 
+     * @param src to change
+     * @param toRetain to be evaluated
+     * @return changed src map
+     */
+    public static <K, V> Map<K, V> retainAll(Map<K, V> src, Collection<K> toRetain) {
+        //don't know how it is possible, but without a new set instance, we get a concurrentmodificationexception
+        Set<K> keys = new LinkedHashSet<K>(src.keySet());
+        keys.removeAll(toRetain);
         for (K k : keys) {
             src.remove(k);
         }

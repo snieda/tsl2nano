@@ -754,7 +754,7 @@ public class CollectionUtil {
             if (position == -1)
                 return item;
             
-            throw new IllegalArgumentException("position must be between 0 and " + i);
+            throw new IllegalArgumentException(i == 0 ? iterable + " is empty!" : "position must be between 0 and " + i);
         }
     }
 }

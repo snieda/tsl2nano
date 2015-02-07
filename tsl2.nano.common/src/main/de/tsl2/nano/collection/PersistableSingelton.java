@@ -84,4 +84,8 @@ public class PersistableSingelton extends Hashtable {
             ManagedException.forward(e);
         }
     }
+
+    public static void clearCache() {
+        self = null;
+    }
 }

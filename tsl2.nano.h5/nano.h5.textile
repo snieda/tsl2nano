@@ -181,9 +181,25 @@ This methods are called only if _bean.use.beanpresentationhelper.filter_ is true
 * bean.best.attribute.type (default: String.class)
 * bean.best.attribute.regexp (default:.*(name|bezeichnung|description|id).*)
 * bean.best.attribute.minlength (default: 2)
-* bean.best.attribute.maxlength (default: 50)
+* bean.best.attribute.maxlength (default: 99)
 
 All formats, constraints and basic presentation-properties will be evaluated through the type and jpa-annotations of an attribute.
+
+*Rules on evaluating the best order*
+1. attr.id() || attr.unique()
+2. !attr.nullable()
+3. !attr.isRelation()
+4. bean.best.attribute.type (default: String.class)
+5. bean.best.attribute.regexp (default:.*(name|bezeichnung|description|id).*)
+6.a. bean.best.attribute.minlength (default: 2)
+6.b. bean.best.attribute.maxlength (default: 99)
+7. attr.getConstraint().getPrecision() > 0
+8. attr.getType().isInterface()
+	|| (!BeanUtil.isStandardType(attr.getType()) && !BeanClass.hasDefaultConstructor(attr.getType()))
+	|| (!attr.isVirtual() && isGeneratedValue(bean.getDeclaringClass(), names[i])))
+9. attr.isMultiValue() //always the multivalues at the end!
+
+The found best attribute will be checked against an available database to be unique inside the current table-data.
 
 ##### Configuration through Serialization
 
@@ -573,6 +589,54 @@ Mode:
 
 If an item was selected and opened, this item (a _Bean_) will be presented as detail in a new page.
 
+#### letting the beancollector start the search action on activation
+
+Normally a bean collector provides a search mask to filled and started through user input. if you want to have a pre-filled collection, you have to define at least one _minsearch_ or _maxsearch value inside the bean definitions column definitions.
+
+Example:
+
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+ <columnDefinition name="value" columnIndex="9" sortIndex="-1" isSortUpDirection="true" width="-1">
+	<minsearch class="java.lang.Integer">2</minsearch>
+	<maxsearch class="java.lang.Integer">8</maxsearch>
+...
+ </columnDefinition>
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+Of course you have to use values that are compatible with the attributes type.
+
+#### creating a detailed summary for a bean collector
+
+Example using the standard summary function of the bean collector on numbers:
+
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+<columnDefinition standardSummary="true">
+...
+</columnDefinition>
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+Example using the query _sumvalue_ defined in specificcation:
+
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+<columnDefinition>
+...
+	<summary class="de.tsl2.nano.h5.expression.SQLExpression">
+		<expression><![CDATA[§sumvalue]]></expression>
+	</summary>
+...
+</columnDefinition>
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+where the _sumvalue_ expression is defined inside the specifications with:
+
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+<query name="sumvalue" nativeQuery="false">
+   <query><![CDATA[select sum(value) as Gesamt from Charge where party.name = '${party.name}' ]]></query>
+</query>
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+the variable _party.name_ must be defined by the user before while selecting (see action _memorize_) a party to use.
+
 #### direct queries through _QueryResult_
 
 To define direct sql or jpa-ql queries beside the standard mechanism though compiled beans you have the possibility to show a list of values direct through _QueryResult_ which is an extension of _BeanCollector_.
@@ -692,6 +756,19 @@ Example for an attribute through a relation path:
          <doValidation>true</doValidation>
       </attributeDefinition>
    </attribute>
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+if a relation is an iterable or map, it can be specified through a parameter.
+
+Examples for one-to-many relation paths:
+
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+1. customer.address[first].city
+2. customer.address[0].city
+3. customer.address.city     (the first address, too)
+4. customer.address[last].street
+5. customer.address[-1].code (the last address)
+6. customer.address[street=berlinerstrasse].city
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 Example for a virtual attribute:
@@ -1933,14 +2010,14 @@ TODO
 * *create shell like main()-methods on util classes*
 	* getjar, crypt, print, net, XmlUtil, currencyUtil, ByteUtil, Profiler, ConcurrentUtil, SchedulerUtil, GeneratorUtility, NumericConditionOperator
 	* ScriptTool/Util, RulePool, neuron, routing, workflow, equationsolver, vector3d
-
+* jarresolver jars into sub-modules (--> filemonitor on file-tree)
+* jarresolver creating pom.xml for all modules
 * *Refactorings:*
 	* AttributeDefinition --> Attribute
 	* BeanValue --> Value
 	* Bean --> AttributeContainer
 	* Bean soll BeanDefinition referenzieren und nicht erben
 	* Value soll Attribute referenzieren und nicht erben
-
 * *mybook: wcopy + concat files(date) + fop:xhtml2fo.xsl*
 
 * MDA Steps
@@ -2073,3 +2150,23 @@ com.sybase.jdbc2.jdbc.SybDriver
 
 Etc:Connection-->IConnection(core, descriptor)
 Net:Connection-->Link-->Cover(content, descriptor)
+
+*TODO* für zeiterfassung
+* (v) id --> sequence
+* (v) Vorbelegungen und Suche in Suchmaske (z.B. aktueller Monat)
+* (v) labels, tooltips not from presentable but from messages* charge=Erfassung, order: fromdate + wochentag, party-kürzel, fromtime, totime, value, comment 
+** pause=(end-start)-value, +chargeitems.item.name
+** -todate, -discharges
+** dependeny: fromdate --> todate
+** dependeny: totime --> value
+* Category: Art des Kunden
+* Area: Kunde
+* Type: Typ des Dienstes (meist Standard)
+* Classification: Klasse (frei, ?)
+* Item: Projekt (Standard)
+* Bilder mit blob?
+* Summenzeile (beandef oder columndef: + summarize=$feld1-$feld2)
+* Wochentage + unterschiedliche Farben am WE
+* macros aufnehmen und abspielen
+* verschiedene workflows zur verfügung stellen
+* datenbank-user --> benutzer --> session-context + actions

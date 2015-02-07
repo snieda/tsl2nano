@@ -193,6 +193,7 @@ public class HtmlUtil {
     public static final String STYLE_TEXT_ALIGN = "text-align";
     public static final String STYLE_FONT_COLOR = "color";
 
+    public static final String VAL_25PERCENT = "100%";
     public static final String VAL_100PERCENT = "100%";
     public static final String VAL_FALSE = Boolean.FALSE.toString();
     public static final String VAL_TRUE = Boolean.TRUE.toString();
@@ -233,6 +234,18 @@ public class HtmlUtil {
     public static final String XML_TAG_START = "\\<.*\\>";
     public static final String END_TAG = "/";
     public static final String PRE_ATTRIBUTE_FLAG = "FLAG:";
+
+    public static final String CHAR_SUM = L("sum");
+    public static final String CHAR_LE = L("le");
+    public static final String CHAR_GE = L("ge");
+    public static final String CHAR_DELTA = L("Delta");
+    public static final String CHAR_DEG = L("deg");
+    public static final String CHAR_ARROW_DOWN = L("dArr");
+    public static final String CHAR_ARROW_UP = L("uArr");
+    public static final String CHAR_ARROW_RIGHT = L("rArr");
+    public static final String CHAR_ARROW_LEFT = L("lArr");
+    public static final String CHAR_COPYRIGHT = L("copy");
+    public static final String CHAR_POINT = L("bull");
 
     public static Element appendElements(Element parent, String... tagNames) {
         Document doc = parent.getOwnerDocument();
@@ -451,7 +464,7 @@ public class HtmlUtil {
     }
 
     public static boolean containsHtml(String text) {
-        return text.contains("<html>");
+        return text.contains("<html");
     }
 
     public static String createMessagePage(String msg) {
@@ -477,4 +490,13 @@ public class HtmlUtil {
     public static String end(String tagName) {
         return "</" + tagName + ">";
     }
+    
+    public static String percent(int value) {
+        return value + "%";
+    }
+    
+    public static String L(String content) {
+        return "&" + content + ";";
+    }
+    
 }

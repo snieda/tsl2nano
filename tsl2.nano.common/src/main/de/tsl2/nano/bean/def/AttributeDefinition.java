@@ -60,7 +60,7 @@ public class AttributeDefinition<T> implements IAttributeDefinition<T> {
 
     /** serialVersionUID */
     private static final long serialVersionUID = 1403875731423120506L;
-
+    
     @Element(name = "declaring")
     protected IAttribute<T> attribute;
     protected EventController eventController;
@@ -445,8 +445,7 @@ public class AttributeDefinition<T> implements IAttributeDefinition<T> {
      */
     public T getDefault() {
         IConstraint<T> c = getConstraint();
-        if (c.getDefault() == null && getAccessMethod() != null && !c.isNullable() && !generatedValue()
-            && Environment.get("attribute.use.default", true)) {
+        if (c.getDefault() == null && getAccessMethod() != null && !c.isNullable() && !BeanPresentationHelper.isGeneratedValue(this)) {
             Object genType = getAccessMethod().getGenericReturnType();
             if (genType instanceof Class) {
                 Class<T> gtype = (Class<T>) genType;

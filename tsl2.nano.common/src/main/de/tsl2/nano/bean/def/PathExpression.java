@@ -11,13 +11,11 @@ package de.tsl2.nano.bean.def;
 
 import java.io.Serializable;
 
-import javax.smartcardio.ATR;
-
-import org.simpleframework.xml.Attribute;
 import org.simpleframework.xml.core.Commit;
 
 import de.tsl2.nano.core.cls.BeanClass;
 import de.tsl2.nano.core.util.StringUtil;
+import de.tsl2.nano.historize.Volatile;
 
 /**
  * resolves relations through a path to several beans/attributes
@@ -32,10 +30,13 @@ public class PathExpression<T> extends AbstractExpression<T> implements IValueEx
 
     transient String[] attributePath;
 
+    /** performance optimizing */
+    transient Volatile<T> v;
+
     /** attribute relation separator (like 'myattr1.relationattr.nextrelationattr' */
     public static final String PATH_SEPARATOR = ".";
 
-    protected PathExpression() {
+    public PathExpression() {
     }
 
     /**
@@ -76,7 +77,9 @@ public class PathExpression<T> extends AbstractExpression<T> implements IValueEx
      */
     @Override
     public T getValue(Object instance) {
-        return (T) BeanClass.getValue(instance, attributePath);
+        if (v.expired())
+            v.set((T) BeanClass.getValue(instance, attributePath));
+        return v.get();
     }
 
     @Override
@@ -85,13 +88,15 @@ public class PathExpression<T> extends AbstractExpression<T> implements IValueEx
         for (int i = 0; i < attributePath.length - 1; i++) {
             v = BeanClass.getValue(v, attributePath[i]);
             if (v == null)
-                throw new IllegalStateException("couldn't set value " + value + " for attribute " + this +". please set a value for " + attributePath[i] + " first!"); 
+                throw new IllegalStateException("couldn't set value " + value + " for attribute " + this
+                    + ". please set a value for " + attributePath[i] + " first!");
         }
-        Bean.getBean((Serializable)v).setValue(attributePath[attributePath.length - 1], value);
+        Bean.getBean((Serializable) v).setValue(attributePath[attributePath.length - 1], value);
     }
 
     @Commit
     private void initDeserializing() {
+        v = new Volatile<T>(500, null);
         attributePath = splitChain(expression);
     }
 

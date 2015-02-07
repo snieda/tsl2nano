@@ -602,7 +602,18 @@ public class BeanClass<T> implements Serializable {
     }
 
     /**
-     * evaluate the value of the given bean attribute path
+     * evaluate the value of the given bean attribute path. if a relation is an iterable or map, it can be specified
+     * through a parameter.
+     * <p/>
+     * Example:
+     * <pre>
+     * 1. customer.address[first].city
+     * 2. customer.address[0].city
+     * 3. customer.address.city     (the first address, too)
+     * 4. customer.address[last].street
+     * 5. customer.address[-1].code (the last address)
+     * 6. customer.address[street=berlinerstrasse].city
+     * </pre>
      * 
      * @param bean starting instance
      * @param path full relation path
@@ -612,25 +623,43 @@ public class BeanClass<T> implements Serializable {
         Object value = bean;
         for (int i = 0; i < path.length; i++) {
             try {
+                //eval the parameters of the last relation
+                String par = i > 0 ? StringUtil.substring(path[i - 1], "[", "]", false, true) : null;
                 if (value instanceof Iterable) {
+                    Iterable iter = (Iterable) value;
+                    if (!iter.iterator().hasNext())
+                        return null;
                     int p;
-                    String sp = StringUtil.substring(path[i], "[", "]", false, true);
-                    if ("first".equalsIgnoreCase(sp)) {
+                    if ("first".equalsIgnoreCase(par)) {
                         p = 0;
-                    } else if ("last".equalsIgnoreCase(sp)) {
+                    } else if ("last".equalsIgnoreCase(par)) {
                         p = -1;
-                    } else if (sp != null) {
-                        p = Integer.valueOf(sp);
+                    } else if (par != null && par.contains("=")) {
+                        String att = StringUtil.substring(par, null, "=");
+                        String val = StringUtil.substring(par, "=", null);
+                        p = -2;
+                        int ii = 0;
+                        for (Object item : iter) {
+                            if (val.equals(getBeanValue(item, att))) {
+                                p = ii;
+                                break;
+                            }
+                            ii++;
+                        }
+                    } else if (par != null) {
+                        p = Integer.valueOf(par);
                     } else
                         p = 0;
-                    value = CollectionUtil.get((Iterable) value, p);
+                    value = CollectionUtil.get(iter, p);
                 } else if (value instanceof Map) {
-                    String key = StringUtil.substring(path[i], "[", "]");
-                    value = ((Map)value).get(key);
-                } else {
-                    //don't use the performance enhanced BeanValue.getBeanValue in cause dependency-cycles
-                    value = getBeanValue(value, path[i]);
+                    Map map = (Map) value;
+                    if (map.size() == 0)
+                        return null;
+                    value = map.get(par);
                 }
+                String name = StringUtil.substring(path[i], null, "[");
+                //don't use the performance enhanced BeanValue.getBeanValue in cause dependency-cycles
+                value = getBeanValue(value, name);
             } catch (final Exception ex) {
                 throw new ManagedException("Error on attribute path '" + StringUtil.toString(path, 1000)
                     + "'! Attribute '"
@@ -659,21 +688,6 @@ public class BeanClass<T> implements Serializable {
      */
     public void setValue(T instance, String attributeName, Object value) {
         getAttribute(attributeName).setValue(instance, value);
-//        final String methodName = BeanAttribute.PREFIX_WRITE_ACCESS + attributeName.substring(0, 1).toUpperCase()
-//            + attributeName.substring(1);
-//        final Class<?> argType = value != null ? value.getClass() : Object.class;
-//        try {
-//            LOG.debug("calling " + methodName + "(" + value + ")");
-//            final Method method = clazz.getDeclaredMethod(methodName, new Class[] { argType });
-//            method.invoke(instance, value);
-//        } catch (final Exception e) {
-//            try {
-//                final Method method = clazz.getMethod(methodName, new Class[] { argType });
-//                method.invoke(instance, value);
-//            } catch (Exception e1) {
-//                ManagedException.forward(e);
-//            }
-//        }
     }
 
     /**

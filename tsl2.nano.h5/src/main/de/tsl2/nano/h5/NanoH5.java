@@ -18,7 +18,10 @@ import java.text.Format;
 import java.text.ParsePosition;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashMap;
+import java.util.HashSet;
 import java.util.LinkedHashMap;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Properties;
@@ -36,6 +39,7 @@ import de.tsl2.nano.bean.def.BeanCollector;
 import de.tsl2.nano.bean.def.BeanDefinition;
 import de.tsl2.nano.bean.def.BeanPresentationHelper;
 import de.tsl2.nano.bean.def.IPageBuilder;
+import de.tsl2.nano.bean.def.PathExpression;
 import de.tsl2.nano.collection.MapUtil;
 import de.tsl2.nano.core.AppLoader;
 import de.tsl2.nano.core.Environment;
@@ -91,14 +95,19 @@ public class NanoH5 extends NanoHTTPD implements ISystemConnector<Persistence> {
     public static final String JAR_RESOURCES = "tsl2.nano.resources.jar";
     public static final String JAR_SIMPLEXML = "tsl2.nano.simple-xml.jar";
 
+    /** ant script to start the hibernatetool 'hbm2java' */
+    static final String REVERSE_ENG_SCRIPT = "reverse-eng.xml";
+    /** hibernate reverse engeneer configuration */
+    static final String HIBREVNAME = "hibernate.reveng.xml";
+    
     Map<InetAddress, NanoH5Session> sessions;
 
     IPageBuilder<?, String> builder;
     URL serviceURL;
     ClassLoader appstartClassloader;
 
-    /** workaround to avoid re-serving a cached request. */
-    private Properties lastHeader;
+//    /** workaround to avoid re-serving a cached request. */
+//    private Properties lastHeader;
 
     private static final String DEBUG_HTML_FILE = AppLoader.getFileSystemPrefix() + "application.html";
     static final String START_PAGE = "Start";
@@ -107,7 +116,7 @@ public class NanoH5 extends NanoHTTPD implements ISystemConnector<Persistence> {
     private static final String BEAN_GENERATION_PACKAGENAME = "bean.generation.packagename";
 
     public NanoH5() throws IOException {
-        this(Environment.get("http.connection", "localhost:8067"), Environment.get(IPageBuilder.class));
+        this(Environment.get("service.url", "http://localhost:8067"), Environment.get(IPageBuilder.class));
     }
 
     public NanoH5(String serviceURL, IPageBuilder<?, String> builder) throws IOException {
@@ -118,6 +127,7 @@ public class NanoH5 extends NanoHTTPD implements ISystemConnector<Persistence> {
         appstartClassloader = Thread.currentThread().getContextClassLoader();
         Environment.addService(ClassLoader.class, appstartClassloader);
         sessions = new LinkedHashMap<InetAddress, NanoH5Session>();
+        AbstractExpression.registerExpression(new PathExpression().getExpressionPattern(), PathExpression.class);
         AbstractExpression.registerExpression(new RuleExpression().getExpressionPattern(), RuleExpression.class);
         AbstractExpression.registerExpression(new SQLExpression().getExpressionPattern(), SQLExpression.class);
     }
@@ -128,7 +138,7 @@ public class NanoH5 extends NanoHTTPD implements ISystemConnector<Persistence> {
      * @param args
      */
     public static void main(String[] args) {
-        startApplication(NanoH5.class, MapUtil.asMap(0, "http.connection"), args);
+        startApplication(NanoH5.class, MapUtil.asMap(0, "service.url"), args);
     }
 
     /**
@@ -187,6 +197,7 @@ public class NanoH5 extends NanoHTTPD implements ISystemConnector<Persistence> {
         URL serviceURL = null;
         try {
             serviceURL = new URL(serviceURLString);
+            Environment.setProperty("service.url", serviceURL.toString());
         } catch (MalformedURLException e) {
             ManagedException.forward(e);
         }
@@ -213,7 +224,7 @@ public class NanoH5 extends NanoHTTPD implements ISystemConnector<Persistence> {
             MapUtil.asMap("url", serviceURL, "text", Environment.getName()));
         String page =
             Html5Presentation.createMessagePage("start.template", Environment.translate("tsl2nano.start", true) + " "
-                + Environment.getName(), serviceURL);
+                + Environment.translate(Environment.getName(), true), serviceURL);
         FileUtil.writeBytes(page.getBytes(), resultHtmlFile, false);
         return page;
     }
@@ -245,8 +256,8 @@ public class NanoH5 extends NanoHTTPD implements ISystemConnector<Persistence> {
             }
         }
         session.startTime = startTime;
-        //workaround to avoid doing a cached request twice
-        lastHeader = header;
+//        //workaround to avoid doing a cached request twice
+//        lastHeader = header;
 
         return session.serve(uri, method, header, parms, files);
     }
@@ -294,9 +305,11 @@ public class NanoH5 extends NanoHTTPD implements ISystemConnector<Persistence> {
      * 
      * @return data specific context name
      */
-    private String createSesionContext() {
-        Persistence p = Persistence.current();
-        return p.getDatabase() + "." + p.getDefaultSchema() + "." + p.getJarFile();
+    private Iterable<BeanDefinition> createSesionContext() {
+//        Persistence p = Persistence.current();
+        Iterable<BeanDefinition> context = new LinkedHashSet<BeanDefinition>();
+//        context.put("session.name", p.getDatabase() + "." + p.getDefaultSchema() + "." + p.getJarFile());
+        return context;
     }
 
     /**
@@ -609,6 +622,15 @@ public class NanoH5 extends NanoHTTPD implements ISystemConnector<Persistence> {
         Message.send("creating new database " + persistence.getDatabase() + " for url "
             + persistence.getConnectionUrl());
         Properties p = new Properties();
+        //check if an equal named ddl-script is inside our jar file. should be done on 'anyway' or 'timedb'.
+        try {
+            Environment.extractResource(persistence.getDatabase() + ".sql");
+        } catch (Exception e) {
+            //ok, it was only a try ;-)
+        }
+        Environment.extractResource(REVERSE_ENG_SCRIPT);
+        Environment.extractResource(HIBREVNAME);
+        
         //give mda.xml the information to don't start nano.h5
         p.put("nano.h5.running", "true");
         Environment.get(CompatibilityLayer.class).runRegistered("ant",
@@ -618,10 +640,6 @@ public class NanoH5 extends NanoHTTPD implements ISystemConnector<Persistence> {
     }
 
     protected static Boolean generateJarFile(String jarFile, String generator, String schema) {
-        /** ant script to start the hibernatetool 'hbm2java' */
-        final String REVERSE_ENG_SCRIPT = "reverse-eng.xml";
-        /** hibernate reverse engeneer configuration */
-        final String HIBREVNAME = "hibernate.reveng.xml";
         Environment.extractResource(REVERSE_ENG_SCRIPT);
         Environment.extractResource(HIBREVNAME);
         Properties properties = new Properties();
@@ -654,7 +672,7 @@ public class NanoH5 extends NanoHTTPD implements ISystemConnector<Persistence> {
         sessions.clear();
         Environment.reset();
         Environment.setProperty(Environment.KEY_CONFIG_PATH, configPath);
-        Environment.setProperty("http.serviceURL", serviceURL.toString());
+        Environment.setProperty("service.url", serviceURL.toString());
         Bean.clearCache();
         Thread.currentThread().setContextClassLoader(appstartClassloader);
         createPageBuilder();

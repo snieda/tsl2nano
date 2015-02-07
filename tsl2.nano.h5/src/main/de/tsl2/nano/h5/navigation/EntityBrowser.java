@@ -68,6 +68,7 @@ public class EntityBrowser implements IBeanNavigator {
                 if (current != userResponseBean) {
                     while (!userResponseBean.equals(current = navigation.pop()))
                         ;
+                    navigation.push(current);
                     return current;
                 }
             }

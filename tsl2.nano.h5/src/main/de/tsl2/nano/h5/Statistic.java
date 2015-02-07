@@ -84,7 +84,7 @@ public class Statistic<COLLECTIONTYPE extends Collection<T>, T> extends BeanColl
         List<String> valueColumns = new ArrayList<>(names.length);
 
         /*
-         * check, which columns should be shown. if a column has more than 100 group by elements, its to big
+         * check, which columns should be shown. if a column has more than 500 group by elements, its to big
          * evaluate the number columns
          */
         long maxcount = Environment.get("statistic.maxgroupcount", 500);

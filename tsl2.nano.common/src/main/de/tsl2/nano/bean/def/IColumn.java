@@ -59,4 +59,12 @@ public interface IColumn extends Comparable<IColumn> {
      */
     public abstract Format getFormat();
 
+    /**
+     * @return a fixed minimum search value
+     */
+    Comparable<?> getMinSearchValue();
+    /**
+     * @return a fixed maximum search value
+     */
+    Comparable<?> getMaxSearchValue();
 }

@@ -221,7 +221,7 @@ class RuleCoverProxy<T> implements IRuleCover<T>, InvocationHandler {
      */
     @Override
     public Map<String, Object> getContext() {
-        return Bean.getBean(contextObject).toValueMap();
+        return Bean.getBean(contextObject).toValueMap(null);
     }
 
     /**

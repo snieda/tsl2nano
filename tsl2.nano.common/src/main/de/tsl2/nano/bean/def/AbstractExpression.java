@@ -19,12 +19,12 @@ public abstract class AbstractExpression<T> implements IValueExpression<T>, IAtt
     private static final long serialVersionUID = 2798715915354958266L;
 
     /** declaringClass of first attribute in chain */
-    @Attribute
+    @Attribute(required = false)
     protected Class<?> declaringClass;
     /** attribute type */
-    @Attribute(required=false)
+    @Attribute(required = false)
     protected Class<T> type;
-    @Element(data=true)
+    @Element(data = true)
     protected String expression;
 
     /**
@@ -42,11 +42,6 @@ public abstract class AbstractExpression<T> implements IValueExpression<T>, IAtt
     @SuppressWarnings("rawtypes")
     protected static final Map<String, Class<? extends IValueExpression>> registeredExtensions =
         new HashMap<String, Class<? extends IValueExpression>>();
-
-    static {
-        //TODO: how to use IValueExpression.getExpressionPattern
-        registerExpression(".*\\.*", PathExpression.class);
-    }
 
     public AbstractExpression() {
         super();
@@ -106,10 +101,10 @@ public abstract class AbstractExpression<T> implements IValueExpression<T>, IAtt
     public Class<?> getDeclaringClass() {
         return declaringClass;
     }
-    
+
     @Override
     public String toString() {
-        return declaringClass.getSimpleName() + ":" + expression;
+        return (declaringClass != null ? declaringClass.getSimpleName() + ": " : "") + expression;
     }
 
     /**
@@ -120,13 +115,12 @@ public abstract class AbstractExpression<T> implements IValueExpression<T>, IAtt
         return getName().compareTo(o.getName());
     }
 
-
     @Override
     public String getId() {
         return getDeclaringClass().getSimpleName() + ":" + getExpression();
     }
-    
-   /**
+
+    /**
      * {@inheritDoc}
      */
     @Override
@@ -140,7 +134,7 @@ public abstract class AbstractExpression<T> implements IValueExpression<T>, IAtt
     public void setName(String name) {
         this.name = name;
     }
-    
+
     /**
      * {@inheritDoc}
      */

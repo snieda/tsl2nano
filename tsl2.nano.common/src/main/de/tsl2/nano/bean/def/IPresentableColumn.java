@@ -21,10 +21,26 @@ import de.tsl2.nano.action.IAction;
 public interface IPresentableColumn extends IColumn {
     /**
      * getSortingAction
+     * 
      * @return action to sort the column
      */
-    public IAction<?> getSortingAction(final IBeanCollector<?, ?> collector);
-    
+    IAction<?> getSortingAction(final IBeanCollector<?, ?> collector);
+
+    /**
+     * if true and {@link #getSummary()} is empty, the table presenting this column should summarize all number values
+     * of this column
+     * 
+     * @return
+     */
+    boolean isStandardSummary();
+
+    /**
+     * getSummarize
+     * 
+     * @return a summarize expression to be shown to the foot of a table. overwrites {@link #isStandardSummary()}.
+     */
+    IValueExpression<?> getSummary();
+
     /**
      * extending layout informations for a table column
      */

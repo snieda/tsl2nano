@@ -41,6 +41,8 @@ import org.simpleframework.xml.core.Persist;
 
 import de.tsl2.nano.bean.BeanUtil;
 import de.tsl2.nano.collection.MapUtil;
+import de.tsl2.nano.collection.PersistableSingelton;
+import de.tsl2.nano.collection.PersistentCache;
 import de.tsl2.nano.core.cls.BeanClass;
 import de.tsl2.nano.core.exception.ExceptionHandler;
 import de.tsl2.nano.core.exception.Message;
@@ -52,6 +54,7 @@ import de.tsl2.nano.core.util.NetUtil;
 import de.tsl2.nano.core.util.StringUtil;
 import de.tsl2.nano.core.util.XmlUtil;
 import de.tsl2.nano.format.DefaultFormat;
+import de.tsl2.nano.util.NumberUtil;
 
 /**
  * Generic Application-Environment. Providing:
@@ -94,12 +97,13 @@ public class Environment {
 
     /** if true, this environment will be persisted on any change. */
     transient boolean autopersist = false;
-    
+
     public static final String FRAMEWORK = "de.tsl2.nano";
     public static final String PREFIX = Environment.class.getPackage().getName() + ".";
 
     public static final String KEY_SYS_BASEDIR = PREFIX + ".basedir";
     public static final String KEY_DEFAULT_FORMAT = PREFIX + "defaultformat";
+    public static final String KEY_CONFIG_RELPATH = PREFIX + "config.relative.path";
     public static final String KEY_CONFIG_PATH = PREFIX + "config.path";
 
     public static final String CONFIG_XML_NAME = "environment.xml";
@@ -270,6 +274,7 @@ public class Environment {
         info = StringUtil.insertProperties(info, p);
         LogFactory.log(info);
 
+        self.properties.put(KEY_CONFIG_RELPATH, dir + "/");
         self.properties.put(KEY_CONFIG_PATH, new File(dir).getAbsolutePath().replace("\\", "/") + "/");
         new File(self.getTempPath()).mkdir();
         self.services = new Hashtable<Class<?>, Object>();
@@ -320,6 +325,10 @@ public class Environment {
      * resets the current environment to be empty
      */
     public static void reset() {
+        //TODO: extend from java.io.Closable and walk through all services to close them!
+        ResourceBundle.clearCache();
+        PersistableSingelton.clearCache();
+        PersistentCache.clearCache();
         self = null;
     }
 
@@ -352,6 +361,28 @@ public class Environment {
             setProperty(key, value);
         }
         return value;
+    }
+
+    /**
+     * usable as persistable counter (will be stored to file system)
+     * @param key the values name to be changed
+     * @param diff addition
+     * @return new value
+     */
+    public static final <T extends Number> T counter(String key, T diff) {
+        Object value = (T) self().properties.get(key);
+        if (value == null && diff != null) {
+            value = diff;
+        } else {
+            if (NumberUtil.isInteger(diff.getClass()))
+                value = (((Number) value).intValue() + diff.intValue());
+            else if (NumberUtil.isFloating(diff.getClass()))
+                value = (((Number) value).doubleValue() + diff.doubleValue());
+            else
+                value = (((Number) value).longValue() + diff.longValue());
+        }
+        setProperty(key, value);
+        return (T) value;
     }
 
     /**
@@ -438,10 +469,6 @@ public class Environment {
         }
     }
 
-//    public static String translate(String key, Object... args) {
-//        return Messages.getFormattedString((String) key, args);
-//    }
-//
     /**
      * formats the given object
      * 
@@ -473,10 +500,29 @@ public class Environment {
         return getConfigPath() + type.getSimpleName().toLowerCase();
     }
 
+    /**
+     * absolute base path for this environment
+     * 
+     * @return
+     */
     public static String getConfigPath() {
         return getProperty(KEY_CONFIG_PATH);
     }
 
+    /**
+     * relative base path for this environment
+     * 
+     * @return
+     */
+    public static String getConfigPathRel() {
+        return getProperty(KEY_CONFIG_RELPATH);
+    }
+
+    /**
+     * absolute temp path for this environment
+     * 
+     * @return
+     */
     public static String getTempPath() {
         return getConfigPath() + "temp/";
     }
@@ -570,10 +616,11 @@ public class Environment {
         create(envDir);
 
         //don't overwrite the new values
-        MapUtil.removeAll(tempProperties, self().properties);
-        MapUtil.removeAll(tempServices, self().services());
-        
+        MapUtil.removeAll(tempProperties, self().properties.keySet());
+        MapUtil.removeAll(tempServices, self().services().keySet());
+
         //add the not existing old values (programmatically added and not persisted!)
+        Messages.reload();
         services().putAll(tempServices);
         self().properties.putAll(tempProperties);
     }
@@ -606,6 +653,7 @@ public class Environment {
 
     /**
      * loads a properties file (only from environment directory!) with a default key sorting.
+     * 
      * @param fileName property file to load
      * @return loaded or new properties
      */
@@ -628,7 +676,7 @@ public class Environment {
         }
         return p;
     }
-    
+
     public static final boolean extractResourceToDir(String resourceName, String destinationDir) {
         //put build informations into system-properties
         getBuildInformations();
@@ -686,7 +734,7 @@ public class Environment {
     }
 
     /**
-     * searches for the given jar-file names in current classloader and to loads them perhaps through an
+     * searches for the given jar-file names in current classloader and loads them perhaps through an
      * internet-repository (like with maven).
      * 
      * @param dependencyNames jar-file names to check.
@@ -761,7 +809,7 @@ public class Environment {
             get(CompatibilityLayer.class).run(clsJarResolver, "main", new Class[] { String[].class },
                 new Object[] { dependencyNames });
         } else {
-            throw new IllegalStateException("The following dependencies couldn't be resolved:\n"
+            throw new IllegalStateException("couldn't resolve dependencies:\n"
                 + StringUtil.toFormattedString(dependencyNames, 100, true));
         }
         return "dependency loading successfull";

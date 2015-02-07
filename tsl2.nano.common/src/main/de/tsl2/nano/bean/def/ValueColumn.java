@@ -48,6 +48,14 @@ public class ValueColumn<T> implements IPresentableColumn, Serializable {
     int width;
     @Element(required=false)
     IPresentable presentable;
+    @Element(required=false)
+    Comparable<T> minsearch; 
+    @Element(required=false)
+    Comparable<T> maxsearch;
+    @Attribute(required=false)
+    boolean standardSummary;
+    @Element(required=false)
+    IValueExpression<?> summary;
     
     /**
      * constructor to be serializable
@@ -198,6 +206,46 @@ public class ValueColumn<T> implements IPresentableColumn, Serializable {
         return actionSortColumn;
     }
     
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public Comparable<?> getMinSearchValue() {
+        return maxsearch;
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public Comparable<?> getMaxSearchValue() {
+        return maxsearch;
+    }
+
+    
+    /**
+     * @return Returns the standardSummary.
+     */
+    @Override
+    public boolean isStandardSummary() {
+        return standardSummary;
+    }
+
+    /**
+     * @return Returns the summarize.
+     */
+    @Override
+    public IValueExpression<?> getSummary() {
+        return summary;
+    }
+
+    /**
+     * @param summary The summarize to set.
+     */
+    public void setSummary(IValueExpression<?> summary) {
+        this.summary = summary;
+    }
+
     @Override
     public String toString() {
         return "column '" + name + "' at index " + columnIndex;

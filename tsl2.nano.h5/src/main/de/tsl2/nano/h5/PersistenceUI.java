@@ -133,7 +133,7 @@ public class PersistenceUI {
                         Object userName = Util.asString(value);
                         String eval;
                         if (userName != null && Util.isEmpty(defaultSchema)) {
-                            if (value != null && value.toString().contains("hsqldb"))
+                            if (value != null && persistence.getConnectionUrl().contains("hsqldb"))
                                 eval = "PUBLIC";
                             else
                                 eval = userName.toString().toUpperCase();

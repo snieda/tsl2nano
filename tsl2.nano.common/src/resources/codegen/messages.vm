@@ -1,0 +1,30 @@
+/*
+ * File: $HeadURL$
+ * Id  : $Id$
+ * 
+ * created by: velocity template (${template})
+ * created on: ----/--/-- (not filled with property 'time' to simplify version-diffs)
+ * 
+ * ${copyright}
+ */
+package ${package};
+
+#define($attKey) KEY_${util.toUpperCase(${att.Name})}#end
+#define($attKeyTooltip) KEY_TOOLTIP_${util.toUpperCase(${att.Name})}#end
+#define($attName) ATTR_${util.toUpperCase(${att.Name})}#end
+
+/**
+ * Attribute and message label key definition for Messages.
+ * <p>
+ * <b>Generated</b> do not modify!!!
+ *
+ * @author Generated through velocity template (messages.vm)
+ * @version $Revision$ 
+ */
+public interface ${class.Name} {
+
+#foreach( $att in $class.Attributes)    
+    /** key name of $att.Name in resource bundle */
+    public static final int ${attKey} = ${attKey}.hashcode();
+#end
+}

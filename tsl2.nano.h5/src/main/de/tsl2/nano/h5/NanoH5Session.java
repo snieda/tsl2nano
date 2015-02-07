@@ -19,7 +19,6 @@ import static de.tsl2.nano.h5.NanoH5.OFFSET_FILTERLINES;
 import static de.tsl2.nano.h5.NanoHTTPD.HTTP_BADREQUEST;
 import static de.tsl2.nano.h5.NanoHTTPD.MIME_HTML;
 
-import java.io.IOException;
 import java.io.Serializable;
 import java.lang.Thread.UncaughtExceptionHandler;
 import java.net.InetAddress;
@@ -28,9 +27,11 @@ import java.net.URL;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Map;
 import java.util.Properties;
 import java.util.Set;
 import java.util.concurrent.Executors;
@@ -66,6 +67,7 @@ import de.tsl2.nano.format.RegExpFormat;
 import de.tsl2.nano.h5.NanoHTTPD.Response;
 import de.tsl2.nano.h5.configuration.BeanConfigurator;
 import de.tsl2.nano.h5.navigation.IBeanNavigator;
+import de.tsl2.nano.h5.navigation.Parameter;
 import de.tsl2.nano.h5.websocket.NanoWebSocketServer;
 import de.tsl2.nano.h5.websocket.WebSocketExceptionHandler;
 import de.tsl2.nano.persistence.Persistence;
@@ -83,6 +85,7 @@ import de.tsl2.nano.util.NumberUtil;
 public class NanoH5Session implements ISession {
     private static final Log LOG = LogFactory.getLog(NanoH5Session.class);
 
+    String id;
     NanoH5 server;
     IPageBuilder<?, String> builder;
     /** workflow or bean navigator */
@@ -90,7 +93,7 @@ public class NanoH5Session implements ISession {
     /** html response */
     Response response;
     /** concatencation of database-name+schema+beans.jar */
-    String context;
+    Iterable<BeanDefinition> context;
 
     /** sessions classloader */
     ClassLoader sessionClassloader;
@@ -106,7 +109,7 @@ public class NanoH5Session implements ISession {
     /** logs all user actions to be given on error-handling */
     List<String> actionLog;
 
-    /** for profiling in status-line (current work-time) */
+    /** for profiling in status-line (current work-time of last request) */
     long startTime;
 
     /** session start */
@@ -127,7 +130,7 @@ public class NanoH5Session implements ISession {
      */
     public NanoH5Session(NanoH5 server,
             InetAddress inetAddress, IBeanNavigator navigator,
-            ClassLoader appstartClassloader, IAuthorization authorization, String context) {
+            ClassLoader appstartClassloader, IAuthorization authorization, Iterable<BeanDefinition> context) {
         super();
         this.server = server;
         this.inetAddress = inetAddress;
@@ -139,6 +142,8 @@ public class NanoH5Session implements ISession {
         this.authorization = authorization;
         this.context = context;
         this.sessionStart = System.currentTimeMillis();
+        Persistence p = Persistence.current();
+        this.id = inetAddress + p.getConnectionUrl() + "." + p.getConnectionUserName() + "." + p.getJarFile();
     }
 
     /**
@@ -153,7 +158,7 @@ public class NanoH5Session implements ISession {
                 (ExceptionHandler) Environment.addService(UncaughtExceptionHandler.class,
                     new WebSocketExceptionHandler(socketServer));
             socketServer.start();
-            
+
             Runtime.getRuntime().addShutdownHook(Executors.defaultThreadFactory().newThread(new Runnable() {
                 @Override
                 public void run() {
@@ -162,7 +167,7 @@ public class NanoH5Session implements ISession {
                         for (WebSocket webSocket : sockets) {
                             webSocket.send(" === APPLICATION STOPPED! === ");
 //                            Message.send("APPLICATION STOPPED!");
-                            
+
                         }
                         socketServer.stop();
                     } catch (Exception e) {
@@ -437,6 +442,7 @@ public class NanoH5Session implements ISession {
                          * submit/assign and cancel will not push a new element to the navigation stack!
                          * TODO: refactore access to names ('reset' and 'save')
                          */
+                        action.setParameter(getContextParameter());
                         Object result = action.activate();
 
                         /*
@@ -472,6 +478,23 @@ public class NanoH5Session implements ISession {
         return responseObject;
     }
 
+    /**
+     * context parameters will be evaluated from context beans. these beans may have references to other beans. so the
+     * context beans have to be in the right order.
+     * 
+     * @return context parameters
+     */
+    private Parameter getContextParameter() {
+        Iterable<BeanDefinition> con = getContext();
+        Parameter p = new Parameter();
+        for (BeanDefinition c : con) {
+            p.putAll(c.toValueMap(p));
+        }
+        if (LOG.isDebugEnabled())
+            LOG.debug("session:" + this + "\n\tcontext parameters: " + p.keySet());
+        return p;
+    }
+
     private void logaction(IAction<?> action, Properties parameter) {
         logaction(action.getId(), parameter);
     }
@@ -504,7 +527,8 @@ public class NanoH5Session implements ISession {
                          * if the type is object, the bean doesn't know exactly it's real type, so
                          * we assume it should be serializable...
                          */
-                        if (!type.isPrimitive() && !Serializable.class.isAssignableFrom(type) && !Object.class.isAssignableFrom(type)) {
+                        if (!type.isPrimitive() && !Serializable.class.isAssignableFrom(type)
+                            && !Object.class.isAssignableFrom(type)) {
                             LOG.debug("ignoring not-serializable attribute " + vmodel.getAttribute(p));
                             continue;
                         }
@@ -709,7 +733,7 @@ public class NanoH5Session implements ISession {
     }
 
     @Override
-    public Object getContext() {
+    public Iterable<BeanDefinition> getContext() {
         return context;
     }
 
@@ -753,5 +777,10 @@ public class NanoH5Session implements ISession {
     @Override
     public int getWebsocketPort() {
         return websocketPort;
+    }
+
+    @Override
+    public String toString() {
+        return id;
     }
 }

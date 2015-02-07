@@ -38,6 +38,14 @@ public class ClassGenerator {
 
     protected static final Log LOG = LogFactory.getLog(ClassGenerator.class);
 
+    public static final String SRC_NAME = "src.file";
+    public static final String DEST_PREFIX = "dest.prefix";
+    public static final String DEST_POSTFIX = "dest.postfix";
+    public static final String DEST_FILENAME_PATTERN = "${dest.prefix}${src.file}${dest.postfix}";
+    
+    public static final String DEFAULT_DEST_PREFIX = "src/gen";
+    public static final String DEFAULT_DEST_POSTFIX = ".java";
+    
     protected ClassGenerator() {
         init();
     }
@@ -135,7 +143,7 @@ public class ClassGenerator {
         context.put("util", util);
         context.put("time", new Timestamp(System.currentTimeMillis()));
         context.put("template", templateFile);
-        context.put("copyright", "Copyright (c) 2002-2011 Thomas Schneider");
+        context.put("copyright", "Copyright (c) 2002-2015 Thomas Schneider");
         for (final Object p : properties.keySet()) {
             final Object v = properties.get(p);
             context.put((String) p, v);
@@ -162,7 +170,7 @@ public class ClassGenerator {
     }
 
     /**
-     * override this method to provide your model
+     * override this method to provide your class model (the source class)
      * 
      * @param modelFile source file name (normally a beans java file name)
      * @param classLoader classloader to be used to load modelFile class.
@@ -179,7 +187,7 @@ public class ClassGenerator {
     }
 
     /**
-     * override this method to provide a default classloader
+     * override this method to provide a default destination file
      * 
      * @see #getModel(String, ClassLoader)
      * 
@@ -187,8 +195,8 @@ public class ClassGenerator {
      * @return default classloader
      */
     protected String getDefaultDestinationFile(String modelFile) {
+//        return engine.getProperty(DEST_FILENAME_PATTERN)
         modelFile = modelFile.replace('.', '/');
-        //      return modelFile.replaceAll("(\\.java)", "UI\\1");
         return "src/gen/" + modelFile + "UI.java";
     }
 
@@ -226,7 +234,7 @@ public class ClassGenerator {
      * @return generators default classloader
      */
     protected ClassLoader getDefaultClassloader() {
-        return this.getClass().getClassLoader();
+        return Thread.currentThread().getContextClassLoader();
     }
 
     /**
@@ -235,6 +243,8 @@ public class ClassGenerator {
      */
     public static void main(String args[]) throws Exception {
 
+        //TODO: class generator name for singelton!
+        
         if (args.length != 2) {
             System.out.print("Syntax: ClassGenerator <model> <template>");
             System.exit(1);
