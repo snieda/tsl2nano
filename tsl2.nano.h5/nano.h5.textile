@@ -2151,6 +2151,12 @@ com.sybase.jdbc2.jdbc.SybDriver
 Etc:Connection-->IConnection(core, descriptor)
 Net:Connection-->Link-->Cover(content, descriptor)
 
+* Terminal:
+** status-bar: space, time, time-last-action, count(items-changed), user
+** own jar file
+** network classloader
+** (x) if only one item available --> select it
+
 *TODO* für zeiterfassung
 * (v) id --> sequence
 * (v) Vorbelegungen und Suche in Suchmaske (z.B. aktueller Monat)
@@ -2166,7 +2172,7 @@ Net:Connection-->Link-->Cover(content, descriptor)
 * Item: Projekt (Standard)
 * Bilder mit blob?
 * Summenzeile (beandef oder columndef: + summarize=$feld1-$feld2)
-* Wochentage + unterschiedliche Farben am WE
+* Wochentage + unterschiedliche Farben am WE+Feiertage
 * macros aufnehmen und abspielen
 * verschiedene workflows zur verfügung stellen
 * datenbank-user --> benutzer --> session-context + actions
