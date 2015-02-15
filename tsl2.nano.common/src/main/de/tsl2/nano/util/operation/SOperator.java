@@ -24,7 +24,7 @@ import de.tsl2.nano.util.parser.SParser;
  */
 @SuppressWarnings("unchecked")
 public abstract class SOperator<T> extends Operator<CharSequence, T> {
-    SParser parser = new SParser();
+    transient SParser parser = new SParser();
     /**
      * constructor
      */

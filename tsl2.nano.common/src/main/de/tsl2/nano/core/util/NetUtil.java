@@ -221,7 +221,7 @@ public class NetUtil {
      * downloads the given strUrl if a network connection is available
      * 
      * @param url network url to load
-     * @param destDir local destination directory
+     * @param destDir local destination directory. if null, user.dir will be used
      * @param flat if true, the file of that url will be put directly to the environment directory. otherwise the full
      *            path will be stored to the environment.
      * @param overwrite if true, existing files will be overwritten
@@ -230,6 +230,7 @@ public class NetUtil {
     public static File download(URL url, String destDir, boolean flat, boolean overwrite) {
         try {
             String fileName = flat ? new File(url.getFile()).getName() : getFileName(url);
+            destDir = destDir == null ? System.getProperty("user.dir") : destDir;
             fileName = (destDir.endsWith("/") ? destDir : destDir + "/") + fileName;
             File file = new File(fileName);
             if (overwrite || !file.exists()) {
@@ -245,7 +246,7 @@ public class NetUtil {
 
     static String getFileName(URL url) {
         String f = url.getFile();
-        return Util.isEmpty(f) ? NetUtil.URL_STANDARDFILENAME : FileUtil.getValidPathName(f);
+        return Util.isEmpty(f) || f.equals("/") ? NetUtil.URL_STANDARDFILENAME : FileUtil.getValidPathName(f);
     }
 
     public static void wcopy(String url, String dir, String include, String exclude) {
@@ -485,19 +486,23 @@ class WCopy {
         StringBuilder txt = new StringBuilder(String.valueOf(data));
         StringBuilder buf = new StringBuilder(file.getPath() + ":");
         URL url = null;
-        String u;
+        String u, f;
         int index = 0;
         while (index < txt.length() && (!Util.isEmpty(u =
-            StringUtil.extract(txt, "(?:(href|src|content)\\s*\\=\\s*\")(.)+(?:\")", null, index)))) {
+            StringUtil.extract(txt, "(?:(href|src)\\s*\\=\\s*\")(.)+(?:\")", null, index)))) {
             u = StringUtil.substring(u, "\"", "\"");
-            index = txt.indexOf(u, index) + u.length();
             try {
                 url = NetUtil.url(u, site.getHost());
+                if (site.getHost().equals(url.getHost()))
+                    f = NetUtil.getFileName(url);
+                else
+                    f = FileUtil.getValidFileName(url.toString()); 
+                index = txt.indexOf(u, index) + f.length();
                 urls.add(url);
                 if (LOG.isDebugEnabled())
                     buf.append("\n\t--> " + url);
                 //replace url with a local file name
-                StringUtil.replace(txt, u, NetUtil.getFileName(url));
+                StringUtil.replace(txt, u, f);
             } catch (Exception e) {
                 LOG.debug(e.toString());
                 index += 4;

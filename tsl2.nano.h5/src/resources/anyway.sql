@@ -78,12 +78,15 @@ CREATE TABLE Item (
                 end DATE,
                 value NUMERIC NOT NULL,
                 description VARCHAR(256),
+                icon LONGVARBINARY NOT NULL,
                 CONSTRAINT idx_item PRIMARY KEY (id)
 );
 
 -- Comment for table [Item]: shopping item, menu item in a restaurant, time-period in a timesheet, etc.;
 
 -- Comment for column [end]: availability;
+
+-- Comment for column [icon]: item image for better user experience;
 
 
 CREATE INDEX Item_idx

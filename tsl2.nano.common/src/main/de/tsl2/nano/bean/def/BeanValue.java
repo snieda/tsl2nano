@@ -71,6 +71,7 @@ public class BeanValue<T> extends AttributeDefinition<T> implements IValueDefini
 
     /** a cache of all created beanvalues - if bean cache is not deaktivated */
     protected static final List<BeanValue> beanValueCache = new LinkedList<BeanValue>();
+    /** for performance enhancement one bean to be used to search inside the {@link #beanValueCache} */
     protected static final BeanValue searchBV = new BeanValue();
 
     /**
@@ -347,6 +348,8 @@ public class BeanValue<T> extends AttributeDefinition<T> implements IValueDefini
         int cleared = beanValueCache.size();
         LOG.info("clearing beanvalue cache of " + cleared + " elements");
         beanValueCache.clear();
+        searchBV.instance = null;
+        searchBV.attribute = null;
         return cleared;
     }
 

@@ -21,10 +21,12 @@ import org.simpleframework.xml.core.Commit;
 
 import de.tsl2.nano.bean.def.IConstraint;
 import de.tsl2.nano.collection.CollectionUtil;
+import de.tsl2.nano.core.IPredicate;
 import de.tsl2.nano.core.util.StringUtil;
 import de.tsl2.nano.core.util.Util;
 
 /**
+ * the Container of items. if only one item is available, it should delegate the request directly to that item.
  * 
  * @author Tom
  * @version $Revision$
@@ -35,10 +37,12 @@ public class Tree<T> extends AItem<List<T>> implements ITree<T> {
     /** serialVersionUID */
     private static final long serialVersionUID = -3656677742608173033L;
 
+    /** child nodes */
     @ElementList(type = AItem.class, inline = true, entry = "item", required = false)
     List<IItem<T>> nodes;
 
     transient private boolean isactive;
+    /** if result is a collection */
     boolean multiple = true;
 
     /**
@@ -75,6 +79,38 @@ public class Tree<T> extends AItem<List<T>> implements ITree<T> {
         return nodes;
     }
 
+    /**
+     * filters all child nodes where the condition return false
+     * 
+     * @param context application context
+     * @return filtered child nodes
+     */
+    public List<IItem<T>> getFilteredNodes(final Properties context) {
+        return CollectionUtil.getFiltering(getNodes(), new IPredicate<IItem<T>>() {
+            @Override
+            public boolean eval(IItem<T> arg0) {
+                return arg0.getCondition() == null || arg0.getCondition().isTrue(context);
+            }
+        });
+    }
+
+    /**
+     * if the selected child is again of type tree but has only one active child, this child will be activated.
+     * 
+     * @param selected selected child
+     * @param in input
+     * @param out output
+     * @param env application context
+     * @return the selected item, or if it is a tree having only one active child - this child
+     */
+    public IItem<T> delegateToUniqueChild(IItem<T> selected, InputStream in, PrintStream out, Properties env) {
+        if (selected.getType() == Type.Tree && ((Tree) selected).getFilteredNodes(env).size() == 1) {
+            //if only one tree child is available, delegate directly to that item
+            return selected.react(this, "1", in, out, env);
+        } else
+            return selected;
+    }
+
     @Override
     protected void initConstraints(IConstraint<List<T>> constraints) {
     }
@@ -104,9 +140,9 @@ public class Tree<T> extends AItem<List<T>> implements ITree<T> {
     }
 
     @Override
-    public String ask() {
+    public String ask(Properties env) {
         isactive = true;
-        return "Please enter a number between 1 and " + getNodes().size() + POSTFIX_QUESTION;
+        return "Please enter a number between 1 and " + getFilteredNodes(env).size() + POSTFIX_QUESTION;
     }
 
     /**
@@ -118,11 +154,12 @@ public class Tree<T> extends AItem<List<T>> implements ITree<T> {
         if (Util.isEmpty(input))
             return getParent();
         IItem next = null;
+        //find the item through current user input
         if (input.matches("\\d+")) {
             //input: one-based index
-            next = (IItem) getNodes().get(Integer.valueOf(input) - 1);
+            next = (IItem) getFilteredNodes(env).get(Integer.valueOf(input) - 1);
         } else {
-            List<IItem<T>> childs = getNodes();
+            List<IItem<T>> childs = getFilteredNodes(env);
             input = input.toLowerCase();
             for (IItem i : childs) {
                 if (i.getName().toLowerCase().startsWith(input)) {
@@ -136,7 +173,11 @@ public class Tree<T> extends AItem<List<T>> implements ITree<T> {
         IItem nextnext = null;
         if (!next.isEditable()) {
             nextnext = next.react(this, null, in, out, env);
+        } else if (next.getType() == Type.Tree && ((Tree) next).getFilteredNodes(env).size() == 1) {
+            //if only one tree child is available, delegate directly to that item
+            nextnext = next.react(this, "1", in, out, env);
         }
+        //assign the new result
         if (multiple)
             getValue().add((T) next.getValue());
         else
@@ -164,7 +205,8 @@ public class Tree<T> extends AItem<List<T>> implements ITree<T> {
     }
 
     @Commit
-    private void initDeserialization() {
+    protected void initDeserialization() {
+        super.initDeserialization();
         //fill yourself as parent for all children
         for (IItem n : getNodes()) {
             n.setParent(this);
@@ -175,9 +217,9 @@ public class Tree<T> extends AItem<List<T>> implements ITree<T> {
      * {@inheritDoc}
      */
     @Override
-    public String getDescription(boolean full) {
+    public String getDescription(Properties env, boolean full) {
         if (isactive) {
-            List<IItem<T>> list = getNodes();
+            List<IItem<T>> list = getFilteredNodes(env);
             StringBuilder buf = new StringBuilder(list.size() * 60);
             int i = 0;
             //evaluate key string length for formatted output
@@ -189,10 +231,11 @@ public class Tree<T> extends AItem<List<T>> implements ITree<T> {
             //print the child item list
             int s = String.valueOf(list.size()).length() + 1;
             for (IItem t : list) {
-//                buf.append(" " + ++i + "." + t.toString());
-                buf.append(StringUtil.fixString(String.valueOf(++i), s, ' ', false) + "."
+                buf.append(StringUtil.fixString(String.valueOf(++i), s, ' ', false)
+                    + "."
                     + StringUtil.fixString(t.getPresentationPrefix() + translate(t.getName()), kl, ' ', true)
-                    + (t.getType().equals(Type.Tree) ? "" : POSTFIX_QUESTION + (full ? t.getDescription(full) : StringUtil.toString(t.getValue(), 50)))
+                    + (t.getType().equals(Type.Tree) ? "" : POSTFIX_QUESTION
+                        + (full ? t.getDescription(env, full) : StringUtil.toString(t.getValue(), 50)))
                     + "\n");
             }
             return buf.toString();

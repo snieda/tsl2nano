@@ -15,7 +15,6 @@ import static de.tsl2.nano.incubation.terminal.TextTerminal.SCREEN_WIDTH;
 import static de.tsl2.nano.incubation.terminal.TextTerminal.getTextFrame;
 
 import java.io.File;
-import java.io.FileWriter;
 import java.io.InputStream;
 import java.io.PrintStream;
 import java.io.Serializable;
@@ -29,6 +28,7 @@ import org.simpleframework.xml.Attribute;
 import org.simpleframework.xml.Element;
 import org.simpleframework.xml.core.Commit;
 
+import de.tsl2.nano.core.Environment;
 import de.tsl2.nano.core.Finished;
 import de.tsl2.nano.core.ManagedException;
 import de.tsl2.nano.core.Messages;
@@ -53,12 +53,16 @@ import de.tsl2.nano.core.util.XmlUtil;
  * - batch mode possible
  * - simplified java method calls
  * - variable output sizes and styles
+ * - workflow conditions: items are active if an optional condition is true
+ * - if an item container (a tree) has only one visible item (perhaps filtered through conditions), it delegates directly to that item
  * </pre>
  * 
  * @author Tom
  * @version $Revision$
  */
 public class Terminal implements IItemHandler, Serializable {
+    /** serialVersionUID */
+    private static final long serialVersionUID = -5767124822662015899L;
     transient private static final Log LOG;
     static {
         LogFactory.setPrintToConsole(false);
@@ -70,6 +74,7 @@ public class Terminal implements IItemHandler, Serializable {
     /** base item - should be a Selection */
     @Element
     IItem root;
+    
     /** utility to read user input */
     transient Scanner input;
     transient InputStream in;
@@ -87,6 +92,7 @@ public class Terminal implements IItemHandler, Serializable {
 
     static final String KEY_COMMAND = ":";
     static final String KEY_HELP = "help";
+    static final String KEY_INFO = "info";
     static final String KEY_PROPERTIES = "properties";
     static final String KEY_SAVE = "save";
     static final String KEY_QUIT = "quit";
@@ -146,6 +152,9 @@ public class Terminal implements IItemHandler, Serializable {
             LOG.info("starting terminal " + name);
             input = new Scanner(in);
             prepareEnvironment(env, root);
+            //if only one tree-item available, go to that item
+            if (root instanceof Tree)
+                root = ((Tree) root).delegateToUniqueChild(root, in, out, env);
             serve(root, in, (PrintStream) out, env);
             shutdown();
         } catch (Finished ex) {
@@ -160,6 +169,8 @@ public class Terminal implements IItemHandler, Serializable {
 
     protected void shutdown() {
         save();
+        String shutdownInfo = "\n|\n|\nSHUTDOWN TERMINAL!\n|\nsaved changes to\n" + name + "\nand\n " + name + ".properties";
+        printScreen(shutdownInfo, out, null, true);
         LOG.info("terminal " + name + " ended");
     }
 
@@ -200,16 +211,16 @@ public class Terminal implements IItemHandler, Serializable {
     @Override
     public void printScreen(IItem item, PrintStream out) {
         out.print(TextTerminal.getTextFrame(item.toString(), style, width, true));
-        String question = item.ask();
+        String question = item.ask(env);
         printScreen(
-            item.getDescription(false),
-            out, question);
+            item.getDescription(env, false),
+            out, question, false);
     }
 
     /**
      * {@inheritDoc}
      */
-    public void printScreen(String screen, PrintStream out, String question) {
+    public void printScreen(String screen, PrintStream out, String question, boolean center) {
         //split screens to max height
         String s = screen;
         int lines = 0, page = 0, i = 0, l = -1;
@@ -217,7 +228,7 @@ public class Terminal implements IItemHandler, Serializable {
             if (i - l > width - 2)
                 i = l + width - 2;
             if (++lines > height) {
-                out.print(getTextFrame(s.substring(page, i), style, width, false));
+                out.print(getTextFrame(s.substring(page, i), style, width, center));
                 out.print(">>> PLEASE HIT ENTER FOR THE NEXT PAGE <<<");
                 page = i + 1;
                 lines = 0;
@@ -232,7 +243,7 @@ public class Terminal implements IItemHandler, Serializable {
         if (lines > 1 && lines <= height) {
             screen = s.substring(page, s.length());
             screen += StringUtil.fixString(height - lines, ' ').replace(" ", " \n");
-            out.print(getTextFrame(screen, style, width, false));
+            out.print(getTextFrame(screen, style, width, center));
         }
         out.print(question);
     }
@@ -252,10 +263,12 @@ public class Terminal implements IItemHandler, Serializable {
             //to see the input in batch mode
             if (!Util.isEmpty(input) && input.startsWith(KEY_COMMAND)) {
                 if (isCommand(input, KEY_HELP)) {
-                    printScreen(getHelp(), out, "");
-                    printScreen(item.getDescription(true), out, "");
+                    printScreen(getHelp(), out, "", false);
+                    printScreen(item.getDescription(env, true), out, "", false);
                 } else if (isCommand(input, KEY_PROPERTIES)) {
                     System.getProperties().list(out);
+                } else if (isCommand(input, KEY_INFO)) {
+                    printScreen(Environment.createInfo(), out, "", false);
                 } else if (isCommand(input, KEY_SAVE)) {
                     save();
                 } else if (isCommand(input, KEY_QUIT)) {
@@ -290,7 +303,11 @@ public class Terminal implements IItemHandler, Serializable {
 //            env.remove(item.getName());
 //    }
 
-    private boolean isInBatchMode() {
+    boolean isInBatchMode() {
+        return isInBatchMode(in);
+    }
+    
+    static boolean isInBatchMode(InputStream in) {
         return in != System.in;
     }
 
@@ -325,8 +342,15 @@ public class Terminal implements IItemHandler, Serializable {
      * @return
      */
     private String nextLine(InputStream in) {
-        String text = input.hasNextLine() ? input.nextLine() : null;
-        if (isInBatchMode())
+        return nextLine(input, in, out);
+    }
+    
+    static String nextLine(InputStream in, PrintStream out) {
+        return nextLine(new Scanner(in), in, out);
+    }
+    static String nextLine(Scanner scanner, InputStream in, PrintStream out) {
+        String text = scanner.hasNextLine() ? scanner.nextLine() : null;
+        if (isInBatchMode(in))
             out.println(text);
         return text;
     }
@@ -343,8 +367,12 @@ public class Terminal implements IItemHandler, Serializable {
             + "You can leave an item with key ENTER, you can show this help typing ':help',\n"
             + "If you leave the entire menu with ENTER, a property file with the new values\n"
             + "will be written, if you hit Strg+c, the entire menu will be aborted. If you\n"
-            + "type ':properties' you will see a list of all property values. :quit will stop\n"
-            + " the terminal save the property file.";
+            + "type ':properties' you will see a list of all property values. :info will show\n"
+            + " some system informations. :quit will stop the terminal save the property file.\n"
+            + "To set reset an items value, type 'null' as value\n"
+            + "It is possible to define workflow conditions, so items are not visible, if their\n"
+            + " condition is negative.\n"
+            + "If an item container (a tree) has only one visible item, that item will be activated.";
     }
 
     public static void main(String[] args) {

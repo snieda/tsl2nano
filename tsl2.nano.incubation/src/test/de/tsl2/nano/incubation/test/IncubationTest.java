@@ -21,6 +21,7 @@ import java.math.BigDecimal;
 import java.sql.Time;
 import java.text.DateFormat;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.Hashtable;
 import java.util.LinkedHashMap;
@@ -75,6 +76,7 @@ import de.tsl2.nano.incubation.vnet.neuron.VNeuron;
 import de.tsl2.nano.incubation.vnet.routing.Location;
 import de.tsl2.nano.incubation.vnet.routing.RoutingAStar;
 import de.tsl2.nano.incubation.vnet.workflow.ComparableMap;
+import de.tsl2.nano.incubation.vnet.workflow.Condition;
 import de.tsl2.nano.incubation.vnet.workflow.VActivity;
 import de.tsl2.nano.logictable.DefaultHeader;
 import de.tsl2.nano.logictable.EquationSolver;
@@ -573,24 +575,26 @@ public class IncubationTest {
         Tree root = new Tree("Toolbox", "Helpful Utilities");
 
         Tree printing = new Tree("Printing", null);
-        printing.add(new Input("source", "printer-info", "file to print - or only a printer info"));
+        printing.add(new Input("source", "printer-info", "file to print - or only a printer info", false));
         printing.add(new Input("printer", "PDFCreator", "printer to use"));
         printing.add(new Input("jobname", "tsl2nano", "print job name"));
         printing.add(new Input("mimetype", "MIME_PCL", "mime type"));
         printing.add(new Input("papersize", "ISO_A4", "paper size"));
-        printing.add(new Input("quality", "NORMAL", "print quality"));
+        printing.add(new Input("quality", new Constraint<String>(String.class, Arrays.asList("NORMAL", "HIGH")), "NORMAL", "print quality"));
         printing.add(new Input("priority", "1", "print priority (1-100)"));
         printing.add(new Input("xsltfile", "test.xsl", "xsl-fo transformation file to do a apache fop"));
         printing.add(new Input("username", null, "user name to be used by the printer"));
+        Action<?> mainAction;
         printing
-            .add(new MainAction("print", PrintUtil.class, "source", "printer", "papersize", "quality", "priority",
+            .add(mainAction = new MainAction("print", PrintUtil.class, "source", "printer", "jobname", "papersize", "quality", "priority",
                 "xsltfile", "mimetype", "jobname", "username"));
+        mainAction.setCondition(new Condition("quality=NORMAL"));
         root.add(printing);
 
         Tree crypt = new Tree("Crypt", null);
         crypt.add(new Input("password", null, "password for encryption - if needed by algorithm"));
         crypt.add(new Input("algorithm", "PBEWithMD5AndDES", "encryption algorithm"));
-        crypt.add(new Input("text", null, "text to be encrypted. if it starts with 'file:' the file will be read"));
+        crypt.add(new Input("text", null, "text to be encrypted. if it starts with 'file:' the file will be read", false));
         crypt.add(new Input("base64", true, "whether base64 encoding should be used"));
         crypt.add(new Input("include", ".*", "regular expression to constrain text parts to be encrypted"));
         crypt
@@ -598,8 +602,8 @@ public class IncubationTest {
         root.add(crypt);
 
         Tree perm = new Tree("Permutator", null);
-        perm.add(new Input("source", null, "source collection"));
-        perm.add(new Input("transformer", null, "transforming action"));
+        perm.add(new Input("source", null, "source collection", false));
+        perm.add(new Input("transformer", null, "transforming action", false));
         perm.add(new Input("swap", null, "whether to swap key and values in destination-map"));
         perm.add(new Input("backward", null, "action to do a back-transformation for each keys value"));
         perm
@@ -607,8 +611,8 @@ public class IncubationTest {
         root.add(perm);
 
         Tree xml = new Tree("Xml", null);
-        xml.add(new Input("source", null, "source file"));
-        xml.add(new Input("expression", null, "xpath expression"));
+        xml.add(new Input("source", null, "source file", false));
+        xml.add(new Input("expression", null, "xpath expression", false));
         xml.add(new Action(XmlUtil.class, "transform", "source", Action.KEY_ENV));
         xml.add(new Action(XmlUtil.class, "xpath", "expression", "source"));
         root.add(xml);
@@ -627,7 +631,7 @@ public class IncubationTest {
         scan.add(new Action(NetUtil.class, "scans", "lowest-port", "highest-port", "ip"));
         Tree wcopy = new Tree("WCopy", null);
         net.add(wcopy);
-        wcopy.add(new Input("url", null, "url to get files from"));
+        wcopy.add(new Input("url", null, "url to get files from", false));
         wcopy.add(new Input("dir", null, "local directory to save the downloaded files"));
         wcopy.add(new Input("include", null, "regular expression for files to download"));
         wcopy.add(new Input("exclude", null, "regular exression for files to be filtered"));
@@ -636,7 +640,7 @@ public class IncubationTest {
         net.add(new Action(NetUtil.class, "getNetInfo"));
         root.add(net);
 
-        InputStream in = Terminal.createBatchStream("Printing", "jobname", "test", "print", ":quit");
+        InputStream in = Terminal.createBatchStream("Printing", "jobname", "test", "10", "", ":quit");
         new Terminal(root, in, System.out, 79, 22, 1).run();
 
         Terminal.main(new String[] { Terminal.DEFAULT_NAME });

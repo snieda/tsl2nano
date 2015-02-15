@@ -7,7 +7,9 @@ import java.util.Map;
 import org.apache.commons.logging.Log;
 import org.simpleframework.xml.Default;
 import org.simpleframework.xml.DefaultType;
+import org.simpleframework.xml.Element;
 import org.simpleframework.xml.ElementMap;
+import org.simpleframework.xml.core.Persist;
 
 import de.tsl2.nano.action.IAction;
 import de.tsl2.nano.collection.CollectionUtil;
@@ -46,19 +48,24 @@ public abstract class Operator<INPUT, OUTPUT> extends Parser<INPUT> {
 
     /**
      * technical member while it's not possible to create an array out of a generic type. the
-     * BeanUtil.getGenericType(Class) can't solve that problem, too.
+     * BeanUtil.getGenericType(Class) can't solve that problem, too. the annotation element has required = false to be
+     * set to null in {@link #initSerialization()}.
      */
+    @Element(required = false)
     Class<? extends INPUT> inputType;
-    /** syntax defining special expression parts */
-    @ElementMap(inline = true)
+    /** syntax defining special expression parts. required=false to be set to null in {@link #initSerialization()} */
+    @ElementMap(inline = true, required = false)
     Map<String, INPUT> syntax;
     /** a map containing any values. values found by this solver must be of right type */
     private transient Map<INPUT, OUTPUT> values;
     /** converter to convert an operand to a result type and vice versa */
     transient IConverter<INPUT, OUTPUT> converter;
     /** holds all operations to be resolvable */
-    @ElementMap(inline = true, entry = "operation")
-    Map<INPUT, IAction<OUTPUT>> operationDefs;
+//    @ElementMap(inline = true, entry = "operation")
+    transient Map<INPUT, IAction<OUTPUT>> operationDefs;
+
+    /** if true, this class will serialize all informations, including syntax etc. */
+    transient boolean explizitXml = false;
 
     public static final String KEY_BEGIN = "begin";
     public static final String KEY_END = "end";
@@ -326,6 +333,16 @@ public abstract class Operator<INPUT, OUTPUT> extends Parser<INPUT> {
 
     protected OUTPUT newOperand(INPUT expr) {
         return (OUTPUT) converter.to(expr);
+    }
+
+    @Persist
+    void initSerialization() {
+        if (!explizitXml) {
+            //TODO: how to tell simple-xml on runtime not to include this vars
+//            this.getClass().getField("syntax").addAnnotation(...)
+            syntax = null;
+            inputType = null;
+        }
     }
 
     @Override

@@ -371,7 +371,7 @@ public class PrintUtil {
                 List<File> fileset = FileUtil.getFileset("./", source);
                 for (File file : fileset) {
                     stream = FileUtil.getFile(file.getPath());
-                    print(am.get("jobname"), printer, stream, am.get("mimetype"), am.get("username"),
+                    print(jobname, printer, stream, am.get("mimetype"), am.get("username"),
                         paper, quality, priority, pageranges);
                 }
                 return;

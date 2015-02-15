@@ -141,6 +141,10 @@ public class FormatUtil {
                         }
                     }
 
+                    @Override
+                    public String toString() {
+                        return df.toPattern();
+                    }
                 };
             } else if (Time.class.isAssignableFrom(type)) {
                 f = getTimeFormat(DateFormat.getTimeInstance(), Time.class);
@@ -161,7 +165,10 @@ public class FormatUtil {
                         pos.setIndex(source != null && source.length() > 0 ? source.length() : 1);
                         return Util.isEmpty(source) ? null : source;
                     }
-
+                    @Override
+                    public String toString() {
+                        return "*";
+                    }
                 };
             } else if (Boolean.class.isAssignableFrom(type)) {
                 f = new Format() {
@@ -245,6 +252,10 @@ public class FormatUtil {
                 return parseObject != null ? BeanClass.createInstance(instanceType, ((Date)parseObject).getTime()) : null;
             }
 
+            @Override
+            public String toString() {
+                return mf.toString();
+            }
         };
     }
     /**
@@ -276,6 +287,10 @@ public class FormatUtil {
                 return checkParse(mf, null, pos, source);
             }
 
+            @Override
+            public String toString() {
+                return mf.toString();
+            }
         };
     }
 

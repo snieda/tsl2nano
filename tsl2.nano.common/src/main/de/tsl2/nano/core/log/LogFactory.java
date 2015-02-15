@@ -147,7 +147,7 @@ public/*abstract*/class LogFactory implements Runnable, Serializable {
                     log("error: LogFactory couldn't save xml properties");
                 }
             }
-            final Thread worker = ConcurrentUtil.startDaemon("logger", self);
+            ConcurrentUtil.startDaemon("logger", self);
             Runtime.getRuntime().addShutdownHook(Executors.defaultThreadFactory().newThread(new Runnable() {
                 @Override
                 public void run() {

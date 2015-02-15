@@ -73,6 +73,13 @@ public class TimedReferences<T> {
     }
 
     /**
+     * clear
+     */
+    public void clear() {
+        tempHardRefs.clear();
+    }
+    
+    /**
      * isLongPeriod
      * 
      * @param time time to be evaluated

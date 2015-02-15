@@ -17,16 +17,17 @@ import java.util.Properties;
 
 import org.simpleframework.xml.Attribute;
 import org.simpleframework.xml.Element;
+import org.simpleframework.xml.core.Commit;
 
 import de.tsl2.nano.bean.def.Constraint;
 import de.tsl2.nano.bean.def.IConstraint;
 import de.tsl2.nano.core.ManagedException;
-import de.tsl2.nano.core.Messages;
-import de.tsl2.nano.core.cls.BeanAttribute;
 import de.tsl2.nano.core.util.StringUtil;
 import de.tsl2.nano.core.util.Util;
+import de.tsl2.nano.incubation.vnet.workflow.Condition;
 
 /**
+ * the base implementation for all item types.
  * 
  * @author Tom
  * @version $Revision$
@@ -41,6 +42,9 @@ public class AItem<T> implements IItem<T>, Serializable {
     Type type;
     @Element(type = Constraint.class, required = false)
     IConstraint<T> constraints;
+    /** optional condition to evaluate through an expression, whether this item is visible. */
+    @Element(required = false)
+    Condition condition;
 
     T value;
     transient IItem<?> parent;
@@ -51,7 +55,8 @@ public class AItem<T> implements IItem<T>, Serializable {
 
     static final int PREFIX = 1;
     static final String POSTFIX_QUESTION = ": ";
-    
+    static final String NULL = "null";
+
     /**
      * constructor
      */
@@ -115,7 +120,7 @@ public class AItem<T> implements IItem<T>, Serializable {
      * {@inheritDoc}
      */
     @Override
-    @Element(required=false)
+    @Element(required = false)
     public T getValue() {
         return value;
     }
@@ -124,15 +129,16 @@ public class AItem<T> implements IItem<T>, Serializable {
      * {@inheritDoc}
      */
     @Override
-    @Element(required=false)
+    @Element(required = false)
     public void setValue(T value) {
+        //constraints can only be null while deserialization (before call of commit)
         if (constraints != null)
             constraints.check(name, value);
         this.value = value;
     }
 
     @Override
-    public String ask() {
+    public String ask(Properties env) {
         String ask = "Please enter a " + constraints.getType().getSimpleName();
         if (constraints.getMinimum() != null || constraints.getMaximum() != null) {
             ask += " between " + constraints.getMinimum() != null ? constraints.getMinimum() : "<any>"
@@ -144,12 +150,21 @@ public class AItem<T> implements IItem<T>, Serializable {
     }
 
     /**
+     * uses a scanner to wait for the nextLine
+     */
+    void nextLine(InputStream in, PrintStream out) {
+        Terminal.nextLine(in, out);
+    }
+
+    /**
      * {@inheritDoc}
      */
     @SuppressWarnings({ "unchecked", "rawtypes" })
     @Override
     public IItem react(IItem caller, String input, InputStream in, PrintStream out, Properties env) {
         try {
+            if (input.equals(NULL))
+                input = null;
             setValue((T) getConstraints().getFormat().parseObject(input));
             if (!Util.isEmpty(input))
                 env.put(getName(), getValue());
@@ -192,7 +207,7 @@ public class AItem<T> implements IItem<T>, Serializable {
      * {@inheritDoc}
      */
     @Override
-    public String getDescription(boolean full) {
+    public String getDescription(Properties env, boolean full) {
         if (description == null)
             description = getConstraints() != null ? getConstraints().toString() : name;
         return description;
@@ -201,7 +216,7 @@ public class AItem<T> implements IItem<T>, Serializable {
     public void setDescription(String description) {
         this.description = description;
     }
-    
+
     /**
      * {@inheritDoc}
      */
@@ -218,10 +233,29 @@ public class AItem<T> implements IItem<T>, Serializable {
         this.parent = parent;
     }
 
+    /**
+     * @return Returns the condition.
+     */
+    public Condition getCondition() {
+        return condition;
+    }
+
+    /**
+     * @param condition The condition to set.
+     */
+    public void setCondition(Condition condition) {
+        this.condition = condition;
+    }
+
     public static String translate(String name) {
         return Terminal.translate(name);
     }
-    
+
+    @Commit
+    protected void initDeserialization() {
+        initConstraints(constraints);
+    }
+
     /**
      * {@inheritDoc}
      */

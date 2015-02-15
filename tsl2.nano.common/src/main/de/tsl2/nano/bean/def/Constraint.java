@@ -9,7 +9,9 @@
  */
 package de.tsl2.nano.bean.def;
 
+import java.math.BigDecimal;
 import java.text.Format;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.Map;
 
@@ -25,6 +27,7 @@ import de.tsl2.nano.collection.CollectionUtil;
 import de.tsl2.nano.core.ManagedException;
 import de.tsl2.nano.format.FormatUtil;
 import de.tsl2.nano.format.GenericParser;
+import de.tsl2.nano.util.NumberUtil;
 
 /**
  * Checks constraints of a given value
@@ -86,6 +89,39 @@ public class Constraint<T> extends AbstractConstraint<T> implements IConstraint<
         super();
         setType(type);
         setRange(min, max);
+    }
+
+    public Constraint(Class<T> type, T... allowedValues) {
+        this(type, Arrays.asList(allowedValues));
+    }
+    /**
+     * tries to set values from given type and allowedValues. will set the length, scale and precision.
+     * @param type allowed type
+     * @param allowedValues allowed values. the first value will be used as default value.
+     */
+    public Constraint(Class<T> type, Collection<T> allowedValues) {
+        super();
+        setType(type);
+        if (allowedValues.size() > 0) {
+            setRange(allowedValues);
+            setDefault(allowedValues.iterator().next());
+            int length = -1;
+            for (T v : allowedValues) {
+                length = Math.max(length, v.toString().length());
+            }
+            setLength(length);
+            
+            if (BigDecimal.class.isAssignableFrom(type)) {
+                int scale = -1, precision = -1;
+                for (T v : allowedValues) {
+                    BigDecimal b = (BigDecimal)v;
+                    scale = Math.max(scale, b.scale());
+                    precision = Math.max(precision, b.precision());
+                }
+                setScale(scale);
+                setPrecision(precision);
+            }
+        }
     }
 
     /**

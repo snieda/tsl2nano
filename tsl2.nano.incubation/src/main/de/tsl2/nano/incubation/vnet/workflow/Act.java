@@ -4,7 +4,6 @@ import java.util.Map;
 
 import org.simpleframework.xml.core.Commit;
 
-import de.tsl2.nano.core.util.StringUtil;
 import de.tsl2.nano.util.operation.ConditionOperator;
 
 /**
@@ -18,7 +17,7 @@ public class Act<T> extends VActivity<String, T> {
     /** serialVersionUID */
     private static final long serialVersionUID = -1031984359714782652L;
 
-    protected transient ConditionOperator<Object> op;
+    protected transient Condition op;
 
     /**
      * constructor for xml-deserialization
@@ -28,7 +27,7 @@ public class Act<T> extends VActivity<String, T> {
 
     public Act(String name, String condition, String expression, ComparableMap<CharSequence, Object> stateValues) {
         super(name, condition, expression);
-        op = new ConditionOperator<Object>(stateValues);
+        op = new Condition(stateValues);
     }
 
     @Override
@@ -38,12 +37,11 @@ public class Act<T> extends VActivity<String, T> {
 
     @Override
     public boolean canActivate(Map parameter) {
-        //sometimes we get a string out of eval, but sometimes a boolean. so we generalize it ;-)
-        return (Boolean) Boolean.valueOf(StringUtil.toString(op.eval(condition, parameter)));
+        return op.isTrue(parameter);
     }
 
     @Commit
     private void initDeserializing() {
-        op = new ConditionOperator<Object>(new ComparableMap<CharSequence, Object>());
+        op = new Condition(new ComparableMap<CharSequence, Object>());
     }
 }

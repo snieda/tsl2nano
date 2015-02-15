@@ -275,6 +275,8 @@ public class HtmlUtil {
             String c = content.toString();
             if (isHtml(c))
                 appendNodesFromText(e, c);
+            else if (c.matches("\\&.+[;]"))
+                e.setNodeValue(c);
             else
                 e.setTextContent(c);
         }

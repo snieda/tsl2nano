@@ -442,7 +442,8 @@ public class NanoH5Session implements ISession {
                          * submit/assign and cancel will not push a new element to the navigation stack!
                          * TODO: refactore access to names ('reset' and 'save')
                          */
-                        action.setParameter(getContextParameter());
+                        if (action.getParameter() == null)
+                            action.setParameter(getContextParameter());
                         Object result = action.activate();
 
                         /*

@@ -12,7 +12,6 @@ package de.tsl2.nano.incubation.terminal;
 import java.io.InputStream;
 import java.io.PrintStream;
 import java.util.Properties;
-import java.util.Scanner;
 
 import org.simpleframework.xml.Element;
 import org.simpleframework.xml.ElementArray;
@@ -21,7 +20,6 @@ import de.tsl2.nano.bean.def.IConstraint;
 import de.tsl2.nano.core.ManagedException;
 import de.tsl2.nano.core.execution.IRunnable;
 import de.tsl2.nano.core.log.LogFactory;
-import de.tsl2.nano.core.util.ConcurrentUtil;
 import de.tsl2.nano.core.util.StringUtil;
 
 /**
@@ -51,28 +49,35 @@ public class Action<T> extends AItem<T> {
     public Action() {
         super();
         type = Type.Action;
+        prefix.setCharAt(PREFIX, '!');
     }
 
     public Action(Class<?> mainClass, String method, String... argumentNames) {
         this(mainClass, method, null, argumentNames);
     }
-    
+
     public Action(Class<?> mainClass, String method, T defaultValue, String... argumentNames) {
         super(method, null, Type.Action, defaultValue, null);
         this.mainClass = mainClass;
         this.method = method;
         argNames = argumentNames;
+        prefix.setCharAt(PREFIX, '!');
     }
 
     @SuppressWarnings({ "rawtypes", "unchecked" })
     T run(Properties context) {
         Class[] cls = new Class[argNames.length];
         Properties p = new Properties();
-        String v;
+        Object v;
         for (int i = 0; i < argNames.length; i++) {
-            v = context.getProperty(argNames[i]);
-            if (v != null)
-                p.put("arg" + (i+1), v);
+            if (KEY_ENV.equals(argNames[i])) {
+                v = context;
+            } else {
+                v = context.get(argNames[i]);
+            }
+            if (v != null) {
+                p.put("arg" + (i + 1), v);
+            }
             cls[i] = v != null ? v.getClass() : String.class;
         }
         IRunnable<T, Properties> runner = null;
@@ -99,7 +104,7 @@ public class Action<T> extends AItem<T> {
             value = run(env);
             changed = true;
             //let us see the result
-            new Scanner(in).nextLine();
+            nextLine(in, out);
         } finally {
             LogFactory.setPrintToConsole(false);
         }

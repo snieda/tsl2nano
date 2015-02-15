@@ -3,7 +3,7 @@
    <root class="de.tsl2.nano.incubation.terminal.Tree" name="Toolbox" type="Tree">
       <item class="de.tsl2.nano.incubation.terminal.Tree" name="Printing" type="Tree">
          <item class="de.tsl2.nano.incubation.terminal.Input" name="source" type="Input">
-            <constraints type="java.lang.String" nullable="true" length="-1">
+            <constraints type="java.lang.String" nullable="false" length="-1">
                <scale>-1</scale>
                <precision>-1</precision>
             </constraints>
@@ -38,9 +38,12 @@
             <value class="java.lang.String">ISO_A4</value>
          </item>
          <item class="de.tsl2.nano.incubation.terminal.Input" name="quality" type="Input">
-            <constraints type="java.lang.String" nullable="true" length="-1">
+            <constraints type="java.lang.String" nullable="true" length="6">
+               <defaultValue class="java.lang.String">NORMAL</defaultValue>
                <scale>-1</scale>
                <precision>-1</precision>
+               <value class="java.lang.String">NORMAL</value>
+               <value class="java.lang.String">HIGH</value>
             </constraints>
             <value class="java.lang.String">NORMAL</value>
          </item>
@@ -65,11 +68,15 @@
             </constraints>
          </item>
          <item class="de.tsl2.nano.incubation.terminal.MainAction" name="print" type="Action">
+            <condition>
+               <expression>quality=NORMAL</expression>
+            </condition>
             <mainClass>de.tsl2.nano.core.util.PrintUtil</mainClass>
             <method>main</method>
-            <argNames length="9">
+            <argNames length="10">
                <string>source</string>
                <string>printer</string>
+               <string>jobname</string>
                <string>papersize</string>
                <string>quality</string>
                <string>priority</string>
@@ -95,7 +102,7 @@
             <value class="java.lang.String">PBEWithMD5AndDES</value>
          </item>
          <item class="de.tsl2.nano.incubation.terminal.Input" name="text" type="Input">
-            <constraints type="java.lang.String" nullable="true" length="-1">
+            <constraints type="java.lang.String" nullable="false" length="-1">
                <scale>-1</scale>
                <precision>-1</precision>
             </constraints>
@@ -128,13 +135,13 @@
       </item>
       <item class="de.tsl2.nano.incubation.terminal.Tree" name="Permutator" type="Tree">
          <item class="de.tsl2.nano.incubation.terminal.Input" name="source" type="Input">
-            <constraints type="java.lang.String" nullable="true" length="-1">
+            <constraints type="java.lang.String" nullable="false" length="-1">
                <scale>-1</scale>
                <precision>-1</precision>
             </constraints>
          </item>
          <item class="de.tsl2.nano.incubation.terminal.Input" name="transformer" type="Input">
-            <constraints type="java.lang.String" nullable="true" length="-1">
+            <constraints type="java.lang.String" nullable="false" length="-1">
                <scale>-1</scale>
                <precision>-1</precision>
             </constraints>
@@ -164,13 +171,13 @@
       </item>
       <item class="de.tsl2.nano.incubation.terminal.Tree" name="Xml" type="Tree">
          <item class="de.tsl2.nano.incubation.terminal.Input" name="source" type="Input">
-            <constraints type="java.lang.String" nullable="true" length="-1">
+            <constraints type="java.lang.String" nullable="false" length="-1">
                <scale>-1</scale>
                <precision>-1</precision>
             </constraints>
          </item>
          <item class="de.tsl2.nano.incubation.terminal.Input" name="expression" type="Input">
-            <constraints type="java.lang.String" nullable="true" length="-1">
+            <constraints type="java.lang.String" nullable="false" length="-1">
                <scale>-1</scale>
                <precision>-1</precision>
             </constraints>
@@ -199,7 +206,7 @@
                   <scale>-1</scale>
                   <precision>-1</precision>
                </constraints>
-               <value class="java.lang.String">192.168.5.49</value>
+               <value class="java.lang.String">192.168.56.1</value>
             </item>
             <item class="de.tsl2.nano.incubation.terminal.Input" name="lowest-port" type="Input">
                <constraints type="java.lang.Integer" nullable="true" length="-1">
@@ -227,7 +234,7 @@
          </item>
          <item class="de.tsl2.nano.incubation.terminal.Tree" name="WCopy" type="Tree">
             <item class="de.tsl2.nano.incubation.terminal.Input" name="url" type="Input">
-               <constraints type="java.lang.String" nullable="true" length="-1">
+               <constraints type="java.lang.String" nullable="false" length="-1">
                   <scale>-1</scale>
                   <precision>-1</precision>
                </constraints>

@@ -184,7 +184,7 @@ public class ValueColumn<T> implements IPresentableColumn, Serializable {
     
     public IAction<?> getSortingAction(final IBeanCollector<?, ?> collector) {
         if (actionSortColumn == null) {
-            actionSortColumn = new CommonAction<Object>(name, Messages.getStringOpt(name, true), getDescription()) {
+            actionSortColumn = new CommonAction<Object>(name, Messages.getStringOpt(getPresentable().getLabel(), true), getDescription()) {
                 @Override
                 public Object action() throws Exception {
                     collector.shiftSortIndexes();

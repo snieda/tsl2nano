@@ -77,4 +77,10 @@ public class TimedReferenceMap<V> extends ReferenceMap<Object, V> {
         timedReferences.add(value);
         return super.put(key, value);
     }
+    
+    @Override
+    public void clear() {
+        super.clear();
+        timedReferences.clear();
+    }
 }

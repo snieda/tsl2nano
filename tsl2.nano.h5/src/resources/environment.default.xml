@@ -74,7 +74,7 @@
       <object class="java.lang.String">...</object>
    </property>
    <!-- http-servers ip address and listening port. -->
-   <property name="http.serviceURL">
+   <property name="service.url">
       <object class="java.lang.String">http://localhost:8067</object>
    </property>
    <!-- html5 method: post or get-->

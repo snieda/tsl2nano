@@ -28,10 +28,11 @@ import de.tsl2.nano.core.util.Util;
  */
 @SuppressWarnings({ "unchecked", "serial" })
 public class ConditionOperator<T> extends SOperator<T> {
-    private BooleanOperator op;
+    transient private BooleanOperator op;
 
     public static final String KEY_THEN = "?";
     public static final String KEY_ELSE = ":";
+    public static final String KEY_EQUALS = "=";
 
     public static final String KEY_ANY = ".+";
 
@@ -84,8 +85,9 @@ public class ConditionOperator<T> extends SOperator<T> {
     @SuppressWarnings("rawtypes")
     @Override
     protected void createOperations() {
-        syntax.put(KEY_OPERATION, "[!&|?:]");
+        syntax.put(KEY_OPERATION, "[!&|?:=]");
         operationDefs = new HashMap<CharSequence, IAction<T>>();
+        //TODO: the following two operations will be overwritten throuth the TypeOp ones, so we should delete them
         addOperation(KEY_THEN, new CommonAction<T>() {
             @Override
             public T action() throws Exception {
@@ -106,6 +108,15 @@ public class ConditionOperator<T> extends SOperator<T> {
                  * if expression is false, we start an action or simply return a stored value.
                  */
                 return executeIf((T) parameter[1], !result);
+            }
+        });
+        addOperation(KEY_EQUALS, new CommonAction<T>() {
+            @Override
+            public T action() throws Exception {
+                /*
+                 * if both parameter are equal, return true
+                 */
+                return (T)((Object)Util.equals(parameter));
             }
         });
 
@@ -175,7 +186,7 @@ public class ConditionOperator<T> extends SOperator<T> {
 class TypeOP<T> extends CommonAction<T> {
     /** serialVersionUID */
     private static final long serialVersionUID = -8140609432513549007L;
-    SOperator<T> op;
+    transient SOperator<T> op;
     Class<T> type;
     String sop = "&";
 

@@ -213,27 +213,13 @@ public class Environment {
         LogFactory.setLogFile(dir + "/" + "logfactory.log");
         LogFactory.setLogFactoryXml(dir + "/" + "logfactory.xml");
 
-        String info = "\n===========================================================\n" + "creating environment "
-            + dir
-            + "\n"
-            + "    build : ${build.info}\n"
-            + "    args  : ${sun.java.command}\n"
-            + "    dir   : ${user.dir}\n"
-            + "    time  : ${nano.tstamp}\n"
-            + "    user  : ${user.name}, home: ${user.home}\n"
-            + "    lang  : ${user.country}_${user.language}, encoding: ${sun.jnu.encoding}\n"
-            + "    encode: ${file.encoding}\n"
-            + "    loader: ${main.context.classloader}\n"
-            + "    java  : ${java.runtime.version}, ${java.home}\n"
-            + "    os    : ${os.name}, ${os.version} ${sun.os.patch.level} ${os.arch}\n"
-            + "    system: ${sun.cpu.isalist} ${sun.arch.data.model}\n"
-            + "    net-ip: ${inetadress.myip}\n"
-            + "===========================================================";
-        Properties p = new Properties();
-        p.putAll(System.getProperties());
-        p.put("nano.tstamp", new Date());
-        p.put("main.context.classloader", Thread.currentThread().getContextClassLoader());
-        p.put("inetadress.myip", NetUtil.getMyIP());
+        LogFactory.log("\n===========================================================\n" 
+                + "creating environment "
+                + dir
+                + "\n"
+                + createInfo()
+                + "==========================================================="
+                );
 
         //provide some external functions as options for this framework
         CompatibilityLayer layer = new CompatibilityLayer();
@@ -270,14 +256,13 @@ public class Environment {
             self.properties = new TreeMap();
 //          LOG.warn("no environment.properties available");
         }
-        p.put("build.info", getBuildInformations());
-        info = StringUtil.insertProperties(info, p);
-        LogFactory.log(info);
-
+        
+        self.services = new Hashtable<Class<?>, Object>();
+        addService(layer);
+        
         self.properties.put(KEY_CONFIG_RELPATH, dir + "/");
         self.properties.put(KEY_CONFIG_PATH, new File(dir).getAbsolutePath().replace("\\", "/") + "/");
         new File(self.getTempPath()).mkdir();
-        self.services = new Hashtable<Class<?>, Object>();
         registerBundle(PREFIX + "messages", true);
         if (new File(getConfigPath() + "messages.properties").canRead())
             registerBundle("messages", true);
@@ -285,10 +270,34 @@ public class Environment {
         ExceptionHandler exceptionHandler = new ExceptionHandler();
         Thread.setDefaultUncaughtExceptionHandler(exceptionHandler);
         addService(UncaughtExceptionHandler.class, exceptionHandler);
-        addService(layer);
+        
         //add frameworks beandef classes as standard-types
 //        BeanUtil.addStandardTypePackages("de.tsl2.nano.bean.def");
 //        self.persist();
+    }
+
+    public static String createInfo() {
+        String info = 
+                  "    build : ${build.info}\n"
+                + "    args  : ${sun.java.command}\n"
+                + "    dir   : ${user.dir}\n"
+                + "    time  : ${nano.tstamp}\n"
+                + "    user  : ${user.name}, home: ${user.home}\n"
+                + "    lang  : ${user.country}_${user.language}, encoding: ${sun.jnu.encoding}\n"
+                + "    encode: ${file.encoding}\n"
+                + "    loader: ${main.context.classloader}\n"
+                + "    java  : ${java.runtime.version}, ${java.home}\n"
+                + "    os    : ${os.name}, ${os.version} ${sun.os.patch.level} ${os.arch}\n"
+                + "    system: ${sun.cpu.isalist} ${sun.arch.data.model}\n"
+                + "    net-ip: ${inetadress.myip}\n";
+            Properties p = new Properties();
+            p.putAll(System.getProperties());
+            p.put("nano.tstamp", new Date());
+            p.put("main.context.classloader", Thread.currentThread().getContextClassLoader());
+            p.put("inetadress.myip", NetUtil.getMyIP());
+
+            p.put("build.info", getBuildInformations());
+            return StringUtil.insertProperties(info, p);
     }
 
     /**

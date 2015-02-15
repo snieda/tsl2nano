@@ -48,9 +48,9 @@ public class MainAction<T> extends Action<T> {
     }
     
     @Override
-    public String getDescription(boolean full) {
+    public String getDescription(Properties env, boolean full) {
         //print the main help screen
         run(new Properties());
-        return super.getDescription(full);
+        return super.getDescription(env, full);
     }
 }

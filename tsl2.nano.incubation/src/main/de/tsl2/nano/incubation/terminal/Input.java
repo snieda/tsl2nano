@@ -13,6 +13,8 @@ import java.io.InputStream;
 import java.io.PrintStream;
 import java.util.Properties;
 
+import org.simpleframework.xml.core.Commit;
+
 import de.tsl2.nano.bean.def.IConstraint;
 import de.tsl2.nano.core.util.StringUtil;
 import de.tsl2.nano.core.util.Util;
@@ -38,6 +40,10 @@ public class Input<T> extends AItem<T> {
     public Input(String name, T value, String description) {
         this(name, null, value, description);
     }
+    public Input(String name, T value, String description, boolean nullable) {
+        this(name, null, value, description);
+        getConstraints().setNullable(nullable);
+    }
     
     public Input(String name, IConstraint<T> constraints, T value, String description) {
         this(name, constraints, value, description, true);
@@ -53,6 +59,7 @@ public class Input<T> extends AItem<T> {
     public Input(String name, IConstraint<T> constraints, T value, String description, boolean nullable) {
         super(name, constraints, Type.Input, value, description);
         getConstraints().setNullable(nullable);
+        initDeserialization();
     }
 
     @Override
@@ -63,17 +70,16 @@ public class Input<T> extends AItem<T> {
     }
     
     @Override
-    public String ask() {
-        return StringUtil.substring(super.ask(), null, POSTFIX_QUESTION) + " (" + getValue() + ")" + POSTFIX_QUESTION;
+    public String ask(Properties env) {
+        return StringUtil.substring(super.ask(env), null, POSTFIX_QUESTION) + " (" + getValue() + ")" + POSTFIX_QUESTION;
     }
-    
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    public String toString() {
-        if (getConstraints() != null && !constraints.isNullable())
+
+    @Commit
+    protected void initDeserialization() {
+        super.initDeserialization();
+        if (!getConstraints().isNullable())
             prefix.setCharAt(PREFIX, '§');
-        return super.toString();
+        else
+            prefix.setCharAt(PREFIX, '*');
     }
 }

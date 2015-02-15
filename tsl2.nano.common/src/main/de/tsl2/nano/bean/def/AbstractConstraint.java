@@ -85,6 +85,8 @@ public abstract class AbstractConstraint<T> implements IConstraint<T>, Serializa
                     status = Status.illegalArgument(name, fval, " lower than " + max);
                 } else if ((length = getLength()) > 0 && fval.length() > length) {
                     status = Status.illegalArgument(name, fval, " a maximum-length of " + length);
+                } else if (getAllowedValues() != null && !getAllowedValues().contains(parse(fval))) {
+                    status = Status.illegalArgument(name, fval, " one of " + getAllowedValues());
                 }
             }
             //TODO: check numbers on scale and precision
