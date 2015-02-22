@@ -21,7 +21,8 @@ import de.tsl2.nano.core.log.LogFactory;
 import de.tsl2.nano.format.FormatUtil;
 
 /**
- * handler for primitives and their immutable wrappers
+ * handler for primitives and their immutable wrappers. all wrappers have a static 'TYPE' providing the primitive class
+ * - and MIN_VAUE and MAX_VALUE.
  * 
  * @author Thomas Schneider
  * @version $Revision$

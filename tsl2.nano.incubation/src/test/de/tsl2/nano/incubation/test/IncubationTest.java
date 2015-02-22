@@ -23,6 +23,7 @@ import java.text.DateFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.HashMap;
 import java.util.Hashtable;
 import java.util.LinkedHashMap;
 import java.util.Map;
@@ -62,6 +63,7 @@ import de.tsl2.nano.incubation.specification.Pool;
 import de.tsl2.nano.incubation.specification.rules.Rule;
 import de.tsl2.nano.incubation.specification.rules.RulePool;
 import de.tsl2.nano.incubation.terminal.Action;
+import de.tsl2.nano.incubation.terminal.AsciiImage;
 import de.tsl2.nano.incubation.terminal.Input;
 import de.tsl2.nano.incubation.terminal.MainAction;
 import de.tsl2.nano.incubation.terminal.Terminal;
@@ -462,11 +464,11 @@ public class IncubationTest {
         commandManager.doIt(a);
         assertEquals(a.getContext(), tbean);
         commandManager.doIt(d);
-        assertEquals(a.getContext(), null);
+        assertEquals(d.getContext(), null);
         commandManager.undo();
-        assertEquals(a.getContext(), tbean);
+        assertEquals(d.getContext(), tbean);
         commandManager.redo();
-        assertEquals(a.getContext(), null);
+        assertEquals(d.getContext(), null);
     }
 
     public <CONTEXT> void undoRedo(ICommand<CONTEXT>... cmds) throws Exception {
@@ -526,7 +528,7 @@ public class IncubationTest {
     }
 
     @Test
-    public void testInvader() throws Exception {
+    public void testPermutator() throws Exception {
         final Map p = MapUtil.asMap("data", "Meier", "algorithm", Crypt.ALGO_PBEWithMD5AndDES);
         final String transformer =
             "transformer=\"de.tsl2.nano.core.util.Crypt encrypt ${data} ${password} ${algorithm}\"";
@@ -640,15 +642,33 @@ public class IncubationTest {
         net.add(new Action(NetUtil.class, "getNetInfo"));
         root.add(net);
 
-        InputStream in = Terminal.createBatchStream("Printing", "jobname", "test", "10", "", ":quit");
-        new Terminal(root, in, System.out, 79, 22, 1).run();
+        Tree file = new Tree("File-Operation", null);
+        file.add(new Input("directory", System.getProperty("user.dir"), "base directory for file operations"));
+        file.add(new Input("file", "**/[\\w]+\\.txt", "regular expression (with ant-like path **) as file filter"));
+        file.add(new Input("destination", System.getProperty("user.dir"), "destination directory for file operations"));
+        file.add(new Action("List", FileUtil.class, "foreach", "directory", "file", "file.operation.null"));
+        file.add(new Action("Delete", FileUtil.class, "foreach", "directory", "file", "file.operation.delete"));
+        file.add(new Action("Copy", FileUtil.class, "foreach", "directory", "file", "file.operation.copy"));
+        file.add(new MainAction("Imageviewer", AsciiImage.class, "file", "image.out", "terminal.width", "terminal.height"));
+        root.add(file);
 
+        Map<String, Object> defs = new HashMap<String, Object>();
+        defs.put("file.operation.delete", "test");
+        defs.put("file.operation.delete", "test");
+        defs.put("image.out", "-out");
+        
+        InputStream in = Terminal.createBatchStream("Printing", "jobname", "test", "10", "", ":quit");
+        new Terminal(root, in, System.out, 79, 22, 1, defs).run();
+
+        //check, if serialization was ok
+        System.setIn(Terminal.createBatchStream("", "Printing", "jobname", "test", "10", "", ":quit"));
         Terminal.main(new String[] { Terminal.DEFAULT_NAME });
 
+        //ok? --> use it in our project!
         FileUtil.copy(Terminal.DEFAULT_NAME, "src/resources/" + Terminal.DEFAULT_NAME);
 
         //admin console
-        Terminal.main(new String[] { Terminal.DEFAULT_NAME, TerminalAdmin.ADMIN });
+//        Terminal.main(new String[] { Terminal.DEFAULT_NAME, TerminalAdmin.ADMIN });
     }
 
     @Test
@@ -743,6 +763,7 @@ class TestJob implements Callable<String>, Serializable {
  * test command doing a simple text replacing
  */
 class Command extends ACommand<StringBuilder> {
+    private static final long serialVersionUID = 1L;
 
     public Command(StringBuilder context, IChange... changes) {
         super(context, changes);
@@ -765,6 +786,7 @@ class Command extends ACommand<StringBuilder> {
  */
 @SuppressWarnings({ "unchecked" })
 class ECommand extends ACommand<Serializable> {
+    private static final long serialVersionUID = 1L;
 
     public ECommand(Serializable context, IChange... changes) {
         super(context, changes);

@@ -40,6 +40,7 @@ import java.util.Date;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Map;
 import java.util.Properties;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
@@ -948,6 +949,7 @@ public class FileUtil {
     public static List<File> getFileset(String dir, String include) {
         return getFileset(dir, include, null, true);
     }
+
     /**
      * ant-like fileset. returns all files matching the given include expression.
      * 
@@ -1049,7 +1051,7 @@ public class FileUtil {
     public static <T> Iterable<T> forTree(String dirPath, final String include, final IRunnable<T, File> action) {
         return forTree(dirPath, include, action, null);
     }
-    
+
     /**
      * evaluates all files in dirPath matching include pattern.
      * 
@@ -1058,7 +1060,10 @@ public class FileUtil {
      * @param action action to be done for each matching file in tree.
      * @return collected results of all calls of action.
      */
-    public static <T> Iterable<T> forTree(String dirPath, final String include, final IRunnable<T, File> action, Comparator<File> sorter) {
+    public static <T> Iterable<T> forTree(String dirPath,
+            final String include,
+            final IRunnable<T, File> action,
+            Comparator<File> sorter) {
         List<File> files = getFileset(dirPath, include);
         if (sorter != null)
             Collections.sort(files, sorter);
@@ -1080,20 +1085,35 @@ public class FileUtil {
     };
 
     /**
+     * action for {@link #forEach(String, String, IRunnable)}
+     */
+    public static final IRunnable<Object, File> DO_COPY = new IRunnable<Object, File>() {
+        @Override
+        public Object run(File context, Object... extArgs) {
+            copy(context.getPath(), (String)extArgs[0]);
+            return new File((String) extArgs[0]);
+        }
+    };
+
+    /**
      * starts the given action for the matching file set.
      * 
      * @param dirPath root path to work on
      * @param regExFilename regular expression for file name that must be matched to start the action on that file.
-     * @param action action on a matching file
+     * @param action (optional) action on a matching file
+     * @param args (optional) arguments to be used by the given action.
      * @return files that matched the regular expression.
      */
-    public static File[] forEach(String dirPath, final String regExFilename, final IRunnable<Object, File> action) {
+    public static File[] forEach(String dirPath,
+            final String regExFilename,
+            final IRunnable<Object, File> action,
+            final Object...args) {
         return new File(dirPath).listFiles(new FilenameFilter() {
             @Override
             public boolean accept(File dir, String name) {
                 boolean accept = name.matches(regExFilename);
-                if (accept) {
-                    action.run(new File(dir.getPath() + "/" + name));
+                if (accept && action != null) {
+                    action.run(new File(dir.getPath() + "/" + name), args);
                 }
                 return accept;
             }

@@ -31,17 +31,15 @@ public class NumericConditionOperator extends ConditionOperator<Object> {
      */
     @Override
     protected CharSequence precalc(CharSequence expression) {
+        expression = wrap(expression);
         //first, calculate functions and replace their expression with their results
-        Object funcResult = funcop.eval(expression, (Map<CharSequence, Object>) getValues());
-        if (funcResult != null)
-            expression = funcResult.toString();
-
+        funcop.eval(expression, (Map<CharSequence, Object>) getValues());
         return super.precalc(expression);
     }
     
     @Override
     public BigDecimal eval(CharSequence expression, Map<CharSequence, Object> v) {
-        Object result = super.eval(expression, v);
+        Object result = super.eval(wrap(expression), v);
         return (BigDecimal) (result instanceof BigDecimal ? result : result != null ? new BigDecimal(result.toString()
             .trim()) : null);
     }

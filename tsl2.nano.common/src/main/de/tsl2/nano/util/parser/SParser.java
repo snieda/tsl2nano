@@ -51,7 +51,7 @@ public class SParser extends Parser<CharSequence> {
 
     @Override
     public CharSequence wrap(CharSequence src) {
-        return new StringBuilder(src);
+        return src instanceof StringBuilder ? src : new StringBuilder(src);
     }
 
     public CharSequence unwrap(CharSequence src) {

@@ -49,6 +49,7 @@ import de.tsl2.nano.core.exception.Message;
 import de.tsl2.nano.core.execution.CompatibilityLayer;
 import de.tsl2.nano.core.execution.Profiler;
 import de.tsl2.nano.core.log.LogFactory;
+import de.tsl2.nano.core.util.BitUtil;
 import de.tsl2.nano.core.util.FileUtil;
 import de.tsl2.nano.core.util.NetUtil;
 import de.tsl2.nano.core.util.StringUtil;
@@ -213,13 +214,13 @@ public class Environment {
         LogFactory.setLogFile(dir + "/" + "logfactory.log");
         LogFactory.setLogFactoryXml(dir + "/" + "logfactory.xml");
 
-        LogFactory.log("\n===========================================================\n" 
-                + "creating environment "
-                + dir
-                + "\n"
-                + createInfo()
-                + "==========================================================="
-                );
+        LogFactory.log("\n===========================================================\n"
+            + "creating environment "
+            + dir
+            + "\n"
+            + createInfo()
+            + "==========================================================="
+            );
 
         //provide some external functions as options for this framework
         CompatibilityLayer layer = new CompatibilityLayer();
@@ -256,10 +257,10 @@ public class Environment {
             self.properties = new TreeMap();
 //          LOG.warn("no environment.properties available");
         }
-        
+
         self.services = new Hashtable<Class<?>, Object>();
         addService(layer);
-        
+
         self.properties.put(KEY_CONFIG_RELPATH, dir + "/");
         self.properties.put(KEY_CONFIG_PATH, new File(dir).getAbsolutePath().replace("\\", "/") + "/");
         new File(self.getTempPath()).mkdir();
@@ -270,15 +271,15 @@ public class Environment {
         ExceptionHandler exceptionHandler = new ExceptionHandler();
         Thread.setDefaultUncaughtExceptionHandler(exceptionHandler);
         addService(UncaughtExceptionHandler.class, exceptionHandler);
-        
+
         //add frameworks beandef classes as standard-types
 //        BeanUtil.addStandardTypePackages("de.tsl2.nano.bean.def");
 //        self.persist();
     }
 
     public static String createInfo() {
-        String info = 
-                  "    build : ${build.info}\n"
+        String info =
+            "    build : ${build.info}\n"
                 + "    args  : ${sun.java.command}\n"
                 + "    dir   : ${user.dir}\n"
                 + "    time  : ${nano.tstamp}\n"
@@ -287,17 +288,32 @@ public class Environment {
                 + "    encode: ${file.encoding}\n"
                 + "    loader: ${main.context.classloader}\n"
                 + "    java  : ${java.runtime.version}, ${java.home}\n"
+                + "    memory: ${memory}"
+                + "    disc  : ${disc}"
                 + "    os    : ${os.name}, ${os.version} ${sun.os.patch.level} ${os.arch}\n"
                 + "    system: ${sun.cpu.isalist} ${sun.arch.data.model}\n"
+                + "    procs : ${processors}"
                 + "    net-ip: ${inetadress.myip}\n";
-            Properties p = new Properties();
-            p.putAll(System.getProperties());
-            p.put("nano.tstamp", new Date());
-            p.put("main.context.classloader", Thread.currentThread().getContextClassLoader());
-            p.put("inetadress.myip", NetUtil.getMyIP());
+        Properties p = new Properties();
+        p.putAll(System.getProperties());
+        p.put("nano.tstamp", new Date());
+        p.put("main.context.classloader", Thread.currentThread().getContextClassLoader());
+        p.put("inetadress.myip", NetUtil.getMyIP());
+        
+        long free = Runtime.getRuntime().freeMemory() / (1024 * 1024);
+        long total = Runtime.getRuntime().totalMemory() / (1024 * 1024);
+        p.put("memory", "free " + free + "M of total " + total + "M");
 
-            p.put("build.info", getBuildInformations());
-            return StringUtil.insertProperties(info, p);
+        p.put("processors", Runtime.getRuntime().availableProcessors());
+        
+        File[] roots = File.listRoots();
+        StringBuilder f = new StringBuilder();
+        for (int i = 0; i < roots.length; i++) {
+            f.append(roots[i].getName() + "(" + BitUtil.amount(roots[i].getFreeSpace()) + " / " + BitUtil.amount(roots[i].getTotalSpace()));
+        }
+        p.put("disc", f.toString());
+        p.put("build.info", getBuildInformations());
+        return StringUtil.insertProperties(info, p);
     }
 
     /**
@@ -374,6 +390,7 @@ public class Environment {
 
     /**
      * usable as persistable counter (will be stored to file system)
+     * 
      * @param key the values name to be changed
      * @param diff addition
      * @return new value

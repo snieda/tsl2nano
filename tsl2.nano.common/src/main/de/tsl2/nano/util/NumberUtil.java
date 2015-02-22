@@ -223,11 +223,11 @@ public class NumberUtil extends BitUtil {
         try {
             return (BigDecimal) FormatUtil.getDefaultFormat(BigDecimal.class, true).parseObject(numberAsString);
         } catch (final ParseException e) {
-            ManagedException.forward(e);
+//            ManagedException.forward(e);
             return null;
         }
     }
-
+    
     /**
      * delegates to {@link #getNumberAndStringComparator(Format, boolean)} with stringOnly= false.
      */
@@ -305,7 +305,7 @@ public class NumberUtil extends BitUtil {
     }
 
     /**
-     * checks the given string to be a number
+     * checks the given string to be a 'ganze' number
      * 
      * @param value
      * @return if value is parseable to a number

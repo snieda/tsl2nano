@@ -1347,11 +1347,12 @@ public class CommonTest {
         NetUtil.scans(0, 10000);
     }
     
-    @Test
+//    @Test
     public void testNetUtilWCopy() throws Exception {
         //not a real test - only to see it working!
         NetUtil.wcopy("http://mobile.chefkoch.de", "test/", null, null);
     }
+    
     @Test
     public void testCrypt() throws Exception {
         String txt = "test1234";

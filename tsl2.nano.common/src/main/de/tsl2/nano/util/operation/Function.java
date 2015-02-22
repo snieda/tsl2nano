@@ -10,7 +10,6 @@
 package de.tsl2.nano.util.operation;
 
 import java.lang.reflect.Method;
-import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -51,9 +50,10 @@ public class Function<OUTPUT> extends SParser {
     Function() {
     }
 
+    @SuppressWarnings("unchecked")
     public OUTPUT eval(CharSequence expression, Map<CharSequence, Object> values) {
         CharSequence func;
-        OUTPUT result;
+        OUTPUT res = null;
         expression = wrap(expression);
         while (!isEmpty(expression)) {
             while (isEmpty(func = extract(expression, FUNC_NAME + FUNC_BEGIN + FUNC_ARG + "*" + FUNC_END)))
@@ -61,12 +61,12 @@ public class Function<OUTPUT> extends SParser {
                     break;
             if (isEmpty(func))
                 break;
-            result = calc(func, values);
-            values.put(func, result);
-            replace(expression, func, result != null ? result.toString() : "");
+            res = calc(func, values);
+            values.put(func, res);
+            replace(expression, func, res != null ? FormatUtil.getDefaultFormat(res, false).format(res) : "");
         }
-        result = (OUTPUT) values.get(expression);
-        return (OUTPUT) (result != null ? result : expression);
+        OUTPUT result = (OUTPUT) values.get(expression);
+        return (OUTPUT) (result != null ? result : res != null ? res : expression);
     }
 
     private OUTPUT calc(CharSequence func, Map<CharSequence, Object> values) {
@@ -74,8 +74,12 @@ public class Function<OUTPUT> extends SParser {
         CharSequence name = this.extract(f, FUNC_NAME, "");
         List<Object> argList = new ArrayList<Object>();
         CharSequence p = f;
+        Number num;
         while (!isEmpty(p = extract(f, "\\w+", ""))) {
-            argList.add(values.get(p));
+            if (NumberUtil.isNumber(p.toString()))
+                argList.add(NumberUtil.getBigDecimal(p.toString()).doubleValue());
+            else
+                argList.add(values.get(p));
         }
         OUTPUT result = null;
         if (funcContainer == null)
@@ -85,10 +89,11 @@ public class Function<OUTPUT> extends SParser {
         for (FunctionContainer fc : funcContainer) {
             if (fc.hasMethod(name)) {
                 try {
-                    Object[] args = fc.argType != null ? Util.convertAll(fc.argType, argList.toArray()) : argList.toArray();
+                    Object[] args =
+                        fc.argType != null ? Util.convertAll(fc.argType, argList.toArray()) : argList.toArray();
                     result = (OUTPUT) BeanClass.call(fc.funcClass, name.toString(), fc.usePrimitives, args);
-                    if (fc.argType != null)//TODO: create an if clause to constrain this formatting
-                        result = (OUTPUT) FormatUtil.getDefaultFormat(result, false).format(result);
+//                    if (fc.argType != null)//TODO: create an if clause to constrain this formatting
+//                        result = (OUTPUT) FormatUtil.getDefaultFormat(result, false).format(result);
                     LOG.info(func + " = " + result + " [with " + values + "]");
                     funcFound = true;
                     break;
@@ -98,7 +103,7 @@ public class Function<OUTPUT> extends SParser {
             }
         }
         if (!funcFound)
-            throw new IllegalArgumentException("function " +  func + " is not defined!");
+            throw new IllegalArgumentException("function " + func + " is not defined!");
         return result;
     }
 

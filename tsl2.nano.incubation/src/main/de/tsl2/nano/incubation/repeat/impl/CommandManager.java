@@ -95,7 +95,7 @@ public class CommandManager implements ICommandManager {
     
     @Override
     public ICommand<?> undo() {
-        ICommand<?> cmd = done.poll();
+        ICommand<?> cmd = done.size() > 0 ? done.pollLast() : null;
         if (cmd != null) {
             undone.add(cmd);
             cmd.undo();

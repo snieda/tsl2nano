@@ -1,5 +1,11 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <terminal name="terminal.xml" width="79" height="22" style="1">
+   <definition name="file.operation.delete">
+      <value class="java.lang.String">test</value>
+   </definition>
+   <definition name="image.out">
+      <value class="java.lang.String">-out</value>
+   </definition>
    <root class="de.tsl2.nano.incubation.terminal.Tree" name="Toolbox" type="Tree">
       <item class="de.tsl2.nano.incubation.terminal.Tree" name="Printing" type="Tree">
          <item class="de.tsl2.nano.incubation.terminal.Input" name="source" type="Input">
@@ -272,6 +278,66 @@
             <mainClass>de.tsl2.nano.core.util.NetUtil</mainClass>
             <method>getNetInfo</method>
             <argNames length="0"/>
+         </item>
+      </item>
+      <item class="de.tsl2.nano.incubation.terminal.Tree" name="File-Operation" type="Tree">
+         <item class="de.tsl2.nano.incubation.terminal.Input" name="directory" type="Input">
+            <constraints type="java.lang.String" nullable="true" length="-1">
+               <scale>-1</scale>
+               <precision>-1</precision>
+            </constraints>
+            <value class="java.lang.String">C:\eigen\tsl2\tsl2-workspace\tsl2-nano\tsl2.nano.incubation</value>
+         </item>
+         <item class="de.tsl2.nano.incubation.terminal.Input" name="file" type="Input">
+            <constraints type="java.lang.String" nullable="true" length="-1">
+               <scale>-1</scale>
+               <precision>-1</precision>
+            </constraints>
+            <value class="java.lang.String">**/[\w]+\.txt</value>
+         </item>
+         <item class="de.tsl2.nano.incubation.terminal.Input" name="destination" type="Input">
+            <constraints type="java.lang.String" nullable="true" length="-1">
+               <scale>-1</scale>
+               <precision>-1</precision>
+            </constraints>
+            <value class="java.lang.String">C:\eigen\tsl2\tsl2-workspace\tsl2-nano\tsl2.nano.incubation</value>
+         </item>
+         <item class="de.tsl2.nano.incubation.terminal.Action" name="List" type="Action">
+            <mainClass>de.tsl2.nano.core.util.FileUtil</mainClass>
+            <method>foreach</method>
+            <argNames length="3">
+               <string>directory</string>
+               <string>file</string>
+               <string>file.operation.null</string>
+            </argNames>
+         </item>
+         <item class="de.tsl2.nano.incubation.terminal.Action" name="Delete" type="Action">
+            <mainClass>de.tsl2.nano.core.util.FileUtil</mainClass>
+            <method>foreach</method>
+            <argNames length="3">
+               <string>directory</string>
+               <string>file</string>
+               <string>file.operation.delete</string>
+            </argNames>
+         </item>
+         <item class="de.tsl2.nano.incubation.terminal.Action" name="Copy" type="Action">
+            <mainClass>de.tsl2.nano.core.util.FileUtil</mainClass>
+            <method>foreach</method>
+            <argNames length="3">
+               <string>directory</string>
+               <string>file</string>
+               <string>file.operation.copy</string>
+            </argNames>
+         </item>
+         <item class="de.tsl2.nano.incubation.terminal.MainAction" name="Imageviewer" type="Action">
+            <mainClass>de.tsl2.nano.incubation.terminal.AsciiImage</mainClass>
+            <method>main</method>
+            <argNames length="4">
+               <string>file</string>
+               <string>image.out</string>
+               <string>terminal.width</string>
+               <string>terminal.height</string>
+            </argNames>
          </item>
       </item>
    </root>

@@ -13,7 +13,7 @@ import java.io.Serializable;
 
 /**
  * generic range object. usable for comparable values like numbers, dates, strings. but it is usable too for any
- * objects, implementing {@link Comparable}.
+ * object, implementing {@link Comparable}.
  * 
  * @author Thomas Schneider
  * @version $Revision$

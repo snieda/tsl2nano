@@ -11,7 +11,7 @@ package de.tsl2.nano.util.operation;
 
 /**
  * base for comparable objects like numbers, dates, strings - but for any other objects, too - to provide some standard
- * operations.
+ * operations. Object already provides: {@link #equals(Object)}.
  * 
  * @author Thomas Schneider
  * @version $Revision$
