@@ -21,19 +21,18 @@ public class MainAction<T> extends Action<T> {
     }
     
     public MainAction(String name, Class<?> mainClass, String... argumentNames) {
-        super(mainClass, "main", argumentNames);
-        this.name = name;
+        super(name, mainClass, "main", argumentNames);
     }
 
     @Override
     @SuppressWarnings({ "rawtypes", "unchecked" })
     T run(Properties context) {
         List<String> argList = new ArrayList<String>(argNames.length);
-        String a;
+        Object a;
         for (int i = 0; i < argNames.length; i++) {
-            a = context.getProperty(argNames[i]);
+            a = context.get(argNames[i]);
             if (a != null)
-                argList.add(a);
+                argList.add(a.toString());
         }
         context.put("arg1", argList.toArray(new String[0]));
         if (runner == null) {

@@ -56,8 +56,15 @@ public class Action<T> extends AItem<T> {
         this(mainClass, method, null, argumentNames);
     }
 
+    public Action(String name, Class<?> mainClass, String method, String... argumentNames) {
+        this(name, mainClass, method, null, argumentNames);
+    }
+
     public Action(Class<?> mainClass, String method, T defaultValue, String... argumentNames) {
-        super(method, null, Type.Action, defaultValue, null);
+        this(method, mainClass, method, defaultValue, argumentNames);
+    }
+    public Action(String name, Class<?> mainClass, String method, T defaultValue, String... argumentNames) {
+        super(name, null, Type.Action, defaultValue, null);
         this.mainClass = mainClass;
         this.method = method;
         argNames = argumentNames;
@@ -101,7 +108,10 @@ public class Action<T> extends AItem<T> {
     public IItem react(IItem caller, String input, InputStream in, PrintStream out, Properties env) {
         try {
             LogFactory.setPrintToConsole(true);
-            value = run(env);
+            Properties p = new Properties();
+            p.putAll(env);
+            p.putAll(System.getProperties());
+            value = run(p);
             changed = true;
             //let us see the result
             nextLine(in, out);

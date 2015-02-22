@@ -17,8 +17,10 @@ import static de.tsl2.nano.incubation.terminal.TextTerminal.getTextFrame;
 import java.io.File;
 import java.io.InputStream;
 import java.io.PrintStream;
+import java.io.PrintWriter;
 import java.io.Serializable;
 import java.util.List;
+import java.util.Map;
 import java.util.Properties;
 import java.util.Scanner;
 import java.util.Set;
@@ -26,6 +28,7 @@ import java.util.Set;
 import org.apache.commons.logging.Log;
 import org.simpleframework.xml.Attribute;
 import org.simpleframework.xml.Element;
+import org.simpleframework.xml.ElementMap;
 import org.simpleframework.xml.core.Commit;
 
 import de.tsl2.nano.core.Environment;
@@ -51,15 +54,18 @@ import de.tsl2.nano.core.util.XmlUtil;
  * - result will be written to a property map
  * - tree nodes can be selected through numbers or names
  * - batch mode possible
+ * - macro recording and replaying
  * - simplified java method calls
  * - variable output sizes and styles
  * - workflow conditions: items are active if an optional condition is true
  * - if an item container (a tree) has only one visible item (perhaps filtered through conditions), it delegates directly to that item
+ * - actions get the entire environment properties (including system properties) on calling run().
  * </pre>
  * 
  * @author Tom
  * @version $Revision$
  */
+@SuppressWarnings({ "unchecked", "rawtypes" })
 public class Terminal implements IItemHandler, Serializable {
     /** serialVersionUID */
     private static final long serialVersionUID = -5767124822662015899L;
@@ -71,10 +77,6 @@ public class Terminal implements IItemHandler, Serializable {
     /** used as file name */
     @Attribute
     String name = DEFAULT_NAME;
-    /** base item - should be a Selection */
-    @Element
-    IItem root;
-    
     /** utility to read user input */
     transient Scanner input;
     transient InputStream in;
@@ -85,19 +87,52 @@ public class Terminal implements IItemHandler, Serializable {
     int height = SCREEN_HEIGHT;
     @Attribute
     int style = BLOCK_BAR;
+    /** item properties */
     transient Properties env;
+
+    /**
+     * predefined variables (not changable through user input) copied to the {@link #env} but not saved in property
+     * file. mostly technical definitions.
+     */
+    @ElementMap(entry = "definition", attribute=true, inline = true, keyType = String.class, key = "name", required=false, value="value", valueType = Object.class)
+    Map <String, Object> definitions;
 
     /** batch file name. the batch file contains input instructions (numbers or names) separated by '\n'. */
     String batch;
 
+    /** base item - should be a Selection */
+    @Element
+    IItem root;
+
+    /**
+     * true, if macro recording was started through {@link #KEY_MACRO_RECORD} and not yet stoped with
+     * {@link #KEY_MACRO_STOP}
+     */
+    transient boolean isRecording;
+
+    /** command identifier */
     static final String KEY_COMMAND = ":";
+    /*
+     * available commands
+     */
     static final String KEY_HELP = "help";
+    /** prints system informations */
     static final String KEY_INFO = "info";
+    /** prints all system properties */
     static final String KEY_PROPERTIES = "properties";
+    /** starts macro recording. user input will be stored to {@link #batch} and saved on terminal end. */
+    static final String KEY_MACRO_RECORD = "record";
+    /** stops macro recording */
+    static final String KEY_MACRO_STOP = "stop";
+    /** saves the current state to xml and property files */
     static final String KEY_SAVE = "save";
+    /** quits the terminal */
     static final String KEY_QUIT = "quit";
 
-    public static final String DEFAULT_NAME = "terminal.xml";
+    public static final String PREFIX = "terminal.";
+    
+    /** default script file name */
+    public static final String DEFAULT_NAME = PREFIX + "xml";
 
     public Terminal() {
         initDeserialization();
@@ -105,7 +140,7 @@ public class Terminal implements IItemHandler, Serializable {
 
     @Commit
     protected void initDeserialization() {
-        env = new Properties();
+        env = createEnvironment(definitions);
         in = System.in;
         out = System.out;
     }
@@ -115,7 +150,11 @@ public class Terminal implements IItemHandler, Serializable {
     }
 
     public Terminal(IItem root, InputStream in, PrintStream out) {
-        this(root, in, out, SCREEN_WIDTH, SCREEN_HEIGHT, BLOCK_BAR);
+        this(root, in, out, SCREEN_WIDTH, SCREEN_HEIGHT, BLOCK_BAR, null);
+    }
+
+    public Terminal(IItem root, InputStream in, PrintStream out, int width, int height, int style) {
+        this(root, in, out, width, height, style, null);
     }
 
     /**
@@ -126,7 +165,7 @@ public class Terminal implements IItemHandler, Serializable {
      * @param in
      * @param out
      */
-    public Terminal(IItem root, InputStream in, PrintStream out, int width, int height, int style) {
+    public Terminal(IItem root, InputStream in, PrintStream out, int width, int height, int style, Map<String, Object> defintions) {
         super();
         this.root = root;
         this.in = in;
@@ -134,7 +173,15 @@ public class Terminal implements IItemHandler, Serializable {
         this.width = width;
         this.height = height;
         this.style = style;
-        env = new Properties();
+        this.definitions = defintions;
+        this.env = createEnvironment(defintions);
+    }
+
+    static Properties createEnvironment(Map definitions) {
+        Properties env = new Properties();
+        if (definitions != null)
+            env.putAll(definitions);
+        return env;
     }
 
     public static Terminal create(String file) {
@@ -152,6 +199,12 @@ public class Terminal implements IItemHandler, Serializable {
             LOG.info("starting terminal " + name);
             input = new Scanner(in);
             prepareEnvironment(env, root);
+//            //welcome screen
+            if (!isInBatchMode()) {
+                new AsciiImage().convertToAscii("beanex-logo-small.jpg", new PrintWriter(out), width, height).flush();
+//              printScreen(String.valueOf(FileUtil.getFileData("terminal.welcome.txt", null)), out, null, false);
+                nextLine(in);
+            }
             //if only one tree-item available, go to that item
             if (root instanceof Tree)
                 root = ((Tree) root).delegateToUniqueChild(root, in, out, env);
@@ -167,9 +220,26 @@ public class Terminal implements IItemHandler, Serializable {
         }
     }
 
+    /**
+     * see {@link #definitions}
+     * @return Returns the definitions.
+     */
+    public Map<String, Object> getDefinitions() {
+        return definitions;
+    }
+
+    /**
+     * see {@link #definitions}
+     * @param definitions The definitions to set.
+     */
+    public void setDefinitions(Map<String, Object> definitions) {
+        this.definitions = definitions;
+    }
+
     protected void shutdown() {
         save();
-        String shutdownInfo = "\n|\n|\nSHUTDOWN TERMINAL!\n|\nsaved changes to\n" + name + "\nand\n " + name + ".properties";
+        String shutdownInfo =
+            "\n|\n|\nSHUTDOWN TERMINAL!\n|\nsaved changes to\n" + name + "\nand\n " + name + ".properties";
         printScreen(shutdownInfo, out, null, true);
         LOG.info("terminal " + name + " ended");
     }
@@ -180,13 +250,15 @@ public class Terminal implements IItemHandler, Serializable {
         //replace objects through their toString()
         Properties envCopy = new Properties();
         for (Object k : keys) {
+            //pre defined variables are not content of item properties
+            if (definitions != null && definitions.containsKey(k))
+                continue;
             Object v = env.get(k);
             envCopy.put(k, v instanceof String ? v : StringUtil.toString(v, -1));
         }
         FileUtil.saveProperties(name + ".properties", envCopy);
     }
 
-    @SuppressWarnings({ "unchecked", "rawtypes" })
     private void prepareEnvironment(Properties env, IItem root) {
         Object value = root.getValue();
         if (value != null)
@@ -197,6 +269,10 @@ public class Terminal implements IItemHandler, Serializable {
                 prepareEnvironment(env, c);
             }
         }
+        //to be accessible for actions
+        System.setProperty(PREFIX + "name", name);
+        System.getProperties().put(PREFIX + "width", width);
+        System.getProperties().put(PREFIX + "height", height);
     }
 
     /**
@@ -269,6 +345,10 @@ public class Terminal implements IItemHandler, Serializable {
                     System.getProperties().list(out);
                 } else if (isCommand(input, KEY_INFO)) {
                     printScreen(Environment.createInfo(), out, "", false);
+                } else if (isCommand(input, KEY_MACRO_RECORD)) {
+                    isRecording = true;
+                } else if (isCommand(input, KEY_MACRO_STOP)) {
+                    isRecording = false;
                 } else if (isCommand(input, KEY_SAVE)) {
                     save();
                 } else if (isCommand(input, KEY_QUIT)) {
@@ -306,7 +386,7 @@ public class Terminal implements IItemHandler, Serializable {
     boolean isInBatchMode() {
         return isInBatchMode(in);
     }
-    
+
     static boolean isInBatchMode(InputStream in) {
         return in != System.in;
     }
@@ -342,12 +422,17 @@ public class Terminal implements IItemHandler, Serializable {
      * @return
      */
     private String nextLine(InputStream in) {
-        return nextLine(input, in, out);
+        String line = nextLine(input, in, out);
+        //TODO: refactore to do the recording inside the base static nextLine(..)
+        if (isRecording)
+            batch = batch == null ? line : batch + ", " + line;
+        return line;
     }
-    
+
     static String nextLine(InputStream in, PrintStream out) {
         return nextLine(new Scanner(in), in, out);
     }
+
     static String nextLine(Scanner scanner, InputStream in, PrintStream out) {
         String text = scanner.hasNextLine() ? scanner.nextLine() : null;
         if (isInBatchMode(in))
