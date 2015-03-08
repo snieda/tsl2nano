@@ -230,6 +230,7 @@ public class HtmlUtil {
     public static final String VAL_OPACITY_0_9 = "opacity:0.9;";
     public static final String VAL_TRANSPARENT_INHERIT = "opacity:0.0;";
     public static final String VAL_TRANSPARENT = "background-color: transparent;";
+    public static final String VAL_ROUNDCORNER = "padding:6px;-webkit-border-radius:6px;-moz-border-radius:6px;border-radius:6px;";
 
     public static final String XML_TAG_START = "\\<.*\\>";
     public static final String END_TAG = "/";

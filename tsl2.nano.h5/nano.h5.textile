@@ -615,7 +615,7 @@ Example using the standard summary function of the bean collector on numbers:
 </columnDefinition>
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-Example using the query _sumvalue_ defined in specificcation:
+Example using the query _sumvalue_ defined in specification:
 
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 <columnDefinition>

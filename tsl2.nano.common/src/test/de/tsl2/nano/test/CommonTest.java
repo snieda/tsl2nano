@@ -110,25 +110,6 @@ public class CommonTest {
     }
 
     @Test
-    public void testEncryption() throws Exception {
-        //TODO: define providers
-//        //DES
-//        String str = "dies ist ein einfacher zu verschlüsselnder text";
-//        SymmetricCipher cipher = new SymmetricCipher();
-//        byte[] encrypt = cipher.encrypt(str.getBytes());
-//        LOG.info("text: " + str);
-//        LOG.info("rsa : " + StringUtil.toHexString(encrypt));
-//        assertEquals(str, cipher.decrypt(encrypt));
-//        //RSA
-//        str = "dies ist ein einfacher zu verschlüsselnder text";
-//        cipher = new AsymmetricCipher();
-//        encrypt = cipher.encrypt(str.getBytes());
-//        LOG.info("text: " + str);
-//        LOG.info("des : " + StringUtil.toHexString(encrypt));
-//        assertEquals(str, cipher.decrypt(encrypt));
-    }
-
-    @Test
     public void testStringUtil() throws Exception {
         //split and concat
         String str = "diesisteineinfachertext";
@@ -969,16 +950,17 @@ public class CommonTest {
     
     @Test
     public void testBeanAttributeStress() throws Exception {
+        long stress = 1000000;
     //method access and stress test
         final TypeBean typeBean = new TypeBean();
-        Profiler.si().stressTest("beanutil", 100000000, new Runnable() {
+        Profiler.si().stressTest("beanutil", stress, new Runnable() {
             BeanAttribute ba = BeanAttribute.getBeanAttribute(TypeBean.class, "string");
 
             public void run() {
                 ba.getValue(typeBean);
             }
         });
-        Profiler.si().stressTest("standard", 100000000, new Runnable() {
+        Profiler.si().stressTest("standard", stress, new Runnable() {
             public void run() {
                 typeBean.getString();
             }
@@ -990,7 +972,7 @@ public class CommonTest {
 
         //object creation
 
-        Profiler.si().stressTest("beanutil", 100000000, new Runnable() {
+        Profiler.si().stressTest("beanutil", stress, new Runnable() {
             TypeBean p = null;
             BeanClass bc = BeanClass.getBeanClass(TypeBean.class);
 
@@ -998,7 +980,7 @@ public class CommonTest {
                 p = (TypeBean) bc.createInstance();
             }
         });
-        Profiler.si().stressTest("standard", 100000000, new Runnable() {
+        Profiler.si().stressTest("standard", stress, new Runnable() {
             TypeBean p = null;
 
             public void run() {
@@ -1188,7 +1170,7 @@ public class CommonTest {
 
     @Test
     public void testArrayPerformance() {
-        final int c = 10001;
+        final int c = 1000;
         String description = "Test adding and getting one million elements on:\n0. FloatArray\n1. ArrayList\n2. Typed ArrayList\n3. ArrSegList\n4. LinkedList";
         Profiler.si().compareTests(description, 1000, new Runnable() {
             @Override
@@ -1335,7 +1317,8 @@ public class CommonTest {
         Profiler.si().stressTest("downloader", 1000, new Runnable() {
             @Override
             public void run() {
-                NetUtil.download("http://sourceforge.net/projects/tsl2nano/files/0.7.0/tsl2.nano.h5.0.7.0.jar/download", System.getProperty("user.home") + "/", true, true);
+                //https://sourceforge.net/projects/tsl2nano/files/latest/download?source=navbar
+                NetUtil.download("http://sourceforge.net/projects/tsl2nano/files/0.7.0-beta/tsl2.nano.h5.0.7.0.jar/download", "test/", true, true);
             }
         });
     }

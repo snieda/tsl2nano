@@ -609,7 +609,11 @@ public class Html5Presentation<T> extends BeanPresentationHelper<T> implements I
         return parent;
     }
 
-    private Element createController(ISession session, Element parent, Controller controller, boolean interactive, boolean fullwidth) {
+    private Element createController(ISession session,
+            Element parent,
+            Controller controller,
+            boolean interactive,
+            boolean fullwidth) {
         Element table = appendElement(parent,
             TAG_TABLE,
             /*            ATTR_BORDER,
@@ -637,11 +641,11 @@ public class Html5Presentation<T> extends BeanPresentationHelper<T> implements I
         List<BeanDefinition> v = new ArrayList<>();
         //do the Object-casting trick to cast from List<Object> to List<BeanDefinition>
         Object navigation = Arrays.asList(session.getNavigationStack());
-        v.addAll((List<BeanDefinition>)navigation);
-        v.addAll((Collection<BeanDefinition>)session.getContext());
+        v.addAll((List<BeanDefinition>) navigation);
+        v.addAll((Collection<BeanDefinition>) session.getContext());
         addSessionValues(v);
     }
-    
+
     public static String createMessagePage(String templateName, String message, URL serviceURL) {
         InputStream stream = Environment.getResource(templateName);
         String startPage = String.valueOf(FileUtil.getFileData(stream, null));
@@ -772,14 +776,19 @@ public class Html5Presentation<T> extends BeanPresentationHelper<T> implements I
 
     /**
      * createCollector
-     * @param session 
+     * 
+     * @param session
      * 
      * @param parent parent
      * @param bean collector to create a table for
      * @param interactive if false, no buttons and edit fields are shown
      * @return html table tag
      */
-    Element createCollector(ISession session, Element parent, BeanCollector<Collection<T>, T> bean, boolean interactive, boolean fullwidth) {
+    Element createCollector(ISession session,
+            Element parent,
+            BeanCollector<Collection<T>, T> bean,
+            boolean interactive,
+            boolean fullwidth) {
         /*
          * workaround to enable buttons
          */
@@ -909,7 +918,7 @@ public class Html5Presentation<T> extends BeanPresentationHelper<T> implements I
         //summary
         List<IPresentableColumn> columns = tableDescriptor.getColumnDefinitionsIndexSorted();
         Element sum = appendElement(footerRow, TAG_CELL, content(""));
-        ((Collection<BeanDefinition>)session.getContext()).add(tableDescriptor);
+        ((Collection<BeanDefinition>) session.getContext()).add(tableDescriptor);
         Map contextParameter = new PrivateAccessor<>(session).call("getContextParameter", Map.class);
         boolean hasSummary = false;
         for (IPresentableColumn c : columns) {
@@ -920,7 +929,7 @@ public class Html5Presentation<T> extends BeanPresentationHelper<T> implements I
         }
         if (hasSummary)//show the line only, if at least one entry was set.
             appendElement(sum, TAG_PARAGRAPH, content(CHAR_SUM), ATTR_ALIGN, VAL_ALIGN_CENTER);
-        
+
         //search-count
         footerRow = appendElement(footer, TAG_ROW);
         appendElement(footerRow,
@@ -1194,7 +1203,7 @@ public class Html5Presentation<T> extends BeanPresentationHelper<T> implements I
             /*ATTR_BGCOLOR,
             COLOR_LIGHT_BLUE,*/
             ATTR_STYLE,
-            VAL_TRANSPARENT,
+            VAL_TRANSPARENT + VAL_ROUNDCORNER,
             enable("sortable", true));
         if (Environment.get("html5.table.show.caption", false))
             appendElement(table, "caption", content(title));
@@ -1214,7 +1223,7 @@ public class Html5Presentation<T> extends BeanPresentationHelper<T> implements I
                 "1",
                 ATTR_WIDTH,
                 Presentable.asText(c.getWidth()),
-//                "style",
+                //                "style",
 //                "-webkit-transform: scale(1.2);",
                 ATTR_BGCOLOR,
                 COLOR_LIGHT_GRAY);
@@ -1277,6 +1286,12 @@ public class Html5Presentation<T> extends BeanPresentationHelper<T> implements I
                 "checkbox",
                 enable(ATTR_CHECKED, isSelected));
 
+        String icon =
+            (icon = itemBean.getPresentable().getIcon()) != null ? icon : item instanceof BeanDefinition
+                && (icon = ((BeanDefinition<?>) item).getPresentable().getIcon()) != null ? icon : null;
+        if (icon != null) {
+            appendElement(firstCell, TAG_IMAGE, ATTR_SRC, icon);
+        }
         Collection<IPresentableColumn> colDefs = tableDescriptor.getColumnDefinitionsIndexSorted();
         Element cell;
         String value;

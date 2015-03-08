@@ -40,6 +40,7 @@ import de.tsl2.nano.bean.def.BeanDefinition;
 import de.tsl2.nano.bean.def.BeanPresentationHelper;
 import de.tsl2.nano.bean.def.IPageBuilder;
 import de.tsl2.nano.bean.def.PathExpression;
+import de.tsl2.nano.collection.ExpiringMap;
 import de.tsl2.nano.collection.MapUtil;
 import de.tsl2.nano.core.AppLoader;
 import de.tsl2.nano.core.Environment;
@@ -126,7 +127,7 @@ public class NanoH5 extends NanoHTTPD implements ISystemConnector<Persistence> {
         Environment.registerBundle(NanoH5.class.getPackage().getName() + ".messages", true);
         appstartClassloader = Thread.currentThread().getContextClassLoader();
         Environment.addService(ClassLoader.class, appstartClassloader);
-        sessions = new LinkedHashMap<InetAddress, NanoH5Session>();
+        sessions = new ExpiringMap<InetAddress, NanoH5Session>((long)Environment.get("session.expire.time.minutes", -1l));
         AbstractExpression.registerExpression(new PathExpression().getExpressionPattern(), PathExpression.class);
         AbstractExpression.registerExpression(new RuleExpression().getExpressionPattern(), RuleExpression.class);
         AbstractExpression.registerExpression(new SQLExpression().getExpressionPattern(), SQLExpression.class);
@@ -205,7 +206,7 @@ public class NanoH5 extends NanoHTTPD implements ISystemConnector<Persistence> {
     }
 
     public static int getPort(String serviceURL) {
-        return Integer.valueOf(StringUtil.substring(serviceURL, ":", null));
+        return Integer.valueOf(StringUtil.substring(serviceURL, ":", null, true));
     }
 
     protected String createStartPage() {
