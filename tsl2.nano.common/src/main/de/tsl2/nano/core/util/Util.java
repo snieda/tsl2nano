@@ -189,10 +189,10 @@ public class Util {
     public static final byte[] cryptoHash(byte[] data) {
         return cryptoHash(data, "SHA", 32);
     }
-    
+
     /**
-     * creates a hash for the given data. use {@link StringUtil#toHexString(byte[])} to convert the result to a more readable
-     * string.
+     * creates a hash for the given data. use {@link StringUtil#toHexString(byte[])} to convert the result to a more
+     * readable string.
      * 
      * @param data data to hash
      * @param algorithm one of MD2, MD5, SHA, SHA-1, SHA-256, SHA-384, SHA-512
@@ -236,7 +236,19 @@ public class Util {
     }
 
     /**
-     * value
+     * value of array at given
+     * 
+     * @param arr array
+     * @param index array index for value
+     * @param defaultValue default value, if array does not contain a value at the given index.
+     * @return value of array at given index, or if null or not existing, the defaultValue
+     */
+    public static <T> T value(T[] arr, int index, T defaultValue) {
+        return arr.length > index && arr[index] != null ? arr[index] : defaultValue;
+    }
+
+    /**
+     * if given value is not null, it will be used/returned. if it is null, the defaultValue will be used/returned
      * 
      * @param objects object to check
      * @param defaultValue
@@ -344,6 +356,19 @@ public class Util {
                 result.add(action.run(i));
         }
         return result;
+    }
+
+    /**
+     * convenience to get a system property. if not defined, the default value will be returned
+     * 
+     * @param name system property name
+     * @param defaultValue system property default
+     * @return value or default value
+     */
+    @SuppressWarnings("unchecked")
+    public static <T> T get(String name, T defaultValue) {
+        Object result = System.getProperties().get(name);
+        return (T) (result != null ? result : defaultValue);
     }
 
     /**

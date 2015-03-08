@@ -9,14 +9,14 @@
  */
 package de.tsl2.nano.structure;
 
-
-
 /**
+ * a connection with one end - the destination and a description of that connection. useful on trees and nets.
  * 
  * @author Tom
- * @version $Revision$ 
+ * @version $Revision$
  */
 public interface IConnection<CORE, DESCRIPTOR> {
     INode<CORE, DESCRIPTOR> getDestination();
+
     DESCRIPTOR getDescriptor();
 }

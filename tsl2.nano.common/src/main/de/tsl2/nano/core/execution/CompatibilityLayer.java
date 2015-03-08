@@ -113,6 +113,10 @@ public class CompatibilityLayer {
         }
     }
 
+    public void runOptionalMain(String className, String... args) {
+        runOptional(className, "main", new Class[]{String[].class}, new Object[]{args});
+    }
+
     public Object runOptional(String className, String methodName, Class[] par, Object... args) {
         try {
             return BeanClass.createBeanClass(className).callMethod(null, methodName, par, args);

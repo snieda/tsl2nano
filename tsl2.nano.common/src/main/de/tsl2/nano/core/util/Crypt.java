@@ -1,22 +1,19 @@
 package de.tsl2.nano.core.util;
 
-import java.io.BufferedInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.UnsupportedEncodingException;
 import java.security.Key;
+import java.security.NoSuchAlgorithmException;
 import java.security.Provider;
 import java.security.SecureRandom;
 import java.security.Security;
 import java.security.spec.AlgorithmParameterSpec;
 
-import javax.crypto.BadPaddingException;
 import javax.crypto.Cipher;
 import javax.crypto.CipherInputStream;
-import javax.crypto.IllegalBlockSizeException;
 import javax.crypto.KeyGenerator;
 import javax.crypto.SecretKeyFactory;
-import javax.crypto.ShortBufferException;
 import javax.crypto.spec.IvParameterSpec;
 import javax.crypto.spec.PBEKeySpec;
 import javax.crypto.spec.PBEParameterSpec;
@@ -27,6 +24,8 @@ import org.apache.commons.logging.Log;
 import sun.misc.BASE64Decoder;
 import sun.misc.BASE64Encoder;
 import de.tsl2.nano.core.ManagedException;
+import de.tsl2.nano.core.classloader.NetworkClassLoader;
+import de.tsl2.nano.core.execution.CompatibilityLayer;
 import de.tsl2.nano.core.log.LogFactory;
 
 /**
@@ -152,10 +151,11 @@ public class Crypt {
         paramSpec = createParamSpec(algorithm);
     }
 
-    private static void preInit() {
+    private static void preInit(String algorithm) {
         if (LOG.isDebugEnabled()) {
             LOG.debug(providers());
         }
+        provide(algorithm);
     }
 
     private static String providers() {
@@ -165,6 +165,22 @@ public class Crypt {
             ps.append("\t" + providers[i].getInfo() + "\n");
         }
         return ps.toString();
+    }
+
+    private static void provide(String algorithm) {
+        try {
+            SecretKeyFactory.getInstance(algorithm);
+        } catch (Exception e) {
+            downloadProvider(algorithm);
+        }
+    }
+    
+    private static void downloadProvider(String algorithm2) {
+        ClassLoader cl = Thread.currentThread().getContextClassLoader();
+        if (cl instanceof NetworkClassLoader) {
+            //if available we try to download bouncycastle through maven
+            new CompatibilityLayer().runOptionalMain("de.tsl2.nano.jarresolver.JarResolver", "org.bouncycastle");
+        }
     }
 
     private static AlgorithmParameterSpec createParamSpec(String algorithm) {
@@ -184,7 +200,7 @@ public class Crypt {
      * Generates the password based encryption key (PBE). using the given algorithm
      */
     private static Key generateSecretKey(byte[] pwd, String algorithm) {
-        preInit();
+        preInit(algorithm);
         try {
             SecretKeyFactory keyFac = SecretKeyFactory.getInstance(algorithm);
             return keyFac.generateSecret(new SecretKeySpec(pwd, algorithm));
@@ -198,7 +214,7 @@ public class Crypt {
      * Generates the password based encryption key (PBE). using the given algorithm
      */
     private static Key generatePBEKey(char[] pwd, String algorithm) {
-        preInit();
+        preInit(algorithm);
         try {
             PBEKeySpec pbeKeySpec = new PBEKeySpec(pwd);
             SecretKeyFactory keyFac = SecretKeyFactory.getInstance(algorithm);
@@ -216,7 +232,7 @@ public class Crypt {
      * @return
      */
     private static Key generateRandomKey(String algorithm) {
-        preInit();
+        preInit(algorithm);
         try {
             //for key generation use only the algorithm name like AES (not AES/CBC/PKCS5Padding)
             algorithm = StringUtil.substring(algorithm, null, "/");
@@ -343,7 +359,15 @@ public class Crypt {
     }
 
     static Cipher cipher(String algorithm, int mode, Key key, AlgorithmParameterSpec spec) throws Exception {
-        Cipher cipher = Cipher.getInstance(algorithm);
+        Cipher cipher = null;
+        try {
+            cipher = Cipher.getInstance(algorithm);
+        } catch (NoSuchAlgorithmException ex) {
+            downloadProvider(algorithm);
+            cipher = Cipher.getInstance(algorithm);
+            if (cipher == null)
+                throw ex;
+        }
         cipher.init(mode, key, spec);
         return cipher;
     }

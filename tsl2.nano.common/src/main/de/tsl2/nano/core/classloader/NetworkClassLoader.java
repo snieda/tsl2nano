@@ -47,6 +47,21 @@ public class NetworkClassLoader extends NestedJarClassLoader {
     String environment;
 
     /**
+     * convenience to create an network-url-classloader on given directories and registering it to the current thread.
+     * 
+     * @param directories to search jar files from
+     * @return new classloader, searching classes in the nested jar, on the given directories and on the network using maven...
+     */
+    public static NetworkClassLoader createAndRegister(String... directories) {
+        NetworkClassLoader cl = new NetworkClassLoader(Thread.currentThread().getContextClassLoader());
+        for (int i = 0; i < directories.length; i++) {
+            cl.addLibraryPath(directories[i]);
+        }
+        Thread.currentThread().setContextClassLoader(cl);
+        return cl;
+    }
+
+    /**
      * constructor
      * 
      * @param parent

@@ -279,21 +279,20 @@ public class Environment {
 
     public static String createInfo() {
         String info =
-            "    build : ${build.info}\n"
-                + "    args  : ${sun.java.command}\n"
-                + "    dir   : ${user.dir}\n"
-                + "    time  : ${nano.tstamp}\n"
-                + "    user  : ${user.name}, home: ${user.home}\n"
-                + "    lang  : ${user.country}_${user.language}, encoding: ${sun.jnu.encoding}\n"
-                + "    encode: ${file.encoding}\n"
-                + "    loader: ${main.context.classloader}\n"
-                + "    java  : ${java.runtime.version}, ${java.home}\n"
-                + "    memory: ${memory}"
-                + "    disc  : ${disc}"
-                + "    os    : ${os.name}, ${os.version} ${sun.os.patch.level} ${os.arch}\n"
-                + "    system: ${sun.cpu.isalist} ${sun.arch.data.model}\n"
-                + "    procs : ${processors}"
-                + "    net-ip: ${inetadress.myip}\n";
+            "  build : ${build.info}\n"
+                + "  args  : ${sun.java.command}\n"
+                + "  dir   : ${user.dir}\n"
+                + "  time  : ${nano.tstamp}\n"
+                + "  user  : ${user.name}, home: ${user.home}\n"
+                + "  lang  : ${user.country}_${user.language}, encoding: ${sun.jnu.encoding}\n"
+                + "  encode: ${file.encoding}\n"
+                + "  loader: ${main.context.classloader}\n"
+                + "  java  : ${java.runtime.version}, ${java.home}\n"
+                + "  memory: ${memory}\n"
+                + "  discs : ${disc}\n"
+                + "  os    : ${os.name}, ${os.version} ${sun.os.patch.level} ${os.arch}\n"
+                + "  system: ${sun.cpu.isalist} ${sun.arch.data.model} x${processors}\n"
+                + "  net-ip: ${inetadress.myip}\n";
         Properties p = new Properties();
         p.putAll(System.getProperties());
         p.put("nano.tstamp", new Date());
@@ -309,7 +308,7 @@ public class Environment {
         File[] roots = File.listRoots();
         StringBuilder f = new StringBuilder();
         for (int i = 0; i < roots.length; i++) {
-            f.append(roots[i].getName() + "(" + BitUtil.amount(roots[i].getFreeSpace()) + " / " + BitUtil.amount(roots[i].getTotalSpace()));
+            f.append(roots[i].getName() + "(" + roots[i] + " " + BitUtil.amount(roots[i].getFreeSpace()) + "/" + BitUtil.amount(roots[i].getTotalSpace()) + ")");
         }
         p.put("disc", f.toString());
         p.put("build.info", getBuildInformations());

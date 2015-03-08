@@ -11,6 +11,8 @@ package de.tsl2.nano.core.util;
 
 import java.math.BigInteger;
 import java.text.MessageFormat;
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.Map;
 import java.util.Properties;
@@ -584,6 +586,27 @@ public class StringUtil {
         return buf.toString();
     }
 
+    /**
+     * delegates to {@link #format(String, int, String, String)}
+     */
+    public static final String format(String text, int maxLineWidth) {
+        return format(text, maxLineWidth, "\n");
+    }
+    
+    /**
+     * formats the given text into given line length
+     * @param text text to format
+     * @param maxLineWidth maximum line width
+     */
+    public static final String format(String text, int maxLineWidth, String CR) {
+        String items[] = text.split(CR);
+        ArrayList<String> lines = new ArrayList<String>();
+        for (int i = 0; i < items.length; i++) {
+            lines.addAll(Arrays.asList(StringUtil.split(items[i], maxLineWidth)));
+        }
+        return StringUtil.concat(CR.toCharArray(), lines.toArray());
+    }
+    
     public static final String findRegExp(String text, String regex, int start) {
         final Matcher matcher = Pattern.compile(regex).matcher(text);
         return matcher.find(start) ? matcher.group() : null;

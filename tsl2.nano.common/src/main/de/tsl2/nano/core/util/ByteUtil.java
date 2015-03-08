@@ -21,6 +21,7 @@ import java.io.PipedOutputStream;
 import java.io.PrintStream;
 import java.io.Serializable;
 import java.util.Arrays;
+import java.util.Locale;
 
 import org.apache.commons.logging.Log;
 
@@ -224,6 +225,16 @@ public class ByteUtil extends Util {
         }
     }
 
+    /**
+     * toString
+     * @param stream source
+     * @param encoding (optional) if null, the system file.encoding will be used. e.g.: UTF-8
+     * @return stream read into a string
+     */
+    public static final String toString(InputStream stream, String encoding) {
+        return String.valueOf(FileUtil.getFileData(stream, encoding != null ? encoding : get("file.encoding", "UTF-8")));
+    }
+    
     /**
      * @return piped stream
      */

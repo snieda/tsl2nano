@@ -31,10 +31,10 @@ public class TimedReferences<T> {
     Log LOG = LogFactory.getLog(TimedReferences.class);
     
     /** definition of time to be hold (temporarily) */
-    static final long PERIOD_TO_BE_OLD = 1000 * 60;
-    long periodToBeOld = PERIOD_TO_BE_OLD;
+    static final long TIMEOUT = 1000 * 60;
+    long periodToBeOld = TIMEOUT;
     
-    /** storing all values with a timestamp - to be removed after {@link #PERIOD_TO_BE_OLD} */
+    /** storing all values with a timestamp - to be removed after {@link #TIMEOUT} */
     Map<Long, T> tempHardRefs = new LinkedHashMap<Long, T>();
     long lastRemove = 0;
 
@@ -83,7 +83,7 @@ public class TimedReferences<T> {
      * isLongPeriod
      * 
      * @param time time to be evaluated
-     * @return true, if time is older than {@link #PERIOD_TO_BE_OLD}
+     * @return true, if time is older than {@link #TIMEOUT}
      */
     private boolean isLongPeriod(long time) {
         return System.currentTimeMillis() - time > periodToBeOld;
@@ -92,14 +92,14 @@ public class TimedReferences<T> {
     /**
      * @return Returns the periodToBeOld.
      */
-    public long getPeriodToBeOld() {
+    public long getTimeout() {
         return periodToBeOld;
     }
 
     /**
      * @param periodToBeOld The periodToBeOld to set.
      */
-    public void setPeriodToBeOld(long periodToBeOld) {
+    public void setTimeout(long periodToBeOld) {
         this.periodToBeOld = periodToBeOld;
     }
     

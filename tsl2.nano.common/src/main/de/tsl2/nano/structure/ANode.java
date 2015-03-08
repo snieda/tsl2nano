@@ -18,9 +18,10 @@ import de.tsl2.nano.messaging.EventController;
 import de.tsl2.nano.messaging.IListener;
 
 /**
+ * see {@link INode}
  * 
  * @author Tom
- * @version $Revision$ 
+ * @version $Revision$
  */
 public class ANode<T, D> implements INode<T, D> {
     /** the nodes real object */
@@ -29,7 +30,7 @@ public class ANode<T, D> implements INode<T, D> {
     protected List<IConnection<T, D>> connections;
     /** controller, handling notification events for other nodes */
     protected EventController controller;
-    
+
     /**
      * @return Returns the {@link #core}.
      */
@@ -74,12 +75,23 @@ public class ANode<T, D> implements INode<T, D> {
      */
     @SuppressWarnings("rawtypes")
     public IConnection<T, D> connect(ANode<T, D> destination, D descriptor) {
-        IConnection<T, D> connection = new AConnection<T, D>(destination, descriptor);
+        IConnection<T, D> connection = createConnection(destination, descriptor);
         connections.add(connection);
         if (connection instanceof IListener)
-        getController().addListener(((IListener) connection));
+            getController().addListener(((IListener) connection));
 
         return connection;
+    }
+
+    /**
+     * creates a connection instance
+     * 
+     * @param destination node to connect to
+     * @param descriptor connection description
+     * @return new created connection
+     */
+    protected IConnection<T, D> createConnection(ANode<T, D> destination, D descriptor) {
+        return new AConnection<T, D>(destination, descriptor);
     }
 
 //    public List<T> createChildNodes(List<T> items) {
@@ -125,4 +137,24 @@ public class ANode<T, D> implements INode<T, D> {
                 CollectionUtil.copyOfRange(nodeFilters, 1, nodeFilters.length));
     }
 
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public int hashCode() {
+        final int prime = 31;
+        int result = 1;
+        result = prime * result + ((core == null) ? 0 : core.hashCode());
+        return result;
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public boolean equals(Object obj) {
+        if (this == obj)
+            return true;
+        return hashCode() == obj.hashCode();
+    }
 }

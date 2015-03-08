@@ -59,7 +59,7 @@ public class TimedReferenceMap<V> extends ReferenceMap<Object, V> {
      * @param timeToBeOld
      */
     public void setTimeToBeOld(long timeToBeOld) {
-        timedReferences.setPeriodToBeOld(timeToBeOld);
+        timedReferences.setTimeout(timeToBeOld);
     }
 
     /**

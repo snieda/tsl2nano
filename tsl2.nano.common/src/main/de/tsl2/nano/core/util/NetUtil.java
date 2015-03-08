@@ -229,7 +229,7 @@ public class NetUtil {
      */
     public static File download(URL url, String destDir, boolean flat, boolean overwrite) {
         try {
-            String fileName = flat ? new File(url.getFile()).getName() : getFileName(url);
+            String fileName = flat ? new File(FileUtil.getValidFileName(url.getFile())).getName() : getFileName(url);
             destDir = destDir == null ? System.getProperty("user.dir") : destDir;
             fileName = (destDir.endsWith("/") ? destDir : destDir + "/") + fileName;
             File file = new File(fileName);
