@@ -18,6 +18,7 @@ import de.tsl2.nano.core.ManagedException;
 import de.tsl2.nano.core.util.StringUtil;
 import de.tsl2.nano.messaging.EventController;
 import de.tsl2.nano.messaging.IListener;
+import de.tsl2.nano.structure.ANode;
 import de.tsl2.nano.structure.IConnection;
 
 /**
@@ -182,17 +183,6 @@ public class Node<T extends IListener<Notification> & ILocatable & Serializable 
      * {@inheritDoc}
      */
     @Override
-    public int hashCode() {
-        final int prime = 31;
-        int result = 1;
-        result = prime * result + ((core == null) ? 0 : core.hashCode());
-        return result;
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    @Override
     public boolean equals(Object obj) {
         if (this == obj)
             return true;
@@ -207,6 +197,11 @@ public class Node<T extends IListener<Notification> & ILocatable & Serializable 
         return core.compareTo(o.core);
     }
 
+    @Override
+    protected IConnection<T, D> createConnection(ANode<T, D> destination, D descriptor) {
+        return new Connection((Node) destination, descriptor);
+    }
+    
     /**
      * {@inheritDoc}
      */

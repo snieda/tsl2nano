@@ -9,9 +9,12 @@
  */
 package de.tsl2.nano.incubation.terminal;
 
+import java.io.File;
 import java.io.InputStream;
 import java.io.PrintStream;
+import java.io.PrintWriter;
 import java.io.Serializable;
+import java.io.StringWriter;
 import java.text.ParseException;
 import java.util.Properties;
 
@@ -22,6 +25,7 @@ import org.simpleframework.xml.core.Commit;
 import de.tsl2.nano.bean.def.Constraint;
 import de.tsl2.nano.bean.def.IConstraint;
 import de.tsl2.nano.core.ManagedException;
+import de.tsl2.nano.core.Messages;
 import de.tsl2.nano.core.util.StringUtil;
 import de.tsl2.nano.core.util.Util;
 import de.tsl2.nano.incubation.vnet.workflow.Condition;
@@ -32,6 +36,7 @@ import de.tsl2.nano.incubation.vnet.workflow.Condition;
  * @author Tom
  * @version $Revision$
  */
+@SuppressWarnings("rawtypes")
 public class AItem<T> implements IItem<T>, Serializable {
     /** serialVersionUID */
     private static final long serialVersionUID = 7142058494650831052L;
@@ -47,10 +52,15 @@ public class AItem<T> implements IItem<T>, Serializable {
     Condition condition;
 
     T value;
-    transient IItem<?> parent;
+    transient IContainer parent;
     transient byte[] origin;
     transient StringBuilder prefix = new StringBuilder("( ) ");
     transient boolean changed;
+    /**
+     * if description is null, the constraints toString() will be used. if description is an image file name, this image
+     * will be converted to an ascii text.
+     */
+    @Element(required=false)
     private String description;
 
     static final int PREFIX = 1;
@@ -76,9 +86,12 @@ public class AItem<T> implements IItem<T>, Serializable {
         this.name = name;
         this.type = type;
         this.value = value;
-        this.description = description;
-
+        initDescription(description);
         initConstraints(constraints);
+    }
+
+    private void initDescription(String description2) {
+
     }
 
     @SuppressWarnings("unchecked")
@@ -139,14 +152,14 @@ public class AItem<T> implements IItem<T>, Serializable {
 
     @Override
     public String ask(Properties env) {
-        String ask = "Please enter a " + constraints.getType().getSimpleName();
+        String ask = constraints.getType().getSimpleName();
         if (constraints.getMinimum() != null || constraints.getMaximum() != null) {
             ask += " between " + constraints.getMinimum() != null ? constraints.getMinimum() : "<any>"
                 + constraints.getMaximum() != null ? constraints.getMaximum() : "<any>";
         } else if (constraints.getAllowedValues() != null) {
             ask += " as one of: " + StringUtil.toString(constraints.getAllowedValues(), 60);
         }
-        return ask + POSTFIX_QUESTION;
+        return Messages.getFormattedString("tsl2nano.entervalue", ask, StringUtil.toFirstUpper(name)) + POSTFIX_QUESTION;
     }
 
     /**
@@ -159,7 +172,7 @@ public class AItem<T> implements IItem<T>, Serializable {
     /**
      * {@inheritDoc}
      */
-    @SuppressWarnings({ "unchecked", "rawtypes" })
+    @SuppressWarnings({ "unchecked" })
     @Override
     public IItem react(IItem caller, String input, InputStream in, PrintStream out, Properties env) {
         try {
@@ -174,7 +187,7 @@ public class AItem<T> implements IItem<T>, Serializable {
         } catch (ParseException e) {
             ManagedException.forward(e);
         }
-        return caller == this ? getParent() : this;
+        return caller == this ? getParent().next(in, out, env) : this;
     }
 
     /**
@@ -204,12 +217,29 @@ public class AItem<T> implements IItem<T>, Serializable {
     }
 
     /**
-     * {@inheritDoc}
+     * {@inheritDoc}.
+     * <p/>
+     * see {@link #description}.
      */
     @Override
     public String getDescription(Properties env, boolean full) {
-        if (description == null)
+        //if sequential mode, show the parents (-->tree) description
+        if (Util.get(Terminal.KEY_SEQUENTIAL, false)  && getParent() != null) {
+            return getParent().getDescription(env, full);
+        } else if (description == null) {
             description = getConstraints() != null ? getConstraints().toString() : name;
+        } else if (full && hasFileDescription()) {
+            StringWriter stream = new StringWriter();
+            try {
+                Terminal.printAsciiImage(description, new PrintWriter(stream), Util.get(Terminal.KEY_WIDTH, 80),
+                    Util.get(Terminal.KEY_HEIGHT, 20), false, false);
+                new AsciiImage().convertToAscii(description, new PrintWriter(stream), Util.get(Terminal.KEY_WIDTH, 80),
+                    Util.get(Terminal.KEY_HEIGHT, 20));
+                return stream.toString();
+            } catch (Exception e) {
+                ManagedException.forward(e);
+            }
+        }
         return description;
     }
 
@@ -218,10 +248,19 @@ public class AItem<T> implements IItem<T>, Serializable {
     }
 
     /**
+     * hasFileDescription
+     * 
+     * @return true, if description points to a file
+     */
+    protected boolean hasFileDescription() {
+        return description != null && new File(description).exists();
+    }
+
+    /**
      * {@inheritDoc}
      */
     @Override
-    public IItem getParent() {
+    public IContainer getParent() {
         return parent;
     }
 
@@ -229,7 +268,7 @@ public class AItem<T> implements IItem<T>, Serializable {
      * @param parent The {@link #parent} to set.
      */
     @Override
-    public void setParent(IItem parent) {
+    public void setParent(IContainer parent) {
         this.parent = parent;
     }
 

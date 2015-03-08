@@ -1,13 +1,13 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<terminal name="terminal.xml" width="79" height="22" style="1">
+<terminal name="terminal.xml" width="79" height="22" style="1" bars="true" useNetworkExtension="true">
    <definition name="file.operation.delete">
       <value class="java.lang.String">test</value>
    </definition>
    <definition name="image.out">
       <value class="java.lang.String">-out</value>
    </definition>
-   <root class="de.tsl2.nano.incubation.terminal.Tree" name="Toolbox" type="Tree">
-      <item class="de.tsl2.nano.incubation.terminal.Tree" name="Printing" type="Tree">
+   <root class="de.tsl2.nano.incubation.terminal.Container" name="Toolbox" type="Container">
+      <item class="de.tsl2.nano.incubation.terminal.Container" name="Printing" type="Container">
          <item class="de.tsl2.nano.incubation.terminal.Input" name="source" type="Input">
             <constraints type="java.lang.String" nullable="false" length="-1">
                <scale>-1</scale>
@@ -27,6 +27,9 @@
                <scale>-1</scale>
                <precision>-1</precision>
             </constraints>
+            <description>Constraint(class java.lang.String, length: -1, mandatory: false, 
+	range: null - null, 
+	format: *)</description>
             <value class="java.lang.String">test</value>
          </item>
          <item class="de.tsl2.nano.incubation.terminal.Input" name="mimetype" type="Input">
@@ -77,6 +80,7 @@
             <condition>
                <expression>quality=NORMAL</expression>
             </condition>
+            <description>print</description>
             <mainClass>de.tsl2.nano.core.util.PrintUtil</mainClass>
             <method>main</method>
             <argNames length="10">
@@ -93,7 +97,7 @@
             </argNames>
          </item>
       </item>
-      <item class="de.tsl2.nano.incubation.terminal.Tree" name="Crypt" type="Tree">
+      <item class="de.tsl2.nano.incubation.terminal.Container" name="Crypt" type="Container">
          <item class="de.tsl2.nano.incubation.terminal.Input" name="password" type="Input">
             <constraints type="java.lang.String" nullable="true" length="-1">
                <scale>-1</scale>
@@ -139,7 +143,7 @@
             </argNames>
          </item>
       </item>
-      <item class="de.tsl2.nano.incubation.terminal.Tree" name="Permutator" type="Tree">
+      <item class="de.tsl2.nano.incubation.terminal.Container" name="Permutator" type="Container">
          <item class="de.tsl2.nano.incubation.terminal.Input" name="source" type="Input">
             <constraints type="java.lang.String" nullable="false" length="-1">
                <scale>-1</scale>
@@ -175,7 +179,7 @@
             </argNames>
          </item>
       </item>
-      <item class="de.tsl2.nano.incubation.terminal.Tree" name="Xml" type="Tree">
+      <item class="de.tsl2.nano.incubation.terminal.Container" name="Xml" type="Container">
          <item class="de.tsl2.nano.incubation.terminal.Input" name="source" type="Input">
             <constraints type="java.lang.String" nullable="false" length="-1">
                <scale>-1</scale>
@@ -205,14 +209,14 @@
             </argNames>
          </item>
       </item>
-      <item class="de.tsl2.nano.incubation.terminal.Tree" name="Net" type="Tree">
-         <item class="de.tsl2.nano.incubation.terminal.Tree" name="Scan" type="Tree">
+      <item class="de.tsl2.nano.incubation.terminal.Container" name="Net" type="Container">
+         <item class="de.tsl2.nano.incubation.terminal.Container" name="Scan" type="Container">
             <item class="de.tsl2.nano.incubation.terminal.Input" name="ip" type="Input">
                <constraints type="java.lang.String" nullable="true" length="-1">
                   <scale>-1</scale>
                   <precision>-1</precision>
                </constraints>
-               <value class="java.lang.String">192.168.56.1</value>
+               <value class="java.lang.String">192.168.178.21</value>
             </item>
             <item class="de.tsl2.nano.incubation.terminal.Input" name="lowest-port" type="Input">
                <constraints type="java.lang.Integer" nullable="true" length="-1">
@@ -238,7 +242,7 @@
                </argNames>
             </item>
          </item>
-         <item class="de.tsl2.nano.incubation.terminal.Tree" name="WCopy" type="Tree">
+         <item class="de.tsl2.nano.incubation.terminal.Container" name="WCopy" type="Container">
             <item class="de.tsl2.nano.incubation.terminal.Input" name="url" type="Input">
                <constraints type="java.lang.String" nullable="false" length="-1">
                   <scale>-1</scale>
@@ -280,7 +284,7 @@
             <argNames length="0"/>
          </item>
       </item>
-      <item class="de.tsl2.nano.incubation.terminal.Tree" name="File-Operation" type="Tree">
+      <item class="de.tsl2.nano.incubation.terminal.Container" name="File-Operation" type="Container">
          <item class="de.tsl2.nano.incubation.terminal.Input" name="directory" type="Input">
             <constraints type="java.lang.String" nullable="true" length="-1">
                <scale>-1</scale>

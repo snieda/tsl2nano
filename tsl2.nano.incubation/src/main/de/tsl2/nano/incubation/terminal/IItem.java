@@ -70,10 +70,10 @@ public interface IItem<T> {
     boolean isEditable();
 
     /** items parent */
-    IItem getParent();
+    IContainer getParent();
 
     /** used by framework */
-    void setParent(IItem parent);
+    void setParent(IContainer parent);
 
     /** shows informations like edited, duty, type of input. */
     String getPresentationPrefix();
@@ -83,5 +83,5 @@ public interface IItem<T> {
 }
 
 enum Type implements Serializable {
-    Input, Option, Tree, Action;
+    Input, Option, Container, Action;
 }

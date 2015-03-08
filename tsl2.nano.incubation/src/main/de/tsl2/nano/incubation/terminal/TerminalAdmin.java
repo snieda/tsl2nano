@@ -26,21 +26,21 @@ public class TerminalAdmin extends Terminal {
 
     public static final String ADMIN = "admin";
 
-    ITree items;
+    IContainer items;
     
     @SuppressWarnings({ "unchecked", "rawtypes" })
     public static TerminalAdmin create(String filename) {
         final TerminalAdmin t = new TerminalAdmin();
-        final Tree s = new Tree(filename, "edit terminal");
+        final Container s = new Container(filename, "edit terminal");
         t.root = s;
-        t.items = new Tree(filename, "MyTerminal");
+        t.items = new Container(filename, "MyTerminal");
         s.add(new Input("name", null, filename, "Terminal name"));
         s.add(new Input("width", null, TextTerminal.SCREEN_WIDTH, "Terminal width"));
         s.add(new Input("height", null, TextTerminal.SCREEN_HEIGHT, "Terminal height"));
         s.add(new Input("style", null, TextTerminal.BLOCK_BAR, "Terminal style"));
         
-        ITree creator;
-        s.add(creator = new Tree("items", "terminal items"));
+        IContainer creator;
+        s.add(creator = new Container("items", "terminal items"));
         creator.add(new Input("name", null, "<undefined>", "Item name"));
         creator.add(new Input("type", null, Type.Input, "Item type"));
         creator.add(new Input("default", null, "", "Items default value"));

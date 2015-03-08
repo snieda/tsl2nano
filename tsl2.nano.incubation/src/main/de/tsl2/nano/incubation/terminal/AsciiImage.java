@@ -25,10 +25,10 @@ public class AsciiImage {
 //    /** scan rate, higher numbers will down-scale the image */
 //    int rate = 10;
     /** RGB weights */
-    double RGB[] = new double[] { 0.30, 0.11, 0.59 };
+    static final double RGB[] = new double[] { 0.30, 0.11, 0.59 };
 
     /** the character mapping for the range 0-250 as indexes of 0-25. */
-    char CHARS[] = {
+    static final char CHARS[] = {
         '@', '@', '@', '@', '@', '@',
         '#', '#',
         '8', '8', '8',
@@ -41,7 +41,7 @@ public class AsciiImage {
     };
 
     /** 4-gray shades with bars */
-    char BARS[] = {
+    static final char BARS[] = {
         0xDB, 0xDB, 0xDB, 0xDB, 0xDB, 0xDB,
         0xDB, 0xDB,
         0xB2, 0xB2, 0xB2,
@@ -52,6 +52,29 @@ public class AsciiImage {
         0xB0, 0xB0, 0xB0,
         ' ', ' '
     };
+
+    /** charset. see {@link #CHARS} or {@link #BARS} */
+    char[] charset;
+    /** rgb transformation. see {@link #RGB} */
+    double[] trgb;
+
+    /**
+     * constructor
+     */
+    public AsciiImage() {
+        this(BARS, RGB);
+    }
+
+    /**
+     * constructor
+     * 
+     * @param charset
+     * @param trgb
+     */
+    public AsciiImage(char[] charset, double[] trgb) {
+        this.charset = charset;
+        this.trgb = trgb;
+    }
 
     /**
      * delegates to {@link #convertToAscii(String)} creating an own printwriter
@@ -76,7 +99,10 @@ public class AsciiImage {
      * @throws Exception
      */
     public PrintWriter convertToAscii(String image, PrintWriter printer, int width, int height) throws Exception {
-        BufferedImage img = ImageIO.read(new File(image));
+        return convertToAscii(ImageIO.read(new File(image)), printer, width, height);
+    }
+
+    public PrintWriter convertToAscii(BufferedImage img, PrintWriter printer, int width, int height) throws Exception {
         double px;
         Color pxColor;
         StringBuilder buf = new StringBuilder(img.getWidth());
@@ -100,7 +126,7 @@ public class AsciiImage {
                             continue;
                         pxColor = new Color(img.getRGB(x + rx, y + ry));
                         px +=
-                            (((pxColor.getRed() * RGB[0]) + (pxColor.getGreen() * RGB[1]) + (pxColor.getBlue() * RGB[2])));
+                            (((pxColor.getRed() * trgb[0]) + (pxColor.getGreen() * trgb[1]) + (pxColor.getBlue() * trgb[2])));
                     }
                 }
                 px = px / (xrate * yrate);
@@ -113,7 +139,7 @@ public class AsciiImage {
     }
 
     public char ascii(double g) {
-        return BARS[((int) g / 10)];
+        return charset[((int) g / 10)];
     }
 
     public static void main(String[] args) {

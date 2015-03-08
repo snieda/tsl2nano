@@ -24,6 +24,10 @@ import java.util.Map;
 import java.util.Properties;
 import java.util.Scanner;
 import java.util.Set;
+import java.util.Timer;
+import java.util.concurrent.TimeUnit;
+
+import javax.imageio.ImageIO;
 
 import org.apache.commons.logging.Log;
 import org.simpleframework.xml.Attribute;
@@ -35,12 +39,14 @@ import de.tsl2.nano.core.Environment;
 import de.tsl2.nano.core.Finished;
 import de.tsl2.nano.core.ManagedException;
 import de.tsl2.nano.core.Messages;
+import de.tsl2.nano.core.classloader.NetworkClassLoader;
 import de.tsl2.nano.core.log.LogFactory;
 import de.tsl2.nano.core.util.ByteUtil;
 import de.tsl2.nano.core.util.FileUtil;
 import de.tsl2.nano.core.util.StringUtil;
 import de.tsl2.nano.core.util.Util;
 import de.tsl2.nano.core.util.XmlUtil;
+import de.tsl2.nano.util.SchedulerUtil;
 
 /**
  * Terminal showing a textual manual. The configuration can be read through an xml file (standard name:
@@ -60,6 +66,11 @@ import de.tsl2.nano.core.util.XmlUtil;
  * - workflow conditions: items are active if an optional condition is true
  * - if an item container (a tree) has only one visible item (perhaps filtered through conditions), it delegates directly to that item
  * - actions get the entire environment properties (including system properties) on calling run().
+ * - sequential mode: if true, all tree items will be asked for in a sequential mode.
+ * - show ascii-pictures (transformed from pixel-images) for an item (description must point to an image file)
+ * - extends itself downloading required jars from network (if {@link #useNetworkExtension} ist true)
+ * - schedule mode: starts a scheduler for an action
+ * 
  * </pre>
  * 
  * @author Tom
@@ -87,6 +98,8 @@ public class Terminal implements IItemHandler, Serializable {
     int height = SCREEN_HEIGHT;
     @Attribute
     int style = BLOCK_BAR;
+    @Attribute
+    boolean bars = true;
     /** item properties */
     transient Properties env;
 
@@ -94,8 +107,8 @@ public class Terminal implements IItemHandler, Serializable {
      * predefined variables (not changable through user input) copied to the {@link #env} but not saved in property
      * file. mostly technical definitions.
      */
-    @ElementMap(entry = "definition", attribute=true, inline = true, keyType = String.class, key = "name", required=false, value="value", valueType = Object.class)
-    Map <String, Object> definitions;
+    @ElementMap(entry = "definition", attribute = true, inline = true, keyType = String.class, key = "name", required = false, value = "value", valueType = Object.class)
+    Map<String, Object> definitions;
 
     /** batch file name. the batch file contains input instructions (numbers or names) separated by '\n'. */
     String batch;
@@ -104,11 +117,18 @@ public class Terminal implements IItemHandler, Serializable {
     @Element
     IItem root;
 
+    /** useNetworkExtension */
+    @Attribute
+    boolean useNetworkExtension = true;
+
     /**
      * true, if macro recording was started through {@link #KEY_MACRO_RECORD} and not yet stoped with
      * {@link #KEY_MACRO_STOP}
      */
     transient boolean isRecording;
+
+    /** if true, all tree items will be accessed directly and sequentially */
+    boolean sequential = false;
 
     /** command identifier */
     static final String KEY_COMMAND = ":";
@@ -124,25 +144,34 @@ public class Terminal implements IItemHandler, Serializable {
     static final String KEY_MACRO_RECORD = "record";
     /** stops macro recording */
     static final String KEY_MACRO_STOP = "stop";
+
+    /** starts a scheduler for the given action */
+    static final String KEY_SCHEDULE = "schedule";
+
+    public static final String KEY_SEQUENTIAL0 = "sequential";
+
+    static final String KEY_USENETWORKEXTENSION = "network";
+    
     /** saves the current state to xml and property files */
     static final String KEY_SAVE = "save";
     /** quits the terminal */
     static final String KEY_QUIT = "quit";
 
     public static final String PREFIX = "terminal.";
-    
+    public static final String KEY_NAME = PREFIX + "name";
+    public static final String KEY_WIDTH = PREFIX + "width";
+    public static final String KEY_HEIGHT = PREFIX + "height";
+
+    public static final String KEY_SEQUENTIAL = PREFIX + "sequential";
+
     /** default script file name */
     public static final String DEFAULT_NAME = PREFIX + "xml";
 
+    static final String ASK_ENTER = ">>> PLEASE HIT ENTER FOR THE NEXT PAGE <<<";
+    private static final String LOGO = "tsl2nano.logo.png";
+
     public Terminal() {
         initDeserialization();
-    }
-
-    @Commit
-    protected void initDeserialization() {
-        env = createEnvironment(definitions);
-        in = System.in;
-        out = System.out;
     }
 
     public Terminal(IItem root) {
@@ -165,7 +194,13 @@ public class Terminal implements IItemHandler, Serializable {
      * @param in
      * @param out
      */
-    public Terminal(IItem root, InputStream in, PrintStream out, int width, int height, int style, Map<String, Object> defintions) {
+    public Terminal(IItem root,
+            InputStream in,
+            PrintStream out,
+            int width,
+            int height,
+            int style,
+            Map<String, Object> defintions) {
         super();
         this.root = root;
         this.in = in;
@@ -201,13 +236,12 @@ public class Terminal implements IItemHandler, Serializable {
             prepareEnvironment(env, root);
 //            //welcome screen
             if (!isInBatchMode()) {
-                new AsciiImage().convertToAscii("beanex-logo-small.jpg", new PrintWriter(out), width, height).flush();
-//              printScreen(String.valueOf(FileUtil.getFileData("terminal.welcome.txt", null)), out, null, false);
+                printAsciiImage(LOGO, new PrintWriter(out), width, height, true, bars);
                 nextLine(in);
             }
             //if only one tree-item available, go to that item
-            if (root instanceof Tree)
-                root = ((Tree) root).delegateToUniqueChild(root, in, out, env);
+            if (root instanceof Container)
+                root = ((Container) root).delegateToUniqueChild(root, in, out, env);
             serve(root, in, (PrintStream) out, env);
             shutdown();
         } catch (Finished ex) {
@@ -220,8 +254,27 @@ public class Terminal implements IItemHandler, Serializable {
         }
     }
 
+    public static void printAsciiImage(String name,
+            PrintWriter out,
+            int width,
+            int height,
+            boolean resource,
+            boolean bars) {
+        try {
+            if (resource)
+                new AsciiImage(bars ? AsciiImage.BARS : AsciiImage.CHARS, AsciiImage.RGB).convertToAscii(
+                    ImageIO.read(FileUtil.getResource(name)), out, width, height).flush();
+            else
+                new AsciiImage().convertToAscii(name, out, width, height).flush();
+        } catch (Exception e) {
+            //it's only a logo, no problem (perhaps on android)
+            LOG.error(e.toString());
+        }
+    }
+
     /**
      * see {@link #definitions}
+     * 
      * @return Returns the definitions.
      */
     public Map<String, Object> getDefinitions() {
@@ -230,6 +283,7 @@ public class Terminal implements IItemHandler, Serializable {
 
     /**
      * see {@link #definitions}
+     * 
      * @param definitions The definitions to set.
      */
     public void setDefinitions(Map<String, Object> definitions) {
@@ -263,16 +317,22 @@ public class Terminal implements IItemHandler, Serializable {
         Object value = root.getValue();
         if (value != null)
             env.put(root.getName(), value);
-        if (root.getType().equals(Type.Tree)) {
-            List<IItem> childs = ((ITree) root).getNodes();
+        if (root.getType().equals(Type.Container)) {
+            List<IItem> childs = ((IContainer) root).getNodes();
             for (IItem c : childs) {
                 prepareEnvironment(env, c);
             }
         }
+        if (useNetworkExtension) {
+            String classpath = System.getProperty("user.dir") + "/lib";
+            new File(classpath).mkdirs();
+            NetworkClassLoader.createAndRegister(classpath);
+        }
         //to be accessible for actions
-        System.setProperty(PREFIX + "name", name);
-        System.getProperties().put(PREFIX + "width", width);
-        System.getProperties().put(PREFIX + "height", height);
+        System.setProperty(KEY_NAME, name);
+        System.getProperties().put(KEY_WIDTH, width);
+        System.getProperties().put(KEY_HEIGHT, height);
+        System.getProperties().put(KEY_SEQUENTIAL, sequential);
     }
 
     /**
@@ -305,7 +365,7 @@ public class Terminal implements IItemHandler, Serializable {
                 i = l + width - 2;
             if (++lines > height) {
                 out.print(getTextFrame(s.substring(page, i), style, width, center));
-                out.print(">>> PLEASE HIT ENTER FOR THE NEXT PAGE <<<");
+                out.print(ASK_ENTER);
                 page = i + 1;
                 lines = 0;
                 if (!isInBatchMode())
@@ -339,7 +399,8 @@ public class Terminal implements IItemHandler, Serializable {
             //to see the input in batch mode
             if (!Util.isEmpty(input) && input.startsWith(KEY_COMMAND)) {
                 if (isCommand(input, KEY_HELP)) {
-                    printScreen(getHelp(), out, "", false);
+                    printScreen(getHelp(), out, ASK_ENTER, false);
+                    nextLine(in);
                     printScreen(item.getDescription(env, true), out, "", false);
                 } else if (isCommand(input, KEY_PROPERTIES)) {
                     System.getProperties().list(out);
@@ -349,6 +410,14 @@ public class Terminal implements IItemHandler, Serializable {
                     isRecording = true;
                 } else if (isCommand(input, KEY_MACRO_STOP)) {
                     isRecording = false;
+                } else if (isCommand(input, KEY_SCHEDULE)) {
+                    schedule(item, input, in, out, env);
+                } else if (isCommand(input, KEY_SEQUENTIAL0)) {
+                    sequential = !sequential;
+                    prepareEnvironment(env, root);
+                } else if (isCommand(input, KEY_USENETWORKEXTENSION)) {
+                    useNetworkExtension = !useNetworkExtension;
+                    prepareEnvironment(env, root);
                 } else if (isCommand(input, KEY_SAVE)) {
                     save();
                 } else if (isCommand(input, KEY_QUIT)) {
@@ -374,6 +443,41 @@ public class Terminal implements IItemHandler, Serializable {
             nextLine(in);
             serve(item, in, out, env);
         }
+    }
+
+    /**
+     * schedule
+     * 
+     * @param item
+     * @param input
+     * @param in
+     * @param out
+     * @param env
+     */
+    private void schedule(final IItem item,
+            final String input,
+            InputStream in,
+            final PrintStream out,
+            final Properties env) {
+        out.println("preparing scheduler on parameters (:schedule:command:delay:period:end), input=" + input);
+        String[] args = input.split(":");
+        int i = 2;
+        final IItem action = ((Container) item).getNode(args[i++], env);
+        long delay = Integer.valueOf(Util.value(args, i++, "1000"));
+        long period = Integer.valueOf(Util.value(args, i++, "1000"));
+        long end = Integer.valueOf(Util.value(args, i++, "3600000"));
+        TimeUnit unit = TimeUnit.MICROSECONDS;
+        out.println("starting scheduler for action " + action + ":\n"
+            + "  delay : " + delay + " milliseconds\n"
+            + "  period: " + period + " milliseconds\n"
+            + "  end   : " + end + " milliseconds\n");
+        SchedulerUtil.runAt(delay, period, end, unit, new Runnable() {
+            @Override
+            public void run() {
+                InputStream in0 = createBatchStream("\n");
+                action.react(item, input, in0, out, env);
+            }
+        });
     }
 
 //    private void put(IItem item) {
@@ -412,7 +516,21 @@ public class Terminal implements IItemHandler, Serializable {
     }
 
     private boolean isCommand(String input, String cmd) {
-        return cmd.startsWith(input.substring(1).toLowerCase());
+        return cmd.startsWith(StringUtil.substring(input.substring(1), null, KEY_COMMAND).toLowerCase());
+    }
+
+    /**
+     * @return Returns the sequential.
+     */
+    public boolean isSequential() {
+        return sequential;
+    }
+
+    /**
+     * @param sequential The sequential to set.
+     */
+    public void setSequential(boolean sequential) {
+        this.sequential = sequential;
     }
 
     /**
@@ -440,6 +558,13 @@ public class Terminal implements IItemHandler, Serializable {
         return text;
     }
 
+    @Commit
+    protected void initDeserialization() {
+        env = createEnvironment(definitions);
+        in = System.in;
+        out = System.out;
+    }
+
     public static final String getHelp() {
         return "The Terminal is configured through xml files with only four types of items.\n"
             + " (+) Tree    : holds childs of all types, but normally Options\n"
@@ -454,10 +579,17 @@ public class Terminal implements IItemHandler, Serializable {
             + "will be written, if you hit Strg+c, the entire menu will be aborted. If you\n"
             + "type ':properties' you will see a list of all property values. :info will show\n"
             + " some system informations. :quit will stop the terminal save the property file.\n"
+            + "':record' will record your actions to be saved as batch. ':stop' stops the macro.\n"
             + "To set reset an items value, type 'null' as value\n"
             + "It is possible to define workflow conditions, so items are not visible, if their\n"
             + " condition is negative.\n"
-            + "If an item container (a tree) has only one visible item, that item will be activated.";
+            + "If an item container (a tree) has only one visible item, that item will be activated."
+            + "If you turn on 'sequence', the user doesn't have to enter each command number - all"
+            + " items of a container will be asked sequentially."
+            + "If you input the command :schedule:<item-no>[:delay][:period[:end]]] the item, which"
+            + "has to be an action will be scheduled for the given milliseconds."
+            + "You can set the mode 'useNetworkExtension' to true, if you want, that the terminal" +
+            "downloads required (by action-definitions) jar-files itself";
     }
 
     public static void main(String[] args) {

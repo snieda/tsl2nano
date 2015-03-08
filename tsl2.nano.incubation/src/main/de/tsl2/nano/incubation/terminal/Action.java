@@ -98,9 +98,13 @@ public class Action<T> extends AItem<T> {
 
     @SuppressWarnings("rawtypes")
     protected void initConstraints(IConstraint constraints) {
-
     }
 
+    @Override
+    public String ask(Properties env) {
+        return "...starting action " + getName() + " ...";
+    }
+    
     /**
      * {@inheritDoc}
      */
@@ -114,11 +118,14 @@ public class Action<T> extends AItem<T> {
             value = run(p);
             changed = true;
             //let us see the result
-            nextLine(in, out);
+        } catch (Exception ex) {
+            ex.printStackTrace();
+            return caller == this ? getParent().next(in, out, env) : this;
         } finally {
+            nextLine(in, out);
             LogFactory.setPrintToConsole(false);
         }
-        return caller;
+        return caller == this ? getParent().next(in, out, env) : this;
     }
 
     /**

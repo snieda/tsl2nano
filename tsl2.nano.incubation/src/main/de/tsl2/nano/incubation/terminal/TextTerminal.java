@@ -7,6 +7,8 @@
 package de.tsl2.nano.incubation.terminal;
 
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.StringTokenizer;
 
 import de.tsl2.nano.core.util.FileUtil;
@@ -189,6 +191,9 @@ public class TextTerminal {
      * @return
      */
     public static String getFormattedItem(String item, int width, int alignment, String styles, String resets) {
+        //if item text is to long
+        item = StringUtil.format(item, width, resets);
+        
         if (styles == null) {
             styles = "";
         }

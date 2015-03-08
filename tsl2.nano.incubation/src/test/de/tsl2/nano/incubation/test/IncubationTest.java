@@ -68,7 +68,7 @@ import de.tsl2.nano.incubation.terminal.Input;
 import de.tsl2.nano.incubation.terminal.MainAction;
 import de.tsl2.nano.incubation.terminal.Terminal;
 import de.tsl2.nano.incubation.terminal.TerminalAdmin;
-import de.tsl2.nano.incubation.terminal.Tree;
+import de.tsl2.nano.incubation.terminal.Container;
 import de.tsl2.nano.incubation.vnet.ILocatable;
 import de.tsl2.nano.incubation.vnet.Net;
 import de.tsl2.nano.incubation.vnet.Node;
@@ -123,12 +123,12 @@ public class IncubationTest {
         };
         final EventController c = new EventController();
         final ThreadingEventController ct = Environment.get(ThreadingEventController.class);
-        for (int i = 0; i < 100; i++) {
+        for (int i = 0; i < 50; i++) {
             c.addListener(listener);
             ct.addListener(listener);
         }
         final Object event = new Object();
-        Profiler.si().compareTests("test simple and multi-threaded event-handling", 100, new Runnable() {
+        Profiler.si().compareTests("test simple and multi-threaded event-handling", 50, new Runnable() {
             public void run() {
                 c.fireEvent(event);
             }
@@ -268,7 +268,7 @@ public class IncubationTest {
         if (route == null)
             fail("No route found for " + saarbruecken + " --> " + wuerzburg);
         else {
-            Node<Location, Float>[] shortestWay = new Node[] { kaiserslautern, frankfurt, wuerzburg };
+            Node<Location, Float>[] shortestWay = new Node[] { saarbruecken, kaiserslautern, frankfurt, wuerzburg };
             Collection<IConnection<Location, Float>> navigation = routing.navigate(saarbruecken, route, null);
             log("Navigation: " + navigation);
             int i = 0;
@@ -281,7 +281,7 @@ public class IncubationTest {
         }
     }
 
-    @Test
+//    @Test
     public void testVNetWithKanbanFlow() {
         int testcount = 100;
         /*
@@ -574,9 +574,9 @@ public class IncubationTest {
 //
     @Test
     public void testTerminalTools() throws Exception {
-        Tree root = new Tree("Toolbox", "Helpful Utilities");
+        Container root = new Container("Toolbox", "Helpful Utilities");
 
-        Tree printing = new Tree("Printing", null);
+        Container printing = new Container("Printing", null);
         printing.add(new Input("source", "printer-info", "file to print - or only a printer info", false));
         printing.add(new Input("printer", "PDFCreator", "printer to use"));
         printing.add(new Input("jobname", "tsl2nano", "print job name"));
@@ -593,7 +593,7 @@ public class IncubationTest {
         mainAction.setCondition(new Condition("quality=NORMAL"));
         root.add(printing);
 
-        Tree crypt = new Tree("Crypt", null);
+        Container crypt = new Container("Crypt", null);
         crypt.add(new Input("password", null, "password for encryption - if needed by algorithm"));
         crypt.add(new Input("algorithm", "PBEWithMD5AndDES", "encryption algorithm"));
         crypt.add(new Input("text", null, "text to be encrypted. if it starts with 'file:' the file will be read", false));
@@ -603,7 +603,7 @@ public class IncubationTest {
             .add(new MainAction(Crypt.class, "password", "algorithm", "text", "base64", "include"));
         root.add(crypt);
 
-        Tree perm = new Tree("Permutator", null);
+        Container perm = new Container("Permutator", null);
         perm.add(new Input("source", null, "source collection", false));
         perm.add(new Input("transformer", null, "transforming action", false));
         perm.add(new Input("swap", null, "whether to swap key and values in destination-map"));
@@ -612,7 +612,7 @@ public class IncubationTest {
             .add(new MainAction(Permutator.class, "source", "transformer", "swap", "backward"));
         root.add(perm);
 
-        Tree xml = new Tree("Xml", null);
+        Container xml = new Container("Xml", null);
         xml.add(new Input("source", null, "source file", false));
         xml.add(new Input("expression", null, "xpath expression", false));
         xml.add(new Action(XmlUtil.class, "transform", "source", Action.KEY_ENV));
@@ -624,14 +624,14 @@ public class IncubationTest {
 //        getjar.add(new MainAction(BeanClass.createBeanClass("de.tsl2.nano.jarresolver.JarResolver", null).getClazz(), "name"));
 //        root.add(getjar);
 //
-        Tree net = new Tree("Net", null);
-        Tree scan = new Tree("Scan", null);
+        Container net = new Container("Net", null);
+        Container scan = new Container("Scan", null);
         net.add(scan);
         scan.add(new Input("ip", NetUtil.getMyIP(), "internet address to be scanned"));
         scan.add(new Input("lowest-port", 0, "lowest port to be scanned"));
         scan.add(new Input("highest-port", 100, "highest port to be scanned"));
         scan.add(new Action(NetUtil.class, "scans", "lowest-port", "highest-port", "ip"));
-        Tree wcopy = new Tree("WCopy", null);
+        Container wcopy = new Container("WCopy", null);
         net.add(wcopy);
         wcopy.add(new Input("url", null, "url to get files from", false));
         wcopy.add(new Input("dir", null, "local directory to save the downloaded files"));
@@ -642,7 +642,7 @@ public class IncubationTest {
         net.add(new Action(NetUtil.class, "getNetInfo"));
         root.add(net);
 
-        Tree file = new Tree("File-Operation", null);
+        Container file = new Container("File-Operation", null);
         file.add(new Input("directory", System.getProperty("user.dir"), "base directory for file operations"));
         file.add(new Input("file", "**/[\\w]+\\.txt", "regular expression (with ant-like path **) as file filter"));
         file.add(new Input("destination", System.getProperty("user.dir"), "destination directory for file operations"));
@@ -656,6 +656,7 @@ public class IncubationTest {
         defs.put("file.operation.delete", "test");
         defs.put("file.operation.delete", "test");
         defs.put("image.out", "-out");
+        System.getProperties().put(Terminal.KEY_SEQUENTIAL, true);
         
         InputStream in = Terminal.createBatchStream("Printing", "jobname", "test", "10", "", ":quit");
         new Terminal(root, in, System.out, 79, 22, 1, defs).run();

@@ -32,7 +32,7 @@ import de.tsl2.nano.core.util.Util;
  * @version $Revision$
  */
 @SuppressWarnings("rawtypes")
-public class Tree<T> extends AItem<List<T>> implements ITree<T> {
+public class Container<T> extends AItem<List<T>> implements IContainer<T> {
 
     /** serialVersionUID */
     private static final long serialVersionUID = -3656677742608173033L;
@@ -44,19 +44,23 @@ public class Tree<T> extends AItem<List<T>> implements ITree<T> {
     transient private boolean isactive;
     /** if result is a collection */
     boolean multiple = true;
+    /** if true, all tree items will be accessed directly and sequentially */
+    transient boolean sequential = false;
+    /** on sequential mode, this index points to the actual child-item */
+    transient int seqIndex = -1;
 
     /**
      * constructor
      */
-    public Tree() {
+    public Container() {
         super();
         //WORKAROUND: unable to save list of values through simple-xml
         value = new ArrayList<T>();
-        type = Type.Tree;
+        type = Type.Container;
         prefix.setCharAt(PREFIX, '+');
     }
 
-    public Tree(String name, String description) {
+    public Container(String name, String description) {
         this(name, null, new ArrayList<T>(), description);
     }
 
@@ -68,8 +72,8 @@ public class Tree<T> extends AItem<List<T>> implements ITree<T> {
      * @param type
      * @param value
      */
-    public Tree(String name, IConstraint<List<T>> constraints, List<T> selected, String description) {
-        super(name, constraints, Type.Tree, selected, description);
+    public Container(String name, IConstraint<List<T>> constraints, List<T> selected, String description) {
+        super(name, constraints, Type.Container, selected, description);
         nodes = new ArrayList<IItem<T>>();
         prefix.setCharAt(PREFIX, '+');
     }
@@ -104,7 +108,7 @@ public class Tree<T> extends AItem<List<T>> implements ITree<T> {
      * @return the selected item, or if it is a tree having only one active child - this child
      */
     public IItem<T> delegateToUniqueChild(IItem<T> selected, InputStream in, PrintStream out, Properties env) {
-        if (selected.getType() == Type.Tree && ((Tree) selected).getFilteredNodes(env).size() == 1) {
+        if (selected.getType() == Type.Container && ((Container) selected).getFilteredNodes(env).size() == 1) {
             //if only one tree child is available, delegate directly to that item
             return selected.react(this, "1", in, out, env);
         } else
@@ -142,7 +146,10 @@ public class Tree<T> extends AItem<List<T>> implements ITree<T> {
     @Override
     public String ask(Properties env) {
         isactive = true;
-        return "Please enter a number between 1 and " + getFilteredNodes(env).size() + POSTFIX_QUESTION;
+        List<IItem<T>> children = getFilteredNodes(env);
+        return sequential && seqIndex > -1 && seqIndex < children.size() ? children.get(seqIndex).ask(env)
+            : "Please enter a number between 1 and "
+                + children.size() + POSTFIX_QUESTION;
     }
 
     /**
@@ -151,29 +158,28 @@ public class Tree<T> extends AItem<List<T>> implements ITree<T> {
     @SuppressWarnings("unchecked")
     @Override
     public IItem react(IItem caller, String input, InputStream in, PrintStream out, Properties env) {
-        if (Util.isEmpty(input))
+        sequential = Util.get(Terminal.KEY_SEQUENTIAL, false);
+        if (Util.isEmpty(input) && !sequential)
             return getParent();
         IItem next = null;
-        //find the item through current user input
-        if (input.matches("\\d+")) {
-            //input: one-based index
-            next = (IItem) getFilteredNodes(env).get(Integer.valueOf(input) - 1);
-        } else {
-            List<IItem<T>> childs = getFilteredNodes(env);
-            input = input.toLowerCase();
-            for (IItem i : childs) {
-                if (i.getName().toLowerCase().startsWith(input)) {
-                    next = i;
-                    break;
-                }
-            }
-            if (next == null)
-                throw new IllegalArgumentException(input + " is not a known value!");
+        List<IItem<T>> filteredNodes = getFilteredNodes(env);
+        /*
+         * sequential mode
+         */
+        if (sequential && seqIndex < filteredNodes.size()) {
+            return next(in, out, env);
         }
+
+        /*
+         * standard menu selection mode
+         */
+        //find the item through current user input
+        next = getNode(input, env);
+
         IItem nextnext = null;
         if (!next.isEditable()) {
             nextnext = next.react(this, null, in, out, env);
-        } else if (next.getType() == Type.Tree && ((Tree) next).getFilteredNodes(env).size() == 1) {
+        } else if (next.getType() == Type.Container && ((Container) next).getFilteredNodes(env).size() == 1) {
             //if only one tree child is available, delegate directly to that item
             nextnext = next.react(this, "1", in, out, env);
         }
@@ -185,6 +191,22 @@ public class Tree<T> extends AItem<List<T>> implements ITree<T> {
         env.put(getName(), getValue());
         isactive = false;
         return nextnext != null ? nextnext : next;
+    }
+
+    public IItem getNode(String input, Properties env) {
+        if (input.matches("\\d+")) {
+            //input: one-based index
+            return (IItem) getFilteredNodes(env).get(Integer.valueOf(input) - 1);
+        } else {
+            List<IItem<T>> childs = getFilteredNodes(env);
+            input = input.toLowerCase();
+            for (IItem i : childs) {
+                if (i.getName().toLowerCase().startsWith(input)) {
+                    return i;
+                }
+            }
+            throw new IllegalArgumentException(input + " is not a known value!");
+        }
     }
 
     @SuppressWarnings("unchecked")
@@ -204,6 +226,31 @@ public class Tree<T> extends AItem<List<T>> implements ITree<T> {
         this.multiple = multiple;
     }
 
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public IItem<T> next(InputStream in, PrintStream out, Properties env) {
+        IItem<T> next;
+        if (sequential) {
+            if (++seqIndex < getFilteredNodes(env).size()) {
+                next = (IItem) getFilteredNodes(env).get(seqIndex);
+                //ask for all tree items
+                if (next.getType() == Type.Container)
+                    return next.react(this, null, in, out, env);
+                else
+                    return next;
+            } else {
+//                sequential = false;
+//                seqIndex = -1;
+                next = (IItem<T>) getParent().next(in, out, env);
+            }
+        } else {
+            next = (IItem<T>) this;
+        }
+        return next;
+    }
+
     @Commit
     protected void initDeserialization() {
         super.initDeserialization();
@@ -218,7 +265,9 @@ public class Tree<T> extends AItem<List<T>> implements ITree<T> {
      */
     @Override
     public String getDescription(Properties env, boolean full) {
-        if (isactive) {
+        if (isactive || sequential) {
+            if (sequential && hasFileDescription())
+                return super.getDescription(env, full);
             List<IItem<T>> list = getFilteredNodes(env);
             StringBuilder buf = new StringBuilder(list.size() * 60);
             int i = 0;
@@ -234,7 +283,7 @@ public class Tree<T> extends AItem<List<T>> implements ITree<T> {
                 buf.append(StringUtil.fixString(String.valueOf(++i), s, ' ', false)
                     + "."
                     + StringUtil.fixString(t.getPresentationPrefix() + translate(t.getName()), kl, ' ', true)
-                    + (t.getType().equals(Type.Tree) ? "" : POSTFIX_QUESTION
+                    + (t.getType().equals(Type.Container) ? "" : POSTFIX_QUESTION
                         + (full ? t.getDescription(env, full) : StringUtil.toString(t.getValue(), 50)))
                     + "\n");
             }
@@ -243,4 +292,5 @@ public class Tree<T> extends AItem<List<T>> implements ITree<T> {
             return getPresentationPrefix() + name + "\n";
         }
     }
+
 }
