@@ -13,7 +13,7 @@ import java.io.Serializable;
 import java.util.Collection;
 import java.util.Map;
 
-import de.tsl2.nano.core.Environment;
+import de.tsl2.nano.core.ENV;
 import de.tsl2.nano.execution.IPRunnable;
 
 /**
@@ -66,7 +66,7 @@ public class SQLExpression<T extends Serializable> extends RunnableExpression<T>
 
     @Override
     protected IPRunnable<T, Map<String, Object>> createRunnable() {
-        return (IPRunnable<T, Map<String, Object>>) Environment.get(QueryPool.class).get(expression.substring(1));
+        return (IPRunnable<T, Map<String, Object>>) ENV.get(QueryPool.class).get(expression.substring(1));
     }
 
     @Override

@@ -20,7 +20,7 @@ import de.tsl2.nano.bean.def.BeanPresentationHelper;
 import de.tsl2.nano.bean.def.IPresentable;
 import de.tsl2.nano.bean.def.SecureAction;
 import de.tsl2.nano.bean.def.ValueExpression;
-import de.tsl2.nano.core.Environment;
+import de.tsl2.nano.core.ENV;
 import de.tsl2.nano.core.util.FileUtil;
 import de.tsl2.nano.core.util.StringUtil;
 import de.tsl2.nano.core.util.Util;
@@ -62,7 +62,7 @@ public class PersistenceUI {
              * create dependency listeners
              */
             Properties props;
-            String pfile = Environment.getConfigPath() + "persistence.properties";
+            String pfile = ENV.getConfigPath() + "persistence.properties";
             if ((props = FileUtil.loadPropertiesFromFile(pfile)) == null) {
                 props = new Properties();
                 props.setProperty("DRIVER_jdbc.odbc", "sun.jdbc.odbc.JdbcOdbcDriver");
@@ -289,9 +289,9 @@ public class PersistenceUI {
                 "transactionType",
                 "persistenceUnit", "hibernateDialect", "database", "defaultSchema", "port", "generator", "autoddl", "replication");
         }
-        if (login.toString().matches(Environment.get("default.present.attribute.multivalue", ".*")))
+        if (login.toString().matches(ENV.get("default.present.attribute.multivalue", ".*")))
             login.removeAttributes("jdbcProperties");
-        if (Environment.get("login.jarfile.fileselector", true)) {
+        if (ENV.get("login.jarfile.fileselector", true)) {
             login.getAttribute("jarFile").getPresentation().setType(IPresentable.TYPE_ATTACHMENT);
             ((Html5Presentable) login.getAttribute("jarFile").getPresentation()).getLayoutConstraints().put("accept",
                 ".jar");
@@ -300,7 +300,7 @@ public class PersistenceUI {
         login.getAttribute("autoddl").setRange(Arrays.asList("false", "validate", "update", "create", "create-drop"));
         
         login.getPresentationHelper().change(BeanPresentationHelper.PROP_DESCRIPTION,
-            Environment.translate("jarFile.tooltip", true),
+            ENV.translate("jarFile.tooltip", true),
             "jarFile");
         
         login.getPresentationHelper().change(BeanPresentationHelper.PROP_NULLABLE, false);
@@ -310,7 +310,7 @@ public class PersistenceUI {
         login.getPresentationHelper().chg("replication", BeanPresentationHelper.PROP_ENABLER, new IActivable() {
             @Override
             public boolean isActive() {
-                return Environment.get("use.database.replication", false);
+                return ENV.get("use.database.replication", false);
             }
         });
 //        ((Map)login.getPresentable().getLayoutConstraints()).put("style", "opacity: 0.9;");

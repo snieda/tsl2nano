@@ -18,7 +18,7 @@ import de.tsl2.nano.bean.def.IIPresentable;
 import de.tsl2.nano.bean.def.IPresentable;
 import de.tsl2.nano.bean.def.IPresentableColumn;
 import de.tsl2.nano.bean.def.PathExpression;
-import de.tsl2.nano.core.Environment;
+import de.tsl2.nano.core.ENV;
 import de.tsl2.nano.core.cls.BeanClass;
 import de.tsl2.nano.core.cls.IAttribute;
 import de.tsl2.nano.core.util.Util;
@@ -39,11 +39,11 @@ public class AttributeConfigurator implements Serializable {
     IIPresentable presentable;
 
     public AttributeConfigurator() {
-        this(BeanClass.createInstance(AttributeDefinition.class, new PathExpression(Environment.get(BeanConfigurator.class).def.getClazz(), "attribute.path")));
+        this(BeanClass.createInstance(AttributeDefinition.class, new PathExpression(ENV.get(BeanConfigurator.class).def.getClazz(), "attribute.path")));
     }
     
     public AttributeConfigurator(String attributeName) {
-        this((AttributeDefinition<?>) Environment.get(BeanConfigurator.class).def.getAttribute(attributeName));
+        this((AttributeDefinition<?>) ENV.get(BeanConfigurator.class).def.getAttribute(attributeName));
     }
 
     /**

@@ -25,7 +25,7 @@ import de.tsl2.nano.bean.def.BeanDefinition;
 import de.tsl2.nano.bean.def.BeanValue;
 import de.tsl2.nano.bean.def.IValueDefinition;
 import de.tsl2.nano.bean.def.ValueExpression;
-import de.tsl2.nano.core.Environment;
+import de.tsl2.nano.core.ENV;
 import de.tsl2.nano.core.ISession;
 import de.tsl2.nano.core.log.LogFactory;
 import de.tsl2.nano.core.util.FileUtil;
@@ -106,7 +106,7 @@ public class NanoWebSocketServer extends WebSocketServer {
     public void onMessage(WebSocket conn, String msg) {
         LOG.debug("receiving message: '" + msg + "' from " + conn);
         //if we are in configuration mode, do nothing
-        if (Environment.get(BeanConfigurator.class) != null)
+        if (ENV.get(BeanConfigurator.class) != null)
             return;
         //to be secure, no file is saved on wrong name
         attachment_info = null;
@@ -175,7 +175,7 @@ public class NanoWebSocketServer extends WebSocketServer {
      * @return
      */
     public static String getAttachmentFilename(Object instance, String attribute, String value) {
-        return Environment.getTempPath()
+        return ENV.getTempPath()
             + FileUtil.getValidFileName(BeanValue.getBeanValue(instance, attribute).getValueId() + "."
                 + Util.asString(value));
     }

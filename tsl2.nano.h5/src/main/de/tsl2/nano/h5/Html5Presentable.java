@@ -9,7 +9,7 @@ import java.util.LinkedHashMap;
 import de.tsl2.nano.bean.def.AttributeDefinition;
 import de.tsl2.nano.bean.def.IPresentable;
 import de.tsl2.nano.bean.def.Presentable;
-import de.tsl2.nano.core.Environment;
+import de.tsl2.nano.core.ENV;
 import de.tsl2.nano.core.util.Util;
 
 /**
@@ -64,7 +64,7 @@ public class Html5Presentable extends Presentable {
     public LinkedHashMap<String, String> getLayout() {
         if (layout == null) {
             //LinkedHashmap not supported by simple-xml
-            layout = new LinkedHashMap<>(Environment.get("default.layout", DEFAULT_HASHMAP));
+            layout = new LinkedHashMap<>(ENV.get("default.layout", DEFAULT_HASHMAP));
         }
         return (LinkedHashMap<String, String>) layout;
     }
@@ -82,7 +82,7 @@ public class Html5Presentable extends Presentable {
         if (layoutConstraints == null) {
             //LinkedHashmap not supported by simple-xml
             layoutConstraints =
-                new LinkedHashMap<>(Environment.get("default.layoutconstaints", DEFAULT_HASHMAP));
+                new LinkedHashMap<>(ENV.get("default.layoutconstaints", DEFAULT_HASHMAP));
         }
         return (LinkedHashMap<String, String>) layoutConstraints;
     }

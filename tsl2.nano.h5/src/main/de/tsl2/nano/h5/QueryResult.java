@@ -25,7 +25,7 @@ import de.tsl2.nano.bean.def.AttributeDefinition;
 import de.tsl2.nano.bean.def.BeanCollector;
 import de.tsl2.nano.bean.def.BeanFinder;
 import de.tsl2.nano.bean.def.IAttributeDefinition;
-import de.tsl2.nano.core.Environment;
+import de.tsl2.nano.core.ENV;
 import de.tsl2.nano.core.cls.IAttribute;
 import de.tsl2.nano.h5.expression.Query;
 import de.tsl2.nano.h5.expression.QueryPool;
@@ -83,7 +83,7 @@ public class QueryResult<COLLECTIONTYPE extends Collection<T>, T> extends BeanCo
 
     @Commit
     protected void initDeserialization() {
-        query = (Query<Collection<Object[]>>) Environment.get(QueryPool.class).get(queryName);
+        query = (Query<Collection<Object[]>>) ENV.get(QueryPool.class).get(queryName);
         beanFinder = new BeanFinder() {
             @Override
             public Collection superGetData(Object fromFilter, Object toFilter) {

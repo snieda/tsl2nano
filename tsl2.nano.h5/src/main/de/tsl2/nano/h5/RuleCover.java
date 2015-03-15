@@ -29,7 +29,7 @@ import de.tsl2.nano.bean.IValueAccess;
 import de.tsl2.nano.bean.def.AttributeDefinition;
 import de.tsl2.nano.bean.def.Bean;
 import de.tsl2.nano.bean.def.IValueDefinition;
-import de.tsl2.nano.core.Environment;
+import de.tsl2.nano.core.ENV;
 import de.tsl2.nano.core.cls.BeanAttribute;
 import de.tsl2.nano.core.cls.BeanClass;
 import de.tsl2.nano.core.exception.Message;
@@ -120,7 +120,7 @@ public class RuleCover implements IConnector<AttributeDefinition<?>> {
         RuleCoverProxy invHandler = new RuleCoverProxy(this, name, child);
         invHandler.setContext(contextObject);
         T cover =
-            (T) Proxy.newProxyInstance(Environment.get(ClassLoader.class), new Class[] { interfaze },
+            (T) Proxy.newProxyInstance(ENV.get(ClassLoader.class), new Class[] { interfaze },
                 invHandler);
         if (covers == null)
             covers = new LinkedList<>();
@@ -199,7 +199,7 @@ class RuleCoverProxy<T> implements IRuleCover<T>, InvocationHandler {
         boolean existRule = false;
         if (hasRule) {
             String ruleName = rules.get(propertyPath);
-            existRule = Environment.get(RulePool.class).get(ruleName) != null;
+            existRule = ENV.get(RulePool.class).get(ruleName) != null;
             if (!existRule) {
                 Message.send("couldn't find rule '" + ruleName + "' for property '" + propertyPath
                     + "' in specifications!");
@@ -213,7 +213,7 @@ class RuleCoverProxy<T> implements IRuleCover<T>, InvocationHandler {
      */
     @Override
     public Object eval(String propertyPath) {
-        return Environment.get(RulePool.class).get(rules.get(propertyPath)).run(getContext());
+        return ENV.get(RulePool.class).get(rules.get(propertyPath)).run(getContext());
     }
 
     /**

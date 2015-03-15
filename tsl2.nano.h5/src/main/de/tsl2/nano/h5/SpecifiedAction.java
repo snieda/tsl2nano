@@ -17,7 +17,7 @@ import org.simpleframework.xml.core.Commit;
 import de.tsl2.nano.bean.BeanUtil;
 import de.tsl2.nano.bean.IConnector;
 import de.tsl2.nano.bean.def.SecureAction;
-import de.tsl2.nano.core.Environment;
+import de.tsl2.nano.core.ENV;
 import de.tsl2.nano.core.exception.Message;
 import de.tsl2.nano.incubation.specification.actions.ActionPool;
 
@@ -50,7 +50,7 @@ public class SpecifiedAction<RETURNTYPE> extends SecureAction<RETURNTYPE> implem
      * @param instance
      */
     public SpecifiedAction(String name, Object instance) {
-        super(name, Environment.translate(name, true));
+        super(name, ENV.translate(name, true));
         this.name = name;
         this.instance = instance;
     }
@@ -58,10 +58,10 @@ public class SpecifiedAction<RETURNTYPE> extends SecureAction<RETURNTYPE> implem
     @SuppressWarnings("unchecked")
     @Override
     public RETURNTYPE action() throws Exception {
-        Object result = Environment.get(ActionPool.class).get(name)
+        Object result = ENV.get(ActionPool.class).get(name)
             .run(instance != null ? BeanUtil.toValueMap(instance) : new LinkedHashMap<String, Object>());
         if (BeanUtil.isStandardType(result)) {
-            Message.send(Environment.translate("tsl2nano.result.information", false, getShortDescription(), result));
+            Message.send(ENV.translate("tsl2nano.result.information", false, getShortDescription(), result));
             return null;
         } else {
             return (RETURNTYPE) result;
@@ -87,7 +87,7 @@ public class SpecifiedAction<RETURNTYPE> extends SecureAction<RETURNTYPE> implem
     @Commit
     private void initDesializing() {
         this.id = this.name;
-        this.shortDescription = Environment.translate(this.name, true);
+        this.shortDescription = ENV.translate(this.name, true);
         this.longDescription = this.shortDescription;
     }
 }

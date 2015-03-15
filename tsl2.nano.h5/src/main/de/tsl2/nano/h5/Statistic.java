@@ -22,7 +22,7 @@ import de.tsl2.nano.bean.def.AttributeDefinition;
 import de.tsl2.nano.bean.def.BeanCollector;
 import de.tsl2.nano.bean.def.BeanDefinition;
 import de.tsl2.nano.bean.def.IAttributeDefinition;
-import de.tsl2.nano.core.Environment;
+import de.tsl2.nano.core.ENV;
 import de.tsl2.nano.core.cls.IAttribute;
 import de.tsl2.nano.core.util.StringUtil;
 import de.tsl2.nano.core.util.Util;
@@ -74,11 +74,11 @@ public class Statistic<COLLECTIONTYPE extends Collection<T>, T> extends BeanColl
     }
 
     private <T> Collection<T> create(Class<T> beanType, List<String> attributeNames) {
-        attributeNames.add(Environment.translate("tsl2nano.name", true));
-        attributeNames.add(Environment.translate("tsl2nano.count", true));
+        attributeNames.add(ENV.translate("tsl2nano.name", true));
+        attributeNames.add(ENV.translate("tsl2nano.count", true));
 
         BeanDefinition<T> def = BeanDefinition.getBeanDefinition(beanType);
-        setName(Environment.translate("tsl2nano.statistic", true) + " (" + def.getName() + ")");
+        setName(ENV.translate("tsl2nano.statistic", true) + " (" + def.getName() + ")");
         String[] names = def.getAttributeNames();
         List<String> statColumns = new ArrayList<>(names.length);
         List<String> valueColumns = new ArrayList<>(names.length);
@@ -87,8 +87,8 @@ public class Statistic<COLLECTIONTYPE extends Collection<T>, T> extends BeanColl
          * check, which columns should be shown. if a column has more than 500 group by elements, its to big
          * evaluate the number columns
          */
-        long maxcount = Environment.get("statistic.maxgroupcount", 500);
-        String sum = Environment.translate("tsl2nano.sum", true) + "(";
+        long maxcount = ENV.get("statistic.maxgroupcount", 500);
+        String sum = ENV.translate("tsl2nano.sum", true) + "(";
         IAttributeDefinition<?> attrDef;
         for (int i = 0; i < names.length; i++) {
             attrDef = def.getAttribute(names[i]);
@@ -115,7 +115,7 @@ public class Statistic<COLLECTIONTYPE extends Collection<T>, T> extends BeanColl
 
     private static <T> Collection<? extends T> createSummary(BeanDefinition<T> def, List<String> valueColumns) {
         String summary =
-            Environment.translate("tsl2nano.all", true) + " " + Environment.translate("tsl2nano.elements", true);
+            ENV.translate("tsl2nano.all", true) + " " + ENV.translate("tsl2nano.elements", true);
         String qstr = "select ''{0}'', count(*) {2} from {1}";
 
         String strValueColumns = StringUtil.concatWrap(",sum({0})".toCharArray(), valueColumns.toArray());
@@ -129,7 +129,7 @@ public class Statistic<COLLECTIONTYPE extends Collection<T>, T> extends BeanColl
         String qstr = "select ''{3}: '' || {0}, count({0}) {2} from {1} group by {0} order by 1";
 
         String strValueColumns = StringUtil.concatWrap(",sum({0})".toCharArray(), valueColumns.toArray());
-        String columnname = Environment.translate(def.getAttribute(column).getId(), true);
+        String columnname = ENV.translate(def.getAttribute(column).getId(), true);
         return BeanContainer.instance().getBeansByQuery(
             MessageFormat.format(qstr, column, def, strValueColumns, columnname),
             false, (Object[]) null);

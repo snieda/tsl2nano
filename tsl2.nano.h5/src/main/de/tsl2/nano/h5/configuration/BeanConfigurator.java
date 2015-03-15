@@ -30,7 +30,7 @@ import de.tsl2.nano.bean.def.ValueExpression;
 import de.tsl2.nano.bean.def.ValueGroup;
 import de.tsl2.nano.collection.Entry;
 import de.tsl2.nano.collection.MapUtil;
-import de.tsl2.nano.core.Environment;
+import de.tsl2.nano.core.ENV;
 import de.tsl2.nano.core.cls.IAttribute;
 import de.tsl2.nano.core.util.Util;
 import de.tsl2.nano.h5.Html5Presentable;
@@ -57,13 +57,13 @@ public class BeanConfigurator<T> implements Serializable {
      */
     @SuppressWarnings({ "unchecked", "rawtypes" })
     public static <I extends Serializable> Bean<BeanConfigurator<I>> create(Class<I> type) {
-        boolean autopersistEnv = Environment.isAutopersist();
+        boolean autopersistEnv = ENV.isAutopersist();
         try {
-            Environment.setAutopersist(false);
+            ENV.setAutopersist(false);
             //wrap the bean-def into a bean-configurator and pack it into an own bean
             BeanConfigurator<?> configurer = new BeanConfigurator(BeanDefinition.getBeanDefinition(type));
             //register it to be used by creating new AttributeConfigurators 
-            Environment.addService(BeanConfigurator.class, configurer);
+            ENV.addService(BeanConfigurator.class, configurer);
 
             //define the presentation
             Bean<?> configBean = Bean.getBean(configurer);
@@ -125,7 +125,7 @@ public class BeanConfigurator<T> implements Serializable {
             }
             return (Bean<BeanConfigurator<I>>) configBean;
         } finally {
-            Environment.setAutopersist(autopersistEnv);
+            ENV.setAutopersist(autopersistEnv);
         }
     }
 
@@ -238,7 +238,7 @@ public class BeanConfigurator<T> implements Serializable {
     public Object actionSave() {
         defAccessor.set("isdefault", false);
         def.saveDefinition();
-        Environment.removeService(BeanConfigurator.class);
+        ENV.removeService(BeanConfigurator.class);
 
         /*
          * refresh all beans
@@ -252,7 +252,7 @@ public class BeanConfigurator<T> implements Serializable {
     public Object actionReset() {
         defAccessor.set("isdefault", true);
         def.deleteDefinition();
-        Environment.removeService(BeanConfigurator.class);
+        ENV.removeService(BeanConfigurator.class);
         /*
          * refresh all beans
          */

@@ -26,7 +26,7 @@ import java.util.StringTokenizer;
 import java.util.TimeZone;
 import java.util.Vector;
 
-import de.tsl2.nano.core.Environment;
+import de.tsl2.nano.core.ENV;
 import de.tsl2.nano.core.Main;
 import de.tsl2.nano.core.util.FileUtil;
 import de.tsl2.nano.core.util.ConcurrentUtil;
@@ -908,7 +908,7 @@ public class NanoHTTPD extends Main
 		}
 
 		File f = new File( homeDir, uri );
-		InputStream resource = Environment.getResource(uri.substring(1));
+		InputStream resource = ENV.getResource(uri.substring(1));
 		if ( res == null && !f.exists() && resource == null)
 			res = new Response( HTTP_NOTFOUND, MIME_PLAINTEXT,
 				"Error 404, file not found." );

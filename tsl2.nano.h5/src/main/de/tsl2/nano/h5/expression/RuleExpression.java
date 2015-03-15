@@ -15,7 +15,7 @@ import java.util.Date;
 import java.util.Map;
 import java.util.Set;
 
-import de.tsl2.nano.core.Environment;
+import de.tsl2.nano.core.ENV;
 import de.tsl2.nano.execution.IPRunnable;
 import de.tsl2.nano.incubation.specification.rules.Rule;
 import de.tsl2.nano.incubation.specification.rules.RulePool;
@@ -51,7 +51,7 @@ public class RuleExpression<T extends Serializable> extends RunnableExpression<T
     }
 
     protected IPRunnable<T, Map<String, Object>> createRunnable() {
-        return (Rule<T>) Environment.get(RulePool.class).get(expression.substring(1));
+        return (Rule<T>) ENV.get(RulePool.class).get(expression.substring(1));
     }
 
     @Override

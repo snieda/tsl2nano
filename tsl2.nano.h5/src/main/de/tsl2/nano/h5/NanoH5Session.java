@@ -51,7 +51,7 @@ import de.tsl2.nano.bean.def.IPageBuilder;
 import de.tsl2.nano.bean.def.IPresentable;
 import de.tsl2.nano.collection.CollectionUtil;
 import de.tsl2.nano.collection.ListSet;
-import de.tsl2.nano.core.Environment;
+import de.tsl2.nano.core.ENV;
 import de.tsl2.nano.core.ISession;
 import de.tsl2.nano.core.Main;
 import de.tsl2.nano.core.ManagedException;
@@ -150,12 +150,12 @@ public class NanoH5Session implements ISession {
      * createExceptionHandler
      */
     private void createExceptionHandler() {
-        if (Environment.get("use.websocket", true)) {
+        if (ENV.get("use.websocket", true)) {
             final NanoWebSocketServer socketServer =
                 new NanoWebSocketServer(this, createSocketAddress());
             websocketPort = socketServer.getPort();
             this.exceptionHandler =
-                (ExceptionHandler) Environment.addService(UncaughtExceptionHandler.class,
+                (ExceptionHandler) ENV.addService(UncaughtExceptionHandler.class,
                     new WebSocketExceptionHandler(socketServer));
             socketServer.start();
 
@@ -177,7 +177,7 @@ public class NanoH5Session implements ISession {
             }));
         } else {
             this.exceptionHandler =
-                (ExceptionHandler) Environment.addService(UncaughtExceptionHandler.class, new ExceptionHandler());
+                (ExceptionHandler) ENV.addService(UncaughtExceptionHandler.class, new ExceptionHandler());
         }
         Thread.currentThread().setUncaughtExceptionHandler(exceptionHandler);
     }
@@ -259,7 +259,7 @@ public class NanoH5Session implements ISession {
             } else {
                 close();
                 return server.createResponse(Html5Presentation.createMessagePage("start.template",
-                    Environment.getName() + "<br/>" + "Restart Session", server.serviceURL));
+                    ENV.getName() + "<br/>" + "Restart Session", server.serviceURL));
             }
         } catch (Throwable e /*respect errors like NoClassDefFound...the application should continue!*/) {
             LOG.error(e);
@@ -296,13 +296,13 @@ public class NanoH5Session implements ISession {
 
     String createStatusText(long startTime) {
         String user =
-            authorization != null ? Environment.translate("tsl2nano.login.user", true) + ": "
+            authorization != null ? ENV.translate("tsl2nano.login.user", true) + ": "
                 + authorization.getUser() + ", " + "Online: "
                 + DateUtil.getFormattedMinutes(getDuration()) + " min, " : "";
         return PREFIX_STATUS_LINE + user
-            + Environment.translate("tsl2nano.time", true)
+            + ENV.translate("tsl2nano.time", true)
             + ": " + DateUtil.getFormattedDateTime(new Date()) + ", "
-            + Environment.translate("tsl2nano.request", true) + ": "
+            + ENV.translate("tsl2nano.request", true) + ": "
             + DateUtil.getFormattedMinutes(System.currentTimeMillis() - startTime) + " min"
             + (LOG.isDebugEnabled() ? ", " + "Memory: " + (Profiler.getUsedMem() / (1024 * 1024)) + " MB" : "")
             + (LOG.isDebugEnabled() ? ", " + "working sessions: " + server.sessions.size() : "");
@@ -348,10 +348,10 @@ public class NanoH5Session implements ISession {
                 ((BeanDefinition) nav.current()).onDeactivation();
 
                 //perhaps remove configuration bean
-                BeanConfigurator configurator = Environment.get(BeanConfigurator.class);
+                BeanConfigurator configurator = ENV.get(BeanConfigurator.class);
                 if (configurator != null
                     && ((BeanDefinition) nav.current()).getDeclaringClass().equals(BeanConfigurator.class)) {
-                    Environment.removeService(BeanConfigurator.class);
+                    ENV.removeService(BeanConfigurator.class);
                 }
             }
             return IAction.CANCELED;
@@ -388,7 +388,7 @@ public class NanoH5Session implements ISession {
                         responseObject = null;
                     } else if (isOpenAction(parms, (BeanCollector) nav.current())) {
                         //normally, after a selection the navigation object will be hold on stack
-                        if (Environment.get("application.edit.multiple", true))
+                        if (ENV.get("application.edit.multiple", true))
                             responseObject = putSelectionOnStack((BeanCollector) nav.current());
                         else
                             responseObject = nav.current();
@@ -429,7 +429,7 @@ public class NanoH5Session implements ISession {
                     logaction(action, parms);
                     //send this information to the client to show a progress bar.
                     Message.send("submit");
-                    Message.send(Environment.translate("tsl2nano.starting", true) + " "
+                    Message.send(ENV.translate("tsl2nano.starting", true) + " "
                         + action.getShortDescription() + " ...");
                     if (c.isMultiValue() && action.getId().endsWith(BeanCollector.POSTFIX_QUICKSEARCH)) {
                         action.setParameter(parms.get(Html5Presentation.ID_QUICKSEARCH_FIELD));
@@ -456,7 +456,7 @@ public class NanoH5Session implements ISession {
                             responseObject = result;
                             if (c instanceof Bean
                                 && ((Bean) c).getInstance() instanceof Persistence)
-                                authorization = Environment.get(IAuthorization.class);
+                                authorization = ENV.get(IAuthorization.class);
                         } else if (action.getId().endsWith("reset")) {
                             responseObject = c;
                         } else {
