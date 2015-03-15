@@ -38,7 +38,7 @@ import javax.persistence.metamodel.Metamodel;
 
 import org.apache.commons.logging.Log;
 
-import de.tsl2.nano.core.Environment;
+import de.tsl2.nano.core.ENV;
 import de.tsl2.nano.core.cls.BeanClass;
 import de.tsl2.nano.core.log.LogFactory;
 import de.tsl2.nano.core.util.StringUtil;
@@ -534,7 +534,7 @@ public class NanoEntityManagerFactory implements javax.persistence.EntityManager
         protected Class<X> evaluateResultType(String qstr) {
             //TODO: not-complete evaluation
             String clsName = StringUtil.substring(qstr, "from ", " t");
-            Collection<Class> beanTypes = Environment.get("loadedBeanTypes", null);
+            Collection<Class> beanTypes = ENV.get("loadedBeanTypes", null);
             for (Class t : beanTypes) {
                 if (t.getSimpleName().equals(clsName))
                     return t;

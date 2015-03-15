@@ -11,7 +11,7 @@ import javax.persistence.Persistence;
 
 import org.apache.commons.logging.Log;
 
-import de.tsl2.nano.core.Environment;
+import de.tsl2.nano.core.ENV;
 import de.tsl2.nano.core.ManagedException;
 import de.tsl2.nano.core.log.LogFactory;
 import de.tsl2.nano.persistence.replication.GenericReplicatingServiceBean;
@@ -39,7 +39,7 @@ public class GenericLocalServiceBean extends GenericReplicatingServiceBean {
      * @param entityManager persistence entity manager
      */
     public GenericLocalServiceBean(EntityManager entityManager) {
-        this(entityManager, Environment.get("use.database.replication", false));
+        this(entityManager, ENV.get("use.database.replication", false));
     }
 
     /**
@@ -148,7 +148,7 @@ public class GenericLocalServiceBean extends GenericReplicatingServiceBean {
          * GenericLocalServiceBean.class.getClassLoader().getResource("META-INF/persistence.xml");
          * so we have to 'extend' the classpath of the hibernate-lib
          */
-        Environment.assignClassloaderToCurrentThread();
+        ENV.assignClassloaderToCurrentThread();
         LOG.info("current threads classloader: " + Thread.currentThread().getContextClassLoader());
         
 //        LOG.info(StringUtil.toFormattedString(BeanClass.call(Persistence.class, "getProviders"), 100));
@@ -157,7 +157,7 @@ public class GenericLocalServiceBean extends GenericReplicatingServiceBean {
          * if an orm tool has no javax.persistence provider implementation, it is possible to invoke through
          * setting it as service in the Environment
          */
-        EntityManager entityManager = Environment.get(EntityManager.class);
+        EntityManager entityManager = ENV.get(EntityManager.class);
         if (entityManager != null) {
             LOG.info("using a spezialized (not through javax.persistence) entitymanager: " + entityManager);
             return entityManager;

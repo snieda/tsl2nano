@@ -19,7 +19,7 @@ import java.util.concurrent.Executors;
 
 import org.apache.commons.logging.Log;
 
-import de.tsl2.nano.core.Environment;
+import de.tsl2.nano.core.ENV;
 import de.tsl2.nano.core.ManagedException;
 import de.tsl2.nano.core.execution.CompatibilityLayer;
 import de.tsl2.nano.core.log.LogFactory;
@@ -66,7 +66,7 @@ public class Replication extends Persistence implements Runnable {
     @SuppressWarnings("static-access")
     public static Replication current() {
         if (Persistence.exists()) {
-            return Environment.get(XmlUtil.class).loadXml(getPath(FILE_PERSISTENCE_BEAN),
+            return ENV.get(XmlUtil.class).loadXml(getPath(FILE_PERSISTENCE_BEAN),
                 Replication.class);
         } else {
             return new Replication();
@@ -95,7 +95,7 @@ public class Replication extends Persistence implements Runnable {
 
         p = prop;
 
-        if (Environment.get("use.database.replication", false)) {
+        if (ENV.get("use.database.replication", false)) {
             startReplicationThread();
         }
     }
@@ -111,7 +111,7 @@ public class Replication extends Persistence implements Runnable {
 
     public String save() throws IOException {
         FileUtil.removeToBackup(getPath(getBeanFileName()));
-        Environment.get(XmlUtil.class).saveXml(getPath(getBeanFileName()), this);
+        ENV.get(XmlUtil.class).saveXml(getPath(getBeanFileName()), this);
         return null;
     }
 
@@ -172,7 +172,7 @@ public class Replication extends Persistence implements Runnable {
         /*
          * start the hsqldb database
          */
-        Environment.get(CompatibilityLayer.class).runOptional("org.hsqldb.Server",
+        ENV.get(CompatibilityLayer.class).runOptional("org.hsqldb.Server",
             "main",
             new Class[] { String[].class },
             new Object[] { new String[] { "-database",

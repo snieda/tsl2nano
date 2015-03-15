@@ -10,7 +10,7 @@
 package de.tsl2.nano.persistence;
 
 import de.tsl2.nano.bean.BeanContainer;
-import de.tsl2.nano.core.Environment;
+import de.tsl2.nano.core.ENV;
 import de.tsl2.nano.service.util.IGenericService;
 
 /**
@@ -40,7 +40,7 @@ public class GenericLocalBeanContainer extends GenericBeanContainer {
 
     protected IGenericService getGenService() {
         if (service == null) {
-            IGenericService s = Environment.get(IGenericService.class);
+            IGenericService s = ENV.get(IGenericService.class);
             if (s != null) {
                 service = s;
             } else {

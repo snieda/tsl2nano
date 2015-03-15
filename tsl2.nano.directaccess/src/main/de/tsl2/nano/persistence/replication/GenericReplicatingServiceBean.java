@@ -27,7 +27,7 @@ import javax.persistence.metamodel.EntityType;
 
 import org.apache.commons.logging.Log;
 
-import de.tsl2.nano.core.Environment;
+import de.tsl2.nano.core.ENV;
 import de.tsl2.nano.core.ManagedException;
 import de.tsl2.nano.core.cls.BeanAttribute;
 import de.tsl2.nano.core.cls.BeanClass;
@@ -148,7 +148,7 @@ public class GenericReplicatingServiceBean extends GenericServiceBean {
             /*
              * while there is no current transaction, the 'commit' should do nothing ;-)
              */
-            service.executeQuery(Environment.get("connection.check.sql", "commit")/* + "grant select on " + Environment.get(IAuthorization.class).getUser()*/,
+            service.executeQuery(ENV.get("connection.check.sql", "commit")/* + "grant select on " + Environment.get(IAuthorization.class).getUser()*/,
                 true, new Object[0]);
             return connected = true;
         } catch (Exception ex) {
@@ -163,7 +163,7 @@ public class GenericReplicatingServiceBean extends GenericServiceBean {
 
     protected void doForReplication(Runnable replicationJob) {
         ConcurrentUtil.startDaemon("replication-service-job", replicationJob, true,
-            Environment.get(UncaughtExceptionHandler.class));
+            ENV.get(UncaughtExceptionHandler.class));
     }
 
     @Override

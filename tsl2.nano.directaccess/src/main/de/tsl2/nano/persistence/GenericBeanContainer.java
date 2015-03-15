@@ -18,7 +18,7 @@ import javax.persistence.Entity;
 import de.tsl2.nano.action.CommonAction;
 import de.tsl2.nano.action.IAction;
 import de.tsl2.nano.bean.BeanContainer;
-import de.tsl2.nano.core.Environment;
+import de.tsl2.nano.core.ENV;
 import de.tsl2.nano.core.cls.BeanClass;
 import de.tsl2.nano.service.util.BeanContainerUtil;
 import de.tsl2.nano.service.util.IGenericService;
@@ -44,7 +44,7 @@ public abstract class GenericBeanContainer extends BeanContainerUtil {
      * @param classloader loader to be used inside the own servicefactory instance.
      */
     public static void initContainer(final GenericBeanContainer container, ClassLoader classloader) {
-        Environment.addService(IGenericService.class, container.getGenService());
+        ENV.addService(IGenericService.class, container.getGenService());
 
         IAction<Collection<?>> typeFinder = new CommonAction<Collection<?>>() {
             @Override
@@ -159,7 +159,7 @@ public abstract class GenericBeanContainer extends BeanContainerUtil {
     }
 
     protected static Object hasPermission(String name, String action) {
-        return Environment.get(IAuthorization.class).hasAccess(name, action);
+        return ENV.get(IAuthorization.class).hasAccess(name, action);
     }
 
     protected abstract IGenericService getGenService();

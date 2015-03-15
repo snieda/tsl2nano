@@ -21,7 +21,7 @@ import de.tsl2.nano.action.IAction;
 import de.tsl2.nano.bean.BeanContainer;
 import de.tsl2.nano.bean.BeanUtil;
 import de.tsl2.nano.bean.def.BeanValue;
-import de.tsl2.nano.core.Environment;
+import de.tsl2.nano.core.ENV;
 import de.tsl2.nano.core.util.FileUtil;
 import de.tsl2.nano.core.util.StringUtil;
 import de.tsl2.nano.execution.ScriptUtil;
@@ -45,7 +45,7 @@ public class ScriptTool implements Serializable {
     /** ant script for several user defined targets. contains an sql target */
     final String ANTSCRIPTNAME = "antscripts.xml";
     final String ANTSCRIPTPROP = "antscripts.properties";
-    static final String SERIALIZED_SCRIPTOOL = Environment.getTempPath() + ScriptTool.class.getSimpleName().toLowerCase();
+    static final String SERIALIZED_SCRIPTOOL = ENV.getTempPath() + ScriptTool.class.getSimpleName().toLowerCase();
     
     public static ScriptTool createInstance() {
         File file = new File(SERIALIZED_SCRIPTOOL);
@@ -104,13 +104,13 @@ public class ScriptTool implements Serializable {
                 String queries = getText();
                 if (queries != null) {
                     String sqlFileName = "sql-script-" + System.currentTimeMillis() + ".sql";
-                    String sqlFilePath = Environment.getConfigPath() + sqlFileName;
+                    String sqlFilePath = ENV.getConfigPath() + sqlFileName;
                     FileUtil.writeBytes(queries.getBytes(), sqlFilePath, false);
                     Properties p = Persistence.current().getJdbcProperties();
-                    p.put("dir", Environment.getConfigPath());
+                    p.put("dir", ENV.getConfigPath());
                     p.put("includes", sqlFileName);
-                    p.put("classloader", Environment.get(ClassLoader.class));
-                    String antFile = Environment.getConfigPath() + ANTSCRIPTNAME;
+                    p.put("classloader", ENV.get(ClassLoader.class));
+                    String antFile = ENV.getConfigPath() + ANTSCRIPTNAME;
                     boolean result = ScriptUtil.ant(antFile, "sql", p);
                     new File(sqlFilePath).delete();
                     return result ? "successfull" : "errors occurred. please see console for details";
@@ -134,13 +134,13 @@ public class ScriptTool implements Serializable {
                 String queries = getText();
                 if (queries != null) {
                     String scriptFileName = "script-" + System.currentTimeMillis() + ".script";
-                    String scriptFilePath = Environment.getConfigPath() + scriptFileName;
+                    String scriptFilePath = ENV.getConfigPath() + scriptFileName;
                     FileUtil.writeBytes(queries.getBytes(), scriptFilePath, false);
                     Properties p = new Properties();
-                    p.put("dir", Environment.getConfigPath());
+                    p.put("dir", ENV.getConfigPath());
                     p.put("includes", scriptFileName);
-                    p.put("classloader", Environment.get(ClassLoader.class));
-                    String antFile = Environment.getConfigPath() + ANTSCRIPTNAME;
+                    p.put("classloader", ENV.get(ClassLoader.class));
+                    String antFile = ENV.getConfigPath() + ANTSCRIPTNAME;
                     boolean result = ScriptUtil.ant(antFile, "script", p);
                     new File(scriptFilePath).delete();
                     return result ? "successfull" : "errors occurred. please see console for details";
@@ -226,8 +226,8 @@ public class ScriptTool implements Serializable {
          * on first time, we copy the scripts like antscripts.xml
          * to the plugin-workspace. we do this to provide user changes on that files!
          */
-        Environment.extractResource(ANTSCRIPTNAME);
-        Environment.extractResource(ANTSCRIPTPROP);
+        ENV.extractResource(ANTSCRIPTNAME);
+        ENV.extractResource(ANTSCRIPTPROP);
     }
 
     protected Object executeStatement(String strStmt, boolean pureSQL) throws Exception {
@@ -329,7 +329,7 @@ public class ScriptTool implements Serializable {
     public IAction<Collection<?>> runner() {
         if (runner == null) {
             String id = "scripttool.go";
-            String lbl = Environment.translate(id, true);
+            String lbl = ENV.translate(id, true);
             runner = new CommonAction(id, lbl, lbl) {
                 @Override
                 public Object action() throws Exception {

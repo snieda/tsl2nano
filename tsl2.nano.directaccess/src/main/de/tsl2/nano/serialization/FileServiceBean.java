@@ -17,7 +17,7 @@ import java.util.Properties;
 
 import javax.security.auth.Subject;
 
-import de.tsl2.nano.core.Environment;
+import de.tsl2.nano.core.ENV;
 import de.tsl2.nano.core.util.FileUtil;
 import de.tsl2.nano.service.util.IGenericService;
 import de.tsl2.nano.service.util.batch.Part;
@@ -48,7 +48,7 @@ public class FileServiceBean implements IGenericService {
     public <T> Collection<T> findAll(Class<T> beanType, int startIndex, int maxResult, Class... lazyRelations) {
         Collection<?> allEntities = entityCache.get(beanType);
         if (allEntities == null) {
-            allEntities = (Collection<?>) FileUtil.load(Environment.getConfigPath(beanType) + ".dat");
+            allEntities = (Collection<?>) FileUtil.load(ENV.getConfigPath(beanType) + ".dat");
             entityCache.put(beanType, allEntities);
         }
         return (Collection<T>) allEntities;
@@ -214,7 +214,7 @@ public class FileServiceBean implements IGenericService {
     @Override
     public <T> T persistNoTransaction(T bean, boolean refreshBean, boolean flush, Class... lazyRelations) {
         Class<?> entityType = bean.getClass();
-        FileUtil.save(Environment.getConfigPath(entityType) + ".dat", this.entityCache.get(entityType));
+        FileUtil.save(ENV.getConfigPath(entityType) + ".dat", this.entityCache.get(entityType));
         return bean;
     }
 

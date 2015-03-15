@@ -22,7 +22,7 @@ import javax.persistence.metamodel.EntityType;
 import org.apache.commons.logging.Log;
 
 import de.tsl2.nano.collection.ITransformer;
-import de.tsl2.nano.core.Environment;
+import de.tsl2.nano.core.ENV;
 import de.tsl2.nano.core.classloader.RuntimeClassloader;
 import de.tsl2.nano.core.classloader.TransformingClassLoader;
 import de.tsl2.nano.core.log.LogFactory;
@@ -86,11 +86,11 @@ public class PersistenceClassLoader extends TransformingClassLoader {
     @SuppressWarnings({ "rawtypes", "unchecked" })
     @Override
     public List<Class> loadBeanClasses(String beanjar, String regExp, StringBuilder messages) {
-        if (Environment.get("use.applicationserver", false) || Environment.get(EntityManager.class) != null)
+        if (ENV.get("use.applicationserver", false) || ENV.get(EntityManager.class) != null)
             return super.loadBeanClasses(beanjar, regExp, messages);
         else {//local through entity types should be faster
             Collection<EntityType<?>> types =
-                ((AbstractStatelessServiceBean) Environment.get(IGenericService.class)).getEntityTypes();
+                ((AbstractStatelessServiceBean) ENV.get(IGenericService.class)).getEntityTypes();
             LOG.info("loading " + types.size() + " entity-types from entitymanagerfactory");
             List<Class> list = new ArrayList(types.size());
             for (EntityType t : types) {
