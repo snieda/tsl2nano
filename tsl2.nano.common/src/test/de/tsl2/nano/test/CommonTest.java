@@ -65,7 +65,7 @@ import de.tsl2.nano.collection.CollectionUtil;
 import de.tsl2.nano.collection.FloatArray;
 import de.tsl2.nano.collection.ITransformer;
 import de.tsl2.nano.collection.MapUtil;
-import de.tsl2.nano.core.Environment;
+import de.tsl2.nano.core.ENV;
 import de.tsl2.nano.core.ManagedException;
 import de.tsl2.nano.core.classloader.NestedJarClassLoader;
 import de.tsl2.nano.core.cls.BeanAttribute;
@@ -104,9 +104,9 @@ public class CommonTest {
 
     @BeforeClass
     public static void setUp() {
-        Environment.setProperty(Environment.KEY_CONFIG_PATH, "test/");
+        ENV.setProperty(ENV.KEY_CONFIG_PATH, "test/");
 //        Environment.setProperty("strict.mode", true);
-        Environment.deleteAllConfigFiles();
+        ENV.deleteAllConfigFiles();
     }
 
     @Test
@@ -561,7 +561,7 @@ public class CommonTest {
          * test it , using a separation string
          */
         //first, create an example file and test bean
-        String testFile = Environment.getConfigPath() + "commontest-fromflatfile.txt";
+        String testFile = ENV.getConfigPath() + "commontest-fromflatfile.txt";
         String s = "0123 456789 Monday\n1234 567890 Tuesday";
         FileUtil.writeBytes(s.getBytes(), testFile, false);
 
@@ -856,7 +856,7 @@ public class CommonTest {
         //check the adding action
         assertTrue((Integer) ((IAction) range.getActions().iterator().next()).activate() == 3);
         //check serialization
-        FileUtil.saveXml(range, Environment.getConfigPath() + "test.xml");
+        FileUtil.saveXml(range, ENV.getConfigPath() + "test.xml");
     }
     
     @Test
@@ -873,10 +873,10 @@ public class CommonTest {
         map.put("key1", "value1");
         map.put("key2", "value2");
         tb.setObject(map);
-        FileUtil.saveXml(tb, Environment.getConfigPath() + "testmap.xml");
+        FileUtil.saveXml(tb, ENV.getConfigPath() + "testmap.xml");
 
         BeanClass bc = BeanClass.getBeanClass(TypeBean.class);
-        FileUtil.saveXml(bc, Environment.getConfigPath() + "beanclass.xml");
+        FileUtil.saveXml(bc, ENV.getConfigPath() + "beanclass.xml");
 
         final BeanDefinition<TypeBean> beandef = BeanDefinition.getBeanDefinition(TypeBean.class);
         beandef.getAttribute("immutableFloat").setBasicDef(10,
@@ -891,8 +891,8 @@ public class CommonTest {
             }
         });
         //check standard serialization
-        FileUtil.save(Environment.getConfigPath() + "beandef.ser", beandef);
-        FileUtil.load(Environment.getConfigPath() + "beandef.ser");
+        FileUtil.save(ENV.getConfigPath() + "beandef.ser", beandef);
+        FileUtil.load(ENV.getConfigPath() + "beandef.ser");
 
         beandef.saveDefinition();
         

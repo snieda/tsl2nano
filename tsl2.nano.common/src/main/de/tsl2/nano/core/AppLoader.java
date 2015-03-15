@@ -31,7 +31,7 @@ import de.tsl2.nano.core.util.ConcurrentUtil;
  * <pre>
  * - Extend the AppLoader and create the main method, creating a new instance of your extended loader and calling {@link #start(String[])}.
  * - Override {@link #getManual()} to have a check and print of application usage
- * - Override {@link #createEnvironment(Argumentator)} to interpret arguments and set application environment (see {@link Environment}).
+ * - Override {@link #createEnvironment(Argumentator)} to interpret arguments and set application environment (see {@link ENV}).
  * 
  * Example:
  * 
@@ -176,7 +176,7 @@ public class AppLoader {
              * start the jar path checker thread
              */
             //don't use the wrong classloaders Environment!
-            int deltaTime = (Integer) BeanClass.createBeanClass(Environment.class.getName()).callMethod(null, "get",
+            int deltaTime = (Integer) BeanClass.createBeanClass(ENV.class.getName()).callMethod(null, "get",
                 new Class[] { String.class, Object.class }, "jar.checker.deltatime", 1000);
             networkClassLoader.startPathChecker(environment, deltaTime);
 

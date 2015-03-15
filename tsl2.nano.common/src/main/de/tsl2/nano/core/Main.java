@@ -34,7 +34,7 @@ public class Main {
      * constructor
      */
     public Main() {
-        Environment.addService(Main.class, this);
+        ENV.addService(Main.class, this);
     }
     
     /**
@@ -75,7 +75,7 @@ public class Main {
             for (int i = 0; i < args.length; i++) {
                 String argName = argMapping.get(i);
                 if (argName != null)
-                    Environment.setProperty(argName, args[i]);
+                    ENV.setProperty(argName, args[i]);
             }
         }
     }

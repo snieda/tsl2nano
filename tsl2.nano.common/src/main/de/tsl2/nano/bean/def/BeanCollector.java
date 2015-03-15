@@ -46,7 +46,7 @@ import de.tsl2.nano.collection.CollectionUtil;
 import de.tsl2.nano.collection.Entry;
 import de.tsl2.nano.collection.FilteringIterator;
 import de.tsl2.nano.collection.MapEntrySet;
-import de.tsl2.nano.core.Environment;
+import de.tsl2.nano.core.ENV;
 import de.tsl2.nano.core.IPredicate;
 import de.tsl2.nano.core.ManagedException;
 import de.tsl2.nano.core.Messages;
@@ -356,7 +356,7 @@ public class BeanCollector<COLLECTIONTYPE extends Collection<T>, T> extends Bean
                 }
 
                 private Collection<T> authorized(COLLECTIONTYPE collection) {
-                    if (Environment.get("check.permission.data", true)) {
+                    if (ENV.get("check.permission.data", true)) {
                         return CollectionUtil.getFiltering(collection, new IPredicate<T>() {
                             @Override
                             public boolean eval(T arg0) {
@@ -553,7 +553,7 @@ public class BeanCollector<COLLECTIONTYPE extends Collection<T>, T> extends Bean
          * do a copy of the selected element (only if exactly one element was selected) and the property was set.
          */
         if (selectedItem != null && getSelectionProvider() != null && getSelectionProvider().getValue().size() == 1
-            && Environment.get("collector.new.clone.selected", true)
+            && ENV.get("collector.new.clone.selected", true)
             && !(Entry.class.isAssignableFrom(type))) {
             try {
                 /*
@@ -590,7 +590,7 @@ public class BeanCollector<COLLECTIONTYPE extends Collection<T>, T> extends Bean
         /*
          * if timestamp fields are not shown, generate new timestamps
          */
-        if (Environment.get("default.attribute.timestamp", true)) {
+        if (ENV.get("default.attribute.timestamp", true)) {
             //respect all attributes
             BeanClass<T> bc = BeanClass.getBeanClass(getDeclaringClass());
             List<IAttribute> attrs = bc.getAttributes();
@@ -616,9 +616,9 @@ public class BeanCollector<COLLECTIONTYPE extends Collection<T>, T> extends Bean
         final BeanAttribute idAttribute = BeanContainer.getIdAttribute(newItem);
         if (idAttribute != null) {
             Object value = null;
-            if (Environment.get("value.id.fill.uuid", true)) {
+            if (ENV.get("value.id.fill.uuid", true)) {
                 if (String.class.isAssignableFrom(idAttribute.getType())) {
-                    IAttributeDef def = Environment.get(IBeanContainer.class).getAttributeDef(newItem,
+                    IAttributeDef def = ENV.get(IBeanContainer.class).getAttributeDef(newItem,
                         idAttribute.getName());
                     //TODO: through string cut, the uuid may not be unique
                     value =
@@ -626,12 +626,12 @@ public class BeanCollector<COLLECTIONTYPE extends Collection<T>, T> extends Bean
                 } else if (NumberUtil.isNumber(idAttribute.getType())) {
                     //subtract the years from 1970 to 2015 to be castable to an int
                     //TODO: use a more unique value
-                    if (Environment.get("value.id.use.timestamp", false)) {
+                    if (ENV.get("value.id.use.timestamp", false)) {
                         value = System.currentTimeMillis();
                         if (NumberUtil.isInteger(idAttribute.getType()))
                             value = DateUtil.getMillisWithoutYear((Long) value);
                     } else {
-                        value = Environment.counter("value.id.counter.start", 1);
+                        value = ENV.counter("value.id.counter.start", 1);
                     }
                 } else {
                     LOG.warn("the id-attribute " + idAttribute + " can't be assigned to a generated value!");
@@ -890,7 +890,7 @@ public class BeanCollector<COLLECTIONTYPE extends Collection<T>, T> extends Bean
             }
             columnDefinitions.add((IPresentableColumn) col);
         }
-        if (Environment.get("collector.use.multiple.filter", true)) {
+        if (ENV.get("collector.use.multiple.filter", true)) {
             //TODO: filtering ids, and invisibles, too --> don't ask multiple-flag
             columnDefinitions = CollectionUtil.getFiltering(columnDefinitions,
                 new IPredicate<IPresentableColumn>() {
@@ -1019,7 +1019,7 @@ public class BeanCollector<COLLECTIONTYPE extends Collection<T>, T> extends Bean
                     if (v != null)
                         result += v.doubleValue();
                 }
-                return Environment.translate("tsl2nano.total", true) + ": "
+                return ENV.translate("tsl2nano.total", true) + ": "
                     + getAttribute(col.getName()).getFormat().format(result);
             } else {
                 return "";
@@ -1194,7 +1194,7 @@ public class BeanCollector<COLLECTIONTYPE extends Collection<T>, T> extends Bean
             public COLLECTIONTYPE action() throws Exception {
                 //TODO: fire refresh event
                 searchStatus = Messages.getFormattedString("tsl2nano.searchdialog.searchrunning");
-                Environment.get(Profiler.class).starting(this, getName());
+                ENV.get(Profiler.class).starting(this, getName());
                 COLLECTIONTYPE result = (COLLECTIONTYPE) getBeanFinder().getData();
                 searchStatus = Messages.getFormattedString("tsl2nano.searchdialog.searchresultcount",
                     result.size());
@@ -1235,7 +1235,7 @@ public class BeanCollector<COLLECTIONTYPE extends Collection<T>, T> extends Bean
                 public COLLECTIONTYPE action() throws Exception {
                     //TODO: fire refresh event
                     searchStatus = Messages.getFormattedString("tsl2nano.searchdialog.searchrunning");
-                    Environment.get(Profiler.class).starting(this, getName());
+                    ENV.get(Profiler.class).starting(this, getName());
                     COLLECTIONTYPE result = (COLLECTIONTYPE) getBeanFinder().getData((String) getParameter(0));
                     searchStatus = Messages.getFormattedString("tsl2nano.searchdialog.searchresultcount",
                         result.size());
@@ -1348,7 +1348,7 @@ public class BeanCollector<COLLECTIONTYPE extends Collection<T>, T> extends Bean
     }
 
     private static boolean useExtraCollectorDefinition() {
-        return Environment.get("collector.use.extra.definition", false);
+        return ENV.get("collector.use.extra.definition", false);
     }
 
     /**
@@ -1406,7 +1406,7 @@ public class BeanCollector<COLLECTIONTYPE extends Collection<T>, T> extends Bean
         if (asString == null && name != null) {
             //empty search-beans are possible
             asString =
-                (useExtraCollectorDefinition() ? Environment.translate("tsl2nano.list", false) + " " : "")
+                (useExtraCollectorDefinition() ? ENV.translate("tsl2nano.list", false) + " " : "")
                     + StringUtil.substring(name,
                         null,
                         POSTFIX_COLLECTOR);

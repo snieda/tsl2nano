@@ -12,7 +12,7 @@ package de.tsl2.nano.util.operation;
 import java.math.BigDecimal;
 import java.util.Map;
 
-import de.tsl2.nano.core.Environment;
+import de.tsl2.nano.core.ENV;
 
 /**
  * Combination of conditioning (including booleans) and numeric operator. result has to be of type {@link BigDecimal}.
@@ -24,7 +24,7 @@ import de.tsl2.nano.core.Environment;
  */
 public class NumericConditionOperator extends ConditionOperator<Object> {
     @SuppressWarnings("unchecked")
-    transient Function<Object> funcop = Environment.get(Function.class);
+    transient Function<Object> funcop = ENV.get(Function.class);
 
     /**
      * calculate functions

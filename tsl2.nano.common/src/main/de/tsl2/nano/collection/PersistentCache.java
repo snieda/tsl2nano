@@ -13,7 +13,7 @@ import java.io.File;
 
 import org.apache.commons.logging.Log;
 
-import de.tsl2.nano.core.Environment;
+import de.tsl2.nano.core.ENV;
 import de.tsl2.nano.core.ManagedException;
 import de.tsl2.nano.core.log.LogFactory;
 import de.tsl2.nano.core.util.FileUtil;
@@ -62,7 +62,7 @@ public class PersistentCache {
         cacheFilePath = cachePath + "/tsl2nano-persistentcache.xml";
         try {
             if (new File(cacheFilePath).exists()) {
-                self.cache = Environment.get(XmlUtil.class).loadXml(cacheFilePath, ReferenceMap.class);
+                self.cache = ENV.get(XmlUtil.class).loadXml(cacheFilePath, ReferenceMap.class);
             }
         } catch (final Exception e) {
             ManagedException.forward(e);
@@ -86,7 +86,7 @@ public class PersistentCache {
     public Object put(Object key, Object value) {
         final Object result = cache.put(key, value);
         try {
-            Environment.get(XmlUtil.class).saveXml(cacheFilePath, cache);
+            ENV.get(XmlUtil.class).saveXml(cacheFilePath, cache);
         } catch (final Exception e) {
             ManagedException.forward(e);
         }
@@ -99,7 +99,7 @@ public class PersistentCache {
     public Object remove(Object key) {
         final Object result = cache.remove(key);
         try {
-            Environment.get(XmlUtil.class).saveXml(cacheFilePath, cache);
+            ENV.get(XmlUtil.class).saveXml(cacheFilePath, cache);
         } catch (final Exception e) {
             ManagedException.forward(e);
         }

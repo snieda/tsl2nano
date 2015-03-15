@@ -29,7 +29,7 @@ import de.tsl2.nano.bean.IValueAccess;
 import de.tsl2.nano.collection.CollectionUtil;
 import de.tsl2.nano.collection.MapUtil;
 import de.tsl2.nano.collection.TimedReferenceMap;
-import de.tsl2.nano.core.Environment;
+import de.tsl2.nano.core.ENV;
 import de.tsl2.nano.core.ManagedException;
 import de.tsl2.nano.core.Messages;
 import de.tsl2.nano.core.cls.BeanAttribute;
@@ -645,7 +645,7 @@ public class Bean<T> extends BeanDefinition<T> {
             bean = createBean(instanceOrName, beandef);
         }
 
-        if (cacheInstance && Environment.get("use.bean.cache", true))
+        if (cacheInstance && ENV.get("use.bean.cache", true))
             timedCache.put(instanceOrName, bean);
         return bean;
     }

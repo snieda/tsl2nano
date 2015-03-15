@@ -29,8 +29,11 @@ import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.transform.Result;
 import javax.xml.transform.Transformer;
+import javax.xml.transform.TransformerConfigurationException;
+import javax.xml.transform.TransformerException;
 import javax.xml.transform.TransformerFactory;
 import javax.xml.transform.sax.SAXResult;
+import javax.xml.transform.stream.StreamResult;
 import javax.xml.transform.stream.StreamSource;
 import javax.xml.xpath.XPath;
 import javax.xml.xpath.XPathConstants;
@@ -50,7 +53,7 @@ import org.w3c.dom.Document;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 
-import de.tsl2.nano.core.Environment;
+import de.tsl2.nano.core.ENV;
 import de.tsl2.nano.core.ManagedException;
 import de.tsl2.nano.core.execution.CompatibilityLayer;
 import de.tsl2.nano.core.log.LogFactory;
@@ -63,6 +66,7 @@ import de.tsl2.nano.core.log.LogFactory;
  * - xpath
  * - velocity transformations (to generate source code etc.)
  * - apache fop transformations (to create printable formats like pcl, pdf, rtf, jpg, etc.)
+ * - xsl-tranformations
  * </pre>
  * 
  * @author Thomas Schneider
@@ -72,12 +76,12 @@ public class XmlUtil {
     private static final Log LOG = LogFactory.getLog(XmlUtil.class);
 
     /**
-     * transform
+     * generates through velocity
      * 
      * @param templateFile
      */
-    public static void transform(String templateFile) {
-        transform(templateFile, "generated/" + templateFile, new Properties());
+    public static void transformVel(String templateFile) {
+        transformVel(templateFile, "generated/" + templateFile, new Properties());
     }
 
     /**
@@ -86,8 +90,8 @@ public class XmlUtil {
      * @param templateFile source file, destination will be generated/ + templateFile
      * @param p properties
      */
-    public static void transform(String templateFile, Properties p) {
-        transform(templateFile, "generated/" + templateFile, p);
+    public static void transformVel(String templateFile, Properties p) {
+        transformVel(templateFile, "generated/" + templateFile, p);
     }
 
     /**
@@ -97,7 +101,7 @@ public class XmlUtil {
      * @param destFile destination file
      * @param p properties
      */
-    public static void transform(String templateFile, String destFile, Properties p) {
+    public static void transformVel(String templateFile, String destFile, Properties p) {
         try {
             /*
              * to avoid a static dependency to velocity, we use the compatibility layer
@@ -124,7 +128,7 @@ public class XmlUtil {
                 "org.apache.velocity.runtime.resource.loader.JarResourceLoader");
 
             //this code is untested yet!!!
-            CompatibilityLayer layer = Environment.get(CompatibilityLayer.class);
+            CompatibilityLayer layer = ENV.get(CompatibilityLayer.class);
             Object engine =
                 layer.runOptional("org.apache.velocity.app.VelocityEngine", "VelocityEngine",
                     new Class[] { Properties.class }, p);
@@ -153,7 +157,7 @@ public class XmlUtil {
         String destFile = srcFile.getPath() + "." + StringUtil.substring(mimeType, "/", null);
         FileUtil.writeBytes(fop(srcFile, mimeType, xsltFile), destFile, false);
     }
-    
+
     /**
      * Druckt eine xml-Datei über apache fop (version 1.1) in ein angegebenes mime-ausgabe format - entweder in eine
      * Datei oder direkt an den Drucker.
@@ -224,6 +228,27 @@ public class XmlUtil {
     }
 
     /**
+     * does an xsl transformation
+     * @param srcFile source to be transformed
+     * @param xsl transformation definition
+     * @param outputFile destination file
+     * @throws TransformerConfigurationException
+     * @throws TransformerException
+     */
+    public static void transformXsl(String srcFile, String xsl, String outputFile)
+            throws TransformerConfigurationException,
+            TransformerException {
+        LOG.info("creating xsl transformation for " + srcFile + " with " + xsl);
+        TransformerFactory factory = TransformerFactory.newInstance();
+        StreamSource xslStream = new StreamSource(new File(xsl));
+        Transformer transformer = factory.newTransformer(xslStream);
+        StreamSource in = new StreamSource(new File(srcFile));
+        StreamResult out = new StreamResult(new File(outputFile));
+        transformer.transform(in, out);
+        System.out.println("xsl transformation result: " + outputFile);
+    }
+
+    /**
      * delegates to {@link #jasperReport(String, boolean, boolean, Map, Connection)}
      */
     public void jasperReport(String srcName, String outputFilename) throws Exception {
@@ -235,6 +260,7 @@ public class XmlUtil {
 
     /**
      * jasperReport. for further informations, see http://www.tutorialspoint.com/jasper_reports/jasper_quick_guide.htm.
+     * 
      * @param srcName xml/jrxml or jasper file to be read. if it is an xml/jrxml, the flag compile should be true.
      * @param compile
      * @param xml if true, report will be written to xml - otherwise to pdf
@@ -260,7 +286,7 @@ public class XmlUtil {
             }
             JasperPrint print = JasperFillManager.fillReport(inputStream, parameter, connection);
             ByteArrayOutputStream arrayOutputStream = new ByteArrayOutputStream();
-            
+
             LOG.debug("Exporting..");
             if (xml)
                 JasperExportManager.exportReportToXmlStream(print, arrayOutputStream);
@@ -371,7 +397,7 @@ public class XmlUtil {
     }
 
     public static final <T> T loadXml(String xmlFile, Class<T> type) {
-        return loadXml(xmlFile, type, Environment.get(CompatibilityLayer.class), true);
+        return loadXml(xmlFile, type, ENV.get(CompatibilityLayer.class), true);
     }
 
     @SuppressWarnings("unchecked")
@@ -384,7 +410,7 @@ public class XmlUtil {
             return javax.xml.bind.JAXB.unmarshal(xmlFile, type);
         } else */if (compLayer.isAvailable("org.simpleframework.xml.core.Persister")) {
             if (assignClassloader)
-                Environment.assignClassloaderToCurrentThread();
+                ENV.assignClassloaderToCurrentThread();
             LOG.debug("loading type '" + type.getName() + "' from '" + xmlFile + "'");
             return loadSimpleXml_(xmlFile, type);
         } else {
@@ -409,7 +435,7 @@ public class XmlUtil {
     }
 
     public static final void saveXml(String xmlFile, Object obj) {
-        CompatibilityLayer compLayer = Environment.get(CompatibilityLayer.class);
+        CompatibilityLayer compLayer = ENV.get(CompatibilityLayer.class);
         //not available on android
         /*if (compLayer.isAvailable("javax.xml.bind.JAXB")) {
             javax.xml.bind.JAXB.marshal(obj, xmlFile);

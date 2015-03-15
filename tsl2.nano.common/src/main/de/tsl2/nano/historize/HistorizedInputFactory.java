@@ -14,7 +14,7 @@ import java.util.Map;
 import java.util.Properties;
 import java.util.Set;
 
-import de.tsl2.nano.core.Environment;
+import de.tsl2.nano.core.ENV;
 import de.tsl2.nano.core.ManagedException;
 
 /**
@@ -36,7 +36,7 @@ public class HistorizedInputFactory extends Properties {
     /** serialVersionUID */
     private static final long serialVersionUID = -5485485250948235886L;
     private static Map<String, HistorizedInput> factoryMap = new Hashtable<String, HistorizedInput>();
-    private static String path = Environment.getConfigPath() + "temp/";
+    private static String path = ENV.getConfigPath() + "temp/";
 
     /**
      * sets standard file path for historized inputs

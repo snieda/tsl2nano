@@ -18,7 +18,7 @@ import java.util.List;
 
 import org.apache.commons.logging.Log;
 
-import de.tsl2.nano.core.Environment;
+import de.tsl2.nano.core.ENV;
 import de.tsl2.nano.core.cls.BeanClass;
 import de.tsl2.nano.core.log.LogFactory;
 import de.tsl2.nano.core.util.FileUtil;
@@ -125,7 +125,7 @@ public class NetworkClassLoader extends NestedJarClassLoader {
             String pckName = BeanClass.getPackageName(name);
             if (!unresolveables.contains(pckName)) {
                 try {
-                    if (BeanClass.isPublicClassName(name) && Environment.loadDependencies(name) != null) {
+                    if (BeanClass.isPublicClassName(name) && ENV.loadDependencies(name) != null) {
                         //reload jar-files from environment
                         addLibraryPath(environment);
                         return super.findClass(name);

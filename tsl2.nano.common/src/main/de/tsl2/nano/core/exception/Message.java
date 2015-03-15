@@ -14,7 +14,7 @@ import java.nio.ByteBuffer;
 
 import org.apache.commons.logging.Log;
 
-import de.tsl2.nano.core.Environment;
+import de.tsl2.nano.core.ENV;
 import de.tsl2.nano.core.ManagedException;
 import de.tsl2.nano.core.log.LogFactory;
 
@@ -69,14 +69,14 @@ public class Message extends RuntimeException {
         //TODO: why the current thread doesn't have the right handler? using
         //      the environment will create problems on multi-sessions!
 //        send(Thread.currentThread().getUncaughtExceptionHandler(), message);
-        send(Environment.get(UncaughtExceptionHandler.class), message);
+        send(ENV.get(UncaughtExceptionHandler.class), message);
     }
 
     public static final void send(ByteBuffer message) {
         //TODO: why the current thread doesn't have the right handler? using
         //      the environment will create problems on multi-sessions!
 //        send(Thread.currentThread().getUncaughtExceptionHandler(), message);
-        send(Environment.get(UncaughtExceptionHandler.class), message);
+        send(ENV.get(UncaughtExceptionHandler.class), message);
     }
 
     /**

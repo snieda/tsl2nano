@@ -58,7 +58,7 @@ import de.tsl2.nano.bean.ValueHolder;
 import de.tsl2.nano.collection.CollectionUtil;
 import de.tsl2.nano.collection.PersistableSingelton;
 import de.tsl2.nano.collection.PersistentCache;
-import de.tsl2.nano.core.Environment;
+import de.tsl2.nano.core.ENV;
 import de.tsl2.nano.core.ISession;
 import de.tsl2.nano.core.ManagedException;
 import de.tsl2.nano.core.classloader.NetworkClassLoader;
@@ -340,19 +340,19 @@ public class BeanPresentationHelper<T> {
             if (v != null) {
                 return RegExpFormat.createNumberRegExp(v);
             } else {
-                final int l = length != UNDEFINED ? length : Environment.get("value.default.number64.length", 19);
-                final int p = precision != UNDEFINED ? precision : Environment.get("value.default.number64.precision",
+                final int l = length != UNDEFINED ? length : ENV.get("value.default.number64.length", 19);
+                final int p = precision != UNDEFINED ? precision : ENV.get("value.default.number64.precision",
                     4);
                 return RegExpFormat.createNumberRegExp(l, p);
             }
         } else if (Number.class.isAssignableFrom(attr.getType()) || double.class.isAssignableFrom(attr.getType())
             || float.class.isAssignableFrom(attr.getType())) {
-            final int l = length != UNDEFINED ? length : Environment.get("value.default.number64.length", 19);
-            final int p = precision != UNDEFINED ? precision : Environment.get("value.default.number64.length", 4);
+            final int l = length != UNDEFINED ? length : ENV.get("value.default.number64.length", 19);
+            final int p = precision != UNDEFINED ? precision : ENV.get("value.default.number64.length", 4);
             return RegExpFormat.createNumberRegExp(l, p);
         } else if (int.class.isAssignableFrom(attr.getType()) || long.class.isAssignableFrom(attr.getType())
             || short.class.isAssignableFrom(attr.getType())) {
-            final int l = length != UNDEFINED ? length : Environment.get("value.default.number32.length", 10);
+            final int l = length != UNDEFINED ? length : ENV.get("value.default.number32.length", 10);
             return RegExpFormat.createNumberRegExp(l, 0);
         } else if (length != UNDEFINED) {
             return RegExpFormat.createAlphaNumRegExp(length, false);
@@ -385,7 +385,7 @@ public class BeanPresentationHelper<T> {
         int type = getDefaultType((IAttribute) attr);
         if (!NumberUtil.hasBit(type, IPresentable.TYPE_OPTION)
             && !NumberUtil.hasBit(type, IPresentable.TYPE_INPUT_NUMBER)) {
-            if (attr.length() > Environment.get("field.min.multiline.length", 100) || attr.isMultiValue())
+            if (attr.length() > ENV.get("field.min.multiline.length", 100) || attr.isMultiValue())
                 type |= IPresentable.TYPE_INPUT_MULTILINE;
         }
         return type;
@@ -437,7 +437,7 @@ public class BeanPresentationHelper<T> {
         int style = 0;
         if (attr instanceof IAttributeDef) {
             IAttributeDef def = (IAttributeDef) attr;
-            if (def.length() > Environment.get("field.style.multi.min.length", 100) && def.precision() == -1)
+            if (def.length() > ENV.get("field.style.multi.min.length", 100) && def.precision() == -1)
                 style |= IPresentable.STYLE_MULTI;
         }
         return style;
@@ -460,11 +460,11 @@ public class BeanPresentationHelper<T> {
                     return RegExpFormat.createNumberRegExp(v);
                 } else {
                     int l = attribute.length() != UNDEFINED ? attribute.length()
-                        : Environment.get("default.bigdecimal.length", 19);
+                        : ENV.get("default.bigdecimal.length", 19);
                     int p = attribute.precision() != UNDEFINED ? attribute.precision()
-                        : Environment.get("default.bigdecimal.precision", 4);
+                        : ENV.get("default.bigdecimal.precision", 4);
 
-                    String currencyPattern = Environment.get("value.currency.length.precision", "11,2");
+                    String currencyPattern = ENV.get("value.currency.length.precision", "11,2");
                     if (currencyPattern.equals(l + "," + p))
                         return RegExpFormat.createCurrencyRegExp();
                     else
@@ -472,13 +472,13 @@ public class BeanPresentationHelper<T> {
                 }
             } else if (NumberUtil.isFloating(type)) {
                 int l = attribute.length() != UNDEFINED ? attribute.length()
-                    : Environment.get("default.bigdecimal.length", 19);
+                    : ENV.get("default.bigdecimal.length", 19);
                 int p = attribute.precision() != UNDEFINED ? attribute.precision()
-                    : Environment.get("default.bigdecimal.precision", 4);
+                    : ENV.get("default.bigdecimal.precision", 4);
                 return RegExpFormat.createNumberRegExp(l, p, type);
             } else if (NumberUtil.isInteger(type)) {
                 int l = attribute.length() != UNDEFINED ? attribute.length()
-                    : Environment.get("default.int.length", 10);
+                    : ENV.get("default.int.length", 10);
                 return RegExpFormat.createNumberRegExp(l, 0, type);
             }
         } else if (BeanClass.isAssignableFrom(Date.class, type)) {
@@ -491,7 +491,7 @@ public class BeanPresentationHelper<T> {
             else
                 regexp = RegExpFormat.createDateRegExp();
         } else if (BeanClass.isAssignableFrom(String.class, type)) {
-            int l = attribute.length() != UNDEFINED ? attribute.length() : Environment.get("default.text.length", 100);
+            int l = attribute.length() != UNDEFINED ? attribute.length() : ENV.get("default.text.length", 100);
             regexp = RegExpFormat.createAlphaNumRegExp(l, false);
         } else {
             regexp = new GenericParser(attribute.getType());
@@ -549,7 +549,7 @@ public class BeanPresentationHelper<T> {
      * bean and return it's attributes if the id is another bean!
      */
     public void defineAdditionalAttributes() {
-        if (Environment.get("define.additional.attributes", true)) {
+        if (ENV.get("define.additional.attributes", true)) {
             BeanAttribute id = BeanContainer.getIdAttribute(bean.getClazz());
             if (id != null && !BeanUtil.isStandardType(id.getDeclaringClass()) && bean.hasAttribute(id.getName())) {
                 bean.combineRelationAttributes(id.getName());
@@ -991,10 +991,10 @@ public class BeanPresentationHelper<T> {
     }
 
     NavigableMap<Integer, Integer> getBestAttributeOrder(String[] names) {
-        Class<?> bestType = Environment.get("bean.best.attribute.type", String.class);
-        String bestRegexp = Environment.get("bean.best.attribute.regexp", ".*(name|bezeichnung|description|id).*");
-        int bestminlength = Environment.get("bean.best.attribute.minlength", 2);
-        int bestmaxlength = Environment.get("bean.best.attribute.maxlength", 99);
+        Class<?> bestType = ENV.get("bean.best.attribute.type", String.class);
+        String bestRegexp = ENV.get("bean.best.attribute.regexp", ".*(name|bezeichnung|description|id).*");
+        int bestminlength = ENV.get("bean.best.attribute.minlength", 2);
+        int bestmaxlength = ENV.get("bean.best.attribute.maxlength", 99);
 
         /*
          * create a map with matching levels and their attribute indexes.
@@ -1225,8 +1225,8 @@ public class BeanPresentationHelper<T> {
     public void reset() {
         BeanContainer.reset();
         Bean.clearCache();
-        NetworkClassLoader.resetUnresolvedClasses(Environment.getConfigPath());
-        Environment.reload();
+        NetworkClassLoader.resetUnresolvedClasses(ENV.getConfigPath());
+        ENV.reload();
     }
 
     protected boolean isRootBean() {
@@ -1297,7 +1297,7 @@ public class BeanPresentationHelper<T> {
                 "icons/reload.png") {
                 @Override
                 public Object action() throws Exception {
-                    Environment.get(BeanPresentationHelper.class).reset();
+                    ENV.get(BeanPresentationHelper.class).reset();
                     return page("configuration refreshed");
                 }
 
@@ -1476,7 +1476,7 @@ public class BeanPresentationHelper<T> {
                 .add(new SecureAction(bean.getClazz(), "print", IAction.MODE_UNDEFINED, false, "icons/print.png") {
                     @Override
                     public Object action() throws Exception {
-                        return Environment.get(IPageBuilder.class).build(vsession.getValue(), bean, null, false);
+                        return ENV.get(IPageBuilder.class).build(vsession.getValue(), bean, null, false);
                     }
                 });
 
@@ -1493,22 +1493,22 @@ public class BeanPresentationHelper<T> {
                 IAction.MODE_UNDEFINED,
                 false,
                 "icons/images_all.png") {
-                String exportFileName = Environment.get(bean.getName() + ".export.file",
-                    Environment.getConfigPathRel() + bean.getName() + ".rtf");
+                String exportFileName = ENV.get(bean.getName() + ".export.file",
+                    ENV.getConfigPathRel() + bean.getName() + ".rtf");
                 File exportFile = new File(exportFileName);
 
                 @Override
                 public Object action() throws Exception {
                     //TODO: file selection, and ant-variable insertion...
-                    String var_start = Environment.get("export.var.start", "##");
-                    String var_end = Environment.get("export.var.end", "##");
+                    String var_start = ENV.get("export.var.start", "##");
+                    String var_end = ENV.get("export.var.end", "##");
                     String content = String.valueOf(FileUtil.getFileData(exportFileName, null));
                     content =
                         StringUtil.insertProperties(content, BeanUtil.toValueMap(((Bean) bean).getInstance()),
                             var_start, var_end);
                     String newFileName = FileUtil.getUniqueFileName(exportFileName);
                     FileUtil.writeBytes(content.getBytes(), newFileName, false);
-                    String url = Environment.get("service.url") + "/" + newFileName;
+                    String url = ENV.get("service.url") + "/" + newFileName;
                     return decorate(url, url);
                 }
 
@@ -1529,7 +1529,7 @@ public class BeanPresentationHelper<T> {
                 IAction.MODE_UNDEFINED,
                 false,
                 "icons/trust_unknown.png") {
-                final String helpFile = Environment.getConfigPathRel() + bean.getName().toLowerCase() + ".help.";
+                final String helpFile = ENV.getConfigPathRel() + bean.getName().toLowerCase() + ".help.";
                 final File htmlFile = new File(helpFile + "html");
                 final File pdfFile = new File(helpFile + "pdf");
                 final String tooltip = htmlFile.getPath() + " or " + pdfFile.getPath();
@@ -1539,7 +1539,7 @@ public class BeanPresentationHelper<T> {
                     if (htmlFile.canRead())
                         return String.valueOf(FileUtil.getFileData(htmlFile.getPath(), null));
                     else if (pdfFile.canRead()) {
-                        String url = Environment.get("service.url") + "/" + helpFile + "pdf";
+                        String url = ENV.get("service.url") + "/" + helpFile + "pdf";
                         return /*url;//*/decorate(url, url);
                     } else
                         return page("No help found (" + tooltip + ")");
@@ -1575,7 +1575,7 @@ public class BeanPresentationHelper<T> {
     }
 
     protected final boolean matches(String patternKey, boolean any) {
-        return bean.getName().matches(Environment.get(patternKey, any ? ".*" : "XXXXXXXXXX"));
+        return bean.getName().matches(ENV.get(patternKey, any ? ".*" : "XXXXXXXXXX"));
     }
 
     public BeanPresentationHelper createHelper(BeanDefinition def) {
@@ -1610,7 +1610,7 @@ public class BeanPresentationHelper<T> {
      */
     public static final boolean isGeneratedValue(IAttributeDefinition<?> attribute) {
         return attribute.generatedValue()
-            || (attribute.id() && Environment.get("value.id.fill.uuid", true) && (String.class
+            || (attribute.id() && ENV.get("value.id.fill.uuid", true) && (String.class
                 .isAssignableFrom(attribute.getType()) || NumberUtil.isNumber(attribute.getType())));
     }
 

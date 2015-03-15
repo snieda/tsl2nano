@@ -35,7 +35,7 @@ import de.tsl2.nano.bean.IAttributeDef;
 import de.tsl2.nano.bean.IConnector;
 import de.tsl2.nano.bean.IValueAccess;
 import de.tsl2.nano.bean.ValueHolder;
-import de.tsl2.nano.core.Environment;
+import de.tsl2.nano.core.ENV;
 import de.tsl2.nano.core.ManagedException;
 import de.tsl2.nano.core.cls.BeanAttribute;
 import de.tsl2.nano.core.cls.BeanClass;
@@ -335,7 +335,7 @@ public class AttributeDefinition<T> implements IAttributeDefinition<T> {
             } else if (type.isEnum()) {
                 getConstraint().setFormat(FormatUtil.getDefaultFormat(type, true));
             } else if (BeanUtil.isStandardType(type)) {
-                getConstraint().setFormat(Environment.get(BeanPresentationHelper.class).getDefaultRegExpFormat(this));
+                getConstraint().setFormat(ENV.get(BeanPresentationHelper.class).getDefaultRegExpFormat(this));
             } else {
                 getConstraint().setFormat(new ValueExpressionTypeFormat<T>(type));
             }
@@ -457,7 +457,7 @@ public class AttributeDefinition<T> implements IAttributeDefinition<T> {
             if (c.getDefault() == null) {
                 if (NumberUtil.isNumber(getType())) {
                     getConstraint().setDefault((T) NumberUtil.getDefaultInstance((Class<Number>) getType()));
-                } else if (Environment.isTestMode()) {
+                } else if (ENV.isTestMode()) {
                     /*
                      * to create new entities without user input, these fields are filled on test mode
                      */
@@ -603,7 +603,7 @@ public class AttributeDefinition<T> implements IAttributeDefinition<T> {
     public IPresentable getPresentation() {
         //TODO: create presentation helper through MultipleInheritanceProxy
         if (presentable == null)
-            presentable = Environment.get(BeanPresentationHelper.class).createPresentable(this);
+            presentable = ENV.get(BeanPresentationHelper.class).createPresentable(this);
         return presentable;
     }
 
@@ -628,7 +628,7 @@ public class AttributeDefinition<T> implements IAttributeDefinition<T> {
             final Map<String, Object> layout,
             final Map<String, Object> layoutConstraints,
             final String description) {
-        presentable = Environment.get(BeanPresentationHelper.class).createPresentable();
+        presentable = ENV.get(BeanPresentationHelper.class).createPresentable();
         presentable.setPresentation(label, type, style, enabler, visible, (Serializable) layout,
             (Serializable) layoutConstraints, description);
         return presentable;

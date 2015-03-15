@@ -22,6 +22,7 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.Date;
 import java.util.Enumeration;
+import java.util.HashMap;
 import java.util.Hashtable;
 import java.util.Iterator;
 import java.util.List;
@@ -33,7 +34,7 @@ import java.util.Set;
 import java.util.TreeMap;
 import java.util.TreeSet;
 
-import org.apache.tools.ant.BuildListener;
+import org.apache.commons.logging.Log;
 import org.simpleframework.xml.Default;
 import org.simpleframework.xml.DefaultType;
 import org.simpleframework.xml.ElementMap;
@@ -66,6 +67,7 @@ import de.tsl2.nano.util.NumberUtil;
  * - translation with registered resources bundles
  * - default formatting of objects
  * - running code in compatibility mode
+ * - conveniences for logging
  * </pre>
  * <p/>
  * 
@@ -81,10 +83,9 @@ import de.tsl2.nano.util.NumberUtil;
  */
 @SuppressWarnings({ "unchecked", "static-access" })
 @Default(value = DefaultType.FIELD, required = false)
-public class Environment {
-//    Log LOG = LogFactory.getLog(Environment.class);
+public class ENV {
 
-    private static Environment self;
+    private static ENV self;
     @SuppressWarnings("rawtypes")
     @ElementMap(entry = "property", key = "name", attribute = true, inline = true, required = false, keyType = String.class, valueType = Object.class)
     private TreeMap properties;
@@ -99,8 +100,11 @@ public class Environment {
     /** if true, this environment will be persisted on any change. */
     transient boolean autopersist = false;
 
+    //TODO: constrain the max size
+    transient Map<Class<?>, Log> loggers = new HashMap<Class<?>, Log>();
+    
     public static final String FRAMEWORK = "de.tsl2.nano";
-    public static final String PREFIX = Environment.class.getPackage().getName() + ".";
+    public static final String PREFIX = ENV.class.getPackage().getName() + ".";
 
     public static final String KEY_SYS_BASEDIR = PREFIX + ".basedir";
     public static final String KEY_DEFAULT_FORMAT = PREFIX + "defaultformat";
@@ -115,7 +119,7 @@ public class Environment {
 
     static final String DEF_PATHSEPRATOR = "/";
 
-    private Environment() {
+    private ENV() {
         self = this;
     }
 
@@ -141,7 +145,7 @@ public class Environment {
         if (buildInfo == null) {
             try {
                 InputStream biStream =
-                    Environment.class.getClassLoader().getResourceAsStream("build-tsl2.nano.h5.properties");
+                    ENV.class.getClassLoader().getResourceAsStream("build-tsl2.nano.h5.properties");
                 if (biStream != null) {
                     Properties bi = new Properties();
                     bi.load(biStream);
@@ -175,14 +179,14 @@ public class Environment {
     public static <T> T get(Class<T> service) {
         Object s = services().get(service);
         if (s == null) {
-            self().log("no service found for " + service);
-            self().log("available services:\n" + StringUtil.toFormattedString(services(), 500, true));
+            info("no service found for " + service);
+            info("available services:\n" + StringUtil.toFormattedString(services(), 500, true));
             String path = getConfigPath(service) + ".xml";
             if (new File(path).canRead()) {
-                self().log("loading service from " + path);
+                self().info("loading service from " + path);
                 self().addService(service, self().get(XmlUtil.class).loadXml(path, service));
             } else if (BeanClass.hasDefaultConstructor(service)) {
-                self().log("trying to create service " + service + " through default construction");
+                self().info("trying to create service " + service + " through default construction");
                 T newService = self().addService(BeanClass.createInstance(service));
                 if (newService instanceof Serializable) {
                     get(XmlUtil.class).saveXml(path, newService);
@@ -201,7 +205,7 @@ public class Environment {
         return self != null;
     }
 
-    protected final static Environment self() {
+    protected final static ENV self() {
         if (self == null) {
             create(System.getProperty(KEY_CONFIG_PATH, System.getProperty("user.dir").replace('\\', '/')));
         }
@@ -248,12 +252,12 @@ public class Environment {
 
         File configFile = new File(dir + "/" + CONFIG_XML_NAME);//new File(System.getProperty(KEY_CONFIG_PATH, System.getProperty("user.dir")));
         if (configFile.canRead()) {
-            self = XmlUtil.loadXml(configFile.getPath(), Environment.class, layer, false);
+            self = XmlUtil.loadXml(configFile.getPath(), ENV.class, layer, false);
 //            String configPath = getConfigPath();
 //            if (!configPath.endsWith("/") && !configPath.endsWith("\\"))
 //                setProperty(KEY_CONFIG_PATH, configPath + "/");
         } else {
-            self = new Environment();
+            self = new ENV();
             self.properties = new TreeMap();
 //          LOG.warn("no environment.properties available");
         }
@@ -341,7 +345,7 @@ public class Environment {
      */
     public static <T> T addService(Class<T> interfaze, T service) {
         services().put(interfaze, service);
-        self().log("adding service '" + interfaze + "' with implementation " + service);
+        self().info("adding service '" + interfaze + "' with implementation " + service);
         return service;
     }
 
@@ -467,7 +471,7 @@ public class Environment {
     public static void registerBundle(String bundlePath, boolean head) {
         ResourceBundle bundle = ResourceBundle.getBundle(bundlePath, Locale.getDefault(), Thread.currentThread()
             .getContextClassLoader());
-        self().log("registering resource bundle '" + bundlePath + "'");
+        self().info("registering resource bundle '" + bundlePath + "'");
         Messages.registerBundle(bundle, head);
     }
 
@@ -561,7 +565,7 @@ public class Environment {
         String pck = (String) get("application.main.package");
         if (pck == null) {
             pck = "org.nano." + getName().toLowerCase().trim();
-            self().log("WARNING: no 'application.main.package' defined in environment! using default: " + pck);
+            self().info("WARNING: no 'application.main.package' defined in environment! using default: " + pck);
             self().setProperty("application.main.package", pck);
         }
         return pck;
@@ -683,7 +687,7 @@ public class Environment {
      * @return loaded or new properties
      */
     public static Properties getSortedProperties(String fileName) {
-        String rc = Environment.getConfigPath() + fileName;
+        String rc = ENV.getConfigPath() + fileName;
         File rcFile = new File(rc);
         //create a sorted property map
         Properties p = new Properties() {
@@ -844,6 +848,10 @@ public class Environment {
         return Boolean.getBoolean(KEY_TESTMODE);
     }
 
+    public static boolean isDebugEnabled(Class<?> cls) {
+        return LogFactory.getLog(cls).isDebugEnabled();
+    }
+    
     @Persist
     protected void initSerialization() {
         /*
@@ -860,7 +868,7 @@ public class Environment {
             Object value = properties.get(key);
             if (isNotSerializable(value)
                 || !BeanUtil.isSingleValueType(value.getClass())) {
-                log("removing property '" + key
+                info("removing property '" + key
                     + "' from serialization while its value is not serializable or doesn't have a default constructor!");
                 keyIt.remove();
             }
@@ -870,7 +878,7 @@ public class Environment {
             Object key = (Object) keyIt.next();
             Object value = services.get(key);
             if (isNotSerializable(value)) {
-                log("removing service '" + key
+                info("removing service '" + key
                     + "' from serialization while its value is not serializable or doesn't have a default constructor!");
                 keyIt.remove();
             }
@@ -890,13 +898,65 @@ public class Environment {
                 .hasDefaultConstructor(value.getClass())));
     }
 
-    protected void log(Object obj) {
-        System.out.println(obj);
+    /**
+     * logger
+     * @param caller
+     * @return
+     */
+    protected static Log logger(Object caller) {
+        Log log = self().loggers.get(caller.getClass());
+        if (log == null) {
+            log = LogFactory.getLog(caller.getClass());
+        }
+        return log;
     }
 
-    protected void trace(Object obj) {
-        if (true)
-            log(obj);
+    /**
+     * convenience to call a standard logger without creating a member.
+     * @param caller the caller instance
+     * @param item item to be logged
+     */
+    public static void error(Object caller, Object item) {
+        logger(caller).error(item);
     }
 
+    /**
+     * convenience to call a standard logger without creating a member.
+     * @param caller the caller instance
+     * @param item item to be logged
+     */
+    public static void warn(Object caller, Object item) {
+        logger(caller.getClass()).warn(item);
+    }
+
+    /**
+     * convenience to call a standard logger without creating a member.
+     * @param caller the caller instance
+     * @param item item to be logged
+     */
+    public static void info(Object caller, Object item) {
+        logger(caller.getClass()).info(item);
+    }
+
+    protected static void info(Object item) {
+        logger(ENV.class).info(item);
+    }
+    
+    /**
+     * convenience to call a standard logger without creating a member.
+     * @param caller the caller instance
+     * @param item item to be logged
+     */
+    public static void debug(Object caller, Object item) {
+        logger(caller.getClass()).debug(item);
+    }
+
+    /**
+     * convenience to call a standard logger without creating a member.
+     * @param caller the caller instance
+     * @param item item to be logged
+     */
+    public static void trace(Object caller, Object item) {
+        logger(caller.getClass()).trace(item);
+    }
 }

@@ -26,7 +26,7 @@ import org.simpleframework.xml.core.Commit;
 import de.tsl2.nano.bean.BeanContainer;
 import de.tsl2.nano.bean.BeanProxy;
 import de.tsl2.nano.bean.BeanUtil;
-import de.tsl2.nano.core.Environment;
+import de.tsl2.nano.core.ENV;
 import de.tsl2.nano.core.ManagedException;
 import de.tsl2.nano.core.cls.BeanAttribute;
 import de.tsl2.nano.core.cls.BeanClass;
@@ -261,7 +261,7 @@ public class ValueExpression<TYPE> implements
     protected TYPE createInstance(String toValue) {
         TYPE instance;
         if (type.isInterface())
-            instance = BeanProxy.createBeanImplementation(type, null, null, Environment.get(ClassLoader.class));
+            instance = BeanProxy.createBeanImplementation(type, null, null, ENV.get(ClassLoader.class));
         else if (BeanUtil.isStandardType(type))
             instance = PrimitiveUtil.create(type, toValue);
         else if (BeanClass.hasStringConstructor(type))
@@ -494,7 +494,7 @@ public class ValueExpression<TYPE> implements
         TYPE exampleBean = createExampleBean(input, true);
         Collection<TYPE> values =
             BeanContainer.instance().getBeansByExample(exampleBean, true, 0,
-                Environment.get("websocket.intputassist.maxitemcount", 20));
+                ENV.get("websocket.intputassist.maxitemcount", 20));
         return values;
     }
 

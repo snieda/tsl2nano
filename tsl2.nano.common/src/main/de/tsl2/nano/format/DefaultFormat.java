@@ -22,7 +22,7 @@ import org.apache.commons.logging.Log;
 import org.simpleframework.xml.Attribute;
 
 import de.tsl2.nano.bean.BeanUtil;
-import de.tsl2.nano.core.Environment;
+import de.tsl2.nano.core.ENV;
 import de.tsl2.nano.core.Messages;
 import de.tsl2.nano.core.execution.CompatibilityLayer;
 import de.tsl2.nano.core.log.LogFactory;
@@ -99,7 +99,7 @@ public class DefaultFormat extends Format {
             result.append(StringUtil.toString(obj, 80));
         } else {
             //pure objects, representing there instance id --> use reflection
-            CompatibilityLayer cl = Environment.get(CompatibilityLayer.class);
+            CompatibilityLayer cl = ENV.get(CompatibilityLayer.class);
             if (!BeanUtil.hasToString(obj) && cl.isAvailable("tsl2.nano.format.ToStringBuilder")) {
                 try {
                     result.append(StringUtil.toString(cl.runRegistered("reflectionToString", obj), 80));

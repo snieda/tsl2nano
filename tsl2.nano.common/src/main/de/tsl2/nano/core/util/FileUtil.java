@@ -50,6 +50,7 @@ import org.apache.commons.codec.binary.Base64;
 import org.apache.commons.logging.Log;
 
 import de.tsl2.nano.core.ManagedException;
+import de.tsl2.nano.core.Messages;
 import de.tsl2.nano.core.execution.IRunnable;
 import de.tsl2.nano.core.log.LogFactory;
 import de.tsl2.nano.core.util.FileUtil.FileDetail;
@@ -1090,7 +1091,7 @@ public class FileUtil {
     public static final IRunnable<Object, File> DO_COPY = new IRunnable<Object, File>() {
         @Override
         public Object run(File context, Object... extArgs) {
-            copy(context.getPath(), (String)extArgs[0]);
+            copy(context.getPath(), (String) extArgs[0]);
             return new File((String) extArgs[0]);
         }
     };
@@ -1107,7 +1108,7 @@ public class FileUtil {
     public static File[] forEach(String dirPath,
             final String regExFilename,
             final IRunnable<Object, File> action,
-            final Object...args) {
+            final Object... args) {
         return new File(dirPath).listFiles(new FilenameFilter() {
             @Override
             public boolean accept(File dir, String name) {
@@ -1162,6 +1163,29 @@ public class FileUtil {
 
     public static InputStream getURLStream(String url) {
         return NetUtil.getURLStream(url);
+    }
+
+    public static String getDetails(File file) {
+        return "name    : " + decorate(file)
+            + "\npath    : " + file.getParent()
+            + "\nmodified: " + DateUtil.getFormattedDateTime(new Date(file.lastModified()))
+            + "\naccess  : " + (file.canRead() ? "r" : "") + (file.canWrite() ? "w" : "")
+            + (file.canExecute() ? "x" : "")
+            + "\nsize    : " + BitUtil.amount(file.length());
+    }
+
+    private static String decorate(File file) {
+        StringBuilder prefix = new StringBuilder(3);
+        StringBuilder postfix = new StringBuilder(3);
+        if (file.isDirectory()) {
+            prefix.append("[");
+            postfix.append("]");
+        }
+        if (file.isHidden()) {
+            prefix.append("<");
+            postfix.insert(0, ">");
+        }
+        return prefix + file.getName() + postfix;
     }
 }
 

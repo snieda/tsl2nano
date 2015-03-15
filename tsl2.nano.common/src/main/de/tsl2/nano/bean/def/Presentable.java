@@ -21,7 +21,7 @@ import org.simpleframework.xml.core.Commit;
 
 import de.tsl2.nano.action.IActivable;
 import de.tsl2.nano.bean.BeanContainer;
-import de.tsl2.nano.core.Environment;
+import de.tsl2.nano.core.ENV;
 import de.tsl2.nano.core.Messages;
 import de.tsl2.nano.core.cls.IAttribute;
 import de.tsl2.nano.core.util.Util;
@@ -78,7 +78,7 @@ public class Presentable implements IIPresentable, Serializable {
         label = attr.getId();//!Messages.hasKey(attr.getId()) ? Environment.translate(attr.getId(), true) : attr.getId();
         description = label;
         
-        BeanPresentationHelper<?> helper = Environment.get(BeanPresentationHelper.class);
+        BeanPresentationHelper<?> helper = ENV.get(BeanPresentationHelper.class);
         type = def != null ? helper.getDefaultType(def) : helper.getDefaultType(attr);
         style = def != null ?
             helper.getDefaultHorizontalAlignment(def) : helper.getDefaultHorizontalAlignment(attr);
@@ -356,12 +356,12 @@ public class Presentable implements IIPresentable, Serializable {
     protected void initDeserialization() {
         //try to translate after first loading
         if (description != null && description.equals(label)) {
-            String d = Environment.translate(label + Messages.POSTFIX_TOOLTIP, false);
+            String d = ENV.translate(label + Messages.POSTFIX_TOOLTIP, false);
             if (d != null && !d.startsWith(Messages.TOKEN_MSG_NOTFOUND))
                 description = d;
         }
         if (label != null)
-            label = Environment.translate(label, true);
+            label = ENV.translate(label, true);
         initialized = true;
     }
     

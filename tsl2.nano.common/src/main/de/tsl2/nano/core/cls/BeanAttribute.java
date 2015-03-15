@@ -23,7 +23,7 @@ import org.simpleframework.xml.DefaultType;
 import org.simpleframework.xml.core.Commit;
 import org.simpleframework.xml.core.Persist;
 
-import de.tsl2.nano.core.Environment;
+import de.tsl2.nano.core.ENV;
 import de.tsl2.nano.core.ManagedException;
 import de.tsl2.nano.core.log.LogFactory;
 import de.tsl2.nano.core.util.StringUtil;
@@ -364,7 +364,7 @@ public class BeanAttribute<T> implements IAttribute<T> {
         // see also BeanObservableValue.getPropertyDescriptor(Class beanClass, String propertyName)
         // means we have the special case where "string" starts with 2 uppercase characters 
         // => the first character is NOT decapitalized ...
-        return Environment.get("bean.attribute.decapitalize", true) ? /*Introspector.*/decapitalize(string) : string
+        return ENV.get("bean.attribute.decapitalize", true) ? /*Introspector.*/decapitalize(string) : string
             .substring(0, 1).toLowerCase() + string.substring(1);
     }
 

@@ -36,7 +36,7 @@ import de.tsl2.nano.collection.Entry;
 import de.tsl2.nano.collection.ListSet;
 import de.tsl2.nano.collection.MapEntrySet;
 import de.tsl2.nano.collection.MapUtil;
-import de.tsl2.nano.core.Environment;
+import de.tsl2.nano.core.ENV;
 import de.tsl2.nano.core.ManagedException;
 import de.tsl2.nano.core.cls.BeanAttribute;
 import de.tsl2.nano.core.cls.BeanClass;
@@ -134,7 +134,7 @@ public class BeanValue<T> extends AttributeDefinition<T> implements IValueDefini
                 getConstraint().setType((Class<T>) temporalType());
             else if (isVirtual())
                 getConstraint().setType(((IValueAccess<T>) instance).getType());
-            else if (instance != null && Environment.get("value.use.instancetype", true)) {
+            else if (instance != null && ENV.get("value.use.instancetype", true)) {
                 try {
                     T value = getValue();
                     //don't use inner class infos or enum values
@@ -214,7 +214,7 @@ public class BeanValue<T> extends AttributeDefinition<T> implements IValueDefini
     public File getValueFile() {
         T v = getValue();
         byte[] data = (byte[]) (v instanceof byte[] ? v : BeanUtil.serialize(v));
-        String fname = Environment.getTempPath() + getId() + "-" + UUID.nameUUIDFromBytes(data);
+        String fname = ENV.getTempPath() + getId() + "-" + UUID.nameUUIDFromBytes(data);
         File file = new File(fname);
         if (!file.exists())
             FileUtil.writeBytes(data, file.getPath(), false);
@@ -504,7 +504,7 @@ public class BeanValue<T> extends AttributeDefinition<T> implements IValueDefini
     public IAction<IBeanCollector<?, T>> getSelectorAction() {
         //TODO: move that to the attribute: IPresentable
         return new SecureAction<IBeanCollector<?, T>>(getName() + POSTFIX_SELECTOR,
-            Environment.get("field.selector.text", "...")) {
+            ENV.get("field.selector.text", "...")) {
             @Override
             public IBeanCollector<?, T> action() throws Exception {
                 BeanCollector<?, ?> beanCollector;

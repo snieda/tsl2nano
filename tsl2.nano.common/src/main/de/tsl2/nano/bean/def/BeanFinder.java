@@ -19,7 +19,7 @@ import org.apache.commons.logging.Log;
 
 import de.tsl2.nano.bean.BeanContainer;
 import de.tsl2.nano.bean.BeanUtil;
-import de.tsl2.nano.core.Environment;
+import de.tsl2.nano.core.ENV;
 import de.tsl2.nano.core.cls.BeanClass;
 import de.tsl2.nano.core.log.LogFactory;
 import de.tsl2.nano.util.operation.IRange;
@@ -45,7 +45,7 @@ public class BeanFinder<T, F> implements IBeanFinder<T, F>, Serializable {
     /** optional detail bean definition to present a selected bean in a detailed mask */
     Bean<T> detailBean;
     transient int currentStartIndex = 0;
-    int maxResultCount = Environment.get("service.maxresult", 100);
+    int maxResultCount = ENV.get("service.maxresult", 100);
 
     private static final Log LOG = LogFactory.getLog(BeanFinder.class);
 

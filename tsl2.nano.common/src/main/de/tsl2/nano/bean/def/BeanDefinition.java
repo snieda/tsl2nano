@@ -47,7 +47,7 @@ import de.tsl2.nano.bean.IValueAccess;
 import de.tsl2.nano.bean.ValueHolder;
 import de.tsl2.nano.collection.CollectionUtil;
 import de.tsl2.nano.collection.ListSet;
-import de.tsl2.nano.core.Environment;
+import de.tsl2.nano.core.ENV;
 import de.tsl2.nano.core.IPredicate;
 import de.tsl2.nano.core.ManagedException;
 import de.tsl2.nano.core.Messages;
@@ -147,7 +147,7 @@ public class BeanDefinition<T> extends BeanClass<T> implements IPluggable<BeanDe
 
     private static final List<BeanDefinition> virtualBeanCache = new ListSet<BeanDefinition>();
     private static final BeanDefinition volatileBean = new BeanDefinition(Object.class);
-    private static boolean usePersistentCache = Environment.get("beandef.usepersistent.cache", true);
+    private static boolean usePersistentCache = ENV.get("beandef.usepersistent.cache", true);
 
     /**
      * This constructor is only for internal use (serialization) - don't call this constructor - use
@@ -164,7 +164,7 @@ public class BeanDefinition<T> extends BeanClass<T> implements IPluggable<BeanDe
      * @param beanClass
      */
     public BeanDefinition(Class<T> beanClass) {
-        super((Class<T>) (Environment.get("beandef.ignore.anonymous.fields", true) ? getDefiningClass(beanClass)
+        super((Class<T>) (ENV.get("beandef.ignore.anonymous.fields", true) ? getDefiningClass(beanClass)
             : beanClass));
         name = beanClass == UNDEFINED.getClass() ? /*"undefined"*/StringUtil.STR_ANY : super.getName();
     }
@@ -313,7 +313,7 @@ public class BeanDefinition<T> extends BeanClass<T> implements IPluggable<BeanDe
         /*
          * filter the result using a default filter by the presentation helper
          */
-        if (Environment.get("bean.use.beanpresentationhelper.filter", true)) {
+        if (ENV.get("bean.use.beanpresentationhelper.filter", true)) {
             return CollectionUtil.getFiltering(attributes, new IPredicate<IAttribute>() {
                 @Override
                 public boolean eval(IAttribute arg0) {
@@ -724,7 +724,7 @@ public class BeanDefinition<T> extends BeanClass<T> implements IPluggable<BeanDe
      */
     public IPresentable getPresentable() {
         if (presentable == null) {
-            presentable = (Presentable) Environment.get(BeanPresentationHelper.class).createPresentable();
+            presentable = (Presentable) ENV.get(BeanPresentationHelper.class).createPresentable();
         }
         return presentable;
     }
@@ -741,7 +741,7 @@ public class BeanDefinition<T> extends BeanClass<T> implements IPluggable<BeanDe
      */
     public <PH extends BeanPresentationHelper<T>> PH getPresentationHelper() {
         if (presentationHelper == null)
-            presentationHelper = Environment.get(BeanPresentationHelper.class).createHelper(this);
+            presentationHelper = ENV.get(BeanPresentationHelper.class).createHelper(this);
         return (PH) presentationHelper;
     }
 
@@ -921,7 +921,7 @@ public class BeanDefinition<T> extends BeanClass<T> implements IPluggable<BeanDe
                                 + ".failed' !", ex);
                         }
                     }
-                    if (Environment.get("application.mode.strict", false))
+                    if (ENV.get("application.mode.strict", false))
                         ManagedException.forward(e);
                     else
                         LOG.error("couldn't load configuration " + xmlFile.getPath() + " for bean " + type, e);
@@ -964,7 +964,7 @@ public class BeanDefinition<T> extends BeanClass<T> implements IPluggable<BeanDe
         if (extension.isEmpty())
             extension = null;
         //remove not-serializable or cycling actions
-        if (actions != null && !Environment.get("strict.mode", false)) {
+        if (actions != null && !ENV.get("strict.mode", false)) {
             Class<?> cls;
             for (Iterator<IAction> actionIt = actions.iterator(); actionIt.hasNext();) {
                 IAction a = (IAction) actionIt.next();
@@ -1043,7 +1043,7 @@ public class BeanDefinition<T> extends BeanClass<T> implements IPluggable<BeanDe
     }
 
     public static String getDefinitionDirectory() {
-        return Environment.getConfigPath() + "presentation/";
+        return ENV.getConfigPath() + "presentation/";
     }
 
     protected static File getDefinitionFile(String name) {
@@ -1058,7 +1058,7 @@ public class BeanDefinition<T> extends BeanClass<T> implements IPluggable<BeanDe
 
     private void saveResourceEntries() {
         String name = "messages.properties";
-        saveResourceEntries(Environment.getSortedProperties(name), name);
+        saveResourceEntries(ENV.getSortedProperties(name), name);
     }
 
     /**
@@ -1070,7 +1070,7 @@ public class BeanDefinition<T> extends BeanClass<T> implements IPluggable<BeanDe
         String id;
         for (IAttributeDefinition<?> a : attributes) {
             id = a.getId();
-            if (Environment.translate(id, false).startsWith(Messages.TOKEN_MSG_NOTFOUND)) {
+            if (ENV.translate(id, false).startsWith(Messages.TOKEN_MSG_NOTFOUND)) {
                 p.put(id, a.getPresentation().getLabel());
                 p.put(id + Messages.POSTFIX_TOOLTIP, a.getPresentation().getLabel());
             }
@@ -1078,12 +1078,12 @@ public class BeanDefinition<T> extends BeanClass<T> implements IPluggable<BeanDe
         Collection<IAction> actions = getActions();
         for (IAction a : actions) {
             id = a.getId();
-            if (Environment.translate(id, false).startsWith(Messages.TOKEN_MSG_NOTFOUND)) {
+            if (ENV.translate(id, false).startsWith(Messages.TOKEN_MSG_NOTFOUND)) {
                 p.put(a.getId(), a.getShortDescription());
                 p.put(a.getId() + Messages.POSTFIX_TOOLTIP, a.getShortDescription());
             }
         }
-        FileUtil.saveProperties(Environment.getConfigPath() + fileName, p);
+        FileUtil.saveProperties(ENV.getConfigPath() + fileName, p);
     }
 
     /**
@@ -1134,7 +1134,7 @@ public class BeanDefinition<T> extends BeanClass<T> implements IPluggable<BeanDe
                 xmlFile.getParentFile().mkdirs();
                 XmlUtil.saveXml(xmlFile.getPath(), this);
             } catch (Exception e) {
-                if (Environment.get("strict.mode", false))
+                if (ENV.get("strict.mode", false))
                     ManagedException.forward(e);
                 else
                     LOG.warn("couldn't save configuration " + xmlFile.getPath() + " for bean" + getClazz(), e);
@@ -1207,7 +1207,7 @@ public class BeanDefinition<T> extends BeanClass<T> implements IPluggable<BeanDe
 
     private final boolean isSaveable() {
         String clsName = clazz.getName();
-        return usePersistentCache && !clsName.startsWith("java") && !clazz.getName().startsWith(Environment.FRAMEWORK)
+        return usePersistentCache && !clsName.startsWith("java") && !clazz.getName().startsWith(ENV.FRAMEWORK)
             && !getClazz().isArray()/*simple-xml is not able to deserialize arrays*/;
     }
 

@@ -26,7 +26,7 @@ import java.util.Date;
 import org.apache.commons.logging.Log;
 
 import de.tsl2.nano.collection.CollectionUtil;
-import de.tsl2.nano.core.Environment;
+import de.tsl2.nano.core.ENV;
 import de.tsl2.nano.core.ManagedException;
 import de.tsl2.nano.core.cls.BeanClass;
 import de.tsl2.nano.core.execution.CompatibilityLayer;
@@ -215,7 +215,7 @@ public class FormatUtil {
                 f = new Format() {
                     @Override
                     public StringBuffer format(Object obj, StringBuffer toAppendTo, FieldPosition pos) {
-                        return toAppendTo.append(obj != null ? Environment.format(obj) : "");
+                        return toAppendTo.append(obj != null ? ENV.format(obj) : "");
                     }
 
                     @Override
