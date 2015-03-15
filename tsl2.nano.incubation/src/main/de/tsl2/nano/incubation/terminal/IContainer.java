@@ -12,6 +12,7 @@ package de.tsl2.nano.incubation.terminal;
 import java.io.InputStream;
 import java.io.PrintStream;
 import java.util.List;
+import java.util.Map;
 import java.util.Properties;
 
 /**
@@ -20,23 +21,22 @@ import java.util.Properties;
  * @author Tom
  * @version $Revision$
  */
-public interface IContainer<I> extends IItem<List<I>> {
+public interface IContainer<I> extends IItem<I> {
     I getValue(int i);
 
     /**
-     * @return child items
+     * @return child items depending on the current context.
      */
-    List<IItem<I>> getNodes();
+    @SuppressWarnings("rawtypes")
+    public List<? extends IItem<I>> getNodes(final Map context);
 
-    IItem<I> next(InputStream in, PrintStream out, Properties env);
-    
     /**
      * adds a child
      * 
      * @param item item
      * @return true, if successful added
      */
-    boolean add(IItem<I> item);
+    <II extends IItem<I>> boolean add(II item);
 
     /**
      * removes a child
@@ -44,5 +44,14 @@ public interface IContainer<I> extends IItem<List<I>> {
      * @param item item
      * @return true, if successful removed
      */
-    boolean remove(IItem<I> item);
+    <II extends IItem<I>> boolean remove(II item);
+
+    /**
+     * evaluates the next child node depending on the current environment
+     * @param in input stream
+     * @param out terminal output
+     * @param env current terminal environment
+     * @return normally the container itself
+     */
+    <II extends IItem<I>> II next(InputStream in, PrintStream out, Properties env);
 }

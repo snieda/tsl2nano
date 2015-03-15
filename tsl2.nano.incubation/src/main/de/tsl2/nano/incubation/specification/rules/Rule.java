@@ -14,7 +14,7 @@ import java.util.Map;
 
 import org.simpleframework.xml.core.Commit;
 
-import de.tsl2.nano.core.Environment;
+import de.tsl2.nano.core.ENV;
 import de.tsl2.nano.core.util.StringUtil;
 import de.tsl2.nano.incubation.specification.AbstractRunnable;
 import de.tsl2.nano.incubation.specification.ParType;
@@ -85,7 +85,7 @@ public class Rule<T> extends AbstractRunnable<T> {
      * importSubRules
      */
     void importSubRules() {
-        RulePool pool = Environment.get(RulePool.class);
+        RulePool pool = ENV.get(RulePool.class);
         String subRule;
         while ((subRule = StringUtil.extract(operation, "§\\w+")).length() > 0) {
             Rule<?> rule = pool.get(subRule.substring(1));
@@ -109,7 +109,7 @@ public class Rule<T> extends AbstractRunnable<T> {
     public T run(Map<String, Object> arguments, Object... extArgs) {
         if (!initialized)
             importSubRules();
-        arguments = checkedArguments(arguments, Environment.get("application.mode.strict", false));
+        arguments = checkedArguments(arguments, ENV.get("application.mode.strict", false));
         operator.reset();
         //in generics it is not possible to cast from Map(String,?) to Map(CharSequence, ?)
         Object a = arguments;

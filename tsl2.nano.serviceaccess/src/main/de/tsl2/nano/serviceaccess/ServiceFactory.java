@@ -30,7 +30,7 @@ import javax.security.auth.login.LoginContext;
 
 import org.apache.commons.logging.Log;
 
-import de.tsl2.nano.core.Environment;
+import de.tsl2.nano.core.ENV;
 import de.tsl2.nano.core.ManagedException;
 import de.tsl2.nano.core.log.LogFactory;
 import de.tsl2.nano.core.util.FileUtil;
@@ -111,7 +111,7 @@ public class ServiceFactory {
                 LOG.info("couldn't load optional properties from serviceaccess.properties in classpath");
             }
             // set the default jndi prefix
-            jndiPrefix = properties.getProperty(KEY_JNDI_PREFIX, Environment.getName().toLowerCase().trim());
+            jndiPrefix = properties.getProperty(KEY_JNDI_PREFIX, ENV.getName().toLowerCase().trim());
         } catch (final Exception e) {
             throw new RuntimeException(e);
         }

@@ -19,7 +19,7 @@ import java.util.Map;
 import java.util.TreeMap;
 
 import de.tsl2.nano.collection.ListSet;
-import de.tsl2.nano.core.Environment;
+import de.tsl2.nano.core.ENV;
 import de.tsl2.nano.core.ManagedException;
 import de.tsl2.nano.messaging.EventController;
 import de.tsl2.nano.messaging.IListener;
@@ -65,7 +65,7 @@ public class Net<T extends IListener<Notification> & ILocatable & Serializable &
      */
     public Net() {
         elements = new TreeMap<String, Node<T, D>>();
-        Environment.removeService(NotificationController.class);
+        ENV.removeService(NotificationController.class);
     }
 
     /**

@@ -17,7 +17,7 @@ import javax.security.auth.Subject;
 
 import org.apache.commons.logging.Log;
 
-import de.tsl2.nano.core.Environment;
+import de.tsl2.nano.core.ENV;
 import de.tsl2.nano.core.Messages;
 import de.tsl2.nano.core.log.LogFactory;
 import de.tsl2.nano.core.util.XmlUtil;
@@ -57,7 +57,7 @@ public class Authorization implements IAuthorization {
      */
     public static Authorization create(String userName, boolean secure) {
         Subject subject = new Subject();
-        String permissions = Environment.getConfigPath() + userName + "-permissons.xml";
+        String permissions = ENV.getConfigPath() + userName + "-permissons.xml";
         if (new File(permissions).canRead()) {
             Subject subjectDef = XmlUtil.loadXml(permissions, Subject.class);
             subject.getPrincipals().addAll(subjectDef.getPrincipals());
@@ -144,7 +144,7 @@ public class Authorization implements IAuthorization {
     @Override
     public Object getUser() {
         UserPrincipal principal = subject != null ? subject.getPrincipals(UserPrincipal.class).iterator().next() : null;
-        return principal != null && principal.getData() != null ? Environment.format(principal.getData()) : principal.getName();
+        return principal != null && principal.getData() != null ? ENV.format(principal.getData()) : principal.getName();
     }
 
     /**

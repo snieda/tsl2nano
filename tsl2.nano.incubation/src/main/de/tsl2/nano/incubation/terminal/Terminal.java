@@ -35,7 +35,7 @@ import org.simpleframework.xml.Element;
 import org.simpleframework.xml.ElementMap;
 import org.simpleframework.xml.core.Commit;
 
-import de.tsl2.nano.core.Environment;
+import de.tsl2.nano.core.ENV;
 import de.tsl2.nano.core.Finished;
 import de.tsl2.nano.core.ManagedException;
 import de.tsl2.nano.core.Messages;
@@ -102,7 +102,9 @@ public class Terminal implements IItemHandler, Serializable {
     boolean bars = true;
     /** item properties */
     transient Properties env;
-
+    /** default: false. if true, on each terminal save, the terminals xml serialization file will be stored.  */
+    boolean refreshConfig = false;
+    
     /**
      * predefined variables (not changable through user input) copied to the {@link #env} but not saved in property
      * file. mostly technical definitions.
@@ -151,7 +153,7 @@ public class Terminal implements IItemHandler, Serializable {
     public static final String KEY_SEQUENTIAL0 = "sequential";
 
     static final String KEY_USENETWORKEXTENSION = "network";
-    
+
     /** saves the current state to xml and property files */
     static final String KEY_SAVE = "save";
     /** quits the terminal */
@@ -299,7 +301,8 @@ public class Terminal implements IItemHandler, Serializable {
     }
 
     protected void save() {
-        XmlUtil.saveXml(name, this);
+        if (refreshConfig || !new File(name).exists())
+            XmlUtil.saveXml(name, this);
         Set<Object> keys = env.keySet();
         //replace objects through their toString()
         Properties envCopy = new Properties();
@@ -318,9 +321,11 @@ public class Terminal implements IItemHandler, Serializable {
         if (value != null)
             env.put(root.getName(), value);
         if (root.getType().equals(Type.Container)) {
-            List<IItem> childs = ((IContainer) root).getNodes();
-            for (IItem c : childs) {
-                prepareEnvironment(env, c);
+            List<IItem> childs = ((IContainer) root).getNodes(env);
+            if (childs != null) {
+                for (IItem c : childs) {
+                    prepareEnvironment(env, c);
+                }
             }
         }
         if (useNetworkExtension) {
@@ -405,7 +410,7 @@ public class Terminal implements IItemHandler, Serializable {
                 } else if (isCommand(input, KEY_PROPERTIES)) {
                     System.getProperties().list(out);
                 } else if (isCommand(input, KEY_INFO)) {
-                    printScreen(Environment.createInfo(), out, "", false);
+                    printScreen(ENV.createInfo(), out, "", false);
                 } else if (isCommand(input, KEY_MACRO_RECORD)) {
                     isRecording = true;
                 } else if (isCommand(input, KEY_MACRO_STOP)) {
@@ -531,6 +536,21 @@ public class Terminal implements IItemHandler, Serializable {
      */
     public void setSequential(boolean sequential) {
         this.sequential = sequential;
+    }
+
+    
+    /**
+     * @return Returns the refreshConfig. see {@link #refreshConfig}
+     */
+    public boolean isRefreshConfig() {
+        return refreshConfig;
+    }
+
+    /**
+     * @param refreshConfig The refreshConfig to set. see {@link #refreshConfig}
+     */
+    public void setRefreshConfig(boolean refreshConfig) {
+        this.refreshConfig = refreshConfig;
     }
 
     /**

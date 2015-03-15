@@ -16,7 +16,7 @@ import org.simpleframework.xml.Attribute;
 import de.tsl2.nano.bean.def.AbstractDependencyListener;
 import de.tsl2.nano.bean.def.AttributeDefinition;
 import de.tsl2.nano.collection.MapUtil;
-import de.tsl2.nano.core.Environment;
+import de.tsl2.nano.core.ENV;
 
 /**
  * dependency listener evaluating its value through a given rule.
@@ -55,6 +55,6 @@ public abstract class RuleDependencyListener<T> extends AbstractDependencyListen
      */
     @SuppressWarnings("unchecked")
     protected T evaluate(Object source) {
-        return (T) Environment.get(RulePool.class).get(ruleName).run(MapUtil.asMap("master", source));
+        return (T) ENV.get(RulePool.class).get(ruleName).run(MapUtil.asMap("master", source));
     }
 }

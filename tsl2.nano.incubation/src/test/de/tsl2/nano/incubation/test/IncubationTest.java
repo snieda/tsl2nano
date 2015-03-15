@@ -37,7 +37,7 @@ import de.tsl2.nano.bean.BeanUtil;
 import de.tsl2.nano.bean.def.Constraint;
 import de.tsl2.nano.collection.MapUtil;
 import de.tsl2.nano.collection.TableList;
-import de.tsl2.nano.core.Environment;
+import de.tsl2.nano.core.ENV;
 import de.tsl2.nano.core.Finished;
 import de.tsl2.nano.core.ManagedException;
 import de.tsl2.nano.core.cls.BeanClass;
@@ -64,6 +64,7 @@ import de.tsl2.nano.incubation.specification.rules.Rule;
 import de.tsl2.nano.incubation.specification.rules.RulePool;
 import de.tsl2.nano.incubation.terminal.Action;
 import de.tsl2.nano.incubation.terminal.AsciiImage;
+import de.tsl2.nano.incubation.terminal.FileSelector;
 import de.tsl2.nano.incubation.terminal.Input;
 import de.tsl2.nano.incubation.terminal.MainAction;
 import de.tsl2.nano.incubation.terminal.Terminal;
@@ -122,7 +123,7 @@ public class IncubationTest {
             }
         };
         final EventController c = new EventController();
-        final ThreadingEventController ct = Environment.get(ThreadingEventController.class);
+        final ThreadingEventController ct = ENV.get(ThreadingEventController.class);
         for (int i = 0; i < 50; i++) {
             c.addListener(listener);
             ct.addListener(listener);
@@ -419,7 +420,7 @@ public class IncubationTest {
 
         Pool pool = new RulePool();
         pool.add(rule.getName(), rule);
-        Environment.addService(pool);
+        ENV.addService(pool);
         Rule<BigDecimal> ruleWithImport =
             new Rule<BigDecimal>("test-import", "A ? 1 + §test : (x2 * 3)",
                 (LinkedHashMap<String, ParType>) MapUtil.asMap("A",
@@ -613,10 +614,13 @@ public class IncubationTest {
         root.add(perm);
 
         Container xml = new Container("Xml", null);
-        xml.add(new Input("source", null, "source file", false));
-        xml.add(new Input("expression", null, "xpath expression", false));
-        xml.add(new Action(XmlUtil.class, "transform", "source", Action.KEY_ENV));
-        xml.add(new Action(XmlUtil.class, "xpath", "expression", "source"));
+        xml.add(new FileSelector("source", ".*xml", "${user.dir}"));
+        xml.add(new FileSelector("xsl-transformation", ".*xsl.*", "${user.dir}"));
+        xml.add(new Input("xsl-destination", "${user.dir}/${source}.html", "xsl destination file", false));
+        xml.add(new Input("xpath-expression", null, "xpath expression", false));
+        xml.add(new Action(XmlUtil.class, "transformVel", "source", Action.KEY_ENV));
+        xml.add(new Action(XmlUtil.class, "transformXsl", "source", "xsl-transformation", "xsl-destination"));
+        xml.add(new Action(XmlUtil.class, "xpath", "xpath-expression", "source"));
         root.add(xml);
 
 //        Tree getjar = new Tree("getJar", null);

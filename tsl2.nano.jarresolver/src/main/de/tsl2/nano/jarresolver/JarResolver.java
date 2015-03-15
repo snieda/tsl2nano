@@ -20,7 +20,7 @@ import java.util.Set;
 import org.apache.commons.logging.Log;
 
 import de.tsl2.nano.collection.MapUtil;
-import de.tsl2.nano.core.Environment;
+import de.tsl2.nano.core.ENV;
 import de.tsl2.nano.core.ManagedException;
 import de.tsl2.nano.core.cls.BeanClass;
 import de.tsl2.nano.core.log.LogFactory;
@@ -99,7 +99,7 @@ public class JarResolver {
     public JarResolver() {
         props = new Properties();
         try {
-            props.load(Environment.getResource("jarresolver.properties"));
+            props.load(ENV.getResource("jarresolver.properties"));
             String updateUrl = props.getProperty(URL_UPDATE_PROPERTIES);
             if (updateUrl != null) {
                 try {
@@ -142,7 +142,7 @@ public class JarResolver {
 
     private void createMvnScript() {
         LOG.info("creating mavens pom.xml");
-        InputStream stream = Environment.getResource(TMP_POM);
+        InputStream stream = ENV.getResource(TMP_POM);
         String pom = String.valueOf(FileUtil.getFileData(stream, "UTF-8"));
 
         Properties p = new Properties();
@@ -155,7 +155,7 @@ public class JarResolver {
     @SuppressWarnings({ "rawtypes", "unchecked" })
     private String createDependencyInformation() {
         String[] deps = getDependencies();
-        InputStream stream = Environment.getResource(TMP_DEPENDENCY);
+        InputStream stream = ENV.getResource(TMP_DEPENDENCY);
         String dependency = String.valueOf(FileUtil.getFileData(stream, "UTF-8"));
 
         StringBuilder buf = new StringBuilder(deps.length * (dependency.length() + 20));
@@ -229,7 +229,7 @@ public class JarResolver {
      */
     protected File download(String strUrl, boolean flat, boolean overwrite) {
         basedir = props.getProperty(DIR_LOCALREPOSITORY);
-        basedir = !Util.isEmpty(basedir) ? basedir : Environment.getConfigPath();
+        basedir = !Util.isEmpty(basedir) ? basedir : ENV.getConfigPath();
         return NetUtil.download(strUrl, basedir, flat, overwrite);
     }
 

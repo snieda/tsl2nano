@@ -40,7 +40,7 @@ import de.tsl2.nano.bean.IAttributeDef;
 import de.tsl2.nano.bean.def.Bean;
 import de.tsl2.nano.bean.def.IAttributeDefinition;
 import de.tsl2.nano.bean.def.IValueDefinition;
-import de.tsl2.nano.core.Environment;
+import de.tsl2.nano.core.ENV;
 import de.tsl2.nano.core.ManagedException;
 import de.tsl2.nano.core.cls.BeanAttribute;
 import de.tsl2.nano.core.cls.BeanClass;
@@ -71,7 +71,7 @@ public class BeanContainerUtil {
             ServiceFactory.createInstance(classloader);
         }
         final IGenericService service = ServiceFactory.instance().getService(IGenericService.class);
-        Environment.addService(IGenericService.class, service);
+        ENV.addService(IGenericService.class, service);
 
         final IAction<Collection<?>> typeFinder = new CommonAction<Collection<?>>() {
             @Override

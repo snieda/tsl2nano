@@ -180,31 +180,46 @@
          </item>
       </item>
       <item class="de.tsl2.nano.incubation.terminal.Container" name="Xml" type="Container">
-         <item class="de.tsl2.nano.incubation.terminal.Input" name="source" type="Input">
+         <item class="de.tsl2.nano.incubation.terminal.FileSelector" name="source" type="Container">
+            <directory>C:\eigen\tsl2\tsl2-workspace\tsl2-nano\tsl2.nano.incubation</directory>
+            <include>.*xml</include>
+         </item>
+         <item class="de.tsl2.nano.incubation.terminal.FileSelector" name="xsl-transformation" type="Container">
+            <directory>C:\eigen\tsl2\tsl2-workspace\tsl2-nano\tsl2.nano.incubation</directory>
+            <include>.*xml</include>
+         </item>
+         <item class="de.tsl2.nano.incubation.terminal.FileSelector" name="xsl-destination" type="Container">
+            <directory>C:\eigen\tsl2\tsl2-workspace\tsl2-nano\tsl2.nano.incubation</directory>
+            <include>.*xml</include>
+         </item>
+         <item class="de.tsl2.nano.incubation.terminal.Input" name="xpath-expression" type="Input">
             <constraints type="java.lang.String" nullable="false" length="-1">
                <scale>-1</scale>
                <precision>-1</precision>
             </constraints>
          </item>
-         <item class="de.tsl2.nano.incubation.terminal.Input" name="expression" type="Input">
-            <constraints type="java.lang.String" nullable="false" length="-1">
-               <scale>-1</scale>
-               <precision>-1</precision>
-            </constraints>
-         </item>
-         <item class="de.tsl2.nano.incubation.terminal.Action" name="transform" type="Action">
+         <item class="de.tsl2.nano.incubation.terminal.Action" name="transformVel" type="Action">
             <mainClass>de.tsl2.nano.core.util.XmlUtil</mainClass>
-            <method>transform</method>
+            <method>transformVel</method>
             <argNames length="2">
                <string>source</string>
                <string>ENVIRONMENT</string>
+            </argNames>
+         </item>
+         <item class="de.tsl2.nano.incubation.terminal.Action" name="transformXsl" type="Action">
+            <mainClass>de.tsl2.nano.core.util.XmlUtil</mainClass>
+            <method>transformXsl</method>
+            <argNames length="3">
+               <string>source</string>
+               <string>xsl-transformation</string>
+               <string>xsl-destination</string>
             </argNames>
          </item>
          <item class="de.tsl2.nano.incubation.terminal.Action" name="xpath" type="Action">
             <mainClass>de.tsl2.nano.core.util.XmlUtil</mainClass>
             <method>xpath</method>
             <argNames length="2">
-               <string>expression</string>
+               <string>xpath-expression</string>
                <string>source</string>
             </argNames>
          </item>

@@ -16,7 +16,7 @@ import java.util.Map;
 import org.apache.commons.logging.Log;
 
 import de.tsl2.nano.bean.BeanUtil;
-import de.tsl2.nano.core.Environment;
+import de.tsl2.nano.core.ENV;
 import de.tsl2.nano.core.log.LogFactory;
 import de.tsl2.nano.core.util.XmlUtil;
 import de.tsl2.nano.execution.IPRunnable;
@@ -58,7 +58,7 @@ public class Pool<T extends IPRunnable<?, ?>> {
      * @return
      */
     private String getDirectory() {
-        return Environment.getConfigPath() + "specification/" + getType().getSimpleName().toLowerCase() + "/";
+        return ENV.getConfigPath() + "specification/" + getType().getSimpleName().toLowerCase() + "/";
     }
 
     private Class<T> getType() {
@@ -67,7 +67,7 @@ public class Pool<T extends IPRunnable<?, ?>> {
 
     private T loadRunnable(String path) {
         try {
-            T r = Environment.get(XmlUtil.class).loadXml(path, getType());
+            T r = ENV.get(XmlUtil.class).loadXml(path, getType());
             runnables.put(r.getName(), r);
             return r;
         } catch (Exception e) {
@@ -102,7 +102,7 @@ public class Pool<T extends IPRunnable<?, ?>> {
         runnables().put(name, runnable);
         String fileName = getFileName(runnable.getName());
         LOG.info("adding runnable '" + name + "' and saving it to " + fileName);
-        Environment.get(XmlUtil.class).saveXml(fileName, runnable);
+        ENV.get(XmlUtil.class).saveXml(fileName, runnable);
     }
 
     /**

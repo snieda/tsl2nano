@@ -9,9 +9,16 @@
  */
 package de.tsl2.nano.incubation.terminal;
 
+import java.io.InputStream;
+import java.io.PrintStream;
+import java.text.ParseException;
+import java.util.Properties;
+
 import org.simpleframework.xml.Element;
 
 import de.tsl2.nano.bean.def.IConstraint;
+import de.tsl2.nano.core.ManagedException;
+import de.tsl2.nano.core.util.Util;
 
 /**
  * 
@@ -35,7 +42,7 @@ public class Option<T> extends AItem<T> {
     }
 
     public Option(String name, IConstraint<T> constraints, T defaultValue, String description) {
-        this(name, constraints, defaultValue, false, description);
+        this(name, constraints, defaultValue, true, description);
     }
 
     /**
@@ -59,6 +66,16 @@ public class Option<T> extends AItem<T> {
     @Override
     public boolean isEditable() {
         return false;
+    }
+
+    @Override
+    public IItem react(IItem caller, String input, InputStream in, PrintStream out, Properties env) {
+        if (!Util.isEmpty(input))
+            env.put(getName(), getValue());
+        else
+            env.remove(getName());
+        changed = !changed;
+        return caller == this ? getParent().next(in, out, env) : caller;
     }
 
     /**

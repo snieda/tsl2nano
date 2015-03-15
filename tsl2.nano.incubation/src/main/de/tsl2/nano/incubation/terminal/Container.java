@@ -13,8 +13,10 @@ import java.io.InputStream;
 import java.io.PrintStream;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import java.util.Properties;
 
+import org.simpleframework.xml.Attribute;
 import org.simpleframework.xml.ElementList;
 import org.simpleframework.xml.Transient;
 import org.simpleframework.xml.core.Commit;
@@ -32,18 +34,19 @@ import de.tsl2.nano.core.util.Util;
  * @version $Revision$
  */
 @SuppressWarnings("rawtypes")
-public class Container<T> extends AItem<List<T>> implements IContainer<T> {
+public class Container<T> extends AItem<T> implements IContainer<T> {
 
     /** serialVersionUID */
     private static final long serialVersionUID = -3656677742608173033L;
 
     /** child nodes */
     @ElementList(type = AItem.class, inline = true, entry = "item", required = false)
-    List<IItem<T>> nodes;
+    List<AItem<T>> nodes;
 
     transient private boolean isactive;
-    /** if result is a collection */
-    boolean multiple = true;
+    /** (default:true) if true, result (=value) is a collection! */
+    @Attribute(required=false)
+    boolean multiple = false;
     /** if true, all tree items will be accessed directly and sequentially */
     transient boolean sequential = false;
     /** on sequential mode, this index points to the actual child-item */
@@ -55,13 +58,13 @@ public class Container<T> extends AItem<List<T>> implements IContainer<T> {
     public Container() {
         super();
         //WORKAROUND: unable to save list of values through simple-xml
-        value = new ArrayList<T>();
+        value = (T) (multiple ? new ArrayList<T>() : value);
         type = Type.Container;
         prefix.setCharAt(PREFIX, '+');
     }
 
     public Container(String name, String description) {
-        this(name, null, new ArrayList<T>(), description);
+        this(name, null, null, description);
     }
 
     /**
@@ -72,14 +75,14 @@ public class Container<T> extends AItem<List<T>> implements IContainer<T> {
      * @param type
      * @param value
      */
-    public Container(String name, IConstraint<List<T>> constraints, List<T> selected, String description) {
-        super(name, constraints, Type.Container, selected, description);
-        nodes = new ArrayList<IItem<T>>();
+    public Container(String name, IConstraint<T> constraints, List<T> selected, String description) {
+        super(name, constraints, Type.Container, (T)selected, description);
+        multiple = selected != null;
+        nodes = new ArrayList<AItem<T>>();
         prefix.setCharAt(PREFIX, '+');
     }
 
-    @Override
-    public List<IItem<T>> getNodes() {
+    protected List<AItem<T>> getNodes() {
         return nodes;
     }
 
@@ -89,10 +92,11 @@ public class Container<T> extends AItem<List<T>> implements IContainer<T> {
      * @param context application context
      * @return filtered child nodes
      */
-    public List<IItem<T>> getFilteredNodes(final Properties context) {
-        return CollectionUtil.getFiltering(getNodes(), new IPredicate<IItem<T>>() {
+    @Override
+    public List<AItem<T>> getNodes(final Map context) {
+        return CollectionUtil.getFiltering(nodes, new IPredicate<AItem<T>>() {
             @Override
-            public boolean eval(IItem<T> arg0) {
+            public boolean eval(AItem<T> arg0) {
                 return arg0.getCondition() == null || arg0.getCondition().isTrue(context);
             }
         });
@@ -108,7 +112,7 @@ public class Container<T> extends AItem<List<T>> implements IContainer<T> {
      * @return the selected item, or if it is a tree having only one active child - this child
      */
     public IItem<T> delegateToUniqueChild(IItem<T> selected, InputStream in, PrintStream out, Properties env) {
-        if (selected.getType() == Type.Container && ((Container) selected).getFilteredNodes(env).size() == 1) {
+        if (selected.getType() == Type.Container && ((Container) selected).getNodes(env).size() == 1) {
             //if only one tree child is available, delegate directly to that item
             return selected.react(this, "1", in, out, env);
         } else
@@ -116,22 +120,22 @@ public class Container<T> extends AItem<List<T>> implements IContainer<T> {
     }
 
     @Override
-    protected void initConstraints(IConstraint<List<T>> constraints) {
+    protected void initConstraints(IConstraint<T> constraints) {
     }
 
     @Override
     @Transient
     //WORKAROUND: unable to save list of values through simple-xml
 //    @ElementList(type=Object.class, inline = true, entry = "value", required = false)
-    public List<T> getValue() {
-        return super.getValue();
+    public T getValue() {
+        return value;
     }
 
     @Override
     @Transient
     //WORKAROUND: unable to save list of values through simple-xml
 //    @ElementList(type=Object.class, inline = true, entry = "value", required = false)
-    public void setValue(List<T> value) {
+    public void setValue(T value) {
         super.setValue(value);
     }
 
@@ -140,13 +144,13 @@ public class Container<T> extends AItem<List<T>> implements IContainer<T> {
      */
     @Override
     public T getValue(int i) {
-        return value.get(i);
+        return multiple ? ((List<T>)value).get(i) : value;
     }
 
     @Override
     public String ask(Properties env) {
         isactive = true;
-        List<IItem<T>> children = getFilteredNodes(env);
+        List<AItem<T>> children = getNodes(env);
         return sequential && seqIndex > -1 && seqIndex < children.size() ? children.get(seqIndex).ask(env)
             : "Please enter a number between 1 and "
                 + children.size() + POSTFIX_QUESTION;
@@ -162,7 +166,7 @@ public class Container<T> extends AItem<List<T>> implements IContainer<T> {
         if (Util.isEmpty(input) && !sequential)
             return getParent();
         IItem next = null;
-        List<IItem<T>> filteredNodes = getFilteredNodes(env);
+        List<AItem<T>> filteredNodes = getNodes(env);
         /*
          * sequential mode
          */
@@ -178,17 +182,19 @@ public class Container<T> extends AItem<List<T>> implements IContainer<T> {
 
         IItem nextnext = null;
         if (!next.isEditable()) {
-            nextnext = next.react(this, null, in, out, env);
-        } else if (next.getType() == Type.Container && ((Container) next).getFilteredNodes(env).size() == 1) {
+            nextnext = next.react(this, Util.asString(next.getValue()), in, out, env);
+        } else if (next.getType() == Type.Container && ((Container) next).getNodes(env).size() == 1) {
             //if only one tree child is available, delegate directly to that item
             nextnext = next.react(this, "1", in, out, env);
         }
         //assign the new result
         if (multiple)
-            getValue().add((T) next.getValue());
+            ((List<T>)value).add((T) next.getValue());
         else
-            getValue().set(0, (T) next.getValue());
-        env.put(getName(), getValue());
+            setValue((T) next.getValue());
+        
+        if (getValue() != null)
+            env.put(getName(), getValue());
         isactive = false;
         return nextnext != null ? nextnext : next;
     }
@@ -196,9 +202,9 @@ public class Container<T> extends AItem<List<T>> implements IContainer<T> {
     public IItem getNode(String input, Properties env) {
         if (input.matches("\\d+")) {
             //input: one-based index
-            return (IItem) getFilteredNodes(env).get(Integer.valueOf(input) - 1);
+            return (IItem) getNodes(env).get(Integer.valueOf(input) - 1);
         } else {
-            List<IItem<T>> childs = getFilteredNodes(env);
+            List<AItem<T>> childs = getNodes(env);
             input = input.toLowerCase();
             for (IItem i : childs) {
                 if (i.getName().toLowerCase().startsWith(input)) {
@@ -213,7 +219,7 @@ public class Container<T> extends AItem<List<T>> implements IContainer<T> {
     @Override
     public boolean add(IItem item) {
         item.setParent(this);
-        return getNodes().add(item);
+        return getNodes().add((AItem)item);
     }
 
     @Override
@@ -233,8 +239,8 @@ public class Container<T> extends AItem<List<T>> implements IContainer<T> {
     public IItem<T> next(InputStream in, PrintStream out, Properties env) {
         IItem<T> next;
         if (sequential) {
-            if (++seqIndex < getFilteredNodes(env).size()) {
-                next = (IItem) getFilteredNodes(env).get(seqIndex);
+            if (++seqIndex < getNodes(env).size()) {
+                next = (IItem) getNodes(env).get(seqIndex);
                 //ask for all tree items
                 if (next.getType() == Type.Container)
                     return next.react(this, null, in, out, env);
@@ -255,8 +261,10 @@ public class Container<T> extends AItem<List<T>> implements IContainer<T> {
     protected void initDeserialization() {
         super.initDeserialization();
         //fill yourself as parent for all children
-        for (IItem n : getNodes()) {
-            n.setParent(this);
+        if (getNodes() != null) {
+            for (IItem n : getNodes()) {
+                n.setParent(this);
+            }
         }
     }
 
@@ -268,28 +276,28 @@ public class Container<T> extends AItem<List<T>> implements IContainer<T> {
         if (isactive || sequential) {
             if (sequential && hasFileDescription())
                 return super.getDescription(env, full);
-            List<IItem<T>> list = getFilteredNodes(env);
+            List<AItem<T>> list = getNodes(env);
             StringBuilder buf = new StringBuilder(list.size() * 60);
             int i = 0;
             //evaluate key string length for formatted output
             int kl = 0;
             for (IItem<T> t : list) {
-                kl = Math.max(kl, t.getPresentationPrefix().length() + translate(t.getName()).length());
+                kl = Math.max(kl, ((AItem)t).getName(-1, (char)-1).length());
             }
             kl++;
+            int vwidth = Util.get(Terminal.KEY_WIDTH, 80) - (kl + 8);
             //print the child item list
             int s = String.valueOf(list.size()).length() + 1;
-            for (IItem t : list) {
+            for (AItem t : list) {
                 buf.append(StringUtil.fixString(String.valueOf(++i), s, ' ', false)
                     + "."
-                    + StringUtil.fixString(t.getPresentationPrefix() + translate(t.getName()), kl, ' ', true)
-                    + (t.getType().equals(Type.Container) ? "" : POSTFIX_QUESTION
-                        + (full ? t.getDescription(env, full) : StringUtil.toString(t.getValue(), 50)))
+                    + ((AItem)t).getName(kl, ' ') + POSTFIX_QUESTION
+                        + (full && !t.getType().equals(Type.Container) ? t.getDescription(env, full) : StringUtil.toString(t.getValueText(), vwidth))
                     + "\n");
             }
             return buf.toString();
         } else {
-            return getPresentationPrefix() + name + "\n";
+            return getName(-1, (char)-1) + "\n";
         }
     }
 
