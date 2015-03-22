@@ -195,7 +195,7 @@ public class NestedJarClassLoader extends LibClassLoader implements Cloneable {
         if (hasRootJar && nestedJars == null) {
             String rootPath = getRootJarPath();
             if (rootPath != null && new File(rootPath).isFile()) {
-                hasRootJar = true;
+//                hasRootJar = true;
                 nestedJars = getNestedJars(rootPath);
                 LOG.info("current jar: " + rootPath
                     + "\nnesting jars:\n"
@@ -203,9 +203,9 @@ public class NestedJarClassLoader extends LibClassLoader implements Cloneable {
                 if (LOG.isDebugEnabled())
                     readManifest();
                 this.jarFileStreams = new HashMap<String, ZipStream>(nestedJars.length);
-            } else {
-                hasRootJar = false;
-                LOG.info("application not launched through jar-file. No nested jar files to load.");
+//            } else {
+//                hasRootJar = false;
+//                LOG.info("application not launched through jar-file. No nested jar files to load.");
             }
         }
         return nestedJars;
