@@ -55,10 +55,10 @@ public class TerminalAdmin extends Terminal {
         return t;
     }
 
-    protected static IItem createItem(String name, Type type, Object defaultValue) {
+    protected static IItem createItem(IContainer parent, String name, Type type, Object defaultValue) {
         switch (type) {
         case Option:
-            return new Option(name, null, (Boolean) defaultValue, "");
+            return new Option(parent, name, null, (Boolean) defaultValue, "");
         case Input:
             return new Input(name, null, defaultValue, "");
         case Action:

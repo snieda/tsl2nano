@@ -599,13 +599,20 @@ public class FileUtil {
     public static Object load(String filename) {
         LOG.info("deserializing object from: " + filename);
         Object l_return = null;
+        ObjectInputStream o = null;
         try {
             FileInputStream file = new FileInputStream(filename);
-            ObjectInputStream o = new ObjectInputStream(file);
+            o = new ObjectInputStream(file);
             l_return = o.readObject();
-            o.close();
         } catch (Exception ex) {
             throw new RuntimeException(ex);
+        } finally {
+            if (o != null)
+                try {
+                    o.close();
+                } catch (IOException e) {
+                    LOG.error("coudn't close stream " + filename);
+                }
         }
         return l_return;
     }

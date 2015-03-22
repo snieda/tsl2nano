@@ -124,7 +124,7 @@ public class Container<T> extends AItem<T> implements IContainer<T> {
     }
 
     @Override
-    @Transient
+//    @Transient
     //WORKAROUND: unable to save list of values through simple-xml
 //    @ElementList(type=Object.class, inline = true, entry = "value", required = false)
     public T getValue() {
@@ -132,7 +132,7 @@ public class Container<T> extends AItem<T> implements IContainer<T> {
     }
 
     @Override
-    @Transient
+//    @Transient
     //WORKAROUND: unable to save list of values through simple-xml
 //    @ElementList(type=Object.class, inline = true, entry = "value", required = false)
     public void setValue(T value) {
@@ -183,7 +183,7 @@ public class Container<T> extends AItem<T> implements IContainer<T> {
         IItem nextnext = null;
         if (!next.isEditable()) {
             nextnext = next.react(this, Util.asString(next.getValue()), in, out, env);
-        } else if (next.getType() == Type.Container && ((Container) next).getNodes(env).size() == 1) {
+        } else if (next instanceof IContainer && ((Container) next).getNodes(env).size() == 1) {
             //if only one tree child is available, delegate directly to that item
             nextnext = next.react(this, "1", in, out, env);
         }
@@ -285,7 +285,7 @@ public class Container<T> extends AItem<T> implements IContainer<T> {
                 kl = Math.max(kl, ((AItem)t).getName(-1, (char)-1).length());
             }
             kl++;
-            int vwidth = Util.get(Terminal.KEY_WIDTH, 80) - (kl + 8);
+            int vwidth = Util.get(Terminal.KEY_WIDTH, 80) - (kl + 9);
             //print the child item list
             int s = String.valueOf(list.size()).length() + 1;
             for (AItem t : list) {

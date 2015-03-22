@@ -1379,10 +1379,10 @@ public class Html5Presentation<T> extends BeanPresentationHelper<T> implements I
                 rowName + "." + c.getName(),
                 ATTR_TYPE,
                 ATTR_TYPE_SEARCH,
-                ATTR_SIZE,/* 'width' doesn't work, so we set the displaying char-size */
-                Presentable.asText(c.getWidth()),
-                ATTR_WIDTH,
-                Presentable.asText(c.getWidth()),
+//                ATTR_SIZE,/* 'width' doesn't work, so we set the displaying char-size */
+//                Presentable.asText(c.getWidth()),
+//                ATTR_WIDTH,
+//                Presentable.asText(c.getWidth()),
                 ATTR_BGCOLOR,
                 COLOR_WHITE,
                 "tabindex",

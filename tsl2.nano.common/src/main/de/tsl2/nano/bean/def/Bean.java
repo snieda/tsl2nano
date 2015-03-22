@@ -456,18 +456,7 @@ public class Bean<T> extends BeanDefinition<T> {
      * @return
      */
     public Object save() {
-        Object result;
-        try {
-            if (CompositionFactory.markToPersist(instance)) {
-                //refresh the bean!
-//                result = BeanContainer.instance().getBeansByExample(instance).iterator().next();
-                result = instance;
-            } else
-                result = /*setInstance(*/save(instance)/*)*/;
-        } finally {
-//            detach();
-        }
-        return result;
+        return /*setInstance(*/save(instance)/*)*/;
     }
 
     /**
@@ -488,7 +477,20 @@ public class Bean<T> extends BeanDefinition<T> {
         // do the save - fill the old bean with the new id value
         Object newBean;
         try {
-            newBean = BeanContainer.instance().save(bean);
+            if (CompositionFactory.markToPersist(bean)) {
+                //refresh the bean!
+//                result = BeanContainer.instance().getBeansByExample(instance).iterator().next();
+                newBean = bean;
+            } else {
+                newBean = BeanContainer.instance().save(bean);
+                /*
+                 * after the save operation, the presenter can be used only after
+                 * a BeanContainer.resolveLayzRelation() and a reset()-call.
+                 * 
+                 * the gui using this presenter should be closed or recreated!
+                 */
+                newBean = BeanContainer.instance().resolveLazyRelations(newBean);
+            }
         } catch (final RuntimeException e) {
             if (BeanContainer.isConstraintError(e)) {
                 throw new ManagedException("tsl2nano.impossible_create", new Object[] { /*Configuration.current()
@@ -497,14 +499,9 @@ public class Bean<T> extends BeanDefinition<T> {
             } else {
                 throw e;
             }
+        } finally {
+//          detach();
         }
-        /*
-         * after the save operation, the presenter can be used only after
-         * a BeanContainer.resolveLayzRelation() and a reset()-call.
-         * 
-         * the gui using this presenter should be closed or recreated!
-         */
-        newBean = BeanContainer.instance().resolveLazyRelations(newBean);
         //if the saved object is the presenters bean - use the new refreshed bean
         if (newBean.getClass().equals(instance.getClass())) {
             instance = (T) newBean;
@@ -519,6 +516,7 @@ public class Bean<T> extends BeanDefinition<T> {
 
     /**
      * fills a map with all bean-attribute-names and their values.
+     * 
      * @param properties will be ignored (is only inherited)
      * @return map filled with all attribute values
      */
@@ -577,7 +575,7 @@ public class Bean<T> extends BeanDefinition<T> {
                 valueDef = copy(attr, valueDef);
                 BeanValue.beanValueCache.add((BeanValue) valueDef);
                 if (valueDef instanceof IPluggable) {
-                    Collection<IConnector> plugins = ((IPluggable)valueDef).getPlugins();
+                    Collection<IConnector> plugins = ((IPluggable) valueDef).getPlugins();
                     for (IConnector p : plugins) {
                         p.connect(valueDef);
                     }
@@ -787,7 +785,7 @@ class SaveAction<T> extends SecureAction<T> implements Serializable {
     }
 
     public T action() throws Exception {
-        return (T) bean.save(instance);
+        return (T) bean.save();
     }
 
     @Override

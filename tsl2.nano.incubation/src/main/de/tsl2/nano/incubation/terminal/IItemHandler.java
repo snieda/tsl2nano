@@ -23,7 +23,7 @@ public interface IItemHandler extends Runnable {
     Object getUserInterface();
 
     /** prints user info screen. should be able to do paging. */
-    void printScreen(IItem item, PrintStream out);
+    String printScreen(IItem item, PrintStream out);
 
     /**
      * waits for user input and calls {@link #printScreen(IItem, PrintStream)} to show informations. all inputs and

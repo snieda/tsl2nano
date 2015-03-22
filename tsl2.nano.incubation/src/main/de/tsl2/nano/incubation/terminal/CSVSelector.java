@@ -11,16 +11,12 @@ package de.tsl2.nano.incubation.terminal;
 
 import java.io.File;
 import java.io.FileNotFoundException;
-import java.io.InputStream;
-import java.io.PrintStream;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
-import java.util.Properties;
 import java.util.Scanner;
 
 import org.simpleframework.xml.Element;
-import org.simpleframework.xml.core.Persist;
 
 import de.tsl2.nano.core.ManagedException;
 import de.tsl2.nano.core.util.StringUtil;
@@ -31,15 +27,15 @@ import de.tsl2.nano.core.util.StringUtil;
  * @author Tom, Thomas Schneider
  * @version $Revision$
  */
-public class CSVSelector extends Container<String> {
+public class CSVSelector extends Selector<String> {
+    /** serialVersionUID */
+    private static final long serialVersionUID = -8246582918469244440L;
     /** csv file name */
     @Element
     String csv;
     /** regular expression pattern to extract the child nodes. */
     @Element
     String pattern;
-    /** serialVersionUID */
-    private static final long serialVersionUID = -8246582918469244440L;
 
     /**
      * constructor
@@ -58,30 +54,18 @@ public class CSVSelector extends Container<String> {
         super(name, description);
         this.csv = csvName;
         this.pattern = pattern;
-        initDeserialization();
     }
 
+    @SuppressWarnings({ "rawtypes", "unchecked" })
     @Override
-    public List<AItem<String>> getNodes(Map context) {
-        if (nodes == null || nodes.size() == 0) {
-            final IItem caller_ = this.getParent();
-            Properties props = new Properties();
-            props.putAll(context);
-            props.putAll(System.getProperties());
-            String csvFileName = StringUtil.insertProperties(csv, props);
+    protected List<String> createItems(Map context) {
+            String csvFileName = StringUtil.insertProperties(csv, context);
             Scanner scanner = null;
+            List<String> items = new LinkedList<String>();
             try {
                 scanner = new Scanner(new File(csvFileName));
-                nodes = new LinkedList<AItem<String>>();
                 while (scanner.hasNext(pattern)) {
-                    String item = scanner.next(pattern);
-                    nodes.add(new Option<String>(item, null, item, item) {
-                        @Override
-                        public IItem react(IItem caller, String input, InputStream in, PrintStream out, Properties env) {
-                            super.react(caller, input, in, out, env);
-                            return caller_;
-                        }
-                    });
+                    items.add(scanner.next(pattern));
                 }
             } catch (FileNotFoundException e) {
                 ManagedException.forward(e);
@@ -89,13 +73,7 @@ public class CSVSelector extends Container<String> {
                 if (scanner != null)
                 scanner.close();
             }
-        }
-        return super.getNodes(context);
+        return items;
     }
 
-    @Persist
-    protected void initSerialization() {
-        if (nodes != null)
-            nodes.clear();
-    }
 }

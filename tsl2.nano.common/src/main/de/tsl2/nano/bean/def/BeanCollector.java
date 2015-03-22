@@ -1386,9 +1386,13 @@ public class BeanCollector<COLLECTIONTYPE extends Collection<T>, T> extends Bean
         //first the search values
         if (hasFilter()) {
             Collection<T> s = getSearchPanelBeans();
-            Iterator<T> it = s.iterator();
-            toValueMap(it.next(), name + ".search.from.", false, false);
-            toValueMap(it.next(), name + ".search.to.", false, false);
+            if (s.size() == 2) {
+                Iterator<T> it = s.iterator();
+                result.putAll(toValueMap(it.next(), name + ".search.from.", false, false));
+                result.putAll(toValueMap(it.next(), name + ".search.to.", false, false));
+            } else {
+                LOG.warn("beancollector " + this + " should have a search filter, but no from/to beans are available!");
+            }
         }
         //then the summary columns (only the standard calculation while no session parameters are available!)
         Collection<IPresentableColumn> cols = getColumnDefinitions();

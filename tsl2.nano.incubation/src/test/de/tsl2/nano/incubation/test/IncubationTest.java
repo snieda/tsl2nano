@@ -26,9 +26,12 @@ import java.util.Collection;
 import java.util.HashMap;
 import java.util.Hashtable;
 import java.util.LinkedHashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Properties;
 import java.util.concurrent.Callable;
+
+import javax.print.attribute.standard.MediaSizeName;
 
 import org.apache.commons.logging.Log;
 import org.junit.Test;
@@ -64,12 +67,15 @@ import de.tsl2.nano.incubation.specification.rules.Rule;
 import de.tsl2.nano.incubation.specification.rules.RulePool;
 import de.tsl2.nano.incubation.terminal.Action;
 import de.tsl2.nano.incubation.terminal.AsciiImage;
+import de.tsl2.nano.incubation.terminal.Container;
+import de.tsl2.nano.incubation.terminal.DirSelector;
+import de.tsl2.nano.incubation.terminal.FieldSelector;
 import de.tsl2.nano.incubation.terminal.FileSelector;
 import de.tsl2.nano.incubation.terminal.Input;
 import de.tsl2.nano.incubation.terminal.MainAction;
+import de.tsl2.nano.incubation.terminal.Selector;
 import de.tsl2.nano.incubation.terminal.Terminal;
 import de.tsl2.nano.incubation.terminal.TerminalAdmin;
-import de.tsl2.nano.incubation.terminal.Container;
 import de.tsl2.nano.incubation.vnet.ILocatable;
 import de.tsl2.nano.incubation.vnet.Net;
 import de.tsl2.nano.incubation.vnet.Node;
@@ -578,14 +584,14 @@ public class IncubationTest {
         Container root = new Container("Toolbox", "Helpful Utilities");
 
         Container printing = new Container("Printing", null);
-        printing.add(new Input("source", "printer-info", "file to print - or only a printer info", false));
+        printing.add(new FileSelector("source", "printer-info", ".*"));
         printing.add(new Input("printer", "PDFCreator", "printer to use"));
         printing.add(new Input("jobname", "tsl2nano", "print job name"));
         printing.add(new Input("mimetype", "MIME_PCL", "mime type"));
-        printing.add(new Input("papersize", "ISO_A4", "paper size"));
+        printing.add(new FieldSelector("papersize", "ISO_A4", "paper size", MediaSizeName.class, MediaSizeName.class));
         printing.add(new Input("quality", new Constraint<String>(String.class, Arrays.asList("NORMAL", "HIGH")), "NORMAL", "print quality"));
         printing.add(new Input("priority", "1", "print priority (1-100)"));
-        printing.add(new Input("xsltfile", "test.xsl", "xsl-fo transformation file to do a apache fop"));
+        printing.add(new Input("xsltfile", null, "xsl-fo transformation file to do a apache fop"));
         printing.add(new Input("username", null, "user name to be used by the printer"));
         Action<?> mainAction;
         printing
@@ -614,8 +620,8 @@ public class IncubationTest {
         root.add(perm);
 
         Container xml = new Container("Xml", null);
-        xml.add(new FileSelector("source", ".*xml", "${user.dir}"));
-        xml.add(new FileSelector("xsl-transformation", ".*xsl.*", "${user.dir}"));
+        xml.add(new FileSelector("source", null, ".*xml", "${user.dir}"));
+        xml.add(new FileSelector("xsl-transformation", null, ".*xsl.*", "${user.dir}"));
         xml.add(new Input("xsl-destination", "${user.dir}/${source}.html", "xsl destination file", false));
         xml.add(new Input("xpath-expression", null, "xpath expression", false));
         xml.add(new Action(XmlUtil.class, "transformVel", "source", Action.KEY_ENV));
@@ -647,7 +653,7 @@ public class IncubationTest {
         root.add(net);
 
         Container file = new Container("File-Operation", null);
-        file.add(new Input("directory", System.getProperty("user.dir"), "base directory for file operations"));
+        file.add(new DirSelector("directory", "${user.dir}", ".*"));
         file.add(new Input("file", "**/[\\w]+\\.txt", "regular expression (with ant-like path **) as file filter"));
         file.add(new Input("destination", System.getProperty("user.dir"), "destination directory for file operations"));
         file.add(new Action("List", FileUtil.class, "foreach", "directory", "file", "file.operation.null"));

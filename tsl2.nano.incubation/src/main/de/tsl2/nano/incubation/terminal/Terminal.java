@@ -70,6 +70,7 @@ import de.tsl2.nano.util.SchedulerUtil;
  * - show ascii-pictures (transformed from pixel-images) for an item (description must point to an image file)
  * - extends itself downloading required jars from network (if {@link #useNetworkExtension} ist true)
  * - schedule mode: starts a scheduler for an action
+ * - selectors for files, content of files, class members etc.
  * 
  * </pre>
  * 
@@ -103,6 +104,7 @@ public class Terminal implements IItemHandler, Serializable {
     /** item properties */
     transient Properties env;
     /** default: false. if true, on each terminal save, the terminals xml serialization file will be stored.  */
+    @Attribute(required=false)
     boolean refreshConfig = false;
     
     /**
@@ -113,6 +115,7 @@ public class Terminal implements IItemHandler, Serializable {
     Map<String, Object> definitions;
 
     /** batch file name. the batch file contains input instructions (numbers or names) separated by '\n'. */
+    @Element(required=false)
     String batch;
 
     /** base item - should be a Selection */
@@ -130,6 +133,7 @@ public class Terminal implements IItemHandler, Serializable {
     transient boolean isRecording;
 
     /** if true, all tree items will be accessed directly and sequentially */
+    @Attribute(required=false)
     boolean sequential = false;
 
     /** command identifier */
@@ -169,7 +173,7 @@ public class Terminal implements IItemHandler, Serializable {
     /** default script file name */
     public static final String DEFAULT_NAME = PREFIX + "xml";
 
-    static final String ASK_ENTER = ">>> PLEASE HIT ENTER FOR THE NEXT PAGE <<<";
+    static final String ASK_ENTER = ">>> PLEASE HIT ENTER FOR THE NEXT PAGE OR ENTER A SELECTION <<<";
     private static final String LOGO = "tsl2nano.logo.png";
 
     public Terminal() {
@@ -211,11 +215,12 @@ public class Terminal implements IItemHandler, Serializable {
         this.height = height;
         this.style = style;
         this.definitions = defintions;
-        this.env = createEnvironment(defintions);
+        this.env = createEnvironment(name, defintions);
     }
 
-    static Properties createEnvironment(Map definitions) {
-        Properties env = new Properties();
+    static Properties createEnvironment(String name, Map definitions) {
+        String p = name + ".properties";
+        Properties env = new File(p).canRead() ? FileUtil.loadPropertiesFromFile(p) : new Properties();
         if (definitions != null)
             env.putAll(definitions);
         return env;
@@ -317,9 +322,13 @@ public class Terminal implements IItemHandler, Serializable {
     }
 
     private void prepareEnvironment(Properties env, IItem root) {
+        if (root.getType() == Type.Option)
+            return;
         Object value = root.getValue();
         if (value != null)
             env.put(root.getName(), value);
+        if (root.getType() == Type.Selector)
+            return;
         if (root.getType().equals(Type.Container)) {
             List<IItem> childs = ((IContainer) root).getNodes(env);
             if (childs != null) {
@@ -350,10 +359,10 @@ public class Terminal implements IItemHandler, Serializable {
     }
 
     @Override
-    public void printScreen(IItem item, PrintStream out) {
+    public String printScreen(IItem item, PrintStream out) {
         out.print(TextTerminal.getTextFrame(item.toString(), style, width, true));
         String question = item.ask(env);
-        printScreen(
+        return printScreen(
             item.getDescription(env, false),
             out, question, false);
     }
@@ -361,8 +370,9 @@ public class Terminal implements IItemHandler, Serializable {
     /**
      * {@inheritDoc}
      */
-    public void printScreen(String screen, PrintStream out, String question, boolean center) {
+    public String printScreen(String screen, PrintStream out, String question, boolean center) {
         //split screens to max height
+        String pagingInput;
         String s = screen;
         int lines = 0, page = 0, i = 0, l = -1;
         while ((i = s.indexOf("\n", l + 1)) < s.length() && i != -1) {
@@ -373,9 +383,10 @@ public class Terminal implements IItemHandler, Serializable {
                 out.print(ASK_ENTER);
                 page = i + 1;
                 lines = 0;
-                if (!isInBatchMode())
-                    nextLine(in);
-                else
+                if (!isInBatchMode()) {
+                    if ((pagingInput = nextLine(in)).length() > 0)
+                        return pagingInput;
+                } else
                     out.println();
             }
             l = i;
@@ -387,6 +398,7 @@ public class Terminal implements IItemHandler, Serializable {
             out.print(getTextFrame(screen, style, width, center));
         }
         out.print(question);
+        return null;
     }
 
     public static String translate(String name) {
@@ -399,8 +411,9 @@ public class Terminal implements IItemHandler, Serializable {
     @Override
     public void serve(IItem item, InputStream in, PrintStream out, Properties env) {
         try {
-            printScreen(item, out);
-            String input = nextLine(in);
+            String input = printScreen(item, out);
+            if (input == null)
+                input = nextLine(in);
             //to see the input in batch mode
             if (!Util.isEmpty(input) && input.startsWith(KEY_COMMAND)) {
                 if (isCommand(input, KEY_HELP)) {
@@ -580,7 +593,7 @@ public class Terminal implements IItemHandler, Serializable {
 
     @Commit
     protected void initDeserialization() {
-        env = createEnvironment(definitions);
+        env = createEnvironment(name, definitions);
         in = System.in;
         out = System.out;
     }

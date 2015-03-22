@@ -41,8 +41,8 @@ public class Option<T> extends AItem<T> {
         type = Type.Option;
     }
 
-    public Option(String name, IConstraint<T> constraints, T defaultValue, String description) {
-        this(name, constraints, defaultValue, true, description);
+    public Option(IContainer<?> parent, String name, IConstraint<T> constraints, T defaultValue, String description) {
+        this(parent, name, constraints, defaultValue, true, description);
     }
 
     /**
@@ -53,8 +53,9 @@ public class Option<T> extends AItem<T> {
      * @param type
      * @param value
      */
-    public Option(String name, IConstraint<T> constraints, T defaultValue, boolean active, String description) {
+    public Option(IContainer<?> parent, String name, IConstraint<T> constraints, T defaultValue, boolean active, String description) {
         super(name, constraints, Type.Option, defaultValue, description);
+        this.parent = parent;
         this.defaultValue = defaultValue;
         if (!active)
             this.value = null;

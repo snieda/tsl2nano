@@ -72,7 +72,8 @@ public class AppLoader {
      */
     protected void createEnvironment(String environment, Argumentator args) {
         System.setProperty(environment, environment + "/");
-        BeanClass.createBeanClass("de.tsl2.nano.core.Environment").callMethod(null,
+        //we don't want to have a direct dependency to the environment class!
+        BeanClass.createBeanClass("de.tsl2.nano.core.ENV").callMethod(null,
             "create",
             new Class[] { String.class },
             environment);
@@ -206,6 +207,7 @@ public class AppLoader {
         } catch (Throwable ex) {
             //main exception catching: log the exception before exiting!
             ex.printStackTrace();
+            LOG.error(ex);
         }
     }
 

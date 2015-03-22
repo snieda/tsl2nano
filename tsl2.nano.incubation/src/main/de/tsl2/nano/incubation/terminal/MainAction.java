@@ -1,11 +1,13 @@
 package de.tsl2.nano.incubation.terminal;
 
 import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Properties;
 
 import de.tsl2.nano.core.ManagedException;
 import de.tsl2.nano.core.execution.IRunnable;
+import de.tsl2.nano.core.util.Util;
 
 public class MainAction<T> extends Action<T> {
     /** serialVersionUID */
@@ -29,11 +31,22 @@ public class MainAction<T> extends Action<T> {
     T run(Properties context) {
         List<String> argList = new ArrayList<String>(argNames.length);
         Object a;
+        /*
+         * a main method normally gets no null arguments. calling it inside a jvm, arguments may be null
+         * and shouldn't be shift the next arguments. so, we collect all arguments inclusive null values,
+         * removing the null values from the end!
+         */
         for (int i = 0; i < argNames.length; i++) {
             a = context.get(argNames[i]);
-            if (a != null)
-                argList.add(a.toString());
+            argList.add(Util.asString(a));
         }
+        for (int i = argList.size() - 1; i >= 0; i--) {
+            if (argList.get(i) == null)
+                argList.remove(i);
+            else
+                break;
+        }
+        
         context.put("arg1", argList.toArray(new String[0]));
         if (runner == null) {
             try {

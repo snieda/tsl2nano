@@ -1,19 +1,16 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<terminal name="terminal.xml" width="79" height="22" style="1" bars="true" useNetworkExtension="true">
+<terminal name="terminal.xml" width="79" height="22" style="1" bars="true" refreshConfig="false" useNetworkExtension="true" sequential="false">
    <definition name="file.operation.delete">
       <value class="java.lang.String">test</value>
    </definition>
    <definition name="image.out">
       <value class="java.lang.String">-out</value>
    </definition>
-   <root class="de.tsl2.nano.incubation.terminal.Container" name="Toolbox" type="Container">
-      <item class="de.tsl2.nano.incubation.terminal.Container" name="Printing" type="Container">
-         <item class="de.tsl2.nano.incubation.terminal.Input" name="source" type="Input">
-            <constraints type="java.lang.String" nullable="false" length="-1">
-               <scale>-1</scale>
-               <precision>-1</precision>
-            </constraints>
-            <value class="java.lang.String">printer-info</value>
+   <root class="de.tsl2.nano.incubation.terminal.Container" name="Toolbox" type="Container" multiple="false">
+      <item class="de.tsl2.nano.incubation.terminal.Container" name="Printing" type="Container" multiple="false">
+         <item class="de.tsl2.nano.incubation.terminal.FileSelector" name="source" type="Container" multiple="false">
+            <directory>${user.dir}</directory>
+            <include>.*</include>
          </item>
          <item class="de.tsl2.nano.incubation.terminal.Input" name="printer" type="Input">
             <constraints type="java.lang.String" nullable="true" length="-1">
@@ -39,11 +36,9 @@
             </constraints>
             <value class="java.lang.String">MIME_PCL</value>
          </item>
-         <item class="de.tsl2.nano.incubation.terminal.Input" name="papersize" type="Input">
-            <constraints type="java.lang.String" nullable="true" length="-1">
-               <scale>-1</scale>
-               <precision>-1</precision>
-            </constraints>
+         <item class="de.tsl2.nano.incubation.terminal.FieldSelector" name="papersize" type="Container" multiple="false">
+            <cls>javax.print.attribute.standard.MediaSizeName</cls>
+            <field>javax.print.attribute.standard.MediaSizeName</field>
             <value class="java.lang.String">ISO_A4</value>
          </item>
          <item class="de.tsl2.nano.incubation.terminal.Input" name="quality" type="Input">
@@ -68,7 +63,6 @@
                <scale>-1</scale>
                <precision>-1</precision>
             </constraints>
-            <value class="java.lang.String">test.xsl</value>
          </item>
          <item class="de.tsl2.nano.incubation.terminal.Input" name="username" type="Input">
             <constraints type="java.lang.String" nullable="true" length="-1">
@@ -97,7 +91,7 @@
             </argNames>
          </item>
       </item>
-      <item class="de.tsl2.nano.incubation.terminal.Container" name="Crypt" type="Container">
+      <item class="de.tsl2.nano.incubation.terminal.Container" name="Crypt" type="Container" multiple="false">
          <item class="de.tsl2.nano.incubation.terminal.Input" name="password" type="Input">
             <constraints type="java.lang.String" nullable="true" length="-1">
                <scale>-1</scale>
@@ -143,7 +137,7 @@
             </argNames>
          </item>
       </item>
-      <item class="de.tsl2.nano.incubation.terminal.Container" name="Permutator" type="Container">
+      <item class="de.tsl2.nano.incubation.terminal.Container" name="Permutator" type="Container" multiple="false">
          <item class="de.tsl2.nano.incubation.terminal.Input" name="source" type="Input">
             <constraints type="java.lang.String" nullable="false" length="-1">
                <scale>-1</scale>
@@ -179,18 +173,21 @@
             </argNames>
          </item>
       </item>
-      <item class="de.tsl2.nano.incubation.terminal.Container" name="Xml" type="Container">
-         <item class="de.tsl2.nano.incubation.terminal.FileSelector" name="source" type="Container">
-            <directory>C:\eigen\tsl2\tsl2-workspace\tsl2-nano\tsl2.nano.incubation</directory>
+      <item class="de.tsl2.nano.incubation.terminal.Container" name="Xml" type="Container" multiple="false">
+         <item class="de.tsl2.nano.incubation.terminal.FileSelector" name="source" type="Container" multiple="false">
+            <directory>${user.dir}</directory>
             <include>.*xml</include>
          </item>
-         <item class="de.tsl2.nano.incubation.terminal.FileSelector" name="xsl-transformation" type="Container">
-            <directory>C:\eigen\tsl2\tsl2-workspace\tsl2-nano\tsl2.nano.incubation</directory>
-            <include>.*xml</include>
+         <item class="de.tsl2.nano.incubation.terminal.FileSelector" name="xsl-transformation" type="Container" multiple="false">
+            <directory>${user.dir}</directory>
+            <include>.*xsl.*</include>
          </item>
-         <item class="de.tsl2.nano.incubation.terminal.FileSelector" name="xsl-destination" type="Container">
-            <directory>C:\eigen\tsl2\tsl2-workspace\tsl2-nano\tsl2.nano.incubation</directory>
-            <include>.*xml</include>
+         <item class="de.tsl2.nano.incubation.terminal.Input" name="xsl-destination" type="Input">
+            <constraints type="java.lang.String" nullable="false" length="-1">
+               <scale>-1</scale>
+               <precision>-1</precision>
+            </constraints>
+            <value class="java.lang.String">${user.dir}/${source}.html</value>
          </item>
          <item class="de.tsl2.nano.incubation.terminal.Input" name="xpath-expression" type="Input">
             <constraints type="java.lang.String" nullable="false" length="-1">
@@ -224,8 +221,8 @@
             </argNames>
          </item>
       </item>
-      <item class="de.tsl2.nano.incubation.terminal.Container" name="Net" type="Container">
-         <item class="de.tsl2.nano.incubation.terminal.Container" name="Scan" type="Container">
+      <item class="de.tsl2.nano.incubation.terminal.Container" name="Net" type="Container" multiple="false">
+         <item class="de.tsl2.nano.incubation.terminal.Container" name="Scan" type="Container" multiple="false">
             <item class="de.tsl2.nano.incubation.terminal.Input" name="ip" type="Input">
                <constraints type="java.lang.String" nullable="true" length="-1">
                   <scale>-1</scale>
@@ -257,7 +254,7 @@
                </argNames>
             </item>
          </item>
-         <item class="de.tsl2.nano.incubation.terminal.Container" name="WCopy" type="Container">
+         <item class="de.tsl2.nano.incubation.terminal.Container" name="WCopy" type="Container" multiple="false">
             <item class="de.tsl2.nano.incubation.terminal.Input" name="url" type="Input">
                <constraints type="java.lang.String" nullable="false" length="-1">
                   <scale>-1</scale>
@@ -299,13 +296,10 @@
             <argNames length="0"/>
          </item>
       </item>
-      <item class="de.tsl2.nano.incubation.terminal.Container" name="File-Operation" type="Container">
-         <item class="de.tsl2.nano.incubation.terminal.Input" name="directory" type="Input">
-            <constraints type="java.lang.String" nullable="true" length="-1">
-               <scale>-1</scale>
-               <precision>-1</precision>
-            </constraints>
-            <value class="java.lang.String">C:\eigen\tsl2\tsl2-workspace\tsl2-nano\tsl2.nano.incubation</value>
+      <item class="de.tsl2.nano.incubation.terminal.Container" name="File-Operation" type="Container" multiple="false">
+         <item class="de.tsl2.nano.incubation.terminal.DirSelector" name="directory" type="Container" multiple="false">
+            <root class="java.lang.String">${user.dir}</root>
+            <include>.*</include>
          </item>
          <item class="de.tsl2.nano.incubation.terminal.Input" name="file" type="Input">
             <constraints type="java.lang.String" nullable="true" length="-1">

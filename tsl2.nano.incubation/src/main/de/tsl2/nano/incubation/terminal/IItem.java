@@ -83,5 +83,5 @@ public interface IItem<T> {
 }
 
 enum Type implements Serializable {
-    Input, Option, Container, Action;
+    Input, Option, Container, Selector, Action;
 }

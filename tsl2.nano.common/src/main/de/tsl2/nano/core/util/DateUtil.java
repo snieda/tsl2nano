@@ -9,12 +9,11 @@
  */
 package de.tsl2.nano.core.util;
 
-import java.text.ParseException;
 import java.text.DateFormat;
+import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.Date;
-import java.util.LinkedList;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
 
@@ -24,13 +23,22 @@ import de.tsl2.nano.util.NumberUtil;
 import de.tsl2.nano.util.Period;
 
 /**
- * Utility-class for date and time operations
+ * Utility-class for date and time operations. on default, it is not thread safe! call {@link #multithreaded} to be
+ * thread safe.
  * 
  * @author ds 18.02.2009
  * @version $Revision$
  */
 public final class DateUtil {
+    /**
+     * if you are running on exactly one thread, this static is used for performance enhancements. if you are running
+     * multi-threaded, call {@link #runMultiThreaded()}. see access in {@link #getCalendar()}
+     */
     static Calendar cal;
+
+    /** see {@link #cal} */
+    static boolean multithreaded = false;
+
     /** the default date-time format */
     private static final DateFormat DEFAULT_DATETIME_FORMAT = DateFormat.getDateTimeInstance(DateFormat.MEDIUM,
         DateFormat.MEDIUM);
@@ -62,6 +70,13 @@ public final class DateUtil {
      */
     private DateUtil() {
         super();
+    }
+
+    /**
+     * see {@link #multithreaded} and {@link #cal} and {@link #getCalendar()}.
+     */
+    public static void runMultiThreaded() {
+        multithreaded = true;
     }
 
     /**
@@ -745,7 +760,7 @@ public final class DateUtil {
      * @return calendar without lenient calculation
      */
     private static final Calendar getCalendar() {
-        if (cal == null) {
+        if (cal == null || multithreaded) {
             cal = Calendar.getInstance();
 //            cal.getTimeZone().setRawOffset(0);
 //            cal.setLenient(false);

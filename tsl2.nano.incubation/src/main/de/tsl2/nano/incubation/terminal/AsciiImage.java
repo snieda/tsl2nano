@@ -109,8 +109,9 @@ public class AsciiImage {
 
         int xrate = width == -1 ? height == -1 ? 1 : -1 : (int) Math.round(img.getWidth() / (double) width);
         int yrate = height == -1 ? width == -1 ? 1 : xrate : (int) Math.round(img.getHeight() / (double) height);
-        if (xrate == -1)
-            xrate = yrate;
+        //Guarantee values bigger than zero!
+        if (xrate <= 0)
+            xrate = yrate <= 0 ? (yrate = 1) : yrate;
 
         for (int y = 0; y < img.getHeight(); y += yrate) {
             for (int x = 0; x < img.getWidth(); x += xrate) {
