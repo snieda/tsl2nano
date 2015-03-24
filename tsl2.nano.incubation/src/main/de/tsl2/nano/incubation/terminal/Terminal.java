@@ -46,6 +46,8 @@ import de.tsl2.nano.core.util.FileUtil;
 import de.tsl2.nano.core.util.StringUtil;
 import de.tsl2.nano.core.util.Util;
 import de.tsl2.nano.core.util.XmlUtil;
+import de.tsl2.nano.incubation.terminal.IItem.Type;
+import de.tsl2.nano.incubation.terminal.item.Container;
 import de.tsl2.nano.util.SchedulerUtil;
 
 /**
@@ -580,7 +582,7 @@ public class Terminal implements IItemHandler, Serializable {
         return line;
     }
 
-    static String nextLine(InputStream in, PrintStream out) {
+    public static String nextLine(InputStream in, PrintStream out) {
         return nextLine(new Scanner(in), in, out);
     }
 

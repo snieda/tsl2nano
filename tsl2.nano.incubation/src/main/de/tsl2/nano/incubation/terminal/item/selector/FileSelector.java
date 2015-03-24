@@ -7,7 +7,7 @@
  * 
  * Copyright: (c) Thomas Schneider 2015, all rights reserved
  */
-package de.tsl2.nano.incubation.terminal;
+package de.tsl2.nano.incubation.terminal.item.selector;
 
 import java.io.File;
 import java.io.InputStream;
@@ -23,6 +23,8 @@ import org.simpleframework.xml.ElementList;
 
 import de.tsl2.nano.core.util.FileUtil;
 import de.tsl2.nano.core.util.StringUtil;
+import de.tsl2.nano.incubation.terminal.IItem;
+import de.tsl2.nano.incubation.terminal.item.Option;
 
 /**
  * creates a list of options for this container

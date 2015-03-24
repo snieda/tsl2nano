@@ -7,7 +7,7 @@
  * 
  * Copyright: (c) Thomas Schneider 2015, all rights reserved
  */
-package de.tsl2.nano.incubation.terminal;
+package de.tsl2.nano.incubation.terminal.item.selector;
 
 import java.io.InputStream;
 import java.io.PrintStream;
@@ -22,6 +22,7 @@ import org.simpleframework.xml.ElementList;
 
 import de.tsl2.nano.core.util.StringUtil;
 import de.tsl2.nano.core.util.Util;
+import de.tsl2.nano.incubation.terminal.IItem;
 
 /**
  * The tree selector is a {@link Selector} that provides walking through a tree to select exactly one node.

@@ -80,8 +80,9 @@ public interface IItem<T> {
 
     /** item description to be used as user help */
     String getDescription(Properties env, boolean full);
+    
+    enum Type implements Serializable {
+        Input, Option, Container, Selector, Action;
+    }
 }
 
-enum Type implements Serializable {
-    Input, Option, Container, Selector, Action;
-}

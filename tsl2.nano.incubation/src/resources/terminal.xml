@@ -6,20 +6,20 @@
    <definition name="image.out">
       <value class="java.lang.String">-out</value>
    </definition>
-   <root class="de.tsl2.nano.incubation.terminal.Container" name="Toolbox" type="Container" multiple="false">
-      <item class="de.tsl2.nano.incubation.terminal.Container" name="Printing" type="Container" multiple="false">
-         <item class="de.tsl2.nano.incubation.terminal.FileSelector" name="source" type="Container" multiple="false">
+   <root class="de.tsl2.nano.incubation.terminal.item.Container" name="Toolbox" type="Container" multiple="false">
+      <item class="de.tsl2.nano.incubation.terminal.item.Container" name="Printing" type="Container" multiple="false">
+         <item class="de.tsl2.nano.incubation.terminal.item.selector.FileSelector" name="source" type="Container" multiple="false">
             <directory>${user.dir}</directory>
             <include>.*</include>
          </item>
-         <item class="de.tsl2.nano.incubation.terminal.Input" name="printer" type="Input">
+         <item class="de.tsl2.nano.incubation.terminal.item.Input" name="printer" type="Input">
             <constraints type="java.lang.String" nullable="true" length="-1">
                <scale>-1</scale>
                <precision>-1</precision>
             </constraints>
             <value class="java.lang.String">PDFCreator</value>
          </item>
-         <item class="de.tsl2.nano.incubation.terminal.Input" name="jobname" type="Input">
+         <item class="de.tsl2.nano.incubation.terminal.item.Input" name="jobname" type="Input">
             <constraints type="java.lang.String" nullable="true" length="-1">
                <scale>-1</scale>
                <precision>-1</precision>
@@ -29,19 +29,19 @@
 	format: *)</description>
             <value class="java.lang.String">test</value>
          </item>
-         <item class="de.tsl2.nano.incubation.terminal.Input" name="mimetype" type="Input">
+         <item class="de.tsl2.nano.incubation.terminal.item.Input" name="mimetype" type="Input">
             <constraints type="java.lang.String" nullable="true" length="-1">
                <scale>-1</scale>
                <precision>-1</precision>
             </constraints>
             <value class="java.lang.String">MIME_PCL</value>
          </item>
-         <item class="de.tsl2.nano.incubation.terminal.FieldSelector" name="papersize" type="Container" multiple="false">
+         <item class="de.tsl2.nano.incubation.terminal.item.selector.FieldSelector" name="papersize" type="Container" multiple="false">
             <cls>javax.print.attribute.standard.MediaSizeName</cls>
             <field>javax.print.attribute.standard.MediaSizeName</field>
             <value class="java.lang.String">ISO_A4</value>
          </item>
-         <item class="de.tsl2.nano.incubation.terminal.Input" name="quality" type="Input">
+         <item class="de.tsl2.nano.incubation.terminal.item.Input" name="quality" type="Input">
             <constraints type="java.lang.String" nullable="true" length="6">
                <defaultValue class="java.lang.String">NORMAL</defaultValue>
                <scale>-1</scale>
@@ -51,26 +51,26 @@
             </constraints>
             <value class="java.lang.String">NORMAL</value>
          </item>
-         <item class="de.tsl2.nano.incubation.terminal.Input" name="priority" type="Input">
+         <item class="de.tsl2.nano.incubation.terminal.item.Input" name="priority" type="Input">
             <constraints type="java.lang.String" nullable="true" length="-1">
                <scale>-1</scale>
                <precision>-1</precision>
             </constraints>
             <value class="java.lang.String">1</value>
          </item>
-         <item class="de.tsl2.nano.incubation.terminal.Input" name="xsltfile" type="Input">
+         <item class="de.tsl2.nano.incubation.terminal.item.Input" name="xsltfile" type="Input">
             <constraints type="java.lang.String" nullable="true" length="-1">
                <scale>-1</scale>
                <precision>-1</precision>
             </constraints>
          </item>
-         <item class="de.tsl2.nano.incubation.terminal.Input" name="username" type="Input">
+         <item class="de.tsl2.nano.incubation.terminal.item.Input" name="username" type="Input">
             <constraints type="java.lang.String" nullable="true" length="-1">
                <scale>-1</scale>
                <precision>-1</precision>
             </constraints>
          </item>
-         <item class="de.tsl2.nano.incubation.terminal.MainAction" name="print" type="Action">
+         <item class="de.tsl2.nano.incubation.terminal.item.MainAction" name="print" type="Action">
             <condition>
                <expression>quality=NORMAL</expression>
             </condition>
@@ -91,41 +91,41 @@
             </argNames>
          </item>
       </item>
-      <item class="de.tsl2.nano.incubation.terminal.Container" name="Crypt" type="Container" multiple="false">
-         <item class="de.tsl2.nano.incubation.terminal.Input" name="password" type="Input">
+      <item class="de.tsl2.nano.incubation.terminal.item.Container" name="Crypt" type="Container" multiple="false">
+         <item class="de.tsl2.nano.incubation.terminal.item.Input" name="password" type="Input">
             <constraints type="java.lang.String" nullable="true" length="-1">
                <scale>-1</scale>
                <precision>-1</precision>
             </constraints>
          </item>
-         <item class="de.tsl2.nano.incubation.terminal.Input" name="algorithm" type="Input">
+         <item class="de.tsl2.nano.incubation.terminal.item.Input" name="algorithm" type="Input">
             <constraints type="java.lang.String" nullable="true" length="-1">
                <scale>-1</scale>
                <precision>-1</precision>
             </constraints>
             <value class="java.lang.String">PBEWithMD5AndDES</value>
          </item>
-         <item class="de.tsl2.nano.incubation.terminal.Input" name="text" type="Input">
+         <item class="de.tsl2.nano.incubation.terminal.item.Input" name="text" type="Input">
             <constraints type="java.lang.String" nullable="false" length="-1">
                <scale>-1</scale>
                <precision>-1</precision>
             </constraints>
          </item>
-         <item class="de.tsl2.nano.incubation.terminal.Input" name="base64" type="Input">
+         <item class="de.tsl2.nano.incubation.terminal.item.Input" name="base64" type="Input">
             <constraints type="java.lang.Boolean" nullable="true" length="-1">
                <scale>-1</scale>
                <precision>-1</precision>
             </constraints>
             <value class="java.lang.Boolean">true</value>
          </item>
-         <item class="de.tsl2.nano.incubation.terminal.Input" name="include" type="Input">
+         <item class="de.tsl2.nano.incubation.terminal.item.Input" name="include" type="Input">
             <constraints type="java.lang.String" nullable="true" length="-1">
                <scale>-1</scale>
                <precision>-1</precision>
             </constraints>
             <value class="java.lang.String">.*</value>
          </item>
-         <item class="de.tsl2.nano.incubation.terminal.MainAction" name="Crypt" type="Action">
+         <item class="de.tsl2.nano.incubation.terminal.item.MainAction" name="Crypt" type="Action">
             <mainClass>de.tsl2.nano.core.util.Crypt</mainClass>
             <method>main</method>
             <argNames length="5">
@@ -137,32 +137,32 @@
             </argNames>
          </item>
       </item>
-      <item class="de.tsl2.nano.incubation.terminal.Container" name="Permutator" type="Container" multiple="false">
-         <item class="de.tsl2.nano.incubation.terminal.Input" name="source" type="Input">
+      <item class="de.tsl2.nano.incubation.terminal.item.Container" name="Permutator" type="Container" multiple="false">
+         <item class="de.tsl2.nano.incubation.terminal.item.Input" name="source" type="Input">
             <constraints type="java.lang.String" nullable="false" length="-1">
                <scale>-1</scale>
                <precision>-1</precision>
             </constraints>
          </item>
-         <item class="de.tsl2.nano.incubation.terminal.Input" name="transformer" type="Input">
+         <item class="de.tsl2.nano.incubation.terminal.item.Input" name="transformer" type="Input">
             <constraints type="java.lang.String" nullable="false" length="-1">
                <scale>-1</scale>
                <precision>-1</precision>
             </constraints>
          </item>
-         <item class="de.tsl2.nano.incubation.terminal.Input" name="swap" type="Input">
+         <item class="de.tsl2.nano.incubation.terminal.item.Input" name="swap" type="Input">
             <constraints type="java.lang.String" nullable="true" length="-1">
                <scale>-1</scale>
                <precision>-1</precision>
             </constraints>
          </item>
-         <item class="de.tsl2.nano.incubation.terminal.Input" name="backward" type="Input">
+         <item class="de.tsl2.nano.incubation.terminal.item.Input" name="backward" type="Input">
             <constraints type="java.lang.String" nullable="true" length="-1">
                <scale>-1</scale>
                <precision>-1</precision>
             </constraints>
          </item>
-         <item class="de.tsl2.nano.incubation.terminal.MainAction" name="Permutator" type="Action">
+         <item class="de.tsl2.nano.incubation.terminal.item.MainAction" name="Permutator" type="Action">
             <mainClass>de.tsl2.nano.core.util.Permutator</mainClass>
             <method>main</method>
             <argNames length="4">
@@ -173,29 +173,29 @@
             </argNames>
          </item>
       </item>
-      <item class="de.tsl2.nano.incubation.terminal.Container" name="Xml" type="Container" multiple="false">
-         <item class="de.tsl2.nano.incubation.terminal.FileSelector" name="source" type="Container" multiple="false">
+      <item class="de.tsl2.nano.incubation.terminal.item.Container" name="Xml" type="Container" multiple="false">
+         <item class="de.tsl2.nano.incubation.terminal.item.selector.FileSelector" name="source" type="Container" multiple="false">
             <directory>${user.dir}</directory>
             <include>.*xml</include>
          </item>
-         <item class="de.tsl2.nano.incubation.terminal.FileSelector" name="xsl-transformation" type="Container" multiple="false">
+         <item class="de.tsl2.nano.incubation.terminal.item.selector.FileSelector" name="xsl-transformation" type="Container" multiple="false">
             <directory>${user.dir}</directory>
             <include>.*xsl.*</include>
          </item>
-         <item class="de.tsl2.nano.incubation.terminal.Input" name="xsl-destination" type="Input">
+         <item class="de.tsl2.nano.incubation.terminal.item.Input" name="xsl-destination" type="Input">
             <constraints type="java.lang.String" nullable="false" length="-1">
                <scale>-1</scale>
                <precision>-1</precision>
             </constraints>
             <value class="java.lang.String">${user.dir}/${source}.html</value>
          </item>
-         <item class="de.tsl2.nano.incubation.terminal.Input" name="xpath-expression" type="Input">
+         <item class="de.tsl2.nano.incubation.terminal.item.Input" name="xpath-expression" type="Input">
             <constraints type="java.lang.String" nullable="false" length="-1">
                <scale>-1</scale>
                <precision>-1</precision>
             </constraints>
          </item>
-         <item class="de.tsl2.nano.incubation.terminal.Action" name="transformVel" type="Action">
+         <item class="de.tsl2.nano.incubation.terminal.item.Action" name="transformVel" type="Action">
             <mainClass>de.tsl2.nano.core.util.XmlUtil</mainClass>
             <method>transformVel</method>
             <argNames length="2">
@@ -203,7 +203,7 @@
                <string>ENVIRONMENT</string>
             </argNames>
          </item>
-         <item class="de.tsl2.nano.incubation.terminal.Action" name="transformXsl" type="Action">
+         <item class="de.tsl2.nano.incubation.terminal.item.Action" name="transformXsl" type="Action">
             <mainClass>de.tsl2.nano.core.util.XmlUtil</mainClass>
             <method>transformXsl</method>
             <argNames length="3">
@@ -212,7 +212,7 @@
                <string>xsl-destination</string>
             </argNames>
          </item>
-         <item class="de.tsl2.nano.incubation.terminal.Action" name="xpath" type="Action">
+         <item class="de.tsl2.nano.incubation.terminal.item.Action" name="xpath" type="Action">
             <mainClass>de.tsl2.nano.core.util.XmlUtil</mainClass>
             <method>xpath</method>
             <argNames length="2">
@@ -221,30 +221,30 @@
             </argNames>
          </item>
       </item>
-      <item class="de.tsl2.nano.incubation.terminal.Container" name="Net" type="Container" multiple="false">
-         <item class="de.tsl2.nano.incubation.terminal.Container" name="Scan" type="Container" multiple="false">
-            <item class="de.tsl2.nano.incubation.terminal.Input" name="ip" type="Input">
+      <item class="de.tsl2.nano.incubation.terminal.item.Container" name="Net" type="Container" multiple="false">
+         <item class="de.tsl2.nano.incubation.terminal.item.Container" name="Scan" type="Container" multiple="false">
+            <item class="de.tsl2.nano.incubation.terminal.item.Input" name="ip" type="Input">
                <constraints type="java.lang.String" nullable="true" length="-1">
                   <scale>-1</scale>
                   <precision>-1</precision>
                </constraints>
                <value class="java.lang.String">192.168.178.21</value>
             </item>
-            <item class="de.tsl2.nano.incubation.terminal.Input" name="lowest-port" type="Input">
+            <item class="de.tsl2.nano.incubation.terminal.item.Input" name="lowest-port" type="Input">
                <constraints type="java.lang.Integer" nullable="true" length="-1">
                   <scale>-1</scale>
                   <precision>-1</precision>
                </constraints>
                <value class="java.lang.Integer">0</value>
             </item>
-            <item class="de.tsl2.nano.incubation.terminal.Input" name="highest-port" type="Input">
+            <item class="de.tsl2.nano.incubation.terminal.item.Input" name="highest-port" type="Input">
                <constraints type="java.lang.Integer" nullable="true" length="-1">
                   <scale>-1</scale>
                   <precision>-1</precision>
                </constraints>
                <value class="java.lang.Integer">100</value>
             </item>
-            <item class="de.tsl2.nano.incubation.terminal.Action" name="scans" type="Action">
+            <item class="de.tsl2.nano.incubation.terminal.item.Action" name="scans" type="Action">
                <mainClass>de.tsl2.nano.core.util.NetUtil</mainClass>
                <method>scans</method>
                <argNames length="3">
@@ -254,32 +254,32 @@
                </argNames>
             </item>
          </item>
-         <item class="de.tsl2.nano.incubation.terminal.Container" name="WCopy" type="Container" multiple="false">
-            <item class="de.tsl2.nano.incubation.terminal.Input" name="url" type="Input">
+         <item class="de.tsl2.nano.incubation.terminal.item.Container" name="WCopy" type="Container" multiple="false">
+            <item class="de.tsl2.nano.incubation.terminal.item.Input" name="url" type="Input">
                <constraints type="java.lang.String" nullable="false" length="-1">
                   <scale>-1</scale>
                   <precision>-1</precision>
                </constraints>
             </item>
-            <item class="de.tsl2.nano.incubation.terminal.Input" name="dir" type="Input">
+            <item class="de.tsl2.nano.incubation.terminal.item.Input" name="dir" type="Input">
                <constraints type="java.lang.String" nullable="true" length="-1">
                   <scale>-1</scale>
                   <precision>-1</precision>
                </constraints>
             </item>
-            <item class="de.tsl2.nano.incubation.terminal.Input" name="include" type="Input">
+            <item class="de.tsl2.nano.incubation.terminal.item.Input" name="include" type="Input">
                <constraints type="java.lang.String" nullable="true" length="-1">
                   <scale>-1</scale>
                   <precision>-1</precision>
                </constraints>
             </item>
-            <item class="de.tsl2.nano.incubation.terminal.Input" name="exclude" type="Input">
+            <item class="de.tsl2.nano.incubation.terminal.item.Input" name="exclude" type="Input">
                <constraints type="java.lang.String" nullable="true" length="-1">
                   <scale>-1</scale>
                   <precision>-1</precision>
                </constraints>
             </item>
-            <item class="de.tsl2.nano.incubation.terminal.Action" name="wcopy" type="Action">
+            <item class="de.tsl2.nano.incubation.terminal.item.Action" name="wcopy" type="Action">
                <mainClass>de.tsl2.nano.core.util.NetUtil</mainClass>
                <method>wcopy</method>
                <argNames length="4">
@@ -290,32 +290,32 @@
                </argNames>
             </item>
          </item>
-         <item class="de.tsl2.nano.incubation.terminal.Action" name="getNetInfo" type="Action">
+         <item class="de.tsl2.nano.incubation.terminal.item.Action" name="getNetInfo" type="Action">
             <mainClass>de.tsl2.nano.core.util.NetUtil</mainClass>
             <method>getNetInfo</method>
             <argNames length="0"/>
          </item>
       </item>
-      <item class="de.tsl2.nano.incubation.terminal.Container" name="File-Operation" type="Container" multiple="false">
-         <item class="de.tsl2.nano.incubation.terminal.DirSelector" name="directory" type="Container" multiple="false">
+      <item class="de.tsl2.nano.incubation.terminal.item.Container" name="File-Operation" type="Container" multiple="false">
+         <item class="de.tsl2.nano.incubation.terminal.item.selector.DirSelector" name="directory" type="Container" multiple="false">
             <root class="java.lang.String">${user.dir}</root>
             <include>.*</include>
          </item>
-         <item class="de.tsl2.nano.incubation.terminal.Input" name="file" type="Input">
+         <item class="de.tsl2.nano.incubation.terminal.item.Input" name="file" type="Input">
             <constraints type="java.lang.String" nullable="true" length="-1">
                <scale>-1</scale>
                <precision>-1</precision>
             </constraints>
             <value class="java.lang.String">**/[\w]+\.txt</value>
          </item>
-         <item class="de.tsl2.nano.incubation.terminal.Input" name="destination" type="Input">
+         <item class="de.tsl2.nano.incubation.terminal.item.Input" name="destination" type="Input">
             <constraints type="java.lang.String" nullable="true" length="-1">
                <scale>-1</scale>
                <precision>-1</precision>
             </constraints>
             <value class="java.lang.String">C:\eigen\tsl2\tsl2-workspace\tsl2-nano\tsl2.nano.incubation</value>
          </item>
-         <item class="de.tsl2.nano.incubation.terminal.Action" name="List" type="Action">
+         <item class="de.tsl2.nano.incubation.terminal.item.Action" name="List" type="Action">
             <mainClass>de.tsl2.nano.core.util.FileUtil</mainClass>
             <method>foreach</method>
             <argNames length="3">
@@ -324,7 +324,7 @@
                <string>file.operation.null</string>
             </argNames>
          </item>
-         <item class="de.tsl2.nano.incubation.terminal.Action" name="Delete" type="Action">
+         <item class="de.tsl2.nano.incubation.terminal.item.Action" name="Delete" type="Action">
             <mainClass>de.tsl2.nano.core.util.FileUtil</mainClass>
             <method>foreach</method>
             <argNames length="3">
@@ -333,7 +333,7 @@
                <string>file.operation.delete</string>
             </argNames>
          </item>
-         <item class="de.tsl2.nano.incubation.terminal.Action" name="Copy" type="Action">
+         <item class="de.tsl2.nano.incubation.terminal.item.Action" name="Copy" type="Action">
             <mainClass>de.tsl2.nano.core.util.FileUtil</mainClass>
             <method>foreach</method>
             <argNames length="3">
@@ -342,7 +342,7 @@
                <string>file.operation.copy</string>
             </argNames>
          </item>
-         <item class="de.tsl2.nano.incubation.terminal.MainAction" name="Imageviewer" type="Action">
+         <item class="de.tsl2.nano.incubation.terminal.item.MainAction" name="Imageviewer" type="Action">
             <mainClass>de.tsl2.nano.incubation.terminal.AsciiImage</mainClass>
             <method>main</method>
             <argNames length="4">

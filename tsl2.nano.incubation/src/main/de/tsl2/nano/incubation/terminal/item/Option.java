@@ -7,18 +7,18 @@
  * 
  * Copyright: (c) Thomas Schneider 2014, all rights reserved
  */
-package de.tsl2.nano.incubation.terminal;
+package de.tsl2.nano.incubation.terminal.item;
 
 import java.io.InputStream;
 import java.io.PrintStream;
-import java.text.ParseException;
 import java.util.Properties;
 
 import org.simpleframework.xml.Element;
 
 import de.tsl2.nano.bean.def.IConstraint;
-import de.tsl2.nano.core.ManagedException;
 import de.tsl2.nano.core.util.Util;
+import de.tsl2.nano.incubation.terminal.IContainer;
+import de.tsl2.nano.incubation.terminal.IItem;
 
 /**
  * 

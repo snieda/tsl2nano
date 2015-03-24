@@ -7,7 +7,7 @@
  * 
  * Copyright: (c) Thomas Schneider 2015, all rights reserved
  */
-package de.tsl2.nano.incubation.terminal;
+package de.tsl2.nano.incubation.terminal.item.selector;
 
 import java.util.Arrays;
 import java.util.List;

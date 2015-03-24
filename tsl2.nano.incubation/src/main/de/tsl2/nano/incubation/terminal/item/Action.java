@@ -7,7 +7,7 @@
  * 
  * Copyright: (c) Thomas Schneider 2014, all rights reserved
  */
-package de.tsl2.nano.incubation.terminal;
+package de.tsl2.nano.incubation.terminal.item;
 
 import java.io.InputStream;
 import java.io.PrintStream;
@@ -21,6 +21,8 @@ import de.tsl2.nano.core.ManagedException;
 import de.tsl2.nano.core.execution.IRunnable;
 import de.tsl2.nano.core.log.LogFactory;
 import de.tsl2.nano.core.util.StringUtil;
+import de.tsl2.nano.incubation.terminal.IItem;
+import de.tsl2.nano.incubation.terminal.Terminal;
 
 /**
  * action to be used on {@link Terminal}s. no inline {@link Runnable} are supported as instances of this class must be

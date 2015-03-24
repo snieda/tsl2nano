@@ -7,7 +7,7 @@
  * 
  * Copyright: (c) Thomas Schneider 2014, all rights reserved
  */
-package de.tsl2.nano.incubation.terminal;
+package de.tsl2.nano.incubation.terminal.item;
 
 import java.io.File;
 import java.io.InputStream;
@@ -28,6 +28,10 @@ import de.tsl2.nano.core.ManagedException;
 import de.tsl2.nano.core.Messages;
 import de.tsl2.nano.core.util.StringUtil;
 import de.tsl2.nano.core.util.Util;
+import de.tsl2.nano.incubation.terminal.AsciiImage;
+import de.tsl2.nano.incubation.terminal.IContainer;
+import de.tsl2.nano.incubation.terminal.IItem;
+import de.tsl2.nano.incubation.terminal.Terminal;
 import de.tsl2.nano.incubation.vnet.workflow.Condition;
 
 /**
@@ -42,7 +46,7 @@ public class AItem<T> implements IItem<T>, Serializable {
     private static final long serialVersionUID = 7142058494650831052L;
 
     @Attribute
-    String name;
+    protected String name;
     @Attribute
     Type type;
     @Element(type = Constraint.class, required = false)
@@ -51,7 +55,7 @@ public class AItem<T> implements IItem<T>, Serializable {
     @Element(required = false)
     Condition condition;
 
-    T value;
+    protected T value;
     transient IContainer parent;
     transient byte[] origin;
     transient StringBuilder prefix = new StringBuilder("( ) ");
