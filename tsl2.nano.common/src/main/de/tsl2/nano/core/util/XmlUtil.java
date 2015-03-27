@@ -49,12 +49,15 @@ import org.apache.fop.apps.FOUserAgent;
 import org.apache.fop.apps.Fop;
 import org.apache.fop.apps.FopFactory;
 import org.simpleframework.xml.stream.Format;
+import org.simpleframework.xml.transform.Matcher;
+import org.simpleframework.xml.transform.Transform;
 import org.w3c.dom.Document;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 
 import de.tsl2.nano.core.ENV;
 import de.tsl2.nano.core.ManagedException;
+import de.tsl2.nano.core.cls.PrimitiveUtil;
 import de.tsl2.nano.core.execution.CompatibilityLayer;
 import de.tsl2.nano.core.log.LogFactory;
 
@@ -229,6 +232,7 @@ public class XmlUtil {
 
     /**
      * does an xsl transformation
+     * 
      * @param srcFile source to be transformed
      * @param xsl transformation definition
      * @param outputFile destination file
@@ -427,7 +431,8 @@ public class XmlUtil {
      */
     public static <T> T loadSimpleXml_(String xmlFile, Class<T> type) {
         try {
-            return new org.simpleframework.xml.core.Persister().read(type, new FileInputStream(new File(xmlFile)));
+            return new org.simpleframework.xml.core.Persister(new SimpleXmlArrayWorkaround()).read(type,
+                new FileInputStream(new File(xmlFile)));
         } catch (Exception e) {
             //don't use the ManagedException.forward(), because the LogFactory is using this, too!
             throw new RuntimeException(e);
@@ -472,4 +477,32 @@ public class XmlUtil {
             throw new RuntimeException(e);
         }
     }
+}
+
+/**
+ * workaround on simple-xml problem for field type byte[].class.
+ * 
+ * @author Tom
+ * @version $Revision$
+ */
+class SimpleXmlArrayWorkaround implements Matcher {
+    @Override
+    public Transform<?> match(@SuppressWarnings("rawtypes") final Class type) throws Exception {
+        if (type.equals(Class.class)) {
+            return new Transform() {
+                @Override
+                public Object read(String clsName) throws Exception {
+                    //loading the class through the ClassLoder.loadClass(name) may fail on object arrays, so we load it through Class.forName(name)
+                    return clsName.contains(".") || clsName.startsWith("[") ? Class.forName(clsName) : PrimitiveUtil.getPrimitiveClass(clsName);
+                }
+
+                @Override
+                public String write(Object arg0) throws Exception {
+                    return arg0.toString();
+                }
+            };
+        }
+        return null;
+    }
+
 }

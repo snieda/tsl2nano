@@ -15,6 +15,7 @@ import static junit.framework.Assert.assertNotNull;
 import static junit.framework.Assert.assertTrue;
 import static junit.framework.Assert.fail;
 
+import java.io.File;
 import java.io.InputStream;
 import java.io.Serializable;
 import java.math.BigDecimal;
@@ -559,6 +560,25 @@ public class IncubationTest {
         } catch (Finished f) {
             log(f.getMessage());
         }
+    }
+    @Test
+    public void testSimpleXml() throws Exception {
+        //check java classloading of an array
+        String clsName = byte[].class.getName();//"[B";//"java.lang.byte[]";
+        Class cls = getClass().forName(clsName);
+        //try it again through loadClass() - this fails!
+//        Class cls = getClass().getClassLoader().loadClass(clsName);
+        assertEquals(cls.getName(), clsName);
+
+        TypeBean bean = new TypeBean();
+        bean.setPrimitiveChar(' ');
+        bean.setType(cls);
+        
+        String xmlfile = "test/typebean.xml";
+        new File(xmlfile).getParentFile().mkdirs();
+        XmlUtil.saveSimpleXml_(xmlfile, bean);
+        TypeBean bean1 = XmlUtil.loadSimpleXml_(xmlfile, TypeBean.class);
+        assertEquals(bean.getType(), bean1.getType());
     }
 
 //    @Test
