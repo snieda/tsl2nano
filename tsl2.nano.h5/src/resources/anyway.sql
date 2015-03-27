@@ -78,7 +78,7 @@ CREATE TABLE Item (
                 end DATE,
                 value NUMERIC NOT NULL,
                 description VARCHAR(256),
-                icon LONGVARBINARY NOT NULL,
+                icon LONGVARBINARY,
                 CONSTRAINT idx_item PRIMARY KEY (id)
 );
 

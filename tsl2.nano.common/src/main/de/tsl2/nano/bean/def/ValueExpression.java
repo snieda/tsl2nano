@@ -266,6 +266,8 @@ public class ValueExpression<TYPE> implements
             instance = PrimitiveUtil.create(type, toValue);
         else if (BeanClass.hasStringConstructor(type))
             instance = (TYPE) BeanClass.createInstance(type, toValue);
+        else if (byte[].class.isAssignableFrom(type))
+            instance = (TYPE) toValue.getBytes();
         else
             instance = (TYPE) BeanClass.createInstance(type);
         return instance;

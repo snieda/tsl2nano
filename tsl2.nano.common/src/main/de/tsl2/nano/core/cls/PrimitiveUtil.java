@@ -236,6 +236,20 @@ public class PrimitiveUtil {
     public static byte asPrimitive(Byte o) {
         return o.byteValue();
     }
+
+    /**
+     * usable on loading classes where a classloader isn't able to do it.
+     * 
+     * @param name full class name. for primitives its only the name of the primitive e.g.: int.
+     * @return primitive class or null
+     */
+    public static Class<?> getPrimitiveClass(String name) {
+        for (int i = 0; i < primitives.length; i++) {
+            if (primitives[i].getName().equals(name))
+                return primitives[i];
+        }
+        return null;
+    }
 }
 
 class SimpleClassComparator implements Comparator<Class> {

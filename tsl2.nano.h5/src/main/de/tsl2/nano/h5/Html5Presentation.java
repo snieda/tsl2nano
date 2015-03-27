@@ -1603,7 +1603,7 @@ public class Html5Presentation<T> extends BeanPresentationHelper<T> implements I
             ATTR_ID,
             beanValue.getId(),
             ATTR_SRC,
-            FileUtil.getRelativePath(beanValue.getValueFile(), ENV.getConfigPath()));
+            beanValue.getValueFile() != null ? FileUtil.getRelativePath(beanValue.getValueFile(), ENV.getConfigPath()) : "");
         return input;
     }
 
@@ -1729,7 +1729,7 @@ public class Html5Presentation<T> extends BeanPresentationHelper<T> implements I
         String type;
         int t = beanValue.getPresentation().getType();
         //let the specialized input types work
-        t = NumberUtil.filterBits(t, IPresentable.TYPE_INPUT);
+        t = NumberUtil.filterBits(t, IPresentable.TYPE_INPUT, IPresentable.TYPE_INPUT_MULTILINE);
         switch (t) {
         case IPresentable.TYPE_SELECTION:
             type = "text";

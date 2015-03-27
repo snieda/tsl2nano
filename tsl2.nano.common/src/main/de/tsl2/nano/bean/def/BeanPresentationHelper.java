@@ -384,7 +384,8 @@ public class BeanPresentationHelper<T> {
             return IPresentable.TYPE_TIME;
         int type = getDefaultType((IAttribute) attr);
         if (!NumberUtil.hasBit(type, IPresentable.TYPE_OPTION)
-            && !NumberUtil.hasBit(type, IPresentable.TYPE_INPUT_NUMBER)) {
+            && !NumberUtil.hasBit(type, IPresentable.TYPE_INPUT_NUMBER)
+            && !NumberUtil.hasBit(type, IPresentable.TYPE_DATA)) {
             if (attr.length() > ENV.get("field.min.multiline.length", 100) || attr.isMultiValue())
                 type |= IPresentable.TYPE_INPUT_MULTILINE;
         }
@@ -1235,9 +1236,9 @@ public class BeanPresentationHelper<T> {
 
     protected void addSessionValues(ISession session) {
         //do the Object-casting trick to cast from List<Object> to List<BeanDefinition>
-        addSessionValues((List<BeanDefinition>)(Object)Arrays.asList(session.getNavigationStack()));
+        addSessionValues((List<BeanDefinition>) (Object) Arrays.asList(session.getNavigationStack()));
     }
-    
+
     /**
      * tries to set values from navigation/history queue to this new bean - created by BeanCollector.createItem().
      * 

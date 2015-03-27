@@ -59,6 +59,8 @@ public class TypeBean implements Serializable, Comparable<TypeBean> {
 
     WeekdayEnum weekdayEnum;
     
+    Class type;
+    
     /**
      * @return Returns the string.
      */
@@ -422,6 +424,20 @@ public class TypeBean implements Serializable, Comparable<TypeBean> {
      */
     public void setWeekdayEnum(WeekdayEnum weekdayEnum) {
         this.weekdayEnum = weekdayEnum;
+    }
+
+    /**
+     * @return Returns the type.
+     */
+    public Class getType() {
+        return type;
+    }
+
+    /**
+     * @param type The type to set.
+     */
+    public void setType(Class type) {
+        this.type = type;
     }
 
     /**

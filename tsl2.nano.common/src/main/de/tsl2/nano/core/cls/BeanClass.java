@@ -11,6 +11,7 @@ package de.tsl2.nano.core.cls;
 
 import java.io.Serializable;
 import java.lang.annotation.Annotation;
+import java.lang.reflect.Array;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
@@ -606,6 +607,7 @@ public class BeanClass<T> implements Serializable {
      * through a parameter.
      * <p/>
      * Example:
+     * 
      * <pre>
      * 1. customer.address[first].city
      * 2. customer.address[0].city
@@ -753,7 +755,8 @@ public class BeanClass<T> implements Serializable {
 
     /**
      * creates a new instance through the given arguments. if you don't call the default constructor, the performance
-     * will go down on searching the right constructor.
+     * will go down on searching the right constructor. if the given class is a primitive the wrapper class will be used
+     * instead. if it is an array the args must specify the dimensions of that array.
      * 
      * @param args constructor arguments
      * @return new bean instance
@@ -762,6 +765,17 @@ public class BeanClass<T> implements Serializable {
         T instance = null;
         if (clazz.isPrimitive())
             clazz = PrimitiveUtil.getWrapper(clazz);
+        if (clazz.isArray()) {//fill the new array with given args
+            if (args.length == 0)
+                Array.newInstance(clazz, 0);
+            else {
+                int[] dims = new int[args.length];
+                for (int i = 0; i < dims.length; i++) {
+                    dims[i] = (Integer) args[i];
+                }
+                Array.newInstance(clazz, dims);
+            }
+        }
         if (args.length == 0) {//--> default constructor
             try {
                 Constructor<T> constructor = clazz.getConstructor(new Class[0]);

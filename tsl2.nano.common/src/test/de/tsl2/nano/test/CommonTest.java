@@ -65,6 +65,7 @@ import de.tsl2.nano.collection.CollectionUtil;
 import de.tsl2.nano.collection.FloatArray;
 import de.tsl2.nano.collection.ITransformer;
 import de.tsl2.nano.collection.MapUtil;
+import de.tsl2.nano.core.Argumentator;
 import de.tsl2.nano.core.ENV;
 import de.tsl2.nano.core.ManagedException;
 import de.tsl2.nano.core.classloader.NestedJarClassLoader;
@@ -76,6 +77,7 @@ import de.tsl2.nano.core.util.Crypt;
 import de.tsl2.nano.core.util.DateUtil;
 import de.tsl2.nano.core.util.FileUtil;
 import de.tsl2.nano.core.util.NetUtil;
+import de.tsl2.nano.core.util.PrintUtil;
 import de.tsl2.nano.core.util.StringUtil;
 import de.tsl2.nano.currency.CurrencyUnit;
 import de.tsl2.nano.currency.CurrencyUtil;
@@ -1352,5 +1354,18 @@ public class CommonTest {
         //not available on standard jdk:
 //        Crypt.main(new String[]{"0123456", Crypt.ALGO_PBEWithHmacSHA1AndDESede, txt});
 //        Crypt.main(new String[]{"0123456", Crypt.ALGO_PBEWithSHAAndAES, txt});
+    }
+    
+    /**
+     * it's not really a test but prints some informations to the console...
+     */
+    @Test
+    public void testArgumentator() {
+        //printutil is a complex use case for argumentator. without any arguments, the help screen will be printed.
+        PrintUtil.main(new String[0]);
+        
+        String keyValues = Argumentator.staticKeyValues(IPresentable.class, int.class);
+        System.out.println("Presentable types and styles:");
+        System.out.println(keyValues);
     }
 }
