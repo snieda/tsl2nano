@@ -9,8 +9,6 @@
  */
 package de.tsl2.nano.h5.websocket;
 
-import org.java_websocket.WebSocketFactory;
-
 import de.tsl2.nano.bean.def.SecureAction;
 
 /**
