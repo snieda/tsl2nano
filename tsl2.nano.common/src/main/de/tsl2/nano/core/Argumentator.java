@@ -236,6 +236,23 @@ public class Argumentator {
         return buf.toString();
     }
 
+    /**
+     * evaluates all static field names through {@link #staticNames(Class, Class)} and fills their values to a string.
+     * 
+     * @param cls class to evaluate
+     * @param fieldType constant type
+     * @return string containing all static field names of given type.
+     */
+    public static final String staticKeyValues(Class<?> cls, Class<?> fieldType) {
+        BeanClass<?> bc = BeanClass.getBeanClass(cls);
+        String[] names = bc.getFieldNames(fieldType, true);
+        StringBuilder buf = new StringBuilder(names.length * 10);
+        for (int i = 0; i < names.length; i++) {
+            buf.append(names[i] + "\t\t\t= " + BeanClass.getStatic(cls, names[i]) + "\n");
+        }
+        return buf.toString();
+    }
+
     public void printManual() {
         printManual(System.out);
     }
