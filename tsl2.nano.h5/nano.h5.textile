@@ -716,7 +716,7 @@ Whether multiple value relations (one-to-many) are shown is defined inside the e
 
 ### Attribute Presentation
 
-The attributes are the most important and complex definitions. They contain the sub-definitions described in the next chapter. Each attribute will be presented by a label, defined by the _Presentable.getLabel()_ the value itself, mostly shown as input field and optional, if the value has a relation to other beans or is a collection of values - a selection button. The label will be translated through a resource bundle - the message.properties. It is possible to embed html-tags inside the translation.
+The attributes are the most important and complex definitions. They contain sub-definitions described in the next chapter. Each attribute will be presented by a label, defined by the _Presentable.getLabel()_ the value itself, mostly shown as input field and optional, if the value has a relation to other beans or is a collection of values - a selection button. The label will be translated through a resource bundle - the message.properties. It is possible to embed html-tags inside the translation.
 
 Example:
 
@@ -728,12 +728,17 @@ persistence.connectionUrl=<a href="http://www.databasedrivers.com/jdbc/">Databas
 
 This is the most important attribute property. Normally it is a standard bean-attribute, defined by the declaring class and the attribute name. The following declaration types are available:
 
-* bean-attribute: (default) the attribute value is defined by the declaring class and the attribute name (accessed through getter and setter methods)
+* bean-attribute: (default, _de.tsl2.nano.core.cls.BeanAttribute_) the attribute value is defined by the declaring class and the attribute name (accessed through getter and setter methods)
 * virtual-attribute: the attribute value is any fixed value
 * value-expression: the attribute value is defined by an expression
 	* path-expression: the expression is a path from a bean-attribute to another one - through one or more relations. expression example: _person.organization.name_.
 	* rule-expression: the expression is an existing rule name.
 	* sql-expression: the expression is an existing query name.
+
+All available attribute instances:
+
+[[img src=nano.h5.attributes.png]]
+
 
 Example for an attribute through a relation path:
 
@@ -815,6 +820,48 @@ These are generalized properties to define the presentation in any gui (graphica
 * _layout_: in nano.h5: a map of html5 attributes to be set for child elements, if attribute is a container
 * _layoutconstraints_: in nano.h5: a map of html5 attributes to be set for the attributes html element
 * _icon_: optional icon to be shown with that attribute
+
+*Presentable types and styles:*
+
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+UNDEFINED			= -1
+UNSET				= 0
+TYPE_INPUT			= 1
+TYPE_SELECTION		= 2
+TYPE_OPTION			= 4
+TYPE_DATE			= 8
+TYPE_TIME			= 16
+TYPE_LABEL			= 32
+TYPE_TABLE			= 64
+TYPE_TREE			= 128
+TYPE_ATTACHMENT		= 256
+TYPE_GROUP			= 512
+TYPE_FORM			= 1024
+TYPE_PAINT			= 2048
+TYPE_INPUT_MULTILINE= 4096
+TYPE_DATA			= 8192
+TYPE_INPUT_NUMBER	= 32768
+TYPE_INPUT_TEL		= 65536
+TYPE_INPUT_EMAIL	= 131072
+TYPE_INPUT_URL		= 262144
+TYPE_INPUT_PASSWORD	= 524288
+TYPE_INPUT_SEARCH	= 1048576
+TYPE_OPTION_RADIO	= 2097152
+STYLE_SINGLE		= 1
+STYLE_MULTI			= 2
+STYLE_ALIGN_LEFT	= 4
+STYLE_ALIGN_CENTER	= 8
+STYLE_ALIGN_RIGHT	= 16
+STYLE_ALIGN_TOP		= 32
+STYLE_ALIGN_BOTTOM	= 64
+STYLE_DATA_IMG		= 128
+STYLE_DATA_EMBED	= 256
+STYLE_DATA_OBJECT	= 1024
+STYLE_DATA_CANVAS	= 2048
+STYLE_DATA_AUDIO	= 4096
+STYLE_DATA_VIDEO	= 8192
+STYLE_DATA_DEVICE	= 16384
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 Example for some layoutconstraints:
 
@@ -2182,3 +2229,5 @@ Net:Connection-->Link-->Cover(content, descriptor)
 
 
 * NanoTask, NanoProc, NanoLogic?
+* TODO: simplexml --> xstream
+* simplexml: type = java.lang.byte[] --> [B
