@@ -19,10 +19,9 @@ import org.java_websocket.WebSocket;
 import org.java_websocket.handshake.ClientHandshake;
 import org.java_websocket.server.WebSocketServer;
 
+import de.tsl2.nano.bean.def.Attachment;
 import de.tsl2.nano.bean.def.Bean;
-import de.tsl2.nano.bean.def.BeanCollector;
 import de.tsl2.nano.bean.def.BeanDefinition;
-import de.tsl2.nano.bean.def.BeanValue;
 import de.tsl2.nano.bean.def.IValueDefinition;
 import de.tsl2.nano.bean.def.ValueExpression;
 import de.tsl2.nano.core.ENV;
@@ -30,9 +29,7 @@ import de.tsl2.nano.core.ISession;
 import de.tsl2.nano.core.log.LogFactory;
 import de.tsl2.nano.core.util.FileUtil;
 import de.tsl2.nano.core.util.StringUtil;
-import de.tsl2.nano.core.util.Util;
 import de.tsl2.nano.h5.configuration.BeanConfigurator;
-import de.tsl2.nano.persistence.Persistence;
 
 /**
  * Html5 WebSocket Server to provide a rich client gui interaction.
@@ -158,26 +155,12 @@ public class NanoWebSocketServer extends WebSocketServer {
         String attrName = StringUtil.substring(id, ".", null, true);
         String name = getValue(attachment_info);
         Bean<?> bean = (Bean<?>) getCurrentBean(id);
-        String fileName = getAttachmentFilename(bean.getInstance(), attrName, name);
+        String fileName = Attachment.getFilename(bean.getInstance(), attrName, name);
         FileUtil.writeBytes(message.array(),
             fileName,
             false);
         conn.send("attachment '" + attachment_info + "' succefull transferred");
         attachment_info = null;
-    }
-
-    /**
-     * getAttachmentFilename
-     * 
-     * @param instance
-     * @param attribute
-     * @param value
-     * @return
-     */
-    public static String getAttachmentFilename(Object instance, String attribute, String value) {
-        return ENV.getTempPath()
-            + FileUtil.getValidFileName(BeanValue.getBeanValue(instance, attribute).getValueId() + "."
-                + Util.asString(value));
     }
 
     private BeanDefinition<?> getCurrentBean(String id) {

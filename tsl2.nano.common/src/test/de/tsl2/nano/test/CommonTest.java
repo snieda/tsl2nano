@@ -18,6 +18,7 @@ import static org.junit.Assert.fail;
 
 import java.io.File;
 import java.io.Reader;
+import java.io.Serializable;
 import java.math.BigDecimal;
 import java.math.MathContext;
 import java.net.InetAddress;
@@ -43,6 +44,7 @@ import java.util.Map;
 import java.util.Properties;
 
 import org.apache.commons.logging.Log;
+import org.apache.xmlgraphics.util.MimeConstants;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
@@ -951,6 +953,23 @@ public class CommonTest {
     }
     
     @Test
+    public void testBeanPresentation() throws Exception {
+        BeanDefinition.deleteDefinitions();
+        BeanDefinition def = BeanDefinition.getBeanDefinition(TypeBean.class);
+        Map<String, String> lMap = MapUtil.asMap("width", "99");
+        def.getAttribute("object").getPresentation().setLayout((Serializable)lMap);
+        Map<String, String> lcMap = MapUtil.asMap("type", "image/svg+xml");
+        def.getAttribute("object").getPresentation().setLayout((Serializable)lcMap);
+        def.saveDefinition();
+        
+        BeanDefinition.clearCache();
+        
+        def = BeanDefinition.getBeanDefinition(TypeBean.class);
+        lMap = def.getAttribute("object").getPresentation().getLayout();
+        assertTrue("image/svg+xml".equals(lMap.get("type")));
+    }
+    
+    @Test
     public void testBeanAttributeStress() throws Exception {
         long stress = 1000000;
     //method access and stress test
@@ -1366,6 +1385,10 @@ public class CommonTest {
         
         String keyValues = Argumentator.staticKeyValues(IPresentable.class, int.class);
         System.out.println("Presentable types and styles:");
+        System.out.println(keyValues);
+
+        keyValues = Argumentator.staticValues(MimeConstants.class, String.class);
+        System.out.println("mime types:");
         System.out.println(keyValues);
     }
 }

@@ -9,8 +9,28 @@
  */
 package de.tsl2.nano.h5;
 
-import static de.tsl2.nano.bean.def.IBeanCollector.MODE_MULTISELECTION;
 import static de.tsl2.nano.bean.def.IBeanCollector.MODE_ASSIGNABLE;
+import static de.tsl2.nano.bean.def.IBeanCollector.MODE_MULTISELECTION;
+import static de.tsl2.nano.bean.def.IPresentable.POSTFIX_SELECTOR;
+import static de.tsl2.nano.bean.def.IPresentable.*;
+import static de.tsl2.nano.bean.def.IPresentable.STYLE_ALIGN_RIGHT;
+import static de.tsl2.nano.bean.def.IPresentable.STYLE_DATA_IMG;
+import static de.tsl2.nano.bean.def.IPresentable.STYLE_MULTI;
+import static de.tsl2.nano.bean.def.IPresentable.TYPE_ATTACHMENT;
+import static de.tsl2.nano.bean.def.IPresentable.TYPE_DATA;
+import static de.tsl2.nano.bean.def.IPresentable.TYPE_DATE;
+import static de.tsl2.nano.bean.def.IPresentable.TYPE_INPUT;
+import static de.tsl2.nano.bean.def.IPresentable.TYPE_INPUT_EMAIL;
+import static de.tsl2.nano.bean.def.IPresentable.TYPE_INPUT_MULTILINE;
+import static de.tsl2.nano.bean.def.IPresentable.TYPE_INPUT_NUMBER;
+import static de.tsl2.nano.bean.def.IPresentable.TYPE_INPUT_PASSWORD;
+import static de.tsl2.nano.bean.def.IPresentable.TYPE_INPUT_SEARCH;
+import static de.tsl2.nano.bean.def.IPresentable.TYPE_INPUT_TEL;
+import static de.tsl2.nano.bean.def.IPresentable.TYPE_INPUT_URL;
+import static de.tsl2.nano.bean.def.IPresentable.TYPE_OPTION;
+import static de.tsl2.nano.bean.def.IPresentable.TYPE_OPTION_RADIO;
+import static de.tsl2.nano.bean.def.IPresentable.TYPE_SELECTION;
+import static de.tsl2.nano.bean.def.IPresentable.TYPE_TIME;
 import static de.tsl2.nano.h5.HtmlUtil.*;
 import static de.tsl2.nano.h5.HtmlUtil.ALIGN_LEFT;
 import static de.tsl2.nano.h5.HtmlUtil.ALIGN_RIGHT;
@@ -54,6 +74,7 @@ import static de.tsl2.nano.h5.HtmlUtil.ATTR_TYPE_SEARCH;
 import static de.tsl2.nano.h5.HtmlUtil.ATTR_VALUE;
 import static de.tsl2.nano.h5.HtmlUtil.ATTR_WIDTH;
 import static de.tsl2.nano.h5.HtmlUtil.BTN_ASSIGN;
+import static de.tsl2.nano.h5.HtmlUtil.CHAR_SUM;
 import static de.tsl2.nano.h5.HtmlUtil.COLOR_BLACK;
 import static de.tsl2.nano.h5.HtmlUtil.COLOR_BLUE;
 import static de.tsl2.nano.h5.HtmlUtil.COLOR_LIGHTER_BLUE;
@@ -80,6 +101,7 @@ import static de.tsl2.nano.h5.HtmlUtil.TAG_IMAGE;
 import static de.tsl2.nano.h5.HtmlUtil.TAG_INPUT;
 import static de.tsl2.nano.h5.HtmlUtil.TAG_LINK;
 import static de.tsl2.nano.h5.HtmlUtil.TAG_OPTION;
+import static de.tsl2.nano.h5.HtmlUtil.TAG_PARAGRAPH;
 import static de.tsl2.nano.h5.HtmlUtil.TAG_PRE;
 import static de.tsl2.nano.h5.HtmlUtil.TAG_ROW;
 import static de.tsl2.nano.h5.HtmlUtil.TAG_SCRIPT;
@@ -93,6 +115,7 @@ import static de.tsl2.nano.h5.HtmlUtil.VAL_ALIGN_CENTER;
 import static de.tsl2.nano.h5.HtmlUtil.VAL_ALIGN_LEFT;
 import static de.tsl2.nano.h5.HtmlUtil.VAL_ALIGN_RIGHT;
 import static de.tsl2.nano.h5.HtmlUtil.VAL_FRM_SELF;
+import static de.tsl2.nano.h5.HtmlUtil.VAL_ROUNDCORNER;
 import static de.tsl2.nano.h5.HtmlUtil.VAL_TRANSPARENT;
 import static de.tsl2.nano.h5.HtmlUtil.appendElement;
 import static de.tsl2.nano.h5.HtmlUtil.enable;
@@ -260,12 +283,12 @@ public class Html5Presentation<T> extends BeanPresentationHelper<T> implements I
                             final ScriptTool tool = ScriptTool.createInstance();
                             beanTool = Bean.getBean(tool);
                             beanTool.setAttributeFilter("sourceFile", "selectedAction", "text"/*, "result"*/);
-                            beanTool.getAttribute("text").getPresentation().setType(IPresentable.TYPE_INPUT_MULTILINE);
+                            beanTool.getAttribute("text").getPresentation().setType(TYPE_INPUT_MULTILINE);
                             beanTool.getAttribute("text").getConstraint().setLength(100000);
                             beanTool.getAttribute("text").getConstraint()
                                 .setFormat(null/*RegExpFormat.createLengthRegExp(0, 100000, 0)*/);
-//                        beanTool.getAttribute("result").getPresentation().setType(IPresentable.TYPE_TABLE);
-                            beanTool.getAttribute("sourceFile").getPresentation().setType(IPresentable.TYPE_ATTACHMENT);
+//                        beanTool.getAttribute("result").getPresentation().setType(TYPE_TABLE);
+                            beanTool.getAttribute("sourceFile").getPresentation().setType(TYPE_ATTACHMENT);
                             beanTool.getAttribute("selectedAction").setRange(tool.availableActions());
                             beanTool.addAction(tool.runner());
 
@@ -400,7 +423,7 @@ public class Html5Presentation<T> extends BeanPresentationHelper<T> implements I
                     doc = factory.newDocumentBuilder().parse(metaFrame);
                     NodeList childs = doc.getFirstChild().getChildNodes();
                     for (int i = 0; i < childs.getLength(); i++) {
-                        if (childs.item(i).getNodeName().equals("body")) {
+                        if (childs.item(i).getNodeName().equals(TAG_BODY)) {
                             body = (Element) childs.item(i);
                             break;
                         }
@@ -503,7 +526,7 @@ public class Html5Presentation<T> extends BeanPresentationHelper<T> implements I
          * The body
          */
         Element body =
-            appendElement(html, TAG_BODY, ATTR_ID, (!Util.isEmpty(title, true) ? title : "body"));
+            appendElement(html, TAG_BODY, ATTR_ID, (!Util.isEmpty(title, true) ? title : TAG_BODY));
         if (interactive) {
             String style =
                 ENV.get("application.page.style", STYLE_BACKGROUND_RADIAL_GRADIENT
@@ -835,7 +858,7 @@ public class Html5Presentation<T> extends BeanPresentationHelper<T> implements I
         parent = appendElement(parent, TAG_DIV, ATTR_ALIGN, VAL_ALIGN_RIGHT);
         Element input =
             appendElement(parent, TAG_INPUT, ATTR_ID, ID_QUICKSEARCH_FIELD, ATTR_NAME, ID_QUICKSEARCH_FIELD, ATTR_TYPE,
-                ATTR_TYPE_SEARCH, ATTR_TITLE, tooltip, "tabindex", ++tabIndex + "");
+                ATTR_TYPE_SEARCH, ATTR_TITLE, tooltip, ATTR_TABINDEX, ++tabIndex + "");
         if (ENV.get("websocket.use.inputassist", true)) {
             HtmlUtil.appendAttributes(input, "onkeypress",
                 ENV.get("websocket.inputassist.function", "inputassist(event)"));
@@ -879,7 +902,7 @@ public class Html5Presentation<T> extends BeanPresentationHelper<T> implements I
         }
         //TODO: only layout-constraints should be set
         if (p.getLayoutConstraints() instanceof Map) {
-            HtmlUtil.appendAttributes(grid, MapUtil.asArray((Map<String, String>) p.getLayoutConstraints()));
+            HtmlUtil.appendAttributes(grid, MapUtil.asArray((Map<String, Object>) p.getLayoutConstraints()));
         }
     }
 
@@ -1261,7 +1284,7 @@ public class Html5Presentation<T> extends BeanPresentationHelper<T> implements I
                     ? "this.getElementsByTagName('input')[0].onclick()" : null,
                 "ondblclick",
                 "location=this.getElementsByTagName('a')[0]",
-                "tabindex",
+                ATTR_TABINDEX,
                 tab,
                 ATTR_ACCESSKEY,
                 shortCut,
@@ -1297,17 +1320,37 @@ public class Html5Presentation<T> extends BeanPresentationHelper<T> implements I
         String value;
         if (colDefs.size() > 0) {
             for (IPresentableColumn c : colDefs) {
-                value = tableDescriptor.getColumnText((T) item, c.getIndex());
-                cell =
-                    appendElement(row, TAG_CELL, content(value), ATTR_TITLE,
-                        itemBean.toString() + ": " + ENV.translate(c.getName(), true),
-                        ATTR_HEADERS, c.getIndex() + ":" + c.getName(), ATTR_ID,
-                        tableDescriptor.getId() + "[" + tabIndex
-                            + ", " + c.getIndex() + "]");
-                if (c.getPresentable() != null)
-                    appendAttributes(cell, rowBackground, c.getPresentable(), false);
-                if (Messages.isMarkedAsProblem(value))
-                    HtmlUtil.appendAttributes(cell, ATTR_COLOR, COLOR_RED);
+                //on byte[] show an image through attached file
+                if (BitUtil.hasBit(itemBean.getAttribute(c.getName()).getPresentation().getType(), TYPE_DATA,
+                    TYPE_ATTACHMENT)) {
+                    BeanValue<?> beanValue = (BeanValue<?>) itemBean.getAttribute(c.getName());
+                    value = beanValue.getValueFile().getPath();
+                    cell =
+                        appendElement(row, TAG_CELL, ATTR_TITLE,
+                            itemBean.toString() + ": " + ENV.translate(c.getName(), true),
+                            ATTR_HEADERS, c.getIndex() + ":" + c.getName(), ATTR_ID,
+                            tableDescriptor.getId() + "[" + tabIndex
+                                + ", " + c.getIndex() + "]");
+                    Element data = createDataTag(cell, beanValue);
+                    if (c.getPresentable() != null) {
+                        appendAttributes(data, rowBackground, c.getPresentable(), false);
+                        appendAttributes(cell, rowBackground, c.getPresentable(), false);
+                    }
+                    if (Messages.isMarkedAsProblem(value))
+                        HtmlUtil.appendAttributes(cell, ATTR_COLOR, COLOR_RED);
+                } else {//standard --> text
+                    value = tableDescriptor.getColumnText((T) item, c.getIndex());
+                    cell =
+                        appendElement(row, TAG_CELL, content(value), ATTR_TITLE,
+                            itemBean.toString() + ": " + ENV.translate(c.getName(), true),
+                            ATTR_HEADERS, c.getIndex() + ":" + c.getName(), ATTR_ID,
+                            tableDescriptor.getId() + "[" + tabIndex
+                                + ", " + c.getIndex() + "]");
+                    if (c.getPresentable() != null)
+                        appendAttributes(cell, rowBackground, c.getPresentable(), false);
+                    if (Messages.isMarkedAsProblem(value))
+                        HtmlUtil.appendAttributes(cell, ATTR_COLOR, COLOR_RED);
+                }
             }
         } else {//don't show only an empty entry!
             value = StringUtil.toString(item, Integer.MAX_VALUE);
@@ -1379,13 +1422,13 @@ public class Html5Presentation<T> extends BeanPresentationHelper<T> implements I
                 rowName + "." + c.getName(),
                 ATTR_TYPE,
                 ATTR_TYPE_SEARCH,
-//                ATTR_SIZE,/* 'width' doesn't work, so we set the displaying char-size */
+                //                ATTR_SIZE,/* 'width' doesn't work, so we set the displaying char-size */
 //                Presentable.asText(c.getWidth()),
 //                ATTR_WIDTH,
 //                Presentable.asText(c.getWidth()),
                 ATTR_BGCOLOR,
                 COLOR_WHITE,
-                "tabindex",
+                ATTR_TABINDEX,
                 ++tabIndex + "",
                 ATTR_VALUE,
                 value,
@@ -1412,7 +1455,7 @@ public class Html5Presentation<T> extends BeanPresentationHelper<T> implements I
                 TAG_ROW,
                 ATTR_ID,
                 itemBean.getId().toString(),
-                "tabindex",
+                ATTR_TABINDEX,
                 ++tabIndex + "",
                 ATTR_FORMTARGET,
                 VAL_FRM_SELF,
@@ -1460,125 +1503,133 @@ public class Html5Presentation<T> extends BeanPresentationHelper<T> implements I
         cell = createLayoutConstraints(cell, p);
         cell = createLayout(cell, p);
         //now the field itself
-        Element input;
-        if (p.getType() == IPresentable.TYPE_DATA) {
+        Element input = null;
+        if (isData(beanValue)) {
             input = createDataTag(cell, beanValue);
-        } else if (beanValue.getConstraint().getAllowedValues() == null) {
-            RegExpFormat regexpFormat =
-                beanValue.getFormat() instanceof RegExpFormat ? (RegExpFormat) beanValue.getFormat()
-                    : null;
-            String type = getType(beanValue);
-            String width = Presentable.asText(p.getWidth());
-            if (width == null)
-                width = "50";
-            boolean isOption = "checkbox".equals(type);
-            input =
-                appendElement(
-                    cell,
-                    multiLineText ? TAG_TEXTAREA : TAG_INPUT,
-                    /*content(getSuffix(regexpFormat)),*/
-                    ATTR_TYPE,
-                    type,
-                    ATTR_ID,
-                    beanValue.getId(),
-                    ATTR_CLASS,
-                    "bean.field.input",
-                    ATTR_NAME,
-                    beanValue.getName(),
-                    ATTR_PATTERN,
-                    regexpFormat != null ? regexpFormat.getPattern() : ENV.get("default.pattern.regexp", ".*"),
-                    ATTR_STYLE,
-                    getTextAlignmentAsStyle(p.getStyle()),
-                    ATTR_SIZE,/* 'width' doesn't work, so we set the displaying char-size */
-                    width,
-                    ATTR_WIDTH,
-                    width,
-                    ATTR_MIN,
-                    StringUtil.toString(beanValue.getConstraint().getMinimum()),
-                    ATTR_MAX,
-                    StringUtil.toString(beanValue.getConstraint().getMaximum()),
-                    ATTR_MAXLENGTH,
-                    (beanValue.length() > 0 ? String.valueOf(beanValue.length()) : String.valueOf(Integer.MAX_VALUE)),
-                    (isOption ? enable(ATTR_CHECKED, (Boolean) beanValue.getValue()) : ATTR_VALUE),
-                    (isOption ? "checked" : getValue(beanValue, type)),
-                    ATTR_TITLE,
-                    p.getDescription()
-                        + (LOG.isDebugEnabled() ? "\n\n" + "<![CDATA[" + beanValue.toDebugString() + "]]>" : ""),
-                    "tabindex",
-                    p.layout("tabindex", ++tabIndex).toString(),
-                    enableFlag(ATTR_HIDDEN, !p.isVisible()),
-                    enableFlag(ATTR_DISABLED, !interactive || !p.getEnabler().isActive()),
-                    enableFlag(ATTR_READONLY, !interactive || !p.getEnabler().isActive() || beanValue.composition()),
-                    enableFlag(ATTR_REQUIRED, !beanValue.nullable() && !beanValue.generatedValue()));
+            appendAttributes(input, p, false);
+        }
+        if (beanValue.getConstraint().getAllowedValues() == null) {
+            if (input == null || BitUtil.hasBit(p.getType(), TYPE_ATTACHMENT)) {
+                RegExpFormat regexpFormat =
+                    beanValue.getFormat() instanceof RegExpFormat ? (RegExpFormat) beanValue.getFormat()
+                        : null;
+                String type = getType(beanValue);
+                String width = Presentable.asText(p.getWidth());
+                if (width == null)
+                    width = "50";
+                boolean isOption = "checkbox".equals(type);
+                input =
+                    appendElement(
+                        cell,
+                        multiLineText ? TAG_TEXTAREA : TAG_INPUT,
+                        /*content(getSuffix(regexpFormat)),*/
+                        ATTR_TYPE,
+                        type,
+                        ATTR_ID,
+                        beanValue.getId(),
+                        ATTR_CLASS,
+                        "bean.field.input",
+                        ATTR_NAME,
+                        beanValue.getName(),
+                        ATTR_PATTERN,
+                        regexpFormat != null ? regexpFormat.getPattern() : ENV.get("default.pattern.regexp", ".*"),
+                        ATTR_STYLE,
+                        getTextAlignmentAsStyle(p.getStyle()),
+                        ATTR_SIZE,/* 'width' doesn't work, so we set the displaying char-size */
+                        width,
+                        ATTR_WIDTH,
+                        width,
+                        ATTR_MIN,
+                        StringUtil.toString(beanValue.getConstraint().getMinimum()),
+                        ATTR_MAX,
+                        StringUtil.toString(beanValue.getConstraint().getMaximum()),
+                        ATTR_MAXLENGTH,
+                        (beanValue.length() > 0 ? String.valueOf(beanValue.length()) : String
+                            .valueOf(Integer.MAX_VALUE)),
+                        (isOption ? enable(ATTR_CHECKED, (Boolean) beanValue.getValue()) : ATTR_VALUE),
+                        (isOption ? "checked" : getValue(beanValue, type)),
+                        ATTR_TITLE,
+                        p.getDescription()
+                            + (LOG.isDebugEnabled() ? "\n\n" + "<![CDATA[" + beanValue.toDebugString() + "]]>" : ""),
+                        ATTR_TABINDEX,
+                        p.layout("tabindex", ++tabIndex).toString(),
+                        enableFlag(ATTR_HIDDEN, !p.isVisible()),
+                        enableFlag(ATTR_DISABLED, !interactive || !p.getEnabler().isActive()),
+                        enableFlag(ATTR_READONLY, !interactive || !p.getEnabler().isActive() || beanValue.composition()),
+                        enableFlag(ATTR_REQUIRED, !beanValue.nullable() && !beanValue.generatedValue()));
 
-            if (multiLineText) {
-                HtmlUtil.appendAttributes(input, ATTR_ROWS, p.layout("rows", "5"), ATTR_COLS, p.layout("cols", "50"),
-                    enable("wrap", p.layout("wrap", true)));
-                input.setTextContent(beanValue.getValueText());
-            }
-            if (interactive) {
-                //create a finder button - on disabled items, show a view with details!
-                if (beanValue.isSelectable()) {
-                    String shortcut = shortCut(++tabIndex);
-                    Element a = createAction(cell,
-                        beanValue.getName() + IPresentable.POSTFIX_SELECTOR,
-                        ENV.translate("tsl2nano.finder.action.label", false),
-                        ENV.translate("tsl2nano.selection", true),
-                        null,
-                        shortcut,
-                        null,
-                        beanValue.hasWriteAccess(),
-                        false,
-                        true);
-                    HtmlUtil.appendAttributes(a, "tabindex", shortcut);
-
+                if (multiLineText) {
+                    HtmlUtil.appendAttributes(input, ATTR_ROWS, p.layout("rows", "5"), ATTR_COLS,
+                        p.layout("cols", "50"),
+                        enable("wrap", p.layout("wrap", true)));
+                    input.setTextContent(beanValue.getValueText());
                 }
-                if (p.getEnabler().isActive()) {
-                    //perhaps create an input assist listener
-                    if (beanValue.getValueExpression() != null && ENV.get("websocket.use.inputassist", true)) {
-                        HtmlUtil.appendAttributes(input, "onkeypress",
-                            ENV.get("websocket.inputassist.function", "inputassist(event)"));
+                if (interactive) {
+                    //create a finder button - on disabled items, show a view with details!
+                    if (beanValue.isSelectable()) {
+                        String shortcut = shortCut(++tabIndex);
+                        Element a = createAction(cell,
+                            beanValue.getName() + POSTFIX_SELECTOR,
+                            ENV.translate("tsl2nano.finder.action.label", false),
+                            ENV.translate("tsl2nano.selection", true),
+                            null,
+                            shortcut,
+                            null,
+                            beanValue.hasWriteAccess(),
+                            false,
+                            true);
+                        HtmlUtil.appendAttributes(a, "tabindex", shortcut);
+
                     }
-                    //perhaps create an dependency listener
-                    if (beanValue.hasListeners()) {
-                        HtmlUtil.appendAttributes(input, "onblur",
-                            ENV.get("websocket.dependency.function", "evaluatedependencies(event)"));
-                    }
-                    //handle attachments
-                    if (BitUtil.hasBit(beanValue.getPresentation().getType(), IPresentable.TYPE_ATTACHMENT)) {
-                        HtmlUtil.appendAttributes(input, "onchange",
-                            ENV.get("websocket.attachment.function", "transferattachment(this)"));
-                        /*
-                         * save the attachment to file system to be transferred by http-server,
-                         * using bean-id and attribute name
-                         */
-                        Object v = beanValue.getValue();
+                    if (p.getEnabler().isActive()) {
+                        //perhaps create an input assist listener
+                        if (beanValue.getValueExpression() != null && ENV.get("websocket.use.inputassist", true)) {
+                            HtmlUtil.appendAttributes(input, "onkeypress",
+                                ENV.get("websocket.inputassist.function", "inputassist(event)"));
+                        }
+                        //perhaps create an dependency listener
+                        if (beanValue.hasListeners()) {
+                            HtmlUtil.appendAttributes(input, "onblur",
+                                ENV.get("websocket.dependency.function", "evaluatedependencies(event)"));
+                        }
+                        //handle attachments
+                        if (BitUtil.hasBit(beanValue.getPresentation().getType(), TYPE_ATTACHMENT)) {
+                            HtmlUtil.appendAttributes(input, "onchange",
+                                ENV.get("websocket.attachment.function", "transferattachment(this)"));
+                            /*
+                             * save the attachment to file system to be transferred by http-server,
+                             * using bean-id and attribute name
+                             */
+                            Object v = beanValue.getValue();
 //                        if (beanValue instanceof Attachment) {
 //                            FileUtil.writeBytes(((Attachment)beanValue).getValue(), FileUtil.getValidFileName(beanValue.getName()), false);
 //                        } else {
-                        if (v != null) {
-                            byte[] bytes;
-                            if (v instanceof byte[])
-                                bytes = (byte[]) v;
-                            else if (v instanceof ByteBuffer)
-                                bytes = ((ByteBuffer) v).array();
-                            else if (v instanceof String)
-                                bytes = ((String) v).getBytes();
-                            else
-                                throw new IllegalStateException("attachment of attribute '" + beanValue.getValueId()
-                                    + "' has to be of type byte[], ByteBuffer or String!");
-                            FileUtil.writeBytes(bytes, ENV.getTempPath() + beanValue.getValueId(), false);
+                            if (v != null) {
+                                byte[] bytes;
+                                if (v instanceof byte[])
+                                    bytes = (byte[]) v;
+                                else if (v instanceof ByteBuffer)
+                                    bytes = ((ByteBuffer) v).array();
+                                else if (v instanceof String)
+                                    bytes = ((String) v).getBytes();
+                                else
+                                    throw new IllegalStateException("attachment of attribute '"
+                                        + beanValue.getValueId()
+                                        + "' has to be of type byte[], ByteBuffer or String!");
+                                FileUtil.writeBytes(bytes, ENV.getTempPath() + beanValue.getValueId(), false);
+                            }
                         }
-                    }
 //                    }
-                } else {//gray background on disabled
-                    HtmlUtil.appendAttributes(input, ATTR_STYLE, STYLE_BACKGROUND_LIGHTGRAY);
+                    } else {//gray background on disabled
+                        HtmlUtil.appendAttributes(input, ATTR_STYLE, STYLE_BACKGROUND_LIGHTGRAY);
+                    }
                 }
             }
         } else {
             input = createSelectorField(cell, beanValue);
         }
-        appendAttributes(input, p, false);
+        if (!isData(beanValue))
+            appendAttributes(input, p, false);
 
         if (beanValue.hasStatusError()) {
             row = appendElement(parent, TAG_ROW);
@@ -1597,22 +1648,52 @@ public class Html5Presentation<T> extends BeanPresentationHelper<T> implements I
      * @return
      */
     private Element createDataTag(Element cell, BeanValue<?> beanValue) {
-        Element input;
-        input = appendElement(cell,
-            getDataTag(beanValue),
-            ATTR_ID,
-            beanValue.getId(),
-            ATTR_SRC,
-            beanValue.getValueFile() != null ? FileUtil.getRelativePath(beanValue.getValueFile(), ENV.getConfigPath()) : "");
-        return input;
+        Element data;
+        String tagName = getDataTag(beanValue);
+        File file = beanValue.getValueFile();
+        //embed the file content
+        String content = null;
+        if (tagName.equals(TAG_EMBED) && file != null) {
+            content = new String(FileUtil.getFileBytes(file.getPath(), null));
+        }
+        data =
+            appendElement(
+                cell,
+                tagName,
+                content(content),
+                ATTR_ID,
+                beanValue.getId() + ".data",
+                getDataAttribute(tagName),
+                file != null ? FileUtil.getRelativePath(file,
+                    ENV.getConfigPath()) : "",
+                ATTR_CLASS,
+                "bean.field.data");
+        return data;
     }
 
+    /**
+     * evaluates the html tag name through the presentable style.
+     * 
+     * @param beanValue
+     * @return tag name
+     */
     private String getDataTag(BeanValue<?> beanValue) {
-        int baseBit = BitUtil.highestBitPosition(IPresentable.STYLE_DATA_IMG >> 1);
-        int style = beanValue.getPresentation().getStyle();
+        int baseBit = BitUtil.highestBitPosition(STYLE_DATA_IMG >> 1);
+        int highBit = BitUtil.highestBitPosition(STYLE_DATA_FRAME >> 1);
+        int style = BitUtil.filterBitRange(beanValue.getPresentation().getStyle(), baseBit, highBit);
         style = style >> baseBit;
-        final String[] tags = { "img", "embed", "object", "audio", "video", "device" };
+        final String[] tags = { "img", "embed", "object", "canvas", "audio", "video", "device", "iframe" };
         return style == 0 ? tags[0] : BitUtil.description(style, Arrays.asList(tags));
+    }
+
+    /**
+     * evaluates the html source attribute name for the given tag-name. for the tag 'object' it is 'data' - on all other
+     * tags it is 'src'.
+     * 
+     * @return tag name
+     */
+    private String getDataAttribute(String tagName) {
+        return tagName.equals(TAG_OBJECT) ? ATTR_DATA : ATTR_SRC;
     }
 
     /**
@@ -1653,8 +1734,8 @@ public class Html5Presentation<T> extends BeanPresentationHelper<T> implements I
     }
 
     private boolean isMultiline(IPresentable p) {
-        return BitUtil.hasBit(p.getType(), IPresentable.TYPE_INPUT_MULTILINE)
-            || BitUtil.hasBit(p.getStyle(), IPresentable.STYLE_MULTI);
+        return BitUtil.hasBit(p.getType(), TYPE_INPUT_MULTILINE)
+            || BitUtil.hasBit(p.getStyle(), STYLE_MULTI);
     }
 
     private String getSuffix(RegExpFormat regexpFormat) {
@@ -1671,13 +1752,13 @@ public class Html5Presentation<T> extends BeanPresentationHelper<T> implements I
     }
 
     private String getTextAlignment(int style) {
-        return NumberUtil.hasBit(style, IPresentable.STYLE_ALIGN_RIGHT) ? VAL_ALIGN_RIGHT : NumberUtil.hasBit(style,
-            IPresentable.STYLE_ALIGN_CENTER) ? VAL_ALIGN_CENTER : VAL_ALIGN_LEFT;
+        return NumberUtil.hasBit(style, STYLE_ALIGN_RIGHT) ? VAL_ALIGN_RIGHT : NumberUtil.hasBit(style,
+            STYLE_ALIGN_CENTER) ? VAL_ALIGN_CENTER : VAL_ALIGN_LEFT;
     }
 
     private String getTextAlignmentAsStyle(int style) {
-        return NumberUtil.hasBit(style, IPresentable.STYLE_ALIGN_RIGHT) ? style(STYLE_TEXT_ALIGN, VAL_ALIGN_RIGHT)
-            : NumberUtil.hasBit(style, IPresentable.STYLE_ALIGN_CENTER) ? style(STYLE_TEXT_ALIGN, VAL_ALIGN_CENTER)
+        return NumberUtil.hasBit(style, STYLE_ALIGN_RIGHT) ? style(STYLE_TEXT_ALIGN, VAL_ALIGN_RIGHT)
+            : NumberUtil.hasBit(style, STYLE_ALIGN_CENTER) ? style(STYLE_TEXT_ALIGN, VAL_ALIGN_CENTER)
                 : style(STYLE_TEXT_ALIGN, VAL_ALIGN_LEFT);
     }
 
@@ -1697,7 +1778,7 @@ public class Html5Presentation<T> extends BeanPresentationHelper<T> implements I
                 ATTR_TITLE,
                 beanValue.getPresentation().getDescription(),
                 "tabindex",
-                beanValue.getPresentation().layout("tabindex", ++tabIndex).toString(),
+                beanValue.getPresentation().layout(ATTR_TABINDEX, ++tabIndex).toString(),
                 enableFlag(ATTR_HIDDEN, !beanValue.getPresentation().isVisible()),
                 enableFlag(ATTR_READONLY, !beanValue.getPresentation().getEnabler().isActive()),
                 enableFlag(ATTR_REQUIRED, !beanValue.nullable()));
@@ -1729,50 +1810,50 @@ public class Html5Presentation<T> extends BeanPresentationHelper<T> implements I
         String type;
         int t = beanValue.getPresentation().getType();
         //let the specialized input types work
-        t = NumberUtil.filterBits(t, IPresentable.TYPE_INPUT, IPresentable.TYPE_INPUT_MULTILINE);
+        t = NumberUtil.filterBits(t, TYPE_INPUT, TYPE_INPUT_MULTILINE);
         switch (t) {
-        case IPresentable.TYPE_SELECTION:
+        case TYPE_SELECTION:
             type = "text";
             break;
-        case IPresentable.TYPE_OPTION_RADIO:
+        case TYPE_OPTION_RADIO:
             type = "radio";
             break;
-        case IPresentable.TYPE_OPTION:
+        case TYPE_OPTION:
             type = "checkbox";
             break;
-        case IPresentable.TYPE_DATE | IPresentable.TYPE_TIME:
+        case TYPE_DATE | TYPE_TIME:
             type = "datetime";
             break;
-        case IPresentable.TYPE_TIME:
+        case TYPE_TIME:
             type = "time";
             break;
-        case IPresentable.TYPE_DATE:
+        case TYPE_DATE:
             type = "date";
             break;
-        case IPresentable.TYPE_INPUT_NUMBER:
+        case TYPE_INPUT_NUMBER:
             //floatings are not supported in html input type=number
             if (NumberUtil.isInteger(beanValue.getType())) {
                 type = "number";
                 break;
             }
-        case IPresentable.TYPE_INPUT_TEL:
+        case TYPE_INPUT_TEL:
             type = "tel";
             break;
-        case IPresentable.TYPE_INPUT_EMAIL:
+        case TYPE_INPUT_EMAIL:
             type = "email";
             break;
-        case IPresentable.TYPE_INPUT_URL:
+        case TYPE_INPUT_URL:
             type = "url";
             break;
-        case IPresentable.TYPE_INPUT_PASSWORD:
+        case TYPE_INPUT_PASSWORD:
             type = "password";
             break;
-        case IPresentable.TYPE_INPUT_SEARCH:
+        case TYPE_INPUT_SEARCH:
             type = "search";
             break;
-        case IPresentable.TYPE_DATA:
+        case TYPE_DATA:
             type = "img";
-        case IPresentable.TYPE_ATTACHMENT:
+        case TYPE_ATTACHMENT:
             //on type = 'file' only the file-name is given (no path!)
             //will provide an upload button for the client system
             type = "file";
@@ -1785,7 +1866,7 @@ public class Html5Presentation<T> extends BeanPresentationHelper<T> implements I
     }
 
     Element createFooter(Document doc, Object footer) {
-        Element body = (Element) ((NodeList) doc.getElementsByTagName("body")).item(0);
+        Element body = (Element) ((NodeList) doc.getElementsByTagName(TAG_BODY)).item(0);
         Element table = createGrid(body, "Status", "page.footer.table", 1);
 
         //fallback: setting style from environment-properties

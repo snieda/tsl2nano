@@ -34,6 +34,7 @@ import org.apache.commons.logging.Log;
 import de.tsl2.nano.bean.BeanContainer;
 import de.tsl2.nano.bean.IBeanContainer;
 import de.tsl2.nano.bean.def.AbstractExpression;
+import de.tsl2.nano.bean.def.Attachment;
 import de.tsl2.nano.bean.def.Bean;
 import de.tsl2.nano.bean.def.BeanCollector;
 import de.tsl2.nano.bean.def.BeanDefinition;
@@ -507,7 +508,7 @@ public class NanoH5 extends NanoHTTPD implements ISystemConnector<Persistence> {
          * standard environment path.
          */
         if (!isAbsolutePath) {
-            String attachmentJarName = NanoWebSocketServer.getAttachmentFilename(persistence, "jarFile", jarName);
+            String attachmentJarName = Attachment.getFilename(persistence, "jarFile", jarName);
             File attFile = new File(attachmentJarName);
             if (attFile.canRead()) {
                 FileUtil.copy(attFile.getPath(), persistence.jarFileInEnvironment());

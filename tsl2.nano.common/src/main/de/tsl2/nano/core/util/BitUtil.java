@@ -92,13 +92,14 @@ public class BitUtil extends CUtil {
      * @return filtered bit field
      */
     public static final int filterBitRange(int field, int low, int high) {
+        int bits = 0;
         for (int i = low; i <= high; i++) {
             int b = 1 << i;
             if (field < b)
                 break;
-            field = hasBit(field, b) ? field - b : field;
+            bits |= hasBit(field, b) ? b : 0;
         }
-        return field;
+        return bits;
     }
 
     /**
@@ -158,7 +159,7 @@ public class BitUtil extends CUtil {
         int highestBit = highestBitPosition(number);
         int[] bits = new int[highestBit];
         for (int i = 0; i < highestBit; i++) {
-            bits[i] = hasBit(number, i + 1) ? 1 : 0;
+            bits[i] = hasBit(number, bitToDecimal(i)) ? 1 : 0;
         }
         return bits;
     }

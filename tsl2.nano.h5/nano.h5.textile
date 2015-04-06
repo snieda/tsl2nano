@@ -856,11 +856,12 @@ STYLE_ALIGN_TOP		= 32
 STYLE_ALIGN_BOTTOM	= 64
 STYLE_DATA_IMG		= 128
 STYLE_DATA_EMBED	= 256
-STYLE_DATA_OBJECT	= 1024
-STYLE_DATA_CANVAS	= 2048
-STYLE_DATA_AUDIO	= 4096
-STYLE_DATA_VIDEO	= 8192
-STYLE_DATA_DEVICE	= 16384
+STYLE_DATA_OBJECT	= 512
+STYLE_DATA_CANVAS	= 1024
+STYLE_DATA_AUDIO	= 2048
+STYLE_DATA_VIDEO	= 4096
+STYLE_DATA_DEVICE	= 8192
+STYLE_DATA_FRAME	= 16384
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 Example for some layoutconstraints:
@@ -885,6 +886,96 @@ Example for some layoutconstraints:
       </attributeDefinition>
    </attribute>
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+*Data and attachments*
+
+The following types declare data types that should be editable through the attachment type:
+
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+TYPE_ATTACHMENT		= 256
+TYPE_DATA			= 8192
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+To have a file selector box as user input, you should use TYPE_ATTACHMENT.
+To define the detailed style of your data, you can set one of the following styles:
+
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+STYLE_DATA_IMG		= 128
+STYLE_DATA_EMBED	= 256
+STYLE_DATA_OBJECT	= 512
+STYLE_DATA_CANVAS	= 1024
+STYLE_DATA_AUDIO	= 2048
+STYLE_DATA_VIDEO	= 4096
+STYLE_DATA_DEVICE	= 8192
+STYLE_DATA_FRAME	= 16384
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+These styles correspond to the equal named html5 tag names. The default style is *img*, where no additional informations are required. If you use the style *object*, you have to define the *mimetype* for the object. You do this through a layout property (e.g. type="image/svg+xml").
+
+Using the type *TYPE_ATTACHMENT* and style *STYLE_DATA_OBJECT* would result in the html-tag
+
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+<object data="myfile.svg" type="image/svg+xml">
+</object>
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+Example, showing an svg as attachment:
+
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+   <attribute name="icon">
+      <attributeDefinition id="false" unique="false" composition="false" cascading="false" generatedValue="false">
+         <declaring class="de.tsl2.nano.core.cls.BeanAttribute" declaringClass="org.anonymous.project.Item" name="icon"/>
+         <constraint type="[B" nullable="true" length="255">
+         </constraint>
+         <presentable class="de.tsl2.nano.h5.Html5Presentable" type="256" style="1028" visible="true" searchable="true">
+            <label>Icon</label>
+            <description>item.icon</description>
+            <enabler class="de.tsl2.nano.action.IActivable$1" active="true"/>
+         </presentable>
+         <columnDefinition name="icon" columnIndex="10" sortIndex="-1" isSortUpDirection="true" width="-1" standardSummary="false">
+            <presentable class="de.tsl2.nano.h5.Html5Presentable" type="256" style="1028" visible="true" searchable="true">
+               <label>Icon</label>
+               <description>item.icon</description>
+            <layout name="type">image/svg+xml</layout>
+               <enabler class="de.tsl2.nano.action.IActivable$1" active="true"/>
+            </presentable>
+         </columnDefinition>
+         <doValidation>true</doValidation>
+      </attributeDefinition>
+   </attribute>
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+Available mime types (e.g. for the tag _object_):
+
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+application/pdf
+application/postscript
+application/postscript
+application/x-pcl
+application/vnd.hp-PCL
+application/x-afp
+application/vnd.ibm.modcap
+image/x-afp+fs10
+image/x-afp+fs11
+image/x-afp+fs45
+image/x-afp+goca
+text/plain
+application/rtf
+text/richtext
+text/rtf
+application/mif
+image/svg+xml
+image/gif
+image/png
+image/jpeg
+image/tiff
+text/xsl
+image/x-emf
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+Using the style _embed_ would embed the whole attachment content into the html response file. all other styles only reference the given source file with an _src_ attribute.
+
+Please have a look at the html5-tags and their corresponding attributes, that could be provided through the attributes layout definition map.
 
 #### Column-Definitions
 
@@ -1250,7 +1341,7 @@ BeanDefinition b = BeanDefinition.getBeanDefinition(org.anonymous.project.Person
 
 ### Transferring local file attachments
 
-Simply set your beans attribute type to be an attachment. The client will use file-selector to select your file. After selecting the file, this file will be sent to the application and the bean can access this file, stored inside the environments temp path.
+Simply set your beans attribute type to be an attachment. The client will use a file-selector to select your file. After selecting the file, this file will be sent to the application and the bean can access this file, stored inside the environments temp path.
 
 Example:
 
@@ -2220,7 +2311,7 @@ Net:Connection-->Link-->Cover(content, descriptor)
 * Type: Typ des Dienstes (meist Standard)
 * Classification: Klasse (frei, ?)
 * Item: Projekt (Standard)
-* Bilder mit blob?
+* (v) Bilder mit blob?
 * Summenzeile (beandef oder columndef: + summarize=$feld1-$feld2)
 * Wochentage + unterschiedliche Farben am WE+Feiertage
 * macros aufnehmen und abspielen
@@ -2229,5 +2320,7 @@ Net:Connection-->Link-->Cover(content, descriptor)
 
 
 * NanoTask, NanoProc, NanoLogic?
-* TODO: simplexml --> xstream
-* simplexml: type = java.lang.byte[] --> [B
+* (-) TODO: simplexml --> xstream
+* (v) simplexml: type = java.lang.byte[] --> [B
+* how to show a pdf file inside the html response
+* interactions on svg-pictures?

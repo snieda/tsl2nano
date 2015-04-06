@@ -85,6 +85,7 @@ import de.tsl2.nano.util.NumberUtil;
 @Default(value = DefaultType.FIELD, required = false)
 public class ENV {
 
+    private static final String PATH_TEMP = "temp/";
     private static ENV self;
     @SuppressWarnings("rawtypes")
     @ElementMap(entry = "property", key = "name", attribute = true, inline = true, required = false, keyType = String.class, valueType = Object.class)
@@ -102,7 +103,7 @@ public class ENV {
 
     //TODO: constrain the max size
     transient Map<Class<?>, Log> loggers = new HashMap<Class<?>, Log>();
-    
+
     public static final String FRAMEWORK = "de.tsl2.nano";
     public static final String PREFIX = ENV.class.getPackage().getName() + ".";
 
@@ -302,17 +303,18 @@ public class ENV {
         p.put("nano.tstamp", new Date());
         p.put("main.context.classloader", Thread.currentThread().getContextClassLoader());
         p.put("inetadress.myip", NetUtil.getMyIP());
-        
+
         long free = Runtime.getRuntime().freeMemory() / (1024 * 1024);
         long total = Runtime.getRuntime().totalMemory() / (1024 * 1024);
         p.put("memory", "free " + free + "M of total " + total + "M");
 
         p.put("processors", Runtime.getRuntime().availableProcessors());
-        
+
         File[] roots = File.listRoots();
         StringBuilder f = new StringBuilder();
         for (int i = 0; i < roots.length; i++) {
-            f.append(roots[i].getName() + "(" + roots[i] + " " + BitUtil.amount(roots[i].getFreeSpace()) + "/" + BitUtil.amount(roots[i].getTotalSpace()) + ")");
+            f.append(roots[i].getName() + "(" + roots[i] + " " + BitUtil.amount(roots[i].getFreeSpace()) + "/"
+                + BitUtil.amount(roots[i].getTotalSpace()) + ")");
         }
         p.put("disc", f.toString());
         p.put("build.info", getBuildInformations());
@@ -553,7 +555,25 @@ public class ENV {
      * @return
      */
     public static String getTempPath() {
-        return getConfigPath() + "temp/";
+        return getConfigPath() + PATH_TEMP;
+    }
+
+    /**
+     * relative temp path for this environment
+     * 
+     * @return
+     */
+    public static String getTempPathRel() {
+        return getConfigPathRel() + PATH_TEMP;
+    }
+
+    /**
+     * points to the temp path starting from classpath. nothing more than the relative path {@link #PATH_TEMP}.
+     * 
+     * @return
+     */
+    public static String getTempPathURL() {
+        return PATH_TEMP;
     }
 
     /**
@@ -851,7 +871,7 @@ public class ENV {
     public static boolean isDebugEnabled(Class<?> cls) {
         return LogFactory.getLog(cls).isDebugEnabled();
     }
-    
+
     @Persist
     protected void initSerialization() {
         /*
@@ -900,6 +920,7 @@ public class ENV {
 
     /**
      * logger
+     * 
      * @param caller
      * @return
      */
@@ -913,6 +934,7 @@ public class ENV {
 
     /**
      * convenience to call a standard logger without creating a member.
+     * 
      * @param caller the caller instance
      * @param item item to be logged
      */
@@ -922,6 +944,7 @@ public class ENV {
 
     /**
      * convenience to call a standard logger without creating a member.
+     * 
      * @param caller the caller instance
      * @param item item to be logged
      */
@@ -931,6 +954,7 @@ public class ENV {
 
     /**
      * convenience to call a standard logger without creating a member.
+     * 
      * @param caller the caller instance
      * @param item item to be logged
      */
@@ -941,9 +965,10 @@ public class ENV {
     protected static void info(Object item) {
         logger(ENV.class).info(item);
     }
-    
+
     /**
      * convenience to call a standard logger without creating a member.
+     * 
      * @param caller the caller instance
      * @param item item to be logged
      */
@@ -953,6 +978,7 @@ public class ENV {
 
     /**
      * convenience to call a standard logger without creating a member.
+     * 
      * @param caller the caller instance
      * @param item item to be logged
      */

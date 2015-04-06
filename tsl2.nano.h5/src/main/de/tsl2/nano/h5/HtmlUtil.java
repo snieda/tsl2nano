@@ -121,6 +121,8 @@ public class HtmlUtil {
     public static final String ATTR_SRC = "src";
     public static final String ATTR_ALT = "alt";
 
+    public static final String ATTR_DATA = "data";
+
     public static final String TAG_AUDIO = "audio";
     public static final String TAG_VIDEO = "video";
     public static final String TAG_EMBED = "embed";
@@ -165,6 +167,7 @@ public class HtmlUtil {
     public static final String ATTR_SPANCOL = "colspan";
     public static final String ATTR_SPANROW = "rowspan";
     public static final String ATTR_HEADERS = "header";
+    public static final String ATTR_TABINDEX = "tabindex";
 
     public static final String COLOR_WHITE = "#FFFFFF";
     public static final String COLOR_BLACK = "#000000";
@@ -300,6 +303,10 @@ public class HtmlUtil {
              *    be wrapped into symbolic tags.
              * 2. if there are more than one tag, create a root tag
              */
+            int xmlPrefixEnd = text.indexOf("?>");
+            if (xmlPrefixEnd != -1)
+                text = text.substring(xmlPrefixEnd + 3);
+            
             final String BEG = begin(TAG_SPAN), END = end(TAG_SPAN);
             String prefix = StringUtil.substring(text, null, "<");
             if (!Util.isEmpty(prefix))
@@ -327,7 +334,8 @@ public class HtmlUtil {
                 e.appendChild(doc.adoptNode(childNodes.item(i)));
             }
         } catch (Exception e1) {
-            ManagedException.forward(e1);
+            //don't interrupt the html response but show the error message.
+            e.setTextContent(e1.getLocalizedMessage());
         }
     }
 

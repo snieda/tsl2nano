@@ -172,15 +172,18 @@ public interface IPresentable extends Serializable {
     public static final int STYLE_ALIGN_BOTTOM = 64;
     
     /*
-     * this styles are defined for html5 media tags
+     * this styles are defined for html5 media tags.
+     * NOTE: STYLE_DATA_IMG has to be the lowest one of this bock - 
+     *       STYLE_DATA_FRAME the highest one! there doesn't has to be any leak.
      */
     public static final int STYLE_DATA_IMG = 128;
     public static final int STYLE_DATA_EMBED = 256;
-    public static final int STYLE_DATA_OBJECT = 1 << 10;
-    public static final int STYLE_DATA_CANVAS = 1 << 11;
-    public static final int STYLE_DATA_AUDIO = 1 << 12;
-    public static final int STYLE_DATA_VIDEO = 1 << 13;
-    public static final int STYLE_DATA_DEVICE = 1 << 14;
+    public static final int STYLE_DATA_OBJECT = 512;
+    public static final int STYLE_DATA_CANVAS = 1 << 10;
+    public static final int STYLE_DATA_AUDIO = 1 << 11;
+    public static final int STYLE_DATA_VIDEO = 1 << 12;
+    public static final int STYLE_DATA_DEVICE = 1 << 13;
+    public static final int STYLE_DATA_FRAME = 1 << 14;
 
     /*
      * standard colors

@@ -9,13 +9,18 @@
  */
 package de.tsl2.nano.bean.def;
 
+import java.io.File;
 import java.lang.reflect.Method;
+import java.util.UUID;
 
 import org.simpleframework.xml.Attribute;
 
+import de.tsl2.nano.bean.BeanUtil;
 import de.tsl2.nano.bean.IValueAccess;
+import de.tsl2.nano.core.ENV;
 import de.tsl2.nano.core.cls.IAttribute;
 import de.tsl2.nano.core.util.FileUtil;
+import de.tsl2.nano.core.util.Util;
 import de.tsl2.nano.messaging.EventController;
 
 /**
@@ -28,16 +33,21 @@ public class Attachment implements IValueAccess<byte[]>, IAttribute<byte[]> {
     /** serialVersionUID */
     private static final long serialVersionUID = -1460468414949211876L;
 
+    /** attachment data */
     transient byte[] data;
+    /** attribute name */
     @Attribute
     String name;
+    /** full file path (including the extension, that may be used for presentation aspects) */
     @Attribute
     String file;
     transient EventController eventController;
 
+    private static final String EMPTY = "EMPTY";
+
     public Attachment() {
     }
-    
+
     /**
      * constructor
      * 
@@ -68,7 +78,7 @@ public class Attachment implements IValueAccess<byte[]>, IAttribute<byte[]> {
     public void setName(String name) {
         this.name = name;
     }
-    
+
     @Override
     public byte[] getValue(Object instance) {
         if (data == null)
@@ -142,5 +152,78 @@ public class Attachment implements IValueAccess<byte[]>, IAttribute<byte[]> {
         if (eventController == null)
             eventController = new EventController();
         return eventController;
+    }
+
+    public static byte[] getFileBytes(Object instance, String name, String source) {
+        return FileUtil.getFileBytes(getFilename(instance, name, source), null);
+    }
+
+    /**
+     * getAttachmentFilename
+     * 
+     * @param instance
+     * @param attribute
+     * @param name
+     * @return
+     */
+    public static String getFilename(Object instance, String attribute, String name) {
+        return ENV.getTempPath()
+            + FileUtil.getValidFileName(BeanValue.getBeanValue(instance, attribute).getValueId() + "."
+                + Util.asString(name));
+    }
+
+    /**
+     * can be used, if for example a bean value is a byte-array to be used from outside (perhaps on an html-page loading
+     * an image). if the value is not a byte-array, it will be created through serialization. this byte-array will be
+     * saved (if not saved before) to a file inside a temp-directory of your environment.
+     * 
+     * @return temporary file-path of the current bean-value, saved as byte-array.
+     */
+    public static File getValueFile(String id, Object v) {
+        byte[] data = (byte[]) (v instanceof byte[] ? v : BeanUtil.serialize(v));
+        String fname = id + "-" + (data != null ? UUID.nameUUIDFromBytes(data) : EMPTY);
+        String ext = getExtension(data);
+        /*
+         * writing to the servers temp path needs a path, starting from 'user.dir' (--> application start path).
+         * transferring a file as source to the client to be shown inside the html page,
+         * we need the relative path starting from the html page.
+         * Example:
+         * servers temp path: myappconfigpath/temp/
+         * html source path : /temp/
+         */
+        File file = new File(ENV.getTempPathRel() + fname + ext);
+        if (!file.exists() && data != null)
+            FileUtil.writeBytes(data, file.getPath(), false);
+        return new File(ENV.getTempPathURL() + fname + ext);
+    }
+
+    /**
+     * evaluate the data type of the given byte stream. it's only a simple workaround for svg and pdf files. some
+     * browsers (like Chrome) need a file extension to show an svg file on an img-tag.
+     * 
+     * @param data
+     * @return file extension
+     */
+    private static String getExtension(byte[] data) {
+        String str = new String(data);
+        if (str.startsWith("%PDF"))
+            return ".pdf";
+        else if (str.contains("<svg"))
+            return ".svg";
+        else
+            return "";
+    }
+
+    /**
+     * isAttachment
+     * 
+     * @param a an attribute
+     * @return true, if presentable type is {@link IPresentable#TYPE_ATTACHMENT} and the attributes value type is
+     *         byte[].
+     */
+    public static final boolean isAttachment(IAttributeDefinition<?> a) {
+        int ptype = a.getPresentation() != null ? a.getPresentation().getType() : -1;
+        return ptype == IPresentable.TYPE_ATTACHMENT
+            && byte[].class.isAssignableFrom(a.getType());
     }
 }

@@ -13,9 +13,11 @@ import static de.tsl2.nano.bean.def.IPresentable.STYLE_ALIGN_CENTER;
 import static de.tsl2.nano.bean.def.IPresentable.STYLE_ALIGN_LEFT;
 import static de.tsl2.nano.bean.def.IPresentable.STYLE_ALIGN_RIGHT;
 import static de.tsl2.nano.bean.def.IPresentable.STYLE_MULTI;
+import static de.tsl2.nano.bean.def.IPresentable.TYPE_ATTACHMENT;
 import static de.tsl2.nano.bean.def.IPresentable.TYPE_DATA;
 import static de.tsl2.nano.bean.def.IPresentable.TYPE_DATE;
 import static de.tsl2.nano.bean.def.IPresentable.TYPE_INPUT;
+import static de.tsl2.nano.bean.def.IPresentable.TYPE_INPUT_MULTILINE;
 import static de.tsl2.nano.bean.def.IPresentable.TYPE_INPUT_NUMBER;
 import static de.tsl2.nano.bean.def.IPresentable.TYPE_OPTION;
 import static de.tsl2.nano.bean.def.IPresentable.TYPE_SELECTION;
@@ -37,11 +39,9 @@ import java.util.Iterator;
 import java.util.LinkedHashSet;
 import java.util.LinkedList;
 import java.util.List;
-import java.util.Map;
 import java.util.NavigableMap;
 import java.util.NavigableSet;
 import java.util.Properties;
-import java.util.ResourceBundle;
 import java.util.Set;
 import java.util.SortedSet;
 import java.util.TreeMap;
@@ -56,8 +56,6 @@ import de.tsl2.nano.bean.IAttributeDef;
 import de.tsl2.nano.bean.IValueAccess;
 import de.tsl2.nano.bean.ValueHolder;
 import de.tsl2.nano.collection.CollectionUtil;
-import de.tsl2.nano.collection.PersistableSingelton;
-import de.tsl2.nano.collection.PersistentCache;
 import de.tsl2.nano.core.ENV;
 import de.tsl2.nano.core.ISession;
 import de.tsl2.nano.core.ManagedException;
@@ -379,15 +377,15 @@ public class BeanPresentationHelper<T> {
 
     public int getDefaultType(IAttributeDefinition<?> attr) {
         if (attr.temporalType() != null && Timestamp.class.isAssignableFrom(attr.temporalType()))
-            return IPresentable.TYPE_DATE | IPresentable.TYPE_TIME;
+            return TYPE_DATE | TYPE_TIME;
         if (attr.temporalType() != null && Time.class.isAssignableFrom(attr.temporalType()))
-            return IPresentable.TYPE_TIME;
+            return TYPE_TIME;
         int type = getDefaultType((IAttribute) attr);
-        if (!NumberUtil.hasBit(type, IPresentable.TYPE_OPTION)
-            && !NumberUtil.hasBit(type, IPresentable.TYPE_INPUT_NUMBER)
-            && !NumberUtil.hasBit(type, IPresentable.TYPE_DATA)) {
+        if (!NumberUtil.hasBit(type, TYPE_OPTION)
+            && !NumberUtil.hasBit(type, TYPE_INPUT_NUMBER)
+            && !NumberUtil.hasBit(type, TYPE_ATTACHMENT)) {
             if (attr.length() > ENV.get("field.min.multiline.length", 100) || attr.isMultiValue())
-                type |= IPresentable.TYPE_INPUT_MULTILINE;
+                type |= TYPE_INPUT_MULTILINE;
         }
         return type;
     }
@@ -414,7 +412,7 @@ public class BeanPresentationHelper<T> {
         } else if (Boolean.class.isAssignableFrom(attr.getType()) || boolean.class.isAssignableFrom(attr.getType())) {
             type = TYPE_OPTION;
         } else if (attr.getType().isArray() && byte[].class.isAssignableFrom(attr.getType())) {//perhaps for blobs
-            type = TYPE_DATA;
+            type = TYPE_ATTACHMENT;
         } else if (attr.getType().isArray() || Collection.class.isAssignableFrom(attr.getType())) {//complex type --> list
             type = TYPE_TABLE;
         } else if (BeanUtil.isStandardType(attr.getType())) {
@@ -439,7 +437,7 @@ public class BeanPresentationHelper<T> {
         if (attr instanceof IAttributeDef) {
             IAttributeDef def = (IAttributeDef) attr;
             if (def.length() > ENV.get("field.style.multi.min.length", 100) && def.precision() == -1)
-                style |= IPresentable.STYLE_MULTI;
+                style |= STYLE_MULTI;
         }
         return style;
     }
@@ -620,6 +618,11 @@ public class BeanPresentationHelper<T> {
 //        }
     }
 
+    protected boolean isData(IAttributeDefinition<?> attribute) {
+        IPresentable p = attribute.getPresentation();
+        return p.getType() == TYPE_DATA || p.getType() == TYPE_ATTACHMENT;
+    }
+    
     /**
      * sets a layoutconstraint SWT.FILL horizontal.
      * 

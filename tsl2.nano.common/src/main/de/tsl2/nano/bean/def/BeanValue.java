@@ -23,7 +23,6 @@ import java.util.LinkedHashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
-import java.util.UUID;
 
 import org.apache.commons.logging.Log;
 
@@ -42,7 +41,6 @@ import de.tsl2.nano.core.cls.BeanAttribute;
 import de.tsl2.nano.core.cls.BeanClass;
 import de.tsl2.nano.core.cls.IAttribute;
 import de.tsl2.nano.core.log.LogFactory;
-import de.tsl2.nano.core.util.FileUtil;
 import de.tsl2.nano.core.util.StringUtil;
 import de.tsl2.nano.core.util.Util;
 import de.tsl2.nano.messaging.ChangeEvent;
@@ -212,15 +210,17 @@ public class BeanValue<T> extends AttributeDefinition<T> implements IValueDefini
      * @return temporary file-path of the current bean-value, saved as byte-array.
      */
     public File getValueFile() {
-        T v = getValue();
-        byte[] data = (byte[]) (v instanceof byte[] ? v : BeanUtil.serialize(v));
-        String fname = ENV.getTempPath() + getId() + "-" + (data != null ? UUID.nameUUIDFromBytes(data) : "EMPTY");
-        File file = new File(fname);
-        if (!file.exists() && data != null)
-            FileUtil.writeBytes(data, file.getPath(), false);
-        return file;
+        return Attachment.getValueFile(getId(), getValue());
     }
 
+    @Override
+    public T getParsedValue(String source) {
+        if (Attachment.isAttachment(this))
+            return (T) Attachment.getFileBytes(instance, getName(), source);
+        else
+            return super.getParsedValue(source);
+    }
+    
     /**
      * setParsedValue
      * 
@@ -501,6 +501,7 @@ public class BeanValue<T> extends AttributeDefinition<T> implements IValueDefini
     }
 
     /** returns an optional action as finder/assigner - useful to select a new value */
+    @SuppressWarnings("serial")
     public IAction<IBeanCollector<?, T>> getSelectorAction() {
         //TODO: move that to the attribute: IPresentable
         return new SecureAction<IBeanCollector<?, T>>(getName() + POSTFIX_SELECTOR,
@@ -546,6 +547,7 @@ public class BeanValue<T> extends AttributeDefinition<T> implements IValueDefini
      * @param parent the parent bean of this attribute (must be given as {@link #getParent()} not allways is filled.
      * @return selector (see {@link #getSelectorAction()}.
      */
+    @SuppressWarnings("serial")
     public IBeanCollector<?, ?> connectToSelector(BeanDefinition<?> parent) {
         final IAction<?> selectorAction = getSelectorAction();
         final IBeanCollector<?, ?> collector = (IBeanCollector<?, ?>) selectorAction.activate();
