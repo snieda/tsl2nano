@@ -9,15 +9,20 @@
  */
 package de.tsl2.nano.h5.test;
 
-import java.io.IOException;
+import static org.junit.Assert.assertTrue;
 
 import org.junit.Test;
+import org.w3c.dom.Element;
 
-import com.gargoylesoftware.htmlunit.ElementNotFoundException;
 import com.gargoylesoftware.htmlunit.History;
 import com.gargoylesoftware.htmlunit.WebClient;
 import com.gargoylesoftware.htmlunit.html.HtmlForm;
 import com.gargoylesoftware.htmlunit.html.HtmlPage;
+import com.sun.jersey.api.container.httpserver.HttpServerFactory;
+import com.sun.net.httpserver.HttpServer;
+
+import de.tsl2.nano.core.util.NetUtil;
+import de.tsl2.nano.math.vector.Point;
 
 /**
  * 
@@ -59,7 +64,7 @@ public class NanoH5Test {
         back(page);
         submit(page, beanName + "." + "export");
         back(page);
-        
+
         page = submit(page, beanName + "." + "new");
         page = submit(page, beanName + "." + "save");
         page = submit(page, beanName + "." + "delete");
@@ -71,4 +76,28 @@ public class NanoH5Test {
     private void runServer() {
         //TODO: start nano.h5 and hsqldb
     }
+
+    @Test
+    public void testNetUtilRestful() throws Exception {
+        String url = "http://localhost/rest";
+        Class<?> responseType = String.class;
+//        Event event =
+//            BeanProxy.createBeanImplementation(Event.class, MapUtil.asMap("type", "mouseclick", "target", null), null,
+//                null);
+        //TODO: how to provide parameter of any object type?
+//        Point p = new Point(5,5);
+        Object args[] = new Object[] {"event", "x", 5, "y", 5};
+
+        //create the server (see service class RestfulService, must be public!)
+        HttpServer server = HttpServerFactory.create(url);
+        server.start();
+
+        //request..
+        String response = NetUtil.getRestful(url/*, responseType*/, args);
+        server.stop(0);
+
+        assertTrue(response != null && responseType.isAssignableFrom(response.getClass()));
+        assertTrue(response.equals("5, 5"));
+    }
+
 }
