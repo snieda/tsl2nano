@@ -10,7 +10,9 @@
 package de.tsl2.nano.bean.def;
 
 import java.io.File;
+import java.io.InputStream;
 import java.lang.reflect.Method;
+import java.nio.Buffer;
 import java.util.UUID;
 
 import org.simpleframework.xml.Attribute;
@@ -205,6 +207,8 @@ public class Attachment implements IValueAccess<byte[]>, IAttribute<byte[]> {
      * @return file extension
      */
     private static String getExtension(byte[] data) {
+        if (data == null)
+            return "";
         String str = new String(data);
         if (str.startsWith("%PDF"))
             return ".pdf";
@@ -224,6 +228,13 @@ public class Attachment implements IValueAccess<byte[]>, IAttribute<byte[]> {
     public static final boolean isAttachment(IAttributeDefinition<?> a) {
         int ptype = a.getPresentation() != null ? a.getPresentation().getType() : -1;
         return ptype == IPresentable.TYPE_ATTACHMENT
-            && byte[].class.isAssignableFrom(a.getType());
+            && isData(a);
+    }
+    
+    public static final boolean isData(IAttributeDefinition<?> a) {
+        Class<?> type = a.getType();
+        return byte[].class.isAssignableFrom(type)
+                || Buffer.class.isAssignableFrom(type)
+                || InputStream.class.isAssignableFrom(type);
     }
 }
