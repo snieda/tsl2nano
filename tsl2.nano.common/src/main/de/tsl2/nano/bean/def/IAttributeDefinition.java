@@ -22,7 +22,8 @@ import de.tsl2.nano.core.cls.IAttribute;
  * @author Thomas Schneider
  * @version $Revision$
  */
-public interface IAttributeDefinition<T> extends IAttribute<T>, IAttributeDef, Serializable {
+@SuppressWarnings("rawtypes")
+public interface IAttributeDefinition<T> extends IAttribute<T>, IAttributeDef, IPluggable, Serializable {
 
     /** format-constraint for the attributes value */
     Format getFormat();

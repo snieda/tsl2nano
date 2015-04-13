@@ -95,7 +95,7 @@ public class AttributeDefinition<T> implements IAttributeDefinition<T> {
      * optional plugins.
      */
     @ElementList(inline = true, entry = "plugin", required = false)
-    protected Collection<IConnector<AttributeDefinition>> plugins;
+    protected Collection<IConnector> plugins;
 
     private static final Log LOG = LogFactory.getLog(AttributeDefinition.class);
 
@@ -714,16 +714,18 @@ public class AttributeDefinition<T> implements IAttributeDefinition<T> {
     /**
      * @return Returns the plugins.
      */
-    public Collection<IConnector<AttributeDefinition>> getPlugins() {
+    @Override
+    public Collection<IConnector> getPlugins() {
         return plugins;
     }
 
     /**
      * @param plugin The plugin to add.
      */
-    public void addPlugin(IConnector<AttributeDefinition> plugin) {
+    @Override
+    public void addPlugin(IConnector plugin) {
         if (plugins == null)
-            plugins = new LinkedList<IConnector<AttributeDefinition>>();
+            plugins = new LinkedList<IConnector>();
         LOG.info("connecting plugin " + plugin + " to " + this);
         plugin.connect(this);
         plugins.add(plugin);
@@ -735,7 +737,8 @@ public class AttributeDefinition<T> implements IAttributeDefinition<T> {
      * @param plugin to remove
      * @return true, if plugin was removed
      */
-    public boolean removePlugin(IConnector<AttributeDefinition> plugin) {
+    @Override
+    public boolean removePlugin(IConnector plugin) {
         if (plugins == null) {
             LOG.warn("plugin " + plugin + " can't be removed. no plugins available yet!");
             return false;
