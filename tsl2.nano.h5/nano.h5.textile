@@ -1,5 +1,5 @@
 **FullRelation Nano.H5**
-<font size="-1">&copy; Thomas Schneider 2012-2014</font>
+<font size="-1">&copy; Thomas Schneider 2012-2015</font>
 
 <p hidden>
 <meta-tag>
@@ -43,7 +43,7 @@ To do a *quick-start*, go to chapter _Starting / Test_.
 * navigation can be a configurable workflow - or simply an entity browser 
 * pre-defines formatting, validation and presentation of relations
 * pure html-5 (no javascript - except for websockts)
-* using websockets to show status messages, input-assist and dependency field refresing
+* using websockets to show status messages, input-assist and dependency field refreshing
 * pure jpa - jpa-annotations are read to resolve attribute-presentation
 * independent of a special o/r mapper. all o/r mappers supporting javax.persistence with an EntityManager are usable.
 * simple database replication on user-loaded data - offline working possible
@@ -973,7 +973,13 @@ text/xsl
 image/x-emf
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-Using the style _embed_ would embed the whole attachment content into the html response file. all other styles only reference the given source file with an _src_ attribute.
+Using the style _embed_ would embed the whole attachment content into the html response file - only, if no _pluginspage_ attribute was defined. all other styles only reference the given source file with an _src_ attribute.
+
+To show for example a pdf file in your html page, you can add a plugin attribute. Add the following layout tag to the attributes presentable tag.
+
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+	<layout name="pluginspage">http://www.adobe.com/products/acrobat/readstep2.html</layout>
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 Please have a look at the html5-tags and their corresponding attributes, that could be provided through the attributes layout definition map.
 
@@ -1309,6 +1315,7 @@ The use of websockets and their internal javascripts is optional. Nano.h5 provid
 2. as input assist: supporting the user with available values
 3. as dependency listener: refreshing other dependent values after change a fields value
 4. as file attachment transferrer: providing to transfer local content to the server
+5. as restful service request: the attribute has to present an _iframe. the current user interaction event will be sent to the service - the result will be embedded into the iframe.
 The main exception handler is connected to a WebSocketServer. All messages, sent through __Message.send(msg)__ are transferred to all connected child sessions. After getting the 'submit' event, a progress bar is shown.
 
 ### The applications message service
@@ -1348,6 +1355,14 @@ Example:
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 BeanDefinition b = BeanDefinition.getBeanDefinition(MyEntity.class);
 ((AttributeDefinition)b.getAttribute("my-attribute-name")).getPresentation().setType(IPresentable.TYPE_ATTACHMENT);
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+### calling a restful service to embed the result into an iframe
+
+TODO
+
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 ### Technical details: How it works
@@ -1872,8 +1887,124 @@ Here is a list of currently available browser solutions to create model graphs:
 TODO
 
 
+## List of data-sources: 
 
+http://publib.boulder.ibm.com/infocenter/wsdoc400/v6r0/index.jsp?topic=/com.ibm.websphere.iseries.doc/info/ae/ae/rdat_scriptool.html
 
+## JDBC-Drivers
+
+IBM DB2
+jdbc:db2://<HOST>:<PORT>/<DB>
+COM.ibm.db2.jdbc.app.DB2Driver
+
+JDBC-ODBC Bridge
+jdbc:odbc:<DB>
+sun.jdbc.odbc.JdbcOdbcDriver
+
+Microsoft SQL Server
+jdbc:weblogic:mssqlserver4:<DB>@<HOST>:<PORT>
+weblogic.jdbc.mssqlserver4.Driver
+
+Oracle Thin
+jdbc:oracle:thin:@<HOST>:<PORT>:<SID>
+oracle.jdbc.driver.OracleDriver
+
+PointBase Embedded Server
+jdbc:pointbase://embedded[:<PORT>]/<DB>
+com.pointbase.jdbc.jdbcUniversalDriver
+
+Cloudscape
+jdbc:cloudscape:<DB>
+COM.cloudscape.core.JDBCDriver
+
+Cloudscape RMI
+jdbc:rmi://<HOST>:<PORT>/jdbc:cloudscape:<DB>
+RmiJdbc.RJDriver
+
+Firebird (JCA/JDBC Driver)
+jdbc:firebirdsql:[//<HOST>[:<PORT>]/]<DB>
+org.firebirdsql.jdbc.FBDriver
+
+IDS Server
+jdbc:ids://<HOST>:<PORT>/conn?dsn='<ODBC_DSN_NAME>'
+ids.sql.IDSDriver
+
+Informix Dynamic Server
+jdbc:informix-sqli://<HOST>:<PORT>/<DB>:INFORMIXSERVER=<SERVER_NAME>
+com.informix.jdbc.IfxDriver
+
+InstantDB (v3.13 and earlier)
+jdbc:idb:<DB>
+jdbc.idbDriver
+
+InstantDB (v3.14 and later)
+jdbc:idb:<DB>
+org.enhydra.instantdb.jdbc.idbDriver
+
+Interbase (InterClient Driver)
+jdbc:interbase://<HOST>/<DB>
+interbase.interclient.Driver
+
+Hypersonic SQL (v1.2 and earlier)
+jdbc:HypersonicSQL:<DB>
+hSql.hDriver
+
+Hypersonic SQL (v1.3 and later)
+jdbc:hsql:<URL>
+org.hsql.jdbcDriver
+
+H2 (old)
+jdbc:h2:<URL>
+com.h2database.Driver
+
+H2
+jdbc:h2:<URL>
+org.h2.Driver
+
+Derby/Cloudscape/JavaDB
+jdbc:derby:[subsubprotocol:][databaseName][;attribute=value]*
+org.apache.derby.jdbc.EmbeddedDriver
+org.apache.derby.jdbc.ClientDriver
+
+Microsoft SQL Server (JTurbo Driver)
+jdbc:JTurbo://<HOST>:<PORT>/<DB>
+com.ashna.jturbo.driver.Driver
+
+Microsoft SQL Server (Sprinta Driver)
+jdbc:inetdae:<HOST>:<PORT>?database=<DB>
+com.inet.tds.TdsDriver
+
+Microsoft SQL Server 2000 (Microsoft Driver)
+jdbc:microsoft:sqlserver://<HOST>:<PORT>[;DatabaseName=<DB>]
+com.microsoft.jdbc.sqlserver.SQLServerDriver
+
+MySQL (MM.MySQL Driver)
+jdbc:mysql://<HOST>:<PORT>/<DB>
+org.gjt.mm.mysql.Driver
+
+Oracle OCI 8i
+jdbc:oracle:oci8:@<SID>
+oracle.jdbc.driver.OracleDriver
+
+Oracle OCI 9i
+jdbc:oracle:oci:@<SID>
+oracle.jdbc.driver.OracleDriver
+
+PostgreSQL (v6.5 and earlier)
+jdbc:postgresql://<HOST>:<PORT>/<DB>
+postgresql.Driver
+
+PostgreSQL (v7.0 and later)
+jdbc:postgresql://<HOST>:<PORT>/<DB>
+org.postgresql.Driver
+
+Sybase (jConnect 4.2 and earlier)
+jdbc:sybase:Tds:<HOST>:<PORT>
+com.sybase.jdbc.SybDriver
+
+Sybase (jConnect 5.2)
+jdbc:sybase:Tds:<HOST>:<PORT>
+com.sybase.jdbc2.jdbc.SybDriver
 
 
 ## Known Problems and some Solutions
@@ -1938,7 +2069,10 @@ TODO
  0.7.0b | 09.11.2014 | gui fading, offline message, web-cache through manifest, testing batoo-jpa
  0.7.0c | 15.11.2014 | reverse-engineering with openjpa support, jar resolving enhanced
  0.7.0d | 11.01.2015 | auto creating new databases through an equal named sql file
+ 0.7.0e | 27.03.2015 | attachments extended
  
+[GLOSSARY]
+
 ## TODOs
 
 * (v) BeanCollector.createItem() --> replace common BeanUtils call to be able to run on android
@@ -2177,115 +2311,6 @@ Dest  : property map with: source-string=transformation
 Trial : action on each dest-key, checking if action-result equals key-value
       : distributing the work to many stations
 
-h3. list of data-sources: 
-
-http://publib.boulder.ibm.com/infocenter/wsdoc400/v6r0/index.jsp?topic=/com.ibm.websphere.iseries.doc/info/ae/ae/rdat_scriptool.html
-
-h3. JDBC-Drivers
-
-IBM DB2
-jdbc:db2://<HOST>:<PORT>/<DB>
-COM.ibm.db2.jdbc.app.DB2Driver
-
-JDBC-ODBC Bridge
-jdbc:odbc:<DB>
-sun.jdbc.odbc.JdbcOdbcDriver
-
-Microsoft SQL Server
-jdbc:weblogic:mssqlserver4:<DB>@<HOST>:<PORT>
-weblogic.jdbc.mssqlserver4.Driver
-
-Oracle Thin
-jdbc:oracle:thin:@<HOST>:<PORT>:<SID>
-oracle.jdbc.driver.OracleDriver
-
-PointBase Embedded Server
-jdbc:pointbase://embedded[:<PORT>]/<DB>
-com.pointbase.jdbc.jdbcUniversalDriver
-
-Cloudscape
-jdbc:cloudscape:<DB>
-COM.cloudscape.core.JDBCDriver
-
-Cloudscape RMI
-jdbc:rmi://<HOST>:<PORT>/jdbc:cloudscape:<DB>
-RmiJdbc.RJDriver
-
-Firebird (JCA/JDBC Driver)
-jdbc:firebirdsql:[//<HOST>[:<PORT>]/]<DB>
-org.firebirdsql.jdbc.FBDriver
-
-IDS Server
-jdbc:ids://<HOST>:<PORT>/conn?dsn='<ODBC_DSN_NAME>'
-ids.sql.IDSDriver
-
-Informix Dynamic Server
-jdbc:informix-sqli://<HOST>:<PORT>/<DB>:INFORMIXSERVER=<SERVER_NAME>
-com.informix.jdbc.IfxDriver
-
-InstantDB (v3.13 and earlier)
-jdbc:idb:<DB>
-jdbc.idbDriver
-
-InstantDB (v3.14 and later)
-jdbc:idb:<DB>
-org.enhydra.instantdb.jdbc.idbDriver
-
-Interbase (InterClient Driver)
-jdbc:interbase://<HOST>/<DB>
-interbase.interclient.Driver
-
-Hypersonic SQL (v1.2 and earlier)
-jdbc:HypersonicSQL:<DB>
-hSql.hDriver
-
-Hypersonic SQL (v1.3 and later)
-jdbc:HypersonicSQL:<DB>
-org.hsql.jdbcDriver
-
-Microsoft SQL Server (JTurbo Driver)
-jdbc:JTurbo://<HOST>:<PORT>/<DB>
-com.ashna.jturbo.driver.Driver
-
-Microsoft SQL Server (Sprinta Driver)
-jdbc:inetdae:<HOST>:<PORT>?database=<DB>
-com.inet.tds.TdsDriver
-
-Microsoft SQL Server 2000 (Microsoft Driver)
-jdbc:microsoft:sqlserver://<HOST>:<PORT>[;DatabaseName=<DB>]
-com.microsoft.jdbc.sqlserver.SQLServerDriver
-
-MySQL (MM.MySQL Driver)
-jdbc:mysql://<HOST>:<PORT>/<DB>
-org.gjt.mm.mysql.Driver
-
-Oracle OCI 8i
-jdbc:oracle:oci8:@<SID>
-oracle.jdbc.driver.OracleDriver
-
-Oracle OCI 9i
-jdbc:oracle:oci:@<SID>
-oracle.jdbc.driver.OracleDriver
-
-PostgreSQL (v6.5 and earlier)
-jdbc:postgresql://<HOST>:<PORT>/<DB>
-postgresql.Driver
-
-PostgreSQL (v7.0 and later)
-jdbc:postgresql://<HOST>:<PORT>/<DB>
-org.postgresql.Driver
-
-Sybase (jConnect 4.2 and earlier)
-jdbc:sybase:Tds:<HOST>:<PORT>
-com.sybase.jdbc.SybDriver
-
-Sybase (jConnect 5.2)
-jdbc:sybase:Tds:<HOST>:<PORT>
-com.sybase.jdbc2.jdbc.SybDriver
-
-
-[GLOSSARY]
-
 Etc:Connection-->IConnection(core, descriptor)
 Net:Connection-->Link-->Cover(content, descriptor)
 
@@ -2324,3 +2349,6 @@ Net:Connection-->Link-->Cover(content, descriptor)
 * (v) simplexml: type = java.lang.byte[] --> [B
 * how to show a pdf file inside the html response
 * interactions on svg-pictures?
+** using jax-rs?
+** using rmi?
+** direct sockets?
