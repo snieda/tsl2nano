@@ -18,6 +18,7 @@ import java.util.List;
 
 import de.tsl2.nano.bean.BeanContainer;
 import de.tsl2.nano.bean.def.ArrayValue;
+import de.tsl2.nano.bean.def.Attachment;
 import de.tsl2.nano.bean.def.AttributeDefinition;
 import de.tsl2.nano.bean.def.BeanCollector;
 import de.tsl2.nano.bean.def.BeanDefinition;
@@ -93,7 +94,7 @@ public class Statistic<COLLECTIONTYPE extends Collection<T>, T> extends BeanColl
         for (int i = 0; i < names.length; i++) {
             attrDef = def.getAttribute(names[i]);
             if (attrDef.id() || attrDef.generatedValue() || attrDef.isMultiValue() || attrDef.unique()
-                || attrDef.isVirtual())
+                || attrDef.isVirtual() || Attachment.isData(attrDef))
                 continue;
             else if (NumberUtil.isNumber(attrDef.getType())) {
                 valueColumns.add(names[i]);

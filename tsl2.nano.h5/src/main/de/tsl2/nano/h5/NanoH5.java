@@ -532,7 +532,7 @@ public class NanoH5 extends NanoHTTPD implements ISystemConnector<Persistence> {
                 generatorTask = "org.apache.openjpa.jdbc.ant.ReverseMappingToolTask";
             }
             ENV.loadClassDependencies("org.apache.tools.ant.taskdefs.Taskdef",
-                generatorTask, persistence.getConnectionDriverClass());
+                generatorTask, persistence.getConnectionDriverClass(), persistence.getProvider());
 
             if (isNewDatabase(persistence)) {
                 generateDatabase(persistence);

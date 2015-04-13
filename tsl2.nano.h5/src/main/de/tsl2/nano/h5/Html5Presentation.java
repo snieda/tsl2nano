@@ -1547,7 +1547,7 @@ public class Html5Presentation<T> extends BeanPresentationHelper<T> implements I
                         (beanValue.length() > 0 ? String.valueOf(beanValue.length()) : String
                             .valueOf(Integer.MAX_VALUE)),
                         (isOption ? enable(ATTR_CHECKED, (Boolean) beanValue.getValue()) : ATTR_VALUE),
-                        (isOption ? "checked" : getValue(beanValue, type)),
+                        (isOption ? ((Boolean) beanValue.getValue() ? "checked" : null) : getValue(beanValue, type)),
                         ATTR_TITLE,
                         p.getDescription()
                             + (LOG.isDebugEnabled() ? "\n\n" + "<![CDATA[" + beanValue.toDebugString() + "]]>" : ""),
@@ -1653,7 +1653,7 @@ public class Html5Presentation<T> extends BeanPresentationHelper<T> implements I
         File file = beanValue.getValueFile();
         //embed the file content
         String content = null;
-        if (tagName.equals(TAG_EMBED) && file != null) {
+        if (tagName.equals(TAG_EMBED) && file != null && getLayout(beanValue, "pluginspage") == null) {
             content = new String(FileUtil.getFileBytes(file.getPath(), null));
         }
         data =
@@ -1667,8 +1667,17 @@ public class Html5Presentation<T> extends BeanPresentationHelper<T> implements I
                 file != null ? FileUtil.getRelativePath(file,
                     ENV.getConfigPath()) : "",
                 ATTR_CLASS,
-                "bean.field.data");
+                "bean.field.data",
+                ATTR_TITLE,//fallback to show an info text, if data couldn't be shown
+                "If no Plugin is available to show the content, klick on the downloaded item in your browser."
+                );
+        
         return data;
+    }
+
+    private String getLayout(BeanValue<?> beanValue, String name) {
+        IPresentable p = beanValue.getPresentation();
+        return p != null ? p.layout(name) : null;
     }
 
     /**
@@ -1680,7 +1689,7 @@ public class Html5Presentation<T> extends BeanPresentationHelper<T> implements I
     private String getDataTag(BeanValue<?> beanValue) {
         int baseBit = BitUtil.highestBitPosition(STYLE_DATA_IMG >> 1);
         int highBit = BitUtil.highestBitPosition(STYLE_DATA_FRAME >> 1);
-        int style = BitUtil.filterBitRange(beanValue.getPresentation().getStyle(), baseBit, highBit);
+        int style = BitUtil.retainBitRange(beanValue.getPresentation().getStyle(), baseBit, highBit);
         style = style >> baseBit;
         final String[] tags = { "img", "embed", "object", "canvas", "audio", "video", "device", "iframe" };
         return style == 0 ? tags[0] : BitUtil.description(style, Arrays.asList(tags));

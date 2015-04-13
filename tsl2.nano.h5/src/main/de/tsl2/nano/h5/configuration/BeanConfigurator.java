@@ -88,7 +88,12 @@ public class BeanConfigurator<T> implements Serializable {
                 BeanDefinition<ValueColumn> configColDef = BeanDefinition.getBeanDefinition(ValueColumn.class);
                 configColDef.setAttributeFilter("name", "description", "index", "sortIndex", "sortUpDirection",
                     "format",
-                    "width");
+                    "width"
+/*                    "standardSummary",
+                    "presentable",
+                    "minSearchValue",
+                    "maxSearchValue"*/
+                    );
                 configColDef.getPresentable().setLayout(layout);
 //            configColDef.saveDefinition();
 

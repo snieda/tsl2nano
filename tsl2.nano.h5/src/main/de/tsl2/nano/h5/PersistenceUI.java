@@ -69,9 +69,10 @@ public class PersistenceUI {
                 props.setProperty("DRIVER_jdbc.oracle", "oracle.jdbc.OracleDriver");
                 props.setProperty("DRIVER_jdbc.db2", "com.ibm.db2.jcc.DB2Driver");
                 props.setProperty("DRIVER_jdbc.hsqldb", persistence.STD_LOCAL_DATABASE_DRIVER);
-                props.setProperty("DRIVER_jdbc.h2", "org.h2.jdbcDriver");
+                props.setProperty("DRIVER_jdbc.h2", "org.h2.Driver");
                 props.setProperty("DRIVER_jdbc.sybase", "com.sybase.jdbc2.jdbc.SybDriver");
-                props.setProperty("DRIVER_jdbc.derby", "derbyclient");
+                props.setProperty("DRIVER_jdbc.derby", "org.apache.derby.jdbc.EmbeddedDriver");
+//                props.setProperty("DRIVER_jdbc.derby", "org.apache.derby.jdbc.ClientDriver");
                 props.setProperty("DRIVER_jdbc.xerial", "sqlite-jdbc");
                 props.setProperty("DRIVER_jdbc.postgresql", "org.postgresql.Driver");
                 props.setProperty("DRIVER_jdbc.mysql", "com.mysql.jdbc.Driver");
@@ -81,10 +82,10 @@ public class PersistenceUI {
                 props.setProperty("DATASOURCE_jdbc.oracle", "oracle.jdbc.pool.OracleDataSource");
                 props.setProperty("DATASOURCE_jdbc.hsqldb", "org.hsqldb.jdbc.JDBCDataSource");
                 props.setProperty("DATASOURCE_jdbc.sybase", "com.sybase.jdbc2.jdbc.SybDataSource");
-                props.setProperty("DATASOURCE_org.apache.derby", "derbyclient");
+                props.setProperty("DATASOURCE_org.apache.derby", "org.apache.derby.jdbc.ClientDriver");
                 props.setProperty("DATASOURCE_org.xerial", "sqlite-jdbc");
                 props.setProperty("DATASOURCE_org.postgresql", "postgresql/postgresql");
-                props.setProperty("DATASOURCE_com.h2database", "h2");
+                props.setProperty("DATASOURCE_com.h2database", "org.h2.Driver");
                 props.setProperty("DATASOURCE_com.mysql.jdbc", "mysql/mysql-connector-java");
                 props.setProperty("DATASOURCE_net.sourceforge.jtds", "jtds");
                 props.setProperty("DATASOURCE_org.firebirdsql.jdbc", "jaybird-jdk17");
