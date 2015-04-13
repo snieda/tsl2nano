@@ -717,6 +717,7 @@ public class CommonTest {
             "collection",
             "arrayObject",
             "arrayPrimitive",
+            "type",
             "weekdayEnum").values().retainAll(asMap.values()));
 
         /*
