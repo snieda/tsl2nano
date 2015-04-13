@@ -92,6 +92,24 @@ public class BitUtil extends CUtil {
      * @return filtered bit field
      */
     public static final int filterBitRange(int field, int low, int high) {
+        for (int i = low; i <= high; i++) {
+            int b = 1 << i;
+            if (field < b)
+                break;
+            field = hasBit(field, b) ? field - b : field;
+        }
+        return field;
+    }
+
+    /**
+     * retains all bits between lowest bit and highest bit from given bit field.
+     * 
+     * @param field bit field
+     * @param low lowest bit to filter (retain). please provide only the bit position: e.g. 10 instead of 1 << 10.
+     * @param high highest bit to filter (retain). please provide only the bit position: e.g. 10 instead of 1 << 10.
+     * @return filtered bit field
+     */
+    public static final int retainBitRange(int field, int low, int high) {
         int bits = 0;
         for (int i = low; i <= high; i++) {
             int b = 1 << i;

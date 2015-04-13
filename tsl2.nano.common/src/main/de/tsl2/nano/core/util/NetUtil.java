@@ -9,6 +9,9 @@
  */
 package de.tsl2.nano.core.util;
 
+import static de.tsl2.nano.core.util.ByteUtil.serialize;
+import static de.tsl2.nano.core.util.ByteUtil.toByteArray;
+
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
@@ -32,6 +35,8 @@ import java.util.Set;
 
 import org.apache.commons.logging.Log;
 
+import de.tsl2.nano.bean.BeanUtil;
+import de.tsl2.nano.collection.MapUtil;
 import de.tsl2.nano.core.ManagedException;
 import de.tsl2.nano.core.log.LogFactory;
 
@@ -155,6 +160,35 @@ public class NetUtil {
             if (LOG.isDebugEnabled())
                 LOG.debug("response: " + StringUtil.toString(response, 100));
             return response;
+        } catch (Exception e) {
+            ManagedException.forward(e);
+            return null;
+        }
+    }
+
+    /**
+     * simply returns the response of the given url + args restful request
+     * 
+     * @param url
+     * @param responseType type of response object
+     * @param args key/value pairs to be appended as rest-ful call to the url
+     * @return content as object of type responseType
+     */
+    @SuppressWarnings("unchecked")
+    public static /*<T> T*/String getRestful(String url/*, Class<T> responseType*/, Object... args) {
+        try {
+            //create the rest-ful call
+            StringBuilder buf = new StringBuilder(url);
+            for (int i = 0; i < args.length; i++) {
+                buf.append("/" + args[i]);
+            }
+            url = buf.toString();
+
+            LOG.debug("starting request: " + url);
+            char[] response = FileUtil.getFileData(url(url).openStream(), null);
+            if (LOG.isDebugEnabled())
+                LOG.debug("response: " + StringUtil.toString(response, 100));
+            return /*(T)*/String.valueOf(response);
         } catch (Exception e) {
             ManagedException.forward(e);
             return null;
@@ -338,6 +372,66 @@ public class NetUtil {
     }
 
     /**
+     * creates a new socket and connects it to the given server (host + port)
+     * 
+     * @param host server
+     * @param port communication port
+     * @return client socket
+     */
+    public static Socket connect(String host, int port) {
+        try {
+            Socket socket = new Socket();
+            socket.connect(new InetSocketAddress(host, port), 3000);
+            return socket;
+        } catch (Exception e) {
+            ManagedException.forward(e);
+            return null;
+        }
+    }
+
+    /**
+     * sends the given args to the given server, creating and closing a socket to the server
+     * 
+     * @param host server ip
+     * @param port server socket port
+     * @param resultType result type
+     * @param args data (key/values) to be sent packed into a map (key1, value1, key2, value2,...)
+     * @return servers result
+     */
+    public static <T> T send(String host, int port, Class<T> resultType, Object... args) {
+        Socket socket = NetUtil.connect(host, port);
+        try {
+            return send(connect(host, port), resultType, args);
+        } finally {
+            if (socket != null)
+                try {
+                    socket.close();
+                } catch (IOException e) {
+                    ManagedException.forward(e);
+                }
+        }
+    }
+
+    /**
+     * sends the given args to the given server, using the given socket - without closing it
+     * 
+     * @param socket socket
+     * @param resultType result type
+     * @param args data (key/values) to be sent packed into a map (key1, value1, key2, value2,...)
+     * @return servers result
+     */
+    @SuppressWarnings("unchecked")
+    public static <T> T send(Socket socket, Class<T> resultType, Object... args) {
+        try {
+            socket.getOutputStream().write(BeanUtil.serialize(MapUtil.asMap(args)));
+            return (T) serialize(toByteArray(socket.getInputStream()));
+        } catch (IOException e) {
+            ManagedException.forward(e);
+            return null;
+        }
+    }
+
+    /**
      * delegates to {@link #scan(int, int, InetAddress...)} for the given ip.
      */
     public static Map<InetSocketAddress, Boolean> scan(InetAddress ip, int minPort, int maxPort) {
@@ -496,7 +590,7 @@ class WCopy {
                 if (site.getHost().equals(url.getHost()))
                     f = NetUtil.getFileName(url);
                 else
-                    f = FileUtil.getValidFileName(url.toString()); 
+                    f = FileUtil.getValidFileName(url.toString());
                 index = txt.indexOf(u, index) + f.length();
                 urls.add(url);
                 if (LOG.isDebugEnabled())
