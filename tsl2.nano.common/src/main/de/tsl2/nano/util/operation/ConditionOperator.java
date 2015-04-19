@@ -116,7 +116,7 @@ public class ConditionOperator<T> extends SOperator<T> {
                 /*
                  * if both parameter are equal, return true
                  */
-                return (T)((Object)Util.equals(parameter));
+                return (T)Util.untyped(Util.equals(parameter));
             }
         });
 
