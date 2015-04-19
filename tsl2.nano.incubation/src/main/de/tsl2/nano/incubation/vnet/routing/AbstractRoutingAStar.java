@@ -19,6 +19,7 @@ import java.util.List;
 import java.util.PriorityQueue;
 import java.util.Set;
 
+import de.tsl2.nano.core.util.Util;
 import de.tsl2.nano.incubation.vnet.Connection;
 import de.tsl2.nano.incubation.vnet.ILocatable;
 import de.tsl2.nano.incubation.vnet.Link;
@@ -106,7 +107,7 @@ public abstract class AbstractRoutingAStar<T extends IListener<Notification> & I
         // distance f
         float f, g, tentative_g;
         List<Connection<T, D>> nextConnections =
-            (List<Connection<T, D>>) (Object) currentConnection.getDestination().getConnections();
+            (List<Connection<T, D>>) Util.untyped(currentConnection.getDestination().getConnections());
         Node<T, D> successor;
         for (Connection<T, D> con : nextConnections) {
             successor = (Node<T, D>) con.getDestination();
