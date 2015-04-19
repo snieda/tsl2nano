@@ -704,7 +704,7 @@ public class IncubationTest {
 
     @Test
     public void testTerminalAdmin() throws Exception {
-        //admin console^
+        //admin console
         //TODO: test
 //        Terminal.main(new String[] { Terminal.DEFAULT_NAME, TerminalAdmin.ADMIN });
     }

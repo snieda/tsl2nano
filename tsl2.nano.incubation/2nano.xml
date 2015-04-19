@@ -19,33 +19,57 @@ to create a new application-version, do the following:
 	<target name="distribute.2nano">
 		<!-- cleaning will remove all files from project origin!!! -->
 		<!-- <property name="refactore.clean" value="true" /> -->
-		<property name="sh.compile.classpath2" value="../tsl2.nano.common" />
-		<ant antfile="project-distribute.xml">
+		<ant antfile="project-distribute.xml" inheritall="false">
 			<property name="refactore.property.file" value="${basedir}/project/distribute-common.properties" />
+			<property name="basedir" value="../tsl2.nano.common" />
+			<property name="sh.compile.classpath2" value="../tsl2.nano.common" />
+			<property name="target.dir" value="../../target" />
 		</ant>
-		<ant antfile="project-distribute.xml">
+		<ant antfile="project-distribute.xml" inheritall="false">
 			<property name="refactore.property.file" value="${basedir}/project/distribute-serviceaccess.properties" />
+			<property name="basedir" value="../tsl2.nano.serviceaccess" />
+			<property name="sh.compile.classpath2" value="../tsl2.nano.common" />
+			<property name="target.dir" value="../../target" />
 		</ant>
-		<ant antfile="project-distribute.xml">
+		<ant antfile="project-distribute.xml" inheritall="false">
 			<property name="refactore.property.file" value="${basedir}/project/distribute-directaccess.properties" />
+			<property name="basedir" value="../tsl2.nano.directaccess" />
+			<property name="sh.compile.classpath2" value="../tsl2.nano.common" />
+			<property name="target.dir" value="../../target" />
 		</ant>
-		<ant antfile="project-distribute.xml">
+		<ant antfile="project-distribute.xml" inheritall="false">
 			<property name="refactore.property.file" value="${basedir}/project/distribute-incubation.properties" />
+			<property name="basedir" value="../tsl2.nano.incubation" />
+			<property name="sh.compile.classpath2" value="../tsl2.nano.common" />
+			<property name="target.dir" value="../../target" />
 		</ant>
-		<ant antfile="project-distribute.xml">
+		<ant antfile="project-distribute.xml" inheritall="false">
 			<property name="refactore.property.file" value="${basedir}/project/distribute-ormliteprovider.properties" />
+			<property name="basedir" value="../tsl2.nano.ormliteprovider" />
+			<property name="sh.compile.classpath2" value="../tsl2.nano.common" />
+			<property name="target.dir" value="../../target" />
 		</ant>
 
-		<ant antfile="project-distribute.xml">
+		<ant antfile="project-distribute.xml" inheritall="false">
 			<property name="refactore.property.file" value="${basedir}/project/distribute-ebeanprovider.properties" />
+			<property name="basedir" value="../tsl2.nano.ebeanprovider" />
+			<property name="sh.compile.classpath2" value="../tsl2.nano.common" />
+			<property name="target.dir" value="../../target" />
 		</ant>
 
-		<ant antfile="project-distribute.xml">
+		<ant antfile="project-distribute.xml" inheritall="false">
 			<property name="refactore.property.file" value="${basedir}/project/distribute-jarresolver.properties" />
+			<property name="basedir" value="../tsl2.nano.jarresolver" />
+			<property name="sh.compile.classpath2" value="../tsl2.nano.common" />
+			<property name="target.dir" value="../../target" />
 		</ant>
 
 		<ant antfile="project-distribute.xml">
 			<property name="refactore.property.file" value="${basedir}/project/distribute-h5.properties" />
+			<property name="basedir" value="../tsl2.nano.h5" />
+			<property name="sh.compile.classpath2" value="../tsl2.nano.common" />
+			<property name="sh.compile.exclude3" value="src/sample/**" />
+			<property name="target.dir" value="../../target" />
 		</ant>
 
 		<antcall target="core.2nano" />

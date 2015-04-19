@@ -14,7 +14,11 @@
 	<property name="refactore.property.file" value="../tsl2.nano.common/project-distribute.properties" />
 	<echo message="loading refactoring properties from: ${refactore.property.file}" />
 	<property file="${refactore.property.file}" />
+	<property name="basedir" value="${refactore.path}" />
+	<property file="../tsl2.nano.common/shell.properties" />
+	<!--<property name="jvmarg" value="-javaagent:ci/jacoco/jacocoagent.jar=destfile=ci/jacoco.exec"/> -->
 	<property name="shell" value="../tsl2.nano.common/shell.xml" />
+	<property name="analysis" value="../tsl2.nano.common/src/resources/code-analysis.xml" />
 
 	<target name="project.refactore" if="project.refactore">
 		<property name="sh.regexp.exclude" value="**/*.*ar" />
@@ -85,7 +89,9 @@
 
 	<target name="refactore.build" if="refactore.build">
 		<ant antfile="${shell}" target="sh.build.full">
+			
 			<property name="sh.build.basedir" value="${refactore.path}" />
+			<property name="sh.build.name" value="${refactore.name}" />
 			<property name="sh.build.name" value="${refactore.name}" />
 			<!-- setting properties inside the ant file tag will overwrite previous settings!
 			<property name="sh.build.src" value="${refactore.path}/src/main" />
@@ -100,6 +106,10 @@
 		<antcall target="refactore.clean" />
 		<antcall target="project.refactore" />
 		<antcall target="refactore.build" />
+		<ant antfile="${analysis}">
+			<property name="src.dir" value="${refactore.path}/src/main" />
+			<property name="basedir" value="${refactore.path}" />
+		</ant>
 	</target>
 
 </project>

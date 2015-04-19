@@ -81,6 +81,7 @@ import de.tsl2.nano.core.util.FileUtil;
 import de.tsl2.nano.core.util.NetUtil;
 import de.tsl2.nano.core.util.PrintUtil;
 import de.tsl2.nano.core.util.StringUtil;
+import de.tsl2.nano.core.util.Util;
 import de.tsl2.nano.currency.CurrencyUnit;
 import de.tsl2.nano.currency.CurrencyUtil;
 import de.tsl2.nano.execution.ScriptUtil;
@@ -162,13 +163,13 @@ public class CommonTest {
         if (!fileName.equals("A_____bstimm-SummeID______123__")) {
             fail("getValidFileName() didn't work");
         }
-        
+
         Collection<File> files = FileUtil.getTreeFiles("./", ".*/resources");
         assertTrue(files.size() == 1 && files.iterator().next().getName().equals("resources"));
-        
+
         files = FileUtil.getFileset("./", "**/resources/**/*class.vm");
         assertTrue(files.size() == 1 && files.iterator().next().getName().equals("beanclass.vm"));
-        
+
     }
 
     @Test
@@ -341,13 +342,13 @@ public class CommonTest {
         tb1.setString("Anton");
         TypeBean tb2 = new TypeBean();
         tb2.setString("Berta");
-        List<TypeBean> transforming = CollectionUtil.getTransforming(Arrays.asList(tb1, tb2),
+        List<TypeBean> transforming = (List<TypeBean>) Util.untyped(CollectionUtil.getTransforming(Arrays.asList(tb1, tb2),
             new ITransformer<TypeBean, String>() {
                 @Override
                 public String transform(TypeBean toTransform) {
                     return toTransform.string;
                 }
-            });
+            }));
         assertEquals(Arrays.asList("Anton", "Berta"), CollectionUtil.getList(transforming.iterator()));
     }
 
@@ -472,13 +473,13 @@ public class CommonTest {
 //            //ok
 //            LOG.info(ex);
 //        }
-        
+
         //testing quarters
         Date d = DateUtil.getDate(2002, 1, 1);
         assertEquals(1, DateUtil.getCurrentQuarter(d));
         assertEquals(2, DateUtil.getNextQuarter(d));
         assertEquals(d, DateUtil.getQuarter(2002, DateUtil.Q1));
-        
+
         d = DateUtil.getQuarter(1970, DateUtil.Q4);
         assertEquals(4, DateUtil.getCurrentQuarter(d));
         assertEquals(1, DateUtil.getNextQuarter(d));
@@ -553,7 +554,7 @@ public class CommonTest {
         DecimalFormat df = (DecimalFormat) DecimalFormat.getInstance();
         df.applyPattern("###,###,###.00 €");
         LOG.info(df.format(123456789));
-        
+
         //test the factor and rounding mode
         assertEquals(f, CurrencyUtil.getFactor(d));
         assertEquals(new BigDecimal(51.13d, new MathContext(4)), CurrencyUtil.getActualValue(100f, d));
@@ -606,7 +607,7 @@ public class CommonTest {
 
         //this reader will eliminate the " quotations!
         Reader reader = FileUtil.getTransformingReader(FileUtil.getFile(testFile), ' ', ' ', true);
-        
+
         //read it with fixed-columns
         result = BeanUtil.fromFlatFile(reader,
             "\",\"",
@@ -668,17 +669,17 @@ public class CommonTest {
         String cls = "org.company123.my123product.My_ClassName";
         assertTrue(BeanClass.isPublicClassName(cls));
         assertEquals("org.company123.my123product", BeanClass.getPackageName(cls));
-        
+
         String nocls = "org.company123.my123product.resource";
         assertFalse(BeanClass.isPublicClassName(nocls));
-        
+
         nocls = "org.company123.my123product.My_ClassName$1";
         assertFalse(BeanClass.isPublicClassName(nocls));
 
         nocls = "nix";
         assertFalse(BeanClass.isPublicClassName(nocls));
     }
-    
+
     @Test
     public void testBeanUtils() throws Exception {
         /*
@@ -687,9 +688,10 @@ public class CommonTest {
         TypeBean tbm = new TypeBean();
         Object[] args = new Object[] { "string", "test", "primitiveInt", 2 };
         Bean.getBean(tbm, args);
-        
+
         Map asMap = MapUtil.asMap(args);
-        assertTrue(BeanUtil.toValueMap(tbm, false, false, true, "string", "primitiveInt").values().containsAll(asMap.values()));
+        assertTrue(BeanUtil.toValueMap(tbm, false, false, true, "string", "primitiveInt").values()
+            .containsAll(asMap.values()));
         assertFalse(BeanUtil.toValueMap(tbm,
             "",
             false,
@@ -764,9 +766,10 @@ public class CommonTest {
         if (bclass.findAttributes(Deprecated.class).size() != 2) {
             fail("didn't find the right annotations!");
         }
-        
+
         //test the export functions - but con't check that automatically!
-        BeanCollector<Collection<TypeBean>,TypeBean> collector = BeanCollector.getBeanCollector(Arrays.asList(bean, bean2), 0);
+        BeanCollector<Collection<TypeBean>, TypeBean> collector =
+            BeanCollector.getBeanCollector(Arrays.asList(bean, bean2), 0);
         System.out.println(BeanUtil.presentAsCSV(collector));
         System.out.println(BeanUtil.presentAsHtmlTable(collector));
     }
@@ -863,7 +866,7 @@ public class CommonTest {
         //check serialization
         FileUtil.saveXml(range, ENV.getConfigPath() + "test.xml");
     }
-    
+
     @Test
     public void testBeanSerialization() throws Exception {
         /*
@@ -900,7 +903,7 @@ public class CommonTest {
         FileUtil.load(ENV.getConfigPath() + "beandef.ser");
 
         beandef.saveDefinition();
-        
+
         BeanDefinition.clearCache();
         BeanDefinition<TypeBean> beandefFromXml = BeanDefinition.getBeanDefinition(TypeBean.class);
         assertEquals(beandef, beandefFromXml);
@@ -911,7 +914,7 @@ public class CommonTest {
 //        assertTrue(BeanUtil.equals(beandef.getAttributes(), beandefFromXml.getAttributes()));
         assertArrayEquals(beandef.getAttributeNames(), beandefFromXml.getAttributeNames());
         assertEquals(beandef.getActions(), beandefFromXml.getActions());
-        
+
         /*
          * create a full beandefinition
          */
@@ -924,17 +927,19 @@ public class CommonTest {
 //        p.setLayout(MapUtil.asMap("columns", 2, "rows", 2));
 //        p.setLayoutConstraints(MapUtil.asMap("colspan", 2, "rowspan", 2));
         p.setPresentationDetails(IPresentable.COLOR_BLACK, IPresentable.COLOR_GREEN, "favicon.png");
-        
+
         beandef.setValue(tb, "bigDecimal", new BigDecimal(20.00));
-        beandef.getAttribute("bigDecimal").setBasicDef(UNDEFINED, false, RegExpFormat.createCurrencyRegExp(), new BigDecimal(1.00), "test-description");
+        beandef.getAttribute("bigDecimal").setBasicDef(UNDEFINED, false, RegExpFormat.createCurrencyRegExp(),
+            new BigDecimal(1.00), "test-description");
         beandef.setValue(tb, "bigDecimal", new BigDecimal(30.00));
-        
+
         beandef.saveDefinition();
-        
+
         /*
          * create a full beancollector
          */
-        BeanCollector<Collection<TypeBean>,TypeBean> collector = BeanCollector.getBeanCollector(TypeBean.class, null, IBeanCollector.MODE_ALL, null);
+        BeanCollector<Collection<TypeBean>, TypeBean> collector =
+            BeanCollector.getBeanCollector(TypeBean.class, null, IBeanCollector.MODE_ALL, null);
         p = collector.getPresentable();
         p.setStyle(UNDEFINED);
         p.setType(UNDEFINED);
@@ -943,37 +948,38 @@ public class CommonTest {
 //        p.setLayout(MapUtil.asMap("columns", 2, "rows", 2));
 //        p.setLayoutConstraints(MapUtil.asMap("colspan", 2, "rowspan", 2));
         p.setPresentationDetails(IPresentable.COLOR_BLACK, IPresentable.COLOR_GREEN, "favicon.png");
-        
+
         collector.setValue(tb, "bigDecimal", new BigDecimal(20.00));
-        collector.getAttribute("bigDecimal").setBasicDef(UNDEFINED, false, RegExpFormat.createCurrencyRegExp(), new BigDecimal(1.00), "test-description");
+        collector.getAttribute("bigDecimal").setBasicDef(UNDEFINED, false, RegExpFormat.createCurrencyRegExp(),
+            new BigDecimal(1.00), "test-description");
         collector.setValue(tb, "bigDecimal", new BigDecimal(30.00));
 
         collector.addColumnDefinition("bigDecimal", 0, 0, false, 200);
         collector.getBeanFinder().setMaxResultCount(100);
         collector.saveDefinition();
     }
-    
+
     @Test
     public void testBeanPresentation() throws Exception {
         BeanDefinition.deleteDefinitions();
         BeanDefinition def = BeanDefinition.getBeanDefinition(TypeBean.class);
         Map<String, String> lMap = MapUtil.asMap("width", "99");
-        def.getAttribute("object").getPresentation().setLayout((Serializable)lMap);
+        def.getAttribute("object").getPresentation().setLayout((Serializable) lMap);
         Map<String, String> lcMap = MapUtil.asMap("type", "image/svg+xml");
-        def.getAttribute("object").getPresentation().setLayout((Serializable)lcMap);
+        def.getAttribute("object").getPresentation().setLayout((Serializable) lcMap);
         def.saveDefinition();
-        
+
         BeanDefinition.clearCache();
-        
+
         def = BeanDefinition.getBeanDefinition(TypeBean.class);
         lMap = def.getAttribute("object").getPresentation().getLayout();
         assertTrue("image/svg+xml".equals(lMap.get("type")));
     }
-    
+
     @Test
     public void testBeanAttributeStress() throws Exception {
         long stress = 1000000;
-    //method access and stress test
+        //method access and stress test
         final TypeBean typeBean = new TypeBean();
         Profiler.si().stressTest("beanutil", stress, new Runnable() {
             BeanAttribute ba = BeanAttribute.getBeanAttribute(TypeBean.class, "string");
@@ -1168,7 +1174,7 @@ public class CommonTest {
     @Test
     public void testConditionOperator() {
         String f = "(A&B ) | C ? D : E";
-        
+
         Map<CharSequence, Object> values = new Hashtable<CharSequence, Object>();
         values.put("A", true);
         values.put("C", true);
@@ -1182,7 +1188,7 @@ public class CommonTest {
 //            }
 //        });
         assertEquals("D", new ConditionOperator(values).eval(f));
-        
+
         values.remove(Operator.KEY_RESULT);
         values.put("A", true);
         values.put("C", false);
@@ -1192,8 +1198,9 @@ public class CommonTest {
 
     @Test
     public void testArrayPerformance() {
-        final int c = 1000;
-        String description = "Test adding and getting one million elements on:\n0. FloatArray\n1. ArrayList\n2. Typed ArrayList\n3. ArrSegList\n4. LinkedList";
+        final int c = 2;//1000;
+        String description =
+            "Test adding and getting one million elements on:\n0. FloatArray\n1. ArrayList\n2. Typed ArrayList\n3. ArrSegList\n4. LinkedList";
         Profiler.si().compareTests(description, 1000, new Runnable() {
             @Override
             public void run() {
@@ -1333,17 +1340,22 @@ public class CommonTest {
         TypeBean aopBean = BeanEnhancer.enhance(obj, before, null, obj.getClass().getMethod("getObject", new Class[0]));
         assertTrue("invoked".equals(aopBean.getObject()));
     }
-    
+
     @Test
     public void testNetUtilDownload() throws Exception {
-        Profiler.si().stressTest("downloader", 1000, new Runnable() {
-            @Override
-            public void run() {
-                //https://sourceforge.net/projects/tsl2nano/files/latest/download?source=navbar
-                NetUtil.download("http://sourceforge.net/projects/tsl2nano/files/0.7.0-beta/tsl2.nano.h5.0.7.0.jar/download", "test/", true, true);
-            }
-        });
+        if (NetUtil.isOnline()) {
+            Profiler.si().stressTest("downloader", 20, new Runnable() {
+                @Override
+                public void run() {
+                    //https://sourceforge.net/projects/tsl2nano/files/latest/download?source=navbar
+                    NetUtil.download(
+                        "http://sourceforge.net/projects/tsl2nano/files/0.7.0-beta/tsl2.nano.h5.0.7.0.jar/download",
+                        "test/", true, true);
+                }
+            });
+        }
     }
+
     @Test
     public void testNetUtilScan() throws Exception {
         //check for exception only
@@ -1351,31 +1363,33 @@ public class CommonTest {
         //not a real test - only to see it working!
         NetUtil.scans(0, 10000);
     }
-    
+
 //    @Test
     public void testNetUtilWCopy() throws Exception {
         //not a real test - only to see it working!
         NetUtil.wcopy("http://mobile.chefkoch.de", "test/", null, null);
     }
-    
+
     @Test
     public void testCrypt() throws Exception {
         String txt = "test1234";
-        FileUtil.writeBytes(txt.getBytes(), "testfile.txt", false);
-        
+        String testfile = ENV.getTempPath() + "testfile.txt";
+        FileUtil.writeBytes(txt.getBytes(), testfile, false);
+
         Crypt.main(new String[0]);
-        Crypt.main(new String[]{"", "DES", txt});
-        Crypt.main(new String[]{"", "AES", txt});
-        Crypt.main(new String[]{"", Crypt.ALGO_DES, txt});
-        Crypt.main(new String[]{"", Crypt.ALGO_AES, txt});
-        Crypt.main(new String[]{"0123456", Crypt.ALGO_PBEWithMD5AndDES, txt});
-        Crypt.main(new String[]{"0123456", Crypt.ALGO_PBEWithMD5AndDES, "-file:testfile.txt", "-include:\\w+"});
-        Crypt.main(new String[]{"0123456", Crypt.ALGO_PBEWithMD5AndDES, "-file:testfile.txt", "-base64", "-include:\\w+"});
+        Crypt.main(new String[] { "", "DES", txt });
+        Crypt.main(new String[] { "", "AES", txt });
+        Crypt.main(new String[] { "", Crypt.ALGO_DES, txt });
+        Crypt.main(new String[] { "", Crypt.ALGO_AES, txt });
+        Crypt.main(new String[] { "0123456", Crypt.ALGO_PBEWithMD5AndDES, txt });
+        Crypt.main(new String[] { "0123456", Crypt.ALGO_PBEWithMD5AndDES, "-file:" + testfile, "-include:\\w+" });
+        Crypt.main(new String[] { "0123456", Crypt.ALGO_PBEWithMD5AndDES, "-file:" + testfile, "-base64",
+            "-include:\\w+" });
         //not available on standard jdk:
 //        Crypt.main(new String[]{"0123456", Crypt.ALGO_PBEWithHmacSHA1AndDESede, txt});
 //        Crypt.main(new String[]{"0123456", Crypt.ALGO_PBEWithSHAAndAES, txt});
     }
-    
+
     /**
      * it's not really a test but prints some informations to the console...
      */
@@ -1383,7 +1397,7 @@ public class CommonTest {
     public void testArgumentator() {
         //printutil is a complex use case for argumentator. without any arguments, the help screen will be printed.
         PrintUtil.main(new String[0]);
-        
+
         String keyValues = Argumentator.staticKeyValues(IPresentable.class, int.class);
         System.out.println("Presentable types and styles:");
         System.out.println(keyValues);
