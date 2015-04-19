@@ -42,6 +42,7 @@ import de.tsl2.nano.core.ENV;
 import de.tsl2.nano.core.cls.BeanClass;
 import de.tsl2.nano.core.log.LogFactory;
 import de.tsl2.nano.core.util.StringUtil;
+import de.tsl2.nano.core.util.Util;
 
 /**
  * simplified base implementation of an {@link javax.persistence.EntityManagerFactory} and an abstract
@@ -432,7 +433,7 @@ public class NanoEntityManagerFactory implements javax.persistence.EntityManager
 
         @Override
         public Set<Parameter<?>> getParameters() {
-            return new HashSet<Parameter<?>>((Collection<? extends Parameter<?>>) parameter.values());
+            return new HashSet<Parameter<?>>((Collection<? extends Parameter<?>>) Util.untyped(parameter.values()));
         }
 
         @Override

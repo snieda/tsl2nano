@@ -9,6 +9,8 @@
  */
 package de.tsl2.nano.bean.def;
 
+import java.io.Serializable;
+
 import de.tsl2.nano.messaging.EventController;
 import de.tsl2.nano.messaging.IListener;
 
@@ -18,7 +20,9 @@ import de.tsl2.nano.messaging.IListener;
  * @author Tom
  * @version $Revision$
  */
-public abstract class AbstractDependencyListener<T> implements IListener<T> {
+public abstract class AbstractDependencyListener<T> implements IListener<T>, Serializable {
+    /** serialVersionUID */
+    private static final long serialVersionUID = -4105265981459378940L;
     /** full attribute-definition object - transient to be serializable */
     transient protected AttributeDefinition<T> attribute;
     /** attributes id - to be serialized/deserialized - to evaluate the full object after de-serialization */

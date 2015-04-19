@@ -16,6 +16,7 @@ import java.util.Map;
 import java.util.Set;
 
 import de.tsl2.nano.core.ENV;
+import de.tsl2.nano.core.util.Util;
 import de.tsl2.nano.execution.IPRunnable;
 import de.tsl2.nano.incubation.specification.rules.Rule;
 import de.tsl2.nano.incubation.specification.rules.RulePool;
@@ -40,7 +41,7 @@ public class RuleExpression<T extends Serializable> extends RunnableExpression<T
     }
 
     public RuleExpression(Class<?> argumentHolderClass, String ruleName) {
-        this(argumentHolderClass, ruleName, (Class<T>) Object.class);
+        this(argumentHolderClass, ruleName, (Class<T>) Util.untyped(Object.class));
     }
 
     /**
@@ -65,7 +66,7 @@ public class RuleExpression<T extends Serializable> extends RunnableExpression<T
             if (v instanceof Date)
                 arguments.put(charSequence, (T) new BigDecimal(((Date) v).getTime()));
         }
-        return (Map<String, Object>) arguments;
+        return (Map<String, Object>) Util.untyped(arguments);
     }
     
     @Override

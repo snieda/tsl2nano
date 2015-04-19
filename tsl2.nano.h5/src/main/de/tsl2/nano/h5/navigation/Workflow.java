@@ -25,6 +25,7 @@ import de.tsl2.nano.bean.def.BeanCollector;
 import de.tsl2.nano.bean.def.BeanDefinition;
 import de.tsl2.nano.core.Messages;
 import de.tsl2.nano.core.util.StringUtil;
+import de.tsl2.nano.core.util.Util;
 import de.tsl2.nano.incubation.vnet.Net;
 import de.tsl2.nano.incubation.vnet.Notification;
 
@@ -108,7 +109,7 @@ public class Workflow extends EntityBrowser implements Cloneable {
             Notification n = new Notification(null, context);
             Collection<BeanDefinition> result = net.notifyAndCollect(n, BeanDefinition.class);
             setCurrent(result.isEmpty() ? null : result.iterator().next());
-            navigation.addAll((Collection<? extends BeanDefinition<?>>) result);
+            navigation.addAll((Collection<? extends BeanDefinition<?>>) Util.untyped(result));
         }
         return current;
     }

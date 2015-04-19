@@ -884,7 +884,7 @@ public class ENV {
          */
         Set<Object> keySet = properties.keySet();
         for (Iterator<?> keyIt = keySet.iterator(); keyIt.hasNext();) {
-            Object key = (Object) keyIt.next();
+            Object key = keyIt.next();
             Object value = properties.get(key);
             if (isNotSerializable(value)
                 || !BeanUtil.isSingleValueType(value.getClass())) {
@@ -895,7 +895,7 @@ public class ENV {
         }
         Set<Class<?>> serviceKeys = services.keySet();
         for (Iterator<?> keyIt = serviceKeys.iterator(); keyIt.hasNext();) {
-            Object key = (Object) keyIt.next();
+            Object key = keyIt.next();
             Object value = services.get(key);
             if (isNotSerializable(value)) {
                 info("removing service '" + key

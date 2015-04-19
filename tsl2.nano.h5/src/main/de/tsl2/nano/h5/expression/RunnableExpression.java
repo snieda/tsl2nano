@@ -18,6 +18,7 @@ import de.tsl2.nano.bean.def.AbstractExpression;
 import de.tsl2.nano.bean.def.Bean;
 import de.tsl2.nano.collection.MapUtil;
 import de.tsl2.nano.core.ManagedException;
+import de.tsl2.nano.core.util.Util;
 import de.tsl2.nano.execution.IPRunnable;
 
 /**
@@ -88,18 +89,18 @@ public abstract class RunnableExpression<T extends Serializable> extends Abstrac
         if (arguments == null)
             arguments = new HashMap<String, T>();
         if (beanInstance == null)
-            return (Map<String, Object>) arguments;
+            return (Map<String, Object>) Util.untyped(arguments);
         Map<String, ? extends Serializable> p = getRunnable().getParameter();
         if (beanInstance instanceof Map)
             arguments.putAll((Map<? extends String, ? extends T>) beanInstance);
         else
-            arguments.putAll((Map<String, ? extends T>) BeanUtil.toValueMap(beanInstance, false,
-                true, true, (p != null ? p.keySet().toArray(new String[0]) : null)));
+            arguments.putAll((Map<String, ? extends T>) Util.untyped(BeanUtil.toValueMap(beanInstance, false,
+                true, true, (p != null ? p.keySet().toArray(new String[0]) : null))));
         
         //TODO: not performance-optimized: do the filtering before
         MapUtil.retainAll(arguments, p.keySet());
         
-        return (Map<String, Object>) arguments;
+        return (Map<String, Object>) Util.untyped(arguments);
     }
 
     /**

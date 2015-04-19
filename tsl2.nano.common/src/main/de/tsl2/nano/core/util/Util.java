@@ -378,9 +378,10 @@ public class Util {
      * Example: Set<MyClass> set = (Set<MyClass) (Object) new HashSet<MyExtendedClass>();
      * 
      * @param checkedGenericObject
+     * @param uncheckedCast the cast to be done on the given object
      * @return un-typed object
      */
-    public static final Object untyped(Object checkedGenericObject) {
+    public static final Object untyped(Object checkedGenericObject/*, Class<T> uncheckedCast*/) {
         return checkedGenericObject;
     }
 
