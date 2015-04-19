@@ -1307,6 +1307,19 @@ Some hints:
 * the provider should be set to _org.apache.openjpa.persistence.PersistenceProviderImpl_
 * openjpa-2.3.0 is not able to find/generate primary keys --> no class can be generated! Please use snapshots of 2.4.0
 
+## Interactive attribute content
+
+There are several possibilities to add interactive content to your page.
+
+* Presenting an Attribute as one of:
+	* Canvas (canvas filled through drawing informations of the attributes value)
+	* SVG (svg can contain interactive content and can embed or reference bitmaps, "see tutorial": http://www.petercollingridge.co.uk/interactive-svg-components
+	* Javascript (attributes value contains javascript)
+	* WebGL (attribute value as web-gl)
+* Rich Client GUI interactions through WebSockets (see next chapter)
+
+These attributes may be BeanAttributes, getting their content f.e. from a database - or virtual attributes getting their content from somewhere else.
+
 ## Rich Client GUI interactions through WebSockets 
 
 The use of websockets and their internal javascripts is optional. Nano.h5 provides four mechanisms to use websockets:
@@ -1346,6 +1359,8 @@ BeanDefinition b = BeanDefinition.getBeanDefinition(org.anonymous.project.Person
 });
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
+Another feature is to define a timer through _createTimer(periodInSeconds)_ (xml-tag: _timer_) to do a scheduled client refresh.
+
 ### Transferring local file attachments
 
 Simply set your beans attribute type to be an attachment. The client will use a file-selector to select your file. After selecting the file, this file will be sent to the application and the bean can access this file, stored inside the environments temp path.
@@ -1357,13 +1372,16 @@ BeanDefinition b = BeanDefinition.getBeanDefinition(MyEntity.class);
 ((AttributeDefinition)b.getAttribute("my-attribute-name")).getPresentation().setType(IPresentable.TYPE_ATTACHMENT);
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-### calling a restful service to embed the result into an iframe
+### Calling a restful service to embed the result into an iframe
 
-TODO
+TODO: develop and describe...
+
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+Another feature is to define a timer through _createTimer(periodInSeconds)_ (xml-tag: _timer_) to do a scheduled client refresh.
+
 
 ### Technical details: How it works
 
