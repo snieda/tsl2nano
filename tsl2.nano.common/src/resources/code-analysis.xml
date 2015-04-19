@@ -1,25 +1,37 @@
 <?xml version="1.0" encoding="UTF-8"?>
+<!--
+	Starts static code analysis for a given project. 'basedir' should be inherited from calling
+	Project and should point to the main directory of that project. 
+	
+	created by Thomas Schneider / 2010
+-->
 <project default="all" name="analysis">
+	<property name="analysis.home" value="${basedir}/../tsl2.nano.common"/>
 
+	<target name="init">
+		<mkdir dir="ci"/>
+	</target>
+	
 	<!--  Allgemeine Konfiguration -->
-	<target name="all" depends="findbugs,pmd,cpd,checkstyle" />
+	<target name="all" depends="init,findbugs,pmd,cpd,checkstyle" />
 
 	<path id="ana.java.src.path">
-		<fileset id="ana.java.src.dir" dir="..">
+		<fileset id="ana.java.src.dir" dir="${basedir}">
 			<include name="**/*.java" />
 		</fileset>
 	</path>
 
 	<!-- Findbugs -->
-	<property name="findbugs.home" value="ci/findbugs" />
+	<echo>Doing static code analysis on: ${basedir}</echo>
+	<property name="findbugs.home" value="${analysis.home}/ci/findbugs" />
 	<path id="findbugs-jar">
 		<pathelement path="${findbugs.home}/findbugs-ant.jar" />
 	</path>
 	<taskdef name="findbugs" classname="edu.umd.cs.findbugs.anttask.FindBugsTask" classpathref="findbugs-jar" />
-	<target name="findbugs">
+	<target name="findbugs" depends="init">
 		<findbugs home="${findbugs.home}" output="xml:withMessages" outputFile="ci/findbugs.xml">
-			<sourcePath path="../${project.name}/src/main" />
-			<class location="../${project.name}/bin" />
+			<sourcePath path="${basedir}" />
+			<class location="bin" />
 		</findbugs>
 	</target>
 
@@ -27,12 +39,12 @@
 	<!-- PMD -->
 	<path id="pmd.classpath">
 		<pathelement location="${build}" />
-		<fileset dir="ci/pmd">
+		<fileset dir="${analysis.home}/ci/pmd">
 			<include name="*.jar" />
 		</fileset>
 	</path>
 	<taskdef name="pmd" classname="net.sourceforge.pmd.ant.PMDTask" classpathref="pmd.classpath" />
-	<target name="pmd">
+	<target name="pmd" depends="init">
 		<pmd rulesetfiles="rulesets/favorites.xml">
 			<formatter type="xml" toFile="ci/pmd.xml" />
 			<fileset refid="ana.java.src.dir" />
@@ -42,7 +54,7 @@
 
 	<!-- CPD -->
 	<taskdef name="cpd" classname="net.sourceforge.pmd.cpd.CPDTask" classpathref="pmd.classpath" />
-	<target name="cpd">
+	<target name="cpd" depends="init">
 		<cpd minimumTokenCount="100" ignoreLiterals="true" encoding="ISO-8859-15" format="xml" language="java" outputFile="ci/cpd.xml">
 			<fileset refid="ana.java.src.dir" />
 		</cpd>
@@ -50,9 +62,9 @@
 
 
 	<!-- Checkstyle -->
-	<taskdef resource="checkstyletask.properties" classpath="ci/checkstyle/checkstyle-5.3-all.jar" />
-	<target name="checkstyle">
-		<checkstyle config="ci/checkstyle/sun_checks.xml" failOnViolation="false">
+	<taskdef resource="checkstyletask.properties" classpath="${analysis.home}/ci/checkstyle/checkstyle-5.3-all.jar" />
+	<target name="checkstyle" depends="init">
+		<checkstyle config="${analysis.home}/ci/checkstyle/sun_checks.xml" failOnViolation="false">
 			<fileset refid="ana.java.src.dir" />
 			<formatter type="xml" toFile="ci/checkstyle.xml" />
 		</checkstyle>
