@@ -9,7 +9,6 @@
  */
 package de.tsl2.nano.service.util;
 
-import java.io.Serializable;
 import java.util.HashSet;
 import java.util.LinkedHashSet;
 import java.util.Properties;
@@ -36,7 +35,7 @@ import de.tsl2.nano.serviceaccess.ServiceFactory;
  * @author Thomas Schneider
  * @version $Revision$
  */
-public abstract class BaseServiceTest extends RemoteServiceRunner<Serializable> {
+public abstract class BaseServiceTest extends RemoteServiceRunner {
     protected static final Log LOG = LogFactory.getLog(BaseServiceTest.class);
     /** should be used to ask before creating the test data in setUp() */
     protected static final boolean CREATE_SPECIFIC_TESTDATA = false;

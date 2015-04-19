@@ -32,7 +32,7 @@ import de.tsl2.nano.serviceaccess.aas.principal.UserPrincipal;
  * @author Thomas Schneider
  * @version $Revision$
  */
-public class RemoteServiceRunner<SimpleContext> {
+public class RemoteServiceRunner {
 
     /**
      * mini service locator. overwrite this method, if you want to login to a special user, to get the roles, the user
@@ -73,7 +73,7 @@ public class RemoteServiceRunner<SimpleContext> {
         } else {
             user = ServiceFactory.instance().getUserObject();
         }
-        final ICRunnable<SimpleContext> uc = getService(useCaseInterface);
+        final ICRunnable<RemoteServiceRunner.SimpleContext> uc = getService(useCaseInterface);
         final SimpleContext context = new SimpleContext();
         context.user = user;
         try {

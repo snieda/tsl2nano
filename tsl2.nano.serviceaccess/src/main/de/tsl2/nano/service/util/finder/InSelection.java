@@ -14,6 +14,8 @@ import static de.tsl2.nano.service.util.ServiceUtil.addInSelection;
 import java.util.Arrays;
 import java.util.Collection;
 
+import de.tsl2.nano.core.util.Util;
+
 /**
  * finder to load a collection of beans having attribute values that are contained in the given selection.
  * 
@@ -36,7 +38,7 @@ public class InSelection<T> extends AbstractFinder<T> {
      */
     public InSelection(Class<T> resultType, String attribute, Collection<?> selection, Class<Object>... relationsToLoad) {
         super(resultType, relationsToLoad);
-        par = Arrays.asList((Object)selection);
+        par = Arrays.asList(Util.untyped(selection));
         this.attribute = attribute;
     }
 

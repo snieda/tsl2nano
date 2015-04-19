@@ -372,6 +372,19 @@ public class Util {
     }
 
     /**
+     * workaround for java compiler (mostly not for the jit-compiler) to uncheck generic types to be castable to another
+     * generic. It does the same like casting to Object.
+     * <p/>
+     * Example: Set<MyClass> set = (Set<MyClass) (Object) new HashSet<MyExtendedClass>();
+     * 
+     * @param checkedGenericObject
+     * @return un-typed object
+     */
+    public static final Object untyped(Object checkedGenericObject) {
+        return checkedGenericObject;
+    }
+
+    /**
      * standard toString implementation
      * 
      * @param cls root class

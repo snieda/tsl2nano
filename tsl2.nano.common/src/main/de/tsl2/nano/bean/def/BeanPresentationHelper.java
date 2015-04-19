@@ -1239,7 +1239,7 @@ public class BeanPresentationHelper<T> {
 
     protected void addSessionValues(ISession session) {
         //do the Object-casting trick to cast from List<Object> to List<BeanDefinition>
-        addSessionValues((List<BeanDefinition>) (Object) Arrays.asList(session.getNavigationStack()));
+        addSessionValues((List<BeanDefinition>) Util.untyped(Arrays.asList(session.getNavigationStack())));
     }
 
     /**

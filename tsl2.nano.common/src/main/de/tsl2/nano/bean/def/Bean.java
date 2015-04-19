@@ -37,6 +37,7 @@ import de.tsl2.nano.core.cls.BeanClass;
 import de.tsl2.nano.core.cls.IAttribute;
 import de.tsl2.nano.core.log.LogFactory;
 import de.tsl2.nano.core.util.StringUtil;
+import de.tsl2.nano.core.util.Util;
 import de.tsl2.nano.messaging.IListener;
 
 /**
@@ -537,7 +538,7 @@ public class Bean<T> extends BeanDefinition<T> {
         copy(beandef, bean, "attributeFilter", "attributeDefinitions", "asString", "presentationHelper");
         bean.attributeFilter = beandef.attributeFilter != null ? CollectionUtil.copy(beandef.attributeFilter) : null;
         bean.attributeDefinitions =
-            (LinkedHashMap<String, IAttributeDefinition<?>>) createValueDefinitions(beandef.getAttributeDefinitions());
+            (LinkedHashMap<String, IAttributeDefinition<?>>) Util.untyped(createValueDefinitions(beandef.getAttributeDefinitions()));
         bean.setInstance(instance);
 
         if (bean.getPlugins() != null) {

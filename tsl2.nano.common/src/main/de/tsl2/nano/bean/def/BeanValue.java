@@ -514,10 +514,10 @@ public class BeanValue<T> extends AttributeDefinition<T> implements IValueDefini
                 if (isMultiValue()) {
                     Selector<T> vsel = selector();
                     Collection<T> collection = vsel.getValueAsCollection();
-                    beanCollector = BeanCollector.getBeanCollector(vsel.getCollectionEntryType(),
+                    beanCollector = (BeanCollector<?, ?>) Util.untyped(BeanCollector.getBeanCollector(vsel.getCollectionEntryType(),
                         collection,
                         enabled ? MODE_ALL : 0,
-                        comp);
+                        comp));
                     if (collection == null) {
                         vsel.createCollectionValue();
                     }
@@ -528,7 +528,7 @@ public class BeanValue<T> extends AttributeDefinition<T> implements IValueDefini
                     if (v != null)
                         selection.add(v);
                     beanCollector =
-                        BeanCollector.getBeanCollector(getType(), selection, enabled ? MODE_ALL_SINGLE : 0, comp);
+                        (BeanCollector<?, ?>) Util.untyped(BeanCollector.getBeanCollector(getType(), selection, enabled ? MODE_ALL_SINGLE : 0, comp));
                     beanCollector.setSelectionProvider(new SelectionProvider(selection));
                 }
                 return (IBeanCollector<?, T>) beanCollector;
