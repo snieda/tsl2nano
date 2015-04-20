@@ -20,6 +20,9 @@ import de.tsl2.nano.incubation.specification.rules.RuleDependencyListener;
  * @version $Revision$
  */
 public class WebSocketRuleDependencyListener<T> extends RuleDependencyListener<T> {
+    /** serialVersionUID */
+    private static final long serialVersionUID = 7261323751717858340L;
+
     /**
      * constructor
      */

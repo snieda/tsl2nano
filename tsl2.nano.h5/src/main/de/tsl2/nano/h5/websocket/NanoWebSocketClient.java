@@ -20,16 +20,17 @@ import org.java_websocket.handshake.ServerHandshake;
 import de.tsl2.nano.core.log.LogFactory;
 
 /**
- * Html5 WebSocket Client
+ * Html5 WebSocket Client. This implementation does only some logging.
  * 
  * @author Tom, Thomas Schneider
- * @version $Revision$ 
+ * @version $Revision$
  */
 public class NanoWebSocketClient extends WebSocketClient {
     private static final Log LOG = LogFactory.getLog(NanoWebSocketClient.class);
 
     /**
      * constructor
+     * 
      * @param serverURI
      */
     public NanoWebSocketClient(URI serverURI) {
@@ -38,6 +39,7 @@ public class NanoWebSocketClient extends WebSocketClient {
 
     /**
      * constructor
+     * 
      * @param serverUri
      * @param draft
      */
@@ -47,6 +49,7 @@ public class NanoWebSocketClient extends WebSocketClient {
 
     /**
      * constructor
+     * 
      * @param serverUri
      * @param draft
      * @param headers

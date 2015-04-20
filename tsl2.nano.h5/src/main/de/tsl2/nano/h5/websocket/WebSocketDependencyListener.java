@@ -9,8 +9,8 @@
  */
 package de.tsl2.nano.h5.websocket;
 
-import de.tsl2.nano.bean.def.AttributeDefinition;
 import de.tsl2.nano.bean.def.AbstractDependencyListener;
+import de.tsl2.nano.bean.def.AttributeDefinition;
 import de.tsl2.nano.core.exception.Message;
 
 /**
@@ -21,6 +21,9 @@ import de.tsl2.nano.core.exception.Message;
  * @version $Revision$
  */
 public abstract class WebSocketDependencyListener<T> extends AbstractDependencyListener<T> {
+    /** serialVersionUID */
+    private static final long serialVersionUID = 5776202030295212325L;
+
     /**
      * constructor
      */
