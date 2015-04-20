@@ -149,7 +149,7 @@ public class NanoWebSocketServer extends WebSocketServer {
 //        String attachment_filename = session.getId() + "." + session.getWorkingObject();
 
         if (attachment_info == null)
-            throw new IllegalStateException("'attachment_filename' is null but should be sent by client previously!");
+            throw new IllegalStateException("'attachment_filename' is null but should have been sent by client previously!");
 
         String id = getId(attachment_info);
         String attrName = StringUtil.substring(id, ".", null, true);

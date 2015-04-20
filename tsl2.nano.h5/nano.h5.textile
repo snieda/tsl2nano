@@ -1359,7 +1359,10 @@ BeanDefinition b = BeanDefinition.getBeanDefinition(org.anonymous.project.Person
 });
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-Another feature is to define a timer through _createTimer(periodInSeconds)_ (xml-tag: _timer_) to do a scheduled client refresh.
+If you use the _WebSocketServiceListener_ you can define the following properties:
+* restfulUrl: url to a RESTful service
+* parameter: name of the first methods parameter - assigned to the bean attributes value
+* timer: through _createTimer(periodInSeconds)_ (xml-tag: _timer_) to do a scheduled client refresh.
 
 ### Transferring local file attachments
 
