@@ -1,6 +1,6 @@
 /*
- * File: $HeadURL$
  * Id  : $Id$
+ * File: $HeadURL$
  * 
  * created by: Tom, Thomas Schneider
  * created on: 06.06.2014
@@ -12,11 +12,15 @@ package de.tsl2.nano.h5.websocket;
 import de.tsl2.nano.bean.def.SecureAction;
 
 /**
+ * TODO: implement {@link #action()}
  * 
  * @author Tom, Thomas Schneider
- * @version $Revision$ 
+ * @version $Revision$
  */
 public class WebSocketAction<RETURNTYPE> extends SecureAction<RETURNTYPE> {
+
+    /** serialVersionUID */
+    private static final long serialVersionUID = 4999252100679124691L;
 
     /**
      * constructor
@@ -27,6 +31,7 @@ public class WebSocketAction<RETURNTYPE> extends SecureAction<RETURNTYPE> {
 
     /**
      * constructor
+     * 
      * @param prefix
      * @param name
      * @param actionMode
@@ -39,6 +44,7 @@ public class WebSocketAction<RETURNTYPE> extends SecureAction<RETURNTYPE> {
 
     /**
      * constructor
+     * 
      * @param id
      * @param actionMode
      */
@@ -48,6 +54,7 @@ public class WebSocketAction<RETURNTYPE> extends SecureAction<RETURNTYPE> {
 
     /**
      * constructor
+     * 
      * @param id
      * @param shortDescription
      * @param longDescription
@@ -59,6 +66,7 @@ public class WebSocketAction<RETURNTYPE> extends SecureAction<RETURNTYPE> {
 
     /**
      * constructor
+     * 
      * @param id
      * @param label
      */
@@ -68,6 +76,7 @@ public class WebSocketAction<RETURNTYPE> extends SecureAction<RETURNTYPE> {
 
     /**
      * constructor
+     * 
      * @param id
      */
     public WebSocketAction(String id) {
