@@ -416,9 +416,9 @@ starting ${ant.project.name}:
 	<target name="sh.clean" unless="sh.disable.clean" depends="sh.init" description="cleans all binaries">
 		<!-- fallbacks -->
 		<property name="sh.clean.basedir" value="${basedir}" />
-		<property name="sh.clean.bin.dir" value="${sh.java.bin.dir}" />
-		<property name="sh.clean.target.dir" value="${sh.java.target.dir}" />
-		<echo message="cleaning ${sh.clean.bin.dir} and ${sh.clean.target.dir}" />
+		<property name="sh.clean.bin.dir" value="${basedir}/${sh.java.bin.dir}" />
+		<property name="sh.clean.target.dir" value="${basedir}/${sh.java.target.dir}" />
+		<!-- <echo message="cleaning ${sh.clean.bin.dir} and ${sh.clean.target.dir}" /> -->
 		<sh.clean sh.clean.basedir="${sh.clean.basedir}" sh.clean.bin.dir="${sh.clean.bin.dir}" sh.clean.target.dir="${sh.clean.target.dir}" />
 	</target>
 
@@ -428,10 +428,8 @@ starting ${ant.project.name}:
 		<attribute name="sh.clean.bin.dir" />
 		<attribute name="sh.clean.target.dir" />
 		<sequential>
-			<delete>
-				<fileset dir="@{sh.clean.bin.dir}" />
-				<fileset dir="@{sh.clean.target.dir}" />
-			</delete>
+			<delete dir="@{sh.clean.bin.dir}" />
+			<delete dir="@{sh.clean.target.dir}" />
 		</sequential>
 	</macrodef>
 
@@ -450,6 +448,7 @@ starting ${ant.project.name}:
 		<property name="sh.compile.classpath4" value="${sh.compile.classpath}" />
 		<property name="sh.compile.debug" value="false" />
 		<property name="sh.compile.cargs" value="-nowarn" />
+		<property name="sh.java.encoding" value="cp1252" />
 		<property name="sh.compile.encoding" value="${sh.java.encoding}" />
 
 		<!-- start it -->
@@ -475,13 +474,17 @@ starting ${ant.project.name}:
 		<attribute name="sh.compile.encoding" />
 		<sequential>
 			<mkdir dir="@{sh.compile.bindir}" />
+
 			<!-- 'optimize is true, if debug is false and vice versa -->
 			<condition property="optimize" value="false">
 				<isset property="sh.compile.debug" />
 			</condition>
 			<property name="optimize" value="true" />
 
-			<echo>compiler basedir: ${basedir}. classpath: @{sh.compile.classpath};@{sh.compile.classpath2};@{sh.compile.classpath3};@{sh.compile.classpath4}</echo>
+			<echo>
+compiler basedir: ${basedir}. classpath: @{sh.compile.classpath};@{sh.compile.classpath2};@{sh.compile.classpath3};@{sh.compile.classpath4}
+	src: @{sh.compile.srcdir}, @{sh.compile.srcdir2}, @{sh.compile.srcdir3}, @{sh.compile.srcdir4}
+			</echo>
 			<javac destdir="@{sh.compile.bindir}" listfiles="@{sh.compile.debug}" depend="true" debuglevel="lines,vars,source" verbose="@{sh.compile.debug}" nowarn="true" optimize="${optimize}" debug="@{sh.compile.debug}" extdirs="@{sh.compile.extdirs}" encoding="@{sh.compile.encoding}">
 				<classpath>
 					<fileset dir="@{sh.compile.classpath}">
@@ -509,6 +512,23 @@ starting ${ant.project.name}:
 				<exclude name="@{sh.compile.exclude}" />
 				<compilerarg value="@{sh.compile.cargs}" />
 			</javac>
+
+			<!-- copy resource files to bin -->
+			<copy todir="@{sh.compile.bindir}" preservelastmodified="on">
+				<fileset dir="@{sh.compile.srcdir}">
+					<exclude name="**/*.java" />
+				</fileset>
+				<fileset dir="@{sh.compile.srcdir2}">
+					<exclude name="**/*.java" />
+				</fileset>
+				<fileset dir="@{sh.compile.srcdir3}">
+					<exclude name="**/*.java" />
+				</fileset>
+				<fileset dir="@{sh.compile.srcdir4}">
+					<exclude name="**/*.java" />
+				</fileset>
+			</copy>
+
 		</sequential>
 	</macrodef>
 
@@ -703,10 +723,10 @@ starting ${ant.project.name}:
 		<property name="sh.junit.test.dir" value="${sh.java.test.dir}" />
 		<property name="sh.junit.target.dir" value="${sh.java.target.dir}" />
 		<property name="sh.junit.include" value="**/*Test.java" />
-		<property name="sh.junit.jvmarg" value="" />
+		<property name="sh.junit.jvmarg" value="-javaagent:ci/jacoco/jacocoagent.jar=destfile=${sh.junit.target.dir}ci/jacoco.exec" />
 
 		<mkdir dir="${sh.junit.target.dir}/junit/report" />
-		<sh.junit sh.junit.test.dir="${sh.junit.test.dir}" sh.junit.target.dir="${sh.junit.target.dir}" sh.junit.include="${sh.junit.include}" sh.junit.jvmarg="${sh.junit.jvmarg}"/>
+		<sh.junit sh.junit.test.dir="${sh.junit.test.dir}" sh.junit.target.dir="${sh.junit.target.dir}" sh.junit.include="${sh.junit.include}" sh.junit.jvmarg="${sh.junit.jvmarg}" />
 	</target>
 
 	<macrodef name="sh.junit">
@@ -714,17 +734,18 @@ starting ${ant.project.name}:
 		<attribute name="sh.junit.target.dir" />
 		<attribute name="sh.junit.include" />
 		<attribute name="sh.junit.jvmarg" />
-		
+
 		<sequential>
 			<!-- if not defined ... use fallback -->
 			<echo message="doing junit on ${basedir}" />
 			<property name="junittest.exclude" value="**/Base*Test.java" />
-			
-			<delete dir="${sh.junit.target.dir}/junit" failonerror="false"/>
-			<mkdir dir="${sh.junit.target.dir}/junit"/>
-			
+
+			<delete dir="${sh.junit.target.dir}/junit" failonerror="false" />
+			<mkdir dir="${sh.junit.target.dir}/junit" />
+
+			<echo>starting junit with jvmarg: ${jvmarg}</echo>
 			<junit fork="true" printsummary="true" showoutput="true">
-		    	<jvmarg value="${sh.junit.jvmarg}"/>
+				<jvmarg value="${sh.junit.jvmarg}" />
 				<classpath>
 					<fileset dir="${basedir}/../">
 						<include name="**/*.jar" />
@@ -740,7 +761,6 @@ starting ${ant.project.name}:
 					</fileset>
 				</batchtest>
 			</junit>
-			<mkdir dir="${sh.junit.target.dir}/junit"/>
 			<!--
 			<junitreport todir="${sh.junit.target.dir}/junit">
 				<fileset dir="${sh.junit.target.dir}/junit">
@@ -949,7 +969,7 @@ starting ${ant.project.name}:
 		<property name="sh.build.lib" value="${sh.build.basedir}/lib" />
 		<property name="sh.build.bin" value="${sh.build.basedir}/bin" />
 		<property name="sh.build.debug" value="false" />
-    	<property name="sh.junit.jvmarg" value="-javaagent:ci/jacoco/jacocoagent.jar=destfile=ci/jacoco.exec" />
+		<property name="sh.junit.jvmarg" value="-javaagent:ci/jacoco/jacocoagent.jar=destfile=ci/jacoco.exec" />
 
 		<!-- store build informations to build.properties -->
 		<buildnumber file="${sh.build.basedir}/src/resources/build-${sh.build.name}.properties" />
@@ -963,8 +983,9 @@ starting ${ant.project.name}:
 		</propertyfile>
 
 		<!-- create binaries -->
-		<antcall target="sh.compile" inheritall="false">
+		<antcall target="sh.compile">
 			<param name="sh.compile.srcdir" value="${sh.build.src}" />
+			<param name="sh.compile.srcdir2" value="${sh.build.basedir}/src/resources" />
 			<param name="sh.compile.bindir" value="${sh.build.bin}" />
 			<param name="sh.compile.classpath" value="${sh.build.lib}" />
 			<param name="sh.compile.debug" value="${sh.build.debug}" />
@@ -1012,6 +1033,6 @@ starting ${ant.project.name}:
 	</target>
 
 	<!-- calls the sh.build target after clean, runs junit tests -->
-	<target name="sh.build.full" depends="sh.clean, sh.compile, sh.build, sh.junit">
+	<target name="sh.build.full" depends="sh.clean, sh.build, sh.junit">
 	</target>
 </project>
