@@ -117,8 +117,9 @@ public class Container<T> extends AItem<T> implements IContainer<T> {
         if (selected.getType() == Type.Container && ((Container) selected).getNodes(env).size() == 1) {
             //if only one tree child is available, delegate directly to that item
             return selected.react(this, "1", in, out, env);
-        } else
+        } else {
             return selected;
+        }
     }
 
     @Override
@@ -165,8 +166,9 @@ public class Container<T> extends AItem<T> implements IContainer<T> {
     @Override
     public IItem react(IItem caller, String input, InputStream in, PrintStream out, Properties env) {
         sequential = Util.get(Terminal.KEY_SEQUENTIAL, false);
-        if (Util.isEmpty(input) && !sequential)
+        if (Util.isEmpty(input) && !sequential) {
             return getParent();
+        }
         IItem next = null;
         List<AItem<T>> filteredNodes = getNodes(env);
         /*
@@ -190,13 +192,15 @@ public class Container<T> extends AItem<T> implements IContainer<T> {
             nextnext = next.react(this, "1", in, out, env);
         }
         //assign the new result
-        if (multiple)
+        if (multiple) {
             ((List<T>)value).add((T) next.getValue());
-        else
+        } else {
             setValue((T) next.getValue());
+        }
         
-        if (getValue() != null)
+        if (getValue() != null) {
             env.put(getName(), getValue());
+        }
         isactive = false;
         return nextnext != null ? nextnext : next;
     }
@@ -204,7 +208,7 @@ public class Container<T> extends AItem<T> implements IContainer<T> {
     public IItem getNode(String input, Properties env) {
         if (input.matches("\\d+")) {
             //input: one-based index
-            return (IItem) getNodes(env).get(Integer.valueOf(input) - 1);
+            return getNodes(env).get(Integer.valueOf(input) - 1);
         } else {
             List<AItem<T>> childs = getNodes(env);
             input = input.toLowerCase();
@@ -242,23 +246,25 @@ public class Container<T> extends AItem<T> implements IContainer<T> {
         IItem<T> next;
         if (sequential) {
             if (++seqIndex < getNodes(env).size()) {
-                next = (IItem) getNodes(env).get(seqIndex);
+                next = getNodes(env).get(seqIndex);
                 //ask for all tree items
-                if (next.getType() == Type.Container)
+                if (next.getType() == Type.Container) {
                     return next.react(this, null, in, out, env);
-                else
+                } else {
                     return next;
+                }
             } else {
 //                sequential = false;
 //                seqIndex = -1;
-                next = (IItem<T>) getParent().next(in, out, env);
+                next = getParent().next(in, out, env);
             }
         } else {
-            next = (IItem<T>) this;
+            next = this;
         }
         return next;
     }
 
+    @Override
     @Commit
     protected void initDeserialization() {
         super.initDeserialization();
@@ -276,8 +282,9 @@ public class Container<T> extends AItem<T> implements IContainer<T> {
     @Override
     public String getDescription(Properties env, boolean full) {
         if (isactive || sequential) {
-            if (sequential && hasFileDescription())
+            if (sequential && hasFileDescription()) {
                 return super.getDescription(env, full);
+            }
             List<AItem<T>> list = getNodes(env);
             StringBuilder buf = new StringBuilder(list.size() * 60);
             int i = 0;
@@ -293,7 +300,7 @@ public class Container<T> extends AItem<T> implements IContainer<T> {
             for (AItem t : list) {
                 buf.append(StringUtil.fixString(String.valueOf(++i), s, ' ', false)
                     + "."
-                    + ((AItem)t).getName(kl, ' ') + POSTFIX_QUESTION
+                    + t.getName(kl, ' ') + POSTFIX_QUESTION
                         + (full && !t.getType().equals(Type.Container) ? t.getDescription(env, full) : StringUtil.toString(t.getValueText(), vwidth))
                     + "\n");
             }

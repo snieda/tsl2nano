@@ -24,8 +24,9 @@ public class DefaultHeader extends DefaultFormat implements Comparable<DefaultHe
 
     @Override
     public String toString() {
-        if (title == null)
+        if (title == null) {
             title = getTitle(columnIndex);
+        }
         return title;
     }
 

@@ -38,8 +38,6 @@ import de.tsl2.nano.bean.BeanContainer;
 import de.tsl2.nano.bean.BeanUtil;
 import de.tsl2.nano.bean.IAttributeDef;
 import de.tsl2.nano.bean.def.Bean;
-import de.tsl2.nano.bean.def.IAttributeDefinition;
-import de.tsl2.nano.bean.def.IValueDefinition;
 import de.tsl2.nano.core.ENV;
 import de.tsl2.nano.core.ManagedException;
 import de.tsl2.nano.core.cls.BeanAttribute;
@@ -89,11 +87,12 @@ public class BeanContainerUtil {
             @Override
             public Collection<?> action() {
                 boolean useLike = parameter[1] instanceof Boolean && ((Boolean) parameter[1]);
-                if (useLike)
+                if (useLike) {
                     return service.findByExampleLike(parameter[0], true, (Integer) parameter[2],
                         (Integer) parameter[3]);
-                else
+                } else {
                     return service.findByExample(parameter[0], true);
+                }
             }
         };
         final IAction<Collection<?>> betweenFinder = new CommonAction<Collection<?>>() {
@@ -281,8 +280,9 @@ public class BeanContainerUtil {
 
                         @Override
                         public boolean nullable() {
-                            if (nullable == null)
+                            if (nullable == null) {
                                 nullable = oneToMany != null || (Boolean) joinColumnBC.callMethod(joinColumn, "nullable");
+                            }
                             return nullable;
                         }
 
@@ -336,8 +336,9 @@ public class BeanContainerUtil {
 
                         @Override
                         public boolean generatedValue() {
-                            if (generatedValue == null)
+                            if (generatedValue == null) {
                                 generatedValue = isGeneratedValue(clazz, attribute);
+                            }
                             return generatedValue;
                         }
                     };
@@ -412,8 +413,9 @@ public class BeanContainerUtil {
 
                         @Override
                         public boolean generatedValue() {
-                            if (generatedValue == null)
+                            if (generatedValue == null) {
                                 generatedValue = isGeneratedValue(clazz, attribute);
+                            }
                             return generatedValue;
                         }
                     };
@@ -432,32 +434,36 @@ public class BeanContainerUtil {
                     @Override
                     public int scale() {
 //                    return column.scale();
-                        if (scale == null)
+                        if (scale == null) {
                             scale = (Integer) columnBC.callMethod(column, "scale");
+                        }
                         return scale;
                     }
 
                     @Override
                     public int precision() {
 //                    return column.precision();
-                        if (precision == null)
+                        if (precision == null) {
                             precision = (Integer) columnBC.callMethod(column, "precision");
+                        }
                         return precision;
                     }
 
                     @Override
                     public boolean nullable() {
 //                    return column.nullable();
-                        if (nullable == null)
+                        if (nullable == null) {
                             nullable = oneToMany != null || (Boolean) columnBC.callMethod(column, "nullable");
+                        }
                         return nullable;
                     }
 
                     @Override
                     public int length() {
 //                    return column.length();
-                        if (length == null)
+                        if (length == null) {
                             length = (Integer) columnBC.callMethod(column, "length");
+                        }
                         return length;
                     }
 
@@ -468,8 +474,9 @@ public class BeanContainerUtil {
 
                     @Override
                     public boolean unique() {
-                        if (unique == null)
+                        if (unique == null) {
                             unique = (Boolean) columnBC.callMethod(column, "unique");
+                        }
                         return unique;
                     }
 
@@ -493,8 +500,9 @@ public class BeanContainerUtil {
 
                     @Override
                     public boolean generatedValue() {
-                        if (generatedValue == null)
+                        if (generatedValue == null) {
                             generatedValue = isGeneratedValue(clazz, attribute);
+                        }
                         return generatedValue;
                     }
                 };
@@ -515,8 +523,8 @@ public class BeanContainerUtil {
     protected static Class<? extends Date> getTemporalType(final Annotation temporal) {
         BeanClass temporalBC = BeanClass.getBeanClass(temporal.getClass());
         TemporalType t = (TemporalType) temporalBC.callMethod(temporal, "value");
-        return (Class<? extends Date>) (t.equals(TemporalType.DATE) ? Date.class
-            : t.equals(TemporalType.TIME) ? Time.class : Timestamp.class);
+        return t.equals(TemporalType.DATE) ? Date.class
+            : t.equals(TemporalType.TIME) ? Time.class : Timestamp.class;
     }
 
     private static final String attrKey(Class<?> clazz, String attribute) {
@@ -570,11 +578,13 @@ public class BeanContainerUtil {
         Bean<Serializable> bean = Bean.getBean(entity);
         Serializable id = (Serializable) bean.getId();
         // a composite key is not a standard type like String or Number
-        if (id == null || BeanUtil.isStandardType(id))
+        if (id == null || BeanUtil.isStandardType(id)) {
             return;
+        }
 
-        if (attributeNames.length == 0)
+        if (attributeNames.length == 0) {
             attributeNames = bean.getAttributeNames();
+        }
 
         for (int i = 0; i < attributeNames.length; i++) {
             /*
@@ -597,10 +607,11 @@ public class BeanContainerUtil {
                     c = (Column) idAttr.getAnnotation(Column.class);
                     if (c != null && c.name().equals(jc.name())) {
                         valueObject = attribute.getValue(entity);
-                        if (valueObject != null)
+                        if (valueObject != null) {
                             value = Bean.getBean((Serializable)valueObject).getId();
-                        else
+                        } else {
                             value = null;
+                        }
                         //TODO: shell we do a check against the types?
                         idAttr.setValue(id, value);
                     }

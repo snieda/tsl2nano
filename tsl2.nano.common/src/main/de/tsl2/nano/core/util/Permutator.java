@@ -9,23 +9,14 @@
  */
 package de.tsl2.nano.core.util;
 
-import java.io.File;
-import java.io.FileReader;
 import java.io.InputStream;
 import java.io.PipedInputStream;
 import java.io.PrintStream;
-import java.util.Collection;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.Map;
-import java.util.Properties;
-import java.util.Set;
 
-import de.tsl2.nano.collection.CollectionUtil;
-import de.tsl2.nano.core.Argumentator;
-import de.tsl2.nano.core.Finished;
 import de.tsl2.nano.core.ManagedException;
-import de.tsl2.nano.core.cls.BeanClass;
 
 /**
  * permutes the given array in the given range and prints to the given print stream. usable as brute force algorithm.
@@ -54,6 +45,7 @@ public class Permutator extends APermutator<Character, Integer> {
         super(min, max, start, end);
     }
 
+    @Override
     public InputStream permute() {
         PipedInputStream in = new PipedInputStream();
         try {

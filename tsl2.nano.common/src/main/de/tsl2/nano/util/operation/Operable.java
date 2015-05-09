@@ -145,7 +145,8 @@ public class Operable<T extends Comparable<T>> implements IOperable<T> {
      * throws an exception, if converter is null.
      */
     protected void checkConverter() {
-        if (converter == null)
+        if (converter == null) {
             throw new UnsupportedOperationException("without converter, this operation is undefined!");
+        }
     }
 }

@@ -16,6 +16,9 @@ package de.tsl2.nano.math.vector;
  * @version $Revision$
  */
 public class Rectangle extends Coordinate {
+    /** serialVersionUID */
+    private static final long serialVersionUID = 1L;
+
     public Rectangle(float x, float y, float w, float h) {
         super(x, y, w, h);
     }

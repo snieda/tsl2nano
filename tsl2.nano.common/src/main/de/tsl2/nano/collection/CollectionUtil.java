@@ -60,11 +60,13 @@ public class CollectionUtil {
     public static final <T> T[] asArray(T... objects) {
         Class<T> type = null;
         for (int i = 0; i < objects.length; i++) {
-            if (objects[i] != null)
+            if (objects[i] != null) {
                 type = (Class<T>) objects[i].getClass();
+            }
         }
-        if (type == null)
+        if (type == null) {
             type = (Class<T>) Object.class;
+        }
         return (T[]) Array.newInstance(type, objects.length);
     }
 
@@ -92,10 +94,11 @@ public class CollectionUtil {
      *         with <S | L> listOrSet ?
      */
     public static final <T> ListSet<T> asListSet(Collection<T> listOrSet) {
-        if (listOrSet instanceof ListSet)
+        if (listOrSet instanceof ListSet) {
             return (ListSet<T>) listOrSet;
-        else
+        } else {
             return new ListSet(listOrSet);
+        }
     }
 
     /**
@@ -208,12 +211,14 @@ public class CollectionUtil {
      * @return true, if c is null or c.size() == 0 or all values are null.
      */
     public static boolean hasNoValues(Collection c) {
-        if (c == null || c.size() == 0)
+        if (c == null || c.size() == 0) {
             return true;
+        }
 
         for (Object object : c) {
-            if (object != null)
+            if (object != null) {
                 return false;
+            }
         }
         return true;
     }
@@ -354,8 +359,9 @@ public class CollectionUtil {
      */
     public static <T, U> T[] copyOfRange(U[] original, int from, int to, Class<? extends T[]> newType) {
         int newLength = to - from;
-        if (newLength < 0)
+        if (newLength < 0) {
             throw new IllegalArgumentException(from + " > " + to);
+        }
         T[] copy = ((Object) newType == (Object) Object[].class) ? (T[]) new Object[newLength]
             : (T[]) Array.newInstance(newType.getComponentType(), newLength);
         System.arraycopy(original, from, copy, 0, Math.min(original.length - from, newLength));
@@ -503,13 +509,15 @@ public class CollectionUtil {
      * @param enumToString enums value toString()
      */
     public static final <E extends Enum<E>> E findEnum(Class<E> enumClass, String enumToString) {
-        if (Util.isEmpty(enumToString))
+        if (Util.isEmpty(enumToString)) {
             return null;
+        }
         E[] enumConstants = enumClass.getEnumConstants();
         enumToString = enumToString.toLowerCase();
         for (E e : enumConstants) {
-            if (e.toString().toLowerCase().equals(enumToString))
+            if (e.toString().toLowerCase().equals(enumToString)) {
                 return e;
+            }
         }
         throw new IllegalArgumentException(enumToString + " can't be found as enum of " + enumClass);
     }
@@ -608,8 +616,9 @@ public class CollectionUtil {
     public static final <I extends Iterable<T>, T extends Comparable<T>> I getFilteringBetween(I src,
             final T from,
             final T to) {
-        if (from == null && to == null)
+        if (from == null && to == null) {
             return src;
+        }
         final boolean useNull = from == null || to == null;
         return FilteringIterator.getFilteringIterable(src, new IPredicate<T>() {
             @Override
@@ -636,8 +645,9 @@ public class CollectionUtil {
             final T from,
             final T to,
             final boolean ignoreCase) {
-        if (from == null && to == null)
+        if (from == null && to == null) {
             return src;
+        }
         return FilteringIterator.getFilteringIterable(src, new IPredicate<T>() {
             @Override
             public boolean eval(T arg0) {
@@ -646,14 +656,16 @@ public class CollectionUtil {
                     from != null && !BeanUtil.isEmpty(from) ? ignoreCase && from.toString() != null ? from.toString()
                         .toUpperCase()
                         : from.toString() : null;
-                if (StringUtil.STR_ANY.equals(sfrom))
+                if (StringUtil.STR_ANY.equals(sfrom)) {
                     sfrom = null;
+                }
                 String sto =
                     to != null && !BeanUtil.isEmpty(to) ? ignoreCase && to.toString() != null ? to.toString()
                         .toUpperCase()
                         : to.toString() : null;
-                if (StringUtil.STR_ANY.equals(sto))
+                if (StringUtil.STR_ANY.equals(sto)) {
                     sto = null;
+                }
                 boolean useNull = from == null || to == null;
 
                 String sarg = arg0 != null ? ignoreCase && arg0.toString() != null ? arg0.toString().toUpperCase()
@@ -700,8 +712,9 @@ public class CollectionUtil {
     public static Collection load(String file, String delimiter) {
         try {
             Scanner sc = new Scanner(new File(file));
-            if (delimiter != null)
+            if (delimiter != null) {
                 sc.useDelimiter(delimiter);
+            }
             Collection c = new LinkedList<String>();
             while (sc.hasNext()) {
                 c.add(sc.next());
@@ -741,18 +754,20 @@ public class CollectionUtil {
      * @return value at position
      */
     public static <T> T get(Iterable<T> iterable, int position) {
-        if (iterable instanceof List)
+        if (iterable instanceof List) {
             return ((List<T>) iterable).get(position);
-        else {
+        } else {
             int i = 0;
             T item = null;
             for (T t : iterable) {
-                if (i++ == position)
+                if (i++ == position) {
                     return t;
+                }
                 item = t;
             }
-            if (position == -1)
+            if (position == -1) {
                 return item;
+            }
             
             throw new IllegalArgumentException(i == 0 ? iterable + " is empty!" : "position must be between 0 and " + i);
         }

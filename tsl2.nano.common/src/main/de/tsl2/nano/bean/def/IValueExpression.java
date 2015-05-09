@@ -9,6 +9,8 @@
  */
 package de.tsl2.nano.bean.def;
 
+import de.tsl2.nano.core.cls.BeanAttribute;
+
 /**
  * base definition for all calculation attributes like rules or sql-statements.
  * 

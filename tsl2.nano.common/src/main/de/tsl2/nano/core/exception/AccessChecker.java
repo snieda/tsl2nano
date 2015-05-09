@@ -38,9 +38,9 @@ public class AccessChecker {
      */
     public static final boolean checkCaller(String packageExpression, int callerPosition, StringBuffer resultCallerName) {
         StackTraceElement[] stackTrace = Thread.currentThread().getStackTrace();
-        if (stackTrace.length <= callerPosition)
+        if (stackTrace.length <= callerPosition) {
             return false;
-        else {
+        } else {
             boolean matched = stackTrace[callerPosition].getClassName().matches(packageExpression);
             if (!matched && resultCallerName != null) {
                 resultCallerName.append(stackTrace[callerPosition]);
@@ -56,9 +56,10 @@ public class AccessChecker {
         if (LOG.isDebugEnabled()) {
             String packageName = Messages.class.getPackage().getName();
             StringBuffer callerName = new StringBuffer();
-            if (!checkCaller(packageName + ".*", 4, callerName))
+            if (!checkCaller(packageName + ".*", 4, callerName)) {
                 throw new ManagedException("This method should only be called by framework classes!",
                     "method " + callerName + ": <method call outside of package: " + packageName + ">");
+            }
         }
     }
 }

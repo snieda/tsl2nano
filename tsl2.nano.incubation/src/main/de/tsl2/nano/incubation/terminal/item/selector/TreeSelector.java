@@ -11,17 +11,13 @@ package de.tsl2.nano.incubation.terminal.item.selector;
 
 import java.io.InputStream;
 import java.io.PrintStream;
-import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
-import java.util.Map;
 import java.util.Properties;
 
 import org.simpleframework.xml.Element;
 import org.simpleframework.xml.ElementList;
 
 import de.tsl2.nano.core.util.StringUtil;
-import de.tsl2.nano.core.util.Util;
 import de.tsl2.nano.incubation.terminal.IItem;
 
 /**
@@ -31,6 +27,8 @@ import de.tsl2.nano.incubation.terminal.IItem;
  * @version $Revision$
  */
 public abstract class TreeSelector<T> extends Selector<T> {
+    /** serialVersionUID */
+    private static final long serialVersionUID = 1L;
     /** roots */
     @ElementList(entry="root", inline=true)
     List<T> roots;

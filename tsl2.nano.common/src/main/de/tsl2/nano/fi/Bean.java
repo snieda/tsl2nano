@@ -21,6 +21,8 @@ import de.tsl2.nano.bean.def.Presentable;
  * @version $Revision$ 
  */
 public class Bean<T> extends de.tsl2.nano.bean.def.Bean<T> {
+    /** serialVersionUID */
+    private static final long serialVersionUID = 1L;
     AttributeDefinition<?> attrOnConstruction;
     
     /**

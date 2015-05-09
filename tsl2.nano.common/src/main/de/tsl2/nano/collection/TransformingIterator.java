@@ -52,7 +52,7 @@ public class TransformingIterator<S, T> implements Iterator<T> {
 
     @Override
     public T next() {
-        return (T) transformer.transform(parentIt.next());
+        return transformer.transform(parentIt.next());
     }
 
     @Override
@@ -83,8 +83,9 @@ public class TransformingIterator<S, T> implements Iterator<T> {
                 @Override
                 public Object invoke(Object proxy, Method method, Object[] args) throws Throwable {
                     Object result = method.invoke(iterable, args);
-                    if (Iterator.class.isAssignableFrom(method.getReturnType()))
+                    if (Iterator.class.isAssignableFrom(method.getReturnType())) {
                         result = new TransformingIterator<S, T>(iterable, transformer);
+                    }
                     return result;
                 }
             });

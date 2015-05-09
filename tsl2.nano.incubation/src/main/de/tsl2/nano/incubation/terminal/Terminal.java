@@ -24,7 +24,6 @@ import java.util.Map;
 import java.util.Properties;
 import java.util.Scanner;
 import java.util.Set;
-import java.util.Timer;
 import java.util.concurrent.TimeUnit;
 
 import javax.imageio.ImageIO;
@@ -223,8 +222,9 @@ public class Terminal implements IItemHandler, Serializable {
     static Properties createEnvironment(String name, Map definitions) {
         String p = name + ".properties";
         Properties env = new File(p).canRead() ? FileUtil.loadPropertiesFromFile(p) : new Properties();
-        if (definitions != null)
+        if (definitions != null) {
             env.putAll(definitions);
+        }
         return env;
     }
 
@@ -249,17 +249,19 @@ public class Terminal implements IItemHandler, Serializable {
                 nextLine(in);
             }
             //if only one tree-item available, go to that item
-            if (root instanceof Container)
+            if (root instanceof Container) {
                 root = ((Container) root).delegateToUniqueChild(root, in, out, env);
-            serve(root, in, (PrintStream) out, env);
+            }
+            serve(root, in, out, env);
             shutdown();
         } catch (Finished ex) {
             shutdown();
         } catch (Exception ex) {
             ManagedException.forward(ex);
         } finally {
-            if (input != null)
+            if (input != null) {
                 input.close();
+            }
         }
     }
 
@@ -270,11 +272,12 @@ public class Terminal implements IItemHandler, Serializable {
             boolean resource,
             boolean bars) {
         try {
-            if (resource)
+            if (resource) {
                 new AsciiImage(bars ? AsciiImage.BARS : AsciiImage.CHARS, AsciiImage.RGB).convertToAscii(
                     ImageIO.read(FileUtil.getResource(name)), out, width, height).flush();
-            else
+            } else {
                 new AsciiImage().convertToAscii(name, out, width, height).flush();
+            }
         } catch (Exception e) {
             //it's only a logo, no problem (perhaps on android)
             LOG.error(e.toString());
@@ -308,15 +311,17 @@ public class Terminal implements IItemHandler, Serializable {
     }
 
     protected void save() {
-        if (refreshConfig || !new File(name).exists())
+        if (refreshConfig || !new File(name).exists()) {
             XmlUtil.saveXml(name, this);
+        }
         Set<Object> keys = env.keySet();
         //replace objects through their toString()
         Properties envCopy = new Properties();
         for (Object k : keys) {
             //pre defined variables are not content of item properties
-            if (definitions != null && definitions.containsKey(k))
+            if (definitions != null && definitions.containsKey(k)) {
                 continue;
+            }
             Object v = env.get(k);
             envCopy.put(k, v instanceof String ? v : StringUtil.toString(v, -1));
         }
@@ -324,13 +329,16 @@ public class Terminal implements IItemHandler, Serializable {
     }
 
     private void prepareEnvironment(Properties env, IItem root) {
-        if (root.getType() == Type.Option)
+        if (root.getType() == Type.Option) {
             return;
+        }
         Object value = root.getValue();
-        if (value != null)
+        if (value != null) {
             env.put(root.getName(), value);
-        if (root.getType() == Type.Selector)
+        }
+        if (root.getType() == Type.Selector) {
             return;
+        }
         if (root.getType().equals(Type.Container)) {
             List<IItem> childs = ((IContainer) root).getNodes(env);
             if (childs != null) {
@@ -378,18 +386,21 @@ public class Terminal implements IItemHandler, Serializable {
         String s = screen;
         int lines = 0, page = 0, i = 0, l = -1;
         while ((i = s.indexOf("\n", l + 1)) < s.length() && i != -1) {
-            if (i - l > width - 2)
+            if (i - l > width - 2) {
                 i = l + width - 2;
+            }
             if (++lines > height) {
                 out.print(getTextFrame(s.substring(page, i), style, width, center));
                 out.print(ASK_ENTER);
                 page = i + 1;
                 lines = 0;
                 if (!isInBatchMode()) {
-                    if ((pagingInput = nextLine(in)).length() > 0)
+                    if ((pagingInput = nextLine(in)).length() > 0) {
                         return pagingInput;
-                } else
+                    }
+                } else {
                     out.println();
+                }
             }
             l = i;
         }
@@ -414,8 +425,9 @@ public class Terminal implements IItemHandler, Serializable {
     public void serve(IItem item, InputStream in, PrintStream out, Properties env) {
         try {
             String input = printScreen(item, out);
-            if (input == null)
+            if (input == null) {
                 input = nextLine(in);
+            }
             //to see the input in batch mode
             if (!Util.isEmpty(input) && input.startsWith(KEY_COMMAND)) {
                 if (isCommand(input, KEY_HELP)) {
@@ -577,8 +589,9 @@ public class Terminal implements IItemHandler, Serializable {
     private String nextLine(InputStream in) {
         String line = nextLine(input, in, out);
         //TODO: refactore to do the recording inside the base static nextLine(..)
-        if (isRecording)
+        if (isRecording) {
             batch = batch == null ? line : batch + ", " + line;
+        }
         return line;
     }
 
@@ -588,8 +601,9 @@ public class Terminal implements IItemHandler, Serializable {
 
     static String nextLine(Scanner scanner, InputStream in, PrintStream out) {
         String text = scanner.hasNextLine() ? scanner.nextLine() : null;
-        if (isInBatchMode(in))
+        if (isInBatchMode(in)) {
             out.println(text);
+        }
         return text;
     }
 
@@ -635,10 +649,11 @@ public class Terminal implements IItemHandler, Serializable {
         try {
             String name = args.length > 0 ? args[0] : DEFAULT_NAME;
             boolean admin = args.length > 1 && args[1].equals(TerminalAdmin.ADMIN) ? true : false;
-            if (admin || !new File(name).exists())
+            if (admin || !new File(name).exists()) {
                 TerminalAdmin.create(name).run();
-            else
+            } else {
                 create(name).run();
+            }
         } catch (Exception e) {
             ManagedException.forward(e);
         }

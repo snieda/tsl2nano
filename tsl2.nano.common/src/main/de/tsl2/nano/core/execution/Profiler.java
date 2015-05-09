@@ -76,8 +76,9 @@ public class Profiler {
      * @return singelton instance
      */
     public static final Profiler si() {
-        if (self == null)
+        if (self == null) {
             self = new Profiler();
+        }
         return self;
     }
 
@@ -117,7 +118,7 @@ public class Profiler {
      * @return start time
      */
     public long starting(Object classOrInstance, String name) {
-        ProfilerObject po = (ProfilerObject) ProfilerObject.fastConstruct();
+        ProfilerObject po = ProfilerObject.fastConstruct();
         po.clazz = getClazz(classOrInstance);
         po.name = name;
         po.start = System.currentTimeMillis();
@@ -348,23 +349,30 @@ class ProfilerObject implements Cloneable {
      */
     @Override
     public boolean equals(Object obj) {
-        if (this == obj)
+        if (this == obj) {
             return true;
-        if (obj == null)
+        }
+        if (obj == null) {
             return false;
-        if (getClass() != obj.getClass())
+        }
+        if (getClass() != obj.getClass()) {
             return false;
+        }
         ProfilerObject other = (ProfilerObject) obj;
         if (clazz == null) {
-            if (other.clazz != null)
+            if (other.clazz != null) {
                 return false;
-        } else if (!clazz.equals(other.clazz))
+            }
+        } else if (!clazz.equals(other.clazz)) {
             return false;
+        }
         if (name == null) {
-            if (other.name != null)
+            if (other.name != null) {
                 return false;
-        } else if (!name.equals(other.name))
+            }
+        } else if (!name.equals(other.name)) {
             return false;
+        }
         return true;
     }
 

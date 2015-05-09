@@ -78,6 +78,7 @@ public class Node<T extends IListener<Notification> & ILocatable & Serializable 
     /**
      * @return Returns the controller.
      */
+    @Override
     public EventController getController() {
         return controller;
     }
@@ -119,8 +120,9 @@ public class Node<T extends IListener<Notification> & ILocatable & Serializable 
 
     private void waitToBeIdle() {
         long start = System.currentTimeMillis();
-        if (isWorking())
+        if (isWorking()) {
             Net.log("waiting for working node " + this);
+        }
         while (isWorking()) {
             try {
                 Thread.sleep(100);
@@ -164,14 +166,16 @@ public class Node<T extends IListener<Notification> & ILocatable & Serializable 
     }
 
     private void increaseStatus() {
-        if (status.get() > STATUS_WORKING)
+        if (status.get() > STATUS_WORKING) {
             throw new IllegalStateException();
+        }
         status.incrementAndGet();
     }
 
     private void decreaseStatus() {
-        if (status.get() < STATUS_IDLE)
+        if (status.get() < STATUS_IDLE) {
             throw new IllegalStateException();
+        }
         status.decrementAndGet();
     }
 
@@ -184,8 +188,9 @@ public class Node<T extends IListener<Notification> & ILocatable & Serializable 
      */
     @Override
     public boolean equals(Object obj) {
-        if (this == obj)
+        if (this == obj) {
             return true;
+        }
         return compareTo((Node<T, D>) obj) == 0;
     }
 

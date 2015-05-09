@@ -36,7 +36,6 @@ import de.tsl2.nano.core.util.ConcurrentUtil;
 import de.tsl2.nano.service.util.AbstractStatelessServiceBean;
 import de.tsl2.nano.service.util.GenericServiceBean;
 import de.tsl2.nano.service.util.IGenericBaseService;
-import de.tsl2.nano.serviceaccess.IAuthorization;
 
 /**
  * NOT FINISHED YET!
@@ -155,8 +154,9 @@ public class GenericReplicatingServiceBean extends GenericServiceBean {
 //            //WORKAROUND for check
 //            String msg = ex.toString();
 //            boolean dbAnswer = msg != null && msg.contains("SQLException");
-            if (/*!dbAnswer && */throwException)
+            if (/*!dbAnswer && */throwException) {
                 ManagedException.forward(ex);
+            }
             return connected = false;//!dbAnswer;
         }
     }
@@ -224,8 +224,9 @@ public class GenericReplicatingServiceBean extends GenericServiceBean {
                 Object attrValue = attr.getValue(e);
                 if (attrValue != null && !container.contains(attrValue)) {
                     loadedBean = repService.refresh(attrValue);
-                    if (loadedBean == null)
+                    if (loadedBean == null) {
                         myAttrValues.add(attrValue);
+                    }
                 }
             }
             addReplicationEntities(repService, myAttrValues, container);

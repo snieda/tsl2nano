@@ -11,9 +11,13 @@ package de.tsl2.nano.util;
 
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
+import java.util.LinkedHashSet;
 import java.util.Map;
+import java.util.Set;
 
+import de.tsl2.nano.collection.CollectionUtil;
 import de.tsl2.nano.core.ManagedException;
+import de.tsl2.nano.core.cls.BeanClass;
 
 /**
  * Should only be used by framework developers</p> Some classes are not intended to be extended. Defining fields and
@@ -36,6 +40,9 @@ import de.tsl2.nano.core.ManagedException;
  * pa.call("mymethodname", "myparameter1");
  * </pre>
  * 
+ * Provides powerful but dangerous method and member filters. As last workaround for a framework developer the method
+ * {@link #eval(String, Class, Class...)} tries to get a desired property from any object.
+ * <p/>
  * For further informations, see {@link UnboundAccessor}.
  * 
  * @author ts
@@ -50,14 +57,13 @@ public class PrivateAccessor<T> extends UnboundAccessor<T> {
     public PrivateAccessor(T instance) {
         super(instance);
     }
-    
+
     /**
      * see {@link UnboundAccessor#UnboundAccessor(Object, boolean)}
      */
     public PrivateAccessor(T instance, boolean useMemberCache) {
         super(instance, useMemberCache);
     }
-
 
     @Override
     protected Field getField(String name) throws Exception {
@@ -68,8 +74,9 @@ public class PrivateAccessor<T> extends UnboundAccessor<T> {
         try {
             return cls.getDeclaredField(name);
         } catch (NoSuchFieldException e) {
-            if (cls.getSuperclass() != null)
+            if (cls.getSuperclass() != null) {
                 return getField(cls.getSuperclass(), name);
+            }
             ManagedException.forward(e);
             return null;
         }
@@ -84,11 +91,104 @@ public class PrivateAccessor<T> extends UnboundAccessor<T> {
         try {
             return cls.getDeclaredMethod(name, par);
         } catch (NoSuchMethodException e) {
-            if (cls.getSuperclass() != null)
+            if (cls.getSuperclass() != null) {
                 return getMethod(cls.getSuperclass(), name, par);
+            }
             ManagedException.forward(e);
             return null;
         }
     }
-    
+
+    /**
+     * tries to find the right method. calls all found methods to get the desired property. if no one was found, it
+     * tries that again on the class fields.
+     * 
+     * @param nameExpression (optional) regular expression to match a method name
+     * @param returnType (optional) desired return type
+     * @param pars first or complete arguments that types have to match the methods parameter types.
+     * @return desired property instance or null, if no method or field provides this property.
+     */
+    public <T> T eval(String nameExpression, Class<T> returnType, Object... pars) {
+        Class[] args = getArgTypes(pars);
+        Set<Method> methods = findMethod(nameExpression, returnType, args);
+        for (Method m : methods) {
+            try {
+                m.setAccessible(true);
+                return (T) m.invoke(instance, args);
+            } catch (Exception e) {
+                //Ok, try the next one...
+            }
+        }
+
+        Set<Field> members = findMembers(nameExpression, returnType);
+        for (Field f : members) {
+            try {
+                f.setAccessible(true);
+                return (T) f.get(instance);
+            } catch (Exception e) {
+                //Ok, try the next one...
+            }
+        }
+        return null;
+    }
+
+    private Class[] getArgTypes(Object[] pars) {
+        Class[] args = new Class[pars.length];
+        for (int i = 0; i < pars.length; i++) {
+            args[i] = pars[i] != null ? pars[i].getClass() : Object.class;
+        }
+        return args;
+    }
+
+    /**
+     * generic method finder. give a regular expression of methods name, its return type and some arg types to get a
+     * filtered method list.
+     * 
+     * @param nameExpression (optional) regular expression to match a method name
+     * @param returnType (optional) desired return type
+     * @param args first or complete arguments that types have to match the methods parameter types.
+     * @return set of found methods
+     */
+    protected Set<Method> findMethod(String nameExpression, Class returnType, Class... args) {
+        Method[] methods = instance.getClass().getMethods();
+        methods = CollectionUtil.concat(methods, instance.getClass().getDeclaredMethods());
+        Set<Method> result = new LinkedHashSet<Method>();
+        for (int i = 0; i < methods.length; i++) {
+            if ((nameExpression == null || methods[i].getName().matches(nameExpression))
+                && (returnType == null || BeanClass.isAssignableFrom(methods[i].getReturnType(), returnType))) {
+                Class<?>[] parTypes = methods[i].getParameterTypes();
+                boolean typesOk = true;
+                for (int j = 0; j < args.length; j++) {
+                    if (!(BeanClass.isAssignableFrom(parTypes[j], args[j]))) {
+                        typesOk = false;
+                        break;
+                    }
+                }
+                if (typesOk)
+                    result.add(methods[i]);
+            }
+        }
+        return result;
+    }
+
+    /**
+     * generic member finder. give a regular expression of methods name and its return type.
+     * 
+     * @param nameExpression (optional) regular expression to match a member name
+     * @param returnType (optional) desired return type
+     * @return set of found members
+     */
+    protected Set<Field> findMembers(String nameExpression, Class returnType) {
+        Field[] fields = instance.getClass().getFields();
+        fields = CollectionUtil.concat(fields, instance.getClass().getDeclaredFields());
+        Set<Field> result = new LinkedHashSet<Field>();
+        for (int i = 0; i < fields.length; i++) {
+            if ((nameExpression == null || fields[i].getName().matches(nameExpression))
+                && (returnType == null || BeanClass.isAssignableFrom(fields[i].getType(), returnType))) {
+                result.add(fields[i]);
+            }
+        }
+        return result;
+    }
+
 }

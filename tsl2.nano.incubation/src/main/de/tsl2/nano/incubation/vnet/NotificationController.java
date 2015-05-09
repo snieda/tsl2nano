@@ -20,6 +20,9 @@ import de.tsl2.nano.messaging.IListener;
  */
 public class NotificationController extends ThreadingEventController {
     
+    /** serialVersionUID */
+    private static final long serialVersionUID = 1L;
+
     public void notify(Notification n) {
             fireEvent(n);
     }

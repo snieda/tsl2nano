@@ -37,10 +37,8 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.Date;
-import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
-import java.util.Map;
 import java.util.Properties;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
@@ -50,7 +48,6 @@ import org.apache.commons.codec.binary.Base64;
 import org.apache.commons.logging.Log;
 
 import de.tsl2.nano.core.ManagedException;
-import de.tsl2.nano.core.Messages;
 import de.tsl2.nano.core.execution.IRunnable;
 import de.tsl2.nano.core.log.LogFactory;
 import de.tsl2.nano.core.util.FileUtil.FileDetail;
@@ -112,8 +109,9 @@ public class FileUtil {
                 if (zipEntry.getName().matches(filter)) {
                     files.add(zipEntry.getName());
                 }
-                if (closeStream)
+                if (closeStream) {
                     sourceStream.closeEntry();
+                }
             }
             return (String[]) files.toArray(new String[0]);
         } catch (final Exception ex) {
@@ -396,12 +394,13 @@ public class FileUtil {
         } catch (final Exception e) {
             ManagedException.forward(e);
         } finally {
-            if (stream != null)
+            if (stream != null) {
                 try {
                     stream.close();
                 } catch (IOException e) {
                     ManagedException.forward(e);
                 }
+            }
         }
     }
 
@@ -436,8 +435,9 @@ public class FileUtil {
 
     public static Properties loadPropertiesFromFile(String resourceFile) {
         File f = new File(resourceFile);
-        if (!f.canRead())
+        if (!f.canRead()) {
             return null;
+        }
         final Properties properties = new Properties();
         try {
             LOG.info("loading resource: " + resourceFile);
@@ -457,12 +457,14 @@ public class FileUtil {
      * @return filled properties
      */
     public static Properties loadProperties(String resourceFile, ClassLoader classLoader) {
-        if (classLoader == null)
+        if (classLoader == null) {
             classLoader = Thread.currentThread().getContextClassLoader();
+        }
         Thread.currentThread().setContextClassLoader(classLoader);
         final InputStream resource = classLoader.getResourceAsStream(resourceFile);
-        if (resource == null)
+        if (resource == null) {
             throw new IllegalArgumentException("file: " + resourceFile + " not found");
+        }
         final Properties properties = new Properties();
         try {
             LOG.info("loading resource: " + resourceFile);
@@ -547,8 +549,9 @@ public class FileUtil {
         LOG.info("Try to open File " + strFile);
         InputStream file = null;
         try {
-            if (classLoader == null)
+            if (classLoader == null) {
                 classLoader = Thread.currentThread().getContextClassLoader();
+            }
             file = getResource(strFile, classLoader);
             if (file == null) {
                 file = getFile(strFile);
@@ -580,7 +583,10 @@ public class FileUtil {
         LOG.info("writing " + ByteUtil.amount(data.length) + " into file " + file);
         FileOutputStream out = null;
         try {
-            out = new FileOutputStream(file, append);
+            File f = new File(file);
+            if (f.getParentFile() != null)
+                f.getParentFile().mkdirs();
+            out = new FileOutputStream(f, append);
         } catch (/*FileNotFound*/final Exception ex) {
             ManagedException.forward(ex);
             return;
@@ -607,12 +613,13 @@ public class FileUtil {
         } catch (Exception ex) {
             throw new RuntimeException(ex);
         } finally {
-            if (o != null)
+            if (o != null) {
                 try {
                     o.close();
                 } catch (IOException e) {
                     LOG.error("coudn't close stream " + filename);
                 }
+            }
         }
         return l_return;
     }
@@ -734,6 +741,7 @@ public class FileUtil {
         Reader r = new FilterReader(reader) {
             boolean firstLineRead = false;
 
+            @Override
             public int read(char[] cbuf, int off, int len) throws IOException {
                 if (ignoreFirstLine && !firstLineRead) {
                     skipLine();
@@ -753,16 +761,18 @@ public class FileUtil {
                     firstLineRead = true;
                 }
                 int c = super.read();
-                if (replace == 0) // ignore this char and read the next!
+                if (replace == 0) {
                     return (char) c == transform ? super.read() : c;
-                else
+                } else {
                     return (char) c == transform ? replace : c;
+                }
             }
 
             void skipLine() throws IOException {
                 int c;
-                while ((c = super.read()) != -1 && (char) c != '\n')
+                while ((c = super.read()) != -1 && (char) c != '\n') {
                     ;
+                }
             }
         };
         return r;
@@ -778,6 +788,8 @@ public class FileUtil {
         try {
             final File f1 = new File(srcFile);
             final File f2 = new File(destFile);
+            if (f2.getParentFile() != null)
+                f2.getParentFile().mkdirs();
             write(new FileInputStream(f1), new FileOutputStream(f2), true);
             LOG.info("file " + srcFile + " copied to " + destFile);
         } catch (final Exception ex) {
@@ -993,8 +1005,9 @@ public class FileUtil {
         LinkedList<File> result = new LinkedList<File>();
         try {
             getTreeFiles(basePath, basePath, regExFilename, result);
-            if (sortBy != null)
+            if (sortBy != null) {
                 Collections.sort(result, new FileComparator(sortBy, sortUp));
+            }
             LOG.debug("fileset(" + basePath + regExFilename + " --> " + StringUtil.toString(result, 200));
             return result;
         } catch (Exception e) {
@@ -1006,18 +1019,21 @@ public class FileUtil {
     static Collection<File> getTreeFiles(String basePath, String path, String regExFilename, Collection<File> result) throws Exception {
         File dir = new File(path);
         File[] files = dir.listFiles();
-        if (files == null)
+        if (files == null) {
             throw new IllegalArgumentException("'" + path + "' is not a directory");
+        }
         String pattern =
             "\\Q" + new File(basePath).getCanonicalPath() + "\\E"
                 + regExFilename.replace("/", "\\Q" + File.separator + "\\E");
 
         for (File file : files) {
-            if (file.getCanonicalPath().matches(pattern))
+            if (file.getCanonicalPath().matches(pattern)) {
                 result.add(file);
+            }
             //no else-if, a directory can match, too. --> recursion
-            if (file.isDirectory())
+            if (file.isDirectory()) {
                 getTreeFiles(basePath, file.getPath(), regExFilename, result);
+            }
         }
         return result;
     }
@@ -1073,8 +1089,9 @@ public class FileUtil {
             final IRunnable<T, File> action,
             Comparator<File> sorter) {
         List<File> files = getFileset(dirPath, include);
-        if (sorter != null)
+        if (sorter != null) {
             Collections.sort(files, sorter);
+        }
         Collection<T> result = new ArrayList<T>();
         for (File file : files) {
             result.add(action.run(file));

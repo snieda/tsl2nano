@@ -40,8 +40,8 @@ public class RuleExpression<T extends Serializable> extends RunnableExpression<T
         super();
     }
 
-    public RuleExpression(Class<?> argumentHolderClass, String ruleName) {
-        this(argumentHolderClass, ruleName, (Class<T>) Util.untyped(Object.class));
+    public RuleExpression(Class<?> declaringClass, String ruleName) {
+        this(declaringClass, ruleName, (Class<T>) Util.untyped(Object.class));
     }
 
     /**
@@ -51,20 +51,21 @@ public class RuleExpression<T extends Serializable> extends RunnableExpression<T
         super(argumentHolderClass, ruleName, type);
     }
 
+    @Override
     protected IPRunnable<T, Map<String, Object>> createRunnable() {
         return (Rule<T>) ENV.get(RulePool.class).get(expression.substring(1));
     }
 
     @Override
     protected Map<String, Object> refreshArguments(Object beanInstance) {
-        Map<String, Object> args = super.refreshArguments(beanInstance);
         //transform dates to numbers
         //TODO it's dirty - implement generic for different types
         Set<String> keySet = arguments.keySet();
         for (String charSequence : keySet) {
             Object v = arguments.get(charSequence);
-            if (v instanceof Date)
+            if (v instanceof Date) {
                 arguments.put(charSequence, (T) new BigDecimal(((Date) v).getTime()));
+            }
         }
         return (Map<String, Object>) Util.untyped(arguments);
     }

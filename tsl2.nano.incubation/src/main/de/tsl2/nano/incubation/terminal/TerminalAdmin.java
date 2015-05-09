@@ -9,9 +9,6 @@
  */
 package de.tsl2.nano.incubation.terminal;
 
-import java.util.Properties;
-
-import de.tsl2.nano.core.execution.IRunnable;
 import de.tsl2.nano.core.util.XmlUtil;
 import de.tsl2.nano.incubation.terminal.IItem.Type;
 import de.tsl2.nano.incubation.terminal.item.Container;
@@ -62,7 +59,7 @@ public class TerminalAdmin extends Terminal {
     protected static IItem createItem(IContainer parent, String name, Type type, Object defaultValue) {
         switch (type) {
         case Option:
-            return new Option(parent, name, null, (Boolean) defaultValue, "");
+            return new Option(parent, name, null, defaultValue, "");
         case Input:
             return new Input(name, null, defaultValue, "");
         case Action:

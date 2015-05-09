@@ -33,7 +33,7 @@ public class NumericConditionOperator extends ConditionOperator<Object> {
     protected CharSequence precalc(CharSequence expression) {
         expression = wrap(expression);
         //first, calculate functions and replace their expression with their results
-        funcop.eval(expression, (Map<CharSequence, Object>) getValues());
+        funcop.eval(expression, getValues());
         return super.precalc(expression);
     }
     

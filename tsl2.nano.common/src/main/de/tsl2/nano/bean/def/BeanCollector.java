@@ -40,7 +40,6 @@ import de.tsl2.nano.bean.BeanContainer;
 import de.tsl2.nano.bean.BeanUtil;
 import de.tsl2.nano.bean.IAttributeDef;
 import de.tsl2.nano.bean.IBeanContainer;
-import de.tsl2.nano.bean.IValueAccess;
 import de.tsl2.nano.bean.ValueHolder;
 import de.tsl2.nano.collection.CollectionUtil;
 import de.tsl2.nano.collection.Entry;
@@ -167,8 +166,9 @@ public class BeanCollector<COLLECTIONTYPE extends Collection<T>, T> extends Bean
     public BeanCollector(Class<T> beanType, final COLLECTIONTYPE collection, int workingMode, Composition composition) {
         this(new BeanFinder<T, Object>(beanType), workingMode, composition);
         this.collection = collection;
-        if (isStaticCollection || !hasMode(MODE_SEARCHABLE))
+        if (isStaticCollection || !hasMode(MODE_SEARCHABLE)) {
             this.searchStatus = "";
+        }
     }
 
     /**
@@ -207,9 +207,10 @@ public class BeanCollector<COLLECTIONTYPE extends Collection<T>, T> extends Bean
 //        } else {
         this.workingMode = workingMode;
 //        }
-        if (isStaticCollection)
+        if (isStaticCollection) {
             searchStatus =
                 Messages.getFormattedString("tsl2nano.searchdialog.searchresultcount", this.collection.size());
+        }
         this.composition = composition;
         if (composition != null && composition.getTargetType() == null) {
             if (hasMode(MODE_SEARCHABLE)) {
@@ -222,8 +223,9 @@ public class BeanCollector<COLLECTIONTYPE extends Collection<T>, T> extends Bean
         actions = new LinkedHashSet<IAction>();
         if (hasMode(MODE_SEARCHABLE)) {
             createSearchAction();
-            if (hasFilter())
+            if (hasFilter()) {
                 createResetAction();
+            }
         }
         if (hasMode(MODE_EDITABLE)) {
             createOpenAction();
@@ -244,7 +246,7 @@ public class BeanCollector<COLLECTIONTYPE extends Collection<T>, T> extends Bean
         //try to evaluate the collection content type
         if (beanFinder == null) {
             if (collection != null && collection.size() > 0) {
-                setBeanFinder(new BeanFinder((Class<T>) collection.iterator().next().getClass()));
+                setBeanFinder(new BeanFinder(collection.iterator().next().getClass()));
             } else {
                 setBeanFinder(new BeanFinder(super.getClazz()));
             }
@@ -268,8 +270,9 @@ public class BeanCollector<COLLECTIONTYPE extends Collection<T>, T> extends Bean
                 break;
             }
         }
-        if (dosearch)
+        if (dosearch) {
             getBeanFinder().getData();
+        }
     }
 
     @Override
@@ -278,10 +281,11 @@ public class BeanCollector<COLLECTIONTYPE extends Collection<T>, T> extends Bean
         /*
          * if a bean-collector was left through cancel, new created compositions must be removed!
          */
-        if (composition != null)
+        if (composition != null) {
             for (T instance : collection) {
                 Bean.getBean((Serializable) instance).onDeactivation();
             }
+        }
     }
 
     /**
@@ -314,7 +318,7 @@ public class BeanCollector<COLLECTIONTYPE extends Collection<T>, T> extends Bean
                         Iterator<T> it = searchPanelBeans.iterator();
                         T from = searchPanelBeans.size() > 0 ? it.next() : null;
                         T to = searchPanelBeans.size() > 1 ? it.next() : null;
-                        return (COLLECTIONTYPE) getData(from, to);
+                        return getData(from, to);
                     }
                 }
 
@@ -326,14 +330,15 @@ public class BeanCollector<COLLECTIONTYPE extends Collection<T>, T> extends Bean
                          */
                         if (composition != null) {
                             for (Iterator<T> it = collection.iterator(); it.hasNext();) {
-                                T item = (T) it.next();
-                                if (!composition.getParentContainer().contains(item))
+                                T item = it.next();
+                                if (!composition.getParentContainer().contains(item)) {
                                     it.remove();
+                                }
                             }
                         }
                     } else if (!betweenFinderCreated) {
                         collection =
-                            (COLLECTIONTYPE) CollectionUtil.getFilteringBetween(collection, from, (T) to, true);
+                            CollectionUtil.getFilteringBetween(collection, from, (T) to, true);
                         betweenFinderCreated = true;
                     }
                     /*
@@ -348,7 +353,7 @@ public class BeanCollector<COLLECTIONTYPE extends Collection<T>, T> extends Bean
                             (COLLECTIONTYPE) getValueExpression().matchingObjects(expression);
                     } else if (!betweenFinderCreated) {
                         collection =
-                            (COLLECTIONTYPE) CollectionUtil.getFiltering(collection, new StringBuilder(expression));
+                            CollectionUtil.getFiltering(collection, new StringBuilder(expression));
                         betweenFinderCreated = true;
                     }
                     Collections.sort((List) collection, getValueExpression().getComparator());
@@ -386,9 +391,11 @@ public class BeanCollector<COLLECTIONTYPE extends Collection<T>, T> extends Bean
     /**
      * @return Returns the selectionProvider.
      */
+    @Override
     public ISelectionProvider<T> getSelectionProvider() {
-        if (selectionProvider == null)
+        if (selectionProvider == null) {
             selectionProvider = new SelectionProvider<T>(new LinkedList<T>());
+        }
         return selectionProvider;
     }
 
@@ -440,8 +447,9 @@ public class BeanCollector<COLLECTIONTYPE extends Collection<T>, T> extends Bean
      * @return first selection element or null
      */
     protected T getFirstSelectedElement() {
-        if (getSelectionProvider() == null)
+        if (getSelectionProvider() == null) {
             return null;
+        }
         Collection<T> selection = getSelectionProvider().getValue();
         return selection.isEmpty() ? null : selection.iterator().next();
     }
@@ -538,8 +546,9 @@ public class BeanCollector<COLLECTIONTYPE extends Collection<T>, T> extends Bean
      */
     @Override
     public void deleteItem(T item) {
-        if (!CompositionFactory.markToPersist(item) && Bean.getBean((Serializable) item).getId() != null)
+        if (!CompositionFactory.markToPersist(item) && Bean.getBean((Serializable) item).getId() != null) {
             BeanContainer.instance().delete(item);
+        }
     }
 
     /**
@@ -561,7 +570,7 @@ public class BeanCollector<COLLECTIONTYPE extends Collection<T>, T> extends Bean
                  * but the tsl2nano util may cause a classloader exception.
                  * we don't use a deep copy to avoid lazyloading problems
                  */
-                newItem = (T) BeanUtil.clone(selectedItem);
+                newItem = BeanUtil.clone(selectedItem);
                 BeanUtil.createOwnCollectionInstances(newItem);
             } catch (final Exception e) {
                 LOG.error(e);
@@ -578,10 +587,11 @@ public class BeanCollector<COLLECTIONTYPE extends Collection<T>, T> extends Bean
             } else if (Entry.class.isAssignableFrom(type)) {
                 // normally we would handle this inside the generic else block, but we need
                 // the generics key and value type informations
-                if (Proxy.isProxyClass(collection.getClass()))
+                if (Proxy.isProxyClass(collection.getClass())) {
                     newItem = (T) ((MapEntrySet) (FilteringIterator.getIterable((Proxy) collection))).add(null, null);
-                else
+                } else {
                     newItem = (T) ((MapEntrySet) (collection)).add(null, null);
+                }
             } else {
                 newItem = BeanContainer.instance().createBean(getType());
             }
@@ -628,8 +638,9 @@ public class BeanCollector<COLLECTIONTYPE extends Collection<T>, T> extends Bean
                     //TODO: use a more unique value
                     if (ENV.get("value.id.use.timestamp", false)) {
                         value = System.currentTimeMillis();
-                        if (NumberUtil.isInteger(idAttribute.getType()))
+                        if (NumberUtil.isInteger(idAttribute.getType())) {
                             value = DateUtil.getMillisWithoutYear((Long) value);
+                        }
                     } else {
                         value = ENV.counter("value.id.counter.start", 1);
                     }
@@ -661,6 +672,7 @@ public class BeanCollector<COLLECTIONTYPE extends Collection<T>, T> extends Bean
             BeanContainer.getActionText(actionId, false),
             BeanContainer.getActionText(actionId, true),
             IAction.MODE_UNDEFINED) {
+            @Override
             public Object action() throws Exception {
                 T newBean = createItem(getFirstSelectedElement());
                 if (newBean == null) {
@@ -668,7 +680,7 @@ public class BeanCollector<COLLECTIONTYPE extends Collection<T>, T> extends Bean
                 }
                 final Object result = editItem(newBean);
                 if (!IAction.CANCELED.equals(result)) {
-                    newBean = (T) beanFinder.unwrapToSelectableBean(result);
+                    newBean = beanFinder.unwrapToSelectableBean(result);
                     final T finalBean = newBean;
                     final COLLECTIONTYPE values = collection;
                     values.add(newBean);
@@ -682,8 +694,9 @@ public class BeanCollector<COLLECTIONTYPE extends Collection<T>, T> extends Bean
                                  * Here we use equals() instead of hashcode()
                                  */
                                 for (Iterator it = values.iterator(); it.hasNext();) {
-                                    if (it.next().equals(finalBean))
+                                    if (it.next().equals(finalBean)) {
                                         it.remove();
+                                    }
                                 }
                             }
                             getSelectionProvider().getValue().remove(finalBean);
@@ -694,8 +707,9 @@ public class BeanCollector<COLLECTIONTYPE extends Collection<T>, T> extends Bean
                                 values.add((T) b.getInstance());
                                 getSelectionProvider().getValue().add((T) b.getInstance());
                             } else {
-                                if (composition != null)
+                                if (composition != null) {
                                     composition.remove(finalBean);
+                                }
                             }
                             return null;
                         }
@@ -734,6 +748,7 @@ public class BeanCollector<COLLECTIONTYPE extends Collection<T>, T> extends Bean
             BeanContainer.getActionText(actionId, false),
             BeanContainer.getActionText(actionId, true),
             IAction.MODE_UNDEFINED) {
+            @Override
             public Object action() throws Exception {
                 checkBeforeDelete(getSelectionProvider().getValue());
                 final COLLECTIONTYPE values = collection;
@@ -774,9 +789,11 @@ public class BeanCollector<COLLECTIONTYPE extends Collection<T>, T> extends Bean
             BeanContainer.getActionText(actionId, false),
             BeanContainer.getActionText(actionId, true),
             /*(closeDialogOnOpenAction ? */IAction.MODE_DLG_OK/* : IAction.MODE_UNDEFINED)*/) {
+            @Override
             public Object action() throws Exception {
-                if (!hasSelection())
+                if (!hasSelection()) {
                     return null;
+                }
                 //eval. the bean, get relations, and couple (after OK) it with table
                 final T selectedBean = getFirstSelectedElement();
                 T fullBean = reloadBean ? BeanContainer.instance().resolveLazyRelations(selectedBean) : selectedBean;
@@ -820,8 +837,9 @@ public class BeanCollector<COLLECTIONTYPE extends Collection<T>, T> extends Bean
      */
     protected void replaceBean(T selectedBean, T newBean) {
         //TODO: the new item will be added to the end - but should be at the same position as the old one
-        if (collection.remove(selectedBean))
+        if (collection.remove(selectedBean)) {
             collection.add(newBean);
+        }
     }
 
     @Override
@@ -858,8 +876,9 @@ public class BeanCollector<COLLECTIONTYPE extends Collection<T>, T> extends Bean
         //we have to use the iterator to get the filtered data!
         for (Iterator<IPresentableColumn> it = colDefs.iterator(); it.hasNext();) {
             c = it.next();
-            if (c.getPresentable().isVisible())
+            if (c.getPresentable().isVisible()) {
                 colDefCopy.add(c);
+            }
         }
         Collections.sort(colDefCopy);
         return colDefCopy;
@@ -885,10 +904,11 @@ public class BeanCollector<COLLECTIONTYPE extends Collection<T>, T> extends Bean
             } else {
                 //if derived from deserialization, the cycling attributeDefinition is null
                 ValueColumn vc = (ValueColumn) col;
-                if (vc.attributeDefinition == null)
+                if (vc.attributeDefinition == null) {
                     vc.attributeDefinition = attr;
+                }
             }
-            columnDefinitions.add((IPresentableColumn) col);
+            columnDefinitions.add(col);
         }
         if (ENV.get("collector.use.multiple.filter", true)) {
             //TODO: filtering ids, and invisibles, too --> don't ask multiple-flag
@@ -934,8 +954,9 @@ public class BeanCollector<COLLECTIONTYPE extends Collection<T>, T> extends Bean
         List<String> cnames = new ArrayList<String>(colDefs.size());
 
         for (IPresentableColumn c : colDefs) {
-            if (c.getPresentable().isVisible())
+            if (c.getPresentable().isVisible()) {
                 cnames.add(c.getDescription());
+            }
         }
         return cnames;
     }
@@ -946,13 +967,15 @@ public class BeanCollector<COLLECTIONTYPE extends Collection<T>, T> extends Bean
         if (names.length > i) {
             String name = names[i];
             IPresentableColumn column = getAttribute(name).getColumnDefinition();
-            if (column != null && column.getIndex() == i)
+            if (column != null && column.getIndex() == i) {
                 return column;
+            }
         }
         Collection<IPresentableColumn> colDefs = getColumnDefinitions();
         for (IPresentableColumn c : colDefs) {
-            if (c.getIndex() == i)
+            if (c.getIndex() == i) {
                 return c;
+            }
         }
         return null;
     }
@@ -984,8 +1007,9 @@ public class BeanCollector<COLLECTIONTYPE extends Collection<T>, T> extends Bean
      * @return column value
      */
     protected <V> V getColumnValueEx(Object element, IAttributeDefinition<V> attribute) {
-        if (element == null)
+        if (element == null) {
             return null;
+        }
         Object value;
         value = attribute instanceof IValueDefinition ? ((IValueDefinition) attribute).getValue()
             : attribute.getValue(element);
@@ -996,10 +1020,11 @@ public class BeanCollector<COLLECTIONTYPE extends Collection<T>, T> extends Bean
     public String getColumnText(Object element, int columnIndex) {
         IPresentableColumn col = getColumn(columnIndex);
         //column may be filtered (e.g. id-columns)
-        if (col == null)
+        if (col == null) {
             return "";
-        else if (col instanceof ValueColumn)
+        } else if (col instanceof ValueColumn) {
             return getColumnText(element, ((ValueColumn) col).attributeDefinition);
+        }
         return getColumnText(element, getAttribute(col.getName()));
     }
 
@@ -1016,8 +1041,9 @@ public class BeanCollector<COLLECTIONTYPE extends Collection<T>, T> extends Bean
                 for (T item : collection) {
                     Bean b = Bean.getBean((Serializable) item);
                     Number v = (Number) b.getValue(col.getName());
-                    if (v != null)
+                    if (v != null) {
                         result += v.doubleValue();
+                    }
                 }
                 return ENV.translate("tsl2nano.total", true) + ": "
                     + getAttribute(col.getName()).getFormat().format(result);
@@ -1035,8 +1061,9 @@ public class BeanCollector<COLLECTIONTYPE extends Collection<T>, T> extends Bean
         Object value;
         try {
             value = getColumnValueEx(element, attribute);
-            if (value == null)
+            if (value == null) {
                 return "";
+            }
             if (attribute.getFormat() != null) {
                 return attribute.getFormat().format(value);
             } else {
@@ -1054,17 +1081,19 @@ public class BeanCollector<COLLECTIONTYPE extends Collection<T>, T> extends Bean
     public void shiftSortIndexes() {
         Collection<IPresentableColumn> columns = getColumnDefinitions();
         for (IPresentableColumn c : columns) {
-            if (c.getSortIndex() != IPresentable.UNDEFINED)
-                if (c.getSortIndex() < columns.size())
+            if (c.getSortIndex() != IPresentable.UNDEFINED) {
+                if (c.getSortIndex() < columns.size()) {
                     ((ValueColumn) c).sortIndex++;
-                else
+                } else {
                     ((ValueColumn) c).sortIndex = IPresentable.UNDEFINED;
+                }
+            }
         }
     }
 
     Integer[] getSortIndexes() {
         //important: do a copy of the origin - otherwise the next time the columns will be arranged through sortindex!
-        List<IPresentableColumn> columns = new ArrayList((List<IPresentableColumn>) getColumnDefinitions());
+        List<IPresentableColumn> columns = new ArrayList(getColumnDefinitions());
         Collections.sort(columns, new Comparator<IPresentableColumn>() {
             @Override
             public int compare(IPresentableColumn o1, IPresentableColumn o2) {
@@ -1078,7 +1107,9 @@ public class BeanCollector<COLLECTIONTYPE extends Collection<T>, T> extends Bean
         List<Integer> indexes = new ArrayList<Integer>(columns.size());
         for (IPresentableColumn c : columns) {
             if (c.getSortIndex() == IPresentable.UNDEFINED)
+             {
                 break;//the following will be undefined, too (--> sorting)
+            }
             indexes.add(c.getIndex());
         }
         return indexes.toArray(new Integer[0]);
@@ -1132,7 +1163,7 @@ public class BeanCollector<COLLECTIONTYPE extends Collection<T>, T> extends Bean
                 if (hasSearchRequestChanged == null) {
                     for (T rb : rangeBeans) {
                         //we can't use the bean cache - if empty beans were stored they would be reused!
-                        connect(new Bean((Serializable) rb), rb, new CommonAction() {
+                        connect(new Bean(rb), rb, new CommonAction() {
                             @Override
                             public Object action() throws Exception {
                                 return hasSearchRequestChanged = true;
@@ -1142,15 +1173,18 @@ public class BeanCollector<COLLECTIONTYPE extends Collection<T>, T> extends Bean
                     //assign fixed search ranges
                     Collection<IPresentableColumn> columns = getColumnDefinitions();
                     for (IPresentableColumn c : columns) {
-                        if (c.getMinSearchValue() != null)
+                        if (c.getMinSearchValue() != null) {
                             BeanClass.getBeanClass(getType()).setValue(from, c.getName(), c.getMinSearchValue());
-                        if (c.getMaxSearchValue() != null)
+                        }
+                        if (c.getMaxSearchValue() != null) {
                             BeanClass.getBeanClass(getType()).setValue(to, c.getName(), c.getMaxSearchValue());
+                        }
                     }
                 }
                 return rangeBeans;
-            } else
+            } else {
                 return new LinkedList<T>();
+            }
         }
         return new LinkedList<T>();
     }
@@ -1158,6 +1192,7 @@ public class BeanCollector<COLLECTIONTYPE extends Collection<T>, T> extends Bean
     /**
      * @return Returns the collection.
      */
+    @Override
     public COLLECTIONTYPE getCurrentData() {
         return collection;
     }
@@ -1170,8 +1205,9 @@ public class BeanCollector<COLLECTIONTYPE extends Collection<T>, T> extends Bean
     protected Collection<IAction> getSearchPanelActions() {
         if (hasMode(MODE_SEARCHABLE)) {
             return Arrays.asList((IAction) searchAction, resetAction);
-        } else
+        } else {
             return new LinkedList<IAction>();
+        }
     }
 
     public IAction<COLLECTIONTYPE> getSearchAction() {
@@ -1198,8 +1234,9 @@ public class BeanCollector<COLLECTIONTYPE extends Collection<T>, T> extends Bean
                 COLLECTIONTYPE result = (COLLECTIONTYPE) getBeanFinder().getData();
                 searchStatus = Messages.getFormattedString("tsl2nano.searchdialog.searchresultcount",
                     result.size());
-                if (openAction != null)
+                if (openAction != null) {
                     openAction.setDefault(true);
+                }
                 return result;
             }
 
@@ -1239,8 +1276,9 @@ public class BeanCollector<COLLECTIONTYPE extends Collection<T>, T> extends Bean
                     COLLECTIONTYPE result = (COLLECTIONTYPE) getBeanFinder().getData((String) getParameter(0));
                     searchStatus = Messages.getFormattedString("tsl2nano.searchdialog.searchresultcount",
                         result.size());
-                    if (openAction != null)
+                    if (openAction != null) {
                         openAction.setDefault(true);
+                    }
                     return result;
                 }
 
@@ -1274,8 +1312,9 @@ public class BeanCollector<COLLECTIONTYPE extends Collection<T>, T> extends Bean
                 //TODO: fire refresh event
                 BeanUtil.resetValues(getBeanFinder().getFilterRange().getInstance().getFrom());
                 BeanUtil.resetValues(getBeanFinder().getFilterRange().getInstance().getTo());
-                if (!isStaticCollection && collection != null)
+                if (!isStaticCollection && collection != null) {
                     collection.clear();
+                }
                 setSelected();
                 searchStatus =
                     isStaticCollection || !hasMode(MODE_SEARCHABLE) ? "" : Messages
@@ -1397,8 +1436,9 @@ public class BeanCollector<COLLECTIONTYPE extends Collection<T>, T> extends Bean
         //then the summary columns (only the standard calculation while no session parameters are available!)
         Collection<IPresentableColumn> cols = getColumnDefinitions();
         for (IPresentableColumn c : cols) {
-            if (c.isStandardSummary() || c.getSummary() != null)
+            if (c.isStandardSummary() || c.getSummary() != null) {
                 result.put(getAttribute(c.getName()).getId() + ".summary", getSummaryText(properties, c.getIndex()));
+            }
         }
         //and the row count
         result.put(name + ".search.count", collection.size());
@@ -1434,6 +1474,7 @@ public class BeanCollector<COLLECTIONTYPE extends Collection<T>, T> extends Bean
         out.defaultWriteObject();
     }
 
+    @Override
     @Commit
     protected void initDeserialization() {
         init(collection, beanFinder, workingMode, composition);

@@ -80,8 +80,9 @@ public class CommandManager implements ICommandManager {
             cmd[i].run();
             hasDone = (hasDone == null ? true : hasDone) & done.add(cmd[i]);
         }
-        if (recorder.isRecording())
+        if (recorder.isRecording()) {
             recorder.record(null, cmd);
+        }
         return hasDone != null && hasDone;
     }
 

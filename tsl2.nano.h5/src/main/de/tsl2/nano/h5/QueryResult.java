@@ -67,8 +67,9 @@ public class QueryResult<COLLECTIONTYPE extends Collection<T>, T> extends BeanCo
     @Override
     public List<IAttribute> getAttributes(boolean readAndWriteAccess) {
         if (!allDefinitionsCached) {
-            if (attributeDefinitions == null)
+            if (attributeDefinitions == null) {
                 attributeDefinitions = new LinkedHashMap<String, IAttributeDefinition<?>>();
+            }
             List<String> names = query.getColumnNames();
             IAttribute<?> attribute;
             int i = 0;
@@ -78,9 +79,10 @@ public class QueryResult<COLLECTIONTYPE extends Collection<T>, T> extends BeanCo
             }
             allDefinitionsCached = true;
         }
-        return new ArrayList<IAttribute>((Collection) attributeDefinitions.values());
+        return new ArrayList<IAttribute>(attributeDefinitions.values());
     }
 
+    @Override
     @Commit
     protected void initDeserialization() {
         query = (Query<Collection<Object[]>>) ENV.get(QueryPool.class).get(queryName);

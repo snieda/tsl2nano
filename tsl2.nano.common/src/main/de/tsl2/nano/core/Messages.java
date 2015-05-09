@@ -124,8 +124,9 @@ public class Messages {
                 int i = key.lastIndexOf(".");
                 s = key.substring(i + 1);
             }
-            if (!s.contains("&") && format)
+            if (!s.contains("&") && format) {
                 s = StringUtil.toFirstUpper(s);
+            }
         }
         return s;
     }
@@ -143,8 +144,9 @@ public class Messages {
             String a;
             for (int i = 0; i < parameter.length; i++) {
                 a = parameter[i] != null ? getStringOpt(String.valueOf(parameter[i])) : null;
-                if (a != null)
+                if (a != null) {
                     parameter[i] = a;
+                }
             }
             text = MessageFormat.format(text, parameter);
         }

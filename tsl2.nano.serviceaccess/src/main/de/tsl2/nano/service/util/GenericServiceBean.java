@@ -36,7 +36,6 @@ import de.tsl2.nano.collection.MapUtil;
 import de.tsl2.nano.core.ManagedException;
 import de.tsl2.nano.core.cls.BeanAttribute;
 import de.tsl2.nano.core.cls.BeanClass;
-import de.tsl2.nano.core.log.LogFactory;
 import de.tsl2.nano.core.util.StringUtil;
 import de.tsl2.nano.service.util.batch.Part;
 import de.tsl2.nano.service.util.finder.AbstractFinder;
@@ -76,8 +75,9 @@ public class GenericServiceBean extends NamedQueryServiceBean implements IGeneri
     public <T> Collection<T> findAll(Class<T> beanType, int startIndex, int maxResult, Class... lazyRelations) {
         checkContextSecurity();
         if (isVirtualEntity(beanType)) {
-            if (isNamedQuery(beanType))
+            if (isNamedQuery(beanType)) {
                 return findByNamedQuery(beanType, getNamedQueryByArguments(beanType), maxResult);
+            }
         }
         final StringBuffer qStr = createStatement(beanType);
         Map<String, ?> hints = MapUtil.asMap("org.hibernate.cacheable",
@@ -215,8 +215,9 @@ public class GenericServiceBean extends NamedQueryServiceBean implements IGeneri
             attributes =
                 /*isLazyLoadingOnlyOnOneToMany() ? new BeanClass(clazz).getMultiValueAttributes() : */BeanClass
                     .getBeanClass(clazz).getAttributeNames();
-            if (fillTypes != null && fillTypes.size() > 0)
+            if (fillTypes != null && fillTypes.size() > 0) {
                 checkTypesOnly = true;
+            }
         }
         try {
             BeanAttribute beanAttribute;
@@ -232,8 +233,9 @@ public class GenericServiceBean extends NamedQueryServiceBean implements IGeneri
                 if (Collection.class.isAssignableFrom(relationType)) {
                     relationType = beanAttribute.getGenericType();
                 }
-                if (checkTypesOnly && !fillTypes.contains(relationType))
+                if (checkTypesOnly && !fillTypes.contains(relationType)) {
                     continue;
+                }
 
                 /*
                  * now, check for eager loading
@@ -390,8 +392,9 @@ public class GenericServiceBean extends NamedQueryServiceBean implements IGeneri
         checkContextSecurity();
         final Class<T> beanType = (Class<T>) (bean != null ? bean.getClass() : null);
         if (isVirtualEntity(beanType)) {
-            if (isNamedQuery(beanType))
+            if (isNamedQuery(beanType)) {
                 return persistByNamedQuery(bean);
+            }
         }
         // try {
         /*
@@ -413,8 +416,9 @@ public class GenericServiceBean extends NamedQueryServiceBean implements IGeneri
         if (refreshBean) {
             connection().refresh(newbean); //re-read the state (after the trigger executes)
         }
-        if (LOG.isDebugEnabled())
+        if (LOG.isDebugEnabled()) {
             LOG.debug(new Diff(bean, newbean).toString());
+        }
         return fillTree(Arrays.asList(newbean), lazyRelations).iterator().next();
         // } catch (Exception ex) {
         // //catch it and throw a new one. otherwise, the server (toplink) will
@@ -454,8 +458,9 @@ public class GenericServiceBean extends NamedQueryServiceBean implements IGeneri
         checkContextSecurity();
         final Class<?> beanType = (bean != null ? bean.getClass() : null);
         if (isVirtualEntity(beanType)) {
-            if (isNamedQuery(beanType))
+            if (isNamedQuery(beanType)) {
                 removeByNamedQuery(bean);
+            }
             return;
         }
         // try {
@@ -559,8 +564,9 @@ public class GenericServiceBean extends NamedQueryServiceBean implements IGeneri
         final Class<T> beanType = (Class<T>) (firstBean != null ? firstBean.getClass()
             : secondBean != null ? secondBean.getClass() : null);
         if (isVirtualEntity(beanType)) {
-            if (isNamedQuery(beanType))
+            if (isNamedQuery(beanType)) {
                 return findByNamedQuery(beanType, getNamedQueryByArguments(beanType), maxResult);
+            }
         }
         StringBuffer qStr = new StringBuffer();
         Collection<?> parameter = createBetweenStatement(qStr, firstBean, secondBean, caseInsensitive);
@@ -629,10 +635,11 @@ public class GenericServiceBean extends NamedQueryServiceBean implements IGeneri
         query = ServiceUtil.setHints(query, hints);
 
         if (args != null && args.length > 0) {
-            if (ServiceUtil.useNamedParameters(queryString))
+            if (ServiceUtil.useNamedParameters(queryString)) {
                 query = ServiceUtil.setNamedParameters(query, args);
-            else
+            } else {
                 query = ServiceUtil.setParameters(query, args);
+            }
         }
         logTrace(query);
         return query;
@@ -700,7 +707,7 @@ public class GenericServiceBean extends NamedQueryServiceBean implements IGeneri
     @Override
     public <T> Part<T>[] findBatch(Part<T>... batchParts) {
         for (int i = 0; i < batchParts.length; i++) {
-            batchParts[i].setResult((Collection<T>) find(batchParts[i].getFinders()));
+            batchParts[i].setResult(find(batchParts[i].getFinders()));
         }
         return batchParts;
     }

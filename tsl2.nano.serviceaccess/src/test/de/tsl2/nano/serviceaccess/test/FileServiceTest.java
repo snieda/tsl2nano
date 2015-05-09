@@ -76,8 +76,7 @@ public class FileServiceTest extends BaseServiceTest {
         assert fileService.exists(testFile);
         //second: do it again - overwriting
         fileService.writeFile(testFile, data, true);
-        //third: read it and compare it
-        final byte[] content = fileService.getFileContent(testFile);
+        fileService.getFileContent(testFile);
         
 //        assert sun.io.ByteToCharConverter.getDefault().convertAll(content).equals(testFileContent.toCharArray());
         

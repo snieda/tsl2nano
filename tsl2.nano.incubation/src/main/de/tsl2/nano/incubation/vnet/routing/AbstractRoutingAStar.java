@@ -26,7 +26,6 @@ import de.tsl2.nano.incubation.vnet.Link;
 import de.tsl2.nano.incubation.vnet.Node;
 import de.tsl2.nano.incubation.vnet.Notification;
 import de.tsl2.nano.messaging.IListener;
-import de.tsl2.nano.structure.ANode;
 import de.tsl2.nano.structure.Cover;
 import de.tsl2.nano.structure.IConnection;
 import de.tsl2.nano.structure.INode;
@@ -79,7 +78,7 @@ public abstract class AbstractRoutingAStar<T extends IListener<Notification> & I
             // Wurde das Ziel gefunden?
             if (currentConnection.getDestination().equals(destination)) {
                 log("route finished: " + start + currentConnection);
-                return (Connection<T, D>) currentConnection;
+                return currentConnection;
             }
             // Wenn das Ziel noch nicht gefunden wurde: Nachfolgeknoten
             // des aktuellen Knotens auf die Open List setzen
@@ -110,7 +109,7 @@ public abstract class AbstractRoutingAStar<T extends IListener<Notification> & I
             (List<Connection<T, D>>) Util.untyped(currentConnection.getDestination().getConnections());
         Node<T, D> successor;
         for (Connection<T, D> con : nextConnections) {
-            successor = (Node<T, D>) con.getDestination();
+            successor = con.getDestination();
             log_("\t--> " + successor);
             // wenn der Nachfolgeknoten bereits auf der Closed List ist - tue nichts
             if (closedlist.contains(con)) {
@@ -146,8 +145,9 @@ public abstract class AbstractRoutingAStar<T extends IListener<Notification> & I
     public Collection<IConnection<T, D>> navigate(INode<T, D> start,
             IConnection<T, D> route,
             List<IConnection<T, D>> currentTrack) {
-        if (currentTrack == null)
+        if (currentTrack == null) {
             currentTrack = new LinkedList<IConnection<T, D>>();
+        }
         currentTrack.add(route);
         List<IConnection<T, D>> connections = route.getDestination().getConnections();
         //filter the backward connections

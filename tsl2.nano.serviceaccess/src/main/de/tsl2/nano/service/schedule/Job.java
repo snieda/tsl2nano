@@ -72,8 +72,9 @@ public class Job<RUNNABLE> implements Serializable {
         super();
         this.name = name;
         this.timerHandle = timerHandle;
-        if (timerHandle != null)
+        if (timerHandle != null) {
             nextStart = timerHandle.getTimer().getNextTimeout();
+        }
         this.callbacks = callbacks;
         this.context = context;
         this.stopOnError = stopOnError;
@@ -201,10 +202,11 @@ public class Job<RUNNABLE> implements Serializable {
      * @param ex
      */
     public void setLastException(Throwable ex) {
-        if (ex != null)
+        if (ex != null) {
             lastResult = new SStatus(ex);
-        else
+        } else {
             lastResult = new SStatus();
+        }
     }
 
     /**

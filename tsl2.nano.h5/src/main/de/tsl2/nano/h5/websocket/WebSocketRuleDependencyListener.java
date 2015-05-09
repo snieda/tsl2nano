@@ -19,7 +19,7 @@ import de.tsl2.nano.incubation.specification.rules.RuleDependencyListener;
  * @author Tom, Thomas Schneider
  * @version $Revision$
  */
-public class WebSocketRuleDependencyListener<T> extends RuleDependencyListener<T> {
+public class WebSocketRuleDependencyListener<T> extends RuleDependencyListener<T, WSEvent> {
     /** serialVersionUID */
     private static final long serialVersionUID = 7261323751717858340L;
 
@@ -39,7 +39,7 @@ public class WebSocketRuleDependencyListener<T> extends RuleDependencyListener<T
     }
 
     @Override
-    public void handleEvent(Object source) {
+    public void handleEvent(WSEvent source) {
         WebSocketDependencyListener.sendValue(attributeID, propertyName, evaluate(source));
     }
 }

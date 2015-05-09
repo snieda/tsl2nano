@@ -18,7 +18,6 @@ import de.tsl2.nano.core.ENV;
 import de.tsl2.nano.core.util.StringUtil;
 import de.tsl2.nano.incubation.specification.AbstractRunnable;
 import de.tsl2.nano.incubation.specification.ParType;
-import de.tsl2.nano.util.operation.Function;
 import de.tsl2.nano.util.operation.NumericConditionOperator;
 import de.tsl2.nano.util.operation.Operator;
 
@@ -89,8 +88,9 @@ public class Rule<T> extends AbstractRunnable<T> {
         String subRule;
         while ((subRule = StringUtil.extract(operation, "§\\w+")).length() > 0) {
             Rule<?> rule = pool.get(subRule.substring(1));
-            if (rule == null)
+            if (rule == null) {
                 throw new IllegalArgumentException("Referenced rule " + subRule + " in " + this + " not found!");
+            }
             operation = operation.replaceAll(subRule, "(" + rule.operation + ")");
             parameter.putAll(rule.parameter);
             //TODO: what to do with sub rule constraints?
@@ -107,8 +107,9 @@ public class Rule<T> extends AbstractRunnable<T> {
     @SuppressWarnings("unchecked")
     @Override
     public T run(Map<String, Object> arguments, Object... extArgs) {
-        if (!initialized)
+        if (!initialized) {
             importSubRules();
+        }
         arguments = checkedArguments(arguments, ENV.get("application.mode.strict", false));
         operator.reset();
         //in generics it is not possible to cast from Map(String,?) to Map(CharSequence, ?)
@@ -121,6 +122,7 @@ public class Rule<T> extends AbstractRunnable<T> {
         return result;
     }
 
+    @Override
     @SuppressWarnings("unchecked")
     @Commit
     protected void initDeserializing() {

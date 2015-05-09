@@ -24,6 +24,7 @@ import de.tsl2.nano.core.ENV;
 import de.tsl2.nano.core.util.FileUtil;
 import de.tsl2.nano.core.util.StringUtil;
 import de.tsl2.nano.core.util.Util;
+import de.tsl2.nano.h5.websocket.WSEvent;
 import de.tsl2.nano.h5.websocket.WebSocketDependencyListener;
 import de.tsl2.nano.persistence.Persistence;
 
@@ -115,14 +116,16 @@ public class PersistenceUI {
                 .addListener(
                     new WebSocketDependencyListener<String>() {
                         @Override
-                        public String evaluate(Object value) {
+                        public String evaluate(WSEvent evt) {
+                            String value = (String) evt.newValue;
                             String eval = StringUtil.toString(value);
                             defaultSchema.delete(0, defaultSchema.length());
-                            if (value != null)
+                            if (value != null) {
                                 defaultSchema.append(eval);
+                            }
                             return eval;
                         }
-                    });
+                    }, WSEvent.class);
             login
             .getAttribute("connectionUserName")
             .changeHandler()
@@ -130,21 +133,23 @@ public class PersistenceUI {
                 new WebSocketDependencyListener<String>((AttributeDefinition<String>) login
                     .getAttribute("defaultSchema")) {
                     @Override
-                    public String evaluate(Object value) {
+                    public String evaluate(WSEvent evt) {
+                        Object value = evt.newValue;
                         Object userName = Util.asString(value);
                         String eval;
                         if (userName != null && Util.isEmpty(defaultSchema)) {
-                            if (value != null && persistence.getConnectionUrl().contains("hsqldb"))
+                            if (value != null && persistence.getConnectionUrl().contains("hsqldb")) {
                                 eval = "PUBLIC";
-                            else
+                            } else {
                                 eval = userName.toString().toUpperCase();
+                            }
                             defaultSchema.replace(0, defaultSchema.length(), eval);
                         } else {
                             eval = defaultSchema.toString();
                         }
                         return eval;
                     }
-                });
+                }, WSEvent.class);
             login
                 .getAttribute("connectionUrl")
                 .changeHandler()
@@ -152,7 +157,8 @@ public class PersistenceUI {
                     new WebSocketDependencyListener<String>((AttributeDefinition<String>) login
                         .getAttribute("connectionDriverClass")) {
                         @Override
-                        public String evaluate(Object value) {
+                        public String evaluate(WSEvent evt) {
+                            Object value = evt.newValue;
                             String url = Util.asString(value);
                             if (url != null) {
                                 String prefix = StringUtil.extract(url, "^\\w+[:]\\w+").replace(':', '.');
@@ -162,7 +168,7 @@ public class PersistenceUI {
                             }
                             return null;
                         }
-                    });
+                    }, WSEvent.class);
             login
                 .getAttribute("connectionUrl")
                 .changeHandler()
@@ -170,7 +176,8 @@ public class PersistenceUI {
                     new WebSocketDependencyListener<String>((AttributeDefinition<String>) login
                         .getAttribute("datasourceClass")) {
                         @Override
-                        public String evaluate(Object value) {
+                        public String evaluate(WSEvent evt) {
+                            Object value = evt.newValue;
                             String url = Util.asString(value);
                             if (url != null) {
                                 String prefix = StringUtil.extract(url, "^\\w+[:]\\w+").replace(':', '.');
@@ -180,7 +187,7 @@ public class PersistenceUI {
                             }
                             return null;
                         }
-                    });
+                    }, WSEvent.class);
             login
                 .getAttribute("connectionUrl")
                 .changeHandler()
@@ -188,7 +195,8 @@ public class PersistenceUI {
                     new WebSocketDependencyListener<String>((AttributeDefinition<String>) login
                         .getAttribute("hibernateDialect")) {
                         @Override
-                        public String evaluate(Object value) {
+                        public String evaluate(WSEvent evt) {
+                            Object value = evt.newValue;
                             String url = Util.asString(value);
                             if (url != null) {
                                 String prefix = StringUtil.extract(url, "^\\w+[:]\\w+").replace(':', '.');
@@ -198,7 +206,7 @@ public class PersistenceUI {
                             }
                             return null;
                         }
-                    });
+                    }, WSEvent.class);
             login
                 .getAttribute("connectionUrl")
                 .changeHandler()
@@ -206,7 +214,8 @@ public class PersistenceUI {
                     new WebSocketDependencyListener<String>((AttributeDefinition<String>) login
                         .getAttribute("database")) {
                         @Override
-                        public String evaluate(Object value) {
+                        public String evaluate(WSEvent evt) {
+                            Object value = evt.newValue;
                             String url = Util.asString(value);
                             if (url != null) {
                                 String prefix = StringUtil.extract(url, "^\\w+[:]\\w+").replace(':', '.');
@@ -218,29 +227,31 @@ public class PersistenceUI {
                             //fallback
                             return persistence.getDatabase();
                         }
-                    });
+                    }, WSEvent.class);
             login
                 .getAttribute("connectionUrl")
                 .changeHandler()
                 .addListener(
                     new WebSocketDependencyListener<String>((AttributeDefinition<String>) login.getAttribute("port")) {
                         @Override
-                        public String evaluate(Object value) {
+                        public String evaluate(WSEvent evt) {
+                            Object value = evt.newValue;
                             String url = Util.asString(value);
                             if (url != null) {
                                 String prefix = StringUtil.extract(url, "^\\w+[:]\\w+").replace(':', '.');
                                 if (!Util.isEmpty(prefix)) {
                                     String port = StringUtil.extract(url, "[:]\\d+[:]\\w+");
-                                    if (!Util.isEmpty(port))
+                                    if (!Util.isEmpty(port)) {
                                         return StringUtil.substring(port, ":", ":");
-                                    else {
+                                    } else {
                                         port = StringUtil.extract(url, "[:]\\d+$");
-                                        if (!Util.isEmpty(port))
+                                        if (!Util.isEmpty(port)) {
                                             return StringUtil.substring(port, ":", null);
-                                        else {
+                                        } else {
                                             port = StringUtil.extract(url, "[:]\\d+;");
-                                            if (!Util.isEmpty(port))
+                                            if (!Util.isEmpty(port)) {
                                                 return StringUtil.substring(port, ":", ";");
+                                            }
                                         }
                                     }
 
@@ -248,7 +259,7 @@ public class PersistenceUI {
                             }
                             return null;
                         }
-                    });
+                    }, WSEvent.class);
             login
                 .getAttribute("connectionUrl")
                 .changeHandler()
@@ -256,21 +267,24 @@ public class PersistenceUI {
                     new WebSocketDependencyListener<String>((AttributeDefinition<String>) login
                         .getAttribute("defaultSchema")) {
                         @Override
-                        public String evaluate(Object value) {
+                        public String evaluate(WSEvent evt) {
+                            Object value = evt.newValue;
                             Object userName = login.getAttribute("connectionUserName").getValue();
                             String eval = null;
                             if (userName != null) {
-                                if (value != null && value.toString().contains("hsqldb"))
+                                if (value != null && value.toString().contains("hsqldb")) {
                                     eval = "PUBLIC";
-                                else
+                                } else {
                                     eval = userName.toString().toUpperCase();
+                                }
                             }
                             return eval;
                         }
-                    });
+                    }, WSEvent.class);
             login.getAttribute("provider").changeHandler().addListener(new WebSocketDependencyListener<String>() {
                 @Override
-                protected String evaluate(Object value) {
+                protected String evaluate(WSEvent evt) {
+                    Object value = evt.newValue;
                     String url = Util.asString(value);
                     if (url != null) {
                         String prefix = StringUtil.extract(url, "\\w+[:]\\w+");
@@ -290,8 +304,9 @@ public class PersistenceUI {
                 "transactionType",
                 "persistenceUnit", "hibernateDialect", "database", "defaultSchema", "port", "generator", "autoddl", "replication");
         }
-        if (login.toString().matches(ENV.get("default.present.attribute.multivalue", ".*")))
+        if (login.toString().matches(ENV.get("default.present.attribute.multivalue", ".*"))) {
             login.removeAttributes("jdbcProperties");
+        }
         if (ENV.get("login.jarfile.fileselector", true)) {
             login.getAttribute("jarFile").getPresentation().setType(IPresentable.TYPE_ATTACHMENT);
             ((Html5Presentable) login.getAttribute("jarFile").getPresentation()).getLayoutConstraints().put("accept",

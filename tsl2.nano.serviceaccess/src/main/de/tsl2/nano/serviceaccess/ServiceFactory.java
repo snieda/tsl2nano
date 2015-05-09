@@ -301,9 +301,10 @@ public class ServiceFactory {
      * 
      * @param classLoader the classLoader to set
      */
-    public static void createInstance(ClassLoader classLoader) {
+    public static ServiceFactory createInstance(ClassLoader classLoader) {
         self = new ServiceFactory(classLoader);
         LOG.info("ServiceFactory singelton instance assigned: " + self);
+        return self;
     }
 
     /**

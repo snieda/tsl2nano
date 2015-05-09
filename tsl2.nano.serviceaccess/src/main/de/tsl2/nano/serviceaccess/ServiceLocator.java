@@ -7,26 +7,21 @@
  */
 package de.tsl2.nano.serviceaccess;
 
-import java.io.File;
 import java.util.Collections;
 import java.util.Hashtable;
 import java.util.Map;
 import java.util.Properties;
 
-import javax.ejb.embeddable.EJBContainer;
 import javax.naming.Binding;
-import javax.naming.Context;
 import javax.naming.InitialContext;
 import javax.naming.NameClassPair;
 import javax.naming.NamingEnumeration;
 import javax.naming.NamingException;
-import javax.naming.NotContextException;
 
 import org.apache.commons.logging.Log;
 
 import de.tsl2.nano.core.ManagedException;
 import de.tsl2.nano.core.log.LogFactory;
-import de.tsl2.nano.core.util.FileUtil;
 import de.tsl2.nano.core.util.StringUtil;
 
 /**

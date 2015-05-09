@@ -72,8 +72,7 @@ public class SegmentList<TARRAY, T> extends ArrayList<TARRAY> {
      * @return new array
      */
     public TARRAY toSegmentArray() {
-        TARRAY arr = (TARRAY) newArraySegment(elementCount());
-        int c = 0;
+        TARRAY arr = newArraySegment(elementCount());
         int off = 0, segment = 0;
         for (TARRAY af : this) {
             segment = Array.getLength(af);

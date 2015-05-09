@@ -84,8 +84,9 @@ public class NanoEntityManagerFactory implements javax.persistence.EntityManager
     }
 
     public static final NanoEntityManagerFactory instance() {
-        if (self == null)
+        if (self == null) {
             self = new NanoEntityManagerFactory();
+        }
         return self;
     }
 
@@ -361,12 +362,14 @@ public class NanoEntityManagerFactory implements javax.persistence.EntityManager
         public X getSingleResult() {
             List<X> resultList = getResultList();
             if (resultList != null) {
-                if (resultList.size() > 1)
+                if (resultList.size() > 1) {
                     throw new IllegalStateException();
-                else
+                } else {
                     return resultList.size() == 1 ? resultList.iterator().next() : null;
-            } else
+                }
+            } else {
                 return null;
+            }
 
         }
 
@@ -472,6 +475,7 @@ public class NanoEntityManagerFactory implements javax.persistence.EntityManager
         }
 
 //        @Override
+        @Override
         public <T> TypedQuery<X> setParameter(Parameter<T> arg0, T arg1) {
             parameter.put(arg0.getName(),
                 arg0 instanceof NParameter ? arg0 : new NParameter(arg0.getName(), arg0.getParameterType(), arg1));
@@ -537,8 +541,9 @@ public class NanoEntityManagerFactory implements javax.persistence.EntityManager
             String clsName = StringUtil.substring(qstr, "from ", " t");
             Collection<Class> beanTypes = ENV.get("loadedBeanTypes", null);
             for (Class t : beanTypes) {
-                if (t.getSimpleName().equals(clsName))
+                if (t.getSimpleName().equals(clsName)) {
                     return t;
+                }
             }
             throw new IllegalArgumentException("The result type is not evaluable through the given select: " +qstr);
         }

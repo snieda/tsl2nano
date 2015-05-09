@@ -98,6 +98,7 @@ public class Action<T> extends AItem<T> {
         return runner.run(p);
     }
 
+    @Override
     @SuppressWarnings("rawtypes")
     protected void initConstraints(IConstraint constraints) {
     }

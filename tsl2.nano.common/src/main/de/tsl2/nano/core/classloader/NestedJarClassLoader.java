@@ -200,8 +200,9 @@ public class NestedJarClassLoader extends LibClassLoader implements Cloneable {
                 LOG.info("current jar: " + rootPath
                     + "\nnesting jars:\n"
                     + StringUtil.toFormattedString(nestedJars, -1, true));
-                if (LOG.isDebugEnabled())
+                if (LOG.isDebugEnabled()) {
                     readManifest();
+                }
                 this.jarFileStreams = new HashMap<String, ZipStream>(nestedJars.length);
 //            } else {
 //                hasRootJar = false;
@@ -302,10 +303,11 @@ class ZipStream {
     byte[] getFile(String fileName) {
         byte[] entryBytes = zipEntryBytes.get(fileName);
         if (entryBytes == null) {
-            if (zipStream == null)
+            if (zipStream == null) {
                 return null;
-            else
+            } else {
                 return readFromZip(fileName);
+            }
         }
         zipEntryBytes.remove(entryBytes);
         return entryBytes;

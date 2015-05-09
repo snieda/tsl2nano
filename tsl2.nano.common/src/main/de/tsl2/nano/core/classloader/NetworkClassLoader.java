@@ -22,7 +22,6 @@ import de.tsl2.nano.core.ENV;
 import de.tsl2.nano.core.cls.BeanClass;
 import de.tsl2.nano.core.log.LogFactory;
 import de.tsl2.nano.core.util.FileUtil;
-import de.tsl2.nano.core.util.StringUtil;
 
 /**
  * Loads unresolved classes from network-connection through a maven repository. All classes that cannot be found through
@@ -131,10 +130,11 @@ public class NetworkClassLoader extends NestedJarClassLoader {
                         return super.findClass(name);
                     }
                 } catch (Exception e2) {
-                    if (LOG.isDebugEnabled())
+                    if (LOG.isDebugEnabled()) {
                         LOG.warn("couldn't load class " + name, e2);
-                    else
+                    } else {
                         LOG.warn("couldn't load class " + name);
+                    }
                     unresolveables.add(pckName);
                     FileUtil.save(environment + "/" + FILENAME_UNRESOLVEABLES, unresolveables);
                 }

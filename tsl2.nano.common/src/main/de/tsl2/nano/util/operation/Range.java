@@ -60,8 +60,9 @@ public class Range<T> implements IRange<T>, Serializable {
         BeanClass<? extends Object> cls = BeanClass.getBeanClass(instance.getClass());
         List<IAttribute> attributes = cls.getAttributes();
         for (IAttribute a : attributes) {
-            if (a.getType().isPrimitive())
+            if (a.getType().isPrimitive()) {
                 a.setValue(instance, PrimitiveUtil.getMinimumValue(a.getType()));
+            }
         }
     }
 
@@ -74,8 +75,9 @@ public class Range<T> implements IRange<T>, Serializable {
         BeanClass<? extends Object> cls = BeanClass.getBeanClass(instance.getClass());
         List<IAttribute> attributes = cls.getAttributes();
         for (IAttribute a : attributes) {
-            if (a.getType().isPrimitive())
+            if (a.getType().isPrimitive()) {
                 a.setValue(instance, PrimitiveUtil.getMaximumValue(a.getType()));
+            }
         }
     }
 }

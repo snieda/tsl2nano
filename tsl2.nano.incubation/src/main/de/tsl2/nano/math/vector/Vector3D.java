@@ -16,6 +16,8 @@ package de.tsl2.nano.math.vector;
  * @version $Revision$
  */
 public class Vector3D extends Vector {
+    /** serialVersionUID */
+    private static final long serialVersionUID = 1L;
     /**
      * e1, e2, e3 are the standard normalized vectors for dim 3.
      */

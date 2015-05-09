@@ -126,14 +126,16 @@ public class BeanClass<T> implements Serializable {
         Field[] fields = clazz.getFields();
         for (int i = 0; i < fields.length; i++) {
             if (type.isAssignableFrom(fields[i].getType())
-                && (!staticOnly || Modifier.isStatic(fields[i].getModifiers())))
+                && (!staticOnly || Modifier.isStatic(fields[i].getModifiers()))) {
                 names.add(fields[i].getName());
+            }
         }
         fields = clazz.getDeclaredFields();
         for (int i = 0; i < fields.length; i++) {
             if (type.isAssignableFrom(fields[i].getType())
-                && (!staticOnly || Modifier.isStatic(fields[i].getModifiers())))
+                && (!staticOnly || Modifier.isStatic(fields[i].getModifiers()))) {
                 names.add(fields[i].getName());
+            }
         }
         return names.toArray(new String[0]);
     }
@@ -211,8 +213,9 @@ public class BeanClass<T> implements Serializable {
          * define a new cached-class to get the methods from there.
          */
         BeanClass cachedBC = CachedBeanClass.getCachedBeanClass(clazz);
-        if (cachedBC != null && cachedBC != this)
+        if (cachedBC != null && cachedBC != this) {
             return cachedBC.getAttributes(readAndWriteAccess);
+        }
 
         final Method[] allMethods = clazz.getMethods();
         final LinkedList<String> accessedMethods = new LinkedList<String>();
@@ -249,8 +252,9 @@ public class BeanClass<T> implements Serializable {
     public IAttribute getAttribute(String name) {
         List<IAttribute> attrs = getAttributes();
         for (IAttribute a : attrs) {
-            if (a.getName().equals(name))
+            if (a.getName().equals(name)) {
                 return a;
+            }
         }
         return null;
     }
@@ -320,8 +324,9 @@ public class BeanClass<T> implements Serializable {
         Method[] methods = clazz.getMethods();
         ArrayList<Method> methodList = new ArrayList<Method>(methods.length);
         for (int i = 0; i < methods.length; i++) {
-            if (filter.eval(methods[i]))
+            if (filter.eval(methods[i])) {
                 methodList.add(methods[i]);
+            }
         }
         return methodList;
     }
@@ -410,8 +415,9 @@ public class BeanClass<T> implements Serializable {
      */
     public <A extends Annotation> Object[] getAnnotationValues(Class<A> annotationClass, String... memberNames) {
         Class a = getAnnotation(annotationClass);
-        if (a == null)
+        if (a == null) {
             return null;
+        }
         BeanClass bc = BeanClass.getBeanClass(a);
         Object[] values = new Object[memberNames.length];
         for (int i = 0; i < memberNames.length; i++) {
@@ -528,6 +534,10 @@ public class BeanClass<T> implements Serializable {
         return callMethod(instance, methodName, new Class[0], new Object[0]);
     }
 
+    public static Object call(String type, String staticMethodName, Object... args) {
+        return BeanClass.createBeanClass(type).callMethod(null, staticMethodName, null, false, args);
+    }
+
     public static Object call(Class<?> type, String staticMethodName, boolean usePrimitives, Object... args) {
         return BeanClass.getBeanClass(type).callMethod(null, staticMethodName, null, usePrimitives, args);
     }
@@ -629,8 +639,9 @@ public class BeanClass<T> implements Serializable {
                 String par = i > 0 ? StringUtil.substring(path[i - 1], "[", "]", false, true) : null;
                 if (value instanceof Iterable) {
                     Iterable iter = (Iterable) value;
-                    if (!iter.iterator().hasNext())
+                    if (!iter.iterator().hasNext()) {
                         return null;
+                    }
                     int p;
                     if ("first".equalsIgnoreCase(par)) {
                         p = 0;
@@ -650,13 +661,15 @@ public class BeanClass<T> implements Serializable {
                         }
                     } else if (par != null) {
                         p = Integer.valueOf(par);
-                    } else
+                    } else {
                         p = 0;
+                    }
                     value = CollectionUtil.get(iter, p);
                 } else if (value instanceof Map) {
                     Map map = (Map) value;
-                    if (map.size() == 0)
+                    if (map.size() == 0) {
                         return null;
+                    }
                     value = map.get(par);
                 }
                 String name = StringUtil.substring(path[i], null, "[");
@@ -763,12 +776,13 @@ public class BeanClass<T> implements Serializable {
      */
     public static <T> T createInstance(Class<T> clazz, Object... args) {
         T instance = null;
-        if (clazz.isPrimitive())
+        if (clazz.isPrimitive()) {
             clazz = PrimitiveUtil.getWrapper(clazz);
+        }
         if (clazz.isArray()) {//fill the new array with given args
-            if (args.length == 0)
+            if (args.length == 0) {
                 Array.newInstance(clazz, 0);
-            else {
+            } else {
                 int[] dims = new int[args.length];
                 for (int i = 0; i < dims.length; i++) {
                     dims[i] = (Integer) args[i];
@@ -851,8 +865,9 @@ public class BeanClass<T> implements Serializable {
      * @return loaded class
      */
     static Class load(String className, ClassLoader classloader) {
-        if (classloader == null)
+        if (classloader == null) {
             classloader = Thread.currentThread().getContextClassLoader();
+        }
         try {
             LOG.debug("loading class " + className + " through classloader " + classloader);
             return classloader.loadClass(className);
@@ -943,7 +958,7 @@ public class BeanClass<T> implements Serializable {
      * @return reseted source object
      */
     public static <S> S resetValues(S src, String... attributeNames) {
-        return (S) copyValues(createInstance(src.getClass()), src, false);
+        return copyValues(createInstance(src.getClass()), src, false);
     }
 
     /**
@@ -954,10 +969,12 @@ public class BeanClass<T> implements Serializable {
      * @return all fields of given class
      */
     protected static Field[] fieldsOf(Class cls, List<Field> fields) {
-        if (fields == null)
+        if (fields == null) {
             fields = new ArrayList<Field>();
-        if (cls.getSuperclass() != null)
+        }
+        if (cls.getSuperclass() != null) {
             fieldsOf(cls.getSuperclass(), fields);
+        }
         fields.addAll(Arrays.asList(cls.getDeclaredFields()));
         return fields.toArray(new Field[0]);
     }
@@ -990,8 +1007,9 @@ public class BeanClass<T> implements Serializable {
             int c = 0;
             for (int i = 0; i < fields.length; i++) {
                 String name = fields[i].getName();
-                if (noCopyList.contains(name))
+                if (noCopyList.contains(name)) {
                     continue;
+                }
                 int di = destFieldNames.indexOf(name);
                 if (di != -1) {
                     if (!BitUtil.hasBit(destFields[di].getModifiers(), Modifier.FINAL)) {
@@ -1056,8 +1074,9 @@ public class BeanClass<T> implements Serializable {
         Collection<Class> allInterfaces = new LinkedHashSet<Class>();
         allInterfaces.addAll(Arrays.asList(clazz.getInterfaces()));
         Class<?> superClass = clazz;
-        while ((superClass = superClass.getSuperclass()) != null)
+        while ((superClass = superClass.getSuperclass()) != null) {
             allInterfaces.addAll(Arrays.asList(superClass.getInterfaces()));
+        }
         return allInterfaces.toArray(new Class[0]);
     }
 
@@ -1148,8 +1167,9 @@ class CachedBeanClass<T> extends BeanClass<T> {
             bc = new CachedBeanClass(beanClass);
             bcCache.put(beanClass, bc);
             if (LOG.isDebugEnabled()) {
-                if (bcCache.size() % 1000 == 0)
+                if (bcCache.size() % 1000 == 0) {
                     LOG.debug("internal beanclass cache has " + bcCache.size() + " elements");
+                }
             }
         }
         return bc;

@@ -23,6 +23,7 @@ public abstract class Parser<INPUT> implements IParser<INPUT> {
      * @param term term to check
      * @return true, if term is empty
      */
+    @Override
     public boolean isEmpty(INPUT term) {
         return Util.isEmpty(term, true);
     }
@@ -33,6 +34,7 @@ public abstract class Parser<INPUT> implements IParser<INPUT> {
      * @param src source to be transformed/wrapped
      * @return transformed/wrapped value
      */
+    @Override
     public INPUT wrap(INPUT src) {
         return src;
     }
@@ -43,11 +45,13 @@ public abstract class Parser<INPUT> implements IParser<INPUT> {
      * @param src source to be re-transformed
      * @return re-transformed/unwrapped value
      */
+    @Override
     public INPUT unwrap(INPUT src) {
         return src;
     }
 
 
+    @Override
     public INPUT extract(INPUT source, INPUT regexp) {
         return extract(source, regexp, null);
     }

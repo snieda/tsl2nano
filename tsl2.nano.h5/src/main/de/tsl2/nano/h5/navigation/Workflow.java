@@ -9,7 +9,6 @@
  */
 package de.tsl2.nano.h5.navigation;
 
-import java.io.Serializable;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
@@ -66,8 +65,9 @@ public class Workflow extends EntityBrowser implements Cloneable {
         context = new Parameter();
         net = new Net<BeanAct, Parameter>();
         cache = new HashMap<String, BeanDefinition<?>>();
-        if (activities != null)
+        if (activities != null) {
             net.addAll(activities);
+        }
     }
 
     /**

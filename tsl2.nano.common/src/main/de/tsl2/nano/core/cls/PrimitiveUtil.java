@@ -179,10 +179,11 @@ public class PrimitiveUtil {
         boolean isassignable = cls1.isAssignableFrom(cls2);
         if (!isassignable) {
             try {
-                if (cls1.isPrimitive() && !cls2.isPrimitive())
+                if (cls1.isPrimitive() && !cls2.isPrimitive()) {
                     isassignable = cls1.isAssignableFrom(getPrimitive(cls2));
-                else if (cls2.isPrimitive() && !cls1.isPrimitive())
+                } else if (cls2.isPrimitive() && !cls1.isPrimitive()) {
                     isassignable = cls2.isAssignableFrom(getPrimitive(cls1));
+                }
             } catch (Exception ex) {
                 //do nothing - it was only a try...
                 LOG.debug("class " + cls1 + " is not assignable from " + cls2);
@@ -230,7 +231,7 @@ public class PrimitiveUtil {
     }
 
     public static char asPrimitive(Character o) {
-        return ((Character) o).charValue();
+        return o.charValue();
     }
 
     public static byte asPrimitive(Byte o) {
@@ -245,8 +246,9 @@ public class PrimitiveUtil {
      */
     public static Class<?> getPrimitiveClass(String name) {
         for (int i = 0; i < primitives.length; i++) {
-            if (primitives[i].getName().equals(name))
+            if (primitives[i].getName().equals(name)) {
                 return primitives[i];
+            }
         }
         return null;
     }

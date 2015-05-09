@@ -41,8 +41,9 @@ public class VNeuron extends Neuron<String> implements
 
     @Override
     public void handleEvent(Notification event) {
-        if (feedSignal((Float) event.getNotification()) == Neuron.FIRE)
+        if (feedSignal((Float) event.getNotification()) == Neuron.FIRE) {
             event.addResponse(getPath(), getPath());
+        }
     }
 
     @Override

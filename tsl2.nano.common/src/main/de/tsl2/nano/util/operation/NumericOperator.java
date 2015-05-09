@@ -52,6 +52,7 @@ public class NumericOperator extends SOperator<BigDecimal> {
     /**
      * define all possible operations. see {@link #operationDefs}
      */
+    @Override
     @SuppressWarnings("serial")
     protected void createOperations() {
         syntax.put(KEY_OPERATION, "[-+*/%^]");

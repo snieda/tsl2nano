@@ -30,6 +30,7 @@ import de.tsl2.nano.core.log.LogFactory;
 import de.tsl2.nano.core.util.FileUtil;
 import de.tsl2.nano.core.util.StringUtil;
 import de.tsl2.nano.h5.configuration.BeanConfigurator;
+import de.tsl2.nano.math.vector.Point;
 
 /**
  * Html5 WebSocket Server to provide a rich client gui interaction.
@@ -51,6 +52,7 @@ public class NanoWebSocketServer extends WebSocketServer {
 
     public static final String PRE_TARGET = "/";
     public static final String PRE_ID = "@";
+    public static final String PRE_POS = "?";
     public static final String PRE_VALUE = ":";
 
     public static final String TARGET_DEPENDENCY = "dependency";
@@ -103,8 +105,9 @@ public class NanoWebSocketServer extends WebSocketServer {
     public void onMessage(WebSocket conn, String msg) {
         LOG.debug("receiving message: '" + msg + "' from " + conn);
         //if we are in configuration mode, do nothing
-        if (ENV.get(BeanConfigurator.class) != null)
+        if (ENV.get(BeanConfigurator.class) != null) {
             return;
+        }
         //to be secure, no file is saved on wrong name
         attachment_info = null;
 
@@ -112,6 +115,7 @@ public class NanoWebSocketServer extends WebSocketServer {
         String target = getTarget(msg);
         String id = getId(msg);
         String value = getValue(msg);
+        Point pos = getPosition(msg);//mouse-click position
         BeanDefinition<?> beandef = getCurrentBean(id);
         String attr = StringUtil.substring(id, ".", null, true);
         if (beandef != null) {
@@ -125,8 +129,9 @@ public class NanoWebSocketServer extends WebSocketServer {
                 break;
             case TARGET_DEPENDENCY:
                 IValueDefinition attribute = ((Bean) beandef).getAttribute(attr);
-                //to take effect, use dependency listners
-                attribute.changeHandler().fireEvent(value);
+                //to take effect, use dependency listeners
+                attribute.changeHandler().fireEvent(
+                    new WSEvent(attribute, attribute.getValue(), value, (int) pos.x(), (int) pos.y()));
                 break;
             case TARGET_ATTACHMENT:
                 /*
@@ -136,6 +141,7 @@ public class NanoWebSocketServer extends WebSocketServer {
                 attachment_info = msg;
                 break;
             default:
+                LOG.error("unexptected message target: " + target);
                 throw new IllegalArgumentException();
             }
         }
@@ -148,8 +154,10 @@ public class NanoWebSocketServer extends WebSocketServer {
         //save the received file blob to environment
 //        String attachment_filename = session.getId() + "." + session.getWorkingObject();
 
-        if (attachment_info == null)
-            throw new IllegalStateException("'attachment_filename' is null but should have been sent by client previously!");
+        if (attachment_info == null) {
+            throw new IllegalStateException(
+                "'attachment_filename' is null but should have been sent by client previously!");
+        }
 
         String id = getId(attachment_info);
         String attrName = StringUtil.substring(id, ".", null, true);
@@ -169,7 +177,7 @@ public class NanoWebSocketServer extends WebSocketServer {
 //        if (isLoginPersistence) {
 //            currentBean = Bean.getBean(Persistence.current());
 //        } else {
-            BeanDefinition<?> currentBean = (BeanDefinition<?>) session.getWorkingObject();
+        BeanDefinition<?> currentBean = (BeanDefinition<?>) session.getWorkingObject();
 //        }
         return currentBean;
     }
@@ -179,7 +187,22 @@ public class NanoWebSocketServer extends WebSocketServer {
     }
 
     public static String getId(String message) {
-        return StringUtil.substring(message, PRE_ID, PRE_VALUE);
+        return StringUtil.substring(message, PRE_ID, PRE_POS);
+    }
+
+    public static Point getPosition(String message) {
+        String ps = StringUtil.substring(message, PRE_POS, PRE_VALUE);
+        String xs = StringUtil.substring(ps, null, ",");
+        String ys = StringUtil.substring(ps, ",", null);
+
+        int x = -1, y = -1;
+        try {
+            x = Integer.valueOf(xs);
+            y = Integer.valueOf(ys);
+        } catch (NumberFormatException ex) {
+
+        }
+        return new Point(x, y);
     }
 
     public static String getValue(String message) {

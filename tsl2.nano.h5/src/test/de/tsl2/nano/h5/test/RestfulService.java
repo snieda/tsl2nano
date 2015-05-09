@@ -6,8 +6,11 @@ import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
 import javax.ws.rs.core.MediaType;
 
-import de.tsl2.nano.math.vector.Point;
-
+/**
+ * Test it through 'http://localhost:8080/rstest/rest/event/x/5/y/5'
+ * @author Tom, Thomas Schneider
+ * @version $Revision$ 
+ */
 @Path("event")
 public class RestfulService
 {

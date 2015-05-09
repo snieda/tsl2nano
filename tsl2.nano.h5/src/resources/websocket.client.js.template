@@ -28,9 +28,9 @@ socket.onmessage = function(e) {
 	else if (e.data.indexOf('/inputassist') == 0) {
 		fillInputOptions(e.data);
 	} else if (e.data.indexOf('/dependency') == 0) {
-			refreshdependency(e.data);
+		refreshdependency(e.data);
 	} else if (e.data.indexOf('/attachment') == 0) {
-		//TODO: impl.
+		// TODO: impl.
 	} else
 		showStatusMessage(e.data);
 };
@@ -44,9 +44,9 @@ socket.onclose = function(e) {
  * // Sending canvas ImageData as ArrayBuffer var img =
  * canvas_context.getImageData(0, 0, 400, 320); var binary = new
  * Uint8Array(img.data.length); for (var i = 0; i < img.data.length; i++) {
- * binary[i] = img.data[i]; } socket.send(binary.buffer);
- *  // Sending file as Blob var file =
- * document.querySelector('input[type="file"]').files[0]; socket.send(file);
+ * binary[i] = img.data[i]; } socket.send(binary.buffer); // Sending file as
+ * Blob var file = document.querySelector('input[type="file"]').files[0];
+ * socket.send(file);
  */
 
 /**
@@ -97,7 +97,8 @@ function fillInputOptions(msg) {
 	// now, the new options should be filled
 	var select = e.appendChild(document.createElement('select'));
 	select.setAttribute('name', id + '.select');
-	//TODO: some browser wont react on some event-types, so we use several types
+	// TODO: some browser wont react on some event-types, so we use several
+	// types
 	select.setAttribute('onselect', 'inputassistselect(event)');
 	select.setAttribute('oninput', 'inputassistselect(event)');
 	select.setAttribute('onchange', 'inputassistselect(event)');
@@ -108,11 +109,11 @@ function fillInputOptions(msg) {
 		console.log('creating option \'' + items[i] + '\'');
 		option = select.appendChild(document.createElement('option'));
 		option.setAttribute('value', items[i]);
-//		select.setAttribute('onclick', 'inputassistselect(event)');
+		// select.setAttribute('onclick', 'inputassistselect(event)');
 		option.appendChild(document.createTextNode(items[i]));
 	}
-	
-	//if only one item was found - set the value to the input field
+
+	// if only one item was found - set the value to the input field
 	if (items.length == 1)
 		document.getElementById(id).value = items[0];
 }
@@ -130,37 +131,67 @@ function getValue(msg) {
 }
 
 function createMessage(target, id, value) {
-	return '/' + target + '@' + id + ':' + value;
+	return createMessage(target, id, value, -1, -1);
 }
-/**
- * after an input-assist request and the following the server response,
- * a selection list was provided for the user. if the user selects an item
- * of this list, the selected item value should be transferred to the input field
- * and the selection-element should be removed.
- */
-function inputassistselect(e) {
-	console.log('transerring selected value \'' + e.srcElement.value + '\' to element: ' + e.srcElement.name);
-	var inputelement = document.getElementById(e.srcElement.name);
-	//setAttribute doesn't work here (on chrome), so we set the value directly.
-	inputelement.setAttribute('value', e.srcElement.value);
-	inputelement.value = e.srcElement.value;
-	
-	e.srcElement.parentNode.removeChild(e.srcElement);
+
+function createMessage(target, id, value, clientX, clientY) {
+	return '/' + target + '@' + id + '?' + clientX + ',' + clientY + ':'
+			+ value;
 }
 
 /**
- * if an attribute has change listeners, the server will evaluate the new values for that listeners,
- * calling refreshdependency() for each listener to refresh it's value on client side.
+ * after an input-assist request and the following the server response, a
+ * selection list was provided for the user. if the user selects an item of this
+ * list, the selected item value should be transferred to the input field and
+ * the selection-element should be removed.
+ */
+function inputassistselect(e) {
+	console.log('transerring selected value \'' + e.srcElement.value
+			+ '\' to element: ' + e.srcElement.name);
+	var inputelement = document.getElementById(e.srcElement.name);
+	// setAttribute doesn't work here (on chrome), so we set the value directly.
+	inputelement.setAttribute('value', e.srcElement.value);
+	inputelement.value = e.srcElement.value;
+
+	e.srcElement.parentNode.removeChild(e.srcElement);
+}
+
+function getPosition(element) {
+	var xPosition = 0;
+	var yPosition = 0;
+
+	while (element) {
+		xPosition += (element.offsetLeft - element.scrollLeft + element.clientLeft);
+		yPosition += (element.offsetTop - element.scrollTop + element.clientTop);
+		element = element.offsetParent;
+	}
+	return {
+		x : xPosition,
+		y : yPosition
+	};
+}
+
+/**
+ * if an attribute has change listeners, the server will evaluate the new values
+ * for that listeners, calling refreshdependency() for each listener to refresh
+ * it's value on client side.
  */
 function evaluatedependencies(e) {
-	var msg = createMessage('dependency', e.srcElement.id, e.srcElement.value);
+	var x = -1, y = -1;
+	if (e.clientX) {
+		var parentPosition = getPosition(e.currentTarget);
+		x = e.clientX - parentPosition.x;
+		y = e.clientY - parentPosition.y;
+	}
+	var msg = createMessage('dependency', e.srcElement.id, e.srcElement.value,
+			x, y);
 	showStatusMessage(msg);
 	socket.send(msg);
 }
 
 /**
- * if dependency-listeners are defined for value changes on an input field,
- * the server will inform these for the changes.
+ * if dependency-listeners are defined for value changes on an input field, the
+ * server will inform these for the changes.
  */
 function refreshdependency(msg) {
 	showStatusMessage('refreshing dependency: ' + msg);
@@ -174,11 +205,11 @@ function refreshdependency(msg) {
  * sends a selected file to the server
  */
 function transferattachment(src) {
-	 // Sending file as Blob 
+	// Sending file as Blob
 	var file = document.querySelector('input[type="file"]').files[0];
 	showStatusMessage('sending attachment: ' + file.name);
-	//first send the file name
+	// first send the file name
 	socket.send(createMessage('attachment', src.id, file.name));
-	//now, send the bytes
+	// now, send the bytes
 	socket.send(file);
 }

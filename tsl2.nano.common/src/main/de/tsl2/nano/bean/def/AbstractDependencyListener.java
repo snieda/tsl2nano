@@ -20,7 +20,7 @@ import de.tsl2.nano.messaging.IListener;
  * @author Tom
  * @version $Revision$
  */
-public abstract class AbstractDependencyListener<T> implements IListener<T>, Serializable {
+public abstract class AbstractDependencyListener<T, E> implements IListener<E>, Serializable {
     /** serialVersionUID */
     private static final long serialVersionUID = -4105265981459378940L;
     /** full attribute-definition object - transient to be serializable */

@@ -184,8 +184,9 @@ public class Bean<T> extends BeanDefinition<T> {
      * @param instance
      */
     public Bean<T> setInstance(T instance) {
-        if (clazz.equals(UNDEFINED.getClass()))
+        if (clazz.equals(UNDEFINED.getClass())) {
             this.clazz = (Class<T>) instance.getClass();
+        }
         this.asString = null;
         this.instance = instance;
         replaceInstanceInAttributes(instance);
@@ -196,10 +197,12 @@ public class Bean<T> extends BeanDefinition<T> {
     public Collection<IAction> getActions() {
         if (actions == null) {
             if (!isVirtual()) {
-                if (instance != null)//perhaps an extended class has actions
+                if (instance != null) {
                     actions = getActionsByClass(instance.getClass(), null, new Object[] { instance });
-                if (actions.size() == 0 && isSelectable())
+                }
+                if (actions.size() == 0 && isSelectable()) {
                     addDefaultSaveAction();
+                }
             }
         }
         return super.getActions();
@@ -218,10 +221,11 @@ public class Bean<T> extends BeanDefinition<T> {
      * @return attribute value or null
      */
     public Object getValue(String... path) {
-        if (isVirtual())
+        if (isVirtual()) {
             return getAttribute(path[0]).getValue();
-        else
+        } else {
             return BeanClass.getValue(instance, path);
+        }
     }
 
     /**
@@ -271,11 +275,13 @@ public class Bean<T> extends BeanDefinition<T> {
      */
     public BeanDefinition<?> getValueAsBean(String name, boolean cacheInstance) {
         IValueDefinition<?> attribute = getAttribute(name);
-        if (BeanUtil.isStandardType(attribute.getType()) /*!BeanContainer.instance().isPersistable(attribute.getType())*/)
+        if (BeanUtil.isStandardType(attribute.getType()) /*!BeanContainer.instance().isPersistable(attribute.getType())*/) {
             throw new ManagedException("The attribute '" + name + "' is not a persistable bean");
+        }
         Serializable value = (Serializable) attribute.getValue();
-        if (value == null)
+        if (value == null) {
             return null;
+        }
         Bean<?> bean = value instanceof Bean ? (Bean) value : getBean(value, cacheInstance);
         return bean;
     }
@@ -297,9 +303,10 @@ public class Bean<T> extends BeanDefinition<T> {
             Object defaultValue,
             String description,
             IPresentable presentation) {
-        if (instance.equals(UNDEFINED))
+        if (instance.equals(UNDEFINED)) {
             throw new IllegalStateException(
                 "this bean has no real instance (UNDEFINED). if you add bean-attributes, they must have own instances!");
+        }
         return addAttribute(instance, name, length, nullable, format, defaultValue, description, presentation);
     }
 
@@ -333,11 +340,13 @@ public class Bean<T> extends BeanDefinition<T> {
             throw new IllegalArgumentException(StringUtil.toString(msgMap, 0));
         }
         if (crossChecker != null)
+        {
             crossChecker.check();
-        //TODO: refactore incubation rule to be usable here...
+            //TODO: refactore incubation rule to be usable here...
 //        if (rule != null) {
 //            RulePool.get(rule).run(...);
 //        }
+        }
     }
 
     public void addCrossValueChecker(BeanValue checkBean,
@@ -390,8 +399,9 @@ public class Bean<T> extends BeanDefinition<T> {
         if (attributeDefinitions != null) {
             for (final IAttributeDefinition<?> a : attributeDefinitions.values()) {
                 //TODO: what to do with virtual values?
-                if (a.isVirtual() && a.getAccessMethod() != null)
+                if (a.isVirtual() && a.getAccessMethod() != null) {
                     continue;
+                }
                 ((BeanValue) a).setInstance(instance2);
             }
         }
@@ -521,6 +531,7 @@ public class Bean<T> extends BeanDefinition<T> {
      * @param properties will be ignored (is only inherited)
      * @return map filled with all attribute values
      */
+    @Override
     public Map<String, Object> toValueMap(Map<String, Object> properties) {
         return toValueMap(instance, true, false, false);
     }
@@ -538,7 +549,8 @@ public class Bean<T> extends BeanDefinition<T> {
         copy(beandef, bean, "attributeFilter", "attributeDefinitions", "asString", "presentationHelper");
         bean.attributeFilter = beandef.attributeFilter != null ? CollectionUtil.copy(beandef.attributeFilter) : null;
         bean.attributeDefinitions =
-            (LinkedHashMap<String, IAttributeDefinition<?>>) Util.untyped(createValueDefinitions(beandef.getAttributeDefinitions()));
+            (LinkedHashMap<String, IAttributeDefinition<?>>) Util.untyped(createValueDefinitions(beandef
+                .getAttributeDefinitions()));
         bean.setInstance(instance);
 
         if (bean.getPlugins() != null) {
@@ -547,8 +559,9 @@ public class Bean<T> extends BeanDefinition<T> {
             }
         }
         //give the new bean the chance to create actions...only if null
-        if (bean.actions != null && bean.actions.size() == 0)
+        if (bean.actions != null && bean.actions.size() == 0) {
             bean.actions = null;
+        }
         return bean;
     }
 
@@ -577,8 +590,10 @@ public class Bean<T> extends BeanDefinition<T> {
                 BeanValue.beanValueCache.add((BeanValue) valueDef);
                 if (valueDef instanceof IPluggable) {
                     Collection<IConnector> plugins = ((IPluggable) valueDef).getPlugins();
-                    for (IConnector p : plugins) {
-                        p.connect(valueDef);
+                    if (plugins != null) {
+                        for (IConnector p : plugins) {
+                            p.connect(valueDef);
+                        }
                     }
                 }
                 valueDefs.put(attr.getName(), valueDef);
@@ -628,9 +643,10 @@ public class Bean<T> extends BeanDefinition<T> {
      * @return new created bean
      */
     public static <I extends Serializable> Bean<I> getBean(I instanceOrName, boolean cacheInstance) {
-        Bean<I> bean = (Bean<I>) timedCache.get(instanceOrName);
-        if (bean != null)
+        Bean<I> bean = timedCache.get(instanceOrName);
+        if (bean != null) {
             return bean;
+        }
         if (instanceOrName instanceof String) {
             BeanDefinition<I> beandef = (BeanDefinition<I>) getBeanDefinition((String) instanceOrName);
             bean = createBean((I) UNDEFINED, beandef);
@@ -644,8 +660,9 @@ public class Bean<T> extends BeanDefinition<T> {
             bean = createBean(instanceOrName, beandef);
         }
 
-        if (cacheInstance && ENV.get("use.bean.cache", true))
+        if (cacheInstance && ENV.get("use.bean.cache", true)) {
             timedCache.put(instanceOrName, bean);
+        }
         return bean;
     }
 
@@ -726,8 +743,9 @@ public class Bean<T> extends BeanDefinition<T> {
             detacher.run();
             detacher = null;
             return true;
-        } else
+        } else {
             return false;
+        }
     }
 
     @Override
@@ -741,10 +759,11 @@ public class Bean<T> extends BeanDefinition<T> {
         final StringBuilder buf = new StringBuilder(attributes.size() * 15);
         buf.append(getName() + " {");
         for (final IAttribute<T> beanAttribute : attributes) {
-            if (beanAttribute instanceof BeanValue)
+            if (beanAttribute instanceof BeanValue) {
                 buf.append(beanAttribute.toString());
-            else
+            } else {
                 buf.append(beanAttribute.getName() + "=" + beanAttribute.getValue(instance) + "\n");
+            }
         }
         buf.append("}");
         return buf.toString();
@@ -752,8 +771,9 @@ public class Bean<T> extends BeanDefinition<T> {
 
     @Override
     public String toString() {
-        if (asString == null)
+        if (asString == null) {
             asString = toString(instance);
+        }
         return asString;
     }
 }
@@ -785,6 +805,7 @@ class SaveAction<T> extends SecureAction<T> implements Serializable {
         this.instance = instance;
     }
 
+    @Override
     public T action() throws Exception {
         return (T) bean.save();
     }

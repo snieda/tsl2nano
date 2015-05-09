@@ -34,6 +34,7 @@ public class ANode<T, D> implements INode<T, D> {
     /**
      * @return Returns the {@link #core}.
      */
+    @Override
     public T getCore() {
         return core;
     }
@@ -48,6 +49,7 @@ public class ANode<T, D> implements INode<T, D> {
     /**
      * @return Returns the {@link #connections}.
      */
+    @Override
     public List<IConnection<T, D>> getConnections() {
         return connections;
     }
@@ -60,8 +62,9 @@ public class ANode<T, D> implements INode<T, D> {
      */
     public IConnection<T, D> getConnection(INode<T, D> destination) {
         for (IConnection<T, D> c : getConnections()) {
-            if (c.getDestination().equals(destination))
+            if (c.getDestination().equals(destination)) {
                 return c;
+            }
         }
         return null;
     }
@@ -77,8 +80,9 @@ public class ANode<T, D> implements INode<T, D> {
     public IConnection<T, D> connect(ANode<T, D> destination, D descriptor) {
         IConnection<T, D> connection = createConnection(destination, descriptor);
         connections.add(connection);
-        if (connection instanceof IListener)
+        if (connection instanceof IListener) {
             getController().addListener(((IListener) connection));
+        }
 
         return connection;
     }
@@ -118,8 +122,9 @@ public class ANode<T, D> implements INode<T, D> {
 
     protected INode<T, D> getConnection(T item) {
         for (IConnection<T, D> c : getConnections()) {
-            if (item.equals(c.getDestination().getCore()))
+            if (item.equals(c.getDestination().getCore())) {
                 return c.getDestination();
+            }
         }
         return null;
     }
@@ -127,14 +132,15 @@ public class ANode<T, D> implements INode<T, D> {
     @Override
     public INode<T, D> path(String... nodeFilters) {
         List<T> filter = CollectionUtil.getFiltering(getConnectionItems(), new StringBuilder(nodeFilters[0]));
-        if (filter.size() == 0)
+        if (filter.size() == 0) {
             return null;
-        else if (filter.size() > 1)
+        } else if (filter.size() > 1) {
             throw new IllegalArgumentException("node filter " + nodeFilters[0] + " was not unique for tree-children "
                 + StringUtil.toString(getConnections(), 100));
-        else
+        } else {
             return getConnection(filter.iterator().next()).path(
                 CollectionUtil.copyOfRange(nodeFilters, 1, nodeFilters.length));
+        }
     }
 
     /**
@@ -153,8 +159,9 @@ public class ANode<T, D> implements INode<T, D> {
      */
     @Override
     public boolean equals(Object obj) {
-        if (this == obj)
+        if (this == obj) {
             return true;
+        }
         return hashCode() == obj.hashCode();
     }
 }

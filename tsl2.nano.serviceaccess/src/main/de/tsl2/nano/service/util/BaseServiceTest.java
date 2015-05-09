@@ -67,8 +67,9 @@ public abstract class BaseServiceTest extends RemoteServiceRunner {
      * @param entities persisted entities
      */
     protected void persisted(Object... entities) {
-        if (entitiesToDestroy == null)
+        if (entitiesToDestroy == null) {
             entitiesToDestroy = new HashSet<Object>();
+        }
         for (Object e : entities) {
             entitiesToDestroy.add(e);
         }

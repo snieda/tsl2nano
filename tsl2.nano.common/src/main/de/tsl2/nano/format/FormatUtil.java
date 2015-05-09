@@ -70,8 +70,10 @@ public class FormatUtil {
                 } else {
                     //on float we get roundingmode HALF_EVEN - why is that the default?
                     if (CompatibilityLayer.MIN_JDK16)
+                     {
                         df.setRoundingMode(RoundingMode.HALF_UP);
 //                    df.setMaximumFractionDigits(340);
+                    }
                 }
                 df.setGroupingUsed(false);
                 df.setParseBigDecimal(true);
@@ -109,8 +111,9 @@ public class FormatUtil {
                              * Workaround: trying to start with a negative number, the '-' must be combined with at least one digit
                              * to be parse-able.
                              */
-                            if (df.getNegativePrefix().equals(source))
+                            if (df.getNegativePrefix().equals(source)) {
                                 source = source + "0";
+                            }
 
                             pos.setIndex(source.length());
                             BigDecimal bigDecimal;
@@ -314,8 +317,9 @@ public class FormatUtil {
                     break;
                 }
             }
-            if (check)
+            if (check) {
                 return checkParse(format, parseResult, pos, source);
+            }
         }
         return parseResult;
     }
@@ -328,8 +332,9 @@ public class FormatUtil {
      */
     protected static Object checkParse(Format format, Object parseResult, ParsePosition pos, String source) {
         parseResult = parseResult != null ? parseResult : format.parseObject(source, pos);
-        if (source != null && !source.equals(format.format(parseResult)))
+        if (source != null && !source.equals(format.format(parseResult))) {
             throw new ManagedException("tsl2nano.invalidvalue", new Object[] { source });
+        }
         return parseResult;
     }
 
@@ -403,8 +408,9 @@ public class FormatUtil {
     public static final Format getCurrencyFormat(String currencyCode, int fractionDigits) {
         final DecimalFormat numberFormat = (DecimalFormat) (currencyCode != null ? NumberFormat.getCurrencyInstance()
             : NumberFormat.getInstance());
-        if (currencyCode != null)
+        if (currencyCode != null) {
             numberFormat.setCurrency(Currency.getInstance(currencyCode));
+        }
         numberFormat.setMinimumFractionDigits(fractionDigits);
         numberFormat.setMaximumFractionDigits(fractionDigits);
         numberFormat.setGroupingUsed(true);

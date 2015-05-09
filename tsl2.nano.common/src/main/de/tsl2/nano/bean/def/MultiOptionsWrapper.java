@@ -62,7 +62,7 @@ public class MultiOptionsWrapper<E> extends OptionsWrapper<E> {
     @Override
     protected void setValue(int index, boolean value) {
         if (value) {
-            valueset.add((E) getEnumConstants()[index]);
+            valueset.add(getEnumConstants()[index]);
         } else {
             valueset.remove(getEnumConstants()[index]);
         }

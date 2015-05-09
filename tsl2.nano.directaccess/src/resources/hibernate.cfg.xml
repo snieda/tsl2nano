@@ -7,10 +7,10 @@
 
     <session-factory>
         <!-- properties -->
-        <property name="connection.username">ks</property>
+        <property name="connection.username">SA</property>
         <property name="connection.url">jdbc:oracle:thin:@localhost:1521:xe</property>
         <property name="dialect">org.hibernate.dialect.Oracle10gDialect</property>
-        <property name="connection.password">ksks</property>
+        <property name="connection.password">sasa</property>
         <property name="connection.driver_class">oracle.jdbc.OracleDriver</property>
 
         <!-- JDBC connection pool (use the built-in) -->

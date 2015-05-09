@@ -17,7 +17,7 @@ import de.tsl2.nano.core.ENV;
 import de.tsl2.nano.execution.IPRunnable;
 
 /**
- * Usable as attribute getting it's value through a give sql-query.
+ * Usable as attribute getting it's value through a given sql-query.
  * 
  * @author Tom, Thomas Schneider
  * @version $Revision$
@@ -30,15 +30,15 @@ public class SQLExpression<T extends Serializable> extends RunnableExpression<T>
     public SQLExpression() {
     }
 
-    public SQLExpression(Class<?> argumentHolderClass, String query) {
-        this(argumentHolderClass, query, null);
+    public SQLExpression(Class<?> attributeHolderClass, String query) {
+        this(attributeHolderClass, query, null);
     }
 
     /**
      * constructor
      */
-    public SQLExpression(Class<?> argumentHolderClass, String query, Class<T> type) {
-        super(argumentHolderClass, query, type);
+    public SQLExpression(Class<?> attributeHolderClass, String query, Class<T> type) {
+        super(attributeHolderClass, query, type);
     }
 
     @Override

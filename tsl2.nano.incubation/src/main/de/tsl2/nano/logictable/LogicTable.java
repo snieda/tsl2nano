@@ -94,8 +94,9 @@ public class LogicTable<H extends Format & Comparable<H>, ID> extends TableList<
         for (int i = 0; i < header.length; i++) {
             String h = header[i].toString();
             h = StringUtil.extract(h, regexpHeader);
-            if (h.equals(expression))
+            if (h.equals(expression)) {
                 return header[i];
+            }
         }
         throw new IllegalArgumentException("no header entry found for: " + expression);
     }
@@ -104,8 +105,9 @@ public class LogicTable<H extends Format & Comparable<H>, ID> extends TableList<
         for (int i = 0; i < rows.size(); i++) {
             ID r = getRowID(i);
             String rt = r.toString();
-            if (rt.equals(expression))
+            if (rt.equals(expression)) {
                 return r;
+            }
         }
         throw new IllegalArgumentException("no header entry found for: " + expression);
     }

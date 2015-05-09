@@ -61,8 +61,9 @@ public class MapEntrySet<K, V> extends LinkedHashSet<Entry<K, V>> {
 
     @Override
     public boolean add(Entry<K, V> e) {
-        if (e == null)
+        if (e == null) {
             return false;
+        }
         boolean result = super.add(e);
         if (result && e.getKey() != null && !internal && sync) {
             map.put(e.getKey(), e.getValue());
@@ -74,8 +75,9 @@ public class MapEntrySet<K, V> extends LinkedHashSet<Entry<K, V>> {
     @Override
     public boolean remove(Object o) {
         boolean result = super.remove(o);
-        if (result && !internal && sync)
+        if (result && !internal && sync) {
             map.remove(((Map.Entry) o).getKey());
+        }
         return result;
     }
 

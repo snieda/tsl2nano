@@ -9,8 +9,8 @@
  */
 package de.tsl2.nano.core.classloader;
 
-import java.io.Serializable;
 import java.io.File;
+import java.io.Serializable;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.net.URLClassLoader;
@@ -30,9 +30,9 @@ import de.tsl2.nano.core.ManagedException;
 import de.tsl2.nano.core.cls.BeanClass;
 import de.tsl2.nano.core.log.LogFactory;
 import de.tsl2.nano.core.util.ByteUtil;
+import de.tsl2.nano.core.util.ConcurrentUtil;
 import de.tsl2.nano.core.util.FileUtil;
 import de.tsl2.nano.core.util.StringUtil;
-import de.tsl2.nano.core.util.ConcurrentUtil;
 
 /**
  * provides dynamic classloading through extending classpath on runtime. use {@link #addURL(URL)} to enhance the
@@ -136,8 +136,9 @@ public class RuntimeClassloader extends URLClassLoader {
         if (beanjar == null) {
             return new LinkedList<Class>();
         }
-        if (messages == null)
+        if (messages == null) {
             messages = new StringBuilder();
+        }
 
         LOG.info("loading bean classes from: " + beanjar);
         addFile(beanjar);
@@ -264,13 +265,15 @@ public class RuntimeClassloader extends URLClassLoader {
                     }
                 }
                 for (int i = 0; i < files.length; i++) {
-                    if (last == null || files[i].lastModified() > last.lastModified())
+                    if (last == null || files[i].lastModified() > last.lastModified()) {
                         last = files[i];
+                    }
                 }
                 lastFiles = files;
                 fileList = new ArrayList<File>();
-                if (last != null && last.lastModified() > System.currentTimeMillis() - waitMillis)
+                if (last != null && last.lastModified() > System.currentTimeMillis() - waitMillis) {
                     fileList.add(last);
+                }
                 return fileList;
             }
         };

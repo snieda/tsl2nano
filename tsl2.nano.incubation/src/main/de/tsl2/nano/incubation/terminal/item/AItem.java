@@ -104,7 +104,7 @@ public class AItem<T> implements IItem<T>, Serializable {
             this.constraints = constraints;
         } else {
             Class<T> t = (Class<T>) (value != null ? value.getClass() : String.class);
-            this.constraints = new Constraint<T>((Class<T>) t);
+            this.constraints = new Constraint<T>(t);
             this.constraints.setFormat(Constraint.createFormat(t));
         }
     }
@@ -149,8 +149,9 @@ public class AItem<T> implements IItem<T>, Serializable {
     @Element(required = false)
     public void setValue(T value) {
         //constraints can only be null while deserialization (before call of commit)
-        if (constraints != null)
+        if (constraints != null) {
             constraints.check(name, value);
+        }
         this.value = value;
     }
 
@@ -180,13 +181,15 @@ public class AItem<T> implements IItem<T>, Serializable {
     @Override
     public IItem react(IItem caller, String input, InputStream in, PrintStream out, Properties env) {
         try {
-            if (input.equals(NULL))
+            if (input.equals(NULL)) {
                 input = null;
+            }
             setValue((T) getConstraints().getFormat().parseObject(input));
-            if (!Util.isEmpty(input))
+            if (!Util.isEmpty(input)) {
                 env.put(getName(), getValue());
-            else
+            } else {
                 env.remove(getName());
+            }
             changed = true;
         } catch (ParseException e) {
             ManagedException.forward(e);
@@ -215,8 +218,9 @@ public class AItem<T> implements IItem<T>, Serializable {
      */
     @Override
     public String getPresentationPrefix() {
-        if (isChanged())
+        if (isChanged()) {
             prefix.setCharAt(PREFIX, 'x');
+        }
         return prefix.toString();
     }
 
@@ -279,6 +283,7 @@ public class AItem<T> implements IItem<T>, Serializable {
     /**
      * @return Returns the condition.
      */
+    @Override
     public Condition getCondition() {
         return condition;
     }

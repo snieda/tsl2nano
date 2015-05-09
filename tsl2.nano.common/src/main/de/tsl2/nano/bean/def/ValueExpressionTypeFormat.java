@@ -38,8 +38,9 @@ public class ValueExpressionTypeFormat<T> extends ValueExpressionFormat<T> {
 
     @Override
     ValueExpression<T> ve() {
-        if (ve == null)
+        if (ve == null) {
             ve = BeanDefinition.getBeanDefinition(type).getValueExpression();
+        }
         return ve;
     }
     

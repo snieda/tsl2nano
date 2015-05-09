@@ -59,8 +59,9 @@ public abstract class RunnableExpression<T extends Serializable> extends Abstrac
     }
 
     public IPRunnable<T, Map<String, Object>> getRunnable() {
-        if (runnable == null)
+        if (runnable == null) {
             runnable = createRunnable();
+        }
         return runnable;
     }
 
@@ -74,9 +75,10 @@ public abstract class RunnableExpression<T extends Serializable> extends Abstrac
     @Override
     public T getValue(Object beanInstance) {
         try {
-            T result = (T) getRunnable().run(refreshArguments(beanInstance));
-            if (connectedAttribute != null)
+            T result = getRunnable().run(refreshArguments(beanInstance));
+            if (connectedAttribute != null) {
                 Bean.getBean((Serializable) beanInstance).getAttribute(connectedAttribute).setValue(result);
+            }
             return result;
         } catch (final Exception e) {
             ManagedException.forward(new IllegalStateException("Execution of '" + getName()
@@ -86,16 +88,19 @@ public abstract class RunnableExpression<T extends Serializable> extends Abstrac
     }
 
     protected Map<String, Object> refreshArguments(Object beanInstance) {
-        if (arguments == null)
+        if (arguments == null) {
             arguments = new HashMap<String, T>();
-        if (beanInstance == null)
+        }
+        if (beanInstance == null) {
             return (Map<String, Object>) Util.untyped(arguments);
+        }
         Map<String, ? extends Serializable> p = getRunnable().getParameter();
-        if (beanInstance instanceof Map)
+        if (beanInstance instanceof Map) {
             arguments.putAll((Map<? extends String, ? extends T>) beanInstance);
-        else
+        } else {
             arguments.putAll((Map<String, ? extends T>) Util.untyped(BeanUtil.toValueMap(beanInstance, false,
                 true, true, (p != null ? p.keySet().toArray(new String[0]) : null))));
+        }
         
         //TODO: not performance-optimized: do the filtering before
         MapUtil.retainAll(arguments, p.keySet());

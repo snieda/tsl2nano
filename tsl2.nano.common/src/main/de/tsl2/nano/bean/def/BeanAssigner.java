@@ -74,8 +74,9 @@ public class BeanAssigner<T> {
                 200));
             this.sourceItems.removeAll(toRemove);
         } else {
-            if (destItems != null)
+            if (destItems != null) {
                 this.sourceItems.removeAll(destItems);
+            }
         }
     }
 

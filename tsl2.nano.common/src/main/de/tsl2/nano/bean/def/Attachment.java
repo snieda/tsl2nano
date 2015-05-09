@@ -83,8 +83,9 @@ public class Attachment implements IValueAccess<byte[]>, IAttribute<byte[]> {
 
     @Override
     public byte[] getValue(Object instance) {
-        if (data == null)
+        if (data == null) {
             data = FileUtil.getFileBytes(file, null);
+        }
         return data;
     }
 
@@ -151,8 +152,9 @@ public class Attachment implements IValueAccess<byte[]>, IAttribute<byte[]> {
 
     @Override
     public EventController changeHandler() {
-        if (eventController == null)
+        if (eventController == null) {
             eventController = new EventController();
+        }
         return eventController;
     }
 
@@ -194,8 +196,9 @@ public class Attachment implements IValueAccess<byte[]>, IAttribute<byte[]> {
          * html source path : /temp/
          */
         File file = new File(ENV.getTempPathRel() + fname + ext);
-        if (!file.exists() && data != null)
+        if (!file.exists() && data != null) {
             FileUtil.writeBytes(data, file.getPath(), false);
+        }
         return new File(ENV.getTempPathURL() + fname + ext);
     }
 
@@ -207,15 +210,17 @@ public class Attachment implements IValueAccess<byte[]>, IAttribute<byte[]> {
      * @return file extension
      */
     private static String getExtension(byte[] data) {
-        if (data == null)
+        if (data == null) {
             return "";
+        }
         String str = new String(data);
-        if (str.startsWith("%PDF"))
+        if (str.startsWith("%PDF")) {
             return ".pdf";
-        else if (str.contains("<svg"))
+        } else if (str.contains("<svg")) {
             return ".svg";
-        else
+        } else {
             return "";
+        }
     }
 
     /**

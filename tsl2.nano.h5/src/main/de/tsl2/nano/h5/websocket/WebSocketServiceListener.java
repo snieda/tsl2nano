@@ -11,6 +11,7 @@ package de.tsl2.nano.h5.websocket;
 
 import java.util.concurrent.TimeUnit;
 
+import org.simpleframework.xml.Element;
 import org.simpleframework.xml.core.Commit;
 import org.w3c.dom.events.Event;
 
@@ -27,15 +28,18 @@ import de.tsl2.nano.util.SchedulerUtil;
  * @author Tom, Thomas Schneider
  * @version $Revision$
  */
-public class WebSocketServiceListener<T> extends AbstractDependencyListener<T> {
+public class WebSocketServiceListener<T> extends WebSocketDependencyListener<T> {
     /** serialVersionUID */
     private static final long serialVersionUID = 5776202030295212325L;
 
     /** restful service url */
+    @Element
     String restfulUrl;
     /** parameter name */
+    @Element
     String parameter;
     /** optional timer in seconds to send refreshed data to the attribute presentation */
+    @Element
     Long timer;
 
     /**
@@ -55,8 +59,8 @@ public class WebSocketServiceListener<T> extends AbstractDependencyListener<T> {
 
     
     @Override
-    public void handleEvent(Object source) {
-        sendValue(attributeID, propertyName, evaluate((Event)source));
+    public void handleEvent(WSEvent source) {
+        sendValue(attributeID, propertyName, evaluate(source));
     }
 
     public static void sendValue(String attributeID, String propertyName, Object value) {
@@ -70,7 +74,7 @@ public class WebSocketServiceListener<T> extends AbstractDependencyListener<T> {
      */
     public void createTimer(Long timer) {
         this.timer = timer;
-        SchedulerUtil.runAt((long)0, timer, Long.MAX_VALUE, TimeUnit.SECONDS, new Runnable() {
+        SchedulerUtil.runAt(0, timer, Long.MAX_VALUE, TimeUnit.SECONDS, new Runnable() {
             @Override
             public void run() {
                 handleEvent(null);
@@ -84,13 +88,14 @@ public class WebSocketServiceListener<T> extends AbstractDependencyListener<T> {
      * @param value source value of another attribute
      * @return new value
      */
-    protected T evaluate(Event value) {
-        return (T)NetUtil.getRestful(restfulUrl, String.class, parameter, value);
+    protected T evaluate(WSEvent evt) {
+        return (T)NetUtil.getRestful(restfulUrl, String.class, parameter, evt.newValue);
     }
 
     @Commit
     protected void initDeserialization() {
-        if (timer != null)
+        if (timer != null) {
             createTimer(timer);
+        }
     }
 }

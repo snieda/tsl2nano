@@ -45,8 +45,9 @@ public class TimedReferences<T> {
      */
     public void add(T value) {
         //do that only after periods
-        if (isLongPeriod(lastRemove))
+        if (isLongPeriod(lastRemove)) {
             removeOldTemporaries();
+        }
 
         tempHardRefs.put(System.currentTimeMillis(), value);
     }   

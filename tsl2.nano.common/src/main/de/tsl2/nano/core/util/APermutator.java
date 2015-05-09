@@ -141,12 +141,13 @@ public abstract class APermutator<T extends Comparable<T>, P extends Comparable<
              */
             Properties p = new Properties();
             File fmap = new File(mapname);
-            if (fmap.exists())
+            if (fmap.exists()) {
                 try {
                     p.load(new FileReader(fmap));
                 } catch (Exception e) {
                     ManagedException.forward(e);
                 }
+            }
             if (!p.values().containsAll(src)) {
                 transformer = transformer.replace("\"", "");
                 String[] a = transformer.split("\\s");
@@ -155,10 +156,11 @@ public abstract class APermutator<T extends Comparable<T>, P extends Comparable<
                 for (Object o : src) {
                     BeanClass bc = BeanClass.createBeanClass(a[0]);
                     t = BeanClass.call(bc.getClazz(), a[1], false, a1);
-                    if (swap)
+                    if (swap) {
                         p.put(t, o);
-                    else
+                    } else {
                         p.put(o, t);
+                    }
                 }
                 FileUtil.saveProperties(mapname, p);
             }

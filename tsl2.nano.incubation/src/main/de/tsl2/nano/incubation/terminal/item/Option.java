@@ -57,8 +57,9 @@ public class Option<T> extends AItem<T> {
         super(name, constraints, Type.Option, defaultValue, description);
         this.parent = parent;
         this.defaultValue = defaultValue;
-        if (!active)
+        if (!active) {
             this.value = null;
+        }
     }
 
     /**
@@ -71,10 +72,11 @@ public class Option<T> extends AItem<T> {
 
     @Override
     public IItem react(IItem caller, String input, InputStream in, PrintStream out, Properties env) {
-        if (!Util.isEmpty(input))
+        if (!Util.isEmpty(input)) {
             env.put(getName(), getValue());
-        else
+        } else {
             env.remove(getName());
+        }
         changed = !changed;
         return caller == this ? getParent().next(in, out, env) : caller;
     }

@@ -48,6 +48,7 @@ public class Connection<T extends IListener<Notification> & ILocatable & Seriali
     /**
      * @param destination The destination to set.
      */
+    @Override
     public void setDestination(Node<T, D> destination) {
         super.setDestination(destination);
         //TODO: fire change event

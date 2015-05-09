@@ -102,8 +102,9 @@ public class EntityManager extends NanoEntityManagerFactory.AbstractEntityManage
             @Override
             public List getResultList() {
                     Class t = type;
-                    if (type == null || Object.class.isAssignableFrom(type))
+                    if (type == null || Object.class.isAssignableFrom(type)) {
                         t = evaluateResultType(qstr);
+                    }
                     Query query = getServer().createQuery(t, qstr);
                     Set<String> keySet = parameter.keySet();
                     for (String k : keySet) {

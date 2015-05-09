@@ -140,8 +140,9 @@ public class MapValue<T> implements IValueAccess<T>, IAttribute<T> {
 
     @Override
     public EventController changeHandler() {
-        if (eventController == null)
+        if (eventController == null) {
             eventController = new EventController();
+        }
         return eventController;
     }
 }

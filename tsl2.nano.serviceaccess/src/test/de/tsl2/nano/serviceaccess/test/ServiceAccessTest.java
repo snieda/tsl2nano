@@ -88,7 +88,7 @@ public class ServiceAccessTest {
     public void testServiceAccess() throws Exception {
         // we have no server - so create at least one test service
         final Map<String, Object> initialServices = new Hashtable<String, Object>();
-        final ITestService service = (ITestService) BeanProxy.createBeanImplementation(ITestService.class,
+        final ITestService service = BeanProxy.createBeanImplementation(ITestService.class,
             null,null,
             this.getClass().getClassLoader());
         initialServices.put(ITestService.class.getName(), service);
@@ -173,6 +173,9 @@ public class ServiceAccessTest {
         testAuthentication();
 
         final IAction<?> actionExit = new AbstractPrincipalAction<Object>("action.exit", "Exit", "Exit") {
+            /** serialVersionUID */
+            private static final long serialVersionUID = 1L;
+
             @Override
             public Object action() throws Exception {
                 log("..starting the empty action...");
@@ -180,6 +183,9 @@ public class ServiceAccessTest {
             }
         };
         final IAction<?> actionAny = new AbstractPrincipalAction<Object>("action.any", "...", "...") {
+            /** serialVersionUID */
+            private static final long serialVersionUID = 1L;
+
             @Override
             public Object action() throws Exception {
                 log("..starting any action...");

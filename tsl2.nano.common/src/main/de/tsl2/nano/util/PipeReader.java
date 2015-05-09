@@ -69,7 +69,7 @@ public class PipeReader implements Runnable {
         firstStepConnected = in != null ? false : true;
         try {
             this.pi = new PipedInputStream();
-            this.po = new PipedOutputStream((PipedInputStream) pi);
+            this.po = new PipedOutputStream(pi);
             this.ps = new PrintStream(po);
         } catch (IOException e) {
             ManagedException.forward(e);
@@ -98,8 +98,9 @@ public class PipeReader implements Runnable {
         if (!firstStepConnected) {
             firstStepConnected = true;
             connect(in, po);
-        } else
+        } else {
             connect(pi, out);
+        }
     }
 
     /**
@@ -147,8 +148,9 @@ public class PipeReader implements Runnable {
      */
     public static PrintStream readInThreads(InputStream in, OutputStream out) {
         PipeReader pipeReader = new PipeReader(in, out);
-        if (!pipeReader.firstStepConnected)
+        if (!pipeReader.firstStepConnected) {
             new Thread(pipeReader).start();
+        }
         new Thread(pipeReader).start();
         return pipeReader.getPrintStream();
     }

@@ -65,8 +65,9 @@ public class Input<T> extends AItem<T> {
 
     @Override
     public IItem react(IItem caller, String input, InputStream in, PrintStream out, Properties env) {
-        if (Util.isEmpty(input))
+        if (Util.isEmpty(input)) {
             input = StringUtil.toString(getValue());
+        }
         return super.react(caller, input, in, out, env);
     }
     
@@ -75,12 +76,14 @@ public class Input<T> extends AItem<T> {
         return StringUtil.substring(super.ask(env), null, POSTFIX_QUESTION) + " (" + getValue() + ")" + POSTFIX_QUESTION;
     }
 
+    @Override
     @Commit
     protected void initDeserialization() {
         super.initDeserialization();
-        if (!getConstraints().isNullable())
+        if (!getConstraints().isNullable()) {
             prefix.setCharAt(PREFIX, '§');
-        else
+        } else {
             prefix.setCharAt(PREFIX, '*');
+        }
     }
 }

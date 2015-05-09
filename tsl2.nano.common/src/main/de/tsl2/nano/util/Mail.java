@@ -39,12 +39,15 @@ public class Mail {
                 null == from || 0 >= from.length() ||
                 null == to || 0 >= to.length() ||
                 ((null == subject || 0 >= subject.length())
-                && (null == msg || 0 >= msg.length())))
+                && (null == msg || 0 >= msg.length()))) {
                 throw new IllegalArgumentException("Invalid Parameters for SmtpSimple.sendEmail().");
-            if (null == fromRealName || 0 >= fromRealName.length())
+            }
+            if (null == fromRealName || 0 >= fromRealName.length()) {
                 fromRealName = from;
-            if (null == toRealName || 0 >= toRealName.length())
+            }
+            if (null == toRealName || 0 >= toRealName.length()) {
                 toRealName = to;
+            }
             so = new Socket(smtpServer, 25);
             os = new DataOutputStream(so.getOutputStream());
             is = new BufferedReader(
@@ -69,12 +72,15 @@ public class Mail {
             ManagedException.forward(ex);
         } finally {
             try {
-                if (is != null)
+                if (is != null) {
                     is.close();
-                if (os != null)
+                }
+                if (os != null) {
                     os.close();
-                if (so != null)
+                }
+                if (so != null) {
                     so.close();
+                }
             } catch (Exception ex) {
             }
         }
@@ -93,8 +99,9 @@ public class Mail {
             out.print(sRd);
             if (null != sAnswerMustStartWith
                 && 0 < sAnswerMustStartWith.length()
-                && !sRd.startsWith(sAnswerMustStartWith))
+                && !sRd.startsWith(sAnswerMustStartWith)) {
                 throw new IllegalStateException();
+            }
         }
     }
 

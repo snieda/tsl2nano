@@ -86,9 +86,9 @@ public class PersistenceClassLoader extends TransformingClassLoader {
     @SuppressWarnings({ "rawtypes", "unchecked" })
     @Override
     public List<Class> loadBeanClasses(String beanjar, String regExp, StringBuilder messages) {
-        if (ENV.get("use.applicationserver", false) || ENV.get(EntityManager.class) != null)
+        if (ENV.get("use.applicationserver", false) || ENV.get(EntityManager.class) != null) {
             return super.loadBeanClasses(beanjar, regExp, messages);
-        else {//local through entity types should be faster
+        } else {//local through entity types should be faster
             Collection<EntityType<?>> types =
                 ((AbstractStatelessServiceBean) ENV.get(IGenericService.class)).getEntityTypes();
             LOG.info("loading " + types.size() + " entity-types from entitymanagerfactory");

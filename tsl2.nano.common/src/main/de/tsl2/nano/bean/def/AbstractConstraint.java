@@ -34,8 +34,9 @@ public abstract class AbstractConstraint<T> implements IConstraint<T>, Serializa
     @Override
     public void check(String name, T value) {
         IStatus status = checkStatus(name, value);
-        if (status.error() != null)
+        if (status.error() != null) {
             throw (RuntimeException) status.error();
+        }
     }
 
     /**

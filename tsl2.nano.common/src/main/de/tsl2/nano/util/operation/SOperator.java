@@ -50,6 +50,7 @@ public abstract class SOperator<T> extends Operator<CharSequence, T> {
      * 
      * @return map containing needed {@link #syntax}. see {@link #syntax(String)}.
      */
+    @Override
     protected Map<String, CharSequence> createSyntax() {
         String open = "(", close = ")";
         return MapUtil.asMap(KEY_BEGIN,
@@ -72,9 +73,11 @@ public abstract class SOperator<T> extends Operator<CharSequence, T> {
             ""*/);
     }
 
+    @Override
     protected void createTermSyntax() {
-        if (syntax.get(KEY_HIGH_OPERATION) == null)
+        if (syntax.get(KEY_HIGH_OPERATION) == null) {
             syntax.put(KEY_HIGH_OPERATION, syntax.get(KEY_OPERATION));
+        }
         String term = "[^" + "\\" + syntax(KEY_END) + "\\" + syntax(KEY_BEGIN) + syntax(KEY_HIGH_OPERATION).subSequence(1, syntax(KEY_HIGH_OPERATION).length() - 2) + "]*" + syntax(KEY_OPERATION) + "\\s*" + syntax(KEY_OPERAND);
         syntax.put(KEY_TERM, term);
         syntax.put(KEY_TERM_ENCLOSED, "\\" + syntax(KEY_BEGIN) + "\\s*" + term + "\\s*" + "\\" + syntax(KEY_END));
@@ -110,6 +113,7 @@ public abstract class SOperator<T> extends Operator<CharSequence, T> {
         return parser.wrap(src);
     }
 
+    @Override
     public CharSequence unwrap(CharSequence src) {
         return parser.unwrap(src);
     }

@@ -24,7 +24,7 @@ import de.tsl2.nano.core.ENV;
  * @author Tom
  * @version $Revision$
  */
-public abstract class RuleDependencyListener<T> extends AbstractDependencyListener<T> implements Serializable {
+public abstract class RuleDependencyListener<T, E> extends AbstractDependencyListener<T, E> implements Serializable {
     /** serialVersionUID */
     private static final long serialVersionUID = 5298740573340818934L;
     @Attribute
@@ -54,7 +54,7 @@ public abstract class RuleDependencyListener<T> extends AbstractDependencyListen
      * @return result of executing a rule.
      */
     @SuppressWarnings("unchecked")
-    protected T evaluate(Object source) {
+    protected T evaluate(E source) {
         return (T) ENV.get(RulePool.class).get(ruleName).run(MapUtil.asMap("master", source));
     }
 }

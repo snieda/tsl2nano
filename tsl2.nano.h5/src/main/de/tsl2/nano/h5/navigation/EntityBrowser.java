@@ -62,12 +62,13 @@ public class EntityBrowser implements IBeanNavigator {
                         ? BeanCollector.getBeanCollector(Util.getContainer(userResponseObject), 0)
                         : Bean.getBean((Serializable) userResponseObject)));
             isOnWork = navigation.contains(userResponseBean);
-            if (!isOnWork) //--> go forward
+            if (!isOnWork) {
                 return (current = navigation.push(userResponseBean));
-            else {
+            } else {
                 if (current != userResponseBean) {
-                    while (!userResponseBean.equals(current = navigation.pop()))
+                    while (!userResponseBean.equals(current = navigation.pop())) {
                         ;
+                    }
                     navigation.push(current);
                     return current;
                 }
@@ -75,8 +76,9 @@ public class EntityBrowser implements IBeanNavigator {
 
         }
         //go back
-        if (!isOnWork && current != null)//checking to be not the first page
+        if (!isOnWork && current != null) {
             navigation.pop();
+        }
 
         current = navigation.size() > 0 ? navigation.peek() : null;
         //workaround for a canceled new action
@@ -99,13 +101,15 @@ public class EntityBrowser implements IBeanNavigator {
      */
     @SuppressWarnings("rawtypes")
     private void removeUnpersistedNewEntities(BeanCollector collector) {
-        if (!BeanContainer.instance().isPersistable(collector.getBeanFinder().getType()))
+        if (!BeanContainer.instance().isPersistable(collector.getBeanFinder().getType())) {
             return;
+        }
         Collection currentData = collector.getCurrentData();
         for (Iterator iterator = currentData.iterator(); iterator.hasNext();) {
             Object item = iterator.next();
-            if (BeanContainer.isTransient(item))
+            if (BeanContainer.isTransient(item)) {
                 iterator.remove();
+            }
         }
     }
 

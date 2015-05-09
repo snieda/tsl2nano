@@ -127,8 +127,9 @@ public class Net<T extends IListener<Notification> & ILocatable & Serializable &
         Collection<Node<T, D>> nodes = elements.values();
         for (Node<T, D> n : nodes) {
             //check, if node n has right path to be notified
-            if (notification.notifiy((ILocatable) n))
+            if (notification.notifiy(n)) {
                 n.notify(notification);
+            }
         }
     }
 
@@ -177,7 +178,7 @@ public class Net<T extends IListener<Notification> & ILocatable & Serializable &
         while (timeout != -1 || System.currentTimeMillis() - start > timeout) {
             log_("\ndelegating notification " + notification + " to idle nodes (count: " + count++ + ")...");
             for (Node<T, D> n : nodes) {
-                if (notification.notifiy((ILocatable) n) && n.isIdle()) {
+                if (notification.notifiy(n) && n.isIdle()) {
                     n.notify(notification);
                     return;
                 }
@@ -268,8 +269,9 @@ public class Net<T extends IListener<Notification> & ILocatable & Serializable &
             + " msecs)");
         log_("collecting results...");
         for (Notification n : notifications) {
-            if (n.getResponse() != null)
+            if (n.getResponse() != null) {
                 results.addAll((Collection<? extends R>) n.getResponse().values());
+            }
         }
         log_("done\n");
         return results;
@@ -328,10 +330,11 @@ public class Net<T extends IListener<Notification> & ILocatable & Serializable &
      * @return new event controller
      */
     public static EventController createEventController() {
-        if (workParallel)
+        if (workParallel) {
             return new NotificationController();
-        else
+        } else {
             return new EventController();
+        }
     }
 
     /**

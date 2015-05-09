@@ -20,7 +20,7 @@ import de.tsl2.nano.core.exception.Message;
  * @author Tom, Thomas Schneider
  * @version $Revision$
  */
-public abstract class WebSocketDependencyListener<T> extends AbstractDependencyListener<T> {
+public abstract class WebSocketDependencyListener<T> extends AbstractDependencyListener<T, WSEvent> {
     /** serialVersionUID */
     private static final long serialVersionUID = 5776202030295212325L;
 
@@ -40,8 +40,8 @@ public abstract class WebSocketDependencyListener<T> extends AbstractDependencyL
     }
 
     @Override
-    public void handleEvent(Object source) {
-        sendValue(attributeID, propertyName, evaluate(source));
+    public void handleEvent(WSEvent evt) {
+        sendValue(attributeID, propertyName, evaluate(evt));
     }
 
     public static void sendValue(String attributeID, String propertyName, Object value) {
@@ -55,5 +55,5 @@ public abstract class WebSocketDependencyListener<T> extends AbstractDependencyL
      * @param value source value of another attribute
      * @return new value
      */
-    abstract protected T evaluate(Object value);
+    abstract protected T evaluate(WSEvent evt);
 }

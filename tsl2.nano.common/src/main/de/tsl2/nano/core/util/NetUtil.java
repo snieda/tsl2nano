@@ -81,32 +81,39 @@ public class NetUtil {
         return getInetAddress().getHostAddress();
     }
 
+    public static String getMyIP() {
+        return getMyAddress().getHostAddress();
+    }
+    
     /**
      * getMyIPAdress
      * 
      * @return
      */
-    public static String getMyIP() {
+    public static InetAddress getMyAddress() {
         try {
             Enumeration<NetworkInterface> networkInterfaces = NetworkInterface.getNetworkInterfaces();
             while (networkInterfaces.hasMoreElements()) {
-                NetworkInterface ni = (NetworkInterface) networkInterfaces.nextElement();
-                if (!ni.isUp() || ni.isVirtual() || ni.isLoopback())
+                NetworkInterface ni = networkInterfaces.nextElement();
+                if (!ni.isUp() || ni.isVirtual() || ni.isLoopback()) {
                     continue;
+                }
                 Enumeration<InetAddress> inetAdresses = ni.getInetAddresses();
                 while (inetAdresses.hasMoreElements()) {
                     InetAddress inetAddress = inetAdresses.nextElement();
                     if (inetAddress.isAnyLocalAddress()
                         || inetAddress.isLinkLocalAddress()
                         //                        || inetAddress.isSiteLocalAddress()
-                        || inetAddress.isMulticastAddress())
+                        || inetAddress.isMulticastAddress()) {
                         continue;
+                    }
                     //TODO: how to check for VPN connections?
-                    if (inetAddress.isReachable(2000))
-                        return inetAddress.getHostAddress();
+                    if (inetAddress.isReachable(2000)) {
+                        return inetAddress;
+                    }
                 }
             }
-            return InetAddress.getLoopbackAddress().getHostAddress();//getInetAdress();
+            return InetAddress.getLoopbackAddress();//getInetAdress();
         } catch (Exception e) {
             ManagedException.forward(e);
             return null;
@@ -131,7 +138,7 @@ public class NetUtil {
             StringBuilder str = new StringBuilder();
             Enumeration<NetworkInterface> networkInterfaces = NetworkInterface.getNetworkInterfaces();
             while (networkInterfaces.hasMoreElements()) {
-                NetworkInterface ni = (NetworkInterface) networkInterfaces.nextElement();
+                NetworkInterface ni = networkInterfaces.nextElement();
                 Enumeration<InetAddress> inetAdresses = ni.getInetAddresses();
                 if (inetAdresses.hasMoreElements()) {
                     str.append(ni.getDisplayName() + "\n");
@@ -157,8 +164,9 @@ public class NetUtil {
         try {
             LOG.debug("starting request: " + strUrl);
             String response = String.valueOf(FileUtil.getFileData(url(strUrl).openStream(), null));
-            if (LOG.isDebugEnabled())
+            if (LOG.isDebugEnabled()) {
                 LOG.debug("response: " + StringUtil.toString(response, 100));
+            }
             return response;
         } catch (Exception e) {
             ManagedException.forward(e);
@@ -186,8 +194,9 @@ public class NetUtil {
 
             LOG.debug("starting request: " + url);
             char[] response = FileUtil.getFileData(url(url).openStream(), null);
-            if (LOG.isDebugEnabled())
+            if (LOG.isDebugEnabled()) {
                 LOG.debug("response: " + StringUtil.toString(response, 100));
+            }
             return /*(T)*/String.valueOf(response);
         } catch (Exception e) {
             ManagedException.forward(e);
@@ -231,17 +240,20 @@ public class NetUtil {
     public static final URL url(String surl, String parent) {
         URI uri = URI.create(surl);
         try {
-            if (surl.startsWith("//"))
+            if (surl.startsWith("//")) {
                 return new URL("http:" + surl);
+            }
             if (uri.getScheme() == null) {
-                if (parent == null || uri.getHost() != null)
+                if (parent == null || uri.getHost() != null) {
                     parent = "http://";
-                else {
-                    if (URI.create(parent).getScheme() == null)
+                } else {
+                    if (URI.create(parent).getScheme() == null) {
                         parent = "http://" + parent;
+                    }
                 }
-                if (parent.endsWith("/") && surl.startsWith("/"))
+                if (parent.endsWith("/") && surl.startsWith("/")) {
                     surl = surl.substring(1);
+                }
                 return new URL(parent + surl);
             } else {
                 return uri.toURL();
@@ -306,12 +318,13 @@ public class NetUtil {
         } catch (Exception e) {
             ManagedException.forward(e);
         } finally {
-            if (stream != null)
+            if (stream != null) {
                 try {
                     stream.close();
                 } catch (IOException e) {
                     ManagedException.forward(e);
                 }
+            }
         }
     }
 
@@ -403,12 +416,13 @@ public class NetUtil {
         try {
             return send(connect(host, port), resultType, args);
         } finally {
-            if (socket != null)
+            if (socket != null) {
                 try {
                     socket.close();
                 } catch (IOException e) {
                     ManagedException.forward(e);
                 }
+            }
         }
     }
 
@@ -477,12 +491,13 @@ public class NetUtil {
         }
         result = worker.waitForJobs(timeout * 4);
         StringBuilder buf = new StringBuilder(result.size() * 30);
-        buf.append("========== network-port-scanning finished ================\n");
+        buf.append("========== network-port-check finished ================\n");
         buf.append("open ports:\n");
         Set<InetSocketAddress> ns = result.keySet();
         for (InetSocketAddress a : ns) {
-            if (Boolean.TRUE.equals(result.get(a)))
+            if (Boolean.TRUE.equals(result.get(a))) {
                 buf.append(a + "\t: " + props.getProperty(String.valueOf(a.getPort())));
+            }
         }
         LOG.info(buf);
         return result;
@@ -558,8 +573,9 @@ class WCopy {
             LOG.error(e.toString());
             return;
         }
-        if (requestedURLs.contains(url))
+        if (requestedURLs.contains(url)) {
             return;
+        }
         URL[] urls = evaluateUrls(file, site);
         requestedURLs.add(url);
         for (URL u : urls) {
@@ -587,14 +603,16 @@ class WCopy {
             u = StringUtil.substring(u, "\"", "\"");
             try {
                 url = NetUtil.url(u, site.getHost());
-                if (site.getHost().equals(url.getHost()))
+                if (site.getHost().equals(url.getHost())) {
                     f = NetUtil.getFileName(url);
-                else
+                } else {
                     f = FileUtil.getValidFileName(url.toString());
+                }
                 index = txt.indexOf(u, index) + f.length();
                 urls.add(url);
-                if (LOG.isDebugEnabled())
+                if (LOG.isDebugEnabled()) {
                     buf.append("\n\t--> " + url);
+                }
                 //replace url with a local file name
                 StringUtil.replace(txt, u, f);
             } catch (Exception e) {
@@ -602,8 +620,9 @@ class WCopy {
                 index += 4;
             }
         }
-        if (LOG.isDebugEnabled())
+        if (LOG.isDebugEnabled()) {
             LOG.debug(buf.toString());
+        }
         return urls.toArray(new URL[0]);
     }
 

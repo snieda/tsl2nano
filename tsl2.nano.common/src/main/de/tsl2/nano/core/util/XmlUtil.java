@@ -292,21 +292,23 @@ public class XmlUtil {
             ByteArrayOutputStream arrayOutputStream = new ByteArrayOutputStream();
 
             LOG.debug("Exporting..");
-            if (xml)
+            if (xml) {
                 JasperExportManager.exportReportToXmlStream(print, arrayOutputStream);
-            else
+            } else {
                 JasperExportManager.exportReportToPdfStream(print, arrayOutputStream);
+            }
             return arrayOutputStream.toByteArray();
         } catch (Exception e) {
             ManagedException.forward(e);
             return null;
         } finally {
-            if (inputStream != null)
+            if (inputStream != null) {
                 try {
                     inputStream.close();
                 } catch (IOException e) {
                     ManagedException.forward(e);
                 }
+            }
         }
     }
 
@@ -413,8 +415,9 @@ public class XmlUtil {
         /*if (compLayer.isAvailable("javax.xml.bind.JAXB")) {
             return javax.xml.bind.JAXB.unmarshal(xmlFile, type);
         } else */if (compLayer.isAvailable("org.simpleframework.xml.core.Persister")) {
-            if (assignClassloader)
+            if (assignClassloader) {
                 ENV.assignClassloaderToCurrentThread();
+            }
             LOG.debug("loading type '" + type.getName() + "' from '" + xmlFile + "'");
             return loadSimpleXml_(xmlFile, type);
         } else {
@@ -463,15 +466,17 @@ public class XmlUtil {
             new org.simpleframework.xml.core.Persister(new Format("<?xml version=\"1.0\" encoding=\"UTF-8\"?>")).write(
                 obj, new File(xmlFile));
             //workaround for empty files
-            if (FileUtil.getFile(xmlFile).available() == 0)
+            if (FileUtil.getFile(xmlFile).available() == 0) {
                 new File(xmlFile).delete();
+            }
         } catch (Exception e) {
             //as simple-xml doesn't delete corrupt created files, we move it to temp
             File file = new File(xmlFile);
             if (file.exists()) {
                 File temp = new File(xmlFile + ".failed");
-                if (!temp.exists() || temp.delete())
+                if (!temp.exists() || temp.delete()) {
                     file.renameTo(temp);
+                }
             }
             //don't use the ManagedException.forward(), because the LogFactory is using this, too!
             throw new RuntimeException(e);

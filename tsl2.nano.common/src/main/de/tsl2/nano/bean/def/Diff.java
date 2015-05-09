@@ -60,8 +60,9 @@ public class Diff<T> {
      * @return Returns the attributes.
      */
     private List<IAttribute> getAttributes() {
-        if (attributes == null)
+        if (attributes == null) {
             attributes = BeanClass.getBeanClass(first.getClass()).getAttributes();
+        }
         return attributes;
     }
 
@@ -72,8 +73,9 @@ public class Diff<T> {
         for (IAttribute a : attrs) {
             v1 = a.getValue(first);
             v2 = a.getValue(second);
-            if (!v2.equals(v2))
+            if (!v2.equals(v2)) {
                 diffs.add(new Difference(a.getName(), v1, v2));
+            }
         }
         return diffs;
     }

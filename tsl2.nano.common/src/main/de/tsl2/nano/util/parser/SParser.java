@@ -54,6 +54,7 @@ public class SParser extends Parser<CharSequence> {
         return src instanceof StringBuilder ? src : new StringBuilder(src);
     }
 
+    @Override
     public CharSequence unwrap(CharSequence src) {
         return src != null ? src.toString() : null;
     }
@@ -64,6 +65,6 @@ public class SParser extends Parser<CharSequence> {
     @Override
     public CharSequence trim(CharSequence totrim) {
         //TODO: it's only a workaround
-        return (CharSequence) totrim.toString().trim();
+        return totrim.toString().trim();
     }
 }

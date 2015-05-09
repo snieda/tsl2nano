@@ -16,8 +16,8 @@ import org.apache.commons.logging.Log;
 
 import de.tsl2.nano.core.ManagedException;
 import de.tsl2.nano.core.log.LogFactory;
-import de.tsl2.nano.core.util.StringUtil;
 import de.tsl2.nano.core.util.ConcurrentUtil;
+import de.tsl2.nano.core.util.StringUtil;
 
 /**
  * @param <RETURNTYPE>

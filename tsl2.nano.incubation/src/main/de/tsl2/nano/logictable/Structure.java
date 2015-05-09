@@ -50,14 +50,16 @@ public class Structure<CONTENT extends List<ITEM>, ITEM, BEGIN, END> implements 
     protected CONTENT separate(CONTENT content, Map<Integer, CONTENT> tree) {
         int ibegin = content.indexOf(begin);
         int iend = content.lastIndexOf(end);
-        if (iend == -1)
+        if (iend == -1) {
             iend = content.size();
+        }
         CONTENT subContent = (CONTENT) content.subList(ibegin + 1, iend - 1);
         tree.put(tree.size() + 1, subContent);
-        if (ibegin < 0 || iend < 0)
+        if (ibegin < 0 || iend < 0) {
             return subContent;
-        else
+        } else {
             return separate(subContent, tree);
+        }
     }
 
     /**

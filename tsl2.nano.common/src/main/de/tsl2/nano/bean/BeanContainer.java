@@ -9,8 +9,8 @@
  */
 package de.tsl2.nano.bean;
 
-import java.util.LinkedHashMap;
 import java.util.Collection;
+import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
 import java.util.LinkedList;
 import java.util.Map;
@@ -229,7 +229,7 @@ public class BeanContainer implements IBeanContainer {
         try {
             T bean;
             if (type.isInterface()) {
-                bean = (T) BeanProxy.createBeanImplementation(type, null, null, Thread.currentThread()
+                bean = BeanProxy.createBeanImplementation(type, null, null, Thread.currentThread()
                     .getContextClassLoader());
             } else {
                 bean = BeanClass.createInstance(type);

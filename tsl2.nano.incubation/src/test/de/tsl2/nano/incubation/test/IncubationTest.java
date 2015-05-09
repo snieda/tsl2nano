@@ -27,7 +27,6 @@ import java.util.Collection;
 import java.util.HashMap;
 import java.util.Hashtable;
 import java.util.LinkedHashMap;
-import java.util.List;
 import java.util.Map;
 import java.util.Properties;
 import java.util.concurrent.Callable;
@@ -68,7 +67,6 @@ import de.tsl2.nano.incubation.specification.rules.Rule;
 import de.tsl2.nano.incubation.specification.rules.RulePool;
 import de.tsl2.nano.incubation.terminal.AsciiImage;
 import de.tsl2.nano.incubation.terminal.Terminal;
-import de.tsl2.nano.incubation.terminal.TerminalAdmin;
 import de.tsl2.nano.incubation.terminal.item.Action;
 import de.tsl2.nano.incubation.terminal.item.Container;
 import de.tsl2.nano.incubation.terminal.item.Input;
@@ -76,7 +74,6 @@ import de.tsl2.nano.incubation.terminal.item.MainAction;
 import de.tsl2.nano.incubation.terminal.item.selector.DirSelector;
 import de.tsl2.nano.incubation.terminal.item.selector.FieldSelector;
 import de.tsl2.nano.incubation.terminal.item.selector.FileSelector;
-import de.tsl2.nano.incubation.terminal.item.selector.Selector;
 import de.tsl2.nano.incubation.vnet.ILocatable;
 import de.tsl2.nano.incubation.vnet.Net;
 import de.tsl2.nano.incubation.vnet.Node;
@@ -137,10 +134,12 @@ public class IncubationTest {
         }
         final Object event = new Object();
         Profiler.si().compareTests("test simple and multi-threaded event-handling", 50, new Runnable() {
+            @Override
             public void run() {
                 c.fireEvent(event);
             }
         }, new Runnable() {
+            @Override
             public void run() {
                 ct.fireEvent(event);
             }
@@ -198,7 +197,7 @@ public class IncubationTest {
             @Override
             public boolean canActivate(Map parameter) {
                 //sometimes we get a string out of eval, but sometimes a boolean. so we generalize it ;-)
-                return (Boolean) Boolean.valueOf(StringUtil.toString(op.eval(condition)));
+                return Boolean.valueOf(StringUtil.toString(op.eval(condition)));
             }
 
         }
@@ -216,12 +215,11 @@ public class IncubationTest {
                 "D"),
                 state0.getCore(),
                 state);
-        Node<VActivity<String, String>, ComparableMap<CharSequence, Object>> state2 =
-            net.addAndConnect(new Act("state2",
-                "D",
-                "E"),
-                state1.getCore(),
-                state);
+        net.addAndConnect(new Act("state2",
+            "D",
+            "E"),
+            state1.getCore(),
+            state);
 
         //create a callback for responses
         IListener<Notification> responseHandler = new IListener<Notification>() {
@@ -273,18 +271,20 @@ public class IncubationTest {
 
         RoutingAStar routing = new RoutingAStar();
         IConnection<Location, Float> route = routing.route(saarbruecken, wuerzburg);
-        if (route == null)
+        if (route == null) {
             fail("No route found for " + saarbruecken + " --> " + wuerzburg);
-        else {
+        } else {
             Node<Location, Float>[] shortestWay = new Node[] { saarbruecken, kaiserslautern, frankfurt, wuerzburg };
             Collection<IConnection<Location, Float>> navigation = routing.navigate(saarbruecken, route, null);
             log("Navigation: " + navigation);
             int i = 0;
-            if (navigation.size() < shortestWay.length)
+            if (navigation.size() < shortestWay.length) {
                 fail("navigation incomplete");
+            }
             for (IConnection<Location, Float> connection : navigation) {
-                if (!connection.getDestination().equals(shortestWay[i++]))
+                if (!connection.getDestination().equals(shortestWay[i++])) {
                     fail("Routing didn't find shortest Way!");
+                }
             }
         }
     }
@@ -805,8 +805,8 @@ class Command extends ACommand<StringBuilder> {
     public void runWith(IChange... changes) {
         for (int i = 0; i < changes.length; i++) {
             String item = (String) changes[i].getItem();
-            String old = StringUtil.toString((String) changes[i].getOld());
-            String neW = StringUtil.toString((String) changes[i].getNew());
+            String old = StringUtil.toString(changes[i].getOld());
+            String neW = StringUtil.toString(changes[i].getNew());
             StringUtil.extract(getContext(), item != null ? item : old, neW);
         }
     }
@@ -844,6 +844,7 @@ class EBean extends TypeBean {
     /** serialVersionUID */
     private static final long serialVersionUID = 2662724418006121099L;
 
+    @Override
     public boolean equals(Object obj) {
         return BeanUtil.equals(BeanUtil.serialize(this), BeanUtil.serialize(obj));
     }

@@ -61,8 +61,9 @@ public class FileSelector extends Selector<String> {
      */
     public FileSelector(String name, String description, List<String> roots, String include) {
         super(name, description);
-        if (roots.size() == 0)
+        if (roots.size() == 0) {
             roots.add("${user.dir}");
+        }
         this.roots = roots;
         this.include = include;
     }
@@ -83,6 +84,9 @@ public class FileSelector extends Selector<String> {
         final IItem<?> caller_ = this.getParent();
         if (file.isFile()) {
             nodes.add(new Option<String>(this, file.getName(), null, file.getPath(), FileUtil.getDetails(file)) {
+                /** serialVersionUID */
+                private static final long serialVersionUID = 1L;
+
                 @Override
                 public IItem react(IItem caller, String input, InputStream in, PrintStream out, Properties env) {
                     super.react(caller, input, in, out, env);

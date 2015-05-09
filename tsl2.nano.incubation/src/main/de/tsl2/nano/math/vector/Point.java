@@ -17,6 +17,9 @@ package de.tsl2.nano.math.vector;
  */
 public class Point extends Coordinate {
 
+    /** serialVersionUID */
+    private static final long serialVersionUID = 1L;
+
     /**
      * constructor
      * 

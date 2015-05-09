@@ -107,6 +107,7 @@ public class BeanValue<T> extends AttributeDefinition<T> implements IValueDefini
      * 
      * @return
      */
+    @Override
     public Object getInstance() {
         return instance;
     }
@@ -115,9 +116,10 @@ public class BeanValue<T> extends AttributeDefinition<T> implements IValueDefini
      * @param beanInstance The bean to set.
      */
     void setInstance(Object beanInstance) {
-        if (isVirtualAccess() && beanInstance != null && !(beanInstance instanceof IValueAccess))
+        if (isVirtualAccess() && beanInstance != null && !(beanInstance instanceof IValueAccess)) {
             throw new IllegalArgumentException("instance of virtual attribute " + this
                 + " must be of type IValueAccess, but is: " + beanInstance);
+        }
         this.instance = beanInstance;
     }
 
@@ -126,19 +128,20 @@ public class BeanValue<T> extends AttributeDefinition<T> implements IValueDefini
         //TODO: set UNDEFINED instead of object
         if (getConstraint().getType() == Object.class || getConstraint().getType().isInterface()) {
             //if a value-expression was defined, the valueexpression-type has to be used!
-            if (attribute.isVirtual())
+            if (attribute.isVirtual()) {
                 getConstraint().setType(super.getType());
-            else if (temporalType() != null)
+            } else if (temporalType() != null) {
                 getConstraint().setType((Class<T>) temporalType());
-            else if (isVirtual())
+            } else if (isVirtual()) {
                 getConstraint().setType(((IValueAccess<T>) instance).getType());
-            else if (instance != null && ENV.get("value.use.instancetype", true)) {
+            } else if (instance != null && ENV.get("value.use.instancetype", true)) {
                 try {
                     T value = getValue();
                     //don't use inner class infos or enum values
                     if (value != null && !value.getClass().isAnonymousClass()
-                        && value.getClass().getDeclaringClass() == null)
+                        && value.getClass().getDeclaringClass() == null) {
                         getConstraint().setType((Class<T>) BeanClass.getDefiningClass(value.getClass()));
+                    }
                 } catch (Exception e) {
                     LOG.warn("couldn't evaluate type through instance. using method-returntype instead. error was: "
                         + e.toString());
@@ -158,9 +161,10 @@ public class BeanValue<T> extends AttributeDefinition<T> implements IValueDefini
              */
             if (Collection.class.isAssignableFrom(getType())) {
                 T value = getValue();
-                if (value != null)
+                if (value != null) {
                     getConstraint().setFormat(
-                        new CollectionExpressionFormat<T>((Class<T>) getGenericType(0), (Collection<T>) value));
+                        new CollectionExpressionFormat<T>(getGenericType(0), (Collection<T>) value));
+                }
             }
         }
         return super.getFormat();
@@ -173,7 +177,7 @@ public class BeanValue<T> extends AttributeDefinition<T> implements IValueDefini
      */
     @Override
     public T getValue() {
-        return (T) getValue(instance);
+        return getValue(instance);
     }
 
     /**
@@ -215,10 +219,11 @@ public class BeanValue<T> extends AttributeDefinition<T> implements IValueDefini
 
     @Override
     public T getParsedValue(String source) {
-        if (Attachment.isAttachment(this))
+        if (Attachment.isAttachment(this)) {
             return (T) Attachment.getFileBytes(instance, getName(), source);
-        else
+        } else {
             return super.getParsedValue(source);
+        }
     }
     
     /**
@@ -246,8 +251,9 @@ public class BeanValue<T> extends AttributeDefinition<T> implements IValueDefini
                         break;
                     }
                 }
-                if (v == null)
+                if (v == null) {
                     throw ManagedException.illegalArgument(source, getConstraint().getAllowedValues());
+                }
             } else {
                 v = getParsedValue(source);
             }
@@ -272,11 +278,13 @@ public class BeanValue<T> extends AttributeDefinition<T> implements IValueDefini
         final ChangeEvent event = new ChangeEvent(this, false, false, oldValue, value);
         changeHandler().fireEvent(event);
         if (!event.breakEvent) {
-            if (LOG.isDebugEnabled())
+            if (LOG.isDebugEnabled()) {
                 LOG.debug("setting new value for attribute '" + getName() + "': " + value);
+            }
             setValue(instance, value);
-            if (isDoValidation())
+            if (isDoValidation()) {
                 status = isValid(value);
+            }
             event.hasChanged = true;
             changeHandler().fireEvent(event);
         }
@@ -300,8 +308,9 @@ public class BeanValue<T> extends AttributeDefinition<T> implements IValueDefini
         assert chain.length > 0 : "chain must not be empty!";
 
         BeanValue bv = root == null ? null : getBeanValue(root, chain[0]);
-        if (bv == null || chain.length == 1)
-            return (IValueDefinition) bv;
+        if (bv == null || chain.length == 1) {
+            return bv;
+        }
         return getRelation(bv.getValue(), Arrays.copyOfRange(chain, 1, chain.length));
     }
 
@@ -364,8 +373,9 @@ public class BeanValue<T> extends AttributeDefinition<T> implements IValueDefini
         changeHandler().addListener(new IListener<ChangeEvent>() {
             @Override
             public void handleEvent(ChangeEvent changeEvent) {
-                if (changeEvent.hasChanged)
+                if (changeEvent.hasChanged) {
                     anotherValue.setValue((T) changeEvent.newValue);
+                }
             }
         });
     }
@@ -381,9 +391,9 @@ public class BeanValue<T> extends AttributeDefinition<T> implements IValueDefini
             } else {
                 return BeanUtil.createUUID();
             }
-        }
-        else
+        } else {
             return super.getId();
+        }
     }
 
     /**
@@ -396,9 +406,9 @@ public class BeanValue<T> extends AttributeDefinition<T> implements IValueDefini
                 description = StringUtil.toFirstUpper(super.getName());
             }
             return description;
-        }
-        else
+        } else {
             return super.getName();
+        }
     }
 
     @Override
@@ -428,12 +438,15 @@ public class BeanValue<T> extends AttributeDefinition<T> implements IValueDefini
     @Override
     public int compareTo(IAttribute<T> o) {
         //not really a compareTo...but a base for equals
-        if (!(o instanceof BeanValue))
+        if (!(o instanceof BeanValue)) {
             return -1;
-        if (instance != ((BeanValue) o).instance)
+        }
+        if (instance != ((BeanValue) o).instance) {
             return -1;
-        if (description != null && !description.equals(((BeanValue) o).description))
+        }
+        if (description != null && !description.equals(((BeanValue) o).description)) {
             return -1;
+        }
         return super.compareTo(o);
     }
 
@@ -443,6 +456,7 @@ public class BeanValue<T> extends AttributeDefinition<T> implements IValueDefini
      * 
      * @return true, if the instance is of type {@link ValueHolder}.
      */
+    @Override
     public boolean isVirtual() {
         return super.isVirtual() || instance instanceof IValueAccess;
     }
@@ -495,8 +509,9 @@ public class BeanValue<T> extends AttributeDefinition<T> implements IValueDefini
     }
 
     Selector<T> selector() {
-        if (selector == null)
+        if (selector == null) {
             selector = new Selector(this);
+        }
         return selector;
     }
 
@@ -525,8 +540,9 @@ public class BeanValue<T> extends AttributeDefinition<T> implements IValueDefini
                 } else {
                     LinkedList<T> selection = new LinkedList<T>();
                     T v = getValue();
-                    if (v != null)
+                    if (v != null) {
                         selection.add(v);
+                    }
                     beanCollector =
                         (BeanCollector<?, ?>) Util.untyped(BeanCollector.getBeanCollector(getType(), selection, enabled ? MODE_ALL_SINGLE : 0, comp));
                     beanCollector.setSelectionProvider(new SelectionProvider(selection));
@@ -560,9 +576,9 @@ public class BeanValue<T> extends AttributeDefinition<T> implements IValueDefini
                     Selector<T> vsel = selector();
                     Collection v = vsel.cachedValue();
                     s = selectionProvider.getValue();
-                    if (v == null)
+                    if (v == null) {
                         setValue((T) s);
-                    else {
+                    } else {
                         //fill values - only if not the same reference!
                         if (v != s) {
                             v.clear();
@@ -624,8 +640,8 @@ class Selector<T> {
 
     Class<T> getCollectionEntryType() {
         checkForMap();
-        return (Class<T>) (isMap ? Entry.class : getAttribute() instanceof BeanAttribute
-            ? ((BeanAttribute) getAttribute()).getGenericType() : Object.class);
+        return isMap ? Entry.class : getAttribute() instanceof BeanAttribute
+            ? ((BeanAttribute) getAttribute()).getGenericType() : Object.class;
     }
 
     IAttribute<T> getAttribute() {
@@ -644,21 +660,24 @@ class Selector<T> {
     }
 
     Collection<T> cachedValue() {
-        if (cachedValue == null)
+        if (cachedValue == null) {
             cachedValue = getValueAsCollection();
+        }
         return cachedValue;
     }
 
     void createCollectionValue() {
         checkForMap();
-        if (isMap)
+        if (isMap) {
             valueAccess.setValue((T) new LinkedHashMap());
-        else
+        } else {
             valueAccess.setValue((T) new ListSet<T>());
+        }
     }
 
     void checkForMap() {
-        if (isMap == null)
+        if (isMap == null) {
             isMap = valueAccess.getValue() instanceof Map;
+        }
     }
 }

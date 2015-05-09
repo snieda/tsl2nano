@@ -48,6 +48,7 @@ public abstract class AbstractRunnable<T> implements IPRunnable<T, Map<String, O
     /**
      * @return Returns the name.
      */
+    @Override
     public String getName() {
         return name;
     }
@@ -58,13 +59,15 @@ public abstract class AbstractRunnable<T> implements IPRunnable<T, Map<String, O
      * @param arguments to be checked and collected
      * @param strict if true, arguments not defined as parameter will throw an {@link IllegalArgumentException}.
      */
+    @Override
     public Map<String, Object> checkedArguments(Map<String, Object> arguments, boolean strict) {
         Map<String, Object> args = new LinkedHashMap<String, Object>();
         Set<String> keySet = arguments.keySet();
         Set<String> defs = parameter.keySet();
         for (String par : defs) {
-            if (strict && !keySet.contains(par))
+            if (strict && !keySet.contains(par)) {
                 throw new IllegalArgumentException(par);
+            }
             Object arg = arguments.get(par);
             checkConstraint(par, arg);
             args.put(par, arg);
@@ -74,8 +77,9 @@ public abstract class AbstractRunnable<T> implements IPRunnable<T, Map<String, O
 
     @SuppressWarnings({ "rawtypes", "unchecked" })
     protected void createConstraints() {
-        if (constraints == null)
+        if (constraints == null) {
             constraints = new HashMap<String, Constraint<?>>();
+        }
         Set<String> pars = parameter.keySet();
         for (CharSequence p : pars) {
             Class<?> cls = parameter.get(p).getType();
@@ -91,8 +95,9 @@ public abstract class AbstractRunnable<T> implements IPRunnable<T, Map<String, O
     @SuppressWarnings({ "rawtypes", "unchecked" })
     protected void checkConstraint(CharSequence par, Object arg) {
         Constraint constraint = constraints.get(par);
-        if (constraint != null)
-            constraint.check(getName(), (Comparable) arg);
+        if (constraint != null) {
+            constraint.check(getName(), arg);
+        }
     }
 
     /**
@@ -112,8 +117,9 @@ public abstract class AbstractRunnable<T> implements IPRunnable<T, Map<String, O
      */
     public List<Class<?>> getParameterList() {
         List<Class<?>> pars = new ArrayList<Class<?>>(parameter.size());
-        if (parameter == null)
+        if (parameter == null) {
             return new ArrayList<Class<?>>(0);
+        }
 
         for (ParType par : parameter.values()) {
             pars.add(par.getType());

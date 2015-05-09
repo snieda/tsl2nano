@@ -136,8 +136,9 @@ public class ExpiringMap<K, V> extends LinkedHashMap<K, V> {
 
     @Override
     public void clear() {
-        if (timeout != -1)
+        if (timeout != -1) {
             touches.clear();
+        }
         super.clear();
     }
 

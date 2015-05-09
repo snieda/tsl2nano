@@ -58,8 +58,9 @@ public class ConditionOperator<T> extends SOperator<T> {
     }
 
     protected BooleanOperator getOp() {
-        if (op == null)
+        if (op == null) {
             op = new BooleanOperator((Map<CharSequence, Boolean>) getValues());
+        }
         return op;
     }
 
@@ -134,13 +135,14 @@ public class ConditionOperator<T> extends SOperator<T> {
     private T executeIf(T p, boolean iF) {
         Object result;
         if (iF) {
-            if (p instanceof IAction)
+            if (p instanceof IAction) {
                 result = ((IAction<T>) p).activate();
-            else if (p instanceof CharSequence
-                && ((CharSequence) p).toString().matches(KEY_ANY + syntax(KEY_OPERATION) + KEY_ANY))
+            } else if (p instanceof CharSequence
+                && ((CharSequence) p).toString().matches(KEY_ANY + syntax(KEY_OPERATION) + KEY_ANY)) {
                 result = op.eval((CharSequence) p);
-            else
+            } else {
                 result = p;
+            }
             addValue(KEY_RESULT, (T) result);
         } else {
             //trick to overrule the compiler check
@@ -156,12 +158,14 @@ public class ConditionOperator<T> extends SOperator<T> {
             //perhaps extract the last expression before key_then
             CharSequence prefix = subElement(ifCond, null, syntax.get(KEY_BEGIN), true);
             CharSequence ifCondSub = subElement(ifCond, syntax.get(KEY_BEGIN), syntax.get(KEY_END), true);
-            if (prefix.equals(ifCondSub))
+            if (prefix.equals(ifCondSub)) {
                 prefix = syntax.get(KEY_EMPTY);
+            }
             //check and execute
             boolean ifTrue = this.op.eval(ifCondSub, (Map<CharSequence, Boolean>) getValues());
-            if (!ifTrue)
+            if (!ifTrue) {
                 ifTrue = this.op.eval(ifCond, (Map<CharSequence, Boolean>) getValues());
+            }
             return ifTrue
                 ? eval(concat(prefix, subEnclosing(expression, KEY_THEN, KEY_ELSE)))
                 : eval(concat(prefix, subEnclosing(expression, KEY_ELSE, null)));
@@ -200,14 +204,14 @@ class TypeOP<T> extends CommonAction<T> {
     @Override
     public T action() throws Exception {
         T o1 =
-            (T) (parameter[0] != null && type.isAssignableFrom(parameter[0].getClass()) ? (T) parameter[0]
-                : op.converter
-                    .to((CharSequence) parameter[0]));
+            parameter[0] != null && type.isAssignableFrom(parameter[0].getClass()) ? (T) parameter[0]
+            : op.converter
+                .to((CharSequence) parameter[0]);
         T o2 =
-            (T) (parameter[1] != null && type.isAssignableFrom(parameter[1].getClass()) ? (T) parameter[1]
-                : op.converter
-                    .to((CharSequence) parameter[1]));
-        IAction<T> operation = (IAction<T>) op.operationDefs.get(sop);
+            parameter[1] != null && type.isAssignableFrom(parameter[1].getClass()) ? (T) parameter[1]
+            : op.converter
+                .to((CharSequence) parameter[1]);
+        IAction<T> operation = op.operationDefs.get(sop);
         operation.setParameter(new Object[] { o1, o2 });
         return operation.activate();
     }

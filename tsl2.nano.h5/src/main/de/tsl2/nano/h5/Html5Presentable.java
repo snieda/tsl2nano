@@ -39,10 +39,11 @@ public class Html5Presentable extends Presentable {
     }
 
     public void setWidth(int width) {
-        if (width != UNDEFINED)
+        if (width != UNDEFINED) {
             getLayout().put(ATTR_SIZE, String.valueOf(width));
-        else
+        } else {
             getLayout().remove(ATTR_SIZE);
+        }
     }
 
     @Override
@@ -52,24 +53,27 @@ public class Html5Presentable extends Presentable {
     }
 
     public void setHeight(int height) {
-        if (height != UNDEFINED)
+        if (height != UNDEFINED) {
             getLayout().put(ATTR_HEIGHT, String.valueOf(height));
-        else
+        } else {
             getLayout().remove(ATTR_HEIGHT);
+        }
     }
 
     /**
      * @return Returns the layout.
      */
+    @Override
     public LinkedHashMap<String, String> getLayout() {
         if (layout == null) {
             //LinkedHashmap not supported by simple-xml
             layout = new LinkedHashMap<>(ENV.get("default.layout", DEFAULT_HASHMAP));
         }
-        return (LinkedHashMap<String, String>) layout;
+        return layout;
     }
 
     //to have write-access, we need this setter
+    @Override
     public <L extends Serializable, T extends IPresentable> T setLayout(L l) {
         this.layout = (LinkedHashMap<String, String>) l;
         return (T) this;
@@ -78,16 +82,18 @@ public class Html5Presentable extends Presentable {
     /**
      * @return Returns the layoutConstraints.
      */
+    @Override
     public LinkedHashMap<String, String> getLayoutConstraints() {
         if (layoutConstraints == null) {
             //LinkedHashmap not supported by simple-xml
             layoutConstraints =
                 new LinkedHashMap<>(ENV.get("default.layoutconstaints", DEFAULT_HASHMAP));
         }
-        return (LinkedHashMap<String, String>) layoutConstraints;
+        return layoutConstraints;
     }
 
     //to have write-access, we need this setter
+    @Override
     public <L extends Serializable, T extends IPresentable> T setLayoutConstraints(L lc) {
         this.layoutConstraints = (LinkedHashMap<String, String>) lc;
         return (T) this;

@@ -100,15 +100,17 @@ public class CurrencyUtil {
     }
 
     public static final CurrencyUnit getCurrencyUnit(final Currency c) {
-        if (c == null)
+        if (c == null) {
             return null;
-        if (historicCurrencyUnits.isEmpty())
+        }
+        if (historicCurrencyUnits.isEmpty()) {
             initializeCurrencyUnits();
+        }
         Collection<CurrencyUnit> currencies = CollectionUtil.getFilteredCollection(historicCurrencyUnits,
             new IPredicate<CurrencyUnit>() {
                 @Override
                 public boolean eval(CurrencyUnit arg0) {
-                    CurrencyUnit cu = (CurrencyUnit) arg0;
+                    CurrencyUnit cu = arg0;
                     return cu.getCurrencyCode().equals(c.getCurrencyCode());
                 }
             });
@@ -123,13 +125,14 @@ public class CurrencyUtil {
      * @return default currency, valid for the given date
      */
     public static final CurrencyUnit getCurrency(final Locale loc, final Date date) {
-        if (historicCurrencyUnits.isEmpty())
+        if (historicCurrencyUnits.isEmpty()) {
             initializeCurrencyUnits();
+        }
         Collection<CurrencyUnit> currencies = CollectionUtil.getFilteredCollection(historicCurrencyUnits,
             new IPredicate<CurrencyUnit>() {
                 @Override
                 public boolean eval(CurrencyUnit arg0) {
-                    CurrencyUnit cu = (CurrencyUnit) arg0;
+                    CurrencyUnit cu = arg0;
                     return cu.getCountryCode().equals(loc.getCountry()) && new Period(cu.getValidFrom(),
                         cu.getValidUntil()).contains(new Period(date, date));
                 }
@@ -164,7 +167,7 @@ public class CurrencyUtil {
      * @return actual rounded value
      */
     public static BigDecimal getActualValue(float value, CurrencyUnit unit) {
-        BigDecimal bd = BigDecimal.valueOf((double)(value / unit.getFactor()));
+        BigDecimal bd = BigDecimal.valueOf(value / unit.getFactor());
         return bd.setScale(unit.getCurrency().getDefaultFractionDigits(), BigDecimal.ROUND_HALF_UP);
     }
 
@@ -227,8 +230,9 @@ public class CurrencyUtil {
     public static final NumberFormat getFormat(String currencyCode, int fractionDigits) {
         final DecimalFormat numberFormat = (DecimalFormat) (currencyCode != null ? NumberFormat.getCurrencyInstance()
             : NumberFormat.getInstance());
-        if (currencyCode != null)
+        if (currencyCode != null) {
             numberFormat.setCurrency(Currency.getInstance(currencyCode));
+        }
         numberFormat.setMinimumFractionDigits(fractionDigits);
         numberFormat.setMaximumFractionDigits(fractionDigits);
         numberFormat.setGroupingUsed(true);

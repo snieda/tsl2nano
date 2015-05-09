@@ -85,11 +85,12 @@ public class Message extends RuntimeException {
      * @param message
      */
     public static final void send(UncaughtExceptionHandler exceptionHandler, Object message) {
-        if (exceptionHandler != null)
+        if (exceptionHandler != null) {
             exceptionHandler.uncaughtException(Thread.currentThread(), message instanceof ByteBuffer ? new Message(
                 (ByteBuffer) message) : new Message(String.valueOf(message)));
-        else
+        } else {
             LOG.info(message);
+        }
     }
 
     @Override

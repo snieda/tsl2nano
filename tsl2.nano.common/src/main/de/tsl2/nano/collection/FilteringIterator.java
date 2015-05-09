@@ -71,8 +71,9 @@ public class FilteringIterator<E> implements ListIterator<E> {
 
     @Override
     public E next() {
-        if (!previewing)
+        if (!previewing) {
             preview();
+        }
         previewing = false;
         return item;
     }
@@ -109,8 +110,9 @@ public class FilteringIterator<E> implements ListIterator<E> {
      */
     @Override
     public E previous() {
-        if (!previewing)
+        if (!previewing) {
             backview();
+        }
         previewing = false;
         return item;
     }
@@ -146,8 +148,9 @@ public class FilteringIterator<E> implements ListIterator<E> {
      */
     @Override
     public void add(E e) {
-        if (size > 0)
+        if (size > 0) {
             size++;
+        }
         ((ListIterator<E>) previewIt).add(e);
     }
 

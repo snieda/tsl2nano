@@ -56,11 +56,14 @@ public class Function<OUTPUT> extends SParser {
         OUTPUT res = null;
         expression = wrap(expression);
         while (!isEmpty(expression)) {
-            while (isEmpty(func = extract(expression, FUNC_NAME + FUNC_BEGIN + FUNC_ARG + "*" + FUNC_END)))
-                if (isEmpty(extract(expression, FUNC_NAME + FUNC_BEGIN, "")))
+            while (isEmpty(func = extract(expression, FUNC_NAME + FUNC_BEGIN + FUNC_ARG + "*" + FUNC_END))) {
+                if (isEmpty(extract(expression, FUNC_NAME + FUNC_BEGIN, ""))) {
                     break;
-            if (isEmpty(func))
+                }
+            }
+            if (isEmpty(func)) {
                 break;
+            }
             res = calc(func, values);
             values.put(func, res);
             replace(expression, func, res != null ? FormatUtil.getDefaultFormat(res, false).format(res) : "");
@@ -74,16 +77,17 @@ public class Function<OUTPUT> extends SParser {
         CharSequence name = this.extract(f, FUNC_NAME, "");
         List<Object> argList = new ArrayList<Object>();
         CharSequence p = f;
-        Number num;
         while (!isEmpty(p = extract(f, "\\w+", ""))) {
-            if (NumberUtil.isNumber(p.toString()))
+            if (NumberUtil.isNumber(p.toString())) {
                 argList.add(NumberUtil.getBigDecimal(p.toString()).doubleValue());
-            else
+            } else {
                 argList.add(values.get(p));
+            }
         }
         OUTPUT result = null;
-        if (funcContainer == null)
+        if (funcContainer == null) {
             funcContainer = Arrays.asList(new FunctionContainer(Math.class, double.class, true));
+        }
 
         boolean funcFound = false;
         for (FunctionContainer fc : funcContainer) {
@@ -102,8 +106,9 @@ public class Function<OUTPUT> extends SParser {
                 }
             }
         }
-        if (!funcFound)
+        if (!funcFound) {
             throw new IllegalArgumentException("function " + func + " is not defined!");
+        }
         return result;
     }
 

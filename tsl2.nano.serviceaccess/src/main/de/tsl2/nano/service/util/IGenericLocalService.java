@@ -9,7 +9,6 @@
  */
 package de.tsl2.nano.service.util;
 
-import java.util.Collection;
 import java.util.List;
 
 import javax.ejb.Local;
@@ -87,6 +86,7 @@ public interface IGenericLocalService extends IGenericBaseService, IQueryService
     /**
      * only for tests - creates an empty server side factory.
      */
+    @Override
     void initServerSideFactories();
 
 }

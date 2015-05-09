@@ -127,7 +127,7 @@ public class OptionsWrapper<E> {
      * @return current selected real value
      */
     public E getValue() {
-        return (E) ovalue.getValue();
+        return ovalue.getValue();
     }
 
     /**

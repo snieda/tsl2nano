@@ -16,7 +16,7 @@
 	<property file="${refactore.property.file}" />
 	<property name="basedir" value="${refactore.path}" />
 	<property file="../tsl2.nano.common/shell.properties" />
-	<!--<property name="jvmarg" value="-javaagent:ci/jacoco/jacocoagent.jar=destfile=ci/jacoco.exec"/> -->
+	<property name="jvmarg" value="-javaagent:../tsl2.nano.common/ci/jacoco/jacocoagent.jar=destfile=target/ci/jacoco.exec"/>
 	<property name="shell" value="../tsl2.nano.common/shell.xml" />
 	<property name="analysis" value="../tsl2.nano.common/src/resources/code-analysis.xml" />
 
@@ -91,7 +91,6 @@
 		<ant antfile="${shell}" target="sh.build.full">
 			
 			<property name="sh.build.basedir" value="${refactore.path}" />
-			<property name="sh.build.name" value="${refactore.name}" />
 			<property name="sh.build.name" value="${refactore.name}" />
 			<!-- setting properties inside the ant file tag will overwrite previous settings!
 			<property name="sh.build.src" value="${refactore.path}/src/main" />

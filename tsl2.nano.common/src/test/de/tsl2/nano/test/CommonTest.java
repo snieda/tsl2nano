@@ -252,8 +252,9 @@ public class CommonTest {
             //check the sorting - there is no util method for that
 //            if (!Collections.isEqualCollection(textAndNumbers, sortedList))
             for (int k = 0; k < sortedList.size(); k++) {
-                if (!textAndNumbers.get(k).equals(sortedList.get(k)))
+                if (!textAndNumbers.get(k).equals(sortedList.get(k))) {
                     fail("sorting of text and numbers failed: " + textAndNumbers.get(k) + " ==> " + sortedList.get(k));
+                }
             }
         }
 
@@ -382,8 +383,9 @@ public class CommonTest {
         for (int i = 0; i < valid.length; i++) {
             d = (Date) df.parseObject(valid[i]);
             LOG.info("parsing '" + valid[i] + "' ==> " + d);
-            if (d == null)
+            if (d == null) {
                 fail("parsing '" + valid[i] + "' should not fail!");
+            }
         }
 
         //invalids
@@ -392,8 +394,9 @@ public class CommonTest {
             try {
                 LOG.info("parsing invalid value '" + invalid[i] + "'");
                 d = (Date) df.parseObject(invalid[i]);
-                if (d != null)
+                if (d != null) {
                     fail("parsing '" + invalid[i] + "' should fail!");
+                }
             } catch (ManagedException ex) {
                 //ok, parsing should fail
             }
@@ -803,6 +806,7 @@ public class CommonTest {
         b1.setAttrDef("string", 5, false, new RegExpFormat("[A-Z]+", 5), null, null);
         final ArrayList<String> handled = new ArrayList<String>();
         b2.connect("primitiveChar", b1.getAttribute("string"), new CommonAction<Object>() {
+            @Override
             public Object action() throws Exception {
                 LOG.info("starting connection callback...");
                 handled.add("connect");
@@ -811,6 +815,7 @@ public class CommonTest {
         });
 
         b1.observe("string", new IListener<ChangeEvent>() {
+            @Override
             public void handleEvent(ChangeEvent changeEvent) {
                 LOG.info(changeEvent);
                 handled.add("observe");
@@ -984,11 +989,13 @@ public class CommonTest {
         Profiler.si().stressTest("beanutil", stress, new Runnable() {
             BeanAttribute ba = BeanAttribute.getBeanAttribute(TypeBean.class, "string");
 
+            @Override
             public void run() {
                 ba.getValue(typeBean);
             }
         });
         Profiler.si().stressTest("standard", stress, new Runnable() {
+            @Override
             public void run() {
                 typeBean.getString();
             }
@@ -1004,6 +1011,7 @@ public class CommonTest {
             TypeBean p = null;
             BeanClass bc = BeanClass.getBeanClass(TypeBean.class);
 
+            @Override
             public void run() {
                 p = (TypeBean) bc.createInstance();
             }
@@ -1011,6 +1019,7 @@ public class CommonTest {
         Profiler.si().stressTest("standard", stress, new Runnable() {
             TypeBean p = null;
 
+            @Override
             public void run() {
                 p = new TypeBean();
             }
@@ -1273,7 +1282,8 @@ public class CommonTest {
     @Test
     public void testJarClassloader() {
         ClassLoader contextClassLoader = Thread.currentThread().getContextClassLoader();
-        NestedJarClassLoader jarClassLoader = new NestedJarClassLoader(contextClassLoader) {
+        new NestedJarClassLoader(contextClassLoader) {
+            @Override
             protected String getRootJarPath() {
                 return "../target/de.tsl2.nano.common_0.0.2.B.jar";
             }

@@ -67,8 +67,9 @@ public abstract class AbstractExpression<T> implements IValueExpression<T>, IAtt
     @SuppressWarnings("unchecked")
     @Override
     public Class<T> getType() {
-        if (type == null)
+        if (type == null) {
             type = (Class<T>) BeanDefinition.UNDEFINED.getClass();
+        }
         return type;
     }
 
@@ -88,9 +89,10 @@ public abstract class AbstractExpression<T> implements IValueExpression<T>, IAtt
 
     @Override
     public void setExpression(String valueExpression) {
-        if (valueExpression == null || !valueExpression.matches(getExpressionPattern()))
+        if (valueExpression == null || !valueExpression.matches(getExpressionPattern())) {
             throw new IllegalArgumentException("The expression '" + valueExpression
                 + "' has to match the regular expression '" + getExpressionPattern() + "'");
+        }
         this.expression = valueExpression;
         this.name = null;
     }
@@ -98,6 +100,7 @@ public abstract class AbstractExpression<T> implements IValueExpression<T>, IAtt
     /**
      * @return Returns the declaringClass.
      */
+    @Override
     public Class<?> getDeclaringClass() {
         return declaringClass;
     }
@@ -125,8 +128,9 @@ public abstract class AbstractExpression<T> implements IValueExpression<T>, IAtt
      */
     @Override
     public String getName() {
-        if (name == null)
+        if (name == null) {
             name = expression;
+        }
         return expression;
     }
 
@@ -213,8 +217,9 @@ public abstract class AbstractExpression<T> implements IValueExpression<T>, IAtt
     protected static Class<? extends IValueExpression> getImplementation(String attributeName) {
         Set<String> regExs = registeredExtensions.keySet();
         for (String attrRegEx : regExs) {
-            if (attributeName.matches(attrRegEx))
+            if (attributeName.matches(attrRegEx)) {
                 return registeredExtensions.get(attrRegEx);
+            }
         }
         return null;
     }

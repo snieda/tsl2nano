@@ -121,8 +121,9 @@ public class AttributeDefinition<T> implements IAttributeDefinition<T> {
     public AttributeDefinition(IAttribute<T> attribute) {
         super();
         this.attribute = attribute;
-        if (attribute.getAccessMethod() != null)
+        if (attribute.getAccessMethod() != null) {
             defineDefaults();
+        }
     }
 
     protected AttributeDefinition(Method readAccessMethod) {
@@ -180,8 +181,9 @@ public class AttributeDefinition<T> implements IAttributeDefinition<T> {
     @Commit
     private void initDeserialization() {
         status = IStatus.STATUS_OK;
-        if (getColumnDefinition() != null && getColumnDefinition() instanceof ValueColumn)
+        if (getColumnDefinition() != null && getColumnDefinition() instanceof ValueColumn) {
             ((ValueColumn) getColumnDefinition()).attributeDefinition = this;
+        }
 
         //provide dependency listeners their attribute-definition
         if (hasListeners()) {
@@ -189,7 +191,7 @@ public class AttributeDefinition<T> implements IAttributeDefinition<T> {
             Collection<IListener> listener = changeHandler().getListeners(Object.class);
             for (IListener l : listener) {
                 if (l instanceof AbstractDependencyListener) {
-                    AbstractDependencyListener<?> dl = (AbstractDependencyListener<?>) l;
+                    AbstractDependencyListener<?, ?> dl = (AbstractDependencyListener<?, ?>) l;
                     String name = StringUtil.substring(dl.attributeID, ".", null);
                     dl.setAttribute((AttributeDefinition) beandef.getAttribute(name));
                 }
@@ -204,9 +206,11 @@ public class AttributeDefinition<T> implements IAttributeDefinition<T> {
         }
     }
 
+    @Override
     public final IConstraint<T> getConstraint() {
-        if (constraint == null)
+        if (constraint == null) {
             constraint = new Constraint(BeanClass.getDefiningClass(attribute.getType()));
+        }
         return constraint;
     }
 
@@ -228,8 +232,9 @@ public class AttributeDefinition<T> implements IAttributeDefinition<T> {
         try {
             getConstraint().setBasicDef(length, nullable, format, defaultValue);
         } catch (Exception e) {
-            if (doValidation)
+            if (doValidation) {
                 ManagedException.forward(e);
+            }
         }
         this.description = description;
         return this;
@@ -329,9 +334,9 @@ public class AttributeDefinition<T> implements IAttributeDefinition<T> {
         if (getConstraint().getFormat() == null) {
             Class<T> type = getType();
             if (Collection.class.isAssignableFrom(type)) {
-                getConstraint().setFormat(new CollectionExpressionTypeFormat<T>((Class<T>) getGenericType(0)));
+                getConstraint().setFormat(new CollectionExpressionTypeFormat<T>(getGenericType(0)));
             } else if (Map.class.isAssignableFrom(type)) {
-                getConstraint().setFormat(new MapExpressionFormat<T>((Class<T>) getGenericType(1)));
+                getConstraint().setFormat(new MapExpressionFormat<T>(getGenericType(1)));
             } else if (type.isEnum()) {
                 getConstraint().setFormat(FormatUtil.getDefaultFormat(type, true));
             } else if (BeanUtil.isStandardType(type)) {
@@ -408,17 +413,18 @@ public class AttributeDefinition<T> implements IAttributeDefinition<T> {
 //        if (StringUtil.isEmpty(source))
 //            return null;
         T value = null;
-        if (getFormat() != null)
+        if (getFormat() != null) {
             try {
                 //the parser will decide, how to handle empty/null values
                 value = (T) getFormat().parseObject(source);
             } catch (ParseException e) {
                 ManagedException.forward(e);
             }
-        else if (String.class.isAssignableFrom(getType()))
+        } else if (String.class.isAssignableFrom(getType())) {
             value = (T) source;
-        else
+        } else {
             throw new ManagedException("no format/parser available for field " + getName());
+        }
         return value;
     }
 
@@ -450,8 +456,9 @@ public class AttributeDefinition<T> implements IAttributeDefinition<T> {
             if (genType instanceof Class) {
                 Class<T> gtype = (Class<T>) genType;
                 if (BeanUtil.isStandardType(gtype)) {
-                    if (BeanClass.hasDefaultConstructor(gtype))
-                        getConstraint().setDefault((T) BeanClass.createInstance(gtype));
+                    if (BeanClass.hasDefaultConstructor(gtype)) {
+                        getConstraint().setDefault(BeanClass.createInstance(gtype));
+                    }
                 }
             }
             if (c.getDefault() == null) {
@@ -482,11 +489,13 @@ public class AttributeDefinition<T> implements IAttributeDefinition<T> {
      */
     @Override
     public String getDescription() {
-        if (description == null && getName() != null)
-            if (getPresentation() != null)
+        if (description == null && getName() != null) {
+            if (getPresentation() != null) {
                 description = getPresentation().getDescription();
-            else
+            } else {
                 description = StringUtil.toFirstUpper(getName());
+            }
+        }
         return description;
     }
 
@@ -586,6 +595,7 @@ public class AttributeDefinition<T> implements IAttributeDefinition<T> {
      * 
      * @return true, if the declaring class is of type {@link IValueAccess}.
      */
+    @Override
     public boolean isVirtual() {
         return attribute.isVirtual();
     }
@@ -602,8 +612,9 @@ public class AttributeDefinition<T> implements IAttributeDefinition<T> {
     @Override
     public IPresentable getPresentation() {
         //TODO: create presentation helper through MultipleInheritanceProxy
-        if (presentable == null)
+        if (presentable == null) {
             presentable = ENV.get(BeanPresentationHelper.class).createPresentable(this);
+        }
         return presentable;
     }
 
@@ -669,6 +680,7 @@ public class AttributeDefinition<T> implements IAttributeDefinition<T> {
      * @param sortUpDirection
      * @param width
      */
+    @Override
     public void setColumnDefinition(int index, int sortIndex, boolean sortUpDirection, int width) {
         this.columnDefinition = new ValueColumn(this, index, sortIndex, sortUpDirection, width);
         this.columnDefinition.setPresentable(getPresentation());
@@ -724,8 +736,9 @@ public class AttributeDefinition<T> implements IAttributeDefinition<T> {
      */
     @Override
     public void addPlugin(IConnector plugin) {
-        if (plugins == null)
+        if (plugins == null) {
             plugins = new LinkedList<IConnector>();
+        }
         LOG.info("connecting plugin " + plugin + " to " + this);
         plugin.connect(this);
         plugins.add(plugin);
@@ -770,8 +783,9 @@ public class AttributeDefinition<T> implements IAttributeDefinition<T> {
 
     @Override
     public void setName(String name) {
-        if (!isVirtual())
+        if (!isVirtual()) {
             throw new IllegalStateException("name cannot be changed on non-virtual (=fixed) attributes!");
+        }
         attribute.setName(name);
     }
     

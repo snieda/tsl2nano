@@ -73,6 +73,9 @@ public abstract class Selector<T> extends Container<T> {
     protected void addOption(Object item) {
         final IItem<?> caller_ = this.getParent();
         Option option = new Option<T>(this, item.toString(), null, (T) item, null) {
+            /** serialVersionUID */
+            private static final long serialVersionUID = 1L;
+
             @Override
             public IItem react(IItem caller, String input, InputStream in, PrintStream out, Properties env) {
                 super.react(caller, input, in, out, env);
@@ -107,8 +110,9 @@ public abstract class Selector<T> extends Container<T> {
    @Persist
     protected void initSerialization() {
         super.initDeserialization();
-        if (nodes != null)
+        if (nodes != null) {
             nodes.clear();
+        }
     }
 
 }

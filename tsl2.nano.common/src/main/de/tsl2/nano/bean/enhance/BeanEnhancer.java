@@ -186,10 +186,12 @@ public class BeanEnhancer<T> {
                     //second try on all other methods
                     method = cls.getMethod(methods[i].getName(), null/*new MethodDescriptor(methods[i]).getName()*/);
                 }
-                if (invokeBefore != null)
+                if (invokeBefore != null) {
                     method.insertBefore(invokeBefore);
-                if (invokeAfter != null)
+                }
+                if (invokeAfter != null) {
                     method.insertAfter(invokeAfter);
+                }
             }
             //TODO: duplicated - all methods are overridden...
             cls.setSuperclass(cp.getCtClass(clsName));
@@ -226,10 +228,11 @@ public class BeanEnhancer<T> {
                 /*
                  * remap the attributes: all class/type definitions should be null values inside the proxy
                  */
-                if (obj instanceof Class)
+                if (obj instanceof Class) {
                     values.put(n, null);
-                else
+                } else {
                     values.put(n, obj);
+                }
             }
             if (LOG.isDebugEnabled()) {
                 cls.debugWriteFile("c:/test");

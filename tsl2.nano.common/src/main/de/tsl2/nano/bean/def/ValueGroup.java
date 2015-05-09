@@ -46,8 +46,9 @@ public class ValueGroup extends Presentable {
         for (int i = 0; i < attributeNames.length; i++) {
             add(attributeNames[i]);
         }
-        if (!open)
+        if (!open) {
             setEnabler(IActivable.INACTIVE);
+        }
         type = TYPE_FORM;
     }
 

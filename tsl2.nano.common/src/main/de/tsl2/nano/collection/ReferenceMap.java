@@ -69,6 +69,7 @@ public class ReferenceMap<K, V> extends AbstractMap<K, V>
         return weak ? new WeakReference<V>(value, queue) : new SoftReference<V>(value, queue);
     }
 
+    @Override
     public V get(Object key) {
         expungeStaleEntries();
         V result = null;
@@ -95,30 +96,36 @@ public class ReferenceMap<K, V> extends AbstractMap<K, V>
         }
     }
 
+    @Override
     public V put(K key, V value) {
         expungeStaleEntries();
         Reference<V> soft_ref = createReference(value, queue);
         reverseLookup.put(soft_ref, key);
         Reference<V> result = hash.put(key, soft_ref);
-        if (result == null)
+        if (result == null) {
             return null;
+        }
         reverseLookup.remove(result);
         return result.get();
     }
 
+    @Override
     public V remove(Object key) {
         expungeStaleEntries();
         Reference<V> result = hash.remove(key);
-        if (result == null)
+        if (result == null) {
             return null;
+        }
         return result.get();
     }
 
+    @Override
     public void clear() {
         hash.clear();
         reverseLookup.clear();
     }
 
+    @Override
     public int size() {
         expungeStaleEntries();
         return hash.size();
@@ -128,6 +135,7 @@ public class ReferenceMap<K, V> extends AbstractMap<K, V>
      * Returns a copy of the key/values in the map at the point of calling. However, setValue still sets the value in
      * the actual HashMap.
      */
+    @Override
     public Set<Entry<K, V>> entrySet() {
         expungeStaleEntries();
         Set<Entry<K, V>> result = new LinkedHashSet<Entry<K, V>>();
@@ -135,14 +143,17 @@ public class ReferenceMap<K, V> extends AbstractMap<K, V>
             final V value = entry.getValue().get();
             if (value != null) {
                 result.add(new Entry<K, V>() {
+                    @Override
                     public K getKey() {
                         return entry.getKey();
                     }
 
+                    @Override
                     public V getValue() {
                         return value;
                     }
 
+                    @Override
                     public V setValue(V v) {
                         entry.setValue(createReference(v, queue));
                         return value;

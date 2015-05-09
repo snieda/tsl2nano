@@ -26,6 +26,7 @@ import de.tsl2.nano.core.util.StringUtil;
 import de.tsl2.nano.core.util.Util;
 import de.tsl2.nano.core.util.XmlUtil;
 import de.tsl2.nano.persistence.replication.Replication;
+import de.tsl2.nano.util.UnboundAccessor;
 
 /**
  * bean class to define the content of a persistence.xml and jdbc-connection.properties
@@ -40,13 +41,13 @@ public class Persistence implements Serializable {
     protected String transactionType = "RESOURCE_LOCAL";
     protected String provider = "org.hibernate.ejb.HibernatePersistence";
     protected String jtaDataSource = "<UNDEFINED>";
-    protected String jarFile = "beans.jar";
+    protected String jarFile = "anyway.jar";
     protected String connectionDriverClass = STD_LOCAL_DATABASE_DRIVER;
     protected String connectionUrl = STD_LOCAL_DATABASE_URL;
     protected String connectionUserName = "SA";
     protected String connectionPassword = "";
     protected String hibernateDialect = "org.hibernate.dialect.HSQLDialect";
-    protected String defaultSchema = "";
+    protected String defaultSchema = "PUBLIC";
     protected String datasourceClass = "org.hsqldb.jdbc.JDBCDataSource";
     protected String port = "9003";
     protected String database = "anyway";
@@ -88,8 +89,9 @@ public class Persistence implements Serializable {
      * constructor
      */
     public Persistence(String jarFile) {
-        if (jarFile != null)
+        if (jarFile != null) {
             this.jarFile = jarFile;
+        }
     }
 
     /**
@@ -377,16 +379,17 @@ public class Persistence implements Serializable {
          */
         InputStream stream = (InputStream) Thread.currentThread()
             .getContextClassLoader()
-            .getResource(Util.isEmpty(getReplication()) ? FILE_PERSISTENCE_NOREP_TML : FILE_PERSISTENCE_TML)
-            .getContent();
+            .getResourceAsStream(Util.isEmpty(getReplication()) ? FILE_PERSISTENCE_NOREP_TML : FILE_PERSISTENCE_TML);
+        
         String persistence_xml = String.copyValueOf(FileUtil.getFileData(stream, null));
         Map<String, Object> prop = new HashMap<String, Object>();
         addPersistenceProperties(null, prop);
 
-        if (replication != null)
+        if (replication != null) {
             replication.addPersistenceProperties(this, prop);
-        else
+        } else {
             new Replication().addPersistenceProperties(this, prop);
+        }
         persistence_xml = StringUtil.insertProperties(persistence_xml, prop);
         ENV.saveBackup(FILE_PERSISTENCE_XML);
         FileUtil.removeToBackup(getBackupPath(FILE_PERSISTENCE_XML));
@@ -493,27 +496,29 @@ public class Persistence implements Serializable {
      */
     public String getAutoddl() {
         if (provider.contains("toplink") || provider.contains("eclipselink")) {
-            if (autoddl.equals("false"))
+            if (autoddl.equals("false")) {
                 return "none";
-            else if (autoddl.equals("validate"))
+            } else if (autoddl.equals("validate")) {
                 return "none";
-            else if (autoddl.equals("update"))
+            } else if (autoddl.equals("update")) {
                 return "create-tables";
-            else if (autoddl.equals("create"))
+            } else if (autoddl.equals("create")) {
                 return "create-tables";
-            else if (autoddl.equals("create-drop"))
+            } else if (autoddl.equals("create-drop")) {
                 return "drop-and-create-tables";
+            }
         } else if (provider.contains("openjpa")) {
-            if (autoddl.equals("false"))
+            if (autoddl.equals("false")) {
                 return "false";
-            else if (autoddl.equals("validate"))
+            } else if (autoddl.equals("validate")) {
                 return "false";
-            else if (autoddl.equals("update"))
+            } else if (autoddl.equals("update")) {
                 return "buildSchema(ForeignKeys=true";
-            else if (autoddl.equals("create"))
+            } else if (autoddl.equals("create")) {
                 return "buildSchema(ForeignKeys=true";
-            else if (autoddl.equals("create-drop"))
+            } else if (autoddl.equals("create-drop")) {
                 return "buildSchema(ForeignKeys=true";
+            }
         }
         return autoddl;
     }
@@ -558,8 +563,9 @@ public class Persistence implements Serializable {
         } else {
             p = new Persistence();
         }
-        if (p.getReplication() == null && ENV.get("use.database.replication", false))
+        if (p.getReplication() == null && ENV.get("use.database.replication", false)) {
             p.setReplication(new Replication());
+        }
         return p;
     }
 }

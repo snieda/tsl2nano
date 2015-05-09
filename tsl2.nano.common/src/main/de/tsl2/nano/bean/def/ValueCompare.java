@@ -28,8 +28,9 @@ public class ValueCompare<T extends Comparable<T>> implements Comparable<T> {
 
     @Override
     public int compareTo(T o) {
-        if (o == null)
+        if (o == null) {
             return 1;
+        }
         T v = value.getValue();
         return v != null ? v.compareTo(o) : -1;
     }

@@ -30,15 +30,6 @@ import de.tsl2.nano.util.Period;
  * @version $Revision$
  */
 public final class DateUtil {
-    /**
-     * if you are running on exactly one thread, this static is used for performance enhancements. if you are running
-     * multi-threaded, call {@link #runMultiThreaded()}. see access in {@link #getCalendar()}
-     */
-    static Calendar cal;
-
-    /** see {@link #cal} */
-    static boolean multithreaded = false;
-
     /** the default date-time format */
     private static final DateFormat DEFAULT_DATETIME_FORMAT = DateFormat.getDateTimeInstance(DateFormat.MEDIUM,
         DateFormat.MEDIUM);
@@ -70,13 +61,6 @@ public final class DateUtil {
      */
     private DateUtil() {
         super();
-    }
-
-    /**
-     * see {@link #multithreaded} and {@link #cal} and {@link #getCalendar()}.
-     */
-    public static void runMultiThreaded() {
-        multithreaded = true;
     }
 
     /**
@@ -760,10 +744,10 @@ public final class DateUtil {
      * @return calendar without lenient calculation
      */
     private static final Calendar getCalendar() {
-        if (cal == null || multithreaded) {
+        Calendar cal = ConcurrentUtil.getCurrent(Calendar.class);
+        if (cal == null) {
             cal = Calendar.getInstance();
-//            cal.getTimeZone().setRawOffset(0);
-//            cal.setLenient(false);
+            ConcurrentUtil.setCurrent(cal);
         }
         return cal;
     }
@@ -920,8 +904,9 @@ public final class DateUtil {
         int year = getYear(date);
         for (i = 0; i < QUARTERS.length - 1; i++) {
             if (includes(getQuarter(year, QUARTERS[i]),
-                add(getQuarter(year, QUARTERS[i + 1]), Calendar.MILLISECOND, -1), date))
+                add(getQuarter(year, QUARTERS[i + 1]), Calendar.MILLISECOND, -1), date)) {
                 break;
+            }
         }
         return i + 1;
     }

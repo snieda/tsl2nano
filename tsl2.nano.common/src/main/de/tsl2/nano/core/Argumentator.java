@@ -160,12 +160,14 @@ public class Argumentator {
      * @param man
      */
     private static void check(String name, Object value, Map<String, String> man) {
-        if (man == null)
+        if (man == null) {
             return;
+        }
         //TODO: check args against manual 'man'
         String rule = null;
-        if (false)
+        if (false) {
             throw new IllegalArgumentException(rule);
+        }
     }
 
     /**
@@ -275,7 +277,6 @@ public class Argumentator {
         StringBuilder buf = new StringBuilder(keys.size() * width);
         int kw = 10;// key width
         int fkw = kw + 2; // full key width
-        int w = width - fkw;//minus key-length + ': '
         int w1 = width - 4;//no key, but tab-width
         String newlinetab = "\n" + StringUtil.fixString("", fkw, ' ', true);
         buf.append(StringUtil.fixString("", width, '-', true) + "\n");

@@ -283,8 +283,9 @@ public class RegExpFormat extends Format implements INumberFormatCheck {
     protected void init(String pattern, String init, int maxCharacterCount, int regExpFlags) {
         this.pattern = pattern;
         if (init != null) {
-            if (initMap == systemInitMap)
+            if (initMap == systemInitMap) {
                 initMap = new HashMap<String, String>();
+            }
             initMap.put(pattern, init);
         }
         this.maxCharacterCount = maxCharacterCount;
@@ -905,8 +906,9 @@ public class RegExpFormat extends Format implements INumberFormatCheck {
      * @return empty or filled suffix
      */
     protected static String getParsingSuffix(Format format, String txt) {
-        if (format instanceof GenericParser)
+        if (format instanceof GenericParser) {
             format = ((GenericParser) format).getParsingFormat();
+        }
         //TODO: its a workaround to handle the currency format. use the positive/negative prefix and suffix
         if (format instanceof DecimalFormat) {
             final StringBuffer s = new StringBuffer();
@@ -944,6 +946,7 @@ public class RegExpFormat extends Format implements INumberFormatCheck {
      * 
      * @return true, if this format instance asserts to be a number format
      */
+    @Override
     public boolean isNumber() {
         return parser.isNumber();
     }
@@ -1093,20 +1096,23 @@ public class RegExpFormat extends Format implements INumberFormatCheck {
             @Override
             public Object parseObject(String source) throws ParseException {
                 final String formattedSource = (String) super.parseObject(source);
-                if (formattedSource == null)
+                if (formattedSource == null) {
                     return null;
+                }
                 Object convSource = converter != null ? converter.to(formattedSource) : formattedSource;
                 attribute.setValue(instance, convSource);
                 if (source.length() < initMask.length() || formattedSource.equals(getInitMask())) {
                     return instance;
                 }
-                if (useCache && cache.containsKey(convSource))
+                if (useCache && cache.containsKey(convSource)) {
                     return cache.get(convSource);
+                }
                 Collection<TYPE> result = BeanContainer.instance().getBeansByExample(instance);
                 if (result.size() > 0) {
                     Object resObject = result.iterator().next();
-                    if (useCache)
+                    if (useCache) {
                         cache.put(convSource, resObject);
+                    }
                     return resObject;
                 }
                 return null;
@@ -1133,10 +1139,11 @@ public class RegExpFormat extends Format implements INumberFormatCheck {
     @Persist
     private void initSerialization() {
         //remove copied entries of systeminitmap - if it is not the systemInitMap itself!
-        if (initMap != null && initMap != systemInitMap)
+        if (initMap != null && initMap != systemInitMap) {
             MapUtil.removeAll(initMap, systemInitMap.keySet());
-        else
+        } else {
             initMap = null;
+        }
     }
 
     private void readObject(java.io.ObjectInputStream in) throws IOException, ClassNotFoundException {
@@ -1147,8 +1154,9 @@ public class RegExpFormat extends Format implements INumberFormatCheck {
     @Commit
     @Complete
     private void initDeserialization() {
-        if (initMap == null)
+        if (initMap == null) {
             initMap = systemInitMap;
+        }
     }
 
 }

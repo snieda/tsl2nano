@@ -9,6 +9,17 @@ to create a new application-version, do the following:
  - change build.version of all build*.properties
  - change MANIFEST.MF of all projects
  - change run.bat to start jar with new version number
+ 
+to do a fast distribution without re-compiling tests and analysis,
+set the following jvm properties:
+-Dsh.disable.clean=true 
+-Dsh.disable.compile=true 
+-Dsh.disable.junit=true 
+-Danalysis.disable.findbugs=true 
+-Danalysis.disable.pmd=true 
+-Danalysis.disable.cpd=true 
+-Danalysis.disable.checkstyle=true
+
 ========================================================================= -->
 <project default="distribute.2nano" name="distrubute.2nano">
 	<property file="../tsl2.nano.common/shell.properties" />
@@ -29,12 +40,14 @@ to create a new application-version, do the following:
 			<property name="refactore.property.file" value="${basedir}/project/distribute-serviceaccess.properties" />
 			<property name="basedir" value="../tsl2.nano.serviceaccess" />
 			<property name="sh.compile.classpath2" value="../tsl2.nano.common" />
+			<property name="sh.compile.srcdir2" value="../tsl2.nano.serviceaccess/src/main" />
 			<property name="target.dir" value="../../target" />
 		</ant>
 		<ant antfile="project-distribute.xml" inheritall="false">
 			<property name="refactore.property.file" value="${basedir}/project/distribute-directaccess.properties" />
 			<property name="basedir" value="../tsl2.nano.directaccess" />
 			<property name="sh.compile.classpath2" value="../tsl2.nano.common" />
+			<property name="sh.compile.classpath3" value="../tsl2.nano.serviceaccess" />
 			<property name="target.dir" value="../../target" />
 		</ant>
 		<ant antfile="project-distribute.xml" inheritall="false">
@@ -47,6 +60,8 @@ to create a new application-version, do the following:
 			<property name="refactore.property.file" value="${basedir}/project/distribute-ormliteprovider.properties" />
 			<property name="basedir" value="../tsl2.nano.ormliteprovider" />
 			<property name="sh.compile.classpath2" value="../tsl2.nano.common" />
+			<property name="sh.compile.classpath3" value="../tsl2.nano.serviceaccess" />
+			<property name="sh.compile.classpath4" value="../tsl2.nano.directaccess" />
 			<property name="target.dir" value="../../target" />
 		</ant>
 
@@ -54,6 +69,8 @@ to create a new application-version, do the following:
 			<property name="refactore.property.file" value="${basedir}/project/distribute-ebeanprovider.properties" />
 			<property name="basedir" value="../tsl2.nano.ebeanprovider" />
 			<property name="sh.compile.classpath2" value="../tsl2.nano.common" />
+			<property name="sh.compile.classpath3" value="../tsl2.nano.serviceaccess" />
+			<property name="sh.compile.classpath4" value="../tsl2.nano.directaccess" />
 			<property name="target.dir" value="../../target" />
 		</ant>
 
@@ -67,7 +84,9 @@ to create a new application-version, do the following:
 		<ant antfile="project-distribute.xml">
 			<property name="refactore.property.file" value="${basedir}/project/distribute-h5.properties" />
 			<property name="basedir" value="../tsl2.nano.h5" />
-			<property name="sh.compile.classpath2" value="../tsl2.nano.common" />
+			<property name="sh.compile.classpath2" value=".." />
+			<property name="sh.compile.classpath3" value="../tsl2.nano.serviceaccess" />
+			<property name="sh.compile.classpath4" value="../tsl2.nano.directaccess" />
 			<property name="sh.compile.exclude3" value="src/sample/**" />
 			<property name="target.dir" value="../../target" />
 		</ant>
@@ -154,7 +173,7 @@ to create a new application-version, do the following:
 			<property name="sh.jar.destination" value="${test.dir}/tsl2.nano.h5.${build.version}.jar" />
 			<property name="sh.jar.manifest" value="../tsl2.nano.h5/META-INF/MANIFEST.MF" />
 			<property name="sh.jar.include" value="**" />
-			<property name="sh.jar.exclude" value="build-tsl2.nano.h5.propertiess" />
+			<property name="sh.jar.exclude" value="build-tsl2.nano.h5.properties" />
 		</ant>
 
 		<ant antfile="../tsl2.nano.common/shell.xml" target="sh.jar">
@@ -163,7 +182,7 @@ to create a new application-version, do the following:
 			<property name="sh.jar.destination" value="${test.dir}/tsl2.nano.h5.${build.version}.jar" />
 			<property name="sh.jar.manifest" value="../tsl2.nano.h5/META-INF/MANIFEST.MF" />
 			<property name="sh.jar.include" value="**" />
-			<property name="sh.jar.exclude" value="build*.propertiess" />
+			<property name="sh.jar.exclude" value="build*.properties" />
 		</ant>
 
 		<ant antfile="../tsl2.nano.common/shell.xml" target="sh.jar">
@@ -185,10 +204,69 @@ to create a new application-version, do the following:
 			<property name="sh.jar.srcdir" value="${target.dir}" />
 			<property name="sh.jar.destination" value="${test.dir}/tsl2.nano.h5.${build.version}.jar" />
 			<property name="sh.jar.manifest" value="../tsl2.nano.h5/META-INF/MANIFEST.MF" />
-			<property name="sh.jar.include" value="slf4j-api-1.7.*.jar" />
+			<!--<property name="sh.jar.include" value="slf4j-api-1.7.*.jar" />-->
 			<property name="sh.jar.include" value="java_websocket.jar" />
 		</ant>
-		
+
+		<!-- 
+			create war-file to start nano.h5 through a rest-service inside an ejb-container 
+		-->
+		<ant antfile="../tsl2.nano.common/shell.xml" target="sh.jar">
+			<property file="../tsl2.nano.h5/src/resources/build-tsl2.nano.h5.properties" />
+			<property name="sh.jar.srcdir" value="../tsl2.nano.serviceaccess/bin" />
+			<property name="sh.jar.destination" value="${target.dir}/tslx.nano.serviceaccess-noejb.${build.version}.jar" />
+			<property name="sh.jar.exclude" value="**/*ServiceBean.class" />
+			<property name="sh.jar.exclude2" value="**/MANIFEST.MF" />
+		</ant>
+		<ant antfile="../tsl2.nano.common/shell.xml" target="sh.copy">
+			<property name="sh.copy.srcdir" value="../tsl2.nano.h5/bin" />
+			<property name="sh.copy.destination" value="${target.dir}/war/WEB-INF/classes" />
+			<property name="sh.copy.exclude" value="**/test/**" />
+			<property name="sh.copy.exclude2" value="**/WEB-INF/**" />
+		</ant>
+		<ant antfile="../tsl2.nano.common/shell.xml" target="sh.copy">
+			<property name="sh.copy.srcdir" value="../tsl2.nano.directaccess/src/resources" />
+			<property name="sh.copy.destination" value="${target.dir}/war/WEB-INF/classes" />
+		</ant>
+		<ant antfile="../tsl2.nano.common/shell.xml" target="sh.copy">
+			<property name="sh.copy.srcdir" value="${target.dir}" />
+			<property name="sh.copy.destination" value="${target.dir}/war/WEB-INF/lib" />
+			<property name="sh.copy.include" value="tsl2*.jar" />
+			<property name="sh.copy.include2" value="simple-xml*.jar" />
+			<property name="sh.copy.include3" value="java_websocket.jar" />
+			<property name="sh.copy.exclude" value="*src.jar" />
+			<property name="sh.copy.exclude2" value="*tsl2.nano.core*.jar" />
+			<property name="sh.copy.exclude3" value="tsl2.nano.h5.0*.jar" />
+		</ant>
+		<ant antfile="../tsl2.nano.common/shell.xml" target="sh.copy">
+			<property name="sh.copy.srcdir" value="${target.dir}" />
+			<property name="sh.copy.destination" value="${target.dir}/war/WEB-INF/lib" />
+			<property name="sh.copy.include" value="tslx*.jar" />
+		</ant>
+		<ant antfile="../tsl2.nano.common/shell.xml" target="sh.copy">
+			<property name="sh.copy.srcdir" value="${target.dir}" />
+			<property name="sh.copy.destination" value="${target.dir}/war/WEB-INF/lib" />
+			<property name="sh.copy.include" value="simple-xml*.jar" />
+		</ant>
+		<ant antfile="../tsl2.nano.common/shell.xml" target="sh.copy">
+			<property name="sh.copy.srcdir" value="${target.dir}" />
+			<property name="sh.copy.destination" value="${target.dir}/war/WEB-INF/lib" />
+			<property name="sh.copy.include" value="java_websocket.jar" />
+		</ant>
+		<ant antfile="../tsl2.nano.common/shell.xml" target="sh.copy">
+			<property name="sh.copy.srcdir" value="../tsl2.nano.h5/bin" />
+			<property name="sh.copy.destination" value="${target.dir}/war/" />
+			<property name="sh.copy.include" value="**/web.xml" />
+		</ant>
+		<ant antfile="../tsl2.nano.common/shell.xml" target="sh.jar">
+			<property file="../tsl2.nano.h5/src/resources/build-tsl2.nano.h5.properties" />
+			<property name="sh.jar.srcdir" value="${target.dir}/war" />
+			<property name="sh.jar.destination" value="${test.dir}/tsl2.nano.h5.${build.version}.war" />
+			<property name="sh.jar.exclude" value="**/tsl2.nano.h5.0*.jar" />
+			<property name="sh.jar.exclude2" value="**/tsl2.nano.serviceaccess*.jar" />
+		</ant>
+
+		<!-- create test environment -->
 		<ant antfile="../tsl2.nano.common/shell.xml" target="sh.copy">
 			<property name="sh.copy.srcdir" value="../tsl2.nano.h5/src/resources" />
 			<property name="sh.copy.destination" value="${test.dir}" />

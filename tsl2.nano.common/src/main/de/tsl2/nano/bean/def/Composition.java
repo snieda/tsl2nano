@@ -88,8 +88,9 @@ public class Composition<C> {
      * @param target (optional) target to be assigned to the child item
      */
     public void add(C newItem, Object target) {
-        if (target != null)
+        if (target != null) {
             this.target.setValue(newItem, target);
+        }
         getParentContainer().add(newItem);
     }
     

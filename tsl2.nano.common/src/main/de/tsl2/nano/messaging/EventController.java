@@ -19,8 +19,6 @@ import org.simpleframework.xml.Default;
 import org.simpleframework.xml.DefaultType;
 import org.simpleframework.xml.ElementMap;
 
-import de.tsl2.nano.bean.def.AttributeDefinition;
-
 /**
  * manages bean typed or untyped events. registers {@link IListener}s and fires {@link ChangeEvent} or other events to
  * be handled by the listeners.<br/>

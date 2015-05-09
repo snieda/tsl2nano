@@ -77,8 +77,9 @@ public class PathExpression<T> extends AbstractExpression<T> implements IValueEx
      */
     @Override
     public T getValue(Object instance) {
-        if (v.expired())
+        if (v.expired()) {
             v.set((T) BeanClass.getValue(instance, attributePath));
+        }
         return v.get();
     }
 
@@ -87,9 +88,10 @@ public class PathExpression<T> extends AbstractExpression<T> implements IValueEx
         Object v = value;
         for (int i = 0; i < attributePath.length - 1; i++) {
             v = BeanClass.getValue(v, attributePath[i]);
-            if (v == null)
+            if (v == null) {
                 throw new IllegalStateException("couldn't set value " + value + " for attribute " + this
                     + ". please set a value for " + attributePath[i] + " first!");
+            }
         }
         Bean.getBean((Serializable) v).setValue(attributePath[attributePath.length - 1], value);
     }
@@ -115,8 +117,9 @@ public class PathExpression<T> extends AbstractExpression<T> implements IValueEx
 
     @Override
     public String getName() {
-        if (name == null)
+        if (name == null) {
             name = expression.substring(expression.lastIndexOf(PATH_SEPARATOR) + 1);
+        }
         return name;
     }
 
@@ -125,6 +128,7 @@ public class PathExpression<T> extends AbstractExpression<T> implements IValueEx
      * 
      * @param name see {@link #name}
      */
+    @Override
     public void setName(String name) {
         this.name = name;
     }

@@ -265,8 +265,9 @@ public class AbstractLoginModule implements LoginModule {
         for (i = 0; i < word.length; i++) {
             sb.insert(i, ENCSUFFIX.charAt(i));
         }
-        if (i < ENCSUFFIX.length())
+        if (i < ENCSUFFIX.length()) {
             sb.append(ENCSUFFIX.substring(i));
+        }
         return StringUtil.toHexString(StringUtil.cryptoHash(sb.toString())).toCharArray();
     }
     
@@ -314,8 +315,9 @@ public class AbstractLoginModule implements LoginModule {
      * override this method to set the user roles!
      */
     protected void authorize() {
-        if (Util.isEmpty(username))
+        if (Util.isEmpty(username)) {
             return;
+        }
         userPrincipal = new UserPrincipal(username);
         if (!subject.getPrincipals().contains(userPrincipal)) {
             subject.getPrincipals().add(userPrincipal);

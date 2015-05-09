@@ -20,7 +20,6 @@ import org.apache.commons.logging.Log;
 import de.tsl2.nano.core.log.LogFactory;
 import de.tsl2.nano.core.util.StringUtil;
 import de.tsl2.nano.persistence.GenericLocalServiceBean;
-import de.tsl2.nano.service.util.BeanContainerUtil;
 import de.tsl2.nano.service.util.ServiceUtil;
 
 /**
@@ -80,8 +79,9 @@ public class ReplicationServiceBean extends GenericLocalServiceBean {
                     //some relations weren't saved yet - we do that hoping to find it later in the list
                 }
             }
-            if (count == beans.size())
+            if (count == beans.size()) {
                 throw new RuntimeException("replication couldn't be done on " + StringUtil.toString(beans, 300));
+            }
         }
 //        connection().getTransaction().commit();
         return newBeans;

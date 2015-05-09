@@ -97,15 +97,17 @@ public class Extension<BASE, EXT> implements Serializable, IConverter<BASE, EXT>
         Object value;
         for (String m : members) {
             value = extAcc.member(m);
-            if (value != null && Serializable.class.isAssignableFrom(value.getClass()))
+            if (value != null && Serializable.class.isAssignableFrom(value.getClass())) {
                 members().put(m, value);
+            }
         }
 
     }
 
     private final LinkedHashMap<String, Object> members() {
-        if (members == null)
+        if (members == null) {
             members = new LinkedHashMap<String, Object>();
+        }
         return members;
     }
 
@@ -118,8 +120,7 @@ public class Extension<BASE, EXT> implements Serializable, IConverter<BASE, EXT>
 
     @Override
     public BASE from(EXT toValue) {
-        new UnsupportedOperationException();
-        return null;
+        throw new UnsupportedOperationException();
     }
 
     @Override

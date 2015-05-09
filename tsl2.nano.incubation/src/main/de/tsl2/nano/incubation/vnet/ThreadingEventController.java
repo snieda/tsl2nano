@@ -25,6 +25,8 @@ import de.tsl2.nano.messaging.IListener;
  * @version $Revision$
  */
 public class ThreadingEventController extends EventController {
+    /** serialVersionUID */
+    private static final long serialVersionUID = 1L;
     //TODO: use newFixedThreadPool(nThreads)
     private static ExecutorService executorService = Executors.newCachedThreadPool();
 
@@ -40,9 +42,11 @@ public class ThreadingEventController extends EventController {
         return new ThreadingEventController();
     }
 
+    @Override
     @SuppressWarnings({ "unchecked", "rawtypes" })
     public void handle(final IListener l, final Object e) {
         executorService.execute(new Runnable() {
+            @Override
             public void run() {
                 Net.log_("new task " + Thread.currentThread() + " for '" + l + "' handling '" + e + "'\n");
                 l.handleEvent(e);

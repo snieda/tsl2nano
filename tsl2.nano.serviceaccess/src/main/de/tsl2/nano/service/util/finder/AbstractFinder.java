@@ -71,8 +71,9 @@ public abstract class AbstractFinder<T> implements Serializable {
             Collection<Object> parameter,
             Collection<Class<Object>> lazyRelations) {
         this.index = index;
-        if (par != null)
+        if (par != null) {
             parameter.addAll(par);
+        }
         lazyRelations.addAll(Arrays.asList(this.relationsToLoad));
         if (currentQuery.length() == 0) {
             currentQuery.append(createStatement(resultType));

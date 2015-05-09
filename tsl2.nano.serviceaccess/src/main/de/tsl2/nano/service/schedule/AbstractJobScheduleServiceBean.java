@@ -71,8 +71,9 @@ public abstract class AbstractJobScheduleServiceBean<RUNNABLE> implements
                 Job<RUNNABLE> job = (Job<RUNNABLE>) timer.getInfo();
                 job.setTimerHandle(timer);
                 //check for previous vm-crashes - then the job wasn't stopped
-                if (job.isRunning())
+                if (job.isRunning()) {
                     job.setAsStopped(new Exception("job wasn't stopped regularly. Perhaps the server crashed while running!"));
+                }
                 jobs.add(job);
             }
         }
@@ -128,6 +129,7 @@ public abstract class AbstractJobScheduleServiceBean<RUNNABLE> implements
     /**
      * {@inheritDoc}
      */
+    @Override
     public TimerHandle createScheduleJob(String name,
             ScheduleExpression scheduleExpression,
             Serializable context,
@@ -214,10 +216,12 @@ public abstract class AbstractJobScheduleServiceBean<RUNNABLE> implements
      *            only the short name of {@link Job#getName()} the first found item will be returned.
      * @return job or null
      */
+    @Override
     public Job<RUNNABLE> getJob(String name) {
         for (Job<RUNNABLE> job : jobs) {
-            if (job.getUniqueName().equals(name) || job.getName().equals(name))
+            if (job.getUniqueName().equals(name) || job.getName().equals(name)) {
                 return job;
+            }
         }
         return null;
     }
@@ -229,8 +233,9 @@ public abstract class AbstractJobScheduleServiceBean<RUNNABLE> implements
      */
     public Job<RUNNABLE> getJob(TimerHandle th) {
         for (Job<RUNNABLE> job : jobs) {
-            if (job.getTimerHandle().equals(th))
+            if (job.getTimerHandle().equals(th)) {
                 return job;
+            }
         }
         return null;
     }
@@ -383,8 +388,9 @@ public abstract class AbstractJobScheduleServiceBean<RUNNABLE> implements
                     job.setAsStopped(ex);
                     addToHistory(job);
                     //if job is expired, removed it from list
-                    if (getNextTimeout(timer) == null)
+                    if (getNextTimeout(timer) == null) {
                         jobs.remove(job);
+                    }
                     LOG.info("next run will be: " + getNextTimeout(timer));
                 }
             }
@@ -404,7 +410,7 @@ public abstract class AbstractJobScheduleServiceBean<RUNNABLE> implements
     protected void addToHistory(Job<RUNNABLE> job) {
         jobHistory.add(new JobHistoryEntry(job));
         //backup to file-system (should be done through file-connector)
-        FileUtil.save(FILE_HISTORY, (Serializable) jobHistory);
+        FileUtil.save(FILE_HISTORY, jobHistory);
     }
 
     /**
@@ -422,8 +428,9 @@ public abstract class AbstractJobScheduleServiceBean<RUNNABLE> implements
      */
     protected Job<RUNNABLE> getRunningJob() {
         for (Job<RUNNABLE> job : jobs) {
-            if (job.isRunning())
+            if (job.isRunning()) {
                 return job;
+            }
         }
         return null;
     }

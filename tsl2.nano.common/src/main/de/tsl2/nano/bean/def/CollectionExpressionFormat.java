@@ -75,14 +75,16 @@ public class CollectionExpressionFormat<T> extends ValueExpressionFormat<T> {
     @SuppressWarnings("unchecked")
     static <T> StringBuffer format0(T obj, StringBuffer toAppendTo, FieldPosition pos, ValueExpression<T> ve) {
         pos.setEndIndex(pos.getBeginIndex() + 1);
-        if (obj == null)
+        if (obj == null) {
             return toAppendTo;
+        }
         Collection<T> c = (Collection<T>) obj;
         for (T item : c) {
             toAppendTo.append(ve.to(item) + DIV);
         }
-        if (c.size() > 0)
+        if (c.size() > 0) {
             toAppendTo.delete(toAppendTo.length() - DIV.length(), toAppendTo.length());
+        }
         return toAppendTo;
     }
 
@@ -104,8 +106,9 @@ public class CollectionExpressionFormat<T> extends ValueExpressionFormat<T> {
         pos.setIndex(pos.getIndex() + 1);
         //don't create an empty collection if there are no values
         if (Util.isEmpty(source)) {
-            if (collectionInstance != null)
+            if (collectionInstance != null) {
                 collectionInstance.clear();
+            }
             return collectionInstance;
         }
         String[] s = source.split(DIV);

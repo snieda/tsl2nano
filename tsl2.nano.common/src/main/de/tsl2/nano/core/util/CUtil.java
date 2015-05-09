@@ -50,8 +50,9 @@ public class CUtil extends ByteUtil {
         int c;
         for (int i = 0; i < o.length; i += 2) {
             c = compareTo(o[i], o[i + 1]);
-            if (c != 0)
+            if (c != 0) {
                 return c;
+            }
         }
         return 0;
     }
@@ -200,7 +201,8 @@ public class CUtil extends ByteUtil {
      * @param min minimum value
      */
     public static final <T extends Comparable<T>> void checkGreater(String name, T value, T min) {
-        if (!isGreater(value, min))
+        if (!isGreater(value, min)) {
             throw new ManagedException("tsl2nano.valuesizefailure", new Object[] { name, min });
+        }
     }
 }

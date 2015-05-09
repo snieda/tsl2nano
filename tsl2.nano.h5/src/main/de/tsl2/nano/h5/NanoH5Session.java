@@ -27,11 +27,9 @@ import java.net.URL;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Date;
-import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
-import java.util.Map;
 import java.util.Properties;
 import java.util.Set;
 import java.util.concurrent.Executors;
@@ -221,8 +219,9 @@ public class NanoH5Session implements ISession {
             //WORKAROUND for uri-problem
             String referer = header.getProperty("referer");
             if (parms.containsKey(IAction.CANCELED)
-                || (method.equals("POST") && referer != null && uri.length() > 1 && referer.contains(uri)))
+                || (method.equals("POST") && referer != null && uri.length() > 1 && referer.contains(uri))) {
                 uri = "/";
+            }
             //extract bean-specific prefix
             BeanDefinition<?> linkToModel = nav.fromUrl(uri);
             Object userResponse = null;
@@ -244,15 +243,18 @@ public class NanoH5Session implements ISession {
                 }
                 if (userResponse instanceof String && !userResponse.equals(IAction.CANCELED)) {
                     msg = (String) userResponse;
-                    if (HtmlUtil.isURL(msg))
+                    if (HtmlUtil.isURL(msg)) {
                         return server.serve(msg, "GET", header, parms, files);
-                    else if (!HtmlUtil.containsHtml(msg))
+                    } else if (!HtmlUtil.containsHtml(msg)) {
                         msg = HtmlUtil.createMessagePage(msg);
+                    }
                 } else {
-                    if (userResponse instanceof BeanDefinition)
+                    if (userResponse instanceof BeanDefinition) {
                         ((BeanDefinition) userResponse).onActivation();
-                    if (!exceptionHandler.hasExceptions())
+                    }
+                    if (!exceptionHandler.hasExceptions()) {
                         Message.send(exceptionHandler, createStatusText(startTime));
+                    }
                     msg = getNextPage(userResponse);
                 }
                 response = server.createResponse(msg);
@@ -263,7 +265,10 @@ public class NanoH5Session implements ISession {
             }
         } catch (Throwable e /*respect errors like NoClassDefFound...the application should continue!*/) {
             LOG.error(e);
-            ManagedException ex = (ManagedException) new ManagedException(e) {
+            ManagedException ex = new ManagedException(e) {
+                /** serialVersionUID */
+                private static final long serialVersionUID = 1L;
+
                 @Override
                 public String getMessage() {
                     return super.getMessage() + "\n\nAction-Stack:\n"
@@ -364,8 +369,9 @@ public class NanoH5Session implements ISession {
         if (nav.current() instanceof Controller) {
             Controller ctrl = (Controller) nav.current();
             String actionName = (String) parms.keySet().iterator().next();
-            if (actionName != null && actionName.startsWith(Controller.PREFIX_CTRLACTION))
+            if (actionName != null && actionName.startsWith(Controller.PREFIX_CTRLACTION)) {
                 return ctrl.doAction(actionName);
+            }
         }
         //follow links or fill selected items
         if (nav.current() instanceof BeanCollector) {
@@ -388,10 +394,11 @@ public class NanoH5Session implements ISession {
                         responseObject = null;
                     } else if (isOpenAction(parms, (BeanCollector) nav.current())) {
                         //normally, after a selection the navigation object will be hold on stack
-                        if (ENV.get("application.edit.multiple", true))
+                        if (ENV.get("application.edit.multiple", true)) {
                             responseObject = putSelectionOnStack((BeanCollector) nav.current());
-                        else
+                        } else {
                             responseObject = nav.current();
+                        }
                     }
                 }
             }
@@ -407,8 +414,9 @@ public class NanoH5Session implements ISession {
         if (nav.current() != null) {
             BeanDefinition<?> c = nav.current();
             actions = new ArrayList<IAction>();
-            if (nav.current().getActions() != null)
+            if (nav.current().getActions() != null) {
                 actions.addAll(c.getActions());
+            }
             actions.addAll(c.getPresentationHelper().getPageActions(this));
             actions.addAll(c.getPresentationHelper().getSessionActions(this));
             actions.addAll(c.getPresentationHelper().getApplicationActions(this));
@@ -419,8 +427,9 @@ public class NanoH5Session implements ISession {
             //start the actions
             //respect action-call through menu-link (with method GET but starting with '!!!'
             Set<Object> keySet = new HashSet<Object>();
-            if (uri.contains(Html5Presentation.PREFIX_ACTION))
+            if (uri.contains(Html5Presentation.PREFIX_ACTION)) {
                 keySet.add(StringUtil.substring(uri, Html5Presentation.PREFIX_ACTION, null));
+            }
             keySet.addAll(parms.keySet());
             for (Object k : keySet) {
                 String p = (String) k;
@@ -442,8 +451,9 @@ public class NanoH5Session implements ISession {
                          * submit/assign and cancel will not push a new element to the navigation stack!
                          * TODO: refactore access to names ('reset' and 'save')
                          */
-                        if (action.getParameter() == null)
+                        if (action.getParameter() == null) {
                             action.setParameter(getContextParameter());
+                        }
                         Object result = action.activate();
 
                         /*
@@ -455,8 +465,9 @@ public class NanoH5Session implements ISession {
                         if (result != null && responseObject != IAction.CANCELED && !action.getId().endsWith("save")) {
                             responseObject = result;
                             if (c instanceof Bean
-                                && ((Bean) c).getInstance() instanceof Persistence)
+                                && ((Bean) c).getInstance() instanceof Persistence) {
                                 authorization = ENV.get(IAuthorization.class);
+                            }
                         } else if (action.getId().endsWith("reset")) {
                             responseObject = c;
                         } else {
@@ -491,8 +502,9 @@ public class NanoH5Session implements ISession {
         for (BeanDefinition c : con) {
             p.putAll(c.toValueMap(p));
         }
-        if (LOG.isDebugEnabled())
+        if (LOG.isDebugEnabled()) {
             LOG.debug("session:" + this + "\n\tcontext parameters: " + p.keySet());
+        }
         return p;
     }
 
@@ -535,10 +547,11 @@ public class NanoH5Session implements ISession {
                         }
                         String oldString = bv.getValueText();
                         String newString = parms.getProperty(p);
-                        if (oldString == null || !oldString.equals(newString))
+                        if (oldString == null || !oldString.equals(newString)) {
                             vmodel.setParsedValue(p, newString);
-                        else
+                        } else {
                             LOG.debug("ignoring unchanged attribute " + vmodel.getAttribute(p));
+                        }
                     } catch (Exception e) {
                         exceptions.add(e);
                     }
@@ -577,8 +590,9 @@ public class NanoH5Session implements ISession {
     private IAction<?> getAction(Collection<IAction> actions, String id) {
         if (actions != null) {
             for (IAction a : actions) {
-                if (a.getId().equals(id))
+                if (a.getId().equals(id)) {
                     return a;
+                }
             }
         }
         return null;
@@ -594,8 +608,9 @@ public class NanoH5Session implements ISession {
 
     protected <T> boolean isNewAction(Properties parms, BeanCollector<?, T> model) {
         for (Object k : parms.keySet()) {
-            if (isNewAction((String) k, model))
+            if (isNewAction((String) k, model)) {
                 return true;
+            }
         }
         return false;
     }
@@ -606,8 +621,9 @@ public class NanoH5Session implements ISession {
 
     protected <T> boolean isOpenAction(Properties parms, BeanCollector<?, T> model) {
         for (Object k : parms.keySet()) {
-            if (isOpenAction((String) k, model))
+            if (isOpenAction((String) k, model)) {
                 return true;
+            }
         }
         return false;
     }
@@ -618,8 +634,9 @@ public class NanoH5Session implements ISession {
 
     protected <T> boolean isSearchRequest(Properties parms, BeanCollector<?, T> model) {
         for (Object k : parms.keySet()) {
-            if (isSearchRequest((String) k, model))
+            if (isSearchRequest((String) k, model)) {
                 return true;
+            }
         }
         return false;
     }
@@ -638,13 +655,16 @@ public class NanoH5Session implements ISession {
             final String NAME = "name";
             if (!from.getAttributeNames()[0].equals(NAME) || from.getAttributeNames().length != 1) {
                 from.getPresentationHelper().change(BeanPresentationHelper.PROP_DOVALIDATION, false);
-                if (from.hasAttribute(NAME))
+                if (from.hasAttribute(NAME)) {
                     from.setAttributeFilter(NAME);
+                }
 //            from.setName(null);
                 to.getPresentationHelper().change(BeanPresentationHelper.PROP_DOVALIDATION, false);
                 if (to.hasAttribute(NAME))
+                 {
                     to.setAttributeFilter(NAME);
 //            to.setName(null);
+                }
             }
 
             for (String p : parms.stringPropertyNames()) {
@@ -681,8 +701,9 @@ public class NanoH5Session implements ISession {
         String v;
         for (String p : parms.stringPropertyNames()) {
             v = parms.getProperty(p);
-            if (v != null && v.matches(RegExpFormat.FORMAT_DATE_SQL))
+            if (v != null && v.matches(RegExpFormat.FORMAT_DATE_SQL)) {
                 parms.setProperty(p, DateUtil.getFormattedDate(DateUtil.getDateSQL(v)));
+            }
         }
     }
 
@@ -720,8 +741,9 @@ public class NanoH5Session implements ISession {
     boolean provideSelection(BeanCollector c, Properties parms) {
         Collection<Object> elements = getSelectedElements(c, parms);
         c.getSelectionProvider().setValue(elements);
-        if (c.getComposition() != null)
+        if (c.getComposition() != null) {
             c.getCurrentData().retainAll(elements);
+        }
         return !c.getSelectionProvider().isEmpty();
 //
 //        if (elements.size() > 0)
@@ -768,6 +790,7 @@ public class NanoH5Session implements ISession {
         return nav.toArray();
     }
 
+    @Override
     public Object getWorkingObject() {
         return nav.current();
     }

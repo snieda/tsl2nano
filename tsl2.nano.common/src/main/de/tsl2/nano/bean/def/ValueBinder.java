@@ -54,9 +54,9 @@ public class ValueBinder<FIRST, SECOND> implements Serializable {
         super();
         this.firstValue = firstValue;
         this.secondValue = secondValue;
-        if (converter != null)
+        if (converter != null) {
             this.converter = converter;
-        else {
+        } else {
             this.converter = new IConverter<FIRST, SECOND>() {
 
                 @Override

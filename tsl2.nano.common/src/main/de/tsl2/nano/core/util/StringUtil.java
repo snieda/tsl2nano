@@ -51,19 +51,20 @@ public class StringUtil {
      * @return outer enclosing match.
      */
     public static String subEnclosing(String data, String from, String to, boolean constrain) {
-        if (from == null && to == null)
+        if (from == null && to == null) {
             return constrain ? null : data;
-        else if (from == null)
+        } else if (from == null) {
             return substring(data, from, to, true, true);
-        else if (to == null)
+        } else if (to == null) {
             return substring(data, from, to, 0, true);
-        else {
+        } else {
             int iFrom = data.indexOf(from);
             int iTo = data.lastIndexOf(to);
-            if (constrain && iFrom == -1 || iTo == -1)
+            if (constrain && iFrom == -1 || iTo == -1) {
                 return null;
-            else
+            } else {
                 return data.substring(iFrom != -1 ? iFrom + from.length() : 0, iTo != -1 ? iTo : data.length());
+            }
         }
     }
 
@@ -82,14 +83,16 @@ public class StringUtil {
      */
     public static String substring(String data, String from, String to, boolean last, boolean constrain) {
         int i = !last ? 0 : from != null ? data.lastIndexOf(from) : to != null ? data.lastIndexOf(to) : 0;
-        if (i < 0 && constrain)
+        if (i < 0 && constrain) {
             return null;
+        }
         i = i == -1 ? 0 : i;
-        if (from != null || i == 0)
+        if (from != null || i == 0) {
             return substring(data, from, to, i, constrain);
-        else
+        } else {
             // if 'last' is used for 'to', we return directly the substring
             return data.substring(0, i);
+        }
     }
 
     /**
@@ -110,38 +113,43 @@ public class StringUtil {
      * @return extracted substring
      */
     public static String substring(String data, String from, String to, int start, boolean constrain) {
-        if (from == null && to == null)
+        if (from == null && to == null) {
             return constrain ? null : data;
+        }
         if (from == null) {
             final int i = data.indexOf(to, start);
             if (i < 0) {
-                if (constrain)
+                if (constrain) {
                     return null;
-                else
+                } else {
                     return data.substring(start);
+                }
             }
             return data.substring(start, i);
         } else if (to == null) {
             final int i = data.indexOf(from, start);
             if (i < 0) {
-                if (constrain)
+                if (constrain) {
                     return null;
-                else
+                } else {
                     return data.substring(start);
+                }
             }
             return data.substring(i + from.length());
         } else {
             int i = data.indexOf(from, start);
             if (i < 0) {
-                if (constrain)
+                if (constrain) {
                     return null;
+                }
                 from = "";//-->length = 0
                 i = start;
             }
             int j = data.indexOf(to, i + from.length() + 1);
             if (j < 0) {
-                if (constrain)
+                if (constrain) {
                     return null;
+                }
                 j = data.length();
             }
             return data.substring(i + from.length(), j);
@@ -219,12 +227,14 @@ public class StringUtil {
     public static void trim(StringBuilder src, char c) {
         int i = 0;
         //from start
-        while (i < src.length() && src.charAt(i) == c)
+        while (i < src.length() && src.charAt(i) == c) {
             src.deleteCharAt(i++);
+        }
         //at the end
         i = src.length();
-        while (i > 0 && src.charAt(--i) == c)
+        while (i > 0 && src.charAt(--i) == c) {
             src.deleteCharAt(i);
+        }
     }
 
     public static void replace(StringBuilder str, String expression, String replacement) {
@@ -509,8 +519,9 @@ public class StringUtil {
         final StringBuffer buf = new StringBuffer(s.length() + betweenFiller.length() * splitIndexes.length);
         int lastIndex = 0;
         for (int i = 0; i < splitIndexes.length; i++) {
-            if (s.length() < splitIndexes[i])
+            if (s.length() < splitIndexes[i]) {
                 break;
+            }
             buf.append(s.substring(lastIndex, splitIndexes[i]) + betweenFiller);
             lastIndex = splitIndexes[i];
         }
@@ -561,8 +572,9 @@ public class StringUtil {
         final StringBuffer buf = new StringBuffer(names.length * 15);
         final String ssep = String.valueOf(sep);
         for (int i = 0; i < names.length; i++) {
-            if (names[i] != null)
+            if (names[i] != null) {
                 buf.append(names[i] + ssep);
+            }
         }
         return buf.length() > sep.length ? buf.substring(0, buf.length() - sep.length) : buf.toString();
     }
@@ -580,8 +592,9 @@ public class StringUtil {
         final StringBuffer buf = new StringBuffer(names.length * 15);
         final String wwrap = String.valueOf(wrap);
         for (int i = 0; i < names.length; i++) {
-            if (names[i] != null)
+            if (names[i] != null) {
                 buf.append(MessageFormat.format(wwrap, names[i]));
+            }
         }
         return buf.toString();
     }
@@ -631,10 +644,11 @@ public class StringUtil {
      */
     public static final void replaceNulls(Object[] strs, boolean useNull) {
         for (int i = 0; i < strs.length; i++) {
-            if (strs[i] == null && !useNull)
+            if (strs[i] == null && !useNull) {
                 strs[i] = "";
-            else if (strs[i] != null && strs[i].toString().length() == 0 && useNull)
+            } else if (strs[i] != null && strs[i].toString().length() == 0 && useNull) {
                 strs[i] = null;
+            }
         }
     }
 

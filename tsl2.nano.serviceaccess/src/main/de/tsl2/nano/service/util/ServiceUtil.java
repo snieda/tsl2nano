@@ -105,8 +105,9 @@ public class ServiceUtil {
             Object exampleBean,
             boolean useLike,
             boolean caseInsensitive) {
-        if (qStr.length() == 0)
+        if (qStr.length() == 0) {
             qStr.append(createStatement(exampleBean.getClass()));
+        }
         final Collection parameter = new LinkedList();
         qStr = addAndConditions(qStr, exampleBean, useLike ? OP_LIKE : OP_EQ, parameter, caseInsensitive);
         LOG.debug(getLogInfo(qStr, parameter));
@@ -129,8 +130,9 @@ public class ServiceUtil {
             T secondBean,
             boolean caseInsensitive) {
         prepareStringValuesForBetween(firstBean, secondBean);
-        if (qStr.length() == 0)
+        if (qStr.length() == 0) {
             qStr.append(createStatement(firstBean.getClass()));
+        }
         final Collection parameter = new LinkedList();
         addBetweenConditions(qStr, firstBean, secondBean, parameter, caseInsensitive);
         LOG.debug(getLogInfo(qStr, parameter));
@@ -265,8 +267,9 @@ public class ServiceUtil {
             Collection parameter,
             boolean caseInsensitive) {
         String bracket_close = "";
-        if (and_cond == null)
+        if (and_cond == null) {
             and_cond = CLAUSE_AND;
+        }
         if (!qStr.toString().contains(CLAUSE_WHERE)) {
             and_cond = CLAUSE_WHERE;
         }
@@ -313,8 +316,9 @@ public class ServiceUtil {
                         strValue = strValue.replace('*', '%');
                     } else {
                         if (operator.equals(OP_GE) || operator.equals(OP_GT)) {
-                            if (attributeDef.length() > 0)
+                            if (attributeDef.length() > 0) {
                                 strValue = StringUtil.fixString(strValue, attributeDef.length(), '0', true);
+                            }
                             /*
                              * the between mechanism (e.g.: between abc000 and abczzz) doesn't respect the full match!
                              * so we have to add an and-condition (with brackets!) to the full match with EQUAL.
@@ -323,8 +327,9 @@ public class ServiceUtil {
                             and_cond = CLAUSE_OR;
                             parameter.add(caseInsensitive ? ((String) value).toLowerCase() : (String) value);
                         } else if (operator.equals(OP_LE) || operator.equals(OP_LT)) {
-                            if (attributeDef.length() > 0)
+                            if (attributeDef.length() > 0) {
                                 strValue = StringUtil.fixString(strValue, attributeDef.length(), 'z', true);
+                            }
                             bracket_close = BRACKET_CLOSE;
                         }
                     }
@@ -383,8 +388,9 @@ public class ServiceUtil {
             Collection parameter,
             boolean caseInsensitive) {
         String bracket_open = "", bracket_close = "";
-        if (and_cond == null)
+        if (and_cond == null) {
             and_cond = CLAUSE_AND;
+        }
         if (!qStr.toString().contains(CLAUSE_WHERE)) {
             and_cond = CLAUSE_WHERE;
         }
@@ -427,8 +433,9 @@ public class ServiceUtil {
                     if (fromValue instanceof String) {
                         strValue = fromValue != null ? (caseInsensitive ? fromValue.toString().toLowerCase()
                             : fromValue.toString()) : "";
-                        if (attributeDef.length() > 0)
+                        if (attributeDef.length() > 0) {
                             strValue = StringUtil.fixString(strValue, attributeDef.length(), '0', true);
+                        }
                         qStr.append(and_cond + bracket_open + varName + OP_EQ + VALUE_PH);
                         and_cond = CLAUSE_OR;
                         bracket_open = "";
@@ -452,8 +459,9 @@ public class ServiceUtil {
                     if (toValue instanceof String) {
                         strValue = toValue != null ? (caseInsensitive ? toValue.toString().toLowerCase()
                             : toValue.toString()) : "";
-                        if (attributeDef.length() > 0)
+                        if (attributeDef.length() > 0) {
                             strValue = StringUtil.fixString(strValue, attributeDef.length(), 'z', true);
+                        }
                         toValue = strValue;
                     }
                     if (toValue != null) {
@@ -700,8 +708,9 @@ public class ServiceUtil {
             attributes = bc.findAttributes(EmbeddedId.class);
             if (attributes.size() > 0) {
                 return attributes.iterator().next().getName();
-            } else
+            } else {
                 return null;
+            }
         }
     }
 
@@ -963,12 +972,15 @@ public class ServiceUtil {
             Object annotationValue,
             Collection match,
             Collection checkedInstances) {
-        if (bean == null)
+        if (bean == null) {
             return match;
-        if (checkedInstances == null)
+        }
+        if (checkedInstances == null) {
             checkedInstances = new HashSet();
-        if (match == null)
+        }
+        if (match == null) {
             match = new HashSet();
+        }
         if (bean instanceof Collection) {
             //loop over oneToMany collection ignoring lazyinit-exceptions
             try {
@@ -982,20 +994,23 @@ public class ServiceUtil {
                 return match;
             }
         }
-        if (checkedInstances.contains(bean))
+        if (checkedInstances.contains(bean)) {
             return match;
-        if (!bean.getClass().getPackage().getName().startsWith(packagePrefix))
+        }
+        if (!bean.getClass().getPackage().getName().startsWith(packagePrefix)) {
             return match;
+        }
         LOG.debug("checking instance: " + bean);
         BeanClass<?> beanClass = BeanClass.getBeanClass(bean.getClass());
         Collection<BeanAttribute> ids = beanClass.findAttributes(annotation);
-        if (ids != null && ids.size() > 0)
+        if (ids != null && ids.size() > 0) {
             if (ids.iterator().next().getValue(bean) == annotationValue
                 || (annotationValue != null && annotationValue.equals(ids.iterator()
                     .next()))) {
                 LOG.info("matched value on bean: " + bean);
                 match.add(bean);
             }
+        }
         checkedInstances.add(bean);
         for (IAttribute<?> attr : beanClass.getAttributes()) {
             findAnnotationInEntityTree(attr.getValue(bean),
@@ -1025,8 +1040,9 @@ public class ServiceUtil {
         ArrayList<Object> onwork = new ArrayList<Object>();
         //first, check the new instance trees for themselves
         for (int i = 0; i < newInstances.length; i++) {
-            if (newInstances[i] != null)
+            if (newInstances[i] != null) {
                 useNewInstances(newInstances[i], newEntities, onwork);
+            }
         }
         //now, do the main thing
         return useNewInstances(tree, Arrays.asList(newInstances), onwork);
@@ -1050,8 +1066,9 @@ public class ServiceUtil {
      */
     public static int useNewInstances(Object tree, List<Object> newEntities, List<Object> onwork) {
         int count = 0, i;
-        if (onwork.contains(tree))
+        if (onwork.contains(tree)) {
             return 0;
+        }
         onwork.add(tree);
         List<? extends IAttribute> attributes = BeanClass.getBeanClass(tree.getClass()).getAttributes();
         for (IAttribute attr : attributes) {

@@ -174,8 +174,9 @@ public abstract class Operator<INPUT, OUTPUT> extends Parser<INPUT> {
      * delegates to {@link #eval(Object)} filling the given values to {@link #values}.
      */
     public OUTPUT eval(INPUT expression, Map<INPUT, OUTPUT> v) {
-        if (values == null)
+        if (values == null) {
             values = new HashMap<INPUT, OUTPUT>();
+        }
         values.putAll(v);
         return eval(expression);
     }
@@ -213,8 +214,9 @@ public abstract class Operator<INPUT, OUTPUT> extends Parser<INPUT> {
                 t = extract(term, syntax(KEY_TERM));
                 boolean finish = unwrap(expression).equals(term);
                 replace(expression, term, converter.from(operate(wrap(t), values)));
-                if (finish)
+                if (finish) {
                     break;
+                }
             }
 
             OUTPUT result;
@@ -223,8 +225,9 @@ public abstract class Operator<INPUT, OUTPUT> extends Parser<INPUT> {
             } else {
                 INPUT operand = extract(expression, syntax.get(KEY_OPERAND));
                 result = getValue(operand);
-                if (isEmpty(expression))
+                if (isEmpty(expression)) {
                     expression = operand;
+                }
                 result = result != null ? result : converter.to(trim(expression));
             }
             if (LOG.isDebugEnabled()) {
@@ -277,8 +280,9 @@ public abstract class Operator<INPUT, OUTPUT> extends Parser<INPUT> {
         INPUT toEnclose, t;
         while (!isEmpty(toEnclose = extract(expression, notEnclosed))) {
             t = extract(toEnclose, term);
-            if (extract(t, highOp) != null)
+            if (extract(t, highOp) != null) {
                 replace(expression, t, concat(syntax.get(KEY_BEGIN), t, syntax.get(KEY_END)));
+            }
         }
         return expression;
     }
@@ -332,7 +336,7 @@ public abstract class Operator<INPUT, OUTPUT> extends Parser<INPUT> {
     }
 
     protected OUTPUT newOperand(INPUT expr) {
-        return (OUTPUT) converter.to(expr);
+        return converter.to(expr);
     }
 
     @Persist

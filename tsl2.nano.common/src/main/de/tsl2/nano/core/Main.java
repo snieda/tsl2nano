@@ -74,8 +74,9 @@ public class Main {
         if (argMapping != null && argMapping.size() > 0) {
             for (int i = 0; i < args.length; i++) {
                 String argName = argMapping.get(i);
-                if (argName != null)
+                if (argName != null) {
                     ENV.setProperty(argName, args[i]);
+                }
             }
         }
     }

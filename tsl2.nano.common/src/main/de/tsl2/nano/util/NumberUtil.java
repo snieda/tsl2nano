@@ -19,13 +19,11 @@ import java.text.ParsePosition;
 import java.util.Comparator;
 import java.util.Locale;
 
-import de.tsl2.nano.core.ManagedException;
 import de.tsl2.nano.core.cls.BeanClass;
 import de.tsl2.nano.core.cls.PrimitiveUtil;
 import de.tsl2.nano.core.util.BitUtil;
 import de.tsl2.nano.core.util.DateUtil;
 import de.tsl2.nano.core.util.StringUtil;
-import de.tsl2.nano.core.util.Util;
 import de.tsl2.nano.format.FormatUtil;
 
 /**
@@ -155,11 +153,13 @@ public class NumberUtil extends BitUtil {
      * @return true, if all numbers = 0
      */
     public static final boolean isAllZero(BigDecimal... numbers) {
-        if (numbers.length == 0)
+        if (numbers.length == 0) {
             throw new IllegalArgumentException("At least one number has to be given!");
+        }
         for (int i = 0; i < numbers.length; i++) {
-            if (BigDecimal.ZERO.compareTo(numbers[i]) != 0)
+            if (BigDecimal.ZERO.compareTo(numbers[i]) != 0) {
                 return false;
+            }
         }
         return true;
     }
@@ -175,10 +175,12 @@ public class NumberUtil extends BitUtil {
         int sign = 0, s;
         for (int i = 0; i < numbers.length; i++) {
             s = numbers[i].signum();
-            if (sign == 0 && s != 0)
+            if (sign == 0 && s != 0) {
                 sign = s;
-            if (s != 0 && sign != s)
+            }
+            if (s != 0 && sign != s) {
                 return false;
+            }
         }
         return true;
     }
@@ -287,8 +289,9 @@ public class NumberUtil extends BitUtil {
             //to check, if the whole string s1 was parsed (the parser may parse only the first part of s1), we need the parse position
             ParsePosition pos = new ParsePosition(0);
             Number number = numberFormat.parse(s1, pos);
-            if (pos.getIndex() < s1.length())
+            if (pos.getIndex() < s1.length()) {
                 return null;
+            }
             return number;
         } catch (final Exception ex) {
             return null;

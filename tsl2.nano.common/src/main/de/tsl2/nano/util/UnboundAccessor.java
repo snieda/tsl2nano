@@ -76,8 +76,9 @@ public class UnboundAccessor<T> {
         this.instance = instance;
         this.useMemberCache = useMemberCache;
         this.methodCache = new Hashtable<String, Method>();
-        if (useMemberCache)
+        if (useMemberCache) {
             this.memberCache = new Hashtable<String, Object>();
+        }
     }
 
     /**
@@ -102,8 +103,9 @@ public class UnboundAccessor<T> {
     protected <A extends Annotation> List<String> memberNames(List<String> memberNames,
             Class<? extends Object> cls,
             Class<A>... havingAnnotations) {
-        if (cls.getSuperclass() != null)
+        if (cls.getSuperclass() != null) {
             memberNames(memberNames, cls.getSuperclass(), havingAnnotations);
+        }
         Field[] fields = cls.getDeclaredFields();
         for (Field field : fields) {
             Annotation[] annotations = field.getAnnotations();
@@ -111,8 +113,9 @@ public class UnboundAccessor<T> {
             for (int i = 0; i < annotations.length; i++) {
                 annotationTypes[i] = annotations[i].annotationType();
             }
-            if (Util.contains(annotationTypes, havingAnnotations))
+            if (Util.contains(annotationTypes, havingAnnotations)) {
                 memberNames.add(field.getName());
+            }
         }
         return memberNames;
     }
@@ -137,8 +140,9 @@ public class UnboundAccessor<T> {
      * @return all members of given class and all super-classes
      */
     protected Map<String, Object> members(Class<? extends Object> cls) {
-        if (cls.getSuperclass() != null)
+        if (cls.getSuperclass() != null) {
             members(cls.getSuperclass());
+        }
         Field[] fields = cls.getDeclaredFields();
         for (Field field : fields) {
             member(field.getName(), field.getType());
@@ -163,8 +167,9 @@ public class UnboundAccessor<T> {
     public <M> M member(String name, Class<M> memberType) {
         if (useMemberCache) {
             Object cf = memberCache.get(name);
-            if (cf != null)
+            if (cf != null) {
                 return (M) (cf == NULL ? null : cf);
+            }
         }
         try {
             Field f = getField(name);
@@ -266,8 +271,9 @@ public class UnboundAccessor<T> {
         String methodID = par != null ? getMethodID(name, par) : name;
         Method m = methodCache.get(methodID);
         try {
-            if (m == null)
+            if (m == null) {
                 m = registerMethod(name, par, true);
+            }
             return (M) m.invoke(instance, args);
         } catch (Exception e) {
             ManagedException.forward(e);

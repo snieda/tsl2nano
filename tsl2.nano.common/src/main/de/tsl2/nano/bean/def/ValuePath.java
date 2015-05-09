@@ -30,6 +30,8 @@ import de.tsl2.nano.messaging.EventController;
 @SuppressWarnings("unchecked")
 @Default(value = DefaultType.FIELD, required = false)
 public class ValuePath<B, T> extends PathExpression<T> implements IValueAccess<T> {
+    /** serialVersionUID */
+    private static final long serialVersionUID = 1L;
     transient B instance;
     transient EventController eventController;
 
@@ -67,12 +69,13 @@ public class ValuePath<B, T> extends PathExpression<T> implements IValueAccess<T
     @Override
     public void setValue(T object) {
         Object lastInstance;
-        if (attributePath.length > 1)
+        if (attributePath.length > 1) {
             lastInstance =
                 BeanClass.getValue(instance,
                     CollectionUtil.copyOfRange(attributePath, 0, attributePath.length - 2, String[].class));
-        else
+        } else {
             lastInstance = instance;
+        }
         BeanAttribute.getBeanAttribute(BeanClass.getDefiningClass(lastInstance.getClass()),
             attributePath[attributePath.length - 1]).setValue(lastInstance, object);
     }
@@ -89,8 +92,9 @@ public class ValuePath<B, T> extends PathExpression<T> implements IValueAccess<T
      */
     @Override
     public EventController changeHandler() {
-        if (eventController == null)
+        if (eventController == null) {
             eventController = new EventController();
+        }
         return eventController;
     }
 

@@ -77,13 +77,15 @@ public class JobServer implements Runnable, Closeable {
         this.connections = new HashMap<String, Socket>();
         loadedCommands = new HashMap<String, Collection<Class<?>>>();
         this.port = port;
-        if (isWorker)
+        if (isWorker) {
             localExecutorService.execute(this);
+        }
     }
 
     private Socket newConnection() {
-        if (connections.size() == availableWorkstations.size())
+        if (connections.size() == availableWorkstations.size()) {
             return null;
+        }
         Set<String> ips = connections.keySet();
         for (String ip : availableWorkstations) {
             if (!ips.contains(ip)) {
@@ -108,8 +110,9 @@ public class JobServer implements Runnable, Closeable {
         Collection<Socket> sockets = connections.values();
         for (Socket socket : sockets) {
             //TODO: how to check availability?
-            if (!socket.isConnected())
+            if (!socket.isConnected()) {
                 return socket;
+            }
         }
         throw new IllegalStateException("all registered workstations are in use! no more connections available");
     }

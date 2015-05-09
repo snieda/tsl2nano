@@ -10,19 +10,15 @@
 package de.tsl2.nano.incubation.terminal.item.selector;
 
 import java.io.File;
-import java.io.InputStream;
-import java.io.PrintStream;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
-import java.util.Properties;
 
 import org.simpleframework.xml.Attribute;
 
 import de.tsl2.nano.core.util.FileUtil;
 import de.tsl2.nano.core.util.StringUtil;
-import de.tsl2.nano.core.util.Util;
 import de.tsl2.nano.incubation.terminal.item.Option;
 
 /**
@@ -56,8 +52,9 @@ public class DirSelector extends TreeSelector<String> {
      */
     public DirSelector(String name, String description, List<String> roots, String include) {
         super(name, description);
-        if (roots.size() == 0)
+        if (roots.size() == 0) {
             roots.add("${user.dir}");
+        }
         this.roots = roots;
         this.include = include;
     }
@@ -69,8 +66,9 @@ public class DirSelector extends TreeSelector<String> {
             roots = new ArrayList<String>();
             roots.add("${user.dir}");
         }
-        if (include == null)
+        if (include == null) {
             include = ".*";
+        }
         for (String root : roots) {
             root = StringUtil.insertProperties(root, context);
             files.addAll(Arrays.asList(FileUtil.getFiles(root, include)));
@@ -81,12 +79,16 @@ public class DirSelector extends TreeSelector<String> {
     @Override
     protected void addOption(Object item) {
         File file = (File) item;
-        if (file.isFile() && !showFiles)
+        if (file.isFile() && !showFiles) {
             return;
+        }
 //        final IItem<?> parent_ = getParent();
         if (file.isFile()) {
             nodes.add(new Option<String>(this, file.getName(), null, file.getPath(), FileUtil.getDetails(file)) {
-//                @Override
+/** serialVersionUID */
+                private static final long serialVersionUID = 1L;
+
+                //                @Override
 //                public IItem react(IItem caller, String input, InputStream in, PrintStream out, Properties env) {
 //                    super.react(caller, input, in, out, env);
 //                    return parent_;

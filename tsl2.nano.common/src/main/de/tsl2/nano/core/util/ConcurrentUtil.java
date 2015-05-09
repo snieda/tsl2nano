@@ -10,6 +10,7 @@
 package de.tsl2.nano.core.util;
 
 import java.lang.Thread.UncaughtExceptionHandler;
+import java.util.Hashtable;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.Executors;
@@ -28,6 +29,9 @@ import de.tsl2.nano.core.log.LogFactory;
  */
 public class ConcurrentUtil {
     private static final Log LOG = LogFactory.getLog(ConcurrentUtil.class);
+
+    @SuppressWarnings("rawtypes")
+    private static final Map<Class, ThreadLocal<?>> threadLocals = new Hashtable<Class, ThreadLocal<?>>();
 
     public static Thread startDaemon(String name,
             Runnable runtime) {
@@ -48,13 +52,44 @@ public class ConcurrentUtil {
         LOG.info("starting thread " + name);
         Thread thread = Executors.defaultThreadFactory().newThread(runtime);
         thread.setName(name);
-        if (handler != null)
+        if (handler != null) {
             thread.setUncaughtExceptionHandler(handler);
-        if (lowPriority)
+        }
+        if (lowPriority) {
             thread.setPriority(Thread.MIN_PRIORITY);
+        }
         thread.setDaemon(true);
         thread.start();
         return thread;
+    }
+
+    /**
+     * provides thread local values, stored before through {@link #setCurrent(Object)}. For further informations, see
+     * {@link ThreadLocal} and {@link ThreadLocal#get()}
+     * 
+     * @param threadLocalType value type
+     * @return value, if stored for the current thread or null
+     */
+    @SuppressWarnings("unchecked")
+    public static <T> T getCurrent(Class<T> threadLocalType) {
+        ThreadLocal<?> tl = threadLocals.get(threadLocalType);
+        return (T) (tl != null ? tl.get() : null);
+    }
+
+    /**
+     * sets a new value. for further informations, {@link #getCurrent(Class)}, {@link ThreadLocal} and
+     * {@link ThreadLocal#set(Object)}.
+     * 
+     * @param value value to store as threadlocal inside the current thread.
+     */
+    @SuppressWarnings("unchecked")
+    public static <T> void setCurrent(T value) {
+        ThreadLocal<T> tl = (ThreadLocal<T>) threadLocals.get(value.getClass());
+        if (tl == null) {
+            tl = new ThreadLocal<T>();
+            threadLocals.put(value.getClass(), tl);
+        }
+        tl.set(value);
     }
 
     /**
@@ -141,8 +176,9 @@ class Worker<INPUT, OUTPUT> {
      * @param jobs
      */
     public void run(Runnable... jobs) {
-        if (jobs.length == 0)
+        if (jobs.length == 0) {
             throw new IllegalArgumentException("at least one job has to be given!");
+        }
         for (int i = 0; i < jobs.length; i++) {
             /*
              * if there are to many ips and ports we have to wait for some threads to avoid outofmemory.

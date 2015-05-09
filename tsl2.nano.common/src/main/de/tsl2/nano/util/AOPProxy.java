@@ -47,11 +47,13 @@ public class AOPProxy<T> implements InvocationHandler {
      */
     @Override
     public Object invoke(Object proxy, Method method, Object[] args) throws Throwable {
-        if (before != null)
+        if (before != null) {
             before.run(null, delegate, method, args);
+        }
         Object result = method.invoke(delegate, args);
-        if (after != null)
+        if (after != null) {
             after.run(null, delegate, method, args);
+        }
         if (method.getReturnType().isInterface()) {
             result = createEnhancement(result, before, after, proxyResult);
         }

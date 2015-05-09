@@ -12,7 +12,6 @@ package de.tsl2.nano.h5.test;
 import static org.junit.Assert.assertTrue;
 
 import org.junit.Test;
-import org.w3c.dom.Element;
 
 import com.gargoylesoftware.htmlunit.History;
 import com.gargoylesoftware.htmlunit.WebClient;
@@ -22,7 +21,6 @@ import com.sun.jersey.api.container.httpserver.HttpServerFactory;
 import com.sun.net.httpserver.HttpServer;
 
 import de.tsl2.nano.core.util.NetUtil;
-import de.tsl2.nano.math.vector.Point;
 
 /**
  * 

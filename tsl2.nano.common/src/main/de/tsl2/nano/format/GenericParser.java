@@ -74,25 +74,28 @@ public class GenericParser<T> extends DefaultFormat implements INumberFormatChec
             scale = numberFormat.getMinimumFractionDigits();
             postfix = numberFormat.getCurrency().getCurrencyCode();
             if (type == null) {
-                if (numberFormat.isParseIntegerOnly())
+                if (numberFormat.isParseIntegerOnly()) {
                     parsingType = (Class<T>) Integer.class;
-                else
+                } else {
                     parsingType = (Class<T>) BigDecimal.class;
+                }
             }
         } else if (format instanceof DateFormat) {
             if (type == null) {
                 SimpleDateFormat sdf = (SimpleDateFormat) format;
                 String sdfPattern = sdf.toPattern();
-                if (sdfPattern.contains("y") && sdfPattern.contains("s"))
+                if (sdfPattern.contains("y") && sdfPattern.contains("s")) {
                     parsingType = (Class<T>) Timestamp.class;
-                else if (sdfPattern.contains("s"))
+                } else if (sdfPattern.contains("s")) {
                     parsingType = (Class<T>) Time.class;
-                else
+                } else {
                     parsingType = (Class<T>) Date.class;
+                }
             }
         } else {
-            if (type == null)
+            if (type == null) {
                 parsingType = (Class<T>) String.class;
+            }
         }
         if (format instanceof RegExpFormat) {
             parsingPattern = ((RegExpFormat)format).getPattern();
@@ -143,6 +146,7 @@ public class GenericParser<T> extends DefaultFormat implements INumberFormatChec
      * isNumber
      * @return true, if internal formatter is a number format
      */
+    @Override
     public boolean isNumber() {
         return getParsingFormat() instanceof NumberFormat;
     }

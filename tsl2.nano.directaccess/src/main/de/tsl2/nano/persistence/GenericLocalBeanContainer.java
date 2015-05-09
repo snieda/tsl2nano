@@ -32,12 +32,14 @@ public class GenericLocalBeanContainer extends GenericBeanContainer {
      */
     public static void initLocalContainer(ClassLoader classloader, boolean checkConnection) {
         GenericLocalBeanContainer container = new GenericLocalBeanContainer();
-        if (checkConnection)// pre-load the service
+        if (checkConnection) {
             ((GenericLocalServiceBean) container.getGenService()).checkConnection(true);
+        }
 
         initContainer(container, classloader);
     }
 
+    @Override
     protected IGenericService getGenService() {
         if (service == null) {
             IGenericService s = ENV.get(IGenericService.class);

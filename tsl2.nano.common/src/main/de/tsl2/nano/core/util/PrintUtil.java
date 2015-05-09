@@ -15,7 +15,6 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
-import java.util.Properties;
 
 import javax.print.Doc;
 import javax.print.DocFlavor;
@@ -130,17 +129,23 @@ public class PrintUtil {
             int[]... pageranges) {
         HashPrintRequestAttributeSet pras = new HashPrintRequestAttributeSet();
         //sometimes, the user name will not be set
-        if (username != null)
+        if (username != null) {
             pras.add(new RequestingUserName(username, Locale
                 .getDefault()));
-        if (paperSize != null) //ISO_A4, ...
+        }
+        if (paperSize != null) {
             pras.add(paperSize);
+        }
         if (priority > 0)
+         {
             pras.add(new JobPriority(priority));//1-100
-        if (pageranges != null && pageranges.length > 0)
+        }
+        if (pageranges != null && pageranges.length > 0) {
             pras.add(new PageRanges(pageranges));
-        if (quality != null)
+        }
+        if (quality != null) {
             pras.add(quality);
+        }
         return print(jobName, printerName, stream, mimeType, pras);
     }
 
@@ -215,33 +220,40 @@ public class PrintUtil {
             + toString(ps.getSupportedDocFlavors())
             + toString(ps.getSupportedAttributeCategories());
         LOG.info(info);
-        if (!LogFactory.isPrintToConsole())
+        if (!LogFactory.isPrintToConsole()) {
             System.out.println(info);
+        }
     }
 
     private static PrintJobListener getPrintJobListener() {
         return new PrintJobListener() {
 
+            @Override
             public void printJobRequiresAttention(PrintJobEvent pje) {
                 LOG.info("print job requires attention: " + toString(pje));
             }
 
+            @Override
             public void printJobNoMoreEvents(PrintJobEvent pje) {
                 LOG.info("print job has nor more events: " + toString(pje));
             }
 
+            @Override
             public void printJobFailed(PrintJobEvent pje) {
                 LOG.info("print job failed: " + toString(pje));
             }
 
+            @Override
             public void printJobCompleted(PrintJobEvent pje) {
                 LOG.info("print job completed: " + toString(pje));
             }
 
+            @Override
             public void printJobCanceled(PrintJobEvent pje) {
                 LOG.info("print job canceled: " + toString(pje));
             }
 
+            @Override
             public void printDataTransferCompleted(PrintJobEvent pje) {
                 LOG.info("print job data transfer completed: " + toString(pje));
             }
@@ -333,16 +345,19 @@ public class PrintUtil {
             String source = am.get("source");
             String printer = am.get("printer");
             String jobname = am.get("jobname");
-            if (jobname == null)
+            if (jobname == null) {
                 jobname = source;
+            }
             String ps = am.get("papersize");
             MediaSizeName paper = null;
-            if (ps != null)
+            if (ps != null) {
                 paper = (MediaSizeName) BeanClass.getStatic(MediaSizeName.class, ps);
+            }
             PrintQuality quality = null;
             String qual = am.get("quality");
-            if (qual != null)
+            if (qual != null) {
                 quality = (PrintQuality) BeanClass.getStatic(PrintQuality.class, qual);
+            }
             Integer priority;
             String prio = am.get("priority");
             priority = prio != null ? Integer.valueOf(prio) : 0;
@@ -353,16 +368,19 @@ public class PrintUtil {
                 return;
             } else if (source.endsWith(".xml")) {//fop transformation
                 String xslt = am.get("xsltfile");
-                if (xslt == null)
+                if (xslt == null) {
                     throw new IllegalArgumentException(
                         "if source is an xml file, an xslt-transformation file has to be given!");
+                }
                 File xsltFile = new File(xslt);
                 String mimeType = am.get("mimetype");
-                if (mimeType == null)
+                if (mimeType == null) {
                     mimeType = "application/pdf";
-                if (source.contains("*"))
+                }
+                if (source.contains("*")) {
                     throw new IllegalArgumentException(
                         "doing an apache fop transformation, no file filter is allowed. please provide an explicit file name!");
+                }
                 byte[] fop = XmlUtil.fop(new File(source), mimeType, xsltFile);
                 //write the output to a file for e.g. debugging
                 FileUtil.writeBytes(fop, source + "." + StringUtil.substring(mimeType, "/", null), false);

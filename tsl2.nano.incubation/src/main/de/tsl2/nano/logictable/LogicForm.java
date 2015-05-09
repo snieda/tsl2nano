@@ -44,7 +44,7 @@ public class LogicForm<H extends Format & Comparable<H>, ID> extends LogicTable<
             if (expression.contains(CONFIG_EXPRESSION)) {
                 try {
                     String[] c = expression.split(CONFIG_EXPRESSION);
-                    H cellFormat = createFormat(c[1]);
+                    createFormat(c[1]);
                     return header[column].format(c[0]);
                 } catch (Exception ex) {
                     return e;

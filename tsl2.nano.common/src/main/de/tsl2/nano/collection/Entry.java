@@ -66,8 +66,9 @@ public class Entry<K, V> implements Map.Entry<K, V>, Serializable {
     @Override
     public V setValue(V value) {
         this.value = value;
-        if (sync)
+        if (sync) {
             map.put(key, value);
+        }
         return value;
     }
 

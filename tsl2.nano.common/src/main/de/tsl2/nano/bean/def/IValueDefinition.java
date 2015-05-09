@@ -22,11 +22,13 @@ public interface IValueDefinition<T> extends IAttributeDefinition<T>, IValueAcce
     Object getInstance();
 
     /** returns true, if this attribute is a relation (foreign key) to another bean */
+    @Override
     boolean isRelation();
     
     /** returns the relation value - if the attribute value is another bean */
     IValueDefinition<?> getRelation(String name);
 
     /** returns true, if attribute is of type {@link IValueAccess} - means, it belongs not to the parents bean-class. */
+    @Override
     public boolean isVirtual();
 }

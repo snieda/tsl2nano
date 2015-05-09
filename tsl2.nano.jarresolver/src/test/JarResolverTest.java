@@ -1,3 +1,6 @@
+import static junit.framework.Assert.assertFalse;
+import static junit.framework.Assert.assertTrue;
+
 import org.apache.commons.logging.Log;
 import org.junit.AfterClass;
 import org.junit.BeforeClass;
@@ -7,7 +10,6 @@ import de.tsl2.nano.core.log.LogFactory;
 import de.tsl2.nano.core.util.FileUtil;
 import de.tsl2.nano.core.util.StringUtil;
 import de.tsl2.nano.jarresolver.JarResolver;
-import static junit.framework.Assert.*;
 
 /*
  * File: $HeadURL$
@@ -71,8 +73,9 @@ public class JarResolverTest {
      * download
      */
     private boolean download(String pckOrName, String jarName) {
-        if (jarName != null)
+        if (jarName != null) {
             FileUtil.forEach("./", jarName, FileUtil.DO_DELETE);
+        }
         new JarResolver().start(new String[] { pckOrName });
         return jarName != null ? loaded(jarName) : false;
     }

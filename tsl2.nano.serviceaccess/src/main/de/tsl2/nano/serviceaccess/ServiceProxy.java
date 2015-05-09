@@ -137,6 +137,6 @@ public class ServiceProxy<T> extends DefaultService implements InvocationHandler
     @SuppressWarnings("rawtypes")
     public static final void dontLog(Object service) {
         LOG.info("turning off logging for service " + service);
-        ((ServiceProxy)Proxy.getInvocationHandler((Proxy)service)).setDoLog(false);
+        ((ServiceProxy)Proxy.getInvocationHandler(service)).setDoLog(false);
     }
 }

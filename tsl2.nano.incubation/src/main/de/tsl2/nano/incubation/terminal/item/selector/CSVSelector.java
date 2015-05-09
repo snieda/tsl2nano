@@ -70,8 +70,9 @@ public class CSVSelector extends Selector<String> {
             } catch (FileNotFoundException e) {
                 ManagedException.forward(e);
             } finally {
-                if (scanner != null)
-                scanner.close();
+                if (scanner != null) {
+                    scanner.close();
+                }
             }
         return items;
     }

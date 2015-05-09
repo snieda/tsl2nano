@@ -117,13 +117,14 @@ public class Work<CONTEXT> implements Future<CONTEXT> {
         } catch (Exception e) {
             ManagedException.forward(e);
         } finally {
-            if (connected())
+            if (connected()) {
                 try {
                     socket.close();
                 } catch (IOException e) {
                     //no problem, may be socket will be closed later
                     LOG.error(e);
                 }
+            }
         }
         LOG.info("timeout reached for task " + this);
         return null;

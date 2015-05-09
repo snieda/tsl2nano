@@ -21,7 +21,6 @@ import java.io.PipedOutputStream;
 import java.io.PrintStream;
 import java.io.Serializable;
 import java.util.Arrays;
-import java.util.Locale;
 
 import org.apache.commons.logging.Log;
 
@@ -156,8 +155,9 @@ public class ByteUtil extends Util {
         if (!bean1.getClass().equals(bean2.getClass())) {
             return false;
         }
-        if (bean1.equals(bean2))
+        if (bean1.equals(bean2)) {
             return true;
+        }
 
         return equals(convertToByteArray(bean1), convertToByteArray(bean2));
     }

@@ -90,5 +90,6 @@ public interface IGenericService extends IGenericBaseService, IQueryService , IB
     /**
      * only for tests - creates an empty server side factory.
      */
+    @Override
     void initServerSideFactories();
 }

@@ -44,7 +44,7 @@ public class OrderBy<T> extends AbstractFinder<T> {
     StringBuffer createQuery(StringBuffer currentQuery,
             Collection<Object> parameter,
             Collection<Class<Object>> lazyRelations) {
-        return currentQuery.append(createOrderByPostfix( (String[]) attributeNames));
+        return currentQuery.append(createOrderByPostfix( attributeNames));
     }
     
     static String createOrderByPostfix(String[] attributeNames) {

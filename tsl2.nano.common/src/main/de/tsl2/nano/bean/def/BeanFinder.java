@@ -130,8 +130,9 @@ public class BeanFinder<T, F> implements IBeanFinder<T, F>, Serializable {
      */
     @Override
     public Collection<T> previous() {
-        if (currentStartIndex >= getMaxResultCount())
+        if (currentStartIndex >= getMaxResultCount()) {
             currentStartIndex -= getMaxResultCount();
+        }
         return getData();
     }
 

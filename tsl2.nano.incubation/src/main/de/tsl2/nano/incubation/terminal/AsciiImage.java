@@ -110,8 +110,9 @@ public class AsciiImage {
         int xrate = width == -1 ? height == -1 ? 1 : -1 : (int) Math.round(img.getWidth() / (double) width);
         int yrate = height == -1 ? width == -1 ? 1 : xrate : (int) Math.round(img.getHeight() / (double) height);
         //Guarantee values bigger than zero!
-        if (xrate <= 0)
+        if (xrate <= 0) {
             xrate = yrate <= 0 ? (yrate = 1) : yrate;
+        }
 
         for (int y = 0; y < img.getHeight(); y += yrate) {
             for (int x = 0; x < img.getWidth(); x += xrate) {
@@ -119,12 +120,14 @@ public class AsciiImage {
                 //create the average of a pixel block 
                 for (int ry = 0; ry < yrate; ry++) {
                     //on rounding errors...
-                    if (y + ry >= img.getHeight())
+                    if (y + ry >= img.getHeight()) {
                         continue;
+                    }
                     for (int rx = 0; rx < xrate; rx++) {
                         //on rounding errors...
-                        if (x + rx >= img.getWidth())
+                        if (x + rx >= img.getWidth()) {
                             continue;
+                        }
                         pxColor = new Color(img.getRGB(x + rx, y + ry));
                         px +=
                             (((pxColor.getRed() * trgb[0]) + (pxColor.getGreen() * trgb[1]) + (pxColor.getBlue() * trgb[2])));
@@ -151,11 +154,11 @@ public class AsciiImage {
             }
             long start = System.currentTimeMillis();
             PrintWriter writer;
-            if (args.length > 1 && args[1].equals("-out"))
+            if (args.length > 1 && args[1].equals("-out")) {
                 writer =
                     new AsciiImage().convertToAscii(args[0], new PrintWriter(System.out), Integer.valueOf(args[2]),
                         Integer.valueOf(args[3]));
-            else {
+            } else {
                 writer = new AsciiImage().convertToAscii(args[0]);
             }
             writer.close();

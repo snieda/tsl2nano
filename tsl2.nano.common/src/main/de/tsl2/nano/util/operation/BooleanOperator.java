@@ -68,6 +68,7 @@ public class BooleanOperator extends SOperator<Boolean> {
     /**
      * define all possible operations. see {@link #operationDefs}
      */
+    @Override
     @SuppressWarnings("serial")
     protected void createOperations() {
         syntax.put(KEY_OPERATION, "[!&|]");

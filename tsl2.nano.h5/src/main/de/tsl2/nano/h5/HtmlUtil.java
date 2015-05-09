@@ -12,11 +12,9 @@ package de.tsl2.nano.h5;
 import java.io.StringReader;
 import java.io.StringWriter;
 import java.net.URI;
-import java.util.Iterator;
 
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
-import javax.xml.parsers.ParserConfigurationException;
 import javax.xml.transform.OutputKeys;
 import javax.xml.transform.Transformer;
 import javax.xml.transform.TransformerException;
@@ -24,13 +22,13 @@ import javax.xml.transform.TransformerFactory;
 import javax.xml.transform.dom.DOMSource;
 import javax.xml.transform.stream.StreamResult;
 
-import org.xml.sax.InputSource;
 import org.apache.commons.logging.Log;
 import org.w3c.dom.Attr;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
+import org.xml.sax.InputSource;
 
 import de.tsl2.nano.core.ManagedException;
 import de.tsl2.nano.core.log.LogFactory;
@@ -277,12 +275,13 @@ public class HtmlUtil {
         Element e = doc.createElement(tagName);
         if (content != null) {
             String c = content.toString();
-            if (isHtml(c))
+            if (isHtml(c)) {
                 appendNodesFromText(e, c);
-            else if (c.matches("\\&.+[;]"))
+            } else if (c.matches("\\&.+[;]")) {
                 e.setNodeValue(c);
-            else
+            } else {
                 e.setTextContent(c);
+            }
         }
         appendAttributes(e, attributes);
         parent.appendChild(e);
@@ -304,16 +303,19 @@ public class HtmlUtil {
              * 2. if there are more than one tag, create a root tag
              */
             int xmlPrefixEnd = text.indexOf("?>");
-            if (xmlPrefixEnd != -1)
+            if (xmlPrefixEnd != -1) {
                 text = text.substring(xmlPrefixEnd + 3);
+            }
             
             final String BEG = begin(TAG_SPAN), END = end(TAG_SPAN);
             String prefix = StringUtil.substring(text, null, "<");
-            if (!Util.isEmpty(prefix))
+            if (!Util.isEmpty(prefix)) {
                 text = text.replace(prefix, BEG + prefix + END);
+            }
             String postfix = StringUtil.substring(text, ">", null, true);
-            if (!Util.isEmpty(postfix))
+            if (!Util.isEmpty(postfix)) {
                 text = text.replace(postfix, BEG + postfix + END);
+            }
 
             text = BEG + text + END;
 
@@ -351,8 +353,9 @@ public class HtmlUtil {
         Document doc = e.getOwnerDocument();
         for (int i = 0; i < attributes.length; i++) {
             //disabled flag attribute --> continue
-            if (attributes[i] == null)
+            if (attributes[i] == null) {
                 continue;
+            }
             String attrName = (String) attributes[i];
             Attr attr = null;
             if (attrName.startsWith(PRE_ATTRIBUTE_FLAG)) {
@@ -453,8 +456,9 @@ public class HtmlUtil {
     }
 
     public static final boolean isURL(String str) {
-        if (str.isEmpty() || str.equals("/") || str.equals("/null"))
+        if (str.isEmpty() || str.equals("/") || str.equals("/null")) {
             return false;
+        }
         try {
             URI.create(str);
             return str.contains(".") || str.contains("/");

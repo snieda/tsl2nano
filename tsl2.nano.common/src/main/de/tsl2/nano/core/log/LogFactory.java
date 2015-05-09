@@ -23,8 +23,8 @@ import org.simpleframework.xml.core.Persist;
 
 import de.tsl2.nano.core.ManagedException;
 import de.tsl2.nano.core.util.BitUtil;
-import de.tsl2.nano.core.util.StringUtil;
 import de.tsl2.nano.core.util.ConcurrentUtil;
+import de.tsl2.nano.core.util.StringUtil;
 import de.tsl2.nano.core.util.XmlUtil;
 
 /**
@@ -120,16 +120,18 @@ public/*abstract*/class LogFactory implements Runnable, Serializable {
              * while it not possible to use convenience method from other base classes,
              * because the all use this logfactory, we have to create some not-nice code.
              */
-            if (new File(logFactoryXml).canRead())
+            if (new File(logFactoryXml).canRead()) {
                 try {
                     self = XmlUtil.loadSimpleXml_(logFactoryXml, LogFactory.class);
-                    if (self.loglevels == null)
+                    if (self.loglevels == null) {
                         self.loglevels = new HashMap<String, Integer>();
+                    }
                 } catch (Throwable e) {//NoClassDefFound would be an error --> Throwable
                     //ok, we create the instance directly!
                     System.err.println(e);
 //                    e.printStackTrace();
                 }
+            }
             if (self == null) {
                 self = new LogFactory() /* on abstract: {} */;
                 self.loggingQueue = new LinkedBlockingQueue<String>(self.queueCapacity);
@@ -217,12 +219,13 @@ public/*abstract*/class LogFactory implements Runnable, Serializable {
         instance().err = error;
         if (bitsetStatesToLog == -1) {
             String logLevel = System.getProperty("tsl2.nano.log.level");
-            if ("trace".equals(logLevel))
+            if ("trace".equals(logLevel)) {
                 instance().statesToLog = LOG_ALL;
-            else if ("debug".equals(logLevel))
+            } else if ("debug".equals(logLevel)) {
                 instance().statesToLog = LOG_DEBUG;
-            else if ("warn".equals(logLevel))
+            } else if ("warn".equals(logLevel)) {
                 instance().statesToLog = LOG_WARN;
+            }
         } else {
             instance().statesToLog = bitsetStatesToLog;
         }
@@ -308,13 +311,14 @@ public/*abstract*/class LogFactory implements Runnable, Serializable {
     }
 
     private final boolean hasLogLevel(String path, int level) {
-        if (!loglevels.containsKey(path))
+        if (!loglevels.containsKey(path)) {
             if (path.indexOf('.') == -1) {
                 //TODO: create default path levels to enhance performance
                 return true;//level <= defaultPckLogLevel;//minimum default level
             } else {
                 return hasLogLevel(StringUtil.substring(path, null, ".", true), level);
             }
+        }
         return loglevels.get(path) >= level;
     }
 
@@ -338,74 +342,92 @@ public/*abstract*/class LogFactory implements Runnable, Serializable {
             /*
              * not using override annotations to be usable on jdk 1.5 platforms!
              */
+            @Override
             public void warn(Object arg0, Throwable arg1) {
                 log(logClass, WARN, arg0, arg1);
             }
 
+            @Override
             public void warn(Object arg0) {
                 log(logClass, WARN, arg0, null);
             }
 
+            @Override
             public void trace(Object arg0, Throwable arg1) {
                 log(logClass, TRACE, arg0, arg1);
             }
 
+            @Override
             public void trace(Object arg0) {
                 log(logClass, TRACE, arg0, null);
             }
 
+            @Override
             public boolean isWarnEnabled() {
                 return instance().isEnabled(WARN);
             }
 
+            @Override
             public boolean isTraceEnabled() {
                 return instance().isEnabled(TRACE);
             }
 
+            @Override
             public boolean isInfoEnabled() {
                 return instance().isEnabled(INFO);
             }
 
+            @Override
             public boolean isFatalEnabled() {
                 return instance().isEnabled(FATAL);
             }
 
+            @Override
             public boolean isErrorEnabled() {
                 return instance().isEnabled(ERROR);
             }
 
+            @Override
             public boolean isDebugEnabled() {
                 return instance().isEnabled(DEBUG);
             }
 
+            @Override
             public void info(Object arg0, Throwable arg1) {
                 log(logClass, INFO, arg0, arg1);
             }
 
+            @Override
             public void info(Object arg0) {
                 log(logClass, INFO, arg0, null);
             }
 
+            @Override
             public void fatal(Object arg0, Throwable arg1) {
                 log(logClass, FATAL, arg0, arg1);
             }
 
+            @Override
             public void fatal(Object arg0) {
                 log(logClass, FATAL, arg0, null);
             }
 
+            @Override
             public void error(Object arg0, Throwable arg1) {
                 log(logClass, ERROR, arg0, arg1);
             }
 
+            @Override
             public void error(Object arg0) {
                 log(logClass, ERROR, arg0, null);
             }
 
+            @Override
             public void debug(Object arg0, Throwable arg1) {
                 log(logClass, DEBUG, arg0, arg1);
             }
 
+            @Override
             public void debug(Object arg0) {
                 log(logClass, DEBUG, arg0, null);
             }
@@ -485,8 +507,9 @@ public/*abstract*/class LogFactory implements Runnable, Serializable {
         int i;
         int len = Math.min(newText.length(), lastText.length());
         for (i = 0; i < len; i++) {
-            if (lastText.charAt(i) == newText.charAt(i))
+            if (lastText.charAt(i) == newText.charAt(i)) {
                 continue;
+            }
             break;
         }
         return i;

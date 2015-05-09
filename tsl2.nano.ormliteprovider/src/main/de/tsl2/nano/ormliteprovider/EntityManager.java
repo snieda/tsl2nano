@@ -14,24 +14,18 @@ import java.util.Collection;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 
 import javax.persistence.TypedQuery;
 
 import org.apache.commons.logging.Log;
 
-import com.j256.ormlite.dao.BaseDaoImpl;
 import com.j256.ormlite.dao.Dao;
 import com.j256.ormlite.dao.DaoManager;
 import com.j256.ormlite.jdbc.JdbcConnectionSource;
-import com.j256.ormlite.stmt.PreparedQuery;
-import com.j256.ormlite.stmt.mapped.MappedPreparedStmt;
 import com.j256.ormlite.support.ConnectionSource;
-import com.j256.ormlite.table.TableInfo;
 
 import de.tsl2.nano.core.ManagedException;
 import de.tsl2.nano.core.log.LogFactory;
-import de.tsl2.nano.core.util.StringUtil;
 import de.tsl2.nano.core.util.Util;
 import de.tsl2.nano.persistence.provider.NanoEntityManagerFactory;
 
@@ -75,8 +69,9 @@ public class EntityManager extends NanoEntityManagerFactory.AbstractEntityManage
             public List getResultList() {
                 try {
                     Class t = type;
-                    if (type == null || Object.class.isAssignableFrom(type))
+                    if (type == null || Object.class.isAssignableFrom(type)) {
                         t = evaluateResultType(qstr);
+                    }
 //                    TableInfo tableInfo = new TableInfo(connectionSource, (BaseDaoImpl) dao(t), t);
 //                    PreparedQuery preparedQuery =
 //                        new MappedPreparedStmt(tableInfo, toNativeSQL(qstr), argFieldTypes, resultFieldTypes,
@@ -193,8 +188,9 @@ public class EntityManager extends NanoEntityManagerFactory.AbstractEntityManage
     private final <T> Dao dao(Class<T> type) {
         try {
             Dao dao = DaoManager.lookupDao(connectionSource, type);
-            if (dao == null)
+            if (dao == null) {
                 dao = DaoManager.createDao(connectionSource, type);
+            }
             return dao;
         } catch (Exception e) {
             LOG.warn("Did you annotate properties instead of fields? ORMLite is not able to read property (get*) annotations!");

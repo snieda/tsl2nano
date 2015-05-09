@@ -38,8 +38,9 @@ public class CompositionFactory {
     }
 
     public static final CompositionFactory instance() {
-        if (self == null)
+        if (self == null) {
             self = new CompositionFactory();
+        }
         return self;
     }
 
@@ -129,8 +130,9 @@ public class CompositionFactory {
         Collection container = c.getParentContainer();
         if (container != null) {
             for (Object obj : container) {
-                if (obj == child)
+                if (obj == child) {
                     return true;
+                }
             }
         }
         return false;

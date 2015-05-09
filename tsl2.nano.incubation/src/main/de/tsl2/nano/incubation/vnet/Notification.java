@@ -68,8 +68,9 @@ public class Notification implements ILocatable {
         this.notification = notification;
         this.path = path;
         this.response = response;
-        if (responseListener != null)
+        if (responseListener != null) {
             getResponseController().addListener(responseListener);
+        }
     }
 
     /**
@@ -118,11 +119,13 @@ public class Notification implements ILocatable {
      * @param aresponse response of a node
      */
     public void addResponse(String srcPath, Object aresponse) {
-        if (response == null)
+        if (response == null) {
             response = new ConcurrentHashMap<String, Object>();
+        }
         //concurrenthashmap is not able to store null values!
-        if (aresponse != null)
+        if (aresponse != null) {
             response.put(srcPath, aresponse);
+        }
         if (responseController != null) {
             responseController.fireEvent(new Notification(srcPath, aresponse));
         }
@@ -133,8 +136,9 @@ public class Notification implements ILocatable {
      * @return event controller of this notification
      */
     public EventController getResponseController() {
-        if (responseController == null)
+        if (responseController == null) {
             responseController = new EventController();
+        }
         return responseController;
     }
 

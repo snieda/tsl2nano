@@ -65,7 +65,7 @@ public class Condition extends ConditionOperator<Object> {
     @SuppressWarnings({ "rawtypes", "unchecked" })
     public boolean isTrue(Map parameter) {
         //sometimes we get a string out of eval, but sometimes a boolean. so we generalize it ;-)
-        return (Boolean) Boolean.valueOf(StringUtil.toString(eval(expression, parameter)));
+        return Boolean.valueOf(StringUtil.toString(eval(expression, parameter)));
     }
 
 }

@@ -41,15 +41,15 @@ public final class Finder {
     public static <FINDER extends AbstractFinder<T>, T> String createQuery(Collection<Object> parameter,
             Collection<Class<Object>> lazyRelations,
             FINDER... finder) {
-        if (finder.length == 0)
+        if (finder.length == 0) {
             throw ManagedException.illegalState("at least one finder must be defined!", parameter);
-        else if (finder[0].getResultType() == null)
+        } else if (finder[0].getResultType() == null) {
             throw ManagedException.illegalArgument(finder[0], "the first finder must define a resultType!");
+        }
         StringBuffer qStr = new StringBuffer();//createStatement(finder[0].getResultType());
-        int maxResult = 0;
         for (int i = 0; i < finder.length; i++) {
             finder[i].addToQuery(i, qStr, parameter, lazyRelations);
-            maxResult += finder[i].getMaxResult();
+            finder[i].getMaxResult();
         }
         LOG.debug(getLogInfo(qStr, parameter));
         return qStr.toString();

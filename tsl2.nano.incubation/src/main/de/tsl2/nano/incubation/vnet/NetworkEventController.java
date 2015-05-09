@@ -26,6 +26,8 @@ import de.tsl2.nano.messaging.IListener;
  * @version $Revision$
  */
 public class NetworkEventController extends EventController {
+    /** serialVersionUID */
+    private static final long serialVersionUID = 1L;
     private static transient JobServer jobServer = new JobServer();
 
     protected NetworkEventController() {
@@ -40,6 +42,7 @@ public class NetworkEventController extends EventController {
         return new NetworkEventController();
     }
 
+    @Override
     @SuppressWarnings({ "unchecked", "rawtypes" })
     public void handle(final IListener l, final Object e) {
         jobServer.execute(e.toString(), new Callable() {

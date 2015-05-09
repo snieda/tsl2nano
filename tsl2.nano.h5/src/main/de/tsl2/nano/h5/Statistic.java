@@ -71,7 +71,7 @@ public class Statistic<COLLECTIONTYPE extends Collection<T>, T> extends BeanColl
                 attributeDefinitions.put(name, new AttributeDefinition(attribute));
             }
         }
-        return new ArrayList<IAttribute>((Collection) attributeDefinitions.values());
+        return new ArrayList<IAttribute>(attributeDefinitions.values());
     }
 
     private <T> Collection<T> create(Class<T> beanType, List<String> attributeNames) {
@@ -94,13 +94,14 @@ public class Statistic<COLLECTIONTYPE extends Collection<T>, T> extends BeanColl
         for (int i = 0; i < names.length; i++) {
             attrDef = def.getAttribute(names[i]);
             if (attrDef.id() || attrDef.generatedValue() || attrDef.isMultiValue() || attrDef.unique()
-                || attrDef.isVirtual() || Attachment.isData(attrDef))
+                || attrDef.isVirtual() || Attachment.isData(attrDef)) {
                 continue;
-            else if (NumberUtil.isNumber(attrDef.getType())) {
+            } else if (NumberUtil.isNumber(attrDef.getType())) {
                 valueColumns.add(names[i]);
                 attributeNames.add(sum + names[i] + ")");
-            } else if (groupByCount(def, names[i]) <= maxcount)
+            } else if (groupByCount(def, names[i]) <= maxcount) {
                 statColumns.add(names[i]);
+            }
         }
 
         /*

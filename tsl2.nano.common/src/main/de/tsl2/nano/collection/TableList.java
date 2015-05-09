@@ -73,7 +73,7 @@ public class TableList<H extends Comparable<H>, ID> {
         } else {//--> default construction
             BeanClass<H> bc = BeanClass.getBeanClass(headerType);
             for (int i = 0; i < header.length; i++) {
-                header[i] = (H) bc.createInstance();
+                header[i] = bc.createInstance();
             }
         }
     }
@@ -142,10 +142,10 @@ public class TableList<H extends Comparable<H>, ID> {
      * @return headers as string array
      */
     public String[] getColumns() {
-        if (headerType.equals(String.class))
+        if (headerType.equals(String.class)) {
             // using dynamic cast to be compilable on standard jdk16 compilers
             return String[].class.cast(header);
-        else {
+        } else {
             String[] columns = new String[header.length];
             for (int i = 0; i < header.length; i++) {
                 columns[i] = header[i].toString();
@@ -176,8 +176,9 @@ public class TableList<H extends Comparable<H>, ID> {
      * @return the table object itself
      */
     public TableList<H, ID> add(int index, ID rowId, Object... values) {
-        if (values == null || values.length == 0)
+        if (values == null || values.length == 0) {
             values = new Object[header.length];
+        }
         rows.add(index, new Row<ID>(index, rowId, values));
         return this;
     }
@@ -192,10 +193,11 @@ public class TableList<H extends Comparable<H>, ID> {
      * @return the table object itself
      */
     public TableList<H, ID> set(int index, ID rowId, Object... values) {
-        if (values == null || values.length == 0)
+        if (values == null || values.length == 0) {
             values = new Object[header.length];
-        else
+        } else {
             checkRowSize(values);
+        }
         rows.set(index, new Row<ID>(index, rowId, values));
         return this;
     }
@@ -392,8 +394,9 @@ public class TableList<H extends Comparable<H>, ID> {
     public int indexOf(ID rowId) {
         Row.temp.rowId = rowId;
         int i = rows.indexOf(Row.temp);
-        if (i == -1)
+        if (i == -1) {
             throw new IllegalArgumentException("The row-id " + rowId + " couldn't be found on table " + this);
+        }
         return i;
 //        int i = 0;
 //        for (Row r : rows) {
@@ -434,11 +437,12 @@ public class TableList<H extends Comparable<H>, ID> {
     }
 
     protected final void checkRowSize(int row) {
-        if (row == -1 || row >= rows.size())
+        if (row == -1 || row >= rows.size()) {
             throw new IllegalArgumentException("The given row index " + row
                 + " is unavailable. Only "
                 + rows.size()
                 + " rows are available!");
+        }
     }
 
     protected final void checkColumnSize(int column) {
@@ -542,8 +546,9 @@ class Row<ID> {
      */
     @Override
     public boolean equals(Object obj) {
-        if (!(obj instanceof Row))
+        if (!(obj instanceof Row)) {
             return false;
+        }
         return rowId.equals(((Row) obj).rowId);
     }
 

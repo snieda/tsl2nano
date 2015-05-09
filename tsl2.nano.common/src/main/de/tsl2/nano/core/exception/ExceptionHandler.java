@@ -9,14 +9,13 @@
  */
 package de.tsl2.nano.core.exception;
 
-import java.util.ArrayList;
 import java.lang.Thread.UncaughtExceptionHandler;
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.LinkedList;
 import java.util.List;
 
 import de.tsl2.nano.core.util.StringUtil;
-import de.tsl2.nano.core.util.Util;
 
 /**
  * simple exception handler to be used by several threads.
@@ -42,8 +41,9 @@ public class ExceptionHandler implements UncaughtExceptionHandler {
     public ExceptionHandler(boolean concurrent) {
         super();
         exceptions = new LinkedList<Throwable>();
-        if (concurrent)
+        if (concurrent) {
             exceptions = Collections.synchronizedList(exceptions);
+        }
     }
 
     @Override

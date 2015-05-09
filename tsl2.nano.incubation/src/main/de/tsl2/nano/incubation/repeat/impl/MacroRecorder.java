@@ -1,7 +1,6 @@
 package de.tsl2.nano.incubation.repeat.impl;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collection;
 import java.util.Deque;
 import java.util.HashMap;
@@ -39,9 +38,10 @@ public class MacroRecorder<CONTEXT> implements IMacroManager<CONTEXT> {
     @Override
     public void record(String id, ICommand<CONTEXT>... m) {
         if (recordingID == null) {
-            if (id == null)
+            if (id == null) {
                 throw new IllegalStateException(
                     "please call 'record' with a filled 'id' to start the recording process!");
+            }
             recordingID = id;
         }
         macro().addAll(copy(m));
@@ -84,8 +84,9 @@ public class MacroRecorder<CONTEXT> implements IMacroManager<CONTEXT> {
     @SuppressWarnings({ "unchecked", "rawtypes" })
     @Override
     public int play(String id, CONTEXT context) {
-        if (isRecording())
+        if (isRecording()) {
             throw new IllegalStateException("please stop macro recording first!");
+        }
         Deque<ICommand<?>> m = macro(id);
         int size = m.size();
         for (ICommand cmd : m) {

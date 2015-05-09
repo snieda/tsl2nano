@@ -28,8 +28,8 @@ import java.util.Vector;
 
 import de.tsl2.nano.core.ENV;
 import de.tsl2.nano.core.Main;
-import de.tsl2.nano.core.util.FileUtil;
 import de.tsl2.nano.core.util.ConcurrentUtil;
+import de.tsl2.nano.core.util.FileUtil;
 
 /**
  * A simple, tiny, nicely embeddable HTTP 1.0 (partially 1.1) server in Java
@@ -233,7 +233,8 @@ public class NanoHTTPD extends Main
 		myServerSocket = new ServerSocket( myTcpPort );
 		myThread = new Thread( new Runnable()
 			{
-				public void run()
+				@Override
+                public void run()
 				{
 					try
 					{
@@ -279,16 +280,17 @@ public class NanoHTTPD extends Main
 		File wwwroot = new File(".").getAbsoluteFile();
 
 		// Show licence if requested
-		for ( int i=0; i<args.length; ++i )
-		if(args[i].equalsIgnoreCase("-p"))
-			port = Integer.parseInt( args[i+1] );
-		else if(args[i].equalsIgnoreCase("-d"))
-			wwwroot = new File( args[i+1] ).getAbsoluteFile();
-		else if ( args[i].toLowerCase().endsWith( "licence" ))
-		{
-			myOut.println( LICENCE + "\n" );
-			break;
-		}
+		for ( int i=0; i<args.length; ++i ) {
+            if(args[i].equalsIgnoreCase("-p")) {
+                port = Integer.parseInt( args[i+1] );
+            } else if(args[i].equalsIgnoreCase("-d")) {
+                wwwroot = new File( args[i+1] ).getAbsoluteFile();
+            } else if ( args[i].toLowerCase().endsWith( "licence" ))
+            {
+            	myOut.println( LICENCE + "\n" );
+            	break;
+            }
+        }
 
 		try
 		{
@@ -319,12 +321,15 @@ public class NanoHTTPD extends Main
 			ConcurrentUtil.startDaemon("nano-session:" + s, this, false, null);
 		}
 
-		public void run()
+		@Override
+        public void run()
 		{
 			try
 			{
 				InputStream is = mySocket.getInputStream();
-				if ( is == null) return;
+				if ( is == null) {
+                    return;
+                }
 
 				// Read the first 8192 bytes.
 				// The full header should fit in here.
@@ -340,8 +345,9 @@ public class NanoHTTPD extends Main
                                         {
                                                 rlen += read;
                                                 splitbyte = findHeaderEnd(buf, rlen);
-                                                if (splitbyte > 0)
-                                                        break;
+                                                if (splitbyte > 0) {
+                                                    break;
+                                                }
                                                 read = is.read(buf, rlen, bufsize - rlen);
                                         }
                                 }
@@ -369,8 +375,9 @@ public class NanoHTTPD extends Main
 
 				// Write the part of body already read to ByteArrayOutputStream f
 				ByteArrayOutputStream f = new ByteArrayOutputStream();
-                                if (splitbyte < rlen)
-                                        f.write(buf, splitbyte, rlen-splitbyte);
+                                if (splitbyte < rlen) {
+                                    f.write(buf, splitbyte, rlen-splitbyte);
+                                }
 
 				// While Firefox sends on the first read all the data fitting
                                 // our buffer, Chrome and Opera send only the headers even if
@@ -378,10 +385,11 @@ public class NanoHTTPD extends Main
 				// out whether we have already consumed part of body, if we
 				// have reached the end of the data to be sent or we should
 				// expect the first byte of the body at the next read.
-				if (splitbyte < rlen)
-                                        size -= rlen-splitbyte;
-                                else if (splitbyte==0 || size == 0x7FFFFFFFFFFFFFFFl)
-					size = 0;
+				if (splitbyte < rlen) {
+                    size -= rlen-splitbyte;
+                } else if (splitbyte==0 || size == 0x7FFFFFFFFFFFFFFFl) {
+                                    size = 0;
+                                }
 
 				// Now read all the body and write it to f
 				buf = new byte[512];
@@ -389,8 +397,9 @@ public class NanoHTTPD extends Main
 				{
 					rlen = is.read(buf, 0, 512);
 					size -= rlen;
-					if (rlen > 0)
-						f.write(buf, 0, rlen);
+					if (rlen > 0) {
+                        f.write(buf, 0, rlen);
+                    }
 				}
 
 				// Get the raw body as a byte []
@@ -418,12 +427,14 @@ public class NanoHTTPD extends Main
 					if (contentType.equalsIgnoreCase("multipart/form-data"))
 					{
 						// Handle multipart/form-data
-						if ( !st.hasMoreTokens())
-							sendError( HTTP_BADREQUEST, "BAD REQUEST: Content type is multipart/form-data but boundary missing. Usage: GET /example/file.html" );
+						if ( !st.hasMoreTokens()) {
+                            sendError( HTTP_BADREQUEST, "BAD REQUEST: Content type is multipart/form-data but boundary missing. Usage: GET /example/file.html" );
+                        }
 						String boundaryExp = st.nextToken();
 						st = new StringTokenizer( boundaryExp , "=" );
-						if (st.countTokens() != 2)
-							sendError( HTTP_BADREQUEST, "BAD REQUEST: Content type is multipart/form-data but boundary syntax error. Usage: GET /example/file.html" );
+						if (st.countTokens() != 2) {
+                            sendError( HTTP_BADREQUEST, "BAD REQUEST: Content type is multipart/form-data but boundary syntax error. Usage: GET /example/file.html" );
+                        }
 						st.nextToken();
 						String boundary = st.nextToken();
 
@@ -446,17 +457,19 @@ public class NanoHTTPD extends Main
 				}
 
                 //13112013ts: nullpointer on method
-				if (method != null && method.equalsIgnoreCase( "PUT" ))
-					files.put("content", saveTmpFile( fbuf, 0, f.size()));
+				if (method != null && method.equalsIgnoreCase( "PUT" )) {
+                    files.put("content", saveTmpFile( fbuf, 0, f.size()));
+                }
 
 				// Ok, now do the serve()
 				//11102013ts: provide the socket to work on sessions
 				header.put("socket", mySocket);
 				Response r = serve( uri, method, header, parms, files );
-				if ( r == null )
-					sendError( HTTP_INTERNALERROR, "SERVER INTERNAL ERROR: Serve() returned a null response." );
-				else
-					sendResponse( r.status, r.mimeType, r.header, r.data );
+				if ( r == null ) {
+                    sendError( HTTP_INTERNALERROR, "SERVER INTERNAL ERROR: Serve() returned a null response." );
+                } else {
+                    sendResponse( r.status, r.mimeType, r.header, r.data );
+                }
 
 				in.close();
 				is.close();
@@ -485,17 +498,20 @@ public class NanoHTTPD extends Main
 			try {
 				// Read the request line
 				String inLine = in.readLine();
-				if (inLine == null)
+				if (inLine == null) {
                     sendError( HTTP_BADREQUEST, "BAD REQUEST: Syntax error. Usage: GET /example/file.html" );
+                }
 				StringTokenizer st = new StringTokenizer( inLine );
-				if ( !st.hasMoreTokens())
-					sendError( HTTP_BADREQUEST, "BAD REQUEST: Syntax error. Usage: GET /example/file.html" );
+				if ( !st.hasMoreTokens()) {
+                    sendError( HTTP_BADREQUEST, "BAD REQUEST: Syntax error. Usage: GET /example/file.html" );
+                }
 
 				String method = st.nextToken();
 				pre.put("method", method);
 
-				if ( !st.hasMoreTokens())
-					sendError( HTTP_BADREQUEST, "BAD REQUEST: Missing URI. Usage: GET /example/file.html" );
+				if ( !st.hasMoreTokens()) {
+                    sendError( HTTP_BADREQUEST, "BAD REQUEST: Missing URI. Usage: GET /example/file.html" );
+                }
 
 				String uri = st.nextToken();
 
@@ -505,8 +521,9 @@ public class NanoHTTPD extends Main
 				{
 					decodeParms( uri.substring( qmi+1 ), parms );
 					uri = decodePercent( uri.substring( 0, qmi ));
-				}
-				else uri = decodePercent(uri);
+				} else {
+                    uri = decodePercent(uri);
+                }
 
 				// If there's another token, it's protocol version,
 				// followed by HTTP headers. Ignore version but parse headers.
@@ -518,8 +535,9 @@ public class NanoHTTPD extends Main
 					while ( line != null && line.trim().length() > 0 )
 					{
 						int p = line.indexOf( ':' );
-						if ( p >= 0 )
-							header.put( line.substring(0,p).trim().toLowerCase(), line.substring(p+1).trim());
+						if ( p >= 0 ) {
+                            header.put( line.substring(0,p).trim().toLowerCase(), line.substring(p+1).trim());
+                        }
 						line = in.readLine();
 					}
 				}
@@ -546,16 +564,18 @@ public class NanoHTTPD extends Main
 				String mpline = in.readLine();
 				while ( mpline != null )
 				{
-					if (mpline.indexOf(boundary) == -1)
-						sendError( HTTP_BADREQUEST, "BAD REQUEST: Content type is multipart/form-data but next chunk does not start with boundary. Usage: GET /example/file.html" );
+					if (mpline.indexOf(boundary) == -1) {
+                        sendError( HTTP_BADREQUEST, "BAD REQUEST: Content type is multipart/form-data but next chunk does not start with boundary. Usage: GET /example/file.html" );
+                    }
 					boundarycount++;
 					Properties item = new Properties();
 					mpline = in.readLine();
 					while (mpline != null && mpline.trim().length() > 0)
 					{
 						int p = mpline.indexOf( ':' );
-						if (p != -1)
-							item.put( mpline.substring(0,p).trim().toLowerCase(), mpline.substring(p+1).trim());
+						if (p != -1) {
+                            item.put( mpline.substring(0,p).trim().toLowerCase(), mpline.substring(p+1).trim());
+                        }
 						mpline = in.readLine();
 					}
 					if (mpline != null)
@@ -571,8 +591,9 @@ public class NanoHTTPD extends Main
 						{
                                                         String token = st.nextToken().trim();
 							int p = token.indexOf( '=' );
-							if (p!=-1)
-								disposition.put( token.substring(0,p).trim().toLowerCase(), token.substring(p+1).trim());
+							if (p!=-1) {
+                                disposition.put( token.substring(0,p).trim().toLowerCase(), token.substring(p+1).trim());
+                            }
 						}
 						String pname = disposition.getProperty("name");
 						pname = pname.substring(1,pname.length()-1);
@@ -585,17 +606,19 @@ public class NanoHTTPD extends Main
 								if ( mpline != null)
 								{
 									int d = mpline.indexOf(boundary);
-									if (d == -1)
-										value+=mpline;
-									else
-										value+=mpline.substring(0,d-2);
+									if (d == -1) {
+                                        value+=mpline;
+                                    } else {
+                                        value+=mpline.substring(0,d-2);
+                                    }
 								}
 							}
 						}
 						else
 						{
-							if (boundarycount> bpositions.length)
-								sendError( HTTP_INTERNALERROR, "Error processing request" );
+							if (boundarycount> bpositions.length) {
+                                sendError( HTTP_INTERNALERROR, "Error processing request" );
+                            }
 							int offset = stripMultipartHeaders(fbuf, bpositions[boundarycount-2]);
 							String path = saveTmpFile(fbuf, offset, bpositions[boundarycount-1]-offset-4);
 							files.put(pname, path);
@@ -624,8 +647,9 @@ public class NanoHTTPD extends Main
                         int splitbyte = 0;
                         while (splitbyte + 3 < rlen)
                         {
-                                if (buf[splitbyte] == '\r' && buf[splitbyte + 1] == '\n' && buf[splitbyte + 2] == '\r' && buf[splitbyte + 3] == '\n')
-                                        return splitbyte + 4;
+                                if (buf[splitbyte] == '\r' && buf[splitbyte + 1] == '\n' && buf[splitbyte + 2] == '\r' && buf[splitbyte + 3] == '\n') {
+                                    return splitbyte + 4;
+                                }
                                 splitbyte++;
                         }
                         return 0;
@@ -643,8 +667,9 @@ public class NanoHTTPD extends Main
 			{
 				if (b[i] == boundary[matchcount])
 				{
-					if (matchcount == 0)
-						matchbyte = i;
+					if (matchcount == 0) {
+                        matchbyte = i;
+                    }
 					matchcount++;
 					if (matchcount==boundary.length)
 					{
@@ -702,8 +727,9 @@ public class NanoHTTPD extends Main
 			int i = 0;
 			for (i=offset; i<b.length; i++)
 			{
-				if (b[i] == '\r' && b[++i] == '\n' && b[++i] == '\r' && b[++i] == '\n')
-					break;
+				if (b[i] == '\r' && b[++i] == '\n' && b[++i] == '\r' && b[++i] == '\n') {
+                    break;
+                }
 			}
 			return i+1;
 		}
@@ -723,14 +749,14 @@ public class NanoHTTPD extends Main
 					switch ( c )
 					{
 						case '+':
-                                                        baos.write( (int)' ' );
+                                                        baos.write( ' ' );
 							break;
 						case '%':
                                                         baos.write(Integer.parseInt( str.substring(i+1,i+3), 16 ));
 							i += 2;
 							break;
 						default:
-                                                        baos.write( (int)c );
+                                                        baos.write( c );
 							break;
 					}
 				}
@@ -754,19 +780,21 @@ public class NanoHTTPD extends Main
 		private void decodeParms( String parms, Properties p )
 			throws InterruptedException
 		{
-			if ( parms == null )
-				return;
+			if ( parms == null ) {
+                return;
+            }
 
 			StringTokenizer st = new StringTokenizer( parms, "&" );
 			while ( st.hasMoreTokens())
 			{
 				String e = st.nextToken();
 				int sep = e.indexOf( '=' );
-				if ( sep >= 0 )
-					p.put( decodePercent( e.substring( 0, sep )).trim(),
+				if ( sep >= 0 ) {
+                    p.put( decodePercent( e.substring( 0, sep )).trim(),
 						   decodePercent( e.substring( sep+1 )));
-                                else
-                                        p.put( decodePercent( e ).trim(), "" );
+                } else {
+                    p.put( decodePercent( e ).trim(), "" );
+                }
 			}
 		}
 
@@ -787,18 +815,21 @@ public class NanoHTTPD extends Main
 		{
 			try
 			{
-				if ( status == null )
-					throw new Error( "sendResponse(): Status can't be null." );
+				if ( status == null ) {
+                    throw new Error( "sendResponse(): Status can't be null." );
+                }
 
 				OutputStream out = mySocket.getOutputStream();
 				PrintWriter pw = new PrintWriter( out );
 				pw.print("HTTP/1.0 " + status + " \r\n");
 
-				if ( mime != null )
-					pw.print("Content-Type: " + mime + "\r\n");
+				if ( mime != null ) {
+                    pw.print("Content-Type: " + mime + "\r\n");
+                }
 
-				if ( header == null || header.getProperty( "Date" ) == null )
-					pw.print( "Date: " + gmtFrmt.format( new Date()) + "\r\n");
+				if ( header == null || header.getProperty( "Date" ) == null ) {
+                    pw.print( "Date: " + gmtFrmt.format( new Date()) + "\r\n");
+                }
 
 				if ( header != null )
 				{
@@ -833,8 +864,9 @@ public class NanoHTTPD extends Main
 				}
 				out.flush();
 				out.close();
-				if ( data != null )
-					data.close();
+				if ( data != null ) {
+                    data.close();
+                }
 			}
 			catch( IOException ioe )
 			{
@@ -857,11 +889,11 @@ public class NanoHTTPD extends Main
 		while ( st.hasMoreTokens())
 		{
 			String tok = st.nextToken();
-			if ( tok.equals( "/" ))
-				newUri += "/";
-			else if ( tok.equals( " " ))
-				newUri += "%20";
-			else
+			if ( tok.equals( "/" )) {
+                newUri += "/";
+            } else if ( tok.equals( " " )) {
+                newUri += "%20";
+            } else
 			{
 //				newUri += URLEncoder.encode( tok );
 				// For Java 1.4 you'll want to use this instead:
@@ -890,28 +922,32 @@ public class NanoHTTPD extends Main
 		Response res = null;
 
 		// Make sure we won't die of an exception later
-		if ( !homeDir.isDirectory())
-			res = new Response( HTTP_INTERNALERROR, MIME_PLAINTEXT,
+		if ( !homeDir.isDirectory()) {
+            res = new Response( HTTP_INTERNALERROR, MIME_PLAINTEXT,
 				"INTERNAL ERRROR: serveFile(): given homeDir is not a directory." );
+        }
 
 		if ( res == null )
 		{
 			// Remove URL arguments
 			uri = uri.trim().replace( File.separatorChar, '/' );
-			if ( uri.indexOf( '?' ) >= 0 )
-				uri = uri.substring(0, uri.indexOf( '?' ));
+			if ( uri.indexOf( '?' ) >= 0 ) {
+                uri = uri.substring(0, uri.indexOf( '?' ));
+            }
 
 			// Prohibit getting out of current directory
-			if ( uri.startsWith( ".." ) || uri.endsWith( ".." ) || uri.indexOf( "../" ) >= 0 )
-				res = new Response( HTTP_FORBIDDEN, MIME_PLAINTEXT,
+			if ( uri.startsWith( ".." ) || uri.endsWith( ".." ) || uri.indexOf( "../" ) >= 0 ) {
+                res = new Response( HTTP_FORBIDDEN, MIME_PLAINTEXT,
 					"FORBIDDEN: Won't serve ../ for security reasons." );
+            }
 		}
 
 		File f = new File( homeDir, uri );
 		InputStream resource = ENV.getResource(uri.substring(1));
-		if ( res == null && !f.exists() && resource == null)
-			res = new Response( HTTP_NOTFOUND, MIME_PLAINTEXT,
+		if ( res == null && !f.exists() && resource == null) {
+            res = new Response( HTTP_NOTFOUND, MIME_PLAINTEXT,
 				"Error 404, file not found." );
+        }
 
 		// List the directory, if necessary
 		if ( res == null && f.isDirectory())
@@ -930,12 +966,11 @@ public class NanoHTTPD extends Main
 			if ( res == null )
 			{
 				// First try index.html and index.htm
-				if ( new File( f, "index.html" ).exists())
-					f = new File( homeDir, uri + "/index.html" );
-				else if ( new File( f, "index.htm" ).exists())
-					f = new File( homeDir, uri + "/index.htm" );
-				// No index file, list the directory if it is readable
-				else if ( allowDirectoryListing && f.canRead() )
+				if ( new File( f, "index.html" ).exists()) {
+                    f = new File( homeDir, uri + "/index.html" );
+                } else if ( new File( f, "index.htm" ).exists()) {
+                    f = new File( homeDir, uri + "/index.htm" );
+                } else if ( allowDirectoryListing && f.canRead() )
 				{
 					String[] files = f.list();
 					String msg = "<html><body><h1>Directory " + uri + "</h1><br/>";
@@ -944,8 +979,9 @@ public class NanoHTTPD extends Main
 					{
 						String u = uri.substring( 0, uri.length()-1 );
 						int slash = u.lastIndexOf( '/' );
-						if ( slash >= 0 && slash  < u.length())
-							msg += "<b><a href=\"" + uri.substring(0, slash+1) + "\">..</a></b><br/>";
+						if ( slash >= 0 && slash  < u.length()) {
+                            msg += "<b><a href=\"" + uri.substring(0, slash+1) + "\">..</a></b><br/>";
+                        }
 					}
 
 					if (files!=null)
@@ -968,17 +1004,20 @@ public class NanoHTTPD extends Main
 							{
 								long len = curFile.length();
 								msg += " &nbsp;<font size=2>(";
-								if ( len < 1024 )
-									msg += len + " bytes";
-								else if ( len < 1024 * 1024 )
-									msg += len/1024 + "." + (len%1024/10%100) + " KB";
-								else
-									msg += len/(1024*1024) + "." + len%(1024*1024)/10%100 + " MB";
+								if ( len < 1024 ) {
+                                    msg += len + " bytes";
+                                } else if ( len < 1024 * 1024 ) {
+                                    msg += len/1024 + "." + (len%1024/10%100) + " KB";
+                                } else {
+                                    msg += len/(1024*1024) + "." + len%(1024*1024)/10%100 + " MB";
+                                }
 
 								msg += ")</font>";
 							}
 							msg += "<br/>";
-							if ( dir ) msg += "</b>";
+							if ( dir ) {
+                                msg += "</b>";
+                            }
 						}
 					}
 					msg += "</body></html>";
@@ -999,10 +1038,12 @@ public class NanoHTTPD extends Main
 				// Get MIME type from file name extension, if possible
 				String mime = null;
 				int dot = f.getCanonicalPath().lastIndexOf( '.' );
-				if ( dot >= 0 )
-					mime = (String)theMimeTypes.get( f.getCanonicalPath().substring( dot + 1 ).toLowerCase());
-				if ( mime == null )
-					mime = MIME_DEFAULT_BINARY;
+				if ( dot >= 0 ) {
+                    mime = (String)theMimeTypes.get( f.getCanonicalPath().substring( dot + 1 ).toLowerCase());
+                }
+				if ( mime == null ) {
+                    mime = MIME_DEFAULT_BINARY;
+                }
 
 				// Calculate etag
 				String etag = Integer.toHexString((f.getAbsolutePath() + f.lastModified() + "" + f.length()).hashCode());
@@ -1036,42 +1077,49 @@ public class NanoHTTPD extends Main
 					{
 						res = new Response( HTTP_RANGE_NOT_SATISFIABLE, MIME_PLAINTEXT, "" );
 						res.addHeader( "Content-Range", "bytes 0-0/" + fileLen);
-                                                if ( mime.startsWith( "application/" ))
-                                                  res.addHeader( "Content-Disposition", "attachment; filename=\"" + f.getName() + "\"");
+                                                if ( mime.startsWith( "application/" )) {
+                                                    res.addHeader( "Content-Disposition", "attachment; filename=\"" + f.getName() + "\"");
+                                                }
 						res.addHeader( "ETag", etag);
 					}
 					else
 					{
-						if ( endAt < 0 )
-							endAt = fileLen-1;
+						if ( endAt < 0 ) {
+                            endAt = fileLen-1;
+                        }
 						long newLen = endAt - startFrom + 1;
-						if ( newLen < 0 ) newLen = 0;
+						if ( newLen < 0 ) {
+                            newLen = 0;
+                        }
 
 						final long dataLen = newLen;
 						FileInputStream fis = new FileInputStream( f ) {
-							public int available() throws IOException { return (int)dataLen; }
+							@Override
+                            public int available() throws IOException { return (int)dataLen; }
 						};
 						fis.skip( startFrom );
 
 						res = new Response( HTTP_PARTIALCONTENT, mime, fis );
 						res.addHeader( "Content-Length", "" + dataLen);
 						res.addHeader( "Content-Range", "bytes " + startFrom + "-" + endAt + "/" + fileLen);
-                                                if ( mime.startsWith( "application/" ))
-                                                        res.addHeader( "Content-Disposition", "attachment; filename=\"" + f.getName() + "\"");
+                                                if ( mime.startsWith( "application/" )) {
+                                                    res.addHeader( "Content-Disposition", "attachment; filename=\"" + f.getName() + "\"");
+                                                }
 						res.addHeader( "ETag", etag);
 					}
 				}
 				else
 				{
-					if (etag.equals(header.getProperty("if-none-match")))
-						res = new Response( HTTP_NOTMODIFIED, mime, "");
-					else
+					if (etag.equals(header.getProperty("if-none-match"))) {
+                        res = new Response( HTTP_NOTMODIFIED, mime, "");
+                    } else
 					{
                         //12012014ts: load from jar-resource
 						res = new Response( HTTP_OK, mime, getStream( f, resource));
 						res.addHeader( "Content-Length", "" + fileLen);
-                                                if ( mime.startsWith( "application/" ))
-                                                        res.addHeader( "Content-Disposition", "attachment; filename=\"" + f.getName() + "\"");
+                                                if ( mime.startsWith( "application/" )) {
+                                                    res.addHeader( "Content-Disposition", "attachment; filename=\"" + f.getName() + "\"");
+                                                }
 						res.addHeader( "ETag", etag);
 					}
 				}
@@ -1122,8 +1170,9 @@ public class NanoHTTPD extends Main
 			"zip		application/octet-stream "+
 			"exe		application/octet-stream "+
 			"class		application/octet-stream " );
-		while ( st.hasMoreTokens())
-			theMimeTypes.put( st.nextToken(), st.nextToken());
+		while ( st.hasMoreTokens()) {
+            theMimeTypes.put( st.nextToken(), st.nextToken());
+        }
 	}
 
 	private static int theBufferSize = 16 * 1024;

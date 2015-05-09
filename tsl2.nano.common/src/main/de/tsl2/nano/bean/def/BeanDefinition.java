@@ -243,10 +243,11 @@ public class BeanDefinition<T> extends BeanClass<T> implements IPluggable<BeanDe
         ArrayList<String> names = new ArrayList<String>(Arrays.asList(getAttributeNames()));
         int currentSize = names.size();
         names.removeAll(Arrays.asList(attributeNamesToRemove));
-        if (names.size() + attributeNamesToRemove.length != currentSize)
+        if (names.size() + attributeNamesToRemove.length != currentSize) {
             throw ManagedException.implementationError("not all of given attributes were removed!",
                 attributeNamesToRemove,
                 getAttributeNames());
+        }
         setAttributeFilter(names.toArray(new String[0]));
     }
 
@@ -294,8 +295,9 @@ public class BeanDefinition<T> extends BeanClass<T> implements IPluggable<BeanDe
                 if (allAttributes.size() != attributeFilter.length) {
                     List<String> filterList = Arrays.asList(attributeFilter);
                     for (Iterator<String> it = allAttributes.iterator(); it.hasNext();) {
-                        if (!filterList.contains(it.next()))
+                        if (!filterList.contains(it.next())) {
                             it.remove();
+                        }
                     }
                 }
             }
@@ -309,7 +311,7 @@ public class BeanDefinition<T> extends BeanClass<T> implements IPluggable<BeanDe
         }
         //don't use the generic type H (Class<H>) to be compilable on standard jdk javac.
         ArrayList<IAttribute> attributes =
-            new ArrayList<IAttribute>((Collection/*<? extends BeanAttribute>*/) getAttributeDefinitions().values());
+            new ArrayList<IAttribute>(getAttributeDefinitions().values());
         /*
          * filter the result using a default filter by the presentation helper
          */
@@ -392,6 +394,7 @@ public class BeanDefinition<T> extends BeanClass<T> implements IPluggable<BeanDe
      * @param name attribute name (on virtual attributes it is the description of the {@link BeanValue}).
      * @return attribute
      */
+    @Override
     public IAttributeDefinition getAttribute(String name) {
         IAttributeDefinition definition = getAttributeDefinitions().get(name);
         if (definition == null) {
@@ -419,9 +422,9 @@ public class BeanDefinition<T> extends BeanClass<T> implements IPluggable<BeanDe
     @Override
     public String[] getAttributeNames(boolean readAndWriteAccess) {
         if (attributeFilter == null) {
-            if (isVirtual() && attributeDefinitions != null)
+            if (isVirtual() && attributeDefinitions != null) {
                 attributeFilter = attributeDefinitions.keySet().toArray(new String[0]);
-            else if (!isVirtual()) {
+            } else if (!isVirtual()) {
                 if (allDefinitionsCached) {
                     attributeFilter = attributeDefinitions.keySet().toArray(new String[0]);
                 } else {
@@ -541,12 +544,13 @@ public class BeanDefinition<T> extends BeanClass<T> implements IPluggable<BeanDe
             name/*newAttribute.getName() != null ? newAttribute.getName() : newAttribute.getDescription()*/,
             newAttribute);
         //if no filter was defined, it will be prefilled in getAttributeNames()
-        if (attributeFilter == null)
+        if (attributeFilter == null) {
             attributeFilter = getAttributeNames();
-        else
+        } else {
             attributeFilter = CollectionUtil.concatNew(new String[attributeFilter.length + 1],
                 attributeFilter,
                 new String[] { name });
+        }
         allDefinitionsCached = false;
         return newAttribute;
     }
@@ -639,8 +643,9 @@ public class BeanDefinition<T> extends BeanClass<T> implements IPluggable<BeanDe
             Collection<IAction> actions,
             Object... parameters) {
         final Method[] methods = getDefiningClass(clazz).getMethods();
-        if (actions == null)
+        if (actions == null) {
             actions = new ArrayList<IAction>();
+        }
         for (int i = 0; i < methods.length; i++) {
             if (methods[i].getName().startsWith(ACTION_PREFIX) && methods[i].getParameterTypes().length == 0) {
                 final Method m = methods[i];
@@ -656,8 +661,9 @@ public class BeanDefinition<T> extends BeanClass<T> implements IPluggable<BeanDe
                     }
                 };
                 String imagePath = id + ".icon";
-                if (Messages.hasKey(imagePath))
+                if (Messages.hasKey(imagePath)) {
                     newAction.setImagePath(Messages.getString(imagePath));
+                }
                 newAction.setParameter(parameters);
                 actions.add(newAction);
             }
@@ -689,8 +695,9 @@ public class BeanDefinition<T> extends BeanClass<T> implements IPluggable<BeanDe
      * @param abstractAction
      */
     public BeanDefinition<T> addAction(IAction action) {
-        if (actions == null)
+        if (actions == null) {
             actions = new LinkedHashSet<IAction>();
+        }
         actions.add(action);
         return this;
     }
@@ -704,8 +711,9 @@ public class BeanDefinition<T> extends BeanClass<T> implements IPluggable<BeanDe
     public IAction<?> getAction(String id) {
         if (actions != null) {
             for (IAction a : actions) {
-                if (a.getId().equals(id))
+                if (a.getId().equals(id)) {
                     return a;
+                }
             }
         }
         return null;
@@ -740,8 +748,9 @@ public class BeanDefinition<T> extends BeanClass<T> implements IPluggable<BeanDe
      * @return Returns the presentationHelper.
      */
     public <PH extends BeanPresentationHelper<T>> PH getPresentationHelper() {
-        if (presentationHelper == null)
+        if (presentationHelper == null) {
             presentationHelper = ENV.get(BeanPresentationHelper.class).createHelper(this);
+        }
         return (PH) presentationHelper;
     }
 
@@ -800,8 +809,9 @@ public class BeanDefinition<T> extends BeanClass<T> implements IPluggable<BeanDe
         Object v;
         for (IAttributeDefinition<?> attr : attributes.values()) {
             v = attr instanceof IValueAccess ? ((IValueAccess) attr).getValue() : attr.getValue(beanInstance);
-            if (v instanceof IValueAccess)
+            if (v instanceof IValueAccess) {
                 connect(attr.getName(), (IValueAccess<?>) attr.getValue(beanInstance), callback, afterChanging);
+            }
         }
     }
 
@@ -856,8 +866,9 @@ public class BeanDefinition<T> extends BeanClass<T> implements IPluggable<BeanDe
         //this was previously evaluated on each AttributeDefinition.defineDefaults()
         Collection<IAttributeDefinition<?>> attrs = getAttributeDefinitions().values();
         for (IAttributeDefinition<?> attr : attrs) {
-            if (attr.id())
+            if (attr.id()) {
                 return attr;
+            }
         }
         return null;
     }
@@ -896,16 +907,16 @@ public class BeanDefinition<T> extends BeanClass<T> implements IPluggable<BeanDe
             File xmlFile = getDefinitionFile(name);
             if (usePersistentCache && xmlFile.canRead()) {
                 try {
-                    beandef = (BeanDefinition<T>) XmlUtil.loadXml(xmlFile.getPath(), BeanDefinition.class);
+                    beandef = XmlUtil.loadXml(xmlFile.getPath(), BeanDefinition.class);
                     //workaround for simple-xml not creating the desired root-extension-instance
                     if (beandef.extension != null) {
                         beandef = (BeanDefinition<T>) beandef.extension.to(beandef);
                     }
                     //perhaps, the file defines another bean-name or bean-type
                     if ((name == null || name.equalsIgnoreCase(beandef.getName())
-                        && (type == null || type.equals(beandef.getClazz()))))
+                        && (type == null || type.equals(beandef.getClazz())))) {
                         virtualBeanCache.add(beandef);
-                    else {
+                    } else {
                         LOG.warn("the file " + xmlFile.getPath() + " doesn't define the bean with name '" + name
                             + "' and type " + type);
                         beandef = null;
@@ -913,18 +924,20 @@ public class BeanDefinition<T> extends BeanClass<T> implements IPluggable<BeanDe
                 } catch (Exception e) {
                     if (xmlFile.canWrite()) {
                         try {
-                            if (!xmlFile.renameTo(new File(xmlFile.getPath() + ".failed")))
+                            if (!xmlFile.renameTo(new File(xmlFile.getPath() + ".failed"))) {
                                 LOG.warn("couldn't rename failed beandefinition-file '" + xmlFile + "' to '" + xmlFile
                                     + ".failed' !");
+                            }
                         } catch (Exception ex) {
                             LOG.error("couldn't rename failed beandefinition-file '" + xmlFile + "' to '" + xmlFile
                                 + ".failed' !", ex);
                         }
                     }
-                    if (ENV.get("application.mode.strict", false))
+                    if (ENV.get("application.mode.strict", false)) {
                         ManagedException.forward(e);
-                    else
+                    } else {
                         LOG.error("couldn't load configuration " + xmlFile.getPath() + " for bean " + type, e);
+                    }
                 }
             }
             if (beandef == null) {
@@ -961,13 +974,14 @@ public class BeanDefinition<T> extends BeanClass<T> implements IPluggable<BeanDe
     @Persist
     protected void initSerialization() {
         extension = new Extension(this);
-        if (extension.isEmpty())
+        if (extension.isEmpty()) {
             extension = null;
+        }
         //remove not-serializable or cycling actions
         if (actions != null && !ENV.get("strict.mode", false)) {
             Class<?> cls;
             for (Iterator<IAction> actionIt = actions.iterator(); actionIt.hasNext();) {
-                IAction a = (IAction) actionIt.next();
+                IAction a = actionIt.next();
                 //on inline implementations check the parent class
                 cls = a.getClass().getEnclosingClass();
                 if (cls != null && (BeanDefinition.class.isAssignableFrom(cls)
@@ -976,8 +990,9 @@ public class BeanDefinition<T> extends BeanClass<T> implements IPluggable<BeanDe
                     actionIt.remove();
                 }
             }
-            if (actions.isEmpty())
+            if (actions.isEmpty()) {
                 actions = null;
+            }
         }
         //disconnect from beandefinition to be serializable
         if (plugins != null) {
@@ -1091,8 +1106,9 @@ public class BeanDefinition<T> extends BeanClass<T> implements IPluggable<BeanDe
      */
     public static Collection<BeanDefinition<?>> loadVirtualDefinitions() {
         File[] virtDefs = FileUtil.getFiles(getDefinitionDirectory() + PREFIX_VIRTUAL, ".*.xml");
-        if (virtDefs == null)
+        if (virtDefs == null) {
             return new ArrayList<BeanDefinition<?>>();
+        }
         Collection<BeanDefinition<?>> types = new ArrayList<BeanDefinition<?>>();
         String name;
         for (File file : virtDefs) {
@@ -1129,24 +1145,27 @@ public class BeanDefinition<T> extends BeanClass<T> implements IPluggable<BeanDe
      * @param xmlFile xml serialized file
      */
     protected void saveBeanDefinition(File xmlFile) {
-        if (usePersistentCache)
+        if (usePersistentCache) {
             try {
                 xmlFile.getParentFile().mkdirs();
                 XmlUtil.saveXml(xmlFile.getPath(), this);
             } catch (Exception e) {
-                if (ENV.get("strict.mode", false))
+                if (ENV.get("strict.mode", false)) {
                     ManagedException.forward(e);
-                else
+                } else {
                     LOG.warn("couldn't save configuration " + xmlFile.getPath() + " for bean" + getClazz(), e);
+                }
             }
+        }
     }
 
     /**
      * deletes all definition files - and clears the cache!
      */
     public static void deleteDefinitions() {
-        if (!usePersistentCache)
+        if (!usePersistentCache) {
             return;
+        }
         for (BeanDefinition<?> beandef : virtualBeanCache) {
             beandef.deleteDefinition(false);
         }
@@ -1163,11 +1182,13 @@ public class BeanDefinition<T> extends BeanClass<T> implements IPluggable<BeanDe
     protected void deleteDefinition(boolean remove) {
         if (usePersistentCache) {
             File file = getDefinitionFile(getName());
-            if (file.canWrite())
+            if (file.canWrite()) {
                 file.delete();
+            }
         }
-        if (remove)
+        if (remove) {
             virtualBeanCache.remove(this);
+        }
     }
 
     public static int clearCache() {
@@ -1189,6 +1210,9 @@ public class BeanDefinition<T> extends BeanClass<T> implements IPluggable<BeanDe
         getValueExpression();
         getAttributeNames();
         BeanCollector.createColumnDefinitions(this, new IActivable() {
+            /** serialVersionUID */
+            private static final long serialVersionUID = 1L;
+
             @Override
             public boolean isActive() {
                 return getPresentationHelper().matches("default.present.attribute.multivalue", true);
@@ -1201,8 +1225,9 @@ public class BeanDefinition<T> extends BeanClass<T> implements IPluggable<BeanDe
         }
 //        getActions();
         getPresentable();
-        if (isSaveable())
+        if (isSaveable()) {
             saveDefinition();
+        }
     }
 
     private final boolean isSaveable() {
@@ -1258,10 +1283,11 @@ public class BeanDefinition<T> extends BeanClass<T> implements IPluggable<BeanDe
      * @return field descriptor of nesting presenter
      */
     public final IAttributeDefinition getNestingBean(String... beanStructure) {
-        if (beanStructure.length > 1)
+        if (beanStructure.length > 1) {
             return getNestingField(this, beanStructure);
-        else
+        } else {
             return getAttribute(beanStructure[0]);
+        }
     }
 
     private final IAttributeDefinition getNestingField(BeanDefinition<?> bean, String... keyStructure) {
@@ -1277,6 +1303,7 @@ public class BeanDefinition<T> extends BeanClass<T> implements IPluggable<BeanDe
     /**
      * @return Returns the plugins.
      */
+    @Override
     public Collection<IConnector<BeanDefinition>> getPlugins() {
         return plugins;
     }
@@ -1284,9 +1311,11 @@ public class BeanDefinition<T> extends BeanClass<T> implements IPluggable<BeanDe
     /**
      * @param plugin The plugin to add.
      */
+    @Override
     public void addPlugin(IConnector<BeanDefinition> plugin) {
-        if (plugins == null)
+        if (plugins == null) {
             plugins = new LinkedList<IConnector<BeanDefinition>>();
+        }
         LOG.info("connecting plugin " + plugin + " to " + this);
         plugin.connect(this);
         plugins.add(plugin);
@@ -1298,6 +1327,7 @@ public class BeanDefinition<T> extends BeanClass<T> implements IPluggable<BeanDe
      * @param plugin to remove
      * @return true, if plugin was removed
      */
+    @Override
     public boolean removePlugin(IConnector<BeanDefinition> plugin) {
         if (plugins == null) {
             LOG.warn("plugin " + plugin + " can't be removed. no plugins available yet!");
@@ -1314,10 +1344,11 @@ public class BeanDefinition<T> extends BeanClass<T> implements IPluggable<BeanDe
     public ValueExpression<T> getValueExpression() {
         if (valueExpression == null) {
             String presentingAttr = getPresentationHelper().getBestPresentationAttribute();
-            if (presentingAttr != null)
+            if (presentingAttr != null) {
                 valueExpression = new ValueExpression<T>("{" + presentingAttr + "}", getClazz());
-            else
+            } else {
                 valueExpression = new ValueExpression<T>(getName(), getClazz());
+            }
         }
         return valueExpression;
     }
@@ -1350,8 +1381,9 @@ public class BeanDefinition<T> extends BeanClass<T> implements IPluggable<BeanDe
      * @return current bean instance
      */
     public ValueGroup addValueGroup(String label, Boolean open, String... attributeNames) {
-        if (valueGroups == null)
+        if (valueGroups == null) {
             valueGroups = new LinkedList<ValueGroup>();
+        }
         ValueGroup valueGroup = new ValueGroup(label, open, attributeNames);
         valueGroups.add(valueGroup);
         return valueGroup;
@@ -1365,8 +1397,9 @@ public class BeanDefinition<T> extends BeanClass<T> implements IPluggable<BeanDe
     public void setDefaultValues(Object instance) {
         List<IAttribute> attributes = getAttributes();
         for (IAttribute a : attributes) {
-            if (a instanceof AttributeDefinition)
+            if (a instanceof AttributeDefinition) {
                 a.setValue(instance, ((AttributeDefinition) a).getDefault());
+            }
         }
     }
 
@@ -1421,8 +1454,9 @@ public class BeanDefinition<T> extends BeanClass<T> implements IPluggable<BeanDe
             boolean onlyFilteredAttributes,
             String... filterAttributes) {
         final List<? extends IAttribute> attributes = onlySingleValues ? getSingleValueAttributes() : getAttributes();
-        if (filterAttributes.length == 0)
+        if (filterAttributes.length == 0) {
             Collections.sort(attributes);
+        }
         final Map<String, Object> map = new LinkedHashMap<String, Object>(attributes.size());
         final List<String> filter = Arrays.asList(filterAttributes);
         Object value;
@@ -1434,10 +1468,11 @@ public class BeanDefinition<T> extends BeanClass<T> implements IPluggable<BeanDe
                         .getValue(instance);
                 if (formatted) {
                     BeanValue<?> bv = (BeanValue<?>) beanAttribute;
-                    if (bv.getFormat() != null)
+                    if (bv.getFormat() != null) {
                         value = bv.getFormat().format(value);
-                    else
+                    } else {
                         value = value != null ? value.toString() : "";
+                    }
                 }
                 map.put(keyPrefix + beanAttribute.getName(), value);
             }

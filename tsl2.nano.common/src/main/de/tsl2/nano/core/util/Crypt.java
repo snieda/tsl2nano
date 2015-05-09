@@ -365,8 +365,9 @@ public class Crypt {
         } catch (NoSuchAlgorithmException ex) {
             downloadProvider(algorithm);
             cipher = Cipher.getInstance(algorithm);
-            if (cipher == null)
+            if (cipher == null) {
                 throw ex;
+            }
         }
         cipher.init(mode, key, spec);
         return cipher;
@@ -438,14 +439,16 @@ public class Crypt {
     static <T> T getData(String arg, Class<T> type) {
         if (arg.startsWith("-file:")) {
             arg = getFileName(arg);
-            if (InputStream.class.isAssignableFrom(type))
+            if (InputStream.class.isAssignableFrom(type)) {
                 return (T) FileUtil.getFile(arg);
-            else if (String.class.isAssignableFrom(type))
+            } else if (String.class.isAssignableFrom(type)) {
                 return (T) new String(FileUtil.getFileBytes(arg, null));
-            else
+            } else {
                 throw new IllegalArgumentException(type + " not allowed!");
-        } else
+            }
+        } else {
             return (T) arg;
+        }
     }
 
     static String getFileName(String arg) {

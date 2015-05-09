@@ -9,6 +9,7 @@
  */
 package de.tsl2.nano.bean;
 
+import java.sql.Time;
 import java.util.Date;
 
 /**

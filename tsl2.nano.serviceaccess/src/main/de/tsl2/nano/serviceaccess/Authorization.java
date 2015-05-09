@@ -64,8 +64,9 @@ public class Authorization implements IAuthorization {
         } else {
             //if no permission was defined, a wildcard for all permissions will be set.
             subject.getPrincipals().add(new UserPrincipal(userName));
-            if (!secure)
+            if (!secure) {
                 subject.getPrincipals().add(new Role("admin", new APermission("*", "*")));
+            }
             try {
                 XmlUtil.saveXml(permissions, subject);
             } catch (Exception e) {
@@ -81,8 +82,9 @@ public class Authorization implements IAuthorization {
     @Override
     public boolean hasAccess(String name, String action) {
         boolean p = new APermission(name, action).hasAccess(getSubject());
-        if (!p)
+        if (!p) {
             LOG.warn("permission for '" + name + "(" + (action == null ? PERM_EXE : action) + ")' not availabe!");
+        }
         return p;
     }
 

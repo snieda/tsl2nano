@@ -13,7 +13,6 @@ import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.Reader;
-import java.io.Serializable;
 import java.io.StreamTokenizer;
 import java.lang.reflect.Method;
 import java.lang.reflect.ParameterizedType;
@@ -36,9 +35,7 @@ import org.apache.commons.logging.Log;
 import de.tsl2.nano.bean.def.Bean;
 import de.tsl2.nano.bean.def.BeanCollector;
 import de.tsl2.nano.bean.def.BeanDefinition;
-import de.tsl2.nano.bean.def.BeanValue;
 import de.tsl2.nano.bean.def.IAttributeDefinition;
-import de.tsl2.nano.bean.def.IValueDefinition;
 import de.tsl2.nano.collection.CollectionUtil;
 import de.tsl2.nano.collection.ListSet;
 import de.tsl2.nano.core.ManagedException;
@@ -217,8 +214,9 @@ public class BeanUtil extends ByteUtil {
     public static boolean isStandardType(Class<?> type) {
         //if type is root object, it will be an special extension - not a standard type
         //TODO: whats about interfaces like comparable - see isStandardInterface()?
-        if (type.getName().equals(Object.class.getName()))
+        if (type.getName().equals(Object.class.getName())) {
             return false;
+        }
         //on array types, the package is null!
         final String p = type.getPackage() != null ? type.getPackage().getName() : type.getClass().getName();
         return type.isPrimitive() || STD_TYPE_PKGS.contains(p);
@@ -291,14 +289,16 @@ public class BeanUtil extends ByteUtil {
             Type genericType = clazz.getGenericSuperclass();
             //try to get the type through the first defined generic interface
             if (genericType == null) {
-                if (clazz.getGenericInterfaces().length > 0)
+                if (clazz.getGenericInterfaces().length > 0) {
                     genericType = clazz.getGenericInterfaces()[0];
-                else
+                } else {
                     return null;
+                }
             }
             Type type = ((ParameterizedType) genericType).getActualTypeArguments()[0];
-            if (type instanceof ParameterizedType)
+            if (type instanceof ParameterizedType) {
                 return (Class<?>) ((ParameterizedType) type).getRawType();
+            }
             return (Class<?>) type;
         } catch (Exception e) {
             ManagedException.forward(e);
@@ -550,8 +550,9 @@ public class BeanUtil extends ByteUtil {
         /*
          * do some validation checks
          */
-        if (attributeNames.length == 0)
+        if (attributeNames.length == 0) {
             throw ManagedException.implementationError("give at least one attribute-name to be filled!", null);
+        }
         if (separation == null) {
             boolean hasColumnIndexes = false;
             for (String n : attributeNames) {
@@ -560,11 +561,12 @@ public class BeanUtil extends ByteUtil {
                     break;
                 }
             }
-            if (!hasColumnIndexes)
+            if (!hasColumnIndexes) {
                 throw ManagedException
                     .implementationError(
                         "if you don't give a separation-character, you should give at least one column-index in your attribute-names",
                         null);
+            }
         }
 
         final Collection<T> result = new LinkedList<T>();
@@ -646,8 +648,9 @@ public class BeanUtil extends ByteUtil {
                         }
                         lastSep += t.length() + (c != null ? 0 : separation.length());
                         //at line end, no separation char will occur
-                        if (st.sval.length() < lastSep)
+                        if (st.sval.length() < lastSep) {
                             lastSep = st.sval.length();
+                        }
                         if (attr == null || attr.startsWith("null:")) {
                             LOG.info("ignoring line " + st.lineno()
                                 + ", token '"
@@ -807,8 +810,9 @@ public class BeanUtil extends ByteUtil {
      */
     public static boolean hasToString(Class cls) {
         try {
-            if (cls.isInterface())
+            if (cls.isInterface()) {
                 return false;
+            }
             final Method method = cls.getMethod("toString", new Class[0]);
             //pure objects, representating there instance id
             return !method.toString().equals(OBJ_TOSTRING);

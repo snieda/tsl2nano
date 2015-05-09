@@ -56,14 +56,16 @@ public class EquationSolver extends NumericOperator {
      */
     public EquationSolver(NumberFormat formatter, Map<String, Object> values) {
         super();
-        if (formatter == null)
+        if (formatter == null) {
             this.formatter = NumberFormat.getInstance();
-        else
+        } else {
             this.formatter = formatter;
-        if (values == null)
+        }
+        if (values == null) {
             this.values = new Hashtable<String, Object>();
-        else
+        } else {
             this.values = values;
+        }
     }
 
     public Object eval(String expression) {
@@ -78,8 +80,9 @@ public class EquationSolver extends NumericOperator {
         StringBuilder t;
         while (true) {
             term = extract(expression, TERM);
-            if (term.isEmpty())
+            if (term.isEmpty()) {
                 break;
+            }
             t = new StringBuilder(term.substring(1, term.length() - 1));
             StringUtil.replace(expression, term, String.valueOf(operate(t, values)));
         }

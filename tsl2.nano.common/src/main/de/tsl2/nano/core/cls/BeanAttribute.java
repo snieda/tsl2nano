@@ -9,8 +9,8 @@
  */
 package de.tsl2.nano.core.cls;
 
-import java.io.Serializable;
 import java.io.IOException;
+import java.io.Serializable;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
@@ -97,9 +97,9 @@ public class BeanAttribute<T> implements IAttribute<T> {
          * define a new cached-class to get the methods from there.
          */
         BeanClass cachedBC = CachedBeanClass.getCachedBeanClass(clazz);
-        if (cachedBC != null)
+        if (cachedBC != null) {
             return (BeanAttribute) cachedBC.getAttribute(attributeName);
-        else {
+        } else {
             Method method = getReadAccessMethod(clazz, attributeName, throwException);
             return method != null ? new BeanAttribute(method) : null;
         }
@@ -123,12 +123,13 @@ public class BeanAttribute<T> implements IAttribute<T> {
             try {
                 return clazz.getMethod(methodName, EMPTY_CLS_ARG);
             } catch (final Exception e1) {
-                if (throwException)
+                if (throwException) {
                     ManagedException.forward(e);
-                else
+                } else {
                     LOG.debug("No access method for attribute '" + attributeName
                         + "' available on class "
                         + clazz.getName());
+                }
                 return null;
             }
         }
@@ -155,6 +156,7 @@ public class BeanAttribute<T> implements IAttribute<T> {
      * 
      * @return getter method of current attribute
      */
+    @Override
     public Method getAccessMethod() {
         return readAccessMethod;
     }
@@ -209,6 +211,7 @@ public class BeanAttribute<T> implements IAttribute<T> {
      * @return simple class name + attribute name. the class name starts with a lower case to follow the same rules as
      *         used on generating presenters.
      */
+    @Override
     public String getId() {
         return toFirstLower(readAccessMethod.getDeclaringClass().getSimpleName()) + "." + getName();
     }
@@ -217,6 +220,7 @@ public class BeanAttribute<T> implements IAttribute<T> {
      * @param beanInstance bean
      * @return value of bean attribute for the given instance
      */
+    @Override
     @SuppressWarnings("unchecked")
     public T getValue(Object beanInstance) {
         try {
@@ -232,16 +236,18 @@ public class BeanAttribute<T> implements IAttribute<T> {
      * @param beanInstance bean
      * @param value value to set
      */
+    @Override
     public void setValue(Object beanInstance, Object value) {
         if (hasWriteAccess()) {
             //on primitive it is not possible to set a null value - we ignore setValue(null)
-            if (!(getType().isPrimitive() && value == null))
+            if (!(getType().isPrimitive() && value == null)) {
                 try {
                     writeAccessMethod.setAccessible(true);
                     writeAccessMethod.invoke(beanInstance, new Object[] { value });
                 } catch (final Exception e) {
                     ManagedException.forward(e);
                 }
+            }
         } else {
             LOG.warn("no write access for attribute value '" + getName() + "'! missing setter for: " + readAccessMethod);
         }
@@ -250,6 +256,7 @@ public class BeanAttribute<T> implements IAttribute<T> {
     /**
      * @return attribute name
      */
+    @Override
     public String getName() {
         return getName(readAccessMethod);
     }
@@ -290,10 +297,12 @@ public class BeanAttribute<T> implements IAttribute<T> {
     /**
      * @return type of attribute
      */
+    @Override
     @SuppressWarnings("unchecked")
     public Class<T> getType() {
-        if (readAccessMethod == null)
+        if (readAccessMethod == null) {
             initDeserializing();
+        }
         return (Class<T>) readAccessMethod.getReturnType();
     }
 
@@ -322,14 +331,16 @@ public class BeanAttribute<T> implements IAttribute<T> {
      */
     public static Class<?> getGenericType(Method method, int typePos) {
         Object genType = method.getGenericReturnType();
-        if (genType instanceof ParameterizedType)
+        if (genType instanceof ParameterizedType) {
             genType = ((ParameterizedType) genType).getActualTypeArguments()[typePos];
+        }
         return genType instanceof Class ? (Class<?>) genType : Object.class;
     }
 
     /**
      * @return whether there is a public setter defined
      */
+    @Override
     public boolean hasWriteAccess() {
         return getWriteAccessMethod(readAccessMethod) != null;
     }
@@ -339,6 +350,7 @@ public class BeanAttribute<T> implements IAttribute<T> {
      * 
      * @return declaring class
      */
+    @Override
     public Class getDeclaringClass() {
         return readAccessMethod.getDeclaringClass();
     }
@@ -432,8 +444,9 @@ public class BeanAttribute<T> implements IAttribute<T> {
      */
     public <A extends Annotation> Object[] getAnnotationValues(Class<A> annotationClass, String... memberNames) {
         A a = getAnnotation(annotationClass);
-        if (a == null)
+        if (a == null) {
             return null;
+        }
         BeanClass bc = BeanClass.getBeanClass(a.getClass());
         Object[] values = new Object[memberNames.length];
         for (int i = 0; i < memberNames.length; i++) {

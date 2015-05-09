@@ -9,8 +9,6 @@
  */
 package de.tsl2.nano.bean.def;
 
-import java.text.MessageFormat;
-
 import de.tsl2.nano.core.ENV;
 
 /**

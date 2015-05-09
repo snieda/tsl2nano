@@ -46,8 +46,9 @@ public class Expression<T> extends AbstractFinder<T> {
         super(resultType, relationsToLoad);
         expression = queryString;
 //        this.asSubSelect = asSubSelect;
-        if (args != null)
+        if (args != null) {
             par = Arrays.asList(args);
+        }
     }
 
     /**

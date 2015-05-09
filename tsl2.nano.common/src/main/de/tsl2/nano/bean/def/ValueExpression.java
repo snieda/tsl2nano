@@ -181,16 +181,19 @@ public class ValueExpression<TYPE> implements
      */
     @Override
     public TYPE from(String toValue) {
-        if (type == null)
+        if (type == null) {
             throw ManagedException
                 .implementationError(
                     "The conversion from string to object is only available, if the ValueExpression was created with a class type argument!",
                     "type of value-expression '" + toString() + "' is null");
-        if (Util.isEmpty(toValue))
+        }
+        if (Util.isEmpty(toValue)) {
             return null;
+        }
         //if type is object we return the value itself - it's an instanceof Object
-        if (type.isAssignableFrom(Object.class))
+        if (type.isAssignableFrom(Object.class)) {
             return (TYPE) toValue;
+        }
 
         TYPE exampleBean = createExampleBean(toValue);
 
@@ -260,16 +263,17 @@ public class ValueExpression<TYPE> implements
      */
     protected TYPE createInstance(String toValue) {
         TYPE instance;
-        if (type.isInterface())
+        if (type.isInterface()) {
             instance = BeanProxy.createBeanImplementation(type, null, null, ENV.get(ClassLoader.class));
-        else if (BeanUtil.isStandardType(type))
+        } else if (BeanUtil.isStandardType(type)) {
             instance = PrimitiveUtil.create(type, toValue);
-        else if (BeanClass.hasStringConstructor(type))
-            instance = (TYPE) BeanClass.createInstance(type, toValue);
-        else if (byte[].class.isAssignableFrom(type))
+        } else if (BeanClass.hasStringConstructor(type)) {
+            instance = BeanClass.createInstance(type, toValue);
+        } else if (byte[].class.isAssignableFrom(type)) {
             instance = (TYPE) toValue.getBytes();
-        else
-            instance = (TYPE) BeanClass.createInstance(type);
+        } else {
+            instance = BeanClass.createInstance(type);
+        }
         return instance;
     }
 
@@ -278,8 +282,9 @@ public class ValueExpression<TYPE> implements
      */
     @Override
     public String to(TYPE fromValue) {
-        if (fromValue == null)
+        if (fromValue == null) {
             return "";
+        }
         if (hasArguments) {
             Map<String, Object> valueMap = BeanUtil.toValueMap(fromValue, false, false, true, attributes);
             if (valueMap.size() == 0) {
@@ -321,13 +326,14 @@ public class ValueExpression<TYPE> implements
     }
 
     protected void preformatBeans(Object[] args) {
-        if (!BeanContainer.isInitialized())
+        if (!BeanContainer.isInitialized()) {
             return;
+        }
         for (int i = 0; i < args.length; i++) {
             if (args[i] != null) {
-                if (BeanContainer.instance().isPersistable(args[i].getClass()))
+                if (BeanContainer.instance().isPersistable(args[i].getClass())) {
                     args[i] = Bean.getBean((Serializable) args[i]).toString();
-                else if (args[i] instanceof Collection) {
+                } else if (args[i] instanceof Collection) {
                     Collection<?> c = (Collection<?>) args[i];
                     if (c.size() > 0 && BeanContainer.instance().isPersistable(c.iterator().next().getClass())) {
                         StringBuilder buf = new StringBuilder();
@@ -378,8 +384,9 @@ public class ValueExpression<TYPE> implements
         StringBuilder expr = new StringBuilder(expression);
         while (i != -1 && (splitter = StringUtil.substring(expr, "$", "%", i)).length() > 0) {
             splitters.add(splitter);
-            if (i == 0)
+            if (i == 0) {
                 i = expr.indexOf("$");
+            }
             i = expr.indexOf("$", i + 1);
         }
         return splitters.toArray(new String[0]);
@@ -418,8 +425,9 @@ public class ValueExpression<TYPE> implements
         StringBuilder expr = new StringBuilder(expression);
         while (i != -1 && (splitter = StringUtil.substring(expr, "}", "{", i)).length() > 0) {
             splitters.add(splitter);
-            if (i == 0)
+            if (i == 0) {
                 i = expr.indexOf("}");
+            }
             i = expr.indexOf("}", i + 1);
         }
         return splitters.toArray(new String[0]);
@@ -432,8 +440,9 @@ public class ValueExpression<TYPE> implements
      * @return attribute values
      */
     protected String[] getAttributeValues(String toValue) {
-        if (attributeSplitters.length == 0)
+        if (attributeSplitters.length == 0) {
             return new String[] { toValue };
+        }
         String splittedValues[] = new String[attributeSplitters.length + 1];
         String from = null;
         String to = null;
@@ -441,14 +450,16 @@ public class ValueExpression<TYPE> implements
         for (int i = 0; i <= attributeSplitters.length; i++) {
             to = i < attributeSplitters.length ? attributeSplitters[i] : null;
             splittedValues[i] = StringUtil.substring(toValue, from, to, j);
-            if (i == attributeSplitters.length)
+            if (i == attributeSplitters.length) {
                 break;
+            }
             from = to;
             j = toValue.indexOf(to) + to.length();
         }
         return splittedValues;
     }
 
+    @Override
     public Class<TYPE> getType() {
         return type;
     }

@@ -82,6 +82,7 @@ public class Vector extends Coordinate implements Comparable<Vector> {
     /**
      * {@inheritDoc}
      */
+    @Override
     public void add(float... v) {
         checkDimension(v);
         for (int i = 0; i < v.length; i++) {
@@ -270,8 +271,9 @@ public class Vector extends Coordinate implements Comparable<Vector> {
      */
     public void normalize() {
         float l = len();
-        if (l == 0)
+        if (l == 0) {
             return;
+        }
         for (int i = 0; i < x.length; i++) {
             x[i] /= l;
         }
@@ -286,8 +288,9 @@ public class Vector extends Coordinate implements Comparable<Vector> {
         int a = isEVector(this);
         if (a != -1) {
             for (int i = 0; i < x.length; i++) {
-                if (i == a)
+                if (i == a) {
                     continue;
+                }
                 Vector v1 = e(x.length, i);
                 if (v1.scalar(v2.x) != 0) {
                     x = v1.x;
@@ -296,8 +299,9 @@ public class Vector extends Coordinate implements Comparable<Vector> {
             }
         } else {
             for (int i = 0; i < x.length; i++) {
-                if (x[i] == 0)
+                if (x[i] == 0) {
                     continue;
+                }
                 Vector v1 = clone(1);
                 v1.x[i] = -v1.x[i];
                 if (v1.scalar(v2.x) != 0) {
@@ -314,8 +318,9 @@ public class Vector extends Coordinate implements Comparable<Vector> {
      * @return axis/row of 1
      */
     protected static int isEVector(Vector v) {
-        if (v.len() != 1)
+        if (v.len() != 1) {
             return -1;
+        }
         int u = 0;
         int a = -1;
         for (int i = 0; i < v.x.length; i++) {
@@ -349,10 +354,11 @@ public class Vector extends Coordinate implements Comparable<Vector> {
     public static Vector invert(Vector v) {
         Vector n = v.clone(1);
         for (int i = 0; i < v.x.length; i++) {
-            if (v.x[i] == 0)
+            if (v.x[i] == 0) {
                 n.x[i] = 1;
-            else
+            } else {
                 n.x[i] = 0;
+            }
         }
         return n;
     }

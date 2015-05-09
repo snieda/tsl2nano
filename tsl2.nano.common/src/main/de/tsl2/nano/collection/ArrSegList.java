@@ -160,6 +160,7 @@ public class ArrSegList<TARRAY, T> implements List<T> {
      * 
      * @return size
      */
+    @Override
     public int size() {
         return elements;
     }
@@ -224,8 +225,9 @@ public class ArrSegList<TARRAY, T> implements List<T> {
     @Override
     public boolean containsAll(Collection<?> c) {
         for (Object item : c) {
-            if (!contains(item))
+            if (!contains(item)) {
                 return false;
+            }
         }
         return true;
     }
@@ -286,8 +288,9 @@ public class ArrSegList<TARRAY, T> implements List<T> {
         int i;
         for (TARRAY arr : seg) {
             i = Arrays.binarySearch((Object[]) arr, o);
-            if (i >= 0)
+            if (i >= 0) {
                 return i;
+            }
         }
         return -1;
     }

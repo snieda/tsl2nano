@@ -1,7 +1,6 @@
 package de.tsl2.nano.incubation.terminal.item;
 
 import java.util.ArrayList;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Properties;
 
@@ -41,10 +40,11 @@ public class MainAction<T> extends Action<T> {
             argList.add(Util.asString(a));
         }
         for (int i = argList.size() - 1; i >= 0; i--) {
-            if (argList.get(i) == null)
+            if (argList.get(i) == null) {
                 argList.remove(i);
-            else
+            } else {
                 break;
+            }
         }
         
         context.put("arg1", argList.toArray(new String[0]));

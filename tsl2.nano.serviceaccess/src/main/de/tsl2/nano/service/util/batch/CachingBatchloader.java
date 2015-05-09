@@ -67,8 +67,9 @@ public class CachingBatchloader {
      * @return singelton
      */
     public static final CachingBatchloader instance() {
-        if (self == null)
+        if (self == null) {
             self = new CachingBatchloader();
+        }
         return self;
     }
 
@@ -106,8 +107,9 @@ public class CachingBatchloader {
         try {
             Part<T>[] loadedParts = genService.findBatch(nextBatchParts.toArray(new Part[0]));
             for (int i = 0; i < loadedParts.length; i++) {
-                if (loadedParts[i].isCache())
+                if (loadedParts[i].isCache()) {
                     cache.put(loadedParts[i].getId(), loadedParts[i]);
+                }
             }
         } finally {
             nextBatchParts.clear();
@@ -125,11 +127,12 @@ public class CachingBatchloader {
     public <T> Collection<T> get(Class<T> type, String partId) {
         Part<?> part = cache.get(partId);
         if (part == null && nextBatchParts.contains(new Part(partId))) {
-            if (mode == MODE_AUTO)
+            if (mode == MODE_AUTO) {
                 execute();
-            else
+            } else {
                 throw ManagedException.implementationError("the batch-loading wasn't started yet! you have to call 'execute' before getting the data",
                     partId);
+            }
         }
         return (Collection<T>) (part != null ? part.getResult() : null);
     }
@@ -145,15 +148,16 @@ public class CachingBatchloader {
     public <T> T getSingle(Class<T> type, String partId) {
         Collection<T> result = get(type, partId);
         if (result != null) {
-            if (result.size() == 1)
+            if (result.size() == 1) {
                 return result.iterator().next();
-            else
+            } else {
                 throw ManagedException.implementationError("the cache for " + type
                     + "|"
                     + partId
                     + " is not a single result. the cache contains"
                     + result.size()
                     + " elements for that!", "getSingle()", "get()");
+            }
         }
         return null;
     }
@@ -179,10 +183,11 @@ public class CachingBatchloader {
             partIds = (String[]) cache.keySet().toArray();
         }
         for (int i = 0; i < partIds.length; i++) {
-            if (cache.remove(partIds[i]) == null)
+            if (cache.remove(partIds[i]) == null) {
                 throw ManagedException.implementationError("cache item couldn't be removed!",
                     partIds[i],
                     cache.keySet());
+            }
         }
     }
 }

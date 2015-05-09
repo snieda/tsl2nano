@@ -15,6 +15,7 @@ import java.io.FileReader;
 import java.io.InputStream;
 import java.io.Serializable;
 import java.lang.Thread.UncaughtExceptionHandler;
+import java.net.InetAddress;
 import java.text.Format;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -131,8 +132,9 @@ public class ENV {
      */
     public static String getName() {
         String path = self.getConfigPath().replace(File.separator, DEF_PATHSEPRATOR);
-        if (path.lastIndexOf(DEF_PATHSEPRATOR) == path.length() - 1)
+        if (path.lastIndexOf(DEF_PATHSEPRATOR) == path.length() - 1) {
             path = path.substring(0, path.length() - 1);
+        }
         return StringUtil.toFirstUpper(StringUtil.substring(path, DEF_PATHSEPRATOR, null, true));
     }
 
@@ -270,8 +272,9 @@ public class ENV {
         self.properties.put(KEY_CONFIG_PATH, new File(dir).getAbsolutePath().replace("\\", "/") + "/");
         new File(self.getTempPath()).mkdir();
         registerBundle(PREFIX + "messages", true);
-        if (new File(getConfigPath() + "messages.properties").canRead())
+        if (new File(getConfigPath() + "messages.properties").canRead()) {
             registerBundle("messages", true);
+        }
         addService(Profiler.class, Profiler.si());
         ExceptionHandler exceptionHandler = new ExceptionHandler();
         Thread.setDefaultUncaughtExceptionHandler(exceptionHandler);
@@ -289,24 +292,28 @@ public class ENV {
                 + "  dir   : ${user.dir}\n"
                 + "  time  : ${nano.tstamp}\n"
                 + "  user  : ${user.name}, home: ${user.home}\n"
-                + "  lang  : ${user.country}_${user.language}, encoding: ${sun.jnu.encoding}\n"
+                + "  lang  : ${user.country}_${user.language}, sun.jnu.encoding: ${sun.jnu.encoding}\n"
                 + "  encode: ${file.encoding}\n"
                 + "  loader: ${main.context.classloader}\n"
-                + "  java  : ${java.runtime.version}, ${java.home}\n"
+                + "  java  : ${java.vm.name}, ${java.runtime.version}, ${java.home}\n"
                 + "  memory: ${memory}\n"
                 + "  discs : ${disc}\n"
+                + "  io.tmp: ${java.io.tmpdir}\n"
                 + "  os    : ${os.name}, ${os.version} ${sun.os.patch.level} ${os.arch}\n"
                 + "  system: ${sun.cpu.isalist} ${sun.arch.data.model} x${processors}\n"
-                + "  net-ip: ${inetadress.myip}\n";
+                + "  net-ip: ${inetadress.myip} (host-name: ${inetadress.hostname})\n";
         Properties p = new Properties();
         p.putAll(System.getProperties());
         p.put("nano.tstamp", new Date());
         p.put("main.context.classloader", Thread.currentThread().getContextClassLoader());
-        p.put("inetadress.myip", NetUtil.getMyIP());
+        
+        InetAddress myAddress = NetUtil.getMyAddress();
+        p.put("inetadress.myip", myAddress.getHostAddress());
+        p.put("inetadress.hostname", myAddress.getHostName());
 
-        long free = Runtime.getRuntime().freeMemory() / (1024 * 1024);
-        long total = Runtime.getRuntime().totalMemory() / (1024 * 1024);
-        p.put("memory", "free " + free + "M of total " + total + "M");
+        String free = BitUtil.amount(Runtime.getRuntime().freeMemory());
+        String total = BitUtil.amount(Runtime.getRuntime().totalMemory());
+        p.put("memory", "free " + free + " of total " + total);
 
         p.put("processors", Runtime.getRuntime().availableProcessors());
 
@@ -401,16 +408,17 @@ public class ENV {
      * @return new value
      */
     public static final <T extends Number> T counter(String key, T diff) {
-        Object value = (T) self().properties.get(key);
+        Object value = self().properties.get(key);
         if (value == null && diff != null) {
             value = diff;
         } else {
-            if (NumberUtil.isInteger(diff.getClass()))
+            if (NumberUtil.isInteger(diff.getClass())) {
                 value = (((Number) value).intValue() + diff.intValue());
-            else if (NumberUtil.isFloating(diff.getClass()))
+            } else if (NumberUtil.isFloating(diff.getClass())) {
                 value = (((Number) value).doubleValue() + diff.doubleValue());
-            else
+            } else {
                 value = (((Number) value).longValue() + diff.longValue());
+            }
         }
         setProperty(key, value);
         return (T) value;
@@ -442,8 +450,9 @@ public class ENV {
      */
     public static void setProperty(String key, Object value) {
         self().properties.put(key, value);
-        if (self().autopersist)
+        if (self().autopersist) {
             self().persist();
+        }
     }
 
     /**
@@ -451,8 +460,9 @@ public class ENV {
      */
     public static void setProperties(Map properties) {
 //        self().properties = properties;
-        if (self().autopersist)
+        if (self().autopersist) {
             self().persist();
+        }
     }
 
     /**
@@ -488,15 +498,16 @@ public class ENV {
      * @return bundle value the translated value or the key itself if no translation is available
      */
     public static String translate(Object key, boolean optional, Object... args) {
-        if (key instanceof Enum)
+        if (key instanceof Enum) {
             return Messages.getString((Enum<?>) key);
-        else {
-            if (optional && args.length == 0)
+        } else {
+            if (optional && args.length == 0) {
                 return Messages.getStringOpt((String) key, true);
-            else if (args.length > 0)
+            } else if (args.length > 0) {
                 return Messages.getFormattedString((String) key, args);
-            else
+            } else {
                 return Messages.getString((String) key);
+            }
         }
     }
 
@@ -679,9 +690,9 @@ public class ENV {
      */
     public static void assignClassloaderToCurrentThread() {
         ClassLoader cl = (ClassLoader) self().services.get(ClassLoader.class);
-        if (cl != null)
+        if (cl != null) {
             Thread.currentThread().setContextClassLoader(cl);
-        else {
+        } else {
             addService(ClassLoader.class, Thread.currentThread().getContextClassLoader());
 //            get(Log.class).warn("no classloader defined!");
         }
@@ -695,8 +706,9 @@ public class ENV {
      */
     public static InputStream getResource(String fileName) {
         ClassLoader classLoader = (ClassLoader) self().services.get(ClassLoader.class);
-        if (classLoader == null)
+        if (classLoader == null) {
             classLoader = addService(Thread.currentThread().getContextClassLoader());
+        }
         return classLoader.getResourceAsStream(fileName);
     }
 
@@ -711,6 +723,9 @@ public class ENV {
         File rcFile = new File(rc);
         //create a sorted property map
         Properties p = new Properties() {
+            /** serialVersionUID */
+            private static final long serialVersionUID = 1L;
+
             @Override
             public synchronized Enumeration<Object> keys() {
                 return Collections.enumeration(new TreeSet<Object>(super.keySet()));
@@ -726,11 +741,14 @@ public class ENV {
         return p;
     }
 
-    public static final boolean extractResourceToDir(String resourceName, String destinationDir) {
-        //put build informations into system-properties
-        getBuildInformations();
-        resourceName = System.getProperty(resourceName, resourceName);
-        return AppLoader.isNestingJar() ? extractResource(resourceName, destinationDir + resourceName) : false;
+    /**
+     * copies the existing file in environment to the temp dir.
+     * 
+     * @param environmentFile
+     */
+    public static final void saveBackup(String environmentFile) {
+        FileUtil.copy(getConfigPath() + environmentFile,
+            getTempPath() + environmentFile + "." + System.currentTimeMillis());
     }
 
     /**
@@ -740,21 +758,15 @@ public class ENV {
      * @return true, if resource was saved. if application wasn't started from jar (perhaps in an ide), it returns
      *         always false.
      */
-    public static final boolean extractResource(String resourceName) {
+    public static final boolean extractResourceToDir(String resourceName, String destinationDir) {
         //put build informations into system-properties
         getBuildInformations();
         resourceName = System.getProperty(resourceName, resourceName);
-        return AppLoader.isNestingJar() ? extractResource(resourceName, resourceName) : false;
+        return AppLoader.isNestingJar() ? extractResource(resourceName, destinationDir + resourceName) : false;
     }
 
-    /**
-     * copies the existing file in environment to the temp dir.
-     * 
-     * @param environmentFile
-     */
-    public static final void saveBackup(String environmentFile) {
-        FileUtil.copy(getConfigPath() + environmentFile,
-            getTempPath() + environmentFile + "." + System.currentTimeMillis());
+    public static final boolean extractResource(String resourceName) {
+        return extractResourceToDir(resourceName, "");
     }
 
     /**
@@ -768,11 +780,14 @@ public class ENV {
         File destFile = new File(fileName);
         File file = destFile.isAbsolute() ? destFile : new File(getConfigPath() + fileName);
         if (!file.exists()) {
+            if (file.getParentFile() != null)
+                file.getParentFile().mkdirs();
             InputStream res = get(ClassLoader.class).getResourceAsStream(resourceName);
             try {
-                if (res == null /*|| res.available() <= 0*/)
+                if (res == null /*|| res.available() <= 0*/) {
                     throw new IllegalStateException("the resource '" + resourceName
                         + "' of our main-jar-file is not available or empty!");
+                }
                 FileUtil.write(res, new FileOutputStream(file), true);
                 return true;
             } catch (Exception e) {
@@ -796,8 +811,9 @@ public class ENV {
         File[] environmentJars = FileUtil.getFiles(getConfigPath(), ".*[.]jar");
         Collection<String> availableJars =
             new ArrayList<String>((nestedJars != null ? nestedJars.length : 0) + environmentJars.length);
-        if (nestedJars != null)
+        if (nestedJars != null) {
             availableJars.addAll(Arrays.asList(nestedJars));
+        }
         for (int i = 0; i < environmentJars.length; i++) {
             availableJars.add(environmentJars[i].getName());
         }
@@ -846,8 +862,9 @@ public class ENV {
                 break;
             }
         }
-        if (!foreignDependencies)
+        if (!foreignDependencies) {
             return null;
+        }
         //load the dependencies through maven, if available
         String clsJarResolver = "de.tsl2.nano.jarresolver.JarResolver";
         if (get("classloader.usenetwork.loader", true) && NetUtil.isOnline()

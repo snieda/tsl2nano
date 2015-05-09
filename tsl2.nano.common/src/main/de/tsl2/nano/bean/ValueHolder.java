@@ -89,9 +89,11 @@ public class ValueHolder<T> implements Serializable, IValueAccess<T> {
      * 
      * @return Returns the changeHandler.
      */
+    @Override
     public EventController changeHandler() {
-        if (changeHandler == null)
+        if (changeHandler == null) {
             changeHandler = new EventController();
+        }
         return changeHandler;
     }
 

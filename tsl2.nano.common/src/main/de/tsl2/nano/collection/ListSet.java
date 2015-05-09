@@ -96,8 +96,9 @@ public class ListSet<E> extends ArrayList<E> implements Set<E> {
      * @param comp special comparator.
      */
     public void setComparator(Comparator<E> comp) {
-        if (this.comp != null)
+        if (this.comp != null) {
             ManagedException.illegalState(comp, this);
+        }
         this.comp = comp;
     }
 

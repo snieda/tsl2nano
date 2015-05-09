@@ -27,7 +27,6 @@ import de.tsl2.nano.collection.CollectionUtil;
 import de.tsl2.nano.core.ManagedException;
 import de.tsl2.nano.format.FormatUtil;
 import de.tsl2.nano.format.GenericParser;
-import de.tsl2.nano.util.NumberUtil;
 
 /**
  * Checks constraints of a given value
@@ -144,8 +143,9 @@ public class Constraint<T> extends AbstractConstraint<T> implements IConstraint<
         this.defaultValue = defaultValue;
         if (defaultValue != null) {
             IStatus s = checkStatus(getType() != null ? getType().getSimpleName() : "arg", defaultValue);
-            if (!s.ok())
+            if (!s.ok()) {
                 throw new ManagedException(s.message());
+            }
         }
         return (C) this;
     }
@@ -315,8 +315,9 @@ public class Constraint<T> extends AbstractConstraint<T> implements IConstraint<
 
     @Override
     public Class<T> getType() {
-        if (type == null)
+        if (type == null) {
             type = (Class<T>) Object.class;
+        }
         return type;
     }
 
@@ -325,19 +326,22 @@ public class Constraint<T> extends AbstractConstraint<T> implements IConstraint<
     @Override
     public <C extends IConstraint<T>> C setType(Class<T> type) {
         this.type = type;
-        if (type.isEnum())
+        if (type.isEnum()) {
             setRange(CollectionUtil.getEnumValues((Class<Enum>) type));
+        }
         return (C) this;
     }
 
     @Persist
     private void initSerialization() {
         //simple-xml has problems on deserializing anonymous classes
-        if (format != null && format.getClass().isAnonymousClass())
+        if (format != null && format.getClass().isAnonymousClass()) {
             format = null;
+        }
         //the enum values should not be persisted
-        if (Enum.class.isAssignableFrom(getType()))
+        if (Enum.class.isAssignableFrom(getType())) {
             allowedValues = null;
+        }
     }
 
     @Complete
@@ -347,9 +351,11 @@ public class Constraint<T> extends AbstractConstraint<T> implements IConstraint<
 
     @Commit
     private void initDeserialization() {
-        if (Enum.class.isAssignableFrom(getType()))
+        if (Enum.class.isAssignableFrom(getType())) {
             allowedValues = CollectionUtil.getEnumValues((Class<Enum>) getType());
-        if (format == null)
+        }
+        if (format == null) {
             format = createFormat(getType());
+        }
     }
 }

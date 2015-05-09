@@ -36,10 +36,11 @@ public class NodeStatistics {
      * @param direct
      */
     public void addWorkingTime(long workingTime, boolean direct) {
-        if (direct)
+        if (direct) {
             notifications++;
-        else
+        } else {
             notifiedThroughConnection++;
+        }
         this.workingTime = workingTime;
     }
     

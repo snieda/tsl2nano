@@ -7,8 +7,6 @@
 package de.tsl2.nano.incubation.terminal;
 
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.StringTokenizer;
 
 import de.tsl2.nano.core.util.FileUtil;

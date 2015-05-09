@@ -135,7 +135,7 @@ public class BeanPresentationHelper<T> {
     public static final String KEY_TEXT_CR = PREFIX_DEFRULE + "text.cr";
 
     /** default comparator - used by lists and tables to do a default sort */
-    public static Comparator STRING_COMPARATOR = NumberUtil.getNumberAndStringComparator(new DefaultFormat());
+    public static final Comparator STRING_COMPARATOR = NumberUtil.getNumberAndStringComparator(new DefaultFormat());
 
     public BeanPresentationHelper() {
     }
@@ -304,9 +304,9 @@ public class BeanPresentationHelper<T> {
     public int getDefaultHorizontalAlignment(IAttribute beanAttribute) {
         int alignment;
         final Class<?> type = beanAttribute.getType();
-        if (beanAttribute instanceof IAttributeDefinition && ((IAttributeDefinition<?>) beanAttribute).length() == 1)
+        if (beanAttribute instanceof IAttributeDefinition && ((IAttributeDefinition<?>) beanAttribute).length() == 1) {
             alignment = STYLE_ALIGN_RIGHT;
-        else if (Number.class.isAssignableFrom(type)) {
+        } else if (Number.class.isAssignableFrom(type)) {
             alignment = STYLE_ALIGN_RIGHT;
         } else {
             alignment = STYLE_ALIGN_LEFT;
@@ -376,16 +376,19 @@ public class BeanPresentationHelper<T> {
     }
 
     public int getDefaultType(IAttributeDefinition<?> attr) {
-        if (attr.temporalType() != null && Timestamp.class.isAssignableFrom(attr.temporalType()))
+        if (attr.temporalType() != null && Timestamp.class.isAssignableFrom(attr.temporalType())) {
             return TYPE_DATE | TYPE_TIME;
-        if (attr.temporalType() != null && Time.class.isAssignableFrom(attr.temporalType()))
+        }
+        if (attr.temporalType() != null && Time.class.isAssignableFrom(attr.temporalType())) {
             return TYPE_TIME;
+        }
         int type = getDefaultType((IAttribute) attr);
         if (!NumberUtil.hasBit(type, TYPE_OPTION)
             && !NumberUtil.hasBit(type, TYPE_INPUT_NUMBER)
             && !NumberUtil.hasBit(type, TYPE_ATTACHMENT)) {
-            if (attr.length() > ENV.get("field.min.multiline.length", 100) || attr.isMultiValue())
+            if (attr.length() > ENV.get("field.min.multiline.length", 100) || attr.isMultiValue()) {
                 type |= TYPE_INPUT_MULTILINE;
+            }
         }
         return type;
     }
@@ -417,8 +420,9 @@ public class BeanPresentationHelper<T> {
             type = TYPE_TABLE;
         } else if (BeanUtil.isStandardType(attr.getType())) {
             type = TYPE_INPUT;
-            if (NumberUtil.isNumber(attr.getType()))
+            if (NumberUtil.isNumber(attr.getType())) {
                 type |= TYPE_INPUT_NUMBER;
+            }
         } else {//complex type --> combo box list
             type = TYPE_SELECTION;
         }
@@ -436,8 +440,9 @@ public class BeanPresentationHelper<T> {
         int style = 0;
         if (attr instanceof IAttributeDef) {
             IAttributeDef def = (IAttributeDef) attr;
-            if (def.length() > ENV.get("field.style.multi.min.length", 100) && def.precision() == -1)
+            if (def.length() > ENV.get("field.style.multi.min.length", 100) && def.precision() == -1) {
                 style |= STYLE_MULTI;
+            }
         }
         return style;
     }
@@ -464,10 +469,11 @@ public class BeanPresentationHelper<T> {
                         : ENV.get("default.bigdecimal.precision", 4);
 
                     String currencyPattern = ENV.get("value.currency.length.precision", "11,2");
-                    if (currencyPattern.equals(l + "," + p))
+                    if (currencyPattern.equals(l + "," + p)) {
                         return RegExpFormat.createCurrencyRegExp();
-                    else
+                    } else {
                         return RegExpFormat.createNumberRegExp(l, p, type);
+                    }
                 }
             } else if (NumberUtil.isFloating(type)) {
                 int l = attribute.length() != UNDEFINED ? attribute.length()
@@ -482,13 +488,14 @@ public class BeanPresentationHelper<T> {
             }
         } else if (BeanClass.isAssignableFrom(Date.class, type)) {
             if (BeanClass.isAssignableFrom(Timestamp.class, type)
-                || (attribute.temporalType() != null && Timestamp.class.isAssignableFrom(attribute.temporalType())))
+                || (attribute.temporalType() != null && Timestamp.class.isAssignableFrom(attribute.temporalType()))) {
                 regexp = RegExpFormat.createDateTimeRegExp();
-            else if (BeanClass.isAssignableFrom(Time.class, type)
-                || (attribute.temporalType() != null && Time.class.isAssignableFrom(attribute.temporalType())))
+            } else if (BeanClass.isAssignableFrom(Time.class, type)
+                || (attribute.temporalType() != null && Time.class.isAssignableFrom(attribute.temporalType()))) {
                 regexp = RegExpFormat.createTimeRegExp();
-            else
+            } else {
                 regexp = RegExpFormat.createDateRegExp();
+            }
         } else if (BeanClass.isAssignableFrom(String.class, type)) {
             int l = attribute.length() != UNDEFINED ? attribute.length() : ENV.get("default.text.length", 100);
             regexp = RegExpFormat.createAlphaNumRegExp(l, false);
@@ -515,11 +522,12 @@ public class BeanPresentationHelper<T> {
         Collection<?> manyToOneSelector = null;
         if (!Collection.class.isAssignableFrom(type)) {
             if (Enum.class.isAssignableFrom(type)) {
-                manyToOneSelector = (Collection<V>) CollectionUtil.getEnumValues(type);
+                manyToOneSelector = CollectionUtil.getEnumValues(type);
             } else if (!BeanUtil.isStandardType(type) && !BeanUtil.isByteStream(type)) {
                 //TODO: don't load the relations at the moment :-(
-                if (true)
+                if (true) {
                     return null;
+                }
                 manyToOneSelector = getAttributeRelations(beanAttribute, type, Integer.MAX_VALUE);
                 if (manyToOneSelector == null) {
                     manyToOneSelector = new LinkedList<V>();
@@ -865,7 +873,7 @@ public class BeanPresentationHelper<T> {
         final IValueDefinition<E> attribute = ((Bean) bean).getAttribute(attrName);
         OptionsWrapper<E> enumWrapper;
         if (isMultiSelection) {
-            if (!Collection.class.isAssignableFrom((Class<?>) attribute.getType())) {
+            if (!Collection.class.isAssignableFrom(attribute.getType())) {
                 throw new ManagedException(
                     "tsl2nano.implementationerror",
                     new Object[] {
@@ -988,8 +996,9 @@ public class BeanPresentationHelper<T> {
         }
         //be sure to add all names
         for (int i = 0; i < names.length; i++) {
-            if (!ordered.contains(names[i]))
+            if (!ordered.contains(names[i])) {
                 ordered.add(names[i]);
+            }
         }
         return ordered.toArray(new String[0]);
     }
@@ -1007,16 +1016,15 @@ public class BeanPresentationHelper<T> {
         NavigableMap<Integer, Integer> levels = new TreeMap<Integer, Integer>();
         for (int i = 0; i < names.length; i++) {
             IAttributeDefinition attr = bean.getAttribute(names[i]);
-            if (attr.isMultiValue()) //always the multivalues at the end!
+            if (attr.isMultiValue()) {
                 ml = Integer.MIN_VALUE;
-            else if (attr.getType().isInterface()
+            } else if (attr.getType().isInterface()
                 || (!BeanUtil.isStandardType(attr.getType()) && !BeanClass.hasDefaultConstructor(attr.getType()))
-                || (!attr.isVirtual() && isGeneratedValue(bean.getDeclaringClass(), names[i])))
+                || (!attr.isVirtual() && isGeneratedValue(bean.getDeclaringClass(), names[i]))) {
                 ml = Short.MIN_VALUE;
-            else if (attr.getConstraint().getPrecision() > 0)
+            } else if (attr.getConstraint().getPrecision() > 0) {
                 ml = Byte.MIN_VALUE;
-            //avoid stackoverflow checking if valueExpression was created already
-            else if (bean.valueExpression == null || isDefaultAttribute((IAttribute) attr)) {
+            } else if (bean.valueExpression == null || isDefaultAttribute(attr)) {
                 ml = 0;
                 ml = (1 << 10) * (attr.id() || attr.unique() ? 1 : 0);
                 ml |= (1 << 9) * (!attr.nullable() ? 1 : 0);
@@ -1036,8 +1044,9 @@ public class BeanPresentationHelper<T> {
              * we just increase it (lazy workaround). so, attributes with higher i win.
              */
             if (ml != 0) {
-                while (levels.containsKey(ml))
+                while (levels.containsKey(ml)) {
                     ml++;
+                }
             }
             levels.put(ml, i);
         }
@@ -1085,13 +1094,15 @@ public class BeanPresentationHelper<T> {
                             continue;
                         }
                         //we don't check virtuals and uniques - they have to be correct
-                        if (attr.isVirtual() || attr.unique())
+                        if (attr.isVirtual() || attr.unique()) {
                             break;
+                        }
                         q = query.replace(ALIAS, names[i]);
                         grouping = BeanContainer.instance().getBeansByQuery(q, false, (Object[]) null);
                         maxCount = grouping.size() > 0 ? grouping.iterator().next() : null;
-                        if (Util.isEmpty(maxCount) || maxCount.intValue() < 2)
+                        if (Util.isEmpty(maxCount) || maxCount.intValue() < 2) {
                             break;
+                        }
                         it.remove();
                     }
                 } catch (Exception ex) {
@@ -1153,10 +1164,11 @@ public class BeanPresentationHelper<T> {
         final String CR = config.getProperty(KEY_TEXT_CR, "\n");
         StringBuilder str = new StringBuilder();
         str.append(bean.getName() + CR);
-        if (bean.isMultiValue())
+        if (bean.isMultiValue()) {
             return fillCollectorPresentation(str, TAB, CR).toString();
-        else
+        } else {
             return fillBeanPresentation(str, TAB, CR).toString();
+        }
     }
 
     /**
@@ -1200,7 +1212,7 @@ public class BeanPresentationHelper<T> {
     protected StringBuilder fillBeanPresentation(StringBuilder str, final String TAB, final String CR) {
         String[] names = bean.getAttributeNames();
         for (int i = 0; i < names.length; i++) {
-            IAttributeDefinition<?> attr = (IAttributeDefinition<?>) bean.getAttribute(names[i]);
+            IAttributeDefinition<?> attr = bean.getAttribute(names[i]);
             str.append(attr.getPresentation().getLabel() + TAB + ((BeanValue) attr).getValueText() + CR);
         }
         return str;
@@ -1248,8 +1260,9 @@ public class BeanPresentationHelper<T> {
      * @param session current session
      */
     protected void addSessionValues(List<BeanDefinition> sessionValues) {
-        if (bean.getId() != null)
+        if (bean.getId() != null) {
             throw new IllegalStateException("this method should only be called on new/transient objects! bean:" + bean);
+        }
         Bean b = (Bean) bean;
 
         List<BeanValue> beanValues = b.getBeanValues();
@@ -1274,8 +1287,9 @@ public class BeanPresentationHelper<T> {
      */
     public Collection<IAction> getApplicationActions(ISession session) {
         if (appActions == null) {
-            if (bean == null || session == null)
+            if (bean == null || session == null) {
                 return new LinkedList<IAction>();
+            }
             appActions = new ArrayList<IAction>(10);
 
             appActions.add(new SecureAction(bean.getClazz(),
@@ -1326,8 +1340,9 @@ public class BeanPresentationHelper<T> {
          */
         final ValueHolder<ISession> vsession = new ValueHolder<ISession>(session);
         if (sessionActions == null) {
-            if (bean == null || session.getUserAuthorization() == null)
+            if (bean == null || session.getUserAuthorization() == null) {
                 return new LinkedList<IAction>();
+            }
             vsession.setValue(session);
             sessionActions = new ArrayList<IAction>(2);
             if (session.getContext() instanceof Collection) {
@@ -1368,8 +1383,9 @@ public class BeanPresentationHelper<T> {
     public Collection<IAction> getPageActions(ISession session) {
         final ValueHolder<ISession> vsession = new ValueHolder<ISession>(session);
         if (pageActions == null) {
-            if (bean == null)
+            if (bean == null) {
                 return new LinkedList<IAction>();
+            }
             pageActions = new ArrayList<IAction>(10);
 
             vsession.setValue(session);
@@ -1540,13 +1556,14 @@ public class BeanPresentationHelper<T> {
 
                 @Override
                 public Object action() throws Exception {
-                    if (htmlFile.canRead())
+                    if (htmlFile.canRead()) {
                         return String.valueOf(FileUtil.getFileData(htmlFile.getPath(), null));
-                    else if (pdfFile.canRead()) {
+                    } else if (pdfFile.canRead()) {
                         String url = ENV.get("service.url") + "/" + helpFile + "pdf";
                         return /*url;//*/decorate(url, url);
-                    } else
+                    } else {
                         return page("No help found (" + tooltip + ")");
+                    }
                 }
 
                 @Override

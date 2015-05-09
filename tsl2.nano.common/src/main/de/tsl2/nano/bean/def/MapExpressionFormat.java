@@ -58,8 +58,9 @@ public class MapExpressionFormat<T> extends ValueExpressionFormat<T> {
         for (Object key : keySet) {
             toAppendTo.append(key + "=" + ve.to(m.get(key)) + DIV);
         }
-        if (m.size() > 0)
+        if (m.size() > 0) {
             toAppendTo.delete(toAppendTo.length() - DIV.length(), toAppendTo.length());
+        }
         return toAppendTo;
     }
 

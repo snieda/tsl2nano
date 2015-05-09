@@ -44,8 +44,9 @@ public class ManagedException extends RuntimeException {
      */
     protected ManagedException(Throwable cause, boolean logNow) {
         super(MESSAGE_FORWARDED, cause);
-        if (logNow)
+        if (logNow) {
             LOG.error(MESSAGE_FORWARDED, cause);
+        }
     }
 
     public ManagedException(String message, Object... args) {
@@ -132,8 +133,9 @@ public class ManagedException extends RuntimeException {
     }
 
     public static void assertion(boolean assertion, String message, Object...args) {
-        if (!assertion)
+        if (!assertion) {
             throw new ManagedException(message, args);
+        }
     }
     
     /**
@@ -156,8 +158,9 @@ public class ManagedException extends RuntimeException {
             } else if (ex instanceof InvocationTargetException) {
                 cause = ((InvocationTargetException)ex).getTargetException();
             }
-            if (cause == null)
+            if (cause == null) {
                 return ex;
+            }
         }
         return getRootCause(cause);
     }

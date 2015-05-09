@@ -136,10 +136,11 @@ public class ValueColumn<T> implements IPresentableColumn, Serializable {
      */
     @Override
     public int getWidth() {
-        if (width != UNDEFINED)
+        if (width != UNDEFINED) {
             return width;
-        else
+        } else {
             return attributeDefinition.getPresentation().getWidth();
+        }
     }
 
     public void setWidth(int width) {
@@ -182,9 +183,12 @@ public class ValueColumn<T> implements IPresentableColumn, Serializable {
         this.presentable = presentable;
     }
     
+    @Override
     public IAction<?> getSortingAction(final IBeanCollector<?, ?> collector) {
         if (actionSortColumn == null) {
             actionSortColumn = new CommonAction<Object>(name, Messages.getStringOpt(getPresentable().getLabel(), true), getDescription()) {
+                /** serialVersionUID */
+                private static final long serialVersionUID = 1L;
                 @Override
                 public Object action() throws Exception {
                     collector.shiftSortIndexes();

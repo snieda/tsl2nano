@@ -136,8 +136,9 @@ public class JarResolver {
     private void loadDependencies() {
         System.setProperty("M2_HOME", mvnRoot);
         Process process = SystemUtil.execute(new File(basedir), mvnRoot + "/bin/mvn.bat", "install");
-        if (process.exitValue() != 0)
+        if (process.exitValue() != 0) {
             LOG.error("Process returned with: " + process.exitValue());
+        }
     }
 
     private void createMvnScript() {
@@ -165,8 +166,9 @@ public class JarResolver {
             LOG.info("creating dependency '" + deps[i] + "'");
             version = StringUtil.extract(deps[i], REGEX_VERSION);
             //version should not be an empty string
-            if (Util.isEmpty(version))
+            if (Util.isEmpty(version)) {
                 version = null;
+            }
             if (deps[i].contains("/")) {
                 groupId = StringUtil.substring(deps[i], null, "/");
                 artifactId = StringUtil.substring(deps[i], "/", version);
@@ -181,8 +183,9 @@ public class JarResolver {
                             String jarName = findJarOnline(artifactId);
                             if (jarName != null) {
                                 artifactId = StringUtil.extract(jarName, "\\w+");
-                                if (!Util.isEmpty(artifactId))
+                                if (!Util.isEmpty(artifactId)) {
                                     groupId = artifactId;
+                                }
                             }
                         }
                         if (groupId == null) {//try it yourself
@@ -204,8 +207,9 @@ public class JarResolver {
 
     private String[] getDependencies() {
         String depStr = (String) props.get(JAR_DEPENDENCIES);
-        if (Util.isEmpty(depStr))
+        if (Util.isEmpty(depStr)) {
             throw new IllegalArgumentException("no dependencies defined --> nothing to do!");
+        }
         return depStr.split(",\\s*");
     }
 
@@ -213,8 +217,9 @@ public class JarResolver {
         File mvnFile = download((String) props.get(URL_MVN_DOWNLOAD), false, false);
         mvnRoot = mvnFile.getParent();
         String extractedName = mvnRoot + "/" + StringUtil.substring(mvnFile.getName(), null, "-bin.zip");
-        if (!new File(extractedName + "/bin").exists())
+        if (!new File(extractedName + "/bin").exists()) {
             FileUtil.extract(mvnFile.getPath(), mvnRoot + "/", ".*");
+        }
         mvnRoot = extractedName;
     }
 
@@ -257,16 +262,19 @@ public class JarResolver {
             } else {
                 addIt = !onlyLoadDefined;
             }
-            if (addIt && !deps[i].matches(PACKAGE_EXCEPTION))
+            if (addIt && !deps[i].matches(PACKAGE_EXCEPTION)) {
                 buf.append("," + deps[i]);
+            }
         }
 
-        if (buf.length() == 0)
+        if (buf.length() == 0) {
             throw new IllegalArgumentException("no dependencies defined --> nothing to do!");
+        }
 
         jars = buf.toString();
-        if (jars.startsWith(","))
+        if (jars.startsWith(",")) {
             jars = jars.substring(1);
+        }
         props.setProperty(JAR_DEPENDENCIES, jars);
     }
 
@@ -275,8 +283,9 @@ public class JarResolver {
         String key;
         for (Object k : keySet) {
             key = (String) k;
-            if (key.startsWith(PRE_PACKAGE) && props.getProperty(key).equals(artifactId))
+            if (key.startsWith(PRE_PACKAGE) && props.getProperty(key).equals(artifactId)) {
                 return StringUtil.substring(key, PRE_PACKAGE, null);
+            }
         }
         return null;
     }
@@ -292,9 +301,9 @@ public class JarResolver {
      */
     private String findPackage(String dependency, boolean packageKey) {
         String pck = props.getProperty(PRE_PACKAGE + dependency);
-        if (pck != null)
+        if (pck != null) {
             return packageKey ? dependency : pck;
-        else if (dependency.indexOf(".") != dependency.lastIndexOf(".")) {
+        } else if (dependency.indexOf(".") != dependency.lastIndexOf(".")) {
             String part = StringUtil.substring(dependency, null, ".", true);
             pck = findPackage(part, packageKey);
             /*
@@ -303,13 +312,14 @@ public class JarResolver {
              * are searching on the values (packageKey = true)!
              */
             return pck != null && (!packageKey || dependency.contains(StringUtil.substring(pck, null, "/", true))) ? pck : null;
-        } else if (dependency.contains("-"))
+        } else if (dependency.contains("-")) {
             //search for parts of given package
             return findPackage(StringUtil.substring(dependency, null, "-", true), packageKey);
-        else if (props.values().contains(dependency))
+        } else if (props.values().contains(dependency)) {
             return findPackageByArtifactId(dependency);
-        else
+        } else {
             return (pck = findGroupId(dependency)) != null ? pck + (!packageKey ? "/" : "") : null;
+        }
     }
 
     /**
@@ -326,10 +336,11 @@ public class JarResolver {
             if (a.contains(artifactIdPart)) {
                 pkg = findPackageByArtifactId(a);
                 if (pkg != null) {
-                    if (a.contains("/"))
+                    if (a.contains("/")) {
                         return StringUtil.substring(a, null, "/");
-                    else
+                    } else {
                         return StringUtil.substring(pkg, PRE_PACKAGE, null);
+                    }
                 }
             }
         }

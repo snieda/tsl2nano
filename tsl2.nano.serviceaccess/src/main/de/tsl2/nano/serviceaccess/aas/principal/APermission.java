@@ -57,8 +57,9 @@ public class APermission extends BasicPermission {
             for (Role role : roles) {
                 Set<BasicPermission> permissions = role.getPermissions();
                 for (BasicPermission p : permissions) {
-                    if (p.implies(this))
+                    if (p.implies(this)) {
                         return;
+                    }
                 }
             }
         } else {
@@ -84,14 +85,17 @@ public class APermission extends BasicPermission {
     @Override
     public boolean implies(Permission p) {
         boolean result = super.implies(p);
-        if (!result)
+        if (!result) {
             return result;
+        }
         
         BasicPermission bp = (BasicPermission) p;
-        if (actions == null || actions.equals("*"))
+        if (actions == null || actions.equals("*")) {
             return true;
-        if (bp.getActions() == null || bp.getActions().equals("*"))
+        }
+        if (bp.getActions() == null || bp.getActions().equals("*")) {
             return false;
+        }
         List<String> s = Arrays.asList(actions.split(","));
         List<String> sbp = Arrays.asList(bp.getActions().split(","));
         return s.containsAll(sbp);

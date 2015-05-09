@@ -40,8 +40,9 @@ public class BitUtil extends CUtil {
      * @return number of trailing zeros or -1 if zero.
      */
     public static final int highestBitPosition(int decimal) {
-        if (decimal == 0)
+        if (decimal == 0) {
             return 0;
+        }
         return Integer.numberOfTrailingZeros(highestOneBit(decimal)) + 1;
     }
 
@@ -52,7 +53,7 @@ public class BitUtil extends CUtil {
      * @return decimal representation of given bit
      */
     public static final int bitToDecimal(int bit) {
-        return (int) 1 << bit;//Math.pow(2, bit);//Float.floatToIntBits(bit);
+        return 1 << bit;//Math.pow(2, bit);//Float.floatToIntBits(bit);
     }
 
     /**
@@ -94,8 +95,9 @@ public class BitUtil extends CUtil {
     public static final int filterBitRange(int field, int low, int high) {
         for (int i = low; i <= high; i++) {
             int b = 1 << i;
-            if (field < b)
+            if (field < b) {
                 break;
+            }
             field = hasBit(field, b) ? field - b : field;
         }
         return field;
@@ -113,8 +115,9 @@ public class BitUtil extends CUtil {
         int bits = 0;
         for (int i = low; i <= high; i++) {
             int b = 1 << i;
-            if (field < b)
+            if (field < b) {
                 break;
+            }
             bits |= hasBit(field, b) ? b : 0;
         }
         return bits;
@@ -229,8 +232,9 @@ public class BitUtil extends CUtil {
         int[] bits = bits(number);
         StringBuilder description = new StringBuilder();
         for (int i = 0; i < bits.length; i++) {
-            if (bool(bits[i]))
+            if (bool(bits[i])) {
                 description.append(", " + bitNames.get(i));
+            }
         }
         return description.length() > 2 ? description.substring(2) : null;
     }

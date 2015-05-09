@@ -18,9 +18,6 @@ import java.text.Format;
 import java.text.ParsePosition;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
@@ -43,7 +40,6 @@ import de.tsl2.nano.bean.def.IPageBuilder;
 import de.tsl2.nano.bean.def.PathExpression;
 import de.tsl2.nano.collection.ExpiringMap;
 import de.tsl2.nano.collection.MapUtil;
-import de.tsl2.nano.core.AppLoader;
 import de.tsl2.nano.core.ENV;
 import de.tsl2.nano.core.ManagedException;
 import de.tsl2.nano.core.cls.BeanClass;
@@ -60,7 +56,6 @@ import de.tsl2.nano.h5.expression.SQLExpression;
 import de.tsl2.nano.h5.navigation.EntityBrowser;
 import de.tsl2.nano.h5.navigation.IBeanNavigator;
 import de.tsl2.nano.h5.navigation.Workflow;
-import de.tsl2.nano.h5.websocket.NanoWebSocketServer;
 import de.tsl2.nano.persistence.GenericLocalBeanContainer;
 import de.tsl2.nano.persistence.Persistence;
 import de.tsl2.nano.persistence.PersistenceClassLoader;
@@ -111,7 +106,7 @@ public class NanoH5 extends NanoHTTPD implements ISystemConnector<Persistence> {
 //    /** workaround to avoid re-serving a cached request. */
 //    private Properties lastHeader;
 
-    private static final String DEBUG_HTML_FILE = AppLoader.getFileSystemPrefix() + "application.html";
+    private static final String START_HTML_FILE = /*AppLoader.getFileSystemPrefix() +*/ "application.html";
     static final String START_PAGE = "Start";
     static final int OFFSET_FILTERLINES = 2;
 
@@ -128,7 +123,7 @@ public class NanoH5 extends NanoHTTPD implements ISystemConnector<Persistence> {
         ENV.registerBundle(NanoH5.class.getPackage().getName() + ".messages", true);
         appstartClassloader = Thread.currentThread().getContextClassLoader();
         ENV.addService(ClassLoader.class, appstartClassloader);
-        sessions = new ExpiringMap<InetAddress, NanoH5Session>((long)ENV.get("session.expire.time.minutes", -1l));
+        sessions = new ExpiringMap<InetAddress, NanoH5Session>(ENV.get("session.expire.time.minutes", -1l));
         AbstractExpression.registerExpression(new PathExpression().getExpressionPattern(), PathExpression.class);
         AbstractExpression.registerExpression(new RuleExpression().getExpressionPattern(), RuleExpression.class);
         AbstractExpression.registerExpression(new SQLExpression().getExpressionPattern(), SQLExpression.class);
@@ -148,6 +143,13 @@ public class NanoH5 extends NanoHTTPD implements ISystemConnector<Persistence> {
      */
     @Override
     public void start() {
+        //print errors directly
+        Thread.currentThread().setUncaughtExceptionHandler(new UncaughtExceptionHandler() {
+            @Override
+            public void uncaughtException(Thread t, Throwable e) {
+                e.printStackTrace();
+            }
+        });
         try {
 //            LogFactory.setLogLevel(LogFactory.LOG_ALL);
             LOG.info(System.getProperties());
@@ -159,7 +161,7 @@ public class NanoH5 extends NanoHTTPD implements ISystemConnector<Persistence> {
             ENV.extractResource("mda.xml");
             ENV.extractResource("beandef.xsd");
             ENV.extractResource("tsl2nano-appcache.mf");
-            ENV.extractResourceToDir("favicon.ico", "../");
+            ENV.extractResource("favicon.ico");
             String dir = ENV.getConfigPath();
             File icons = new File(dir + "icons");
             if (!icons.exists()) {
@@ -177,8 +179,9 @@ public class NanoH5 extends NanoHTTPD implements ISystemConnector<Persistence> {
             }
 
             LOG.info("Listening on port " + serviceURL.getPort() + ". Hit Enter to stop.\n");
-            if (System.getProperty("os.name").startsWith("Windows"))
-                SystemUtil.executeRegisteredWindowsPrg("application.html");
+            if (System.getProperty("os.name").startsWith("Windows")) {
+                SystemUtil.executeRegisteredWindowsPrg(applicationHtmlFile());
+            }
 
             myOut = LogFactory.getOut();
             myErr = LogFactory.getErr();
@@ -190,12 +193,15 @@ public class NanoH5 extends NanoHTTPD implements ISystemConnector<Persistence> {
     }
 
     public static URL getServiceURL(String serviceURLString) {
-        if (serviceURLString == null)
+        if (serviceURLString == null) {
             serviceURLString = ENV.get("service.url", "http://localhost:8067");
-        if (!serviceURLString.matches(".*[:][0-9]{4,4}"))
+        }
+        if (!serviceURLString.matches(".*[:][0-9]{3,5}")) {
             serviceURLString = "localhost:" + serviceURLString;
-        if (!serviceURLString.contains("://"))
+        }
+        if (!serviceURLString.contains("://")) {
             serviceURLString = "http://" + serviceURLString;
+        }
         URL serviceURL = null;
         try {
             serviceURL = new URL(serviceURLString);
@@ -211,7 +217,7 @@ public class NanoH5 extends NanoHTTPD implements ISystemConnector<Persistence> {
     }
 
     protected String createStartPage() {
-        return createStartPage(DEBUG_HTML_FILE);
+        return createStartPage(applicationHtmlFile());
     }
 
     /**
@@ -237,8 +243,9 @@ public class NanoH5 extends NanoHTTPD implements ISystemConnector<Persistence> {
     @Override
     public Response serve(String uri, String method, Properties header, Properties parms, Properties files) {
         if (method.equals("GET") && !NumberUtil.isNumber(uri.substring(1)) && HtmlUtil.isURL(uri)
-            && !uri.contains(Html5Presentation.PREFIX_BEANREQUEST))
+            && !uri.contains(Html5Presentation.PREFIX_BEANREQUEST)) {
             return super.serve(uri, method, header, parms, files);
+        }
 
         long startTime = System.currentTimeMillis();
         InetAddress requestor = ((Socket) header.get("socket")).getInetAddress();
@@ -327,8 +334,9 @@ public class NanoH5 extends NanoHTTPD implements ISystemConnector<Persistence> {
          * create the presentable navigation stack
          */
         ISystemConnector conn = ENV.get(ISystemConnector.class);
-        if (conn == null)
+        if (conn == null) {
             conn = ENV.addService(ISystemConnector.class, this);
+        }
 
         Bean login = Bean.getBean(conn.createConnectionInfo());
 
@@ -553,9 +561,10 @@ public class NanoH5 extends NanoHTTPD implements ISystemConnector<Persistence> {
                         + ENV.get(UncaughtExceptionHandler.class).toString());
             }
         } else if (isAbsolutePath) {//copy it into the own classpath (to don't lock the file)
-            if (!selectedFile.exists())
+            if (!selectedFile.exists()) {
                 throw new IllegalArgumentException(
                     "If an absolute file-path is given, the file has to exist! If the file-path is relative and doesn't exist, it will be created/generated");
+            }
 //            if (!new File(envFile).exists())
             FileUtil.copy(selectedFile.getPath(), persistence.jarFileInEnvironment());
         }
@@ -668,6 +677,9 @@ public class NanoH5 extends NanoHTTPD implements ISystemConnector<Persistence> {
             properties);
     }
 
+    private String applicationHtmlFile() {
+        return ENV.getTempPath() + START_HTML_FILE;
+    }
     protected void reset() {
         String configPath = ENV.get(ENV.KEY_CONFIG_PATH, "config");
 

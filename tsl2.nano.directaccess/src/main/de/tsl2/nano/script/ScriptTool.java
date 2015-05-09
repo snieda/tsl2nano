@@ -54,9 +54,9 @@ public class ScriptTool implements Serializable {
             tool.initAntScriptFile();
             tool.initActions();
             return tool;
-        }
-        else
+        } else {
             return new ScriptTool();
+        }
     }
     
     /**
@@ -239,8 +239,9 @@ public class ScriptTool implements Serializable {
                 Collection c = (Collection) result;
                 if (c.size() == 1) {
                     Object singleObject = c.iterator().next();
-                    if (BeanUtil.isStandardType(singleObject))
+                    if (BeanUtil.isStandardType(singleObject)) {
                         return singleObject;
+                    }
                 }
             }
             return result;

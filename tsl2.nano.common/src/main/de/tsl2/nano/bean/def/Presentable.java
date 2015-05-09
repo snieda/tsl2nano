@@ -100,6 +100,7 @@ public class Presentable implements IIPresentable, Serializable {
     /**
      * @return Returns the type.
      */
+    @Override
     public int getType() {
         return type;
     }
@@ -107,6 +108,7 @@ public class Presentable implements IIPresentable, Serializable {
     /**
      * @return Returns the style.
      */
+    @Override
     public int getStyle() {
         return style;
     }
@@ -114,15 +116,18 @@ public class Presentable implements IIPresentable, Serializable {
     /**
      * @return Returns the description.
      */
+    @Override
     public String getDescription() {
-        if (!initialized)
+        if (!initialized) {
             initDeserialization();
+        }
         return description;
     }
 
     /**
      * @return Returns the layout.
      */
+    @Override
     public Serializable getLayout() {
         return layout;
     }
@@ -130,6 +135,7 @@ public class Presentable implements IIPresentable, Serializable {
     /**
      * @return Returns the layoutConstraints.
      */
+    @Override
     public Serializable getLayoutConstraints() {
         return layoutConstraints;
     }
@@ -169,8 +175,9 @@ public class Presentable implements IIPresentable, Serializable {
 
     @Override
     public IActivable getEnabler() {
-        if (enabler == null)
+        if (enabler == null) {
             enabler = IActivable.ACTIVE;
+        }
         return enabler;
     }
 
@@ -189,14 +196,16 @@ public class Presentable implements IIPresentable, Serializable {
 
     @Override
     public String getLabel() {
-        if (!initialized)
+        if (!initialized) {
             initDeserialization();
+        }
         return label;
     }
 
     /**
      * @return Returns the icon.
      */
+    @Override
     public String getIcon() {
         return icon;
     }
@@ -204,6 +213,7 @@ public class Presentable implements IIPresentable, Serializable {
     /**
      * @return Returns the foreground.
      */
+    @Override
     public int[] getForeground() {
         return foreground;
     }
@@ -211,6 +221,7 @@ public class Presentable implements IIPresentable, Serializable {
     /**
      * @return Returns the background.
      */
+    @Override
     public int[] getBackground() {
         return background;
     }
@@ -285,6 +296,7 @@ public class Presentable implements IIPresentable, Serializable {
         return (T) this;
     }
 
+    @Override
     public String layout(String name) {
         return layout(name, null);
     }
@@ -295,12 +307,15 @@ public class Presentable implements IIPresentable, Serializable {
     @Override
     public <T> T layout(String name, T defaultValue) {
         T value = null;
-        if (layout instanceof Map)
+        if (layout instanceof Map) {
             value = (T) ((Map) layout).get(name);
-        if (value == null && layoutConstraints instanceof Map)
+        }
+        if (value == null && layoutConstraints instanceof Map) {
             value = (T) ((Map) layoutConstraints).get(name);
-        if (value == null)
+        }
+        if (value == null) {
             value = defaultValue;
+        }
         return value;
     }
 
@@ -357,11 +372,13 @@ public class Presentable implements IIPresentable, Serializable {
         //try to translate after first loading
         if (description != null && description.equals(label)) {
             String d = ENV.translate(label + Messages.POSTFIX_TOOLTIP, false);
-            if (d != null && !d.startsWith(Messages.TOKEN_MSG_NOTFOUND))
+            if (d != null && !d.startsWith(Messages.TOKEN_MSG_NOTFOUND)) {
                 description = d;
+            }
         }
-        if (label != null)
+        if (label != null) {
             label = ENV.translate(label, true);
+        }
         initialized = true;
     }
     

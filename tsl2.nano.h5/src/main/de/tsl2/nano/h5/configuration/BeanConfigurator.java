@@ -146,8 +146,9 @@ public class BeanConfigurator<T> implements Serializable {
             "imagePath");
         configAction.setIdAttribute("id");
         configAction.setValueExpression(new ValueExpression<CommonAction>("{shortDescription}", CommonAction.class));
-        if (layout != null)
+        if (layout != null) {
             configAction.getPresentable().setLayout(layout);
+        }
     }
 
     /**

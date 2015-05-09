@@ -9,15 +9,12 @@
  */
 package de.tsl2.nano.core.util;
 
-import java.io.File;
-import java.io.FilenameFilter;
 import java.lang.reflect.Array;
 import java.security.MessageDigest;
 import java.text.ParseException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
-import java.util.Iterator;
 import java.util.Map;
 
 import de.tsl2.nano.collection.MapUtil;
@@ -46,8 +43,9 @@ public class Util {
     public static boolean isAllNull(Object... objects) {
         checkParameterCount(objects, 1);
         for (Object o : objects) {
-            if (o != null)
+            if (o != null) {
                 return false;
+            }
         }
         return true;
     }
@@ -61,15 +59,17 @@ public class Util {
     public static boolean hasNull(Object... objects) {
         checkParameterCount(objects, 1);
         for (Object o : objects) {
-            if (o != null)
+            if (o != null) {
                 return false;
+            }
         }
         return true;
     }
 
     protected static void checkParameterCount(Object[] objects, int i) {
-        if (objects == null || objects.length < i)
+        if (objects == null || objects.length < i) {
             throw new IllegalArgumentException("at least " + i + " parameter must be given!");
+        }
     }
 
     /**
@@ -122,17 +122,19 @@ public class Util {
      */
     @SuppressWarnings({ "unchecked", "rawtypes" })
     public static final Collection<?> getContainer(Object obj) {
-        if (obj == null)
+        if (obj == null) {
             return null;
+        }
         Class<?> cls = obj.getClass();
-        if (cls.isArray())
+        if (cls.isArray()) {
             return asList(obj);
-        else if (Collection.class.isAssignableFrom(cls))
+        } else if (Collection.class.isAssignableFrom(cls)) {
             return (Collection<?>) obj;
-        else if (Map.class.isAssignableFrom(cls))
+        } else if (Map.class.isAssignableFrom(cls)) {
             return MapUtil.asEntrySetExtender((Map) obj);
-        else
+        } else {
             throw new ManagedException(obj + " is not a container!");
+        }
     }
 
     /**
@@ -156,8 +158,9 @@ public class Util {
      */
     public static final <T> boolean contains(T[] data, T... items) {
         for (int i = 0; i < data.length; i++) {
-            if (in(data[i], items))
+            if (in(data[i], items)) {
                 return true;
+            }
         }
         return false;
     }
@@ -228,8 +231,9 @@ public class Util {
         checkParameterCount(objects, 2);
         Object last = objects[0];
         for (Object o : objects) {
-            if (o != null && !o.equals(last))
+            if (o != null && !o.equals(last)) {
                 return false;
+            }
             last = o;
         }
         return true;
@@ -298,8 +302,9 @@ public class Util {
      * @return to type converted value
      */
     public static Object convert(Class type, Object value) {
-        if (value == null)
+        if (value == null) {
             return type.isPrimitive() ? PrimitiveUtil.getDefaultValue(type) : null;
+        }
         try {
             //TODO: howto bypass javas autoboxing on primitives?
 //            if (type.isPrimitive())
@@ -349,11 +354,13 @@ public class Util {
             final IRunnable<T, S> action) {
         for (S i : items) {
             //recursive
-            if (i instanceof Iterable)
+            if (i instanceof Iterable) {
                 forEach((Iterable<S>) i, regEx, result, action);
+            }
             //do the job
-            if (String.valueOf(i).matches(regEx))
+            if (String.valueOf(i).matches(regEx)) {
                 result.add(action.run(i));
+            }
         }
         return result;
     }

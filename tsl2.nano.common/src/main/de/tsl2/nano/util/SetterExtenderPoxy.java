@@ -69,8 +69,9 @@ public class SetterExtenderPoxy implements InvocationHandler, Serializable {
     }
     
     public static final Object instanceOf(Proxy proxy) {
-        if (proxy == null)
+        if (proxy == null) {
             return null;
+        }
         return ((SetterExtenderPoxy)proxy.getInvocationHandler(proxy)).accessor.instance();
     }
 }

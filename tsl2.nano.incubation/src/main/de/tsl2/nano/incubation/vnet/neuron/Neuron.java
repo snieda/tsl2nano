@@ -48,16 +48,18 @@ public class Neuron<T> {
         feeding = signal * core.Fv;
         mempot += feeding;
 //    		Console.printDebug(toStringDescription());
-        if (mempot >= threshold + core.To)
+        if (mempot >= threshold + core.To) {
             return fire(fireWithOutput);
+        }
         return output = QUIET;
     }
 
     int fire(boolean withOutput) {
         output = FIRE;
         threshold += output * core.Tv;
-        if (withOutput)
+        if (withOutput) {
             System.out.print(toString() + " ");
+        }
 //    // Gib Signal an umliegende Neuronen (in eigenem Thread) weiter
 //    		if (!stopFiringThreads)
 //    		    new Thread(this, kernel.toString()).start();

@@ -25,7 +25,6 @@ import org.simpleframework.xml.ElementMap;
 
 import de.tsl2.nano.bean.IConnector;
 import de.tsl2.nano.bean.IRuleCover;
-import de.tsl2.nano.bean.IValueAccess;
 import de.tsl2.nano.bean.def.AttributeDefinition;
 import de.tsl2.nano.bean.def.Bean;
 import de.tsl2.nano.bean.def.IValueDefinition;
@@ -73,8 +72,9 @@ public class RuleCover implements IConnector<AttributeDefinition<?>> {
         for (String k : pks) {
             if (k.contains(".")) {
                 String c = StringUtil.substring(k, null, ".", true);
-                if (!propertyRules.containsKey(c))
+                if (!propertyRules.containsKey(c)) {
                     propertyRules.put(c, "---");
+                }
             }
         }
         //now we cover the properties
@@ -122,8 +122,9 @@ public class RuleCover implements IConnector<AttributeDefinition<?>> {
         T cover =
             (T) Proxy.newProxyInstance(ENV.get(ClassLoader.class), new Class[] { interfaze },
                 invHandler);
-        if (covers == null)
+        if (covers == null) {
             covers = new LinkedList<>();
+        }
         covers.add((IRuleCover<?>) Proxy.getInvocationHandler(cover));
         return cover;
     }

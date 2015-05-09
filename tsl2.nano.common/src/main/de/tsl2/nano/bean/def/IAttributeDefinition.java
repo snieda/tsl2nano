@@ -42,6 +42,7 @@ public interface IAttributeDefinition<T> extends IAttribute<T>, IAttributeDef, I
     boolean isRelation();
 
     /** should be true, if this attribute defines the id of the owning bean */
+    @Override
     boolean id();
 
     /** checks, if the given value is valid for this attribute - should not throw an exception */

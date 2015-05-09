@@ -57,11 +57,12 @@ public class VAttribute<T> extends BeanAttribute<T> {
 
     @Override
     public T getValue(Object beanInstance) {
-        if (beanInstance == null)
+        if (beanInstance == null) {
             return null;
-        else if (!(beanInstance instanceof IValueAccess))
+        } else if (!(beanInstance instanceof IValueAccess)) {
             throw new IllegalArgumentException("instance of virtual attribute " + this
                 + " must be of type IValueAccess, but is: " + beanInstance);
+        }
         return super.getValue(beanInstance);
     }
     

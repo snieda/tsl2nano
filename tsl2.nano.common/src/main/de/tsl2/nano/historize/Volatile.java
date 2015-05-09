@@ -44,14 +44,16 @@ public class Volatile<T> {
     public Volatile(long period, T value) {
         super();
         this.period = period;
-        if (value != null)
+        if (value != null) {
             set(value);
+        }
     }
 
     public boolean expired() {
         boolean expired = System.currentTimeMillis() > start + period;
-        if (expired)
+        if (expired) {
             value = null;
+        }
         return expired;
     }
 
