@@ -1,7 +1,7 @@
 **FullRelation Nano.H5**
 <font size="-1">&copy; Thomas Schneider 2012-2015</font>
 <a href="http://sourceforge.net/projects/tsl2nano/files/0.7.0-beta/tsl2.nano.h5.0.7.0.jar/download">Download on sourceforge</a>
-<a href="http://sourceforge.net/projects/tsl2nano/files/definitions/nano.h5.jnlp/download">Start Nano.H5 through WebStart</a>
+<a href="http://sourceforge.net/projects/tsl2nano/files/0.7.0-beta/nano.h5.jnlp">Start Nano.H5 through WebStart</a>
 <p hidden>
 <meta-tag>
 crud, grud, crud2gui, crud2html, bean2html, entity2html, bean2gui, entity2gui, jpa2gui, jpa2html, jpa persistence provider, openjpa, hibernate, datanucleus, eclipselink, toplink, batoo, ormlite, ebean, data-editor, data-sheet, entity browser, jpa2, full stack framework, orm, o/r mapper
@@ -1068,6 +1068,10 @@ Example for a rule using another sub-rule:
 #### Presenting data or media like images, audio, video
 
 If an attribute holds data of type _byte[]_, it may be presented as image or any other non-textual type. The default-mechanism will declare the attributes type as _TYPE_DATA_ which will save the attributes value to a temporary file to be sent through http to the client and to be shown as image - or if a special style was defined, as _embed_, _object_, _audio_, _video_, _canvas_ or _device_ - as known from _HTML5_ embedded content tags.
+
+#### Interactive actions on images
+
+Using pixel or vector pictures as attribute content and defining a dependency listener of type _WebSocketDependencyListener_ will give you the possibility to let the user interact on data content. your dependency listener will have access to the clients mouse click position to refresh other attributes depending on that click into the picture or vector graphic.
 
 ## Changing Layouts through the _BeanConfigurator_
 
