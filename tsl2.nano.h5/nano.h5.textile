@@ -1,6 +1,7 @@
 **FullRelation Nano.H5**
 <font size="-1">&copy; Thomas Schneider 2012-2015</font>
-
+<a href="http://sourceforge.net/projects/tsl2nano/files/0.7.0-beta/tsl2.nano.h5.0.7.0.jar/download">Download on sourceforge</a>
+<a href="http://sourceforge.net/projects/tsl2nano/files/definitions/nano.h5.jnlp/download">Start Nano.H5 through WebStart</a>
 <p hidden>
 <meta-tag>
 crud, grud, crud2gui, crud2html, bean2html, entity2html, bean2gui, entity2gui, jpa2gui, jpa2html, jpa persistence provider, openjpa, hibernate, datanucleus, eclipselink, toplink, batoo, ormlite, ebean, data-editor, data-sheet, entity browser, jpa2, full stack framework, orm, o/r mapper
@@ -53,6 +54,7 @@ To do a *quick-start*, go to chapter _Starting / Test_.
 * many features through nano.common, and nano.incubation like a rule, sql, action engine, network executor etc.
 * resolves all external (jdbc-drivers, etc.) jar-dependencies on runtime on an available network connection
 * handling blobs of data (byte[]) to be presented in html as picture, audio, video or object.
+* providing attributes as virtuals (not bound to a real bean-attribute, rule-expressions, sql-query-expressions and RESTful-service-call-expressions
 * planned interfaces: 
 	* xsd-->bean
 	* java-interface-->java-bean (mock through internal proxy)
@@ -104,10 +106,12 @@ this software should provide a fast way to create a standard application through
 * Client/Server application
 * Web application for small user-groups
 * Standalone or through connection to an application server
+* Application, started through a rest service in a web container
 * with or without local replication database
 * Usable as Entity-Browser configuring your data
 * Usable as full-configurable application
 * Usable as full-stack framework to develop model-driven applications
+* application, started inside a web-container through an own restful service, if ports are open (e.g. in jboss: http://localhost:8080/tsl2.nano.h5.0.7.0/web/start/user.home/free.port)
 
 The _environment.xml_ in your current environment directory defines access-modes. F.e. _http.connection_ will define, if it is remote-accessible or not. For more informations, see chapter _The Environment_.
 
@@ -734,6 +738,7 @@ This is the most important attribute property. Normally it is a standard bean-at
 	* path-expression: the expression is a path from a bean-attribute to another one - through one or more relations. expression example: _person.organization.name_.
 	* rule-expression: the expression is an existing rule name.
 	* sql-expression: the expression is an existing query name.
+	* restful-expression: the expression is the url of a restful-service
 
 All available attribute instances:
 
@@ -1326,9 +1331,10 @@ The use of websockets and their internal javascripts is optional. Nano.h5 provid
 
 1. as application message service: providing status messages from main application 
 2. as input assist: supporting the user with available values
-3. as dependency listener: refreshing other dependent values after change a fields value
-4. as file attachment transferrer: providing to transfer local content to the server
-5. as restful service request: the attribute has to present an _iframe. the current user interaction event will be sent to the service - the result will be embedded into the iframe.
+3. as dependency listener: refreshing other dependent values after change a fields value or doing a mouse click on data like pictures
+4. as dependency listener: refreshing other dependent values through calls of RESTful services
+5. as file attachment transferrer: providing to transfer local content to the server
+6. as restful service request: the attribute has to present an _iframe. the current user interaction event will be sent to the service - the result will be embedded into the iframe.
 The main exception handler is connected to a WebSocketServer. All messages, sent through __Message.send(msg)__ are transferred to all connected child sessions. After getting the 'submit' event, a progress bar is shown.
 
 ### The applications message service
@@ -2370,6 +2376,29 @@ Net:Connection-->Link-->Cover(content, descriptor)
 * (v) simplexml: type = java.lang.byte[] --> [B
 * how to show a pdf file inside the html response
 * interactions on svg-pictures?
-** using jax-rs?
-** using rmi?
-** direct sockets?
+** using jax-rs: javascript implementieren
+* Datenbank: +Version, +Benutzer+Rollen
+* Nano.H5 im Web-Container starten
+** über Restful: nano.h5/start/config/8686
+** als Servlet
+* QS (jenkins Probleme)
+** Jacoco agent erstellt kein *.exec
+** tests korrigieren
+** Checkstyle warnungen bearbeiten
+ 
+ 
+war:
+* WEB-INF/web..xml rausschmeissen
+* jar --> war
+* h5 bin --> WEB-INF/classes (Vorsicht: manchmal ex. classes/WEB-INF..., oder ...test)
+** core Klassen mit nach WEB-INF/classes kopieren!
+* Es darf nur eine RestfulApplication in WEB-INF/classes... existieren
+* Alle nicht-jars aus jar-Hauptverzeichnis nach WEB-INF/classes verschieben
+* nach WEB-INF/lib: simple, common, direct, incubation websocket
+* serviceaccess nach WEB-INF/lib: Problem NamedQueryCache in Modul schon vorhanden <-- MANIFEST.MF löschen
+* - am besten serviceaccess in WEB-INF/classes, dann als resource nach .nano.h5
+* - im JAX-RS den parent.class.path auf war-file setzen
+* - serviceaccess: persistence.xml_ --> persistence.xml
+* serviceaccess: test raus
+** abstractstatelessservice, genericservicebean, namedqueryservice, fileservicebean raus
+* jdbc-properties: wenn hsqldb dann default-schema PUBLIC
