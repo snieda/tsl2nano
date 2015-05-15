@@ -318,7 +318,7 @@ public class PersistenceUI {
         login.getPresentationHelper().change(BeanPresentationHelper.PROP_DESCRIPTION,
             ENV.translate("jarFile.tooltip", true),
             "jarFile");
-        
+        login.getAttribute("connectionPassword").getPresentation().setType(IPresentable.TYPE_INPUT_PASSWORD);
         login.getPresentationHelper().change(BeanPresentationHelper.PROP_NULLABLE, false);
         login.getPresentationHelper().change(BeanPresentationHelper.PROP_NULLABLE, true, "connectionPassword");
         login.getPresentationHelper().change(BeanPresentationHelper.PROP_NULLABLE, true, "jarFile");

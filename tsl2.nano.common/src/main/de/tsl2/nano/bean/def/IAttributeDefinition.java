@@ -15,6 +15,7 @@ import java.util.Collection;
 
 import de.tsl2.nano.bean.IAttributeDef;
 import de.tsl2.nano.core.cls.IAttribute;
+import de.tsl2.nano.core.util.ISecure;
 
 /**
  * full bean attribute definition - to validate attribute value.
@@ -102,4 +103,6 @@ public interface IAttributeDefinition<T> extends IAttribute<T>, IAttributeDef, I
      * renames the attribute to be a relation from another bean. relation name parts are concatenated through '.'.
      */
     void setAsRelation(String string);
+    
+    ISecure getSecure();
 }

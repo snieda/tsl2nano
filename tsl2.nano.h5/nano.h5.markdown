@@ -1,8 +1,11 @@
-**FullRelation Nano.H5**
-<font size="-1">&copy; Thomas Schneider 2012-2015</font>
+<h6 align="center">FullRelation Nano.H5<br/>
+<font size="-1">&copy; Thomas Schneider 2012-2015
+<br/>
 <a href="http://sourceforge.net/projects/tsl2nano/files/0.7.0-beta/tsl2.nano.h5.0.7.0.jar/download">Download on sourceforge</a>
+<br/>
 <a href="http://sourceforge.net/projects/tsl2nano/files/0.7.0-beta/nano.h5.jnlp">Start Nano.H5 through WebStart</a>
 <p hidden>
+</font></h6>
 <meta-tag>
 crud, grud, crud2gui, crud2html, bean2html, entity2html, bean2gui, entity2gui, jpa2gui, jpa2html, jpa persistence provider, openjpa, hibernate, datanucleus, eclipselink, toplink, batoo, ormlite, ebean, data-editor, data-sheet, entity browser, jpa2, full stack framework, orm, o/r mapper
 </meta-tag>
@@ -106,13 +109,13 @@ this software should provide a fast way to create a standard application through
 * Client/Server application
 * Web application for small user-groups
 * Standalone or through connection to an application server
-* Application, started through a rest service in a web container
+* Application, started through a rest service in a web container (e.g. in jboss: http://localhost:8080/tsl2.nano.h5.0.7.0/web/start/user.home/free.port)
 * with or without local replication database
 * Usable as Entity-Browser configuring your data
 * Usable as full-configurable application
 * Usable as full-stack framework to develop model-driven applications
-* application, started inside a web-container through an own restful service, if ports are open (e.g. in jboss: http://localhost:8080/tsl2.nano.h5.0.7.0/web/start/user.home/free.port)
-
+* Provides a JNLP file for Java Web Start
+ 
 The _environment.xml_ in your current environment directory defines access-modes. F.e. _http.connection_ will define, if it is remote-accessible or not. For more informations, see chapter _The Environment_.
 
 ### Third Party Libraries
@@ -1073,6 +1076,16 @@ If an attribute holds data of type _byte[]_, it may be presented as image or any
 
 Using pixel or vector pictures as attribute content and defining a dependency listener of type _WebSocketDependencyListener_ will give you the possibility to let the user interact on data content. your dependency listener will have access to the clients mouse click position to refresh other attributes depending on that click into the picture or vector graphic.
 
+#### Attribute Encryption
+
+Set the _secure_ property on your attribute - if it is of type String - to have an attribute encryption. The framework provides two implementations:
+ 
+1. hashes: de.tsl2.nano.core.util.Hash
+2. crypt : de.tsl2.nano.core.util.Crypt
+
+If you use hash, the presentation will automatically be a password field. Setting a new value will directly hash the value.
+If you use crypt, the en- decryption will be done on saving or loading the bean and its attributes.
+ 
 ## Changing Layouts through the _BeanConfigurator_
 
 The chapter before described the structure of all definitions. _Nano.H5_ provides an administration tool inside the application to do some configurations on runtime. If you are inside the detail-page of a bean, there is an action 'Configuration' on your headers button-group. If you activate it, you are inside a configuration mode, letting you change layout and styling of the current bean.
@@ -1149,6 +1162,7 @@ The application class _NanoH5_ has a method _createAuthorization()_ that defines
 Permissions contain a name - perhaps ended by a wildcard - and comma separated actions (a wildcard is possible, too. The permissions work on actions and data. The _BeanContainer_ provides to ask for permissions: call _BeanContainer.instance().hasPermission(name, actions) to check access to a call or to any data. The _Environment_ provides access to the implementation of _IAuthorization_. Call _Environment.get(IAuthorization.class).hasAccess(name, actions) to check for permissions.
 
 To define special permissions for a user, change the content of the file _[username]-permissions.xml_ and use the translation resourcebundle _messages.properties_ to find the field and action names to fill in.
+To use your own Authorization, set your implemenation of IAuthorization as service in the environment.
 
 The framework does all checks for you. But if you need extended access to authority informations, read the following details.
 
@@ -1225,6 +1239,11 @@ The replications hsqldb database will be started internally.
 - database: replication-<user-name>
 - port: 9898
 
+## Working on multiple Databases
+
+In standalone mode, database connections are defined inside the _persistence.xml_. Define multiple _persistence_untit_s if you need access to multiple databases. Of course, they need their mapping entity beans. So define the beans jar file in the persistence.xml and store it in the environments directory.
+
+Working inside an application server, the server will provide a database pool. connections are defined for example in jboss in a deployed xml file (or the jboss configuration file like standalone.xml) having datasource entries.
 ## Using an Applicationserver
 
 If you don't want to have a standalone appliation, you are able to use an application server like jboss. To do this you must have:
@@ -1474,136 +1493,6 @@ Run the script tsl2.nano.incubation/2nano.xml. un-comment the first entry of _re
 _Nano.H5_ is based on the framework _tsl2.common_ and it's bean package. The bean package provides a generic and comfortable way to describe your user interface. If the standards of _Nano.H5_ don't fulfil your needs, you can develop own beans on top of _Nano.H5_ - without creating special gui-elements or interaction, this will be done by the framework - generating html-pages through the _BeanPresentation_ implementation. Of course, this implementation is extendable, too. Have a look at chapter _Dependencies_ to know, which jar-files you should copy to the environment directory (f.e. _h5.sample_).
 
 If you download and unpack _test.h5.sample_, you yield an eclipse project referencing the _tsl2.nano_ jar-files.
-
-File Structure:
-
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-|   application.html
-|   favicon.ico
-|   run.bat
-|   tsl2.nano.h5.0.0.4.jar
-|   
-\---config
-    |   ant-launcher.jar
-    |   ant-nodeps.jar
-    |   ant.jar
-    |   antlr-2.7.7.jar
-    |   beandef.xsd
-    |   bsh-core-2.0b4.jar
-    |   classmate-0.5.4.jar
-    |   commons-collections-3.2.1.jar
-    |   commons-logging-1.1.1.jar
-    |   dom4j-1.6.1.jar
-    |   environment.xml
-    |   freemarker.jar
-    |   hibernate-commons-annotations-4.0.1.Final.jar
-    |   hibernate-core-4.0.0.Final.jar
-    |   hibernate-entitymanager-4.0.0.Final.jar
-    |   hibernate-jpa-2.0-api-1.0.1.Final.jar
-    |   hibernate-tools-4.0.0-CR1.jar
-    |   hibernate.reveng.xml
-    |   hibtool.xml
-    |   hsqldb.jar
-    |   jandex-1.0.3.Final.jar
-    |   javassist-3.12.1.GA.jar
-    |   jboss-logging-3.1.0.CR2.jar
-    |   jboss-transaction-api_1.1_spec-1.0.0.Final.jar
-    |   jdbc-connection.properties
-    |   jtidy-r8-20060801.jar
-    |   log4j-1.2.15.jar
-    |   logfactory.log
-    |   logfactory.xml
-    |   mda.bat
-    |   mda.properties
-    |   mda.xml
-    |   mypersistence-bean.xml
-    |   mypersistence.xml
-    |   runServer.bat
-    |   shell.xml
-    |   slf4j-api-1.5.8.jar
-    |   slf4j-log4j12-1.5.8.jar
-    |   time-permissons.xml
-    |   timedb.jar
-    |   timedb.lck
-    |   timedb.log
-    |   timedb.properties
-    |   timedb.script
-    |   timedb.sql
-    |   tsl2.nano.common.1.1.0.jar
-    |   tsl2.nano.incubation.0.0.4.jar
-    |   
-    +---beandef
-    |       address.xml
-    |       bank.xml
-    |       changes.xml
-    |       classes.xml
-    |       colors.xml
-    |       comments.xml
-    |       customer.xml
-    |       holiday.xml
-    |       keys.xml
-    |       organisation.xml
-    |       persistence.xml
-    |       person.xml
-    |       personhistory.xml
-    |       personrhythm.xml
-    |       personrhythmid.xml
-    |       planconstraints.xml
-    |       project.xml
-    |       projectdetails.xml
-    |       projectstatus.xml
-    |       properties.xml
-    |       replication.xml
-    |       start.xml
-    |       times.xml
-    |       timesid.xml
-    |       types.xml
-    |       
-    +---css
-    |   |   meta-frame.html
-    |   |   ...css specific files...
-    +---generated-bin
-    |  ...all classes compiled from generated-src...   
-    +---generated-src
-    |   +---my
-    |   |   \---app
-    |   |           Loader.java
-    |   |           MyApp.java
-    |   |           
-    |   \---org
-    |       \---anonymous
-    |           \---project
-    |                   Address.java
-    |                   Bank.java
-    |                   Changes.java
-    |                   Classes.java
-    |                   Colors.java
-    |                   Comments.java
-    |                   Customer.java
-    |                   Holiday.java
-    |                   Keys.java
-    |                   Organisation.java
-    |                   Person.java
-    |                   Personhistory.java
-    |                   Personrhythm.java
-    |                   PersonrhythmId.java
-    |                   Planconstraints.java
-    |                   Project.java
-    |                   Projectdetails.java
-    |                   Projectstatus.java
-    |                   Properties.java
-    |                   PropertiesId.java
-    |                   Times.java
-    |                   TimesId.java
-    |                   Types.java
-    |                   
-    +---icons
-    | ...all icons used by buttons...
-    +---lib
-    \---META-INF
-            MANIFEST.MF
-            persistence.xml
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 The implementation _Loader.java_ and _MyApp.java_ provide an own entry for the sample application. The _Loader_ only tells java to load _MyApp_. _MyApp_ overwrites three methods. Only _createBeanCollectors_ defines own beans and an own navigation stack.
 
@@ -2101,6 +1990,8 @@ com.sybase.jdbc2.jdbc.SybDriver
  0.7.0c | 15.11.2014 | reverse-engineering with openjpa support, jar resolving enhanced
  0.7.0d | 11.01.2015 | auto creating new databases through an equal named sql file
  0.7.0e | 27.03.2015 | attachments extended
+ 0.7.0f | 10.05.2015 | new: RESTful service access, mouseclick access on dependency listeners
+ 0.7.0g | 17.05.2015 | new: Secure Attributes: hashes or encrypts attribute values on runtime
  
 [GLOSSARY]
 

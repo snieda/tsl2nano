@@ -41,6 +41,8 @@ import de.tsl2.nano.core.cls.BeanAttribute;
 import de.tsl2.nano.core.cls.BeanClass;
 import de.tsl2.nano.core.cls.IAttribute;
 import de.tsl2.nano.core.log.LogFactory;
+import de.tsl2.nano.core.util.Crypt;
+import de.tsl2.nano.core.util.ISecure;
 import de.tsl2.nano.core.util.StringUtil;
 import de.tsl2.nano.core.util.Util;
 import de.tsl2.nano.format.FormatUtil;
@@ -91,6 +93,10 @@ public class AttributeDefinition<T> implements IAttributeDefinition<T> {
     @Attribute(required = false)
     private boolean generatedValue;
 
+    /** optional encryption */
+    @Element
+    private ISecure secure;
+    
     /**
      * optional plugins.
      */
@@ -247,7 +253,10 @@ public class AttributeDefinition<T> implements IAttributeDefinition<T> {
     public T getValue(Object beanInstance) {
         try {
             //using the default may result in problems on checking the value (e.g. in value-expression or isValue())
-            return /*beanInstance == null && isVirtualAccess() ? getDefault() : */attribute.getValue(beanInstance);
+            T result = /*beanInstance == null && isVirtualAccess() ? getDefault() : */attribute.getValue(beanInstance);
+            if (result != null && secure != null)
+                result = (T) secure.decrypt((String) result);
+            return result;
         } catch (Exception ex) {
             LOG.error("error evaluating value for attribute '" + getName() + "'", ex);
             status = new Status(ex);
@@ -794,7 +803,25 @@ public class AttributeDefinition<T> implements IAttributeDefinition<T> {
      */
     @Override
     public void setValue(Object instance, T value) {
+        if (secure != null)
+            value = (T) secure.encrypt((String) value);
         attribute.setValue(instance, value);
+    }
+
+    /**
+     * @return Returns the secure.
+     */
+    public ISecure getSecure() {
+        return secure;
+    }
+
+    /**
+     * @param secure The secure to set.
+     */
+    public void setSecure(ISecure secure) {
+        if (String.class.isAssignableFrom(getType()))
+            throw new IllegalStateException("encrypted fields must be of type String.class");
+        this.secure = secure;
     }
 
     /**

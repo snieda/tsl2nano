@@ -1914,6 +1914,9 @@ public class Html5Presentation<T> extends BeanPresentationHelper<T> implements I
             type = "text";
             break;
         }
+        //is it a text field and a hashed value?
+        if (type.equals("text") && beanValue.getSecure() != null && !beanValue.getSecure().canDecrypt())
+            type = "password";
         return type;
     }
 

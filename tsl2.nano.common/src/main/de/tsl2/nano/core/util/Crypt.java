@@ -75,7 +75,7 @@ import de.tsl2.nano.core.log.LogFactory;
  * @author Tom
  * @version $Revision$
  */
-public class Crypt {
+public class Crypt implements ISecure {
     private static final Log LOG = LogFactory.getLog(Crypt.class);
     private Key key;
     private String encoding;
@@ -255,6 +255,10 @@ public class Crypt {
         return key;
     }
 
+    public InputStream encrypt(InputStream stream) {
+        return encrypt(stream, ".*");
+    }
+    
     /**
      * encryption is delegated to {@link #encrypt(byte[], Key, AlgorithmParameterSpec, String, String, boolean)}
      * 
@@ -280,6 +284,10 @@ public class Crypt {
         }
     }
 
+    public InputStream decrypt(InputStream stream) {
+        return decrypt(stream, ".*");
+    }
+    
     /**
      * decryption is delegated to {@link #decrypt(String, Key, AlgorithmParameterSpec, String, String, boolean)}
      * 
@@ -310,6 +318,7 @@ public class Crypt {
      * @param data to be encrypted
      * @return encrypted string
      */
+    @Override
     public String encrypt(String data) {
         try {
             return encrypt(data.getBytes(encoding), key(), paramSpec, algorithm, encoding, useBASE64, 0, data.length());
@@ -379,6 +388,7 @@ public class Crypt {
      * @param encrypted to be decrypted
      * @return decrypted string
      */
+    @Override
     public String decrypt(String encrypted) {
         return decrypt(encrypted, key, paramSpec, algorithm, encoding, useBASE64, 0, encrypted.length());
     }
@@ -453,6 +463,14 @@ public class Crypt {
 
     static String getFileName(String arg) {
         return StringUtil.substring(arg, "-file:", null);
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public boolean canDecrypt() {
+        return true;
     }
 
     /**
