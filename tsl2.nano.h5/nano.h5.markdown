@@ -2247,7 +2247,7 @@ Net:Connection-->Link-->Cover(content, descriptor)
 
 *TODO* für zeiterfassung
 * (v) id --> sequence
-* (v) Vorbelegungen und Suche in Suchmaske (z.B. aktueller Monat)
+* (v) Vorbelegungen und Suche in Suchmaske (z.B. aktueller Monat <-- 'Merken')
 * (v) labels, tooltips not from presentable but from messages* charge=Erfassung, order: fromdate + wochentag, party-kürzel, fromtime, totime, value, comment 
 ** pause=(end-start)-value, +chargeitems.item.name
 ** -todate, -discharges
@@ -2280,8 +2280,14 @@ Net:Connection-->Link-->Cover(content, descriptor)
 ** Jacoco agent erstellt kein *.exec
 ** tests korrigieren
 ** Checkstyle warnungen bearbeiten
- 
- 
+
+* RasterBean like TslTableProcessor?
+* Triggers: 
+** start search, if not more than 20 entries
+** create new, if no entry available
+** assign entry , if only one available
+* show count on beancollectors
+
 war:
 * WEB-INF/web..xml rausschmeissen
 * jar --> war

@@ -18,7 +18,11 @@ import java.util.Map;
 import java.util.Properties;
 import java.util.Set;
 
+import javax.persistence.EntityGraph;
+import javax.persistence.StoredProcedureQuery;
 import javax.persistence.TypedQuery;
+import javax.persistence.criteria.CriteriaDelete;
+import javax.persistence.criteria.CriteriaUpdate;
 
 import org.apache.commons.logging.Log;
 
@@ -175,5 +179,71 @@ public class EntityManager extends NanoEntityManagerFactory.AbstractEntityManage
     @Override
     public void clear() {
         Ebean.getServerCacheManager().clearAll();
+    }
+
+    @Override
+    public <T> EntityGraph<T> createEntityGraph(Class<T> arg0) {
+        // TODO Auto-generated method stub
+        return null;
+    }
+
+    @Override
+    public EntityGraph<?> createEntityGraph(String arg0) {
+        // TODO Auto-generated method stub
+        return null;
+    }
+
+    @Override
+    public StoredProcedureQuery createNamedStoredProcedureQuery(String arg0) {
+        // TODO Auto-generated method stub
+        return null;
+    }
+
+    @Override
+    public javax.persistence.Query createQuery(CriteriaUpdate arg0) {
+        // TODO Auto-generated method stub
+        return null;
+    }
+
+    @Override
+    public javax.persistence.Query createQuery(CriteriaDelete arg0) {
+        // TODO Auto-generated method stub
+        return null;
+    }
+
+    @Override
+    public StoredProcedureQuery createStoredProcedureQuery(String arg0) {
+        // TODO Auto-generated method stub
+        return null;
+    }
+
+    @Override
+    public StoredProcedureQuery createStoredProcedureQuery(String arg0, Class... arg1) {
+        // TODO Auto-generated method stub
+        return null;
+    }
+
+    @Override
+    public StoredProcedureQuery createStoredProcedureQuery(String arg0, String... arg1) {
+        // TODO Auto-generated method stub
+        return null;
+    }
+
+    @Override
+    public EntityGraph<?> getEntityGraph(String arg0) {
+        // TODO Auto-generated method stub
+        return null;
+    }
+
+    @Override
+    public <T> List<EntityGraph<? super T>> getEntityGraphs(Class<T> arg0) {
+        // TODO Auto-generated method stub
+        return null;
+    }
+
+    @Override
+    public boolean isJoinedToTransaction() {
+        // TODO Auto-generated method stub
+        return false;
     }
 }

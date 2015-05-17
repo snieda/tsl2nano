@@ -89,7 +89,7 @@ public class NanoH5 extends NanoHTTPD implements ISystemConnector<Persistence> {
     public static final String JAR_DIRECTACCESS = "tsl2.nano.directaccess.jar";
     public static final String JAR_INCUBATION = "tsl2.nano.incubation.jar";
     public static final String JAR_SAMPLE = "tsl2.nano.sample.jar";
-    public static final String JAR_RESOURCES = "tsl2.nano.resources.jar";
+    public static final String JAR_RESOURCES = "tsl2.nano.h5.default-resources.jar";
     public static final String JAR_SIMPLEXML = "tsl2.nano.simple-xml.jar";
 
     /** ant script to start the hibernatetool 'hbm2java' */
@@ -166,11 +166,17 @@ public class NanoH5 extends NanoHTTPD implements ISystemConnector<Persistence> {
             File icons = new File(dir + "icons");
             if (!icons.exists()) {
                 try {
-                    FileUtil.extractNestedZip("tsl2.nano.h5.default-resources.jar", dir, null);
+                    FileUtil.extractNestedZip(JAR_RESOURCES, dir, null);
                 } catch (Exception ex) {
                     //this shouldn't influence the application start!
-                    LOG.warn("couldn't extract resources from internal file " + "tsl2.nano.h5.default-resources.jar",
+                    LOG.warn("couldn't extract resources from internal file " + JAR_RESOURCES,
                         ex);
+                    try {
+                        ENV.extractResource("icons/**");
+                    } catch (Exception ex1) {
+                        LOG.warn("couldn't extract resources from icons directory",
+                            ex1);
+                    }
                 }
                 /*
                  * on first start, extract the sample files

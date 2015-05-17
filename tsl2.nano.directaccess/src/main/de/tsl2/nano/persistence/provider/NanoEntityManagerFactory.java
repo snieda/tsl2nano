@@ -22,6 +22,7 @@ import java.util.Map;
 import java.util.Set;
 
 import javax.persistence.Cache;
+import javax.persistence.EntityGraph;
 import javax.persistence.EntityManager;
 import javax.persistence.EntityTransaction;
 import javax.persistence.FlushModeType;
@@ -30,6 +31,7 @@ import javax.persistence.Parameter;
 import javax.persistence.Persistence;
 import javax.persistence.PersistenceUnitUtil;
 import javax.persistence.Query;
+import javax.persistence.SynchronizationType;
 import javax.persistence.TemporalType;
 import javax.persistence.TypedQuery;
 import javax.persistence.criteria.CriteriaBuilder;
@@ -698,5 +700,33 @@ public class NanoEntityManagerFactory implements javax.persistence.EntityManager
         public void setRollbackOnly() {
             rollbackOnly = true;
         }
+    }
+
+    @Override
+    public <T> void addNamedEntityGraph(String arg0, EntityGraph<T> arg1) {
+        throw new UnsupportedOperationException();
+    }
+
+    @Override
+    public void addNamedQuery(String arg0, Query arg1) {
+        throw new UnsupportedOperationException();
+    }
+
+    @Override
+    public EntityManager createEntityManager(SynchronizationType arg0) {
+        // TODO Auto-generated method stub
+        return null;
+    }
+
+    @Override
+    public EntityManager createEntityManager(SynchronizationType arg0, Map arg1) {
+        // TODO Auto-generated method stub
+        return null;
+    }
+
+    @Override
+    public <T> T unwrap(Class<T> arg0) {
+        // TODO Auto-generated method stub
+        return null;
     }
 }
