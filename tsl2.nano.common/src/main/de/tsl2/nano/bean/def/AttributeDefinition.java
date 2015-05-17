@@ -94,7 +94,7 @@ public class AttributeDefinition<T> implements IAttributeDefinition<T> {
     private boolean generatedValue;
 
     /** optional encryption */
-    @Element
+    @Element(required = false)
     private ISecure secure;
     
     /**
