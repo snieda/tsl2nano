@@ -55,6 +55,7 @@
 		    <property name="openjpa.ConnectionDriverName" value="${connection.driver_class}"/>
 		    <property name="openjpa.ConnectionUserName" value="${connection.username}"/>
 		    <property name="openjpa.ConnectionPassword" value="${connection.password}"/> -->
+
 		    <property name="openjpa.Log" value="DefaultLevel=INFO, Runtime=INFO, Tool=TRACE"/>
 		    <property name="openjpa.jdbc.SynchronizeMappings" value="${autoddl}"/>
 			<property name="openjpa.RuntimeUnenhancedClasses" value="supported"/>

@@ -211,9 +211,9 @@ set the following jvm properties:
 		<!-- using key:
 		keytool -genkey -keystore tsl2store -alias tsl2
 		passwd: tsl2tsl2, name: tsl2, surname: tsl2, orga: tsl2
-		-->
-		<signjar alias="tsl2"  keystore="tsl2keys"  storepass="tsl2pass"  jar="${test.dir}/tsl2.nano.h5.${build.version}.jar">
+		<signjar alias="tsl2"  keystore="tsl2store"  storepass="tsl2tsl2"  jar="${test.dir}/tsl2.nano.h5.${build.version}.jar">
 		</signjar>
+		-->
 		
 		<!-- 
 			create war-file to start nano.h5 through a rest-service inside an ejb-container 

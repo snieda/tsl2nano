@@ -18,6 +18,7 @@ import org.simpleframework.xml.ElementArray;
 
 import de.tsl2.nano.bean.def.IConstraint;
 import de.tsl2.nano.core.ManagedException;
+import de.tsl2.nano.core.cls.BeanClass;
 import de.tsl2.nano.core.execution.IRunnable;
 import de.tsl2.nano.core.log.LogFactory;
 import de.tsl2.nano.core.util.StringUtil;
@@ -38,8 +39,10 @@ public class Action<T> extends AItem<T> {
 
     public static final String KEY_ENV = "ENVIRONMENT";
 
-    @Element
+    /** mainClass, if null, the {@link #method} must start with it's full class path */
+    @Element(required=false)
     Class<?> mainClass;
+    /** method. see {@link #mainClass} */
     @Element
     String method;
     @ElementArray
@@ -91,13 +94,21 @@ public class Action<T> extends AItem<T> {
         }
         IRunnable<T, Properties> runner = null;
         try {
-            runner = new de.tsl2.nano.incubation.specification.actions.Action(mainClass.getMethod(method, cls));
+            runner = new de.tsl2.nano.incubation.specification.actions.Action(getMainClass().getMethod(method, cls));
         } catch (Exception e) {
             ManagedException.forward(e);
         }
         return runner.run(p);
     }
 
+    protected Class<?> getMainClass() {
+        if (mainClass == null && method.contains(".")) {
+            String mainClassName = StringUtil.substring(method, null, ".", true);
+            mainClass = BeanClass.createBeanClass(mainClassName).getClazz();
+            method = StringUtil.substring(method, ".", null, true);
+        }
+        return mainClass;
+    }
     @Override
     @SuppressWarnings("rawtypes")
     protected void initConstraints(IConstraint constraints) {

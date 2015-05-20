@@ -601,6 +601,9 @@ public class IncubationTest {
 //
     @Test
     public void testTerminalTools() throws Exception {
+        
+        FileUtil.removeToBackup(Terminal.DEFAULT_NAME);
+        
         Container root = new Container("Toolbox", "Helpful Utilities");
 
         Container printing = new Container("Printing", null);
@@ -648,6 +651,11 @@ public class IncubationTest {
         xml.add(new Action(XmlUtil.class, "transformXsl", "source", "xsl-transformation", "xsl-destination"));
         xml.add(new Action(XmlUtil.class, "xpath", "xpath-expression", "source"));
         root.add(xml);
+
+        Container html = new Container("Html", null);
+        html.add(new FileSelector("source", null, ".*.markdown", "${user.dir}"));
+        html.add(new MainAction("Markdown (TxtMark)", "com.github.rjeschke.txtmark.cmd.Run", "source"));
+        root.add(html);
 
 //        Tree getjar = new Tree("getJar", null);
 //        getjar.add(new Input("name", null, "name, jar-file or class package to load with dependencies from web"));

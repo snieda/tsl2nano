@@ -1333,7 +1333,7 @@ Some hints:
 * don't define more than one persistence-unit in your persistence.xml
 * constrain the _schema_ otherwise all schemats will be respected
 * the provider should be set to _org.apache.openjpa.persistence.PersistenceProviderImpl_
-* openjpa-2.3.0 is not able to find/generate primary keys --> no class can be generated! Please use snapshots of 2.4.0
+* openjpa-2.3.0 is not able to find/generate primary keys --> no class can be generated! Please at least 2.4.0
 
 ## Interactive attribute content
 
@@ -2287,6 +2287,8 @@ Net:Connection-->Link-->Cover(content, descriptor)
 ** create new, if no entry available
 ** assign entry , if only one available
 * show count on beancollectors
+* Terminal: +pegdown (markdown processor)
+* home-page on: /home/user-web/s/sn/snieda/htdocs
 
 war:
 * WEB-INF/web..xml rausschmeissen

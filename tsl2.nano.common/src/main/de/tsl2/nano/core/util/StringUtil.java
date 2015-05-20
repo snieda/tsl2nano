@@ -636,6 +636,16 @@ public class StringUtil {
     }
 
     /**
+     * firstToLowerCase
+     * 
+     * @param string to convert
+     * @return converted string
+     */
+    public static final String toFirstLower(String string) {
+        return String.valueOf(string.charAt(0)).toLowerCase() + string.substring(1, string.length());
+    }
+
+    /**
      * replaceNulls
      * 
      * @param strs array to replace the empty objects to nulls or vice versa

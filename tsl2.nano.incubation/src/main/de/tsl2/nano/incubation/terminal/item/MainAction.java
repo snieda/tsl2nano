@@ -5,6 +5,7 @@ import java.util.List;
 import java.util.Properties;
 
 import de.tsl2.nano.core.ManagedException;
+import de.tsl2.nano.core.cls.BeanClass;
 import de.tsl2.nano.core.execution.IRunnable;
 import de.tsl2.nano.core.util.Util;
 
@@ -17,6 +18,10 @@ public class MainAction<T> extends Action<T> {
     public MainAction() {
     }
 
+    public MainAction(String name, String mainClass, String... argumentNames) {
+        super(name, null, mainClass + ".main", argumentNames);
+    }
+    
     public MainAction(Class<?> mainClass, String... argumentNames) {
         this(mainClass.getSimpleName(), mainClass, argumentNames);
     }
@@ -50,7 +55,7 @@ public class MainAction<T> extends Action<T> {
         context.put("arg1", argList.toArray(new String[0]));
         if (runner == null) {
             try {
-                runner = new de.tsl2.nano.incubation.specification.actions.Action(mainClass.getMethod("main",
+                runner = new de.tsl2.nano.incubation.specification.actions.Action(getMainClass().getMethod("main",
                     new Class[] { String[].class }));
             } catch (Exception e) {
                 ManagedException.forward(e);

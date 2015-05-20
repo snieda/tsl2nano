@@ -30,8 +30,9 @@ java -cp * org.hsqldb.Server -database ${jdbc.database} -port ${jdbc.port} -sile
 		<echo file="createuser.sql">
 CREATE USER ${jdbc.username} PASSWORD '${jdbc.password}';
 GRANT DBA to ${jdbc.username};
--- CREATE SCHEMA ${jdbc.scheme} AUTHORIZATION DBA;
--- SET SCHEMA ${jdbc.scheme};
+commit;
+CREATE SCHEMA ${jdbc.scheme} AUTHORIZATION DBA;
+SET SCHEMA ${jdbc.scheme};
 commit;
 		</echo>
 		
@@ -56,14 +57,14 @@ commit;
 				</ant>
 				<echo message="cleaning database..." />
 				<ant antfile="shell.xml" target="sh.sql">
-					<property name="sh.sql.include" value="*drop*.sql"/>
+					<property name="sh.sql.include" value="*drop*${jdbc.database}*.sql"/>
 					<property name="sh.sql.onerror" value="continue"/>
 				</ant>
 				<echo message="creating database..." />
 				<ant antfile="shell.xml" target="sh.sql">
-					<!-- <property name="sh.sql.include" value="h5.sample.sql"/> -->
+					<property name="sh.sql.include" value="*${jdbc.database}*.sql"/>
 					<property name="sh.sql.exclude" value="*drop*.sql"/>
-					<property name="sh.sql.exclude" value="createuser.sql"/>
+					<property name="sh.sql.exclude2" value="createuser.sql"/>
 				</ant>
 				
 				<!-- create the beans jar file -->

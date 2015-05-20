@@ -80,14 +80,15 @@
 		</hibernatetool>
 	</target>
 
-	<target name="hbm2doc" depends="inithbm" description="create doc for java bean classes">
+	<target name="hbm2doc" depends="inithbm" description="create doc for database">
 		<hibernatetool destdir="${basedir}">
-			<jdbcconfiguration packagename="${packagename}" revengfile="${hibernate.reveng.xml}" configurationfile="${hbm.conf.xml}" propertyfile="${server.db-config.file}" detectmanytomany="true" />
-			<hbm2doc destdir="doc" />
+			<jdbcconfiguration packagename="${packagename}" revengfile="${hibernate.reveng.xml}" propertyfile="${server.db-config.file}" detectmanytomany="true" />
+			<hbm2doc destdir="doc/${jdbc.database}" />
 		</hibernatetool>
 	</target>
 
 	<target name="hibernate-tools" depends="hbm2java">
+		<antcall target="hbm2doc" />
 	</target>
 
 	<!-- ================================= 

@@ -88,21 +88,15 @@ function fillInputOptions(msg) {
 
 	// first, we remove the last input-assist
 	var e = document.getElementById(id);
-	// e.nextSibling.setAttribute('hidden', 'true');
+	e.setAttribute('list', id + '.datalist');
 	e = e.parentNode;
-	var lastSelect = e.getElementsByTagName('select');
+	var lastSelect = e.getElementsByTagName('datalist');
 	if (lastSelect.length > 0)
 		e.removeChild(lastSelect[0]);
 
 	// now, the new options should be filled
-	var select = e.appendChild(document.createElement('select'));
-	select.setAttribute('name', id + '.select');
-	// TODO: some browser wont react on some event-types, so we use several
-	// types
-	select.setAttribute('onselect', 'inputassistselect(event)');
-	select.setAttribute('oninput', 'inputassistselect(event)');
-	select.setAttribute('onchange', 'inputassistselect(event)');
-	select.setAttribute('onkeypress', 'inputassistselect(event)');
+	var select = e.appendChild(document.createElement('datalist'));
+	select.setAttribute('name', id + '.datalist');
 	var items = list.split(',');
 	var option;
 	for ( var i = 0; i < items.length; i++) {
@@ -113,9 +107,6 @@ function fillInputOptions(msg) {
 		option.appendChild(document.createTextNode(items[i]));
 	}
 
-	// if only one item was found - set the value to the input field
-	if (items.length == 1)
-		document.getElementById(id).value = items[0];
 }
 
 function getTarget(msg) {
@@ -140,11 +131,12 @@ function createMessage(target, id, value, clientX, clientY) {
 }
 
 /**
- * after an input-assist request and the following the server response, a
+ * after an input-assist request and the following server response, a
  * selection list was provided for the user. if the user selects an item of this
  * list, the selected item value should be transferred to the input field and
  * the selection-element should be removed.
  */
+/*
 function inputassistselect(e) {
 	console.log('transerring selected value \'' + e.srcElement.value
 			+ '\' to element: ' + e.srcElement.name);
@@ -155,7 +147,7 @@ function inputassistselect(e) {
 
 	e.srcElement.parentNode.removeChild(e.srcElement);
 }
-
+*/
 function getPosition(element) {
 	var xPosition = 0;
 	var yPosition = 0;

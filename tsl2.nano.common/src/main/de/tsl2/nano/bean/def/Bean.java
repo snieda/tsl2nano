@@ -583,10 +583,13 @@ public class Bean<T> extends BeanDefinition<T> {
                 IValueAccess valueDef = new BeanValue();/*UNDEFINED, AttributeDefinition.UNDEFINEDMETHOD) {
                                                         @Override
                                                         protected void defineDefaults() {
-                                                        // don't set any defaults - all  overwrite members in the next step
+                                                        // don't set any defaults - overwrite members in the next step
                                                         }
                                                         };*/
-                valueDef = copy(attr, valueDef);
+                valueDef = copy(attr, valueDef, "parent");
+                //Workaround for 'parent' field in BeanValue to avoid a ConcurrentModificationException in Android
+                if (attr instanceof BeanValue)
+                    ((BeanValue)valueDef).setParent(((BeanValue)attr).getParent());
                 BeanValue.beanValueCache.add((BeanValue) valueDef);
                 if (valueDef instanceof IPluggable) {
                     Collection<IConnector> plugins = ((IPluggable) valueDef).getPlugins();

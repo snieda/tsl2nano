@@ -38,6 +38,9 @@ public class EventController implements Serializable {
     //TODO: remove transient if you found a workaround on simple-xml problem with map(collection).
     transient Map<Class, Collection<IListener>> listener;
 
+    /** if listeners were only added through {@link #addListener(IListener)} - without event type, this is false */
+    transient boolean hasTypedListener = false;
+    
     /**
      * internal access method to guarantee a listener collection instance
      * 
@@ -48,17 +51,13 @@ public class EventController implements Serializable {
             listener = new LinkedHashMap<Class, Collection<IListener>>();
         }
 
-        Class<?> type = onlyObjectListeners() ? Object.class : eventType;
+        Class<?> type = hasTypedListener || listener.size() > 1 ? eventType : Object.class;
         Collection<IListener> typedListener = listener.get(type);
         if (typedListener == null) {
             typedListener = new ArrayList<IListener>();
             listener.put(type, typedListener);
         }
         return typedListener;
-    }
-
-    private boolean onlyObjectListeners() {
-        return !hasListeners() || listener.size() == 1 && listener.keySet().iterator().next().equals(Object.class);
     }
 
     /**
@@ -88,6 +87,7 @@ public class EventController implements Serializable {
      *            {@link #addListener(IListener)}.
      */
     public <T> void addListener(IListener<T> l, Class<T> eventType) {
+        hasTypedListener = true;
         listener(eventType).add(l);
     }
 

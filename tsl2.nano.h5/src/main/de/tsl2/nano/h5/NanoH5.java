@@ -88,7 +88,7 @@ public class NanoH5 extends NanoHTTPD implements ISystemConnector<Persistence> {
     public static final String JAR_SERVICEACCESS = "tsl2.nano.serviceaccess.jar";
     public static final String JAR_DIRECTACCESS = "tsl2.nano.directaccess.jar";
     public static final String JAR_INCUBATION = "tsl2.nano.incubation.jar";
-    public static final String JAR_SAMPLE = "tsl2.nano.sample.jar";
+    public static final String JAR_SAMPLE = "tsl2.nano.h5.sample.jar";
     public static final String JAR_RESOURCES = "tsl2.nano.h5.default-resources.jar";
     public static final String JAR_SIMPLEXML = "tsl2.nano.simple-xml.jar";
 
@@ -178,10 +178,20 @@ public class NanoH5 extends NanoHTTPD implements ISystemConnector<Persistence> {
                             ex1);
                     }
                 }
+//                if (AppLoader.isDalvik()) {//on android, we cannot yet create the beans-jar-file
+//                    try {
+//                        ENV.extractResource("anyway.jar");
+//                    } catch (Exception e1) {
+//                        LOG.warn("couldn't extract resources from internal file " + "anyway.jar",
+//                            e1);
+//                    }
+//                }
                 /*
+                 * DEPRECATED: we integrate the 'anyway' database as sample
                  * on first start, extract the sample files
                  */
-                ((Html5Presentation) ENV.get(BeanPresentationHelper.class)).createSampleEnvironment();
+                if (ENV.get("create.sample.files.on.first.start", false))
+                    ((Html5Presentation) ENV.get(BeanPresentationHelper.class)).createSampleEnvironment();
             }
 
             LOG.info("Listening on port " + serviceURL.getPort() + ". Hit Enter to stop.\n");
@@ -642,6 +652,7 @@ public class NanoH5 extends NanoHTTPD implements ISystemConnector<Persistence> {
         //check if an equal named ddl-script is inside our jar file. should be done on 'anyway' or 'timedb'.
         try {
             ENV.extractResource(persistence.getDatabase() + ".sql");
+            ENV.extractResource("drop-" + persistence.getDatabase() + ".sql");
         } catch (Exception e) {
             //ok, it was only a try ;-)
         }

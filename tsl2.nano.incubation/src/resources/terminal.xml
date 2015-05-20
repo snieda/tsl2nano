@@ -221,6 +221,18 @@
             </argNames>
          </item>
       </item>
+      <item class="de.tsl2.nano.incubation.terminal.item.Container" name="Html" type="Container" multiple="false">
+         <item class="de.tsl2.nano.incubation.terminal.item.selector.FileSelector" name="source" type="Container" multiple="false">
+            <directory>${user.dir}</directory>
+            <include>*.markdown</include>
+         </item>
+         <item class="de.tsl2.nano.incubation.terminal.item.MainAction" name="Markdown (TxtMark)" type="Action">
+            <method>com.github.rjeschke.txtmark.cmd.Run.main</method>
+            <argNames length="1">
+               <string>source</string>
+            </argNames>
+         </item>
+      </item>
       <item class="de.tsl2.nano.incubation.terminal.item.Container" name="Net" type="Container" multiple="false">
          <item class="de.tsl2.nano.incubation.terminal.item.Container" name="Scan" type="Container" multiple="false">
             <item class="de.tsl2.nano.incubation.terminal.item.Input" name="ip" type="Input">
@@ -297,7 +309,7 @@
          </item>
       </item>
       <item class="de.tsl2.nano.incubation.terminal.item.Container" name="File-Operation" type="Container" multiple="false">
-         <item class="de.tsl2.nano.incubation.terminal.item.selector.DirSelector" name="directory" type="Container" multiple="false">
+         <item class="de.tsl2.nano.incubation.terminal.item.selector.DirSelector" name="directory" type="Container" multiple="false" showFiles="true">
             <root class="java.lang.String">${user.dir}</root>
             <include>.*</include>
          </item>

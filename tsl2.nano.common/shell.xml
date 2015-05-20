@@ -971,6 +971,12 @@ compiler basedir: ${basedir}. classpath: @{sh.compile.classpath};@{sh.compile.cl
 		<property name="sh.build.debug" value="false" />
 		<property name="sh.junit.jvmarg" value="-javaagent:ci/jacoco/jacocoagent.jar=destfile=ci/jacoco.exec" />
 
+		<!-- clean -->
+		<antcall target="sh.clean">
+			<param name="sh.clean.basedir" value="${sh.build.basedir}" />
+			<param name="sh.clean.bin.dir" value="${sh.build.bin}" />
+		</antcall>
+		
 		<!-- store build informations to build.properties -->
 		<buildnumber file="${sh.build.basedir}/src/resources/build-${sh.build.name}.properties" />
 		<propertyfile file="${sh.build.basedir}/src/resources/build-${sh.build.name}.properties">
@@ -1016,15 +1022,21 @@ compiler basedir: ${basedir}. classpath: @{sh.compile.classpath};@{sh.compile.cl
 		<antcall target="sh.jar">
 			<param name="sh.jar.srcdir" value="${sh.build.bin}" />
 			<param name="sh.jar.destination" value="${sh.build.basedir}/${sh.build.name}.${sh.build.version}.jar" />
-			<param name="sh.jar.manifest" value="${sh.build.basedir}/META-INF/MANIFEST.MF" />
+			<param name="sh.jar.manifest" value="${sh.build.basedir}/${java.target.dir}/META-INF/MANIFEST.MF" />
 		</antcall>
 
-		<!-- TODO: signjar -->
-
+		<!-- TODO: key parameter -->
+		<!-- using key:
+		keytool -genkey -keystore tsl2store -alias tsl2
+		passwd: tsl2tsl2, name: tsl2, surname: tsl2, orga: tsl2
+		<signjar alias="tsl2"  keystore="../tsl2.nano.incubation/tsl2store"  storepass="tsl2tsl2"  jar="${sh.build.basedir}/${sh.build.name}.${sh.build.version}.jar">
+		</signjar>
+		-->
+		
 		<!-- source-jar -->
 		<antcall target="sh.jar">
 			<param name="sh.jar.srcdir" value="${sh.build.basedir}" />
-			<param name="sh.jar.destination" value="${sh.build.basedir}/${sh.build.name}.${sh.build.version}.src.jar" />
+			<param name="sh.jar.destination" value="${sh.build.basedir}/${java.target.dir}/${sh.build.name}.${sh.build.version}.src.jar" />
 			<param name="sh.jar.exclude" value="**/bin/**" />
 			<param name="sh.jar.exclude2" value="**/*.*ar" />
 			<param name="sh.jar.exclude3" value="**/*.zip" />

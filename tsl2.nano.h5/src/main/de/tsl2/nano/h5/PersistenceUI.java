@@ -55,7 +55,8 @@ public class PersistenceUI {
         if (login.isDefault()) {
             login.setAttributeFilter("connectionUserName", "connectionPassword", "connectionUrl", "jarFile",
                 "connectionDriverClass", "provider", "datasourceClass", "jtaDataSource", "transactionType",
-                "persistenceUnit", "hibernateDialect", "database", "defaultSchema", "port", "generator", "autoddl", "replication",
+                "persistenceUnit", "hibernateDialect", "database", "defaultSchema", "port", "generator", "autoddl",
+                "replication",
                 "jdbcProperties");
             login.setValueExpression(new ValueExpression<Persistence>("{connectionUrl}"));
 
@@ -66,6 +67,16 @@ public class PersistenceUI {
             String pfile = ENV.getConfigPath() + "persistence.properties";
             if ((props = FileUtil.loadPropertiesFromFile(pfile)) == null) {
                 props = new Properties();
+                props.setProperty("PROVIDER_Hibernate", "org.hibernate.ejb.HibernatePersistence");
+                props.setProperty("PROVIDER_OpenJPA", "org.apache.openjpa.persistence.PersistenceProviderImpl");
+                props.setProperty("PROVIDER_EclipseLink", "org.eclipse.persistence.jpa.PersistenceProvider");
+                props.setProperty("PROVIDER_TopLink", "oracle.toplink.essentials.PersistenceProvider");
+                props.setProperty("PROVIDER_Acme", "com.acme.persistence");
+                props.setProperty("PROVIDER_DataNucleus", "org.datanucleus.api.jpa.PersistenceProviderImpl");
+                props.setProperty("PROVIDER_BatooJPA", "org.batoo.jpa.core.BatooPersistenceProvider");
+                props.setProperty("PROVIDER_EBean", "de.tsl2.nano.ebeanprovider.EntityManager");
+                props.setProperty("PROVIDER_ORMLite", "de.tsl2.nano.ormliteprovider.EntityManager");
+
                 props.setProperty("DRIVER_jdbc.odbc", "sun.jdbc.odbc.JdbcOdbcDriver");
                 props.setProperty("DRIVER_jdbc.oracle", "oracle.jdbc.OracleDriver");
                 props.setProperty("DRIVER_jdbc.db2", "com.ibm.db2.jcc.DB2Driver");
@@ -83,10 +94,10 @@ public class PersistenceUI {
                 props.setProperty("DATASOURCE_jdbc.oracle", "oracle.jdbc.pool.OracleDataSource");
                 props.setProperty("DATASOURCE_jdbc.hsqldb", "org.hsqldb.jdbc.JDBCDataSource");
                 props.setProperty("DATASOURCE_jdbc.sybase", "com.sybase.jdbc2.jdbc.SybDataSource");
-                props.setProperty("DATASOURCE_org.apache.derby", "org.apache.derby.jdbc.ClientDriver");
+                props.setProperty("DATASOURCE_jdbc.derby", "org.apache.derby.jdbc.ClientDriver");
                 props.setProperty("DATASOURCE_org.xerial", "sqlite-jdbc");
                 props.setProperty("DATASOURCE_org.postgresql", "postgresql/postgresql");
-                props.setProperty("DATASOURCE_com.h2database", "org.h2.Driver");
+                props.setProperty("DATASOURCE_jdbc.h2", "org.h2.Driver");
                 props.setProperty("DATASOURCE_com.mysql.jdbc", "mysql/mysql-connector-java");
                 props.setProperty("DATASOURCE_net.sourceforge.jtds", "jtds");
                 props.setProperty("DATASOURCE_org.firebirdsql.jdbc", "jaybird-jdk17");
@@ -127,29 +138,29 @@ public class PersistenceUI {
                         }
                     }, WSEvent.class);
             login
-            .getAttribute("connectionUserName")
-            .changeHandler()
-            .addListener(
-                new WebSocketDependencyListener<String>((AttributeDefinition<String>) login
-                    .getAttribute("defaultSchema")) {
-                    @Override
-                    public String evaluate(WSEvent evt) {
-                        Object value = evt.newValue;
-                        Object userName = Util.asString(value);
-                        String eval;
-                        if (userName != null && Util.isEmpty(defaultSchema)) {
-                            if (value != null && persistence.getConnectionUrl().contains("hsqldb")) {
-                                eval = "PUBLIC";
+                .getAttribute("connectionUserName")
+                .changeHandler()
+                .addListener(
+                    new WebSocketDependencyListener<String>((AttributeDefinition<String>) login
+                        .getAttribute("defaultSchema")) {
+                        @Override
+                        public String evaluate(WSEvent evt) {
+                            Object value = evt.newValue;
+                            Object userName = Util.asString(value);
+                            String eval;
+                            if (userName != null && Util.isEmpty(defaultSchema)) {
+                                if (value != null && persistence.getConnectionUrl().contains("hsqldb")) {
+                                    eval = "PUBLIC";
+                                } else {
+                                    eval = userName.toString().toUpperCase();
+                                }
+                                defaultSchema.replace(0, defaultSchema.length(), eval);
                             } else {
-                                eval = userName.toString().toUpperCase();
+                                eval = defaultSchema.toString();
                             }
-                            defaultSchema.replace(0, defaultSchema.length(), eval);
-                        } else {
-                            eval = defaultSchema.toString();
+                            return eval;
                         }
-                        return eval;
-                    }
-                }, WSEvent.class);
+                    }, WSEvent.class);
             login
                 .getAttribute("connectionUrl")
                 .changeHandler()
@@ -293,7 +304,30 @@ public class PersistenceUI {
                     }
                     return null;
                 }
-            });
+            }, WSEvent.class);
+            login
+                .getAttribute("provider")
+                .changeHandler()
+                .addListener(
+                    new WebSocketDependencyListener<String>((AttributeDefinition<String>) login
+                        .getAttribute("provider")) {
+                        @Override
+                        protected String evaluate(WSEvent evt) {
+                            Object value = evt.newValue;
+                            String provider = Util.asString(value);
+                            if (p != null) {
+                                String k, prov = provider.toLowerCase();
+                                for (Object key : p.keySet()) {
+                                    k = (String) key;
+                                    if (k.startsWith("PROVIDER_") && k.toLowerCase().contains(prov)) {
+                                        provider = p.getProperty(k);
+                                        break;
+                                    }
+                                }
+                            }
+                            return provider;
+                        }
+                    }, WSEvent.class);
             /*
              * create expandable panels
              */
@@ -302,7 +336,8 @@ public class PersistenceUI {
             login.addValueGroup("details   ", false, "connectionDriverClass", "provider", "datasourceClass",
                 "jtaDataSource",
                 "transactionType",
-                "persistenceUnit", "hibernateDialect", "database", "defaultSchema", "port", "generator", "autoddl", "replication");
+                "persistenceUnit", "hibernateDialect", "database", "defaultSchema", "port", "generator", "autoddl",
+                "replication");
         }
         if (login.toString().matches(ENV.get("default.present.attribute.multivalue", ".*"))) {
             login.removeAttributes("jdbcProperties");
@@ -314,7 +349,7 @@ public class PersistenceUI {
         }
         login.getAttribute("generator").setRange(Arrays.asList(Persistence.GEN_HIBERNATE, Persistence.GEN_OPENJPA));
         login.getAttribute("autoddl").setRange(Arrays.asList("false", "validate", "update", "create", "create-drop"));
-        
+
         login.getPresentationHelper().change(BeanPresentationHelper.PROP_DESCRIPTION,
             ENV.translate("jarFile.tooltip", true),
             "jarFile");
@@ -343,6 +378,10 @@ public class PersistenceUI {
                 return "icons/open.png";
             }
 
+            @Override
+            public String getLongDescription() {
+                return ENV.translate("tsl2nano.login.ok.tooltip", true);
+            }
             @Override
             public boolean isEnabled() {
                 return true;

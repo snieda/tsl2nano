@@ -468,7 +468,10 @@ public class Html5Presentation<T> extends BeanPresentationHelper<T> implements I
                 TAG_IMAGE,
                 content(ENV.getBuildInformations()),
                 ATTR_SRC,
-                "icons/beanex-logo-micro.jpg");
+                "icons/beanex-logo-micro.jpg",
+                ATTR_TITLE,
+                "Framework Version and Documentation/Help"
+                );
 
             if (image != null) {
                 c2 = appendElement(c2, TAG_H3, content(), ATTR_ALIGN, ALIGN_CENTER);
@@ -478,7 +481,13 @@ public class Html5Presentation<T> extends BeanPresentationHelper<T> implements I
                     ATTR_SRC,
                     image);
             } else {
-                c2 = appendElement(c2, TAG_H3, content(title), ATTR_ALIGN, ALIGN_CENTER);
+                String docURL = ENV.getConfigPath() + "doc/" + StringUtil.toFirstLower(title) + "/index.html";
+                if (new File(docURL).canRead()) {
+                    c2 = appendElement(c2, TAG_H3, ATTR_ALIGN, ALIGN_CENTER);
+                    appendElement(c2, TAG_LINK, content(title), ATTR_HREF, docURL);
+                } else {
+                    c2 = appendElement(c2, TAG_H3, content(title), ATTR_ALIGN, ALIGN_CENTER);
+                }
             }
             Element c3 = appendElement(row, TAG_CELL, ATTR_ALIGN, ALIGN_RIGHT);
             if (interactive && bean != null) {
@@ -1622,6 +1631,11 @@ public class Html5Presentation<T> extends BeanPresentationHelper<T> implements I
                             HtmlUtil.appendAttributes(input, "onkeypress",
                                 ENV.get("websocket.inputassist.function", "inputassist(event)"));
                         }
+                        //on focus gained, preselect text
+                        if (ENV.get("websocket.autoselect", true)) {
+                            HtmlUtil.appendAttributes(input, "onfocus", "this.select();");
+                        }
+                        
                         //perhaps create an dependency listener
                         if (beanValue.hasListeners()) {
                             HtmlUtil.appendAttributes(input, "onblur",
@@ -1988,7 +2002,7 @@ public class Html5Presentation<T> extends BeanPresentationHelper<T> implements I
             //the common-jar will be used by ant-scripts...
             ENV.extractResourceToDir(NanoH5.JAR_COMMON, dir);
             ENV.extractResourceToDir(NanoH5.JAR_INCUBATION, dir);
-            FileUtil.extractNestedZip("tsl2.nano.h5.sample.jar", dir, null);
+            FileUtil.extractNestedZip(NanoH5.JAR_SAMPLE, dir, null);
             FileUtil.writeBytes("call run.bat sample 8070".getBytes(), System.getProperty("user.dir")
                 + "/sample.bat", false);
             //"Sample code and database created.\nPlease replace 'tsl2.nano.h5.jar/META-INF/MANIFEST.MF' with 'sample/META-INF/MANIFEST.MF' and start the new sample batch file...";
