@@ -165,12 +165,23 @@ Creating an UML-Diagram with perhaps _ArgoUML_, or creating an ER-Diagram with f
 
 The other option would be to have an existing _beans.jar_. This could be selected on the entry- or login-page of nano-h5. If you enter an absolute path for the attribute _JarFile_ inside the _Persistence_ page, this bean-file will be used to load the entity-classes. If you enter a relative path and the given file doesn't exist, it will be generated through hibernate-tools (if hibernate is in your environment!).
 
-##### Process Description (using hibernate-tools)
+##### Process Description
 
-* the jdbc-driver of your database, _ant_, _hibernate_ and _hibernate-tools_ have to be in your classpath or environment directory.
-* Use a tool like _ArgoUML_ or _architect_ to create an UML-Diagram 
-* Export the data model to a ddl file (sql statements to create the database). This file must be stored in the environment directory with extension _sql_ (e.g. timedb.sql).
-* start _mda.bat_ to generate the database from ddl file creating the beans-jar file through hibernate tools.
+0. perhaps create a new datamodel (use a tool like _ArgoUML_ or _architect_ to create an UML-Diagram) and export the resulting ddl-file to your new  environment directory of nano.h5. the filename must end with .sql
+1. start the nano.h5 application
+2. input your database connection url and user/password (if you don't change anything, the __anyway__ sample databae will be created and used
+3. if you want a specific jpa-provider or generation tool, change that in the bottom panel
+4. click the *OK* Button to start the first process
+
+Now, the following will be done:
+
+* nano.h5 downloads maven (~6MB) to load the following libraries:
+* jdbc-driver (~1MB)
+* ant (~2MB)
+* the generator tool *hibernate-tools* or *openjpa* (6-12MB)
+* if the database-url points to a local database and it is an hsqldb or h2, the database will be downloaded, started and created throuth the given ddl-scripts (*.sql)
+* if the given beans jar-file wasn't found, it will be created through the selected generator.
+* now you see a list of available entities to work on
 
 #### Framework mechanisms - how to extend the framework
 
@@ -598,7 +609,9 @@ If an item was selected and opened, this item (a _Bean_) will be presented as de
 
 #### letting the beancollector start the search action on activation
 
-Normally a bean collector provides a search mask to filled and started through user input. if you want to have a pre-filled collection, you have to define at least one _minsearch_ or _maxsearch value inside the bean definitions column definitions.
+Normally a bean collector provides a search mask to filled and started through user input. If only a small number of items are available in the database, it will be loaded directyl, depending on the environments entry *beancollector.do.search.on.count.lowerthan* with a default of 20.
+
+If you want to have a pre-filled collection, you have to define at least one _minsearch_ or _maxsearch value inside the bean definitions column definitions.
 
 Example:
 
@@ -611,6 +624,8 @@ Example:
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 Of course you have to use values that are compatible with the attributes type.
+
+You are able to predefine/memorize beans to be used on new beans or to constrain the search attributes. Go into the detail page of a bean and click 'memorize' at the top menu to store that bean inside your current session as default bean of that type.
 
 #### creating a detailed summary for a bean collector
 
@@ -1813,6 +1828,7 @@ http://publib.boulder.ibm.com/infocenter/wsdoc400/v6r0/index.jsp?topic=/com.ibm.
 
 ## JDBC-Drivers
 
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 IBM DB2
 jdbc:db2://<HOST>:<PORT>/<DB>
 COM.ibm.db2.jdbc.app.DB2Driver
@@ -1925,7 +1941,9 @@ com.sybase.jdbc.SybDriver
 Sybase (jConnect 5.2)
 jdbc:sybase:Tds:<HOST>:<PORT>
 com.sybase.jdbc2.jdbc.SybDriver
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
+Actual list: http://infocenter.pentaho.com/help/index.jsp?topic=%2Fsupported_components%2Freference_jdbc_drivers.html
 
 ## Known Problems and some Solutions
 
@@ -2282,12 +2300,15 @@ Net:Connection-->Link-->Cover(content, descriptor)
 ** Checkstyle warnungen bearbeiten
 
 * RasterBean like TslTableProcessor?
+* (v) Nesting panels in collectors
+* (v) Nesting Attributes
+* (v) Page for Environment
 * Triggers: 
-** start search, if not more than 20 entries
+** (v) start search, if not more than 20 entries
 ** create new, if no entry available
-** assign entry , if only one available
-* show count on beancollectors
-* Terminal: +pegdown (markdown processor)
+** (x) assign entry , if only one available
+* (v) show count on beancollectors
+* (x) Terminal: +pegdown (markdown processor)
 * home-page on: /home/user-web/s/sn/snieda/htdocs
 
 war:

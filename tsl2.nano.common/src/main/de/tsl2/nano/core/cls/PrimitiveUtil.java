@@ -140,6 +140,18 @@ public class PrimitiveUtil {
     }
 
     /**
+     * on primitives we have the problem, that they always have a value. sometimes we need the workaround to check, if
+     * it is a 'real' value.
+     * 
+     * @param primitiveType
+     * @param value to be checked, if it is the primitives default value (e.g. on int = 0)
+     * @return true if given value is the primitives default value
+     */
+    public static <T> boolean isDefaultValue(Class<T> primitiveType, T value) {
+        return value.equals(getDefaultValue(primitiveType));
+    }
+
+    /**
      * returns the minimum value of the given primitive
      * 
      * @param <T> primitive type

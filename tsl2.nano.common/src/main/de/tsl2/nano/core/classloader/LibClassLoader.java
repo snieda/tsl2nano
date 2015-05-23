@@ -16,6 +16,8 @@ import java.net.URLStreamHandlerFactory;
 import java.util.Arrays;
 
 import de.tsl2.nano.core.ManagedException;
+import de.tsl2.nano.core.util.FileUtil;
+import de.tsl2.nano.core.util.NetUtil;
 
 /**
  * Is able to add all jars of a given path to the classpath (see {@link #addLibraryPath(String)}.
@@ -43,7 +45,7 @@ public class LibClassLoader extends RuntimeClassloader {
      * @param path path added to the classpath adding all jars, too
      */
     public void addLibraryPath(String path) {
-        final File fPath = new File(path);
+        final File fPath = FileUtil.getURIFile(path);
         if (!fPath.isDirectory()) {
             throw ManagedException.illegalArgument(path, "path must be a directory!");
         }

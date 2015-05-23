@@ -97,6 +97,7 @@ function fillInputOptions(msg) {
 	// now, the new options should be filled
 	var select = e.appendChild(document.createElement('datalist'));
 	select.setAttribute('name', id + '.datalist');
+	select.setAttribute('id', id + '.datalist');
 	var items = list.split(',');
 	var option;
 	for ( var i = 0; i < items.length; i++) {

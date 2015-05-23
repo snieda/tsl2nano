@@ -10,6 +10,7 @@
 package de.tsl2.nano.bean.def;
 
 import java.io.Serializable;
+import java.util.List;
 
 import de.tsl2.nano.action.IActivable;
 
@@ -35,12 +36,20 @@ public interface IPresentable extends Serializable {
     /** returns true, if this instance should be presented in a search mask */
     boolean isSearchable();
     
+    /** returns true, if this instance should be presented in a nesting detail panel */
+    boolean isNesting();
+    
     /** returns the label or title */
     String getLabel();
 
     /** returns a description */
     String getDescription();
 
+    /**
+     * @returns an optional item list to be usable as input assist with auto-completion.
+     */
+    List<?> getItemList();
+    
     /** returns optional layout. if it is used as descriptor only, it is recommended to fill maps of type 
      * {@link Map<String, ?} to be transformable into the graphical information object. */
     <L extends Serializable> L getLayout();
@@ -202,6 +211,7 @@ public interface IPresentable extends Serializable {
 
     public static final String POSTFIX_SELECTOR = ".selector";
     
+    @SuppressWarnings("unchecked")
     public static final IPresentable DEFAULT = new IPresentable() {
         /** serialVersionUID */
         private static final long serialVersionUID = 1L;
@@ -340,6 +350,15 @@ public interface IPresentable extends Serializable {
         @Override
         public <T> T layout(String name, T defaultValue) {
             throw new UnsupportedOperationException();
+        }
+        @Override
+        public java.util.List<?> getItemList() {
+            return null;
+        }
+        
+        @Override
+        public boolean isNesting() {
+            return false;
         }
     };
 }

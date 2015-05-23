@@ -1,2 +1,2 @@
-ant -buildfile mda.xml do.all
+ant -buildfile mda.xml %*
 pause

@@ -37,6 +37,8 @@ import org.simpleframework.xml.Namespace;
 import org.simpleframework.xml.core.Commit;
 import org.simpleframework.xml.core.Persist;
 
+import sun.security.action.GetLongAction;
+
 import de.tsl2.nano.action.CommonAction;
 import de.tsl2.nano.action.IAction;
 import de.tsl2.nano.action.IActivable;
@@ -176,6 +178,7 @@ public class BeanDefinition<T> extends BeanClass<T> implements IPluggable<BeanDe
      * see {@link #setActivationActionNames(String...)}. {@link #activationActionNames} and {@link #getActions()}.
      */
     public void onActivation() {
+        LOG.info("onActivation of " + toString() + ": searching activation actions");
         if (activationActionNames != null) {
             for (int i = 0; i < activationActionNames.length; i++) {
                 getAction(activationActionNames[i]).activate();
@@ -733,6 +736,8 @@ public class BeanDefinition<T> extends BeanClass<T> implements IPluggable<BeanDe
     public IPresentable getPresentable() {
         if (presentable == null) {
             presentable = (Presentable) ENV.get(BeanPresentationHelper.class).createPresentable();
+            presentable.setLabel(toString());
+            presentable.setDescription(toString());
         }
         return presentable;
     }
@@ -783,7 +788,7 @@ public class BeanDefinition<T> extends BeanClass<T> implements IPluggable<BeanDe
             final IAction<?> callback,
             boolean afterChanging) {
         valueToConnect.changeHandler().addListener(
-            new ValueConnection(this, attrName, valueToConnect, callback, afterChanging));
+            new ValueConnection(this, attrName, valueToConnect, callback, afterChanging), ChangeEvent.class);
         isconnected = true;
     }
 
@@ -1030,6 +1035,13 @@ public class BeanDefinition<T> extends BeanClass<T> implements IPluggable<BeanDe
             }
             attributeFilter = attributeDefinitions.keySet().toArray(new String[0]);
             createNaturalSortedAttributeNames(attributeFilter);
+            IIPresentable p = (IIPresentable) getPresentable();
+            if (p != null) {
+                if (p.getLabel() == null)
+                    p.setLabel(toString());
+                if (p.getDescription() == null)
+                    p.setDescription(toString());
+            }
             allDefinitionsCached = true;
         }
         if (actions != null) {

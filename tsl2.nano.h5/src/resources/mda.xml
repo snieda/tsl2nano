@@ -5,6 +5,8 @@
 -->
 <project name="model driven generator" default="do.all" basedir=".">
 	<property file="mda.properties" />
+	<property file="jdbc-connection.properties"/>
+
 	<target name="help" description="help overview">
 		<echo message="please use one of these targets: do.all"/>
 	</target>
@@ -20,11 +22,15 @@
 			<include name="**/*.class"/>
 		</fileset>
 	</path>
-	<target name="do.all" description="creates database from ddl and entity beans from jdbc-connection">
-		<property file="jdbc-connection.properties"/>
-	
-		<echo file="runServer.bat">
-java -cp * org.hsqldb.Server -database ${jdbc.database} -port ${jdbc.port} -silent false -trace true %1 %2 %3 %4 %5 %6 %7 %8 %9
+
+	<!-- creates a user/schema, drops and creates tables -->
+	<target name="create.database">
+		<echo>
+**********************************************************
+creating database: ${jdbc.url}
+	script-set   : ${jdbc.database}
+	user         : ${jdbc.username}
+**********************************************************
 		</echo>
 		
 		<echo file="createuser.sql">
@@ -34,6 +40,36 @@ commit;
 CREATE SCHEMA ${jdbc.scheme} AUTHORIZATION DBA;
 SET SCHEMA ${jdbc.scheme};
 commit;
+		</echo>
+		
+		<echo message="creating user..." />
+		<ant antfile="shell.xml" target="sh.sql">
+			<property name="sh.sql.include" value="createuser.sql"/>
+			<property name="sh.sql.onerror" value="continue"/>
+		</ant>
+		<echo message="cleaning database..." />
+		<ant antfile="shell.xml" target="sh.sql">
+			<property name="sh.sql.include" value="*drop*${jdbc.database}*.sql"/>
+			<property name="sh.sql.onerror" value="continue"/>
+		</ant>
+		<echo message="creating database..." />
+		<ant antfile="shell.xml" target="sh.sql">
+			<property name="sh.sql.include" value="*${jdbc.database}*.sql"/>
+			<property name="sh.sql.exclude" value="*drop*.sql"/>
+			<property name="sh.sql.exclude2" value="*init*.sql"/>
+			<property name="sh.sql.exclude3" value="createuser.sql"/>
+		</ant>
+
+		<echo message="filling data..." />
+		<ant antfile="shell.xml" target="sh.sql">
+			<property name="sh.sql.include" value="*init*${jdbc.database}*.sql"/>
+		</ant>
+	</target>
+	
+	<target name="do.all" description="creates database from ddl and entity beans from jdbc-connection">
+	
+		<echo file="runServer.bat">
+java -cp * org.hsqldb.Server -database ${jdbc.database} -port ${jdbc.port} -silent false -trace true %1 %2 %3 %4 %5 %6 %7 %8 %9
 		</echo>
 		
 	<!-- start the database with name ${basedir} -->
@@ -48,24 +84,9 @@ commit;
 			<sequential>
 				<property name="sh.sleep.milliseconds" value="3000" />
 				<ant antfile="shell.xml" target="sh.sleep"/>
-				<echo message="creating user..." />
-				<ant antfile="shell.xml" target="sh.sql">
-					<property name="sh.sql.userid" value="SA"/>
-					<property name="sh.sql.password" value=""/>
-					<property name="sh.sql.include" value="createuser.sql"/>
-					<property name="sh.sql.onerror" value="continue"/>
-				</ant>
-				<echo message="cleaning database..." />
-				<ant antfile="shell.xml" target="sh.sql">
-					<property name="sh.sql.include" value="*drop*${jdbc.database}*.sql"/>
-					<property name="sh.sql.onerror" value="continue"/>
-				</ant>
-				<echo message="creating database..." />
-				<ant antfile="shell.xml" target="sh.sql">
-					<property name="sh.sql.include" value="*${jdbc.database}*.sql"/>
-					<property name="sh.sql.exclude" value="*drop*.sql"/>
-					<property name="sh.sql.exclude2" value="createuser.sql"/>
-				</ant>
+				
+				<!-- create the database -->
+				<antcall target="create.database"/>
 				
 				<!-- create the beans jar file -->
 				<ant antfile="reverse-eng.xml" />

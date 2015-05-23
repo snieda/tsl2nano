@@ -11,6 +11,7 @@ package de.tsl2.nano.bean.def;
 
 import java.io.Serializable;
 import java.util.LinkedHashMap;
+import java.util.List;
 
 
 /**
@@ -54,4 +55,11 @@ public interface IIPresentable extends IPresentable, Serializable {
      * @param background The background to set.
      */
     void setBackground(int[] background);
+
+    /** sets an item list */
+    <T extends IPresentable> T setItemList(List<?> itemlist);
+
+    /** sets nesting */
+    <T extends IPresentable> T setNesting(boolean nesting);
+
 }

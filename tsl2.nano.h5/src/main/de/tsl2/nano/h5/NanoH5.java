@@ -558,6 +558,8 @@ public class NanoH5 extends NanoHTTPD implements ISystemConnector<Persistence> {
             ENV.loadClassDependencies("org.apache.tools.ant.taskdefs.Taskdef",
                 generatorTask, persistence.getConnectionDriverClass(), persistence.getProvider());
 
+            provideScripts(persistence);
+            
             if (isNewDatabase(persistence)) {
                 generateDatabase(persistence);
             }
@@ -632,6 +634,19 @@ public class NanoH5 extends NanoHTTPD implements ISystemConnector<Persistence> {
         return beanClasses;
     }
 
+    private void provideScripts(Persistence persistence) {
+        //check if an equal named ddl-script is inside our jar file. should be done on 'anyway' or 'timedb'.
+        try {
+            ENV.extractResource(persistence.getDatabase() + ".sql");
+            ENV.extractResource("drop-" + persistence.getDatabase() + ".sql");
+        } catch (Exception e) {
+            //ok, it was only a try ;-)
+        }
+        ENV.extractResource(REVERSE_ENG_SCRIPT);
+        ENV.extractResource(HIBREVNAME);
+        
+    }
+
     private boolean isNewDatabase(Persistence persistence) {
         if (!Util.isEmpty(persistence.getPort())) {
             int p = Integer.valueOf(persistence.getPort());
@@ -649,16 +664,7 @@ public class NanoH5 extends NanoHTTPD implements ISystemConnector<Persistence> {
         Message.send("creating new database " + persistence.getDatabase() + " for url "
             + persistence.getConnectionUrl());
         Properties p = new Properties();
-        //check if an equal named ddl-script is inside our jar file. should be done on 'anyway' or 'timedb'.
-        try {
-            ENV.extractResource(persistence.getDatabase() + ".sql");
-            ENV.extractResource("drop-" + persistence.getDatabase() + ".sql");
-        } catch (Exception e) {
-            //ok, it was only a try ;-)
-        }
-        ENV.extractResource(REVERSE_ENG_SCRIPT);
-        ENV.extractResource(HIBREVNAME);
-        
+
         //give mda.xml the information to don't start nano.h5
         p.put("nano.h5.running", "true");
         ENV.get(CompatibilityLayer.class).runRegistered("ant",

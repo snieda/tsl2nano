@@ -1,23 +1,27 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!-- This reverse engineering script provides targets for hibernate-tools and openjpa -->
 <project name="reverse-eng" basedir="." default="create.bean.jar">
+	<property file="jdbc-connection.properties"/>
+
 	<property name="plugin.dir" value="${basedir}/.." />
 	<property name="src.dir" value="generated-src" />
 	<property name="bin.dir" value="generated-bin" />
 	<property name="lib.dir" value="lib" />
 	<property name="packagename" value="org.anonymous.project" />
 	<property name="packagepath" value="org/anonymous/project" />
-	<property name="bean.jar.path" value="bean.jar" />
+	<property name="bean.jar.path" value="${jdbc.database}.jar" />
 	<property name="resources.dir" value="src/resources" />
 	<property name="resources.db.dir" value="${resources.dir}/db" />
 	<property name="server.db-config.file" value="jdbc-connection.properties" />
 	<property name="schema" value="PUBLIC" />
+	<property name="hibernate.reveng.xml" value="hibernate.reveng.xml" />
+
 	<property file="${server.db-config.file}" />
 
 	<!-- FALLBACK: generator to use:
 		1. hibernate-tools: 'hibernate-tools'
 		2. openjpa        : 'openjpa-reverse-eng' -->
-	<property name="generator" value="openjpa-reverse-eng" />
+	<property name="generator" value="hibernate-tools" />
 
 	<!-- Hibernate properties -->
 	<property name="hbm.conf.xml" value="${basedir}/hibernate.cfg.xml" />

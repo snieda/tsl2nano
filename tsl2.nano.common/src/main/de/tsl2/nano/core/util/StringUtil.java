@@ -412,7 +412,7 @@ public class StringUtil {
     public static String insertProperties(String text, Map<? extends Object, Object> properties) {
         return insertProperties(text, properties, "${", "}");
     }
-    
+
     /**
      * text variables (starting with ${ and ending with }), will be replaced by the given properties (Map<Obbject,
      * Object> because of {@link Properties}).
@@ -421,7 +421,10 @@ public class StringUtil {
      * @param properties insertables
      * @return text with insertions
      */
-    public static String insertProperties(String text, Map<? extends Object, Object> properties, String key_prefix, String key_postfix) {
+    public static String insertProperties(String text,
+            Map<? extends Object, Object> properties,
+            String key_prefix,
+            String key_postfix) {
         int i = 0;
         Object value;
         String vname;
@@ -440,8 +443,8 @@ public class StringUtil {
     /**
      * delegates to {@link #extract(CharSequence, String, String)} with null replacement
      */
-    public static String extract(CharSequence source, String regexp) {
-        return extract(source, regexp, null);
+    public static String extract(CharSequence source, String regexp, int...groups) {
+        return extract(source, regexp, null, 0, groups);
     }
 
     public static String extract(CharSequence source, String regexp, String replacement) {
@@ -449,35 +452,59 @@ public class StringUtil {
     }
 
     /**
-     * extract regular expression
+     * extract regular expression. if you use brackets, the last group (represented by brackets) will be extracted.
+     * <p/>
+     * Example 1:
+     * 
+     * <pre>
+     * String url = &quot;jdbc:mysql://db4free.net:3306/0zeit&quot;;
+     * String port = StringUtil.extract(url, &quot;[:](\\d+)[:/;]\\w+&quot;);
+     * assertEquals(&quot;3306&quot;, port);
+     * </pre>
      * 
      * @param source source string. if it is an instanceof StringBuilder, the replacement can work.
      * @param regexp pattern
      * @param replacement (optional) all occurrences of regexp will be replaced in source (only if source is of type
      *            StringBuilder!).
      * @param start start index to search and/or replace
+     * @param groups (ignored, if source is a StringBuilder) group numbers to concat. if empty, the last group will be returned
      * @return part of source or empty string
      */
-    public static String extract(CharSequence source, String regexp, String replacement, int start) {
+    public static String extract(CharSequence source, String regexp, String replacement, int start, int... groups) {
         final Pattern p = Pattern.compile(regexp);
         final Matcher m = p.matcher(source);
         if (m.find(start)) {
-            String result = m.group();
+            String result;
             if (replacement != null) {
                 if (source instanceof StringBuilder) {
+                    result = m.group(m.groupCount());
                     StringBuilder sb = (StringBuilder) source;
                     replace(sb, result, replacement, start);
+                } else {
+                    result = concatGroups(m, groups);
                 }
 //                if (source instanceof StringBuffer) {
 //                    StringBuffer sb = (StringBuffer) source;
 //                    sb.delete(0, sb.length());
 //                    sb.append(m.replaceAll(replacement));
 //                }
+            } else {
+                result = concatGroups(m, groups);
             }
             return result;
         } else {
             return "";
         }
+    }
+
+    private static final String concatGroups(Matcher m, int[] groups) {
+        if (groups.length == 0)
+            return m.group(m.groupCount());
+        StringBuilder buf = new StringBuilder();
+        for (int i = 0; i < groups.length; i++) {
+            buf.append(m.group(groups[i]));
+        }
+        return buf.toString();
     }
 
 //    /**
@@ -605,9 +632,10 @@ public class StringUtil {
     public static final String format(String text, int maxLineWidth) {
         return format(text, maxLineWidth, "\n");
     }
-    
+
     /**
      * formats the given text into given line length
+     * 
      * @param text text to format
      * @param maxLineWidth maximum line width
      */
@@ -619,7 +647,7 @@ public class StringUtil {
         }
         return StringUtil.concat(CR.toCharArray(), lines.toArray());
     }
-    
+
     public static final String findRegExp(String text, String regex, int start) {
         final Matcher matcher = Pattern.compile(regex).matcher(text);
         return matcher.find(start) ? matcher.group() : null;

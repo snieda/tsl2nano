@@ -19,6 +19,7 @@ import de.tsl2.nano.core.classloader.NetworkClassLoader;
 import de.tsl2.nano.core.cls.BeanClass;
 import de.tsl2.nano.core.log.LogFactory;
 import de.tsl2.nano.core.util.ConcurrentUtil;
+import de.tsl2.nano.core.util.FileUtil;
 import de.tsl2.nano.core.util.StringUtil;
 
 /**
@@ -143,6 +144,7 @@ public class AppLoader {
                     environment = getFileSystemPrefix() + "config";
                 }
             }
+            environment = FileUtil.getURIFile(environment).getPath();
 
             if (mainmethod == null) {
                 mainmethod = "main";
@@ -247,6 +249,7 @@ public class AppLoader {
      * @param environment name/path to be added to the classloader
      */
     protected NetworkClassLoader provideClassloader(String environment) {
+        environment = FileUtil.getURIFile(environment).getPath();
         ClassLoader contextClassLoader = Thread.currentThread().getContextClassLoader();
         String classPath = System.getProperty("java.class.path");
         /*

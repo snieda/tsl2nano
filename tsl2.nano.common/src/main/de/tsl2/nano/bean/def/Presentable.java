@@ -10,12 +10,15 @@
 package de.tsl2.nano.bean.def;
 
 import java.io.Serializable;
+import java.util.Collection;
 import java.util.LinkedHashMap;
+import java.util.List;
 import java.util.Map;
 
 import org.simpleframework.xml.Attribute;
 import org.simpleframework.xml.Element;
 import org.simpleframework.xml.ElementArray;
+import org.simpleframework.xml.ElementList;
 import org.simpleframework.xml.ElementMap;
 import org.simpleframework.xml.core.Commit;
 
@@ -66,6 +69,12 @@ public class Presentable implements IIPresentable, Serializable {
     @ElementArray(required = false)
     int[] background;
 
+    @ElementList(required = false)
+    List<?> itemlist;
+
+    @Attribute(required = false)
+    boolean nesting;
+    
     /** needed for instances that wont be serialized */
     private transient boolean initialized;
 
@@ -365,6 +374,33 @@ public class Presentable implements IIPresentable, Serializable {
     @Override
     public void setBackground(int[] background) {
         this.background = background;
+    }
+
+    @Override
+    public List<?> getItemList() {
+        return itemlist;
+    }
+    @Override
+    public <T extends IPresentable> T setItemList(List<?> itemlist) {
+        this.itemlist = itemlist;
+        return (T) this;
+    }
+    
+    /**
+     * @return Returns the nesting.
+     */
+    @Override
+    public boolean isNesting() {
+        return nesting;
+    }
+
+    /**
+     * @param nesting The nesting to set.
+     */
+    @Override
+    public <T extends IPresentable> T setNesting(boolean nesting) {
+        this.nesting = nesting;
+        return (T) this;
     }
 
     @Commit

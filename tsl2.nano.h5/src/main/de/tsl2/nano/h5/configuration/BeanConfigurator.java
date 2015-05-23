@@ -72,7 +72,8 @@ public class BeanConfigurator<T> implements Serializable {
                 Serializable layout = (Serializable) MapUtil.asMap(ATTR_BGCOLOR, COLOR_LIGHT_GRAY);
 
                 BeanDefinition<Html5Presentable> configPres = BeanDefinition.getBeanDefinition(Html5Presentable.class);
-                configPres.setAttributeFilter("label", "description", "icon", "type", "style", "visible", "width",
+                configPres.setAttributeFilter("label", "description", "icon", "type", "style", "visible", "searchable",
+                    "nesting", "width",
                     "height", "layout",
                     "layoutConstraints");
                 configPres.getPresentable().setLayout(layout);
@@ -89,7 +90,7 @@ public class BeanConfigurator<T> implements Serializable {
                 configColDef.setAttributeFilter("name", "description", "index", "sortIndex", "sortUpDirection",
                     "format",
                     "width"
-/*                    "standardSummary",
+                    /*                    "standardSummary",
                     "presentable",
                     "minSearchValue",
                     "maxSearchValue"*/

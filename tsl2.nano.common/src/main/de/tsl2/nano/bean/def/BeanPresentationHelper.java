@@ -26,6 +26,7 @@ import static de.tsl2.nano.bean.def.IPresentable.TYPE_TIME;
 import static de.tsl2.nano.bean.def.IPresentable.UNDEFINED;
 
 import java.io.File;
+import java.io.Serializable;
 import java.math.BigDecimal;
 import java.sql.Time;
 import java.sql.Timestamp;
@@ -497,7 +498,7 @@ public class BeanPresentationHelper<T> {
                 regexp = RegExpFormat.createDateRegExp();
             }
         } else if (BeanClass.isAssignableFrom(String.class, type)) {
-            int l = attribute.length() != UNDEFINED ? attribute.length() : ENV.get("default.text.length", 100);
+            int l = attribute.length() != UNDEFINED ? attribute.length() : ENV.get("default.text.length", 5000);
             regexp = RegExpFormat.createAlphaNumRegExp(l, false);
         } else {
             regexp = new GenericParser(attribute.getType());
@@ -1299,7 +1300,7 @@ public class BeanPresentationHelper<T> {
                 "icons/cascade.png") {
                 @Override
                 public Object action() throws Exception {
-                    return "./";
+                    return Bean.getBean((Serializable)BeanClass.getStatic(ENV.class, "self"));
                 }
 
                 @Override
@@ -1355,6 +1356,10 @@ public class BeanPresentationHelper<T> {
                     public Object action() throws Exception {
                         ((Collection) vsession.getValue().getContext()).add(bean);
                         return bean;
+                    }
+                    @Override
+                    public boolean isEnabled() {
+                        return super.isEnabled() && bean.isPersistable() && !bean.isMultiValue();
                     }
                 });
             }
@@ -1480,6 +1485,26 @@ public class BeanPresentationHelper<T> {
                     public Object action() throws Exception {
                         collector.setMode(NumberUtil.toggleBits(collector.getWorkingMode(),
                             IBeanCollector.MODE_SHOW_MULTIPLES));
+                        collector.getSearchAction().activate();
+                        return collector;
+                    }
+
+                    @Override
+                    public boolean isEnabled() {
+                        return super.isEnabled() && collector.hasMode(IBeanCollector.MODE_SEARCHABLE)
+                            && !collector.getDeclaringClass().isArray()
+                            && collector.getCurrentData().size() > 0;
+                    }
+                });
+                pageActions.add(new SecureAction(collector.getClazz(),
+                    "nestingdetails",
+                    IAction.MODE_UNDEFINED,
+                    false,
+                    "icons/cascade.png") {
+                    @Override
+                    public Object action() throws Exception {
+                        collector.setMode(NumberUtil.toggleBits(collector.getWorkingMode(),
+                            IBeanCollector.MODE_SHOW_NESTINGDETAILS));
                         collector.getSearchAction().activate();
                         return collector;
                     }

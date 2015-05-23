@@ -757,6 +757,23 @@ public class Bean<T> extends BeanDefinition<T> {
         asString = null;
     }
 
+    @Override
+    public void onActivation() {
+        //on new beans, we fill manyToOne relations if exactly one item is available
+        if (BeanContainer.isTransient(instance) && ENV.get("bean.new.fill.relations.on.one.item", true)) {
+            String[] names = getAttributeNames();
+            for (int i = 0; i < names.length; i++) {
+                IValueDefinition attr = getAttribute(names[i]);
+                if (attr.isRelation() && !attr.isMultiValue() && attr.getValue() == null) {
+                    if (BeanContainer.getCount(attr.getType()) == 1) {
+                        attr.setValue(BeanContainer.instance().getBeans(attr.getType(), 0, -1).iterator().next());
+                    }
+                }
+            }
+        }
+        super.onActivation();
+    }
+    
     public String toStringDescription() {
         final Collection<? extends IAttribute> attributes = getAttributes();
         final StringBuilder buf = new StringBuilder(attributes.size() * 15);

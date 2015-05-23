@@ -154,7 +154,7 @@ public class MapUtil {
     }
 
     /**
-     * retain all elements in src that are contained in toRetain. all other will be removed. 
+     * retain all elements in src that are contained in toRetain. all other will be removed.
      * 
      * @param src to change
      * @param toRetain to be evaluated
@@ -254,4 +254,20 @@ public class MapUtil {
 //            Set.class }, Arrays.asList(entrySetExtender, m.entrySet()), EntrySetExtender.class.getClassLoader());
     }
 
+    /**
+     * finds all values for a given key set
+     * 
+     * @param map source map
+     * @param keyExpression regular expression to match a key
+     * @return all values of keys that match the given key expression
+     */
+    public static <V> List<V> getValues(Map<?, V> map, String keyExpression) {
+        Set<?> keySet = map.keySet();
+        List<V> result = new LinkedList<V>();
+        for (Object k : keySet) {
+            if (k.toString().matches(keyExpression))
+                result.add(map.get(k));
+        }
+        return result;
+    }
 }

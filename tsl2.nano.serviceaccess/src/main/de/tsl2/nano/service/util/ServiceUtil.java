@@ -41,6 +41,7 @@ import de.tsl2.nano.core.ManagedException;
 import de.tsl2.nano.core.cls.BeanAttribute;
 import de.tsl2.nano.core.cls.BeanClass;
 import de.tsl2.nano.core.cls.IAttribute;
+import de.tsl2.nano.core.cls.PrimitiveUtil;
 import de.tsl2.nano.core.log.LogFactory;
 import de.tsl2.nano.core.util.StringUtil;
 
@@ -288,7 +289,11 @@ public class ServiceUtil {
                 if (value == null) {
                     continue;
                 }
-                //recursive entity-attributes on transient objects
+                //workaround on primitives having always a value: we ignore the default values
+                if (beanAttribute.getType().isPrimitive() && PrimitiveUtil.isDefaultValue(beanAttribute.getType(), value))
+                    continue;
+                    
+                //recursive entity-attributes on persistent objects
                 if (BeanContainerUtil.isPersistable(beanAttribute.getType()) && getId(value) == null) {
                     addAndConditions(qStr, attrPrefix + name + ".", value, operator, parameter, caseInsensitive);
                     //the relations can have only null values, so that no where/and clause may be added

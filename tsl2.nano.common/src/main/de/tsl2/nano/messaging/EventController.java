@@ -76,7 +76,7 @@ public class EventController implements Serializable {
      * @param l listener to register
      */
     public void addListener(IListener l) {
-        addListener(l, Object.class);
+        addListener(l, ChangeEvent.class);
     }
 
     /**

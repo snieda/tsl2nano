@@ -126,6 +126,9 @@ public class BeanCollector<COLLECTIONTYPE extends Collection<T>, T> extends Bean
     /** temporary variable to hold the {@link #toString()} output (--> performance) */
     private transient String asString;
 
+    /** on each activation, we do a count on the database */
+    private transient long lastCount = -1;
+
     /**
      * the beancollector should listen to any change of the search-panel (beanfinders range-bean) to know which action
      * should have the focus
@@ -262,17 +265,34 @@ public class BeanCollector<COLLECTIONTYPE extends Collection<T>, T> extends Bean
     @Override
     public void onActivation() {
         super.onActivation();
-        Collection<IPresentableColumn> columns = getColumnDefinitions();
-        boolean dosearch = false;
-        for (IPresentableColumn c : columns) {
-            if (c.getMinSearchValue() != null || c.getMaxSearchValue() != null) {
-                dosearch = true;
-                break;
+        if (!isStaticCollection) {
+            long countCheck = ENV.get("beancollector.do.search.on.count.lowerthan", 20);
+            boolean dosearch = countCheck > 0 && count() < countCheck;
+
+            //if at least one column has a search value, we start the search directly
+            if (!dosearch) {
+                Collection<IPresentableColumn> columns = getColumnDefinitions();
+                for (IPresentableColumn c : columns) {
+                    if (c.getMinSearchValue() != null || c.getMaxSearchValue() != null) {
+                        dosearch = true;
+                        break;
+                    }
+                }
+            }
+            if (dosearch) {
+                getBeanFinder().getData();
             }
         }
-        if (dosearch) {
-            getBeanFinder().getData();
-        }
+    }
+
+    private long count() {
+        long count =
+            !Util.isEmpty(collection) ? collection.size() : BeanContainer.instance().isPersistable(getType())
+                ? BeanContainer.getCount(getType()) : -1;
+        if (count != lastCount)
+            asString = null;
+        lastCount = count;
+        return lastCount;
     }
 
     @Override
@@ -323,6 +343,9 @@ public class BeanCollector<COLLECTIONTYPE extends Collection<T>, T> extends Bean
                 }
 
                 public Collection<T> getData(T from, Object to) {
+                    searchStatus = Messages.getFormattedString("tsl2nano.searchdialog.searchrunning");
+                    ENV.get(Profiler.class).starting(this, getName());
+
                     if (!isStaticCollection || (isPersistable() && composition == null)) {
                         collection = (COLLECTIONTYPE) ((IBeanFinder<T, Object>) beanFinder).getData(from, to);
                         /*
@@ -344,7 +367,10 @@ public class BeanCollector<COLLECTIONTYPE extends Collection<T>, T> extends Bean
                     /*
                      * respect authorization/permissions
                      */
-                    return authorized(collection);
+                    Collection<T> result = authorized(collection);
+                    searchStatus = Messages.getFormattedString("tsl2nano.searchdialog.searchresultcount",
+                        result.size());
+                    return result;
                 }
 
                 public Collection<T> getData(String expression) {
@@ -1107,7 +1133,7 @@ public class BeanCollector<COLLECTIONTYPE extends Collection<T>, T> extends Bean
         List<Integer> indexes = new ArrayList<Integer>(columns.size());
         for (IPresentableColumn c : columns) {
             if (c.getSortIndex() == IPresentable.UNDEFINED)
-             {
+            {
                 break;//the following will be undefined, too (--> sorting)
             }
             indexes.add(c.getIndex());
@@ -1229,11 +1255,7 @@ public class BeanCollector<COLLECTIONTYPE extends Collection<T>, T> extends Bean
             @Override
             public COLLECTIONTYPE action() throws Exception {
                 //TODO: fire refresh event
-                searchStatus = Messages.getFormattedString("tsl2nano.searchdialog.searchrunning");
-                ENV.get(Profiler.class).starting(this, getName());
                 COLLECTIONTYPE result = (COLLECTIONTYPE) getBeanFinder().getData();
-                searchStatus = Messages.getFormattedString("tsl2nano.searchdialog.searchresultcount",
-                    result.size());
                 if (openAction != null) {
                     openAction.setDefault(true);
                 }
@@ -1289,7 +1311,7 @@ public class BeanCollector<COLLECTIONTYPE extends Collection<T>, T> extends Bean
 
                 @Override
                 public String getImagePath() {
-                    return "icons/find.png";
+                    return "icons/search-small.png";
                 }
             };
         }
@@ -1453,7 +1475,7 @@ public class BeanCollector<COLLECTIONTYPE extends Collection<T>, T> extends Bean
                 (useExtraCollectorDefinition() ? ENV.translate("tsl2nano.list", false) + " " : "")
                     + StringUtil.substring(name,
                         null,
-                        POSTFIX_COLLECTOR);
+                        POSTFIX_COLLECTOR) + (lastCount != -1 ? " (" + lastCount + ")" : "");
         }
         return asString;
     }

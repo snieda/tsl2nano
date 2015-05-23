@@ -17,9 +17,11 @@ import de.tsl2.nano.action.IActivable;
 import de.tsl2.nano.bean.def.AttributeDefinition;
 import de.tsl2.nano.bean.def.Bean;
 import de.tsl2.nano.bean.def.BeanPresentationHelper;
+import de.tsl2.nano.bean.def.IIPresentable;
 import de.tsl2.nano.bean.def.IPresentable;
 import de.tsl2.nano.bean.def.SecureAction;
 import de.tsl2.nano.bean.def.ValueExpression;
+import de.tsl2.nano.collection.MapUtil;
 import de.tsl2.nano.core.ENV;
 import de.tsl2.nano.core.util.FileUtil;
 import de.tsl2.nano.core.util.StringUtil;
@@ -85,22 +87,31 @@ public class PersistenceUI {
                 props.setProperty("DRIVER_jdbc.sybase", "com.sybase.jdbc2.jdbc.SybDriver");
                 props.setProperty("DRIVER_jdbc.derby", "org.apache.derby.jdbc.EmbeddedDriver");
 //                props.setProperty("DRIVER_jdbc.derby", "org.apache.derby.jdbc.ClientDriver");
-                props.setProperty("DRIVER_jdbc.xerial", "sqlite-jdbc");
+                props.setProperty("DRIVER_jdbc.xerial", "org.sqlite.JDBC");
+                props.setProperty("DRIVER_jdbc.sqldroid", "org.sqldroid.SQLDroidDriver");
                 props.setProperty("DRIVER_jdbc.postgresql", "org.postgresql.Driver");
                 props.setProperty("DRIVER_jdbc.mysql", "com.mysql.jdbc.Driver");
                 props.setProperty("DRIVER_jdbc.jtds.sqlserver", "net.sourceforge.jtds.jdbc.Driver");
                 props.setProperty("DRIVER_jdbc.firebirdsql", "jaybird-jdk17");
-
+                props.setProperty("DRIVER_jdbc.ucanaccess", "net.ucanaccess.jdbc.UcanaccessDriver");
+                props.setProperty("DRIVER_jdbc.sapdb", "com.sap.dbtech.jdbc.DriverSapDB");
+                
+                //if unknown, we use the driver name...
+                props.setProperty("DATASOURCE_jdbc.odbc", "sun.jdbc.odbc.JdbcOdbcDriver");
                 props.setProperty("DATASOURCE_jdbc.oracle", "oracle.jdbc.pool.OracleDataSource");
+                props.setProperty("DATASOURCE_jdbc.db2", "com.ibm.db2.jcc.DB2Driver");
                 props.setProperty("DATASOURCE_jdbc.hsqldb", "org.hsqldb.jdbc.JDBCDataSource");
+                props.setProperty("DATASOURCE_jdbc.h2", "org.h2.Driver");
                 props.setProperty("DATASOURCE_jdbc.sybase", "com.sybase.jdbc2.jdbc.SybDataSource");
                 props.setProperty("DATASOURCE_jdbc.derby", "org.apache.derby.jdbc.ClientDriver");
-                props.setProperty("DATASOURCE_org.xerial", "sqlite-jdbc");
-                props.setProperty("DATASOURCE_org.postgresql", "postgresql/postgresql");
-                props.setProperty("DATASOURCE_jdbc.h2", "org.h2.Driver");
-                props.setProperty("DATASOURCE_com.mysql.jdbc", "mysql/mysql-connector-java");
-                props.setProperty("DATASOURCE_net.sourceforge.jtds", "jtds");
-                props.setProperty("DATASOURCE_org.firebirdsql.jdbc", "jaybird-jdk17");
+                props.setProperty("DATASOURCE_jdbc.xerial", "org.sqlite.JDBC");
+                props.setProperty("DATASOURCE_jdbc.sqldroid", "org.sqldroid.SQLDroidDriver");
+                props.setProperty("DATASOURCE_jdbc.postgresql", "org.postgresql.Driver");
+                props.setProperty("DATASOURCE_jdbc.mysql", "com.mysql.jdbc.Driver");
+                props.setProperty("DATASOURCE_jdbc.jtds", "net.sourceforge.jtds.jdbc.Driver");
+                props.setProperty("DATASOURCE_jdbc.firebirdsql", "jaybird-jdk17");
+                props.setProperty("DATASOURCE_jdbc.ucanaccess", "net.ucanaccess.jdbc.UcanaccessDriver");
+                props.setProperty("DATASOURCE_jdbc.sapdb", "com.sap.dbtech.jdbc.DriverSapDB");
 
                 props.setProperty("DIALECT_jdbc.oracle", "org.hibernate.dialect.Oracle10gDialect");
                 props.setProperty("DIALECT_jdbc.db2", "org.hibernate.dialect.DB2Dialect");
@@ -114,8 +125,33 @@ public class PersistenceUI {
                 props.setProperty("DIALECT_jdbc.mysql", "org.hibernate.dialect.MySQLDialect");
                 props.setProperty("DIALECT_jdbc.sqlserver", "org.hibernate.dialect.SQLServerDialect");//Microsoft SQL-Server
                 props.setProperty("DIALECT_jdbc.firebirdsql", "org.hibernate.dialect.FirebirdDialect");//jaybird
-                props.setProperty("DIALECT_jdbc.sapdb", "org.hibernate.dialect.SAPDBDialect");//jaybird
+                props.setProperty("DIALECT_jdbc.sapdb", "org.hibernate.dialect.SAPDBDialect");
+                
+                props.setProperty("URLSYNTAX_jdbc.odbc", "jdbc:odbc:<alias>");
+                props.setProperty("URLSYNTAX_jdbc.oracle", "jdbc:oracle:thin:@<server>[:<1521>]:<database_name>");
+                props.setProperty("URLSYNTAX_jdbc.db2", "jdbc:db2://<HOST>:<PORT>/<DB>");
+                props.setProperty("URLSYNTAX_jdbc.hsqldb", "jdbc:hsqldb:<databaseName>");
+                props.setProperty("URLSYNTAX_jdbc.h2", "jdbc:h2:<URL>");
+                props.setProperty("URLSYNTAX_jdbc.sybase", "jdbc:sybase:Tds:<HOST>:<PORT>");
+                props.setProperty("URLSYNTAX_jdbc.derby", "jdbc:derby:[subsubprotocol:][databaseName][;attribute=value]*");
+                props.setProperty("URLSYNTAX_jdbc.xerial", "jdbc:sqlite:<db-file-path>");
+                props.setProperty("URLSYNTAX_jdbc.sqldroid", "jdbc:sqlite:<db-file-path>");
+                props.setProperty("URLSYNTAX_jdbc.postgresql", "jdbc:postgresql://<HOST>:<PORT>/<DB>");
+                props.setProperty("URLSYNTAX_jdbc.mysql", "jdbc:mysql://<hostname>[,<failoverhost>][<:3306>]/<dbname>[?<param1>=<value1>][&<param2>=<value2>]");
+                props.setProperty("URLSYNTAX_jdbc.jtds", "jdbc:jtds:<server_type>://<server>[:<port>][/<database>][;<property>=<value>[;...]]");
+                props.setProperty("URLSYNTAX_jdbc.firebirdsql", "jdbc:firebirdsql://host[:port]/<database>");
+                props.setProperty("URLSYNTAX_jdbc.ucanaccess", "jdbc:ucanaccess://<mdb-file-path>");//ms-access
+                props.setProperty("URLSYNTAX_jdbc.sapdb", "jdbc:sapdb://<server>[:<port>]/<databaseName>");//default-port: 7210
+                    
                 FileUtil.saveProperties(pfile, props);
+
+                //input assists - completions
+                ((IIPresentable)login.getAttribute("connectionUrl").getPresentation()).setItemList(MapUtil.getValues(props, "URLSYNTAX_.*"));
+                ((IIPresentable)login.getAttribute("connectionDriverClass").getPresentation()).setItemList(MapUtil.getValues(props, "DRIVER_.*"));
+                ((IIPresentable)login.getAttribute("datasourceClass").getPresentation()).setItemList(MapUtil.getValues(props, "DATASOURCE_.*"));
+                ((IIPresentable)login.getAttribute("provider").getPresentation()).setItemList(MapUtil.getValues(props, "PROVIDER_.*"));
+                ((IIPresentable)login.getAttribute("hibernateDialect").getPresentation()).setItemList(MapUtil.getValues(props, "DIALECT_.*"));
+                ((IIPresentable)login.getAttribute("transactionType").getPresentation()).setItemList(Arrays.asList("RESOURCE_LOCAL", "JTA"));
             }
             final Properties p = props;
             //refresh the default schema to be asked by the username listener
@@ -231,8 +267,7 @@ public class PersistenceUI {
                             if (url != null) {
                                 String prefix = StringUtil.extract(url, "^\\w+[:]\\w+").replace(':', '.');
                                 if (!Util.isEmpty(prefix)) {
-                                    String database = StringUtil.extract(url, "[:]\\d+[:](\\w+)");
-                                    return StringUtil.substring(database, ":", null, true);
+                                    return StringUtil.extract(url, "[:]\\d+[:/;](\\w+)");
                                 }
                             }
                             //fallback
@@ -251,21 +286,7 @@ public class PersistenceUI {
                             if (url != null) {
                                 String prefix = StringUtil.extract(url, "^\\w+[:]\\w+").replace(':', '.');
                                 if (!Util.isEmpty(prefix)) {
-                                    String port = StringUtil.extract(url, "[:]\\d+[:]\\w+");
-                                    if (!Util.isEmpty(port)) {
-                                        return StringUtil.substring(port, ":", ":");
-                                    } else {
-                                        port = StringUtil.extract(url, "[:]\\d+$");
-                                        if (!Util.isEmpty(port)) {
-                                            return StringUtil.substring(port, ":", null);
-                                        } else {
-                                            port = StringUtil.extract(url, "[:]\\d+;");
-                                            if (!Util.isEmpty(port)) {
-                                                return StringUtil.substring(port, ":", ";");
-                                            }
-                                        }
-                                    }
-
+                                    return StringUtil.extract(url, "[:](\\d+)([:/;]\\w+)?", 1);
                                 }
                             }
                             return null;
@@ -364,6 +385,7 @@ public class PersistenceUI {
                 return ENV.get("use.database.replication", false);
             }
         });
+        
 //        ((Map)login.getPresentable().getLayoutConstraints()).put("style", "opacity: 0.9;");
         IAction<Object> loginAction = new SecureAction<Object>("tsl2nano.login.ok") {
             //TODO: ref. to persistence class
@@ -382,6 +404,7 @@ public class PersistenceUI {
             public String getLongDescription() {
                 return ENV.translate("tsl2nano.login.ok.tooltip", true);
             }
+
             @Override
             public boolean isEnabled() {
                 return true;

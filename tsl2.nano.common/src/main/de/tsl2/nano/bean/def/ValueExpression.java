@@ -203,7 +203,11 @@ public class ValueExpression<TYPE> implements
                 LOG.error("string-to-object-parser: found more than one object:\n"
                     + StringUtil.toFormattedString(beansByExample, 100, true));
                 throw new ManagedException("tsl2nano.multiple.items", new Object[] { toValue, type, type });
+            } else if (beansByExample.size() == 0) {
+                LOG.error("string-to-object-parser: found no object:\n"
+                        + StringUtil.toFormattedString(BeanUtil.toValueMap(exampleBean), 100, true));
             }
+            
             return beansByExample.size() > 0 ? beansByExample.iterator().next() : null;
         } else {
             return exampleBean;

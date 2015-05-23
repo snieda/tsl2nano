@@ -30,10 +30,25 @@ import de.tsl2.nano.format.FormatUtil;
  * @version $Revision$
  */
 public class Util {
-
+    public static final String FRAMEWORK_PACKAGE;
+    static {
+        String pck = Util.class.getPackage().getName();
+        String[] p = pck.split("\\.");
+        FRAMEWORK_PACKAGE = StringUtil.concat(new char[]{'.'}, p[0], p[1], p[2]);
+    }
     protected Util() {
     }
 
+    /**
+     * isFrameworkClass
+     * @param cls
+     * @return true, if given class is part of this framework
+     */
+    public static boolean isFrameworkClass(Class<?> cls) {
+        //compare the first three package names
+        return cls.getPackage().getName().startsWith(FRAMEWORK_PACKAGE);
+    }
+    
     /**
      * isAllNull
      * 

@@ -55,6 +55,7 @@ import de.tsl2.nano.core.util.BitUtil;
 import de.tsl2.nano.core.util.FileUtil;
 import de.tsl2.nano.core.util.NetUtil;
 import de.tsl2.nano.core.util.StringUtil;
+import de.tsl2.nano.core.util.Util;
 import de.tsl2.nano.core.util.XmlUtil;
 import de.tsl2.nano.format.DefaultFormat;
 import de.tsl2.nano.util.NumberUtil;
@@ -84,8 +85,11 @@ import de.tsl2.nano.util.NumberUtil;
  */
 @SuppressWarnings({ "unchecked", "static-access" })
 @Default(value = DefaultType.FIELD, required = false)
-public class ENV {
+public class ENV implements Serializable {
 
+    /** serialVersionUID */
+    private static final long serialVersionUID = 5988200267214868670L;
+    
     private static final String PATH_TEMP = "temp/";
     private static ENV self;
     @SuppressWarnings("rawtypes")
@@ -105,7 +109,7 @@ public class ENV {
     //TODO: constrain the max size
     transient Map<Class<?>, Log> loggers = new HashMap<Class<?>, Log>();
 
-    public static final String FRAMEWORK = "de.tsl2.nano";
+    public static final String FRAMEWORK = Util.FRAMEWORK_PACKAGE;
     public static final String PREFIX = ENV.class.getPackage().getName() + ".";
 
     public static final String KEY_SYS_BASEDIR = PREFIX + ".basedir";

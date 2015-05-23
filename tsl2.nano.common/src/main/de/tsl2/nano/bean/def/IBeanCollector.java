@@ -27,6 +27,8 @@ public interface IBeanCollector<COLLECTIONTYPE extends Collection<T>, T> extends
     public static final int MODE_ASSIGNABLE = 32;
     /** show one-to-many relations in table (will have effects on {@link BeanDefinition#attributeFilter} and {@link BeanDefinition#attributeDefinitions} */
     public static final int MODE_SHOW_MULTIPLES = 64;
+    /** if a beans attribute is a relation, show its details in a nested panel */
+    public static final int MODE_SHOW_NESTINGDETAILS = 128;
 
     public static final int MODE_ALL_SINGLE = MODE_EDITABLE | MODE_CREATABLE | MODE_DELETABLE | MODE_SEARCHABLE | MODE_ASSIGNABLE;
     public static final int MODE_ALL = MODE_ALL_SINGLE | MODE_MULTISELECTION | MODE_SHOW_MULTIPLES;

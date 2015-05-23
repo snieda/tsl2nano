@@ -126,7 +126,11 @@ public class CommonTest {
         assertEquals("text", StringUtil.substring(str, "einfacher", null));
         assertEquals("dies", StringUtil.substring(str, null, "ist"));
 //        assertEquals(str, StringUtil.substring(str, null, null));
-        assertEquals("text", StringUtil.extract(str, "[etx]{4,4}", "spruch"));
+
+        assertEquals("text", StringUtil.extract(str, "[etx]{4,4}"));
+        StringBuilder sbstr = new StringBuilder(str);
+        assertEquals("text", StringUtil.extract(sbstr, "[etx]{4,4}", "spruch"));
+        assertEquals("diesisteineinfacherspruch", sbstr.toString());
 
         //test crypto
         String[] passwds = new String[] { "meinpass", "12345678", "azAzäÄüÜ" };
@@ -135,6 +139,18 @@ public class CommonTest {
             LOG.info(passwds[i] + " ==> " + "(" + cryptoHash.length + ") " + StringUtil.toString(cryptoHash, 1000));
             LOG.info(passwds[i] + " crypto-hex: " + StringUtil.toHexString(cryptoHash));
         }
+
+        //complex extracting
+        String url = "jdbc:mysql://db4free.net:3306/0zeit";
+        String port = StringUtil.extract(url, "[:](\\d+)[:/;]\\w+");
+        assertEquals("3306", port);
+
+        port = StringUtil.extract(url, "[:](\\d+)([:/;]\\w+)", 1);
+        assertEquals("3306", port);
+
+        url = "jdbc:mysql://db4free.net:3306";
+        port = StringUtil.extract(url, "[:](\\d+)([:/;]\\w+)?", 1);
+        assertEquals("3306", port);
     }
 
     @Test
@@ -343,13 +359,14 @@ public class CommonTest {
         tb1.setString("Anton");
         TypeBean tb2 = new TypeBean();
         tb2.setString("Berta");
-        List<TypeBean> transforming = (List<TypeBean>) Util.untyped(CollectionUtil.getTransforming(Arrays.asList(tb1, tb2),
-            new ITransformer<TypeBean, String>() {
-                @Override
-                public String transform(TypeBean toTransform) {
-                    return toTransform.string;
-                }
-            }));
+        List<TypeBean> transforming =
+            (List<TypeBean>) Util.untyped(CollectionUtil.getTransforming(Arrays.asList(tb1, tb2),
+                new ITransformer<TypeBean, String>() {
+                    @Override
+                    public String transform(TypeBean toTransform) {
+                        return toTransform.string;
+                    }
+                }));
         assertEquals(Arrays.asList("Anton", "Berta"), CollectionUtil.getList(transforming.iterator()));
     }
 

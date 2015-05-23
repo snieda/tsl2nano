@@ -402,6 +402,17 @@ public class BeanContainer implements IBeanContainer {
     }
 
     /**
+     * data rows for the given type
+     * @param beanType bean type
+     * @return count(*) for type
+     */
+    public static final long getCount(Class<?> beanType) {
+        return ((Number) instance()
+            .getBeansByQuery("select count(*) from " + beanType.getSimpleName(), true, (Object[]) null).iterator()
+            .next()).longValue(); 
+    }
+    
+    /**
      * getActionId
      * 
      * @param beanType presenters bean type to create an action for

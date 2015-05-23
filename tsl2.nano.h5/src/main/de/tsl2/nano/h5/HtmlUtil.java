@@ -106,6 +106,7 @@ public class HtmlUtil {
     public static final String ATTR_WRAP = "wrap";
 
     public static final String TAG_SELECT = "select";
+    public static final String TAG_DATALIST = "datalist";
     public static final String TAG_OPTGROUP = "optgroup";
     public static final String TAG_OPTION = "option";
     public static final String ATTR_SIZE = "size";

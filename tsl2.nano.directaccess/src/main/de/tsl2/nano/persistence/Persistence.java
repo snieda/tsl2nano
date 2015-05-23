@@ -343,9 +343,10 @@ public class Persistence implements Serializable {
         put(prop, "hibernate.connection.password", getConnectionPassword());
         put(prop, "hibernate.default_schema", getDefaultSchema());
 
-        //WORKAROUND FUER OPENJPA REVERSE ENGENINEERING
+        //WORKAROUND FOR OPENJPA REVERSE ENGENINEERING
         put(prop, "openjpa.provider", "org.apache.openjpa.persistence.PersistenceProviderImpl");
 
+        put(prop, "generator", getGenerator());
         put(prop, "autoddl", getAutoddl());
 
         put(prop, "javax.persistence.provider", getProvider());
