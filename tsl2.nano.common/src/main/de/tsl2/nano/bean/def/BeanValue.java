@@ -236,16 +236,18 @@ public class BeanValue<T> extends AttributeDefinition<T> implements IValueDefini
         try {
             T v = null;
             /* 
-             * if allowed values are defined, re-use their instances!
+             * if 'allowed values' are defined, re-use their instances!
              * it is not possible to move that block to value-expression,
              * because value-expression doesn't have access to the attribute-definition!
              */
             if (!Util.isEmpty(source) && getConstraint().getAllowedValues() != null
                 && !getConstraint().getType().isEnum()) {
                 String name;
+                Object id;
                 for (Object allowed : getConstraint().getAllowedValues()) {
+                    id = Bean.getBean((Serializable) allowed).getId();
                     name = Bean.getBean((Serializable) allowed).toString();
-                    if (name.equals(source)) {
+                    if ((id != null && id.equals(source)) || name.equals(source)) {
                         LOG.debug("recognition of selected value '" + name + "' successful!");
                         v = (T) allowed;
                         break;

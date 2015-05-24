@@ -46,7 +46,8 @@ public class Util {
      */
     public static boolean isFrameworkClass(Class<?> cls) {
         //compare the first three package names
-        return cls.getPackage().getName().startsWith(FRAMEWORK_PACKAGE);
+        //some classes like Object[].class have no package path!
+        return cls.getPackage() != null && cls.getPackage().getName().startsWith(FRAMEWORK_PACKAGE);
     }
     
     /**

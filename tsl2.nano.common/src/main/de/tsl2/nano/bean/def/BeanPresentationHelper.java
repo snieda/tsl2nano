@@ -1074,10 +1074,17 @@ public class BeanPresentationHelper<T> {
              * we solve this loading a 'group by' looking for duplicated attributes.
              */
             NavigableSet<Integer> keySet = levels.descendingKeySet();
+            boolean isEmpty;
+            try {
+                isEmpty = ((Number) BeanContainer.instance()
+                        .getBeansByQuery("select count(*) from " + bean.getName(), true, new Object[0]).iterator().next())
+                        .intValue() == 0;
+            } catch (Exception ex) {
+                LOG.warn(bean.getName() + " is declared as @ENTITY but has no mapped TABLE --> can't evaluate best attribute!");
+                isEmpty = false;
+            }
             if (bean.isPersistable()
-                && ((Number) BeanContainer.instance()
-                    .getBeansByQuery("select count(*) from " + bean.getName(), true, new Object[0]).iterator().next())
-                    .intValue() == 0) {
+                && isEmpty) {
                 Collection<Long> grouping;
                 final String ALIAS = "XXX";
                 String query = "select max(count(" + ALIAS + ")) from " + bean.getName() + " group by " + ALIAS;

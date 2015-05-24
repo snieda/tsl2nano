@@ -13,6 +13,7 @@ import java.io.File;
 import java.io.PrintStream;
 import java.io.Serializable;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.Properties;
 
@@ -24,6 +25,7 @@ import de.tsl2.nano.bean.def.BeanValue;
 import de.tsl2.nano.core.ENV;
 import de.tsl2.nano.core.util.FileUtil;
 import de.tsl2.nano.core.util.StringUtil;
+import de.tsl2.nano.core.util.Util;
 import de.tsl2.nano.execution.ScriptUtil;
 import de.tsl2.nano.persistence.Persistence;
 
@@ -32,7 +34,7 @@ import de.tsl2.nano.persistence.Persistence;
  * @author Thomas Schneider, Thomas Schneider
  * @version $Revision$
  */
-@SuppressWarnings({ "rawtypes", "serial" , "unchecked"})
+@SuppressWarnings({ "rawtypes", "serial", "unchecked" })
 public class ScriptTool implements Serializable {
     String sourceFile;
     IAction selectedAction;
@@ -41,12 +43,12 @@ public class ScriptTool implements Serializable {
     transient Collection<IAction> availableActions;
     transient PrintStream systemout;
     transient IAction<Collection<?>> runner;
-    
+
     /** ant script for several user defined targets. contains an sql target */
     final String ANTSCRIPTNAME = "antscripts.xml";
     final String ANTSCRIPTPROP = "antscripts.properties";
     static final String SERIALIZED_SCRIPTOOL = ENV.getTempPath() + ScriptTool.class.getSimpleName().toLowerCase();
-    
+
     public static ScriptTool createInstance() {
         File file = new File(SERIALIZED_SCRIPTOOL);
         if (file.canRead()) {
@@ -58,7 +60,7 @@ public class ScriptTool implements Serializable {
             return new ScriptTool();
         }
     }
-    
+
     /**
      * constructor
      */
@@ -242,6 +244,10 @@ public class ScriptTool implements Serializable {
                     if (BeanUtil.isStandardType(singleObject)) {
                         return singleObject;
                     }
+                } else if (c.size() == 0) {
+                    //don't return an empty collection to avoid an error message
+                    return Arrays.asList(ENV.translate("tsl2nano.searchdialog.searchresultcount", false,
+                        0));
                 }
             }
             return result;
@@ -326,7 +332,7 @@ public class ScriptTool implements Serializable {
     public Collection<IAction> availableActions() {
         return availableActions;
     }
-    
+
     public IAction<Collection<?>> runner() {
         if (runner == null) {
             String id = "scripttool.go";

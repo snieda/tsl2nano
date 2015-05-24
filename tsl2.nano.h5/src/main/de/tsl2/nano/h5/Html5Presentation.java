@@ -628,8 +628,8 @@ public class Html5Presentation<T> extends BeanPresentationHelper<T> implements I
         }
 
         Element panel =
-                appendElement(parent, TAG_DIV, ATTR_STYLE,
-                    (interactive ? ENV.get("page.data.style", "overflow: auto; height: 700px;") : null));
+            appendElement(parent, TAG_DIV, ATTR_STYLE,
+                (interactive ? ENV.get("page.data.style", "overflow: auto; height: 700px;") : null));
         createContentPanel(session, panel, bean, interactive, ENV.get("page.data.fullwidth", false));
 
         if (isRoot) {
@@ -649,7 +649,11 @@ public class Html5Presentation<T> extends BeanPresentationHelper<T> implements I
      * @param bean
      * @param interactive
      */
-    private Element createContentPanel(ISession session, Element panel, BeanDefinition bean, boolean interactive, boolean fullwidth) {
+    private Element createContentPanel(ISession session,
+            Element panel,
+            BeanDefinition bean,
+            boolean interactive,
+            boolean fullwidth) {
 //        Element frame = appendElement(parent, "iframe", ATTR_SRC, "#data", ATTR_NAME, "dataframe");
 //        panel = appendElement(parent, TAG_LINK, ATTR_NAME, "data", "target", "_blank");
         if (bean instanceof Controller) {
@@ -1777,7 +1781,9 @@ public class Html5Presentation<T> extends BeanPresentationHelper<T> implements I
                 ATTR_CLASS,
                 "bean.field.data",
                 ATTR_TITLE,//fallback to show an info text, if data couldn't be shown
-                "If no Plugin is available to show the content,\n klick on the downloaded item in your browser."
+                file != null
+                    ? file.getPath() /*"If no Plugin is available to show the content,\n klick on the downloaded item in your browser."*/
+                    : ""
             );
 
         return data;
@@ -1932,7 +1938,7 @@ public class Html5Presentation<T> extends BeanPresentationHelper<T> implements I
                 id = bv.getId().toString();
                 description = bv.getPresentable().getDescription();
             }
-            appendElement(parent, TAG_OPTION, content(content), ATTR_ID, id, ATTR_TITLE, description,
+            appendElement(parent, TAG_OPTION, content(content), ATTR_VALUE, id, "label", content,
                 enable(ATTR_SELECTED, selected != null && v.equals(selected)));
         }
     }
