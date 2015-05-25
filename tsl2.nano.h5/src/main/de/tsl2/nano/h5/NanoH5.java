@@ -159,7 +159,6 @@ public class NanoH5 extends NanoHTTPD implements ISystemConnector<Persistence> {
             ENV.extractResource("shell.xml");
             ENV.extractResource("mda.bat");
             ENV.extractResource("mda.xml");
-            ENV.extractResource("beandef.xsd");
             ENV.extractResource("tsl2nano-appcache.mf");
             ENV.extractResource("favicon.ico");
             String dir = ENV.getConfigPath();
@@ -570,11 +569,8 @@ public class NanoH5 extends NanoHTTPD implements ISystemConnector<Persistence> {
                 throw new ManagedException(
                     "Couldn't generate bean jar file '"
                         + jarName
-                        + "' through ant-script 'reverse-eng.xml'! Please see log file for exceptions. Possible errors are:\n"
-                        + "\t- no ant jar files (ant.jar, ant-launcher.jar, ant-nodeps.jar) in your environment directory\n"
-                        + "\t- no hibernate or open-jpa jar files in your environment directory\n"
-                        + "\t- no jdbc-driver-jar file for the given 'ConnectionDriverClass' in your environment directory\n"
-                        + "\t- your java is an JRE instead of a full JDK (needed to compile the generated classes!)\n"
+                        + "' through ant-script 'reverse-eng.xml'! Please see log file for exceptions.\n"
+                        + "\tIs your java only a JRE? We need the full JDK to compile the generated classes.\n"
                         + "\nAs alternative you may select an existing bean-jar file (-->no generation needed!) in field \"JarFile\"\n\n"
                         + ENV.get(UncaughtExceptionHandler.class).toString());
             }

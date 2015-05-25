@@ -631,7 +631,7 @@ public class BeanPresentationHelper<T> {
         IPresentable p = attribute.getPresentation();
         return p.getType() == TYPE_DATA || p.getType() == TYPE_ATTACHMENT;
     }
-    
+
     /**
      * sets a layoutconstraint SWT.FILL horizontal.
      * 
@@ -1074,67 +1074,71 @@ public class BeanPresentationHelper<T> {
              * we solve this loading a 'group by' looking for duplicated attributes.
              */
             NavigableSet<Integer> keySet = levels.descendingKeySet();
-            boolean isEmpty;
-            try {
-                isEmpty = ((Number) BeanContainer.instance()
-                        .getBeansByQuery("select count(*) from " + bean.getName(), true, new Object[0]).iterator().next())
-                        .intValue() == 0;
-            } catch (Exception ex) {
-                LOG.warn(bean.getName() + " is declared as @ENTITY but has no mapped TABLE --> can't evaluate best attribute!");
-                isEmpty = false;
-            }
-            if (bean.isPersistable()
-                && isEmpty) {
-                Collection<Long> grouping;
-                final String ALIAS = "XXX";
-                String query = "select max(count(" + ALIAS + ")) from " + bean.getName() + " group by " + ALIAS;
-                String q;
-                Long maxCount;
-                int i = 0;
+            if (bean.isPersistable()) {
+                boolean isEmpty;
                 try {
-                    IAttributeDefinition attr;
-                    for (Iterator<Integer> it = keySet.iterator(); it.hasNext();) {
-                        //check data to seam unique
-                        i = levels.get(it.next());
-                        attr = bean.getAttribute(names[i]);
-                        if (attr.nullable() || attr.isMultiValue()) {
-                            it.remove();
-                            continue;
-                        }
-                        //we don't check virtuals and uniques - they have to be correct
-                        if (attr.isVirtual() || attr.unique()) {
-                            break;
-                        }
-                        q = query.replace(ALIAS, names[i]);
-                        grouping = BeanContainer.instance().getBeansByQuery(q, false, (Object[]) null);
-                        maxCount = grouping.size() > 0 ? grouping.iterator().next() : null;
-                        if (Util.isEmpty(maxCount) || maxCount.intValue() < 2) {
-                            break;
-                        }
-                        it.remove();
-                    }
+                    isEmpty =
+                        ((Number) BeanContainer.instance()
+                            .getBeansByQuery("select count(*) from " + bean.getName(), true, new Object[0]).iterator()
+                            .next())
+                            .intValue() == 0;
                 } catch (Exception ex) {
-                    IAttribute id = bean.getIdAttribute();
-                    if (id != null) {
-                        LOG.warn("couldn't check attribute for unique data: " + bean.getName() + "." + names[i]
-                            + ". Using id-attribute " + id.getId(), ex);
-                        return id.getName();
-                    } else {
-                        LOG.warn("couldn't check attribute for unique data: " + bean.getName() + "." + names[i], ex);
-                        return names[i];
-                    }
+                    LOG.warn(bean.getName()
+                        + " is declared as @ENTITY but has no mapped TABLE --> can't evaluate best attribute!");
+                    isEmpty = false;
                 }
-                if (levels.isEmpty()) {
-                    IAttribute id = bean.getIdAttribute();
-                    String msg = "No unique field as value-expression found for " + bean
-                        + " available fields: " + StringUtil.toString(names, 100) + ". ";
-                    if (id != null) {
-                        LOG.warn(msg + "Using id-attribute " + id.getId());
-                        return id.getName();
-                    } else {
-                        LOG.warn(msg + "No id-attribute available. Using attribute : " + bean.getName() + "."
-                            + names[i]);
-                        return names[i];
+                if (isEmpty) {
+                    Collection<Long> grouping;
+                    final String ALIAS = "XXX";
+                    String query = "select max(count(" + ALIAS + ")) from " + bean.getName() + " group by " + ALIAS;
+                    String q;
+                    Long maxCount;
+                    int i = 0;
+                    try {
+                        IAttributeDefinition attr;
+                        for (Iterator<Integer> it = keySet.iterator(); it.hasNext();) {
+                            //check data to seam unique
+                            i = levels.get(it.next());
+                            attr = bean.getAttribute(names[i]);
+                            if (attr.nullable() || attr.isMultiValue()) {
+                                it.remove();
+                                continue;
+                            }
+                            //we don't check virtuals and uniques - they have to be correct
+                            if (attr.isVirtual() || attr.unique()) {
+                                break;
+                            }
+                            q = query.replace(ALIAS, names[i]);
+                            grouping = BeanContainer.instance().getBeansByQuery(q, false, (Object[]) null);
+                            maxCount = grouping.size() > 0 ? grouping.iterator().next() : null;
+                            if (Util.isEmpty(maxCount) || maxCount.intValue() < 2) {
+                                break;
+                            }
+                            it.remove();
+                        }
+                    } catch (Exception ex) {
+                        IAttribute id = bean.getIdAttribute();
+                        if (id != null) {
+                            LOG.warn("couldn't check attribute for unique data: " + bean.getName() + "." + names[i]
+                                + ". Using id-attribute " + id.getId(), ex);
+                            return id.getName();
+                        } else {
+                            LOG.warn("couldn't check attribute for unique data: " + bean.getName() + "." + names[i], ex);
+                            return names[i];
+                        }
+                    }
+                    if (levels.isEmpty()) {
+                        IAttribute id = bean.getIdAttribute();
+                        String msg = "No unique field as value-expression found for " + bean
+                            + " available fields: " + StringUtil.toString(names, 100) + ". ";
+                        if (id != null) {
+                            LOG.warn(msg + "Using id-attribute " + id.getId());
+                            return id.getName();
+                        } else {
+                            LOG.warn(msg + "No id-attribute available. Using attribute : " + bean.getName() + "."
+                                + names[i]);
+                            return names[i];
+                        }
                     }
                 }
             }
@@ -1307,7 +1311,7 @@ public class BeanPresentationHelper<T> {
                 "icons/cascade.png") {
                 @Override
                 public Object action() throws Exception {
-                    return Bean.getBean((Serializable)BeanClass.getStatic(ENV.class, "self"));
+                    return Bean.getBean((Serializable) BeanClass.getStatic(ENV.class, "self"));
                 }
 
                 @Override
@@ -1364,6 +1368,7 @@ public class BeanPresentationHelper<T> {
                         ((Collection) vsession.getValue().getContext()).add(bean);
                         return bean;
                     }
+
                     @Override
                     public boolean isEnabled() {
                         return super.isEnabled() && bean.isPersistable() && !bean.isMultiValue();

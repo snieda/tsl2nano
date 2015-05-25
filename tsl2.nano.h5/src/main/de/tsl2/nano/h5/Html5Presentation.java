@@ -1399,7 +1399,10 @@ public class Html5Presentation<T> extends BeanPresentationHelper<T> implements I
         if (colDefs.size() > 0) {
             for (IPresentableColumn c : colDefs) {
                 //on byte[] show an image through attached file
-                if (BitUtil.hasBit(itemBean.getAttribute(c.getName()).getPresentation().getType(), TYPE_DATA,
+                //workaround: on virtuals searching the attribute may cause an error
+                if (itemBean.isVirtual() ? BitUtil.hasBit(c.getPresentable().getType(), TYPE_DATA,
+                    TYPE_ATTACHMENT) : BitUtil.hasBit(itemBean.getAttribute(c.getName()).getPresentation().getType(),
+                    TYPE_DATA,
                     TYPE_ATTACHMENT)) {
                     BeanValue<?> beanValue = (BeanValue<?>) itemBean.getAttribute(c.getName());
                     value = beanValue.getValueFile().getPath();

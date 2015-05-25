@@ -367,7 +367,7 @@ public class BeanDefinition<T> extends BeanClass<T> implements IPluggable<BeanDe
      */
     public boolean isVirtual() {
         return clazz.equals(UNDEFINED.getClass())
-            || /*after deserialization it is only object */clazz.equals(Object.class);
+            || /*after deserialization it is only object */clazz.equals(Object.class) || clazz.isArray();
     }
 
     public List<IAttributeDefinition<?>> getBeanAttributes() {
@@ -1027,7 +1027,8 @@ public class BeanDefinition<T> extends BeanClass<T> implements IPluggable<BeanDe
             for (String k : keys) {
                 IAttribute a = attributeDefinitions.get(k);
                 if (!a.getName().equals(k)) {
-                    LOG.warn("attribute-definition name '" + k + "' differs from its attribute name '" + a.getName() + "'");
+                    LOG.warn("attribute-definition name '" + k + "' differs from its attribute name '" + a.getName()
+                        + "'");
                     if (a.isVirtual()) {
                         a.setName(k);
                     }
@@ -1159,7 +1160,10 @@ public class BeanDefinition<T> extends BeanClass<T> implements IPluggable<BeanDe
     protected void saveBeanDefinition(File xmlFile) {
         if (usePersistentCache) {
             try {
-                xmlFile.getParentFile().mkdirs();
+                if (!xmlFile.exists()) {
+                    xmlFile.getParentFile().mkdirs();
+                    ENV.extractResourceToDir("beandef.xsd", xmlFile.getParentFile().getPath());
+                }
                 XmlUtil.saveXml(xmlFile.getPath(), this);
             } catch (Exception e) {
                 if (ENV.get("strict.mode", false)) {
@@ -1418,7 +1422,7 @@ public class BeanDefinition<T> extends BeanClass<T> implements IPluggable<BeanDe
     public Map<String, Object> toValueMap(Map<String, Object> properties) {
         throw new UnsupportedOperationException();
     }
-    
+
     /**
      * fills a map with all bean-attribute-names and their values
      * 
