@@ -20,6 +20,8 @@ import java.io.PipedInputStream;
 import java.io.PipedOutputStream;
 import java.io.PrintStream;
 import java.io.Serializable;
+import java.nio.ByteBuffer;
+import java.sql.Blob;
 import java.util.Arrays;
 
 import org.apache.commons.logging.Log;
@@ -46,9 +48,34 @@ public class ByteUtil extends Util {
      */
     public static boolean isByteStream(Class<?> type) {
         return type.equals(Serializable.class)
-            || (type.isArray() && (type.isAssignableFrom(Byte[].class) || type.isAssignableFrom(byte[].class)));
+            || (type.isArray() && (Byte[].class.isAssignableFrom(type) || byte[].class.isAssignableFrom(type)))
+            || ByteBuffer.class.isAssignableFrom(type) || Blob.class.isAssignableFrom(type);
     }
 
+    /**
+     * getBytes
+     * @param o
+     * @return bytes of the current object
+     */
+    public static byte[] getBytes(Object o) {
+        if (o instanceof byte[])
+            return (byte[]) o;
+        if (o instanceof Byte[])
+            return serialize(o);
+        else if (o instanceof String)
+            return ((String)o).getBytes();
+        else if (o instanceof ByteBuffer)
+            return ((ByteBuffer)o).array();
+        else if (o instanceof Blob)
+            try {
+                return ByteUtil.toByteArray(((Blob) o).getBinaryStream());
+            } catch (Exception e) {
+                ManagedException.forward(e);
+                return null;
+            }
+        else
+            return serialize(o);
+    }
     /**
      * Serialization of a bean-object to a byte-array.
      * 
@@ -130,8 +157,7 @@ public class ByteUtil extends Util {
     /**
      * Compares two Objects by serializing them comparing their equivalent byte-arrays.
      * <p/>
-     * Condition: the comparable objects need to implement the Serializable-interface and have to be of same
-     * class.
+     * Condition: the comparable objects need to implement the Serializable-interface and have to be of same class.
      * 
      * @param bean1 first object
      * @param bean2 second object
@@ -227,14 +253,16 @@ public class ByteUtil extends Util {
 
     /**
      * toString
+     * 
      * @param stream source
      * @param encoding (optional) if null, the system file.encoding will be used. e.g.: UTF-8
      * @return stream read into a string
      */
     public static final String toString(InputStream stream, String encoding) {
-        return String.valueOf(FileUtil.getFileData(stream, encoding != null ? encoding : get("file.encoding", "UTF-8")));
+        return String
+            .valueOf(FileUtil.getFileData(stream, encoding != null ? encoding : get("file.encoding", "UTF-8")));
     }
-    
+
     /**
      * @return piped stream
      */

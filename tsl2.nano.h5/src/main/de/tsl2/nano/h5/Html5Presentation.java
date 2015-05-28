@@ -132,6 +132,7 @@ import java.io.InputStream;
 import java.io.Serializable;
 import java.net.URL;
 import java.nio.ByteBuffer;
+import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
@@ -180,6 +181,7 @@ import de.tsl2.nano.core.cls.BeanClass;
 import de.tsl2.nano.core.cls.IAttribute;
 import de.tsl2.nano.core.log.LogFactory;
 import de.tsl2.nano.core.util.BitUtil;
+import de.tsl2.nano.core.util.ByteUtil;
 import de.tsl2.nano.core.util.DateUtil;
 import de.tsl2.nano.core.util.FileUtil;
 import de.tsl2.nano.core.util.StringUtil;
@@ -1718,19 +1720,11 @@ public class Html5Presentation<T> extends BeanPresentationHelper<T> implements I
 //                            FileUtil.writeBytes(((Attachment)beanValue).getValue(), FileUtil.getValidFileName(beanValue.getName()), false);
 //                        } else {
                             if (v != null) {
-                                byte[] bytes;
-                                if (v instanceof byte[]) {
-                                    bytes = (byte[]) v;
-                                } else if (v instanceof ByteBuffer) {
-                                    bytes = ((ByteBuffer) v).array();
-                                } else if (v instanceof String) {
-                                    bytes = ((String) v).getBytes();
-                                } else {
-                                    throw new IllegalStateException("attachment of attribute '"
-                                        + beanValue.getValueId()
-                                        + "' has to be of type byte[], ByteBuffer or String!");
-                                }
-                                FileUtil.writeBytes(bytes, ENV.getTempPath() + beanValue.getValueId(), false);
+                                if (!ByteUtil.isByteStream(v.getClass())
+                                        throw new IllegalStateException("attachment of attribute '"
+                                                + beanValue.getValueId()
+                                                + "' has to be of type byte[], ByteBuffer or String!");
+                                FileUtil.writeBytes(ByteUtil.getBytes(v), ENV.getTempPath() + beanValue.getValueId(), false);
                             }
                         }
 //                    }
@@ -2019,7 +2013,7 @@ public class Html5Presentation<T> extends BeanPresentationHelper<T> implements I
         Element preFooter;
         if (footer instanceof Throwable) {
             Element details = doc.createElement(TAG_LINK);
-            details.setAttribute(ATTR_HREF, new File(LogFactory.getLogFileName()).getAbsolutePath());
+            details.setAttribute(ATTR_HREF, "file:///" + new File(LogFactory.getLogFileName()).getAbsolutePath());
             details.setTextContent(ENV.translate("tsl2nano.exception", true));
             addRow(table, details);
             preFooter = doc.createElement(TAG_PRE);

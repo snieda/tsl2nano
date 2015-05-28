@@ -41,7 +41,7 @@ import de.tsl2.nano.core.cls.BeanAttribute;
 import de.tsl2.nano.core.cls.BeanClass;
 import de.tsl2.nano.core.cls.IAttribute;
 import de.tsl2.nano.core.log.LogFactory;
-import de.tsl2.nano.core.util.Crypt;
+import de.tsl2.nano.core.util.ByteUtil;
 import de.tsl2.nano.core.util.ISecure;
 import de.tsl2.nano.core.util.StringUtil;
 import de.tsl2.nano.core.util.Util;
@@ -348,7 +348,7 @@ public class AttributeDefinition<T> implements IAttributeDefinition<T> {
                 getConstraint().setFormat(new MapExpressionFormat<T>(getGenericType(1)));
             } else if (type.isEnum()) {
                 getConstraint().setFormat(FormatUtil.getDefaultFormat(type, true));
-            } else if (BeanUtil.isStandardType(type)) {
+            } else if (BeanUtil.isStandardType(type) && !ByteUtil.isByteStream(type)) {
                 getConstraint().setFormat(ENV.get(BeanPresentationHelper.class).getDefaultRegExpFormat(this));
             } else {
                 getConstraint().setFormat(new ValueExpressionTypeFormat<T>(type));

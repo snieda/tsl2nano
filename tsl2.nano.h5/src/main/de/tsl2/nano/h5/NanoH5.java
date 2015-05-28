@@ -276,7 +276,12 @@ public class NanoH5 extends NanoHTTPD implements ISystemConnector<Persistence> {
                 session = createSession(requestor);
             } else if (method.equals("GET") && parms.size() == 0 && (uri.length() < 2 || header.get("referer") == null)) {
                 LOG.debug("reloading cached page...");
-                return session.response;
+                try {
+                    session.response.data.reset();
+                    return session.response;
+                } catch (IOException e) {
+                    LOG.error(e);
+                }
             }
         }
         session.startTime = startTime;
@@ -635,6 +640,7 @@ public class NanoH5 extends NanoHTTPD implements ISystemConnector<Persistence> {
         try {
             ENV.extractResource(persistence.getDatabase() + ".sql");
             ENV.extractResource("drop-" + persistence.getDatabase() + ".sql");
+            ENV.extractResource("init-" + persistence.getDatabase() + ".sql");
         } catch (Exception e) {
             //ok, it was only a try ;-)
         }

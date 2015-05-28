@@ -66,6 +66,7 @@ import de.tsl2.nano.core.cls.BeanClass;
 import de.tsl2.nano.core.cls.IAttribute;
 import de.tsl2.nano.core.exception.Message;
 import de.tsl2.nano.core.log.LogFactory;
+import de.tsl2.nano.core.util.ByteUtil;
 import de.tsl2.nano.core.util.FileUtil;
 import de.tsl2.nano.core.util.StringUtil;
 import de.tsl2.nano.core.util.Util;
@@ -415,7 +416,7 @@ public class BeanPresentationHelper<T> {
             type = TYPE_DATE;
         } else if (Boolean.class.isAssignableFrom(attr.getType()) || boolean.class.isAssignableFrom(attr.getType())) {
             type = TYPE_OPTION;
-        } else if (attr.getType().isArray() && byte[].class.isAssignableFrom(attr.getType())) {//perhaps for blobs
+        } else if (ByteUtil.isByteStream(attr.getType())) {//perhaps for blobs
             type = TYPE_ATTACHMENT;
         } else if (attr.getType().isArray() || Collection.class.isAssignableFrom(attr.getType())) {//complex type --> list
             type = TYPE_TABLE;

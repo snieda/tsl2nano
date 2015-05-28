@@ -32,6 +32,7 @@ import de.tsl2.nano.core.cls.BeanAttribute;
 import de.tsl2.nano.core.cls.BeanClass;
 import de.tsl2.nano.core.cls.PrimitiveUtil;
 import de.tsl2.nano.core.log.LogFactory;
+import de.tsl2.nano.core.util.ByteUtil;
 import de.tsl2.nano.core.util.StringUtil;
 import de.tsl2.nano.core.util.Util;
 import de.tsl2.nano.format.FormatUtil;
@@ -205,9 +206,9 @@ public class ValueExpression<TYPE> implements
                 throw new ManagedException("tsl2nano.multiple.items", new Object[] { toValue, type, type });
             } else if (beansByExample.size() == 0) {
                 LOG.error("string-to-object-parser: found no object:\n"
-                        + StringUtil.toFormattedString(BeanUtil.toValueMap(exampleBean), 100, true));
+                    + StringUtil.toFormattedString(BeanUtil.toValueMap(exampleBean), 100, true));
             }
-            
+
             return beansByExample.size() > 0 ? beansByExample.iterator().next() : null;
         } else {
             return exampleBean;
@@ -273,7 +274,7 @@ public class ValueExpression<TYPE> implements
             instance = PrimitiveUtil.create(type, toValue);
         } else if (BeanClass.hasStringConstructor(type)) {
             instance = BeanClass.createInstance(type, toValue);
-        } else if (byte[].class.isAssignableFrom(type)) {
+        } else if (ByteUtil.isByteStream(type)) {
             instance = (TYPE) toValue.getBytes();
         } else {
             instance = BeanClass.createInstance(type);
@@ -309,7 +310,7 @@ public class ValueExpression<TYPE> implements
              * workaround for new instances of composite beans, having a value expression of its id attribute.
              * this would result in an empty string on new instances.
              */
-            return txt.isEmpty() ? "[new: " + fromValue + "]"  : txt;
+            return txt.isEmpty() ? "[new: " + fromValue + "]" : txt;
         } else {
             //lazy workaround...
             return getWorkaroundFormat(fromValue);
