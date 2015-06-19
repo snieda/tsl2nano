@@ -44,15 +44,38 @@ public abstract class Selector<T> extends Container<T> {
     @Override
     public List<AItem<T>> getNodes(Map context) {
         if (nodes == null || nodes.size() == 0) {
-            Properties props = new Properties();
-            props.putAll(context);
-            props.putAll(System.getProperties());
+            Properties props = initProperties(context);
             nodes = new LinkedList<AItem<T>>();
+            createFirstNode(nodes, props);
             for (Object item : createItems(props)) {
                 addOption(item);
             }
+            createLastNode(nodes, props);
         }
         return nodes;
+    }
+
+    /**
+     * to be overwritten - does nothing
+     * @param nodes
+     * @param props
+     */
+    protected void createFirstNode(List<AItem<T>> nodes, Properties props) {
+    }
+
+    /**
+     * to be overwritten - does nothing
+     * @param nodes
+     * @param props
+     */
+    protected void createLastNode(List<AItem<T>> nodes, Properties props) {
+    }
+
+    protected Properties initProperties(Map context) {
+        Properties props = new Properties();
+        props.putAll(context);
+        props.putAll(System.getProperties());
+        return props;
     }
 
     /**

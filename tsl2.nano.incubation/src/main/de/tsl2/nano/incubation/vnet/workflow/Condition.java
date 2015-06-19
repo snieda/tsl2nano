@@ -68,4 +68,8 @@ public class Condition extends ConditionOperator<Object> {
         return Boolean.valueOf(StringUtil.toString(eval(expression, parameter)));
     }
 
+    @Override
+    public String toString() {
+        return expression;
+    }
 }

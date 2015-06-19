@@ -47,8 +47,12 @@ public class AItem<T> implements IItem<T>, Serializable {
 
     @Attribute
     protected String name;
-    @Attribute
-    Type type;
+    /** presentation style. see the parent terminal style */
+    @Attribute(required=false)
+    protected Integer style;
+    
+    /** the type has to be set by the implementing class */
+    transient Type type;
     @Element(type = Constraint.class, required = false)
     IConstraint<T> constraints;
     /** optional condition to evaluate through an expression, whether this item is visible. */
@@ -170,8 +174,8 @@ public class AItem<T> implements IItem<T>, Serializable {
     /**
      * uses a scanner to wait for the nextLine
      */
-    void nextLine(InputStream in, PrintStream out) {
-        Terminal.nextLine(in, out);
+    protected String nextLine(InputStream in, PrintStream out) {
+        return Terminal.nextLine(in, out);
     }
 
     /**
@@ -236,19 +240,29 @@ public class AItem<T> implements IItem<T>, Serializable {
             return getParent().getDescription(env, full);
         } else if (description == null) {
             description = getConstraints() != null ? getConstraints().toString() : name;
-        } else if (full && hasFileDescription()) {
-            StringWriter stream = new StringWriter();
-            try {
-                Terminal.printAsciiImage(description, new PrintWriter(stream), Util.get(Terminal.KEY_WIDTH, 80),
-                    Util.get(Terminal.KEY_HEIGHT, 20), false, false);
-                new AsciiImage().convertToAscii(description, new PrintWriter(stream), Util.get(Terminal.KEY_WIDTH, 80),
-                    Util.get(Terminal.KEY_HEIGHT, 20));
-                return stream.toString();
-            } catch (Exception e) {
-                ManagedException.forward(e);
-            }
+        } else if (full || hasFileDescription()) {
+            description = printImageDescription();
         }
         return description;
+    }
+
+    protected String printImageDescription() {
+        return printImageDescription(Util.get(Terminal.KEY_HEIGHT, 20) - 6);
+    }
+    /**
+     * printImageDescription
+     */
+    protected String printImageDescription(int height) {
+        StringWriter stream = new StringWriter();
+        try {
+            new AsciiImage().convertToAscii(description, new PrintWriter(stream), Util.get(Terminal.KEY_WIDTH, 80) - 2,
+                height);
+            //remove windows returns
+            return stream.toString().replaceAll("\r", "");
+        } catch (Exception e) {
+            ManagedException.forward(e);
+            return null;
+        }
     }
 
     public void setDescription(String description) {
@@ -260,8 +274,8 @@ public class AItem<T> implements IItem<T>, Serializable {
      * 
      * @return true, if description points to a file
      */
-    protected boolean hasFileDescription() {
-        return description != null && new File(description).exists();
+    public boolean hasFileDescription() {
+        return description != null && new File(description).isFile();
     }
 
     /**
@@ -295,6 +309,20 @@ public class AItem<T> implements IItem<T>, Serializable {
         this.condition = condition;
     }
 
+    /**
+     * @return Returns the style.
+     */
+    public Integer getStyle() {
+        return style;
+    }
+
+    /**
+     * @param style The style to set.
+     */
+    public void setStyle(Integer style) {
+        this.style = style;
+    }
+
     public static String translate(String name) {
         return Terminal.translate(name);
     }
@@ -305,7 +333,7 @@ public class AItem<T> implements IItem<T>, Serializable {
     }
 
     protected String getValueText() {
-        return constraints != null &&  constraints.getFormat() != null ? constraints.getFormat().format(value) : Util.value(value, "<>");
+        return String.valueOf(constraints != null &&  constraints.getFormat() != null ? constraints.getFormat().format(value) : Util.value(value, "<>"));
     }
     
     protected String getName(int fixlength, char filler) {
@@ -318,6 +346,6 @@ public class AItem<T> implements IItem<T>, Serializable {
      */
     @Override
     public String toString() {
-        return getName(-1, (char)-1) + value + "\n";
+        return getName(-1, (char)-1) + ": " + (value != null ? value : "<>") + "\n";
     }
 }

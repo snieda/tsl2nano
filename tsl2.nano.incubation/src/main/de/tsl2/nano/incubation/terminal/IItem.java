@@ -81,6 +81,9 @@ public interface IItem<T> {
     /** item description to be used as user help */
     String getDescription(Properties env, boolean full);
     
+    /** optional, defines an own frame style */
+    Integer getStyle();
+    
     enum Type implements Serializable {
         Input, Option, Container, Selector, Action;
     }

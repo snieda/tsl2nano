@@ -40,13 +40,15 @@ public class Action<T> extends AItem<T> {
     public static final String KEY_ENV = "ENVIRONMENT";
 
     /** mainClass, if null, the {@link #method} must start with it's full class path */
-    @Element(required=false)
+    @Element(required = false)
     Class<?> mainClass;
     /** method. see {@link #mainClass} */
     @Element
     String method;
     @ElementArray
     String[] argNames;
+
+    transient Object instance;
 
     /**
      * constructor
@@ -61,6 +63,10 @@ public class Action<T> extends AItem<T> {
         this(mainClass, method, null, argumentNames);
     }
 
+    public Action(Object instance, String method, String... argumentNames) {
+        this(method, instance, method, null, argumentNames);
+    }
+
     public Action(String name, Class<?> mainClass, String method, String... argumentNames) {
         this(name, mainClass, method, null, argumentNames);
     }
@@ -68,6 +74,12 @@ public class Action<T> extends AItem<T> {
     public Action(Class<?> mainClass, String method, T defaultValue, String... argumentNames) {
         this(method, mainClass, method, defaultValue, argumentNames);
     }
+
+    public Action(String name, Object instance, String method, T defaultValue, String... argumentNames) {
+        this(name, instance.getClass(), method, defaultValue, argumentNames);
+        this.instance = instance;
+    }
+
     public Action(String name, Class<?> mainClass, String method, T defaultValue, String... argumentNames) {
         super(name, null, Type.Action, defaultValue, null);
         this.mainClass = mainClass;
@@ -92,6 +104,8 @@ public class Action<T> extends AItem<T> {
             }
             cls[i] = v != null ? v.getClass() : String.class;
         }
+        if (instance != null)
+            p.put("instance", instance);
         IRunnable<T, Properties> runner = null;
         try {
             runner = new de.tsl2.nano.incubation.specification.actions.Action(getMainClass().getMethod(method, cls));
@@ -109,6 +123,7 @@ public class Action<T> extends AItem<T> {
         }
         return mainClass;
     }
+
     @Override
     @SuppressWarnings("rawtypes")
     protected void initConstraints(IConstraint constraints) {
@@ -118,7 +133,7 @@ public class Action<T> extends AItem<T> {
     public String ask(Properties env) {
         return "...starting action " + getName() + " ...";
     }
-    
+
     /**
      * {@inheritDoc}
      */
@@ -133,13 +148,15 @@ public class Action<T> extends AItem<T> {
             changed = true;
             //let us see the result
         } catch (Exception ex) {
-            ex.printStackTrace();
-            return caller == this ? getParent().next(in, out, env) : this;
+//            ex.printStackTrace();
+            return getParent().next(in, out, env);
         } finally {
-            nextLine(in, out);
             LogFactory.setPrintToConsole(false);
+            out.print("done: " + (value != null ? "[" + StringUtil.toString(value, 30) + "]" : "")
+                + " ...please hit enter to return");
+            nextLine(in, out);
         }
-        return caller == this ? getParent().next(in, out, env) : this;
+        return getParent().next(in, out, env);
     }
 
     /**
@@ -148,6 +165,15 @@ public class Action<T> extends AItem<T> {
     @Override
     public boolean isEditable() {
         return false;
+    }
+
+    /**
+     * setInstance
+     * 
+     * @param instance
+     */
+    public void setInstance(Object instance) {
+        this.instance = instance;
     }
 
     /**

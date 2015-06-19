@@ -46,7 +46,9 @@ import de.tsl2.nano.core.util.StringUtil;
 import de.tsl2.nano.core.util.Util;
 import de.tsl2.nano.core.util.XmlUtil;
 import de.tsl2.nano.incubation.terminal.IItem.Type;
+import de.tsl2.nano.incubation.terminal.item.AItem;
 import de.tsl2.nano.incubation.terminal.item.Container;
+import de.tsl2.nano.util.PrivateAccessor;
 import de.tsl2.nano.util.SchedulerUtil;
 
 /**
@@ -59,7 +61,7 @@ import de.tsl2.nano.util.SchedulerUtil;
  * - input constraints check
  * - configuration over xml
  * - result will be written to a property map
- * - tree nodes can be selected through numbers or names
+ * - tree nodes can be selected through numbers or names (the first unique characters are enough)
  * - batch mode possible
  * - macro recording and replaying
  * - simplified java method calls
@@ -71,8 +73,8 @@ import de.tsl2.nano.util.SchedulerUtil;
  * - show ascii-pictures (transformed from pixel-images) for an item (description must point to an image file)
  * - extends itself downloading required jars from network (if {@link #useNetworkExtension} ist true)
  * - schedule mode: starts a scheduler for an action
- * - selectors for files, content of files, class members etc.
- * 
+ * - selectors for files, content of files, class members, properties, csv-files etc.
+ * - administration modus to create/remove items
  * </pre>
  * 
  * @author Tom
@@ -104,10 +106,10 @@ public class Terminal implements IItemHandler, Serializable {
     boolean bars = true;
     /** item properties */
     transient Properties env;
-    /** default: false. if true, on each terminal save, the terminals xml serialization file will be stored.  */
-    @Attribute(required=false)
+    /** default: false. if true, on each terminal save, the terminals xml serialization file will be stored. */
+    @Attribute(required = false)
     boolean refreshConfig = false;
-    
+
     /**
      * predefined variables (not changable through user input) copied to the {@link #env} but not saved in property
      * file. mostly technical definitions.
@@ -116,7 +118,7 @@ public class Terminal implements IItemHandler, Serializable {
     Map<String, Object> definitions;
 
     /** batch file name. the batch file contains input instructions (numbers or names) separated by '\n'. */
-    @Element(required=false)
+    @Element(required = false)
     String batch;
 
     /** base item - should be a Selection */
@@ -134,7 +136,7 @@ public class Terminal implements IItemHandler, Serializable {
     transient boolean isRecording;
 
     /** if true, all tree items will be accessed directly and sequentially */
-    @Attribute(required=false)
+    @Attribute(required = false)
     boolean sequential = false;
 
     /** command identifier */
@@ -154,6 +156,8 @@ public class Terminal implements IItemHandler, Serializable {
 
     /** starts a scheduler for the given action */
     static final String KEY_SCHEDULE = "schedule";
+
+    static final String KEY_ADMIN = "admin";
 
     public static final String KEY_SEQUENTIAL0 = "sequential";
 
@@ -306,7 +310,7 @@ public class Terminal implements IItemHandler, Serializable {
         save();
         String shutdownInfo =
             "\n|\n|\nSHUTDOWN TERMINAL!\n|\nsaved changes to\n" + name + "\nand\n " + name + ".properties";
-        printScreen(shutdownInfo, out, null, true);
+        printScreen(shutdownInfo, out, null, style, true);
         LOG.info("terminal " + name + " ended");
     }
 
@@ -370,17 +374,23 @@ public class Terminal implements IItemHandler, Serializable {
 
     @Override
     public String printScreen(IItem item, PrintStream out) {
-        out.print(TextTerminal.getTextFrame(item.toString(), style, width, true));
+        String title = item.toString();
+        int style = item.getStyle() != null ? item.getStyle() : this.style;
+        out.print(title.length() > (3 * width) ? title : TextTerminal.getTextFrame(title, style, width, true));
         String question = item.ask(env);
         return printScreen(
             item.getDescription(env, false),
-            out, question, false);
+            out, question, style, false);
+    }
+
+    public String printScreen(String screen, PrintStream out, String question) {
+        return printScreen(screen, out, question, style, false);
     }
 
     /**
      * {@inheritDoc}
      */
-    public String printScreen(String screen, PrintStream out, String question, boolean center) {
+    public String printScreen(String screen, PrintStream out, String question, int style, boolean center) {
         //split screens to max height
         String pagingInput;
         String s = screen;
@@ -431,13 +441,13 @@ public class Terminal implements IItemHandler, Serializable {
             //to see the input in batch mode
             if (!Util.isEmpty(input) && input.startsWith(KEY_COMMAND)) {
                 if (isCommand(input, KEY_HELP)) {
-                    printScreen(getHelp(), out, ASK_ENTER, false);
+                    printScreen(getHelp(), out, ASK_ENTER);
                     nextLine(in);
-                    printScreen(item.getDescription(env, true), out, "", false);
+                    printScreen(item.getDescription(env, true), out, "");
                 } else if (isCommand(input, KEY_PROPERTIES)) {
                     System.getProperties().list(out);
                 } else if (isCommand(input, KEY_INFO)) {
-                    printScreen(ENV.createInfo(), out, "", false);
+                    printScreen(ENV.createInfo(), out, "");
                 } else if (isCommand(input, KEY_MACRO_RECORD)) {
                     isRecording = true;
                 } else if (isCommand(input, KEY_MACRO_STOP)) {
@@ -450,6 +460,8 @@ public class Terminal implements IItemHandler, Serializable {
                 } else if (isCommand(input, KEY_USENETWORKEXTENSION)) {
                     useNetworkExtension = !useNetworkExtension;
                     prepareEnvironment(env, root);
+                } else if (isCommand(input, KEY_ADMIN)) {
+                    startAmin(item);
                 } else if (isCommand(input, KEY_SAVE)) {
                     save();
                 } else if (isCommand(input, KEY_QUIT)) {
@@ -475,6 +487,15 @@ public class Terminal implements IItemHandler, Serializable {
             nextLine(in);
             serve(item, in, out, env);
         }
+    }
+
+    private void startAmin(IItem item) {
+        int ostyle = style;
+        style = 3;
+        ItemAdministrator administrator = new ItemAdministrator(this, (Container) item);
+        serve(administrator, in, out, env);
+        administrator.clean();
+        style = ostyle;
     }
 
     /**
@@ -565,7 +586,6 @@ public class Terminal implements IItemHandler, Serializable {
         this.sequential = sequential;
     }
 
-    
     /**
      * @return Returns the refreshConfig. see {@link #refreshConfig}
      */
@@ -623,22 +643,38 @@ public class Terminal implements IItemHandler, Serializable {
             + "The items can have the following properties:\n"
             + " x: changed or visited\n"
             + " §: duty (has to be visited)\n\n"
-            + "You can leave an item with key ENTER, you can show this help typing ':help',\n"
-            + "If you leave the entire menu with ENTER, a property file with the new values\n"
-            + "will be written, if you hit Strg+c, the entire menu will be aborted. If you\n"
-            + "type ':properties' you will see a list of all property values. :info will show\n"
-            + " some system informations. :quit will stop the terminal save the property file.\n"
-            + "':record' will record your actions to be saved as batch. ':stop' stops the macro.\n"
+            + "You can leave an item with key ENTER, you can show this help typing ':help'\n"
             + "To set reset an items value, type 'null' as value\n"
+            + "If you leave the entire menu with ENTER, a property file with the new values\n"
+            + "will be written, if you hit Strg+c, the entire menu will be aborted.\n"
+            + "If your input starts with ':', one of the following commands can be entered:\n"
+            + " properties: list of all property values\n"
+            + " info      : system info will show\n"
+            + " quit      : will stop the terminal save the property file.\n"
+            + " record    : will record your actions to be saved as batch\n"
+            + " stop      : stops the macro\n"
+            + " help      : shows this help\n"
+            + " admin     : administrate your current item (adding/removing child-items)\n"
+            + " schedule:<item-no>[:delay][:period[:end]]] the item, which"
+            + " has to be an action will be scheduled for the given milliseconds\n"
             + "It is possible to define workflow conditions, so items are not visible, if their\n"
             + " condition is negative.\n"
             + "If an item container (a tree) has only one visible item, that item will be activated."
             + "If you turn on 'sequence', the user doesn't have to enter each command number - all"
             + " items of a container will be asked sequentially."
-            + "If you input the command :schedule:<item-no>[:delay][:period[:end]]] the item, which"
-            + "has to be an action will be scheduled for the given milliseconds."
-            + "You can set the mode 'useNetworkExtension' to true, if you want, that the terminal" +
-            "downloads required (by action-definitions) jar-files itself";
+            + "You can set the mode 'useNetworkExtension' to true, if you want, that the terminal"
+            + "downloads required (by action-definitions) jar-files itself.";
+    }
+
+    @Override
+    public String toString() {
+        return getClass() + ":\n"
+            + StringUtil.toFormattedString(new PrivateAccessor(this).members(presentalMembers()), -1, false);
+    }
+
+    static String[] presentalMembers() {
+        return new String[] { "name", "width", "height", "style", "bars", "refreshConfig", "batch",
+            "useNetworkExtension", "sequential" };
     }
 
     public static void main(String[] args) {

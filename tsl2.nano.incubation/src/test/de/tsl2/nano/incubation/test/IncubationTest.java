@@ -27,6 +27,7 @@ import java.util.Collection;
 import java.util.HashMap;
 import java.util.Hashtable;
 import java.util.LinkedHashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Properties;
 import java.util.concurrent.Callable;
@@ -55,6 +56,7 @@ import de.tsl2.nano.core.util.Permutator;
 import de.tsl2.nano.core.util.PrintUtil;
 import de.tsl2.nano.core.util.StringUtil;
 import de.tsl2.nano.core.util.XmlUtil;
+import de.tsl2.nano.execution.AntRunner;
 import de.tsl2.nano.incubation.network.JobServer;
 import de.tsl2.nano.incubation.repeat.IChange;
 import de.tsl2.nano.incubation.repeat.ICommand;
@@ -74,6 +76,8 @@ import de.tsl2.nano.incubation.terminal.item.MainAction;
 import de.tsl2.nano.incubation.terminal.item.selector.DirSelector;
 import de.tsl2.nano.incubation.terminal.item.selector.FieldSelector;
 import de.tsl2.nano.incubation.terminal.item.selector.FileSelector;
+import de.tsl2.nano.incubation.terminal.item.selector.PropertySelector;
+import de.tsl2.nano.incubation.terminal.item.selector.Selector;
 import de.tsl2.nano.incubation.vnet.ILocatable;
 import de.tsl2.nano.incubation.vnet.Net;
 import de.tsl2.nano.incubation.vnet.Node;
@@ -561,6 +565,7 @@ public class IncubationTest {
             log(f.getMessage());
         }
     }
+
     @Test
     public void testSimpleXml() throws Exception {
         //check java classloading of an array
@@ -573,7 +578,7 @@ public class IncubationTest {
         TypeBean bean = new TypeBean();
         bean.setPrimitiveChar(' ');
         bean.setType(cls);
-        
+
         String xmlfile = "test/typebean.xml";
         new File(xmlfile).getParentFile().mkdirs();
         XmlUtil.saveSimpleXml_(xmlfile, bean);
@@ -601,9 +606,9 @@ public class IncubationTest {
 //
     @Test
     public void testTerminalTools() throws Exception {
-        
+
         FileUtil.removeToBackup(Terminal.DEFAULT_NAME);
-        
+
         Container root = new Container("Toolbox", "Helpful Utilities");
 
         Container printing = new Container("Printing", null);
@@ -612,21 +617,25 @@ public class IncubationTest {
         printing.add(new Input("jobname", "tsl2nano", "print job name"));
         printing.add(new Input("mimetype", "MIME_PCL", "mime type"));
         printing.add(new FieldSelector("papersize", "ISO_A4", "paper size", MediaSizeName.class, MediaSizeName.class));
-        printing.add(new Input("quality", new Constraint<String>(String.class, Arrays.asList("NORMAL", "HIGH")), "NORMAL", "print quality"));
+        printing.add(new Input("quality", new Constraint<String>(String.class, Arrays.asList("NORMAL", "HIGH")),
+            "NORMAL", "print quality"));
         printing.add(new Input("priority", "1", "print priority (1-100)"));
         printing.add(new Input("xsltfile", null, "xsl-fo transformation file to do a apache fop"));
         printing.add(new Input("username", null, "user name to be used by the printer"));
         Action<?> mainAction;
         printing
-            .add(mainAction = new MainAction("print", PrintUtil.class, "source", "printer", "jobname", "papersize", "quality", "priority",
-                "xsltfile", "mimetype", "jobname", "username"));
+            .add(mainAction =
+                new MainAction("print", PrintUtil.class, "source", "printer", "jobname", "papersize", "quality",
+                    "priority",
+                    "xsltfile", "mimetype", "jobname", "username"));
         mainAction.setCondition(new Condition("quality=NORMAL"));
         root.add(printing);
 
         Container crypt = new Container("Crypt", null);
         crypt.add(new Input("password", null, "password for encryption - if needed by algorithm"));
         crypt.add(new Input("algorithm", "PBEWithMD5AndDES", "encryption algorithm"));
-        crypt.add(new Input("text", null, "text to be encrypted. if it starts with 'file:' the file will be read", false));
+        crypt.add(new Input("text", null, "text to be encrypted. if it starts with 'file:' the file will be read",
+            false));
         crypt.add(new Input("base64", true, "whether base64 encoding should be used"));
         crypt.add(new Input("include", ".*", "regular expression to constrain text parts to be encrypted"));
         crypt
@@ -656,6 +665,13 @@ public class IncubationTest {
         html.add(new FileSelector("source", null, ".*.markdown", "${user.dir}"));
         html.add(new MainAction("Markdown (TxtMark)", "com.github.rjeschke.txtmark.cmd.Run", "source"));
         root.add(html);
+
+        Container ant = new Container("Ant", null);
+        ant.add(new AntTaskSelector("task", "Jar", "pack given filesets to zip"));
+        ant.add(new PropertySelector<String>("properties", "ant task properties", null/*MapUtil.asMap("destFile", "mynew.jar")*/));
+        ant.add(new Input("filesets", "./:{**/*.*ml}**/*.xml;${user.dir}:{*.txt}", "filesets expression", false));
+        ant.add(new Action(AntRunner.class, "runTask", "task", "properties", "filesets"));
+        root.add(ant);
 
 //        Tree getjar = new Tree("getJar", null);
 //        getjar.add(new Input("name", null, "name, jar-file or class package to load with dependencies from web"));
@@ -687,7 +703,8 @@ public class IncubationTest {
         file.add(new Action("List", FileUtil.class, "foreach", "directory", "file", "file.operation.null"));
         file.add(new Action("Delete", FileUtil.class, "foreach", "directory", "file", "file.operation.delete"));
         file.add(new Action("Copy", FileUtil.class, "foreach", "directory", "file", "file.operation.copy"));
-        file.add(new MainAction("Imageviewer", AsciiImage.class, "file", "image.out", "terminal.width", "terminal.height"));
+        file.add(new MainAction("Imageviewer", AsciiImage.class, "file", "image.out", "terminal.width",
+            "terminal.height"));
         root.add(file);
 
         Map<String, Object> defs = new HashMap<String, Object>();
@@ -695,7 +712,7 @@ public class IncubationTest {
         defs.put("file.operation.delete", "test");
         defs.put("image.out", "-out");
         System.getProperties().put(Terminal.KEY_SEQUENTIAL, true);
-        
+
         InputStream in = Terminal.createBatchStream("Printing", "jobname", "test", "10", "", ":quit");
         new Terminal(root, in, System.out, 79, 22, 1, defs).run();
 
@@ -860,5 +877,59 @@ class EBean extends TypeBean {
     @Override
     public String toString() {
         return getString() + getImmutableInteger();//new String(BeanUtil.serialize(this));
+    }
+
+}
+
+class AntTaskSelector extends Selector {
+
+    /**
+     * constructor
+     */
+    public AntTaskSelector() {
+        super();
+        // TODO Auto-generated constructor stub
+    }
+
+    /**
+     * constructor
+     * 
+     * @param name
+     * @param value
+     * @param description
+     */
+    public AntTaskSelector(String name, Object value, String description) {
+        super(name, value, description);
+        // TODO Auto-generated constructor stub
+    }
+
+    /**
+     * constructor
+     * 
+     * @param name
+     * @param description
+     */
+    public AntTaskSelector(String name, String description) {
+        super(name, description);
+        // TODO Auto-generated constructor stub
+    }
+
+    @Override
+    protected List createItems(Map props) {
+        String tasks =
+            "Ant AntCall ANTLR AntStructure AntVersion Apply ExecOn Apt Attrib Augment Available Basename Bindtargets BuildNumber"
+                + " BUnzip2 BZip2 Cab Continuus Synergy Tasks CvsChangeLog Checksum Chgrp Chmod Chown Clearcase Tasks Componentdef Concat"
+                + " Condition Supported conditions Copy Copydir Copyfile Cvs CVSPass CvsTagDiff CvsVersion Defaultexcludes Delete Deltree"
+                + " Depend Dependset Diagnostics Dirname Ear Echo Echoproperties EchoXML EJB Tasks Exec Fail Filter FixCRLF FTP GenKey"
+                + " Get GUnzip GZip Hostinfo Image Import Include Input Jar Jarlib-available Jarlib-display Jarlib-manifest"
+                + " Jarlib-resolve Java Javac JavaCC Javadoc Javadoc2 Javah JDepend JJDoc JJTree Jlink JspC JUnit JUnitReport Length"
+                + " LoadFile LoadProperties LoadResource Local MacroDef Mail MakeURL Manifest ManifestClassPath MimeMail Mkdir Move"
+                + " Native2Ascii NetRexxC Nice Parallel Patch PathConvert Perforce Tasks PreSetDef ProjectHelper Property PropertyFile"
+                + " PropertyHelper Pvcs Record Rename RenameExtensions Replace ReplaceRegExp ResourceCount Retry RExec Rmic Rpm"
+                + " SchemaValidate Scp Script Scriptdef Sequential ServerDeploy Setproxy SignJar Sleep SourceOffSite Sound Splash Sql"
+                + " Sshexec Sshsession Subant Symlink Sync Tar Taskdef Telnet Tempfile Touch Translate Truncate TStamp Typedef Unjar"
+                + " Untar Unwar Unzip Uptodate Microsoft Visual SourceSafe Tasks Waitfor War WhichResource Weblogic JSP Compiler"
+                + " XmlProperty XmlValidate XSLT Style Zip";
+        return Arrays.asList(tasks.split(" "));
     }
 }

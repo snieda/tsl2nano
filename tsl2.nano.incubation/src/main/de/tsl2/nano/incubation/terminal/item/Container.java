@@ -47,7 +47,7 @@ public class Container<T> extends AItem<T> implements IContainer<T> {
 
     transient private boolean isactive;
     /** (default:true) if true, result (=value) is a collection! */
-    @Attribute(required=false)
+    @Attribute(required = false)
     boolean multiple = false;
     /** if true, all tree items will be accessed directly and sequentially */
     transient boolean sequential = false;
@@ -63,6 +63,7 @@ public class Container<T> extends AItem<T> implements IContainer<T> {
         value = (T) (multiple ? new ArrayList<T>() : value);
         type = Type.Container;
         prefix.setCharAt(PREFIX, '+');
+        initNodes();
     }
 
     public Container(String name, String description) {
@@ -78,10 +79,14 @@ public class Container<T> extends AItem<T> implements IContainer<T> {
      * @param value
      */
     public Container(String name, IConstraint<T> constraints, List<T> selected, String description) {
-        super(name, constraints, Type.Container, (T)selected, description);
+        super(name, constraints, Type.Container, (T) selected, description);
         multiple = selected != null;
-        nodes = new ArrayList<AItem<T>>();
+        initNodes();
         prefix.setCharAt(PREFIX, '+');
+    }
+
+    protected void initNodes() {
+        nodes = new ArrayList<AItem<T>>();
     }
 
     protected List<AItem<T>> getNodes() {
@@ -147,7 +152,7 @@ public class Container<T> extends AItem<T> implements IContainer<T> {
      */
     @Override
     public T getValue(int i) {
-        return multiple ? ((List<T>)value).get(i) : value;
+        return multiple ? ((List<T>) value).get(i) : value;
     }
 
     @Override
@@ -193,11 +198,11 @@ public class Container<T> extends AItem<T> implements IContainer<T> {
         }
         //assign the new result
         if (multiple) {
-            ((List<T>)value).add((T) next.getValue());
+            ((List<T>) value).add((T) next.getValue());
         } else {
             setValue((T) next.getValue());
         }
-        
+
         if (getValue() != null) {
             env.put(getName(), getValue());
         }
@@ -225,7 +230,7 @@ public class Container<T> extends AItem<T> implements IContainer<T> {
     @Override
     public boolean add(IItem item) {
         item.setParent(this);
-        return getNodes().add((AItem)item);
+        return getNodes().add((AItem) item);
     }
 
     @Override
@@ -273,6 +278,8 @@ public class Container<T> extends AItem<T> implements IContainer<T> {
             for (IItem n : getNodes()) {
                 n.setParent(this);
             }
+        } else {
+            initNodes();
         }
     }
 
@@ -282,16 +289,22 @@ public class Container<T> extends AItem<T> implements IContainer<T> {
     @Override
     public String getDescription(Properties env, boolean full) {
         if (isactive || sequential) {
-            if (sequential && hasFileDescription()) {
-                return super.getDescription(env, full);
-            }
+            String img = null;
             List<AItem<T>> list = getNodes(env);
-            StringBuilder buf = new StringBuilder(list.size() * 60);
+            if (hasFileDescription()) {
+                if (sequential)
+                    return super.getDescription(env, full);
+                else {
+                    int height = Util.get(Terminal.KEY_HEIGHT, 20);
+                    img = printImageDescription(height - (list.size() >= height ? 0 : list.size()));
+                }
+            }
+            StringBuilder buf = img != null ? new StringBuilder(img) : new StringBuilder(list.size() * 60);
             int i = 0;
             //evaluate key string length for formatted output
             int kl = 0;
             for (IItem<T> t : list) {
-                kl = Math.max(kl, ((AItem)t).getName(-1, (char)-1).length());
+                kl = Math.max(kl, ((AItem) t).getName(-1, (char) -1).length());
             }
             kl++;
             int vwidth = Util.get(Terminal.KEY_WIDTH, 80) - (kl + 9);
@@ -300,13 +313,15 @@ public class Container<T> extends AItem<T> implements IContainer<T> {
             for (AItem t : list) {
                 buf.append(StringUtil.fixString(String.valueOf(++i), s, ' ', false)
                     + "."
-                    + t.getName(kl, ' ') + POSTFIX_QUESTION
-                        + (full && !t.getType().equals(Type.Container) ? t.getDescription(env, full) : StringUtil.toString(t.getValueText(), vwidth))
+                    + t.getName(kl, ' ')
+                    + POSTFIX_QUESTION
+                    + (full && !t.getType().equals(Type.Container) ? t.getDescription(env, full) : StringUtil.toString(
+                        t.getValueText(), vwidth))
                     + "\n");
             }
             return buf.toString();
         } else {
-            return getName(-1, (char)-1) + "\n";
+            return getName(-1, (char) -1) + "\n";
         }
     }
 
