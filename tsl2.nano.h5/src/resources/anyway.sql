@@ -74,7 +74,7 @@ CREATE TABLE Item (
                 end DATE,
                 value NUMERIC NOT NULL,
                 description VARCHAR(256),
-                icon BLOB NOT NULL,
+                icon LONGVARBINARY NOT NULL,
                 CONSTRAINT idx_item PRIMARY KEY (id)
 );
 -- COMMENT ON TABLE Item IS 'shopping item, menu item in a restaurant, time-period in a timesheet, etc.';
