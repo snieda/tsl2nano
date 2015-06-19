@@ -44,6 +44,8 @@ import java.util.Map;
 import java.util.Properties;
 
 import org.apache.commons.logging.Log;
+import org.apache.tools.ant.types.FileSet;
+import org.apache.tools.ant.types.selectors.FilenameSelector;
 import org.apache.xmlgraphics.util.MimeConstants;
 import org.junit.BeforeClass;
 import org.junit.Test;
@@ -84,6 +86,7 @@ import de.tsl2.nano.core.util.StringUtil;
 import de.tsl2.nano.core.util.Util;
 import de.tsl2.nano.currency.CurrencyUnit;
 import de.tsl2.nano.currency.CurrencyUtil;
+import de.tsl2.nano.execution.AntRunner;
 import de.tsl2.nano.execution.ScriptUtil;
 import de.tsl2.nano.format.DefaultFormat;
 import de.tsl2.nano.format.RegExpFormat;
@@ -1195,6 +1198,10 @@ public class CommonTest {
         values.put("x1", x1);
         values.put("x2", x2);
         assertEquals(new BigDecimal(61), new NumericOperator(values).eval(f));
+
+        //TODO: implement this case
+//        f ="-1 + (-x1 + x2)";
+//        assertEquals(BigDecimal.ZERO, new NumericOperator(values).eval(f));
     }
 
     @Test
@@ -1220,6 +1227,12 @@ public class CommonTest {
         values.put("C", false);
         values.put("E", "E");
         assertEquals("E", new ConditionOperator(values).eval(f));
+        
+        f = " A = B";
+        values.put("B", true);
+        assertTrue((Boolean)new ConditionOperator(values).eval(f));
+        values.put("B", false);
+        assertFalse((Boolean)new ConditionOperator(values).eval(f));
     }
 
     @Test
@@ -1432,5 +1445,17 @@ public class CommonTest {
         keyValues = Argumentator.staticValues(MimeConstants.class, String.class);
         System.out.println("mime types:");
         System.out.println(keyValues);
+    }
+    
+    @Test
+    public void testAntRunner() {
+        String destFile = "test/test.jar";
+        File basedir = new File("./");
+        FileSet[] fileSets = AntRunner.createFileSets("./:{**/*.*ml}**/*.xml;" + basedir.getPath() + ":{*.txt}");
+        Properties props = new Properties();
+        props.put("destFile", new File(destFile));
+        AntRunner.runTask("Jar", props, fileSets);
+        assertTrue(new File(destFile).exists());
+        new File(destFile).delete();
     }
 }
