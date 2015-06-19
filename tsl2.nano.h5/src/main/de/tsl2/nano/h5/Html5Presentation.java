@@ -55,7 +55,8 @@ import static de.tsl2.nano.h5.HtmlUtil.ATTR_HEADERS;
 import static de.tsl2.nano.h5.HtmlUtil.ATTR_HIDDEN;
 import static de.tsl2.nano.h5.HtmlUtil.ATTR_HREF;
 import static de.tsl2.nano.h5.HtmlUtil.ATTR_ID;
-import static de.tsl2.nano.h5.HtmlUtil.*;
+import static de.tsl2.nano.h5.HtmlUtil.ATTR_LIST;
+import static de.tsl2.nano.h5.HtmlUtil.ATTR_MAX;
 import static de.tsl2.nano.h5.HtmlUtil.ATTR_MAXLENGTH;
 import static de.tsl2.nano.h5.HtmlUtil.ATTR_METHOD;
 import static de.tsl2.nano.h5.HtmlUtil.ATTR_MIN;
@@ -94,6 +95,7 @@ import static de.tsl2.nano.h5.HtmlUtil.STYLE_TEXT_ALIGN;
 import static de.tsl2.nano.h5.HtmlUtil.TAG_BODY;
 import static de.tsl2.nano.h5.HtmlUtil.TAG_BUTTON;
 import static de.tsl2.nano.h5.HtmlUtil.TAG_CELL;
+import static de.tsl2.nano.h5.HtmlUtil.TAG_DATALIST;
 import static de.tsl2.nano.h5.HtmlUtil.TAG_DIV;
 import static de.tsl2.nano.h5.HtmlUtil.TAG_EMBED;
 import static de.tsl2.nano.h5.HtmlUtil.TAG_FORM;
@@ -131,8 +133,6 @@ import java.io.File;
 import java.io.InputStream;
 import java.io.Serializable;
 import java.net.URL;
-import java.nio.ByteBuffer;
-import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
@@ -1720,7 +1720,7 @@ public class Html5Presentation<T> extends BeanPresentationHelper<T> implements I
 //                            FileUtil.writeBytes(((Attachment)beanValue).getValue(), FileUtil.getValidFileName(beanValue.getName()), false);
 //                        } else {
                             if (v != null) {
-                                if (!ByteUtil.isByteStream(v.getClass())
+                                if (!ByteUtil.isByteStream(v.getClass()))
                                         throw new IllegalStateException("attachment of attribute '"
                                                 + beanValue.getValueId()
                                                 + "' has to be of type byte[], ByteBuffer or String!");
