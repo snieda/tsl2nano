@@ -17,7 +17,6 @@ import java.util.Map;
 
 import org.simpleframework.xml.Default;
 import org.simpleframework.xml.DefaultType;
-import org.simpleframework.xml.ElementMap;
 
 /**
  * manages bean typed or untyped events. registers {@link IListener}s and fires {@link ChangeEvent} or other events to
@@ -34,7 +33,7 @@ public class EventController implements Serializable {
     private static final long serialVersionUID = 1L;
     
     /** all registered value change listeners */
-    @ElementMap(entry = "listener", key = "type", attribute = true, inline = true, value = "attributeListener", valueType = IListener.class, required = false)
+//    @ElementMap(entry = "listener", key = "type", keyType = Class.class, attribute = true, inline = true, required = false)
     //TODO: remove transient if you found a workaround on simple-xml problem with map(collection).
     transient Map<Class, Collection<IListener>> listener;
 
