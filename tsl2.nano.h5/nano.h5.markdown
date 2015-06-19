@@ -6,14 +6,15 @@
 <a href="http://sourceforge.net/projects/tsl2nano/files/0.7.0-beta/nano.h5.jnlp">Start Nano.H5 through WebStart</a>
 <p hidden>
 </font></h6>
-<meta-tag>
-crud, grud, crud2gui, crud2html, bean2html, entity2html, bean2gui, entity2gui, jpa2gui, jpa2html, jpa persistence provider, openjpa, hibernate, datanucleus, eclipselink, toplink, batoo, ormlite, ebean, data-editor, data-sheet, entity browser, jpa2, full stack framework, orm, o/r mapper
-</meta-tag>
 </p>
 
 [TOC]
 
 [[project_screenshots]]
+
+<meta-tag>
+crud, grud, crud2gui, crud2html, bean2html, entity2html, bean2gui, entity2gui, jpa2gui, jpa2html, jpa persistence provider, openjpa, hibernate, datanucleus, eclipselink, toplink, batoo, ormlite, ebean, data-editor, data-sheet, entity browser, jpa2, full stack framework, orm, o/r mapper
+</meta-tag>
 
 ## Introduction
 
@@ -190,6 +191,28 @@ Now, the following will be done:
 In java a bean is a type/class defined by attributes (=properties). These attributes are readable through getter-methods ('get' + attribute-name) and changeable through setter methods ('set' + attribute-name).
 
 _Nano.H5_ tries to change coppling between beans and attributes. A bean, defined by it's compiled class can have additional attributes to be presented. JPA annotations are interpreted to constrain the  java-bean attributes and an additional presentation interface defines the layout of beans and attributes.
+
+##### Where to get java entity beans from
+
+###### Having a database connection and a ddl
+
+If you don't give a beans-jar-file, nano.h5 tries to create the beans for you - using hibernate-tools or openjpa.
+
+###### Having data stored in xml files
+
+If you have xml files but no xsd schema definitions, create them through trang.jar. Download trang.jar, open a command line and go into the directory holding the data xml files:
+
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+java -jar trang.jar .* <myxsdfilename>
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+With an xsd file you are able to generate java classes through jaxb, which is integrated in oracles java implementation. the command:
+
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+xjc -d <src-base-directory> <xsd-schema-file>
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+will generate the desired java classes into _src-base_directory_.
 
 ##### Which bean attributes should be presented on default
 
@@ -2310,6 +2333,9 @@ Net:Connection-->Link-->Cover(content, descriptor)
 * (v) show count on beancollectors
 * (x) Terminal: +pegdown (markdown processor)
 * home-page on: /home/user-web/s/sn/snieda/htdocs
+* Test App starten!
+* beandef.xsd in *.xml integrieren
+* terminal: flat mode (super-tree with selection e.g. 1.1.1)
 
 war:
 * WEB-INF/web..xml rausschmeissen
