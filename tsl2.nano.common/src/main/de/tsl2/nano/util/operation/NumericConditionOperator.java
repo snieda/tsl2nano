@@ -13,6 +13,7 @@ import java.math.BigDecimal;
 import java.util.Map;
 
 import de.tsl2.nano.core.ENV;
+import de.tsl2.nano.core.util.RegExUtil;
 
 /**
  * Combination of conditioning (including booleans) and numeric operator. result has to be of type {@link BigDecimal}.
@@ -48,7 +49,7 @@ public class NumericConditionOperator extends ConditionOperator<Object> {
     @Override
     protected void createOperations() {
         super.createOperations();
-        syntax.put(KEY_OPERATION, "[!&|?:\\-+*/%^]");
+        syntax.put(KEY_OPERATION, RegExUtil.any("[\\-+*/%^]", syntax.get(KEY_OPERATION)));
         syntax.put(KEY_HIGH_OPERATION, "[*/%^]");
         /*
          * re-use numeric operations

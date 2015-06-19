@@ -67,18 +67,27 @@ public abstract class Operator<INPUT, OUTPUT> extends Parser<INPUT> {
     /** if true, this class will serialize all informations, including syntax etc. */
     transient boolean explizitXml = false;
 
+    /** begin of eclosing a term (e.g. brackets) */
     public static final String KEY_BEGIN = "begin";
+    /** end of eclosing a term (e.g. brackets) */
     public static final String KEY_END = "end";
+    /** operand1 + operation + operand2 */
     public static final String KEY_TERM = "term";
+    /** enclosing a term with brackets */
     public static final String KEY_TERM_ENCLOSED = "term.enclosed";
+    /** operation for: min <between> max */
     public static final String KEY_BETWEEN = "between";
     public static final String KEY_CONCAT = "concat";
     public static final String KEY_OPERATION = "operation";
-    public static final String KEY_HIGH_OPERATION = "high_operation";
+    /** for numeric operations we need a classification of operations (like square root, pow, ...) */
+    public static final String KEY_HIGH_OPERATION = "high.operation";
+    /** expression for first or second operand */
     public static final String KEY_OPERAND = "operand";
+    /** key word for an empty expression */
     public static final String KEY_EMPTY = "empty";
 //    public static final String KEY_DEFAULT_OPERAND = "default.operand";
 //    public static final String KEY_DEFAULT_OPERATOR = "default.operator";
+    /** key word to store the the result inside the value map */
     public static final String KEY_RESULT = "result";
 
     public Operator() {
@@ -316,7 +325,7 @@ public abstract class Operator<INPUT, OUTPUT> extends Parser<INPUT> {
             operation.setParameter(new Object[] { n1, n2 });
             result = operation.activate();
         } else {
-            throw new IllegalArgumentException(term.toString() + " (operation should match:"
+            throw new IllegalArgumentException(term.toString() + " (operation should match: "
                 + syntax(KEY_OPERATION)
                 + ")");
         }

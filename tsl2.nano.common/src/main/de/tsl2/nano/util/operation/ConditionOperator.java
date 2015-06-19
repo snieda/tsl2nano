@@ -88,7 +88,7 @@ public class ConditionOperator<T> extends SOperator<T> {
     protected void createOperations() {
         syntax.put(KEY_OPERATION, "[!&|?:=]");
         operationDefs = new HashMap<CharSequence, IAction<T>>();
-        //TODO: the following two operations will be overwritten throuth the TypeOp ones, so we should delete them
+        //TODO: the following two operations will be overwritten through the TypeOp ones, so we should delete them
         addOperation(KEY_THEN, new CommonAction<T>() {
             @Override
             public T action() throws Exception {

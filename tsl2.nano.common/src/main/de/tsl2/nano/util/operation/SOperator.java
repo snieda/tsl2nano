@@ -65,6 +65,7 @@ public abstract class SOperator<T> extends Operator<CharSequence, T> {
             "(.*)",
             KEY_OPERAND,
             "([-]?[a-zA-Z0-9.,]+)",
+            /*NEW_ALTERNATIVE:"([-]?[a-zA-Z0-9.,]+)",*/
             KEY_EMPTY,
             ""/*,
             KEY_DEFAULT_OPERAND,
@@ -79,6 +80,17 @@ public abstract class SOperator<T> extends Operator<CharSequence, T> {
             syntax.put(KEY_HIGH_OPERATION, syntax.get(KEY_OPERATION));
         }
         String term = "[^" + "\\" + syntax(KEY_END) + "\\" + syntax(KEY_BEGIN) + syntax(KEY_HIGH_OPERATION).subSequence(1, syntax(KEY_HIGH_OPERATION).length() - 2) + "]*" + syntax(KEY_OPERATION) + "\\s*" + syntax(KEY_OPERAND);
+        syntax.put(KEY_TERM, term);
+        syntax.put(KEY_TERM_ENCLOSED, "\\" + syntax(KEY_BEGIN) + "\\s*" + term + "\\s*" + "\\" + syntax(KEY_END));
+    }
+
+//    @Override
+    protected void createTermSyntax_NEW_ALTERNIVE13062015() {
+        if (syntax.get(KEY_HIGH_OPERATION) == null) {
+            syntax.put(KEY_HIGH_OPERATION, "(\\.)");
+        }
+        String FOPERAND = "(" + syntax(KEY_HIGH_OPERATION) + "?" + syntax(KEY_OPERAND) + ")?";
+        String term = FOPERAND + "\\s*" + syntax(KEY_OPERATION) + "\\s*" + FOPERAND;
         syntax.put(KEY_TERM, term);
         syntax.put(KEY_TERM_ENCLOSED, "\\" + syntax(KEY_BEGIN) + "\\s*" + term + "\\s*" + "\\" + syntax(KEY_END));
     }
