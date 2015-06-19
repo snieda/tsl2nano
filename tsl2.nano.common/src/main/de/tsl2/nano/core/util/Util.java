@@ -274,9 +274,8 @@ public class Util {
      * @param defaultValue
      * @return object, or if null the defaultValue
      */
-    @SuppressWarnings("unchecked")
-    public static <T> T value(Object object, T defaultValue) {
-        return (T) (object != null ? object : defaultValue);
+    public static <T> T value(T object, T defaultValue) {
+        return object != null ? object : defaultValue;
     }
 
     /**
