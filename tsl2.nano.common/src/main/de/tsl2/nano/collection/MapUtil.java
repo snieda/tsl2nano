@@ -17,6 +17,7 @@ import java.util.LinkedHashSet;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.Properties;
 import java.util.Set;
 
 import de.tsl2.nano.bean.BeanUtil;
@@ -67,6 +68,9 @@ public class MapUtil {
         return BeanUtil.toValueMap(o, keyPrefix, onlySingleValues, filterAttributes);
     }
 
+    public static Map asProperties(Object... keysAndValues) {
+        return asMap(new Properties(), keysAndValues);
+    }
     /**
      * collects the given objects to keys and their values (defined by object order) and puts it into a new map.
      * 
@@ -74,16 +78,18 @@ public class MapUtil {
      * @return map containing the given keys and values.
      */
     public static Map asMap(Object... keysAndValues) {
+        return asMap(new LinkedHashMap<Object, Object>(), keysAndValues);
+    }
+    public static Map asMap(Map instance, Object... keysAndValues) {
         if (keysAndValues == null || keysAndValues.length % 2 == 1) {
             throw ManagedException.implementationError(
                 "the 'keysAndValues' parameters must not be null and must contain pairs of keys and values!",
                 keysAndValues);
         }
-        final Map<Object, Object> map = new LinkedHashMap<Object, Object>();
         for (int i = 0; i < keysAndValues.length - 1; i += 2) {
-            map.put(keysAndValues[i], keysAndValues[i + 1]);
+            instance.put(keysAndValues[i], keysAndValues[i + 1]);
         }
-        return map;
+        return instance;
     }
 
     /**

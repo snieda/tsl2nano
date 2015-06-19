@@ -1,6 +1,8 @@
 package de.tsl2.nano.execution;
 
+import java.io.DataOutputStream;
 import java.io.File;
+import java.io.IOException;
 import java.util.Scanner;
 
 import org.apache.commons.logging.Log;
@@ -35,6 +37,7 @@ public class SystemUtil {
      * <p>
      * if you have admin permission problems (IOException, 740 error) use "cmd.exe" and "/C" to start your executable.
      * 
+     * @param directory where to start the command from
      * @param command command with arguments
      */
     public static final Process execute(File directory, String... command) {
@@ -46,7 +49,7 @@ public class SystemUtil {
                 + "\n\tdir: "
                 + processBuilder.directory()
                 + (LOG.isDebugEnabled() ? "\n\tenv: "
-                + processBuilder.environment(): ""));
+                    + processBuilder.environment() : ""));
             process = processBuilder.start();
             final Scanner scanner = new Scanner(process.getInputStream());
             while (scanner.hasNextLine()) {
@@ -71,8 +74,22 @@ public class SystemUtil {
         return execute("rundll32", "url.dll,FileProtocolHandler", fileName);
     }
 
-    public SystemUtil() {
-        super();
+    /**
+     * runs the given commands as root
+     * 
+     * @param cmds shell commands
+     */
+    public void runAsRoot(String... cmds) {
+        try {
+            Process p = Runtime.getRuntime().exec("su");
+            DataOutputStream os = new DataOutputStream(p.getOutputStream());
+            for (String c : cmds) {
+                os.writeBytes(c + "\n");
+            }
+            os.writeBytes("exit\n");
+            os.flush();
+        } catch (IOException e) {
+            ManagedException.forward(e);
+        }
     }
-
 }

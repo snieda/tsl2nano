@@ -33,6 +33,17 @@ public class ConcurrentUtil {
     @SuppressWarnings("rawtypes")
     private static final Map<Class, ThreadLocal<?>> threadLocals = new Hashtable<Class, ThreadLocal<?>>();
 
+
+    /**
+     * getCaller
+     * @return calling method name
+     */
+    public static String getCaller() {
+        //without calling security manager like Thread.getStacktrace() do.
+        StackTraceElement[] st = new Exception().getStackTrace();
+        return st.length > 2 ? st[2].toString() : "<unknown>";
+    }
+
     public static Thread startDaemon(String name,
             Runnable runtime) {
         return startDaemon(name, runtime, true, null);

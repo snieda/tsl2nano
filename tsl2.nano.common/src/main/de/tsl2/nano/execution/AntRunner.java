@@ -9,11 +9,15 @@
  */
 package de.tsl2.nano.execution;
 
+import java.io.File;
 import java.io.PipedInputStream;
 import java.io.PipedOutputStream;
 import java.io.PrintStream;
 import java.lang.reflect.Method;
+import java.util.ArrayList;
 import java.util.Enumeration;
+import java.util.Hashtable;
+import java.util.Map;
 import java.util.Properties;
 import java.util.Set;
 
@@ -30,6 +34,7 @@ import org.apache.tools.ant.taskdefs.MatchingTask;
 import org.apache.tools.ant.types.FileSet;
 import org.apache.tools.ant.types.resources.Files;
 import org.apache.tools.ant.types.selectors.FileSelector;
+import org.apache.tools.ant.types.selectors.FilenameSelector;
 
 import de.tsl2.nano.core.ManagedException;
 import de.tsl2.nano.core.cls.BeanClass;
@@ -79,8 +84,17 @@ public class AntRunner {
     public static final String TASK_FILES = "Files";
     public static final String TASK_REPLACE_REGEXP = "optional.ReplaceRegExp";
     public static final String TASK_XSLT = "XSLTProcess";
+    public static final String TASK_SQL = "Sql";
 
     private static final Log LOG = LogFactory.getLog(AntRunner.class);
+
+    /**
+     * delegates to {@link #runTask(String, Properties, FileSet...)} using {@link #createFileSets(String)} to create the
+     * {@link FileSet}s.
+     */
+    public static void runTask(String name, Properties taskProperties, String fileSetExpression) {
+        runTask(name, taskProperties, createFileSets(fileSetExpression));
+    }
 
     /**
      * starts the task by name using its properties and perhaps some filesets.
@@ -89,7 +103,8 @@ public class AntRunner {
      * @param taskProperties task properties
      * @param fileSets optional filesets (depends on the task!)
      */
-    public static void runTask(String name, Properties taskProperties, FileSet... fileSets) {
+    @SuppressWarnings({ "rawtypes", "unchecked" })
+    public static void runTask(String name, Map taskProperties, FileSet... fileSets) {
         Class<?> taskType = null;
         Task task = null;
         try {
@@ -103,7 +118,7 @@ public class AntRunner {
         task.setTaskType("AntRunner." + taskType);
         task.setTaskName("AntRunner." + taskType);
         task.setOwningTarget(new Target());
-        task.setLocation(new Location(System.getProperty("user.home")));
+        task.setLocation(new Location(System.getProperty("user.dir")));
         task.getProject().addBuildListener(createLogfileBuildListener());
         task.getProject().addBuildListener(createPipedAntBuildListener(new PipedOutputStream()));
 
@@ -111,34 +126,35 @@ public class AntRunner {
          * now we use the properties to fill bean attributes of ant task
          */
         final Set<Object> keySet = taskProperties.keySet();
+        final BeanClass bc = BeanClass.getBeanClass(taskType);
         for (final Object key : keySet) {
             final String n = (String) key;
-            final BeanClass bc = BeanClass.getBeanClass(taskType);
             bc.setValue(task, n, taskProperties.get(n));
         }
 
         /*
          * optional filesets
-         * NOT YET WORKING!
          */
-        if (task instanceof MatchingTask) {
-            final MatchingTask mtask = (MatchingTask) task;
-            for (final FileSet fs : fileSets) {
-                final Enumeration<FileSelector> fsEnum = fs.selectorElements();
-                while (fsEnum.hasMoreElements()) {
-                    final FileSelector sel = fsEnum.nextElement();
-                    mtask.add(sel);
-                }
-            }
-        } else if (fileSets.length > 0) {
+        if (fileSets.length > 0) {
             try { //try it directly through 'addFileset'
                 final Method addFilesetMethod = taskType.getMethod("addFileset", new Class[] { FileSet.class });
                 for (final FileSet fs : fileSets) {
                     addFilesetMethod.invoke(task, new Object[] { fs });
                 }
             } catch (final Exception e) {
-                LOG.warn("The task '" + task.getClass().getName()
-                    + "' is not a MatchingTask ==> given FileSets are ignored", e);
+                if (task instanceof MatchingTask) {
+                    final MatchingTask mtask = (MatchingTask) task;
+                    for (final FileSet fs : fileSets) {
+                        final Enumeration<FileSelector> fsEnum = fs.selectorElements();
+                        while (fsEnum.hasMoreElements()) {
+                            final FileSelector sel = fsEnum.nextElement();
+                            mtask.add(sel);
+                        }
+                    }
+                } else {
+                    LOG.warn("The task '" + task.getClass().getName()
+                        + "' is not a MatchingTask ==> given FileSets are ignored", e);
+                }
             }
         }
 
@@ -148,7 +164,7 @@ public class AntRunner {
         LOG.info("starting task " + taskType
             + " with properties:\n"
             + StringUtil.toFormattedString(taskProperties, 100, true)
-            + (fileSets.length > 0 ? "\nfilesets:\n"/* + StringUtil.toFormattedString(fileSets, 100, true)*/: ""));
+            /*+ (fileSets.length > 0 ? "\nfilesets:\n" + StringUtil.toFormattedString(fileSets, 100, true): "")*/);
         task.execute();
         LOG.info("build " + taskType + " successful");
     }
@@ -181,4 +197,33 @@ public class AntRunner {
         return consoleLogger;
     }
 
+    /**
+     * <directory-name>[:{include][,<include>...]]}[[exclude][,<exclude>...]];...
+     * 
+     * @param expression
+     * @return
+     */
+    public static FileSet[] createFileSets(String expression) {
+        String[] fsets = expression.split(";");
+        ArrayList<FileSet> fileSets = new ArrayList<FileSet>(fsets.length);
+        String[] includes, excludes;
+        String s;
+        for (int i = 0; i < fsets.length; i++) {
+            FileSet fileSet = new FileSet();
+            fileSet.setDir(new File(StringUtil.substring(fsets[i], null, ":{")));
+            s = StringUtil.substring(fsets[i], "{", "}");
+            includes = s.split(",");
+            fileSet.appendIncludes(includes);
+            s = StringUtil.substring(fsets[i], "}", null);
+            excludes = s.split(",");
+            fileSet.appendExcludes(excludes);
+//            for (int e = 0; e < excludes.length; e++) {
+//                FilenameSelector nameSelector = new FilenameSelector();
+//                nameSelector.setName(excludes[e]);
+//                fileSet.addFilename(nameSelector);
+//            }
+            fileSets.add(fileSet);
+        }
+        return (FileSet[]) fileSets.toArray(new FileSet[0]);
+    }
 }

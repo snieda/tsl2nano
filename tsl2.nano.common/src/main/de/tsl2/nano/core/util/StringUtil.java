@@ -448,7 +448,7 @@ public class StringUtil {
     }
 
     public static String extract(CharSequence source, String regexp, String replacement) {
-        return extract(source, regexp, replacement, 0);
+        return extract(source, regexp, replacement, 0, 0);
     }
 
     /**

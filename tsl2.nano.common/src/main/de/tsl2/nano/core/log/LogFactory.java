@@ -444,13 +444,6 @@ public/*abstract*/class LogFactory implements Runnable, Serializable {
         return BitUtil.hasBit(statesToLog, state);
     }
 
-    private static final Exception STACKTRACER = new Exception();
-
-    protected static String getCaller() {
-        StackTraceElement[] st = STACKTRACER.getStackTrace();
-        return st.length > 2 ? st[2].toString() : "<unknown>";
-    }
-
     /**
      * simple delegate to {@link #log(Class, State, Object, Throwable)}
      */

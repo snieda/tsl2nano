@@ -151,6 +151,7 @@ public class BeanUtil extends ByteUtil {
 
     /**
      * calls the internal {@link Object#clone()} method.
+     * 
      * @param src source to copy
      * @return copied object
      */
@@ -244,7 +245,7 @@ public class BeanUtil extends ByteUtil {
      * @return true, if type is not a map, collection or array.
      */
     public static boolean isSingleValueType(Class<?> type) {
-        return !(type.isArray() || Collection.class.isAssignableFrom(type) || Map.class.isAssignableFrom(type));
+        return !(type.isArray() || Collection.class.isAssignableFrom(type) || Map.class.isAssignableFrom(type) || isByteStream(type));
     }
 
     /**
@@ -712,6 +713,7 @@ public class BeanUtil extends ByteUtil {
 
     /**
      * creates a simple html-table as presentation for the given collector.
+     * 
      * @param collector
      * @return see {@link #present(BeanCollector, String, String, String, String, String, String, String, String)}
      */

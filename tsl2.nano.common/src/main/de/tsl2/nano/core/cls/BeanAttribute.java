@@ -12,6 +12,7 @@ package de.tsl2.nano.core.cls;
 import java.io.IOException;
 import java.io.Serializable;
 import java.lang.annotation.Annotation;
+import java.lang.reflect.Constructor;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.lang.reflect.ParameterizedType;
@@ -162,9 +163,10 @@ public class BeanAttribute<T> implements IAttribute<T> {
     }
 
     public static final boolean isGetterMethod(Method method) {
-        return method.getName().startsWith(PREFIX_READ_ACCESS) || method.getName().startsWith(PREFIX_BOOLEAN_READ_ACCESS);
+        return method.getName().startsWith(PREFIX_READ_ACCESS)
+            || method.getName().startsWith(PREFIX_BOOLEAN_READ_ACCESS);
     }
-    
+
     /**
      * searches for the write access method belonging to the given read access method.
      * 
@@ -239,6 +241,9 @@ public class BeanAttribute<T> implements IAttribute<T> {
     @Override
     public void setValue(Object beanInstance, Object value) {
         if (hasWriteAccess()) {
+            //String --> File(String) etc.
+            if (value != null && !writeAccessMethod.getReturnType().isAssignableFrom(value.getClass()))
+                value = wrap(value);
             //on primitive it is not possible to set a null value - we ignore setValue(null)
             if (!(getType().isPrimitive() && value == null)) {
                 try {
@@ -263,9 +268,10 @@ public class BeanAttribute<T> implements IAttribute<T> {
 
     @Override
     public void setName(String name) {
-        throw new IllegalStateException("beanattribute name cannot be changed. this is only supported on virtual attributes");
+        throw new IllegalStateException(
+            "beanattribute name cannot be changed. this is only supported on virtual attributes");
     }
-    
+
     /**
      * @param readAccessMethod getter method
      * @return attribute name
@@ -566,6 +572,40 @@ public class BeanAttribute<T> implements IAttribute<T> {
     @Override
     public boolean isVirtual() {
         return false;//IValueAccess.class.isAssignableFrom(getDeclaringClass());
+    }
+
+    T wrap(Object value) {
+        return wrap(value, getType());
+    }
+
+    /**
+     * sometimes the value is easily convertable to the desired type, like String-->File etc. respects primitives and
+     * wrapperType {@link Class}.
+     * 
+     * @param value to be wrapped into an instance of wrapperType.
+     * @param wrapperType having a constructor with parameter value.getClass()
+     * @return wrapped instance or value itself
+     */
+    @SuppressWarnings("unchecked")
+    public static <T> T wrap(Object value, Class<T> wrapperType) {
+        // check, if constructor for value is available in wrapper type
+        try {
+            Constructor<T> c;
+            if (value != null && !wrapperType.isAssignableFrom(value.getClass())) {
+                if (Class.class.isAssignableFrom(wrapperType))
+                    return (T) Class.forName(value.toString());
+                else {
+                    if (wrapperType.isPrimitive())
+                        wrapperType = PrimitiveUtil.getWrapper(wrapperType);
+                    if ((c = wrapperType.getConstructor(new Class[] { value.getClass() })) != null) {
+                        return c.newInstance(value);
+                    }
+                }
+            }
+        } catch (Exception e) {
+            ManagedException.forward(e);
+        }
+        return (T) value;
     }
 
 //    private void readObjectNoData() throws ObjectStreamException {

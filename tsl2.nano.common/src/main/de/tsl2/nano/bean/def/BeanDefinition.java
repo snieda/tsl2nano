@@ -954,7 +954,8 @@ public class BeanDefinition<T> extends BeanClass<T> implements IPluggable<BeanDe
 //                    if (true /*xmlFile.canWrite()*/) {
 //                        //be careful: having write access will introduce another behaviour
 //                        if (type != UNDEFINED.getClass())
-                beandef.autoInit(name);
+                if (ENV.get("beandef.autoinit", true))
+                    beandef.autoInit(name);
 //                        beandef.saveBeanDefinition(xmlFile);
 //                    } else
 //                        LOG.warn("couldn't write bean-definition cache to: " + xmlFile.getPath());

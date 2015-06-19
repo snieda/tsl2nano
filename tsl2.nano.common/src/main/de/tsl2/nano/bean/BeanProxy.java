@@ -53,7 +53,9 @@ public class BeanProxy implements InvocationHandler, Serializable {
     Map<String, Object> beanProperties = null;
     /** optional delegate (real object) (not used or tested yet!) */
     Object delegate;
-
+    /** if true, the property hashmap will be prefered to the delegate */
+    boolean preferProperties = false;
+    
     static/*final*/Method METHOD_GET_PROPERTY;
     static/*final*/Method METHOD_SET_PROPERTY;
     static {
@@ -73,7 +75,7 @@ public class BeanProxy implements InvocationHandler, Serializable {
      * Constructor
      */
     protected BeanProxy() {
-        this(new HashMap<String, Object>(), null);
+        this(new HashMap<String, Object>(), false, null);
     }
 
     /**
@@ -82,7 +84,7 @@ public class BeanProxy implements InvocationHandler, Serializable {
      * @param beanProperties bean properties to be used as attribute values.
      * @param delegate see {@linkplain #delegate}, may be null
      */
-    protected BeanProxy(Map<String, Object> beanProperties, Object delegate) {
+    protected BeanProxy(Map<String, Object> beanProperties, boolean preferProperties, Object delegate) {
         super();
         if (beanProperties != null) {
             this.beanProperties = beanProperties;
@@ -90,6 +92,7 @@ public class BeanProxy implements InvocationHandler, Serializable {
             this.beanProperties = new HashMap<String, Object>();
         }
         this.delegate = delegate;
+        this.preferProperties = preferProperties;
     }
 
     /**
@@ -103,6 +106,18 @@ public class BeanProxy implements InvocationHandler, Serializable {
 //    	return createBeanImplementation(interfaze, attributes, BeanProxy.class.getClassLoader());
 //    }
 
+    public static <T> T createBeanImplementation(Class<T> interfaze,
+            Map<String, Object> attributes) {
+        return createBeanImplementation(interfaze, attributes, null, false, null);
+    }
+
+    public static <T> T createBeanImplementation(Class<T> interfaze,
+            Map<String, Object> attributes,
+            Object delegate,
+            ClassLoader classLoader) {
+        return createBeanImplementation(interfaze, attributes, delegate, false, classLoader);
+    }
+
     /**
      * creates a new proxy instance with BeanProxy as invocationhandler.
      * 
@@ -113,10 +128,13 @@ public class BeanProxy implements InvocationHandler, Serializable {
     public static <T> T createBeanImplementation(Class<T> interfaze,
             Map<String, Object> attributes,
             Object delegate,
+            boolean preferProperties,
             ClassLoader classLoader) {
+        if (classLoader == null)
+            classLoader = Thread.currentThread().getContextClassLoader();
         return (T) Proxy.newProxyInstance(classLoader,
             new Class[] { interfaze, BeanProperty.class },
-            new BeanProxy(attributes, delegate));
+            new BeanProxy(attributes, preferProperties, delegate));
     }
 
     /**
@@ -131,7 +149,7 @@ public class BeanProxy implements InvocationHandler, Serializable {
 
         if (method.getName() == "getClass") {
             return proxy.getClass().getInterfaces()[0];
-        } else if (delegate != null && method.getDeclaringClass().isAssignableFrom(delegate.getClass())) {
+        } else if (!preferProperties && delegate != null && method.getDeclaringClass().isAssignableFrom(delegate.getClass())) {
             result = method.invoke(delegate, args);
         } else if (method.equals(METHOD_GET_PROPERTY)) {
             result = beanProperties.get(args[0]);
@@ -166,6 +184,10 @@ public class BeanProxy implements InvocationHandler, Serializable {
             result = getDefaultPrimitive(method, args, result);
         }
 
+        //not preferring properties but didn't find the property, try the delegate
+        if (preferProperties && result == null && delegate != null && method.getDeclaringClass().isAssignableFrom(delegate.getClass()))
+            result = method.invoke(delegate, args);
+        
         //for test purpose, we provide last invokation as property
         beanProperties.put(PROPERTY_INVOKATION_INFO + method.getName(), getMethodArgsId(method, args));
 
