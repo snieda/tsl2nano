@@ -13,11 +13,16 @@ import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.util.LinkedHashSet;
 import java.util.Map;
+import java.util.Properties;
 import java.util.Set;
+
+import org.apache.commons.logging.Log;
 
 import de.tsl2.nano.collection.CollectionUtil;
 import de.tsl2.nano.core.ManagedException;
 import de.tsl2.nano.core.cls.BeanClass;
+import de.tsl2.nano.core.log.LogFactory;
+import de.tsl2.nano.core.util.Util;
 
 /**
  * Should only be used by framework developers</p> Some classes are not intended to be extended. Defining fields and
@@ -50,7 +55,7 @@ import de.tsl2.nano.core.cls.BeanClass;
  */
 @SuppressWarnings("rawtypes")
 public class PrivateAccessor<T> extends UnboundAccessor<T> {
-
+    
     /**
      * see {@link UnboundAccessor#UnboundAccessor(Object)}
      */
@@ -189,6 +194,25 @@ public class PrivateAccessor<T> extends UnboundAccessor<T> {
             }
         }
         return result;
+    }
+
+    /**
+     * assign all given properties to the fields of the given instance.
+     * 
+     * @param instance to be changed
+     * @param fieldValues
+     * @param assignNulls whether to assign properties with null values
+     * @return the given instance itself
+     */
+    public static <T> T assign(T instance, Properties fieldValues, boolean assignNulls) {
+        UnboundAccessor<T> acc = new PrivateAccessor<T>(instance);
+
+        for (Object key : fieldValues.keySet()) {
+            if (Util.isEmpty(fieldValues.get(key)))
+                continue;
+            acc.set((String) key, fieldValues.get(key));
+        }
+        return instance;
     }
 
 }

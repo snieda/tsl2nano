@@ -13,12 +13,17 @@ import java.lang.annotation.Annotation;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Hashtable;
 import java.util.List;
 import java.util.Map;
 
+import org.apache.commons.logging.Log;
+
 import de.tsl2.nano.core.ManagedException;
+import de.tsl2.nano.core.cls.BeanAttribute;
+import de.tsl2.nano.core.log.LogFactory;
 import de.tsl2.nano.core.util.StringUtil;
 import de.tsl2.nano.core.util.Util;
 
@@ -44,6 +49,7 @@ import de.tsl2.nano.core.util.Util;
  */
 @SuppressWarnings({ "unchecked", "rawtypes" })
 public class UnboundAccessor<T> {
+    private static final Log LOG = LogFactory.getLog(UnboundAccessor.class);
     /** instance to access (not-)inherited members and methods (privates too) */
     T instance;
 
@@ -125,12 +131,12 @@ public class UnboundAccessor<T> {
      * 
      * @return all members of all instance class and all super-classes
      */
-    public Map<String, Object> members() {
+    public Map<String, Object> members(String...names) {
         if (memberCache == null) {
             useMemberCache = true;
             setMemberCache(new HashMap<String, Object>());
         }
-        return members(this.accessibleInstance().getClass());
+        return members(this.accessibleInstance().getClass(), names);
     }
 
     /**
@@ -139,13 +145,15 @@ public class UnboundAccessor<T> {
      * @param cls class to evaluate
      * @return all members of given class and all super-classes
      */
-    protected Map<String, Object> members(Class<? extends Object> cls) {
+    protected Map<String, Object> members(Class<? extends Object> cls, String...names) {
         if (cls.getSuperclass() != null) {
-            members(cls.getSuperclass());
+            members(cls.getSuperclass(), names);
         }
         Field[] fields = cls.getDeclaredFields();
+        List nameList = names.length > 0 ? Arrays.asList(names) : null;
         for (Field field : fields) {
-            member(field.getName(), field.getType());
+            if (nameList == null || nameList.contains(field.getName()))
+                member(field.getName(), field.getType());
         }
         return memberCache;
     }
@@ -195,9 +203,12 @@ public class UnboundAccessor<T> {
      */
     public void set(String memberName, Object newValue) {
         try {
+            if (LOG.isTraceEnabled())
+                LOG.trace("changing field " + instance.getClass().getName() + "." + memberName + ": " + newValue);
             Field f = getField(memberName);
             f.setAccessible(true);
-            f.set(instance, newValue);
+            //TODO: refactor to avoid access to BeanAttribute
+            f.set(instance, BeanAttribute.wrap(newValue, f.getType()));
             if (useMemberCache) {
                 memberCache.put(memberName, newValue != null ? newValue : NULL);
             }
