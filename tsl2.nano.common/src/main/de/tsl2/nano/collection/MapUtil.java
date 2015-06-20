@@ -80,7 +80,7 @@ public class MapUtil {
     public static Map asMap(Object... keysAndValues) {
         return asMap(new LinkedHashMap<Object, Object>(), keysAndValues);
     }
-    public static Map asMap(Map instance, Object... keysAndValues) {
+    public static <M extends Map> M asMap(M instance, Object... keysAndValues) {
         if (keysAndValues == null || keysAndValues.length % 2 == 1) {
             throw ManagedException.implementationError(
                 "the 'keysAndValues' parameters must not be null and must contain pairs of keys and values!",

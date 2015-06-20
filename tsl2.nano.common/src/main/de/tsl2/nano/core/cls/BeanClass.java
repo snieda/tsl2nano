@@ -716,14 +716,23 @@ public class BeanClass<T> implements Serializable {
     }
 
     /**
-     * hasDefaultConstructor
-     * 
-     * @param clazz
-     * @return
+     * @delegates to {@link #hasDefaultConstructor(Class, boolean)} with mustBePublic = false
      */
     public static boolean hasDefaultConstructor(Class<?> clazz) {
+        return hasDefaultConstructor(clazz, false);
+    }
+
+    /**
+     * hasDefaultConstructor
+     * 
+     * @param clazz to be checked for the default constructor
+     * @param mustBePublic if true, the constructors accessible has to be true
+     * @return true, if default constructor available
+     */
+    public static boolean hasDefaultConstructor(Class<?> clazz, boolean mustBePublic) {
         try {
-            return clazz.getDeclaredConstructor(new Class[0]) != null;
+            Constructor c;
+            return (c = clazz.getDeclaredConstructor(new Class[0])) != null && (!mustBePublic || c.isAccessible());
         } catch (Exception e) {
             return false;
         }

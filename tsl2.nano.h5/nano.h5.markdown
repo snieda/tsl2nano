@@ -2336,6 +2336,7 @@ Net:Connection-->Link-->Cover(content, descriptor)
 * Test App starten!
 * beandef.xsd in *.xml integrieren
 * terminal: flat mode (super-tree with selection e.g. 1.1.1)
+* terminal: scans --> varargs like String...
 
 war:
 * WEB-INF/web..xml rausschmeissen

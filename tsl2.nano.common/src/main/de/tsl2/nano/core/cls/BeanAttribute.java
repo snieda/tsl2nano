@@ -591,7 +591,7 @@ public class BeanAttribute<T> implements IAttribute<T> {
         // check, if constructor for value is available in wrapper type
         try {
             Constructor<T> c;
-            if (value != null && !wrapperType.isAssignableFrom(value.getClass())) {
+            if (value != null && !PrimitiveUtil.isAssignableFrom(wrapperType, value.getClass())) {
                 if (Class.class.isAssignableFrom(wrapperType))
                     return (T) Class.forName(value.toString());
                 else {
