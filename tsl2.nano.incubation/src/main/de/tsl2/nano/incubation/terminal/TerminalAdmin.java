@@ -21,7 +21,7 @@ import de.tsl2.nano.incubation.terminal.item.Option;
  * @author Tom, Thomas Schneider
  * @version $Revision$ 
  */
-public class TerminalAdmin extends Terminal {
+public class TerminalAdmin extends SIShell {
     /** serialVersionUID */
     private static final long serialVersionUID = 1L;
 
@@ -35,10 +35,10 @@ public class TerminalAdmin extends Terminal {
         final Container s = new Container(filename, "edit terminal");
         t.root = s;
         t.items = new Container(filename, "MyTerminal");
-        s.add(new Input("name", null, filename, "Terminal name"));
-        s.add(new Input("width", null, TextTerminal.SCREEN_WIDTH, "Terminal width"));
-        s.add(new Input("height", null, TextTerminal.SCREEN_HEIGHT, "Terminal height"));
-        s.add(new Input("style", null, TextTerminal.BLOCK_BAR, "Terminal style"));
+        s.add(new Input("name", null, filename, "SIShell name"));
+        s.add(new Input("width", null, TextTerminal.SCREEN_WIDTH, "SIShell width"));
+        s.add(new Input("height", null, TextTerminal.SCREEN_HEIGHT, "SIShell height"));
+        s.add(new Input("style", null, TextTerminal.BLOCK_BAR, "SIShell style"));
         
         IContainer creator;
         s.add(creator = new Container("items", "terminal items"));
@@ -71,6 +71,6 @@ public class TerminalAdmin extends Terminal {
 
     @Override
     protected void save() {
-        XmlUtil.saveXml(name, new Terminal(items));
+        XmlUtil.saveXml(name, new SIShell(items));
     }
 }

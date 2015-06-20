@@ -46,14 +46,13 @@ import de.tsl2.nano.core.util.StringUtil;
 import de.tsl2.nano.core.util.Util;
 import de.tsl2.nano.core.util.XmlUtil;
 import de.tsl2.nano.incubation.terminal.IItem.Type;
-import de.tsl2.nano.incubation.terminal.item.AItem;
 import de.tsl2.nano.incubation.terminal.item.Container;
 import de.tsl2.nano.util.PrivateAccessor;
 import de.tsl2.nano.util.SchedulerUtil;
 
 /**
- * Terminal showing a textual manual. The configuration can be read through an xml file (standard name:
- * {@link #DEFAULT_NAME}). For further informations, see {@link IItem}.
+ * Structured Input Shell (SIShell) showing a textual manual. The configuration can be read through an xml file
+ * (standard name: {@link #DEFAULT_NAME}). For further informations, see {@link IItem}.
  * 
  * <pre>
  * Features:
@@ -74,20 +73,20 @@ import de.tsl2.nano.util.SchedulerUtil;
  * - extends itself downloading required jars from network (if {@link #useNetworkExtension} ist true)
  * - schedule mode: starts a scheduler for an action
  * - selectors for files, content of files, class members, properties, csv-files etc.
- * - administration modus to create/remove items
+ * - administration modus to create/change/remove items, change terminal properties
  * </pre>
  * 
  * @author Tom
  * @version $Revision$
  */
 @SuppressWarnings({ "unchecked", "rawtypes" })
-public class Terminal implements IItemHandler, Serializable {
+public class SIShell implements IItemHandler, Serializable {
     /** serialVersionUID */
     private static final long serialVersionUID = -5767124822662015899L;
     transient private static final Log LOG;
     static {
         LogFactory.setPrintToConsole(false);
-        LOG = LogFactory.getLog(Terminal.class);
+        LOG = LogFactory.getLog(SIShell.class);
     }
     /** used as file name */
     @Attribute
@@ -168,7 +167,7 @@ public class Terminal implements IItemHandler, Serializable {
     /** quits the terminal */
     static final String KEY_QUIT = "quit";
 
-    public static final String PREFIX = "terminal.";
+    public static final String PREFIX = "sishell.";
     public static final String KEY_NAME = PREFIX + "name";
     public static final String KEY_WIDTH = PREFIX + "width";
     public static final String KEY_HEIGHT = PREFIX + "height";
@@ -181,19 +180,19 @@ public class Terminal implements IItemHandler, Serializable {
     static final String ASK_ENTER = ">>> PLEASE HIT ENTER FOR THE NEXT PAGE OR ENTER A SELECTION <<<";
     private static final String LOGO = "tsl2nano.logo.png";
 
-    public Terminal() {
+    public SIShell() {
         initDeserialization();
     }
 
-    public Terminal(IItem root) {
+    public SIShell(IItem root) {
         this(root, System.in, System.out);
     }
 
-    public Terminal(IItem root, InputStream in, PrintStream out) {
+    public SIShell(IItem root, InputStream in, PrintStream out) {
         this(root, in, out, SCREEN_WIDTH, SCREEN_HEIGHT, BLOCK_BAR, null);
     }
 
-    public Terminal(IItem root, InputStream in, PrintStream out, int width, int height, int style) {
+    public SIShell(IItem root, InputStream in, PrintStream out, int width, int height, int style) {
         this(root, in, out, width, height, style, null);
     }
 
@@ -205,7 +204,7 @@ public class Terminal implements IItemHandler, Serializable {
      * @param in
      * @param out
      */
-    public Terminal(IItem root,
+    public SIShell(IItem root,
             InputStream in,
             PrintStream out,
             int width,
@@ -232,8 +231,8 @@ public class Terminal implements IItemHandler, Serializable {
         return env;
     }
 
-    public static Terminal create(String file) {
-        Terminal t = XmlUtil.loadXml(file, Terminal.class);
+    public static SIShell create(String file) {
+        SIShell t = new File(file).exists() ? XmlUtil.loadXml(file, SIShell.class) : new SIShell(new Container(file, null));
         t.name = file;
         return t;
     }
@@ -244,7 +243,7 @@ public class Terminal implements IItemHandler, Serializable {
     @Override
     public void run() {
         try {
-            LOG.info("starting terminal " + name);
+            LOG.info("starting SI-Shell " + name);
             input = new Scanner(in);
             prepareEnvironment(env, root);
 //            //welcome screen
@@ -309,9 +308,9 @@ public class Terminal implements IItemHandler, Serializable {
     protected void shutdown() {
         save();
         String shutdownInfo =
-            "\n|\n|\nSHUTDOWN TERMINAL!\n|\nsaved changes to\n" + name + "\nand\n " + name + ".properties";
+            "\n|\n|\nSHUTDOWN SI-Shell!\n|\nsaved changes to\n" + name + "\nand\n " + name + ".properties";
         printScreen(shutdownInfo, out, null, style, true);
-        LOG.info("terminal " + name + " ended");
+        LOG.info("si-shell " + name + " ended");
     }
 
     protected void save() {
@@ -352,7 +351,7 @@ public class Terminal implements IItemHandler, Serializable {
             }
         }
         if (useNetworkExtension) {
-            String classpath = System.getProperty("user.dir") + "/lib";
+            String classpath = System.getProperty("user.dir") + "/." + getClass().getSimpleName().toLowerCase();
             new File(classpath).mkdirs();
             NetworkClassLoader.createAndRegister(classpath);
         }
@@ -465,7 +464,7 @@ public class Terminal implements IItemHandler, Serializable {
                 } else if (isCommand(input, KEY_SAVE)) {
                     save();
                 } else if (isCommand(input, KEY_QUIT)) {
-                    throw new Finished("terminal stopped");
+                    throw new Finished("si-shell stopped");
                 } else {
                     throw new IllegalArgumentException(input + " is not a known command!");
                 }
@@ -635,7 +634,7 @@ public class Terminal implements IItemHandler, Serializable {
     }
 
     public static final String getHelp() {
-        return "The Terminal is configured through xml files with only four types of items.\n"
+        return "The SIShell is configured through xml files with only four types of items.\n"
             + " (+) Tree    : holds childs of all types, but normally Options\n"
             + " (*) Input   : user input, has to be terminated with ENTER\n"
             + " (!) Action  : starts a command --> if terminated, the user has to hit ENTER\n"
@@ -650,7 +649,7 @@ public class Terminal implements IItemHandler, Serializable {
             + "If your input starts with ':', one of the following commands can be entered:\n"
             + " properties: list of all property values\n"
             + " info      : system info will show\n"
-            + " quit      : will stop the terminal save the property file.\n"
+            + " quit      : will stop the shell, save the property file.\n"
             + " record    : will record your actions to be saved as batch\n"
             + " stop      : stops the macro\n"
             + " help      : shows this help\n"
@@ -662,7 +661,7 @@ public class Terminal implements IItemHandler, Serializable {
             + "If an item container (a tree) has only one visible item, that item will be activated."
             + "If you turn on 'sequence', the user doesn't have to enter each command number - all"
             + " items of a container will be asked sequentially."
-            + "You can set the mode 'useNetworkExtension' to true, if you want, that the terminal"
+            + "You can set the mode 'useNetworkExtension' to true, if you want, that the shell "
             + "downloads required (by action-definitions) jar-files itself.";
     }
 
@@ -683,9 +682,17 @@ public class Terminal implements IItemHandler, Serializable {
 //            return;
 //        }
         try {
+//            //TODO: refactor
+//            ClassLoader cl = new NetworkClassLoader(Thread.currentThread().getContextClassLoader());
+//            Thread.currentThread().setContextClassLoader(cl);
+
             String name = args.length > 0 ? args[0] : DEFAULT_NAME;
+            if (FileUtil.hasResource(name)) {
+                ENV.extractResource(name);
+                name = ENV.getConfigPath() + name;
+            }
             boolean admin = args.length > 1 && args[1].equals(TerminalAdmin.ADMIN) ? true : false;
-            if (admin || !new File(name).exists()) {
+            if (admin/* || !new File(name).exists()*/) {
                 TerminalAdmin.create(name).run();
             } else {
                 create(name).run();

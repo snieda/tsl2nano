@@ -23,10 +23,10 @@ import de.tsl2.nano.core.execution.IRunnable;
 import de.tsl2.nano.core.log.LogFactory;
 import de.tsl2.nano.core.util.StringUtil;
 import de.tsl2.nano.incubation.terminal.IItem;
-import de.tsl2.nano.incubation.terminal.Terminal;
+import de.tsl2.nano.incubation.terminal.SIShell;
 
 /**
- * action to be used on {@link Terminal}s. no inline {@link Runnable} are supported as instances of this class must be
+ * action to be used on {@link SIShell}s. no inline {@link Runnable} are supported as instances of this class must be
  * serializable! So we do that only through reflection.
  * 
  * @author Tom

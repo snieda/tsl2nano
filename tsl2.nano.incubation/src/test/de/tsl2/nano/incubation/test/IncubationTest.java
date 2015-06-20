@@ -27,9 +27,9 @@ import java.util.Collection;
 import java.util.HashMap;
 import java.util.Hashtable;
 import java.util.LinkedHashMap;
-import java.util.List;
 import java.util.Map;
 import java.util.Properties;
+import java.util.TreeMap;
 import java.util.concurrent.Callable;
 
 import javax.print.attribute.standard.MediaSizeName;
@@ -68,16 +68,16 @@ import de.tsl2.nano.incubation.specification.Pool;
 import de.tsl2.nano.incubation.specification.rules.Rule;
 import de.tsl2.nano.incubation.specification.rules.RulePool;
 import de.tsl2.nano.incubation.terminal.AsciiImage;
-import de.tsl2.nano.incubation.terminal.Terminal;
+import de.tsl2.nano.incubation.terminal.SIShell;
 import de.tsl2.nano.incubation.terminal.item.Action;
 import de.tsl2.nano.incubation.terminal.item.Container;
 import de.tsl2.nano.incubation.terminal.item.Input;
 import de.tsl2.nano.incubation.terminal.item.MainAction;
+import de.tsl2.nano.incubation.terminal.item.selector.AntTaskSelector;
 import de.tsl2.nano.incubation.terminal.item.selector.DirSelector;
 import de.tsl2.nano.incubation.terminal.item.selector.FieldSelector;
 import de.tsl2.nano.incubation.terminal.item.selector.FileSelector;
 import de.tsl2.nano.incubation.terminal.item.selector.PropertySelector;
-import de.tsl2.nano.incubation.terminal.item.selector.Selector;
 import de.tsl2.nano.incubation.vnet.ILocatable;
 import de.tsl2.nano.incubation.vnet.Net;
 import de.tsl2.nano.incubation.vnet.Node;
@@ -596,18 +596,18 @@ public class IncubationTest {
 //        root.add(new Action("action1", null, new SRunnable(), "Action 1"));
 //
 //        InputStream in = ByteUtil.getInputStream("1\n2\n3\n4\n5\n\n".getBytes());
-//        new Terminal(root, in, System.out, 79, 10, 1).run();
+//        new SIShell(root, in, System.out, 79, 10, 1).run();
 //
-//        Terminal.main(new String[] { Terminal.DEFAULT_NAME });
+//        SIShell.main(new String[] { SIShell.DEFAULT_NAME });
 //
 //        //admin console
-//        Terminal.main(new String[] { Terminal.DEFAULT_NAME, TerminalAdmin.ADMIN });
+//        SIShell.main(new String[] { SIShell.DEFAULT_NAME, TerminalAdmin.ADMIN });
 //    }
 //
     @Test
-    public void testTerminalTools() throws Exception {
+    public void testSIShellTools() throws Exception {
 
-        FileUtil.removeToBackup(Terminal.DEFAULT_NAME);
+        FileUtil.removeToBackup(SIShell.DEFAULT_NAME);
 
         Container root = new Container("Toolbox", "Helpful Utilities");
 
@@ -668,7 +668,7 @@ public class IncubationTest {
 
         Container ant = new Container("Ant", null);
         ant.add(new AntTaskSelector("task", "Jar", "pack given filesets to zip"));
-        ant.add(new PropertySelector<String>("properties", "ant task properties", null/*MapUtil.asMap("destFile", "mynew.jar")*/));
+        ant.add(new PropertySelector<String>("properties", "ant task properties", null/*MapUtil.asMap(new TreeMap(), "destFile", "mynew.jar")*/));
         ant.add(new Input("filesets", "./:{**/*.*ml}**/*.xml;${user.dir}:{*.txt}", "filesets expression", false));
         ant.add(new Action(AntRunner.class, "runTask", "task", "properties", "filesets"));
         root.add(ant);
@@ -703,35 +703,35 @@ public class IncubationTest {
         file.add(new Action("List", FileUtil.class, "foreach", "directory", "file", "file.operation.null"));
         file.add(new Action("Delete", FileUtil.class, "foreach", "directory", "file", "file.operation.delete"));
         file.add(new Action("Copy", FileUtil.class, "foreach", "directory", "file", "file.operation.copy"));
-        file.add(new MainAction("Imageviewer", AsciiImage.class, "file", "image.out", "terminal.width",
-            "terminal.height"));
+        file.add(new MainAction("Imageviewer", AsciiImage.class, "file", "image.out", "sishell.width",
+            "sishell.height"));
         root.add(file);
 
         Map<String, Object> defs = new HashMap<String, Object>();
         defs.put("file.operation.delete", "test");
         defs.put("file.operation.delete", "test");
         defs.put("image.out", "-out");
-        System.getProperties().put(Terminal.KEY_SEQUENTIAL, true);
+        System.getProperties().put(SIShell.KEY_SEQUENTIAL, true);
 
-        InputStream in = Terminal.createBatchStream("Printing", "jobname", "test", "10", "", ":quit");
-        new Terminal(root, in, System.out, 79, 22, 1, defs).run();
+        InputStream in = SIShell.createBatchStream("Printing", "jobname", "test", "10", "", ":quit");
+        new SIShell(root, in, System.out, 79, 22, 1, defs).run();
 
         //check, if serialization was ok
-        System.setIn(Terminal.createBatchStream("", "Printing", "jobname", "test", "10", "", ":quit"));
-        Terminal.main(new String[] { Terminal.DEFAULT_NAME });
+        System.setIn(SIShell.createBatchStream("", "Printing", "jobname", "test", "10", "", ":quit"));
+        SIShell.main(new String[] { SIShell.DEFAULT_NAME });
 
         //ok? --> use it in our project!
-        FileUtil.copy(Terminal.DEFAULT_NAME, "src/resources/" + Terminal.DEFAULT_NAME);
+        FileUtil.copy(SIShell.DEFAULT_NAME, "src/resources/" + SIShell.DEFAULT_NAME);
 
         //admin console
-//        Terminal.main(new String[] { Terminal.DEFAULT_NAME, TerminalAdmin.ADMIN });
+//        SIShell.main(new String[] { SIShell.DEFAULT_NAME, TerminalAdmin.ADMIN });
     }
 
     @Test
     public void testTerminalAdmin() throws Exception {
         //admin console
         //TODO: test
-//        Terminal.main(new String[] { Terminal.DEFAULT_NAME, TerminalAdmin.ADMIN });
+//        SIShell.main(new String[] { SIShell.DEFAULT_NAME, TerminalAdmin.ADMIN });
     }
 
     static void log_(String msg) {
@@ -879,57 +879,4 @@ class EBean extends TypeBean {
         return getString() + getImmutableInteger();//new String(BeanUtil.serialize(this));
     }
 
-}
-
-class AntTaskSelector extends Selector {
-
-    /**
-     * constructor
-     */
-    public AntTaskSelector() {
-        super();
-        // TODO Auto-generated constructor stub
-    }
-
-    /**
-     * constructor
-     * 
-     * @param name
-     * @param value
-     * @param description
-     */
-    public AntTaskSelector(String name, Object value, String description) {
-        super(name, value, description);
-        // TODO Auto-generated constructor stub
-    }
-
-    /**
-     * constructor
-     * 
-     * @param name
-     * @param description
-     */
-    public AntTaskSelector(String name, String description) {
-        super(name, description);
-        // TODO Auto-generated constructor stub
-    }
-
-    @Override
-    protected List createItems(Map props) {
-        String tasks =
-            "Ant AntCall ANTLR AntStructure AntVersion Apply ExecOn Apt Attrib Augment Available Basename Bindtargets BuildNumber"
-                + " BUnzip2 BZip2 Cab Continuus Synergy Tasks CvsChangeLog Checksum Chgrp Chmod Chown Clearcase Tasks Componentdef Concat"
-                + " Condition Supported conditions Copy Copydir Copyfile Cvs CVSPass CvsTagDiff CvsVersion Defaultexcludes Delete Deltree"
-                + " Depend Dependset Diagnostics Dirname Ear Echo Echoproperties EchoXML EJB Tasks Exec Fail Filter FixCRLF FTP GenKey"
-                + " Get GUnzip GZip Hostinfo Image Import Include Input Jar Jarlib-available Jarlib-display Jarlib-manifest"
-                + " Jarlib-resolve Java Javac JavaCC Javadoc Javadoc2 Javah JDepend JJDoc JJTree Jlink JspC JUnit JUnitReport Length"
-                + " LoadFile LoadProperties LoadResource Local MacroDef Mail MakeURL Manifest ManifestClassPath MimeMail Mkdir Move"
-                + " Native2Ascii NetRexxC Nice Parallel Patch PathConvert Perforce Tasks PreSetDef ProjectHelper Property PropertyFile"
-                + " PropertyHelper Pvcs Record Rename RenameExtensions Replace ReplaceRegExp ResourceCount Retry RExec Rmic Rpm"
-                + " SchemaValidate Scp Script Scriptdef Sequential ServerDeploy Setproxy SignJar Sleep SourceOffSite Sound Splash Sql"
-                + " Sshexec Sshsession Subant Symlink Sync Tar Taskdef Telnet Tempfile Touch Translate Truncate TStamp Typedef Unjar"
-                + " Untar Unwar Unzip Uptodate Microsoft Visual SourceSafe Tasks Waitfor War WhichResource Weblogic JSP Compiler"
-                + " XmlProperty XmlValidate XSLT Style Zip";
-        return Arrays.asList(tasks.split(" "));
-    }
 }

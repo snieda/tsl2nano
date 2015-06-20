@@ -14,12 +14,14 @@ import java.io.InputStream;
 import java.io.PrintStream;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Properties;
 
 import org.simpleframework.xml.Element;
 import org.simpleframework.xml.ElementList;
+import org.simpleframework.xml.core.Commit;
 
 import de.tsl2.nano.core.util.FileUtil;
 import de.tsl2.nano.core.util.StringUtil;
@@ -45,7 +47,10 @@ public class FileSelector extends Selector<String> {
      * constructor
      */
     public FileSelector() {
-        super();
+        if (roots == null) {
+            roots = new LinkedList<String>();
+            roots.add("${user.dir}");
+        }
     }
 
     public FileSelector(String name, String value, String include, String... roots) {
@@ -105,4 +110,12 @@ public class FileSelector extends Selector<String> {
             nodes.add(dir);
         }
     }
+    
+//    @Commit
+//    protected void initDeserialization() {
+//        super.initDeserialization();
+//        if (roots == null) {
+//            
+//        }
+//    }
 }

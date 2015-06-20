@@ -27,7 +27,7 @@ import de.tsl2.nano.core.util.StringUtil;
 import de.tsl2.nano.core.util.Util;
 import de.tsl2.nano.incubation.terminal.IContainer;
 import de.tsl2.nano.incubation.terminal.IItem;
-import de.tsl2.nano.incubation.terminal.Terminal;
+import de.tsl2.nano.incubation.terminal.SIShell;
 
 /**
  * the Container of items. if only one item is available, it should delegate the request directly to that item.
@@ -170,7 +170,7 @@ public class Container<T> extends AItem<T> implements IContainer<T> {
     @SuppressWarnings("unchecked")
     @Override
     public IItem react(IItem caller, String input, InputStream in, PrintStream out, Properties env) {
-        sequential = Util.get(Terminal.KEY_SEQUENTIAL, false);
+        sequential = Util.get(SIShell.KEY_SEQUENTIAL, false);
         if (Util.isEmpty(input) && !sequential) {
             return getParent();
         }
@@ -295,7 +295,7 @@ public class Container<T> extends AItem<T> implements IContainer<T> {
                 if (sequential)
                     return super.getDescription(env, full);
                 else {
-                    int height = Util.get(Terminal.KEY_HEIGHT, 20);
+                    int height = Util.get(SIShell.KEY_HEIGHT, 20);
                     img = printImageDescription(height - (list.size() >= height ? 0 : list.size()));
                 }
             }
@@ -307,7 +307,7 @@ public class Container<T> extends AItem<T> implements IContainer<T> {
                 kl = Math.max(kl, ((AItem) t).getName(-1, (char) -1).length());
             }
             kl++;
-            int vwidth = Util.get(Terminal.KEY_WIDTH, 80) - (kl + 9);
+            int vwidth = Util.get(SIShell.KEY_WIDTH, 80) - (kl + 9);
             //print the child item list
             int s = String.valueOf(list.size()).length() + 1;
             for (AItem t : list) {

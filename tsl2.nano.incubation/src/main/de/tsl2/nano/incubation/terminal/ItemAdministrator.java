@@ -51,7 +51,7 @@ public class ItemAdministrator<T> extends Container<T> {
     private static final long serialVersionUID = 5127419882040627794L;
 
     transient IItem parent;
-    transient Terminal terminal;
+    transient SIShell terminal;
     /** item as descriptor for new items */
     transient Properties item;
     private Action<T> addingAction;
@@ -100,11 +100,11 @@ public class ItemAdministrator<T> extends Container<T> {
     /**
      * constructor
      */
-    public ItemAdministrator(Terminal terminal, Container<T> toAdmin) {
+    public ItemAdministrator(SIShell terminal, Container<T> toAdmin) {
         init(terminal, toAdmin);
     }
 
-    protected void init(final Terminal terminal, Container<T> toAdmin) {
+    protected void init(final SIShell terminal, Container<T> toAdmin) {
         this.terminal = terminal;
         this.parent = toAdmin;
         this.nodes = (List<AItem<T>>) new PrivateAccessor(toAdmin).member("nodes");
@@ -159,7 +159,7 @@ public class ItemAdministrator<T> extends Container<T> {
             @Override
             public IItem react(IItem caller, String input, InputStream in, PrintStream out, Properties env) {
                 out.println("\nchanging terminal:\n" + terminal);
-                askItem(in, out, env, this, item, Terminal.presentalMembers());
+                askItem(in, out, env, this, item, SIShell.presentalMembers());
                 return super.react(caller, input, in, out, env);
             }
 
@@ -187,7 +187,7 @@ public class ItemAdministrator<T> extends Container<T> {
         //first, the standard attributes
         for (int i = 0; i < itemAttributes.length; i++) {
             out.print(itemAttributes[i] + ": ");
-            item.put(itemAttributes[i], Terminal.nextLine(in, out));
+            item.put(itemAttributes[i], SIShell.nextLine(in, out));
         }
 
         //some defaults and instances
@@ -209,7 +209,7 @@ public class ItemAdministrator<T> extends Container<T> {
                     if (!description[i].equals(ARGS)) {
                         if (!description[i].contains("=")) {
                             out.print(description[i] + ": ");
-                            item.put(description[i], Terminal.nextLine(in, out));
+                            item.put(description[i], SIShell.nextLine(in, out));
                         } else {
                             String kv[] = description[i].split("=");
                             item.put(kv[0], kv[1]);
@@ -220,7 +220,7 @@ public class ItemAdministrator<T> extends Container<T> {
                         String arg;
                         while (true) {
                             out.print("argument name " + argNames.size() + ": ");
-                            if (Util.isEmpty(arg = Terminal.nextLine(in, out)))
+                            if (Util.isEmpty(arg = SIShell.nextLine(in, out)))
                                 break;
                             argNames.add(arg);
                         }
@@ -233,7 +233,7 @@ public class ItemAdministrator<T> extends Container<T> {
                 String cls = type.contains(".") ? type : AItem.class.getPackage().getName() + "." + type;
                 out.println("\nTrying type: " + cls);
                 out.println("<<<please hit enter to confirm>>>");
-                Terminal.nextLine(in, out);
+                SIShell.nextLine(in, out);
                 item.put(TYPE, cls);
             }
         }

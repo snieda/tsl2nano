@@ -273,6 +273,31 @@ set the following jvm properties:
 			<property name="sh.jar.exclude2" value="**/tsl2.nano.serviceaccess*.jar" />
 		</ant>
 
+		<!-- create SI Shell -->
+		<ant antfile="../tsl2.nano.common/shell.xml" target="sh.jar">
+			<property file="../tsl2.nano.incubation/src/resources/build-tsl2.nano.incubation.properties" />
+			<property name="sh.jar.srcdir" value="../tsl2.nano.common/bin" />
+			<property name="sh.jar.destination" value="${test.dir}/sishell.${build.version}.jar" />
+			<property name="sh.jar.exclude" value="**/test/**" />
+		</ant>
+		<ant antfile="../tsl2.nano.common/shell.xml" target="sh.jar">
+			<property file="../tsl2.nano.incubation/src/resources/build-tsl2.nano.incubation.properties" />
+			<property name="sh.jar.srcdir" value="../tsl2.nano.common/lib" />
+			<property name="sh.jar.destination" value="${test.dir}/sishell.${build.version}.jar" />
+		</ant>
+		<ant antfile="../tsl2.nano.common/shell.xml" target="sh.jar">
+			<property file="../tsl2.nano.incubation/src/resources/build-tsl2.nano.incubation.properties" />
+			<property name="sh.jar.srcdir" value="../tsl2.nano.jarresolver/bin" />
+			<property name="sh.jar.destination" value="${test.dir}/sishell.${build.version}.jar" />
+			<property name="sh.jar.exclude" value="**/test/**" />
+		</ant>
+		<ant antfile="../tsl2.nano.common/shell.xml" target="sh.jar">
+			<property file="../tsl2.nano.incubation/src/resources/build-tsl2.nano.incubation.properties" />
+			<property name="sh.jar.srcdir" value="../tsl2.nano.incubation/bin" />
+			<property name="sh.jar.destination" value="${test.dir}/sishell.${build.version}.jar" />
+			<property name="sh.jar.exclude" value="**/test/**" />
+		</ant>
+		
 		<!-- create test environment -->
 		<ant antfile="../tsl2.nano.common/shell.xml" target="sh.copy">
 			<property name="sh.copy.srcdir" value="../tsl2.nano.h5/src/resources" />

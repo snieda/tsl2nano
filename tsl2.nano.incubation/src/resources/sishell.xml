@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<terminal name="terminal.xml" width="79" height="22" style="1" bars="true" refreshConfig="false" useNetworkExtension="true" sequential="false">
+<SIShell name="sishell.xml" width="79" height="22" style="1" bars="true" refreshConfig="false" useNetworkExtension="true" sequential="false">
    <definition name="file.operation.delete">
       <value class="java.lang.String">test</value>
    </definition>
@@ -233,7 +233,7 @@
          </item>
       </item>
       <item class="de.tsl2.nano.incubation.terminal.item.Container" name="Ant" multiple="false">
-         <item class="de.tsl2.nano.incubation.test.AntTaskSelector" name="task" multiple="false">
+         <item class="de.tsl2.nano.incubation.terminal.item.selector.AntTaskSelector" name="task" multiple="false">
             <value class="java.lang.String">Jar</value>
          </item>
          <item class="de.tsl2.nano.incubation.terminal.item.selector.PropertySelector" name="properties" multiple="false"/>
@@ -261,7 +261,7 @@
                   <scale>-1</scale>
                   <precision>-1</precision>
                </constraints>
-               <value class="java.lang.String">192.168.56.1</value>
+               <value class="java.lang.String">192.168.178.21</value>
             </item>
             <item class="de.tsl2.nano.incubation.terminal.item.Input" name="lowest-port">
                <constraints type="java.lang.Integer" nullable="true" length="-1">
@@ -381,10 +381,10 @@
             <argNames length="4">
                <string>file</string>
                <string>image.out</string>
-               <string>terminal.width</string>
-               <string>terminal.height</string>
+               <string>sishell.width</string>
+               <string>sishell.height</string>
             </argNames>
          </item>
       </item>
    </root>
-</terminal>
+</SIShell>

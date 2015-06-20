@@ -12,6 +12,7 @@ package de.tsl2.nano.incubation.terminal.item.selector;
 import java.io.File;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 
@@ -36,7 +37,10 @@ public class DirSelector extends TreeSelector<String> {
      * constructor
      */
     public DirSelector() {
-        super();
+        if (roots == null) {
+            roots = new LinkedList<String>();
+            roots.add("${user.dir}");
+        }
     }
 
     public DirSelector(String name, String value, String include, String... roots) {

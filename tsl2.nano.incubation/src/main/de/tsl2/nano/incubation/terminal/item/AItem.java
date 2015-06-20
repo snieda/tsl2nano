@@ -31,7 +31,7 @@ import de.tsl2.nano.core.util.Util;
 import de.tsl2.nano.incubation.terminal.AsciiImage;
 import de.tsl2.nano.incubation.terminal.IContainer;
 import de.tsl2.nano.incubation.terminal.IItem;
-import de.tsl2.nano.incubation.terminal.Terminal;
+import de.tsl2.nano.incubation.terminal.SIShell;
 import de.tsl2.nano.incubation.vnet.workflow.Condition;
 
 /**
@@ -175,7 +175,7 @@ public class AItem<T> implements IItem<T>, Serializable {
      * uses a scanner to wait for the nextLine
      */
     protected String nextLine(InputStream in, PrintStream out) {
-        return Terminal.nextLine(in, out);
+        return SIShell.nextLine(in, out);
     }
 
     /**
@@ -236,7 +236,7 @@ public class AItem<T> implements IItem<T>, Serializable {
     @Override
     public String getDescription(Properties env, boolean full) {
         //if sequential mode, show the parents (-->tree) description
-        if (Util.get(Terminal.KEY_SEQUENTIAL, false)  && getParent() != null) {
+        if (Util.get(SIShell.KEY_SEQUENTIAL, false)  && getParent() != null) {
             return getParent().getDescription(env, full);
         } else if (description == null) {
             description = getConstraints() != null ? getConstraints().toString() : name;
@@ -247,7 +247,7 @@ public class AItem<T> implements IItem<T>, Serializable {
     }
 
     protected String printImageDescription() {
-        return printImageDescription(Util.get(Terminal.KEY_HEIGHT, 20) - 6);
+        return printImageDescription(Util.get(SIShell.KEY_HEIGHT, 20) - 6);
     }
     /**
      * printImageDescription
@@ -255,7 +255,7 @@ public class AItem<T> implements IItem<T>, Serializable {
     protected String printImageDescription(int height) {
         StringWriter stream = new StringWriter();
         try {
-            new AsciiImage().convertToAscii(description, new PrintWriter(stream), Util.get(Terminal.KEY_WIDTH, 80) - 2,
+            new AsciiImage().convertToAscii(description, new PrintWriter(stream), Util.get(SIShell.KEY_WIDTH, 80) - 2,
                 height);
             //remove windows returns
             return stream.toString().replaceAll("\r", "");
@@ -324,7 +324,7 @@ public class AItem<T> implements IItem<T>, Serializable {
     }
 
     public static String translate(String name) {
-        return Terminal.translate(name);
+        return SIShell.translate(name);
     }
 
     @Commit

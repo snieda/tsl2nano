@@ -261,7 +261,7 @@ public class TextTerminal {
     }
 
     static void testScreen() {
-        //Zeichensatz Console: Terminal
+        //Zeichensatz Console: SIShell
         //einfache Text-Linie
         System.out.println("/--------\\"); //0xC4
         System.out.println("| Halloo |"); //0xB3

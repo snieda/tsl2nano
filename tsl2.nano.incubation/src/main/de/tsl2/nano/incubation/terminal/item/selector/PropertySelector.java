@@ -15,6 +15,7 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Properties;
+import java.util.TreeMap;
 
 import org.simpleframework.xml.Default;
 import org.simpleframework.xml.DefaultType;
@@ -36,9 +37,9 @@ import de.tsl2.nano.incubation.terminal.item.Input;
 public class PropertySelector<T> extends Selector<T> {
     private static final long serialVersionUID = 5127419882040627794L;
 
-    /** TODO: how to serialize any map in simple-xml? */
-    @ElementMap(required = false, inline = true, entry = "property", key = "key", attribute=true, keyType=String.class)
-    Map properties;
+    /** TODO: how to serialize any map in simple-xml? we defined the map identically to ENV.properties, but it doesn't work */
+    //@ElementMap(entry = "property", key = "name", attribute = true, inline = true, required = false, keyType = String.class, valueType = Object.class)
+    transient TreeMap properties;
 
     transient Properties item;
     
@@ -54,7 +55,7 @@ public class PropertySelector<T> extends Selector<T> {
      * @param name
      * @param description
      */
-    public PropertySelector(String name, String description, Map properties) {
+    public PropertySelector(String name, String description, TreeMap properties) {
         super(name, description);
         this.properties = properties;
     }
@@ -68,7 +69,7 @@ public class PropertySelector<T> extends Selector<T> {
                 add(new Input((String) key, context.get(key), null));
             }
         } else {
-            properties = new Properties();
+            properties = new TreeMap();
         }
         return new LinkedList();
     }
