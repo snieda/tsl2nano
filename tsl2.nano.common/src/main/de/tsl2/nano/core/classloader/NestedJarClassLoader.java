@@ -14,10 +14,8 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.net.URL;
 import java.net.URLStreamHandlerFactory;
-import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.jar.Attributes;
 import java.util.jar.Manifest;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
@@ -201,7 +199,7 @@ public class NestedJarClassLoader extends LibClassLoader implements Cloneable {
                     + "\nnesting jars:\n"
                     + StringUtil.toFormattedString(nestedJars, -1, true));
                 if (LOG.isDebugEnabled()) {
-                    readManifest();
+                    readManifest(this);
                 }
                 this.jarFileStreams = new HashMap<String, ZipStream>(nestedJars.length);
 //            } else {
@@ -214,30 +212,6 @@ public class NestedJarClassLoader extends LibClassLoader implements Cloneable {
 
     private String[] getNestedJars(String rootPath) {
         return FileUtil.readFileNamesFromZip(rootPath, "*jar");
-    }
-
-    protected Attributes readManifest() {
-        Attributes attributes = new Attributes();
-        try {
-            for (Enumeration<URL> manifests = getResources("META-INF/MANIFEST.MF"); manifests.hasMoreElements();) {
-                URL manifestURL = manifests.nextElement();
-                InputStream in = manifestURL.openStream();
-                try {
-                    Manifest manifest = new Manifest(in);
-
-                    attributes.putAll(manifest.getMainAttributes());
-//                String arguments = mainAttributes.getValue("Arguments");
-//                if (arguments != null)
-//                    log("Found arguments: " + arguments);
-                } finally {
-                    in.close();
-                }
-            }
-        } catch (Exception ex) {
-            throw new RuntimeException(ex);
-        }
-        LOG.debug("manifest:\n" + StringUtil.toFormattedString(attributes, 80));
-        return attributes;
     }
 
     /**
