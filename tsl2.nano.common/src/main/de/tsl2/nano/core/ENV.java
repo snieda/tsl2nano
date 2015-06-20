@@ -192,7 +192,7 @@ public class ENV implements Serializable {
             if (new File(path).canRead()) {
                 self().info("loading service from " + path);
                 self().addService(service, self().get(XmlUtil.class).loadXml(path, service));
-            } else if (BeanClass.hasDefaultConstructor(service)) {
+            } else if (!service.isInterface() && BeanClass.hasDefaultConstructor(service, true)) {
                 self().info("trying to create service " + service + " through default construction");
                 T newService = self().addService(BeanClass.createInstance(service));
                 if (newService instanceof Serializable) {
@@ -271,7 +271,8 @@ public class ENV implements Serializable {
 
         self.services = new Hashtable<Class<?>, Object>();
         addService(layer);
-
+        addService(ClassLoader.class, Thread.currentThread().getContextClassLoader());
+        
         self.properties.put(KEY_CONFIG_RELPATH, dir + "/");
         self.properties.put(KEY_CONFIG_PATH, new File(dir).getAbsolutePath().replace("\\", "/") + "/");
         new File(self.getTempPath()).mkdir();

@@ -44,6 +44,9 @@ import de.tsl2.nano.core.util.StringUtil;
  * </pre>
  * 
  * ATTENTION: your extension should do not more than that - to have as less dependencies as possible!
+ * <p/>
+ * Another possibility is to add the AppLoader argument 'MAIN-ARGS' to the manifest file. This will be used as main
+ * arguments, if no other arguments were given. The arguments should be blank separated.
  * 
  * @author ts
  * @version $Revision$
@@ -92,8 +95,14 @@ public class AppLoader {
         String mainmethod;
         String environment;
         String[] nargs;
-        if (args.length == 1) {
-            environment = getFileSystemPrefix() + "config";
+        if (args.length == 0) {
+            System.out.println(
+                "AppLoader needs at least one parameter!\n  " +
+                    "syntax: AppLoader [environment-dir(default:config)] <mainclass> [method-if-not-main] [args...]" +
+                    "Tip: it is possible to add 'Main-Arguments' to the META-INF/MANIFEST file.");
+            return;
+        } else if (args.length == 1) {
+            environment = getFileSystemPrefix() + "." + StringUtil.substring(args[0], ".", null, true).toLowerCase();
             mainclass = args[0];
             mainmethod = "main";
             nargs = new String[0];
@@ -126,7 +135,7 @@ public class AppLoader {
      * @param environment (optional, default: config) environment name or path
      * @param args main args (must not be null!)
      */
-    public void start(String mainclass, String environment, String mainmethod, String[] args) {
+    public void start(String mainclass, String mainmethod, String environment, String[] args) {
         try {
             /*
              * check and use the AppLoaders main arguments
@@ -226,8 +235,8 @@ public class AppLoader {
 
     /**
      * printHelp
-     * @param name 
      * 
+     * @param name
      * @param args
      */
     protected void printHelp(String name) {
@@ -240,7 +249,14 @@ public class AppLoader {
      * @param args console call arguments
      */
     public static void main(String[] args) {
+        if (args.length == 0)
+            args = getArgumentsFromManifest();
         new AppLoader().start(args);
+    }
+
+    static String[] getArgumentsFromManifest() {
+        String argss = Argumentator.readManifest().getValue("Main-Arguments");
+        return argss != null ? argss.split("\\s") : new String[0];
     }
 
     /**

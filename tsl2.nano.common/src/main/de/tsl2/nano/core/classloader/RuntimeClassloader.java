@@ -10,6 +10,7 @@
 package de.tsl2.nano.core.classloader;
 
 import java.io.File;
+import java.io.InputStream;
 import java.io.Serializable;
 import java.net.MalformedURLException;
 import java.net.URL;
@@ -21,8 +22,11 @@ import java.security.PermissionCollection;
 import java.security.Permissions;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Enumeration;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.jar.Attributes;
+import java.util.jar.Manifest;
 
 import org.apache.commons.logging.Log;
 
@@ -278,6 +282,55 @@ public class RuntimeClassloader extends URLClassLoader {
             }
         };
         ConcurrentUtil.startDaemon("classloader-environment-path-checker", pathChecker);
+    }
+
+    /**
+     * delegates to {@link #readManifest(ClassLoader)} using the current threads context classloader
+     */
+    public static Attributes readManifest() {
+        return readManifest(Thread.currentThread().getContextClassLoader());
+    }
+    
+    /**
+     * gets all attributes of all manifest files
+     * @param cl classloader
+     * @return
+     */
+    public static Attributes readManifest(ClassLoader cl) {
+        Attributes attributes = new Attributes();
+        try {
+            for (Enumeration<URL> manifests = cl.getResources("META-INF/MANIFEST.MF"); manifests.hasMoreElements();) {
+                URL manifestURL = manifests.nextElement();
+                InputStream in = manifestURL.openStream();
+                try {
+                    Manifest manifest = new Manifest(in);
+
+                    attributes.putAll(manifest.getMainAttributes());
+//                String arguments = mainAttributes.getValue("Arguments");
+//                if (arguments != null)
+//                    log("Found arguments: " + arguments);
+                } finally {
+                    in.close();
+                }
+            }
+        } catch (Exception ex) {
+            throw new RuntimeException(ex);
+        }
+        LOG.debug("manifest:\n" + StringUtil.toFormattedString(attributes, 80));
+        return attributes;
+    }
+
+    /**
+     * UNDER CONSTRUCTION<p/>
+     * convenience to create an any instance of runtime-classloader on given directories and registering it to the current thread.
+     * 
+     * @param paths to be added to the classpath. the format of paths depends on the classloader implementation. 
+     * @return new classloader, searching classes in inside the given paths (may be files, urls, directories)
+     */
+    public static <T extends RuntimeClassloader> T createAndRegister(Class<T> classLoaderType, String... paths) {
+        T cl = BeanClass.createInstance(classLoaderType, Thread.currentThread().getContextClassLoader(), paths);
+        Thread.currentThread().setContextClassLoader(cl);
+        return cl;
     }
 
     @Override
