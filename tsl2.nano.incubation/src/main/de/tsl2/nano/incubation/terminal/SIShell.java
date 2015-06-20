@@ -97,6 +97,7 @@ public class SIShell implements IItemHandler, Serializable {
     transient PrintStream out;
     @Attribute
     int width = SCREEN_WIDTH;
+    /** if height < 1, the height will be dynamic to the items height */
     @Attribute
     int height = SCREEN_HEIGHT;
     @Attribute
@@ -232,7 +233,8 @@ public class SIShell implements IItemHandler, Serializable {
     }
 
     public static SIShell create(String file) {
-        SIShell t = new File(file).exists() ? XmlUtil.loadXml(file, SIShell.class) : new SIShell(new Container(file, null));
+        SIShell t =
+            new File(file).exists() ? XmlUtil.loadXml(file, SIShell.class) : new SIShell(new Container(file, null));
         t.name = file;
         return t;
     }
@@ -248,7 +250,7 @@ public class SIShell implements IItemHandler, Serializable {
             prepareEnvironment(env, root);
 //            //welcome screen
             if (!isInBatchMode()) {
-                printAsciiImage(LOGO, new PrintWriter(out), width, height, true, bars);
+                printAsciiImage(LOGO, new PrintWriter(out), width, height > 0 ? height : 22, true, bars);
                 nextLine(in);
             }
             //if only one tree-item available, go to that item
@@ -355,10 +357,17 @@ public class SIShell implements IItemHandler, Serializable {
             new File(classpath).mkdirs();
             NetworkClassLoader.createAndRegister(classpath);
         }
+        provideToSystem();
+    }
+
+    public void provideToSystem() {
         //to be accessible for actions
         System.setProperty(KEY_NAME, name);
         System.getProperties().put(KEY_WIDTH, width);
-        System.getProperties().put(KEY_HEIGHT, height);
+        if (height > 0)
+            System.getProperties().put(KEY_HEIGHT, height);
+        else
+            System.getProperties().remove(KEY_HEIGHT);
         System.getProperties().put(KEY_SEQUENTIAL, sequential);
     }
 
@@ -398,7 +407,7 @@ public class SIShell implements IItemHandler, Serializable {
             if (i - l > width - 2) {
                 i = l + width - 2;
             }
-            if (++lines > height) {
+            if (++lines > height && height > 0) {
                 out.print(getTextFrame(s.substring(page, i), style, width, center));
                 out.print(ASK_ENTER);
                 page = i + 1;
@@ -414,9 +423,10 @@ public class SIShell implements IItemHandler, Serializable {
             l = i;
         }
         //print the rest
-        if (lines > 1 && lines <= height) {
+        if (lines > 1 && (height < 1 || lines <= height)) {
             screen = s.substring(page, s.length());
-            screen += StringUtil.fixString(height - lines, ' ').replace(" ", " \n");
+            if (height > 0)
+                screen += StringUtil.fixString(height - lines, ' ').replace(" ", " \n");
             out.print(getTextFrame(screen, style, width, center));
         }
         out.print(question);
@@ -691,6 +701,7 @@ public class SIShell implements IItemHandler, Serializable {
                 ENV.extractResource(name);
                 name = ENV.getConfigPath() + name;
             }
+            ENV.extractResource("messages.properties");
             boolean admin = args.length > 1 && args[1].equals(TerminalAdmin.ADMIN) ? true : false;
             if (admin/* || !new File(name).exists()*/) {
                 TerminalAdmin.create(name).run();
