@@ -69,6 +69,7 @@ import de.tsl2.nano.incubation.specification.rules.Rule;
 import de.tsl2.nano.incubation.specification.rules.RulePool;
 import de.tsl2.nano.incubation.terminal.AsciiImage;
 import de.tsl2.nano.incubation.terminal.SIShell;
+import de.tsl2.nano.incubation.terminal.WebUtil;
 import de.tsl2.nano.incubation.terminal.item.Action;
 import de.tsl2.nano.incubation.terminal.item.Container;
 import de.tsl2.nano.incubation.terminal.item.Input;
@@ -684,32 +685,56 @@ public class IncubationTest {
         scan.add(new Input("ip", NetUtil.getMyIP(), "internet address to be scanned"));
         scan.add(new Input("lowest-port", 0, "lowest port to be scanned"));
         scan.add(new Input("highest-port", 100, "highest port to be scanned"));
-        scan.add(new Action(NetUtil.class, "scans", "lowest-port", "highest-port", "ip"));
-        Container wcopy = new Container("WCopy", null);
+        scan.add(new Action(NetUtil.class, "scans", "(java.lang.int)lowest-port", "(java.lang.int)highest-port", "(java.lang.String[])ip"));
+        Container wcopy = new Container("WCopy", "Downloads a site");
         net.add(wcopy);
         wcopy.add(new Input("url", null, "url to get files from", false));
         wcopy.add(new Input("dir", null, "local directory to save the downloaded files"));
         wcopy.add(new Input("include", null, "regular expression for files to download"));
         wcopy.add(new Input("exclude", null, "regular exression for files to be filtered"));
         wcopy.add(new Action(NetUtil.class, "wcopy", "url", "dir", "include", "exclude"));
+        Container proxy = new Container("Proxy", null);
+        net.add(proxy);
+        proxy.add(new Input("uri", null, "uri to evaluate proxy for (http, https, ftp or socket)", false));
+        proxy.add(new Input("proxy", null, "new proxy (e.g.: myproxy.myorg.org)"));
+        proxy.add(new Input("user", null, "new proxies user"));
+        proxy.add(new Input("password", null, "new proxies password"));
+        proxy.add(new Action(NetUtil.class, "proxy", "uri", "proxy", "user", "password"));
+
+        Container download = new Container("Download", "Downloads a single file");
+        net.add(download);
+        download.add(new Input("url", null, "url to be loaded", false));
+        download.add(new Input("dir", null, "local directory to save the downloaded file"));
+        download.add(new Action(NetUtil.class, "download", "url", "dir"));
+        
+        Container browse = new Container("Browse", "Shows the given URL");
+        net.add(browse);
+        browse.add(new Input("url", null, "url to be loaded", false));
+        browse.add(new Action(NetUtil.class, "browse", "url", "out"));
+
+        Container restful = new Container("Restful", "Calls a RESTful service");
+        net.add(restful);
+        restful.add(new Input("url", null, "URL of a RESTful service", false));
+        restful.add(new PropertySelector<String>("arguments", "RESTful arguments", null/*MapUtil.asMap(new TreeMap(), "destFile", "mynew.jar")*/));
+        restful.add(new Action(NetUtil.class, "getRestful", "url", "arguments"));
 
         net.add(new Action(NetUtil.class, "getNetInfo"));
+        net.add(new Action(NetUtil.class, "getFreePort"));
         root.add(net);
 
         Container file = new Container("File-Operation", null);
         file.add(new DirSelector("directory", "${user.dir}", ".*"));
         file.add(new Input("file", "**/[\\w]+\\.txt", "regular expression (with ant-like path **) as file filter"));
-        file.add(new Input("destination", System.getProperty("user.dir"), "destination directory for file operations"));
-        file.add(new Action("List", FileUtil.class, "foreach", "directory", "file", "file.operation.null"));
-        file.add(new Action("Delete", FileUtil.class, "foreach", "directory", "file", "file.operation.delete"));
-        file.add(new Action("Copy", FileUtil.class, "foreach", "directory", "file", "file.operation.copy"));
+        file.add(new Input("destination", "${user.dir}", "destination directory for file operations"));
+        file.add(new Action("Details", FileUtil.class, "getDetails", "(java.io.File)file"));
+        file.add(new FileSelector("List", "file", "directory"));
+        file.add(new Action("Delete", FileUtil.class, "foreach", "directory", "file", "(" + IRunnable.class.getName() + ")" + Action.createReferenceName(FileUtil.class, "DO_DELETE")));
+        file.add(new Action("Copy", FileUtil.class, "foreach", "directory", "file", "(" + IRunnable.class.getName() + ")" + Action.createReferenceName(FileUtil.class, "DO_COPY")));
         file.add(new MainAction("Imageviewer", AsciiImage.class, "file", "image.out", "sishell.width",
             "sishell.height"));
         root.add(file);
 
         Map<String, Object> defs = new HashMap<String, Object>();
-        defs.put("file.operation.delete", "test");
-        defs.put("file.operation.delete", "test");
         defs.put("image.out", "-out");
         System.getProperties().put(SIShell.KEY_SEQUENTIAL, true);
 
@@ -734,6 +759,11 @@ public class IncubationTest {
 //        SIShell.main(new String[] { SIShell.DEFAULT_NAME, TerminalAdmin.ADMIN });
     }
 
+    @Test
+    public void testXml2Text() throws Exception {
+//        log(StringUtil.removeXMLTags(String.valueOf(FileUtil.getFileData("printing-xml-with-fop.html", "UTF-8"))));
+    }
+    
     static void log_(String msg) {
         System.out.print(msg);
     }

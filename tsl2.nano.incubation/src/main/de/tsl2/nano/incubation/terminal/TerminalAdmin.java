@@ -70,7 +70,8 @@ public class TerminalAdmin extends SIShell {
     }
 
     @Override
-    protected void save() {
-        XmlUtil.saveXml(name, new SIShell(items));
+    protected void save(boolean saveConfiguration) {
+        if (saveConfiguration)
+            XmlUtil.saveXml(name, new SIShell(items));
     }
 }

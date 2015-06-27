@@ -39,9 +39,11 @@ import de.tsl2.nano.core.Finished;
 import de.tsl2.nano.core.ManagedException;
 import de.tsl2.nano.core.Messages;
 import de.tsl2.nano.core.classloader.NetworkClassLoader;
+import de.tsl2.nano.core.execution.CompatibilityLayer;
 import de.tsl2.nano.core.log.LogFactory;
 import de.tsl2.nano.core.util.ByteUtil;
 import de.tsl2.nano.core.util.FileUtil;
+import de.tsl2.nano.core.util.NetUtil;
 import de.tsl2.nano.core.util.StringUtil;
 import de.tsl2.nano.core.util.Util;
 import de.tsl2.nano.core.util.XmlUtil;
@@ -178,7 +180,7 @@ public class SIShell implements IItemHandler, Serializable {
     /** default script file name */
     public static final String DEFAULT_NAME = PREFIX + "xml";
 
-    static final String ASK_ENTER = ">>> PLEASE HIT ENTER FOR THE NEXT PAGE OR ENTER A SELECTION <<<";
+    static final String ASK_ENTER = ENV.translate("ask.enter", false);
     private static final String LOGO = "tsl2nano.logo.png";
 
     public SIShell() {
@@ -233,8 +235,13 @@ public class SIShell implements IItemHandler, Serializable {
     }
 
     public static SIShell create(String file) {
+        File ffile = new File(file);
+        //do a pre-check on the toolbox configuration file which needs ant to be available
+        if (file.contains(DEFAULT_NAME) && ffile.exists() && !NetUtil.isOnline()
+            && !new CompatibilityLayer().isAvailable("org.apache.tools.ant.Task"))
+            throw new ManagedException("error.ant.missing", file);
         SIShell t =
-            new File(file).exists() ? XmlUtil.loadXml(file, SIShell.class) : new SIShell(new Container(file, null));
+            ffile.exists() ? XmlUtil.loadXml(file, SIShell.class) : new SIShell(new Container(file, null));
         t.name = file;
         return t;
     }
@@ -308,15 +315,15 @@ public class SIShell implements IItemHandler, Serializable {
     }
 
     protected void shutdown() {
-        save();
+        save(refreshConfig || !new File(name).exists());
         String shutdownInfo =
-            "\n|\n|\nSHUTDOWN SI-Shell!\n|\nsaved changes to\n" + name + "\nand\n " + name + ".properties";
+            ENV.translate("message.shutdown", false, name);
         printScreen(shutdownInfo, out, null, style, true);
         LOG.info("si-shell " + name + " ended");
     }
 
-    protected void save() {
-        if (refreshConfig || !new File(name).exists()) {
+    protected void save(boolean saveConfiguration) {
+        if (saveConfiguration) {
             XmlUtil.saveXml(name, this);
         }
         Set<Object> keys = env.keySet();
@@ -443,6 +450,7 @@ public class SIShell implements IItemHandler, Serializable {
     @Override
     public void serve(IItem item, InputStream in, PrintStream out, Properties env) {
         try {
+            env.put("out", out);
             String input = printScreen(item, out);
             if (input == null) {
                 input = nextLine(in);
@@ -472,11 +480,11 @@ public class SIShell implements IItemHandler, Serializable {
                 } else if (isCommand(input, KEY_ADMIN)) {
                     startAmin(item);
                 } else if (isCommand(input, KEY_SAVE)) {
-                    save();
+                    save(true);
                 } else if (isCommand(input, KEY_QUIT)) {
                     throw new Finished("si-shell stopped");
                 } else {
-                    throw new IllegalArgumentException(input + " is not a known command!");
+                    throw new IllegalArgumentException(input + ENV.translate("unknown.command", false));
                 }
                 nextLine(in);
                 serve(item, in, out, env);
@@ -644,35 +652,7 @@ public class SIShell implements IItemHandler, Serializable {
     }
 
     public static final String getHelp() {
-        return "The SIShell is configured through xml files with only four types of items.\n"
-            + " (+) Tree    : holds childs of all types, but normally Options\n"
-            + " (*) Input   : user input, has to be terminated with ENTER\n"
-            + " (!) Action  : starts a command --> if terminated, the user has to hit ENTER\n"
-            + " ( ) Option  : is a simple child of a Tree\n\n"
-            + "The items can have the following properties:\n"
-            + " x: changed or visited\n"
-            + " §: duty (has to be visited)\n\n"
-            + "You can leave an item with key ENTER, you can show this help typing ':help'\n"
-            + "To set reset an items value, type 'null' as value\n"
-            + "If you leave the entire menu with ENTER, a property file with the new values\n"
-            + "will be written, if you hit Strg+c, the entire menu will be aborted.\n"
-            + "If your input starts with ':', one of the following commands can be entered:\n"
-            + " properties: list of all property values\n"
-            + " info      : system info will show\n"
-            + " quit      : will stop the shell, save the property file.\n"
-            + " record    : will record your actions to be saved as batch\n"
-            + " stop      : stops the macro\n"
-            + " help      : shows this help\n"
-            + " admin     : administrate your current item (adding/removing child-items)\n"
-            + " schedule:<item-no>[:delay][:period[:end]]] the item, which"
-            + " has to be an action will be scheduled for the given milliseconds\n"
-            + "It is possible to define workflow conditions, so items are not visible, if their\n"
-            + " condition is negative.\n"
-            + "If an item container (a tree) has only one visible item, that item will be activated."
-            + "If you turn on 'sequence', the user doesn't have to enter each command number - all"
-            + " items of a container will be asked sequentially."
-            + "You can set the mode 'useNetworkExtension' to true, if you want, that the shell "
-            + "downloads required (by action-definitions) jar-files itself.";
+        return ENV.translate("help", false);
     }
 
     @Override
@@ -712,4 +692,5 @@ public class SIShell implements IItemHandler, Serializable {
             ManagedException.forward(e);
         }
     }
+
 }

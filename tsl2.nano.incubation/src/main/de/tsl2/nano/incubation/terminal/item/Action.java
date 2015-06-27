@@ -18,6 +18,7 @@ import org.simpleframework.xml.ElementArray;
 
 import de.tsl2.nano.bean.def.IConstraint;
 import de.tsl2.nano.core.ManagedException;
+import de.tsl2.nano.core.cls.BeanAttribute;
 import de.tsl2.nano.core.cls.BeanClass;
 import de.tsl2.nano.core.execution.IRunnable;
 import de.tsl2.nano.core.log.LogFactory;
@@ -94,15 +95,21 @@ public class Action<T> extends AItem<T> {
         Properties p = new Properties();
         Object v;
         for (int i = 0; i < argNames.length; i++) {
-            if (KEY_ENV.equals(argNames[i])) {
+            String argName = StringUtil.substring(argNames[i], ")", null);
+            if (KEY_ENV.equals(argName)) {
                 v = context;
+            } else if (isReference(argName)) {
+                v = resolveReference(argName);
             } else {
-                v = context.get(argNames[i]);
+                v = context.get(argName);
             }
+            //optional casting
+            String c = StringUtil.substring(argNames[i], "(", ")", false, true);
+            Class<?> cast = c != null ? BeanClass.createBeanClass(c).getClazz() : String.class;
             if (v != null) {
                 p.put("arg" + (i + 1), v);
             }
-            cls[i] = v != null ? v.getClass() : String.class;
+            cls[i] = v != null ? BeanClass.getDefiningClass(v.getClass()) : cast;
         }
         if (instance != null)
             p.put("instance", instance);
@@ -113,6 +120,29 @@ public class Action<T> extends AItem<T> {
             ManagedException.forward(e);
         }
         return runner.run(p);
+    }
+
+    /**
+     * creates a reference name as concatenation of cls + field. result is:<br/>
+     * <@>cls.getName()<:>field
+     * 
+     * @param cls class holding the field
+     * @param field field name
+     * @return string describing the field reference.
+     */
+    public static String createReferenceName(Class<?> cls, String field) {
+        return "@" + cls.getName() + ":" + field;
+    }
+
+    private boolean isReference(String expression) {
+        return expression.startsWith("@");
+    }
+
+    @SuppressWarnings("rawtypes")
+    private Object resolveReference(String expression) {
+        String description[] = expression.substring(1).split(":");
+        BeanClass bc = BeanClass.createBeanClass(description[0]);
+        return BeanClass.getStatic(bc.getClazz(), description[1]);
     }
 
     protected Class<?> getMainClass() {

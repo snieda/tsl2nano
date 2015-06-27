@@ -22,6 +22,7 @@ import org.simpleframework.xml.core.Commit;
 
 import de.tsl2.nano.bean.def.IConstraint;
 import de.tsl2.nano.collection.CollectionUtil;
+import de.tsl2.nano.core.ENV;
 import de.tsl2.nano.core.IPredicate;
 import de.tsl2.nano.core.util.StringUtil;
 import de.tsl2.nano.core.util.Util;
@@ -50,7 +51,8 @@ public class Container<T> extends AItem<T> implements IContainer<T> {
     @Attribute(required = false)
     boolean multiple = false;
     /** if true, all tree items will be accessed directly and sequentially */
-    transient boolean sequential = false;
+    @Attribute(required=false)
+    boolean sequential = false;
     /** on sequential mode, this index points to the actual child-item */
     transient int seqIndex = -1;
 
@@ -159,19 +161,21 @@ public class Container<T> extends AItem<T> implements IContainer<T> {
     public String ask(Properties env) {
         isactive = true;
         List<AItem<T>> children = getNodes(env);
-        return sequential && seqIndex > -1 && seqIndex < children.size() ? children.get(seqIndex).ask(env)
-            : "Please enter a number between 1 and "
+        return isSequential() && seqIndex > -1 && seqIndex < children.size() ? children.get(seqIndex).ask(env)
+            : ENV.translate("ask.number", false)
                 + children.size() + POSTFIX_QUESTION;
     }
 
+    public boolean isSequential() {
+        return sequential || (Boolean)System.getProperties().get(SIShell.KEY_SEQUENTIAL);
+    }
     /**
      * {@inheritDoc}
      */
     @SuppressWarnings("unchecked")
     @Override
     public IItem react(IItem caller, String input, InputStream in, PrintStream out, Properties env) {
-        sequential = Util.get(SIShell.KEY_SEQUENTIAL, false);
-        if (Util.isEmpty(input) && !sequential) {
+        if (Util.isEmpty(input) && !isSequential()) {
             return getParent();
         }
         IItem next = null;
@@ -179,7 +183,7 @@ public class Container<T> extends AItem<T> implements IContainer<T> {
         /*
          * sequential mode
          */
-        if (sequential && seqIndex < filteredNodes.size()) {
+        if (isSequential() && seqIndex < filteredNodes.size()) {
             return next(in, out, env);
         }
 
@@ -249,7 +253,7 @@ public class Container<T> extends AItem<T> implements IContainer<T> {
     @Override
     public IItem<T> next(InputStream in, PrintStream out, Properties env) {
         IItem<T> next;
-        if (sequential) {
+        if (isSequential()) {
             if (++seqIndex < getNodes(env).size()) {
                 next = getNodes(env).get(seqIndex);
                 //ask for all tree items
@@ -288,11 +292,11 @@ public class Container<T> extends AItem<T> implements IContainer<T> {
      */
     @Override
     public String getDescription(Properties env, boolean full) {
-        if (isactive || sequential) {
+        if (isactive || isSequential()) {
             String img = null;
             List<AItem<T>> list = getNodes(env);
             if (hasFileDescription()) {
-                if (sequential)
+                if (isSequential())
                     return super.getDescription(env, full);
                 else {
                     int height = Util.get(SIShell.KEY_HEIGHT, 20);
@@ -316,7 +320,7 @@ public class Container<T> extends AItem<T> implements IContainer<T> {
                     + t.getName(kl, ' ')
                     + POSTFIX_QUESTION
                     + (full && !t.getType().equals(Type.Container) ? t.getDescription(env, full) : StringUtil.toString(
-                        t.getValueText(), vwidth))
+                        t.getValueText().replace('\n', ' '), vwidth))
                     + "\n");
             }
             return buf.toString();

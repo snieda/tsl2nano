@@ -48,9 +48,9 @@ public class AItem<T> implements IItem<T>, Serializable {
     @Attribute
     protected String name;
     /** presentation style. see the parent terminal style */
-    @Attribute(required=false)
+    @Attribute(required = false)
     protected Integer style;
-    
+
     /** the type has to be set by the implementing class */
     transient Type type;
     @Element(type = Constraint.class, required = false)
@@ -68,7 +68,7 @@ public class AItem<T> implements IItem<T>, Serializable {
      * if description is null, the constraints toString() will be used. if description is an image file name, this image
      * will be converted to an ascii text.
      */
-    @Element(required=false)
+    @Element(required = false)
     private String description;
 
     static final int PREFIX = 1;
@@ -168,7 +168,8 @@ public class AItem<T> implements IItem<T>, Serializable {
         } else if (constraints.getAllowedValues() != null) {
             ask += " as one of: " + StringUtil.toString(constraints.getAllowedValues(), 60);
         }
-        return Messages.getFormattedString("tsl2nano.entervalue", ask, StringUtil.toFirstUpper(name)) + POSTFIX_QUESTION;
+        return Messages.getFormattedString("tsl2nano.entervalue", ask, StringUtil.toFirstUpper(name))
+            + POSTFIX_QUESTION;
     }
 
     /**
@@ -236,7 +237,7 @@ public class AItem<T> implements IItem<T>, Serializable {
     @Override
     public String getDescription(Properties env, boolean full) {
         //if sequential mode, show the parents (-->tree) description
-        if (Util.get(SIShell.KEY_SEQUENTIAL, false)  && getParent() != null) {
+        if (Util.get(SIShell.KEY_SEQUENTIAL, false) && getParent() != null) {
             return getParent().getDescription(env, full);
         } else if (description == null) {
             description = getConstraints() != null ? getConstraints().toString() : name;
@@ -249,6 +250,7 @@ public class AItem<T> implements IItem<T>, Serializable {
     protected String printImageDescription() {
         return printImageDescription(Util.get(SIShell.KEY_HEIGHT, 20) - 6);
     }
+
     /**
      * printImageDescription
      */
@@ -333,19 +335,21 @@ public class AItem<T> implements IItem<T>, Serializable {
     }
 
     protected String getValueText() {
-        return String.valueOf(constraints != null &&  constraints.getFormat() != null ? constraints.getFormat().format(value) : Util.value(value, "<>"));
+        return String.valueOf(constraints != null && constraints.getFormat() != null ? constraints.getFormat().format(
+            value) : Util.value(value, "<>"));
     }
-    
+
     protected String getName(int fixlength, char filler) {
         String str = getPresentationPrefix() + translate(name);
         return fixlength != -1 ? StringUtil.fixString(str, fixlength, filler, true) : str;
     }
-    
+
     /**
      * {@inheritDoc}
      */
     @Override
     public String toString() {
-        return getName(-1, (char)-1) + ": " + (value != null ? value : "<>") + "\n";
+        return getName(-1, (char) -1) + ": "
+            + (value != null ? StringUtil.toString(value.toString().replace('\n', ' '), 60) : "<>") + "\n";
     }
 }

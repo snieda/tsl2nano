@@ -17,19 +17,25 @@ import java.util.List;
 import java.util.Map;
 import java.util.Properties;
 
+import de.tsl2.nano.bean.def.Constraint;
+import de.tsl2.nano.bean.def.IConstraint;
 import de.tsl2.nano.core.cls.BeanClass;
 import de.tsl2.nano.core.util.FileUtil;
 import de.tsl2.nano.core.util.StringUtil;
 import de.tsl2.nano.core.util.Util;
 import de.tsl2.nano.execution.AntRunner;
 import de.tsl2.nano.execution.SystemUtil;
+import de.tsl2.nano.format.RegExpFormat;
 import de.tsl2.nano.incubation.terminal.item.AItem;
 import de.tsl2.nano.incubation.terminal.item.Action;
 import de.tsl2.nano.incubation.terminal.item.Container;
 import de.tsl2.nano.incubation.terminal.item.Input;
 import de.tsl2.nano.incubation.terminal.item.MainAction;
 import de.tsl2.nano.incubation.terminal.item.Option;
+import de.tsl2.nano.incubation.terminal.item.selector.ActionSelector;
+import de.tsl2.nano.incubation.terminal.item.selector.CSVSelector;
 import de.tsl2.nano.incubation.terminal.item.selector.DirSelector;
+import de.tsl2.nano.incubation.terminal.item.selector.FieldSelector;
 import de.tsl2.nano.incubation.terminal.item.selector.FileSelector;
 import de.tsl2.nano.incubation.terminal.item.selector.PropertySelector;
 import de.tsl2.nano.incubation.vnet.workflow.Condition;
@@ -43,6 +49,9 @@ import de.tsl2.nano.util.PrivateAccessor;
  */
 @SuppressWarnings({ "unchecked", "rawtypes" })
 public class ItemAdministrator<T> extends Container<T> {
+    private static final String NEWINDEX = "newindex";
+    /** the items position in a container/tree */
+    private static final String INDEX = "index";
     /** mostly needed to define an action */
     private static final String ARGS = "args[]";
     /** the items type (full class name) */
@@ -57,6 +66,7 @@ public class ItemAdministrator<T> extends Container<T> {
     private Action<T> addingAction;
     private Action<T> removingAction;
     private Action<T> changingAction;
+    private Action<T> constraintsAction;
     private Action<T> terminalAction;
     private static int count = 0;
 
@@ -77,10 +87,12 @@ public class ItemAdministrator<T> extends Container<T> {
                 "method=execute", ARGS });
             itemTypes.put("ant", new String[] { Action.class.getName(), "mainClass=" + AntRunner.class.getName(),
                 "method=runTask", ARGS /*"task", "properties", "fileset"*/});
+            itemTypes.put("selector", new String[] { ActionSelector.class.getName(), "mainClass=", "method", ARGS });
             itemTypes.put("file", new String[] { FileSelector.class.getName(), "roots", "include" });
             itemTypes.put("dir", new String[] { DirSelector.class.getName(), "roots", "include" });
+            itemTypes.put("csv", new String[] { CSVSelector.class.getName(), "csv", "pattern" });
             itemTypes.put("properties", new String[] { PropertySelector.class.getName() });
-            itemTypes.put("csv", new String[] { PropertySelector.class.getName(), "csv", "pattern" });
+            itemTypes.put("field", new String[] { FieldSelector.class.getName(), "cls", "field"/*field-type*/});
 
             Properties p = new Properties();
             for (String k : itemTypes.keySet()) {
@@ -116,7 +128,7 @@ public class ItemAdministrator<T> extends Container<T> {
         addingAction = new Action<T>(this, "addItem") {
             @Override
             public IItem react(IItem caller, String input, InputStream in, PrintStream out, Properties env) {
-                askItem(in, out, env, this, item, TYPE, "name", "value", "description", "condition", "style");
+                askItem(in, out, env, this, item, TYPE, INDEX, "name", "value", "description", "condition", "style");
                 return super.react(caller, input, in, out, env);
             }
 
@@ -130,10 +142,11 @@ public class ItemAdministrator<T> extends Container<T> {
             public IItem react(IItem caller, String input, InputStream in, PrintStream out, Properties env) {
                 //which item - show some infos
                 out.print("select item to change: ");
-                item.put("index", nextLine(in, out));
-                out.println(StringUtil.toFormattedString(new PrivateAccessor(nodes.get(getSelectedIndex())).members(), -1));
-                
-                askItem(in, out, env, this, item, "name", "value", "description", "condition", "style");
+                item.put(INDEX, nextLine(in, out));
+                out.println(StringUtil.toFormattedString(new PrivateAccessor(nodes.get(getSelectedIndex())).members(),
+                    -1));
+
+                askItem(in, out, env, this, item, NEWINDEX, "name", "value", "description", "condition", "style");
                 return super.react(caller, input, in, out, env);
             }
 
@@ -141,12 +154,32 @@ public class ItemAdministrator<T> extends Container<T> {
         changingAction.setParent(this);
         nodes.add(changingAction);
 
+        //action to change items constraints
+        constraintsAction = new Action<T>(this, "changeConstraints") {
+            @Override
+            public IItem react(IItem caller, String input, InputStream in, PrintStream out, Properties env) {
+                //which item - show some infos
+                out.print("select item to change constraints: ");
+                item.put(INDEX, nextLine(in, out));
+                IConstraint<?> c = nodes.get(getSelectedIndex()).getConstraints();
+                if (c != null)
+                    out.println(StringUtil.toFormattedString(new PrivateAccessor(c).members(), -1));
+
+                askItem(in, out, env, this, item, "type", "format", "nullable", "length", "scale", "precision", "min",
+                    "max", "defaultValue");
+                return super.react(caller, input, in, out, env);
+            }
+
+        };
+        constraintsAction.setParent(this);
+        nodes.add(constraintsAction);
+
         //action to remove items
         removingAction = new Action<T>(this, "removeItem") {
             @Override
             public IItem react(IItem caller, String input, InputStream in, PrintStream out, Properties env) {
                 out.print("select item to remove: ");
-                item.put("index", nextLine(in, out));
+                item.put(INDEX, nextLine(in, out));
                 env.put("instance", this);
                 return super.react(caller, input, in, out, env);
             }
@@ -192,6 +225,8 @@ public class ItemAdministrator<T> extends Container<T> {
 
         //some defaults and instances
         boolean hasType = item.containsKey(TYPE);
+        if (!Util.isEmpty(item.get("condition")))
+            item.put("condition", new Condition(item.getProperty("condition")));
         if (!Util.isEmpty(item.get("condition")))
             item.put("condition", new Condition(item.getProperty("condition")));
         //now, the type specific attributes
@@ -247,6 +282,7 @@ public class ItemAdministrator<T> extends Container<T> {
         nodes.remove(addingAction);
         nodes.remove(removingAction);
         nodes.remove(changingAction);
+        nodes.remove(constraintsAction);
         nodes.remove(terminalAction);
     }
 
@@ -259,7 +295,7 @@ public class ItemAdministrator<T> extends Container<T> {
     }
 
     int getSelectedIndex() {
-        return Integer.valueOf(item.getProperty("index")) - 1;
+        return Integer.valueOf(item.getProperty(INDEX)) - 1;
     }
 
     /**
@@ -269,28 +305,69 @@ public class ItemAdministrator<T> extends Container<T> {
      * @param item to be added
      */
     public static <T> void add(List<AItem<T>> nodes, Properties item) {
-        AItem instance = BeanClass.createInstance(item.getProperty(TYPE));
-        item.remove(TYPE);
-        nodes.add(PrivateAccessor.assign(instance, item, false));
-        item.clear();
+        try {
+            AItem instance = BeanClass.createInstance(item.getProperty(TYPE));
+            int index = !Util.isEmpty(item.get(INDEX)) ? Integer.valueOf((String) item.get(INDEX)) : nodes.size();
+            item.remove(TYPE);
+            item.remove(INDEX);
+            nodes.add(index, PrivateAccessor.assign(instance, item, false));
+        } finally {
+            item.clear();
+        }
     }
 
     public void removeItem() {
-        nodes.remove(getSelectedIndex());
-        item.clear();
+        try {
+            nodes.remove(getSelectedIndex());
+        } finally {
+            item.clear();
+        }
     }
 
     public void changeItem() {
-        IItem selectedItem = nodes.get(getSelectedIndex());
-        item.remove(TYPE);
-        item.remove("index");
-        PrivateAccessor.assign(selectedItem, item, false);
-        item.clear();
+        try {
+            AItem selectedItem = nodes.get(getSelectedIndex());
+            int index = !Util.isEmpty(item.get(NEWINDEX)) ? Integer.valueOf((String) item.get(NEWINDEX)) : -1;
+            item.remove(TYPE);
+            item.remove(INDEX);
+            item.remove(NEWINDEX);
+            PrivateAccessor.assign(selectedItem, item, false);
+
+            if (index != -1) {
+                nodes.remove(selectedItem);
+                nodes.add(index - 1, selectedItem);
+            }
+        } finally {
+            item.clear();
+        }
+    }
+
+    public void changeConstraints() {
+        try {
+            IItem selectedItem = nodes.get(getSelectedIndex());
+            String pattern = item.getProperty("format");
+            if (!Util.isEmpty(pattern)) {
+                String slen = item.getProperty("length");
+                if (!Util.isEmpty(slen))
+                    item.put("format", new RegExpFormat(pattern, Integer.valueOf(slen)));
+                else
+                    item.put("format", new RegExpFormat(pattern, null));
+            }
+            item.remove("name");
+            item.remove(INDEX);
+            IConstraint c = selectedItem.getConstraints() != null ? selectedItem.getConstraints() : new Constraint();
+            PrivateAccessor.assign(c, item, false);
+        } finally {
+            item.clear();
+        }
     }
 
     public void changeTerminal() {
-        PrivateAccessor.assign(terminal, item, false);
-        item.clear();
+        try {
+            PrivateAccessor.assign(terminal, item, false);
+        } finally {
+            item.clear();
+        }
     }
 
     @Override
