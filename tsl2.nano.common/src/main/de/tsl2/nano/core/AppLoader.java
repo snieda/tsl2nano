@@ -15,6 +15,7 @@ import java.util.Map;
 
 import org.apache.commons.logging.Log;
 
+import de.tsl2.nano.collection.CollectionUtil;
 import de.tsl2.nano.core.classloader.NetworkClassLoader;
 import de.tsl2.nano.core.cls.BeanClass;
 import de.tsl2.nano.core.log.LogFactory;
@@ -45,8 +46,15 @@ import de.tsl2.nano.core.util.StringUtil;
  * 
  * ATTENTION: your extension should do not more than that - to have as less dependencies as possible!
  * <p/>
- * Another possibility is to add the AppLoader argument 'MAIN-ARGS' to the manifest file. This will be used as main
- * arguments, if no other arguments were given. The arguments should be blank separated.
+ * 
+ * The main arguments will be concatenated through the following rule:<br/>
+ * 1. META-INF/MANIFEST.MF:Main-Arguments<br/>
+ * 2. System.getProperties("apploader.args")<br/>
+ * 3. main(args) the real command line arguments
+ * <p/>
+ * 
+ * The environment directory is defined in the first main args, if args.length > 1. If you set the system property
+ * 'env.user.home', the user.home will be used as parent directory for the environment.
  * 
  * @author ts
  * @version $Revision$
@@ -102,12 +110,14 @@ public class AppLoader {
                     "Tip: it is possible to add 'Main-Arguments' to the META-INF/MANIFEST file.");
             return;
         } else if (args.length == 1) {
+            //use the mainclass name as environment name
             environment = getFileSystemPrefix() + "." + StringUtil.substring(args[0], ".", null, true).toLowerCase();
             mainclass = args[0];
             mainmethod = "main";
             nargs = new String[0];
         } else {
-            environment = args[0];
+            //if a full path was given, use that directly
+            environment = args[0].startsWith("/") || args[0].contains(":") ? args[0] : getFileSystemPrefix() + args[0];
             mainclass = args[1];
             int processed = 2;
             mainmethod = args.length > 2 ? args[processed++] : "main";
@@ -249,8 +259,11 @@ public class AppLoader {
      * @param args console call arguments
      */
     public static void main(String[] args) {
-        if (args.length == 0)
-            args = getArgumentsFromManifest();
+        String sa = System.getProperty("apploader.args");
+        String[] sargs = sa != null ? sa.split(",") : new String[0];
+        args =
+            CollectionUtil.concat(String[].class, getArgumentsFromManifest(),
+                sargs, args);
         new AppLoader().start(args);
     }
 
@@ -307,7 +320,9 @@ public class AppLoader {
     }
 
     public static String getFileSystemPrefix() {
-        //on dalvik systems, the  MainActivity.onCreate() should set the syste property
+        if (System.getProperty("env.user.home") != null && !isDalvik())
+            return System.getProperty("user.home") + "/";
+        //on dalvik systems, the  MainActivity.onCreate() should set the system property
         return isDalvik() ? System.getProperty("android.sdcard.path", "/mnt/sdcard/") : isUnixFS()
             && new File("/opt").canWrite() ? "/opt/" : "";
     }

@@ -390,7 +390,8 @@ public class CollectionUtil {
     public static <T> T[] concat(Class<? extends T[]> newType, T[]... arrays) {
         int newLength = 0;
         for (int i = 0; i < arrays.length; i++) {
-            newLength += arrays[i].length;
+            if (arrays[i] != null)
+                newLength += arrays[i].length;
         }
         return concatNew((T[]) Array.newInstance(newType.getComponentType(), newLength), arrays);
     }
@@ -407,8 +408,10 @@ public class CollectionUtil {
     public static <T, U> T[] concatNew(T[] newArray, U[]... arrays) {
         int dest = 0;
         for (int i = 0; i < arrays.length; i++) {
-            System.arraycopy(arrays[i], 0, newArray, dest, arrays[i].length);
-            dest += arrays[i].length;
+            if (arrays[i] != null) {
+                System.arraycopy(arrays[i], 0, newArray, dest, arrays[i].length);
+                dest += arrays[i].length;
+            }
         }
         return newArray;
     }
@@ -768,7 +771,7 @@ public class CollectionUtil {
             if (position == -1) {
                 return item;
             }
-            
+
             throw new IllegalArgumentException(i == 0 ? iterable + " is empty!" : "position must be between 0 and " + i);
         }
     }

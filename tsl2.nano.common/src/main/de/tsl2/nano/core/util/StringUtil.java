@@ -35,6 +35,7 @@ public class StringUtil {
     /** variable (like ant-variables) matching expression. e.g.: ${myvar} */
     public static final String VAR_REGEXP = "\\$\\{[\\w._-]+\\}";
     public static final String STR_ANY = "*";
+    static String XTAG = "<[^>]*>";
 
     /**
      * @see #substring(String, String, String, int)
@@ -443,7 +444,7 @@ public class StringUtil {
     /**
      * delegates to {@link #extract(CharSequence, String, String)} with null replacement
      */
-    public static String extract(CharSequence source, String regexp, int...groups) {
+    public static String extract(CharSequence source, String regexp, int... groups) {
         return extract(source, regexp, null, 0, groups);
     }
 
@@ -467,7 +468,8 @@ public class StringUtil {
      * @param replacement (optional) all occurrences of regexp will be replaced in source (only if source is of type
      *            StringBuilder!).
      * @param start start index to search and/or replace
-     * @param groups (ignored, if source is a StringBuilder) group numbers to concat. if empty, the last group will be returned
+     * @param groups (ignored, if source is a StringBuilder) group numbers to concat. if empty, the last group will be
+     *            returned
      * @return part of source or empty string
      */
     public static String extract(CharSequence source, String regexp, String replacement, int start, int... groups) {
@@ -735,5 +737,15 @@ public class StringUtil {
     @SuppressWarnings("unchecked")
     public static <T extends CharSequence> T cut(T name, int maxLength) {
         return (T) (name.length() > maxLength ? name.subSequence(0, maxLength) : name);
+    }
+
+    /**
+     * like an xml2text this method tries to remove all xml tags and returns the pure text content.
+     * 
+     * @param xmlContent xml string
+     * @return pure text with carriage returns
+     */
+    public static String removeXMLTags(String xmlContent) {
+        return xmlContent.replaceAll("[\n]?" + XTAG + "(\\w*)" + XTAG, "\n\1");
     }
 }

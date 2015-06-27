@@ -22,6 +22,7 @@ import java.io.Serializable;
 import java.math.BigDecimal;
 import java.math.MathContext;
 import java.net.InetAddress;
+import java.net.InetSocketAddress;
 import java.text.DateFormat;
 import java.text.DecimalFormat;
 import java.text.Format;
@@ -1396,6 +1397,23 @@ public class CommonTest {
         }
     }
 
+    @Test
+    public void testNetUtilProxies() throws Exception {
+//        LOG.info("gateway is:" + NetUtil.gateway());
+        
+        LOG.info(NetUtil.proxy("http://mvnrepository.com"));
+        LOG.info(NetUtil.proxy("http://mvnrepository.com", "proxy.myorg.de:8080"));
+
+        LOG.info(NetUtil.proxy("https://mvnrepository.com"));
+        LOG.info(NetUtil.proxy("https://mvnrepository.com", "proxy.myorg.de:8080"));
+
+        LOG.info(NetUtil.proxy("ftp://mvnrepository.com"));
+        LOG.info(NetUtil.proxy("ftp://mvnrepository.com", "proxy.myorg.de:8080"));
+
+        LOG.info(NetUtil.proxy("socket://mvnrepository.com"));
+        LOG.info(NetUtil.proxy("socket://mvnrepository.com", "proxy.myorg.de:8080"));
+    }
+    
     @Test
     public void testNetUtilScan() throws Exception {
         //check for exception only

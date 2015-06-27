@@ -15,14 +15,21 @@ import static de.tsl2.nano.core.util.ByteUtil.toByteArray;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.PrintStream;
+import java.io.PrintWriter;
+import java.net.DatagramSocket;
 import java.net.InetAddress;
 import java.net.InetSocketAddress;
 import java.net.MalformedURLException;
 import java.net.NetworkInterface;
+import java.net.Proxy;
+import java.net.ProxySelector;
 import java.net.ServerSocket;
 import java.net.Socket;
+import java.net.SocketAddress;
 import java.net.SocketException;
 import java.net.URI;
+import java.net.URISyntaxException;
 import java.net.URL;
 import java.net.UnknownHostException;
 import java.util.Collection;
@@ -84,7 +91,7 @@ public class NetUtil {
     public static String getMyIP() {
         return getMyAddress().getHostAddress();
     }
-    
+
     /**
      * getMyIPAdress
      * 
@@ -175,6 +182,21 @@ public class NetUtil {
     }
 
     /**
+     * gets the URL content through a call to {@link #get(String)} and removes all xml-tags to have pure text.
+     * 
+     * @param strUrl url to load
+     * @param out prints out pure text of url
+     */
+    public static void browse(String strUrl, PrintStream out) {
+        out.println(StringUtil.removeXMLTags(get(strUrl)));
+    }
+
+    @SuppressWarnings({ "unchecked", "rawtypes" })
+    public static/*<T> T*/String getRestful(String url/*, Class<T> responseType*/, Map args) {
+        return getRestful(url, MapUtil.asArray(args));
+    }
+
+    /**
      * simply returns the response of the given url + args restful request
      * 
      * @param url
@@ -182,8 +204,7 @@ public class NetUtil {
      * @param args key/value pairs to be appended as rest-ful call to the url
      * @return content as object of type responseType
      */
-    @SuppressWarnings("unchecked")
-    public static /*<T> T*/String getRestful(String url/*, Class<T> responseType*/, Object... args) {
+    public static/*<T> T*/String getRestful(String url/*, Class<T> responseType*/, Object... args) {
         try {
             //create the rest-ful call
             StringBuilder buf = new StringBuilder(url);
@@ -217,6 +238,13 @@ public class NetUtil {
             ManagedException.forward(e);
             return null;
         }
+    }
+
+    /**
+     * delegates ot {@link #download(URL, String, boolean, boolean)}
+     */
+    public static File download(String strUrl, String destDir) {
+        return download(url(strUrl), destDir, false, true);
     }
 
     /**
@@ -336,7 +364,12 @@ public class NetUtil {
     public static final boolean isOnline() {
         if (lastOnlineCheck - System.currentTimeMillis() > deltaOnlineCheck) {
             lastOnlineCheck = System.currentTimeMillis();
-            isonline = !getMyIP().equals(InetAddress.getLoopbackAddress().getHostAddress());
+//            isonline = !getMyIP().equals(InetAddress.getLoopbackAddress().getHostAddress());
+            try {
+                isonline = InetAddress.getByName("www.google.com").isReachable(2000);
+            } catch (Exception e) {
+                isonline = false;
+            }
         }
         return isonline;
     }
@@ -358,6 +391,121 @@ public class NetUtil {
             return -1;
         }
 
+    }
+
+//    public static String gateway() {
+//        try (DatagramSocket s = new DatagramSocket()) {
+//          s.connect(InetAddress.getByAddress(new byte[] { 1, 1, 1, 1 }), 0);
+//          return new String(NetworkInterface.getByInetAddress(s.getLocalAddress()).getHardwareAddress());
+//        } catch (Exception e) {
+//          e.printStackTrace();
+//          return null;
+//        }
+//      }
+
+    public static Proxy proxy(String testURI) {
+        return proxy(testURI, null, null, null);
+    }
+
+    public static Proxy proxy(String testURI, String newProxy) {
+        return proxy(testURI, newProxy, null, null);
+    }
+
+    /**
+     * @param testURI uri to evaluate the protocol from
+     * @param newProxy (optional) new proxy configuration to be set.
+     * @param user (optional) user for new proxy configuration
+     * @param passwd (optional) password for new proxy configuration
+     * @return last proxy for the given uri protocol
+     */
+    public static Proxy proxy(String testURI, String newProxy, String user, String passwd) {
+        String host = null;
+        int port = -1;
+        if (newProxy != null) {
+            String proxy[] = newProxy.split("\\:");
+            host = proxy[0];
+            if (proxy.length > 1)
+                port = Integer.valueOf(proxy[1]);
+        }
+        return proxy(testURI, host, port, user, passwd);
+    }
+
+    /**
+     * logs some proxy informations and let you define a proxy to be set to the system properties and to be usable on
+     * connections.
+     * 
+     * @see "Web Proxy Autodiscovery Protocol" and "Proxy-Auto-Config-(PAC)-Standard". Try to look at
+     *      http://wpad/wpad.dat or http://wpad.com/wpad.dat.
+     * 
+     * @param testURI uri to evaluate the protocol from. may be http, https, ftp or socket. e.g.: http://foo.bar.
+     * @param newProxy (optional) new proxy configuration to be set.
+     * @param user (optional) user for new proxy configuration
+     * @param passwd (optional) password for new proxy configuration
+     * @return last or new proxy for the given uri protocol, or null on errors or not available
+     */
+    public static Proxy proxy(String testURI, String newProxyHost, int port, String user, String passwd) {
+        String protocol = testURI.split("\\:\\/\\/")[0] + ".";
+        LOG.info("to see the organisations automatic proxy definitions, open the 'Proxy-Auto-Config-(PAC)-Standard' file, mostly http://wpad/wpad.dat or http://wpad.com/wpad.dat (-->'Web Proxy Autodiscovery Protocol') in your browser!");
+        LOG.info("current system properties: {" + getSystem(protocol + "proxyHost") + getSystem(protocol + "proxyPort")
+            + getSystem(protocol + "proxyUser") + getSystem(protocol + "proxyPassword"));
+        LOG.info("}");
+
+        LOG.info("detecting current proxies on " + testURI + ":");
+        try {
+            StringBuilder buf = new StringBuilder();
+            List<Proxy> protProxies = ProxySelector.getDefault().select(new URI(testURI));
+            Proxy currentProxy = null;
+            if (protProxies != null) {
+                for (Proxy proxy : protProxies) {
+                    buf.append("\t - PROXY type: " + proxy.type());
+                    InetSocketAddress addr = (InetSocketAddress) proxy.address();
+
+                    if (addr == null) {
+                        buf.append(" (No Proxy)");
+                    } else {
+                        buf.append("hostName: " + addr.getHostName() + "\n\t http.proxyPort = " + addr.getPort());
+                        //last proxy wins
+                        currentProxy = proxy;
+                    }
+                    buf.append("\n");
+                }
+            }
+
+            if (newProxyHost != null && port != -1) {
+                buf.append("\nsetting new system properties:");
+                setSystem("java.net.useSystemProxies", "true", buf);
+                setSystem(protocol + "proxySet", "true", buf);
+                setSystem(protocol + "proxyHost", newProxyHost, buf);
+                setSystem(protocol + "proxyPort", String.valueOf(port), buf);
+                if (user != null)
+                    setSystem(protocol + "proxyUser", user, buf);
+                if (passwd != null)
+                    setSystem(protocol + "proxyPassword", passwd, buf);
+                LOG.info(buf);
+
+                SocketAddress addr = new InetSocketAddress(newProxyHost, port);
+                Proxy.Type type =
+                    protocol.startsWith("http") ? Proxy.Type.HTTP : protocol.startsWith("sock") ? Proxy.Type.SOCKS
+                        : Proxy.Type.DIRECT;
+                return type.equals(Proxy.Type.DIRECT) ? Proxy.NO_PROXY : new Proxy(type, addr);
+            } else
+                // last configuration
+                LOG.info(buf);
+            return currentProxy;
+        } catch (URISyntaxException e) {
+            e.printStackTrace();
+            new RuntimeException(e);
+        }
+        return null;
+    }
+
+    static String getSystem(String k) {
+        return System.getProperty(k) != null ? "\n\t" + k + "=" + System.getProperty(k) : "";
+    }
+
+    static void setSystem(String k, String v, StringBuilder log) {
+        log.append("\n\t key=" + k + ", value=" + v);
+        System.setProperty(k, v);
     }
 
     /**

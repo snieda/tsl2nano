@@ -608,6 +608,20 @@ public class BeanAttribute<T> implements IAttribute<T> {
         return (T) value;
     }
 
+    /**
+     * wraps (see {@link #wrap(Object, Class)}) the given value through the castInfo information to the desired cast.
+     * 
+     * @param value to wrap into an object defined by castInfo
+     * @param castInfo (optional) any text or name containing a part with: (<classpath>)
+     * @return if castInfo with cast to class was found: the wrapped (see {@link #wrap(Object, Class)}) value, otherwise
+     *         the value itself
+     */
+    @SuppressWarnings("unchecked")
+    public static Object cast(Object value, String castInfo) {
+        String cast = castInfo != null ? StringUtil.substring(castInfo, "(", ")", false, true) : null;
+        return cast != null ? BeanAttribute.wrap(value, BeanClass.createBeanClass(cast).getClazz()) : value;
+    }
+
 //    private void readObjectNoData() throws ObjectStreamException {
 //
 //    }
