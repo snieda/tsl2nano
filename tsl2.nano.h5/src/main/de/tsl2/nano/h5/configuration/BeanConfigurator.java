@@ -15,6 +15,7 @@ import static de.tsl2.nano.h5.HtmlUtil.COLOR_LIGHT_GRAY;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -24,6 +25,7 @@ import de.tsl2.nano.bean.def.Bean;
 import de.tsl2.nano.bean.def.BeanDefinition;
 import de.tsl2.nano.bean.def.CollectionExpressionTypeFormat;
 import de.tsl2.nano.bean.def.Constraint;
+import de.tsl2.nano.bean.def.IAttributeDefinition;
 import de.tsl2.nano.bean.def.Presentable;
 import de.tsl2.nano.bean.def.ValueColumn;
 import de.tsl2.nano.bean.def.ValueExpression;
@@ -179,10 +181,26 @@ public class BeanConfigurator<T> implements Serializable {
     /**
      * @param attributes The attributeDefinitions to set.
      */
+    @SuppressWarnings({ "rawtypes", "unchecked" })
     public void setAttributes(List<AttributeConfigurator> attributes) {
-        defAccessor.call("getAttributeDefinitions", Map.class).clear();
+        Map<String, IAttributeDefinition> definitions = defAccessor.call("getAttributeDefinitions", Map.class);
+        Map<String, IAttributeDefinition> invisibles = new LinkedHashMap<>(definitions);
+        definitions.clear();
+        int i = 0;
         for (AttributeConfigurator cattr : attributes) {
-            def.addAttribute(cattr.unwrap());
+            IAttributeDefinition a = cattr.unwrap();
+            //IMPROVE: enhance interfaces to set index without reflection
+            new PrivateAccessor(a.getColumnDefinition()).set("columnIndex", ++i);
+            def.addAttribute(a);
+            invisibles.remove(a.getName());
+        }
+        //add not-selected attributes as invisibles at the end
+        for (IAttributeDefinition<?> a : invisibles.values()) {
+            //IMPROVE: enhance interfaces to set index without reflection
+            new PrivateAccessor(a.getColumnDefinition()).set("columnIndex", ++i);
+            a.getPresentation().setVisible(false);
+            a.getColumnDefinition().getPresentable().setVisible(false);
+            def.addAttribute(a);
         }
     }
 
