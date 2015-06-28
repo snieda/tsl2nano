@@ -29,7 +29,6 @@ import java.util.Hashtable;
 import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Properties;
-import java.util.TreeMap;
 import java.util.concurrent.Callable;
 
 import javax.print.attribute.standard.MediaSizeName;
@@ -69,7 +68,6 @@ import de.tsl2.nano.incubation.specification.rules.Rule;
 import de.tsl2.nano.incubation.specification.rules.RulePool;
 import de.tsl2.nano.incubation.terminal.AsciiImage;
 import de.tsl2.nano.incubation.terminal.SIShell;
-import de.tsl2.nano.incubation.terminal.WebUtil;
 import de.tsl2.nano.incubation.terminal.item.Action;
 import de.tsl2.nano.incubation.terminal.item.Container;
 import de.tsl2.nano.incubation.terminal.item.Input;
