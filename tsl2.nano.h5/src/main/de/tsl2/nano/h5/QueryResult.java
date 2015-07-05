@@ -86,6 +86,8 @@ public class QueryResult<COLLECTIONTYPE extends Collection<T>, T> extends BeanCo
     @Commit
     protected void initDeserialization() {
         query = (Query<Collection<Object[]>>) ENV.get(QueryPool.class).get(queryName);
+        if (query == null)
+            throw new IllegalStateException(this + " can't load query '" + queryName + "'");
         beanFinder = new BeanFinder() {
             @Override
             public Collection superGetData(Object fromFilter, Object toFilter) {

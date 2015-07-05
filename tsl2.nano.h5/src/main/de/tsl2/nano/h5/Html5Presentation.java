@@ -161,6 +161,7 @@ import de.tsl2.nano.bean.def.BeanCollector;
 import de.tsl2.nano.bean.def.BeanDefinition;
 import de.tsl2.nano.bean.def.BeanPresentationHelper;
 import de.tsl2.nano.bean.def.BeanValue;
+import de.tsl2.nano.bean.def.IAttributeDefinition;
 import de.tsl2.nano.bean.def.IBeanCollector;
 import de.tsl2.nano.bean.def.IPageBuilder;
 import de.tsl2.nano.bean.def.IPresentable;
@@ -191,6 +192,7 @@ import de.tsl2.nano.format.RegExpFormat;
 import de.tsl2.nano.h5.configuration.BeanConfigurator;
 import de.tsl2.nano.h5.expression.Query;
 import de.tsl2.nano.h5.expression.QueryPool;
+import de.tsl2.nano.incubation.specification.rules.RulePool;
 import de.tsl2.nano.script.ScriptTool;
 import de.tsl2.nano.util.NumberUtil;
 import de.tsl2.nano.util.PrivateAccessor;
@@ -350,7 +352,15 @@ public class Html5Presentation<T> extends BeanPresentationHelper<T> implements I
                 "icons/full_screen.png") {
                 @Override
                 public Object action() throws Exception {
-                    return new Statistic<>(bean.getDeclaringClass());
+                    BeanValue<T> from = null, to = null;
+                    if (bean instanceof BeanCollector) {
+                        BeanCollector collector = (BeanCollector) bean;
+                        from = (BeanValue<T>) collector.getBeanFinder().getFilterRange().getAttribute("from");
+                        to = (BeanValue<T>) collector.getBeanFinder().getFilterRange().getAttribute("to");
+                    }
+                    Statistic s = new Statistic(bean.getDeclaringClass(), from.getValue(), to.getValue());
+                    s.saveVirtualDefinition("statistics " + bean);
+                    return s;
                 }
 
                 @Override
@@ -364,6 +374,8 @@ public class Html5Presentation<T> extends BeanPresentationHelper<T> implements I
 
     @Override
     public void reset() {
+        ENV.get(RulePool.class).reset();
+        ENV.get(QueryPool.class).reset();
         super.reset();
         //TODO: clear template cache
     }
@@ -1398,15 +1410,17 @@ public class Html5Presentation<T> extends BeanPresentationHelper<T> implements I
         Collection<IPresentableColumn> colDefs = tableDescriptor.getColumnDefinitionsIndexSorted();
         Element cell;
         String value;
+        IValueDefinition<?> attr;
         if (colDefs.size() > 0) {
             for (IPresentableColumn c : colDefs) {
+                attr = itemBean.hasAttribute(c.getName()) ?itemBean.getAttribute(c.getName()) : null;
                 //on byte[] show an image through attached file
                 //workaround: on virtuals searching the attribute may cause an error
                 if (itemBean.isVirtual() ? BitUtil.hasBit(c.getPresentable().getType(), TYPE_DATA,
-                    TYPE_ATTACHMENT) : BitUtil.hasBit(itemBean.getAttribute(c.getName()).getPresentation().getType(),
+                    TYPE_ATTACHMENT) : attr != null && BitUtil.hasBit(attr.getPresentation().getType(),
                     TYPE_DATA,
                     TYPE_ATTACHMENT)) {
-                    BeanValue<?> beanValue = (BeanValue<?>) itemBean.getAttribute(c.getName());
+                    BeanValue<?> beanValue = (BeanValue<?>) attr;
                     value = beanValue.getValueFile().getPath();
                     cell =
                         appendElement(row, TAG_CELL, ATTR_TITLE,
@@ -1422,8 +1436,9 @@ public class Html5Presentation<T> extends BeanPresentationHelper<T> implements I
                     if (Messages.isMarkedAsProblem(value)) {
                         HtmlUtil.appendAttributes(cell, ATTR_COLOR, COLOR_RED);
                     }
-                } else if (tableDescriptor.hasMode(IBeanCollector.MODE_SHOW_NESTINGDETAILS)
-                    && !BeanUtil.isStandardType(itemBean.getAttribute(c.getName()).getType())) {//nesting panels
+                } else if (attr != null && tableDescriptor.hasMode(IBeanCollector.MODE_SHOW_NESTINGDETAILS)
+                    && !BeanUtil.isStandardType(attr.getType())
+                    && attr.getValue() != null) {//nesting panels
                     cell =
                         appendElement(row, TAG_CELL, ATTR_TITLE,
                             itemBean.toString() + ": " + ENV.translate(c.getName(), true),
@@ -1432,7 +1447,7 @@ public class Html5Presentation<T> extends BeanPresentationHelper<T> implements I
                                 + ", " + c.getIndex() + "]");
 //                    cell = appendElement(cell, TAG_EMBED);
                     createContentPanel(session, cell,
-                        Bean.getBean((Serializable) itemBean.getAttribute(c.getName()).getValue()), interactive, false);
+                        Bean.getBean((Serializable) attr.getValue()), interactive, false);
                 } else {//standard --> text
                     value = tableDescriptor.getColumnText(item, c.getIndex());
                     cell =

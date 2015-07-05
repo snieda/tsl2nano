@@ -16,7 +16,10 @@ import java.util.LinkedHashMap;
 import java.util.LinkedList;
 import java.util.List;
 
+import org.simpleframework.xml.Element;
+
 import de.tsl2.nano.bean.BeanContainer;
+import de.tsl2.nano.bean.BeanUtil;
 import de.tsl2.nano.bean.def.ArrayValue;
 import de.tsl2.nano.bean.def.Attachment;
 import de.tsl2.nano.bean.def.AttributeDefinition;
@@ -27,10 +30,14 @@ import de.tsl2.nano.core.ENV;
 import de.tsl2.nano.core.cls.IAttribute;
 import de.tsl2.nano.core.util.StringUtil;
 import de.tsl2.nano.core.util.Util;
+import de.tsl2.nano.service.util.ServiceUtil;
 import de.tsl2.nano.util.NumberUtil;
 
 /**
- * ON CONSTRUCTION
+ * Does a statistic by doing a group by on all columns. Set {@link #from} and {@link #toString()} on the constructor
+ * {@link #Statistic(Class, Object, Object)} to do a filtering. set the attribute filter (see
+ * {@link BeanDefinition#setAttributeFilter(String...)} to select the attributes to do a statistic on (creating a 'group
+ * by' select).
  * 
  * @author Tom, Thomas Schneider
  * @version $Revision$
@@ -39,9 +46,19 @@ public class Statistic<COLLECTIONTYPE extends Collection<T>, T> extends BeanColl
     /** serialVersionUID */
     private static final long serialVersionUID = 1L;
 
+    /** columnNames of the statistic table */
     List<String> columnNames;
 
+    @Element(required = false)
+    T from;
+    @Element(required = false)
+    T to;
+
     public Statistic() {
+    }
+
+    public Statistic(Class<T> beanType) {
+        this(beanType, null, null);
     }
 
     /**
@@ -51,11 +68,13 @@ public class Statistic<COLLECTIONTYPE extends Collection<T>, T> extends BeanColl
      * @param workingMode
      */
     @SuppressWarnings("unchecked")
-    public Statistic(Class<T> beanType) {
+    public Statistic(Class<T> beanType, T from, T to) {
         super();
         setMode(0);
         columnNames = new LinkedList<String>();
-        collection = (COLLECTIONTYPE) create(beanType, columnNames);
+        this.from = from;
+        this.to = to;
+        collection = (COLLECTIONTYPE) create(beanType, columnNames, from, to);
         isStaticCollection = true;
     }
 
@@ -74,7 +93,7 @@ public class Statistic<COLLECTIONTYPE extends Collection<T>, T> extends BeanColl
         return new ArrayList<IAttribute>(attributeDefinitions.values());
     }
 
-    private <T> Collection<T> create(Class<T> beanType, List<String> attributeNames) {
+    private <T> Collection<T> create(Class<T> beanType, List<String> attributeNames, T from, T to) {
         attributeNames.add(ENV.translate("tsl2nano.name", true));
         attributeNames.add(ENV.translate("tsl2nano.count", true));
 
@@ -84,6 +103,9 @@ public class Statistic<COLLECTIONTYPE extends Collection<T>, T> extends BeanColl
         List<String> statColumns = new ArrayList<>(names.length);
         List<String> valueColumns = new ArrayList<>(names.length);
 
+        searchStatus =
+            ENV.translate("tsl2nano.summary", true) + ": " + ENV.translate("tsl2nano.from", true)
+                + BeanUtil.toFormattedMap(from) + ENV.translate("tsl2nano.to", true) + BeanUtil.toFormattedMap(to);
         /*
          * check, which columns should be shown. if a column has more than 500 group by elements, its to big
          * evaluate the number columns
@@ -99,7 +121,7 @@ public class Statistic<COLLECTIONTYPE extends Collection<T>, T> extends BeanColl
             } else if (NumberUtil.isNumber(attrDef.getType())) {
                 valueColumns.add(names[i]);
                 attributeNames.add(sum + names[i] + ")");
-            } else if (groupByCount(def, names[i]) <= maxcount) {
+            } else if (groupByCount(def, names[i], from, to) <= maxcount) {
                 statColumns.add(names[i]);
             }
         }
@@ -109,43 +131,62 @@ public class Statistic<COLLECTIONTYPE extends Collection<T>, T> extends BeanColl
          */
         Collection<T> collection = new ArrayList<>();
         for (String n : statColumns) {
-            collection.addAll(createStatistics(def, n, valueColumns));
+            collection.addAll(createStatistics(def, n, valueColumns, from, to));
         }
-        collection.addAll(createSummary(def, valueColumns));
+        collection.addAll(createSummary(def, valueColumns, from, to));
         return collection;
     }
 
-    private static <T> Collection<? extends T> createSummary(BeanDefinition<T> def, List<String> valueColumns) {
+    private static <T> Collection<? extends T> createSummary(BeanDefinition<T> def,
+            List<String> valueColumns,
+            T from,
+            T to) {
         String summary =
             ENV.translate("tsl2nano.all", true) + " " + ENV.translate("tsl2nano.elements", true);
-        String qstr = "select ''{0}'', count(*) {2} from {1}";
+        String qstr = "select ''{0}'', count(*) {2} from {1} t {3}";
 
         String strValueColumns = StringUtil.concatWrap(",sum({0})".toCharArray(), valueColumns.toArray());
-        return BeanContainer.instance().getBeansByQuery(MessageFormat.format(qstr, summary, def, strValueColumns),
-            false, (Object[]) null);
+        Collection<?> parameter = new LinkedList<>();
+        String where = whereConstraints(from, to, parameter).toString();
+        return BeanContainer.instance().getBeansByQuery(
+            MessageFormat.format(qstr, summary, def, strValueColumns, where),
+            false, parameter.toArray());
     }
 
     private static <T> Collection<? extends T> createStatistics(BeanDefinition<T> def,
             String column,
-            List<String> valueColumns) {
-        String qstr = "select ''{3}: '' || {0}, count({0}) {2} from {1} group by {0} order by 1";
+            List<String> valueColumns,
+            T from,
+            T to) {
+        String qstr = "select ''{3}: '' || {0}, count({0}) {2} from {1} t {4} group by {0} order by 1";
 
         String strValueColumns = StringUtil.concatWrap(",sum({0})".toCharArray(), valueColumns.toArray());
         String columnname = ENV.translate(def.getAttribute(column).getId(), true);
+        Collection<?> parameter = new LinkedList<>();
+        String where = whereConstraints(from, to, parameter).toString();
         return BeanContainer.instance().getBeansByQuery(
-            MessageFormat.format(qstr, column, def, strValueColumns, columnname),
-            false, (Object[]) null);
+            MessageFormat.format(qstr, column, def, strValueColumns, columnname, where),
+            false, parameter.toArray());
     }
 
-    private static <T> int groupByCount(BeanDefinition def, String column) {
-        String qstr = "select count(" + column + ") from " + def.getName() + " group by " + column;
+    private static <T> int groupByCount(BeanDefinition<T> def, String column, T from, T to) {
+        Collection parameter = new LinkedList<>();
+        String qstr =
+            "select count(" + column + ") from " + def.getName() + " t " + whereConstraints(from, to, parameter)
+                + " group by "
+                + column;
 
         //JPA is not able to resolve the expression ..count(count(....)), so we have to use native sql
 
-        Collection<Object> result = BeanContainer.instance().getBeansByQuery(qstr, false, (Object[]) null);
+        Collection<Object> result = BeanContainer.instance().getBeansByQuery(qstr, false, parameter.toArray());
         //Woraround: returning direct size. count(count(.)) would have better performance
         return result.size();
         //JPA-QL sometimes seems to return empty collections on my count() request
 //        return result.size() > 0 ? ((Number)result.iterator().next()).intValue() : 0;
+    }
+
+    private static <T> StringBuffer whereConstraints(T from, T to, Collection parameter) {
+        return from == null || to == null ? new StringBuffer(" 1=1 ") : ServiceUtil.addBetweenConditions(
+            new StringBuffer(), from, to, parameter, true);
     }
 }

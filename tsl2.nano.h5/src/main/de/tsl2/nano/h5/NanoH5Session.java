@@ -499,6 +499,12 @@ public class NanoH5Session implements ISession {
     private Parameter getContextParameter() {
         Iterable<BeanDefinition> con = getContext();
         Parameter p = new Parameter();
+        LOG.debug("filling context for session: " + this);
+        for (BeanDefinition c : con) {
+            p.putAll(c.toValueMap(p));
+        }
+        //to that twice to let rules and queries use defined parameter
+        LOG.debug("second iteration on context for session: " + this);
         for (BeanDefinition c : con) {
             p.putAll(c.toValueMap(p));
         }

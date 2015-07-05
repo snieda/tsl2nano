@@ -110,7 +110,7 @@ public class Query<RESULT> implements IPRunnable<RESULT, Map<String, Object>> {
             operation = operation.replace("${", ":").replace("}", "");
             StringBuilder q = new StringBuilder(operation);
             while ((!Util.isEmpty(p = StringUtil.extract(q, VAR_SQL, "")))) {
-                parameter.put(p.substring(1), null);
+                parameter.put(p, null);
             }
         }
         return parameter;
@@ -130,7 +130,7 @@ public class Query<RESULT> implements IPRunnable<RESULT, Map<String, Object>> {
             String p;
             String select = StringUtil.substring(operation.toLowerCase(), "select", "from");
             StringBuilder q = new StringBuilder(select);
-            while ((!Util.isEmpty(p = StringUtil.extract(q, "(^|\\,)\\s*([^\\s,]+)(\\s+as\\s+([\\w]+))?", "")))) {
+            while ((!Util.isEmpty(p = StringUtil.extract(q, "(^|\\,)\\s*([^\\s,]+)(\\s+as\\s+([\\w]+))?", "", 0, 0)))) {
                 columnNames.add(p.contains("as ") ? StringUtil.substring(p, "as ", null) : StringUtil.substring(p, ".",
                     null));
             }
