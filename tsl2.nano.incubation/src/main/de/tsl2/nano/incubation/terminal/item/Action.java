@@ -11,7 +11,9 @@ package de.tsl2.nano.incubation.terminal.item;
 
 import java.io.InputStream;
 import java.io.PrintStream;
+import java.lang.reflect.Method;
 import java.util.Properties;
+import java.util.Set;
 
 import org.simpleframework.xml.Element;
 import org.simpleframework.xml.ElementArray;
@@ -25,6 +27,7 @@ import de.tsl2.nano.core.log.LogFactory;
 import de.tsl2.nano.core.util.StringUtil;
 import de.tsl2.nano.incubation.terminal.IItem;
 import de.tsl2.nano.incubation.terminal.SIShell;
+import de.tsl2.nano.util.PrivateAccessor;
 
 /**
  * action to be used on {@link SIShell}s. no inline {@link Runnable} are supported as instances of this class must be
@@ -109,13 +112,16 @@ public class Action<T> extends AItem<T> {
             if (v != null) {
                 p.put("arg" + (i + 1), v);
             }
-            cls[i] = v != null ? BeanClass.getDefiningClass(v.getClass()) : cast;
+            cls[i] = c != null ? cast : v != null ? BeanClass.getDefiningClass(v.getClass()) : cast;
         }
         if (instance != null)
             p.put("instance", instance);
         IRunnable<T, Properties> runner = null;
         try {
-            runner = new de.tsl2.nano.incubation.specification.actions.Action(getMainClass().getMethod(method, cls));
+            Set<Method> methods = PrivateAccessor.findMethod(mainClass, method, null, cls);
+            //if nothing found, throw a nosuchmethod exception
+            Method m = methods.size() > 0 ? methods.iterator().next() : getMainClass().getMethod(method, cls);
+            runner = new de.tsl2.nano.incubation.specification.actions.Action(m);
         } catch (Exception e) {
             ManagedException.forward(e);
         }

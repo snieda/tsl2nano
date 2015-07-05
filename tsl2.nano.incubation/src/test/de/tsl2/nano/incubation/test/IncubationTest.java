@@ -683,7 +683,7 @@ public class IncubationTest {
         scan.add(new Input("ip", NetUtil.getMyIP(), "internet address to be scanned"));
         scan.add(new Input("lowest-port", 0, "lowest port to be scanned"));
         scan.add(new Input("highest-port", 100, "highest port to be scanned"));
-        scan.add(new Action(NetUtil.class, "scans", "(java.lang.int)lowest-port", "(java.lang.int)highest-port", "(java.lang.String[])ip"));
+        scan.add(new Action(NetUtil.class, "scans", "(int)lowest-port", "(int)highest-port", "(java.lang.String[])ip"));
         Container wcopy = new Container("WCopy", "Downloads a site");
         net.add(wcopy);
         wcopy.add(new Input("url", null, "url to get files from", false));
@@ -712,7 +712,7 @@ public class IncubationTest {
 
         Container restful = new Container("Restful", "Calls a RESTful service");
         net.add(restful);
-        restful.add(new Input("url", null, "URL of a RESTful service", false));
+        restful.add(new Input("url", "http://echo.jsontest.com/title/ipsum", "URL of a RESTful service", false));
         restful.add(new PropertySelector<String>("arguments", "RESTful arguments", null/*MapUtil.asMap(new TreeMap(), "destFile", "mynew.jar")*/));
         restful.add(new Action(NetUtil.class, "getRestful", "url", "arguments"));
 
@@ -726,8 +726,8 @@ public class IncubationTest {
         file.add(new Input("destination", "${user.dir}", "destination directory for file operations"));
         file.add(new Action("Details", FileUtil.class, "getDetails", "(java.io.File)file"));
         file.add(new FileSelector("List", "file", "directory"));
-        file.add(new Action("Delete", FileUtil.class, "foreach", "directory", "file", "(" + IRunnable.class.getName() + ")" + Action.createReferenceName(FileUtil.class, "DO_DELETE")));
-        file.add(new Action("Copy", FileUtil.class, "foreach", "directory", "file", "(" + IRunnable.class.getName() + ")" + Action.createReferenceName(FileUtil.class, "DO_COPY")));
+        file.add(new Action("Delete", FileUtil.class, "forEach", "directory", "file", "(" + IRunnable.class.getName() + ")" + Action.createReferenceName(FileUtil.class, "DO_DELETE")));
+        file.add(new Action("Copy", FileUtil.class, "forEach", "directory", "file", "(" + IRunnable.class.getName() + ")" + Action.createReferenceName(FileUtil.class, "DO_COPY")));
         file.add(new MainAction("Imageviewer", AsciiImage.class, "file", "image.out", "sishell.width",
             "sishell.height"));
         root.add(file);

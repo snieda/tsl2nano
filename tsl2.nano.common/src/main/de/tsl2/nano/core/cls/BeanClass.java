@@ -517,7 +517,7 @@ public class BeanClass<T> implements Serializable {
         try {
             Field field = declared ? clazz.getDeclaredField(fieldName) : clazz.getField(fieldName);
             field.setAccessible(true);
-            field.set(instance, value);
+            field.set(instance, BeanAttribute.wrap(value, field.getType()));
         } catch (Exception e) {
             ManagedException.forward(e);
         }
@@ -580,6 +580,10 @@ public class BeanClass<T> implements Serializable {
                     par[i] = Object.class;
                 }
             }
+        } else {//wrap argument objects to have the right types
+            for (int i = 0; i < args.length; i++) {
+                args[i] = BeanAttribute.wrap(args[i], par[i]);
+            }            
         }
         try {
             LOG.debug("calling " + clazz.getName()

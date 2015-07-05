@@ -16,12 +16,9 @@ import java.util.Map;
 import java.util.Properties;
 import java.util.Set;
 
-import org.apache.commons.logging.Log;
-
 import de.tsl2.nano.collection.CollectionUtil;
 import de.tsl2.nano.core.ManagedException;
 import de.tsl2.nano.core.cls.BeanClass;
-import de.tsl2.nano.core.log.LogFactory;
 import de.tsl2.nano.core.util.Util;
 
 /**
@@ -145,6 +142,10 @@ public class PrivateAccessor<T> extends UnboundAccessor<T> {
         return args;
     }
 
+    protected Set<Method> findMethod(String nameExpression, Class returnType, Class... args) {
+        return findMethod(instance.getClass(), nameExpression, returnType, args);
+    }
+    
     /**
      * generic method finder. give a regular expression of methods name, its return type and some arg types to get a
      * filtered method list.
@@ -154,9 +155,9 @@ public class PrivateAccessor<T> extends UnboundAccessor<T> {
      * @param args first or complete arguments that types have to match the methods parameter types.
      * @return set of found methods
      */
-    protected Set<Method> findMethod(String nameExpression, Class returnType, Class... args) {
-        Method[] methods = instance.getClass().getMethods();
-        methods = CollectionUtil.concat(methods, instance.getClass().getDeclaredMethods());
+    public static Set<Method> findMethod(Class cls, String nameExpression, Class returnType, Class... args) {
+        Method[] methods = cls.getMethods();
+        methods = CollectionUtil.concat(methods, cls.getDeclaredMethods());
         Set<Method> result = new LinkedHashSet<Method>();
         for (int i = 0; i < methods.length; i++) {
             if ((nameExpression == null || methods[i].getName().matches(nameExpression))

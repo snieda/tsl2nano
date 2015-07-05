@@ -79,13 +79,13 @@ public class Pool<T extends IPRunnable<?, ?>> {
     /**
      * getRule
      * 
-     * @param name rule to find
-     * @return rule or null
+     * @param name rule/query to find
+     * @return rule/query or null
      */
     public T get(String name) {
-        T rule = runnables().get(name);
+        T runnable = runnables().get(name);
         //perhaps not loaded (new or recursive)
-        return rule != null ? rule : loadRunnable(getFileName(name));
+        return runnable != null ? runnable : loadRunnable(getFileName(name));
     }
 
     private String getFileName(String name) {

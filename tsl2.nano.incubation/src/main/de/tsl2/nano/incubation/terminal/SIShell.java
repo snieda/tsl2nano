@@ -111,6 +111,8 @@ public class SIShell implements IItemHandler, Serializable {
     /** default: false. if true, on each terminal save, the terminals xml serialization file will be stored. */
     @Attribute(required = false)
     boolean refreshConfig = false;
+    @Attribute(required = false)
+    boolean fullException = false;
 
     /**
      * predefined variables (not changable through user input) copied to the {@link #env} but not saved in property
@@ -499,7 +501,10 @@ public class SIShell implements IItemHandler, Serializable {
             throw ex;
         } catch (Exception ex) {
             //print only - no problem
-            ex.printStackTrace(out);
+            if (fullException)
+                ex.printStackTrace(out);
+            else
+                out.println(new ManagedException("tsl2nano.error", ex).getLocalizedMessage());
             //do it again
             nextLine(in);
             serve(item, in, out, env);
