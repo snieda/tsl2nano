@@ -192,7 +192,7 @@ public class ENV implements Serializable {
             if (new File(path).canRead()) {
                 self().info("loading service from " + path);
                 self().addService(service, self().get(XmlUtil.class).loadXml(path, service));
-            } else if (!service.isInterface() && BeanClass.hasDefaultConstructor(service, true)) {
+            } else if (!service.isInterface() && BeanClass.hasDefaultConstructor(service, !Util.isFrameworkClass(service))) {
                 self().info("trying to create service " + service + " through default construction");
                 T newService = self().addService(BeanClass.createInstance(service));
                 if (newService instanceof Serializable) {

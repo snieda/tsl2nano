@@ -1438,7 +1438,7 @@ public class BeanDefinition<T> extends BeanClass<T> implements IPluggable<BeanDe
             boolean onlyFilterAttributes,
             String... filterAttributes) {
         final String classPrefix =
-            useClassPrefix ? BeanAttribute.toFirstLower(instance.getClass().getSimpleName()) + "."
+            useClassPrefix ? BeanAttribute.toFirstLower(BeanClass.getName(instance.getClass())) + "."
                 : "";
         return toValueMap(instance, classPrefix, onlySingleValues, onlyFilterAttributes, filterAttributes);
     }

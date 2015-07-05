@@ -114,7 +114,7 @@ public class BeanCollector<COLLECTIONTYPE extends Collection<T>, T> extends Bean
     protected transient IAction<COLLECTIONTYPE> searchAction;
     protected transient IAction<COLLECTIONTYPE> quickSearchAction;
     protected transient IAction<?> resetAction;
-    transient String searchStatus = Messages.getString("tsl2nano.searchdialog.nosearch");
+    protected transient String searchStatus = Messages.getString("tsl2nano.searchdialog.nosearch");
 
     /** whether to refresh data from beancontainer before opening edit-dialog */
     @Transient

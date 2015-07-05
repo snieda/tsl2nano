@@ -75,7 +75,8 @@ public class ArrayValue<T> implements IValueAccess<T>, IAttribute<T> {
     
     @Override
     public T getValue(Object instance) {
-        return (T) ((Object[]) instance)[index];
+        return (T) (instance instanceof Object[] ? ((Object[]) instance)[index] : instance != null && index == 0
+            ? instance : null/*throw new IllegalArgumentException(this + " can't evaluate value for instance " + instance)*/);
     }
 
     @Override
