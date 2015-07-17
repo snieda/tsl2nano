@@ -364,11 +364,13 @@ public class NetUtil {
     public static final boolean isOnline() {
         if (lastOnlineCheck - System.currentTimeMillis() > deltaOnlineCheck) {
             lastOnlineCheck = System.currentTimeMillis();
-//            isonline = !getMyIP().equals(InetAddress.getLoopbackAddress().getHostAddress());
-            try {
-                isonline = InetAddress.getByName("www.google.com").isReachable(2000);
-            } catch (Exception e) {
-                isonline = false;
+            isonline = !getMyIP().equals(InetAddress.getLoopbackAddress().getHostAddress());
+            if (isonline) {//check, whether most important site is available
+                try {//isReachable(2000) fails...
+                    isonline = InetAddress.getByName("www.google.com") != null;//.isReachable(2000);
+                } catch (Exception e) {
+                    isonline = false;
+                }
             }
         }
         return isonline;

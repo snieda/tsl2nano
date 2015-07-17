@@ -141,6 +141,31 @@ public class BeanClass<T> implements Serializable {
     }
 
     /**
+     * getFieldNames
+     * 
+     * @param type return type
+     * @return all method names of class hierarchy that return of the given type.
+     */
+    public Method[] getMethods(Class<?> type, boolean staticOnly) {
+        Set<Method> names = new LinkedHashSet<Method>();
+        Method[] methods = clazz.getMethods();
+        for (int i = 0; i < methods.length; i++) {
+            if (type.isAssignableFrom(methods[i].getReturnType())
+                && (!staticOnly || Modifier.isStatic(methods[i].getModifiers()))) {
+                names.add(methods[i]);
+            }
+        }
+        methods = clazz.getDeclaredMethods();
+        for (int i = 0; i < methods.length; i++) {
+            if (type.isAssignableFrom(methods[i].getReturnType())
+                && (!staticOnly || Modifier.isStatic(methods[i].getModifiers()))) {
+                names.add(methods[i]);
+            }
+        }
+        return names.toArray(new Method[0]);
+    }
+
+    /**
      * getName
      * 
      * @return simple class name

@@ -9,6 +9,8 @@
  */
 package de.tsl2.nano.core.util;
 
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 /**
@@ -187,6 +189,7 @@ public class BitUtil extends CUtil {
 
     /**
      * bit
+     * 
      * @param bool
      * @return 1 or 0
      */
@@ -237,5 +240,15 @@ public class BitUtil extends CUtil {
             }
         }
         return description.length() > 2 ? description.substring(2) : null;
+    }
+
+    /**
+     * converts the given string expression to a boolean value.
+     * 
+     * @param booleanExpression
+     * @return true, if given string matches "true|on|1|x|yes|y|j|ja".
+     */
+    public static boolean bool(Object booleanExpression) {
+        return booleanExpression != null && booleanExpression.toString().toLowerCase().matches("true|on|1|x|yes|y|j|ja");
     }
 }

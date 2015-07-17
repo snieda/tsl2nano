@@ -544,7 +544,7 @@ public class Bean<T> extends BeanDefinition<T> {
      * @param beandef bean description
      * @return new created bean holding given instance
      */
-    protected static <I extends Serializable> Bean<I> createBean(I instance, BeanDefinition<I> beandef) {
+    protected static <I> Bean<I> createBean(I instance, BeanDefinition<I> beandef) {
         Bean<I> bean = new Bean<I>();
         copy(beandef, bean, "attributeFilter", "attributeDefinitions", "asString", "presentationHelper");
         bean.attributeFilter = beandef.attributeFilter != null ? CollectionUtil.copy(beandef.attributeFilter) : null;
@@ -620,7 +620,7 @@ public class Bean<T> extends BeanDefinition<T> {
      * @param keysAndValues key-value-pairs to be filled to the given instance
      * @return new created bean
      */
-    public static <I extends Serializable> Bean<I> getBean(I instanceOrName, Object... keysAndValues) {
+    public static <I> Bean<I> getBean(I instanceOrName, Object... keysAndValues) {
         Bean<I> bean = getBean(instanceOrName);
         Map map = MapUtil.asMap(keysAndValues);
         Set<String> keySet = map.keySet();
@@ -633,7 +633,7 @@ public class Bean<T> extends BeanDefinition<T> {
     /**
      * @see #getBean(Serializable, boolean)
      */
-    public static <I extends Serializable> Bean<I> getBean(I instanceOrName) {
+    public static <I> Bean<I> getBean(I instanceOrName) {
         return getBean(instanceOrName, true/*!BeanUtil.isStandardType(instanceOrName)*/);
     }
 
@@ -645,7 +645,7 @@ public class Bean<T> extends BeanDefinition<T> {
      * @param instanceOrName an object or string (--> {@link #isVirtual()})
      * @return new created bean
      */
-    public static <I extends Serializable> Bean<I> getBean(I instanceOrName, boolean cacheInstance) {
+    public static <I> Bean<I> getBean(I instanceOrName, boolean cacheInstance) {
         Bean<I> bean = timedCache.get(instanceOrName);
         if (bean != null) {
             return bean;
