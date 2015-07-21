@@ -96,7 +96,7 @@ public class NanoH5 extends NanoHTTPD implements ISystemConnector<Persistence> {
     static final String REVERSE_ENG_SCRIPT = "reverse-eng.xml";
     /** hibernate reverse engeneer configuration */
     static final String HIBREVNAME = "hibernate.reveng.xml";
-    
+
     Map<InetAddress, NanoH5Session> sessions;
 
     IPageBuilder<?, String> builder;
@@ -106,7 +106,7 @@ public class NanoH5 extends NanoHTTPD implements ISystemConnector<Persistence> {
 //    /** workaround to avoid re-serving a cached request. */
 //    private Properties lastHeader;
 
-    private static final String START_HTML_FILE = /*AppLoader.getFileSystemPrefix() +*/ "application.html";
+    private static final String START_HTML_FILE = /*AppLoader.getFileSystemPrefix() +*/"application.html";
     static final String START_PAGE = "Start";
     static final int OFFSET_FILTERLINES = 2;
 
@@ -553,6 +553,8 @@ public class NanoH5 extends NanoHTTPD implements ISystemConnector<Persistence> {
             ENV.extractResource(JAR_DIRECTACCESS);
             ENV.extractResource(JAR_SERVICEACCESS);
 
+            provideScripts(persistence);
+
             String generatorTask;
             if (persistence.getGenerator().equals(Persistence.GEN_HIBERNATE)) {
                 generatorTask = "org.hibernate.tool.ant.HibernateToolTask";
@@ -562,9 +564,7 @@ public class NanoH5 extends NanoHTTPD implements ISystemConnector<Persistence> {
             ENV.loadClassDependencies("org.apache.tools.ant.taskdefs.Taskdef",
                 generatorTask, persistence.getConnectionDriverClass(), persistence.getProvider());
 
-            provideScripts(persistence);
-            
-            if (isNewDatabase(persistence)) {
+            if (isNewLocalDatabase(persistence) || persistence.autoDllIsCreateDrop()) {
                 generateDatabase(persistence);
             }
             Boolean generationComplete =
@@ -646,10 +646,10 @@ public class NanoH5 extends NanoHTTPD implements ISystemConnector<Persistence> {
         }
         ENV.extractResource(REVERSE_ENG_SCRIPT);
         ENV.extractResource(HIBREVNAME);
-        
+
     }
 
-    private boolean isNewDatabase(Persistence persistence) {
+    private boolean isNewLocalDatabase(Persistence persistence) {
         if (!Util.isEmpty(persistence.getPort())) {
             int p = Integer.valueOf(persistence.getPort());
             //TODO: eval if url on localhost
@@ -705,6 +705,7 @@ public class NanoH5 extends NanoHTTPD implements ISystemConnector<Persistence> {
     private String applicationHtmlFile() {
         return ENV.getTempPath() + START_HTML_FILE;
     }
+
     protected void reset() {
         String configPath = ENV.get(ENV.KEY_CONFIG_PATH, "config");
 

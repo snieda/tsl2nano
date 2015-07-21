@@ -18,6 +18,7 @@ import javax.security.auth.login.LoginException;
 
 import de.tsl2.nano.bean.def.IStatus;
 import de.tsl2.nano.core.ManagedException;
+import de.tsl2.nano.core.cls.BeanClass;
 import de.tsl2.nano.core.execution.ICRunnable;
 import de.tsl2.nano.core.execution.IRunnable;
 import de.tsl2.nano.serviceaccess.ServiceFactory;
@@ -118,7 +119,7 @@ public class RemoteServiceRunner {
             log("Please provide a classpath to the usecase-interface to be started!");
             return;
         }
-        final Class<?> uc = Class.forName(args[0]);
+        final Class<?> uc = BeanClass.load(args[0]);
         new RemoteServiceRunner().start((Class<ICRunnable<RemoteServiceRunner.SimpleContext>>) uc, args);
     }
 

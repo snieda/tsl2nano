@@ -2285,6 +2285,9 @@ Net:Connection-->Link-->Cover(content, descriptor)
 ** file-selector
 ** picture viewer (asciipicture)
 ** beanexaminer ;-)
+* (-) automatische Uebersetzungen einer messages.properties ueber restful (--> Google Übersetzer)
+* Volltextsuche
+* Query wird bei jeder Aktion ausgeführt - um den Context zu aktualisieren
 
 *TODO* für zeiterfassung
 * (v) id --> sequence
@@ -2299,13 +2302,20 @@ Net:Connection-->Link-->Cover(content, descriptor)
 * Type: Typ des Dienstes (meist Standard)
 * Classification: Klasse (frei, ?)
 * Item: Projekt (Standard)
+* messages übersetzen
+* (v) +Bankverbindung (+Paypal, ...)
+* +Party.kürzel
+* ER-Diagramme link
+* frm an online-model zum verlinken
+* Digatal Identity (mail, twitter, homepage...)
 * (v) Bilder mit blob?
-* Summenzeile (beandef oder columndef: + summarize=$feld1-$feld2)
+* (v) Summenzeile (beandef oder columndef: + summarize=$feld1-$feld2)
 * Wochentage + unterschiedliche Farben am WE+Feiertage
 * macros aufnehmen und abspielen
 * verschiedene workflows zur verfügung stellen
 * datenbank-user --> benutzer --> session-context + actions
-
+* (v) Statistik eingeschränkt auf Suchparameter
+* https://editor.ponyorm.com/explore
 
 * NanoTask, NanoProc, NanoLogic?
 * (-) TODO: simplexml --> xstream
@@ -2328,15 +2338,16 @@ Net:Connection-->Link-->Cover(content, descriptor)
 * (v) Page for Environment
 * Triggers: 
 ** (v) start search, if not more than 20 entries
-** create new, if no entry available
-** (x) assign entry , if only one available
+** (-) create new, if no entry available
+** (v) assign entry , if only one available
 * (v) show count on beancollectors
 * (x) Terminal: +pegdown (markdown processor)
 * home-page on: /home/user-web/s/sn/snieda/htdocs
 * Test App starten!
 * beandef.xsd in *.xml integrieren
 * terminal: flat mode (super-tree with selection e.g. 1.1.1)
-* terminal: scans --> varargs like String...
+* (v) terminal: scans --> varargs like String...
+* SecurityManager ausschalten und eigene policy in jar ausliefern
 
 war:
 * WEB-INF/web..xml rausschmeissen
@@ -2353,3 +2364,10 @@ war:
 * serviceaccess: test raus
 ** abstractstatelessservice, genericservicebean, namedqueryservice, fileservicebean raus
 * jdbc-properties: wenn hsqldb dann default-schema PUBLIC
+
+ponyorm:
+* CR werden aus type=text entfernt --> type=textarea
+* Das Zeichen ` rausschmeissen
+* AUTO_INCREMENT, LONGBLOB,...
+
+erdplus: kann nichts allgemeines exportieren

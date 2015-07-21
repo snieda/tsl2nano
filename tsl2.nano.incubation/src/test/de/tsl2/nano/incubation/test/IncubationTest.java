@@ -57,6 +57,7 @@ import de.tsl2.nano.core.util.StringUtil;
 import de.tsl2.nano.core.util.XmlUtil;
 import de.tsl2.nano.execution.AntRunner;
 import de.tsl2.nano.incubation.network.JobServer;
+import de.tsl2.nano.incubation.platform.PlatformManagement;
 import de.tsl2.nano.incubation.repeat.IChange;
 import de.tsl2.nano.incubation.repeat.ICommand;
 import de.tsl2.nano.incubation.repeat.impl.AChange;
@@ -677,7 +678,7 @@ public class IncubationTest {
 //        getjar.add(new MainAction(BeanClass.createBeanClass("de.tsl2.nano.jarresolver.JarResolver", null).getClazz(), "name"));
 //        root.add(getjar);
 //
-        Container net = new Container("Net", null);
+        Container net = new Container("Net", "wrench.png");
         Container scan = new Container("Scan", null);
         net.add(scan);
         scan.add(new Input("ip", NetUtil.getMyIP(), "internet address to be scanned"));
@@ -760,6 +761,21 @@ public class IncubationTest {
     @Test
     public void testXml2Text() throws Exception {
 //        log(StringUtil.removeXMLTags(String.valueOf(FileUtil.getFileData("printing-xml-with-fop.html", "UTF-8"))));
+    }
+    
+    @Test
+    public void testPlatformBeans() throws Exception {
+        ENV.setProperty("beandef.autoinit", false);
+        PlatformManagement.printMBeans(System.out, null);
+        PlatformManagement.logNotifications(null);
+        
+        //so something
+        ArrayList<byte[]> array = new ArrayList<byte[]>();
+        for (int i = 0; i < 1000000; i++) {
+            array.add(new byte[1024 * i]);
+        }
+        System.gc();
+        System.out.println("end: " + array.size());
     }
     
     static void log_(String msg) {

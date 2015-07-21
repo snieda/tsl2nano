@@ -19,6 +19,7 @@ import java.io.InputStream;
 import java.io.PrintStream;
 import java.io.PrintWriter;
 import java.io.Serializable;
+import java.io.StringWriter;
 import java.util.List;
 import java.util.Map;
 import java.util.Properties;
@@ -30,6 +31,8 @@ import javax.imageio.ImageIO;
 
 import org.apache.commons.logging.Log;
 import org.simpleframework.xml.Attribute;
+import org.simpleframework.xml.Default;
+import org.simpleframework.xml.DefaultType;
 import org.simpleframework.xml.Element;
 import org.simpleframework.xml.ElementMap;
 import org.simpleframework.xml.core.Commit;
@@ -47,6 +50,7 @@ import de.tsl2.nano.core.util.NetUtil;
 import de.tsl2.nano.core.util.StringUtil;
 import de.tsl2.nano.core.util.Util;
 import de.tsl2.nano.core.util.XmlUtil;
+import de.tsl2.nano.incubation.platform.PlatformManagement;
 import de.tsl2.nano.incubation.terminal.IItem.Type;
 import de.tsl2.nano.incubation.terminal.item.Container;
 import de.tsl2.nano.util.PrivateAccessor;
@@ -82,6 +86,7 @@ import de.tsl2.nano.util.SchedulerUtil;
  * @version $Revision$
  */
 @SuppressWarnings({ "unchecked", "rawtypes" })
+@Default(value = DefaultType.FIELD, required = false)
 public class SIShell implements IItemHandler, Serializable {
     /** serialVersionUID */
     private static final long serialVersionUID = -5767124822662015899L;
@@ -111,9 +116,7 @@ public class SIShell implements IItemHandler, Serializable {
     /** default: false. if true, on each terminal save, the terminals xml serialization file will be stored. */
     @Attribute(required = false)
     boolean refreshConfig = false;
-    @Attribute(required = false)
-    boolean fullException = false;
-
+    transient Exception lastException;
     /**
      * predefined variables (not changable through user input) copied to the {@link #env} but not saved in property
      * file. mostly technical definitions.
@@ -151,6 +154,8 @@ public class SIShell implements IItemHandler, Serializable {
     static final String KEY_HELP = "help";
     /** prints system informations */
     static final String KEY_INFO = "info";
+    /** prints content of all platform MBeans (JMX) */
+    static final String KEY_PLATFORMINFO = "platform";
     /** prints all system properties */
     static final String KEY_PROPERTIES = "properties";
     /** starts macro recording. user input will be stored to {@link #batch} and saved on terminal end. */
@@ -166,6 +171,8 @@ public class SIShell implements IItemHandler, Serializable {
     public static final String KEY_SEQUENTIAL0 = "sequential";
 
     static final String KEY_USENETWORKEXTENSION = "network";
+
+    public static final String KEY_LASTEXCEPTION = "exception";
 
     /** saves the current state to xml and property files */
     static final String KEY_SAVE = "save";
@@ -467,6 +474,13 @@ public class SIShell implements IItemHandler, Serializable {
                     System.getProperties().list(out);
                 } else if (isCommand(input, KEY_INFO)) {
                     printScreen(ENV.createInfo(), out, "");
+                } else if (isCommand(input, KEY_PLATFORMINFO)) {
+                    printScreen(PlatformManagement.getMBeanInfo(null).toString(), out, "");
+                } else if (isCommand(input, KEY_LASTEXCEPTION)) {
+                    if (lastException != null)
+                        lastException.printStackTrace(out);
+                    else
+                        out.println("no exception thrown!");
                 } else if (isCommand(input, KEY_MACRO_RECORD)) {
                     isRecording = true;
                 } else if (isCommand(input, KEY_MACRO_STOP)) {
@@ -500,11 +514,9 @@ public class SIShell implements IItemHandler, Serializable {
             //terminal will be stopped
             throw ex;
         } catch (Exception ex) {
+            lastException = ex;
             //print only - no problem
-            if (fullException)
-                ex.printStackTrace(out);
-            else
-                out.println(new ManagedException("tsl2nano.error", ex).getLocalizedMessage());
+            out.println(ex.getLocalizedMessage());
             //do it again
             nextLine(in);
             serve(item, in, out, env);
@@ -687,6 +699,7 @@ public class SIShell implements IItemHandler, Serializable {
                 name = ENV.getConfigPath() + name;
             }
             ENV.extractResource("messages.properties");
+            ENV.extractResource("wrench.png");
             boolean admin = args.length > 1 && args[1].equals(TerminalAdmin.ADMIN) ? true : false;
             if (admin/* || !new File(name).exists()*/) {
                 TerminalAdmin.create(name).run();

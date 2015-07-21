@@ -206,3 +206,20 @@ function transferattachment(src) {
 	// now, send the bytes
 	socket.send(file);
 }
+
+/**
+ * html5 clipboard api (not used yet!)
+ */
+document.addEventListener('paste', function(e){
+    if(e.clipboardData.types.indexOf('text/plain') > -1){
+        processDataFromClipboard(e.clipboardData.getData('text/plain'));
+//        e.preventDefault(); // We are already handling the data from the clipboard, we do not want it inserted into the document
+    }
+});
+
+function processDataFromClipboard(clipboard) {
+	var target = document.getElementById('clipboard.paste.target');
+	if (target != null) {
+		target.nodeValue = clipboard;
+	}
+}

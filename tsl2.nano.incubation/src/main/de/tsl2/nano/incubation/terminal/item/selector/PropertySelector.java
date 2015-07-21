@@ -19,8 +19,9 @@ import java.util.TreeMap;
 
 import org.simpleframework.xml.Default;
 import org.simpleframework.xml.DefaultType;
-import org.simpleframework.xml.ElementMap;
 
+import de.tsl2.nano.core.util.StringUtil;
+import de.tsl2.nano.core.util.Util;
 import de.tsl2.nano.incubation.terminal.IItem;
 import de.tsl2.nano.incubation.terminal.ItemAdministrator;
 import de.tsl2.nano.incubation.terminal.item.AItem;
@@ -28,6 +29,7 @@ import de.tsl2.nano.incubation.terminal.item.Action;
 import de.tsl2.nano.incubation.terminal.item.Input;
 
 /**
+ * Provides the creation of a property map. It is not really a {@link Selector} because it collects multiple key/values.
  * 
  * @author Tom, Thomas Schneider
  * @version $Revision$
@@ -37,12 +39,15 @@ import de.tsl2.nano.incubation.terminal.item.Input;
 public class PropertySelector<T> extends Selector<T> {
     private static final long serialVersionUID = 5127419882040627794L;
 
-    /** TODO: how to serialize any map in simple-xml? we defined the map identically to ENV.properties, but it doesn't work */
+    /**
+     * TODO: how to serialize any map in simple-xml? we defined the map identically to ENV.properties, but it doesn't
+     * work
+     */
     //@ElementMap(entry = "property", key = "name", attribute = true, inline = true, required = false, keyType = String.class, valueType = Object.class)
     transient TreeMap properties;
 
     transient Properties item;
-    
+
     /**
      * constructor
      */
@@ -63,7 +68,7 @@ public class PropertySelector<T> extends Selector<T> {
     @Override
     protected List<?> createItems(Map context) {
         item = new Properties();
-        
+
         if (properties != null) {
             for (Object key : properties.keySet()) {
                 add(new Input((String) key, context.get(key), null));
@@ -87,7 +92,7 @@ public class PropertySelector<T> extends Selector<T> {
         };
         addingAction.setParent(this);
         nodes.add(addingAction);
-        
+
         //action to remove items
         Action<T> removingAction = new Action<T>(this, "removeInput") {
             @Override
@@ -117,5 +122,9 @@ public class PropertySelector<T> extends Selector<T> {
         //the cast is not correct...but we ignore that at the moment
         return (T) properties;
     }
-    
+
+    @Override
+    protected String getValueText() {
+        return Util.isEmpty(properties) ? super.getValueText() : StringUtil.toString(properties, 40);
+    }
 }

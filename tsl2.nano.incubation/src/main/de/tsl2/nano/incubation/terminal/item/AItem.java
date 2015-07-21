@@ -19,6 +19,8 @@ import java.text.ParseException;
 import java.util.Properties;
 
 import org.simpleframework.xml.Attribute;
+import org.simpleframework.xml.Default;
+import org.simpleframework.xml.DefaultType;
 import org.simpleframework.xml.Element;
 import org.simpleframework.xml.core.Commit;
 
@@ -41,6 +43,7 @@ import de.tsl2.nano.incubation.vnet.workflow.Condition;
  * @version $Revision$
  */
 @SuppressWarnings("rawtypes")
+//@Default(value = DefaultType.FIELD, required = false)
 public class AItem<T> implements IItem<T>, Serializable {
     /** serialVersionUID */
     private static final long serialVersionUID = 7142058494650831052L;
@@ -69,7 +72,7 @@ public class AItem<T> implements IItem<T>, Serializable {
      * will be converted to an ascii text.
      */
     @Element(required = false)
-    private String description;
+    protected String description;
 
     static final int PREFIX = 1;
     static final String POSTFIX_QUESTION = ": ";
@@ -98,8 +101,8 @@ public class AItem<T> implements IItem<T>, Serializable {
         initConstraints(constraints);
     }
 
-    private void initDescription(String description2) {
-
+    private void initDescription(String description) {
+        this.description = description;
     }
 
     @SuppressWarnings("unchecked")

@@ -19,6 +19,7 @@ import java.util.Map;
 import java.util.Properties;
 
 import de.tsl2.nano.core.ManagedException;
+import de.tsl2.nano.core.cls.BeanClass;
 import de.tsl2.nano.core.execution.ICRunnable;
 import de.tsl2.nano.execution.Runner;
 import de.tsl2.nano.serviceaccess.ServiceFactory;
@@ -108,7 +109,7 @@ public class ServiceRunner extends BaseServiceTest implements ICRunnable<HashMap
         final String s = (String) context.get("service");
         Class<?> serviceInterface;
         try {
-            serviceInterface = Class.forName(s);
+            serviceInterface = BeanClass.load(s);
             final Object service = getService(serviceInterface);
 
             final String m = (String) context.get("method");

@@ -26,7 +26,6 @@ import de.tsl2.nano.core.util.StringUtil;
 import de.tsl2.nano.core.util.Util;
 import de.tsl2.nano.core.util.XmlUtil;
 import de.tsl2.nano.persistence.replication.Replication;
-import de.tsl2.nano.util.UnboundAccessor;
 
 /**
  * bean class to define the content of a persistence.xml and jdbc-connection.properties
@@ -306,9 +305,25 @@ public class Persistence implements Serializable {
      */
     public String save() throws IOException {
         ENV.saveBackup(getBeanFileName());
+        provideDatabaseInputAsDDL();
         ENV.get(XmlUtil.class).saveXml(getPath(getBeanFileName()), this);
         saveJdbcProperties();
         return savePersistenceXml();
+    }
+
+    /**
+     * if the user pastes a full database model ddl into the database input field, it will be saved to a file defined by
+     * beans-jar file name.
+     */
+    private void provideDatabaseInputAsDDL() {
+        if (database == null)
+            throw new IllegalArgumentException("the field database must not be empty!");
+        else if (database.toLowerCase().matches(".*create\\s+table.*")) {
+            String name = StringUtil.substring(getJarFile(), null, ".");
+            String file = ENV.getConfigPath() + name + ".sql";
+            FileUtil.writeBytes(database.getBytes(), file , false);
+            setDatabase(name);
+        }
     }
 
     protected String getBeanFileName() {
@@ -524,6 +539,13 @@ public class Persistence implements Serializable {
         return autoddl;
     }
 
+    /**
+     * autoDllIsCreateDrop
+     * @return true, if {@link #autoddl} equals 'create-drop'
+     */
+    public boolean autoDllIsCreateDrop() {
+        return autoddl.equals("create-drop");
+    }
     /**
      * @param autoddl The autoddl to set.
      */

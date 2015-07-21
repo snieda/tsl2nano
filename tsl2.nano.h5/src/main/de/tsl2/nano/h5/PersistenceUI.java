@@ -9,8 +9,10 @@
  */
 package de.tsl2.nano.h5;
 
+import java.io.Serializable;
 import java.util.Arrays;
 import java.util.Properties;
+import java.util.regex.Pattern;
 
 import de.tsl2.nano.action.IAction;
 import de.tsl2.nano.action.IActivable;
@@ -26,6 +28,7 @@ import de.tsl2.nano.core.ENV;
 import de.tsl2.nano.core.util.FileUtil;
 import de.tsl2.nano.core.util.StringUtil;
 import de.tsl2.nano.core.util.Util;
+import de.tsl2.nano.format.RegExpFormat;
 import de.tsl2.nano.h5.websocket.WSEvent;
 import de.tsl2.nano.h5.websocket.WebSocketDependencyListener;
 import de.tsl2.nano.persistence.Persistence;
@@ -379,6 +382,12 @@ public class PersistenceUI {
         login.getPresentationHelper().change(BeanPresentationHelper.PROP_NULLABLE, true, "connectionPassword");
         login.getPresentationHelper().change(BeanPresentationHelper.PROP_NULLABLE, true, "jarFile");
         login.getPresentationHelper().change(BeanPresentationHelper.PROP_NULLABLE, true, "replication");
+
+        login.getPresentationHelper().change(BeanPresentationHelper.PROP_STYLE, IPresentable.STYLE_MULTI, "database");
+        login.getPresentationHelper().change(BeanPresentationHelper.PROP_LENGTH, 100000, "database");
+        ((RegExpFormat)login.getAttribute("database").getFormat()).setPattern(RegExpFormat.alphanum(100000, false), null, 100000, Pattern.MULTILINE);
+        login.getAttribute("database").getPresentation().setLayoutConstraints((Serializable)MapUtil.asMap("rows", 1, "cols", "51", "style", "width:382;"));
+        
         login.getPresentationHelper().chg("replication", BeanPresentationHelper.PROP_ENABLER, new IActivable() {
             @Override
             public boolean isActive() {

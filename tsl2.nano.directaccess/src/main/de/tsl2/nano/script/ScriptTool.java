@@ -257,7 +257,7 @@ public class ScriptTool implements Serializable {
 //                Connection con = null;
 //                try {
 //                    Persistence p = Persistence.getCurrent();
-//                    Class.forName(p.getConnectionDriverClass());
+//                    BeanClass.load(p.getConnectionDriverClass());
 //                    con = DriverManager.getConnection(p.getConnectionUrl(),
 //                        p.getConnectionUserName(),
 //                        p.getConnectionPassword());
