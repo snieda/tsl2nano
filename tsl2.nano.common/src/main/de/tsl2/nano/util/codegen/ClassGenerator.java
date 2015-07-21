@@ -79,7 +79,7 @@ public class ClassGenerator {
      */
     protected static final ClassGenerator instance(String className) {
         try {
-            return instance((ClassGenerator) Class.forName(className).newInstance());
+            return instance((ClassGenerator) BeanClass.load(className).newInstance());
         } catch (final Exception e) {
             ManagedException.forward(e);
             return null;

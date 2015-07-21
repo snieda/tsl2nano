@@ -64,7 +64,8 @@ public class BeanUtil extends ByteUtil {
     private static final List<String> STD_TYPE_PKGS;
 
     static {
-        STD_TYPE_PKGS = new ArrayList<String>(3);
+        STD_TYPE_PKGS = new ArrayList<String>(5);
+        STD_TYPE_PKGS.add("sun.management");
         STD_TYPE_PKGS.add("java.lang");
         STD_TYPE_PKGS.add("java.util");
         STD_TYPE_PKGS.add("java.math");

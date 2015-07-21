@@ -494,7 +494,7 @@ public class RegExpFormat extends Format implements INumberFormatCheck {
      * @param alphaonly if true, only alpha numerics are allowed
      * @return regular expression describing the given text specifications
      */
-    protected static final String alphanum(int count, boolean alphaonly) {
+    public static final String alphanum(int count, boolean alphaonly) {
         return (alphaonly ? "[a-zA-Z]" : PATTERN_SINGLE_BYTE_SPACE) + "{0," + count + "}";
     }
 
@@ -626,7 +626,7 @@ public class RegExpFormat extends Format implements INumberFormatCheck {
      * @return new formatter for the given text specifications
      */
     public static RegExpFormat createAlphaNumRegExp(int count, boolean alphaonly) {
-        return new RegExpFormat(alphanum(count, alphaonly), count, 0);
+        return new RegExpFormat(alphanum(count, alphaonly), count, count > 100 ? Pattern.MULTILINE : 0);
     }
 
     /**

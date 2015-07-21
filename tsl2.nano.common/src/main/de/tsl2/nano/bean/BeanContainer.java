@@ -464,7 +464,8 @@ public class BeanContainer implements IBeanContainer {
             return null;
         }
         Class cls = (Class) (beanOrClass == null || beanOrClass instanceof Class ? beanOrClass : beanOrClass.getClass());
-        assert cls != null && instance().isPersistable(cls) : "bean must be a persistable entity bean instance!";
+        if (cls == null || !instance().isPersistable(cls))
+            return null;
         final BeanClass bc = BeanClass.getBeanClass(cls);
         final Collection<BeanAttribute> attributes = bc.getSingleValueAttributes();
         for (final BeanAttribute attr : attributes) {

@@ -14,6 +14,7 @@ import java.io.FileReader;
 import java.lang.reflect.Method;
 import java.util.Properties;
 
+import de.tsl2.nano.core.cls.BeanClass;
 import de.tsl2.nano.core.execution.ICRunnable;
 
 /**
@@ -36,7 +37,7 @@ public class Runner {
         for (int i = 0; i < args.length; i++) {
             p.setProperty("args" + i, args[i]);
         }
-        final Class<ICRunnable<Properties>> rclass = (Class<ICRunnable<Properties>>) Class.forName(args[0]);
+        final Class<ICRunnable<Properties>> rclass = (Class<ICRunnable<Properties>>) BeanClass.load(args[0]);
         final Method runMethod = rclass.getMethod("run", new Class[] { Object.class, Object[].class });
 
         log("starting " + runMethod + " with arguments: " + p);

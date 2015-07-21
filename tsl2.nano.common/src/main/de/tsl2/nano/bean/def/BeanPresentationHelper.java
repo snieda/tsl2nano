@@ -320,7 +320,9 @@ public class BeanPresentationHelper<T> {
      * {@inheritDoc}
      */
     protected Format getDefaultFormat(BeanValue attr) {
-        final IAttributeDef def = BeanContainer.instance().getAttributeDef(bean, attr.getName());
+        final IAttributeDef def =
+            BeanContainer.instance().isPersistable(bean.getDeclaringClass()) ? BeanContainer.instance()
+                .getAttributeDef(bean, attr.getName()) : null;
         if (def != null) {
             return getDefaultFormat(attr, attr.getInstance(), def.length(), def.scale(), def.precision());
         }
@@ -586,7 +588,9 @@ public class BeanPresentationHelper<T> {
      * {@inheritDoc}
      */
     protected boolean isDefaultDuty(IAttribute beanAttribute, Object bean) {
-        final IAttributeDef attributeDef = BeanContainer.instance().getAttributeDef(bean, beanAttribute.getName());
+        final IAttributeDef attributeDef =
+            BeanContainer.instance().isPersistable(BeanClass.getDefiningClass(bean.getClass())) ? BeanContainer
+                .instance().getAttributeDef(bean, beanAttribute.getName()) : null;
         return attributeDef != null ? !attributeDef.nullable() : false;
     }
 
@@ -1157,6 +1161,8 @@ public class BeanPresentationHelper<T> {
     }
 
     private boolean isGeneratedValue(Class<T> declaringClass, String attribute) {
+        if (!BeanContainer.isInitialized() || !BeanContainer.instance().isPersistable(declaringClass))
+            return false;
         BeanClass bc;
         try {
             bc = BeanClass.createBeanClass("javax.persistence.GeneratedValue");

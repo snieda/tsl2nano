@@ -23,6 +23,7 @@ import java.math.BigDecimal;
 import java.math.MathContext;
 import java.net.InetAddress;
 import java.net.InetSocketAddress;
+import java.security.Policy;
 import java.text.DateFormat;
 import java.text.DecimalFormat;
 import java.text.Format;
@@ -70,6 +71,7 @@ import de.tsl2.nano.collection.CollectionUtil;
 import de.tsl2.nano.collection.FloatArray;
 import de.tsl2.nano.collection.ITransformer;
 import de.tsl2.nano.collection.MapUtil;
+import de.tsl2.nano.core.AppLoader;
 import de.tsl2.nano.core.Argumentator;
 import de.tsl2.nano.core.ENV;
 import de.tsl2.nano.core.ManagedException;
@@ -1463,6 +1465,13 @@ public class CommonTest {
         keyValues = Argumentator.staticValues(MimeConstants.class, String.class);
         System.out.println("mime types:");
         System.out.println(keyValues);
+    }
+    
+    @Test
+    public void testSecurity() {
+        BeanClass.call(AppLoader.class, "noSecurity", false);
+        System.out.println(System.getSecurityManager());
+        System.out.println(Policy.getPolicy());
     }
     
     @Test

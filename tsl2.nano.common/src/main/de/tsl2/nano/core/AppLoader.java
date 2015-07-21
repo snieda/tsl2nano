@@ -10,6 +10,10 @@
 package de.tsl2.nano.core;
 
 import java.io.File;
+import java.net.URLClassLoader;
+import java.security.Permission;
+import java.security.Policy;
+import java.security.ProtectionDomain;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
@@ -22,6 +26,7 @@ import de.tsl2.nano.core.log.LogFactory;
 import de.tsl2.nano.core.util.ConcurrentUtil;
 import de.tsl2.nano.core.util.FileUtil;
 import de.tsl2.nano.core.util.StringUtil;
+import de.tsl2.nano.core.util.Util;
 
 /**
  * Provides an Application Starter with an own extended classloader and a convenience to handle call arguments (the
@@ -287,10 +292,15 @@ public class AppLoader {
          *    so we have to add the jar-file itself ('java.classpath') and the user.dir to the path.
          * 2. loading from IDE-classpath, we have to use the parent classloader
          */
+        //perhaps on application servers, the following property is set
         String mngt = System.getProperty("javax.management.builder.initial");
-        ClassLoader cl = classPath.contains(";") || mngt != null || isDalvik() ? contextClassLoader : null;
+        //e.g. the JNLPClassLoader is of type URLClassLoader
+        ClassLoader cl =
+            contextClassLoader instanceof URLClassLoader || classPath.contains(";") || mngt != null || isDalvik()
+                ? contextClassLoader : null;
         NetworkClassLoader nestedLoader = new NetworkClassLoader(cl);
         if (cl == null) {
+            LOG.info("discarding boot classloader " + contextClassLoader);
             nestedLoader.addFile(classPath);
 //            String configDir = System.getProperty("user.dir") + "/" + environment + "/";
 //            nestedLoader.addLibraryPath(new File(configDir).getAbsolutePath());
@@ -343,5 +353,35 @@ public class AppLoader {
 
     public static boolean isNestingJar() {
         return Boolean.getBoolean(KEY_ISNESTEDJAR);
+    }
+
+    /**
+     * only for testing
+     * <p/>
+     * tres to remove any security manager and, additionally sets a policy with all permissions. will be used as
+     * workaaround inside a container - but will normally not work.
+     */
+    protected static void noSecurity() {
+        try {
+            //first, set the permission to reset the security manager.
+//            Policy policy = Policy.getInstance(AllPermission.class.getName(), null);
+            Policy policy = new Policy() {
+                @Override
+                public boolean implies(ProtectionDomain domain, Permission permission) {
+                    return true;
+                }
+
+                @Override
+                public String toString() {
+                    return Util.toString(Policy.class, "all-permissions");
+                }
+            };
+            Policy.setPolicy(policy);
+            //try to reset the securiy manager
+            System.setSecurityManager(null);
+        } catch (Exception e) {
+            //if it doesn't work, ignore that. the security manager will throw its security exception on actions without permission.
+            LOG.info("couldn't set all permissions. failure: " + e.toString());
+        }
     }
 }

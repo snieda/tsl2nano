@@ -16,6 +16,7 @@ import java.io.InputStream;
 import java.io.Serializable;
 import java.lang.Thread.UncaughtExceptionHandler;
 import java.net.InetAddress;
+import java.security.Policy;
 import java.text.Format;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -300,6 +301,7 @@ public class ENV implements Serializable {
                 + "  lang  : ${user.country}_${user.language}, sun.jnu.encoding: ${sun.jnu.encoding}\n"
                 + "  encode: ${file.encoding}\n"
                 + "  loader: ${main.context.classloader}\n"
+                + "  secure: ${security}\n"
                 + "  java  : ${java.vm.name}, ${java.runtime.version}, ${java.home}\n"
                 + "  memory: ${memory}\n"
                 + "  discs : ${disc}\n"
@@ -320,6 +322,14 @@ public class ENV implements Serializable {
         String total = BitUtil.amount(Runtime.getRuntime().totalMemory());
         p.put("memory", "free " + free + " of total " + total);
 
+        String security;
+        if (System.getSecurityManager() != null) {
+            security = System.getSecurityManager().toString() + "(policy: " + Policy.getPolicy() + ")";
+        } else {
+            security = "<null>";
+        }
+        p.put("security", security);
+        
         p.put("processors", Runtime.getRuntime().availableProcessors());
 
         File[] roots = File.listRoots();

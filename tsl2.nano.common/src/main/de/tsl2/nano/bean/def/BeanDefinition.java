@@ -74,9 +74,10 @@ import de.tsl2.nano.messaging.IListener;
  * @version $Revision$
  */
 @SuppressWarnings({ "rawtypes", "unchecked" })
-@Namespace(reference = "beandef.xsd")
+@Namespace(reference = BeanDefinition.BEANDEF_XSD)
 @Default(value = DefaultType.FIELD, required = false)
 public class BeanDefinition<T> extends BeanClass<T> implements IPluggable<BeanDefinition>, Serializable {
+    static final String BEANDEF_XSD = "beandef.xsd";
     /** serialVersionUID */
     private static final long serialVersionUID = -1110193041263724431L;
     private static final Log LOG = LogFactory.getLog(BeanDefinition.class);
@@ -1163,7 +1164,8 @@ public class BeanDefinition<T> extends BeanClass<T> implements IPluggable<BeanDe
             try {
                 if (!xmlFile.exists()) {
                     xmlFile.getParentFile().mkdirs();
-                    ENV.extractResourceToDir("beandef.xsd", xmlFile.getParentFile().getPath());
+                    if (FileUtil.hasResource(BEANDEF_XSD))
+                        ENV.extractResourceToDir(BEANDEF_XSD, xmlFile.getParentFile().getPath());
                 }
                 XmlUtil.saveXml(xmlFile.getPath(), this);
             } catch (Exception e) {

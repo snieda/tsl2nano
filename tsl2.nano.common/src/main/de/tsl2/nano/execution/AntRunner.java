@@ -108,7 +108,7 @@ public class AntRunner {
         Class<?> taskType = null;
         Task task = null;
         try {
-            taskType = Class.forName(TASK_PATH + "." + name);
+            taskType = BeanClass.load(TASK_PATH + "." + name);
             task = (Task) taskType.newInstance();
         } catch (final Exception e) {
             ManagedException.forward(e);
