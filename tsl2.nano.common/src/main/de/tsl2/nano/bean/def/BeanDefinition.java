@@ -37,8 +37,6 @@ import org.simpleframework.xml.Namespace;
 import org.simpleframework.xml.core.Commit;
 import org.simpleframework.xml.core.Persist;
 
-import sun.security.action.GetLongAction;
-
 import de.tsl2.nano.action.CommonAction;
 import de.tsl2.nano.action.IAction;
 import de.tsl2.nano.action.IActivable;
