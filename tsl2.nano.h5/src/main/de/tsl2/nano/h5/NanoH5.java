@@ -46,6 +46,7 @@ import de.tsl2.nano.core.cls.BeanClass;
 import de.tsl2.nano.core.exception.Message;
 import de.tsl2.nano.core.execution.CompatibilityLayer;
 import de.tsl2.nano.core.log.LogFactory;
+import de.tsl2.nano.core.util.ConcurrentUtil;
 import de.tsl2.nano.core.util.FileUtil;
 import de.tsl2.nano.core.util.NetUtil;
 import de.tsl2.nano.core.util.StringUtil;
@@ -155,12 +156,17 @@ public class NanoH5 extends NanoHTTPD implements ISystemConnector<Persistence> {
             LOG.info(System.getProperties());
             createStartPage();
 
-            ENV.extractResourceToDir("run.bat", "../");
-            ENV.extractResource("shell.xml");
-            ENV.extractResource("mda.bat");
-            ENV.extractResource("mda.xml");
-            ENV.extractResource("tsl2nano-appcache.mf");
-            ENV.extractResource("favicon.ico");
+            try {
+                ENV.extractResourceToDir("run.bat", "../");
+                ENV.extractResource("shell.xml");
+                ENV.extractResource("mda.bat");
+                ENV.extractResource("mda.xml");
+                ENV.extractResource("tsl2nano-appcache.mf");
+                ENV.extractResource("favicon.ico");
+            } catch (Exception ex) {
+                LOG.error("couldn't extract ant or shell script", ex);
+                ENV.get(UncaughtExceptionHandler.class).uncaughtException(null, ex);
+            }
             String dir = ENV.getConfigPath();
             File icons = new File(dir + "icons");
             if (!icons.exists()) {
@@ -175,6 +181,7 @@ public class NanoH5 extends NanoHTTPD implements ISystemConnector<Persistence> {
                     } catch (Exception ex1) {
                         LOG.warn("couldn't extract resources from icons directory",
                             ex1);
+                        ENV.get(UncaughtExceptionHandler.class).uncaughtException(null, ex);
                     }
                 }
 //                if (AppLoader.isDalvik()) {//on android, we cannot yet create the beans-jar-file
@@ -196,13 +203,17 @@ public class NanoH5 extends NanoHTTPD implements ISystemConnector<Persistence> {
             LOG.info("Listening on port " + serviceURL.getPort() + ". Hit Enter to stop.\n");
             if (System.getProperty("os.name").startsWith("Windows")) {
                 SystemUtil.executeRegisteredWindowsPrg(applicationHtmlFile());
+            } else {
+                LOG.info("Please open the URL '" + serviceURL.toString() + "' in your browser");
             }
 
             myOut = LogFactory.getOut();
             myErr = LogFactory.getErr();
+            LOG.info("waiting for input on " + System.in);
             System.in.read();
         } catch (Exception ioe) {
             LOG.error("Couldn't start server:", ioe);
+            ConcurrentUtil.sleep(3000);
             System.exit(-1);
         }
     }
