@@ -1022,10 +1022,9 @@ compiler basedir: ${basedir}. classpath: @{sh.compile.classpath};@{sh.compile.cl
 		<!-- TODO: key parameter -->
 		<!-- using key:
 		keytool -genkey -keystore tsl2store -alias tsl2
-		passwd: tsl2tsl2, name: tsl2, surname: tsl2, orga: tsl2
+		passwd: tsl2tsl2, name: tsl2, surname: tsl2, orga: tsl2 -->
 		<signjar alias="tsl2"  keystore="../tsl2.nano.incubation/tsl2store"  storepass="tsl2tsl2"  jar="${sh.build.basedir}/${sh.build.name}.${sh.build.version}.jar">
 		</signjar>
-		-->
 		
 		<!-- source-jar -->
 		<antcall target="sh.jar">
