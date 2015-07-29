@@ -187,6 +187,10 @@ public class AppLoader {
                 + environment
                 + "\n"
                 + "#############################################################\n");
+            
+            //TODO: should be removed after resolving access problems
+            noSecurity();
+            
             /*
              * create the classloader to be used by the new application
              */
@@ -296,7 +300,7 @@ public class AppLoader {
         String mngt = System.getProperty("javax.management.builder.initial");
         //e.g. the JNLPClassLoader is of type URLClassLoader
         ClassLoader cl =
-            contextClassLoader instanceof URLClassLoader || classPath.contains(";") || mngt != null || isDalvik()
+            /*contextClassLoader instanceof URLClassLoader || */classPath.contains(";") || mngt != null || isDalvik()
                 ? contextClassLoader : null;
         NetworkClassLoader nestedLoader = new NetworkClassLoader(cl);
         if (cl == null) {
@@ -358,11 +362,12 @@ public class AppLoader {
     /**
      * only for testing
      * <p/>
-     * tres to remove any security manager and, additionally sets a policy with all permissions. will be used as
+     * tries to remove any security manager and, additionally sets a policy with all permissions. will be used as
      * workaaround inside a container - but will normally not work.
      */
     protected static void noSecurity() {
         try {
+            LOG.info("resetting security manager and policies to enable all-permissions");
             //first, set the permission to reset the security manager.
 //            Policy policy = Policy.getInstance(AllPermission.class.getName(), null);
             Policy policy = new Policy() {
