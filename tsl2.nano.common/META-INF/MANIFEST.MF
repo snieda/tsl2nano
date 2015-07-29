@@ -6,5 +6,5 @@ Application-Name: tsl2 shell
 Permissions: all-permissions
 Main-Class: de.tsl2.nano.core.AppLoader
 Main-Arguments: de.tsl2.nano.execution.ScriptUtil ant shell.xml
-Class-Path: tsl2.nano.common.1.1.1.jar ant.jar ant-launcher.jar ant-nodeps.jar
+Class-Path: simple-xml-2.7.jar ant.jar ant-launcher.jar ant-nodeps.jar
 

@@ -7,7 +7,7 @@ Permissions: all-permissions
 Main-Class: de.tsl2.nano.core.AppLoader
 Main-Arguments: de.tsl2.nano.incubation.terminal.SIShell
 Class-Path: tsl2.nano.common.1.1.1.jar 
+ simple-xml.jar 
  ant.jar ant-launcher.jar 
- ant-nodeps.jar
- simple-xml.jar
+ ant-nodeps.jar 
  
