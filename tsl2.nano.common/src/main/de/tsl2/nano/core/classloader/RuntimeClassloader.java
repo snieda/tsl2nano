@@ -335,6 +335,6 @@ public class RuntimeClassloader extends URLClassLoader {
 
     @Override
     public String toString() {
-        return this.getClass().getName() + "[urls: " + getURLs().length + "]";
+        return this.getClass().getName() + "[parent: " + getParent() + ", urls: " + getURLs().length + "]";
     }
 }

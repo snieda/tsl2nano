@@ -14,8 +14,11 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.net.URL;
 import java.net.URLStreamHandlerFactory;
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
+import java.util.jar.Attributes;
 import java.util.jar.Manifest;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
@@ -28,13 +31,19 @@ import de.tsl2.nano.core.util.FileUtil;
 import de.tsl2.nano.core.util.StringUtil;
 
 /**
- * class to enable nesting jar-files into a jar-file. here it isn't possible to use utility classes, because they aren't
- * loaded yet. so we use simple outputs.
+ * Extends the {@link LibClassLoader} to load classes from nesting jar-files. tries to access its owning jar file (see
+ * {@link #getRootJarPath()} to evaluate the jar-file names in the root of its owning jar. If this owning jar isn't
+ * accessable, it reads META-INF/MANIFEST.MF/Class-Path attributes and tries to load all given jars inside this root
+ * jar. see {@link #getManifestClassPath()}.
+ * <p/>
+ * WARN: here it isn't possible to use utility classes, because they aren't loaded yet. so we use simple outputs.
  * 
  * @author ts
  * @version $Revision$
  */
 public class NestedJarClassLoader extends LibClassLoader implements Cloneable {
+    protected static final String EXT_CLASS = ".class";
+
     private static final Log LOG = LogFactory.getLog(NestedJarClassLoader.class);
 
     /** hasRootJar, initial true to start evaluation! */
@@ -184,11 +193,21 @@ public class NestedJarClassLoader extends LibClassLoader implements Cloneable {
 //        return null;
 //    }
 
+    /**
+     * evaluates the root jar file name through the system property 'java.class.path'.
+     * 
+     * @return root/owing jar file name
+     */
     protected String getRootJarPath() {
         String rootPath = System.getProperty("java.class.path");
         return rootPath.contains(";") ? null : rootPath;
     }
 
+    /**
+     * evaluates all nested jar files of the owning jar.
+     * 
+     * @return jar file names
+     */
     public String[] getNestedJars() {
         if (hasRootJar && nestedJars == null) {
             String rootPath = getRootJarPath();
@@ -205,13 +224,47 @@ public class NestedJarClassLoader extends LibClassLoader implements Cloneable {
 //            } else {
 //                hasRootJar = false;
 //                LOG.info("application not launched through jar-file. No nested jar files to load.");
+            } else {//try to load the jars through Class-Path attribute in manfest.mf
+                nestedJars = getManifestClassPath();
             }
         }
         return nestedJars;
     }
 
+    /**
+     * reads META-INF/MANIFEST.MF/Class-Path attributes and tries to load all given jars inside this root jar.
+     * getManifestClassPath
+     */
+    protected String[] getManifestClassPath() {
+        Attributes attributes = readManifest(this);
+        String classPath = attributes.getValue("Class-Path");
+        if (classPath != null) {
+            LOG.info("reading nested jars through META-INF/MANIFEST.MF/Class-Path:\n\t" + classPath);
+            String[] jars = classPath.split("\\s");
+            //check, if jar as nested available
+            this.jarFileStreams = new HashMap<String, ZipStream>(jars.length);
+            List<String> nestedJars = new ArrayList<String>(jars.length);
+            for (int i = 0; i < jars.length; i++) {
+                if (getResource(jars[i]) != null)
+                    nestedJars.add(jars[i]);
+                else
+                    LOG.warn(jars[i]
+                        + " couldnt't be loaded as nested content of this root jar!");
+            }
+            LOG.info(StringUtil.toFormattedString(nestedJars, -1, true));
+            return nestedJars.toArray(new String[0]);
+        }
+        return null;
+    }
+
+    /**
+     * reads all jar file names in the root directory of the owning jar.
+     * 
+     * @param rootPath
+     * @return jar file names
+     */
     private String[] getNestedJars(String rootPath) {
-        return FileUtil.readFileNamesFromZip(rootPath, "*jar");
+        return FileUtil.readFileNamesFromZip(rootPath, "*" + EXT_LIBRARY.substring(1));
     }
 
     /**
@@ -236,7 +289,7 @@ public class NestedJarClassLoader extends LibClassLoader implements Cloneable {
      * @return class name
      */
     private String getFileName(String name) {
-        return name.replace('.', '/') + ".class";
+        return name.replace('.', '/') + EXT_CLASS;
     }
 
     @Override

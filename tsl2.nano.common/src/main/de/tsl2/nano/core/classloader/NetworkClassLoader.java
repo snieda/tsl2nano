@@ -24,8 +24,8 @@ import de.tsl2.nano.core.log.LogFactory;
 import de.tsl2.nano.core.util.FileUtil;
 
 /**
- * Loads unresolved classes from network-connection through a maven repository. All classes that cannot be found through
- * maven are cached in {@link #unresolveables}.
+ * Extends the {@link NestedJarClassLoader} to load unresolved classes from network-connection through a maven
+ * repository. All classes that cannot be found through maven are cached in {@link #unresolveables}.
  * 
  * @author Tom
  * @version $Revision$
@@ -45,11 +45,14 @@ public class NetworkClassLoader extends NestedJarClassLoader {
      */
     String environment;
 
+    private transient int downloadedjars;
+
     /**
      * convenience to create an network-url-classloader on given directories and registering it to the current thread.
      * 
      * @param directories to search jar files from
-     * @return new classloader, searching classes in the nested jar, on the given directories and on the network using maven...
+     * @return new classloader, searching classes in the nested jar, on the given directories and on the network using
+     *         maven...
      */
     public static NetworkClassLoader createAndRegister(String... directories) {
         NetworkClassLoader cl = new NetworkClassLoader(Thread.currentThread().getContextClassLoader());
@@ -126,6 +129,7 @@ public class NetworkClassLoader extends NestedJarClassLoader {
                 try {
                     if (BeanClass.isPublicClassName(name) && ENV.loadDependencies(name) != null) {
                         //reload jar-files from environment
+                        downloadedjars++;
                         addLibraryPath(environment);
                         return super.findClass(name);
                     }
@@ -152,5 +156,11 @@ public class NetworkClassLoader extends NestedJarClassLoader {
     public static boolean resetUnresolvedClasses(String path) {
         unresolveables.clear();
         return new File(path + FILENAME_UNRESOLVEABLES).delete();
+    }
+
+    @Override
+    public String toString() {
+        return super.toString() + "[downloaded-jars:" + downloadedjars + ", unresolved-classes:"
+            + unresolveables.size() + "]";
     }
 }

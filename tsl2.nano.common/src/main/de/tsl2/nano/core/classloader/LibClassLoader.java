@@ -17,15 +17,17 @@ import java.util.Arrays;
 
 import de.tsl2.nano.core.ManagedException;
 import de.tsl2.nano.core.util.FileUtil;
-import de.tsl2.nano.core.util.NetUtil;
 
 /**
- * Is able to add all jars of a given path to the classpath (see {@link #addLibraryPath(String)}.
+ * Extends the {@link RuntimeClassloader} to add all jars of a given path to the classpath (see
+ * {@link #addLibraryPath(String)}.
  * 
  * @author Thomas Schneider
  * @version $Revision$
  */
 public class LibClassLoader extends RuntimeClassloader {
+
+    protected static final String EXT_LIBRARY = ".jar";
 
     public LibClassLoader(URL[] urls) {
         super(urls);
@@ -53,7 +55,7 @@ public class LibClassLoader extends RuntimeClassloader {
         final File[] jarFiles = fPath.listFiles(new FilenameFilter() {
             @Override
             public boolean accept(File dir, String name) {
-                return name.endsWith(".jar");
+                return name.endsWith(EXT_LIBRARY);
             }
         });
 
