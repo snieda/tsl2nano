@@ -611,7 +611,7 @@ public class BeanClass<T> implements Serializable {
             }            
         }
         try {
-            LOG.debug("calling " + clazz.getName()
+            LOG.debug("calling " + clazz.getClassLoader().toString() + ":" + clazz.getName()
                 + "."
                 + methodName
                 + " with parameters:"
