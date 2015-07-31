@@ -200,7 +200,6 @@ public class NanoH5 extends NanoHTTPD implements ISystemConnector<Persistence> {
                     ((Html5Presentation) ENV.get(BeanPresentationHelper.class)).createSampleEnvironment();
             }
 
-            LOG.info("Listening on port " + serviceURL.getPort() + ". Hit Enter to stop.\n");
             if (System.getProperty("os.name").startsWith("Windows")) {
                 SystemUtil.executeRegisteredWindowsPrg(applicationHtmlFile());
             } else {
@@ -209,8 +208,17 @@ public class NanoH5 extends NanoHTTPD implements ISystemConnector<Persistence> {
 
             myOut = LogFactory.getOut();
             myErr = LogFactory.getErr();
-            LOG.info("waiting for input on " + System.in);
-            System.in.read();
+            
+            try {
+                LOG.info("Listening on port " + serviceURL.getPort() + ". Hit Enter or Strg+C to stop.\n");
+                LOG.debug("waiting for input on " + System.in);
+                System.in.read();
+            } catch (Exception ex) {
+                LOG.debug("server mode without input console available (message: " + ex.toString() + ")");
+                while (true) {
+                    ConcurrentUtil.sleep(3000);
+                }
+            }
         } catch (Exception ioe) {
             LOG.error("Couldn't start server:", ioe);
             ConcurrentUtil.sleep(3000);
