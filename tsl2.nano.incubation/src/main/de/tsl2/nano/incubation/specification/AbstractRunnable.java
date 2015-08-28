@@ -21,7 +21,7 @@ public abstract class AbstractRunnable<T> implements IPRunnable<T, Map<String, O
 
     @Attribute
     protected String name;
-    @ElementMap(entry = "parameter", attribute = true, inline = true, keyType = String.class, key = "name", valueType = ParType.class, value = "type")
+    @ElementMap(entry = "parameter", attribute = true, inline = true, keyType = String.class, key = "name", valueType = ParType.class, value = "type", required=false)
     protected LinkedHashMap<String, ParType> parameter;
     @ElementMap(entry = "constraint", attribute = true, inline = true, keyType = String.class, key = "name", value = "definition", valueType = Constraint.class, required = false)
     Map<String, Constraint<?>> constraints;

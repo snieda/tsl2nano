@@ -19,7 +19,6 @@ import java.io.InputStream;
 import java.io.PrintStream;
 import java.io.PrintWriter;
 import java.io.Serializable;
-import java.io.StringWriter;
 import java.util.List;
 import java.util.Map;
 import java.util.Properties;
@@ -37,6 +36,7 @@ import org.simpleframework.xml.Element;
 import org.simpleframework.xml.ElementMap;
 import org.simpleframework.xml.core.Commit;
 
+import de.tsl2.nano.core.AppLoader;
 import de.tsl2.nano.core.ENV;
 import de.tsl2.nano.core.Finished;
 import de.tsl2.nano.core.ManagedException;
@@ -45,16 +45,20 @@ import de.tsl2.nano.core.classloader.NetworkClassLoader;
 import de.tsl2.nano.core.execution.CompatibilityLayer;
 import de.tsl2.nano.core.log.LogFactory;
 import de.tsl2.nano.core.util.ByteUtil;
+import de.tsl2.nano.core.util.ConcurrentUtil;
 import de.tsl2.nano.core.util.FileUtil;
 import de.tsl2.nano.core.util.NetUtil;
 import de.tsl2.nano.core.util.StringUtil;
 import de.tsl2.nano.core.util.Util;
 import de.tsl2.nano.core.util.XmlUtil;
+import de.tsl2.nano.execution.SystemUtil;
 import de.tsl2.nano.incubation.platform.PlatformManagement;
 import de.tsl2.nano.incubation.terminal.IItem.Type;
 import de.tsl2.nano.incubation.terminal.item.Container;
+import de.tsl2.nano.incubation.terminal.item.selector.Sequence;
 import de.tsl2.nano.util.PrivateAccessor;
 import de.tsl2.nano.util.SchedulerUtil;
+import de.tsl2.nano.util.UnboundAccessor;
 
 /**
  * Structured Input Shell (SIShell) showing a textual manual. The configuration can be read through an xml file
@@ -146,6 +150,9 @@ public class SIShell implements IItemHandler, Serializable {
     @Attribute(required = false)
     boolean sequential = false;
 
+    @Element(required = false)
+    String clearScreenCmd = AppLoader.isUnixFS() ? "clear" : "cls";
+
     /** command identifier */
     static final String KEY_COMMAND = ":";
     /*
@@ -165,6 +172,9 @@ public class SIShell implements IItemHandler, Serializable {
 
     /** starts a scheduler for the given action */
     static final String KEY_SCHEDULE = "schedule";
+
+    /** starts the given reflection expression on a given property */
+    static final String KEY_REFLECT = "reflect";
 
     static final String KEY_ADMIN = "admin";
 
@@ -327,7 +337,7 @@ public class SIShell implements IItemHandler, Serializable {
         save(refreshConfig || !new File(name).exists());
         String shutdownInfo =
             ENV.translate("message.shutdown", false, name);
-        printScreen(shutdownInfo, out, null, style, true);
+        printScreen(shutdownInfo, in, out, null, width, height, style, true, isInBatchMode());
         LOG.info("si-shell " + name + " ended");
     }
 
@@ -404,17 +414,18 @@ public class SIShell implements IItemHandler, Serializable {
         String question = item.ask(env);
         return printScreen(
             item.getDescription(env, false),
-            out, question, style, false);
+            in,
+            out, question, width, height, style, false, isInBatchMode());
     }
 
-    public String printScreen(String screen, PrintStream out, String question) {
-        return printScreen(screen, out, question, style, false);
+    public String printScreen(String screen, InputStream in, PrintStream out, String question) {
+        return printScreen(screen, in, out, question, width, height, style, false, isInBatchMode());
     }
 
     /**
      * {@inheritDoc}
      */
-    public String printScreen(String screen, PrintStream out, String question, int style, boolean center) {
+    public static String printScreen(String screen, InputStream in, PrintStream out, String question, int width, int height, int style, boolean center, boolean isInBatchMode) {
         //split screens to max height
         String pagingInput;
         String s = screen;
@@ -428,8 +439,8 @@ public class SIShell implements IItemHandler, Serializable {
                 out.print(ASK_ENTER);
                 page = i + 1;
                 lines = 0;
-                if (!isInBatchMode()) {
-                    if ((pagingInput = nextLine(in)).length() > 0) {
+                if (!isInBatchMode) {
+                    if ((pagingInput = nextLine(in, out)).length() > 0) {
                         return pagingInput;
                     }
                 } else {
@@ -457,25 +468,29 @@ public class SIShell implements IItemHandler, Serializable {
      * {@inheritDoc}
      */
     @Override
-    public void serve(IItem item, InputStream in, PrintStream out, Properties env) {
+    public void serve(final IItem item, InputStream in, final PrintStream out, Properties env) {
         try {
             env.put("out", out);
+            clearScreeen();
             String input = printScreen(item, out);
             if (input == null) {
                 input = nextLine(in);
+                if (input.equals("stop")) {
+                    ConcurrentUtil.stopOrInterrupt("sishell.printscreen");
+                }
             }
-            //to see the input in batch mode
+            //shell commands
             if (!Util.isEmpty(input) && input.startsWith(KEY_COMMAND)) {
                 if (isCommand(input, KEY_HELP)) {
-                    printScreen(getHelp(), out, ASK_ENTER);
+                    printScreen(getHelp(), in, out, ASK_ENTER);
                     nextLine(in);
-                    printScreen(item.getDescription(env, true), out, "");
+                    printScreen(item.getDescription(env, true), in, out, "");
                 } else if (isCommand(input, KEY_PROPERTIES)) {
                     System.getProperties().list(out);
                 } else if (isCommand(input, KEY_INFO)) {
-                    printScreen(ENV.createInfo(), out, "");
+                    printScreen(ENV.createInfo(), in, out, "");
                 } else if (isCommand(input, KEY_PLATFORMINFO)) {
-                    printScreen(PlatformManagement.getMBeanInfo(null).toString(), out, "");
+                    printScreen(PlatformManagement.getMBeanInfo(null).toString(), in, out, "");
                 } else if (isCommand(input, KEY_LASTEXCEPTION)) {
                     if (lastException != null)
                         lastException.printStackTrace(out);
@@ -487,6 +502,8 @@ public class SIShell implements IItemHandler, Serializable {
                     isRecording = false;
                 } else if (isCommand(input, KEY_SCHEDULE)) {
                     schedule(item, input, in, out, env);
+                } else if (isCommand(input, KEY_REFLECT)) {
+                    reflect(input, in, out, env);
                 } else if (isCommand(input, KEY_SEQUENTIAL0)) {
                     sequential = !sequential;
                     prepareEnvironment(env, root);
@@ -505,6 +522,7 @@ public class SIShell implements IItemHandler, Serializable {
                 nextLine(in);
                 serve(item, in, out, env);
             } else {
+                input = provideInputParameter(input, env);
                 IItem next = item.react(item, input, in, out, env);
                 if (next != null) {
                     serve(next, in, out, env);
@@ -521,6 +539,38 @@ public class SIShell implements IItemHandler, Serializable {
             nextLine(in);
             serve(item, in, out, env);
         }
+    }
+
+    private void clearScreeen() {
+        try {
+            if (!Util.isEmpty(clearScreenCmd))
+                SystemUtil.execute(clearScreenCmd);
+        } catch (Exception e) {
+            LOG.warn("clear screen command '" + clearScreenCmd + "' failed: " + e.toString()
+                + ". resetting the clear screen command.");
+            clearScreenCmd = null;
+        }
+    }
+
+    private void reflect(String input, InputStream in, PrintStream out, Properties env) {
+        env = new Properties(env);
+        input = provideInputParameter(input, env);
+        Object instance = env.get("instance");
+        UnboundAccessor acc = new UnboundAccessor(instance);
+        Object args = null;
+        Object result = acc.call(env.getProperty("method"), Object.class, args);
+        out.println("result of reflection call: " + result);
+    }
+
+    private String provideInputParameter(String input, Properties par) {
+        String[] p = input.split("\\s");
+        if (p.length < 1)
+            return input;
+        //the first array item is the command itself
+        for (int i = 1; i < p.length; i++) {
+            par.put(StringUtil.substring(p[i], null, "="), StringUtil.substring(p[i], "=", null));
+        }
+        return p[0];
     }
 
     private void startAmin(IItem item) {

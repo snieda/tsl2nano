@@ -165,7 +165,7 @@ public class PrivateAccessor<T> extends UnboundAccessor<T> {
                 Class<?>[] parTypes = methods[i].getParameterTypes();
                 boolean typesOk = true;
                 for (int j = 0; j < args.length; j++) {
-                    if (!(BeanClass.isAssignableFrom(parTypes[j], args[j]))) {
+                    if (j >= parTypes.length || j >= args.length || !(BeanClass.isAssignableFrom(parTypes[j], args[j]))) {
                         typesOk = false;
                         break;
                     }

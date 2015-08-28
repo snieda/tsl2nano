@@ -93,7 +93,7 @@ public class Action<T> extends AItem<T> {
     }
 
     @SuppressWarnings({ "rawtypes", "unchecked" })
-    T run(Properties context) {
+    public T run(Properties context) {
         Class[] cls = new Class[argNames.length];
         Properties p = new Properties();
         Object v;

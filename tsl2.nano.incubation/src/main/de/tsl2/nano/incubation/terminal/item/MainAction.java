@@ -30,10 +30,22 @@ public class MainAction<T> extends Action<T> {
         super(name, mainClass, "main", argumentNames);
     }
 
+    /**
+     * constructor
+     * @param name
+     * @param mainClass
+     * @param method
+     * @param defaultValue
+     * @param argumentNames
+     */
+    protected MainAction(String name, Class<?> mainClass, String method, T defaultValue, String... argumentNames) {
+        super(name, mainClass, method, defaultValue, argumentNames);
+    }
+    
     @Override
     @SuppressWarnings({ "rawtypes", "unchecked" })
-    T run(Properties context) {
-        List<String> argList = new ArrayList<String>(argNames.length);
+    public T run(Properties context) {
+        List<String> argList = createArguments();
         Object a;
         /*
          * a main method normally gets no null arguments. calling it inside a jvm, arguments may be null
@@ -55,13 +67,21 @@ public class MainAction<T> extends Action<T> {
         context.put("arg1", argList.toArray(new String[0]));
         if (runner == null) {
             try {
-                runner = new de.tsl2.nano.incubation.specification.actions.Action(getMainClass().getMethod("main",
+                runner = new de.tsl2.nano.incubation.specification.actions.Action(getMainClass().getMethod(method,
                     new Class[] { String[].class }));
             } catch (Exception e) {
                 ManagedException.forward(e);
             }
         }
         return runner.run(context);
+    }
+
+    /**
+     * createArguments
+     * @return
+     */
+    protected ArrayList<String> createArguments() {
+        return new ArrayList<String>(argNames.length);
     }
     
     @Override
@@ -70,4 +90,5 @@ public class MainAction<T> extends Action<T> {
         run(new Properties());
         return super.getDescription(env, full);
     }
+
 }

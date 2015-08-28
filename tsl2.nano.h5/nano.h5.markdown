@@ -2288,6 +2288,12 @@ Net:Connection-->Link-->Cover(content, descriptor)
 * (-) automatische Uebersetzungen einer messages.properties ueber restful (--> Google Übersetzer)
 * Volltextsuche
 * Query wird bei jeder Aktion ausgeführt - um den Context zu aktualisieren
+* (x) Sequence (action through a selector)
+* xpath-selector
+* sql-selector
+* (x) shell: providing interactive parameter (e.g.: print printer=pdf, or 11 printer=pdf)
+* (x) reflect <name> <method> <arguments>
+* checker?
 
 *TODO* für zeiterfassung
 * (v) id --> sequence
@@ -2347,7 +2353,9 @@ Net:Connection-->Link-->Cover(content, descriptor)
 * beandef.xsd in *.xml integrieren
 * terminal: flat mode (super-tree with selection e.g. 1.1.1)
 * (v) terminal: scans --> varargs like String...
-* SecurityManager ausschalten und eigene policy in jar ausliefern
+* (x) SecurityManager ausschalten und eigene policy in jar ausliefern
+* signing: probleme beim start von ant script reverseeng.xml: LogFactory
+* property jnlpx.origFilenameArg (how to get the root jar from jnlp)
 
 war:
 * WEB-INF/web..xml rausschmeissen

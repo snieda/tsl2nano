@@ -78,6 +78,8 @@ import de.tsl2.nano.incubation.terminal.item.selector.DirSelector;
 import de.tsl2.nano.incubation.terminal.item.selector.FieldSelector;
 import de.tsl2.nano.incubation.terminal.item.selector.FileSelector;
 import de.tsl2.nano.incubation.terminal.item.selector.PropertySelector;
+import de.tsl2.nano.incubation.terminal.item.selector.Sequence;
+import de.tsl2.nano.incubation.terminal.item.selector.XPathSelector;
 import de.tsl2.nano.incubation.vnet.ILocatable;
 import de.tsl2.nano.incubation.vnet.Net;
 import de.tsl2.nano.incubation.vnet.Node;
@@ -659,6 +661,8 @@ public class IncubationTest {
         xml.add(new Action(XmlUtil.class, "transformVel", "source", Action.KEY_ENV));
         xml.add(new Action(XmlUtil.class, "transformXsl", "source", "xsl-transformation", "xsl-destination"));
         xml.add(new Action(XmlUtil.class, "xpath", "xpath-expression", "source"));
+        xml.add(new Sequence(new de.tsl2.nano.incubation.terminal.item.Command("sequential echo command", "echo"), new XPathSelector(
+            "xpathselector", null, "bin/" + SIShell.DEFAULT_NAME, "//@name"), null));
         root.add(xml);
 
         Container html = new Container("Html", null);
@@ -705,7 +709,7 @@ public class IncubationTest {
         download.add(new Input("url", null, "url to be loaded", false));
         download.add(new Input("dir", null, "local directory to save the downloaded file"));
         download.add(new Action(NetUtil.class, "download", "url", "dir"));
-        
+
         Container browse = new Container("Browse", "Shows the given URL");
         net.add(browse);
         browse.add(new Input("url", null, "url to be loaded", false));
@@ -714,7 +718,8 @@ public class IncubationTest {
         Container restful = new Container("Restful", "Calls a RESTful service");
         net.add(restful);
         restful.add(new Input("url", "http://echo.jsontest.com/title/ipsum", "URL of a RESTful service", false));
-        restful.add(new PropertySelector<String>("arguments", "RESTful arguments", null/*MapUtil.asMap(new TreeMap(), "destFile", "mynew.jar")*/));
+        restful
+            .add(new PropertySelector<String>("arguments", "RESTful arguments", null/*MapUtil.asMap(new TreeMap(), "destFile", "mynew.jar")*/));
         restful.add(new Action(NetUtil.class, "getRestful", "url", "arguments"));
 
         net.add(new Action(NetUtil.class, "getNetInfo"));
@@ -727,11 +732,17 @@ public class IncubationTest {
         file.add(new Input("destination", "${user.dir}", "destination directory for file operations"));
         file.add(new Action("Details", FileUtil.class, "getDetails", "(java.io.File)file"));
         file.add(new FileSelector("List", "file", "directory"));
-        file.add(new Action("Delete", FileUtil.class, "forEach", "directory", "file", "(" + IRunnable.class.getName() + ")" + Action.createReferenceName(FileUtil.class, "DO_DELETE")));
-        file.add(new Action("Copy", FileUtil.class, "forEach", "directory", "file", "(" + IRunnable.class.getName() + ")" + Action.createReferenceName(FileUtil.class, "DO_COPY")));
+        file.add(new Action("Delete", FileUtil.class, "forEach", "directory", "file", "(" + IRunnable.class.getName()
+            + ")" + Action.createReferenceName(FileUtil.class, "DO_DELETE")));
+        file.add(new Action("Copy", FileUtil.class, "forEach", "directory", "file", "(" + IRunnable.class.getName()
+            + ")" + Action.createReferenceName(FileUtil.class, "DO_COPY")));
         file.add(new MainAction("Imageviewer", AsciiImage.class, "file", "image.out", "sishell.width",
             "sishell.height"));
         root.add(file);
+
+        Container shell = new Container("Shell", "Starts OS Shell commands");
+        shell.add(new de.tsl2.nano.incubation.terminal.item.Command("command", "cmd /C"));
+        root.add(shell);
 
         Map<String, Object> defs = new HashMap<String, Object>();
         defs.put("image.out", "-out");
@@ -762,13 +773,13 @@ public class IncubationTest {
     public void testXml2Text() throws Exception {
 //        log(StringUtil.removeXMLTags(String.valueOf(FileUtil.getFileData("printing-xml-with-fop.html", "UTF-8"))));
     }
-    
+
     @Test
     public void testPlatformBeans() throws Exception {
         ENV.setProperty("beandef.autoinit", false);
         PlatformManagement.printMBeans(System.out, null);
         PlatformManagement.logNotifications(null);
-        
+
         //so something
         ArrayList<byte[]> array = new ArrayList<byte[]>();
         for (int i = 0; i < 1000000; i++) {
@@ -777,7 +788,7 @@ public class IncubationTest {
         System.gc();
         System.out.println("end: " + array.size());
     }
-    
+
     static void log_(String msg) {
         System.out.print(msg);
     }

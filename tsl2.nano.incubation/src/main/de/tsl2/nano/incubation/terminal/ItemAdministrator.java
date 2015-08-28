@@ -28,6 +28,7 @@ import de.tsl2.nano.execution.SystemUtil;
 import de.tsl2.nano.format.RegExpFormat;
 import de.tsl2.nano.incubation.terminal.item.AItem;
 import de.tsl2.nano.incubation.terminal.item.Action;
+import de.tsl2.nano.incubation.terminal.item.Command;
 import de.tsl2.nano.incubation.terminal.item.Container;
 import de.tsl2.nano.incubation.terminal.item.Input;
 import de.tsl2.nano.incubation.terminal.item.MainAction;
@@ -38,6 +39,9 @@ import de.tsl2.nano.incubation.terminal.item.selector.DirSelector;
 import de.tsl2.nano.incubation.terminal.item.selector.FieldSelector;
 import de.tsl2.nano.incubation.terminal.item.selector.FileSelector;
 import de.tsl2.nano.incubation.terminal.item.selector.PropertySelector;
+import de.tsl2.nano.incubation.terminal.item.selector.SQLSelector;
+import de.tsl2.nano.incubation.terminal.item.selector.Sequence;
+import de.tsl2.nano.incubation.terminal.item.selector.XPathSelector;
 import de.tsl2.nano.incubation.vnet.workflow.Condition;
 import de.tsl2.nano.util.PrivateAccessor;
 
@@ -83,6 +87,7 @@ public class ItemAdministrator<T> extends Container<T> {
             itemTypes.put("input", new String[] { Input.class.getName() });
             itemTypes.put("action", new String[] { Action.class.getName(), "mainClass", "method", ARGS });
             itemTypes.put("mainaction", new String[] { MainAction.class.getName(), "mainClass", ARGS });
+            itemTypes.put("command", new String[] { Command.class.getName(), "cmd", ARGS });
             itemTypes.put("shell", new String[] { Action.class.getName(), "mainClass=" + SystemUtil.class.getName(),
                 "method=execute", ARGS });
             itemTypes.put("ant", new String[] { Action.class.getName(), "mainClass=" + AntRunner.class.getName(),
@@ -93,6 +98,9 @@ public class ItemAdministrator<T> extends Container<T> {
             itemTypes.put("csv", new String[] { CSVSelector.class.getName(), "csv", "pattern" });
             itemTypes.put("properties", new String[] { PropertySelector.class.getName() });
             itemTypes.put("field", new String[] { FieldSelector.class.getName(), "cls", "field"/*field-type*/});
+            itemTypes.put("xpath", new String[] { XPathSelector.class.getName(), "xml", "xpath"});
+            itemTypes.put("sql", new String[] { SQLSelector.class.getName(), "driver", "url", "user", "password", "sql"});
+            itemTypes.put("sequence", new String[] { Sequence.class.getName(), "action", "selector"});
 
             Properties p = new Properties();
             for (String k : itemTypes.keySet()) {

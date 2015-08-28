@@ -233,6 +233,18 @@
                <string>source</string>
             </argNames>
          </item>
+         <item class="de.tsl2.nano.incubation.terminal.item.selector.Sequence" name="sequential echo command" multiple="false" sequential="false">
+            <action class="de.tsl2.nano.incubation.terminal.item.Command" name="sequential echo command">
+               <mainClass>de.tsl2.nano.execution.SystemUtil</mainClass>
+               <method>execute</method>
+               <argNames length="0"/>
+               <cmd>echo</cmd>
+            </action>
+            <sequence class="de.tsl2.nano.incubation.terminal.item.selector.XPathSelector" name="xpathselector" multiple="false" sequential="false">
+               <xml>bin/sishell.xml</xml>
+               <xpath>//@name</xpath>
+            </sequence>
+         </item>
       </item>
       <item class="de.tsl2.nano.incubation.terminal.item.Container" name="Html" multiple="false" sequential="false">
          <item class="de.tsl2.nano.incubation.terminal.item.selector.FileSelector" name="source" multiple="false" sequential="false">
@@ -525,6 +537,15 @@
                <string>sishell.width</string>
                <string>sishell.height</string>
             </argNames>
+         </item>
+      </item>
+      <item class="de.tsl2.nano.incubation.terminal.item.Container" name="Shell" multiple="false" sequential="false">
+         <description>Starts OS Shell commands</description>
+         <item class="de.tsl2.nano.incubation.terminal.item.Command" name="command">
+            <mainClass>de.tsl2.nano.execution.SystemUtil</mainClass>
+            <method>execute</method>
+            <argNames length="0"/>
+            <cmd>cmd /C</cmd>
          </item>
       </item>
    </root>

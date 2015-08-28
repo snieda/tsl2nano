@@ -28,7 +28,9 @@ public class SystemUtil {
      * @return
      */
     public static final Process execute(String... command) {
-        return execute(new File(command[0]).getParentFile(), command);
+        File dir = new File(command[0]);
+        dir = dir.isFile() ? dir.getParentFile() : new File(System.getProperty("user.dir"));
+        return execute(dir, command);
     }
 
     /**

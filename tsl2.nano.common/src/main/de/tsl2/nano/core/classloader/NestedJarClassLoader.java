@@ -249,7 +249,7 @@ public class NestedJarClassLoader extends LibClassLoader implements Cloneable {
                     nestedJars.add(jars[i]);
                 else
                     LOG.warn(jars[i]
-                        + " couldnt't be loaded as nested content of this root jar!");
+                        + " couldn't be loaded as nested content of this root jar!");
             }
             LOG.info(StringUtil.toFormattedString(nestedJars, -1, true));
             return nestedJars.toArray(new String[0]);

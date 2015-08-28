@@ -6,6 +6,7 @@ Application-Name: Nano.H5
 Permissions: all-permissions
 Main-Class: de.tsl2.nano.h5.Loader
 Class-Path: ./ 
+ ../tsl2.nano.h5.0.7.0.jar 
  tsl2.nano.common.1.1.1.jar 
  simple-xml-2.7.jar 
  de.tsl2.nano.serviceaccess.1.0.2.jar 

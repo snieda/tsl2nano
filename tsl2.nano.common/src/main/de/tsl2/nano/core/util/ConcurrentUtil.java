@@ -33,9 +33,9 @@ public class ConcurrentUtil {
     @SuppressWarnings("rawtypes")
     private static final Map<Class, ThreadLocal<?>> threadLocals = new Hashtable<Class, ThreadLocal<?>>();
 
-
     /**
      * getCaller
+     * 
      * @return calling method name
      */
     public static String getCaller() {
@@ -114,6 +114,27 @@ public class ConcurrentUtil {
         } catch (InterruptedException e) {
             ManagedException.forward(e);
         }
+    }
+
+    /**
+     * calls {@link Thread#interrupt()} on a thread with the given name in the current threadgroup.
+     * 
+     * @param threadName thread to interrupt.
+     * @return true, if thread was found and interrupted.
+     */
+    public static final boolean stopOrInterrupt(String threadName) {
+        ThreadGroup tg = Thread.currentThread().getThreadGroup();
+        Thread allThreads[] = new Thread[tg.activeCount()];
+        tg.enumerate(allThreads);
+        for (int i = 0; i < allThreads.length; i++) {
+            if (allThreads[i].getName().equals(threadName)) {
+                LOG.debug("interrupting thread " + threadName);
+                allThreads[i].interrupt();
+                return true;
+            }
+        }
+        LOG.error("couldn't find thread " + threadName);
+        return false;
     }
 
     /**
