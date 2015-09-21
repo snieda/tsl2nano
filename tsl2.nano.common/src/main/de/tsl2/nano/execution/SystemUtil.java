@@ -3,6 +3,8 @@ package de.tsl2.nano.execution;
 import java.io.DataOutputStream;
 import java.io.File;
 import java.io.IOException;
+import java.io.InputStream;
+import java.util.Map;
 import java.util.Scanner;
 
 import org.apache.commons.logging.Log;
@@ -52,17 +54,51 @@ public class SystemUtil {
                 + processBuilder.directory()
                 + (LOG.isDebugEnabled() ? "\n\tenv: "
                     + processBuilder.environment() : ""));
+
+            provideJdkAsJavaHome(processBuilder.environment());
+            processBuilder.inheritIO();
             process = processBuilder.start();
-            final Scanner scanner = new Scanner(process.getInputStream());
+            //IMPROVE: could we use redirection? we need output to standard + log file
+            Scanner scanner = new Scanner(process.getInputStream());
             while (scanner.hasNextLine()) {
                 LOG.info(scanner.nextLine());
             }
             scanner.close();
-            LOG.info("errorlevel: " + process.waitFor());
+            int result = process.waitFor();
+            LOG.info("-------------------------------------------------------------------");
+            LOG.info("process '" + command + "' finished with errorlevel: " + result);
+            if (result != 0) {
+                scanner = new Scanner(process.getErrorStream());
+                StringBuilder buf = new StringBuilder();
+                while (scanner.hasNextLine()) {
+                    buf.append(scanner.nextLine() + "\n");
+                }
+                LOG.error(buf.toString());
+                scanner.close();
+            }
+            LOG.info("-------------------------------------------------------------------");
         } catch (final Exception e) {
             ManagedException.forward(e);
         }
         return process;
+    }
+
+    /**
+     * tries to set the system property 'java.home' as system environment variable 'JAVA_HOME'. if java.home is a path
+     * to a JRE, we try to extract the path to JDK.
+     * 
+     * @param env writable os system environment map
+     */
+    private static void provideJdkAsJavaHome(Map<String, String> env) {
+        if (!env.containsKey("java_home")) {
+            String javaHome = System.getProperty("java.home");
+            if (javaHome != null) {
+                //use jdk instead of jre
+                if (javaHome.contains("java/jre"))
+                    javaHome = StringUtil.substring(javaHome, null, "/jre");
+                env.put("JAVA_HOME", javaHome);
+            }
+        }
     }
 
     /**

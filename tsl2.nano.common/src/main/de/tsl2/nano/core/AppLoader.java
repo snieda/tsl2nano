@@ -10,7 +10,6 @@
 package de.tsl2.nano.core;
 
 import java.io.File;
-import java.net.URLClassLoader;
 import java.security.Permission;
 import java.security.Policy;
 import java.security.ProtectionDomain;
@@ -389,4 +388,5 @@ public class AppLoader {
             LOG.info("couldn't set all permissions. failure: " + e.toString());
         }
     }
+    
 }
