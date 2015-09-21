@@ -2293,7 +2293,7 @@ Net:Connection-->Link-->Cover(content, descriptor)
 * sql-selector
 * (x) shell: providing interactive parameter (e.g.: print printer=pdf, or 11 printer=pdf)
 * (x) reflect <name> <method> <arguments>
-* checker?
+* checker (polling action)
 
 *TODO* für zeiterfassung
 * (v) id --> sequence
@@ -2313,7 +2313,7 @@ Net:Connection-->Link-->Cover(content, descriptor)
 * +Party.kürzel
 * ER-Diagramme link
 * frm an online-model zum verlinken
-* Digatal Identity (mail, twitter, homepage...)
+* Digital Identity (mail, twitter, homepage...)
 * (v) Bilder mit blob?
 * (v) Summenzeile (beandef oder columndef: + summarize=$feld1-$feld2)
 * Wochentage + unterschiedliche Farben am WE+Feiertage

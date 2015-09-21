@@ -220,7 +220,7 @@ public class NanoH5 extends NanoHTTPD implements ISystemConnector<Persistence> {
                 }
             }
         } catch (Exception ioe) {
-            LOG.error("Couldn't start server:", ioe);
+            LOG.error("Couldn't start server: ", ioe);
             ConcurrentUtil.sleep(3000);
             System.exit(-1);
         }

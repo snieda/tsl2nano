@@ -4,14 +4,14 @@ create schema ADMIN
 
 CREATE TABLE ADMIN.Grouprole (
                 id INTEGER NOT NULL,
-                CONSTRAINT id PRIMARY KEY (id)
+                CONSTRAINT idx_admin_grouprole PRIMARY KEY (id)
 );
 
 
 CREATE TABLE ADMIN.Role (
                 id INTEGER NOT NULL,
                 name VARCHAR(64) NOT NULL,
-                CONSTRAINT id PRIMARY KEY (id)
+                CONSTRAINT idx_admin_role PRIMARY KEY (id)
 );
 
 
@@ -21,7 +21,7 @@ CREATE TABLE ADMIN.History (
                 column VARCHAR(64) NOT NULL,
                 action VARCHAR(64) NOT NULL,
                 date TIMESTAMP NOT NULL,
-                CONSTRAINT id PRIMARY KEY (id)
+                CONSTRAINT idx_admin_history PRIMARY KEY (id)
 );
 
 
@@ -31,21 +31,21 @@ CREATE TABLE ADMIN.User (
                 name VARCHAR(64) NOT NULL,
                 name2 VARCHAR(64) NOT NULL,
                 passwd VARCHAR(64) NOT NULL,
-                CONSTRAINT id PRIMARY KEY (id)
+                CONSTRAINT idx_admin_user PRIMARY KEY (id)
 );
 -- COMMENT ON TABLE ADMIN.User IS 'application user';
 
 
 CREATE TABLE ADMIN.Usergroup (
                 id INTEGER NOT NULL,
-                CONSTRAINT id PRIMARY KEY (id)
+                CONSTRAINT idx_admin_usergroup PRIMARY KEY (id)
 );
 
 
 CREATE TABLE ADMIN.Group (
                 id INTEGER NOT NULL,
                 name VARCHAR(64) NOT NULL,
-                CONSTRAINT id PRIMARY KEY (id)
+                CONSTRAINT idx_admin_group PRIMARY KEY (id)
 );
 
 
@@ -53,7 +53,7 @@ CREATE TABLE ADMIN.Version (
                 id INTEGER NOT NULL,
                 name VARCHAR(64) NOT NULL,
                 date TIMESTAMP NOT NULL,
-                CONSTRAINT id PRIMARY KEY (id)
+                CONSTRAINT idx_admin_version PRIMARY KEY (id)
 );
 -- COMMENT ON TABLE ADMIN.Version IS 'Version der Datenbank-Instanz';
 
