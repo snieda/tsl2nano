@@ -532,7 +532,13 @@ public/*abstract*/class LogFactory implements Runnable, Serializable {
             }
             //on errors, we don't use the queuing thread
             if (ex != null) {
-                ex.printStackTrace(factory.err);
+                try {
+                    ex.printStackTrace(factory.err);
+                } catch (Exception e) {
+                    //don't stop the flow on logging problems!
+                    ex.printStackTrace();
+                    e.printStackTrace();
+                }
                 if (factory.err != System.err) {
                     ex.printStackTrace(System.err);
                 }
