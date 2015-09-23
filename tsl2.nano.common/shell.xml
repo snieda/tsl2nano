@@ -625,6 +625,12 @@ compiler basedir: ${basedir}. classpath: @{sh.compile.classpath};@{sh.compile.cl
 
 	<!-- windows specific call to cmd.exe -->
 	<target name="sh.exec.cmd">
+		<condition property="start.cmd" value="cmd.exe" else="bash">
+			<contains string="${os.name}" substring="windows" casesensitive="false"/>
+		</condition>
+		<condition property="slash.c" value="/C" else="">
+			<contains string="${os.name}" substring="windows" casesensitive="false"/>
+		</condition>
 		<property name="sh.exec.cmd.dir" value="${basedir}" />
 		<property name="sh.exec.cmd.outputfile" value="${basedir}.log" />
 		<property name="sh.exec.cmd.resultproperty" value="${basedir}.result" />
@@ -634,8 +640,8 @@ compiler basedir: ${basedir}. classpath: @{sh.compile.classpath};@{sh.compile.cl
 		<property name="sh.exec.cmd.arg4" value="" />
 		<property name="sh.exec.cmd.arg5" value="" />
 		<property name="sh.exec.cmd.arg6" value="" />
-		<exec dir="${sh.exec.cmd.dir}" executable="cmd.exe" output="${sh.exec.cmd.outputfile}" resultproperty="${sh.exec.cmd.resultproperty}">
-			<arg value="/C" />
+		<exec dir="${sh.exec.cmd.dir}" executable="${start.cmd}" output="${sh.exec.cmd.outputfile}" resultproperty="${sh.exec.cmd.resultproperty}">
+			<arg value="${slash.c}" />
 			<arg value="${sh.exec.cmd.arg1}" />
 			<arg value="${sh.exec.cmd.arg2}" />
 			<arg value="${sh.exec.cmd.arg3}" />

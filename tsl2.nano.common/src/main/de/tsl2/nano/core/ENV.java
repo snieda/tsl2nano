@@ -774,14 +774,21 @@ public class ENV implements Serializable {
      *         always false.
      */
     public static final boolean extractResourceToDir(String resourceName, String destinationDir) {
+        return extractResourceToDir(resourceName, destinationDir, false);
+    }
+    public static final boolean extractResourceToDir(String resourceName, String destinationDir, boolean executable) {
         //put build informations into system-properties
         getBuildInformations();
         resourceName = System.getProperty(resourceName, resourceName);
-        return AppLoader.isNestingJar() ? extractResource(resourceName, destinationDir + resourceName) : false;
+        return AppLoader.isNestingJar() ? extractResource(resourceName, destinationDir + resourceName, executable) : false;
+    }
+
+    public static final boolean extractResource(String resourceName, boolean executable) {
+        return extractResourceToDir(resourceName, "", executable);
     }
 
     public static final boolean extractResource(String resourceName) {
-        return extractResourceToDir(resourceName, "");
+        return extractResourceToDir(resourceName, "", false);
     }
 
     /**
@@ -791,7 +798,7 @@ public class ENV implements Serializable {
      * @param resourceName resource name
      * @return true if new file was created
      */
-    public static final boolean extractResource(String resourceName, String fileName) {
+    public static final boolean extractResource(String resourceName, String fileName, boolean executable) {
         File destFile = new File(fileName);
         File file = destFile.isAbsolute() ? destFile : new File(getConfigPath() + fileName);
         if (!file.exists()) {
@@ -804,6 +811,8 @@ public class ENV implements Serializable {
                         + "' of our main-jar-file is not available or empty!");
                 }
                 FileUtil.write(res, new FileOutputStream(file), true);
+                if (executable)
+                    file.setExecutable(true);
                 return true;
             } catch (Exception e) {
                 ManagedException.forward(e);

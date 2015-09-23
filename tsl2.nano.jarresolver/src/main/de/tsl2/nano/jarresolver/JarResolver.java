@@ -20,6 +20,7 @@ import java.util.Set;
 import org.apache.commons.logging.Log;
 
 import de.tsl2.nano.collection.MapUtil;
+import de.tsl2.nano.core.AppLoader;
 import de.tsl2.nano.core.ENV;
 import de.tsl2.nano.core.ManagedException;
 import de.tsl2.nano.core.cls.BeanClass;
@@ -135,7 +136,9 @@ public class JarResolver {
 
     private void loadDependencies() {
         System.setProperty("M2_HOME", mvnRoot);
-        Process process = SystemUtil.execute(new File(basedir), mvnRoot + "/bin/mvn.bat", "install");
+        String script = AppLoader.isUnixFS() ? "/bin/mvn" : "/bin/mvn.bat";
+        new File(mvnRoot + script).setExecutable(true);
+        Process process = SystemUtil.execute(new File(basedir), mvnRoot + script, "install");
         if (process.exitValue() != 0) {
             LOG.error("Process returned with: " + process.exitValue());
         }
