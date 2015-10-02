@@ -178,6 +178,10 @@ some internals:
 		</sequential>
 	</macrodef>
 
+	<target name="sh.copyfile">
+		<copy file="${sh.copyfile.file}" tofile="${sh.copyfile.tofile}" />
+	</target>
+	
 	<description>
 target: sh.copy
 	useable to be started by shell-scripts. all environment variables are stored into 'sh'.
@@ -620,11 +624,12 @@ compiler basedir: ${basedir}. classpath: @{sh.compile.classpath};@{sh.compile.cl
 	<!-- standard shell command -->
 	<target name="sh.exec" unless="sh.disable.exec">
 		<property name="sh.exec.dir" value="${basedir}" />
+		<echo message="starting os command '${sh.exec.command}' in directory '${sh.exec.dir}'" />
 		<exec dir="${sh.exec.dir}" command="${sh.exec.command}" />
 	</target>
 
 	<!-- windows specific call to cmd.exe -->
-	<target name="sh.exec.cmd">
+	<target name="sh.exec.cmd" unless="sh.disable.exec.cmd">
 		<condition property="start.cmd" value="cmd.exe" else="bash">
 			<contains string="${os.name}" substring="windows" casesensitive="false"/>
 		</condition>
@@ -729,7 +734,7 @@ compiler basedir: ${basedir}. classpath: @{sh.compile.classpath};@{sh.compile.cl
 		<property name="sh.junit.test.dir" value="${sh.java.test.dir}" />
 		<property name="sh.junit.target.dir" value="${sh.java.target.dir}" />
 		<property name="sh.junit.include" value="**/*Test.java" />
-		<property name="sh.junit.jvmarg" value="-javaagent:ci/jacoco/jacocoagent.jar=destfile=${sh.junit.target.dir}ci/jacoco.exec" />
+		<property name="sh.junit.jvmarg" value="-javaagent:../tsl2.nano.common/ci/jacoco/jacocoagent.jar=destfile=${sh.junit.target.dir}ci/jacoco.exec" />
 
 		<mkdir dir="${sh.junit.target.dir}/junit/report" />
 		<sh.junit sh.junit.test.dir="${sh.junit.test.dir}" sh.junit.target.dir="${sh.junit.target.dir}" sh.junit.include="${sh.junit.include}" sh.junit.jvmarg="${sh.junit.jvmarg}" />
@@ -975,7 +980,7 @@ compiler basedir: ${basedir}. classpath: @{sh.compile.classpath};@{sh.compile.cl
 		<property name="sh.build.lib" value="${sh.build.basedir}/lib" />
 		<property name="sh.build.bin" value="${sh.build.basedir}/bin" />
 		<property name="sh.build.debug" value="false" />
-		<property name="sh.junit.jvmarg" value="-javaagent:ci/jacoco/jacocoagent.jar=destfile=ci/jacoco.exec" />
+		<property name="sh.junit.jvmarg" value="-javaagent:../tsl2.nano.common/ci/jacoco/jacocoagent.jar=destfile=ci/jacoco.exec" />
 		
 		<!-- store build informations to build.properties -->
 		<buildnumber file="${sh.build.basedir}/src/resources/build-${sh.build.name}.properties" />
