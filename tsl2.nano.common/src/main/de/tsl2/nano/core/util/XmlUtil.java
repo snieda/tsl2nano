@@ -437,6 +437,12 @@ public class XmlUtil {
             return new org.simpleframework.xml.core.Persister(new SimpleXmlArrayWorkaround()).read(type,
                 new FileInputStream(new File(xmlFile)));
         } catch (Exception e) {
+            //mark the loaded xml file as corrupt
+            File file = new File(xmlFile);
+            if (file.canWrite()) {
+                LOG.info("renaming corrupted file '" + xmlFile + "' to: " + xmlFile + ".failed");
+                file.renameTo(new File(file.getPath() + ".failed"));
+            }
             //don't use the ManagedException.forward(), because the LogFactory is using this, too!
             throw new RuntimeException(e);
         }

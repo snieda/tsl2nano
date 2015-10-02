@@ -96,6 +96,7 @@ public class SystemUtil {
                 //use jdk instead of jre
                 if (javaHome.contains("java/jre"))
                     javaHome = StringUtil.substring(javaHome, null, "/jre");
+                LOG.info("JAVA_HOME wasn't set. setting it to: " + javaHome);
                 env.put("JAVA_HOME", javaHome);
             }
         }
