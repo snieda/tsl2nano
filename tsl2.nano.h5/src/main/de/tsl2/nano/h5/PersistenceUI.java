@@ -386,7 +386,7 @@ public class PersistenceUI {
         login.getPresentationHelper().change(BeanPresentationHelper.PROP_STYLE, IPresentable.STYLE_MULTI, "database");
         login.getPresentationHelper().change(BeanPresentationHelper.PROP_LENGTH, 100000, "database");
         ((RegExpFormat)login.getAttribute("database").getFormat()).setPattern(RegExpFormat.alphanum(100000, false), null, 100000, Pattern.MULTILINE);
-        login.getAttribute("database").getPresentation().setLayoutConstraints((Serializable)MapUtil.asMap("rows", 1, "cols", "51", "style", "width:382;"));
+        login.getAttribute("database").getPresentation().setLayoutConstraints((Serializable)MapUtil.asMap("rows", 1, "cols", "50", "style", "width:382;"));
         
         login.getPresentationHelper().chg("replication", BeanPresentationHelper.PROP_ENABLER, new IActivable() {
             @Override

@@ -161,7 +161,6 @@ import de.tsl2.nano.bean.def.BeanCollector;
 import de.tsl2.nano.bean.def.BeanDefinition;
 import de.tsl2.nano.bean.def.BeanPresentationHelper;
 import de.tsl2.nano.bean.def.BeanValue;
-import de.tsl2.nano.bean.def.IAttributeDefinition;
 import de.tsl2.nano.bean.def.IBeanCollector;
 import de.tsl2.nano.bean.def.IPageBuilder;
 import de.tsl2.nano.bean.def.IPresentable;
@@ -476,7 +475,7 @@ public class Html5Presentation<T> extends BeanPresentationHelper<T> implements I
             Element c2 = appendElement(row, TAG_CELL);
             String localDoc = ENV.getConfigPath() + "nano.h5.html";
             String docLink =
-                new File(localDoc).canRead() ? localDoc : "https://sourceforge.net/p/tsl2nano/wiki/Home/";
+                new File(localDoc).canRead() ? "./nano.h5.html" : "https://sourceforge.net/p/tsl2nano/wiki/Home/";
             c1 = appendElement(c1, TAG_LINK, ATTR_HREF, docLink);
             appendElement(c1,
                 TAG_IMAGE,
@@ -2028,7 +2027,7 @@ public class Html5Presentation<T> extends BeanPresentationHelper<T> implements I
         Element preFooter;
         if (footer instanceof Throwable) {
             Element details = doc.createElement(TAG_LINK);
-            details.setAttribute(ATTR_HREF, "file:///" + new File(LogFactory.getLogFileName()).getAbsolutePath());
+            details.setAttribute(ATTR_HREF, "./" + new File(LogFactory.getLogFileName()).getName());
             details.setTextContent(ENV.translate("tsl2nano.exception", true));
             addRow(table, details);
             preFooter = doc.createElement(TAG_PRE);
