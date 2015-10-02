@@ -19,7 +19,7 @@
 	<path id="classpath">
 		<fileset dir="${basedir}">
 			<include name="**/*.jar"/>
-			<include name="**/*.class"/>
+			<include name="generated-bin/**/*.class"/>
 		</fileset>
 	</path>
 
@@ -68,10 +68,6 @@ commit;
 	
 	<target name="do.all" description="creates database from ddl and entity beans from jdbc-connection">
 	
-		<echo file="runServer.bat">
-java -cp * org.hsqldb.Server -database ${jdbc.database} -port ${jdbc.port} -silent false -trace true %1 %2 %3 %4 %5 %6 %7 %8 %9
-		</echo>
-		<chmod perm="+x" file="runServer.bat" />
 		<condition property="start" value="start" else="">
 			<!-- <equals casesensitive="false" arg1="${env.os.name}" arg2="windows" /> -->
 			<contains string="${os.name}" substring="windows" casesensitive="false"/>
@@ -79,6 +75,13 @@ java -cp * org.hsqldb.Server -database ${jdbc.database} -port ${jdbc.port} -sile
 		<condition property="background" value="" else="&amp;">
 			<contains string="${os.name}" substring="windows" casesensitive="false"/>
 		</condition>
+		<condition property="cmdargs" value="%*" else="$*">
+			<contains string="${os.name}" substring="windows" casesensitive="false"/>
+		</condition>
+		<echo file="runServer.bat">
+java -cp * org.hsqldb.Server -database ${jdbc.database} -port ${jdbc.port} -silent false -trace true ${cmdargs}
+		</echo>
+		<chmod perm="+x" file="runServer.bat" />
 	<!-- start the database with name ${basedir} -->
 	
 		<parallel failonany="true">
@@ -100,8 +103,8 @@ java -cp * org.hsqldb.Server -database ${jdbc.database} -port ${jdbc.port} -sile
 				<ant antfile="reverse-eng.xml" />
 				
 				<!-- start the nano-h5 application if not started from there. -->
-				<condition property="sh.disable.exec.cmd">
-					<istrue id="nano.h5.running"/>
+				<condition property="sh.disable.exec.cmd" value="true">
+					<istrue value="${nano.h5.running}"/>
 				</condition>
 				<ant antfile="shell.xml" target="sh.exec.cmd">
 					<property name="sh.exec.cmd.dir" value="${basedir}/.."/>
@@ -110,8 +113,10 @@ java -cp * org.hsqldb.Server -database ${jdbc.database} -port ${jdbc.port} -sile
 					<property name="sh.exec.cmd.arg3" value="${basedir}"/>
 					<property name="sh.exec.cmd.arg4" value="${background}"/>
 				</ant>
+				<fail message="mda generation task successful finished!"/>
 			</sequential>
 		</parallel>
+		<echo message="mda generation finished!"/>
 	</target>
 
 </project>	

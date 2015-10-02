@@ -48,6 +48,9 @@ import de.tsl2.nano.core.util.StringUtil;
 public class RuntimeClassloader extends URLClassLoader {
     private static final Log LOG = LogFactory.getLog(RuntimeClassloader.class);
 
+    /** tsl2 default class directory */
+    public static final String DEFAULT_BIN_DIR = "generated-bin";
+    
     /**
      * constructor
      * 
@@ -335,6 +338,7 @@ public class RuntimeClassloader extends URLClassLoader {
 
     @Override
     public String toString() {
+        StringUtil.toFormattedString(getURLs(), -1, true);
         return this.getClass().getName() + "[parent: " + getParent() + ", urls: " + getURLs().length + "]";
     }
 }

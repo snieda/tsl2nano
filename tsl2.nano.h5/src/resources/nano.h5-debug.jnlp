@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<jnlp spec="1.0+" codebase=
+"./" 
+    href="nano.h5.jnlp">
+    <information>
+        <title>Nano H5</title>
+        <vendor>TSL2</vendor>
+		<homepage href="http://sourceforge.net/projects/tsl2nano" />
+        <description>Java Framework for realtime Html-Application creation</description>
+	</information>
+    <resources>
+        <!-- Application Resources -->
+        <j2se version="1.7+"
+              href="file://java.sun.com/products/autodl/j2se"/>
+        <jar href="tsl2.nano.h5.0.7.0-signed.jar"
+            main="true" />
+
+    </resources>
+	<security>
+          <all-permissions/>
+     </security>
+    <application-desc
+         name="Nano H5"
+         main-class=
+           "de.tsl2.nano.h5.Loader"
+         width="300"
+         height="600">
+     </application-desc>
+     <update check="background"/>
+</jnlp>

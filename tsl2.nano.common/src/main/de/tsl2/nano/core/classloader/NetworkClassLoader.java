@@ -22,6 +22,7 @@ import de.tsl2.nano.core.ENV;
 import de.tsl2.nano.core.cls.BeanClass;
 import de.tsl2.nano.core.log.LogFactory;
 import de.tsl2.nano.core.util.FileUtil;
+import de.tsl2.nano.core.util.StringUtil;
 
 /**
  * Extends the {@link NestedJarClassLoader} to load unresolved classes from network-connection through a maven
@@ -39,6 +40,9 @@ public class NetworkClassLoader extends NestedJarClassLoader {
     /** filename for persistent cache of {@link #unresolveables}. */
     static final String FILENAME_UNRESOLVEABLES = "network.classloader.unresolvables";
 
+    /** standard exclude expresion */
+    public static final String REGEX_EXCLUDE = "standalone";
+    
     /**
      * environment config path. as it is not possible to use the type Environment.class itself (import class is loaded
      * by AppLoader, but a new Environment was created), we use this variable instead.
@@ -66,10 +70,20 @@ public class NetworkClassLoader extends NestedJarClassLoader {
     /**
      * constructor
      * 
-     * @param parent
+     * @param parent parent class loader
      */
     public NetworkClassLoader(ClassLoader parent) {
-        super(parent);
+        this(parent, null);
+    }
+    
+    /**
+     * constructor
+     * 
+     * @param parent parent class loader
+     * @param exclude regular expression for nested jars to be excluded from classpath. see {@link NestedJarClassLoader#NestedJarClassLoader(ClassLoader, String)}
+     */
+    public NetworkClassLoader(ClassLoader parent, String exclude) {
+        super(parent, exclude);
     }
 
     /**
@@ -121,6 +135,9 @@ public class NetworkClassLoader extends NestedJarClassLoader {
     @Override
     public Class<?> findClass(String name) throws ClassNotFoundException {
         try {
+            //if a root classpath contains a classes directory, extract the class name
+            if (name.startsWith(DEFAULT_BIN_DIR))
+                name = StringUtil.substring(name, ".", null);
             return super.findClass(name);
         } catch (ClassNotFoundException e) {
             //try it again after loading it from network

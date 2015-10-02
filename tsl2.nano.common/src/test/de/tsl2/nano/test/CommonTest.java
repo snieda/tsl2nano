@@ -1315,10 +1315,10 @@ public class CommonTest {
     @Test
     public void testJarClassloader() {
         ClassLoader contextClassLoader = Thread.currentThread().getContextClassLoader();
-        new NestedJarClassLoader(contextClassLoader) {
+        NestedJarClassLoader cl = new NestedJarClassLoader(contextClassLoader, "standalone") {
             @Override
             protected String getRootJarPath() {
-                return "../target/de.tsl2.nano.common_0.0.2.B.jar";
+                return "../../target/test.h5.sample/tsl2.nano.h5.0.7.0-standalone.jar";
             }
 //
 //            @Override
@@ -1326,6 +1326,9 @@ public class CommonTest {
 //                return getExternalJarInputStream(jarName);
 //            }
         };
+        
+        // filter the 'standalones'
+        assertTrue(cl.getNestedJars().length == 16);
     }
 
     /**

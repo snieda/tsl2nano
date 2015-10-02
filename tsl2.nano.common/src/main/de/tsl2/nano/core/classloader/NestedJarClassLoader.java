@@ -42,6 +42,7 @@ import de.tsl2.nano.core.util.StringUtil;
  * @version $Revision$
  */
 public class NestedJarClassLoader extends LibClassLoader implements Cloneable {
+    /** class loading extension */
     protected static final String EXT_CLASS = ".class";
 
     private static final Log LOG = LogFactory.getLog(NestedJarClassLoader.class);
@@ -49,11 +50,31 @@ public class NestedJarClassLoader extends LibClassLoader implements Cloneable {
     /** hasRootJar, initial true to start evaluation! */
     boolean hasRootJar = true;
 
+    /** class variable to enhance performance of classloading on nested jar files. */
     Map<String, ZipStream> jarFileStreams;
+    /** all nestedJars of it's main jar */
     String[] nestedJars;
+    /** regular expression to exclude nesting jars from classpath */
+    String exclude;
 
+    /**
+     * constructor
+     * 
+     * @param parent parent class loader
+     */
     public NestedJarClassLoader(ClassLoader parent) {
+        this(parent, null);
+    }
+
+    /**
+     * constructor
+     * 
+     * @param parent parent class loader
+     * @param exclude regular expression for nested jars to be excluded from classpath.
+     */
+    public NestedJarClassLoader(ClassLoader parent, String exclude) {
         super(new URL[0], parent);
+        this.exclude = exclude;
     }
 
     public NestedJarClassLoader(URL[] urls) {
@@ -264,7 +285,8 @@ public class NestedJarClassLoader extends LibClassLoader implements Cloneable {
      * @return jar file names
      */
     private String[] getNestedJars(String rootPath) {
-        return FileUtil.readFileNamesFromZip(rootPath, "*" + EXT_LIBRARY.substring(1));
+        return FileUtil.readFileNamesFromZip(rootPath, (exclude != null ? "(?!" + exclude + ")" : "") + "*"
+            + EXT_LIBRARY.substring(1));
     }
 
     /**

@@ -301,7 +301,7 @@ public class AppLoader {
         ClassLoader cl =
             /*contextClassLoader instanceof URLClassLoader || */classPath.contains(";") || mngt != null || isDalvik()
                 ? contextClassLoader : null;
-        NetworkClassLoader nestedLoader = new NetworkClassLoader(cl);
+        NetworkClassLoader nestedLoader = new NetworkClassLoader(cl, NetworkClassLoader.REGEX_EXCLUDE);
         if (cl == null) {
             LOG.info("discarding boot classloader " + contextClassLoader);
             nestedLoader.addFile(classPath);
@@ -311,6 +311,11 @@ public class AppLoader {
         } else {
             System.setProperty(KEY_ISNESTEDJAR, Boolean.toString(false));
         }
+        //set the classes directory before the root config directory!
+        File binDir = new File(environment + "/" + NetworkClassLoader.DEFAULT_BIN_DIR);
+        binDir.mkdirs();
+        nestedLoader.addLibraryPath(binDir.getAbsolutePath());
+        
         nestedLoader.addLibraryPath(new File(environment).getAbsolutePath());
         System.out.println("resetting current thread classloader " + contextClassLoader + " with " + nestedLoader);
         Thread.currentThread().setContextClassLoader(nestedLoader);

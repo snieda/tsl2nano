@@ -1372,6 +1372,7 @@ Some hints:
 * constrain the _schema_ otherwise all schemats will be respected
 * the provider should be set to _org.apache.openjpa.persistence.PersistenceProviderImpl_
 * openjpa-2.3.0 is not able to find/generate primary keys --> no class can be generated! Please at least 2.4.0
+* edit the *persistence.xml* and set the property *openjpa.jdbc.DBDictionary* to  value="hsql(SupportsSchemaForGetTables=false)"
 
 ## Interactive attribute content
 

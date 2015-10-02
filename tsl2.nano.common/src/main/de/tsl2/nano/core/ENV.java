@@ -774,21 +774,25 @@ public class ENV implements Serializable {
      *         always false.
      */
     public static final boolean extractResourceToDir(String resourceName, String destinationDir) {
-        return extractResourceToDir(resourceName, destinationDir, false);
+        return extractResourceToDir(resourceName, destinationDir, false, false);
     }
-    public static final boolean extractResourceToDir(String resourceName, String destinationDir, boolean executable) {
+    public static final boolean extractResourceToDir(String resourceName, String destinationDir, boolean flat, boolean executable) {
         //put build informations into system-properties
         getBuildInformations();
         resourceName = System.getProperty(resourceName, resourceName);
-        return AppLoader.isNestingJar() ? extractResource(resourceName, destinationDir + resourceName, executable) : false;
+        return AppLoader.isNestingJar() ? extractResource(resourceName, destinationDir + resourceName, flat, executable) : false;
+    }
+
+    public static final boolean extractResource(String resourceName, boolean flat, boolean executable) {
+        return extractResourceToDir(resourceName, "", flat, executable);
     }
 
     public static final boolean extractResource(String resourceName, boolean executable) {
-        return extractResourceToDir(resourceName, "", executable);
+        return extractResourceToDir(resourceName, "", false, executable);
     }
 
     public static final boolean extractResource(String resourceName) {
-        return extractResourceToDir(resourceName, "", false);
+        return extractResourceToDir(resourceName, "", false, false);
     }
 
     /**
@@ -798,9 +802,9 @@ public class ENV implements Serializable {
      * @param resourceName resource name
      * @return true if new file was created
      */
-    public static final boolean extractResource(String resourceName, String fileName, boolean executable) {
+    public static final boolean extractResource(String resourceName, String fileName, boolean flat, boolean executable) {
         File destFile = new File(fileName);
-        File file = destFile.isAbsolute() ? destFile : new File(getConfigPath() + fileName);
+        File file = destFile.isAbsolute() ? destFile : new File(getConfigPath() + (flat ? destFile.getName() : fileName));
         if (!file.exists()) {
             if (file.getParentFile() != null)
                 file.getParentFile().mkdirs();

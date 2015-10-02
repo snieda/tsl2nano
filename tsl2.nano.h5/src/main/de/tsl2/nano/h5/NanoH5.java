@@ -40,6 +40,7 @@ import de.tsl2.nano.bean.def.IPageBuilder;
 import de.tsl2.nano.bean.def.PathExpression;
 import de.tsl2.nano.collection.ExpiringMap;
 import de.tsl2.nano.collection.MapUtil;
+import de.tsl2.nano.core.AppLoader;
 import de.tsl2.nano.core.ENV;
 import de.tsl2.nano.core.ManagedException;
 import de.tsl2.nano.core.cls.BeanClass;
@@ -93,10 +94,19 @@ public class NanoH5 extends NanoHTTPD implements ISystemConnector<Persistence> {
     public static final String JAR_RESOURCES = "tsl2.nano.h5.default-resources.jar";
     public static final String JAR_SIMPLEXML = "tsl2.nano.simple-xml.jar";
 
+    public static final String ZIP_STANDALONE = "standalone.zip";
+    
     /** ant script to start the hibernatetool 'hbm2java' */
     static final String REVERSE_ENG_SCRIPT = "reverse-eng.xml";
     /** hibernate reverse engeneer configuration */
     static final String HIBREVNAME = "hibernate.reveng.xml";
+
+    /**
+     * if nano was packaged as standalone jar, the o/r-mapper, hsqldb and mysqlconnector are stored inside this
+     * directory to be extraced into the environments directory. the standalone path inside the jar is not part of the
+     * classpath!
+     */
+    static final String LIBS_STANDALONE = "standalone/";
 
     Map<InetAddress, NanoH5Session> sessions;
 
@@ -157,12 +167,18 @@ public class NanoH5 extends NanoHTTPD implements ISystemConnector<Persistence> {
             createStartPage();
 
             try {
-                ENV.extractResourceToDir("run.bat", "../");
+                if (AppLoader.isUnixFS()) {
+                    ENV.extractResourceToDir("run.sh", "../", false, true);
+                    ENV.extractResource("mda.sh", true);
+                } else {
+                    ENV.extractResourceToDir("run.bat", "../", false, false);
+                    ENV.extractResource("mda.bat");
+                }
                 ENV.extractResource("shell.xml");
-                ENV.extractResource("mda.bat");
                 ENV.extractResource("mda.xml");
                 ENV.extractResource("tsl2nano-appcache.mf");
                 ENV.extractResource("favicon.ico");
+                onStandaloneExtractJars();
             } catch (Exception ex) {
                 LOG.error("couldn't extract ant or shell script", ex);
                 ENV.get(UncaughtExceptionHandler.class).uncaughtException(null, ex);
@@ -208,7 +224,7 @@ public class NanoH5 extends NanoHTTPD implements ISystemConnector<Persistence> {
 
             myOut = LogFactory.getOut();
             myErr = LogFactory.getErr();
-            
+
             try {
                 LOG.info("Listening on port " + serviceURL.getPort() + ". Hit Enter or Strg+C to stop.\n");
                 LOG.debug("waiting for input on " + System.in);
@@ -223,6 +239,17 @@ public class NanoH5 extends NanoHTTPD implements ISystemConnector<Persistence> {
             LOG.error("Couldn't start server: ", ioe);
             ConcurrentUtil.sleep(3000);
             System.exit(-1);
+        }
+    }
+
+    /**
+     * if this jar is a standalone (containing o/r-mapper and a database), extract that jars to be available for ant
+     * scripts. for more informations, see {@link #LIBS_STANDALONE}.
+     */
+    private void onStandaloneExtractJars() {
+        if (FileUtil.hasResource(ZIP_STANDALONE)) {
+            ENV.extractResource("hibernate-jpa-2.1-api-1.0.0.Final.jar", true, false);
+            FileUtil.extractNestedZip(ZIP_STANDALONE, ENV.getConfigPath(), null);
         }
     }
 
