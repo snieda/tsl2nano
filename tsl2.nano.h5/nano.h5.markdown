@@ -101,7 +101,6 @@ this software should provide a fast way to create a standard application through
 ### What this framework is not intended to be
 
 * the web-application mode is not designed or tested for big data transfers or high network traffics.
-* at the moment, only parts of the nano frameworks are used in productive applications.
 * at the moment it is on construction - no guarantee can be given for any function or feature.
 * no particular value is done for graphical design.
 
@@ -118,6 +117,34 @@ this software should provide a fast way to create a standard application through
 * Provides a JNLP file for Java Web Start
  
 The _environment.xml_ in your current environment directory defines access-modes. F.e. _http.connection_ will define, if it is remote-accessible or not. For more informations, see chapter _The Environment_.
+
+#### Provided Start Packages
+
+_This text is included in the README.txt of the nano.h5 download directory_
+
+package description:
+- *tsl2.nano.h5.<version-number>.jar*: base "nano.h5" application. needs internet access on first use to download jdbc-drivers, ant and a jpa implementation.
+-  *tsl2.nano.h5.<version-number>-standalone.jar*: includes base "nano.h5" application with ant, jdbc-drivers for hsqldb and mysql libraries to work without internet access.
+-  *tsl2.nano.h5.<version-number>-signed.jar*: same as *tsl2.nano.h5.<version-number>-standalone.jar* but with signed content to be accessable through webstart (*nano.h5.jnlp*)
+- *nano.h5.jnlp*: java webstart descriptor to start *tsl2.nano.h5.<version-number>-signed.jar*. will create its environment directory in its download directory.
+- *sishell.<version-number>.jar*: "Structured Input Shell", a terminal application as toolbox for configurations, start scripts and administration. It is also integrated in *tsl2.nano.h5.<version-number>.jar*, but without starting support.  
+
+#### Commandline arguments
+
+start parameters:
+
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+java [-Denv.user.home=true] -jar tsl2.nano.h5.<version>.jar [environment-path (default: .nanoh5.environment] [http-server-port (default: 8067)]
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+This call is implemented inside the _run.bat_ script. Use that, if you are on windows. But normally, nano-h5 should be runnable through a double-click on the jar file _tsl2.nano.h5.x.y.z.jar_.
+
+If you start it on _Windows_, a browser will be opened to show the initial screen. On other systems you should open an html-browser with file <environment-path>/temp/_application.html_ or directly with: *http://<hostname>:<port>* (default: http://localhost:8067).
+
+Start parameter can be given in several ways. The main arguments will be concatenated through the following rule:
+ 1. META-INF/MANIFEST.MF:Main-Arguments
+ 2. System.getProperties("apploader.args")
+ 3. main(args) the real command line arguments
 
 ### Third Party Libraries
 
@@ -315,7 +342,7 @@ config/runServer.bat
 
 To start nano.h5 you have to call it with following syntax:
 
-java -jar tsl2.nano.h5.x.y.z.jar [environment-path (default: config] [http-server-port (default: 8067)]
+java -jar tsl2.nano.h5.x.y.z.jar [environment-path (default: .nanoh5.environment | env.user.home] [http-server-port (default: 8067)]
 
 This call is implemented inside the _run.bat_ script. Use that, if you are on windows. But normally, nano-h5 should be runnable through a double-click on the jar file _tsl2.nano.h5.x.y.z.jar_.
 
@@ -1282,6 +1309,7 @@ The replications hsqldb database will be started internally.
 In standalone mode, database connections are defined inside the _persistence.xml_. Define multiple _persistence_untit_s if you need access to multiple databases. Of course, they need their mapping entity beans. So define the beans jar file in the persistence.xml and store it in the environments directory.
 
 Working inside an application server, the server will provide a database pool. connections are defined for example in jboss in a deployed xml file (or the jboss configuration file like standalone.xml) having datasource entries.
+
 ## Using an Applicationserver
 
 If you don't want to have a standalone appliation, you are able to use an application server like jboss. To do this you must have:
@@ -2357,6 +2385,8 @@ Net:Connection-->Link-->Cover(content, descriptor)
 * (x) SecurityManager ausschalten und eigene policy in jar ausliefern
 * signing: probleme beim start von ant script reverseeng.xml: LogFactory
 * property jnlpx.origFilenameArg (how to get the root jar from jnlp)
+* *admin-anyway.sql* verlagern, damit es bei jnlp nicht angezogen wird
+* jnlp: funktioniert erst beim zweiten Start <-- jars abwarten
 
 war:
 * WEB-INF/web..xml rausschmeissen
