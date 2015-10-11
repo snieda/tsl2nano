@@ -365,7 +365,7 @@ public class AppLoader {
 
     public static final boolean isUnix() {
         //we distinguish only between windows or not --> unix
-        return !System.getProperty("os.name").equalsIgnoreCase("windows");
+        return !System.getProperty("os.name").toLowerCase().contains("windows");
     }
 
     public static final boolean isUnixFS() {
