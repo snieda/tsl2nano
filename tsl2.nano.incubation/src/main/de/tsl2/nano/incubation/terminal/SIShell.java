@@ -151,7 +151,7 @@ public class SIShell implements IItemHandler, Serializable {
     boolean sequential = false;
 
     @Element(required = false)
-    String clearScreenCmd = AppLoader.isUnixFS() ? "clear" : "cls";
+    String clearScreenCmd = AppLoader.isUnix() ? "clear" : "cls";
 
     /** command identifier */
     static final String KEY_COMMAND = ":";

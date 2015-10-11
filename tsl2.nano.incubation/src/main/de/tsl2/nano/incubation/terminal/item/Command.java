@@ -1,13 +1,10 @@
 package de.tsl2.nano.incubation.terminal.item;
 
 import java.util.ArrayList;
-import java.util.List;
 import java.util.Properties;
 
 import org.simpleframework.xml.Element;
 
-import de.tsl2.nano.core.ManagedException;
-import de.tsl2.nano.core.cls.BeanClass;
 import de.tsl2.nano.core.execution.IRunnable;
 import de.tsl2.nano.core.util.Util;
 import de.tsl2.nano.execution.SystemUtil;
