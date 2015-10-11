@@ -110,7 +110,7 @@ public class AppLoader {
         if (args.length == 0) {
             System.out.println(
                 "AppLoader needs at least one parameter!\n  " +
-                    "syntax: AppLoader [environment-dir(default:config)] <mainclass> [method-if-not-main] [args...]" +
+                    "syntax: AppLoader [environment-dir(default:'.' + main-class + '.environment')] <mainclass> [method-if-not-main] [args...]" +
                     "Tip: it is possible to add 'Main-Arguments' to the META-INF/MANIFEST file.");
             return;
         } else if (args.length == 1) {
@@ -146,7 +146,7 @@ public class AppLoader {
      * starts application loading. will be called by the static main method to work inside an extended class instance.
      * 
      * @param mainclass main-class to start it's main method with new classloader. must not be null!
-     * @param environment (optional, default: config) environment name or path
+     * @param environment (optional, default: see #getDefaultEnvPath()) environment name or path
      * @param args main args (must not be null!)
      */
     public void start(String mainclass, String mainmethod, String environment, String[] args) {
@@ -164,7 +164,7 @@ public class AppLoader {
                     System.arraycopy(args, 1, nargs, 0, nargs.length);
                     args = nargs;
                 } else {
-                    environment = getFileSystemPrefix() + "config";
+                    environment = getFileSystemPrefix() + getDefaultEnvPath(mainclass);
                 }
             }
             environment = FileUtil.getURIFile(environment).getPath();
@@ -239,6 +239,15 @@ public class AppLoader {
             ex.printStackTrace();
             LOG.error(ex);
         }
+    }
+
+    /**
+     * getDefaultEnvPath
+     * @param mainclass
+     * @return '.' + main-class-name + '.environment'
+     */
+    private String getDefaultEnvPath(String mainclass) {
+        return "." + StringUtil.substring(mainclass, ".", null, true).toLowerCase() + ".environment";
     }
 
     /**
@@ -341,8 +350,8 @@ public class AppLoader {
         if (System.getProperty("env.user.home") != null && !isDalvik())
             return System.getProperty("user.home") + "/";
         //on dalvik systems, the  MainActivity.onCreate() should set the system property
-        return isDalvik() ? System.getProperty("android.sdcard.path", "/mnt/sdcard/") : isUnixFS()
-            && new File("/opt").canWrite() ? "/opt/" : "";
+        return isDalvik() ? System.getProperty("android.sdcard.path", "/mnt/sdcard/") : isUnix() ?
+            /*&& new File("/opt").canWrite() ? "/opt/"*/ /*System.getProperty("user.home") + "/"*/ "" : "";
     }
 
     /**
@@ -352,6 +361,11 @@ public class AppLoader {
      */
     public static final boolean isDalvik() {
         return System.getProperty("java.vm.specification.name").startsWith("Dalvik");
+    }
+
+    public static final boolean isUnix() {
+        //we distinguish only between windows or not --> unix
+        return !System.getProperty("os.name").equalsIgnoreCase("windows");
     }
 
     public static final boolean isUnixFS() {

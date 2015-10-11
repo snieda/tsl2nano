@@ -59,7 +59,7 @@ public class UnboundAccessor<T> {
     Map<String, Method> methodCache;
     /** enables {@link #memberCache} cache. */
     boolean useMemberCache;
-    static Object NULL = new Object();
+    static Object NULL = new Object() { public String toString() {return "<empty>";};};
 
     /**
      * {@link #useMemberCache} will be false.
@@ -184,7 +184,7 @@ public class UnboundAccessor<T> {
             f.setAccessible(true);
             if (useMemberCache) {
                 M value = (M) f.get(accessibleInstance());
-                memberCache.put(name, value != null ? value : NULL);
+                memberCache.put(name, (value != null ? value : NULL));
                 return value;
             } else {
                 return (M) f.get(accessibleInstance());

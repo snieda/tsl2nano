@@ -15,9 +15,10 @@ if [ "$3"== "debug" ] then `set DEBUG="-agentlib:jdwp=transport=dt_socket,addres
 if [ "$3"== "debug" ] then `set NANO_DEBUG=-Dtsl2.nano.log.level=debug` fi
 if [ "$3"== "test" ] then `set NANO_TEST=-Dtsl2.nano.test=true` fi
 if [ "$3"== "nopause" ] then `set NOPAUSE=nopause` fi
+#set UH=-Denv.user.home=true
 #set USERDIR=-Duser.dir=$PRJ
 #@start javaw
-java  $USERDIR $NANO_DEBUG  -Xmx512m -Djava.awt.headless=true $DEBUG -jar tsl2.nano.h5.0.7.0.jar $PRJ $PORT 
+java  $USERDIR $NANO_DEBUG  -Xmx512m -Djava.awt.headless=true $DEBUG $UH -jar tsl2.nano.h5.0.7.0.jar $PRJ $PORT 
 #-agentpath:...visualvm_138/profiler/lib/deployed/jdk16/windows/profilerinterface.dll=...\visualvm_138\profiler\lib,5140
 #>$PRJ.log
 if [ not "$NOPAUSE" == "nopause" ] then pause fi

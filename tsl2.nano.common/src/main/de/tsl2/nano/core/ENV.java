@@ -113,7 +113,7 @@ public class ENV implements Serializable {
     public static final String FRAMEWORK = Util.FRAMEWORK_PACKAGE;
     public static final String PREFIX = ENV.class.getPackage().getName() + ".";
 
-    public static final String KEY_SYS_BASEDIR = PREFIX + ".basedir";
+    public static final String KEY_SYS_BASEDIR = PREFIX + "basedir";
     public static final String KEY_DEFAULT_FORMAT = PREFIX + "defaultformat";
     public static final String KEY_CONFIG_RELPATH = PREFIX + "config.relative.path";
     public static final String KEY_CONFIG_PATH = PREFIX + "config.path";

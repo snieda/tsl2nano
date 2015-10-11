@@ -630,7 +630,7 @@ compiler basedir: ${basedir}. classpath: @{sh.compile.classpath};@{sh.compile.cl
 
 	<!-- windows specific call to cmd.exe -->
 	<target name="sh.exec.cmd" unless="sh.disable.exec.cmd">
-		<condition property="start.cmd" value="cmd.exe" else="bash">
+		<condition property="start.cmd" value="cmd.exe" else="sh">
 			<contains string="${os.name}" substring="windows" casesensitive="false"/>
 		</condition>
 		<condition property="slash.c" value="/C" else="">

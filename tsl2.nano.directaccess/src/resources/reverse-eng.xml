@@ -57,9 +57,9 @@
 			<!-- to find resources like META-INF -->
 			<path path="${bin.dir}" />
 			<path refid="compiler.classpath" />
-			<fileset dir="${plugin.dir}">
+			<!-- <fileset dir="${plugin.dir}">
 				<include name="**/*.jar" />
-			</fileset>
+			</fileset> -->
 			<fileset dir="${basedir}">
 				<include name="**/*.jar" />
 			</fileset>

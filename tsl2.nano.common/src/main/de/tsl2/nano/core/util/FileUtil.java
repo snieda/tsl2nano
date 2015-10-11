@@ -484,8 +484,11 @@ public class FileUtil {
      */
     public static void saveProperties(String resourceFile, Properties p) {
         try {
-            p.store(new FileOutputStream(new File(resourceFile)), "generated at " + DateFormat.getDateTimeInstance()
-                .format(new Date()) + " from code " + ConcurrentUtil.getCaller() + " by user " + System.getProperty("user.name"));
+            p.store(
+                new FileOutputStream(new File(resourceFile)),
+                "generated at " + DateFormat.getDateTimeInstance()
+                    .format(new Date()) + " from code " + ConcurrentUtil.getCaller() + " by user "
+                    + System.getProperty("user.name"));
         } catch (Exception e) {
             ManagedException.forward(e);
         }
@@ -493,13 +496,14 @@ public class FileUtil {
 
     /**
      * hasResource
+     * 
      * @param name resource name
      * @return true, if resource was found by the current threads classloader
      */
     public static final boolean hasResource(String name) {
         return Thread.currentThread().getContextClassLoader().getResource(name) != null;
     }
-    
+
     /**
      * Gets resources for WebStart or Applets
      */
@@ -1177,7 +1181,8 @@ public class FileUtil {
     public static String getRelativePath(String file, String currentPath) {
         String relpath =
             StringUtil.substring(replaceWindowsSeparator(file), replaceWindowsSeparator(currentPath), null);
-        return File.separatorChar == '\\' && relpath.startsWith("/") ? relpath.substring(1) : relpath;
+        return relpath.startsWith("/") && (File.separatorChar == '\\' || !new File(relpath).exists()) ? relpath
+            .substring(1) : relpath;
     }
 
     public static final String replaceWindowsSeparator(String path) {

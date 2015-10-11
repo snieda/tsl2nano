@@ -423,7 +423,9 @@ public class Persistence implements Serializable {
         put(prop, "transaction-type", "RESOURCE_LOCAL");
         put(prop, "provider", getProvider());
 
-        put(prop, "jar-file", "file:./" + jarFileInEnvironment());
+        String jarFile = jarFileInEnvironment();
+        //respect absolute pathes (on linux starting with '/' on windows with 'c:'
+        put(prop, "jar-file", "file:" + /*((jarFile.startsWith("/") || jarFile.charAt(1) == ':')*/(new File(jarFile).isAbsolute() ? "//" + jarFile : "./" + jarFile));
         put(prop, "jta-data-source", getJtaDataSource());
         put(prop, "hibernate.dialect", getHibernateDialect());
         put(prop, "connection.driver_class", getConnectionDriverClass());

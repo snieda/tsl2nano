@@ -67,19 +67,25 @@ commit;
 	</target>
 	
 	<target name="do.all" description="creates database from ddl and entity beans from jdbc-connection">
-	
+
+		<!-- on windows we start the hsqldb in a new shell - as background process -->
 		<condition property="start" value="start" else="">
 			<!-- <equals casesensitive="false" arg1="${env.os.name}" arg2="windows" /> -->
 			<contains string="${os.name}" substring="windows" casesensitive="false"/>
 		</condition>
+		<!-- on linux we need to start hsqldb in a background process -->
 		<condition property="background" value="" else="&amp;">
 			<contains string="${os.name}" substring="windows" casesensitive="false"/>
 		</condition>
-		<condition property="cmdargs" value="%*" else="$*">
+		<condition property="cmdargs" value="%*" else="$* ${background}">
+			<contains string="${os.name}" substring="windows" casesensitive="false"/>
+		</condition>
+		<!-- on windows we can't constrain with a real filter -->
+		<condition property="cp" value="*" else="hsqldb*.jar">
 			<contains string="${os.name}" substring="windows" casesensitive="false"/>
 		</condition>
 		<echo file="runServer.bat">
-java -cp * org.hsqldb.Server -database ${jdbc.database} -port ${jdbc.port} -silent false -trace true ${cmdargs}
+java -cp ${cp} org.hsqldb.Server -database ${jdbc.database} -port ${jdbc.port} -silent false -trace true ${cmdargs}
 		</echo>
 		<chmod perm="+x" file="runServer.bat" />
 	<!-- start the database with name ${basedir} -->
