@@ -136,7 +136,7 @@ public class JarResolver {
 
     private void loadDependencies() {
         System.setProperty("M2_HOME", mvnRoot);
-        String script = AppLoader.isUnixFS() ? "/bin/mvn" : "/bin/mvn.bat";
+        String script = AppLoader.isUnix() ? "/bin/mvn" : "/bin/mvn.bat";
         new File(mvnRoot + script).setExecutable(true);
         Process process = SystemUtil.execute(new File(basedir), mvnRoot + script, "install");
         if (process.exitValue() != 0) {
