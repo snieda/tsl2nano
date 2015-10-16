@@ -207,11 +207,12 @@ public class CompatibilityLayer {
      */
     public boolean isAvailable(String className) {
         try {
-            Thread.currentThread().getContextClassLoader().loadClass(className);
-            return true;
-        } catch (ClassNotFoundException e) {
-            return false;
+            if (Thread.currentThread().getContextClassLoader().loadClass(className) != null)
+                return true;
+        } catch (Throwable e) {
+            //ClassNotFoundException and the LinkageError NoClassDefFoundError must be catched!
         }
+        return false;
     }
 }
 

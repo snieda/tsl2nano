@@ -71,6 +71,7 @@ public class MapUtil {
     public static Map asProperties(Object... keysAndValues) {
         return asMap(new Properties(), keysAndValues);
     }
+
     /**
      * collects the given objects to keys and their values (defined by object order) and puts it into a new map.
      * 
@@ -80,6 +81,7 @@ public class MapUtil {
     public static Map asMap(Object... keysAndValues) {
         return asMap(new LinkedHashMap<Object, Object>(), keysAndValues);
     }
+
     public static <M extends Map> M asMap(M instance, Object... keysAndValues) {
         if (keysAndValues == null || keysAndValues.length % 2 == 1) {
             throw ManagedException.implementationError(
@@ -275,5 +277,29 @@ public class MapUtil {
                 result.add(map.get(k));
         }
         return result;
+    }
+
+    /**
+     * delegates to {@link #copy(Map, int, int, Map)} creating a new destination map
+     */
+    public static <K, V> Map<K, V> copy(Map<K, V> src, int start, int end) {
+        return copy(src, start, end, new HashMap<K, V>());
+    }
+    /**
+     * copies the given block of elements from src to dest. be careful: the order of your src map may not be defined!
+     * 
+     * @param src source map
+     * @param start first item to be copied
+     * @param end last item to be copied
+     * @param dest destination map
+     * @return destination map
+     */
+    public static <K, V> Map<K, V> copy(Map<K, V> src, int start, int end, Map<K, V> dest) {
+        int i = 0;
+        for (Object k : src.keySet()) {
+            if (i >= start && i < end)
+                dest.put((K) k, src.get(k));
+        }
+        return dest;
     }
 }

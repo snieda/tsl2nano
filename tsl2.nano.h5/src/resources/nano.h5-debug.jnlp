@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <jnlp spec="1.0+" codebase=
 "./" 
-    href="nano.h5.jnlp">
+    href="nano.h5-debug.jnlp">
     <information>
         <title>Nano H5</title>
         <vendor>TSL2</vendor>
@@ -23,8 +23,8 @@
          name="Nano H5"
          main-class=
            "de.tsl2.nano.h5.Loader"
-         width="300"
-         height="600">
+         width="600"
+         height="900">
      </application-desc>
      <update check="background"/>
 </jnlp>

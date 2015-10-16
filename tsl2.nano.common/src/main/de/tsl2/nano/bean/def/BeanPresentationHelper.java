@@ -68,6 +68,7 @@ import de.tsl2.nano.core.exception.Message;
 import de.tsl2.nano.core.log.LogFactory;
 import de.tsl2.nano.core.util.ByteUtil;
 import de.tsl2.nano.core.util.FileUtil;
+import de.tsl2.nano.core.util.NumberUtil;
 import de.tsl2.nano.core.util.StringUtil;
 import de.tsl2.nano.core.util.Util;
 import de.tsl2.nano.format.DefaultFormat;
@@ -75,7 +76,6 @@ import de.tsl2.nano.format.GenericParser;
 import de.tsl2.nano.format.RegExpFormat;
 import de.tsl2.nano.messaging.ChangeEvent;
 import de.tsl2.nano.messaging.IListener;
-import de.tsl2.nano.util.NumberUtil;
 
 /**
  * class to provide presentation definitions/algorithms for sets of attributes. this class holds only its parent

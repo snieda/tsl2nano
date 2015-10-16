@@ -20,8 +20,10 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.LinkedHashSet;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import java.util.Properties;
+import java.util.ResourceBundle;
 import java.util.Stack;
 
 import javax.persistence.EntityManager;
@@ -43,6 +45,8 @@ import de.tsl2.nano.collection.MapUtil;
 import de.tsl2.nano.core.AppLoader;
 import de.tsl2.nano.core.ENV;
 import de.tsl2.nano.core.ManagedException;
+import de.tsl2.nano.core.Messages;
+import de.tsl2.nano.core.classloader.NetworkClassLoader;
 import de.tsl2.nano.core.cls.BeanClass;
 import de.tsl2.nano.core.exception.Message;
 import de.tsl2.nano.core.execution.CompatibilityLayer;
@@ -50,6 +54,7 @@ import de.tsl2.nano.core.log.LogFactory;
 import de.tsl2.nano.core.util.ConcurrentUtil;
 import de.tsl2.nano.core.util.FileUtil;
 import de.tsl2.nano.core.util.NetUtil;
+import de.tsl2.nano.core.util.NumberUtil;
 import de.tsl2.nano.core.util.StringUtil;
 import de.tsl2.nano.core.util.Util;
 import de.tsl2.nano.execution.SystemUtil;
@@ -66,7 +71,7 @@ import de.tsl2.nano.service.util.BeanContainerUtil;
 import de.tsl2.nano.serviceaccess.Authorization;
 import de.tsl2.nano.serviceaccess.IAuthorization;
 import de.tsl2.nano.serviceaccess.ServiceFactory;
-import de.tsl2.nano.util.NumberUtil;
+import de.tsl2.nano.util.Translator;
 
 /**
  * An Application of subclassing NanoHTTPD to make a custom HTTP server.
@@ -95,7 +100,7 @@ public class NanoH5 extends NanoHTTPD implements ISystemConnector<Persistence> {
     public static final String JAR_SIMPLEXML = "tsl2.nano.simple-xml.jar";
 
     public static final String ZIP_STANDALONE = "standalone.zip";
-    
+
     /** ant script to start the hibernatetool 'hbm2java' */
     static final String REVERSE_ENG_SCRIPT = "reverse-eng.xml";
     /** hibernate reverse engeneer configuration */
@@ -109,7 +114,7 @@ public class NanoH5 extends NanoHTTPD implements ISystemConnector<Persistence> {
     static final String LIBS_STANDALONE = "standalone/";
 
     Map<InetAddress, NanoH5Session> sessions;
-
+    long requests = 0;
     IPageBuilder<?, String> builder;
     URL serviceURL;
     ClassLoader appstartClassloader;
@@ -330,6 +335,7 @@ public class NanoH5 extends NanoHTTPD implements ISystemConnector<Persistence> {
                 }
             }
         }
+        requests++;
         session.startTime = startTime;
 //        //workaround to avoid doing a cached request twice
 //        lastHeader = header;
@@ -406,6 +412,15 @@ public class NanoH5 extends NanoHTTPD implements ISystemConnector<Persistence> {
 
         Bean login = Bean.getBean(conn.createConnectionInfo());
 
+        //on webstart, the incubation jar (Workflow-->Parameter-->ComparableMap) is not present
+        if (!ENV.get(CompatibilityLayer.class).isAvailable("de.tsl2.nano.incubation.vnet.workflow.ComparableMap")) {
+            ENV.extractResource(JAR_INCUBATION);
+            //ENV holds an old class reference, so we use the threads context classloader
+//            ((NetworkClassLoader)Thread.currentThread().getContextClassLoader()).addFile(ENV.getConfigPath() + System.getProperty(JAR_INCUBATION));
+            //wait until the classloader found the new jar file
+            ConcurrentUtil.sleep(2000);
+        }
+        
         Workflow workflow = ENV.get(Workflow.class);
 
         if (workflow == null || workflow.isEmpty()) {
@@ -522,6 +537,15 @@ public class NanoH5 extends NanoHTTPD implements ISystemConnector<Persistence> {
          */
         types.addAll(BeanDefinition.loadVirtualDefinitions());
 
+        /*
+         * perhaps, do auto-translation if no resourcebundle present for current locale
+         */
+        if (NetUtil.isOnline() && !Messages.exists("messages")) {
+            Message.send("doing machine translation for locale " + Locale.getDefault());
+            Translator.translateBundle(ENV.getConfigPath() + "messages", Messages.keySet(), Locale.ENGLISH,
+                Locale.getDefault());
+        }
+
         BeanCollector root = new BeanCollector(BeanCollector.class, types, MODE_EDITABLE | MODE_SEARCHABLE, null);
         root.setName(StringUtil.toFirstUpper(StringUtil
             .substring(Persistence.current().getJarFile().replace("\\", "/"), "/", ".jar", true)));
@@ -610,7 +634,8 @@ public class NanoH5 extends NanoHTTPD implements ISystemConnector<Persistence> {
             ENV.loadClassDependencies("org.apache.tools.ant.taskdefs.Taskdef",
                 generatorTask, persistence.getConnectionDriverClass(), persistence.getProvider());
 
-            if (isNewLocalDatabase(persistence) || persistence.autoDllIsCreateDrop()) {
+            if ((isLocalDatabase(persistence) && !canConnectToLocalDatabase(persistence))
+                || persistence.autoDllIsCreateDrop()) {
                 generateDatabase(persistence);
             }
             Boolean generationComplete =
@@ -632,6 +657,14 @@ public class NanoH5 extends NanoHTTPD implements ISystemConnector<Persistence> {
             }
 //            if (!new File(envFile).exists())
             FileUtil.copy(selectedFile.getPath(), persistence.jarFileInEnvironment());
+        }
+
+        //may be on second start after having already generated the jar file
+        if (isLocalDatabase(persistence) && !canConnectToLocalDatabase(persistence)) {
+            String[] cmd =
+                AppLoader.isUnix() ? new String[] { "sh", "runServer.bat" } : new String[] { "cmd", "/C", "start",
+                    "runServer.bat" };
+            SystemUtil.execute(new File(ENV.getConfigPathRel()), cmd);
         }
 
         boolean useJPAPersistenceProvider = true;
@@ -695,15 +728,20 @@ public class NanoH5 extends NanoHTTPD implements ISystemConnector<Persistence> {
 
     }
 
-    private boolean isNewLocalDatabase(Persistence persistence) {
+    private boolean isLocalDatabase(Persistence persistence) {
         if (!Util.isEmpty(persistence.getPort())) {
-            int p = Integer.valueOf(persistence.getPort());
-            //TODO: eval if url on localhost
             String url = persistence.getConnectionUrl();
             return Arrays.asList(persistence.STD_LOCAL_DATABASE_DRIVERS).contains(
                 persistence.getConnectionDriverClass())
-                && (url.contains("localhost") || url.contains("127.0.0.1"))
-                && !NetUtil.isOpen(NetUtil.getInetAddress(), p);
+                && (url.contains("localhost") || url.contains("127.0.0.1"));
+        }
+        return false;
+    }
+
+    private boolean canConnectToLocalDatabase(Persistence persistence) {
+        if (!Util.isEmpty(persistence.getPort())) {
+            int p = Integer.valueOf(persistence.getPort());
+            return NetUtil.isOpen(NetUtil.getInetAddress(), p);
         }
         return false;
     }
@@ -765,6 +803,11 @@ public class NanoH5 extends NanoHTTPD implements ISystemConnector<Persistence> {
         builder = ENV.get(IPageBuilder.class);
     }
 
+    @Override
+    public String toString() {
+        return Util.toString(NanoH5.class, "serviceURL: " + serviceURL,
+            "sessions: " + (sessions != null ? sessions.size() : 0), "requests: " + requests);
+    }
 //    /**
 //     * createTestNavigationModel
 //     * 

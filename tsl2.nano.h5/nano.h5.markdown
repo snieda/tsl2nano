@@ -183,7 +183,7 @@ A summary of lightweight ORM tools can be read here: ftp://ftp.informatik.uni-st
 
 The architecture is defined by the application framework [tsl2.nano.common](../tsl2.nano.common/nano.common.html). The data and service layer is defined by [tsl2.nano.serviceaccess](../tsl2.nano.sericeaccess/nano.serviceaccess.html).
 
-[[img src=nano-h5-overview.png]]
+<img src="https://sourceforge.net/p/tsl2nano/code/ci/master/tree/tsl2.nano.h5/doc/nano-h5-overview.png"/>
 
 #### Model Driven Architecture (MDA))
 
@@ -338,7 +338,7 @@ Before you start _nano.h5_, you should start the sample hsqldb database:
 
 config/runServer.bat
 
-[[img src=h5.sample.database.jpg]]
+<img src="https://sourceforge.net/p/tsl2nano/code/ci/master/tree/tsl2.nano.h5/doc/h5.sample.database.jpg"/>
 
 To start nano.h5 you have to call it with following syntax:
 
@@ -348,21 +348,21 @@ This call is implemented inside the _run.bat_ script. Use that, if you are on wi
 
 If you start it on _Windows_, a browser will be opened to show the initial screen:
 
-[[img src=h5.sample.start.jpg]]
+<img src="https://sourceforge.net/p/tsl2nano/code/ci/master/tree/tsl2.nano.h5/doc/h5.sample.start.jpg"/>
 
 If you are not on _Windows_, you should open an html-browser with file _application.html_.
 
 Now you can login to the sample database. It is fully configurable, which o/r mapper and database should be used. After pressing Ok, a _persistence.xml_ will be generated to be found by the _javax.persistence_ implementation.
 
-[[img src=h5.sample.persistence.jpg]]
+<img src="https://sourceforge.net/p/tsl2nano/code/ci/master/tree/tsl2.nano.h5/doc/h5.sample.persistence.jpg"/>
 
 All entities of the jar-file, containing the entities, will be listed. You can filter the list and select one or more to edit them.
 
-[[img src=h5.sample.entity-types.jpg]]
+<img src="https://sourceforge.net/p/tsl2nano/code/ci/master/tree/tsl2.nano.h5/doc/h5.sample.entity-types.jpg"/>
 
 Then you will get a search page with a search filter and an empty list. Pushing the search-button will create the result list.
 
-[[img src=h5.sample.entity-search.jpg]]
+<img src="https://sourceforge.net/p/tsl2nano/code/ci/master/tree/tsl2.nano.h5/doc/h5.sample.entity-search.jpg"/>
 
 If you click a column header (here f.e. _comments_), the list will be sorted by this column - clicking on that column a second time, the sorting will be done in the other direction. 
 
@@ -383,9 +383,9 @@ Everything of your application will be accessible through this environment. It p
 
 A description of all configuration attributes can be found [here](src/resources/environment.default.xml)
 
-### Language and Translations
+### Internationalization: Languages and automatic Translations
 
-The _messages.properties_ is the language file to translate every application specific text. You can overwrite it through putting your own file into the environment-directory. All bean or bean-attribute-names will be translated - if no presentation xml file are present. To define a german translation, you would create the file _messages_de.properties_ to the environment-dirctory.
+The _messages.properties_ is the language file to translate every application specific text. You can overwrite it through putting your own file into the environment-directory. All bean or bean-attribute-names will be translated - if no presentation xml file are present. To define for example a german translation, you would create the file _messages_de.properties_ to the environment-dirctory.
 All framework specific and generic texts will be translated through the internal _de.tsl2.nano.messages.properties_.
 
 The environments file _messages.properties_ generated on new beans provides default entries for all available fields and actions. Change it to define other translations (will be done since you change the bean-definition names in the xml files directly. It is possible to add html tags like:
@@ -393,6 +393,12 @@ The environments file _messages.properties_ generated on new beans provides defa
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 myfieldid=<a href=another-url.html>my-translation</a>
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+Tip: to have a good internationalization result on generating a new environment, put your _messages.properties_ file into a new self created environment directory. This _messages.properties_ may hold some glossaries or a full specific translation.
+
+The framework provides automatic translation through a network connection. So, if no _messages_[locale].properties_ was found in the environment directory, the framework will try to create a translation for the _messages.properties_ from english to the current locale of the java vm - only, if _tsl2nano.offline_ is not true. This machine translation is only a first try - you should inspect this file on your own. 
+
+To create different translations you can start the virtual machine with different locales. You do that f.e. with vm-arg _set LANG=-Duser.country=FR -Duser.language=fr_.
 
 ## Application and Page Actions
 
@@ -443,6 +449,8 @@ The _JarResolver_ is able to resolve dependencies on runtime through a network c
 * transforms known class names (with package) to known jar-dependencies
 * creates dynamically a pom.xml holding all dependencies
 * loads all given dependencies through maven to the current path
+
+You can switch off using jar-resolving throuth the NetworkClassloader by setting the java-argument *tsl2nano.offline=true*. Or you set the ENV property *classloader.usenetwork.loader = false*.
 
 #### Framework dependencies
 
@@ -810,7 +818,7 @@ This is the most important attribute property. Normally it is a standard bean-at
 
 All available attribute instances:
 
-[[img src=nano.h5.attributes.png]]
+<img src="https://sourceforge.net/p/tsl2nano/code/ci/master/tree/tsl2.nano.h5/doc/nano.h5.attributes.png"/>
 
 
 Example for an attribute through a relation path:
@@ -1455,6 +1463,8 @@ BeanDefinition b = BeanDefinition.getBeanDefinition(org.anonymous.project.Person
 });
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
+### Monitoring and refreshing a value through REST services and a Timer
+
 If you use the _WebSocketServiceListener_ you can define the following properties:
 * restfulUrl: url to a RESTful service
 * parameter: name of the first methods parameter - assigned to the bean attributes value
@@ -2062,6 +2072,7 @@ Actual list: http://infocenter.pentaho.com/help/index.jsp?topic=%2Fsupported_com
  0.7.0e | 27.03.2015 | attachments extended
  0.7.0f | 10.05.2015 | new: RESTful service access, mouseclick access on dependency listeners
  0.7.0g | 17.05.2015 | new: Secure Attributes: hashes or encrypts attribute values on runtime
+ 0.7.0h | 17.10.2015 | webstart/jnlp, war, automatic translation
  
 [GLOSSARY]
 

@@ -22,7 +22,7 @@ import java.io.Serializable;
 import java.math.BigDecimal;
 import java.math.MathContext;
 import java.net.InetAddress;
-import java.net.InetSocketAddress;
+import java.net.URI;
 import java.security.Policy;
 import java.text.DateFormat;
 import java.text.DecimalFormat;
@@ -44,10 +44,10 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Properties;
+import java.util.ResourceBundle;
 
 import org.apache.commons.logging.Log;
 import org.apache.tools.ant.types.FileSet;
-import org.apache.tools.ant.types.selectors.FilenameSelector;
 import org.apache.xmlgraphics.util.MimeConstants;
 import org.junit.BeforeClass;
 import org.junit.Test;
@@ -84,6 +84,7 @@ import de.tsl2.nano.core.util.Crypt;
 import de.tsl2.nano.core.util.DateUtil;
 import de.tsl2.nano.core.util.FileUtil;
 import de.tsl2.nano.core.util.NetUtil;
+import de.tsl2.nano.core.util.NumberUtil;
 import de.tsl2.nano.core.util.PrintUtil;
 import de.tsl2.nano.core.util.StringUtil;
 import de.tsl2.nano.core.util.Util;
@@ -95,8 +96,8 @@ import de.tsl2.nano.format.DefaultFormat;
 import de.tsl2.nano.format.RegExpFormat;
 import de.tsl2.nano.messaging.ChangeEvent;
 import de.tsl2.nano.messaging.IListener;
-import de.tsl2.nano.util.NumberUtil;
 import de.tsl2.nano.util.Period;
+import de.tsl2.nano.util.Translator;
 import de.tsl2.nano.util.operation.CRange;
 import de.tsl2.nano.util.operation.ConditionOperator;
 import de.tsl2.nano.util.operation.IConvertableUnit;
@@ -173,7 +174,8 @@ public class CommonTest {
         }
 
         //works only on windows
-        ScriptUtil.execute("cmd", "/C", "echo", "hello");
+        assertTrue(ScriptUtil.execute("cmd", "/C", "echo", "hello").exitValue() == 0);
+        assertTrue(ScriptUtil.execute("cmd", "/C", "runsh.bat").exitValue() == 0);
         //works only on windows
 //        ScriptUtil.execute("c:/Program Files (x86)/Adobe/Reader 10.0/Reader/AcroRd32.exe", "c:/eigen/SVN-Eclipse-Einrichtung.pdf");
 //        ScriptUtil.executeRegisteredWindowsPrg("c:/eigen/SVN-Eclipse-Einrichtung.pdf");
@@ -1230,12 +1232,12 @@ public class CommonTest {
         values.put("C", false);
         values.put("E", "E");
         assertEquals("E", new ConditionOperator(values).eval(f));
-        
+
         f = " A = B";
         values.put("B", true);
-        assertTrue((Boolean)new ConditionOperator(values).eval(f));
+        assertTrue((Boolean) new ConditionOperator(values).eval(f));
         values.put("B", false);
-        assertFalse((Boolean)new ConditionOperator(values).eval(f));
+        assertFalse((Boolean) new ConditionOperator(values).eval(f));
     }
 
     @Test
@@ -1326,7 +1328,7 @@ public class CommonTest {
 //                return getExternalJarInputStream(jarName);
 //            }
         };
-        
+
         // filter the 'standalones'
         assertTrue(cl.getNestedJars().length == 16);
     }
@@ -1405,7 +1407,7 @@ public class CommonTest {
     @Test
     public void testNetUtilProxies() throws Exception {
 //        LOG.info("gateway is:" + NetUtil.gateway());
-        
+
         LOG.info(NetUtil.proxy("http://mvnrepository.com"));
         LOG.info(NetUtil.proxy("http://mvnrepository.com", "proxy.myorg.de:8080"));
 
@@ -1418,7 +1420,7 @@ public class CommonTest {
         LOG.info(NetUtil.proxy("socket://mvnrepository.com"));
         LOG.info(NetUtil.proxy("socket://mvnrepository.com", "proxy.myorg.de:8080"));
     }
-    
+
     @Test
     public void testNetUtilScan() throws Exception {
         //check for exception only
@@ -1469,14 +1471,14 @@ public class CommonTest {
         System.out.println("mime types:");
         System.out.println(keyValues);
     }
-    
+
     @Test
     public void testSecurity() {
         BeanClass.call(AppLoader.class, "noSecurity", false);
         System.out.println(System.getSecurityManager());
         System.out.println(Policy.getPolicy());
     }
-    
+
     @Test
     public void testAntRunner() {
         String destFile = "test/test.jar";
@@ -1488,4 +1490,51 @@ public class CommonTest {
         assertTrue(new File(destFile).exists());
         new File(destFile).delete();
     }
+
+    @Test
+    public void testTranslateNames() {
+        Properties res = createTestTranslationProperties();
+        String name;
+        final String TRANSLATED = "Meine Methode";
+        assertEquals(TRANSLATED, getTranslated(res, name = "MM"));
+        assertEquals(TRANSLATED, getTranslated(res, name = "myMethod"));
+    }
+
+    private Properties createTestTranslationProperties() {
+        Properties props = new Properties();
+        props.put("MM", "Meine Methode");
+        props.put("my", "Meine");
+        props.put("method", "Methode");
+        return props;
+    }
+
+    private String getTranslated(Properties res, String name) {
+        String[] words = StringUtil.splitCamelCase(name);
+        StringBuilder str = new StringBuilder(name.length() * 2);
+        String value;
+        for (int i = 0; i < words.length; i++) {
+            value = res.getProperty(words[i]);
+            if (value == null)
+                value = res.getProperty(StringUtil.toFirstLower(words[i]));
+            str.append(value + " ");
+        }
+        return str.toString().trim();
+    }
+
+    @Test
+    public void testResourcebundleTranslation() throws Exception {
+        Properties p = createTestTranslationProperties();
+        Properties t = Translator.translateProperties("test", p, Locale.ENGLISH, Locale.GERMAN);
+        //the words are german - so, no translation can be done --> p = t. it's only an integration test
+        assertEquals(p, t);
+    }
+
+    @Test
+    public void testBlockTranslation() throws Exception {
+        Properties p = createTestTranslationProperties();
+        Properties t = Translator.translateProperties0("test", p, Locale.ENGLISH, Locale.GERMAN);
+        //the words are german - so, no translation can be done --> p = t. it's only an integration test
+        assertEquals(p, t);
+    }
+
 }

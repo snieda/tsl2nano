@@ -55,11 +55,11 @@ import de.tsl2.nano.core.log.LogFactory;
 import de.tsl2.nano.core.util.BitUtil;
 import de.tsl2.nano.core.util.FileUtil;
 import de.tsl2.nano.core.util.NetUtil;
+import de.tsl2.nano.core.util.NumberUtil;
 import de.tsl2.nano.core.util.StringUtil;
 import de.tsl2.nano.core.util.Util;
 import de.tsl2.nano.core.util.XmlUtil;
 import de.tsl2.nano.format.DefaultFormat;
-import de.tsl2.nano.util.NumberUtil;
 
 /**
  * Generic Application-Environment. Providing:

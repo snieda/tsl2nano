@@ -7,7 +7,7 @@
  * 
  * Copyright: (c) Thomas Schneider 2009, all rights reserved
  */
-package de.tsl2.nano.format;
+package de.tsl2.nano.core.util;
 
 import java.math.BigDecimal;
 import java.math.RoundingMode;
@@ -31,9 +31,7 @@ import de.tsl2.nano.core.ManagedException;
 import de.tsl2.nano.core.cls.BeanClass;
 import de.tsl2.nano.core.execution.CompatibilityLayer;
 import de.tsl2.nano.core.log.LogFactory;
-import de.tsl2.nano.core.util.Util;
-import de.tsl2.nano.currency.CurrencyUtil;
-import de.tsl2.nano.util.NumberUtil;
+//import de.tsl2.nano.currency.CurrencyUtil;
 
 /**
  * evaluates a {@link Format} for a given type or instance. used by validators, to check input.
@@ -347,7 +345,7 @@ public class FormatUtil {
      * @param precision fraction digits
      * @return number format or null
      */
-    protected static final Format getDefaultExtendedFormat(Class<?> type,
+    public static final Format getDefaultExtendedFormat(Class<?> type,
             String prefix,
             String postfix,
             int precision,

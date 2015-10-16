@@ -23,6 +23,8 @@ import java.util.Date;
 
 import org.simpleframework.xml.Attribute;
 
+import de.tsl2.nano.core.util.FormatUtil;
+
 /**
  * is able to format the given type to a string and to parse a string into an object of the given type. uses
  * {@link DefaultFormat} to format to a string and {@link FormatUtil} and {@link RegExpFormat} to parse a

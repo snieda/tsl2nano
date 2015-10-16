@@ -9,10 +9,10 @@ import org.apache.commons.logging.Log;
 
 import de.tsl2.nano.bean.BeanContainer;
 import de.tsl2.nano.bean.BeanUtil;
-import de.tsl2.nano.collection.ListSet;
 import de.tsl2.nano.core.ManagedException;
 import de.tsl2.nano.core.cls.BeanAttribute;
 import de.tsl2.nano.core.log.LogFactory;
+import de.tsl2.nano.core.util.ListSet;
 import de.tsl2.nano.core.util.StringUtil;
 
 /**

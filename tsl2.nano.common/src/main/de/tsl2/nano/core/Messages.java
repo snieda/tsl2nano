@@ -2,13 +2,18 @@ package de.tsl2.nano.core;
 
 import java.text.MessageFormat;
 import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.Hashtable;
 import java.util.List;
+import java.util.Locale;
 import java.util.MissingResourceException;
 import java.util.ResourceBundle;
+import java.util.Set;
 
 import org.apache.commons.logging.Log;
 
 import de.tsl2.nano.core.log.LogFactory;
+import de.tsl2.nano.core.util.FileUtil;
 import de.tsl2.nano.core.util.StringUtil;
 import de.tsl2.nano.util.PrivateAccessor;
 
@@ -54,6 +59,26 @@ public class Messages {
     }
 
     /**
+     * evaluates the full file name (without path) of the given resource name for the current default locale.
+     * 
+     * @param name resource name
+     * @return full resource file name.
+     */
+    public static final String getResourceFileName(String name) {
+        return name + "_" + Locale.getDefault().toString() + ".properties";
+    }
+
+    /**
+     * checks, whether the resource {@link #getResourceFileName(String)} exists.
+     * 
+     * @param name resource name
+     * @return true, if {@link #getResourceFileName(String)} could be found in the current threads classpath
+     */
+    public static boolean exists(String name) {
+        return FileUtil.hasResource(getResourceFileName(name));
+    }
+
+    /**
      * Get the translation for the given key from the ResourceBundle pool.
      * 
      * @param key the bundle key
@@ -73,6 +98,7 @@ public class Messages {
 
     /**
      * find
+     * 
      * @param key key to search for
      * @return key-value found in the first registered bundle or null if not found.
      */
@@ -89,20 +115,21 @@ public class Messages {
 
     /**
      * markProblem
+     * 
      * @param key text to be wrapped
      * @return {@link #TOKEN_MSG_NOTFOUND} + key + {@link #TOKEN_MSG_NOTFOUND}
      */
     public static String markProblem(String key) {
         return TOKEN_MSG_NOTFOUND + key + TOKEN_MSG_NOTFOUND;
     }
-    
+
     /**
      * delegates to {@link #getStringOpt(String, boolean)} with format = false.
      */
     public static String getStringOpt(String key) {
         return getStringOpt(key, false);
     }
-    
+
     /**
      * optional translation. tries to get the translation from resoucebundle pool. if not found, the naming part of the
      * key will be returned.
@@ -128,7 +155,7 @@ public class Messages {
                 s = StringUtil.toFirstUpper(s);
             }
         }
-        return s;
+        return StringUtil.concat(" ".toCharArray(), StringUtil.splitCamelCase(s));
     }
 
     /**
@@ -218,16 +245,17 @@ public class Messages {
     public static final boolean isMarkedAsProblem(String text) {
         return unknown(text);
     }
-    
+
     /**
      * hasKey
+     * 
      * @param key key to search
      * @return true, if key was found in one of the registered bundles
      */
     public static boolean hasKey(String key) {
         return find(key) != null;
     }
-    
+
     /**
      * if a resource bundle key was not found (through {@link #getString(String)}, the key, surrounded with
      * {@link #TOKEN_MSG_NOTFOUND} will be returned as result. this result will be evaluated.
@@ -238,14 +266,36 @@ public class Messages {
     public static final boolean unknown(String searchedKeyResult) {
         return searchedKeyResult.startsWith(TOKEN_MSG_NOTFOUND) && searchedKeyResult.endsWith(TOKEN_MSG_NOTFOUND);
     }
-    
+
     /**
      * reloads all cached resouce bundles
      */
     public static final void reload() {
         ResourceBundle.clearCache();
-        for (int i = 0; i< BUNDLE_LIST.size(); i++) {
-            BUNDLE_LIST.set(i, ResourceBundle.getBundle((String) new PrivateAccessor<ResourceBundle>(BUNDLE_LIST.get(i)).member("name")));
+        for (int i = 0; i < BUNDLE_LIST.size(); i++) {
+            BUNDLE_LIST.set(i,
+                ResourceBundle.getBundle((String) new PrivateAccessor<ResourceBundle>(BUNDLE_LIST.get(i))
+                    .member("name")));
         }
+    }
+
+    /**
+     * getBundleRoot
+     * 
+     * @param name resource bundle
+     * @return bundle without locale specification.
+     */
+    public static ResourceBundle getBundleRoot(String name) {
+        return ResourceBundle.getBundle(name, Locale.ROOT);
+    }
+    /**
+     * @return keySet of all registered bundles
+     */
+    public static Set<String> keySet() {
+        HashSet<String> keySet = new HashSet<String>();
+        for (ResourceBundle bundle : BUNDLE_LIST) {
+            keySet.addAll(bundle.keySet());
+        }
+        return keySet;
     }
 }

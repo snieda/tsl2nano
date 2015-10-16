@@ -10,9 +10,9 @@ Class-Path: ./
  ../tsl2.nano.h5.0.7.0.jar 
  tsl2.nano.common.1.1.1.jar 
  simple-xml-2.7.jar 
- de.tsl2.nano.serviceaccess.1.0.2.jar 
- de.tsl2.nano.directaccess.0.0.5.jar 
- de.tsl2.nano.incubation.0.5.1.jar 
+ tsl2.nano.serviceaccess.1.0.2.jar 
+ tsl2.nano.directaccess.0.0.5.jar 
+ tsl2.nano.incubation.0.5.1.jar 
  tsl2.nano.jarresolver.0.0.1.jar 
  tsl2.nano.ebeanprovider.0.0.1.jar 
  tsl2.nano.ormliteprovider.0.0.1.jar 

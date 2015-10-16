@@ -56,11 +56,11 @@ import de.tsl2.nano.core.exception.Message;
 import de.tsl2.nano.core.execution.Profiler;
 import de.tsl2.nano.core.log.LogFactory;
 import de.tsl2.nano.core.util.DateUtil;
+import de.tsl2.nano.core.util.FormatUtil;
+import de.tsl2.nano.core.util.NumberUtil;
 import de.tsl2.nano.core.util.StringUtil;
 import de.tsl2.nano.core.util.Util;
-import de.tsl2.nano.format.FormatUtil;
 import de.tsl2.nano.util.DelegatorProxy;
-import de.tsl2.nano.util.NumberUtil;
 
 /**
  * see {@link IBeanCollector}. the collector inherits from {@link BeanDefinition}.

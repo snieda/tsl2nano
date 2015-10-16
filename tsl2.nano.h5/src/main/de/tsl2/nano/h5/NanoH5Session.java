@@ -48,7 +48,6 @@ import de.tsl2.nano.bean.def.IBeanCollector;
 import de.tsl2.nano.bean.def.IPageBuilder;
 import de.tsl2.nano.bean.def.IPresentable;
 import de.tsl2.nano.collection.CollectionUtil;
-import de.tsl2.nano.collection.ListSet;
 import de.tsl2.nano.core.ENV;
 import de.tsl2.nano.core.ISession;
 import de.tsl2.nano.core.Main;
@@ -58,7 +57,9 @@ import de.tsl2.nano.core.exception.Message;
 import de.tsl2.nano.core.execution.Profiler;
 import de.tsl2.nano.core.log.LogFactory;
 import de.tsl2.nano.core.util.DateUtil;
+import de.tsl2.nano.core.util.ListSet;
 import de.tsl2.nano.core.util.NetUtil;
+import de.tsl2.nano.core.util.NumberUtil;
 import de.tsl2.nano.core.util.StringUtil;
 import de.tsl2.nano.core.util.Util;
 import de.tsl2.nano.format.RegExpFormat;
@@ -71,7 +72,6 @@ import de.tsl2.nano.h5.websocket.WebSocketExceptionHandler;
 import de.tsl2.nano.persistence.Persistence;
 import de.tsl2.nano.service.util.BeanContainerUtil;
 import de.tsl2.nano.serviceaccess.IAuthorization;
-import de.tsl2.nano.util.NumberUtil;
 
 /**
  * user session for nano.h5 server
@@ -252,9 +252,9 @@ public class NanoH5Session implements ISession {
                     if (userResponse instanceof BeanDefinition) {
                         ((BeanDefinition) userResponse).onActivation();
                     }
-                    if (!exceptionHandler.hasExceptions()) {
+//                    if (!exceptionHandler.hasExceptions()) {
                         Message.send(exceptionHandler, createStatusText(startTime));
-                    }
+//                    }
                     msg = getNextPage(userResponse);
                 }
                 response = server.createResponse(msg);

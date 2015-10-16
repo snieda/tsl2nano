@@ -12,9 +12,7 @@ package de.tsl2.nano.core.classloader;
 import java.io.File;
 import java.net.URL;
 import java.net.URLStreamHandlerFactory;
-import java.util.ArrayList;
 import java.util.Collection;
-import java.util.List;
 
 import org.apache.commons.logging.Log;
 
@@ -22,6 +20,7 @@ import de.tsl2.nano.core.ENV;
 import de.tsl2.nano.core.cls.BeanClass;
 import de.tsl2.nano.core.log.LogFactory;
 import de.tsl2.nano.core.util.FileUtil;
+import de.tsl2.nano.core.util.ListSet;
 import de.tsl2.nano.core.util.StringUtil;
 
 /**
@@ -35,7 +34,7 @@ public class NetworkClassLoader extends NestedJarClassLoader {
     private static final Log LOG = LogFactory.getLog(NetworkClassLoader.class);
 
     /** persistent cache for classes that couldn't be loaded through network. */
-    static final List<String> unresolveables = new ArrayList<String>();
+    static final ListSet<String> unresolveables = new ListSet<String>();
 
     /** filename for persistent cache of {@link #unresolveables}. */
     static final String FILENAME_UNRESOLVEABLES = "network.classloader.unresolvables";
@@ -125,7 +124,7 @@ public class NetworkClassLoader extends NestedJarClassLoader {
         if (environment == null || !environment.equals(path)) {
             File persistedList = new File(path + "/" + FILENAME_UNRESOLVEABLES);
             if (persistedList.canRead()) {
-                unresolveables.addAll((Collection<? extends String>) FileUtil.load(persistedList.getPath()));
+                unresolveables.addAll(ListSet.load(persistedList.getPath()));
                 LOG.info("unresolvable class-packages are:\n\t" + unresolveables);
             }
         }
@@ -157,7 +156,7 @@ public class NetworkClassLoader extends NestedJarClassLoader {
                         LOG.warn("couldn't load class " + name);
                     }
                     unresolveables.add(pckName);
-                    FileUtil.save(environment + "/" + FILENAME_UNRESOLVEABLES, unresolveables);
+                    unresolveables.save(environment + "/" + FILENAME_UNRESOLVEABLES);
                 }
             }
             //throw the origin exception!

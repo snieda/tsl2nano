@@ -184,6 +184,7 @@ import de.tsl2.nano.core.util.BitUtil;
 import de.tsl2.nano.core.util.ByteUtil;
 import de.tsl2.nano.core.util.DateUtil;
 import de.tsl2.nano.core.util.FileUtil;
+import de.tsl2.nano.core.util.NumberUtil;
 import de.tsl2.nano.core.util.StringUtil;
 import de.tsl2.nano.core.util.Util;
 import de.tsl2.nano.format.GenericParser;
@@ -193,7 +194,6 @@ import de.tsl2.nano.h5.expression.Query;
 import de.tsl2.nano.h5.expression.QueryPool;
 import de.tsl2.nano.incubation.specification.rules.RulePool;
 import de.tsl2.nano.script.ScriptTool;
-import de.tsl2.nano.util.NumberUtil;
 import de.tsl2.nano.util.PrivateAccessor;
 
 /**

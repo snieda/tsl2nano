@@ -13,7 +13,7 @@ import java.text.FieldPosition;
 import java.text.ParsePosition;
 import java.util.Collection;
 
-import de.tsl2.nano.collection.ListSet;
+import de.tsl2.nano.core.util.ListSet;
 import de.tsl2.nano.core.util.Util;
 
 /**

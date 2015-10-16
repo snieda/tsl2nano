@@ -3,7 +3,6 @@ package de.tsl2.nano.execution;
 import java.io.DataOutputStream;
 import java.io.File;
 import java.io.IOException;
-import java.io.InputStream;
 import java.util.Map;
 import java.util.Scanner;
 
@@ -40,6 +39,7 @@ public class SystemUtil {
      * example: <code>ScriptUtil.execute("cmd", "/C", "echo", "hello");</code>
      * <p>
      * if you have admin permission problems (IOException, 740 error) use "cmd.exe" and "/C" to start your executable.
+     * on unix use "sh" as shell prefix.
      * 
      * @param directory where to start the command from
      * @param command command with arguments
@@ -66,7 +66,7 @@ public class SystemUtil {
             scanner.close();
             int result = process.waitFor();
             LOG.info("-------------------------------------------------------------------");
-            LOG.info("process '" + command + "' finished with errorlevel: " + result);
+            LOG.info("process '" + StringUtil.toString(command, 120) + "' finished with errorlevel: " + result);
             if (result != 0) {
                 scanner = new Scanner(process.getErrorStream());
                 StringBuilder buf = new StringBuilder();

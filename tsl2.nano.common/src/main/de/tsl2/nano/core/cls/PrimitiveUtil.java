@@ -18,7 +18,7 @@ import org.apache.commons.logging.Log;
 
 import de.tsl2.nano.core.ManagedException;
 import de.tsl2.nano.core.log.LogFactory;
-import de.tsl2.nano.format.FormatUtil;
+import de.tsl2.nano.core.util.FormatUtil;
 
 /**
  * handler for primitives and their immutable wrappers. all wrappers have a static 'TYPE' providing the primitive class

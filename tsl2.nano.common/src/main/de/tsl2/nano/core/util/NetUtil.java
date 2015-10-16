@@ -362,6 +362,8 @@ public class NetUtil {
      * @return true, if this system is connected to a network
      */
     public static final boolean isOnline() {
+        if (Boolean.getBoolean("tsl2nano.offline"))
+            return false;
         if (lastOnlineCheck - System.currentTimeMillis() > deltaOnlineCheck) {
             lastOnlineCheck = System.currentTimeMillis();
             isonline = !getMyIP().equals(InetAddress.getLoopbackAddress().getHostAddress());

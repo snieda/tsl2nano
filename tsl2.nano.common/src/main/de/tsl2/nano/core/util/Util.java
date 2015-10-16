@@ -11,6 +11,7 @@ package de.tsl2.nano.core.util;
 
 import java.lang.reflect.Array;
 import java.security.MessageDigest;
+import java.text.Format;
 import java.text.ParseException;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -21,7 +22,6 @@ import de.tsl2.nano.collection.MapUtil;
 import de.tsl2.nano.core.ManagedException;
 import de.tsl2.nano.core.cls.PrimitiveUtil;
 import de.tsl2.nano.core.execution.IRunnable;
-import de.tsl2.nano.format.FormatUtil;
 
 /**
  * utils for general purpose on simple objects.
@@ -34,13 +34,15 @@ public class Util {
     static {
         String pck = Util.class.getPackage().getName();
         String[] p = pck.split("\\.");
-        FRAMEWORK_PACKAGE = StringUtil.concat(new char[]{'.'}, p[0], p[1], p[2]);
+        FRAMEWORK_PACKAGE = StringUtil.concat(new char[] { '.' }, p[0], p[1], p[2]);
     }
+
     protected Util() {
     }
 
     /**
      * isFrameworkClass
+     * 
      * @param cls
      * @return true, if given class is part of this framework
      */
@@ -49,7 +51,7 @@ public class Util {
         //some classes like Object[].class have no package path!
         return cls.getPackage() != null && cls.getPackage().getName().startsWith(FRAMEWORK_PACKAGE);
     }
-    
+
     /**
      * isAllNull
      * 
@@ -381,7 +383,8 @@ public class Util {
     }
 
     /**
-     * convenience to get a system property. if not defined, the default value will be returned
+     * convenience to get a system property. if defined, it will be converted to the type of defaultValue. if not
+     * defined, the default value will be returned.
      * 
      * @param name system property name
      * @param defaultValue system property default
@@ -390,7 +393,15 @@ public class Util {
     @SuppressWarnings("unchecked")
     public static <T> T get(String name, T defaultValue) {
         Object result = System.getProperties().get(name);
-        return (T) (result != null ? result : defaultValue);
+        if (result != null && defaultValue != null && !defaultValue.getClass().isAssignableFrom(result.getClass())) {
+            Format df = FormatUtil.getDefaultFormat(defaultValue, true);
+            try {
+                return (T) df.parseObject((String) result);
+            } catch (ParseException e) {
+                ManagedException.forward(e);
+            }
+        }
+        return defaultValue;
     }
 
     /**

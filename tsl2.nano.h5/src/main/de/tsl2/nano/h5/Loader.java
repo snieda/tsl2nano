@@ -45,7 +45,8 @@ public class Loader extends AppLoader {
             String[] files = rootjar.getParentFile().list();
             for (int i = 0; i < files.length; i++) {
                 if (files[i].endsWith(".jar"))
-                    cl.addFile(new File(files[i]).getName());
+                    System.out.println("adding " + files[i] + " to classpath");
+                    cl.addFile(new File(files[i]).getPath());
             }
         }
         

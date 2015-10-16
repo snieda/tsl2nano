@@ -13,9 +13,7 @@ import java.util.concurrent.TimeUnit;
 
 import org.simpleframework.xml.Element;
 import org.simpleframework.xml.core.Commit;
-import org.w3c.dom.events.Event;
 
-import de.tsl2.nano.bean.def.AbstractDependencyListener;
 import de.tsl2.nano.bean.def.AttributeDefinition;
 import de.tsl2.nano.core.exception.Message;
 import de.tsl2.nano.core.util.NetUtil;

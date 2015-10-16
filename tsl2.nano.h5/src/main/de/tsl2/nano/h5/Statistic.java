@@ -28,10 +28,10 @@ import de.tsl2.nano.bean.def.BeanDefinition;
 import de.tsl2.nano.bean.def.IAttributeDefinition;
 import de.tsl2.nano.core.ENV;
 import de.tsl2.nano.core.cls.IAttribute;
+import de.tsl2.nano.core.util.NumberUtil;
 import de.tsl2.nano.core.util.StringUtil;
 import de.tsl2.nano.core.util.Util;
 import de.tsl2.nano.service.util.ServiceUtil;
-import de.tsl2.nano.util.NumberUtil;
 
 /**
  * Does a statistic by doing a group by on all columns. Set {@link #from} and {@link #toString()} on the constructor

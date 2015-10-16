@@ -36,9 +36,9 @@ import org.junit.Test;
 
 import de.tsl2.nano.action.IAction;
 import de.tsl2.nano.bean.BeanProxy;
-import de.tsl2.nano.collection.ListSet;
 import de.tsl2.nano.core.execution.Profiler;
 import de.tsl2.nano.core.util.DateUtil;
+import de.tsl2.nano.core.util.ListSet;
 import de.tsl2.nano.service.feature.FeatureFactory;
 import de.tsl2.nano.service.schedule.IJobScheduleService;
 import de.tsl2.nano.service.util.ServiceUtil;

@@ -591,6 +591,16 @@ public class StringUtil {
     }
 
     /**
+     * splits a name with camel-case concatenation into an array of names.
+     * 
+     * @param ccName text to split
+     * @return split ccName
+     */
+    public static final String[] splitCamelCase(String ccName) {
+        return ccName.replaceAll("([a-z0-9])([A-Z])", "$1 $2").split("\\s");
+    }
+
+    /**
      * concats the given names into one string separated by 'sep'. if a name is null, it will be ignored.
      * 
      * @param sep separator

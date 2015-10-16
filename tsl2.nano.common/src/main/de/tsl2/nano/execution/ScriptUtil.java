@@ -22,7 +22,7 @@ import de.tsl2.nano.core.util.FileUtil;
 import de.tsl2.nano.core.util.StringUtil;
 
 /**
- * Util to start system executables
+ * Util to start ant scripts
  * 
  * @author Thomas Schneider
  * @version $Revision$

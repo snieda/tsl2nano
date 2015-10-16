@@ -33,9 +33,9 @@ import de.tsl2.nano.core.cls.BeanClass;
 import de.tsl2.nano.core.cls.PrimitiveUtil;
 import de.tsl2.nano.core.log.LogFactory;
 import de.tsl2.nano.core.util.ByteUtil;
+import de.tsl2.nano.core.util.FormatUtil;
 import de.tsl2.nano.core.util.StringUtil;
 import de.tsl2.nano.core.util.Util;
-import de.tsl2.nano.format.FormatUtil;
 import de.tsl2.nano.util.operation.IConverter;
 
 /**

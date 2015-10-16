@@ -20,8 +20,8 @@ import de.tsl2.nano.bean.def.BeanCollector;
 import de.tsl2.nano.bean.def.BeanDefinition;
 import de.tsl2.nano.bean.def.ValueExpression;
 import de.tsl2.nano.core.cls.IAttribute;
+import de.tsl2.nano.core.util.NumberUtil;
 import de.tsl2.nano.core.util.StringUtil;
-import de.tsl2.nano.util.NumberUtil;
 
 /**
  * Special {@link BeanCollector} to show a list of beans providing their actions. the defined bean should have some

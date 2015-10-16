@@ -9,8 +9,8 @@
  */
 package de.tsl2.nano.format;
 
-import static de.tsl2.nano.format.FormatUtil.getCurrencyFormatNoFraction;
-import static de.tsl2.nano.format.FormatUtil.getCurrencyFormatNoSymbol;
+import static de.tsl2.nano.core.util.FormatUtil.getCurrencyFormatNoFraction;
+import static de.tsl2.nano.core.util.FormatUtil.getCurrencyFormatNoSymbol;
 
 import java.io.IOException;
 import java.io.Serializable;
@@ -51,6 +51,7 @@ import de.tsl2.nano.core.cls.BeanAttribute;
 import de.tsl2.nano.core.cls.BeanClass;
 import de.tsl2.nano.core.log.LogFactory;
 import de.tsl2.nano.core.util.DateUtil;
+import de.tsl2.nano.core.util.FormatUtil;
 import de.tsl2.nano.core.util.StringUtil;
 import de.tsl2.nano.core.util.Util;
 import de.tsl2.nano.currency.CurrencyUtil;

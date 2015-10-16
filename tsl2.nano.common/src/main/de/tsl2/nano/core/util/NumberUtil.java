@@ -7,7 +7,7 @@
  * 
  * Copyright: (c) Thomas Schneider 2010, all rights reserved
  */
-package de.tsl2.nano.util;
+package de.tsl2.nano.core.util;
 
 import java.math.BigDecimal;
 import java.math.BigInteger;
@@ -21,10 +21,6 @@ import java.util.Locale;
 
 import de.tsl2.nano.core.cls.BeanClass;
 import de.tsl2.nano.core.cls.PrimitiveUtil;
-import de.tsl2.nano.core.util.BitUtil;
-import de.tsl2.nano.core.util.DateUtil;
-import de.tsl2.nano.core.util.StringUtil;
-import de.tsl2.nano.format.FormatUtil;
 
 /**
  * Some utils for numbers and comparables
