@@ -147,15 +147,16 @@ public class PersistenceUI {
                 props.setProperty("URLSYNTAX_jdbc.sapdb", "jdbc:sapdb://<server>[:<port>]/<databaseName>");//default-port: 7210
                     
                 FileUtil.saveProperties(pfile, props);
-
-                //input assists - completions
-                ((IIPresentable)login.getAttribute("connectionUrl").getPresentation()).setItemList(MapUtil.getValues(props, "URLSYNTAX_.*"));
-                ((IIPresentable)login.getAttribute("connectionDriverClass").getPresentation()).setItemList(MapUtil.getValues(props, "DRIVER_.*"));
-                ((IIPresentable)login.getAttribute("datasourceClass").getPresentation()).setItemList(MapUtil.getValues(props, "DATASOURCE_.*"));
-                ((IIPresentable)login.getAttribute("provider").getPresentation()).setItemList(MapUtil.getValues(props, "PROVIDER_.*"));
-                ((IIPresentable)login.getAttribute("hibernateDialect").getPresentation()).setItemList(MapUtil.getValues(props, "DIALECT_.*"));
-                ((IIPresentable)login.getAttribute("transactionType").getPresentation()).setItemList(Arrays.asList("RESOURCE_LOCAL", "JTA"));
             }
+
+            //input assists - completions
+            ((IIPresentable)login.getAttribute("connectionUrl").getPresentation()).setItemList(MapUtil.getValues(props, "URLSYNTAX_.*"));
+            ((IIPresentable)login.getAttribute("connectionDriverClass").getPresentation()).setItemList(MapUtil.getValues(props, "DRIVER_.*"));
+            ((IIPresentable)login.getAttribute("datasourceClass").getPresentation()).setItemList(MapUtil.getValues(props, "DATASOURCE_.*"));
+            ((IIPresentable)login.getAttribute("provider").getPresentation()).setItemList(MapUtil.getValues(props, "PROVIDER_.*"));
+            ((IIPresentable)login.getAttribute("hibernateDialect").getPresentation()).setItemList(MapUtil.getValues(props, "DIALECT_.*"));
+            ((IIPresentable)login.getAttribute("transactionType").getPresentation()).setItemList(Arrays.asList("RESOURCE_LOCAL", "JTA"));
+
             final Properties p = props;
             //refresh the default schema to be asked by the username listener
             String ds = (String) login.getValue("defaultSchema");

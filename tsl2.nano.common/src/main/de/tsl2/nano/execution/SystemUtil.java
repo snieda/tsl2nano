@@ -66,7 +66,7 @@ public class SystemUtil {
             scanner.close();
             int result = process.waitFor();
             LOG.info("-------------------------------------------------------------------");
-            LOG.info("process '" + StringUtil.toString(command, 120) + "' finished with errorlevel: " + result);
+            LOG.info("process '" + StringUtil.toString(command, -1) + "' finished with errorlevel: " + result);
             if (result != 0) {
                 scanner = new Scanner(process.getErrorStream());
                 StringBuilder buf = new StringBuilder();

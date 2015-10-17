@@ -32,7 +32,7 @@ creating database: ${jdbc.url}
 	user         : ${jdbc.username}
 **********************************************************
 		</echo>
-		
+
 		<echo file="createuser.sql">
 CREATE USER ${jdbc.username} PASSWORD '${jdbc.password}';
 GRANT DBA to ${jdbc.username};
@@ -41,17 +41,20 @@ CREATE SCHEMA ${jdbc.scheme} AUTHORIZATION DBA;
 SET SCHEMA ${jdbc.scheme};
 commit;
 		</echo>
-		
+
 		<echo message="creating user..." />
 		<ant antfile="shell.xml" target="sh.sql">
 			<property name="sh.sql.include" value="createuser.sql"/>
 			<property name="sh.sql.onerror" value="continue"/>
 		</ant>
-		<echo message="cleaning database..." />
-		<ant antfile="shell.xml" target="sh.sql">
-			<property name="sh.sql.include" value="*drop*${jdbc.database}*.sql"/>
-			<property name="sh.sql.onerror" value="continue"/>
-		</ant>
+		<echo message="" file="drop-dummy-${jdbc.database}.sql" />
+		<parallel failonany="false"> <!-- parallel as workaround: if no script exists, we don't want to stop! -->
+			<echo message="cleaning database..." />
+			<ant antfile="shell.xml" target="sh.sql">
+				<property name="sh.sql.include" value="*drop*${jdbc.database}*.sql" />
+				<property name="sh.sql.onerror" value="continue" />
+			</ant>
+		</parallel>
 		<echo message="creating database..." />
 		<ant antfile="shell.xml" target="sh.sql">
 			<property name="sh.sql.include" value="*${jdbc.database}*.sql"/>
@@ -60,12 +63,16 @@ commit;
 			<property name="sh.sql.exclude3" value="createuser.sql"/>
 		</ant>
 
-		<echo message="filling data..." />
-		<ant antfile="shell.xml" target="sh.sql">
-			<property name="sh.sql.include" value="*init*${jdbc.database}*.sql"/>
-		</ant>
+		<echo message="" file="init-dummy-${jdbc.database}.sql" />
+		<parallel failonany="false"> <!-- parallel as workaround: if no script exists, we don't want to stop! -->
+			<echo message="filling data..." />
+			<ant antfile="shell.xml" target="sh.sql">
+				<property name="sh.sql.include" value="*init*${jdbc.database}*.sql" />
+				<property name="sh.sql.onerror" value="continue" />
+			</ant>
+		</parallel>
 	</target>
-	
+
 	<target name="do.all" description="creates database from ddl and entity beans from jdbc-connection">
 
 		<!-- on windows we start the hsqldb in a new shell - as background process -->
@@ -88,8 +95,8 @@ commit;
 java -cp ${cp} org.hsqldb.Server -database ${jdbc.database} -port ${jdbc.port} -silent false -trace true ${cmdargs}
 		</echo>
 		<chmod perm="+x" file="runServer.bat" />
-	<!-- start the database with name ${basedir} -->
-	
+		<!-- start the database with name ${basedir} -->
+
 		<parallel failonany="true">
 			<!-- first, start the database server and wait... -->
 			<ant antfile="shell.xml" target="sh.exec.cmd">
@@ -101,13 +108,13 @@ java -cp ${cp} org.hsqldb.Server -database ${jdbc.database} -port ${jdbc.port} -
 			<sequential>
 				<property name="sh.sleep.milliseconds" value="3000" />
 				<ant antfile="shell.xml" target="sh.sleep"/>
-				
+
 				<!-- create the database -->
 				<antcall target="create.database"/>
-				
+
 				<!-- create the beans jar file -->
 				<ant antfile="reverse-eng.xml" />
-				
+
 				<!-- start the nano-h5 application if not started from there. -->
 				<condition property="sh.disable.exec.cmd" value="true">
 					<istrue value="${nano.h5.running}"/>
@@ -125,4 +132,4 @@ java -cp ${cp} org.hsqldb.Server -database ${jdbc.database} -port ${jdbc.port} -
 		<echo message="mda generation finished!"/>
 	</target>
 
-</project>	
+</project>

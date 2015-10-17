@@ -21,6 +21,7 @@ import java.util.Properties;
 
 import de.tsl2.nano.core.ENV;
 import de.tsl2.nano.core.ManagedException;
+import de.tsl2.nano.core.exception.Message;
 import de.tsl2.nano.core.util.FileUtil;
 import de.tsl2.nano.core.util.StringUtil;
 import de.tsl2.nano.core.util.Util;
@@ -36,11 +37,14 @@ import de.tsl2.nano.persistence.replication.Replication;
 public class Persistence implements Serializable {
     /** serialVersionUID */
     private static final long serialVersionUID = 2360829578078838714L;
+    
+    private static final String DEFAULT_DATABASE = "anyway";
+    
     protected String persistenceUnit = "genericPersistenceUnit";
     protected String transactionType = "RESOURCE_LOCAL";
     protected String provider = "org.hibernate.ejb.HibernatePersistence";
     protected String jtaDataSource = "<UNDEFINED>";
-    protected String jarFile = "anyway.jar";
+    protected String jarFile = DEFAULT_DATABASE + ".jar";
     protected String connectionDriverClass = STD_LOCAL_DATABASE_DRIVER;
     protected String connectionUrl = STD_LOCAL_DATABASE_URL;
     protected String connectionUserName = "SA";
@@ -49,7 +53,7 @@ public class Persistence implements Serializable {
     protected String defaultSchema = "PUBLIC";
     protected String datasourceClass = "org.hsqldb.jdbc.JDBCDataSource";
     protected String port = "9003";
-    protected String database = "anyway";
+    protected String database = DEFAULT_DATABASE;
     private Persistence replication;
     /** One of 'hbm2java' or 'openjpa-reverse-eng' */
     private String generator = GEN_HIBERNATE;
@@ -318,10 +322,16 @@ public class Persistence implements Serializable {
     private void provideDatabaseInputAsDDL() {
         if (database == null)
             throw new IllegalArgumentException("the field database must not be empty!");
-        else if (database.toLowerCase().matches(".*create\\s+table.*")) {
+        else if (database.toLowerCase().matches("(?s).*create\\s+table.*")) {
             String name = StringUtil.substring(getJarFile(), null, ".");
+            if (name.equals(DEFAULT_DATABASE)) {
+                name = FileUtil.getUniqueFileName("ddlcopy");
+                setJarFile(name + ".jar");
+            }
             String file = ENV.getConfigPath() + name + ".sql";
-            FileUtil.writeBytes(database.getBytes(), file , false);
+            Message.send("ddl script detected in field database. saving content to " + file);
+            //remove ´` characters and save.
+            FileUtil.writeBytes(database.replaceAll("[´`]", "").getBytes(), file , false);
             setDatabase(name);
         }
     }
@@ -379,7 +389,7 @@ public class Persistence implements Serializable {
         put(prop, "jdbc.url", getConnectionUrl());
         put(prop, "jdbc.username", getConnectionUserName());
         put(prop, "jdbc.password", getConnectionPassword());
-        put(prop, "jdbc.database", database);
+        put(prop, "jdbc.database", getDatabase());
         put(prop, "jdbc.port", port);
         put(prop, "jdbc.scheme", getDefaultSchema());
         return prop;
