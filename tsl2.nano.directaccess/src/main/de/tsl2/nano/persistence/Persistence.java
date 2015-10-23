@@ -130,7 +130,7 @@ public class Persistence implements Serializable {
      */
     public String getJarFile() {
         //Workaround for eclipselink, using it's own classloader - loading from parent of META-INF/
-        return jarFile.startsWith("!") ? jarFile.substring(1) : jarFile;
+        return jarFile.startsWith("!") ? jarFile.substring(1) : StringUtil.substring(jarFile, "file:///", null);
     }
 
     /**
@@ -166,8 +166,7 @@ public class Persistence implements Serializable {
      */
     public void setConnectionUrl(String connectionUrl) {
         this.connectionUrl = connectionUrl;
-        String portExtract = StringUtil.extract(connectionUrl, "[:][0-9]{4,7}([:]|)");
-        setPort(StringUtil.substring(portExtract, ":", ":"));
+        setPort(getPort(connectionUrl));
 
         setDatabase(StringUtil.substring(connectionUrl, getPort() + ":", null));
     }
@@ -434,8 +433,8 @@ public class Persistence implements Serializable {
         put(prop, "provider", getProvider());
 
         String jarFile = jarFileInEnvironment();
-        //respect absolute pathes (on linux starting with '/' on windows with 'c:'
-        put(prop, "jar-file", "file:" + /*((jarFile.startsWith("/") || jarFile.charAt(1) == ':')*/(new File(jarFile).isAbsolute() ? "//" + jarFile : "./" + jarFile));
+        //a relative file url should start with file:///, too - but the persistence providers can't work on that
+        put(prop, "jar-file", "file:" + (new File(jarFile).isAbsolute() ? "///" + (jarFile.startsWith("/") ? jarFile.substring(1) : jarFile) : "./" + jarFile));
         put(prop, "jta-data-source", getJtaDataSource());
         put(prop, "hibernate.dialect", getHibernateDialect());
         put(prop, "connection.driver_class", getConnectionDriverClass());
@@ -602,5 +601,14 @@ public class Persistence implements Serializable {
             p.setReplication(new Replication());
         }
         return p;
+    }
+
+    /**
+     * extracts the port of the given database url
+     * @param url database url
+     * @return port or null
+     */
+    public String getPort(String url) {
+        return StringUtil.extract(url, "[:](\\d+)([:/;]\\w+)?", 1);
     }
 }

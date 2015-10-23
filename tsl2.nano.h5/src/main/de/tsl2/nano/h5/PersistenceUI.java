@@ -231,7 +231,7 @@ public class PersistenceUI {
                             Object value = evt.newValue;
                             String url = Util.asString(value);
                             if (url != null) {
-                                String prefix = StringUtil.extract(url, "^\\w+[:]\\w+").replace(':', '.');
+                                String prefix = getDriverPrefix(url);
                                 if (!Util.isEmpty(prefix)) {
                                     return p.getProperty("DATASOURCE_" + prefix);
                                 }
@@ -250,7 +250,7 @@ public class PersistenceUI {
                             Object value = evt.newValue;
                             String url = Util.asString(value);
                             if (url != null) {
-                                String prefix = StringUtil.extract(url, "^\\w+[:]\\w+").replace(':', '.');
+                                String prefix = getDriverPrefix(url);
                                 if (!Util.isEmpty(prefix)) {
                                     return p.getProperty("DIALECT_" + prefix);
                                 }
@@ -269,7 +269,7 @@ public class PersistenceUI {
                             Object value = evt.newValue;
                             String url = Util.asString(value);
                             if (url != null) {
-                                String prefix = StringUtil.extract(url, "^\\w+[:]\\w+").replace(':', '.');
+                                String prefix = getDriverPrefix(url);
                                 if (!Util.isEmpty(prefix)) {
                                     return StringUtil.extract(url, "[:]\\d+[:/;](\\w+)");
                                 }
@@ -288,9 +288,9 @@ public class PersistenceUI {
                             Object value = evt.newValue;
                             String url = Util.asString(value);
                             if (url != null) {
-                                String prefix = StringUtil.extract(url, "^\\w+[:]\\w+").replace(':', '.');
+                                String prefix = getDriverPrefix(url);
                                 if (!Util.isEmpty(prefix)) {
-                                    return StringUtil.extract(url, "[:](\\d+)([:/;]\\w+)?", 1);
+                                    return persistence.getPort(url);
                                 }
                             }
                             return null;
@@ -317,19 +317,19 @@ public class PersistenceUI {
                             return eval;
                         }
                     }, WSEvent.class);
-            login.getAttribute("provider").changeHandler().addListener(new WebSocketDependencyListener<String>() {
-                @Override
-                protected String evaluate(WSEvent evt) {
-                    Object value = evt.newValue;
-                    String url = Util.asString(value);
-                    if (url != null) {
-                        String prefix = StringUtil.extract(url, "\\w+[:]\\w+");
-                        String v = p.getProperty("DIALECT_" + prefix);
-                        return v;
-                    }
-                    return null;
-                }
-            }, WSEvent.class);
+//            login.getAttribute("provider").changeHandler().addListener(new WebSocketDependencyListener<String>() {
+//                @Override
+//                protected String evaluate(WSEvent evt) {
+//                    Object value = evt.newValue;
+//                    String url = Util.asString(value);
+//                    if (url != null) {
+//                        String prefix = StringUtil.extract(url, "\\w+[:]\\w+");
+//                        String v = p.getProperty("DIALECT_" + prefix);
+//                        return v;
+//                    }
+//                    return null;
+//                }
+//            }, WSEvent.class);
             login
                 .getAttribute("provider")
                 .changeHandler()
@@ -388,6 +388,17 @@ public class PersistenceUI {
         login.getPresentationHelper().change(BeanPresentationHelper.PROP_LENGTH, 100000, "database");
         ((RegExpFormat)login.getAttribute("database").getFormat()).setPattern(RegExpFormat.alphanum(100000, false), null, 100000, Pattern.MULTILINE);
         login.getAttribute("database").getPresentation().setLayoutConstraints((Serializable)MapUtil.asMap("rows", 1, "cols", "50", "style", "width:382;"));
+
+        /*
+         * caution: this is a flag to disable changing any field of the persistence.xml. The persistence.xml 
+         * will be loaded by the provider as is. This is an issue for testing purposes on differen providers.
+         */
+        login.getPresentationHelper().change(BeanPresentationHelper.PROP_ENABLER, new IActivable() {
+            @Override
+            public boolean isActive() {
+                return ENV.get("login.save.persistence", true);
+            }
+        });
         
         login.getPresentationHelper().chg("replication", BeanPresentationHelper.PROP_ENABLER, new IActivable() {
             @Override
@@ -401,7 +412,8 @@ public class PersistenceUI {
             //TODO: ref. to persistence class
             @Override
             public Object action() throws Exception {
-                persistence.save();
+                if (ENV.get("login.save.persistence", true))
+                    persistence.save();
                 return connector.connect(persistence);
             }
 
@@ -438,5 +450,9 @@ public class PersistenceUI {
         };
         login.addAction(loginAction);
         return login;
+    }
+
+    protected static String getDriverPrefix(String url) {
+        return StringUtil.extract(url, "^\\w+[:]\\w+").replace(':', '.');
     }
 }

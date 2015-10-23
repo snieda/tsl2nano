@@ -19,6 +19,8 @@ import org.apache.commons.logging.Log;
 import de.tsl2.nano.core.ManagedException;
 import de.tsl2.nano.core.log.LogFactory;
 import de.tsl2.nano.core.util.FormatUtil;
+import de.tsl2.nano.core.util.StringUtil;
+import de.tsl2.nano.core.util.Util;
 
 /**
  * handler for primitives and their immutable wrappers. all wrappers have a static 'TYPE' providing the primitive class
@@ -248,6 +250,57 @@ public class PrimitiveUtil {
 
     public static byte asPrimitive(Byte o) {
         return o.byteValue();
+    }
+
+    /**
+     * conversion of primitives or wrappers. conversions/casts of primitives in typed/compiled code is no problem. on
+     * dynamic conversions/casts, knowing the converting types on runtime there is a problem, because {@link Class#cast}
+     * restricts casts like Integer-->Long - while its no problem on static code.
+     * <p/>
+     * this method does not use reflection to do the conversion.
+     * 
+     * @param value primitive/wrapper value to convert to another primitive/wrapper defined by conversionType
+     * @param conversionType result type
+     * @return converted value
+     */
+    public static <T> T convert(Object value, Class<T> conversionType) {
+        if (value == null)
+            return null;
+        
+        //first: convert the non-number values to numbers
+        if (isAssignableFrom(Boolean.class, value.getClass()))
+            value = (Boolean)value ? 1 : 0;
+        else if (isAssignableFrom(Character.class, value.getClass()))
+            value = value.hashCode();
+        
+        //now we have a number
+        double d = ((Number)value).doubleValue();
+        
+        if (isAssignableFrom(Boolean.class, conversionType)) {
+            return (T) (d != 0 ? Boolean.TRUE : Boolean.FALSE);
+        } else if (isAssignableFrom(Integer.class, conversionType)) {
+            Integer c = (int)d;
+            return (T) c;
+        } else if (isAssignableFrom(Long.class, conversionType)) {
+            Long c = (long)d;
+            return (T) c;
+        } else if (isAssignableFrom(Float.class, conversionType)) {
+            Float c = (float)d;
+            return (T) c;
+        } else if (isAssignableFrom(Double.class, conversionType)) {
+            Double c = d;
+            return (T) c;
+        } else if (isAssignableFrom(Short.class, conversionType)) {
+            Short c = (short)d;
+            return (T) c;
+        } else if (isAssignableFrom(Byte.class, conversionType)) {
+            Byte c = (byte)d;
+            return (T) c;
+        } else if (isAssignableFrom(Character.class, conversionType)) {
+            Character c = (char)d;
+            return (T) c;
+        }
+        throw new IllegalArgumentException("conversionType is not primitive or wrapper type");
     }
 
     /**

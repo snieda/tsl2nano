@@ -595,8 +595,8 @@ public class BeanAttribute<T> implements IAttribute<T> {
                 if (Class.class.isAssignableFrom(wrapperType))
                     return (T) BeanClass.load(value.toString());
                 else {
-                    if (wrapperType.isPrimitive())
-                        wrapperType = PrimitiveUtil.getWrapper(wrapperType);
+                    if (PrimitiveUtil.isPrimitiveOrWrapper(wrapperType))
+                        return PrimitiveUtil.convert(value, wrapperType);
                     if ((c = wrapperType.getConstructor(new Class[] { value.getClass() })) != null) {
                         return c.newInstance(value);
                     }

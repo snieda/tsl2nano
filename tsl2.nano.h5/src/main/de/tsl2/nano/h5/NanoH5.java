@@ -653,7 +653,7 @@ public class NanoH5 extends NanoHTTPD implements ISystemConnector<Persistence> {
         } else if (isAbsolutePath) {//copy it into the own classpath (to don't lock the file)
             if (!selectedFile.exists()) {
                 throw new IllegalArgumentException(
-                    "If an absolute file-path is given, the file has to exist! If the file-path is relative and doesn't exist, it will be created/generated");
+                    selectedFile + " (-- If an absolute file-path is given, the file has to exist! If the file-path is relative and doesn't exist, it will be created/generated.");
             }
 //            if (!new File(envFile).exists())
             FileUtil.copy(selectedFile.getPath(), persistence.jarFileInEnvironment());
@@ -741,7 +741,7 @@ public class NanoH5 extends NanoHTTPD implements ISystemConnector<Persistence> {
     private boolean canConnectToLocalDatabase(Persistence persistence) {
         if (!Util.isEmpty(persistence.getPort())) {
             int p = Integer.valueOf(persistence.getPort());
-            return NetUtil.isOpen(NetUtil.getInetAddress(), p);
+            return NetUtil.isOpen(p);
         }
         return false;
     }

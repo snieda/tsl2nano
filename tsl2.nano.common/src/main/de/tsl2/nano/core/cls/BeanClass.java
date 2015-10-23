@@ -94,6 +94,14 @@ public class BeanClass<T> implements Serializable {
     }
 
     /**
+     * delegates to {@link #getBeanClass(Class)} using {@link #getDefiningClass(Class)} to evaluate the real class of
+     * given instance.
+     */
+    public static final <C> BeanClass<C> getBeanClass(C instance) {
+        return (BeanClass<C>) CachedBeanClass.getCachedBeanClass(getDefiningClass(instance.getClass()));
+    }
+
+    /**
      * uses an internal cache through {@link CachedBeanClass} to perform on getting all attributes
      * 
      * @param <C> bean type
@@ -608,10 +616,11 @@ public class BeanClass<T> implements Serializable {
         } else {//wrap argument objects to have the right types
             for (int i = 0; i < args.length; i++) {
                 args[i] = BeanAttribute.wrap(args[i], par[i]);
-            }            
+            }
         }
         try {
-            LOG.debug("calling " + clazz.getClassLoader().toString() + ":" + clazz.getName()
+            LOG.debug("calling " + (clazz.getClassLoader() != null ? clazz.getClassLoader().toString() + ":" : "")
+                + clazz.getName()
                 + "."
                 + methodName
                 + " with parameters:"
@@ -901,13 +910,14 @@ public class BeanClass<T> implements Serializable {
 
     /**
      * load
+     * 
      * @param className
      * @return
      */
     public static Class load(String className) {
         return load(className, null);
     }
-    
+
     /**
      * load
      * 

@@ -9,11 +9,13 @@
  */
 package de.tsl2.nano.core.classloader;
 
-import java.io.File;
 import java.io.FilenameFilter;
+import java.io.File;
 import java.net.URL;
 import java.net.URLStreamHandlerFactory;
 import java.util.Arrays;
+import java.util.Collections;
+import java.util.List;
 
 import de.tsl2.nano.core.ManagedException;
 import de.tsl2.nano.core.util.FileUtil;
@@ -52,7 +54,7 @@ public class LibClassLoader extends RuntimeClassloader {
             throw ManagedException.illegalArgument(path, "path must be a directory!");
         }
 
-        final File[] jarFiles = fPath.listFiles(new FilenameFilter() {
+        File[] jarFiles = fPath.listFiles(new FilenameFilter() {
             @Override
             public boolean accept(File dir, String name) {
                 return name.endsWith(EXT_LIBRARY);
@@ -64,8 +66,22 @@ public class LibClassLoader extends RuntimeClassloader {
             addFile(path);
         }
 
+        jarFiles = sortByVersion(jarFiles);
         for (final File file : jarFiles) {
             addFile(file.getAbsolutePath());
         }
+    }
+
+    /**
+     * to avoid classloading conflicts, do a reverse sorting by name - higher versions come first.
+     * @param jarFiles list of jar files
+     * @return sorted jars
+     */
+    private File[] sortByVersion(File[] jarFiles) {
+        //IMPROVE: performance!
+        Arrays.sort(jarFiles);
+        List<File> list = Arrays.asList(jarFiles);
+        Collections.reverse(list);
+        return list.toArray(new File[0]);
     }
 }

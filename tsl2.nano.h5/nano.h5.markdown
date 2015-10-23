@@ -28,15 +28,15 @@ To do a *quick-start*, go to chapter _Starting / Test_.
 
 ### What does it for you?
 
-* it starts a generic application with default mechanisms and configurations to present data in html5
+* it starts a generic application with default mechanisms and configurations to present data (->jpa) in html5
 * it provides all needed libraries for you - independent of the database and jpa-persistence tool you use
 * it creates all jpa-entities for you (of course, you can use your own!)
-* all entities are configured and presented in a most reasonable way - but easily to be enhanced by you
+* all (jpa) entities are configured and presented in a most reasonable way - but easily to be enhanced by you
 * data is searchable and editable in a comfortable way - can be prepared to be printed and exported
 * it provides several working modes: single standalone app, network/multi-user and/or access to an application-server
 
 ### Technical Goals
-* pure model implementation + platform independency (works on android, too).
+* pure model implementation + platform independence (works on android, too).
 * small, having as less as possible static dependencies to other libraries
 * everything has a default - all defaults are configurable (Convention over Configuration)
 * application, session and entity behaviors are configurable
@@ -47,8 +47,8 @@ To do a *quick-start*, go to chapter _Starting / Test_.
 * resolves all bean/entity relations to be browsed.
 * navigation can be a configurable workflow - or simply an entity browser 
 * pre-defines formatting, validation and presentation of relations
-* pure html-5 (no javascript - except for websockts)
-* using websockets to show status messages, input-assist and dependency field refreshing
+* pure html-5 (no javascript, only html5-scripting-api for websockts)
+* using websockets to show status messages, input-assist and dependency field or timer refreshing
 * pure jpa - jpa-annotations are read to resolve attribute-presentation
 * independent of a special o/r mapper. all o/r mappers supporting javax.persistence with an EntityManager are usable.
 * simple database replication on user-loaded data - offline working possible
@@ -59,6 +59,7 @@ To do a *quick-start*, go to chapter _Starting / Test_.
 * resolves all external (jdbc-drivers, etc.) jar-dependencies on runtime on an available network connection
 * handling blobs of data (byte[]) to be presented in html as picture, audio, video or object.
 * providing attributes as virtuals (not bound to a real bean-attribute, rule-expressions, sql-query-expressions and RESTful-service-call-expressions
+* automatic translations through network connection
 * planned interfaces: 
 	* xsd-->bean
 	* java-interface-->java-bean (mock through internal proxy)
@@ -91,10 +92,11 @@ this software should provide a fast way to create a standard application through
 
 #### It is a full stack framework, but you can use it for other simple use cases:
 
-* as an entity browser or editor
+* as an entity/database browser or editor
 * as an JPQL or SQL statement tester with the integrated *ScriptTool*
 * as a test base to check your model on different jpa persistence providers like *hibernate*, *elcipselink*, *openjpa*, *datanucleus* or *batoo*. you can switch between them with three mouseclicks.
 * as a quick solution to generate your entity beans through the given database connection and to test that model.
+* as a test-system, using an origin beans-jar-file to rebuild database on your local system on any database - transferring needed data through replication. all done in background for you.
 
 ...all available without any application server!
 
@@ -206,7 +208,7 @@ Now, the following will be done:
 * nano.h5 downloads maven (~6MB) to load the following libraries:
 * jdbc-driver (~1MB)
 * ant (~2MB)
-* the generator tool *hibernate-tools* or *openjpa* (6-12MB)
+* the generator tool *hibernate-tools* (12MB) or *openjpa* (6MB)
 * if the database-url points to a local database and it is an hsqldb or h2, the database will be downloaded, started and created throuth the given ddl-scripts (*.sql)
 * if the given beans jar-file wasn't found, it will be created through the selected generator.
 * now you see a list of available entities to work on
@@ -221,7 +223,7 @@ _Nano.H5_ tries to change coppling between beans and attributes. A bean, defined
 
 ##### Where to get java entity beans from
 
-###### Having a database connection and a ddl
+###### Having a database connection and/or a ddl
 
 If you don't give a beans-jar-file, nano.h5 tries to create the beans for you - using hibernate-tools or openjpa.
 
@@ -303,16 +305,36 @@ The following service may be set to override the default mechanisms:
 
 ### Quick-Start
 
-* install a java jdk at [TODOleast version 1.7]. If you only install a java jre-version, the bean-jar file cannot be generated - then you have to select an existing one.
-* get the newest version of [TODOtsl2.nano.h5.jar]
-* start this jar file. this will create the environments _config_ and _sample_ and a _run.bat_.
-* go into the extracted sub-directory _sample_ and start the _Windows_-batch file _startServer.bat_. This will start the sample database.
+* install a <a href="http://www.oracle.com/technetwork/java/javase/downloads/jdk7-downloads-1880260.html">java jdk at least version 1.7</a>. If you only install a java jre-version, the bean-jar file cannot be generated - then you have to select an existing one.
+* get the newest version of <a href="https://sourceforge.net/projects/tsl2nano/">tsl2.nano.h5</a>
+* start this jar file with _java -jar tsl2.nano.h5.[version-number].jar_. this will create the environments _config_ and _sample_ and a _run.bat_.
+* go into the extracted sub-directory _sample_ and start the _Windows_-batch file _runServer.bat_. This will start the sample database.
 * start the _run.bat_
 * if you are not on a _Windows_ system, start your internet browser with adress _localhost:8067_, or just do a double-click on the file _application.html_
 * In the center of the browser-page do a click on the centered link, starting with text 'Start...'
 * Do a login filling the user-name 'time' and password 'time' and clicking the Ok-Button.
 * After a while you will see all availabe entity-types to be browsable...
 
+### Online Quick-Start with a great selection of Database-Models on PonyORM
+
+There are some online database-model creation/using provider like PonyORM (ponyorm.com) and ERDPlus (erdplus.com). This may be a fast possibility to see different database models working in tsl2.nano.h5.
+
+Since most UML-model designer will generate a DDL (database definition language) script which may use a specific database dialect, we try to use HSqldb as local database server with compatibility modes switched on. See _Database Providers and Dialects_ for more informations.
+
+Here is a short description how to use a model from PonyORM and starting a full database-application with web-start on that model:
+
+ - open the link https://editor.ponyorm.com/user/pony/OnlineStore in your browser
+ - select a datbase dialect on the top tab panel and click on it (prefered: oracle)
+ - click the button _select all_
+ - copy the selection to the clipboard using _Ctrl+C_ or simply with the context menu of a right-mouse-click on the selection
+ - go to the tsl2.nano.h5 documentation page https://sourceforge.net/p/tsl2nano/wiki/Home/ and click on the link _Start Nano.H5 through WebStart_ http://sourceforge.net/projects/tsl2nano/files/0.7.0-beta/nano.h5.jnlp
+ - after a while, Nano.H5 will open a page in your browser. click on the centered link of that page
+ - expand the detail panel
+ - click into the field _Database_
+ - paste the text from clipboard with Ctrl+V  or simply using the context menu of a right-mouse click on the field
+ - click on the _OK_ Button at the bottom
+ - after some minutes, Nano.H5 should show a list of available beans/tables.
+ 
 ### Overview
 
 The tsl2.nano.h5 framework can be started through it's jar _tsl2.nano.h5-xxxxx.jar_. A start script _run.bat_ (will be generated on first start) is available to do this in _Windows_. Starting it, a given directory is used as a kind of workspace where you put all configuration and jar files into - to be used. This jars may be ant, an o/r-mapper like hibernate with all it's dependencies. The configuration files are _the environment.xml_ and all xml files describing the presentation of each entity bean. Icons for all buttons and backgrounds are in the _icons_ folder. The main jar file can contain all dependent jar files (as described in the manifest file) or outside in the same directory as the main jar.
@@ -1540,6 +1562,10 @@ It is possible to enhance the logging level as start parameter, too. add the par
 
 To start the application in test mode, add the parameter *-Dtsl2.nano.test=true*. This will change the behaviour of creating new items. on test mode, all duty fields will be filled with default values to enable test engines save new entities without user input.
 
+### Testing JPA-Providers and the persistence.xml
+
+If you want to test some properties in the persistence.xml without letting _nano.h5_ generate it from template persistence.tml, change the environment property _login.save.persistence_ to _false_.
+
 ### Help on Html5
 
 Normally, you don't have to create html-pages by yourself, but if you are interested in html5, have a look at the following tutorials/references:
@@ -1881,8 +1907,25 @@ Here is a list of currently available browser solutions to create model graphs:
 * Hit Menu 'Create SQL Script' using the defaults and saving the shown sql script into your tsl2.nano.h5 environment directory 'anyway' with name 'anyway.sql'.
 * Go into this environment directory and start the script 'mda' with parameter 'anyway'.
 
-TODO
+## Database Providers and Dialects
 
+There are defined ANSI SQL Standards, but most datbase providers use additional specific function sets. So, JPA providers like hibernate use distinguished database dialects on different database systems.
+
+For a small and fast java database, providing most features of SQL-92, HSQLDB is the first selection. HSQLDB provides additional features to switch on compatibility mode for some dialects:
+ - DB2				: SET DATABASE SQL SYNTAX DB2 TRUE;
+ - MySQL			: SET DATABASE SQL SYNTAX MYS TRUE;
+ - MS SQL Server	: SET DATABASE SQL SYNTAX MSS TRUE;
+ - Oracle			: SET DATABASE SQL SYNTAX ORA TRUE;
+ - PostGres			: SET DATABASE SQL SYNTAX PGS TRUE;
+
+These dialects can be switched on through the connection-url, too:
+ - DB2				: ;sql.syntax_db2=true
+ - MySQL			: ;sql.syntax_mys=true
+ - MS SQL Server	: ;sql.syntax_mss=true
+ - Oracle			: ;sql.syntax_ora=true
+ - PostGres			: ;sql.syntax_pgs=true
+
+This is useful if DDL generators create specific dialects - or simply for testing.
 
 ## List of data-sources: 
 

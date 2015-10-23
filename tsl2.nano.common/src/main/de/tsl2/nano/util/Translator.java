@@ -52,20 +52,24 @@ public class Translator {
         Set<Object> keySet = origin.keySet();
         Properties target = new Properties();
         int tries = 0;
+        String word = null;
         for (Object k : keySet) {
             try {
-                target.put(k, translate(srcLang, destLang, origin.get(k).toString()));
+                word = origin.get(k).toString();
+                if (word.matches("\\w+")) //translate only 'real' words!
+                    target.put(k, translate(srcLang, destLang, word));
             } catch (Exception e) {
-                if (tries++ < 3) {
-                    ConcurrentUtil.sleep(1000);
+                if (tries++ < 20) {
+                    LOG.info("...retrying translation on word " + target.size() + " / " + origin.size());
+                    ConcurrentUtil.sleep(3000);
                     try {
-                        target.put(k, translate(srcLang, destLang, origin.get(k).toString()));
+                        target.put(k, translate(srcLang, destLang, word));
                         continue;
                     } catch (Exception e1) {
                         //Ok, log only the first error and stop
                     }
                 }
-                LOG.error("stopping translation on word '" + origin.get(k) + "' in cause of error: ", e);
+                LOG.error("stopping translation on word '" + origin.get(k) + "' in cause of error: " + e.toString());
                 LOG.info("only " + target.size() + " of " + origin.size() + " were translated!");
                 break;
             }

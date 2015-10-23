@@ -1631,6 +1631,9 @@ public class Html5Presentation<T> extends BeanPresentationHelper<T> implements I
                     width = "50";
                 }
                 boolean isOption = "checkbox".equals(type);
+                //Attention on Autoboxing with null values!
+                boolean hasTrueValue = isOption && beanValue.getValue() != null ? (Boolean)beanValue.getValue() : false;
+                
                 input =
                     appendElement(
                         cell,
@@ -1659,8 +1662,8 @@ public class Html5Presentation<T> extends BeanPresentationHelper<T> implements I
                         ATTR_MAXLENGTH,
                         (beanValue.length() > 0 ? String.valueOf(beanValue.length()) : String
                             .valueOf(Integer.MAX_VALUE)),
-                        (isOption ? enable(ATTR_CHECKED, (Boolean) beanValue.getValue()) : ATTR_VALUE),
-                        (isOption ? ((Boolean) beanValue.getValue() ? "checked" : null) : getValue(beanValue, type)),
+                        (isOption ? enable(ATTR_CHECKED, hasTrueValue) : ATTR_VALUE),
+                        (isOption ? (hasTrueValue ? "checked" : null) : getValue(beanValue, type)),
                         ATTR_TITLE,
                         p.getDescription()
                             + (LOG.isDebugEnabled() ? "\n\n" + "<![CDATA[" + beanValue.toDebugString() + "]]>" : ""),

@@ -187,7 +187,7 @@ public class CollectionUtil {
     }
 
     /**
-     * find
+     * finds an entry through bean-reflection
      * 
      * @param <T> collection type
      * @param source source collection

@@ -537,6 +537,20 @@ public class NetUtil {
     }
 
     /**
+     * checks, if a server socket could be created for the given port. if true, it will be closed immediately.
+     * @param port port to check
+     * @return true, if there is already a server socket on this port, otherwise false
+     */
+    public static boolean isOpen(int port) {
+        try {
+            new ServerSocket(port).close();
+            return false;
+        } catch (IOException e) {
+            return true;
+        }
+    }
+
+    /**
      * creates a new socket and connects it to the given server (host + port)
      * 
      * @param host server

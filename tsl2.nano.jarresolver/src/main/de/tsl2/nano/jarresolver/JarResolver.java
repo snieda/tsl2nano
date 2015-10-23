@@ -372,7 +372,7 @@ public class JarResolver {
             final String JAR_REGEX0 = "[a-zA-Z0-9_.-]+" + "\\.jar";
             jarName = StringUtil.extract(content, JAR_REGEX0);
         }
-        LOG.info("findjar.com found '" + jarName + "' for class '" + pck);
+        LOG.info("findjar.com found '" + jarName + "' for class " + pck);
         return Util.isEmpty(jarName) ? null : jarName;
     }
 

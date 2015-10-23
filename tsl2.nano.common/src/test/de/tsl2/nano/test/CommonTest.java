@@ -78,6 +78,7 @@ import de.tsl2.nano.core.ManagedException;
 import de.tsl2.nano.core.classloader.NestedJarClassLoader;
 import de.tsl2.nano.core.cls.BeanAttribute;
 import de.tsl2.nano.core.cls.BeanClass;
+import de.tsl2.nano.core.cls.PrimitiveUtil;
 import de.tsl2.nano.core.execution.Profiler;
 import de.tsl2.nano.core.log.LogFactory;
 import de.tsl2.nano.core.util.Crypt;
@@ -1537,4 +1538,11 @@ public class CommonTest {
         assertEquals(p, t);
     }
 
+    @Test
+    public void testPrimitives() throws Exception {
+        int i = 10;
+        long l = PrimitiveUtil.convert(i, long.class);
+//        Long l = long.class.cast(i);
+        assertEquals(i, l);
+    }
 }
