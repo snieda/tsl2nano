@@ -73,7 +73,7 @@ public class Diff<T> {
         for (IAttribute a : attrs) {
             v1 = a.getValue(first);
             v2 = a.getValue(second);
-            if (!v2.equals(v2)) {
+            if ((v1 != null && !v1.equals(v2)) || (v1 == null && v2 != null)) {
                 diffs.add(new Difference(a.getName(), v1, v2));
             }
         }

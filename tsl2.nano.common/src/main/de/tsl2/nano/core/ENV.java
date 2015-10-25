@@ -806,6 +806,7 @@ public class ENV implements Serializable {
         File destFile = new File(fileName);
         File file = destFile.isAbsolute() ? destFile : new File(getConfigPath() + (flat ? destFile.getName() : fileName));
         if (!file.exists()) {
+            logger(ENV.class).debug("extracting resource " + resourceName);
             if (file.getParentFile() != null)
                 file.getParentFile().mkdirs();
             InputStream res = get(ClassLoader.class).getResourceAsStream(resourceName);

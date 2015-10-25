@@ -168,7 +168,7 @@ public class NanoH5 extends NanoHTTPD implements ISystemConnector<Persistence> {
         });
         try {
 //            LogFactory.setLogLevel(LogFactory.LOG_ALL);
-            LOG.info(System.getProperties());
+            LOG.debug(System.getProperties());
             createStartPage();
 
             try {
@@ -252,8 +252,10 @@ public class NanoH5 extends NanoHTTPD implements ISystemConnector<Persistence> {
      * scripts. for more informations, see {@link #LIBS_STANDALONE}.
      */
     private void onStandaloneExtractJars() {
-        if (FileUtil.hasResource(ZIP_STANDALONE)) {
-            ENV.extractResource("hibernate-jpa-2.1-api-1.0.0.Final.jar", true, false);
+        final String JAR_JPA_API = "hibernate-jpa-2.1-api-1.0.0.Final.jar";
+        if (FileUtil.hasResource(ZIP_STANDALONE) && !new File(ENV.getConfigPath() + JAR_JPA_API).exists()) {
+            LOG.info("extracting " + ZIP_STANDALONE + " and " + JAR_JPA_API);
+            ENV.extractResource(JAR_JPA_API, true, false);
             FileUtil.extractNestedZip(ZIP_STANDALONE, ENV.getConfigPath(), null);
         }
     }

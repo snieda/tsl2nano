@@ -335,6 +335,12 @@ Here is a short description how to use a model from PonyORM and starting a full 
  - click on the _OK_ Button at the bottom
  - after some minutes, Nano.H5 should show a list of available beans/tables.
  
+#### Known Problems on HsqlDB compatibility mode or DDL scripts provided by PonyORM
+
+*     mysql   : AUTO_INCREMENT must be before PRIMARY KEY
+*     postgres: BYTEA <-- unknown
+*     oracle  : Triggers with :NEW
+
 ### Overview
 
 The tsl2.nano.h5 framework can be started through it's jar _tsl2.nano.h5-xxxxx.jar_. A start script _run.bat_ (will be generated on first start) is available to do this in _Windows_. Starting it, a given directory is used as a kind of workspace where you put all configuration and jar files into - to be used. This jars may be ant, an o/r-mapper like hibernate with all it's dependencies. The configuration files are _the environment.xml_ and all xml files describing the presentation of each entity bean. Icons for all buttons and backgrounds are in the _icons_ folder. The main jar file can contain all dependent jar files (as described in the manifest file) or outside in the same directory as the main jar.
@@ -1893,7 +1899,7 @@ Here is a list of currently available browser solutions to create model graphs:
 
 * https://wiki.postgresql.org/wiki/Community_Guide_to_PostgreSQL_GUI_Tools
 	* http://www.jrromero.net/tools/jsUML2
-	* Gliffy
+	* Gliffy (https://www.gliffy.com/)
 	* Creatly.com
 	* Diagram.ly
 	* LucidChart
@@ -2459,8 +2465,11 @@ war:
 * jdbc-properties: wenn hsqldb dann default-schema PUBLIC
 
 ponyorm:
-* CR werden aus type=text entfernt --> type=textarea
-* Das Zeichen ` rausschmeissen
-* AUTO_INCREMENT, LONGBLOB,...
+* (v) CR werden aus type=text entfernt --> type=textarea
+* (v) Das Zeichen ` rausschmeissen
+* (x) AUTO_INCREMENT, LONGBLOB,... <-- hsqldb compatibility mode
+*     mysql   : AUTO_INCREMENT must be before PRIMARY KEY
+*     postgres: BYTEA
+*     oracle  : Triggers with :NEW
 
 erdplus: kann nichts allgemeines exportieren

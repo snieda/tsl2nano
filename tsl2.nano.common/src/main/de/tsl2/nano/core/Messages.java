@@ -155,7 +155,7 @@ public class Messages {
                 s = StringUtil.toFirstUpper(s);
             }
         }
-        return StringUtil.concat(" ".toCharArray(), StringUtil.splitCamelCase(s));
+        return StringUtil.spaceCamelCase(s);
     }
 
     /**

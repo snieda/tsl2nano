@@ -32,7 +32,7 @@ public class Translator {
 //            "https://www.googleapis.com/language/translate/v2?key=INSERT-YOUR-KEY&q=hello%20world&source=en&target=de";
 
     public static final String translate(Locale srcLang, Locale destLang, String words) {
-        words = StringUtil.concat(" ".toCharArray(), StringUtil.splitCamelCase(words));
+        words = StringUtil.spaceCamelCase(words);
         words = words.replaceAll("[^\\w]+", "\\+");
         String request = MessageFormat.format(URL_TANSLATION_TEMPL, srcLang, destLang, words);
         return NetUtil.get(request).substring(2).trim();
