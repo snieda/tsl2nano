@@ -16,6 +16,10 @@
 crud, grud, crud2gui, crud2html, bean2html, entity2html, bean2gui, entity2gui, jpa2gui, jpa2html, jpa persistence provider, openjpa, hibernate, datanucleus, eclipselink, toplink, batoo, ormlite, ebean, data-editor, data-sheet, entity browser, jpa2, full stack framework, orm, o/r mapper
 </meta-tag>
 
+<description>
+crud, grud, crud2gui, crud2html, bean2html, entity2html, bean2gui, entity2gui, jpa2gui, jpa2html, jpa persistence provider, openjpa, hibernate, datanucleus, eclipselink, toplink, batoo, ormlite, ebean, data-editor, data-sheet, entity browser, jpa2, full stack framework, orm, o/r mapper
+</description>
+
 ## Introduction
 
 NanoH5 (or FullRelation) is an UI independent gui implementation framework providing a model driven design (MDA). It is bound to the app framework __tsl2.nano.commons__ and the jpa-service framework __tsl2.nano.serviceaccess__. It is possible to build a complete html5 application through a given class- or database-model. An Html5 presentation layer is provided as default.
@@ -566,6 +570,8 @@ Example for programmatically adding plugins:
 
 To do a structured work on a usable specification, rules, queries and actions can be defined before implementing or configuring the presentation. This is done by creating these items as xml-files inside the environments _specifiation_ directory. To see how it works, hit the applications menu button 'sample-codes' and have a look into the specification directory.
 
+All items in the specification directory will be tested against their own _specification_ entries. These are assertions for simple test or boundary conditions. The tests/checks are done on creating the instances of the rules. To switch these tests off, set the environment variable _"rule.check.specifications"_ to false.
+
 Example for a query:
 
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -618,7 +624,7 @@ This action will be shown as button in your beansdefs detail view.
 
 ### The rule cover
 
-The rule cover is a plugin-mechanism to override fix values of beandefinition properties through the dynamic evaluation of referenced specification rules.
+The rule cover is a plugin-mechanism to override fix values of beandefinition properties through dynamic evaluation of referenced specification rules.
  
 Example, referencing a rule for a property of your beandefinition:
 
@@ -631,6 +637,14 @@ Example, referencing a rule for a property of your beandefinition:
 </beanDefinition>
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
+### Defining a rule through javascript
+
+Use a _RuleScript_ to define a rule with a javascript expression.
+ 
+### Defining an action through javascript
+
+Use a _ActionScript_ to define an action with a javascript expression.
+ 
 ## The _ScriptTool_
 
 After login, you are able to execute queries and scripts like ant-scripts. You have to enable it in your _environment.xml_ to see the _ScriptTool_ in the list of _BeanCollectors_.
@@ -831,6 +845,22 @@ Example:
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 persistence.connectionUrl=<a href="http://www.databasedrivers.com/jdbc/">Database-URL</a>
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+There is a standard filter to present only non-technical single value fields. So, the following types of attributes will not be shown on default:
+ - multiple values (like collections)
+ - id fields (mostly filled by generic sequences)
+ - timestamps (filled automatically by system; use DATE and TIME for user inputs)
+ 
+The _BeanPresentationHelper.isDefaultAttribute(IAttribute attribute)_ implements that filter and can be switched off by setting the environment variable _bean.use.beanpresentationhelper.filter_ to _false_. Or you can set switches for the three types directly:
+ - default.present.attribute.id: regular expression - e.g.: .*
+ - default.present.attribute.multivalue: regular expression - e.g.: .*
+ - default.present.attribute.timestamp: regular expression - e.g.: .*
+
+Be careful, jpa generators like hibernate may change their implementation on generated temporal types from DATE to TIMESTAMP.
+
+#### Dynamic Attribute Presentation
+
+The presentation of an attribute can be defined through an xml file. To use dynamic presentation values, you can use the plugin _RuleCover_ which will invoke the given rule for a defined property.
 
 #### Attribute Declaration
 
@@ -1330,15 +1360,17 @@ TODO: use bean-path to inspect condition expressions like 'times.type = F'.
 
 ## Database Replication - Working Offline
 
-It is possible to replicate the data loaded from a remote database. The environments property _use.database.replication_ must be true (default is false!). The replication will be done through a second persistence-unit 'replication' (see _mypersistence.xml_). For each user an own local replication database will be created.
+It is possible to replicate the data loaded from a remote database. The environments property _use.database.replication_ must be true (default is false!). The replication will be done through a second persistence-unit 'replication' (see _persistence.xml_). For each user an own local replication database will be created.
 
 The replication is done in it's own thread to avoid conflictions with the application. The O/R mapper will create all tables through bean informations. A special bean holds the information (time, id, change-type) about the changes done by the user. All data, loaded and edited by the current user will be replicated to a local database. Of course the dependent data will be replicated, too, to have a valid datastore.
 
 The replication connection is configurable like the persistence-unit is. But at the moment, only the combination hsqldb and hibernate are tested - and it's only usable in standalone-mode - without application-server!
 
-The replications hsqldb database will be started internally.
+The replications hsqldb database will be started internally (configuration :see META-INF/persistence.tml).
 - database: replication-<user-name>
 - port: 9898
+
+If the model cycles entity relations, replication may fail. Sometimes, it helps to increase the heap memory (specially for the permormance) - if not, you should select other bean instance (base instances) before to replicate.
 
 ## Working on multiple Databases
 
@@ -1477,6 +1509,10 @@ To refresh dependent values after changing a special value, do the following:
 * create a new class, implementing _WebSocketDependencyListener.evaluate()_
 * add an instance of this dependency listener to the special values change-handler.
 
+available implementations:
+* WebSocketDependencyListener
+* WebSocketRuleDependencyListener
+
 Example: creating a dependency listener
 
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -1489,6 +1525,38 @@ BeanDefinition b = BeanDefinition.getBeanDefinition(org.anonymous.project.Person
         return "my-refreshed-value:" + Util.asString(value);
     }
 });
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+more complex Example: creating a dependency listener
+
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+final BeanDefinition b = BeanDefinition.getBeanDefinition(org.anonymous.project.Person);
+((AttributeDefinition)b.getAttribute("organisation")).changeHandler().addListener(new WebSocketDependencyListener(((AttributeDefinition)b.getAttribute("shortname")) {
+
+    @Override
+    protected Object evaluate(Object value) {
+	    //new value of attribute 'organisation'
+	    Object value = evt.newValue;
+	    //here we set dynamically which attribute depends on changes
+	    setAttribute(b.getAttribute("shortname"));
+	    //the evt.source holds the changed bean value
+	    IValueDefinition srcValue = (IValueDefinition)evt.getSource();
+	    //here we get the old value of the dependent attribute 'shortname'
+	    //through srcValue.getInstance() you could get all other values with Bean.getBean(srcValue)
+	    Object lastAttributeValue = getAttribute().getValue(srcValue.getInstance());
+	    //return the refreshed value for attribute 'shortname' 
+	    return value + "/" + lastAttributeValue;
+    }
+});
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+If you use the _WebSocketRuleDependencyListener_ you set a rule name to call a specification rule for evaluate the new attribute value. This dependency listener can be embedded into the owning attributedefinition of the presentation xml file.
+
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    BeanDefinition b =
+        BeanDefinition.getBeanDefinition(BeanClass.createBeanClass("org.anonymous.project.Person").getClazz());
+    ((AttributeDefinition) b.getAttribute("name")).changeHandler().addListener(
+        new WebSocketRuleDependencyListener<T>(b.getAttribute("shortname"), "shortname", "rule-shortname"));
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 ### Monitoring and refreshing a value through REST services and a Timer
@@ -1860,7 +1928,7 @@ set the following *environment.xml* properties:
 * set log-level to info: *default.log.level=8*
 * disable multiple field/column filter: *collector.use.multiple.filter=false*
 * get only 50 lines per search: *service.maxresult=50*
-* ???: *bean.use.beanpresentationhelper.filter=false*
+* don't use the attribute pre-filter: *bean.use.beanpresentationhelper.filter=false*
 * turn off replication: *use.database.replication = false*
 
 ## Android
@@ -1904,7 +1972,10 @@ Here is a list of currently available browser solutions to create model graphs:
 	* Diagram.ly
 	* LucidChart
 	* MxGraph (jGraph)
-
+	* Draw.io
+	* PonyORM
+	* Mogway ER Designer (Java Webstart, creates DDL) http://mogwai.sourceforge.net/erdesignerng/erdesignerng.jnlp
+	
 ##### The Model
 
 * Please downlad SQL Power Architect from http://www.sqlpower.ca/page/download?fileName=http://download.sqlpower.ca/architect/1.0.7/community.
@@ -2122,7 +2193,8 @@ Actual list: http://infocenter.pentaho.com/help/index.jsp?topic=%2Fsupported_com
  0.7.0f | 10.05.2015 | new: RESTful service access, mouseclick access on dependency listeners
  0.7.0g | 17.05.2015 | new: Secure Attributes: hashes or encrypts attribute values on runtime
  0.7.0h | 17.10.2015 | webstart/jnlp, war, automatic translation
- 
+ 0.8.0b | 15.11.2015 | refactorings, replication enhanced, dependency listeners now persistable/configurable, changes on beandef xml and xsd
+
 [GLOSSARY]
 
 ## TODOs
@@ -2406,11 +2478,14 @@ Net:Connection-->Link-->Cover(content, descriptor)
 * (v) Bilder mit blob?
 * (v) Summenzeile (beandef oder columndef: + summarize=$feld1-$feld2)
 * Wochentage + unterschiedliche Farben am WE+Feiertage
+* DependencyListener für Stunden-Berechnung: Ende-Beginn
+* Sekunden entfernen
 * macros aufnehmen und abspielen
 * verschiedene workflows zur verfügung stellen
 * datenbank-user --> benutzer --> session-context + actions
 * (v) Statistik eingeschränkt auf Suchparameter
 * https://editor.ponyorm.com/explore
+* erweiterte attribut-sortierung: von --> bis, string --> date --> time --> value --> timestamp --> blob
 
 * NanoTask, NanoProc, NanoLogic?
 * (-) TODO: simplexml --> xstream
@@ -2446,7 +2521,13 @@ Net:Connection-->Link-->Cover(content, descriptor)
 * signing: probleme beim start von ant script reverseeng.xml: LogFactory
 * property jnlpx.origFilenameArg (how to get the root jar from jnlp)
 * *admin-anyway.sql* verlagern, damit es bei jnlp nicht angezogen wird
-* jnlp: funktioniert erst beim zweiten Start <-- jars abwarten
+* (v) jnlp: funktioniert erst beim zweiten Start <-- jars abwarten
+* was tun, wenn zum zweiten Mal generiert wird und schon Klassen in generated-src vorhanden sind? diese sind dann von jpa nicht ladbar.
+* doc+test rulescript, actionscript (javascript)
+* kion: javax.persistence.PersistenceException: org.hibernate.PropertyValueException: not-null property references a null or transient value : de.eom.kion.beans.festsetzung.steuerakte.Austrittregel._austrittregel_BUNDESLANDIDBackref
+* Doc: Verwende am besten Chrome+Hibernate+Hsqldb
+* implement XmlPresentableConverter to provide readable xml files
+* test: create random data through lists with: german-names.lst, cities.lst, countries.lst, banks.lst
 
 war:
 * WEB-INF/web..xml rausschmeissen
