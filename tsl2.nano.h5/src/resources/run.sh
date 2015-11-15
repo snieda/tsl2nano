@@ -20,7 +20,7 @@ if [ "$3"== "nopause" ] then `set NOPAUSE=nopause` fi
 #set USERDIR=-Duser.dir=$PRJ
 #set LANG=-Duser.country=FR -Duser.language=fr
 #@start javaw
-java $OFFLINE $LANG $USERDIR $NANO_DEBUG  -Xmx512m -Djava.awt.headless=true $DEBUG $UH -jar tsl2.nano.h5.0.7.0.jar $PRJ $PORT 
+java $OFFLINE $LANG $USERDIR $NANO_DEBUG  -Xmx512m -Djava.awt.headless=true $DEBUG $UH -jar tsl2.nano.h5.0.8.0.jar $PRJ $PORT 
 #-agentpath:...visualvm_138/profiler/lib/deployed/jdk16/windows/profilerinterface.dll=...\visualvm_138\profiler\lib,5140
 #>$PRJ.log
 if [ not "$NOPAUSE" == "nopause" ] then pause fi
