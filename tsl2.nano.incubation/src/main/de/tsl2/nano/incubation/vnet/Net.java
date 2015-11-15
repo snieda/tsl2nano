@@ -19,11 +19,13 @@ import java.util.Map;
 import java.util.TreeMap;
 
 import de.tsl2.nano.core.ENV;
+import de.tsl2.nano.core.IPredicate;
 import de.tsl2.nano.core.ManagedException;
 import de.tsl2.nano.core.util.ListSet;
 import de.tsl2.nano.messaging.EventController;
 import de.tsl2.nano.messaging.IListener;
 import de.tsl2.nano.structure.IConnection;
+import de.tsl2.nano.structure.INode;
 
 /**
  * provides a virtual net with {@link Node}s having {@link Connection}s to several other {@link Node}s. Each
@@ -109,6 +111,26 @@ public class Net<T extends IListener<Notification> & ILocatable & Serializable &
     }
 
     /**
+     * TODO: implement and test
+     * <p/>
+     * crawler starting from root - adding all connections that satisfy addingCondition. crawls the network of nodes
+     * through all of its connections. you can use the standard {@link Node} implementation or implement your own
+     * {@link INode} defining its special connections.
+     * 
+     * @param root INode implementation holding the root object.
+     * @param addingCondition
+     * @return all items found through crawling the nodes net.
+     */
+    public ListSet<INode<T, D>> crawl(INode<T, D> root, IPredicate<INode<T, D>> addingCondition) {
+        ListSet<INode<T, D>> result = new ListSet<INode<T, D>>();
+        for (IConnection<T, D> c : root.getConnections()) {
+            if (addingCondition.eval(c.getDestination()))
+                result.add(c.getDestination());
+        }
+        return result;
+    }
+
+    /**
      * remove
      * 
      * @param nodeCore node to be removed
@@ -127,14 +149,14 @@ public class Net<T extends IListener<Notification> & ILocatable & Serializable &
         Collection<Node<T, D>> nodes = elements.values();
         for (Node<T, D> n : nodes) {
             //check, if node n has right path to be notified
-            if (notification.notifiy(n)) {
+            if (notification.notify(n)) {
                 n.notify(notification);
             }
         }
     }
 
     /**
-     * does the whole job. sends all notifications, waits until all nodes are ready, collects all results of all
+     * does the whole job. sends a notification to all dependent net nodes, waits until all nodes are ready, collects all results of all
      * notifications and returns a result list.
      * 
      * @param <R> result type
@@ -178,7 +200,7 @@ public class Net<T extends IListener<Notification> & ILocatable & Serializable &
         while (timeout != -1 || System.currentTimeMillis() - start > timeout) {
             log_("\ndelegating notification " + notification + " to idle nodes (count: " + count++ + ")...");
             for (Node<T, D> n : nodes) {
-                if (notification.notifiy(n) && n.isIdle()) {
+                if (notification.notify(n) && n.isIdle()) {
                     n.notify(notification);
                     return;
                 }

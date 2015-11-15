@@ -101,7 +101,7 @@ public class Notification implements ILocatable {
      * @param obj object to evaluate
      * @return true, if given object should be notified
      */
-    public boolean notifiy(ILocatable obj) {
+    public boolean notify(ILocatable obj) {
         return path == null || obj.getPath().startsWith(path);
     }
 

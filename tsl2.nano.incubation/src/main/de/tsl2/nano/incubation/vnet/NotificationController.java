@@ -29,7 +29,7 @@ public class NotificationController extends ThreadingEventController {
 
     @Override
     public void handle(IListener l, Object e) {
-        if (((Notification) e).notifiy((ILocatable) l)) {
+        if (((Notification) e).notify((ILocatable) l)) {
             super.handle(l, e);
         }
     }
