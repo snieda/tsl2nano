@@ -46,8 +46,10 @@ public class Presentable implements IIPresentable, Serializable {
     int style = UNSET;
     @Element(required = false)
     String label;
+    transient String translatedLabel;
     @Element(required = false)
     String description;
+    transient String translatedDescription;
     //normally only serializable - but simple-xml has problems to serialize hashmaps, if they aren't directly declared.
     @ElementMap(entry = "layout", key = "name", attribute = true, inline = true, valueType = String.class, required = false)
     protected LinkedHashMap<String, String> layout;
@@ -130,7 +132,7 @@ public class Presentable implements IIPresentable, Serializable {
         if (!initialized) {
             initDeserialization();
         }
-        return description;
+        return translatedDescription;
     }
 
     /**
@@ -208,7 +210,7 @@ public class Presentable implements IIPresentable, Serializable {
         if (!initialized) {
             initDeserialization();
         }
-        return label;
+        return translatedLabel;
     }
 
     /**
@@ -406,14 +408,15 @@ public class Presentable implements IIPresentable, Serializable {
     @Commit
     protected void initDeserialization() {
         //try to translate after first loading
+        translatedDescription = description;
         if (description != null && description.equals(label)) {
             String d = ENV.translate(label + Messages.POSTFIX_TOOLTIP, false);
             if (d != null && !d.startsWith(Messages.TOKEN_MSG_NOTFOUND)) {
-                description = d;
+                translatedDescription = d;
             }
         }
         if (label != null) {
-            label = ENV.translate(label, true);
+            translatedLabel= ENV.translate(label, true);
         }
         initialized = true;
     }

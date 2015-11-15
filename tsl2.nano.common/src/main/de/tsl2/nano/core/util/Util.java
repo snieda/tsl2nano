@@ -393,12 +393,16 @@ public class Util {
     @SuppressWarnings("unchecked")
     public static <T> T get(String name, T defaultValue) {
         Object result = System.getProperties().get(name);
-        if (result != null && defaultValue != null && !defaultValue.getClass().isAssignableFrom(result.getClass())) {
-            Format df = FormatUtil.getDefaultFormat(defaultValue, true);
-            try {
-                return (T) df.parseObject((String) result);
-            } catch (ParseException e) {
-                ManagedException.forward(e);
+        if (result != null) {
+            if (defaultValue != null && !defaultValue.getClass().isAssignableFrom(result.getClass())) {
+                Format df = FormatUtil.getDefaultFormat(defaultValue, true);
+                try {
+                    return (T) df.parseObject((String) result);
+                } catch (ParseException e) {
+                    ManagedException.forward(e);
+                }
+            } else {
+                return (T) result;
             }
         }
         return defaultValue;

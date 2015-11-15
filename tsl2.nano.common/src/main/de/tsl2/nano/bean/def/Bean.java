@@ -27,6 +27,7 @@ import de.tsl2.nano.bean.BeanUtil;
 import de.tsl2.nano.bean.IConnector;
 import de.tsl2.nano.bean.IValueAccess;
 import de.tsl2.nano.collection.CollectionUtil;
+import de.tsl2.nano.collection.Entry;
 import de.tsl2.nano.collection.MapUtil;
 import de.tsl2.nano.collection.TimedReferenceMap;
 import de.tsl2.nano.core.ENV;
@@ -589,7 +590,7 @@ public class Bean<T> extends BeanDefinition<T> {
                 valueDef = copy(attr, valueDef, "parent");
                 //Workaround for 'parent' field in BeanValue to avoid a ConcurrentModificationException in Android
                 if (attr instanceof BeanValue)
-                    ((BeanValue)valueDef).setParent(((BeanValue)attr).getParent());
+                    ((BeanValue) valueDef).setParent(((BeanValue) attr).getParent());
                 BeanValue.beanValueCache.add((BeanValue) valueDef);
                 if (valueDef instanceof IPluggable) {
                     Collection<IConnector> plugins = ((IPluggable) valueDef).getPlugins();
@@ -657,6 +658,16 @@ public class Bean<T> extends BeanDefinition<T> {
             bean = createArrayBean(instanceOrName);
         } else if (Map.class.isAssignableFrom(instanceOrName.getClass())) {
             bean = createMapBean(instanceOrName);
+        } else if (Entry.class.isAssignableFrom(instanceOrName.getClass())) {
+            BeanDefinition<I> beandef =
+                    getBeanDefinition((Class<I>) BeanClass.getDefiningClass(instanceOrName.getClass()));
+                bean = createBean(instanceOrName, beandef);
+                Entry entry = (Entry) instanceOrName;
+                if (entry.getValue() != null) {
+                    IConstraint c = bean.getAttribute("value").getConstraint();
+                    c.setFormat(null);
+                    c.setType(BeanClass.getDefiningClass(entry.getValue().getClass()));
+                }
         } else {
             BeanDefinition<I> beandef =
                 getBeanDefinition((Class<I>) BeanClass.getDefiningClass(instanceOrName.getClass()));
@@ -693,8 +704,11 @@ public class Bean<T> extends BeanDefinition<T> {
         Map map = (Map) mapInstance;
         Bean bean = new Bean(map);
         Set keySet = map.keySet();
+        Object v;
         for (Object k : keySet) {
-            bean.addAttribute(new BeanValue(bean.instance, new MapValue(map.get(k).toString())));
+            v = map.get(k);
+            bean.addAttribute(new BeanValue(bean.instance, new MapValue(v, (v != null ? BeanClass.getDefiningClass(v
+                .getClass()) : null), null)));
         }
         return bean;
     }
@@ -773,7 +787,7 @@ public class Bean<T> extends BeanDefinition<T> {
         }
         super.onActivation();
     }
-    
+
     public String toStringDescription() {
         final Collection<? extends IAttribute> attributes = getAttributes();
         final StringBuilder buf = new StringBuilder(attributes.size() * 15);

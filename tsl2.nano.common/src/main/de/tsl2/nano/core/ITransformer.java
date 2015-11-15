@@ -7,7 +7,7 @@
  * 
  * Copyright: (c) Thomas Schneider 2013, all rights reserved
  */
-package de.tsl2.nano.collection;
+package de.tsl2.nano.core;
 
 /**
  * Transforms an object from S to T.

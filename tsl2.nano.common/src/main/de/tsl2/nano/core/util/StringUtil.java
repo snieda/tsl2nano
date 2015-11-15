@@ -20,6 +20,7 @@ import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import de.tsl2.nano.core.ITransformer;
 import de.tsl2.nano.core.ManagedException;
 import de.tsl2.nano.core.Messages;
 
@@ -254,6 +255,27 @@ public class StringUtil {
         if (i != -1) {
             str.replace(i, i + expression.length(), replacement);
         }
+    }
+
+    /**
+     * replaces all matches of regex in source src calling the callback {@link ITransformer#transform(String)} of your
+     * given transformer.
+     * 
+     * @param src source string
+     * @param regex regular expression to be matched before replace
+     * @param transformer callback to replace matches.
+     * @return transformed string
+     */
+    public static String replaceAll(CharSequence src, String regex, ITransformer<String, String> transformer) {
+        Matcher matcher = Pattern.compile(regex).matcher(src);
+        StringBuffer result = new StringBuffer(src.length());
+        while (matcher.find()) {
+            //while appendReplacement seems to block strings having special characters like '$', '{', the appending is done on #append()
+            matcher.appendReplacement(result, "");
+            result.append(transformer.transform(matcher.group()));
+        }
+        matcher.appendTail(result);
+        return result.toString();
     }
 
     /**
@@ -611,7 +633,7 @@ public class StringUtil {
     public static final String spaceCamelCase(String ccName) {
         return ccName.replaceAll("([a-z0-9])([A-Z])", "$1 $2");
     }
-    
+
     /**
      * concats the given names into one string separated by 'sep'. if a name is null, it will be ignored.
      * 

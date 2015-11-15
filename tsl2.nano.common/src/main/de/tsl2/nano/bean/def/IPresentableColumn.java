@@ -35,9 +35,9 @@ public interface IPresentableColumn extends IColumn {
     boolean isStandardSummary();
 
     /**
-     * getSummarize
+     * getSummary
      * 
-     * @return a summarize expression to be shown to the foot of a table. overwrites {@link #isStandardSummary()}.
+     * @return a summary expression to be shown to the foot of a table. overwrites {@link #isStandardSummary()}.
      */
     IValueExpression<?> getSummary();
 

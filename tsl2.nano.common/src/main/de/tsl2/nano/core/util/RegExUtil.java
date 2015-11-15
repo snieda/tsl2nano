@@ -51,6 +51,6 @@ public class RegExUtil {
             buf.append(terms[i] + concat);
         }
         buf.replace(buf.length() - 1, buf.length(), ")");
-        return buf.substring(0, buf.length() - 1);
+        return buf.toString();
     }
 }

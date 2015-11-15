@@ -33,6 +33,7 @@ import org.apache.tools.ant.util.CollectionUtils;
 import de.tsl2.nano.action.IAction;
 import de.tsl2.nano.bean.BeanUtil;
 import de.tsl2.nano.core.IPredicate;
+import de.tsl2.nano.core.ITransformer;
 import de.tsl2.nano.core.ManagedException;
 import de.tsl2.nano.core.cls.BeanAttribute;
 import de.tsl2.nano.core.log.LogFactory;

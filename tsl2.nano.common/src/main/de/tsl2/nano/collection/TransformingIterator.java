@@ -15,6 +15,7 @@ import java.lang.reflect.Proxy;
 import java.util.Iterator;
 import java.util.Queue;
 
+import de.tsl2.nano.core.ITransformer;
 import de.tsl2.nano.core.cls.BeanClass;
 
 /**

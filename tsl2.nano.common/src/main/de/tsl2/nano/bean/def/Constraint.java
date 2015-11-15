@@ -54,9 +54,9 @@ public class Constraint<T> extends AbstractConstraint<T> implements IConstraint<
     @Element(required = false)
     T defaultValue;
 
-    @Element(required = false)
+    @Attribute(required = false)
     private int scale = UNDEFINED;
-    @Element(required = false)
+    @Attribute(required = false)
     private int precision = UNDEFINED;
 
     @ElementList(inline = true, entry = "value", required = false)

@@ -32,6 +32,7 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.Properties;
 import java.util.ResourceBundle;
+import java.util.Scanner;
 import java.util.Set;
 import java.util.TreeMap;
 import java.util.TreeSet;
@@ -517,7 +518,12 @@ public class ENV implements Serializable {
             return Messages.getString((Enum<?>) key);
         } else {
             if (optional && args.length == 0) {
-                return Messages.getStringOpt((String) key, true);
+                return StringUtil.replaceAll((CharSequence)key, "[\\w\\.\\:\\\\/]+", new ITransformer<String, String>() {
+                    @Override
+                    public String transform(String toTransform) {
+                        return Messages.getStringOpt(toTransform, true);
+                    }
+                });
             } else if (args.length > 0) {
                 return Messages.getFormattedString((String) key, args);
             } else {
@@ -641,7 +647,7 @@ public class ENV implements Serializable {
      * @param obj object to serialize to xml.
      */
     public static void persist(Object obj) {
-        persist(obj.getClass() + ".xml", obj);
+        persist(obj.getClass().getSimpleName().toLowerCase(), obj);
     }
 
     /**
@@ -650,7 +656,7 @@ public class ENV implements Serializable {
      * @param obj object to serialize to xml.
      */
     public static void persist(String name, Object obj) {
-        self().get(XmlUtil.class).saveXml(name + ".xml", obj);
+        self().get(XmlUtil.class).saveXml(getConfigPath() + name + ".xml", obj);
     }
 
     /**

@@ -20,6 +20,7 @@ import java.lang.reflect.Proxy;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.HashMap;
 import java.util.Hashtable;
 import java.util.Iterator;
 import java.util.LinkedHashSet;
@@ -375,9 +376,15 @@ public class BeanClass<T> implements Serializable {
         LOG.debug("evaluate attributes with annotation :" + annotationType);
         final Collection<BeanAttribute> attributes = new LinkedList<BeanAttribute>();
         final Method[] methods = clazz.getMethods();
+        BeanAttribute attr;
         for (final Method m : methods) {
             if (getAnnotation(m.getAnnotations(), annotationType) != null) {
-                attributes.add(BeanAttribute.getBeanAttribute(clazz, BeanAttribute.getName(m)));
+                attr = BeanAttribute.getBeanAttribute(clazz, BeanAttribute.getName(m));
+                if (attr != null)
+                    attributes.add(attr);
+                else
+                    LOG.warn("method " + m + " is annotated with " + annotationType
+                        + " but no BeanAttribute could be found on it!");
             }
         }
         //on a declared or base (perhaps private) field?
@@ -387,7 +394,12 @@ public class BeanClass<T> implements Serializable {
             for (final Field f : fields) {
                 if (getAnnotation(f.getAnnotations(), annotationType) != null) {
                     LOG.debug("declared field with annotation found: " + f);
-                    attributes.add(BeanAttribute.getBeanAttribute(hierClass, f.getName()));
+                    attr = BeanAttribute.getBeanAttribute(hierClass, f.getName());
+                    if (attr != null)
+                        attributes.add(attr);
+                    else
+                        LOG.warn("field " + f + " is annotated with " + annotationType
+                            + " but no BeanAttribute could be found on it!");
                 }
             }
             // it's not possible to call a private field from extending class
@@ -1214,6 +1226,9 @@ class CachedBeanClass<T> extends BeanClass<T> {
      */
     private transient boolean readAndWriteAttributes;
 
+    /** on each call to {@link #getAnnotation(Class)} */
+    private transient Map<Class<? extends Annotation>, Collection<BeanAttribute>> annotatedAttributes;
+
     /** cache to avoid multiple calls on Class.getMethods() and creation of BeanAttribute instances */
     protected transient static final Map<Class, BeanClass> bcCache = new Hashtable<Class, BeanClass>();
 
@@ -1242,6 +1257,18 @@ class CachedBeanClass<T> extends BeanClass<T> {
             attributes = super.getAttributes(this.readAndWriteAttributes = readAndWriteAccess);
         }
         return new ArrayList<IAttribute>(attributes);
+    }
+
+    @Override
+    public Collection<BeanAttribute> findAttributes(Class<? extends Annotation> annotationType) {
+        if (annotatedAttributes == null)
+            annotatedAttributes = new HashMap<Class<? extends Annotation>, Collection<BeanAttribute>>();
+        Collection<BeanAttribute> result;
+        if ((result = annotatedAttributes.get(annotationType)) == null) {
+            result = super.findAttributes(annotationType);
+            annotatedAttributes.put(annotationType, result);
+        }
+        return result;
     }
 
     /**

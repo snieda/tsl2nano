@@ -69,11 +69,11 @@ import de.tsl2.nano.bean.enhance.BeanEnhancer;
 import de.tsl2.nano.collection.ArrSegList;
 import de.tsl2.nano.collection.CollectionUtil;
 import de.tsl2.nano.collection.FloatArray;
-import de.tsl2.nano.collection.ITransformer;
 import de.tsl2.nano.collection.MapUtil;
 import de.tsl2.nano.core.AppLoader;
 import de.tsl2.nano.core.Argumentator;
 import de.tsl2.nano.core.ENV;
+import de.tsl2.nano.core.ITransformer;
 import de.tsl2.nano.core.ManagedException;
 import de.tsl2.nano.core.classloader.NestedJarClassLoader;
 import de.tsl2.nano.core.cls.BeanAttribute;
@@ -1321,7 +1321,7 @@ public class CommonTest {
         NestedJarClassLoader cl = new NestedJarClassLoader(contextClassLoader, "standalone") {
             @Override
             protected String getRootJarPath() {
-                return "../../target/test.h5.sample/tsl2.nano.h5.0.7.0-standalone.jar";
+                return "../../target/test.h5.sample/tsl2.nano.h5.0.8.0-standalone.jar";
             }
 //
 //            @Override
@@ -1398,7 +1398,7 @@ public class CommonTest {
                 public void run() {
                     //https://sourceforge.net/projects/tsl2nano/files/latest/download?source=navbar
                     NetUtil.download(
-                        "http://sourceforge.net/projects/tsl2nano/files/0.7.0-beta/tsl2.nano.h5.0.7.0.jar/download",
+                        "http://sourceforge.net/projects/tsl2nano/files/0.8.0-beta/tsl2.nano.h5.0.7.0.jar/download",
                         "test/", true, true);
                 }
             });

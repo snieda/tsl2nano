@@ -488,7 +488,7 @@ public class BeanValue<T> extends AttributeDefinition<T> implements IValueDefini
      * @return Returns a given parent or the standard parent evaluated from instance.
      */
     public Bean<?> getParent() {
-        return parent != null ? parent : Bean.getBean((Serializable) instance);
+        return parent != null || instance == null ? parent : Bean.getBean((Serializable) instance);
     }
 
     /**

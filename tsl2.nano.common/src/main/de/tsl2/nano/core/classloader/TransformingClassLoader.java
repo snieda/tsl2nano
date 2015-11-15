@@ -13,7 +13,7 @@ import java.io.IOException;
 import java.net.URL;
 import java.util.Enumeration;
 
-import de.tsl2.nano.collection.ITransformer;
+import de.tsl2.nano.core.ITransformer;
 
 /**
  * It is a {@link RuntimeClassloader}, manipulating search parameter for a new class or resource.

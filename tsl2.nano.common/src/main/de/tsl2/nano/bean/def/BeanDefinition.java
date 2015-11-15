@@ -72,7 +72,7 @@ import de.tsl2.nano.messaging.IListener;
  * @version $Revision$
  */
 @SuppressWarnings({ "rawtypes", "unchecked" })
-@Namespace(reference = BeanDefinition.BEANDEF_XSD)
+@Namespace(reference = "http://sourceforge.net/projects/tsl2nano ./" + BeanDefinition.BEANDEF_XSD)
 @Default(value = DefaultType.FIELD, required = false)
 public class BeanDefinition<T> extends BeanClass<T> implements IPluggable<BeanDefinition>, Serializable {
     static final String BEANDEF_XSD = "beandef.xsd";
@@ -904,7 +904,7 @@ public class BeanDefinition<T> extends BeanClass<T> implements IPluggable<BeanDe
      */
     public static <T> BeanDefinition<T> getBeanDefinition(final String name, Class<T> type, boolean fullInitStore) {
         volatileBean.name = name;
-        //TODO: think about use a structure through package path on file system
+        //TODO: think about using a structure through package path on file system
         int i = virtualBeanCache.indexOf(volatileBean);
         BeanDefinition<T> beandef = null;
         if (i == -1) {
@@ -1025,7 +1025,7 @@ public class BeanDefinition<T> extends BeanClass<T> implements IPluggable<BeanDe
              */
             Set<String> keys = attributeDefinitions.keySet();
             for (String k : keys) {
-                IAttribute a = attributeDefinitions.get(k);
+                IAttributeDefinition a = attributeDefinitions.get(k);
                 if (!a.getName().equals(k)) {
                     LOG.warn("attribute-definition name '" + k + "' differs from its attribute name '" + a.getName()
                         + "'");
@@ -1033,6 +1033,9 @@ public class BeanDefinition<T> extends BeanClass<T> implements IPluggable<BeanDe
                         a.setName(k);
                     }
                 }
+                //change listeners hold only the attribute-id and must have attribute instances
+                if (a instanceof AttributeDefinition)
+                    ((AttributeDefinition<T>)a).injectAttributeOnChangeListeners(this);
             }
             attributeFilter = attributeDefinitions.keySet().toArray(new String[0]);
             createNaturalSortedAttributeNames(attributeFilter);
@@ -1100,7 +1103,7 @@ public class BeanDefinition<T> extends BeanClass<T> implements IPluggable<BeanDe
             id = a.getId();
             if (ENV.translate(id, false).startsWith(Messages.TOKEN_MSG_NOTFOUND)) {
                 p.put(id, a.getPresentation().getLabel());
-                p.put(id + Messages.POSTFIX_TOOLTIP, a.getPresentation().getLabel());
+                p.put(id + Messages.POSTFIX_TOOLTIP, a.getPresentation().getDescription());
             }
         }
         Collection<IAction> actions = getActions();
@@ -1163,7 +1166,7 @@ public class BeanDefinition<T> extends BeanClass<T> implements IPluggable<BeanDe
                 if (!xmlFile.exists()) {
                     xmlFile.getParentFile().mkdirs();
                     if (FileUtil.hasResource(BEANDEF_XSD))
-                        ENV.extractResourceToDir(BEANDEF_XSD, xmlFile.getParentFile().getPath());
+                        ENV.extractResourceToDir(BEANDEF_XSD, xmlFile.getParentFile().getPath() + "/");
                 }
                 XmlUtil.saveXml(xmlFile.getPath(), this);
             } catch (Exception e) {

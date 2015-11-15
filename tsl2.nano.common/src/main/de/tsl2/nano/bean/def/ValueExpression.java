@@ -192,7 +192,7 @@ public class ValueExpression<TYPE> implements
             return null;
         }
         //if type is object we return the value itself - it's an instanceof Object
-        if (type.isAssignableFrom(Object.class)) {
+        if (type.isAssignableFrom(Object.class) || type.isAssignableFrom(Serializable.class)) {
             return (TYPE) toValue;
         }
 

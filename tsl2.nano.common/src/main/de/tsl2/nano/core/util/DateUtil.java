@@ -9,6 +9,7 @@
  */
 package de.tsl2.nano.core.util;
 
+import java.sql.Time;
 import java.text.DateFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
@@ -448,6 +449,24 @@ public final class DateUtil {
         return cal.getTime();
     }
 
+    /**
+     * delegates to {@link #getTime(int, int, int)} with second = 0.
+     */
+    public static Time getTime(int hour, int minute) {
+        return getTime(hour, minute, 0);
+    }
+    
+    /**
+     * getTime
+     * @param hour
+     * @param minute
+     * @param second
+     * @return new time instance
+     */
+    public static Time getTime(int hour, int minute, int second) {
+        return new Time(hour * HOUR_TO_MINUTES * MILLI_TO_MINUTES + minute * MILLI_TO_MINUTES + 1000 * second);
+    }
+    
     /**
      * returns desired part of date
      * 

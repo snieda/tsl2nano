@@ -569,7 +569,7 @@ public class BeanPresentationHelper<T> {
     }
 
     /**
-     * checks, if given attribute should be presented.
+     * checks, if given attribute should be presented. false will be returned on multivalues, ids and timestamps.
      * 
      * @param attribute attribute to check.
      * @return true, if attribute should be presented.
@@ -581,7 +581,7 @@ public class BeanPresentationHelper<T> {
                 false))
             && (!attr.isMultiValue() || matches("default.present.attribute.multivalue", true))
             && (attr.temporalType() == null || !Timestamp.class
-                .isAssignableFrom(attr.temporalType()) || matches("default.present.attribute.timestamp", false));
+                .isAssignableFrom(attr.temporalType()) || matches("default.present.attribute.timestamp", true));
     }
 
     /**

@@ -81,7 +81,7 @@ public class AttributeDefinition<T> implements IAttributeDefinition<T> {
     private IPresentable presentable;
     @Element(type = ValueColumn.class, required = false)
     private IPresentableColumn columnDefinition;
-    @Element(required = false)
+    @Attribute(required = false)
     private boolean doValidation = true;
     /** see {@link #composition()} */
     @Attribute(required = false)
@@ -191,9 +191,23 @@ public class AttributeDefinition<T> implements IAttributeDefinition<T> {
             ((ValueColumn) getColumnDefinition()).attributeDefinition = this;
         }
 
+        //injectAttributeOnChangeListeners() will be called from BeanDefinition
+        
+        //connect optional plugins
+        if (plugins != null) {
+            for (IConnector p : plugins) {
+                LOG.info("connecting plugin " + p + " to " + this);
+                p.connect(this);
+            }
+        }
+    }
+
+    /**
+     * uses the information of {@link #attributeID} to inject the real {@link AttributeDefinition} into registered change listeners
+     */
+    void injectAttributeOnChangeListeners(BeanDefinition beandef) {
         //provide dependency listeners their attribute-definition
         if (hasListeners()) {
-            BeanDefinition beandef = BeanDefinition.getBeanDefinition(getDeclaringClass());
             Collection<IListener> listener = changeHandler().getListeners(Object.class);
             for (IListener l : listener) {
                 if (l instanceof AbstractDependencyListener) {
@@ -201,13 +215,6 @@ public class AttributeDefinition<T> implements IAttributeDefinition<T> {
                     String name = StringUtil.substring(dl.attributeID, ".", null);
                     dl.setAttribute((AttributeDefinition) beandef.getAttribute(name));
                 }
-            }
-        }
-        //connect optional plugins
-        if (plugins != null) {
-            for (IConnector p : plugins) {
-                LOG.info("connecting plugin " + p + " to " + this);
-                p.connect(this);
             }
         }
     }
@@ -419,11 +426,11 @@ public class AttributeDefinition<T> implements IAttributeDefinition<T> {
      * @return parsed value
      */
     public T getParsedValue(String source) {
-//        if (StringUtil.isEmpty(source))
-//            return null;
         T value = null;
         if (getFormat() != null) {
             try {
+              if (Util.isEmpty(source) && nullable())
+                  return null;
                 //the parser will decide, how to handle empty/null values
                 value = (T) getFormat().parseObject(source);
             } catch (ParseException e) {
@@ -852,6 +859,7 @@ public class AttributeDefinition<T> implements IAttributeDefinition<T> {
     /**
      * {@inheritDoc}
      */
+    @Override
     public EventController changeHandler() {
         if (eventController == null) {
             eventController = new EventController();

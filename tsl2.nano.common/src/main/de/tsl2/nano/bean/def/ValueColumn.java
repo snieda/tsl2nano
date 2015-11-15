@@ -226,13 +226,20 @@ public class ValueColumn<T> implements IPresentableColumn, Serializable {
         return maxsearch;
     }
 
-    
     /**
      * @return Returns the standardSummary.
      */
     @Override
     public boolean isStandardSummary() {
         return standardSummary;
+    }
+
+    /**
+     * @param standardSummary The standardSummary to set.
+     */
+    public void setStandardSummary(boolean standardSummary) {
+        this.standardSummary = standardSummary;
+        this.summary = null;
     }
 
     /**
@@ -248,6 +255,7 @@ public class ValueColumn<T> implements IPresentableColumn, Serializable {
      */
     public void setSummary(IValueExpression<?> summary) {
         this.summary = summary;
+        this.standardSummary = false;
     }
 
     @Override
