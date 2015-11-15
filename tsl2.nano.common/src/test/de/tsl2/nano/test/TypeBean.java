@@ -14,6 +14,7 @@ import java.sql.Time;
 import java.sql.Timestamp;
 import java.util.Collection;
 import java.util.Date;
+import java.util.Map;
 
 /**
  * Simple Bean, holding attributes of most types.
@@ -24,6 +25,38 @@ import java.util.Date;
  * @version $Revision$
  */
 public class TypeBean implements Serializable, Comparable<TypeBean> {
+    public static final String ATTR_STRING = "string";
+    public static final String ATTR_BIGDECIMAL = "bigdecimal";
+    public static final String ATTR_DATE = "date";
+    public static final String ATTR_TIME = "time";
+    public static final String ATTR_TIMESTAMP = "timestamp";
+    public static final String ATTR_OBJECT = "object";
+    public static final String ATTR_COLLECTION = "collection";
+    public static final String ATTR_MAP = "map";
+    public static final String ATTR_ARRAYPRIMITIVE = "arrayPrimitive";
+    public static final String ATTR_ARRAYOBJECT = "arrayObject";
+    public static final String ATTR_WEEKDAYENUM = "weekdayEnum";
+    public static final String ATTR_TYPE = "type";
+    public static final String ATTR_BINARY = "binary";
+    public static final String ATTR_RELATION = "relation";
+
+    public static final String ATTR_PRIMITIVEBOOLEAN = "primitiveBoolean";
+    public static final String ATTR_PRIMITIVEBYTE = "primitiveByte";
+    public static final String ATTR_PRIMITIVECHAR = "primitiveChar";
+    public static final String ATTR_PRIMITIVESHORT = "primitiveShort";
+    public static final String ATTR_PRIMITIVEINT = "primitiveInt";
+    public static final String ATTR_PRIMITIVELONG = "primitiveLong";
+    public static final String ATTR_PRIMITIVEFLOAT = "primitiveFloat";
+    public static final String ATTR_PRIMITIVEDOUBLE = "primitiveDouble";
+
+    public static final String ATTR_IMMUTABLEBOOLEAN = "immutableBoolean";
+    public static final String ATTR_IMMUTABLEBYTE = "immutableByte";
+    public static final String ATTR_IMMUTABLECHAR = "immutableChar";
+    public static final String ATTR_IMMUTABLESHORT = "immutableShort";
+    public static final String ATTR_IMMUTABLEINTEGER = "immutableInteger";
+    public static final String ATTR_IMMUTABLELONG = "immutableLong";
+    public static final String ATTR_IMMUTABLEFLOAT = "immutableFloat";
+    public static final String ATTR_IMMUTABLEDOUBLE = "immutableDouble";
     /** serialVersionUID */
     private static final long serialVersionUID = -6960081067363829887L;
     String string;
@@ -53,13 +86,16 @@ public class TypeBean implements Serializable, Comparable<TypeBean> {
     Object object;
 
     Collection<?> collection;
+    Map<?,?> map;
     @Deprecated
     Object[] arrayObject;
     int[] arrayPrimitive;
-
+    byte[] binary;
     WeekdayEnum weekdayEnum;
     
     Class type;
+
+    TypeBean relation;
     
     /**
      * @return Returns the string.
@@ -438,6 +474,48 @@ public class TypeBean implements Serializable, Comparable<TypeBean> {
      */
     public void setType(Class type) {
         this.type = type;
+    }
+
+    /**
+     * @return Returns the map.
+     */
+    public Map<?, ?> getMap() {
+        return map;
+    }
+
+    /**
+     * @param map The map to set.
+     */
+    public void setMap(Map<?, ?> map) {
+        this.map = map;
+    }
+
+    /**
+     * @return Returns the binary.
+     */
+    public byte[] getBinary() {
+        return binary;
+    }
+
+    /**
+     * @param binary The binary to set.
+     */
+    public void setBinary(byte[] binary) {
+        this.binary = binary;
+    }
+
+    /**
+     * @return Returns the relation.
+     */
+    public TypeBean getRelation() {
+        return relation;
+    }
+
+    /**
+     * @param relation The relation to set.
+     */
+    public void setRelation(TypeBean relation) {
+        this.relation = relation;
     }
 
     /**
