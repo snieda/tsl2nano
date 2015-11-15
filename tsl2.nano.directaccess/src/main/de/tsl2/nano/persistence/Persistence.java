@@ -344,7 +344,7 @@ public class Persistence implements Serializable {
      * 
      * @throws IOException
      */
-    private void saveJdbcProperties() throws IOException {
+    protected void saveJdbcProperties() throws IOException {
         Properties prop = getJdbcProperties();
 
         ENV.saveBackup(FILE_JDBC_PROP_FILE);
@@ -432,9 +432,7 @@ public class Persistence implements Serializable {
         put(prop, "transaction-type", "RESOURCE_LOCAL");
         put(prop, "provider", getProvider());
 
-        String jarFile = jarFileInEnvironment();
-        //a relative file url should start with file:///, too - but the persistence providers can't work on that
-        put(prop, "jar-file", "file:" + (new File(jarFile).isAbsolute() ? "///" + (jarFile.startsWith("/") ? jarFile.substring(1) : jarFile) : "./" + jarFile));
+        put(prop, "jar-file", jarURL());
         put(prop, "jta-data-source", getJtaDataSource());
         put(prop, "hibernate.dialect", getHibernateDialect());
         put(prop, "connection.driver_class", getConnectionDriverClass());
@@ -442,6 +440,12 @@ public class Persistence implements Serializable {
         put(prop, "connection.username", getConnectionUserName());
         put(prop, "connection.password", getConnectionPassword());
         put(prop, "autoddl", getAutoddl());
+    }
+
+    public String jarURL() {
+        String jarFile = jarFileInEnvironment();
+        //a relative file url should start with file:///, too - but the persistence providers can't work on that
+        return "file:" + (new File(jarFile).isAbsolute() ? "///" + (jarFile.startsWith("/") ? jarFile.substring(1) : jarFile) : "./" + jarFile);
     }
 
     /**

@@ -13,29 +13,43 @@ import java.lang.Thread.UncaughtExceptionHandler;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.Collections;
+import java.util.Comparator;
+import java.util.HashMap;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
+import java.util.TreeMap;
 
 import javax.ejb.TransactionAttribute;
 import javax.ejb.TransactionAttributeType;
 import javax.persistence.EntityManager;
 import javax.persistence.ManyToOne;
+import javax.persistence.OneToMany;
 import javax.persistence.OneToOne;
 import javax.persistence.metamodel.EntityType;
 
 import org.apache.commons.logging.Log;
 
+import de.tsl2.nano.bean.BeanContainer;
+import de.tsl2.nano.bean.def.Bean;
+import de.tsl2.nano.bean.def.BeanValue;
 import de.tsl2.nano.core.ENV;
+import de.tsl2.nano.core.ITransformer;
 import de.tsl2.nano.core.ManagedException;
 import de.tsl2.nano.core.cls.BeanAttribute;
 import de.tsl2.nano.core.cls.BeanClass;
+import de.tsl2.nano.core.exception.Message;
 import de.tsl2.nano.core.log.LogFactory;
 import de.tsl2.nano.core.util.ConcurrentUtil;
+import de.tsl2.nano.core.util.ListSet;
+import de.tsl2.nano.core.util.StringUtil;
 import de.tsl2.nano.service.util.AbstractStatelessServiceBean;
 import de.tsl2.nano.service.util.GenericServiceBean;
 import de.tsl2.nano.service.util.IGenericBaseService;
+import de.tsl2.nano.util.PrivateAccessor;
 
 /**
  * NOT FINISHED YET!
@@ -59,8 +73,12 @@ public class GenericReplicatingServiceBean extends GenericServiceBean {
     protected IGenericBaseService replication;
     protected boolean connected = true;
     protected boolean collectReplications = false;
+    //WORKAROUND
+    static Tree<Object, BeanValue> tree = new Tree<Object, BeanValue>();
 
     private static final Log LOG = LogFactory.getLog(GenericReplicatingServiceBean.class);
+
+    private static long threadcount = 0;
 
     /**
      * constructor
@@ -147,8 +165,10 @@ public class GenericReplicatingServiceBean extends GenericServiceBean {
             /*
              * while there is no current transaction, the 'commit' should do nothing ;-)
              */
-            service.executeQuery(ENV.get("connection.check.sql", "commit")/* + "grant select on " + Environment.get(IAuthorization.class).getUser()*/,
-                true, new Object[0]);
+            service
+                .executeQuery(
+                    ENV.get("connection.check.sql", "commit")/* + "grant select on " + Environment.get(IAuthorization.class).getUser()*/,
+                    true, new Object[0]);
             return connected = true;
         } catch (Exception ex) {
 //            //WORKAROUND for check
@@ -162,12 +182,12 @@ public class GenericReplicatingServiceBean extends GenericServiceBean {
     }
 
     protected void doForReplication(Runnable replicationJob) {
-        ConcurrentUtil.startDaemon("replication-service-job", replicationJob, true,
+        ConcurrentUtil.startDaemon(replicationJob.toString() + ":" + threadcount++, replicationJob, true,
             ENV.get(UncaughtExceptionHandler.class));
     }
 
     @Override
-    public Collection<?> findByQuery(String queryString,
+    public Collection<?> findByQuery(final String queryString,
             boolean nativeQuery,
             int startIndex,
             int maxResult,
@@ -177,18 +197,54 @@ public class GenericReplicatingServiceBean extends GenericServiceBean {
         final Collection<?> result;
         if (connected) {
             result = super.findByQuery(queryString, nativeQuery, startIndex, maxResult, args, hints, lazyRelations);
+            if (result.size() > 0
+                && BeanContainer.instance().isPersistable(
+                    BeanClass.getDefiningClass(result.iterator().next().getClass()))) {
+                //IMPROVE: how to encapsulate this loop?
+                for (final IGenericBaseService repService : replicationServices) {
+                    doForReplication(new Runnable() {
+                        @Override
+                        public void run() {
+                            Message.send("preparing replication for " + result.size() + " main objects");
+                            long totalCount = 0, notpersisted = 0;
+                            Tree<Object, BeanValue> container = tree;
+                            if (ENV.get("replication.singleTransaction", true)) {
+                                LinkedList<Object> rep = new LinkedList<Object>();
+                                for (Object object : result) {
+                                    try {
+                                        rep.add(object);
+                                        addReplicationEntities(repService, rep, container,
+                                            BeanClass.getDefiningClass(object.getClass()));
+                                        Message.send("trying to replicate " + container.size() + " objects");
+                                        totalCount += container.size();
+                                        repService.persistCollection(new ArrayList(container.keySet()));
+                                    } catch (Exception e) {
+                                        notpersisted += container.size();
+                                        Message.send(e.toString());
+                                        //give the user a chance to see it before the next message...
+                                        ConcurrentUtil.sleep(2000);
+                                    }
+                                    rep.clear();
+                                    container.clear();
+                                }
+                            } else {
+                                LinkedList<Object> rep = new LinkedList<Object>(result);
+                                addReplicationEntities(repService, rep, container,
+                                    BeanClass.getDefiningClass(result.iterator().next().getClass()));
+                                Message.send("trying to replicate " + container.size() + " objects");
+                                repService.persistCollection(container.keySet());
+                                totalCount = container.size();
+                            }
+                            Message.send("replication of " + (totalCount - notpersisted) + " / " + totalCount + " objects done!");
+                        }
 
-            //IMPROVE: how to encapsulate this loop?
-            for (final IGenericBaseService repService : replicationServices) {
-                doForReplication(new Runnable() {
-                    @Override
-                    public void run() {
-                        LinkedList<Object> rep = new LinkedList<Object>(result);
-                        addReplicationEntities(repService, rep, rep);
-                        LOG.debug("trying to replicate " + rep.size() + " objects");
-                        repService.persistCollection(rep);
-                    }
-                });
+                        @Override
+                        public String toString() {
+                            return "replication-job [query: " + StringUtil.toString(queryString, 40) + " -- result: "
+                                + result.size() + " items]";
+                        }
+                    });
+                }
             }
         } else {
             //TODO: impl. mode collect
@@ -203,6 +259,15 @@ public class GenericReplicatingServiceBean extends GenericServiceBean {
         return result;
     }
 
+    @SuppressWarnings("rawtypes")
+    protected void addReplicationEntities(IGenericBaseService repService,
+            List<Object> reps,
+            Tree<Object, BeanValue> container, Class... excludes) {
+        //WORKAROUND: make it available for replicationservicebean
+//        ENV.addService(tree);
+        addReplicationEntities(repService, reps, container, true, excludes);
+    }
+
     /**
      * checks recursive the given list of objects to be replicated to the given service.
      * 
@@ -210,43 +275,69 @@ public class GenericReplicatingServiceBean extends GenericServiceBean {
      * @param reps objects to be checked if already persisted
      */
     @SuppressWarnings({ "rawtypes", "unchecked" })
-    protected void addReplicationEntities(IGenericBaseService repService, List<Object> reps, List<Object> container) {
+    protected void addReplicationEntities(IGenericBaseService repService,
+            List<Object> reps,
+            Tree<Object, BeanValue> container,
+            boolean addRepsToContainer,
+            Class... excludes) {
+        LOG.debug("examining " + reps.size() + " objects for replication. collected replication objects: "
+            + container.size());
         Object loadedBean;
         BeanClass bc;
+        List<Class> lexcludes = Arrays.asList(excludes);
         ArrayList<Object> replications = new ArrayList<Object>(reps);
         List<Object> myAttrValues = new LinkedList<Object>();
         for (Object e : replications) {
+            if (container.contains(e)) {
+                continue;
+            }
+            if (addRepsToContainer) {
+                container.add(e);
+            }
             bc = BeanClass.getBeanClass(e.getClass());
             Collection<BeanAttribute> relationAttrs = bc.findAttributes(ManyToOne.class);
             relationAttrs.addAll(bc.findAttributes(OneToOne.class));
             myAttrValues.clear();
             for (BeanAttribute attr : relationAttrs) {
+                if (lexcludes.contains(attr.getType()))
+                    continue;
                 Object attrValue = attr.getValue(e);
-                if (attrValue != null && !container.contains(attrValue)) {
+                if (attrValue != null) {
                     loadedBean = repService.refresh(attrValue);
                     if (loadedBean == null) {
-                        myAttrValues.add(attrValue);
+                        if (!container.contains(attrValue)) {
+                            myAttrValues.add(attrValue);
+                        }
+                        container.addDependencies(attrValue, BeanValue.getBeanValue(e, attr.getName()));
+                    } else {
+                        attr.setValue(e, loadedBean);
                     }
                 }
             }
-            addReplicationEntities(repService, myAttrValues, container);
-            container.addAll(0, myAttrValues);
-
-            //do it for oneToMany again
-//            myAttrValues.clear();
-//            relationAttrs = bc.findAttributes(OneToMany.class);
-//            for (BeanAttribute attr : relationAttrs) {
-//                Collection<Object> oneToMany = (Collection<Object>) attr.getValue(e);
-//                for (Object item : oneToMany) {
-//                    if (item != null && !container.contains(item)) {
-//                        loadedBean = repService.refresh(item);
-//                        if (loadedBean == null)
-//                            myAttrValues.add(item);
+            //do it for oneToMany again --> but add only manyToOne/oneToOne to the container
+            relationAttrs = bc.findAttributes(OneToMany.class);
+            Collection<Object> values;
+            BeanValue bv;
+            for (BeanAttribute attr : relationAttrs) {
+                if ((values = (Collection<Object>) attr.getValue(e)) != null && values.size() > 0) {
+                    bv = BeanValue.getBeanValue(e, attr.getName());
+//                    if (bv.composition()) {//set null-ids on compositions
+//                        for (Object v : values) {
+//                            Bean.getBean(v).getIdAttribute().setValue(v, null);
+//                        }
 //                    }
-//                }
-//            }
-//            addReplicationEntities(repService, myAttrValues, container);
-//            container.addAll(0, myAttrValues);
+                    addReplicationEntities(repService, new ArrayList<Object>(values), container,
+                        !bv.composition(), excludes);
+                }
+            }
+
+            if (myAttrValues.size() > 0) {//--> performance
+                if (LOG.isDebugEnabled())
+                    LOG.debug(bc.getClazz().getName() + " --> " + StringUtil.toString(myAttrValues, -1));
+                addReplicationEntities(repService, myAttrValues, container, true, excludes);
+//                container.addAll(0, myAttrValues);
+            }
+
         }
     }
 
@@ -260,15 +351,23 @@ public class GenericReplicatingServiceBean extends GenericServiceBean {
         //IMPROVE: how to encapsulate this loop?
         for (final IGenericBaseService repService : replicationServices) {
             doForReplication(new Runnable() {
+                EntityType<? extends Object> entity;
+                Object id;
+
                 @Override
                 public void run() {
                     repService.persist(bean);
                     if (!connected) {
-                        EntityType<? extends Object> entity = connection().getMetamodel().entity(bean.getClass());
+                        entity = connection().getMetamodel().entity(bean.getClass());
                         String idName = entity.getId(bean.getClass()).getName();
-                        Object id = BeanClass.getValue(bean, idName);
+                        id = BeanClass.getValue(bean, idName);
                         repService.persist(new ReplicationChange(entity.getName(), id));
                     }
+                }
+
+                @Override
+                public String toString() {
+                    return "replication-job [persist: " + entity.getName() + "@" + id + "]";
                 }
             });
         }
@@ -287,7 +386,95 @@ public class GenericReplicatingServiceBean extends GenericServiceBean {
                 public void run() {
                     repService.remove(bean);
                 }
+
+                @Override
+                public String toString() {
+                    return "replication-job [remove: " + bean + "]";
+                }
             });
         }
+    }
+}
+
+/**
+ * IMPROVE: use Net+Node from incubation
+ * 
+ * @param <T>
+ * @param <D>
+ * @author Tom, Thomas Schneider
+ * @version $Revision$
+ */
+@SuppressWarnings("serial")
+class Tree<T, D> extends HashMap<T, Collection<D>> {
+    /** special tree keys to distinguish between standard items and dependencies */
+    List<T> items = new LinkedList<T>();
+    
+    Comparator<T> comparator =
+        new Comparator<T>() {
+            @Override
+            public int compare(Object o1, Object o2) {
+                Collection<D> c1 = get(o1);
+                Collection<D> c2 = get(o2);
+                return c1 == null && c2 == null ? 0 : c1 == null ? 1 : c2 == null ? -1 : c1.size() > c2.size() ? -1 : 1;
+            }
+        };
+
+    public void add(T node) {
+        items.add(node);
+    }
+
+    public void addDependencies(T node, D... destination) {
+        Collection<D> collection = get(node);
+        if (collection == null) {
+            collection = new LinkedList<D>();
+            put(node, collection);
+        }
+        for (int i = 0; i < destination.length; i++) {
+            collection.add(destination[i]);
+        }
+    }
+
+    public boolean contains(T node) {
+        return items.contains(node);
+    }
+
+    @Override
+    public int size() {
+        return items.size();
+    }
+    public boolean remove(T node, D destination) {
+        items.remove(node);
+        Collection<D> collection = get(node);
+        if (collection != null) {
+            return collection.remove(destination);
+        }
+        return false;
+    }
+
+    /**
+     * provides a sorted keyset
+     * {@inheritDoc}
+     */
+    @Override
+    public Set<T> keySet() {
+        ListSet<T> keys = new ListSet<T>(items);
+        Collections.sort(keys, comparator);
+        return keys;
+    }
+
+    /**
+     * doFor
+     * 
+     * @param node
+     * @param action
+     */
+    public void doFor(T node, ITransformer<D, D> action) {
+        Collection<D> c = get(node);
+        if (c != null) {
+            for (D d : c) {
+                action.transform(d);
+            }
+        }
+        remove(node);
     }
 }

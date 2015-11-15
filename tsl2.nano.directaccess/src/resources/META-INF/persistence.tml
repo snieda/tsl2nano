@@ -30,7 +30,7 @@
 			<property name="hibernate.archive.autodetection" value="class"/>
 			<!-- <property name="hibernate.ejb.cfgfile" value="/hibernate.cfg.xml" /> -->
 			<property name="hibernate.hbm2ddl.auto" value="${autoddl}"/>
-			<property name="hibernate.show_sql" value="true"/>
+			<property name="hibernate.show_sql" value="false"/>
 			<property name="hibernate.format_sql" value="true"/>
 			<property name="hibernate.use_sql_comments" value="true"/>
 			<!-- <property name="hibernate.cache.provider_class" value="org.hibernate.cache.EHCacheProvider"/> -->
@@ -104,12 +104,11 @@
 	        <property name="hibernate.connection.url" value="${replication.url}"/>
 	        <property name="hibernate.connection.password" value="${replication.password}"/>
 			<property name="hibernate.archive.autodetection" value="class"/>
-			<!-- <property name="hibernate.ejb.cfgfile" value="/hibernate.cfg.xml" /> -->
+			<!-- <property name="hibernate.ejb.cfgfile" value="hibernate.cfg.xml" /> -->
 			<property name="hibernate.dialect" value="${replication.dialect}" />
-			<property name="hibernate.hbm2ddl.auto" value="create"/>
-			<property name="hibernate.show_sql" value="true"/>
+			<property name="hibernate.hbm2ddl.auto" value="update"/>
+			<property name="hibernate.show_sql" value="false"/>
 			<!-- <property name="hibernate.cache.provider_class" value="org.hibernate.cache.EHCacheProvider"/> -->
-			<!-- <property name="hibernate.cache.use_second_level_cache" value="false"/> -->
 			<!-- <property name="hibernate.cache.use_query_cache" value="false"/> -->
 			<!-- <property name="hibernate.generate_statistics" value="false"/> -->
 			<property name="hibernate.connection.autocommit" value="true"/>

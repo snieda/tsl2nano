@@ -21,8 +21,8 @@ import javax.persistence.metamodel.EntityType;
 
 import org.apache.commons.logging.Log;
 
-import de.tsl2.nano.collection.ITransformer;
 import de.tsl2.nano.core.ENV;
+import de.tsl2.nano.core.ITransformer;
 import de.tsl2.nano.core.classloader.RuntimeClassloader;
 import de.tsl2.nano.core.classloader.TransformingClassLoader;
 import de.tsl2.nano.core.log.LogFactory;
