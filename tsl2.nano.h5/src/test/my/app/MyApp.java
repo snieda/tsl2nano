@@ -8,6 +8,13 @@ import static de.tsl2.nano.h5.Html5Presentation.L_GRIDWIDTH;
 import static de.tsl2.nano.h5.HtmlUtil.ATTR_BORDER;
 import static de.tsl2.nano.h5.HtmlUtil.ATTR_SIZE;
 import static de.tsl2.nano.h5.HtmlUtil.ATTR_SPANCOL;
+import static de.tsl2.nano.test.TypeBean.ATTR_BINARY;
+import static de.tsl2.nano.test.TypeBean.ATTR_DATE;
+import static de.tsl2.nano.test.TypeBean.ATTR_IMMUTABLEINTEGER;
+import static de.tsl2.nano.test.TypeBean.ATTR_OBJECT;
+import static de.tsl2.nano.test.TypeBean.ATTR_STRING;
+import static de.tsl2.nano.test.TypeBean.ATTR_TIME;
+import static de.tsl2.nano.test.TypeBean.ATTR_TIMESTAMP;
 
 import java.io.IOException;
 import java.io.Serializable;
@@ -20,7 +27,6 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Properties;
 
-import org.anonymous.project.Times;
 import org.apache.commons.logging.Log;
 
 import de.tsl2.nano.bean.IBeanContainer;
@@ -36,9 +42,8 @@ import de.tsl2.nano.bean.def.IValueDefinition;
 import de.tsl2.nano.bean.def.PathExpression;
 import de.tsl2.nano.bean.def.SecureAction;
 import de.tsl2.nano.collection.MapUtil;
-import de.tsl2.nano.core.Environment;
+import de.tsl2.nano.core.ENV;
 import de.tsl2.nano.core.ManagedException;
-import de.tsl2.nano.core.cls.BeanClass;
 import de.tsl2.nano.core.log.LogFactory;
 import de.tsl2.nano.execution.ScriptUtil;
 import de.tsl2.nano.h5.Controller;
@@ -60,6 +65,8 @@ import de.tsl2.nano.incubation.specification.actions.Action;
 import de.tsl2.nano.incubation.specification.actions.ActionPool;
 import de.tsl2.nano.incubation.specification.rules.Rule;
 import de.tsl2.nano.incubation.specification.rules.RulePool;
+
+//import org.anonymous.project.Times;
 
 /**
  * Example implementations for Nano.h5
@@ -117,7 +124,7 @@ public class MyApp extends NanoH5 {
             p,
             "organisation"));
         Workflow workflow = new Workflow("test.workflow", acts);
-        Environment.persist(workflow);
+        ENV.persist(workflow);
 
         /*
          * use a rule with sub-rule
@@ -130,14 +137,16 @@ public class MyApp extends NanoH5 {
         testRule.addConstraint("x1", new Constraint<BigDecimal>(BigDecimal.class, BigDecimal.ZERO, BigDecimal.ONE));
         testRule.addConstraint(Rule.KEY_RESULT, new Constraint<BigDecimal>(BigDecimal.class, BigDecimal.ZERO,
             BigDecimal.TEN));
-        Environment.get(RulePool.class).add("test", testRule);
+        testRule.addSpecification("notA-1-2", null, 4, MapUtil.asMap("x1", 1, "x2", 2));
+        testRule.addSpecification("A-2-1", null, 2, MapUtil.asMap("x1", 2, "x2", 1));
+        ENV.get(RulePool.class).add("test", testRule);
 
         //another rule to test sub-rule-imports
-        Environment.get(RulePool.class).add("test-import",
+        ENV.get(RulePool.class).add("test-import",
             new Rule<BigDecimal>("test-import", "A ? 1 + §test : (x2 * 3)", par));
 
         BigDecimal result =
-            (BigDecimal) Environment.get(RulePool.class).get("test-import")
+            (BigDecimal) ENV.get(RulePool.class).get("test-import")
                 .run(MapUtil.asMap("A", true, "x1", new BigDecimal(1), "x2", new BigDecimal(2)));
 
         LOG.info("my test-import rule result:" + result);
@@ -149,7 +158,7 @@ public class MyApp extends NanoH5 {
 
         HashMap<String, Serializable> par1 = new HashMap<>();
         Query<Object> query = new Query<>("times.begin", qstr, true, par1);
-        QueryPool queryPool = Environment.get(QueryPool.class);
+        QueryPool queryPool = ENV.get(QueryPool.class);
         queryPool.add(query.getName(), query);
 
         /*
@@ -162,9 +171,9 @@ public class MyApp extends NanoH5 {
             ManagedException.forward(e);
         }
         Action<Object> a = new Action<>(antCaller);
-        a.addConstraint("arg1", new Constraint<String>(Environment.getConfigPath() + "antscripts.xml"));
+        a.addConstraint("arg1", new Constraint<String>(ENV.getConfigPath() + "antscripts.xml"));
         a.addConstraint("arg2", new Constraint<String>("help"));
-        Environment.get(ActionPool.class).add("ant", a);
+        ENV.get(ActionPool.class).add("ant", a);
 
         /*
          * define a Controller as Collector of Actions of a Bean
@@ -206,13 +215,13 @@ public class MyApp extends NanoH5 {
         /*
          * define own beans to present your entities another way
          */
-        Collection<Times> times = Environment.get(IBeanContainer.class).getBeans(Times.class, UNDEFINED, UNDEFINED);
+        Collection<Times> times = ENV.get(IBeanContainer.class).getBeans(Times.class, UNDEFINED, UNDEFINED);
 
         BeanCollector<Collection<Times>, Times> beanCollector =
-            new BeanCollector<Collection<Times>, Times>(times, BeanCollector.MODE_ALL);
+            new BeanCollector<Collection<Times>, Times>(Times.class, times, BeanCollector.MODE_ALL, null);
 
         AttributeDefinition space1 = beanCollector.getPresentationHelper().addSpaceValue();
-        beanCollector.addAttribute("path-test", new PathExpression<>(Times.class, "id.dbBegin"), null, null);
+        beanCollector.addAttribute("path-test", new PathExpression<>(Times.class, "relation.string"), null, null);
         beanCollector.addAttribute("rule-test", new RuleExpression<>(Times.class, "§test-import"), null, null);
         beanCollector
             .addAttribute(
@@ -222,14 +231,15 @@ public class MyApp extends NanoH5 {
                     "?" + query.getName(), Object[].class),
                 null, null);
         beanCollector.addAttribute("virtual-test", "I'm virtual", null, null, null);
-        beanCollector.addAttribute("picture", new Attachment("picture", Environment.getConfigPath()
+        beanCollector.addAttribute(ATTR_BINARY, new Attachment("picture", ENV.getConfigPath()
             + "/icons/attach.png"), null, null);
-        beanCollector.setAttributeFilter("path-test", "creation", "dbEnd", "pause", space1.getName(), "project",
-            "comment");
+        beanCollector.setAttributeFilter("path-test", ATTR_TIMESTAMP, ATTR_TIME, ATTR_DATE, space1.getName(),
+            ATTR_STRING,
+            ATTR_OBJECT, ATTR_IMMUTABLEINTEGER);
         //more fields on one line (one field has grid-width 3)
         beanCollector.getPresentable().setLayout((Serializable) MapUtil.asMap(L_GRIDWIDTH, 12));
         //let the field 'comment' grow to full width
-        beanCollector.getAttribute("comment").getPresentation()
+        beanCollector.getAttribute(ATTR_OBJECT).getPresentation()
             .setLayoutConstraints((Serializable) MapUtil.asMap(ATTR_SPANCOL, 11, ATTR_BORDER, 1, ATTR_SIZE, 150));
 
         /*
@@ -246,40 +256,25 @@ public class MyApp extends NanoH5 {
         /*
          * create a dependency listener
          */
-        BeanDefinition b =
-            BeanDefinition.getBeanDefinition(BeanClass.createBeanClass("org.anonymous.project.Person").getClazz());
-        ((AttributeDefinition) b.getAttribute("organisation")).changeHandler().addListener(
-            new WebSocketDependencyListener() {
-
-                @Override
-                protected Object evaluate(WSEvent evt) {
-                    //new value of attribute 'organisation'
-                    Object value = evt.newValue;
-                    //here we set dynamically which attribute depends on changes
-                    setAttribute(b.getAttribute("shortname"));
-                    //the evt.source holds the changed bean value
-                    IValueDefinition srcValue = (IValueDefinition)evt.getSource();
-                    //here we get the old value of the dependent attribute 'shortname'
-                    //through srcValue.getInstance() you could get all other values with Bean.getBean(srcValue)
-                    Object lastAttributeValue = getAttribute().getValue(srcValue.getInstance());
-                    //return the refreshed value for attribute 'shortname' 
-                    return value + "/" + lastAttributeValue;
-                }
-            });
+        final BeanDefinition b =
+            BeanDefinition.getBeanDefinition(Times.class);
+        ((AttributeDefinition) b.getAttribute(ATTR_OBJECT)).changeHandler().addListener(
+            new MyWebSocketDependencyListener<>(b));
 
         /*
          * create a dependency listener with a rule
          */
-        BeanDefinition b =
-            BeanDefinition.getBeanDefinition(BeanClass.createBeanClass("org.anonymous.project.Person").getClazz());
-        ((AttributeDefinition) b.getAttribute("name")).changeHandler().addListener(
-            new WebSocketRuleDependencyListener<T>(b.getAttribute("shortname"), "shortname", "rule-shortname");
+        ((AttributeDefinition) b.getAttribute(ATTR_STRING)).changeHandler().addListener(
+            new WebSocketRuleDependencyListener((AttributeDefinition) b.getAttribute(ATTR_IMMUTABLEINTEGER),
+                ATTR_IMMUTABLEINTEGER,
+                "rule-string-integer"));
 
         /*
          * use file attachments
          */
-        ((AttributeDefinition) b.getAttribute("comment")).getPresentation().setType(IPresentable.TYPE_ATTACHMENT);
+        ((AttributeDefinition) b.getAttribute(ATTR_OBJECT)).getPresentation().setType(IPresentable.TYPE_ATTACHMENT);
 
+        b.saveDefinition();
         /*
          * define your own navigation stack
          */
@@ -289,5 +284,48 @@ public class MyApp extends NanoH5 {
     @SuppressWarnings("unchecked")
     public static void main(String[] args) {
         startApplication(MyApp.class, MapUtil.asMap(0, "service.url"), args);
+    }
+}
+
+class MyWebSocketDependencyListener<T> extends WebSocketDependencyListener<T> {
+    /** serialVersionUID */
+    private static final long serialVersionUID = 8843743756584284534L;
+    transient BeanDefinition<?> b;
+
+    /**
+     * constructor
+     */
+    protected MyWebSocketDependencyListener() {
+        super();
+    }
+
+    /**
+     * constructor
+     * 
+     * @param attribute
+     */
+    protected MyWebSocketDependencyListener(AttributeDefinition<T> attribute) {
+        super(attribute);
+    }
+
+    public MyWebSocketDependencyListener(BeanDefinition<?> b) {
+        this.b = b;
+    }
+
+    @SuppressWarnings("unchecked")
+    @Override
+    protected T evaluate(WSEvent evt) {
+        //new value of attribute 'organisation'
+        Object value = evt.newValue;
+        //here we set dynamically which attribute depends on changes
+        setAttribute(b.getAttribute(ATTR_STRING));
+        //the evt.source holds the changed bean value
+        @SuppressWarnings("rawtypes")
+        IValueDefinition srcValue = (IValueDefinition) evt.getSource();
+        //here we get the old value of the dependent attribute 'shortname'
+        //through srcValue.getInstance() you could get all other values with Bean.getBean(srcValue)
+        Object lastAttributeValue = getAttribute().getValue(srcValue.getInstance());
+        //return the refreshed value for attribute 'shortname' 
+        return (T) (value + "/" + lastAttributeValue);
     }
 }

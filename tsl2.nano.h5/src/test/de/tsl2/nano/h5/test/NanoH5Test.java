@@ -11,6 +11,15 @@ package de.tsl2.nano.h5.test;
 
 import static org.junit.Assert.assertTrue;
 
+import java.io.File;
+import java.io.IOException;
+import java.util.Properties;
+
+import my.app.MyApp;
+import my.app.Times;
+
+import org.anonymous.project.Charge;
+import org.junit.Ignore;
 import org.junit.Test;
 
 import com.gargoylesoftware.htmlunit.History;
@@ -20,7 +29,21 @@ import com.gargoylesoftware.htmlunit.html.HtmlPage;
 import com.sun.jersey.api.container.httpserver.HttpServerFactory;
 import com.sun.net.httpserver.HttpServer;
 
+import de.tsl2.nano.bean.BeanContainer;
+import de.tsl2.nano.bean.IBeanContainer;
+import de.tsl2.nano.bean.def.Bean;
+import de.tsl2.nano.bean.def.BeanDefinition;
+import de.tsl2.nano.core.ENV;
+import de.tsl2.nano.core.cls.BeanClass;
 import de.tsl2.nano.core.util.NetUtil;
+import de.tsl2.nano.execution.SystemUtil;
+import de.tsl2.nano.h5.Html5Presentation;
+import de.tsl2.nano.h5.NanoH5;
+import de.tsl2.nano.h5.timesheet.Timesheet;
+import de.tsl2.nano.incubation.specification.rules.RulePool;
+import de.tsl2.nano.service.util.BeanContainerUtil;
+import de.tsl2.nano.test.TypeBean;
+import de.tsl2.nano.util.codegen.PackageGenerator;
 
 /**
  * 
@@ -30,11 +53,13 @@ import de.tsl2.nano.core.util.NetUtil;
 public class NanoH5Test {
 
     @Test
+    @Ignore
     public void testNano() throws Exception {
-        runServer();
+        String serviceURL = "http://localhost:8066";
+        runNano(serviceURL);
 
         WebClient webClient = new WebClient();
-        HtmlPage page = webClient.getPage("http://localhost:8066");
+        HtmlPage page = webClient.getPage(serviceURL);
         page = submit(page, "tsl2.nano.login.ok");
         page = submit(page, "beancollector.selectall");
         page = submit(page, "beancollector.open");
@@ -71,8 +96,9 @@ public class NanoH5Test {
         return page;
     }
 
-    private void runServer() {
+    private void runNano(String serviceURL) throws IOException {
         //TODO: start nano.h5 and hsqldb
+        new NanoH5(serviceURL, null);
     }
 
     @Test
@@ -84,7 +110,7 @@ public class NanoH5Test {
 //                null);
         //TODO: how to provide parameter of any object type?
 //        Point p = new Point(5,5);
-        Object args[] = new Object[] {"event", "x", 5, "y", 5};
+        Object args[] = new Object[] { "event", "x", 5, "y", 5 };
 
         //create the server (see service class RestfulService, must be public!)
         HttpServer server = HttpServerFactory.create(url);
@@ -98,4 +124,63 @@ public class NanoH5Test {
         assertTrue(response.equals("5, 5"));
     }
 
+    @Test
+    public void testMyApp() throws Exception {
+        createAndTest(new MyApp() {
+            @Override
+            public void start() {
+                createBeanCollectors(null);
+            }
+        }, null, Times.class);
+    }
+
+    @SuppressWarnings({ "rawtypes", "unchecked" })
+    public void createAndTest(NanoH5 app, Properties anywayMapper, Class...beanTypesToCheck) throws Exception {
+        assert beanTypesToCheck != null && beanTypesToCheck.length > 0 : "at least one beantype must be given!";
+        final String DIR_TEST = "test/" + BeanClass.getDefiningClass(app.getClass()).getSimpleName().toLowerCase();
+        new File(DIR_TEST).delete();
+        ENV.create(DIR_TEST);
+        //first: generate all configurations....
+        if (anywayMapper != null) {
+            //TODO: map names. e.g. : Charge --> TimeEntry
+        }
+        String pckName = beanTypesToCheck[0].getPackage().getName();
+        System.setProperty("bean.generation.packagename", pckName);
+        System.setProperty("bean.generation.outputpath", DIR_TEST);
+        PackageGenerator.main(new String[] { "bin/" + pckName.replace('.', '/') });
+
+        BeanContainer.initEmtpyServiceActions();
+        ENV.addService(IBeanContainer.class, BeanContainer.instance());
+        app.start();
+        ENV.persist();
+
+        //now we reload the configurations...
+        new Html5Presentation().reset();
+        ENV.reset();
+
+        ENV.create(DIR_TEST);
+        for (int i = 0; i < beanTypesToCheck.length; i++) {
+            Bean bean = Bean.getBean(BeanClass.createInstance(beanTypesToCheck[i]));
+            System.out.println(bean.toValueMap(null));
+        }
+
+        //create xsd from trang.jar
+        assertTrue(new File(DIR_TEST + "/" + "../../../tsl2.nano.common/lib-tools/trang.jar").exists());
+        assertTrue(SystemUtil.execute(new File(DIR_TEST), "cmd", "/C", "java -jar ../../../tsl2.nano.common/lib-tools/trang.jar presentation/*.xml presentation/beandef.xsd").exitValue() == 0);
+        
+        //extract language messages
+        ENV.extractResource(pckName.replace('.', '/') + "/messages_de.properties");
+        ENV.extractResource(pckName.replace('.', '/') + "/messages_de_DE.properties");
+    }
+
+    @Test
+    public void testTimesheet() throws Exception {
+        Properties mapper = new Properties();
+        createAndTest(new Timesheet() {
+            @Override
+            public void start() {
+                createBeanCollectors(null);
+            }
+        }, mapper, Charge.class);
+    }
 }
