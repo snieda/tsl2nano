@@ -65,6 +65,7 @@ import de.tsl2.nano.incubation.repeat.impl.ACommand;
 import de.tsl2.nano.incubation.repeat.impl.CommandManager;
 import de.tsl2.nano.incubation.specification.ParType;
 import de.tsl2.nano.incubation.specification.Pool;
+import de.tsl2.nano.incubation.specification.rules.AbstractRule;
 import de.tsl2.nano.incubation.specification.rules.Rule;
 import de.tsl2.nano.incubation.specification.rules.RulePool;
 import de.tsl2.nano.incubation.terminal.AsciiImage;
