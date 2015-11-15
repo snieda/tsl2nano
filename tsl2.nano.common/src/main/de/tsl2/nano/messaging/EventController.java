@@ -10,6 +10,8 @@
 package de.tsl2.nano.messaging;
 
 import java.io.Serializable;
+import de.tsl2.nano.messaging.ListenerList;
+
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.LinkedHashMap;
@@ -17,6 +19,7 @@ import java.util.Map;
 
 import org.simpleframework.xml.Default;
 import org.simpleframework.xml.DefaultType;
+import org.simpleframework.xml.ElementMap;
 
 /**
  * manages bean typed or untyped events. registers {@link IListener}s and fires {@link ChangeEvent} or other events to
@@ -33,9 +36,9 @@ public class EventController implements Serializable {
     private static final long serialVersionUID = 1L;
     
     /** all registered value change listeners */
-//    @ElementMap(entry = "listener", key = "type", keyType = Class.class, attribute = true, inline = true, required = false)
+    @ElementMap(entry = "listener", key = "type", keyType = Class.class, valueType=ListenerList.class, attribute = true, inline = true, required = false)
     //TODO: remove transient if you found a workaround on simple-xml problem with map(collection).
-    transient Map<Class, Collection<IListener>> listener;
+    Map<Class, ListenerList<IListener>> listener;
 
     /** if listeners were only added through {@link #addListener(IListener)} - without event type, this is false */
     transient boolean hasTypedListener = false;
@@ -47,16 +50,16 @@ public class EventController implements Serializable {
      */
     protected final <T> Collection<IListener> listener(Class<T> eventType) {
         if (listener == null) {
-            listener = new LinkedHashMap<Class, Collection<IListener>>();
+            listener = new LinkedHashMap<Class, ListenerList<IListener>>();
         }
 
         Class<?> type = hasTypedListener || listener.size() > 1 ? eventType : Object.class;
-        Collection<IListener> typedListener = listener.get(type);
+        ListenerList<IListener> typedListener = listener.get(type);
         if (typedListener == null) {
-            typedListener = new ArrayList<IListener>();
+            typedListener = new ListenerList<IListener>();
             listener.put(type, typedListener);
         }
-        return typedListener;
+        return typedListener.getList();
     }
 
     /**
@@ -136,8 +139,8 @@ public class EventController implements Serializable {
      */
     public void fireEvent(Object e) {
         //use a copy of listeners to avoid problems on handlers removing listeners from the list.
-        Collection<IListener> listeners = new ArrayList(listener(e.getClass()));
-        for (final IListener l : listeners) {
+        ListenerList<IListener> listeners = new ListenerList(listener(e.getClass()));
+        for (final IListener l : listeners.getList()) {
             handle(l, e);
         }
     }

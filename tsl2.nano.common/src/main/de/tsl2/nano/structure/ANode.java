@@ -12,7 +12,7 @@ package de.tsl2.nano.structure;
 import java.util.List;
 
 import de.tsl2.nano.collection.CollectionUtil;
-import de.tsl2.nano.collection.ITransformer;
+import de.tsl2.nano.core.ITransformer;
 import de.tsl2.nano.core.util.StringUtil;
 import de.tsl2.nano.messaging.EventController;
 import de.tsl2.nano.messaging.IListener;
@@ -70,7 +70,14 @@ public class ANode<T, D> implements INode<T, D> {
     }
 
     /**
-     * connect
+     * convenience to add a connections. delegates to {@link #connect(ANode, Object)} with null descriptor.
+     */
+    public IConnection<T, D> add(ANode<T, D> destination) {
+        return connect(destination, null);
+    }
+
+    /**
+     * creates a new connection
      * 
      * @param destination node to connect to
      * @param descriptor connection description

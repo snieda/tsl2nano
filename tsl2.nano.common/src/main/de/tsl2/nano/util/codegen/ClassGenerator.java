@@ -14,6 +14,7 @@ import org.apache.velocity.app.VelocityEngine;
 import de.tsl2.nano.core.ManagedException;
 import de.tsl2.nano.core.cls.BeanClass;
 import de.tsl2.nano.core.log.LogFactory;
+import de.tsl2.nano.core.util.Util;
 
 /**
  * 
@@ -35,6 +36,7 @@ import de.tsl2.nano.core.log.LogFactory;
 public class ClassGenerator {
     private static ClassGenerator self = null;
     private VelocityEngine engine;
+    String codeTemplate;
 
     protected static final Log LOG = LogFactory.getLog(ClassGenerator.class);
 
@@ -45,6 +47,7 @@ public class ClassGenerator {
     
     public static final String DEFAULT_DEST_PREFIX = "src/gen";
     public static final String DEFAULT_DEST_POSTFIX = ".java";
+    public static final String POSTFIX_CLS = ".class";
     
     protected ClassGenerator() {
         init();
@@ -134,6 +137,10 @@ public class ClassGenerator {
             Properties properties,
             ClassLoader classLoader) throws Exception {
 
+//        if (templateFile == null || !new File(templateFile).canRead()) {
+//            throw new IllegalStateException("template file " + templateFile + " not readable.");
+//        }
+                
         final GeneratorUtility util = getUtilityInstance();
         final VelocityContext context = new VelocityContext();
 
@@ -197,7 +204,7 @@ public class ClassGenerator {
     protected String getDefaultDestinationFile(String modelFile) {
 //        return engine.getProperty(DEST_FILENAME_PATTERN)
         modelFile = modelFile.replace('.', '/');
-        return "src/gen/" + modelFile + "UI.java";
+        return "src/gen/" + modelFile + Util.get("bean.generation.namepostfix", "Const.java");
     }
 
     /**
