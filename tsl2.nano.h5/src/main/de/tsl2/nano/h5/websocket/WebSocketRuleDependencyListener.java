@@ -9,7 +9,7 @@
  */
 package de.tsl2.nano.h5.websocket;
 
-import de.tsl2.nano.bean.def.AttributeDefinition;
+import de.tsl2.nano.bean.def.IAttributeDefinition;
 import de.tsl2.nano.incubation.specification.rules.RuleDependencyListener;
 
 /**
@@ -34,7 +34,7 @@ public class WebSocketRuleDependencyListener<T> extends RuleDependencyListener<T
      * 
      * @param attribute
      */
-    public WebSocketRuleDependencyListener(AttributeDefinition<T> attribute, String propertyName, String ruleName) {
+    public WebSocketRuleDependencyListener(IAttributeDefinition<T> attribute, String propertyName, String ruleName) {
         super(attribute, propertyName, ruleName);
     }
 

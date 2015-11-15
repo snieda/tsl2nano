@@ -14,7 +14,7 @@ import java.io.Serializable;
 import org.simpleframework.xml.Attribute;
 
 import de.tsl2.nano.bean.def.AbstractDependencyListener;
-import de.tsl2.nano.bean.def.AttributeDefinition;
+import de.tsl2.nano.bean.def.IAttributeDefinition;
 import de.tsl2.nano.collection.MapUtil;
 import de.tsl2.nano.core.ENV;
 
@@ -43,18 +43,24 @@ public abstract class RuleDependencyListener<T, E> extends AbstractDependencyLis
      * @param attribute
      * @param propertyName
      */
-    public RuleDependencyListener(AttributeDefinition<T> attribute, String propertyName, String ruleName) {
+    public RuleDependencyListener(IAttributeDefinition<T> attribute, String propertyName, String ruleName) {
         super(attribute, propertyName);
         this.ruleName = ruleName;
     }
 
     /**
-     * evaluate a new value through a rule.
+     * evaluate a new value through a rule. the given source will be set argument with name/key 'master'.
+     * 
      * @param source new foreign value
      * @return result of executing a rule.
      */
     @SuppressWarnings("unchecked")
     protected T evaluate(E source) {
         return (T) ENV.get(RulePool.class).get(ruleName).run(MapUtil.asMap("master", source));
+    }
+    
+    @Override
+    public String toString() {
+        return super.toString() + " rule:" + ruleName;
     }
 }

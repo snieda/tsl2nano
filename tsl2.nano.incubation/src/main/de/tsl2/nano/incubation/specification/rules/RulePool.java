@@ -17,7 +17,7 @@ import de.tsl2.nano.incubation.specification.Pool;
  * @author Tom, Thomas Schneider
  * @version $Revision$
  */
-public class RulePool extends Pool<Rule<?>> {
+public class RulePool extends Pool<AbstractRule<?>> {
     /**
      * constructor
      */

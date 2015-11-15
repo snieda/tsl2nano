@@ -15,8 +15,6 @@ import java.util.Map;
 import org.simpleframework.xml.core.Commit;
 
 import de.tsl2.nano.core.ENV;
-import de.tsl2.nano.core.util.StringUtil;
-import de.tsl2.nano.incubation.specification.AbstractRunnable;
 import de.tsl2.nano.incubation.specification.ParType;
 import de.tsl2.nano.util.operation.NumericConditionOperator;
 import de.tsl2.nano.util.operation.Operator;
@@ -54,15 +52,12 @@ import de.tsl2.nano.util.operation.Operator;
  * @author Tom, Thomas Schneider
  * @version $Revision$
  */
-public class Rule<T> extends AbstractRunnable<T> {
+public class Rule<T> extends AbstractRule<T> {
     /** serialVersionUID */
     private static final long serialVersionUID = 8557708958880364123L;
     public static final String KEY_RESULT = Operator.KEY_RESULT;
 
     transient NumericConditionOperator operator;
-    
-    /** the rule is initialized when all sub-rules are imported. see {@link #importSubRules()} */
-    boolean initialized;
     
     /**
      * constructor only to be used by deserializing
@@ -81,25 +76,6 @@ public class Rule<T> extends AbstractRunnable<T> {
     }
 
     /**
-     * importSubRules
-     */
-    void importSubRules() {
-        RulePool pool = ENV.get(RulePool.class);
-        String subRule;
-        while ((subRule = StringUtil.extract(operation, "§\\w+")).length() > 0) {
-            Rule<?> rule = pool.get(subRule.substring(1));
-            if (rule == null) {
-                throw new IllegalArgumentException("Referenced rule " + subRule + " in " + this + " not found!");
-            }
-            operation = operation.replaceAll(subRule, "(" + rule.operation + ")");
-            parameter.putAll(rule.parameter);
-            //TODO: what to do with sub rule constraints?
-//            constraints.putAll(rule.constraints);
-        }
-        initialized = true;
-    }
-
-    /**
      * executes the given rule, checking the given arguments.
      * @param arguments rule input
      * @return evaluation result
@@ -115,7 +91,6 @@ public class Rule<T> extends AbstractRunnable<T> {
         //in generics it is not possible to cast from Map(String,?) to Map(CharSequence, ?)
         Object a = arguments;
         
-        
         //calculate the numeric and boolean operations
         T result = (T) operator.eval((CharSequence)operation, (Map<CharSequence, Object>) a);
         checkConstraint(Operator.KEY_RESULT, result);
@@ -123,7 +98,6 @@ public class Rule<T> extends AbstractRunnable<T> {
     }
 
     @Override
-    @SuppressWarnings("unchecked")
     @Commit
     protected void initDeserializing() {
         super.initDeserializing();

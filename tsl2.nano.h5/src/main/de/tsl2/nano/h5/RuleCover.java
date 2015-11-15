@@ -27,6 +27,7 @@ import de.tsl2.nano.bean.IConnector;
 import de.tsl2.nano.bean.IRuleCover;
 import de.tsl2.nano.bean.def.AttributeDefinition;
 import de.tsl2.nano.bean.def.Bean;
+import de.tsl2.nano.bean.def.IAttributeDefinition;
 import de.tsl2.nano.bean.def.IValueDefinition;
 import de.tsl2.nano.core.ENV;
 import de.tsl2.nano.core.cls.BeanAttribute;
@@ -45,18 +46,34 @@ import de.tsl2.nano.util.PrivateAccessor;
  * @version $Revision$
  */
 @SuppressWarnings({ "unchecked", "rawtypes" })
-public class RuleCover implements IConnector<AttributeDefinition<?>> {
+public class RuleCover implements IConnector<IAttributeDefinition<?>> {
     /** serialVersionUID */
     private static final long serialVersionUID = -7935692478754934118L;
 
     /**
-     * map holding the rule name for each property-name to be evaluated through a rule engine. the property-names should
+     * map holding the rule name (as value) for each property-name (as key) to be evaluated through a rule engine. the property-names should
      * be described by a path to the desired bean-attribute (e.g.: 'myBean.mysubbean.myattribute')
      */
     @ElementMap(entry = "rule", key = "for-property", attribute = true, inline = true, value = "name", valueType = String.class, required = true)
     Map<String, String> propertyRules;
 
     transient Collection<IRuleCover<?>> covers;
+
+    /**
+     * constructor
+     */
+    public RuleCover() {
+        super();
+    }
+
+    /**
+     * constructor
+     * @param propertyRules see {@link #propertyRules}
+     */
+    public RuleCover(Map<String, String> propertyRules) {
+        super();
+        this.propertyRules = propertyRules;
+    }
 
     public boolean hasRules(Object child) {
         return false;
@@ -66,7 +83,7 @@ public class RuleCover implements IConnector<AttributeDefinition<?>> {
      * {@inheritDoc} the connection will be done for definitions and instances!
      */
     @Override
-    public Object connect(AttributeDefinition<?> connectionEnd) {
+    public Object connect(IAttributeDefinition<?> connectionEnd) {
         //first: extract the direct childs
         Set<String> pks = propertyRules.keySet();
         for (String k : pks) {
@@ -82,8 +99,10 @@ public class RuleCover implements IConnector<AttributeDefinition<?>> {
         List<String> names = Arrays.asList(bcDef.getAttributeNames());
 
         PrivateAccessor<?> acc = new PrivateAccessor<>(connectionEnd);
+        boolean nameFound = false;
         for (String k : pks) {
             if (names.contains(k)) {
+                nameFound = true;
                 Object origin = acc.member(k);
                 if (!Proxy.isProxyClass(origin.getClass())) {
                     Object cover = cover(k, origin, acc.typeOf(k), connectionEnd);
@@ -94,12 +113,13 @@ public class RuleCover implements IConnector<AttributeDefinition<?>> {
                 }
             }
         }
-
+        if (!nameFound)
+            throw new IllegalStateException("no attribute matches for attributedefinition for " + propertyRules.keySet());
         return this;
     }
 
     @Override
-    public void disconnect(AttributeDefinition<?> connectionEnd) {
+    public void disconnect(IAttributeDefinition<?> connectionEnd) {
         BeanClass bcDef = BeanClass.getBeanClass(connectionEnd.getClass());
         for (IRuleCover<?> cover : getCovers()) {
             bcDef.setValue(connectionEnd, cover.getName(), cover.getDelegate());

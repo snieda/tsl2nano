@@ -629,15 +629,7 @@ public class Html5Presentation<T> extends BeanPresentationHelper<T> implements I
 
         //navigation bar
         if (interactive && navigation.length > 0) {
-            Element link;
-            Element nav = appendElement(parent, "nav", ATTR_ID, "navigation");
-            for (BeanDefinition<?> bean : navigation) {
-                link = appendElement(nav, TAG_LINK, ATTR_HREF, PREFIX_BEANLINK
-                    + bean.getName(),
-                    ATTR_STYLE, ENV.get("page.navigation.section.style", "color: #AAAAAA;"));
-                appendElement(link, TAG_IMAGE, content(ENV.translate(bean.toString(), true)), ATTR_SRC,
-                    "icons/forward.png");
-            }
+            createNavigationbar(parent, navigation);
         }
 
         Element panel =
@@ -652,6 +644,23 @@ public class Html5Presentation<T> extends BeanPresentationHelper<T> implements I
             }
         }
         return parent;
+    }
+
+    /**
+     * createNavigationbar
+     * @param parent
+     * @param navigation
+     */
+    protected void createNavigationbar(Element parent, BeanDefinition<?>... navigation) {
+        Element link;
+        Element nav = appendElement(parent, "nav", ATTR_ID, "navigation");
+        for (BeanDefinition<?> bean : navigation) {
+            link = appendElement(nav, TAG_LINK, ATTR_HREF, PREFIX_BEANLINK
+                + bean.getName(),
+                ATTR_STYLE, ENV.get("page.navigation.section.style", "color: #AAAAAA;"));
+            appendElement(link, TAG_IMAGE, content(ENV.translate(bean.toString(), true)), ATTR_SRC,
+                "icons/forward.png");
+        }
     }
 
     /**
@@ -1973,7 +1982,7 @@ public class Html5Presentation<T> extends BeanPresentationHelper<T> implements I
             type = "checkbox";
             break;
         case TYPE_DATE | TYPE_TIME:
-            type = "datetime";
+            type = ENV.get("default.present.type.date.insteadof.datetime", true) ? "date": "datetime";
             break;
         case TYPE_TIME:
             type = "time";

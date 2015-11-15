@@ -87,6 +87,12 @@ public abstract class RunnableExpression<T extends Serializable> extends Abstrac
         }
     }
 
+    /**
+     * calls {@link BeanUtil#toValueMap(Object)} to create a map holding all values of the given bean instance
+     * 
+     * @param beanInstance to be 'value'-mapped
+     * @return map holding all values of the given bean instance
+     */
     protected Map<String, Object> refreshArguments(Object beanInstance) {
         if (arguments == null) {
             arguments = new HashMap<String, T>();
@@ -101,10 +107,10 @@ public abstract class RunnableExpression<T extends Serializable> extends Abstrac
             arguments.putAll((Map<String, ? extends T>) Util.untyped(BeanUtil.toValueMap(beanInstance, false,
                 true, true, (p != null ? p.keySet().toArray(new String[0]) : null))));
         }
-        
+
         //TODO: not performance-optimized: do the filtering before
         MapUtil.retainAll(arguments, p.keySet());
-        
+
         return (Map<String, Object>) Util.untyped(arguments);
     }
 
