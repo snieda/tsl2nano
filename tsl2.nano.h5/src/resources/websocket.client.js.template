@@ -59,6 +59,13 @@ function showStatusMessage(msg) {
 }
 
 /**
+ * different browser implementations: IE and Chrome use event.srcElement - all others event.target
+ */
+function target(e) {
+	return e.srcElement || e.target; 
+}
+
+/**
  * each field having an InputAssist implementation will call this function on
  * 'onkeypress'.
  */
@@ -68,8 +75,8 @@ function inputassist(e) {
 		code = e.keyCode;
 	else if (e.which)
 		code = e.which;
-	var text = e.srcElement.value + String.fromCharCode(code);
-	var request = createMessage('inputassist', e.srcElement.id, text);
+	var text = target(e).value + String.fromCharCode(code);
+	var request = createMessage('inputassist', target(e).id, text);
 	console.log('sending input-assist request: \'' + request + '\'');
 	socket.send(request);
 }
@@ -139,14 +146,14 @@ function createMessage(target, id, value, clientX, clientY) {
  */
 /*
 function inputassistselect(e) {
-	console.log('transerring selected value \'' + e.srcElement.value
-			+ '\' to element: ' + e.srcElement.name);
-	var inputelement = document.getElementById(e.srcElement.name);
+	console.log('transerring selected value \'' + target(e).value
+			+ '\' to element: ' + target(e).name);
+	var inputelement = document.getElementById(target(e).name);
 	// setAttribute doesn't work here (on chrome), so we set the value directly.
-	inputelement.setAttribute('value', e.srcElement.value);
-	inputelement.value = e.srcElement.value;
+	inputelement.setAttribute('value', target(e).value);
+	inputelement.value = target(e).value;
 
-	e.srcElement.parentNode.removeChild(e.srcElement);
+	target(e).parentNode.removeChild(target(e));
 }
 */
 function getPosition(element) {
@@ -176,7 +183,7 @@ function evaluatedependencies(e) {
 		x = e.clientX - parentPosition.x;
 		y = e.clientY - parentPosition.y;
 	}
-	var msg = createMessage('dependency', e.srcElement.id, e.srcElement.value,
+	var msg = createMessage('dependency', target(e).id, target(e).value,
 			x, y);
 	showStatusMessage(msg);
 	socket.send(msg);

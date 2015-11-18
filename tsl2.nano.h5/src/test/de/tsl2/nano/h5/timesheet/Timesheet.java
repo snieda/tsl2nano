@@ -187,7 +187,7 @@ public class Timesheet extends NanoH5 {
          * add attribute presentation rules
          */
         RuleScript<String> presValueColor = new RuleScript<String>("presValueColor", "value > 10 ? red : black", null);
-        RuleCover ruleCover = new RuleCover(MapUtil.asMap("presentation.background", presValueColor.getName()));
+        RuleCover ruleCover = new RuleCover(MapUtil.asMap("presentable.background", presValueColor.getName()));
         ruleCover.connect(charge.getAttribute(ATTR_VALUE));
         
         charge.saveDefinition();

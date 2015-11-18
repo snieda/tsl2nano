@@ -95,13 +95,15 @@ public class RuleCover implements IConnector<IAttributeDefinition<?>> {
             }
         }
         //now we cover the properties
-        BeanClass bcDef = BeanClass.getBeanClass(connectionEnd.getClass());
-        List<String> names = Arrays.asList(bcDef.getAttributeNames());
+//        BeanClass bcDef = BeanClass.getBeanClass(connectionEnd.getClass());
+//        List<String> names = Arrays.asList(bcDef.getAttributeNames());
 
+        //working on fields directly because not all attributedefinition-attributes are public
         PrivateAccessor<?> acc = new PrivateAccessor<>(connectionEnd);
+        acc.members();
         boolean nameFound = false;
         for (String k : pks) {
-            if (names.contains(k)) {
+            if (acc.hasMember(k)) {
                 nameFound = true;
                 Object origin = acc.member(k);
                 if (!Proxy.isProxyClass(origin.getClass())) {

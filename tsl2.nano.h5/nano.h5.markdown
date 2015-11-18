@@ -2528,6 +2528,15 @@ Net:Connection-->Link-->Cover(content, descriptor)
 * Doc: Verwende am besten Chrome+Hibernate+Hsqldb
 * implement XmlPresentableConverter to provide readable xml files
 * test: create random data through lists with: german-names.lst, cities.lst, countries.lst, banks.lst
+* rules:
+* RuleCover
+* integration of external rule engines like visual rules, drools
+* entscheidungstabelle --> csv-Datei --> rule-xml
+* trace: Runtime.traceInstructions
+* webstart: JAVA_VM_ARGS
+* SEO: page ranking mit Seorch, diagnoSEO
+* Argumentator --> GetOpts
+* QueryResult sollte wie BeanDefinition konfigurierbar sein.
 
 war:
 * WEB-INF/web..xml rausschmeissen

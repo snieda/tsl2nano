@@ -502,8 +502,10 @@ public class StringUtil {
             if (replacement != null) {
                 if (source instanceof StringBuilder) {
                     result = m.group(m.groupCount());
-                    StringBuilder sb = (StringBuilder) source;
-                    replace(sb, result, replacement, start);
+                    if (result != null) {
+                        StringBuilder sb = (StringBuilder) source;
+                        replace(sb, result, replacement, start);
+                    }
                 } else {
                     result = concatGroups(m, groups);
                 }

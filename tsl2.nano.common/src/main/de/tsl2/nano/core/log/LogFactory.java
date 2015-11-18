@@ -220,7 +220,7 @@ public/*abstract*/class LogFactory implements Runnable, Serializable {
         if (bitsetStatesToLog == -1) {
             String logLevel = System.getProperty("tsl2.nano.log.level");
             if ("trace".equals(logLevel)) {
-                instance().statesToLog = LOG_ALL;
+                enableTrace();
             } else if ("debug".equals(logLevel)) {
                 instance().statesToLog = LOG_DEBUG;
             } else if ("warn".equals(logLevel)) {
@@ -229,6 +229,12 @@ public/*abstract*/class LogFactory implements Runnable, Serializable {
         } else {
             instance().statesToLog = bitsetStatesToLog;
         }
+    }
+
+    private static void enableTrace() {
+        instance().statesToLog = LOG_ALL;
+        Runtime.getRuntime().traceInstructions(true);
+        Runtime.getRuntime().traceMethodCalls(true);
     }
 
     /**
@@ -292,6 +298,8 @@ public/*abstract*/class LogFactory implements Runnable, Serializable {
      */
     public static final void setLogLevel(int loglevel) {
         instance().statesToLog = loglevel;
+        if (BitUtil.hasBit(loglevel, TRACE))
+            enableTrace();
     }
 
     /**

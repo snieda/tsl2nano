@@ -1424,8 +1424,8 @@ public class Html5Presentation<T> extends BeanPresentationHelper<T> implements I
                 attr = itemBean.hasAttribute(c.getName()) ?itemBean.getAttribute(c.getName()) : null;
                 //on byte[] show an image through attached file
                 //workaround: on virtuals searching the attribute may cause an error
-                if (itemBean.isVirtual() ? BitUtil.hasBit(c.getPresentable().getType(), TYPE_DATA,
-                    TYPE_ATTACHMENT) : attr != null && BitUtil.hasBit(attr.getPresentation().getType(),
+                //TODO: if a virtual bean is empty, no attributes are available --> show a warning!
+                if (attr != null && BitUtil.hasBit(attr.getPresentation().getType(),
                     TYPE_DATA,
                     TYPE_ATTACHMENT)) {
                     BeanValue<?> beanValue = (BeanValue<?>) attr;
@@ -1982,7 +1982,8 @@ public class Html5Presentation<T> extends BeanPresentationHelper<T> implements I
             type = "checkbox";
             break;
         case TYPE_DATE | TYPE_TIME:
-            type = ENV.get("default.present.type.date.insteadof.datetime", true) ? "date": "datetime";
+            //most browsers are not able to present a datetime. 
+            type = ENV.get("default.present.type.datetime", "datetime-local");
             break;
         case TYPE_TIME:
             type = "time";

@@ -245,6 +245,18 @@ public class UnboundAccessor<T> {
     }
 
     /**
+     * hasMember
+     * @param name field/member name
+     * @return true, if field/member with given name exists
+     */
+    public boolean hasMember(String name) {
+        try {
+            return getField(name) != null;
+        } catch (Exception e) {
+            return false;
+        }
+    }
+    /**
      * evaluates the desired field. see {@link Class#getField(String)}
      * 
      * @param name field name
