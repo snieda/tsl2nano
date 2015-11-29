@@ -13,6 +13,7 @@ import static org.junit.Assert.assertTrue;
 
 import java.io.File;
 import java.io.IOException;
+import java.net.URL;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -24,6 +25,7 @@ import my.app.MyApp;
 import my.app.Times;
 
 import org.anonymous.project.Charge;
+import org.apache.tools.ant.taskdefs.Classloader;
 import org.junit.Ignore;
 import org.junit.Test;
 
@@ -38,9 +40,14 @@ import de.tsl2.nano.bean.BeanContainer;
 import de.tsl2.nano.bean.IBeanContainer;
 import de.tsl2.nano.bean.def.Bean;
 import de.tsl2.nano.bean.def.BeanDefinition;
+import de.tsl2.nano.bean.def.BeanPresentationHelper;
 import de.tsl2.nano.core.ENV;
+import de.tsl2.nano.core.ManagedException;
 import de.tsl2.nano.core.Messages;
+import de.tsl2.nano.core.classloader.RuntimeClassloader;
 import de.tsl2.nano.core.cls.BeanClass;
+import de.tsl2.nano.core.exception.Message;
+import de.tsl2.nano.core.util.ConcurrentUtil;
 import de.tsl2.nano.core.util.FileUtil;
 import de.tsl2.nano.core.util.NetUtil;
 import de.tsl2.nano.execution.AntRunner;
@@ -49,7 +56,11 @@ import de.tsl2.nano.h5.Html5Presentation;
 import de.tsl2.nano.h5.NanoH5;
 import de.tsl2.nano.h5.timesheet.Timesheet;
 import de.tsl2.nano.incubation.specification.rules.RulePool;
+import de.tsl2.nano.persistence.GenericLocalBeanContainer;
+import de.tsl2.nano.persistence.Persistence;
 import de.tsl2.nano.service.util.BeanContainerUtil;
+import de.tsl2.nano.serviceaccess.Authorization;
+import de.tsl2.nano.serviceaccess.IAuthorization;
 import de.tsl2.nano.test.TypeBean;
 import de.tsl2.nano.util.Translator;
 import de.tsl2.nano.util.codegen.PackageGenerator;
@@ -156,6 +167,9 @@ public class NanoH5Test {
         Files.deleteIfExists(Paths.get(DIR_TEST));
 
         ENV.create(DIR_TEST);
+        RuntimeClassloader cl = new RuntimeClassloader(new URL[0]);
+        cl.addFile(ENV.getConfigPath());
+        ENV.addService(ClassLoader.class, cl);
         //first: generate all configurations....
         if (anywayMapper != null) {
             //TODO: map names. e.g. : Charge --> TimeEntry
@@ -165,7 +179,17 @@ public class NanoH5Test {
         System.setProperty("bean.generation.outputpath", DIR_TEST);
         PackageGenerator.main(new String[] { "bin/" + pckName.replace('.', '/') });
 
-        BeanContainer.initEmtpyServiceActions();
+        ENV.addService(BeanPresentationHelper.class, new Html5Presentation<>());
+        try {
+            Persistence.current().save();
+        } catch (IOException e) {
+            ManagedException.forward(e);
+        }
+        String userName = Persistence.current().getConnectionUserName();
+        ENV.addService(IAuthorization.class, Authorization.create(userName, false));
+
+//      BeanContainer.initEmtpyServiceActions();
+        GenericLocalBeanContainer.initLocalContainer(ENV.get(ClassLoader.class), false);
         ENV.addService(IBeanContainer.class, BeanContainer.instance());
         app.start();
 //        Translator.translateBundle(ENV.getConfigPath() + "messages", Messages.keySet(), Locale.ENGLISH,
@@ -206,12 +230,14 @@ public class NanoH5Test {
         //create a deployable package
         Properties p = new Properties();
         p.put("destFile", "target/" + name + ".zip");
-        AntRunner.runTask(AntRunner.TASK_ZIP, p, DIR_TEST + ":{**}");
+        AntRunner.runTask(AntRunner.TASK_ZIP, p, new File(DIR_TEST).getParent() + ":{**}");
         
         //delete the test output
-        p.clear();
-        p.put("dir", DIR_TEST);
-        AntRunner.runTask(AntRunner.TASK_DELETE, p, (String)null);
+//        ConcurrentUtil.sleep(10000);
+        new File(DIR_TEST).deleteOnExit();
+//        p.clear();
+//        p.put("dir", DIR_TEST);
+//        AntRunner.runTask(AntRunner.TASK_DELETE, p, (String)null);
     }
 
     @Test

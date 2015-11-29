@@ -192,7 +192,8 @@ public class Timesheet extends NanoH5App {
         
         charge.saveDefinition();
 
-        new Statistic<>(Charge.class).saveVirtualDefinition("statistics " + Charge.class.getSimpleName());
+        //TODO: Statistics executes queries immediately to evaluate grupby column names
+//        new Statistic<>(Charge.class).saveVirtualDefinition("statistics " + Charge.class.getSimpleName());
         
         /*
          * Sample Workflow with three activities
