@@ -13,16 +13,16 @@
 [[project_screenshots]]
 
 <meta-tag>
-crud, grud, crud2gui, crud2html, bean2html, entity2html, bean2gui, entity2gui, jpa2gui, jpa2html, jpa persistence provider, openjpa, hibernate, datanucleus, eclipselink, toplink, batoo, ormlite, ebean, data-editor, data-sheet, entity browser, jpa2, full stack framework, orm, o/r mapper
+crud, grud, crud2gui, crud2html, bean2html, entity2html, bean2gui, entity2gui, jpa2gui, jpa2html, jpa persistence provider, openjpa, hibernate, datanucleus, eclipselink, toplink, batoo, ormlite, ebean, data-editor, data-sheet, entity browser, jpa2, full stack framework, orm, o/r mapper, projector
 </meta-tag>
 
 <description>
-crud, grud, crud2gui, crud2html, bean2html, entity2html, bean2gui, entity2gui, jpa2gui, jpa2html, jpa persistence provider, openjpa, hibernate, datanucleus, eclipselink, toplink, batoo, ormlite, ebean, data-editor, data-sheet, entity browser, jpa2, full stack framework, orm, o/r mapper
+crud, grud, crud2gui, crud2html, bean2html, entity2html, bean2gui, entity2gui, jpa2gui, jpa2html, jpa persistence provider, openjpa, hibernate, datanucleus, eclipselink, toplink, batoo, ormlite, ebean, data-editor, data-sheet, entity browser, jpa2, full stack framework, orm, o/r mapper, projector
 </description>
 
 ## Introduction
 
-NanoH5 (or FullRelation) is an UI independent gui implementation framework providing a model driven design (MDA). It is bound to the app framework __tsl2.nano.commons__ and the jpa-service framework __tsl2.nano.serviceaccess__. It is possible to build a complete html5 application through a given class- or database-model. An Html5 presentation layer is provided as default.
+NanoH5 (or FullRelation) is an UI independent gui implementation framework providing a model driven design (MDA) and following the projector pattern. It is bound to the app framework __tsl2.nano.commons__ and the jpa-service framework __tsl2.nano.serviceaccess__. It is possible to build a complete html5 application through a given class- or database-model. An Html5 presentation layer is provided as default.
 
 - Everything will be filled for you by defaults - presenting a full application getting a database connection through any persistence provider (jpa 2.x)
 - define it or implement it - all object-types have their representation as readable xml-file.
@@ -190,6 +190,8 @@ A summary of lightweight ORM tools can be read here: ftp://ftp.informatik.uni-st
 The architecture is defined by the application framework [tsl2.nano.common](../tsl2.nano.common/nano.common.html). The data and service layer is defined by [tsl2.nano.serviceaccess](../tsl2.nano.sericeaccess/nano.serviceaccess.html).
 
 <img src="https://sourceforge.net/p/tsl2nano/code/ci/master/tree/tsl2.nano.h5/doc/nano-h5-overview.png"/>
+
+The base for the model is any JPA-provider, the presentation of entity-beans will be configured through xml (using simple-xml as xml-persister and prefilling the beans with usable defaults). The presentation follows the projector pattern.
 
 #### Model Driven Architecture (MDA))
 
@@ -2171,7 +2173,9 @@ Actual list: http://infocenter.pentaho.com/help/index.jsp?topic=%2Fsupported_com
 	* ebean 2.8.1: "@OneToMany MUST have Cascade.PERSIST or Cascade.ALL because this is a unidirectional relationship"
 	* ormlite: "Generated-id field 'myID' in MyEntity can't be type STRING.  Must be one of: INTEGER INTEGER_OBJ LONG LONG_OBJ UUID"
 	* ormlite: "No fields have a DatabaseField annotation in class org.anonymous.project.Address"
-
+* SimpleXml: TransformationException on Lists
+	* use ListWrapper instead of type List
+	
 ## Changelog
 
  Version | Date | Description
@@ -2531,12 +2535,15 @@ Net:Connection-->Link-->Cover(content, descriptor)
 * rules:
 * RuleCover
 * integration of external rule engines like visual rules, drools
-* entscheidungstabelle --> csv-Datei --> rule-xml
+* entscheidungstabelle --> csv-Datei --> rule-xml, --> tree (graphviz)
 * trace: Runtime.traceInstructions
 * webstart: JAVA_VM_ARGS
 * SEO: page ranking mit Seorch, diagnoSEO
 * Argumentator --> GetOpts
-* QueryResult sollte wie BeanDefinition konfigurierbar sein.
+* QueryResult, Statistics sollten wie BeanDefinition konfigurierbar sein.
+* DecisionTableInterpreter --> Rule, LogicTable
+* BeanCollector --> LogicTable, LogicTableUI mit dependency listeners
+* FormattedLogFactory per session
 
 war:
 * WEB-INF/web..xml rausschmeissen
