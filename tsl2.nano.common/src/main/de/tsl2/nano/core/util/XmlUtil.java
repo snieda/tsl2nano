@@ -20,7 +20,6 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.Serializable;
 import java.io.StringWriter;
-import java.lang.annotation.Annotation;
 import java.lang.reflect.InvocationHandler;
 import java.lang.reflect.Proxy;
 import java.sql.Connection;
@@ -58,12 +57,8 @@ import org.simpleframework.xml.convert.Registry;
 import org.simpleframework.xml.convert.RegistryStrategy;
 import org.simpleframework.xml.core.Persister;
 import org.simpleframework.xml.strategy.Strategy;
-import org.simpleframework.xml.strategy.TreeStrategy;
-import org.simpleframework.xml.strategy.Type;
-import org.simpleframework.xml.strategy.Value;
 import org.simpleframework.xml.stream.Format;
 import org.simpleframework.xml.stream.InputNode;
-import org.simpleframework.xml.stream.NodeMap;
 import org.simpleframework.xml.stream.OutputNode;
 import org.simpleframework.xml.transform.Matcher;
 import org.simpleframework.xml.transform.Transform;
@@ -73,12 +68,10 @@ import org.w3c.dom.NodeList;
 
 import de.tsl2.nano.core.ENV;
 import de.tsl2.nano.core.ManagedException;
-import de.tsl2.nano.core.cls.BeanAttribute;
 import de.tsl2.nano.core.cls.BeanClass;
 import de.tsl2.nano.core.cls.PrimitiveUtil;
 import de.tsl2.nano.core.execution.CompatibilityLayer;
 import de.tsl2.nano.core.log.LogFactory;
-import de.tsl2.nano.util.PrivateAccessor;
 
 /**
  * provides convenience methods for:
