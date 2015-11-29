@@ -29,16 +29,17 @@ import java.util.Hashtable;
 import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Properties;
+import java.util.Scanner;
 import java.util.concurrent.Callable;
 
 import javax.print.attribute.standard.MediaSizeName;
 
 import org.apache.commons.logging.Log;
+import org.junit.Ignore;
 import org.junit.Test;
 
 import de.tsl2.nano.bean.BeanUtil;
 import de.tsl2.nano.bean.def.Constraint;
-import de.tsl2.nano.collection.MapUtil;
 import de.tsl2.nano.collection.TableList;
 import de.tsl2.nano.core.ENV;
 import de.tsl2.nano.core.Finished;
@@ -50,6 +51,7 @@ import de.tsl2.nano.core.log.LogFactory;
 import de.tsl2.nano.core.util.ByteUtil;
 import de.tsl2.nano.core.util.Crypt;
 import de.tsl2.nano.core.util.FileUtil;
+import de.tsl2.nano.core.util.MapUtil;
 import de.tsl2.nano.core.util.NetUtil;
 import de.tsl2.nano.core.util.Permutator;
 import de.tsl2.nano.core.util.PrintUtil;
@@ -81,6 +83,7 @@ import de.tsl2.nano.incubation.terminal.item.selector.FileSelector;
 import de.tsl2.nano.incubation.terminal.item.selector.PropertySelector;
 import de.tsl2.nano.incubation.terminal.item.selector.Sequence;
 import de.tsl2.nano.incubation.terminal.item.selector.XPathSelector;
+import de.tsl2.nano.incubation.tree.Tree;
 import de.tsl2.nano.incubation.vnet.ILocatable;
 import de.tsl2.nano.incubation.vnet.Net;
 import de.tsl2.nano.incubation.vnet.Node;
@@ -790,6 +793,31 @@ public class IncubationTest {
         System.out.println("end: " + array.size());
     }
 
+    @Test
+    @Ignore
+    public void testTree() throws Exception {
+        String src = "";
+//        digraph G {
+//            2: size ="4,4";
+//            3: main [shape=box]; /* this is a comment */
+//            4: main -> parse [weight=8];
+//            5: parse -> execute;
+//            6: main -> init [style=dotted];
+//            7: main -> cleanup;
+//            8: execute -> { make_string; printf}
+//            9: init -> make_string;
+//            10: edge [color=red]; // so is this
+//            11: main -> printf [style=bold,label="100 times"];
+//            12: make_string [label="make a\nstring"];
+//            13: node [shape=box,style=filled,color=".7 .3 1.0"];
+//            14: execute -> compare;
+//            15: } 
+
+        Tree<String, String> graph = new Tree<String, String>("main", null);
+//        graph.pu
+        graph = Tree.fromString(new Scanner(graph.toString()));
+    }
+    
     static void log_(String msg) {
         System.out.print(msg);
     }
