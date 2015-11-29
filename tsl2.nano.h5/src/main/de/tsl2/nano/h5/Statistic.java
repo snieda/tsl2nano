@@ -197,7 +197,7 @@ public class Statistic<COLLECTIONTYPE extends Collection<T>, T> extends BeanColl
     }
 
     private static <T> StringBuffer whereConstraints(T from, T to, Collection parameter) {
-        return from == null || to == null ? new StringBuffer(" 1=1 ") : ServiceUtil.addBetweenConditions(
+        return from == null || to == null ? new StringBuffer(" where 1=1 ") : ServiceUtil.addBetweenConditions(
             new StringBuffer(), from, to, parameter, true);
     }
 
