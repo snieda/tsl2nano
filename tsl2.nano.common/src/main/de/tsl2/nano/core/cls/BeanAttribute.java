@@ -14,6 +14,7 @@ import java.io.Serializable;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Field;
+import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.lang.reflect.ParameterizedType;
 import java.util.Map;
@@ -101,7 +102,7 @@ public class BeanAttribute<T> implements IAttribute<T> {
          */
         BeanClass cachedBC = CachedBeanClass.getCachedBeanClass(clazz);
         if (cachedBC != null) {
-            return (BeanAttribute) cachedBC.getAttribute(attributeName);
+            return (BeanAttribute) cachedBC.getAttribute(attributeName, throwException);
         } else {
             Method method = getReadAccessMethod(clazz, attributeName, throwException);
             return method != null ? new BeanAttribute(method) : null;
@@ -175,25 +176,66 @@ public class BeanAttribute<T> implements IAttribute<T> {
      * @param readAccessMethod
      * @return the setter method for the given getter method or null if not available.
      */
+    @SuppressWarnings("unchecked")
     Method getWriteAccessMethod(Method readAccessMethod) {
         if (writeAccessMethod == null) {
             assert isGetterMethod(readAccessMethod) : "method has to start with " + PREFIX_READ_ACCESS;
             //use the generic name through readAccessMethod, because extension may override getName() returning a presentation name.
             final String attributeName = getName(readAccessMethod);
-            try {
-                writeAccessMethod = readAccessMethod.getDeclaringClass()
-                    .getMethod(PREFIX_WRITE_ACCESS + toFirstUpper(attributeName),
-                        new Class[] { readAccessMethod.getReturnType() });
-            } catch (final SecurityException e) {
-                ManagedException.forward(e);
-                return null;
-            } catch (final NoSuchMethodException e) {
-                //ok --> no write acces method available!
-            }
+            writeAccessMethod =
+                getWriteAccessMethod(readAccessMethod.getDeclaringClass(), attributeName,
+                    (Class<T>) readAccessMethod.getReturnType());
         }
         return writeAccessMethod;
     }
 
+    /**
+     * getWriteAccessMethod
+     * 
+     * @param readAccessMethod
+     * @param attributeName
+     */
+    public static <T> Method getWriteAccessMethod(Class<?> cls, String attributeName, Class<T> type) {
+        try {
+            return cls.getMethod(PREFIX_WRITE_ACCESS + toFirstUpper(attributeName), new Class[] { type });
+        } catch (final SecurityException e) {
+            ManagedException.forward(e);
+        } catch (final NoSuchMethodException e) {
+            //ok --> no write access method available!
+        }
+        return null;
+    }
+
+    @SuppressWarnings("unchecked")
+    public static <T> BeanAttribute<T> getBeanAttributeWriter(Class<?> cls, String attributeName, Class<T> type) {
+        BeanAttribute attr = getBeanAttribute(cls, attributeName, false);
+        if (attr == null) {
+            attr = new BeanAttribute<T>();
+            attr.writeAccessMethod = getWriteAccessMethod(cls, attributeName, type);
+        }
+        return attr;
+    }
+
+//    /**
+//     * setValue
+//     * @param instance object instance to invoke on  (must not be null!)
+//     * @param attributeName attribute name
+//     * @param value new value (must not be null!)
+//     */
+//    public static <T> void setValue(Object instance, String attributeName, T value) {
+//        if (instance == null || value == null)
+//            throw new IllegalArgumentException("instance and value must not be null!");
+//        Class<?> cls = BeanClass.getDefiningClass(instance.getClass());
+//        Class<?> type = BeanClass.getDefiningClass(value.getClass());
+//        Method writeAccessMethod = getWriteAccessMethod(cls, attributeName, type);
+//        if (writeAccessMethod == null)
+//            throw new IllegalArgumentException("no setter method found for " + cls + " -> " + attributeName + "(" + type + ")");
+//        try {
+//            writeAccessMethod.invoke(instance, value);
+//        } catch (Exception e) {
+//            ManagedException.forward(e);
+//        }
+//    }
     /**
      * constructor to be serializable
      */
@@ -309,7 +351,10 @@ public class BeanAttribute<T> implements IAttribute<T> {
     @SuppressWarnings("unchecked")
     public Class<T> getType() {
         if (readAccessMethod == null) {
-            initDeserializing();
+            if (writeAccessMethod == null)
+                initDeserializing();
+            else
+                return (Class<T>) writeAccessMethod.getParameterTypes()[0];
         }
         return (Class<T>) readAccessMethod.getReturnType();
     }
@@ -466,7 +511,8 @@ public class BeanAttribute<T> implements IAttribute<T> {
 
     //UNTESTED. MAY CHANGE WITH JDK IMPLEMENTATION
     @SuppressWarnings("unchecked")
-    public <A extends Annotation> void setAnnotationValues(Class<A> annotationClass, Map<String, Object> annoationAttributes) {
+    public <A extends Annotation> void setAnnotationValues(Class<A> annotationClass,
+            Map<String, Object> annoationAttributes) {
         A a = getAnnotation(annotationClass);
         if (a == null) {
             LOG.warn("annotation " + annotationClass + " not found on beanattribute " + this);

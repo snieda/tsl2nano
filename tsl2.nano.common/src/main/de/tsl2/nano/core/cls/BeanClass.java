@@ -285,13 +285,21 @@ public class BeanClass<T> implements Serializable {
     }
 
     public IAttribute getAttribute(String name) {
+        return getAttribute(name, false);
+    }
+
+    public IAttribute getAttribute(String name, boolean throwException) {
         List<IAttribute> attrs = getAttributes();
         for (IAttribute a : attrs) {
             if (a.getName().equals(name)) {
                 return a;
             }
         }
-        return null;
+        if (throwException)
+            throw new IllegalArgumentException("attribute '" + name + "' not available in " + clazz
+                + "\n\tavailable attributes are:\n" + StringUtil.toFormattedString(attrs, -1, true));
+        else
+            return null;
     }
 
     /**
@@ -737,7 +745,7 @@ public class BeanClass<T> implements Serializable {
      * @param value new attribute value
      */
     public void setValue(T instance, String attributeName, Object value) {
-        getAttribute(attributeName).setValue(instance, value);
+        getAttribute(attributeName, true).setValue(instance, value);
     }
 
     /**

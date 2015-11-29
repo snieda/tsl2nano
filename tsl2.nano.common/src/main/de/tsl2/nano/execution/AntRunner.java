@@ -37,9 +37,11 @@ import org.apache.tools.ant.types.selectors.FileSelector;
 import org.apache.tools.ant.types.selectors.FilenameSelector;
 
 import de.tsl2.nano.core.ManagedException;
+import de.tsl2.nano.core.cls.BeanAttribute;
 import de.tsl2.nano.core.cls.BeanClass;
 import de.tsl2.nano.core.log.LogFactory;
 import de.tsl2.nano.core.util.StringUtil;
+import de.tsl2.nano.core.util.Util;
 
 /**
  * is able to run ant targets given by name and properties. If task is a {@link MatchingTask}, an array of
@@ -93,7 +95,7 @@ public class AntRunner {
      * {@link FileSet}s.
      */
     public static void runTask(String name, Properties taskProperties, String fileSetExpression) {
-        runTask(name, taskProperties, createFileSets(fileSetExpression));
+        runTask(name, taskProperties, fileSetExpression != null ? createFileSets(fileSetExpression) : (FileSet[])null);
     }
 
     /**
@@ -136,16 +138,15 @@ public class AntRunner {
          * now we use the properties to fill bean attributes of ant task
          */
         final Set<Object> keySet = taskProperties.keySet();
-        final BeanClass bc = BeanClass.getBeanClass(taskType);
         for (final Object key : keySet) {
             final String n = (String) key;
-            bc.setValue(task, n, taskProperties.get(n));
+            BeanAttribute.getBeanAttributeWriter(task.getClass(), n, File.class).setValue(task, taskProperties.get(n));
         }
 
         /*
          * optional filesets
          */
-        if (fileSets.length > 0) {
+        if (!Util.isEmpty(fileSets)) {
             try { //try it directly through 'addFileset'
                 final Method addFilesetMethod = taskType.getMethod("addFileset", new Class[] { FileSet.class });
                 for (final FileSet fs : fileSets) {
