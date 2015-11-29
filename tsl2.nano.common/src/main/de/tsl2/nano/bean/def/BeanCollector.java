@@ -238,6 +238,9 @@ public class BeanCollector<COLLECTIONTYPE extends Collection<T>, T> extends Bean
             createDeleteAction();
         }
 //        }
+        assignColumnValues();
+        if (ENV.get("beandef.autoinit", true))
+            autoInit(name);
     }
 
     /**
@@ -1434,8 +1437,6 @@ public class BeanCollector<COLLECTIONTYPE extends Collection<T>, T> extends Bean
         //use an own map instance to be independent of changes by other beans or beancollectors.
         bc.attributeDefinitions = new LinkedHashMap<String, IAttributeDefinition<?>>(bc.attributeDefinitions);
         bc.init(collection, new BeanFinder(beandef.getClazz()), workingMode, composition);
-        //while deserialization was done on BeanDefinition, we have to do this step manually
-        bc.initDeserialization();
         return bc;
     }
 
@@ -1505,6 +1506,12 @@ public class BeanCollector<COLLECTIONTYPE extends Collection<T>, T> extends Bean
     @Commit
     protected void initDeserialization() {
         init(collection, beanFinder, workingMode, composition);
+    }
+
+    /**
+     * assignColumnValues
+     */
+    protected void assignColumnValues() {
         if (columnDefinitions != null) {
             for (IPresentableColumn c : columnDefinitions) {
                 ((ValueColumn) c).attributeDefinition = getAttribute(c.getName());
