@@ -32,10 +32,10 @@ import javax.persistence.Query;
 import javax.security.auth.Subject;
 
 import de.tsl2.nano.bean.def.Diff;
-import de.tsl2.nano.collection.MapUtil;
 import de.tsl2.nano.core.ManagedException;
 import de.tsl2.nano.core.cls.BeanAttribute;
 import de.tsl2.nano.core.cls.BeanClass;
+import de.tsl2.nano.core.util.MapUtil;
 import de.tsl2.nano.core.util.StringUtil;
 import de.tsl2.nano.service.util.batch.Part;
 import de.tsl2.nano.service.util.finder.AbstractFinder;

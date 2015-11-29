@@ -20,6 +20,7 @@ import java.util.TreeMap;
 
 import de.tsl2.nano.core.ENV;
 import de.tsl2.nano.core.IPredicate;
+import de.tsl2.nano.core.ITransformer;
 import de.tsl2.nano.core.ManagedException;
 import de.tsl2.nano.core.util.ListSet;
 import de.tsl2.nano.messaging.EventController;
@@ -123,11 +124,31 @@ public class Net<T extends IListener<Notification> & ILocatable & Serializable &
      */
     public ListSet<INode<T, D>> crawl(INode<T, D> root, IPredicate<INode<T, D>> addingCondition) {
         ListSet<INode<T, D>> result = new ListSet<INode<T, D>>();
+        if (addingCondition.eval(root))
+            result.add(root);
         for (IConnection<T, D> c : root.getConnections()) {
-            if (addingCondition.eval(c.getDestination()))
-                result.add(c.getDestination());
+            result.addAll(crawl(c.getDestination(), addingCondition));
         }
         return result;
+    }
+
+    /**
+     * TODO: implement and test
+     * <p/>
+     * crawler starting from root - transforming all connections through the given transformer. crawls the network of nodes
+     * through all of its connections. you can use the standard {@link Node} implementation or implement your own
+     * {@link INode} defining its special connections.
+     * 
+     * @param root INode implementation holding the root object.
+     * @param transformer node transformer
+     * @return transformed root node
+     */
+    public INode<T, D> crawl(INode<T, D> root, ITransformer<INode<T, D>, INode<T, D>> transformer) {
+        INode<T, D> transformed = transformer.transform(root);
+        for (IConnection<T, D> c : root.getConnections()) {
+            crawl(c.getDestination(), transformer);
+        }
+        return transformed;
     }
 
     /**
