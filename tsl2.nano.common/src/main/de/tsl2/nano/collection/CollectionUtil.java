@@ -777,4 +777,77 @@ public class CollectionUtil {
             throw new IllegalArgumentException(i == 0 ? iterable + " is empty!" : "position must be between 0 and " + i);
         }
     }
+    public static <T> Collection<NamedValue> asNamedCollection(Map<?, T> m) {
+        LinkedList<NamedValue> list = new LinkedList<NamedValue>();
+        NamedValue.putAll(m, list);
+        return list;
+    }
+
+    /**
+     * see {@link MapEntrySet}.
+     * 
+     * @param m map to wrap into a proxy to combine the both interfaces {@link List} and {@link Map}.
+     * @return proxy implementing both interfaces through delegation.
+     */
+    public static <K, V> Set<Map.Entry<K, V>> asEntrySetExtender(final Map<K, V> m) {
+//        /**
+//         * Extender of a maps entry set - used by MapUtil to provide a combination of Collection and Map. workaround in cause of
+//         * interface naming clash of {@link Collection} and {@link Map} (method remove(Object) with different return types).
+//         * 
+//         * @author Tom
+//         * @version $Revision$
+//         */
+//        public interface EntrySetExtender<K, V, E> {
+//            /**
+//             * @return the map behind the entry set
+//             */
+//            Map<K, V> map();
+//
+//            /**
+//             * overwrite the entryset add method that will throw an unsupported operation exception.
+//             */
+//            boolean add(E entry);
+//            boolean addAll(Collection<? extends E> c);
+//            /**
+//             * creates a new entry using the {@link #map()}. the new entry should be returned.
+//             */
+//            Map.Entry<K, V> addEntry(K key, V value);
+//        }
+//        EntrySetExtender<K, V, ?> entrySetExtender = new EntrySetExtender<K, V, Object>() {
+//            PrivateAccessor<Map<K, V>> mapAccessor = new PrivateAccessor<Map<K, V>>(m);
+//
+//            @Override
+//            public Map<K, V> map() {
+//                return m;
+//            }
+//
+//            @Override
+//            public boolean add(Object entry) {
+//                Map.Entry<K, V> e = (Entry<K, V>) entry;
+//                addEntry(e.getKey(), e.getValue());
+//                return true;
+//            }
+//
+//            @Override
+//            public boolean addAll(Collection<? extends Object> c) {
+//                for (Object object : c) {
+//                    Map.Entry<K, V> e = (Entry<K, V>) object;
+//                    m.put(e.getKey(), e.getValue());
+//                }
+//                return true;
+//            }
+//
+//            @Override
+//            public Entry<K, V> addEntry(K key, V value) {
+//                m.put(key, value);
+//                return mapAccessor.call("getEntry", Map.Entry.class, new Class[] { Object.class }, key);
+//            }
+//
+//        };
+        return new MapEntrySet(m);
+//        return (Set<Entry<K, V>>) DelegatorProxy.delegator(new Class[] { EntrySetExtender.class, Set.class },
+//            entrySetExtender, m.entrySet());
+//        return (Set<Entry<K, V>>) MultipleInheritanceProxy.createMultipleInheritance(new Class[] { EntrySetExtender.class,
+//            Set.class }, Arrays.asList(entrySetExtender, m.entrySet()), EntrySetExtender.class.getClassLoader());
+    }
 }

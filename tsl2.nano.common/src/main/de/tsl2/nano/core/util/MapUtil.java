@@ -6,7 +6,7 @@
  * 
  * $Id$ 
  */
-package de.tsl2.nano.collection;
+package de.tsl2.nano.core.util;
 
 import java.lang.reflect.Array;
 import java.lang.reflect.Method;
@@ -20,11 +20,12 @@ import java.util.Map;
 import java.util.Properties;
 import java.util.Set;
 
-import de.tsl2.nano.bean.BeanUtil;
-import de.tsl2.nano.bean.def.Bean;
+//import de.tsl2.nano.bean.BeanUtil;
+//import de.tsl2.nano.bean.def.Bean;
+//import de.tsl2.nano.collection.MapEntrySet;
+//import de.tsl2.nano.collection.NamedValue;
 import de.tsl2.nano.core.ManagedException;
 import de.tsl2.nano.core.cls.BeanAttribute;
-import de.tsl2.nano.core.util.StringUtil;
 
 /**
  * utilities for maps.
@@ -52,22 +53,22 @@ public class MapUtil {
         return map;
     }
 
-    /**
-     * fills a map with all bean-attribute-names and their values
-     * 
-     * @param o bean
-     * @param useClassPrefix if true, the class-name will be used as prefix for the key
-     * @param onlySingleValues if true, collections will be ignored
-     * @param filterAttributes attributes to be filtered (ignored)
-     * @return see {@link Bean#toValueMap()}
-     */
-    public static Map<String, Object> toValueMap(Object o,
-            String keyPrefix,
-            boolean onlySingleValues,
-            String... filterAttributes) {
-        return BeanUtil.toValueMap(o, keyPrefix, onlySingleValues, filterAttributes);
-    }
-
+//    /**
+//     * fills a map with all bean-attribute-names and their values
+//     * 
+//     * @param o bean
+//     * @param useClassPrefix if true, the class-name will be used as prefix for the key
+//     * @param onlySingleValues if true, collections will be ignored
+//     * @param filterAttributes attributes to be filtered (ignored)
+//     * @return see {@link Bean#toValueMap()}
+//     */
+//    public static Map<String, Object> toValueMap(Object o,
+//            String keyPrefix,
+//            boolean onlySingleValues,
+//            String... filterAttributes) {
+//        return BeanUtil.toValueMap(o, keyPrefix, onlySingleValues, filterAttributes);
+//    }
+//
     public static Map asProperties(Object... keysAndValues) {
         return asMap(new Properties(), keysAndValues);
     }
@@ -186,80 +187,6 @@ public class MapUtil {
      */
     public static String toString(Map<?, ?> map) {
         return StringUtil.toFormattedString(map, Integer.MAX_VALUE);
-    }
-
-    public static <T> Collection<NamedValue> asNamedCollection(Map<?, T> m) {
-        LinkedList<NamedValue> list = new LinkedList<NamedValue>();
-        NamedValue.putAll(m, list);
-        return list;
-    }
-
-    /**
-     * see {@link MapEntrySet}.
-     * 
-     * @param m map to wrap into a proxy to combine the both interfaces {@link List} and {@link Map}.
-     * @return proxy implementing both interfaces through delegation.
-     */
-    public static <K, V> Set<Map.Entry<K, V>> asEntrySetExtender(final Map<K, V> m) {
-//        /**
-//         * Extender of a maps entry set - used by MapUtil to provide a combination of Collection and Map. workaround in cause of
-//         * interface naming clash of {@link Collection} and {@link Map} (method remove(Object) with different return types).
-//         * 
-//         * @author Tom
-//         * @version $Revision$
-//         */
-//        public interface EntrySetExtender<K, V, E> {
-//            /**
-//             * @return the map behind the entry set
-//             */
-//            Map<K, V> map();
-//
-//            /**
-//             * overwrite the entryset add method that will throw an unsupported operation exception.
-//             */
-//            boolean add(E entry);
-//            boolean addAll(Collection<? extends E> c);
-//            /**
-//             * creates a new entry using the {@link #map()}. the new entry should be returned.
-//             */
-//            Map.Entry<K, V> addEntry(K key, V value);
-//        }
-//        EntrySetExtender<K, V, ?> entrySetExtender = new EntrySetExtender<K, V, Object>() {
-//            PrivateAccessor<Map<K, V>> mapAccessor = new PrivateAccessor<Map<K, V>>(m);
-//
-//            @Override
-//            public Map<K, V> map() {
-//                return m;
-//            }
-//
-//            @Override
-//            public boolean add(Object entry) {
-//                Map.Entry<K, V> e = (Entry<K, V>) entry;
-//                addEntry(e.getKey(), e.getValue());
-//                return true;
-//            }
-//
-//            @Override
-//            public boolean addAll(Collection<? extends Object> c) {
-//                for (Object object : c) {
-//                    Map.Entry<K, V> e = (Entry<K, V>) object;
-//                    m.put(e.getKey(), e.getValue());
-//                }
-//                return true;
-//            }
-//
-//            @Override
-//            public Entry<K, V> addEntry(K key, V value) {
-//                m.put(key, value);
-//                return mapAccessor.call("getEntry", Map.Entry.class, new Class[] { Object.class }, key);
-//            }
-//
-//        };
-        return new MapEntrySet(m);
-//        return (Set<Entry<K, V>>) DelegatorProxy.delegator(new Class[] { EntrySetExtender.class, Set.class },
-//            entrySetExtender, m.entrySet());
-//        return (Set<Entry<K, V>>) MultipleInheritanceProxy.createMultipleInheritance(new Class[] { EntrySetExtender.class,
-//            Set.class }, Arrays.asList(entrySetExtender, m.entrySet()), EntrySetExtender.class.getClassLoader());
     }
 
     /**

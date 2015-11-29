@@ -44,7 +44,6 @@ import org.simpleframework.xml.core.Complete;
 import org.simpleframework.xml.core.Persist;
 
 import de.tsl2.nano.bean.BeanContainer;
-import de.tsl2.nano.collection.MapUtil;
 import de.tsl2.nano.collection.ReferenceMap;
 import de.tsl2.nano.core.ManagedException;
 import de.tsl2.nano.core.cls.BeanAttribute;
@@ -52,6 +51,7 @@ import de.tsl2.nano.core.cls.BeanClass;
 import de.tsl2.nano.core.log.LogFactory;
 import de.tsl2.nano.core.util.DateUtil;
 import de.tsl2.nano.core.util.FormatUtil;
+import de.tsl2.nano.core.util.MapUtil;
 import de.tsl2.nano.core.util.StringUtil;
 import de.tsl2.nano.core.util.Util;
 import de.tsl2.nano.currency.CurrencyUtil;

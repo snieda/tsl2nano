@@ -9,12 +9,12 @@
  */
 package de.tsl2.nano.util;
 
-import java.lang.reflect.InvocationHandler;
 import java.lang.reflect.Method;
 import java.lang.reflect.Proxy;
 
 import de.tsl2.nano.core.cls.BeanClass;
 import de.tsl2.nano.core.execution.ICRunnable;
+import de.tsl2.nano.core.util.DelegationHandler;
 
 /**
  * simple proxy to enable aop-like enhancement.
@@ -22,8 +22,10 @@ import de.tsl2.nano.core.execution.ICRunnable;
  * @author Thomas Schneider
  * @version $Revision$
  */
-public class AOPProxy<T> implements InvocationHandler {
-    Object delegate;
+@SuppressWarnings("unchecked")
+public class AOPProxy<T> extends DelegationHandler<T> {
+    /** serialVersionUID */
+    private static final long serialVersionUID = 4521781880753753839L;
     ICRunnable<?> before, after;
     boolean proxyResult;
 
@@ -35,8 +37,8 @@ public class AOPProxy<T> implements InvocationHandler {
      * @param after (optional) action to execute. will be run with arguments instance, method, and args - after executing the original method.
      * @param proxyResult whether to wrap the result into a new proxy (recursive).
      */
-    public AOPProxy(Object delegate, ICRunnable<?> before, ICRunnable<?> after, boolean proxyResult) {
-        this.delegate = delegate;
+    public AOPProxy(T delegate, ICRunnable<?> before, ICRunnable<?> after, boolean proxyResult) {
+        super(delegate);
         this.before = before;
         this.after = after;
         this.proxyResult = proxyResult;
@@ -50,7 +52,7 @@ public class AOPProxy<T> implements InvocationHandler {
         if (before != null) {
             before.run(null, delegate, method, args);
         }
-        Object result = method.invoke(delegate, args);
+        Object result = super.invoke(proxy, method, args);
         if (after != null) {
             after.run(null, delegate, method, args);
         }
@@ -69,6 +71,7 @@ public class AOPProxy<T> implements InvocationHandler {
      * @param proxyResult whether to wrap the result into a new proxy (recursive).
      * @return
      */
+    @SuppressWarnings("rawtypes")
     public static final <T> T createEnhancement(T instance, ICRunnable<?> before, ICRunnable<?> after, boolean proxyResult) {
         return (T) Proxy.newProxyInstance(Thread.currentThread().getContextClassLoader(), BeanClass.getBeanClass(instance.getClass())
             .getInterfaces(), new AOPProxy(instance, before, after, proxyResult));

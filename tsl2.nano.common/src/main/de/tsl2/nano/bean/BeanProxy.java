@@ -7,8 +7,6 @@
  */
 package de.tsl2.nano.bean;
 
-import java.io.Serializable;
-import java.lang.reflect.InvocationHandler;
 import java.lang.reflect.Method;
 import java.lang.reflect.Proxy;
 import java.util.HashMap;
@@ -18,6 +16,7 @@ import de.tsl2.nano.action.IAction;
 import de.tsl2.nano.bean.def.BeanProperty;
 import de.tsl2.nano.core.ManagedException;
 import de.tsl2.nano.core.cls.BeanAttribute;
+import de.tsl2.nano.core.util.DelegationHandler;
 import de.tsl2.nano.core.util.StringUtil;
 
 /**
@@ -46,13 +45,10 @@ import de.tsl2.nano.core.util.StringUtil;
  * @author ts 15.12.2008
  * @version $Revision: 1.0 $
  */
-public class BeanProxy implements InvocationHandler, Serializable {
+@SuppressWarnings("unchecked")
+public class BeanProxy<T> extends DelegationHandler<T> {
     /** serialVersionUID */
-    private static final long serialVersionUID = 1L;
-    /** holds all bean properties */
-    Map<String, Object> beanProperties = null;
-    /** optional delegate (real object) (not used or tested yet!) */
-    Object delegate;
+    private static final long serialVersionUID = -3486884118905162667L;
     /** if true, the property hashmap will be prefered to the delegate */
     boolean preferProperties = false;
     
@@ -84,14 +80,8 @@ public class BeanProxy implements InvocationHandler, Serializable {
      * @param beanProperties bean properties to be used as attribute values.
      * @param delegate see {@linkplain #delegate}, may be null
      */
-    protected BeanProxy(Map<String, Object> beanProperties, boolean preferProperties, Object delegate) {
-        super();
-        if (beanProperties != null) {
-            this.beanProperties = beanProperties;
-        } else {
-            this.beanProperties = new HashMap<String, Object>();
-        }
-        this.delegate = delegate;
+    protected BeanProxy(Map<String, Object> beanProperties, boolean preferProperties, T delegate) {
+        super(delegate, beanProperties);
         this.preferProperties = preferProperties;
     }
 
@@ -113,7 +103,7 @@ public class BeanProxy implements InvocationHandler, Serializable {
 
     public static <T> T createBeanImplementation(Class<T> interfaze,
             Map<String, Object> attributes,
-            Object delegate,
+            T delegate,
             ClassLoader classLoader) {
         return createBeanImplementation(interfaze, attributes, delegate, false, classLoader);
     }
@@ -125,9 +115,10 @@ public class BeanProxy implements InvocationHandler, Serializable {
      * @param attributes map of bean attributes for this bean implementation
      * @return implementation of the given interface.
      */
+    @SuppressWarnings({ "unchecked", "rawtypes" })
     public static <T> T createBeanImplementation(Class<T> interfaze,
             Map<String, Object> attributes,
-            Object delegate,
+            T delegate,
             boolean preferProperties,
             ClassLoader classLoader) {
         if (classLoader == null)
@@ -143,6 +134,7 @@ public class BeanProxy implements InvocationHandler, Serializable {
      * 
      * @see java.lang.reflect.InvocationHandler#invoke(java.lang.Object, java.lang.reflect.Method, java.lang.Object[])
      */
+    @SuppressWarnings("rawtypes")
     @Override
     public Object invoke(Object proxy, Method method, Object[] args) throws Throwable {
         Object result = null;
@@ -150,35 +142,35 @@ public class BeanProxy implements InvocationHandler, Serializable {
         if (method.getName() == "getClass") {
             return proxy.getClass().getInterfaces()[0];
         } else if (!preferProperties && delegate != null && method.getDeclaringClass().isAssignableFrom(delegate.getClass())) {
-            result = method.invoke(delegate, args);
+            result = invokeDelegate(method, args);
         } else if (method.equals(METHOD_GET_PROPERTY)) {
-            result = beanProperties.get(args[0]);
+            result = properties.get(args[0]);
         } else if (method.getName().startsWith(BeanAttribute.PREFIX_READ_ACCESS) && (args == null || args.length == 0)) {
             final String attributeName = new BeanAttribute(method).getName();
-            result = beanProperties.get(attributeName);
+            result = properties.get(attributeName);
             //auto-boxing - storing the default value in properties
             if (result == null && method.getReturnType().isPrimitive()) {
                 result = BeanUtil.getDefaultValue(method.getReturnType());
-                beanProperties.put(attributeName, result);
+                properties.put(attributeName, result);
             }
         } else if (method.equals(METHOD_SET_PROPERTY)) {
             //this spec. enables all values to be changed!
-            beanProperties.put((String) args[0], args[1]);
+            properties.put((String) args[0], args[1]);
         } else if (method.getName().startsWith(BeanAttribute.PREFIX_WRITE_ACCESS) && args.length == 1) {
             final String attributeName = new BeanAttribute(method).getName();
-            beanProperties.put(attributeName, args[0]);
+            properties.put(attributeName, args[0]);
         } else {
             /*
              * the interface defines a method call, that is not a getter or a setter.
-             * on construction, the beanProperties may contain an action with
+             * on construction, the properties may contain an action with
              * key = method-name. otherwise it is possible to store full method call
-             * with arguments in the beanProperties.
+             * with arguments in the properties.
              */
-            final IAction<?> action = (IAction<?>) beanProperties.get(method.getName());
+            final IAction<?> action = (IAction<?>) properties.get(method.getName());
             if (action != null) {
                 result = action.activate();
             } else {
-                result = beanProperties.get(getMethodArgsId(method, args));
+                result = properties.get(getMethodArgsId(method, args));
             }
             //auto-boxing - storing the default value in properties
             result = getDefaultPrimitive(method, args, result);
@@ -186,10 +178,10 @@ public class BeanProxy implements InvocationHandler, Serializable {
 
         //not preferring properties but didn't find the property, try the delegate
         if (preferProperties && result == null && delegate != null && method.getDeclaringClass().isAssignableFrom(delegate.getClass()))
-            result = method.invoke(delegate, args);
+            result = invokeDelegate(method, args);
         
         //for test purpose, we provide last invokation as property
-        beanProperties.put(PROPERTY_INVOKATION_INFO + method.getName(), getMethodArgsId(method, args));
+        properties.put(PROPERTY_INVOKATION_INFO + method.getName(), getMethodArgsId(method, args));
 
         return result;
     }
@@ -207,34 +199,9 @@ public class BeanProxy implements InvocationHandler, Serializable {
         //auto-boxing - storing the default value in properties
         if (result == null && method.getReturnType().isPrimitive()) {
             result = BeanUtil.getDefaultValue(method.getReturnType());
-            beanProperties.put(getMethodArgsId(method, args), result);
+            properties.put(getMethodArgsId(method, args), result);
         }
         return result;
-    }
-
-    /**
-     * creates an id for the given method and its calling arguments
-     * 
-     * @param method method
-     * @param args calling arguments
-     * @return new key to be stored in a map
-     */
-    public static String getMethodArgsId(Method method, Object[] args) {
-        return method.getDeclaringClass() + "."
-            + method.getName()
-            + "("
-            + StringUtil.toString(args, Integer.MAX_VALUE)
-            + ")";
-    }
-
-    /**
-     * setProperty
-     * 
-     * @param key key
-     * @param value value
-     */
-    public void setProperty(String key, Object value) {
-        beanProperties.put(key, value);
     }
 
     /**
@@ -247,16 +214,6 @@ public class BeanProxy implements InvocationHandler, Serializable {
         final String invInfo = (String) ((BeanProperty) proxyInstance).getProperty(PROPERTY_INVOKATION_INFO + methodName);
         return StringUtil.substring(invInfo, "(", ")", true);
 
-    }
-
-    /**
-     * toString
-     * 
-     * @see java.lang.Object#toString()
-     */
-    @Override
-    public String toString() {
-        return "BeanProxy: " + beanProperties.toString();
     }
 
 }

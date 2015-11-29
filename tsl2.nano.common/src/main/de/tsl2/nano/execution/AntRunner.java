@@ -89,7 +89,7 @@ public class AntRunner {
     private static final Log LOG = LogFactory.getLog(AntRunner.class);
 
     /**
-     * delegates to {@link #runTask(String, Properties, FileSet...)} using {@link #createFileSets(String)} to create the
+     * delegates to {@link #runTask(String, Map, FileSet...)} using {@link #createFileSets(String)} to create the
      * {@link FileSet}s.
      */
     public static void runTask(String name, Properties taskProperties, String fileSetExpression) {
@@ -98,6 +98,8 @@ public class AntRunner {
 
     /**
      * starts the task by name using its properties and perhaps some filesets.
+     * <p/>
+     * See <a href="https://ant.apache.org/manual/tasksoverview.html"> here for an overview of ants standard tasks</a>.
      * 
      * @param name task name
      * @param taskProperties task properties

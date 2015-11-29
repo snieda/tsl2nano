@@ -10,6 +10,7 @@
 package de.tsl2.nano.core.util;
 
 import java.math.BigInteger;
+import java.nio.charset.Charset;
 import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -470,6 +471,9 @@ public class StringUtil {
         return extract(source, regexp, null, 0, groups);
     }
 
+    /**
+     * delegates to {@link #extract(CharSequence, String, String, int, int...)}
+     */
     public static String extract(CharSequence source, String regexp, String replacement) {
         return extract(source, regexp, replacement, 0, 0);
     }
@@ -774,6 +778,20 @@ public class StringUtil {
     }
 
     /**
+     * converts the given bytes to a decimal string
+     * 
+     * @param bytes bytes to convert
+     * @return decimal string
+     */
+    public static String fromHexString(String hex) {
+        StringBuilder buf = new StringBuilder(hex.length());
+        for (int i = 0; i < hex.length(); i += 2) {
+            buf.append((char) Integer.parseInt(hex.substring(i, i + 2), 16));
+        }
+        return buf.toString();
+    }
+
+    /**
      * cuts the given string to have a maximum length of maxLength characters.
      * 
      * @param name source
@@ -794,4 +812,5 @@ public class StringUtil {
     public static String removeXMLTags(String xmlContent) {
         return xmlContent.replaceAll("[\n]?" + XTAG + "(\\w*)" + XTAG, "\n\1");
     }
+
 }

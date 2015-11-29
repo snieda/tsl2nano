@@ -917,7 +917,7 @@ public class BeanDefinition<T> extends BeanClass<T> implements IPluggable<BeanDe
                         beandef = (BeanDefinition<T>) beandef.extension.to(beandef);
                     }
                     //perhaps, the file defines another bean-name or bean-type
-                    if ((name == null || name.equalsIgnoreCase(beandef.getName())
+                    if ((name == null || name.equalsIgnoreCase(beandef.getName()) || name.equalsIgnoreCase(FileUtil.getValidFileName(beandef.getName()))
                         && (type == null || type.equals(beandef.getClazz())))) {
                         virtualBeanCache.add(beandef);
                     } else {
@@ -926,21 +926,9 @@ public class BeanDefinition<T> extends BeanClass<T> implements IPluggable<BeanDe
                         beandef = null;
                     }
                 } catch (Exception e) {
-                    if (xmlFile.canWrite()) {
-                        try {
-                            if (!xmlFile.renameTo(new File(xmlFile.getPath() + ".failed"))) {
-                                LOG.warn("couldn't rename failed beandefinition-file '" + xmlFile + "' to '" + xmlFile
-                                    + ".failed' !");
-                            }
-                        } catch (Exception ex) {
-                            LOG.error("couldn't rename failed beandefinition-file '" + xmlFile + "' to '" + xmlFile
-                                + ".failed' !", ex);
-                        }
-                    }
+                    LOG.error("couldn't load configuration " + xmlFile.getPath() + " for bean " + type + ": " +  e.toString());
                     if (ENV.get("application.mode.strict", false)) {
                         ManagedException.forward(e);
-                    } else {
-                        LOG.error("couldn't load configuration " + xmlFile.getPath() + " for bean " + type, e);
                     }
                 }
             }
@@ -1084,7 +1072,15 @@ public class BeanDefinition<T> extends BeanClass<T> implements IPluggable<BeanDe
 
     public void saveDefinition() {
         saveResourceEntries();
+        //non-serializable actions will be removed - so we add them after serialization
+        Collection<IAction> actionCopy = actions != null ? new ArrayList<IAction>(actions) : new ArrayList<IAction>();
         saveBeanDefinition(getDefinitionFile(getName()));
+        if (actions == null)
+        actions = actionCopy;
+        else {
+            actions.clear();
+            actions.addAll(actionCopy);
+        }
     }
 
     private void saveResourceEntries() {
@@ -1223,7 +1219,7 @@ public class BeanDefinition<T> extends BeanClass<T> implements IPluggable<BeanDe
      * 
      * @param name bean name to set.
      */
-    protected void autoInit(String name) {
+    public void autoInit(String name) {
         LOG.debug("calling autoinit() for " + name);
         setName(name);
         List<IAttributeDefinition<?>> attributes = getBeanAttributes();

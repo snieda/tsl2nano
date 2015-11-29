@@ -44,7 +44,6 @@ import org.simpleframework.xml.ElementMap;
 import org.simpleframework.xml.core.Persist;
 
 import de.tsl2.nano.bean.BeanUtil;
-import de.tsl2.nano.collection.MapUtil;
 import de.tsl2.nano.collection.PersistableSingelton;
 import de.tsl2.nano.collection.PersistentCache;
 import de.tsl2.nano.core.cls.BeanClass;
@@ -55,6 +54,7 @@ import de.tsl2.nano.core.execution.Profiler;
 import de.tsl2.nano.core.log.LogFactory;
 import de.tsl2.nano.core.util.BitUtil;
 import de.tsl2.nano.core.util.FileUtil;
+import de.tsl2.nano.core.util.MapUtil;
 import de.tsl2.nano.core.util.NetUtil;
 import de.tsl2.nano.core.util.NumberUtil;
 import de.tsl2.nano.core.util.StringUtil;

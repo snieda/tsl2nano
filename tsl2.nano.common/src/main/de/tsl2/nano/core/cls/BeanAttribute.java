@@ -16,6 +16,7 @@ import java.lang.reflect.Constructor;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.lang.reflect.ParameterizedType;
+import java.util.Map;
 
 import org.apache.commons.logging.Log;
 import org.simpleframework.xml.Attribute;
@@ -27,6 +28,7 @@ import org.simpleframework.xml.core.Persist;
 import de.tsl2.nano.core.ENV;
 import de.tsl2.nano.core.ManagedException;
 import de.tsl2.nano.core.log.LogFactory;
+import de.tsl2.nano.core.util.AnnotationProxy;
 import de.tsl2.nano.core.util.StringUtil;
 
 /**
@@ -451,6 +453,7 @@ public class BeanAttribute<T> implements IAttribute<T> {
     public <A extends Annotation> Object[] getAnnotationValues(Class<A> annotationClass, String... memberNames) {
         A a = getAnnotation(annotationClass);
         if (a == null) {
+            LOG.warn("annotation " + annotationClass + " not found on beanattribute " + this);
             return null;
         }
         BeanClass bc = BeanClass.getBeanClass(a.getClass());
@@ -459,6 +462,21 @@ public class BeanAttribute<T> implements IAttribute<T> {
             values[i] = bc.callMethod(a, memberNames[i]);
         }
         return values;
+    }
+
+    //UNTESTED. MAY CHANGE WITH JDK IMPLEMENTATION
+    @SuppressWarnings("unchecked")
+    public <A extends Annotation> void setAnnotationValues(Class<A> annotationClass, Map<String, Object> annoationAttributes) {
+        A a = getAnnotation(annotationClass);
+        if (a == null) {
+            LOG.warn("annotation " + annotationClass + " not found on beanattribute " + this);
+            return;
+        }
+        String[] memberNames = annoationAttributes.keySet().toArray(new String[0]);
+        BeanClass bc = BeanClass.getBeanClass(a.getClass());
+        for (int i = 0; i < memberNames.length; i++) {
+            bc.setField(a, memberNames[i], annoationAttributes.get(memberNames[i]));
+        }
     }
 
     /**
@@ -485,15 +503,8 @@ public class BeanAttribute<T> implements IAttribute<T> {
      * @since 1.5
      */
     public <A extends Annotation> A getMethodAnnotation(Class<A> annotationClass) {
-        if (annotationClass == null) {
-            throw new NullPointerException();
-        }
-
-        //direct access
-//        return readAccessMethod.getAnnotation(annotationClass);
-
         //indirect access
-        return BeanClass.getAnnotation(readAccessMethod.getAnnotations(), annotationClass);
+        return AnnotationProxy.getAnnotation(readAccessMethod.getAnnotations(), annotationClass);
     }
 
     /**
@@ -504,15 +515,9 @@ public class BeanAttribute<T> implements IAttribute<T> {
      * @since 1.5
      */
     public <A extends Annotation> A getFieldAnnotation(Class<A> annotationClass) {
-        if (annotationClass == null) {
-            throw new NullPointerException();
-        }
-
         Field f = null;
         try {
             f = readAccessMethod.getDeclaringClass().getDeclaredField(getName());
-            //direct access
-//            return f.getAnnotation(annotationClass);
         } catch (final Exception e) {
             if (f == null) {
                 return null;
@@ -521,7 +526,7 @@ public class BeanAttribute<T> implements IAttribute<T> {
             }
         }
         //indirect access
-        return BeanClass.getAnnotation(f.getAnnotations(), annotationClass);
+        return AnnotationProxy.getAnnotation(f.getAnnotations(), annotationClass);
     }
 
     /**

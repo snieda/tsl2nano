@@ -28,7 +28,6 @@ import de.tsl2.nano.bean.IConnector;
 import de.tsl2.nano.bean.IValueAccess;
 import de.tsl2.nano.collection.CollectionUtil;
 import de.tsl2.nano.collection.Entry;
-import de.tsl2.nano.collection.MapUtil;
 import de.tsl2.nano.collection.TimedReferenceMap;
 import de.tsl2.nano.core.ENV;
 import de.tsl2.nano.core.ManagedException;
@@ -37,6 +36,7 @@ import de.tsl2.nano.core.cls.BeanAttribute;
 import de.tsl2.nano.core.cls.BeanClass;
 import de.tsl2.nano.core.cls.IAttribute;
 import de.tsl2.nano.core.log.LogFactory;
+import de.tsl2.nano.core.util.MapUtil;
 import de.tsl2.nano.core.util.StringUtil;
 import de.tsl2.nano.core.util.Util;
 import de.tsl2.nano.messaging.IListener;
@@ -682,7 +682,7 @@ public class Bean<T> extends BeanDefinition<T> {
 
     @Override
     //not yet used on creation
-    protected void autoInit(String name) {
+    public void autoInit(String name) {
         super.autoInit(name);
         List<BeanValue<?>> beanValues = getBeanValues();
         for (BeanValue<?> bv : beanValues) {

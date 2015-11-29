@@ -18,7 +18,7 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.Map;
 
-import de.tsl2.nano.collection.MapUtil;
+import de.tsl2.nano.collection.CollectionUtil;
 import de.tsl2.nano.core.ManagedException;
 import de.tsl2.nano.core.cls.PrimitiveUtil;
 import de.tsl2.nano.core.execution.IRunnable;
@@ -149,7 +149,7 @@ public class Util {
         } else if (Collection.class.isAssignableFrom(cls)) {
             return (Collection<?>) obj;
         } else if (Map.class.isAssignableFrom(cls)) {
-            return MapUtil.asEntrySetExtender((Map) obj);
+            return CollectionUtil.asEntrySetExtender((Map) obj);
         } else {
             throw new ManagedException(obj + " is not a container!");
         }

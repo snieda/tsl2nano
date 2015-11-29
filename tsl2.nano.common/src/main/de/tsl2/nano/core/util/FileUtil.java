@@ -75,7 +75,7 @@ public class FileUtil {
             return null;
         }
         //open the source data file
-        FileInputStream fis;
+        FileInputStream fis = null;
         try {
             fis = new FileInputStream(zip);
             return new ZipInputStream(new BufferedInputStream(fis));
@@ -276,6 +276,7 @@ public class FileUtil {
      */
     public static void writeToZip(String zipfile, String file, String data) {
         //open a zip-file
+        ZipOutputStream targetStream = null;
         try {
             File zip = new File(zipfile);
             if (!zip.exists()) {
@@ -283,7 +284,7 @@ public class FileUtil {
                 zip.createNewFile();
             }
             FileOutputStream fos = new FileOutputStream(zip);
-            ZipOutputStream targetStream = new ZipOutputStream(fos);
+            targetStream = new ZipOutputStream(fos);
             targetStream.setMethod(ZipOutputStream.DEFLATED);
 
             //open the source data file
@@ -314,13 +315,14 @@ public class FileUtil {
                 + " / "
                 + zipEntry.getSize()
                 + ")");
-            //close the zip entry and other open streams
             targetStream.closeEntry();
-            targetStream.close();
             //sourceStream.close();
         } catch (Exception ex) {
             LOG.error(ex);
             ManagedException.forward(ex);
+        } finally {
+            //close the zip entry and other open streams
+            close(targetStream, false);
         }
     }
 
@@ -394,13 +396,7 @@ public class FileUtil {
         } catch (final Exception e) {
             ManagedException.forward(e);
         } finally {
-            if (stream != null) {
-                try {
-                    stream.close();
-                } catch (IOException e) {
-                    ManagedException.forward(e);
-                }
-            }
+            close(stream, true);
         }
     }
 
@@ -578,13 +574,7 @@ public class FileUtil {
         } catch (final Exception e) {
             ManagedException.forward(e);
         } finally {
-            if (file != null) {
-                try {
-                    file.close();
-                } catch (final IOException e) {
-                    ManagedException.forward(e);
-                }
-            }
+            close(file, true);
         }
         return null;
     }
@@ -626,13 +616,7 @@ public class FileUtil {
         } catch (Exception ex) {
             throw new RuntimeException(ex);
         } finally {
-            if (o != null) {
-                try {
-                    o.close();
-                } catch (IOException e) {
-                    LOG.error("coudn't close stream " + filename);
-                }
-            }
+            close(o, false);
         }
         return l_return;
     }
@@ -645,13 +629,15 @@ public class FileUtil {
      */
     public static void save(String filename, Object object) {
         LOG.info("serializing object to file: " + filename);
+        ObjectOutputStream o = null;
         try {
             final FileOutputStream file = new FileOutputStream(filename);
-            final ObjectOutputStream o = new ObjectOutputStream(file);
+            o = new ObjectOutputStream(file);
             o.writeObject(object);
-            o.close();
         } catch (final IOException ex) {
             throw new RuntimeException(ex);
+        } finally {
+            close(o, false);
         }
     }
 
@@ -708,7 +694,7 @@ public class FileUtil {
      * @return content
      */
     public static synchronized char[] getFileData(InputStream stream, String encoding) {
-        InputStreamReader file;
+        InputStreamReader file = null;
         try {
             file = encoding != null ? new InputStreamReader(stream, encoding) : new InputStreamReader(stream);
 
@@ -720,6 +706,8 @@ public class FileUtil {
             return data;
         } catch (final Exception ex) {
             throw new RuntimeException(ex);
+        } finally {
+            close(file, false);
         }
     }
 
@@ -797,7 +785,7 @@ public class FileUtil {
      * @param srcFile source file
      * @param destFile destination file
      */
-    public static void copy(String srcFile, String destFile) {
+    public static boolean copy(String srcFile, String destFile) {
         try {
             final File f1 = new File(srcFile);
             final File f2 = new File(destFile);
@@ -805,8 +793,10 @@ public class FileUtil {
                 f2.getParentFile().mkdirs();
             write(new FileInputStream(f1), new FileOutputStream(f2), true);
             LOG.info("file " + srcFile + " copied to " + destFile);
+            return true;
         } catch (final Exception ex) {
             LOG.error(ex.getMessage());
+            return false;
         }
     }
 
@@ -850,12 +840,8 @@ public class FileUtil {
             ManagedException.forward(e);
         } finally {
             if (closeStreams) {
-                try {
-                    in.close();
-                    out.close();
-                } catch (IOException e) {
-                    ManagedException.forward(e);
-                }
+                    close(in, false);
+                    close(out, true);
             }
         }
     }
@@ -1010,7 +996,6 @@ public class FileUtil {
      *            use '/' of java and linux!
      * @return all files in tree, matching regExFilename
      */
-    @SuppressWarnings("rawtypes")
     public static List<File> getTreeFiles(String basePath,
             final String regExFilename,
             FileDetail sortBy,
@@ -1224,6 +1209,70 @@ public class FileUtil {
             postfix.insert(0, ">");
         }
         return prefix + file.getName() + postfix;
+    }
+
+    /**
+     * convenience to close any inputstream
+     * 
+     * @param inputStream stream to close
+     * @param forwardException if true and an {@link IOException} was thrown, it will be re-thrown - otherwise it will
+     *            only be logged.
+     * @return null, if close() was successful, otherwise the given instances
+     */
+    public static final <T extends InputStream> T close(T inputStream, boolean forwardException) {
+        if (inputStream != null)
+            try {
+                inputStream.close();
+                return null;
+            } catch (IOException e) {
+                if (forwardException)
+                    ManagedException.forward(e);
+                else
+                    LOG.error("can't close inputstream " + inputStream, e);
+            }
+        return inputStream;
+    }
+    /**
+     * convenience to close any outputstream
+     * 
+     * @param outputStream stream to close
+     * @param forwardException if true and an {@link IOException} was thrown, it will be re-thrown - otherwise it will
+     *            only be logged.
+     * @return null, if close() was successful, otherwise the given instances
+     */
+    public static final <T extends OutputStream> T close(T outputStream, boolean forwardException) {
+        if (outputStream != null)
+            try {
+                outputStream.close();
+                return null;
+            } catch (IOException e) {
+                if (forwardException)
+                    ManagedException.forward(e);
+                else
+                    LOG.error("can't close inputstream " + outputStream, e);
+            }
+        return outputStream;
+    }
+    /**
+     * convenience to close any reader
+     * 
+     * @param reader stream to close
+     * @param forwardException if true and an {@link IOException} was thrown, it will be re-thrown - otherwise it will
+     *            only be logged.
+     * @return null, if close() was successful, otherwise the given instances
+     */
+    public static final <T extends Reader> T close(T reader, boolean forwardException) {
+        if (reader != null)
+            try {
+                reader.close();
+                return null;
+            } catch (IOException e) {
+                if (forwardException)
+                    ManagedException.forward(e);
+                else
+                    LOG.error("can't close inputstream " + reader, e);
+            }
+        return reader;
     }
 }
 

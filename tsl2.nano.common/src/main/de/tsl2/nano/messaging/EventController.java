@@ -10,7 +10,8 @@
 package de.tsl2.nano.messaging;
 
 import java.io.Serializable;
-import de.tsl2.nano.messaging.ListenerList;
+
+import de.tsl2.nano.core.util.ListWrapper;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -36,9 +37,9 @@ public class EventController implements Serializable {
     private static final long serialVersionUID = 1L;
     
     /** all registered value change listeners */
-    @ElementMap(entry = "listener", key = "type", keyType = Class.class, valueType=ListenerList.class, attribute = true, inline = true, required = false)
+    @ElementMap(entry = "listener", key = "type", keyType = Class.class, valueType=ListWrapper.class, attribute = true, inline = true, required = false)
     //TODO: remove transient if you found a workaround on simple-xml problem with map(collection).
-    Map<Class, ListenerList<IListener>> listener;
+    Map<Class, ListWrapper<IListener>> listener;
 
     /** if listeners were only added through {@link #addListener(IListener)} - without event type, this is false */
     transient boolean hasTypedListener = false;
@@ -50,13 +51,13 @@ public class EventController implements Serializable {
      */
     protected final <T> Collection<IListener> listener(Class<T> eventType) {
         if (listener == null) {
-            listener = new LinkedHashMap<Class, ListenerList<IListener>>();
+            listener = new LinkedHashMap<Class, ListWrapper<IListener>>();
         }
 
         Class<?> type = hasTypedListener || listener.size() > 1 ? eventType : Object.class;
-        ListenerList<IListener> typedListener = listener.get(type);
+        ListWrapper<IListener> typedListener = listener.get(type);
         if (typedListener == null) {
-            typedListener = new ListenerList<IListener>();
+            typedListener = new ListWrapper<IListener>();
             listener.put(type, typedListener);
         }
         return typedListener.getList();
@@ -139,7 +140,7 @@ public class EventController implements Serializable {
      */
     public void fireEvent(Object e) {
         //use a copy of listeners to avoid problems on handlers removing listeners from the list.
-        ListenerList<IListener> listeners = new ListenerList(listener(e.getClass()));
+        ListWrapper<IListener> listeners = new ListWrapper(listener(e.getClass()));
         for (final IListener l : listeners.getList()) {
             handle(l, e);
         }

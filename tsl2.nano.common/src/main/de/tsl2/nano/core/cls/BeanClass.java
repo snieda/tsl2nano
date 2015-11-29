@@ -41,6 +41,7 @@ import de.tsl2.nano.collection.CollectionUtil;
 import de.tsl2.nano.core.IPredicate;
 import de.tsl2.nano.core.ManagedException;
 import de.tsl2.nano.core.log.LogFactory;
+import de.tsl2.nano.core.util.AnnotationProxy;
 import de.tsl2.nano.core.util.BitUtil;
 import de.tsl2.nano.core.util.StringUtil;
 import de.tsl2.nano.core.util.Util;
@@ -378,7 +379,7 @@ public class BeanClass<T> implements Serializable {
         final Method[] methods = clazz.getMethods();
         BeanAttribute attr;
         for (final Method m : methods) {
-            if (getAnnotation(m.getAnnotations(), annotationType) != null) {
+            if (AnnotationProxy.getAnnotation(m.getAnnotations(), annotationType) != null) {
                 attr = BeanAttribute.getBeanAttribute(clazz, BeanAttribute.getName(m));
                 if (attr != null)
                     attributes.add(attr);
@@ -392,7 +393,7 @@ public class BeanClass<T> implements Serializable {
         while (hierClass != null) {
             final Field[] fields = hierClass.getDeclaredFields();
             for (final Field f : fields) {
-                if (getAnnotation(f.getAnnotations(), annotationType) != null) {
+                if (AnnotationProxy.getAnnotation(f.getAnnotations(), annotationType) != null) {
                     LOG.debug("declared field with annotation found: " + f);
                     attr = BeanAttribute.getBeanAttribute(hierClass, f.getName());
                     if (attr != null)
@@ -444,7 +445,7 @@ public class BeanClass<T> implements Serializable {
      * @since 1.5
      */
     public <A extends Annotation> Class<? extends Annotation> getAnnotation(Class<A> annotationClass) {
-        final Annotation annotation = getAnnotation(clazz.getAnnotations(), annotationClass);
+        final Annotation annotation = AnnotationProxy.getAnnotation(clazz.getAnnotations(), annotationClass);
         return annotation != null ? annotation.annotationType() : null;
     }
 
@@ -469,26 +470,6 @@ public class BeanClass<T> implements Serializable {
             values[i] = bc.callMethod(a, memberNames[i]);
         }
         return values;
-    }
-
-    /**
-     * asks for the given annotation. this is a 'soft' implementation, means: will not use objects reference, but
-     * class.getName(). so, different classloaders will not be respected!
-     * 
-     * @throws NullPointerException {@inheritDoc}
-     * @since 1.5
-     */
-    static final <A extends Annotation> A getAnnotation(Annotation[] annotations, Class<A> annotationClass) {
-        if (annotationClass == null) {
-            throw new NullPointerException();
-        }
-
-        for (int i = 0; i < annotations.length; i++) {
-            if (annotations[i].annotationType().getName().equals(annotationClass.getName())) {
-                return (A) annotations[i];
-            }
-        }
-        return null;
     }
 
     /**

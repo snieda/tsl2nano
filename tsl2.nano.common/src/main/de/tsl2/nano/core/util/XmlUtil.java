@@ -19,6 +19,10 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.Serializable;
+import java.io.StringWriter;
+import java.lang.annotation.Annotation;
+import java.lang.reflect.InvocationHandler;
+import java.lang.reflect.Proxy;
 import java.sql.Connection;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
@@ -48,7 +52,19 @@ import org.apache.commons.logging.Log;
 import org.apache.fop.apps.FOUserAgent;
 import org.apache.fop.apps.Fop;
 import org.apache.fop.apps.FopFactory;
+import org.simpleframework.xml.Element;
+import org.simpleframework.xml.convert.Converter;
+import org.simpleframework.xml.convert.Registry;
+import org.simpleframework.xml.convert.RegistryStrategy;
+import org.simpleframework.xml.core.Persister;
+import org.simpleframework.xml.strategy.Strategy;
+import org.simpleframework.xml.strategy.TreeStrategy;
+import org.simpleframework.xml.strategy.Type;
+import org.simpleframework.xml.strategy.Value;
 import org.simpleframework.xml.stream.Format;
+import org.simpleframework.xml.stream.InputNode;
+import org.simpleframework.xml.stream.NodeMap;
+import org.simpleframework.xml.stream.OutputNode;
 import org.simpleframework.xml.transform.Matcher;
 import org.simpleframework.xml.transform.Transform;
 import org.w3c.dom.Document;
@@ -57,9 +73,12 @@ import org.w3c.dom.NodeList;
 
 import de.tsl2.nano.core.ENV;
 import de.tsl2.nano.core.ManagedException;
+import de.tsl2.nano.core.cls.BeanAttribute;
+import de.tsl2.nano.core.cls.BeanClass;
 import de.tsl2.nano.core.cls.PrimitiveUtil;
 import de.tsl2.nano.core.execution.CompatibilityLayer;
 import de.tsl2.nano.core.log.LogFactory;
+import de.tsl2.nano.util.PrivateAccessor;
 
 /**
  * provides convenience methods for:
@@ -433,18 +452,24 @@ public class XmlUtil {
      * @return
      */
     public static <T> T loadSimpleXml_(String xmlFile, Class<T> type) {
+        FileInputStream fileInputStream = null;
         try {
-            return new org.simpleframework.xml.core.Persister(new SimpleXmlArrayWorkaround()).read(type,
-                new FileInputStream(new File(xmlFile)));
+            return new org.simpleframework.xml.core.Persister(getSimpleXmlProxyStrategy(), new SimpleXmlArrayWorkaround()).read(type,
+                fileInputStream = new FileInputStream(new File(xmlFile)));
         } catch (Exception e) {
             //mark the loaded xml file as corrupt
             File file = new File(xmlFile);
             if (file.canWrite()) {
+                fileInputStream = FileUtil.close(fileInputStream, false);
                 LOG.info("renaming corrupted file '" + xmlFile + "' to: " + xmlFile + ".failed");
-                file.renameTo(new File(file.getPath() + ".failed"));
+                if (!file.renameTo(new File(file.getPath() + ".failed")))
+                    LOG.warn("couldn't rename corrupted file '" + xmlFile + "' to '" + xmlFile
+                        + ".failed' !");
             }
             //don't use the ManagedException.forward(), because the LogFactory is using this, too!
             throw new RuntimeException(e);
+        } finally {
+            FileUtil.close(fileInputStream, false);
         }
     }
 
@@ -469,7 +494,7 @@ public class XmlUtil {
      */
     public static void saveSimpleXml_(String xmlFile, Object obj) {
         try {
-            new org.simpleframework.xml.core.Persister(new Format("<?xml version=\"1.0\" encoding=\"UTF-8\"?>")).write(
+            new org.simpleframework.xml.core.Persister(getSimpleXmlProxyStrategy(), new Format("<?xml version=\"1.0\" encoding=\"UTF-8\"?>")).write(
                 obj, new File(xmlFile));
             //workaround for empty files
             if (FileUtil.getFile(xmlFile).available() == 0) {
@@ -488,6 +513,47 @@ public class XmlUtil {
             throw new RuntimeException(e);
         }
     }
+
+    public static Strategy getSimpleXmlProxyStrategy() {
+//        return new TreeStrategy() {
+//            @Override
+//            public Value read(Type type, NodeMap node, Map map) throws Exception {
+//                // TODO Auto-generated method stub
+//                return super.read(type, node, map);
+//            }
+//            @Override
+//            public boolean write(Type type, Object value, NodeMap node, Map map) {
+//                if (Proxy.isProxyClass(value.getClass()))
+//                    value = Proxy.getInvocationHandler(value);
+//                return super.write(type, value, node, map);
+//            }
+//        };
+
+        final Persister persister = new Persister();
+        final Converter converter = new Converter() {
+            @Override
+            public Object read(InputNode n) throws Exception {
+                //WORKAROUND to evaluate the class name. where can we extract the class name from?
+                final Class cls = BeanClass.load("de.tsl2.nano.h5.RuleCover");
+                Element element = AnnotationProxy.getAnnotation(SimpleXmlAnnotator.class, "attribute", Element.class);
+                AnnotationProxy.setAnnotationValues(element, "name", "ruleCover", "type", cls);
+                Object ih = persister.read(cls, n.getNext(), false);
+                return DelegationHandler.createProxy((DelegationHandler) ih);
+            }
+            @Override
+            public void write(OutputNode n, Object o) throws Exception {
+                InvocationHandler handler = Proxy.getInvocationHandler(o);
+                n.setAttribute("class", handler.getClass().getName());
+                persister.write(handler, n);
+            }
+        };
+        Registry reg = new Registry() {
+            public Converter lookup(Class type) throws Exception {
+                return Proxy.isProxyClass(type) || InvocationHandler.class.isAssignableFrom(type) ? converter : null;
+            }
+        };
+        return new RegistryStrategy(reg);
+    }
 }
 
 /**
@@ -499,17 +565,50 @@ public class XmlUtil {
 class SimpleXmlArrayWorkaround implements Matcher {
     @Override
     public Transform<?> match(@SuppressWarnings("rawtypes") final Class type) throws Exception {
+        final ClassLoader loader = Thread.currentThread().getContextClassLoader();
         if (type.equals(Class.class)) {
             return new Transform() {
                 @Override
                 public Object read(String clsName) throws Exception {
                     //loading the class through the ClassLoder.loadClass(name) may fail on object arrays, so we load it through Class.forName(name)
-                    return clsName.contains(".") || clsName.startsWith("[") ? Class.forName(clsName) : PrimitiveUtil.getPrimitiveClass(clsName);
+                    return clsName.contains(".") || clsName.startsWith("[") ? loader.loadClass(clsName) : PrimitiveUtil
+                        .getPrimitiveClass(clsName);
                 }
 
                 @Override
                 public String write(Object arg0) throws Exception {
                     return arg0.toString();
+                }
+            };
+        }
+        return null;
+    }
+
+}
+
+/**
+ * workaround on simple-xml problem for field type byte[].class.
+ * 
+ * @author Tom
+ * @version $Revision$
+ */
+class SimpleXmlProxyWorkaround implements Matcher {
+    @Override
+    public Transform<?> match(@SuppressWarnings("rawtypes") final Class type) throws Exception {
+        if (Proxy.isProxyClass(type)) {
+            return new Transform() {
+                Persister persister = new Persister();
+
+                @Override
+                public Object read(String object) throws Exception {
+                    return persister.read(object, (String) null);
+                }
+
+                @Override
+                public String write(Object arg0) throws Exception {
+                    StringWriter writer = new StringWriter();
+                    persister.write(Proxy.getInvocationHandler(arg0), writer);
+                    return writer.getBuffer().toString();
                 }
             };
         }

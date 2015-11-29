@@ -31,9 +31,9 @@ import de.tsl2.nano.action.IAction;
 import de.tsl2.nano.bean.BeanUtil;
 import de.tsl2.nano.bean.IValueAccess;
 import de.tsl2.nano.bean.ValueHolder;
+import de.tsl2.nano.collection.CollectionUtil;
 import de.tsl2.nano.collection.Entry;
 import de.tsl2.nano.collection.MapEntrySet;
-import de.tsl2.nano.collection.MapUtil;
 import de.tsl2.nano.core.ENV;
 import de.tsl2.nano.core.ManagedException;
 import de.tsl2.nano.core.cls.BeanAttribute;
@@ -654,7 +654,7 @@ class Selector<T> {
         Object v = valueAccess.getValue();
         if (v instanceof Map) {
             isMap = true;
-            return MapUtil.asEntrySetExtender((Map) v);
+            return CollectionUtil.asEntrySetExtender((Map) v);
         } else {
             isMap = false;
             return (Collection<T>) v;

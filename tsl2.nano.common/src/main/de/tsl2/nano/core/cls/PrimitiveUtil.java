@@ -82,7 +82,7 @@ public class PrimitiveUtil {
      * @return true, if given type is primitive or wrapper.
      */
     public static boolean isPrimitiveOrWrapper(Class<?> type) {
-        return type.isPrimitive() || Arrays.binarySearch(wrappers, type) >= 0;
+        return type.isPrimitive() || (Comparator.class.isAssignableFrom(type) && Arrays.binarySearch(wrappers, type) >= 0);
     }
 
     /**

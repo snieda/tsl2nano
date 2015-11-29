@@ -43,7 +43,6 @@ import java.util.Set;
 import org.apache.commons.logging.Log;
 
 import de.tsl2.nano.bean.BeanUtil;
-import de.tsl2.nano.collection.MapUtil;
 import de.tsl2.nano.core.ManagedException;
 import de.tsl2.nano.core.log.LogFactory;
 

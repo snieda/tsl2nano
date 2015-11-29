@@ -19,6 +19,7 @@ import static org.junit.Assert.fail;
 import java.io.File;
 import java.io.Reader;
 import java.io.Serializable;
+import java.lang.annotation.Annotation;
 import java.math.BigDecimal;
 import java.math.MathContext;
 import java.net.InetAddress;
@@ -50,7 +51,9 @@ import org.apache.commons.logging.Log;
 import org.apache.tools.ant.types.FileSet;
 import org.apache.xmlgraphics.util.MimeConstants;
 import org.junit.BeforeClass;
+import org.junit.Ignore;
 import org.junit.Test;
+import org.simpleframework.xml.Element;
 
 import de.tsl2.nano.action.CommonAction;
 import de.tsl2.nano.action.IAction;
@@ -69,7 +72,6 @@ import de.tsl2.nano.bean.enhance.BeanEnhancer;
 import de.tsl2.nano.collection.ArrSegList;
 import de.tsl2.nano.collection.CollectionUtil;
 import de.tsl2.nano.collection.FloatArray;
-import de.tsl2.nano.collection.MapUtil;
 import de.tsl2.nano.core.AppLoader;
 import de.tsl2.nano.core.Argumentator;
 import de.tsl2.nano.core.ENV;
@@ -81,12 +83,15 @@ import de.tsl2.nano.core.cls.BeanClass;
 import de.tsl2.nano.core.cls.PrimitiveUtil;
 import de.tsl2.nano.core.execution.Profiler;
 import de.tsl2.nano.core.log.LogFactory;
+import de.tsl2.nano.core.util.AnnotationProxy;
 import de.tsl2.nano.core.util.Crypt;
 import de.tsl2.nano.core.util.DateUtil;
 import de.tsl2.nano.core.util.FileUtil;
+import de.tsl2.nano.core.util.MapUtil;
 import de.tsl2.nano.core.util.NetUtil;
 import de.tsl2.nano.core.util.NumberUtil;
 import de.tsl2.nano.core.util.PrintUtil;
+import de.tsl2.nano.core.util.SimpleXmlAnnotator;
 import de.tsl2.nano.core.util.StringUtil;
 import de.tsl2.nano.core.util.Util;
 import de.tsl2.nano.currency.CurrencyUnit;
@@ -146,6 +151,8 @@ public class CommonTest {
             byte[] cryptoHash = StringUtil.cryptoHash("הצüהצüהü");
             LOG.info(passwds[i] + " ==> " + "(" + cryptoHash.length + ") " + StringUtil.toString(cryptoHash, 1000));
             LOG.info(passwds[i] + " crypto-hex: " + StringUtil.toHexString(cryptoHash));
+            LOG.info(passwds[i] + "        hex: " + StringUtil.toHexString(passwds[i].getBytes()));
+            LOG.info(passwds[i] + "           : " + StringUtil.fromHexString(StringUtil.toHexString(passwds[i].getBytes())));
         }
 
         //complex extracting
@@ -1544,5 +1551,27 @@ public class CommonTest {
         long l = PrimitiveUtil.convert(i, long.class);
 //        Long l = long.class.cast(i);
         assertEquals(i, l);
+    }
+    
+    @Test
+    @Ignore("seems not work on suns jdk1.7")
+    public void testAnnotationProxy() throws Exception {
+        Element origin = AnnotationProxy.getAnnotation(SimpleXmlAnnotator.class, "attribute", Element.class);
+        Annotation proxy = AnnotationProxy.createProxy(new AnnotationProxy(origin, "name", "ruleCover", "type", CommonTest.class));
+        //this seems not work on suns jdk1.7
+        Annotation[] annotations = AnnotationProxy.getAnnotations(SimpleXmlAnnotator.class, "attribute");
+        
+        annotations[0] = proxy;
+        
+        assertTrue(CommonTest.class.equals(AnnotationProxy.getAnnotation(SimpleXmlAnnotator.class, "attribute", Element.class).type()));
+    }
+    @Test
+//    @Ignore("seems not work on suns jdk1.7")
+    public void testAnnotationValueChange() throws Exception {
+        Element origin = AnnotationProxy.getAnnotation(SimpleXmlAnnotator.class, "attribute", Element.class);
+        //this seems not work on suns jdk1.7
+        int count = AnnotationProxy.setAnnotationValues(origin, "name", "ruleCover", "type", CommonTest.class);
+        assertTrue(count == 2);
+        assertTrue(CommonTest.class.equals(AnnotationProxy.getAnnotation(SimpleXmlAnnotator.class, "attribute", Element.class).type()));
     }
 }
