@@ -15,8 +15,8 @@ import org.simpleframework.xml.Attribute;
 
 import de.tsl2.nano.bean.def.AbstractDependencyListener;
 import de.tsl2.nano.bean.def.IAttributeDefinition;
-import de.tsl2.nano.collection.MapUtil;
 import de.tsl2.nano.core.ENV;
+import de.tsl2.nano.core.util.MapUtil;
 
 /**
  * dependency listener evaluating its value through a given rule.

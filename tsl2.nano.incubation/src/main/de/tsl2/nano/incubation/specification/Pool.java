@@ -17,7 +17,9 @@ import org.apache.commons.logging.Log;
 
 import de.tsl2.nano.bean.BeanUtil;
 import de.tsl2.nano.core.ENV;
+import de.tsl2.nano.core.cls.BeanClass;
 import de.tsl2.nano.core.log.LogFactory;
+import de.tsl2.nano.core.util.StringUtil;
 import de.tsl2.nano.core.util.XmlUtil;
 import de.tsl2.nano.execution.IPRunnable;
 
@@ -57,8 +59,8 @@ public class Pool<T extends IPRunnable<?, ?>> {
      * 
      * @return
      */
-    private String getDirectory() {
-        return ENV.getConfigPath() + "specification/" + getType().getSimpleName().toLowerCase() + "/";
+    protected String getDirectory() {
+        return ENV.getConfigPath() + "specification/" + StringUtil.substring(BeanClass.getDefiningClass(this.getClass()).getSimpleName().toLowerCase(), null, Pool.class.getSimpleName().toLowerCase()) + "/";
     }
 
     private Class<T> getType() {
