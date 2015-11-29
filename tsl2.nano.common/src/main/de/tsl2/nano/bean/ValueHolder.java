@@ -12,6 +12,7 @@ package de.tsl2.nano.bean;
 import java.io.Serializable;
 
 import org.simpleframework.xml.Attribute;
+import org.simpleframework.xml.Element;
 
 import de.tsl2.nano.messaging.ChangeEvent;
 import de.tsl2.nano.messaging.EventController;
@@ -26,8 +27,9 @@ public class ValueHolder<T> implements Serializable, IValueAccess<T> {
     /** serialVersionUID */
     private static final long serialVersionUID = 7453785034902931979L;
 
+    @Element
     T value;
-    @Attribute
+    @Attribute(required=false)
     Class<T> type;
     transient EventController changeHandler;
 

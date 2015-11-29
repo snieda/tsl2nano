@@ -40,9 +40,9 @@ public class Presentable implements IIPresentable, Serializable {
     /** serialVersionUID */
     private static final long serialVersionUID = -7970100238668263393L;
 
-    @Attribute
+    @Attribute(required=false)
     int type = UNSET;
-    @Attribute
+    @Attribute(required=false)
     int style = UNSET;
     @Element(required = false)
     String label;
@@ -56,9 +56,9 @@ public class Presentable implements IIPresentable, Serializable {
     //normally only serializable - but simple-xml has problems to serialize hashmaps, if they aren't directly declared.
     @ElementMap(entry = "layoutconstraint", key = "name", attribute = true, inline = true, valueType = String.class, required = false)
     protected LinkedHashMap<String, String> layoutConstraints;
-    @Attribute
+    @Attribute(required=false)
     boolean visible = true;
-    @Attribute
+    @Attribute(required=false)
     boolean searchable = true;
     
     @Element(required = false)
