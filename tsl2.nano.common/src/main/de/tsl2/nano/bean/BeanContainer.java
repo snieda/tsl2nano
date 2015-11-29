@@ -9,6 +9,7 @@
  */
 package de.tsl2.nano.bean;
 
+import java.io.Serializable;
 import java.util.Collection;
 import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
@@ -119,34 +120,35 @@ public class BeanContainer implements IBeanContainer {
      * testing.
      */
     public static final void initEmtpyServiceActions() {
+        final Collection<?> EMPTY_LIST = null;//new LinkedList();
         final IAction<Collection<?>> relationFinder = new CommonAction<Collection<?>>("empty.service.relationFinder") {
             @Override
             public Collection<?> action() {
-                return null;//new LinkedList();
+                return EMPTY_LIST;
             }
         };
         final IAction<Collection<?>> exampleFinder = new CommonAction<Collection<?>>("empty.service.exampleFinder") {
             @Override
             public Collection<?> action() {
-                return null;//new LinkedList();
+                return EMPTY_LIST;
             }
         };
         final IAction<Collection<?>> betweenFinder = new CommonAction<Collection<?>>("empty.service.betweenFinder") {
             @Override
             public Collection<?> action() {
-                return null;//new LinkedList();
+                return EMPTY_LIST;
             }
         };
         final IAction<Collection<?>> queryFinder = new CommonAction<Collection<?>>("empty.service.queryFinder") {
             @Override
             public Collection<?> action() {
-                return null;//new LinkedList();
+                return EMPTY_LIST;
             }
         };
         final IAction<Collection<?>> queryMapFinder = new CommonAction<Collection<?>>("empty.service.queryMapFinder") {
             @Override
             public Collection<?> action() {
-                return null;//new LinkedList();
+                return EMPTY_LIST;
             }
         };
         final IAction lazyRelationResolver = new CommonAction("empty.service.lazyRelationResolver") {
@@ -187,7 +189,7 @@ public class BeanContainer implements IBeanContainer {
         final IAction persistableAction = new CommonAction("empty.service.persistableAction") {
             @Override
             public Object action() {
-                return false;
+                return Serializable.class.isAssignableFrom((Class<?>) getParameter()[0]);
             }
         };
         final IAction<Integer> executeAction = new CommonAction<Integer>("empty.service.executeAction") {
