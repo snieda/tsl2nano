@@ -101,6 +101,14 @@ public class AntRunner {
      * <p/>
      * See <a href="https://ant.apache.org/manual/tasksoverview.html"> here for an overview of ants standard tasks</a>.
      * 
+     * <pre>
+     * Example:
+     *   FileSet[] fileSets = AntRunner.createFileSets("./:{**\*.*ml}**\*.xml;" + basedir.getPath() + ":{*.txt}");
+     *   Properties props = new Properties();
+     *   props.put("destFile", new File(destFile));
+     *   AntRunner.runTask("Jar", props, fileSets);
+     * </pre>
+     * 
      * @param name task name
      * @param taskProperties task properties
      * @param fileSets optional filesets (depends on the task!)
@@ -165,8 +173,9 @@ public class AntRunner {
          */
         LOG.info("starting task " + taskType
             + " with properties:\n"
-            + StringUtil.toFormattedString(taskProperties, 100, true)
-            /*+ (fileSets.length > 0 ? "\nfilesets:\n" + StringUtil.toFormattedString(fileSets, 100, true): "")*/);
+            + StringUtil.toFormattedString(taskProperties, 100, true));
+        //TODO: FileSet throws NullPointers inside its toString() method!
+//            + (fileSets != null && fileSets.length > 0 ? "\nfilesets:\n" + StringUtil.toFormattedString(fileSets, 100, true): ""));
         task.execute();
         LOG.info("build " + taskType + " successful");
     }
@@ -200,7 +209,7 @@ public class AntRunner {
     }
 
     /**
-     * <directory-name>[:{include][,<include>...]]}[[exclude][,<exclude>...]];...
+     * <directory-name>[:{[include][,<include>...]]}[[exclude][,<exclude>...]];...
      * 
      * @param expression
      * @return

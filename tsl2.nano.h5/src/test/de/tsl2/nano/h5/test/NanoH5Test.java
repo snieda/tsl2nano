@@ -206,12 +206,12 @@ public class NanoH5Test {
         //create a deployable package
         Properties p = new Properties();
         p.put("destFile", "target/" + name + ".zip");
-        AntRunner.runTask(AntRunner.TASK_ZIP, p, DIR_TEST + "/**/*");
+        AntRunner.runTask(AntRunner.TASK_ZIP, p, DIR_TEST + ":{**}");
         
         //delete the test output
-//        p.clear();
-//        p.put("dir", DIR_TEST);
-//        AntRunner.runTask(AntRunner.TASK_DELETE, p, (String)null);
+        p.clear();
+        p.put("dir", DIR_TEST);
+        AntRunner.runTask(AntRunner.TASK_DELETE, p, (String)null);
     }
 
     @Test
