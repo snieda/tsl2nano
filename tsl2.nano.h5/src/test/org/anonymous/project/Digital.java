@@ -1,10 +1,14 @@
 package org.anonymous.project;
-// Generated 14.11.2015 00:32:01 by Hibernate Tools 4.3.1.Final
+// Generated 27.11.2015 18:21:32 by Hibernate Tools 4.3.1.Final
 
 
+import java.util.HashSet;
+import java.util.Set;
 import javax.persistence.Column;
 import javax.persistence.Entity;
+import javax.persistence.FetchType;
 import javax.persistence.Id;
+import javax.persistence.OneToMany;
 import javax.persistence.Table;
 
 /**
@@ -21,15 +25,24 @@ public class Digital  implements java.io.Serializable {
      private int location;
      private String name;
      private String value;
+     private Set<Location> locations = new HashSet<Location>(0);
 
     public Digital() {
     }
 
+	
     public Digital(int id, int location, String name, String value) {
+        this.id = id;
+        this.location = location;
+        this.name = name;
+        this.value = value;
+    }
+    public Digital(int id, int location, String name, String value, Set<Location> locations) {
        this.id = id;
        this.location = location;
        this.name = name;
        this.value = value;
+       this.locations = locations;
     }
    
      @Id 
@@ -72,6 +85,15 @@ public class Digital  implements java.io.Serializable {
     
     public void setValue(String value) {
         this.value = value;
+    }
+
+@OneToMany(fetch=FetchType.LAZY, mappedBy="digital")
+    public Set<Location> getLocations() {
+        return this.locations;
+    }
+    
+    public void setLocations(Set<Location> locations) {
+        this.locations = locations;
     }
 
 

@@ -1,11 +1,17 @@
 package org.anonymous.project;
-// Generated 14.11.2015 00:32:01 by Hibernate Tools 4.3.1.Final
+// Generated 27.11.2015 18:21:32 by Hibernate Tools 4.3.1.Final
 
 
 import java.sql.Blob;
+import java.util.HashSet;
+import java.util.Set;
 import javax.persistence.Column;
 import javax.persistence.Entity;
+import javax.persistence.FetchType;
 import javax.persistence.Id;
+import javax.persistence.JoinColumn;
+import javax.persistence.ManyToOne;
+import javax.persistence.OneToMany;
 import javax.persistence.Table;
 
 /**
@@ -19,24 +25,26 @@ public class Type  implements java.io.Serializable {
 
 
      private int id;
-     private int area;
+     private Area area;
      private String name;
      private Blob icon;
+     private Set<Item> items = new HashSet<Item>(0);
 
     public Type() {
     }
 
 	
-    public Type(int id, int area, String name) {
+    public Type(int id, Area area, String name) {
         this.id = id;
         this.area = area;
         this.name = name;
     }
-    public Type(int id, int area, String name, Blob icon) {
+    public Type(int id, Area area, String name, Blob icon, Set<Item> items) {
        this.id = id;
        this.area = area;
        this.name = name;
        this.icon = icon;
+       this.items = items;
     }
    
      @Id 
@@ -51,13 +59,13 @@ public class Type  implements java.io.Serializable {
         this.id = id;
     }
 
-    
-    @Column(name="AREA", nullable=false)
-    public int getArea() {
+@ManyToOne(fetch=FetchType.LAZY)
+    @JoinColumn(name="AREA", nullable=false)
+    public Area getArea() {
         return this.area;
     }
     
-    public void setArea(int area) {
+    public void setArea(Area area) {
         this.area = area;
     }
 
@@ -79,6 +87,15 @@ public class Type  implements java.io.Serializable {
     
     public void setIcon(Blob icon) {
         this.icon = icon;
+    }
+
+@OneToMany(fetch=FetchType.LAZY, mappedBy="type")
+    public Set<Item> getItems() {
+        return this.items;
+    }
+    
+    public void setItems(Set<Item> items) {
+        this.items = items;
     }
 
 

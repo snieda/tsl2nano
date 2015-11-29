@@ -35,7 +35,7 @@ import de.tsl2.nano.bean.def.IPresentable;
 import de.tsl2.nano.bean.def.IValueDefinition;
 import de.tsl2.nano.bean.def.PathExpression;
 import de.tsl2.nano.bean.def.SecureAction;
-import de.tsl2.nano.collection.MapUtil;
+import de.tsl2.nano.core.util.MapUtil;
 import de.tsl2.nano.core.Environment;
 import de.tsl2.nano.core.ManagedException;
 import de.tsl2.nano.core.cls.BeanClass;

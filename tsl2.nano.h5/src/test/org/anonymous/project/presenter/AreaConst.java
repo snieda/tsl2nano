@@ -13,14 +13,16 @@ package org.anonymous.project.presenter;
  * Resource bundle preparation: copy this block to your resource bundle!
  * 
  * BLOCKSTART
-area.category=Category
-area.category.tooltip=Category tooltip...
 area.name=Name
 area.name.tooltip=Name tooltip...
 area.id=Id
 area.id.tooltip=Id tooltip...
 area.icon=Icon
 area.icon.tooltip=Icon tooltip...
+area.types=Types
+area.types.tooltip=Types tooltip...
+area.category=Category
+area.category.tooltip=Category tooltip...
  * BLOCKEND */
 
 /**
@@ -33,9 +35,6 @@ area.icon.tooltip=Icon tooltip...
  */
 public interface AreaConst {
 
-    /** key name of category in resource bundle */
-    public static final String  KEY_CATEGORY = "area.category";
-    public static final String  KEY_TOOLTIP_CATEGORY = "area.category.tooltip";
     /** key name of name in resource bundle */
     public static final String  KEY_NAME = "area.name";
     public static final String  KEY_TOOLTIP_NAME = "area.name.tooltip";
@@ -45,13 +44,21 @@ public interface AreaConst {
     /** key name of icon in resource bundle */
     public static final String  KEY_ICON = "area.icon";
     public static final String  KEY_TOOLTIP_ICON = "area.icon.tooltip";
+    /** key name of types in resource bundle */
+    public static final String  KEY_TYPES = "area.types";
+    public static final String  KEY_TOOLTIP_TYPES = "area.types.tooltip";
+    /** key name of category in resource bundle */
+    public static final String  KEY_CATEGORY = "area.category";
+    public static final String  KEY_TOOLTIP_CATEGORY = "area.category.tooltip";
 
-    /** bean attribute category */
-    public static final String  ATTR_CATEGORY = "category";
     /** bean attribute name */
     public static final String  ATTR_NAME = "name";
     /** bean attribute id */
     public static final String  ATTR_ID = "id";
     /** bean attribute icon */
     public static final String  ATTR_ICON = "icon";
+    /** bean attribute types */
+    public static final String  ATTR_TYPES = "types";
+    /** bean attribute category */
+    public static final String  ATTR_CATEGORY = "category";
 }

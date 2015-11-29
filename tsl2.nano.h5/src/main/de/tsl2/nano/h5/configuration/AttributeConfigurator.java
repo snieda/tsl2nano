@@ -156,7 +156,7 @@ public class AttributeConfigurator implements Serializable {
     }
 
     public void setPresentable(IPresentable p) {
-        attrAccessor.set("presentable", /*SetterExtenderPoxy.instanceOf((Proxy) */p/*)*/);
+        attrAccessor.set("presentable", /*SetterExtenderPoxy.instanceOf((ProxyWrapper) */p/*)*/);
     }
 
     public IPresentableColumn getColumnDefinition() {

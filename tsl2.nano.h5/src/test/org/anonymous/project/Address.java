@@ -1,10 +1,14 @@
 package org.anonymous.project;
-// Generated 14.11.2015 00:32:01 by Hibernate Tools 4.3.1.Final
+// Generated 27.11.2015 18:21:32 by Hibernate Tools 4.3.1.Final
 
 
+import java.util.HashSet;
+import java.util.Set;
 import javax.persistence.Column;
 import javax.persistence.Entity;
+import javax.persistence.FetchType;
 import javax.persistence.Id;
+import javax.persistence.OneToMany;
 import javax.persistence.Table;
 
 /**
@@ -22,16 +26,26 @@ public class Address  implements java.io.Serializable {
      private String code;
      private String city;
      private String country;
+     private Set<Location> locations = new HashSet<Location>(0);
 
     public Address() {
     }
 
+	
     public Address(int id, String street, String code, String city, String country) {
+        this.id = id;
+        this.street = street;
+        this.code = code;
+        this.city = city;
+        this.country = country;
+    }
+    public Address(int id, String street, String code, String city, String country, Set<Location> locations) {
        this.id = id;
        this.street = street;
        this.code = code;
        this.city = city;
        this.country = country;
+       this.locations = locations;
     }
    
      @Id 
@@ -84,6 +98,15 @@ public class Address  implements java.io.Serializable {
     
     public void setCountry(String country) {
         this.country = country;
+    }
+
+@OneToMany(fetch=FetchType.LAZY, mappedBy="address")
+    public Set<Location> getLocations() {
+        return this.locations;
+    }
+    
+    public void setLocations(Set<Location> locations) {
+        this.locations = locations;
     }
 
 

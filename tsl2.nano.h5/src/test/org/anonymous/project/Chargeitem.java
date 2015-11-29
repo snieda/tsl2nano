@@ -1,10 +1,16 @@
 package org.anonymous.project;
-// Generated 14.11.2015 00:32:01 by Hibernate Tools 4.3.1.Final
+// Generated 27.11.2015 18:21:32 by Hibernate Tools 4.3.1.Final
 
 
+import java.util.HashSet;
+import java.util.Set;
 import javax.persistence.Column;
 import javax.persistence.Entity;
+import javax.persistence.FetchType;
 import javax.persistence.Id;
+import javax.persistence.JoinColumn;
+import javax.persistence.ManyToOne;
+import javax.persistence.OneToMany;
 import javax.persistence.Table;
 
 /**
@@ -18,16 +24,24 @@ public class Chargeitem  implements java.io.Serializable {
 
 
      private int id;
+     private Item item;
      private int charge;
-     private int item;
+     private Set<Charge> charges = new HashSet<Charge>(0);
 
     public Chargeitem() {
     }
 
-    public Chargeitem(int id, int charge, int item) {
+	
+    public Chargeitem(int id, Item item, int charge) {
+        this.id = id;
+        this.item = item;
+        this.charge = charge;
+    }
+    public Chargeitem(int id, Item item, int charge, Set<Charge> charges) {
        this.id = id;
-       this.charge = charge;
        this.item = item;
+       this.charge = charge;
+       this.charges = charges;
     }
    
      @Id 
@@ -42,6 +56,16 @@ public class Chargeitem  implements java.io.Serializable {
         this.id = id;
     }
 
+@ManyToOne(fetch=FetchType.LAZY)
+    @JoinColumn(name="ITEM", nullable=false)
+    public Item getItem() {
+        return this.item;
+    }
+    
+    public void setItem(Item item) {
+        this.item = item;
+    }
+
     
     @Column(name="CHARGE", nullable=false)
     public int getCharge() {
@@ -52,14 +76,13 @@ public class Chargeitem  implements java.io.Serializable {
         this.charge = charge;
     }
 
-    
-    @Column(name="ITEM", nullable=false)
-    public int getItem() {
-        return this.item;
+@OneToMany(fetch=FetchType.LAZY, mappedBy="chargeitem")
+    public Set<Charge> getCharges() {
+        return this.charges;
     }
     
-    public void setItem(int item) {
-        this.item = item;
+    public void setCharges(Set<Charge> charges) {
+        this.charges = charges;
     }
 
 

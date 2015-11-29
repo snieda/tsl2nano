@@ -171,7 +171,6 @@ import de.tsl2.nano.bean.def.SecureAction;
 import de.tsl2.nano.bean.def.ValueExpressionFormat;
 import de.tsl2.nano.bean.def.ValueGroup;
 import de.tsl2.nano.collection.CollectionUtil;
-import de.tsl2.nano.collection.MapUtil;
 import de.tsl2.nano.core.AppLoader;
 import de.tsl2.nano.core.ENV;
 import de.tsl2.nano.core.ISession;
@@ -184,6 +183,7 @@ import de.tsl2.nano.core.util.BitUtil;
 import de.tsl2.nano.core.util.ByteUtil;
 import de.tsl2.nano.core.util.DateUtil;
 import de.tsl2.nano.core.util.FileUtil;
+import de.tsl2.nano.core.util.MapUtil;
 import de.tsl2.nano.core.util.NumberUtil;
 import de.tsl2.nano.core.util.StringUtil;
 import de.tsl2.nano.core.util.Util;
@@ -2052,14 +2052,21 @@ public class Html5Presentation<T> extends BeanPresentationHelper<T> implements I
                 preFooter = doc.createElement(TAG_SPAN);
                 preFooter.setAttribute(ATTR_ID, "footer");
                 boolean isKey;
+                String[] txt;//text + optional tooltip
                 for (int i = 0; i < split.length; i++) {
                     isKey = i % 2 == 0;
                     if (isKey) {
                         appendElement(preFooter, TAG_IMAGE, ATTR_SRC, "icons/properties.png");
                     }
-                    appendElement(preFooter, isKey ? "b" : "i", content(split[i] + "  "), ATTR_COLOR, isKey
+                    //evaluate the text and optional a title (tooltip)
+                    txt = split[i].split("§");
+                    Element e = appendElement(preFooter, isKey ? "b" : "i", content(txt[0] + "  "), ATTR_COLOR, isKey
                         ? COLOR_BLUE
                         : COLOR_BLACK);
+                    if (txt.length > 1) {
+                        txt[1] = StringUtil.fromHexString(txt[1]);
+                        HtmlUtil.appendAttributes(e, ATTR_TITLE, txt[1]);
+                    }
                 }
                 appendElement(preFooter, TAG_IMAGE, ATTR_SRC, "icons/properties.png");
             } else {

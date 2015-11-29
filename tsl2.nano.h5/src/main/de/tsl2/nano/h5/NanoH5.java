@@ -41,7 +41,6 @@ import de.tsl2.nano.bean.def.BeanPresentationHelper;
 import de.tsl2.nano.bean.def.IPageBuilder;
 import de.tsl2.nano.bean.def.PathExpression;
 import de.tsl2.nano.collection.ExpiringMap;
-import de.tsl2.nano.collection.MapUtil;
 import de.tsl2.nano.core.AppLoader;
 import de.tsl2.nano.core.ENV;
 import de.tsl2.nano.core.ManagedException;
@@ -53,6 +52,7 @@ import de.tsl2.nano.core.execution.CompatibilityLayer;
 import de.tsl2.nano.core.log.LogFactory;
 import de.tsl2.nano.core.util.ConcurrentUtil;
 import de.tsl2.nano.core.util.FileUtil;
+import de.tsl2.nano.core.util.MapUtil;
 import de.tsl2.nano.core.util.NetUtil;
 import de.tsl2.nano.core.util.NumberUtil;
 import de.tsl2.nano.core.util.StringUtil;
@@ -437,7 +437,7 @@ public class NanoH5 extends NanoHTTPD implements ISystemConnector<Persistence> {
             } else {
                 navigationModel.push(connect((Persistence) login.getInstance()));
             }
-            return new EntityBrowser(navigationModel);
+            return new EntityBrowser("entity-browser", navigationModel);
         } else {
             //create a copy for the new session
             try {
@@ -648,7 +648,7 @@ public class NanoH5 extends NanoHTTPD implements ISystemConnector<Persistence> {
                     "Couldn't generate bean jar file '"
                         + jarName
                         + "' through ant-script 'reverse-eng.xml'! Please see log file for exceptions.\n"
-                        + "\tIs your java only a JRE? We need the full JDK to compile the generated classes.\n"
+                        + (!ENV.get(CompatibilityLayer.class).isAvailable("java.lang.Compiler") ? "\tYOUR JAVA IS ONLY A JRE! We need the full JDK to compile the generated classes.\n" : "")
                         + "\nAs alternative you may select an existing bean-jar file (-->no generation needed!) in field \"JarFile\"\n\n"
                         + ENV.get(UncaughtExceptionHandler.class).toString());
             }

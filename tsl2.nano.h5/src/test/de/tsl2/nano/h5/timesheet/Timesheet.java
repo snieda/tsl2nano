@@ -86,18 +86,18 @@ import de.tsl2.nano.bean.def.SecureAction;
 import de.tsl2.nano.bean.def.VAttribute;
 import de.tsl2.nano.bean.def.ValueColumn;
 import de.tsl2.nano.bean.def.ValueExpression;
-import de.tsl2.nano.collection.MapUtil;
 import de.tsl2.nano.core.ENV;
 import de.tsl2.nano.core.ManagedException;
 import de.tsl2.nano.core.log.LogFactory;
 import de.tsl2.nano.core.util.DateUtil;
+import de.tsl2.nano.core.util.MapUtil;
 import de.tsl2.nano.core.util.Util;
 import de.tsl2.nano.execution.ScriptUtil;
 import de.tsl2.nano.h5.Controller;
-import de.tsl2.nano.h5.NanoH5;
 import de.tsl2.nano.h5.QueryResult;
 import de.tsl2.nano.h5.RuleCover;
 import de.tsl2.nano.h5.SpecifiedAction;
+import de.tsl2.nano.h5.Statistic;
 import de.tsl2.nano.h5.expression.Query;
 import de.tsl2.nano.h5.expression.QueryPool;
 import de.tsl2.nano.h5.expression.RuleExpression;
@@ -105,6 +105,7 @@ import de.tsl2.nano.h5.expression.SQLExpression;
 import de.tsl2.nano.h5.navigation.BeanAct;
 import de.tsl2.nano.h5.navigation.Parameter;
 import de.tsl2.nano.h5.navigation.Workflow;
+import de.tsl2.nano.h5.test.NanoH5App;
 import de.tsl2.nano.h5.websocket.WSEvent;
 import de.tsl2.nano.h5.websocket.WebSocketRuleDependencyListener;
 import de.tsl2.nano.incubation.specification.ParType;
@@ -123,8 +124,7 @@ import de.tsl2.nano.util.codegen.ClassGenerator;
  * @author Tom, Thomas Schneider
  * @version $Revision$
  */
-public class Timesheet extends NanoH5 {
-    private static final Log LOG = LogFactory.getLog(MyApp.class);
+public class Timesheet extends NanoH5App {
 
     /**
      * constructor
@@ -155,7 +155,7 @@ public class Timesheet extends NanoH5 {
         define(Digital.class, DigitalConst.ATTR_NAME);
         define(Coordinate.class, ve(CoordinateConst.ATTR_X) + "-" + ve(CoordinateConst.ATTR_Y) + "-" + ve(CoordinateConst.ATTR_X));
         define(Area.class, AreaConst.ATTR_NAME);
-        define(Item.class, ItemConst.ATTR_NAME);
+        define(Item.class, ItemConst.ATTR_NAME, ItemConst.ATTR_ID, ItemConst.ATTR_NAME, ItemConst.ATTR_ORGANISATION, ItemConst.ATTR_CLASSIFICATION, ItemConst.ATTR_TYPE, ItemConst.ATTR_START, ItemConst.ATTR_END, ItemConst.ATTR_VALUE, ItemConst.ATTR_DESCRIPTION, ItemConst.ATTR_CHARGEITEMS, ItemConst.ATTR_PROPERTIES);
         define(Chargeitem.class, ChargeitemConst.ATTR_ITEM);
         define(Discharge.class, ve(DischargeConst.ATTR_CHARGE) + " (" + ve(DischargeConst.ATTR_DATE) + ": " + ve(DischargeConst.ATTR_VALUE));
         
@@ -163,7 +163,7 @@ public class Timesheet extends NanoH5 {
          * configure the main type: Charge (Zeiterfassung)
          */
         BeanDefinition<Charge> charge = define(Charge.class, ve(ChargeConst.ATTR_CHARGEITEM) + " (" + ve(ChargeConst.ATTR_FROMDATE) + ": " + ve(ChargeConst.ATTR_VALUE) + ")"
-            , ATTR_FROMDATE, ATTR_FROMTIME, ATTR_TOTIME, ATTR_PAUSE, ATTR_PARTY, ATTR_CHARGEITEM, ATTR_VALUE);
+            , ATTR_FROMDATE, ATTR_FROMTIME, ATTR_TOTIME, ATTR_PAUSE, ATTR_VALUE, ATTR_PARTY, ATTR_CHARGEITEM);
         IPresentableColumn column = charge.getAttribute(ATTR_VALUE).getColumnDefinition();
         if (column instanceof ValueColumn)
             ((ValueColumn)column).setStandardSummary(true);
@@ -187,11 +187,13 @@ public class Timesheet extends NanoH5 {
          * add attribute presentation rules
          */
         RuleScript<String> presValueColor = new RuleScript<String>("presValueColor", "value > 10 ? red : black", null);
-        RuleCover ruleCover = new RuleCover(MapUtil.asMap("presentable.background", presValueColor.getName()));
+        RuleCover ruleCover = new RuleCover(presValueColor.getName(), MapUtil.asMap("presentable.background", presValueColor.getName()));
         ruleCover.connect(charge.getAttribute(ATTR_VALUE));
         
         charge.saveDefinition();
 
+        new Statistic<>(Charge.class).saveVirtualDefinition("statistics " + Charge.class.getSimpleName());
+        
         /*
          * Sample Workflow with three activities
          */
@@ -369,28 +371,4 @@ public class Timesheet extends NanoH5 {
          */
         return beanCollector;
     }
-
-    private String ve(String expression) {
-        return "{" + expression + "}";
-    }
-
-    /**
-     * define
-     * @param valueExpression 
-     * @param type 
-     */
-    protected <T> BeanDefinition<T> define(Class<T> type, String valueExpression, String...attributeFilter) {
-        BeanDefinition<T> bean = BeanDefinition.getBeanDefinition(type);
-        String ve = valueExpression.contains("{") ? valueExpression : "{" + valueExpression + "}";
-        bean.setValueExpression(new ValueExpression<T>(ve, type));
-        if (!Util.isEmpty(attributeFilter))
-            bean.setAttributeFilter(attributeFilter);
-        bean.saveDefinition();
-        return bean;
-    }
-    @SuppressWarnings("unchecked")
-    public static void main(String[] args) {
-        startApplication(MyApp.class, MapUtil.asMap(0, "service.url"), args);
-    }
-
 }

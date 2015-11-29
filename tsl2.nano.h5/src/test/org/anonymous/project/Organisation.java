@@ -1,11 +1,15 @@
 package org.anonymous.project;
-// Generated 14.11.2015 00:32:01 by Hibernate Tools 4.3.1.Final
+// Generated 27.11.2015 18:21:32 by Hibernate Tools 4.3.1.Final
 
 
 import java.sql.Blob;
+import java.util.HashSet;
+import java.util.Set;
 import javax.persistence.Column;
 import javax.persistence.Entity;
+import javax.persistence.FetchType;
 import javax.persistence.Id;
+import javax.persistence.OneToMany;
 import javax.persistence.Table;
 import javax.persistence.UniqueConstraint;
 
@@ -24,6 +28,9 @@ public class Organisation  implements java.io.Serializable {
      private String name;
      private String description;
      private Blob icon;
+     private Set<Item> items = new HashSet<Item>(0);
+     private Set<Party> parties = new HashSet<Party>(0);
+     private Set<Property> properties = new HashSet<Property>(0);
 
     public Organisation() {
     }
@@ -33,11 +40,14 @@ public class Organisation  implements java.io.Serializable {
         this.id = id;
         this.name = name;
     }
-    public Organisation(int id, String name, String description, Blob icon) {
+    public Organisation(int id, String name, String description, Blob icon, Set<Item> items, Set<Party> parties, Set<Property> properties) {
        this.id = id;
        this.name = name;
        this.description = description;
        this.icon = icon;
+       this.items = items;
+       this.parties = parties;
+       this.properties = properties;
     }
    
      @Id 
@@ -80,6 +90,33 @@ public class Organisation  implements java.io.Serializable {
     
     public void setIcon(Blob icon) {
         this.icon = icon;
+    }
+
+@OneToMany(fetch=FetchType.LAZY, mappedBy="organisation")
+    public Set<Item> getItems() {
+        return this.items;
+    }
+    
+    public void setItems(Set<Item> items) {
+        this.items = items;
+    }
+
+@OneToMany(fetch=FetchType.LAZY, mappedBy="organisation")
+    public Set<Party> getParties() {
+        return this.parties;
+    }
+    
+    public void setParties(Set<Party> parties) {
+        this.parties = parties;
+    }
+
+@OneToMany(fetch=FetchType.LAZY, mappedBy="organisation")
+    public Set<Property> getProperties() {
+        return this.properties;
+    }
+    
+    public void setProperties(Set<Property> properties) {
+        this.properties = properties;
     }
 
 

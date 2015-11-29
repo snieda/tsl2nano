@@ -13,14 +13,16 @@ package org.anonymous.project.presenter;
  * Resource bundle preparation: copy this block to your resource bundle!
  * 
  * BLOCKSTART
-type.area=Area
-type.area.tooltip=Area tooltip...
 type.name=Name
 type.name.tooltip=Name tooltip...
 type.id=Id
 type.id.tooltip=Id tooltip...
 type.icon=Icon
 type.icon.tooltip=Icon tooltip...
+type.area=Area
+type.area.tooltip=Area tooltip...
+type.items=Items
+type.items.tooltip=Items tooltip...
  * BLOCKEND */
 
 /**
@@ -33,9 +35,6 @@ type.icon.tooltip=Icon tooltip...
  */
 public interface TypeConst {
 
-    /** key name of area in resource bundle */
-    public static final String  KEY_AREA = "type.area";
-    public static final String  KEY_TOOLTIP_AREA = "type.area.tooltip";
     /** key name of name in resource bundle */
     public static final String  KEY_NAME = "type.name";
     public static final String  KEY_TOOLTIP_NAME = "type.name.tooltip";
@@ -45,13 +44,21 @@ public interface TypeConst {
     /** key name of icon in resource bundle */
     public static final String  KEY_ICON = "type.icon";
     public static final String  KEY_TOOLTIP_ICON = "type.icon.tooltip";
+    /** key name of area in resource bundle */
+    public static final String  KEY_AREA = "type.area";
+    public static final String  KEY_TOOLTIP_AREA = "type.area.tooltip";
+    /** key name of items in resource bundle */
+    public static final String  KEY_ITEMS = "type.items";
+    public static final String  KEY_TOOLTIP_ITEMS = "type.items.tooltip";
 
-    /** bean attribute area */
-    public static final String  ATTR_AREA = "area";
     /** bean attribute name */
     public static final String  ATTR_NAME = "name";
     /** bean attribute id */
     public static final String  ATTR_ID = "id";
     /** bean attribute icon */
     public static final String  ATTR_ICON = "icon";
+    /** bean attribute area */
+    public static final String  ATTR_AREA = "area";
+    /** bean attribute items */
+    public static final String  ATTR_ITEMS = "items";
 }

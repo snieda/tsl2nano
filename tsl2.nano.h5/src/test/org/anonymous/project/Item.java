@@ -1,13 +1,19 @@
 package org.anonymous.project;
-// Generated 14.11.2015 00:32:01 by Hibernate Tools 4.3.1.Final
+// Generated 27.11.2015 18:21:32 by Hibernate Tools 4.3.1.Final
 
 
 import java.math.BigDecimal;
 import java.sql.Blob;
 import java.util.Date;
+import java.util.HashSet;
+import java.util.Set;
 import javax.persistence.Column;
 import javax.persistence.Entity;
+import javax.persistence.FetchType;
 import javax.persistence.Id;
+import javax.persistence.JoinColumn;
+import javax.persistence.ManyToOne;
+import javax.persistence.OneToMany;
 import javax.persistence.Table;
 import javax.persistence.Temporal;
 import javax.persistence.TemporalType;
@@ -23,33 +29,35 @@ public class Item  implements java.io.Serializable {
 
 
      private int id;
-     private int orga;
-     private int class_;
-     private int type;
+     private Organisation organisation;
+     private Classification classification;
+     private Type type;
      private String name;
      private Date start;
      private Date end;
      private BigDecimal value;
      private String description;
      private Blob icon;
+     private Set<Property> properties = new HashSet<Property>(0);
+     private Set<Chargeitem> chargeitems = new HashSet<Chargeitem>(0);
 
     public Item() {
     }
 
 	
-    public Item(int id, int orga, int class_, int type, String name, Date start, BigDecimal value) {
+    public Item(int id, Organisation organisation, Classification classification, Type type, String name, Date start, BigDecimal value) {
         this.id = id;
-        this.orga = orga;
-        this.class_ = class_;
+        this.organisation = organisation;
+        this.classification = classification;
         this.type = type;
         this.name = name;
         this.start = start;
         this.value = value;
     }
-    public Item(int id, int orga, int class_, int type, String name, Date start, Date end, BigDecimal value, String description, Blob icon) {
+    public Item(int id, Organisation organisation, Classification classification, Type type, String name, Date start, Date end, BigDecimal value, String description, Blob icon, Set<Property> properties, Set<Chargeitem> chargeitems) {
        this.id = id;
-       this.orga = orga;
-       this.class_ = class_;
+       this.organisation = organisation;
+       this.classification = classification;
        this.type = type;
        this.name = name;
        this.start = start;
@@ -57,6 +65,8 @@ public class Item  implements java.io.Serializable {
        this.value = value;
        this.description = description;
        this.icon = icon;
+       this.properties = properties;
+       this.chargeitems = chargeitems;
     }
    
      @Id 
@@ -71,33 +81,33 @@ public class Item  implements java.io.Serializable {
         this.id = id;
     }
 
-    
-    @Column(name="ORGA", nullable=false)
-    public int getOrga() {
-        return this.orga;
+@ManyToOne(fetch=FetchType.LAZY)
+    @JoinColumn(name="ORGA", nullable=false)
+    public Organisation getOrganisation() {
+        return this.organisation;
     }
     
-    public void setOrga(int orga) {
-        this.orga = orga;
-    }
-
-    
-    @Column(name="CLASS", nullable=false)
-    public int getClass_() {
-        return this.class_;
-    }
-    
-    public void setClass_(int class_) {
-        this.class_ = class_;
+    public void setOrganisation(Organisation organisation) {
+        this.organisation = organisation;
     }
 
+@ManyToOne(fetch=FetchType.LAZY)
+    @JoinColumn(name="CLASS", nullable=false)
+    public Classification getClassification() {
+        return this.classification;
+    }
     
-    @Column(name="TYPE", nullable=false)
-    public int getType() {
+    public void setClassification(Classification classification) {
+        this.classification = classification;
+    }
+
+@ManyToOne(fetch=FetchType.LAZY)
+    @JoinColumn(name="TYPE", nullable=false)
+    public Type getType() {
         return this.type;
     }
     
-    public void setType(int type) {
+    public void setType(Type type) {
         this.type = type;
     }
 
@@ -159,6 +169,24 @@ public class Item  implements java.io.Serializable {
     
     public void setIcon(Blob icon) {
         this.icon = icon;
+    }
+
+@OneToMany(fetch=FetchType.LAZY, mappedBy="item")
+    public Set<Property> getProperties() {
+        return this.properties;
+    }
+    
+    public void setProperties(Set<Property> properties) {
+        this.properties = properties;
+    }
+
+@OneToMany(fetch=FetchType.LAZY, mappedBy="item")
+    public Set<Chargeitem> getChargeitems() {
+        return this.chargeitems;
+    }
+    
+    public void setChargeitems(Set<Chargeitem> chargeitems) {
+        this.chargeitems = chargeitems;
     }
 
 

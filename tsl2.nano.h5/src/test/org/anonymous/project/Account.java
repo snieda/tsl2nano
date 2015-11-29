@@ -1,10 +1,14 @@
 package org.anonymous.project;
-// Generated 14.11.2015 00:32:01 by Hibernate Tools 4.3.1.Final
+// Generated 27.11.2015 18:21:32 by Hibernate Tools 4.3.1.Final
 
 
+import java.util.HashSet;
+import java.util.Set;
 import javax.persistence.Column;
 import javax.persistence.Entity;
+import javax.persistence.FetchType;
 import javax.persistence.Id;
+import javax.persistence.OneToMany;
 import javax.persistence.Table;
 
 /**
@@ -21,15 +25,24 @@ public class Account  implements java.io.Serializable {
      private String name;
      private String bic;
      private String iban;
+     private Set<Discharge> discharges = new HashSet<Discharge>(0);
 
     public Account() {
     }
 
+	
     public Account(int id, String name, String bic, String iban) {
+        this.id = id;
+        this.name = name;
+        this.bic = bic;
+        this.iban = iban;
+    }
+    public Account(int id, String name, String bic, String iban, Set<Discharge> discharges) {
        this.id = id;
        this.name = name;
        this.bic = bic;
        this.iban = iban;
+       this.discharges = discharges;
     }
    
      @Id 
@@ -72,6 +85,15 @@ public class Account  implements java.io.Serializable {
     
     public void setIban(String iban) {
         this.iban = iban;
+    }
+
+@OneToMany(fetch=FetchType.LAZY, mappedBy="account")
+    public Set<Discharge> getDischarges() {
+        return this.discharges;
+    }
+    
+    public void setDischarges(Set<Discharge> discharges) {
+        this.discharges = discharges;
     }
 
 

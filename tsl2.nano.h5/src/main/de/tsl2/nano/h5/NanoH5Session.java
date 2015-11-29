@@ -302,11 +302,13 @@ public class NanoH5Session implements ISession {
     String createStatusText(long startTime) {
         String user =
             authorization != null ? ENV.translate("tsl2nano.login.user", true) + ": "
-                + authorization.getUser() + ", " + "Online: "
+                + authorization.getUser()+ "§" + StringUtil.toHexString(getUserAuthorization().toString().getBytes()) + ", " + "Online: "
                 + DateUtil.getFormattedMinutes(getDuration()) + " min, " : "";
         return PREFIX_STATUS_LINE + user
             + ENV.translate("tsl2nano.time", true)
             + ": " + DateUtil.getFormattedDateTime(new Date()) + ", "
+            + ENV.translate("tsl2nano.session", true)
+            + ": " + ENV.translate(nav.getName(), true) + "§" + StringUtil.toHexString(getContext().toString().getBytes()) + ", "
             + ENV.translate("tsl2nano.request", true) + ": "
             + DateUtil.getFormattedMinutes(System.currentTimeMillis() - startTime) + " min"
             + (LOG.isDebugEnabled() ? ", " + "Memory: " + (Profiler.getUsedMem() / (1024 * 1024)) + " MB" : "")

@@ -1,10 +1,13 @@
 package org.anonymous.project;
-// Generated 14.11.2015 00:32:01 by Hibernate Tools 4.3.1.Final
+// Generated 27.11.2015 18:21:32 by Hibernate Tools 4.3.1.Final
 
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
+import javax.persistence.FetchType;
 import javax.persistence.Id;
+import javax.persistence.JoinColumn;
+import javax.persistence.ManyToOne;
 import javax.persistence.Table;
 
 /**
@@ -18,9 +21,9 @@ public class Property  implements java.io.Serializable {
 
 
      private int id;
-     private Integer item;
-     private Integer party;
-     private Integer orga;
+     private Organisation organisation;
+     private Item item;
+     private Party party;
      private String akey;
      private String avalue;
 
@@ -33,11 +36,11 @@ public class Property  implements java.io.Serializable {
         this.akey = akey;
         this.avalue = avalue;
     }
-    public Property(int id, Integer item, Integer party, Integer orga, String akey, String avalue) {
+    public Property(int id, Organisation organisation, Item item, Party party, String akey, String avalue) {
        this.id = id;
+       this.organisation = organisation;
        this.item = item;
        this.party = party;
-       this.orga = orga;
        this.akey = akey;
        this.avalue = avalue;
     }
@@ -54,34 +57,34 @@ public class Property  implements java.io.Serializable {
         this.id = id;
     }
 
+@ManyToOne(fetch=FetchType.LAZY)
+    @JoinColumn(name="ORGA")
+    public Organisation getOrganisation() {
+        return this.organisation;
+    }
     
-    @Column(name="ITEM")
-    public Integer getItem() {
+    public void setOrganisation(Organisation organisation) {
+        this.organisation = organisation;
+    }
+
+@ManyToOne(fetch=FetchType.LAZY)
+    @JoinColumn(name="ITEM")
+    public Item getItem() {
         return this.item;
     }
     
-    public void setItem(Integer item) {
+    public void setItem(Item item) {
         this.item = item;
     }
 
-    
-    @Column(name="PARTY")
-    public Integer getParty() {
+@ManyToOne(fetch=FetchType.LAZY)
+    @JoinColumn(name="PARTY")
+    public Party getParty() {
         return this.party;
     }
     
-    public void setParty(Integer party) {
+    public void setParty(Party party) {
         this.party = party;
-    }
-
-    
-    @Column(name="ORGA")
-    public Integer getOrga() {
-        return this.orga;
-    }
-    
-    public void setOrga(Integer orga) {
-        this.orga = orga;
     }
 
     

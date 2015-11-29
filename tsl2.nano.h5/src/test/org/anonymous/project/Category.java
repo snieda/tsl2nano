@@ -1,11 +1,15 @@
 package org.anonymous.project;
-// Generated 14.11.2015 00:32:01 by Hibernate Tools 4.3.1.Final
+// Generated 27.11.2015 18:21:32 by Hibernate Tools 4.3.1.Final
 
 
 import java.sql.Blob;
+import java.util.HashSet;
+import java.util.Set;
 import javax.persistence.Column;
 import javax.persistence.Entity;
+import javax.persistence.FetchType;
 import javax.persistence.Id;
+import javax.persistence.OneToMany;
 import javax.persistence.Table;
 
 /**
@@ -21,6 +25,7 @@ public class Category  implements java.io.Serializable {
      private int id;
      private String name;
      private Blob icon;
+     private Set<Area> areas = new HashSet<Area>(0);
 
     public Category() {
     }
@@ -30,10 +35,11 @@ public class Category  implements java.io.Serializable {
         this.id = id;
         this.name = name;
     }
-    public Category(int id, String name, Blob icon) {
+    public Category(int id, String name, Blob icon, Set<Area> areas) {
        this.id = id;
        this.name = name;
        this.icon = icon;
+       this.areas = areas;
     }
    
      @Id 
@@ -66,6 +72,15 @@ public class Category  implements java.io.Serializable {
     
     public void setIcon(Blob icon) {
         this.icon = icon;
+    }
+
+@OneToMany(fetch=FetchType.LAZY, mappedBy="category")
+    public Set<Area> getAreas() {
+        return this.areas;
+    }
+    
+    public void setAreas(Set<Area> areas) {
+        this.areas = areas;
     }
 
 

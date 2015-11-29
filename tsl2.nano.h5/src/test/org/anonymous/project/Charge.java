@@ -1,12 +1,18 @@
 package org.anonymous.project;
-// Generated 14.11.2015 00:32:01 by Hibernate Tools 4.3.1.Final
+// Generated 27.11.2015 18:21:32 by Hibernate Tools 4.3.1.Final
 
 
 import java.math.BigDecimal;
 import java.util.Date;
+import java.util.HashSet;
+import java.util.Set;
 import javax.persistence.Column;
 import javax.persistence.Entity;
+import javax.persistence.FetchType;
 import javax.persistence.Id;
+import javax.persistence.JoinColumn;
+import javax.persistence.ManyToOne;
+import javax.persistence.OneToMany;
 import javax.persistence.Table;
 import javax.persistence.Temporal;
 import javax.persistence.TemporalType;
@@ -22,8 +28,8 @@ public class Charge  implements java.io.Serializable {
 
 
      private int id;
-     private int party;
-     private int chargeitem;
+     private Chargeitem chargeitem;
+     private Party party;
      private Date fromdate;
      private Date fromtime;
      private Date todate;
@@ -31,25 +37,26 @@ public class Charge  implements java.io.Serializable {
      private Date pause;
      private BigDecimal value;
      private String comment;
+     private Set<Discharge> discharges = new HashSet<Discharge>(0);
 
     public Charge() {
     }
 
 	
-    public Charge(int id, int party, int chargeitem, Date fromdate, Date fromtime, Date todate, Date totime, BigDecimal value) {
+    public Charge(int id, Chargeitem chargeitem, Party party, Date fromdate, Date fromtime, Date todate, Date totime, BigDecimal value) {
         this.id = id;
-        this.party = party;
         this.chargeitem = chargeitem;
+        this.party = party;
         this.fromdate = fromdate;
         this.fromtime = fromtime;
         this.todate = todate;
         this.totime = totime;
         this.value = value;
     }
-    public Charge(int id, int party, int chargeitem, Date fromdate, Date fromtime, Date todate, Date totime, Date pause, BigDecimal value, String comment) {
+    public Charge(int id, Chargeitem chargeitem, Party party, Date fromdate, Date fromtime, Date todate, Date totime, Date pause, BigDecimal value, String comment, Set<Discharge> discharges) {
        this.id = id;
-       this.party = party;
        this.chargeitem = chargeitem;
+       this.party = party;
        this.fromdate = fromdate;
        this.fromtime = fromtime;
        this.todate = todate;
@@ -57,6 +64,7 @@ public class Charge  implements java.io.Serializable {
        this.pause = pause;
        this.value = value;
        this.comment = comment;
+       this.discharges = discharges;
     }
    
      @Id 
@@ -71,24 +79,24 @@ public class Charge  implements java.io.Serializable {
         this.id = id;
     }
 
-    
-    @Column(name="PARTY", nullable=false)
-    public int getParty() {
-        return this.party;
-    }
-    
-    public void setParty(int party) {
-        this.party = party;
-    }
-
-    
-    @Column(name="CHARGEITEM", nullable=false)
-    public int getChargeitem() {
+@ManyToOne(fetch=FetchType.LAZY)
+    @JoinColumn(name="CHARGEITEM", nullable=false)
+    public Chargeitem getChargeitem() {
         return this.chargeitem;
     }
     
-    public void setChargeitem(int chargeitem) {
+    public void setChargeitem(Chargeitem chargeitem) {
         this.chargeitem = chargeitem;
+    }
+
+@ManyToOne(fetch=FetchType.LAZY)
+    @JoinColumn(name="PARTY", nullable=false)
+    public Party getParty() {
+        return this.party;
+    }
+    
+    public void setParty(Party party) {
+        this.party = party;
     }
 
     @Temporal(TemporalType.TIMESTAMP)
@@ -159,6 +167,15 @@ public class Charge  implements java.io.Serializable {
     
     public void setComment(String comment) {
         this.comment = comment;
+    }
+
+@OneToMany(fetch=FetchType.LAZY, mappedBy="charge")
+    public Set<Discharge> getDischarges() {
+        return this.discharges;
+    }
+    
+    public void setDischarges(Set<Discharge> discharges) {
+        this.discharges = discharges;
     }
 
 

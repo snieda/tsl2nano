@@ -13,6 +13,11 @@ import static org.junit.Assert.assertTrue;
 
 import java.io.File;
 import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.util.List;
+import java.util.Locale;
 import java.util.Properties;
 
 import my.app.MyApp;
@@ -34,8 +39,11 @@ import de.tsl2.nano.bean.IBeanContainer;
 import de.tsl2.nano.bean.def.Bean;
 import de.tsl2.nano.bean.def.BeanDefinition;
 import de.tsl2.nano.core.ENV;
+import de.tsl2.nano.core.Messages;
 import de.tsl2.nano.core.cls.BeanClass;
+import de.tsl2.nano.core.util.FileUtil;
 import de.tsl2.nano.core.util.NetUtil;
+import de.tsl2.nano.execution.AntRunner;
 import de.tsl2.nano.execution.SystemUtil;
 import de.tsl2.nano.h5.Html5Presentation;
 import de.tsl2.nano.h5.NanoH5;
@@ -43,6 +51,7 @@ import de.tsl2.nano.h5.timesheet.Timesheet;
 import de.tsl2.nano.incubation.specification.rules.RulePool;
 import de.tsl2.nano.service.util.BeanContainerUtil;
 import de.tsl2.nano.test.TypeBean;
+import de.tsl2.nano.util.Translator;
 import de.tsl2.nano.util.codegen.PackageGenerator;
 
 /**
@@ -52,10 +61,14 @@ import de.tsl2.nano.util.codegen.PackageGenerator;
  */
 public class NanoH5Test {
 
+    static String getServiceURL() {
+        return "http://localhost:" + NetUtil.getFreePort();
+    }
+
     @Test
     @Ignore
     public void testNano() throws Exception {
-        String serviceURL = "http://localhost:8066";
+        String serviceURL = getServiceURL();
         runNano(serviceURL);
 
         WebClient webClient = new WebClient();
@@ -126,7 +139,7 @@ public class NanoH5Test {
 
     @Test
     public void testMyApp() throws Exception {
-        createAndTest(new MyApp() {
+        createAndTest(new MyApp(getServiceURL(), null) {
             @Override
             public void start() {
                 createBeanCollectors(null);
@@ -135,10 +148,13 @@ public class NanoH5Test {
     }
 
     @SuppressWarnings({ "rawtypes", "unchecked" })
-    public void createAndTest(NanoH5 app, Properties anywayMapper, Class...beanTypesToCheck) throws Exception {
+    public void createAndTest(NanoH5 app, Properties anywayMapper, Class... beanTypesToCheck) throws Exception {
         assert beanTypesToCheck != null && beanTypesToCheck.length > 0 : "at least one beantype must be given!";
-        final String DIR_TEST = "test/" + BeanClass.getDefiningClass(app.getClass()).getSimpleName().toLowerCase();
-        new File(DIR_TEST).delete();
+        String name = BeanClass.getDefiningClass(app.getClass()).getSimpleName().toLowerCase();
+        final String DIR_TEST = "test/.nanoh5." + name;
+//        new File(DIR_TEST).delete();
+        Files.deleteIfExists(Paths.get(DIR_TEST));
+
         ENV.create(DIR_TEST);
         //first: generate all configurations....
         if (anywayMapper != null) {
@@ -152,6 +168,8 @@ public class NanoH5Test {
         BeanContainer.initEmtpyServiceActions();
         ENV.addService(IBeanContainer.class, BeanContainer.instance());
         app.start();
+//        Translator.translateBundle(ENV.getConfigPath() + "messages", Messages.keySet(), Locale.ENGLISH,
+//            Locale.getDefault());
         ENV.persist();
 
         //now we reload the configurations...
@@ -164,19 +182,42 @@ public class NanoH5Test {
             System.out.println(bean.toValueMap(null));
         }
 
+        //check xml failed files - these are written, if simple-xml has problems on deserializing from xml
+        List<File> failed = FileUtil.getTreeFiles(DIR_TEST, ".*.xml.failed");
+        assertTrue(failed.toString(), failed.size() == 0);
+        
         //create xsd from trang.jar
         assertTrue(new File(DIR_TEST + "/" + "../../../tsl2.nano.common/lib-tools/trang.jar").exists());
-        assertTrue(SystemUtil.execute(new File(DIR_TEST), "cmd", "/C", "java -jar ../../../tsl2.nano.common/lib-tools/trang.jar presentation/*.xml presentation/beandef.xsd").exitValue() == 0);
-        
+        assertTrue(SystemUtil.execute(new File(DIR_TEST), "cmd", "/C",
+            "java -jar ../../../tsl2.nano.common/lib-tools/trang.jar presentation/*.xml presentation/beandef.xsd")
+            .exitValue() == 0);
+
         //extract language messages
-        ENV.extractResource(pckName.replace('.', '/') + "/messages_de.properties");
-        ENV.extractResource(pckName.replace('.', '/') + "/messages_de_DE.properties");
+        String path = "src/test/de/tsl2/nano/h5/timesheet/";
+        String initDB = "init-" + name + "-anyway.sql";
+        assertTrue(FileUtil.copy(path + initDB, DIR_TEST + "/" + initDB));
+        assertTrue(FileUtil.copy(path + "messages_de.properties", DIR_TEST + "/messages_de.properties"));
+        assertTrue(FileUtil.copy(path + "messages_de_DE.properties", DIR_TEST + "/messages_de_DE.properties"));
+
+        //create  run configuration
+        FileUtil.writeBytes(("run.bat " + new File(DIR_TEST).getName()).getBytes(), new File(DIR_TEST).getParent() + "/" + name + ".bat", false);
+        FileUtil.writeBytes(("run.sh " + new File(DIR_TEST).getName()).getBytes(), new File(DIR_TEST).getParent() + "/" + name + ".sh", false);
+        
+        //create a deployable package
+        Properties p = new Properties();
+        p.put("destFile", "target/" + name + ".zip");
+        AntRunner.runTask(AntRunner.TASK_ZIP, p, DIR_TEST + "/**/*");
+        
+        //delete the test output
+//        p.clear();
+//        p.put("dir", DIR_TEST);
+//        AntRunner.runTask(AntRunner.TASK_DELETE, p, (String)null);
     }
 
     @Test
     public void testTimesheet() throws Exception {
         Properties mapper = new Properties();
-        createAndTest(new Timesheet() {
+        createAndTest(new Timesheet(getServiceURL(), null) {
             @Override
             public void start() {
                 createBeanCollectors(null);

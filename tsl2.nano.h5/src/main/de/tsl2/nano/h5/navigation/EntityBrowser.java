@@ -15,6 +15,8 @@ import java.util.Iterator;
 import java.util.Properties;
 import java.util.Stack;
 
+import org.simpleframework.xml.Attribute;
+
 import de.tsl2.nano.action.IAction;
 import de.tsl2.nano.bean.BeanContainer;
 import de.tsl2.nano.bean.def.Bean;
@@ -31,6 +33,8 @@ import de.tsl2.nano.h5.Html5Presentation;
  * @version $Revision$
  */
 public class EntityBrowser implements IBeanNavigator {
+    @Attribute
+    String name;
     transient protected Stack<BeanDefinition<?>> navigation;
     transient protected BeanDefinition<?> current;
 
@@ -39,8 +43,9 @@ public class EntityBrowser implements IBeanNavigator {
      * 
      * @param navigation
      */
-    public EntityBrowser(Stack<BeanDefinition<?>> navigation) {
+    public EntityBrowser(String name, Stack<BeanDefinition<?>> navigation) {
         super();
+        this.name = name;
         this.navigation = navigation;
     }
 
@@ -152,8 +157,17 @@ public class EntityBrowser implements IBeanNavigator {
     }
 
     @Override
+    public String getName() {
+        return name;
+    }
+    
+    @Override
     public boolean isEmpty() {
         return navigation.empty();
     }
 
+    @Override
+    public boolean done() {
+        return false;
+    }
 }

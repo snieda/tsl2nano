@@ -1,5 +1,5 @@
 package org.anonymous.project;
-// Generated 14.11.2015 00:32:01 by Hibernate Tools 4.3.1.Final
+// Generated 27.11.2015 18:21:32 by Hibernate Tools 4.3.1.Final
 
 
 import java.math.BigDecimal;
@@ -7,7 +7,10 @@ import java.sql.Blob;
 import java.util.Date;
 import javax.persistence.Column;
 import javax.persistence.Entity;
+import javax.persistence.FetchType;
 import javax.persistence.Id;
+import javax.persistence.JoinColumn;
+import javax.persistence.ManyToOne;
 import javax.persistence.Table;
 import javax.persistence.Temporal;
 import javax.persistence.TemporalType;
@@ -23,8 +26,8 @@ public class Discharge  implements java.io.Serializable {
 
 
      private int id;
-     private int charge;
-     private int account;
+     private Account account;
+     private Charge charge;
      private Date date;
      private BigDecimal value;
      private String comment;
@@ -34,17 +37,17 @@ public class Discharge  implements java.io.Serializable {
     }
 
 	
-    public Discharge(int id, int charge, int account, Date date, BigDecimal value) {
+    public Discharge(int id, Account account, Charge charge, Date date, BigDecimal value) {
         this.id = id;
-        this.charge = charge;
         this.account = account;
+        this.charge = charge;
         this.date = date;
         this.value = value;
     }
-    public Discharge(int id, int charge, int account, Date date, BigDecimal value, String comment, Blob document) {
+    public Discharge(int id, Account account, Charge charge, Date date, BigDecimal value, String comment, Blob document) {
        this.id = id;
-       this.charge = charge;
        this.account = account;
+       this.charge = charge;
        this.date = date;
        this.value = value;
        this.comment = comment;
@@ -63,24 +66,24 @@ public class Discharge  implements java.io.Serializable {
         this.id = id;
     }
 
-    
-    @Column(name="CHARGE", nullable=false)
-    public int getCharge() {
-        return this.charge;
-    }
-    
-    public void setCharge(int charge) {
-        this.charge = charge;
-    }
-
-    
-    @Column(name="ACCOUNT", nullable=false)
-    public int getAccount() {
+@ManyToOne(fetch=FetchType.LAZY)
+    @JoinColumn(name="ACCOUNT", nullable=false)
+    public Account getAccount() {
         return this.account;
     }
     
-    public void setAccount(int account) {
+    public void setAccount(Account account) {
         this.account = account;
+    }
+
+@ManyToOne(fetch=FetchType.LAZY)
+    @JoinColumn(name="CHARGE", nullable=false)
+    public Charge getCharge() {
+        return this.charge;
+    }
+    
+    public void setCharge(Charge charge) {
+        this.charge = charge;
     }
 
     @Temporal(TemporalType.TIMESTAMP)

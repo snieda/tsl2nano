@@ -1,11 +1,17 @@
 package org.anonymous.project;
-// Generated 14.11.2015 00:32:01 by Hibernate Tools 4.3.1.Final
+// Generated 27.11.2015 18:21:32 by Hibernate Tools 4.3.1.Final
 
 
 import java.sql.Blob;
+import java.util.HashSet;
+import java.util.Set;
 import javax.persistence.Column;
 import javax.persistence.Entity;
+import javax.persistence.FetchType;
 import javax.persistence.Id;
+import javax.persistence.JoinColumn;
+import javax.persistence.ManyToOne;
+import javax.persistence.OneToMany;
 import javax.persistence.Table;
 
 /**
@@ -19,24 +25,26 @@ public class Area  implements java.io.Serializable {
 
 
      private int id;
-     private int category;
+     private Category category;
      private String name;
      private Blob icon;
+     private Set<Type> types = new HashSet<Type>(0);
 
     public Area() {
     }
 
 	
-    public Area(int id, int category, String name) {
+    public Area(int id, Category category, String name) {
         this.id = id;
         this.category = category;
         this.name = name;
     }
-    public Area(int id, int category, String name, Blob icon) {
+    public Area(int id, Category category, String name, Blob icon, Set<Type> types) {
        this.id = id;
        this.category = category;
        this.name = name;
        this.icon = icon;
+       this.types = types;
     }
    
      @Id 
@@ -51,13 +59,13 @@ public class Area  implements java.io.Serializable {
         this.id = id;
     }
 
-    
-    @Column(name="CATEGORY", nullable=false)
-    public int getCategory() {
+@ManyToOne(fetch=FetchType.LAZY)
+    @JoinColumn(name="CATEGORY", nullable=false)
+    public Category getCategory() {
         return this.category;
     }
     
-    public void setCategory(int category) {
+    public void setCategory(Category category) {
         this.category = category;
     }
 
@@ -79,6 +87,15 @@ public class Area  implements java.io.Serializable {
     
     public void setIcon(Blob icon) {
         this.icon = icon;
+    }
+
+@OneToMany(fetch=FetchType.LAZY, mappedBy="area")
+    public Set<Type> getTypes() {
+        return this.types;
+    }
+    
+    public void setTypes(Set<Type> types) {
+        this.types = types;
     }
 
 

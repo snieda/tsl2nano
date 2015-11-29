@@ -1,10 +1,13 @@
 package org.anonymous.project;
-// Generated 14.11.2015 00:32:01 by Hibernate Tools 4.3.1.Final
+// Generated 27.11.2015 18:21:32 by Hibernate Tools 4.3.1.Final
 
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
+import javax.persistence.FetchType;
 import javax.persistence.Id;
+import javax.persistence.JoinColumn;
+import javax.persistence.ManyToOne;
 import javax.persistence.Table;
 
 /**
@@ -18,29 +21,29 @@ public class Location  implements java.io.Serializable {
 
 
      private int id;
+     private Digital digital;
+     private Coordinate coordinate;
+     private Address address;
+     private Party party;
      private String name;
-     private Integer address;
-     private Integer coordinate;
-     private int party;
-     private int digital;
 
     public Location() {
     }
 
 	
-    public Location(int id, String name, int party, int digital) {
+    public Location(int id, Digital digital, Party party, String name) {
         this.id = id;
-        this.name = name;
-        this.party = party;
         this.digital = digital;
+        this.party = party;
+        this.name = name;
     }
-    public Location(int id, String name, Integer address, Integer coordinate, int party, int digital) {
+    public Location(int id, Digital digital, Coordinate coordinate, Address address, Party party, String name) {
        this.id = id;
-       this.name = name;
-       this.address = address;
-       this.coordinate = coordinate;
-       this.party = party;
        this.digital = digital;
+       this.coordinate = coordinate;
+       this.address = address;
+       this.party = party;
+       this.name = name;
     }
    
      @Id 
@@ -55,6 +58,46 @@ public class Location  implements java.io.Serializable {
         this.id = id;
     }
 
+@ManyToOne(fetch=FetchType.LAZY)
+    @JoinColumn(name="DIGITAL", nullable=false)
+    public Digital getDigital() {
+        return this.digital;
+    }
+    
+    public void setDigital(Digital digital) {
+        this.digital = digital;
+    }
+
+@ManyToOne(fetch=FetchType.LAZY)
+    @JoinColumn(name="COORDINATE")
+    public Coordinate getCoordinate() {
+        return this.coordinate;
+    }
+    
+    public void setCoordinate(Coordinate coordinate) {
+        this.coordinate = coordinate;
+    }
+
+@ManyToOne(fetch=FetchType.LAZY)
+    @JoinColumn(name="ADDRESS")
+    public Address getAddress() {
+        return this.address;
+    }
+    
+    public void setAddress(Address address) {
+        this.address = address;
+    }
+
+@ManyToOne(fetch=FetchType.LAZY)
+    @JoinColumn(name="PARTY", nullable=false)
+    public Party getParty() {
+        return this.party;
+    }
+    
+    public void setParty(Party party) {
+        this.party = party;
+    }
+
     
     @Column(name="NAME", nullable=false, length=64)
     public String getName() {
@@ -63,46 +106,6 @@ public class Location  implements java.io.Serializable {
     
     public void setName(String name) {
         this.name = name;
-    }
-
-    
-    @Column(name="ADDRESS")
-    public Integer getAddress() {
-        return this.address;
-    }
-    
-    public void setAddress(Integer address) {
-        this.address = address;
-    }
-
-    
-    @Column(name="COORDINATE")
-    public Integer getCoordinate() {
-        return this.coordinate;
-    }
-    
-    public void setCoordinate(Integer coordinate) {
-        this.coordinate = coordinate;
-    }
-
-    
-    @Column(name="PARTY", nullable=false)
-    public int getParty() {
-        return this.party;
-    }
-    
-    public void setParty(int party) {
-        this.party = party;
-    }
-
-    
-    @Column(name="DIGITAL", nullable=false)
-    public int getDigital() {
-        return this.digital;
-    }
-    
-    public void setDigital(int digital) {
-        this.digital = digital;
     }
 
 

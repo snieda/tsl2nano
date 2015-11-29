@@ -14,7 +14,7 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Stack;
 
-import org.simpleframework.xml.Attribute;
+import org.apache.commons.logging.Log;
 import org.simpleframework.xml.ElementList;
 import org.simpleframework.xml.Transient;
 import org.simpleframework.xml.core.Commit;
@@ -22,7 +22,9 @@ import org.simpleframework.xml.core.Commit;
 import de.tsl2.nano.bean.def.Bean;
 import de.tsl2.nano.bean.def.BeanCollector;
 import de.tsl2.nano.bean.def.BeanDefinition;
+import de.tsl2.nano.bean.def.StatusInfo;
 import de.tsl2.nano.core.Messages;
+import de.tsl2.nano.core.log.LogFactory;
 import de.tsl2.nano.core.util.StringUtil;
 import de.tsl2.nano.core.util.Util;
 import de.tsl2.nano.incubation.vnet.Net;
@@ -36,8 +38,7 @@ import de.tsl2.nano.incubation.vnet.Notification;
  * @version $Revision$
  */
 public class Workflow extends EntityBrowser implements Cloneable {
-    @Attribute
-    String name;
+    private static final Log LOG = LogFactory.getLog(Workflow.class);
     @Transient Net<BeanAct, Parameter> net;
     @ElementList(entry = "activity", inline = true, required = true)
     Collection<BeanAct> activities;
@@ -45,7 +46,8 @@ public class Workflow extends EntityBrowser implements Cloneable {
     @Transient Bean<?> login;
     @Transient String asString;
     @Transient Parameter context = new Parameter();
-
+    @Transient StatusInfo status;
+    
     /**
      * constructor
      */
@@ -59,8 +61,7 @@ public class Workflow extends EntityBrowser implements Cloneable {
      * @param activities
      */
     public Workflow(String name, Collection<BeanAct> activities) {
-        super(new Stack<BeanDefinition<?>>());
-        this.name = name;
+        super(name, new Stack<BeanDefinition<?>>());
         this.activities = activities;
         context = new Parameter();
         net = new Net<BeanAct, Parameter>();
@@ -68,6 +69,7 @@ public class Workflow extends EntityBrowser implements Cloneable {
         if (activities != null) {
             net.addAll(activities);
         }
+        status = new StatusInfo();
     }
 
     /**
@@ -83,9 +85,14 @@ public class Workflow extends EntityBrowser implements Cloneable {
      */
     @Override
     public boolean isEmpty() {
-        return (activities == null || activities.isEmpty()) && navigation.isEmpty();
+        return (activities == null || activities.isEmpty() || done()) && navigation.isEmpty();
     }
 
+    @Override
+    public boolean done() {
+        return status.getEndedAt() != null;
+    }
+    
     /**
      * {@inheritDoc}
      */
@@ -95,6 +102,9 @@ public class Workflow extends EntityBrowser implements Cloneable {
         BeanDefinition<?> fromStack;
         if (current == null) {
             setCurrent(login);
+            if (!status.running())
+                status.start();
+            LOG.info("\n================== STARTING WORKFLOW ==================\n\t" + this);
         } else if (!super.isEmpty() && (fromStack = super.next(userResponseObject)) != null) {
             return fromStack;
         } else {
@@ -110,6 +120,12 @@ public class Workflow extends EntityBrowser implements Cloneable {
             Collection<BeanDefinition> result = net.notifyAndCollect(n, BeanDefinition.class);
             setCurrent(result.isEmpty() ? null : result.iterator().next());
             navigation.addAll((Collection<? extends BeanDefinition<?>>) Util.untyped(result));
+        }
+        if (current == null) {
+            status.stop();
+            status.setMsg(name + " finished with status: " + status);
+            current = Bean.getBean(status);
+            LOG.info("\n================== ENDING WORKFLOW ==================\n\t" + this);
         }
         return current;
     }
@@ -154,6 +170,16 @@ public class Workflow extends EntityBrowser implements Cloneable {
     public Workflow clone() throws CloneNotSupportedException {
         return new Workflow(name, activities);
     }
+
+    @Override
+    public boolean equals(Object obj) {
+        return obj instanceof Workflow && hashCode() == obj.hashCode();
+    }
+    
+    @Override
+    public int hashCode() {
+        return name.hashCode();
+    }
     
     @Override
     public String toString() {
@@ -163,7 +189,7 @@ public class Workflow extends EntityBrowser implements Cloneable {
                 String c = current.toString();
                 acts.replace(c, "*" + c + "*");
             }
-            asString = name + "(activities: " + acts + ")";
+            asString = Util.toString(getClass(), "name: " + name, "login: " + login, "status: " + status, "activities: " + acts);
         }
         return asString;
     }

@@ -10,17 +10,13 @@
 package de.tsl2.nano.h5;
 
 import java.io.Serializable;
-import java.lang.reflect.InvocationHandler;
 import java.lang.reflect.Method;
 import java.lang.reflect.Proxy;
-import java.util.Arrays;
-import java.util.Collection;
 import java.util.Hashtable;
-import java.util.LinkedList;
-import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import org.simpleframework.xml.Attribute;
 import org.simpleframework.xml.ElementMap;
 
 import de.tsl2.nano.bean.IConnector;
@@ -31,8 +27,8 @@ import de.tsl2.nano.bean.def.IAttributeDefinition;
 import de.tsl2.nano.bean.def.IValueDefinition;
 import de.tsl2.nano.core.ENV;
 import de.tsl2.nano.core.cls.BeanAttribute;
-import de.tsl2.nano.core.cls.BeanClass;
 import de.tsl2.nano.core.exception.Message;
+import de.tsl2.nano.core.util.DelegationHandler;
 import de.tsl2.nano.core.util.StringUtil;
 import de.tsl2.nano.incubation.specification.rules.RulePool;
 import de.tsl2.nano.util.PrivateAccessor;
@@ -45,89 +41,47 @@ import de.tsl2.nano.util.PrivateAccessor;
  * @author Tom
  * @version $Revision$
  */
-@SuppressWarnings({ "unchecked", "rawtypes" })
-public class RuleCover implements IConnector<IAttributeDefinition<?>> {
+public class RuleCover<T> extends DelegationHandler<T> implements
+        IRuleCover<T>,
+        IConnector<IAttributeDefinition<?>> {
     /** serialVersionUID */
-    private static final long serialVersionUID = -7935692478754934118L;
-
+    private static final long serialVersionUID = -4157641723681767640L;
     /**
-     * map holding the rule name (as value) for each property-name (as key) to be evaluated through a rule engine. the property-names should
-     * be described by a path to the desired bean-attribute (e.g.: 'myBean.mysubbean.myattribute')
+     * map holding the rule name (as value) for each property-name (as key) to be evaluated through a rule engine. the
+     * property-names should be described by a path to the desired bean-attribute (e.g.: 'myBean.mysubbean.myattribute')
      */
-    @ElementMap(entry = "rule", key = "for-property", attribute = true, inline = true, value = "name", valueType = String.class, required = true)
-    Map<String, String> propertyRules;
-
-    transient Collection<IRuleCover<?>> covers;
+    @ElementMap(entry = "rule", attribute = true, inline = true, key = "for-property", keyType = String.class, value = "name", valueType = String.class)
+    Map<String, String> rules;
+    transient Serializable contextObject;
+    @Attribute(required = false)
+    String name;
 
     /**
      * constructor
      */
-    public RuleCover() {
+    protected RuleCover() {
         super();
     }
 
     /**
      * constructor
-     * @param propertyRules see {@link #propertyRules}
+     * 
+     * @param delegate
+     * @param context
      */
-    public RuleCover(Map<String, String> propertyRules) {
+    public RuleCover(String name, Map<String, String> rules) {
         super();
-        this.propertyRules = propertyRules;
-    }
+        this.name = name;
+        this.rules = rules;
 
-    public boolean hasRules(Object child) {
-        return false;
-    }
-
-    /**
-     * {@inheritDoc} the connection will be done for definitions and instances!
-     */
-    @Override
-    public Object connect(IAttributeDefinition<?> connectionEnd) {
-        //first: extract the direct childs
-        Set<String> pks = propertyRules.keySet();
-        for (String k : pks) {
-            if (k.contains(".")) {
-                String c = StringUtil.substring(k, null, ".", true);
-                if (!propertyRules.containsKey(c)) {
-                    propertyRules.put(c, "---");
-                }
-            }
-        }
-        //now we cover the properties
-//        BeanClass bcDef = BeanClass.getBeanClass(connectionEnd.getClass());
-//        List<String> names = Arrays.asList(bcDef.getAttributeNames());
-
-        //working on fields directly because not all attributedefinition-attributes are public
-        PrivateAccessor<?> acc = new PrivateAccessor<>(connectionEnd);
-        acc.members();
-        boolean nameFound = false;
-        for (String k : pks) {
-            if (acc.hasMember(k)) {
-                nameFound = true;
-                Object origin = acc.member(k);
-                if (!Proxy.isProxyClass(origin.getClass())) {
-                    Object cover = cover(k, origin, acc.typeOf(k), connectionEnd);
-                    acc.set(k, cover);
-                } else {//already covered, set the instance of the current context object
-                    ((IRuleCover) Proxy.getInvocationHandler(origin))
-                        .setContext((Serializable) ((IValueDefinition) connectionEnd).getInstance());
-                }
-            }
-        }
-        if (!nameFound)
-            throw new IllegalStateException("no attribute matches for attributedefinition for " + propertyRules.keySet());
-        return this;
-    }
-
-    @Override
-    public void disconnect(IAttributeDefinition<?> connectionEnd) {
-        BeanClass bcDef = BeanClass.getBeanClass(connectionEnd.getClass());
-        for (IRuleCover<?> cover : getCovers()) {
-            bcDef.setValue(connectionEnd, cover.getName(), cover.getDelegate());
-            //release the context instance to avoid memory leaks
-            cover.setContext(null);
-        }
+//        //store its own property rules (cutting the prefix of its name)
+//        Set<String> props = rules.keySet();
+//        rules = new Hashtable<>();
+//        for (String k : props) {
+//            if (k.startsWith(name + ".")) {
+//                rules.put(StringUtil.substring(k, name + ".", null), rules.get(k));
+//            }
+//        }
     }
 
     /**
@@ -138,74 +92,10 @@ public class RuleCover implements IConnector<IAttributeDefinition<?>> {
      * @param interfaze interface of child to be used on the covering proxy.
      * @return child covering proxy object.
      */
-    public <T> T cover(String name, T child, Class<T> interfaze, Serializable contextObject) {
-        RuleCoverProxy invHandler = new RuleCoverProxy(this, name, child);
-        invHandler.setContext(contextObject);
-        T cover =
-            (T) Proxy.newProxyInstance(ENV.get(ClassLoader.class), new Class[] { interfaze },
-                invHandler);
-        if (covers == null) {
-            covers = new LinkedList<>();
-        }
-        covers.add((IRuleCover<?>) Proxy.getInvocationHandler(cover));
-        return cover;
-    }
-
-    /**
-     * getContentObject
-     * 
-     * @param cover
-     * @return the origin object of the given covering proxy.
-     */
-    public <T> T getContentObject(IRuleCover<T> cover) {
-        return cover.getDelegate();
-    }
-
-    /**
-     * getCovers
-     * 
-     * @return all created covers of this plugin
-     */
-    public Collection<IRuleCover<?>> getCovers() {
-        return covers;
-    }
-
-}
-
-class RuleCoverProxy<T> implements IRuleCover<T>, InvocationHandler {
-    Map<String, String> rules;
-    Serializable contextObject;
-    T delegate;
-    String name;
-
-    /**
-     * constructor
-     * 
-     * @param delegate
-     */
-    public RuleCoverProxy(RuleCover parent, String name, T delegate) {
-        this(parent, name, delegate, null);
-    }
-
-    /**
-     * constructor
-     * 
-     * @param delegate
-     * @param context
-     */
-    public RuleCoverProxy(RuleCover parent, String name, T delegate, Map<String, Object> context) {
-        super();
-        this.delegate = delegate;
-        this.contextObject = contextObject;
-
-        //store its own property rules (cutting the prefix of its name)
-        Set<String> props = parent.propertyRules.keySet();
-        rules = new Hashtable<>();
-        for (String k : props) {
-            if (k.startsWith(name + ".")) {
-                rules.put(StringUtil.substring(k, name + ".", null), parent.propertyRules.get(k));
-            }
-        }
+    @SuppressWarnings("unchecked")
+    public T cover(T child, Class<T> interfaze, Serializable contextObject) {
+        delegate = child;
+        return (T) Proxy.newProxyInstance(ENV.get(ClassLoader.class), new Class[] { interfaze }, this);
     }
 
     @Override
@@ -256,14 +146,6 @@ class RuleCoverProxy<T> implements IRuleCover<T>, InvocationHandler {
     }
 
     /**
-     * @return Returns the delegate.
-     */
-    @Override
-    public T getDelegate() {
-        return delegate;
-    }
-
-    /**
      * {@inheritDoc}
      */
     @Override
@@ -275,6 +157,52 @@ class RuleCoverProxy<T> implements IRuleCover<T>, InvocationHandler {
             }
         }
         return method.invoke(delegate, args);
+    }
+
+    /**
+     * {@inheritDoc} the connection will be done for definitions and instances!
+     */
+    @SuppressWarnings({ "unchecked", "rawtypes" })
+    @Override
+    public Object connect(IAttributeDefinition<?> connectionEnd) {
+        //first: extract the direct childs
+        Set<String> pks = rules.keySet();
+        for (String k : pks) {
+            if (k.contains(".")) {
+                String c = StringUtil.substring(k, null, ".", true);
+                if (!rules.containsKey(c)) {
+                    rules.put(c, "---");
+                }
+            }
+        }
+        //now we cover the properties
+//        BeanClass bcDef = BeanClass.getBeanClass(connectionEnd.getClass());
+//        List<String> names = Arrays.asList(bcDef.getAttributeNames());
+
+        //working on fields directly because not all attributedefinition-attributes are public
+        PrivateAccessor<?> acc = new PrivateAccessor<>(connectionEnd);
+        acc.members();
+        boolean nameFound = false;
+        for (String k : pks) {
+            if (acc.hasMember(k)) {
+                nameFound = true;
+                T origin = (T) acc.member(k);
+                if (!Proxy.isProxyClass(origin.getClass())) {
+                    acc.set(k, cover(origin, acc.typeOf(k), connectionEnd));
+                } else {//already covered, set the instance of the current context object
+                    ((IRuleCover) Proxy.getInvocationHandler(origin))
+                        .setContext((Serializable) ((IValueDefinition) connectionEnd).getInstance());
+                }
+            }
+        }
+        if (!nameFound)
+            throw new IllegalStateException("no attribute matches for attributedefinition for " + rules.keySet());
+        return this;
+    }
+
+    @Override
+    public void disconnect(IAttributeDefinition<?> connectionEnd) {
+        throw new UnsupportedOperationException();
     }
 
 }

@@ -1,11 +1,15 @@
 package org.anonymous.project;
-// Generated 14.11.2015 00:32:01 by Hibernate Tools 4.3.1.Final
+// Generated 27.11.2015 18:21:32 by Hibernate Tools 4.3.1.Final
 
 
 import java.sql.Blob;
+import java.util.HashSet;
+import java.util.Set;
 import javax.persistence.Column;
 import javax.persistence.Entity;
+import javax.persistence.FetchType;
 import javax.persistence.Id;
+import javax.persistence.OneToMany;
 import javax.persistence.Table;
 
 /**
@@ -22,6 +26,7 @@ public class Classification  implements java.io.Serializable {
      private int value;
      private String name;
      private Blob icon;
+     private Set<Item> items = new HashSet<Item>(0);
 
     public Classification() {
     }
@@ -32,11 +37,12 @@ public class Classification  implements java.io.Serializable {
         this.value = value;
         this.name = name;
     }
-    public Classification(int id, int value, String name, Blob icon) {
+    public Classification(int id, int value, String name, Blob icon, Set<Item> items) {
        this.id = id;
        this.value = value;
        this.name = name;
        this.icon = icon;
+       this.items = items;
     }
    
      @Id 
@@ -79,6 +85,15 @@ public class Classification  implements java.io.Serializable {
     
     public void setIcon(Blob icon) {
         this.icon = icon;
+    }
+
+@OneToMany(fetch=FetchType.LAZY, mappedBy="classification")
+    public Set<Item> getItems() {
+        return this.items;
+    }
+    
+    public void setItems(Set<Item> items) {
+        this.items = items;
     }
 
 

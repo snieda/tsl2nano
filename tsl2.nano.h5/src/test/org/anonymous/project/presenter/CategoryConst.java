@@ -19,6 +19,8 @@ category.id=Id
 category.id.tooltip=Id tooltip...
 category.icon=Icon
 category.icon.tooltip=Icon tooltip...
+category.areas=Areas
+category.areas.tooltip=Areas tooltip...
  * BLOCKEND */
 
 /**
@@ -40,6 +42,9 @@ public interface CategoryConst {
     /** key name of icon in resource bundle */
     public static final String  KEY_ICON = "category.icon";
     public static final String  KEY_TOOLTIP_ICON = "category.icon.tooltip";
+    /** key name of areas in resource bundle */
+    public static final String  KEY_AREAS = "category.areas";
+    public static final String  KEY_TOOLTIP_AREAS = "category.areas.tooltip";
 
     /** bean attribute name */
     public static final String  ATTR_NAME = "name";
@@ -47,4 +52,6 @@ public interface CategoryConst {
     public static final String  ATTR_ID = "id";
     /** bean attribute icon */
     public static final String  ATTR_ICON = "icon";
+    /** bean attribute areas */
+    public static final String  ATTR_AREAS = "areas";
 }

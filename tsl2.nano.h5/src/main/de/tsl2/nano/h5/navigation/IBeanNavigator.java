@@ -19,6 +19,11 @@ import de.tsl2.nano.bean.def.BeanDefinition;
  */
 public interface IBeanNavigator {
     /**
+     * getName
+     * @return navigators name
+     */
+    String getName();
+    /**
      * adds new bean
      * @param bean to add
      */
@@ -59,4 +64,10 @@ public interface IBeanNavigator {
      * @return new array
      */
     BeanDefinition<?>[] toArray();
+    
+    /**
+     * done
+     * @return true, if no more navigation objects are available
+     */
+    boolean done();
 }

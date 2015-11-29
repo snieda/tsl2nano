@@ -1,11 +1,15 @@
 package org.anonymous.project;
-// Generated 14.11.2015 00:32:01 by Hibernate Tools 4.3.1.Final
+// Generated 27.11.2015 18:21:32 by Hibernate Tools 4.3.1.Final
 
 
 import java.math.BigDecimal;
+import java.util.HashSet;
+import java.util.Set;
 import javax.persistence.Column;
 import javax.persistence.Entity;
+import javax.persistence.FetchType;
 import javax.persistence.Id;
+import javax.persistence.OneToMany;
 import javax.persistence.Table;
 
 /**
@@ -22,6 +26,7 @@ public class Coordinate  implements java.io.Serializable {
      private BigDecimal x;
      private BigDecimal y;
      private BigDecimal z;
+     private Set<Location> locations = new HashSet<Location>(0);
 
     public Coordinate() {
     }
@@ -32,11 +37,12 @@ public class Coordinate  implements java.io.Serializable {
         this.x = x;
         this.y = y;
     }
-    public Coordinate(int id, BigDecimal x, BigDecimal y, BigDecimal z) {
+    public Coordinate(int id, BigDecimal x, BigDecimal y, BigDecimal z, Set<Location> locations) {
        this.id = id;
        this.x = x;
        this.y = y;
        this.z = z;
+       this.locations = locations;
     }
    
      @Id 
@@ -79,6 +85,15 @@ public class Coordinate  implements java.io.Serializable {
     
     public void setZ(BigDecimal z) {
         this.z = z;
+    }
+
+@OneToMany(fetch=FetchType.LAZY, mappedBy="coordinate")
+    public Set<Location> getLocations() {
+        return this.locations;
+    }
+    
+    public void setLocations(Set<Location> locations) {
+        this.locations = locations;
     }
 
 

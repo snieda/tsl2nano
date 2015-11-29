@@ -21,6 +21,8 @@ digital.location=Location
 digital.location.tooltip=Location tooltip...
 digital.id=Id
 digital.id.tooltip=Id tooltip...
+digital.locations=Locations
+digital.locations.tooltip=Locations tooltip...
  * BLOCKEND */
 
 /**
@@ -45,6 +47,9 @@ public interface DigitalConst {
     /** key name of id in resource bundle */
     public static final String  KEY_ID = "digital.id";
     public static final String  KEY_TOOLTIP_ID = "digital.id.tooltip";
+    /** key name of locations in resource bundle */
+    public static final String  KEY_LOCATIONS = "digital.locations";
+    public static final String  KEY_TOOLTIP_LOCATIONS = "digital.locations.tooltip";
 
     /** bean attribute name */
     public static final String  ATTR_NAME = "name";
@@ -54,4 +59,6 @@ public interface DigitalConst {
     public static final String  ATTR_LOCATION = "location";
     /** bean attribute id */
     public static final String  ATTR_ID = "id";
+    /** bean attribute locations */
+    public static final String  ATTR_LOCATIONS = "locations";
 }

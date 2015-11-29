@@ -21,6 +21,8 @@ classification.id=Id
 classification.id.tooltip=Id tooltip...
 classification.icon=Icon
 classification.icon.tooltip=Icon tooltip...
+classification.items=Items
+classification.items.tooltip=Items tooltip...
  * BLOCKEND */
 
 /**
@@ -45,6 +47,9 @@ public interface ClassificationConst {
     /** key name of icon in resource bundle */
     public static final String  KEY_ICON = "classification.icon";
     public static final String  KEY_TOOLTIP_ICON = "classification.icon.tooltip";
+    /** key name of items in resource bundle */
+    public static final String  KEY_ITEMS = "classification.items";
+    public static final String  KEY_TOOLTIP_ITEMS = "classification.items.tooltip";
 
     /** bean attribute name */
     public static final String  ATTR_NAME = "name";
@@ -54,4 +59,6 @@ public interface ClassificationConst {
     public static final String  ATTR_ID = "id";
     /** bean attribute icon */
     public static final String  ATTR_ICON = "icon";
+    /** bean attribute items */
+    public static final String  ATTR_ITEMS = "items";
 }

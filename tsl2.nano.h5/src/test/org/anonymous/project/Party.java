@@ -1,11 +1,17 @@
 package org.anonymous.project;
-// Generated 14.11.2015 00:32:01 by Hibernate Tools 4.3.1.Final
+// Generated 27.11.2015 18:21:32 by Hibernate Tools 4.3.1.Final
 
 
 import java.sql.Blob;
+import java.util.HashSet;
+import java.util.Set;
 import javax.persistence.Column;
 import javax.persistence.Entity;
+import javax.persistence.FetchType;
 import javax.persistence.Id;
+import javax.persistence.JoinColumn;
+import javax.persistence.ManyToOne;
+import javax.persistence.OneToMany;
 import javax.persistence.Table;
 
 /**
@@ -19,29 +25,35 @@ public class Party  implements java.io.Serializable {
 
 
      private int id;
-     private int orga;
+     private Organisation organisation;
      private String name;
      private String description;
      private String shortname;
      private Blob icon;
+     private Set<Location> locations = new HashSet<Location>(0);
+     private Set<Property> properties = new HashSet<Property>(0);
+     private Set<Charge> charges = new HashSet<Charge>(0);
 
     public Party() {
     }
 
 	
-    public Party(int id, int orga, String name, String shortname) {
+    public Party(int id, Organisation organisation, String name, String shortname) {
         this.id = id;
-        this.orga = orga;
+        this.organisation = organisation;
         this.name = name;
         this.shortname = shortname;
     }
-    public Party(int id, int orga, String name, String description, String shortname, Blob icon) {
+    public Party(int id, Organisation organisation, String name, String description, String shortname, Blob icon, Set<Location> locations, Set<Property> properties, Set<Charge> charges) {
        this.id = id;
-       this.orga = orga;
+       this.organisation = organisation;
        this.name = name;
        this.description = description;
        this.shortname = shortname;
        this.icon = icon;
+       this.locations = locations;
+       this.properties = properties;
+       this.charges = charges;
     }
    
      @Id 
@@ -56,14 +68,14 @@ public class Party  implements java.io.Serializable {
         this.id = id;
     }
 
-    
-    @Column(name="ORGA", nullable=false)
-    public int getOrga() {
-        return this.orga;
+@ManyToOne(fetch=FetchType.LAZY)
+    @JoinColumn(name="ORGA", nullable=false)
+    public Organisation getOrganisation() {
+        return this.organisation;
     }
     
-    public void setOrga(int orga) {
-        this.orga = orga;
+    public void setOrganisation(Organisation organisation) {
+        this.organisation = organisation;
     }
 
     
@@ -104,6 +116,33 @@ public class Party  implements java.io.Serializable {
     
     public void setIcon(Blob icon) {
         this.icon = icon;
+    }
+
+@OneToMany(fetch=FetchType.LAZY, mappedBy="party")
+    public Set<Location> getLocations() {
+        return this.locations;
+    }
+    
+    public void setLocations(Set<Location> locations) {
+        this.locations = locations;
+    }
+
+@OneToMany(fetch=FetchType.LAZY, mappedBy="party")
+    public Set<Property> getProperties() {
+        return this.properties;
+    }
+    
+    public void setProperties(Set<Property> properties) {
+        this.properties = properties;
+    }
+
+@OneToMany(fetch=FetchType.LAZY, mappedBy="party")
+    public Set<Charge> getCharges() {
+        return this.charges;
+    }
+    
+    public void setCharges(Set<Charge> charges) {
+        this.charges = charges;
     }
 
 

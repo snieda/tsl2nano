@@ -16,7 +16,7 @@ import java.util.LinkedHashMap;
 import java.util.LinkedList;
 import java.util.List;
 
-import org.simpleframework.xml.Element;
+import org.simpleframework.xml.Transient;
 
 import de.tsl2.nano.bean.BeanContainer;
 import de.tsl2.nano.bean.BeanUtil;
@@ -28,6 +28,7 @@ import de.tsl2.nano.bean.def.BeanDefinition;
 import de.tsl2.nano.bean.def.IAttributeDefinition;
 import de.tsl2.nano.core.ENV;
 import de.tsl2.nano.core.cls.IAttribute;
+import de.tsl2.nano.core.util.ListWrapper;
 import de.tsl2.nano.core.util.NumberUtil;
 import de.tsl2.nano.core.util.StringUtil;
 import de.tsl2.nano.core.util.Util;
@@ -47,11 +48,15 @@ public class Statistic<COLLECTIONTYPE extends Collection<T>, T> extends BeanColl
     private static final long serialVersionUID = 1L;
 
     /** columnNames of the statistic table */
-    List<String> columnNames;
+    @Transient
+    //this Transient annotation marks the attribute as extension member
+    ListWrapper<String> columnNames;
 
-    @Element(required = false)
+    @Transient
+    //this Transient annotation marks the attribute as extension member
     T from;
-    @Element(required = false)
+    @Transient
+    //this Transient annotation marks the attribute as extension member
     T to;
 
     public Statistic() {
@@ -71,10 +76,10 @@ public class Statistic<COLLECTIONTYPE extends Collection<T>, T> extends BeanColl
     public Statistic(Class<T> beanType, T from, T to) {
         super();
         setMode(0);
-        columnNames = new LinkedList<String>();
+        columnNames = new ListWrapper<String>();
         this.from = from;
         this.to = to;
-        collection = (COLLECTIONTYPE) create(beanType, columnNames, from, to);
+        collection = (COLLECTIONTYPE) create(beanType, columnNames.getList(), from, to);
         isStaticCollection = true;
     }
 
@@ -82,7 +87,7 @@ public class Statistic<COLLECTIONTYPE extends Collection<T>, T> extends BeanColl
     public List<IAttribute> getAttributes(boolean readAndWriteAccess) {
         if (Util.isEmpty(attributeDefinitions)) {
             attributeDefinitions = new LinkedHashMap<String, IAttributeDefinition<?>>();
-            List<String> names = columnNames;
+            List<String> names = columnNames.getList();
             IAttribute<?> attribute;
             int i = 0;
             for (String name : names) {
@@ -103,9 +108,11 @@ public class Statistic<COLLECTIONTYPE extends Collection<T>, T> extends BeanColl
         List<String> statColumns = new ArrayList<>(names.length);
         List<String> valueColumns = new ArrayList<>(names.length);
 
-        searchStatus =
-            ENV.translate("tsl2nano.summary", true) + ": " + ENV.translate("tsl2nano.from", true)
-                + BeanUtil.toFormattedMap(from) + ENV.translate("tsl2nano.to", true) + BeanUtil.toFormattedMap(to);
+        if (from != null && to != null) {
+            searchStatus =
+                ENV.translate("tsl2nano.summary", true) + ": " + ENV.translate("tsl2nano.from", true)
+                    + BeanUtil.toFormattedMap(from) + ENV.translate("tsl2nano.to", true) + BeanUtil.toFormattedMap(to);
+        }
         /*
          * check, which columns should be shown. if a column has more than 500 group by elements, its to big
          * evaluate the number columns
@@ -137,6 +144,7 @@ public class Statistic<COLLECTIONTYPE extends Collection<T>, T> extends BeanColl
         return collection;
     }
 
+    @SuppressWarnings("unchecked")
     private static <T> Collection<? extends T> createSummary(BeanDefinition<T> def,
             List<String> valueColumns,
             T from,
@@ -148,11 +156,13 @@ public class Statistic<COLLECTIONTYPE extends Collection<T>, T> extends BeanColl
         String strValueColumns = StringUtil.concatWrap(",sum({0})".toCharArray(), valueColumns.toArray());
         Collection<?> parameter = new LinkedList<>();
         String where = whereConstraints(from, to, parameter).toString();
-        return BeanContainer.instance().getBeansByQuery(
+        Collection<? extends T> result = BeanContainer.instance().getBeansByQuery(
             MessageFormat.format(qstr, summary, def, strValueColumns, where),
             false, parameter.toArray());
+        return (Collection<? extends T>) (result != null ? result : new ArrayList<>());
     }
 
+    @SuppressWarnings("unchecked")
     private static <T> Collection<? extends T> createStatistics(BeanDefinition<T> def,
             String column,
             List<String> valueColumns,
@@ -164,9 +174,10 @@ public class Statistic<COLLECTIONTYPE extends Collection<T>, T> extends BeanColl
         String columnname = ENV.translate(def.getAttribute(column).getId(), true);
         Collection<?> parameter = new LinkedList<>();
         String where = whereConstraints(from, to, parameter).toString();
-        return BeanContainer.instance().getBeansByQuery(
+        Collection<? extends T> result = BeanContainer.instance().getBeansByQuery(
             MessageFormat.format(qstr, column, def, strValueColumns, columnname, where),
             false, parameter.toArray());
+        return (Collection<? extends T>) (result != null ? result : new ArrayList<>());
     }
 
     private static <T> int groupByCount(BeanDefinition<T> def, String column, T from, T to) {
@@ -180,7 +191,7 @@ public class Statistic<COLLECTIONTYPE extends Collection<T>, T> extends BeanColl
 
         Collection<Object> result = BeanContainer.instance().getBeansByQuery(qstr, false, parameter.toArray());
         //Woraround: returning direct size. count(count(.)) would have better performance
-        return result.size();
+        return result != null ? result.size() : 0;
         //JPA-QL sometimes seems to return empty collections on my count() request
 //        return result.size() > 0 ? ((Number)result.iterator().next()).intValue() : 0;
     }
@@ -189,4 +200,23 @@ public class Statistic<COLLECTIONTYPE extends Collection<T>, T> extends BeanColl
         return from == null || to == null ? new StringBuffer(" 1=1 ") : ServiceUtil.addBetweenConditions(
             new StringBuffer(), from, to, parameter, true);
     }
+
+//    @Override
+//    @Commit
+//    protected void initDeserialization() {
+//        beanFinder = new BeanFinder() {
+//            @Override
+//            public Collection superGetData(Object fromFilter, Object toFilter) {
+//                Map<String, Object> context = new HashMap<String, Object>();
+//                if (fromFilter != null && toFilter != null) {
+//                    String[] names = query.getParameter().keySet().toArray(new String[0]);
+//                    context.putAll(BeanUtil.toValueMap(fromFilter, "from", false, names));
+//                    context.putAll(BeanUtil.toValueMap(toFilter, "to", false, names));
+//                }
+//                return query.run(context);
+//            }
+//        };
+//        init(null, beanFinder, 0, null);
+//        isStaticCollection = false;
+//    }
 }
