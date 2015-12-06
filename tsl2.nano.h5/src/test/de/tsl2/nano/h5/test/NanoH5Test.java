@@ -17,6 +17,9 @@ import java.net.URL;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.text.SimpleDateFormat;
+import java.util.Date;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.Properties;
@@ -41,6 +44,7 @@ import de.tsl2.nano.bean.IBeanContainer;
 import de.tsl2.nano.bean.def.Bean;
 import de.tsl2.nano.bean.def.BeanDefinition;
 import de.tsl2.nano.bean.def.BeanPresentationHelper;
+import de.tsl2.nano.bean.def.Constraint;
 import de.tsl2.nano.core.ENV;
 import de.tsl2.nano.core.ManagedException;
 import de.tsl2.nano.core.Messages;
@@ -48,14 +52,19 @@ import de.tsl2.nano.core.classloader.RuntimeClassloader;
 import de.tsl2.nano.core.cls.BeanClass;
 import de.tsl2.nano.core.exception.Message;
 import de.tsl2.nano.core.util.ConcurrentUtil;
+import de.tsl2.nano.core.util.DateUtil;
 import de.tsl2.nano.core.util.FileUtil;
+import de.tsl2.nano.core.util.MapUtil;
 import de.tsl2.nano.core.util.NetUtil;
 import de.tsl2.nano.execution.AntRunner;
 import de.tsl2.nano.execution.SystemUtil;
 import de.tsl2.nano.h5.Html5Presentation;
 import de.tsl2.nano.h5.NanoH5;
+import de.tsl2.nano.h5.navigation.Parameter;
 import de.tsl2.nano.h5.timesheet.Timesheet;
+import de.tsl2.nano.incubation.specification.ParType;
 import de.tsl2.nano.incubation.specification.rules.RulePool;
+import de.tsl2.nano.incubation.specification.rules.RuleScript;
 import de.tsl2.nano.persistence.GenericLocalBeanContainer;
 import de.tsl2.nano.persistence.Persistence;
 import de.tsl2.nano.service.util.BeanContainerUtil;
@@ -149,6 +158,19 @@ public class NanoH5Test {
     }
 
     @Test
+    public void testJS() throws Exception {
+        LinkedHashMap<String, ParType> p = new LinkedHashMap<String, ParType>();
+        Charge charge = new Charge();
+        charge.setFromdate(DateUtil.getToday());
+        p.put("charge", new ParType(Charge.class));
+        p.put("formatter", new ParType(new SimpleDateFormat("EE")));
+//        RuleScript<String> script = new RuleScript<String>("weekday", "var options = {weekday: 'short'}; charge.getFromdate().toLocaleDateString('de-DE', options);", p);
+        RuleScript<String> script = new RuleScript<String>("weekday", "formatter.format(charge.getFromdate());", p);
+        String result = script.run(MapUtil.asMap("charge", charge));
+        assertTrue(new SimpleDateFormat("EE").format(DateUtil.getToday()).equals(result));
+    }
+    
+    @Test
     public void testMyApp() throws Exception {
         createAndTest(new MyApp(getServiceURL(), null) {
             @Override
@@ -217,15 +239,18 @@ public class NanoH5Test {
             .exitValue() == 0);
 
         //extract language messages
+        String basedir = new File(DIR_TEST).getParent() + "/";
         String path = "src/test/de/tsl2/nano/h5/timesheet/";
         String initDB = "init-" + name + "-anyway.sql";
         assertTrue(FileUtil.copy(path + initDB, DIR_TEST + "/" + initDB));
         assertTrue(FileUtil.copy(path + "messages_de.properties", DIR_TEST + "/messages_de.properties"));
         assertTrue(FileUtil.copy(path + "messages_de_DE.properties", DIR_TEST + "/messages_de_DE.properties"));
+        assertTrue(FileUtil.copy("src/resources/run.bat", basedir + "run.bat"));
+        assertTrue(FileUtil.copy("src/resources/run.sh", basedir + "run.sh"));
 
         //create  run configuration
-        FileUtil.writeBytes(("run.bat " + new File(DIR_TEST).getName()).getBytes(), new File(DIR_TEST).getParent() + "/" + name + ".bat", false);
-        FileUtil.writeBytes(("run.sh " + new File(DIR_TEST).getName()).getBytes(), new File(DIR_TEST).getParent() + "/" + name + ".sh", false);
+        FileUtil.writeBytes(("run.bat " + new File(DIR_TEST).getName()).getBytes(), basedir + name + ".bat", false);
+        FileUtil.writeBytes(("run.sh " + new File(DIR_TEST).getName()).getBytes(), basedir + name + ".sh", false);
         
         //create a deployable package
         Properties p = new Properties();
