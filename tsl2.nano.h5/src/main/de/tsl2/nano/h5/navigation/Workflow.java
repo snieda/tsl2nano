@@ -90,7 +90,7 @@ public class Workflow extends EntityBrowser implements Cloneable {
 
     @Override
     public boolean done() {
-        return status.getEndedAt() != null;
+        return status.finished();
     }
     
     /**
@@ -100,7 +100,7 @@ public class Workflow extends EntityBrowser implements Cloneable {
     @Override
     public BeanDefinition<?> next(Object userResponseObject) {
         BeanDefinition<?> fromStack;
-        if (current == null) {
+        if (current == null && !status.finished()) {
             setCurrent(login);
             if (!status.running())
                 status.start();
@@ -161,6 +161,14 @@ public class Workflow extends EntityBrowser implements Cloneable {
         this.login = login;
     }
 
+    /**
+     * status info
+     * @return current status info
+     */
+    public StatusInfo getStatus() {
+        return status;
+    }
+    
     @Commit
     private void initDeserializing() {
         net.addAll(activities);
