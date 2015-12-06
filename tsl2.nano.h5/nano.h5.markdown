@@ -2540,8 +2540,10 @@ Net:Connection-->Link-->Cover(content, descriptor)
 * webstart: JAVA_VM_ARGS
 * SEO: page ranking mit Seorch, diagnoSEO
 * Argumentator --> GetOpts
-* QueryResult, Statistics sollten wie BeanDefinition konfigurierbar sein.
-* DecisionTableInterpreter --> Rule, LogicTable
+* (v) QueryResult, Statistics sollten wie BeanDefinition konfigurierbar sein.
+* (v) DecisionTableInterpreter --> Rule, LogicTable
+** table <--> tree
+** table.rotate
 * BeanCollector --> LogicTable, LogicTableUI mit dependency listeners
 * FormattedLogFactory per session
 
