@@ -23,7 +23,6 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Properties;
-import java.util.ResourceBundle;
 import java.util.Stack;
 
 import javax.persistence.EntityManager;
@@ -45,7 +44,6 @@ import de.tsl2.nano.core.AppLoader;
 import de.tsl2.nano.core.ENV;
 import de.tsl2.nano.core.ManagedException;
 import de.tsl2.nano.core.Messages;
-import de.tsl2.nano.core.classloader.NetworkClassLoader;
 import de.tsl2.nano.core.cls.BeanClass;
 import de.tsl2.nano.core.exception.Message;
 import de.tsl2.nano.core.execution.CompatibilityLayer;
@@ -324,9 +322,14 @@ public class NanoH5 extends NanoHTTPD implements ISystemConnector<Persistence> {
         } else {//perhaps session was interrupted/closed but not removed
             //WORKAROUND: may occur on cached pages
             if (session.nav == null || session.nav.isEmpty()) {
+                boolean done = session.nav != null && session.nav.done();
                 session.close();
                 sessions.remove(session.inetAddress);
                 session = createSession(requestor);
+                if (done) {
+                    // the workflow was done, now create the entity browser
+                    session.nav = createGenericNavigationModel(true);
+                }
             } else if (method.equals("GET") && parms.size() == 0 && (uri.length() < 2 || header.get("referer") == null)) {
                 LOG.debug("reloading cached page...");
                 try {
@@ -395,13 +398,17 @@ public class NanoH5 extends NanoHTTPD implements ISystemConnector<Persistence> {
         return context;
     }
 
+    protected IBeanNavigator createGenericNavigationModel() {
+        return createGenericNavigationModel(false);
+    }
+
     /**
      * reads all classes of 'beanjar', creates a root beancollector holding a collection of this classes.
      * 
      * @param beanjar jar to resolve the desired entities from
      * @return navigation stack holding a beancollector for all entity classes inside beanjar
      */
-    protected IBeanNavigator createGenericNavigationModel() {
+    protected IBeanNavigator createGenericNavigationModel(boolean workflowDone) {
 
         BeanContainer.initEmtpyServiceActions();
         /*
@@ -422,10 +429,10 @@ public class NanoH5 extends NanoHTTPD implements ISystemConnector<Persistence> {
             //wait until the classloader found the new jar file
             ConcurrentUtil.sleep(2000);
         }
-        
+
         Workflow workflow = ENV.get(Workflow.class);
 
-        if (workflow == null || workflow.isEmpty()) {
+        if (workflow == null || workflow.isEmpty() || workflowDone) {
             LOG.debug("creating navigation stack");
             Stack<BeanDefinition<?>> navigationModel = new Stack<BeanDefinition<?>>();
             Bean<String> startPage = Bean.getBean(START_PAGE);
@@ -520,7 +527,6 @@ public class NanoH5 extends NanoHTTPD implements ISystemConnector<Persistence> {
      * @param beanClasses new loaded bean types
      * @return a root bean-collector holding all bean-type collectors.
      */
-    @SuppressWarnings("serial")
     protected BeanDefinition<?> createBeanCollectors(List<Class> beanClasses) {
         Message.send("loading bean collectors for " + beanClasses.size() + " types");
         LOG.debug("creating collector for: ");
@@ -648,14 +654,17 @@ public class NanoH5 extends NanoHTTPD implements ISystemConnector<Persistence> {
                     "Couldn't generate bean jar file '"
                         + jarName
                         + "' through ant-script 'reverse-eng.xml'! Please see log file for exceptions.\n"
-                        + (!ENV.get(CompatibilityLayer.class).isAvailable("java.lang.Compiler") ? "\tYOUR JAVA IS ONLY A JRE! We need the full JDK to compile the generated classes.\n" : "")
+                        + (!ENV.get(CompatibilityLayer.class).isAvailable("java.lang.Compiler")
+                            ? "\tYOUR JAVA IS ONLY A JRE! We need the full JDK to compile the generated classes.\n"
+                            : "")
                         + "\nAs alternative you may select an existing bean-jar file (-->no generation needed!) in field \"JarFile\"\n\n"
                         + ENV.get(UncaughtExceptionHandler.class).toString());
             }
         } else if (isAbsolutePath) {//copy it into the own classpath (to don't lock the file)
             if (!selectedFile.exists()) {
                 throw new IllegalArgumentException(
-                    selectedFile + " (-- If an absolute file-path is given, the file has to exist! If the file-path is relative and doesn't exist, it will be created/generated.");
+                    selectedFile
+                        + " (-- If an absolute file-path is given, the file has to exist! If the file-path is relative and doesn't exist, it will be created/generated.");
             }
 //            if (!new File(envFile).exists())
             FileUtil.copy(selectedFile.getPath(), persistence.jarFileInEnvironment());

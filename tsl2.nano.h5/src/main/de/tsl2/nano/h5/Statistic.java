@@ -156,9 +156,9 @@ public class Statistic<COLLECTIONTYPE extends Collection<T>, T> extends BeanColl
         String strValueColumns = StringUtil.concatWrap(",sum({0})".toCharArray(), valueColumns.toArray());
         Collection<?> parameter = new LinkedList<>();
         String where = whereConstraints(from, to, parameter).toString();
-        Collection<? extends T> result = BeanContainer.instance().getBeansByQuery(
+        Collection<?> result = (Collection<? extends T>) getBeansByQuery(
             MessageFormat.format(qstr, summary, def, strValueColumns, where),
-            false, parameter.toArray());
+            parameter);
         return (Collection<? extends T>) (result != null ? result : new ArrayList<>());
     }
 
@@ -174,9 +174,9 @@ public class Statistic<COLLECTIONTYPE extends Collection<T>, T> extends BeanColl
         String columnname = ENV.translate(def.getAttribute(column).getId(), true);
         Collection<?> parameter = new LinkedList<>();
         String where = whereConstraints(from, to, parameter).toString();
-        Collection<? extends T> result = BeanContainer.instance().getBeansByQuery(
+        Collection<?> result = getBeansByQuery(
             MessageFormat.format(qstr, column, def, strValueColumns, columnname, where),
-            false, parameter.toArray());
+            parameter);
         return (Collection<? extends T>) (result != null ? result : new ArrayList<>());
     }
 
@@ -189,11 +189,27 @@ public class Statistic<COLLECTIONTYPE extends Collection<T>, T> extends BeanColl
 
         //JPA is not able to resolve the expression ..count(count(....)), so we have to use native sql
 
-        Collection<Object> result = BeanContainer.instance().getBeansByQuery(qstr, false, parameter.toArray());
+        Collection<Object> result = getBeansByQuery(qstr, parameter);
         //Woraround: returning direct size. count(count(.)) would have better performance
         return result != null ? result.size() : 0;
         //JPA-QL sometimes seems to return empty collections on my count() request
 //        return result.size() > 0 ? ((Number)result.iterator().next()).intValue() : 0;
+    }
+
+    /**
+     * getBeansByQuery
+     * 
+     * @param qstr
+     * @param parameter
+     * @return
+     */
+    protected static Collection<Object> getBeansByQuery(String qstr, Collection<?> parameter) {
+        try {
+            return BeanContainer.instance().getBeansByQuery(qstr, false, parameter.toArray());
+        } catch (Exception e) {
+            //ok, no group-by-count informations available, yet
+        }
+        return null;
     }
 
     private static <T> StringBuffer whereConstraints(T from, T to, Collection parameter) {
