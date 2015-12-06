@@ -281,10 +281,11 @@ public/*abstract*/class LogFactory implements Runnable, Serializable {
      */
     private void initPrintStream(String outputFile) {
         try {
+            new File(outputFile).getParentFile().mkdirs();
             PrintStream outFile = new PrintStream(outputFile);
             out = outFile;
             err = outFile;
-        } catch (FileNotFoundException e) {
+        } catch (Exception e) {
             //the logger shouldn't stop the application...
             err.println(e);
         }
