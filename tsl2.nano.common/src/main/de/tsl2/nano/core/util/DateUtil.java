@@ -784,6 +784,18 @@ public final class DateUtil {
         return cal.getTime();
     }
 
+    public static final Date clearTime(Date src) {
+        Calendar cal = getCalendar();
+        clearTime(cal);
+        return cal.getTime();
+    }
+
+    public static final Date clearSeconds(Date src) {
+        Calendar cal = getCalendar();
+        setSeconds(cal, 0, 0);
+        return cal.getTime();
+    }
+
     /**
      * sets all time parameters to 0.
      * 
@@ -817,6 +829,21 @@ public final class DateUtil {
     protected static final Calendar setTime(Calendar cal, int hour, int minute, int second, int millisecond) {
         cal.set(Calendar.HOUR_OF_DAY, hour);
         cal.set(Calendar.MINUTE, minute);
+        setSeconds(cal, second, millisecond);
+        return cal;
+    }
+
+    /**
+     * sets all time parameters to the given ones.
+     * 
+     * @param cal calendar instance
+     * @param hour
+     * @param minute
+     * @param second
+     * @param millisecond
+     * @return the given calendar instance
+     */
+    protected static final Calendar setSeconds(Calendar cal, int second, int millisecond) {
         cal.set(Calendar.SECOND, second);
         cal.set(Calendar.MILLISECOND, millisecond);
         return cal;
