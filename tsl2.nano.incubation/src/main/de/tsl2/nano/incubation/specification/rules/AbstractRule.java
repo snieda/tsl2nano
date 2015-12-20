@@ -5,6 +5,7 @@ import java.util.LinkedHashMap;
 import de.tsl2.nano.core.ENV;
 import de.tsl2.nano.core.util.StringUtil;
 import de.tsl2.nano.incubation.specification.AbstractRunnable;
+import de.tsl2.nano.incubation.specification.ParType;
 
 /**
  * base rule with sub-rule importing
@@ -20,23 +21,28 @@ public abstract class AbstractRule<T> extends AbstractRunnable<T> {
     /** the rule is initialized when all sub-rules are imported. see {@link #importSubRules()} */
     protected boolean initialized;
 
+    public static final char PREFIX = '§';
+
     public AbstractRule() {
         super();
     }
 
-    @SuppressWarnings({ "rawtypes", "unchecked" })
-    public AbstractRule(String name, String operation, LinkedHashMap parameter) {
+    public AbstractRule(String name, String operation, LinkedHashMap<String, ParType> parameter) {
         super(name, operation, parameter);
     }
 
+    @Override
+    public String prefix() {
+        return String.valueOf(PREFIX);
+    }
     /**
      * importSubRules
      */
     protected void importSubRules() {
         RulePool pool = ENV.get(RulePool.class);
         String subRule;
-        while ((subRule = StringUtil.extract(operation, "§\\w+")).length() > 0) {
-            AbstractRule<?> rule = pool.get(subRule.substring(1));
+        while ((subRule = StringUtil.extract(operation, prefix() + "\\w+")).length() > 0) {
+            AbstractRule<?> rule = pool.get(subRule);
             if (rule == null) {
                 throw new IllegalArgumentException("Referenced rule " + subRule + " in " + this + " not found!");
             }

@@ -12,9 +12,11 @@ package de.tsl2.nano.incubation.specification.rules;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
+import org.apache.commons.logging.Log;
 import org.simpleframework.xml.core.Commit;
 
 import de.tsl2.nano.core.ENV;
+import de.tsl2.nano.core.log.LogFactory;
 import de.tsl2.nano.incubation.specification.ParType;
 import de.tsl2.nano.util.operation.NumericConditionOperator;
 import de.tsl2.nano.util.operation.Operator;
@@ -55,6 +57,7 @@ import de.tsl2.nano.util.operation.Operator;
 public class Rule<T> extends AbstractRule<T> {
     /** serialVersionUID */
     private static final long serialVersionUID = 8557708958880364123L;
+    private static final Log LOG = LogFactory.getLog(Rule.class);
     public static final String KEY_RESULT = Operator.KEY_RESULT;
 
     transient NumericConditionOperator operator;
@@ -92,6 +95,7 @@ public class Rule<T> extends AbstractRule<T> {
         Object a = arguments;
         
         //calculate the numeric and boolean operations
+        LOG.debug("running rule <" + toString() + "> on arguemnts: " + a);
         T result = (T) operator.eval((CharSequence)operation, (Map<CharSequence, Object>) a);
         checkConstraint(Operator.KEY_RESULT, result);
         return result;

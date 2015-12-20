@@ -43,5 +43,6 @@ public class Act<T> extends VActivity<String, T> {
     @Commit
     private void initDeserializing() {
         op = new Condition(new ComparableMap<CharSequence, Object>());
+        op.setExpression(expression);
     }
 }

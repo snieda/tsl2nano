@@ -436,7 +436,7 @@ public class IncubationTest {
         XmlUtil.saveXml("test.xml", rule);
 
         Pool pool = new RulePool();
-        pool.add(rule.getName(), rule);
+        pool.add(rule);
         ENV.addService(pool);
         Rule<BigDecimal> ruleWithImport =
             new Rule<BigDecimal>("test-import", "A ? 1 + §test : (x2 * 3)",

@@ -114,6 +114,6 @@ public class Specification {
     
     @Override
     public String toString() {
-        return Util.toString(getClass(), "name: ", name);
+        return Util.toString(getClass(), "name: " + name);
     }
 }

@@ -3,15 +3,19 @@ package de.tsl2.nano.incubation.specification.rules;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Scanner;
+import java.util.Set;
 
 import de.tsl2.nano.collection.CollectionUtil;
 import de.tsl2.nano.core.util.StringUtil;
 import de.tsl2.nano.core.util.Util;
+import de.tsl2.nano.incubation.tree.STree;
+import de.tsl2.nano.incubation.tree.Tree;
 
 /**
  * Reads a CSV-file containing a decision table and creates rule conditions. enables creating (business) rules on
@@ -260,6 +264,55 @@ class DTRule<T> {
         return matchtable;
     }
 
+    /**
+     * transforms the current decision table to a tree. each odd level holds the parameter names, followed by its conditions (the values of the table) in the next (even) level. So, the tree nodes are
+     * strings or conditions.
+     *
+     * @return transformed decision table
+     */
+  //UNTESTED!   
+    @SuppressWarnings("unchecked")
+    public STree toTree() {
+      Set<String> keys = par.keySet();
+      STree tree = null, parent = null;
+      for (String k : keys) {
+        /*
+         * create new tree node(s) and append all conditions to the new node(s).
+         * the child map holds a set of keys, so identical keys will be removed.
+         */
+        if (parent == null)
+          tree = new STree(k, parent, par.get(k).toArray());
+        else {
+          Collection<Tree> children = parent.values();
+          for (Tree child : children) {
+            child.put(k.hashCode(), new STree(k, child, par.get(k)));
+          }
+        }
+        parent = tree;
+      }
+      return (STree) tree.getRoot();
+    }
+    
+//UNTESTED!   
+    public static <T> DTRule<T> fromTree(STree<T> tree) {
+      final Map<String, List<Condition>> par = new HashMap<String, List<Condition>>();
+      HashMap<String, Object> properties = new HashMap<String, Object>();
+     
+//      tree.transformTree(new ITransformer<STree<T>, STree<T>>() {
+//        @Override
+//        public STree<T> transform(STree<T> t) {
+//            if (t.getNode() instanceof String) {
+//                Collection<Condition> current = par.get(t.getNode());
+//                par.put((String)t.getNode(), (List<Condition>) (current == null ? t.getChildren() : current.addAll((Collection<? extends Condition>) t.getChildren())));
+//              } else {
+//                //do nothing
+//              }
+//            return t;
+//        }
+//      });
+     return new DTRule(properties, par);
+    }
+   
     @Override
     public String toString() {
         return Util.toString(this.getClass(), "name=" + properties.get("name"));

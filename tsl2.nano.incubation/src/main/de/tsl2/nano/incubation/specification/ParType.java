@@ -14,7 +14,7 @@ import java.math.BigDecimal;
 import java.util.Date;
 
 import org.simpleframework.xml.Attribute;
-import org.simpleframework.xml.Text;
+import org.simpleframework.xml.Element;
 
 /**
  * Parameter types to simplify rule parameter definitions - especially on xml files.
@@ -26,11 +26,13 @@ public class ParType implements Serializable {
     /** serialVersionUID */
     private static final long serialVersionUID = -2568880599680159654L;
     
-    @Text(required = false)
+    @Element(required = false)
     T type;
     @Attribute(required = false)
     Class<?> javaType;
-
+    @Element(required=false)
+    Object defaultValue;
+    
     /**
      * constructor
      */
@@ -57,6 +59,20 @@ public class ParType implements Serializable {
         this.javaType = javaType;
     }
 
+    /**
+     * constructor
+     * @param defaultValue
+     */
+    public ParType(Object defaultValue) {
+        super();
+        this.defaultValue = defaultValue;
+        javaType = defaultValue.getClass();
+    }
+    
+    public Object getDefaultValue() {
+        return defaultValue;
+    }
+    
     public Class<?> getType() {
         return javaType != null ? javaType : type.transform();
     }

@@ -39,9 +39,9 @@ public abstract class AbstractRunnable<T> implements IPRunnable<T, Map<String, O
     @ElementMap(entry = "parameter", attribute = true, inline = true, keyType = String.class, key = "name", valueType = ParType.class, value = "type", required = false)
     protected LinkedHashMap<String, ParType> parameter;
     @ElementMap(entry = "constraint", attribute = true, inline = true, keyType = String.class, key = "name", value = "definition", valueType = Constraint.class, required = false)
-    Map<String, Constraint<?>> constraints;
+    protected Map<String, Constraint<?>> constraints;
     @ElementList(required = false, inline = true, type = Specification.class)
-    Collection<Specification> specifications;
+    protected Collection<Specification> specifications;
     @Element
     protected String operation;
 
@@ -81,11 +81,15 @@ public abstract class AbstractRunnable<T> implements IPRunnable<T, Map<String, O
         Map<String, Object> args = new LinkedHashMap<String, Object>();
         Set<String> keySet = arguments.keySet();
         Set<String> defs = parameter != null ? parameter.keySet() : arguments.keySet();
+        Object arg;
         for (String par : defs) {
-            if (strict && !keySet.contains(par)) {
-                throw new IllegalArgumentException(par);
+            if (!keySet.contains(par)) {
+                arg = parameter != null ? parameter.get(par).getDefaultValue() : null;
+                if (arg == null && strict)
+                    throw new IllegalArgumentException(par);
+            } else {
+                arg = arguments.get(par);
             }
-            Object arg = arguments.get(par);
             checkConstraint(par, arg);
             args.put(par, arg);
         }
@@ -94,11 +98,11 @@ public abstract class AbstractRunnable<T> implements IPRunnable<T, Map<String, O
 
     @SuppressWarnings({ "rawtypes", "unchecked" })
     protected void createConstraints() {
-        if (parameter == null)
-            return;
         if (constraints == null) {
             constraints = new HashMap<String, Constraint<?>>();
         }
+        if (parameter == null)
+            return;
         Set<String> pars = parameter.keySet();
         for (CharSequence p : pars) {
             Class<?> cls = parameter.get(p).getType();
@@ -113,6 +117,8 @@ public abstract class AbstractRunnable<T> implements IPRunnable<T, Map<String, O
 
     @SuppressWarnings({ "rawtypes", "unchecked" })
     protected void checkConstraint(CharSequence par, Object arg) {
+        if (constraints == null)
+            createConstraints();
         Constraint constraint = constraints.get(par);
         if (constraint != null) {
             constraint.check(getName(), arg);
@@ -146,6 +152,13 @@ public abstract class AbstractRunnable<T> implements IPRunnable<T, Map<String, O
         return pars;
     }
 
+    /**
+     * prefix
+     * @return referencing name prefix
+     */
+    public String prefix() {
+        return "";
+    }
     @Override
     public String toString() {
         return name + "{" + operation + "}";
@@ -187,6 +200,7 @@ public abstract class AbstractRunnable<T> implements IPRunnable<T, Map<String, O
                 parameter.put(k, new ParType(value != null ? BeanClass.getDefiningClass(value.getClass()) : String.class));
             }
         }
+        checkSpecifications();
         return s;
     }
 
@@ -197,18 +211,26 @@ public abstract class AbstractRunnable<T> implements IPRunnable<T, Map<String, O
      */
     void checkSpecifications() {
         if (specifications != null) {
-            T result;
             for (Specification s : specifications) {
-                LOG.debug("checking rule '" + getName() + " for specification " + s);
-                result = run(s.getArguments());
-                if (result != null && !result.equals(s.getExptected()))
-                    throw new IllegalStateException("assertion failed on rule " + getName() + ": expected="
-                        + s.getExptected()
-                        + " , but was: " + result);
+                checkSpecification(s);
             }
+            LOG.info("rule " + getName() + " loaded and checked against " + specifications.size() + " specifications");
         } else {
             LOG.warn("rule '" + getName() + "' didn't define any specification to be tested against!");
         }
+    }
+
+    /**
+     * checkSpecification
+     * @param s
+     */
+    protected void checkSpecification(Specification s) {
+        LOG.debug("checking rule '" + getName() + " for specification " + s);
+        T result = run(s.getArguments());
+        if (result != null && !result.equals(s.getExptected()))
+            throw new IllegalStateException("assertion failed on rule " + getName() + ", " + s + ": expected="
+                + s.getExptected()
+                + " , but was: " + result);
     }
 
     @Commit

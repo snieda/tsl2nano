@@ -17,6 +17,7 @@ import java.util.Scanner;
 import java.util.SortedMap;
 import java.util.TreeMap;
 
+import de.tsl2.nano.collection.CollectionUtil;
 import de.tsl2.nano.core.IPredicate;
 import de.tsl2.nano.core.ITransformer;
 import de.tsl2.nano.core.util.StringUtil;
@@ -115,6 +116,32 @@ public class Tree<C, T> extends TreeMap<C, Tree<C, T>> {
         return parent;
     }
     
+    /**
+     * getChildren
+     * @return child nodes
+     */
+    public List<T> getChildren() {
+        return CollectionUtil.getTransforming(values(), new ITransformer<Tree<C, T>, T>() {
+            @Override
+            public T transform(Tree<C, T> t) {
+                return t.getNode();
+            }
+        });
+    }
+    
+    /**
+     * @return the tree node level. counts the parents.
+     */
+    public int getLevel() {
+      int l = 1;
+      Tree<?,?> p = parent;
+      while(p != null) {
+        p = p.getParent();
+        l++;
+      }
+      return l;
+    }
+   
     public Tree<C, T> getRoot() {
         return parent != null ? parent.getRoot() : this;
     }
@@ -209,7 +236,7 @@ public class Tree<C, T> extends TreeMap<C, Tree<C, T>> {
      * 
      * @param transformer transformer
      */
-    protected void transformTree(ITransformer<Tree<C, T>, Tree<C, T>> transformer) {
+    public void transformTree(ITransformer<Tree<C, T>, Tree<C, T>> transformer) {
         transformer.transform(this);
         for (Tree<C, T> n : values()) {
             n.transformTree(transformer);

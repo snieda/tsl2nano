@@ -14,12 +14,15 @@ import java.util.Map;
 
 import javax.script.Bindings;
 import javax.script.ScriptEngine;
-import javax.script.ScriptEngineManager;
+import javax.swing.SpringLayout.Constraints;
 
+import org.apache.commons.logging.Log;
 import org.simpleframework.xml.core.Commit;
 
 import de.tsl2.nano.core.ENV;
 import de.tsl2.nano.core.ManagedException;
+import de.tsl2.nano.core.log.LogFactory;
+import de.tsl2.nano.incubation.specification.ParType;
 import de.tsl2.nano.util.operation.Operator;
 
 /**
@@ -32,12 +35,15 @@ public class RuleScript<T> extends AbstractRule<T> {
     /** serialVersionUID */
     private static final long serialVersionUID = -6479357867492017791L;
 
+    private static final Log LOG = LogFactory.getLog(RuleScript.class);
+    
     transient ScriptEngine engine;
 
+    public static final char PREFIX = '%';
     /**
      * constructor
      */
-    public RuleScript() {
+    protected RuleScript() {
         super();
     }
 
@@ -47,16 +53,20 @@ public class RuleScript<T> extends AbstractRule<T> {
      * @param operation
      * @param parameter
      */
-    public RuleScript(String name, String operation, LinkedHashMap parameter) {
+    public RuleScript(String name, String operation, LinkedHashMap<String, ParType> parameter) {
         super(name, operation, parameter);
         init();
     }
 
     void init() {
-        engine =
-            new ScriptEngineManager().getEngineByName("javascript");
+        engine = ActionScript.createEngine();
     }
 
+    @Override
+    public String prefix() {
+        return String.valueOf(PREFIX);
+    }
+    
     @SuppressWarnings("unchecked")
     @Override
     public T run(Map<String, Object> arguments, Object... extArgs) {
@@ -65,9 +75,9 @@ public class RuleScript<T> extends AbstractRule<T> {
         }
         arguments = checkedArguments(arguments, ENV.get("application.mode.strict", false));
         //in generics it is not possible to cast from Map(String,?) to Map(CharSequence, ?)
-        Object a = arguments;
         
         try {
+            LOG.debug("running rule <" + toString() + "> on arguemnts: " + arguments);
             T result = (T) engine.eval(operation, bind(arguments));
             checkConstraint(Operator.KEY_RESULT, result);
             return result;
@@ -78,15 +88,13 @@ public class RuleScript<T> extends AbstractRule<T> {
     }
 
     private Bindings bind(Map<String, Object> arguments) {
-        Bindings bindings = engine.createBindings();
-        bindings.putAll(arguments);
-        return bindings;
+        return ActionScript.bind(engine, arguments);
     }
 
     @Override
     @Commit
     protected void initDeserializing() {
-        super.initDeserializing();
         init();
+        super.initDeserializing();
     }
 }

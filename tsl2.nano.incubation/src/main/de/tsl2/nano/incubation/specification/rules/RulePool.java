@@ -24,4 +24,18 @@ public class RulePool extends Pool<AbstractRule<?>> {
     public RulePool() {
         super();
     }
+
+    @Override
+    public AbstractRule<?> get(String name) {
+        Class<? extends AbstractRule> type;
+        if (name.startsWith(String.valueOf(RuleScript.PREFIX))) {
+            type = RuleScript.class;
+            name = name.substring(1);
+        } else {
+            type = Rule.class;
+            if (name.startsWith(String.valueOf(AbstractRule.PREFIX)))
+                name = name.substring(1);
+        }
+        return super.get(name, type);
+    }
 }

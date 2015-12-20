@@ -14,7 +14,10 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
 
+import org.apache.commons.logging.Log;
+
 import de.tsl2.nano.core.ManagedException;
+import de.tsl2.nano.core.log.LogFactory;
 import de.tsl2.nano.core.util.StringUtil;
 import de.tsl2.nano.messaging.EventController;
 import de.tsl2.nano.messaging.IListener;
@@ -44,6 +47,8 @@ public class Node<T extends IListener<Notification> & ILocatable & Serializable 
     /** serialVersionUID */
     private static final long serialVersionUID = 3229162660341988123L;
 
+//    private static final Log LOG = LogFactory.getLog(Node.class);
+    
     private AtomicInteger status = new AtomicInteger(STATUS_IDLE);
     NodeStatistics statistics;
 
@@ -113,6 +118,8 @@ public class Node<T extends IListener<Notification> & ILocatable & Serializable 
              */
             event.path = null;
             controller.fireEvent(event);
+//        } catch (Exception ex) {
+//            LOG.error(ex);
         } finally {
             setIdle();
         }
