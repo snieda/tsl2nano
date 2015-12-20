@@ -464,7 +464,9 @@ public final class DateUtil {
      * @return new time instance
      */
     public static Time getTime(int hour, int minute, int second) {
-        return new Time(hour * HOUR_TO_MINUTES * MILLI_TO_MINUTES + minute * MILLI_TO_MINUTES + 1000 * second);
+        Calendar cal = getCalendar();
+        cal.setTimeInMillis(hour * HOUR_TO_MINUTES * MILLI_TO_MINUTES + minute * MILLI_TO_MINUTES + 1000 * second);
+        return new Time(cal.getTimeInMillis() - cal.getTimeZone().getOffset(cal.getTimeInMillis()));
     }
     
     /**
@@ -786,12 +788,14 @@ public final class DateUtil {
 
     public static final Date clearTime(Date src) {
         Calendar cal = getCalendar();
+        cal.getTimeZone().setRawOffset(0);
         clearTime(cal);
         return cal.getTime();
     }
 
     public static final Date clearSeconds(Date src) {
         Calendar cal = getCalendar();
+        cal.getTimeZone().setRawOffset(0);
         setSeconds(cal, 0, 0);
         return cal.getTime();
     }

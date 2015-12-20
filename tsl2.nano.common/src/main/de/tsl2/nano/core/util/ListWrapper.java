@@ -58,4 +58,9 @@ public class ListWrapper<E> implements Serializable {
     public List<E> getList() {
         return list;
     }
+    
+    @Override
+    public String toString() {
+        return Util.toString(getClass(), "list: " + list);
+    }
 }

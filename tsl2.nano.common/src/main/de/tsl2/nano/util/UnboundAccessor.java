@@ -16,6 +16,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Hashtable;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -134,7 +135,7 @@ public class UnboundAccessor<T> {
     public Map<String, Object> members(String...names) {
         if (memberCache == null) {
             useMemberCache = true;
-            setMemberCache(new HashMap<String, Object>());
+            setMemberCache(new LinkedHashMap<String, Object>());
         }
         return members(this.accessibleInstance().getClass(), names);
     }

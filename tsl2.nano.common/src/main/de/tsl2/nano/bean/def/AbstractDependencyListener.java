@@ -14,6 +14,7 @@ import java.io.Serializable;
 import org.simpleframework.xml.Attribute;
 import org.simpleframework.xml.Transient;
 
+import de.tsl2.nano.core.ManagedException;
 import de.tsl2.nano.core.util.Util;
 import de.tsl2.nano.messaging.EventController;
 import de.tsl2.nano.messaging.IListener;
@@ -24,7 +25,7 @@ import de.tsl2.nano.messaging.IListener;
  * @author Tom
  * @version $Revision$
  */
-public abstract class AbstractDependencyListener<T, E> implements IListener<E>, Serializable {
+public abstract class AbstractDependencyListener<T, E> implements IListener<E>, Serializable, Cloneable {
     /** serialVersionUID */
     private static final long serialVersionUID = -4105265981459378940L;
     /** full attribute-definition object - transient to be serializable */
@@ -74,6 +75,16 @@ public abstract class AbstractDependencyListener<T, E> implements IListener<E>, 
     protected void setAttribute(IAttributeDefinition<T> attribute) {
         this.attribute = attribute;
         this.attributeID = attribute.getId();
+    }
+
+    @Override
+    public Object clone() {
+        try {
+            return super.clone();
+        } catch (CloneNotSupportedException e) {
+            ManagedException.forward(e);
+            return null;
+        }
     }
     
     @Override

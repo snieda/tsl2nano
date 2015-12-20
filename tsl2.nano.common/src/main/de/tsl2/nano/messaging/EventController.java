@@ -11,6 +11,8 @@ package de.tsl2.nano.messaging;
 
 import java.io.Serializable;
 
+import de.tsl2.nano.bean.BeanUtil;
+import de.tsl2.nano.core.log.LogFactory;
 import de.tsl2.nano.core.util.ListWrapper;
 
 import java.util.ArrayList;
@@ -18,9 +20,11 @@ import java.util.Collection;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
+import org.apache.commons.logging.Log;
 import org.simpleframework.xml.Default;
 import org.simpleframework.xml.DefaultType;
 import org.simpleframework.xml.ElementMap;
+import org.simpleframework.xml.core.Commit;
 
 /**
  * manages bean typed or untyped events. registers {@link IListener}s and fires {@link ChangeEvent} or other events to
@@ -30,20 +34,22 @@ import org.simpleframework.xml.ElementMap;
  * @author Thomas Schneider
  * @version $Revision$
  */
-@SuppressWarnings({"rawtypes", "unchecked"})
+@SuppressWarnings({ "rawtypes", "unchecked" })
 @Default(value = DefaultType.FIELD, required = false)
 public class EventController implements Serializable {
     /** serialVersionUID */
     private static final long serialVersionUID = 1L;
-    
+
+    private static final Log LOG = LogFactory.getLog(EventController.class);
+
     /** all registered value change listeners */
-    @ElementMap(entry = "listener", key = "type", keyType = Class.class, valueType=ListWrapper.class, attribute = true, inline = true, required = false)
+    @ElementMap(entry = "listener", key = "type", keyType = Class.class, valueType = ListWrapper.class, attribute = true, inline = true, required = false)
     //TODO: remove transient if you found a workaround on simple-xml problem with map(collection).
     Map<Class, ListWrapper<IListener>> listener;
 
     /** if listeners were only added through {@link #addListener(IListener)} - without event type, this is false */
     transient boolean hasTypedListener = false;
-    
+
     /**
      * internal access method to guarantee a listener collection instance
      * 
@@ -54,6 +60,8 @@ public class EventController implements Serializable {
             listener = new LinkedHashMap<Class, ListWrapper<IListener>>();
         }
 
+        if (eventType == null)
+            return allListener();
         Class<?> type = hasTypedListener || listener.size() > 1 ? eventType : Object.class;
         ListWrapper<IListener> typedListener = listener.get(type);
         if (typedListener == null) {
@@ -61,6 +69,16 @@ public class EventController implements Serializable {
             listener.put(type, typedListener);
         }
         return typedListener.getList();
+    }
+
+    protected final <T> Collection<IListener> allListener() {
+        ArrayList<IListener> all = new ArrayList<IListener>();
+        if (listener != null) {
+            for (ListWrapper<IListener> l : listener.values()) {
+                all.addAll((Collection<? extends IListener>) l.getList());
+            }
+        }
+        return all;
     }
 
     /**
@@ -79,7 +97,8 @@ public class EventController implements Serializable {
      * @param l listener to register
      */
     public void addListener(IListener l) {
-        addListener(l, ChangeEvent.class);
+        Class<?> type = BeanUtil.getGenericInterfaceType(l.getClass(), IListener.class, 0);
+        addListener(l, type != null ? type : ChangeEvent.class);
     }
 
     /**
@@ -91,6 +110,7 @@ public class EventController implements Serializable {
      */
     public <T> void addListener(IListener<T> l, Class<T> eventType) {
         hasTypedListener = true;
+        //TODO: check type
         listener(eventType).add(l);
     }
 
@@ -102,7 +122,7 @@ public class EventController implements Serializable {
      * @return true, if existing listener could be removed, otherwise false.
      */
     public boolean removeListener(IListener l) {
-        return removeListener(l, Object.class);
+        return removeListener(l, null);
     }
 
     /**
@@ -117,7 +137,35 @@ public class EventController implements Serializable {
         if (listener == null) {
             return false;
         }
-        return listener(eventType).remove(l);
+        if (eventType == null) {
+            //search in all eventTypes
+            for (ListWrapper<IListener> ls : listener.values()) {
+                if (ls != null) {
+                    if (ls.getList().remove(l))
+                        return true;
+                }
+            }
+            return false;
+        } else {
+            return listener(eventType).remove(l);
+        }
+    }
+
+    /**
+     * searches for the given listener in the registered listeners and returns the event type of the stored listener.
+     * 
+     * @param l listener to search
+     * @return event type of this listener or null, if not found or undefined
+     */
+    public Class<?> getEventType(IListener l) {
+        if (listener != null) {
+            ListWrapper<IListener> ll;
+            for (Class type : listener.keySet()) {
+                if ((ll = listener.get(type)) != null && ll.getList().contains(l))
+                    return type;
+            }
+        }
+        return null;
     }
 
     /**
@@ -153,6 +201,7 @@ public class EventController implements Serializable {
      * @param e event
      */
     public void handle(IListener l, Object e) {
+        LOG.debug("sending event '" + e + "' to listener " + l);
         l.handleEvent(e);
     }
 
@@ -165,11 +214,12 @@ public class EventController implements Serializable {
             listener = null;
         }
     }
-    
+
     /**
      * getListeners
-     * @param type listener type to evaluate
-     * @return copy of typed listeners
+     * 
+     * @param type listener type to evaluate. if type is null, all listeners will be returned
+     * @return copy of typed listeners or all listeners
      */
     public Collection<IListener> getListeners(Class eventType) {
         return new ArrayList<IListener>(listener(eventType));

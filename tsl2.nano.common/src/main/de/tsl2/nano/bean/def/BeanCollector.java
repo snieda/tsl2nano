@@ -244,6 +244,14 @@ public class BeanCollector<COLLECTIONTYPE extends Collection<T>, T> extends Bean
     }
 
     /**
+     * the beancollector instance itself should not be saved - this is done by its underlaying beandefinition
+     */
+    @Override
+    protected boolean isSaveable() {
+        return false;//getClass().equals(BeanCollector.class) ? false : super.isSaveable();
+    }
+
+    /**
      * getBeanType
      * 
      * @return optional beanType (content type of collection)
@@ -291,9 +299,9 @@ public class BeanCollector<COLLECTIONTYPE extends Collection<T>, T> extends Bean
     private long count() {
         long count = -1;
         try {
-        count =
-            !Util.isEmpty(collection) ? collection.size() : BeanContainer.instance().isPersistable(getType())
-                ? BeanContainer.getCount(getType()) : -1;
+            count =
+                !Util.isEmpty(collection) ? collection.size() : BeanContainer.instance().isPersistable(getType())
+                    ? BeanContainer.getCount(getType()) : -1;
         } catch (Exception ex) {
             LOG.warn(getName() + " is declared as @ENTITY but has no mapped TABLE --> can't evaluate count(*)!");
         }

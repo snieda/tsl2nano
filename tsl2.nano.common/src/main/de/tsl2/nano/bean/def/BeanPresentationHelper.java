@@ -980,7 +980,6 @@ public class BeanPresentationHelper<T> {
      * @param listener user defined listener to act on selection changes.
      * @param enumConstants enum constants
      */
-    @SuppressWarnings("unchecked")
     protected void setEnumBooleanListener(OptionsWrapper<?> wrapper,
             IListener<ChangeEvent> listener,
             Enum[] enumConstants) {

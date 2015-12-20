@@ -354,4 +354,12 @@ public class NumberUtil extends BitUtil {
             numberType, String.valueOf(0));
     }
 
+    /**
+     * convenience to check a number for NaN.
+     * @param number to be checked
+     * @return true, if number is {@link Double} and {@link Double#isNaN()} is true.
+     */
+    public static boolean isNaN(Object number) {
+        return number != null && number instanceof Double && ((Double)number).isNaN();
+    }
 }

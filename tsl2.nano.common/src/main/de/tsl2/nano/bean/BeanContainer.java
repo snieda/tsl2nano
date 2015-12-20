@@ -10,20 +10,26 @@
 package de.tsl2.nano.bean;
 
 import java.io.Serializable;
+import java.sql.Time;
 import java.util.Collection;
+import java.util.Date;
 import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
 import java.util.LinkedList;
+import java.util.List;
 import java.util.Map;
 import java.util.Properties;
 import java.util.Set;
 
 import de.tsl2.nano.action.CommonAction;
 import de.tsl2.nano.action.IAction;
+import de.tsl2.nano.core.ENV;
 import de.tsl2.nano.core.ManagedException;
 import de.tsl2.nano.core.Messages;
 import de.tsl2.nano.core.cls.BeanAttribute;
 import de.tsl2.nano.core.cls.BeanClass;
+import de.tsl2.nano.core.cls.IAttribute;
+import de.tsl2.nano.core.util.DateUtil;
 import de.tsl2.nano.core.util.StringUtil;
 
 /**
@@ -250,6 +256,17 @@ public class BeanContainer implements IBeanContainer {
                     beanAttribute.setValue(bean, new LinkedHashMap());
                 }
             }
+            // clean date and time values
+            List<IAttribute> attributes = clazz.getSingleValueAttributes();
+            for (IAttribute beanAttribute : attributes) {
+                if (Time.class.isAssignableFrom(beanAttribute.getType())) {
+                    if (ENV.get("default.field.date.clear.time", true))
+                        DateUtil.clearSeconds((Date) beanAttribute.getValue(bean));
+                } else if (Date.class.isAssignableFrom(beanAttribute.getType())) {
+                    if (ENV.get("default.field.time.clear.seconds", true))
+                        DateUtil.clearTime((Date) beanAttribute.getValue(bean));
+                }
+            }
             return bean;
         } catch (final Exception e) {
             ManagedException.forward(e);
@@ -289,7 +306,7 @@ public class BeanContainer implements IBeanContainer {
      */
     @Override
     public <T> Collection<T> getBeansByExample(T exampleBean) {
-        return getBeansByExample(exampleBean, false, 0, Integer.MAX_VALUE );
+        return getBeansByExample(exampleBean, false, 0, Integer.MAX_VALUE);
     }
 
     /**
@@ -297,7 +314,7 @@ public class BeanContainer implements IBeanContainer {
      */
     @Override
     public <T> Collection<T> getBeansByExample(T exampleBean, Boolean useLike, int startIndex, int maxResult) {
-        exampleFinderAction.setParameter(new Object[] { exampleBean, useLike, startIndex, maxResult  });
+        exampleFinderAction.setParameter(new Object[] { exampleBean, useLike, startIndex, maxResult });
         return (Collection<T>) exampleFinderAction.activate();
     }
 
@@ -356,7 +373,10 @@ public class BeanContainer implements IBeanContainer {
      * {@inheritDoc}
      */
     @Override
-    public <T> Collection<T> getBeansByQuery(String query, Boolean nativeQuery, Map<String, Object> par, Class... lazyRelations) {
+    public <T> Collection<T> getBeansByQuery(String query,
+            Boolean nativeQuery,
+            Map<String, Object> par,
+            Class... lazyRelations) {
         queryMapAction.setParameter(new Object[] { query, nativeQuery, par, lazyRelations });
         return (Collection<T>) queryMapAction.activate();
     }
@@ -366,7 +386,7 @@ public class BeanContainer implements IBeanContainer {
      */
     @Override
     public Integer executeStmt(String query, Boolean nativeQuery, Object[] args) {
-        executeAction.setParameter(new Object[] { query, nativeQuery, args});
+        executeAction.setParameter(new Object[] { query, nativeQuery, args });
         return executeAction.activate();
     }
 
@@ -405,15 +425,16 @@ public class BeanContainer implements IBeanContainer {
 
     /**
      * data rows for the given type
+     * 
      * @param beanType bean type
      * @return count(*) for type
      */
     public static final long getCount(Class<?> beanType) {
         return ((Number) instance()
             .getBeansByQuery("select count(*) from " + beanType.getSimpleName(), true, (Object[]) null).iterator()
-            .next()).longValue(); 
+            .next()).longValue();
     }
-    
+
     /**
      * getActionId
      * 
@@ -423,9 +444,10 @@ public class BeanContainer implements IBeanContainer {
      * @return full action id
      */
     public static final String getActionId(Class<?> beanType, boolean packedInList, String actionName) {
-        final String type = BeanClass.getName(beanType).toLowerCase() + (packedInList ? Messages.getString("tsl2nano.list")
-            .toLowerCase()
-            : "");
+        final String type =
+            BeanClass.getName(beanType).toLowerCase() + (packedInList ? Messages.getString("tsl2nano.list")
+                .toLowerCase()
+                : "");
         return type + "." + actionName.toLowerCase();
     }
 
@@ -465,7 +487,8 @@ public class BeanContainer implements IBeanContainer {
         if (!isInitialized()) {
             return null;
         }
-        Class cls = (Class) (beanOrClass == null || beanOrClass instanceof Class ? beanOrClass : beanOrClass.getClass());
+        Class cls =
+            (Class) (beanOrClass == null || beanOrClass instanceof Class ? beanOrClass : beanOrClass.getClass());
         if (cls == null || !instance().isPersistable(cls))
             return null;
         final BeanClass bc = BeanClass.getBeanClass(cls);
@@ -493,7 +516,7 @@ public class BeanContainer implements IBeanContainer {
             return true;
         }
     }
-    
+
     //TODO: implement getValueBetween using new action
 //    public static final <A, T> Collection<A> getValueBetween(String attributeName, Class<A>attributeType, T first, T second) {
 //        ServiceUtil.

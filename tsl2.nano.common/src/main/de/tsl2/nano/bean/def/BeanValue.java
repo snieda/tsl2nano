@@ -39,6 +39,7 @@ import de.tsl2.nano.core.ManagedException;
 import de.tsl2.nano.core.cls.BeanAttribute;
 import de.tsl2.nano.core.cls.BeanClass;
 import de.tsl2.nano.core.cls.IAttribute;
+import de.tsl2.nano.core.cls.PrimitiveUtil;
 import de.tsl2.nano.core.log.LogFactory;
 import de.tsl2.nano.core.util.ListSet;
 import de.tsl2.nano.core.util.StringUtil;
@@ -225,7 +226,7 @@ public class BeanValue<T> extends AttributeDefinition<T> implements IValueDefini
             return super.getParsedValue(source);
         }
     }
-    
+
     /**
      * setParsedValue
      * 
@@ -285,6 +286,10 @@ public class BeanValue<T> extends AttributeDefinition<T> implements IValueDefini
             }
             setValue(instance, value);
             if (isDoValidation()) {
+                T assignValue = getValue();
+                value = //the type may be changed through wrap()
+                    value != null && oldValue != assignValue
+                        && !PrimitiveUtil.isAssignableFrom(getType(), value.getClass()) ? assignValue : value;
                 status = isValid(value);
             }
             event.hasChanged = true;
@@ -531,10 +536,12 @@ public class BeanValue<T> extends AttributeDefinition<T> implements IValueDefini
                 if (isMultiValue()) {
                     Selector<T> vsel = selector();
                     Collection<T> collection = vsel.getValueAsCollection();
-                    beanCollector = (BeanCollector<?, ?>) Util.untyped(BeanCollector.getBeanCollector(vsel.getCollectionEntryType(),
-                        collection,
-                        enabled ? MODE_ALL : 0,
-                        comp));
+                    beanCollector =
+                        (BeanCollector<?, ?>) Util.untyped(BeanCollector.getBeanCollector(
+                            vsel.getCollectionEntryType(),
+                            collection,
+                            enabled ? MODE_ALL : 0,
+                            comp));
                     if (collection == null) {
                         vsel.createCollectionValue();
                     }
@@ -546,7 +553,8 @@ public class BeanValue<T> extends AttributeDefinition<T> implements IValueDefini
                         selection.add(v);
                     }
                     beanCollector =
-                        (BeanCollector<?, ?>) Util.untyped(BeanCollector.getBeanCollector(getType(), selection, enabled ? MODE_ALL_SINGLE : 0, comp));
+                        (BeanCollector<?, ?>) Util.untyped(BeanCollector.getBeanCollector(getType(), selection, enabled
+                            ? MODE_ALL_SINGLE : 0, comp));
                     beanCollector.setSelectionProvider(new SelectionProvider(selection));
                 }
                 return (IBeanCollector<?, T>) beanCollector;

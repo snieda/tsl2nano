@@ -554,6 +554,7 @@ public class Bean<T> extends BeanDefinition<T> {
                 .getAttributeDefinitions()));
         bean.setInstance(instance);
 
+        injectIntoRuleCovers(bean);
         if (bean.getPlugins() != null) {
             for (IConnector p : bean.getPlugins()) {
                 p.connect(bean);
@@ -564,6 +565,26 @@ public class Bean<T> extends BeanDefinition<T> {
             bean.actions = null;
         }
         return bean;
+    }
+
+    /**
+     * injectIntoRuleCovers
+     * @param bean
+     */
+    protected static <I> void injectIntoRuleCovers(Bean<I> bean) {
+        Set<String> keys = bean.getAttributeDefinitions().keySet();
+        for (String k : keys) {
+            IAttributeDefinition a = bean.getAttributeDefinitions().get(k);
+
+            //change listeners hold only the attribute-id and must have attribute instances
+            AttributeDefinition attrDef;
+            if (a instanceof AttributeDefinition) {
+                attrDef = (AttributeDefinition) a;
+                attrDef.injectAttributeOnChangeListeners(bean);
+                if (attrDef instanceof IValueDefinition)
+                    attrDef.injectIntoRuleCover((IValueDefinition) attrDef);
+            }
+        }
     }
 
     /**
@@ -660,14 +681,14 @@ public class Bean<T> extends BeanDefinition<T> {
             bean = createMapBean(instanceOrName);
         } else if (Entry.class.isAssignableFrom(instanceOrName.getClass())) {
             BeanDefinition<I> beandef =
-                    getBeanDefinition((Class<I>) BeanClass.getDefiningClass(instanceOrName.getClass()));
-                bean = createBean(instanceOrName, beandef);
-                Entry entry = (Entry) instanceOrName;
-                if (entry.getValue() != null) {
-                    IConstraint c = bean.getAttribute("value").getConstraint();
-                    c.setFormat(null);
-                    c.setType(BeanClass.getDefiningClass(entry.getValue().getClass()));
-                }
+                getBeanDefinition((Class<I>) BeanClass.getDefiningClass(instanceOrName.getClass()));
+            bean = createBean(instanceOrName, beandef);
+            Entry entry = (Entry) instanceOrName;
+            if (entry.getValue() != null) {
+                IConstraint c = bean.getAttribute("value").getConstraint();
+                c.setFormat(null);
+                c.setType(BeanClass.getDefiningClass(entry.getValue().getClass()));
+            }
         } else {
             BeanDefinition<I> beandef =
                 getBeanDefinition((Class<I>) BeanClass.getDefiningClass(instanceOrName.getClass()));

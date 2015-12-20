@@ -23,6 +23,9 @@ import java.io.StringWriter;
 import java.lang.reflect.InvocationHandler;
 import java.lang.reflect.Proxy;
 import java.sql.Connection;
+import java.text.SimpleDateFormat;
+import java.util.Arrays;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.Map;
@@ -70,6 +73,7 @@ import de.tsl2.nano.core.ENV;
 import de.tsl2.nano.core.ManagedException;
 import de.tsl2.nano.core.cls.BeanClass;
 import de.tsl2.nano.core.cls.PrimitiveUtil;
+import de.tsl2.nano.core.cls.Reflection;
 import de.tsl2.nano.core.execution.CompatibilityLayer;
 import de.tsl2.nano.core.log.LogFactory;
 
@@ -507,6 +511,7 @@ public class XmlUtil {
         }
     }
 
+    @SuppressWarnings({ "rawtypes", "unused", "unchecked"})
     public static Strategy getSimpleXmlProxyStrategy() {
 //        return new TreeStrategy() {
 //            @Override
@@ -523,7 +528,8 @@ public class XmlUtil {
 //        };
 
         final Persister persister = new Persister();
-        final Converter converter = new Converter() {
+        //this converter delegates from a proxy to its invocationhandler
+        final Converter proxyConverter = new Converter() {
             @Override
             public Object read(InputNode n) throws Exception {
                 //WORKAROUND to evaluate the class name. where can we extract the class name from?
@@ -540,9 +546,27 @@ public class XmlUtil {
                 persister.write(handler, n);
             }
         };
+        //jdk classes that are not persistable by simpelxml will use Reflection
+        final Map<Class, String[]> unpersistableClasses = MapUtil.asMap(SimpleDateFormat.class, new String[]{"pattern"});
+        final Converter reflectConverter = new Converter() {
+            @Override
+            public Object read(InputNode n) throws Exception {
+                Reflection ref = persister.read(Reflection.class, n.getNext(), false);
+                return ref.object();
+            }
+            @Override
+            public void write(OutputNode n, Object o) throws Exception {
+                persister.write(Reflection.reflectFields(o, unpersistableClasses.get(o.getClass())), n);
+            }
+        };
         Registry reg = new Registry() {
             public Converter lookup(Class type) throws Exception {
-                return Proxy.isProxyClass(type) || InvocationHandler.class.isAssignableFrom(type) ? converter : null;
+                if (Proxy.isProxyClass(type) || InvocationHandler.class.isAssignableFrom(type)) {
+                    return proxyConverter;
+                } else if (unpersistableClasses.keySet().contains(type))
+                    return reflectConverter;
+                else
+                    return null;
             }
         };
         return new RegistryStrategy(reg);
@@ -556,8 +580,9 @@ public class XmlUtil {
  * @version $Revision$
  */
 class SimpleXmlArrayWorkaround implements Matcher {
+    @SuppressWarnings("rawtypes")
     @Override
-    public Transform<?> match(@SuppressWarnings("rawtypes") final Class type) throws Exception {
+    public Transform<?> match(final Class type) throws Exception {
         final ClassLoader loader = Thread.currentThread().getContextClassLoader();
         if (type.equals(Class.class)) {
             return new Transform() {
@@ -571,37 +596,6 @@ class SimpleXmlArrayWorkaround implements Matcher {
                 @Override
                 public String write(Object arg0) throws Exception {
                     return arg0.toString();
-                }
-            };
-        }
-        return null;
-    }
-
-}
-
-/**
- * workaround on simple-xml problem for field type byte[].class.
- * 
- * @author Tom
- * @version $Revision$
- */
-class SimpleXmlProxyWorkaround implements Matcher {
-    @Override
-    public Transform<?> match(@SuppressWarnings("rawtypes") final Class type) throws Exception {
-        if (Proxy.isProxyClass(type)) {
-            return new Transform() {
-                Persister persister = new Persister();
-
-                @Override
-                public Object read(String object) throws Exception {
-                    return persister.read(object, (String) null);
-                }
-
-                @Override
-                public String write(Object arg0) throws Exception {
-                    StringWriter writer = new StringWriter();
-                    persister.write(Proxy.getInvocationHandler(arg0), writer);
-                    return writer.getBuffer().toString();
                 }
             };
         }

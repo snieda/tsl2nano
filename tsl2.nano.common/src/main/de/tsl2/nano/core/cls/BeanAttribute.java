@@ -639,6 +639,7 @@ public class BeanAttribute<T> implements IAttribute<T> {
      */
     @SuppressWarnings("unchecked")
     public static <T> T wrap(Object value, Class<T> wrapperType) {
+        LOG.debug("trying to convert '" + value + "' to " + wrapperType);
         // check, if constructor for value is available in wrapper type
         try {
             Constructor<T> c;
@@ -648,9 +649,7 @@ public class BeanAttribute<T> implements IAttribute<T> {
                 else {
                     if (PrimitiveUtil.isPrimitiveOrWrapper(wrapperType))
                         return PrimitiveUtil.convert(value, wrapperType);
-                    if ((c = wrapperType.getConstructor(new Class[] { value.getClass() })) != null) {
-                        return c.newInstance(value);
-                    }
+                    return BeanClass.createInstance(wrapperType, value);
                 }
             }
         } catch (Exception e) {

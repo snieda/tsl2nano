@@ -17,11 +17,14 @@ import java.lang.reflect.Proxy;
 import java.util.HashMap;
 import java.util.Map;
 
+import org.apache.commons.logging.Log;
 import org.simpleframework.xml.Element;
 import org.simpleframework.xml.ElementMap;
 import org.simpleframework.xml.core.Commit;
 
+import de.tsl2.nano.core.ManagedException;
 import de.tsl2.nano.core.cls.BeanClass;
+import de.tsl2.nano.core.log.LogFactory;
 
 /**
  * base handler using a delegate to enhance. optional attribute properties (key=attributeName, value=attributeValue)
@@ -30,9 +33,11 @@ import de.tsl2.nano.core.cls.BeanClass;
  * @author Tom
  * @version $Revision$
  */
-public class DelegationHandler<T> implements IDelegationHandler<T>, Serializable {
+public class DelegationHandler<T> implements IDelegationHandler<T>, Serializable, Cloneable {
     /** serialVersionUID */
     private static final long serialVersionUID = -6883144560678494837L;
+    private static final Log LOG = LogFactory.getLog(DelegationHandler.class);
+    
     /** values for this proxy to use - overruling the {@link #delegate} */
     @ElementMap(attribute = true, inline = true, keyType = String.class, required = false)
     protected Map<String, Object> properties;
@@ -171,6 +176,16 @@ public class DelegationHandler<T> implements IDelegationHandler<T>, Serializable
     }
 
     @Override
+    public Object clone() {
+        try {
+            LOG.debug("cloning handler " + this);
+            return super.clone();
+        } catch (CloneNotSupportedException e) {
+            ManagedException.forward(e);
+            return null;
+        }
+    }
+    @Override
     public String toString() {
         return Util.toString(getClass(), "delegate: " + getDelegate(), "interfaces: " + getInterfaces(), "properties: " + properties);
     }
@@ -183,6 +198,7 @@ public class DelegationHandler<T> implements IDelegationHandler<T>, Serializable
      */
     @SuppressWarnings("unchecked")
     public static final <T> T createProxy(DelegationHandler<T> invocationHandler) {
+        LOG.debug("creating proxy for handler: " + invocationHandler);
         return (T) Proxy.newProxyInstance(Thread.currentThread().getContextClassLoader(),
             BeanClass.getBeanClass(invocationHandler.getDelegate().getClass())
                 .getInterfaces(), invocationHandler);

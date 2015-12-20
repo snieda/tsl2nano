@@ -10,7 +10,9 @@
 package de.tsl2.nano.bean.def;
 
 import java.io.Serializable;
+import java.lang.reflect.InvocationHandler;
 import java.lang.reflect.Method;
+import java.lang.reflect.Proxy;
 import java.text.Format;
 import java.text.ParseException;
 import java.util.Collection;
@@ -42,6 +44,7 @@ import de.tsl2.nano.core.cls.BeanClass;
 import de.tsl2.nano.core.cls.IAttribute;
 import de.tsl2.nano.core.log.LogFactory;
 import de.tsl2.nano.core.util.ByteUtil;
+import de.tsl2.nano.core.util.DelegationHandler;
 import de.tsl2.nano.core.util.FormatUtil;
 import de.tsl2.nano.core.util.ISecure;
 import de.tsl2.nano.core.util.NumberUtil;
@@ -50,6 +53,7 @@ import de.tsl2.nano.core.util.Util;
 import de.tsl2.nano.messaging.EventController;
 import de.tsl2.nano.messaging.IListener;
 import de.tsl2.nano.util.PrivateAccessor;
+import de.tsl2.nano.util.UnboundAccessor;
 
 /**
  * 
@@ -170,7 +174,8 @@ public class AttributeDefinition<T> implements IAttributeDefinition<T> {
                 generatedValue = def.generatedValue();
             }
         }
-        initDeserialization();
+        if (status == null)
+            initDeserialization();
     }
 
     @Persist
@@ -190,29 +195,70 @@ public class AttributeDefinition<T> implements IAttributeDefinition<T> {
         if (getColumnDefinition() != null && getColumnDefinition() instanceof ValueColumn) {
             ((ValueColumn) getColumnDefinition()).attributeDefinition = this;
         }
-
         //injectAttributeOnChangeListeners() will be called from BeanDefinition
-        
+        injectIntoPlugins(this);
+    }
+
+    /**
+     * injectPlugins
+     */
+    protected void injectIntoPlugins(IAttributeDefinition<T> attr) {
         //connect optional plugins
         if (plugins != null) {
             for (IConnector p : plugins) {
-                LOG.info("connecting plugin " + p + " to " + this);
-                p.connect(this);
+                LOG.info("connecting plugin " + p + " to " + attr);
+                p.connect(attr);
+            }
+        }
+    }
+
+    /**
+     * injectRuleCover
+     * @param attr new attribute definition to connect to rule cover instance
+     */
+    protected void injectIntoRuleCover(IValueDefinition<T> attr) {
+        //connect optional rule-covers (use accessor instead of BeanDefinition to avoid stackoverflow
+        PrivateAccessor attrAcc = new PrivateAccessor(attr);
+        Map members = attrAcc.members();
+        InvocationHandler handler;
+        Object item;
+        for (Object k : members.keySet()) {
+            item = members.get(k);
+            if (item != null && Proxy.isProxyClass(item.getClass())) {
+                handler = Proxy.getInvocationHandler(item);
+              //create proxy for each bean instance
+                if (handler instanceof DelegationHandler) {
+                    // compare instances: if attr is a delegation-handler we must ignore its delegate!
+                    if (item == attr.getInstance())
+                        throw new IllegalStateException("the given attribute " + attr + " seems to be a rulecover itself!");
+                    handler = (InvocationHandler) ((DelegationHandler<T>) handler).clone();
+                    item = DelegationHandler.createProxy((DelegationHandler<T>) handler);
+                    attrAcc.set((String) k, item);
+                    new UnboundAccessor(handler).call("setContext", null, new Class[]{Serializable.class}, attr.getInstance());
+                }
             }
         }
     }
 
     /**
      * uses the information of {@link #attributeID} to inject the real {@link AttributeDefinition} into registered change listeners
+     * @throws CloneNotSupportedException 
      */
     void injectAttributeOnChangeListeners(BeanDefinition beandef) {
         //provide dependency listeners their attribute-definition
         if (hasListeners()) {
-            Collection<IListener> listener = changeHandler().getListeners(Object.class);
+            Collection<IListener> listener = changeHandler().getListeners(null);
+            boolean isBean = beandef instanceof Bean;
             for (IListener l : listener) {
                 if (l instanceof AbstractDependencyListener) {
                     AbstractDependencyListener<?, ?> dl = (AbstractDependencyListener<?, ?>) l;
                     String name = StringUtil.substring(dl.attributeID, ".", null);
+                    if (isBean) {//create a specific listener instance for the given bean!
+                        dl = (AbstractDependencyListener<?, ?>) dl.clone();
+                        Class eventType = changeHandler().getEventType(l);
+                        changeHandler().removeListener(l);
+                        changeHandler().addListener(dl, eventType);
+                    }
                     dl.setAttribute((AttributeDefinition) beandef.getAttribute(name));
                 }
             }

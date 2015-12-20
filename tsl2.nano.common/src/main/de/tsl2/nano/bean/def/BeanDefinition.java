@@ -218,6 +218,26 @@ public class BeanDefinition<T> extends BeanClass<T> implements IPluggable<BeanDe
         this.attributeFilter = availableAttributes;
         isdefault = false;
         refreshAttributeDefinitions();
+        setColumnDefinitionOrder(availableAttributes);
+    }
+
+    /**
+     * setColumnDefinitionOrder
+     * @param columns attribute column names
+     */
+    public void setColumnDefinitionOrder(String[] columns) {
+        IAttribute a;
+        IPresentableColumn c;
+        int i = 0;
+        for (String name : columns) {
+            if ((a = getAttribute(name, false)) != null) {
+                if (a instanceof IAttributeDefinition) {
+                     c = ((IAttributeDefinition)a).getColumnDefinition();
+                     if (c instanceof ValueColumn)
+                         ((ValueColumn)c).setIndex(i++);
+                }
+            }
+        }
     }
 
     protected void refreshAttributeDefinitions() {
@@ -615,7 +635,7 @@ public class BeanDefinition<T> extends BeanClass<T> implements IPluggable<BeanDe
     /**
      * isCreatable
      * 
-     * @return true, if attribute is non-standard propriety object type having a public default constructor.
+     * @return true, if bean is non-standard type having a public default constructor.
      */
     public boolean isCreatable() {
         Class t = getDefiningClass(clazz);
@@ -1246,7 +1266,7 @@ public class BeanDefinition<T> extends BeanClass<T> implements IPluggable<BeanDe
         }
     }
 
-    private final boolean isSaveable() {
+    protected boolean isSaveable() {
         String clsName = clazz.getName();
         return usePersistentCache && !clsName.startsWith("java") && !clazz.getName().startsWith(ENV.FRAMEWORK)
             && !getClazz().isArray()/*simple-xml is not able to deserialize arrays*/;
@@ -1414,7 +1434,8 @@ public class BeanDefinition<T> extends BeanClass<T> implements IPluggable<BeanDe
         List<IAttribute> attributes = getAttributes();
         for (IAttribute a : attributes) {
             if (a instanceof AttributeDefinition) {
-                a.setValue(instance, ((AttributeDefinition) a).getDefault());
+                if (a.hasWriteAccess())
+                    a.setValue(instance, ((AttributeDefinition) a).getDefault());
             }
         }
     }

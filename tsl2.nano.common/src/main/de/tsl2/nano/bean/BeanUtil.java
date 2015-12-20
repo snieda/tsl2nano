@@ -32,6 +32,8 @@ import java.util.UUID;
 
 import org.apache.commons.logging.Log;
 
+import sun.reflect.generics.reflectiveObjects.ParameterizedTypeImpl;
+
 import de.tsl2.nano.bean.def.Bean;
 import de.tsl2.nano.bean.def.BeanCollector;
 import de.tsl2.nano.bean.def.BeanDefinition;
@@ -280,6 +282,59 @@ public class BeanUtil extends ByteUtil {
     }
 
     /**
+     * looks for the given interface in the hierarchy of the given object type and tries to get the generic type for
+     * that interface.
+     * 
+     * @param cls object type
+     * @param interfaze interface to search a generic type for.
+     * @return generic type for interfaze
+     */
+    public static Class<?> getGenericInterfaceType(Class cls, Class interfaze, int pos) {
+        Type[] interfaces = cls.getGenericInterfaces();
+        for (int i = 0; i < interfaces.length; i++) {
+            if (interfaze.equals(getGenericInterface(interfaces[i])))
+                return getGeneric(interfaces[i], pos);
+        }
+        if (cls.getGenericSuperclass() != null)//TODO: leider gehen hier die generic-infos verloren
+            return ((Class)getGenericInterfaceType((Class) ((ParameterizedType)cls.getGenericSuperclass()).getRawType(), interfaze, pos));
+        throw new IllegalArgumentException("the given class " + cls + " has no generic interface: " + interfaze);
+    }
+
+    protected static Class<?> getGenericInterface(Type type) {
+        return (Class<?>) (ParameterizedType.class.isAssignableFrom(type.getClass()) ? ((ParameterizedType)type).getRawType() : type);
+    }
+    /**
+     * getClass
+     * @param genericType
+     * @return
+     */
+    protected static Class<?> getGeneric(Type genericType, int pos) {
+        Type type = ((ParameterizedType) genericType).getActualTypeArguments()[0];
+        if (type instanceof ParameterizedType) {
+            return (Class<?>) ((ParameterizedType) type).getRawType();
+        }
+        return type instanceof Class ? (Class<?>) type : null;
+    }
+
+    /**
+     * getGenericType
+     * 
+     * @param clazz class of field
+     * @param fieldName field name
+     * @return first generic type of given field
+     */
+    public static Class<?> getGenericType(Class<?> clazz, String fieldName) {
+        try {
+            return (Class<?>) ((ParameterizedType) clazz.getDeclaredField(fieldName).getGenericType())
+                .getActualTypeArguments()[0];
+        } catch (Exception e) {
+            ManagedException.forward(e);
+            return null;
+        }
+    }
+
+    /**
+     * @deprecated: use {@link #getGenericInterfaceType(Object, Class)} instead
      * getGenericType
      * 
      * @param clazz class of field
@@ -297,30 +352,9 @@ public class BeanUtil extends ByteUtil {
                     return null;
                 }
             }
-            Type type = ((ParameterizedType) genericType).getActualTypeArguments()[0];
-            if (type instanceof ParameterizedType) {
-                return (Class<?>) ((ParameterizedType) type).getRawType();
-            }
-            return (Class<?>) type;
+            return getGeneric(genericType, 0);
         } catch (Exception e) {
-            ManagedException.forward(e);
-            return null;
-        }
-    }
-
-    /**
-     * getGenericType
-     * 
-     * @param clazz class of field
-     * @param fieldName field name
-     * @return first generic type of given field
-     */
-    public static Class<?> getGenericType(Class<?> clazz, String fieldName) {
-        try {
-            return (Class<?>) ((ParameterizedType) clazz.getDeclaredField(fieldName).getGenericType())
-                .getActualTypeArguments()[0];
-        } catch (Exception e) {
-            ManagedException.forward(e);
+            LOG.warn(e.toString());
             return null;
         }
     }
