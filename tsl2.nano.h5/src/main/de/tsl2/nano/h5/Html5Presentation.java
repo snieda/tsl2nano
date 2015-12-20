@@ -314,7 +314,7 @@ public class Html5Presentation<T> extends BeanPresentationHelper<T> implements I
                                         new Query(name, tool.getText(), tool.getSelectedAction().getId()
                                             .equals("scripttool.sql.id"),
                                             null);
-                                    ENV.get(QueryPool.class).add(query.getName(), query);
+                                    ENV.get(QueryPool.class).add(query);
                                     QueryResult qr = new QueryResult(query.getName());
                                     qr.setName(BeanDefinition.PREFIX_VIRTUAL + query.getName());
                                     qr.saveDefinition();
@@ -1972,6 +1972,12 @@ public class Html5Presentation<T> extends BeanPresentationHelper<T> implements I
         //let the specialized input types work
         t = NumberUtil.filterBits(t, TYPE_INPUT, TYPE_INPUT_MULTILINE);
         switch (t) {
+        case TYPE_INPUT_NUMBER:
+            //floatings are not supported in html input type=number
+            if (NumberUtil.isInteger(beanValue.getType())) {
+                type = "number";
+                break;
+            }
         case TYPE_SELECTION:
             type = "text";
             break;
@@ -1983,7 +1989,7 @@ public class Html5Presentation<T> extends BeanPresentationHelper<T> implements I
             break;
         case TYPE_DATE | TYPE_TIME:
             //most browsers are not able to present a datetime. 
-            type = ENV.get("default.present.type.datetime", "datetime-local");
+            type = ENV.get("default.present.type.datetime", "date"/*"datetime-local"*/);
             break;
         case TYPE_TIME:
             type = "time";
@@ -1991,12 +1997,6 @@ public class Html5Presentation<T> extends BeanPresentationHelper<T> implements I
         case TYPE_DATE:
             type = "date";
             break;
-        case TYPE_INPUT_NUMBER:
-            //floatings are not supported in html input type=number
-            if (NumberUtil.isInteger(beanValue.getType())) {
-                type = "number";
-                break;
-            }
         case TYPE_INPUT_TEL:
             type = "tel";
             break;
@@ -2014,6 +2014,7 @@ public class Html5Presentation<T> extends BeanPresentationHelper<T> implements I
             break;
         case TYPE_DATA:
             type = "img";
+            break;
         case TYPE_ATTACHMENT:
             //on type = 'file' only the file-name is given (no path!)
             //will provide an upload button for the client system

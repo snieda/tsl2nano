@@ -9,6 +9,8 @@
  */
 package de.tsl2.nano.h5.timesheet;
 
+import static junit.framework.Assert.*;
+
 import static de.tsl2.nano.bean.def.IPresentable.UNDEFINED;
 import static de.tsl2.nano.h5.Html5Presentation.L_GRIDWIDTH;
 import static de.tsl2.nano.h5.HtmlUtil.ATTR_BORDER;
@@ -21,22 +23,28 @@ import static de.tsl2.nano.test.TypeBean.ATTR_OBJECT;
 import static de.tsl2.nano.test.TypeBean.ATTR_STRING;
 import static de.tsl2.nano.test.TypeBean.ATTR_TIME;
 import static de.tsl2.nano.test.TypeBean.ATTR_TIMESTAMP;
-
-import static org.anonymous.project.presenter.ChargeConst.*;
+import static org.anonymous.project.presenter.ChargeConst.ATTR_CHARGEITEM;
+import static org.anonymous.project.presenter.ChargeConst.ATTR_FROMDATE;
+import static org.anonymous.project.presenter.ChargeConst.ATTR_FROMTIME;
+import static org.anonymous.project.presenter.ChargeConst.ATTR_PARTY;
+import static org.anonymous.project.presenter.ChargeConst.ATTR_PAUSE;
+import static org.anonymous.project.presenter.ChargeConst.ATTR_TOTIME;
+import static org.anonymous.project.presenter.ChargeConst.ATTR_VALUE;
 
 import java.io.IOException;
 import java.io.Serializable;
 import java.lang.reflect.Method;
 import java.math.BigDecimal;
 import java.sql.Time;
+import java.text.SimpleDateFormat;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Map;
 import java.util.Properties;
 
-import my.app.MyApp;
 import my.app.Times;
 
 import org.anonymous.project.Account;
@@ -69,31 +77,29 @@ import org.anonymous.project.presenter.OrganisationConst;
 import org.anonymous.project.presenter.PartyConst;
 import org.anonymous.project.presenter.PropertyConst;
 import org.anonymous.project.presenter.TypeConst;
-import org.apache.commons.logging.Log;
 
 import de.tsl2.nano.bean.IBeanContainer;
 import de.tsl2.nano.bean.def.Attachment;
 import de.tsl2.nano.bean.def.AttributeDefinition;
+import de.tsl2.nano.bean.def.Bean;
 import de.tsl2.nano.bean.def.BeanCollector;
 import de.tsl2.nano.bean.def.BeanDefinition;
 import de.tsl2.nano.bean.def.Constraint;
+import de.tsl2.nano.bean.def.IAttributeDefinition;
 import de.tsl2.nano.bean.def.IBeanCollector;
 import de.tsl2.nano.bean.def.IPageBuilder;
 import de.tsl2.nano.bean.def.IPresentable;
 import de.tsl2.nano.bean.def.IPresentableColumn;
 import de.tsl2.nano.bean.def.PathExpression;
 import de.tsl2.nano.bean.def.SecureAction;
-import de.tsl2.nano.bean.def.VAttribute;
 import de.tsl2.nano.bean.def.ValueColumn;
-import de.tsl2.nano.bean.def.ValueExpression;
 import de.tsl2.nano.core.ENV;
 import de.tsl2.nano.core.ManagedException;
-import de.tsl2.nano.core.log.LogFactory;
 import de.tsl2.nano.core.util.DateUtil;
 import de.tsl2.nano.core.util.MapUtil;
-import de.tsl2.nano.core.util.Util;
 import de.tsl2.nano.execution.ScriptUtil;
 import de.tsl2.nano.h5.Controller;
+import de.tsl2.nano.h5.HtmlUtil;
 import de.tsl2.nano.h5.QueryResult;
 import de.tsl2.nano.h5.RuleCover;
 import de.tsl2.nano.h5.SpecifiedAction;
@@ -112,11 +118,11 @@ import de.tsl2.nano.incubation.specification.ParType;
 import de.tsl2.nano.incubation.specification.actions.Action;
 import de.tsl2.nano.incubation.specification.actions.ActionPool;
 import de.tsl2.nano.incubation.specification.rules.Rule;
+import de.tsl2.nano.incubation.specification.rules.RuleDependencyListener;
 import de.tsl2.nano.incubation.specification.rules.RulePool;
 import de.tsl2.nano.incubation.specification.rules.RuleScript;
 import de.tsl2.nano.messaging.ChangeEvent;
 import de.tsl2.nano.messaging.IListener;
-import de.tsl2.nano.util.codegen.ClassGenerator;
 
 /**
  * Creates a timesheet configuration on NanoH5 and anyway database
@@ -125,6 +131,8 @@ import de.tsl2.nano.util.codegen.ClassGenerator;
  * @version $Revision$
  */
 public class Timesheet extends NanoH5App {
+    String redColorStyle = "background-color: red;";
+    String greenColorStyle = "background-color: green;";
 
     /**
      * constructor
@@ -141,6 +149,20 @@ public class Timesheet extends NanoH5App {
     @SuppressWarnings({ "unchecked", "rawtypes" })
     @Override
     protected BeanDefinition<?> createBeanCollectors(List<Class> beanClasses) {
+        //this call will initialize the complete entity structure
+        BeanDefinition<Charge> charge = BeanDefinition.getBeanDefinition(Charge.class);
+        
+        /*
+         * create some virtual attributes
+         */
+        final String ATTR_WEEKDAY = "weekday";
+        LinkedHashMap<String, ParType> pt = new LinkedHashMap<String, ParType>();
+        pt.put("charge", new ParType(Charge.class));
+        pt.put("formatter", new ParType(new SimpleDateFormat("EE")));
+        RuleScript<String> script = new RuleScript<String>(ATTR_WEEKDAY, "charge.getFromdate() != null ? formatter.format(charge.getFromdate()) : \"\";", pt);
+        ENV.get(RulePool.class).add(script);
+        charge.addAttribute(ATTR_WEEKDAY, new RuleExpression<>(Charge.class, RuleScript.PREFIX + ATTR_WEEKDAY), null, null);
+        
         /*
          * define all beans
          */
@@ -162,38 +184,56 @@ public class Timesheet extends NanoH5App {
         /*
          * configure the main type: Charge (Zeiterfassung)
          */
-        BeanDefinition<Charge> charge = define(Charge.class, ve(ChargeConst.ATTR_CHARGEITEM) + " (" + ve(ChargeConst.ATTR_FROMDATE) + ": " + ve(ChargeConst.ATTR_VALUE) + ")"
-            , ATTR_FROMDATE, ATTR_FROMTIME, ATTR_TOTIME, ATTR_PAUSE, ATTR_VALUE, ATTR_PARTY, ATTR_CHARGEITEM);
+        charge = define(Charge.class, ve(ChargeConst.ATTR_CHARGEITEM) + " (" + ve(ChargeConst.ATTR_FROMDATE) + ": " + ve(ChargeConst.ATTR_VALUE) + ")"
+            , ATTR_FROMDATE, ATTR_WEEKDAY, ATTR_FROMTIME, ATTR_TOTIME, ATTR_PAUSE, ATTR_PARTY, ATTR_CHARGEITEM, ATTR_VALUE);
         IPresentableColumn column = charge.getAttribute(ATTR_VALUE).getColumnDefinition();
         if (column instanceof ValueColumn)
             ((ValueColumn)column).setStandardSummary(true);
+        IAttributeDefinition attrWeekday = charge.getAttribute(ATTR_WEEKDAY);
+        attrWeekday.getPresentation().setVisible(false);
+//        ((ValueColumn)attrWeekday.getColumnDefinition()).setIndex(2);
         
         /*
          * add dependency listeners on rules
          */
-        RuleScript<BigDecimal> calcTime = new RuleScript<BigDecimal>("calcTime", "(toTime - fromTime) - pause", null);
+        RuleScript<BigDecimal> calcTime = new RuleScript<BigDecimal>("calcTime", 
+          "var from = charge.fromtime != null ? charge.fromtime.getTime() : 0;" +
+          "var to = charge.totime != null ? charge.totime.getTime() : 0;" +
+          "var p = charge.pause != null ? charge.pause.getTime() : 0;" +
+          "((to - from) - p) / (3600 * 1000);", null);
         Time t0800 = DateUtil.getTime(8, 0);
         Time t1700 = DateUtil.getTime(17, 0);
         Time t0000 = DateUtil.getTime(0, 0);
         Time t0030 = DateUtil.getTime(0, 30);
-        calcTime.addSpecification("notime", "check for zero-times", BigDecimal.ZERO, MapUtil.asMap("fromTime", t0800, "toTime", t0800, "pause", t0000));
-        calcTime.addSpecification("standard", "standard work day", new BigDecimal(8.5), MapUtil.asMap("fromTime", t0800, t1700, t0030));
-        ENV.get(RulePool.class).add(calcTime.getName(), calcTime);
-        IListener<WSEvent> listener = new WebSocketRuleDependencyListener(charge.getAttribute(ATTR_VALUE), ATTR_VALUE, calcTime.getName());
-        charge.getAttribute(ATTR_FROMTIME).changeHandler().addListener(listener);
-        charge.getAttribute(ATTR_TOTIME).changeHandler().addListener(listener);
+        //TODO: howto set the arguments without using an instanceof Charge?
+//        calcTime.addSpecification("notime", "check for zero-times", BigDecimal.ZERO, MapUtil.asMap("charge.fromtime", t0800, "charge.totime", t0800, "charge.pause", t0000));
+//        calcTime.addSpecification("standard", "standard work day", new BigDecimal(8.5), MapUtil.asMap("charge.fromtime", t0800, t1700, t0030));
+        
+        charge.getAttribute(ATTR_VALUE).getConstraint().setScale(2);
+        charge.getAttribute(ATTR_VALUE).getConstraint().setPrecision(4);
+        
+        // create dependency listeners for websocket and standard bean-changing
+        ENV.get(RulePool.class).add(calcTime);
+        IListener<WSEvent> wsListener = new WebSocketRuleDependencyListener(charge.getAttribute(ATTR_VALUE), ATTR_VALUE, RuleScript.PREFIX + calcTime.getName());
+        IListener<ChangeEvent> listener = new RuleDependencyListener(charge.getAttribute(ATTR_VALUE), ATTR_VALUE, RuleScript.PREFIX + calcTime.getName());
+        charge.getAttribute(ATTR_FROMTIME).changeHandler().addListener(wsListener, WSEvent.class);
+        charge.getAttribute(ATTR_FROMTIME).changeHandler().addListener(listener, ChangeEvent.class);
+        charge.getAttribute(ATTR_TOTIME).changeHandler().addListener(wsListener, WSEvent.class);
+        charge.getAttribute(ATTR_TOTIME).changeHandler().addListener(listener, ChangeEvent.class);
         
         /*
          * add attribute presentation rules
          */
-        RuleScript<String> presValueColor = new RuleScript<String>("presValueColor", "value > 10 ? red : black", null);
-        RuleCover ruleCover = new RuleCover(presValueColor.getName(), MapUtil.asMap("presentable.background", presValueColor.getName()));
+        RuleScript<String> presValueColor = new RuleScript<String>(
+                "presValueColor", "new Map('style', value > 10 ? '" + redColorStyle + "' : '" + greenColorStyle + "');", null);
+        ENV.get(RulePool.class).add(presValueColor);
+        RuleCover ruleCover = new RuleCover("%" + presValueColor.getName(), MapUtil.asMap("presentable.layoutConstraints", presValueColor.getName()));
         ruleCover.connect(charge.getAttribute(ATTR_VALUE));
         
         charge.saveDefinition();
 
-        //TODO: Statistics executes queries immediately to evaluate grupby column names
-//        new Statistic<>(Charge.class).saveVirtualDefinition("statistics " + Charge.class.getSimpleName());
+        //TODO: Statistics executes queries immediately to evaluate group-by column names
+        new Statistic<>(Charge.class).saveVirtualDefinition("statistics " + Charge.class.getSimpleName());
         
         /*
          * Sample Workflow with three activities
@@ -232,16 +272,15 @@ public class Timesheet extends NanoH5App {
         par.put("x1", ParType.NUMBER);
         par.put("x2", ParType.NUMBER);
         Rule<BigDecimal> testRule = new Rule<BigDecimal>("test", "A ? (x1 + 1) : (x2 * 2)", par);
-        testRule.addConstraint("x1", new Constraint<BigDecimal>(BigDecimal.class, BigDecimal.ZERO, BigDecimal.ONE));
+        testRule.addConstraint("x1", new Constraint<BigDecimal>(BigDecimal.class, BigDecimal.ZERO, BigDecimal.TEN));
         testRule.addConstraint(Rule.KEY_RESULT, new Constraint<BigDecimal>(BigDecimal.class, BigDecimal.ZERO,
             BigDecimal.TEN));
-        testRule.addSpecification("notA-1-2", null, 4, MapUtil.asMap("x1", 1, "x2", 2));
-        testRule.addSpecification("A-2-1", null, 2, MapUtil.asMap("x1", 2, "x2", 1));
-        ENV.get(RulePool.class).add("test", testRule);
+        testRule.addSpecification("notA-1-2", null, new BigDecimal(4), MapUtil.asMap("x1", new BigDecimal(1), "x2", new BigDecimal(2)));
+        testRule.addSpecification("A-2-1", null, new BigDecimal(2), MapUtil.asMap("x1", new BigDecimal(2), "x2", new BigDecimal(1)));
+        ENV.get(RulePool.class).add(testRule);
 
         //another rule to test sub-rule-imports
-        ENV.get(RulePool.class).add("test-import",
-            new Rule<BigDecimal>("test-import", "A ? 1 + §test : (x2 * 3)", par));
+        ENV.get(RulePool.class).add(new Rule<BigDecimal>("test-import", "A ? 1 + §test : (x2 * 3)", par));
 
         BigDecimal result =
             (BigDecimal) ENV.get(RulePool.class).get("test-import")
@@ -257,7 +296,7 @@ public class Timesheet extends NanoH5App {
         HashMap<String, Serializable> par1 = new HashMap<>();
         Query<Object> query = new Query<>("times.begin", qstr, true, par1);
         QueryPool queryPool = ENV.get(QueryPool.class);
-        queryPool.add(query.getName(), query);
+        queryPool.add(query);
 
         /*
          * define an action
@@ -271,7 +310,7 @@ public class Timesheet extends NanoH5App {
         Action<Object> a = new Action<>(antCaller);
         a.addConstraint("arg1", new Constraint<String>(ENV.getConfigPath() + "antscripts.xml"));
         a.addConstraint("arg2", new Constraint<String>("help"));
-        ENV.get(ActionPool.class).add("ant", a);
+        ENV.get(ActionPool.class).add(a);
 
         /*
          * define a Controller as Collector of Actions of a Bean
@@ -305,7 +344,7 @@ public class Timesheet extends NanoH5App {
             + "where 1 = 1\n";
 
         query = new Query<>("times-overview", qstr, true, null);
-        queryPool.add(query.getName(), query);
+        queryPool.add(query);
 
         QueryResult qr = new QueryResult<>(query.getName());
         qr.saveVirtualDefinition(query.getName());
@@ -359,7 +398,7 @@ public class Timesheet extends NanoH5App {
         ((AttributeDefinition) b.getAttribute(ATTR_STRING)).changeHandler().addListener(
             new WebSocketRuleDependencyListener((AttributeDefinition) b.getAttribute(ATTR_IMMUTABLEINTEGER),
                 ATTR_IMMUTABLEINTEGER,
-                "rule-string-integer"));
+                "rule-string-integer"), WSEvent.class);
 
         /*
          * use file attachments
@@ -371,5 +410,23 @@ public class Timesheet extends NanoH5App {
          * define your own navigation stack
          */
         return beanCollector;
+    }
+    
+    /**
+     * check assertions
+     */
+    @Override
+    public void stop() {
+        Charge c = new Charge();
+        Bean bean = Bean.getBean(c);
+        c.setFromdate(DateUtil.getToday());
+        c.setFromtime(DateUtil.getTime(8, 30));
+        bean.getAttribute(ATTR_TOTIME).setValue(DateUtil.getTime(20, 0));
+        assertTrue(new BigDecimal(11.5).equals(c.getValue()));
+        
+        Map lc = bean.getAttribute(ATTR_VALUE).getPresentation().getLayoutConstraints();
+        assertTrue(redColorStyle.equals(lc.get("style")));
+        
+        super.stop();
     }
 }

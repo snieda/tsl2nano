@@ -2546,7 +2546,10 @@ Net:Connection-->Link-->Cover(content, descriptor)
 ** table.rotate
 * BeanCollector --> LogicTable, LogicTableUI mit dependency listeners
 * FormattedLogFactory per session
-
+* java 8 Probleme:
+	* ant start erst beim 2.mal
+	* javascript engine = null
+	
 war:
 * WEB-INF/web..xml rausschmeissen
 * jar --> war

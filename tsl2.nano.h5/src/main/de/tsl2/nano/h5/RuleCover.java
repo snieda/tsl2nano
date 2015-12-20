@@ -12,7 +12,8 @@ package de.tsl2.nano.h5;
 import java.io.Serializable;
 import java.lang.reflect.Method;
 import java.lang.reflect.Proxy;
-import java.util.Hashtable;
+import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 
@@ -31,6 +32,7 @@ import de.tsl2.nano.core.exception.Message;
 import de.tsl2.nano.core.util.DelegationHandler;
 import de.tsl2.nano.core.util.StringUtil;
 import de.tsl2.nano.incubation.specification.rules.RulePool;
+import de.tsl2.nano.incubation.specification.rules.RuleScript;
 import de.tsl2.nano.util.PrivateAccessor;
 
 /**
@@ -52,6 +54,7 @@ public class RuleCover<T> extends DelegationHandler<T> implements
      */
     @ElementMap(entry = "rule", attribute = true, inline = true, key = "for-property", keyType = String.class, value = "name", valueType = String.class)
     Map<String, String> rules;
+    /** contextObject: bean to be used as attribute through toValueMap() call. */
     transient Serializable contextObject;
     @Attribute(required = false)
     String name;
@@ -112,7 +115,7 @@ public class RuleCover<T> extends DelegationHandler<T> implements
         boolean existRule = false;
         if (hasRule) {
             String ruleName = rules.get(propertyPath);
-            existRule = ENV.get(RulePool.class).get(ruleName) != null;
+            existRule = ENV.get(RulePool.class).get(RuleScript.PREFIX + ruleName) != null;
             if (!existRule) {
                 Message.send("couldn't find rule '" + ruleName + "' for property '" + propertyPath
                     + "' in specifications!");
@@ -126,7 +129,7 @@ public class RuleCover<T> extends DelegationHandler<T> implements
      */
     @Override
     public Object eval(String propertyPath) {
-        return ENV.get(RulePool.class).get(rules.get(propertyPath)).run(getContext());
+        return ENV.get(RulePool.class).get(RuleScript.PREFIX + rules.get(propertyPath)).run(getContext());
     }
 
     /**
@@ -134,7 +137,7 @@ public class RuleCover<T> extends DelegationHandler<T> implements
      */
     @Override
     public Map<String, Object> getContext() {
-        return Bean.getBean(contextObject).toValueMap(null);
+        return contextObject != null ? Bean.getBean(contextObject).toValueMap(contextObject, false, true, false) : new HashMap<String, Object>();
     }
 
     /**
@@ -195,6 +198,12 @@ public class RuleCover<T> extends DelegationHandler<T> implements
                 }
             }
         }
+        //remove class prefixes to be accessible on invoiking
+        for (String k : new HashSet<String>(pks)) {
+            String ruleName = rules.remove(k);
+            rules.put(StringUtil.substring(k, ".", null, true), ruleName);
+        }
+        
         if (!nameFound)
             throw new IllegalStateException("no attribute matches for attributedefinition for " + rules.keySet());
         return this;

@@ -139,11 +139,10 @@ public class MyApp extends NanoH5 {
             BigDecimal.TEN));
         testRule.addSpecification("notA-1-2", null, 4, MapUtil.asMap("x1", 1, "x2", 2));
         testRule.addSpecification("A-2-1", null, 2, MapUtil.asMap("x1", 2, "x2", 1));
-        ENV.get(RulePool.class).add("test", testRule);
+        ENV.get(RulePool.class).add(testRule);
 
         //another rule to test sub-rule-imports
-        ENV.get(RulePool.class).add("test-import",
-            new Rule<BigDecimal>("test-import", "A ? 1 + §test : (x2 * 3)", par));
+        ENV.get(RulePool.class).add(new Rule<BigDecimal>("test-import", "A ? 1 + §test : (x2 * 3)", par));
 
         BigDecimal result =
             (BigDecimal) ENV.get(RulePool.class).get("test-import")
@@ -159,7 +158,7 @@ public class MyApp extends NanoH5 {
         HashMap<String, Serializable> par1 = new HashMap<>();
         Query<Object> query = new Query<>("times.begin", qstr, true, par1);
         QueryPool queryPool = ENV.get(QueryPool.class);
-        queryPool.add(query.getName(), query);
+        queryPool.add(query);
 
         /*
          * define an action
@@ -173,7 +172,7 @@ public class MyApp extends NanoH5 {
         Action<Object> a = new Action<>(antCaller);
         a.addConstraint("arg1", new Constraint<String>(ENV.getConfigPath() + "antscripts.xml"));
         a.addConstraint("arg2", new Constraint<String>("help"));
-        ENV.get(ActionPool.class).add("ant", a);
+        ENV.get(ActionPool.class).add(a);
 
         /*
          * define a Controller as Collector of Actions of a Bean
@@ -207,7 +206,7 @@ public class MyApp extends NanoH5 {
             + "where 1 = 1\n";
 
         query = new Query<>("times-overview", qstr, true, null);
-        queryPool.add(query.getName(), query);
+        queryPool.add(query);
 
         QueryResult qr = new QueryResult<>(query.getName());
         qr.saveVirtualDefinition(query.getName());

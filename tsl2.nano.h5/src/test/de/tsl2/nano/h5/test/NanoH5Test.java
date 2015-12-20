@@ -45,6 +45,8 @@ import de.tsl2.nano.bean.def.Bean;
 import de.tsl2.nano.bean.def.BeanDefinition;
 import de.tsl2.nano.bean.def.BeanPresentationHelper;
 import de.tsl2.nano.bean.def.Constraint;
+import de.tsl2.nano.bean.def.IStatus;
+import de.tsl2.nano.bean.def.IValueDefinition;
 import de.tsl2.nano.core.ENV;
 import de.tsl2.nano.core.ManagedException;
 import de.tsl2.nano.core.Messages;
@@ -60,11 +62,15 @@ import de.tsl2.nano.execution.AntRunner;
 import de.tsl2.nano.execution.SystemUtil;
 import de.tsl2.nano.h5.Html5Presentation;
 import de.tsl2.nano.h5.NanoH5;
+import de.tsl2.nano.h5.expression.QueryPool;
 import de.tsl2.nano.h5.navigation.Parameter;
+import de.tsl2.nano.h5.navigation.Workflow;
 import de.tsl2.nano.h5.timesheet.Timesheet;
 import de.tsl2.nano.incubation.specification.ParType;
+import de.tsl2.nano.incubation.specification.actions.ActionPool;
 import de.tsl2.nano.incubation.specification.rules.RulePool;
 import de.tsl2.nano.incubation.specification.rules.RuleScript;
+import de.tsl2.nano.messaging.ChangeEvent;
 import de.tsl2.nano.persistence.GenericLocalBeanContainer;
 import de.tsl2.nano.persistence.Persistence;
 import de.tsl2.nano.service.util.BeanContainerUtil;
@@ -226,11 +232,39 @@ public class NanoH5Test {
         for (int i = 0; i < beanTypesToCheck.length; i++) {
             Bean bean = Bean.getBean(BeanClass.createInstance(beanTypesToCheck[i]));
             System.out.println(bean.toValueMap(null));
+            Bean.getBean(bean.getPresentable()).toValueMap(null);
+            bean.getActions();
+            bean.getPlugins();
+            String[] attributeNames = bean.getAttributeNames();
+            IValueDefinition attr;
+            for (int j = 0; j < attributeNames.length; j++) {
+                attr = bean.getAttribute(attributeNames[j]);
+                IStatus status = attr.getStatus();
+                if (status != null && status.error() != null)
+                    throw new IllegalStateException(status.error());
+                attr.changeHandler().fireEvent(ChangeEvent.createEvent(attr, null, null, false));
+                //trigger all possible rulecovers
+//                Bean.getBean(attr.getConstraint()).toValueMap(null);
+//                Bean.getBean(attr.getPresentation()).toValueMap(null);
+//                if (attr.getColumnDefinition() != null)
+//                    Bean.getBean(attr.getColumnDefinition()).toValueMap(null);
+            }
         }
 
         //check xml failed files - these are written, if simple-xml has problems on deserializing from xml
         List<File> failed = FileUtil.getTreeFiles(DIR_TEST, ".*.xml.failed");
         assertTrue(failed.toString(), failed.size() == 0);
+        
+        //check workflow and specifications
+        Workflow workflow = ENV.get(Workflow.class);
+        if (workflow != null)
+            assertTrue(!workflow.isEmpty());
+        
+        ENV.get(RulePool.class);
+        ENV.get(QueryPool.class);
+        ENV.get(ActionPool.class);
+
+        app.stop();
         
         //create xsd from trang.jar
         assertTrue(new File(DIR_TEST + "/" + "../../../tsl2.nano.common/lib-tools/trang.jar").exists());

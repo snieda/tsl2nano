@@ -12,6 +12,7 @@ package de.tsl2.nano.h5.expression;
 import java.io.Serializable;
 import java.math.BigDecimal;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
 
@@ -21,6 +22,7 @@ import de.tsl2.nano.execution.IPRunnable;
 import de.tsl2.nano.incubation.specification.rules.AbstractRule;
 import de.tsl2.nano.incubation.specification.rules.Rule;
 import de.tsl2.nano.incubation.specification.rules.RulePool;
+import de.tsl2.nano.incubation.specification.rules.RuleScript;
 
 /**
  * Attribute providing the calculation of a {@link Rule}. This attribute can be connected to a 'real' bean-attribute to
@@ -54,11 +56,12 @@ public class RuleExpression<T extends Serializable> extends RunnableExpression<T
 
     @Override
     protected IPRunnable<T, Map<String, Object>> createRunnable() {
-        return (AbstractRule<T>) ENV.get(RulePool.class).get(expression.substring(1));
+        return (AbstractRule<T>) ENV.get(RulePool.class).get(expression.substring(1), getRunnableType(expression));
     }
 
     @Override
     protected Map<String, Object> refreshArguments(Object beanInstance) {
+        super.refreshArguments(beanInstance);
         //transform dates to numbers
         //TODO it's dirty - implement generic for different types
         Set<String> keySet = arguments.keySet();
@@ -73,11 +76,14 @@ public class RuleExpression<T extends Serializable> extends RunnableExpression<T
     
     @Override
     public String getExpressionPattern() {
-        return "\\§.*";
+        return "[" + AbstractRule.PREFIX + RuleScript.PREFIX + "].*";
     }
 
     @Override
     public String getName() {
         return expression.substring(1);
+    }
+    protected Class<? extends AbstractRule> getRunnableType(String ruleName) {
+        return ruleName.charAt(0) == RuleScript.PREFIX ? RuleScript.class : Rule.class;
     }
 }
