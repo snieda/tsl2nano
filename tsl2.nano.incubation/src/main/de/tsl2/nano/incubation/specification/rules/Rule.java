@@ -96,7 +96,7 @@ public class Rule<T> extends AbstractRule<T> {
         
         //calculate the numeric and boolean operations
         LOG.debug("running rule <" + toString() + "> on arguemnts: " + a);
-        T result = (T) operator.eval((CharSequence)operation, (Map<CharSequence, Object>) a);
+        T result = (T) operator.eval((CharSequence)getOperation(), (Map<CharSequence, Object>) a);
         checkConstraint(Operator.KEY_RESULT, result);
         return result;
     }

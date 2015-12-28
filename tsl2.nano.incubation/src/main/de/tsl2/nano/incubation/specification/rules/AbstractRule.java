@@ -41,12 +41,12 @@ public abstract class AbstractRule<T> extends AbstractRunnable<T> {
     protected void importSubRules() {
         RulePool pool = ENV.get(RulePool.class);
         String subRule;
-        while ((subRule = StringUtil.extract(operation, prefix() + "\\w+")).length() > 0) {
+        while ((subRule = StringUtil.extract(getOperation(), prefix() + "\\w+")).length() > 0) {
             AbstractRule<?> rule = pool.get(subRule);
             if (rule == null) {
                 throw new IllegalArgumentException("Referenced rule " + subRule + " in " + this + " not found!");
             }
-            operation = operation.replaceAll(subRule, "(" + rule.operation + ")");
+            setOperation(getOperation().replaceAll(subRule, "(" + rule.getOperation() + ")"));
             parameter.putAll(rule.parameter);
             //TODO: what to do with sub rule constraints?
             //            constraints.putAll(rule.constraints);

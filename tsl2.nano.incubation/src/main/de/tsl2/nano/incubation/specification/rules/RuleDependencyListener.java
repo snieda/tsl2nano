@@ -77,10 +77,10 @@ public class RuleDependencyListener<T, E extends ChangeEvent> extends AbstractDe
         else if (!getAttribute().getDeclaringClass().isAssignableFrom(srcValue.getDeclaringClass()))
             throw new IllegalArgumentException("event.source beanvalue should have an declaring class "
                 + attribute.getDeclaringClass() + " but was: " + srcValue.getDeclaringClass());
-        Map<String, Object> master = Bean.getBean(srcValue.getInstance()).toValueMap(null);
-        master.put(StringUtil.substring(attributeID, null, ".", true), srcValue.getInstance());
-        master.put(srcValue.getId(), source.newValue);
-        return (T) ENV.get(RulePool.class).get(ruleName).run(master);
+        Map<String, Object> context = Bean.getBean(srcValue.getInstance()).toValueMap(null, false, false, false);
+        context.put(StringUtil.substring(attributeID, null, ".", true), srcValue.getInstance());
+        context.put(srcValue.getId(), source.newValue);
+        return (T) ENV.get(RulePool.class).get(ruleName).run(context);
     }
 
     @Override

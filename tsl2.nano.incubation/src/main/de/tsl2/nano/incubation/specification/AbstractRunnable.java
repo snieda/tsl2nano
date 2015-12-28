@@ -20,10 +20,13 @@ import de.tsl2.nano.bean.def.Constraint;
 import de.tsl2.nano.core.ENV;
 import de.tsl2.nano.core.cls.BeanClass;
 import de.tsl2.nano.core.log.LogFactory;
+import de.tsl2.nano.core.util.FileUtil;
+import de.tsl2.nano.core.util.NetUtil;
 import de.tsl2.nano.execution.IPRunnable;
 
 /**
- * runnable checking its arguments against constraints. provides checks against a specification/assertions
+ * runnable checking its arguments against constraints. provides checks against a specification/assertions. if member
+ * operation is an url (e.g. starting with file:) the url content will be used as operation.
  * 
  * @param <T> result type
  * @author Tom, Thomas Schneider
@@ -44,6 +47,7 @@ public abstract class AbstractRunnable<T> implements IPRunnable<T, Map<String, O
     protected Collection<Specification> specifications;
     @Element
     protected String operation;
+    transient protected String operationContent;
 
     public AbstractRunnable() {
         super();
@@ -154,11 +158,13 @@ public abstract class AbstractRunnable<T> implements IPRunnable<T, Map<String, O
 
     /**
      * prefix
+     * 
      * @return referencing name prefix
      */
     public String prefix() {
         return "";
     }
+
     @Override
     public String toString() {
         return name + "{" + operation + "}";
@@ -197,7 +203,8 @@ public abstract class AbstractRunnable<T> implements IPRunnable<T, Map<String, O
             Map<String, Object> args = s.getArguments();
             for (String k : args.keySet()) {
                 Object value = args.get(k);
-                parameter.put(k, new ParType(value != null ? BeanClass.getDefiningClass(value.getClass()) : String.class));
+                parameter.put(k, new ParType(value != null ? BeanClass.getDefiningClass(value.getClass())
+                    : String.class));
             }
         }
         checkSpecifications();
@@ -222,6 +229,7 @@ public abstract class AbstractRunnable<T> implements IPRunnable<T, Map<String, O
 
     /**
      * checkSpecification
+     * 
      * @param s
      */
     protected void checkSpecification(Specification s) {
@@ -231,6 +239,21 @@ public abstract class AbstractRunnable<T> implements IPRunnable<T, Map<String, O
             throw new IllegalStateException("assertion failed on rule " + getName() + ", " + s + ": expected="
                 + s.getExptected()
                 + " , but was: " + result);
+    }
+
+    public String getOperation() {
+        if (operationContent == null && operation != null) {
+            if (NetUtil.isURL(operation))
+                operationContent = new String(FileUtil.getFileBytes(operation, null));
+            else
+                operationContent = operation;
+        }
+        return operationContent;
+    }
+
+    protected void setOperation(String operation) {
+        this.operation = operation;
+        operationContent = null;
     }
 
     @Commit

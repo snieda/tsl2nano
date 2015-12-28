@@ -74,7 +74,7 @@ public class Pool<T extends IPRunnable<?, ?>> {
      * 
      * @return
      */
-    protected String getDirectory() {
+    public String getDirectory() {
         return ENV.getConfigPath()
             + "specification/"
             + StringUtil.substring(BeanClass.getDefiningClass(this.getClass()).getSimpleName().toLowerCase(), null,
@@ -127,7 +127,7 @@ public class Pool<T extends IPRunnable<?, ?>> {
         return (I) (runnable != null ? runnable : loadRunnable(getFileName(name), type));
     }
 
-    private String getFileName(String name) {
+    protected String getFileName(String name) {
         return name.endsWith(".xml") ? name : getDirectory() + name + ".xml";
     }
 

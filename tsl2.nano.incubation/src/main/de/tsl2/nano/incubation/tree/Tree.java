@@ -236,8 +236,8 @@ public class Tree<C, T> extends TreeMap<C, Tree<C, T>> {
      * 
      * @param transformer transformer
      */
-    public void transformTree(ITransformer<Tree<C, T>, Tree<C, T>> transformer) {
-        transformer.transform(this);
+    public <TREE extends Tree<C, T>> void transformTree(ITransformer<TREE, TREE> transformer) {
+        transformer.transform((TREE) this);
         for (Tree<C, T> n : values()) {
             n.transformTree(transformer);
         }

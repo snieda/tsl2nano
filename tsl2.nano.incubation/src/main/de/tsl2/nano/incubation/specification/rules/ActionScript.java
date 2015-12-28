@@ -69,7 +69,7 @@ public class ActionScript<T> extends AbstractRunnable<T> {
     @Override
     public T run(Map<String, Object> arguments, Object... extArgs) {
         try {
-            return (T) engine.eval(operation, bind(engine, arguments));
+            return (T) engine.eval(getOperation(), bind(engine, arguments));
         } catch (Exception e) {
             ManagedException.forward(e);
             return null;

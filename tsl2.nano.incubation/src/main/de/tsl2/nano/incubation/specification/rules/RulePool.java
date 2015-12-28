@@ -26,11 +26,20 @@ public class RulePool extends Pool<AbstractRule<?>> {
     }
 
     @Override
+    protected String getFileName(String name) {
+        //cut optional rule prefix
+        name = name.matches("\\w+.*") ? name : name.substring(1);
+        return super.getFileName(name);
+    }
+    @Override
     public AbstractRule<?> get(String name) {
         Class<? extends AbstractRule> type;
         if (name.startsWith(String.valueOf(RuleScript.PREFIX))) {
             type = RuleScript.class;
             name = name.substring(1);
+        } else if (name.startsWith(String.valueOf(RuleDecisionTable.PREFIX))) {
+                type = RuleDecisionTable.class;
+                name = name.substring(1);
         } else {
             type = Rule.class;
             if (name.startsWith(String.valueOf(AbstractRule.PREFIX)))
