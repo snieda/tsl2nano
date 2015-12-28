@@ -57,8 +57,8 @@ public class Action<T> extends AbstractRunnable<T> {
     public Action(Method method) {
         super();
         this.declaringClass = method.getDeclaringClass();
-        this.operation = method.getName();
-        this.name = this.operation;
+        setOperation(method.getName());
+        this.name = getOperation();
         createParameter(method);
         initDeserializing();
     }
@@ -75,7 +75,7 @@ public class Action<T> extends AbstractRunnable<T> {
     @Override
     public T run(Map<String, Object> context, Object... extArgs) {
         Object instance = context.remove("instance");
-        return (T) BeanClass.getBeanClass(declaringClass).callMethod(instance, operation,
+        return (T) BeanClass.getBeanClass(declaringClass).callMethod(instance, getOperation(),
             getParameterList().toArray(new Class[0]), checkedArguments(context, false).values()
                 .toArray());
     }
