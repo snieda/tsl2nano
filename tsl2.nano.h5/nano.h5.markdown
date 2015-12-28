@@ -639,10 +639,19 @@ Example, referencing a rule for a property of your beandefinition:
 </beanDefinition>
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
+Three rule types are known:
+- Rule: a boolean/numeric operation
+- RuleScript: a java script expression
+- RuleDecisionTable: a decision table where the first column defines the parameter names and all following column are decision values. the last line defines the result vector.
+
 ### Defining a rule through javascript
 
 Use a _RuleScript_ to define a rule with a javascript expression.
  
+### Defining a rule through a decision table
+
+Use a _RuleDecisionTable_ to define a rule through an excel sheet exporting its data through an *csv* file.
+
 ### Defining an action through javascript
 
 Use a _ActionScript_ to define an action with a javascript expression.
@@ -663,6 +672,8 @@ The _meta-frame.html_ defines the html header and an empty body. Inside the head
 An example is provided with _tsl2.nano.h5.x.y.z.jar_. After first start, a css directory will be created. To turn on the given css-styling, rename the file _meta-framex.html_ to _meta-frame.html_ This is only an example - not yet working perfectly!
 
 ### Configuring Presentation, Layout and Constraints
+
+Layouts and LayoutConstraints must be of type *Map* or *String*. If a string is given, this string will be set as element style.
 
 #### Overview styles for Application, BeanCollectors and Beans
 
@@ -2549,6 +2560,8 @@ Net:Connection-->Link-->Cover(content, descriptor)
 * java 8 Probleme:
 	* ant start erst beim 2.mal
 	* javascript engine = null
+* bean.action<Name> --> annotation
+* bean.action<Name>(arguments) --> create Dialog for action arguments
 	
 war:
 * WEB-INF/web..xml rausschmeissen
