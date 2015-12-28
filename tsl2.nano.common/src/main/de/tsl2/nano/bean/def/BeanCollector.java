@@ -13,6 +13,7 @@ import java.io.IOException;
 import java.io.Serializable;
 import java.lang.reflect.Proxy;
 import java.sql.Timestamp;
+import java.text.Format;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
@@ -997,7 +998,7 @@ public class BeanCollector<COLLECTIONTYPE extends Collection<T>, T> extends Bean
 
         for (IPresentableColumn c : colDefs) {
             if (c.getPresentable().isVisible()) {
-                cnames.add(c.getDescription());
+                cnames.add(c.getName());
             }
         }
         return cnames;
@@ -1106,8 +1107,11 @@ public class BeanCollector<COLLECTIONTYPE extends Collection<T>, T> extends Bean
             if (value == null) {
                 return "";
             }
-            if (attribute.getFormat() != null) {
-                return attribute.getFormat().format(value);
+            Format f =
+                attribute.getColumnDefinition() != null && attribute.getColumnDefinition().getFormat() != null
+                    ? attribute.getColumnDefinition().getFormat() : attribute.getFormat();
+            if (f != null) {
+                return f.format(value);
             } else {
                 FormatUtil.getDefaultFormat(value, false).format(value);
             }

@@ -38,6 +38,9 @@ public class ValueColumn<T> implements IPresentableColumn, Serializable {
     /** attribute name to be identifiable */
     @Attribute(required=false)
     String name;
+    /** optional format. if not set, the attributedefintions format will be used */
+    @Element(required=false)
+    Format format;
     @Attribute(required=false)
     int columnIndex;
     @Attribute(required=false)
@@ -164,9 +167,13 @@ public class ValueColumn<T> implements IPresentableColumn, Serializable {
      */
     @Override
     public Format getFormat() {
-        return attributeDefinition.getFormat();
+        return format != null ? format : attributeDefinition.getFormat();
     }
 
+    public void setFormat(Format format) {
+        this.format = format;
+    }
+    
     /**
      * {@inheritDoc}
      */

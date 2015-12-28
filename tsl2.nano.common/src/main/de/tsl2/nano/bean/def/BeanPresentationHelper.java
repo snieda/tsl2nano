@@ -1412,7 +1412,7 @@ public class BeanPresentationHelper<T> {
             pageActions = new ArrayList<IAction>(10);
 
             vsession.setValue(session);
-            if (bean.isMultiValue()) {
+            if (bean.isMultiValue() && bean instanceof BeanCollector) {
                 final BeanCollector<?, T> collector = (BeanCollector<?, T>) bean;
                 if (BeanContainer.instance().isPersistable(collector.getType())) {
                     pageActions.add(new SecureAction(collector.getClazz(),

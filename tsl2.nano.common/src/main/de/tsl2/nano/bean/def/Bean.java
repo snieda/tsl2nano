@@ -569,6 +569,7 @@ public class Bean<T> extends BeanDefinition<T> {
 
     /**
      * injectIntoRuleCovers
+     * 
      * @param bean
      */
     protected static <I> void injectIntoRuleCovers(Bean<I> bean) {
@@ -728,8 +729,8 @@ public class Bean<T> extends BeanDefinition<T> {
         Object v;
         for (Object k : keySet) {
             v = map.get(k);
-            bean.addAttribute(new BeanValue(bean.instance, new MapValue(v, (v != null ? BeanClass.getDefiningClass(v
-                .getClass()) : null), null)));
+            bean.addAttribute(new BeanValue(bean.instance, new MapValue(v != null ? v : k, (v != null ? BeanClass.getDefiningClass(v
+                .getClass()) : null), map)));
         }
         return bean;
     }
@@ -822,6 +823,18 @@ public class Bean<T> extends BeanDefinition<T> {
         }
         buf.append("}");
         return buf.toString();
+    }
+
+    @Override
+    protected void finalize() throws Throwable {
+        //don't call a getter to evaluate attributes - the attributes would be created then
+        if (attributeDefinitions != null) {
+            for (IAttributeDefinition<?> bv : attributeDefinitions.values()) {
+                if (bv instanceof BeanValue)
+                    BeanValue.beanValueCache.remove(bv);
+            }
+        }
+        super.finalize();
     }
 
     @Override

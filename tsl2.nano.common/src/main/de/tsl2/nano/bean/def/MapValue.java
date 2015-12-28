@@ -48,7 +48,7 @@ public class MapValue<T> implements IValueAccess<T>, IAttribute<T> {
      */
     public MapValue(Object name, Class<T> type, Map map) {
         this.name = name;
-        this.type = (Class<T>) (type != null ? type : map != null ? map.get(name).getClass() : Object.class);
+        this.type = (Class<T>) (type != null ? type : map != null && map.get(name) != null ? map.get(name).getClass() : Object.class);
         this.map = map;
     }
 

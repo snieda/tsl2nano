@@ -669,7 +669,7 @@ public class BeanDefinition<T> extends BeanClass<T> implements IPluggable<BeanDe
             actions = new ArrayList<IAction>();
         }
         for (int i = 0; i < methods.length; i++) {
-            if (methods[i].getName().startsWith(ACTION_PREFIX) && methods[i].getParameterTypes().length == 0) {
+            if (methods[i].getName().startsWith(ACTION_PREFIX)/* && methods[i].getParameterTypes().length == 0*/) {
                 final Method m = methods[i];
                 final String cls = m.getDeclaringClass().getSimpleName().toLowerCase();
                 final String name = m.getName().substring(ACTION_PREFIX.length());
@@ -679,12 +679,19 @@ public class BeanDefinition<T> extends BeanClass<T> implements IPluggable<BeanDe
                     Messages.getStringOpt(m.toGenericString())) {
                     @Override
                     public Object action() throws Exception {
-                        return m.invoke(getParameter()[0], new Object[0]);
+                        Object[] args = Arrays.copyOfRange(getParameter(), 1, getParameter().length);
+                        return m.invoke(getParameter()[0], args);
                     }
+                    @Override
+                        public Class[] getArgumentTypes() {
+                            return m.getParameterTypes();
+                        }
                 };
                 String imagePath = id + ".icon";
                 if (Messages.hasKey(imagePath)) {
                     newAction.setImagePath(Messages.getString(imagePath));
+                } else {
+                    newAction.setImagePath("icons/go.png");
                 }
                 newAction.setParameter(parameters);
                 actions.add(newAction);
