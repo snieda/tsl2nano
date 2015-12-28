@@ -313,6 +313,11 @@ public abstract class CommonAction<RETURNTYPE> implements IAction<RETURNTYPE>, S
         return receiverIDs;
     }
 
+    @Override
+    public Class[] getArgumentTypes() {
+        return null;
+    }
+    
     /**
      * @return Returns the parameter.
      */

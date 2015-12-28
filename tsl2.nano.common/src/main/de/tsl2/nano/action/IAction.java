@@ -110,10 +110,18 @@ public interface IAction<RETURNTYPE> extends Runnable {
     Collection<String> getReceiverIDs();
 
     /**
+     * getArgumentTypes
+     * 
+     * @return optional definition of argument types to check {@link #getParameter()} and
+     *         {@link #setParameter(Object...)}. default is null
+     */
+    Class[] getArgumentTypes();
+
+    /**
      * @return optional call arguments for action.
      */
     Object[] getParameter();
-    
+
     Object getParameter(int i);
 
     /**
