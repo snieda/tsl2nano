@@ -105,7 +105,8 @@ public class NanoWebSocketServer extends WebSocketServer {
     public void onMessage(WebSocket conn, String msg) {
         LOG.debug("receiving message: '" + msg + "' from " + conn);
         //if we are in configuration mode, do nothing
-        if (ENV.get(BeanConfigurator.class) != null) {
+        Package pck = ((BeanDefinition)session.getWorkingObject()).getDeclaringClass().getPackage();
+        if (pck.equals(BeanConfigurator.class.getPackage()) || pck.equals(BeanDefinition.class.getPackage())) {
             return;
         }
         //to be secure, no file is saved on wrong name

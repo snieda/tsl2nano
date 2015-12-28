@@ -10,6 +10,9 @@
 package de.tsl2.nano.h5.configuration;
 
 import java.io.Serializable;
+import java.util.Collection;
+
+import javax.xml.ws.Action;
 
 import de.tsl2.nano.bean.def.AttributeDefinition;
 import de.tsl2.nano.bean.def.IAttributeDefinition;
@@ -18,10 +21,14 @@ import de.tsl2.nano.bean.def.IIPresentable;
 import de.tsl2.nano.bean.def.IPresentable;
 import de.tsl2.nano.bean.def.IPresentableColumn;
 import de.tsl2.nano.bean.def.PathExpression;
+import de.tsl2.nano.bean.def.ValueExpression;
 import de.tsl2.nano.core.ENV;
 import de.tsl2.nano.core.cls.BeanClass;
 import de.tsl2.nano.core.cls.IAttribute;
 import de.tsl2.nano.core.util.Util;
+import de.tsl2.nano.h5.RuleCover;
+import de.tsl2.nano.messaging.EventController;
+import de.tsl2.nano.messaging.IListener;
 import de.tsl2.nano.util.PrivateAccessor;
 
 /**
@@ -30,6 +37,7 @@ import de.tsl2.nano.util.PrivateAccessor;
  * @author Tom, Thomas Schneider
  * @version $Revision$
  */
+
 public class AttributeConfigurator implements Serializable {
     /** serialVersionUID */
     private static final long serialVersionUID = 1L;
@@ -182,7 +190,23 @@ public class AttributeConfigurator implements Serializable {
     public boolean isComposition() {
         return attr.composition();
     }
+    
+    public Collection<IListener> getListener() {
+        return attr.changeHandler().getListeners(null);
+    }
 
+    public void setListener(Collection<IListener> listener) {
+        //do nothing - enables , setting listeners
+    }
+
+    public Object getDefault() {
+        return attr.getDefault();
+    }
+    
+    public ValueExpression getValueExpression() {
+        return attr.getValueExpression();
+    }
+    
     public IAttributeDefinition<?> unwrap() {
         return attr;
     }
@@ -190,5 +214,12 @@ public class AttributeConfigurator implements Serializable {
     @Override
     public String toString() {
         return Util.toString(getClass(), attr);
+    }
+    
+    public void actionAddRuleCover(String child, String rule) {
+        RuleCover.cover(attr.getDeclaringClass(), attr.getName(), child, rule);
+    }
+    public void actionRemoveRuleCover(String child, String rule) {
+        RuleCover.removeCover(attr.getDeclaringClass(), attr.getName(), child);
     }
 }

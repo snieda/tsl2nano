@@ -58,6 +58,7 @@ import de.tsl2.nano.core.execution.Profiler;
 import de.tsl2.nano.core.log.LogFactory;
 import de.tsl2.nano.core.util.DateUtil;
 import de.tsl2.nano.core.util.ListSet;
+import de.tsl2.nano.core.util.MapUtil;
 import de.tsl2.nano.core.util.NetUtil;
 import de.tsl2.nano.core.util.NumberUtil;
 import de.tsl2.nano.core.util.StringUtil;
@@ -253,7 +254,7 @@ public class NanoH5Session implements ISession {
                         ((BeanDefinition) userResponse).onActivation();
                     }
 //                    if (!exceptionHandler.hasExceptions()) {
-                        Message.send(exceptionHandler, createStatusText(startTime));
+                    Message.send(exceptionHandler, createStatusText(startTime));
 //                    }
                     msg = getNextPage(userResponse);
                 }
@@ -302,13 +303,15 @@ public class NanoH5Session implements ISession {
     String createStatusText(long startTime) {
         String user =
             authorization != null ? ENV.translate("tsl2nano.login.user", true) + ": "
-                + authorization.getUser()+ "§" + StringUtil.toHexString(getUserAuthorization().toString().getBytes()) + ", " + "Online: "
+                + authorization.getUser() + "§" + StringUtil.toHexString(getUserAuthorization().toString().getBytes())
+                + ", " + "Online: "
                 + DateUtil.getFormattedMinutes(getDuration()) + " min, " : "";
         return PREFIX_STATUS_LINE + user
             + ENV.translate("tsl2nano.time", true)
             + ": " + DateUtil.getFormattedDateTime(new Date()) + ", "
             + ENV.translate("tsl2nano.session", true)
-            + ": " + ENV.translate(nav.getName(), true) + "§" + StringUtil.toHexString(getContext().toString().getBytes()) + ", "
+            + ": " + ENV.translate(nav.getName(), true) + "§"
+            + StringUtil.toHexString(getContext().toString().getBytes()) + ", "
             + ENV.translate("tsl2nano.request", true) + ": "
             + DateUtil.getFormattedMinutes(System.currentTimeMillis() - startTime) + " min"
             + (LOG.isDebugEnabled() ? ", " + "Memory: " + (Profiler.getUsedMem() / (1024 * 1024)) + " MB" : "")
@@ -422,7 +425,7 @@ public class NanoH5Session implements ISession {
             actions.addAll(c.getPresentationHelper().getPageActions(this));
             actions.addAll(c.getPresentationHelper().getSessionActions(this));
             actions.addAll(c.getPresentationHelper().getApplicationActions(this));
-            if (c.isMultiValue()) {
+            if (c.isMultiValue() && c instanceof BeanCollector) {
                 actions.addAll(((BeanCollector) c).getColumnSortingActions());
                 actions.add(((BeanCollector) c).getQuickSearchAction());
             }
@@ -445,7 +448,7 @@ public class NanoH5Session implements ISession {
                     if (c.isMultiValue() && action.getId().endsWith(BeanCollector.POSTFIX_QUICKSEARCH)) {
                         action.setParameter(parms.get(Html5Presentation.ID_QUICKSEARCH_FIELD));
                         responseObject = action.activate();
-                    } else if (c.isMultiValue()
+                    } else if (c.isMultiValue() && c instanceof BeanCollector
                         && isSearchRequest(action.getId(), (BeanCollector<?, ?>) c)) {
                         responseObject = processSearchRequest(parms, (BeanCollector<?, ?>) c);
                     } else {
@@ -456,8 +459,16 @@ public class NanoH5Session implements ISession {
                         if (action.getParameter() == null) {
                             action.setParameter(getContextParameter());
                         }
-                        Object result = action.activate();
-
+                        Object result;
+                        //on parametrized actions provide a new detail dialog/page
+                        if (action.getArgumentTypes() != null) {
+                            Bean bean = Bean.getBean(MapUtil.fromKeys(action.getArgumentTypes()));
+                            bean.addAction(action);
+                            result = bean;
+                        } else {
+                            result = action.activate();
+                        }
+                        
                         /*
                          * if action is asynchron, it's a long term action showing the same page again
                          * with progress informations
@@ -505,7 +516,7 @@ public class NanoH5Session implements ISession {
         for (BeanDefinition c : con) {
             p.putAll(c.toValueMap(p));
         }
-        //to that twice to let rules and queries use defined parameter
+        //do that twice to let rules and queries use defined parameter
         LOG.debug("second iteration on context for session: " + this);
         for (BeanDefinition c : con) {
             p.putAll(c.toValueMap(p));
@@ -669,7 +680,7 @@ public class NanoH5Session implements ISession {
 //            from.setName(null);
                 to.getPresentationHelper().change(BeanPresentationHelper.PROP_DOVALIDATION, false);
                 if (to.hasAttribute(NAME))
-                 {
+                {
                     to.setAttributeFilter(NAME);
 //            to.setName(null);
                 }

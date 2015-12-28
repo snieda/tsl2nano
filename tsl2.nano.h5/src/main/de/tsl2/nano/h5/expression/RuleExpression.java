@@ -12,7 +12,6 @@ package de.tsl2.nano.h5.expression;
 import java.io.Serializable;
 import java.math.BigDecimal;
 import java.util.Date;
-import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
 
@@ -21,6 +20,7 @@ import de.tsl2.nano.core.util.Util;
 import de.tsl2.nano.execution.IPRunnable;
 import de.tsl2.nano.incubation.specification.rules.AbstractRule;
 import de.tsl2.nano.incubation.specification.rules.Rule;
+import de.tsl2.nano.incubation.specification.rules.RuleDecisionTable;
 import de.tsl2.nano.incubation.specification.rules.RulePool;
 import de.tsl2.nano.incubation.specification.rules.RuleScript;
 
@@ -76,14 +76,18 @@ public class RuleExpression<T extends Serializable> extends RunnableExpression<T
     
     @Override
     public String getExpressionPattern() {
-        return "[" + AbstractRule.PREFIX + RuleScript.PREFIX + "].*";
+        return expressionPattern();
+    }
+
+    public static String expressionPattern() {
+        return "[" + AbstractRule.PREFIX + RuleScript.PREFIX + RuleDecisionTable.PREFIX + "].*";
     }
 
     @Override
     public String getName() {
         return expression.substring(1);
     }
-    protected Class<? extends AbstractRule> getRunnableType(String ruleName) {
-        return ruleName.charAt(0) == RuleScript.PREFIX ? RuleScript.class : Rule.class;
+    public static Class<? extends AbstractRule> getRunnableType(String ruleName) {
+        return ruleName.charAt(0) == RuleScript.PREFIX ? RuleScript.class : ruleName.charAt(0) == RuleDecisionTable.PREFIX ? RuleDecisionTable.class : Rule.class;
     }
 }

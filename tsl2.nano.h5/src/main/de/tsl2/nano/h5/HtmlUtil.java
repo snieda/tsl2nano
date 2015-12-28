@@ -32,6 +32,7 @@ import org.xml.sax.InputSource;
 
 import de.tsl2.nano.core.ManagedException;
 import de.tsl2.nano.core.log.LogFactory;
+import de.tsl2.nano.core.util.NetUtil;
 import de.tsl2.nano.core.util.StringUtil;
 import de.tsl2.nano.core.util.Util;
 
@@ -457,16 +458,7 @@ public class HtmlUtil {
     }
 
     public static final boolean isURL(String str) {
-        if (str.isEmpty() || str.equals("/") || str.equals("/null")) {
-            return false;
-        }
-        try {
-            URI.create(str);
-            return str.contains(".") || str.contains("/");
-        } catch (Exception e) {
-            //ok, no url
-            return false;
-        }
+        return NetUtil.isURL(str);
     }
 
     /**

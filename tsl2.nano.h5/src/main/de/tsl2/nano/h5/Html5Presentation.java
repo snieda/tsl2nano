@@ -981,13 +981,9 @@ public class Html5Presentation<T> extends BeanPresentationHelper<T> implements I
                 ATTR_ALIGN,
                 getTextAlignment(p.getStyle()));
         }
-        if (p.getLayout() instanceof Map) {
-            HtmlUtil.appendAttributes(grid, MapUtil.asArray((Map<String, Object>) p.getLayout()));
-        }
+        createLayout(grid, p);
         //TODO: only layout-constraints should be set
-        if (p.getLayoutConstraints() instanceof Map) {
-            HtmlUtil.appendAttributes(grid, MapUtil.asArray((Map<String, Object>) p.getLayoutConstraints()));
-        }
+        createLayoutConstraints(grid, p);
     }
 
     /**
@@ -1176,7 +1172,7 @@ public class Html5Presentation<T> extends BeanPresentationHelper<T> implements I
      */
     Element createBeanActions(Element form, BeanDefinition<?> model) {
         Element panel = createActionPanel(form, model.getActions(), true, ATTR_ALIGN, ALIGN_CENTER);
-        if (model.isMultiValue() && ((BeanCollector) model).hasMode(MODE_ASSIGNABLE)) {
+        if (model.isMultiValue() && model instanceof BeanCollector && ((BeanCollector) model).hasMode(MODE_ASSIGNABLE)) {
             String assignLabel = Messages.getStringOpt("tsl2nano.assign", true);
             createAction(panel, BTN_ASSIGN, assignLabel, assignLabel, "submit", null, "icons/links.png", true, true,
                 false);
@@ -1850,8 +1846,11 @@ public class Html5Presentation<T> extends BeanPresentationHelper<T> implements I
      * @return
      */
     private Element createLayout(Element parent, IPresentable presentable) {
-        if (presentable.getLayout() instanceof Map) {
-            parent = appendElement(parent, TAG_TABLE, MapUtil.asStringArray((Map) presentable.getLayout()));
+        Serializable l = presentable.getLayout();
+        if (l instanceof Map) {
+            parent = appendElement(parent, TAG_TABLE, MapUtil.asStringArray((Map) l));
+        } else if (l instanceof String) {
+            parent = appendElement(parent, TAG_TABLE, ATTR_STYLE, (String)l);
         }
         return parent;
     }
@@ -1864,9 +1863,12 @@ public class Html5Presentation<T> extends BeanPresentationHelper<T> implements I
      * @return
      */
     private Element createLayoutConstraints(Element parent, IPresentable p) {
-        if (p.getLayoutConstraints() instanceof Map) {
-            HtmlUtil.appendAttributes(parent, MapUtil.asArray((Map<String, String>) p.getLayoutConstraints()));
+        Object lc = p.getLayoutConstraints();
+        if (lc instanceof Map) {
+            HtmlUtil.appendAttributes(parent, MapUtil.asArray((Map<String, String>) lc));
+        } else if (lc instanceof String) {
         }
+            HtmlUtil.appendAttributes(parent, ATTR_STYLE, lc);
         return parent;
     }
 
