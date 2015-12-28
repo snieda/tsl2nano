@@ -257,6 +257,19 @@ public class NetUtil {
         return url(surl, null);
     }
 
+    public static final boolean isURL(String str) {
+        if (str.isEmpty() || str.equals("/") || str.equals("/null")) {
+            return false;
+        }
+        try {
+            URI.create(str);
+            return str.contains(".") || str.contains("/");
+        } catch (Exception e) {
+            //ok, no url
+            return false;
+        }
+    }
+
     /**
      * convenience to get an url object. if no scheme/protocol is given, 'http://' will be used!
      * 

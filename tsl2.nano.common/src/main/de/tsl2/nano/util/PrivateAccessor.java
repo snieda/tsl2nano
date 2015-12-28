@@ -72,15 +72,14 @@ public class PrivateAccessor<T> extends UnboundAccessor<T> {
         return getField(instance.getClass(), name);
     }
 
-    protected Field getField(Class<?> cls, String name) {
+    protected Field getField(Class<?> cls, String name) throws NoSuchFieldException {
         try {
             return cls.getDeclaredField(name);
         } catch (NoSuchFieldException e) {
             if (cls.getSuperclass() != null) {
                 return getField(cls.getSuperclass(), name);
             }
-            ManagedException.forward(e);
-            return null;
+            throw e;
         }
     }
 

@@ -455,9 +455,10 @@ public final class DateUtil {
     public static Time getTime(int hour, int minute) {
         return getTime(hour, minute, 0);
     }
-    
+
     /**
      * getTime
+     * 
      * @param hour
      * @param minute
      * @param second
@@ -466,9 +467,12 @@ public final class DateUtil {
     public static Time getTime(int hour, int minute, int second) {
         Calendar cal = getCalendar();
         cal.setTimeInMillis(hour * HOUR_TO_MINUTES * MILLI_TO_MINUTES + minute * MILLI_TO_MINUTES + 1000 * second);
-        return new Time(cal.getTimeInMillis() - cal.getTimeZone().getOffset(cal.getTimeInMillis()));
+        //subtract the timezone - only if time > timezone-value
+        long toffset = cal.getTimeZone().getOffset(cal.getTimeInMillis());
+        return new Time(cal.getTimeInMillis()
+            - (cal.getTimeInMillis() > toffset ? toffset : 0));
     }
-    
+
     /**
      * returns desired part of date
      * 

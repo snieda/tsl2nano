@@ -212,6 +212,7 @@ public class MapUtil {
     public static <K, V> Map<K, V> copy(Map<K, V> src, int start, int end) {
         return copy(src, start, end, new HashMap<K, V>());
     }
+
     /**
      * copies the given block of elements from src to dest. be careful: the order of your src map may not be defined!
      * 
@@ -228,5 +229,19 @@ public class MapUtil {
                 dest.put((K) k, src.get(k));
         }
         return dest;
+    }
+
+    /**
+     * fills a map with given keys (values are null) respecting the given order of the keys.
+     * 
+     * @param keys defining the map content
+     * @return map holding the keys with null values
+     */
+    public static <T> Map<T, Object> fromKeys(T... keys) {
+        LinkedHashMap<T, Object> map = new LinkedHashMap<T, Object>();
+        for (int i = 0; i < keys.length; i++) {
+            map.put(keys[i], null);
+        }
+        return map;
     }
 }

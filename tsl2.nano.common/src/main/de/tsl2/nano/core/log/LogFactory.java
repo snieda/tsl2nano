@@ -13,6 +13,7 @@ import java.util.Queue;
 import java.util.concurrent.Executors;
 import java.util.concurrent.LinkedBlockingQueue;
 
+import org.apache.commons.logging.Log;
 import org.simpleframework.xml.Attribute;
 import org.simpleframework.xml.Default;
 import org.simpleframework.xml.DefaultType;
@@ -555,4 +556,22 @@ public/*abstract*/class LogFactory implements Runnable, Serializable {
         }
     }
 
+    /**
+     * convenience to avoid creating log members on each class.
+     * logger
+     * @param obj any instance to log
+     * @return logger for given instance
+     */
+    public static final Log logger(Object obj) {
+        return logger(obj.getClass());
+    }
+    /**
+     * convenience to avoid creating log members on each class.
+     * logger
+     * @param cls any class to log
+     * @return logger for given instance
+     */
+    public static final Log logger(Class cls) {
+        return getLog(cls);
+    }
 }
