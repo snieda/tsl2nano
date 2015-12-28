@@ -1,0 +1,66 @@
+==============================================================================
+Instructions to debug/trace an application without working on a checked-out 
+project or any ide*
+==============================================================================
+
+==============================================================================
+== Preconditions
+==============================================================================
+
+1. access to application jar-libraries
+2. access to the following tools:
+	- any java decompiler like procyon, jd-gui, d4j
+	- aspectjweaver.jar, aspectjrt.jar
+	- standard java compiler with tools.jar
+	- compiled aspect Trace.java (Trace.class)
+	- compiled weaver start class (StartWeaver)
+3. any text editor
+
+==============================================================================
+== Steps and Conditions
+==============================================================================
+
+------------------------------------------------------------------------------
+-- Exception Stacktrace without lines
+------------------------------------------------------------------------------
+
+1. If you have no sources, decompile the jar with:
+	- procyon: java -jar procyon-decompiler-0.5.30.jar <JARFILE> -o OUTPUTDIR
+	- jd-gui : open jar in gui and select class file
+	- cfr    : java -jar cfr_0_108.jar <JARFILE> --outputdir OUTPUTDIR
+2. Compile one new code file against the current jar-files
+	- javac -cp * -g -sourcepath src src/mypackage/MyClass
+3. Pack it to the owning jar-file
+4. If no hot-deploy is active, restart the application and review the error
+
+------------------------------------------------------------------------------
+-- Log extensions
+------------------------------------------------------------------------------
+
+1. Simple
+	- call Runtime.getRuntime().traceMethodCalls(true)
+	- call Runtime.getRuntime().traceInstructions(true)
+	
+2. AOP (AspectJ)
+
+java argument: -javaagent:lib/aspectjweaver.jar
+
+If no log properties are accessible, use AOP to trace method calls. If we can't
+restart the application and no hot-deployment is available, we have to create
+a connection to the running jdk through javax.management:
+	- Put the classes StartWeaver and Trace to the path of the other jars
+	- Start StartWeaver with: java -jar weavetrace.jar
+	- now the agent aspectjweaver is connected and the Trace aop should extend
+	  the logging
+
+aop.xml should be found in classpath 'META-INF/aop.xml'.
+
+3. Creating own Agents
+
+see http://dhruba.name/2010/02/07/creation-dynamic-loading-and-instrumentation-with-javaagents/
+
+- implement an *ClassFileTransformer*
+- provide static and dynamic entry points to start the agent:
+	- use jdk tools.jar VirtualMachine.attach(jarFile) to load your agent dynamically
+	- or provide the methods *public static void premain(String args, Instrumentation inst) throws Exception*
+	  and *public static void agentmain(String args, Instrumentation inst) throws Exception*
