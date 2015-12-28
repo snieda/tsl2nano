@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<aspectj>
+	<aspects>
+		<concrete-aspect name="tracer" extends="de.tsl2.nano.agent.LogMeAs">
+			<pointcut name="traceMethodAround" expression="execution(public * *.*(..))" />
+			<pointcut name="traceMethod"       expression="execution(!public XXX *.*(..))" />
+		</concrete-aspect>
+	</aspects>
+	<!-- options="-verbose -showWeaveInfo" -->
+	<weaver>
+		<include within="*"/>
+		<exclude within="*..Log*"/>
+ 		<exclude within="com..*"/>
+		<exclude within="org..*"/>
+		<exclude within="sun..*"/>
+		<exclude within="java..*"/>
+		<dump within="*" beforeandafter="true"/>
+	</weaver>
+</aspectj>
