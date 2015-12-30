@@ -1352,8 +1352,7 @@ public class BeanCollector<COLLECTIONTYPE extends Collection<T>, T> extends Bean
             @Override
             public Object action() throws Exception {
                 //TODO: fire refresh event
-                BeanUtil.resetValues(getBeanFinder().getFilterRange().getInstance().getFrom());
-                BeanUtil.resetValues(getBeanFinder().getFilterRange().getInstance().getTo());
+                getBeanFinder().reset();
                 if (!isStaticCollection && collection != null) {
                     collection.clear();
                 }

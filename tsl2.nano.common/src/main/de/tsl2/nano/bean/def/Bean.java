@@ -769,6 +769,11 @@ public class Bean<T> extends BeanDefinition<T> {
         if (!isMultiValue()) {
             detach("remove");
         }
+        //remove temp values of listeners
+        List<BeanValue<?>> bvs = getBeanValues();
+        for (BeanValue<?> bv : bvs) {
+            bv.changeHandler().reset();
+        }
     }
 
     /**

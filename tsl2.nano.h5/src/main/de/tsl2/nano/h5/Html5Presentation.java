@@ -981,7 +981,9 @@ public class Html5Presentation<T> extends BeanPresentationHelper<T> implements I
                 ATTR_ALIGN,
                 getTextAlignment(p.getStyle()));
         }
-        createLayout(grid, p);
+        if (p.getLayout() instanceof Map) {
+            HtmlUtil.appendAttributes(grid, MapUtil.asArray((Map<String, Object>) p.getLayout()));
+        }
         //TODO: only layout-constraints should be set
         createLayoutConstraints(grid, p);
     }
@@ -1867,8 +1869,8 @@ public class Html5Presentation<T> extends BeanPresentationHelper<T> implements I
         if (lc instanceof Map) {
             HtmlUtil.appendAttributes(parent, MapUtil.asArray((Map<String, String>) lc));
         } else if (lc instanceof String) {
-        }
             HtmlUtil.appendAttributes(parent, ATTR_STYLE, lc);
+        }
         return parent;
     }
 

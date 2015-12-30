@@ -155,7 +155,7 @@ public class RuleDecisionTable<T> extends AbstractRule<T> {
 
     private T evalResult(byte[][] mt, boolean stopOnFirst) {
         boolean matched = false;
-        for (int i = 0; i < mt.length; i++) {
+        for (int i = 0; i < mt[0].length; i++) {
             if (matches(mt, i)) {
                 if (stopOnFirst)
                     return getResultVector().get(i);

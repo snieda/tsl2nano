@@ -20,7 +20,7 @@
   </data-source>
  </project-data-sources>
  <source-databases>
-  <database id="DB0" populated="true" UUID="e8da966f-cf93-43c9-a85e-70c11fefe02a" dbcs-ref="DS2" name="PlayPen Database" physicalName="anyway" sql-exception="ca.sqlpower.sqlobject.SQLObjectException: ca.sqlpower.sqlobject.SQLObjectException: ca.sqlpower.sqlobject.SQLObjectException: ca.sqlpower.sqlobject.SQLObjectException: ca.sqlpower.sqlobject.SQLObjectException: ca.sqlpower.sqlobject.SQLObjectException: ca.sqlpower.sqlobject.SQLObjectException: ca.sqlpower.sqlobject.SQLObjectException: ca.sqlpower.sqlobject.SQLObjectException: ca.sqlpower.sqlobject.SQLObjectException: ca.sqlpower.sqlobject.SQLObjectException: Couldn&apos;t connect to database: Database lock acquisition failure: lockFile: org.hsqldb.persist.LockFile@b21156d8[file =null, exists=false, locked=false, valid=false, ] method: setPath reason: java.io.IOException: Die Syntax für den Dateinamen, Verzeichnisnamen oder die Datenträgerbezeichnung ist falsch" >
+  <database id="DB0" populated="true" UUID="e8da966f-cf93-43c9-a85e-70c11fefe02a" dbcs-ref="DS2" name="PlayPen Database" physicalName="anyway" sql-exception="ca.sqlpower.sqlobject.SQLObjectException: ca.sqlpower.sqlobject.SQLObjectException: ca.sqlpower.sqlobject.SQLObjectException: ca.sqlpower.sqlobject.SQLObjectException: ca.sqlpower.sqlobject.SQLObjectException: ca.sqlpower.sqlobject.SQLObjectException: ca.sqlpower.sqlobject.SQLObjectException: ca.sqlpower.sqlobject.SQLObjectException: ca.sqlpower.sqlobject.SQLObjectException: ca.sqlpower.sqlobject.SQLObjectException: ca.sqlpower.sqlobject.SQLObjectException: ca.sqlpower.sqlobject.SQLObjectException: Couldn&apos;t connect to database: Database lock acquisition failure: lockFile: org.hsqldb.persist.LockFile@b21156d8[file =null, exists=false, locked=false, valid=false, ] method: setPath reason: java.io.IOException: Die Syntax für den Dateinamen, Verzeichnisnamen oder die Datenträgerbezeichnung ist falsch" >
    <relationships>
    </relationships>
   </database>
@@ -85,7 +85,7 @@
     <column id="COL19" populated="true" UUID="f2f72274-238b-45c6-946f-9d53d0fbb799" autoIncrement="false" autoIncrementSequenceName="Charge_pause_seq" defaultValue="" name="pause" nullable="1" physicalName="pause" precision="0" referenceCount="1" scale="0" sourceDataTypeName="UserDefinedSQLType" type="92" userDefinedTypeUUID="10d6960f-169d-47c2-860a-37341342b1d5" >
      <remarks></remarks>
     </column>
-    <column id="COL20" populated="true" UUID="09d817ee-6fa1-49f5-90f4-02cca9fc060d" autoIncrement="false" autoIncrementSequenceName="Charge_value_seq" defaultValue="" name="value" nullable="0" physicalName="value" precision="0" referenceCount="1" scale="0" sourceDataTypeName="UserDefinedSQLType" type="3" userDefinedTypeUUID="cc1304ea-628a-4fc5-a84a-06ba14759152" >
+    <column id="COL20" populated="true" UUID="09d817ee-6fa1-49f5-90f4-02cca9fc060d" autoIncrement="false" autoIncrementSequenceName="Charge_value_seq" defaultValue="" name="value" nullable="0" physicalName="value" precision="2" referenceCount="1" scale="0" sourceDataTypeName="UserDefinedSQLType" type="3" userDefinedTypeUUID="cc1304ea-628a-4fc5-a84a-06ba14759152" >
      <remarks></remarks>
     </column>
     <column id="COL21" populated="true" UUID="39c43a41-3a4a-42ee-bf54-5606a1be1dd1" autoIncrement="false" autoIncrementSequenceName="Charge_description_seq" defaultValue="" name="comment" nullable="1" physicalName="comment" precision="512" referenceCount="1" scale="0" sourceDataTypeName="UserDefinedSQLType" type="12" userDefinedTypeUUID="831ac2d4-0e65-47ec-a0b7-62b7f6b8760a" >
@@ -120,7 +120,7 @@
     <column id="COL30" populated="true" UUID="82167d4c-6629-410d-9325-a78123e762b9" autoIncrement="false" autoIncrementSequenceName="Discharge_date_seq" defaultValue="" name="date" nullable="0" physicalName="date" precision="0" referenceCount="1" scale="0" sourceDataTypeName="UserDefinedSQLType" type="93" userDefinedTypeUUID="6497d8de-0e00-40d6-a42e-e2adca83be64" >
      <remarks></remarks>
     </column>
-    <column id="COL31" populated="true" UUID="286517db-3290-467c-a3f6-61f81dc31b50" autoIncrement="false" autoIncrementSequenceName="Discharge_value_seq" defaultValue="" name="value" nullable="0" physicalName="value" precision="0" referenceCount="1" scale="0" sourceDataTypeName="UserDefinedSQLType" type="3" userDefinedTypeUUID="cc1304ea-628a-4fc5-a84a-06ba14759152" >
+    <column id="COL31" populated="true" UUID="286517db-3290-467c-a3f6-61f81dc31b50" autoIncrement="false" autoIncrementSequenceName="Discharge_value_seq" defaultValue="" name="value" nullable="0" physicalName="value" precision="2" referenceCount="1" scale="0" sourceDataTypeName="UserDefinedSQLType" type="3" userDefinedTypeUUID="cc1304ea-628a-4fc5-a84a-06ba14759152" >
      <remarks></remarks>
     </column>
     <column id="COL32" populated="true" UUID="cc998f0c-1b81-4e0d-a25c-a8191891665d" autoIncrement="false" autoIncrementSequenceName="Discharge_comment_seq" defaultValue="" name="comment" nullable="1" physicalName="comment" precision="512" referenceCount="1" scale="0" sourceDataTypeName="UserDefinedSQLType" type="12" userDefinedTypeUUID="831ac2d4-0e65-47ec-a0b7-62b7f6b8760a" >
@@ -367,7 +367,7 @@
     <column id="COL104" populated="true" UUID="ee75f683-40e2-43fc-ae3d-d81bf27e73d3" autoIncrement="false" autoIncrementSequenceName="Item_end_seq" defaultValue="" name="end" nullable="1" physicalName="end" precision="0" referenceCount="1" scale="0" sourceDataTypeName="UserDefinedSQLType" type="91" userDefinedTypeUUID="ee349be3-6af2-46e1-b305-975f5354b009" >
      <remarks>availability</remarks>
     </column>
-    <column id="COL105" populated="true" UUID="f46e9096-b801-4807-b86f-a3432ece93d0" autoIncrement="false" autoIncrementSequenceName="Item_value_seq" defaultValue="" name="value" nullable="0" physicalName="value" precision="0" referenceCount="1" scale="0" sourceDataTypeName="UserDefinedSQLType" type="2" userDefinedTypeUUID="115245ce-612c-4d6a-b559-6dd903dd959a" >
+    <column id="COL105" populated="true" UUID="f46e9096-b801-4807-b86f-a3432ece93d0" autoIncrement="false" autoIncrementSequenceName="Item_value_seq" defaultValue="" name="value" nullable="0" physicalName="value" precision="2" referenceCount="1" scale="0" sourceDataTypeName="UserDefinedSQLType" type="2" userDefinedTypeUUID="115245ce-612c-4d6a-b559-6dd903dd959a" >
      <remarks></remarks>
     </column>
     <column id="COL106" populated="true" UUID="982f8ced-bc5e-4e07-9617-d84ea8f21475" autoIncrement="false" autoIncrementSequenceName="Item_description_seq" defaultValue="" name="description" nullable="1" physicalName="description" precision="256" referenceCount="1" scale="0" sourceDataTypeName="UserDefinedSQLType" type="12" userDefinedTypeUUID="831ac2d4-0e65-47ec-a0b7-62b7f6b8760a" >
@@ -758,7 +758,7 @@ on a party, it may be a bank connection or a party category.</remarks>
  <ddl-generator type="ca.sqlpower.architect.ddl.GenericDDLGenerator" allow-connection="true"> </ddl-generator>
  <liquibase-settings useSeparateChangeSets="false" generateId="false" idStart="1"/>
  <create-kettle-job-settings filePath="" jobName="" schemaName="" kettleJoinType="0" savingToFile="true" />
- <play-pen zoom="1.0" viewportX="0" viewportY="0" relationship-style="rectilinear" names-displayLogicalNames="true" showPrimaryTag="true" showForeignTag="true" showAlternateTag="true" columnVisibility="ALL" relationshipLabelVisibility="true">
+ <play-pen zoom="1.0" viewportX="0" viewportY="167" relationship-style="rectilinear" names-displayLogicalNames="true" showPrimaryTag="true" showForeignTag="true" showAlternateTag="true" columnVisibility="ALL" relationshipLabelVisibility="true">
   <table-pane table-ref="TAB2" x="101" y="70" bgColor="0xeeeeee" fgColor="0x000000" rounded="false" dashed="false"/>
   <table-pane table-ref="TAB11" x="424" y="151" bgColor="0xeeeeee" fgColor="0x000000" rounded="false" dashed="false"/>
   <table-pane table-ref="TAB26" x="435" y="370" bgColor="0xeeeeee" fgColor="0x000000" rounded="false" dashed="false"/>

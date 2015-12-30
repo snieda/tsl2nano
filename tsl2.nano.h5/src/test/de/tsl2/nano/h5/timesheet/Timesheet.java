@@ -242,6 +242,8 @@ public class Timesheet extends NanoH5App {
         charge.getAttribute(ATTR_FROMTIME).changeHandler().addListener(listener, ChangeEvent.class);
         charge.getAttribute(ATTR_TOTIME).changeHandler().addListener(wsListener, WSEvent.class);
         charge.getAttribute(ATTR_TOTIME).changeHandler().addListener(listener, ChangeEvent.class);
+        charge.getAttribute(ATTR_PAUSE).changeHandler().addListener(wsListener, WSEvent.class);
+        charge.getAttribute(ATTR_PAUSE).changeHandler().addListener(listener, ChangeEvent.class);
 
         /*
          * add attribute presentation rules

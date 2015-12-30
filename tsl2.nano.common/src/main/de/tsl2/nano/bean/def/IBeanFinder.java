@@ -101,4 +101,9 @@ public interface IBeanFinder<T, F> {
      * @param maxresult
      */
     void setMaxResultCount(int maxresult);
+    
+    /**
+     * resets the from and to ranges
+     */
+    void reset();
 }

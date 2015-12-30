@@ -10,11 +10,6 @@
 package de.tsl2.nano.messaging;
 
 import java.io.Serializable;
-
-import de.tsl2.nano.bean.BeanUtil;
-import de.tsl2.nano.core.log.LogFactory;
-import de.tsl2.nano.core.util.ListWrapper;
-
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.LinkedHashMap;
@@ -24,7 +19,10 @@ import org.apache.commons.logging.Log;
 import org.simpleframework.xml.Default;
 import org.simpleframework.xml.DefaultType;
 import org.simpleframework.xml.ElementMap;
-import org.simpleframework.xml.core.Commit;
+
+import de.tsl2.nano.bean.BeanUtil;
+import de.tsl2.nano.core.log.LogFactory;
+import de.tsl2.nano.core.util.ListWrapper;
 
 /**
  * manages bean typed or untyped events. registers {@link IListener}s and fires {@link ChangeEvent} or other events to
@@ -212,6 +210,16 @@ public class EventController implements Serializable {
         if (listener != null) {
             listener.clear();
             listener = null;
+        }
+    }
+
+    public void reset() {
+        if (listener != null) {
+            Collection<IListener> listeners = getListeners(null);
+            for (IListener l : listeners) {
+                if (l instanceof IStatefulListener)
+                    ((IStatefulListener)l).reset();
+            }
         }
     }
 

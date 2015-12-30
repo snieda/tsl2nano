@@ -15,6 +15,7 @@ import java.util.Map;
 import org.apache.commons.logging.Log;
 import org.simpleframework.xml.Attribute;
 
+import de.tsl2.nano.bean.BeanUtil;
 import de.tsl2.nano.bean.IValueAccess;
 import de.tsl2.nano.bean.def.AbstractDependencyListener;
 import de.tsl2.nano.bean.def.Bean;
@@ -24,6 +25,7 @@ import de.tsl2.nano.core.ENV;
 import de.tsl2.nano.core.log.LogFactory;
 import de.tsl2.nano.core.util.StringUtil;
 import de.tsl2.nano.messaging.ChangeEvent;
+import de.tsl2.nano.util.PrivateAccessor;
 
 /**
  * dependency listener evaluating its value through a given rule.
@@ -39,6 +41,9 @@ public class RuleDependencyListener<T, E extends ChangeEvent> extends AbstractDe
 
     @Attribute
     String ruleName;
+
+    /** copy of base instance holding all further changes */
+    transient Object changes;
 
     /**
      * constructor
@@ -58,6 +63,12 @@ public class RuleDependencyListener<T, E extends ChangeEvent> extends AbstractDe
         this.ruleName = ruleName;
     }
 
+    @SuppressWarnings("unchecked")
+    @Override
+    public void handleEvent(E event) {
+        ((IValueAccess<T>) getAttribute()).setValue(evaluate(event));
+    }
+
     /**
      * evaluate a new value through a rule. the events source (a beanvalue) and all parents attributes will be given to
      * the rule as arguments.
@@ -65,7 +76,7 @@ public class RuleDependencyListener<T, E extends ChangeEvent> extends AbstractDe
      * @param source new foreign value
      * @return result of executing a rule.
      */
-    @SuppressWarnings("unchecked")
+    @SuppressWarnings({ "unchecked", "rawtypes" })
     protected T evaluate(E source) {
         BeanValue srcValue = (BeanValue) source.getSource();
         if (getAttribute() == null) {
@@ -77,20 +88,44 @@ public class RuleDependencyListener<T, E extends ChangeEvent> extends AbstractDe
         else if (!getAttribute().getDeclaringClass().isAssignableFrom(srcValue.getDeclaringClass()))
             throw new IllegalArgumentException("event.source beanvalue should have an declaring class "
                 + attribute.getDeclaringClass() + " but was: " + srcValue.getDeclaringClass());
-        Map<String, Object> context = Bean.getBean(srcValue.getInstance()).toValueMap(null, false, false, false);
+        Bean<Object> bean = registerChange(source);
+        Map<String, Object> context = bean.toValueMap(null, false, false, false);
         context.put(StringUtil.substring(attributeID, null, ".", true), srcValue.getInstance());
-        context.put(srcValue.getId(), source.newValue);
+//        context.put(srcValue.getName(), source.newValue);
         return (T) ENV.get(RulePool.class).get(ruleName).run(context);
+    }
+
+    /**
+     * registerChange
+     * 
+     * @param source
+     * @param srcValue
+     * @return
+     */
+    @SuppressWarnings("rawtypes")
+    private Bean<Object> registerChange(E source) {
+        BeanValue srcValue = (BeanValue) source.getSource();
+        if (changes == null)
+            changes = BeanUtil.copy(srcValue.getInstance());
+        Bean<Object> bean = Bean.getBean(changes);
+        //don't call the listener on setting a new value
+        new PrivateAccessor(bean.getAttribute(srcValue.getName())).set("eventController", null);
+//        bean.getAttribute(srcValue.getName()).changeHandler().dispose();
+        if (source.newValue instanceof String)
+            bean.setParsedValue(srcValue.getName(), (String) source.newValue);
+        else
+            bean.setValue(srcValue.getName(), source.newValue);
+        return bean;
+    }
+
+    @Override
+    public void reset() {
+        super.reset();
+        changes = null;
     }
 
     @Override
     public String toString() {
         return super.toString() + " rule:" + ruleName;
-    }
-
-    @SuppressWarnings("unchecked")
-    @Override
-    public void handleEvent(E event) {
-        ((IValueAccess<T>)getAttribute()).setValue(evaluate(event));
     }
 }

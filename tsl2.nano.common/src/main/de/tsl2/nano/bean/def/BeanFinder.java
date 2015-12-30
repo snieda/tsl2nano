@@ -231,4 +231,12 @@ public class BeanFinder<T, F> implements IBeanFinder<T, F>, Serializable {
     public void setMaxResultCount(int maxresult) {
         this.maxResultCount = maxresult;
     }
+    
+    @Override
+    public void reset() {
+        rangeBean = null;
+        lastExpression = null;
+        currentStartIndex = 0;
+        detailBean = null;
+    }
 }

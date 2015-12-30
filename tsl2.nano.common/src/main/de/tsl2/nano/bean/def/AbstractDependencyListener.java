@@ -18,6 +18,7 @@ import de.tsl2.nano.core.ManagedException;
 import de.tsl2.nano.core.util.Util;
 import de.tsl2.nano.messaging.EventController;
 import de.tsl2.nano.messaging.IListener;
+import de.tsl2.nano.messaging.IStatefulListener;
 
 /**
  * standard dependency {@link IListener} to be added to the {@link EventController} of an {@link AttributeDefinition}.
@@ -25,7 +26,7 @@ import de.tsl2.nano.messaging.IListener;
  * @author Tom
  * @version $Revision$
  */
-public abstract class AbstractDependencyListener<T, E> implements IListener<E>, Serializable, Cloneable {
+public abstract class AbstractDependencyListener<T, E> implements IStatefulListener<E>, Serializable, Cloneable {
     /** serialVersionUID */
     private static final long serialVersionUID = -4105265981459378940L;
     /** full attribute-definition object - transient to be serializable */
@@ -85,6 +86,11 @@ public abstract class AbstractDependencyListener<T, E> implements IListener<E>, 
             ManagedException.forward(e);
             return null;
         }
+    }
+
+    @Override
+    public void reset() {
+        attribute = null;
     }
     
     @Override
