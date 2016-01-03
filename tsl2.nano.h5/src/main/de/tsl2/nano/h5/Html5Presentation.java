@@ -1357,7 +1357,7 @@ public class Html5Presentation<T> extends BeanPresentationHelper<T> implements I
         boolean isSelected = tableDescriptor.getSelectionProvider() != null ? tableDescriptor.getSelectionProvider()
             .getValue()
             .contains(item) : false;
-
+        tableDescriptor.nextRow();
         Bean<Serializable> itemBean = Bean.getBean((Serializable) item);
         String beanStyle = itemBean.getPresentable().layout(ATTR_STYLE);
         String rowBackground;

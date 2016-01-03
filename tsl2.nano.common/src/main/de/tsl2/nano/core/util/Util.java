@@ -53,6 +53,14 @@ public class Util {
     }
 
     /**
+     * isJavaType
+     * @param cls class to evaluate
+     * @return true, if class package name starts with 'java'
+     */
+    public static boolean isJavaType(Class<?> cls) {
+        return cls.getPackage() != null && cls.getPackage().getName().startsWith("java");
+    }
+    /**
      * isAllNull
      * 
      * @param objects objects to check

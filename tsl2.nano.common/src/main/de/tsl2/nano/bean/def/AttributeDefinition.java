@@ -66,7 +66,7 @@ public class AttributeDefinition<T> implements IAttributeDefinition<T> {
 
     /** serialVersionUID */
     private static final long serialVersionUID = 1403875731423120506L;
-    
+
     @Element(name = "declaring")
     protected IAttribute<T> attribute;
     protected EventController eventController;
@@ -100,7 +100,7 @@ public class AttributeDefinition<T> implements IAttributeDefinition<T> {
     /** optional encryption */
     @Element(required = false)
     private ISecure secure;
-    
+
     /**
      * optional plugins.
      */
@@ -214,35 +214,56 @@ public class AttributeDefinition<T> implements IAttributeDefinition<T> {
 
     /**
      * injectRuleCover
+     * 
      * @param attr new attribute definition to connect to rule cover instance
      */
     protected void injectIntoRuleCover(IValueDefinition<T> attr) {
         //connect optional rule-covers (use accessor instead of BeanDefinition to avoid stackoverflow
-        PrivateAccessor attrAcc = new PrivateAccessor(attr);
-        Map members = attrAcc.members();
+        injectIntoRuleCover(new PrivateAccessor(attr), attr.getInstance());
+    }
+
+    /**
+     * inject the given attribute as context - walks recursive to the member tree of acc
+     * 
+     * @param acc direct/indirect member of attr in member tree
+     * @param instance to be set as context object in all RuleCover Proxies.
+     */
+    protected static <I> void injectIntoRuleCover(UnboundAccessor acc, Object instance) {
+        //connect optional rule-covers (use accessor instead of BeanDefinition to avoid stackoverflow
+        Map members = acc.members();
         InvocationHandler handler;
         Object item;
         for (Object k : members.keySet()) {
             item = members.get(k);
-            if (item != null && Proxy.isProxyClass(item.getClass())) {
-                handler = Proxy.getInvocationHandler(item);
-              //create proxy for each bean instance
-                if (handler instanceof DelegationHandler) {
-                    // compare instances: if attr is a delegation-handler we must ignore its delegate!
-                    if (item == attr.getInstance())
-                        throw new IllegalStateException("the given attribute " + attr + " seems to be a rulecover itself!");
-                    handler = (InvocationHandler) ((DelegationHandler<T>) handler).clone();
-                    item = DelegationHandler.createProxy((DelegationHandler<T>) handler);
-                    attrAcc.set((String) k, item);
-                    new UnboundAccessor(handler).call("setContext", null, new Class[]{Serializable.class}, attr.getInstance());
+            if (item != null) {
+                //first inject the child tree - be careful, don't produce a stackoverflow
+                if (Util.isFrameworkClass(item.getClass()) && !item.getClass().isAnonymousClass() && !(item instanceof IAttribute) && !(item instanceof BeanDefinition))
+                    injectIntoRuleCover(new PrivateAccessor(item), instance);
+                //now the own direct members
+                if (Proxy.isProxyClass(item.getClass())) {
+                    handler = Proxy.getInvocationHandler(item);
+                    //create proxy for each bean instance
+                    if (handler instanceof DelegationHandler) {
+                        // compare instances: if attr is a delegation-handler we must ignore its delegate!
+                        if (item == instance)
+                            throw new IllegalStateException("the given instance " + instance
+                                + " seems to be a rulecover itself!");
+                        handler = (InvocationHandler) ((DelegationHandler<I>) handler).clone();
+                        item = DelegationHandler.createProxy((DelegationHandler<I>) handler);
+                        acc.set((String) k, item);
+                        new UnboundAccessor(handler).call("setContext", null, new Class[] { Serializable.class },
+                            instance);
+                    }
                 }
             }
         }
     }
 
     /**
-     * uses the information of {@link #attributeID} to inject the real {@link AttributeDefinition} into registered change listeners
-     * @throws CloneNotSupportedException 
+     * uses the information of {@link #attributeID} to inject the real {@link AttributeDefinition} into registered
+     * change listeners
+     * 
+     * @throws CloneNotSupportedException
      */
     void injectAttributeOnChangeListeners(BeanDefinition beandef) {
         //provide dependency listeners their attribute-definition
@@ -475,8 +496,8 @@ public class AttributeDefinition<T> implements IAttributeDefinition<T> {
         T value = null;
         if (getFormat() != null) {
             try {
-              if (Util.isEmpty(source) && nullable())
-                  return null;
+                if (Util.isEmpty(source) && nullable())
+                    return null;
                 //the parser will decide, how to handle empty/null values
                 value = (T) getFormat().parseObject(source);
             } catch (ParseException e) {
@@ -513,7 +534,8 @@ public class AttributeDefinition<T> implements IAttributeDefinition<T> {
      */
     public T getDefault() {
         IConstraint<T> c = getConstraint();
-        if (c.getDefault() == null && getAccessMethod() != null && !c.isNullable() && !BeanPresentationHelper.isGeneratedValue(this)) {
+        if (c.getDefault() == null && getAccessMethod() != null && !c.isNullable()
+            && !BeanPresentationHelper.isGeneratedValue(this)) {
             Object genType = getAccessMethod().getGenericReturnType();
             if (genType instanceof Class) {
                 Class<T> gtype = (Class<T>) genType;
@@ -850,7 +872,7 @@ public class AttributeDefinition<T> implements IAttributeDefinition<T> {
         }
         attribute.setName(name);
     }
-    
+
     /**
      * {@inheritDoc}
      */

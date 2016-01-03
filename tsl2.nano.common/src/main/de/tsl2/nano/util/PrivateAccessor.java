@@ -69,10 +69,11 @@ public class PrivateAccessor<T> extends UnboundAccessor<T> {
 
     @Override
     protected Field getField(String name) throws Exception {
-        return getField(instance.getClass(), name);
+        return getField(instance().getClass(), name);
     }
 
-    protected Field getField(Class<?> cls, String name) throws NoSuchFieldException {
+    @Override
+    protected Field getField(Class cls, String name) throws NoSuchFieldException {
         try {
             return cls.getDeclaredField(name);
         } catch (NoSuchFieldException e) {
@@ -85,7 +86,7 @@ public class PrivateAccessor<T> extends UnboundAccessor<T> {
 
     @Override
     protected Method getMethod(String name, Class[] par) throws Exception {
-        return getMethod(instance.getClass(), name, par);
+        return getMethod(instance().getClass(), name, par);
     }
 
     protected Method getMethod(Class<?> cls, String name, Class[] par) {
@@ -109,13 +110,14 @@ public class PrivateAccessor<T> extends UnboundAccessor<T> {
      * @param pars first or complete arguments that types have to match the methods parameter types.
      * @return desired property instance or null, if no method or field provides this property.
      */
-    public <T> T eval(String nameExpression, Class<T> returnType, Object... pars) {
+    @SuppressWarnings("unchecked")
+    public <R> R eval(String nameExpression, Class<R> returnType, Object... pars) {
         Class[] args = getArgTypes(pars);
         Set<Method> methods = findMethod(nameExpression, returnType, args);
         for (Method m : methods) {
             try {
                 m.setAccessible(true);
-                return (T) m.invoke(instance, args);
+                return (R) m.invoke(instance(), args);
             } catch (Exception e) {
                 //Ok, try the next one...
             }
@@ -125,7 +127,7 @@ public class PrivateAccessor<T> extends UnboundAccessor<T> {
         for (Field f : members) {
             try {
                 f.setAccessible(true);
-                return (T) f.get(instance);
+                return (R) f.get(instance());
             } catch (Exception e) {
                 //Ok, try the next one...
             }
@@ -142,7 +144,7 @@ public class PrivateAccessor<T> extends UnboundAccessor<T> {
     }
 
     protected Set<Method> findMethod(String nameExpression, Class returnType, Class... args) {
-        return findMethod(instance.getClass(), nameExpression, returnType, args);
+        return findMethod(instance().getClass(), nameExpression, returnType, args);
     }
     
     /**
@@ -184,8 +186,8 @@ public class PrivateAccessor<T> extends UnboundAccessor<T> {
      * @return set of found members
      */
     protected Set<Field> findMembers(String nameExpression, Class returnType) {
-        Field[] fields = instance.getClass().getFields();
-        fields = CollectionUtil.concat(fields, instance.getClass().getDeclaredFields());
+        Field[] fields = instance().getClass().getFields();
+        fields = CollectionUtil.concat(fields, instance().getClass().getDeclaredFields());
         Set<Field> result = new LinkedHashSet<Field>();
         for (int i = 0; i < fields.length; i++) {
             if ((nameExpression == null || fields[i].getName().matches(nameExpression))

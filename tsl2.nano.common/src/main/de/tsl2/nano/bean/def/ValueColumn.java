@@ -31,35 +31,35 @@ import de.tsl2.nano.core.Messages;
 public class ValueColumn<T> implements IPresentableColumn, Serializable {
     /** serialVersionUID */
     private static final long serialVersionUID = 3998475409703066783L;
-    
+
     transient IAttributeDefinition<T> attributeDefinition;
     transient IAction<?> actionSortColumn;
-    
+
     /** attribute name to be identifiable */
-    @Attribute(required=false)
+    @Attribute(required = false)
     String name;
     /** optional format. if not set, the attributedefintions format will be used */
-    @Element(required=false)
+    @Element(required = false)
     Format format;
-    @Attribute(required=false)
+    @Attribute(required = false)
     int columnIndex;
-    @Attribute(required=false)
+    @Attribute(required = false)
     int sortIndex;
-    @Attribute(required=false)
+    @Attribute(required = false)
     boolean isSortUpDirection;
-    @Attribute(required=false)
+    @Attribute(required = false)
     int width;
-    @Element(required=false)
+    @Element(required = false)
     IPresentable presentable;
-    @Element(required=false)
-    Comparable<T> minsearch; 
-    @Element(required=false)
+    @Element(required = false)
+    Comparable<T> minsearch;
+    @Element(required = false)
     Comparable<T> maxsearch;
-    @Attribute(required=false)
+    @Attribute(required = false)
     boolean standardSummary;
-    @Element(required=false)
+    @Element(required = false)
     IValueExpression<?> summary;
-    
+
     /**
      * constructor to be serializable
      */
@@ -117,7 +117,7 @@ public class ValueColumn<T> implements IPresentableColumn, Serializable {
     public void setIndex(int index) {
         columnIndex = index;
     }
-    
+
     /**
      * {@inheritDoc}
      */
@@ -149,7 +149,7 @@ public class ValueColumn<T> implements IPresentableColumn, Serializable {
     public void setWidth(int width) {
         this.width = width;
     }
-    
+
     /**
      * {@inheritDoc}
      */
@@ -161,7 +161,7 @@ public class ValueColumn<T> implements IPresentableColumn, Serializable {
     public void setName(String name) {
         this.name = name;
     }
-    
+
     /**
      * {@inheritDoc}
      */
@@ -173,7 +173,7 @@ public class ValueColumn<T> implements IPresentableColumn, Serializable {
     public void setFormat(Format format) {
         this.format = format;
     }
-    
+
     /**
      * {@inheritDoc}
      */
@@ -189,34 +189,40 @@ public class ValueColumn<T> implements IPresentableColumn, Serializable {
     public void setPresentable(IPresentable presentable) {
         this.presentable = presentable;
     }
-    
+
     @Override
     public IAction<?> getSortingAction(final IBeanCollector<?, ?> collector) {
         if (actionSortColumn == null) {
-            actionSortColumn = new CommonAction<Object>(name, Messages.getStringOpt(getPresentable().getLabel(), true), getDescription()) {
-                /** serialVersionUID */
-                private static final long serialVersionUID = 1L;
-                @Override
-                public Object action() throws Exception {
-                    collector.shiftSortIndexes();
-                    sortIndex = 0;
-                    isSortUpDirection = isSortUpDirection ? false: true;
-                    collector.sort();
-                    return collector;
-                }
-                @Override
-                public String getImagePath() {
-                    return imagePath != null ? imagePath : sortIndex == 0 ? isSortUpDirection ? "icons/up.png" : "icons/down.png" : "icons/cascade.png";
-                }
-                @Override
-                public Object getKeyStroke() {
-                    return String.valueOf(columnIndex);
-                }
-            };
+            actionSortColumn =
+                new CommonAction<Object>(name, Messages.getStringOpt(getPresentable().getLabel(), true),
+                    getDescription()) {
+                    /** serialVersionUID */
+                    private static final long serialVersionUID = 1L;
+
+                    @Override
+                    public Object action() throws Exception {
+                        collector.shiftSortIndexes();
+                        sortIndex = 0;
+                        isSortUpDirection = isSortUpDirection ? false : true;
+                        collector.sort();
+                        return collector;
+                    }
+
+                    @Override
+                    public String getImagePath() {
+                        return imagePath != null ? imagePath : sortIndex == 0 ? isSortUpDirection ? "icons/up.png"
+                            : "icons/down.png" : "icons/cascade.png";
+                    }
+
+                    @Override
+                    public Object getKeyStroke() {
+                        return String.valueOf(columnIndex);
+                    }
+                };
         }
         return actionSortColumn;
     }
-    
+
     /**
      * {@inheritDoc}
      */
@@ -263,6 +269,16 @@ public class ValueColumn<T> implements IPresentableColumn, Serializable {
     public void setSummary(IValueExpression<?> summary) {
         this.summary = summary;
         this.standardSummary = false;
+    }
+
+    /**
+     * delegates to {@link #attributeDefinition#getValue()}, if available - if not, throws an
+     * {@link IllegalStateException}
+     */
+    public T getValue() {
+        if (attributeDefinition instanceof IValueDefinition)
+            return ((IValueDefinition<T>) attributeDefinition).getValue();
+        throw new IllegalStateException("valuecolumn " + this + " has no access to an IValueDefinition!");
     }
 
     @Override

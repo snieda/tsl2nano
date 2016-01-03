@@ -554,7 +554,7 @@ public class Bean<T> extends BeanDefinition<T> {
                 .getAttributeDefinitions()));
         bean.setInstance(instance);
 
-        injectIntoRuleCovers(bean);
+        injectIntoRuleCovers(bean, instance);
         if (bean.getPlugins() != null) {
             for (IConnector p : bean.getPlugins()) {
                 p.connect(bean);
@@ -565,27 +565,6 @@ public class Bean<T> extends BeanDefinition<T> {
             bean.actions = null;
         }
         return bean;
-    }
-
-    /**
-     * injectIntoRuleCovers
-     * 
-     * @param bean
-     */
-    protected static <I> void injectIntoRuleCovers(Bean<I> bean) {
-        Set<String> keys = bean.getAttributeDefinitions().keySet();
-        for (String k : keys) {
-            IAttributeDefinition a = bean.getAttributeDefinitions().get(k);
-
-            //change listeners hold only the attribute-id and must have attribute instances
-            AttributeDefinition attrDef;
-            if (a instanceof AttributeDefinition) {
-                attrDef = (AttributeDefinition) a;
-                attrDef.injectAttributeOnChangeListeners(bean);
-                if (attrDef instanceof IValueDefinition)
-                    attrDef.injectIntoRuleCover((IValueDefinition) attrDef);
-            }
-        }
     }
 
     /**

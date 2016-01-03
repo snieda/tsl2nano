@@ -28,19 +28,16 @@ import de.tsl2.nano.bean.def.AttributeDefinition;
 import de.tsl2.nano.bean.def.Bean;
 import de.tsl2.nano.bean.def.BeanDefinition;
 import de.tsl2.nano.bean.def.IAttributeDefinition;
-import de.tsl2.nano.bean.def.IValueDefinition;
 import de.tsl2.nano.core.ENV;
 import de.tsl2.nano.core.cls.BeanAttribute;
 import de.tsl2.nano.core.exception.Message;
 import de.tsl2.nano.core.log.LogFactory;
 import de.tsl2.nano.core.util.DelegationHandler;
+import de.tsl2.nano.core.util.IDelegationHandler;
 import de.tsl2.nano.core.util.MapUtil;
 import de.tsl2.nano.core.util.StringUtil;
-import de.tsl2.nano.h5.expression.RuleExpression;
-import de.tsl2.nano.h5.expression.RunnableExpression;
-import de.tsl2.nano.incubation.specification.rules.AbstractRule;
+import de.tsl2.nano.core.util.Util;
 import de.tsl2.nano.incubation.specification.rules.RulePool;
-import de.tsl2.nano.incubation.specification.rules.RuleScript;
 import de.tsl2.nano.util.PrivateAccessor;
 
 /**
@@ -58,6 +55,8 @@ public class RuleCover<T> extends DelegationHandler<T> implements
     private static final long serialVersionUID = -4157641723681767640L;
 
     private static final Log LOG = LogFactory.getLog(RuleCover.class);
+
+    private static final String REF = "-REF-";
 
     /**
      * map holding the rule name (as value) for each property-name (as key) to be evaluated through a rule engine. the
@@ -155,6 +154,7 @@ public class RuleCover<T> extends DelegationHandler<T> implements
      * @param attr instance attribute
      * @param child child of attribute
      */
+    @SuppressWarnings({ "rawtypes", "unchecked" })
     public static void removeCover(Class cls, String attr, String child) {
         String parent = StringUtil.substring(child, null, ".", true);
         IAttributeDefinition attribute = BeanDefinition.getBeanDefinition(cls).getAttribute(attr);
@@ -240,16 +240,16 @@ public class RuleCover<T> extends DelegationHandler<T> implements
     @SuppressWarnings({ "unchecked", "rawtypes" })
     @Override
     public Object connect(IAttributeDefinition<?> connectionEnd) {
-        //first: extract the direct childs
+        //first: extract the direct childs - and their parents as ref object-names
         Set<String> pks = rules.keySet();
         HashMap refs = new HashMap<>();
+        String parentRef;
         for (String k : pks) {
             if (k.contains(".")) {
-                String[] c = k.split("\\.");
-                for (int i = 0; i < c.length; i++) {
-                    if (!rules.containsKey(c[i])) {
-                        refs.put(c[i], "---");
-                    }
+                //cut the last entry
+                parentRef = StringUtil.substring(k, null, ".", true);
+                if (!rules.containsKey(parentRef)) {
+                    refs.put(parentRef, REF);
                 }
             }
         }
@@ -260,19 +260,16 @@ public class RuleCover<T> extends DelegationHandler<T> implements
 //        List<String> names = Arrays.asList(bcDef.getAttributeNames());
 
         //working on fields directly because not all attributedefinition-attributes are public
-        PrivateAccessor<?> acc = new PrivateAccessor<>(connectionEnd);
-        acc.members();
         boolean nameFound = false;
+        PrivateAccessor<?> acc = new PrivateAccessor<>(connectionEnd);
+        T origin;
         for (String k : pks) {
-            if (acc.hasMember(k)) {
+            if ((origin = (T) acc.forceMember(k.split("\\."))) != null && !Util.isJavaType(origin.getClass())) {
                 nameFound = true;
-                T origin = (T) acc.member(k);
-                if (!Proxy.isProxyClass(origin.getClass())) {
-                    acc.set(k, cover(origin, acc.typeOf(k), connectionEnd));
-                } else {//already covered, set the instance of the current context object
-                    ((IRuleCover) Proxy.getInvocationHandler(origin))
-                        .setContext((Serializable) ((IValueDefinition) connectionEnd).getInstance());
+                if (Proxy.isProxyClass(origin.getClass())) {//already covered, create a new proxy from invocationhandler
+                    origin = (T) ((IDelegationHandler) Proxy.getInvocationHandler(origin)).getDelegate();
                 }
+                acc.set(k, cover(origin, acc.typeOf(k), connectionEnd));
             }
         }
         //remove class prefixes to be accessible on invoking

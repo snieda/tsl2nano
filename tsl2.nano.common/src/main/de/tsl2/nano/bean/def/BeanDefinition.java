@@ -62,6 +62,7 @@ import de.tsl2.nano.core.util.XmlUtil;
 import de.tsl2.nano.format.DefaultFormat;
 import de.tsl2.nano.messaging.ChangeEvent;
 import de.tsl2.nano.messaging.IListener;
+import de.tsl2.nano.util.PrivateAccessor;
 
 /**
  * Holds all informations to define a bean as a container of bean-attributes. Uses {@link BeanClass} and
@@ -989,6 +990,24 @@ public class BeanDefinition<T> extends BeanClass<T> implements IPluggable<BeanDe
      */
     public static void define(BeanDefinition beandef) {
         virtualBeanCache.add(beandef);
+    }
+
+    /**
+     * injectIntoRuleCovers
+     * 
+     * @param bean
+     */
+    protected static <I> void injectIntoRuleCovers(BeanDefinition<I> beandef, Object instance) {
+        Set<String> keys = beandef.getAttributeDefinitions().keySet();
+        for (String k : keys) {
+            IAttributeDefinition a = beandef.getAttributeDefinitions().get(k);
+
+            //change listeners hold only the attribute-id and must have attribute instances
+            if (a instanceof BeanValue) {
+                ((BeanValue)a).injectAttributeOnChangeListeners(beandef);
+            }
+            AttributeDefinition.injectIntoRuleCover(new PrivateAccessor(a), instance);
+        }
     }
 
     @Persist

@@ -136,6 +136,9 @@ public class BeanCollector<COLLECTIONTYPE extends Collection<T>, T> extends Bean
      */
     private transient Boolean hasSearchRequestChanged;
 
+    /** pointer to the current row to be build/painted/evaluated */
+    private transient Iterator<T> iterator = null;
+    
     /**
      * constructor. should only used by framework - for de-serialization.
      */
@@ -295,6 +298,8 @@ public class BeanCollector<COLLECTIONTYPE extends Collection<T>, T> extends Bean
                 getBeanFinder().getData();
             }
         }
+        if (hasMode(MODE_SEARCHABLE))
+            injectIntoRuleCovers(this, getSearchPanelBeans().iterator().next());
     }
 
     private long count() {
@@ -1457,6 +1462,21 @@ public class BeanCollector<COLLECTIONTYPE extends Collection<T>, T> extends Bean
         asString = null;
     }
 
+    /**
+     * evaluates the next row in the list of data and prepares some properties.
+     * @return next row
+     */
+    public T nextRow() {
+        if (iterator == null)
+            iterator = getCurrentData().iterator();
+        T currentRow = iterator.hasNext() ? iterator.next() : null;
+        if (currentRow == null)
+            iterator = null;
+        else //TODO: this will be a performance issue!
+            injectIntoRuleCovers(this, currentRow);
+        return currentRow;
+    }
+    
     @Override
     public Map<String, Object> toValueMap(Map<String, Object> properties) {
         Map<String, Object> result = new HashMap<String, Object>();

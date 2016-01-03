@@ -9,8 +9,6 @@
  */
 package de.tsl2.nano.h5.timesheet;
 
-import static junit.framework.Assert.*;
-
 import static de.tsl2.nano.bean.def.IPresentable.UNDEFINED;
 import static de.tsl2.nano.h5.Html5Presentation.L_GRIDWIDTH;
 import static de.tsl2.nano.h5.HtmlUtil.ATTR_BORDER;
@@ -23,6 +21,7 @@ import static de.tsl2.nano.test.TypeBean.ATTR_OBJECT;
 import static de.tsl2.nano.test.TypeBean.ATTR_STRING;
 import static de.tsl2.nano.test.TypeBean.ATTR_TIME;
 import static de.tsl2.nano.test.TypeBean.ATTR_TIMESTAMP;
+import static junit.framework.Assert.assertTrue;
 import static org.anonymous.project.presenter.ChargeConst.ATTR_CHARGEITEM;
 import static org.anonymous.project.presenter.ChargeConst.ATTR_FROMDATE;
 import static org.anonymous.project.presenter.ChargeConst.ATTR_FROMTIME;
@@ -37,7 +36,9 @@ import java.lang.reflect.Method;
 import java.math.BigDecimal;
 import java.sql.Time;
 import java.text.SimpleDateFormat;
+import java.util.Arrays;
 import java.util.Collection;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.LinkedList;
@@ -101,7 +102,6 @@ import de.tsl2.nano.core.util.FileUtil;
 import de.tsl2.nano.core.util.MapUtil;
 import de.tsl2.nano.execution.ScriptUtil;
 import de.tsl2.nano.h5.Controller;
-import de.tsl2.nano.h5.HtmlUtil;
 import de.tsl2.nano.h5.QueryResult;
 import de.tsl2.nano.h5.RuleCover;
 import de.tsl2.nano.h5.SpecifiedAction;
@@ -254,6 +254,7 @@ public class Timesheet extends NanoH5App {
                     + "' : '" + greenColorStyle + "'); map;", null);
         ENV.get(RulePool.class).add(presValueColor);
         RuleCover.cover(Charge.class, ATTR_VALUE, "presentable.layoutConstraints", "%" + presValueColor.getName());
+        RuleCover.cover(Charge.class, ATTR_VALUE, "columnDefinition.presentable.layoutConstraints", "%" + presValueColor.getName());
         //one rulecover on columndefs..presentable.layoutconstraints
 //        ruleCover = new RuleCover("%" + presValueColor.getName(), MapUtil.asMap(
 //                "columnDefinition.presentable.layoutConstraints", presValueColor.getName()));
@@ -270,6 +271,7 @@ public class Timesheet extends NanoH5App {
         RuleDecisionTable dtRule = RuleDecisionTable.fromCSV(ruleDir + "weekcolor.csv");
         ENV.get(RulePool.class).add(dtRule);
         RuleCover.cover(Charge.class, ATTR_FROMDATE, "presentable.layoutConstraints", "&" + dtRule.getName());
+        RuleCover.cover(Charge.class, ATTR_FROMDATE, "columnDefinition.presentable.layoutConstraints", "&" + dtRule.getName());
         
         charge.saveDefinition();
 
@@ -462,7 +464,8 @@ public class Timesheet extends NanoH5App {
     public void stop() {
         Charge c = new Charge();
         Bean bean = Bean.getBean(c);
-        c.setFromdate(DateUtil.getToday());
+        Date sunday = DateUtil.getDate("03.01.2016");
+        c.setFromdate(sunday);
         c.setFromtime(DateUtil.getTime(8, 30));
         bean.getAttribute(ATTR_TOTIME).setValue(DateUtil.getTime(20, 0));
         assertTrue(new BigDecimal(11.5).equals(c.getValue()));
@@ -471,8 +474,17 @@ public class Timesheet extends NanoH5App {
         assertTrue(redColorStyle.equals(lc.get("style")));
 
         String style = bean.getAttribute(ATTR_FROMDATE).getPresentation().getLayoutConstraints();
-        //test only on weekdays successfull ;-)
-        assertTrue(greenColorStyle.equals(style));
+        assertTrue(redColorStyle.equals(style));
+
+        //test it on value-column
+        style = bean.getAttribute(ATTR_FROMDATE).getColumnDefinition().getPresentable().getLayoutConstraints();
+        assertTrue(redColorStyle.equals(style));
+
+        //test it on value-column in beancollector
+        BeanCollector<Collection<Charge>,Charge> collector = BeanCollector.getBeanCollector(Arrays.asList(c), 0);
+        collector.nextRow();
+        style = collector.getAttribute(ATTR_FROMDATE).getColumnDefinition().getPresentable().getLayoutConstraints();
+        assertTrue(redColorStyle.equals(style));
 
         super.stop();
     }
