@@ -192,7 +192,12 @@ import de.tsl2.nano.format.RegExpFormat;
 import de.tsl2.nano.h5.configuration.BeanConfigurator;
 import de.tsl2.nano.h5.expression.Query;
 import de.tsl2.nano.h5.expression.QueryPool;
+import de.tsl2.nano.h5.websocket.WSEvent;
+import de.tsl2.nano.h5.websocket.WebSocketRuleDependencyListener;
+import de.tsl2.nano.incubation.specification.rules.RuleDependencyListener;
 import de.tsl2.nano.incubation.specification.rules.RulePool;
+import de.tsl2.nano.messaging.ChangeEvent;
+import de.tsl2.nano.messaging.IListener;
 import de.tsl2.nano.script.ScriptTool;
 import de.tsl2.nano.util.PrivateAccessor;
 
@@ -648,6 +653,7 @@ public class Html5Presentation<T> extends BeanPresentationHelper<T> implements I
 
     /**
      * createNavigationbar
+     * 
      * @param parent
      * @param navigation
      */
@@ -1419,7 +1425,7 @@ public class Html5Presentation<T> extends BeanPresentationHelper<T> implements I
         IValueDefinition<?> attr;
         if (colDefs.size() > 0) {
             for (IPresentableColumn c : colDefs) {
-                attr = itemBean.hasAttribute(c.getName()) ?itemBean.getAttribute(c.getName()) : null;
+                attr = itemBean.hasAttribute(c.getName()) ? itemBean.getAttribute(c.getName()) : null;
                 //on byte[] show an image through attached file
                 //workaround: on virtuals searching the attribute may cause an error
                 //TODO: if a virtual bean is empty, no attributes are available --> show a warning!
@@ -1639,8 +1645,9 @@ public class Html5Presentation<T> extends BeanPresentationHelper<T> implements I
                 }
                 boolean isOption = "checkbox".equals(type);
                 //Attention on Autoboxing with null values!
-                boolean hasTrueValue = isOption && beanValue.getValue() != null ? (Boolean)beanValue.getValue() : false;
-                
+                boolean hasTrueValue =
+                    isOption && beanValue.getValue() != null ? (Boolean) beanValue.getValue() : false;
+
                 input =
                     appendElement(
                         cell,
@@ -1745,10 +1752,11 @@ public class Html5Presentation<T> extends BeanPresentationHelper<T> implements I
 //                        } else {
                             if (v != null) {
                                 if (!ByteUtil.isByteStream(v.getClass()))
-                                        throw new IllegalStateException("attachment of attribute '"
-                                                + beanValue.getValueId()
-                                                + "' has to be of type byte[], ByteBuffer or String!");
-                                FileUtil.writeBytes(ByteUtil.getBytes(v), ENV.getTempPath() + beanValue.getValueId(), false);
+                                    throw new IllegalStateException("attachment of attribute '"
+                                        + beanValue.getValueId()
+                                        + "' has to be of type byte[], ByteBuffer or String!");
+                                FileUtil.writeBytes(ByteUtil.getBytes(v), ENV.getTempPath() + beanValue.getValueId(),
+                                    false);
                             }
                         }
 //                    }
@@ -1852,7 +1860,7 @@ public class Html5Presentation<T> extends BeanPresentationHelper<T> implements I
         if (l instanceof Map) {
             parent = appendElement(parent, TAG_TABLE, MapUtil.asStringArray((Map) l));
         } else if (l instanceof String) {
-            parent = appendElement(parent, TAG_TABLE, ATTR_STYLE, (String)l);
+            parent = appendElement(parent, TAG_TABLE, ATTR_STYLE, (String) l);
         }
         return parent;
     }
@@ -2175,4 +2183,22 @@ public class Html5Presentation<T> extends BeanPresentationHelper<T> implements I
         return createMessagePage("message.template", message, null);
     }
 
+    /**
+     * convenience to add two rule listeners on changing an attribute (observable), to refresh another attribute
+     * (observer). The first is {@link WebSocketRuleDependencyListener} on user interaction, the other is the standard
+     * listener RuleDependencyListener on object changes.
+     * 
+     * @param observer refreshing attribute
+     * @param rule rule to evaluate the observer refreshing
+     * @param observables changing attributes
+     */
+    public void addRuleListener(String observer, String rule, String... observables) {
+        IListener<WSEvent> wsListener =
+            new WebSocketRuleDependencyListener(bean.getAttribute(observer), observer, rule);
+        IListener<ChangeEvent> listener = new RuleDependencyListener(bean.getAttribute(observer), observer, rule);
+        for (int i = 0; i < observables.length; i++) {
+            bean.getAttribute(observables[i]).changeHandler().addListener(wsListener, WSEvent.class);
+            bean.getAttribute(observables[i]).changeHandler().addListener(listener, ChangeEvent.class);
+        }
+    }
 }

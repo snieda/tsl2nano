@@ -9,12 +9,19 @@
  */
 package de.tsl2.nano.h5.configuration;
 
+import static org.anonymous.project.presenter.ChargeConst.ATTR_FROMTIME;
+import static org.anonymous.project.presenter.ChargeConst.ATTR_VALUE;
+
 import java.io.Serializable;
+import java.util.ArrayList;
 import java.util.Collection;
 
 import javax.xml.ws.Action;
 
+import de.tsl2.nano.bean.annotation.Constraint;
 import de.tsl2.nano.bean.def.AttributeDefinition;
+import de.tsl2.nano.bean.def.BeanDefinition;
+import de.tsl2.nano.bean.def.BeanPresentationHelper;
 import de.tsl2.nano.bean.def.IAttributeDefinition;
 import de.tsl2.nano.bean.def.IConstraint;
 import de.tsl2.nano.bean.def.IIPresentable;
@@ -26,7 +33,13 @@ import de.tsl2.nano.core.ENV;
 import de.tsl2.nano.core.cls.BeanClass;
 import de.tsl2.nano.core.cls.IAttribute;
 import de.tsl2.nano.core.util.Util;
+import de.tsl2.nano.h5.Html5Presentation;
 import de.tsl2.nano.h5.RuleCover;
+import de.tsl2.nano.h5.websocket.WSEvent;
+import de.tsl2.nano.h5.websocket.WebSocketRuleDependencyListener;
+import de.tsl2.nano.incubation.specification.rules.RuleDependencyListener;
+import de.tsl2.nano.incubation.specification.rules.RuleScript;
+import de.tsl2.nano.messaging.ChangeEvent;
 import de.tsl2.nano.messaging.EventController;
 import de.tsl2.nano.messaging.IListener;
 import de.tsl2.nano.util.PrivateAccessor;
@@ -47,9 +60,10 @@ public class AttributeConfigurator implements Serializable {
     IIPresentable presentable;
 
     public AttributeConfigurator() {
-        this(BeanClass.createInstance(AttributeDefinition.class, new PathExpression(ENV.get(BeanConfigurator.class).def.getClazz(), "attribute.path")));
+        this(BeanClass.createInstance(AttributeDefinition.class,
+            new PathExpression(ENV.get(BeanConfigurator.class).def.getClazz(), "attribute.path")));
     }
-    
+
     public AttributeConfigurator(String attributeName) {
         this((AttributeDefinition<?>) ENV.get(BeanConfigurator.class).def.getAttribute(attributeName));
     }
@@ -190,7 +204,7 @@ public class AttributeConfigurator implements Serializable {
     public boolean isComposition() {
         return attr.composition();
     }
-    
+
     public Collection<IListener> getListener() {
         return attr.changeHandler().getListeners(null);
     }
@@ -202,11 +216,11 @@ public class AttributeConfigurator implements Serializable {
     public Object getDefault() {
         return attr.getDefault();
     }
-    
+
     public ValueExpression getValueExpression() {
         return attr.getValueExpression();
     }
-    
+
     public IAttributeDefinition<?> unwrap() {
         return attr;
     }
@@ -215,11 +229,33 @@ public class AttributeConfigurator implements Serializable {
     public String toString() {
         return Util.toString(getClass(), attr);
     }
-    
-    public void actionAddRuleCover(String child, String rule) {
+
+    @SuppressWarnings("rawtypes")
+    @de.tsl2.nano.bean.annotation.Action(name = "addListener", argNames = { "Observer Attribute",
+        "Observable Attribute", "Rule-Name" })
+    public void actionAddListener(
+            @Constraint(pattern = "(\\w+") String observer,
+            @Constraint(pattern = "(\\w+") String observable,
+            @Constraint(pattern = "[%§!]\\w+") String rule) {
+        BeanDefinition def = ENV.get(BeanConfigurator.class).def;
+        Html5Presentation helper = (Html5Presentation) def.getPresentationHelper();
+        helper.addRuleListener(observer, rule, observable);
+    }
+
+//    public void actionRemoveListener(String child, String rule) {
+//        RuleCover.removeCover(attr.getDeclaringClass(), attr.getName(), child);
+//    }
+//
+    @de.tsl2.nano.bean.annotation.Action(name = "addRuleCover", argNames = { "Part of Attribute", "Rule-Name" })
+    public void actionAddRuleCover(
+            @Constraint(defaultValue = "presentable.layoutConstraints", pattern = "(\\w+[\\.]?)+", allowed = {
+                "presentable", "presentable.layout", "columnDefinition" }) String child,
+            @Constraint(pattern = "[%§!]\\w+") String rule) {
         RuleCover.cover(attr.getDeclaringClass(), attr.getName(), child, rule);
     }
+
     public void actionRemoveRuleCover(String child, String rule) {
         RuleCover.removeCover(attr.getDeclaringClass(), attr.getName(), child);
     }
+
 }

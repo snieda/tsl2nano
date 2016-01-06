@@ -21,15 +21,18 @@ import static de.tsl2.nano.h5.NanoHTTPD.MIME_HTML;
 
 import java.io.Serializable;
 import java.lang.Thread.UncaughtExceptionHandler;
+import java.lang.reflect.Array;
 import java.net.InetAddress;
 import java.net.InetSocketAddress;
 import java.net.URL;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.Date;
 import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Map;
 import java.util.Properties;
 import java.util.Set;
 import java.util.concurrent.Executors;
@@ -47,7 +50,9 @@ import de.tsl2.nano.bean.def.BeanValue;
 import de.tsl2.nano.bean.def.IBeanCollector;
 import de.tsl2.nano.bean.def.IPageBuilder;
 import de.tsl2.nano.bean.def.IPresentable;
+import de.tsl2.nano.bean.def.MethodAction;
 import de.tsl2.nano.collection.CollectionUtil;
+import de.tsl2.nano.collection.MapEntrySet;
 import de.tsl2.nano.core.ENV;
 import de.tsl2.nano.core.ISession;
 import de.tsl2.nano.core.Main;
@@ -65,6 +70,7 @@ import de.tsl2.nano.core.util.StringUtil;
 import de.tsl2.nano.core.util.Util;
 import de.tsl2.nano.format.RegExpFormat;
 import de.tsl2.nano.h5.NanoHTTPD.Response;
+import de.tsl2.nano.h5.configuration.AttributeConfigurator;
 import de.tsl2.nano.h5.configuration.BeanConfigurator;
 import de.tsl2.nano.h5.navigation.IBeanNavigator;
 import de.tsl2.nano.h5.navigation.Parameter;
@@ -461,14 +467,23 @@ public class NanoH5Session implements ISession {
                         }
                         Object result;
                         //on parametrized actions provide a new detail dialog/page
-                        if (action.getArgumentTypes() != null) {
-                            Bean bean = Bean.getBean(MapUtil.fromKeys(action.getArgumentTypes()));
-                            bean.addAction(action);
-                            result = bean;
+                        if (!Util.isEmpty(action.getArgumentTypes())) {
+                            if (!nav.current().isMultiValue()) {//define the arguments
+                                Map<String, Object> args = MapUtil.fromKeys(MethodAction.getArgumentNames(action));
+                                //TODO: extend the BeanCollector to use @Constraint of each argument (=row)
+                                BeanDefinition bean = BeanCollector.getBeanCollector(Util.getContainer(args), 0);
+                                bean.addAction(action);
+                                result = bean;
+                            } else {//set the arguments and start the parametrized action
+                                MapEntrySet argSet = (MapEntrySet) ((BeanCollector)nav.current()).getCurrentData();
+                                Object[] args = CollectionUtil.concat(Arrays.copyOfRange(action.getParameter(), 0, 1), argSet.map().values().toArray());
+                                action.setParameter(args);
+                                result = action.activate();
+                            }
                         } else {
                             result = action.activate();
                         }
-                        
+
                         /*
                          * if action is asynchron, it's a long term action showing the same page again
                          * with progress informations

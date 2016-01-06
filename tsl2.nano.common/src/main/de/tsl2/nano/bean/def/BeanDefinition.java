@@ -45,6 +45,7 @@ import de.tsl2.nano.bean.BeanUtil;
 import de.tsl2.nano.bean.IConnector;
 import de.tsl2.nano.bean.IValueAccess;
 import de.tsl2.nano.bean.ValueHolder;
+import de.tsl2.nano.bean.annotation.Action;
 import de.tsl2.nano.collection.CollectionUtil;
 import de.tsl2.nano.core.ENV;
 import de.tsl2.nano.core.IPredicate;
@@ -643,8 +644,6 @@ public class BeanDefinition<T> extends BeanClass<T> implements IPluggable<BeanDe
         return !BeanUtil.isStandardType(t) && BeanClass.hasDefaultConstructor(t);
     }
 
-    static final String ACTION_PREFIX = "action";
-
     /**
      * getBeanActions
      * 
@@ -661,7 +660,6 @@ public class BeanDefinition<T> extends BeanClass<T> implements IPluggable<BeanDe
      * @param actions (optional) collection to be filled with actions
      * @return all public methods (wrapped into actions) starting with 'action' and having no arguments.
      */
-    @SuppressWarnings("serial")
     public static Collection<IAction> getActionsByClass(Class<?> clazz,
             Collection<IAction> actions,
             Object... parameters) {
@@ -670,30 +668,8 @@ public class BeanDefinition<T> extends BeanClass<T> implements IPluggable<BeanDe
             actions = new ArrayList<IAction>();
         }
         for (int i = 0; i < methods.length; i++) {
-            if (methods[i].getName().startsWith(ACTION_PREFIX)/* && methods[i].getParameterTypes().length == 0*/) {
-                final Method m = methods[i];
-                final String cls = m.getDeclaringClass().getSimpleName().toLowerCase();
-                final String name = m.getName().substring(ACTION_PREFIX.length());
-                final String id = cls + "." + name.toLowerCase();
-                CommonAction<Object> newAction = new CommonAction<Object>(id,
-                    name,
-                    Messages.getStringOpt(m.toGenericString())) {
-                    @Override
-                    public Object action() throws Exception {
-                        Object[] args = Arrays.copyOfRange(getParameter(), 1, getParameter().length);
-                        return m.invoke(getParameter()[0], args);
-                    }
-                    @Override
-                        public Class[] getArgumentTypes() {
-                            return m.getParameterTypes();
-                        }
-                };
-                String imagePath = id + ".icon";
-                if (Messages.hasKey(imagePath)) {
-                    newAction.setImagePath(Messages.getString(imagePath));
-                } else {
-                    newAction.setImagePath("icons/go.png");
-                }
+            if (methods[i].getName().startsWith(MethodAction.ACTION_PREFIX) || methods[i].isAnnotationPresent(Action.class)) {
+                CommonAction<Object> newAction = new MethodAction<Object>(methods[i]);
                 newAction.setParameter(parameters);
                 actions.add(newAction);
             }

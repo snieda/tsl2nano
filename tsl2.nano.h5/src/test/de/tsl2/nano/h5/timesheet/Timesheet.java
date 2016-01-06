@@ -102,6 +102,7 @@ import de.tsl2.nano.core.util.FileUtil;
 import de.tsl2.nano.core.util.MapUtil;
 import de.tsl2.nano.execution.ScriptUtil;
 import de.tsl2.nano.h5.Controller;
+import de.tsl2.nano.h5.Html5Presentation;
 import de.tsl2.nano.h5.QueryResult;
 import de.tsl2.nano.h5.RuleCover;
 import de.tsl2.nano.h5.SpecifiedAction;
@@ -232,18 +233,8 @@ public class Timesheet extends NanoH5App {
 
         // create dependency listeners for websocket and standard bean-changing
         ENV.get(RulePool.class).add(calcTime);
-        IListener<WSEvent> wsListener =
-            new WebSocketRuleDependencyListener(charge.getAttribute(ATTR_VALUE), ATTR_VALUE, RuleScript.PREFIX
-                + calcTime.getName());
-        IListener<ChangeEvent> listener =
-            new RuleDependencyListener(charge.getAttribute(ATTR_VALUE), ATTR_VALUE, RuleScript.PREFIX
-                + calcTime.getName());
-        charge.getAttribute(ATTR_FROMTIME).changeHandler().addListener(wsListener, WSEvent.class);
-        charge.getAttribute(ATTR_FROMTIME).changeHandler().addListener(listener, ChangeEvent.class);
-        charge.getAttribute(ATTR_TOTIME).changeHandler().addListener(wsListener, WSEvent.class);
-        charge.getAttribute(ATTR_TOTIME).changeHandler().addListener(listener, ChangeEvent.class);
-        charge.getAttribute(ATTR_PAUSE).changeHandler().addListener(wsListener, WSEvent.class);
-        charge.getAttribute(ATTR_PAUSE).changeHandler().addListener(listener, ChangeEvent.class);
+        Html5Presentation helper = charge.getPresentationHelper();
+        helper.addRuleListener(ATTR_VALUE, RuleScript.PREFIX + calcTime.getName(), ATTR_FROMTIME, ATTR_TOTIME, ATTR_PAUSE);
 
         /*
          * add attribute presentation rules

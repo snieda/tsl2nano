@@ -43,9 +43,9 @@ public class Constraint<T> extends AbstractConstraint<T> implements IConstraint<
     @Element(required = false)
     protected Format format;
     @Attribute(required = false)
-    private boolean nullable = true;
+    protected boolean nullable = true;
     @Attribute(required = false)
-    private int length = UNDEFINED;
+    protected int length = UNDEFINED;
     @Element(required = false)
     Comparable<T> min;
     @Element(required = false)

@@ -2208,7 +2208,8 @@ Actual list: http://infocenter.pentaho.com/help/index.jsp?topic=%2Fsupported_com
  0.7.0f | 10.05.2015 | new: RESTful service access, mouseclick access on dependency listeners
  0.7.0g | 17.05.2015 | new: Secure Attributes: hashes or encrypts attribute values on runtime
  0.7.0h | 17.10.2015 | webstart/jnlp, war, automatic translation
- 0.8.0b | 15.11.2015 | refactorings, replication enhanced, dependency listeners now persistable/configurable, changes on beandef xml and xsd
+ 0.8.0a | 15.11.2015 | refactorings, replication enhanced, dependency listeners now persistable/configurable, changes on beandef xml and xsd
+ 0.8.0b | 07.01.2016 | rule-listener, rule-cover enhanced, new app package: timesheet, bean-actions parametrized with annotations
 
 [GLOSSARY]
 

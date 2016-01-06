@@ -602,7 +602,7 @@ public class BeanAttribute<T> implements IAttribute<T> {
      * Extension for {@link Serializable}
      */
     private void readObject(java.io.ObjectInputStream in) throws IOException, ClassNotFoundException {
-        //Method ist not serializable, so we use informations to reconstruct it.
+        //Method is not serializable, so we use informations to reconstruct it.
         in.defaultReadObject();
         initDeserializing();
     }
