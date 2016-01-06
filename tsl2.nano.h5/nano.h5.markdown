@@ -1,9 +1,9 @@
 <h6 align="center">FullRelation Nano.H5<br/>
-<font size="-1">&copy; Thomas Schneider 2012-2015
+<font size="-1">&copy; Thomas Schneider 2012-2016
 <br/>
-<a href="http://sourceforge.net/projects/tsl2nano/files/0.7.0-beta/tsl2.nano.h5.0.7.0.jar/download">Download on sourceforge</a>
+<a href="http://sourceforge.net/projects/tsl2nano/files/0.8.0-beta/tsl2.nano.h5.0.8.0.jar/download">Download on sourceforge</a>
 <br/>
-<a href="http://sourceforge.net/projects/tsl2nano/files/0.7.0-beta/nano.h5.jnlp">Start Nano.H5 through WebStart</a>
+<a href="http://sourceforge.net/projects/tsl2nano/files/0.8.0-beta/nano.h5.jnlp">Start Nano.H5 through WebStart</a>
 <p hidden>
 </font></h6>
 </p>
@@ -468,6 +468,10 @@ On top of each html page you will see on the left side an application icon (clic
 
 * *save*: saves/persists the current bean.
 * *close*: closes the current page, returning to the last one without saving.
+
+### Buttons defined through actions inside the beans/entities itself
+
+Each entity can define actions to be presented as buttons itself. See chapter _Bean Actions_.
 
 ### Dependencies
 
@@ -1229,7 +1233,39 @@ Set the _secure_ property on your attribute - if it is of type String - to have 
 
 If you use hash, the presentation will automatically be a password field. Setting a new value will directly hash the value.
 If you use crypt, the en- decryption will be done on saving or loading the bean and its attributes.
- 
+
+### Bean Actions
+
+Each entity can define methods that will automically be presented as buttons on a detail panel. This methods must follow the following constraints:
+
+1. the method must be public in any class inside the current class hierarchy.
+2. the method name must start with prefix 'action' or must have the annotation @Action.
+
+With Annotation @Action you can define parameter names, if you have method parameters. Additionally you can define more parameter constraints through Annotation @Column.
+
+Example without Annotation:
+
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+public void actionRemoveRuleCover(String child, String rule) {
+    RuleCover.removeCover(attr.getDeclaringClass(), attr.getName(), child);
+}
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+Example with Annotation:
+
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+@de.tsl2.nano.bean.annotation.Action(name = "addListener", argNames = { "Observer Attribute",
+    "Observable Attribute", "Rule-Name" })
+public void actionAddListener(
+        @Constraint(pattern = "(\\w+") String observer,
+        @Constraint(pattern = "(\\w+") String observable,
+        @Constraint(pattern = "[%§!]\\w+") String rule) {
+    BeanDefinition def = ENV.get(BeanConfigurator.class).def;
+    Html5Presentation helper = (Html5Presentation) def.getPresentationHelper();
+    helper.addRuleListener(observer, rule, observable);
+}
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
 ## Changing Layouts through the _BeanConfigurator_
 
 The chapter before described the structure of all definitions. _Nano.H5_ provides an administration tool inside the application to do some configurations on runtime. If you are inside the detail-page of a bean, there is an action 'Configuration' on your headers button-group. If you activate it, you are inside a configuration mode, letting you change layout and styling of the current bean.
@@ -1248,6 +1284,37 @@ Inside the _Presentable_ configuration, you are able to change f.e. the layout o
 which result in
 
 [TODO png]
+
+### Adding Change Listeners and Rule Covers
+
+The BeanConfigurator provides the ability to add change listeners and rule covers on bean attributes.
+
+#### Change Listener
+
+A change listener will be defined through an observer attribute, an observable attribute and a rule, calculating a reaction for the observer attribute if the observable changes.
+
+You start the configuration after entering the configuration panel selecting an attribute and clicking the button 'Add Rule Listener'. Then you define three names (case-sensitive!):
+
+1. observer attribute name
+2. observable attribute name
+3. existing rule name (defined in specification directory)
+
+Then you hit 'Add Rule Listener' to finish the action. Close the configuration panels until you reach the panel having a 'save' button. Hit the save button to save the new configuration. The changes will be loaded after restart or reset.
+
+#### Rule Covers
+
+A rule cover covers any property to evaluate the properties value on runtime. A rule cover will be defined through a member of an attribute and a rule name. direct members of an attribute are:
+
+* constraint (having properties to constrain the user input)
+* presentable (having properties to define the gui presentation)
+* columnDefinition (having properties to define the presentation inside a table)
+
+You start the configuration after entering the configuration panel selecting an attribute and clicking the button 'Add Rule Cover'. Then you define two names (case-sensitive!):
+
+* property of attribute (any property in the attributes member hierarchy. e.g.: presentable.layoutConstraints)
+* existing rule name (defined in specification directory)
+
+Then you hit 'Add Rule Cover' to finish the action. Close the configuration panels until you reach the panel having a 'save' button. Hit the save button to save the new configuration. The changes will be loaded after restart or reset.
 
 ## Resolving _many-to-many_ constellations
 
