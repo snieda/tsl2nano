@@ -9,19 +9,12 @@
  */
 package de.tsl2.nano.h5.configuration;
 
-import static org.anonymous.project.presenter.ChargeConst.ATTR_FROMTIME;
-import static org.anonymous.project.presenter.ChargeConst.ATTR_VALUE;
-
 import java.io.Serializable;
-import java.util.ArrayList;
 import java.util.Collection;
-
-import javax.xml.ws.Action;
 
 import de.tsl2.nano.bean.annotation.Constraint;
 import de.tsl2.nano.bean.def.AttributeDefinition;
 import de.tsl2.nano.bean.def.BeanDefinition;
-import de.tsl2.nano.bean.def.BeanPresentationHelper;
 import de.tsl2.nano.bean.def.IAttributeDefinition;
 import de.tsl2.nano.bean.def.IConstraint;
 import de.tsl2.nano.bean.def.IIPresentable;
@@ -35,12 +28,6 @@ import de.tsl2.nano.core.cls.IAttribute;
 import de.tsl2.nano.core.util.Util;
 import de.tsl2.nano.h5.Html5Presentation;
 import de.tsl2.nano.h5.RuleCover;
-import de.tsl2.nano.h5.websocket.WSEvent;
-import de.tsl2.nano.h5.websocket.WebSocketRuleDependencyListener;
-import de.tsl2.nano.incubation.specification.rules.RuleDependencyListener;
-import de.tsl2.nano.incubation.specification.rules.RuleScript;
-import de.tsl2.nano.messaging.ChangeEvent;
-import de.tsl2.nano.messaging.EventController;
 import de.tsl2.nano.messaging.IListener;
 import de.tsl2.nano.util.PrivateAccessor;
 
@@ -246,7 +233,7 @@ public class AttributeConfigurator implements Serializable {
 //        RuleCover.removeCover(attr.getDeclaringClass(), attr.getName(), child);
 //    }
 //
-    @de.tsl2.nano.bean.annotation.Action(name = "addRuleCover", argNames = { "Part of Attribute", "Rule-Name" })
+    @de.tsl2.nano.bean.annotation.Action(name = "addRuleCover", argNames = { "Property of Attribute", "Rule-Name" })
     public void actionAddRuleCover(
             @Constraint(defaultValue = "presentable.layoutConstraints", pattern = "(\\w+[\\.]?)+", allowed = {
                 "presentable", "presentable.layout", "columnDefinition" }) String child,
