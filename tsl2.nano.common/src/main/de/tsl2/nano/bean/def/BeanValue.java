@@ -41,6 +41,8 @@ import de.tsl2.nano.core.cls.BeanClass;
 import de.tsl2.nano.core.cls.IAttribute;
 import de.tsl2.nano.core.cls.PrimitiveUtil;
 import de.tsl2.nano.core.log.LogFactory;
+import de.tsl2.nano.core.util.ByteUtil;
+import de.tsl2.nano.core.util.FileUtil;
 import de.tsl2.nano.core.util.ListSet;
 import de.tsl2.nano.core.util.StringUtil;
 import de.tsl2.nano.core.util.Util;
@@ -215,13 +217,19 @@ public class BeanValue<T> extends AttributeDefinition<T> implements IValueDefini
      * @return temporary file-path of the current bean-value, saved as byte-array.
      */
     public File getValueFile() {
-        return Attachment.getValueFile(getId(), getValue());
+        return String.class.isAssignableFrom(getType()) ? new File(Attachment.getFilename(instance, getName(), (String) getValue())) : Attachment.getValueFile(getId(), getValue());
     }
 
     @Override
     public T getParsedValue(String source) {
         if (Attachment.isAttachment(this)) {
-            return (T) Attachment.getFileBytes(instance, getName(), source);
+            //--> attachment, holding the data (not a file-name only)
+            //first: load the transferred temporary file
+            byte[] transferredBytes = FileUtil.getFileBytes(Attachment.getFilename(instance, getName(), source), null);
+            //second: save that as new file - only for this instance!
+            byte[] bytes = Attachment.getFileBytes(getId(), transferredBytes);
+            //perhaps, convert the byte[] to an instanceof of Blob, InputStream,...
+            return ByteUtil.toByteStream(bytes, getType());
         } else {
             return super.getParsedValue(source);
         }

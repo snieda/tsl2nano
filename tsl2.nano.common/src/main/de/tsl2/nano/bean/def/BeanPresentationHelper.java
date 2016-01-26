@@ -66,6 +66,7 @@ import de.tsl2.nano.core.cls.BeanClass;
 import de.tsl2.nano.core.cls.IAttribute;
 import de.tsl2.nano.core.exception.Message;
 import de.tsl2.nano.core.log.LogFactory;
+import de.tsl2.nano.core.util.BitUtil;
 import de.tsl2.nano.core.util.ByteUtil;
 import de.tsl2.nano.core.util.FileUtil;
 import de.tsl2.nano.core.util.NumberUtil;
@@ -419,7 +420,7 @@ public class BeanPresentationHelper<T> {
         } else if (Boolean.class.isAssignableFrom(attr.getType()) || boolean.class.isAssignableFrom(attr.getType())) {
             type = TYPE_OPTION;
         } else if (ByteUtil.isByteStream(attr.getType())) {//perhaps for blobs
-            type = TYPE_ATTACHMENT;
+            type = TYPE_DATA | TYPE_ATTACHMENT;
         } else if (attr.getType().isArray() || Collection.class.isAssignableFrom(attr.getType())) {//complex type --> list
             type = TYPE_TABLE;
         } else if (BeanUtil.isStandardType(attr.getType())) {
@@ -634,7 +635,7 @@ public class BeanPresentationHelper<T> {
 
     protected boolean isData(IAttributeDefinition<?> attribute) {
         IPresentable p = attribute.getPresentation();
-        return p.getType() == TYPE_DATA || p.getType() == TYPE_ATTACHMENT;
+        return BitUtil.hasBit(p.getType(), TYPE_DATA, TYPE_ATTACHMENT);
     }
 
     /**

@@ -155,6 +155,7 @@ import de.tsl2.nano.action.IAction;
 import de.tsl2.nano.bean.BeanUtil;
 import de.tsl2.nano.bean.IValueAccess;
 import de.tsl2.nano.bean.ValueHolder;
+import de.tsl2.nano.bean.def.Attachment;
 import de.tsl2.nano.bean.def.AttributeDefinition;
 import de.tsl2.nano.bean.def.Bean;
 import de.tsl2.nano.bean.def.BeanCollector;
@@ -484,11 +485,11 @@ public class Html5Presentation<T> extends BeanPresentationHelper<T> implements I
             c1 = appendElement(c1, TAG_LINK, ATTR_HREF, docLink);
             appendElement(c1,
                 TAG_IMAGE,
-                content(ENV.getBuildInformations()),
+                content(),
                 ATTR_SRC,
                 "icons/beanex-logo-micro.jpg",
                 ATTR_TITLE,
-                "Framework Version and Documentation/Help");
+                "Framework Version: " + ENV.getBuildInformations());
 
             if (image != null) {
                 c2 = appendElement(c2, TAG_H3, content(), ATTR_ALIGN, ALIGN_CENTER);
@@ -552,6 +553,7 @@ public class Html5Presentation<T> extends BeanPresentationHelper<T> implements I
         Element head = appendElement(html, TAG_HEAD, ATTR_TITLE, "Nano-H5 Application: " + title);
 
         appendElement(head, "meta", "name", "author", "content", "tsl2.nano.h5 (by Thomas Schneider/2013)");
+        appendElement(head, "meta", "name", "viewport", "content", "width=device-width, height=device-height, initial-scale=1");
 //        appendElement(head, "link", "rel", "stylesheet", "href", "css/style.css");
 
         /*
@@ -639,7 +641,7 @@ public class Html5Presentation<T> extends BeanPresentationHelper<T> implements I
 
         Element panel =
             appendElement(parent, TAG_DIV, ATTR_STYLE,
-                (interactive ? ENV.get("page.data.style", "overflow: auto; height: 700px;") : null));
+                (interactive ? ENV.get("page.data.style", "overflow: auto; height: 75%;") : null));
         createContentPanel(session, panel, bean, interactive, ENV.get("page.data.fullwidth", false));
 
         if (isRoot) {
@@ -1433,7 +1435,8 @@ public class Html5Presentation<T> extends BeanPresentationHelper<T> implements I
                     TYPE_DATA,
                     TYPE_ATTACHMENT)) {
                     BeanValue<?> beanValue = (BeanValue<?>) attr;
-                    value = beanValue.getValueFile().getPath();
+                    File valueFile = beanValue.getValueFile();
+                    value = valueFile != null ? valueFile.getPath() : null;
                     cell =
                         appendElement(row, TAG_CELL, ATTR_TITLE,
                             itemBean.toString() + ": " + ENV.translate(c.getName(), true),
@@ -1445,7 +1448,7 @@ public class Html5Presentation<T> extends BeanPresentationHelper<T> implements I
                         appendAttributes(data, rowBackground, c.getPresentable(), false);
                         appendAttributes(cell, rowBackground, c.getPresentable(), false);
                     }
-                    if (Messages.isMarkedAsProblem(value)) {
+                    if (value != null && Messages.isMarkedAsProblem(value)) {
                         HtmlUtil.appendAttributes(cell, ATTR_COLOR, COLOR_RED);
                     }
                 } else if (attr != null && tableDescriptor.hasMode(IBeanCollector.MODE_SHOW_NESTINGDETAILS)
@@ -1751,12 +1754,23 @@ public class Html5Presentation<T> extends BeanPresentationHelper<T> implements I
 //                            FileUtil.writeBytes(((Attachment)beanValue).getValue(), FileUtil.getValidFileName(beanValue.getName()), false);
 //                        } else {
                             if (v != null) {
-                                if (!ByteUtil.isByteStream(v.getClass()))
-                                    throw new IllegalStateException("attachment of attribute '"
-                                        + beanValue.getValueId()
-                                        + "' has to be of type byte[], ByteBuffer or String!");
-                                FileUtil.writeBytes(ByteUtil.getBytes(v), ENV.getTempPath() + beanValue.getValueId(),
-                                    false);
+                                boolean writeFile = true;
+                                if (v instanceof String)
+                                    if (new File((String) v).exists())
+                                        v =
+                                            FileUtil.getFileBytes(Attachment.getFilename(beanValue.getInstance(),
+                                                beanValue.getName(), (String) v), null);
+                                    else //not a file name and no data --> do nothing
+                                        writeFile = false;
+                                
+                                    if (writeFile && ByteUtil.isByteStream(v.getClass()))
+                                        FileUtil.writeBytes(ByteUtil.getBytes(v),
+                                            ENV.getTempPath() + beanValue.getValueFile().getPath(),
+                                            false);
+                                    else if (writeFile)
+                                        throw new IllegalStateException("attachment of attribute '"
+                                            + beanValue.getValueId()
+                                            + "' has to be of type byte[], ByteBuffer, Blob or String!");
                             }
                         }
 //                    }
@@ -2028,6 +2042,7 @@ public class Html5Presentation<T> extends BeanPresentationHelper<T> implements I
             type = "img";
             break;
         case TYPE_ATTACHMENT:
+        case TYPE_ATTACHMENT | TYPE_DATA:
             //on type = 'file' only the file-name is given (no path!)
             //will provide an upload button for the client system
             type = "file";

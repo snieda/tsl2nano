@@ -100,8 +100,9 @@ public class DelegationHandler<T> implements IDelegationHandler<T>, Serializable
      */
     public DelegationHandler(T delegate, Map<String, Object> properties) {
         super();
-        if (delegate == null)
-            throw new IllegalArgumentException("delegate must not be null!");
+        if (delegate == null && Util.isEmpty(properties))
+            //don't escalate here - this may be done in extension 
+            LOG.warn("delegate handler without delegate and any property!");
         this.delegate = delegate;
         this.properties = properties != null ? properties : getProperties();
     }

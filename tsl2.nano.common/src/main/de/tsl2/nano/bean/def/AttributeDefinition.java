@@ -35,6 +35,7 @@ import de.tsl2.nano.bean.BeanContainer;
 import de.tsl2.nano.bean.BeanUtil;
 import de.tsl2.nano.bean.IAttributeDef;
 import de.tsl2.nano.bean.IConnector;
+import de.tsl2.nano.bean.IRuleCover;
 import de.tsl2.nano.bean.IValueAccess;
 import de.tsl2.nano.bean.ValueHolder;
 import de.tsl2.nano.core.ENV;
@@ -243,7 +244,7 @@ public class AttributeDefinition<T> implements IAttributeDefinition<T> {
                 if (Proxy.isProxyClass(item.getClass())) {
                     handler = Proxy.getInvocationHandler(item);
                     //create proxy for each bean instance
-                    if (handler instanceof DelegationHandler) {
+                    if (handler instanceof DelegationHandler && handler instanceof IRuleCover) {
                         // compare instances: if attr is a delegation-handler we must ignore its delegate!
                         if (item == instance)
                             throw new IllegalStateException("the given instance " + instance

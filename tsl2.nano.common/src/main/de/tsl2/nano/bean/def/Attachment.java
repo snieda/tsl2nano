@@ -10,9 +10,7 @@
 package de.tsl2.nano.bean.def;
 
 import java.io.File;
-import java.io.InputStream;
 import java.lang.reflect.Method;
-import java.nio.Buffer;
 import java.util.UUID;
 
 import org.simpleframework.xml.Attribute;
@@ -21,6 +19,8 @@ import de.tsl2.nano.bean.BeanUtil;
 import de.tsl2.nano.bean.IValueAccess;
 import de.tsl2.nano.core.ENV;
 import de.tsl2.nano.core.cls.IAttribute;
+import de.tsl2.nano.core.util.BitUtil;
+import de.tsl2.nano.core.util.ByteUtil;
 import de.tsl2.nano.core.util.FileUtil;
 import de.tsl2.nano.core.util.Util;
 import de.tsl2.nano.messaging.EventController;
@@ -45,7 +45,7 @@ public class Attachment implements IValueAccess<byte[]>, IAttribute<byte[]> {
     String file;
     transient EventController eventController;
 
-    private static final String EMPTY = "EMPTY";
+    private static final String ICON_EMPTY = "icons/blocked.png";
 
     public Attachment() {
     }
@@ -83,7 +83,7 @@ public class Attachment implements IValueAccess<byte[]>, IAttribute<byte[]> {
 
     @Override
     public byte[] getValue(Object instance) {
-        if (data == null) {
+        if (data == null && file != null) {
             data = FileUtil.getFileBytes(file, null);
         }
         return data;
@@ -158,8 +158,25 @@ public class Attachment implements IValueAccess<byte[]>, IAttribute<byte[]> {
         return eventController;
     }
 
-    public static byte[] getFileBytes(Object instance, String name, String source) {
-        return FileUtil.getFileBytes(getFilename(instance, name, source), null);
+    /**
+     * should be used, if the bean attribute stores the content of the attachment
+     * @param id attribute id
+     * @param source attachment content
+     * @return attachment content
+     */
+    public static byte[] getFileBytes(String id, Object source) {
+        return FileUtil.getFileBytes(getValueFile(id, source).getPath(), null);
+    }
+
+    /**
+     * should be used, if the bean attribute stores only the file name of the attachment
+     * @param instance bean values instance
+     * @param attribute attribute name
+     * @param file file name
+     * @return attachment content
+     */
+    public static byte[] getFileBytes(Object instance, String attribute, String file) {
+        return FileUtil.getFileBytes(getFilename(instance, attribute, file), null);
     }
 
     /**
@@ -184,8 +201,10 @@ public class Attachment implements IValueAccess<byte[]>, IAttribute<byte[]> {
      * @return temporary file-path of the current bean-value, saved as byte-array.
      */
     public static File getValueFile(String id, Object v) {
-        byte[] data = (byte[]) (v instanceof byte[] ? v : BeanUtil.serialize(v));
-        String fname = id + "-" + (data != null ? UUID.nameUUIDFromBytes(data) : EMPTY);
+        if (v == null)
+            return null;
+        byte[] data = ByteUtil.getBytes(v);
+        String fname = data != null ? id + "-" + UUID.nameUUIDFromBytes(data) : ICON_EMPTY;
         String ext = getExtension(data);
         /*
          * writing to the servers temp path needs a path, starting from 'user.dir' (--> application start path).
@@ -232,14 +251,11 @@ public class Attachment implements IValueAccess<byte[]>, IAttribute<byte[]> {
      */
     public static final boolean isAttachment(IAttributeDefinition<?> a) {
         int ptype = a.getPresentation() != null ? a.getPresentation().getType() : -1;
-        return ptype == IPresentable.TYPE_ATTACHMENT
+        return BitUtil.hasBit(ptype, IPresentable.TYPE_ATTACHMENT)
             && isData(a);
     }
-    
+
     public static final boolean isData(IAttributeDefinition<?> a) {
-        Class<?> type = a.getType();
-        return byte[].class.isAssignableFrom(type)
-                || Buffer.class.isAssignableFrom(type)
-                || InputStream.class.isAssignableFrom(type);
+        return ByteUtil.isByteStream(a.getType());
     }
 }

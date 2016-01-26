@@ -10,7 +10,6 @@
 package de.tsl2.nano.bean.def;
 
 import java.io.Serializable;
-import java.util.Collection;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;

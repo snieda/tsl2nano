@@ -216,6 +216,9 @@ public class Timesheet extends NanoH5App {
                 "var to = totime != null ? totime.getTime() : 0;" +
                 "var p = pause != null ? pause.getTime() : 0;" +
                 "Math.round(((to - from) - p) / (3600 * 10)) / 100;", null);
+        /*
+         * add some specifications (=tests) to be checked on loading a rule
+         */
         Time t0800 = DateUtil.getTime(8, 0);
         Time t1700 = DateUtil.getTime(17, 0);
         Time t0000 = DateUtil.getTime(0, 0);

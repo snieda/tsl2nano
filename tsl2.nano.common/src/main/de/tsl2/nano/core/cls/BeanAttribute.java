@@ -30,6 +30,7 @@ import de.tsl2.nano.core.ENV;
 import de.tsl2.nano.core.ManagedException;
 import de.tsl2.nano.core.log.LogFactory;
 import de.tsl2.nano.core.util.AnnotationProxy;
+import de.tsl2.nano.core.util.ByteUtil;
 import de.tsl2.nano.core.util.StringUtil;
 
 /**
@@ -649,6 +650,8 @@ public class BeanAttribute<T> implements IAttribute<T> {
                 else {
                     if (PrimitiveUtil.isPrimitiveOrWrapper(wrapperType))
                         return PrimitiveUtil.convert(value, wrapperType);
+                    else if (ByteUtil.isByteStream(wrapperType))
+                        return ByteUtil.toByteStream((byte[])value, wrapperType);
                     return BeanClass.createInstance(wrapperType, value);
                 }
             }

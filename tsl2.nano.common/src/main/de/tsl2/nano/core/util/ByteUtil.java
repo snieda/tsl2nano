@@ -24,6 +24,8 @@ import java.nio.ByteBuffer;
 import java.sql.Blob;
 import java.util.Arrays;
 
+import javax.sql.rowset.serial.SerialBlob;
+
 import org.apache.commons.logging.Log;
 
 import de.tsl2.nano.core.ManagedException;
@@ -49,11 +51,46 @@ public class ByteUtil extends Util {
     public static boolean isByteStream(Class<?> type) {
         return type.equals(Serializable.class)
             || (type.isArray() && (Byte[].class.isAssignableFrom(type) || byte[].class.isAssignableFrom(type)))
-            || ByteBuffer.class.isAssignableFrom(type) || Blob.class.isAssignableFrom(type);
+            || ByteBuffer.class.isAssignableFrom(type) || InputStream.class.isAssignableFrom(type) || Blob.class.isAssignableFrom(type);
+    }
+
+    /**
+     * converts given bytes to any stream, defined by type. is able to fill {@link Blob}, {@link String},
+     * {@link ByteBuffer}, {@link Byte}[] and any serializeable. see {@link #toByteArray(InputStream)}.
+     * 
+     * @param bytes source bytes
+     * @param type to create an instance for, filled with source bytes
+     * @return new instance of type
+     */
+    @SuppressWarnings("unchecked")
+    public static <T> T toByteStream(byte[] bytes, Class<T> type) {
+        if (byte[].class.isAssignableFrom(type)) {
+            return (T) bytes;
+        } else if (Blob.class.isAssignableFrom(type)) {
+            try {
+                return (T) new SerialBlob(bytes);
+            } catch (Exception e) {
+                ManagedException.forward(e);
+                return null;
+            }
+        } else if (Byte[].class.isAssignableFrom(type)) {
+            Byte[] b = new Byte[bytes.length];
+            System.arraycopy(bytes, 0, b, 0, bytes.length);
+            return (T) b;
+        } else if (String.class.isAssignableFrom(type)) {
+            return (T) new String(bytes);
+        } else if (ByteBuffer.class.isAssignableFrom(type)) {
+            return (T) ByteBuffer.wrap(bytes);
+        } else if (InputStream.class.isAssignableFrom(type)) {
+            return (T) new ByteArrayInputStream(bytes);
+        } else {
+            return (T) convertToObject(bytes, null);
+        }
     }
 
     /**
      * getBytes
+     * 
      * @param o
      * @return bytes of the current object
      */
@@ -63,12 +100,14 @@ public class ByteUtil extends Util {
         if (o instanceof Byte[])
             return serialize(o);
         else if (o instanceof String)
-            return ((String)o).getBytes();
+            return ((String) o).getBytes();
         else if (o instanceof ByteBuffer)
-            return ((ByteBuffer)o).array();
+            return ((ByteBuffer) o).array();
+        else if (o instanceof InputStream)
+            return toByteArray((InputStream) o);
         else if (o instanceof Blob)
             try {
-                return ByteUtil.toByteArray(((Blob) o).getBinaryStream());
+                return toByteArray(((Blob) o).getBinaryStream());
             } catch (Exception e) {
                 ManagedException.forward(e);
                 return null;
@@ -76,6 +115,7 @@ public class ByteUtil extends Util {
         else
             return serialize(o);
     }
+
     /**
      * Serialization of a bean-object to a byte-array.
      * 
