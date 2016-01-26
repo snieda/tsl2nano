@@ -30,6 +30,8 @@ NanoH5 (or FullRelation) is an UI independent gui implementation framework provi
 
 To do a *quick-start*, go to chapter _Starting / Test_.
 
+A cool way to see the power of this tool can be seen in chapter _Online Quick-Start with a great selection of Database-Models on PonyORM_.
+
 ### What does it for you?
 
 * it starts a generic application with default mechanisms and configurations to present data (->jpa) in html5
@@ -115,7 +117,7 @@ this software should provide a fast way to create a standard application through
 * Client/Server application
 * Web application for small user-groups
 * Standalone or through connection to an application server
-* Application, started through a rest service in a web container (e.g. in jboss: http://localhost:8080/tsl2.nano.h5.0.7.0/web/start/user.home/free.port)
+* Application, started through a rest service in a web container (e.g. in jboss: http://localhost:8080/tsl2.nano.h5.0.8.0/web/start/user.home/free.port)
 * with or without local replication database
 * Usable as Entity-Browser configuring your data
 * Usable as full-configurable application
@@ -313,7 +315,7 @@ The following service may be set to override the default mechanisms:
 
 * install a <a href="http://www.oracle.com/technetwork/java/javase/downloads/jdk7-downloads-1880260.html">java jdk at least version 1.7</a>. If you only install a java jre-version, the bean-jar file cannot be generated - then you have to select an existing one.
 * get the newest version of <a href="https://sourceforge.net/projects/tsl2nano/">tsl2.nano.h5</a>
-* start this jar file with _java -jar tsl2.nano.h5.[version-number].jar_. this will create the environments _config_ and _sample_ and a _run.bat_.
+* start this jar file with _java -jar tsl2.nano.h5.[version-number].jar_. this will create the environments _nanoh5.environment_ and a _run.bat_.
 * go into the extracted sub-directory _sample_ and start the _Windows_-batch file _runServer.bat_. This will start the sample database.
 * start the _run.bat_
 * if you are not on a _Windows_ system, start your internet browser with adress _localhost:8067_, or just do a double-click on the file _application.html_
@@ -325,21 +327,23 @@ The following service may be set to override the default mechanisms:
 
 There are some online database-model creation/using provider like PonyORM (ponyorm.com) and ERDPlus (erdplus.com). This may be a fast possibility to see different database models working in tsl2.nano.h5.
 
-Since most UML-model designer will generate a DDL (database definition language) script which may use a specific database dialect, we try to use HSqldb as local database server with compatibility modes switched on. See _Database Providers and Dialects_ for more informations.
+Since most UML-model designers will generate a DDL (database definition language) script which may use a specific database dialect, we try to use HSqldb as local database server with compatibility modes switched on. See _Database Providers and Dialects_ for more informations.
 
 Here is a short description how to use a model from PonyORM and starting a full database-application with web-start on that model:
 
+ - be sure to use NOT java 8, as there the jnlp couldn't be started without a real certification!
  - open the link https://editor.ponyorm.com/user/pony/OnlineStore in your browser
  - select a datbase dialect on the top tab panel and click on it (prefered: oracle)
  - click the button _select all_
  - copy the selection to the clipboard using _Ctrl+C_ or simply with the context menu of a right-mouse-click on the selection
- - go to the tsl2.nano.h5 documentation page https://sourceforge.net/p/tsl2nano/wiki/Home/ and click on the link _Start Nano.H5 through WebStart_ http://sourceforge.net/projects/tsl2nano/files/0.7.0-beta/nano.h5.jnlp
+ - go to the tsl2.nano.h5 documentation page https://sourceforge.net/p/tsl2nano/wiki/Home/ and click on the link _Start Nano.H5 through WebStart_ http://sourceforge.net/projects/tsl2nano/files/0.8.0-beta/nano.h5.jnlp
  - after a while, Nano.H5 will open a page in your browser. click on the centered link of that page
  - expand the detail panel
  - click into the field _Database_
  - paste the text from clipboard with Ctrl+V  or simply using the context menu of a right-mouse click on the field
  - click on the _OK_ Button at the bottom
  - after some minutes, Nano.H5 should show a list of available beans/tables.
+ - open a type, create a new bean and click 'configure' to configure the presentation of this bean type.
  
 #### Known Problems on HsqlDB compatibility mode or DDL scripts provided by PonyORM
 
@@ -644,22 +648,118 @@ Example, referencing a rule for a property of your beandefinition:
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 Three rule types are known:
-- Rule: a boolean/numeric operation
-- RuleScript: a java script expression
-- RuleDecisionTable: a decision table where the first column defines the parameter names and all following column are decision values. the last line defines the result vector.
+- *Rule*: a boolean/numeric operation
+- *RuleScript*: a java script expression
+- *RuleDecisionTable*: a decision table where the first column defines the parameter names and all following column are decision values. the last line defines the result vector.
 
 ### Defining a rule through javascript
 
 Use a _RuleScript_ to define a rule with a javascript expression.
  
+Example returning a map with an html style to be used as layoutconstraint on an attribute:
+
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+String redColorStyle = "color: red;";
+String greenColorStyle = "color: green;";
+
+//define the rule
+RuleScript<String> presValueColor =
+    new RuleScript<String>(
+        "presValueColor", "var map = new java.util.HashMap(); map.put('style', value > 10 ? '" 
+        + redColorStyle
+        + "' : '" + greenColorStyle + "'); map;", null);
+
+//this will persist the rule to '<ENV>/specification/rule/presValueColor.xml'            
+ENV.get(RulePool.class).add(presValueColor);
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+...the xml equivalent would be:
+
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+<?xml version="1.0" encoding="UTF-8"?>
+<ruleScript name="presValueColor">
+   <operation>var map = new java.util.HashMap(); map.put(&apos;style&apos;, value &gt; 10 ? &apos;color: red;&apos; : &apos;color: green;&apos;); map;</operation>
+</ruleScript>
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+...the rule-cover could be done with:
+
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+RuleCover.cover(Charge.class, ATTR_VALUE, "presentable.layoutConstraints", "%" + presValueColor.getName());
+RuleCover.cover(Charge.class, ATTR_VALUE, "columnDefinition.presentable.layoutConstraints", "%" + presValueColor.getName());
+
+charge.saveDefinition();
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
 ### Defining a rule through a decision table
 
 Use a _RuleDecisionTable_ to define a rule through an excel sheet exporting its data through an *csv* file.
+
+Example creating a csv and referencing this csv through a RuleDecisionTable:
+
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+String redColorStyle = "color: red;";
+String greenColorStyle = "color: green;";
+
+//create a csv file holding a decision-table
+TableList tl = new TableList<>(2);
+tl.add("matrix", "<1>", "<2>", "<3>", "<4>", "<5>", "<6>", "<7>");
+tl.add("weekday", "Mo", "Di", "Mi", "Do", "Fr","Sa", "So");
+tl.add("result", greenColorStyle, greenColorStyle, greenColorStyle, greenColorStyle, greenColorStyle, redColorStyle, redColorStyle);
+String ruleDir = ENV.get(RulePool.class).getDirectory();
+FileUtil.save(ruleDir + "weekcolor.csv", tl.dump());
+
+//now, we create the rule referencing the weekcolor.csv decision-table:
+RuleDecisionTable dtRule = RuleDecisionTable.fromCSV(ruleDir + "weekcolor.csv");
+ENV.get(RulePool.class).add(dtRule);
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+...the xml equivalent would be:
+
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+<?xml version="1.0" encoding="UTF-8"?>
+<ruleDecisionTable name="weekcolor">
+   <operation>[BASEDIR]/.nanoh5.timesheet/specification/rule/weekcolor.csv</operation>
+</ruleDecisionTable>
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+...the csv would be:
+
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+matrix	<1>	<2>	<3>	<4>	<5>	<6>	<7>	
+weekday	Mo	Di	Mi	Do	Fr	Sa	So	
+result	color: green;	color: green;	color: green;	color: green;	color: green;	color: red;	color: red;	
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+...the rule-cover could be done with:
+
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+RuleCover.cover(Charge.class, ATTR_FROMDATE, "presentable.layoutConstraints", "&" + dtRule.getName());
+RuleCover.cover(Charge.class, ATTR_FROMDATE, "columnDefinition.presentable.layoutConstraints", "&" + dtRule.getName());
+
+charge.saveDefinition();
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 ### Defining an action through javascript
 
 Use a _ActionScript_ to define an action with a javascript expression.
  
+Example:
+
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+TODO
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+### Defining a rule through standard java operations
+
+Use a _Rule_ to define an action with an expression containing standard java operations.
+ 
+Example:
+
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+TODO
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
 ## The _ScriptTool_
 
 After login, you are able to execute queries and scripts like ant-scripts. You have to enable it in your _environment.xml_ to see the _ScriptTool_ in the list of _BeanCollectors_.
@@ -2607,30 +2707,38 @@ Net:Connection-->Link-->Cover(content, descriptor)
 * (v) jnlp: funktioniert erst beim zweiten Start <-- jars abwarten
 * was tun, wenn zum zweiten Mal generiert wird und schon Klassen in generated-src vorhanden sind? diese sind dann von jpa nicht ladbar.
 * doc+test rulescript, actionscript (javascript)
-* kion: javax.persistence.PersistenceException: org.hibernate.PropertyValueException: not-null property references a null or transient value : de.eom.kion.beans.festsetzung.steuerakte.Austrittregel._austrittregel_BUNDESLANDIDBackref
+* (v) kion: javax.persistence.PersistenceException: org.hibernate.PropertyValueException: not-null property references a null or transient value : de.eom.kion.beans.festsetzung.steuerakte.Austrittregel._austrittregel_BUNDESLANDIDBackref
 * Doc: Verwende am besten Chrome+Hibernate+Hsqldb
 * implement XmlPresentableConverter to provide readable xml files
 * test: create random data through lists with: german-names.lst, cities.lst, countries.lst, banks.lst
 * rules:
-* RuleCover
-* integration of external rule engines like visual rules, drools
-* entscheidungstabelle --> csv-Datei --> rule-xml, --> tree (graphviz)
+** (v) RuleCover
+** integration of external rule engines like visual rules, drools
+** entscheidungstabelle --> csv-Datei --> rule-xml, --> tree (graphviz)
 * trace: Runtime.traceInstructions
 * webstart: JAVA_VM_ARGS
 * SEO: page ranking mit Seorch, diagnoSEO
 * Argumentator --> GetOpts
 * (v) QueryResult, Statistics sollten wie BeanDefinition konfigurierbar sein.
 * (v) DecisionTableInterpreter --> Rule, LogicTable
-** table <--> tree
+** (x) table <--> tree
 ** table.rotate
 * BeanCollector --> LogicTable, LogicTableUI mit dependency listeners
 * FormattedLogFactory per session
 * java 8 Probleme:
 	* ant start erst beim 2.mal
-	* javascript engine = null
-* bean.action<Name> --> annotation
-* bean.action<Name>(arguments) --> create Dialog for action arguments
 	
+	* javascript engine = null
+* (v) bean.action<Name> --> annotation
+* (v) bean.action<Name>(arguments) --> create Dialog for action arguments
+* do more integration of packages like timesheet - perhaps link to the zip file
+* (x) HOTFIX for image integration
+* ( ) Integration of REST(map of properties, with serialization) with XML/JSON response
+* ( ) store map/json to database (service-URL, fixed properties, user properties, result xml/json)
+* ( ) Html-Tree element (details+table+css?)
+* x/y --> svg
+* responsive design
+
 war:
 * WEB-INF/web..xml rausschmeissen
 * jar --> war
