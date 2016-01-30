@@ -19,13 +19,10 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.Serializable;
-import java.io.StringWriter;
 import java.lang.reflect.InvocationHandler;
 import java.lang.reflect.Proxy;
 import java.sql.Connection;
 import java.text.SimpleDateFormat;
-import java.util.Arrays;
-import java.util.Collection;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.Map;
@@ -589,7 +586,7 @@ class SimpleXmlArrayWorkaround implements Matcher {
                 @Override
                 public Object read(String clsName) throws Exception {
                     //loading the class through the ClassLoder.loadClass(name) may fail on object arrays, so we load it through Class.forName(name)
-                    return clsName.contains(".") || clsName.startsWith("[") ? loader.loadClass(clsName) : PrimitiveUtil
+                    return clsName.contains(".") || clsName.startsWith("[") ? loader.getClass().forName(clsName) : PrimitiveUtil
                         .getPrimitiveClass(clsName);
                 }
 

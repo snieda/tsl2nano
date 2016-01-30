@@ -238,7 +238,7 @@ public class AttributeDefinition<T> implements IAttributeDefinition<T> {
             item = members.get(k);
             if (item != null) {
                 //first inject the child tree - be careful, don't produce a stackoverflow
-                if (Util.isFrameworkClass(item.getClass()) && !item.getClass().isAnonymousClass() && !(item instanceof IAttribute) && !(item instanceof BeanDefinition))
+                if (item != instance && Util.isFrameworkClass(item.getClass()) && !item.getClass().isAnonymousClass() && !(item instanceof IAttribute) && !(item instanceof BeanDefinition))
                     injectIntoRuleCover(new PrivateAccessor(item), instance);
                 //now the own direct members
                 if (Proxy.isProxyClass(item.getClass())) {

@@ -10,6 +10,7 @@
 package de.tsl2.nano.h5;
 
 import java.util.LinkedHashMap;
+import java.util.Set;
 
 import org.simpleframework.xml.Attribute;
 import org.simpleframework.xml.core.Commit;
@@ -19,6 +20,8 @@ import de.tsl2.nano.bean.IConnector;
 import de.tsl2.nano.bean.def.SecureAction;
 import de.tsl2.nano.core.ENV;
 import de.tsl2.nano.core.exception.Message;
+import de.tsl2.nano.core.util.Util;
+import de.tsl2.nano.incubation.specification.actions.Action;
 import de.tsl2.nano.incubation.specification.actions.ActionPool;
 
 /**
@@ -58,14 +61,35 @@ public class SpecifiedAction<RETURNTYPE> extends SecureAction<RETURNTYPE> implem
     @SuppressWarnings("unchecked")
     @Override
     public RETURNTYPE action() throws Exception {
-        Object result = ENV.get(ActionPool.class).get(name)
-            .run(instance != null ? BeanUtil.toValueMap(instance) : new LinkedHashMap<String, Object>());
+        if (instance == null && !Util.isEmpty(getParameter()))
+            instance = getParameter(0);
+        //fill specified action parameters
+        Set<String> argNames = getArgumentNames();
+        LinkedHashMap<String, Object> pars = new LinkedHashMap<String, Object>();
+        int i = 1;
+        for (String argName : argNames) {
+            if (getParameter().length <= i)
+                break;
+            pars.put(argName, getParameter(i++));
+        }
+        if (instance != null)
+            pars.putAll(BeanUtil.toValueMap(instance));
+        Action<?> a = getActionRunner();
+        Object result = a.run(pars);
         if (BeanUtil.isStandardType(result)) {
             Message.send(ENV.translate("tsl2nano.result.information", false, getShortDescription(), result));
             return null;
         } else {
             return (RETURNTYPE) result;
         }
+    }
+
+    /**
+     * getActionRunner
+     * @return
+     */
+    public Action<?> getActionRunner() {
+        return ENV.get(ActionPool.class).get(name);
     }
 
     /**
@@ -79,6 +103,15 @@ public class SpecifiedAction<RETURNTYPE> extends SecureAction<RETURNTYPE> implem
         return this;
     }
 
+    @Override
+    public Class[] getArgumentTypes() {
+        return getActionRunner().getParameterList().toArray(new Class[0]);
+    }
+    
+    public Set<String> getArgumentNames() {
+        return getActionRunner().getParameter().keySet();
+    }
+    
     @Override
     public void disconnect(Object connectionEnd) {
         //nothing to clean..

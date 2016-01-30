@@ -229,7 +229,7 @@ public class ValueExpression<TYPE> implements
     public TYPE createExampleBean(String toValue, boolean addSearchPostfix) {
         TYPE exampleBean = createInstance(toValue);
         //TODO: how-to extract the attribute-name information from expression?
-        Bean<TYPE> b = (Bean<TYPE>) Bean.getBean((Serializable) exampleBean);
+        Bean<TYPE> b = (Bean<TYPE>) Bean.getBean(exampleBean);
         String[] attributeValues = getAttributeValues(toValue);
         for (int i = 0; i < attributes.length; i++) {
             IValueDefinition<?> attr = b.getAttribute(attributes[i]);

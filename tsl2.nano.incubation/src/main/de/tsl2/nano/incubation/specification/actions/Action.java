@@ -16,8 +16,11 @@ import java.util.Map;
 import org.simpleframework.xml.Attribute;
 
 import de.tsl2.nano.core.cls.BeanClass;
+import de.tsl2.nano.core.util.StringUtil;
 import de.tsl2.nano.incubation.specification.AbstractRunnable;
 import de.tsl2.nano.incubation.specification.ParType;
+import de.tsl2.nano.util.PrivateAccessor;
+import de.tsl2.nano.util.UnboundAccessor;
 
 /**
  * Action to be loaded by ActionPool and provided to SpecifiedAction.
@@ -49,6 +52,27 @@ public class Action<T> extends AbstractRunnable<T> {
         this.declaringClass = declaringClass;
     }
 
+    public Action(String method) {
+        this(getMethod(method));
+    }
+
+    public Action(String name, String method) {
+        this(getMethod(method));
+        this.name = name;
+    }
+
+    /**
+     * createMethod
+     * @param method
+     * @return 
+     */
+    static Method getMethod(String method) {
+        String clsName = StringUtil.substring(method, null, ".", true);
+        String methodName = StringUtil.substring(method, ".", null, true);
+        Class<?> cls = BeanClass.load(clsName);
+        return PrivateAccessor.findMethod(cls, methodName, null).iterator().next();
+    }
+    
     /**
      * constructor
      * 

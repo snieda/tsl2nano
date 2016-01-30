@@ -21,6 +21,7 @@ rem set USERDIR=-Duser.dir=%PRJ%
 rem set LANG=-Duser.country=FR -Duser.language=fr
 rem set DEBUG="-agentlib:jdwp=transport=dt_socket,address=8787,server=y,suspend=n"
 rem set AGENT=-javaagent:%PRJ%/aspectjweaver.jar
+rem set JAVA_OPTS=-Dhttp.proxyHost=myproxy -Dhttp.proxyPort=8080
 rem @start javaw
 java %OFFLINE% %LANG% %USERDIR% %NANO_DEBUG% %AGENT% -Xmx512m -Djava.awt.headless=true %DEBUG% %UH% -jar tsl2.nano.h5.0.8.0.jar %PRJ% %PORT% 
 REM -agentpath:...visualvm_138/profiler/lib/deployed/jdk16/windows/profilerinterface.dll=...\visualvm_138\profiler\lib,5140

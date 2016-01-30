@@ -47,6 +47,9 @@ import java.util.Map;
 import java.util.Properties;
 import java.util.ResourceBundle;
 
+import javax.json.JsonObject;
+import javax.json.JsonStructure;
+
 import org.apache.commons.logging.Log;
 import org.apache.tools.ant.types.FileSet;
 import org.apache.xmlgraphics.util.MimeConstants;
@@ -1444,6 +1447,23 @@ public class CommonTest {
     }
 
     @Test
+    public void testNetUtilJSON() throws Exception {
+        JsonStructure structure = NetUtil.getRestfulJSON("http://headers.jsontest.com/"/*"https://graph.facebook.com/search?q=java&type=post"*/);
+        System.out.println(StringUtil.toString(structure, -1));
+        
+        Bean<JsonStructure> bean = Bean.getBean(structure);
+        System.out.println(bean);
+        
+        String echoService = "http://echo.jsontest.com";
+        structure = NetUtil.getRestfulJSON(echoService, "mykey1", "myvalue1", "mykey2", "myvalue2");
+        System.out.println(StringUtil.toString(structure, -1));
+        
+        JsonObject obj = (JsonObject) structure;
+        assertTrue(obj.get("mykey1").toString().equals("\"myvalue1\""));
+        assertTrue(obj.get("mykey2").toString().equals("\"myvalue2\""));
+    }
+    
+    @Test
     public void testCrypt() throws Exception {
         String txt = "test1234";
         String testfile = ENV.getTempPath() + "testfile.txt";
@@ -1554,7 +1574,7 @@ public class CommonTest {
     }
     
     @Test
-    @Ignore("seems not work on suns jdk1.7")
+    @Ignore("seems not to work on suns jdk1.7")
     public void testAnnotationProxy() throws Exception {
         Element origin = AnnotationProxy.getAnnotation(SimpleXmlAnnotator.class, "attribute", Element.class);
         Annotation proxy = AnnotationProxy.createProxy(new AnnotationProxy(origin, "name", "ruleCover", "type", CommonTest.class));
@@ -1566,7 +1586,7 @@ public class CommonTest {
         assertTrue(CommonTest.class.equals(AnnotationProxy.getAnnotation(SimpleXmlAnnotator.class, "attribute", Element.class).type()));
     }
     @Test
-//    @Ignore("seems not work on suns jdk1.7")
+//    @Ignore("seems not to work on suns jdk1.7")
     public void testAnnotationValueChange() throws Exception {
         Element origin = AnnotationProxy.getAnnotation(SimpleXmlAnnotator.class, "attribute", Element.class);
         //this seems not work on suns jdk1.7

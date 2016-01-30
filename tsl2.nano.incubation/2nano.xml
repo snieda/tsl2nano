@@ -206,6 +206,7 @@ set the following jvm properties:
 			<property name="sh.jar.manifest" value="../tsl2.nano.h5/META-INF/MANIFEST.MF" />
 			<!--<property name="sh.jar.include" value="slf4j-api-1.7.*.jar" />-->
 			<property name="sh.jar.include" value="java_websocket.jar" />
+			<property name="sh.jar.include2" value="javax.json-*.jar" />
 		</ant>
 
 		

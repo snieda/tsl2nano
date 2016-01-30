@@ -1341,7 +1341,7 @@ Each entity can define methods that will automically be presented as buttons on 
 1. the method must be public in any class inside the current class hierarchy.
 2. the method name must start with prefix 'action' or must have the annotation @Action.
 
-With Annotation @Action you can define parameter names, if you have method parameters. Additionally you can define more parameter constraints through Annotation @Column.
+With Annotation _@Action_ you can define parameter names, if you have method parameters. Additionally you can define more parameter constraints through Annotation _@Column_.
 
 Example without Annotation:
 
@@ -1365,6 +1365,38 @@ public void actionAddListener(
     helper.addRuleListener(observer, rule, observable);
 }
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+It is possible to add any action on runtime to your bean. 
+
+- Simply go to configuration page of your bean (use page button 'configuration' if you are inside your beans detail page).
+- use _Create specification Action_, if you didn't yet define the desired specification action and define a name and an existing class+method (mypackage.MyClass.myMethod).
+- use _Add Action_ and write the specified action name in the next page
+
+Example creating a new bean action on runtime:
+
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+New specified Actionname	: testaction
+Action-Expression			: de.tsl2.nano.core.util.NetUtil.getRestfulJSON
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+...this will result in file _.../specification/action/testaction.xml:
+
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+<?xml version="1.0" encoding="UTF-8"?>
+<action name="testaction" declaringClass="de.tsl2.nano.core.util.NetUtil">
+   <parameter name="arg1">
+      <type javaType="java.lang.String" />
+   </parameter>
+   <parameter name="arg2">
+      <type javaType="[Ljava.lang.Object;"/>
+   </parameter>
+   <operation>getRestfulJSON</operation>
+</action>
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+...now you can _Add Action_ _testaction_ to your bean.
+
+After saving the bean configuration, the new action should be available. test it, activating the new Button _Testaction_ and fill the first argument with test REST-Service-URL: _http://headers.jsontest.com/_. After activating the button _TestAction_ again, the REST service will be called and the returned JSON structure will be shown an a new simple html table.
 
 ## Changing Layouts through the _BeanConfigurator_
 
@@ -2377,6 +2409,7 @@ Actual list: http://infocenter.pentaho.com/help/index.jsp?topic=%2Fsupported_com
  0.7.0h | 17.10.2015 | webstart/jnlp, war, automatic translation
  0.8.0a | 15.11.2015 | refactorings, replication enhanced, dependency listeners now persistable/configurable, changes on beandef xml and xsd
  0.8.0b | 07.01.2016 | rule-listener, rule-cover enhanced, new app package: timesheet, bean-actions parametrized with annotations
+ 0.8.0c | 01.02.2016 | many fixes, bean-configuration provides creation of actions (e.g. for REST service calls showing the JSON result)
 
 [GLOSSARY]
 
@@ -2737,7 +2770,8 @@ Net:Connection-->Link-->Cover(content, descriptor)
 * ( ) store map/json to database (service-URL, fixed properties, user properties, result xml/json)
 * ( ) Html-Tree element (details+table+css?)
 * x/y --> svg
-* responsive design
+* Statistics graph: select function (like sum, avg, ...), x-column/y-column
+* responsive design (table-->div+span+css)
 
 war:
 * WEB-INF/web..xml rausschmeissen

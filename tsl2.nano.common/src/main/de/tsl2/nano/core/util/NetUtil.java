@@ -16,8 +16,7 @@ import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.PrintStream;
-import java.io.PrintWriter;
-import java.net.DatagramSocket;
+import java.io.StringReader;
 import java.net.InetAddress;
 import java.net.InetSocketAddress;
 import java.net.MalformedURLException;
@@ -31,6 +30,7 @@ import java.net.SocketException;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URL;
+import java.net.URLConnection;
 import java.net.UnknownHostException;
 import java.util.Collection;
 import java.util.Enumeration;
@@ -39,6 +39,9 @@ import java.util.List;
 import java.util.Map;
 import java.util.Properties;
 import java.util.Set;
+
+import javax.json.Json;
+import javax.json.JsonStructure;
 
 import org.apache.commons.logging.Log;
 
@@ -190,6 +193,11 @@ public class NetUtil {
         out.println(StringUtil.removeXMLTags(get(strUrl)));
     }
 
+    public static JsonStructure getRestfulJSON(String url, Object... args) {
+        String jsonStr = getRestful(url, args);
+        return Json.createReader(new StringReader(jsonStr)).read();
+    }
+
     @SuppressWarnings({ "unchecked", "rawtypes" })
     public static/*<T> T*/String getRestful(String url/*, Class<T> responseType*/, Map args) {
         return getRestful(url, MapUtil.asArray(args));
@@ -207,8 +215,10 @@ public class NetUtil {
         try {
             //create the rest-ful call
             StringBuilder buf = new StringBuilder(url);
-            for (int i = 0; i < args.length; i++) {
-                buf.append("/" + args[i]);
+            if (args != null) {
+                for (int i = 0; i < args.length; i++) {
+                    buf.append("/" + args[i]);
+                }
             }
             url = buf.toString();
 
@@ -225,14 +235,25 @@ public class NetUtil {
     }
 
     /**
+     * delegates to {@link #getURLStream(String, Proxy, String)}
+     */
+    public static InputStream getURLStream(String url) {
+        return getURLStream(url, Proxy.NO_PROXY, "");
+    }
+
+    /**
      * getURLStream
      * 
      * @param url
-     * @return
+     * @param proxy use {@link Proxy#NO_PROXY} if no needed
+     * @param accept value for http header key=Accept
+     * @return input stream of connection
      */
-    public static InputStream getURLStream(String url) {
+    public static InputStream getURLStream(String url, Proxy proxy, String accept) {
         try {
-            return URI.create(url).toURL().openStream();
+            URLConnection con = URI.create(url).toURL().openConnection(proxy);
+            con.addRequestProperty("Accept", accept);
+            return con.getInputStream();
         } catch (Exception e) {
             ManagedException.forward(e);
             return null;
@@ -550,6 +571,7 @@ public class NetUtil {
 
     /**
      * checks, if a server socket could be created for the given port. if true, it will be closed immediately.
+     * 
      * @param port port to check
      * @return true, if there is already a server socket on this port, otherwise false
      */

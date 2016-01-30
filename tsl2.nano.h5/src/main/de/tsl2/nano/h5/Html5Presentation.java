@@ -1110,6 +1110,8 @@ public class Html5Presentation<T> extends BeanPresentationHelper<T> implements I
             String icon,
             Collection<IAction> actions,
             String... attributes) {
+        if (Util.isEmpty(actions))
+            return null;
         /*
          * the main sub menu item will use the first action to link to...
          */
@@ -1118,13 +1120,11 @@ public class Html5Presentation<T> extends BeanPresentationHelper<T> implements I
             appendElement(list, TAG_LINK, content(name), ATTR_HREF, PREFIX_ACTION + actions.iterator().next().getId());
         appendElement(alink, "span", "class", icon);
         Element sub = appendElement(list, "ul");
-        if (actions != null) {
-            for (IAction a : actions) {
-                Element li = appendElement(sub, "li");
-                appendElement(li, TAG_LINK, content(Messages.stripMnemonics(a.getShortDescription())),
-                    ATTR_HREF,
-                    PREFIX_ACTION + a.getId());
-            }
+        for (IAction a : actions) {
+            Element li = appendElement(sub, "li");
+            appendElement(li, TAG_LINK, content(Messages.stripMnemonics(a.getShortDescription())),
+                ATTR_HREF,
+                PREFIX_ACTION + a.getId());
         }
         return list;
     }

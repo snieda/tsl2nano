@@ -21,8 +21,10 @@ if [ "$3"== "nopause" ] then `NOPAUSE=nopause` fi
 #LANG=-Duser.country=FR -Duser.language=fr
 #DEBUG="-agentlib:jdwp=transport=dt_socket,address=8787,server=y,suspend=n"
 #AGENT=-javaagent:%PRJ%/aspectjweaver.jar
+#JAVA_OPTS=-Dhttp.proxyHost=myproxy -Dhttp.proxyPort=8080
+
 #@start javaw
-java $OFFLINE $LANG $USERDIR $NANO_DEBUG  -Xmx512m -Djava.awt.headless=true $DEBUG $UH -jar tsl2.nano.h5.0.8.0.jar $PRJ $PORT 
+java $OFFLINE $LANG $USERDIR $NANO_DEBUG $JAVA_OPTS -Xmx512m -Djava.awt.headless=true $DEBUG $UH -jar tsl2.nano.h5.0.8.0.jar $PRJ $PORT 
 #-agentpath:...visualvm_138/profiler/lib/deployed/jdk16/windows/profilerinterface.dll=...\visualvm_138\profiler\lib,5140
 #>$PRJ.log
 if [ not "$NOPAUSE" == "nopause" ] then 'read -p' fi

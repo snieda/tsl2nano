@@ -36,6 +36,11 @@ import de.tsl2.nano.core.cls.IAttribute;
 import de.tsl2.nano.core.util.MapUtil;
 import de.tsl2.nano.core.util.Util;
 import de.tsl2.nano.h5.Html5Presentable;
+import de.tsl2.nano.h5.SpecifiedAction;
+import de.tsl2.nano.incubation.specification.actions.Action;
+import de.tsl2.nano.incubation.specification.actions.ActionPool;
+import de.tsl2.nano.incubation.specification.rules.RulePool;
+import de.tsl2.nano.incubation.specification.rules.RuleScript;
 import de.tsl2.nano.util.PrivateAccessor;
 
 /**
@@ -300,4 +305,25 @@ public class BeanConfigurator<T> implements Serializable {
     public String toString() {
         return Util.toString(getClass(), def);
     }
+
+    @SuppressWarnings({ "rawtypes"})
+    @de.tsl2.nano.bean.annotation.Action(name = "createAction", argNames = { "New specified ActionName", "Action-Expression" })
+    public void actionCreateAction (
+            @de.tsl2.nano.bean.annotation.Constraint(defaultValue = "presentable.layoutConstraints", pattern = "[%§!]\\w+", allowed = {
+                "presentable", "presentable.layout", "columnDefinition" }) String name,
+            @de.tsl2.nano.bean.annotation.Constraint(pattern = ".*") String expression) {
+        ENV.get(ActionPool.class).add(new Action(name, expression));
+    }
+
+    @SuppressWarnings({ "rawtypes", "unchecked"})
+    @de.tsl2.nano.bean.annotation.Action(name = "addAction", argNames = { "Specified Actioname"})
+    public void actionAddAction (
+            @de.tsl2.nano.bean.annotation.Constraint(defaultValue = "presentable.layoutConstraints", pattern = "[%§!]\\w+", allowed = {
+                "presentable", "presentable.layout", "columnDefinition" }) String name) {
+        //check, if action available
+        ENV.get(ActionPool.class).get(name);
+        SpecifiedAction<Object> action = new SpecifiedAction(name, null);
+        def.addAction(action);
+    }
+
 }

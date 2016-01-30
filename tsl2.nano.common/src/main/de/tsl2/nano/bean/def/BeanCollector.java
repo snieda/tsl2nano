@@ -1511,6 +1511,11 @@ public class BeanCollector<COLLECTIONTYPE extends Collection<T>, T> extends Bean
     }
 
     @Override
+    public int hashCode() {
+        return super.hashCode() + (collection != null ? collection.hashCode() : 0);
+    }
+    
+    @Override
     public String toString() {
         if (asString == null && name != null) {
             //empty search-beans are possible

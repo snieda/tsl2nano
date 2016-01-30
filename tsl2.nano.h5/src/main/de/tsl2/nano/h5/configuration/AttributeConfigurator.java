@@ -28,6 +28,8 @@ import de.tsl2.nano.core.cls.IAttribute;
 import de.tsl2.nano.core.util.Util;
 import de.tsl2.nano.h5.Html5Presentation;
 import de.tsl2.nano.h5.RuleCover;
+import de.tsl2.nano.incubation.specification.rules.RulePool;
+import de.tsl2.nano.incubation.specification.rules.RuleScript;
 import de.tsl2.nano.messaging.IListener;
 import de.tsl2.nano.util.PrivateAccessor;
 
@@ -243,6 +245,15 @@ public class AttributeConfigurator implements Serializable {
 
     public void actionRemoveRuleCover(String child, String rule) {
         RuleCover.removeCover(attr.getDeclaringClass(), attr.getName(), child);
+    }
+
+    @SuppressWarnings({ "rawtypes", "unchecked" })
+    @de.tsl2.nano.bean.annotation.Action(name = "createRule", argNames = { "Rule-Name", "Rule-Expression" })
+    public void actionCreateRule(
+            @Constraint(defaultValue = "presentable.layoutConstraints", pattern = "[%§!]\\w+", allowed = {
+                "presentable", "presentable.layout", "columnDefinition" }) String name,
+            @Constraint(pattern = ".*") String expression) {
+        ENV.get(RulePool.class).add(new RuleScript(name, expression, null));
     }
 
 }
