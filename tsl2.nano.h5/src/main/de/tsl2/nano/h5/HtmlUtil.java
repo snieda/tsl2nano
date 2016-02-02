@@ -186,11 +186,11 @@ public class HtmlUtil {
     public static final String STYLE_BACKGROUND_RADIAL_GRADIENT =
         "background: radial-gradient(#9999FF, #000000);";
     public static final String STYLE_BACKGROUND_FADING_TRANSITION =
-            "-webkit-transition: background 2.5s ease-in-out; -moz-transition: background 2.5s ease-in-out; -ms-transition: background 2.5s ease-in-out; -o-transition: background 2.5s ease-in-out; transition: background 2.5s ease-in-out;";
+        "-webkit-transition: background 2.5s ease-in-out; -moz-transition: background 2.5s ease-in-out; -ms-transition: background 2.5s ease-in-out; -o-transition: background 2.5s ease-in-out; transition: background 2.5s ease-in-out;";
     public static final String STYLE_BACKGROUND_FADING_KEYFRAMES =
-            "-webkit-animation: fade 1s; -webkit-animation-fill-mode: both; -moz-animation: fade 1s; -moz-animation-fill-mode: both; -o-animation: fade 1s; -o-animation-fill-mode: both; animation: fade 1s; animation-fill-mode: both;";
+        "-webkit-animation: fade 1s; -webkit-animation-fill-mode: both; -moz-animation: fade 1s; -moz-animation-fill-mode: both; -o-animation: fade 1s; -o-animation-fill-mode: both; animation: fade 1s; animation-fill-mode: both;";
     public static final String CSS_BACKGROUND_FADING_KEYFRAMES =
-            "@-webkit-keyframes fade {0%{opacity: 0;} 100% {opacity: 1;}} @-moz-keyframes fade {0%{opacity: 0;} 100% {opacity: 1;}} @-o-keyframes fade {0%{opacity: 0;} 100% {opacity: 1;}} @keyframes fade {0%{opacity: 0;} 100% {opacity: 1;}} ";
+        "@-webkit-keyframes fade {0%{opacity: 0;} 100% {opacity: 1;}} @-moz-keyframes fade {0%{opacity: 0;} 100% {opacity: 1;}} @-o-keyframes fade {0%{opacity: 0;} 100% {opacity: 1;}} @keyframes fade {0%{opacity: 0;} 100% {opacity: 1;}} ";
     public static final String STYLE_BACKGROUND_LIGHTGRAY = "background: #CCCCCC;";
     /** dynamic styles. use method {@link #style(String, String)} to set styles! */
     public static final String STYLE_TEXT_ALIGN = "text-align";
@@ -233,7 +233,8 @@ public class HtmlUtil {
     public static final String VAL_OPACITY_0_9 = "opacity:0.9;";
     public static final String VAL_TRANSPARENT_INHERIT = "opacity:0.0;";
     public static final String VAL_TRANSPARENT = "background-color: transparent;";
-    public static final String VAL_ROUNDCORNER = "padding:6px;-webkit-border-radius:6px;-moz-border-radius:6px;border-radius:6px;";
+    public static final String VAL_ROUNDCORNER =
+        "padding:6px;-webkit-border-radius:6px;-moz-border-radius:6px;border-radius:6px;";
 
     public static final String XML_TAG_START = "\\<.*\\>";
     public static final String END_TAG = "/";
@@ -308,7 +309,7 @@ public class HtmlUtil {
             if (xmlPrefixEnd != -1) {
                 text = text.substring(xmlPrefixEnd + 3);
             }
-            
+
             final String BEG = begin(TAG_SPAN), END = end(TAG_SPAN);
             String prefix = StringUtil.substring(text, null, "<");
             if (!Util.isEmpty(prefix)) {
@@ -475,12 +476,13 @@ public class HtmlUtil {
         return text.contains("<html");
     }
 
-    public static String createMessagePage(String msg) {
-        return "<html><body>" + createMessage(msg, COLOR_RED) + "</body></html>";
+    public static String createMessagePage(String title, String msg) {
+        return "<html><body background=icons/spe.jpg><div style=\"border: 2px solid; float: middle; text-align: center; color: red; font-weight: bold;\">"
+            + title + "</div>" + createMessage(msg) + "</body></html>";
     }
 
-    public static String createMessage(String msg, String color) {
-        return "<font color=\"" + color + "\"><pre>" + msg + "</pre></font>";
+    public static String createMessage(String msg) {
+        return "<pre>" + msg + "</pre>";
     }
 
     public static boolean isHtml(String asString) {
@@ -498,13 +500,13 @@ public class HtmlUtil {
     public static String end(String tagName) {
         return "</" + tagName + ">";
     }
-    
+
     public static String percent(int value) {
         return value + "%";
     }
-    
+
     public static String L(String content) {
         return "&" + content + ";";
     }
-    
+
 }

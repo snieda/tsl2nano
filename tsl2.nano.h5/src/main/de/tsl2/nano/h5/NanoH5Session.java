@@ -253,7 +253,7 @@ public class NanoH5Session implements ISession {
                     if (HtmlUtil.isURL(msg)) {
                         return server.serve(msg, "GET", header, parms, files);
                     } else if (!HtmlUtil.containsHtml(msg)) {
-                        msg = HtmlUtil.createMessagePage(msg);
+                        msg = HtmlUtil.createMessagePage(ENV.translate("tsl2nano.info", true), msg);
                     }
                 } else {
                     if (userResponse instanceof BeanDefinition) {

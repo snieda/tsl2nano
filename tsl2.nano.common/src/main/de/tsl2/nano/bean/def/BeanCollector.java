@@ -280,6 +280,7 @@ public class BeanCollector<COLLECTIONTYPE extends Collection<T>, T> extends Bean
     @Override
     public void onActivation() {
         super.onActivation();
+        iterator = null;
         if (!isStaticCollection) {
             long countCheck = ENV.get("beancollector.do.search.on.count.lowerthan", 20);
             boolean dosearch = countCheck > 0 && count() < countCheck;
@@ -324,6 +325,7 @@ public class BeanCollector<COLLECTIONTYPE extends Collection<T>, T> extends Bean
     @Override
     public void onDeactivation() {
         super.onDeactivation();
+        iterator = null;
         /*
          * if a bean-collector was left through cancel, new created compositions must be removed!
          */
@@ -1477,9 +1479,13 @@ public class BeanCollector<COLLECTIONTYPE extends Collection<T>, T> extends Bean
         T currentRow = iterator.hasNext() ? iterator.next() : null;
         if (currentRow == null)
             iterator = null;
-        else
+        else {
             //TODO: this will be a performance issue!
             injectIntoRuleCovers(this, currentRow);
+            //avoid concurrentmodification exception because caller doesn't call the last nextRow()
+            if (!iterator.hasNext())
+                iterator = null;
+        }
         return currentRow;
     }
 

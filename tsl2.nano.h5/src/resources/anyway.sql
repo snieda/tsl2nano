@@ -96,7 +96,7 @@ CREATE TABLE Item (
                 name VARCHAR(64) NOT NULL,
                 start DATE NOT NULL,
                 end DATE,
-                value NUMERIC NOT NULL,
+                value DECIMAL(8,2) NOT NULL,
                 description VARCHAR(256),
                 icon BLOB,
                 CONSTRAINT idx_item PRIMARY KEY (id)
@@ -189,7 +189,7 @@ CREATE TABLE Charge (
                 todate DATE NOT NULL,
                 totime TIME NOT NULL,
                 pause TIME,
-                value DECIMAL(2,2) NOT NULL,
+                value DECIMAL(8,2) NOT NULL,
                 comment VARCHAR(512),
                 CONSTRAINT idx_charge PRIMARY KEY (id)
 );
@@ -205,7 +205,7 @@ CREATE TABLE Discharge (
                 charge INTEGER NOT NULL,
                 account INTEGER NOT NULL,
                 date TIMESTAMP NOT NULL,
-                value DECIMAL(2,2) NOT NULL,
+                value DECIMAL(8,2) NOT NULL,
                 comment VARCHAR(512),
                 document BLOB,
                 CONSTRAINT idx_discharge PRIMARY KEY (id)

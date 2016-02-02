@@ -415,7 +415,7 @@ public class Html5Presentation<T> extends BeanPresentationHelper<T> implements I
             }
             return html;
         } catch (Exception ex) {
-            return HtmlUtil.createMessagePage(ManagedException.toRuntimeEx(ex, true, true).getMessage());
+            return HtmlUtil.createMessagePage(ENV.translate("tsl2nano.error", true), ManagedException.toRuntimeEx(ex, true, true).getMessage());
         }
     }
 

@@ -9,6 +9,7 @@
  */
 package de.tsl2.nano.h5;
 
+import java.io.File;
 import java.util.LinkedHashMap;
 import java.util.Set;
 
@@ -78,7 +79,7 @@ public class SpecifiedAction<RETURNTYPE> extends SecureAction<RETURNTYPE> implem
         Object result = a.run(pars);
         if (BeanUtil.isStandardType(result)) {
             Message.send(ENV.translate("tsl2nano.result.information", false, getShortDescription(), result));
-            return null;
+            return (RETURNTYPE) result;
         } else {
             return (RETURNTYPE) result;
         }
@@ -115,6 +116,15 @@ public class SpecifiedAction<RETURNTYPE> extends SecureAction<RETURNTYPE> implem
     @Override
     public void disconnect(Object connectionEnd) {
         //nothing to clean..
+    }
+
+    @Override
+    public String getImagePath() {
+        String icon = super.getImagePath();
+        //fallback icon
+        if (icon == null || !new File(icon).exists())
+            return "icons/images_all.png"; 
+        return super.getImagePath();
     }
     
     @Commit

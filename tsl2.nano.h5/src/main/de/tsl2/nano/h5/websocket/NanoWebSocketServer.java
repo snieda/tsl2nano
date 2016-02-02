@@ -129,10 +129,12 @@ public class NanoWebSocketServer extends WebSocketServer {
                 conn.send(createMessage(target, id, availableValues));
                 break;
             case TARGET_DEPENDENCY:
-                IValueDefinition attribute = ((Bean) beandef).getAttribute(attr);
-                //to take effect, use dependency listeners
-                attribute.changeHandler().fireEvent(
-                    new WSEvent(attribute, attribute.getValue(), value, (int) pos.x(), (int) pos.y()));
+                if (beandef instanceof Bean) {
+                    IValueDefinition attribute = ((Bean) beandef).getAttribute(attr);
+                    //to take effect, use dependency listeners
+                    attribute.changeHandler().fireEvent(
+                        new WSEvent(attribute, attribute.getValue(), value, (int) pos.x(), (int) pos.y()));
+                }
                 break;
             case TARGET_ATTACHMENT:
                 /*
