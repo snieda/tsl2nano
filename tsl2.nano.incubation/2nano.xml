@@ -207,6 +207,8 @@ set the following jvm properties:
 			<!--<property name="sh.jar.include" value="slf4j-api-1.7.*.jar" />-->
 			<property name="sh.jar.include" value="java_websocket.jar" />
 			<property name="sh.jar.include2" value="javax.json-*.jar" />
+			<property name="sh.jar.include3" value="xchart*.jar" />
+			<property name="sh.jar.include4" value="VectorGraphics2D*.jar" />
 		</ant>
 
 		
@@ -316,7 +318,7 @@ set the following jvm properties:
 		<!-- using key:
 		keytool -genkey -keystore tsl2store -alias tsl2 -validity 1800
 		passwd: tsl2tsl2, name: tsl2, surname: tsl2, orga: tsl2
-		jarsigner -keystore tsl2store -storepass tsl2tsl2 <jar-file> <alias> -->
+		jarsigner -keystore tsl2store -storepass tsl2tsl2 <jar-file> <alias> -tsacert <alias> -->
 		<signjar alias="tsl2"  keystore="tsl2store" storepass="tsl2tsl2"  jar="${test.dir}/tsl2.nano.h5.${build.version}-signed.jar" />
 
 		<!-- create test environment -->

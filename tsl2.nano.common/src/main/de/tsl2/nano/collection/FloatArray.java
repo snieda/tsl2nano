@@ -92,6 +92,10 @@ public class FloatArray {
     public int size() {
         return elements;
     }
+
+    public void clear() {
+        elements = 0;
+    }
     
     /**
      * creates one new primitive array holding all stored elements

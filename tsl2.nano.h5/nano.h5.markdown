@@ -2410,6 +2410,7 @@ Actual list: http://infocenter.pentaho.com/help/index.jsp?topic=%2Fsupported_com
  0.8.0a | 15.11.2015 | refactorings, replication enhanced, dependency listeners now persistable/configurable, changes on beandef xml and xsd
  0.8.0b | 07.01.2016 | rule-listener, rule-cover enhanced, new app package: timesheet, bean-actions parametrized with annotations
  0.8.0c | 01.02.2016 | many fixes, bean-configuration provides creation of actions (e.g. for REST service calls showing the JSON result)
+ 0.8.0d | 08.02.2016 | statistics now showing bar charts with xgraph
 
 [GLOSSARY]
 

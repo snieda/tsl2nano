@@ -57,12 +57,17 @@ public class ActionScript<T> extends AbstractRunnable<T> {
     }
 
     public static ScriptEngine createEngine() {
-        ScriptEngine engine = new ScriptEngineManager().getEngineByName("javascript");
+        //java7 provides rhino as javascript, java8 provides nashorn
+        ScriptEngine engine = new ScriptEngineManager().getEngineByName(isJava8() ? "nashorn" : "javascript");
         if (engine == null)
             throw new IllegalStateException("couldn't create engine for: 'javascript'\n\tavailable engines: "
                 + StringUtil.toFormattedString(new ScriptEngineManager().getEngineFactories(), 1, true));
         LOG.info("script engine loaded: " + engine);
         return engine;
+    }
+
+    private static boolean isJava8() {
+        return System.getProperty("java.runtime.version").contains("1.8.");
     }
 
     @SuppressWarnings("unchecked")

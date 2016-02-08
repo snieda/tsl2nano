@@ -16,6 +16,7 @@ import java.util.LinkedHashMap;
 import java.util.LinkedList;
 import java.util.List;
 
+import org.simpleframework.xml.Element;
 import org.simpleframework.xml.Transient;
 
 import de.tsl2.nano.bean.BeanContainer;
@@ -28,10 +29,12 @@ import de.tsl2.nano.bean.def.BeanDefinition;
 import de.tsl2.nano.bean.def.IAttributeDefinition;
 import de.tsl2.nano.core.ENV;
 import de.tsl2.nano.core.cls.IAttribute;
+import de.tsl2.nano.core.util.FileUtil;
 import de.tsl2.nano.core.util.ListWrapper;
 import de.tsl2.nano.core.util.NumberUtil;
 import de.tsl2.nano.core.util.StringUtil;
 import de.tsl2.nano.core.util.Util;
+import de.tsl2.nano.incubation.graph.SVGChart;
 import de.tsl2.nano.service.util.ServiceUtil;
 
 /**
@@ -109,9 +112,9 @@ public class Statistic<COLLECTIONTYPE extends Collection<T>, T> extends BeanColl
         List<String> valueColumns = new ArrayList<>(names.length);
 
         if (from != null && to != null) {
-            searchStatus =
+            searchStatus = "<div>" + 
                 ENV.translate("tsl2nano.summary", true) + ": " + ENV.translate("tsl2nano.from", true)
-                    + BeanUtil.toFormattedMap(from) + ENV.translate("tsl2nano.to", true) + BeanUtil.toFormattedMap(to);
+                    + BeanUtil.toFormattedMap(from) + ENV.translate("tsl2nano.to", true) + BeanUtil.toFormattedMap(to) + "</div>";
         }
         /*
          * check, which columns should be shown. if a column has more than 500 group by elements, its to big
@@ -140,7 +143,13 @@ public class Statistic<COLLECTIONTYPE extends Collection<T>, T> extends BeanColl
         for (String n : statColumns) {
             collection.addAll(createStatistics(def, n, valueColumns, from, to));
         }
+        /*
+         * create an svg chart file without summary
+         */
+        searchStatus += "<span>" + createGraph((Collection<Object[]>) collection) + "</span>";
+        
         collection.addAll(createSummary(def, valueColumns, from, to));
+        
         return collection;
     }
 
@@ -235,4 +244,35 @@ public class Statistic<COLLECTIONTYPE extends Collection<T>, T> extends BeanColl
 //        init(null, beanFinder, 0, null);
 //        isStaticCollection = false;
 //    }
+    
+    /**
+     * creates a simple xy-chart and exports it to an svg-file
+     * @param data
+     */
+    String createGraph(Collection<Object[]> data) {
+        if (data.size() == 0)
+            return "";
+        int columnCount = data.iterator().next().length;
+        List<Object> x = new ArrayList<Object>(data.size());
+        //workaround: on adding a list item, we can't cast to <? extends Number>
+        List yx[] = new ArrayList[columnCount - 1];
+        for (int i = 0; i < yx.length; i++) {
+            yx[i] = new ArrayList<>(columnCount);
+        }
+        for (Object[] a : data) {
+            if (a[0] == null)
+                a[0] = "---";//avoid nullpointer - perhaps the value for null makes sense...
+            x.add(a[0]);
+            for (int i = 1; i < a.length; i++) {
+                yx[i-1].add((Object)a[i]);
+            }
+        }
+        int width = ENV.get("statistic.graph.width", 1920);
+        int height = ENV.get("statistic.graph.height", 1080);
+        String svgFileName = SVGChart.createGraph(SVGChart.Type.BAR, getName(), "", "", width, height, false, x, SVGChart.series(columnNames.getList(), yx)) + ".svg";
+        String svgContent = new String(FileUtil.getFileBytes(svgFileName, null));
+        //workaround: remove fix-size in mm
+        svgContent = svgContent.replaceAll("\\w+[=]\"\\d+mm\"", "");
+        return svgContent.substring(svgContent.indexOf("<svg"));
+    }
 }

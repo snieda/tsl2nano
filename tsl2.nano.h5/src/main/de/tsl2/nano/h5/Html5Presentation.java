@@ -641,7 +641,7 @@ public class Html5Presentation<T> extends BeanPresentationHelper<T> implements I
 
         Element panel =
             appendElement(parent, TAG_DIV, ATTR_STYLE,
-                (interactive ? ENV.get("page.data.style", "overflow: auto; height: 75%;") : null));
+                (interactive ? ENV.get("page.data.style", "overflow: auto; height: 70%;") : null));
         createContentPanel(session, panel, bean, interactive, ENV.get("page.data.fullwidth", false));
 
         if (isRoot) {
@@ -935,10 +935,12 @@ public class Html5Presentation<T> extends BeanPresentationHelper<T> implements I
         if (interactive && bean.hasMode(IBeanCollector.MODE_SEARCHABLE)) {
             Collection<T> data = new LinkedList<T>(bean.getSearchPanelBeans());
             //this looks complicated, but if currentdata is a collection with a FilteringIterator, we need a copy of the filtered items!
-            data.addAll(CollectionUtil.getList(bean.getCurrentData().iterator()));
+            if (bean.getCurrentData() != null)
+                data.addAll(CollectionUtil.getList(bean.getCurrentData().iterator()));
             createTableContent(session, grid, bean, data, interactive, 0, 1);
         } else {
-            createTableContent(session, grid, bean, bean.getCurrentData(), interactive);
+            if (bean.getCurrentData() != null)
+                createTableContent(session, grid, bean, bean.getCurrentData(), interactive);
         }
 
         return grid;
@@ -1902,6 +1904,7 @@ public class Html5Presentation<T> extends BeanPresentationHelper<T> implements I
         if (isMultiline(p)) {
             return "";
         }
+        //let the browser decide, howto present a date - the date should be given as sql date (tested on chrome)
         return type.startsWith("date") ? StringUtil.toString(DateUtil.toSqlDateString((Date) beanValue.getValue()))
             : beanValue.getValueText();
     }

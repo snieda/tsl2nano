@@ -27,6 +27,7 @@ import java.util.Collection;
 import java.util.HashMap;
 import java.util.Hashtable;
 import java.util.LinkedHashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Properties;
 import java.util.Scanner;
@@ -58,6 +59,7 @@ import de.tsl2.nano.core.util.PrintUtil;
 import de.tsl2.nano.core.util.StringUtil;
 import de.tsl2.nano.core.util.XmlUtil;
 import de.tsl2.nano.execution.AntRunner;
+import de.tsl2.nano.incubation.graph.SVGChart;
 import de.tsl2.nano.incubation.network.JobServer;
 import de.tsl2.nano.incubation.platform.PlatformManagement;
 import de.tsl2.nano.incubation.repeat.IChange;
@@ -67,7 +69,6 @@ import de.tsl2.nano.incubation.repeat.impl.ACommand;
 import de.tsl2.nano.incubation.repeat.impl.CommandManager;
 import de.tsl2.nano.incubation.specification.ParType;
 import de.tsl2.nano.incubation.specification.Pool;
-import de.tsl2.nano.incubation.specification.rules.AbstractRule;
 import de.tsl2.nano.incubation.specification.rules.Rule;
 import de.tsl2.nano.incubation.specification.rules.RulePool;
 import de.tsl2.nano.incubation.terminal.AsciiImage;
@@ -98,6 +99,7 @@ import de.tsl2.nano.incubation.vnet.workflow.VActivity;
 import de.tsl2.nano.logictable.DefaultHeader;
 import de.tsl2.nano.logictable.EquationSolver;
 import de.tsl2.nano.logictable.LogicTable;
+import de.tsl2.nano.math.vector.Vector;
 import de.tsl2.nano.messaging.EventController;
 import de.tsl2.nano.messaging.IListener;
 import de.tsl2.nano.structure.Cover;
@@ -816,6 +818,18 @@ public class IncubationTest {
         Tree<String, String> graph = new Tree<String, String>("main", null);
 //        graph.pu
         graph = Tree.fromString(new Scanner(graph.toString()));
+    }
+
+    @Test
+    public void testSVGGraph() throws Exception {
+        SVGChart.createGraph("Nano Graph", "X", "Y", 500, 400, 2d, 1d, 0d);
+    }
+    
+    @Test
+    public void testFloatStream() {
+        List<Vector> vlist = Arrays.asList(new Vector(1,2,3), new Vector(4,5,6), new Vector(7,8,9));
+        List<Vector> list = Vector.fromStream(Vector.toStream(vlist));
+        assertTrue(Arrays.equals(vlist.toArray(), list.toArray()));
     }
     
     static void log_(String msg) {

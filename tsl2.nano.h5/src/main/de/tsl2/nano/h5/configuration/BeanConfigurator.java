@@ -121,8 +121,8 @@ public class BeanConfigurator<T> implements Serializable {
 
                 BeanDefinition<AttributeConfigurator> configAttr =
                     BeanDefinition.getBeanDefinition(AttributeConfigurator.class);
-                configAttr.setAttributeFilter("name", "description", "type",
-                    "constraint"/*, "length", "format", "min", "max"*/,
+                configAttr.setAttributeFilter("name", "description", "type", "format",
+                    "constraint"/*, "length", "min", "max"*/,
                     "presentable", "columnDefinition", "declaration", "valueExpression", "default", "listener");
                 configAttr.getPresentable().setLayout(layout);
                 configAttr.setValueExpression(new ValueExpression("{name}", AttributeConfigurator.class));

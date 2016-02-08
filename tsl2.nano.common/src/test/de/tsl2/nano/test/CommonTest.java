@@ -23,7 +23,6 @@ import java.lang.annotation.Annotation;
 import java.math.BigDecimal;
 import java.math.MathContext;
 import java.net.InetAddress;
-import java.net.URI;
 import java.security.Policy;
 import java.text.DateFormat;
 import java.text.DecimalFormat;
@@ -45,7 +44,6 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Properties;
-import java.util.ResourceBundle;
 
 import javax.json.JsonObject;
 import javax.json.JsonStructure;

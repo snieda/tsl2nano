@@ -10,6 +10,10 @@
 package de.tsl2.nano.h5.configuration;
 
 import java.io.Serializable;
+import java.text.DecimalFormat;
+import java.text.Format;
+import java.text.NumberFormat;
+import java.text.SimpleDateFormat;
 import java.util.Collection;
 
 import de.tsl2.nano.bean.annotation.Constraint;
@@ -22,10 +26,12 @@ import de.tsl2.nano.bean.def.IPresentable;
 import de.tsl2.nano.bean.def.IPresentableColumn;
 import de.tsl2.nano.bean.def.PathExpression;
 import de.tsl2.nano.bean.def.ValueExpression;
+import de.tsl2.nano.bean.def.ValueExpressionFormat;
 import de.tsl2.nano.core.ENV;
 import de.tsl2.nano.core.cls.BeanClass;
 import de.tsl2.nano.core.cls.IAttribute;
 import de.tsl2.nano.core.util.Util;
+import de.tsl2.nano.format.RegExpFormat;
 import de.tsl2.nano.h5.Html5Presentation;
 import de.tsl2.nano.h5.RuleCover;
 import de.tsl2.nano.incubation.specification.rules.RulePool;
@@ -120,29 +126,29 @@ public class AttributeConfigurator implements Serializable {
 //        attrAccessor.set("max", max);
 //    }
 //
-//    public String getFormat() {
-//        Format f = attr.getFormat();
-//        if (f instanceof SimpleDateFormat)
-//            return ((SimpleDateFormat) f).toPattern();
-//        else if (f instanceof NumberFormat)
-//            return ((DecimalFormat) f).toPattern();
-//        else if (f instanceof RegExpFormat)
-//            return ((RegExpFormat) f).getPattern();
-//        else
-//            return f != null ? f.toString() : "";
-//    }
-//
-//    public void setFormat(String format) {
-//        Format f = attr.getFormat();
-//        if (f instanceof SimpleDateFormat)
-//            ((SimpleDateFormat) f).applyPattern(format);
-//        else if (f instanceof NumberFormat)
-//            ((DecimalFormat) f).applyPattern(format);
-//        else if (f instanceof ValueExpressionFormat)
-//            ((ValueExpressionFormat)f).applyPattern(format);
-//        else
-//            ((RegExpFormat) f).setPattern(format, null, attr.getConstraint().getLength(), 0);
-//    }
+    public String getFormat() {
+        Format f = attr.getFormat();
+        if (f instanceof SimpleDateFormat)
+            return ((SimpleDateFormat) f).toPattern();
+        else if (f instanceof NumberFormat)
+            return ((DecimalFormat) f).toPattern();
+        else if (f instanceof RegExpFormat)
+            return ((RegExpFormat) f).getPattern();
+        else
+            return f != null ? f.toString() : "";
+    }
+
+    public void setFormat(String format) {
+        Format f = attr.getFormat();
+        if (f instanceof SimpleDateFormat)
+            ((SimpleDateFormat) f).applyPattern(format);
+        else if (f instanceof NumberFormat)
+            ((DecimalFormat) f).applyPattern(format);
+        else if (f instanceof ValueExpressionFormat)
+            ((ValueExpressionFormat)f).applyPattern(format);
+        else
+            ((RegExpFormat) f).setPattern(format, null, attr.getConstraint().getLength(), 0);
+    }
 //
 //    public boolean isNullable() {
 //        return attr.getConstraint().isNullable();

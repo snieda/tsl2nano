@@ -9,6 +9,16 @@
  */
 package de.tsl2.nano.math.vector;
 
+import java.io.InputStream;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Locale;
+import java.util.Scanner;
+
+import com.sun.xml.internal.messaging.saaj.util.ByteOutputStream;
+
+import de.tsl2.nano.collection.FloatArray;
+
 /**
  * Simple-handling numeric n-dim vector with common calculations. See {@link Coordinate} for further informations.
  * 
@@ -365,6 +375,47 @@ public class Vector extends Coordinate implements Comparable<Vector> {
 
     @Override
     public int compareTo(Vector o) {
-        return (int)(len() - o.len());
+        return (int) (len() - o.len());
+    }
+
+    public static List<Vector> fromStream(InputStream stream) {
+        Scanner sc = new Scanner(stream);
+        final String CR = "\n";
+        FloatArray fa = new FloatArray();
+        List<Vector> vlist = new LinkedList<Vector>();
+        while (sc.hasNext()) {
+            Scanner line = new Scanner(sc.nextLine());
+            //read us floats
+            line.useLocale(Locale.US);
+            while (line.hasNext()) {
+                if (line.hasNextFloat()) {
+                    fa.add(line.nextFloat());
+                } else {
+                    line.next();
+                }
+            }
+            if (fa.size() > 0) {
+                vlist.add(new Vector(fa.toArray()));
+                fa.clear();
+            }
+            line.close();
+        }
+        sc.close();
+        return vlist;
+    }
+
+    public static InputStream toStream(List<Vector> vl) {
+        ByteOutputStream stream = new ByteOutputStream();
+        final byte[] CR = "\n".getBytes(), TAB = "\t".getBytes();
+        for (Vector v : vl) {
+            for (int i = 0; i < v.dimension(); i++) {
+                stream.write(/*DecimalFormat.getInstance().format*/Float.toString(v.x[i]).getBytes());
+                if (i < v.dimension() - 1)
+                    stream.write(TAB);
+            }
+            stream.write(CR);
+        }
+        stream.close();
+        return stream.newInputStream();
     }
 }

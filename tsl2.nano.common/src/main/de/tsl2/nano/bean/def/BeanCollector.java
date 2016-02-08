@@ -1457,7 +1457,7 @@ public class BeanCollector<COLLECTIONTYPE extends Collection<T>, T> extends Bean
         BeanCollector<C, I> bc = new BeanCollector<C, I>();
         copy(beandef, bc, "asString", "presentationHelper");
         //use an own map instance to be independent of changes by other beans or beancollectors.
-        bc.attributeDefinitions = new LinkedHashMap<String, IAttributeDefinition<?>>(bc.attributeDefinitions);
+        bc.attributeDefinitions = new LinkedHashMap<String, IAttributeDefinition<?>>(bc.getAttributeDefinitions());
         bc.init(collection, new BeanFinder(beandef.getClazz()), workingMode, composition);
         return bc;
     }
