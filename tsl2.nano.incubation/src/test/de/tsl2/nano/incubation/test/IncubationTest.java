@@ -15,12 +15,14 @@ import static junit.framework.Assert.assertNotNull;
 import static junit.framework.Assert.assertTrue;
 import static junit.framework.Assert.fail;
 
+import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.io.InputStream;
 import java.io.Serializable;
 import java.math.BigDecimal;
 import java.sql.Time;
 import java.text.DateFormat;
+import java.text.DecimalFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
@@ -823,6 +825,10 @@ public class IncubationTest {
     @Test
     public void testSVGGraph() throws Exception {
         SVGChart.createGraph("Nano Graph", "X", "Y", 500, 400, 2d, 1d, 0d);
+        
+        //test the file import
+        String t = " # Test-Graph\n#generiert...\nX Y1  Y2\n1.0   2.0   3.0\n4    5   6\n7    8   9";
+        SVGChart.createChart(StringUtil.toInputStream(t));
     }
     
     @Test

@@ -1,11 +1,15 @@
 package de.tsl2.nano.incubation.graph;
 
-import java.io.File;
+import java.io.BufferedInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.io.InputStream;
 import java.util.Arrays;
+import java.util.Iterator;
 import java.util.List;
-import java.util.Scanner;
+import java.util.Locale;
+import java.util.Map;
+import java.util.Properties;
 
 import org.knowm.xchart.ChartBuilder_Category;
 import org.knowm.xchart.ChartBuilder_Pie;
@@ -24,6 +28,7 @@ import org.knowm.xchart.internal.style.markers.SeriesMarkers;
 import de.tsl2.nano.core.ENV;
 import de.tsl2.nano.core.ManagedException;
 import de.tsl2.nano.core.util.FileUtil;
+import de.tsl2.nano.scanner.FieldReader;
 
 /**
  * creates simple charts and saves them to at least SVG files. this class has indirect dependencies to java.awt! so it
@@ -165,14 +170,59 @@ public class SVGChart {
         return chart;
     }
 
+    public static void createGraph(String plotFile) {
+        Chart chart = createChart(FileUtil.getFile(plotFile));
+        String file = ENV.getTempPath() + plotFile;
+        exportGraph(file, chart);
+    }
+    
+    /**
+     * delegates to {@link #createChart(InputStream)}
+     */
     public static Chart createChart(String plotFile) {
-        //TODO: implement
+        return createChart(FileUtil.getFile(plotFile));
+    }
+    /**
+     * creates Chart from stream/file
+     * @param stream stream
+     * @return filled chart
+     */
+    @SuppressWarnings({ "rawtypes", "unchecked" })
+    public static Chart createChart(InputStream stream) {
+        //to do a reset, pack it into a bufferedinputstream
+        stream = new BufferedInputStream(stream);
+        stream.mark(1024);
+        Properties properties = FieldReader.read(stream, false);
         try {
-            Scanner sc = new Scanner(new File(plotFile));
-        } catch (FileNotFoundException e) {
+            stream.reset();
+        } catch (IOException e) {
             ManagedException.forward(e);
         }
-        return null;
+        Map<Object, List> data = FieldReader.readTable(stream, FieldReader.DEL_CSV, Locale.US, false, true, false, float[].class);
+        //TODO: chart properties auslesen
+        List header = data.get(FieldReader.HEADER);
+        Type type = Type.valueOf(properties.getProperty("type", "BAR"));
+        String title = properties.getProperty("title", "Graph");
+        String xTitle = properties.getProperty("xTitle", "X");
+        String yTitle = properties.getProperty("yTitle", "Y");
+        int width = Integer.valueOf((String) properties.getOrDefault("width", "1920"));
+        int height = Integer.valueOf((String) properties.getOrDefault("heigth", "1080"));
+        boolean yLogarithmic = Boolean.valueOf(properties.getProperty("yLogarithmic", "false"));
+        Iterator<Object> it = data.keySet().iterator();
+        Object key;
+        key = it.next();
+        if (key == FieldReader.HEADER) {
+            it.remove();
+            key = it.next();
+        }
+        List x = data.get(key);
+        Serie yn[] = new Serie[data.values().size() - 1];
+        int i = 0;
+        while (it.hasNext()) {
+            key = it.next();
+            yn[i++] = serie((String) key, data.get(key));
+        }
+        return createChart(type, title, xTitle, yTitle, width, height, yLogarithmic, x, yn);
     }
     
     /**

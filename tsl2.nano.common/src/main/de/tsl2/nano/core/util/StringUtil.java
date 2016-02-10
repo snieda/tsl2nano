@@ -9,6 +9,8 @@
  */
 package de.tsl2.nano.core.util;
 
+import java.io.ByteArrayInputStream;
+import java.io.InputStream;
 import java.math.BigInteger;
 import java.nio.charset.Charset;
 import java.text.MessageFormat;
@@ -813,4 +815,10 @@ public class StringUtil {
         return xmlContent.replaceAll("[\n]?" + XTAG + "(\\w*)" + XTAG, "\n\1");
     }
 
+    /**
+     * convenience to put a text into an inputstream
+     */
+    public static InputStream toInputStream(String text) {
+        return new ByteArrayInputStream(text.getBytes());
+    }
 }
