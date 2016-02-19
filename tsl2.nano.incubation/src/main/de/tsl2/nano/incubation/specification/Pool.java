@@ -75,7 +75,7 @@ public class Pool<T extends IPRunnable<?, ?>> {
      * @return
      */
     public String getDirectory() {
-        return ENV.getConfigPath()
+        return ENV.getConfigPathRel()
             + "specification/"
             + StringUtil.substring(BeanClass.getDefiningClass(this.getClass()).getSimpleName().toLowerCase(), null,
                 Pool.class.getSimpleName().toLowerCase()) + "/";
