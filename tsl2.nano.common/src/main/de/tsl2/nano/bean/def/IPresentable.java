@@ -67,6 +67,8 @@ public interface IPresentable extends Serializable {
     /** file name for icon */
     String getIcon();
 
+    void setIcon(String icon);
+    
     /** foreground RGB color */
     int[] getForeground();
 
@@ -271,6 +273,14 @@ public interface IPresentable extends Serializable {
         @Override
         public String getIcon() {
             return null;
+        }
+
+        /**
+         * {@inheritDoc}
+         */
+        @Override
+        public void setIcon(String icon) {
+            throw new UnsupportedOperationException();
         }
 
         @Override

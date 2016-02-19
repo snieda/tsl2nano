@@ -36,7 +36,18 @@ public class Query<RESULT> implements IPRunnable<RESULT, Map<String, Object>> {
     /** serialVersionUID */
     private static final long serialVersionUID = -9199837113877884921L;
 
-    private static final String VAR_SQL = "[:]([\\w._-]+)";
+    /** full column expression */
+    private static final String SQL_COL = "(^|\\,)\\s*([^\\s,]+)(\\s+as\\s+([\\w]+))?";
+    /** sql parameter */
+    private static final String SQL_PAR = "[:]([\\w._-]+)";
+    /** sql function */
+    private static final String SQL_FCT = "\\w+\\(.*\\)";
+    /** column name */
+    private static final String SQL_NAM = ".*(\\w+)";
+    /** string literal */
+    private static final String SQL_LIT = "'.*'";
+    /** one or more concatenations */
+    private static final String SQL_CON = "[^,].*[|]{2}[^,]+";
 
     @Attribute
     String name;
@@ -109,7 +120,7 @@ public class Query<RESULT> implements IPRunnable<RESULT, Map<String, Object>> {
             //we allow both: the named query syntax and the most java used ant-like-variables
             operation = operation.replace("${", ":").replace("}", "");
             StringBuilder q = new StringBuilder(operation);
-            while ((!Util.isEmpty(p = StringUtil.extract(q, VAR_SQL, "")))) {
+            while ((!Util.isEmpty(p = StringUtil.extract(q, SQL_PAR, "")))) {
                 parameter.put(p, null);
             }
         }
@@ -128,9 +139,13 @@ public class Query<RESULT> implements IPRunnable<RESULT, Map<String, Object>> {
         if (columnNames == null) {
             columnNames = new ArrayList<String>();
             String p;
+            //get the full selection header and eliminate literals, functions and concatenations
             String select = StringUtil.substring(operation.toLowerCase(), "select", "from");
+            select = select.replaceAll(SQL_LIT, "");
+            select = select.replaceAll(SQL_CON, "");
+            select = select.replaceAll(SQL_FCT, "");
             StringBuilder q = new StringBuilder(select);
-            while ((!Util.isEmpty(p = StringUtil.extract(q, "(^|\\,)\\s*([^\\s,]+)(\\s+as\\s+([\\w]+))?", "", 0, 0)))) {
+            while ((!Util.isEmpty(p = StringUtil.extract(q, SQL_COL, "", 0, 0)))) {
                 columnNames.add(p.contains("as ") ? StringUtil.substring(p, "as ", null) : StringUtil.substring(p, ".",
                     null));
             }

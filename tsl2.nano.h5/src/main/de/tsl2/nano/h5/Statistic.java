@@ -16,7 +16,6 @@ import java.util.LinkedHashMap;
 import java.util.LinkedList;
 import java.util.List;
 
-import org.simpleframework.xml.Element;
 import org.simpleframework.xml.Transient;
 
 import de.tsl2.nano.bean.BeanContainer;
@@ -50,10 +49,16 @@ public class Statistic<COLLECTIONTYPE extends Collection<T>, T> extends BeanColl
     /** serialVersionUID */
     private static final long serialVersionUID = 1L;
 
+    @Transient
+    Class<T> beanType;
+
     /** columnNames of the statistic table */
     @Transient
     //this Transient annotation marks the attribute as extension member
     ListWrapper<String> columnNames;
+
+    @Transient
+    ListWrapper<String> statColumns;
 
     @Transient
     //this Transient annotation marks the attribute as extension member
@@ -82,6 +87,7 @@ public class Statistic<COLLECTIONTYPE extends Collection<T>, T> extends BeanColl
         columnNames = new ListWrapper<String>();
         this.from = from;
         this.to = to;
+        this.beanType = beanType;
         collection = (COLLECTIONTYPE) create(beanType, columnNames.getList(), from, to);
         isStaticCollection = true;
     }
@@ -102,40 +108,48 @@ public class Statistic<COLLECTIONTYPE extends Collection<T>, T> extends BeanColl
     }
 
     private <T> Collection<T> create(Class<T> beanType, List<String> attributeNames, T from, T to) {
-        attributeNames.add(ENV.translate("tsl2nano.name", true));
-        attributeNames.add(ENV.translate("tsl2nano.count", true));
+        if (attributeNames.size() == 0) {
+            attributeNames.add(ENV.translate("tsl2nano.name", true));
+            attributeNames.add(ENV.translate("tsl2nano.count", true));
+        }
 
         BeanDefinition<T> def = BeanDefinition.getBeanDefinition(beanType);
         setName(ENV.translate("tsl2nano.statistic", true) + " (" + def.getName() + ")");
-        String[] names = def.getAttributeNames();
-        List<String> statColumns = new ArrayList<>(names.length);
-        List<String> valueColumns = new ArrayList<>(names.length);
 
         if (from != null && to != null) {
-            searchStatus = "<div>" + 
-                ENV.translate("tsl2nano.summary", true) + ": " + ENV.translate("tsl2nano.from", true)
-                    + BeanUtil.toFormattedMap(from) + ENV.translate("tsl2nano.to", true) + BeanUtil.toFormattedMap(to) + "</div>";
-        }
-        /*
-         * check, which columns should be shown. if a column has more than 500 group by elements, its to big
-         * evaluate the number columns
-         */
-        long maxcount = ENV.get("statistic.maxgroupcount", 500);
-        String sum = ENV.translate("tsl2nano.sum", true) + "(";
-        IAttributeDefinition<?> attrDef;
-        for (int i = 0; i < names.length; i++) {
-            attrDef = def.getAttribute(names[i]);
-            if (attrDef.id() || attrDef.generatedValue() || attrDef.isMultiValue() || attrDef.unique()
-                || attrDef.isVirtual() || Attachment.isData(attrDef)) {
-                continue;
-            } else if (NumberUtil.isNumber(attrDef.getType())) {
-                valueColumns.add(names[i]);
-                attributeNames.add(sum + names[i] + ")");
-            } else if (groupByCount(def, names[i], from, to) <= maxcount) {
-                statColumns.add(names[i]);
-            }
+            searchStatus =
+                "<div>" +
+                    ENV.translate("tsl2nano.summary", true) + ": " + ENV.translate("tsl2nano.from", true)
+                    + BeanUtil.toFormattedMap(from) + ENV.translate("tsl2nano.to", true) + BeanUtil.toFormattedMap(to)
+                    + "</div>";
         }
 
+        String[] names = def.getAttributeNames();
+        List<String> valueColumns = new ArrayList<>(names.length);
+        if (Util.isEmpty(statColumns)) {
+            statColumns = new ListWrapper<String>(names.length);
+
+            /*
+             * check, which columns should be shown. if a column has more than 500 group by elements, its to big
+             * evaluate the number columns
+             */
+            long maxcount = ENV.get("statistic.maxgroupcount", 500);
+            String sum = ENV.translate("tsl2nano.sum", true) + "(";
+            IAttributeDefinition<?> attrDef;
+            for (int i = 0; i < names.length; i++) {
+                attrDef = def.getAttribute(names[i]);
+                if (attrDef.id() || attrDef.generatedValue() || attrDef.isMultiValue() || attrDef.unique()
+                    || attrDef.isVirtual() || Attachment.isData(attrDef)) {
+                    continue;
+                } else if (NumberUtil.isNumber(attrDef.getType())) {
+                    valueColumns.add(names[i]);
+                    attributeNames.add(sum + names[i] + ")");
+                } else if (groupByCount(def, names[i], from, to) <= maxcount) {
+                    statColumns.add(names[i]);
+                }
+            }
+        }
+        
         /*
          * do all group by selects
          */
@@ -146,10 +160,10 @@ public class Statistic<COLLECTIONTYPE extends Collection<T>, T> extends BeanColl
         /*
          * create an svg chart file without summary
          */
-        searchStatus += "<span>" + createGraph((Collection<Object[]>) collection) + "</span>";
-        
+        searchStatus += "<span>" + createGraph(getName(), columnNames.getList(), (Collection<Object[]>) collection) + "</span>";
+
         collection.addAll(createSummary(def, valueColumns, from, to));
-        
+
         return collection;
     }
 
@@ -226,6 +240,11 @@ public class Statistic<COLLECTIONTYPE extends Collection<T>, T> extends BeanColl
             new StringBuffer(), from, to, parameter, true);
     }
 
+    public void onActivation() {
+        super.onActivation();
+        collection = (COLLECTIONTYPE) create(beanType, columnNames.getList(), from, to);
+    }
+
 //    @Override
 //    @Commit
 //    protected void initDeserialization() {
@@ -244,12 +263,13 @@ public class Statistic<COLLECTIONTYPE extends Collection<T>, T> extends BeanColl
 //        init(null, beanFinder, 0, null);
 //        isStaticCollection = false;
 //    }
-    
+
     /**
      * creates a simple xy-chart and exports it to an svg-file
+     * 
      * @param data
      */
-    String createGraph(Collection<Object[]> data) {
+    static String createGraph(String name, List<String> columnNames, Collection<Object[]> data) {
         if (data.size() == 0)
             return "";
         int columnCount = data.iterator().next().length;
@@ -264,12 +284,15 @@ public class Statistic<COLLECTIONTYPE extends Collection<T>, T> extends BeanColl
                 a[0] = "---";//avoid nullpointer - perhaps the value for null makes sense...
             x.add(a[0]);
             for (int i = 1; i < a.length; i++) {
-                yx[i-1].add((Object)a[i]);
+                yx[i - 1].add((Object) a[i]);
             }
         }
         int width = ENV.get("statistic.graph.width", 1920);
         int height = ENV.get("statistic.graph.height", 1080);
-        String svgFileName = SVGChart.createGraph(SVGChart.Type.BAR, getName(), "", "", width, height, false, x, SVGChart.series(columnNames.getList(), yx)) + ".svg";
+        String svgFileName =
+            SVGChart.createGraph(SVGChart.Type.BAR, name, "", "", width, height, false, x,
+                SVGChart.series(columnNames, yx))
+                + ".svg";
         String svgContent = new String(FileUtil.getFileBytes(svgFileName, null));
         //workaround: remove fix-size in mm
         svgContent = svgContent.replaceAll("\\w+[=]\"\\d+mm\"", "");

@@ -1079,7 +1079,8 @@ public class BeanPresentationHelper<T> {
              * we solve this loading a 'group by' looking for duplicated attributes.
              */
             NavigableSet<Integer> keySet = levels.descendingKeySet();
-            if (bean.isPersistable()) {
+            //on initial the beancontainer is served with empty actions!
+            if (!Util.isFrameworkClass(bean.getClazz()) && !Util.isJavaType(bean.getClazz())&& bean.isPersistable()) {
                 boolean isEmpty;
                 try {
                     isEmpty =
@@ -1279,7 +1280,7 @@ public class BeanPresentationHelper<T> {
      * @param session current session
      */
     protected void addSessionValues(List<BeanDefinition> sessionValues) {
-        if (bean.getId() != null) {
+        if (!BeanContainer.instance().isTransient(bean.getId())) {
             throw new IllegalStateException("this method should only be called on new/transient objects! bean:" + bean);
         }
         Bean b = (Bean) bean;
@@ -1292,7 +1293,7 @@ public class BeanPresentationHelper<T> {
 
                 for (BeanValue bv : beanValues) {
                     if (type.isAssignableFrom(bv.getType()) && !bv.composition() && !bv.isMultiValue() && !bv.id()
-                        && bv.isSelectable()
+                        && bv.isSelectable() && bv.getValue() == null
                         && !bv.getConstraint().isNullable()) {
                         bv.setValue(instance);
                     }
@@ -1369,7 +1370,7 @@ public class BeanPresentationHelper<T> {
                     "memorize",
                     IAction.MODE_UNDEFINED,
                     false,
-                    "icons/apply.png") {
+                    "icons/yellow_pin.png") {
                     @Override
                     public Object action() throws Exception {
                         ((Collection) vsession.getValue().getContext()).add(bean);

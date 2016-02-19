@@ -27,6 +27,7 @@ import de.tsl2.nano.bean.def.BeanFinder;
 import de.tsl2.nano.bean.def.IAttributeDefinition;
 import de.tsl2.nano.core.ENV;
 import de.tsl2.nano.core.cls.IAttribute;
+import de.tsl2.nano.core.util.Util;
 import de.tsl2.nano.h5.expression.Query;
 import de.tsl2.nano.h5.expression.QueryPool;
 
@@ -82,6 +83,14 @@ public class QueryResult<COLLECTIONTYPE extends Collection<T>, T> extends BeanCo
         return new ArrayList<IAttribute>(attributeDefinitions.values());
     }
 
+    @Override
+    public void onActivation() {
+        super.onActivation();
+        // TODO this may be before evaluating the new data :-(
+        if (!Util.isEmpty(query.getColumnNames()))
+            searchStatus += "<span>" + Statistic.createGraph(getName(), query.getColumnNames(), (Collection<Object[]>) collection) + "</span>";
+    }
+    
     @Override
     @Commit
     protected void initDeserialization() {

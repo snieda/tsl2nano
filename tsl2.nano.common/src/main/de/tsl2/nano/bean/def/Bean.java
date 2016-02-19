@@ -780,7 +780,7 @@ public class Bean<T> extends BeanDefinition<T> {
     @Override
     public void onActivation() {
         //on new beans, we fill manyToOne relations if exactly one item is available
-        if (BeanContainer.isTransient(instance) && ENV.get("bean.new.fill.relations.on.one.item", true)) {
+        if (!BeanContainer.isInitialized() || BeanContainer.instance().isTransient(instance) && ENV.get("bean.new.fill.relations.on.one.item", true)) {
             String[] names = getAttributeNames();
             for (int i = 0; i < names.length; i++) {
                 IValueDefinition attr = getAttribute(names[i]);

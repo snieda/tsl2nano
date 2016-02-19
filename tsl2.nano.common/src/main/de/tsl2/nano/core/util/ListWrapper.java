@@ -12,6 +12,7 @@ package de.tsl2.nano.core.util;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Iterator;
 import java.util.List;
 
 import org.simpleframework.xml.ElementList;
@@ -23,7 +24,7 @@ import org.simpleframework.xml.ElementList;
  * @author Tom
  * @version $Revision$
  */
-public class ListWrapper<E> implements Serializable {
+public class ListWrapper<E> implements Serializable, Iterable<E> {
     /** serialVersionUID */
     private static final long serialVersionUID = -4272308851598689048L;
 
@@ -57,6 +58,19 @@ public class ListWrapper<E> implements Serializable {
 
     public List<E> getList() {
         return list;
+    }
+    
+    @Override
+    public Iterator<E> iterator() {
+        return getList().iterator();
+    }
+
+    public E get(int index) {
+        return getList().get(index);
+    }
+    
+    public boolean add(E item) {
+        return getList().add(item);
     }
     
     @Override

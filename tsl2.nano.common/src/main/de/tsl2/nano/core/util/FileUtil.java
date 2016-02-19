@@ -840,8 +840,8 @@ public class FileUtil {
             ManagedException.forward(e);
         } finally {
             if (closeStreams) {
-                    close(in, false);
-                    close(out, true);
+                close(in, false);
+                close(out, true);
             }
         }
     }
@@ -1014,7 +1014,8 @@ public class FileUtil {
         }
     }
 
-    static Collection<File> getTreeFiles(String basePath, String path, String regExFilename, Collection<File> result) throws Exception {
+    static Collection<File> getTreeFiles(String basePath, String path, String regExFilename, Collection<File> result)
+            throws Exception {
         File dir = new File(path);
         File[] files = dir.listFiles();
         if (files == null) {
@@ -1232,6 +1233,7 @@ public class FileUtil {
             }
         return inputStream;
     }
+
     /**
      * convenience to close any outputstream
      * 
@@ -1253,6 +1255,7 @@ public class FileUtil {
             }
         return outputStream;
     }
+
     /**
      * convenience to close any reader
      * 
@@ -1273,6 +1276,25 @@ public class FileUtil {
                     LOG.error("can't close inputstream " + reader, e);
             }
         return reader;
+    }
+
+    /**
+     * deletes all sub-directories of the given directory
+     * @param dir directory to delete with all sub-directories
+     * @return true, if given dir could be deleted
+     */
+    public static boolean deleteRecursive(File dir) {
+        if (!dir.canWrite())
+            LOG.error(dir.getPath() + " can't be deleted!");
+        File[] files = dir.listFiles();
+        if (files != null) {
+            LOG.debug("deleting " + files.length + " sub-directories/files of " + dir.getPath() + "...");
+            for (int i = 0; i < files.length; i++) {
+                deleteRecursive(files[i]);
+            }
+        }
+        
+        return dir.delete();
     }
 }
 

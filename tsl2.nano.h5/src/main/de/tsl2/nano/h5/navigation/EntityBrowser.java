@@ -112,7 +112,7 @@ public class EntityBrowser implements IBeanNavigator {
         Collection currentData = collector.getCurrentData();
         for (Iterator iterator = currentData.iterator(); iterator.hasNext();) {
             Object item = iterator.next();
-            if (BeanContainer.isTransient(item)) {
+            if (BeanContainer.instance().isTransient(item)) {
                 iterator.remove();
             }
         }

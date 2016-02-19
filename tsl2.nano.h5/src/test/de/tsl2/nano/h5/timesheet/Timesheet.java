@@ -23,6 +23,7 @@ import static de.tsl2.nano.test.TypeBean.ATTR_TIME;
 import static de.tsl2.nano.test.TypeBean.ATTR_TIMESTAMP;
 import static junit.framework.Assert.assertTrue;
 import static org.anonymous.project.presenter.ChargeConst.ATTR_CHARGEITEM;
+import static org.anonymous.project.presenter.ChargeConst.ATTR_COMMENT;
 import static org.anonymous.project.presenter.ChargeConst.ATTR_FROMDATE;
 import static org.anonymous.project.presenter.ChargeConst.ATTR_FROMTIME;
 import static org.anonymous.project.presenter.ChargeConst.ATTR_PARTY;
@@ -132,6 +133,9 @@ import de.tsl2.nano.incubation.specification.rules.RuleScript;
  * @version $Revision$
  */
 public class Timesheet extends NanoH5App {
+    private static final String STAT_TYPES = "Types";
+    private static final String STAT_PROJECTS = "Projects";
+    private static final String STAT_TIMESHEET_STATISTICS = "Timesheet-Statistics";
     String redColorStyle = "color: red;";
     String greenColorStyle = "color: green;";
 
@@ -171,33 +175,33 @@ public class Timesheet extends NanoH5App {
         /*
          * define all beans
          */
-        define(Type.class, TypeConst.ATTR_NAME);
-        define(Category.class, CategoryConst.ATTR_NAME);
-        define(Account.class, AccountConst.ATTR_NAME);
-        define(Property.class, PropertyConst.ATTR_AKEY);
-        define(Organisation.class, OrganisationConst.ATTR_NAME);
-        define(Party.class, PartyConst.ATTR_SHORTNAME);
-        define(Address.class, ve(AddressConst.ATTR_CITY) + ", " + ve(AddressConst.ATTR_STREET));
-        define(Location.class, LocationConst.ATTR_NAME);
-        define(Digital.class, DigitalConst.ATTR_NAME);
-        define(Coordinate.class, ve(CoordinateConst.ATTR_X) + "-" + ve(CoordinateConst.ATTR_Y) + "-"
+        define(Type.class, icon("equipment"), TypeConst.ATTR_NAME);
+        define(Category.class, null, CategoryConst.ATTR_NAME);
+        define(Account.class, icon("euro"), AccountConst.ATTR_NAME);
+        define(Property.class, icon("table"), PropertyConst.ATTR_AKEY);
+        define(Organisation.class, icon("people"), OrganisationConst.ATTR_NAME);
+        define(Party.class, icon("male"), PartyConst.ATTR_SHORTNAME);
+        define(Address.class, icon("home"), ve(AddressConst.ATTR_CITY) + ", " + ve(AddressConst.ATTR_STREET));
+        define(Location.class, icon("yellow_pin"), LocationConst.ATTR_NAME);
+        define(Digital.class, icon("e-mail"), DigitalConst.ATTR_NAME);
+        define(Coordinate.class, icon("blue_pin"), ve(CoordinateConst.ATTR_X) + "-" + ve(CoordinateConst.ATTR_Y) + "-"
             + ve(CoordinateConst.ATTR_X));
-        define(Area.class, AreaConst.ATTR_NAME);
-        define(Item.class, ItemConst.ATTR_NAME, ItemConst.ATTR_ID, ItemConst.ATTR_NAME, ItemConst.ATTR_ORGANISATION,
+        define(Area.class, icon("boss"), AreaConst.ATTR_NAME);
+        define(Item.class, null, ItemConst.ATTR_NAME, ItemConst.ATTR_ID, ItemConst.ATTR_NAME, ItemConst.ATTR_ORGANISATION,
             ItemConst.ATTR_CLASSIFICATION, ItemConst.ATTR_TYPE, ItemConst.ATTR_START, ItemConst.ATTR_END,
             ItemConst.ATTR_VALUE, ItemConst.ATTR_DESCRIPTION, ItemConst.ATTR_CHARGEITEMS, ItemConst.ATTR_PROPERTIES);
-        define(Chargeitem.class, ChargeitemConst.ATTR_ITEM);
-        define(Discharge.class, ve(DischargeConst.ATTR_CHARGE) + " (" + ve(DischargeConst.ATTR_DATE) + ": "
+        define(Chargeitem.class, icon("buy"), ChargeitemConst.ATTR_ITEM);
+        define(Discharge.class, icon("accounting"), ve(DischargeConst.ATTR_CHARGE) + " (" + ve(DischargeConst.ATTR_DATE) + ": "
             + ve(DischargeConst.ATTR_VALUE));
 
         /*
          * configure the main type: Charge (Zeiterfassung)
          */
         charge =
-            define(Charge.class, ve(ChargeConst.ATTR_CHARGEITEM) + " (" + ve(ChargeConst.ATTR_FROMDATE) + ": "
+            define(Charge.class, icon("clock"), ve(ChargeConst.ATTR_CHARGEITEM) + " (" + ve(ChargeConst.ATTR_FROMDATE) + ": "
                 + ve(ChargeConst.ATTR_VALUE) + ")"
                 , ATTR_FROMDATE, ATTR_WEEKDAY, ATTR_FROMTIME, ATTR_TOTIME, ATTR_PAUSE, ATTR_PARTY, ATTR_CHARGEITEM,
-                ATTR_VALUE);
+                ATTR_VALUE, ATTR_COMMENT);
         IPresentableColumn column = charge.getAttribute(ATTR_VALUE).getColumnDefinition();
         if (column instanceof ValueColumn)
             ((ValueColumn) column).setStandardSummary(true);
@@ -270,6 +274,41 @@ public class Timesheet extends NanoH5App {
         new Statistic<>(Charge.class).saveVirtualDefinition("statistics " + Charge.class.getSimpleName());
 
         /*
+         * statistic queries
+         */
+        String stat = "\n-- get a statistic table from timesheet entries\n" +
+              "-- user and time-period should be given...\n" +
+              "select Month, sum(Workdays) as Workdays, sum(Hours) as Hours, sum(Ill) as Ill, sum(Holiday) as Holiday from (\n" +
+              "select year(c.FROMDATE) || ' ' || monthname(c.FROMDATE) as Month, count(month(c.FROMDATE)) as Workdays, sum(value) as Hours, 0 as Ill, 0 as Holiday from Charge c\n" +
+              "group by Month\n" +
+              "union -- Illness\n" +
+              "select year(c.FROMDATE) || ' ' || monthname(c.FROMDATE) as Month, 0 as Workdays, 0 as Hours, sum(value) as Ill, 0 as Holiday from Charge c join ChargeItem ci on c.CHARGEITEM = ci.ID join Item i on ci.ITEM = i.ID join Type t on i.TYPE = t.ID\n" +
+              "where t.NAME = 'Krank'\n" +
+              "group by Month\n" +
+              "union -- Holidays\n" +
+              "select year(c.FROMDATE) || ' ' || monthname(c.FROMDATE) as Month, 0 as Workdays, 0 as Hours, 0 as Ill, sum(value) as Holiday from Charge c join ChargeItem ci on c.CHARGEITEM = ci.ID join Item i on ci.ITEM = i.ID join Type t on i.TYPE = t.ID\n" +
+              "where t.NAME = 'Urlaub'\n" +
+              "group by Month\n" +
+              ")\n" +
+              "group by Month\n";
+        Query<Object> query = new Query<>(STAT_TIMESHEET_STATISTICS, stat, true, null);
+        QueryPool queryPool = ENV.get(QueryPool.class);
+        queryPool.add(query);
+        new QueryResult<>(query.getName()).saveVirtualDefinition(query.getName());
+
+        stat = "\n-- get a statistic table over projects\n" +
+                "select org.NAME || ' ' || i.NAME as Project, sum(value) as Hours from Charge c join CHARGEITEM ci on c.CHARGEITEM = ci.ID join ITEM i on ci.ITEM = i.ID join ORGANISATION org on i.ORGA = org.ID\n" + 
+                "group by Project\n";
+        queryPool.add(query = new Query<>(STAT_PROJECTS, stat, true, null));
+        new QueryResult<>(query.getName()).saveVirtualDefinition(query.getName());
+
+        stat = "\n-- get a statistic table over types\n" +
+                "select t.NAME as Type, sum(value) as Hours from Charge c join CHARGEITEM ci on c.CHARGEITEM = ci.ID join ITEM i on ci.ITEM = i.ID join TYPE t on i.TYPE = t.ID\n" +
+                "group by t.NAME\n";
+        queryPool.add(query = new Query<>(STAT_TYPES, stat, true, null));
+        new QueryResult<>(query.getName()).saveVirtualDefinition(query.getName());
+
+        /*
          * Sample Workflow with three activities
          */
         LinkedList<BeanAct> acts = new LinkedList<BeanAct>();
@@ -325,16 +364,6 @@ public class Timesheet extends NanoH5App {
         LOG.info("my test-import rule result:" + result);
 
         /*
-         * define a query
-         */
-        String qstr = "select db_begin from times t where t.db_end = :dbEnd";
-
-        HashMap<String, Serializable> par1 = new HashMap<>();
-        Query<Object> query = new Query<>("times.begin", qstr, true, par1);
-        QueryPool queryPool = ENV.get(QueryPool.class);
-        queryPool.add(query);
-
-        /*
          * define an action
          */
         Method antCaller = null;
@@ -371,19 +400,6 @@ public class Timesheet extends NanoH5App {
         });
         timeActionBean.saveDefinition();
         controller.saveVirtualDefinition(timeActionBean.getName() + "-controller");
-
-        /*
-         * define a specific bean-collector presenting a query (SQL or JPA-QL)
-         */
-        qstr = "\nselect t.day as Day, p.name as Project t.dbbegin as Begin, t.dbend as End, t.pause as Pause\n"
-            + "from times t join project p on p.id = times.projid\n"
-            + "where 1 = 1\n";
-
-        query = new Query<>("times-overview", qstr, true, null);
-        queryPool.add(query);
-
-        QueryResult qr = new QueryResult<>(query.getName());
-        qr.saveVirtualDefinition(query.getName());
 
         /*
          * define own beans to present your entities another way
@@ -449,6 +465,15 @@ public class Timesheet extends NanoH5App {
     }
 
     /**
+     * icon
+     * @param name 
+     * @return
+     */
+    StringBuilder icon(String name) {
+        return new StringBuilder("icons/" + name + ".png");
+    }
+
+    /**
      * check assertions
      */
     @Override
@@ -477,6 +502,11 @@ public class Timesheet extends NanoH5App {
         style = collector.getAttribute(ATTR_FROMDATE).getColumnDefinition().getPresentable().getLayoutConstraints();
         assertTrue(redColorStyle.equals(style));
 
+        //test the queries
+//        QueryPool qpool = ENV.get(QueryPool.class);
+//        assertTrue(qpool.get(STAT_TIMESHEET_STATISTICS).getColumnNames().equals(Arrays.asList("")));
+//        assertTrue(qpool.get(STAT_PROJECTS).getColumnNames().equals(Arrays.asList("")));
+//        assertTrue(qpool.get(STAT_TYPES).getColumnNames().equals(Arrays.asList("")));
         super.stop();
     }
 }

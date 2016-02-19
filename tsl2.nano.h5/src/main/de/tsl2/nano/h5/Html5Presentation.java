@@ -152,6 +152,7 @@ import org.w3c.dom.NodeList;
 
 import de.tsl2.nano.action.CommonAction;
 import de.tsl2.nano.action.IAction;
+import de.tsl2.nano.bean.BeanContainer;
 import de.tsl2.nano.bean.BeanUtil;
 import de.tsl2.nano.bean.IValueAccess;
 import de.tsl2.nano.bean.ValueHolder;
@@ -354,7 +355,7 @@ public class Html5Presentation<T> extends BeanPresentationHelper<T> implements I
                 "statistic",
                 IAction.MODE_UNDEFINED,
                 false,
-                "icons/full_screen.png") {
+                "icons/barchart.png") {
                 @Override
                 public Object action() throws Exception {
                     BeanValue<T> from = null, to = null;
@@ -692,7 +693,7 @@ public class Html5Presentation<T> extends BeanPresentationHelper<T> implements I
             panel = createCollector(session, panel, (BeanCollector) bean, interactive, fullwidth);
         } else {
             //prefill a new bean with the current navigation stack objects
-            if (bean.getId() == null) {
+            if (BeanContainer.instance().isTransient(((Bean)bean).getInstance())) {
                 addSessionValues(session);
             }
             panel = createBean(session, panel, (Bean<?>) bean, interactive, fullwidth);
@@ -1755,7 +1756,7 @@ public class Html5Presentation<T> extends BeanPresentationHelper<T> implements I
 //                        if (beanValue instanceof Attachment) {
 //                            FileUtil.writeBytes(((Attachment)beanValue).getValue(), FileUtil.getValidFileName(beanValue.getName()), false);
 //                        } else {
-                            if (v != null) {
+                            if (!Util.isEmpty(v)) {
                                 boolean writeFile = true;
                                 if (v instanceof String)
                                     if (new File((String) v).exists())
@@ -1765,14 +1766,14 @@ public class Html5Presentation<T> extends BeanPresentationHelper<T> implements I
                                     else //not a file name and no data --> do nothing
                                         writeFile = false;
                                 
-                                    if (writeFile && ByteUtil.isByteStream(v.getClass()))
+                                    if (writeFile && (ByteUtil.isByteStream(v.getClass()) || Serializable.class.isAssignableFrom(v.getClass())))
                                         FileUtil.writeBytes(ByteUtil.getBytes(v),
                                             ENV.getTempPath() + beanValue.getValueFile().getPath(),
                                             false);
                                     else if (writeFile)
                                         throw new IllegalStateException("attachment of attribute '"
                                             + beanValue.getValueId()
-                                            + "' has to be of type byte[], ByteBuffer, Blob or String!");
+                                            + "' should be of type byte[], ByteBuffer, Blob or String - or at least Serializable!");
                             }
                         }
 //                    }

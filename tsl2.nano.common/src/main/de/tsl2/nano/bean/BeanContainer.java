@@ -43,6 +43,7 @@ import de.tsl2.nano.core.util.StringUtil;
 public class BeanContainer implements IBeanContainer {
     private static BeanContainer self = null;
 
+    protected IAction<Collection<?>> idFinderAction = null;
     protected IAction<Collection<?>> typeFinderAction = null;
     protected IAction<Collection<?>> exampleFinderAction = null;
     protected IAction<Collection<?>> betweenFinderAction = null;
@@ -94,7 +95,8 @@ public class BeanContainer implements IBeanContainer {
      * @param permissionAction action to evaluate the permission (through roles)
      * @param persistableAction asks, if the given bean is persistable
      */
-    public static final void initServiceActions(IAction<Collection<?>> relationFinder,
+    public static final void initServiceActions(IAction<Collection<?>> idFinder,
+            IAction<Collection<?>> relationFinder,
             IAction<?> lazyRelationResolver,
             IAction<?> saveAction,
             IAction<?> deleteAction,
@@ -107,6 +109,7 @@ public class BeanContainer implements IBeanContainer {
             IAction<Boolean> persistableAction,
             IAction<Integer> executeAction) {
         self = new BeanContainer();
+        self.idFinderAction = idFinder;
         self.typeFinderAction = relationFinder;
         self.lazyrelationInstantiateAction = lazyRelationResolver;
         self.saveAction = saveAction;
@@ -127,6 +130,12 @@ public class BeanContainer implements IBeanContainer {
      */
     public static final void initEmtpyServiceActions() {
         final Collection<?> EMPTY_LIST = null;//new LinkedList();
+        final IAction idFinder = new CommonAction("empty.service.idFinder") {
+            @Override
+            public Object action() {
+                return null;
+            }
+        };
         final IAction<Collection<?>> relationFinder = new CommonAction<Collection<?>>("empty.service.relationFinder") {
             @Override
             public Collection<?> action() {
@@ -204,7 +213,8 @@ public class BeanContainer implements IBeanContainer {
                 return null;
             }
         };
-        BeanContainer.initServiceActions(relationFinder,
+        BeanContainer.initServiceActions(idFinder, 
+            relationFinder,
             lazyRelationResolver,
             saveAction,
             deleteAction,
@@ -290,6 +300,15 @@ public class BeanContainer implements IBeanContainer {
     public <T> T save(T bean) {
         saveAction.setParameter(new Object[] { bean });
         return (T) saveAction.activate();
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public <T> T getByID(Class<T> type, Object id) {
+        idFinderAction.setParameter(new Object[] { type, id });
+        return (T) idFinderAction.activate();
     }
 
     /**
@@ -508,10 +527,12 @@ public class BeanContainer implements IBeanContainer {
      * @param bean instance
      * @return true, if bean is persistable and id attribute is null
      */
-    public static final boolean isTransient(Object bean) {
+    public boolean isTransient(Object bean) {
         final BeanAttribute idAttribute = getIdAttribute(bean);
-        if (idAttribute != null && idAttribute.getValue(bean) != null) {
-            return false;
+        Object id;
+        if (idAttribute != null && (id = idAttribute.getValue(bean)) != null) {
+            Class type = idAttribute.getDeclaringClass();
+            return !isPersistable(type) || getByID(type, id) == null;
         } else {
             return true;
         }

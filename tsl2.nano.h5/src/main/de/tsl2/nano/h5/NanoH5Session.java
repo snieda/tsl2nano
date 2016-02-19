@@ -304,6 +304,7 @@ public class NanoH5Session implements ISession {
         builder = null;
         authorization = null;
         sessionClassloader = null;
+        context = null;
     }
 
     String createStatusText(long startTime) {

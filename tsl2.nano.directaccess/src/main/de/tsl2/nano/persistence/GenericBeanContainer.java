@@ -46,6 +46,17 @@ public abstract class GenericBeanContainer extends BeanContainerUtil {
     public static void initContainer(final GenericBeanContainer container, ClassLoader classloader) {
         ENV.addService(IGenericService.class, container.getGenService());
 
+        IAction idFinder = new CommonAction() {
+            @Override
+            public Object action() {
+                Class entityType = (Class) parameter[0];
+                Object id = parameter[1];
+                if (!BeanClass.getBeanClass(entityType).isAnnotationPresent(Entity.class)) {
+                    return null;
+                }
+                return container.getGenService().findById(entityType, id);
+            }
+        };
         IAction<Collection<?>> typeFinder = new CommonAction<Collection<?>>() {
             @Override
             public Collection<?> action() {
@@ -145,7 +156,8 @@ public abstract class GenericBeanContainer extends BeanContainerUtil {
                     (Object[]) parameter[2]);
             }
         };
-        BeanContainer.initServiceActions(typeFinder,
+        BeanContainer.initServiceActions(idFinder,
+            typeFinder,
             lazyrelationResolver,
             saveAction,
             deleteAction,

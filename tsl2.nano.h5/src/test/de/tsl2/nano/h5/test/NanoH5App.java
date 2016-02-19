@@ -4,22 +4,15 @@ import java.io.IOException;
 
 import org.apache.commons.logging.Log;
 
-import de.tsl2.nano.bean.BeanContainer;
-import de.tsl2.nano.bean.IBeanContainer;
 import de.tsl2.nano.bean.def.BeanDefinition;
-import de.tsl2.nano.bean.def.BeanPresentationHelper;
 import de.tsl2.nano.bean.def.IPageBuilder;
-import de.tsl2.nano.bean.def.IPresentable;
 import de.tsl2.nano.bean.def.ValueExpression;
 import de.tsl2.nano.core.ENV;
-import de.tsl2.nano.core.ManagedException;
 import de.tsl2.nano.core.log.LogFactory;
 import de.tsl2.nano.core.util.MapUtil;
 import de.tsl2.nano.core.util.Util;
 import de.tsl2.nano.h5.Html5Presentation;
 import de.tsl2.nano.h5.NanoH5;
-import de.tsl2.nano.persistence.GenericLocalBeanContainer;
-import de.tsl2.nano.persistence.Persistence;
 
 public class NanoH5App extends NanoH5 {
     protected static final Log LOG = LogFactory.getLog(NanoH5App.class);
@@ -47,13 +40,15 @@ public class NanoH5App extends NanoH5 {
      * @param valueExpression
      * @param type
      */
-    protected <T> BeanDefinition<T> define(Class<T> type, String valueExpression, String... attributeFilter) {
+    protected <T> BeanDefinition<T> define(Class<T> type, StringBuilder icon, String valueExpression, String... attributeFilter) {
         BeanDefinition<T> bean = BeanDefinition.getBeanDefinition(type);
         bean.setPresentationHelper(new Html5Presentation<>(bean));
         String ve = valueExpression.contains("{") ? valueExpression : "{" + valueExpression + "}";
         bean.setValueExpression(new ValueExpression<T>(ve, type));
         if (!Util.isEmpty(attributeFilter))
             bean.setAttributeFilter(attributeFilter);
+        if (icon != null)
+            bean.getPresentable().setIcon(ENV.getConfigPathRel() + icon.toString());
         bean.saveDefinition();
         return bean;
     }

@@ -213,6 +213,8 @@ public class BeanAttribute<T> implements IAttribute<T> {
         if (attr == null) {
             attr = new BeanAttribute<T>();
             attr.writeAccessMethod = getWriteAccessMethod(cls, attributeName, type);
+            if (attr.writeAccessMethod == null)
+                throw new IllegalArgumentException("attribute " + attributeName + " with type " + type + " is not available in class " + cls);
         }
         return attr;
     }

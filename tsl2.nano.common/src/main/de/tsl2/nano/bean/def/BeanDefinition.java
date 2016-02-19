@@ -225,6 +225,7 @@ public class BeanDefinition<T> extends BeanClass<T> implements IPluggable<BeanDe
 
     /**
      * setColumnDefinitionOrder
+     * 
      * @param columns attribute column names
      */
     public void setColumnDefinitionOrder(String[] columns) {
@@ -234,9 +235,9 @@ public class BeanDefinition<T> extends BeanClass<T> implements IPluggable<BeanDe
         for (String name : columns) {
             if ((a = getAttribute(name, false)) != null) {
                 if (a instanceof IAttributeDefinition) {
-                     c = ((IAttributeDefinition)a).getColumnDefinition();
-                     if (c instanceof ValueColumn)
-                         ((ValueColumn)c).setIndex(i++);
+                    c = ((IAttributeDefinition) a).getColumnDefinition();
+                    if (c instanceof ValueColumn)
+                        ((ValueColumn) c).setIndex(i++);
                 }
             }
         }
@@ -668,7 +669,8 @@ public class BeanDefinition<T> extends BeanClass<T> implements IPluggable<BeanDe
             actions = new ArrayList<IAction>();
         }
         for (int i = 0; i < methods.length; i++) {
-            if (methods[i].getName().startsWith(MethodAction.ACTION_PREFIX) || methods[i].isAnnotationPresent(Action.class)) {
+            if (methods[i].getName().startsWith(MethodAction.ACTION_PREFIX)
+                || methods[i].isAnnotationPresent(Action.class)) {
                 CommonAction<Object> newAction = new MethodAction<Object>(methods[i]);
                 newAction.setParameter(parameters);
                 actions.add(newAction);
@@ -870,15 +872,25 @@ public class BeanDefinition<T> extends BeanClass<T> implements IPluggable<BeanDe
         return hashCode() == obj.hashCode();
     }
 
+    /**
+     * returns the attribute that is marked by jpa annotation as ID attribute.
+     * <p/>
+     * 
+     * @return id-attribute or null if not existing or filtered
+     */
     public IAttribute getIdAttribute() {
-        //this was previously evaluated on each AttributeDefinition.defineDefaults()
-        Collection<IAttributeDefinition<?>> attrs = getAttributeDefinitions().values();
-        for (IAttributeDefinition<?> attr : attrs) {
-            if (attr.id()) {
-                return attr;
-            }
-        }
-        return null;
+        /*
+         * WARNING: If this beandefinition filters the id-attribute, this method will return null!
+         */
+//        //this was previously evaluated on each AttributeDefinition.defineDefaults()
+//        Collection<IAttributeDefinition<?>> attrs = getAttributeDefinitions().values();
+//        for (IAttributeDefinition<?> attr : attrs) {
+//            if (attr.id()) {
+//                return attr;
+//            }
+//        }
+//        return null;
+        return BeanContainer.getIdAttribute(getClazz());
     }
 
     /**
@@ -921,7 +933,8 @@ public class BeanDefinition<T> extends BeanClass<T> implements IPluggable<BeanDe
                         beandef = (BeanDefinition<T>) beandef.extension.to(beandef);
                     }
                     //perhaps, the file defines another bean-name or bean-type
-                    if ((name == null || name.equalsIgnoreCase(beandef.getName()) || name.equalsIgnoreCase(FileUtil.getValidFileName(beandef.getName()))
+                    if ((name == null || name.equalsIgnoreCase(beandef.getName()) || name.equalsIgnoreCase(FileUtil
+                        .getValidFileName(beandef.getName()))
                         && (type == null || type.equals(beandef.getClazz())))) {
                         virtualBeanCache.add(beandef);
                     } else {
@@ -930,7 +943,8 @@ public class BeanDefinition<T> extends BeanClass<T> implements IPluggable<BeanDe
                         beandef = null;
                     }
                 } catch (Exception e) {
-                    LOG.error("couldn't load configuration " + xmlFile.getPath() + " for bean " + type + ": " +  e.toString());
+                    LOG.error("couldn't load configuration " + xmlFile.getPath() + " for bean " + type + ": "
+                        + e.toString());
                     if (ENV.get("application.mode.strict", false)) {
                         ManagedException.forward(e);
                     }
@@ -980,7 +994,7 @@ public class BeanDefinition<T> extends BeanClass<T> implements IPluggable<BeanDe
 
             //change listeners hold only the attribute-id and must have attribute instances
             if (a instanceof BeanValue) {
-                ((BeanValue)a).injectAttributeOnChangeListeners(beandef);
+                ((BeanValue) a).injectAttributeOnChangeListeners(beandef);
             }
             AttributeDefinition.injectIntoRuleCover(new PrivateAccessor(a), instance);
         }
@@ -1045,7 +1059,7 @@ public class BeanDefinition<T> extends BeanClass<T> implements IPluggable<BeanDe
                 }
                 //change listeners hold only the attribute-id and must have attribute instances
                 if (a instanceof AttributeDefinition)
-                    ((AttributeDefinition<T>)a).injectAttributeOnChangeListeners(this);
+                    ((AttributeDefinition<T>) a).injectAttributeOnChangeListeners(this);
             }
             attributeFilter = attributeDefinitions.keySet().toArray(new String[0]);
             createNaturalSortedAttributeNames(attributeFilter);
@@ -1098,7 +1112,7 @@ public class BeanDefinition<T> extends BeanClass<T> implements IPluggable<BeanDe
         Collection<IAction> actionCopy = actions != null ? new ArrayList<IAction>(actions) : new ArrayList<IAction>();
         saveBeanDefinition(getDefinitionFile(getName()));
         if (actions == null)
-        actions = actionCopy;
+            actions = actionCopy;
         else {
             actions.clear();
             actions.addAll(actionCopy);

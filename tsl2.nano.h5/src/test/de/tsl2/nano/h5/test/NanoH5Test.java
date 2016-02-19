@@ -192,7 +192,8 @@ public class NanoH5Test {
         String name = BeanClass.getDefiningClass(app.getClass()).getSimpleName().toLowerCase();
         final String DIR_TEST = "test/.nanoh5." + name;
 //        new File(DIR_TEST).delete();
-        Files.deleteIfExists(Paths.get(DIR_TEST));
+//        Files.deleteIfExists(Paths.get(DIR_TEST));
+        FileUtil.deleteRecursive(new File(DIR_TEST));
 
         ENV.create(DIR_TEST);
         RuntimeClassloader cl = new RuntimeClassloader(new URL[0]);
@@ -288,9 +289,22 @@ public class NanoH5Test {
         FileUtil.writeBytes(("run.bat " + new File(DIR_TEST).getName()).getBytes(), basedir + name + ".bat", false);
         FileUtil.writeBytes(("run.sh " + new File(DIR_TEST).getName()).getBytes(), basedir + name + ".sh", false);
         
-        //create a deployable package
+        //workaround: replace path 'test/.nanoh5.timesheet' with '.nanoh5.timesheet'
         Properties p = new Properties();
-        p.put("destFile", "target/" + name + ".zip");
+        p.put("match", "(test[/])([.]nanoh5[.]timesheet)[/](icons)");
+        p.put("replace", "\\3");
+        AntRunner.runTask(AntRunner.TASK_REPLACE_REGEXP, p, new File(DIR_TEST).getParent() + ":{**}");
+
+        p = new Properties();
+        p.put("match", "(test[/])([.]nanoh5[.]timesheet)");
+        p.put("replace", "\\2");
+        AntRunner.runTask(AntRunner.TASK_REPLACE_REGEXP, p, new File(DIR_TEST).getParent() + ":{**}");
+        
+        //create a deployable package
+        new File("target/").mkdirs();
+        String destFile = "target/" + name + ".zip";
+        p = new Properties();
+        p.put("destFile", destFile);
         AntRunner.runTask(AntRunner.TASK_ZIP, p, new File(DIR_TEST).getParent() + ":{**}");
         
         //delete the test output

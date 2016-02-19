@@ -19,6 +19,16 @@ import java.util.Map;
  */
 public interface IBeanContainer {
     /**
+     * returns bean instance of given id
+     * 
+     * @param <T> bean type
+     * @param type class of bean type
+     * @param id bean id
+     * @return bean or null
+     */
+    <T> T getByID(Class<T> type, Object id);
+    
+    /**
      * returns all bean instances of given type
      * 
      * @param <T> bean type

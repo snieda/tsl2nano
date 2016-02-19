@@ -71,6 +71,17 @@ public class BeanContainerUtil {
         final IGenericService service = ServiceFactory.instance().getService(IGenericService.class);
         ENV.addService(IGenericService.class, service);
 
+        final IAction idFinder = new CommonAction() {
+            @Override
+            public Object action() {
+                final Class entityType = (Class) parameter[0];
+                final Object id = parameter[1];
+                if (!BeanClass.getBeanClass(entityType).isAnnotationPresent(Entity.class)) {
+                    return null;
+                }
+                return service.findById(entityType, id);
+            }
+        };
         final IAction<Collection<?>> typeFinder = new CommonAction<Collection<?>>() {
             @Override
             public Collection<?> action() {
@@ -170,7 +181,8 @@ public class BeanContainerUtil {
                     (Object[]) parameter[2]);
             }
         };
-        BeanContainer.initServiceActions(typeFinder,
+        BeanContainer.initServiceActions(idFinder,
+            typeFinder,
             lazyrelationResolver,
             saveAction,
             deleteAction,

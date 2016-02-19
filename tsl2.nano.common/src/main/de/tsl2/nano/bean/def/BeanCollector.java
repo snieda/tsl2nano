@@ -299,7 +299,7 @@ public class BeanCollector<COLLECTIONTYPE extends Collection<T>, T> extends Bean
                 getBeanFinder().getData();
             }
         }
-        if (hasMode(MODE_SEARCHABLE)) {
+        if (hasMode(MODE_SEARCHABLE) && hasDefaultConstructor(getType())) {
             T instance =
                 getSearchPanelBeans().size() > 0 ? getSearchPanelBeans().iterator().next() : BeanClass
                     .createInstance(getType());
@@ -699,7 +699,7 @@ public class BeanCollector<COLLECTIONTYPE extends Collection<T>, T> extends Bean
                         value = ENV.counter("value.id.counter.start", 1);
                     }
                 } else {
-                    LOG.warn("the id-attribute " + idAttribute + " can't be assigned to a generated value!");
+                    LOG.warn("the id-attribute " + idAttribute + " can't be assigned to a generated value of type " + idAttribute.getType());
                 }
             }
             idAttribute.setValue(newItem, value);

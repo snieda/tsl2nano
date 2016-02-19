@@ -141,11 +141,9 @@ package description:
 
 start parameters:
 
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-java [-Denv.user.home=true] -jar tsl2.nano.h5.<version>.jar [environment-path (default: .nanoh5.environment] [http-server-port (default: 8067)]
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+`java [-Denv.user.home=true] -jar tsl2.nano.h5.<version>.jar [environment-path (default: .nanoh5.environment] [http-server-port (default: 8067)]`
 
-This call is implemented inside the _run.bat_ script. Use that, if you are on windows. But normally, nano-h5 should be runnable through a double-click on the jar file _tsl2.nano.h5.x.y.z.jar_.
+This call is implemented inside the _run.bat_ script. Use that, if you are on windows. But normally, nano-h5 should be runnable through a double-click on the jar file _tsl2.nano.h5.<version-number>.jar_.
 
 If you start it on _Windows_, a browser will be opened to show the initial screen. On other systems you should open an html-browser with file <environment-path>/temp/_application.html_ or directly with: *http://<hostname>:<port>* (default: http://localhost:8067).
 
@@ -380,7 +378,7 @@ config/runServer.bat
 
 To start nano.h5 you have to call it with following syntax:
 
-java -jar tsl2.nano.h5.x.y.z.jar [environment-path (default: .nanoh5.environment | env.user.home] [http-server-port (default: 8067)]
+`java -jar tsl2.nano.h5.x.y.z.jar [environment-path (default: .nanoh5.environment | env.user.home] [http-server-port (default: 8067)]`
 
 This call is implemented inside the _run.bat_ script. Use that, if you are on windows. But normally, nano-h5 should be runnable through a double-click on the jar file _tsl2.nano.h5.x.y.z.jar_.
 
@@ -2150,7 +2148,7 @@ The _nano.h5_ framework works on android systems, too. But upto this time I coud
 The O/R mappers *EBean* and *ORMLite* are able to work on JPA-annotations, but no *javax.persistence.EntityManagerFactory* was implemented. The standard jpa persistence providers use libraries that don't work on android - or they have to many methods which causes the exception:
 
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-Dex Loader] Unable to execute dex: method ID not in [0, 0xffff]: 65536 
+	Dex Loader] Unable to execute dex: method ID not in [0, 0xffff]: 65536 
 Conversion to Dalvik format failed: Unable to execute dex: method ID not in [0, 0xffff]: 65536
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
@@ -2223,118 +2221,117 @@ http://publib.boulder.ibm.com/infocenter/wsdoc400/v6r0/index.jsp?topic=/com.ibm.
 ## JDBC-Drivers
 
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-IBM DB2
-jdbc:db2://<HOST>:<PORT>/<DB>
-COM.ibm.db2.jdbc.app.DB2Driver
-
-JDBC-ODBC Bridge
-jdbc:odbc:<DB>
-sun.jdbc.odbc.JdbcOdbcDriver
-
-Microsoft SQL Server
-jdbc:weblogic:mssqlserver4:<DB>@<HOST>:<PORT>
-weblogic.jdbc.mssqlserver4.Driver
-
-Oracle Thin
-jdbc:oracle:thin:@<HOST>:<PORT>:<SID>
-oracle.jdbc.driver.OracleDriver
-
-PointBase Embedded Server
-jdbc:pointbase://embedded[:<PORT>]/<DB>
-com.pointbase.jdbc.jdbcUniversalDriver
-
-Cloudscape
-jdbc:cloudscape:<DB>
-COM.cloudscape.core.JDBCDriver
-
-Cloudscape RMI
-jdbc:rmi://<HOST>:<PORT>/jdbc:cloudscape:<DB>
-RmiJdbc.RJDriver
-
-Firebird (JCA/JDBC Driver)
-jdbc:firebirdsql:[//<HOST>[:<PORT>]/]<DB>
-org.firebirdsql.jdbc.FBDriver
-
-IDS Server
-jdbc:ids://<HOST>:<PORT>/conn?dsn='<ODBC_DSN_NAME>'
-ids.sql.IDSDriver
-
-Informix Dynamic Server
-jdbc:informix-sqli://<HOST>:<PORT>/<DB>:INFORMIXSERVER=<SERVER_NAME>
-com.informix.jdbc.IfxDriver
-
-InstantDB (v3.13 and earlier)
-jdbc:idb:<DB>
-jdbc.idbDriver
-
-InstantDB (v3.14 and later)
-jdbc:idb:<DB>
-org.enhydra.instantdb.jdbc.idbDriver
-
-Interbase (InterClient Driver)
-jdbc:interbase://<HOST>/<DB>
-interbase.interclient.Driver
-
-Hypersonic SQL (v1.2 and earlier)
-jdbc:HypersonicSQL:<DB>
-hSql.hDriver
-
-Hypersonic SQL (v1.3 and later)
-jdbc:hsql:<URL>
-org.hsql.jdbcDriver
-
-H2 (old)
-jdbc:h2:<URL>
-com.h2database.Driver
-
-H2
-jdbc:h2:<URL>
-org.h2.Driver
-
-Derby/Cloudscape/JavaDB
-jdbc:derby:[subsubprotocol:][databaseName][;attribute=value]*
-org.apache.derby.jdbc.EmbeddedDriver
-org.apache.derby.jdbc.ClientDriver
-
-Microsoft SQL Server (JTurbo Driver)
-jdbc:JTurbo://<HOST>:<PORT>/<DB>
-com.ashna.jturbo.driver.Driver
-
-Microsoft SQL Server (Sprinta Driver)
-jdbc:inetdae:<HOST>:<PORT>?database=<DB>
-com.inet.tds.TdsDriver
-
-Microsoft SQL Server 2000 (Microsoft Driver)
-jdbc:microsoft:sqlserver://<HOST>:<PORT>[;DatabaseName=<DB>]
-com.microsoft.jdbc.sqlserver.SQLServerDriver
-
-MySQL (MM.MySQL Driver)
-jdbc:mysql://<HOST>:<PORT>/<DB>
-org.gjt.mm.mysql.Driver
-
-Oracle OCI 8i
-jdbc:oracle:oci8:@<SID>
-oracle.jdbc.driver.OracleDriver
-
-Oracle OCI 9i
-jdbc:oracle:oci:@<SID>
-oracle.jdbc.driver.OracleDriver
-
-PostgreSQL (v6.5 and earlier)
-jdbc:postgresql://<HOST>:<PORT>/<DB>
-postgresql.Driver
-
-PostgreSQL (v7.0 and later)
-jdbc:postgresql://<HOST>:<PORT>/<DB>
-org.postgresql.Driver
-
-Sybase (jConnect 4.2 and earlier)
-jdbc:sybase:Tds:<HOST>:<PORT>
-com.sybase.jdbc.SybDriver
-
-Sybase (jConnect 5.2)
-jdbc:sybase:Tds:<HOST>:<PORT>
-com.sybase.jdbc2.jdbc.SybDriver
+	IBM DB2
+	jdbc:db2://<HOST>:<PORT>/<DB>
+	COM.ibm.db2.jdbc.app.DB2Driver
+	
+	JDBC-ODBC Bridge
+	jdbc:odbc:<DB>
+	sun.jdbc.odbc.JdbcOdbcDriver
+	
+	Microsoft SQL Server
+	jdbc:weblogic:mssqlserver4:<DB>@<HOST>:<PORT>
+	weblogic.jdbc.mssqlserver4.Driver
+	
+	Oracle Thin
+	jdbc:oracle:thin:@<HOST>:<PORT>:<SID>
+	oracle.jdbc.driver.OracleDriver
+	
+	PointBase Embedded Server
+	jdbc:pointbase://embedded[:<PORT>]/<DB>
+	com.pointbase.jdbc.jdbcUniversalDriver
+	
+	Cloudscape
+	jdbc:cloudscape:<DB>
+	COM.cloudscape.core.JDBCDriver
+	
+	Cloudscape RMI
+	jdbc:rmi://<HOST>:<PORT>/jdbc:cloudscape:<DB>
+	RmiJdbc.RJDriver
+	
+	Firebird (JCA/JDBC Driver)
+	jdbc:firebirdsql:[//<HOST>[:<PORT>]/]<DB>
+	org.firebirdsql.jdbc.FBDriver
+	
+	IDS Server
+	jdbc:ids://<HOST>:<PORT>/conn?dsn='<ODBC_DSN_NAME>'
+	ids.sql.IDSDriver
+	
+	Informix Dynamic Server
+	jdbc:informix-sqli://<HOST>:<PORT>/<DB>:INFORMIXSERVER=<SERVER_NAME>
+	com.informix.jdbc.IfxDriver
+	
+	InstantDB (v3.13 and earlier)
+	jdbc:idb:<DB>
+	jdbc.idbDriver
+	
+	InstantDB (v3.14 and later)
+	jdbc:idb:<DB>
+	org.enhydra.instantdb.jdbc.idbDriver
+	
+	Interbase (InterClient Driver)
+	jdbc:interbase://<HOST>/<DB>
+	interbase.interclient.Driver
+	
+	Hypersonic SQL (v1.2 and earlier)
+	jdbc:HypersonicSQL:<DB>
+	hSql.hDriver
+	
+	Hypersonic SQL (v1.3 and later)
+	jdbc:hsql:<URL>
+	org.hsql.jdbcDriver
+	
+	H2 (old)
+	jdbc:h2:<URL>
+	com.h2database.Driver
+	
+	H2
+	jdbc:h2:<URL>
+	org.h2.Driver
+	
+	Derby/Cloudscape/JavaDB
+	jdbc:derby:[subsubprotocol:][databaseName][;attribute=value]*
+	org.apache.derby.jdbc.EmbeddedDriver
+	org.apache.derby.jdbc.ClientDriver
+	
+	Microsoft SQL Server (JTurbo Driver)
+	jdbc:JTurbo://<HOST>:<PORT>/<DB>
+	com.ashna.jturbo.driver.Driver
+	
+	Microsoft SQL Server (Sprinta Driver)
+	jdbc:inetdae:<HOST>:<PORT>?database=<DB>
+	com.inet.tds.TdsDriver
+	
+	Microsoft SQL Server 2000 (Microsoft Driver)
+	jdbc:microsoft:sqlserver://<HOST>:<PORT>[;DatabaseName=<DB>]
+	com.microsoft.jdbc.sqlserver.SQLServerDriver
+	
+	MySQL (MM.MySQL Driver)
+	jdbc:mysql://<HOST>:<PORT>/<DB>
+	org.gjt.mm.mysql.Driver
+	
+	Oracle OCI 8i
+	jdbc:oracle:oci8:@<SID>
+	oracle.jdbc.driver.OracleDriver
+	
+	Oracle OCI 9i
+	jdbc:oracle:oci:@<SID>
+	oracle.jdbc.driver.OracleDriver
+	
+	PostgreSQL (v6.5 and earlier)
+	jdbc:postgresql://<HOST>:<PORT>/<DB>
+	postgresql.Driver
+	
+	PostgreSQL (v7.0 and later)
+	jdbc:postgresql://<HOST>:<PORT>/<DB>
+	org.postgresql.Driver
+	
+	Sybase (jConnect 4.2 and earlier)
+	jdbc:sybase:Tds:<HOST>:<PORT>
+	com.sybase.jdbc.SybDriver
+	
+	Sybase (jConnect 5.2)
+	jdbc:sybase:Tds:<HOST>:<PORT>	com.sybase.jdbc2.jdbc.SybDriver
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 Actual list: http://infocenter.pentaho.com/help/index.jsp?topic=%2Fsupported_components%2Freference_jdbc_drivers.html

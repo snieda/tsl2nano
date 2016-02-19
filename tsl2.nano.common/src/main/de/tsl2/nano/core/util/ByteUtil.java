@@ -49,7 +49,7 @@ public class ByteUtil extends Util {
      * @return true, if type is a byte (or Byte) array, or simple Serializable interface.
      */
     public static boolean isByteStream(Class<?> type) {
-        return type.equals(Serializable.class)
+        return (type.equals(Serializable.class) && isFrameworkClass(type)) // e.g. IPresentable.getLyout() should not be a byte stream
             || (type.isArray() && (Byte[].class.isAssignableFrom(type) || byte[].class.isAssignableFrom(type)))
             || ByteBuffer.class.isAssignableFrom(type) || InputStream.class.isAssignableFrom(type) || Blob.class.isAssignableFrom(type);
     }
