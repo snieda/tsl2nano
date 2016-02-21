@@ -44,6 +44,10 @@ public final class DateUtil {
     private static final int HOUR_TO_MINUTES = 60;
     private static final int DAY_TO_HOUR = 24;
 
+    public static final long MINUTE = MILLI_TO_MINUTES;
+    public static final long HOUR = MINUTE * HOUR_TO_MINUTES;
+    public static final long DAY = DAY_TO_HOUR * HOUR;
+
     public static final Date MIN_DATE = getDate(0, 0, 0);
     public static final Date MAX_DATE = getDate(9999, -1, -1);
 

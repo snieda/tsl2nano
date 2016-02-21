@@ -508,6 +508,9 @@ public class StringUtil {
             if (replacement != null) {
                 if (source instanceof StringBuilder) {
                     result = m.group(m.groupCount());
+                    //if no match was done on the last group, we use the whole match
+                    if (result == null || m.groupCount() > 0)
+                        result = m.group(0);
                     if (result != null) {
                         StringBuilder sb = (StringBuilder) source;
                         replace(sb, result, replacement, start);

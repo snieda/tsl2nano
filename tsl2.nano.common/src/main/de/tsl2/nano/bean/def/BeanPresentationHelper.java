@@ -261,7 +261,8 @@ public class BeanPresentationHelper<T> {
         attributeNames = attributeNames.length > 0 ? attributeNames : bean.getAttributeNames();
         for (int i = 0; i < attributeNames.length; i++) {
             IAttributeDefinition attr = bean.getAttribute(attributeNames[i]);
-            if (String.class.isAssignableFrom(attr.getType()) && attr instanceof IValueDefinition/* && attr.length() == 1*/) {
+            if (String.class.isAssignableFrom(attr.getType())
+                && attr instanceof IValueDefinition/* && attr.length() == 1*/) {
                 BeanValue anfordernCharValue = BeanValue.getBeanValue(((IValueDefinition) attr).getInstance(),
                     attributeNames[i]);
                 ValueMatcher vb = new ValueMatcher(anfordernCharValue, prop(KEY_STR_TRUE), prop(KEY_STR_FALSE));
@@ -874,7 +875,10 @@ public class BeanPresentationHelper<T> {
      * @param enumConstants enum constants
      * @return enum wrapper instance
      */
-    protected <E> OptionsWrapper<E> setEnumBooleanType(String attrName, int style, boolean subGroup, E... enumConstants) {
+    protected <E> OptionsWrapper<E> setEnumBooleanType(String attrName,
+            int style,
+            boolean subGroup,
+            E... enumConstants) {
         //analyze multi-style
         final boolean isMultiSelection = NumberUtil.hasBit(style, STYLE_MULTI);
         final IValueDefinition<E> attribute = ((Bean) bean).getAttribute(attrName);
@@ -970,7 +974,9 @@ public class BeanPresentationHelper<T> {
      * @param listener user defined listener to act on selection changes.
      * @param enumType enum type to evaluate the enum values from
      */
-    protected void setEnumBooleanListener(OptionsWrapper<?> wrapper, IListener<ChangeEvent> listener, Class<?> enumType) {
+    protected void setEnumBooleanListener(OptionsWrapper<?> wrapper,
+            IListener<ChangeEvent> listener,
+            Class<?> enumType) {
         setEnumBooleanListener(wrapper, listener, (Enum[]) enumType.getEnumConstants());
     }
 
@@ -1041,7 +1047,7 @@ public class BeanPresentationHelper<T> {
                     (1 << 5)
                         * (attr.length() == -1
                             || (attr.length() >= bestminlength && attr.length() <= bestmaxlength) ? 1
-                            : 0);
+                                : 0);
             } else {
                 ml = 0;
             }
@@ -1080,14 +1086,14 @@ public class BeanPresentationHelper<T> {
              */
             NavigableSet<Integer> keySet = levels.descendingKeySet();
             //on initial the beancontainer is served with empty actions!
-            if (!Util.isFrameworkClass(bean.getClazz()) && !Util.isJavaType(bean.getClazz())&& bean.isPersistable()) {
+            if (!Util.isFrameworkClass(bean.getClazz()) && !Util.isJavaType(bean.getClazz()) && bean.isPersistable()) {
                 boolean isEmpty;
                 try {
                     isEmpty =
                         ((Number) BeanContainer.instance()
                             .getBeansByQuery("select count(*) from " + bean.getName(), true, new Object[0]).iterator()
                             .next())
-                            .intValue() == 0;
+                                .intValue() == 0;
                 } catch (Exception ex) {
                     LOG.warn(bean.getName()
                         + " is declared as @ENTITY but has no mapped TABLE --> can't evaluate best attribute!");
@@ -1129,7 +1135,8 @@ public class BeanPresentationHelper<T> {
                                 + ". Using id-attribute " + id.getId(), ex);
                             return id.getName();
                         } else {
-                            LOG.warn("couldn't check attribute for unique data: " + bean.getName() + "." + names[i], ex);
+                            LOG.warn("couldn't check attribute for unique data: " + bean.getName() + "." + names[i],
+                                ex);
                             return names[i];
                         }
                     }
@@ -1269,9 +1276,9 @@ public class BeanPresentationHelper<T> {
         return bean != null && BeanCollector.class.isAssignableFrom(bean.getDeclaringClass());
     }
 
-    protected void addSessionValues(ISession session) {
+    protected void addSessionValues(ISession session, Bean bean) {
         //do the Object-casting trick to cast from List<Object> to List<BeanDefinition>
-        addSessionValues((List<BeanDefinition>) Util.untyped(Arrays.asList(session.getNavigationStack())));
+        addSessionValues((List<BeanDefinition>) Util.untyped(Arrays.asList(session.getNavigationStack())), bean);
     }
 
     /**
@@ -1279,13 +1286,12 @@ public class BeanPresentationHelper<T> {
      * 
      * @param session current session
      */
-    protected void addSessionValues(List<BeanDefinition> sessionValues) {
+    protected void addSessionValues(List<BeanDefinition> sessionValues, Bean bean) {
         if (!BeanContainer.instance().isTransient(bean.getId())) {
             throw new IllegalStateException("this method should only be called on new/transient objects! bean:" + bean);
         }
-        Bean b = (Bean) bean;
 
-        List<BeanValue> beanValues = b.getBeanValues();
+        List<BeanValue> beanValues = bean.getBeanValues();
         for (int i = 0; i < sessionValues.size(); i++) {
             if (sessionValues.get(i).isPersistable() && !sessionValues.get(i).isMultiValue()) {
                 Object instance = ((Bean) sessionValues.get(i)).getInstance();
@@ -1319,7 +1325,25 @@ public class BeanPresentationHelper<T> {
                 "icons/cascade.png") {
                 @Override
                 public Object action() throws Exception {
-                    return Bean.getBean((Serializable) BeanClass.getStatic(ENV.class, "self"));
+                    Bean<Serializable> bEnv = Bean.getBean((Serializable) BeanClass.getStatic(ENV.class, "self"));
+                    bEnv.addAction(new SecureAction<Object>(bean.getClazz(), "switch-debug-logging",
+                        IAction.MODE_UNDEFINED, false, "icons/view.png") {
+                        @Override
+                        public Object action() throws Exception {
+                            LogFactory.setLogLevel(LogFactory.isEnabled(LogFactory.DEBUG) ? LogFactory.LOG_STANDARD
+                                : LogFactory.LOG_DEBUG);
+                            return null;
+                        }
+                    });
+                    bEnv.addAction(new SecureAction<Object>(bean.getClazz(), "shutdown",
+                            IAction.MODE_UNDEFINED, false, "icons/turnoff.png") {
+                            @Override
+                            public Object action() throws Exception {
+                                System.exit(0);
+                                return null;
+                            }
+                        });
+                    return bEnv;
                 }
 
                 @Override

@@ -18,6 +18,7 @@ import java.io.FileNotFoundException;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.PrintStream;
 import java.io.Serializable;
 import java.lang.reflect.InvocationHandler;
 import java.lang.reflect.Proxy;
@@ -459,6 +460,18 @@ public class XmlUtil {
                 if (!file.renameTo(new File(file.getPath() + ".failed")))
                     LOG.warn("couldn't rename corrupted file '" + xmlFile + "' to '" + xmlFile
                         + ".failed' !");
+            }
+            //write the error to an equal-named file
+            String stackTraceFile = xmlFile + ".stacktrace";
+            PrintStream printStream = null;
+            try {
+                printStream = new PrintStream(stackTraceFile);
+                e.printStackTrace(printStream);
+            } catch (FileNotFoundException e1) {
+                LOG.error("cant' write stacktrace to " + stackTraceFile );
+            } finally {
+                if (printStream != null)
+                    printStream.close();
             }
             //don't use the ManagedException.forward(), because the LogFactory is using this, too!
             throw new RuntimeException(e);

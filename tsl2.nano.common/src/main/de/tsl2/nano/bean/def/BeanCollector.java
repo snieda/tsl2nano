@@ -620,11 +620,9 @@ public class BeanCollector<COLLECTIONTYPE extends Collection<T>, T> extends Bean
             && !(Entry.class.isAssignableFrom(type))) {
             try {
                 /*
-                 * we don't use the apache util to be compatible on all platforms (e.g. without java.bean package like the dalvik vm)
-                 * but the tsl2nano util may cause a classloader exception.
-                 * we don't use a deep copy to avoid lazyloading problems
+                 * don't copy composition or cascading fields!
                  */
-                newItem = BeanUtil.clone(selectedItem);
+                newItem = copySimpleValues(selectedItem);
                 BeanUtil.createOwnCollectionInstances(newItem);
             } catch (final Exception e) {
                 LOG.error(e);
@@ -636,7 +634,8 @@ public class BeanCollector<COLLECTIONTYPE extends Collection<T>, T> extends Bean
              * there is no information how to create a new bean - at least one stored bean instance must exist!
              */
             if (type != null && Collection.class.isAssignableFrom(type)) {
-                LOG.warn("There is no information how to create a new bean - at least one stored bean instance must exist!");
+                LOG.warn(
+                    "There is no information how to create a new bean - at least one stored bean instance must exist!");
                 return null;
             } else if (Entry.class.isAssignableFrom(type)) {
                 // normally we would handle this inside the generic else block, but we need
@@ -699,7 +698,8 @@ public class BeanCollector<COLLECTIONTYPE extends Collection<T>, T> extends Bean
                         value = ENV.counter("value.id.counter.start", 1);
                     }
                 } else {
-                    LOG.warn("the id-attribute " + idAttribute + " can't be assigned to a generated value of type " + idAttribute.getType());
+                    LOG.warn("the id-attribute " + idAttribute + " can't be assigned to a generated value of type "
+                        + idAttribute.getType());
                 }
             }
             idAttribute.setValue(newItem, value);
@@ -713,6 +713,25 @@ public class BeanCollector<COLLECTIONTYPE extends Collection<T>, T> extends Bean
             composition.add(newItem);
         }
         return newItem;
+    }
+
+    private T copySimpleValues(T selectedItem) {
+        List<String> names = new ArrayList<String>(getAttributeNames().length);
+        IAttributeDefinition attr;
+        for (IAttribute a : getSingleValueAttributes()) {
+            if (isPersistable() && a.isVirtual())
+                continue;
+            else if (a instanceof IAttributeDefinition) {
+                attr = (IAttributeDefinition) a;
+                if (attr.isMultiValue() || attr.composition() || attr.cascading()) {
+                    LOG.debug(
+                        "didn't copy attribute " + attr + " to new item in cause of being a composition or oneToMany");
+                    continue;
+                }
+            }
+            names.add(a.getName());
+        }
+        return copyValues(selectedItem, createInstance(), true, names.toArray(new String[0]));
     }
 
     /**
@@ -1163,8 +1182,7 @@ public class BeanCollector<COLLECTIONTYPE extends Collection<T>, T> extends Bean
         });
         List<Integer> indexes = new ArrayList<Integer>(columns.size());
         for (IPresentableColumn c : columns) {
-            if (c.getSortIndex() == IPresentable.UNDEFINED)
-            {
+            if (c.getSortIndex() == IPresentable.UNDEFINED) {
                 break;//the following will be undefined, too (--> sorting)
             }
             indexes.add(c.getIndex());
@@ -1424,14 +1442,15 @@ public class BeanCollector<COLLECTIONTYPE extends Collection<T>, T> extends Bean
      * @param workingMode working mode of desired collector (see {@link IBeanCollector} for available modes.
      * @return
      */
-    public static final <C extends Collection<I>, I/* extends Serializable*/> BeanCollector<C, I> getBeanCollector(Class<I> beanType,
+    public static final <C extends Collection<I>, I/* extends Serializable*/> BeanCollector<C, I> getBeanCollector(
+            Class<I> beanType,
             Collection<I> collection,
             int workingMode,
             Composition composition) {
         BeanDefinition<I> beandef =
             (BeanDefinition<I>) (beanType.isArray() && !Util.isEmpty(collection) ? Bean
-                .getBean((Serializable) collection.iterator().next()) :
-                getBeanDefinition(beanType.getSimpleName() + (useExtraCollectorDefinition() ? POSTFIX_COLLECTOR
+                .getBean((Serializable) collection.iterator().next())
+                : getBeanDefinition(beanType.getSimpleName() + (useExtraCollectorDefinition() ? POSTFIX_COLLECTOR
                     : ""),
                     beanType,
                     false));
@@ -1450,7 +1469,8 @@ public class BeanCollector<COLLECTIONTYPE extends Collection<T>, T> extends Bean
      * @param beandef bean description
      * @return new created bean-collector holding given collection
      */
-    protected static <C extends Collection<I>, I/* extends Serializable*/> BeanCollector<C, I> createCollector(C collection,
+    protected static <C extends Collection<I>, I/* extends Serializable*/> BeanCollector<C, I> createCollector(
+            C collection,
             int workingMode,
             Composition composition,
             BeanDefinition<I> beandef) {
@@ -1520,7 +1540,7 @@ public class BeanCollector<COLLECTIONTYPE extends Collection<T>, T> extends Bean
     public int hashCode() {
         return super.hashCode() + (collection != null ? collection.hashCode() : 0);
     }
-    
+
     @Override
     public String toString() {
         if (asString == null && name != null) {
@@ -1529,7 +1549,8 @@ public class BeanCollector<COLLECTIONTYPE extends Collection<T>, T> extends Bean
                 (useExtraCollectorDefinition() ? ENV.translate("tsl2nano.list", false) + " " : "")
                     + StringUtil.substring(name,
                         null,
-                        POSTFIX_COLLECTOR) + (lastCount != -1 ? " (" + lastCount + ")" : "");
+                        POSTFIX_COLLECTOR)
+                    + (lastCount != -1 ? " (" + lastCount + ")" : "");
         }
         return asString;
     }
@@ -1581,7 +1602,11 @@ public class BeanCollector<COLLECTIONTYPE extends Collection<T>, T> extends Bean
         return actions;
     }
 
-    public void addColumnDefinition(String attributeName, int index, int sortIndex, boolean sortUpDirection, int width) {
+    public void addColumnDefinition(String attributeName,
+            int index,
+            int sortIndex,
+            boolean sortUpDirection,
+            int width) {
         getAttribute(attributeName).setColumnDefinition(index, sortIndex, sortUpDirection, width);
     }
 

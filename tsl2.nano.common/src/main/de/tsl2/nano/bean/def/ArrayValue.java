@@ -12,6 +12,9 @@ package de.tsl2.nano.bean.def;
 import java.lang.reflect.Method;
 
 import org.simpleframework.xml.Attribute;
+import org.simpleframework.xml.Default;
+import org.simpleframework.xml.DefaultType;
+import org.simpleframework.xml.Element;
 
 import de.tsl2.nano.bean.IValueAccess;
 import de.tsl2.nano.core.cls.IAttribute;
@@ -23,6 +26,7 @@ import de.tsl2.nano.messaging.EventController;
  * @author Tom
  * @version $Revision$
  */
+@Default(value = DefaultType.FIELD, required = false)
 public class ArrayValue<T> implements IValueAccess<T>, IAttribute<T> {
     /** serialVersionUID */
     private static final long serialVersionUID = -1460468414949211876L;
@@ -34,8 +38,13 @@ public class ArrayValue<T> implements IValueAccess<T>, IAttribute<T> {
     String name;
     @Attribute
     int index;
-    transient EventController eventController;
 
+    @Element(required=false)
+    EventController eventController;
+
+    public ArrayValue() {
+    }
+    
     public ArrayValue(String name, int index) {
         this(name, index, null, null);
     }

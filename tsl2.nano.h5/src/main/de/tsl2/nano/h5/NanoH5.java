@@ -49,6 +49,7 @@ import de.tsl2.nano.core.exception.Message;
 import de.tsl2.nano.core.execution.CompatibilityLayer;
 import de.tsl2.nano.core.log.LogFactory;
 import de.tsl2.nano.core.util.ConcurrentUtil;
+import de.tsl2.nano.core.util.DateUtil;
 import de.tsl2.nano.core.util.FileUtil;
 import de.tsl2.nano.core.util.MapUtil;
 import de.tsl2.nano.core.util.NetUtil;
@@ -321,7 +322,7 @@ public class NanoH5 extends NanoHTTPD implements ISystemConnector<Persistence> {
             session = createSession(requestor);
         } else {//perhaps session was interrupted/closed but not removed
             //WORKAROUND: may occur on cached pages
-            if (session.nav == null || session.nav.isEmpty()) {
+            if (session.getDuration() > ENV.get("session.timeout.millis", 12 * DateUtil.HOUR) || session.nav == null || session.nav.isEmpty()) {
                 boolean done = session.nav != null && session.nav.done();
                 session.close();
                 sessions.remove(session.inetAddress);
@@ -478,6 +479,7 @@ public class NanoH5 extends NanoHTTPD implements ISystemConnector<Persistence> {
         PersistenceClassLoader runtimeClassloader = new PersistenceClassLoader(new URL[0],
             rootClassloader());
         runtimeClassloader.addLibraryPath(ENV.getConfigPath());
+        //TODO: the environment and current thread shouldn't use the new sessions classloader! 
         Thread.currentThread().setContextClassLoader(runtimeClassloader);
         ENV.addService(ClassLoader.class, runtimeClassloader);
 

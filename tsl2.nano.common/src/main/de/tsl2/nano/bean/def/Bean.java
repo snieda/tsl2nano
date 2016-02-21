@@ -257,8 +257,30 @@ public class Bean<T> extends BeanDefinition<T> {
         getAttribute(attributeName).setValue(value);
     }
 
+    /**
+     * delegates to {@link BeanValue#setParsedValue(String)}
+     */
     public void setParsedValue(String attributeName, String value) {
         ((BeanValue) getAttribute(attributeName)).setParsedValue(value);
+    }
+
+    /**
+     * searches for the given attribute name. if it exists and it is writable (having a public setter) and the current
+     * value differs from the new given value, the method {@link BeanValue#setParsedValue(String)} will be called.
+     * 
+     * @param attributeName attribute to change, if existing with setter
+     * @param value new value to set
+     * @return true, if attribute was changed to new value
+     */
+    public boolean changeToParsedValue(String attributeName, String value) {
+        BeanValue bv;
+        if (hasAttribute(attributeName) && (bv = (BeanValue) getAttribute(attributeName)).hasWriteAccess()) {
+            if (!bv.getValueText().equals(value)) {
+                bv.setParsedValue(value);
+                return true;
+            }
+        }
+        return false;
     }
 
     /**
@@ -276,7 +298,8 @@ public class Bean<T> extends BeanDefinition<T> {
      */
     public BeanDefinition<?> getValueAsBean(String name, boolean cacheInstance) {
         IValueDefinition<?> attribute = getAttribute(name);
-        if (BeanUtil.isStandardType(attribute.getType()) /*!BeanContainer.instance().isPersistable(attribute.getType())*/) {
+        if (BeanUtil
+            .isStandardType(attribute.getType()) /*!BeanContainer.instance().isPersistable(attribute.getType())*/) {
             throw new ManagedException("The attribute '" + name + "' is not a persistable bean");
         }
         Serializable value = (Serializable) attribute.getValue();
@@ -340,8 +363,7 @@ public class Bean<T> extends BeanDefinition<T> {
         if (!isValid) {
             throw new IllegalArgumentException(StringUtil.toString(msgMap, 0));
         }
-        if (crossChecker != null)
-        {
+        if (crossChecker != null) {
             crossChecker.check();
             //TODO: refactore incubation rule to be usable here...
 //        if (rule != null) {
@@ -458,7 +480,7 @@ public class Bean<T> extends BeanDefinition<T> {
         final String saveLabel =
             BeanContainer.isInitialized() && BeanContainer.instance().isPersistable(getDefiningClass(clazz))
                 && !CompositionFactory.contains(bean) ? Messages
-                .getString("tsl2nano.save") : Messages.getString("tsl2nano.assign");
+                    .getString("tsl2nano.save") : Messages.getString("tsl2nano.assign");
         return new SaveAction(this, bean, actionId, saveLabel, saveLabel, IAction.MODE_DLG_OK);
     }
 
@@ -507,7 +529,7 @@ public class Bean<T> extends BeanDefinition<T> {
             if (BeanContainer.isConstraintError(e)) {
                 throw new ManagedException("tsl2nano.impossible_create", new Object[] { /*Configuration.current()
                                                                                            .getDefaultFormatter()
-                                                                                           .format(*/bean /*)*/});
+                                                                                           .format(*/bean /*)*/ });
             } else {
                 throw e;
             }
@@ -575,7 +597,8 @@ public class Bean<T> extends BeanDefinition<T> {
      * @return new map holding value definitions
      */
     @SuppressWarnings("serial")
-    protected static LinkedHashMap<String, ? extends IValueAccess<?>> createValueDefinitions(Map<String, IAttributeDefinition<?>> attributeDefinitions) {
+    protected static LinkedHashMap<String, ? extends IValueAccess<?>> createValueDefinitions(
+            Map<String, IAttributeDefinition<?>> attributeDefinitions) {
         LinkedHashMap<String, IValueAccess<?>> valueDefs =
             new LinkedHashMap<String, IValueAccess<?>>(attributeDefinitions.size());
         try {
@@ -708,8 +731,9 @@ public class Bean<T> extends BeanDefinition<T> {
         Object v;
         for (Object k : keySet) {
             v = map.get(k);
-            bean.addAttribute(new BeanValue(bean.instance, new MapValue(v != null ? v : k, (v != null ? BeanClass.getDefiningClass(v
-                .getClass()) : null), map)));
+            bean.addAttribute(
+                new BeanValue(bean.instance, new MapValue(v != null ? v : k, (v != null ? BeanClass.getDefiningClass(v
+                    .getClass()) : null), map)));
         }
         return bean;
     }
@@ -780,7 +804,8 @@ public class Bean<T> extends BeanDefinition<T> {
     @Override
     public void onActivation() {
         //on new beans, we fill manyToOne relations if exactly one item is available
-        if (!BeanContainer.isInitialized() || BeanContainer.instance().isTransient(instance) && ENV.get("bean.new.fill.relations.on.one.item", true)) {
+        if (!BeanContainer.isInitialized()
+            || BeanContainer.instance().isTransient(instance) && ENV.get("bean.new.fill.relations.on.one.item", true)) {
             String[] names = getAttributeNames();
             for (int i = 0; i < names.length; i++) {
                 IValueDefinition attr = getAttribute(names[i]);

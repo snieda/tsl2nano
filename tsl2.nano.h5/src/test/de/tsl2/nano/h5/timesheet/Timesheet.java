@@ -503,10 +503,10 @@ public class Timesheet extends NanoH5App {
         assertTrue(redColorStyle.equals(style));
 
         //test the queries
-//        QueryPool qpool = ENV.get(QueryPool.class);
-//        assertTrue(qpool.get(STAT_TIMESHEET_STATISTICS).getColumnNames().equals(Arrays.asList("")));
-//        assertTrue(qpool.get(STAT_PROJECTS).getColumnNames().equals(Arrays.asList("")));
-//        assertTrue(qpool.get(STAT_TYPES).getColumnNames().equals(Arrays.asList("")));
+        QueryPool qpool = ENV.get(QueryPool.class);
+        assertTrue(qpool.get(STAT_TIMESHEET_STATISTICS).getColumnNames().equals(Arrays.asList("Month", "Workdays", "Hours", "Ill", "Holiday")));
+        assertTrue(qpool.get(STAT_PROJECTS).getColumnNames().equals(Arrays.asList("Project", "Hours")));
+        assertTrue(qpool.get(STAT_TYPES).getColumnNames().equals(Arrays.asList("Type", "Hours")));
         super.stop();
     }
 }

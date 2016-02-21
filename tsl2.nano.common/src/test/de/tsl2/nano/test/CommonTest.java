@@ -1339,7 +1339,7 @@ public class CommonTest {
         };
 
         // filter the 'standalones'
-        assertTrue(cl.getNestedJars().length == 16);
+        assertTrue(cl.getNestedJars().length == 21);
     }
 
     /**

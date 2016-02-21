@@ -11,16 +11,19 @@ package de.tsl2.nano.h5.expression;
 
 import java.io.Serializable;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import org.apache.commons.logging.Log;
 import org.simpleframework.xml.Attribute;
 import org.simpleframework.xml.Element;
 import org.simpleframework.xml.ElementMap;
 
 import de.tsl2.nano.bean.BeanContainer;
+import de.tsl2.nano.core.log.LogFactory;
 import de.tsl2.nano.core.util.StringUtil;
 import de.tsl2.nano.core.util.Util;
 import de.tsl2.nano.execution.IPRunnable;
@@ -36,18 +39,22 @@ public class Query<RESULT> implements IPRunnable<RESULT, Map<String, Object>> {
     /** serialVersionUID */
     private static final long serialVersionUID = -9199837113877884921L;
 
-    /** full column expression */
+    private static final Log LOG = LogFactory.getLog(Query.class);
+    
+    /** full column expression for one column */
     private static final String SQL_COL = "(^|\\,)\\s*([^\\s,]+)(\\s+as\\s+([\\w]+))?";
     /** sql parameter */
     private static final String SQL_PAR = "[:]([\\w._-]+)";
     /** sql function */
-    private static final String SQL_FCT = "\\w+\\(.*\\)";
+    private static final String SQL_FCT = "(\\w+)\\([^\\(\\)]+\\)";
     /** column name */
     private static final String SQL_NAM = ".*(\\w+)";
     /** string literal */
-    private static final String SQL_LIT = "'.*'";
+    private static final String SQL_LIT = "['][^']*[']";
     /** one or more concatenations */
-    private static final String SQL_CON = "[^,].*[|]{2}[^,]+";
+    private static final String SQL_CON = "[^,]+[|]{2}";
+    /** column path (if schema, etc. where given) */
+    private static final String SQL_PAT = "(\\w+[.])+";
 
     @Attribute
     String name;
@@ -140,15 +147,19 @@ public class Query<RESULT> implements IPRunnable<RESULT, Map<String, Object>> {
             columnNames = new ArrayList<String>();
             String p;
             //get the full selection header and eliminate literals, functions and concatenations
-            String select = StringUtil.substring(operation.toLowerCase(), "select", "from");
+            String select = StringUtil.substring(operation, "select", "from");
             select = select.replaceAll(SQL_LIT, "");
+            select = select.replaceAll(SQL_PAT, "");
             select = select.replaceAll(SQL_CON, "");
-            select = select.replaceAll(SQL_FCT, "");
+            //TODO: capturing group 1 is not used! why?
+            select = select.replaceAll(SQL_FCT, "\\1");
             StringBuilder q = new StringBuilder(select);
             while ((!Util.isEmpty(p = StringUtil.extract(q, SQL_COL, "", 0, 0)))) {
                 columnNames.add(p.contains("as ") ? StringUtil.substring(p, "as ", null) : StringUtil.substring(p, ".",
-                    null));
+                    null).trim());
             }
+            if (LOG.isDebugEnabled())
+                LOG.debug(Arrays.toString(columnNames.toArray()));
         }
         return columnNames;
     }

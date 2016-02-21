@@ -324,6 +324,7 @@ public class Html5Presentation<T> extends BeanPresentationHelper<T> implements I
                                     ENV.get(QueryPool.class).add(query);
                                     QueryResult qr = new QueryResult(query.getName());
                                     qr.setName(BeanDefinition.PREFIX_VIRTUAL + query.getName());
+                                    qr.getPresentable().setIcon("icons/barchart.png");
                                     qr.saveDefinition();
                                     return "New created specification-query: " + name;
                                 }
@@ -365,6 +366,7 @@ public class Html5Presentation<T> extends BeanPresentationHelper<T> implements I
                         to = (BeanValue<T>) collector.getBeanFinder().getFilterRange().getAttribute("to");
                     }
                     Statistic s = new Statistic(bean.getDeclaringClass(), from.getValue(), to.getValue());
+                    s.getPresentable().setIcon("icons/barchart.png");
                     s.saveVirtualDefinition("statistics " + bean);
                     return s;
                 }
@@ -694,7 +696,7 @@ public class Html5Presentation<T> extends BeanPresentationHelper<T> implements I
         } else {
             //prefill a new bean with the current navigation stack objects
             if (BeanContainer.instance().isTransient(((Bean)bean).getInstance())) {
-                addSessionValues(session);
+                addSessionValues(session, (Bean)bean);
             }
             panel = createBean(session, panel, (Bean<?>) bean, interactive, fullwidth);
         }
@@ -731,13 +733,13 @@ public class Html5Presentation<T> extends BeanPresentationHelper<T> implements I
     }
 
     @Override
-    protected void addSessionValues(ISession session) {
+    protected void addSessionValues(ISession session, Bean bean) {
         List<BeanDefinition> v = new ArrayList<>();
         //do the Object-casting trick to cast from List<Object> to List<BeanDefinition>
         Object navigation = Arrays.asList(session.getNavigationStack());
         v.addAll((List<BeanDefinition>) navigation);
         v.addAll((Collection<BeanDefinition>) session.getContext());
-        addSessionValues(v);
+        addSessionValues(v, bean);
     }
 
     public static String createMessagePage(String templateName, String message, URL serviceURL) {

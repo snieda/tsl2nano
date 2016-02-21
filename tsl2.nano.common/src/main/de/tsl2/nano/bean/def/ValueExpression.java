@@ -455,7 +455,7 @@ public class ValueExpression<TYPE> implements
         for (int i = 0; i <= attributeSplitters.length; i++) {
             to = i < attributeSplitters.length ? attributeSplitters[i] : null;
             splittedValues[i] = StringUtil.substring(toValue, from, to, j);
-            if (i == attributeSplitters.length) {
+            if (i == attributeSplitters.length || toValue.indexOf(to, j) == -1) {
                 break;
             }
             from = to;

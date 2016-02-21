@@ -450,8 +450,8 @@ public/*abstract*/class LogFactory implements Runnable, Serializable {
      * @param state
      * @return
      */
-    protected boolean isEnabled(int state) {
-        return BitUtil.hasBit(statesToLog, state);
+    public static boolean isEnabled(int state) {
+        return BitUtil.hasBit(instance().statesToLog, state);
     }
 
     /**

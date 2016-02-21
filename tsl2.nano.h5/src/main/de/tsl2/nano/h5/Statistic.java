@@ -16,6 +16,7 @@ import java.util.LinkedHashMap;
 import java.util.LinkedList;
 import java.util.List;
 
+import org.apache.commons.logging.Log;
 import org.simpleframework.xml.Transient;
 
 import de.tsl2.nano.bean.BeanContainer;
@@ -28,6 +29,7 @@ import de.tsl2.nano.bean.def.BeanDefinition;
 import de.tsl2.nano.bean.def.IAttributeDefinition;
 import de.tsl2.nano.core.ENV;
 import de.tsl2.nano.core.cls.IAttribute;
+import de.tsl2.nano.core.log.LogFactory;
 import de.tsl2.nano.core.util.FileUtil;
 import de.tsl2.nano.core.util.ListWrapper;
 import de.tsl2.nano.core.util.NumberUtil;
@@ -49,6 +51,7 @@ public class Statistic<COLLECTIONTYPE extends Collection<T>, T> extends BeanColl
     /** serialVersionUID */
     private static final long serialVersionUID = 1L;
 
+    private static final Log LOG = LogFactory.getLog(Statistic.class);
     @Transient
     Class<T> beanType;
 
@@ -92,6 +95,7 @@ public class Statistic<COLLECTIONTYPE extends Collection<T>, T> extends BeanColl
         isStaticCollection = true;
     }
 
+    @SuppressWarnings({ "unchecked", "rawtypes" })
     @Override
     public List<IAttribute> getAttributes(boolean readAndWriteAccess) {
         if (Util.isEmpty(attributeDefinitions)) {
@@ -269,8 +273,9 @@ public class Statistic<COLLECTIONTYPE extends Collection<T>, T> extends BeanColl
      * 
      * @param data
      */
+    @SuppressWarnings({ "unchecked", "rawtypes" })
     static String createGraph(String name, List<String> columnNames, Collection<Object[]> data) {
-        if (data.size() == 0)
+        if (data.size() == 0 || !data.iterator().next().getClass().isArray() /* the compiler checks for array, but on runtime it may be a simple object!*/)
             return "";
         int columnCount = data.iterator().next().length;
         List<Object> x = new ArrayList<Object>(data.size());
@@ -284,7 +289,11 @@ public class Statistic<COLLECTIONTYPE extends Collection<T>, T> extends BeanColl
                 a[0] = "---";//avoid nullpointer - perhaps the value for null makes sense...
             x.add(a[0]);
             for (int i = 1; i < a.length; i++) {
-                yx[i - 1].add((Object) a[i]);
+                if (!(a[i] instanceof Number)) {
+                    LOG.debug("no graph created while y-data is non-number-values");
+                    return "";
+                }
+                yx[i - 1].add(a[i]);
             }
         }
         int width = ENV.get("statistic.graph.width", 1920);

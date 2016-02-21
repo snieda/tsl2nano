@@ -61,6 +61,7 @@ import de.tsl2.nano.core.exception.ExceptionHandler;
 import de.tsl2.nano.core.exception.Message;
 import de.tsl2.nano.core.execution.Profiler;
 import de.tsl2.nano.core.log.LogFactory;
+import de.tsl2.nano.core.util.BitUtil;
 import de.tsl2.nano.core.util.DateUtil;
 import de.tsl2.nano.core.util.ListSet;
 import de.tsl2.nano.core.util.MapUtil;
@@ -297,6 +298,7 @@ public class NanoH5Session implements ISession {
 
     @Override
     public void close() {
+        LOG.debug("closing session " + this);
         server.sessions.remove(inetAddress);
         nav = null;
         response = null;
@@ -690,30 +692,28 @@ public class NanoH5Session implements ISession {
             final String NAME = "name";
             if (!from.getAttributeNames()[0].equals(NAME) || from.getAttributeNames().length != 1) {
                 from.getPresentationHelper().change(BeanPresentationHelper.PROP_DOVALIDATION, false);
-                if (from.hasAttribute(NAME)) {
-                    from.setAttributeFilter(NAME);
-                }
+//                if (from.hasAttribute(NAME)) {
+//                    from.setAttributeFilter(NAME);
+//                }
 //            from.setName(null);
                 to.getPresentationHelper().change(BeanPresentationHelper.PROP_DOVALIDATION, false);
-                if (to.hasAttribute(NAME))
-                {
-                    to.setAttributeFilter(NAME);
+//                if (to.hasAttribute(NAME))
+//                {
+//                    to.setAttributeFilter(NAME);
 //            to.setName(null);
-                }
+//                }
             }
 
             for (String p : parms.stringPropertyNames()) {
                 String rowName = StringUtil.substring(p, null, ".", true);
                 String colName = StringUtil.substring(p, ".", null, true);
-                if (from.getPresentationHelper().prop(KEY_FILTER_FROM_LABEL).equals(rowName)
-                    && from.hasAttribute(colName) && from.getAttribute(colName).hasWriteAccess()) {
-                    from.setParsedValue(colName, parms.getProperty(p));
-                } else if (to.getPresentationHelper().prop(KEY_FILTER_TO_LABEL).equals(rowName)
-                    && to.hasAttribute(colName) && to.getAttribute(colName).hasWriteAccess()) {
-                    to.setParsedValue(colName, parms.getProperty(p));
-                } else if (from.hasAttribute(colName) && from.getAttribute(colName).hasWriteAccess()) {
-                    from.setParsedValue(colName, parms.getProperty(p));
-                    to.setParsedValue(colName, parms.getProperty(p));
+                if (from.getPresentationHelper().prop(KEY_FILTER_FROM_LABEL).equals(rowName)) {
+                    from.changeToParsedValue(colName, parms.getProperty(p));
+                } else if (to.getPresentationHelper().prop(KEY_FILTER_TO_LABEL).equals(rowName)) {
+                    to.changeToParsedValue(colName, parms.getProperty(p));
+                } else  {
+                    from.changeToParsedValue(colName, parms.getProperty(p));
+                    to.changeToParsedValue(colName, parms.getProperty(p));
                 }
             }
         }
