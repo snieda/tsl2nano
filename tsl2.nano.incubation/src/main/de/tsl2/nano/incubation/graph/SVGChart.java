@@ -28,6 +28,7 @@ import org.knowm.xchart.internal.style.markers.SeriesMarkers;
 import de.tsl2.nano.core.ENV;
 import de.tsl2.nano.core.ManagedException;
 import de.tsl2.nano.core.util.FileUtil;
+import de.tsl2.nano.core.util.Util;
 import de.tsl2.nano.scanner.FieldReader;
 
 /**
@@ -205,8 +206,8 @@ public class SVGChart {
         String title = properties.getProperty("title", "Graph");
         String xTitle = properties.getProperty("xTitle", "X");
         String yTitle = properties.getProperty("yTitle", "Y");
-        int width = Integer.valueOf((String) properties.getOrDefault("width", "1920"));
-        int height = Integer.valueOf((String) properties.getOrDefault("heigth", "1080"));
+        int width = Integer.valueOf((String) Util.get(properties, "width", "1920"));
+        int height = Integer.valueOf((String) Util.get(properties, "heigth", "1080"));
         boolean yLogarithmic = Boolean.valueOf(properties.getProperty("yLogarithmic", "false"));
         Iterator<Object> it = data.keySet().iterator();
         Object key;

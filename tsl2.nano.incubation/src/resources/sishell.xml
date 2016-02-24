@@ -11,26 +11,17 @@
             <include>.*</include>
          </item>
          <item class="de.tsl2.nano.incubation.terminal.item.Input" name="printer">
-            <constraints type="java.lang.String" nullable="true" length="-1">
-               <scale>-1</scale>
-               <precision>-1</precision>
-            </constraints>
+            <constraints type="java.lang.String" nullable="true" length="-1" scale="-1" precision="-1"/>
             <description>printer to use</description>
             <value class="java.lang.String">PDFCreator</value>
          </item>
          <item class="de.tsl2.nano.incubation.terminal.item.Input" name="jobname">
-            <constraints type="java.lang.String" nullable="true" length="-1">
-               <scale>-1</scale>
-               <precision>-1</precision>
-            </constraints>
+            <constraints type="java.lang.String" nullable="true" length="-1" scale="-1" precision="-1"/>
             <description>print job name</description>
             <value class="java.lang.String">test</value>
          </item>
          <item class="de.tsl2.nano.incubation.terminal.item.Input" name="mimetype">
-            <constraints type="java.lang.String" nullable="true" length="-1">
-               <scale>-1</scale>
-               <precision>-1</precision>
-            </constraints>
+            <constraints type="java.lang.String" nullable="true" length="-1" scale="-1" precision="-1"/>
             <description>mime type</description>
             <value class="java.lang.String">MIME_PCL</value>
          </item>
@@ -41,10 +32,8 @@
             <value class="java.lang.String">ISO_A4</value>
          </item>
          <item class="de.tsl2.nano.incubation.terminal.item.Input" name="quality">
-            <constraints type="java.lang.String" nullable="true" length="6">
+            <constraints type="java.lang.String" nullable="true" length="6" scale="-1" precision="-1">
                <defaultValue class="java.lang.String">NORMAL</defaultValue>
-               <scale>-1</scale>
-               <precision>-1</precision>
                <value class="java.lang.String">NORMAL</value>
                <value class="java.lang.String">HIGH</value>
             </constraints>
@@ -52,25 +41,16 @@
             <value class="java.lang.String">NORMAL</value>
          </item>
          <item class="de.tsl2.nano.incubation.terminal.item.Input" name="priority">
-            <constraints type="java.lang.String" nullable="true" length="-1">
-               <scale>-1</scale>
-               <precision>-1</precision>
-            </constraints>
+            <constraints type="java.lang.String" nullable="true" length="-1" scale="-1" precision="-1"/>
             <description>print priority (1-100)</description>
             <value class="java.lang.String">1</value>
          </item>
          <item class="de.tsl2.nano.incubation.terminal.item.Input" name="xsltfile">
-            <constraints type="java.lang.String" nullable="true" length="-1">
-               <scale>-1</scale>
-               <precision>-1</precision>
-            </constraints>
+            <constraints type="java.lang.String" nullable="true" length="-1" scale="-1" precision="-1"/>
             <description>xsl-fo transformation file to do a apache fop</description>
          </item>
          <item class="de.tsl2.nano.incubation.terminal.item.Input" name="username">
-            <constraints type="java.lang.String" nullable="true" length="-1">
-               <scale>-1</scale>
-               <precision>-1</precision>
-            </constraints>
+            <constraints type="java.lang.String" nullable="true" length="-1" scale="-1" precision="-1"/>
             <description>user name to be used by the printer</description>
          </item>
          <item class="de.tsl2.nano.incubation.terminal.item.MainAction" name="print">
@@ -95,40 +75,25 @@
       </item>
       <item class="de.tsl2.nano.incubation.terminal.item.Container" name="Crypt" multiple="false" sequential="false">
          <item class="de.tsl2.nano.incubation.terminal.item.Input" name="password">
-            <constraints type="java.lang.String" nullable="true" length="-1">
-               <scale>-1</scale>
-               <precision>-1</precision>
-            </constraints>
+            <constraints type="java.lang.String" nullable="true" length="-1" scale="-1" precision="-1"/>
             <description>password for encryption - if needed by algorithm</description>
          </item>
          <item class="de.tsl2.nano.incubation.terminal.item.Input" name="algorithm">
-            <constraints type="java.lang.String" nullable="true" length="-1">
-               <scale>-1</scale>
-               <precision>-1</precision>
-            </constraints>
+            <constraints type="java.lang.String" nullable="true" length="-1" scale="-1" precision="-1"/>
             <description>encryption algorithm</description>
             <value class="java.lang.String">PBEWithMD5AndDES</value>
          </item>
          <item class="de.tsl2.nano.incubation.terminal.item.Input" name="text">
-            <constraints type="java.lang.String" nullable="false" length="-1">
-               <scale>-1</scale>
-               <precision>-1</precision>
-            </constraints>
+            <constraints type="java.lang.String" nullable="false" length="-1" scale="-1" precision="-1"/>
             <description>text to be encrypted. if it starts with &apos;file:&apos; the file will be read</description>
          </item>
          <item class="de.tsl2.nano.incubation.terminal.item.Input" name="base64">
-            <constraints type="java.lang.Boolean" nullable="true" length="-1">
-               <scale>-1</scale>
-               <precision>-1</precision>
-            </constraints>
+            <constraints type="java.lang.Boolean" nullable="true" length="-1" scale="-1" precision="-1"/>
             <description>whether base64 encoding should be used</description>
             <value class="java.lang.Boolean">true</value>
          </item>
          <item class="de.tsl2.nano.incubation.terminal.item.Input" name="include">
-            <constraints type="java.lang.String" nullable="true" length="-1">
-               <scale>-1</scale>
-               <precision>-1</precision>
-            </constraints>
+            <constraints type="java.lang.String" nullable="true" length="-1" scale="-1" precision="-1"/>
             <description>regular expression to constrain text parts to be encrypted</description>
             <value class="java.lang.String">.*</value>
          </item>
@@ -146,31 +111,19 @@
       </item>
       <item class="de.tsl2.nano.incubation.terminal.item.Container" name="Permutator" multiple="false" sequential="false">
          <item class="de.tsl2.nano.incubation.terminal.item.Input" name="source">
-            <constraints type="java.lang.String" nullable="false" length="-1">
-               <scale>-1</scale>
-               <precision>-1</precision>
-            </constraints>
+            <constraints type="java.lang.String" nullable="false" length="-1" scale="-1" precision="-1"/>
             <description>source collection</description>
          </item>
          <item class="de.tsl2.nano.incubation.terminal.item.Input" name="transformer">
-            <constraints type="java.lang.String" nullable="false" length="-1">
-               <scale>-1</scale>
-               <precision>-1</precision>
-            </constraints>
+            <constraints type="java.lang.String" nullable="false" length="-1" scale="-1" precision="-1"/>
             <description>transforming action</description>
          </item>
          <item class="de.tsl2.nano.incubation.terminal.item.Input" name="swap">
-            <constraints type="java.lang.String" nullable="true" length="-1">
-               <scale>-1</scale>
-               <precision>-1</precision>
-            </constraints>
+            <constraints type="java.lang.String" nullable="true" length="-1" scale="-1" precision="-1"/>
             <description>whether to swap key and values in destination-map</description>
          </item>
          <item class="de.tsl2.nano.incubation.terminal.item.Input" name="backward">
-            <constraints type="java.lang.String" nullable="true" length="-1">
-               <scale>-1</scale>
-               <precision>-1</precision>
-            </constraints>
+            <constraints type="java.lang.String" nullable="true" length="-1" scale="-1" precision="-1"/>
             <description>action to do a back-transformation for each keys value</description>
          </item>
          <item class="de.tsl2.nano.incubation.terminal.item.MainAction" name="Permutator">
@@ -194,18 +147,12 @@
             <include>.*xsl.*</include>
          </item>
          <item class="de.tsl2.nano.incubation.terminal.item.Input" name="xsl-destination">
-            <constraints type="java.lang.String" nullable="false" length="-1">
-               <scale>-1</scale>
-               <precision>-1</precision>
-            </constraints>
+            <constraints type="java.lang.String" nullable="false" length="-1" scale="-1" precision="-1"/>
             <description>xsl destination file</description>
             <value class="java.lang.String">${user.dir}/${source}.html</value>
          </item>
          <item class="de.tsl2.nano.incubation.terminal.item.Input" name="xpath-expression">
-            <constraints type="java.lang.String" nullable="false" length="-1">
-               <scale>-1</scale>
-               <precision>-1</precision>
-            </constraints>
+            <constraints type="java.lang.String" nullable="false" length="-1" scale="-1" precision="-1"/>
             <description>xpath expression</description>
          </item>
          <item class="de.tsl2.nano.incubation.terminal.item.Action" name="transformVel">
@@ -267,10 +214,7 @@
             <description>ant task properties</description>
          </item>
          <item class="de.tsl2.nano.incubation.terminal.item.Input" name="filesets">
-            <constraints type="java.lang.String" nullable="false" length="-1">
-               <scale>-1</scale>
-               <precision>-1</precision>
-            </constraints>
+            <constraints type="java.lang.String" nullable="false" length="-1" scale="-1" precision="-1"/>
             <description>filesets expression</description>
             <value class="java.lang.String">./:{**/*.*ml}**/*.xml;${user.dir}:{*.txt}</value>
          </item>
@@ -288,26 +232,17 @@
          <description>wrench.png</description>
          <item class="de.tsl2.nano.incubation.terminal.item.Container" name="Scan" multiple="false" sequential="false">
             <item class="de.tsl2.nano.incubation.terminal.item.Input" name="ip">
-               <constraints type="java.lang.String" nullable="true" length="-1">
-                  <scale>-1</scale>
-                  <precision>-1</precision>
-               </constraints>
+               <constraints type="java.lang.String" nullable="true" length="-1" scale="-1" precision="-1"/>
                <description>internet address to be scanned</description>
                <value class="java.lang.String">192.168.56.1</value>
             </item>
             <item class="de.tsl2.nano.incubation.terminal.item.Input" name="lowest-port">
-               <constraints type="java.lang.Integer" nullable="true" length="-1">
-                  <scale>-1</scale>
-                  <precision>-1</precision>
-               </constraints>
+               <constraints type="java.lang.Integer" nullable="true" length="-1" scale="-1" precision="-1"/>
                <description>lowest port to be scanned</description>
                <value class="java.lang.Integer">0</value>
             </item>
             <item class="de.tsl2.nano.incubation.terminal.item.Input" name="highest-port">
-               <constraints type="java.lang.Integer" nullable="true" length="-1">
-                  <scale>-1</scale>
-                  <precision>-1</precision>
-               </constraints>
+               <constraints type="java.lang.Integer" nullable="true" length="-1" scale="-1" precision="-1"/>
                <description>highest port to be scanned</description>
                <value class="java.lang.Integer">100</value>
             </item>
@@ -324,31 +259,19 @@
          <item class="de.tsl2.nano.incubation.terminal.item.Container" name="WCopy" multiple="false" sequential="false">
             <description>Downloads a site</description>
             <item class="de.tsl2.nano.incubation.terminal.item.Input" name="url">
-               <constraints type="java.lang.String" nullable="false" length="-1">
-                  <scale>-1</scale>
-                  <precision>-1</precision>
-               </constraints>
+               <constraints type="java.lang.String" nullable="false" length="-1" scale="-1" precision="-1"/>
                <description>url to get files from</description>
             </item>
             <item class="de.tsl2.nano.incubation.terminal.item.Input" name="dir">
-               <constraints type="java.lang.String" nullable="true" length="-1">
-                  <scale>-1</scale>
-                  <precision>-1</precision>
-               </constraints>
+               <constraints type="java.lang.String" nullable="true" length="-1" scale="-1" precision="-1"/>
                <description>local directory to save the downloaded files</description>
             </item>
             <item class="de.tsl2.nano.incubation.terminal.item.Input" name="include">
-               <constraints type="java.lang.String" nullable="true" length="-1">
-                  <scale>-1</scale>
-                  <precision>-1</precision>
-               </constraints>
+               <constraints type="java.lang.String" nullable="true" length="-1" scale="-1" precision="-1"/>
                <description>regular expression for files to download</description>
             </item>
             <item class="de.tsl2.nano.incubation.terminal.item.Input" name="exclude">
-               <constraints type="java.lang.String" nullable="true" length="-1">
-                  <scale>-1</scale>
-                  <precision>-1</precision>
-               </constraints>
+               <constraints type="java.lang.String" nullable="true" length="-1" scale="-1" precision="-1"/>
                <description>regular exression for files to be filtered</description>
             </item>
             <item class="de.tsl2.nano.incubation.terminal.item.Action" name="wcopy">
@@ -364,31 +287,19 @@
          </item>
          <item class="de.tsl2.nano.incubation.terminal.item.Container" name="Proxy" multiple="false" sequential="false">
             <item class="de.tsl2.nano.incubation.terminal.item.Input" name="uri">
-               <constraints type="java.lang.String" nullable="false" length="-1">
-                  <scale>-1</scale>
-                  <precision>-1</precision>
-               </constraints>
+               <constraints type="java.lang.String" nullable="false" length="-1" scale="-1" precision="-1"/>
                <description>uri to evaluate proxy for (http, https, ftp or socket)</description>
             </item>
             <item class="de.tsl2.nano.incubation.terminal.item.Input" name="proxy">
-               <constraints type="java.lang.String" nullable="true" length="-1">
-                  <scale>-1</scale>
-                  <precision>-1</precision>
-               </constraints>
+               <constraints type="java.lang.String" nullable="true" length="-1" scale="-1" precision="-1"/>
                <description>new proxy (e.g.: myproxy.myorg.org)</description>
             </item>
             <item class="de.tsl2.nano.incubation.terminal.item.Input" name="user">
-               <constraints type="java.lang.String" nullable="true" length="-1">
-                  <scale>-1</scale>
-                  <precision>-1</precision>
-               </constraints>
+               <constraints type="java.lang.String" nullable="true" length="-1" scale="-1" precision="-1"/>
                <description>new proxies user</description>
             </item>
             <item class="de.tsl2.nano.incubation.terminal.item.Input" name="password">
-               <constraints type="java.lang.String" nullable="true" length="-1">
-                  <scale>-1</scale>
-                  <precision>-1</precision>
-               </constraints>
+               <constraints type="java.lang.String" nullable="true" length="-1" scale="-1" precision="-1"/>
                <description>new proxies password</description>
             </item>
             <item class="de.tsl2.nano.incubation.terminal.item.Action" name="proxy">
@@ -405,17 +316,11 @@
          <item class="de.tsl2.nano.incubation.terminal.item.Container" name="Download" multiple="false" sequential="false">
             <description>Downloads a single file</description>
             <item class="de.tsl2.nano.incubation.terminal.item.Input" name="url">
-               <constraints type="java.lang.String" nullable="false" length="-1">
-                  <scale>-1</scale>
-                  <precision>-1</precision>
-               </constraints>
+               <constraints type="java.lang.String" nullable="false" length="-1" scale="-1" precision="-1"/>
                <description>url to be loaded</description>
             </item>
             <item class="de.tsl2.nano.incubation.terminal.item.Input" name="dir">
-               <constraints type="java.lang.String" nullable="true" length="-1">
-                  <scale>-1</scale>
-                  <precision>-1</precision>
-               </constraints>
+               <constraints type="java.lang.String" nullable="true" length="-1" scale="-1" precision="-1"/>
                <description>local directory to save the downloaded file</description>
             </item>
             <item class="de.tsl2.nano.incubation.terminal.item.Action" name="download">
@@ -430,10 +335,7 @@
          <item class="de.tsl2.nano.incubation.terminal.item.Container" name="Browse" multiple="false" sequential="false">
             <description>Shows the given URL</description>
             <item class="de.tsl2.nano.incubation.terminal.item.Input" name="url">
-               <constraints type="java.lang.String" nullable="false" length="-1">
-                  <scale>-1</scale>
-                  <precision>-1</precision>
-               </constraints>
+               <constraints type="java.lang.String" nullable="false" length="-1" scale="-1" precision="-1"/>
                <description>url to be loaded</description>
             </item>
             <item class="de.tsl2.nano.incubation.terminal.item.Action" name="browse">
@@ -448,10 +350,7 @@
          <item class="de.tsl2.nano.incubation.terminal.item.Container" name="Restful" multiple="false" sequential="false">
             <description>Calls a RESTful service</description>
             <item class="de.tsl2.nano.incubation.terminal.item.Input" name="url">
-               <constraints type="java.lang.String" nullable="false" length="-1">
-                  <scale>-1</scale>
-                  <precision>-1</precision>
-               </constraints>
+               <constraints type="java.lang.String" nullable="false" length="-1" scale="-1" precision="-1"/>
                <description>URL of a RESTful service</description>
                <value class="java.lang.String">http://echo.jsontest.com/title/ipsum</value>
             </item>
@@ -484,18 +383,12 @@
             <include>.*</include>
          </item>
          <item class="de.tsl2.nano.incubation.terminal.item.Input" name="file">
-            <constraints type="java.lang.String" nullable="true" length="-1">
-               <scale>-1</scale>
-               <precision>-1</precision>
-            </constraints>
+            <constraints type="java.lang.String" nullable="true" length="-1" scale="-1" precision="-1"/>
             <description>regular expression (with ant-like path **) as file filter</description>
             <value class="java.lang.String">**/[\w]+\.txt</value>
          </item>
          <item class="de.tsl2.nano.incubation.terminal.item.Input" name="destination">
-            <constraints type="java.lang.String" nullable="true" length="-1">
-               <scale>-1</scale>
-               <precision>-1</precision>
-            </constraints>
+            <constraints type="java.lang.String" nullable="true" length="-1" scale="-1" precision="-1"/>
             <description>destination directory for file operations</description>
             <value class="java.lang.String">${user.dir}</value>
          </item>

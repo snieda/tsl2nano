@@ -404,7 +404,7 @@ public class HtmlUtil {
         return name + " = " + enabled;
     }
 
-    public static final String style(String styleKey, String styleValue) {
+    public static final String style(String styleKey, Object styleValue) {
         return styleKey + ": " + styleValue + ";";
     }
 

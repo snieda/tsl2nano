@@ -187,7 +187,7 @@ public class Timesheet extends NanoH5App {
         define(Coordinate.class, icon("blue_pin"), ve(CoordinateConst.ATTR_X) + "-" + ve(CoordinateConst.ATTR_Y) + "-"
             + ve(CoordinateConst.ATTR_X));
         define(Area.class, icon("boss"), AreaConst.ATTR_NAME);
-        define(Item.class, null, ItemConst.ATTR_NAME, ItemConst.ATTR_ID, ItemConst.ATTR_NAME, ItemConst.ATTR_ORGANISATION,
+        define(Item.class, icon("equipment"), ItemConst.ATTR_NAME, ItemConst.ATTR_ID, ItemConst.ATTR_NAME, ItemConst.ATTR_ORGANISATION,
             ItemConst.ATTR_CLASSIFICATION, ItemConst.ATTR_TYPE, ItemConst.ATTR_START, ItemConst.ATTR_END,
             ItemConst.ATTR_VALUE, ItemConst.ATTR_DESCRIPTION, ItemConst.ATTR_CHARGEITEMS, ItemConst.ATTR_PROPERTIES);
         define(Chargeitem.class, icon("buy"), ChargeitemConst.ATTR_ITEM);

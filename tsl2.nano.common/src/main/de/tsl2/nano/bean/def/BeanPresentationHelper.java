@@ -1317,50 +1317,16 @@ public class BeanPresentationHelper<T> {
                 return new LinkedList<IAction>();
             }
             appActions = new ArrayList<IAction>(10);
-
             appActions.add(new SecureAction(bean.getClazz(),
-                "environment",
+                "administration",
                 IAction.MODE_UNDEFINED,
                 false,
-                "icons/cascade.png") {
+                "icons/equipment.png") {
                 @Override
                 public Object action() throws Exception {
                     Bean<Serializable> bEnv = Bean.getBean((Serializable) BeanClass.getStatic(ENV.class, "self"));
-                    bEnv.addAction(new SecureAction<Object>(bean.getClazz(), "switch-debug-logging",
-                        IAction.MODE_UNDEFINED, false, "icons/view.png") {
-                        @Override
-                        public Object action() throws Exception {
-                            LogFactory.setLogLevel(LogFactory.isEnabled(LogFactory.DEBUG) ? LogFactory.LOG_STANDARD
-                                : LogFactory.LOG_DEBUG);
-                            return null;
-                        }
-                    });
-                    bEnv.addAction(new SecureAction<Object>(bean.getClazz(), "shutdown",
-                            IAction.MODE_UNDEFINED, false, "icons/turnoff.png") {
-                            @Override
-                            public Object action() throws Exception {
-                                System.exit(0);
-                                return null;
-                            }
-                        });
+                    addAdministrationActions(bEnv);
                     return bEnv;
-                }
-
-                @Override
-                public boolean isEnabled() {
-                    return super.isEnabled() && isRootBean();
-                }
-            });
-
-            appActions.add(new SecureAction(bean.getClazz(),
-                "reset",
-                IAction.MODE_UNDEFINED,
-                false,
-                "icons/reload.png") {
-                @Override
-                public Object action() throws Exception {
-                    ENV.get(BeanPresentationHelper.class).reset();
-                    return page("configuration refreshed");
                 }
 
                 @Override
@@ -1370,6 +1336,50 @@ public class BeanPresentationHelper<T> {
             });
         }
         return appActions;
+    }
+
+    /**
+     * addAdministrationActions
+     */
+    protected void addAdministrationActions(Bean bEnv) {
+        bEnv.addAction(new SecureAction(bean.getClazz(),
+            "reset",
+            IAction.MODE_UNDEFINED,
+            false,
+            "icons/reload.png") {
+            @Override
+            public Object action() throws Exception {
+                ENV.get(BeanPresentationHelper.class).reset();
+                return page("configuration refreshed");
+            }
+
+            @Override
+            public boolean isEnabled() {
+                return super.isEnabled() && isRootBean();
+            }
+        });
+        bEnv.addAction(new SecureAction<Object>(bean.getClazz(), "switch-debug-logging",
+            IAction.MODE_UNDEFINED, false, "icons/view.png") {
+            @Override
+            public Object action() throws Exception {
+                LogFactory.setLogLevel(LogFactory.isEnabled(LogFactory.DEBUG) ? LogFactory.LOG_STANDARD
+                    : LogFactory.LOG_DEBUG);
+                return null;
+            }
+
+            @Override
+            public String getShortDescription() {
+                return LogFactory.isEnabled(LogFactory.DEBUG) ? "Normal Log" : "Debug Log";
+            }
+        });
+        bEnv.addAction(new SecureAction<Object>(bean.getClazz(), "shutdown",
+            IAction.MODE_UNDEFINED, false, "icons/turnoff.png") {
+            @Override
+            public Object action() throws Exception {
+                System.exit(0);
+                return null;
+            }
+        });
     }
 
     /**
@@ -1411,7 +1421,7 @@ public class BeanPresentationHelper<T> {
                 "logout",
                 IAction.MODE_UNDEFINED,
                 false,
-                "icons/turnoff.png") {
+                "icons/exit.png") {
                 @Override
                 public Object action() throws Exception {
 //                    Environment.persist();

@@ -17,6 +17,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Map;
+import java.util.Properties;
 
 import de.tsl2.nano.collection.CollectionUtil;
 import de.tsl2.nano.core.ManagedException;
@@ -398,9 +399,13 @@ public class Util {
      * @param defaultValue system property default
      * @return value or default value
      */
-    @SuppressWarnings("unchecked")
     public static <T> T get(String name, T defaultValue) {
-        Object result = System.getProperties().get(name);
+        return get(System.getProperties(), name, defaultValue);
+    }
+
+    @SuppressWarnings("unchecked")
+    public static <T> T get(Properties p, String name, T defaultValue) {
+        Object result = p.get(name);
         if (result != null) {
             if (defaultValue != null && !defaultValue.getClass().isAssignableFrom(result.getClass())) {
                 Format df = FormatUtil.getDefaultFormat(defaultValue, true);

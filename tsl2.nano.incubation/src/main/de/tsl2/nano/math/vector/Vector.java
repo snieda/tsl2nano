@@ -9,15 +9,19 @@
  */
 package de.tsl2.nano.math.vector;
 
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
 import java.io.InputStream;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Locale;
 import java.util.Scanner;
 
-import com.sun.xml.internal.messaging.saaj.util.ByteOutputStream;
 
 import de.tsl2.nano.collection.FloatArray;
+import de.tsl2.nano.core.ManagedException;
+import de.tsl2.nano.core.util.ByteUtil;
+import de.tsl2.nano.core.util.FileUtil;
 
 /**
  * Simple-handling numeric n-dim vector with common calculations. See {@link Coordinate} for further informations.
@@ -405,17 +409,22 @@ public class Vector extends Coordinate implements Comparable<Vector> {
     }
 
     public static InputStream toStream(List<Vector> vl) {
-        ByteOutputStream stream = new ByteOutputStream();
+        ByteArrayOutputStream stream = new ByteArrayOutputStream();
         final byte[] CR = "\n".getBytes(), TAB = "\t".getBytes();
+        try {
         for (Vector v : vl) {
             for (int i = 0; i < v.dimension(); i++) {
-                stream.write(/*DecimalFormat.getInstance().format*/Float.toString(v.x[i]).getBytes());
+                    stream.write(/*DecimalFormat.getInstance().format*/Float.toString(v.x[i]).getBytes());
                 if (i < v.dimension() - 1)
                     stream.write(TAB);
             }
             stream.write(CR);
         }
-        stream.close();
-        return stream.newInputStream();
+        } catch (IOException e) {
+            ManagedException.forward(e);
+        } finally {
+            FileUtil.close(stream, false);
+        }
+        return ByteUtil.getInputStream(stream.toByteArray());
     }
 }
