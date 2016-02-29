@@ -206,8 +206,8 @@ public class SVGChart {
         String title = properties.getProperty("title", "Graph");
         String xTitle = properties.getProperty("xTitle", "X");
         String yTitle = properties.getProperty("yTitle", "Y");
-        int width = Integer.valueOf((String) Util.get(properties, "width", "1920"));
-        int height = Integer.valueOf((String) Util.get(properties, "heigth", "1080"));
+        int width = Util.get(properties, "width", 640);
+        int height = Util.get(properties, "height", 480);
         boolean yLogarithmic = Boolean.valueOf(properties.getProperty("yLogarithmic", "false"));
         Iterator<Object> it = data.keySet().iterator();
         Object key;
