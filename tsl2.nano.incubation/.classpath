@@ -11,6 +11,6 @@
 	<classpathentry kind="lib" path="lib/xchart-3.0.1.jar"/>
 	<classpathentry kind="lib" path="lib/gral-core-0.10.jar"/>
 	<classpathentry kind="lib" path="lib/VectorGraphics2D-0.9.3.jar"/>
-	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER/org.eclipse.jdt.internal.debug.ui.launcher.StandardVMType/jdk1.8.0_66"/>
+	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>
