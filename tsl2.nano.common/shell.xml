@@ -489,7 +489,7 @@ starting ${ant.project.name}:
 compiler basedir: ${basedir}. classpath: @{sh.compile.classpath};@{sh.compile.classpath2};@{sh.compile.classpath3};@{sh.compile.classpath4}
 	src: @{sh.compile.srcdir}, @{sh.compile.srcdir2}, @{sh.compile.srcdir3}, @{sh.compile.srcdir4}
 			</echo>
-			<javac destdir="@{sh.compile.bindir}" listfiles="@{sh.compile.debug}" depend="true" debuglevel="lines,vars,source" verbose="@{sh.compile.debug}" nowarn="true" optimize="${optimize}" debug="@{sh.compile.debug}" extdirs="@{sh.compile.extdirs}" encoding="@{sh.compile.encoding}">
+			<javac destdir="@{sh.compile.bindir}" listfiles="@{sh.compile.debug}" depend="true" debuglevel="lines,vars,source" verbose="@{sh.compile.debug}" nowarn="true" optimize="${optimize}" debug="@{sh.compile.debug}" extdirs="@{sh.compile.extdirs}" encoding="@{sh.compile.encoding}" includeantruntime="false">
 				<classpath>
 					<fileset dir="@{sh.compile.classpath}">
 						<include name="**/*.jar" />
