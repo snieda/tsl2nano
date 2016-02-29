@@ -55,6 +55,7 @@ import org.anonymous.project.Area;
 import org.anonymous.project.Category;
 import org.anonymous.project.Charge;
 import org.anonymous.project.Chargeitem;
+import org.anonymous.project.Classification;
 import org.anonymous.project.Coordinate;
 import org.anonymous.project.Digital;
 import org.anonymous.project.Discharge;
@@ -70,6 +71,7 @@ import org.anonymous.project.presenter.AreaConst;
 import org.anonymous.project.presenter.CategoryConst;
 import org.anonymous.project.presenter.ChargeConst;
 import org.anonymous.project.presenter.ChargeitemConst;
+import org.anonymous.project.presenter.ClassificationConst;
 import org.anonymous.project.presenter.CoordinateConst;
 import org.anonymous.project.presenter.DigitalConst;
 import org.anonymous.project.presenter.DischargeConst;
@@ -176,7 +178,7 @@ public class Timesheet extends NanoH5App {
          * define all beans
          */
         define(Type.class, icon("equipment"), TypeConst.ATTR_NAME);
-        define(Category.class, null, CategoryConst.ATTR_NAME);
+        define(Category.class, icon("equipment"), CategoryConst.ATTR_NAME);
         define(Account.class, icon("euro"), AccountConst.ATTR_NAME);
         define(Property.class, icon("table"), PropertyConst.ATTR_AKEY);
         define(Organisation.class, icon("people"), OrganisationConst.ATTR_NAME);
@@ -187,6 +189,7 @@ public class Timesheet extends NanoH5App {
         define(Coordinate.class, icon("blue_pin"), ve(CoordinateConst.ATTR_X) + "-" + ve(CoordinateConst.ATTR_Y) + "-"
             + ve(CoordinateConst.ATTR_X));
         define(Area.class, icon("boss"), AreaConst.ATTR_NAME);
+        define(Classification.class, icon("widget"), ClassificationConst.ATTR_NAME);
         define(Item.class, icon("equipment"), ItemConst.ATTR_NAME, ItemConst.ATTR_ID, ItemConst.ATTR_NAME, ItemConst.ATTR_ORGANISATION,
             ItemConst.ATTR_CLASSIFICATION, ItemConst.ATTR_TYPE, ItemConst.ATTR_START, ItemConst.ATTR_END,
             ItemConst.ATTR_VALUE, ItemConst.ATTR_DESCRIPTION, ItemConst.ATTR_CHARGEITEMS, ItemConst.ATTR_PROPERTIES);
@@ -215,10 +218,11 @@ public class Timesheet extends NanoH5App {
         /*
          * add dependency listeners on rules
          */
+        long dayTimeFraction = DateUtil.DAY;
         RuleScript<BigDecimal> calcTime = new RuleScript<BigDecimal>("calcTime",
-            "var from = fromtime != null ? fromtime.getTime() : 0;" +
-                "var to = totime != null ? totime.getTime() : 0;" +
-                "var p = pause != null ? pause.getTime() : 0;" +
+            "var from = fromtime != null ? fromtime.getTime() " + "% " + dayTimeFraction + " : 0;" +
+                "var to = totime != null ? totime.getTime()" + "% " + dayTimeFraction + " : 0;" +
+                "var p = pause != null ? pause.getTime()" + "% " + dayTimeFraction + " : 0;" +
                 "Math.round(((to - from) - p) / (3600 * 10)) / 100;", null);
         /*
          * add some specifications (=tests) to be checked on loading a rule
