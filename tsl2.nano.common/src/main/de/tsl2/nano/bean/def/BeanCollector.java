@@ -1028,7 +1028,7 @@ public class BeanCollector<COLLECTIONTYPE extends Collection<T>, T> extends Bean
 
         for (IPresentableColumn c : colDefs) {
             if (c.getPresentable().isVisible()) {
-                cnames.add(c.getName());
+                cnames.add(c.getPresentable().getLabel());
             }
         }
         return cnames;

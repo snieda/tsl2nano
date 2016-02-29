@@ -850,4 +850,22 @@ public class CollectionUtil {
 //        return (Set<Entry<K, V>>) MultipleInheritanceProxy.createMultipleInheritance(new Class[] { EntrySetExtender.class,
 //            Set.class }, Arrays.asList(entrySetExtender, m.entrySet()), EntrySetExtender.class.getClassLoader());
     }
+
+    /**
+     * removes all entries having a null or empty (empty string, empty collection) value.
+     * @param map map
+     * @return count of removed null-entries
+     */
+    public static int removeEmptyEntries(Map<String, Object> map) {
+        Set<String> keys = map.keySet();
+        int count = 0;
+        for (Iterator iterator = keys.iterator(); iterator.hasNext();) {
+            String k = (String) iterator.next();
+            if (Util.isEmpty(map.get(k))) {
+                iterator.remove();
+                count++;
+            }
+        }
+        return count;
+    }
 }
