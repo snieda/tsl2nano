@@ -268,13 +268,19 @@ public class FileUtil {
     }
 
     /**
-     * Writes the given file with data to the given zipfile.
-     * 
-     * @param zipfile
-     * @param file
-     * @param data
+     * delegates to {@link #writeToZip(String, String, byte[])}
      */
     public static void writeToZip(String zipfile, String file, String data) {
+        writeToZip(zipfile, file, data.getBytes());
+    }
+    /**
+     * Writes the given file with data to the given zipfile.
+     * 
+     * @param zipfile zip file
+     * @param file file-name in zip-file
+     * @param data data to store in file in zip-file
+     */
+    public static void writeToZip(String zipfile, String file, byte[] data) {
         //open a zip-file
         ZipOutputStream targetStream = null;
         try {
@@ -304,7 +310,7 @@ public class FileUtil {
                     targetStream.write(data, 0, bCnt);
                 }
             */
-            targetStream.write(data.getBytes());
+            targetStream.write(data);
             targetStream.flush();
 
             System.out.println("Writing into [" + zipfile
