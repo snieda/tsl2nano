@@ -238,13 +238,11 @@ public class NanoH5Session implements ISession<BeanDefinition>, Serializable {
             while (ranges.hasNext()) {
                 range = ranges.next();
                 type = range.getFrom() != null ? range.getFrom().getClass() : null;
-                if (type != null) {
-                    if (beandef.getDeclaringClass().equals(type)) {
-                        Bean brange = ((BeanCollector) beandef).getBeanFinder().getFilterRange();
-                        brange.getAttribute("from").setValue(range.getFrom());
-                        brange.getAttribute("to").setValue(range.getTo());
-                        break;
-                    }
+                if (beandef.getDeclaringClass().equals(type)) {
+                    Bean brange = ((BeanCollector) beandef).getBeanFinder().getFilterRange();
+                    brange.getAttribute("from").setValue(range.getFrom());
+                    brange.getAttribute("to").setValue(range.getTo());
+                    break;
                 }
             }
         }
