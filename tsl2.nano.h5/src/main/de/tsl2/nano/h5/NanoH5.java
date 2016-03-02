@@ -309,7 +309,7 @@ public class NanoH5 extends NanoHTTPD implements ISystemConnector<Persistence> {
      * {@inheritDoc}
      */
     @Override
-    public Response serve(String uri, String method, Properties header, Properties parms, Properties files) {
+    public synchronized Response serve(String uri, String method, Properties header, Properties parms, Properties files) {
         if (method.equals("GET") && !NumberUtil.isNumber(uri.substring(1)) && HtmlUtil.isURL(uri)
             && !uri.contains(Html5Presentation.PREFIX_BEANREQUEST)) {
             return super.serve(uri, method, header, parms, files);
@@ -476,8 +476,11 @@ public class NanoH5 extends NanoHTTPD implements ISystemConnector<Persistence> {
         return login;
     }
 
+    /**
+     * {@inheritDoc}. thread-safe. will be called from session-thread
+     */
     @Override
-    public BeanDefinition<?> connect(Persistence persistence) {
+    public synchronized BeanDefinition<?> connect(Persistence persistence) {
         //define a new classloader to access all beans of given jar-file
         PersistenceClassLoader runtimeClassloader = new PersistenceClassLoader(new URL[0],
             rootClassloader());
