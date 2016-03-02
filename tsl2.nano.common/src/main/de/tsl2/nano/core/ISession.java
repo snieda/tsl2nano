@@ -10,6 +10,7 @@
 package de.tsl2.nano.core;
 
 import java.lang.Thread.UncaughtExceptionHandler;
+import java.util.Collection;
 
 /**
  * functions of an application session.
@@ -17,11 +18,11 @@ import java.lang.Thread.UncaughtExceptionHandler;
  * @author Tom
  * @version $Revision$
  */
-public interface ISession {
+public interface ISession<WORK> {
     /** @return identifier of this session - perhaps the inetadress + user */
     Object getId();
 
-    /** @return non-unique data context */
+    /** @return non-unique context data */
     Object getContext();
     
     /** @return user authorization implementation */
@@ -36,6 +37,9 @@ public interface ISession {
     /** @return current life duration */
     long getDuration();
 
+    /** checks for closed, expired, done, empty, etc...if check fails, it throws an exception or returns false. */
+    boolean check(long timeout, boolean throwException);
+    
     /** @return main application instance/server */
     Main getApplication();
 
@@ -52,8 +56,8 @@ public interface ISession {
      * getNavigationStack
      * @return array of working objects in the sessions stack.
      */
-    Object[] getNavigationStack();
+    WORK[] getNavigationStack();
     
     /** return the current working object */
-    Object getWorkingObject();
+    WORK getWorkingObject();
 }

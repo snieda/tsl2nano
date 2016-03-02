@@ -19,9 +19,9 @@ import static de.tsl2.nano.h5.NanoH5.OFFSET_FILTERLINES;
 import static de.tsl2.nano.h5.NanoHTTPD.HTTP_BADREQUEST;
 import static de.tsl2.nano.h5.NanoHTTPD.MIME_HTML;
 
+import java.io.File;
 import java.io.Serializable;
 import java.lang.Thread.UncaughtExceptionHandler;
-import java.lang.reflect.Array;
 import java.net.InetAddress;
 import java.net.InetSocketAddress;
 import java.net.URL;
@@ -30,6 +30,7 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.Date;
 import java.util.HashSet;
+import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
@@ -53,6 +54,7 @@ import de.tsl2.nano.bean.def.IPresentable;
 import de.tsl2.nano.bean.def.MethodAction;
 import de.tsl2.nano.collection.CollectionUtil;
 import de.tsl2.nano.collection.MapEntrySet;
+import de.tsl2.nano.core.Context;
 import de.tsl2.nano.core.ENV;
 import de.tsl2.nano.core.ISession;
 import de.tsl2.nano.core.Main;
@@ -61,7 +63,6 @@ import de.tsl2.nano.core.exception.ExceptionHandler;
 import de.tsl2.nano.core.exception.Message;
 import de.tsl2.nano.core.execution.Profiler;
 import de.tsl2.nano.core.log.LogFactory;
-import de.tsl2.nano.core.util.BitUtil;
 import de.tsl2.nano.core.util.DateUtil;
 import de.tsl2.nano.core.util.ListSet;
 import de.tsl2.nano.core.util.MapUtil;
@@ -69,9 +70,9 @@ import de.tsl2.nano.core.util.NetUtil;
 import de.tsl2.nano.core.util.NumberUtil;
 import de.tsl2.nano.core.util.StringUtil;
 import de.tsl2.nano.core.util.Util;
+import de.tsl2.nano.core.util.XmlUtil;
 import de.tsl2.nano.format.RegExpFormat;
 import de.tsl2.nano.h5.NanoHTTPD.Response;
-import de.tsl2.nano.h5.configuration.AttributeConfigurator;
 import de.tsl2.nano.h5.configuration.BeanConfigurator;
 import de.tsl2.nano.h5.navigation.IBeanNavigator;
 import de.tsl2.nano.h5.navigation.Parameter;
@@ -80,6 +81,7 @@ import de.tsl2.nano.h5.websocket.WebSocketExceptionHandler;
 import de.tsl2.nano.persistence.Persistence;
 import de.tsl2.nano.service.util.BeanContainerUtil;
 import de.tsl2.nano.serviceaccess.IAuthorization;
+import de.tsl2.nano.util.operation.IRange;
 
 /**
  * user session for nano.h5 server
@@ -88,42 +90,76 @@ import de.tsl2.nano.serviceaccess.IAuthorization;
  * @version $Revision$
  */
 @SuppressWarnings({ "unchecked", "rawtypes" })
-public class NanoH5Session implements ISession {
+public class NanoH5Session implements ISession<BeanDefinition>, Serializable {
+    /** serialVersionUID */
+    private static final long serialVersionUID = -8299446546343086394L;
+
     private static final Log LOG = LogFactory.getLog(NanoH5Session.class);
 
-    String id;
-    NanoH5 server;
-    IPageBuilder<?, String> builder;
+    transient String id;
+    transient NanoH5 server;
+    transient IPageBuilder<?, String> builder;
     /** workflow or bean navigator */
-    IBeanNavigator nav;
+    transient IBeanNavigator nav;
     /** html response */
-    Response response;
+    transient Response response;
     /** concatencation of database-name+schema+beans.jar */
-    Iterable<BeanDefinition> context;
+    Context context;
 
     /** sessions classloader */
-    ClassLoader sessionClassloader;
+    transient ClassLoader sessionClassloader;
     /** requests user internet adress */
-    InetAddress inetAddress;
+    transient InetAddress inetAddress;
 
     /** port of websocket, if used */
-    int websocketPort;
+    transient int websocketPort;
 
     /** sessions exceptionHandler */
-    ExceptionHandler exceptionHandler;
+    transient ExceptionHandler exceptionHandler;
 
     /** logs all user actions to be given on error-handling */
-    List<String> actionLog;
+    transient List<String> actionLog;
 
     /** for profiling in status-line (current work-time of last request) */
-    long startTime;
+    transient long startTime;
 
     /** session start */
     private long sessionStart;
 
-    private IAuthorization authorization;
+    transient private IAuthorization authorization;
 
     public static final String PREFIX_STATUS_LINE = "@";
+
+//    public static final String KEY_WEBSOCKET_PORT = "websocket.port";
+
+    public static final NanoH5Session createSession(NanoH5 server,
+            InetAddress inetAddress,
+            IBeanNavigator navigator,
+            ClassLoader appstartClassloader,
+            IAuthorization authorization,
+            Map context) {
+        //TODO: respect the bean-set (bean-jar-file!)
+        File storedSessionFile = getSessionFile(authorization);
+        NanoH5Session session = null;
+        if (storedSessionFile != null && storedSessionFile.exists()) {
+            try {
+                //try to load a temp stored session
+                session = ENV.get(XmlUtil.class).loadXml(storedSessionFile.getPath(), NanoH5Session.class);
+                session.init(server, inetAddress, navigator, appstartClassloader, authorization, context);
+            } catch (Exception e) {
+                //on error we create a new session object
+                LOG.error(e);
+            }
+        }
+        if (session == null) {
+            session = new NanoH5Session(server, inetAddress, navigator, appstartClassloader, authorization, context);
+        }
+        return session;
+    }
+
+    private static File getSessionFile(IAuthorization authorization) {
+        return authorization != null ? new File(ENV.getTempPathRel() + "session-" + authorization.getUser()) : null;
+    }
 
     /**
      * constructor
@@ -134,10 +170,32 @@ public class NanoH5Session implements ISession {
      * @param appstartClassloader
      * @param authorization
      */
-    public NanoH5Session(NanoH5 server,
-            InetAddress inetAddress, IBeanNavigator navigator,
-            ClassLoader appstartClassloader, IAuthorization authorization, Iterable<BeanDefinition> context) {
+    protected NanoH5Session(NanoH5 server,
+            InetAddress inetAddress,
+            IBeanNavigator navigator,
+            ClassLoader appstartClassloader,
+            IAuthorization authorization,
+            Map context) {
         super();
+        init(server, inetAddress, navigator, appstartClassloader, authorization, context);
+    }
+
+    /**
+     * init
+     * 
+     * @param server
+     * @param inetAddress
+     * @param navigator
+     * @param appstartClassloader
+     * @param authorization
+     * @param context
+     */
+    void init(NanoH5 server,
+            InetAddress inetAddress,
+            IBeanNavigator navigator,
+            ClassLoader appstartClassloader,
+            IAuthorization authorization,
+            Map context) {
         this.server = server;
         this.inetAddress = inetAddress;
         this.builder = server.builder;
@@ -146,10 +204,51 @@ public class NanoH5Session implements ISession {
         createExceptionHandler();
         this.actionLog = new LinkedList<>();
         this.authorization = authorization;
-        this.context = context;
+        initContext(authorization, context);
         this.sessionStart = System.currentTimeMillis();
         Persistence p = Persistence.current();
         this.id = inetAddress + p.getConnectionUrl() + "." + p.getConnectionUserName() + "." + p.getJarFile();
+
+    }
+
+    /**
+     * initContext
+     * 
+     * @param authorization
+     * @param context
+     */
+    void initContext(IAuthorization authorization, Map context) {
+        this.context = Context.create(authorization != null ? authorization.getUser().toString() : null, true);
+        this.context.putAll(context);
+    }
+
+    /**
+     * injectFromContext
+     * 
+     * @param beandefs
+     * @param type
+     * @param range
+     * @param i
+     */
+    BeanDefinition injectContext(BeanDefinition beandef) {
+        if (beandef.isMultiValue() && beandef.isDefault()) {
+            Iterator<IRange> ranges = this.context.get(IRange.class);
+            Class type;
+            IRange range = null;
+            while (ranges.hasNext()) {
+                range = ranges.next();
+                type = range.getFrom() != null ? range.getFrom().getClass() : null;
+                if (type != null) {
+                    if (beandef.getDeclaringClass().equals(type)) {
+                        Bean brange = ((BeanCollector) beandef).getBeanFinder().getFilterRange();
+                        brange.getAttribute("from").setValue(range.getFrom());
+                        brange.getAttribute("to").setValue(range.getTo());
+                        break;
+                    }
+                }
+            }
+        }
+        return beandef;
     }
 
     /**
@@ -304,7 +403,6 @@ public class NanoH5Session implements ISession {
         response = null;
         authorization = null;
         builder = null;
-        authorization = null;
         sessionClassloader = null;
         context = null;
     }
@@ -343,7 +441,7 @@ public class NanoH5Session implements ISession {
         if (exceptionHandler.hasExceptions()) {
             msg = StringUtil.toFormattedString(exceptionHandler.clearExceptions(), 200, false);
         }
-        BeanDefinition<?> model = nav.next(returnCode);
+        BeanDefinition<?> model = injectContext(nav.next(returnCode));
         return model != null ? builder.build(this, model, msg, true, nav.toArray()) : server.createStartPage();
     }
 
@@ -478,8 +576,9 @@ public class NanoH5Session implements ISession {
                                 bean.addAction(action);
                                 result = bean;
                             } else {//set the arguments and start the parametrized action
-                                MapEntrySet argSet = (MapEntrySet) ((BeanCollector)nav.current()).getCurrentData();
-                                Object[] args = CollectionUtil.concat(Arrays.copyOfRange(action.getParameter(), 0, 1), argSet.map().values().toArray());
+                                MapEntrySet argSet = (MapEntrySet) ((BeanCollector) nav.current()).getCurrentData();
+                                Object[] args = CollectionUtil.concat(Arrays.copyOfRange(action.getParameter(), 0, 1),
+                                    argSet.map().values().toArray());
                                 action.setParameter(args);
                                 result = action.activate();
                             }
@@ -528,21 +627,35 @@ public class NanoH5Session implements ISession {
      * @return context parameters
      */
     private Parameter getContextParameter() {
-        Iterable<BeanDefinition> con = getContext();
+        Iterator<BeanDefinition> con = getContext().get(BeanDefinition.class);
         Parameter p = new Parameter();
         LOG.debug("filling context for session: " + this);
-        for (BeanDefinition c : con) {
+        for (BeanDefinition c = con.next(); con.hasNext();) {
             p.putAll(c.toValueMap(p));
         }
         //do that twice to let rules and queries use defined parameter
         LOG.debug("second iteration on context for session: " + this);
-        for (BeanDefinition c : con) {
+        for (BeanDefinition c = con.next(); con.hasNext();) {
             p.putAll(c.toValueMap(p));
         }
         if (LOG.isDebugEnabled()) {
             LOG.debug("session:" + this + "\n\tcontext parameters: " + p.keySet());
         }
         return p;
+    }
+
+    @SuppressWarnings("static-access")
+    protected void addContextObject(BeanDefinition<?> object) {
+        ((Collection) this.context).add(object);
+        ENV.get(XmlUtil.class).saveXml(getSessionFile(authorization).getPath(), this);
+    }
+
+    @SuppressWarnings("static-access")
+    protected boolean removeContextObject(BeanDefinition<?> object) {
+        boolean result = ((Collection) this.context).remove(object);
+        if (result)
+            ENV.get(XmlUtil.class).saveXml(getSessionFile(authorization).getPath(), this);
+        return result;
     }
 
     private void logaction(IAction<?> action, Properties parameter) {
@@ -711,13 +824,15 @@ public class NanoH5Session implements ISession {
                     from.changeToParsedValue(colName, parms.getProperty(p));
                 } else if (to.getPresentationHelper().prop(KEY_FILTER_TO_LABEL).equals(rowName)) {
                     to.changeToParsedValue(colName, parms.getProperty(p));
-                } else  {
+                } else {
                     from.changeToParsedValue(colName, parms.getProperty(p));
                     to.changeToParsedValue(colName, parms.getProperty(p));
                 }
             }
         }
         model.getSearchAction().activate();
+        //TODO: put only, if range is filled - how can we evaluate that?
+        context.put(model.getDeclaringClass().getName(), model.getBeanFinder().getFilterRange().getInstance());
 //        } catch (Exception ex) {
 //            //don't break the panel-creation - the full exception will be handled in main-session-routine.
 //            LOG.error("couldn' fill search-panel values", ex);
@@ -791,7 +906,7 @@ public class NanoH5Session implements ISession {
     }
 
     @Override
-    public Iterable<BeanDefinition> getContext() {
+    public Context getContext() {
         return context;
     }
 
@@ -821,12 +936,12 @@ public class NanoH5Session implements ISession {
     }
 
     @Override
-    public Object[] getNavigationStack() {
+    public BeanDefinition[] getNavigationStack() {
         return nav.toArray();
     }
 
     @Override
-    public Object getWorkingObject() {
+    public BeanDefinition getWorkingObject() {
         return nav.current();
     }
 
@@ -836,6 +951,21 @@ public class NanoH5Session implements ISession {
     @Override
     public int getWebsocketPort() {
         return websocketPort;
+    }
+
+    @Override
+    public boolean check(long timeout, boolean throwException) {
+        boolean authenicatedButNotConnected =
+            nav.current() != null && !Persistence.class.isAssignableFrom(nav.current().getDeclaringClass())
+                && authorization != null && BeanContainer.instance().isEmptyServices();
+        boolean expired = getDuration() > timeout || nav == null || nav.isEmpty() || authenicatedButNotConnected;
+        if (expired) {
+            LOG.info("session " + this + " expired!");
+            close();
+            if (throwException)
+                throw new ManagedException("session closed");
+        }
+        return !expired;
     }
 
     @Override

@@ -21,6 +21,8 @@ import java.util.Map;
 import java.util.Properties;
 import java.util.Set;
 
+import org.apache.commons.logging.Log;
+
 import de.tsl2.nano.action.CommonAction;
 import de.tsl2.nano.action.IAction;
 import de.tsl2.nano.core.ENV;
@@ -29,7 +31,9 @@ import de.tsl2.nano.core.Messages;
 import de.tsl2.nano.core.cls.BeanAttribute;
 import de.tsl2.nano.core.cls.BeanClass;
 import de.tsl2.nano.core.cls.IAttribute;
+import de.tsl2.nano.core.log.LogFactory;
 import de.tsl2.nano.core.util.DateUtil;
+import de.tsl2.nano.core.util.ListSet;
 import de.tsl2.nano.core.util.StringUtil;
 
 /**
@@ -42,7 +46,12 @@ import de.tsl2.nano.core.util.StringUtil;
 @SuppressWarnings({ "serial", "rawtypes", "unchecked" })
 public class BeanContainer implements IBeanContainer {
     private static BeanContainer self = null;
-
+    
+    private static final Log LOG = LogFactory.getLog(BeanContainer.class);
+    
+    /** on initializing with {@link #initEmtpyServiceActions()} it is true */
+    private boolean emptyServices = false;
+    
     protected IAction<Collection<?>> idFinderAction = null;
     protected IAction<Collection<?>> typeFinderAction = null;
     protected IAction<Collection<?>> exampleFinderAction = null;
@@ -129,7 +138,7 @@ public class BeanContainer implements IBeanContainer {
      * testing.
      */
     public static final void initEmtpyServiceActions() {
-        final Collection<?> EMPTY_LIST = null;//new LinkedList();
+        final Collection<?> EMPTY_LIST = new ListSet();
         final IAction idFinder = new CommonAction("empty.service.idFinder") {
             @Override
             public Object action() {
@@ -139,30 +148,35 @@ public class BeanContainer implements IBeanContainer {
         final IAction<Collection<?>> relationFinder = new CommonAction<Collection<?>>("empty.service.relationFinder") {
             @Override
             public Collection<?> action() {
+                LOG.debug("calling empty-services relationFinder");
                 return EMPTY_LIST;
             }
         };
         final IAction<Collection<?>> exampleFinder = new CommonAction<Collection<?>>("empty.service.exampleFinder") {
             @Override
             public Collection<?> action() {
+                LOG.debug("calling empty-services exampleFinder");
                 return EMPTY_LIST;
             }
         };
         final IAction<Collection<?>> betweenFinder = new CommonAction<Collection<?>>("empty.service.betweenFinder") {
             @Override
             public Collection<?> action() {
+                LOG.debug("calling empty-services betweenFinder");
                 return EMPTY_LIST;
             }
         };
         final IAction<Collection<?>> queryFinder = new CommonAction<Collection<?>>("empty.service.queryFinder") {
             @Override
             public Collection<?> action() {
+                LOG.debug("calling empty-services queryFinder");
                 return EMPTY_LIST;
             }
         };
         final IAction<Collection<?>> queryMapFinder = new CommonAction<Collection<?>>("empty.service.queryMapFinder") {
             @Override
             public Collection<?> action() {
+                LOG.debug("calling empty-services queryMapFinder");
                 return EMPTY_LIST;
             }
         };
@@ -176,6 +190,7 @@ public class BeanContainer implements IBeanContainer {
         final IAction saveAction = new CommonAction("empty.service.saveAction") {
             @Override
             public Object action() {
+                LOG.debug("calling empty-services saveAction");
                 //do nothing, return the instance itself
                 return getParameter()[0];
             }
@@ -183,6 +198,7 @@ public class BeanContainer implements IBeanContainer {
         final IAction deleteAction = new CommonAction("empty.service.deleteAction") {
             @Override
             public Object action() {
+                LOG.debug("calling empty-services deleteAction");
                 //do nothing
                 return null;
             }
@@ -226,8 +242,16 @@ public class BeanContainer implements IBeanContainer {
             permissionAction,
             persistableAction,
             executeAction);
+        self.emptyServices = true;
     }
 
+    /**
+     * @return see {@link #isEmptyServices()}
+     */
+    public boolean isEmptyServices() {
+        return emptyServices;
+    }
+    
     /**
      * {@inheritDoc}
      */

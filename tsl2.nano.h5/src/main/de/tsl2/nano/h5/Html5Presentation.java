@@ -32,102 +32,7 @@ import static de.tsl2.nano.bean.def.IPresentable.TYPE_OPTION;
 import static de.tsl2.nano.bean.def.IPresentable.TYPE_OPTION_RADIO;
 import static de.tsl2.nano.bean.def.IPresentable.TYPE_SELECTION;
 import static de.tsl2.nano.bean.def.IPresentable.TYPE_TIME;
-import static de.tsl2.nano.h5.HtmlUtil.ALIGN_CENTER;
-import static de.tsl2.nano.h5.HtmlUtil.ALIGN_LEFT;
-import static de.tsl2.nano.h5.HtmlUtil.ALIGN_RIGHT;
-import static de.tsl2.nano.h5.HtmlUtil.ATTR_ACCESSKEY;
-import static de.tsl2.nano.h5.HtmlUtil.ATTR_ACTION;
-import static de.tsl2.nano.h5.HtmlUtil.ATTR_ALIGN;
-import static de.tsl2.nano.h5.HtmlUtil.ATTR_ALT;
-import static de.tsl2.nano.h5.HtmlUtil.ATTR_AUTOFOCUS;
-import static de.tsl2.nano.h5.HtmlUtil.ATTR_BGCOLOR;
-import static de.tsl2.nano.h5.HtmlUtil.ATTR_BORDER;
-import static de.tsl2.nano.h5.HtmlUtil.ATTR_CHECKED;
-import static de.tsl2.nano.h5.HtmlUtil.ATTR_CLASS;
-import static de.tsl2.nano.h5.HtmlUtil.ATTR_COLOR;
-import static de.tsl2.nano.h5.HtmlUtil.ATTR_COLS;
-import static de.tsl2.nano.h5.HtmlUtil.ATTR_DATA;
-import static de.tsl2.nano.h5.HtmlUtil.ATTR_DISABLED;
-import static de.tsl2.nano.h5.HtmlUtil.ATTR_FORMNOVALIDATE;
-import static de.tsl2.nano.h5.HtmlUtil.ATTR_FORMTARGET;
-import static de.tsl2.nano.h5.HtmlUtil.ATTR_FRAME;
-import static de.tsl2.nano.h5.HtmlUtil.ATTR_HEADERS;
-import static de.tsl2.nano.h5.HtmlUtil.ATTR_HIDDEN;
-import static de.tsl2.nano.h5.HtmlUtil.ATTR_HREF;
-import static de.tsl2.nano.h5.HtmlUtil.ATTR_ID;
-import static de.tsl2.nano.h5.HtmlUtil.ATTR_LIST;
-import static de.tsl2.nano.h5.HtmlUtil.ATTR_MAX;
-import static de.tsl2.nano.h5.HtmlUtil.ATTR_MAXLENGTH;
-import static de.tsl2.nano.h5.HtmlUtil.ATTR_METHOD;
-import static de.tsl2.nano.h5.HtmlUtil.ATTR_MIN;
-import static de.tsl2.nano.h5.HtmlUtil.ATTR_NAME;
-import static de.tsl2.nano.h5.HtmlUtil.ATTR_PATTERN;
-import static de.tsl2.nano.h5.HtmlUtil.ATTR_READONLY;
-import static de.tsl2.nano.h5.HtmlUtil.ATTR_REQUIRED;
-import static de.tsl2.nano.h5.HtmlUtil.ATTR_ROWS;
-import static de.tsl2.nano.h5.HtmlUtil.ATTR_SELECTED;
-import static de.tsl2.nano.h5.HtmlUtil.ATTR_SIZE;
-import static de.tsl2.nano.h5.HtmlUtil.ATTR_SPANCOL;
-import static de.tsl2.nano.h5.HtmlUtil.ATTR_SRC;
-import static de.tsl2.nano.h5.HtmlUtil.ATTR_STYLE;
-import static de.tsl2.nano.h5.HtmlUtil.ATTR_TABINDEX;
-import static de.tsl2.nano.h5.HtmlUtil.ATTR_TITLE;
-import static de.tsl2.nano.h5.HtmlUtil.ATTR_TYPE;
-import static de.tsl2.nano.h5.HtmlUtil.ATTR_TYPE_JS;
-import static de.tsl2.nano.h5.HtmlUtil.ATTR_TYPE_SEARCH;
-import static de.tsl2.nano.h5.HtmlUtil.ATTR_VALUE;
-import static de.tsl2.nano.h5.HtmlUtil.ATTR_WIDTH;
-import static de.tsl2.nano.h5.HtmlUtil.BTN_ASSIGN;
-import static de.tsl2.nano.h5.HtmlUtil.CHAR_SUM;
-import static de.tsl2.nano.h5.HtmlUtil.COLOR_BLACK;
-import static de.tsl2.nano.h5.HtmlUtil.COLOR_BLUE;
-import static de.tsl2.nano.h5.HtmlUtil.COLOR_LIGHTER_BLUE;
-import static de.tsl2.nano.h5.HtmlUtil.COLOR_LIGHT_BLUE;
-import static de.tsl2.nano.h5.HtmlUtil.COLOR_LIGHT_GRAY;
-import static de.tsl2.nano.h5.HtmlUtil.COLOR_RED;
-import static de.tsl2.nano.h5.HtmlUtil.COLOR_WHITE;
-import static de.tsl2.nano.h5.HtmlUtil.CSS_BACKGROUND_FADING_KEYFRAMES;
-import static de.tsl2.nano.h5.HtmlUtil.STYLE_BACKGROUND_FADING_KEYFRAMES;
-import static de.tsl2.nano.h5.HtmlUtil.STYLE_BACKGROUND_LIGHTGRAY;
-import static de.tsl2.nano.h5.HtmlUtil.STYLE_BACKGROUND_RADIAL_GRADIENT;
-import static de.tsl2.nano.h5.HtmlUtil.STYLE_FONT_COLOR;
-import static de.tsl2.nano.h5.HtmlUtil.STYLE_TEXT_ALIGN;
-import static de.tsl2.nano.h5.HtmlUtil.TAG_BODY;
-import static de.tsl2.nano.h5.HtmlUtil.TAG_BUTTON;
-import static de.tsl2.nano.h5.HtmlUtil.TAG_CELL;
-import static de.tsl2.nano.h5.HtmlUtil.TAG_DATALIST;
-import static de.tsl2.nano.h5.HtmlUtil.TAG_DIV;
-import static de.tsl2.nano.h5.HtmlUtil.TAG_EMBED;
-import static de.tsl2.nano.h5.HtmlUtil.TAG_FORM;
-import static de.tsl2.nano.h5.HtmlUtil.TAG_H3;
-import static de.tsl2.nano.h5.HtmlUtil.TAG_HEAD;
-import static de.tsl2.nano.h5.HtmlUtil.TAG_HEADERCELL;
-import static de.tsl2.nano.h5.HtmlUtil.TAG_HTML;
-import static de.tsl2.nano.h5.HtmlUtil.TAG_IMAGE;
-import static de.tsl2.nano.h5.HtmlUtil.TAG_INPUT;
-import static de.tsl2.nano.h5.HtmlUtil.TAG_LINK;
-import static de.tsl2.nano.h5.HtmlUtil.TAG_OBJECT;
-import static de.tsl2.nano.h5.HtmlUtil.TAG_OPTION;
-import static de.tsl2.nano.h5.HtmlUtil.TAG_PARAGRAPH;
-import static de.tsl2.nano.h5.HtmlUtil.TAG_PRE;
-import static de.tsl2.nano.h5.HtmlUtil.TAG_ROW;
-import static de.tsl2.nano.h5.HtmlUtil.TAG_SCRIPT;
-import static de.tsl2.nano.h5.HtmlUtil.TAG_SELECT;
-import static de.tsl2.nano.h5.HtmlUtil.TAG_SPAN;
-import static de.tsl2.nano.h5.HtmlUtil.TAG_TABLE;
-import static de.tsl2.nano.h5.HtmlUtil.TAG_TBODY;
-import static de.tsl2.nano.h5.HtmlUtil.TAG_TEXTAREA;
-import static de.tsl2.nano.h5.HtmlUtil.VAL_100PERCENT;
-import static de.tsl2.nano.h5.HtmlUtil.VAL_ALIGN_CENTER;
-import static de.tsl2.nano.h5.HtmlUtil.VAL_ALIGN_LEFT;
-import static de.tsl2.nano.h5.HtmlUtil.VAL_ALIGN_RIGHT;
-import static de.tsl2.nano.h5.HtmlUtil.VAL_FRM_SELF;
-import static de.tsl2.nano.h5.HtmlUtil.VAL_ROUNDCORNER;
-import static de.tsl2.nano.h5.HtmlUtil.VAL_TRANSPARENT;
-import static de.tsl2.nano.h5.HtmlUtil.appendElement;
-import static de.tsl2.nano.h5.HtmlUtil.enable;
-import static de.tsl2.nano.h5.HtmlUtil.enableFlag;
-import static de.tsl2.nano.h5.HtmlUtil.style;
+import static de.tsl2.nano.h5.HtmlUtil.*;
 
 import java.io.File;
 import java.io.InputStream;
@@ -174,10 +79,12 @@ import de.tsl2.nano.bean.def.ValueExpressionFormat;
 import de.tsl2.nano.bean.def.ValueGroup;
 import de.tsl2.nano.collection.CollectionUtil;
 import de.tsl2.nano.core.AppLoader;
+import de.tsl2.nano.core.Context;
 import de.tsl2.nano.core.ENV;
 import de.tsl2.nano.core.ISession;
 import de.tsl2.nano.core.ManagedException;
 import de.tsl2.nano.core.Messages;
+import de.tsl2.nano.core.cls.AReference;
 import de.tsl2.nano.core.cls.BeanClass;
 import de.tsl2.nano.core.cls.IAttribute;
 import de.tsl2.nano.core.log.LogFactory;
@@ -219,6 +126,7 @@ public class Html5Presentation<T> extends BeanPresentationHelper<T> implements I
     protected transient int tabIndex;
     private transient List<Character> availableshortCuts;
     private transient static final Character SHORTCUTS[];
+
     static {
         SHORTCUTS = new Character[222];
         for (char i = 0; i < SHORTCUTS.length; i++) {
@@ -289,7 +197,7 @@ public class Html5Presentation<T> extends BeanPresentationHelper<T> implements I
      */
     @SuppressWarnings("serial")
     @Override
-    protected void addAdministrationActions(Bean bEnv) {
+    protected void addAdministrationActions(final ISession session, Bean bEnv) {
         bEnv.addAction(new SecureAction(bean.getClazz(),
             "Scripttool",
             IAction.MODE_UNDEFINED,
@@ -332,7 +240,6 @@ public class Html5Presentation<T> extends BeanPresentationHelper<T> implements I
                                     null);
                             ENV.get(QueryPool.class).add(query);
                             QueryResult qr = new QueryResult(query.getName());
-                            qr.setName(BeanDefinition.PREFIX_VIRTUAL + query.getName());
                             qr.getPresentable().setIcon("icons/barchart.png");
                             qr.saveDefinition();
                             return "New created specification-query: " + name;
@@ -348,7 +255,7 @@ public class Html5Presentation<T> extends BeanPresentationHelper<T> implements I
                 return beanTool;
             }
         });
-        super.addAdministrationActions(bEnv);
+        super.addAdministrationActions(session, bEnv);
     }
 
     @SuppressWarnings("serial")
@@ -424,7 +331,8 @@ public class Html5Presentation<T> extends BeanPresentationHelper<T> implements I
             }
             return html;
         } catch (Exception ex) {
-            return HtmlUtil.createMessagePage(ENV.translate("tsl2nano.error", true), ManagedException.toRuntimeEx(ex, true, true).getMessage());
+            return HtmlUtil.createMessagePage(ENV.translate("tsl2nano.error", true),
+                ManagedException.toRuntimeEx(ex, true, true).getMessage());
         }
     }
 
@@ -490,7 +398,7 @@ public class Html5Presentation<T> extends BeanPresentationHelper<T> implements I
             Element c2 = appendElement(row, TAG_CELL);
             String localDoc = ENV.getConfigPath() + "nano.h5.html";
             String docLink =
-                new File(localDoc).canRead() ? "./nano.h5.html" : "https://sourceforge.net/p/tsl2nano/wiki/Home/";
+                new File(localDoc).canRead() ? "./nano.h5.html" : "https://sourceforge.net/p/tsl2nano/wiki/";
             c1 = appendElement(c1, TAG_LINK, ATTR_HREF, docLink);
             appendElement(c1,
                 TAG_IMAGE,
@@ -540,12 +448,12 @@ public class Html5Presentation<T> extends BeanPresentationHelper<T> implements I
                         "?",
                         ATTR_METHOD,
                         ENV.get("html5.http.method", "post"));
-                    c3 = createExpandable(c3, "Menu", true);
+                    c3 = createExpandable(c3, "Menu", ENV.get("header.menu.open", false));
                     Collection<IAction> actions = new ArrayList<IAction>(getPageActions(session));
                     actions.addAll(getApplicationActions(session));
                     actions.addAll(getSessionActions(session));
                     createActionPanel(c3, actions,
-                        ENV.get("html.show.header.button.text", true),
+                        ENV.get("header.button.text.show", true),
                         ATTR_ALIGN, ALIGN_RIGHT);
                 }
             }
@@ -562,7 +470,8 @@ public class Html5Presentation<T> extends BeanPresentationHelper<T> implements I
         Element head = appendElement(html, TAG_HEAD, ATTR_TITLE, "Nano-H5 Application: " + title);
 
         appendElement(head, "meta", "name", "author", "content", "tsl2.nano.h5 (by Thomas Schneider/2013)");
-        appendElement(head, "meta", "name", "viewport", "content", "width=device-width, height=device-height, initial-scale=1");
+        appendElement(head, "meta", "name", "viewport", "content",
+            "width=device-width, height=device-height, initial-scale=1");
 //        appendElement(head, "link", "rel", "stylesheet", "href", "css/style.css");
 
         /*
@@ -701,8 +610,8 @@ public class Html5Presentation<T> extends BeanPresentationHelper<T> implements I
             panel = createCollector(session, panel, (BeanCollector) bean, interactive, fullwidth);
         } else {
             //prefill a new bean with the current navigation stack objects
-            if (BeanContainer.instance().isTransient(((Bean)bean).getInstance())) {
-                addSessionValues(session, (Bean)bean);
+            if (BeanContainer.instance().isTransient(((Bean) bean).getInstance())) {
+                addSessionValues(session, (Bean) bean);
             }
             panel = createBean(session, panel, (Bean<?>) bean, interactive, fullwidth);
         }
@@ -744,7 +653,7 @@ public class Html5Presentation<T> extends BeanPresentationHelper<T> implements I
         //do the Object-casting trick to cast from List<Object> to List<BeanDefinition>
         Object navigation = Arrays.asList(session.getNavigationStack());
         v.addAll((List<BeanDefinition>) navigation);
-        v.addAll((Collection<BeanDefinition>) session.getContext());
+        v.addAll(CollectionUtil.getList(((NanoH5Session) session).getContext().get(BeanDefinition.class)));
         addSessionValues(v, bean);
     }
 
@@ -799,7 +708,8 @@ public class Html5Presentation<T> extends BeanPresentationHelper<T> implements I
                             bv =
                                 BeanValue.getBeanValue(
                                     BeanCollector.createBeanCollectorHolder((Collection) bean.getValue(name),
-                                        IBeanCollector.MODE_ALL), ValueHolder.ATTR_VALUE);
+                                        IBeanCollector.MODE_ALL),
+                                    ValueHolder.ATTR_VALUE);
                             bv.setDescription(name);
                         } else {
                             bv =
@@ -818,11 +728,13 @@ public class Html5Presentation<T> extends BeanPresentationHelper<T> implements I
         }
     }
 
-    private Element createFieldPanel(ISession session, Element parent,
+    private Element createFieldPanel(ISession session,
+            Element parent,
             IPresentable p,
             Collection<BeanValue<?>> beanValues,
             Collection<IAction> actions,
-            boolean interactive, boolean fullwidth) {
+            boolean interactive,
+            boolean fullwidth) {
         int maxrows = ENV.get("layout.default.maxrowcount", 25);
         int maxcols =
             p.layout(L_GRIDWIDTH, ENV.get("layout.default.columncount", (AppLoader.isDalvik() ? 3 : 9)));
@@ -882,9 +794,10 @@ public class Html5Presentation<T> extends BeanPresentationHelper<T> implements I
     }
 
     private Element createExpandable(Element parent, String title, boolean open) {
-        parent = appendElement(parent, "details", enable("open", open));
+        parent = appendElement(parent, TAG_EXP_DETAILS, enable(ATTR_EXP_OPEN, open));
         String key = shortCut(++tabIndex);
-        appendElement(parent, "summary", content(title), ATTR_ACCESSKEY, key, ATTR_TITLE, "ALT+" + key, ATTR_ALIGN,
+        appendElement(parent, TAG_EXP_SUMMARY, content(title), ATTR_ACCESSKEY, key, ATTR_TITLE, "ALT+" + key,
+            ATTR_ALIGN,
             ALIGN_LEFT, ATTR_STYLE, "color: #6666FF;");
         return parent;
     }
@@ -986,7 +899,8 @@ public class Html5Presentation<T> extends BeanPresentationHelper<T> implements I
     }
 
     private void appendAttributes(Element grid, String parentBGColor, IPresentable p, boolean isContainer) {
-        HtmlUtil.appendAttributes(grid/*, ATTR_NAME, p.getLabel(), p.getDescription(), p.getType(), p.getEnabler(), p.getWidth(), p.getHeight()*/
+        HtmlUtil.appendAttributes(
+            grid/*, ATTR_NAME, p.getLabel(), p.getDescription(), p.getType(), p.getEnabler(), p.getWidth(), p.getHeight()*/
             ,
             ATTR_BGCOLOR,
             convert(ATTR_BGCOLOR, p.getBackground(), COLOR_LIGHT_BLUE),
@@ -1015,7 +929,8 @@ public class Html5Presentation<T> extends BeanPresentationHelper<T> implements I
      * @param data collection holding data
      * @param editableRowNumbers 0-based row numbers to be editable
      */
-    void createTableContent(ISession session, Element grid,
+    void createTableContent(ISession session,
+            Element grid,
             BeanCollector<?, T> tableDescriptor,
             Collection<T> data,
             boolean interactive,
@@ -1043,7 +958,8 @@ public class Html5Presentation<T> extends BeanPresentationHelper<T> implements I
         //summary
         List<IPresentableColumn> columns = tableDescriptor.getColumnDefinitionsIndexSorted();
         Element sum = appendElement(footerRow, TAG_CELL, content(""));
-        ((Collection<BeanDefinition>) session.getContext()).add(tableDescriptor);
+        //collectors will not be used in context?
+//        ((Context) session.getContext()).add(tableDescriptor);
         Map contextParameter = new PrivateAccessor<>(session).call("getContextParameter", Map.class);
         boolean hasSummary = false;
         for (IPresentableColumn c : columns) {
@@ -1193,7 +1109,8 @@ public class Html5Presentation<T> extends BeanPresentationHelper<T> implements I
      */
     Element createBeanActions(Element form, BeanDefinition<?> model) {
         Element panel = createActionPanel(form, model.getActions(), true, ATTR_ALIGN, ALIGN_CENTER);
-        if (model.isMultiValue() && model instanceof BeanCollector && ((BeanCollector) model).hasMode(MODE_ASSIGNABLE)) {
+        if (model.isMultiValue() && model instanceof BeanCollector
+            && ((BeanCollector) model).hasMode(MODE_ASSIGNABLE)) {
             String assignLabel = Messages.getStringOpt("tsl2nano.assign", true);
             createAction(panel, BTN_ASSIGN, assignLabel, assignLabel, "submit", null, "icons/links.png", true, true,
                 false);
@@ -1413,7 +1330,7 @@ public class Html5Presentation<T> extends BeanPresentationHelper<T> implements I
                 ATTR_FORMTARGET,
                 VAL_FRM_SELF,
                 ATTR_STYLE, row1style
-            /*ATTR_BGCOLOR, rowBGColor*/);
+        /*ATTR_BGCOLOR, rowBGColor*/);
 
         //first cell: bean reference as link
         String length = String.valueOf(grid.getChildNodes().getLength() - 1);
@@ -1683,7 +1600,7 @@ public class Html5Presentation<T> extends BeanPresentationHelper<T> implements I
                         regexpFormat != null ? regexpFormat.getPattern() : ENV.get("default.pattern.regexp", ".*"),
                         ATTR_STYLE,
                         getTextAlignmentAsStyle(p.getStyle()),
-                        ATTR_SIZE,/* 'width' doesn't work, so we set the displaying char-size */
+                        ATTR_SIZE, /* 'width' doesn't work, so we set the displaying char-size */
                         width,
                         ATTR_WIDTH,
                         width,
@@ -1703,7 +1620,8 @@ public class Html5Presentation<T> extends BeanPresentationHelper<T> implements I
                         p.layout("tabindex", ++tabIndex).toString(),
                         enableFlag(ATTR_HIDDEN, !p.isVisible()),
                         enableFlag(ATTR_DISABLED, !interactive || !p.getEnabler().isActive()),
-                        enableFlag(ATTR_READONLY, !interactive || !p.getEnabler().isActive() || beanValue.composition()),
+                        enableFlag(ATTR_READONLY,
+                            !interactive || !p.getEnabler().isActive() || beanValue.composition()),
                         enableFlag(ATTR_REQUIRED, !beanValue.nullable() && !beanValue.generatedValue()));
 
                 if (multiLineText) {
@@ -1777,15 +1695,16 @@ public class Html5Presentation<T> extends BeanPresentationHelper<T> implements I
                                                 beanValue.getName(), (String) v), null);
                                     else //not a file name and no data --> do nothing
                                         writeFile = false;
-                                
-                                    if (writeFile && (ByteUtil.isByteStream(v.getClass()) || Serializable.class.isAssignableFrom(v.getClass())))
-                                        FileUtil.writeBytes(ByteUtil.getBytes(v),
-                                            ENV.getTempPath() + beanValue.getValueFile().getPath(),
-                                            false);
-                                    else if (writeFile)
-                                        throw new IllegalStateException("attachment of attribute '"
-                                            + beanValue.getValueId()
-                                            + "' should be of type byte[], ByteBuffer, Blob or String - or at least Serializable!");
+
+                                if (writeFile && (ByteUtil.isByteStream(v.getClass())
+                                    || Serializable.class.isAssignableFrom(v.getClass())))
+                                    FileUtil.writeBytes(ByteUtil.getBytes(v),
+                                        ENV.getTempPath() + beanValue.getValueFile().getPath(),
+                                        false);
+                                else if (writeFile)
+                                    throw new IllegalStateException("attachment of attribute '"
+                                        + beanValue.getValueId()
+                                        + "' should be of type byte[], ByteBuffer, Blob or String - or at least Serializable!");
                             }
                         }
 //                    }
@@ -1838,11 +1757,11 @@ public class Html5Presentation<T> extends BeanPresentationHelper<T> implements I
                     ENV.getConfigPath()) : "",
                 ATTR_CLASS,
                 "bean.field.data",
-                ATTR_TITLE,//fallback to show an info text, if data couldn't be shown
+                ATTR_TITLE, //fallback to show an info text, if data couldn't be shown
                 file != null
-                    ? file.getPath() /*"If no Plugin is available to show the content,\n klick on the downloaded item in your browser."*/
-                    : ""
-            );
+                    ? file
+                        .getPath() /*"If no Plugin is available to show the content,\n klick on the downloaded item in your browser."*/
+                    : "");
 
         return data;
     }

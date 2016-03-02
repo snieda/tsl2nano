@@ -25,6 +25,11 @@ public class Range<T> implements IRange<T>, Serializable {
     protected T to;
 
     /**
+     * constructor for deserialization
+     */
+    protected Range() {
+    }
+    /**
      * constructor
      * @param from
      * @param to

@@ -10,7 +10,11 @@
 
 [TOC]
 
-[[project_screenshots]]
+
+[[members limit=20]]
+[[download_button]]
+
+
 
 <meta-tag>
 crud, grud, crud2gui, crud2html, bean2html, entity2html, bean2gui, entity2gui, jpa2gui, jpa2html, jpa persistence provider, openjpa, hibernate, datanucleus, eclipselink, toplink, batoo, ormlite, ebean, data-editor, data-sheet, entity browser, jpa2, full stack framework, orm, o/r mapper, projector
@@ -189,7 +193,7 @@ A summary of lightweight ORM tools can be read here: ftp://ftp.informatik.uni-st
 
 The architecture is defined by the application framework [tsl2.nano.common](../tsl2.nano.common/nano.common.html). The data and service layer is defined by [tsl2.nano.serviceaccess](../tsl2.nano.sericeaccess/nano.serviceaccess.html).
 
-<img src="https://sourceforge.net/p/tsl2nano/code/ci/master/tree/tsl2.nano.h5/doc/nano-h5-overview.png"/>
+[[img src=nano-h5-overview.png]]
 
 The base for the model is any JPA-provider, the presentation of entity-beans will be configured through xml (using simple-xml as xml-persister and prefilling the beans with usable defaults). The presentation follows the projector pattern.
 
@@ -374,7 +378,7 @@ Before you start _nano.h5_, you should start the sample hsqldb database:
 
 config/runServer.bat
 
-<img src="https://sourceforge.net/p/tsl2nano/code/ci/master/tree/tsl2.nano.h5/doc/h5.sample.database.jpg"/>
+[[img src=h5.sample.database.jpg alt=sample-database]]
 
 To start nano.h5 you have to call it with following syntax:
 
@@ -384,21 +388,21 @@ This call is implemented inside the _run.bat_ script. Use that, if you are on wi
 
 If you start it on _Windows_, a browser will be opened to show the initial screen:
 
-<img src="https://sourceforge.net/p/tsl2nano/code/ci/master/tree/tsl2.nano.h5/doc/h5.sample.start.jpg"/>
+[[img src=h5.sample.start.jpg alt=sample-database]]
 
 If you are not on _Windows_, you should open an html-browser with file _application.html_.
 
 Now you can login to the sample database. It is fully configurable, which o/r mapper and database should be used. After pressing Ok, a _persistence.xml_ will be generated to be found by the _javax.persistence_ implementation.
 
-<img src="https://sourceforge.net/p/tsl2nano/code/ci/master/tree/tsl2.nano.h5/doc/h5.sample.persistence.jpg"/>
+[[img src=h5.sample.persistence.jpg]]
 
 All entities of the jar-file, containing the entities, will be listed. You can filter the list and select one or more to edit them.
 
-<img src="https://sourceforge.net/p/tsl2nano/code/ci/master/tree/tsl2.nano.h5/doc/h5.sample.entity-types.jpg"/>
+[[img src=h5.sample.entity-types.jpg]]
 
 Then you will get a search page with a search filter and an empty list. Pushing the search-button will create the result list.
 
-<img src="https://sourceforge.net/p/tsl2nano/code/ci/master/tree/tsl2.nano.h5/doc/h5.sample.entity-search.jpg"/>
+[[img src=h5.sample.entity-search.jpg]]
 
 If you click a column header (here f.e. _comments_), the list will be sorted by this column - clicking on that column a second time, the sorting will be done in the other direction. 
 
@@ -524,6 +528,15 @@ Hibernate 4 for example would have the following dependencies:
 * antlr.jar
  
 ## Runtime Configuration
+
+## The Administration Panel
+
+The administration panel contains buttons for:
+
+* The Scripttool - to create own queries/statistics on runtime
+* Reset the runtime to reload all configuration files
+* Switching between normal- and debug-logging
+* Shutdown - to stop the entire application - and if started the integrated local database (hsqldb) creating a database backup in the environments _temp_ directory.
 
 ## Extensions of a BeanDefinition  / Presentation
 
@@ -781,6 +794,28 @@ Layouts and LayoutConstraints must be of type *Map* or *String*. If a string is 
 
 The environment properties provide a fast way to define the applications page style. Change the entry _application.page.style_ to use a custom background - perhaps a picture or a color. This must be an html5 css style expression.
 
+The environment keys follow the structure *scope.description-path.field-or-action*:
+
+scopes are:
+* application: application definitions
+* page: singe page defintions
+* beandef: generic bean-definition
+* bean: bean instance definition
+* collector: bean-collector definition
+* beanconfigurator: bean-configurator definition
+
+common description pathes are:
+
+* use: boolean switch
+* html: http/html definition
+* layout: layout definition
+* header: html-tag header definition
+* footer: html-tag footer definition
+* websocket: definition for dynamic web content over websocket
+* field: any field/attribute definition
+* default: any default value
+* value: any value definition
+
 Example setting a radial gradient background color:
 
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -991,7 +1026,7 @@ This is the most important attribute property. Normally it is a standard bean-at
 
 All available attribute instances:
 
-<img src="https://sourceforge.net/p/tsl2nano/code/ci/master/tree/tsl2.nano.h5/doc/nano.h5.attributes.png"/>
+[[img src=nano.h5.attributes.png]]
 
 
 Example for an attribute through a relation path:
@@ -2331,7 +2366,8 @@ http://publib.boulder.ibm.com/infocenter/wsdoc400/v6r0/index.jsp?topic=/com.ibm.
 	com.sybase.jdbc.SybDriver
 	
 	Sybase (jConnect 5.2)
-	jdbc:sybase:Tds:<HOST>:<PORT>	com.sybase.jdbc2.jdbc.SybDriver
+	jdbc:sybase:Tds:<HOST>:<PORT>
+	com.sybase.jdbc2.jdbc.SybDriver
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 Actual list: http://infocenter.pentaho.com/help/index.jsp?topic=%2Fsupported_components%2Freference_jdbc_drivers.html
@@ -2408,6 +2444,7 @@ Actual list: http://infocenter.pentaho.com/help/index.jsp?topic=%2Fsupported_com
  0.8.0b | 07.01.2016 | rule-listener, rule-cover enhanced, new app package: timesheet, bean-actions parametrized with annotations
  0.8.0c | 01.02.2016 | many fixes, bean-configuration provides creation of actions (e.g. for REST service calls showing the JSON result)
  0.8.0d | 08.02.2016 | statistics now showing bar charts with xgraph
+ 0.8.0e | 24.02.2016 | bugfixes, environment-action --> administration-action
 
 [GLOSSARY]
 

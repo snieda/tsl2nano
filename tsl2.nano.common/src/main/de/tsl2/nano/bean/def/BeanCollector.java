@@ -1022,14 +1022,12 @@ public class BeanCollector<COLLECTIONTYPE extends Collection<T>, T> extends Bean
      * @return column labels to be presented as table header
      */
     public List<String> getColumnLabels() {
-        List<IPresentableColumn> colDefs = new ArrayList<IPresentableColumn>(getColumnDefinitions());
-        Collections.sort(colDefs);
+        //get the sorted and visible=true filtered columns
+        List<IPresentableColumn> colDefs = new ArrayList<IPresentableColumn>(getColumnDefinitionsIndexSorted());
         List<String> cnames = new ArrayList<String>(colDefs.size());
 
         for (IPresentableColumn c : colDefs) {
-            if (c.getPresentable().isVisible()) {
-                cnames.add(c.getPresentable().getLabel());
-            }
+            cnames.add(c.getPresentable().getLabel());
         }
         return cnames;
     }

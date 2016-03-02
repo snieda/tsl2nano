@@ -146,6 +146,10 @@ public class HtmlUtil {
     public static final String ALIGN_LEFT = "left";
     public static final String TAG_PRE = "pre";
 
+    public static final String TAG_EXP_DETAILS = "details";
+    public static final String TAG_EXP_SUMMARY = "summary";
+    public static final String ATTR_EXP_OPEN = "open";
+    
     public static final String TAG_SPAN = "span";
     //the font tag is not supported in html5
 //    public static final String TAG_FONT = "font";

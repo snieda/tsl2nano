@@ -18,12 +18,13 @@ import java.text.Format;
 import java.text.ParsePosition;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.LinkedHashSet;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Properties;
 import java.util.Stack;
+import java.util.concurrent.Executors;
 
 import javax.persistence.EntityManager;
 
@@ -321,14 +322,15 @@ public class NanoH5 extends NanoHTTPD implements ISystemConnector<Persistence> {
             //on a new session, no parameter should be set
             session = createSession(requestor);
         } else {//perhaps session was interrupted/closed but not removed
-            //WORKAROUND: may occur on cached pages
-            if (session.getDuration() > ENV.get("session.timeout.millis", 12 * DateUtil.HOUR) || session.nav == null || session.nav.isEmpty()) {
-                boolean done = session.nav != null && session.nav.done();
-                session.close();
+            boolean done = session.nav != null && session.nav.done();
+            if (!session.check(ENV.get("session.timeout.millis", 12 * DateUtil.HOUR), false)) {
+                //TODO: show page with 'session expired'
+                // session expired!
                 sessions.remove(session.inetAddress);
                 session = createSession(requestor);
                 if (done) {
                     // the workflow was done, now create the entity browser
+                    LOG.info("session-workflow of " + session + " was done. creating am entity-browser now...");
                     session.nav = createGenericNavigationModel(true);
                 }
             } else if (method.equals("GET") && parms.size() == 0 && (uri.length() < 2 || header.get("referer") == null)) {
@@ -374,10 +376,11 @@ public class NanoH5 extends NanoHTTPD implements ISystemConnector<Persistence> {
     protected NanoH5Session createSession(InetAddress inetAddress) {
         LOG.info("creating new session on socket: " + inetAddress);
         try {
-            NanoH5Session session = new NanoH5Session(this,
+            //TODO: don't load classloader and authoriation from ENV
+            NanoH5Session session = NanoH5Session.createSession(this,
                 inetAddress,
                 createGenericNavigationModel(),
-                ENV.get(ClassLoader.class), null, createSesionContext());
+                ENV.get(ClassLoader.class), ENV.get(IAuthorization.class), createSesionContext());
             sessions.put(inetAddress, session);
             return session;
         } catch (Throwable e) {
@@ -392,9 +395,9 @@ public class NanoH5 extends NanoHTTPD implements ISystemConnector<Persistence> {
      * 
      * @return data specific context name
      */
-    private Iterable<BeanDefinition> createSesionContext() {
+    private Map createSesionContext() {
 //        Persistence p = Persistence.current();
-        Iterable<BeanDefinition> context = new LinkedHashSet<BeanDefinition>();
+        Map context = new HashMap();
 //        context.put("session.name", p.getDatabase() + "." + p.getDefaultSchema() + "." + p.getJarFile());
         return context;
     }
@@ -678,6 +681,23 @@ public class NanoH5 extends NanoHTTPD implements ISystemConnector<Persistence> {
                 AppLoader.isUnix() ? new String[] { "sh", "runServer.bat" } : new String[] { "cmd", "/C", "start",
                     "runServer.bat" };
             SystemUtil.execute(new File(ENV.getConfigPathRel()), cmd);
+            Runtime.getRuntime().addShutdownHook(Executors.defaultThreadFactory().newThread(new Runnable() {
+                @Override
+                public void run() {
+                        if (BeanContainer.isInitialized()) {
+                            LOG.info("preparing shutdown of local database " + persistence.getConnectionUrl());
+                            try {
+                                BeanContainer.instance().executeStmt("shutdown", true, null);
+                            } catch (Exception e) {
+                                LOG.error(e.toString());
+                            }
+                            String hsqldbScript = persistence.getDatabase() + ".script";
+                            String backupFile = ENV.get("application.database.backup.file", ENV.getTempPathRel() + FileUtil.getUniqueFileName(persistence.getDatabase()) + ".zip");
+                            LOG.info("creating database backup to file " + backupFile);
+                            FileUtil.writeToZip(backupFile, hsqldbScript, FileUtil.getFileBytes(hsqldbScript, null));
+                        }
+                }
+            }));
         }
 
         boolean useJPAPersistenceProvider = true;

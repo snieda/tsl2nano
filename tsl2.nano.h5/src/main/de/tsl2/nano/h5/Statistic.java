@@ -15,6 +15,7 @@ import java.util.Collection;
 import java.util.LinkedHashMap;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Map;
 
 import org.apache.commons.logging.Log;
 import org.simpleframework.xml.Transient;
@@ -27,6 +28,7 @@ import de.tsl2.nano.bean.def.AttributeDefinition;
 import de.tsl2.nano.bean.def.BeanCollector;
 import de.tsl2.nano.bean.def.BeanDefinition;
 import de.tsl2.nano.bean.def.IAttributeDefinition;
+import de.tsl2.nano.collection.CollectionUtil;
 import de.tsl2.nano.core.ENV;
 import de.tsl2.nano.core.cls.IAttribute;
 import de.tsl2.nano.core.log.LogFactory;
@@ -121,10 +123,16 @@ public class Statistic<COLLECTIONTYPE extends Collection<T>, T> extends BeanColl
         setName(ENV.translate("tsl2nano.statistic", true) + " (" + def.getName() + ")");
 
         if (from != null && to != null) {
+            Map<String, Object> fromMap = BeanUtil.toFormattedMap(from);
+            Map<String, Object> toMap = BeanUtil.toFormattedMap(to);
+            CollectionUtil.removeEmptyEntries(fromMap);
+            CollectionUtil.removeEmptyEntries(toMap);
+            String strFrom = fromMap.size() > 0 ? fromMap.toString() : "<" + ENV.translate("tsl2nano.all", false) + ">";
+            String strTo = toMap.size() > 0 ? toMap.toString() : "<" + ENV.translate("tsl2nano.all", false) + ">";
             searchStatus =
                 "<div>" +
-                    ENV.translate("tsl2nano.summary", true) + ": " + ENV.translate("tsl2nano.from", true)
-                    + BeanUtil.toFormattedMap(from) + ENV.translate("tsl2nano.to", true) + BeanUtil.toFormattedMap(to)
+                    ENV.translate("tsl2nano.summary", true) + ": " + ENV.translate("tsl2nano.from", true) +
+                    strFrom + " - " + ENV.translate("tsl2nano.to", true) + strTo
                     + "</div>";
         }
 

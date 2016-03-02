@@ -180,7 +180,7 @@ public class Timesheet extends NanoH5App {
         define(Type.class, icon("equipment"), TypeConst.ATTR_NAME);
         define(Category.class, icon("equipment"), CategoryConst.ATTR_NAME);
         define(Account.class, icon("euro"), AccountConst.ATTR_NAME);
-        define(Property.class, icon("table"), PropertyConst.ATTR_AKEY);
+        define(Property.class, icon("table"), ve(PropertyConst.ATTR_AKEY), PropertyConst.ATTR_AKEY, PropertyConst.ATTR_AVALUE, PropertyConst.ATTR_ORGANISATION, PropertyConst.ATTR_PARTY, PropertyConst.ATTR_ITEM);
         define(Organisation.class, icon("people"), OrganisationConst.ATTR_NAME);
         define(Party.class, icon("male"), PartyConst.ATTR_SHORTNAME);
         define(Address.class, icon("home"), ve(AddressConst.ATTR_CITY) + ", " + ve(AddressConst.ATTR_STREET));
@@ -298,19 +298,25 @@ public class Timesheet extends NanoH5App {
         Query<Object> query = new Query<>(STAT_TIMESHEET_STATISTICS, stat, true, null);
         QueryPool queryPool = ENV.get(QueryPool.class);
         queryPool.add(query);
-        new QueryResult<>(query.getName()).saveVirtualDefinition(query.getName());
+        QueryResult<Collection<Object>, Object> qr = new QueryResult<>(query.getName());
+        qr.getPresentable().setIcon("icons/barchart.png");
+        qr.saveDefinition();
 
         stat = "\n-- get a statistic table over projects\n" +
                 "select org.NAME || ' ' || i.NAME as Project, sum(value) as Hours from Charge c join CHARGEITEM ci on c.CHARGEITEM = ci.ID join ITEM i on ci.ITEM = i.ID join ORGANISATION org on i.ORGA = org.ID\n" + 
                 "group by Project\n";
         queryPool.add(query = new Query<>(STAT_PROJECTS, stat, true, null));
-        new QueryResult<>(query.getName()).saveVirtualDefinition(query.getName());
+        qr = new QueryResult<>(query.getName());
+        qr.getPresentable().setIcon("icons/barchart.png");
+        qr.saveDefinition();
 
         stat = "\n-- get a statistic table over types\n" +
                 "select t.NAME as Type, sum(value) as Hours from Charge c join CHARGEITEM ci on c.CHARGEITEM = ci.ID join ITEM i on ci.ITEM = i.ID join TYPE t on i.TYPE = t.ID\n" +
                 "group by t.NAME\n";
         queryPool.add(query = new Query<>(STAT_TYPES, stat, true, null));
-        new QueryResult<>(query.getName()).saveVirtualDefinition(query.getName());
+        qr = new QueryResult<>(query.getName());
+        qr.getPresentable().setIcon("icons/barchart.png");
+        qr.saveDefinition();
 
         /*
          * Sample Workflow with three activities

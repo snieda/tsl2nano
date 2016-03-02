@@ -192,13 +192,26 @@ public class BeanClass<T> implements Serializable {
     }
 
     /**
+     * evaluates the full enclosing simple name
+     * @param cls class to get the simple name for
+     * @return simple-name with all enclosing classes as prefix
+     */
+    public static String getSimpleName(Class<?> cls) {
+        StringBuilder clsName = new StringBuilder(cls.getSimpleName());
+        while ((cls = cls.getEnclosingClass()) != null) {
+          clsName.insert(0, cls.getSimpleName() + "$");
+        }
+        return clsName.toString();
+      }
+    
+    /**
      * returns the simple class name. if class is a proxy, we return the simple name of the first interface.
      * 
      * @param clazz normal class or proxy class
      * @return simple class name
      */
     public static final String getName(Class clazz, boolean path) {
-        return path ? getDefiningClass(clazz).getName() : getDefiningClass(clazz).getSimpleName();
+        return path ? getDefiningClass(clazz).getName() : getSimpleName(getDefiningClass(clazz));
     }
 
     /**

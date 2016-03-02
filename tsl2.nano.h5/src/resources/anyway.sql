@@ -112,7 +112,7 @@ CREATE INDEX Item_idx
 
 CREATE TABLE ChargeItem (
                 id INTEGER NOT NULL,
-                charge INTEGER NOT NULL,
+                charge DECIMAL(8,2) NOT NULL,
                 item INTEGER NOT NULL,
                 CONSTRAINT idx_chargeitem PRIMARY KEY (id)
 );

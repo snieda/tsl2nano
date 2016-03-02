@@ -57,6 +57,7 @@ import de.tsl2.nano.bean.IAttributeDef;
 import de.tsl2.nano.bean.IValueAccess;
 import de.tsl2.nano.bean.ValueHolder;
 import de.tsl2.nano.collection.CollectionUtil;
+import de.tsl2.nano.core.Context;
 import de.tsl2.nano.core.ENV;
 import de.tsl2.nano.core.ISession;
 import de.tsl2.nano.core.ManagedException;
@@ -1311,7 +1312,7 @@ public class BeanPresentationHelper<T> {
     /**
      * creates extended actions like 'print', 'help', 'export', 'select-all', 'deselect-all' etc.
      */
-    public Collection<IAction> getApplicationActions(ISession session) {
+    public Collection<IAction> getApplicationActions(final ISession session) {
         if (appActions == null) {
             if (bean == null || session == null) {
                 return new LinkedList<IAction>();
@@ -1325,7 +1326,7 @@ public class BeanPresentationHelper<T> {
                 @Override
                 public Object action() throws Exception {
                     Bean<Serializable> bEnv = Bean.getBean((Serializable) BeanClass.getStatic(ENV.class, "self"));
-                    addAdministrationActions(bEnv);
+                    addAdministrationActions(session, bEnv);
                     return bEnv;
                 }
 
@@ -1340,8 +1341,9 @@ public class BeanPresentationHelper<T> {
 
     /**
      * addAdministrationActions
+     * @param session 
      */
-    protected void addAdministrationActions(Bean bEnv) {
+    protected void addAdministrationActions(final ISession session, Bean bEnv) {
         bEnv.addAction(new SecureAction(bean.getClazz(),
             "reset",
             IAction.MODE_UNDEFINED,
@@ -1399,7 +1401,7 @@ public class BeanPresentationHelper<T> {
             }
             vsession.setValue(session);
             sessionActions = new ArrayList<IAction>(2);
-            if (session.getContext() instanceof Collection) {
+            if (session.getContext() instanceof Context) {
                 sessionActions.add(new SecureAction(bean.getClazz(),
                     "memorize",
                     IAction.MODE_UNDEFINED,
@@ -1407,7 +1409,7 @@ public class BeanPresentationHelper<T> {
                     "icons/yellow_pin.png") {
                     @Override
                     public Object action() throws Exception {
-                        ((Collection) vsession.getValue().getContext()).add(bean);
+                        ((Context) vsession.getValue().getContext()).add(((Bean)bean).getInstance());
                         return bean;
                     }
 

@@ -22,12 +22,19 @@ import org.simpleframework.xml.Default;
 import org.simpleframework.xml.DefaultType;
 import org.simpleframework.xml.ElementMap;
 
+import de.tsl2.nano.bean.BReference;
+import de.tsl2.nano.bean.BeanContainer;
+import de.tsl2.nano.bean.def.BeanDefinition;
+import de.tsl2.nano.collection.CollectionUtil;
 import de.tsl2.nano.collection.FilteringIterator;
+import de.tsl2.nano.core.cls.AReference;
+import de.tsl2.nano.core.cls.BeanClass;
 import de.tsl2.nano.core.util.FileUtil;
 import de.tsl2.nano.core.util.XmlUtil;
 
 /**
- * persistable context
+ * persistable context. avoids serializing entities (mostly having a tree of dependencies) directly - using
+ * {@link BReference} to reference entities through their ids.
  * 
  * @author Thomas Schneider
  * @version $Revision$
@@ -50,6 +57,7 @@ public class Context implements Serializable, Map {
 
     /**
      * creates a new instance from file or through constructor
+     * 
      * @param name context name, used as filename on persisting to file system
      * @param autoPersist whether to persist this context on each change. if name is null, no persisting will be done.
      * @return new context instance
@@ -79,7 +87,8 @@ public class Context implements Serializable, Map {
      * @param autoPersist
      */
     protected void init(boolean autoPersist) {
-        this.properties = new TreeMap();
+        if (properties == null)
+            properties = new TreeMap();
         this.autopersist = autoPersist;
     }
 
@@ -142,11 +151,16 @@ public class Context implements Serializable, Map {
      */
     @Override
     public Object put(Object key, Object value) {
-        Object result = properties.put(key, value);
+        Object result = properties.put(key, reference(value));
         if (autopersist) {
             save();
         }
         return result;
+    }
+
+    protected Object reference(Object value) {
+        return value != null && BeanContainer.instance().isPersistable(BeanClass.getDefiningClass(value.getClass()))
+            ? new BReference(value) : value;
     }
 
     /**
@@ -214,7 +228,7 @@ public class Context implements Serializable, Map {
      * @return map value or defaultValue
      */
     public <T> T get(String key, T defaultValue) {
-        T value = (T) properties.get(key);
+        T value = (T) materialize(properties.get(key));
         if (value == null && defaultValue != null) {
             value = defaultValue;
             put(key, value);
@@ -222,19 +236,33 @@ public class Context implements Serializable, Map {
         return value;
     }
 
+    protected Object materialize(Object obj) {
+        return obj instanceof AReference ? ((AReference) obj).resolve() : obj;
+    }
+
     /**
-     * filters only values of valueType to be returned in a filtered iterator
+     * filters only values of valueType to be returned in a filtered iterator. if there are persistable entities, they
+     * are wrapped into {@link BReference} - so, these references can be collected giving a valueType =
+     * BReference.class.
      * 
-     * @param valueType
+     * @param valueType any type to be collected from current context.
      * @return filtered map values
      */
     public <T> Iterator<T> get(final Class<T> valueType) {
-        return (Iterator<T>) new FilteringIterator(properties.values(), new IPredicate() {
+        return CollectionUtil.getTransforming(properties.values(), new ITransformer<Object, T>() {
+            @Override
+            public T transform(Object toTransform) {
+                return (T) (toTransform instanceof BReference ? BeanDefinition.class.isAssignableFrom(valueType) ? ((BReference)toTransform).bean() : ((BReference)toTransform).resolve() : toTransform);
+            }
+        } ,new IPredicate() {
             @Override
             public boolean eval(Object arg0) {
-                return arg0 != null && valueType.isAssignableFrom(arg0.getClass());
+                if (BeanDefinition.class.isAssignableFrom(valueType) && (arg0 instanceof BReference))
+                    return true;
+                return arg0 != null && (valueType.isAssignableFrom(arg0.getClass()) || (arg0 instanceof AReference
+                    && valueType.isAssignableFrom(((AReference) arg0).resolve().getClass())));
             }
-        });
+        }).iterator();
     }
 
     /**
@@ -250,7 +278,8 @@ public class Context implements Serializable, Map {
      * persists the current context
      */
     public void save() {
-        XmlUtil.saveXml(getFileName(getName()), this);
+        if (!properties.isEmpty())
+            XmlUtil.saveXml(getFileName(getName()), this);
     }
 
     public String getName() {
@@ -265,6 +294,6 @@ public class Context implements Serializable, Map {
 
     @Override
     public String toString() {
-        return getName();
+        return getName() + " (items: " + properties.size() + ")";
     }
 }

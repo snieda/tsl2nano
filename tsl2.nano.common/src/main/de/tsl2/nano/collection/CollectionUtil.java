@@ -695,6 +695,19 @@ public class CollectionUtil {
     }
 
     /**
+     * combines transforming and filtering a collection
+     * @param <I> iterable type
+     * @param <T> iterable content type
+     * @param src mostly a collection
+     * @param transformer transformer
+     * @param filter filter
+     * @return filtered and transformed iterable
+     */
+    public static final <I extends Iterable<T>, S, T> I getTransforming(Iterable<S> src, ITransformer<S, T> transformer, IPredicate<T> filter) {
+        return TransformingIterator.getTransformingIterable((Iterable<S>)getFiltering((Iterable<T>)src, filter), transformer);
+    }
+
+    /**
      * swaps two elements in an array
      * 
      * @param array

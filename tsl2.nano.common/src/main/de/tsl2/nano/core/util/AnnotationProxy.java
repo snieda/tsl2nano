@@ -245,7 +245,7 @@ public class AnnotationProxy<A extends Annotation> extends DelegationHandler<A> 
      * Works on suns jdk1.7 and jdk1.8
      * 
      * @param annotation annotation to change
-     * @param values to be set on the given annoation. you have to ensure the names and types.
+     * @param values to be set on the given annotation. you have to ensure the names and types.
      * @return count of changes on annotation
      */
     public static int setAnnotationValues(Annotation annotation, Map<String, Object> values) {
