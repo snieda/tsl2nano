@@ -56,6 +56,19 @@ public class Range<T> implements IRange<T>, Serializable {
         return to;
     }
 
+    
+    /**
+     * @param from The from to set.
+     */
+    public void setFrom(T from) {
+        this.from = from;
+    }
+    /**
+     * @param to The to to set.
+     */
+    public void setTo(T to) {
+        this.to = to;
+    }
     /**
      * evaluates all primitive attributes of the given instance type and sets minimum values for them
      * @param instance range instance
