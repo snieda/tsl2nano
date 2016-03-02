@@ -144,7 +144,7 @@ public class RuleCover<T> extends DelegationHandler<T> implements
     @SuppressWarnings("unchecked")
     public T cover(T child, Class<T> interfaze, Serializable contextObject) {
         delegate = child;
-        return (T) Proxy.newProxyInstance(ENV.get(ClassLoader.class), new Class[] { interfaze }, this);
+        return (T) Proxy.newProxyInstance(Thread.currentThread().getContextClassLoader(), new Class[] { interfaze }, this);
     }
 
     /**

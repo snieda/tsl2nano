@@ -111,7 +111,7 @@ public class ScriptTool implements Serializable {
                     Properties p = Persistence.current().getJdbcProperties();
                     p.put("dir", ENV.getConfigPath());
                     p.put("includes", sqlFileName);
-                    p.put("classloader", ENV.get(ClassLoader.class));
+                    p.put("classloader", Thread.currentThread().getContextClassLoader());
                     String antFile = ENV.getConfigPath() + ANTSCRIPTNAME;
                     boolean result = ScriptUtil.ant(antFile, "sql", p);
                     new File(sqlFilePath).delete();
@@ -141,7 +141,7 @@ public class ScriptTool implements Serializable {
                     Properties p = new Properties();
                     p.put("dir", ENV.getConfigPath());
                     p.put("includes", scriptFileName);
-                    p.put("classloader", ENV.get(ClassLoader.class));
+                    p.put("classloader", Thread.currentThread().getContextClassLoader());
                     String antFile = ENV.getConfigPath() + ANTSCRIPTNAME;
                     boolean result = ScriptUtil.ant(antFile, "script", p);
                     new File(scriptFilePath).delete();

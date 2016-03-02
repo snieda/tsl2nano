@@ -71,7 +71,7 @@ public class PackageGenerator extends ClassGenerator {
         if (args.length > 2) {
             gen = (PackageGenerator) ClassGenerator.instance(args[2]);
             if (args.length > 3 && args[3].length() > 0) {
-                gen.getProperties().putAll(FileUtil.loadProperties(args[3], ENV.get(ClassLoader.class)));
+                gen.getProperties().putAll(FileUtil.loadProperties(args[3], Thread.currentThread().getContextClassLoader()));
             }
         } else {
             gen = (PackageGenerator) ClassGenerator.instance(new PackageGenerator());

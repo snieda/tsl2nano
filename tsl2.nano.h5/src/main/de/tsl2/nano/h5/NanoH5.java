@@ -380,7 +380,7 @@ public class NanoH5 extends NanoHTTPD implements ISystemConnector<Persistence> {
             NanoH5Session session = NanoH5Session.createSession(this,
                 inetAddress,
                 createGenericNavigationModel(),
-                ENV.get(ClassLoader.class), ENV.get(IAuthorization.class), createSesionContext());
+                Thread.currentThread().getContextClassLoader(), ENV.get(IAuthorization.class), createSesionContext());
             sessions.put(inetAddress, session);
             return session;
         } catch (Throwable e) {
@@ -484,7 +484,7 @@ public class NanoH5 extends NanoHTTPD implements ISystemConnector<Persistence> {
         runtimeClassloader.addLibraryPath(ENV.getConfigPath());
         //TODO: the environment and current thread shouldn't use the new sessions classloader! 
         Thread.currentThread().setContextClassLoader(runtimeClassloader);
-        ENV.addService(ClassLoader.class, runtimeClassloader);
+//        ENV.addService(ClassLoader.class, runtimeClassloader);
 
         createAuthorization(persistence);
 

@@ -269,7 +269,7 @@ public class ValueExpression<TYPE> implements
     protected TYPE createInstance(String toValue) {
         TYPE instance;
         if (type.isInterface()) {
-            instance = BeanProxy.createBeanImplementation(type, null, null, ENV.get(ClassLoader.class));
+            instance = BeanProxy.createBeanImplementation(type, null, null, Thread.currentThread().getContextClassLoader());
         } else if (BeanUtil.isStandardType(type)) {
             instance = PrimitiveUtil.create(type, toValue);
         } else if (BeanClass.hasStringConstructor(type)) {
