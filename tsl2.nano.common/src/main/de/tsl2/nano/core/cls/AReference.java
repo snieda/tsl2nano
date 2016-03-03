@@ -67,11 +67,20 @@ public abstract class AReference<T, O> {
     }
 
     protected String createDescription(Object instance) {
-        return PREFIX_REFERENCE + BeanClass.getName(instance.getClass()) + PREFIX_ID + getId(instance);
+        return PREFIX_REFERENCE + toString(instance.getClass()) + PREFIX_ID + getId(instance);
     }
 
     protected static <B> String createDescription(Class<B> type, Object id) {
-        return PREFIX_REFERENCE + BeanClass.getName(type) + PREFIX_ID + id;
+        return PREFIX_REFERENCE + toString(type) + PREFIX_ID + id;
+    }
+
+    /**
+     * toString
+     * @param type
+     * @return
+     */
+    static <B> String toString(Class<B> type) {
+        return BeanClass.getName(type, true);
     }
 
     /**

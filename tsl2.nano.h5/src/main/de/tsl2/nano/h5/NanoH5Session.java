@@ -130,6 +130,8 @@ public class NanoH5Session implements ISession<BeanDefinition>, Serializable {
 
     public static final String PREFIX_STATUS_LINE = "@";
 
+    public static final String PREFIX_CONTEXT_RANGE = "range:";
+    
 //    public static final String KEY_WEBSOCKET_PORT = "websocket.port";
 
     public static final NanoH5Session createSession(NanoH5 server,
@@ -830,7 +832,7 @@ public class NanoH5Session implements ISession<BeanDefinition>, Serializable {
         }
         model.getSearchAction().activate();
         //TODO: put only, if range is filled - how can we evaluate that?
-        context.put(model.getDeclaringClass().getName(), model.getBeanFinder().getFilterRange().getInstance());
+        context.put(PREFIX_CONTEXT_RANGE + model.getDeclaringClass().getName(), model.getBeanFinder().getFilterRange().getInstance());
 //        } catch (Exception ex) {
 //            //don't break the panel-creation - the full exception will be handled in main-session-routine.
 //            LOG.error("couldn' fill search-panel values", ex);

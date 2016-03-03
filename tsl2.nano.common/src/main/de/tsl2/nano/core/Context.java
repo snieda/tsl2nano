@@ -141,7 +141,7 @@ public class Context implements Serializable, Map {
     }
 
     public Object add(Object obj) {
-        String k = String.valueOf(size());
+        String k = obj.getClass().getName();//String.valueOf(obj.hashCode());
         put(k, obj);
         return k;
     }

@@ -423,6 +423,10 @@ Everything of your application will be accessible through this environment. It p
 
 A description of all configuration attributes can be found [here](src/resources/environment.default.xml)
 
+### The Session and it's context
+
+A session will be opened after a user-login. The session stores a context, containing 'memorized' entities and search parameters of bean-collectors to a temporary file. So, search-panels will open with last search parameters. The memorized entities will be pre-selected on creating new entities, if there is a many-to-one relation.
+ 
 ### Internationalization: Languages and automatic Translations
 
 The _messages.properties_ is the language file to translate every application specific text. You can overwrite it through putting your own file into the environment-directory. All bean or bean-attribute-names will be translated - if no presentation xml file are present. To define for example a german translation, you would create the file _messages_de.properties_ to the environment-dirctory.
@@ -2833,3 +2837,6 @@ ponyorm:
 *     oracle  : Triggers with :NEW
 
 erdplus: kann nichts allgemeines exportieren
+
+* (x) collector.reset --> remove from context
+environment.keys
