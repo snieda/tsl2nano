@@ -272,6 +272,8 @@ public class PrimitiveUtil {
             value = (Boolean)value ? 1 : 0;
         else if (isAssignableFrom(Character.class, value.getClass()))
             value = value.hashCode();
+        else if (isAssignableFrom(String.class, value.getClass()))
+            value = Double.valueOf((String) value);
         
         //now we have a number
         double d = ((Number)value).doubleValue();

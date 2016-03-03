@@ -258,7 +258,7 @@ public class Context implements Serializable, Map {
             @Override
             public boolean eval(Object arg0) {
                 if (BeanDefinition.class.isAssignableFrom(valueType) && (arg0 instanceof BReference))
-                    return true;
+                    return ((BReference)arg0).resolve() != null;
                 return arg0 != null && (valueType.isAssignableFrom(arg0.getClass()) || (arg0 instanceof AReference
                     && valueType.isAssignableFrom(((AReference) arg0).resolve().getClass())));
             }

@@ -27,7 +27,7 @@ public abstract class AReference<T, O> {
     @Attribute
     String description;
     
-    transient O instance;
+    protected transient O instance;
 
     static final String PREFIX_REFERENCE = "@";
     static final String PREFIX_ID = ":";
@@ -91,7 +91,8 @@ public abstract class AReference<T, O> {
      */
     protected Pointer getTypeAndId(String description) {
         String[] o = description.substring(1).split(PREFIX_ID);
-        return new Pointer(type(o[0]), o[1]);
+        T type = type(o[0]);
+        return new Pointer(type, id(type, o[1]));
     }
 
     /**
@@ -115,6 +116,13 @@ public abstract class AReference<T, O> {
      * @return type
      */
     protected abstract T type(String strType);
+    
+    /**
+     * creates an id from string
+     * @param strID id information
+     * @return id
+     */
+    protected abstract Object id(T type, String strId);
     
     /**
      * materializes an instance through given description
