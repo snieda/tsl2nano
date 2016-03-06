@@ -246,10 +246,10 @@ public class BeanContainer implements IBeanContainer {
     }
 
     /**
-     * @return see {@link #isEmptyServices()}
+     * @return see {@link #emptyServices}
      */
-    public boolean isEmptyServices() {
-        return emptyServices;
+    public static boolean isConnected() {
+        return isInitialized() && !self.emptyServices;
     }
     
     /**

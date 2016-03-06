@@ -50,7 +50,7 @@ public class BReference<O> extends AReference<Class<O>, O> {
 
     @Override
     protected O materialize(String description) {
-        if (!BeanContainer.isInitialized() || BeanContainer.instance().isEmptyServices())
+        if (!BeanContainer.isConnected())
             return null;
         Pointer tid = getTypeAndId(description);
         return BeanContainer.instance().getByID(tid.type, tid.id);

@@ -234,11 +234,11 @@ public class NumberUtil extends BitUtil {
     }
 
     /**
-     * generic comparator: first numbers then text
+     * generic comparator: first comparable(value) then comparabe(format(value))
      * 
      * @param df formatter to get a string representation of an object to compare
      * @param stringOnly true defines, all objects to compare are of type string (for performance aspects!)
-     * @return comparator using the string representation to compare
+     * @return comparator using interface comparable or, if not present, the string representation to compare
      */
     @SuppressWarnings("unchecked")
     public static Comparator getNumberAndStringComparator(final Format df, final boolean stringOnly) {

@@ -2799,8 +2799,7 @@ Net:Connection-->Link-->Cover(content, descriptor)
 * FormattedLogFactory per session
 * java 8 Probleme:
 	* ant start erst beim 2.mal
-	
-	* javascript engine = null
+	* (v) javascript engine = null
 * (v) bean.action<Name> --> annotation
 * (v) bean.action<Name>(arguments) --> create Dialog for action arguments
 * do more integration of packages like timesheet - perhaps link to the zip file
@@ -2838,5 +2837,4 @@ ponyorm:
 
 erdplus: kann nichts allgemeines exportieren
 
-* (x) collector.reset --> remove from context
-environment.keys
+* environment.keys

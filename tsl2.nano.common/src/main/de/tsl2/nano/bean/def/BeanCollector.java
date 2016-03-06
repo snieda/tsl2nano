@@ -115,7 +115,9 @@ public class BeanCollector<COLLECTIONTYPE extends Collection<T>, T> extends Bean
     protected transient IAction<COLLECTIONTYPE> searchAction;
     protected transient IAction<COLLECTIONTYPE> quickSearchAction;
     protected transient IAction<?> resetAction;
-    protected transient String searchStatus = Messages.getString("tsl2nano.searchdialog.nosearch");
+    protected transient String searchStatus = INIT_SEARCH_STATUS;
+
+    static final String INIT_SEARCH_STATUS = Messages.getString("tsl2nano.searchdialog.nosearch");
 
     /** whether to refresh data from beancontainer before opening edit-dialog */
     @Transient
@@ -128,7 +130,7 @@ public class BeanCollector<COLLECTIONTYPE extends Collection<T>, T> extends Bean
     private transient String asString;
 
     /** on each activation, we do a count on the database */
-    private transient long lastCount = -1;
+    private transient long lastCount = -2;
 
     /**
      * the beancollector should listen to any change of the search-panel (beanfinders range-bean) to know which action
@@ -533,6 +535,15 @@ public class BeanCollector<COLLECTIONTYPE extends Collection<T>, T> extends Bean
      */
     protected boolean hasSearchRequestChanged() {
         return hasSearchRequestChanged != null ? hasSearchRequestChanged : false;
+    }
+
+    /**
+     * wasActivated
+     * 
+     * @return true, if onActivation() was called before.
+     */
+    public boolean wasActivated() {
+        return lastCount > -2;
     }
 
     /**
@@ -1548,7 +1559,7 @@ public class BeanCollector<COLLECTIONTYPE extends Collection<T>, T> extends Bean
                     + StringUtil.substring(name,
                         null,
                         POSTFIX_COLLECTOR)
-                    + (lastCount != -1 ? " (" + lastCount + ")" : "");
+                    + (lastCount > -1 ? " (" + lastCount + ")" : "");
         }
         return asString;
     }

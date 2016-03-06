@@ -238,7 +238,8 @@ public class AttributeDefinition<T> implements IAttributeDefinition<T> {
             item = members.get(k);
             if (item != null) {
                 //first inject the child tree - be careful, don't produce a stackoverflow
-                if (item != instance && Util.isFrameworkClass(item.getClass()) && !item.getClass().isAnonymousClass() && !(item instanceof IAttribute) && !(item instanceof BeanDefinition))
+                if (item != instance && Util.isFrameworkClass(item.getClass()) && !item.getClass().isAnonymousClass()
+                    && !(item instanceof IAttribute) && !(item instanceof BeanDefinition))
                     injectIntoRuleCover(new PrivateAccessor(item), instance);
                 //now the own direct members
                 if (Proxy.isProxyClass(item.getClass())) {
@@ -671,7 +672,8 @@ public class AttributeDefinition<T> implements IAttributeDefinition<T> {
     /** see IVirtualDefinition#isRelation() */
     @Override
     public boolean isRelation() {
-        return BeanContainer.isInitialized() && BeanContainer.instance().isPersistable(getType());
+        return BeanContainer.isConnected()
+            && BeanContainer.instance().isPersistable(getType());
     }
 
     /**
@@ -963,8 +965,11 @@ public class AttributeDefinition<T> implements IAttributeDefinition<T> {
         return Util.toString(getClass(), "declaringClass: " + getType(), "temporal-type: " + temporalType, "name: "
             + getName(),
             "id: " + id, "unique: " + unique, "cascading: " + cascading, "composition: " + composition, "\nattribute: "
-                + attribute, "\nstatus: "
-                + status, "\nconstraints: "
-                + constraint, "\npresentable: " + presentable);
+                + attribute,
+            "\nstatus: "
+                + status,
+            "\nconstraints: "
+                + constraint,
+            "\npresentable: " + presentable);
     }
 }

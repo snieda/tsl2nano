@@ -610,7 +610,7 @@ public class Html5Presentation<T> extends BeanPresentationHelper<T> implements I
             panel = createCollector(session, panel, (BeanCollector) bean, interactive, fullwidth);
         } else {
             //prefill a new bean with the current navigation stack objects
-            if (!BeanContainer.instance().isEmptyServices() && BeanContainer.instance().isTransient(((Bean) bean).getInstance())) {
+            if (BeanContainer.isConnected() && BeanContainer.instance().isTransient(((Bean) bean).getInstance())) {
                 addSessionValues(session, (Bean) bean);
             }
             panel = createBean(session, panel, (Bean<?>) bean, interactive, fullwidth);

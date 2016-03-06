@@ -127,12 +127,12 @@ public class Statistic<COLLECTIONTYPE extends Collection<T>, T> extends BeanColl
             Map<String, Object> toMap = BeanUtil.toFormattedMap(to);
             CollectionUtil.removeEmptyEntries(fromMap);
             CollectionUtil.removeEmptyEntries(toMap);
-            String strFrom = fromMap.size() > 0 ? fromMap.toString() : "<" + ENV.translate("tsl2nano.all", false) + ">";
-            String strTo = toMap.size() > 0 ? toMap.toString() : "<" + ENV.translate("tsl2nano.all", false) + ">";
+            String strFrom = fromMap.size() > 0 ? fromMap.toString() : "(" + ENV.translate("tsl2nano.all", false) + ")";
+            String strTo = toMap.size() > 0 ? toMap.toString() : "(" + ENV.translate("tsl2nano.all", false) + ")";
             searchStatus =
                 "<div>" +
-                    ENV.translate("tsl2nano.summary", true) + ": " + ENV.translate("tsl2nano.from", true) +
-                    strFrom + " - " + ENV.translate("tsl2nano.to", true) + strTo
+                    ENV.translate("tsl2nano.summary", true) + ": " + ENV.translate("tsl2nano.range.from", true) +
+                    strFrom + " - " + ENV.translate("tsl2nano.range.to", true) + strTo
                     + "</div>";
         }
 

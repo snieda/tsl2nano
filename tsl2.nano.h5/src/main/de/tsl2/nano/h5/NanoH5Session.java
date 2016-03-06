@@ -43,11 +43,13 @@ import org.java_websocket.WebSocket;
 
 import de.tsl2.nano.action.IAction;
 import de.tsl2.nano.bean.BeanContainer;
+import de.tsl2.nano.bean.BeanUtil;
 import de.tsl2.nano.bean.def.Bean;
 import de.tsl2.nano.bean.def.BeanCollector;
 import de.tsl2.nano.bean.def.BeanDefinition;
 import de.tsl2.nano.bean.def.BeanPresentationHelper;
 import de.tsl2.nano.bean.def.BeanValue;
+import de.tsl2.nano.bean.def.IAttributeDefinition;
 import de.tsl2.nano.bean.def.IBeanCollector;
 import de.tsl2.nano.bean.def.IPageBuilder;
 import de.tsl2.nano.bean.def.IPresentable;
@@ -59,6 +61,7 @@ import de.tsl2.nano.core.ENV;
 import de.tsl2.nano.core.ISession;
 import de.tsl2.nano.core.Main;
 import de.tsl2.nano.core.ManagedException;
+import de.tsl2.nano.core.cls.BeanClass;
 import de.tsl2.nano.core.exception.ExceptionHandler;
 import de.tsl2.nano.core.exception.Message;
 import de.tsl2.nano.core.execution.Profiler;
@@ -233,7 +236,9 @@ public class NanoH5Session implements ISession<BeanDefinition>, Serializable {
      * @param i
      */
     BeanDefinition injectContext(BeanDefinition beandef) {
-        if (beandef.isMultiValue() && beandef.isDefault()) {
+        //inject search filter only on first time - before first search...
+        if (beandef.isMultiValue() && !((BeanCollector)beandef).wasActivated()) {
+            //fill search parameters...
             Iterator<IRange> ranges = this.context.get(IRange.class);
             Class type;
             IRange range = null;
@@ -242,13 +247,31 @@ public class NanoH5Session implements ISession<BeanDefinition>, Serializable {
                 type = range.getFrom() != null ? range.getFrom().getClass() : null;
                 if (beandef.getDeclaringClass().equals(type)) {
                     Bean brange = ((BeanCollector) beandef).getBeanFinder().getFilterRange();
-                    brange.getAttribute("from").setValue(range.getFrom());
-                    brange.getAttribute("to").setValue(range.getTo());
+                    brange.getAttribute("from").setValue(attachEntities(range.getFrom()));
+                    brange.getAttribute("to").setValue(attachEntities(range.getTo()));
                     break;
                 }
             }
         }
         return beandef;
+    }
+
+    /**
+     * reloads all referenced entities (having only an id)
+     * @param obj transient (example) entity holding attached entities as relations
+     * @return the obj itself
+     */
+    private Object attachEntities(Object obj) {
+        List<IAttributeDefinition<?>> attributes = Bean.getBean(obj).getBeanAttributes();
+        BeanValue bv;
+        for (IAttributeDefinition<?> a : attributes) {
+            if (a.isRelation() && (bv = (BeanValue)a).getValue() != null) {
+                Bean b = Bean.getBean(bv.getValue());
+                Object n = BeanContainer.instance().getByID(bv.getType(), b.getId());
+                bv.setValue(n);
+            }
+        }
+        return obj;
     }
 
     /**
@@ -356,9 +379,6 @@ public class NanoH5Session implements ISession<BeanDefinition>, Serializable {
                         msg = HtmlUtil.createMessagePage(ENV.translate("tsl2nano.info", true), msg);
                     }
                 } else {
-                    if (userResponse instanceof BeanDefinition) {
-                        ((BeanDefinition) userResponse).onActivation();
-                    }
 //                    if (!exceptionHandler.hasExceptions()) {
                     Message.send(exceptionHandler, createStatusText(startTime));
 //                    }
@@ -442,6 +462,7 @@ public class NanoH5Session implements ISession<BeanDefinition>, Serializable {
             msg = StringUtil.toFormattedString(exceptionHandler.clearExceptions(), 200, false);
         }
         BeanDefinition<?> model = injectContext(nav.next(returnCode));
+        model.onActivation();
         return model != null ? builder.build(this, model, msg, true, nav.toArray()) : server.createStartPage();
     }
 
@@ -791,6 +812,10 @@ public class NanoH5Session implements ISession<BeanDefinition>, Serializable {
         return false;
     }
 
+    /* *******************************************************************
+     * search algorithms
+     * ******************************************************************/
+    
     protected <T> boolean isSearchRequest(String actionId, BeanCollector<?, T> model) {
         return model.hasMode(IBeanCollector.MODE_SEARCHABLE) && actionId.equals(model.getSearchAction().getId());
     }
@@ -832,13 +857,45 @@ public class NanoH5Session implements ISession<BeanDefinition>, Serializable {
         }
         model.getSearchAction().activate();
         //TODO: put only, if range is filled - how can we evaluate that?
-        context.put(PREFIX_CONTEXT_RANGE + model.getDeclaringClass().getName(), model.getBeanFinder().getFilterRange().getInstance());
+        putSearchParameterToContext(model);
 //        } catch (Exception ex) {
 //            //don't break the panel-creation - the full exception will be handled in main-session-routine.
 //            LOG.error("couldn' fill search-panel values", ex);
 //        }
         //a search request will show the same search panel again - but with filtered data.
         return model;
+    }
+
+    /**
+     * putSearchParameterToContext
+     * @param model
+     */
+    private <T> void putSearchParameterToContext(BeanCollector<?, T> model) {
+        // create shallow copies of filter, from, to
+        IRange<?> filter = BeanUtil.clone(model.getBeanFinder().getFilterRange().getInstance());
+        //replace entities with copies holding only the id
+        Bean.getBean(filter).setValue("from", detachEntities(BeanUtil.clone(filter.getFrom())));
+        Bean.getBean(filter).setValue("to", detachEntities(BeanUtil.clone(filter.getTo())));
+        context.put(PREFIX_CONTEXT_RANGE + model.getDeclaringClass().getName(), filter);
+    }
+
+    /**
+     * replaces attached entities with copies holding only the id
+     * @param obj transient (example) entity holding attached entities as relations
+     * @return the obj itself
+     */
+    private Object detachEntities(Object obj) {
+        List<IAttributeDefinition<?>> attributes = Bean.getBean(obj).getBeanAttributes();
+        BeanValue bv;
+        for (IAttributeDefinition<?> a : attributes) {
+            if (a.isRelation() && (bv = (BeanValue)a).getValue() != null) {
+                Bean b = Bean.getBean(bv.getValue());
+                Object n = BeanClass.createInstance(a.getType());
+                Bean.getBean(n).getIdAttribute().setValue(n, b.getId());
+                bv.setValue(n);
+            }
+        }
+        return obj;
     }
 
     /**
@@ -957,7 +1014,7 @@ public class NanoH5Session implements ISession<BeanDefinition>, Serializable {
     public boolean check(long timeout, boolean throwException) {
         boolean authenicatedButNotConnected =
             nav.current() != null && !Persistence.class.isAssignableFrom(nav.current().getDeclaringClass())
-                && authorization != null && BeanContainer.instance().isEmptyServices();
+                && authorization != null && !BeanContainer.isConnected();
         boolean expired = getDuration() > timeout || nav == null || nav.isEmpty() || authenicatedButNotConnected;
         if (expired) {
             LOG.info("session " + this + " expired!");
