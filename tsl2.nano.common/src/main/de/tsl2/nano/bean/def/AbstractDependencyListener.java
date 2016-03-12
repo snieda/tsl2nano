@@ -43,6 +43,9 @@ public abstract class AbstractDependencyListener<T, E> implements IStatefulListe
     @Attribute(required=false)
     protected String propertyName;
 
+    /** copy of base instance holding all further changes */
+    transient protected Object changes;
+
     /**
      * constructor
      */
@@ -88,9 +91,35 @@ public abstract class AbstractDependencyListener<T, E> implements IStatefulListe
         }
     }
 
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public void handleEvent(E event) {
+        // TODO Auto-generated method stub
+        
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public Object getStateObject() {
+        return changes;
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public void setStateObject(Object changeObject) {
+        changes = changeObject;
+    }
+
     @Override
     public void reset() {
         attribute = null;
+        setStateObject(null);
     }
     
     @Override

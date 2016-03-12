@@ -966,7 +966,7 @@ public class BeanClass<T> implements Serializable {
      * 
      */
     public static <D> D copyValues(Object src, D dest, String... attributeNames) {
-        return copyValues(src, dest, false, attributeNames);
+        return copyValues(src, dest, false, false, attributeNames);
     }
 
     /**
@@ -979,10 +979,11 @@ public class BeanClass<T> implements Serializable {
      * @param dest destination bean (may be an extension of source bean - or simply a bean with some equal-named
      *            attributes)
      * @param onlyIfNotNull if true, the source values will not overwrite existing destination-values with null.
+     * @param onlyIfDestIsNull if true, the source values will not overwrite existing destination-values.
      * @param attributeNames (optional) fixed attribute names
      * @return destination object
      */
-    public static <D> D copyValues(Object src, D dest, boolean onlyIfNotNull, String... attributeNames) {
+    public static <D> D copyValues(Object src, D dest, boolean onlyIfNotNull, boolean onlyIfDestIsNull, String... attributeNames) {
         int copied = 0;
         if (attributeNames.length == 0) {
             final BeanClass srcClass = BeanClass.getBeanClass(src.getClass());
@@ -1006,7 +1007,7 @@ public class BeanClass<T> implements Serializable {
             }
             if (destAttribute.hasWriteAccess()) {
                 Object value = srcAttribute.getValue(src);
-                if (!onlyIfNotNull || value != null) {
+                if ((!onlyIfNotNull || value != null) && (!onlyIfDestIsNull || (destAttribute.getValue(dest) != null))) {
                     destAttribute.setValue(dest, value);
                     copied++;
                 }

@@ -16,6 +16,15 @@ package de.tsl2.nano.messaging;
  */
 public interface IStatefulListener<T> extends IListener<T> {
     /**
+     * @return current change object - may be null
+     */
+    Object getStateObject();
+    /**
+     * inject a change object to the observer
+     * @param changeObject
+     */
+    void setStateObject(Object changeObject);
+    /**
      * reset stateful data
      */
     void reset();

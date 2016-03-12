@@ -84,4 +84,7 @@ public class Main {
     public void start() {
         throw new UnsupportedOperationException();
     }
+    
+    public void reset() {
+    }
 }

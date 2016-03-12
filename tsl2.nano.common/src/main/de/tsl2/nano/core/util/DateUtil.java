@@ -13,13 +13,16 @@ import java.sql.Time;
 import java.text.DateFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
+import java.util.Arrays;
 import java.util.Calendar;
+import java.util.Collection;
 import java.util.Date;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
 
 import de.tsl2.nano.core.ManagedException;
 import de.tsl2.nano.util.Period;
+import static java.util.Calendar.*;
 
 /**
  * Utility-class for date and time operations. on default, it is not thread safe! call {@link #multithreaded} to be
@@ -44,9 +47,9 @@ public final class DateUtil {
     private static final int HOUR_TO_MINUTES = 60;
     private static final int DAY_TO_HOUR = 24;
 
-    public static final long MINUTE = MILLI_TO_MINUTES;
-    public static final long HOUR = MINUTE * HOUR_TO_MINUTES;
-    public static final long DAY = DAY_TO_HOUR * HOUR;
+    public static final long T_MINUTE = MILLI_TO_MINUTES;
+    public static final long T_HOUR = T_MINUTE * HOUR_TO_MINUTES;
+    public static final long T_DAY = DAY_TO_HOUR * T_HOUR;
 
     public static final Date MIN_DATE = getDate(0, 0, 0);
     public static final Date MAX_DATE = getDate(9999, -1, -1);
@@ -136,7 +139,7 @@ public final class DateUtil {
     public static Date addMinutes(Date date, int minutes) {
         final Calendar cal = getCalendar();
         cal.setTime(date);
-        cal.add(Calendar.MINUTE, minutes);
+        cal.add(MINUTE, minutes);
         return cal.getTime();
 
     }
@@ -706,18 +709,53 @@ public final class DateUtil {
         return cal.getTime();
     }
 
+    /*
+     * Workdays, Holidays, ...
+     */
+    
+    /**
+     * isWorkDay
+     * @param d day to investigate
+     * @param holidays specific holidays
+     * @return true, if given date is not a weekend or holiday
+     */
+    public static boolean isWorkDay(Date d, Collection<Date> holidays) {
+        return isDayOfWeek(d, MONDAY, TUESDAY, WEDNESDAY, THURSDAY, FRIDAY) && !holidays.contains(d);
+    }
+    
+    /**
+     * isDayOfWeek
+     * @param d day to check
+     * @param weekDays expected weekdays
+     * @return true, if given day is one of given weekdays
+     */
+    private static boolean isDayOfWeek(Date d, int...weekDays) {
+        return isDayOfWeek(getCalendar(), weekDays);
+    }
+
+    /**
+     * isDayOfWeek
+     * @param d day to check
+     * @param weekDays expected weekdays
+     * @return true, if given day is one of given weekdays
+     */
+    private static boolean isDayOfWeek(Calendar cal, int...weekDays) {
+        return Arrays.asList(weekDays).contains(cal.get(DAY_OF_WEEK));
+    }
+
     /**
      * getNextWorkday
      * 
-     * @param source date to change
-     * @return next workday
+     * @param d date to start from
+     * @param holidays specific holidays
+     * @return next workday, that is not weekend or holiday
      */
-    public static Date getNextWorkday(Date source) {
+    public static Date getNextWorkday(Date d, Collection<Date> holidays) {
         final Calendar cal = getCalendar();
-        cal.setTime(source);
+        cal.setTime(d);
 
         while (true) {
-            if (cal.get(Calendar.DAY_OF_WEEK) == 1 || cal.get(Calendar.DAY_OF_WEEK) == 7) {
+            if (!isWorkDay(cal.getTime(), holidays)) {
                 cal.add(Calendar.DAY_OF_MONTH, 1);
             } else {
                 return cal.getTime();
@@ -726,6 +764,20 @@ public final class DateUtil {
 
     }
 
+    /**
+     * getWorkdayCount
+     * @param begin day to start from
+     * @param end day to end on
+     * @param holidays specific holidays
+     * @return count of workdays between begin and end.
+     */
+    public static int getWorkdayCount(Date begin, Date end, Collection<Date> holidays) {
+        int c = 0;
+        while (!(begin = getNextWorkday(begin, holidays)).after(end))
+            c++;
+        return c;
+    }
+    
     /**
      * checks, if the two periods intersect. use {@link #MIN_DATE} and {@link #MAX_DATE} for limits. if to1 is null, to1
      * will be {@link #MAX_DATE}. if to2 is null, to2 will be {@link #MAX_DATE}.

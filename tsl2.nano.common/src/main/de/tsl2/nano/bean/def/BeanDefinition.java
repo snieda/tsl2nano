@@ -933,7 +933,7 @@ public class BeanDefinition<T> extends BeanClass<T> implements IPluggable<BeanDe
                         beandef = (BeanDefinition<T>) beandef.extension.to(beandef);
                     }
                     //perhaps, the file defines another bean-name or bean-type
-                    if ((name == null || name.equalsIgnoreCase(beandef.getName()) || name.equalsIgnoreCase(FileUtil
+                    if ((name == null || beandef.isVirtual() || name.equalsIgnoreCase(beandef.getName()) || name.equalsIgnoreCase(FileUtil
                         .getValidFileName(beandef.getName()))
                         && (type == null || type.equals(beandef.getClazz())))) {
                         virtualBeanCache.add(beandef);
@@ -1110,7 +1110,7 @@ public class BeanDefinition<T> extends BeanClass<T> implements IPluggable<BeanDe
         saveResourceEntries();
         //non-serializable actions will be removed - so we add them after serialization
         Collection<IAction> actionCopy = actions != null ? new ArrayList<IAction>(actions) : new ArrayList<IAction>();
-        saveBeanDefinition(getDefinitionFile(getName()));
+        saveBeanDefinition(getDefinitionFile((isVirtual() ? PREFIX_VIRTUAL : "") + getName()));
         if (actions == null)
             actions = actionCopy;
         else {
@@ -1164,16 +1164,6 @@ public class BeanDefinition<T> extends BeanClass<T> implements IPluggable<BeanDe
             types.add(getBeanDefinition(name));
         }
         return types;
-    }
-
-    /**
-     * saveVirtualDefinition
-     * 
-     * @param name
-     */
-    public void saveVirtualDefinition(String name) {
-        setName(PREFIX_VIRTUAL + name);
-        saveDefinition();
     }
 
     /**

@@ -283,7 +283,7 @@ public class BeanCollector<COLLECTIONTYPE extends Collection<T>, T> extends Bean
     public void onActivation() {
         super.onActivation();
         iterator = null;
-        if (!isStaticCollection) {
+        if (!isStaticCollection && Util.isEmpty(collection)) {
             long countCheck = ENV.get("beancollector.do.search.on.count.lowerthan", 20);
             boolean dosearch = countCheck > 0 && count() < countCheck;
 
@@ -400,6 +400,7 @@ public class BeanCollector<COLLECTIONTYPE extends Collection<T>, T> extends Bean
                     Collection<T> result = authorized(collection);
                     searchStatus = Messages.getFormattedString("tsl2nano.searchdialog.searchresultcount",
                         result.size());
+                    sort();
                     return result;
                 }
 
@@ -742,7 +743,7 @@ public class BeanCollector<COLLECTIONTYPE extends Collection<T>, T> extends Bean
             }
             names.add(a.getName());
         }
-        return copyValues(selectedItem, createInstance(), true, names.toArray(new String[0]));
+        return copyValues(selectedItem, createInstance(), true, false, names.toArray(new String[0]));
     }
 
     /**

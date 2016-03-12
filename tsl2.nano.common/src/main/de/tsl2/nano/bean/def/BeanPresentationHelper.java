@@ -1267,7 +1267,7 @@ public class BeanPresentationHelper<T> {
     }
 
     public void reset() {
-        BeanContainer.reset();
+//        BeanContainer.reset();
         Bean.clearCache();
         NetworkClassLoader.resetUnresolvedClasses(ENV.getConfigPath());
         ENV.reload();
@@ -1351,6 +1351,8 @@ public class BeanPresentationHelper<T> {
             "icons/reload.png") {
             @Override
             public Object action() throws Exception {
+                //TODO should we reset the whole application - closing all sessions?
+//                session.getApplication().reset();
                 ENV.get(BeanPresentationHelper.class).reset();
                 return page("configuration refreshed");
             }
@@ -1415,7 +1417,7 @@ public class BeanPresentationHelper<T> {
 
                     @Override
                     public boolean isEnabled() {
-                        return super.isEnabled() && bean.isPersistable() && !bean.isMultiValue();
+                        return super.isEnabled() && bean != null && bean.isPersistable() && !bean.isMultiValue();
                     }
                 });
             }

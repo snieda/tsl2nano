@@ -32,8 +32,6 @@ import java.util.UUID;
 
 import org.apache.commons.logging.Log;
 
-import sun.reflect.generics.reflectiveObjects.ParameterizedTypeImpl;
-
 import de.tsl2.nano.bean.def.Bean;
 import de.tsl2.nano.bean.def.BeanCollector;
 import de.tsl2.nano.bean.def.BeanDefinition;
@@ -89,16 +87,16 @@ public class BeanUtil extends ByteUtil {
      * to copy only not-null values, use {@link #addValues(Object, Object, String...)}.
      */
     public static <D> D copyValues(Object src, D dest, String... attributeNames) {
-        return BeanClass.copyValues(src, dest, false, attributeNames);
+        return BeanClass.copyValues(src, dest, false, false, attributeNames);
     }
 
     /**
-     * copies all not-null values to dest.
+     * copies all not-null values to dest. if overwrite is true, existing dest values will be overwritten.
      * <p/>
      * delegates to {@link BeanClass#copyValues(Object, Object, String...)}.
      */
-    public static <D> D addValues(Object src, D dest, String... attributeNames) {
-        return BeanClass.copyValues(src, dest, true, attributeNames);
+    public static <D> D merge(Object src, D dest, boolean overwrite, String... attributeNames) {
+        return BeanClass.copyValues(src, dest, true, !overwrite, attributeNames);
     }
 
     /**
