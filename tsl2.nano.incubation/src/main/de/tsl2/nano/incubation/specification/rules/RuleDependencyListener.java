@@ -33,17 +33,13 @@ import de.tsl2.nano.util.PrivateAccessor;
  * @author Tom
  * @version $Revision$
  */
-public class RuleDependencyListener<T, E extends ChangeEvent> extends AbstractDependencyListener<T, E> implements
-        Serializable {
+public class RuleDependencyListener<T, E extends ChangeEvent> extends AbstractDependencyListener<T, E> implements Serializable {
     /** serialVersionUID */
     private static final long serialVersionUID = 5298740573340818934L;
     private static final Log LOG = LogFactory.getLog(RuleDependencyListener.class);
 
     @Attribute
     String ruleName;
-
-    /** copy of base instance holding all further changes */
-    transient Object changes;
 
     /**
      * constructor
@@ -66,6 +62,7 @@ public class RuleDependencyListener<T, E extends ChangeEvent> extends AbstractDe
     @SuppressWarnings("unchecked")
     @Override
     public void handleEvent(E event) {
+        initAttribute(event);
         ((IValueAccess<T>) getAttribute()).setValue(evaluate(event));
     }
 
@@ -73,11 +70,20 @@ public class RuleDependencyListener<T, E extends ChangeEvent> extends AbstractDe
      * evaluate a new value through a rule. the events source (a beanvalue) and all parents attributes will be given to
      * the rule as arguments.
      * 
-     * @param source new foreign value
+     * @param evt event holding the new foreign value
      * @return result of executing a rule.
      */
     @SuppressWarnings({ "unchecked", "rawtypes" })
-    protected T evaluate(E source) {
+    protected T evaluate(E evt) {
+        BeanValue srcValue = initAttribute(evt);
+        Bean<Object> bean = registerChange(evt);
+        Map<String, Object> context = bean.toValueMap(null, false, false, false);
+        context.put(StringUtil.substring(attributeID, null, ".", true), srcValue.getInstance());
+//        context.put(srcValue.getName(), source.newValue);
+        return (T) ENV.get(RulePool.class).get(ruleName).run(context);
+    }
+
+    protected BeanValue initAttribute(E source) {
         BeanValue srcValue = (BeanValue) source.getSource();
         if (getAttribute() == null) {
             LOG.info("trying to materialize attribute <" + attributeID + "> with <event.source> instance:"
@@ -88,40 +94,32 @@ public class RuleDependencyListener<T, E extends ChangeEvent> extends AbstractDe
         else if (!getAttribute().getDeclaringClass().isAssignableFrom(srcValue.getDeclaringClass()))
             throw new IllegalArgumentException("event.source beanvalue should have an declaring class "
                 + attribute.getDeclaringClass() + " but was: " + srcValue.getDeclaringClass());
-        Bean<Object> bean = registerChange(source);
-        Map<String, Object> context = bean.toValueMap(null, false, false, false);
-        context.put(StringUtil.substring(attributeID, null, ".", true), srcValue.getInstance());
-//        context.put(srcValue.getName(), source.newValue);
-        return (T) ENV.get(RulePool.class).get(ruleName).run(context);
+        return srcValue;
     }
 
     /**
      * registerChange
      * 
-     * @param source
+     * @param evt
      * @param srcValue
      * @return
      */
     @SuppressWarnings("rawtypes")
-    private Bean<Object> registerChange(E source) {
-        BeanValue srcValue = (BeanValue) source.getSource();
-        if (changes == null)
+    private Bean<Object> registerChange(E evt) {
+        BeanValue srcValue = (BeanValue) evt.getSource();
+        if (changes == null) //workaround, if no server has set called setChangeObject before
             changes = BeanUtil.copy(srcValue.getInstance());
+//        else
+//            BeanUtil.merge(srcValue.getInstance(), changes, false);
         Bean<Object> bean = Bean.getBean(changes);
         //don't call the listener on setting a new value
         new PrivateAccessor(bean.getAttribute(srcValue.getName())).set("eventController", null);
 //        bean.getAttribute(srcValue.getName()).changeHandler().dispose();
-        if (source.newValue instanceof String)
-            bean.setParsedValue(srcValue.getName(), (String) source.newValue);
+        if (evt.newValue instanceof String)
+            bean.setParsedValue(srcValue.getName(), (String) evt.newValue);
         else
-            bean.setValue(srcValue.getName(), source.newValue);
+            bean.setValue(srcValue.getName(), evt.newValue);
         return bean;
-    }
-
-    @Override
-    public void reset() {
-        super.reset();
-        changes = null;
     }
 
     @Override
