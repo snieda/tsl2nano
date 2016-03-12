@@ -9,10 +9,13 @@
  */
 package de.tsl2.nano.h5.websocket;
 
+import java.io.Closeable;
+import java.io.IOException;
 import java.util.Set;
 
 import org.java_websocket.WebSocket;
 
+import de.tsl2.nano.core.ManagedException;
 import de.tsl2.nano.core.exception.ExceptionHandler;
 import de.tsl2.nano.h5.NanoH5Session;
 
@@ -22,7 +25,7 @@ import de.tsl2.nano.h5.NanoH5Session;
  * @author Tom, Thomas Schneider
  * @version $Revision$
  */
-public class WebSocketExceptionHandler extends ExceptionHandler {
+public class WebSocketExceptionHandler extends ExceptionHandler implements Closeable{
     NanoWebSocketServer socket;
 
     /**
@@ -53,5 +56,17 @@ public class WebSocketExceptionHandler extends ExceptionHandler {
                 webSocket.send(e.getMessage());
             }
 //        }
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public void close() throws IOException {
+        try {
+            socket.stop();
+        } catch (InterruptedException e) {
+            ManagedException.forward(e);
+        }
     }
 }

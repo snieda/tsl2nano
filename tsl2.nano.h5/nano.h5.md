@@ -2838,3 +2838,14 @@ ponyorm:
 erdplus: kann nichts allgemeines exportieren
 
 * environment.keys
+* Messages.send uses ENV to evaluate the right exceptionhandler
+* only singelton beancontainer with one user
+* session hash id?
+* timesheet: pause
+* holidays, workdays
+* assign + cancel: new assignment will be shown
+* timestamp --> date ?
+* Feiertage:
+** http://feiertage.jarmedia.de/api/?jahr=2014&nur_land=BY
+** (v) http://holidays.kayaposoft.com/public_holidays.php?country=deu&region=Bavaria&year=2016#
+** ICSCalendarImport implementieren

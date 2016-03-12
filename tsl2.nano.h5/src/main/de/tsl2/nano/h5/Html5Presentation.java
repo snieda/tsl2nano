@@ -103,6 +103,7 @@ import de.tsl2.nano.h5.expression.Query;
 import de.tsl2.nano.h5.expression.QueryPool;
 import de.tsl2.nano.h5.websocket.WSEvent;
 import de.tsl2.nano.h5.websocket.WebSocketRuleDependencyListener;
+import de.tsl2.nano.incubation.specification.actions.ActionPool;
 import de.tsl2.nano.incubation.specification.rules.RuleDependencyListener;
 import de.tsl2.nano.incubation.specification.rules.RulePool;
 import de.tsl2.nano.messaging.ChangeEvent;
@@ -280,7 +281,7 @@ public class Html5Presentation<T> extends BeanPresentationHelper<T> implements I
                     }
                     Statistic s = new Statistic(bean.getDeclaringClass(), from.getValue(), to.getValue());
                     s.getPresentable().setIcon("icons/barchart.png");
-                    s.saveVirtualDefinition("statistics " + bean);
+                    s.saveDefinition();
                     return s;
                 }
 
@@ -297,6 +298,7 @@ public class Html5Presentation<T> extends BeanPresentationHelper<T> implements I
     public void reset() {
         ENV.get(RulePool.class).reset();
         ENV.get(QueryPool.class).reset();
+        ENV.get(ActionPool.class).reset();
         super.reset();
         //TODO: clear template cache
     }
@@ -417,7 +419,7 @@ public class Html5Presentation<T> extends BeanPresentationHelper<T> implements I
                     image);
             } else {
                 String docURL;
-                if (ENV.class.isAssignableFrom(bean.getClazz()))
+                if (bean != null && ENV.class.isAssignableFrom(bean.getClazz()))
                     docURL = new File("./").getAbsolutePath();
                 else
                     docURL = ENV.getConfigPath() + "doc/" + StringUtil.toFirstLower(title) + "/index.html";

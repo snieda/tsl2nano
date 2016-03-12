@@ -196,7 +196,7 @@ public class MyApp extends NanoH5 {
             }
         });
         timeActionBean.saveDefinition();
-        controller.saveVirtualDefinition(timeActionBean.getName() + "-controller");
+        controller.saveDefinition();
 
         /*
          * define a specific bean-collector presenting a query (SQL or JPA-QL)
@@ -209,7 +209,7 @@ public class MyApp extends NanoH5 {
         queryPool.add(query);
 
         QueryResult qr = new QueryResult<>(query.getName());
-        qr.saveVirtualDefinition(query.getName());
+        qr.saveDefinition();
 
         /*
          * define own beans to present your entities another way

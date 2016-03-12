@@ -93,7 +93,7 @@ public class Statistic<COLLECTIONTYPE extends Collection<T>, T> extends BeanColl
         this.from = from;
         this.to = to;
         this.beanType = beanType;
-        collection = (COLLECTIONTYPE) create(beanType, columnNames.getList(), from, to);
+//        collection = (COLLECTIONTYPE) create(beanType, columnNames.getList(), from, to);
         isStaticCollection = true;
     }
 

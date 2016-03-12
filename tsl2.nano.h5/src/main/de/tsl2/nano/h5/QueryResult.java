@@ -62,7 +62,7 @@ public class QueryResult<COLLECTIONTYPE extends Collection<T>, T> extends BeanCo
     public QueryResult(String queryName) {
         super();
         this.queryName = queryName;
-        this.name = "Query: " + queryName;
+        this.name = queryName;
         initDeserialization();
     }
 

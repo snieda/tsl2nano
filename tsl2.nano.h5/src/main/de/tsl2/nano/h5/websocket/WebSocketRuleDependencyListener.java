@@ -39,8 +39,9 @@ public class WebSocketRuleDependencyListener<T> extends RuleDependencyListener<T
     }
 
     @Override
-    public void handleEvent(WSEvent source) {
+    public void handleEvent(WSEvent evt) {
+        initAttribute(evt);
         //the websocket-listener sends the result to the edit-field - so it must be formatted
-        WebSocketDependencyListener.sendValue(attributeID, propertyName, getAttribute().getFormat().format(evaluate(source)));
+        WebSocketDependencyListener.sendValue(attributeID, propertyName, getAttribute().getFormat().format(evaluate(evt)));
     }
 }

@@ -218,7 +218,7 @@ public class Timesheet extends NanoH5App {
         /*
          * add dependency listeners on rules
          */
-        long dayTimeFraction = DateUtil.DAY;
+        long dayTimeFraction = DateUtil.T_DAY;
         RuleScript<BigDecimal> calcTime = new RuleScript<BigDecimal>("calcTime",
             "var from = fromtime != null ? fromtime.getTime() " + "% " + dayTimeFraction + " : 0;" +
                 "var to = totime != null ? totime.getTime()" + "% " + dayTimeFraction + " : 0;" +
@@ -275,7 +275,7 @@ public class Timesheet extends NanoH5App {
         charge.saveDefinition();
 
         //TODO: Statistics executes queries immediately to evaluate group-by column names
-        new Statistic<>(Charge.class).saveVirtualDefinition("statistics " + Charge.class.getSimpleName());
+        new Statistic<>(Charge.class).saveDefinition();
 
         /*
          * statistic queries
@@ -409,7 +409,7 @@ public class Timesheet extends NanoH5App {
             }
         });
         timeActionBean.saveDefinition();
-        controller.saveVirtualDefinition(timeActionBean.getName() + "-controller");
+        controller.saveDefinition();
 
         /*
          * define own beans to present your entities another way

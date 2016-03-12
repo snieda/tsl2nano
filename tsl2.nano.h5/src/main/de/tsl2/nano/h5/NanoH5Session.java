@@ -20,6 +20,7 @@ import static de.tsl2.nano.h5.NanoHTTPD.HTTP_BADREQUEST;
 import static de.tsl2.nano.h5.NanoHTTPD.MIME_HTML;
 
 import java.io.File;
+import java.io.IOException;
 import java.io.Serializable;
 import java.lang.Thread.UncaughtExceptionHandler;
 import java.net.InetAddress;
@@ -338,6 +339,7 @@ public class NanoH5Session implements ISession<BeanDefinition>, Serializable {
      */
     public Response serve(String uri, String method, Properties header, Properties parms, Properties files) {
         String msg = "[undefined]";
+        boolean showStatus = false;
         try {
             Thread.currentThread().setContextClassLoader(sessionClassloader);
             LOG.info(String.format("serving request:\n\turi: %s\n\tmethod: %s\n\theader: %s\n\tparms: %s\n\tfiles: %s",
@@ -380,8 +382,8 @@ public class NanoH5Session implements ISession<BeanDefinition>, Serializable {
                     }
                 } else {
 //                    if (!exceptionHandler.hasExceptions()) {
-                    Message.send(exceptionHandler, createStatusText(startTime));
 //                    }
+                    showStatus = true;
                     msg = getNextPage(userResponse);
                 }
                 response = server.createResponse(msg);
@@ -412,6 +414,8 @@ public class NanoH5Session implements ISession<BeanDefinition>, Serializable {
         //TODO: eliminate bug in NanoHTTPD not resetting uri...
 //        header.clear();
 //        response.header.remove(uri);
+        if (showStatus)
+            Message.send(exceptionHandler, createStatusText(startTime));
         return response;
     }
 
@@ -424,6 +428,14 @@ public class NanoH5Session implements ISession<BeanDefinition>, Serializable {
         authorization = null;
         builder = null;
         sessionClassloader = null;
+        if (exceptionHandler instanceof WebSocketExceptionHandler) {
+            try {
+                ((WebSocketExceptionHandler)exceptionHandler).close();
+            } catch (IOException e) {
+                ManagedException.forward(e);
+            }
+        }
+        exceptionHandler = null;
         context = null;
     }
 

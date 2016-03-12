@@ -45,6 +45,7 @@ import de.tsl2.nano.core.AppLoader;
 import de.tsl2.nano.core.ENV;
 import de.tsl2.nano.core.ManagedException;
 import de.tsl2.nano.core.Messages;
+import de.tsl2.nano.core.classloader.NetworkClassLoader;
 import de.tsl2.nano.core.cls.BeanClass;
 import de.tsl2.nano.core.exception.Message;
 import de.tsl2.nano.core.execution.CompatibilityLayer;
@@ -58,11 +59,14 @@ import de.tsl2.nano.core.util.NumberUtil;
 import de.tsl2.nano.core.util.StringUtil;
 import de.tsl2.nano.core.util.Util;
 import de.tsl2.nano.execution.SystemUtil;
+import de.tsl2.nano.h5.expression.QueryPool;
 import de.tsl2.nano.h5.expression.RuleExpression;
 import de.tsl2.nano.h5.expression.SQLExpression;
 import de.tsl2.nano.h5.navigation.EntityBrowser;
 import de.tsl2.nano.h5.navigation.IBeanNavigator;
 import de.tsl2.nano.h5.navigation.Workflow;
+import de.tsl2.nano.incubation.specification.actions.ActionPool;
+import de.tsl2.nano.incubation.specification.rules.RulePool;
 import de.tsl2.nano.persistence.GenericLocalBeanContainer;
 import de.tsl2.nano.persistence.Persistence;
 import de.tsl2.nano.persistence.PersistenceClassLoader;
@@ -323,7 +327,7 @@ public class NanoH5 extends NanoHTTPD implements ISystemConnector<Persistence> {
             session = createSession(requestor);
         } else {//perhaps session was interrupted/closed but not removed
             boolean done = session.nav != null && session.nav.done();
-            if (!session.check(ENV.get("session.timeout.millis", 12 * DateUtil.HOUR), false)) {
+            if (!session.check(ENV.get("session.timeout.millis", 12 * DateUtil.T_HOUR), false)) {
                 //TODO: show page with 'session expired'
                 // session expired!
                 sessions.remove(session.inetAddress);
@@ -826,14 +830,21 @@ public class NanoH5 extends NanoHTTPD implements ISystemConnector<Persistence> {
         return ENV.getTempPath() + START_HTML_FILE;
     }
 
-    protected void reset() {
+    @Override
+    public void reset() {
         String configPath = ENV.get(ENV.KEY_CONFIG_PATH, "config");
 
+        ENV.get(RulePool.class).reset();
+        ENV.get(QueryPool.class).reset();
+        ENV.get(ActionPool.class).reset();
+        BeanContainer.reset();
+        Bean.clearCache();
+
         sessions.clear();
-        ENV.reset();
+        ENV.reload();
         ENV.setProperty(ENV.KEY_CONFIG_PATH, configPath);
         ENV.setProperty("service.url", serviceURL.toString());
-        Bean.clearCache();
+        NetworkClassLoader.resetUnresolvedClasses(ENV.getConfigPath());
         Thread.currentThread().setContextClassLoader(appstartClassloader);
         createPageBuilder();
         builder = ENV.get(IPageBuilder.class);

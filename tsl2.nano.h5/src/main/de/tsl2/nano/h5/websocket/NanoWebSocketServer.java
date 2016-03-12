@@ -13,24 +13,28 @@ import java.net.InetSocketAddress;
 import java.net.UnknownHostException;
 import java.nio.ByteBuffer;
 import java.util.Collection;
+import java.util.HashMap;
+import java.util.Map;
 
 import org.apache.commons.logging.Log;
 import org.java_websocket.WebSocket;
 import org.java_websocket.handshake.ClientHandshake;
 import org.java_websocket.server.WebSocketServer;
 
+import de.tsl2.nano.bean.BeanUtil;
 import de.tsl2.nano.bean.def.Attachment;
 import de.tsl2.nano.bean.def.Bean;
 import de.tsl2.nano.bean.def.BeanDefinition;
 import de.tsl2.nano.bean.def.IValueDefinition;
 import de.tsl2.nano.bean.def.ValueExpression;
-import de.tsl2.nano.core.ENV;
 import de.tsl2.nano.core.ISession;
 import de.tsl2.nano.core.log.LogFactory;
 import de.tsl2.nano.core.util.FileUtil;
 import de.tsl2.nano.core.util.StringUtil;
 import de.tsl2.nano.h5.configuration.BeanConfigurator;
 import de.tsl2.nano.math.vector.Point;
+import de.tsl2.nano.messaging.IListener;
+import de.tsl2.nano.messaging.IStatefulListener;
 
 /**
  * Html5 WebSocket Server to provide a rich client gui interaction.
@@ -49,6 +53,9 @@ public class NanoWebSocketServer extends WebSocketServer {
      * to (inside the environments temp path). this name is volatile and will be reset on next message.
      */
     String attachment_info;
+
+    /** holding a temp change object for each working object - to be injected into websocket listeners. */
+    private Map<Class, Object> changeObjects;
 
     public static final String PRE_TARGET = "/";
     public static final String PRE_ID = "@";
@@ -105,7 +112,7 @@ public class NanoWebSocketServer extends WebSocketServer {
     public void onMessage(WebSocket conn, String msg) {
         LOG.debug("receiving message: '" + msg + "' from " + conn);
         //if we are in configuration mode, do nothing
-        Package pck = ((BeanDefinition)session.getWorkingObject()).getDeclaringClass().getPackage();
+        Package pck = ((BeanDefinition) session.getWorkingObject()).getDeclaringClass().getPackage();
         if (pck.equals(BeanConfigurator.class.getPackage()) || pck.equals(BeanDefinition.class.getPackage())) {
             return;
         }
@@ -131,9 +138,11 @@ public class NanoWebSocketServer extends WebSocketServer {
             case TARGET_DEPENDENCY:
                 if (beandef instanceof Bean) {
                     IValueDefinition attribute = ((Bean) beandef).getAttribute(attr);
+                    WSEvent evt = new WSEvent(attribute, attribute.getValue(), value, (int) pos.x(), (int) pos.y());
+                    //let all listeners work on the same 'change' object (a temp copy of the bean, holding all temp changes)
+                    injectChangeObject(attribute);
                     //to take effect, use dependency listeners
-                    attribute.changeHandler().fireEvent(
-                        new WSEvent(attribute, attribute.getValue(), value, (int) pos.x(), (int) pos.y()));
+                    attribute.changeHandler().fireEvent(evt);
                 }
                 break;
             case TARGET_ATTACHMENT:
@@ -148,6 +157,38 @@ public class NanoWebSocketServer extends WebSocketServer {
                 throw new IllegalArgumentException();
             }
         }
+    }
+
+    /**
+     * injects a temporary 'change' object, holding all changes to the current parent bean of the given attribute. will
+     * only be done on first time - all listeners will get the same change instance!
+     * 
+     * @param attribute to get the parent bean and the event handler from
+     */
+    @SuppressWarnings("rawtypes")
+    private void injectChangeObject(IValueDefinition attribute) {
+        Object changeObject = null;
+        Collection<IListener> listeners = attribute.changeHandler().getListeners(WSEvent.class);
+        IStatefulListener obs;
+        for (IListener l : listeners) {
+            if ((obs = (IStatefulListener) l).getStateObject() == null) {
+                if (changeObject == null)
+                    changeObject = getChangeObject(attribute);
+                obs.setStateObject(changeObject);
+            }
+        }
+    }
+
+    @SuppressWarnings("rawtypes")
+    private Object getChangeObject(IValueDefinition attribute) {
+        Object o;
+        if (changeObjects == null)
+            changeObjects = new HashMap<>();
+        if ((o = changeObjects.get(attribute.getDeclaringClass())) == null) {
+            o = BeanUtil.copy(attribute.getInstance());
+            changeObjects.put(attribute.getDeclaringClass(), o);
+        }
+        return o;
     }
 
     @Override
