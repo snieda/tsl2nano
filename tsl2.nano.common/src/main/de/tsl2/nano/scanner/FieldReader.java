@@ -14,6 +14,7 @@ import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.LinkedList;
 import java.util.List;
@@ -24,7 +25,10 @@ import java.util.Scanner;
 import java.util.Set;
 import java.util.regex.MatchResult;
 
+import org.apache.tools.ant.filters.StringInputStream;
+
 import de.tsl2.nano.collection.FloatArray;
+import de.tsl2.nano.core.ICallback;
 import de.tsl2.nano.core.util.FileUtil;
 
 /**
@@ -339,6 +343,25 @@ public class FieldReader {
         return p;
     }
 
+    /**
+     * runs through the stream, searching for the given blocks and providing each block content as property map to the callback. 
+     * @param stream source stream
+     * @param blockExpression defining the content of one block to read the properties from
+     * @param keyValueDelimiter key-value delimiter
+     * @param callback worker
+     * @return loop count
+     */
+    public static long forEach(InputStream stream, String blockExpression, String keyValueDelimiter, ICallback callback) {
+        Scanner sc = new Scanner(stream);
+        long count = 0;
+        while(sc.hasNext(blockExpression)) {
+            callback.run(read(new StringInputStream(sc.next(blockExpression)), keyValueDelimiter, DEL_PROP, Locale.getDefault(), false));
+            count++;
+        }
+        sc.close();
+        return count;
+    }
+    
     /**
      * delegates to {@link #extract(String, String, Locale)}
      */
