@@ -89,13 +89,13 @@ public class Rule<T> extends AbstractRule<T> {
         if (!initialized) {
             importSubRules();
         }
-        arguments = checkedArguments(arguments, ENV.get("application.mode.strict", false));
+        arguments = checkedArguments(arguments, ENV.get("app.mode.strict", false));
         operator.reset();
         //in generics it is not possible to cast from Map(String,?) to Map(CharSequence, ?)
         Object a = arguments;
         
         //calculate the numeric and boolean operations
-        LOG.debug("running rule <" + toString() + "> on arguemnts: " + a);
+        LOG.debug("running rule <" + toString() + "> on arguments: " + a);
         T result = (T) operator.eval((CharSequence)getOperation(), (Map<CharSequence, Object>) a);
         checkConstraint(Operator.KEY_RESULT, result);
         return result;

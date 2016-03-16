@@ -87,7 +87,8 @@ set the following jvm properties:
 			<property name="sh.compile.classpath2" value=".." />
 			<property name="sh.compile.classpath3" value="../tsl2.nano.serviceaccess" />
 			<property name="sh.compile.classpath4" value="../tsl2.nano.directaccess" />
-			<property name="sh.compile.exclude3" value="src/sample/**" />
+			<property name="sh.jar.exclude" value="src/sample/**" />
+			<property name="sh.jar.exclude2" value="src/test/**" />
 			<property name="target.dir" value="../../target" />
 		</ant>
 

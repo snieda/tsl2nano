@@ -516,7 +516,7 @@ public class IncubationTest {
         assertTrue(cmdManager.canRedo());
 
         log("text   : " + BeanUtil.copy(context));
-        assertEquals(origin, context);
+        assertEquals(origin.toString(), context.toString());
 
         cmdManager.redo();
         cmdManager.redo();
@@ -526,7 +526,7 @@ public class IncubationTest {
         assertFalse(cmdManager.canRedo());
 
         log("re-done: " + context);
-        assertEquals(changed, context);
+        assertEquals(changed.toString(), context.toString());
     }
 
     @Test

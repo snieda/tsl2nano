@@ -19,6 +19,7 @@ import javax.script.ScriptEngineManager;
 import org.apache.commons.logging.Log;
 import org.simpleframework.xml.core.Commit;
 
+import de.tsl2.nano.core.AppLoader;
 import de.tsl2.nano.core.ManagedException;
 import de.tsl2.nano.core.log.LogFactory;
 import de.tsl2.nano.core.util.StringUtil;
@@ -57,6 +58,8 @@ public class ActionScript<T> extends AbstractRunnable<T> {
     }
 
     public static ScriptEngine createEngine() {
+//        if (!AppLoader.hasCompiler())
+//           throw new IllegalStateException("can't start javascript engine on jre environment. a full jdk must be present!");
         //java7 provides rhino as javascript, java8 provides nashorn
         ScriptEngine engine = new ScriptEngineManager().getEngineByName(isJava8() ? "nashorn" : "javascript");
         if (engine == null)
@@ -67,7 +70,7 @@ public class ActionScript<T> extends AbstractRunnable<T> {
     }
 
     private static boolean isJava8() {
-        return System.getProperty("java.runtime.version").contains("1.8.");
+        return AppLoader.getJavaVersion().equals("1.8");
     }
 
     @SuppressWarnings("unchecked")

@@ -75,11 +75,11 @@ public class RuleScript<T> extends AbstractRule<T> {
         if (!initialized) {
             importSubRules();
         }
-        arguments = checkedArguments(arguments, ENV.get("application.mode.strict", false));
+        arguments = checkedArguments(arguments, ENV.get("app.mode.strict", false));
         //in generics it is not possible to cast from Map(String,?) to Map(CharSequence, ?)
 
         try {
-            LOG.debug("running rule <" + toString() + "> on arguemnts: " + arguments);
+            LOG.debug("running rule <" + toString() + "> on arguments: " + arguments);
             Object obj = engine.eval(getOperation(), bind(arguments));
             T result = (T) transform(obj);
             checkConstraint(Operator.KEY_RESULT, result);
