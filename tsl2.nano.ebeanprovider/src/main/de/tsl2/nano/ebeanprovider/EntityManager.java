@@ -90,7 +90,7 @@ public class EntityManager extends NanoEntityManagerFactory.AbstractEntityManage
             config.setName("custom");
             config.setDefaultServer(true);
             config.loadFromProperties();
-            Collection<Class> beanTypes = ENV.get("loadedBeanTypes", null);
+            Collection<Class> beanTypes = ENV.get("service.loadedBeanTypes", null);
             for (Class cls : beanTypes) {
                 config.addClass(cls);
             }
