@@ -109,7 +109,7 @@ public class ReplicationServiceBean extends GenericLocalServiceBean {
     protected <T> T persistRep(final T bean) {
         Object id = ServiceUtil.getId(bean);
         final T newBean;
-        if (ENV.get("replication.autocommit", true))
+        if (ENV.get("service.replication.autocommit", true))
             newBean = persist/*NoTransaction*/(bean);//, true, true));
         else
             newBean = persistNoTransaction(bean, true, true);

@@ -550,6 +550,10 @@ public class Persistence implements Serializable {
             } else if (autoddl.equals("create-drop")) {
                 return "buildSchema(ForeignKeys=true";
             }
+        } else if (provider.contains("hibernate")) {
+            if (autoddl.equals("false")) {
+                return "";
+            }
         }
         return autoddl;
     }
@@ -601,7 +605,7 @@ public class Persistence implements Serializable {
         } else {
             p = new Persistence();
         }
-        if (p.getReplication() == null && ENV.get("use.database.replication", false)) {
+        if (p.getReplication() == null && ENV.get("service.use.database.replication", false)) {
             p.setReplication(new Replication());
         }
         return p;

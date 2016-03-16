@@ -39,7 +39,7 @@ public class GenericLocalServiceBean extends GenericReplicatingServiceBean {
      * @param entityManager persistence entity manager
      */
     public GenericLocalServiceBean(EntityManager entityManager) {
-        this(entityManager, ENV.get("use.database.replication", false));
+        this(entityManager, ENV.get("service.use.database.replication", false));
     }
 
     /**

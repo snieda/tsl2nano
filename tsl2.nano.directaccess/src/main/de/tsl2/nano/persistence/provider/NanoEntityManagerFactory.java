@@ -541,7 +541,7 @@ public class NanoEntityManagerFactory implements javax.persistence.EntityManager
         protected Class<X> evaluateResultType(String qstr) {
             //TODO: not-complete evaluation
             String clsName = StringUtil.substring(qstr, "from ", " t");
-            Collection<Class> beanTypes = ENV.get("loadedBeanTypes", null);
+            Collection<Class> beanTypes = ENV.get("service.loadedBeanTypes", null);
             for (Class t : beanTypes) {
                 if (t.getSimpleName().equals(clsName)) {
                     return t;

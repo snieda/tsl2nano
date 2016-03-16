@@ -167,7 +167,7 @@ public class GenericReplicatingServiceBean extends GenericServiceBean {
              */
             service
                 .executeQuery(
-                    ENV.get("connection.check.sql", "commit")/* + "grant select on " + Environment.get(IAuthorization.class).getUser()*/,
+                    ENV.get("service.connection.check.sql", "commit")/* + "grant select on " + Environment.get(IAuthorization.class).getUser()*/,
                     true, new Object[0]);
             return connected = true;
         } catch (Exception ex) {
@@ -208,7 +208,7 @@ public class GenericReplicatingServiceBean extends GenericServiceBean {
                             Message.send("preparing replication for " + result.size() + " main objects");
                             long totalCount = 0, notpersisted = 0;
                             Tree<Object, BeanValue> container = tree;
-                            if (ENV.get("replication.singleTransaction", true)) {
+                            if (ENV.get("service.replication.singleTransaction", true)) {
                                 LinkedList<Object> rep = new LinkedList<Object>();
                                 for (Object object : result) {
                                     try {

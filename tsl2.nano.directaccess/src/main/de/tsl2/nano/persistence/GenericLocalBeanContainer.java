@@ -70,7 +70,7 @@ public class GenericLocalBeanContainer extends GenericBeanContainer {
 //                if (sf == null || cfg == null) {
 //                    cfg = new AnnotationConfiguration();
 //                    cfg = cfg.configure();
-//                    Collection beantypes = (Collection) Environment.get("loadedBeanTypes");
+//                    Collection beantypes = (Collection) Environment.get("service.loadedBeanTypes");
 //                    Iterator beans = beantypes.iterator();
 //                    int i = 0;
 //                    Class clazz = null;
