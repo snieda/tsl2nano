@@ -279,7 +279,7 @@ public class NanoH5Session implements ISession<BeanDefinition>, Serializable {
      * createExceptionHandler
      */
     private void createExceptionHandler() {
-        if (ENV.get("use.websocket", true)) {
+        if (ENV.get("websocket.use", true)) {
             final NanoWebSocketServer socketServer =
                 new NanoWebSocketServer(this, createSocketAddress());
             websocketPort = socketServer.getPort();
@@ -325,6 +325,7 @@ public class NanoH5Session implements ISession<BeanDefinition>, Serializable {
     @Override
     public void setUserAuthorization(Object authorization) {
         this.authorization = (IAuthorization) authorization;
+        initContext((IAuthorization) authorization, context);
     }
 
     /**
@@ -339,7 +340,6 @@ public class NanoH5Session implements ISession<BeanDefinition>, Serializable {
      */
     public Response serve(String uri, String method, Properties header, Properties parms, Properties files) {
         String msg = "[undefined]";
-        boolean showStatus = false;
         try {
             Thread.currentThread().setContextClassLoader(sessionClassloader);
             LOG.info(String.format("serving request:\n\turi: %s\n\tmethod: %s\n\theader: %s\n\tparms: %s\n\tfiles: %s",
@@ -383,7 +383,6 @@ public class NanoH5Session implements ISession<BeanDefinition>, Serializable {
                 } else {
 //                    if (!exceptionHandler.hasExceptions()) {
 //                    }
-                    showStatus = true;
                     msg = getNextPage(userResponse);
                 }
                 response = server.createResponse(msg);
@@ -414,8 +413,7 @@ public class NanoH5Session implements ISession<BeanDefinition>, Serializable {
         //TODO: eliminate bug in NanoHTTPD not resetting uri...
 //        header.clear();
 //        response.header.remove(uri);
-        if (showStatus)
-            Message.send(exceptionHandler, createStatusText(startTime));
+        Message.send(exceptionHandler, createStatusText(startTime));
         return response;
     }
 
@@ -448,9 +446,9 @@ public class NanoH5Session implements ISession<BeanDefinition>, Serializable {
         return PREFIX_STATUS_LINE + user
             + ENV.translate("tsl2nano.time", true)
             + ": " + DateUtil.getFormattedDateTime(new Date()) + ", "
-            + ENV.translate("tsl2nano.session", true)
+            + (nav != null ? ENV.translate("tsl2nano.session", true)
             + ": " + ENV.translate(nav.getName(), true) + "§"
-            + StringUtil.toHexString(getContext().toString().getBytes()) + ", "
+            + StringUtil.toHexString(getContext().toString().getBytes()) : "") + ", "
             + ENV.translate("tsl2nano.request", true) + ": "
             + DateUtil.getFormattedMinutes(System.currentTimeMillis() - startTime) + " min"
             + (LOG.isDebugEnabled() ? ", " + "Memory: " + (Profiler.getUsedMem() / (1024 * 1024)) + " MB" : "")
@@ -539,7 +537,7 @@ public class NanoH5Session implements ISession<BeanDefinition>, Serializable {
                         responseObject = null;
                     } else if (isOpenAction(parms, (BeanCollector) nav.current())) {
                         //normally, after a selection the navigation object will be hold on stack
-                        if (ENV.get("application.edit.multiple", true)) {
+                        if (ENV.get("app.edit.multiple", true)) {
                             responseObject = putSelectionOnStack((BeanCollector) nav.current());
                         } else {
                             responseObject = nav.current();
@@ -629,7 +627,7 @@ public class NanoH5Session implements ISession<BeanDefinition>, Serializable {
                             responseObject = result;
                             if (c instanceof Bean
                                 && ((Bean) c).getInstance() instanceof Persistence) {
-                                authorization = ENV.get(IAuthorization.class);
+                                setUserAuthorization(ENV.get(IAuthorization.class));
                             }
                         } else if (action.getId().endsWith("reset")) {
                             responseObject = c;
@@ -1030,9 +1028,10 @@ public class NanoH5Session implements ISession<BeanDefinition>, Serializable {
         boolean expired = getDuration() > timeout || nav == null || nav.isEmpty() || authenicatedButNotConnected;
         if (expired) {
             LOG.info("session " + this + " expired!");
-            close();
-            if (throwException)
+            if (throwException) {
+                close();
                 throw new ManagedException("session closed");
+            }
         }
         return !expired;
     }

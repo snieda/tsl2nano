@@ -67,7 +67,7 @@ public class Html5Presentable extends Presentable {
     public LinkedHashMap<String, String> getLayout() {
         if (layout == null) {
             //LinkedHashmap not supported by simple-xml
-            layout = new LinkedHashMap<>(ENV.get("default.layout", DEFAULT_HASHMAP));
+            layout = new LinkedHashMap<>(ENV.get("layout.default", DEFAULT_HASHMAP));
         }
         return layout;
     }
@@ -87,7 +87,7 @@ public class Html5Presentable extends Presentable {
         if (layoutConstraints == null) {
             //LinkedHashmap not supported by simple-xml
             layoutConstraints =
-                new LinkedHashMap<>(ENV.get("default.layoutconstaints", DEFAULT_HASHMAP));
+                new LinkedHashMap<>(ENV.get("layout.constraints.default", DEFAULT_HASHMAP));
         }
         return layoutConstraints;
     }

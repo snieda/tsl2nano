@@ -15,6 +15,7 @@ if [ "$3"== "debug" ] then `DEBUG="-agentlib:jdwp=transport=dt_socket,address=87
 if [ "$3"== "debug" ] then `NANO_DEBUG=-Dtsl2.nano.log.level=debug` fi
 if [ "$3"== "test" ] then `NANO_TEST=-Dtsl2.nano.test=true` fi
 if [ "$3"== "nopause" ] then `NOPAUSE=nopause` fi
+#STANDALONE="-standalone"
 #OFFLINE=-Dtsl2nano.offline=true
 #UH=-Denv.user.home=true
 #USERDIR=-Duser.dir=$PRJ
@@ -24,7 +25,7 @@ if [ "$3"== "nopause" ] then `NOPAUSE=nopause` fi
 #PROXY=-Dhttp.proxyHost=myproxy -Dhttp.proxyPort=8080
 
 #@start javaw
-java $OFFLINE $UH $LANG $USERDIR $NANO_DEBUG $DEBUG $AGENT $PROXY -Xmx512m -Djava.awt.headless=true $DEBUG $UH -jar tsl2.nano.h5.0.8.0.jar $PRJ $PORT 
+java $OFFLINE $UH $LANG $USERDIR $NANO_DEBUG $DEBUG $AGENT $PROXY -Xmx512m -Djava.awt.headless=true $DEBUG $UH -jar tsl2.nano.h5.0.9.0$STANDALONE.jar $PRJ $PORT 
 #-agentpath:...visualvm_138/profiler/lib/deployed/jdk16/windows/profilerinterface.dll=...\visualvm_138\profiler\lib,5140
 #>$PRJ.log
 if [ not "$NOPAUSE" == "nopause" ] then 'read -p' fi

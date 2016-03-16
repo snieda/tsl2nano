@@ -33,7 +33,7 @@ public class ICSCalendarImport {
      * @return count of entries
      */
     public long importCalendar(String country, String region, Period period) {
-        String holServiceURL = ENV.get("application.holiday.service.url",
+        String holServiceURL = ENV.get("app.holiday.service.url",
             "http://www.kayaposoft.com/enrico/ics/v1.0?country=deu&fromDate=01-01-2016&toDate=31-12-2016&region=Bavaria");
         NetUtil.download(holServiceURL, ENV.getTempPathRel());
         String file = getDownloadFile(country, region, period);

@@ -290,20 +290,13 @@ public class NanoH5Test {
         FileUtil.writeBytes(("run.sh " + new File(DIR_TEST).getName()).getBytes(), basedir + name + ".sh", false);
         
         //workaround: replace path 'test/.nanoh5.timesheet' with '.nanoh5.timesheet'
-        Properties p = new Properties();
-        p.put("match", "(test[/])([.]nanoh5[.]timesheet)[/](icons)");
-        p.put("replace", "\\3");
-        AntRunner.runTask(AntRunner.TASK_REPLACE_REGEXP, p, new File(DIR_TEST).getParent() + ":{**}");
-
-        p = new Properties();
-        p.put("match", "(test[/])([.]nanoh5[.]timesheet)");
-        p.put("replace", "\\2");
-        AntRunner.runTask(AntRunner.TASK_REPLACE_REGEXP, p, new File(DIR_TEST).getParent() + ":{**}");
+        AntRunner.runRegexReplace("(test[/])([.]nanoh5[.]timesheet)[/](icons)", "\\3", new File(DIR_TEST).getParent(), "**");
+        AntRunner.runRegexReplace("(test[/])([.]nanoh5[.]timesheet)", "\\2", new File(DIR_TEST).getParent(), "**");
         
         //create a deployable package
         new File("target/").mkdirs();
         String destFile = "target/" + name + ".zip";
-        p = new Properties();
+        Properties p = new Properties();
         p.put("destFile", destFile);
         AntRunner.runTask(AntRunner.TASK_ZIP, p, new File(DIR_TEST).getParent() + ":{**}");
         

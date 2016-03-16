@@ -49,6 +49,7 @@ import de.tsl2.nano.service.util.ServiceUtil;
  * @author Tom, Thomas Schneider
  * @version $Revision$
  */
+@SuppressWarnings("unchecked")
 public class Statistic<COLLECTIONTYPE extends Collection<T>, T> extends BeanCollector<COLLECTIONTYPE, T> {
     /** serialVersionUID */
     private static final long serialVersionUID = 1L;
@@ -85,7 +86,6 @@ public class Statistic<COLLECTIONTYPE extends Collection<T>, T> extends BeanColl
      * @param beanType
      * @param workingMode
      */
-    @SuppressWarnings("unchecked")
     public Statistic(Class<T> beanType, T from, T to) {
         super();
         setMode(0);
@@ -97,7 +97,7 @@ public class Statistic<COLLECTIONTYPE extends Collection<T>, T> extends BeanColl
         isStaticCollection = true;
     }
 
-    @SuppressWarnings({ "unchecked", "rawtypes" })
+    @SuppressWarnings({ "rawtypes" })
     @Override
     public List<IAttribute> getAttributes(boolean readAndWriteAccess) {
         if (Util.isEmpty(attributeDefinitions)) {
@@ -113,7 +113,7 @@ public class Statistic<COLLECTIONTYPE extends Collection<T>, T> extends BeanColl
         return new ArrayList<IAttribute>(attributeDefinitions.values());
     }
 
-    private <T> Collection<T> create(Class<T> beanType, List<String> attributeNames, T from, T to) {
+    private Collection<T> create(Class<T> beanType, List<String> attributeNames, T from, T to) {
         if (attributeNames.size() == 0) {
             attributeNames.add(ENV.translate("tsl2nano.name", true));
             attributeNames.add(ENV.translate("tsl2nano.count", true));
@@ -179,7 +179,6 @@ public class Statistic<COLLECTIONTYPE extends Collection<T>, T> extends BeanColl
         return collection;
     }
 
-    @SuppressWarnings("unchecked")
     private static <T> Collection<? extends T> createSummary(BeanDefinition<T> def,
             List<String> valueColumns,
             T from,
@@ -197,7 +196,6 @@ public class Statistic<COLLECTIONTYPE extends Collection<T>, T> extends BeanColl
         return (Collection<? extends T>) (result != null ? result : new ArrayList<>());
     }
 
-    @SuppressWarnings("unchecked")
     private static <T> Collection<? extends T> createStatistics(BeanDefinition<T> def,
             String column,
             List<String> valueColumns,
@@ -215,6 +213,7 @@ public class Statistic<COLLECTIONTYPE extends Collection<T>, T> extends BeanColl
         return (Collection<? extends T>) (result != null ? result : new ArrayList<>());
     }
 
+    @SuppressWarnings("rawtypes")
     private static <T> int groupByCount(BeanDefinition<T> def, String column, T from, T to) {
         Collection parameter = new LinkedList<>();
         String qstr =
@@ -247,6 +246,7 @@ public class Statistic<COLLECTIONTYPE extends Collection<T>, T> extends BeanColl
         return null;
     }
 
+    @SuppressWarnings("rawtypes")
     private static <T> StringBuffer whereConstraints(T from, T to, Collection parameter) {
         return from == null || to == null ? new StringBuffer(" where 1=1 ") : ServiceUtil.addBetweenConditions(
             new StringBuffer(), from, to, parameter, true);
@@ -281,7 +281,7 @@ public class Statistic<COLLECTIONTYPE extends Collection<T>, T> extends BeanColl
      * 
      * @param data
      */
-    @SuppressWarnings({ "unchecked", "rawtypes" })
+    @SuppressWarnings({ "rawtypes" })
     static String createGraph(String name, List<String> columnNames, Collection<Object[]> data) {
         if (data.size() == 0 || !data.iterator().next().getClass().isArray() /* the compiler checks for array, but on runtime it may be a simple object!*/)
             return "";

@@ -364,7 +364,7 @@ public class PersistenceUI {
                 "persistenceUnit", "hibernateDialect", "database", "defaultSchema", "port", "generator", "autoddl",
                 "replication");
         }
-        if (login.toString().matches(ENV.get("default.present.attribute.multivalue", ".*"))) {
+        if (login.toString().matches(ENV.get("login.present.attribute.multivalue", ".*"))) {
             login.removeAttributes("jdbcProperties");
         }
         if (ENV.get("login.jarfile.fileselector", true)) {
@@ -403,7 +403,7 @@ public class PersistenceUI {
         login.getPresentationHelper().chg("replication", BeanPresentationHelper.PROP_ENABLER, new IActivable() {
             @Override
             public boolean isActive() {
-                return ENV.get("use.database.replication", false);
+                return ENV.get("service.use.database.replication", false);
             }
         });
         
