@@ -56,7 +56,7 @@ public class Translator {
         for (Object k : keySet) {
             try {
                 word = origin.get(k).toString();
-                if (word.matches("\\w+")) //translate only 'real' words!
+                if (word.matches("[\\w\\s]+")) //translate only 'real' words!
                     target.put(k, translate(srcLang, destLang, word));
             } catch (Exception e) {
                 if (tries++ < 20) {

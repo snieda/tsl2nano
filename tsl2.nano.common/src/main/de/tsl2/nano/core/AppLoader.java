@@ -354,6 +354,18 @@ public class AppLoader {
             /*&& new File("/opt").canWrite() ? "/opt/"*/ /*System.getProperty("user.home") + "/"*/ "" : "";
     }
 
+    public static String getJavaVersion() {
+        return System.getProperty("java.specification.version");
+    }
+
+    public static boolean hasCompiler() {
+        return System.getProperty("java.compiler") != null;
+    }
+    
+    public static boolean isJRE() {
+        return !hasCompiler();
+    }
+    
     /**
      * isDalvik
      * 
@@ -407,5 +419,5 @@ public class AppLoader {
             LOG.info("couldn't set all permissions. failure: " + e.toString());
         }
     }
-    
+
 }

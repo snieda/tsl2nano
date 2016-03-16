@@ -345,19 +345,19 @@ public class BeanPresentationHelper<T> {
             if (v != null) {
                 return RegExpFormat.createNumberRegExp(v);
             } else {
-                final int l = length != UNDEFINED ? length : ENV.get("value.default.number64.length", 19);
-                final int p = precision != UNDEFINED ? precision : ENV.get("value.default.number64.precision",
+                final int l = length != UNDEFINED ? length : ENV.get("value.format.default.number64.length", 19);
+                final int p = precision != UNDEFINED ? precision : ENV.get("value.format.default.number64.precision",
                     4);
                 return RegExpFormat.createNumberRegExp(l, p);
             }
         } else if (Number.class.isAssignableFrom(attr.getType()) || double.class.isAssignableFrom(attr.getType())
             || float.class.isAssignableFrom(attr.getType())) {
-            final int l = length != UNDEFINED ? length : ENV.get("value.default.number64.length", 19);
-            final int p = precision != UNDEFINED ? precision : ENV.get("value.default.number64.length", 4);
+            final int l = length != UNDEFINED ? length : ENV.get("value.format.default.number64.length", 19);
+            final int p = precision != UNDEFINED ? precision : ENV.get("value.format.default.number64.length", 4);
             return RegExpFormat.createNumberRegExp(l, p);
         } else if (int.class.isAssignableFrom(attr.getType()) || long.class.isAssignableFrom(attr.getType())
             || short.class.isAssignableFrom(attr.getType())) {
-            final int l = length != UNDEFINED ? length : ENV.get("value.default.number32.length", 10);
+            final int l = length != UNDEFINED ? length : ENV.get("value.format.default.number32.length", 10);
             return RegExpFormat.createNumberRegExp(l, 0);
         } else if (length != UNDEFINED) {
             return RegExpFormat.createAlphaNumRegExp(length, false);
@@ -471,11 +471,11 @@ public class BeanPresentationHelper<T> {
                     return RegExpFormat.createNumberRegExp(v);
                 } else {
                     int l = attribute.length() != UNDEFINED ? attribute.length()
-                        : ENV.get("default.bigdecimal.length", 19);
+                        : ENV.get("value.format.default.bigdecimal.length", 19);
                     int p = attribute.precision() != UNDEFINED ? attribute.precision()
-                        : ENV.get("default.bigdecimal.precision", 4);
+                        : ENV.get("value.format.default.bigdecimal.precision", 4);
 
-                    String currencyPattern = ENV.get("value.currency.length.precision", "11,2");
+                    String currencyPattern = ENV.get("value.format.currency.length.precision", "11,2");
                     if (currencyPattern.equals(l + "," + p)) {
                         return RegExpFormat.createCurrencyRegExp();
                     } else {
@@ -484,13 +484,13 @@ public class BeanPresentationHelper<T> {
                 }
             } else if (NumberUtil.isFloating(type)) {
                 int l = attribute.length() != UNDEFINED ? attribute.length()
-                    : ENV.get("default.bigdecimal.length", 19);
+                    : ENV.get("value.format.default.bigdecimal.length", 19);
                 int p = attribute.precision() != UNDEFINED ? attribute.precision()
-                    : ENV.get("default.bigdecimal.precision", 4);
+                    : ENV.get("value.format.default.bigdecimal.precision", 4);
                 return RegExpFormat.createNumberRegExp(l, p, type);
             } else if (NumberUtil.isInteger(type)) {
                 int l = attribute.length() != UNDEFINED ? attribute.length()
-                    : ENV.get("default.int.length", 10);
+                    : ENV.get("value.format.default.int.length", 10);
                 return RegExpFormat.createNumberRegExp(l, 0, type);
             }
         } else if (BeanClass.isAssignableFrom(Date.class, type)) {
@@ -504,7 +504,7 @@ public class BeanPresentationHelper<T> {
                 regexp = RegExpFormat.createDateRegExp();
             }
         } else if (BeanClass.isAssignableFrom(String.class, type)) {
-            int l = attribute.length() != UNDEFINED ? attribute.length() : ENV.get("default.text.length", 5000);
+            int l = attribute.length() != UNDEFINED ? attribute.length() : ENV.get("value.format.default.text.length", 5000);
             regexp = RegExpFormat.createAlphaNumRegExp(l, false);
         } else {
             regexp = new GenericParser(attribute.getType());
@@ -563,7 +563,7 @@ public class BeanPresentationHelper<T> {
      * bean and return it's attributes if the id is another bean!
      */
     public void defineAdditionalAttributes() {
-        if (ENV.get("define.additional.attributes", true)) {
+        if (ENV.get("beandef.define.additional.attributes", true)) {
             BeanAttribute id = BeanContainer.getIdAttribute(bean.getClazz());
             if (id != null && !BeanUtil.isStandardType(id.getDeclaringClass()) && bean.hasAttribute(id.getName())) {
                 bean.combineRelationAttributes(id.getName());
@@ -1267,7 +1267,7 @@ public class BeanPresentationHelper<T> {
     }
 
     public void reset() {
-//        BeanContainer.reset();
+        BeanContainer.reset();
         Bean.clearCache();
         NetworkClassLoader.resetUnresolvedClasses(ENV.getConfigPath());
         ENV.reload();

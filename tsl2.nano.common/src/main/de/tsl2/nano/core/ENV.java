@@ -303,6 +303,7 @@ public class ENV implements Serializable {
                 + "  loader: ${main.context.classloader}\n"
                 + "  secure: ${security}\n"
                 + "  java  : ${java.vm.name}, ${java.runtime.version}, ${java.home}\n"
+                + "  complr: ${java.compiler}\n"
                 + "  memory: ${memory}\n"
                 + "  discs : ${disc}\n"
                 + "  io.tmp: ${java.io.tmpdir}\n"
@@ -387,11 +388,13 @@ public class ENV implements Serializable {
     /**
      * WARNING: deletes all config files. no reset on Environment will be done!
      */
-    public static boolean deleteAllConfigFiles() {
+    public static boolean deleteEnvironment() {
         File config = new File(getConfigPath());
-        boolean done = config.delete();
+        boolean done = FileUtil.deleteRecursive(config);
         if (done) {
             config.mkdirs();
+        } else {
+            info("couldn't delete environment " + config);
         }
         return done;
     }

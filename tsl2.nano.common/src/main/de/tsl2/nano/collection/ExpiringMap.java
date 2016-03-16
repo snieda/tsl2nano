@@ -53,7 +53,7 @@ public class ExpiringMap<K, V> extends LinkedHashMap<K, V> {
      */
     public ExpiringMap(long timeout) {
         super();
-        this.timeout = timeout;
+        init(timeout);
     }
 
     /**

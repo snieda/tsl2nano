@@ -124,8 +124,8 @@ public class CommonTest {
     @BeforeClass
     public static void setUp() {
         ENV.setProperty(ENV.KEY_CONFIG_PATH, "test/");
-//        Environment.setProperty("strict.mode", true);
-        ENV.deleteAllConfigFiles();
+//        Environment.setProperty("app.strict.mode", true);
+        ENV.deleteEnvironment();
     }
 
     @Test
@@ -1329,7 +1329,7 @@ public class CommonTest {
         NestedJarClassLoader cl = new NestedJarClassLoader(contextClassLoader, "standalone") {
             @Override
             protected String getRootJarPath() {
-                return "../../target/test.h5.sample/tsl2.nano.h5.0.8.0-standalone.jar";
+                return "../../target/test.h5.sample/tsl2.nano.h5.0.9.0-standalone.jar";
             }
 //
 //            @Override
@@ -1551,6 +1551,7 @@ public class CommonTest {
     public void testResourcebundleTranslation() throws Exception {
         Properties p = createTestTranslationProperties();
         Properties t = Translator.translateProperties("test", p, Locale.ENGLISH, Locale.GERMAN);
+        
         //the words are german - so, no translation can be done --> p = t. it's only an integration test
         assertEquals(p, t);
     }
@@ -1584,10 +1585,10 @@ public class CommonTest {
         assertTrue(CommonTest.class.equals(AnnotationProxy.getAnnotation(SimpleXmlAnnotator.class, "attribute", Element.class).type()));
     }
     @Test
-//    @Ignore("seems not to work on suns jdk1.7")
+    @Ignore("seems not to work on suns jdk1.7")
     public void testAnnotationValueChange() throws Exception {
         Element origin = AnnotationProxy.getAnnotation(SimpleXmlAnnotator.class, "attribute", Element.class);
-        //this seems not work on suns jdk1.7
+        //this seems not to work on suns jdk1.7
         int count = AnnotationProxy.setAnnotationValues(origin, "name", "ruleCover", "type", CommonTest.class);
         assertTrue(count == 2);
         assertTrue(CommonTest.class.equals(AnnotationProxy.getAnnotation(SimpleXmlAnnotator.class, "attribute", Element.class).type()));

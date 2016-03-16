@@ -45,7 +45,7 @@ public class BeanFinder<T, F> implements IBeanFinder<T, F>, Serializable {
     /** optional detail bean definition to present a selected bean in a detailed mask */
     Bean<T> detailBean;
     transient int currentStartIndex = 0;
-    int maxResultCount = ENV.get("service.maxresult", 100);
+    int maxResultCount = ENV.get("collector.service.maxresult", 100);
 
     private static final Log LOG = LogFactory.getLog(BeanFinder.class);
 

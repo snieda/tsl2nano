@@ -712,34 +712,38 @@ public final class DateUtil {
     /*
      * Workdays, Holidays, ...
      */
-    
+
     /**
      * isWorkDay
+     * 
      * @param d day to investigate
      * @param holidays specific holidays
+     * @param freeDays optional other days than the weekend which shouldn't be seen as workdays (e.g. the friday)
      * @return true, if given date is not a weekend or holiday
      */
-    public static boolean isWorkDay(Date d, Collection<Date> holidays) {
-        return isDayOfWeek(d, MONDAY, TUESDAY, WEDNESDAY, THURSDAY, FRIDAY) && !holidays.contains(d);
+    public static boolean isWorkDay(Date d, Collection<Date> holidays, int... freeDays) {
+        return !isDayOfWeek(d, SATURDAY, SUNDAY) && !holidays.contains(d);
     }
-    
+
     /**
      * isDayOfWeek
+     * 
      * @param d day to check
      * @param weekDays expected weekdays
      * @return true, if given day is one of given weekdays
      */
-    private static boolean isDayOfWeek(Date d, int...weekDays) {
+    private static boolean isDayOfWeek(Date d, int... weekDays) {
         return isDayOfWeek(getCalendar(), weekDays);
     }
 
     /**
      * isDayOfWeek
+     * 
      * @param d day to check
      * @param weekDays expected weekdays
      * @return true, if given day is one of given weekdays
      */
-    private static boolean isDayOfWeek(Calendar cal, int...weekDays) {
+    private static boolean isDayOfWeek(Calendar cal, int... weekDays) {
         return Arrays.asList(weekDays).contains(cal.get(DAY_OF_WEEK));
     }
 
@@ -766,6 +770,7 @@ public final class DateUtil {
 
     /**
      * getWorkdayCount
+     * 
      * @param begin day to start from
      * @param end day to end on
      * @param holidays specific holidays
@@ -777,7 +782,7 @@ public final class DateUtil {
             c++;
         return c;
     }
-    
+
     /**
      * checks, if the two periods intersect. use {@link #MIN_DATE} and {@link #MAX_DATE} for limits. if to1 is null, to1
      * will be {@link #MAX_DATE}. if to2 is null, to2 will be {@link #MAX_DATE}.

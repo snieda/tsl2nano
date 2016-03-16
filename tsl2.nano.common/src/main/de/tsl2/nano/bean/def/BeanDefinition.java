@@ -340,7 +340,7 @@ public class BeanDefinition<T> extends BeanClass<T> implements IPluggable<BeanDe
         /*
          * filter the result using a default filter by the presentation helper
          */
-        if (ENV.get("bean.use.beanpresentationhelper.filter", true)) {
+        if (ENV.get("beandef.use.beanpresentationhelper.filter", true)) {
             return CollectionUtil.getFiltering(attributes, new IPredicate<IAttribute>() {
                 @Override
                 public boolean eval(IAttribute arg0) {
@@ -945,7 +945,7 @@ public class BeanDefinition<T> extends BeanClass<T> implements IPluggable<BeanDe
                 } catch (Exception e) {
                     LOG.error("couldn't load configuration " + xmlFile.getPath() + " for bean " + type + ": "
                         + e.toString());
-                    if (ENV.get("application.mode.strict", false)) {
+                    if (ENV.get("app.mode.strict", false)) {
                         ManagedException.forward(e);
                     }
                 }
@@ -1007,7 +1007,7 @@ public class BeanDefinition<T> extends BeanClass<T> implements IPluggable<BeanDe
             extension = null;
         }
         //remove not-serializable or cycling actions
-        if (actions != null && !ENV.get("strict.mode", false)) {
+        if (actions != null && !ENV.get("app.mode.strict", false)) {
             Class<?> cls;
             for (Iterator<IAction> actionIt = actions.iterator(); actionIt.hasNext();) {
                 IAction a = actionIt.next();
@@ -1192,7 +1192,7 @@ public class BeanDefinition<T> extends BeanClass<T> implements IPluggable<BeanDe
                 }
                 XmlUtil.saveXml(xmlFile.getPath(), this);
             } catch (Exception e) {
-                if (ENV.get("strict.mode", false)) {
+                if (ENV.get("app.mode.script", false)) {
                     ManagedException.forward(e);
                 } else {
                     LOG.warn("couldn't save configuration " + xmlFile.getPath() + " for bean" + getClazz(), e);

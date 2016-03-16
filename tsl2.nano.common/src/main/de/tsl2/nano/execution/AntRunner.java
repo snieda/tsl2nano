@@ -95,7 +95,7 @@ public class AntRunner {
      * {@link FileSet}s.
      */
     public static void runTask(String name, Properties taskProperties, String fileSetExpression) {
-        runTask(name, taskProperties, fileSetExpression != null ? createFileSets(fileSetExpression) : (FileSet[])null);
+        runTask(name, taskProperties, fileSetExpression != null ? createFileSets(fileSetExpression) : (FileSet[]) null);
     }
 
     /**
@@ -206,7 +206,7 @@ public class AntRunner {
         final DefaultLogger consoleLogger = new DefaultLogger();
         consoleLogger.setOutputPrintStream(out);
         consoleLogger.setErrorPrintStream(err);
-        consoleLogger.setMessageOutputLevel(true/*LOG.isDebugEnabled()*/? Project.MSG_DEBUG : Project.MSG_INFO);
+        consoleLogger.setMessageOutputLevel(true/*LOG.isDebugEnabled()*/ ? Project.MSG_DEBUG : Project.MSG_INFO);
         return consoleLogger;
     }
 
@@ -238,5 +238,22 @@ public class AntRunner {
             fileSets.add(fileSet);
         }
         return (FileSet[]) fileSets.toArray(new FileSet[0]);
+    }
+
+    /**
+     * convenience to run task {@link #TASK_REPLACE_REGEXP}
+     * 
+     * @param match
+     * @param replace
+     * @param dir
+     * @param includes
+     */
+    public static void runRegexReplace(String match, String replace, String dir, String includes) {
+        if (includes == null)
+            includes = "**";
+        Properties p = new Properties();
+        p.put("match", match);
+        p.put("replace", replace);
+        AntRunner.runTask(AntRunner.TASK_REPLACE_REGEXP, p, dir + ":{" + includes + "}");
     }
 }

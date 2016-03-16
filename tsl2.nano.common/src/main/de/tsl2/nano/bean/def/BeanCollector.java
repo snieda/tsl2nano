@@ -284,7 +284,7 @@ public class BeanCollector<COLLECTIONTYPE extends Collection<T>, T> extends Bean
         super.onActivation();
         iterator = null;
         if (!isStaticCollection && Util.isEmpty(collection)) {
-            long countCheck = ENV.get("beancollector.do.search.on.count.lowerthan", 20);
+            long countCheck = ENV.get("collector.search.auto.count.lowerthan", 20);
             boolean dosearch = countCheck > 0 && count() < countCheck;
 
             //if at least one column has a search value, we start the search directly
@@ -418,7 +418,7 @@ public class BeanCollector<COLLECTIONTYPE extends Collection<T>, T> extends Bean
                 }
 
                 private Collection<T> authorized(COLLECTIONTYPE collection) {
-                    if (ENV.get("check.permission.data", true)) {
+                    if (ENV.get("collector.check.permission.data", true)) {
                         return CollectionUtil.getFiltering(collection, new IPredicate<T>() {
                             @Override
                             public boolean eval(T arg0) {
@@ -665,7 +665,7 @@ public class BeanCollector<COLLECTIONTYPE extends Collection<T>, T> extends Bean
         /*
          * if timestamp fields are not shown, generate new timestamps
          */
-        if (ENV.get("default.attribute.timestamp", true)) {
+        if (ENV.get("value.timestamp.default", true)) {
             //respect all attributes
             BeanClass<T> bc = BeanClass.getBeanClass(getDeclaringClass());
             List<IAttribute> attrs = bc.getAttributes();
@@ -707,7 +707,7 @@ public class BeanCollector<COLLECTIONTYPE extends Collection<T>, T> extends Bean
                             value = DateUtil.getMillisWithoutYear((Long) value);
                         }
                     } else {
-                        value = ENV.counter("value.id.counter.start", 1);
+                        value = ENV.counter("collector.new.id.number.counter.start", 1);
                     }
                 } else {
                     LOG.warn("the id-attribute " + idAttribute + " can't be assigned to a generated value of type "

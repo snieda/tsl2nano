@@ -294,10 +294,10 @@ public class BeanContainer implements IBeanContainer {
             List<IAttribute> attributes = clazz.getSingleValueAttributes();
             for (IAttribute beanAttribute : attributes) {
                 if (Time.class.isAssignableFrom(beanAttribute.getType())) {
-                    if (ENV.get("default.field.date.clear.time", true))
+                    if (ENV.get("value.date.clear.time", true))
                         DateUtil.clearSeconds((Date) beanAttribute.getValue(bean));
                 } else if (Date.class.isAssignableFrom(beanAttribute.getType())) {
-                    if (ENV.get("default.field.time.clear.seconds", true))
+                    if (ENV.get("value.time.clear.seconds", true))
                         DateUtil.clearTime((Date) beanAttribute.getValue(bean));
                 }
             }

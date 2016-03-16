@@ -596,7 +596,6 @@ public class Bean<T> extends BeanDefinition<T> {
      * @param attributeDefinitions attributes to copy and enhance
      * @return new map holding value definitions
      */
-    @SuppressWarnings("serial")
     protected static LinkedHashMap<String, ? extends IValueAccess<?>> createValueDefinitions(
             Map<String, IAttributeDefinition<?>> attributeDefinitions) {
         LinkedHashMap<String, IValueAccess<?>> valueDefs =
@@ -698,7 +697,7 @@ public class Bean<T> extends BeanDefinition<T> {
             bean = createBean(instanceOrName, beandef);
         }
 
-        if (cacheInstance && ENV.get("use.bean.cache", true)) {
+        if (cacheInstance && ENV.get("bean.use.cache", true)) {
             timedCache.put(instanceOrName, bean);
         }
         return bean;
@@ -759,7 +758,7 @@ public class Bean<T> extends BeanDefinition<T> {
         cleared += BeanDefinition.clearCache();
         if (timedCache != null) {
             cleared += timedCache.size();
-            LOG.info("clearing beanclass cache of " + cleared + " elements");
+            LOG.info("clearing bean/value/class cache of " + cleared + " elements");
             timedCache.clear();
         }
         return cleared;

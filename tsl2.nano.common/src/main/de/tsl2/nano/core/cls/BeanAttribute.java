@@ -432,7 +432,7 @@ public class BeanAttribute<T> implements IAttribute<T> {
         // see also BeanObservableValue.getPropertyDescriptor(Class beanClass, String propertyName)
         // means we have the special case where "string" starts with 2 uppercase characters 
         // => the first character is NOT decapitalized ...
-        return ENV.get("bean.attribute.decapitalize", true) ? /*Introspector.*/decapitalize(string) : string
+        return ENV.get("attribute.decapitalize", true) ? /*Introspector.*/decapitalize(string) : string
             .substring(0, 1).toLowerCase() + string.substring(1);
     }
 
