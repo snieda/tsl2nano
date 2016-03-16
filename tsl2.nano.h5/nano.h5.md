@@ -2449,6 +2449,7 @@ Actual list: http://infocenter.pentaho.com/help/index.jsp?topic=%2Fsupported_com
  0.8.0c | 01.02.2016 | many fixes, bean-configuration provides creation of actions (e.g. for REST service calls showing the JSON result)
  0.8.0d | 08.02.2016 | statistics now showing bar charts with xgraph
  0.8.0e | 24.02.2016 | bugfixes, environment-action --> administration-action
+ 0.9.0  | 13.03.2016 | websocketserver fixes, bugfixes, ENV properties renamed
 
 [GLOSSARY]
 
@@ -2849,3 +2850,5 @@ erdplus: kann nichts allgemeines exportieren
 ** http://feiertage.jarmedia.de/api/?jahr=2014&nur_land=BY
 ** (v) http://holidays.kayaposoft.com/public_holidays.php?country=deu&region=Bavaria&year=2016#
 ** ICSCalendarImport implementieren
+* remove h5 test classes from jar
+* remove disabled buttons in menu
