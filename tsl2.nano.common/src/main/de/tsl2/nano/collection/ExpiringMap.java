@@ -151,8 +151,8 @@ public class ExpiringMap<K, V> extends LinkedHashMap<K, V> {
             long now = System.currentTimeMillis();
             Set<java.util.Map.Entry<K, V>> entries = entrySet();
             for (Iterator iterator = entries.iterator(); iterator.hasNext();) {
-                Entry<K, V> entry = (Entry<K, V>) iterator.next();
-                if (now - touches.get(entry.key) > timeout) {
+                java.util.Map.Entry<K, V> entry = (java.util.Map.Entry<K, V>) iterator.next();
+                if (now - touches.get(entry.getKey()) > timeout) {
                     LOG.info("removing expired entry " + entry);
                     iterator.remove();
                 }

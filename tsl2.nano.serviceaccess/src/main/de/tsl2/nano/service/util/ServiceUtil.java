@@ -275,7 +275,7 @@ public class ServiceUtil {
             and_cond = CLAUSE_WHERE;
         }
         attrPrefix = attrPrefix == null ? SUBST_RESULTBEAN + "." : attrPrefix;
-        final Class<?> clazz = valueBean.getClass();
+        final Class<?> clazz = BeanClass.getDefiningClass(valueBean.getClass());
         final BeanClass bclazz = BeanClass.getBeanClass(clazz);
         final Collection<BeanAttribute> attributes = bclazz.getSingleValueAttributes();
         Object value;
