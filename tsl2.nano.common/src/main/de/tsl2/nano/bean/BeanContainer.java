@@ -25,6 +25,9 @@ import org.apache.commons.logging.Log;
 
 import de.tsl2.nano.action.CommonAction;
 import de.tsl2.nano.action.IAction;
+import de.tsl2.nano.bean.def.Bean;
+import de.tsl2.nano.bean.def.BeanValue;
+import de.tsl2.nano.bean.def.IAttributeDefinition;
 import de.tsl2.nano.core.ENV;
 import de.tsl2.nano.core.ManagedException;
 import de.tsl2.nano.core.Messages;
@@ -571,5 +574,42 @@ public class BeanContainer implements IBeanContainer {
 //    }
     public static void reset() {
         self = null;
+    }
+
+    /**
+     * reloads all referenced entities (having only an id)
+     * @param obj transient (example) entity holding attached entities as relations
+     * @return the obj itself
+     */
+    public static Object attachEntities(Object obj) {
+        List<IAttributeDefinition<?>> attributes = Bean.getBean(obj).getBeanAttributes();
+        BeanValue bv;
+        for (IAttributeDefinition<?> a : attributes) {
+            if (a.isRelation() && (bv = (BeanValue)a).getValue() != null) {
+                Bean b = Bean.getBean(bv.getValue());
+                Object n = BeanContainer.instance().getByID(bv.getType(), b.getId());
+                bv.setValue(n);
+            }
+        }
+        return obj;
+    }
+
+    /**
+     * replaces attached entities with copies holding only the id
+     * @param obj transient (example) entity holding attached entities as relations
+     * @return the obj itself
+     */
+    public static Object detachEntities(Object obj) {
+        List<IAttributeDefinition<?>> attributes = Bean.getBean(obj).getBeanAttributes();
+        BeanValue bv;
+        for (IAttributeDefinition<?> a : attributes) {
+            if (a.isRelation() && (bv = (BeanValue)a).getValue() != null) {
+                Bean b = Bean.getBean(bv.getValue());
+                Object n = BeanClass.createInstance(a.getType());
+                Bean.getBean(n).getIdAttribute().setValue(n, b.getId());
+                bv.setValue(n);
+            }
+        }
+        return obj;
     }
 }

@@ -26,11 +26,11 @@ import de.tsl2.nano.core.util.FileUtil;
  */
 public class ICSCalendarReader {
     static final String BLOCK = "BEGIN[:]VEVENT.*END[:]VEVENT";
-    static final String PRE_START = "DTSTART";
-    static final String PRE_END = "DTEND";
-    static final String SUMMARY = "SUMMARY";
-    static final String CATEGORY = "CATEGORY";
-    static final String CLASS = "CLASS";
+    public static final String START = "DTSTART";
+    public static final String END = "DTEND";
+    public static final String SUMMARY = "SUMMARY";
+    public static final String CATEGORY = "CATEGORY";
+    public static final String CLASS = "CLASS";
     static final SimpleDateFormat DF = new SimpleDateFormat("yyyyMMdd");
     static final SimpleDateFormat TF = new SimpleDateFormat("HHmmss");
 
@@ -49,7 +49,7 @@ public class ICSCalendarReader {
                 Object v;
                 for (Object k : keys) {
                     //replace date strings with date objects
-                    if (k.toString().startsWith(PRE_START) || k.toString().startsWith(PRE_END)) {
+                    if (k.toString().startsWith(START) || k.toString().startsWith(END)) {
                         passInfo.put(k, getDate(passInfo, k));
                     }
                 }

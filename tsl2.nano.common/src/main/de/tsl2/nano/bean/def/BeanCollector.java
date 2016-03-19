@@ -1101,14 +1101,18 @@ public class BeanCollector<COLLECTIONTYPE extends Collection<T>, T> extends Bean
 
     @Override
     public String getColumnText(Object element, int columnIndex) {
+        return getColumnText(element, columnIndex, true);
+    }
+    
+    public String getColumnText(Object element, int columnIndex, boolean useColumnFormat) {
         IPresentableColumn col = getColumn(columnIndex);
         //column may be filtered (e.g. id-columns)
         if (col == null) {
             return "";
         } else if (col instanceof ValueColumn) {
-            return getColumnText(element, ((ValueColumn) col).attributeDefinition);
+            return getColumnText(element, ((ValueColumn) col).attributeDefinition, useColumnFormat);
         }
-        return getColumnText(element, getAttribute(col.getName()));
+        return getColumnText(element, getAttribute(col.getName()), useColumnFormat);
     }
 
     @Override
@@ -1137,17 +1141,21 @@ public class BeanCollector<COLLECTIONTYPE extends Collection<T>, T> extends Bean
         return "";
     }
 
+    public String getColumnText(Object element, IAttributeDefinition<?> attribute) {
+        return getColumnText(element, attribute, true);
+    }
+    
     /**
      * {@inheritDoc}
      */
-    public String getColumnText(Object element, IAttributeDefinition<?> attribute) {
+    public String getColumnText(Object element, IAttributeDefinition<?> attribute, boolean useColumnFormat) {
         Object value;
         try {
             value = getColumnValueEx(element, attribute);
             if (value == null) {
                 return "";
             }
-            Format f =
+            Format f = useColumnFormat &&
                 attribute.getColumnDefinition() != null && attribute.getColumnDefinition().getFormat() != null
                     ? attribute.getColumnDefinition().getFormat() : attribute.getFormat();
             if (f != null) {

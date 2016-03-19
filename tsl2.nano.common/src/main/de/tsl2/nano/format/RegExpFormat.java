@@ -126,10 +126,10 @@ public class RegExpFormat extends Format implements INumberFormatCheck {
 
     // TODO how to get the date format from locale? 
     public static final String FORMAT_DATE_SQL = "[1-2]\\d\\d\\d\\-[0-1]\\d\\-[0-3]\\d";
-    public static final String FORMAT_DATE_DE = "[0-3]\\d\\.[0-1]\\d\\.[1-2]\\d\\d\\d";
-    public static final String FORMAT_TIME = "[0-2]\\d\\:[0-5]\\d\\:[0-5]\\d";
-    public static final String FORMAT_DATETIME = FORMAT_DATE_SQL + " " + FORMAT_TIME;
-    public static final String FORMAT_DATETIME_DE = FORMAT_DATE_DE + " " + FORMAT_TIME;
+    public static final String FORMAT_DATE_DE = "[0-3]\\d\\.[0-1]\\d(\\.[1-2]\\d\\d\\d)?";
+    public static final String FORMAT_TIME = "[0-2]\\d\\:[0-5]\\d(\\:[0-5]\\d)?";
+    public static final String FORMAT_DATETIME = FORMAT_DATE_SQL + "( " + FORMAT_TIME + ")?";
+    public static final String FORMAT_DATETIME_DE = FORMAT_DATE_DE + "( " + FORMAT_TIME + ")?";
     public static final String FORMAT_NAME_ALPHA_DE = "[a-zA-Z‰ˆ¸ƒ÷‹ﬂ]+";
     public static final String FORMAT_NAME_ALPHA_EXT_DE = FORMAT_NAME_ALPHA_DE + PATTERN_SINGLE_BYTE_SPACE;
     public static final String FORMAT_NAME_ALPHA = "[a-zA-Z]*";

@@ -100,7 +100,7 @@ public class BeanClass<T> implements Serializable {
      * given instance.
      */
     public static final <C> BeanClass<C> getBeanClass(C instance) {
-        return (BeanClass<C>) CachedBeanClass.getCachedBeanClass(getDefiningClass(instance.getClass()));
+        return (BeanClass<C>) getBeanClass(instance.getClass());
     }
 
     /**
@@ -111,7 +111,11 @@ public class BeanClass<T> implements Serializable {
      * @return new or cached instance
      */
     public static final <C> BeanClass<C> getBeanClass(Class<C> beanClass) {
-        return CachedBeanClass.getCachedBeanClass(beanClass);
+        return getBeanClass(beanClass, true);
+    }
+
+    public static final <C> BeanClass<C> getBeanClass(Class<C> beanClass, boolean evalDefiningClass) {
+        return CachedBeanClass.getCachedBeanClass(evalDefiningClass ? getDefiningClass(beanClass) : beanClass);
     }
 
     /**
@@ -956,7 +960,7 @@ public class BeanClass<T> implements Serializable {
      * delegates to {@link #copyValues(Object, Object, String...)} using all destination attributes having a setter.
      */
     public static <D> D copyValues(Object src, D dest, boolean onlyDestAttributes) {
-        final BeanClass destClass = BeanClass.getBeanClass(dest.getClass());
+        final BeanClass destClass = BeanClass.getBeanClass(dest.getClass(), false);
         String[] attributeNames = destClass.getAttributeNames(true);
         return copyValues(src, dest, attributeNames);
     }
@@ -986,7 +990,7 @@ public class BeanClass<T> implements Serializable {
     public static <D> D copyValues(Object src, D dest, boolean onlyIfNotNull, boolean onlyIfDestIsNull, String... attributeNames) {
         int copied = 0;
         if (attributeNames.length == 0) {
-            final BeanClass srcClass = BeanClass.getBeanClass(src.getClass());
+            final BeanClass srcClass = BeanClass.getBeanClass(src.getClass(), false);
             attributeNames = srcClass.getAttributeNames();
         }
         if (LOG.isTraceEnabled()) {
@@ -1163,12 +1167,12 @@ public class BeanClass<T> implements Serializable {
      * @return defining class - means on anonymous classes, proxies or enhancing it returns the the super class or
      *         interface.
      */
-    public static final Class<?> getDefiningClass(Class<?> cls) {
+    public static final <C> Class<C> getDefiningClass(Class<C> cls) {
         //TODO: how to check for enhancing class
-        return cls.isEnum() ? cls : Proxy.isProxyClass(cls) ? cls.getInterfaces()[0]
+        return (Class<C>) (cls.isEnum() ? cls : Proxy.isProxyClass(cls) ? cls.getInterfaces()[0]
             : (cls.getEnclosingClass() != null || cls
                 .getSimpleName().contains("$")) && cls.getSuperclass() != null ? getDefiningClass(cls.getSuperclass())
-                : cls;
+                : cls);
     }
 
     /**
