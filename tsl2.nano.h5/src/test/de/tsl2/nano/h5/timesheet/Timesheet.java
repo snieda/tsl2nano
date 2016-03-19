@@ -387,6 +387,27 @@ public class Timesheet extends NanoH5App {
         a.addConstraint("arg2", new Constraint<String>("help"));
         ENV.get(ActionPool.class).add(a);
 
+        Method icsHolidays = null;
+        try {
+            icsHolidays = ICSChargeImport.class.getMethod("doImportHolidays");
+        } catch (Exception e) {
+            ManagedException.forward(e);
+        }
+        ENV.get(ActionPool.class).add(new Action<>(icsHolidays));
+
+        Method icsImport = null;
+        try {
+            icsImport = ICSChargeImport.class.getMethod("doImportICS", String.class);
+        } catch (Exception e) {
+            ManagedException.forward(e);
+        }
+        a = new Action<>(icsImport);
+        ENV.get(ActionPool.class).add(a);
+
+        Bean.getBean(Charge.class).addAction(new ActionImportHolidays());
+        Bean.getBean(Charge.class).addAction(new ActionImportCalendar());
+        Bean.getBean(Charge.class).saveDefinition();
+        
         /*
          * define a Controller as Collector of Actions of a Bean
          */

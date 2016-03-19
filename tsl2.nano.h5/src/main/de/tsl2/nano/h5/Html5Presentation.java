@@ -1472,7 +1472,7 @@ public class Html5Presentation<T> extends BeanPresentationHelper<T> implements I
         boolean focusSet = false;
         Collection<IPresentableColumn> colDefs = tableDescriptor.getColumnDefinitionsIndexSorted();
         for (IPresentableColumn c : colDefs) {
-            String value = tableDescriptor.getColumnText(element, c.getIndex());
+            String value = Util.asString(tableDescriptor.getColumnText(element, c.getIndex(), false));
             Element cell0 = appendElement(row, TAG_CELL);
             Element cell = appendElement(cell0, TAG_SPAN);
             appendElement(cell,

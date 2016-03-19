@@ -346,6 +346,8 @@ public class NanoH5 extends NanoHTTPD implements ISystemConnector<Persistence> {
                     // the workflow was done, now create the entity browser
                     LOG.info("session-workflow of " + session + " was done. creating an entity-browser now...");
                     session.nav = createGenericNavigationModel(true);
+                    //don't lose the connection - the first item is the login
+//                    session.nav.next(session.nav.toArray()[1]);
                 }
             } else if (method.equals("GET") && parms.size() == 0
                 && (uri.length() < 2 || header.get("referer") == null)) {

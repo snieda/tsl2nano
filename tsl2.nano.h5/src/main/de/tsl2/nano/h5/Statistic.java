@@ -9,6 +9,7 @@
  */
 package de.tsl2.nano.h5;
 
+import java.io.File;
 import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -19,6 +20,7 @@ import java.util.Map;
 
 import org.apache.commons.logging.Log;
 import org.simpleframework.xml.Transient;
+import org.simpleframework.xml.core.Commit;
 
 import de.tsl2.nano.bean.BeanContainer;
 import de.tsl2.nano.bean.BeanUtil;
@@ -161,7 +163,7 @@ public class Statistic<COLLECTIONTYPE extends Collection<T>, T> extends BeanColl
                 }
             }
         }
-        
+
         /*
          * do all group by selects
          */
@@ -172,7 +174,8 @@ public class Statistic<COLLECTIONTYPE extends Collection<T>, T> extends BeanColl
         /*
          * create an svg chart file without summary
          */
-        searchStatus += "<span>" + createGraph(getName(), columnNames.getList(), (Collection<Object[]>) collection) + "</span>";
+        searchStatus +=
+            "<span>" + createGraph(getName(), columnNames.getList(), (Collection<Object[]>) collection) + "</span>";
 
         collection.addAll(createSummary(def, valueColumns, from, to));
 
@@ -283,7 +286,8 @@ public class Statistic<COLLECTIONTYPE extends Collection<T>, T> extends BeanColl
      */
     @SuppressWarnings({ "rawtypes" })
     static String createGraph(String name, List<String> columnNames, Collection<Object[]> data) {
-        if (data.size() == 0 || !data.iterator().next().getClass().isArray() /* the compiler checks for array, but on runtime it may be a simple object!*/)
+        if (data.size() == 0 || !data.iterator().next().getClass()
+            .isArray() /* the compiler checks for array, but on runtime it may be a simple object!*/)
             return "";
         int columnCount = data.iterator().next().length;
         List<Object> x = new ArrayList<Object>(data.size());
@@ -314,5 +318,26 @@ public class Statistic<COLLECTIONTYPE extends Collection<T>, T> extends BeanColl
         //workaround: remove fix-size in mm
         svgContent = svgContent.replaceAll("\\w+[=]\"\\d+mm\"", "");
         return svgContent.substring(svgContent.indexOf("<svg"));
+    }
+
+    @Override
+    protected void saveBeanDefinition(File xmlFile) {
+        //don't save real entities - perhaps having endless relationships
+        T _from = from, _to = to;
+        if (from != null && to != null) {
+            from = (T) BeanContainer.detachEntities(from);
+            to = (T) BeanContainer.detachEntities(to);
+        }
+        super.saveBeanDefinition(xmlFile);
+        from = _from;
+        to = _to;
+    }
+
+    @Commit
+    @Override
+    protected void initDeserialization() {
+        BeanContainer.attachEntities(from);
+        BeanContainer.attachEntities(to);
+        super.initDeserialization();
     }
 }

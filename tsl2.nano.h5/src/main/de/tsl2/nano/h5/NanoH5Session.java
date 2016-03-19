@@ -238,7 +238,7 @@ public class NanoH5Session implements ISession<BeanDefinition>, Serializable {
      */
     BeanDefinition injectContext(BeanDefinition beandef) {
         //inject search filter only on first time - before first search...
-        if (beandef.isMultiValue() && !((BeanCollector)beandef).wasActivated()) {
+        if (beandef != null && beandef.isMultiValue() && !((BeanCollector)beandef).wasActivated()) {
             //fill search parameters...
             Iterator<IRange> ranges = this.context.get(IRange.class);
             Class type;
@@ -248,31 +248,13 @@ public class NanoH5Session implements ISession<BeanDefinition>, Serializable {
                 type = range.getFrom() != null ? range.getFrom().getClass() : null;
                 if (beandef.getDeclaringClass().equals(type)) {
                     Bean brange = ((BeanCollector) beandef).getBeanFinder().getFilterRange();
-                    brange.getAttribute("from").setValue(attachEntities(range.getFrom()));
-                    brange.getAttribute("to").setValue(attachEntities(range.getTo()));
+                    brange.getAttribute("from").setValue(BeanContainer.attachEntities(range.getFrom()));
+                    brange.getAttribute("to").setValue(BeanContainer.attachEntities(range.getTo()));
                     break;
                 }
             }
         }
         return beandef;
-    }
-
-    /**
-     * reloads all referenced entities (having only an id)
-     * @param obj transient (example) entity holding attached entities as relations
-     * @return the obj itself
-     */
-    private Object attachEntities(Object obj) {
-        List<IAttributeDefinition<?>> attributes = Bean.getBean(obj).getBeanAttributes();
-        BeanValue bv;
-        for (IAttributeDefinition<?> a : attributes) {
-            if (a.isRelation() && (bv = (BeanValue)a).getValue() != null) {
-                Bean b = Bean.getBean(bv.getValue());
-                Object n = BeanContainer.instance().getByID(bv.getType(), b.getId());
-                bv.setValue(n);
-            }
-        }
-        return obj;
     }
 
     /**
@@ -472,7 +454,8 @@ public class NanoH5Session implements ISession<BeanDefinition>, Serializable {
             msg = StringUtil.toFormattedString(exceptionHandler.clearExceptions(), 200, false);
         }
         BeanDefinition<?> model = injectContext(nav.next(returnCode));
-        model.onActivation();
+        if (model != null)
+            model.onActivation();
         return model != null ? builder.build(this, model, msg, true, nav.toArray()) : server.createStartPage();
     }
 
@@ -884,28 +867,9 @@ public class NanoH5Session implements ISession<BeanDefinition>, Serializable {
         // create shallow copies of filter, from, to
         IRange<?> filter = BeanUtil.clone(model.getBeanFinder().getFilterRange().getInstance());
         //replace entities with copies holding only the id
-        Bean.getBean(filter).setValue("from", detachEntities(BeanUtil.clone(filter.getFrom())));
-        Bean.getBean(filter).setValue("to", detachEntities(BeanUtil.clone(filter.getTo())));
+        Bean.getBean(filter).setValue("from", BeanContainer.detachEntities(BeanUtil.clone(filter.getFrom())));
+        Bean.getBean(filter).setValue("to", BeanContainer.detachEntities(BeanUtil.clone(filter.getTo())));
         context.put(PREFIX_CONTEXT_RANGE + model.getDeclaringClass().getName(), filter);
-    }
-
-    /**
-     * replaces attached entities with copies holding only the id
-     * @param obj transient (example) entity holding attached entities as relations
-     * @return the obj itself
-     */
-    private Object detachEntities(Object obj) {
-        List<IAttributeDefinition<?>> attributes = Bean.getBean(obj).getBeanAttributes();
-        BeanValue bv;
-        for (IAttributeDefinition<?> a : attributes) {
-            if (a.isRelation() && (bv = (BeanValue)a).getValue() != null) {
-                Bean b = Bean.getBean(bv.getValue());
-                Object n = BeanClass.createInstance(a.getType());
-                Bean.getBean(n).getIdAttribute().setValue(n, b.getId());
-                bv.setValue(n);
-            }
-        }
-        return obj;
     }
 
     /**

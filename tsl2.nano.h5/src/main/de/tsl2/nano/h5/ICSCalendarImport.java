@@ -18,36 +18,31 @@ import de.tsl2.nano.scanner.ICSCalendarReader;
 import de.tsl2.nano.util.Period;
 
 /**
- * imports an holiday ics calendar
+ * imports a holiday ics calendar from "http://www.kayaposoft.com/enrico/ics/v1.0?country=deu&fromDate=01-01-2016&toDate=31-12-2016&region=Bavaria".
  * 
  * @author Tom, Thomas Schneider
  * @version $Revision$
  */
 public class ICSCalendarImport {
     /**
-     * importCalendar
+     * importCalendar into Charge
      * 
      * @param country
      * @param region
      * @param period
      * @return count of entries
      */
-    public long importCalendar(String country, String region, Period period) {
+    protected long importCalendar(String country, String region, Period period, ICallback callback) {
         String holServiceURL = ENV.get("app.holiday.service.url",
-            "http://www.kayaposoft.com/enrico/ics/v1.0?country=deu&fromDate=01-01-2016&toDate=31-12-2016&region=Bavaria");
+            "http://www.kayaposoft.com/enrico/ics/v1.0?country=" 
+            + country + "deu&fromDate=" + period.getStart() + "&toDate=" + period.getEnd() + "&region=" + region);
         NetUtil.download(holServiceURL, ENV.getTempPathRel());
         String file = getDownloadFile(country, region, period);
-        long count = ICSCalendarReader.forEach(file, new ICallback() {
-            @Override
-            public Object run(Map<Object, Object> passInfo) {
-                // TODO Auto-generated method stub
-                return null;
-            }
-        });
+        long count = ICSCalendarReader.forEach(file, callback);
         return count;
     }
 
-    private String getDownloadFile(String country, String region, Period period) {
+    protected String getDownloadFile(String country, String region, Period period) {
         return ENV.getTempPathRel() + country + " (" + region + ").ics";
     }
 }
