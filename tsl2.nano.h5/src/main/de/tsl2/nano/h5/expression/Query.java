@@ -42,7 +42,7 @@ public class Query<RESULT> implements IPRunnable<RESULT, Map<String, Object>> {
     private static final Log LOG = LogFactory.getLog(Query.class);
     
     /** full column expression for one column */
-    private static final String SQL_COL = "(^|\\,)\\s*([^\\s,]+)(\\s+as\\s+([\\w]+))?";
+    private static final String SQL_COL = "(^|\\,)\\s*([^,]+)(\\s+as\\s+([\\w]+))?";
     /** sql parameter */
     private static final String SQL_PAR = "[:]([\\w._-]+)";
     /** sql function */
@@ -152,10 +152,10 @@ public class Query<RESULT> implements IPRunnable<RESULT, Map<String, Object>> {
             select = select.replaceAll(SQL_PAT, "");
             select = select.replaceAll(SQL_CON, "");
             //TODO: capturing group 1 is not used! why?
-            select = select.replaceAll(SQL_FCT, "\\1");
+            select = select.replaceAll(SQL_FCT, "$1");
             StringBuilder q = new StringBuilder(select);
             while ((!Util.isEmpty(p = StringUtil.extract(q, SQL_COL, "", 0, 0)))) {
-                columnNames.add(p.contains("as ") ? StringUtil.substring(p, "as ", null) : StringUtil.substring(p, ".",
+                columnNames.add(p.contains(" as ") ? StringUtil.substring(p, " as ", null).trim() : StringUtil.substring(p, ".",
                     null).trim());
             }
             if (LOG.isDebugEnabled())

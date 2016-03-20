@@ -1839,7 +1839,7 @@ public class Html5Presentation<T> extends BeanPresentationHelper<T> implements I
             return "";
         }
         //let the browser decide, howto present a date - the date should be given as sql date (tested on chrome)
-        return type.startsWith("date") ? StringUtil.toString(DateUtil.toSqlDateString((Date) beanValue.getValue()))
+        return type.startsWith("date") && ENV.get("html5.present.type.date.tosqldate", true)? StringUtil.toString(DateUtil.toSqlDateString((Date) beanValue.getValue()))
             : beanValue.getValueText();
     }
 
@@ -1951,7 +1951,8 @@ public class Html5Presentation<T> extends BeanPresentationHelper<T> implements I
             type = "checkbox";
             break;
         case TYPE_DATE | TYPE_TIME:
-            //most browsers are not able to present a datetime. 
+            //most browsers are not able to present a datetime. see http://caniuse.com/#search=date
+            //hibernate generates datetime annotations on dates
             type = ENV.get("html5.present.type.datetime", "date"/*"datetime-local"*/);
             break;
         case TYPE_TIME:

@@ -282,15 +282,15 @@ public class Timesheet extends NanoH5App {
          */
         String stat = "\n-- get a statistic table from timesheet entries\n" +
               "-- user and time-period should be given...\n" +
-              "select Month, sum(Workdays) as Workdays, sum(Hours) as Hours, sum(Ill) as Ill, sum(Holiday) as Holiday from (\n" +
-              "select year(c.FROMDATE) || ' ' || monthname(c.FROMDATE) as Month, count(month(c.FROMDATE)) as Workdays, sum(value) as Hours, 0 as Ill, 0 as Holiday from Charge c\n" +
+              "select Month, sum(Workdays) as Workdays, sum(Hours) as Hours, sum(Dayhours) as Dayhours, sum(Ill) as Ill, sum(Holiday) as Holiday from (\n" +
+              "select year(c.FROMDATE) || ' ' || monthname(c.FROMDATE) as Month, count(month(c.FROMDATE)) as Workdays, sum(value) as Hours, sum(value) / count(month(c.FROMDATE)) as Dayhours, 0 as Ill, 0 as Holiday from Charge c\n" +
               "group by Month\n" +
               "union -- Illness\n" +
-              "select year(c.FROMDATE) || ' ' || monthname(c.FROMDATE) as Month, 0 as Workdays, 0 as Hours, sum(value) as Ill, 0 as Holiday from Charge c join ChargeItem ci on c.CHARGEITEM = ci.ID join Item i on ci.ITEM = i.ID join Type t on i.TYPE = t.ID\n" +
+              "select year(c.FROMDATE) || ' ' || monthname(c.FROMDATE) as Month, 0 as Workdays, 0 as Hours, 0 as Dayhours, sum(value) as Ill, 0 as Holiday from Charge c join ChargeItem ci on c.CHARGEITEM = ci.ID join Item i on ci.ITEM = i.ID join Type t on i.TYPE = t.ID\n" +
               "where t.NAME = 'Krank'\n" +
               "group by Month\n" +
               "union -- Holidays\n" +
-              "select year(c.FROMDATE) || ' ' || monthname(c.FROMDATE) as Month, 0 as Workdays, 0 as Hours, 0 as Ill, sum(value) as Holiday from Charge c join ChargeItem ci on c.CHARGEITEM = ci.ID join Item i on ci.ITEM = i.ID join Type t on i.TYPE = t.ID\n" +
+              "select year(c.FROMDATE) || ' ' || monthname(c.FROMDATE) as Month, 0 as Workdays, 0 as Hours, 0 as Dayhours, 0 as Ill, sum(value) as Holiday from Charge c join ChargeItem ci on c.CHARGEITEM = ci.ID join Item i on ci.ITEM = i.ID join Type t on i.TYPE = t.ID\n" +
               "where t.NAME = 'Urlaub'\n" +
               "group by Month\n" +
               ")\n" +
@@ -535,7 +535,7 @@ public class Timesheet extends NanoH5App {
 
         //test the queries
         QueryPool qpool = ENV.get(QueryPool.class);
-        assertTrue(qpool.get(STAT_TIMESHEET_STATISTICS).getColumnNames().equals(Arrays.asList("Month", "Workdays", "Hours", "Ill", "Holiday")));
+        assertTrue(qpool.get(STAT_TIMESHEET_STATISTICS).getColumnNames().equals(Arrays.asList("Month", "Workdays", "Hours", "Dayhours", "Ill", "Holiday")));
         assertTrue(qpool.get(STAT_PROJECTS).getColumnNames().equals(Arrays.asList("Project", "Hours")));
         assertTrue(qpool.get(STAT_TYPES).getColumnNames().equals(Arrays.asList("Type", "Hours")));
         super.stop();

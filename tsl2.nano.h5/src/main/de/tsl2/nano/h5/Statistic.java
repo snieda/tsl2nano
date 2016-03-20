@@ -91,6 +91,7 @@ public class Statistic<COLLECTIONTYPE extends Collection<T>, T> extends BeanColl
     public Statistic(Class<T> beanType, T from, T to) {
         super();
         setMode(0);
+        name = "Statistics: " + beanType.getSimpleName();
         columnNames = new ListWrapper<String>();
         this.from = from;
         this.to = to;
