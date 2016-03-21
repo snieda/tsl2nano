@@ -404,9 +404,10 @@ public class Timesheet extends NanoH5App {
         a = new Action<>(icsImport);
         ENV.get(ActionPool.class).add(a);
 
-        Bean.getBean(Charge.class).addAction(new ActionImportHolidays());
-        Bean.getBean(Charge.class).addAction(new ActionImportCalendar());
-        Bean.getBean(Charge.class).saveDefinition();
+        BeanDefinition<Charge> chargeDef = BeanDefinition.getBeanDefinition(Charge.class);
+        chargeDef.addAction(new ActionImportHolidays());
+        chargeDef.addAction(new ActionImportCalendar());
+        chargeDef.saveDefinition();
         
         /*
          * define a Controller as Collector of Actions of a Bean

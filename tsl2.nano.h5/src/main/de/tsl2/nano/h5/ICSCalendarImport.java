@@ -9,6 +9,7 @@
  */
 package de.tsl2.nano.h5;
 
+import java.text.SimpleDateFormat;
 import java.util.Map;
 
 import de.tsl2.nano.core.ENV;
@@ -24,6 +25,8 @@ import de.tsl2.nano.util.Period;
  * @version $Revision$
  */
 public class ICSCalendarImport {
+    private static final SimpleDateFormat SDF = new SimpleDateFormat("dd-MM-yyyy");
+    
     /**
      * importCalendar into Charge
      * 
@@ -34,8 +37,8 @@ public class ICSCalendarImport {
      */
     protected long importCalendar(String country, String region, Period period, ICallback callback) {
         String holServiceURL = ENV.get("app.holiday.service.url",
-            "http://www.kayaposoft.com/enrico/ics/v1.0?country=" 
-            + country + "deu&fromDate=" + period.getStart() + "&toDate=" + period.getEnd() + "&region=" + region);
+            "http://www.kayaposoft.com/enrico/ics/v1.0") 
+                + "?country=" + country + "&fromDate=" + SDF.format(period.getStart()) + "&toDate=" + SDF.format(period.getEnd()) + "&region=" + region;
         NetUtil.download(holServiceURL, ENV.getTempPathRel());
         String file = getDownloadFile(country, region, period);
         long count = ICSCalendarReader.forEach(file, callback);

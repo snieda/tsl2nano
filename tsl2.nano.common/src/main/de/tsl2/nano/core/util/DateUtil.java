@@ -89,6 +89,10 @@ public final class DateUtil {
         return minutes * MILLI_TO_MINUTES;
     }
 
+    public static final int diffHours(Date date1, Date date2) {
+        return millisToMinutes(diffMillis(date1, date2)) / HOUR_TO_MINUTES;
+    }
+
     /**
      * calculates the difference of 2 given dates in minutes (date2 - date1).
      * 

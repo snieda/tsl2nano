@@ -17,6 +17,9 @@ import de.tsl2.nano.bean.def.SecureAction;
  * @version $Revision$ 
  */
 public class ActionImportHolidays extends SecureAction {
+    /** serialVersionUID */
+    private static final long serialVersionUID = -2850207237378238545L;
+
     /**
      * constructor
      */
@@ -27,5 +30,10 @@ public class ActionImportHolidays extends SecureAction {
     @Override
     public Object action() throws Exception {
         return ICSChargeImport.doImportHolidays();
+    }
+    
+    @Override
+    public String getImagePath() {
+        return "icons/calendar.png";
     }
 }

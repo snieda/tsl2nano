@@ -11,6 +11,7 @@ package de.tsl2.nano.scanner;
 
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
+import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
 
@@ -25,11 +26,11 @@ import de.tsl2.nano.core.util.FileUtil;
  * @version $Revision$
  */
 public class ICSCalendarReader {
-    static final String BLOCK = "BEGIN[:]VEVENT.*END[:]VEVENT";
+    static final String BLOCK = "(?m)BEGIN[:]VEVENT.*END[:]VEVENT";
     public static final String START = "DTSTART";
     public static final String END = "DTEND";
     public static final String SUMMARY = "SUMMARY";
-    public static final String CATEGORY = "CATEGORY";
+    public static final String CATEGORY = "CATEGORIES";
     public static final String CLASS = "CLASS";
     static final SimpleDateFormat DF = new SimpleDateFormat("yyyyMMdd");
     static final SimpleDateFormat TF = new SimpleDateFormat("HHmmss");
@@ -46,13 +47,17 @@ public class ICSCalendarReader {
             @Override
             public Object run(Map<Object, Object> passInfo) {
                 Set<Object> keys = passInfo.keySet();
+                Map<Object, Object> dateObjects = new HashMap<Object, Object>();
                 Object v;
                 for (Object k : keys) {
                     //replace date strings with date objects
-                    if (k.toString().startsWith(START) || k.toString().startsWith(END)) {
-                        passInfo.put(k, getDate(passInfo, k));
+                    if (k.toString().startsWith(START)) {
+                        dateObjects.put(START, getDate(passInfo, k));
+                    }else if (k.toString().startsWith(END)) {
+                        dateObjects.put(END, getDate(passInfo, k));
                     }
                 }
+                passInfo.putAll(dateObjects);
                 return callback.run(passInfo);
             }
 

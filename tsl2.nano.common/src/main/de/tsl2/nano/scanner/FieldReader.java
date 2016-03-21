@@ -30,6 +30,8 @@ import org.apache.tools.ant.filters.StringInputStream;
 import de.tsl2.nano.collection.FloatArray;
 import de.tsl2.nano.core.ICallback;
 import de.tsl2.nano.core.util.FileUtil;
+import de.tsl2.nano.core.util.StringUtil;
+import de.tsl2.nano.core.util.Util;
 
 /**
  * reads any fields from any text file using a {@link Scanner}. all lines starting with {@link #COMMENT} will be
@@ -354,9 +356,17 @@ public class FieldReader {
     public static long forEach(InputStream stream, String blockExpression, String keyValueDelimiter, ICallback callback) {
         Scanner sc = new Scanner(stream);
         long count = 0;
-        while(sc.hasNext(blockExpression)) {
-            callback.run(read(new StringInputStream(sc.next(blockExpression)), keyValueDelimiter, DEL_PROP, Locale.getDefault(), false));
-            count++;
+        StringBuilder block = new StringBuilder();
+        String entry;
+        while(sc.hasNextLine()) {
+            block.append(sc.nextLine() + "\t");
+            if (!Util.isEmpty(entry = StringUtil.extract(block, blockExpression))) {
+                //a scanner reads per line
+                entry = entry.replace('\t', '\n');
+                callback.run(read(new StringInputStream(entry), keyValueDelimiter, DEL_PROP, Locale.getDefault(), false));
+                block.setLength(0);
+                count++;
+            }
         }
         sc.close();
         return count;

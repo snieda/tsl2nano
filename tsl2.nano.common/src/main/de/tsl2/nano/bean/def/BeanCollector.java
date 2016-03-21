@@ -688,34 +688,7 @@ public class BeanCollector<COLLECTIONTYPE extends Collection<T>, T> extends Bean
          * we create a generated value for the id. if jpa annotation @GenerateValue
          * is present, it will overwrite this id.
          */
-        final BeanAttribute idAttribute = BeanContainer.getIdAttribute(newItem);
-        if (idAttribute != null) {
-            Object value = null;
-            if (ENV.get("value.id.fill.uuid", true)) {
-                if (String.class.isAssignableFrom(idAttribute.getType())) {
-                    IAttributeDef def = ENV.get(IBeanContainer.class).getAttributeDef(newItem,
-                        idAttribute.getName());
-                    //TODO: through string cut, the uuid may not be unique
-                    value =
-                        StringUtil.fixString(BeanUtil.createUUID(), (def.length() > -1 ? def.length() : 0), ' ', true);
-                } else if (NumberUtil.isNumber(idAttribute.getType())) {
-                    //subtract the years from 1970 to 2015 to be castable to an int
-                    //TODO: use a more unique value
-                    if (ENV.get("value.id.use.timestamp", false)) {
-                        value = System.currentTimeMillis();
-                        if (NumberUtil.isInteger(idAttribute.getType())) {
-                            value = DateUtil.getMillisWithoutYear((Long) value);
-                        }
-                    } else {
-                        value = ENV.counter("collector.new.id.number.counter.start", 1);
-                    }
-                } else {
-                    LOG.warn("the id-attribute " + idAttribute + " can't be assigned to a generated value of type "
-                        + idAttribute.getType());
-                }
-            }
-            idAttribute.setValue(newItem, value);
-        }
+        BeanContainer.createId(newItem);
 
         /*
          * assign the new item to the composition parent. this should be done last, 
@@ -1103,7 +1076,7 @@ public class BeanCollector<COLLECTIONTYPE extends Collection<T>, T> extends Bean
     public String getColumnText(Object element, int columnIndex) {
         return getColumnText(element, columnIndex, true);
     }
-    
+
     public String getColumnText(Object element, int columnIndex, boolean useColumnFormat) {
         IPresentableColumn col = getColumn(columnIndex);
         //column may be filtered (e.g. id-columns)
@@ -1144,7 +1117,7 @@ public class BeanCollector<COLLECTIONTYPE extends Collection<T>, T> extends Bean
     public String getColumnText(Object element, IAttributeDefinition<?> attribute) {
         return getColumnText(element, attribute, true);
     }
-    
+
     /**
      * {@inheritDoc}
      */

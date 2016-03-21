@@ -17,6 +17,8 @@ import de.tsl2.nano.bean.def.SecureAction;
  * @version $Revision$ 
  */
 public class ActionImportCalendar extends SecureAction {
+    /** serialVersionUID */
+    private static final long serialVersionUID = 1087678476857534285L;
     /**
      * constructor
      */
@@ -26,7 +28,7 @@ public class ActionImportCalendar extends SecureAction {
     
     @Override
     public Object action() throws Exception {
-        return ICSChargeImport.doImportICS((String) getParameter(0));
+        return ICSChargeImport.doImportICS((String) getParameter(1));
     }
     @Override
     public Class[] getArgumentTypes() {

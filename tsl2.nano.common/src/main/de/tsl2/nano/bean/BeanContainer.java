@@ -37,6 +37,7 @@ import de.tsl2.nano.core.cls.IAttribute;
 import de.tsl2.nano.core.log.LogFactory;
 import de.tsl2.nano.core.util.DateUtil;
 import de.tsl2.nano.core.util.ListSet;
+import de.tsl2.nano.core.util.NumberUtil;
 import de.tsl2.nano.core.util.StringUtil;
 
 /**
@@ -49,12 +50,12 @@ import de.tsl2.nano.core.util.StringUtil;
 @SuppressWarnings({ "serial", "rawtypes", "unchecked" })
 public class BeanContainer implements IBeanContainer {
     private static BeanContainer self = null;
-    
+
     private static final Log LOG = LogFactory.getLog(BeanContainer.class);
-    
+
     /** on initializing with {@link #initEmtpyServiceActions()} it is true */
     private boolean emptyServices = false;
-    
+
     protected IAction<Collection<?>> idFinderAction = null;
     protected IAction<Collection<?>> typeFinderAction = null;
     protected IAction<Collection<?>> exampleFinderAction = null;
@@ -232,7 +233,7 @@ public class BeanContainer implements IBeanContainer {
                 return null;
             }
         };
-        BeanContainer.initServiceActions(idFinder, 
+        BeanContainer.initServiceActions(idFinder,
             relationFinder,
             lazyRelationResolver,
             saveAction,
@@ -254,7 +255,7 @@ public class BeanContainer implements IBeanContainer {
     public static boolean isConnected() {
         return isInitialized() && !self.emptyServices;
     }
-    
+
     /**
      * {@inheritDoc}
      */
@@ -578,6 +579,7 @@ public class BeanContainer implements IBeanContainer {
 
     /**
      * reloads all referenced entities (having only an id)
+     * 
      * @param obj transient (example) entity holding attached entities as relations
      * @return the obj itself
      */
@@ -585,7 +587,7 @@ public class BeanContainer implements IBeanContainer {
         List<IAttributeDefinition<?>> attributes = Bean.getBean(obj).getBeanAttributes();
         BeanValue bv;
         for (IAttributeDefinition<?> a : attributes) {
-            if (a.isRelation() && (bv = (BeanValue)a).getValue() != null) {
+            if (a.isRelation() && (bv = (BeanValue) a).getValue() != null) {
                 Bean b = Bean.getBean(bv.getValue());
                 Object n = BeanContainer.instance().getByID(bv.getType(), b.getId());
                 bv.setValue(n);
@@ -596,6 +598,7 @@ public class BeanContainer implements IBeanContainer {
 
     /**
      * replaces attached entities with copies holding only the id
+     * 
      * @param obj transient (example) entity holding attached entities as relations
      * @return the obj itself
      */
@@ -603,7 +606,7 @@ public class BeanContainer implements IBeanContainer {
         List<IAttributeDefinition<?>> attributes = Bean.getBean(obj).getBeanAttributes();
         BeanValue bv;
         for (IAttributeDefinition<?> a : attributes) {
-            if (a.isRelation() && (bv = (BeanValue)a).getValue() != null) {
+            if (a.isRelation() && (bv = (BeanValue) a).getValue() != null) {
                 Bean b = Bean.getBean(bv.getValue());
                 Object n = BeanClass.createInstance(a.getType());
                 Bean.getBean(n).getIdAttribute().setValue(n, b.getId());
@@ -611,5 +614,43 @@ public class BeanContainer implements IBeanContainer {
             }
         }
         return obj;
+    }
+
+    /**
+     * creates and sets a generated value for the id. if jpa annotation @GenerateValue is present, it will overwrite this id.
+     * 
+     * @param newItem
+     */
+    public static void createId(Object newItem) {
+        if (ENV.get("value.id.fill.uuid", true)) {
+            final BeanAttribute idAttribute = BeanContainer.getIdAttribute(newItem);
+            if (idAttribute != null) {
+                Object value = null;
+                if (String.class.isAssignableFrom(idAttribute.getType())) {
+                    IAttributeDef def = ENV.get(IBeanContainer.class).getAttributeDef(newItem,
+                        idAttribute.getName());
+                    //TODO: through string cut, the uuid may not be unique
+                    value =
+                        StringUtil.fixString(BeanUtil.createUUID(), (def.length() > -1 ? def.length() : 0), ' ', true);
+                } else if (NumberUtil.isNumber(idAttribute.getType())) {
+                    //subtract the years from 1970 to 2015 to be castable to an int
+                    //TODO: use a more unique value
+                    if (ENV.get("value.id.use.timestamp", false)) {
+                        value = System.currentTimeMillis();
+                        if (NumberUtil.isInteger(idAttribute.getType())) {
+                            value = DateUtil.getMillisWithoutYear((Long) value);
+                        }
+                    } else {
+                        value = ENV.counter("collector.new.id.number.counter.start", 1);
+                    }
+                } else {
+                    LOG.warn("the id-attribute " + idAttribute + " can't be assigned to a generated value of type "
+                        + idAttribute.getType());
+                }
+                idAttribute.setValue(newItem, value);
+                return;
+            }
+        }
+        LOG.debug("no id will be generated for new item " + newItem);
     }
 }

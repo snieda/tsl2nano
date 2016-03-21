@@ -2841,6 +2841,7 @@ erdplus: kann nichts allgemeines exportieren
 * (v) environment.keys
 * Messages.send uses ENV to evaluate the right exceptionhandler
 * only singelton beancontainer with one user
+* RegexFormat only with german formats
 * session hash id?
 * timesheet: pause
 * holidays, workdays
@@ -2853,3 +2854,5 @@ erdplus: kann nichts allgemeines exportieren
 * remove h5 test classes from jar
 * remove disabled buttons in menu
 * h2 db test
+* ICSImportCharge in timesheet Test (script) integrieren
+* export to ICS
