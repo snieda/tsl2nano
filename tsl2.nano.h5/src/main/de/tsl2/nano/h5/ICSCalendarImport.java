@@ -10,7 +10,6 @@
 package de.tsl2.nano.h5;
 
 import java.text.SimpleDateFormat;
-import java.util.Map;
 
 import de.tsl2.nano.core.ENV;
 import de.tsl2.nano.core.ICallback;
