@@ -32,10 +32,12 @@ import de.tsl2.nano.bean.def.ValueExpression;
 import de.tsl2.nano.bean.def.ValueGroup;
 import de.tsl2.nano.collection.Entry;
 import de.tsl2.nano.core.ENV;
+import de.tsl2.nano.core.cls.BeanClass;
 import de.tsl2.nano.core.cls.IAttribute;
 import de.tsl2.nano.core.log.LogFactory;
 import de.tsl2.nano.core.util.MapUtil;
 import de.tsl2.nano.core.util.Util;
+import de.tsl2.nano.h5.Compositor;
 import de.tsl2.nano.h5.Html5Presentable;
 import de.tsl2.nano.h5.SpecifiedAction;
 import de.tsl2.nano.incubation.specification.actions.Action;
@@ -325,6 +327,18 @@ public class BeanConfigurator<T> implements Serializable {
         ENV.get(ActionPool.class).get(name);
         SpecifiedAction<Object> action = new SpecifiedAction(name, null);
         def.addAction(action);
+    }
+
+    @SuppressWarnings({ "rawtypes", "unchecked"})
+    @de.tsl2.nano.bean.annotation.Action(name = "createCompositor", argNames = { "base type", "base attribute name", "icon attribute name"})
+    public void actionCreateCompositor (
+            String baseType, String baseAttribute, String iconAttribute) {
+        BeanClass bcBaseType = BeanClass.createBeanClass(baseType);
+        //check the attributes
+        bcBaseType.getAttribute(iconAttribute);
+        def.getAttribute(baseAttribute);
+        //now create the compositor
+        new Compositor(def.getClazz(), bcBaseType.getClazz(), baseAttribute, iconAttribute);
     }
 
 }

@@ -201,12 +201,20 @@ public class Bean<T> extends BeanDefinition<T> {
                 if (instance != null) {
                     actions = getActionsByClass(instance.getClass(), null, new Object[] { instance });
                 }
-                if (actions.size() == 0 && isSelectable()) {
+                if (!hasOkAction(actions) && isSelectable()) {
                     addDefaultSaveAction();
                 }
             }
         }
         return super.getActions();
+    }
+
+    private boolean hasOkAction(Collection<IAction> actions) {
+        for (IAction a : actions) {
+            if (a.getActionMode() == IAction.MODE_DLG_OK)
+                return true;
+        }
+        return false;
     }
 
     @Override

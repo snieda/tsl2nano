@@ -203,21 +203,33 @@ public class NetUtil {
         return getRestful(url, MapUtil.asArray(args));
     }
 
+    public static/*<T> T*/String getRestful(String url, Object... args) {
+        return getRestful(url, new char[] { '/', '/', '/' }, args);
+    }
+
+    public static/*<T> T*/String getRestful_(String url, Object... args) {
+        return getRestful(url, new char[] { '?', '=', '&' }, args);
+    }
+
     /**
      * simply returns the response of the given url + args restful request
      * 
      * @param url
      * @param responseType type of response object
+     * @param separators 0: start of parameters (e.g.: '?'), 2: separator between parameters (e.g.: '&'), 1: separator
+     *            between key and value (e.g.: '=').
      * @param args key/value pairs to be appended as rest-ful call to the url
      * @return content as object of type responseType
      */
-    public static/*<T> T*/String getRestful(String url/*, Class<T> responseType*/, Object... args) {
+    public static/*<T> T*/String getRestful(String url/*, Class<T> responseType*/, char[] separators, Object... args) {
         try {
             //create the rest-ful call
             StringBuilder buf = new StringBuilder(url);
+            char c = separators[0];
             if (args != null) {
                 for (int i = 0; i < args.length; i++) {
-                    buf.append("/" + args[i]);
+                    buf.append(c + Util.asString(args[i]).replace(' ', '+'));
+                    c = i + 1 % 2 == 0 ? separators[1] : separators[2];
                 }
             }
             url = buf.toString();
@@ -482,7 +494,8 @@ public class NetUtil {
      */
     public static Proxy proxy(String testURI, String newProxyHost, int port, String user, String passwd) {
         String protocol = testURI.split("\\:\\/\\/")[0] + ".";
-        LOG.info("to see the organisations automatic proxy definitions, open the 'Proxy-Auto-Config-(PAC)-Standard' file, mostly http://wpad/wpad.dat or http://wpad.com/wpad.dat (-->'Web Proxy Autodiscovery Protocol') in your browser!");
+        LOG.info(
+            "to see the organisations automatic proxy definitions, open the 'Proxy-Auto-Config-(PAC)-Standard' file, mostly http://wpad/wpad.dat or http://wpad.com/wpad.dat (-->'Web Proxy Autodiscovery Protocol') in your browser!");
         LOG.info("current system properties: {" + getSystem(protocol + "proxyHost") + getSystem(protocol + "proxyPort")
             + getSystem(protocol + "proxyUser") + getSystem(protocol + "proxyPassword"));
         LOG.info("}");

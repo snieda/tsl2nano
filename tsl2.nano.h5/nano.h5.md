@@ -2856,3 +2856,17 @@ erdplus: kann nichts allgemeines exportieren
 * h2 db test
 * ICSImportCharge in timesheet Test (script) integrieren
 * export to ICS
+* (x) rest-call with ?-=-&
+* (x) correction on new actions not having mode-ok
+* NEW: OneClick-Charger / Fast-Collector
+** base-type, charge-type
+** charge-type constraints
+** value-attribute
+** icon-attribute
+** +-action showing sum(values)
+** --action showing sum(values)
+** o-action as reset
+** list on top showing current actions
+** customized button to charge customized base-types
+** save-button
+** storno-button
