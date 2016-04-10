@@ -225,8 +225,8 @@ public class Timesheet extends NanoH5App {
         long dayTimeFraction = DateUtil.T_DAY;
         RuleScript<BigDecimal> calcTime = new RuleScript<BigDecimal>("calcTime",
             "var from = fromtime != null ? fromtime.getTime() " + "% " + dayTimeFraction + " : 0;" +
-                "var to = totime != null ? totime.getTime()" + "% " + dayTimeFraction + " : 0;" +
-                "var p = pause != null ? pause.getTime()" + "% " + dayTimeFraction + " : 0;" +
+                "var to = totime != null ? totime.getTime() " + "% " + dayTimeFraction + " : 0;" +
+                "var p = pause != null ? (new Date(pause.toGMTString()).getUTCHours()*360000 + new Date(pause.toGMTString()).getUTCMinutes()*60000) " + "% " + dayTimeFraction + " : 0;" +
                 "Math.round(((to - from) - p) / (3600 * 10)) / 100;", null);
         /*
          * add some specifications (=tests) to be checked on loading a rule
@@ -237,6 +237,8 @@ public class Timesheet extends NanoH5App {
         Time t0030 = DateUtil.getTime(0, 30);
         calcTime.addSpecification("notime", "check for zero-times", 0d,
             MapUtil.asMap("fromtime", t0800, "totime", t0800, "pause", t0000));
+        calcTime.addSpecification("notime1", "check for zero-times", 0d,
+            MapUtil.asMap("fromtime", t0800, "totime", t0800, "pause", null));
         calcTime.addSpecification("standard", "standard work day", 8.5d,
             MapUtil.asMap("fromtime", t0800, "totime", t1700, "pause", t0030));
 
@@ -339,54 +341,28 @@ public class Timesheet extends NanoH5App {
         LinkedList<BeanAct> acts = new LinkedList<BeanAct>();
         Parameter p = new Parameter();
         p.put("project", true);
-        p.put("prjname", "test");
+        p.put("type", "Urlaub");
         acts.add(new BeanAct("timesByProject",
             "project&true",
-            "select t from Times t where t.project.id = :prjname",
+            "select t from Charge t where t.chargeitem.item.type.name = :type",
             p,
-            "prjname"));
+            "type"));
         p = new Parameter();
-        p.put("prjname", "test");
+        p.put("prjname", "timesheet");
         acts.add(new BeanAct("organisation",
             "!organisation.activated",
             "select p from Organisation p where ? is null",
             p,
             "prjname"));
         p = new Parameter();
-        p.put("organisation", "test");
+        p.put("organisation", "timesheet-system");
         acts.add(new BeanAct("person",
             "organisation.activated & (!person.activated)",
-            "select p from Person p where p.organisation = ?",
+            "select p from Party p where p.organisation.name = ?",
             p,
             "organisation"));
         Workflow workflow = new Workflow("test.workflow", acts);
         ENV.persist(workflow);
-
-        /*
-         * use a rule with sub-rule
-         */
-        LinkedHashMap<String, ParType> par = new LinkedHashMap<String, ParType>();
-        par.put("A", ParType.BOOLEAN);
-        par.put("x1", ParType.NUMBER);
-        par.put("x2", ParType.NUMBER);
-        Rule<BigDecimal> testRule = new Rule<BigDecimal>("test", "A ? (x1 + 1) : (x2 * 2)", par);
-        testRule.addConstraint("x1", new Constraint<BigDecimal>(BigDecimal.class, BigDecimal.ZERO, BigDecimal.TEN));
-        testRule.addConstraint(Rule.KEY_RESULT, new Constraint<BigDecimal>(BigDecimal.class, BigDecimal.ZERO,
-            BigDecimal.TEN));
-        testRule.addSpecification("notA-1-2", null, new BigDecimal(4),
-            MapUtil.asMap("x1", new BigDecimal(1), "x2", new BigDecimal(2)));
-        testRule.addSpecification("A-2-1", null, new BigDecimal(2),
-            MapUtil.asMap("x1", new BigDecimal(2), "x2", new BigDecimal(1)));
-        ENV.get(RulePool.class).add(testRule);
-
-        //another rule to test sub-rule-imports
-        ENV.get(RulePool.class).add(new Rule<BigDecimal>("test-import", "A ? 1 + §test : (x2 * 3)", par));
-
-        BigDecimal result =
-            (BigDecimal) ENV.get(RulePool.class).get("test-import")
-                .run(MapUtil.asMap("A", true, "x1", new BigDecimal(1), "x2", new BigDecimal(2)));
-
-        LOG.info("my test-import rule result:" + result);
 
         /*
          * define an action
@@ -427,7 +403,7 @@ public class Timesheet extends NanoH5App {
         /*
          * define a Controller as Collector of Actions of a Bean
          */
-        final BeanDefinition timeActionBean = new BeanDefinition(Times.class);
+        final BeanDefinition timeActionBean = new BeanDefinition(Charge.class);
         timeActionBean.setName("time-actions");
         BeanDefinition.define(timeActionBean);
         final Controller controller = new Controller(timeActionBean, IBeanCollector.MODE_SEARCHABLE);
@@ -446,6 +422,7 @@ public class Timesheet extends NanoH5App {
             }
         });
         timeActionBean.saveDefinition();
+        controller.getPresentable().setIcon("icons/forward.png");
         controller.saveDefinition();
 
         /*

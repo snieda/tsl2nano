@@ -113,6 +113,11 @@ public class Controller<COLLECTIONTYPE extends Collection<T>, T> extends BeanCol
     }
 
     @Override
+    public boolean isVirtual() {
+        return true;
+    }
+    
+    @Override
     public ValueExpression<T> getValueExpression() {
         if (valueExpression == null) {
             //use the expression of the standard definition

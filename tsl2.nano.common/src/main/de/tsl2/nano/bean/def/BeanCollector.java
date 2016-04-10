@@ -1470,7 +1470,8 @@ public class BeanCollector<COLLECTIONTYPE extends Collection<T>, T> extends Bean
         copy(beandef, bc, "asString", "presentationHelper", "presentable");
         //use an own map instance to be independent of changes by other beans or beancollectors.
         bc.attributeDefinitions = new LinkedHashMap<String, IAttributeDefinition<?>>(bc.getAttributeDefinitions());
-        bc.presentable = BeanUtil.copy(beandef.presentable);
+        if (beandef.presentable != null)
+            bc.presentable = BeanUtil.copy(beandef.presentable);
         bc.init(collection, new BeanFinder(beandef.getClazz()), workingMode, composition);
         return bc;
     }

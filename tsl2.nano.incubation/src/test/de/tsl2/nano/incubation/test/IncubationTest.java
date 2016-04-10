@@ -95,6 +95,7 @@ import de.tsl2.nano.incubation.vnet.ThreadingEventController;
 import de.tsl2.nano.incubation.vnet.neuron.VNeuron;
 import de.tsl2.nano.incubation.vnet.routing.Location;
 import de.tsl2.nano.incubation.vnet.routing.RoutingAStar;
+import de.tsl2.nano.incubation.vnet.workflow.Act;
 import de.tsl2.nano.incubation.vnet.workflow.ComparableMap;
 import de.tsl2.nano.incubation.vnet.workflow.Condition;
 import de.tsl2.nano.incubation.vnet.workflow.VActivity;
@@ -196,25 +197,6 @@ public class IncubationTest {
         state.put("A", true);
         state.put("B", true);
 
-        class Act extends VActivity<String, String> {
-            ConditionOperator<Object> op = new ConditionOperator<Object>(state);
-
-            public Act(String name, String condition, String expression) {
-                super(name, condition, expression);
-            }
-
-            @Override
-            public String action() throws Exception {
-                return (String) op.eval(expression);
-            }
-
-            @Override
-            public boolean canActivate(Map parameter) {
-                //sometimes we get a string out of eval, but sometimes a boolean. so we generalize it ;-)
-                return Boolean.valueOf(StringUtil.toString(op.eval(condition)));
-            }
-
-        }
         Net<VActivity<String, String>, ComparableMap<CharSequence, Object>> net =
             new Net<VActivity<String, String>, ComparableMap<CharSequence, Object>>();
 //        net.setWorkParallel(false);

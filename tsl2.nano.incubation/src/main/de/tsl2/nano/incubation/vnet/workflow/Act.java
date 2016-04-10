@@ -25,6 +25,10 @@ public class Act<T> extends VActivity<String, T> {
     public Act() {
     }
 
+    public Act(String name, String condition, String expression) {
+        this(name, condition, expression, new ComparableMap<CharSequence, Object>());
+    }
+    
     public Act(String name, String condition, String expression, ComparableMap<CharSequence, Object> stateValues) {
         super(name, condition, expression);
         op = new Condition(stateValues);
@@ -43,6 +47,6 @@ public class Act<T> extends VActivity<String, T> {
     @Commit
     private void initDeserializing() {
         op = new Condition(new ComparableMap<CharSequence, Object>());
-        op.setExpression(expression);
+        op.setExpression(condition);
     }
 }

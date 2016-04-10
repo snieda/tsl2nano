@@ -217,9 +217,11 @@ public class Bean<T> extends BeanDefinition<T> {
     }
 
     private boolean hasOkAction(Collection<IAction> actions) {
-        for (IAction a : actions) {
-            if (a.getActionMode() == IAction.MODE_DLG_OK)
-                return true;
+        if (actions != null) {
+            for (IAction a : actions) {
+                if (a.getActionMode() == IAction.MODE_DLG_OK)
+                    return true;
+            }
         }
         return false;
     }
@@ -589,7 +591,8 @@ public class Bean<T> extends BeanDefinition<T> {
         bean.attributeDefinitions =
             (LinkedHashMap<String, IAttributeDefinition<?>>) Util.untyped(createValueDefinitions(beandef
                 .getAttributeDefinitions()));
-        bean.presentable = BeanUtil.copy(beandef.presentable);
+        if (beandef.presentable != null)
+            bean.presentable = BeanUtil.copy(beandef.presentable);
         bean.setInstance(instance);
 
         injectIntoRuleCovers(bean, instance);

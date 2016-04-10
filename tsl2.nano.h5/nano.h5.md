@@ -1023,6 +1023,16 @@ The simpliest way to create such a _Compositor_ is to use the BeanConfigurator o
 
 If you put in the desired variables and click again 'Create Compositor' this compositor will be saved as virtual definition to be presented in the list of beans on the next start.
 
+##### Using the Compositor
+
+The _Compositor_ creates new beans using a pre-selection as default values. The pre-selection is done through the first line of the search panel - the _from_-Filter. All entries in the from-Filter are used as default values for new beans!
+
+There is a flag (see the xml-file) _forceUserInteraction_ to define, whether the user sees the new bean and has to manual click the save-button - or if the system saves the new beans directly. This enables one-Click creation of new beans.
+
+[[img src=h5.sample.compositor.png]]
+
+All buttons marked with a questionmark (the default icon) are compositor actions defined on runtime through evaluation of entries of type _Item_ (in this example) of the current database.
+
 ### Bean Presentation
 
 A bean - as container of it's attributes - will always be presented as detail page. 
@@ -2931,8 +2941,8 @@ erdplus: kann nichts allgemeines exportieren
 * ICSImportCharge in timesheet Test (script) integrieren
 * export to ICS
 * (x) rest-call with ?-=-&
-* (x) correction on new actions not having mode-ok
-* NEW: OneClick-Charger / Fast-Collector
+* (v) correction on new actions not having mode-ok
+* (v) NEW: OneClick-Charger / Fast-Collector
 ** base-type, charge-type
 ** charge-type constraints
 ** value-attribute
@@ -2945,4 +2955,5 @@ erdplus: kann nichts allgemeines exportieren
 ** save-button
 ** storno-button
 * PROBLEM: loading definitions from file and using BeanClass.copy(src, dst) does not a deep copy!
-* BeanContainer.instance() <-- use ThreadLocals
+* (x) BeanContainer.instance() <-- use ThreadLocals
+* sometimes session-context.xml with Stackoverflow
