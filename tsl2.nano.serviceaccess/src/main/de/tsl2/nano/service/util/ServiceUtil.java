@@ -411,8 +411,8 @@ public class ServiceUtil {
                 final String name = beanAttribute.getName();//getColumnName(beanAttribute);
                 final boolean isString = CharSequence.class.isAssignableFrom(beanAttribute.getType());
                 final String varName = caseInsensitive && isString ? "LOWER(" + attrPrefix + name + ") " : attrPrefix + name + " ";
-                fromValue = beanAttribute.getValue(fromBean);
-                toValue = beanAttribute.getValue(toBean);
+                fromValue = fromBean != null ? beanAttribute.getValue(fromBean) : null;
+                toValue = toBean != null ? beanAttribute.getValue(toBean) : null;
                 if (fromValue == null && toValue == null) {
                     continue;
                 }
