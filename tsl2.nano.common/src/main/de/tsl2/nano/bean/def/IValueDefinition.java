@@ -18,9 +18,12 @@ import de.tsl2.nano.bean.IValueAccess;
  * @version $Revision$
  */
 public interface IValueDefinition<T> extends IAttributeDefinition<T>, IValueAccess<T> {
-    /** bean instance, defining this attribute */
+    /** bean instance, providing this attributes value */
     Object getInstance();
 
+//    /** new instance to provide this attributes value */
+//    void setInstance(Object instance);
+//    
     /** returns true, if this attribute is a relation (foreign key) to another bean */
     @Override
     boolean isRelation();

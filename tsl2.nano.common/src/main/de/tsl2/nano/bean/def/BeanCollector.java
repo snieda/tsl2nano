@@ -123,7 +123,7 @@ public class BeanCollector<COLLECTIONTYPE extends Collection<T>, T> extends Bean
     @Transient
     protected boolean reloadBean = true;
 
-    @ElementList(name = "column", inline = true, required = false/*, type=ValueColumn.class*/)
+//    @ElementList(name = "column", inline = true, required = false/*, type=ValueColumn.class*/)
     private transient Collection<IPresentableColumn> columnDefinitions;
 
     /** temporary variable to hold the {@link #toString()} output (--> performance) */
@@ -280,7 +280,7 @@ public class BeanCollector<COLLECTIONTYPE extends Collection<T>, T> extends Bean
     }
 
     @Override
-    public void onActivation() {
+    public <B extends BeanDefinition<T>> B  onActivation() {
         super.onActivation();
         iterator = null;
         if (!isStaticCollection && Util.isEmpty(collection)) {
@@ -307,6 +307,7 @@ public class BeanCollector<COLLECTIONTYPE extends Collection<T>, T> extends Bean
                     .createInstance(getType());
             injectIntoRuleCovers(this, instance);
         }
+        return (B) this;
     }
 
     private long count() {
@@ -526,7 +527,7 @@ public class BeanCollector<COLLECTIONTYPE extends Collection<T>, T> extends Bean
      * @return true, if bean-finder could create an filter-range instance
      */
     public boolean hasFilter() {
-        return getBeanFinder().getFilterRange() != null;
+        return getBeanFinder() != null && getBeanFinder().getFilterRange() != null;
     }
 
     /**
@@ -670,7 +671,7 @@ public class BeanCollector<COLLECTIONTYPE extends Collection<T>, T> extends Bean
             BeanClass<T> bc = BeanClass.getBeanClass(getDeclaringClass());
             List<IAttribute> attrs = bc.getAttributes();
 //            Map<String, IAttributeDefinition<?>> attrs = getAttributeDefinitions();
-            Timestamp ts = new Timestamp(System.currentTimeMillis());
+            Timestamp ts = new Timestamp(DateUtil.cutSeconds(System.currentTimeMillis()));
             for (IAttribute a : attrs) {
                 IAttributeDef def = BeanContainer.instance().getAttributeDef(newItem, a.getName());
                 if (!def.nullable() && def.temporalType() != null
@@ -1466,9 +1467,10 @@ public class BeanCollector<COLLECTIONTYPE extends Collection<T>, T> extends Bean
             Composition composition,
             BeanDefinition<I> beandef) {
         BeanCollector<C, I> bc = new BeanCollector<C, I>();
-        copy(beandef, bc, "asString", "presentationHelper");
+        copy(beandef, bc, "asString", "presentationHelper", "presentable");
         //use an own map instance to be independent of changes by other beans or beancollectors.
         bc.attributeDefinitions = new LinkedHashMap<String, IAttributeDefinition<?>>(bc.getAttributeDefinitions());
+        bc.presentable = BeanUtil.copy(beandef.presentable);
         bc.init(collection, new BeanFinder(beandef.getClazz()), workingMode, composition);
         return bc;
     }

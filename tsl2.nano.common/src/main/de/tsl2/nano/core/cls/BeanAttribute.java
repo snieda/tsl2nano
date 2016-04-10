@@ -452,8 +452,8 @@ public class BeanAttribute<T> implements IAttribute<T> {
      * @return The decapitalized version of the string.
      */
     private static String decapitalize(String name) {
-        if (name == null || name.length() == 0) {
-            return name;
+
+        if (name == null || name.length() == 0) {return name;
         }
         if (name.length() > 1 && Character.isUpperCase(name.charAt(1)) && Character.isUpperCase(name.charAt(0))) {
             return name;

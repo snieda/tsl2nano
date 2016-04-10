@@ -43,6 +43,7 @@ import de.tsl2.nano.core.ManagedException;
 import de.tsl2.nano.core.log.LogFactory;
 import de.tsl2.nano.core.util.AnnotationProxy;
 import de.tsl2.nano.core.util.BitUtil;
+import de.tsl2.nano.core.util.ByteUtil;
 import de.tsl2.nano.core.util.StringUtil;
 import de.tsl2.nano.core.util.Util;
 
@@ -197,17 +198,18 @@ public class BeanClass<T> implements Serializable {
 
     /**
      * evaluates the full enclosing simple name
+     * 
      * @param cls class to get the simple name for
      * @return simple-name with all enclosing classes as prefix
      */
     public static String getSimpleName(Class<?> cls) {
         StringBuilder clsName = new StringBuilder(cls.getSimpleName());
         while ((cls = cls.getEnclosingClass()) != null) {
-          clsName.insert(0, cls.getSimpleName() + "$");
+            clsName.insert(0, cls.getSimpleName() + "$");
         }
         return clsName.toString();
-      }
-    
+    }
+
     /**
      * returns the simple class name. if class is a proxy, we return the simple name of the first interface.
      * 
@@ -275,7 +277,7 @@ public class BeanClass<T> implements Serializable {
         for (int i = 0; i < allMethods.length; i++) {
             if (allMethods[i].getParameterTypes().length == 0 && (allMethods[i].getName()
                 .startsWith(BeanAttribute.PREFIX_READ_ACCESS) || allMethods[i].getName()
-                .startsWith(BeanAttribute.PREFIX_BOOLEAN_READ_ACCESS))) {
+                    .startsWith(BeanAttribute.PREFIX_BOOLEAN_READ_ACCESS))) {
                 if (allMethods[i].getName().equals("getClass")) {
                     continue;
                 }
@@ -317,6 +319,21 @@ public class BeanClass<T> implements Serializable {
                 + "\n\tavailable attributes are:\n" + StringUtil.toFormattedString(attrs, -1, true));
         else
             return null;
+    }
+
+    /**
+     * getAttribute
+     * @param type to of attribute
+     * @return first found attribute having given type
+     */
+    public IAttribute getAttribute(Class type) {
+        List<IAttribute> attrs = getAttributes();
+        for (IAttribute a : attrs) {
+            if (type.isAssignableFrom(a.getType())) {
+                return a;
+            }
+        }
+        return null;
     }
 
     /**
@@ -987,7 +1004,11 @@ public class BeanClass<T> implements Serializable {
      * @param attributeNames (optional) fixed attribute names
      * @return destination object
      */
-    public static <D> D copyValues(Object src, D dest, boolean onlyIfNotNull, boolean onlyIfDestIsNull, String... attributeNames) {
+    public static <D> D copyValues(Object src,
+            D dest,
+            boolean onlyIfNotNull,
+            boolean onlyIfDestIsNull,
+            String... attributeNames) {
         int copied = 0;
         if (attributeNames.length == 0) {
             final BeanClass srcClass = BeanClass.getBeanClass(src.getClass(), false);
@@ -1011,7 +1032,8 @@ public class BeanClass<T> implements Serializable {
             }
             if (destAttribute.hasWriteAccess()) {
                 Object value = srcAttribute.getValue(src);
-                if ((!onlyIfNotNull || value != null) && (!onlyIfDestIsNull || (destAttribute.getValue(dest) != null))) {
+                if ((!onlyIfNotNull || value != null)
+                    && (!onlyIfDestIsNull || (destAttribute.getValue(dest) != null))) {
                     destAttribute.setValue(dest, value);
                     copied++;
                 }
@@ -1059,18 +1081,23 @@ public class BeanClass<T> implements Serializable {
         return fields.toArray(new Field[0]);
     }
 
+    public static <D> D copy(Object src, D dest, String... noCopy) {
+        return copy(src, dest, false, noCopy);
+    }
+
     /**
-     * deep copy of all fields from src to dest (if available in dest). src class should be assignable from dest or vice
-     * versa.
+     * deep copy (deep = true) of all fields from src to dest (if available in dest). src class should be assignable
+     * from dest or vice versa.
      * <p>
      * Warning: not performance optimized! Matches fields by names without checking type!
      * 
      * @param src source bean
      * @param dest destination bean (may be an extension of source bean - or simply a bean with some equal-named fields)
      * @param noCopy (optional) field names to not be copied
+     * @param deepCopy if true, all serializable values of not-final classes will be copied through serialization
      * @return destination object
      */
-    public static <D> D copy(Object src, D dest, String... noCopy) {
+    public static <D> D copy(Object src, D dest, boolean deep, String... noCopy) {
         if (LOG.isTraceEnabled()) {
             LOG.trace("copying all fields from " + src.getClass().getSimpleName()
                 + " to "
@@ -1085,6 +1112,7 @@ public class BeanClass<T> implements Serializable {
         }
         try {
             int c = 0;
+            Object v;
             for (int i = 0; i < fields.length; i++) {
                 String name = fields[i].getName();
                 if (noCopyList.contains(name)) {
@@ -1092,10 +1120,13 @@ public class BeanClass<T> implements Serializable {
                 }
                 int di = destFieldNames.indexOf(name);
                 if (di != -1) {
-                    if (!BitUtil.hasBit(destFields[di].getModifiers(), Modifier.FINAL)) {
+                    if (!BitUtil.hasBit(destFields[di].getModifiers(), Modifier.FINAL, Modifier.STATIC)) {
                         fields[i].setAccessible(true);
                         destFields[di].setAccessible(true);
-                        destFields[di].set(dest, fields[i].get(src));
+                        v = fields[i].get(src);
+                        if (deep && v instanceof Serializable && !isFinal(v.getClass()))
+                            v = ByteUtil.copy(v);
+                        destFields[di].set(dest, v);
                         c++;
                     }
                 }
@@ -1107,6 +1138,10 @@ public class BeanClass<T> implements Serializable {
             ManagedException.forward(e);
         }
         return dest;
+    }
+
+    public static boolean isFinal(Class<? extends Object> cls) {
+        return BitUtil.hasBit(cls.getModifiers(), Modifier.FINAL);
     }
 
     /**
@@ -1172,7 +1207,7 @@ public class BeanClass<T> implements Serializable {
         return (Class<C>) (cls.isEnum() ? cls : Proxy.isProxyClass(cls) ? cls.getInterfaces()[0]
             : (cls.getEnclosingClass() != null || cls
                 .getSimpleName().contains("$")) && cls.getSuperclass() != null ? getDefiningClass(cls.getSuperclass())
-                : cls);
+                    : cls);
     }
 
     /**
@@ -1209,6 +1244,7 @@ public class BeanClass<T> implements Serializable {
     public String toString() {
         return Util.toString(this.getClass(), clazz);
     }
+
 }
 
 /**

@@ -10,9 +10,7 @@
 package de.tsl2.nano.bean;
 
 import java.io.Serializable;
-import java.sql.Time;
 import java.util.Collection;
-import java.util.Date;
 import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
 import java.util.LinkedList;
@@ -33,7 +31,6 @@ import de.tsl2.nano.core.ManagedException;
 import de.tsl2.nano.core.Messages;
 import de.tsl2.nano.core.cls.BeanAttribute;
 import de.tsl2.nano.core.cls.BeanClass;
-import de.tsl2.nano.core.cls.IAttribute;
 import de.tsl2.nano.core.log.LogFactory;
 import de.tsl2.nano.core.util.DateUtil;
 import de.tsl2.nano.core.util.ListSet;
@@ -49,7 +46,9 @@ import de.tsl2.nano.core.util.StringUtil;
  */
 @SuppressWarnings({ "serial", "rawtypes", "unchecked" })
 public class BeanContainer implements IBeanContainer {
+    /** we provide a thread invariant and a thrad varaint singelton instance - this is not secure but practicable. */
     private static BeanContainer self = null;
+    private static ThreadLocal<BeanContainer> selfThread = new ThreadLocal<BeanContainer>();
 
     private static final Log LOG = LogFactory.getLog(BeanContainer.class);
 
@@ -81,7 +80,11 @@ public class BeanContainer implements IBeanContainer {
      */
     public static final BeanContainer instance() {
         assert self != null : "beancontainer not initialized! call initServiceActions(...) before!";
-        return self;
+        return self();
+    }
+    
+    private static BeanContainer self() {
+        return selfThread.get() != null ? selfThread.get() : self;
     }
 
     /**
@@ -92,7 +95,7 @@ public class BeanContainer implements IBeanContainer {
      *         was called before.
      */
     public static final boolean isInitialized() {
-        return self != null;
+        return self() != null;
     }
 
     /**
@@ -122,6 +125,9 @@ public class BeanContainer implements IBeanContainer {
             IAction<Boolean> persistableAction,
             IAction<Integer> executeAction) {
         self = new BeanContainer();
+        selfThread = new ThreadLocal<BeanContainer>();
+        selfThread.set(self);
+        
         self.idFinderAction = idFinder;
         self.typeFinderAction = relationFinder;
         self.lazyrelationInstantiateAction = lazyRelationResolver;
@@ -253,7 +259,7 @@ public class BeanContainer implements IBeanContainer {
      * @return see {@link #emptyServices}
      */
     public static boolean isConnected() {
-        return isInitialized() && !self.emptyServices;
+        return isInitialized() && !self().emptyServices;
     }
 
     /**
@@ -280,35 +286,32 @@ public class BeanContainer implements IBeanContainer {
             } else {
                 bean = BeanClass.createInstance(type);
             }
-            //to fulfil bindings on onetomany, we bind empty lists
-            final BeanClass clazz = BeanClass.getBeanClass(type);
-            final Collection<BeanAttribute> multiValueAttributes = clazz.getMultiValueAttributes();
-            for (final BeanAttribute beanAttribute : multiValueAttributes) {
-                if (Set.class.isAssignableFrom(beanAttribute.getType())) {
-                    beanAttribute.setValue(bean, new LinkedHashSet());
-                } else if (Collection.class.isAssignableFrom(beanAttribute.getType())) {
-                    beanAttribute.setValue(bean, new LinkedList());
-                } else if (Properties.class.isAssignableFrom(beanAttribute.getType())) {
-                    beanAttribute.setValue(bean, new Properties());
-                } else if (Map.class.isAssignableFrom(beanAttribute.getType())) {
-                    beanAttribute.setValue(bean, new LinkedHashMap());
-                }
-            }
-            // clean date and time values
-            List<IAttribute> attributes = clazz.getSingleValueAttributes();
-            for (IAttribute beanAttribute : attributes) {
-                if (Time.class.isAssignableFrom(beanAttribute.getType())) {
-                    if (ENV.get("value.date.clear.time", true))
-                        DateUtil.clearSeconds((Date) beanAttribute.getValue(bean));
-                } else if (Date.class.isAssignableFrom(beanAttribute.getType())) {
-                    if (ENV.get("value.time.clear.seconds", true))
-                        DateUtil.clearTime((Date) beanAttribute.getValue(bean));
-                }
-            }
+            initDefaults(bean);
             return bean;
         } catch (final Exception e) {
             ManagedException.forward(e);
             return null;
+        }
+    }
+
+    /**
+     * initializes collections not to be null.
+     * @param bean new created bean.
+     */
+    public static <T> void initDefaults(T bean) {
+        //to fulfill bindings on onetomany, we bind empty lists
+        final BeanClass clazz = BeanClass.getBeanClass(bean.getClass());
+        final Collection<BeanAttribute> multiValueAttributes = clazz.getMultiValueAttributes();
+        for (final BeanAttribute beanAttribute : multiValueAttributes) {
+            if (Set.class.isAssignableFrom(beanAttribute.getType())) {
+                beanAttribute.setValue(bean, new LinkedHashSet());
+            } else if (Collection.class.isAssignableFrom(beanAttribute.getType())) {
+                beanAttribute.setValue(bean, new LinkedList());
+            } else if (Properties.class.isAssignableFrom(beanAttribute.getType())) {
+                beanAttribute.setValue(bean, new Properties());
+            } else if (Map.class.isAssignableFrom(beanAttribute.getType())) {
+                beanAttribute.setValue(bean, new LinkedHashMap());
+            }
         }
     }
 
@@ -575,6 +578,7 @@ public class BeanContainer implements IBeanContainer {
 //    }
     public static void reset() {
         self = null;
+        selfThread.remove(); //how to remove all other thread-values?
     }
 
     /**

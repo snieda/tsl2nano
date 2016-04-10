@@ -82,6 +82,7 @@ import org.anonymous.project.presenter.PartyConst;
 import org.anonymous.project.presenter.PropertyConst;
 import org.anonymous.project.presenter.TypeConst;
 
+import de.tsl2.nano.bean.BeanContainer;
 import de.tsl2.nano.bean.IBeanContainer;
 import de.tsl2.nano.bean.def.Attachment;
 import de.tsl2.nano.bean.def.AttributeDefinition;
@@ -104,12 +105,14 @@ import de.tsl2.nano.core.util.DateUtil;
 import de.tsl2.nano.core.util.FileUtil;
 import de.tsl2.nano.core.util.MapUtil;
 import de.tsl2.nano.execution.ScriptUtil;
+import de.tsl2.nano.h5.Compositor;
 import de.tsl2.nano.h5.Controller;
 import de.tsl2.nano.h5.Html5Presentation;
 import de.tsl2.nano.h5.QueryResult;
 import de.tsl2.nano.h5.RuleCover;
 import de.tsl2.nano.h5.SpecifiedAction;
 import de.tsl2.nano.h5.Statistic;
+import de.tsl2.nano.h5.configuration.BeanConfigurator;
 import de.tsl2.nano.h5.expression.Query;
 import de.tsl2.nano.h5.expression.QueryPool;
 import de.tsl2.nano.h5.expression.RuleExpression;
@@ -127,6 +130,7 @@ import de.tsl2.nano.incubation.specification.rules.Rule;
 import de.tsl2.nano.incubation.specification.rules.RuleDecisionTable;
 import de.tsl2.nano.incubation.specification.rules.RulePool;
 import de.tsl2.nano.incubation.specification.rules.RuleScript;
+import de.tsl2.nano.persistence.GenericLocalBeanContainer;
 
 /**
  * Creates a timesheet configuration on NanoH5 and anyway database
@@ -274,8 +278,19 @@ public class Timesheet extends NanoH5App {
         
         charge.saveDefinition();
 
+        //create a compositor
+        //WORAROUND: switch-off real BeanContainer not having any bean-type from anyway.jar
+        //don't use a real persistence.xml while no anyway.jar file exists!
+        BeanContainer.initEmtpyServiceActions();
+        
+        Bean<BeanConfigurator<Charge>> bconf = BeanConfigurator.create(Charge.class);
+        bconf.getInstance().actionCreateCompositor(Item.class.getName(), "chargeitems", "chargeitem", "icon");
+        GenericLocalBeanContainer.initLocalContainer(Thread.currentThread().getContextClassLoader(), false);
+
         //TODO: Statistics executes queries immediately to evaluate group-by column names
-        new Statistic<>(Charge.class).saveDefinition();
+        Statistic<Collection<Charge>, Charge> statistic = new Statistic<>(Charge.class);
+        statistic.getPresentable().setIcon("icons/barchart.png");
+        statistic.onActivation().saveDefinition();
 
         /*
          * statistic queries
@@ -540,5 +555,22 @@ public class Timesheet extends NanoH5App {
         assertTrue(qpool.get(STAT_PROJECTS).getColumnNames().equals(Arrays.asList("Project", "Hours")));
         assertTrue(qpool.get(STAT_TYPES).getColumnNames().equals(Arrays.asList("Type", "Hours")));
         super.stop();
+        
+        //test virtual beans
+        Collection<BeanDefinition<?>> virtualDefinitions = BeanDefinition.loadVirtualDefinitions();
+        int count = 0;
+        for (BeanDefinition<?> beandef : virtualDefinitions) {
+            if (beandef instanceof Statistic)
+                count++;
+            else if (beandef instanceof Compositor)
+                count++;
+            else if (beandef.getName().equals(new QueryResult(STAT_TIMESHEET_STATISTICS).getName()))
+                count++;
+            else if (beandef.getName().equals(new QueryResult(STAT_PROJECTS).getName()))
+                count++;
+            else if (beandef.getName().equals(new QueryResult(STAT_TYPES).getName()))
+                count++;
+        }
+        assertTrue(5 == count);
     }
 }

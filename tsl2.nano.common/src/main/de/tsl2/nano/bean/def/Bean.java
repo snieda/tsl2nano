@@ -191,6 +191,13 @@ public class Bean<T> extends BeanDefinition<T> {
         this.asString = null;
         this.instance = instance;
         replaceInstanceInAttributes(instance);
+
+        if (actions != null) {
+            for (IAction a : actions) {
+                if (a instanceof IConstructable)
+                    ((IConstructable) a).setInstance(instance);
+            }
+        }
         return this;
     }
 
@@ -201,10 +208,10 @@ public class Bean<T> extends BeanDefinition<T> {
                 if (instance != null) {
                     actions = getActionsByClass(instance.getClass(), null, new Object[] { instance });
                 }
-                if (!hasOkAction(actions) && isSelectable()) {
-                    addDefaultSaveAction();
-                }
             }
+        }
+        if (!hasOkAction(actions) && isSelectable()) {
+            addDefaultSaveAction();
         }
         return super.getActions();
     }
@@ -489,7 +496,7 @@ public class Bean<T> extends BeanDefinition<T> {
             BeanContainer.isInitialized() && BeanContainer.instance().isPersistable(getDefiningClass(clazz))
                 && !CompositionFactory.contains(bean) ? Messages
                     .getString("tsl2nano.save") : Messages.getString("tsl2nano.assign");
-        return new SaveAction(this, bean, actionId, saveLabel, saveLabel, IAction.MODE_DLG_OK);
+        return new SaveAction(bean, actionId, saveLabel, saveLabel, IAction.MODE_DLG_OK);
     }
 
     /**
@@ -577,11 +584,12 @@ public class Bean<T> extends BeanDefinition<T> {
      */
     protected static <I> Bean<I> createBean(I instance, BeanDefinition<I> beandef) {
         Bean<I> bean = new Bean<I>();
-        copy(beandef, bean, "attributeFilter", "attributeDefinitions", "asString", "presentationHelper");
+        copy(beandef, bean, "attributeFilter", "attributeDefinitions", "asString", "presentationHelper", "presentable");
         bean.attributeFilter = beandef.attributeFilter != null ? CollectionUtil.copy(beandef.attributeFilter) : null;
         bean.attributeDefinitions =
             (LinkedHashMap<String, IAttributeDefinition<?>>) Util.untyped(createValueDefinitions(beandef
                 .getAttributeDefinitions()));
+        bean.presentable = BeanUtil.copy(beandef.presentable);
         bean.setInstance(instance);
 
         injectIntoRuleCovers(bean, instance);
@@ -809,7 +817,7 @@ public class Bean<T> extends BeanDefinition<T> {
     }
 
     @Override
-    public void onActivation() {
+    public <B extends BeanDefinition<T>> B onActivation() {
         //on new beans, we fill manyToOne relations if exactly one item is available
         if (!BeanContainer.isInitialized()
             || BeanContainer.instance().isTransient(instance) && ENV.get("bean.new.fill.relations.on.one.item", true)) {
@@ -824,6 +832,7 @@ public class Bean<T> extends BeanDefinition<T> {
             }
         }
         super.onActivation();
+        return (B) this;
     }
 
     public String toStringDescription() {
@@ -870,32 +879,38 @@ public class Bean<T> extends BeanDefinition<T> {
  * @version $Revision$
  */
 @SuppressWarnings({ "unchecked" })
-class SaveAction<T> extends SecureAction<T> implements Serializable {
+class SaveAction<T> extends SecureAction<T> implements Serializable, IConstructable<T> {
     /** serialVersionUID */
     private static final long serialVersionUID = -3009132079876910521L;
-    /** bean to handle the save action */
-    private Bean<?> bean;
     /** instance to save - may differ from bean.instance! */
-    private Object instance;
+    private T instance;
 
-    public SaveAction(Bean<?> bean,
-            Object instance,
+    public SaveAction(T instance,
             String id,
             String shortDescription,
             String longDescription,
             int actionMode) {
         super(id, shortDescription, longDescription, actionMode);
-        this.bean = bean;
         this.instance = instance;
     }
 
     @Override
     public T action() throws Exception {
-        return (T) bean.save();
+        return (T) Bean.getBean(instance).save();
     }
 
     @Override
     public String getImagePath() {
         return "icons/save.png";
+    }
+
+    @Override
+    public T getInstance() {
+        return instance;
+    }
+
+    @Override
+    public void setInstance(T instance) {
+        this.instance = instance;
     }
 }

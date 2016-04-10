@@ -330,15 +330,19 @@ public class BeanConfigurator<T> implements Serializable {
     }
 
     @SuppressWarnings({ "rawtypes", "unchecked"})
-    @de.tsl2.nano.bean.annotation.Action(name = "createCompositor", argNames = { "base type", "base attribute name", "icon attribute name"})
+    @de.tsl2.nano.bean.annotation.Action(name = "createCompositor", argNames = { "base type", "base attribute name", "target attribute name", "icon attribute name"})
     public void actionCreateCompositor (
-            String baseType, String baseAttribute, String iconAttribute) {
+            String baseType, String baseAttribute, String targetAttribute, String iconAttribute) {
         BeanClass bcBaseType = BeanClass.createBeanClass(baseType);
         //check the attributes
+        bcBaseType.getAttribute(baseAttribute);
         bcBaseType.getAttribute(iconAttribute);
-        def.getAttribute(baseAttribute);
+        def.getAttribute(targetAttribute);
         //now create the compositor
-        new Compositor(def.getClazz(), bcBaseType.getClazz(), baseAttribute, iconAttribute);
+        Compositor compositor = new Compositor(def.getClazz(), bcBaseType.getClazz(), baseAttribute, targetAttribute, iconAttribute);
+        compositor.getPresentable().setIcon("icons/properties.png");
+//        compositor.getActions();
+        compositor.saveDefinition();
     }
 
 }

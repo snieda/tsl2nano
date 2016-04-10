@@ -23,6 +23,7 @@ import de.tsl2.nano.bean.BeanUtil;
 import de.tsl2.nano.bean.def.ArrayValue;
 import de.tsl2.nano.bean.def.AttributeDefinition;
 import de.tsl2.nano.bean.def.BeanCollector;
+import de.tsl2.nano.bean.def.BeanDefinition;
 import de.tsl2.nano.bean.def.BeanFinder;
 import de.tsl2.nano.bean.def.IAttributeDefinition;
 import de.tsl2.nano.core.ENV;
@@ -85,11 +86,12 @@ public class QueryResult<COLLECTIONTYPE extends Collection<T>, T> extends BeanCo
     }
 
     @Override
-    public void onActivation() {
+    public <B extends BeanDefinition<T>> B  onActivation() {
         super.onActivation();
         // TODO this may be before evaluating the new data :-(
         if (!Util.isEmpty(query.getColumnNames()) && query.getColumnNames().size() > 1)
             searchStatus += "<span>" + Statistic.createGraph(getName(), query.getColumnNames(), (Collection<Object[]>) collection) + "</span>";
+        return (B) this;
     }
     
     @Override

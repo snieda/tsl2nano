@@ -520,6 +520,11 @@ public class CommonTest {
         d = DateUtil.getQuarter(1970, DateUtil.Q4);
         assertEquals(4, DateUtil.getCurrentQuarter(d));
         assertEquals(1, DateUtil.getNextQuarter(d));
+        
+        //test date parts
+        Date clearTime = DateUtil.clearTime(null);
+        long cutTime = DateUtil.cutTime(System.currentTimeMillis());
+        assertEquals(clearTime.getTime(), cutTime - DateUtil.getTimeZoneOffset(cutTime));
     }
 
     @Test

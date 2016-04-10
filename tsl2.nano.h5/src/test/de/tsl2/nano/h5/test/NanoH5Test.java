@@ -218,7 +218,7 @@ public class NanoH5Test {
         ENV.addService(IAuthorization.class, Authorization.create(userName, false));
 
 //      BeanContainer.initEmtpyServiceActions();
-        GenericLocalBeanContainer.initLocalContainer(ENV.get(ClassLoader.class), false);
+        GenericLocalBeanContainer.initLocalContainer(Thread.currentThread().getContextClassLoader(), false);
         ENV.addService(IBeanContainer.class, BeanContainer.instance());
         app.start();
 //        Translator.translateBundle(ENV.getConfigPath() + "messages", Messages.keySet(), Locale.ENGLISH,

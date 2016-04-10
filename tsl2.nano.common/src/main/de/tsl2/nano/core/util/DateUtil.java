@@ -264,7 +264,7 @@ public final class DateUtil {
         if (date != null) {
             startOfDay.setTime(date);
         }
-        return clearTime(startOfDay).getTime();
+        return setTime(startOfDay, 0, 0, 0, 0).getTime();
     }
 
     /**
@@ -577,7 +577,7 @@ public final class DateUtil {
      * @return actual date
      */
     public static Date getToday() {
-        return setTime(new Date(), 0, 0, 0, 0);
+        return clearTime(null);
     }
 
     /**
@@ -673,6 +673,10 @@ public final class DateUtil {
     public static Date setDate(Date source, int year, int month, int day) {
         final Calendar cal = getCalendar();
         cal.setTime(source);
+        return setDate(cal, year, month, day).getTime();
+    }
+    
+    public static Calendar setDate(Calendar cal, int year, int month, int day) {
         if (year != -1) {
             cal.set(Calendar.YEAR, year);
         }
@@ -682,7 +686,7 @@ public final class DateUtil {
         if (day != -1) {
             cal.set(Calendar.DAY_OF_MONTH, day);
         }
-        return cal.getTime();
+        return cal;
     }
 
     /**
@@ -697,7 +701,12 @@ public final class DateUtil {
      */
     public static Date setTime(Date source, int hour, int minute, int second, int milli) {
         final Calendar cal = getCalendar();
-        cal.setTime(source);
+        if (source != null)
+            cal.setTime(source);
+        return setTime(cal, hour, minute, second, milli).getTime();
+    }
+
+    static Calendar setTime(Calendar cal, int hour, int minute, int second, int milli) {
         if (hour != -1) {
             cal.set(Calendar.HOUR_OF_DAY, hour);
         }
@@ -710,7 +719,7 @@ public final class DateUtil {
         if (milli != -1) {
             cal.set(Calendar.MILLISECOND, milli);
         }
-        return cal.getTime();
+        return cal;
     }
 
     /*
@@ -855,28 +864,17 @@ public final class DateUtil {
         return cal.getTime();
     }
 
+    public static final int getTimeZoneOffset(long timeInMillis) {
+        Calendar cal = Calendar.getInstance();
+        return cal.getTimeZone().getOffset(timeInMillis);
+    }
+
     public static final Date clearTime(Date src) {
-        Calendar cal = getCalendar();
-        cal.getTimeZone().setRawOffset(0);
-        clearTime(cal);
-        return cal.getTime();
+        return setTime(src, 0, 0, 0, 0);
     }
 
     public static final Date clearSeconds(Date src) {
-        Calendar cal = getCalendar();
-        cal.getTimeZone().setRawOffset(0);
-        setSeconds(cal, 0, 0);
-        return cal.getTime();
-    }
-
-    /**
-     * sets all time parameters to 0.
-     * 
-     * @param cal calendar instance
-     * @return the given calendar instance
-     */
-    protected static final Calendar clearTime(Calendar cal) {
-        return setTime(cal, 0, 0, 0, 0);
+        return setTime(src, -1, -1, 0, 0);
     }
 
     /**
@@ -899,42 +897,9 @@ public final class DateUtil {
      * @param millisecond
      * @return the given calendar instance
      */
-    protected static final Calendar setTime(Calendar cal, int hour, int minute, int second, int millisecond) {
-        cal.set(Calendar.HOUR_OF_DAY, hour);
-        cal.set(Calendar.MINUTE, minute);
-        setSeconds(cal, second, millisecond);
-        return cal;
-    }
-
-    /**
-     * sets all time parameters to the given ones.
-     * 
-     * @param cal calendar instance
-     * @param hour
-     * @param minute
-     * @param second
-     * @param millisecond
-     * @return the given calendar instance
-     */
     protected static final Calendar setSeconds(Calendar cal, int second, int millisecond) {
         cal.set(Calendar.SECOND, second);
         cal.set(Calendar.MILLISECOND, millisecond);
-        return cal;
-    }
-
-    /**
-     * sets all time parameters to the given ones.
-     * 
-     * @param cal calendar instance
-     * @param year year
-     * @param month month (0-11)
-     * @param day day of month (1-31)
-     * @return the given calendar instance
-     */
-    protected static final Calendar setDate(Calendar cal, int year, int month, int day) {
-        cal.set(Calendar.YEAR, year);
-        cal.set(Calendar.MONTH, month);
-        cal.set(Calendar.DAY_OF_MONTH, day);
         return cal;
     }
 
@@ -949,11 +914,11 @@ public final class DateUtil {
         //IMPROVE: not performance optimized!
         Calendar fcal = getCalendar();
         fcal.setTime(first);
-        clearTime(fcal);
+        setTime(fcal, 0, 0, 0, 0);
 
         Calendar scal = getCalendar();
         scal.setTime(second);
-        clearTime(scal);
+        setTime(scal, 0, 0, 0, 0);
         return fcal.equals(scal);
     }
 
@@ -1085,7 +1050,7 @@ public final class DateUtil {
 
     /**
      * cuts all millis from 1970 until the current year. this could be done trough using a date of 1970, too. usable to
-     * assign a unique value to an int. but be carefull: each year costs 365 * 24 * 3600 * 1000 milliseconds. after 3
+     * assign a unique value to an int. but be careful: each year costs 365 * 24 * 3600 * 1000 milliseconds. after 3
      * weeks, the {@link Integer#MAX_VALUE} is reached.
      * 
      * @param timeInMillis
@@ -1093,5 +1058,19 @@ public final class DateUtil {
      */
     public static final int getMillisWithoutYear(long timeInMillis) {
         return (int) timeInMillis - (getYear(getToday()) * 365 * 24 * 3600 * 1000);
+    }
+
+    /**
+     * cuts all parts that are seconds and smaller
+     * 
+     * @param timeInMillis
+     * @return given time without seconds and milliseconds
+     */
+    public static final long cutSeconds(long timeInMillis) {
+        return timeInMillis - (timeInMillis % MILLI_TO_MINUTES);
+    }
+
+    public static final long cutTime(long timeInMillis) {
+        return timeInMillis - (timeInMillis % (DAY_TO_HOUR * HOUR_TO_MINUTES * MILLI_TO_MINUTES));
     }
 }

@@ -48,10 +48,12 @@ import de.tsl2.nano.bean.BeanUtil;
 import de.tsl2.nano.bean.def.Bean;
 import de.tsl2.nano.bean.def.BeanCollector;
 import de.tsl2.nano.bean.def.BeanDefinition;
+import de.tsl2.nano.bean.def.BeanFinder;
 import de.tsl2.nano.bean.def.BeanPresentationHelper;
 import de.tsl2.nano.bean.def.BeanValue;
 import de.tsl2.nano.bean.def.IAttributeDefinition;
 import de.tsl2.nano.bean.def.IBeanCollector;
+import de.tsl2.nano.bean.def.IBeanFinder;
 import de.tsl2.nano.bean.def.IPageBuilder;
 import de.tsl2.nano.bean.def.IPresentable;
 import de.tsl2.nano.bean.def.MethodAction;
@@ -135,7 +137,7 @@ public class NanoH5Session implements ISession<BeanDefinition>, Serializable {
     public static final String PREFIX_STATUS_LINE = "@";
 
     public static final String PREFIX_CONTEXT_RANGE = "range:";
-    
+
 //    public static final String KEY_WEBSOCKET_PORT = "websocket.port";
 
     public static final NanoH5Session createSession(NanoH5 server,
@@ -238,7 +240,7 @@ public class NanoH5Session implements ISession<BeanDefinition>, Serializable {
      */
     BeanDefinition injectContext(BeanDefinition beandef) {
         //inject search filter only on first time - before first search...
-        if (beandef != null && beandef.isMultiValue() && !((BeanCollector)beandef).wasActivated()) {
+        if (beandef != null && beandef.isMultiValue() && !((BeanCollector) beandef).wasActivated()) {
             //fill search parameters...
             Iterator<IRange> ranges = this.context.get(IRange.class);
             Class type;
@@ -246,11 +248,15 @@ public class NanoH5Session implements ISession<BeanDefinition>, Serializable {
             while (ranges.hasNext()) {
                 range = ranges.next();
                 type = range.getFrom() != null ? range.getFrom().getClass() : null;
+                IBeanFinder beanFinder;
                 if (beandef.getDeclaringClass().equals(type)) {
-                    Bean brange = ((BeanCollector) beandef).getBeanFinder().getFilterRange();
-                    brange.getAttribute("from").setValue(BeanContainer.attachEntities(range.getFrom()));
-                    brange.getAttribute("to").setValue(BeanContainer.attachEntities(range.getTo()));
-                    break;
+                    beanFinder = ((BeanCollector) beandef).getBeanFinder();
+                    if (beanFinder != null) {
+                        Bean brange = beanFinder.getFilterRange();
+                        brange.getAttribute("from").setValue(BeanContainer.attachEntities(range.getFrom()));
+                        brange.getAttribute("to").setValue(BeanContainer.attachEntities(range.getTo()));
+                        break;
+                    }
                 }
             }
         }
@@ -410,7 +416,7 @@ public class NanoH5Session implements ISession<BeanDefinition>, Serializable {
         sessionClassloader = null;
         if (exceptionHandler instanceof WebSocketExceptionHandler) {
             try {
-                ((WebSocketExceptionHandler)exceptionHandler).close();
+                ((WebSocketExceptionHandler) exceptionHandler).close();
             } catch (IOException e) {
                 ManagedException.forward(e);
             }
@@ -429,8 +435,9 @@ public class NanoH5Session implements ISession<BeanDefinition>, Serializable {
             + ENV.translate("tsl2nano.time", true)
             + ": " + DateUtil.getFormattedDateTime(new Date()) + ", "
             + (nav != null ? ENV.translate("tsl2nano.session", true)
-            + ": " + ENV.translate(nav.getName(), true) + "§"
-            + StringUtil.toHexString(getContext().toString().getBytes()) : "") + ", "
+                + ": " + ENV.translate(nav.getName(), true) + "§"
+                + StringUtil.toHexString(getContext().toString().getBytes()) : "")
+            + ", "
             + ENV.translate("tsl2nano.request", true) + ": "
             + DateUtil.getFormattedMinutes(System.currentTimeMillis() - startTime) + " min"
             + (LOG.isDebugEnabled() ? ", " + "Memory: " + (Profiler.getUsedMem() / (1024 * 1024)) + " MB" : "")
@@ -808,7 +815,7 @@ public class NanoH5Session implements ISession<BeanDefinition>, Serializable {
     /* *******************************************************************
      * search algorithms
      * ******************************************************************/
-    
+
     protected <T> boolean isSearchRequest(String actionId, BeanCollector<?, T> model) {
         return model.hasMode(IBeanCollector.MODE_SEARCHABLE) && actionId.equals(model.getSearchAction().getId());
     }
@@ -861,6 +868,7 @@ public class NanoH5Session implements ISession<BeanDefinition>, Serializable {
 
     /**
      * putSearchParameterToContext
+     * 
      * @param model
      */
     private <T> void putSearchParameterToContext(BeanCollector<?, T> model) {

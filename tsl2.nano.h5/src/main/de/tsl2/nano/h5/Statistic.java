@@ -256,9 +256,10 @@ public class Statistic<COLLECTIONTYPE extends Collection<T>, T> extends BeanColl
             new StringBuffer(), from, to, parameter, true);
     }
 
-    public void onActivation() {
+    public <B extends BeanDefinition<T>> B  onActivation() {
         super.onActivation();
         collection = (COLLECTIONTYPE) create(beanType, columnNames.getList(), from, to);
+        return (B) this;
     }
 
 //    @Override
@@ -337,8 +338,10 @@ public class Statistic<COLLECTIONTYPE extends Collection<T>, T> extends BeanColl
     @Commit
     @Override
     protected void initDeserialization() {
-        BeanContainer.attachEntities(from);
-        BeanContainer.attachEntities(to);
+        if (from != null)
+            BeanContainer.attachEntities(from);
+        if (to != null)
+            BeanContainer.attachEntities(to);
         super.initDeserialization();
     }
 }

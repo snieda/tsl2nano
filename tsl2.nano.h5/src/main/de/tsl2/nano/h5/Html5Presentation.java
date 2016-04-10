@@ -154,6 +154,8 @@ public class Html5Presentation<T> extends BeanPresentationHelper<T> implements I
 
     static final String MSG_FOOTER = "progress";
 
+    static final String ICON_DEFAULT = "icons/trust_unknown.png";
+    
     /**
      * constructor
      */
@@ -1089,14 +1091,15 @@ public class Html5Presentation<T> extends BeanPresentationHelper<T> implements I
      * @return
      */
     private Element createAction(Element cell, IAction a, boolean showText) {
+        String path;
         return createAction(cell,
             a.getId(),
             showText ? a.getShortDescription() : null,
             a.getLongDescription(),
             "submit",
             a.getKeyStroke(),
-            (a.getImagePath() != null ? a.getImagePath() : "icons/" + StringUtil.substring(a.getId(), ".", null, true)
-                + ".png"),
+            (a.getImagePath() != null ? a.getImagePath() : new File(ENV.getConfigPath() + (path = "icons/" + StringUtil.substring(a.getId(), ".", null, true)
+                + ".png")).exists() ? path : ICON_DEFAULT),
             a.isEnabled(),
             a.isDefault(),
             a.getActionMode() != IAction.MODE_DLG_OK);

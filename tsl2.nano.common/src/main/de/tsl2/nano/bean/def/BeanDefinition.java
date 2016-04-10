@@ -13,11 +13,13 @@ import java.io.File;
 import java.io.IOException;
 import java.io.Serializable;
 import java.lang.reflect.Method;
+import java.sql.Time;
 import java.text.Format;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.Date;
 import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
@@ -55,6 +57,7 @@ import de.tsl2.nano.core.cls.BeanAttribute;
 import de.tsl2.nano.core.cls.BeanClass;
 import de.tsl2.nano.core.cls.IAttribute;
 import de.tsl2.nano.core.log.LogFactory;
+import de.tsl2.nano.core.util.DateUtil;
 import de.tsl2.nano.core.util.FileUtil;
 import de.tsl2.nano.core.util.ListSet;
 import de.tsl2.nano.core.util.StringUtil;
@@ -178,13 +181,14 @@ public class BeanDefinition<T> extends BeanClass<T> implements IPluggable<BeanDe
      * 
      * see {@link #setActivationActionNames(String...)}. {@link #activationActionNames} and {@link #getActions()}.
      */
-    public void onActivation() {
+    public <B extends BeanDefinition<T>> B onActivation() {
         LOG.info("onActivation of " + toString() + ": searching activation actions");
         if (activationActionNames != null) {
             for (int i = 0; i < activationActionNames.length; i++) {
                 getAction(activationActionNames[i]).activate();
             }
         }
+        return (B) this;
     }
 
     /**
@@ -1431,17 +1435,31 @@ public class BeanDefinition<T> extends BeanClass<T> implements IPluggable<BeanDe
         return valueGroup;
     }
 
+    public void setDefaultValues(Object instance) {
+        setDefaultValues(instance, false);
+    }
+    
     /**
      * fills all attributes with their default values - if defined.
      * 
      * @param instance bean instance to set the values on
      */
-    public void setDefaultValues(Object instance) {
+    public void setDefaultValues(Object instance, boolean onlyOnNull) {
         List<IAttribute> attributes = getAttributes();
         for (IAttribute a : attributes) {
             if (a instanceof AttributeDefinition) {
-                if (a.hasWriteAccess())
-                    a.setValue(instance, ((AttributeDefinition) a).getDefault());
+                if (a.hasWriteAccess() && (!onlyOnNull || a.getValue(instance) == null)) {
+                    Object value = ((AttributeDefinition) a).getDefault();
+                    // clean date and time values
+                    if (Time.class.isAssignableFrom(a.getType())) {
+                        if (ENV.get("value.date.clear.time", true))
+                            value = DateUtil.clearSeconds((Date) value);
+                    } else if (Date.class.isAssignableFrom(a.getType())) {
+                        if (ENV.get("value.time.clear.seconds", true))
+                            value = DateUtil.clearTime((Date) value);
+                    }
+                    a.setValue(instance, value);
+                }
             }
         }
     }
