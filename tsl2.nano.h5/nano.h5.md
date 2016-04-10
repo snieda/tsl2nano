@@ -57,7 +57,7 @@ A cool way to see the power of this tool can be seen in chapter _Online Quick-St
 * resolves all bean/entity relations to be browsed.
 * navigation can be a configurable workflow - or simply an entity browser 
 * pre-defines formatting, validation and presentation of relations
-* pure html-5 (no javascript, only html5-scripting-api for websockts)
+* pure html-5 (no javascript, only html5-scripting-api for websockets)
 * using websockets to show status messages, input-assist and dependency field or timer refreshing
 * pure jpa - jpa-annotations are read to resolve attribute-presentation
 * independent of a special o/r mapper. all o/r mappers supporting javax.persistence with an EntityManager are usable.
@@ -950,11 +950,84 @@ Example:
 </controller>
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
+#### direct creating a set of beans through the _Compositor_
+
+The _Compositor_ is an extension of _BeanCollector_ to present a panel of actions to create beans through dependent beans. These actions will be build on runtime, reading its informations from database. This feature should be used for touch-screen applications.
+
+To provide such a controller you can create an xml-file inside your environments _beandef/virtual_ directory. All beandefs inside the _virtual_ directory will be added to the bean-type list which is presented after login.
+
+Example:
+
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+<?xml version="1.0" encoding="UTF-8"?>
+<compositor clazz="org.anonymous.project.Charge" name="Compositor (Item-Charge)" isNested="false" isdefault="false" xmlns="http://sourceforge.net/projects/tsl2nano ./beandef.xsd">
+   <presentable class="de.tsl2.nano.h5.Html5Presentable" type="0" style="0" visible="true" searchable="true" nesting="false">
+      <label>Charge</label>
+      <description>Charge</description>
+      <icon>icons/properties.png</icon>
+   </presentable>
+   <valueExpression expression="{chargeitem} ({fromdate}: {value})" type="org.anonymous.project.Charge"/>
+   <isconnected>false</isconnected>
+   <extension declaringClass="de.tsl2.nano.h5.Compositor">
+      <member name="workingMode">
+         <object class="java.lang.Integer">16</object>
+      </member>
+      <member name="reloadBean">
+         <object class="java.lang.Boolean">true</object>
+      </member>
+      <member name="parentType">
+         <object class="java.lang.Class">org.anonymous.project.Item</object>
+      </member>
+      <member name="baseAttribute">
+         <object class="java.lang.String">chargeitems</object>
+      </member>
+      <member name="targetAttribute">
+         <object class="java.lang.String">chargeitem</object>
+      </member>
+      <member name="iconAttribute">
+         <object class="java.lang.String">icon</object>
+      </member>
+      <member name="forceUserInteraction">
+         <object class="java.lang.Boolean">true</object>
+      </member>
+   </extension>
+...attribute definitions like for the standard BeanDefinition of 'Charge' ...
+</compositor>
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+using the nano.common bean framework api you would code:
+
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+Bean<BeanConfigurator<Charge>> bconf = BeanConfigurator.create(Charge.class);
+bconf.getInstance().actionCreateCompositor(Item.class.getName(), "chargeitems", "chargeitem", "icon");
+GenericLocalBeanContainer.initLocalContainer(Thread.currentThread().getContextClassLoader(), false);
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+In this example (from timesheet package), you have the model with a manyToMany resolver:
+
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+	Item (*) --> (1) ChargeItem (1) --> (*) Charge 
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+The entities have the following access methods:
+* Item.chargeItems (java.util.Set<ChargeItem>)
+* Charge.chargeItem (ChargeItem)
+
+The icon is an optional reference to an attribute holding an image to be presented on the button.
+
+The simpliest way to create such a _Compositor_ is to use the BeanConfigurator of your current open detail bean:
+
+[[img src=h5.sample.config.compositor.png]]
+
+[[img src=h5.sample.config.compositor.detail.png]]
+
+If you put in the desired variables and click again 'Create Compositor' this compositor will be saved as virtual definition to be presented in the list of beans on the next start.
+
 ### Bean Presentation
 
 A bean - as container of it's attributes - will always be presented as detail page. 
 
-[TODO screenshot]
+[[img src=h5.sample.entity.jpg]]
 
 A detail page presents the attributes of a bean as it is defined in it's bean-definition xml file. for more informations see chapter _Configuration through Serialization_.
 
@@ -2449,7 +2522,8 @@ Actual list: http://infocenter.pentaho.com/help/index.jsp?topic=%2Fsupported_com
  0.8.0c | 01.02.2016 | many fixes, bean-configuration provides creation of actions (e.g. for REST service calls showing the JSON result)
  0.8.0d | 08.02.2016 | statistics now showing bar charts with xgraph
  0.8.0e | 24.02.2016 | bugfixes, environment-action --> administration-action
- 0.9.0  | 13.03.2016 | websocketserver fixes, bugfixes, ENV properties renamed
+ 0.9.0a | 13.03.2016 | websocketserver fixes, bugfixes, ENV properties renamed
+ 0.9.0b | 10.04.2016 | beancontainer now using ThreadLocal, NEW: Compositor
 
 [GLOSSARY]
 
@@ -2870,3 +2944,5 @@ erdplus: kann nichts allgemeines exportieren
 ** customized button to charge customized base-types
 ** save-button
 ** storno-button
+* PROBLEM: loading definitions from file and using BeanClass.copy(src, dst) does not a deep copy!
+* BeanContainer.instance() <-- use ThreadLocals
