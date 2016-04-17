@@ -1331,7 +1331,8 @@ public class Html5Presentation<T> extends BeanPresentationHelper<T> implements I
                 ATTR_ACCESSKEY,
                 shortCut,
                 ATTR_TITLE,
-                "ALT+" + shortCut,
+                "ALT+" + shortCut + (LOG.isDebugEnabled() ? "\n" 
+                        + StringUtil.toFormattedString(BeanUtil.toValueMap(item), 80, true) : ""),
                 ATTR_FORMTARGET,
                 VAL_FRM_SELF,
                 ATTR_STYLE, row1style

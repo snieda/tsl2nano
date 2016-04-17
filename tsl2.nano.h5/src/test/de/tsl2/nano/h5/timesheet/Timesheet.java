@@ -342,7 +342,7 @@ public class Timesheet extends NanoH5App {
         Parameter p = new Parameter();
         p.put("project", true);
         p.put("type", "Urlaub");
-        acts.add(new BeanAct("timesByProject",
+        acts.add(new BeanAct("holidays",
             "project&true",
             "select t from Charge t where t.chargeitem.item.type.name = :type",
             p,

@@ -30,6 +30,7 @@ import de.tsl2.nano.collection.FilteringIterator;
 import de.tsl2.nano.core.cls.AReference;
 import de.tsl2.nano.core.cls.BeanClass;
 import de.tsl2.nano.core.util.FileUtil;
+import de.tsl2.nano.core.util.StringUtil;
 import de.tsl2.nano.core.util.XmlUtil;
 
 /**
@@ -294,6 +295,6 @@ public class Context implements Serializable, Map {
 
     @Override
     public String toString() {
-        return getName() + " (items: " + properties.size() + ")";
+        return getName() + " (items: " + StringUtil.toFormattedString(properties, 20) + ")";
     }
 }

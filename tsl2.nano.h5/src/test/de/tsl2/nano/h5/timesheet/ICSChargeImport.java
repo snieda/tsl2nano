@@ -21,6 +21,7 @@ import java.util.Map;
 
 import org.anonymous.project.Charge;
 import org.anonymous.project.Chargeitem;
+import org.anonymous.project.Item;
 import org.anonymous.project.Party;
 
 import de.tsl2.nano.bean.BeanContainer;
@@ -57,7 +58,7 @@ public class ICSChargeImport extends ICSCalendarImport implements ICallback {
      */
     @Override
     public Object run(Map<Object, Object> entry) {
-        BeanDefinition<Chargeitem> ciDef = BeanDefinition.getBeanDefinition(Chargeitem.class);
+        BeanDefinition<Item> itemDef = BeanDefinition.getBeanDefinition(Item.class);
         BeanDefinition<Party> paDef = BeanDefinition.getBeanDefinition(Party.class);
         Charge c = new Charge();
         BeanContainer.createId(c);
@@ -66,7 +67,11 @@ public class ICSChargeImport extends ICSCalendarImport implements ICallback {
         c.setTodate((Date) entry.get(END));
         c.setTotime(c.getTodate());
         c.setValue(new BigDecimal(0/*DateUtil.diffHours(c.getFromtime(), c.getTotime())*/));
-        c.setChargeitem(ciDef.getValueExpression().from((String) entry.get(CATEGORY)));
+        Item item = itemDef.getValueExpression().from((String) entry.get(CATEGORY));
+        Chargeitem chargeitem = new Chargeitem();
+        chargeitem.setItem(item);
+        chargeitem = BeanContainer.instance().save(chargeitem);
+        c.setChargeitem(chargeitem);
         c.setComment((String) entry.get(SUMMARY));
         c.setParty(paDef.getValueExpression().from((String) entry.get(CLASS)));
         BeanContainer.instance().save(c);

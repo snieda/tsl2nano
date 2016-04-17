@@ -6,6 +6,8 @@ import java.util.List;
 import de.tsl2.nano.core.cls.BeanClass;
 import de.tsl2.nano.core.cls.IAttribute;
 import de.tsl2.nano.core.cls.PrimitiveUtil;
+import de.tsl2.nano.core.util.StringUtil;
+import de.tsl2.nano.core.util.Util;
 
 
 /**
@@ -97,5 +99,10 @@ public class Range<T> implements IRange<T>, Serializable {
                 a.setValue(instance, PrimitiveUtil.getMaximumValue(a.getType()));
             }
         }
+    }
+    
+    @Override
+    public String toString() {
+        return Util.toString(this.getClass(), "from", StringUtil.toString(from, 40), "to", StringUtil.toString(to, 40));
     }
 }
