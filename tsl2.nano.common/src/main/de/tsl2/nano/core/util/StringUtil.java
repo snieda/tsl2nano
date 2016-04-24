@@ -824,4 +824,35 @@ public class StringUtil {
     public static InputStream toInputStream(String text) {
         return new ByteArrayInputStream(text.getBytes());
     }
+
+    /**
+     * search for the given filter. the filter will be divided to its characters. an 100 percent match is done, if all
+     * characters where found as sequence.
+     * 
+     * @param item holding the content to be matched through the given filter. if null, weight is 0.
+     * @param filter stream of characters to be found in item. if null, weight is 1.
+     * @return weight of match. 0: not all characters of the given filter were found. 1: all characters were found as
+     *         sequence.
+     */
+    public static double fuzzyMatch(Object item, String filter) {
+        if (filter == null)
+            return 1;
+        if (item == null)
+            return 0;
+        double weight = 1;
+        String content = item.toString().toLowerCase();
+        filter = filter.toLowerCase();
+//        if (content.contains(filter))
+//            return 1;
+        int la = -1; //last index
+        int lb; //new index
+        for (int i = 0; i < filter.length(); i++) {
+            lb = content.indexOf(filter.charAt(i), la + 1);
+            if (lb < 0)
+                return 0;
+            weight /= (lb - la); 
+            la = lb;
+        }
+        return weight;
+    }
 }

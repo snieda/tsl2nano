@@ -1598,4 +1598,11 @@ public class CommonTest {
         assertTrue(count == 2);
         assertTrue(CommonTest.class.equals(AnnotationProxy.getAnnotation(SimpleXmlAnnotator.class, "attribute", Element.class).type()));
     }
+    @Test
+    public void testFuzzyFilter() throws Exception {
+        String[] c = new String[] {"DisT", "Dies ist ein Test", "irgendwas anderes"};
+        assertTrue(StringUtil.fuzzyMatch(c[0], "dist") == 1);
+        assertTrue(StringUtil.fuzzyMatch(c[1], "dist") == 1d / 2 / 4 );
+        assertTrue(StringUtil.fuzzyMatch(c[2], "dist") == 0);
+    }
 }
