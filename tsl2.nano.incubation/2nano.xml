@@ -121,7 +121,7 @@ set the following jvm properties:
 			<property name="sh.jar.destination" value="${target.dir}/tsl2.nano.h5.sample.jar" />
 			<property name="sh.jar.include" value="generated*/**/my/**" />
 			<property name="sh.jar.include2" value="mypersistence*.xml" />
-			<property name="sh.jar.include3" value="runServer.bat" />
+			<property name="sh.jar.include3" value="runServer.cmd" />
 			<property name="sh.jar.include4" value="timedb.s*" />
 		</ant> -->
 		<ant antfile="../tsl2.nano.common/shell.xml" target="sh.jar">

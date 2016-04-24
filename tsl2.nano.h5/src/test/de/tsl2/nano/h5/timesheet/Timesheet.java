@@ -226,7 +226,7 @@ public class Timesheet extends NanoH5App {
         RuleScript<BigDecimal> calcTime = new RuleScript<BigDecimal>("calcTime",
             "var from = fromtime != null ? fromtime.getTime() " + "% " + dayTimeFraction + " : 0;" +
                 "var to = totime != null ? totime.getTime() " + "% " + dayTimeFraction + " : 0;" +
-                "var p = pause != null ? (new Date(pause.toGMTString()).getUTCHours()*360000 + new Date(pause.toGMTString()).getUTCMinutes()*60000) " + "% " + dayTimeFraction + " : 0;" +
+                "var p = pause != null ? (pause.getTime() - new Date(pause.toGMTString()).getTimezoneOffset()*60000) " + "% " + dayTimeFraction + " : 0;" +
                 "Math.round(((to - from) - p) / (3600 * 10)) / 100;", null);
         /*
          * add some specifications (=tests) to be checked on loading a rule

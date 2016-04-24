@@ -118,10 +118,19 @@ public class JarResolver {
     }
 
     /**
+     * installs given package. see {@link #start(String...)}
+     * @param packages
+     * @return see {@link #start(String...)}
+     */
+    public static String install(String... packages) {
+        return new JarResolver().start(packages);
+    }
+    
+    /**
      * does the whole work
      * 
      * @param deps dependency or package names
-     * @return information string about resolved dependencies
+     * @return information string about resolved dependencies. on error, string starts with FAILED
      */
     public String start(String... deps) {
         if (deps != null && deps.length > 0) {
@@ -129,12 +138,16 @@ public class JarResolver {
         }
         loadMvn();
         createMvnScript();
-        loadDependencies();
+        int result = loadDependencies();
 
-        return props.getProperty(JAR_DEPENDENCIES);
+        return (result > 0 ? "FAILED: " : "") + props.getProperty(JAR_DEPENDENCIES);
     }
 
-    private void loadDependencies() {
+    /**
+     * loadDependencies
+     * @return mvn process exit value (0: Ok, >0 otherwise)
+     */
+    private int loadDependencies() {
         System.setProperty("M2_HOME", mvnRoot);
         String script = AppLoader.isUnix() ? "/bin/mvn" : "/bin/mvn.bat";
         new File(mvnRoot + script).setExecutable(true);
@@ -142,6 +155,7 @@ public class JarResolver {
         if (process.exitValue() != 0) {
             LOG.error("Process returned with: " + process.exitValue());
         }
+        return process.exitValue();
     }
 
     private void createMvnScript() {

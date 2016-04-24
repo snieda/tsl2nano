@@ -18,6 +18,10 @@ DROP CONSTRAINT Party_Charge_fk;
 DROP CONSTRAINT Party_Location_fk;
 DROP CONSTRAINT Party_Property_fk;
 DROP CONSTRAINT Charge_Discharge_fk;
+DROP CONSTRAINT Account_Discharge_fk;
+DROP CONSTRAINT Digital_Location_fk;
+-- some database providers don't support the ansi-sql DROP CONSTRAINT 
+commit;
 
 DROP TABLE Organisation;
 DROP TABLE Classification;
@@ -33,3 +37,5 @@ DROP TABLE Property;
 DROP TABLE Location;
 DROP TABLE Charge;
 DROP TABLE Discharge;
+DROP TABLE Account;
+DROP TABLE Digital;
