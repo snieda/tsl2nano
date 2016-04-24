@@ -136,10 +136,24 @@ _This text is included in the README.txt of the nano.h5 download directory_
 
 package description:
 - *tsl2.nano.h5.<version-number>.jar*: base "nano.h5" application. needs internet access on first use to download jdbc-drivers, ant and a jpa implementation.
--  *tsl2.nano.h5.<version-number>-standalone.jar*: includes base "nano.h5" application with ant, jdbc-drivers for hsqldb and mysql libraries to work without internet access.
+-  *tsl2.nano.h5.<version-number>-standalone.jar*: includes base "nano.h5" application with ant, a jdbc-driver for hsqldb and libraries to work without internet access.
 -  *tsl2.nano.h5.<version-number>-signed.jar*: same as *tsl2.nano.h5.<version-number>-standalone.jar* but with signed content to be accessable through webstart (*nano.h5.jnlp*)
 - *nano.h5.jnlp*: java webstart descriptor to start *tsl2.nano.h5.<version-number>-signed.jar*. will create its environment directory in its download directory.
 - *sishell.<version-number>.jar*: "Structured Input Shell", a terminal application as toolbox for configurations, start scripts and administration. It is also integrated in *tsl2.nano.h5.<version-number>.jar*, but without starting support.  
+
+##### The default database HSQLDB or H2
+
+Inside the standalone package, the driver for _hsqldb_ is included. If you use this database as default, the database will be started and initialized for you - if there are scripts found with the given database name.
+
+It is possible to work on _H2_ as database, that will be started and initialized - but the driver is not included in the standalone package. So you have to be online to be downloaded by nano.h5 - or you have to put the driver by yourself into the environment directory. 
+As URL you should input the following path:
+
+	jdbc:h2:tcp://<host>:<9092>/<database-name>
+
+for example:
+
+	jdbc:h2:tcp://localhost:9092/anyway
+
 
 #### Commandline arguments
 
@@ -318,7 +332,7 @@ The following service may be set to override the default mechanisms:
 * install a <a href="http://www.oracle.com/technetwork/java/javase/downloads/jdk7-downloads-1880260.html">java jdk at least version 1.7</a>. If you only install a java jre-version, the bean-jar file cannot be generated - then you have to select an existing one.
 * get the newest version of <a href="https://sourceforge.net/projects/tsl2nano/">tsl2.nano.h5</a>
 * start this jar file with _java -jar tsl2.nano.h5.[version-number].jar_. this will create the environments _nanoh5.environment_ and a _run.bat_.
-* go into the extracted sub-directory _sample_ and start the _Windows_-batch file _runServer.bat_. This will start the sample database.
+* go into the extracted sub-directory _sample_ and start the _Windows_-batch file _runServer.cmd_. This will start the sample database.
 * start the _run.bat_
 * if you are not on a _Windows_ system, start your internet browser with adress _localhost:8067_, or just do a double-click on the file _application.html_
 * In the center of the browser-page do a click on the centered link, starting with text 'Start...'
@@ -365,18 +379,18 @@ Feel free to test, whether a database-connection of a project you know is workin
 
 ### Using the sample-content
 
-A sample environment is contained in the _tsl2.nano.h5.x.y.z.jar_ file, containing all icons, jars and configurations for a project. It may be used for other nano.h5 projects. It uses:
+A sample environment is contained in the _tsl2.nano.h5.<version>.jar_ file, containing all icons, jars and configurations for a project. It may be used for other nano.h5 projects. It uses:
 
 * ant libraries to generate entitiy beans through hibernate-tools and the sample database
 * hibernate with all dependencies as o/r mapper
 * hibernate-tools
 * hsqldb.jar as jdbc driver for a hsqldb database
-* sample databae _timedb_
+* sample databae _anyway_
 * sample icons for all buttons
 
-Before you start _nano.h5_, you should start the sample hsqldb database:
+_nano.h5_, will start the sample hsqldb database for you calling the script:
 
-config/runServer.bat
+<environment-directory>/runServer.cmd
 
 [[img src=h5.sample.database.jpg alt=sample-database]]
 
@@ -2954,6 +2968,20 @@ erdplus: kann nichts allgemeines exportieren
 ** customized button to charge customized base-types
 ** save-button
 ** storno-button
+
 * PROBLEM: loading definitions from file and using BeanClass.copy(src, dst) does not a deep copy!
 * (x) BeanContainer.instance() <-- use ThreadLocals
 * sometimes session-context.xml with Stackoverflow
+* Holiday import (file name/path, chargeitem)
+* workflow: organisation, ma, project
+* (v) pause --> UTC
+* +Charge.creation, Discharge.creation
+* (v) +Admin:see full bean (inclusive all attributes)
+* PROBLEM: value --> change-event should only do something if value is empty
+* (x) persistence.xml: javax.persistence.schema-generation.* properties
+* REST generator for each entity using BeanContainer
+* CRUD generator for each entity using REST
+* H2: 
+** (v) mda-->runServer.bat <-- define the h2-script-file
+** jdbc:h2:tcp://localhost:9092/anyway
+** LUCENE integration?

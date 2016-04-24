@@ -699,8 +699,8 @@ public class NanoH5 extends NanoHTTPD implements ISystemConnector<Persistence> {
         //may be on second start after having already generated the jar file
         if (isLocalDatabase(persistence) && !canConnectToLocalDatabase(persistence)) {
             String[] cmd =
-                AppLoader.isUnix() ? new String[] { "sh", "runServer.bat" } : new String[] { "cmd", "/C", "start",
-                    "runServer.bat" };
+                AppLoader.isUnix() ? new String[] { "sh", "runServer.cmd" } : new String[] { "cmd", "/C", "start",
+                    "runServer.cmd" };
             SystemUtil.execute(new File(ENV.getConfigPathRel()), cmd);
             Runtime.getRuntime().addShutdownHook(Executors.defaultThreadFactory().newThread(new Runnable() {
                 @Override
@@ -785,15 +785,19 @@ public class NanoH5 extends NanoHTTPD implements ISystemConnector<Persistence> {
     }
 
     private boolean isLocalDatabase(Persistence persistence) {
-        if (!Util.isEmpty(persistence.getPort())) {
-            String url = persistence.getConnectionUrl();
+        String url = persistence.getConnectionUrl();
+        if (!Util.isEmpty(persistence.getPort()) || isH2(url)) {
             return Arrays.asList(persistence.STD_LOCAL_DATABASE_DRIVERS).contains(
                 persistence.getConnectionDriverClass())
-                && (url.contains("localhost") || url.contains("127.0.0.1"));
+                && (url.contains("localhost") || url.contains("127.0.0.1") || isH2(url));
         }
         return false;
     }
 
+    private boolean isH2(String url) {
+        return url.matches("jdbc[:]h2[:].*");
+    }
+    
     private boolean canConnectToLocalDatabase(Persistence persistence) {
         if (!Util.isEmpty(persistence.getPort())) {
             int p = Integer.valueOf(persistence.getPort());

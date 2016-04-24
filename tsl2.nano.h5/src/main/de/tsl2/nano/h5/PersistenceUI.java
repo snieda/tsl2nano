@@ -131,10 +131,10 @@ public class PersistenceUI {
                 props.setProperty("DIALECT_jdbc.sapdb", "org.hibernate.dialect.SAPDBDialect");
                 
                 props.setProperty("URLSYNTAX_jdbc.odbc", "jdbc:odbc:<alias>");
-                props.setProperty("URLSYNTAX_jdbc.oracle", "jdbc:oracle:thin:@<server>[:<1521>]:<database_name>");
+                props.setProperty("URLSYNTAX_jdbc.oracle", "jdbc:oracle:thin:@<server>[:<port(default 1521)>]:<database_name (default xe)>");
                 props.setProperty("URLSYNTAX_jdbc.db2", "jdbc:db2://<HOST>:<PORT>/<DB>");
                 props.setProperty("URLSYNTAX_jdbc.hsqldb", "jdbc:hsqldb:<databaseName>");
-                props.setProperty("URLSYNTAX_jdbc.h2", "jdbc:h2:<URL>");
+                props.setProperty("URLSYNTAX_jdbc.h2", "jdbc:h2:[tcp://]<HOST>[:port(default 9092)]");
                 props.setProperty("URLSYNTAX_jdbc.sybase", "jdbc:sybase:Tds:<HOST>:<PORT>");
                 props.setProperty("URLSYNTAX_jdbc.derby", "jdbc:derby:[subsubprotocol:][databaseName][;attribute=value]*");
                 props.setProperty("URLSYNTAX_jdbc.xerial", "jdbc:sqlite:<db-file-path>");
@@ -189,8 +189,8 @@ public class PersistenceUI {
                             Object userName = Util.asString(value);
                             String eval;
                             if (userName != null && Util.isEmpty(defaultSchema)) {
-                                if (value != null && persistence.getConnectionUrl().contains("hsqldb")) {
-                                    eval = "PUBLIC";
+                                if (value != null && persistence.isEmbeddedDatabase()) {
+                                    eval = Persistence.DEFAULT_SCHEMA;
                                 } else {
                                     eval = userName.toString().toUpperCase();
                                 }
@@ -308,8 +308,8 @@ public class PersistenceUI {
                             Object userName = login.getAttribute("connectionUserName").getValue();
                             String eval = null;
                             if (userName != null) {
-                                if (value != null && value.toString().contains("hsqldb")) {
-                                    eval = "PUBLIC";
+                                if (value != null && Persistence.isEmbeddedDatabase((String) value)) {
+                                    eval = Persistence.DEFAULT_SCHEMA;
                                 } else {
                                     eval = userName.toString().toUpperCase();
                                 }

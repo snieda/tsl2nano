@@ -330,6 +330,7 @@ public class NanoH5Session implements ISession<BeanDefinition>, Serializable {
         String msg = "[undefined]";
         try {
             Thread.currentThread().setContextClassLoader(sessionClassloader);
+            Thread.currentThread().setUncaughtExceptionHandler(exceptionHandler);
             LOG.info(String.format("serving request:\n\turi: %s\n\tmethod: %s\n\theader: %s\n\tparms: %s\n\tfiles: %s",
                 uri,
                 method,

@@ -39,6 +39,7 @@ public class Persistence implements Serializable {
     private static final long serialVersionUID = 2360829578078838714L;
     
     private static final String DEFAULT_DATABASE = "anyway";
+    public static final String DEFAULT_SCHEMA = "PUBLIC";
     
     protected String persistenceUnit = "genericPersistenceUnit";
     protected String transactionType = "RESOURCE_LOCAL";
@@ -50,7 +51,7 @@ public class Persistence implements Serializable {
     protected String connectionUserName = "SA";
     protected String connectionPassword = "";
     protected String hibernateDialect = "org.hibernate.dialect.HSQLDialect";
-    protected String defaultSchema = "PUBLIC";
+    protected String defaultSchema = DEFAULT_SCHEMA;
     protected String datasourceClass = "org.hsqldb.jdbc.JDBCDataSource";
     protected String port = "9003";
     protected String database = DEFAULT_DATABASE;
@@ -79,7 +80,7 @@ public class Persistence implements Serializable {
     public static final String STD_LOCAL_DATABASE_URL = "jdbc:hsqldb:hsql://localhost:9003";
 
     public static final String[] STD_LOCAL_DATABASE_DRIVERS = { STD_LOCAL_DATABASE_DRIVER, "org.hsqldb.jdbcDriver",
-        "org.h2.jdbcDriver" };
+        "org.h2.Driver" };
 
     /**
      * constructor
@@ -618,5 +619,22 @@ public class Persistence implements Serializable {
      */
     public String getPort(String url) {
         return StringUtil.extract(url, "[:](\\d+)([:/;]\\w+)?", 1);
+    }
+
+    /**
+     * see {@link #isEmbeddedDatabase(String)}
+     */
+    public boolean isEmbeddedDatabase() {
+        return isEmbeddedDatabase(getConnectionUrl());
+    }
+
+    /**
+     * isEmbeddedDatabase
+     * @param urlOrDriver
+     * @return true, if it contains hsqldb or h2
+     */
+    public static boolean isEmbeddedDatabase(String urlOrDriver) {
+        return (urlOrDriver.contains("hsqldb")
+                || urlOrDriver.contains("h2"));
     }
 }
