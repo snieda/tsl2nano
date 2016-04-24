@@ -464,7 +464,7 @@ public final class DateUtil {
      * delegates to {@link #getTime(int, int, int)} with second = 0.
      */
     public static Time getTime(int hour, int minute) {
-        return getTime(hour, minute, 0);
+        return getTime(hour, minute, 0, true);
     }
 
     /**
@@ -475,13 +475,16 @@ public final class DateUtil {
      * @param second
      * @return new time instance
      */
-    public static Time getTime(int hour, int minute, int second) {
+    public static Time getTime(int hour, int minute, int second, boolean UTC) {
         Calendar cal = getCalendar();
         cal.setTimeInMillis(hour * HOUR_TO_MINUTES * MILLI_TO_MINUTES + minute * MILLI_TO_MINUTES + 1000 * second);
-        //subtract the timezone - only if time > timezone-value
-        long toffset = cal.getTimeZone().getOffset(cal.getTimeInMillis());
-        return new Time(cal.getTimeInMillis()
-            - (cal.getTimeInMillis() > toffset ? toffset : 0));
+        if (UTC) {
+            //subtract the timezone - only if time > timezone-value
+            long toffset = cal.getTimeZone().getOffset(cal.getTimeInMillis());
+            return new Time(cal.getTimeInMillis() - toffset);
+        } else {
+            return new Time(cal.getTimeInMillis());
+        }
     }
 
     /**
