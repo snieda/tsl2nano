@@ -68,15 +68,17 @@ public class Message extends RuntimeException {
     public static final void send(String message) {
         //TODO: why the current thread doesn't have the right handler? using
         //      the environment will create problems on multi-sessions!
-//        send(Thread.currentThread().getUncaughtExceptionHandler(), message);
         send(ENV.get(UncaughtExceptionHandler.class), message);
+        
+        send(Thread.currentThread().getUncaughtExceptionHandler(), message);
     }
 
     public static final void send(ByteBuffer message) {
         //TODO: why the current thread doesn't have the right handler? using
         //      the environment will create problems on multi-sessions!
-//        send(Thread.currentThread().getUncaughtExceptionHandler(), message);
         send(ENV.get(UncaughtExceptionHandler.class), message);
+        
+        send(Thread.currentThread().getUncaughtExceptionHandler(), message);
     }
 
     /**

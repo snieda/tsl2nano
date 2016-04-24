@@ -22,6 +22,7 @@ import java.util.Properties;
 import java.util.Set;
 
 import org.apache.commons.logging.Log;
+import org.apache.tools.ant.BuildEvent;
 import org.apache.tools.ant.BuildListener;
 import org.apache.tools.ant.DefaultLogger;
 import org.apache.tools.ant.Location;
@@ -39,6 +40,7 @@ import org.apache.tools.ant.types.selectors.FilenameSelector;
 import de.tsl2.nano.core.ManagedException;
 import de.tsl2.nano.core.cls.BeanAttribute;
 import de.tsl2.nano.core.cls.BeanClass;
+import de.tsl2.nano.core.exception.Message;
 import de.tsl2.nano.core.log.LogFactory;
 import de.tsl2.nano.core.util.StringUtil;
 import de.tsl2.nano.core.util.Util;
@@ -126,6 +128,7 @@ public class AntRunner {
             ManagedException.forward(e);
         }
         task.setProject(new Project());
+        task.getProject().setName(name);
         task.getProject().init();
         task.setTaskType("AntRunner." + taskType);
         task.setTaskName("AntRunner." + taskType);
@@ -133,7 +136,7 @@ public class AntRunner {
         task.setLocation(new Location(System.getProperty("user.dir")));
         task.getProject().addBuildListener(createLogfileBuildListener());
         task.getProject().addBuildListener(createPipedAntBuildListener(new PipedOutputStream()));
-
+        task.getProject().addBuildListener(createMessageListener());
         /*
          * now we use the properties to fill bean attributes of ant task
          */
@@ -210,6 +213,48 @@ public class AntRunner {
         return consoleLogger;
     }
 
+    public static BuildListener createMessageListener() {
+        return new BuildListener() {
+
+            @Override
+            public void buildFinished(BuildEvent arg0) {
+                Message.send("BUILD " + arg0.getProject().getName() + " FINISHED");
+            }
+
+            @Override
+            public void buildStarted(BuildEvent arg0) {
+                Message.send("BUILD " + arg0.getProject().getName() + " STARTED");
+            }
+
+            @Override
+            public void messageLogged(BuildEvent arg0) {
+                if (arg0.getException() != null)
+                    Message.send(arg0.getException());
+                else if (arg0.getPriority() == 1)
+                    Message.send(arg0.getMessage());
+            }
+
+            @Override
+            public void targetFinished(BuildEvent arg0) {
+                Message.send("BUILD TARGET " + arg0.getTarget().getName() + " FINISHED");
+            }
+
+            @Override
+            public void targetStarted(BuildEvent arg0) {
+                Message.send("BUILD TARGET " + arg0.getTarget().getName() + " STARTED");
+            }
+
+            @Override
+            public void taskFinished(BuildEvent arg0) {
+            }
+
+            @Override
+            public void taskStarted(BuildEvent arg0) {
+            }
+            
+        };
+    }
+    
     /**
      * <directory-name>[:{[include][,<include>...]]}[[exclude][,<exclude>...]];...
      * 

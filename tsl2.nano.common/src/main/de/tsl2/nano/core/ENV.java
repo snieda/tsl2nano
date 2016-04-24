@@ -907,10 +907,13 @@ public class ENV implements Serializable {
         if (get("classloader.usenetwork.loader", true) && NetUtil.isOnline()
             && get(CompatibilityLayer.class).isAvailable(clsJarResolver)) {
             Message
-                .send("downloading unresolved dependencies: "
+                .send("resolving dependencies: "
                     + StringUtil.toString(dependencyNames, 300));
-            get(CompatibilityLayer.class).run(clsJarResolver, "main", new Class[] { String[].class },
+            Object result = get(CompatibilityLayer.class).run(clsJarResolver, "install", new Class[] { String[].class },
                 new Object[] { dependencyNames });
+            if (result == null || result.toString().startsWith("FAILED"))
+                throw new IllegalStateException("couldn't resolve dependencies:\n"
+                        + StringUtil.toFormattedString(dependencyNames, 100, true));
         } else {
             throw new IllegalStateException("couldn't resolve dependencies:\n"
                 + StringUtil.toFormattedString(dependencyNames, 100, true));

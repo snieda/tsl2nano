@@ -59,6 +59,7 @@ public class ScriptUtil extends SystemUtil {
 
         final File buildFile = new File(filePath);
         final Project p = new Project();
+        p.setName(buildFile.getName());
 //        boolean t = true;
 //        Path path = null;
 //        AntClassLoader ACL = new AntClassLoader(p, path, t);
@@ -67,8 +68,10 @@ public class ScriptUtil extends SystemUtil {
         //logging
         if (buildListener == null) {
             buildListener = AntRunner.createLogfileBuildListener();
+            
         }
         p.addBuildListener(buildListener);
+        p.addBuildListener(AntRunner.createMessageListener());
         try {
             p.fireBuildStarted();
             p.init();
@@ -90,7 +93,6 @@ public class ScriptUtil extends SystemUtil {
             p.addReference("ant.projectHelper", helper);
             target = target != null ? target : p.getDefaultTarget();
             p.setSystemProperties();
-            p.setName(buildFile.getName());
 
             LOG.info("starting ant script: " + buildFile.getAbsolutePath()
                 + "\ntarget: "
