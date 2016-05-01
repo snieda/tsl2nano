@@ -175,6 +175,9 @@ public class Statistic<COLLECTIONTYPE extends Collection<T>, T> extends BeanColl
         /*
          * create an svg chart file without summary
          */
+        //first, remove the last graph data
+        searchStatus = StringUtil.substring(searchStatus, null, "<span");
+        //now, add the new one
         searchStatus +=
             "<span>" + createGraph(getName(), columnNames.getList(), (Collection<Object[]>) collection) + "</span>";
 

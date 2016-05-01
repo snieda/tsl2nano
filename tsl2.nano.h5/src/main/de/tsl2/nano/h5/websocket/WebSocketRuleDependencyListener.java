@@ -9,7 +9,10 @@
  */
 package de.tsl2.nano.h5.websocket;
 
+import org.apache.commons.logging.Log;
+
 import de.tsl2.nano.bean.def.IAttributeDefinition;
+import de.tsl2.nano.core.log.LogFactory;
 import de.tsl2.nano.incubation.specification.rules.RuleDependencyListener;
 
 /**
@@ -23,6 +26,8 @@ public class WebSocketRuleDependencyListener<T> extends RuleDependencyListener<T
     /** serialVersionUID */
     private static final long serialVersionUID = 7261323751717858340L;
 
+    private static final Log LOG = LogFactory.getLog(WebSocketRuleDependencyListener.class);
+    
     /**
      * constructor
      */
@@ -40,6 +45,10 @@ public class WebSocketRuleDependencyListener<T> extends RuleDependencyListener<T
 
     @Override
     public void handleEvent(WSEvent evt) {
+        if (evt.breakEvent == true) { // event was consumed
+            LOG.trace(this + ": ignoring event '" + evt + "' in cause of already be consumed!");
+            return;
+        }
         initAttribute(evt);
         //the websocket-listener sends the result to the edit-field - so it must be formatted
         WebSocketDependencyListener.sendValue(attributeID, propertyName, getAttribute().getFormat().format(evaluate(evt)));

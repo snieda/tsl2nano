@@ -245,10 +245,10 @@ public class Timesheet extends NanoH5App {
         charge.getAttribute(ATTR_VALUE).getConstraint().setScale(2);
         charge.getAttribute(ATTR_VALUE).getConstraint().setPrecision(4);
 
-        // create dependency listeners for websocket and standard bean-changing
+        // create dependency listeners for websocket and NOT standard bean-changing
         ENV.get(RulePool.class).add(calcTime);
         Html5Presentation helper = charge.getPresentationHelper();
-        helper.addRuleListener(ATTR_VALUE, RuleScript.PREFIX + calcTime.getName(), ATTR_FROMTIME, ATTR_TOTIME, ATTR_PAUSE);
+        helper.addRuleListener(ATTR_VALUE, RuleScript.PREFIX + calcTime.getName(), 2, ATTR_FROMTIME, ATTR_TOTIME, ATTR_PAUSE);
 
         /*
          * add attribute presentation rules
@@ -300,18 +300,19 @@ public class Timesheet extends NanoH5App {
         String stat = "\n-- get a statistic table from timesheet entries\n" +
               "-- user and time-period should be given...\n" +
               "select Month, sum(Workdays) as Workdays, sum(Hours) as Hours, sum(Dayhours) as Dayhours, sum(Ill) as Ill, sum(Holiday) as Holiday from (\n" +
-              "select year(c.FROMDATE) || ' ' || monthname(c.FROMDATE) as Month, count(month(c.FROMDATE)) as Workdays, sum(value) as Hours, sum(value) / count(month(c.FROMDATE)) as Dayhours, 0 as Ill, 0 as Holiday from Charge c\n" +
+              "select year(c.FROMDATE) || '(' || lpad(month(c.FROMDATE), 2, '0') || ') ' || monthname(c.FROMDATE) as Month, count(distinct(c.FROMDATE)) as Workdays, sum(value) as Hours, sum(value) / count(distinct(c.FROMDATE)) as Dayhours, 0 as Ill, 0 as Holiday from Charge c\n" +
               "group by Month\n" +
               "union -- Illness\n" +
-              "select year(c.FROMDATE) || ' ' || monthname(c.FROMDATE) as Month, 0 as Workdays, 0 as Hours, 0 as Dayhours, sum(value) as Ill, 0 as Holiday from Charge c join ChargeItem ci on c.CHARGEITEM = ci.ID join Item i on ci.ITEM = i.ID join Type t on i.TYPE = t.ID\n" +
+              "select year(c.FROMDATE) || '(' || lpad(month(c.FROMDATE), 2, '0') || ') ' || monthname(c.FROMDATE) as Month, 0 as Workdays, 0 as Hours, 0 as Dayhours, sum(value) as Ill, 0 as Holiday from Charge c join ChargeItem ci on c.CHARGEITEM = ci.ID join Item i on ci.ITEM = i.ID join Type t on i.TYPE = t.ID\n" +
               "where t.NAME = 'Krank'\n" +
               "group by Month\n" +
               "union -- Holidays\n" +
-              "select year(c.FROMDATE) || ' ' || monthname(c.FROMDATE) as Month, 0 as Workdays, 0 as Hours, 0 as Dayhours, 0 as Ill, sum(value) as Holiday from Charge c join ChargeItem ci on c.CHARGEITEM = ci.ID join Item i on ci.ITEM = i.ID join Type t on i.TYPE = t.ID\n" +
+              "select year(c.FROMDATE) || '(' || lpad(month(c.FROMDATE), 2, '0') || ') ' || monthname(c.FROMDATE) as Month, 0 as Workdays, 0 as Hours, 0 as Dayhours, 0 as Ill, sum(value) as Holiday from Charge c join ChargeItem ci on c.CHARGEITEM = ci.ID join Item i on ci.ITEM = i.ID join Type t on i.TYPE = t.ID\n" +
               "where t.NAME = 'Urlaub'\n" +
               "group by Month\n" +
               ")\n" +
-              "group by Month\n";
+              "group by Month\n" +
+              "order by Month\n";
         Query<Object> query = new Query<>(STAT_TIMESHEET_STATISTICS, stat, true, null);
         QueryPool queryPool = ENV.get(QueryPool.class);
         queryPool.add(query);

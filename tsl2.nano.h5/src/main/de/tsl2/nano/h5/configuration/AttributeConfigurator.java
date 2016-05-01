@@ -234,7 +234,7 @@ public class AttributeConfigurator implements Serializable {
             @Constraint(pattern = "[%§!]\\w+") String rule) {
         BeanDefinition def = ENV.get(BeanConfigurator.class).def;
         Html5Presentation helper = (Html5Presentation) def.getPresentationHelper();
-        helper.addRuleListener(observer, rule, observable);
+        helper.addRuleListener(observer, rule, 2, observable);
     }
 
 //    public void actionRemoveListener(String child, String rule) {

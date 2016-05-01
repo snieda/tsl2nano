@@ -2147,15 +2147,18 @@ public class Html5Presentation<T> extends BeanPresentationHelper<T> implements I
      * 
      * @param observer refreshing attribute
      * @param rule rule to evaluate the observer refreshing
+     * @param type 0: simple dependency listener, 1: websocket dependency listener, 2: both
      * @param observables changing attributes
      */
-    public void addRuleListener(String observer, String rule, String... observables) {
+    public void addRuleListener(String observer, String rule, int type, String... observables) {
         IListener<WSEvent> wsListener =
             new WebSocketRuleDependencyListener(bean.getAttribute(observer), observer, rule);
         IListener<ChangeEvent> listener = new RuleDependencyListener(bean.getAttribute(observer), observer, rule);
         for (int i = 0; i < observables.length; i++) {
-            bean.getAttribute(observables[i]).changeHandler().addListener(wsListener, WSEvent.class);
-            bean.getAttribute(observables[i]).changeHandler().addListener(listener, ChangeEvent.class);
+            if (type % 2 == 0)
+                bean.getAttribute(observables[i]).changeHandler().addListener(listener, ChangeEvent.class);
+            if (type > 0)
+                bean.getAttribute(observables[i]).changeHandler().addListener(wsListener, WSEvent.class);
         }
     }
 }

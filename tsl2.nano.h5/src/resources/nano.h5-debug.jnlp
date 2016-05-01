@@ -12,7 +12,7 @@
         <!-- Application Resources -->
         <j2se version="1.7+"
               href="file://java.sun.com/products/autodl/j2se"/>
-        <jar href="tsl2.nano.h5.0.8.0-signed.jar"
+        <jar href="tsl2.nano.h5.0.9.0-signed.jar"
             main="true" />
 
     </resources>

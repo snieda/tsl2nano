@@ -17,16 +17,16 @@
 
 
 <meta-tag>
-crud, grud, crud2gui, crud2html, bean2html, entity2html, bean2gui, entity2gui, jpa2gui, jpa2html, jpa persistence provider, openjpa, hibernate, datanucleus, eclipselink, toplink, batoo, ormlite, ebean, data-editor, data-sheet, entity browser, jpa2, full stack framework, orm, o/r mapper, projector
+crud, grud, crud2gui, crud2html, bean2html, entity2html, bean2gui, entity2gui, jpa2gui, jpa2html, jpa persistence provider, openjpa, hibernate, datanucleus, eclipselink, toplink, batoo, ormlite, ebean, data-editor, data-sheet, entity browser, jpa2, full stack framework, orm, o/r mapper, projector, callback, rule
 </meta-tag>
 
 <description>
-crud, grud, crud2gui, crud2html, bean2html, entity2html, bean2gui, entity2gui, jpa2gui, jpa2html, jpa persistence provider, openjpa, hibernate, datanucleus, eclipselink, toplink, batoo, ormlite, ebean, data-editor, data-sheet, entity browser, jpa2, full stack framework, orm, o/r mapper, projector
+crud, grud, crud2gui, crud2html, bean2html, entity2html, bean2gui, entity2gui, jpa2gui, jpa2html, jpa persistence provider, openjpa, hibernate, datanucleus, eclipselink, toplink, batoo, ormlite, ebean, data-editor, data-sheet, entity browser, jpa2, full stack framework, orm, o/r mapper, projector, callback, rule
 </description>
 
 ## Introduction
 
-NanoH5 (or FullRelation) is an UI independent gui implementation framework providing a model driven design (MDA) and following the projector pattern. It is bound to the app framework __tsl2.nano.commons__ and the jpa-service framework __tsl2.nano.serviceaccess__. It is possible to build a complete html5 application through a given class- or database-model. An Html5 presentation layer is provided as default.
+NanoH5 (or FullRelation) is an UI independent gui implementation framework providing a model driven design (MDA) and following the projector pattern. Rules are used to describe any data or presentation value. NanoH5 is bound to the app framework __tsl2.nano.commons__ and the jpa-service framework __tsl2.nano.serviceaccess__. It is possible to build a complete html5 application through a given class- or database-model. An Html5 presentation layer using websockets is provided as default.
 
 - Everything will be filled for you by defaults - presenting a full application getting a database connection through any persistence provider (jpa 2.x)
 - define it or implement it - all object-types have their representation as readable xml-file.
