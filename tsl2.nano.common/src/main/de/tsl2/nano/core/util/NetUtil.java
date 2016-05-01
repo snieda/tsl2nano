@@ -386,7 +386,7 @@ public class NetUtil {
             URL url = new URL(strUrl);
             LOG.info("uploading " + strUrl + " to socket " + socket);
             stream = url.openStream();
-            FileUtil.write(stream, socket.getOutputStream(), false);
+            FileUtil.write(stream, socket.getOutputStream(), strUrl, false);
             url.openStream().close();
         } catch (Exception e) {
             ManagedException.forward(e);

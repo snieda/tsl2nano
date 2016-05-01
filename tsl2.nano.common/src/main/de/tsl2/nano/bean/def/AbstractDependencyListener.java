@@ -95,15 +95,6 @@ public abstract class AbstractDependencyListener<T, E> implements IStatefulListe
      * {@inheritDoc}
      */
     @Override
-    public void handleEvent(E event) {
-        // TODO Auto-generated method stub
-        
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    @Override
     public Object getStateObject() {
         return changes;
     }

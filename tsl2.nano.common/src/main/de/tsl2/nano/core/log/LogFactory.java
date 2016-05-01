@@ -492,6 +492,9 @@ public/*abstract*/class LogFactory implements Runnable, Serializable {
                 filter = filterIndex(text, last);
                 if (filter < lastFilter) {
                     filter = 0;
+                } else if (filter >= text.length() - 1) {
+                    filter = 0;
+                    continue;
                 }
                 txt = filter > 0 ? "\t" + text.substring(filter) : text;
                 lastFilter = filter;

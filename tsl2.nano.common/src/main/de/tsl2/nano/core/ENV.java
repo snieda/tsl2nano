@@ -278,7 +278,7 @@ public class ENV implements Serializable {
         self.properties.put(KEY_CONFIG_PATH, new File(dir).getAbsolutePath().replace("\\", "/") + "/");
         new File(self.getTempPath()).mkdir();
         registerBundle(PREFIX + "messages", true);
-        if (new File(getConfigPath() + "messages.properties").canRead()) {
+        if (FileUtil.hasResource(getConfigPath() + "messages.properties")) {
             registerBundle("messages", true);
         }
         addService(Profiler.class, Profiler.si());
@@ -302,7 +302,8 @@ public class ENV implements Serializable {
                 + "  encode: ${file.encoding}\n"
                 + "  loader: ${main.context.classloader}\n"
                 + "  secure: ${security}\n"
-                + "  java  : ${java.vm.name}, ${java.runtime.version}, ${java.home}\n"
+                + "  java  : ${java.vm.name}, ${java.runtime.version}\n"
+                + "  javhom: ${java.home}\n"
                 + "  complr: ${java.compiler}\n"
                 + "  memory: ${memory}\n"
                 + "  discs : ${disc}\n"
@@ -823,7 +824,7 @@ public class ENV implements Serializable {
                     throw new IllegalStateException("the resource '" + resourceName
                         + "' of our main-jar-file is not available or empty!");
                 }
-                FileUtil.write(res, new FileOutputStream(file), true);
+                FileUtil.write(res, new FileOutputStream(file), fileName, true);
                 if (executable)
                     file.setExecutable(true);
                 return true;

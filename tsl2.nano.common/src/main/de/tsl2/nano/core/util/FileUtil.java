@@ -797,7 +797,7 @@ public class FileUtil {
             final File f2 = new File(destFile);
             if (f2.getParentFile() != null)
                 f2.getParentFile().mkdirs();
-            write(new FileInputStream(f1), new FileOutputStream(f2), true);
+            write(new FileInputStream(f1), new FileOutputStream(f2), destFile, true);
             LOG.info("file " + srcFile + " copied to " + destFile);
             return true;
         } catch (final Exception ex) {
@@ -826,13 +826,21 @@ public class FileUtil {
     }
 
     /**
-     * write
-     * 
-     * @param in
-     * @param out
-     * @param closeStreams
+     * @delegates to {@link #write(InputStream, OutputStream, String, boolean)}
      */
     public static void write(InputStream in, OutputStream out, boolean closeStreams) {
+        write(in, out, null, closeStreams);
+    }
+    
+    /**
+     * write
+     * 
+     * @param in stream to read
+     * @param out stream to write
+     * @param outLogName (optional) name of outputstream to be logged
+     * @param closeStreams whether to close the given stream on finishing
+     */
+    public static void write(InputStream in, OutputStream out, String outLogName, boolean closeStreams) {
         final byte[] buf = new byte[1024];
         int len;
         try {
@@ -841,7 +849,7 @@ public class FileUtil {
                 out.write(buf, 0, len);
                 count += len;
             }
-            LOG.info(ByteUtil.amount(count) + " written to " + out);
+            LOG.info(ByteUtil.amount(count) + " written to " + outLogName != null ? outLogName : out);
         } catch (IOException e) {
             ManagedException.forward(e);
         } finally {

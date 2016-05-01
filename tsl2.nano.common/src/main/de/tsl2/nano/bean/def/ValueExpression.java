@@ -201,9 +201,11 @@ public class ValueExpression<TYPE> implements
         if (isPersistable) {//check for unique!
             Collection<TYPE> beansByExample = BeanContainer.instance().getBeansByExample(exampleBean);
             if (beansByExample.size() > 1) {
-                LOG.error("string-to-object-parser: found more than one object:\n"
-                    + StringUtil.toFormattedString(beansByExample, 100, true));
-                throw new ManagedException("tsl2nano.multiple.items", new Object[] { toValue, type, type });
+                LOG.warn("string-to-object-parser: found more than one object:\n"
+                    + StringUtil.toFormattedString(beansByExample, 100, true) + "\n... --> using a simpel transient one!");
+                //on creating search beans, multiple items should not be a problem
+//                throw new ManagedException("tsl2nano.multiple.items", new Object[] { toValue, type, type });
+                return exampleBean;
             } else if (beansByExample.size() == 0) {
                 LOG.error("string-to-object-parser: found no object:\n"
                     + StringUtil.toFormattedString(BeanUtil.toValueMap(exampleBean), 100, true));

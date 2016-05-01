@@ -42,7 +42,7 @@ public class Message extends RuntimeException {
      */
     public Message(String message) {
         super(message);
-        LOG.info(message);
+        LOG.trace("creating message: " + message);
     }
 
     /**

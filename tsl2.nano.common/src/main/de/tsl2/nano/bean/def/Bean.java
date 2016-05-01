@@ -586,13 +586,24 @@ public class Bean<T> extends BeanDefinition<T> {
      */
     protected static <I> Bean<I> createBean(I instance, BeanDefinition<I> beandef) {
         Bean<I> bean = new Bean<I>();
-        copy(beandef, bean, "attributeFilter", "attributeDefinitions", "asString", "presentationHelper", "presentable");
+        copy(beandef, bean, "attributeFilter", "attributeDefinitions", "asString", "presentationHelper", "presentable", "actions");
         bean.attributeFilter = beandef.attributeFilter != null ? CollectionUtil.copy(beandef.attributeFilter) : null;
         bean.attributeDefinitions =
             (LinkedHashMap<String, IAttributeDefinition<?>>) Util.untyped(createValueDefinitions(beandef
                 .getAttributeDefinitions()));
         if (beandef.presentable != null)
             bean.presentable = BeanUtil.copy(beandef.presentable);
+        
+        if (beandef.actions != null) {
+            bean.actions = new ArrayList<IAction>(beandef.actions.size());
+            for (IAction a : beandef.actions) {
+                bean.actions.add(a instanceof Serializable && !a.getClass().isAnonymousClass() ? BeanUtil.copy(a) : a);
+            }
+        }
+        //give the new bean the chance to create actions...only if null
+        if (bean.actions != null && bean.actions.size() == 0) {
+            bean.actions = null;
+        }
         bean.setInstance(instance);
 
         injectIntoRuleCovers(bean, instance);
@@ -600,10 +611,6 @@ public class Bean<T> extends BeanDefinition<T> {
             for (IConnector p : bean.getPlugins()) {
                 p.connect(bean);
             }
-        }
-        //give the new bean the chance to create actions...only if null
-        if (bean.actions != null && bean.actions.size() == 0) {
-            bean.actions = null;
         }
         return bean;
     }

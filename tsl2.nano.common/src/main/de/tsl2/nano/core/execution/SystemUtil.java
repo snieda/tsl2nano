@@ -1,4 +1,4 @@
-package de.tsl2.nano.execution;
+package de.tsl2.nano.core.execution;
 
 import java.io.DataOutputStream;
 import java.io.File;
@@ -65,8 +65,8 @@ public class SystemUtil {
             }
             scanner.close();
             int result = process.waitFor();
-            LOG.info("-------------------------------------------------------------------");
-            LOG.info("process '" + StringUtil.toString(command, -1) + "' finished with errorlevel: " + result);
+            LOG.info("\n-------------------------------------------------------------------\n"
+                + "process '" + StringUtil.toString(command, -1) + "' finished with errorlevel: " + result);
             if (result != 0) {
                 scanner = new Scanner(process.getErrorStream());
                 StringBuilder buf = new StringBuilder();
@@ -76,7 +76,7 @@ public class SystemUtil {
                 LOG.error(buf.toString());
                 scanner.close();
             }
-            LOG.info("-------------------------------------------------------------------");
+            LOG.info("\n-------------------------------------------------------------------");
         } catch (final Exception e) {
             ManagedException.forward(e);
         }
