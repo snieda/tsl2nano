@@ -6,8 +6,8 @@ import java.util.Properties;
 import org.simpleframework.xml.Element;
 
 import de.tsl2.nano.core.execution.IRunnable;
+import de.tsl2.nano.core.execution.SystemUtil;
 import de.tsl2.nano.core.util.Util;
-import de.tsl2.nano.execution.SystemUtil;
 
 /**
  * OS Shell Command

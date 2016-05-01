@@ -98,11 +98,11 @@ public class RuleDependencyListener<T, E extends ChangeEvent> extends AbstractDe
     }
 
     /**
-     * registerChange
+     * register change on the transient change bean of this listener. this changes are not assigned to the entity yet!
      * 
      * @param evt
-     * @param srcValue
-     * @return
+     * @param evt event
+     * @return transient change bean
      */
     @SuppressWarnings("rawtypes")
     private Bean<Object> registerChange(E evt) {
@@ -112,7 +112,14 @@ public class RuleDependencyListener<T, E extends ChangeEvent> extends AbstractDe
 //        else
 //            BeanUtil.merge(srcValue.getInstance(), changes, false);
         Bean<Object> bean = Bean.getBean(changes);
-        //don't call the listener on setting a new value
+        Object lastValue = bean.getValue(srcValue.getName()); 
+        //if nothing was changed, consume it and return
+        if (lastValue != null && lastValue.equals(evt.newValue)) {
+            evt.breakEvent = true;
+            return bean;
+        }
+            
+        //don't call the listener on setting a new transient value
         new PrivateAccessor(bean.getAttribute(srcValue.getName())).set("eventController", null);
 //        bean.getAttribute(srcValue.getName()).changeHandler().dispose();
         if (evt.newValue instanceof String)

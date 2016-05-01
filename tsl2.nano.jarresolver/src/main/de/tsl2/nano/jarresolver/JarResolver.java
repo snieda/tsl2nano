@@ -23,13 +23,13 @@ import de.tsl2.nano.core.AppLoader;
 import de.tsl2.nano.core.ENV;
 import de.tsl2.nano.core.ManagedException;
 import de.tsl2.nano.core.cls.BeanClass;
+import de.tsl2.nano.core.execution.SystemUtil;
 import de.tsl2.nano.core.log.LogFactory;
 import de.tsl2.nano.core.util.FileUtil;
 import de.tsl2.nano.core.util.MapUtil;
 import de.tsl2.nano.core.util.NetUtil;
 import de.tsl2.nano.core.util.StringUtil;
 import de.tsl2.nano.core.util.Util;
-import de.tsl2.nano.execution.SystemUtil;
 
 /**
  * Resolves all given dependencies defined in jarresolver.properties or through main args. Uses maven - downloading
@@ -119,13 +119,14 @@ public class JarResolver {
 
     /**
      * installs given package. see {@link #start(String...)}
+     * 
      * @param packages
      * @return see {@link #start(String...)}
      */
     public static String install(String... packages) {
         return new JarResolver().start(packages);
     }
-    
+
     /**
      * does the whole work
      * 
@@ -145,6 +146,7 @@ public class JarResolver {
 
     /**
      * loadDependencies
+     * 
      * @return mvn process exit value (0: Ok, >0 otherwise)
      */
     private int loadDependencies() {
@@ -328,7 +330,8 @@ public class JarResolver {
              * but our dependency is org.apache.log4j. so we have to check that again - only if we 
              * are searching on the values (packageKey = true)!
              */
-            return pck != null && (!packageKey || dependency.contains(StringUtil.substring(pck, null, "/", true))) ? pck : null;
+            return pck != null && (!packageKey || dependency.contains(StringUtil.substring(pck, null, "/", true))) ? pck
+                : null;
         } else if (dependency.contains("-")) {
             //search for parts of given package
             return findPackage(StringUtil.substring(dependency, null, "-", true), packageKey);
@@ -420,6 +423,20 @@ public class JarResolver {
      * @param args dependency names
      */
     public static void main(String[] args) {
+        if (Util.isEmpty(args)) {
+            System.out.println(
+                    "+-----------------------------------------------------------------+\n"
+                +   "| jar resolver copyright Thomas Schneider / 2012-2016             |\n"
+                +   "| finds and downloads jar libraries for given java class packages.|\n"
+                +   "| jpr: java -jar de.tsl2.nano.jarresolver.JarResolver args[]      |\n"
+                +   "+-----------------------------------------------------------------+\n"
+                +   "| syntax    : jpr class-package [class-package [...]]             |\n"
+                +   "| example-1 : jpr org.hsqldb                                      |\n"
+                +   "| example-2 : jpr ant-1.7.0 org.hsqldb                            |\n"
+                +   "| example-2 : jpr org.hsqldb.jdbc.JDBCDriver                      |\n"
+                +   "+-----------------------------------------------------------------+\n");
+            return;
+        }
         try {
             new JarResolver().start(args);
         } catch (Exception e) {
