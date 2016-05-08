@@ -110,7 +110,8 @@ public class NanoH5 extends NanoHTTPD implements ISystemConnector<Persistence> {
     static final String REVERSE_ENG_SCRIPT = "reverse-eng.xml";
     /** hibernate reverse engeneer configuration */
     static final String HIBREVNAME = "hibernate.reveng.xml";
-
+    static final String HIBREVNAME_TEMPLATE = "hibernate.reveng.tml";
+    
     /**
      * if nano was packaged as standalone jar, the o/r-mapper, hsqldb and mysqlconnector are stored inside this
      * directory to be extraced into the environments directory. the standalone path inside the jar is not part of the
@@ -771,6 +772,8 @@ public class NanoH5 extends NanoHTTPD implements ISystemConnector<Persistence> {
     }
 
     private void provideScripts(Persistence persistence) {
+        System.setProperty(HIBREVNAME_TEMPLATE + ".destination", HIBREVNAME);
+        
         //check if an equal named ddl-script is inside our jar file. should be done on 'anyway' or 'timedb'.
         try {
             ENV.extractResource(persistence.getDatabase() + ".sql");
@@ -779,8 +782,7 @@ public class NanoH5 extends NanoHTTPD implements ISystemConnector<Persistence> {
         } catch (Exception e) {
             //ok, it was only a try ;-)
         }
-        ENV.extractResource(REVERSE_ENG_SCRIPT);
-        ENV.extractResource(HIBREVNAME);
+        ENV.extractResource(HIBREVNAME_TEMPLATE);
 
     }
 
@@ -821,7 +823,7 @@ public class NanoH5 extends NanoHTTPD implements ISystemConnector<Persistence> {
 
     protected static Boolean generateJarFile(String jarFile, String generator, String schema) {
         ENV.extractResource(REVERSE_ENG_SCRIPT);
-        ENV.extractResource(HIBREVNAME);
+        ENV.extractResource(HIBREVNAME_TEMPLATE);
         Properties properties = new Properties();
         properties.setProperty(HIBREVNAME, ENV.getConfigPath() + HIBREVNAME);
 //    properties.setProperty("hbm.conf.xml", "hibernate.conf.xml");

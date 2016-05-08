@@ -788,8 +788,11 @@ public class ENV implements Serializable {
     public static final boolean extractResourceToDir(String resourceName, String destinationDir, boolean flat, boolean executable) {
         //put build informations into system-properties
         getBuildInformations();
+        //perhaps enrich resource name with version-number from build-infos etc.
         resourceName = System.getProperty(resourceName, resourceName);
-        return AppLoader.isNestingJar() ? extractResource(resourceName, destinationDir + resourceName, flat, executable) : false;
+        //perhaps get a templates destination name
+        String destName = System.getProperty(resourceName + ".destination", resourceName);
+        return AppLoader.isNestingJar() ? extractResource(resourceName, destinationDir + destName, flat, executable) : false;
     }
 
     public static final boolean extractResource(String resourceName, boolean flat, boolean executable) {

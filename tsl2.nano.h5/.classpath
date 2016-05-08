@@ -5,6 +5,7 @@
 	<classpathentry kind="src" path="src/test"/>
 	<classpathentry exported="true" kind="lib" path="lib/hsqldb.jar"/>
 	<classpathentry kind="lib" path="lib/jersey-bundle-1.19.jar"/>
+	<classpathentry kind="lib" path="lib/h2-1.4.186.jar"/>
 	<classpathentry exported="true" kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER"/>
 	<classpathentry combineaccessrules="false" exported="true" kind="src" path="/tsl2.nano.directaccess"/>
 	<classpathentry combineaccessrules="false" exported="true" kind="src" path="/tsl2.nano.common"/>

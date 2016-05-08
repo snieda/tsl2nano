@@ -134,11 +134,11 @@ public class MyApp extends NanoH5 {
         par.put("x1", ParType.NUMBER);
         par.put("x2", ParType.NUMBER);
         Rule<BigDecimal> testRule = new Rule<BigDecimal>("test", "A ? (x1 + 1) : (x2 * 2)", par);
-        testRule.addConstraint("x1", new Constraint<BigDecimal>(BigDecimal.class, BigDecimal.ZERO, BigDecimal.ONE));
+        testRule.addConstraint("x1", new Constraint<BigDecimal>(BigDecimal.class, BigDecimal.ZERO, BigDecimal.TEN));
         testRule.addConstraint(Rule.KEY_RESULT, new Constraint<BigDecimal>(BigDecimal.class, BigDecimal.ZERO,
             BigDecimal.TEN));
-        testRule.addSpecification("notA-1-2", null, 4, MapUtil.asMap("x1", 1, "x2", 2));
-        testRule.addSpecification("A-2-1", null, 2, MapUtil.asMap("x1", 2, "x2", 1));
+        testRule.addSpecification("notA-1-2", null, BigDecimal.valueOf(4), MapUtil.asMap("x1", BigDecimal.valueOf(1), "x2", BigDecimal.valueOf(2)));
+        testRule.addSpecification("A-2-1", null, BigDecimal.valueOf(2), MapUtil.asMap("x1", BigDecimal.valueOf(2), "x2", BigDecimal.valueOf(1)));
         ENV.get(RulePool.class).add(testRule);
 
         //another rule to test sub-rule-imports

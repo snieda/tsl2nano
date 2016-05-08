@@ -651,8 +651,10 @@ public class IncubationTest {
         xml.add(new Action(XmlUtil.class, "transformVel", "source", Action.KEY_ENV));
         xml.add(new Action(XmlUtil.class, "transformXsl", "source", "xsl-transformation", "xsl-destination"));
         xml.add(new Action(XmlUtil.class, "xpath", "xpath-expression", "source"));
-        xml.add(new Sequence(new de.tsl2.nano.incubation.terminal.item.Command("sequential echo command", "echo"), new XPathSelector(
-            "xpathselector", null, "bin/" + SIShell.DEFAULT_NAME, "//@name"), null));
+        xml.add(new Sequence(new de.tsl2.nano.incubation.terminal.item.Command("sequential echo command", "echo"),
+            new XPathSelector(
+                "xpathselector", null, "bin/" + SIShell.DEFAULT_NAME, "//@name"),
+            null));
         root.add(xml);
 
         Container html = new Container("Html", null);
@@ -662,7 +664,8 @@ public class IncubationTest {
 
         Container ant = new Container("Ant", null);
         ant.add(new AntTaskSelector("task", "Jar", "pack given filesets to zip"));
-        ant.add(new PropertySelector<String>("properties", "ant task properties", null/*MapUtil.asMap(new TreeMap(), "destFile", "mynew.jar")*/));
+        ant.add(new PropertySelector<String>("properties", "ant task properties",
+            null/*MapUtil.asMap(new TreeMap(), "destFile", "mynew.jar")*/));
         ant.add(new Input("filesets", "./:{**/*.*ml}**/*.xml;${user.dir}:{*.txt}", "filesets expression", false));
         ant.add(new Action(AntRunner.class, "runTask", "task", "properties", "filesets"));
         root.add(ant);
@@ -709,7 +712,8 @@ public class IncubationTest {
         net.add(restful);
         restful.add(new Input("url", "http://echo.jsontest.com/title/ipsum", "URL of a RESTful service", false));
         restful
-            .add(new PropertySelector<String>("arguments", "RESTful arguments", null/*MapUtil.asMap(new TreeMap(), "destFile", "mynew.jar")*/));
+            .add(new PropertySelector<String>("arguments", "RESTful arguments",
+                null/*MapUtil.asMap(new TreeMap(), "destFile", "mynew.jar")*/));
         restful.add(new Action(NetUtil.class, "getRestful", "url", "arguments"));
 
         net.add(new Action(NetUtil.class, "getNetInfo"));
@@ -770,10 +774,14 @@ public class IncubationTest {
         PlatformManagement.printMBeans(System.out, null);
         PlatformManagement.logNotifications(null);
 
-        //so something
+        //do a outofmemoryerror
         ArrayList<byte[]> array = new ArrayList<byte[]>();
-        for (int i = 0; i < 1000000; i++) {
-            array.add(new byte[1024 * i]);
+        try {
+            for (int i = 0; i < 1000000; i++) {
+                array.add(new byte[1024 * i]);
+            }
+        } catch (OutOfMemoryError e) {
+            System.out.println(e.toString());
         }
         System.gc();
         System.out.println("end: " + array.size());
@@ -807,19 +815,19 @@ public class IncubationTest {
     @Test
     public void testSVGGraph() throws Exception {
         SVGChart.createGraph("Nano Graph", "X", "Y", 500, 400, 2d, 1d, 0d);
-        
+
         //test the file import
         String t = " # Test-Graph\n#generiert...\nX Y1  Y2\n1.0   2.0   3.0\n4    5   6\n7    8   9";
         SVGChart.createChart(StringUtil.toInputStream(t));
     }
-    
+
     @Test
     public void testFloatStream() {
-        List<Vector> vlist = Arrays.asList(new Vector(1,2,3), new Vector(4,5,6), new Vector(7,8,9));
+        List<Vector> vlist = Arrays.asList(new Vector(1, 2, 3), new Vector(4, 5, 6), new Vector(7, 8, 9));
         List<Vector> list = Vector.fromStream(Vector.toStream(vlist));
         assertTrue(Arrays.equals(vlist.toArray(), list.toArray()));
     }
-    
+
     static void log_(String msg) {
         System.out.print(msg);
     }

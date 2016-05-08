@@ -17,6 +17,7 @@ import java.io.StreamTokenizer;
 import java.lang.reflect.Method;
 import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
+import java.lang.reflect.TypeVariable;
 import java.text.Format;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -290,7 +291,7 @@ public class BeanUtil extends ByteUtil {
     public static Class<?> getGenericInterfaceType(Class cls, Class interfaze, int pos) {
         Type[] interfaces = cls.getGenericInterfaces();
         for (int i = 0; i < interfaces.length; i++) {
-            if (interfaze.equals(getGenericInterface(interfaces[i])))
+            if (interfaze.isAssignableFrom(getGenericInterface(interfaces[i])))
                 return getGeneric(interfaces[i], pos);
         }
         if (cls.getGenericSuperclass() != null)//TODO: leider gehen hier die generic-infos verloren
@@ -307,9 +308,11 @@ public class BeanUtil extends ByteUtil {
      * @return
      */
     protected static Class<?> getGeneric(Type genericType, int pos) {
-        Type type = ((ParameterizedType) genericType).getActualTypeArguments()[0];
+        Type type = ((ParameterizedType) genericType).getActualTypeArguments()[pos];
         if (type instanceof ParameterizedType) {
             return (Class<?>) ((ParameterizedType) type).getRawType();
+        } else if (type instanceof TypeVariable) {
+            return (Class<?>) ((TypeVariable)type).getGenericDeclaration().getTypeParameters()[0].getGenericDeclaration();
         }
         return type instanceof Class ? (Class<?>) type : null;
     }

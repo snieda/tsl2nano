@@ -40,6 +40,7 @@ public class Persistence implements Serializable {
     
     private static final String DEFAULT_DATABASE = "anyway";
     public static final String DEFAULT_SCHEMA = "PUBLIC";
+    public static final String DEFAULT_CATALOG = DEFAULT_SCHEMA;
     
     protected String persistenceUnit = "genericPersistenceUnit";
     protected String transactionType = "RESOURCE_LOCAL";
@@ -50,10 +51,11 @@ public class Persistence implements Serializable {
     protected String connectionUrl = STD_LOCAL_DATABASE_URL;
     protected String connectionUserName = "SA";
     protected String connectionPassword = "";
-    protected String hibernateDialect = "org.hibernate.dialect.HSQLDialect";
+    protected String hibernateDialect = "org.hibernate.dialect.H2Dialect";
     protected String defaultSchema = DEFAULT_SCHEMA;
-    protected String datasourceClass = "org.hsqldb.jdbc.JDBCDataSource";
-    protected String port = "9003";
+//    protected String datasourceClass = "org.hsqldb.jdbc.JDBCDataSource";
+    protected String datasourceClass = H2_DATABASE_DRIVER;
+    protected String port = "9092";//"9003";
     protected String database = DEFAULT_DATABASE;
     private Persistence replication;
     /** One of 'hbm2java' or 'openjpa-reverse-eng' */
@@ -76,11 +78,16 @@ public class Persistence implements Serializable {
     public static final String GEN_HIBERNATE = "hibernate-tools";
     public static final String GEN_OPENJPA = "openjpa-reverse-eng";
 
-    public static final String STD_LOCAL_DATABASE_DRIVER = "org.hsqldb.jdbc.JDBCDriver";
-    public static final String STD_LOCAL_DATABASE_URL = "jdbc:hsqldb:hsql://localhost:9003";
+    public static final String HSQLDB_DATABASE_DRIVER = "org.hsqldb.jdbc.JDBCDriver";
+    public static final String HSQLDB_DATABASE_URL = "jdbc:hsqldb:hsql://localhost:9003";
+    public static final String H2_DATABASE_DRIVER = "org.h2.Driver";
+    public static final String H2_DATABASE_URL = "jdbc:h2:tcp://localhost:9092/" + DEFAULT_CATALOG;
 
-    public static final String[] STD_LOCAL_DATABASE_DRIVERS = { STD_LOCAL_DATABASE_DRIVER, "org.hsqldb.jdbcDriver",
-        "org.h2.Driver" };
+    public static final String STD_LOCAL_DATABASE_DRIVER = H2_DATABASE_DRIVER;
+    public static final String STD_LOCAL_DATABASE_URL = H2_DATABASE_URL;
+
+    public static final String[] STD_LOCAL_DATABASE_DRIVERS = { HSQLDB_DATABASE_DRIVER, "org.hsqldb.jdbcDriver",
+        H2_DATABASE_DRIVER };
 
     /**
      * constructor

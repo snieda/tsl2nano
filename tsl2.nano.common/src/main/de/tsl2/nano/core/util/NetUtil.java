@@ -295,7 +295,7 @@ public class NetUtil {
             return false;
         }
         try {
-            URI.create(str);
+            URI.create(str);//.toURL();
             return str.contains(".") || str.contains("/");
         } catch (Exception e) {
             //ok, no url
