@@ -29,6 +29,7 @@ import java.io.ObjectOutputStream;
 import java.io.OutputStream;
 import java.io.Reader;
 import java.io.Serializable;
+import java.io.Writer;
 import java.net.URI;
 import java.net.URL;
 import java.text.DateFormat;
@@ -273,6 +274,7 @@ public class FileUtil {
     public static void writeToZip(String zipfile, String file, String data) {
         writeToZip(zipfile, file, data.getBytes());
     }
+
     /**
      * Writes the given file with data to the given zipfile.
      * 
@@ -812,9 +814,9 @@ public class FileUtil {
      * @param in stream
      * @param fileName file to write the input stream into
      */
-    public static void write(InputStream in, final String fileName) {
+    public static long write(InputStream in, final String fileName) {
         try {
-            write(in, new FileOutputStream(new File(fileName)) {
+            return write(in, new FileOutputStream(new File(fileName)) {
                 @Override
                 public String toString() {
                     return fileName;
@@ -822,16 +824,17 @@ public class FileUtil {
             }, true);
         } catch (FileNotFoundException e) {
             ManagedException.forward(e);
+            return -1;
         }
     }
 
     /**
      * @delegates to {@link #write(InputStream, OutputStream, String, boolean)}
      */
-    public static void write(InputStream in, OutputStream out, boolean closeStreams) {
-        write(in, out, null, closeStreams);
+    public static long write(InputStream in, OutputStream out, boolean closeStreams) {
+        return write(in, out, null, closeStreams);
     }
-    
+
     /**
      * write
      * 
@@ -839,8 +842,9 @@ public class FileUtil {
      * @param out stream to write
      * @param outLogName (optional) name of outputstream to be logged
      * @param closeStreams whether to close the given stream on finishing
+     * @return read/written byte count
      */
-    public static void write(InputStream in, OutputStream out, String outLogName, boolean closeStreams) {
+    public static long write(InputStream in, OutputStream out, String outLogName, boolean closeStreams) {
         final byte[] buf = new byte[1024];
         int len;
         try {
@@ -850,8 +854,10 @@ public class FileUtil {
                 count += len;
             }
             LOG.info(ByteUtil.amount(count) + " written to " + outLogName != null ? outLogName : out);
+            return count;
         } catch (IOException e) {
             ManagedException.forward(e);
+            return -1;
         } finally {
             if (closeStreams) {
                 close(in, false);
@@ -1293,7 +1299,30 @@ public class FileUtil {
     }
 
     /**
+     * convenience to close any writer
+     * 
+     * @param writer stream to close
+     * @param forwardException if true and an {@link IOException} was thrown, it will be re-thrown - otherwise it will
+     *            only be logged.
+     * @return null, if close() was successful, otherwise the given instances
+     */
+    public static final <T extends Writer> T close(T writer, boolean forwardException) {
+        if (writer != null)
+            try {
+                writer.close();
+                return null;
+            } catch (IOException e) {
+                if (forwardException)
+                    ManagedException.forward(e);
+                else
+                    LOG.error("can't close writer " + writer, e);
+            }
+        return writer;
+    }
+
+    /**
      * deletes all sub-directories of the given directory
+     * 
      * @param dir directory to delete with all sub-directories
      * @return true, if given dir could be deleted
      */
@@ -1307,8 +1336,31 @@ public class FileUtil {
                 deleteRecursive(files[i]);
             }
         }
-        
+
         return dir.delete();
+    }
+
+    /**
+     * creates a checksum for the data of the given file with the given algorithm 
+     * @param file to check
+     * @param algorithm to use
+     * @return
+     */
+    public static String getChecksum(String file, String algorithm) {
+        return Crypt.hashHex(getFile(file), algorithm);
+    }
+
+    /**
+     * checks given file for given expected checksum hash through given algorithm like MD5, SHA-1, SHA-256, SHA-512 etc.
+     * 
+     * @param file to check
+     * @param algorithm to use
+     * @param expectedHash to check against
+     */
+    public static void checksum(String file, String algorithm, String expectedHash) {
+        if (!getChecksum(file, algorithm).equals(expectedHash))
+            throw new IllegalStateException(
+                file + ": file hash error. file seems to be corrupt (expected hash: " + expectedHash);
     }
 }
 

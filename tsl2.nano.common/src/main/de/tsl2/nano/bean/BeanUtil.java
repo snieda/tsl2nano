@@ -110,6 +110,56 @@ public class BeanUtil extends ByteUtil {
     }
 
     /**
+     * as BeanUtil.copyProperties(..) does only a shallow copy, this method does a deep recursive copy.
+     * <p/>
+     * uses lamdas of jdk 1.8. handles: iterable, enum, number - not handled yet: map, array
+     */
+/*    @SuppressWarnings({ "rawtypes", "unchecked" })
+    private static Object deepCopy(Object src, Object dest) throws Exception {
+      BeanUtils.copyProperties(src, dest);
+      PropertyDescriptor[] pdSrc = BeanUtils.getPropertyDescriptors(src.getClass());
+      PropertyDescriptor pdDest;
+      String name;
+      Object vold, vnew;
+      Class type;
+      for (int i = 0; i < pdSrc.length; i++) {
+        name = pdSrc[i].getName();
+        vold = null;
+        vnew = null;
+        pdDest = BeanUtils.getPropertyDescriptor(dest.getClass(), name);
+        if (pdDest != null && pdSrc[i].getReadMethod() != null && (vold = pdSrc[i].getReadMethod().invoke(src)) != null
+            && (pdDest.getReadMethod() == null || (vnew = pdDest.getReadMethod().invoke(dest)) == null)) {
+          type = pdDest.getReadMethod().getReturnType();
+          //create instance of enum, number or entity
+          vnew = type.isEnum() ? Enum.valueOf((Class) type, ((Enum) vold).name())
+              : Number.class.isAssignableFrom(type) ? type.getConstructor(String.class).newInstance(vold.toString()) : type.newInstance();
+          //set the new value and go into recursion
+          pdDest.getWriteMethod().invoke(dest, deepCopy(vold, vnew));
+        } else if (vold != null && Iterable.class.isAssignableFrom(type = pdDest.getReadMethod().getReturnType())) {
+          //handle collections with recursion
+          Collection it = (Collection) vold;
+          Collection cnew = (Collection) vnew;
+          Object genType = pdDest.getReadMethod().getGenericReturnType();
+          if (genType instanceof ParameterizedType) {
+            genType = ((ParameterizedType) genType).getActualTypeArguments()[0];
+          }
+          if (genType instanceof Class) {
+            Class gtype = (Class) genType;
+            boolean javaType = gtype.getPackage().getName().startsWith("java");
+            it.forEach((Object o) -> {
+              try {
+                cnew.add(javaType ? o : deepCopy(o, gtype.newInstance()));
+              } catch (Exception e) {
+                throw new RuntimeException(e);
+              }
+            });
+          }
+        }
+      }
+      return dest;
+    }
+*/
+    /**
      * wraps all attributes having a collection as value into a new {@link ListSet} instance to unbind a
      * {@link #clone()} instance.
      * 

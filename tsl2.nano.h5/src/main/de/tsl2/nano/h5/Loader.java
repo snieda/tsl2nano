@@ -14,10 +14,8 @@ import java.util.jar.Attributes;
 
 import de.tsl2.nano.core.AppLoader;
 import de.tsl2.nano.core.classloader.NetworkClassLoader;
-import de.tsl2.nano.core.util.ConcurrentUtil;
 import de.tsl2.nano.core.util.FileUtil;
 import de.tsl2.nano.core.util.NetUtil;
-import de.tsl2.nano.core.util.StringUtil;
 
 /**
  * Loader for {@link NanoH5}.
@@ -40,6 +38,15 @@ public class Loader extends AppLoader {
             System.out.println("downloading webstart main jar file from " + appUrl);
             File rootjar = NetUtil.download(appUrl, environment, true, false);
             cl.addFile(rootjar.getPath());
+            //check the download against it's stored checksum SHA-1 (SHA-1 because sourceforge uses this algorithm)
+            File sha1checkFile = NetUtil.download(appUrl + ".SHA-1", environment, true, false);
+            char[] sha1check = FileUtil.getFileData(sha1checkFile.getPath(), "UTF-8");//it's an hex string, the encoding can be ignored
+//            try {
+                FileUtil.checksum(rootjar.getPath(), "SHA-1", String.valueOf(sha1check));
+//            } catch (Exception e) {
+//                //Workaround: try next steps, even if the chechsum failed
+//                System.out.println(e.toString());
+//            }
             //WORKAROUND: extracting all files - for NestingClassLoader not loading any resources
             FileUtil.extract(rootjar.getPath(), environment + "/", null);
             String[] files = rootjar.getParentFile().list();

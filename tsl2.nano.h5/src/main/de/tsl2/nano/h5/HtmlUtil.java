@@ -462,8 +462,8 @@ public class HtmlUtil {
         }
     }
 
-    public static final boolean isURL(String str) {
-        return NetUtil.isURL(str);
+    public static final boolean isURI(String str) {
+        return NetUtil.isURI(str);
     }
 
     /**

@@ -94,8 +94,16 @@ public class Translator {
         String[] t = trans.split("\\s+");
         Properties target = new Properties();
         int i = 0;
+        String tos[];
+        StringBuilder tt = new StringBuilder();
         for (Object k : origin.keySet()) {
-            target.put(k, t[i++]);
+            tos = StringUtil.splitCamelCase((String) origin.get(k));
+            tt.setLength(0);
+            //concat camelcase words...works only on same length
+            for (int j = 0; j < tos.length; j++) {
+                tt.append(t[i++] + " ");
+            }
+            target.put(k, tt.toString().trim());
         }
         return target;
     }

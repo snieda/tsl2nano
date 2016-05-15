@@ -321,7 +321,8 @@ set the following jvm properties:
 		passwd: tsl2tsl2, name: tsl2, surname: tsl2, orga: tsl2
 		jarsigner -keystore tsl2store -storepass tsl2tsl2 <jar-file> <alias> -tsacert <alias> -->
 		<signjar alias="tsl2"  keystore="tsl2store" storepass="tsl2tsl2"  jar="${test.dir}/tsl2.nano.h5.${build.version}-signed.jar" />
-
+		<checksum algorithm="SHA-1" file="${test.dir}/tsl2.nano.h5.${build.version}-signed.jar" />
+		
 		<!-- create test environment -->
 		<ant antfile="../tsl2.nano.common/shell.xml" target="sh.copy">
 			<property name="sh.copy.srcdir" value="../tsl2.nano.h5/src/resources" />

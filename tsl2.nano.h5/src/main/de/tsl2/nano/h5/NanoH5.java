@@ -263,8 +263,15 @@ public class NanoH5 extends NanoHTTPD implements ISystemConnector<Persistence> {
             LOG.info("extracting " + ZIP_STANDALONE + " and " + JAR_JPA_API);
             ENV.extractResource(JAR_JPA_API, true, false);
             FileUtil.extractNestedZip(ZIP_STANDALONE, ENV.getConfigPath(), null);
-            AntRunner.runRegexReplace("rem (set STANDALONE)", "\\1", System.getProperty("user.dir"), "run.bat");
-            AntRunner.runRegexReplace("[#](STANDALONE)", "\\1", System.getProperty("user.dir"), "run.sh");
+            //wait, until the ant jars are stored and loaded
+            ConcurrentUtil.startDaemon("regex-replace-run-scripts", new Runnable() {
+                @Override
+                public void run() {
+                  ConcurrentUtil.sleep(3000);
+                  AntRunner.runRegexReplace("rem (set STANDALONE)", "\\1", System.getProperty("user.dir"), "run.bat");
+                  AntRunner.runRegexReplace("[#](STANDALONE)", "\\1", System.getProperty("user.dir"), "run.sh");
+                }
+            });
         }
     }
 
@@ -322,7 +329,7 @@ public class NanoH5 extends NanoHTTPD implements ISystemConnector<Persistence> {
             Properties header,
             Properties parms,
             Properties files) {
-        if (method.equals("GET") && !NumberUtil.isNumber(uri.substring(1)) && HtmlUtil.isURL(uri)
+        if (method.equals("GET") && !NumberUtil.isNumber(uri.substring(1)) && HtmlUtil.isURI(uri)
             && !uri.contains(Html5Presentation.PREFIX_BEANREQUEST)) {
             return super.serve(uri, method, header, parms, files);
         }
@@ -815,6 +822,7 @@ public class NanoH5 extends NanoHTTPD implements ISystemConnector<Persistence> {
 
         //give mda.xml the information to don't start nano.h5
         p.put("nano.h5.running", "true");
+        
         ENV.get(CompatibilityLayer.class).runRegistered("ant",
             ENV.getConfigPath() + "mda.xml",
             "do.all",

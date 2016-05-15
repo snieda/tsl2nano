@@ -20,9 +20,12 @@ import java.io.File;
 import java.io.Reader;
 import java.io.Serializable;
 import java.lang.annotation.Annotation;
+import java.lang.reflect.Method;
+import java.lang.reflect.Modifier;
 import java.math.BigDecimal;
 import java.math.MathContext;
 import java.net.InetAddress;
+import java.security.KeyPair;
 import java.security.Policy;
 import java.text.DateFormat;
 import java.text.DecimalFormat;
@@ -45,6 +48,7 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.Properties;
 
+import javax.crypto.BadPaddingException;
 import javax.json.JsonObject;
 import javax.json.JsonStructure;
 
@@ -67,6 +71,7 @@ import de.tsl2.nano.bean.def.BeanDefinition;
 import de.tsl2.nano.bean.def.CollectionExpressionFormat;
 import de.tsl2.nano.bean.def.IBeanCollector;
 import de.tsl2.nano.bean.def.IPresentable;
+import de.tsl2.nano.bean.def.Presentable;
 import de.tsl2.nano.bean.def.ValueExpression;
 import de.tsl2.nano.bean.def.ValueMatcher;
 import de.tsl2.nano.bean.enhance.BeanEnhancer;
@@ -85,6 +90,8 @@ import de.tsl2.nano.core.cls.PrimitiveUtil;
 import de.tsl2.nano.core.execution.Profiler;
 import de.tsl2.nano.core.log.LogFactory;
 import de.tsl2.nano.core.util.AnnotationProxy;
+import de.tsl2.nano.core.util.ByteUtil;
+import de.tsl2.nano.core.util.ConcurrentUtil;
 import de.tsl2.nano.core.util.Crypt;
 import de.tsl2.nano.core.util.DateUtil;
 import de.tsl2.nano.core.util.FileUtil;
@@ -101,8 +108,11 @@ import de.tsl2.nano.execution.AntRunner;
 import de.tsl2.nano.execution.ScriptUtil;
 import de.tsl2.nano.format.DefaultFormat;
 import de.tsl2.nano.format.RegExpFormat;
+import de.tsl2.nano.historize.HistorizedInputFactory;
+import de.tsl2.nano.historize.Volatile;
 import de.tsl2.nano.messaging.ChangeEvent;
 import de.tsl2.nano.messaging.IListener;
+import de.tsl2.nano.util.ClassFinder;
 import de.tsl2.nano.util.Period;
 import de.tsl2.nano.util.Translator;
 import de.tsl2.nano.util.operation.CRange;
@@ -146,6 +156,10 @@ public class CommonTest {
         assertEquals("text", StringUtil.extract(sbstr, "[etx]{4,4}", "spruch"));
         assertEquals("diesisteineinfacherspruch", sbstr.toString());
 
+        //test hex
+        String hex = StringUtil.toHexString(str.getBytes());
+        assertEquals(str, StringUtil.fromHexString(hex));
+        
         //test crypto
         String[] passwds = new String[] { "meinpass", "12345678", "azAzäÄüÜ" };
         for (int i = 0; i < passwds.length; i++) {
@@ -153,7 +167,8 @@ public class CommonTest {
             LOG.info(passwds[i] + " ==> " + "(" + cryptoHash.length + ") " + StringUtil.toString(cryptoHash, 1000));
             LOG.info(passwds[i] + " crypto-hex: " + StringUtil.toHexString(cryptoHash));
             LOG.info(passwds[i] + "        hex: " + StringUtil.toHexString(passwds[i].getBytes()));
-            LOG.info(passwds[i] + "           : " + StringUtil.fromHexString(StringUtil.toHexString(passwds[i].getBytes())));
+            LOG.info(
+                passwds[i] + "           : " + StringUtil.fromHexString(StringUtil.toHexString(passwds[i].getBytes())));
         }
 
         //complex extracting
@@ -256,7 +271,7 @@ public class CommonTest {
         assertEquals(bigDecimal, NumberUtil.getBigDecimal("-999,99"));
 
         //comparator test
-        List<String> textAndNumbers = Arrays.asList("", "-1.000,00", "-1.2",//on german notation it will be -12
+        List<String> textAndNumbers = Arrays.asList("", "-1.000,00", "-1.2", //on german notation it will be -12
             "-1,1",
             "0",
             "1",
@@ -264,7 +279,7 @@ public class CommonTest {
             "2",
             "10",
             "11",
-            "1.2",//on german notation it will be 12
+            "1.2", //on german notation it will be 12
             "20",
             "21",
             "22",
@@ -520,7 +535,7 @@ public class CommonTest {
         d = DateUtil.getQuarter(1970, DateUtil.Q4);
         assertEquals(4, DateUtil.getCurrentQuarter(d));
         assertEquals(1, DateUtil.getNextQuarter(d));
-        
+
         //test date parts
         Date clearTime = DateUtil.clearTime(null);
         long cutTime = DateUtil.cutTime(System.currentTimeMillis());
@@ -542,7 +557,7 @@ public class CommonTest {
             "1.000",
             "1000000,00",
             "1.000.000,00",
-            "100000000",//=100.000.000,00
+            "100000000", //=100.000.000,00
             "-",
             "-0",
             "-1",
@@ -762,7 +777,10 @@ public class CommonTest {
             "arrayObject",
             "arrayPrimitive",
             "type",
-            "weekdayEnum").values().retainAll(asMap.values()));
+            "weekdayEnum",
+            "map",
+            "relation",
+            "binary").values().retainAll(asMap.values()));
 
         /*
           * the value-binding and value-matching
@@ -1344,7 +1362,7 @@ public class CommonTest {
         };
 
         // filter the 'standalones'
-        assertTrue(cl.getNestedJars().length == 21);
+        assertTrue(cl.getNestedJars().length == 26);
     }
 
     /**
@@ -1357,7 +1375,13 @@ public class CommonTest {
          */
         TypeBean obj = new TypeBean() {
             int test = 1;
-        };
+
+            //avoid the compiler to optimize this code...
+            public <T extends TypeBean> T dosomethingWithTest() {
+                System.out.println(test);
+                return (T) this;
+            }
+        }.dosomethingWithTest();
 //        System.out.println("original test-value: " + BeanAttribute.getBeanAttribute(obj.getClass(), "test").getValue(obj));
         TypeBean bean = BeanEnhancer.enhance(obj, "Test", false);
         System.out.println("enhanced test-value:" + BeanAttribute.getBeanAttribute(bean.getClass(), "test")
@@ -1409,15 +1433,30 @@ public class CommonTest {
             Profiler.si().stressTest("downloader", 20, new Runnable() {
                 @Override
                 public void run() {
+                    String url;
                     //https://sourceforge.net/projects/tsl2nano/files/latest/download?source=navbar
-                    NetUtil.download(
-                        "http://sourceforge.net/projects/tsl2nano/files/0.8.0-beta/tsl2.nano.h5.0.7.0.jar/download",
+                    File download = NetUtil.download(url =
+                        "http://downloads.sourceforge.net/project/tsl2nano/0.9.0-beta/tsl2.nano.h5.0.9.0.jar",
                         "test/", true, true);
+                    NetUtil.check(url, download, 3 * 1024 * 1024);
                 }
             });
         }
     }
 
+    @Test
+    public void testFileChecksum() throws Exception {
+        //use a verified example from internet...
+        String test = "sha1 this string";
+        String expectedHash = "cf23df2207d99a74fbe169e3eba035e633b65d94";
+        
+        String file = ENV.getConfigPath() + "testchecksum";
+        FileUtil.writeBytes(test.getBytes(), file, false);
+        assertTrue(test.equals(String.valueOf(FileUtil.getFileData(file, null))));
+        
+        FileUtil.checksum(file, "SHA-1", expectedHash);
+    }
+    
     @Test
     public void testNetUtilProxies() throws Exception {
 //        LOG.info("gateway is:" + NetUtil.gateway());
@@ -1451,21 +1490,22 @@ public class CommonTest {
 
     @Test
     public void testNetUtilJSON() throws Exception {
-        JsonStructure structure = NetUtil.getRestfulJSON("http://headers.jsontest.com/"/*"https://graph.facebook.com/search?q=java&type=post"*/);
+        JsonStructure structure = NetUtil
+            .getRestfulJSON("http://headers.jsontest.com/"/*"https://graph.facebook.com/search?q=java&type=post"*/);
         System.out.println(StringUtil.toString(structure, -1));
-        
+
         Bean<JsonStructure> bean = Bean.getBean(structure);
         System.out.println(bean);
-        
+
         String echoService = "http://echo.jsontest.com";
         structure = NetUtil.getRestfulJSON(echoService, "mykey1", "myvalue1", "mykey2", "myvalue2");
         System.out.println(StringUtil.toString(structure, -1));
-        
+
         JsonObject obj = (JsonObject) structure;
         assertTrue(obj.get("mykey1").toString().equals("\"myvalue1\""));
         assertTrue(obj.get("mykey2").toString().equals("\"myvalue2\""));
     }
-    
+
     @Test
     public void testCrypt() throws Exception {
         String txt = "test1234";
@@ -1484,6 +1524,104 @@ public class CommonTest {
         //not available on standard jdk:
 //        Crypt.main(new String[]{"0123456", Crypt.ALGO_PBEWithHmacSHA1AndDESede, txt});
 //        Crypt.main(new String[]{"0123456", Crypt.ALGO_PBEWithSHAAndAES, txt});
+
+        //validate certificates, check signification
+        // TODO: implement and test!
+        KeyPair keyPair = Crypt.generateKeyPair("RSA"/*Crypt.getTransformationPath("RSA", "ECB", "PKCS1Padding")*/);
+        try {
+            Crypt sender = new Crypt(keyPair.getPublic());
+            Crypt receiver = new Crypt(keyPair.getPrivate());
+            byte[] sign = sender.sign("test".getBytes(), "SHA-256", 10);
+            receiver.validate(null);
+            receiver.checkSignification("test".getBytes(), sign, "SHA-256", 10);
+        } catch (UnsupportedOperationException ex) {
+            //not implemented yet!
+        } catch (ManagedException ex) {
+            //not implemented yet!
+        }
+    }
+
+//    @Test
+//    public void testSymEncryption() throws Exception {
+//        SymmetricCipher c = new SymmetricCipher();
+//        System.out.println(c.getTransformationPath());
+//        System.out.println(c.getAlgorithmParameterSpec());
+//        
+//        String data = "mein wichtiger text";
+//        byte[] encrypted = c.encrypt(data.getBytes());
+//        byte[] decrypted = c.decrypt(encrypted);
+//        System.out.println("Symmetric encryption:\n\t" + data + " --> " + new String(encrypted) + " --> " + new String(decrypted));
+//        assertTrue(data.equals(new String(decrypted)));
+//    }
+//    
+//    @Test
+//    public void testAsymEncryption() throws Exception {
+//        AsymmetricCipher c = new AsymmetricCipher();
+//        System.out.println(c.getTransformationPath());
+//        System.out.println(c.getAlgorithmParameterSpec());
+//        
+//        String data = "mein wichtiger text";
+//        byte[] encrypted = c.encrypt(data.getBytes());
+//        byte[] decrypted = c.decrypt(encrypted);
+//        System.out.println("Asymmetric encryption:\n\t" + data + " --> " + new String(encrypted) + " --> " + new String(decrypted));
+//        assertTrue(data.equals(new String(decrypted)));
+//    }
+//    
+    @Test
+    public void testFiBean() throws Exception {
+        de.tsl2.nano.fi.Bean fiBean = new de.tsl2.nano.fi.Bean("test");
+        de.tsl2.nano.fi.Bean abean =
+            fiBean.add("testAttribute", "testAttributeValue").constrain(18, null, false).description(new Presentable());
+        System.out.println(abean);
+        abean.setValue("testAttribute", "testAttributeValue1");
+        assertTrue(!abean.getAttribute("testAttribute").getStatus().ok());
+    }
+
+    @Test
+    public void testHistorize() throws Exception {
+        HistorizedInputFactory.setPath(ENV.getConfigPath());
+        HistorizedInputFactory.create("test", 5, String.class);
+
+        HistorizedInputFactory.instance("test").addAndSave("1");
+        HistorizedInputFactory.instance("test").addAndSave("2");
+        HistorizedInputFactory.instance("test").addAndSave("3");
+        HistorizedInputFactory.instance("test").addAndSave("4");
+        HistorizedInputFactory.instance("test").addAndSave("5");
+
+        assertTrue(HistorizedInputFactory.instance("test").containsValue("1"));
+
+        //only 5 items are allowed, so the first one was deleted!
+        HistorizedInputFactory.instance("test").addAndSave("6");
+        assertTrue(HistorizedInputFactory.instance("test").containsValue("6"));
+        assertTrue(!HistorizedInputFactory.instance("test").containsValue("1"));
+
+        assertTrue(HistorizedInputFactory.deleteAll());
+
+    }
+
+    @Test
+    public void testVolatile() throws Exception {
+        Volatile v = new Volatile(1000, "test");
+        assertTrue(!v.expired());
+        assertTrue(v.get().equals("test"));
+
+        ConcurrentUtil.sleep(1100);
+        assertTrue(v.expired());
+        assertTrue(v.get() == null);
+
+        v.set("test1");
+        assertTrue(!v.expired());
+        assertTrue(v.get().equals("test1"));
+    }
+
+    @Test
+    public void testFieldReader() throws Exception {
+        //TODO
+    }
+
+    @Test
+    public void testBaseTest() throws Exception {
+        //TODO
     }
 
     /**
@@ -1556,7 +1694,7 @@ public class CommonTest {
     public void testResourcebundleTranslation() throws Exception {
         Properties p = createTestTranslationProperties();
         Properties t = Translator.translateProperties("test", p, Locale.ENGLISH, Locale.GERMAN);
-        
+
         //the words are german - so, no translation can be done --> p = t. it's only an integration test
         assertEquals(p, t);
     }
@@ -1576,19 +1714,22 @@ public class CommonTest {
 //        Long l = long.class.cast(i);
         assertEquals(i, l);
     }
-    
+
     @Test
     @Ignore("seems not to work on suns jdk1.7")
     public void testAnnotationProxy() throws Exception {
         Element origin = AnnotationProxy.getAnnotation(SimpleXmlAnnotator.class, "attribute", Element.class);
-        Annotation proxy = AnnotationProxy.createProxy(new AnnotationProxy(origin, "name", "ruleCover", "type", CommonTest.class));
+        Annotation proxy =
+            AnnotationProxy.createProxy(new AnnotationProxy(origin, "name", "ruleCover", "type", CommonTest.class));
         //this seems not work on suns jdk1.7
         Annotation[] annotations = AnnotationProxy.getAnnotations(SimpleXmlAnnotator.class, "attribute");
-        
+
         annotations[0] = proxy;
-        
-        assertTrue(CommonTest.class.equals(AnnotationProxy.getAnnotation(SimpleXmlAnnotator.class, "attribute", Element.class).type()));
+
+        assertTrue(CommonTest.class
+            .equals(AnnotationProxy.getAnnotation(SimpleXmlAnnotator.class, "attribute", Element.class).type()));
     }
+
     @Test
     @Ignore("seems not to work on suns jdk1.7")
     public void testAnnotationValueChange() throws Exception {
@@ -1596,13 +1737,25 @@ public class CommonTest {
         //this seems not to work on suns jdk1.7
         int count = AnnotationProxy.setAnnotationValues(origin, "name", "ruleCover", "type", CommonTest.class);
         assertTrue(count == 2);
-        assertTrue(CommonTest.class.equals(AnnotationProxy.getAnnotation(SimpleXmlAnnotator.class, "attribute", Element.class).type()));
+        assertTrue(CommonTest.class
+            .equals(AnnotationProxy.getAnnotation(SimpleXmlAnnotator.class, "attribute", Element.class).type()));
     }
+
     @Test
     public void testFuzzyFilter() throws Exception {
-        String[] c = new String[] {"DisT", "Dies ist ein Test", "irgendwas anderes"};
+        String[] c = new String[] { "DisT", "Dies ist ein Test", "irgendwas anderes" };
         assertTrue(StringUtil.fuzzyMatch(c[0], "dist") == 1);
-        assertTrue(StringUtil.fuzzyMatch(c[1], "dist") == 1d / 2 / 4 );
+        assertTrue(StringUtil.fuzzyMatch(c[1], "dist") == 1d / 2 / 4);
         assertTrue(StringUtil.fuzzyMatch(c[2], "dist") == 0);
+    }
+
+    @Test
+    public void testClassFinder() throws Exception {
+        String[] c = new String[] { ClassFinder.class.getName(), "tslutilclsfind", "fzzyfnd" };
+        ClassFinder finder = new ClassFinder(this.getClass().getClassLoader());
+        assertTrue(finder.fuzzyFind(c[0], Class.class, -1, null).containsValue(ClassFinder.class));
+        assertTrue(finder.fuzzyFind(c[1], null, Modifier.PUBLIC, null).containsValue(ClassFinder.class));
+        assertTrue(finder.fuzzyFind(c[2], Method.class, -1, null).containsValue(
+            ClassFinder.class.getMethod("fuzzyFind", String.class, Class.class, int.class, Class.class)));
     }
 }

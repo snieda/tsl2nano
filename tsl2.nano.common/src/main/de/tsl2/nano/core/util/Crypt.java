@@ -3,7 +3,11 @@ package de.tsl2.nano.core.util;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.UnsupportedEncodingException;
+import java.security.DigestInputStream;
 import java.security.Key;
+import java.security.KeyPair;
+import java.security.KeyPairGenerator;
+import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.security.Provider;
 import java.security.SecureRandom;
@@ -21,12 +25,12 @@ import javax.crypto.spec.SecretKeySpec;
 
 import org.apache.commons.logging.Log;
 
-import sun.misc.BASE64Decoder;
-import sun.misc.BASE64Encoder;
 import de.tsl2.nano.core.ManagedException;
 import de.tsl2.nano.core.classloader.NetworkClassLoader;
 import de.tsl2.nano.core.execution.CompatibilityLayer;
 import de.tsl2.nano.core.log.LogFactory;
+import sun.misc.BASE64Decoder;
+import sun.misc.BASE64Encoder;
 
 /**
  * simple java encryption. algorithms should have the format "algorithm/mode/padding". padding should be used encrypting
@@ -66,11 +70,14 @@ import de.tsl2.nano.core.log.LogFactory;
  * These transformations are described in the Cipher section of the Java Cryptography Architecture Standard Algorithm Name Documentation. Consult the release documentation for your implementation to see if any other transformations are supported.
  * </pre>
  * 
- * for further informations about available algorithms, see <a
- * href="http://docs.oracle.com/javase/7/docs/technotes/guides/security/StandardNames.html#Cipher" /> <br/>
+ * for further informations about available algorithms, see
+ * <a href="http://docs.oracle.com/javase/7/docs/technotes/guides/security/StandardNames.html#Cipher" /> <br/>
  * <a href="http://docs.oracle.com/javase/7/docs/technotes/guides/security/crypto/CryptoSpec.html" />
- * <p/>
- * TODO: don't fix the encoding to UTF-8. use the system property
+ * 
+ * @see http://java.sun.com/j2se/1.4.2/docs/guide/security/jce/JCERefGuide.html#JceKeystore
+ * @see http://docs.oracle.com/javase/6/docs/technotes/guides/security/SunProviders.html
+ *      <p/>
+ *      TODO: don't fix the encoding to UTF-8. use the system property
  * 
  * @author Tom
  * @version $Revision$
@@ -84,6 +91,7 @@ public class Crypt implements ISecure {
     private AlgorithmParameterSpec paramSpec;
 
     public static final String ENCODE_UTF8 = "UTF-8";
+    //some transformation paths
     public static final String ALGO_DES = "DES/ECB/PKCS5Padding";
     public static final String ALGO_AES = "AES/CBC/PKCS5Padding";
     public static final String ALGO_PBEWithSHAAndAES = "PBEWithSHAAndAES";
@@ -104,17 +112,25 @@ public class Crypt implements ISecure {
     };
 
     /**
-     * constructor using AES key generation, {@link #ALGO_AES} algorithm and {@link #ENCODE_UTF8} encoding.
+     * constructor using random DES key generation, {@link #ALGO_DES} algorithm and {@link #ENCODE_UTF8} encoding.
      */
     public Crypt() {
         this(generateRandomKey("DES"), ALGO_DES, ENCODE_UTF8, true);
     }
 
+    /**
+     * constructor using secret AES or DES key generation, {@link #ALGO_DES} algorithm and {@link #ENCODE_UTF8}
+     * encoding.
+     */
     public Crypt(byte[] pwd) {
         this(generateSecretKey(pwd, pwd == null || pwd.length == 0 ? ALGO_DES : ALGO_AES),
             pwd.length == 0 ? ALGO_DES : ALGO_AES, ENCODE_UTF8, true);
     }
 
+    /**
+     * constructor using given algorithm for key generation, {@link #ALGO_DES} algorithm and {@link #ENCODE_UTF8}
+     * encoding.
+     */
     public Crypt(byte[] pwd, String algorithm) {
         this(generateKey(pwd, algorithm),
             algorithm,
@@ -136,11 +152,21 @@ public class Crypt implements ISecure {
     }
 
     /**
+     * delegates to {@link #Crypt(Key, String, String, boolean)} using {@link #ENCODE_UTF8} and {@link #useBASE64}=true.
+     * 
+     * @param key existing key
+     */
+    public Crypt(Key key) {
+        this(key, key.getAlgorithm(), ENCODE_UTF8, true);
+    }
+
+    /**
      * constructor
      * 
      * @param algorithm
-     * @param key
-     * @param encoding
+     * @param key existing key (public(->encryption) or private (decryption) - perhaps generated with
+     *            {@link #generateKeyPair(String)}.
+     * @param encoding byte stream character encoding
      */
     public Crypt(Key key, String algorithm, String encoding, boolean useBASE64) {
         super();
@@ -158,7 +184,19 @@ public class Crypt implements ISecure {
         provide(algorithm);
     }
 
-    private static String providers() {
+    /**
+     * algorithm/mode/padding to be used on cipher
+     * 
+     * @param algorithm alg
+     * @param mode mode
+     * @param padding pad
+     * @return path
+     */
+    public static String getTransformationPath(String algorithm, String mode, String padding) {
+        return algorithm + "/" + mode + "/" + padding;
+    }
+
+    public static String providers() {
         StringBuilder ps = new StringBuilder("available security providers:\n");
         Provider[] providers = Security.getProviders();
         for (int i = 0; i < providers.length; i++) {
@@ -174,7 +212,7 @@ public class Crypt implements ISecure {
             downloadProvider(algorithm);
         }
     }
-    
+
     private static void downloadProvider(String algorithm2) {
         ClassLoader cl = Thread.currentThread().getContextClassLoader();
         if (cl instanceof NetworkClassLoader) {
@@ -186,7 +224,8 @@ public class Crypt implements ISecure {
     private static AlgorithmParameterSpec createParamSpec(String algorithm) {
         return isPBE(algorithm) ? createPBEParamSpec() : (algorithm.contains("/") && !algorithm.contains("ECB"))
             ? new IvParameterSpec(
-                algorithm.startsWith("DES") ? salt8 : salt16) : null;
+                algorithm.startsWith("DES") ? salt8 : salt16)
+            : null;
 //        return isPBE(algorithm) ? createPBEParamSpec() : algorithm.startsWith("DES") || algorithm.contains("/ECB/")
 //            ? null : createAESParamSpec();
     }
@@ -245,6 +284,26 @@ public class Crypt implements ISecure {
         }
     }
 
+    /**
+     * generates a new public/private key-pair to be used for asymmetric encryption. use {@link KeyPair#getPublic()} to
+     * get the encryption key (also usable for certificates) and {@link KeyPair#getPrivate()} to get the decryption key
+     * (also usable as Signer).
+     * 
+     * @param algorithm to be used. example: RSA, DSA, ...
+     * @return key-pair
+     */
+    public static KeyPair generateKeyPair(String algorithm) {
+        KeyPairGenerator kpg;
+        try {
+            kpg = KeyPairGenerator.getInstance(algorithm);
+            kpg.initialize(createParamSpec(algorithm));
+        } catch (final Exception e) {
+            ManagedException.forward(e);
+            return null;
+        }
+        return kpg.generateKeyPair();
+    }
+
     static boolean isPBE(String algorithm) {
         return algorithm.startsWith("PBE");
     }
@@ -255,10 +314,32 @@ public class Crypt implements ISecure {
         return key;
     }
 
+    public static String hashHex(InputStream stream, String algorithm) {
+        return hex(hash(stream, algorithm));
+    }
+    
+    /**
+     * creates a hash with given algorithm from data in stream
+     * @param stream stream to hash
+     * @param algorithm e.g. SHA-1, SHA-256, SHA-512 (MD5 is already hacked)
+     * @return data hash
+     */
+    public static byte[] hash(InputStream stream, String algorithm) {
+        try {
+            DigestInputStream digestStream = new DigestInputStream(stream, MessageDigest.getInstance(algorithm));
+         // Read the stream and do nothing with it
+            while (digestStream.read() != -1) {}
+            return digestStream.getMessageDigest().digest();
+        } catch (Exception e) {
+            ManagedException.forward(e);
+            return null;
+        }
+    }
+    
     public InputStream encrypt(InputStream stream) {
         return encrypt(stream, ".*");
     }
-    
+
     /**
      * encryption is delegated to {@link #encrypt(byte[], Key, AlgorithmParameterSpec, String, String, boolean)}
      * 
@@ -287,7 +368,7 @@ public class Crypt implements ISecure {
     public InputStream decrypt(InputStream stream) {
         return decrypt(stream, ".*");
     }
-    
+
     /**
      * decryption is delegated to {@link #decrypt(String, Key, AlgorithmParameterSpec, String, String, boolean)}
      * 
@@ -351,7 +432,7 @@ public class Crypt implements ISecure {
             int length) {
         try {
 
-            // encrypt using the cypher
+            // encrypt using the cipher
             byte[] raw = cipher(algorithm, Cipher.ENCRYPT_MODE, key, paramSpec).doFinal(data, offset, length);
 
             // converts to base64 for easier display.
@@ -367,6 +448,10 @@ public class Crypt implements ISecure {
         return new BASE64Encoder().encode(raw);
     }
 
+    static String hex(byte[] data) {
+        return StringUtil.toHexString(data);
+    }
+    
     static Cipher cipher(String algorithm, int mode, Key key, AlgorithmParameterSpec spec) throws Exception {
         Cipher cipher = null;
         try {
@@ -474,6 +559,50 @@ public class Crypt implements ISecure {
     }
 
     /**
+     * validates the given certificate
+     * 
+     * @param certificate to be checked. throws an exception on fail.
+     */
+    public void validate(byte[] certificate) {
+        //TODO: implement
+        throw new UnsupportedOperationException();
+    }
+
+    /**
+     * UNDER CONSTRUCTION<p/>
+     * signs data hashing it to the given length and encrypting with the current private key
+     * 
+     * @param data to be signed
+     * @param hashAlgorithm algorithm for hashing
+     * @param hashLength hashcode length
+     * @return signed data
+     */
+    public byte[] sign(byte[] data, String hashAlgorithm, int hashLength) {
+        byte[] hash = Util.cryptoHash(data, hashAlgorithm, hashLength);
+        String sign = null;
+        try {
+            //do an encryption with the private key --> decryption
+            sign = decrypt(new String(hash, encoding));
+        } catch (UnsupportedEncodingException e) {
+            ManagedException.forward(e);
+        }
+        return sign.getBytes();
+    }
+
+    /**
+     * checks the given signification against the given data hashing it to the given length.
+     * 
+     * @param data to be checked against the signification
+     * @param hashAlgorithm algorithm for hashing
+     * @param hashLength hashcode length
+     * @throws Exception on invalid signification
+     */
+    public void checkSignification(byte[] data, byte[] sign, String hashAlgorithm, int hashLength) {
+        //TODO: implement
+        throw new UnsupportedOperationException();
+    }
+
+    /**
      * 
      * @param args
      */
@@ -515,8 +644,8 @@ public class Crypt implements ISecure {
             log("  example 4: Crypt mYpASsWord AES -file:meintextfile.txt -base64 -include:[^;]+");
             log("  algorithms are:");
             log(
-            "  AES,AESWrap,ARCFOUR,Blowfish,CCM,DES,DESede,DESedeWrap,ECIES,GCM,PBEWith<digest>And<encryption>,RC2,RC4,RC5,RSA\n"
-                + "  Hash: MD2, MD5, SHA, SHA-1, SHA-256, SHA-384, SHA-512");
+                "  AES,AESWrap,ARCFOUR,Blowfish,CCM,DES,DESede,DESedeWrap,ECIES,GCM,PBEWith<digest>And<encryption>,RC2,RC4,RC5,RSA\n"
+                    + "  Hash: MD2, MD5, SHA, SHA-1, SHA-256, SHA-384, SHA-512");
             log("  providers are:\n" + Crypt.providers());
             log("  for further informations see: http://docs.oracle.com/javase/7/docs/technotes/guides/security/StandardNames.html#Cipher");
         }

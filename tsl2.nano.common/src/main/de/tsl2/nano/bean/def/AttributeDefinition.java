@@ -275,14 +275,16 @@ public class AttributeDefinition<T> implements IAttributeDefinition<T> {
             for (IListener l : listener) {
                 if (l instanceof AbstractDependencyListener) {
                     AbstractDependencyListener<?, ?> dl = (AbstractDependencyListener<?, ?>) l;
-                    String name = StringUtil.substring(dl.attributeID, ".", null);
                     if (isBean) {//create a specific listener instance for the given bean!
                         dl = (AbstractDependencyListener<?, ?>) dl.clone();
                         Class eventType = changeHandler().getEventType(l);
                         changeHandler().removeListener(l);
                         changeHandler().addListener(dl, eventType);
                     }
-                    dl.setAttribute((AttributeDefinition) beandef.getAttribute(name));
+                    if (dl.attributeID != null) {
+                        String name = StringUtil.substring(dl.attributeID, ".", null);
+                        dl.setAttribute((AttributeDefinition) beandef.getAttribute(name));
+                    }
                 }
             }
         }

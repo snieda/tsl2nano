@@ -364,7 +364,7 @@ public class NanoH5Session implements ISession<BeanDefinition>, Serializable {
                 }
                 if (userResponse instanceof String && !userResponse.equals(IAction.CANCELED)) {
                     msg = (String) userResponse;
-                    if (HtmlUtil.isURL(msg)) {
+                    if (HtmlUtil.isURI(msg)) {
                         return server.serve(msg, "GET", header, parms, files);
                     } else if (!HtmlUtil.containsHtml(msg)) {
                         msg = HtmlUtil.createMessagePage(ENV.translate("tsl2nano.info", true), msg);

@@ -343,7 +343,8 @@ public class XmlUtil {
      * delegates to {@link #xpath(String, InputStream, Class)}
      */
     public static <RESULTTYPE> RESULTTYPE xpath(String expression,
-            String fileName, Class<RESULTTYPE> resultType) {
+            String fileName,
+            Class<RESULTTYPE> resultType) {
         try {
             return xpath(expression, new FileInputStream(new File(fileName)), resultType);
         } catch (FileNotFoundException e) {
@@ -364,7 +365,8 @@ public class XmlUtil {
      */
     @SuppressWarnings({ "unchecked" })
     private static <RESULTTYPE> RESULTTYPE xpath(String expression,
-            InputStream stream, Class<RESULTTYPE> resultType) {
+            InputStream stream,
+            Class<RESULTTYPE> resultType) {
         DocumentBuilder builder;
         try {
             builder = DocumentBuilderFactory.newInstance().newDocumentBuilder();
@@ -416,6 +418,16 @@ public class XmlUtil {
         }
     }
 
+    public static String replaceTagsAndNamespace(String xml, Class... classes) {
+        //first: the namespace
+        xml = xml.replaceAll("(</?)\\w+[:]", "$1");
+        for (int i = 0; i < classes.length; i++) {
+            //entferne tag der geg. Klasse
+            xml = xml.replaceAll("</?" + StringUtil.toFirstLower(classes[i].getSimpleName()) + "[^>]*>", "");
+        }
+        return xml;
+    }
+
     public static final <T> T loadXml(String xmlFile, Class<T> type) {
         return loadXml(xmlFile, type, ENV.get(CompatibilityLayer.class), true);
     }
@@ -449,8 +461,9 @@ public class XmlUtil {
     public static <T> T loadSimpleXml_(String xmlFile, Class<T> type) {
         FileInputStream fileInputStream = null;
         try {
-            return new org.simpleframework.xml.core.Persister(getSimpleXmlProxyStrategy(), new SimpleXmlArrayWorkaround()).read(type,
-                fileInputStream = new FileInputStream(new File(xmlFile)));
+            return new org.simpleframework.xml.core.Persister(getSimpleXmlProxyStrategy(),
+                new SimpleXmlArrayWorkaround()).read(type,
+                    fileInputStream = new FileInputStream(new File(xmlFile)));
         } catch (Exception e) {
             //mark the loaded xml file as corrupt
             File file = new File(xmlFile);
@@ -468,7 +481,7 @@ public class XmlUtil {
                 printStream = new PrintStream(stackTraceFile);
                 e.printStackTrace(printStream);
             } catch (FileNotFoundException e1) {
-                LOG.error("cant' write stacktrace to " + stackTraceFile );
+                LOG.error("cant' write stacktrace to " + stackTraceFile);
             } finally {
                 if (printStream != null)
                     printStream.close();
@@ -501,8 +514,9 @@ public class XmlUtil {
      */
     public static void saveSimpleXml_(String xmlFile, Object obj) {
         try {
-            new org.simpleframework.xml.core.Persister(getSimpleXmlProxyStrategy(), new Format("<?xml version=\"1.0\" encoding=\"UTF-8\"?>")).write(
-                obj, new File(xmlFile));
+            new org.simpleframework.xml.core.Persister(getSimpleXmlProxyStrategy(),
+                new Format("<?xml version=\"1.0\" encoding=\"UTF-8\"?>")).write(
+                    obj, new File(xmlFile));
             //workaround for empty files
             if (FileUtil.getFile(xmlFile).available() == 0) {
                 new File(xmlFile).delete();
@@ -521,7 +535,7 @@ public class XmlUtil {
         }
     }
 
-    @SuppressWarnings({ "rawtypes", "unused", "unchecked"})
+    @SuppressWarnings({ "rawtypes", "unused", "unchecked" })
     public static Strategy getSimpleXmlProxyStrategy() {
 //        return new TreeStrategy() {
 //            @Override
@@ -549,6 +563,7 @@ public class XmlUtil {
                 Object ih = persister.read(cls, n.getNext(), false);
                 return DelegationHandler.createProxy((DelegationHandler) ih);
             }
+
             @Override
             public void write(OutputNode n, Object o) throws Exception {
                 InvocationHandler handler = Proxy.getInvocationHandler(o);
@@ -557,13 +572,15 @@ public class XmlUtil {
             }
         };
         //jdk classes that are not persistable by simpelxml will use Reflection
-        final Map<Class, String[]> unpersistableClasses = MapUtil.asMap(SimpleDateFormat.class, new String[]{"pattern"});
+        final Map<Class, String[]> unpersistableClasses =
+            MapUtil.asMap(SimpleDateFormat.class, new String[] { "pattern" });
         final Converter reflectConverter = new Converter() {
             @Override
             public Object read(InputNode n) throws Exception {
                 Reflection ref = persister.read(Reflection.class, n.getNext(), false);
                 return ref.object();
             }
+
             @Override
             public void write(OutputNode n, Object o) throws Exception {
                 persister.write(Reflection.reflectFields(o, unpersistableClasses.get(o.getClass())), n);
@@ -599,8 +616,9 @@ class SimpleXmlArrayWorkaround implements Matcher {
                 @Override
                 public Object read(String clsName) throws Exception {
                     //loading the class through the ClassLoder.loadClass(name) may fail on object arrays, so we load it through Class.forName(name)
-                    return clsName.contains(".") || clsName.startsWith("[") ? loader.getClass().forName(clsName) : PrimitiveUtil
-                        .getPrimitiveClass(clsName);
+                    return clsName.contains(".") || clsName.startsWith("[") ? loader.getClass().forName(clsName)
+                        : PrimitiveUtil
+                            .getPrimitiveClass(clsName);
                 }
 
                 @Override

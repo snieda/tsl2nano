@@ -117,7 +117,7 @@ public class BeanEnhancer<T> {
                     fields[i].getType());
             }
 //            if (LOG.isDebugEnabled()) {
-            cls.debugWriteFile("c:/test");
+            cls.debugWriteFile();
             System.out.println(cls.toString());
             cache.put(bean.getClass(), cls);
             return createInterface ? (T) BeanProxy.createBeanImplementation(cls.toClass(),
@@ -263,7 +263,7 @@ public class BeanEnhancer<T> {
      */
     private static <T> T createInstance(T bean, CtClass cls) {
         try {
-            return (T) BeanUtil.copy(bean, BeanClass.getBeanClass(cls.toClass()).createInstance());
+            return (T) BeanUtil.copy(bean, BeanClass.getBeanClass(cls.toClass(), false).createInstance());
         } catch (Exception e) {
             ManagedException.forward(e);
             return null;

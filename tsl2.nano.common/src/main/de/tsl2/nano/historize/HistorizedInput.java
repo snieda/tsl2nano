@@ -124,6 +124,7 @@ public class HistorizedInput<T> extends Properties {
             setProperty(KEY_NAME_PREFIX + i, newEntry);
             break;
         }
+        FileWriter writer = null;
         try {
             list = null;
             if (!file.exists()) {
@@ -131,9 +132,12 @@ public class HistorizedInput<T> extends Properties {
 //                if (!file.createNewFile())
 //                    new ManagedException("couldn't store the given file");
             }
-            store(new FileWriter(file), "Created by class HistorizedInput (NanoFix)");
+            writer = new FileWriter(file);
+            store(writer, "Created by class HistorizedInput (NanoFix)");
         } catch (final Exception e) {
             ManagedException.forward(e);
+        } finally {
+            FileUtil.close(writer, false);
         }
     }
 

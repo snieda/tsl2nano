@@ -15,8 +15,10 @@ import static de.tsl2.nano.core.util.ByteUtil.toByteArray;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.OutputStream;
 import java.io.PrintStream;
 import java.io.StringReader;
+import java.net.HttpURLConnection;
 import java.net.InetAddress;
 import java.net.InetSocketAddress;
 import java.net.MalformedURLException;
@@ -272,30 +274,26 @@ public class NetUtil {
         }
     }
 
-    /**
-     * delegates ot {@link #download(URL, String, boolean, boolean)}
-     */
-    public static File download(String strUrl, String destDir) {
-        return download(url(strUrl), destDir, false, true);
-    }
-
-    /**
-     * delegates ot {@link #download(URL, String, boolean, boolean)}
-     */
-    public static File download(String strUrl, String destDir, boolean flat, boolean overwrite) {
-        return download(url(strUrl), destDir, flat, overwrite);
-    }
-
     public static final URL url(String surl) {
         return url(surl, null);
     }
 
+    public static final boolean isURI(String str) {
+        return isURI(str, false);
+    }
+
     public static final boolean isURL(String str) {
+        return isURI(str, true);
+    }
+
+    public static final boolean isURI(String str, boolean isURL) {
         if (str.isEmpty() || str.equals("/") || str.equals("/null")) {
             return false;
         }
         try {
-            URI.create(str);//.toURL();
+            URI uri = URI.create(str);
+            if (isURL)
+                uri.toURL();
             return str.contains(".") || str.contains("/");
         } catch (Exception e) {
             //ok, no url
@@ -337,6 +335,20 @@ public class NetUtil {
     }
 
     /**
+     * delegates to {@link #download(URL, String, boolean, boolean)}
+     */
+    public static File download(String strUrl, String destDir) {
+        return download(url(strUrl), destDir, false, true);
+    }
+
+    /**
+     * delegates ot {@link #download(URL, String, boolean, boolean)}
+     */
+    public static File download(String strUrl, String destDir, boolean flat, boolean overwrite) {
+        return download(url(strUrl), destDir, flat, overwrite);
+    }
+
+    /**
      * downloads the given strUrl if a network connection is available
      * 
      * @param url network url to load
@@ -361,6 +373,20 @@ public class NetUtil {
         } catch (Exception e) {
             throw ManagedException.toRuntimeEx(e, false, false);
         }
+    }
+
+    /**
+     * checks the length of a download. if no checksums are available you can do this simple check.
+     * 
+     * @param url source url
+     * @param download destination file of download
+     * @param estimatedSize expected download size
+     */
+    public static void check(String url, File download, long estimatedSize) {
+        if (download.length() < estimatedSize)
+            throw new IllegalStateException(
+                "download of " + url + " failed! not all bytes were downloaded. expected length of '" + download
+                    + "': " + estimatedSize + " bytes but was: " + download.length());
     }
 
     static String getFileName(URL url) {
@@ -655,6 +681,30 @@ public class NetUtil {
         } catch (IOException e) {
             ManagedException.forward(e);
             return null;
+        }
+    }
+
+    /**
+     * sends data to a web service given by wsUrl
+     * 
+     * @param wsUrl web service
+     * @param method HttpMethod like GET, PUT, POST etc.
+     * @param contenttype content type like application/xml etc.
+     * @param data data to post
+     */
+    public static void send(String wsUrl, String method, String contenttype, String data) {
+        try {
+            URL url = new URL(wsUrl);
+            HttpURLConnection conn = (HttpURLConnection) url.openConnection();
+            conn.setDoOutput(true);
+
+            conn.setRequestMethod("POST");
+            conn.setRequestProperty("Content-Type", "application/xml");
+            OutputStream os = conn.getOutputStream();
+            os.write(data.getBytes());
+            os.flush();
+        } catch (Exception e) {
+            ManagedException.forward(e);
         }
     }
 

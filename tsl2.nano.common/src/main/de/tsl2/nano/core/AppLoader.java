@@ -64,7 +64,7 @@ import de.tsl2.nano.core.util.Util;
  * @version $Revision$
  */
 public class AppLoader {
-    private static Log LOG = LogFactory.getLog(AppLoader.class);
+    static Log LOG = LogFactory.getLog(AppLoader.class);
 
     private static final String KEY_ISNESTEDJAR = "nano.apploader.isnestedjar";
 
