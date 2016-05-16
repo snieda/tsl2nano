@@ -86,15 +86,17 @@ public class AppLoader {
      * @param environment environment name/path
      * @param args console call arguments (see {@link Argumentator}) to be interpreted.
      */
-    protected void createEnvironment(String environment, Argumentator args) {
+    protected Object createEnvironment(String environment, Argumentator args) {
         System.setProperty(environment, environment + "/");
         //we don't want to have a direct dependency to the environment class!
-        BeanClass.createBeanClass("de.tsl2.nano.core.ENV").callMethod(null,
-            "create",
-            new Class[] { String.class },
-            environment);
-//        Environment.create(environment);
-//        LOG = LogFactory.getLog(AppLoader.class);
+        return callENV("create", environment);
+    }
+
+    public static Object callENV(String fctName, Object... args) {
+        return BeanClass.createBeanClass("de.tsl2.nano.core.ENV").callMethod(null,
+            fctName,
+            Argumentator.getArgumentClasses(String.class, args),
+            args);
     }
 
     /**
@@ -110,7 +112,8 @@ public class AppLoader {
         if (args.length == 0) {
             System.out.println(
                 "AppLoader needs at least one parameter!\n  " +
-                    "syntax: AppLoader [environment-dir(default:'.' + main-class + '.environment')] <mainclass> [method-if-not-main] [args...]" +
+                    "syntax: AppLoader [environment-dir(default:'.' + main-class + '.environment')] <mainclass> [method-if-not-main] [args...]"
+                    +
                     "Tip: it is possible to add 'Main-Arguments' to the META-INF/MANIFEST file.");
             return;
         } else if (args.length == 1) {
@@ -186,10 +189,10 @@ public class AppLoader {
                 + environment
                 + "\n"
                 + "#############################################################\n");
-            
+
             //TODO: should be removed after resolving access problems
             noSecurity();
-            
+
             /*
              * create the classloader to be used by the new application
              */
@@ -243,6 +246,7 @@ public class AppLoader {
 
     /**
      * getDefaultEnvPath
+     * 
      * @param mainclass
      * @return '.' + main-class-name + '.environment'
      */
@@ -324,7 +328,7 @@ public class AppLoader {
         File binDir = new File(environment + "/" + NetworkClassLoader.DEFAULT_BIN_DIR);
         binDir.mkdirs();
         nestedLoader.addLibraryPath(binDir.getAbsolutePath());
-        
+
         nestedLoader.addLibraryPath(new File(environment).getAbsolutePath());
         System.out.println("resetting current thread classloader " + contextClassLoader + " with " + nestedLoader);
         Thread.currentThread().setContextClassLoader(nestedLoader);
@@ -351,7 +355,7 @@ public class AppLoader {
             return System.getProperty("user.home") + "/";
         //on dalvik systems, the  MainActivity.onCreate() should set the system property
         return isDalvik() ? System.getProperty("android.sdcard.path", "/mnt/sdcard/") : isUnix() ?
-            /*&& new File("/opt").canWrite() ? "/opt/"*/ /*System.getProperty("user.home") + "/"*/ "" : "";
+        /*&& new File("/opt").canWrite() ? "/opt/"*/ /*System.getProperty("user.home") + "/"*/ "" : "";
     }
 
     public static String getJavaVersion() {
@@ -361,11 +365,11 @@ public class AppLoader {
     public static boolean hasCompiler() {
         return System.getProperty("java.compiler") != null;
     }
-    
+
     public static boolean isJRE() {
         return !hasCompiler();
     }
-    
+
     /**
      * isDalvik
      * 

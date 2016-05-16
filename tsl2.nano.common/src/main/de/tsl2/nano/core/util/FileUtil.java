@@ -192,8 +192,9 @@ public class FileUtil {
      * @param zipStream
      * @param destDir
      * @param regExFilter
+     * @return extracted files
      */
-    public static void extractNestedZip(String zipFile, String destDir, String regExFilter) {
+    public static List<File> extractNestedZip(String zipFile, String destDir, String regExFilter) {
         ZipInputStream zipStream = FileUtil.getJarInputStream(zipFile);
         String[] zipFiles = FileUtil.readFileNamesFromZip(zipStream, regExFilter, true);
         /*
@@ -203,15 +204,17 @@ public class FileUtil {
         zipStream = FileUtil.getJarInputStream(zipFile);
 
         //reopen it - the zipEntries are closed
+        List<File> extracted = new ArrayList<File>(zipFile.length());
         for (String file : zipFiles) {
             byte[] data = FileUtil.readFromZip(zipStream, file, false);
             if (data == null || data.length == 0) {
                 new File(destDir + file).mkdirs();
             } else if (!new File(destDir + file).exists()) {
                 FileUtil.writeBytes(data, destDir + file, false);
+                extracted.add(new File(destDir + file));
             }
         }
-
+        return extracted;
     }
 
     /**

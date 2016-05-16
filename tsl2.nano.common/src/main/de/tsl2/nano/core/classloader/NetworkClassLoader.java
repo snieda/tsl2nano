@@ -16,7 +16,9 @@ import java.util.Collection;
 
 import org.apache.commons.logging.Log;
 
-import de.tsl2.nano.core.ENV;
+import de.tsl2.nano.core.AppLoader;
+import de.tsl2.nano.core.Argumentator;
+//import de.tsl2.nano.core.ENV;
 import de.tsl2.nano.core.cls.BeanClass;
 import de.tsl2.nano.core.log.LogFactory;
 import de.tsl2.nano.core.util.FileUtil;
@@ -143,7 +145,7 @@ public class NetworkClassLoader extends NestedJarClassLoader {
             String pckName = BeanClass.getPackageName(name);
             if (!unresolveables.contains(pckName)) {
                 try {
-                    if (BeanClass.isPublicClassName(name) && ENV.loadDependencies(name) != null) {
+                    if (BeanClass.isPublicClassName(name) && loadDependencies(name) != null) {
                         //reload jar-files from environment
                         downloadedjars++;
                         addLibraryPath(environment);
@@ -162,6 +164,15 @@ public class NetworkClassLoader extends NestedJarClassLoader {
             //throw the origin exception!
             throw e;
         }
+    }
+
+    //TODO: check refactoring to move loadDependencies from ENV to this class
+    protected Object loadDependencies(String name) {
+        //we don't want to have a direct dependency to the environment class!
+        return BeanClass.createBeanClass("de.tsl2.nano.core.ENV").callMethod(null,
+            "loadDependencies",
+            new Class[] { String[].class },
+            new String[]{name});
     }
 
     /**

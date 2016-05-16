@@ -61,6 +61,7 @@ public class ScriptUtil extends SystemUtil {
         final File buildFile = new File(filePath);
         final Project p = new Project();
         p.setName(buildFile.getName());
+        p.setCoreLoader(Thread.currentThread().getContextClassLoader());
 //        boolean t = true;
 //        Path path = null;
 //        AntClassLoader ACL = new AntClassLoader(p, path, t);

@@ -866,15 +866,21 @@ public class BeanClass<T> implements Serializable {
             clazz = PrimitiveUtil.getWrapper(clazz);
         }
         if (clazz.isArray()) {//fill the new array with given args
-            if (args.length == 0) {
-                Array.newInstance(clazz, 0);
-            } else {
+            //create a new multi-dim array with args as dimensions
+            
+            if (!Integer.class.isAssignableFrom(clazz.getComponentType()) && numbers(args)){
                 int[] dims = new int[args.length];
                 for (int i = 0; i < dims.length; i++) {
                     dims[i] = (Integer) args[i];
                 }
-                Array.newInstance(clazz, dims);
+                instance = (T) Array.newInstance(clazz.getComponentType(), dims);
+            } else {// simply fill the array
+                instance = (T) Array.newInstance(clazz.getComponentType(), args.length);
+                for (int i = 0; i < args.length; i++) {
+                    Array.set(instance, i, BeanAttribute.wrap(args[i], clazz.getComponentType()));
+                }
             }
+            return instance;
         }
         if (args.length == 0) {//--> default constructor
             try {
@@ -923,6 +929,14 @@ public class BeanClass<T> implements Serializable {
             }
         }
         return instance;
+    }
+
+    private static boolean numbers(Object[] args) {
+        for (int i = 0; i < args.length; i++) {
+            if (args[i] == null || !Number.class.isAssignableFrom(args[i].getClass()))
+                return false;
+        }
+        return true;
     }
 
     /**

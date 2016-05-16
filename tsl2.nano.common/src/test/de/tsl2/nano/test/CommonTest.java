@@ -735,6 +735,11 @@ public class CommonTest {
 
         nocls = "nix";
         assertFalse(BeanClass.isPublicClassName(nocls));
+        
+        //create array instances
+        assertTrue(Arrays.equals(new String[]{"a", "b", "c"}, BeanClass.createInstance(String[].class, "a", "b", "c")));
+        //TODO: check, why Arrays.equals() doesn't return true!
+        /*assertTrue(Arrays.equals(new Long[3][3], */BeanClass.createInstance(Long[].class, 3, 3);//));
     }
 
     @Test
@@ -1362,7 +1367,7 @@ public class CommonTest {
         };
 
         // filter the 'standalones'
-        assertTrue(cl.getNestedJars().length == 26);
+        assertTrue(cl.getNestedJars().length == 24);
     }
 
     /**

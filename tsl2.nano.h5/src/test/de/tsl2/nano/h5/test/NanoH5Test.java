@@ -14,21 +14,12 @@ import static org.junit.Assert.assertTrue;
 import java.io.File;
 import java.io.IOException;
 import java.net.URL;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.text.SimpleDateFormat;
-import java.util.Date;
 import java.util.LinkedHashMap;
 import java.util.List;
-import java.util.Locale;
 import java.util.Properties;
 
-import my.app.MyApp;
-import my.app.Times;
-
 import org.anonymous.project.Charge;
-import org.apache.tools.ant.taskdefs.Classloader;
 import org.junit.Ignore;
 import org.junit.Test;
 
@@ -42,19 +33,14 @@ import com.sun.net.httpserver.HttpServer;
 import de.tsl2.nano.bean.BeanContainer;
 import de.tsl2.nano.bean.IBeanContainer;
 import de.tsl2.nano.bean.def.Bean;
-import de.tsl2.nano.bean.def.BeanDefinition;
 import de.tsl2.nano.bean.def.BeanPresentationHelper;
-import de.tsl2.nano.bean.def.Constraint;
 import de.tsl2.nano.bean.def.IStatus;
 import de.tsl2.nano.bean.def.IValueDefinition;
 import de.tsl2.nano.core.ENV;
 import de.tsl2.nano.core.ManagedException;
-import de.tsl2.nano.core.Messages;
 import de.tsl2.nano.core.classloader.RuntimeClassloader;
 import de.tsl2.nano.core.cls.BeanClass;
-import de.tsl2.nano.core.exception.Message;
 import de.tsl2.nano.core.execution.SystemUtil;
-import de.tsl2.nano.core.util.ConcurrentUtil;
 import de.tsl2.nano.core.util.DateUtil;
 import de.tsl2.nano.core.util.FileUtil;
 import de.tsl2.nano.core.util.MapUtil;
@@ -63,7 +49,6 @@ import de.tsl2.nano.execution.AntRunner;
 import de.tsl2.nano.h5.Html5Presentation;
 import de.tsl2.nano.h5.NanoH5;
 import de.tsl2.nano.h5.expression.QueryPool;
-import de.tsl2.nano.h5.navigation.Parameter;
 import de.tsl2.nano.h5.navigation.Workflow;
 import de.tsl2.nano.h5.timesheet.Timesheet;
 import de.tsl2.nano.incubation.specification.ParType;
@@ -73,12 +58,11 @@ import de.tsl2.nano.incubation.specification.rules.RuleScript;
 import de.tsl2.nano.messaging.ChangeEvent;
 import de.tsl2.nano.persistence.GenericLocalBeanContainer;
 import de.tsl2.nano.persistence.Persistence;
-import de.tsl2.nano.service.util.BeanContainerUtil;
 import de.tsl2.nano.serviceaccess.Authorization;
 import de.tsl2.nano.serviceaccess.IAuthorization;
-import de.tsl2.nano.test.TypeBean;
-import de.tsl2.nano.util.Translator;
 import de.tsl2.nano.util.codegen.PackageGenerator;
+import my.app.MyApp;
+import my.app.Times;
 
 /**
  * 
@@ -299,7 +283,7 @@ public class NanoH5Test {
         String destFile = "target/" + name + ".zip";
         Properties p = new Properties();
         p.put("destFile", destFile);
-        AntRunner.runTask(AntRunner.TASK_ZIP, p, new File(DIR_TEST).getParent() + ":{**}");
+        AntRunner.runTask(AntRunner.TASK_ZIP, p, new File(DIR_TEST).getParent() + ":{**/" + name + "/**}");
         
         //delete the test output
 //        ConcurrentUtil.sleep(10000);

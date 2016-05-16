@@ -111,7 +111,7 @@ public class NanoH5 extends NanoHTTPD implements ISystemConnector<Persistence> {
     /** hibernate reverse engeneer configuration */
     static final String HIBREVNAME = "hibernate.reveng.xml";
     static final String HIBREVNAME_TEMPLATE = "hibernate.reveng.tml";
-    
+
     /**
      * if nano was packaged as standalone jar, the o/r-mapper, hsqldb and mysqlconnector are stored inside this
      * directory to be extraced into the environments directory. the standalone path inside the jar is not part of the
@@ -267,9 +267,15 @@ public class NanoH5 extends NanoHTTPD implements ISystemConnector<Persistence> {
             ConcurrentUtil.startDaemon("regex-replace-run-scripts", new Runnable() {
                 @Override
                 public void run() {
-                  ConcurrentUtil.sleep(3000);
-                  AntRunner.runRegexReplace("rem (set STANDALONE)", "\\1", System.getProperty("user.dir"), "run.bat");
-                  AntRunner.runRegexReplace("[#](STANDALONE)", "\\1", System.getProperty("user.dir"), "run.sh");
+                    ConcurrentUtil.sleep(3000);
+                    try {
+                        AntRunner.runRegexReplace("rem (set STANDALONE)", "\\1", System.getProperty("user.dir"),
+                            "run.bat");
+                        AntRunner.runRegexReplace("[#](STANDALONE)", "\\1", System.getProperty("user.dir"), "run.sh");
+                    } catch (Exception e) {
+                        //ok, no real problem, but log it...
+                        LOG.error("", e);
+                    }
                 }
             });
         }
@@ -780,7 +786,7 @@ public class NanoH5 extends NanoHTTPD implements ISystemConnector<Persistence> {
 
     private void provideScripts(Persistence persistence) {
         System.setProperty(HIBREVNAME_TEMPLATE + ".destination", HIBREVNAME);
-        
+
         //check if an equal named ddl-script is inside our jar file. should be done on 'anyway' or 'timedb'.
         try {
             ENV.extractResource(persistence.getDatabase() + ".sql");
@@ -806,7 +812,7 @@ public class NanoH5 extends NanoHTTPD implements ISystemConnector<Persistence> {
     private boolean isH2(String url) {
         return url.matches("jdbc[:]h2[:].*");
     }
-    
+
     private boolean canConnectToLocalDatabase(Persistence persistence) {
         if (!Util.isEmpty(persistence.getPort())) {
             int p = Integer.valueOf(persistence.getPort());
@@ -822,7 +828,7 @@ public class NanoH5 extends NanoHTTPD implements ISystemConnector<Persistence> {
 
         //give mda.xml the information to don't start nano.h5
         p.put("nano.h5.running", "true");
-        
+
         ENV.get(CompatibilityLayer.class).runRegistered("ant",
             ENV.getConfigPath() + "mda.xml",
             "do.all",

@@ -135,6 +135,19 @@ public class Argumentator {
     }
 
     /**
+     * convenience to evaluate argument types. if an argument is null, the type will be the given defaultType 
+     * @param args arguments for method call
+     * @return array of argument types
+     */
+    public static Class[] getArgumentClasses(Class defaultType, Object...args) {
+        Class[] clss = new Class[args.length];
+        for (int i = 0; i < args.length; i++) {
+            clss[i] = args[i] != null ? args[i].getClass() : defaultType;
+        }
+        return clss;
+    }
+    
+    /**
      * provides the desired keys value. if not stored by 'key=value', the alternative arg index will be used.
      * 
      * @param key property key

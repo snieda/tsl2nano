@@ -246,10 +246,10 @@ public class RuntimeClassloader extends URLClassLoader {
                         for (File file : changedFiles) {
                             // TODO: implement unloading existing classes
                             if (file.getPath().endsWith(".jar")) {
+                                addFile(file.getAbsolutePath());
                                 //don't use the previous classloader to get 'Message'.
                                 bc.callMethod(null, "send", new Class[] { String.class }, "New jar-file loaded: "
                                     + file.getAbsolutePath());
-                                addFile(file.getAbsolutePath());
                             }
                         }
                     } catch (Exception e) {
@@ -262,25 +262,24 @@ public class RuntimeClassloader extends URLClassLoader {
             List<File> lastModifiedFile() {
                 File[] files = fPath.listFiles();
                 File last = null;
-                List<File> fileList;
+                List<File> fileList = new ArrayList<File>(Arrays.asList(files));
                 if (lastFiles != null) {
-                    fileList = new ArrayList<File>(Arrays.asList(files));
                     boolean changed = fileList.removeAll(Arrays.asList(lastFiles));
                     if (changed && fileList.size() > 0) {
                         lastFiles = files;
                         return fileList;
                     }
                 }
-                for (int i = 0; i < files.length; i++) {
-                    if (last == null || files[i].lastModified() > last.lastModified()) {
-                        last = files[i];
-                    }
-                }
+//                for (int i = 0; i < files.length; i++) {
+//                    if (last == null || files[i].lastModified() > last.lastModified()) {
+//                        last = files[i];
+//                    }
+//                }
+//                fileList = new ArrayList<File>();
+//                if (last != null && last.lastModified() > System.currentTimeMillis() - waitMillis) {
+//                    fileList.add(last);
+//                }
                 lastFiles = files;
-                fileList = new ArrayList<File>();
-                if (last != null && last.lastModified() > System.currentTimeMillis() - waitMillis) {
-                    fileList.add(last);
-                }
                 return fileList;
             }
         };

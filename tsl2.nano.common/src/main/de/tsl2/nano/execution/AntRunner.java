@@ -155,12 +155,14 @@ public class AntRunner {
                 final Method addFilesetMethod = taskType.getMethod("addFileset", new Class[] { FileSet.class });
                 for (final FileSet fs : fileSets) {
                     addFilesetMethod.invoke(task, new Object[] { fs });
+                    fs.setProject(task.getProject());
                 }
             } catch (final Exception e) {
                 if (task instanceof MatchingTask) {
                     final MatchingTask mtask = (MatchingTask) task;
                     for (final FileSet fs : fileSets) {
                         final Enumeration<FileSelector> fsEnum = fs.selectorElements();
+                        fs.setProject(task.getProject());
                         while (fsEnum.hasMoreElements()) {
                             final FileSelector sel = fsEnum.nextElement();
                             mtask.add(sel);
@@ -273,8 +275,10 @@ public class AntRunner {
             includes = s.split(",");
             fileSet.appendIncludes(includes);
             s = StringUtil.substring(fsets[i], "}", null);
-            excludes = s.split(",");
-            fileSet.appendExcludes(excludes);
+            if (s.length() > 0) {
+                excludes = s.split(",");
+                fileSet.appendExcludes(excludes);
+            }
 //            for (int e = 0; e < excludes.length; e++) {
 //                FilenameSelector nameSelector = new FilenameSelector();
 //                nameSelector.setName(excludes[e]);

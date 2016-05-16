@@ -221,9 +221,10 @@ public class ENV implements Serializable {
     }
 
     @SuppressWarnings("rawtypes")
-    public static void create(String dir) {
+    public static ENV create(String dir) {
         new File(dir).mkdirs();
-        LogFactory.setLogFile(dir + "/" + "logfactory.log");
+        String name = StringUtil.substring(dir, ".nanoh5.", null);
+        LogFactory.setLogFile(dir + "/" + name + ".log");
         LogFactory.setLogFactoryXml(dir + "/" + "logfactory.xml");
 
         LogFactory.log("\n===========================================================\n"
@@ -277,8 +278,9 @@ public class ENV implements Serializable {
         self.properties.put(KEY_CONFIG_RELPATH, dir + "/");
         self.properties.put(KEY_CONFIG_PATH, new File(dir).getAbsolutePath().replace("\\", "/") + "/");
         new File(self.getTempPath()).mkdir();
+
         registerBundle(PREFIX + "messages", true);
-        if (FileUtil.hasResource(getConfigPath() + "messages.properties")) {
+        if (FileUtil.hasResource("messages.properties")) {
             registerBundle("messages", true);
         }
         addService(Profiler.class, Profiler.si());
@@ -289,6 +291,7 @@ public class ENV implements Serializable {
         //add frameworks beandef classes as standard-types
 //        BeanUtil.addStandardTypePackages("de.tsl2.nano.bean.def");
 //        self.persist();
+        return self;
     }
 
     public static String createInfo() {
@@ -894,6 +897,7 @@ public class ENV implements Serializable {
      * @param dependencyNames names including the organisation/product name to be extracted.
      * @return any loader information, or null, if nothing was done.
      */
+    //TODO: check moving to NetworkClassloader
     public static final Object loadDependencies(String... dependencyNames) {
         //check for own framework dependencies
         boolean foreignDependencies = false;
