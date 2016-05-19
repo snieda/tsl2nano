@@ -84,11 +84,11 @@ import sun.misc.BASE64Encoder;
  */
 public class Crypt implements ISecure {
     private static final Log LOG = LogFactory.getLog(Crypt.class);
-    private Key key;
-    private String encoding;
-    private String algorithm;
-    private boolean useBASE64;
-    private AlgorithmParameterSpec paramSpec;
+    Key key;
+    String encoding;
+    String algorithm;
+    boolean useBASE64;
+    AlgorithmParameterSpec paramSpec;
 
     public static final String ENCODE_UTF8 = "UTF-8";
     //some transformation paths
@@ -137,20 +137,6 @@ public class Crypt implements ISecure {
             ENCODE_UTF8, true);
     }
 
-    static Key generateKey(byte[] pwd, String algorithm) {
-        return pwd == null || pwd.length == 0 ? generateRandomKey(algorithm) : isPBE(algorithm) ? generatePBEKey(
-            toCharArray(pwd), algorithm) : generateSecretKey(pwd, algorithm);
-    }
-
-    private static char[] toCharArray(byte[] pwd) {
-        try {
-            return new String(pwd, ENCODE_UTF8).toCharArray();
-        } catch (UnsupportedEncodingException e) {
-            ManagedException.forward(e);
-            return null;
-        }
-    }
-
     /**
      * delegates to {@link #Crypt(Key, String, String, boolean)} using {@link #ENCODE_UTF8} and {@link #useBASE64}=true.
      * 
@@ -182,6 +168,20 @@ public class Crypt implements ISecure {
             LOG.debug(providers());
         }
         provide(algorithm);
+    }
+
+    static Key generateKey(byte[] pwd, String algorithm) {
+        return pwd == null || pwd.length == 0 ? generateRandomKey(algorithm) : isPBE(algorithm) ? generatePBEKey(
+            toCharArray(pwd), algorithm) : generateSecretKey(pwd, algorithm);
+    }
+
+    private static char[] toCharArray(byte[] pwd) {
+        try {
+            return new String(pwd, ENCODE_UTF8).toCharArray();
+        } catch (UnsupportedEncodingException e) {
+            ManagedException.forward(e);
+            return null;
+        }
     }
 
     /**

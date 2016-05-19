@@ -16,6 +16,7 @@ import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 
+import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.io.Reader;
 import java.io.Serializable;
@@ -26,7 +27,10 @@ import java.math.BigDecimal;
 import java.math.MathContext;
 import java.net.InetAddress;
 import java.security.KeyPair;
+import java.security.KeyStore;
 import java.security.Policy;
+import java.security.cert.CertPath;
+import java.security.cert.PKIXBuilderParameters;
 import java.text.DateFormat;
 import java.text.DecimalFormat;
 import java.text.Format;
@@ -98,9 +102,11 @@ import de.tsl2.nano.core.util.FileUtil;
 import de.tsl2.nano.core.util.MapUtil;
 import de.tsl2.nano.core.util.NetUtil;
 import de.tsl2.nano.core.util.NumberUtil;
+import de.tsl2.nano.core.util.PKI;
 import de.tsl2.nano.core.util.PrintUtil;
 import de.tsl2.nano.core.util.SimpleXmlAnnotator;
 import de.tsl2.nano.core.util.StringUtil;
+import de.tsl2.nano.core.util.TrustedOrganisation;
 import de.tsl2.nano.core.util.Util;
 import de.tsl2.nano.currency.CurrencyUnit;
 import de.tsl2.nano.currency.CurrencyUtil;
@@ -1546,6 +1552,25 @@ public class CommonTest {
         }
     }
 
+    @Test
+    public void testPKI() throws Exception {
+        String data = "test data";
+        String passwd = "testpasswd";
+        TrustedOrganisation dn = new TrustedOrganisation("me", "de");
+        PKI pki = new PKI(new Crypt("test".getBytes(), "RSA"), dn);
+        
+        CertPath certPath = pki.createCertPath(dn, null, null);
+        pki.verifyCertPath(certPath, new PKIXBuilderParameters());
+        byte[] signature = pki.sign(new ByteArrayInputStream(data.getBytes()));
+        pki.verify(new ByteArrayInputStream(data.getBytes()), signature);
+        
+        String file = ENV.getConfigPath() + "mystore";
+        KeyStore keyStore = pki.createKeyStore(file, passwd.toCharArray());
+        pki.peristKeyStore(keyStore, file, passwd);
+        pki.createCertificate(FileUtil.getFile(file));
+        
+    }
+    
 //    @Test
 //    public void testSymEncryption() throws Exception {
 //        SymmetricCipher c = new SymmetricCipher();
