@@ -18,7 +18,6 @@ import static de.tsl2.nano.test.TypeBean.ATTR_TIMESTAMP;
 
 import java.io.IOException;
 import java.io.Serializable;
-import java.lang.reflect.Method;
 import java.math.BigDecimal;
 import java.util.Collection;
 import java.util.HashMap;
@@ -163,7 +162,7 @@ public class MyApp extends NanoH5 {
         /*
          * define an action
          */
-        Method antCaller = null;
+        java.lang.reflect.Method antCaller = null;
         try {
             antCaller = ScriptUtil.class.getMethod("ant", new Class[] { String.class, String.class, Properties.class });
         } catch (Exception e) {

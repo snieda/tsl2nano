@@ -33,21 +33,17 @@ import static org.anonymous.project.presenter.ChargeConst.ATTR_VALUE;
 
 import java.io.IOException;
 import java.io.Serializable;
-import java.lang.reflect.Method;
 import java.math.BigDecimal;
 import java.sql.Time;
 import java.text.SimpleDateFormat;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Date;
-import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Properties;
-
-import my.app.Times;
 
 import org.anonymous.project.Account;
 import org.anonymous.project.Address;
@@ -126,11 +122,11 @@ import de.tsl2.nano.h5.websocket.WebSocketRuleDependencyListener;
 import de.tsl2.nano.incubation.specification.ParType;
 import de.tsl2.nano.incubation.specification.actions.Action;
 import de.tsl2.nano.incubation.specification.actions.ActionPool;
-import de.tsl2.nano.incubation.specification.rules.Rule;
 import de.tsl2.nano.incubation.specification.rules.RuleDecisionTable;
 import de.tsl2.nano.incubation.specification.rules.RulePool;
 import de.tsl2.nano.incubation.specification.rules.RuleScript;
 import de.tsl2.nano.persistence.GenericLocalBeanContainer;
+import my.app.Times;
 
 /**
  * Creates a timesheet configuration on NanoH5 and anyway database
@@ -368,7 +364,7 @@ public class Timesheet extends NanoH5App {
         /*
          * define an action
          */
-        Method antCaller = null;
+        java.lang.reflect.Method antCaller = null;
         try {
             antCaller = ScriptUtil.class.getMethod("ant", new Class[] { String.class, String.class, Properties.class });
         } catch (Exception e) {
@@ -379,7 +375,7 @@ public class Timesheet extends NanoH5App {
         a.addConstraint("arg2", new Constraint<String>("help"));
         ENV.get(ActionPool.class).add(a);
 
-        Method icsHolidays = null;
+        java.lang.reflect.Method icsHolidays = null;
         try {
             icsHolidays = ICSChargeImport.class.getMethod("doImportHolidays");
         } catch (Exception e) {
@@ -387,7 +383,7 @@ public class Timesheet extends NanoH5App {
         }
         ENV.get(ActionPool.class).add(new Action<>(icsHolidays));
 
-        Method icsImport = null;
+        java.lang.reflect.Method icsImport = null;
         try {
             icsImport = ICSChargeImport.class.getMethod("doImportICS", String.class);
         } catch (Exception e) {

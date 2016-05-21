@@ -6,7 +6,7 @@
  * websocket client implementation.
  */
 var socket = new WebSocket(
-		'ws://${websocket.server.ip}:${websocket.server.port}');
+		'ws${app.ssl.shortcut}://${websocket.server.ip}:${websocket.server.port}');
 console.log('websocket created:' + socket);
 
 socket.onopen = function() {

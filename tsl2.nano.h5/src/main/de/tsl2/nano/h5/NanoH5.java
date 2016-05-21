@@ -5,6 +5,7 @@ import static de.tsl2.nano.bean.def.IBeanCollector.MODE_EDITABLE;
 import static de.tsl2.nano.bean.def.IBeanCollector.MODE_MULTISELECTION;
 import static de.tsl2.nano.bean.def.IBeanCollector.MODE_SEARCHABLE;
 
+import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
@@ -60,6 +61,7 @@ import de.tsl2.nano.core.util.NumberUtil;
 import de.tsl2.nano.core.util.StringUtil;
 import de.tsl2.nano.core.util.Util;
 import de.tsl2.nano.execution.AntRunner;
+import de.tsl2.nano.h5.NanoHTTPD.Response.Status;
 import de.tsl2.nano.h5.expression.QueryPool;
 import de.tsl2.nano.h5.expression.RuleExpression;
 import de.tsl2.nano.h5.expression.SQLExpression;
@@ -139,6 +141,7 @@ public class NanoH5 extends NanoHTTPD implements ISystemConnector<Persistence> {
     }
 
     public NanoH5(String serviceURL, IPageBuilder<?, String> builder) throws IOException {
+//        super(null, getPort(serviceURL), new File(ENV.getConfigPath()), !LOG.isDebugEnabled());
         super(getPort(serviceURL), new File(ENV.getConfigPath()));
         this.serviceURL = getServiceURL(serviceURL);
         this.builder = builder != null ? builder : createPageBuilder();
@@ -226,15 +229,24 @@ public class NanoH5 extends NanoHTTPD implements ISystemConnector<Persistence> {
                 if (ENV.get("app.create.sample.files.on.first.start", false))
                     ((Html5Presentation) ENV.get(BeanPresentationHelper.class)).createSampleEnvironment();
             }
-
+            //perhaps activate secure transport layer TLS
+            if (ENV.get("app.ssl.activate", false)) {
+                String keyStore = ENV.get("app.ssl.keystore.file", "nanoh5.jks");
+                LOG.info("activating ssl using keystore " + keyStore);
+                makeSecure(NanoHTTPD.makeSSLSocketFactory(keyStore, ENV.get("app.ssl.keystore.password", "nanoh5").toCharArray()), null);
+            } else {
+                ENV.setProperty("app.ssl.shortcut", "");
+            }
+            super.start();
+            
             if (System.getProperty("os.name").startsWith("Windows")) {
                 SystemUtil.executeRegisteredWindowsPrg(applicationHtmlFile());
             } else {
                 LOG.info("Please open the URL '" + serviceURL.toString() + "' in your browser");
             }
 
-            myOut = LogFactory.getOut();
-            myErr = LogFactory.getErr();
+//            myOut = LogFactory.getOut();
+//            myErr = LogFactory.getErr();
 
             try {
                 LOG.info("Listening on port " + serviceURL.getPort() + ". Hit Enter or Strg+C to stop.\n");
@@ -285,11 +297,21 @@ public class NanoH5 extends NanoHTTPD implements ISystemConnector<Persistence> {
         if (serviceURLString == null) {
             serviceURLString = ENV.get("service.url", "http://localhost:8067");
         }
+        //perhaps activate secure transport layer TLS
+        if (serviceURLString.startsWith("https"))
+            ENV.setProperty("app.ssl.activate", true);
+        if (ENV.get("app.ssl.activate", false)) {
+            ENV.setProperty("app.ssl.shortcut", "s");
+            serviceURLString.replace("http://", "https://");
+        } else {
+            ENV.setProperty("app.ssl.shortcut", "");
+            serviceURLString.replace("https://", "http://");
+        }
         if (!serviceURLString.matches(".*[:][0-9]{3,5}")) {
             serviceURLString = "localhost:" + serviceURLString;
         }
         if (!serviceURLString.contains("://")) {
-            serviceURLString = "http://" + serviceURLString;
+            serviceURLString = "http" + ENV.get("app.ssl.shortcut", "") + "://" + serviceURLString;
         }
         URL serviceURL = null;
         try {
@@ -331,17 +353,18 @@ public class NanoH5 extends NanoHTTPD implements ISystemConnector<Persistence> {
      */
     @Override
     public synchronized Response serve(String uri,
-            String method,
-            Properties header,
-            Properties parms,
-            Properties files) {
+            Method m,
+            Map<String, String> header,
+            Map<String, String> parms,
+            Map<String, String> files) {
+        String method = m.name();
         if (method.equals("GET") && !NumberUtil.isNumber(uri.substring(1)) && HtmlUtil.isURI(uri)
             && !uri.contains(Html5Presentation.PREFIX_BEANREQUEST)) {
             return super.serve(uri, method, header, parms, files);
         }
 
         long startTime = System.currentTimeMillis();
-        InetAddress requestor = ((Socket) header.get("socket")).getInetAddress();
+        InetAddress requestor = ((Socket) ((Map)header).get("socket")).getInetAddress();
         NanoH5Session session = sessions.get(requestor);
         if (session == null) {
             //on a new session, no parameter should be set
@@ -367,7 +390,7 @@ public class NanoH5 extends NanoHTTPD implements ISystemConnector<Persistence> {
                 && (uri.length() < 2 || header.get("referer") == null)) {
                 LOG.debug("reloading cached page...");
                 try {
-                    session.response.data.reset();
+                    session.response.getData().reset();
                     return session.response;
                 } catch (IOException e) {
                     LOG.error(e);
@@ -383,11 +406,11 @@ public class NanoH5 extends NanoHTTPD implements ISystemConnector<Persistence> {
     }
 
     public Response createResponse(String msg) {
-        return createResponse(HTTP_OK, MIME_HTML, msg);
+        return createResponse(Response.Status.OK, MIME_HTML, msg);
     }
 
-    public Response createResponse(String status, String type, String msg) {
-        return new NanoHTTPD.Response(status, type, msg);
+    public Response createResponse(Status status, String type, String msg) {
+        return new NanoHTTPD.Response(status, type, new ByteArrayInputStream(msg.getBytes()), msg.length());
     }
 
     /**
@@ -723,10 +746,11 @@ public class NanoH5 extends NanoHTTPD implements ISystemConnector<Persistence> {
                         LOG.info("preparing shutdown of local database " + persistence.getConnectionUrl());
                         try {
                             BeanContainer.instance().executeStmt("shutdown", true, null);
+                            Thread.sleep(1000);
                         } catch (Exception e) {
                             LOG.error(e.toString());
                         }
-                        String hsqldbScript = persistence.getDatabase() + ".script";
+                        String hsqldbScript = isH2(persistence.getConnectionUrl()) ? persistence.getDefaultSchema() + ".mv.db" : persistence.getDatabase() + ".script";
                         String backupFile = ENV.get("app.database.backup.file",
                             ENV.getTempPathRel() + FileUtil.getUniqueFileName(persistence.getDatabase()) + ".zip");
                         LOG.info("creating database backup to file " + backupFile);

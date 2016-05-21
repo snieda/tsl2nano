@@ -45,7 +45,7 @@ A cool way to see the power of this tool can be seen in chapter _Online Quick-St
 * data is searchable and editable in a comfortable way - can be prepared to be printed and exported
 * it provides several working modes: single standalone app, network/multi-user and/or access to an application-server
 
-### Technical Goals
+### Features and Technical Goals
 * pure model implementation + platform independence (works on android, too).
 * small, having as less as possible static dependencies to other libraries
 * everything has a default - all defaults are configurable (Convention over Configuration)
@@ -70,6 +70,7 @@ A cool way to see the power of this tool can be seen in chapter _Online Quick-St
 * handling blobs of data (byte[]) to be presented in html as picture, audio, video or object.
 * providing attributes as virtuals (not bound to a real bean-attribute, rule-expressions, sql-query-expressions and RESTful-service-call-expressions
 * automatic translations through network connection
+* secure connection over https and wss (_app.ssl.activate=true)
 * planned interfaces: 
 	* xsd-->bean
 	* java-interface-->java-bean (mock through internal proxy)
@@ -129,6 +130,21 @@ this software should provide a fast way to create a standard application through
 * Provides a JNLP file for Java Web Start
  
 The _environment.xml_ in your current environment directory defines access-modes. F.e. _http.connection_ will define, if it is remote-accessible or not. For more informations, see chapter _The Environment_.
+
+#### Secure Connections over HTTPS
+
+It is possible to activate a secured connection with TLS (SSL). The following environment properties can be set:
+* *app.ssl.activate*: activates https connections
+* *app.ssl.keystore.file*: defines the name of the keystore to be used for the secured connection. default is *nanoh5.jks*
+* *app.ssl.keystore.password*: defines the password to access the keystore. default is *nanoh5*
+
+A default (nanoh5.jks) keystore is included in the environment, but you can create your own self-signed keystore using the java keytool:
+
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+keytool -genkey -keyalg RSA -alias nanoh5 -keystore nanoh5.jks -storepass nanoh5 -keysize 2048 -ext SAN=DNS:localhost,IP:127.0.0.1  -validity 9999
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+So, the keystore and the password are contained in the environment directory. you should constrain the environment directory to only be readable by administrators.
 
 #### Provided Start Packages
 
@@ -1638,6 +1654,7 @@ The _Nano.H5_ application can be started in different modes.
 	* environment property _http.ip_ is a network ip of your system. all network nodes are able to connect to the application of your system, using their own environment and session. may be used in an intranet.
 	* *Network Multiple Security Mode:*
 	* environment property _http.ip_ is a network ip of your system. all network nodes are able to connect to the application of your system, using their own environment and session working with ssl (under construction!). may be used in the internet.
+	* environment property _app.ssl.activate_ is true, Nano.H5 provides a secure connection over https and wss.
 
 ## Authorization, Roles and Permissions
 
@@ -2993,5 +3010,13 @@ erdplus: kann nichts allgemeines exportieren
 * CRUD generator for each entity using REST
 * H2: 
 ** (v) mda-->runServer.bat <-- define the h2-script-file
-** jdbc:h2:tcp://localhost:9092/anyway
+** (v) jdbc:h2:tcp://localhost:9092/PUBLIC
 ** LUCENE integration?
+
+*HTTPS:
+** keytool -genkey -keyalg RSA -alias nanoh5 -keystore nanoh5.jks -storepass nanoh5 -keysize 2048 -ext SAN=DNS:localhost,IP:127.0.0.1  -validity 9999
+** server.makeSecure(NanoHTTPD.makeSSLSocketFactory("nanoh5.jks", "nanoh5".toCharArray()), null);
+
+YAML --> ObjectMapper
+MDA: manyToMany Error
+slf-api Version (1.5.8 --> 1.7.5) Problem

@@ -16,7 +16,6 @@ import static de.tsl2.nano.h5.HtmlUtil.BTN_ASSIGN;
 import static de.tsl2.nano.h5.HtmlUtil.BTN_CANCEL;
 import static de.tsl2.nano.h5.HtmlUtil.BTN_SUBMIT;
 import static de.tsl2.nano.h5.NanoH5.OFFSET_FILTERLINES;
-import static de.tsl2.nano.h5.NanoHTTPD.HTTP_BADREQUEST;
 import static de.tsl2.nano.h5.NanoHTTPD.MIME_HTML;
 
 import java.io.File;
@@ -35,7 +34,6 @@ import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
-import java.util.Properties;
 import java.util.Set;
 import java.util.concurrent.Executors;
 
@@ -48,10 +46,8 @@ import de.tsl2.nano.bean.BeanUtil;
 import de.tsl2.nano.bean.def.Bean;
 import de.tsl2.nano.bean.def.BeanCollector;
 import de.tsl2.nano.bean.def.BeanDefinition;
-import de.tsl2.nano.bean.def.BeanFinder;
 import de.tsl2.nano.bean.def.BeanPresentationHelper;
 import de.tsl2.nano.bean.def.BeanValue;
-import de.tsl2.nano.bean.def.IAttributeDefinition;
 import de.tsl2.nano.bean.def.IBeanCollector;
 import de.tsl2.nano.bean.def.IBeanFinder;
 import de.tsl2.nano.bean.def.IPageBuilder;
@@ -64,7 +60,6 @@ import de.tsl2.nano.core.ENV;
 import de.tsl2.nano.core.ISession;
 import de.tsl2.nano.core.Main;
 import de.tsl2.nano.core.ManagedException;
-import de.tsl2.nano.core.cls.BeanClass;
 import de.tsl2.nano.core.exception.ExceptionHandler;
 import de.tsl2.nano.core.exception.Message;
 import de.tsl2.nano.core.execution.Profiler;
@@ -78,7 +73,9 @@ import de.tsl2.nano.core.util.StringUtil;
 import de.tsl2.nano.core.util.Util;
 import de.tsl2.nano.core.util.XmlUtil;
 import de.tsl2.nano.format.RegExpFormat;
+import de.tsl2.nano.h5.NanoHTTPD.Method;
 import de.tsl2.nano.h5.NanoHTTPD.Response;
+import de.tsl2.nano.h5.NanoHTTPD.Response.Status;
 import de.tsl2.nano.h5.configuration.BeanConfigurator;
 import de.tsl2.nano.h5.navigation.IBeanNavigator;
 import de.tsl2.nano.h5.navigation.Parameter;
@@ -326,7 +323,7 @@ public class NanoH5Session implements ISession<BeanDefinition>, Serializable {
      * @param files
      * @return html response
      */
-    public Response serve(String uri, String method, Properties header, Properties parms, Properties files) {
+    public Response serve(String uri, String method, Map<String, String> header, Map<String, String> parms, Map<String, String> files) {
         String msg = "[undefined]";
         try {
             Thread.currentThread().setContextClassLoader(sessionClassloader);
@@ -338,7 +335,7 @@ public class NanoH5Session implements ISession<BeanDefinition>, Serializable {
                 parms,
                 files));
             //WORKAROUND for uri-problem
-            String referer = header.getProperty("referer");
+            String referer = header.get("referer");
             if (parms.containsKey(IAction.CANCELED)
                 || (method.equals("POST") && referer != null && uri.length() > 1 && referer.contains(uri))) {
                 uri = "/";
@@ -365,7 +362,7 @@ public class NanoH5Session implements ISession<BeanDefinition>, Serializable {
                 if (userResponse instanceof String && !userResponse.equals(IAction.CANCELED)) {
                     msg = (String) userResponse;
                     if (HtmlUtil.isURI(msg)) {
-                        return server.serve(msg, "GET", header, parms, files);
+                        return server.serve(msg, Method.GET, header, parms, files);
                     } else if (!HtmlUtil.containsHtml(msg)) {
                         msg = HtmlUtil.createMessagePage(ENV.translate("tsl2nano.info", true), msg);
                     }
@@ -394,7 +391,7 @@ public class NanoH5Session implements ISession<BeanDefinition>, Serializable {
             };
             msg = refreshPage(ex);
             Message.send(exceptionHandler, ex.toString());
-            response = server.createResponse(HTTP_BADREQUEST, MIME_HTML, msg);
+            response = server.createResponse(Status.BAD_REQUEST, MIME_HTML, msg);
             actionLog.clear();
             //don't forget that there was an exception. to be seen on the next exception ;-)
             logaction(ex.toString(), parms);
@@ -475,7 +472,7 @@ public class NanoH5Session implements ISession<BeanDefinition>, Serializable {
      * @param uriLinkNumber if navigator.current() is a bean-collector, it is the selected element number
      * @return user response object. may be {@link IAction#CANCELED} any saved or selected object or null.
      */
-    private Object processInput(String uri, Properties parms, Number uriLinkNumber) {
+    private Object processInput(String uri, Map<String, String> parms, Number uriLinkNumber) {
 //        if (parms.containsKey(PageBuilder.COMMAND_RESTART)) {
 //            stop();
 //            main(null);
@@ -680,11 +677,11 @@ public class NanoH5Session implements ISession<BeanDefinition>, Serializable {
         return result;
     }
 
-    private void logaction(IAction<?> action, Properties parameter) {
+    private void logaction(IAction<?> action, Map<String, String> parameter) {
         logaction(action.getId(), parameter);
     }
 
-    private void logaction(String id, Properties p) {
+    private void logaction(String id, Map<String, String> p) {
         actionLog.add(DateUtil.getFormattedTimeStamp() + " ==> " + id + " (" + nav.current() + ")"
             + (!Util.isEmpty(p) ? "\n\t" + p : ""));
     }
@@ -694,12 +691,12 @@ public class NanoH5Session implements ISession<BeanDefinition>, Serializable {
      * 
      * @param parms
      */
-    private void refreshCurrentBeanValues(Properties parms) {
+    private void refreshCurrentBeanValues(Map<String, String> parms) {
         LOG.info("refreshing current bean values");
         if (nav.current() instanceof Bean) {
             Collection<Exception> exceptions = new LinkedList<Exception>();
             Bean vmodel = (Bean) nav.current();
-            for (String p : parms.stringPropertyNames()) {
+            for (String p : parms.keySet()) {
                 if (vmodel.hasAttribute(p)) {
                     try {
                         /*
@@ -718,7 +715,7 @@ public class NanoH5Session implements ISession<BeanDefinition>, Serializable {
                             continue;
                         }
                         String oldString = bv.getValueText();
-                        String newString = parms.getProperty(p);
+                        String newString = parms.get(p);
                         if (oldString == null || !oldString.equals(newString)) {
                             vmodel.setParsedValue(p, newString);
                         } else {
@@ -770,15 +767,15 @@ public class NanoH5Session implements ISession<BeanDefinition>, Serializable {
         return null;
     }
 
-    protected boolean isCanceled(Properties parms) {
+    protected boolean isCanceled(Map<String, String> parms) {
         return parms.containsKey(BTN_CANCEL);
     }
 
-    protected boolean isReturn(Properties parms) {
+    protected boolean isReturn(Map<String, String> parms) {
         return isCanceled(parms) || parms.containsKey(BTN_ASSIGN) || parms.containsKey(BTN_SUBMIT);
     }
 
-    protected <T> boolean isNewAction(Properties parms, BeanCollector<?, T> model) {
+    protected <T> boolean isNewAction(Map<String, String> parms, BeanCollector<?, T> model) {
         for (Object k : parms.keySet()) {
             if (isNewAction((String) k, model)) {
                 return true;
@@ -791,7 +788,7 @@ public class NanoH5Session implements ISession<BeanDefinition>, Serializable {
         return actionId.equals(BeanContainer.getActionId(model.getClazz(), true, "new"));
     }
 
-    protected <T> boolean isOpenAction(Properties parms, BeanCollector<?, T> model) {
+    protected <T> boolean isOpenAction(Map<String, String> parms, BeanCollector<?, T> model) {
         for (Object k : parms.keySet()) {
             if (isOpenAction((String) k, model)) {
                 return true;
@@ -804,7 +801,7 @@ public class NanoH5Session implements ISession<BeanDefinition>, Serializable {
         return actionId.equals(BeanContainer.getActionId(model.getClazz(), true, "open"));
     }
 
-    protected <T> boolean isSearchRequest(Properties parms, BeanCollector<?, T> model) {
+    protected <T> boolean isSearchRequest(Map<String, String> parms, BeanCollector<?, T> model) {
         for (Object k : parms.keySet()) {
             if (isSearchRequest((String) k, model)) {
                 return true;
@@ -821,7 +818,7 @@ public class NanoH5Session implements ISession<BeanDefinition>, Serializable {
         return model.hasMode(IBeanCollector.MODE_SEARCHABLE) && actionId.equals(model.getSearchAction().getId());
     }
 
-    protected <T> BeanCollector<?, T> processSearchRequest(Properties parms, BeanCollector<?, T> model) {
+    protected <T> BeanCollector<?, T> processSearchRequest(Map<String, String> parms, BeanCollector<?, T> model) {
 //        try {
         //fill the search values
         Bean<?> filterBean = model.getBeanFinder().getFilterRange();
@@ -843,16 +840,16 @@ public class NanoH5Session implements ISession<BeanDefinition>, Serializable {
 //                }
             }
 
-            for (String p : parms.stringPropertyNames()) {
+            for (String p : parms.keySet()) {
                 String rowName = StringUtil.substring(p, null, ".", true);
                 String colName = StringUtil.substring(p, ".", null, true);
                 if (from.getPresentationHelper().prop(KEY_FILTER_FROM_LABEL).equals(rowName)) {
-                    from.changeToParsedValue(colName, parms.getProperty(p));
+                    from.changeToParsedValue(colName, parms.get(p));
                 } else if (to.getPresentationHelper().prop(KEY_FILTER_TO_LABEL).equals(rowName)) {
-                    to.changeToParsedValue(colName, parms.getProperty(p));
+                    to.changeToParsedValue(colName, parms.get(p));
                 } else {
-                    from.changeToParsedValue(colName, parms.getProperty(p));
-                    to.changeToParsedValue(colName, parms.getProperty(p));
+                    from.changeToParsedValue(colName, parms.get(p));
+                    to.changeToParsedValue(colName, parms.get(p));
                 }
             }
         }
@@ -886,13 +883,13 @@ public class NanoH5Session implements ISession<BeanDefinition>, Serializable {
      * 
      * @param parms
      */
-    private void convertDates(Properties parms) {
+    private void convertDates(Map<String, String> parms) {
         LOG.info("converting dates");
         String v;
-        for (String p : parms.stringPropertyNames()) {
-            v = parms.getProperty(p);
+        for (String p : parms.keySet()) {
+            v = parms.get(p);
             if (v != null && v.matches(RegExpFormat.FORMAT_DATE_SQL)) {
-                parms.setProperty(p, DateUtil.getFormattedDate(DateUtil.getDateSQL(v)));
+                parms.put(p, DateUtil.getFormattedDate(DateUtil.getDateSQL(v)));
             }
         }
     }
@@ -905,13 +902,13 @@ public class NanoH5Session implements ISession<BeanDefinition>, Serializable {
      * @param parms user response
      * @return all selected table beans
      */
-    Collection<Object> getSelectedElements(BeanCollector c, Properties parms) {
+    Collection<Object> getSelectedElements(BeanCollector c, Map<String, String> parms) {
         Collection<Object> selectedElements = new LinkedList<Object>();
         Number selection;
         Collection<?> data = c.getCurrentData();
-        for (String p : parms.stringPropertyNames()) {
+        for (String p : parms.keySet()) {
             selection = NumberUtil.extractNumber(p);
-            if (selection != null && "on".equalsIgnoreCase(parms.getProperty(p))) {
+            if (selection != null && "on".equalsIgnoreCase(parms.get(p))) {
                 //evaluate selected element to be used by an action
                 Object selectedBean = CollectionUtil.getList(data.iterator())
                     .get(selection.intValue() - (c.hasMode(MODE_SEARCHABLE) && c.hasFilter() ? OFFSET_FILTERLINES : 0));
@@ -922,13 +919,13 @@ public class NanoH5Session implements ISession<BeanDefinition>, Serializable {
     }
 
     /**
-     * uses {@link #getSelectedElements(BeanCollector, Properties)} to provide the selection to the selectionprovider of
+     * uses {@link #getSelectedElements(BeanCollector, Map<String, String>)} to provide the selection to the selectionprovider of
      * the beancollector.
      * 
      * @param c table model
      * @param parms user response
      */
-    boolean provideSelection(BeanCollector c, Properties parms) {
+    boolean provideSelection(BeanCollector c, Map<String, String> parms) {
         Collection<Object> elements = getSelectedElements(c, parms);
         c.getSelectionProvider().setValue(elements);
         if (c.getComposition() != null) {
