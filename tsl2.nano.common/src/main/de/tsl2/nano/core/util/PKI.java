@@ -207,9 +207,13 @@ public class PKI {
      * @return signature
      */
     public byte[] sign(InputStream data) {
-        return sign(data, crypt.algorithm, (PrivateKey) crypt.key);
+        return sign(data, (PrivateKey) crypt.key);
     }
 
+    public byte[] sign(InputStream data, PrivateKey privateKey) {
+        return sign(data, crypt.algorithm, privateKey);
+    }
+    
     /**
      * delegates to {@link #sign(InputStream, String, PrivateKey)} using the given file as data input stream
      */
@@ -244,7 +248,7 @@ public class PKI {
     }
 
     public boolean verify(InputStream data, byte[] signature) {
-        return verify(data, signature, crypt.algorithm);
+        return verify(data, signature, (PublicKey) crypt.key, crypt.algorithm);
     }
     
     /**
@@ -253,9 +257,10 @@ public class PKI {
      * @param signature
      * @param algorithm e.g. SHA1withDSA
      */
-    public static boolean verify(InputStream data, byte[] signature, String algorithm) {
+    public static boolean verify(InputStream data, byte[] signature, PublicKey key, String algorithm) {
         try {
             Signature sig = Signature.getInstance(algorithm);
+            sig.initVerify(key);
 
             //Supply the Signature Object With the Data to be Verified
             BufferedInputStream bufin = new BufferedInputStream(data);
@@ -277,8 +282,11 @@ public class PKI {
         }
     }
 
+    public static KeyStore createKeyStore() {
+        return createKeyStore(null, null);
+    }
     public static KeyStore createKeyStore(String file, char[] password) {
-        return createKeyStore("X.509", file, password);
+        return createKeyStore("PKCS12", file, password);
     }
     
     /**

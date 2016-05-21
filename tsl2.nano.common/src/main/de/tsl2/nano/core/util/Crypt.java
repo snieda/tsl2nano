@@ -304,6 +304,29 @@ public class Crypt implements ISecure {
         return kpg.generateKeyPair();
     }
 
+    /**
+     * generates a password with SHA1PRNG. 
+     * @param length password length
+     * @return
+     */
+    public static String generatePassword(int length) {
+        byte[] passwordBuffer = new byte[length];
+        generatePassword("SHA1PRNG", passwordBuffer );
+        return StringUtil.toHexString(passwordBuffer);
+    }
+    
+    /**
+     * generatePassword
+     * @param algorithm e.g. SHA1PRNG, PKCS11, NativePRNG
+     * @param passwordBuffer to be filled with random bytes
+     */
+    public static void generatePassword(String algorithm, byte[] passwordBuffer) {
+        try {
+            SecureRandom.getInstance(algorithm).nextBytes(passwordBuffer);
+        } catch (NoSuchAlgorithmException e) {
+            ManagedException.forward(e);
+        }
+    }
     static boolean isPBE(String algorithm) {
         return algorithm.startsWith("PBE");
     }

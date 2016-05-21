@@ -18,6 +18,7 @@ import static org.junit.Assert.fail;
 
 import java.io.ByteArrayInputStream;
 import java.io.File;
+import java.io.FileOutputStream;
 import java.io.Reader;
 import java.io.Serializable;
 import java.lang.annotation.Annotation;
@@ -30,7 +31,10 @@ import java.security.KeyPair;
 import java.security.KeyStore;
 import java.security.Policy;
 import java.security.cert.CertPath;
+import java.security.cert.CertPathValidatorResult;
+import java.security.cert.Certificate;
 import java.security.cert.PKIXBuilderParameters;
+import java.security.cert.PKIXCertPathValidatorResult;
 import java.text.DateFormat;
 import java.text.DecimalFormat;
 import java.text.Format;
@@ -1554,20 +1558,30 @@ public class CommonTest {
 
     @Test
     public void testPKI() throws Exception {
+        System.out.println(Crypt.providers());
         String data = "test data";
-        String passwd = "testpasswd";
+        String passwd = Crypt.generatePassword(8);
         TrustedOrganisation dn = new TrustedOrganisation("me", "de");
-        PKI pki = new PKI(new Crypt("test".getBytes(), "RSA"), dn);
+        KeyPair keyPair = Crypt.generateKeyPair("RSA");
+        PKI pki = new PKI(new Crypt(keyPair.getPublic()), dn);
         
-        CertPath certPath = pki.createCertPath(dn, null, null);
-        pki.verifyCertPath(certPath, new PKIXBuilderParameters());
-        byte[] signature = pki.sign(new ByteArrayInputStream(data.getBytes()));
-        pki.verify(new ByteArrayInputStream(data.getBytes()), signature);
-        
+        //creating/loading/persisting keystores
+        KeyStore newKeyStore = pki.createKeyStore();
         String file = ENV.getConfigPath() + "mystore";
+        pki.peristKeyStore(newKeyStore, file, passwd);
         KeyStore keyStore = pki.createKeyStore(file, passwd.toCharArray());
-        pki.peristKeyStore(keyStore, file, passwd);
-        pki.createCertificate(FileUtil.getFile(file));
+        assertTrue(newKeyStore.size() == keyStore.size());
+        
+        //TODO: test certificates
+//        CertPath certPath = pki.createCertPath(dn, null, null);
+//        pki.write(certPath.getCertificates().get(0), new FileOutputStream(file));
+//        Certificate certificate = pki.createCertificate(FileUtil.getFile(file));
+//        CertPathValidatorResult valResult = pki.verifyCertPath(certPath, new PKIXBuilderParameters(keyStore, null));
+//        assertTrue(((PKIXCertPathValidatorResult)valResult).getPublicKey().equals(certificate.getPublicKey()));
+
+        //validating, signing
+        byte[] signature = pki.sign(new ByteArrayInputStream(data.getBytes()), "SHA1withRSA", keyPair.getPrivate());
+        assertTrue(pki.verify(new ByteArrayInputStream(data.getBytes()), signature, keyPair.getPublic(), "SHA1withRSA"));
         
     }
     
