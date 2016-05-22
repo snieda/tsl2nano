@@ -74,6 +74,7 @@ public class ServiceLocator {
         try {
             this.classLoader = classLoader;
             if (env.get(NO_JNDI) != null) {
+                LOG.info("property 'NO_JNDI' found --> no context will be created. all services have to be stored in the service-properties");
                 return;
             } else {
                 LOG.info("creating InitialContext with properties:\n" + StringUtil.toString(env, 300));
@@ -157,7 +158,8 @@ public class ServiceLocator {
     @SuppressWarnings("unchecked")
     public <T> T lookup(String jndiPrefix, Class<T> serviceInterface) {
 //        boolean isFrameworkService = serviceInterface.getPackage().getName().startsWith(PACKAGE_FRAMEWORK);
-        final String name = jndiPrefix != null && jndiPrefix.length() > 0 ? jndiPrefix + "/"
+        //if NO_JNDI was activated, no context is available and the jndi-name will be ignored!
+        final String name = context != null && jndiPrefix != null && jndiPrefix.length() > 0 ? jndiPrefix + "/"
             + serviceInterface.getSimpleName() : serviceInterface.getName();
 
         T s = (T) services.get(name);

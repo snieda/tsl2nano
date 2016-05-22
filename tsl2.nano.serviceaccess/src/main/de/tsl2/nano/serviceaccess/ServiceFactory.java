@@ -223,7 +223,7 @@ public class ServiceFactory {
      * @return true, if subject contains this principal
      */
     public boolean hasPrincipal(Principal principal) {
-        return auth != null ? auth.hasPrincipal(principal) : null;
+        return auth != null ? auth.hasPrincipal(principal) : false;
     }
 
     /**
