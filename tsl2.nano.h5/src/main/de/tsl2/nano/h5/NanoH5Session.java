@@ -325,6 +325,7 @@ public class NanoH5Session implements ISession<BeanDefinition>, Serializable {
      */
     public Response serve(String uri, String method, Map<String, String> header, Map<String, String> parms, Map<String, String> files) {
         String msg = "[undefined]";
+        ManagedException ex = null;
         try {
             Thread.currentThread().setContextClassLoader(sessionClassloader);
             Thread.currentThread().setUncaughtExceptionHandler(exceptionHandler);
@@ -379,7 +380,7 @@ public class NanoH5Session implements ISession<BeanDefinition>, Serializable {
             }
         } catch (Throwable e /*respect errors like NoClassDefFound...the application should continue!*/) {
             LOG.error(e);
-            ManagedException ex = new ManagedException(e) {
+            ex = new ManagedException(e) {
                 /** serialVersionUID */
                 private static final long serialVersionUID = 1L;
 
@@ -390,7 +391,6 @@ public class NanoH5Session implements ISession<BeanDefinition>, Serializable {
                 }
             };
             msg = refreshPage(ex);
-            Message.send(exceptionHandler, ex.toString());
             response = server.createResponse(Status.BAD_REQUEST, MIME_HTML, msg);
             actionLog.clear();
             //don't forget that there was an exception. to be seen on the next exception ;-)
@@ -400,6 +400,8 @@ public class NanoH5Session implements ISession<BeanDefinition>, Serializable {
 //        header.clear();
 //        response.header.remove(uri);
         Message.send(exceptionHandler, createStatusText(startTime));
+        if (ex != null)
+            Message.send(exceptionHandler, ex.toString());
         return response;
     }
 

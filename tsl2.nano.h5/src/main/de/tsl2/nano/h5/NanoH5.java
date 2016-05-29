@@ -233,12 +233,13 @@ public class NanoH5 extends NanoHTTPD implements ISystemConnector<Persistence> {
             if (ENV.get("app.ssl.activate", false)) {
                 String keyStore = ENV.get("app.ssl.keystore.file", "nanoh5.jks");
                 LOG.info("activating ssl using keystore " + keyStore);
-                makeSecure(NanoHTTPD.makeSSLSocketFactory(keyStore, ENV.get("app.ssl.keystore.password", "nanoh5").toCharArray()), null);
+                makeSecure(NanoHTTPD.makeSSLSocketFactory(keyStore,
+                    ENV.get("app.ssl.keystore.password", "nanoh5").toCharArray()), null);
             } else {
                 ENV.setProperty("app.ssl.shortcut", "");
             }
             super.start();
-            
+
             if (System.getProperty("os.name").startsWith("Windows")) {
                 SystemUtil.executeRegisteredWindowsPrg(applicationHtmlFile());
             } else {
@@ -358,13 +359,16 @@ public class NanoH5 extends NanoHTTPD implements ISystemConnector<Persistence> {
             Map<String, String> parms,
             Map<String, String> files) {
         String method = m.name();
-        if (method.equals("GET") && !NumberUtil.isNumber(uri.substring(1)) && HtmlUtil.isURI(uri)
-            && !uri.contains(Html5Presentation.PREFIX_BEANREQUEST)) {
-            return super.serve(uri, method, header, parms, files);
+        if (method.equals("GET")) {
+            // serve files
+            if (!NumberUtil.isNumber(uri.substring(1)) && HtmlUtil.isURI(uri)
+                && !uri.contains(Html5Presentation.PREFIX_BEANREQUEST)) {
+                return super.serve(uri, method, header, parms, files);
+            }
         }
 
         long startTime = System.currentTimeMillis();
-        InetAddress requestor = ((Socket) ((Map)header).get("socket")).getInetAddress();
+        InetAddress requestor = ((Socket) ((Map) header).get("socket")).getInetAddress();
         NanoH5Session session = sessions.get(requestor);
         if (session == null) {
             //on a new session, no parameter should be set
@@ -386,12 +390,12 @@ public class NanoH5 extends NanoHTTPD implements ISystemConnector<Persistence> {
                     //don't lose the connection - the first item is the login
 //                    session.nav.next(session.nav.toArray()[1]);
                 }
-            } else if (method.equals("GET") && parms.size() == 0
+            } else if (method.equals("GET") && parms.size() < 2 /* contains 'QUERY_STRING = null' */
                 && (uri.length() < 2 || header.get("referer") == null)) {
                 LOG.debug("reloading cached page...");
                 try {
                     session.response.getData().reset();
-                    return session.response;
+                    return new Response(Status.OK, "text/html", session.response.getData(), -1);
                 } catch (IOException e) {
                     LOG.error(e);
                 }
@@ -410,7 +414,8 @@ public class NanoH5 extends NanoHTTPD implements ISystemConnector<Persistence> {
     }
 
     public Response createResponse(Status status, String type, String msg) {
-        return new NanoHTTPD.Response(status, type, new ByteArrayInputStream(msg.getBytes()), msg.length());
+        byte[] bytes = msg.getBytes();
+        return new NanoHTTPD.Response(status, type, new ByteArrayInputStream(bytes), bytes.length);
     }
 
     /**
@@ -750,7 +755,8 @@ public class NanoH5 extends NanoHTTPD implements ISystemConnector<Persistence> {
                         } catch (Exception e) {
                             LOG.error(e.toString());
                         }
-                        String hsqldbScript = isH2(persistence.getConnectionUrl()) ? persistence.getDefaultSchema() + ".mv.db" : persistence.getDatabase() + ".script";
+                        String hsqldbScript = isH2(persistence.getConnectionUrl())
+                            ? persistence.getDefaultSchema() + ".mv.db" : persistence.getDatabase() + ".script";
                         String backupFile = ENV.get("app.database.backup.file",
                             ENV.getTempPathRel() + FileUtil.getUniqueFileName(persistence.getDatabase()) + ".zip");
                         LOG.info("creating database backup to file " + backupFile);

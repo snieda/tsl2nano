@@ -101,6 +101,7 @@ import javax.net.ssl.TrustManagerFactory;
 import de.tsl2.nano.core.ENV;
 import de.tsl2.nano.core.Main;
 import de.tsl2.nano.core.ManagedException;
+import de.tsl2.nano.core.exception.Message;
 import de.tsl2.nano.core.log.LogFactory;
 import de.tsl2.nano.h5.NanoHTTPD.Response.IStatus;
 import de.tsl2.nano.h5.NanoHTTPD.Response.Status;
@@ -1557,8 +1558,9 @@ public abstract class NanoHTTPD extends Main {
 
         /**
          * Sends given response to the socket.
+         * @throws IOException 
          */
-        protected void send(OutputStream outputStream) {
+        protected void send(OutputStream outputStream) throws IOException {
             SimpleDateFormat gmtFrmt = new SimpleDateFormat("E, d MMM yyyy HH:mm:ss 'GMT'", Locale.US);
             gmtFrmt.setTimeZone(TimeZone.getTimeZone("GMT"));
 
@@ -1599,7 +1601,9 @@ public abstract class NanoHTTPD extends Main {
                 outputStream.flush();
                 safeClose(this.data);
             } catch (IOException ioe) {
-                NanoHTTPD.LOG.log(Level.SEVERE, "Could not send response to the client", ioe);
+//                NanoHTTPD.LOG.log(Level.SEVERE, "Could not send response to the client", ioe);
+                  Message.send("Server could not send response to the client: " + ioe.toString());
+                  throw ioe;//ts20160528
             }
         }
 
