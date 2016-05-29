@@ -1,9 +1,9 @@
 <h6 align="center">FullRelation Nano.H5<br/>
 <font size="-1">&copy; Thomas Schneider 2012-2016
 <br/>
-<a href="http://sourceforge.net/projects/tsl2nano/files/0.9.0-beta/tsl2.nano.h5.0.8.0.jar/download">Download on sourceforge</a>
+<a href="http://sourceforge.net/projects/tsl2nano/files/1.0.0-beta/tsl2.nano.h5.0.8.0.jar/download">Download on sourceforge</a>
 <br/>
-<a href="http://sourceforge.net/projects/tsl2nano/files/0.9.0-beta/nano.h5.jnlp">Start Nano.H5 through WebStart</a>
+<a href="http://sourceforge.net/projects/tsl2nano/files/1.0.0-beta/nano.h5.jnlp">Start Nano.H5 through WebStart</a>
 <p hidden>
 </font></h6>
 </p>
@@ -122,7 +122,7 @@ this software should provide a fast way to create a standard application through
 * Client/Server application
 * Web application for small user-groups
 * Standalone or through connection to an application server
-* Application, started through a rest service in a web container (e.g. in jboss: http://localhost:8080/tsl2.nano.h5.0.9.0/web/start/user.home/free.port)
+* Application, started through a rest service in a web container (e.g. in jboss: http://localhost:8080/tsl2.nano.h5.1.0.0/web/start/user.home/free.port)
 * with or without local replication database
 * Usable as Entity-Browser configuring your data
 * Usable as full-configurable application
@@ -368,7 +368,7 @@ Here is a short description how to use a model from PonyORM and starting a full 
  - select a datbase dialect on the top tab panel and click on it (prefered: oracle)
  - click the button _select all_
  - copy the selection to the clipboard using _Ctrl+C_ or simply with the context menu of a right-mouse-click on the selection
- - go to the tsl2.nano.h5 documentation page https://sourceforge.net/p/tsl2nano/wiki/Home/ and click on the link _Start Nano.H5 through WebStart_ http://sourceforge.net/projects/tsl2nano/files/0.9.0-beta/nano.h5.jnlp
+ - go to the tsl2.nano.h5 documentation page https://sourceforge.net/p/tsl2nano/wiki/Home/ and click on the link _Start Nano.H5 through WebStart_ http://sourceforge.net/projects/tsl2nano/files/1.0.0-beta/nano.h5.jnlp
  - after a while, Nano.H5 will open a page in your browser. click on the centered link of that page
  - expand the detail panel
  - click into the field _Database_
@@ -1635,7 +1635,7 @@ Each standard table of beans will provide a table-header with Buttons to do up/d
 
 ## Webstart with JNLP
 
-_nano.h5_ provides a jnlp file on [http://sourceforge.net/projects/tsl2nano/files/0.9.0-beta/nano.h5.jnlp]. This webstart downloads the self-certificated *tsl2.nano.h5.<version>-signed.jar* to be started. On java 8, you have to add this download site to the exception list. Do the following steps:
+_nano.h5_ provides a jnlp file on [http://sourceforge.net/projects/tsl2nano/files/1.0.0-beta/nano.h5.jnlp]. This webstart downloads the self-certificated *tsl2.nano.h5.<version>-signed.jar* to be started. On java 8, you have to add this download site to the exception list. Do the following steps:
 * open the java control panel
 * go to the security tab panel
 * click 'edit site list'
@@ -2572,9 +2572,9 @@ Actual list: http://infocenter.pentaho.com/help/index.jsp?topic=%2Fsupported_com
  0.8.0c | 01.02.2016 | many fixes, bean-configuration provides creation of actions (e.g. for REST service calls showing the JSON result)
  0.8.0d | 08.02.2016 | statistics now showing bar charts with xgraph
  0.8.0e | 24.02.2016 | bugfixes, environment-action --> administration-action
- 0.9.0a | 13.03.2016 | websocketserver fixes, bugfixes, ENV properties renamed
- 0.9.0b | 10.04.2016 | beancontainer now using ThreadLocal, NEW: Compositor
- 0.9.0c | 08.05.2016 | H2-Database included as default instead of HSQLDB, because the compatibility mode is working better there.
+ 1.0.0a | 13.03.2016 | websocketserver fixes, bugfixes, ENV properties renamed
+ 1.0.0b | 10.04.2016 | beancontainer now using ThreadLocal, NEW: Compositor
+ 1.0.0c | 08.05.2016 | H2-Database included as default instead of HSQLDB, because the compatibility mode is working better there.
 
 [GLOSSARY]
 

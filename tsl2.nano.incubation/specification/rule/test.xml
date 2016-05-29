@@ -1,20 +1,24 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <rule name="test">
    <parameter name="A">
-      <type>BOOLEAN</type>
+      <type>
+         <type>BOOLEAN</type>
+      </type>
    </parameter>
    <parameter name="x1">
-      <type>NUMBER</type>
+      <type>
+         <type>NUMBER</type>
+      </type>
    </parameter>
    <parameter name="x2">
-      <type>NUMBER</type>
+      <type>
+         <type>NUMBER</type>
+      </type>
    </parameter>
    <constraint name="x1">
-      <definition type="java.math.BigDecimal" nullable="true" length="-1">
+      <definition type="java.math.BigDecimal" nullable="true" length="-1" scale="-1" precision="-1">
          <min class="java.math.BigDecimal">0</min>
          <max class="java.math.BigDecimal">1</max>
-         <scale>-1</scale>
-         <precision>-1</precision>
       </definition>
    </constraint>
    <operation>A ? (x1 + 1) : (x2 * 2)</operation>
