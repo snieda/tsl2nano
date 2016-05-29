@@ -473,7 +473,7 @@ public class Html5Presentation<T> extends BeanPresentationHelper<T> implements I
         HtmlUtil.appendAttributes(html, "manifest", ENV.get("html5.manifest.file", "tsl2nano-appcache.mf"));
         Element head = appendElement(html, TAG_HEAD, ATTR_TITLE, "Nano-H5 Application: " + title);
 
-        appendElement(head, "meta", "name", "author", "content", "tsl2.nano.h5 (by Thomas Schneider/2013)");
+        appendElement(head, "meta", "name", "author", "content", "tsl2.nano.h5 (by Thomas Schneider/2012-2016)");
         appendElement(head, "meta", "name", "viewport", "content",
             "width=device-width, height=device-height, initial-scale=1");
 //        appendElement(head, "link", "rel", "stylesheet", "href", "css/style.css");
