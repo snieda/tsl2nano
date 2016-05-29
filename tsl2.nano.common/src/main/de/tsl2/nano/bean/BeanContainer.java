@@ -46,7 +46,7 @@ import de.tsl2.nano.core.util.StringUtil;
  */
 @SuppressWarnings({ "serial", "rawtypes", "unchecked" })
 public class BeanContainer implements IBeanContainer {
-    /** we provide a thread invariant and a thrad varaint singelton instance - this is not secure but practicable. */
+    /** we provide a thread invariant and a thread variant singelton instance - this is not secure but practicable. */
     private static BeanContainer self = null;
     private static ThreadLocal<BeanContainer> selfThread = new ThreadLocal<BeanContainer>();
 
