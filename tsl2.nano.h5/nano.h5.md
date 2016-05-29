@@ -3013,10 +3013,21 @@ erdplus: kann nichts allgemeines exportieren
 ** (v) jdbc:h2:tcp://localhost:9092/PUBLIC
 ** LUCENE integration?
 
-*HTTPS:
+* (v) HTTPS:
 ** keytool -genkey -keyalg RSA -alias nanoh5 -keystore nanoh5.jks -storepass nanoh5 -keysize 2048 -ext SAN=DNS:localhost,IP:127.0.0.1  -validity 9999
 ** server.makeSecure(NanoHTTPD.makeSSLSocketFactory("nanoh5.jks", "nanoh5".toCharArray()), null);
+** ( ) websockets (org.java_websockets) on wss:// not working 
+** (v) Chrome not working <-- GET + '/' redoing response
 
 YAML --> ObjectMapper
 MDA: manyToMany Error
 slf-api Version (1.5.8 --> 1.7.5) Problem
+* login for simple-remote users only with name and passwd
+* more styling for pages
+* how to inherit foreground-color?
+* Ergebnis-Dienst, Tipp-Spiel:
+Benutzer
+Tipp/Anforderung
+Ergebnis
+Gruppe
+Mannschaft
