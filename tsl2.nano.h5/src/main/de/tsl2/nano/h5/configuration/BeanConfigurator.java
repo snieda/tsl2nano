@@ -42,6 +42,7 @@ import de.tsl2.nano.h5.Html5Presentable;
 import de.tsl2.nano.h5.SpecifiedAction;
 import de.tsl2.nano.incubation.specification.actions.Action;
 import de.tsl2.nano.incubation.specification.actions.ActionPool;
+import de.tsl2.nano.incubation.specification.rules.Rule;
 import de.tsl2.nano.incubation.specification.rules.RulePool;
 import de.tsl2.nano.incubation.specification.rules.RuleScript;
 import de.tsl2.nano.util.PrivateAccessor;
@@ -310,12 +311,18 @@ public class BeanConfigurator<T> implements Serializable {
     }
 
     @SuppressWarnings({ "rawtypes"})
-    @de.tsl2.nano.bean.annotation.Action(name = "createAction", argNames = { "New specified ActionName", "Action-Expression" })
+    @de.tsl2.nano.bean.annotation.Action(name = "createAction", argNames = { "New ActionName", "Action-Expression" })
     public void actionCreateAction (
             @de.tsl2.nano.bean.annotation.Constraint(defaultValue = "presentable.layoutConstraints", pattern = "[%§!]\\w+", allowed = {
                 "presentable", "presentable.layout", "columnDefinition" }) String name,
             @de.tsl2.nano.bean.annotation.Constraint(pattern = ".*") String expression) {
-        ENV.get(ActionPool.class).add(new Action(name, expression));
+        
+        if (expression.startsWith("%"))
+            ENV.get(RulePool.class).add(new RuleScript<>(name, expression, null));
+        else if (expression.startsWith("§"))
+            ENV.get(RulePool.class).add(new Rule(name, expression, null));
+        else
+            ENV.get(ActionPool.class).add(new Action(name, expression.startsWith("!") ? expression.substring(1) : expression));
     }
 
     @SuppressWarnings({ "rawtypes", "unchecked"})
