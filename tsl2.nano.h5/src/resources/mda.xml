@@ -103,7 +103,7 @@ commit;
 		</condition>
 		<condition property="cmdline" 
 			value="java -cp ${cp} org.hsqldb.Server -database ${jdbc.database} -port ${jdbc.port} -silent false -trace true ${cmdargs}" 
-			else="java -cp ${cp} org.h2.tools.Server -baseDir ${basedir} -tcp -tcpPort ${jdbc.port} -tcpAllowOthers -trace ${cmdargs}">
+			else="java -cp ${cp} org.h2.tools.Server -baseDir ${basedir} -web -tcp -tcpPort ${jdbc.port} -tcpAllowOthers -trace ${cmdargs}">
 			<contains string="${jdbc.driver}" substring="hsqldb" casesensitive="true"/>
 		</condition>
 		<echo file="runServer.cmd">
