@@ -18,7 +18,6 @@ import static org.junit.Assert.fail;
 
 import java.io.ByteArrayInputStream;
 import java.io.File;
-import java.io.FileOutputStream;
 import java.io.Reader;
 import java.io.Serializable;
 import java.lang.annotation.Annotation;
@@ -30,11 +29,6 @@ import java.net.InetAddress;
 import java.security.KeyPair;
 import java.security.KeyStore;
 import java.security.Policy;
-import java.security.cert.CertPath;
-import java.security.cert.CertPathValidatorResult;
-import java.security.cert.Certificate;
-import java.security.cert.PKIXBuilderParameters;
-import java.security.cert.PKIXCertPathValidatorResult;
 import java.text.DateFormat;
 import java.text.DecimalFormat;
 import java.text.Format;
@@ -56,7 +50,6 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.Properties;
 
-import javax.crypto.BadPaddingException;
 import javax.json.JsonObject;
 import javax.json.JsonStructure;
 
@@ -98,7 +91,6 @@ import de.tsl2.nano.core.cls.PrimitiveUtil;
 import de.tsl2.nano.core.execution.Profiler;
 import de.tsl2.nano.core.log.LogFactory;
 import de.tsl2.nano.core.util.AnnotationProxy;
-import de.tsl2.nano.core.util.ByteUtil;
 import de.tsl2.nano.core.util.ConcurrentUtil;
 import de.tsl2.nano.core.util.Crypt;
 import de.tsl2.nano.core.util.DateUtil;
@@ -112,6 +104,7 @@ import de.tsl2.nano.core.util.SimpleXmlAnnotator;
 import de.tsl2.nano.core.util.StringUtil;
 import de.tsl2.nano.core.util.TrustedOrganisation;
 import de.tsl2.nano.core.util.Util;
+import de.tsl2.nano.core.util.YamlUtil;
 import de.tsl2.nano.currency.CurrencyUnit;
 import de.tsl2.nano.currency.CurrencyUtil;
 import de.tsl2.nano.execution.AntRunner;
@@ -124,6 +117,7 @@ import de.tsl2.nano.messaging.ChangeEvent;
 import de.tsl2.nano.messaging.IListener;
 import de.tsl2.nano.util.ClassFinder;
 import de.tsl2.nano.util.Period;
+import de.tsl2.nano.util.PrivateAccessor;
 import de.tsl2.nano.util.Translator;
 import de.tsl2.nano.util.operation.CRange;
 import de.tsl2.nano.util.operation.ConditionOperator;
@@ -1801,5 +1795,29 @@ public class CommonTest {
         assertTrue(finder.fuzzyFind(c[1], null, Modifier.PUBLIC, null).containsValue(ClassFinder.class));
         assertTrue(finder.fuzzyFind(c[2], Method.class, -1, null).containsValue(
             ClassFinder.class.getMethod("fuzzyFind", String.class, Class.class, int.class, Class.class)));
+    }
+    
+    @Test
+    public void testYaml() throws Exception {
+        /*
+         * test it on Environments
+         */
+        ENV env = (ENV) BeanClass.getBeanClass(ENV.class).callMethod(null, "self");
+        String dump = YamlUtil.dump(env);
+        System.out.println(dump);
+        ENV env2 = YamlUtil.load(dump, ENV.class);
+        assertTrue(dump.equals(YamlUtil.dump(env2)));
+        /*
+         * test it on BeanDefinitions
+         */
+        BeanDefinition<TypeBean> def = BeanDefinition.getBeanDefinition(TypeBean.class);
+        dump = YamlUtil.dump(def);
+        System.out.println(dump);
+        //to compare xml with yaml...
+//        XmlUtil.saveXml("test.xml", def);
+        
+        //reload the yaml
+        BeanDefinition def2 = YamlUtil.load(dump, BeanDefinition.class);
+        assertTrue(def.equals(def2));
     }
 }

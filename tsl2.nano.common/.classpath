@@ -17,5 +17,6 @@
 	<classpathentry kind="lib" path="lib-tools/xmlgraphics-commons-1.5.jar"/>
 	<classpathentry kind="lib" path="lib/javax.json-api-1.0.jar"/>
 	<classpathentry kind="lib" path="lib/javax.json-1.0.4.jar"/>
+	<classpathentry kind="lib" path="lib/snakeyaml-1.17.jar"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>

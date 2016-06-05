@@ -19,6 +19,8 @@ import java.lang.reflect.Method;
 import java.lang.reflect.ParameterizedType;
 import java.util.Map;
 
+import javax.annotation.PostConstruct;
+
 import org.apache.commons.logging.Log;
 import org.simpleframework.xml.Attribute;
 import org.simpleframework.xml.Default;
@@ -355,7 +357,7 @@ public class BeanAttribute<T> implements IAttribute<T> {
     public Class<T> getType() {
         if (readAccessMethod == null) {
             if (writeAccessMethod == null)
-                initDeserializing();
+                initDeserialization();
             else
                 return (Class<T>) writeAccessMethod.getParameterTypes()[0];
         }
@@ -604,14 +606,15 @@ public class BeanAttribute<T> implements IAttribute<T> {
     /**
      * Extension for {@link Serializable}
      */
+    @PostConstruct
     private void readObject(java.io.ObjectInputStream in) throws IOException, ClassNotFoundException {
         //Method is not serializable, so we use informations to reconstruct it.
         in.defaultReadObject();
-        initDeserializing();
+        initDeserialization();
     }
 
     @Commit
-    private void initDeserializing() {
+    private void initDeserialization() {
         readAccessMethod = getReadAccessMethod(declaringClass, name, true);
     }
 

@@ -63,6 +63,7 @@ import de.tsl2.nano.core.util.ListSet;
 import de.tsl2.nano.core.util.StringUtil;
 import de.tsl2.nano.core.util.Util;
 import de.tsl2.nano.core.util.XmlUtil;
+import de.tsl2.nano.core.util.YamlUtil;
 import de.tsl2.nano.format.DefaultFormat;
 import de.tsl2.nano.messaging.ChangeEvent;
 import de.tsl2.nano.messaging.IListener;
@@ -931,15 +932,19 @@ public class BeanDefinition<T> extends BeanClass<T> implements IPluggable<BeanDe
             File xmlFile = getDefinitionFile(name);
             if (usePersistentCache && xmlFile.canRead()) {
                 try {
-                    beandef = XmlUtil.loadXml(xmlFile.getPath(), BeanDefinition.class);
+                    if (ENV.get("app.configuration.persist.yaml", false))
+                        beandef = YamlUtil.load(xmlFile.getPath(), BeanDefinition.class);
+                    else
+                        beandef = XmlUtil.loadXml(xmlFile.getPath(), BeanDefinition.class);
                     //workaround for simple-xml not creating the desired root-extension-instance
                     if (beandef.extension != null) {
                         beandef = (BeanDefinition<T>) beandef.extension.to(beandef);
                     }
                     //perhaps, the file defines another bean-name or bean-type
-                    if ((name == null || beandef.isVirtual() || name.equalsIgnoreCase(beandef.getName()) || name.equalsIgnoreCase(FileUtil
-                        .getValidFileName(beandef.getName()))
-                        && (type == null || type.equals(beandef.getClazz())))) {
+                    if ((name == null || beandef.isVirtual() || name.equalsIgnoreCase(beandef.getName())
+                        || name.equalsIgnoreCase(FileUtil
+                            .getValidFileName(beandef.getName()))
+                            && (type == null || type.equals(beandef.getClazz())))) {
                         virtualBeanCache.add(beandef);
                     } else {
                         LOG.warn("the file " + xmlFile.getPath() + " doesn't define the bean with name '" + name
@@ -1194,7 +1199,11 @@ public class BeanDefinition<T> extends BeanClass<T> implements IPluggable<BeanDe
                     if (FileUtil.hasResource(BEANDEF_XSD))
                         ENV.extractResourceToDir(BEANDEF_XSD, xmlFile.getParentFile().getPath() + "/");
                 }
-                XmlUtil.saveXml(xmlFile.getPath(), this);
+                if (ENV.get("app.configuration.persist.yaml", false)) {
+                    YamlUtil.dump(this, xmlFile.getPath() + ".yml");
+                } else {
+                    XmlUtil.saveXml(xmlFile.getPath(), this);
+                }
             } catch (Exception e) {
                 if (ENV.get("app.mode.script", false)) {
                     ManagedException.forward(e);
@@ -1438,7 +1447,7 @@ public class BeanDefinition<T> extends BeanClass<T> implements IPluggable<BeanDe
     public void setDefaultValues(Object instance) {
         setDefaultValues(instance, false);
     }
-    
+
     /**
      * fills all attributes with their default values - if defined.
      * 
@@ -1477,7 +1486,8 @@ public class BeanDefinition<T> extends BeanClass<T> implements IPluggable<BeanDe
      * @param filterAttributes attributes to be filtered (ignored, if onlyFilterAttributes)
      * @return map filled with all attribute values
      */
-    public Map<String, Object> toValueMap(Object instance, boolean useClassPrefix,
+    public Map<String, Object> toValueMap(Object instance,
+            boolean useClassPrefix,
             boolean onlySingleValues,
             boolean onlyFilterAttributes,
             String... filterAttributes) {
@@ -1490,7 +1500,8 @@ public class BeanDefinition<T> extends BeanClass<T> implements IPluggable<BeanDe
     /**
      * delegates to {@link #toValueMap(String, boolean, boolean, boolean, String...)} with formatted=false
      */
-    public Map<String, Object> toValueMap(Object instance, String keyPrefix,
+    public Map<String, Object> toValueMap(Object instance,
+            String keyPrefix,
             boolean onlySingleValues,
             boolean onlyFilterAttributes,
             String... filterAttributes) {

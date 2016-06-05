@@ -31,6 +31,9 @@ import de.tsl2.nano.core.util.StringUtil;
 public class ClassFinder {
     private Vector<Class<?>> classes;
 
+    public ClassFinder() {
+        this(Thread.currentThread().getContextClassLoader());
+    }
     /**
      * constructor
      */
@@ -39,6 +42,10 @@ public class ClassFinder {
         classes = (Vector<Class<?>>) new PrivateAccessor(classLoader).member("classes", Vector.class);
     }
 
+    public <M extends Map<Double, Class>> M fuzzyFind(String filter) {
+        return fuzzyFind(filter, Class.class, -1, null);
+    }
+    
     /**
      * finds all classes/methods/fields of the given classloader fuzzy matching the given filter, having the given
      * modifiers (or modifiers is -1) and having the given annotation (or annotation is null)
@@ -67,8 +74,11 @@ public class ClassFinder {
                 if ((modifier < 0 || cls.getModifiers() == modifier)
                     && (annotation == null || cls.getAnnotation(annotation) != null)) {
                     match = StringUtil.fuzzyMatch(cls.getName(), filter);
-                    if (match > 0)
+                    if (match > 0) {
+                        while (result.containsKey(match))
+                            match += 0000000001;
                         result.put(match, (T) cls);
+                    }
                 }
             }
             if (addMethods) {

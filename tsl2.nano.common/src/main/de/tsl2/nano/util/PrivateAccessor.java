@@ -143,7 +143,7 @@ public class PrivateAccessor<T> extends UnboundAccessor<T> {
         return args;
     }
 
-    protected Set<Method> findMethod(String nameExpression, Class returnType, Class... args) {
+    public Set<Method> findMethod(String nameExpression, Class returnType, Class... args) {
         return findMethod(instance().getClass(), nameExpression, returnType, args);
     }
     

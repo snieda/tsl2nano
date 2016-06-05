@@ -59,6 +59,7 @@ import de.tsl2.nano.core.util.NumberUtil;
 import de.tsl2.nano.core.util.StringUtil;
 import de.tsl2.nano.core.util.Util;
 import de.tsl2.nano.core.util.XmlUtil;
+import de.tsl2.nano.core.util.YamlUtil;
 import de.tsl2.nano.format.DefaultFormat;
 
 /**
@@ -90,7 +91,7 @@ public class ENV implements Serializable {
 
     /** serialVersionUID */
     private static final long serialVersionUID = 5988200267214868670L;
-    
+
     private static final String PATH_TEMP = "temp/";
     private static ENV self;
     @SuppressWarnings("rawtypes")
@@ -118,7 +119,7 @@ public class ENV implements Serializable {
     public static final String KEY_CONFIG_RELPATH = PREFIX + "config.relative.path";
     public static final String KEY_CONFIG_PATH = PREFIX + "config.path";
 
-    public static final String CONFIG_XML_NAME = "environment.xml";
+    public static final String CONFIG_NAME = "environment";
 
     public static final String KEY_BUILDINFO = "tsl2.nano.build.informations";
 
@@ -193,7 +194,8 @@ public class ENV implements Serializable {
             if (new File(path).canRead()) {
                 self().info("loading service from " + path);
                 self().addService(service, self().get(XmlUtil.class).loadXml(path, service));
-            } else if (!service.isInterface() && BeanClass.hasDefaultConstructor(service, !Util.isFrameworkClass(service))) {
+            } else if (!service.isInterface()
+                && BeanClass.hasDefaultConstructor(service, !Util.isFrameworkClass(service))) {
                 self().info("trying to create service " + service + " through default construction");
                 T newService = self().addService(BeanClass.createInstance(service));
                 if (newService instanceof Serializable) {
@@ -232,8 +234,7 @@ public class ENV implements Serializable {
             + dir
             + "\n"
             + createInfo()
-            + "==========================================================="
-            );
+            + "===========================================================");
 
         //provide some external functions as options for this framework
         CompatibilityLayer layer = new CompatibilityLayer();
@@ -259,12 +260,14 @@ public class ENV implements Serializable {
             true,
             Object.class);
 
-        File configFile = new File(dir + "/" + CONFIG_XML_NAME);//new File(System.getProperty(KEY_CONFIG_PATH, System.getProperty("user.dir")));
+        File configFile = new File(dir + "/" + CONFIG_NAME + ".xml");//new File(System.getProperty(KEY_CONFIG_PATH, System.getProperty("user.dir")));
         if (configFile.canRead()) {
             self = XmlUtil.loadXml(configFile.getPath(), ENV.class, layer, false);
 //            String configPath = getConfigPath();
 //            if (!configPath.endsWith("/") && !configPath.endsWith("\\"))
 //                setProperty(KEY_CONFIG_PATH, configPath + "/");
+        } else if ((configFile = new File(dir + "/" + CONFIG_NAME + ".yml")).canRead()) {
+            self = YamlUtil.load(new File(configFile.getPath()), ENV.class);
         } else {
             self = new ENV();
             self.properties = new TreeMap();
@@ -274,7 +277,7 @@ public class ENV implements Serializable {
         self.services = new Hashtable<Class<?>, Object>();
         addService(layer);
         addService(ClassLoader.class, Thread.currentThread().getContextClassLoader());
-        
+
         self.properties.put(KEY_CONFIG_RELPATH, dir + "/");
         self.properties.put(KEY_CONFIG_PATH, new File(dir).getAbsolutePath().replace("\\", "/") + "/");
         new File(self.getTempPath()).mkdir();
@@ -318,7 +321,7 @@ public class ENV implements Serializable {
         p.putAll(System.getProperties());
         p.put("nano.tstamp", new Date());
         p.put("main.context.classloader", Thread.currentThread().getContextClassLoader());
-        
+
         InetAddress myAddress = NetUtil.getMyAddress();
         p.put("inetadress.myip", myAddress.getHostAddress());
         p.put("inetadress.hostname", myAddress.getHostName());
@@ -334,7 +337,7 @@ public class ENV implements Serializable {
             security = "<null>";
         }
         p.put("security", security);
-        
+
         p.put("processors", Runtime.getRuntime().availableProcessors());
 
         File[] roots = File.listRoots();
@@ -524,12 +527,13 @@ public class ENV implements Serializable {
             return Messages.getString((Enum<?>) key);
         } else {
             if (optional && args.length == 0) {
-                return StringUtil.replaceAll((CharSequence)key, "[\\w\\.\\:\\\\/]+", new ITransformer<String, String>() {
-                    @Override
-                    public String transform(String toTransform) {
-                        return Messages.getStringOpt(toTransform, true);
-                    }
-                });
+                return StringUtil.replaceAll((CharSequence) key, "[\\w\\.\\:\\\\/]+",
+                    new ITransformer<String, String>() {
+                        @Override
+                        public String transform(String toTransform) {
+                            return Messages.getStringOpt(toTransform, true);
+                        }
+                    });
             } else if (args.length > 0) {
                 return Messages.getFormattedString((String) key, args);
             } else {
@@ -630,7 +634,11 @@ public class ENV implements Serializable {
     }
 
     public static <T> T load(String name, Class<T> type) {
-        return self().get(XmlUtil.class).loadXml(getConfigPath(type) + ".xml", type);
+        if (self().get("app.configuration.persist.yaml", false)) {
+            return self().get(YamlUtil.class).load(new File(getConfigPath(type) + ".yml"), type);
+        } else {
+            return self().get(XmlUtil.class).loadXml(getConfigPath(type) + ".xml", type);
+        }
     }
 
     /**
@@ -662,7 +670,11 @@ public class ENV implements Serializable {
      * @param obj object to serialize to xml.
      */
     public static void persist(String name, Object obj) {
-        self().get(XmlUtil.class).saveXml(getConfigPath() + name + ".xml", obj);
+        if (self().get("app.configuration.persist.yaml", false)) {
+            self().get(YamlUtil.class).dump(obj, getConfigPath() + name + ".yml");
+        } else {
+            self().get(XmlUtil.class).saveXml(getConfigPath() + name + ".xml", obj);
+        }
     }
 
     /**
@@ -671,7 +683,7 @@ public class ENV implements Serializable {
      * @return true, if an environment was created on file system
      */
     public final static boolean isPersisted() {
-        return new File(getConfigPath() + CONFIG_XML_NAME).exists();
+        return new File(getConfigPath() + CONFIG_NAME + ".xml").exists();
     }
 
     /**
@@ -684,7 +696,11 @@ public class ENV implements Serializable {
         Map<Class<?>, Object> tempServices = new Hashtable<Class<?>, Object>(services());
 
         String configPath = getConfigPath();
-        self().get(XmlUtil.class).saveXml(configPath + CONFIG_XML_NAME, self());
+        if (self().get("app.configuration.persist.yaml", false)) {
+            self().get(YamlUtil.class).dump(self(), configPath + CONFIG_NAME + ".yml");
+        } else {
+            self().get(XmlUtil.class).saveXml(configPath + CONFIG_NAME + ".xml", self());
+        }
 
         services().putAll(tempServices);
         self().properties.putAll(tempProperties);
@@ -788,14 +804,19 @@ public class ENV implements Serializable {
     public static final boolean extractResourceToDir(String resourceName, String destinationDir) {
         return extractResourceToDir(resourceName, destinationDir, false, false);
     }
-    public static final boolean extractResourceToDir(String resourceName, String destinationDir, boolean flat, boolean executable) {
+
+    public static final boolean extractResourceToDir(String resourceName,
+            String destinationDir,
+            boolean flat,
+            boolean executable) {
         //put build informations into system-properties
         getBuildInformations();
         //perhaps enrich resource name with version-number from build-infos etc.
         resourceName = System.getProperty(resourceName, resourceName);
         //perhaps get a templates destination name
         String destName = System.getProperty(resourceName + ".destination", resourceName);
-        return AppLoader.isNestingJar() ? extractResource(resourceName, destinationDir + destName, flat, executable) : false;
+        return AppLoader.isNestingJar() ? extractResource(resourceName, destinationDir + destName, flat, executable)
+            : false;
     }
 
     public static final boolean extractResource(String resourceName, boolean flat, boolean executable) {
@@ -817,9 +838,13 @@ public class ENV implements Serializable {
      * @param resourceName resource name
      * @return true if new file was created
      */
-    public static final boolean extractResource(String resourceName, String fileName, boolean flat, boolean executable) {
+    public static final boolean extractResource(String resourceName,
+            String fileName,
+            boolean flat,
+            boolean executable) {
         File destFile = new File(fileName);
-        File file = destFile.isAbsolute() ? destFile : new File(getConfigPath() + (flat ? destFile.getName() : fileName));
+        File file =
+            destFile.isAbsolute() ? destFile : new File(getConfigPath() + (flat ? destFile.getName() : fileName));
         if (!file.exists()) {
             logger(ENV.class).debug("extracting resource " + resourceName);
             if (file.getParentFile() != null)
@@ -921,7 +946,7 @@ public class ENV implements Serializable {
                 new Object[] { dependencyNames });
             if (result == null || result.toString().startsWith("FAILED"))
                 throw new IllegalStateException("couldn't resolve dependencies:\n"
-                        + StringUtil.toFormattedString(dependencyNames, 100, true));
+                    + StringUtil.toFormattedString(dependencyNames, 100, true));
         } else {
             throw new IllegalStateException("couldn't resolve dependencies:\n"
                 + StringUtil.toFormattedString(dependencyNames, 100, true));
@@ -939,6 +964,8 @@ public class ENV implements Serializable {
 
     @Persist
     protected void initSerialization() {
+        if (properties == null)
+            self.properties = new TreeMap();
         /*
          * remove the environment path itself - should not be reloaded
          */
@@ -947,6 +974,7 @@ public class ENV implements Serializable {
         /*
          * remove all not-serializable objects
          */
+
         Set<Object> keySet = properties.keySet();
         for (Iterator<?> keyIt = keySet.iterator(); keyIt.hasNext();) {
             Object key = keyIt.next();
@@ -958,6 +986,9 @@ public class ENV implements Serializable {
                 keyIt.remove();
             }
         }
+
+        if (services == null)
+            self.services = new Hashtable<Class<?>, Object>();
         Set<Class<?>> serviceKeys = services.keySet();
         for (Iterator<?> keyIt = serviceKeys.iterator(); keyIt.hasNext();) {
             Object key = keyIt.next();

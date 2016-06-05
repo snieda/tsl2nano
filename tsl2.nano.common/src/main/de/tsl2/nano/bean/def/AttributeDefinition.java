@@ -947,7 +947,7 @@ public class AttributeDefinition<T> implements IAttributeDefinition<T> {
 
     @Override
     public int hashCode() {
-        return attribute.hashCode();
+        return attribute != null ? attribute.hashCode() : super.hashCode();
     }
 
     /**
@@ -960,7 +960,7 @@ public class AttributeDefinition<T> implements IAttributeDefinition<T> {
 
     @Override
     public String toString() {
-        return attribute.toString();
+        return attribute != null ? attribute.toString() : super.toString();
     }
 
     public String toDebugString() {
