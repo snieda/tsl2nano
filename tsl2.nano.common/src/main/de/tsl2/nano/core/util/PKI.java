@@ -47,7 +47,9 @@ import de.tsl2.nano.core.ManagedException;
 import de.tsl2.nano.core.log.LogFactory;
 
 /**
- * works with keystores, certificates and de-/encryption. can create signed certificates.
+ * works with keystores, certificates and de-/encryption. can create signed certificates. For java security properties,
+ * see '${java_home}/jre/lib/security/java.security'. You can tell the jvm to use a keystore:
+ * -Djavax.net.ssl.keyStore=...java/lib/security/cacerts and -Djavax.net.ssl.keyStorePassword=tobechanged.
  * 
  * @author Tom
  * @version $Revision$
@@ -57,7 +59,7 @@ public class PKI {
 
     Crypt crypt;
     TrustedOrganisation issuer;
-    
+
     /**
      * constructor
      */
@@ -103,7 +105,7 @@ public class PKI {
             Date expiringDate) {
         return createCertPath(subjectDN, issuer, startDate, expiringDate, (PublicKey) crypt.key);
     }
-    
+
     /**
      * creates a new Certification Path. To create a self-signed certificate, give an issuerDN = null.
      * 
@@ -120,16 +122,16 @@ public class PKI {
             Date expiringDate,
             PublicKey subjectPublicKey) {
         try {
-            Set<TrustAnchor> trustAnchors = issuerDN != null ?
-                Collections.singleton(new TrustAnchor(issuerDN.toString(), subjectPublicKey, null)) : null;
+            Set<TrustAnchor> trustAnchors = issuerDN != null
+                ? Collections.singleton(new TrustAnchor(issuerDN.toString(), subjectPublicKey, null)) : null;
             X509CertSelector targetConstraints = new X509CertSelector();
             if (issuerDN != null)
                 targetConstraints.setIssuer(issuerDN.toX500Principal());
             targetConstraints.setSubject(subjectDN.toX500Principal());
             targetConstraints.setSubjectPublicKey(subjectPublicKey);
             targetConstraints.setCertificateValid(expiringDate);
-         // select only certificates with a digitalSignature (first bit = true)
-            targetConstraints.setKeyUsage(new boolean[]{true});
+            // select only certificates with a digitalSignature (first bit = true)
+            targetConstraints.setKeyUsage(new boolean[] { true });
             PKIXBuilderParameters params = new PKIXBuilderParameters(trustAnchors, targetConstraints);
             params.setRevocationEnabled(true);
             params.setDate(startDate);
@@ -213,7 +215,7 @@ public class PKI {
     public byte[] sign(InputStream data, PrivateKey privateKey) {
         return sign(data, crypt.algorithm, privateKey);
     }
-    
+
     /**
      * delegates to {@link #sign(InputStream, String, PrivateKey)} using the given file as data input stream
      */
@@ -250,7 +252,7 @@ public class PKI {
     public boolean verify(InputStream data, byte[] signature) {
         return verify(data, signature, (PublicKey) crypt.key, crypt.algorithm);
     }
-    
+
     /**
      * verifies the given signature against the given data
      * 
@@ -285,10 +287,11 @@ public class PKI {
     public static KeyStore createKeyStore() {
         return createKeyStore(null, null);
     }
+
     public static KeyStore createKeyStore(String file, char[] password) {
         return createKeyStore("PKCS12", file, password);
     }
-    
+
     /**
      * creates a new - or loads an existing {@link KeyStore} from file.
      * 
@@ -331,12 +334,13 @@ public class PKI {
             ManagedException.forward(e);
         }
     }
-    
+
     private static final Map<String, String> manual() {
-        return MapUtil.asMap("help", "this help"
-            , "gencert", "creates a certificate : <subject-dn> [issuer-dn] [public-key]"
-            , "vercert", "verifies a certificate: <cert-file>");
+        return MapUtil.asMap("help", "this help", "gencert",
+            "creates a certificate : <subject-dn> [issuer-dn] [public-key]", "vercert",
+            "verifies a certificate: <cert-file>");
     }
+
     public static void main(String[] args) {
         new Argumentator("PKI", manual(), args);
     }
