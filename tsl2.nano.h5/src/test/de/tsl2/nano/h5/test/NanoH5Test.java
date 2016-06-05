@@ -261,10 +261,18 @@ public class NanoH5Test {
 
         //extract language messages
         String basedir = new File(DIR_TEST).getParent() + "/";
-        String path = "src/test/de/tsl2/nano/h5/timesheet/";
+        String srcPath = "de/tsl2/nano/h5/timesheet/";
+        String path = "src/test/" + srcPath;
         String initDB = "init-" + name + "-anyway.sql";
         //TODO: create myapp test db
 //        assertTrue(FileUtil.copy(path + initDB, DIR_TEST + "/" + initDB));
+        assertTrue(FileUtil.copy(path + "ICSChargeImport.java", DIR_TEST + "/generated-src/" + srcPath + "ICSChargeImport.java"));
+        assertTrue(FileUtil.copy(path + "ActionImportHolidays.java", DIR_TEST +  "/generated-src/" + srcPath + "/ActionImportHolidays.java"));
+        assertTrue(FileUtil.copy(path + "ActionImportCalendar.java", DIR_TEST +  "/generated-src/" + srcPath + "/ActionImportCalendar.java"));
+        assertTrue(FileUtil.copy("bin/" + srcPath + "ICSChargeImport.class", DIR_TEST + "/generated-bin/" + srcPath + "ICSChargeImport.class"));
+        assertTrue(FileUtil.copy("bin/" + srcPath + "ActionImportHolidays.class", DIR_TEST +  "/generated-bin/" + srcPath + "/ActionImportHolidays.class"));
+        assertTrue(FileUtil.copy("bin/" + srcPath + "ActionImportCalendar.class", DIR_TEST +  "/generated-bin/" + srcPath + "/ActionImportCalendar.class"));
+
         assertTrue(FileUtil.copy(path + "messages_de.properties", DIR_TEST + "/messages_de.properties"));
         assertTrue(FileUtil.copy(path + "messages_de_DE.properties", DIR_TEST + "/messages_de_DE.properties"));
         assertTrue(FileUtil.copy("src/resources/run.bat", basedir + "run.bat"));
