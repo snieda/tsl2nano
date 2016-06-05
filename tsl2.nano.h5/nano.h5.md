@@ -71,6 +71,7 @@ A cool way to see the power of this tool can be seen in chapter _Online Quick-St
 * providing attributes as virtuals (not bound to a real bean-attribute, rule-expressions, sql-query-expressions and RESTful-service-call-expressions
 * automatic translations through network connection
 * secure connection over https and wss (_app.ssl.activate=true)
+* supporting yaml on environment and bean configurations.
 * planned interfaces: 
 	* xsd-->bean
 	* java-interface-->java-bean (mock through internal proxy)
@@ -170,6 +171,9 @@ for example:
 
 	jdbc:h2:tcp://localhost:9092/anyway
 
+on default (see mda.xml) a h2-tool web-server will be provided at port 8082. if not, you can start that server-tool inside your environment directory through:
+	
+	java -cp * org.h2.tools.Server
 
 #### Commandline arguments
 
@@ -320,6 +324,72 @@ The _BeanDefinition_ expects only _AttributeDefinition_s from deserializings - t
 On the data side, all collections are wrapped into an object of type _BeanCollector_, single instances that are prepared to be presented are wrapped into an object of type _Bean_. All attributes of a _Bean_ are wrapped into _BeanValue_s. The _BeanCollector_ and the _Bean_ are extensions of _BeanDefinition_, handling the attributes. While the used xml-serializer _Simple-XML_ is not able to create the desired root instance through reading an xml (we have to define the instance type on calling simple-xml), extensions of a _BeanDefinition_ are handled through a special mechanism, implemented in the class _Extension_.
 
 *Tip*: If you delete your environment.xml file, it will be re-created on next restart - all beandefinitions will be re-created, too.
+
+##### Configuration through YAML
+
+On default, all configuration and serialization files are stored into and read from xml, having style definitions through xsd files. if you wish to work on more human readable files, you can switch to *YAML*. The *snakeyaml* library is included into the framework. If you switch to YAML, all existing xml configuration and serialization files will be ignored!
+
+To switch to yaml, change the following environment property:
+
+	app.configuration.persist.yaml=true
+	
+On starting the application, the environment doesn't not know whether to load from xml or yaml - not having load the environment properties yet. so it tries to load first from xml and the from yaml.
+
+A simple bean-definition configuration file will then look like:
+
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+!<BeanDefinition>
+attributeDefinitions:
+  myattribute: !<AttributeDefinition>
+    attribute: !<BeanAttribute>
+      declaringClass: &id002 {name: de.tsl2.nano.test.TypeBean}
+      name: myattribute
+    cascading: false
+    columnDefinition: !<ValueColumn>
+      columnIndex: 1
+      isSortUpDirection: true
+      name: myattribute
+      presentable: &id001 !<Presentable>
+        description: typeBean.myattribute
+        enabler: &id003 !!de.tsl2.nano.action.IActivable$1 {active: true}
+        label: typeBean.myattribute
+        nesting: false
+        searchable: true
+        style: 4
+        type: 1
+        visible: true
+      sortIndex: -1
+      standardSummary: false
+      width: -1
+    composition: false
+    constraint: !<Constraint>
+      format: !<RegExpFormat> {fullMatch: true, isAbleToParse: false, maxCharacterCount: 5000,
+        pattern: '[\x00-\xFF €]{0,5000}', regExpFlags: 8}
+      length: -1
+      nullable: true
+      precision: -1
+      scale: -1
+      type: {name: de.tsl2.nano.test.TypeBean}
+    doValidation: true
+    generatedValue: false
+    id: false
+    presentable: *id001
+    unique: false
+    
+	...
+	
+clazz: *id002
+isNested: false
+isconnected: false
+isdefault: true
+name: TypeBean
+presentable: !<Presentable> {description: TypeBean, label: TypeBean, nesting: false,
+  searchable: true, style: 0, type: 0, visible: true}
+valueExpression: !<ValueExpression>
+  expression: '{myattribute}'
+  type: *id002
+	
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 ##### Registered services and definitions through the environment
 
