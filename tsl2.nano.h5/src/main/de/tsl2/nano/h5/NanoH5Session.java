@@ -913,7 +913,7 @@ public class NanoH5Session implements ISession<BeanDefinition>, Serializable {
             if (selection != null && "on".equalsIgnoreCase(parms.get(p))) {
                 //evaluate selected element to be used by an action
                 Object selectedBean = CollectionUtil.getList(data.iterator())
-                    .get(selection.intValue() - (c.hasMode(MODE_SEARCHABLE) && c.hasFilter() ? OFFSET_FILTERLINES : 0));
+                    .get(selection.intValue() - (ENV.get("layout.grid.searchrow.show", true) &&c.hasMode(MODE_SEARCHABLE) && c.hasFilter() ? OFFSET_FILTERLINES : 0));
                 selectedElements.add(selectedBean);
             }
         }
