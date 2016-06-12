@@ -754,11 +754,13 @@ public class Bean<T> extends BeanDefinition<T> {
         Bean bean = new Bean(map);
         Set keySet = map.keySet();
         Object v;
-        for (Object k : keySet) {
-            v = map.get(k);
-            bean.addAttribute(
-                new BeanValue(bean.instance, new MapValue(v != null ? v : k, (v != null ? BeanClass.getDefiningClass(v
-                    .getClass()) : null), map)));
+        if (map.keySet() != null) {//on a proxy instance, keySet() may return null!
+            for (Object k : keySet) {
+                v = map.get(k);
+                bean.addAttribute(
+                    new BeanValue(bean.instance, new MapValue(v != null ? v : k, (v != null ? BeanClass.getDefiningClass(v
+                        .getClass()) : null), map)));
+            }
         }
         return bean;
     }

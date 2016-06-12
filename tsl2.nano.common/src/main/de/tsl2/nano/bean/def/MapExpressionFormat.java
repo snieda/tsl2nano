@@ -11,6 +11,7 @@ package de.tsl2.nano.bean.def;
 
 import java.text.FieldPosition;
 import java.text.ParsePosition;
+import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Set;
@@ -54,7 +55,7 @@ public class MapExpressionFormat<T> extends ValueExpressionFormat<T> {
     public StringBuffer format(Object obj, StringBuffer toAppendTo, FieldPosition pos) {
         pos.setEndIndex(pos.getBeginIndex() + 1);
         Map<?, T> m = (Map<?, T>) obj;
-        Set<?> keySet = m.keySet();
+        Set<?> keySet = new HashSet(m.keySet());//aoid concurrentmodification exception (don't know why this occurs)
         for (Object key : keySet) {
             toAppendTo.append(key + "=" + ve.to(m.get(key)) + DIV);
         }
