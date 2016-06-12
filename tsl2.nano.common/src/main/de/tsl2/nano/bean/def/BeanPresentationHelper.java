@@ -123,6 +123,7 @@ public class BeanPresentationHelper<T> {
     public static final String PROP_LAYOUT = "layout";
     public static final String PROP_LAYOUTCONSTRAINTS = "layoutConstraints";
     public static final String PROP_ENABLER = "enabler";
+    public static final String PROP_VISIBLE = "visible";
 
     /*
      * Configuration
@@ -178,7 +179,8 @@ public class BeanPresentationHelper<T> {
     private static boolean isPresentableProperty(String propertyName) {
         return propertyName.equals(PROP_STYLE) || propertyName.equals(PROP_LAYOUT)
             || propertyName.equals(PROP_LAYOUTCONSTRAINTS)
-            || propertyName.equals(PROP_ENABLER);
+            || propertyName.equals(PROP_ENABLER)
+            || propertyName.equals(PROP_VISIBLE);
     }
 
     private static boolean isConstraintProperty(String propertyName) {

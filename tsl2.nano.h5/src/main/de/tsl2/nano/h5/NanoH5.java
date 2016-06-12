@@ -502,7 +502,7 @@ public class NanoH5 extends NanoHTTPD implements ISystemConnector<Persistence> {
             navigationModel.push(startPage);
 
             //perhaps, use META-INF/persistence.xml directly without user input
-            if (ENV.get("app.use.gui.login", true)) {
+            if (ENV.get("app.login.use.gui", true)) {
                 navigationModel.push(login);
             } else {
                 navigationModel.push(connect((Persistence) login.getInstance()));
@@ -515,7 +515,7 @@ public class NanoH5 extends NanoHTTPD implements ISystemConnector<Persistence> {
             } catch (CloneNotSupportedException e) {
                 ManagedException.forward(e);
             }
-            if (ENV.get("app.use.gui.login", true)) {
+            if (ENV.get("app.login.use.gui", true)) {
                 workflow.setLogin(login);
             } else {
                 workflow.add(connect((Persistence) login.getInstance()));
@@ -802,7 +802,7 @@ public class NanoH5 extends NanoHTTPD implements ISystemConnector<Persistence> {
             ENV.loadClassDependencies(persistence.getConnectionDriverClass(),
                 persistence.getDatasourceClass(), persistence.getProvider());
             GenericLocalBeanContainer.initLocalContainer(runtimeClassloader,
-                useJPAPersistenceProvider && ENV.get("service.connection.check.on.login", false));
+                useJPAPersistenceProvider && ENV.get("app.login.service.connection.check", false));
         }
         ENV.addService(IBeanContainer.class, BeanContainer.instance());
 

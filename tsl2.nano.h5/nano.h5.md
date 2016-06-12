@@ -523,6 +523,15 @@ Everything of your application will be accessible through this environment. It p
 
 A description of all configuration attributes can be found [here](src/resources/environment.default.xml)
 
+### The Login
+
+The environment defines, how to show the login page:
+
+	app.login.administration	true
+	app.login.use.gui			true
+
+The default _app.login.administration_ value is true. all database and persistence properties are editable and visible. If you switch it to _false_, only a simple user login with name and password are available.
+
 ### The Session and it's context
 
 A session will be opened after a user-login. The session stores a context, containing 'memorized' entities and search parameters of bean-collectors to a temporary file. So, search-panels will open with last search parameters. The memorized entities will be pre-selected on creating new entities, if there is a many-to-one relation.
@@ -890,6 +899,43 @@ The _meta-frame.html_ defines the html header and an empty body. Inside the head
 
 An example is provided with _tsl2.nano.h5.x.y.z.jar_. After first start, a css directory will be created. To turn on the given css-styling, rename the file _meta-framex.html_ to _meta-frame.html_ This is only an example - not yet working perfectly!
 
+### Editing the layout through environment properties on runtime
+
+The layout of the main panels are pre-defined through environment properties. The environment properties are changeable on runtime through the administration panel - only enabled through the main panel that comes directly after the login.
+
+* hit the button 'Administration' on the top
+* click on the button on the left side of the property field
+
+now, you see a list of all available environment properties.
+
+The following entries define panel layouts through css styles or html5 attributes:
+
+* app.page.style	background-image: url(icons/stadion.jpg)
+* layout.attribute.label.color	#FFFFFF
+* layout.attribute.label.width	250
+* layout.button.width	-1
+* layout.configurator.grid.style	background-image: url(icons/art029.jpg); color: white; background: transparent
+* layout.constraints.default
+* layout.default
+* layout.footer.grid.style	background-image: url(icons/spe.jpg)
+* layout.grid.row1.style	background-color: #CCCCFF;background: transparent
+* layout.grid.row2.style	background: transparent
+* layout.grid.show.caption	false
+* layout.grid.style	background: transparent; border: 10; color: #FFFFFF
+* layout.header.button.text.show	true
+* layout.header.grid.style	background-image: url(icons/spe.jpg); background: transparent
+* layout.header.menu.open	false
+* layout.page.data.fullwidth	false
+* layout.page.data.style	overflow: auto; height: 70%;
+* layout.page.navigation.section.style	color: #AAAAAA;
+* layout.panel.columncount	9
+* layout.panel.maxrowcount	25
+* layout.panel.style
+
+this will look like:
+
+[[img src=h5.sample.layout.jpg]]
+	
 ### Configuring Presentation, Layout and Constraints
 
 Layouts and LayoutConstraints must be of type *Map* or *String*. If a string is given, this string will be set as element style.
@@ -2080,7 +2126,7 @@ To start the application in test mode, add the parameter *-Dtsl2.nano.test=true*
 
 ### Testing JPA-Providers and the persistence.xml
 
-If you want to test some properties in the persistence.xml without letting _nano.h5_ generate it from template persistence.tml, change the environment property _login.save.persistence_ to _false_.
+If you want to test some properties in the persistence.xml without letting _nano.h5_ generate it from template persistence.tml, change the environment property _app.login.save.persistence_ to _false_.
 
 ### Help on Html5
 
@@ -2597,7 +2643,7 @@ Actual list: http://infocenter.pentaho.com/help/index.jsp?topic=%2Fsupported_com
 * jpa-providers:
 	* eclipse-link: nullpointer on java.net.URL on loading persistence.xml
 		* eclipseLink loads the METAINF/persistence.xml through another classloader. the bean-jar file will be searched from META-INF/ parent directory
-		* use prefix '!' to define, that no environment-prefix will be added. E.g. '!mybeans.jar'. to enable text-input on jarfile property, change environments 'login.jarfile.fileselector' to false.
+		* use prefix '!' to define, that no environment-prefix will be added. E.g. '!mybeans.jar'. to enable text-input on jarfile property, change environments 'app.login.jarfile.fileselector' to false.
 		* persistable fields of type Date have to annotate a temporal type 
 	* datanucleus: metamodel has to be statically generated and compiled before. this is done automatically on compiling the beans if the datanucleus libraries are present.
 	* openjpa: all jar-file names are invalid:
@@ -2609,7 +2655,7 @@ Actual list: http://infocenter.pentaho.com/help/index.jsp?topic=%2Fsupported_com
 		* see http://openjpa.apache.org/builds/2.3.0/apache-openjpa/docs/ref_guide_dbsetup_dbsupport.html
 	* ebean 3.3.2: "is not an enhanced entity bean. Subclassing is not longer supported in Ebean"
 		* ebean versions after 2.8.1 don't support DynamicProxies any more. enhancing has to be done statically through maven-builds.
-	* batoo-jpa: the jar-file has to have a protocol prefix like 'file:' (e.g.: file:./mybeans.jar). to enable text-input on jarfile property, change environments 'login.jarfile.fileselector' to false.
+	* batoo-jpa: the jar-file has to have a protocol prefix like 'file:' (e.g.: file:./mybeans.jar). to enable text-input on jarfile property, change environments 'app.login.jarfile.fileselector' to false.
 	* ebean 2.8.1: "@OneToMany MUST have Cascade.PERSIST or Cascade.ALL because this is a unidirectional relationship"
 	* ormlite: "Generated-id field 'myID' in MyEntity can't be type STRING.  Must be one of: INTEGER INTEGER_OBJ LONG LONG_OBJ UUID"
 	* ormlite: "No fields have a DatabaseField annotation in class org.anonymous.project.Address"

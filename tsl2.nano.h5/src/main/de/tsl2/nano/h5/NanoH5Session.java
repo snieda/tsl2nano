@@ -515,7 +515,7 @@ public class NanoH5Session implements ISession<BeanDefinition>, Serializable {
                 ListSet listSet = CollectionUtil.asListSet(data);
                 Object selectedItem =
                     listSet.get(uriLinkNumber.intValue()
-                        - (collector.hasMode(MODE_SEARCHABLE) && collector.hasFilter() ? 2 : 0));
+                        - (ENV.get("layout.grid.searchrow.show", true) && collector.hasMode(MODE_SEARCHABLE) && collector.hasFilter() ? 2 : 0));
                 boolean isTypeList = BeanCollector.class.isAssignableFrom(collector.getClazz());
                 responseObject = isTypeList ? selectedItem : Bean.getBean((Serializable) selectedItem);
                 return responseObject;

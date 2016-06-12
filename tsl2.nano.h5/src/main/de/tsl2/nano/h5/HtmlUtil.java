@@ -149,11 +149,11 @@ public class HtmlUtil {
     public static final String TAG_EXP_DETAILS = "details";
     public static final String TAG_EXP_SUMMARY = "summary";
     public static final String ATTR_EXP_OPEN = "open";
-    
+
     public static final String TAG_SPAN = "span";
     //the font tag is not supported in html5
 //    public static final String TAG_FONT = "font";
-    public static final String ATTR_COLOR = "color";
+    static final String ATTR_COLOR = "color";
 
     public static final String TAG_TABLE = "table";
     public static final String TAG_TBODY = "tbody";
@@ -187,6 +187,8 @@ public class HtmlUtil {
     public static final String COLOR_YELLOW = "#CCCC00";
 
     /** static styles */
+    public static final String STYLE_BACKGROUND_COLOR = "background-color";
+    public static final String STYLE_BACKGROUND_TRANSPARENT = "background: transparent;";
     public static final String STYLE_BACKGROUND_RADIAL_GRADIENT =
         "background: radial-gradient(#9999FF, #000000);";
     public static final String STYLE_BACKGROUND_FADING_TRANSITION =
@@ -194,11 +196,12 @@ public class HtmlUtil {
     public static final String STYLE_BACKGROUND_FADING_KEYFRAMES =
         "-webkit-animation: fade 1s; -webkit-animation-fill-mode: both; -moz-animation: fade 1s; -moz-animation-fill-mode: both; -o-animation: fade 1s; -o-animation-fill-mode: both; animation: fade 1s; animation-fill-mode: both;";
     public static final String CSS_BACKGROUND_FADING_KEYFRAMES =
-        "@-webkit-keyframes fade {0%{opacity: 0;} 100% {opacity: 1;}} @-moz-keyframes fade {0%{opacity: 0;} 100% {opacity: 1;}} @-o-keyframes fade {0%{opacity: 0;} 100% {opacity: 1;}} @keyframes fade {0%{opacity: 0;} 100% {opacity: 1;}} ";
+        "@-webkit-keyframes fade {0%{opacity: 0;} 100% {opacity: 1;}} @-moz-keyframes fade {0%{opacity: 0;} 100% {opacity: 1;}} @-o-keyframes fade {0%{opacity: 0;} 100% {opacity: 1;}} @keyframes fade {0%{opacity: 0;} 100% {opacity: 1;}}; ";
     public static final String STYLE_BACKGROUND_LIGHTGRAY = "background: #CCCCCC;";
     /** dynamic styles. use method {@link #style(String, String)} to set styles! */
     public static final String STYLE_TEXT_ALIGN = "text-align";
     public static final String STYLE_FONT_COLOR = "color";
+    public static final String STYLE_COLOR = "color";
 
     public static final String VAL_25PERCENT = "100%";
     public static final String VAL_100PERCENT = "100%";
@@ -384,6 +387,20 @@ public class HtmlUtil {
         return appendElement(parent, TAG_LINK, new StringBuilder(name), ATTR_HREF, href);
     }
 
+    public static Element appendStyle(Element parent, String... styles) {
+        StringBuilder b = new StringBuilder();
+        for (int i = 0; i < styles.length; i ++) {
+            if (styles[i] == null)
+                continue;
+            else if (styles[i].contains(":"))
+                b.append(styles[i]);
+            else if (i<styles.length - 1 && styles[i+1] != null){
+                b.append(style(styles[i], styles[++i]));
+            }
+        }
+        return b.length() > 0 ? appendAttributes(parent, TAG_STYLE, b) : parent;
+    }
+
     /**
      * usable to add an element attribute of type boolean. e.g.: formnovalidate='formnovalidate' or 'false'.
      * 
@@ -446,17 +463,12 @@ public class HtmlUtil {
      * 
      * @param root
      */
-    public static void deleteNullNode(Node root)
-    {
+    public static void deleteNullNode(Node root) {
         NodeList nl = root.getChildNodes();
-        for (int i = 0; i < nl.getLength(); i++)
-        {
-            if (nl.item(i).getNodeType() == Node.TEXT_NODE && nl.item(i).getNodeValue() == null)
-            {
+        for (int i = 0; i < nl.getLength(); i++) {
+            if (nl.item(i).getNodeType() == Node.TEXT_NODE && nl.item(i).getNodeValue() == null) {
                 nl.item(i).getParentNode().removeChild(nl.item(i));
-            }
-            else
-            {
+            } else {
                 deleteNullNode(nl.item(i));
             }
         }

@@ -311,18 +311,20 @@ public class BeanConfigurator<T> implements Serializable {
     }
 
     @SuppressWarnings({ "rawtypes"})
-    @de.tsl2.nano.bean.annotation.Action(name = "createAction", argNames = { "New ActionName", "Action-Expression" })
-    public void actionCreateAction (
-            @de.tsl2.nano.bean.annotation.Constraint(defaultValue = "presentable.layoutConstraints", pattern = "[%§!]\\w+", allowed = {
+    @de.tsl2.nano.bean.annotation.Action(name = "createRuleOrAction", argNames = { "New ActionName", "Type", "Action-Expression" })
+    public void actionCreateRuleOrAction (
+            @de.tsl2.nano.bean.annotation.Constraint(defaultValue = "presentable.layoutConstraints", pattern = "\\w+", allowed = {
                 "presentable", "presentable.layout", "columnDefinition" }) String name,
+            @de.tsl2.nano.bean.annotation.Constraint(defaultValue = "%: RuleScript (--> JavaScript)", pattern = "\\w+", allowed = {
+                "§: Rule (--> Operation)", "%: RuleScript (--> JavaScript)", "!: Action (--> Java)" }) String type,
             @de.tsl2.nano.bean.annotation.Constraint(pattern = ".*") String expression) {
         
-        if (expression.startsWith("%"))
+        if (type.startsWith("%"))
             ENV.get(RulePool.class).add(new RuleScript<>(name, expression, null));
-        else if (expression.startsWith("§"))
+        else if (type.startsWith("§"))
             ENV.get(RulePool.class).add(new Rule(name, expression, null));
         else
-            ENV.get(ActionPool.class).add(new Action(name, expression.startsWith("!") ? expression.substring(1) : expression));
+            ENV.get(ActionPool.class).add(new Action(name, expression));
     }
 
     @SuppressWarnings({ "rawtypes", "unchecked"})
