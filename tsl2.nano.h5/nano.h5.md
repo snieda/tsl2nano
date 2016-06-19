@@ -1781,7 +1781,7 @@ The application class _NanoH5_ has a method _createAuthorization()_ that defines
 Permissions contain a name - perhaps ended by a wildcard - and comma separated actions (a wildcard is possible, too. The permissions work on actions and data. The _BeanContainer_ provides to ask for permissions: call _BeanContainer.instance().hasPermission(name, actions) to check access to a call or to any data. The _Environment_ provides access to the implementation of _IAuthorization_. Call _Environment.get(IAuthorization.class).hasAccess(name, actions) to check for permissions.
 
 To define special permissions for a user, change the content of the file _[username]-permissions.xml_ and use the translation resourcebundle _messages.properties_ to find the field and action names to fill in.
-To use your own Authorization, set your implemenation of IAuthorization as service in the environment.
+To use your own Authorization, set your implementation of IAuthorization as service in the environment.
 
 The framework does all checks for you. But if you need extended access to authority informations, read the following details.
 
@@ -1789,10 +1789,80 @@ The framework does all checks for you. But if you need extended access to author
 
 To check whether a user can access a button (action) you call the _hasAccess_ of IAuthorization or _hasPermission_ of BeanContainer with the id of the action. The second method parameter may be a wildcard (*) or _executable_.
 
+Example configuration for the user SA with role admin:
+
+	<?xml version="1.0" encoding="UTF-8"?>
+	<subject>
+	   <principals class="java.util.Collections$SynchronizedSet">
+	      <principal class="de.tsl2.nano.serviceaccess.aas.principal.UserPrincipal" name="SA" xmlns="permissions.xsd"/>
+	      <principal class="de.tsl2.nano.serviceaccess.aas.principal.Role" name="admin">
+	         <basicPermission class="de.tsl2.nano.serviceaccess.aas.principal.APermission" actions="*" name0="*"/>
+	      </principal>
+	   </principals>
+	   <readOnly>false</readOnly>
+	</subject>
+
+Example configuration for the user Test with role bet (in a bet game):
+
+	<?xml version="1.0" encoding="UTF-8"?>
+	<subject>
+	   <principals class="java.util.Collections$SynchronizedSet">
+	      <principal class="de.tsl2.nano.serviceaccess.aas.principal.UserPrincipal" name="mone" xmlns="permissions.xsd"/>
+	      <principal class="de.tsl2.nano.serviceaccess.aas.principal.Role" name="bet">
+	         <basicPermission class="de.tsl2.nano.serviceaccess.aas.principal.APermission" actions="*" name0="bet.*"/>
+	         <basicPermission class="de.tsl2.nano.serviceaccess.aas.principal.APermission" actions="*" name0="betliste.*"/>
+	         <basicPermission class="de.tsl2.nano.serviceaccess.aas.principal.APermission" actions="*" name0="ranking.*"/>
+	         <basicPermission class="de.tsl2.nano.serviceaccess.aas.principal.APermission" actions="*" name0="rankingliste.*"/>
+	         <basicPermission class="de.tsl2.nano.serviceaccess.aas.principal.APermission" actions="*" name0="beancollectorliste.*"/>
+	         <basicPermission class="de.tsl2.nano.serviceaccess.aas.principal.APermission" actions="*" name0="matchliste.search"/>
+	         <basicPermission class="de.tsl2.nano.serviceaccess.aas.principal.APermission" actions="*" name0="matchliste.open"/>
+	      </principal>
+	   </principals>
+	   <readOnly>false</readOnly>
+	</subject>
+
+Be sure to grant the user to the desired tables and views:
+
+Example, creating a new user Test:
+
+	CREATE USER Test PASSWORD 'test'
+	GRANT ALL ON Bet TO Test
+	GRANT SELECT ON Match TO Test
+	GRANT SELECT ON SCHEMA PUBLIC TO Test
+
 ### Permissions on data
 
-To check whether an entity should be accessed by the current user, you call the _hasAccess_ of IAuthorization or _hasPermission_ of BeanContainer with the class-name + toString() representation of the current object. The second method parameter tells whether to read or write the object.
+To check whether an entity should be accessed by the current user, you call the _hasAccess_ of IAuthorization or _hasPermission_ of BeanContainer with the full-class-name[.]value-expression(data) representation of the current object. The second method parameter tells whether to read or/and write the object.
+Means, if you have a class mypath.MyBean with attributes 'name', 'value' and you define a beans value-expression: {name}, you can constrain the data with:
 
+	<basicPermission class="de.tsl2.nano.serviceaccess.aas.principal.APermission" actions="read" name0="mypath.MyClass.Sch.*"/>
+
+this will list only data for beans having a name starting with 'Sch'.
+
+Example configuration for a user seeing contents of Bet, Match, Tournament:
+
+	<?xml version="1.0" encoding="UTF-8"?>
+	<subject>
+	   <principals class="java.util.Collections$SynchronizedSet">
+	      <principal class="de.tsl2.nano.serviceaccess.aas.principal.UserPrincipal" name="mone" xmlns="permissions.xsd"/>
+	      <principal class="de.tsl2.nano.serviceaccess.aas.principal.Role" name="bet">
+	         <basicPermission class="de.tsl2.nano.serviceaccess.aas.principal.APermission" actions="*" name0="bet.*"/>
+	         <basicPermission class="de.tsl2.nano.serviceaccess.aas.principal.APermission" actions="*" name0="betliste.*"/>
+	         <basicPermission class="de.tsl2.nano.serviceaccess.aas.principal.APermission" actions="*" name0="ranking.*"/>
+	         <basicPermission class="de.tsl2.nano.serviceaccess.aas.principal.APermission" actions="*" name0="rankingliste.*"/>
+	         <basicPermission class="de.tsl2.nano.serviceaccess.aas.principal.APermission" actions="*" name0="beancollectorliste.*"/>
+	         <basicPermission class="de.tsl2.nano.serviceaccess.aas.principal.APermission" actions="*" name0="matchliste.search"/>
+	         <basicPermission class="de.tsl2.nano.serviceaccess.aas.principal.APermission" actions="*" name0="matchliste.open"/>
+	      </principal>
+	      <principal class="de.tsl2.nano.serviceaccess.aas.principal.Role" name="view">
+	         <basicPermission class="de.tsl2.nano.serviceaccess.aas.principal.APermission" actions="read,write" name0="org.anonymous.project.Bet"/>
+	         <basicPermission class="de.tsl2.nano.serviceaccess.aas.principal.APermission" actions="read" name0="org.anonymous.project.Match"/>
+	         <basicPermission class="de.tsl2.nano.serviceaccess.aas.principal.APermission" actions="read" name0="org.anonymous.project.Tournament"/>
+	      </principal>
+	   </principals>
+	   <readOnly>false</readOnly>
+	</subject>
+ 
 ## Navigation and Workflows
 
 A navigator will guide the user through his application session. Before/after each page, the navigator will evaluate the next bean to present. This may be list of entities or simply the details of an entity.
@@ -3138,9 +3208,21 @@ erdplus: kann nichts allgemeines exportieren
 YAML --> ObjectMapper
 MDA: manyToMany Error
 slf-api Version (1.5.8 --> 1.7.5) Problem
-* login for simple-remote users only with name and passwd
-* more styling for pages
-* how to inherit foreground-color?
+* (v) login for simple-remote users only with name and passwd
+* (v) more styling for pages
+* (v) how to inherit foreground-color?
+* principal not with simple wildcard but with regex
+* configuration: +AddVirtualAttribute
+* configuration->action: read annotations to show dropdowns etc.
+* top buttons invisible
+* top buttons -> aside
+* listener zerschiesst wert beim speichern
+* select-first-item: nur wenn nur ein item verfügbar
+* beanconfigurator thread-safe
+* translate bundle --> onetime access
+* NanoSwiX? Nano + Switch (Schaltung (Defaults), Leitungen (Relationen)) + X (Anlehnung an Namen bei Asterix)
+* Icons ueber REST-Service global beschaffen?
+* Icons ueber ValueExpression Namen suchen
 * Ergebnis-Dienst, Tipp-Spiel:
 Benutzer
 Tipp/Anforderung

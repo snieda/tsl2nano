@@ -340,7 +340,7 @@ public class BeanConfigurator<T> implements Serializable {
     }
 
     @SuppressWarnings({ "rawtypes", "unchecked"})
-    @de.tsl2.nano.bean.annotation.Action(name = "createCompositor", argNames = { "base type", "base attribute name", "target attribute name", "icon attribute name"})
+    @de.tsl2.nano.bean.annotation.Action(name = "createCompositor", argNames = { "base type", "base attribute name", "target attribute name (only on manyToMany)", "icon attribute name (optional)"})
     public void actionCreateCompositor (
             String baseType, String baseAttribute, String targetAttribute, String iconAttribute) {
         BeanClass bcBaseType = BeanClass.createBeanClass(baseType);
