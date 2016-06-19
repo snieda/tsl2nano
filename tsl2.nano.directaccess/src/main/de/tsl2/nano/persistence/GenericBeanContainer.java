@@ -20,8 +20,10 @@ import de.tsl2.nano.action.IAction;
 import de.tsl2.nano.bean.BeanContainer;
 import de.tsl2.nano.core.ENV;
 import de.tsl2.nano.core.cls.BeanClass;
+import de.tsl2.nano.core.util.ConcurrentUtil;
 import de.tsl2.nano.service.util.BeanContainerUtil;
 import de.tsl2.nano.service.util.IGenericService;
+import de.tsl2.nano.serviceaccess.Authorization;
 import de.tsl2.nano.serviceaccess.IAuthorization;
 
 /**
@@ -172,7 +174,8 @@ public abstract class GenericBeanContainer extends BeanContainerUtil {
     }
 
     protected static Object hasPermission(String name, String action) {
-        return ENV.get(IAuthorization.class).hasAccess(name, action);
+        IAuthorization auth = ConcurrentUtil.getCurrent(Authorization.class);
+        return auth != null && auth.hasAccess(name, action);
     }
 
     protected abstract IGenericService getGenService();

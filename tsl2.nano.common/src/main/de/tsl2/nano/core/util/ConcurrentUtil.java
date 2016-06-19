@@ -10,6 +10,7 @@
 package de.tsl2.nano.core.util;
 
 import java.lang.Thread.UncaughtExceptionHandler;
+import java.util.HashMap;
 import java.util.Hashtable;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
@@ -88,19 +89,61 @@ public class ConcurrentUtil {
     }
 
     /**
+     * collects all values, given by {@link #getCurrent(Class)} and puts them into a map
+     * @param threadLocalTypes defines the values to be loaded
+     * @return map holding types and values of current thread
+     */
+    @SuppressWarnings({ "rawtypes", "unchecked" })
+    public static Map<Class, Object> getCurrentAsMap(Class... threadLocalTypes) {
+        HashMap<Class, Object> map = new HashMap<Class, Object>(threadLocalTypes.length);
+        for (int i = 0; i < threadLocalTypes.length; i++) {
+            map.put(threadLocalTypes[i], getCurrent(threadLocalTypes[i]));
+        }
+        return map;
+    }
+
+    /**
      * sets a new value. for further informations, {@link #getCurrent(Class)}, {@link ThreadLocal} and
      * {@link ThreadLocal#set(Object)}.
      * 
-     * @param value value to store as threadlocal inside the current thread.
+     * @param values value to store as threadlocal inside the current thread.
      */
-    @SuppressWarnings("unchecked")
-    public static <T> void setCurrent(T value) {
-        ThreadLocal<T> tl = (ThreadLocal<T>) threadLocals.get(value.getClass());
-        if (tl == null) {
-            tl = new ThreadLocal<T>();
-            threadLocals.put(value.getClass(), tl);
+    @SuppressWarnings({ "unchecked", "rawtypes" })
+    public static void setCurrent(Object... values) {
+        for (int i = 0; i < values.length; i++) {
+            if (values[i] == null)
+                continue; //nothing to do
+            ThreadLocal tl = (ThreadLocal) threadLocals.get(values.getClass());
+            if (tl == null) {
+                tl = new ThreadLocal();
+                threadLocals.put(values[i].getClass(), tl);
+            }
+            tl.set(values[i]);
         }
-        tl.set(value);
+    }
+
+    /**
+     * removes all values on the current thread, stored through {@link #setCurrent(Object...)}.
+     * @param types defines the values to be removed from the current thread
+     */
+    @SuppressWarnings("rawtypes")
+    public static void removeCurrent(Class... types) {
+        ThreadLocal tl;
+        for (int i = 0; i < types.length; i++) {
+            tl = threadLocals.get(types[i]);
+            if (tl != null)
+                tl.remove();
+        }
+    }
+
+    /**
+     * removes all values on all threads, stored through {@link #setCurrent(Object...)}.
+     * @param types defines the values to be removed from all threads
+     */
+    public static void removeAllCurrent(Class... types) {
+        for (int i = 0; i < types.length; i++) {
+            threadLocals.remove(types[i]);
+        }
     }
 
     /**

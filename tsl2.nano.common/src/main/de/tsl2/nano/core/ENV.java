@@ -97,7 +97,7 @@ public class ENV implements Serializable {
     @SuppressWarnings("rawtypes")
     @ElementMap(entry = "property", key = "name", attribute = true, inline = true, required = false, keyType = String.class, valueType = Object.class)
     private TreeMap properties;
-
+    
     /**
      * holds all already loaded services - but wrapped into {@link ServiceProxy}. the {@link #serviceLocator} holds the
      * real service instances.
@@ -188,8 +188,8 @@ public class ENV implements Serializable {
     public static <T> T get(Class<T> service) {
         Object s = services().get(service);
         if (s == null) {
-            info("no service found for " + service);
-            info("available services:\n" + StringUtil.toFormattedString(services(), 500, true));
+            debug(self, "no service found for " + service);
+            debug(self, "available services:\n" + StringUtil.toFormattedString(services(), 500, true));
             String path = getConfigPath(service) + ".xml";
             if (new File(path).canRead()) {
                 self().info("loading service from " + path);
@@ -484,7 +484,9 @@ public class ENV implements Serializable {
      * @param properties The properties to set.
      */
     public static void setProperties(Map properties) {
-//        self().properties = properties;
+        if (self().properties == null)
+            self().properties = new TreeMap();
+        self().properties.putAll(properties);
         if (self().autopersist) {
             self().persist();
         }

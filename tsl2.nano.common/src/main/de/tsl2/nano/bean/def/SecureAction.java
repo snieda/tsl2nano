@@ -97,7 +97,7 @@ public abstract class SecureAction<RETURNTYPE> extends CommonAction<RETURNTYPE> 
 
     @Override
     public boolean isEnabled() {
-        return super.isEnabled() && (isAllPermission() || BeanContainer.instance().hasPermission(id, null));
+        return super.isEnabled() && (isAllPermission() || (BeanContainer.isConnected() && BeanContainer.instance().hasPermission(id, null)));
     }
 
     /**

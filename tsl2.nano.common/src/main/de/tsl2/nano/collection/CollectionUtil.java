@@ -584,15 +584,16 @@ public class CollectionUtil {
         return FilteringIterator.getFilteringMap(src, filter);
     }
 
-/**
+    /**
      * filters the given collection.
      * <p/>
-     * Attention: if 'expression' changes afterwards, the collection iterator may change, too! If you
-     * do not want that, use {@link #getList(Iterator) to create a copy.
+     * Attention: if 'expression' changes afterwards, the collection iterator may change, too! If you do not want that,
+     * use {@link #getList(Iterator) to create a copy.
      * 
      * @param <T> collection item type
      * @param src collection to filter
-     * @param expression regular expression to be used as filter. the toString() methods of objects will be used to match against.
+     * @param expression regular expression to be used as filter. the toString() methods of objects will be used to
+     *            match against.
      * @return filtered collection
      */
     public static final <I extends Iterable<T>, T> I getFiltering(I src,
@@ -690,12 +691,14 @@ public class CollectionUtil {
      * @param transformer transformer
      * @return proxied iterable giving {@link TransformingIterator} as iterator.
      */
-    public static final <I extends Iterable<T>, S, T> I getTransforming(Iterable<S> src, ITransformer<S, T> transformer) {
+    public static final <I extends Iterable<T>, S, T> I getTransforming(Iterable<S> src,
+            ITransformer<S, T> transformer) {
         return TransformingIterator.getTransformingIterable(src, transformer);
     }
 
     /**
      * combines transforming and filtering a collection
+     * 
      * @param <I> iterable type
      * @param <T> iterable content type
      * @param src mostly a collection
@@ -703,8 +706,11 @@ public class CollectionUtil {
      * @param filter filter
      * @return filtered and transformed iterable
      */
-    public static final <I extends Iterable<T>, S, T> I getTransforming(Iterable<S> src, ITransformer<S, T> transformer, IPredicate<T> filter) {
-        return TransformingIterator.getTransformingIterable((Iterable<S>)getFiltering((Iterable<T>)src, filter), transformer);
+    public static final <I extends Iterable<T>, S, T> I getTransforming(Iterable<S> src,
+            ITransformer<S, T> transformer,
+            IPredicate<T> filter) {
+        return TransformingIterator.getTransformingIterable((Iterable<S>) getFiltering((Iterable<T>) src, filter),
+            transformer);
     }
 
     /**
@@ -787,9 +793,11 @@ public class CollectionUtil {
                 return item;
             }
 
-            throw new IllegalArgumentException(i == 0 ? iterable + " is empty!" : "position must be between 0 and " + i);
+            throw new IllegalArgumentException(
+                i == 0 ? iterable + " is empty!" : "position must be between 0 and " + i);
         }
     }
+
     public static <T> Collection<NamedValue> asNamedCollection(Map<?, T> m) {
         LinkedList<NamedValue> list = new LinkedList<NamedValue>();
         NamedValue.putAll(m, list);
@@ -866,6 +874,7 @@ public class CollectionUtil {
 
     /**
      * removes all entries having a null or empty (empty string, empty collection) value.
+     * 
      * @param map map
      * @return count of removed null-entries
      */
@@ -880,5 +889,20 @@ public class CollectionUtil {
             }
         }
         return count;
+    }
+
+    /**
+     * searches the given array for the given element through its equals method. more performance provides
+     * Arrays.binarySearch(...), but with some constraints.
+     * 
+     * @param array to search through
+     * @param element to be searched
+     * @return true, if array contains element
+     */
+    public static final boolean contains(Object[] array, Object element) {
+        return Arrays.asList(array).indexOf(element) != -1;
+    }
+    public static final int indexOf(Object[] array, Object element) {
+        return Arrays.asList(array).indexOf(element);
     }
 }

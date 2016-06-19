@@ -34,7 +34,7 @@ import de.tsl2.nano.persistence.replication.Replication;
  * @author Thomas Schneider, Thomas Schneider
  * @version $Revision$
  */
-public class Persistence implements Serializable {
+public class Persistence implements Serializable, Cloneable {
     /** serialVersionUID */
     private static final long serialVersionUID = 2360829578078838714L;
     
@@ -581,6 +581,11 @@ public class Persistence implements Serializable {
     }
 
     @Override
+    public boolean equals(Object obj) {
+        return obj instanceof Persistence && Util.equals(jarFile, connectionUrl, connectionUserName, connectionPassword);
+    }
+    
+    @Override
     public String toString() {
         return getPersistenceUnit() + "-->" + getConnectionUrl() + "-->" + getConnectionUserName();
     }
@@ -643,5 +648,9 @@ public class Persistence implements Serializable {
     public static boolean isEmbeddedDatabase(String urlOrDriver) {
         return (urlOrDriver.contains("hsqldb")
                 || urlOrDriver.contains("h2"));
+    }
+    @Override
+    public Persistence clone() throws CloneNotSupportedException {
+        return (Persistence) super.clone();
     }
 }

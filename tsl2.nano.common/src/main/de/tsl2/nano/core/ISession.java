@@ -37,6 +37,9 @@ public interface ISession<WORK> {
     /** @return current life duration */
     long getDuration();
 
+    /** @return last session access */
+    long getLastAccess();
+
     /** checks for closed, expired, done, empty, etc...if check fails, it throws an exception or returns false. */
     boolean check(long timeout, boolean throwException);
     

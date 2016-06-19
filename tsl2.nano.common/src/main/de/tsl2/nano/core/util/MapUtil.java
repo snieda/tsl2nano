@@ -10,6 +10,7 @@ package de.tsl2.nano.core.util;
 
 import java.lang.reflect.Array;
 import java.lang.reflect.Method;
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
@@ -243,5 +244,19 @@ public class MapUtil {
             map.put(keys[i], null);
         }
         return map;
+    }
+    
+    /**
+     * filter
+     * @param src source map
+     * @param keys keys to find
+     * @return map only holding entries with given keys
+     */
+    public static final <K, V> Map<K, V> filter(Map<K, V> src, K... keys) {
+        LinkedHashMap<K, V> filter = new LinkedHashMap<K, V>(keys.length);
+        for (int i = 0; i < keys.length; i++) {
+            filter.put(keys[i], src.get(keys[i]));
+        }
+        return filter;
     }
 }

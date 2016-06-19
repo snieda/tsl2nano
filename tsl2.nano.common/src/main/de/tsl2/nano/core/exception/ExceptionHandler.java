@@ -74,9 +74,4 @@ public class ExceptionHandler implements UncaughtExceptionHandler {
     public boolean hasExceptions() {
         return exceptions.size() > 0;
     }
-    
-    @Override
-    public String toString() {
-        return super.toString() + (hasExceptions() ? ":\n" + StringUtil.toFormattedString(getExceptions(), -1) : "");
-    }
 }

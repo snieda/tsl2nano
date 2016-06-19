@@ -125,7 +125,6 @@ public class BeanContainer implements IBeanContainer {
             IAction<Boolean> persistableAction,
             IAction<Integer> executeAction) {
         self = new BeanContainer();
-        selfThread = new ThreadLocal<BeanContainer>();
         selfThread.set(self);
         
         self.idFinderAction = idFinder;

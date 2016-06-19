@@ -323,6 +323,7 @@ public class BeanClass<T> implements Serializable {
 
     /**
      * getAttribute
+     * 
      * @param type to of attribute
      * @return first found attribute having given type
      */
@@ -867,8 +868,8 @@ public class BeanClass<T> implements Serializable {
         }
         if (clazz.isArray()) {//fill the new array with given args
             //create a new multi-dim array with args as dimensions
-            
-            if (!Integer.class.isAssignableFrom(clazz.getComponentType()) && numbers(args)){
+
+            if (!Integer.class.isAssignableFrom(clazz.getComponentType()) && numbers(args)) {
                 int[] dims = new int[args.length];
                 for (int i = 0; i < dims.length; i++) {
                     dims[i] = (Integer) args[i];
@@ -883,19 +884,23 @@ public class BeanClass<T> implements Serializable {
             return instance;
         }
         if (args.length == 0) {//--> default constructor
-            try {
-                Constructor<T> constructor = clazz.getConstructor(new Class[0]);
-                constructor.setAccessible(true);
-                instance = constructor.newInstance();
-//                instance = (T) clazz.newInstance();
-            } catch (final Exception e) {
-                //ok, try it on declared constructors
+            if (PrimitiveUtil.isPrimitiveOrWrapper(clazz)) {
+                instance = PrimitiveUtil.getDefaultValue(clazz);
+            } else {
                 try {
-                    Constructor<T> constructor = clazz.getDeclaredConstructor(new Class[0]);
+                    Constructor<T> constructor = clazz.getConstructor(new Class[0]);
                     constructor.setAccessible(true);
                     instance = constructor.newInstance();
-                } catch (final Exception e1) {
-                    ManagedException.forward(e1);
+//                instance = (T) clazz.newInstance();
+                } catch (final Exception e) {
+                    //ok, try it on declared constructors
+                    try {
+                        Constructor<T> constructor = clazz.getDeclaredConstructor(new Class[0]);
+                        constructor.setAccessible(true);
+                        instance = constructor.newInstance();
+                    } catch (final Exception e1) {
+                        ManagedException.forward(e1);
+                    }
                 }
             }
         } else {//searching for the right constructor

@@ -16,6 +16,7 @@ import java.util.Comparator;
 
 import org.apache.commons.logging.Log;
 
+import de.tsl2.nano.collection.CollectionUtil;
 import de.tsl2.nano.core.ManagedException;
 import de.tsl2.nano.core.log.LogFactory;
 import de.tsl2.nano.core.util.FormatUtil;
@@ -82,7 +83,8 @@ public class PrimitiveUtil {
      * @return true, if given type is primitive or wrapper.
      */
     public static boolean isPrimitiveOrWrapper(Class<?> type) {
-        return type.isPrimitive() || (Comparator.class.isAssignableFrom(type) && Arrays.binarySearch(wrappers, type) >= 0);
+        //binarySearch removed in cause of having Classes that are not Comparable!
+        return type.isPrimitive() || (Comparable.class.isAssignableFrom(type) && CollectionUtil.contains(wrappers, type));
     }
 
     /**
@@ -118,26 +120,26 @@ public class PrimitiveUtil {
     public static <T> T getDefaultValue(Class<T> standardType) {
         assert standardType.isPrimitive() : "standardType must be a primitive, but is:" + standardType;
 
-        if (standardType.equals(boolean.class)) {
+        if (standardType.equals(boolean.class) || standardType.equals(Boolean.class)) {
             return (T) Boolean.FALSE;
-        } else if (standardType.equals(int.class)) {
+        } else if (standardType.equals(int.class) || standardType.equals(Integer.class)) {
             return (T) new Integer(0);
-        } else if (standardType.equals(char.class)) {
+        } else if (standardType.equals(char.class) || standardType.equals(Character.class)) {
             return (T) new Character((char) 0);
-        } else if (standardType.equals(short.class)) {
+        } else if (standardType.equals(short.class) || standardType.equals(Short.class)) {
             return (T) new Short((short) 0);
-        } else if (standardType.equals(long.class)) {
+        } else if (standardType.equals(long.class) || standardType.equals(Long.class)) {
             return (T) new Long(0);
-        } else if (standardType.equals(float.class)) {
+        } else if (standardType.equals(float.class) || standardType.equals(Float.class)) {
             return (T) new Float(0);
-        } else if (standardType.equals(double.class)) {
+        } else if (standardType.equals(double.class) || standardType.equals(Double.class)) {
             return (T) new Double(0);
-        } else if (standardType.equals(byte.class)) {
+        } else if (standardType.equals(byte.class) || standardType.equals(Byte.class)) {
             return (T) new Byte((byte) 0);
-        } else if (standardType.equals(void.class)) {
+        } else if (standardType.equals(void.class) || standardType.equals(Void.class)) {
             return null;
         } else {
-            throw ManagedException.implementationError("only primitives are allowed!", standardType);
+            throw ManagedException.implementationError("only primitives and their immutables are allowed!", standardType);
         }
     }
 

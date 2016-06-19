@@ -149,7 +149,7 @@ public class BeanDefinition<T> extends BeanClass<T> implements IPluggable<BeanDe
     static final Serializable UNDEFINED = new Serializable() {
     };
 
-    public static final String PREFIX_VIRTUAL = "virtual.";
+    public static final String PREFIX_VIRTUAL = "virtual";
     protected static final String POSTFIX_FILE_EXT = ".xml";
 
     private static final List<BeanDefinition> virtualBeanCache = new ListSet<BeanDefinition>();
@@ -1119,7 +1119,7 @@ public class BeanDefinition<T> extends BeanClass<T> implements IPluggable<BeanDe
         saveResourceEntries();
         //non-serializable actions will be removed - so we add them after serialization
         Collection<IAction> actionCopy = actions != null ? new ArrayList<IAction>(actions) : new ArrayList<IAction>();
-        saveBeanDefinition(getDefinitionFile((isVirtual() ? PREFIX_VIRTUAL : "") + getName()));
+        saveBeanDefinition(getDefinitionFile((isVirtual() ? PREFIX_VIRTUAL + "." : "") + getName()));
         if (actions == null)
             actions = actionCopy;
         else {
@@ -1169,7 +1169,7 @@ public class BeanDefinition<T> extends BeanClass<T> implements IPluggable<BeanDe
         Collection<BeanDefinition<?>> types = new ArrayList<BeanDefinition<?>>();
         String name;
         for (File file : virtDefs) {
-            name = StringUtil.substring(PREFIX_VIRTUAL + file.getName(), null, POSTFIX_FILE_EXT);
+            name = StringUtil.substring(PREFIX_VIRTUAL + "." + file.getName(), null, POSTFIX_FILE_EXT);
             types.add(getBeanDefinition(name));
         }
         return types;
