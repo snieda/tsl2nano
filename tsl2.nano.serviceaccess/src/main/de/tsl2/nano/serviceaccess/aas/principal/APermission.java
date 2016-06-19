@@ -94,7 +94,7 @@ public class APermission extends BasicPermission {
             return true;
         }
         if (bp.getActions() == null || bp.getActions().equals("*")) {
-            return false;
+            return true;
         }
         List<String> s = Arrays.asList(actions.split(","));
         List<String> sbp = Arrays.asList(bp.getActions().split(","));

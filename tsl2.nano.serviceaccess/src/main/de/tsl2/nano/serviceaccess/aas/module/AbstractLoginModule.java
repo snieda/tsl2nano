@@ -28,6 +28,7 @@ import org.apache.commons.logging.Log;
 import de.tsl2.nano.core.ENV;
 import de.tsl2.nano.core.Messages;
 import de.tsl2.nano.core.log.LogFactory;
+import de.tsl2.nano.core.util.ConcurrentUtil;
 import de.tsl2.nano.core.util.StringUtil;
 import de.tsl2.nano.core.util.Util;
 import de.tsl2.nano.serviceaccess.Authorization;
@@ -326,7 +327,9 @@ public class AbstractLoginModule implements LoginModule {
         //deprecated: access to the user subject should be done through environment
         ServiceFactory.instance().setSubject(subject);
         
-        ENV.addService(IAuthorization.class, new Authorization(subject));
+        Authorization auth = new Authorization(subject);
+        ENV.addService(IAuthorization.class, auth);
+        ConcurrentUtil.setCurrent(auth);
         LOG.debug("added UserPrincipal to Subject");
     }
 

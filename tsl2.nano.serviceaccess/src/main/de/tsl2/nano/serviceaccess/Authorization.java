@@ -61,7 +61,7 @@ public class Authorization implements IAuthorization {
         if (new File(permissions).canRead()) {
             Subject subjectDef = XmlUtil.loadXml(permissions, Subject.class);
             subject.getPrincipals().addAll(subjectDef.getPrincipals());
-        } else {
+        } else if (ENV.get("service.autorization.new.createdefault", true)){
             //if no permission was defined, a wildcard for all permissions will be set.
             subject.getPrincipals().add(new UserPrincipal(userName));
             if (!secure) {
@@ -72,7 +72,10 @@ public class Authorization implements IAuthorization {
             } catch (Exception e) {
                 LOG.error("Couldn't save authorization info in file '" + permissions + "'", e);
             }
+        } else {
+            throw new IllegalArgumentException("User '" + userName + "' not known!");
         }
+        
         return new Authorization(subject);
     }
 
