@@ -89,7 +89,7 @@ public class QueryResult<COLLECTIONTYPE extends Collection<T>, T> extends BeanCo
     public <B extends BeanDefinition<T>> B  onActivation() {
         super.onActivation();
         // TODO this may be before evaluating the new data :-(
-        if (!Util.isEmpty(query.getColumnNames()) && query.getColumnNames().size() > 1)
+        if (!Util.isEmpty(query.getColumnNames()) && query.getColumnNames().size() > 1 && !searchStatus.contains("<span"))
             searchStatus += "<span>" + Statistic.createGraph(getName(), query.getColumnNames(), (Collection<Object[]>) collection) + "</span>";
         return (B) this;
     }

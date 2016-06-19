@@ -41,6 +41,7 @@ import de.tsl2.nano.core.ManagedException;
 import de.tsl2.nano.core.classloader.RuntimeClassloader;
 import de.tsl2.nano.core.cls.BeanClass;
 import de.tsl2.nano.core.execution.SystemUtil;
+import de.tsl2.nano.core.util.ConcurrentUtil;
 import de.tsl2.nano.core.util.DateUtil;
 import de.tsl2.nano.core.util.FileUtil;
 import de.tsl2.nano.core.util.MapUtil;
@@ -199,11 +200,14 @@ public class NanoH5Test {
             ManagedException.forward(e);
         }
         String userName = Persistence.current().getConnectionUserName();
-        ENV.addService(IAuthorization.class, Authorization.create(userName, false));
+        Authorization auth = Authorization.create(userName, false);
+        ENV.addService(IAuthorization.class, auth);
+        ConcurrentUtil.setCurrent(auth);
 
 //      BeanContainer.initEmtpyServiceActions();
         GenericLocalBeanContainer.initLocalContainer(Thread.currentThread().getContextClassLoader(), false);
         ENV.addService(IBeanContainer.class, BeanContainer.instance());
+        ConcurrentUtil.setCurrent(BeanContainer.instance());
         app.start();
 //        Translator.translateBundle(ENV.getConfigPath() + "messages", Messages.keySet(), Locale.ENGLISH,
 //            Locale.getDefault());

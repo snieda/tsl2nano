@@ -30,6 +30,7 @@ import de.tsl2.nano.bean.def.ValueExpressionFormat;
 import de.tsl2.nano.core.ENV;
 import de.tsl2.nano.core.cls.BeanClass;
 import de.tsl2.nano.core.cls.IAttribute;
+import de.tsl2.nano.core.util.ConcurrentUtil;
 import de.tsl2.nano.core.util.Util;
 import de.tsl2.nano.format.RegExpFormat;
 import de.tsl2.nano.h5.Html5Presentation;
@@ -56,11 +57,11 @@ public class AttributeConfigurator implements Serializable {
 
     public AttributeConfigurator() {
         this(BeanClass.createInstance(AttributeDefinition.class,
-            new PathExpression(ENV.get(BeanConfigurator.class).def.getClazz(), "attribute.path")));
+            new PathExpression(ConcurrentUtil.getCurrent(BeanConfigurator.class).def.getClazz(), "attribute.path")));
     }
 
     public AttributeConfigurator(String attributeName) {
-        this((AttributeDefinition<?>) ENV.get(BeanConfigurator.class).def.getAttribute(attributeName));
+        this((AttributeDefinition<?>) ConcurrentUtil.getCurrent(BeanConfigurator.class).def.getAttribute(attributeName));
     }
 
     /**
@@ -232,7 +233,7 @@ public class AttributeConfigurator implements Serializable {
             @Constraint(pattern = "(\\w+") String observer,
             @Constraint(pattern = "(\\w+") String observable,
             @Constraint(pattern = "[%§!]\\w+") String rule) {
-        BeanDefinition def = ENV.get(BeanConfigurator.class).def;
+        BeanDefinition def = ConcurrentUtil.getCurrent(BeanConfigurator.class).def;
         Html5Presentation helper = (Html5Presentation) def.getPresentationHelper();
         helper.addRuleListener(observer, rule, 2, observable);
     }

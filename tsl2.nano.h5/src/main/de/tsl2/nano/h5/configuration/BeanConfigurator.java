@@ -35,6 +35,7 @@ import de.tsl2.nano.core.ENV;
 import de.tsl2.nano.core.cls.BeanClass;
 import de.tsl2.nano.core.cls.IAttribute;
 import de.tsl2.nano.core.log.LogFactory;
+import de.tsl2.nano.core.util.ConcurrentUtil;
 import de.tsl2.nano.core.util.MapUtil;
 import de.tsl2.nano.core.util.Util;
 import de.tsl2.nano.h5.Compositor;
@@ -74,7 +75,7 @@ public class BeanConfigurator<T> implements Serializable {
             //wrap the bean-def into a bean-configurator and pack it into an own bean
             BeanConfigurator<?> configurer = new BeanConfigurator(BeanDefinition.getBeanDefinition(type));
             //register it to be used by creating new AttributeConfigurators 
-            ENV.addService(BeanConfigurator.class, configurer);
+            ConcurrentUtil.setCurrent(configurer);
 
             //define the presentation
             Bean<?> configBean = Bean.getBean(configurer);
@@ -272,7 +273,7 @@ public class BeanConfigurator<T> implements Serializable {
     public Object actionSave() {
         defAccessor.set("isdefault", false);
         def.saveDefinition();
-        ENV.removeService(BeanConfigurator.class);
+        ConcurrentUtil.removeCurrent(BeanConfigurator.class);
 
         /*
          * refresh all beans
@@ -286,7 +287,7 @@ public class BeanConfigurator<T> implements Serializable {
     public Object actionReset() {
         defAccessor.set("isdefault", true);
         def.deleteDefinition();
-        ENV.removeService(BeanConfigurator.class);
+        ConcurrentUtil.removeCurrent(BeanConfigurator.class);
         /*
          * refresh all beans
          */

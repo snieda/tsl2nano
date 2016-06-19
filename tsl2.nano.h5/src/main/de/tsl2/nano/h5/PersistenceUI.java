@@ -385,6 +385,8 @@ public class PersistenceUI {
                     "persistenceUnit", "hibernateDialect", "database", "defaultSchema", "port", "generator", "autoddl",
                     "replication",
                     "jdbcProperties");
+                persistence.setConnectionUserName(null);
+                persistence.setConnectionPassword(null);
             }
         }
         if (login.toString().matches(ENV.get("app.login.present.attribute.multivalue", ".*"))) {

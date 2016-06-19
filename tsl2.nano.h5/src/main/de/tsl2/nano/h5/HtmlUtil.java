@@ -194,7 +194,7 @@ public class HtmlUtil {
     public static final String STYLE_BACKGROUND_FADING_TRANSITION =
         "-webkit-transition: background 2.5s ease-in-out; -moz-transition: background 2.5s ease-in-out; -ms-transition: background 2.5s ease-in-out; -o-transition: background 2.5s ease-in-out; transition: background 2.5s ease-in-out;";
     public static final String STYLE_BACKGROUND_FADING_KEYFRAMES =
-        "-webkit-animation: fade 1s; -webkit-animation-fill-mode: both; -moz-animation: fade 1s; -moz-animation-fill-mode: both; -o-animation: fade 1s; -o-animation-fill-mode: both; animation: fade 1s; animation-fill-mode: both;";
+        "-webkit-animation: fade 2s; -webkit-animation-fill-mode: both; -moz-animation: fade 2s; -moz-animation-fill-mode: both; -o-animation: fade 2s; -o-animation-fill-mode: both; animation: fade 2s; animation-fill-mode: both;";
     public static final String CSS_BACKGROUND_FADING_KEYFRAMES =
         "@-webkit-keyframes fade {0%{opacity: 0;} 100% {opacity: 1;}} @-moz-keyframes fade {0%{opacity: 0;} 100% {opacity: 1;}} @-o-keyframes fade {0%{opacity: 0;} 100% {opacity: 1;}} @keyframes fade {0%{opacity: 0;} 100% {opacity: 1;}}; ";
     public static final String STYLE_BACKGROUND_LIGHTGRAY = "background: #CCCCCC;";

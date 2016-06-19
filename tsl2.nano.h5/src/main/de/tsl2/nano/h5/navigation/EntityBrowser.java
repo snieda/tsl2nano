@@ -168,6 +168,6 @@ public class EntityBrowser implements IBeanNavigator {
 
     @Override
     public boolean done() {
-        return false;
+        return current == null && isEmpty();
     }
 }

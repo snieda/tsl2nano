@@ -64,6 +64,7 @@ import de.tsl2.nano.core.exception.ExceptionHandler;
 import de.tsl2.nano.core.exception.Message;
 import de.tsl2.nano.core.execution.Profiler;
 import de.tsl2.nano.core.log.LogFactory;
+import de.tsl2.nano.core.util.ConcurrentUtil;
 import de.tsl2.nano.core.util.DateUtil;
 import de.tsl2.nano.core.util.ListSet;
 import de.tsl2.nano.core.util.MapUtil;
@@ -83,6 +84,7 @@ import de.tsl2.nano.h5.websocket.NanoWebSocketServer;
 import de.tsl2.nano.h5.websocket.WebSocketExceptionHandler;
 import de.tsl2.nano.persistence.Persistence;
 import de.tsl2.nano.service.util.BeanContainerUtil;
+import de.tsl2.nano.serviceaccess.Authorization;
 import de.tsl2.nano.serviceaccess.IAuthorization;
 import de.tsl2.nano.util.operation.IRange;
 
@@ -129,7 +131,12 @@ public class NanoH5Session implements ISession<BeanDefinition>, Serializable {
     /** session start */
     private long sessionStart;
 
+    /** session access */
+    private long lastAccess;
+
     transient private IAuthorization authorization;
+    transient private BeanContainer beanContainer;
+    transient private BeanConfigurator beanConfigurator;
 
     public static final String PREFIX_STATUS_LINE = "@";
 
@@ -313,6 +320,10 @@ public class NanoH5Session implements ISession<BeanDefinition>, Serializable {
         initContext((IAuthorization) authorization, context);
     }
 
+    void setBeanContainer(BeanContainer beanContainer) {
+        this.beanContainer = beanContainer;
+    }
+
     /**
      * main session serve method. requests of type 'GET' and file-links are handled by the application class (NanoH5).
      * 
@@ -323,18 +334,32 @@ public class NanoH5Session implements ISession<BeanDefinition>, Serializable {
      * @param files
      * @return html response
      */
-    public Response serve(String uri, String method, Map<String, String> header, Map<String, String> parms, Map<String, String> files) {
+    public Response serve(String uri,
+            String method,
+            Map<String, String> header,
+            Map<String, String> parms,
+            Map<String, String> files) {
         String msg = "[undefined]";
         ManagedException ex = null;
         try {
-            Thread.currentThread().setContextClassLoader(sessionClassloader);
-            Thread.currentThread().setUncaughtExceptionHandler(exceptionHandler);
-            LOG.info(String.format("serving request:\n\turi: %s\n\tmethod: %s\n\theader: %s\n\tparms: %s\n\tfiles: %s",
-                uri,
-                method,
-                header,
-                parms,
-                files));
+            //refresh session values on the current thread
+            assignSessionToCurrentThread();
+
+            if (LOG.isDebugEnabled()) {
+                LOG.debug(
+                    String.format("serving request:\n\turi: %s\n\tmethod: %s\n\theader: %s\n\tparms: %s\n\tfiles: %s",
+                        uri,
+                        method,
+                        header,
+                        parms,
+                        files));
+            } else {
+                LOG.info(String.format("serving request: uri: %s, method: %s, %s, parms: %s",
+                    uri,
+                    method,
+                    MapUtil.filter(header, "http-client-ip"),
+                    parms));
+            }
             //WORKAROUND for uri-problem
             String referer = header.get("referer");
             if (parms.containsKey(IAction.CANCELED)
@@ -405,6 +430,30 @@ public class NanoH5Session implements ISession<BeanDefinition>, Serializable {
         return response;
     }
 
+    /**
+     * assignSessionToCurrentThread
+     */
+    void assignSessionToCurrentThread() {
+        lastAccess = System.currentTimeMillis();
+        Thread.currentThread().setContextClassLoader(sessionClassloader);
+        Thread.currentThread().setUncaughtExceptionHandler(exceptionHandler);
+        ConcurrentUtil.setCurrent(getUserAuthorization(), beanContainer);
+        if (nav.current() instanceof Bean && ((Bean) nav.current()).getInstance() instanceof BeanConfigurator) {
+            this.beanConfigurator = (BeanConfigurator) ((Bean)nav.current()).getInstance(); 
+        }
+        ConcurrentUtil.setCurrent(beanConfigurator);
+    }
+
+    /**
+     * defines, which values have to be provided to the current thread. each thread lives only for one request! this is
+     * needed because the app instance provides most of this values and is open for all sessions.
+     * 
+     * @return types to be provided to the current thread
+     */
+    static final Class[] getThreadLocalTypes() {
+        return new Class[] { BeanContainer.class, Authorization.class, BeanConfigurator.class, ExceptionHandler.class };
+    }
+
     @Override
     public void close() {
         LOG.debug("closing session " + this);
@@ -412,6 +461,7 @@ public class NanoH5Session implements ISession<BeanDefinition>, Serializable {
         nav = null;
         response = null;
         authorization = null;
+        beanContainer = null;
         builder = null;
         sessionClassloader = null;
         if (exceptionHandler instanceof WebSocketExceptionHandler) {
@@ -423,6 +473,7 @@ public class NanoH5Session implements ISession<BeanDefinition>, Serializable {
         }
         exceptionHandler = null;
         context = null;
+        ConcurrentUtil.removeCurrent(getThreadLocalTypes());
     }
 
     String createStatusText(long startTime) {
@@ -486,10 +537,10 @@ public class NanoH5Session implements ISession<BeanDefinition>, Serializable {
                 ((BeanDefinition) nav.current()).onDeactivation();
 
                 //perhaps remove configuration bean
-                BeanConfigurator configurator = ENV.get(BeanConfigurator.class);
+                BeanConfigurator configurator = ConcurrentUtil.getCurrent(BeanConfigurator.class);
                 if (configurator != null
                     && ((BeanDefinition) nav.current()).getDeclaringClass().equals(BeanConfigurator.class)) {
-                    ENV.removeService(BeanConfigurator.class);
+                    ConcurrentUtil.removeCurrent(BeanConfigurator.class);
                 }
             }
             return IAction.CANCELED;
@@ -515,7 +566,8 @@ public class NanoH5Session implements ISession<BeanDefinition>, Serializable {
                 ListSet listSet = CollectionUtil.asListSet(data);
                 Object selectedItem =
                     listSet.get(uriLinkNumber.intValue()
-                        - (ENV.get("layout.grid.searchrow.show", true) && collector.hasMode(MODE_SEARCHABLE) && collector.hasFilter() ? 2 : 0));
+                        - (ENV.get("layout.grid.searchrow.show", true) && collector.hasMode(MODE_SEARCHABLE)
+                            && collector.hasFilter() ? 2 : 0));
                 boolean isTypeList = BeanCollector.class.isAssignableFrom(collector.getClazz());
                 responseObject = isTypeList ? selectedItem : Bean.getBean((Serializable) selectedItem);
                 return responseObject;
@@ -617,7 +669,8 @@ public class NanoH5Session implements ISession<BeanDefinition>, Serializable {
                             responseObject = result;
                             if (c instanceof Bean
                                 && ((Bean) c).getInstance() instanceof Persistence) {
-                                setUserAuthorization(ENV.get(IAuthorization.class));
+                                setUserAuthorization(ConcurrentUtil.getCurrent(Authorization.class));
+                                setBeanContainer(ConcurrentUtil.getCurrent(BeanContainer.class));
                             }
                         } else if (action.getId().endsWith("reset")) {
                             responseObject = c;
@@ -873,11 +926,13 @@ public class NanoH5Session implements ISession<BeanDefinition>, Serializable {
      */
     private <T> void putSearchParameterToContext(BeanCollector<?, T> model) {
         // create shallow copies of filter, from, to
-        IRange<?> filter = BeanUtil.clone(model.getBeanFinder().getFilterRange().getInstance());
-        //replace entities with copies holding only the id
-        Bean.getBean(filter).setValue("from", BeanContainer.detachEntities(BeanUtil.clone(filter.getFrom())));
-        Bean.getBean(filter).setValue("to", BeanContainer.detachEntities(BeanUtil.clone(filter.getTo())));
-        context.put(PREFIX_CONTEXT_RANGE + model.getDeclaringClass().getName(), filter);
+        if (model.getBeanFinder().getFilterRange() != null) {
+            IRange<?> filter = BeanUtil.clone(model.getBeanFinder().getFilterRange().getInstance());
+            //replace entities with copies holding only the id
+            Bean.getBean(filter).setValue("from", BeanContainer.detachEntities(BeanUtil.clone(filter.getFrom())));
+            Bean.getBean(filter).setValue("to", BeanContainer.detachEntities(BeanUtil.clone(filter.getTo())));
+            context.put(PREFIX_CONTEXT_RANGE + model.getDeclaringClass().getName(), filter);
+        }
     }
 
     /**
@@ -913,7 +968,9 @@ public class NanoH5Session implements ISession<BeanDefinition>, Serializable {
             if (selection != null && "on".equalsIgnoreCase(parms.get(p))) {
                 //evaluate selected element to be used by an action
                 Object selectedBean = CollectionUtil.getList(data.iterator())
-                    .get(selection.intValue() - (ENV.get("layout.grid.searchrow.show", true) &&c.hasMode(MODE_SEARCHABLE) && c.hasFilter() ? OFFSET_FILTERLINES : 0));
+                    .get(selection.intValue()
+                        - (ENV.get("layout.grid.searchrow.show", true) && c.hasMode(MODE_SEARCHABLE) && c.hasFilter()
+                            ? OFFSET_FILTERLINES : 0));
                 selectedElements.add(selectedBean);
             }
         }
@@ -921,8 +978,8 @@ public class NanoH5Session implements ISession<BeanDefinition>, Serializable {
     }
 
     /**
-     * uses {@link #getSelectedElements(BeanCollector, Map<String, String>)} to provide the selection to the selectionprovider of
-     * the beancollector.
+     * uses {@link #getSelectedElements(BeanCollector, Map<String, String>)} to provide the selection to the
+     * selectionprovider of the beancollector.
      * 
      * @param c table model
      * @param parms user response
@@ -965,6 +1022,11 @@ public class NanoH5Session implements ISession<BeanDefinition>, Serializable {
     }
 
     @Override
+    public long getLastAccess() {
+        return lastAccess;
+    }
+
+    @Override
     public Main getApplication() {
         return server;
     }
@@ -997,7 +1059,8 @@ public class NanoH5Session implements ISession<BeanDefinition>, Serializable {
         boolean authenicatedButNotConnected =
             nav.current() != null && !Persistence.class.isAssignableFrom(nav.current().getDeclaringClass())
                 && authorization != null && !BeanContainer.isConnected();
-        boolean expired = getDuration() > timeout || nav == null || nav.isEmpty() || authenicatedButNotConnected;
+        boolean expired = System.currentTimeMillis() - getLastAccess() > timeout || nav == null || nav.isEmpty()
+            || authenicatedButNotConnected;
         if (expired) {
             LOG.info("session " + this + " expired!");
             if (throwException) {

@@ -46,6 +46,7 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Properties;
+import java.util.TreeMap;
 
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
@@ -353,7 +354,8 @@ public class Html5Presentation<T> extends BeanPresentationHelper<T> implements I
     }
 
     protected Element createGlasspane(Element body) {
-        return appendElement(body, TAG_DIV, ATTR_STYLE, ENV.get("app.page.glasspane.style", "background: transparent;"));
+        return appendElement(body, TAG_DIV, ATTR_STYLE,
+            ENV.get("app.page.glasspane.style", "background: transparent;"));
     }
 
     Element createHeader(ISession session, String title, String image, boolean interactive) {
@@ -517,7 +519,7 @@ public class Html5Presentation<T> extends BeanPresentationHelper<T> implements I
 
             Element script = appendElement(parent, TAG_SCRIPT, ATTR_TYPE, ATTR_TYPE_JS);
 
-            Properties p = new Properties();
+            TreeMap p = new TreeMap<>();
             //on reset, before re-loading ENV, it may be null
             if (ENV.isAvailable())
                 p.putAll(ENV.getProperties());
@@ -556,8 +558,7 @@ public class Html5Presentation<T> extends BeanPresentationHelper<T> implements I
                 return createFormDocument(session, message.toString(), null, interactive);
             } else {
                 parent =
-                    createFormDocument(session, ENV.translate(bean.getName(), true), bean.getPresentable()
-                        .getIcon(), interactive);
+                    createFormDocument(session, ENV.translate(bean.getName(), true), getIcon(bean, null), interactive);
             }
         }
 
@@ -757,7 +758,8 @@ public class Html5Presentation<T> extends BeanPresentationHelper<T> implements I
         //fallback: setting style from environment-properties
         if (isBeanConfiguration()) {
             HtmlUtil.appendAttributes((Element) panel.getParentNode(), "class", "fieldpanel", ATTR_STYLE,
-                ENV.get("layout.configurator.grid.style", "background-image: url(icons/art029.jpg);") + VAL_ROUNDCORNER);
+                ENV.get("layout.configurator.grid.style", "background-image: url(icons/art029.jpg);")
+                    + VAL_ROUNDCORNER);
         } else {
             HtmlUtil.appendAttributes((Element) panel.getParentNode(), "class", "fieldpanel", ATTR_STYLE,
                 ENV.get("layout.panel.style", "background-image: url(icons/spe.jpg);") + VAL_ROUNDCORNER);
@@ -863,7 +865,8 @@ public class Html5Presentation<T> extends BeanPresentationHelper<T> implements I
 
         appendAttributes(grid, bean.getPresentable(), true);
 
-        if (interactive && ENV.get("layout.grid.searchrow.show", true) && bean.hasMode(IBeanCollector.MODE_SEARCHABLE)) {
+        if (interactive && ENV.get("layout.grid.searchrow.show", true)
+            && bean.hasMode(IBeanCollector.MODE_SEARCHABLE)) {
             Collection<T> data = new LinkedList<T>(bean.getSearchPanelBeans());
             //this looks complicated, but if currentdata is a collection with a FilteringIterator, we need a copy of the filtered items!
             if (bean.getCurrentData() != null)
@@ -955,7 +958,8 @@ public class Html5Presentation<T> extends BeanPresentationHelper<T> implements I
                     item, interactive);
             }
         }
-        Element footer = appendElement(grid, "tfoot", ATTR_STYLE, ENV.get("layout.grid.footer.style", STYLE_BACKGROUND_LIGHTGRAY));
+        Element footer =
+            appendElement(grid, "tfoot", ATTR_STYLE, ENV.get("layout.grid.footer.style", STYLE_BACKGROUND_LIGHTGRAY));
         Element footerRow = appendElement(footer, TAG_ROW);
 
         //summary
@@ -1072,7 +1076,8 @@ public class Html5Presentation<T> extends BeanPresentationHelper<T> implements I
         Element cell = appendElement(row, TAG_CELL, attributes);
         if (actions != null) {
             for (IAction a : actions) {
-                createAction(cell, a, showText);
+                if (ENV.get("layout.action.show.disabled", true) || a.isEnabled())
+                    createAction(cell, a, showText);
             }
         }
         return cell;
@@ -1356,9 +1361,7 @@ public class Html5Presentation<T> extends BeanPresentationHelper<T> implements I
                 enable(ATTR_CHECKED, isSelected));
         }
 
-        String icon =
-            (icon = itemBean.getPresentable().getIcon()) != null ? icon : item instanceof BeanDefinition
-                && (icon = ((BeanDefinition<?>) item).getPresentable().getIcon()) != null ? icon : null;
+        String icon = getIcon(itemBean, (Serializable) item);
         if (icon != null) {
             appendElement(firstCell, TAG_IMAGE, ATTR_SRC, icon);
         }
@@ -1435,6 +1438,40 @@ public class Html5Presentation<T> extends BeanPresentationHelper<T> implements I
         return row;
     }
 
+    /**
+     * getIcon
+     * 
+     * @param item
+     * @param bean
+     * @return
+     */
+    String getIcon(BeanDefinition bean, Serializable item) {
+        String icon = null;
+        if (item == null && bean instanceof Bean)
+            item = (Serializable) ((Bean) bean).getInstance();
+        //on data, use a generic way: search inside the environment for a name like the value-expression
+        if (item != null) {
+            String value = bean.getValueExpression().to(item);
+            value = !Util.isEmpty(value) ? StringUtil.extract(value, "\\w+") : value;
+            if (!Util.isEmpty(value)) {
+                //we have to distinguish between java runtime and browser path 
+                String name = "icons/" + value.toLowerCase();
+                if (new File(ENV.getConfigPath() + name + ".jpg").canRead())
+                    icon = name + ".jpg";
+                else if (new File(ENV.getConfigPath() + name + ".png").canRead())
+                    icon = name + ".png";
+                else if (new File(ENV.getConfigPath() + name + ".gif").canRead())
+                    icon = name + ".gif";
+            }
+        }
+        //check the presentable for an icon 
+        if (icon == null) {
+            icon = (icon = bean.getPresentable().getIcon()) != null ? icon : item instanceof BeanDefinition
+                && (icon = ((BeanDefinition<?>) item).getPresentable().getIcon()) != null ? icon : null;
+        }
+        return icon;
+    }
+
     private String dark(String color) {
         //TODO: calculate lighter or darker color
         return COLOR_LIGHTER_BLUE;
@@ -1470,7 +1507,8 @@ public class Html5Presentation<T> extends BeanPresentationHelper<T> implements I
      *         type: rowname.colname
      */
     Element addEditableRow(Element table, BeanCollector<?, T> tableDescriptor, T element, String rowName) {
-        Element row = appendElement(table, TAG_ROW, ATTR_STYLE, ENV.get("layout.grid.searchrow.style", STYLE_BACKGROUND_LIGHTGRAY), ATTR_ALIGN, ALIGN_CENTER);
+        Element row = appendElement(table, TAG_ROW, ATTR_STYLE,
+            ENV.get("layout.grid.searchrow.style", STYLE_BACKGROUND_LIGHTGRAY), ATTR_ALIGN, ALIGN_CENTER);
         if (rowName != null) {
             Element r = appendElement(row, TAG_CELL, ATTR_CLASS, "beancollector.search.row");
             appendElement(r, TAG_PARAGRAPH, content(rowName), ATTR_ALIGN, VAL_ALIGN_CENTER);
@@ -1718,7 +1756,8 @@ public class Html5Presentation<T> extends BeanPresentationHelper<T> implements I
                         }
 //                    }
                     } else {//gray background on disabled
-                        HtmlUtil.appendAttributes(input, ATTR_STYLE, ENV.get("layout.field.disabled.style", STYLE_BACKGROUND_LIGHTGRAY));
+                        HtmlUtil.appendAttributes(input, ATTR_STYLE,
+                            ENV.get("layout.field.disabled.style", STYLE_BACKGROUND_LIGHTGRAY));
                     }
                 }
             }
