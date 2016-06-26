@@ -301,6 +301,7 @@ public class NanoH5Session implements ISession<BeanDefinition>, Serializable {
                 (ExceptionHandler) ENV.addService(UncaughtExceptionHandler.class, new ExceptionHandler());
         }
         Thread.currentThread().setUncaughtExceptionHandler(exceptionHandler);
+        ConcurrentUtil.setCurrent(exceptionHandler);
     }
 
     private InetSocketAddress createSocketAddress() {
@@ -437,11 +438,10 @@ public class NanoH5Session implements ISession<BeanDefinition>, Serializable {
         lastAccess = System.currentTimeMillis();
         Thread.currentThread().setContextClassLoader(sessionClassloader);
         Thread.currentThread().setUncaughtExceptionHandler(exceptionHandler);
-        ConcurrentUtil.setCurrent(getUserAuthorization(), beanContainer);
         if (nav.current() instanceof Bean && ((Bean) nav.current()).getInstance() instanceof BeanConfigurator) {
             this.beanConfigurator = (BeanConfigurator) ((Bean)nav.current()).getInstance(); 
         }
-        ConcurrentUtil.setCurrent(beanConfigurator);
+        ConcurrentUtil.setCurrent(getUserAuthorization(), beanContainer, beanConfigurator);
     }
 
     /**

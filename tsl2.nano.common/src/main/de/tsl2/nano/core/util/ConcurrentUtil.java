@@ -113,7 +113,7 @@ public class ConcurrentUtil {
         for (int i = 0; i < values.length; i++) {
             if (values[i] == null)
                 continue; //nothing to do
-            ThreadLocal tl = (ThreadLocal) threadLocals.get(values.getClass());
+            ThreadLocal tl = (ThreadLocal) threadLocals.get(values[i].getClass());
             if (tl == null) {
                 tl = new ThreadLocal();
                 threadLocals.put(values[i].getClass(), tl);

@@ -424,7 +424,7 @@ public class BeanCollector<COLLECTIONTYPE extends Collection<T>, T> extends Bean
                             @Override
                             public boolean eval(T arg0) {
                                 return getAttributeDefinitions().size() > 0 && BeanContainer.instance()
-                                    .hasPermission(BeanClass.getDefiningClass(arg0.getClass()).getName() + "." + getValueExpression().to(arg0), "read");
+                                    .hasPermission(BeanClass.getDefiningClass(arg0.getClass()).getSimpleName().toLowerCase() + "." + getValueExpression().to(arg0), "read");
                             }
                         });
                     } else {

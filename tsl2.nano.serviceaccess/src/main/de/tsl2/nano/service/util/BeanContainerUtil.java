@@ -246,8 +246,7 @@ public class BeanContainerUtil {
             //soft implementations to evaluate annotations will be used 
             //to avoid classloader problems (ClassCastExceptions on same Class!)
             //normally you should eval the annotations on server side, but we shift it in cause of performance
-            final Class clazz = (Class) ((beanOrType instanceof Class) ? beanOrType : beanOrType.getClass());
-
+            final Class clazz = BeanClass.getDefiningClass((Class) ((beanOrType instanceof Class) ? beanOrType : beanOrType.getClass()));
             final String key = attrKey(clazz, attribute);
             IAttributeDef def;
             //the stored key may have a value == null

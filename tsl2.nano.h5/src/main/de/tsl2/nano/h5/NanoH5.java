@@ -26,6 +26,7 @@ import java.util.Map;
 import java.util.Properties;
 import java.util.Stack;
 import java.util.concurrent.Executors;
+import java.util.concurrent.TimeUnit;
 
 import javax.persistence.EntityManager;
 
@@ -80,6 +81,7 @@ import de.tsl2.nano.service.util.BeanContainerUtil;
 import de.tsl2.nano.serviceaccess.Authorization;
 import de.tsl2.nano.serviceaccess.IAuthorization;
 import de.tsl2.nano.serviceaccess.ServiceFactory;
+import de.tsl2.nano.util.SchedulerUtil;
 import de.tsl2.nano.util.Translator;
 
 /**
@@ -614,10 +616,10 @@ public class NanoH5 extends NanoHTTPD implements ISystemConnector<Persistence> {
         List types = new ArrayList(beanClasses.size());
         for (Class cls : beanClasses) {
             LOG.debug("creating collector for: " + cls);
-            BeanCollector collector = BeanCollector.getBeanCollector(cls, null, MODE_EDITABLE | MODE_CREATABLE
+            BeanCollector collector = BeanCollector.getBeanCollector(cls, null, ENV.get("collector.mode.default", MODE_EDITABLE | MODE_CREATABLE
                 | MODE_MULTISELECTION
-                | MODE_SEARCHABLE, null);
-            if (!BeanContainer.isConnected() || BeanContainer.instance().hasPermission(collector.getName(), null))
+                | MODE_SEARCHABLE), null);
+            if (!BeanContainer.isConnected() || BeanContainer.instance().hasPermission(collector.getName().toLowerCase() +".view", null))
                 types.add(collector);
         }
         /*
@@ -635,7 +637,7 @@ public class NanoH5 extends NanoHTTPD implements ISystemConnector<Persistence> {
                 Locale.getDefault());
         }
 
-        BeanCollector root = new BeanCollector(BeanCollector.class, types, MODE_EDITABLE | MODE_SEARCHABLE, null);
+        BeanCollector root = new BeanCollector(BeanCollector.class, types, ENV.get("collector.root.mode", MODE_EDITABLE | MODE_SEARCHABLE), null);
         root.setName(StringUtil.toFirstUpper(StringUtil
             .substring(Persistence.current().getJarFile().replace("\\", "/"), "/", ".jar", true)));
         root.setAttributeFilter("name");
@@ -758,13 +760,14 @@ public class NanoH5 extends NanoHTTPD implements ISystemConnector<Persistence> {
                 AppLoader.isUnix() ? new String[] { "sh", "runServer.cmd" } : new String[] { "cmd", "/C", "start",
                     "runServer.cmd" };
             SystemUtil.execute(new File(ENV.getConfigPathRel()), cmd);
+            //prepare shutdown and backup
             Runtime.getRuntime().addShutdownHook(Executors.defaultThreadFactory().newThread(new Runnable() {
                 @Override
                 public void run() {
                     if (BeanContainer.isInitialized()) {
                         LOG.info("preparing shutdown of local database " + persistence.getConnectionUrl());
                         try {
-                            BeanContainer.instance().executeStmt("shutdown", true, null);
+                            BeanContainer.instance().executeStmt(ENV.get("app.shutdown.statement", "shutdown"), true, null);
                             Thread.sleep(1000);
                         } catch (Exception e) {
                             LOG.error(e.toString());
@@ -779,6 +782,18 @@ public class NanoH5 extends NanoHTTPD implements ISystemConnector<Persistence> {
                     }
                 }
             }));
+            //do a periodical backup
+            SchedulerUtil.runAt(0, -1, TimeUnit.DAYS, new Runnable() {
+                @Override
+                public void run() {
+                    LOG.info("preparing backup of local database " + persistence.getConnectionUrl());
+                    try {
+                        BeanContainer.instance().executeStmt(ENV.get("app.backup.statement", "backup to temp/database-daily-backup.zip"), true, null);
+                    } catch (Exception e) {
+                        LOG.error(e.toString());
+                    }
+                }
+            });
         }
 
         boolean useJPAPersistenceProvider = true;

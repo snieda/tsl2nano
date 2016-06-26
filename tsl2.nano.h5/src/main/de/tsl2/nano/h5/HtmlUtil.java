@@ -9,9 +9,16 @@
  */
 package de.tsl2.nano.h5;
 
+import static de.tsl2.nano.h5.HtmlUtil.ATTR_BGCOLOR;
+import static de.tsl2.nano.h5.HtmlUtil.ATTR_COLOR;
+import static de.tsl2.nano.h5.HtmlUtil.STYLE_BACKGROUND_COLOR;
+
+import java.io.InputStream;
 import java.io.StringReader;
 import java.io.StringWriter;
 import java.net.URI;
+import java.util.Hashtable;
+import java.util.Map;
 
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
@@ -30,8 +37,12 @@ import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 import org.xml.sax.InputSource;
 
+import de.tsl2.nano.collection.CollectionUtil;
+import de.tsl2.nano.core.ENV;
 import de.tsl2.nano.core.ManagedException;
 import de.tsl2.nano.core.log.LogFactory;
+import de.tsl2.nano.core.util.FileUtil;
+import de.tsl2.nano.core.util.MapUtil;
 import de.tsl2.nano.core.util.NetUtil;
 import de.tsl2.nano.core.util.StringUtil;
 import de.tsl2.nano.core.util.Util;
@@ -156,6 +167,8 @@ public class HtmlUtil {
     static final String ATTR_COLOR = "color";
 
     public static final String TAG_TABLE = "table";
+    public static final String TAG_CAPTION = "caption";
+    public static final String TAG_THEAD = "thead";
     public static final String TAG_TBODY = "tbody";
     public static final String TAG_COLGROUP = "colgroup";
     public static final String TAG_COL = "col";
@@ -259,6 +272,10 @@ public class HtmlUtil {
     public static final String CHAR_COPYRIGHT = L("copy");
     public static final String CHAR_POINT = L("bull");
 
+    protected static final StringBuilder EMPTY_CONTENT = new StringBuilder();
+
+    static String tableDivStyle;
+
     public static Element appendElements(Element parent, String... tagNames) {
         Document doc = parent.getOwnerDocument();
         for (int i = 0; i < tagNames.length; i++) {
@@ -274,6 +291,19 @@ public class HtmlUtil {
             p = (Element) p.appendChild(doc.createElement(tagNames[i]));
         }
         return p;
+    }
+
+    /**
+     * convenience delegating to {@link #appendElement(Element, String, String...)}, using tagAndContentAndattributes[0]
+     * as tag name, tagAndContentAndattributes[1] as content.
+     * 
+     * @param parent parent element to put the new element into
+     * @param tagAndContentAndattributes tag (index=0), content (index=1) and attributes with their values
+     * @return new element
+     */
+    static Element appendTag(Element parent, String... tagAndContentAndattributes) {
+        return appendElement(parent, tagAndContentAndattributes[0], content(tagAndContentAndattributes[1]),
+            CollectionUtil.copyOfRange(tagAndContentAndattributes, 2, tagAndContentAndattributes.length));
     }
 
     public static Element appendElement(Element parent, String tagName, String... attributes) {
@@ -389,12 +419,12 @@ public class HtmlUtil {
 
     public static Element appendStyle(Element parent, String... styles) {
         StringBuilder b = new StringBuilder();
-        for (int i = 0; i < styles.length; i ++) {
+        for (int i = 0; i < styles.length; i++) {
             if (styles[i] == null)
                 continue;
             else if (styles[i].contains(":"))
                 b.append(styles[i]);
-            else if (i<styles.length - 1 && styles[i+1] != null){
+            else if (i < styles.length - 1 && styles[i + 1] != null) {
                 b.append(style(styles[i], styles[++i]));
             }
         }
@@ -423,6 +453,20 @@ public class HtmlUtil {
     public static final String enableBoolean(String name, boolean enable) {
         boolean enabled = enable(name, enable) != null;
         return name + " = " + enabled;
+    }
+
+    /**
+     * exactly one one-value style can be appended as last style element.
+     * 
+     * @param styles
+     * @return
+     */
+    public static final String styles(String... styles) {
+        StringBuilder b = new StringBuilder();
+        for (int i = 0; i < styles.length; i += 2) {
+            b.append(i + 1 < styles.length ? style(styles[i], styles[i + 1]) : styles[i]);
+        }
+        return b.toString();
     }
 
     public static final String style(String styleKey, Object styleValue) {
@@ -525,4 +569,62 @@ public class HtmlUtil {
         return "&" + content + ";";
     }
 
+    protected static final StringBuilder content() {
+        return EMPTY_CONTENT;
+    }
+
+    protected static final StringBuilder content(String str) {
+        return str != null ? new StringBuilder(str) : EMPTY_CONTENT;
+    }
+
+    protected static String convert(String name, Object value, String defaultValue) {
+        if (value == null) {
+            return defaultValue;
+        } else if (name.equals(ATTR_COLOR) || name.equals(ATTR_BGCOLOR) || name.equals(STYLE_BACKGROUND_COLOR)) {
+            int[] c = (int[]) value;
+            StringBuilder s = new StringBuilder(6);
+            for (int i = 0; i < c.length; i++) {
+                s.append(StringUtil.toHexString(c.toString().getBytes()));
+            }
+            return s.toString();
+        } else {
+            return value.toString();
+        }
+    }
+
+    /**
+     * delegates to {@link #TABLE(String, StringBuilder, String...)} with null content
+     */
+    public static final String[] TABLE(String tableTag, String... attrs) {
+        return TABLE(tableTag, null, attrs);
+    }
+
+    /**
+     * decides whether to use the old table tags or its div equivalent. tries to use given attributes as styles. a style
+     * attribute can only be provided at the end!
+     * 
+     * @param tableTag
+     * @param content the tags content as stringbuilder to avoid call parameter problems
+     * @param styles additional style attributes
+     * @return div class = tag + attrs
+     */
+    public static final String[] TABLE(String tableTag, StringBuilder content, String... attrs) {
+        String cont = content != null ? content.toString() : null;
+        if (ENV.get("layout.grid.oldtabletags", true)) {
+            return CollectionUtil.concat(new String[] { tableTag, cont }, attrs);
+        } else {
+            if (attrs.length > 1 && ATTR_STYLE.equals(attrs[attrs.length - 2]))
+                attrs[attrs.length - 2] = "nostyle";
+            return CollectionUtil.concat(new String[] { "div", cont, "style", styles(attrs) },
+                new String[] { "class", tableTag });
+        }
+    }
+
+    public static String tableDivStyles() {
+        if (tableDivStyle == null) {
+            InputStream stream = ENV.getResource("tabledivstyle.template");
+            tableDivStyle = String.valueOf(FileUtil.getFileData(stream, "UTF-8"));
+        }
+        return tableDivStyle;
+    }
 }

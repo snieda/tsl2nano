@@ -45,7 +45,6 @@ import java.util.Date;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
-import java.util.Properties;
 import java.util.TreeMap;
 
 import javax.xml.parsers.DocumentBuilderFactory;
@@ -138,8 +137,7 @@ public class Html5Presentation<T> extends BeanPresentationHelper<T> implements I
     private transient String row2style;
 
     Log LOG = LogFactory.getLog(Html5Presentation.class);
-
-    protected static final StringBuilder EMPTY_CONTENT = new StringBuilder();
+    private static transient String jsWebsocketTemplate;
 
     public static final String L_GRIDWIDTH = "layout.gridwidth";
 
@@ -301,7 +299,9 @@ public class Html5Presentation<T> extends BeanPresentationHelper<T> implements I
         ENV.get(QueryPool.class).reset();
         ENV.get(ActionPool.class).reset();
         super.reset();
-        //TODO: clear template cache
+        //clear template cache
+        jsWebsocketTemplate = null;
+        HtmlUtil.tableDivStyle = null;
     }
 
     /**
@@ -402,9 +402,9 @@ public class Html5Presentation<T> extends BeanPresentationHelper<T> implements I
              * c2: center: Page-Title with image
              * c3: Page-Buttons
              */
-            Element row = appendElement(createGrid(body, "page.header.table", "page.header.table", 3), TAG_ROW);
-            Element c1 = appendElement(row, TAG_CELL);
-            Element c2 = appendElement(row, TAG_CELL);
+            Element row = appendTag(createGrid(body, "page.header.table", "page.header.table", 3), TABLE(TAG_ROW));
+            Element c1 = appendTag(row, TABLE(TAG_CELL));
+            Element c2 = appendTag(row, TABLE(TAG_CELL));
             String localDoc = ENV.getConfigPath() + "nano.h5.html";
             String docLink =
                 new File(localDoc).canRead() ? "./nano.h5.html" : "https://sourceforge.net/p/tsl2nano/wiki/";
@@ -437,7 +437,7 @@ public class Html5Presentation<T> extends BeanPresentationHelper<T> implements I
                     c2 = appendElement(c2, TAG_H3, content(title), ATTR_ALIGN, ALIGN_CENTER);
                 }
             }
-            Element c3 = appendElement(row, TAG_CELL, ATTR_ALIGN, ALIGN_RIGHT);
+            Element c3 = appendTag(row, TABLE(TAG_CELL, ATTR_ALIGN, ALIGN_RIGHT));
             if (interactive && bean != null) {
                 if (useCSS) {
                     Element menu = createMenu(c3, "Menu");
@@ -474,7 +474,10 @@ public class Html5Presentation<T> extends BeanPresentationHelper<T> implements I
     }
 
     private Element createMetaAndBody(ISession session, Element html, String title, boolean interactive) {
-        appendElement(html, ATTR_STYLE, content(CSS_BACKGROUND_FADING_KEYFRAMES));
+        appendElement(html, TAG_STYLE,
+            content(
+                ENV.get("app.frame.style", CSS_BACKGROUND_FADING_KEYFRAMES + (ENV.get("layout.grid.oldtabletags", true)
+                    ? ENV.get("layout.grid.oldtabletags.style", tableDivStyles()) : ".hover, tr:hover td {background: lighgray;}"))));
         HtmlUtil.appendAttributes(html, "manifest", ENV.get("html5.manifest.file", "tsl2nano-appcache.mf"));
         Element head = appendElement(html, TAG_HEAD, ATTR_TITLE, "Nano-H5 Application: " + title);
 
@@ -514,9 +517,10 @@ public class Html5Presentation<T> extends BeanPresentationHelper<T> implements I
      */
     private void createWebSocket(ISession session, Element parent, String elementId) {
         if (ENV.get("websocket.use", true)) {
-            InputStream jsStream = ENV.getResource("websocket.client.js.template");
-            String js = String.valueOf(FileUtil.getFileData(jsStream, "UTF-8"));
-
+            if (jsWebsocketTemplate == null) {
+                InputStream jsStream = ENV.getResource("websocket.client.js.template");
+                jsWebsocketTemplate = String.valueOf(FileUtil.getFileData(jsStream, "UTF-8"));
+            }
             Element script = appendElement(parent, TAG_SCRIPT, ATTR_TYPE, ATTR_TYPE_JS);
 
             TreeMap p = new TreeMap<>();
@@ -528,7 +532,7 @@ public class Html5Presentation<T> extends BeanPresentationHelper<T> implements I
             p.put("websocket.server.port", session.getWebsocketPort());
             p.put("websocket.element.id", elementId);
             script.appendChild(script.getOwnerDocument().createTextNode(
-                StringUtil.insertProperties(js, p)));
+                StringUtil.insertProperties(jsWebsocketTemplate, p)));
         }
     }
 
@@ -633,22 +637,23 @@ public class Html5Presentation<T> extends BeanPresentationHelper<T> implements I
             Controller controller,
             boolean interactive,
             boolean fullwidth) {
-        Element table = appendElement(parent,
-            TAG_TABLE,
-            /*            ATTR_BORDER,
-            border ? "1" : "0",*/
-            ATTR_FRAME,
-            "box",
-            fullwidth ? ATTR_WIDTH : ATTR_ALIGN,
-            fullwidth ? VAL_100PERCENT : ALIGN_CENTER,
-            ATTR_BGCOLOR,
-            COLOR_LIGHT_BLUE,
-            enable("sortable", true));
+        Element table = appendTag(parent,
+            TABLE(TAG_TABLE,
+                /*            ATTR_BORDER,
+                border ? "1" : "0",*/
+                ATTR_FRAME,
+                "box",
+                fullwidth ? ATTR_WIDTH : ATTR_ALIGN,
+                fullwidth ? VAL_100PERCENT : ALIGN_CENTER,
+                ATTR_BGCOLOR,
+                COLOR_LIGHT_BLUE,
+                enable("sortable", true)));
 //        if (Environment.get("html5.table.show.caption", false))
 //            appendElement(table, "caption", content(title));
         //fallback: setting style from environment-properties
         HtmlUtil.appendAttributes(table, ATTR_STYLE,
-            ENV.get("layout.grid.style", "background: transparent, border: 10;"));
+            ENV.get("layout.grid.style",
+                "background: transparent, border: 10;"));
 
         if (controller.getPresentable() != null) {
             appendAttributes(table, controller.getPresentable(), true);
@@ -960,18 +965,18 @@ public class Html5Presentation<T> extends BeanPresentationHelper<T> implements I
         }
         Element footer =
             appendElement(grid, "tfoot", ATTR_STYLE, ENV.get("layout.grid.footer.style", STYLE_BACKGROUND_LIGHTGRAY));
-        Element footerRow = appendElement(footer, TAG_ROW);
+        Element footerRow = appendTag(footer, TABLE(TAG_ROW));
 
         //summary
         List<IPresentableColumn> columns = tableDescriptor.getColumnDefinitionsIndexSorted();
-        Element sum = appendElement(footerRow, TAG_CELL, content(""));
+        Element sum = appendElement(footerRow, TABLE(TAG_CELL)[0], content(""));
         //collectors will not be used in context?
 //        ((Context) session.getContext()).add(tableDescriptor);
         Map contextParameter = new PrivateAccessor<>(session).call("getContextParameter", Map.class);
         boolean hasSummary = false;
         for (IPresentableColumn c : columns) {
             String text = tableDescriptor.getSummaryText(contextParameter, c.getIndex());
-            appendElement(footerRow, TAG_CELL, content(text));
+            appendElement(footerRow, TABLE(TAG_CELL)[0], content(text));
             if (text.length() > 0) {
                 hasSummary = true;
             }
@@ -981,12 +986,12 @@ public class Html5Presentation<T> extends BeanPresentationHelper<T> implements I
         }
 
         //search-count
-        footerRow = appendElement(footer, TAG_ROW);
-        appendElement(footerRow,
-            TAG_CELL,
-            content(tableDescriptor.getSummary()),
-            "colspan",
-            String.valueOf(tableDescriptor.getColumnDefinitions().size() + 1));
+        footerRow = appendTag(footer, TABLE(TAG_ROW));
+        appendTag(footerRow,
+            TABLE(TAG_CELL,
+                content(tableDescriptor.getSummary()),
+                "colspan",
+                String.valueOf(tableDescriptor.getColumnDefinitions().size() + 1)));
     }
 
     /**
@@ -1004,12 +1009,12 @@ public class Html5Presentation<T> extends BeanPresentationHelper<T> implements I
             addActionRow(grid, tableDescriptor, item);
         }
         Element footer = appendElement(grid, "tfoot");
-        Element footerRow = appendElement(footer, TAG_ROW);
-        appendElement(footerRow,
-            TAG_CELL,
-            content(tableDescriptor.getSummary()),
-            "colspan",
-            String.valueOf(tableDescriptor.getColumnDefinitions().size() + 1));
+        Element footerRow = appendTag(footer, TABLE(TAG_ROW));
+        appendTag(footerRow,
+            TABLE(TAG_CELL,
+                content(tableDescriptor.getSummary()),
+                "colspan",
+                String.valueOf(tableDescriptor.getColumnDefinitions().size() + 1)));
     }
 
     public static <T> String toString(T item, ValueExpressionFormat<T> vef) {
@@ -1072,8 +1077,9 @@ public class Html5Presentation<T> extends BeanPresentationHelper<T> implements I
             boolean showText,
             String... attributes) {
         Element panel = createGrid(parent, "Actions", "action.panel", actions != null ? 1 + actions.size() : 1);
-        Element row = appendElement(panel, TAG_ROW, ATTR_CLASS, "action.panel");
-        Element cell = appendElement(row, TAG_CELL, attributes);
+        Element row = appendTag(panel, TABLE(TAG_ROW, ATTR_CLASS, "action.panel"));
+        Element cell = appendTag(row, TABLE(TAG_CELL, attributes));
+        HtmlUtil.appendAttributes(cell, ATTR_STYLE, ENV.get("layout.action.panel", ""));
         if (actions != null) {
             for (IAction a : actions) {
                 if (ENV.get("layout.action.show.disabled", true) || a.isEnabled())
@@ -1203,9 +1209,10 @@ public class Html5Presentation<T> extends BeanPresentationHelper<T> implements I
         if (image != null) {
             appendElement(action, TAG_IMAGE, ATTR_SRC, image, ATTR_ALT, label);
         }
-        String style = ENV.get("layout.action.style", STYLE_BACKGROUND_TRANSPARENT + style(STYLE_COLOR, COLOR_WHITE));
+        String style =
+            ENV.get("layout.action.style", ""/*STYLE_BACKGROUND_TRANSPARENT + style(STYLE_COLOR, COLOR_WHITE)*/);
         int btnWidth;
-        if ((btnWidth = ENV.get("layout.button.width", -1)) != -1) {
+        if ((btnWidth = ENV.get("layout.action.width", -1)) != -1) {
             style += style(ATTR_WIDTH, btnWidth);
         }
         HtmlUtil.appendAttributes(action, ATTR_STYLE, style);
@@ -1227,78 +1234,78 @@ public class Html5Presentation<T> extends BeanPresentationHelper<T> implements I
     }
 
     Element createGrid(Element parent, String title, String id, boolean border, boolean fullwidth, String... columns) {
-        Element table = appendElement(parent,
-            TAG_TABLE,
-            ATTR_BORDER,
-            border ? "10" : "0",
-            ATTR_ID,
-            id,
-            ATTR_FRAME,
-            "box",
-            fullwidth ? ATTR_WIDTH : ATTR_ALIGN,
-            fullwidth ? VAL_100PERCENT : ALIGN_CENTER,
-            /*ATTR^_BGCOLOR,
-            COLOR_LIGHT_BLUE,
-            ATTR_STYLE,
-            VAL_OPACITY_0_5,*/
-            enable("sortable", true));
+        Element table = appendTag(parent,
+            TABLE(TAG_TABLE,
+                ATTR_BORDER,
+                border ? ENV.get("layout.grid.border.width", "10") : "0",
+                ATTR_ID,
+                id,
+                ATTR_FRAME,
+                "box",
+                fullwidth ? ATTR_WIDTH : ATTR_ALIGN,
+                fullwidth ? VAL_100PERCENT : ALIGN_CENTER,
+                /*ATTR_BGCOLOR,
+                COLOR_LIGHT_BLUE,
+                ATTR_STYLE,
+                VAL_OPACITY_0_5,*/
+                enable("sortable", true)));
         if (ENV.get("layout.grid.caption.show", false)) {
-            appendElement(table, "caption", content(title));
+            appendElement(table, TABLE(TAG_CAPTION)[0], content(title));
         }
-        Element head = appendElement(table, "thead");
-        Element colgroup = appendElement(head, TAG_ROW);
+        Element head = appendTag(table, TABLE(TAG_THEAD));
+        Element colgroup = appendTag(head, TABLE(TAG_ROW));
         for (int i = 0; i < columns.length; i++) {
-            appendElement(colgroup, TAG_HEADERCELL, content(columns[i]), ATTR_STYLE,
+            appendElement(colgroup, TABLE(TAG_HEADERCELL)[0], content(columns[i]), ATTR_STYLE,
                 ENV.get("layout.grid.header.column.style", STYLE_BACKGROUND_LIGHTGRAY));
         }
-        return appendElement(table, TAG_TBODY);
+        return appendTag(table, TABLE(TAG_TBODY));
     }
 
     Element createGrid(Element parent, String title, boolean border, BeanCollector<?, ?> collector, boolean fullwidth) {
-        Element table = appendElement(parent,
-            TAG_TABLE,
-            ATTR_BORDER,
-            border ? "10" : "0",
-            ATTR_FRAME,
-            "box", /*"contenteditable", "true",*/
-            fullwidth ? ATTR_WIDTH : ATTR_ALIGN,
-            fullwidth ? VAL_100PERCENT : ALIGN_CENTER,
-            /*ATTR_BGCOLOR,
-            COLOR_LIGHT_BLUE,*/
-            ATTR_STYLE,
-            VAL_TRANSPARENT + VAL_ROUNDCORNER,
-            enable("sortable", true));
+        Element table = appendTag(parent,
+            TABLE(TAG_TABLE,
+                ATTR_BORDER,
+                border ? ENV.get("layout.grid.border.width", "10") : "0",
+                ATTR_FRAME,
+                "box", /*"contenteditable", "true",*/
+                fullwidth ? ATTR_WIDTH : ATTR_ALIGN,
+                fullwidth ? VAL_100PERCENT : ALIGN_CENTER,
+                /*ATTR_BGCOLOR,
+                COLOR_LIGHT_BLUE,*/
+                ATTR_STYLE,
+                VAL_TRANSPARENT + VAL_ROUNDCORNER,
+                enable("sortable", true)));
         if (ENV.get("layout.grid.caption.show", false)) {
-            appendElement(table, "caption", content(title));
+            appendElement(table, TABLE(TAG_CAPTION)[0], content(title));
         }
-        Element head = appendElement(table, "thead");
+        Element head = appendTag(table, TABLE(TAG_THEAD));
         if (collector.getPresentable() != null) {
             appendAttributes(table, collector.getPresentable(), true);
         }
-        Element colgroup = appendElement(head, TAG_ROW, ATTR_BORDER, "1");
+        Element colgroup = appendTag(head, TABLE(TAG_ROW, ATTR_BORDER, "1"));
         if (collector.hasMode(MODE_MULTISELECTION)) {
-            appendElement(colgroup, TAG_HEADERCELL, content());
+            appendElement(colgroup, TABLE(TAG_HEADERCELL)[0], content());
         }
         Collection<IPresentableColumn> columns = collector.getColumnDefinitionsIndexSorted();
         for (IPresentableColumn c : columns) {
-            Element th = appendElement(colgroup,
-                TAG_HEADERCELL,
-                ATTR_ID,
-                c.getIndex() + ":" + c.getName(),
-                ATTR_BORDER,
-                "1",
-                ATTR_WIDTH,
-                Presentable.asText(c.getWidth()),
-                //                "style",
+            Element th = appendTag(colgroup,
+                TABLE(TAG_HEADERCELL,
+                    ATTR_ID,
+                    c.getIndex() + ":" + c.getName(),
+                    ATTR_BORDER,
+                    "1",
+                    ATTR_WIDTH,
+                    Presentable.asText(c.getWidth()),
+                    //                "style",
 //                "-webkit-transform: scale(1.2);",
-                ATTR_STYLE,
-                ENV.get("layout.grid.header.column.style", STYLE_BACKGROUND_LIGHTGRAY));
+                    ATTR_STYLE,
+                    ENV.get("layout.grid.header.column.style", STYLE_BACKGROUND_LIGHTGRAY)));
             if (c.getPresentable() != null) {
                 appendAttributes(th, c.getPresentable(), true);
             }
             createAction(th, c.getSortingAction(collector));
         }
-        return appendElement(table, TAG_TBODY);
+        return appendTag(table, TABLE(TAG_TBODY));
     }
 
     protected Element addRow(ISession session,
@@ -1323,32 +1330,32 @@ public class Html5Presentation<T> extends BeanPresentationHelper<T> implements I
         String tab = String.valueOf(++tabIndex);
         String shortCut = shortCut(tabIndex);
         Element row =
-            appendElement(grid,
-                TAG_ROW,
-                ATTR_ID,
-                Util.asString(itemBean.getId()),
-                ATTR_CLASS,
-                "beancollector.row",
-                "onclick",
-                tableDescriptor.hasMode(IBeanCollector.MODE_EDITABLE)
-                    ? "this.getElementsByTagName('input')[0].onclick()" : null,
-                "ondblclick",
-                "location=this.getElementsByTagName('a')[0]",
-                ATTR_TABINDEX,
-                tab,
-                ATTR_ACCESSKEY,
-                shortCut,
-                ATTR_TITLE,
-                "ALT+" + shortCut + (LOG.isDebugEnabled() ? "\n"
-                    + StringUtil.toFormattedString(BeanUtil.toValueMap(item), 80, true) : ""),
-                ATTR_FORMTARGET,
-                VAL_FRM_SELF,
-                ATTR_STYLE, row1style
-            /*ATTR_BGCOLOR, rowBGColor*/);
+            appendTag(grid,
+                TABLE(TAG_ROW,
+                    ATTR_ID,
+                    Util.asString(itemBean.getId()),
+                    ATTR_CLASS,
+                    "beancollector.row",
+                    "onclick",
+                    tableDescriptor.hasMode(IBeanCollector.MODE_EDITABLE)
+                        ? "this.getElementsByTagName('input')[0].onclick()" : null,
+                    "ondblclick",
+                    "location=this.getElementsByTagName('a')[0]",
+                    ATTR_TABINDEX,
+                    tab,
+                    ATTR_ACCESSKEY,
+                    shortCut,
+                    ATTR_TITLE,
+                    "ALT+" + shortCut + (LOG.isDebugEnabled() ? "\n"
+                        + StringUtil.toFormattedString(BeanUtil.toValueMap(item), 80, true) : ""),
+                    ATTR_FORMTARGET,
+                    VAL_FRM_SELF,
+                    ATTR_STYLE, row1style
+                /*ATTR_BGCOLOR, rowBGColor*/));
 
         //first cell: bean reference as link
         String length = String.valueOf(grid.getChildNodes().getLength() - 1);
-        Element firstCell = appendElement(row, TAG_CELL);
+        Element firstCell = appendTag(row, TABLE(TAG_CELL));
         appendElement(firstCell, TAG_LINK, content(), ATTR_HREF, length);
         if (multiSelection) {
             appendElement(firstCell,
@@ -1382,11 +1389,11 @@ public class Html5Presentation<T> extends BeanPresentationHelper<T> implements I
                     File valueFile = beanValue.getValueFile();
                     value = valueFile != null ? valueFile.getPath() : null;
                     cell =
-                        appendElement(row, TAG_CELL, ATTR_TITLE,
+                        appendTag(row, TABLE(TAG_CELL, ATTR_TITLE,
                             itemBean.toString() + ": " + ENV.translate(c.getName(), true),
                             ATTR_HEADERS, c.getIndex() + ":" + c.getName(), ATTR_ID,
                             tableDescriptor.getId() + "[" + tabIndex
-                                + ", " + c.getIndex() + "]");
+                                + ", " + c.getIndex() + "]"));
                     Element data = createDataTag(cell, beanValue);
                     if (c.getPresentable() != null) {
                         appendAttributes(data, rowBackground, c.getPresentable(), false);
@@ -1399,22 +1406,22 @@ public class Html5Presentation<T> extends BeanPresentationHelper<T> implements I
                     && !BeanUtil.isStandardType(attr.getType())
                     && attr.getValue() != null) {//nesting panels
                     cell =
-                        appendElement(row, TAG_CELL, ATTR_TITLE,
+                        appendTag(row, TABLE(TAG_CELL, ATTR_TITLE,
                             itemBean.toString() + ": " + ENV.translate(c.getName(), true),
                             ATTR_HEADERS, c.getIndex() + ":" + c.getName(), ATTR_ID,
                             tableDescriptor.getId() + "[" + tabIndex
-                                + ", " + c.getIndex() + "]");
+                                + ", " + c.getIndex() + "]"));
 //                    cell = appendElement(cell, TAG_EMBED);
                     createContentPanel(session, cell,
                         Bean.getBean((Serializable) attr.getValue()), interactive, false);
                 } else {//standard --> text
                     value = tableDescriptor.getColumnText(item, c.getIndex());
                     cell =
-                        appendElement(row, TAG_CELL, content(value), ATTR_TITLE,
+                        appendTag(row, TABLE(TAG_CELL, content(value), ATTR_TITLE,
                             itemBean.toString() + ": " + ENV.translate(c.getName(), true),
                             ATTR_HEADERS, c.getIndex() + ":" + c.getName(), ATTR_ID,
                             tableDescriptor.getId() + "[" + tabIndex
-                                + ", " + c.getIndex() + "]");
+                                + ", " + c.getIndex() + "]"));
                     if (c.getPresentable() != null) {
                         appendAttributes(cell, rowBackground, c.getPresentable(), false);
                     }
@@ -1426,11 +1433,11 @@ public class Html5Presentation<T> extends BeanPresentationHelper<T> implements I
         } else {//don't show only an empty entry!
             value = StringUtil.toString(item, Integer.MAX_VALUE);
             cell =
-                appendElement(row, TAG_CELL, content(value), ATTR_TITLE,
+                appendTag(row, TABLE(TAG_CELL, content(value), ATTR_TITLE,
                     itemBean.hashCode() + ": " + ENV.translate("toString", true),
                     ATTR_HEADERS, "0: toString", ATTR_ID,
                     tableDescriptor.getId() + "[" + tabIndex
-                        + ", 0" + "]");
+                        + ", 0" + "]"));
             if (Messages.isMarkedAsProblem(value)) {
                 HtmlUtil.appendAttributes(cell, ATTR_COLOR, COLOR_RED);
             }
@@ -1507,10 +1514,10 @@ public class Html5Presentation<T> extends BeanPresentationHelper<T> implements I
      *         type: rowname.colname
      */
     Element addEditableRow(Element table, BeanCollector<?, T> tableDescriptor, T element, String rowName) {
-        Element row = appendElement(table, TAG_ROW, ATTR_STYLE,
-            ENV.get("layout.grid.searchrow.style", STYLE_BACKGROUND_LIGHTGRAY), ATTR_ALIGN, ALIGN_CENTER);
+        Element row = appendTag(table, TABLE(TAG_ROW, ATTR_STYLE,
+            ENV.get("layout.grid.searchrow.style", STYLE_BACKGROUND_LIGHTGRAY), ATTR_ALIGN, ALIGN_CENTER));
         if (rowName != null) {
-            Element r = appendElement(row, TAG_CELL, ATTR_CLASS, "beancollector.search.row");
+            Element r = appendTag(row, TABLE(TAG_CELL, ATTR_CLASS, "beancollector.search.row"));
             appendElement(r, TAG_PARAGRAPH, content(rowName), ATTR_ALIGN, VAL_ALIGN_CENTER);
         }
 
@@ -1518,7 +1525,7 @@ public class Html5Presentation<T> extends BeanPresentationHelper<T> implements I
         Collection<IPresentableColumn> colDefs = tableDescriptor.getColumnDefinitionsIndexSorted();
         for (IPresentableColumn c : colDefs) {
             String value = Util.asString(tableDescriptor.getColumnText(element, c.getIndex(), false));
-            Element cell0 = appendElement(row, TAG_CELL);
+            Element cell0 = appendTag(row, TABLE(TAG_CELL));
             Element cell = appendElement(cell0, TAG_SPAN);
             appendElement(cell,
                 TAG_INPUT,
@@ -1547,8 +1554,8 @@ public class Html5Presentation<T> extends BeanPresentationHelper<T> implements I
     }
 
     Element addRow(Element table, Element... cells) {
-        Element row = appendElement(table, TAG_ROW);
-        Element rowColumn = appendElement(row, TAG_CELL);
+        Element row = appendTag(table, TABLE(TAG_ROW));
+        Element rowColumn = appendTag(row, TABLE(TAG_CELL));
         for (int i = 0; i < cells.length; i++) {
             rowColumn.appendChild(cells[i]);
         }
@@ -1558,22 +1565,22 @@ public class Html5Presentation<T> extends BeanPresentationHelper<T> implements I
     protected Element addActionRow(Element grid, Controller<?, T> controller, T item) {
         Bean<T> itemBean = controller.getBean(item);
         Element row =
-            appendElement(grid,
-                TAG_ROW,
-                ATTR_ID,
-                itemBean.getId().toString(),
-                ATTR_TABINDEX,
-                ++tabIndex + "",
-                ATTR_FORMTARGET,
-                VAL_FRM_SELF,
-                ATTR_BGCOLOR, itemBean.getPresentable().layout(ATTR_BGCOLOR));
+            appendTag(grid,
+                TABLE(TAG_ROW,
+                    ATTR_ID,
+                    itemBean.getId().toString(),
+                    ATTR_TABINDEX,
+                    ++tabIndex + "",
+                    ATTR_FORMTARGET,
+                    VAL_FRM_SELF,
+                    ATTR_BGCOLOR, itemBean.getPresentable().layout(ATTR_BGCOLOR)));
 
         //first cell: bean reference
-        Element cell = appendElement(row, TAG_CELL, content(itemBean.toString()));
+        Element cell = appendElement(row, TABLE(TAG_CELL)[0], content(itemBean.toString()));
 
         Collection<IAction> actions = itemBean.getActions();
         for (IAction a : actions) {
-            cell = appendElement(row, TAG_CELL);
+            cell = appendTag(row, TABLE(TAG_CELL));
             Element btn = createAction(cell, a);
             btn.setAttribute(ATTR_NAME, Controller.PREFIX_CTRLACTION + tabIndex + controller.POSTFIX_CTRLACTION
                 + a.getId());
@@ -1585,10 +1592,11 @@ public class Html5Presentation<T> extends BeanPresentationHelper<T> implements I
         IPresentable p = beanValue.getPresentation();
         boolean multiLineText = isMultiline(p);
         Element row =
-            parent.getNodeName().equals(TAG_ROW) ? parent : appendElement(parent, TAG_ROW/*, ATTR_STYLE, VAL_OPAC*/);
+            parent.getNodeName().equals(TAG_ROW) || TAG_ROW.equals(parent.getAttribute(ATTR_CLASS)) ? parent
+                : appendTag(parent, TABLE(TAG_ROW)/*, ATTR_STYLE, VAL_OPAC*/);
         //first the label
         if (p.getLabel() != null) {
-            Element cellLabel = appendElement(row, TAG_CELL, content(p.getLabel()
+            Element cellLabel = appendTag(row, TABLE(TAG_CELL, content(p.getLabel()
                 + (beanValue.nullable() ? "" : isGeneratedValue(beanValue) ? " (!)" : " (*)")), ATTR_ID,
                 beanValue.getId() + ".label",
                 ATTR_CLASS,
@@ -1598,15 +1606,15 @@ public class Html5Presentation<T> extends BeanPresentationHelper<T> implements I
                     (String) BeanUtil.valueOf(p.getForeground(),
                         ENV.get("layout.attribute.label.color", "#0000cc"))),
                 enableFlag(ATTR_HIDDEN, !p.isVisible()),
-                enableFlag(ATTR_REQUIRED, !beanValue.nullable() && !isGeneratedValue(beanValue)));
+                enableFlag(ATTR_REQUIRED, !beanValue.nullable() && !isGeneratedValue(beanValue))));
             if (p.getIcon() != null) {
                 appendElement(cellLabel, TAG_IMAGE, ATTR_SRC, p.getIcon());
             }
         } else {//create an empty label
-            appendElement(row, TAG_CELL);
+            appendTag(row, TABLE(TAG_CELL));
         }
         //create the layout and layout-constraints
-        Element cell = appendElement(row, TAG_CELL);
+        Element cell = appendTag(row, TABLE(TAG_CELL));
         cell = createLayoutConstraints(cell, p);
         cell = createLayout(cell, p);
         //now the field itself
@@ -1623,7 +1631,7 @@ public class Html5Presentation<T> extends BeanPresentationHelper<T> implements I
                 String type = getType(beanValue);
                 String width = Presentable.asText(p.getWidth());
                 if (width == null) {
-                    width = "50";
+                    width = ENV.get("field.input.size", "50");
                 }
                 boolean isOption = "checkbox".equals(type);
                 //Attention on Autoboxing with null values!
@@ -1673,7 +1681,7 @@ public class Html5Presentation<T> extends BeanPresentationHelper<T> implements I
 
                 if (multiLineText) {
                     HtmlUtil.appendAttributes(input, ATTR_ROWS, p.layout("rows", "5"), ATTR_COLS,
-                        p.layout("cols", "50"),
+                        p.layout("cols", ENV.get("field.input.size", "50")),
                         enable("wrap", p.layout("wrap", true)));
                     input.setTextContent(beanValue.getValueText());
                 }
@@ -1769,10 +1777,10 @@ public class Html5Presentation<T> extends BeanPresentationHelper<T> implements I
         }
 
         if (beanValue.hasStatusError()) {
-            row = appendElement(parent, TAG_ROW);
+            row = appendTag(parent, TABLE(TAG_ROW));
 //            appendElement(row, TAG_HEADERCELL, content(null));
-            appendElement(row, TAG_CELL, content(beanValue.getStatus().message()), ATTR_SPANCOL, "3", ATTR_SIZE, "-1",
-                ATTR_STYLE, style(STYLE_FONT_COLOR, COLOR_RED));
+            appendTag(row, TABLE(TAG_CELL, content(beanValue.getStatus().message()), ATTR_SPANCOL, "3", ATTR_SIZE, "-1",
+                ATTR_STYLE, style(STYLE_FONT_COLOR, COLOR_RED)));
         }
         return input;
     }
@@ -1854,9 +1862,9 @@ public class Html5Presentation<T> extends BeanPresentationHelper<T> implements I
     private Element createLayout(Element parent, IPresentable presentable) {
         Serializable l = presentable.getLayout();
         if (l instanceof Map) {
-            parent = appendElement(parent, TAG_TABLE, MapUtil.asStringArray((Map) l));
+            parent = appendTag(parent, TABLE(TAG_TABLE, MapUtil.asStringArray((Map) l)));
         } else if (l instanceof String) {
-            parent = appendElement(parent, TAG_TABLE, ATTR_STYLE, (String) l);
+            parent = appendTag(parent, TABLE(TAG_TABLE, ATTR_STYLE, (String) l));
         }
         return parent;
     }
@@ -2140,29 +2148,6 @@ public class Html5Presentation<T> extends BeanPresentationHelper<T> implements I
     @Override
     public Html5Presentable createPresentable(AttributeDefinition<?> attr) {
         return new Html5Presentable(attr);
-    }
-
-    protected static final StringBuilder content() {
-        return EMPTY_CONTENT;
-    }
-
-    protected static final StringBuilder content(String str) {
-        return str != null ? new StringBuilder(str) : EMPTY_CONTENT;
-    }
-
-    protected static String convert(String name, Object value, String defaultValue) {
-        if (value == null) {
-            return defaultValue;
-        } else if (name.equals(ATTR_COLOR) || name.equals(ATTR_BGCOLOR) || name.equals(STYLE_BACKGROUND_COLOR)) {
-            int[] c = (int[]) value;
-            StringBuilder s = new StringBuilder(6);
-            for (int i = 0; i < c.length; i++) {
-                s.append(StringUtil.toHexString(c.toString().getBytes()));
-            }
-            return s.toString();
-        } else {
-            return value.toString();
-        }
     }
 
     @Override
