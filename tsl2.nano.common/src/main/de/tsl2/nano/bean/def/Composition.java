@@ -20,7 +20,7 @@ import de.tsl2.nano.core.cls.IAttribute;
  * On relational models, a composition child (like the uml-composition) needs a connection to it's parent. If a new
  * child is created, this child has to be put into the attribute list of it's parent.
  * <p/>
- * Example: Customer(1)==>(*)Address. But the adress cannot exist without it's parent, the customer.
+ * Example: Customer(1)==>(*)Address. But the address cannot exist without it's parent, the customer.
  * <p/>
  * If a relation model needs to resolve a connection of type: Group (*) ==> (*) Player, a new table 'PlayersGroup'
  * should be created as resolver: Group (*) ==> (1) PlayersGroup (1) ==> (*) Player. The #target is required to resolve this
@@ -150,13 +150,14 @@ public class Composition<C> {
     @SuppressWarnings({ "unchecked", "rawtypes" })
     public C createChildOnTarget(Object targetInstance) {
         BeanClass<C> bc = BeanClass.getBeanClass(Collection.class.isAssignableFrom(parent.getType()) ? parent.getGenericType(0) : parent.getType());
-        C child = bc.createInstance();
+        C child = (C) (target == null ? targetInstance : bc.createInstance());
         BeanContainer.createId(child);
         if (this.target != null && targetInstance != null) {
             this.target.setValue(targetInstance, child);
         }
         IAttribute attr = bc.getAttribute(parent.getDeclaringClass());
-        attr.setValue(child, parent.getInstance());
+        if (attr != null)
+            attr.setValue(child, parent.getInstance());
         getParentContainer().add(child);
         return child;
     }

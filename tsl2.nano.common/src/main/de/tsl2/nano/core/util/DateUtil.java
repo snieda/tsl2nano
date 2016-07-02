@@ -228,6 +228,16 @@ public final class DateUtil {
         return cal.getTime();
     }
 
+    public static float seconds(long millis) {
+        return millis / 1000f;
+    }
+    
+    /**
+     * see {@link #getTimeUnitInMinutes(TimeUnit, int)} * {@link #MILLI_TO_MINUTES}
+     */
+    public static long getTimeUnitInMillis(TimeUnit timeUnit, int timeUnitValue) {
+        return getTimeUnitInMinutes(timeUnit, timeUnitValue) * MILLI_TO_MINUTES;
+    }
     /**
      * Helper to convert from a {@link TimeUnit} based value to a minutes based value.
      * 
@@ -251,6 +261,31 @@ public final class DateUtil {
             throw new IllegalArgumentException("unknown timeUnit=" + timeUnit);
         }
         return timeUnitValue;
+    }
+
+    /**
+     * evaluates the time from now to the next given {@link TimeUnit}. Example: now=20:15, timeUnit=TimeUnit.DAYS -->
+     * result=03:45 in millis
+     * 
+     * @param timeUnit next start time
+     * @return time period in millis to reach the next timeUnit
+     */
+    public static long getDelayToNextTimeUnit(TimeUnit timeUnit) {
+        long now = System.currentTimeMillis();
+        long mod;
+        switch (timeUnit) {
+        case DAYS:
+            mod = DAY_TO_HOUR * HOUR_TO_MINUTES;
+        case HOURS:
+            mod = HOUR_TO_MINUTES;
+            break;
+        case MINUTES:
+            mod = MILLI_TO_MINUTES;
+            break;
+        default:
+            throw new IllegalArgumentException("unknown timeUnit=" + timeUnit);
+        }
+        return now %= mod;
     }
 
     /**
@@ -678,7 +713,7 @@ public final class DateUtil {
         cal.setTime(source);
         return setDate(cal, year, month, day).getTime();
     }
-    
+
     public static Calendar setDate(Calendar cal, int year, int month, int day) {
         if (year != -1) {
             cal.set(Calendar.YEAR, year);

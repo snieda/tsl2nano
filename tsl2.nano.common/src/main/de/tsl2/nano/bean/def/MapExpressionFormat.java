@@ -76,7 +76,7 @@ public class MapExpressionFormat<T> extends ValueExpressionFormat<T> {
         if (!Util.isEmpty(source)) {
             for (int i = 0; i < s.length; i++) {
                 String kv[] = s[i].split("=");
-                m.put(kv[0], ve.from(kv[1]));
+                m.put(kv[0], kv.length > 1 ? ve.from(kv[1]) : null);
             }
         }
         return m;

@@ -270,7 +270,7 @@ public class ENV implements Serializable {
             self = YamlUtil.load(new File(configFile.getPath()), ENV.class);
         } else {
             self = new ENV();
-            self.properties = new TreeMap();
+            self.properties = createPropertyMap();
 //          LOG.warn("no environment.properties available");
         }
 
@@ -295,6 +295,15 @@ public class ENV implements Serializable {
 //        BeanUtil.addStandardTypePackages("de.tsl2.nano.bean.def");
 //        self.persist();
         return self;
+    }
+
+    /**
+     * createPropertyMap
+     * @return
+     */
+    @SuppressWarnings("rawtypes")
+    static TreeMap createPropertyMap() {
+        return (TreeMap) /*Collections.synchronizedMap(*/new TreeMap();
     }
 
     public static String createInfo() {
@@ -485,7 +494,7 @@ public class ENV implements Serializable {
      */
     public static void setProperties(Map properties) {
         if (self().properties == null)
-            self().properties = new TreeMap();
+            self().properties = createPropertyMap();
         self().properties.putAll(properties);
         if (self().autopersist) {
             self().persist();
@@ -623,14 +632,14 @@ public class ENV implements Serializable {
     /**
      * getMainPackage
      * 
-     * @return application main package (stored in 'application.main.package').
+     * @return app.main.package (stored in 'app.main.package').
      */
     public static String getApplicationMainPackage() {
-        String pck = (String) get("application.main.package");
+        String pck = (String) get("app.main.package");
         if (pck == null) {
             pck = "org.nano." + getName().toLowerCase().trim();
-            self().info("WARNING: no 'application.main.package' defined in environment! using default: " + pck);
-            self().setProperty("application.main.package", pck);
+            self().info("WARNING: no 'app.main.package' defined in environment! using default: " + pck);
+            self().setProperty("app.main.package", pck);
         }
         return pck;
     }
@@ -693,7 +702,7 @@ public class ENV implements Serializable {
      */
     public final static void persist() {
         //save backup while some key/values will be removed if not serializable
-        Properties tempProperties = new Properties();
+        TreeMap tempProperties = createPropertyMap();
         tempProperties.putAll(self().properties);
         Map<Class<?>, Object> tempServices = new Hashtable<Class<?>, Object>(services());
 
@@ -713,7 +722,7 @@ public class ENV implements Serializable {
      */
     public static void reload() {
         String envDir = getConfigPath();
-        Properties tempProperties = new Properties();
+        TreeMap tempProperties = createPropertyMap();
         tempProperties.putAll(self().properties);
         Map<Class<?>, Object> tempServices = new Hashtable<Class<?>, Object>(services());
 
@@ -967,7 +976,7 @@ public class ENV implements Serializable {
     @Persist
     protected void initSerialization() {
         if (properties == null)
-            self.properties = new TreeMap();
+            self.properties = createPropertyMap();
         /*
          * remove the environment path itself - should not be reloaded
          */

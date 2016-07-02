@@ -458,6 +458,11 @@ public class CommonTest {
 
     @Test
     public void testDateAndPeriod() throws Exception {
+        long last = System.currentTimeMillis();
+        ConcurrentUtil.sleep(1500);
+        float sec = DateUtil.seconds(System.currentTimeMillis() - last);
+        assertTrue(1.5 < sec && sec < 2);
+        
         //print all date time locale formats
         Locale[] availableLocales = Locale.getAvailableLocales();
         Date today = DateUtil.getToday();

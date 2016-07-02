@@ -825,7 +825,7 @@ public class BeanCollector<COLLECTIONTYPE extends Collection<T>, T> extends Bean
              */
             @Override
             public boolean isEnabled() {
-                return super.isEnabled() && hasMode(MODE_CREATABLE) && hasSelection();
+                return super.isEnabled() && hasMode(MODE_CREATABLE) && (hasSelection() || !ENV.get("app.event.fire.onselectionchange", false));
             }
 
             @Override
@@ -871,7 +871,7 @@ public class BeanCollector<COLLECTIONTYPE extends Collection<T>, T> extends Bean
 
             @Override
             public boolean isEnabled() {
-                return super.isEnabled() && hasMode(MODE_EDITABLE) && hasSelection();
+                return super.isEnabled() && hasMode(MODE_EDITABLE) && (hasSelection() || !ENV.get("app.event.fire.onselectionchange", false));
             }
 
             @Override

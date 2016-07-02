@@ -143,6 +143,21 @@ public abstract class AReference<T, O> {
         return instance;
     }
 
+    @SuppressWarnings("rawtypes")
+    @Override
+    public boolean equals(Object obj) {
+        return description != null ? obj instanceof AReference && description.equals(((AReference)obj).description) : super.equals(obj);
+    }
+    
+    @Override
+    public int hashCode() {
+        return description != null ? description.hashCode() : super.hashCode();
+    }
+    
+    @Override
+    public String toString() {
+        return description != null ? description : super.toString();
+    }
     /**
      * structure for type and id
      * 
