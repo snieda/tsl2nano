@@ -31,6 +31,7 @@ import de.tsl2.nano.core.ISession;
 import de.tsl2.nano.core.log.LogFactory;
 import de.tsl2.nano.core.util.FileUtil;
 import de.tsl2.nano.core.util.StringUtil;
+import de.tsl2.nano.h5.NanoH5Session;
 import de.tsl2.nano.h5.configuration.BeanConfigurator;
 import de.tsl2.nano.math.vector.Point;
 import de.tsl2.nano.messaging.IListener;
@@ -111,6 +112,7 @@ public class NanoWebSocketServer extends WebSocketServer {
     @Override
     public void onMessage(WebSocket conn, String msg) {
         LOG.debug("receiving message: '" + msg + "' from " + conn);
+        ((NanoH5Session)session).assignSessionToCurrentThread();
         //if we are in configuration mode, do nothing
         Package pck = ((BeanDefinition) session.getWorkingObject()).getDeclaringClass().getPackage();
         if (pck.equals(BeanConfigurator.class.getPackage()) || pck.equals(BeanDefinition.class.getPackage())) {

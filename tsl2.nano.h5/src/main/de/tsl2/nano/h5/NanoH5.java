@@ -19,6 +19,7 @@ import java.text.Format;
 import java.text.ParsePosition;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
@@ -49,7 +50,6 @@ import de.tsl2.nano.core.ManagedException;
 import de.tsl2.nano.core.Messages;
 import de.tsl2.nano.core.classloader.NetworkClassLoader;
 import de.tsl2.nano.core.cls.BeanClass;
-import de.tsl2.nano.core.exception.ExceptionHandler;
 import de.tsl2.nano.core.exception.Message;
 import de.tsl2.nano.core.execution.CompatibilityLayer;
 import de.tsl2.nano.core.execution.SystemUtil;
@@ -64,7 +64,6 @@ import de.tsl2.nano.core.util.StringUtil;
 import de.tsl2.nano.core.util.Util;
 import de.tsl2.nano.execution.AntRunner;
 import de.tsl2.nano.h5.NanoHTTPD.Response.Status;
-import de.tsl2.nano.h5.configuration.BeanConfigurator;
 import de.tsl2.nano.h5.expression.QueryPool;
 import de.tsl2.nano.h5.expression.RuleExpression;
 import de.tsl2.nano.h5.expression.SQLExpression;
@@ -79,7 +78,6 @@ import de.tsl2.nano.persistence.PersistenceClassLoader;
 import de.tsl2.nano.persistence.provider.NanoEntityManagerFactory;
 import de.tsl2.nano.service.util.BeanContainerUtil;
 import de.tsl2.nano.serviceaccess.Authorization;
-import de.tsl2.nano.serviceaccess.IAuthorization;
 import de.tsl2.nano.serviceaccess.ServiceFactory;
 import de.tsl2.nano.util.SchedulerUtil;
 import de.tsl2.nano.util.Translator;
@@ -152,7 +150,7 @@ public class NanoH5 extends NanoHTTPD implements ISystemConnector<Persistence> {
         ENV.registerBundle(NanoH5.class.getPackage().getName() + ".messages", true);
         appstartClassloader = Thread.currentThread().getContextClassLoader();
         ENV.addService(ClassLoader.class, appstartClassloader);
-        sessions = new ExpiringMap<InetAddress, NanoH5Session>(ENV.get("session.timeout.millis", 12 * DateUtil.T_HOUR));
+        sessions = Collections.synchronizedMap(new ExpiringMap<InetAddress, NanoH5Session>(ENV.get("session.timeout.millis", 12 * DateUtil.T_HOUR)));
         AbstractExpression.registerExpression(new PathExpression().getExpressionPattern(), PathExpression.class);
         AbstractExpression.registerExpression(new RuleExpression().getExpressionPattern(), RuleExpression.class);
         AbstractExpression.registerExpression(new SQLExpression().getExpressionPattern(), SQLExpression.class);
@@ -357,7 +355,7 @@ public class NanoH5 extends NanoHTTPD implements ISystemConnector<Persistence> {
      * {@inheritDoc}
      */
     @Override
-    public synchronized Response serve(String uri,
+    public Response serve(String uri,
             Method m,
             Map<String, String> header,
             Map<String, String> parms,
@@ -403,7 +401,7 @@ public class NanoH5 extends NanoHTTPD implements ISystemConnector<Persistence> {
 //                    session.nav.next(session.nav.toArray()[1]);
                 }
             } else if (method.equals("GET") && parms.size() < 2 /* contains 'QUERY_STRING = null' */
-                && (uri.length() < 2 || header.get("referer") == null)) {
+                && (uri.length() < 2 || header.get("referer") == null) || isDoubleClickDelay(session)) {
                 LOG.debug("reloading cached page...");
                 try {
                     session.response.getData().reset();
@@ -419,6 +417,10 @@ public class NanoH5 extends NanoHTTPD implements ISystemConnector<Persistence> {
 //        lastHeader = header;
 
         return session.serve(uri, method, header, parms, files);
+    }
+
+    private boolean isDoubleClickDelay(NanoH5Session session) {
+        return System.currentTimeMillis() - ENV.get("app.event.dblclick.delay", 100) < session.getLastAccess();
     }
 
     public Response createResponse(String msg) {

@@ -6,7 +6,7 @@
  * websocket client implementation.
  */
 var socket = new WebSocket(
-		'ws${app.ssl.shortcut}://${websocket.server.ip}:${websocket.server.port}');
+		'ws${app.ssl.shortcut}://' + window.document.location.hostname + ':${websocket.server.port}');
 console.log('websocket created:' + socket);
 
 socket.onopen = function() {
@@ -229,4 +229,8 @@ function processDataFromClipboard(clipboard) {
 	if (target != null) {
 		target.nodeValue = clipboard;
 	}
+}
+
+function fade(btn) {
+	document.getElementByTagName("body").className = "fade-out";
 }

@@ -210,13 +210,13 @@ public class HtmlUtil {
         "-webkit-animation: fade 2s; -webkit-animation-fill-mode: both; -moz-animation: fade 2s; -moz-animation-fill-mode: both; -o-animation: fade 2s; -o-animation-fill-mode: both; animation: fade 2s; animation-fill-mode: both;";
     public static final String CSS_BACKGROUND_FADING_KEYFRAMES =
         "@-webkit-keyframes fade {0%{opacity: 0;} 100% {opacity: 1;}} @-moz-keyframes fade {0%{opacity: 0;} 100% {opacity: 1;}} @-o-keyframes fade {0%{opacity: 0;} 100% {opacity: 1;}} @keyframes fade {0%{opacity: 0;} 100% {opacity: 1;}}; ";
-    public static final String STYLE_BACKGROUND_LIGHTGRAY = "background: #CCCCCC;";
+    public static final String STYLE_BACKGROUND_LIGHTGRAY = "background-color: rgba(247,247,247,.5);";
     /** dynamic styles. use method {@link #style(String, String)} to set styles! */
     public static final String STYLE_TEXT_ALIGN = "text-align";
     public static final String STYLE_FONT_COLOR = "color";
     public static final String STYLE_COLOR = "color";
 
-    public static final String VAL_25PERCENT = "100%";
+    public static final String VAL_25PERCENT = "25%";
     public static final String VAL_100PERCENT = "100%";
     public static final String VAL_FALSE = Boolean.FALSE.toString();
     public static final String VAL_TRUE = Boolean.TRUE.toString();
@@ -393,7 +393,7 @@ public class HtmlUtil {
         Document doc = e.getOwnerDocument();
         for (int i = 0; i < attributes.length; i++) {
             //disabled flag attribute --> continue
-            if (attributes[i] == null) {
+            if (Util.isEmpty(attributes[i])) {
                 continue;
             }
             String attrName = (String) attributes[i];
@@ -401,7 +401,7 @@ public class HtmlUtil {
             if (attrName.startsWith(PRE_ATTRIBUTE_FLAG)) {
                 attrName = StringUtil.substring(attrName, PRE_ATTRIBUTE_FLAG, null);
                 attr = doc.createAttribute(attrName);
-            } else if (i < attributes.length - 1 && attributes[i + 1] != null) {
+            } else if (i < attributes.length - 1 && !Util.isEmpty(attributes[i + 1])) {
                 attr = doc.createAttribute(attrName);
                 attr.setValue(Util.asString(attributes[++i]));
             } else {
@@ -615,14 +615,16 @@ public class HtmlUtil {
         } else {
             if (attrs.length > 1 && ATTR_STYLE.equals(attrs[attrs.length - 2]))
                 attrs[attrs.length - 2] = "nostyle";
-            return CollectionUtil.concat(new String[] { "div", cont, "style", styles(attrs) },
+            String styles = styles(attrs);
+            return CollectionUtil.concat(new String[] { "div", cont },
+                Util.isEmpty(styles) ? new String[] {} : new String[] { "style", styles },
                 new String[] { "class", tableTag });
         }
     }
 
     public static String tableDivStyles() {
         if (tableDivStyle == null) {
-            InputStream stream = ENV.getResource("tabledivstyle.template");
+            InputStream stream = ENV.getResource("style.template");
             tableDivStyle = String.valueOf(FileUtil.getFileData(stream, "UTF-8"));
         }
         return tableDivStyle;

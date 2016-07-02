@@ -36,6 +36,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.Executors;
+import java.util.concurrent.TimeUnit;
 
 import org.apache.commons.logging.Log;
 import org.java_websocket.WebSocket;
@@ -133,6 +134,7 @@ public class NanoH5Session implements ISession<BeanDefinition>, Serializable {
 
     /** session access */
     private long lastAccess;
+    transient int requests;
 
     transient private IAuthorization authorization;
     transient private BeanContainer beanContainer;
@@ -355,7 +357,7 @@ public class NanoH5Session implements ISession<BeanDefinition>, Serializable {
                         parms,
                         files));
             } else {
-                LOG.info(String.format("serving request: uri: %s, method: %s, %s, parms: %s",
+                LOG.info(String.format("serving request " + requests + " : uri: %s, method: %s, %s, parms: %s",
                     uri,
                     method,
                     MapUtil.filter(header, "http-client-ip"),
@@ -434,12 +436,13 @@ public class NanoH5Session implements ISession<BeanDefinition>, Serializable {
     /**
      * assignSessionToCurrentThread
      */
-    void assignSessionToCurrentThread() {
+    public void assignSessionToCurrentThread() {
         lastAccess = System.currentTimeMillis();
+        requests++;
         Thread.currentThread().setContextClassLoader(sessionClassloader);
         Thread.currentThread().setUncaughtExceptionHandler(exceptionHandler);
         if (nav.current() instanceof Bean && ((Bean) nav.current()).getInstance() instanceof BeanConfigurator) {
-            this.beanConfigurator = (BeanConfigurator) ((Bean)nav.current()).getInstance(); 
+            this.beanConfigurator = (BeanConfigurator) ((Bean) nav.current()).getInstance();
         }
         ConcurrentUtil.setCurrent(getUserAuthorization(), beanContainer, beanConfigurator);
     }
@@ -479,7 +482,8 @@ public class NanoH5Session implements ISession<BeanDefinition>, Serializable {
     String createStatusText(long startTime) {
         String user =
             authorization != null ? ENV.translate("tsl2nano.login.user", true) + ": "
-                + authorization.getUser() + "§" + StringUtil.toHexString(getUserAuthorization().toString().getBytes())
+                + authorization.getUser() + "§"
+                + StringUtil.toHexString((getUserAuthorization() + "\n" + "RequestID: " + requests).getBytes())
                 + ", " + "Online: "
                 + DateUtil.getFormattedMinutes(getDuration()) + " min, " : "";
         return PREFIX_STATUS_LINE + user
@@ -490,7 +494,7 @@ public class NanoH5Session implements ISession<BeanDefinition>, Serializable {
                 + StringUtil.toHexString(getContext().toString().getBytes()) : "")
             + ", "
             + ENV.translate("tsl2nano.request", true) + ": "
-            + DateUtil.getFormattedMinutes(System.currentTimeMillis() - startTime) + " min"
+            + DateUtil.seconds(System.currentTimeMillis() - startTime) + " msec"
             + (LOG.isDebugEnabled() ? ", " + "Memory: " + (Profiler.getUsedMem() / (1024 * 1024)) + " MB" : "")
             + (LOG.isDebugEnabled() ? ", " + "working sessions: " + server.sessions.size() : "");
     }

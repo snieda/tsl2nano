@@ -1,0 +1,81 @@
+/* will be assigned as tag style under the html header */
+.table {
+   	display: table;
+   	width: 100%; 
+} 
+tbody, .tbody {
+   	display: table-row-group; 
+}
+thead, .thead {
+   	display: table-header-group;
+   	background-color: rgba(247,247,247,.5);
+   	font-weight: bold; 
+} 
+tfoot, .tfoot {
+   	display: table-footer-group;
+   	font-weight: bold;
+	background-color: rgba(247,247,247,.5); 
+} 
+tr, .tr {
+   	display: table-row; 
+} 
+td, th, .td, .th {
+   	display: table-cell;
+   	padding: 3px 10px;
+   	border: 1px; 
+} 
+tr:nth-child(even), .tr:nth-child(even) {
+  background-color: rgba(255,255,255,.3);
+}
+tr:nth-child(odd), .tr:nth-child(odd) {
+  background-color: rgba(196,196,196,.3);
+}
+tr:hover, .tr:hover {
+  background-color: rgba(247,247,247,.5);
+}
+
+.fade-out {
+	opacity:0;
+}
+.fade-in {
+	opacity:1;
+}
+.tooltip { 
+    display: none; 
+    position: relative;
+    top: 0
+    left: 0;
+    z-index: 99;
+    border: 1px solid #333;
+    background: #eee;
+    width: 300px;
+    text-align: left;
+}
+i:hover + p { 
+	display: block;
+}
+
+@media only screen and (max-width: 640px) {
+tr, .tr {
+   	display: flex; flex-wrap: wrap; 
+} 
+td, th, .td, .th {
+   	display: table-cell;
+   	padding: 3px 10px;
+   	border: 1px; 
+}
+.beancollectorsearchrow {
+	display: none;
+}
+}
+@media only screen and (max-width: 480px) {
+tr, .tr {
+   	width: 100%;
+} 
+td, th, .td, .th {
+   	width: 100%;
+}
+button, input, #field.quicksearch, .actionpanel {
+	width: 100%;
+}
+}

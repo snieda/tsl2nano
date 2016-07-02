@@ -21,6 +21,7 @@ import org.simpleframework.xml.core.Commit;
 import de.tsl2.nano.action.IAction;
 import de.tsl2.nano.bean.BeanContainer;
 import de.tsl2.nano.bean.BeanUtil;
+import de.tsl2.nano.bean.ValueHolder;
 import de.tsl2.nano.bean.def.Bean;
 import de.tsl2.nano.bean.def.BeanCollector;
 import de.tsl2.nano.bean.def.BeanFinder;
@@ -89,6 +90,7 @@ public class Compositor<COLLECTIONTYPE extends Collection<T>, T> extends BeanCol
 
     /**
      * init
+     * 
      * @param beanType
      * @param baseType
      * @param baseAttribute
@@ -100,7 +102,7 @@ public class Compositor<COLLECTIONTYPE extends Collection<T>, T> extends BeanCol
             final String baseAttribute,
             final String targetAttribute,
             String iconAttribute) {
-        this.name = "Compositor (" + baseType.getSimpleName()+ "-" + beanType.getSimpleName() + ")";
+        this.name = "Compositor (" + baseType.getSimpleName() + "-" + beanType.getSimpleName() + ")";
         this.parentType = baseType;
         this.baseAttribute = baseAttribute;
         this.targetAttribute = targetAttribute;
@@ -121,6 +123,7 @@ public class Compositor<COLLECTIONTYPE extends Collection<T>, T> extends BeanCol
     public boolean isVirtual() {
         return true;
     }
+
     /**
      * @deprecated: see {@link #createCompositorActions(Class, Object, String, String, String)} creates an
      *              compositor-action for each item of type baseType, found in the database.
@@ -178,30 +181,33 @@ public class Compositor<COLLECTIONTYPE extends Collection<T>, T> extends BeanCol
         Collection<?> bases = BeanContainer.instance().getBeans(baseType, 0, -1);
         ArrayList<IAction> actions = new ArrayList<>();
         for (final Object base : bases) {
-            actions.add(new SecureAction<T>(Bean.getBean(base).getId().toString(),
+            actions.add(new SecureAction<T>(getName().toLowerCase() + "." + Bean.getBean(base).getId().toString(),
                 Bean.getBean(base).toString()) {
 
                 @SuppressWarnings("unchecked")
                 @Override
                 public T action() throws Exception {
-                    BeanValue parent = (BeanValue) Bean.getBean(base).getAttribute(baseAttribute);
-                    Composition comp = new Composition(parent,
-                        targetAttribute != null ? getAttribute(targetAttribute) : null);
                     getSelectionProvider().getValue().clear();
                     getSelectionProvider().getValue().add(preparedComposition);
                     T item = createItem(preparedComposition);
                     BeanContainer.initDefaults(item);
                     setDefaultValues(item, true);
+
+                    BeanValue parent;
+                    parent = (BeanValue) Bean.getBean(base).getAttribute(baseAttribute);
+                    //on manyTomany targetAttribute must not be null
+                    Composition comp = new Composition(parent,
+                        targetAttribute != null ? getAttribute(targetAttribute) : null);
                     Object resolver = comp.createChildOnTarget(item);
                     if (!forceUserInteraction && Bean.getBean(item).isValid(new HashMap<BeanValue<?>, String>())) {
                         resolver = (T) Bean.getBean(resolver).save();
                         item = (T) Bean.getBean(item).save();
                         getCurrentData().add(item);
                         return (T) _this;//the type T should be removed
-                    } else
+                    } else if (targetAttribute != null)
                         Bean.getBean(resolver).save();
-                        getCurrentData().add(item);
-                        return item;
+                    getCurrentData().add(item);
+                    return item;
                 }
 
                 @Override
@@ -213,6 +219,7 @@ public class Compositor<COLLECTIONTYPE extends Collection<T>, T> extends BeanCol
         }
         return actions;
     }
+
     @Override
     @Commit
     protected void initDeserialization() {

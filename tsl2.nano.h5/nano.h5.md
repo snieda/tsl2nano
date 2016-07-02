@@ -940,6 +940,8 @@ this will look like:
 
 Layouts and LayoutConstraints must be of type *Map* or *String*. If a string is given, this string will be set as element style.
 
+Note: to add some help or informations for an entity or the application, you can put html files to the environment directory 'doc/'. If the application name is 'anyway', the help document will be searched in 'doc/anyway/entities/index.html'. If there is an entitiy of name 'Address', the help document will be searched in 'doc/entities/address.html'. To change these paths - perhaps to link to an url, change the dependent entry inside the environment.xml (e.g.: doc.url.address=http://anyurl.any)
+
 #### Overview styles for Application, BeanCollectors and Beans
 
 The environment properties provide a fast way to define the applications page style. Change the entry _application.page.style_ to use a custom background - perhaps a picture or a color. This must be an html5 css style expression.
@@ -948,7 +950,7 @@ The environment keys follow the structure *scope.description-path.field-or-actio
 
 scopes are:
 * application: application definitions
-* page: singe page defintions
+* page: single page defintions
 * beandef: generic bean-definition
 * bean: bean instance definition
 * collector: bean-collector definition
