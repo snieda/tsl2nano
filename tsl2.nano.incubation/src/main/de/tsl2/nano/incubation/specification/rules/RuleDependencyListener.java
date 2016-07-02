@@ -83,6 +83,7 @@ public class RuleDependencyListener<T, E extends ChangeEvent> extends AbstractDe
         return (T) ENV.get(RulePool.class).get(ruleName).run(context);
     }
 
+    @SuppressWarnings({ "unchecked", "rawtypes" })
     protected BeanValue initAttribute(E source) {
         BeanValue srcValue = (BeanValue) source.getSource();
         if (getAttribute() == null) {
