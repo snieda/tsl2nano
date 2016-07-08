@@ -1,12 +1,3 @@
-/*
- * File: $HeadURL$
- * Id  : $Id$
- * 
- * created by: ts
- * created on: 05.02.2009
- * 
- * Copyright: (c) BMW AG 2009, all rights reserved
- */
 package de.tsl2.nano.format;
 
 import java.lang.reflect.Proxy;

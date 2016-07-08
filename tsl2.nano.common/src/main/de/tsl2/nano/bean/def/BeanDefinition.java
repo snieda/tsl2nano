@@ -1459,15 +1459,17 @@ public class BeanDefinition<T> extends BeanClass<T> implements IPluggable<BeanDe
             if (a instanceof AttributeDefinition) {
                 if (a.hasWriteAccess() && (!onlyOnNull || a.getValue(instance) == null)) {
                     Object value = ((AttributeDefinition) a).getDefault();
-                    // clean date and time values
-                    if (Time.class.isAssignableFrom(a.getType())) {
-                        if (ENV.get("value.date.clear.time", true))
-                            value = DateUtil.clearSeconds((Date) value);
-                    } else if (Date.class.isAssignableFrom(a.getType())) {
-                        if (ENV.get("value.time.clear.seconds", true))
-                            value = DateUtil.clearTime((Date) value);
+                    if (value != null) {
+                        // clean date and time values
+                        if (Time.class.isAssignableFrom(a.getType())) {
+                            if (ENV.get("value.date.clear.time", true))
+                                value = DateUtil.clearSeconds((Date) value);
+                        } else if (Date.class.isAssignableFrom(a.getType())) {
+                            if (ENV.get("value.time.clear.seconds", true))
+                                value = DateUtil.clearTime((Date) value);
+                        }
+                        a.setValue(instance, value);
                     }
-                    a.setValue(instance, value);
                 }
             }
         }
@@ -1526,11 +1528,11 @@ public class BeanDefinition<T> extends BeanClass<T> implements IPluggable<BeanDe
             boolean onlyFilteredAttributes,
             String... filterAttributes) {
         final List<? extends IAttribute> attributes = onlySingleValues ? getSingleValueAttributes() : getAttributes();
-        if (filterAttributes.length == 0) {
+        if (filterAttributes == null || filterAttributes.length == 0) {
             Collections.sort(attributes);
         }
         final Map<String, Object> map = new LinkedHashMap<String, Object>(attributes.size());
-        final List<String> filter = Arrays.asList(filterAttributes);
+        final List<String> filter = filterAttributes != null ? Arrays.asList(filterAttributes) : new LinkedList<String>();
         Object value;
         for (final IAttribute<?> beanAttribute : attributes) {
             if ((onlyFilteredAttributes && filter.contains(beanAttribute.getName()))

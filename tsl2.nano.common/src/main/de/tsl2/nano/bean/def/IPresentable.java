@@ -156,6 +156,8 @@ public interface IPresentable extends Serializable {
     public static final int TYPE_INPUT_MULTILINE = 1 << 12;
     /** e.g. for database blobs to be shown directly */
     public static final int TYPE_DATA = 1 << 13;
+    /** type will be defined by value/data on runtime */
+    public static final int TYPE_DEPEND = UNDEFINED;
 
     /*
      * additional input types (see html5)
@@ -194,7 +196,8 @@ public interface IPresentable extends Serializable {
     public static final int STYLE_DATA_AUDIO = 1 << 11;
     public static final int STYLE_DATA_VIDEO = 1 << 12;
     public static final int STYLE_DATA_DEVICE = 1 << 13;
-    public static final int STYLE_DATA_FRAME = 1 << 14;
+    public static final int STYLE_DATA_SVG = 1 << 14;
+    public static final int STYLE_DATA_FRAME = 1 << 15;
 
     /*
      * standard colors

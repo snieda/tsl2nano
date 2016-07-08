@@ -1,12 +1,3 @@
-/*
- * File: $HeadURL$
- * Id  : $Id$
- * 
- * created by: ts
- * created on: 08.09.2008
- * 
- * Copyright: (c) BMW AG 2009, all rights reserved
- */
 package de.tsl2.nano.util;
 
 import java.io.Serializable;

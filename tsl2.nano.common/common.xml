@@ -185,7 +185,7 @@
 	     called JUnit Test as system property (same name).
 	     Uses the following properties:
 	     "lib.junittest.path" - REQUIRED - A <path> with this id used as Classpath for the JUnit execution
-	     "junittest.name"     - REQUIRED - the full name of the test class (e.g. com.bmw.foo.TestXy) 
+	     "junittest.name"     - REQUIRED - the full name of the test class (e.g. org.anonymous.foo.TestXy) 
 	-->
 	<target name="singleJunit" depends="compile">
 		<tstamp>

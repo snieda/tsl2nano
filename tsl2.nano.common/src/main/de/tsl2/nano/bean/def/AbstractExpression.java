@@ -6,18 +6,30 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
 
+import org.apache.commons.logging.Log;
 import org.simpleframework.xml.Attribute;
 import org.simpleframework.xml.Default;
 import org.simpleframework.xml.DefaultType;
 import org.simpleframework.xml.Element;
 
+import de.tsl2.nano.core.ManagedException;
 import de.tsl2.nano.core.cls.IAttribute;
+import de.tsl2.nano.core.log.LogFactory;
 
+/**
+ * Base Attribute Expression as descriptor of a real (extending) expression. can instantiate a
+ * real expression through registered expression patterns.
+ * 
+ * @param <T>
+ * @author Tom
+ * @version $Revision$
+ */
 @Default(value = DefaultType.FIELD, required = false)
 public abstract class AbstractExpression<T> implements IValueExpression<T>, IAttribute<T>, Serializable {
-    /** serialVersionUID */
     private static final long serialVersionUID = 2798715915354958266L;
 
+    private static final Log LOG = LogFactory.getLog(AbstractExpression.class);
+    
     /** declaringClass of first attribute in chain */
     @Attribute(required = false)
     protected Class<?> declaringClass;
@@ -40,8 +52,8 @@ public abstract class AbstractExpression<T> implements IValueExpression<T>, IAtt
      * String expression.
      */
     @SuppressWarnings("rawtypes")
-    protected static final Map<String, Class<? extends IValueExpression>> registeredExtensions =
-        new HashMap<String, Class<? extends IValueExpression>>();
+    protected static final Map<String, Class<? extends AbstractExpression>> registeredExtensions =
+        new HashMap<String, Class<? extends AbstractExpression>>();
 
     public AbstractExpression() {
         super();
@@ -89,7 +101,7 @@ public abstract class AbstractExpression<T> implements IValueExpression<T>, IAtt
 
     @Override
     public void setExpression(String valueExpression) {
-        if (valueExpression == null || !valueExpression.matches(getExpressionPattern())) {
+        if (valueExpression == null || (getExpressionPattern() != null && !valueExpression.matches(getExpressionPattern()))) {
             throw new IllegalArgumentException("The expression '" + valueExpression
                 + "' has to match the regular expression '" + getExpressionPattern() + "'");
         }
@@ -105,6 +117,10 @@ public abstract class AbstractExpression<T> implements IValueExpression<T>, IAtt
         return declaringClass;
     }
 
+    protected void setDeclaringClass(Class<?> declaringClass) {
+        this.declaringClass = declaringClass;
+    }
+    
     @Override
     public String toString() {
         return (declaringClass != null ? declaringClass.getSimpleName() + ": " : "") + expression;
@@ -120,7 +136,7 @@ public abstract class AbstractExpression<T> implements IValueExpression<T>, IAtt
 
     @Override
     public String getId() {
-        return getDeclaringClass().getSimpleName() + ":" + getExpression();
+        return (getDeclaringClass() != null ? getDeclaringClass().getSimpleName() : "[unknown]") + ":" + getExpression();
     }
 
     /**
@@ -204,8 +220,14 @@ public abstract class AbstractExpression<T> implements IValueExpression<T>, IAtt
      * @param attributeRegEx regular expression, defining a specialized attribute
      * @param extension type to handle the specialized attribute.
      */
-    public static final void registerExpression(String attributeRegEx, Class<? extends IValueExpression> extension) {
-        registeredExtensions.put(attributeRegEx, extension);
+    public static final void registerExpression(Class<? extends AbstractExpression> extension) {
+        try {
+            String pattern = extension.newInstance().getExpressionPattern();
+            LOG.info("registering expression class " + extension + " for pattern: " + pattern);
+            registeredExtensions.put(pattern, extension);
+        } catch (Exception e) {
+            ManagedException.forward(e);
+        }
     }
 
     /**
@@ -214,7 +236,7 @@ public abstract class AbstractExpression<T> implements IValueExpression<T>, IAtt
      * @param attributeName attribute name to check
      * @return registered extension or null - if standard
      */
-    protected static Class<? extends IValueExpression> getImplementation(String attributeName) {
+    protected static Class<? extends AbstractExpression> getImplementation(String attributeName) {
         Set<String> regExs = registeredExtensions.keySet();
         for (String attrRegEx : regExs) {
             if (attributeName.matches(attrRegEx)) {

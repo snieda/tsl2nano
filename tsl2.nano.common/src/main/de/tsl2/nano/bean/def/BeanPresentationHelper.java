@@ -603,7 +603,7 @@ public class BeanPresentationHelper<T> {
 //        bean.addAction(new CommonAction("vzlauf.speichern", IAction.MODE_DLG_OK, false) {
 //            @Override
 //            public Object action() throws Exception {
-//                KionParameterUtil.clearCache();
+//                NanoParameterUtil.clearCache();
 //                return BeanContainer.instance().save(kistParameter);
 //            }
 //        });

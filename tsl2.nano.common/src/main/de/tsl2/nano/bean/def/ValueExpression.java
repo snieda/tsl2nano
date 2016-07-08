@@ -36,6 +36,7 @@ import de.tsl2.nano.core.util.ByteUtil;
 import de.tsl2.nano.core.util.FormatUtil;
 import de.tsl2.nano.core.util.StringUtil;
 import de.tsl2.nano.core.util.Util;
+import de.tsl2.nano.format.GenericTypeMatcher;
 import de.tsl2.nano.util.operation.IConverter;
 
 /**
@@ -191,9 +192,9 @@ public class ValueExpression<TYPE> implements
         if (Util.isEmpty(toValue)) {
             return null;
         }
-        //if type is object we return the value itself - it's an instanceof Object
+        //if type is object we try to get a type through string patterns
         if (type.isAssignableFrom(Object.class) || type.isAssignableFrom(Serializable.class)) {
-            return (TYPE) toValue;
+            return (TYPE) ENV.get(GenericTypeMatcher.class).materialize(toValue);
         }
 
         TYPE exampleBean = createExampleBean(toValue);

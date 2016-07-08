@@ -36,6 +36,9 @@ public class PathExpression<T> extends AbstractExpression<T> implements IValueEx
     /** attribute relation separator (like 'myattr1.relationattr.nextrelationattr' */
     public static final String PATH_SEPARATOR = ".";
 
+    static {
+        registerExpression(PathExpression.class);
+    }
     public PathExpression() {
     }
 
@@ -112,7 +115,7 @@ public class PathExpression<T> extends AbstractExpression<T> implements IValueEx
      */
     @Override
     public String getExpressionPattern() {
-        return ".*\\.*";
+        return "([\\w\\d]+[\\.\\(\\)\\[\\]]?)+";
     }
 
     @Override
