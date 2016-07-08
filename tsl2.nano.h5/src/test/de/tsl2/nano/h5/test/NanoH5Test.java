@@ -141,7 +141,7 @@ public class NanoH5Test {
         server.start();
 
         //request..
-        String response = NetUtil.getRestful(url/*, responseType*/, args);
+        String response = NetUtil.getRest(url/*, responseType*/, args);
         server.stop(0);
 
         assertTrue(response != null && responseType.isAssignableFrom(response.getClass()));
