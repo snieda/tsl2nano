@@ -28,7 +28,7 @@ import org.aspectj.lang.annotation.Pointcut;
  * - the advices 'after' and afterReturning' use pointcut name 'traceMethodEx'
  * </pre>
  * 
- * @author schneith
+ * @author Thomas Schneider
  */
 @Aspect
 public abstract class LogMeAs {

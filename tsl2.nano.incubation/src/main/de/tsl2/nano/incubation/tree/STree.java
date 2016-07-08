@@ -88,7 +88,7 @@ public class STree<T> extends Tree<Integer, T> {
 
   /**
   * The connection info between a node and its children can be evaluated through different strategies.
-  * @author schneith
+  * @author Thomas Schneider
   *
   */
   enum TreeOrderStrategy {

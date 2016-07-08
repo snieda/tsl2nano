@@ -9,7 +9,7 @@ import com.sun.tools.attach.VirtualMachine;
 /**
  * is able to attach java agent on runtime (if not done on starting java with e.g. '-javaagent:lib/aspectjweaver.jar').
  * 
- * @author schneith
+ * @author Thomas Schneider
  */
 public class AttachAgent {
 
