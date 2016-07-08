@@ -22,9 +22,13 @@ import de.tsl2.nano.execution.IPRunnable;
  * @version $Revision$
  */
 public class RestfulExpression<T extends Serializable> extends RunnableExpression<T> {
-
+    transient Object lastResult;
     /** serialVersionUID */
     private static final long serialVersionUID = -107140100937166501L;
+
+    static {
+        registerExpression(RestfulExpression.class);
+    }
 
     public RestfulExpression() {
     }
@@ -42,7 +46,7 @@ public class RestfulExpression<T extends Serializable> extends RunnableExpressio
 
     @Override
     public String getExpressionPattern() {
-        return "http[s]?:[/]{2,2}.*\\:\\d{1,8}/.*";
+        return "http[s]?:[/]{2,2}.*(\\:\\d{1,8}/)?.*";
     }
 
     @Override
@@ -50,7 +54,9 @@ public class RestfulExpression<T extends Serializable> extends RunnableExpressio
         return new IPRunnable<T, Map<String,Object>>() {
             @Override
             public T run(Map<String, Object> context, Object... extArgs) {
-                return (T) NetUtil.getRestful(expression, extArgs);
+//                if (!NetUtil.isOnline())
+//                    return (T) lastResult;
+                return (T) NetUtil.getRest(expression, extArgs);
             }
             @Override
             public String getName() {

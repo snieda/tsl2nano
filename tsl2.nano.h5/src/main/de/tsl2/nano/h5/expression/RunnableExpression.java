@@ -83,7 +83,7 @@ public abstract class RunnableExpression<T extends Serializable> extends Abstrac
             return result;
         } catch (final Exception e) {
             ManagedException.forward(new IllegalStateException("Execution of '" + getName()
-                + "' with current arguments failed!", e));
+                + "' with current arguments failed: " + e.getLocalizedMessage(), e));
             return null;
         }
     }
@@ -113,7 +113,8 @@ public abstract class RunnableExpression<T extends Serializable> extends Abstrac
         }
 
         //TODO: not performance-optimized: do the filtering before
-        MapUtil.retainAll(arguments, p.keySet());
+        if (p != null)
+            MapUtil.retainAll(arguments, p.keySet());
 
         return (Map<String, Object>) Util.untyped(arguments);
     }

@@ -2763,7 +2763,9 @@ Actual list: http://infocenter.pentaho.com/help/index.jsp?topic=%2Fsupported_com
  1.0.0a | 13.03.2016 | websocketserver fixes, bugfixes, ENV properties renamed
  1.0.0b | 10.04.2016 | beancontainer now using ThreadLocal, NEW: Compositor
  1.0.0c | 08.05.2016 | H2-Database included as default instead of HSQLDB, because the compatibility mode is working better there.
-
+ 1.0.0d | 02.07.2016 | layout and styles (responsive for three resolutions) for all panels enhanced.
+ 1.0.0e | 09.07.2016 | RESTful attributes enhanced. NEW: runtime attribute definition NEW: broadcast messages to all sessions.
+ 
 [GLOSSARY]
 
 ## TODOs
@@ -3231,3 +3233,35 @@ Tipp/Anforderung
 Ergebnis
 Gruppe
 Mannschaft
+
+
+
+h5.sessions, ENV.properties, ENV.services, ConcurrentUtil -> Collections.synchronizedMap(.)
+h5.builder überflüssig
+h5.serve synchronized raus
+info: min --> sec
+h5.request --> info tooltip
+MapExpressionFormat.parseObject(..) --> ve.from() raus
+  ValueExpression.createInstance() --> Formatter?
+  BeanAttribute.wrap() --> Convertert?
+  BeanClass.createInstance() --> Formatter?
+  BeanContainer.createBeanInstance() --> Formatter?
+  FormatUtil <-- DefaultFormat <-- GenericParser <-- RegExpFormat
+createDataTag, isData <-- iframe + srcdoc, +svg
+
+<svg height="130" width="500">
+  <defs>
+    <linearGradient id="grad1" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%"
+      style="stop-color:rgb(255,255,0);stop-opacity:1" />
+      <stop offset="100%"
+      style="stop-color:rgb(255,0,0);stop-opacity:1" />
+    </linearGradient>
+  </defs>
+  <ellipse cx="100" cy="70" rx="85" ry="55" fill="url(#grad1)" />
+  <text fill="#ffffff" font-size="45" font-family="Gregorian"
+  x="50" y="86">Nano</text>
+Sorry, your browser does not support inline SVG.
+</svg>
+
+  nalgox ?

@@ -27,6 +27,10 @@ public class SQLExpression<T extends Serializable> extends RunnableExpression<T>
     /** serialVersionUID */
     private static final long serialVersionUID = 4797735771490194926L;
 
+    static {
+        registerExpression(SQLExpression.class);
+    }
+
     public SQLExpression() {
     }
 

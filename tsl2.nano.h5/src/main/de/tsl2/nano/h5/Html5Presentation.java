@@ -430,7 +430,8 @@ public class Html5Presentation<T> extends BeanPresentationHelper<T> implements I
                 if (bean != null && ENV.class.isAssignableFrom(bean.getClazz()))
                     docURL = new File("./").getAbsolutePath();
                 else
-                    docURL = ENV.get("doc.url." + bean.getName().toLowerCase(), "doc/" + StringUtil.toFirstLower(title) + "/index.html");
+                    docURL = ENV.get("doc.url." + bean.getName().toLowerCase(),
+                        "doc/" + StringUtil.toFirstLower(title) + "/index.html");
                 if (new File(ENV.getConfigPath() + docURL).canRead() || NetUtil.isURL(docURL)) {
                     c2 = appendElement(c2, TAG_H3, ATTR_ALIGN, ALIGN_CENTER);
                     appendElement(c2, TAG_LINK, content(title), ATTR_HREF, ENV.getConfigPath() + docURL);
@@ -555,8 +556,10 @@ public class Html5Presentation<T> extends BeanPresentationHelper<T> implements I
         if (isRoot) {
             availableshortCuts = new ArrayList(Arrays.asList(SHORTCUTS));
             tabIndex = -1;
-            row1style = "";ENV.get("layout.grid.row1.style", "background-color: rgba(128,128,128,.3);");
-            row2style = "";ENV.get("layout.grid.row2.style", "background-color: rgba(247,247,247,.3);");
+            row1style = "";
+            ENV.get("layout.grid.row1.style", "background-color: rgba(128,128,128,.3);");
+            row2style = "";
+            ENV.get("layout.grid.row2.style", "background-color: rgba(247,247,247,.3);");
 
             if (bean == null) {
                 return createFormDocument(session, message.toString(), null, interactive);
@@ -1343,7 +1346,8 @@ public class Html5Presentation<T> extends BeanPresentationHelper<T> implements I
                     "beancollectorrow",
                     "onclick",
                     true/*tableDescriptor.hasMode(IBeanCollector.MODE_EDITABLE)*/
-                        ? "this.getElementsByTagName('input')[0].checked = !this.getElementsByTagName('input')[0].checked" : null,
+                        ? "this.getElementsByTagName('input')[0].checked = !this.getElementsByTagName('input')[0].checked"
+                        : null,
                     "ondblclick",
                     "location=this.getElementsByTagName('a')[0]",
                     ATTR_TABINDEX,
@@ -1804,8 +1808,12 @@ public class Html5Presentation<T> extends BeanPresentationHelper<T> implements I
         File file = beanValue.getValueFile();
         //embed the file content
         String content = null;
-        if (tagName.equals(TAG_EMBED) && file != null && getLayout(beanValue, "pluginspage") == null) {
-            content = new String(FileUtil.getFileBytes(file.getPath(), null));
+        if (tagName.equals(TAG_EMBED) || tagName.equals(TAG_SVG)) {
+            if (file != null && getLayout(beanValue, "pluginspage") == null) {
+                content = new String(FileUtil.getFileBytes(file.getPath(), null));
+            } else {
+                content = Util.asString(beanValue.getValue());
+            }
         }
         data =
             appendElement(
@@ -1824,7 +1832,12 @@ public class Html5Presentation<T> extends BeanPresentationHelper<T> implements I
                     ? file
                         .getPath() /*"If no Plugin is available to show the content,\n klick on the downloaded item in your browser."*/
                     : "");
-
+        if (tagName.equals(TAG_FRAME)) {
+            String html = Util.asString(beanValue.getValue());
+            if (!NetUtil.isURL(html))
+                HtmlUtil.appendAttributes(data, ATTR_SRCDOC, html);
+            HtmlUtil.appendAttributes(data, ATTR_WIDTH, "100%");
+        }
         return data;
     }
 
@@ -1844,7 +1857,7 @@ public class Html5Presentation<T> extends BeanPresentationHelper<T> implements I
         int highBit = BitUtil.highestBitPosition(STYLE_DATA_FRAME >> 1);
         int style = BitUtil.retainBitRange(beanValue.getPresentation().getStyle(), baseBit, highBit);
         style = style >> baseBit;
-        final String[] tags = { "img", "embed", "object", "canvas", "audio", "video", "device", "iframe" };
+        final String[] tags = { "img", "embed", "object", "canvas", "audio", "video", "device", "svg", "iframe" };
         return style == 0 ? tags[0] : BitUtil.description(style, Arrays.asList(tags));
     }
 
@@ -2125,6 +2138,7 @@ public class Html5Presentation<T> extends BeanPresentationHelper<T> implements I
         return bean != null && Util.isFrameworkClass(bean.getDeclaringClass());
     }
 
+    @Deprecated
     public void createSampleEnvironment() {
         try {
             String dir = System.getProperty("user.dir") + "/sample/";

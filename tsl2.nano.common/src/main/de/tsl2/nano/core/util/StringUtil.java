@@ -850,9 +850,21 @@ public class StringUtil {
             lb = content.indexOf(filter.charAt(i), la + 1);
             if (lb < 0)
                 return 0;
-            weight /= (lb - la); 
+            weight /= (lb - la);
             la = lb;
         }
         return weight;
+    }
+
+    /**
+     * removes all characters like tabs and CRs.
+     * 
+     * @param src
+     * @return
+     */
+    public static String removeFormatChars(String src) {
+        if (src == null)
+            return null;
+        return src.replaceAll("[\t\r\n]+", "");
     }
 }

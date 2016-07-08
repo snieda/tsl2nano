@@ -222,7 +222,6 @@ public class ENV implements Serializable {
         return self;
     }
 
-    @SuppressWarnings("rawtypes")
     public static ENV create(String dir) {
         new File(dir).mkdirs();
         String name = StringUtil.substring(dir, ".nanoh5.", null);
@@ -370,13 +369,15 @@ public class ENV implements Serializable {
     }
 
     /**
-     * manually add a service to the environment
+     serviceservice* manually add a service to the environment
      * 
-     * @param service service to add (should implement at least one interface.
+     * @param   to ( addshould implement at least one interface.
      */
     public static <T> T addService(T service) {
-        return addService((Class<T>) (service.getClass().getInterfaces().length > 0 ? service.getClass()
-            .getInterfaces()[0] : service.getClass()), service);
+        Class<T> interfaze = (Class<T>) (service.getClass().getInterfaces().length > 0 ? service.getClass().getInterfaces()[0] : null);
+        if (interfaze == null || interfaze.getName().startsWith("java.lang") || interfaze.getName().startsWith("java.io"))
+            interfaze = (Class<T>) service.getClass();
+        return addService(interfaze, service);
     }
 
     /**
@@ -990,8 +991,8 @@ public class ENV implements Serializable {
         for (Iterator<?> keyIt = keySet.iterator(); keyIt.hasNext();) {
             Object key = keyIt.next();
             Object value = properties.get(key);
-            if (isNotSerializable(value)
-                || !BeanUtil.isSingleValueType(value.getClass())) {
+            if (value != null && (isNotSerializable(value)
+                || !BeanUtil.isSingleValueType(value.getClass()))) {
                 info("removing property '" + key
                     + "' from serialization while its value is not serializable or doesn't have a default constructor!");
                 keyIt.remove();

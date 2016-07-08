@@ -20,8 +20,6 @@ import de.tsl2.nano.collection.CollectionUtil;
 import de.tsl2.nano.core.ManagedException;
 import de.tsl2.nano.core.log.LogFactory;
 import de.tsl2.nano.core.util.FormatUtil;
-import de.tsl2.nano.core.util.StringUtil;
-import de.tsl2.nano.core.util.Util;
 
 /**
  * handler for primitives and their immutable wrappers. all wrappers have a static 'TYPE' providing the primitive class
@@ -30,6 +28,7 @@ import de.tsl2.nano.core.util.Util;
  * @author Thomas Schneider
  * @version $Revision$
  */
+@SuppressWarnings({"rawtypes", "unchecked"})
 public class PrimitiveUtil {
     private static final Log LOG = LogFactory.getLog(PrimitiveUtil.class);
 
@@ -324,6 +323,7 @@ public class PrimitiveUtil {
 }
 
 class SimpleClassComparator implements Comparator<Class> {
+    @SuppressWarnings("rawtypes")
     @Override
     public int compare(Class o1, Class o2) {
         return o1.getSimpleName().compareTo(o2.getSimpleName());

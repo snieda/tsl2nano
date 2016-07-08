@@ -11,6 +11,8 @@ package de.tsl2.nano.core;
 
 import java.util.Map;
 
+import de.tsl2.nano.messaging.EventController;
+
 
 /**
  * base class for application main. provides a generic main-method to instantiate an extension of {@link Main}. please
@@ -86,5 +88,9 @@ public class Main {
     }
     
     public void reset() {
+    }
+    
+    public EventController getEventController() {
+        throw new UnsupportedOperationException();
     }
 }

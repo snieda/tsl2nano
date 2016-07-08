@@ -15,8 +15,10 @@ import java.nio.ByteBuffer;
 import org.apache.commons.logging.Log;
 
 import de.tsl2.nano.core.ENV;
+import de.tsl2.nano.core.Main;
 import de.tsl2.nano.core.ManagedException;
 import de.tsl2.nano.core.log.LogFactory;
+import de.tsl2.nano.messaging.EMessage;
 
 /**
  * To handle a message - not to be thrown. See UncaughtExceptionHandler
@@ -95,6 +97,16 @@ public class Message extends RuntimeException {
         } else {
             LOG.info(message);
         }
+    }
+
+    /**
+     * sends the given message to the main application - this may send the message to all sessions. 
+     * @param src sender
+     * @param message the message
+     * @param path to evaluate the destinations
+     */
+    public static void broadcast(Object src, Object message, String path) {
+        ENV.get(Main.class).getEventController().fireEvent(new EMessage(src, "/broadcast:" + message, path));
     }
 
     @Override

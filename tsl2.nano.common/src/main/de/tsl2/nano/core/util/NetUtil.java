@@ -196,25 +196,25 @@ public class NetUtil {
     }
 
     public static JsonStructure getRestfulJSON(String url, Object... args) {
-        String jsonStr = getRestful(url, args);
+        String jsonStr = getRest(url, args);
         return Json.createReader(new StringReader(jsonStr)).read();
     }
 
     @SuppressWarnings({ "unchecked", "rawtypes" })
-    public static/*<T> T*/String getRestful(String url/*, Class<T> responseType*/, Map args) {
-        return getRestful(url, MapUtil.asArray(args));
+    public static/*<T> T*/String getRest(String url/*, Class<T> responseType*/, Map args) {
+        return getRest(url, MapUtil.asArray(args));
     }
 
-    public static/*<T> T*/String getRestful(String url, Object... args) {
-        return getRestful(url, new char[] { '/', '/', '/' }, args);
+    public static/*<T> T*/String getRest(String url, Object... args) {
+        return getRest(url, new char[] { '/', '/', '/' }, args);
     }
 
-    public static/*<T> T*/String getRestful_(String url, Object... args) {
-        return getRestful(url, new char[] { '?', '=', '&' }, args);
+    public static/*<T> T*/String getRest_(String url, Object... args) {
+        return getRest(url, new char[] { '?', '=', '&' }, args);
     }
 
     /**
-     * simply returns the response of the given url + args restful request
+     * simply returns the response of the given url + args rest request
      * 
      * @param url
      * @param responseType type of response object
@@ -223,7 +223,7 @@ public class NetUtil {
      * @param args key/value pairs to be appended as rest-ful call to the url
      * @return content as object of type responseType
      */
-    public static/*<T> T*/String getRestful(String url/*, Class<T> responseType*/, char[] separators, Object... args) {
+    public static/*<T> T*/String getRest(String url/*, Class<T> responseType*/, char[] separators, Object... args) {
         try {
             //create the rest-ful call
             StringBuilder buf = new StringBuilder(url);

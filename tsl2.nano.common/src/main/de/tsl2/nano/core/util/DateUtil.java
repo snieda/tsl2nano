@@ -1,12 +1,3 @@
-/*
- * File: $HeadURL$
- * Id  : $Id$
- * 
- * created by: ds
- * created on: 18.02.2009
- * 
- * Copyright: (c) BMW AG 2009, all rights reserved
- */
 package de.tsl2.nano.core.util;
 
 import java.sql.Time;
@@ -28,7 +19,7 @@ import static java.util.Calendar.*;
  * Utility-class for date and time operations. on default, it is not thread safe! call {@link #multithreaded} to be
  * thread safe.
  * 
- * @author ds 18.02.2009
+ * @author ts 18.02.2009
  * @version $Revision$
  */
 public final class DateUtil {

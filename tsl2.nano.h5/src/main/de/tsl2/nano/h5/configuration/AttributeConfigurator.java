@@ -22,9 +22,9 @@ import de.tsl2.nano.bean.def.BeanDefinition;
 import de.tsl2.nano.bean.def.IAttributeDefinition;
 import de.tsl2.nano.bean.def.IConstraint;
 import de.tsl2.nano.bean.def.IIPresentable;
+import de.tsl2.nano.bean.def.IPageBuilder;
 import de.tsl2.nano.bean.def.IPresentable;
 import de.tsl2.nano.bean.def.IPresentableColumn;
-import de.tsl2.nano.bean.def.PathExpression;
 import de.tsl2.nano.bean.def.ValueExpression;
 import de.tsl2.nano.bean.def.ValueExpressionFormat;
 import de.tsl2.nano.core.ENV;
@@ -33,6 +33,7 @@ import de.tsl2.nano.core.cls.IAttribute;
 import de.tsl2.nano.core.util.ConcurrentUtil;
 import de.tsl2.nano.core.util.Util;
 import de.tsl2.nano.format.RegExpFormat;
+import de.tsl2.nano.h5.Html5Presentable;
 import de.tsl2.nano.h5.Html5Presentation;
 import de.tsl2.nano.h5.RuleCover;
 import de.tsl2.nano.incubation.specification.rules.RulePool;
@@ -57,11 +58,11 @@ public class AttributeConfigurator implements Serializable {
 
     public AttributeConfigurator() {
         this(BeanClass.createInstance(AttributeDefinition.class,
-            new PathExpression(ConcurrentUtil.getCurrent(BeanConfigurator.class).def.getClazz(), "attribute.path")));
+            new ExpressionDescriptor(def().getDeclaringClass())));
     }
 
     public AttributeConfigurator(String attributeName) {
-        this((AttributeDefinition<?>) ConcurrentUtil.getCurrent(BeanConfigurator.class).def.getAttribute(attributeName));
+        this((AttributeDefinition<?>) def().getAttribute(attributeName));
     }
 
     /**
@@ -72,6 +73,15 @@ public class AttributeConfigurator implements Serializable {
     public AttributeConfigurator(AttributeDefinition<?> attr) {
         this.attr = attr;
         attrAccessor = new PrivateAccessor<AttributeDefinition<?>>(attr);
+        if (getDeclaration() instanceof ExpressionDescriptor) {
+            ((ExpressionDescriptor)getDeclaration()).setDeclaringClass(def().getDeclaringClass());
+            presentable = new Html5Presentable(attr);
+            presentable.setType(IPresentable.TYPE_DEPEND);
+        }
+    }
+
+    static BeanDefinition def() {
+        return ConcurrentUtil.getCurrent(BeanConfigurator.class).def;
     }
 
     public String getName() {
@@ -140,16 +150,19 @@ public class AttributeConfigurator implements Serializable {
     }
 
     public void setFormat(String format) {
-        Format f = attr.getFormat();
-        if (f instanceof SimpleDateFormat)
-            ((SimpleDateFormat) f).applyPattern(format);
-        else if (f instanceof NumberFormat)
-            ((DecimalFormat) f).applyPattern(format);
-        else if (f instanceof ValueExpressionFormat)
-            ((ValueExpressionFormat)f).applyPattern(format);
-        else
-            ((RegExpFormat) f).setPattern(format, null, attr.getConstraint().getLength(), 0);
+        if (format != null) {
+            Format f = attr.getFormat();
+            if (f instanceof SimpleDateFormat)
+                ((SimpleDateFormat) f).applyPattern(format);
+            else if (f instanceof NumberFormat)
+                ((DecimalFormat) f).applyPattern(format);
+            else if (f instanceof ValueExpressionFormat)
+                ((ValueExpressionFormat) f).applyPattern(format);
+            else
+                ((RegExpFormat) f).setPattern(format, null, attr.getConstraint().getLength(), 0);
+        }
     }
+
 //
 //    public boolean isNullable() {
 //        return attr.getConstraint().isNullable();
@@ -190,6 +203,11 @@ public class AttributeConfigurator implements Serializable {
     }
 
     public void setDeclaration(IAttribute<?> a) {
+        if (a instanceof ExpressionDescriptor) {
+            ExpressionDescriptor ae = (ExpressionDescriptor)a;
+            if (ae.getExpression() != null)
+                a = ((ExpressionDescriptor)a).toInstance();
+        }
         attrAccessor.set("attribute", a);
     }
 
@@ -233,7 +251,7 @@ public class AttributeConfigurator implements Serializable {
             @Constraint(pattern = "(\\w+") String observer,
             @Constraint(pattern = "(\\w+") String observable,
             @Constraint(pattern = "[%§!]\\w+") String rule) {
-        BeanDefinition def = ConcurrentUtil.getCurrent(BeanConfigurator.class).def;
+        BeanDefinition def = def();
         Html5Presentation helper = (Html5Presentation) def.getPresentationHelper();
         helper.addRuleListener(observer, rule, 2, observable);
     }

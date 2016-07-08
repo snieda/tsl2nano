@@ -104,4 +104,23 @@ public class Html5Presentable extends Presentable {
         getLayoutConstraints().put(name, Util.asString(value));
         return (T) this;
     }
+    
+    @Override
+    public int getType() {
+        int t = super.getType();
+        if (t == TYPE_DEPEND) {
+            //TODO: implement value/data depend type
+            t = TYPE_DATA;
+        }
+        return t;
+    }
+    @Override
+    public int getStyle() {
+        int s = super.getStyle();
+        if (s == UNDEFINED) {
+            //TODO: implement value/data depend type
+            s = STYLE_DATA_FRAME;
+        }
+        return s;
+    }
 }

@@ -36,6 +36,10 @@ public class RuleExpression<T extends Serializable> extends RunnableExpression<T
     /** serialVersionUID */
     private static final long serialVersionUID = 5898135631911176804L;
 
+    static {
+        registerExpression(RuleExpression.class);
+    }
+
     /**
      * constructor
      */

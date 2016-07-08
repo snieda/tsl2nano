@@ -31,6 +31,8 @@ socket.onmessage = function(e) {
 		refreshdependency(e.data);
 	} else if (e.data.indexOf('/attachment') == 0) {
 		// TODO: impl.
+	} else if (e.data.indexOf('/broadcast') == 0) {
+		showBroadcastMessage(e.data);
 	} else
 		showStatusMessage(e.data);
 };
@@ -53,9 +55,26 @@ socket.onclose = function(e) {
  * prints the given status message to the status line
  */
 function showStatusMessage(msg) {
-	console.log("showing status message: " + msg);
 	document.getElementById('${websocket.element.id}').childNodes[0].nodeValue = ' \t'
 			+ msg;
+	//user must enable this feature in his browser...
+	window.status = msg;
+}
+
+/**
+ * prints the given broadcast message
+ */
+function showBroadcastMessage(msg) {
+//	document.getElementById('${broadcast.element.id}').childNodes[0].nodeValue = ' \t'
+//			+ msg;
+	speek(msg);
+	window.alert(getValue(msg));
+}
+
+function speek(msg) {
+	var synth = window.speechSynthesis;
+	var utterThis = new SpeechSynthesisUtterance(msg);
+	synth.speak(utterThis);
 }
 
 /**

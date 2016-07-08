@@ -36,7 +36,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.Executors;
-import java.util.concurrent.TimeUnit;
 
 import org.apache.commons.logging.Log;
 import org.java_websocket.WebSocket;
@@ -83,6 +82,8 @@ import de.tsl2.nano.h5.navigation.IBeanNavigator;
 import de.tsl2.nano.h5.navigation.Parameter;
 import de.tsl2.nano.h5.websocket.NanoWebSocketServer;
 import de.tsl2.nano.h5.websocket.WebSocketExceptionHandler;
+import de.tsl2.nano.messaging.EMessage;
+import de.tsl2.nano.messaging.IListener;
 import de.tsl2.nano.persistence.Persistence;
 import de.tsl2.nano.service.util.BeanContainerUtil;
 import de.tsl2.nano.serviceaccess.Authorization;
@@ -96,7 +97,7 @@ import de.tsl2.nano.util.operation.IRange;
  * @version $Revision$
  */
 @SuppressWarnings({ "unchecked", "rawtypes" })
-public class NanoH5Session implements ISession<BeanDefinition>, Serializable {
+public class NanoH5Session implements ISession<BeanDefinition>, Serializable, IListener<EMessage> {
     /** serialVersionUID */
     private static final long serialVersionUID = -8299446546343086394L;
 
@@ -211,6 +212,7 @@ public class NanoH5Session implements ISession<BeanDefinition>, Serializable {
             IAuthorization authorization,
             Map context) {
         this.server = server;
+        this.server.getEventController().addListener(this);
         this.inetAddress = inetAddress;
         this.builder = server.builder;
         this.nav = navigator;
@@ -461,6 +463,7 @@ public class NanoH5Session implements ISession<BeanDefinition>, Serializable {
     public void close() {
         LOG.debug("closing session " + this);
         server.sessions.remove(inetAddress);
+        server.getEventController().removeListener(this);
         nav = null;
         response = null;
         authorization = null;
@@ -477,6 +480,7 @@ public class NanoH5Session implements ISession<BeanDefinition>, Serializable {
         exceptionHandler = null;
         context = null;
         ConcurrentUtil.removeCurrent(getThreadLocalTypes());
+        server = null;
     }
 
     String createStatusText(long startTime) {
@@ -661,6 +665,12 @@ public class NanoH5Session implements ISession<BeanDefinition>, Serializable {
                             }
                         } else {
                             result = action.activate();
+                            if (action.getId().endsWith(".save") || action.getId().endsWith(".delete"))
+                                Message.broadcast(this,
+                                    ENV.translate("tsl2nano.value.changed", false,
+                                        nav.current().getName() + ": " + nav.current(),
+                                        this.getUserAuthorization().getUser(), action.getShortDescription()),
+                                    "*");
                         }
 
                         /*
@@ -1076,7 +1086,19 @@ public class NanoH5Session implements ISession<BeanDefinition>, Serializable {
     }
 
     @Override
+    public void handleEvent(EMessage e) {
+        if (ENV.get("session.onpersist.broadcast.alert", true)) {
+            if (BeanContainer.instance().hasPermission(e.getMsg().toString(), null)
+                && (e.getDestPath() == null
+                    || toString().startsWith(StringUtil.substring(e.getDestPath(), null, "*")))) {
+                Message.send(exceptionHandler, e.getMsg().toString());
+            }
+        }
+    }
+
+    @Override
     public String toString() {
         return id;
     }
+
 }

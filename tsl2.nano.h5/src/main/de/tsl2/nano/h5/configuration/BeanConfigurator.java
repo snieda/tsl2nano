@@ -26,6 +26,7 @@ import de.tsl2.nano.bean.def.BeanDefinition;
 import de.tsl2.nano.bean.def.CollectionExpressionTypeFormat;
 import de.tsl2.nano.bean.def.Constraint;
 import de.tsl2.nano.bean.def.IAttributeDefinition;
+import de.tsl2.nano.bean.def.IPresentable;
 import de.tsl2.nano.bean.def.Presentable;
 import de.tsl2.nano.bean.def.ValueColumn;
 import de.tsl2.nano.bean.def.ValueExpression;
@@ -60,6 +61,7 @@ public class BeanConfigurator<T> implements Serializable {
     private static final long serialVersionUID = 1L;
     BeanDefinition<T> def;
     private PrivateAccessor<BeanDefinition<?>> defAccessor;
+    private transient List<AttributeConfigurator> attrConfigurators;
 
     /**
      * factory method to create a bean configurator for the given instance type.
@@ -102,11 +104,11 @@ public class BeanConfigurator<T> implements Serializable {
                 configColDef.setAttributeFilter("name", "description", "index", "sortIndex", "sortUpDirection",
                     "format",
                     "width"
-                    /*                    "standardSummary",
-                    "presentable",
-                    "minSearchValue",
-                    "maxSearchValue"*/
-                    );
+                /*                    "standardSummary",
+                "presentable",
+                "minSearchValue",
+                "maxSearchValue"*/
+                );
                 configColDef.getPresentable().setLayout(layout);
 //            configColDef.saveDefinition();
 
@@ -179,13 +181,15 @@ public class BeanConfigurator<T> implements Serializable {
      * @return Returns the attributeDefinitions.
      */
     public List<AttributeConfigurator> getAttributes() {
-        //we know that there are attribute-defs inside!
-        List<IAttribute> attributes = def.getAttributes();
-        ArrayList<AttributeConfigurator> cattrs = new ArrayList<AttributeConfigurator>(attributes.size());
-        for (IAttribute<?> a : attributes) {
-            cattrs.add(new AttributeConfigurator((AttributeDefinition<?>) a));
+        if (attrConfigurators == null) {
+            //we know that there are attribute-defs inside!
+            List<IAttribute> attributes = def.getAttributes();
+            attrConfigurators = new ArrayList<AttributeConfigurator>(attributes.size());
+            for (IAttribute<?> a : attributes) {
+                attrConfigurators.add(new AttributeConfigurator((AttributeDefinition<?>) a));
+            }
         }
-        return cattrs;
+        return attrConfigurators;
     }
 
     /**
@@ -199,8 +203,10 @@ public class BeanConfigurator<T> implements Serializable {
         int i = 0;
         for (AttributeConfigurator cattr : attributes) {
             IAttributeDefinition a = cattr.unwrap();
-            //IMPROVE: enhance interfaces to set index without reflection
-            new PrivateAccessor(a.getColumnDefinition()).set("columnIndex", ++i);
+            if (a.getColumnDefinition() == null)
+                a.setColumnDefinition(++i, IPresentable.UNDEFINED, true, IPresentable.UNDEFINED);
+            else //IMPROVE: enhance interfaces to set index without reflection
+                new PrivateAccessor(a.getColumnDefinition()).set("columnIndex", ++i);
             def.addAttribute(a);
             invisibles.remove(a.getName());
         }
@@ -212,6 +218,7 @@ public class BeanConfigurator<T> implements Serializable {
             a.getColumnDefinition().getPresentable().setVisible(false);
             def.addAttribute(a);
         }
+        attrConfigurators = null;
     }
 
     /**
@@ -272,6 +279,9 @@ public class BeanConfigurator<T> implements Serializable {
      */
     public Object actionSave() {
         defAccessor.set("isdefault", false);
+        //WORKAROUND: doesn't call setAttributes(), so we do it here
+        if (attrConfigurators != null)
+            setAttributes(attrConfigurators);
         def.saveDefinition();
         ConcurrentUtil.removeCurrent(BeanConfigurator.class);
 
@@ -311,15 +321,16 @@ public class BeanConfigurator<T> implements Serializable {
         return Util.toString(getClass(), def);
     }
 
-    @SuppressWarnings({ "rawtypes"})
-    @de.tsl2.nano.bean.annotation.Action(name = "createRuleOrAction", argNames = { "New ActionName", "Type", "Action-Expression" })
-    public void actionCreateRuleOrAction (
+    @SuppressWarnings({ "rawtypes" })
+    @de.tsl2.nano.bean.annotation.Action(name = "createRuleOrAction", argNames = { "New ActionName", "Type",
+        "Action-Expression" })
+    public void actionCreateRuleOrAction(
             @de.tsl2.nano.bean.annotation.Constraint(defaultValue = "presentable.layoutConstraints", pattern = "\\w+", allowed = {
                 "presentable", "presentable.layout", "columnDefinition" }) String name,
             @de.tsl2.nano.bean.annotation.Constraint(defaultValue = "%: RuleScript (--> JavaScript)", pattern = "\\w+", allowed = {
                 "§: Rule (--> Operation)", "%: RuleScript (--> JavaScript)", "!: Action (--> Java)" }) String type,
             @de.tsl2.nano.bean.annotation.Constraint(pattern = ".*") String expression) {
-        
+
         if (type.startsWith("%"))
             ENV.get(RulePool.class).add(new RuleScript<>(name, expression, null));
         else if (type.startsWith("§"))
@@ -328,9 +339,9 @@ public class BeanConfigurator<T> implements Serializable {
             ENV.get(ActionPool.class).add(new Action(name, expression));
     }
 
-    @SuppressWarnings({ "rawtypes", "unchecked"})
-    @de.tsl2.nano.bean.annotation.Action(name = "addAction", argNames = { "Specified Actioname"})
-    public void actionAddAction (
+    @SuppressWarnings({ "rawtypes", "unchecked" })
+    @de.tsl2.nano.bean.annotation.Action(name = "addAction", argNames = { "Specified Actioname" })
+    public void actionAddAction(
             @de.tsl2.nano.bean.annotation.Constraint(defaultValue = "presentable.layoutConstraints", pattern = "[%§!]\\w+", allowed = {
                 "presentable", "presentable.layout", "columnDefinition" }) String name) {
         //check, if action available
@@ -339,9 +350,10 @@ public class BeanConfigurator<T> implements Serializable {
         def.addAction(action);
     }
 
-    @SuppressWarnings({ "rawtypes", "unchecked"})
-    @de.tsl2.nano.bean.annotation.Action(name = "createCompositor", argNames = { "base type", "base attribute name", "target attribute name (only on manyToMany)", "icon attribute name (optional)"})
-    public void actionCreateCompositor (
+    @SuppressWarnings({ "rawtypes", "unchecked" })
+    @de.tsl2.nano.bean.annotation.Action(name = "createCompositor", argNames = { "base type", "base attribute name",
+        "target attribute name (only on manyToMany)", "icon attribute name (optional)" })
+    public void actionCreateCompositor(
             String baseType, String baseAttribute, String targetAttribute, String iconAttribute) {
         BeanClass bcBaseType = BeanClass.createBeanClass(baseType);
         //check the attributes
@@ -349,7 +361,8 @@ public class BeanConfigurator<T> implements Serializable {
         bcBaseType.getAttribute(iconAttribute);
         def.getAttribute(targetAttribute);
         //now create the compositor
-        Compositor compositor = new Compositor(def.getClazz(), bcBaseType.getClazz(), baseAttribute, targetAttribute, iconAttribute);
+        Compositor compositor =
+            new Compositor(def.getClazz(), bcBaseType.getClazz(), baseAttribute, targetAttribute, iconAttribute);
         compositor.getPresentable().setIcon("icons/properties.png");
 //        compositor.getActions();
         compositor.saveDefinition();

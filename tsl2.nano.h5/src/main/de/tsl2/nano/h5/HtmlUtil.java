@@ -133,6 +133,7 @@ public class HtmlUtil {
     public static final String ATTR_ALT = "alt";
 
     public static final String ATTR_DATA = "data";
+    public static final String ATTR_SRCDOC = "srcdoc"; //--> iframe
 
     public static final String TAG_AUDIO = "audio";
     public static final String TAG_VIDEO = "video";
@@ -140,6 +141,8 @@ public class HtmlUtil {
     public static final String TAG_OBJECT = "object";
     public static final String TAG_CANVAS = "canvas";
     public static final String TAG_DEVICE = "device";
+    public static final String TAG_FRAME = "iframe";
+    public static final String TAG_SVG = "svg";
 
     public static final String TAG_BUTTON = "button";
 
@@ -625,7 +628,7 @@ public class HtmlUtil {
     public static String tableDivStyles() {
         if (tableDivStyle == null) {
             InputStream stream = ENV.getResource("style.template");
-            tableDivStyle = String.valueOf(FileUtil.getFileData(stream, "UTF-8"));
+            tableDivStyle = StringUtil.removeFormatChars(String.valueOf(FileUtil.getFileData(stream, "UTF-8")));
         }
         return tableDivStyle;
     }

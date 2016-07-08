@@ -87,7 +87,7 @@ public class WebSocketServiceListener<T> extends WebSocketDependencyListener<T> 
      * @return new value
      */
     protected T evaluate(WSEvent evt) {
-        return (T)NetUtil.getRestful(restfulUrl, String.class, parameter, evt.newValue);
+        return (T)NetUtil.getRest(restfulUrl, String.class, parameter, evt.newValue);
     }
 
     @Commit

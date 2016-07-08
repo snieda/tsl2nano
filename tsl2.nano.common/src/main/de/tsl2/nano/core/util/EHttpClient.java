@@ -1,0 +1,168 @@
+/*
+ * File: $HeadURL$
+ * Id  : $Id$
+ * 
+ * created by: Thomas Schneider
+ * created on: 08.07.2016
+ * 
+ * Copyright: (c) Thomas Schneider 2016, all rights reserved
+ */
+package de.tsl2.nano.core.util;
+
+import java.io.InputStream;
+import java.io.OutputStream;
+import java.io.StringReader;
+import java.net.URLEncoder;
+import java.util.Map;
+import java.util.UUID;
+
+import javax.json.Json;
+import javax.json.JsonStructure;
+
+import org.apache.commons.logging.Log;
+
+import de.tsl2.nano.core.ManagedException;
+import de.tsl2.nano.core.log.LogFactory;
+
+/**
+ * Extended Http Client, providing REST param evaluatation and multipart form data with files.
+ * 
+ * @author Thomas Schneider
+ * @version $Revision$
+ */
+public class EHttpClient extends HttpClient {
+    private static final Log LOG = LogFactory.getLog(EHttpClient.class);
+
+    /**
+     * constructor
+     * 
+     * @param wsUrl
+     */
+    public EHttpClient(String wsUrl) {
+        super(wsUrl);
+    }
+
+    public HttpClient multipartData(Object... chunks) {
+        try {
+            String boundary = UUID.randomUUID().toString();
+            byte[] boundaryBytes =
+                ("--" + boundary + "\r\n").getBytes(UTF8);
+            byte[] finishBoundaryBytes =
+                ("--" + boundary + "--").getBytes(UTF8);
+            http.setRequestProperty("Content-Type",
+                "multipart/form-data; charset=UTF-8; boundary=" + boundary);
+            // Enable streaming mode with default settings
+            http.setChunkedStreamingMode(0);
+
+            OutputStream out = http.getOutputStream();
+            for (int i = 0; i < chunks.length; i++) {
+                if (chunks[i + 1] instanceof String) {
+                    data(out, (String) chunks[i], (String) chunks[i + 1]);
+                } else if (chunks[i + 1] instanceof InputStream) {
+                    data(out, (String) chunks[i], (InputStream) chunks[i + 1], (String) chunks[i]);
+                } else {
+                    throw new IllegalArgumentException("chunks must be of type String or InputStream");
+                }
+                // Send a seperator
+                out.write(i >= chunks.length - 1 ? finishBoundaryBytes : boundaryBytes);
+            }
+            // Finish the request
+            out.write(finishBoundaryBytes);
+        } catch (Exception e) {
+            ManagedException.forward(e);
+        }
+        return this;
+    }
+
+    protected HttpClient data(OutputStream out, String name, String value) {
+        try {
+            String o = "Content-Disposition: form-data; name=\""
+                + URLEncoder.encode(name, UTF8) + "\"\r\n\r\n";
+            out.write(o.getBytes(UTF8));
+        } catch (Exception e) {
+            ManagedException.forward(e);
+        }
+        return this;
+    }
+
+    protected HttpClient data(OutputStream out, String name, InputStream in, String fileName) {
+        try {
+            String o = "Content-Disposition: form-data; name=\"" + URLEncoder.encode(name, "UTF-8")
+                + "\"; filename=\"" + URLEncoder.encode(fileName, UTF8) + "\"\r\n\r\n";
+            out.write(o.getBytes(UTF8));
+            FileUtil.write(in, out, false);
+            byte[] buffer = new byte[2048];
+            for (int n = 0; n >= 0; n = in.read(buffer))
+                out.write(buffer, 0, n);
+            out.write("\r\n".getBytes(UTF8));
+        } catch (Exception e) {
+            ManagedException.forward(e);
+        }
+        return this;
+    }
+
+    public JsonStructure getRestfulJSON(String url, Object... args) {
+        String jsonStr = getRestful(url, args);
+        return Json.createReader(new StringReader(jsonStr)).read();
+    }
+
+    @SuppressWarnings({ "unchecked", "rawtypes" })
+    public /*<T> T*/String getRestful(String url/*, Class<T> responseType*/, Map args) {
+        return getRestful(url, MapUtil.asArray(args));
+    }
+
+    public String getRestful(String url, Object... args) {
+        return getRestful(url, new char[] { '/', '/', '/' }, args);
+    }
+
+    public String getRestful_(String url, Object... args) {
+        return getRestful(url, new char[] { '?', '=', '&' }, args);
+    }
+
+    /**
+     * simply returns the response of the given url + args restful request
+     * 
+     * @param url
+     * @param responseType type of response object
+     * @param separators 0: start of parameters (e.g.: '?'), 2: separator between parameters (e.g.: '&'), 1: separator
+     *            between key and value (e.g.: '=').
+     * @param args key/value pairs to be appended as rest-ful call to the url
+     * @return content as object of type responseType
+     */
+    public String getRestful(String url/*, Class<T> responseType*/, char[] separators, Object... args) {
+        return read(createHttpConnection(parameter(url, separators, args)).get(), String.class);
+    }
+
+    /**
+     * inserts given args into the given url.
+     * 
+     * @param url base url
+     * @param args key-/value pairs
+     * @return new url path
+     */
+    private static String path(String url, String... args) {
+        return StringUtil.insertProperties(url, MapUtil.asMap(args));
+    }
+
+    /**
+     * path
+     * 
+     * @param url
+     * @param separators
+     * @param args
+     * @return
+     */
+    private static String parameter(String url, char[] separators, Object... args) {
+        StringBuilder buf = new StringBuilder(url);
+        char c = separators[0];
+        if (args != null) {
+            for (int i = 0; i < args.length; i++) {
+                buf.append(c + Util.asString(args[i]).replace(' ', '+'));
+                c = i + 1 % 2 == 0 ? separators[1] : separators[2];
+            }
+        }
+        url = buf.toString();
+        return url;
+    }
+
+}

@@ -16,7 +16,9 @@ import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Set;
 
+import de.tsl2.nano.core.ENV;
 import de.tsl2.nano.core.util.Util;
+import de.tsl2.nano.format.GenericTypeMatcher;
 
 /**
  * Format for collections of entities/beans - not implementing it's own toString(). The format packs the given type into
@@ -68,15 +70,18 @@ public class MapExpressionFormat<T> extends ValueExpressionFormat<T> {
     /**
      * {@inheritDoc}
      */
+    @SuppressWarnings("unchecked")
     @Override
     public Object parseObject(String source, ParsePosition pos) {
         pos.setIndex(pos.getIndex() + 1);
         String[] s = source.split(DIV);
         Map<String, T> m = new LinkedHashMap<String, T>(s.length);
         if (!Util.isEmpty(source)) {
+            GenericTypeMatcher matcher = ENV.get(GenericTypeMatcher.class);
             for (int i = 0; i < s.length; i++) {
                 String kv[] = s[i].split("=");
-                m.put(kv[0], kv.length > 1 ? ve.from(kv[1]) : null);
+                Object v = kv.length > 1 ? matcher.materialize(source) : null;
+                m.put(kv[0], (T) v);
             }
         }
         return m;

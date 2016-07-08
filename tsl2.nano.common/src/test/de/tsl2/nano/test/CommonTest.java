@@ -56,6 +56,7 @@ import javax.json.JsonStructure;
 import org.apache.commons.logging.Log;
 import org.apache.tools.ant.types.FileSet;
 import org.apache.xmlgraphics.util.MimeConstants;
+import org.junit.Assert;
 import org.junit.BeforeClass;
 import org.junit.Ignore;
 import org.junit.Test;
@@ -110,6 +111,7 @@ import de.tsl2.nano.currency.CurrencyUtil;
 import de.tsl2.nano.execution.AntRunner;
 import de.tsl2.nano.execution.ScriptUtil;
 import de.tsl2.nano.format.DefaultFormat;
+import de.tsl2.nano.format.GenericTypeMatcher;
 import de.tsl2.nano.format.RegExpFormat;
 import de.tsl2.nano.historize.HistorizedInputFactory;
 import de.tsl2.nano.historize.Volatile;
@@ -1824,5 +1826,18 @@ public class CommonTest {
         //reload the yaml
         BeanDefinition def2 = YamlUtil.load(dump, BeanDefinition.class);
         assertTrue(def.equals(def2));
+    }
+    @Test
+    public void testGenericTypeMatcher() throws Exception {
+        GenericTypeMatcher typeMatcher = new GenericTypeMatcher();
+        Assert.assertEquals(Boolean.TRUE, typeMatcher.materialize("true"));
+        Assert.assertEquals(Boolean.FALSE, typeMatcher.materialize("false"));
+        Assert.assertEquals(Integer.valueOf(100), typeMatcher.materialize("100"));
+        Assert.assertEquals(Long.valueOf(10000000000l), typeMatcher.materialize("10000000000"));
+        Assert.assertEquals(BigDecimal.valueOf(100.12), typeMatcher.materialize("100,12"));
+        Assert.assertEquals(new SimpleDateFormat("dd.MM.yyyy").parse("01.01.2010"),
+            typeMatcher.materialize("01.01.2010"));
+        Assert.assertEquals(new SimpleDateFormat("dd.MM.yyyy").parse("01.01.2010").getTime(),
+            ((Date) typeMatcher.materialize("01.01.2010")).getTime());
     }
 }

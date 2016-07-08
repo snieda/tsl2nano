@@ -65,6 +65,7 @@ import de.tsl2.nano.core.util.Util;
 import de.tsl2.nano.execution.AntRunner;
 import de.tsl2.nano.h5.NanoHTTPD.Response.Status;
 import de.tsl2.nano.h5.expression.QueryPool;
+import de.tsl2.nano.h5.expression.RestfulExpression;
 import de.tsl2.nano.h5.expression.RuleExpression;
 import de.tsl2.nano.h5.expression.SQLExpression;
 import de.tsl2.nano.h5.navigation.EntityBrowser;
@@ -72,6 +73,7 @@ import de.tsl2.nano.h5.navigation.IBeanNavigator;
 import de.tsl2.nano.h5.navigation.Workflow;
 import de.tsl2.nano.incubation.specification.actions.ActionPool;
 import de.tsl2.nano.incubation.specification.rules.RulePool;
+import de.tsl2.nano.messaging.EventController;
 import de.tsl2.nano.persistence.GenericLocalBeanContainer;
 import de.tsl2.nano.persistence.Persistence;
 import de.tsl2.nano.persistence.PersistenceClassLoader;
@@ -129,6 +131,8 @@ public class NanoH5 extends NanoHTTPD implements ISystemConnector<Persistence> {
     URL serviceURL;
     ClassLoader appstartClassloader;
 
+    private EventController eventController;
+
 //    /** workaround to avoid re-serving a cached request. */
 //    private Properties lastHeader;
 
@@ -150,10 +154,13 @@ public class NanoH5 extends NanoHTTPD implements ISystemConnector<Persistence> {
         ENV.registerBundle(NanoH5.class.getPackage().getName() + ".messages", true);
         appstartClassloader = Thread.currentThread().getContextClassLoader();
         ENV.addService(ClassLoader.class, appstartClassloader);
+        eventController = new EventController();
         sessions = Collections.synchronizedMap(new ExpiringMap<InetAddress, NanoH5Session>(ENV.get("session.timeout.millis", 12 * DateUtil.T_HOUR)));
-        AbstractExpression.registerExpression(new PathExpression().getExpressionPattern(), PathExpression.class);
-        AbstractExpression.registerExpression(new RuleExpression().getExpressionPattern(), RuleExpression.class);
-        AbstractExpression.registerExpression(new SQLExpression().getExpressionPattern(), SQLExpression.class);
+        //thought, the expression extensions would register themself - but it's not working
+        AbstractExpression.registerExpression(PathExpression.class);
+        AbstractExpression.registerExpression(RuleExpression.class);
+        AbstractExpression.registerExpression(SQLExpression.class);
+        AbstractExpression.registerExpression(RestfulExpression.class);
     }
 
     /**
@@ -951,6 +958,11 @@ public class NanoH5 extends NanoHTTPD implements ISystemConnector<Persistence> {
         builder = ENV.get(IPageBuilder.class);
     }
 
+    @Override
+    public EventController getEventController() {
+        return eventController;
+    }
+    
     @Override
     public String toString() {
         return Util.toString(NanoH5.class, "serviceURL: " + serviceURL,

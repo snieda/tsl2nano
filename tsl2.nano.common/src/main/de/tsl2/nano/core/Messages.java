@@ -273,6 +273,7 @@ public class Messages {
     public static final void reload() {
         ResourceBundle.clearCache();
         for (int i = 0; i < BUNDLE_LIST.size(); i++) {
+            LOG.info("reloading resourcebundle " + BUNDLE_LIST.get(i));
             BUNDLE_LIST.set(i,
                 ResourceBundle.getBundle((String) new PrivateAccessor<ResourceBundle>(BUNDLE_LIST.get(i))
                     .member("name")));
