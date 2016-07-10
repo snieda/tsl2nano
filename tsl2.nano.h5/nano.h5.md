@@ -3247,6 +3247,11 @@ MapExpressionFormat.parseObject(..) --> ve.from() raus
   BeanClass.createInstance() --> Formatter?
   BeanContainer.createBeanInstance() --> Formatter?
   FormatUtil <-- DefaultFormat <-- GenericParser <-- RegExpFormat
+  twice ant (ant-1.6.5) on running ant-task
+  hibernate not depending slf4j-simple --> ant-task error
+  login ok-button not working on ALT-o
+  status-line with tooltip not working
+  
 createDataTag, isData <-- iframe + srcdoc, +svg
 
 <svg height="130" width="500">
