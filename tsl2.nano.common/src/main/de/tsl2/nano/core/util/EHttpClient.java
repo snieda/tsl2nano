@@ -25,7 +25,7 @@ import de.tsl2.nano.core.ManagedException;
 import de.tsl2.nano.core.log.LogFactory;
 
 /**
- * Extended Http Client, providing REST param evaluatation and multipart form data with files.
+ * Extended Http Client, providing REST param evaluation and multipart form data with files.
  * 
  * @author Thomas Schneider
  * @version $Revision$

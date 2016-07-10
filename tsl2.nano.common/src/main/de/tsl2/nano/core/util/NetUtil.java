@@ -684,6 +684,14 @@ public class NetUtil {
         }
     }
 
+    public static String httpResponse(String wsUrl, String method, String contenttype, String data) {
+        try {
+            return new String(ByteUtil.toByteArray(http(wsUrl, method, contenttype, data)), "UTF-8");
+        } catch (Exception e) {
+            ManagedException.forward(e);
+            return null;
+        }
+    }
     /**
      * sends data to a web service given by wsUrl
      * 
@@ -692,19 +700,22 @@ public class NetUtil {
      * @param contenttype content type like application/xml etc.
      * @param data data to post
      */
-    public static void send(String wsUrl, String method, String contenttype, String data) {
+    public static InputStream http(String wsUrl, String method, String contenttype, String data) {
         try {
             URL url = new URL(wsUrl);
             HttpURLConnection conn = (HttpURLConnection) url.openConnection();
-            conn.setDoOutput(true);
-
-            conn.setRequestMethod("POST");
-            conn.setRequestProperty("Content-Type", "application/xml");
-            OutputStream os = conn.getOutputStream();
-            os.write(data.getBytes());
-            os.flush();
+            if ("POST".equals(method) || "PUT".equals(method) || "DELETE".equals(method)) {
+                conn.setDoOutput(true);
+                conn.setRequestProperty("Content-Type", contenttype);
+                OutputStream os = conn.getOutputStream();
+                os.write(data.getBytes());
+                os.flush();
+            }
+            conn.setRequestMethod(method);
+            return conn.getInputStream();
         } catch (Exception e) {
             ManagedException.forward(e);
+            return null;
         }
     }
 
