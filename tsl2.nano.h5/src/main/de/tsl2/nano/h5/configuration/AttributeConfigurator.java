@@ -22,7 +22,6 @@ import de.tsl2.nano.bean.def.BeanDefinition;
 import de.tsl2.nano.bean.def.IAttributeDefinition;
 import de.tsl2.nano.bean.def.IConstraint;
 import de.tsl2.nano.bean.def.IIPresentable;
-import de.tsl2.nano.bean.def.IPageBuilder;
 import de.tsl2.nano.bean.def.IPresentable;
 import de.tsl2.nano.bean.def.IPresentableColumn;
 import de.tsl2.nano.bean.def.ValueExpression;
@@ -33,7 +32,6 @@ import de.tsl2.nano.core.cls.IAttribute;
 import de.tsl2.nano.core.util.ConcurrentUtil;
 import de.tsl2.nano.core.util.Util;
 import de.tsl2.nano.format.RegExpFormat;
-import de.tsl2.nano.h5.Html5Presentable;
 import de.tsl2.nano.h5.Html5Presentation;
 import de.tsl2.nano.h5.RuleCover;
 import de.tsl2.nano.incubation.specification.rules.RulePool;
@@ -75,8 +73,9 @@ public class AttributeConfigurator implements Serializable {
         attrAccessor = new PrivateAccessor<AttributeDefinition<?>>(attr);
         if (getDeclaration() instanceof ExpressionDescriptor) {
             ((ExpressionDescriptor)getDeclaration()).setDeclaringClass(def().getDeclaringClass());
-            presentable = new Html5Presentable(attr);
-            presentable.setType(IPresentable.TYPE_DEPEND);
+            getPresentable().setType(IPresentable.TYPE_DEPEND);
+            getPresentable().setStyle(IPresentable.UNDEFINED);
+            
         }
     }
 

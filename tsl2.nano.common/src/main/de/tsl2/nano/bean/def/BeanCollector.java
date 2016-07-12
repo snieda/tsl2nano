@@ -336,6 +336,9 @@ public class BeanCollector<COLLECTIONTYPE extends Collection<T>, T> extends Bean
             for (T instance : collection) {
                 Bean.getBean((Serializable) instance).onDeactivation();
             }
+        } else {
+            if (ENV.get("collector.ondeactivation.selection.clear", true))
+                getSelectionProvider().getValue().clear();
         }
     }
 

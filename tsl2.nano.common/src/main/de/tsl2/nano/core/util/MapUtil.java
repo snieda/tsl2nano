@@ -190,6 +190,15 @@ public class MapUtil {
         return StringUtil.toFormattedString(map, Integer.MAX_VALUE);
     }
 
+    public static String toJSON(Map map) {
+        Set keys = map.keySet();
+        StringBuilder buf = new StringBuilder().append("{");
+        for (Object k : keys) {
+            buf.append(k + ":" + map.get(k));
+        }
+        return buf.append("}").toString();
+    }
+    
     /**
      * finds all values for a given key set
      * 

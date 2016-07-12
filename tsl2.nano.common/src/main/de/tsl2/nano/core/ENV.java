@@ -706,16 +706,17 @@ public class ENV implements Serializable {
         TreeMap tempProperties = createPropertyMap();
         tempProperties.putAll(self().properties);
         Map<Class<?>, Object> tempServices = new Hashtable<Class<?>, Object>(services());
-
         String configPath = getConfigPath();
+        try {
         if (self().get("app.configuration.persist.yaml", false)) {
             self().get(YamlUtil.class).dump(self(), configPath + CONFIG_NAME + ".yml");
         } else {
             self().get(XmlUtil.class).saveXml(configPath + CONFIG_NAME + ".xml", self());
         }
-
-        services().putAll(tempServices);
-        self().properties.putAll(tempProperties);
+        } finally {
+            services().putAll(tempServices);
+            self().properties.putAll(tempProperties);
+        }
     }
 
     /**
@@ -992,7 +993,7 @@ public class ENV implements Serializable {
             Object key = keyIt.next();
             Object value = properties.get(key);
             if (value != null && (isNotSerializable(value)
-                || !BeanUtil.isSingleValueType(value.getClass()))) {
+                || !BeanUtil.isSingleValueType(value.getClass())) || value instanceof ClassLoader) {
                 info("removing property '" + key
                     + "' from serialization while its value is not serializable or doesn't have a default constructor!");
                 keyIt.remove();

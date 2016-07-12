@@ -95,6 +95,7 @@ import de.tsl2.nano.core.util.AnnotationProxy;
 import de.tsl2.nano.core.util.ConcurrentUtil;
 import de.tsl2.nano.core.util.Crypt;
 import de.tsl2.nano.core.util.DateUtil;
+import de.tsl2.nano.core.util.EHttpClient;
 import de.tsl2.nano.core.util.FileUtil;
 import de.tsl2.nano.core.util.MapUtil;
 import de.tsl2.nano.core.util.NetUtil;
@@ -1839,5 +1840,9 @@ public class CommonTest {
             typeMatcher.materialize("01.01.2010"));
         Assert.assertEquals(new SimpleDateFormat("dd.MM.yyyy").parse("01.01.2010").getTime(),
             ((Date) typeMatcher.materialize("01.01.2010")).getTime());
+    }
+    @Test
+    public void testEHttpClient() throws Exception {
+        new EHttpClient("https://www.openstreetmap.org/").get("search?", "city", "München");
     }
 }

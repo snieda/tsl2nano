@@ -105,8 +105,9 @@ public abstract class AbstractExpression<T> implements IValueExpression<T>, IAtt
             throw new IllegalArgumentException("The expression '" + valueExpression
                 + "' has to match the regular expression '" + getExpressionPattern() + "'");
         }
+        if (this.expression != null && this.expression.contains(name))
+            this.name = null;
         this.expression = valueExpression;
-        this.name = null;
     }
 
     /**

@@ -12,6 +12,7 @@ package de.tsl2.nano.core.util;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.io.StringReader;
+import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
 import java.util.Map;
 import java.util.UUID;
@@ -32,14 +33,26 @@ import de.tsl2.nano.core.log.LogFactory;
  */
 public class EHttpClient extends HttpClient {
     private static final Log LOG = LogFactory.getLog(EHttpClient.class);
+    public static final char[] SEPARATORS_REST = new char[] { '/', '/', '/' };
+    public static final char[] SEPARATORS_QUERY = new char[] { '?', '=', '&' };
+    private boolean useRESTSeparators;
 
     /**
      * constructor
      * 
-     * @param wsUrl
+     * @param wsUrl base url
      */
     public EHttpClient(String wsUrl) {
+        this(wsUrl, true);
+    }
+    /**
+     * constructor
+     * @param wsUrl base url
+     * @param useRESTSeparators if true, {@link #SEPARATORS_REST} will be used, otherwise {@link #SEPARATORS_QUERY}.
+     */
+    public EHttpClient(String wsUrl, boolean useRESTSeparators) {
         super(wsUrl);
+        this.useRESTSeparators = useRESTSeparators;
     }
 
     public HttpClient multipartData(Object... chunks) {
@@ -63,7 +76,7 @@ public class EHttpClient extends HttpClient {
                 } else {
                     throw new IllegalArgumentException("chunks must be of type String or InputStream");
                 }
-                // Send a seperator
+                // Send a separator
                 out.write(i >= chunks.length - 1 ? finishBoundaryBytes : boundaryBytes);
             }
             // Finish the request
@@ -101,24 +114,37 @@ public class EHttpClient extends HttpClient {
         return this;
     }
 
-    public JsonStructure getRestfulJSON(String url, Object... args) {
-        String jsonStr = getRestful(url, args);
+    public JsonStructure restJSON(String url, Object... args) {
+        String jsonStr = get(url, args);
         return Json.createReader(new StringReader(jsonStr)).read();
     }
 
     @SuppressWarnings({ "unchecked", "rawtypes" })
-    public /*<T> T*/String getRestful(String url/*, Class<T> responseType*/, Map args) {
-        return getRestful(url, MapUtil.asArray(args));
+    public /*<T> T*/String get(String url/*, Class<T> responseType*/, Map args) {
+        return get(url, MapUtil.asArray(args));
     }
 
-    public String getRestful(String url, Object... args) {
-        return getRestful(url, new char[] { '/', '/', '/' }, args);
+    public String get(String url, Object... args) {
+        return get(url, getParameterSeparators(), args);
     }
 
-    public String getRestful_(String url, Object... args) {
-        return getRestful(url, new char[] { '?', '=', '&' }, args);
+    public String rest_(String url, Object... args) {
+        return get(url, getParameterSeparators(), args);
+    }
+    /**
+     * getParameterSeparators
+     * @return
+     */
+    char[] getParameterSeparators() {
+        return useRESTSeparators ? SEPARATORS_REST : SEPARATORS_QUERY;
     }
 
+    public String get(String url/*, Class<T> responseType*/, char[] separators, Object... args) {
+        return rest(url, "GET", null, null, separators, args);
+    }
+    public String rest(String url, String method, String contenttype, String data, Object... args) {
+        return rest(url, method, contenttype, data, getParameterSeparators(), args);
+    }
     /**
      * simply returns the response of the given url + args restful request
      * 
@@ -129,8 +155,8 @@ public class EHttpClient extends HttpClient {
      * @param args key/value pairs to be appended as rest-ful call to the url
      * @return content as object of type responseType
      */
-    public String getRestful(String url/*, Class<T> responseType*/, char[] separators, Object... args) {
-        return read(createHttpConnection(parameter(url, separators, args)).get(), String.class);
+    public String rest(String url, String method, String contenttype, String data /*, Class<T> responseType*/, char[] separators, Object... args) {
+        return read(createHttpConnection(parameter(http.getURL().toString() + url, separators, args)).send(method, contenttype, data != null ? data.getBytes() : null), String.class);
     }
 
     /**
@@ -140,7 +166,8 @@ public class EHttpClient extends HttpClient {
      * @param args key-/value pairs
      * @return new url path
      */
-    private static String path(String url, String... args) {
+    @SuppressWarnings("unchecked")
+    public static String path(String url, String... args) {
         return StringUtil.insertProperties(url, MapUtil.asMap(args));
     }
 
@@ -154,11 +181,15 @@ public class EHttpClient extends HttpClient {
      */
     private static String parameter(String url, char[] separators, Object... args) {
         StringBuilder buf = new StringBuilder(url);
-        char c = separators[0];
+        char c = url.endsWith(String.valueOf(separators[0])) ? 0 : separators[0];
         if (args != null) {
             for (int i = 0; i < args.length; i++) {
-                buf.append(c + Util.asString(args[i]).replace(' ', '+'));
-                c = i + 1 % 2 == 0 ? separators[1] : separators[2];
+                try {
+                    buf.append((c != 0 ? c : "") + URLEncoder.encode(StringUtil.toString(args[i]), UTF8));
+                } catch (UnsupportedEncodingException e) {
+                    ManagedException.forward(e);
+                }
+                c = i % 2 == 0 ? separators[1] : separators[2];
             }
         }
         url = buf.toString();

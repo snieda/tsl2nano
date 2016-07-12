@@ -480,7 +480,7 @@ public class NanoH5Session implements ISession<BeanDefinition>, Serializable, IL
         exceptionHandler = null;
         context = null;
         ConcurrentUtil.removeCurrent(getThreadLocalTypes());
-        server = null;
+//        server = null;
     }
 
     String createStatusText(long startTime) {

@@ -98,6 +98,7 @@ import de.tsl2.nano.core.util.Util;
 import de.tsl2.nano.format.GenericParser;
 import de.tsl2.nano.format.RegExpFormat;
 import de.tsl2.nano.h5.configuration.BeanConfigurator;
+import de.tsl2.nano.h5.configuration.ExpressionDescriptor;
 import de.tsl2.nano.h5.expression.Query;
 import de.tsl2.nano.h5.expression.QueryPool;
 import de.tsl2.nano.h5.websocket.WSEvent;
@@ -1834,7 +1835,7 @@ public class Html5Presentation<T> extends BeanPresentationHelper<T> implements I
                     : "");
         if (tagName.equals(TAG_FRAME)) {
             String html = Util.asString(beanValue.getValue());
-            if (!NetUtil.isURL(html))
+            if (html != null && !NetUtil.isURL(html))
                 HtmlUtil.appendAttributes(data, ATTR_SRCDOC, html);
             HtmlUtil.appendAttributes(data, ATTR_WIDTH, "100%");
         }
@@ -1856,9 +1857,26 @@ public class Html5Presentation<T> extends BeanPresentationHelper<T> implements I
         int baseBit = BitUtil.highestBitPosition(STYLE_DATA_IMG >> 1);
         int highBit = BitUtil.highestBitPosition(STYLE_DATA_FRAME >> 1);
         int style = BitUtil.retainBitRange(beanValue.getPresentation().getStyle(), baseBit, highBit);
+        if (style == -1)
+            style = evalDataStyle(beanValue.getValue());
         style = style >> baseBit;
         final String[] tags = { "img", "embed", "object", "canvas", "audio", "video", "device", "svg", "iframe" };
         return style == 0 ? tags[0] : BitUtil.description(style, Arrays.asList(tags));
+    }
+
+    private int evalDataStyle(Object value) {
+        String c = Util.asString(value);
+        if (ExpressionDescriptor.isURL(c))
+            return IPresentable.STYLE_DATA_FRAME;
+        else if (ExpressionDescriptor.isHtml(c))
+            return IPresentable.STYLE_DATA_FRAME;
+        else if (ExpressionDescriptor.isJSON(c))
+            return IPresentable.STYLE_DATA_FRAME;
+        else if (ExpressionDescriptor.isSVG(c))
+            return IPresentable.STYLE_DATA_SVG;
+        else if (ExpressionDescriptor.isAudio(c))
+            return IPresentable.STYLE_DATA_SVG;
+        return 0;
     }
 
     /**

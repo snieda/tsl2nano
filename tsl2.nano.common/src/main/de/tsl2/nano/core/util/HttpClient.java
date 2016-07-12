@@ -87,7 +87,8 @@ public class HttpClient implements Runnable {
     public InputStream send(String method, String contenttype, byte[] data) {
         try {
             http.setRequestMethod(method);
-            http.setRequestProperty("Content-Type", contenttype);
+            if (contenttype != null)
+                http.setRequestProperty("Content-Type", contenttype);
             if ((method.equals("POST") || method.equals("PUT")) && data != null) {
                 http.setDoOutput(true);
                 http.setFixedLengthStreamingMode(data.length);
@@ -125,7 +126,7 @@ public class HttpClient implements Runnable {
     @Override
     public void run() {
         try {
-            if (http.getOutputStream() != null)
+            if (http.getDoOutput())
                 http.getOutputStream().flush();
             http.connect();
             int code = http.getResponseCode();

@@ -13,6 +13,7 @@ import de.tsl2.nano.bean.BeanUtil;
 import de.tsl2.nano.bean.def.AbstractExpression;
 import de.tsl2.nano.core.cls.BeanClass;
 import de.tsl2.nano.core.util.NetUtil;
+import de.tsl2.nano.core.util.StringUtil;
 
 /**
  * describes an expression through its expression-pattern. tries to identifiy the type of expression and creates an
@@ -37,6 +38,14 @@ public class ExpressionDescriptor<T> extends AbstractExpression<T> {
     @Override
     public String getExpressionPattern() {
         return null;
+    }
+
+    @Override
+    public String getName() {
+        if (name == null && expression != null) {
+            name = StringUtil.substring(super.getName(), "://", null);
+        }
+        return name;
     }
 
     @Override
@@ -71,5 +80,17 @@ public class ExpressionDescriptor<T> extends AbstractExpression<T> {
 
     public static boolean isURL(String response) {
         return response != null && NetUtil.isURL(response);
+    }
+
+    public static boolean isSVG(String response) {
+        return response != null && response.contains("<svg");
+    }
+
+    public static boolean isAudio(String response) {
+        return response != null && response.contains("<audio");
+    }
+
+    public static boolean isVideo(String response) {
+        return response != null && response.contains("<video");
     }
 }
