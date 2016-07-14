@@ -488,7 +488,7 @@ public class SIShell implements IItemHandler, Serializable {
                 } else if (isCommand(input, KEY_PROPERTIES)) {
                     System.getProperties().list(out);
                 } else if (isCommand(input, KEY_INFO)) {
-                    printScreen(ENV.createInfo(), in, out, "");
+                    printScreen(SystemUtil.createInfo(null), in, out, "");
                 } else if (isCommand(input, KEY_PLATFORMINFO)) {
                     printScreen(PlatformManagement.getMBeanInfo(null).toString(), in, out, "");
                 } else if (isCommand(input, KEY_LASTEXCEPTION)) {
