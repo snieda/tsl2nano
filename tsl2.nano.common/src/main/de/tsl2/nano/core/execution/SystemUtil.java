@@ -3,13 +3,19 @@ package de.tsl2.nano.core.execution;
 import java.io.DataOutputStream;
 import java.io.File;
 import java.io.IOException;
+import java.net.InetAddress;
+import java.security.Policy;
+import java.util.Date;
 import java.util.Map;
+import java.util.Properties;
 import java.util.Scanner;
 
 import org.apache.commons.logging.Log;
 
 import de.tsl2.nano.core.ManagedException;
 import de.tsl2.nano.core.log.LogFactory;
+import de.tsl2.nano.core.util.BitUtil;
+import de.tsl2.nano.core.util.NetUtil;
 import de.tsl2.nano.core.util.StringUtil;
 
 /**
@@ -130,5 +136,58 @@ public class SystemUtil {
         } catch (IOException e) {
             ManagedException.forward(e);
         }
+    }
+    public static String createInfo(String buildInfo) {
+        String info =
+            "  build : ${build.info}\n"
+                + "  args  : ${sun.java.command}\n"
+                + "  dir   : ${user.dir}\n"
+                + "  time  : ${nano.tstamp}\n"
+                + "  user  : ${user.name}, home: ${user.home}\n"
+                + "  lang  : ${user.country}_${user.language}, sun.jnu.encoding: ${sun.jnu.encoding}\n"
+                + "  encode: ${file.encoding}\n"
+                + "  loader: ${main.context.classloader}\n"
+                + "  secure: ${security}\n"
+                + "  java  : ${java.vm.name}, ${java.runtime.version}\n"
+                + "  javhom: ${java.home}\n"
+                + "  complr: ${java.compiler}\n"
+                + "  memory: ${memory}\n"
+                + "  discs : ${disc}\n"
+                + "  io.tmp: ${java.io.tmpdir}\n"
+                + "  os    : ${os.name}, ${os.version} ${sun.os.patch.level} ${os.arch}\n"
+                + "  system: ${sun.cpu.isalist} ${sun.arch.data.model} x${processors}\n"
+                + "  net-ip: ${inetadress.myip} (host-name: ${inetadress.hostname})\n";
+        Properties p = new Properties();
+        p.putAll(System.getProperties());
+        p.put("nano.tstamp", new Date());
+        p.put("main.context.classloader", Thread.currentThread().getContextClassLoader());
+
+        InetAddress myAddress = NetUtil.getMyAddress();
+        p.put("inetadress.myip", myAddress.getHostAddress());
+        p.put("inetadress.hostname", myAddress.getHostName());
+
+        String free = BitUtil.amount(Runtime.getRuntime().freeMemory());
+        String total = BitUtil.amount(Runtime.getRuntime().totalMemory());
+        p.put("memory", "free " + free + " of total " + total);
+
+        String security;
+        if (System.getSecurityManager() != null) {
+            security = System.getSecurityManager().toString() + "(policy: " + Policy.getPolicy() + ")";
+        } else {
+            security = "<null>";
+        }
+        p.put("security", security);
+
+        p.put("processors", Runtime.getRuntime().availableProcessors());
+
+        File[] roots = File.listRoots();
+        StringBuilder f = new StringBuilder();
+        for (int i = 0; i < roots.length; i++) {
+            f.append(roots[i].getName() + "(" + roots[i] + " " + BitUtil.amount(roots[i].getFreeSpace()) + "/"
+                + BitUtil.amount(roots[i].getTotalSpace()) + ")");
+        }
+        p.put("disc", f.toString());
+        p.put("build.info", buildInfo);
+        return StringUtil.insertProperties(info, p);
     }
 }
