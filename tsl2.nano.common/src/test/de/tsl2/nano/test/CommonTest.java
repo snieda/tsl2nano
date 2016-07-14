@@ -90,6 +90,7 @@ import de.tsl2.nano.core.cls.BeanAttribute;
 import de.tsl2.nano.core.cls.BeanClass;
 import de.tsl2.nano.core.cls.PrimitiveUtil;
 import de.tsl2.nano.core.execution.Profiler;
+import de.tsl2.nano.core.execution.ThreadState;
 import de.tsl2.nano.core.log.LogFactory;
 import de.tsl2.nano.core.util.AnnotationProxy;
 import de.tsl2.nano.core.util.ConcurrentUtil;
@@ -120,7 +121,6 @@ import de.tsl2.nano.messaging.ChangeEvent;
 import de.tsl2.nano.messaging.IListener;
 import de.tsl2.nano.util.ClassFinder;
 import de.tsl2.nano.util.Period;
-import de.tsl2.nano.util.PrivateAccessor;
 import de.tsl2.nano.util.Translator;
 import de.tsl2.nano.util.operation.CRange;
 import de.tsl2.nano.util.operation.ConditionOperator;
@@ -1845,4 +1845,14 @@ public class CommonTest {
     public void testEHttpClient() throws Exception {
         new EHttpClient("https://www.openstreetmap.org/").get("search?", "city", "München");
     }
+
+    @Test
+    public void testCPUTime() throws Exception {
+        new ThreadState().top(500);
+        for (int i = 0; i < 100; i++) {
+            Math.atan((double) i);
+            ConcurrentUtil.sleep(100);
+        }
+    }
+
 }

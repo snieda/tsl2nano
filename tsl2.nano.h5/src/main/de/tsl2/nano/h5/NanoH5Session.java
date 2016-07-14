@@ -348,7 +348,7 @@ public class NanoH5Session implements ISession<BeanDefinition>, Serializable, IL
         ManagedException ex = null;
         try {
             //refresh session values on the current thread
-            assignSessionToCurrentThread();
+            assignSessionToCurrentThread(true);
 
             if (LOG.isDebugEnabled()) {
                 LOG.debug(
@@ -438,14 +438,16 @@ public class NanoH5Session implements ISession<BeanDefinition>, Serializable, IL
     /**
      * assignSessionToCurrentThread
      */
-    public void assignSessionToCurrentThread() {
-        lastAccess = System.currentTimeMillis();
-        requests++;
+    public void assignSessionToCurrentThread(boolean newRequest) {
+        if (newRequest) {
+            lastAccess = System.currentTimeMillis();
+            requests++;
+            if (nav.current() instanceof Bean && ((Bean) nav.current()).getInstance() instanceof BeanConfigurator) {
+                this.beanConfigurator = (BeanConfigurator) ((Bean) nav.current()).getInstance();
+            }
+        }
         Thread.currentThread().setContextClassLoader(sessionClassloader);
         Thread.currentThread().setUncaughtExceptionHandler(exceptionHandler);
-        if (nav.current() instanceof Bean && ((Bean) nav.current()).getInstance() instanceof BeanConfigurator) {
-            this.beanConfigurator = (BeanConfigurator) ((Bean) nav.current()).getInstance();
-        }
         ConcurrentUtil.setCurrent(getUserAuthorization(), beanContainer, beanConfigurator);
     }
 

@@ -60,6 +60,9 @@ public class RestfulExpression<T extends Serializable> extends RunnableExpressio
      */
     @Attribute(required = false)
     boolean urlRESTSeparators;
+    /** if true, the values (without names and separators) will be appended directly to the url */
+    @Attribute(required = false)
+    boolean valuesOnly;
     /**
      * if true, the response-data will be embedded into the html (e.g. iframe-srcdoc) to be handled by a
      * dependency-listener etc. - if false, the response is handled as link (like iframe-src)
@@ -96,6 +99,7 @@ public class RestfulExpression<T extends Serializable> extends RunnableExpressio
         return new IPRunnable<T, Map<String, Object>>() {
             transient Map<String, ? extends Serializable> parameters;
 
+            @SuppressWarnings("unchecked")
             @Override
             public T run(Map<String, Object> context, Object... extArgs) {
                 if (response.expired()) {
@@ -109,14 +113,22 @@ public class RestfulExpression<T extends Serializable> extends RunnableExpressio
                         if ("PUT".equals(method) || "POST".equals(method)) {
                             postStr = MapUtil.toJSON(BeanUtil.toValueMap(data, false, false, false, this_.getName()));
                         } else if (Util.isEmpty(extArgs)) {
-                            extArgs = MapUtil.asArray(BeanUtil.toValueMap(data, false, false, false, this_.getName()));
+                            Map<String, Object> valueMap =
+                                BeanUtil.toValueMap(data, false, false, false, this_.getName());
+                            extArgs = valuesOnly ? valueMap.values().toArray() : MapUtil.asArray(valueMap);
                         }
                     } else {
                         LOG.warn("the given context may not have desired informations for url " + expression + ": "
                             + context);
                     }
-                    response.set(
-                        new EHttpClient(expression, urlRESTSeparators).rest("", method, contentType, postStr, extArgs));
+                    EHttpClient http = new EHttpClient(
+                        expression + (valuesOnly ? StringUtil.concat(new char[0], extArgs) : ""), urlRESTSeparators);
+                    if (valuesOnly)
+                        response.set(http.get());
+                    else
+                        response.set(
+                            new EHttpClient(expression, urlRESTSeparators).rest("", method, contentType, postStr,
+                                extArgs));
                 }
                 return (T) response.get();
             }

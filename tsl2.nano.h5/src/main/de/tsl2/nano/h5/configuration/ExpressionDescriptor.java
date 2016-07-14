@@ -28,11 +28,16 @@ public class ExpressionDescriptor<T> extends AbstractExpression<T> {
     public ExpressionDescriptor() {
     }
 
+    public ExpressionDescriptor(Class declaringClass) {
+        this(declaringClass, null);
+    }
+    
     /**
      * constructor
      */
-    public ExpressionDescriptor(Class declaringClass) {
+    public ExpressionDescriptor(Class declaringClass, String expression) {
         this.declaringClass = declaringClass;
+        this.expression = expression;
     }
 
     @Override

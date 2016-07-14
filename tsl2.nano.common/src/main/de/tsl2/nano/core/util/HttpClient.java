@@ -15,7 +15,10 @@ import java.io.OutputStream;
 import java.net.HttpURLConnection;
 import java.net.URL;
 
+import org.apache.commons.logging.Log;
+
 import de.tsl2.nano.core.ManagedException;
+import de.tsl2.nano.core.log.LogFactory;
 
 /**
  * simple http client
@@ -26,6 +29,8 @@ import de.tsl2.nano.core.ManagedException;
  * @version $Revision$
  */
 public class HttpClient implements Runnable {
+    Log LOG = LogFactory.getLog(HttpClient.class);
+    
     HttpURLConnection http;
 
     Object result;
@@ -128,8 +133,10 @@ public class HttpClient implements Runnable {
         try {
             if (http.getDoOutput())
                 http.getOutputStream().flush();
+            LOG.debug("sending request " + http.getURL());
             http.connect();
             int code = http.getResponseCode();
+            LOG.debug("--> http-code:" + code);
             if (code >= 300)
                 throw new IllegalStateException("Http " + code + (http.getErrorStream() != null
                     ? ": " + new String(ByteUtil.toByteArray(http.getErrorStream()), "UTF-8") : ""));

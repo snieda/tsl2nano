@@ -15,14 +15,11 @@ import java.io.FileReader;
 import java.io.InputStream;
 import java.io.Serializable;
 import java.lang.Thread.UncaughtExceptionHandler;
-import java.net.InetAddress;
-import java.security.Policy;
 import java.text.Format;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
-import java.util.Date;
 import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.Hashtable;
@@ -33,6 +30,7 @@ import java.util.Map;
 import java.util.Properties;
 import java.util.ResourceBundle;
 import java.util.Set;
+import java.util.SortedMap;
 import java.util.TreeMap;
 import java.util.TreeSet;
 
@@ -50,8 +48,8 @@ import de.tsl2.nano.core.exception.ExceptionHandler;
 import de.tsl2.nano.core.exception.Message;
 import de.tsl2.nano.core.execution.CompatibilityLayer;
 import de.tsl2.nano.core.execution.Profiler;
+import de.tsl2.nano.core.execution.SystemUtil;
 import de.tsl2.nano.core.log.LogFactory;
-import de.tsl2.nano.core.util.BitUtil;
 import de.tsl2.nano.core.util.FileUtil;
 import de.tsl2.nano.core.util.MapUtil;
 import de.tsl2.nano.core.util.NetUtil;
@@ -96,7 +94,7 @@ public class ENV implements Serializable {
     private static ENV self;
     @SuppressWarnings("rawtypes")
     @ElementMap(entry = "property", key = "name", attribute = true, inline = true, required = false, keyType = String.class, valueType = Object.class)
-    private TreeMap properties;
+    private SortedMap properties;
     
     /**
      * holds all already loaded services - but wrapped into {@link ServiceProxy}. the {@link #serviceLocator} holds the
@@ -232,7 +230,7 @@ public class ENV implements Serializable {
             + "creating environment "
             + dir
             + "\n"
-            + createInfo()
+            + SystemUtil.createInfo(getBuildInformations())
             + "===========================================================");
 
         //provide some external functions as options for this framework
@@ -301,62 +299,8 @@ public class ENV implements Serializable {
      * @return
      */
     @SuppressWarnings("rawtypes")
-    static TreeMap createPropertyMap() {
-        return (TreeMap) /*Collections.synchronizedMap(*/new TreeMap();
-    }
-
-    public static String createInfo() {
-        String info =
-            "  build : ${build.info}\n"
-                + "  args  : ${sun.java.command}\n"
-                + "  dir   : ${user.dir}\n"
-                + "  time  : ${nano.tstamp}\n"
-                + "  user  : ${user.name}, home: ${user.home}\n"
-                + "  lang  : ${user.country}_${user.language}, sun.jnu.encoding: ${sun.jnu.encoding}\n"
-                + "  encode: ${file.encoding}\n"
-                + "  loader: ${main.context.classloader}\n"
-                + "  secure: ${security}\n"
-                + "  java  : ${java.vm.name}, ${java.runtime.version}\n"
-                + "  javhom: ${java.home}\n"
-                + "  complr: ${java.compiler}\n"
-                + "  memory: ${memory}\n"
-                + "  discs : ${disc}\n"
-                + "  io.tmp: ${java.io.tmpdir}\n"
-                + "  os    : ${os.name}, ${os.version} ${sun.os.patch.level} ${os.arch}\n"
-                + "  system: ${sun.cpu.isalist} ${sun.arch.data.model} x${processors}\n"
-                + "  net-ip: ${inetadress.myip} (host-name: ${inetadress.hostname})\n";
-        Properties p = new Properties();
-        p.putAll(System.getProperties());
-        p.put("nano.tstamp", new Date());
-        p.put("main.context.classloader", Thread.currentThread().getContextClassLoader());
-
-        InetAddress myAddress = NetUtil.getMyAddress();
-        p.put("inetadress.myip", myAddress.getHostAddress());
-        p.put("inetadress.hostname", myAddress.getHostName());
-
-        String free = BitUtil.amount(Runtime.getRuntime().freeMemory());
-        String total = BitUtil.amount(Runtime.getRuntime().totalMemory());
-        p.put("memory", "free " + free + " of total " + total);
-
-        String security;
-        if (System.getSecurityManager() != null) {
-            security = System.getSecurityManager().toString() + "(policy: " + Policy.getPolicy() + ")";
-        } else {
-            security = "<null>";
-        }
-        p.put("security", security);
-
-        p.put("processors", Runtime.getRuntime().availableProcessors());
-
-        File[] roots = File.listRoots();
-        StringBuilder f = new StringBuilder();
-        for (int i = 0; i < roots.length; i++) {
-            f.append(roots[i].getName() + "(" + roots[i] + " " + BitUtil.amount(roots[i].getFreeSpace()) + "/"
-                + BitUtil.amount(roots[i].getTotalSpace()) + ")");
-        }
-        p.put("disc", f.toString());
-        p.put("build.info", getBuildInformations());
-        return StringUtil.insertProperties(info, p);
+    static SortedMap createPropertyMap() {
+        return Collections.synchronizedSortedMap(new TreeMap());
     }
 
     /**
@@ -701,9 +645,9 @@ public class ENV implements Serializable {
     /**
      * persists the current environment - all transient properties and services will be lost!!!
      */
-    public final static void persist() {
+    public final static synchronized void persist() {
         //save backup while some key/values will be removed if not serializable
-        TreeMap tempProperties = createPropertyMap();
+        SortedMap tempProperties = createPropertyMap();
         tempProperties.putAll(self().properties);
         Map<Class<?>, Object> tempServices = new Hashtable<Class<?>, Object>(services());
         String configPath = getConfigPath();
@@ -724,7 +668,7 @@ public class ENV implements Serializable {
      */
     public static void reload() {
         String envDir = getConfigPath();
-        TreeMap tempProperties = createPropertyMap();
+        SortedMap tempProperties = createPropertyMap();
         tempProperties.putAll(self().properties);
         Map<Class<?>, Object> tempServices = new Hashtable<Class<?>, Object>(services());
 
