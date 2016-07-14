@@ -368,4 +368,15 @@ public class BeanConfigurator<T> implements Serializable {
         compositor.saveDefinition();
     }
 
+    @SuppressWarnings({ "rawtypes", "unchecked" })
+    @de.tsl2.nano.bean.annotation.Action(name = "addAttribute", argNames = { "attribute-expression"})
+    public void actionAddAttribute(
+            String attributeExpression) {
+        ExpressionDescriptor<Object> exDescr = new ExpressionDescriptor<>(def.getDeclaringClass(), attributeExpression);
+        AttributeDefinition attr = def.addAttribute(exDescr.getName(), exDescr.toInstance(), null, null);
+        attr.getPresentation().setType(IPresentable.TYPE_DEPEND);
+        attr.getPresentation().setStyle(IPresentable.UNDEFINED);
+        def.saveDefinition();
+    }
+
 }
