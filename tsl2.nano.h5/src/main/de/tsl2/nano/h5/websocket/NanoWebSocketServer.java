@@ -112,7 +112,7 @@ public class NanoWebSocketServer extends WebSocketServer {
     @Override
     public void onMessage(WebSocket conn, String msg) {
         LOG.debug("receiving message: '" + msg + "' from " + conn);
-        ((NanoH5Session)session).assignSessionToCurrentThread();
+        ((NanoH5Session)session).assignSessionToCurrentThread(false);
         //if we are in configuration mode, do nothing
         Package pck = ((BeanDefinition) session.getWorkingObject()).getDeclaringClass().getPackage();
         if (pck.equals(BeanConfigurator.class.getPackage()) || pck.equals(BeanDefinition.class.getPackage())) {
