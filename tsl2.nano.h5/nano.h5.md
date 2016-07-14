@@ -2139,10 +2139,55 @@ BeanDefinition b = BeanDefinition.getBeanDefinition(MyEntity.class);
 
 ### Calling a restful service to embed the result into an iframe
 
-TODO: develop and describe...
+restful services can be added as attributes through a RestfulExpression. To do this on runtime, select any bean to configure it's type inside the bean-configurator.
+There are two possibilities to add a new attribute.
+
+#### The convenience to add a new attribute (through an expression
+
+Click the 'Add Attribute' button and do a double click on the 'Attribute-Expression' item. Enter an expression (see detail description on the next chapter) and Click 'Add Attribute' again to save the new attribute.
+
+#### Adding a new Attribute - the long and detailed way
+
+[[img src=beanconfigurator.png]]
+
+Click the selector button ('...') on the attributes field, and click new in the following panel to create a new attribute. A default attribute will be created - click the assign button on the selection panel.
+
+[[img src=attributeconfigurator-new.png]]
+
+Now you are inside the new attribute definition. Click on the selection button for the field 'declaration' - there the attribute expression will be defined.
+
+[[attribute-declaration-new.jpg]]
+
+Enter an expression like
+
+	https://openstreetmap.org/search?
+	
+to create a restful-expression attribute.
+
+The expression declaration tries to evaluate the type of expression you input. The following types are identified:
+	PathExpression (Example: person.address.city)
+	SQLExpression (Example: ?select * from MYTABLE where...)
+	RuleExpression (Example: see chapter 'The rule cover')
+	
+After you typed your attribute expression you can click the save- and assign- buttons to return to the main bean configuration panel. Clicking the save button here will persist the bean definition and you will find your new attribute at the end of presentation/MYBEAN.xml (..or .yaml).
+	
+The result should be the changed bean pressenter in the directory MY-ENVIRONMENT/presenter:
 
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-
+   <attribute name="openstreemap.org">
+      <attributeDefinition id="false" unique="false" doValidation="true" composition="false" cascading="false" generatedValue="false">
+         <declaring class="de.tsl2.nano.h5.expression.RestfulExpression" type="de.tsl2.nano.bean.def.BeanDefinition$1" method="GET" urlRESTSeparators="false" handleResponse="false">
+            <expression><![CDATA[https://www.openstreemap.org/search/query?]]></expression>
+         </declaring>
+         <constraint type="java.lang.Object" nullable="true" length="-1" scale="-1" precision="-1"/>
+         <description>openstreemap.org</description>
+         <presentable class="de.tsl2.nano.h5.Html5Presentable" type="-1" style="-1" visible="true" searchable="true" nesting="false">
+            <label>[unknown]:openstreemap.org</label>
+            <description>[unknown]:https://www.openstreemap.org/search/query?</description>
+            <enabler class="de.tsl2.nano.action.IActivable$2" active="false"/>
+         </presentable>
+      </attributeDefinition>
+   </attribute>
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 Another feature is to define a timer through _createTimer(periodInSeconds)_ (xml-tag: _timer_) to do a scheduled client refresh.
@@ -2177,6 +2222,21 @@ function inputassist(e) {
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 As you can see, all messages will change attribute properties.
+
+### Fulltext search with H2 or Lucene
+
+The default database H2 provides full-text search through lucene or on its own. Go to the Administration panel (starting from the first panel after login), click the 'ScriptTool' button end enter:
+
+	CREATE ALIAS IF NOT EXISTS FT_INIT FOR "org.h2.fulltext.FullText.init";
+	CALL FT_INIT();
+	CALL FT_CREATE_INDEX('PUBLIC', 'TEST', NULL);
+
+Click the button 'Start'. This has to be done once - the fulltext-search is now initialized.
+Now enter something like:
+	SELECT T.* FROM FT_SEARCH_DATA('hello', 0, 0) FT, TEST T
+	WHERE FT.TABLE='TEST' AND T.ID=FT.KEYS[0];
+
+If you click the 'Query' button, this query will be saved as query to be shown in the starting bean-collector list.
 
 ## Developing, Deploying and Debugging
 
@@ -3249,7 +3309,7 @@ MapExpressionFormat.parseObject(..) --> ve.from() raus
   FormatUtil <-- DefaultFormat <-- GenericParser <-- RegExpFormat
   twice ant (ant-1.6.5) on running ant-task
   hibernate not depending slf4j-simple --> ant-task error
-  login ok-button not working on ALT-o
+  (v) login ok-button not working on ALT-o
   status-line with tooltip not working
   
 createDataTag, isData <-- iframe + srcdoc, +svg
