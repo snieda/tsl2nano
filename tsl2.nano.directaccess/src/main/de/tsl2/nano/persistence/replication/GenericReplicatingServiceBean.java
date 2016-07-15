@@ -442,7 +442,7 @@ class Tree<T, D> extends HashMap<T, Collection<D>> {
     public int size() {
         return items.size();
     }
-    public boolean remove(T node, D destination) {
+    public boolean delete(T node, D destination) {
         items.remove(node);
         Collection<D> collection = get(node);
         if (collection != null) {

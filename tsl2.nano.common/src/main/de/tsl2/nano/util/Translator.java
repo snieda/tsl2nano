@@ -1,13 +1,21 @@
 package de.tsl2.nano.util;
 
+import java.io.UnsupportedEncodingException;
+import java.net.URLDecoder;
+import java.net.URLEncoder;
 import java.text.MessageFormat;
+import java.util.LinkedHashMap;
 import java.util.Locale;
+import java.util.Map;
 import java.util.Properties;
 import java.util.ResourceBundle;
 import java.util.Set;
+import java.util.TreeMap;
 
 import org.apache.commons.logging.Log;
 
+import de.tsl2.nano.collection.CollectionUtil;
+import de.tsl2.nano.core.ManagedException;
 import de.tsl2.nano.core.Messages;
 import de.tsl2.nano.core.log.LogFactory;
 import de.tsl2.nano.core.util.ConcurrentUtil;
@@ -27,15 +35,20 @@ public class Translator {
         "http://www.worldlingo.com/S000.1/api?wl_srclang={0}&wl_trglang={1}&wl_password=secret&wl_mimetype=text%2Fplain&wl_data={2}";
 
     //Der KEY ist mit einem google-account + projekt verbunden. Fuer dieses Projekt muss 'abrechenbar' aktiviert sein, so dass
-    //Bank-Konto-Daten verfügbar sein müssen :-(
+    //Bank-Konto-Daten verfï¿½gbar sein mï¿½ssen :-(
 //        String googleTranslateUrl =
 //            "https://www.googleapis.com/language/translate/v2?key=INSERT-YOUR-KEY&q=hello%20world&source=en&target=de";
 
     public static final String translate(Locale srcLang, Locale destLang, String words) {
         words = StringUtil.spaceCamelCase(words);
-        words = words.replaceAll("[^\\w]+", "\\+");
+        words = URLEncoder.encode(words);
         String request = MessageFormat.format(URL_TANSLATION_TEMPL, srcLang, destLang, words);
-        return NetUtil.get(request).substring(2).trim();
+        try {
+            return URLDecoder.decode(NetUtil.get(request).substring(2).trim(), "UTF-8");
+        } catch (UnsupportedEncodingException e) {
+            ManagedException.forward(e);
+            return null;
+        }
     }
 
     /**
@@ -47,9 +60,10 @@ public class Translator {
      * @param destLang destination language
      * @return translated properties
      */
-    public static Properties translateProperties(String name, Properties origin, Locale srcLang, Locale destLang/*, int requestWordCount*/) {
+    @SuppressWarnings("rawtypes")
+    public static Properties translateProperties(String name, Map origin, Locale srcLang, Locale destLang/*, int requestWordCount*/) {
         LOG.info("starting translation of " + origin.size() + " words from <" + srcLang + "> to <" + destLang + ">");
-        Set<Object> keySet = origin.keySet();
+        Set keySet = origin.keySet();
         Properties target = new Properties();
         int tries = 0;
         String word = null;
@@ -87,8 +101,9 @@ public class Translator {
      * @param destLang destination language
      * @return translated properties
      */
-    public static Properties translateProperties0(String name, Properties origin, Locale srcLang, Locale destLang/*, int requestWordCount*/) {
-        String words = StringUtil.toString(origin.values(), -1);
+    @SuppressWarnings("rawtypes")
+    public static Map translatePropertiesFast(String name, Map origin, Locale srcLang, Locale destLang/*, int requestWordCount*/) {
+        String words = StringUtil.toString(origin.values(), -1).replaceAll("[,\\s]+", " ");
         String trans = translate(srcLang, destLang, words);
         //create the target properties
         String[] t = trans.split("\\s+");
@@ -96,8 +111,10 @@ public class Translator {
         int i = 0;
         String tos[];
         StringBuilder tt = new StringBuilder();
+        String key;
         for (Object k : origin.keySet()) {
-            tos = StringUtil.splitCamelCase((String) origin.get(k));
+            key = (String) origin.get(k);
+            tos = CollectionUtil.concat(StringUtil.splitCamelCase(key), StringUtil.splitWordBinding(key));
             tt.setLength(0);
             //concat camelcase words...works only on same length
             for (int j = 0; j < tos.length; j++) {
@@ -119,13 +136,29 @@ public class Translator {
      * @param destLang destination language
      * @return translated properties
      */
-    public static Properties translateBundle(String name, Set<String> keySet, Locale srcLang, Locale destLang) {
-        Properties p = new Properties();
+    @SuppressWarnings({ "rawtypes", "unchecked" })
+    public static Map translateBundle(String name, Set<String> keySet, Locale srcLang, Locale destLang) {
+        Map map = new TreeMap(); //alphabetic sorted entries
+        Map p = new LinkedHashMap();
+        Map komplex = new LinkedHashMap();
+        String txt;
         for (String k : keySet) {
-            p.put(k, Messages.getString(k));
+            txt = Messages.getString(k);
+            if (txt.indexOf(' ') == -1 && txt.indexOf('.') == -1) {
+                p.put(k, txt);
+                if (p.size() >= 100) {//request may exceed max length (-->Http 413)
+//                    map.putAll(translatePropertiesFast(name, p, srcLang, destLang));
+//                    p.clear();
+                }
+            } else
+                komplex.put(k, txt);
         }
-        p = translateProperties(name, p, srcLang, destLang);
-        FileUtil.saveProperties(Messages.getResourceFileName(name), p);
+        map.putAll(translateProperties/*Fast*/(name, p, srcLang, destLang));
+        map.putAll(translateProperties(name, komplex, srcLang, destLang));
+        
+        Properties props = new Properties();
+        props.putAll(map);
+        FileUtil.saveProperties(Messages.getResourceFileName(name), props);
         Messages.reload();
         return p;
     }

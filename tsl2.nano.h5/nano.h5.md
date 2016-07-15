@@ -1257,7 +1257,8 @@ This is the most important attribute property. Normally it is a standard bean-at
 	* path-expression: the expression is a path from a bean-attribute to another one - through one or more relations. expression example: _person.organization.name_.
 	* rule-expression: the expression is an existing rule name.
 	* sql-expression: the expression is an existing query name.
-	* restful-expression: the expression is the url of a restful-service
+	* url-expression: the expression is the url of a restful-service
+	* simple-expression: any expression with ant-like variables
 
 All available attribute instances:
 
@@ -2137,7 +2138,7 @@ BeanDefinition b = BeanDefinition.getBeanDefinition(MyEntity.class);
 ((AttributeDefinition)b.getAttribute("my-attribute-name")).getPresentation().setType(IPresentable.TYPE_ATTACHMENT);
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-### Calling a restful service to embed the result into an iframe
+### Calling a RESTful service to embed the result into an iframe
 
 restful services can be added as attributes through a RestfulExpression. To do this on runtime, select any bean to configure it's type inside the bean-configurator.
 There are two possibilities to add a new attribute.
@@ -2160,38 +2161,90 @@ Now you are inside the new attribute definition. Click on the selection button f
 
 Enter an expression like
 
-	https://openstreetmap.org/search?
+	@https://openstreetmap.org/search?
 	
-to create a restful-expression attribute.
+to create a url-expression attribute.
 
 The expression declaration tries to evaluate the type of expression you input. The following types are identified:
 	PathExpression (Example: person.address.city)
 	SQLExpression (Example: ?select * from MYTABLE where...)
 	RuleExpression (Example: see chapter 'The rule cover')
+	URLExpression (Example: @http://openstreetmap.org/search/query={city})
+	SimpleExpression (Example: http://openstreetmap.org/search/query=${city})
 	
 After you typed your attribute expression you can click the save- and assign- buttons to return to the main bean configuration panel. Clicking the save button here will persist the bean definition and you will find your new attribute at the end of presentation/MYBEAN.xml (..or .yaml).
 	
-The result should be the changed bean pressenter in the directory MY-ENVIRONMENT/presenter:
+The result should be the changed bean presenter in the directory MY-ENVIRONMENT/presenter:
 
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-   <attribute name="openstreemap.org">
+   <attribute name="openstreetmap.org">
       <attributeDefinition id="false" unique="false" doValidation="true" composition="false" cascading="false" generatedValue="false">
-         <declaring class="de.tsl2.nano.h5.expression.RestfulExpression" type="de.tsl2.nano.bean.def.BeanDefinition$1" method="GET" urlRESTSeparators="false" handleResponse="false">
-            <expression><![CDATA[https://www.openstreemap.org/search/query?]]></expression>
+         <declaring class="de.tsl2.nano.h5.expression.URLExpression" declaringClass="org.anonymous.project.Address" type="de.tsl2.nano.bean.def.BeanDefinition$1">
+            <expression><![CDATA[@openstreetmap.org]]></expression>
          </declaring>
          <constraint type="java.lang.Object" nullable="true" length="-1" scale="-1" precision="-1"/>
-         <description>openstreemap.org</description>
+         <description>openstreetmap.org</description>
          <presentable class="de.tsl2.nano.h5.Html5Presentable" type="-1" style="-1" visible="true" searchable="true" nesting="false">
-            <label>[unknown]:openstreemap.org</label>
-            <description>[unknown]:https://www.openstreemap.org/search/query?</description>
+            <label>Address:@openstreetmap.org</label>
+            <description>Address:@openstreetmap.org</description>
             <enabler class="de.tsl2.nano.action.IActivable$2" active="false"/>
          </presentable>
       </attributeDefinition>
    </attribute>
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
+The WebClient definition can be found in the specification folder as file 'openstreetmap.org.xml':
+
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+<webClient name="openstreetmap.org" method="GET" urlRESTSeparators="false" valuesOnly="true" handleResponse="false">
+   <operation>http://openstreetmap.org/search?query=</operation>
+   <contextKey>address</contextKey>
+   <parameterNames length="6">
+      <string>id</string>
+      <string>code</string>
+      <string>city</string>
+      <string>street</string>
+      <string>country</string>
+      <string>locations</string>
+   </parameterNames>
+</webClient>
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+The WebClient supports full RESTful access!
+
 Another feature is to define a timer through _createTimer(periodInSeconds)_ (xml-tag: _timer_) to do a scheduled client refresh.
 
+#### WebClient: The Expression for a service url
+
+The expression for an URL can contain extended informations. The syntax is:
+	http[s]?//.*<<(PUT|POST|DELETE)[:]<CONTENTTYPE>
+	
+The expression can contain url query arguments and it can end with '=' or the nano specific method/content-type description (e.g. <<PUT:application/xml)
+
+Examples:
+	http://www.openstreetmap.org/search?query=						// it ends with '=', bean attributes (given as context) will be appended directly without names. no restful syntax will be used
+	http://localhost:8080/myresource/								// a port is given, so it's not a public service. the response will be embedded with its content into the html page
+	http://localhost:8080/myresource/<<PUT:application/json			// rest syntax will be used, method is PUT and content-type is application/json.
+	http://localhost:8080/myresource/city/{city}/street/{street}/	// the attributes 'city' and 'street' will constrain the parameters in *parameterNames*
+	
+If your bean is something like:
+	Address
+		city
+		code
+		street
+all three attributes will be appended as rest query parameters at the end. to change that, edit the address.xml tag: *parameterNames*. Or you give an expression holding something like {city} - this will be extracted as *parameterNames*.
+
+## The content
+
+If you have a method 'PUT', 'POST', you need a content to be posted. The content will be evaluated on running the RestfulExpression through a given context. If no *contentFromContext* was defined, the first context element (normally the bean-instance (e.g. an Address) will be used as content. You can define *contentFromContext* as relation from Address. E.g.: address.city. Then the value of address.city will be used as content. The content will be transformed as defined by content-type (mime-type, see: https://wiki.selfhtml.org/wiki/Referenz:MIME-Typen).
+
+Supported types are:
+	application/xml
+	application/json
+	text/plain
+	text/html
+	image/jpeg
+	image/png
 
 ### Technical details: How it works
 

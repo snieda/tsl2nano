@@ -105,6 +105,7 @@ public abstract class AbstractExpression<T> implements IValueExpression<T>, IAtt
             throw new IllegalArgumentException("The expression '" + valueExpression
                 + "' has to match the regular expression '" + getExpressionPattern() + "'");
         }
+        //if name was calculated, reset it
         if (this.expression != null && this.expression.contains(name))
             this.name = null;
         this.expression = valueExpression;
@@ -118,7 +119,7 @@ public abstract class AbstractExpression<T> implements IValueExpression<T>, IAtt
         return declaringClass;
     }
 
-    protected void setDeclaringClass(Class<?> declaringClass) {
+    public void setDeclaringClass(Class<?> declaringClass) {
         this.declaringClass = declaringClass;
     }
     
@@ -234,13 +235,13 @@ public abstract class AbstractExpression<T> implements IValueExpression<T>, IAtt
     /**
      * getExtension
      * 
-     * @param attributeName attribute name to check
+     * @param expression attribute expression to check
      * @return registered extension or null - if standard
      */
-    protected static Class<? extends AbstractExpression> getImplementation(String attributeName) {
+    protected static Class<? extends AbstractExpression> getImplementation(String expression) {
         Set<String> regExs = registeredExtensions.keySet();
         for (String attrRegEx : regExs) {
-            if (attributeName.matches(attrRegEx)) {
+            if (expression.matches(attrRegEx)) {
                 return registeredExtensions.get(attrRegEx);
             }
         }

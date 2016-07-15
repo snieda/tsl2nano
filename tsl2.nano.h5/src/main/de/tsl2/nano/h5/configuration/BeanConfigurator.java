@@ -366,6 +366,7 @@ public class BeanConfigurator<T> implements Serializable {
         compositor.getPresentable().setIcon("icons/properties.png");
 //        compositor.getActions();
         compositor.saveDefinition();
+        Bean.clearCache();
     }
 
     @SuppressWarnings({ "rawtypes", "unchecked" })
@@ -377,6 +378,7 @@ public class BeanConfigurator<T> implements Serializable {
         attr.getPresentation().setType(IPresentable.TYPE_DEPEND);
         attr.getPresentation().setStyle(IPresentable.UNDEFINED);
         def.saveDefinition();
+        Bean.clearCache();
     }
 
 }

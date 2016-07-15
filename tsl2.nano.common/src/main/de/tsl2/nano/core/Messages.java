@@ -2,8 +2,10 @@ package de.tsl2.nano.core;
 
 import java.text.MessageFormat;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashSet;
 import java.util.Hashtable;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Locale;
 import java.util.MissingResourceException;
@@ -290,11 +292,13 @@ public class Messages {
         return ResourceBundle.getBundle(name, Locale.ROOT);
     }
     /**
-     * @return keySet of all registered bundles
+     * @return keySet of all registered bundles. order: last registered keys come first
      */
     public static Set<String> keySet() {
-        HashSet<String> keySet = new HashSet<String>();
-        for (ResourceBundle bundle : BUNDLE_LIST) {
+        HashSet<String> keySet = new LinkedHashSet<String>();
+        ArrayList<ResourceBundle> reverseBundleList = new ArrayList<ResourceBundle>(BUNDLE_LIST);
+        Collections.reverse(reverseBundleList);
+        for (ResourceBundle bundle : reverseBundleList) {
             keySet.addAll(bundle.keySet());
         }
         return keySet;

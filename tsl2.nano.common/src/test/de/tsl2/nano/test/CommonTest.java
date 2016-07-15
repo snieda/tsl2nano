@@ -168,9 +168,9 @@ public class CommonTest {
         assertEquals(str, StringUtil.fromHexString(hex));
         
         //test crypto
-        String[] passwds = new String[] { "meinpass", "12345678", "azAzäÄüÜ" };
+        String[] passwds = new String[] { "meinpass", "12345678", "azAzï¿½ï¿½ï¿½ï¿½" };
         for (int i = 0; i < passwds.length; i++) {
-            byte[] cryptoHash = StringUtil.cryptoHash("äöüäöüäü");
+            byte[] cryptoHash = StringUtil.cryptoHash("ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½");
             LOG.info(passwds[i] + " ==> " + "(" + cryptoHash.length + ") " + StringUtil.toString(cryptoHash, 1000));
             LOG.info(passwds[i] + " crypto-hex: " + StringUtil.toHexString(cryptoHash));
             LOG.info(passwds[i] + "        hex: " + StringUtil.toHexString(passwds[i].getBytes()));
@@ -358,7 +358,7 @@ public class CommonTest {
     @Test
     public void testCollectionUtil() throws Exception {
         //1. converting from arrays to a list
-        Object[] arr1 = new Object[] { "Hans Müller", "Hans Mueller" };
+        Object[] arr1 = new Object[] { "Hans Mï¿½ller", "Hans Mueller" };
         String[] arr2 = new String[] { "Carsten1", "Carsten0" };
         String[] arr3 = new String[] { "Berta", "Anton" };
         String[] arr4 = new String[] { "1100", "11", "111", "101", "1" };
@@ -377,7 +377,7 @@ public class CommonTest {
             "Carsten0",
             "Carsten1",
             "Hans Mueller",
-            "Hans Müller"), sortedList);
+            "Hans Mï¿½ller"), sortedList);
 
         //3. filtering data
         Collection<String> filteredBetween = CollectionUtil.getFilteringBetween(list, "Anton", "Carsten1");
@@ -621,7 +621,7 @@ public class CommonTest {
         assertEquals("EUR", newCurrency.getCurrencyCode());
 
         DecimalFormat df = (DecimalFormat) DecimalFormat.getInstance();
-        df.applyPattern("###,###,###.00 €");
+        df.applyPattern("###,###,###.00 ï¿½");
         LOG.info(df.format(123456789));
 
         //test the factor and rounding mode
@@ -1192,7 +1192,7 @@ public class CommonTest {
         };
         TypeBean myBean10000 = euroValue.multiply(euro_100);
         assertTrue(myBean10000.getPrimitiveDouble() == 100d * 100d);
-        assertTrue(euroValue.toString().equals("100.0 €"));
+        assertTrue(euroValue.toString().equals("100.0 ï¿½"));
 
         /*
          * second, test the converting
@@ -1747,8 +1747,8 @@ public class CommonTest {
 
     @Test
     public void testBlockTranslation() throws Exception {
-        Properties p = createTestTranslationProperties();
-        Properties t = Translator.translateProperties0("test", p, Locale.ENGLISH, Locale.GERMAN);
+        Map p = createTestTranslationProperties();
+        Map t = Translator.translatePropertiesFast("test", p, Locale.ENGLISH, Locale.GERMAN);
         //the words are german - so, no translation can be done --> p = t. it's only an integration test
         assertEquals(p, t);
     }
@@ -1843,7 +1843,7 @@ public class CommonTest {
     }
     @Test
     public void testEHttpClient() throws Exception {
-        new EHttpClient("https://www.openstreetmap.org/").get("search?", "city", "München");
+        new EHttpClient("https://www.openstreetmap.org/").get("search?", "city", "Mï¿½nchen");
     }
 
     @Test

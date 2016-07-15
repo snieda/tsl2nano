@@ -271,7 +271,8 @@ public class BeanUtil extends ByteUtil {
             return false;
         }
         //on array types, the package is null!
-        final String p = type.getPackage() != null ? type.getPackage().getName() : type.getClass().getName();
+        String p = type.getPackage() != null ? type.getPackage().getName() : type.getClass().getName();
+        p = StringUtil.extract(p, "\\w+[.]\\w+");
         return type.isPrimitive() || STD_TYPE_PKGS.contains(p);
     }
 
@@ -286,7 +287,8 @@ public class BeanUtil extends ByteUtil {
     public static boolean isStandardInterface(Class<?> type) {
         //if type is root object, it will be an special extension - not a standard type
         //on array types, the package is null!
-        final String p = type.getPackage() != null ? type.getPackage().getName() : type.getClass().getName();
+        String p = type.getPackage() != null ? type.getPackage().getName() : type.getClass().getName();
+        p = StringUtil.extract(p, "\\w+[.]\\w+");
         return type.isInterface() || STD_TYPE_PKGS.contains(p);
     }
 

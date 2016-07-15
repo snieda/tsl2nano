@@ -91,7 +91,10 @@ commit;
 		<condition property="background" value="" else="&amp;">
 			<contains string="${os.name}" substring="windows" casesensitive="false"/>
 		</condition>
-		<condition property="cmdargs" value="%*" else="$* ${background}">
+		<condition property="cmdargs" value="%* ${background}" else="$* ${background}">
+			<contains string="${os.name}" substring="windows" casesensitive="false"/>
+		</condition>
+		<condition property="cmdpref" value="" else="">
 			<contains string="${os.name}" substring="windows" casesensitive="false"/>
 		</condition>
 		<!-- on windows we can't constrain with a real filter -->
@@ -102,8 +105,8 @@ commit;
 			<contains string="${os.name}" substring="windows" casesensitive="false"/>
 		</condition>
 		<condition property="cmdline" 
-			value="java -cp ${cp} org.hsqldb.Server -database ${jdbc.database} -port ${jdbc.port} -silent false -trace true ${cmdargs}" 
-			else="java -cp ${cp} org.h2.tools.Server -baseDir ./ -web -webDaemon -tcp -tcpPort ${jdbc.port} -tcpAllowOthers -trace ${cmdargs}">
+			value="${cmdpref}java -cp ${cp} org.hsqldb.Server -database ${jdbc.database} -port ${jdbc.port} -silent false -trace true ${cmdargs}" 
+			else="${cmdpref}java -cp ${cp} org.h2.tools.Server -baseDir ./ -web -webDaemon -tcp -tcpPort ${jdbc.port} -tcpAllowOthers -trace ${cmdargs}">
 			<contains string="${jdbc.driver}" substring="hsqldb" casesensitive="true"/>
 		</condition>
 		<echo file="runServer.cmd">

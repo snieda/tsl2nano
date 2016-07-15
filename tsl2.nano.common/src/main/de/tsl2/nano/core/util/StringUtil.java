@@ -1,9 +1,9 @@
 /*
  * 
  * 
- * Copyright © 2002-2008 Thomas Schneider
+ * Copyright ï¿½ 2002-2008 Thomas Schneider
  * Alle Rechte vorbehalten.
- * Weiterverbreitung, Benutzung, Vervielfältigung oder Offenlegung,
+ * Weiterverbreitung, Benutzung, Vervielfï¿½ltigung oder Offenlegung,
  * auch auszugsweise, nur mit Genehmigung.
  *
  */
@@ -17,6 +17,8 @@ import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.LinkedList;
+import java.util.List;
 import java.util.Map;
 import java.util.Properties;
 import java.util.Set;
@@ -467,6 +469,25 @@ public class StringUtil {
     }
 
     /**
+     * extracts all expressions found. On StringBuilder/StringBuffer the regexp was replaced with "". 
+     * @param source to be searched on
+     * @param regexp to be found
+     * @param groups group to use
+     * @return all found regexp entries.
+     */
+    public static String[] extractAll(CharSequence source, String regexp, int... groups) {
+        String e;
+        List<String> all = new LinkedList<String>();
+        int i = 0;
+        while  (!Util.isEmpty((e = extract(source, regexp, "", i, groups)))) {
+            all.add(e);
+            if (source instanceof String) //on StringBuilder the extracted string was replaced with ""
+                i = ((String) source).indexOf(e, i) + e.length();
+        }
+        return all.toArray(new String[0]);
+    }
+
+    /**
      * delegates to {@link #extract(CharSequence, String, String)} with null replacement
      */
     public static String extract(CharSequence source, String regexp, int... groups) {
@@ -623,6 +644,9 @@ public class StringUtil {
         return result;
     }
 
+    public static final String[] splitWordBinding(String word) {
+        return word.split("[-./]");
+    }
     /**
      * splits a name with camel-case concatenation into an array of names.
      * <p/>

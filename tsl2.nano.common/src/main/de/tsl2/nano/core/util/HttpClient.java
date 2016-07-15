@@ -59,6 +59,9 @@ public class HttpClient implements Runnable {
         return this;
     }
 
+    public String getString() {
+        return read(get(null), String.class);
+    }
     public InputStream get() {
         return get(null);
     }
@@ -145,4 +148,8 @@ public class HttpClient implements Runnable {
         }
     }
 
+    @Override
+    public String toString() {
+        return http.toString();
+    }
 }

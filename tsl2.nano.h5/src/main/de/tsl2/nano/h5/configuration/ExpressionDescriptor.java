@@ -12,8 +12,10 @@ package de.tsl2.nano.h5.configuration;
 import de.tsl2.nano.bean.BeanUtil;
 import de.tsl2.nano.bean.def.AbstractExpression;
 import de.tsl2.nano.core.cls.BeanClass;
+import de.tsl2.nano.core.util.FileUtil;
 import de.tsl2.nano.core.util.NetUtil;
 import de.tsl2.nano.core.util.StringUtil;
+import de.tsl2.nano.core.util.Util;
 
 /**
  * describes an expression through its expression-pattern. tries to identifiy the type of expression and creates an
@@ -45,10 +47,13 @@ public class ExpressionDescriptor<T> extends AbstractExpression<T> {
         return null;
     }
 
+    public static String getName(String url) {
+        return FileUtil.getValidFileName(!Util.isEmpty(url) ? StringUtil.substring(url, "://", "/") : "[undefined]");
+    }
     @Override
     public String getName() {
         if (name == null && expression != null) {
-            name = StringUtil.substring(super.getName(), "://", null);
+            name = getName(super.getName());
         }
         return name;
     }
@@ -61,10 +66,6 @@ public class ExpressionDescriptor<T> extends AbstractExpression<T> {
     @Override
     public void setValue(Object instance, T value) {
 
-    }
-
-    public void setDeclaringClass(Class cls) {
-        this.declaringClass = cls;
     }
 
     @SuppressWarnings("rawtypes")

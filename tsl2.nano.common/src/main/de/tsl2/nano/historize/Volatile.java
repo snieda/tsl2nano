@@ -10,7 +10,7 @@
 package de.tsl2.nano.historize;
 
 /**
- * solution for getter methods doing a long time calculation to evaluate their value - but called more than once in a
+ * Same as an Expiring Reference. solution for getter methods doing a long time calculation to evaluate their value - but called more than once in a
  * short time. mostly, the value wont change between two user actions, so this class provides a mechanism to hold the
  * evaluated value for a very short time.
  * <p/>
@@ -49,6 +49,10 @@ public class Volatile<T> {
         }
     }
 
+    /**
+     * expired
+     * @return true, if value is to old.
+     */
     public boolean expired() {
         boolean expired = System.currentTimeMillis() > start + period;
         if (expired) {
@@ -58,7 +62,7 @@ public class Volatile<T> {
     }
 
     public T get() {
-        return value;
+        return expired() ? null : value;
     }
 
     public void set(T value) {

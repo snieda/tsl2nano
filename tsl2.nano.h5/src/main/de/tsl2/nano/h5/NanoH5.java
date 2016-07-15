@@ -65,9 +65,10 @@ import de.tsl2.nano.core.util.Util;
 import de.tsl2.nano.execution.AntRunner;
 import de.tsl2.nano.h5.NanoHTTPD.Response.Status;
 import de.tsl2.nano.h5.expression.QueryPool;
-import de.tsl2.nano.h5.expression.RestfulExpression;
+import de.tsl2.nano.h5.expression.URLExpression;
 import de.tsl2.nano.h5.expression.RuleExpression;
 import de.tsl2.nano.h5.expression.SQLExpression;
+import de.tsl2.nano.h5.expression.SimpleExpression;
 import de.tsl2.nano.h5.navigation.EntityBrowser;
 import de.tsl2.nano.h5.navigation.IBeanNavigator;
 import de.tsl2.nano.h5.navigation.Workflow;
@@ -160,7 +161,8 @@ public class NanoH5 extends NanoHTTPD implements ISystemConnector<Persistence> {
         AbstractExpression.registerExpression(PathExpression.class);
         AbstractExpression.registerExpression(RuleExpression.class);
         AbstractExpression.registerExpression(SQLExpression.class);
-        AbstractExpression.registerExpression(RestfulExpression.class);
+        AbstractExpression.registerExpression(URLExpression.class);
+        AbstractExpression.registerExpression(SimpleExpression.class);
     }
 
     /**
@@ -197,6 +199,7 @@ public class NanoH5 extends NanoHTTPD implements ISystemConnector<Persistence> {
                     ENV.extractResourceToDir("run.bat", "../", false, false);
                     ENV.extractResource("mda.bat");
                 }
+                ENV.extractResource("readme.txt");
                 ENV.extractResource("shell.xml");
                 ENV.extractResource("mda.xml");
                 ENV.extractResource("tsl2nano-appcache.mf");
@@ -774,6 +777,7 @@ public class NanoH5 extends NanoHTTPD implements ISystemConnector<Persistence> {
                 @Override
                 public void run() {
                     if (BeanContainer.isInitialized()) {
+                        Message.broadcast(this, "APPLICATION SHUTDOWN INITIALIZED...", "*");
                         LOG.info("preparing shutdown of local database " + persistence.getConnectionUrl());
                         try {
                             BeanContainer.instance().executeStmt(ENV.get("app.shutdown.statement", "shutdown"), true, null);

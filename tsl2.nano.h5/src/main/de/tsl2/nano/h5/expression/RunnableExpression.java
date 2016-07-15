@@ -66,6 +66,11 @@ public abstract class RunnableExpression<T extends Serializable> extends Abstrac
         return runnable;
     }
 
+    @Override
+    public String getName() {
+        return getRunnable().getName();
+    }
+    
     /**
      * createRunnable
      * 

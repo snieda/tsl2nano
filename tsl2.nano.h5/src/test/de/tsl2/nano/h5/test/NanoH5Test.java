@@ -19,6 +19,7 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Properties;
 
+import org.anonymous.project.Address;
 import org.anonymous.project.Charge;
 import org.junit.Ignore;
 import org.junit.Test;
@@ -33,7 +34,9 @@ import com.sun.net.httpserver.HttpServer;
 import de.tsl2.nano.bean.BeanContainer;
 import de.tsl2.nano.bean.IBeanContainer;
 import de.tsl2.nano.bean.def.Bean;
+import de.tsl2.nano.bean.def.BeanDefinition;
 import de.tsl2.nano.bean.def.BeanPresentationHelper;
+import de.tsl2.nano.bean.def.IAttributeDefinition;
 import de.tsl2.nano.bean.def.IStatus;
 import de.tsl2.nano.bean.def.IValueDefinition;
 import de.tsl2.nano.core.ENV;
@@ -49,6 +52,8 @@ import de.tsl2.nano.core.util.NetUtil;
 import de.tsl2.nano.execution.AntRunner;
 import de.tsl2.nano.h5.Html5Presentation;
 import de.tsl2.nano.h5.NanoH5;
+import de.tsl2.nano.h5.configuration.BeanConfigurator;
+import de.tsl2.nano.h5.configuration.ExpressionDescriptor;
 import de.tsl2.nano.h5.expression.QueryPool;
 import de.tsl2.nano.h5.navigation.Workflow;
 import de.tsl2.nano.h5.timesheet.Timesheet;
@@ -71,7 +76,6 @@ import my.app.Times;
  * @version $Revision$
  */
 public class NanoH5Test {
-
     static String getServiceURL() {
         return "http://localhost:" + NetUtil.getFreePort();
     }
@@ -175,15 +179,7 @@ public class NanoH5Test {
     public void createAndTest(NanoH5 app, Properties anywayMapper, Class... beanTypesToCheck) throws Exception {
         assert beanTypesToCheck != null && beanTypesToCheck.length > 0 : "at least one beantype must be given!";
         String name = BeanClass.getDefiningClass(app.getClass()).getSimpleName().toLowerCase();
-        final String DIR_TEST = "test/.nanoh5." + name;
-//        new File(DIR_TEST).delete();
-//        Files.deleteIfExists(Paths.get(DIR_TEST));
-        FileUtil.deleteRecursive(new File(DIR_TEST));
-
-        ENV.create(DIR_TEST);
-        RuntimeClassloader cl = new RuntimeClassloader(new URL[0]);
-        cl.addFile(ENV.getConfigPath());
-        ENV.addService(ClassLoader.class, cl);
+        final String DIR_TEST = createENV(name);
         //first: generate all configurations....
         if (anywayMapper != null) {
             //TODO: map names. e.g. : Charge --> TimeEntry
@@ -305,6 +301,24 @@ public class NanoH5Test {
 //        AntRunner.runTask(AntRunner.TASK_DELETE, p, (String)null);
     }
 
+    /**
+     * createENV
+     * @param name
+     * @return
+     */
+    String createENV(String name) {
+        final String DIR_TEST = "test/.nanoh5." + name;
+//        new File(DIR_TEST).delete();
+//        Files.deleteIfExists(Paths.get(DIR_TEST));
+        FileUtil.deleteRecursive(new File(DIR_TEST));
+
+        ENV.create(DIR_TEST);
+        RuntimeClassloader cl = new RuntimeClassloader(new URL[0]);
+        cl.addFile(ENV.getConfigPath());
+        ENV.addService(ClassLoader.class, cl);
+        return DIR_TEST;
+    }
+
     @Test
     public void testTimesheet() throws Exception {
         Properties mapper = new Properties();
@@ -314,5 +328,30 @@ public class NanoH5Test {
                 createBeanCollectors(null);
             }
         }, mapper, Charge.class);
+    }
+    
+    @Test
+    public void testAttributeExpression() throws Exception {
+        createENV("restful");
+        new NanoH5();
+        BeanConfigurator<Address> bconf = BeanConfigurator.create(Address.class).getInstance();
+        bconf.actionAddAttribute("@http://openstreemap.org/search?query={city}<<GET:text/html");
+        bconf.actionAddAttribute("?select count(*) from Address");
+        
+        Bean.clearCache();
+        ENV.reload();
+
+        Address address = new Address();
+        address.setCity("München");
+        address.setStreet("Frankfurter Strasse 1");
+        Bean<Address> bean = Bean.getBean(address);
+
+        IValueDefinition attr = bean.getAttribute("openstreemap.org");
+        System.out.println(attr.getValue());
+
+        //TODO: queries are defined in 'specification'.
+        //TODO: name clash...
+        attr = bean.getAttribute("select count(*) from Address");
+        System.out.println(attr.getValue());
     }
 }
