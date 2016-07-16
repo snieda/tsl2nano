@@ -3,6 +3,8 @@ package tsl2.nano.restaccess;
 import java.util.Arrays;
 import java.util.Collection;
 
+import javax.ejb.EJB;
+import javax.ejb.Stateless;
 import javax.ws.rs.Consumes;
 import javax.ws.rs.GET;
 import javax.ws.rs.OPTIONS;
@@ -16,25 +18,27 @@ import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 
 import de.tsl2.nano.bean.BeanContainer;
-import de.tsl2.nano.core.ENV;
 import de.tsl2.nano.core.cls.BeanClass;
-import de.tsl2.nano.persistence.GenericLocalBeanContainer;
+import de.tsl2.nano.service.util.GenericServiceBean;
 
 /**
  * http://localhost:8080/beancontainer/findById/Person/3 --> {"id":3,"name":"test","description":"test..."}
  * 
- * @author schneith
+ * @author Thomas Schneider
  */
+/** indirectly provide an ejb container */
+@Stateless
 @Path("")
 @SuppressWarnings({"unchecked", "rawtypes"})
 public class RESTBeanContainer {
-
+//    @EJB GenericServiceBean genService;
+    
     /**
      * constructor
      */
     public RESTBeanContainer() {
         // initialize EntityManager and BeanContainer
-        GenericLocalBeanContainer.initLocalContainer(Thread.currentThread().getContextClassLoader(), false);
+//        GenericLocalBeanContainer.initLocalContainer(Thread.currentThread().getContextClassLoader(), false);
     }
     
     @GET

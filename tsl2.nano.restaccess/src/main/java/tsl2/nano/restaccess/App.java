@@ -6,7 +6,7 @@ import javax.ws.rs.ApplicationPath;
 import javax.ws.rs.core.Application;
 
 /**
- *
+ * register this app as rest application.
  */
 @ApplicationPath("")
 public class App extends Application {

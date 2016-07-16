@@ -1,0 +1,67 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<persistence version="2.0" xmlns="http://java.sun.com/xml/ns/persistence" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://java.sun.com/xml/ns/persistence       http://java.sun.com/xml/ns/persistence/persistence_2_0.xsd">
+<!-- <persistence xmlns="http://java.sun.com/xml/ns/persistence" version="1.0">  -->
+	<persistence-unit name="genericPersistenceUnit" transaction-type="JTA">
+		<provider>org.hibernate.ejb.HibernatePersistence</provider>
+		 
+		<!-- JNDI name of the database resource to use -->
+		<!-- <jta-data-source>${jta-data-source}</jta-data-source> -->
+
+		<jar-file>skiller.jar</jar-file>
+        <exclude-unlisted-classes>false</exclude-unlisted-classes>
+	    <shared-cache-mode>ENABLE_SELECTIVE</shared-cache-mode>
+
+		<properties>
+         	<!-- Hibernate Properties -->
+	        <property name="hibernate.connection.driver_class" value="org.h2.Driver"/>
+	        <property name="hibernate.connection.username" value="sa"/>
+	        <property name="hibernate.connection.url" value="jdbc:h2:tcp://localhost:9092/"/>
+	        <property name="hibernate.connection.password" value="sa"/>
+			<property name="hibernate.dialect" value="org.hibernate.dialect.HSQLDialect" />
+			<property name="hibernate.archive.autodetection" value="class"/>
+			<!-- <property name="hibernate.ejb.cfgfile" value="/hibernate.cfg.xml" /> -->
+			<property name="hibernate.hbm2ddl.auto" value="drop-create"/>
+			<property name="hibernate.show_sql" value="true"/>
+			<property name="hibernate.format_sql" value="true"/>
+			<property name="hibernate.use_sql_comments" value="true"/>
+			<!-- <property name="hibernate.cache.provider_class" value="org.hibernate.cache.EHCacheProvider"/> -->
+			<!-- <property name="hibernate.cache.use_query_cache" value="true"/> -->
+			<!-- <property name="hibernate.cache.use_second_level_cache" value="true" /> -->
+			<property name="hibernate.cache.use_minimal_puts" value="true" />
+			<!-- <property name="hibernate.generate_statistics" value="true"/> -->
+			<property name="hibernate.cache.use_structured_entries" value="true"/>
+			<property name="hibernate.default_batch_fetch_size" value="500"/>
+			<property name="hibernate.jdbc.batch_size" value="50"/>
+			<!-- <property name="org.hibernate.FlushMode" value="commit" />  -->
+         	<!-- Hibernate End -->
+
+			<!-- Eclipse-Link, OpenJPA and DataNucleus -->
+			<!-- <property name="javax.persistence.jdbc.driver" value="${connection.driver_class}"/>
+	        <property name="javax.persistence.jdbc.user" value="${connection.username}"/>
+	        <property name="javax.persistence.jdbc.url" value="${connection.url}"/>
+	        <property name="javax.persistence.jdbc.password" value="${connection.password}"/>  -->
+	        
+			<!-- Database generation -->
+			<!--
+            <property name="javax.persistence.schema-generation.database.action" value="${autoddl}"/>
+            <property name="javax.persistence.schema-generation.create-source" value="script"/>
+            <property name="javax.persistence.schema-generation.drop-source" value="script"/>
+            <property name="javax.persistence.schema-generation.create-script-source" value="sql/create.sql"/>
+            <property name="javax.persistence.schema-generation.drop-script-source" value="sql/drop.sql"/>
+            <property name="javax.persistence.sql-load-script-source" value="sql/load.sql"/>
+			-->
+			
+			<!-- if you work with generated ids using sequences (used by AUTO mode, too), toplink
+			     needs the following database table:
+				CREATE TABLE SEQUENCE
+				(
+					SEQ_NAME	   	VARCHAR2(20),
+					SEQ_COUNT     	NUMBER(10)
+				)
+				;
+				INSERT INTO SEQUENCE VALUES ('SEQ_GEN',1);
+			      -->
+         	<!-- Glassfish End -->
+		</properties>
+	</persistence-unit>
+</persistence>

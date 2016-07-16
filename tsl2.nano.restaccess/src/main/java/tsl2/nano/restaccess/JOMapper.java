@@ -3,15 +3,13 @@
  */
 package tsl2.nano.restaccess;
 
-import java.io.IOException;
 import java.io.Serializable;
-import org.codehaus.jackson.map.ObjectMapper;
 
 /**
  * Java Object Mapper. maps a simple object through string descriptors to a java object<p/>
  * Used for rest services working on any java object - not knowing the object types at compile time.<p/>
  * 
- * @author schneith
+ * @author Thomas Schneider
  *
  */
 public abstract class JOMapper<T> implements Serializable {
@@ -38,21 +36,6 @@ public abstract class JOMapper<T> implements Serializable {
     this.content = content;
   }
 
-  /**
-   * creates this mapper through a real object. this constructor is inverse to method
-   * {@link #toObject()}.
-   * @param object real java object
-   */
-  public JOMapper(T object) {
-    this.cls = (Class<T>) object.getClass();
-    this.type = cls.getSimpleName();
-    try {
-      this.content = new ObjectMapper().writeValueAsString(object);
-    } catch (IOException e) {
-      throw new RuntimeException(e);
-    }
-  }
-  
   Class<T> getObjectType() {
     if (cls == null) {
       cls = loadClass(type);

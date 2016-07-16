@@ -8,7 +8,7 @@ import org.codehaus.jackson.map.ObjectMapper;
 
 /**
  * This JOMapper implementation uses simple class names as type and json as content, using jackson.
- * @author schneith
+ * @author Thomas Schneider
  *
  */
 public class JSONMapper<T> extends JOMapper<T> {
@@ -34,10 +34,21 @@ public class JSONMapper<T> extends JOMapper<T> {
   }
 
 
+  /**
+   * creates this mapper through a real object. this constructor is inverse to method
+   * {@link #toObject()}.
+   * @param object real java object
+   */
   public JSONMapper(T object) {
-    super(object);
+    this.cls = (Class<T>) object.getClass();
+    this.type = cls.getSimpleName();
+    try {
+      this.content = new ObjectMapper().writeValueAsString(object);
+    } catch (IOException e) {
+      throw new RuntimeException(e);
+    }
   }
-
+  
   @SuppressWarnings("unchecked")
   @Override
   protected Class<T> loadClass(String type) {
