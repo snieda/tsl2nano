@@ -4,6 +4,8 @@ import java.io.UnsupportedEncodingException;
 import java.net.URLDecoder;
 import java.net.URLEncoder;
 import java.text.MessageFormat;
+import java.util.Collections;
+import java.util.Enumeration;
 import java.util.LinkedHashMap;
 import java.util.Locale;
 import java.util.Map;
@@ -15,6 +17,7 @@ import java.util.TreeMap;
 import org.apache.commons.logging.Log;
 
 import de.tsl2.nano.collection.CollectionUtil;
+import de.tsl2.nano.core.ENV;
 import de.tsl2.nano.core.ManagedException;
 import de.tsl2.nano.core.Messages;
 import de.tsl2.nano.core.log.LogFactory;
@@ -61,7 +64,10 @@ public class Translator {
      * @return translated properties
      */
     @SuppressWarnings("rawtypes")
-    public static Properties translateProperties(String name, Map origin, Locale srcLang, Locale destLang/*, int requestWordCount*/) {
+    public static Properties translateProperties(String name,
+            Map origin,
+            Locale srcLang,
+            Locale destLang/*, int requestWordCount*/) {
         LOG.info("starting translation of " + origin.size() + " words from <" + srcLang + "> to <" + destLang + ">");
         Set keySet = origin.keySet();
         Properties target = new Properties();
@@ -102,11 +108,14 @@ public class Translator {
      * @return translated properties
      */
     @SuppressWarnings("rawtypes")
-    public static Map translatePropertiesFast(String name, Map origin, Locale srcLang, Locale destLang/*, int requestWordCount*/) {
-        String words = StringUtil.toString(origin.values(), -1).replaceAll("[,\\s]+", " ");
+    public static Map translatePropertiesFast(String name,
+            Map origin,
+            Locale srcLang,
+            Locale destLang/*, int requestWordCount*/) {
+        String words = StringUtil.toString(origin.values(), -1);//.replaceAll("[,\\s]+", " ");
         String trans = translate(srcLang, destLang, words);
         //create the target properties
-        String[] t = trans.split("\\s+");
+        String[] t = trans.split("[,\\s]+");
         Properties target = new Properties();
         int i = 0;
         String tos[];
@@ -114,13 +123,15 @@ public class Translator {
         String key;
         for (Object k : origin.keySet()) {
             key = (String) origin.get(k);
-            tos = CollectionUtil.concat(StringUtil.splitCamelCase(key), StringUtil.splitWordBinding(key));
+            tos = /*CollectionUtil.concat(*/StringUtil.splitCamelCase(key)/*, StringUtil.splitWordBinding(key))*/;
             tt.setLength(0);
             //concat camelcase words...works only on same length
             for (int j = 0; j < tos.length; j++) {
-                tt.append(t[i++] + " ");
+                if (++i < t.length)
+                    tt.append(t[i++] + " ");
             }
-            target.put(k, tt.toString().trim());
+//            System.out.println(k + " ("+ origin.get(k) + ") --> " + tt);
+            target.put(k, tt.length() > 0 ? tt.toString().trim() : origin.get(k));
         }
         return target;
     }
@@ -138,7 +149,7 @@ public class Translator {
      */
     @SuppressWarnings({ "rawtypes", "unchecked" })
     public static Map translateBundle(String name, Set<String> keySet, Locale srcLang, Locale destLang) {
-        Map map = new TreeMap(); //alphabetic sorted entries
+        final Map map = new TreeMap(); //alphabetic sorted entries
         Map p = new LinkedHashMap();
         Map komplex = new LinkedHashMap();
         String txt;
@@ -147,16 +158,29 @@ public class Translator {
             if (txt.indexOf(' ') == -1 && txt.indexOf('.') == -1) {
                 p.put(k, txt);
                 if (p.size() >= 100) {//request may exceed max length (-->Http 413)
-//                    map.putAll(translatePropertiesFast(name, p, srcLang, destLang));
-//                    p.clear();
+                    map.putAll(translatePropertiesFast(name, p, srcLang, destLang));
+                    p.clear();
                 }
             } else
                 komplex.put(k, txt);
+            //TODO: key/values are shifted in more komplex bundles. the framework bundles have only en/de!
+            if (!ENV.get("app.translate.bundle.framework", false))
+                break;
         }
-        map.putAll(translateProperties/*Fast*/(name, p, srcLang, destLang));
+        map.putAll(translatePropertiesFast(name, p, srcLang, destLang));
+        //TODO: is the service now able to translate sentences?
         map.putAll(translateProperties(name, komplex, srcLang, destLang));
-        
-        Properties props = new Properties();
+
+        Properties props = new Properties() {
+            @Override
+            public synchronized Enumeration<Object> keys() {
+                return Collections.enumeration(keySet());
+            }
+            @Override
+            public Set<Object> keySet() {
+                return map.keySet();//alphabetic order
+            }
+        };
         props.putAll(map);
         FileUtil.saveProperties(Messages.getResourceFileName(name), props);
         Messages.reload();

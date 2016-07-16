@@ -1167,6 +1167,10 @@ public class FileUtil {
         });
     }
 
+    public static final boolean isRelative(String path) {
+        return path.startsWith(File.separator) || path.contains(":" + File.separator);
+    }
+    
     /**
      * getRelativePath
      * 

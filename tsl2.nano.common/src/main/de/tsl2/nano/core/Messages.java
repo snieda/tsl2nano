@@ -2,9 +2,7 @@ package de.tsl2.nano.core;
 
 import java.text.MessageFormat;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.HashSet;
-import java.util.Hashtable;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Locale;
@@ -296,9 +294,8 @@ public class Messages {
      */
     public static Set<String> keySet() {
         HashSet<String> keySet = new LinkedHashSet<String>();
-        ArrayList<ResourceBundle> reverseBundleList = new ArrayList<ResourceBundle>(BUNDLE_LIST);
-        Collections.reverse(reverseBundleList);
-        for (ResourceBundle bundle : reverseBundleList) {
+        // the bundle list holds the last added bundle as first in the list - with highest priority 
+        for (ResourceBundle bundle : BUNDLE_LIST) {
             keySet.addAll(bundle.keySet());
         }
         return keySet;

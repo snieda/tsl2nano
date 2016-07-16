@@ -932,10 +932,7 @@ public class BeanDefinition<T> extends BeanClass<T> implements IPluggable<BeanDe
             File xmlFile = getDefinitionFile(name);
             if (usePersistentCache && xmlFile.canRead()) {
                 try {
-                    if (ENV.get("app.configuration.persist.yaml", false))
-                        beandef = YamlUtil.load(xmlFile.getPath(), BeanDefinition.class);
-                    else
-                        beandef = XmlUtil.loadXml(xmlFile.getPath(), BeanDefinition.class);
+                    beandef = ENV.load(xmlFile.getPath(), BeanDefinition.class);
                     //workaround for simple-xml not creating the desired root-extension-instance
                     if (beandef.extension != null) {
                         beandef = (BeanDefinition<T>) beandef.extension.to(beandef);
@@ -1199,13 +1196,9 @@ public class BeanDefinition<T> extends BeanClass<T> implements IPluggable<BeanDe
                     if (FileUtil.hasResource(BEANDEF_XSD))
                         ENV.extractResourceToDir(BEANDEF_XSD, xmlFile.getParentFile().getPath() + "/");
                 }
-                if (ENV.get("app.configuration.persist.yaml", false)) {
-                    YamlUtil.dump(this, xmlFile.getPath() + ".yml");
-                } else {
-                    XmlUtil.saveXml(xmlFile.getPath(), this);
-                }
+                ENV.save(xmlFile.getPath(), this);
             } catch (Exception e) {
-                if (ENV.get("app.mode.script", false)) {
+                if (ENV.get("app.mode.strict", false)) {
                     ManagedException.forward(e);
                 } else {
                     LOG.warn("couldn't save configuration " + xmlFile.getPath() + " for bean" + getClazz(), e);

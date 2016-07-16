@@ -95,7 +95,7 @@ public class ENV implements Serializable {
     @SuppressWarnings("rawtypes")
     @ElementMap(entry = "property", key = "name", attribute = true, inline = true, required = false, keyType = String.class, valueType = Object.class)
     private SortedMap properties;
-    
+
     /**
      * holds all already loaded services - but wrapped into {@link ServiceProxy}. the {@link #serviceLocator} holds the
      * real service instances.
@@ -296,6 +296,7 @@ public class ENV implements Serializable {
 
     /**
      * createPropertyMap
+     * 
      * @return
      */
     @SuppressWarnings("rawtypes")
@@ -313,13 +314,15 @@ public class ENV implements Serializable {
     }
 
     /**
-     serviceservice* manually add a service to the environment
+     * serviceservice* manually add a service to the environment
      * 
-     * @param   to ( addshould implement at least one interface.
+     * @param to ( addshould implement at least one interface.
      */
     public static <T> T addService(T service) {
-        Class<T> interfaze = (Class<T>) (service.getClass().getInterfaces().length > 0 ? service.getClass().getInterfaces()[0] : null);
-        if (interfaze == null || interfaze.getName().startsWith("java.lang") || interfaze.getName().startsWith("java.io"))
+        Class<T> interfaze =
+            (Class<T>) (service.getClass().getInterfaces().length > 0 ? service.getClass().getInterfaces()[0] : null);
+        if (interfaze == null || interfaze.getName().startsWith("java.lang")
+            || interfaze.getName().startsWith("java.io"))
             interfaze = (Class<T>) service.getClass();
         return addService(interfaze, service);
     }
@@ -589,14 +592,42 @@ public class ENV implements Serializable {
         return pck;
     }
 
+    /**
+     * loads from xml or yaml file. see property app.configuration.persist.yaml.
+     * 
+     * @param name relative path + file name (if {@link #getConfigPath()} is not included, it will be inserted.
+     * @param type type to de-serialize
+     * @return java instance
+     */
     public static <T> T load(String name, Class<T> type) {
+        name = StringUtil.substring(name, null, ".xml");
+        String path = cleanpath(name);
         if (self().get("app.configuration.persist.yaml", false)) {
-            return self().get(YamlUtil.class).load(new File(getConfigPath(type) + ".yml"), type);
+            return self().get(YamlUtil.class).load(new File(path + ".yml"), type);
         } else {
-            return self().get(XmlUtil.class).loadXml(getConfigPath(type) + ".xml", type);
+            return self().get(XmlUtil.class).loadXml(path + ".xml", type);
         }
     }
 
+    private static String cleanpath(String name) {
+        name = StringUtil.substring(name, null, ".xml");
+        return name.contains(getName()) || !FileUtil.isRelative(name) ? name : getConfigPath() + name;
+    }
+
+    /**
+     * see {@link #load(String, Class)}
+     * @param name relative path + file name (if {@link #getConfigPath()} is not included, it will be inserted.
+     * @param obj object to serialize
+     */
+    public static void save(String name, Object obj) {
+        String path = cleanpath(name);
+        if (self().get("app.configuration.persist.yaml", false)) {
+            self().get(YamlUtil.class).dump(obj, path + ".yml");
+        } else {
+            self().get(XmlUtil.class).saveXml(path + ".xml", obj);
+        }
+    }
+    
     /**
      * @return Returns the autopersist.
      */
@@ -652,11 +683,7 @@ public class ENV implements Serializable {
         Map<Class<?>, Object> tempServices = new Hashtable<Class<?>, Object>(services());
         String configPath = getConfigPath();
         try {
-        if (self().get("app.configuration.persist.yaml", false)) {
-            self().get(YamlUtil.class).dump(self(), configPath + CONFIG_NAME + ".yml");
-        } else {
-            self().get(XmlUtil.class).saveXml(configPath + CONFIG_NAME + ".xml", self());
-        }
+            save(configPath + CONFIG_NAME, self());
         } finally {
             services().putAll(tempServices);
             self().properties.putAll(tempProperties);
