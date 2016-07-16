@@ -156,7 +156,8 @@ public class NanoH5 extends NanoHTTPD implements ISystemConnector<Persistence> {
         appstartClassloader = Thread.currentThread().getContextClassLoader();
         ENV.addService(ClassLoader.class, appstartClassloader);
         eventController = new EventController();
-        sessions = Collections.synchronizedMap(new ExpiringMap<InetAddress, NanoH5Session>(ENV.get("session.timeout.millis", 12 * DateUtil.T_HOUR)));
+        sessions = Collections.synchronizedMap(
+            new ExpiringMap<InetAddress, NanoH5Session>(ENV.get("session.timeout.millis", 12 * DateUtil.T_HOUR)));
         //thought, the expression extensions would register themself - but it's not working
         AbstractExpression.registerExpression(PathExpression.class);
         AbstractExpression.registerExpression(RuleExpression.class);
@@ -462,7 +463,8 @@ public class NanoH5 extends NanoHTTPD implements ISystemConnector<Persistence> {
             NanoH5Session session = NanoH5Session.createSession(this,
                 inetAddress,
                 createGenericNavigationModel(),
-                Thread.currentThread().getContextClassLoader(), ConcurrentUtil.getCurrent(Authorization.class), createSessionContext());
+                Thread.currentThread().getContextClassLoader(), ConcurrentUtil.getCurrent(Authorization.class),
+                createSessionContext());
             sessions.put(inetAddress, session);
             return session;
         } catch (Throwable e) {
@@ -628,10 +630,13 @@ public class NanoH5 extends NanoHTTPD implements ISystemConnector<Persistence> {
         List types = new ArrayList(beanClasses.size());
         for (Class cls : beanClasses) {
             LOG.debug("creating collector for: " + cls);
-            BeanCollector collector = BeanCollector.getBeanCollector(cls, null, ENV.get("collector.mode.default", MODE_EDITABLE | MODE_CREATABLE
-                | MODE_MULTISELECTION
-                | MODE_SEARCHABLE), null);
-            if (!BeanContainer.isConnected() || BeanContainer.instance().hasPermission(collector.getName().toLowerCase() +".view", null))
+            BeanCollector collector = BeanCollector.getBeanCollector(cls, null,
+                ENV.get("collector.mode.default", MODE_EDITABLE | MODE_CREATABLE
+                    | MODE_MULTISELECTION
+                    | MODE_SEARCHABLE),
+                null);
+            if (!BeanContainer.isConnected()
+                || BeanContainer.instance().hasPermission(collector.getName().toLowerCase() + ".view", null))
                 types.add(collector);
         }
         /*
@@ -644,12 +649,21 @@ public class NanoH5 extends NanoHTTPD implements ISystemConnector<Persistence> {
          * perhaps, do auto-translation if no resourcebundle present for current locale
          */
         if (NetUtil.isOnline() && !Messages.exists("messages")) {
-            Message.send("doing machine translation for locale " + Locale.getDefault());
-            Translator.translateBundle(ENV.getConfigPath() + "messages", Messages.keySet(), Locale.ENGLISH,
-                Locale.getDefault());
+            if (FileUtil.hasResource("messages.properties")) {
+                ENV.registerBundle("messages", true);
+
+                if (ENV.get("app.translate.bundle.project", true)) {
+                    Message.send("doing machine translation for locale " + Locale.getDefault());
+                    Translator.translateBundle(ENV.getConfigPath() + "messages", Messages.keySet(), Locale.ENGLISH,
+                        Locale.getDefault());
+                }
+            } else {
+                LOG.warn("no resource bundle 'messages.properties' found in environment directory");
+            }
         }
 
-        BeanCollector root = new BeanCollector(BeanCollector.class, types, ENV.get("collector.root.mode", MODE_EDITABLE | MODE_SEARCHABLE), null);
+        BeanCollector root = new BeanCollector(BeanCollector.class, types,
+            ENV.get("collector.root.mode", MODE_EDITABLE | MODE_SEARCHABLE), null);
         root.setName(StringUtil.toFirstUpper(StringUtil
             .substring(Persistence.current().getJarFile().replace("\\", "/"), "/", ".jar", true)));
         root.setAttributeFilter("name");
@@ -780,7 +794,8 @@ public class NanoH5 extends NanoHTTPD implements ISystemConnector<Persistence> {
                         Message.broadcast(this, "APPLICATION SHUTDOWN INITIALIZED...", "*");
                         LOG.info("preparing shutdown of local database " + persistence.getConnectionUrl());
                         try {
-                            BeanContainer.instance().executeStmt(ENV.get("app.shutdown.statement", "shutdown"), true, null);
+                            BeanContainer.instance().executeStmt(ENV.get("app.shutdown.statement", "shutdown"), true,
+                                null);
                             Thread.sleep(1000);
                         } catch (Exception e) {
                             LOG.error(e.toString());
@@ -801,7 +816,8 @@ public class NanoH5 extends NanoHTTPD implements ISystemConnector<Persistence> {
                 public void run() {
                     LOG.info("preparing backup of local database " + persistence.getConnectionUrl());
                     try {
-                        BeanContainer.instance().executeStmt(ENV.get("app.backup.statement", "backup to temp/database-daily-backup.zip"), true, null);
+                        BeanContainer.instance().executeStmt(
+                            ENV.get("app.backup.statement", "backup to temp/database-daily-backup.zip"), true, null);
                     } catch (Exception e) {
                         LOG.error(e.toString());
                     }
@@ -849,7 +865,7 @@ public class NanoH5 extends NanoHTTPD implements ISystemConnector<Persistence> {
         }
         ENV.addService(IBeanContainer.class, BeanContainer.instance());
         ConcurrentUtil.setCurrent(BeanContainer.instance());
-        
+
         List<Class> beanClasses =
             runtimeClassloader.loadBeanClasses(jarName,
                 ENV.get("bean.class.presentation.regexp", ".*"), null);
@@ -966,7 +982,7 @@ public class NanoH5 extends NanoHTTPD implements ISystemConnector<Persistence> {
     public EventController getEventController() {
         return eventController;
     }
-    
+
     @Override
     public String toString() {
         return Util.toString(NanoH5.class, "serviceURL: " + serviceURL,

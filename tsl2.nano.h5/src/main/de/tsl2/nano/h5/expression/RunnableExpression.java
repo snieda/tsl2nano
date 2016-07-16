@@ -16,11 +16,13 @@ import java.util.Map;
 import de.tsl2.nano.bean.BeanUtil;
 import de.tsl2.nano.bean.def.AbstractExpression;
 import de.tsl2.nano.bean.def.Bean;
+import de.tsl2.nano.core.ENV;
 import de.tsl2.nano.core.ManagedException;
 import de.tsl2.nano.core.cls.BeanAttribute;
 import de.tsl2.nano.core.util.MapUtil;
 import de.tsl2.nano.core.util.Util;
 import de.tsl2.nano.execution.IPRunnable;
+import de.tsl2.nano.execution.VolatileResult;
 
 /**
  * base for all expression runners
@@ -33,14 +35,18 @@ public abstract class RunnableExpression<T extends Serializable> extends Abstrac
     /** serialVersionUID */
     private static final long serialVersionUID = 8147165150625339935L;
 
-    /** runnable to be executed with expression */
-    transient IPRunnable<T, Map<String, Object>> runnable;
-
     /** arguments for rule execution */
     transient Map<String, T> arguments;
 
+    /**
+     * runnable to be executed with expression. if the run() method is currently running, access to the run() method
+     * should be blocked
+     */
+    transient VolatileResult<T> result;
     /** optional real attribute (result-attribute) to set the value through this rule result */
     String connectedAttribute;
+
+    private transient boolean isRunning;
 
     /**
      * constructor
@@ -59,18 +65,18 @@ public abstract class RunnableExpression<T extends Serializable> extends Abstrac
         super(declaringClass, expression, type);
     }
 
-    public IPRunnable<T, Map<String, Object>> getRunnable() {
-        if (runnable == null) {
-            runnable = createRunnable();
+    public VolatileResult<T> getResult() {
+        if (result == null) {
+            result = new VolatileResult<T>(ENV.get("value.expression.expiring", 300), createRunnable());
         }
-        return runnable;
+        return result;
     }
 
     @Override
     public String getName() {
-        return getRunnable().getName();
+        return getResult().getName();
     }
-    
+
     /**
      * createRunnable
      * 
@@ -79,18 +85,26 @@ public abstract class RunnableExpression<T extends Serializable> extends Abstrac
     protected abstract IPRunnable<T, Map<String, Object>> createRunnable();
 
     @Override
-    public T getValue(Object beanInstance) {
-        try {
-            T result = getRunnable().run(refreshArguments(beanInstance));
-            if (connectedAttribute != null) {
-                Bean.getBean((Serializable) beanInstance).getAttribute(connectedAttribute).setValue(result);
+    public synchronized T getValue(Object beanInstance) {
+        if (!isRunning) {
+            isRunning = true;
+            try {
+                T result = getResult().get(refreshArguments(beanInstance));
+                if (connectedAttribute != null) {
+                    Bean.getBean((Serializable) beanInstance).getAttribute(connectedAttribute).setValue(result);
+                }
+                return result;
+            } catch (final Exception e) {
+                ManagedException.forward(new IllegalStateException("Execution of '" + getName()
+                    + "' with current arguments failed: " + e.getLocalizedMessage(), e));
+                return null;
+            } finally {
+                isRunning = false;
             }
-            return result;
-        } catch (final Exception e) {
-            ManagedException.forward(new IllegalStateException("Execution of '" + getName()
-                + "' with current arguments failed: " + e.getLocalizedMessage(), e));
-            return null;
+        } else {
+            return getResult().get();
         }
+
     }
 
     /**
@@ -106,13 +120,13 @@ public abstract class RunnableExpression<T extends Serializable> extends Abstrac
         if (beanInstance == null) {
             return (Map<String, Object>) Util.untyped(arguments);
         }
-        Map<String, ? extends Serializable> p = getRunnable().getParameter();
+        Map<String, ? extends Serializable> p = getResult().getParameter();
         if (beanInstance instanceof Map) {
             arguments.putAll((Map<? extends String, ? extends T>) beanInstance);
         } else {
             //put in all attributes
             arguments.putAll((Map<String, ? extends T>) Util.untyped(BeanUtil.toValueMap(beanInstance, false,
-                true, true, (p != null ? p.keySet().toArray(new String[0]) : null))));
+                true, p != null, (p != null ? p.keySet().toArray(new String[0]) : null))));
             //and now the instance itself
             arguments.put(BeanAttribute.toFirstLower(Bean.getBean(beanInstance).getName()), (T) beanInstance);
         }

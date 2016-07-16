@@ -14,6 +14,7 @@ import java.util.Map;
 
 import de.tsl2.nano.core.util.StringUtil;
 import de.tsl2.nano.execution.IPRunnable;
+import de.tsl2.nano.incubation.specification.AbstractRunnable;
 
 /**
  * simple runnable expression. useful to show an url in an iframe. all context properties are filled into expression if
@@ -42,10 +43,10 @@ public class SimpleExpression extends RunnableExpression<String> {
         return "[^@!§$%&].*";
     }
 
+    @SuppressWarnings("serial")
     @Override
     protected IPRunnable<String, Map<String, Object>> createRunnable() {
-        return new IPRunnable<String, Map<String, Object>>() {
-
+        return new AbstractRunnable<String>() {
             @Override
             public String run(Map<String, Object> context, Object... extArgs) {
                 return StringUtil.insertProperties(expression, context);
@@ -54,16 +55,6 @@ public class SimpleExpression extends RunnableExpression<String> {
             @Override
             public String getName() {
                 return WebClient.getName(expression);
-            }
-
-            @Override
-            public Map<String, ? extends Serializable> getParameter() {
-                return null;
-            }
-
-            @Override
-            public Map<String, Object> checkedArguments(Map<String, Object> args, boolean strict) {
-                return null;
             }
         };
     }

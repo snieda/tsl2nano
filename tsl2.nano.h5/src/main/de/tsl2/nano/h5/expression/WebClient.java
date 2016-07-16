@@ -9,8 +9,8 @@
  */
 package de.tsl2.nano.h5.expression;
 
-import java.io.Serializable;
 import java.net.URLEncoder;
+import java.util.LinkedHashMap;
 import java.util.Map;
 
 import org.apache.commons.logging.Log;
@@ -62,8 +62,6 @@ public class WebClient<T> extends AbstractRunnable<T> {
      */
     @Element(required = false)
     String contextKey;
-    @ElementArray(required = false)
-    String[] parameterNames;
     /**
      * if false, the url query will be created like: http://.../search?city=Munich&code=80000. otherwise, the parameter
      * will be appended through '/'.
@@ -106,7 +104,7 @@ public class WebClient<T> extends AbstractRunnable<T> {
             ws.urlRESTSeparators = false;
         if (expression.matches(".*[{](\\w+)[}].*")) {
             StringBuilder e = new StringBuilder(expression);
-            ws.parameterNames = StringUtil.extractAll(e, "[{](\\w+)[}]");
+            ws.parameter = (LinkedHashMap) ws.createSimpleParameters(StringUtil.extractAll(e, "[{](\\w+)[}]"));
         }
         if (expression.endsWith("="))
             ws.valuesOnly = true;
@@ -115,14 +113,12 @@ public class WebClient<T> extends AbstractRunnable<T> {
 
         ws.operation = expression;
         if (contentClass != null) {
-            ws.parameterNames = createParameterNames(contentClass);
+            ws.parameter = (LinkedHashMap) ws.createParameters(contentClass);
             ws.contextKey = StringUtil.toFirstLower(BeanClass.getName(contentClass));
         }
         ws.name = getName(expression);
         return ws;
     }
-
-    transient Map<String, ? extends Serializable> parameters;
 
     static String[] createParameterNames(Class<?> declaringClass) {
         BeanDefinition<?> def = BeanDefinition.getBeanDefinition(declaringClass);

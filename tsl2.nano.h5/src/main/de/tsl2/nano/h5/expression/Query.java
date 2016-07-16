@@ -13,6 +13,7 @@ import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -122,7 +123,7 @@ public class Query<RESULT> implements IPRunnable<RESULT, Map<String, Object>> {
     @Override
     public Map<String, ? extends Serializable> getParameter() {
         if (parameter == null) {
-            parameter = new HashMap<String, Serializable>();
+            parameter = new LinkedHashMap<String, Serializable>();
             String p;
             //we allow both: the named query syntax and the most java used ant-like-variables
             operation = operation.replace("${", ":").replace("}", "");
