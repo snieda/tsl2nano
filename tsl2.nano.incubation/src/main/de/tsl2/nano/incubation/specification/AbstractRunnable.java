@@ -16,9 +16,11 @@ import org.simpleframework.xml.ElementList;
 import org.simpleframework.xml.ElementMap;
 import org.simpleframework.xml.core.Commit;
 
+import de.tsl2.nano.bean.def.BeanDefinition;
 import de.tsl2.nano.bean.def.Constraint;
 import de.tsl2.nano.core.ENV;
 import de.tsl2.nano.core.cls.BeanClass;
+import de.tsl2.nano.core.cls.IAttribute;
 import de.tsl2.nano.core.log.LogFactory;
 import de.tsl2.nano.core.util.FileUtil;
 import de.tsl2.nano.core.util.NetUtil;
@@ -72,6 +74,25 @@ public abstract class AbstractRunnable<T> implements IPRunnable<T, Map<String, O
     @Override
     public String getName() {
         return name;
+    }
+
+    @SuppressWarnings({ "unchecked", "rawtypes" })
+    protected Map<String, ParType> createParameters(Class declaringClass) {
+        BeanDefinition<?> def = BeanDefinition.getBeanDefinition(declaringClass);
+        List<IAttribute> attrs = def.getAttributes(false);
+        Map<String, ParType> par = new LinkedHashMap<>();
+        for (IAttribute a : attrs) {
+            par.put(a.getName(), new ParType(a.getType()));
+        }
+        return par;
+    }
+
+    protected Map<String, ParType> createSimpleParameters(String...names) {
+        Map<String, ParType> par = new LinkedHashMap<>();
+        for (int i = 0; i < names.length; i++) {
+            par.put(names[i], new ParType(Object.class));
+        }
+        return par;
     }
 
     /**
@@ -145,11 +166,10 @@ public abstract class AbstractRunnable<T> implements IPRunnable<T, Map<String, O
      * @return real parameters
      */
     public List<Class<?>> getParameterList() {
-        List<Class<?>> pars = new ArrayList<Class<?>>(parameter.size());
         if (parameter == null) {
             return new ArrayList<Class<?>>(0);
         }
-
+        List<Class<?>> pars = new ArrayList<Class<?>>(parameter.size());
         for (ParType par : parameter.values()) {
             pars.add(par.getType());
         }

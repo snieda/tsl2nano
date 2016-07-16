@@ -22,7 +22,6 @@ import de.tsl2.nano.core.ManagedException;
 import de.tsl2.nano.core.cls.BeanClass;
 import de.tsl2.nano.core.log.LogFactory;
 import de.tsl2.nano.core.util.StringUtil;
-import de.tsl2.nano.core.util.XmlUtil;
 import de.tsl2.nano.execution.IPRunnable;
 
 /**
@@ -91,10 +90,9 @@ public class Pool<T extends IPRunnable<?, ?>> {
         return (Class<T>) BeanUtil.getGenericType(this.getClass());
     }
 
-    @SuppressWarnings("static-access")
     private <I extends T> I loadRunnable(String path, Class<I> type) {
         try {
-            I r = ENV.get(XmlUtil.class).loadXml(path, type);
+            I r = ENV.load(path, type);
             runnables.put(r.getName(), r);
             return r;
         } catch (Exception e) {
@@ -148,7 +146,7 @@ public class Pool<T extends IPRunnable<?, ?>> {
         runnables().put(name, runnable);
         String fileName = getFileName(runnable.getName());
         LOG.info("adding runnable '" + name + "' and saving it to " + fileName);
-        ENV.get(XmlUtil.class).saveXml(fileName, runnable);
+        ENV.save(fileName, runnable);
     }
 
     /**
