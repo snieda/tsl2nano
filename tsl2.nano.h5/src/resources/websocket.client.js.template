@@ -250,6 +250,25 @@ function processDataFromClipboard(clipboard) {
 	}
 }
 
+/*
+ * not working yet...
+ */
 function fade(btn) {
 	document.getElementByTagName("body").className = "fade-out";
 }
+
+function disablePage(e) {
+	e = e || window.event;
+	gp = document.getElementById('glasspane');    
+	gp.style.display='none';
+//	e.stopPropagation();
+}
+/**
+ * if a submit (reload page from server) was requested, disable the current page and don't handle the event further...
+ */
+window.addEventListener('onsubmit', function(e){
+	disablePage(e);
+});
+document.addEventListener('ondblclick', function(e){
+	disablePage(e);
+});

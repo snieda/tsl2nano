@@ -31,9 +31,12 @@ public class VolatileResult<T> extends Volatile<T> {
     }
 
     public T get(Map<String, Object> context, Object... extArgs) {
-        if (!isRunning || expired())
+        if (expired() && !isRunning)
             try {
                 set(runner.run(context, extArgs));
+            } catch(Exception ex) {
+                //on errors , the expired should be set, too
+                activate();
             } finally {
                 isRunning = false;
             }

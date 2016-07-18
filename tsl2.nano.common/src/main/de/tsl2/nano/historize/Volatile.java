@@ -69,6 +69,13 @@ public class Volatile<T> {
 
     public void set(T value) {
         this.value = value;
+        activate();
+    }
+
+    /**
+     * activate
+     */
+    protected void activate() {
         start = System.currentTimeMillis();
     }
     

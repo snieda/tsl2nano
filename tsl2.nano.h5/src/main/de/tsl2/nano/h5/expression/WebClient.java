@@ -100,17 +100,19 @@ public class WebClient<T> extends AbstractRunnable<T> {
             ws.method = StringUtil.substring(methodContent, null, ":");
             ws.contentType = StringUtil.substring(methodContent, ":", null);
         }
-        if (expression.contains(String.valueOf(EHttpClient.SEPARATORS_QUERY)))
-            ws.urlRESTSeparators = false;
         if (expression.matches(".*[{](\\w+)[}].*")) {
             StringBuilder e = new StringBuilder(expression);
             ws.parameter = (LinkedHashMap) ws.createSimpleParameters(StringUtil.extractAll(e, "[{](\\w+)[}]"));
         }
         if (expression.endsWith("="))
             ws.valuesOnly = true;
-        if (expression.matches(".*[:]\\d+.*"))//port --> special, not public service
+        if (expression.matches(".*[:]\\d+.*")) {//port --> special, not public service
+            ws.urlRESTSeparators = true;
             ws.handleResponse = true;
-
+        }
+        if (expression.contains(String.valueOf(EHttpClient.SEPARATORS_QUERY)))
+            ws.urlRESTSeparators = false;
+        
         ws.operation = expression;
         if (contentClass != null) {
             ws.parameter = (LinkedHashMap) ws.createParameters(contentClass);

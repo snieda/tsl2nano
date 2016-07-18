@@ -356,8 +356,11 @@ public class Html5Presentation<T> extends BeanPresentationHelper<T> implements I
     }
 
     protected Element createGlasspane(Element body) {
-        return appendElement(body, TAG_DIV, ATTR_STYLE,
-            ENV.get("app.page.glasspane.style", "background: transparent;"));
+        /* Display it on the layer with index 1001. cover the whole screen
+         * Make sure this is the highest z-index value used by layers on that page 
+         */
+        return appendElement(body, TAG_DIV, ATTR_ID, "glasspane", ATTR_STYLE,
+            ENV.get("app.page.glasspane.style", "background: transparent;z-index:1001;"));
     }
 
     Element createHeader(ISession session, String title, String image, boolean interactive) {
@@ -1347,10 +1350,10 @@ public class Html5Presentation<T> extends BeanPresentationHelper<T> implements I
                     "beancollectorrow",
                     "onclick",
                     true/*tableDescriptor.hasMode(IBeanCollector.MODE_EDITABLE)*/
-                        ? "this.getElementsByTagName('input')[0].checked = !this.getElementsByTagName('input')[0].checked"
+                        ? "/*if (e.originalEvent.detail < 2 || window.event.originalEvent.detail < 2) */this.getElementsByTagName('input')[0].checked = !this.getElementsByTagName('input')[0].checked"
                         : null,
                     "ondblclick",
-                    "location=this.getElementsByTagName('a')[0]",
+                    "location=this.getElementsByTagName('a')[0];disablePage(e);",
                     ATTR_TABINDEX,
                     tab,
                     ATTR_ACCESSKEY,

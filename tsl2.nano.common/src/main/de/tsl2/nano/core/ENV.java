@@ -271,7 +271,7 @@ public class ENV implements Serializable {
 //          LOG.warn("no environment.properties available");
         }
 
-        self.services = new Hashtable<Class<?>, Object>();
+        self.services = createServiceMap();
         addService(layer);
         addService(ClassLoader.class, Thread.currentThread().getContextClassLoader());
 
@@ -949,7 +949,7 @@ public class ENV implements Serializable {
     @Persist
     protected void initSerialization() {
         if (properties == null)
-            self.properties = createPropertyMap();
+            properties = createPropertyMap();
         /*
          * remove the environment path itself - should not be reloaded
          */
@@ -972,7 +972,7 @@ public class ENV implements Serializable {
         }
 
         if (services == null)
-            self.services = new Hashtable<Class<?>, Object>();
+            services = createServiceMap();
         Set<Class<?>> serviceKeys = services.keySet();
         for (Iterator<?> keyIt = serviceKeys.iterator(); keyIt.hasNext();) {
             Object key = keyIt.next();
@@ -983,6 +983,14 @@ public class ENV implements Serializable {
                 keyIt.remove();
             }
         }
+    }
+
+    /**
+     * createServiceMap
+     * @return
+     */
+    static Map<Class<?>, Object> createServiceMap() {
+        return Collections.synchronizedMap(new Hashtable<Class<?>, Object>());
     }
 
     /**

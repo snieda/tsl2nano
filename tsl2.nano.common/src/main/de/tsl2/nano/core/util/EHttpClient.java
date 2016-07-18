@@ -196,4 +196,10 @@ public class EHttpClient extends HttpClient {
         return url;
     }
 
+    @Override
+    public void run() {
+        if (http.getURL().toString().contains("{"))
+            throw new IllegalStateException("variables not filled: " + http.getURL().toString());
+        super.run();
+    }
 }
