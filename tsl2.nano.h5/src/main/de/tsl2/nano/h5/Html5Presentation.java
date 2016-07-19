@@ -1809,14 +1809,17 @@ public class Html5Presentation<T> extends BeanPresentationHelper<T> implements I
     private Element createDataTag(Element cell, BeanValue<?> beanValue) {
         Element data;
         String tagName = getDataTag(beanValue);
-        File file = beanValue.getValueFile();
+        File file = null;
         //embed the file content
         String content = null;
-        if (tagName.equals(TAG_EMBED) || tagName.equals(TAG_SVG)) {
-            if (file != null && getLayout(beanValue, "pluginspage") == null) {
-                content = new String(FileUtil.getFileBytes(file.getPath(), null));
-            } else {
-                content = Util.asString(beanValue.getValue());
+        if (!tagName.equals(TAG_FRAME)) {
+            file = beanValue.getValueFile();
+            if (tagName.equals(TAG_EMBED) || tagName.equals(TAG_SVG)) {
+                if (file != null && getLayout(beanValue, "pluginspage") == null) {
+                    content = new String(FileUtil.getFileBytes(file.getPath(), null));
+                } else {
+                    content = Util.asString(beanValue.getValue());
+                }
             }
         }
         data =
@@ -1828,7 +1831,7 @@ public class Html5Presentation<T> extends BeanPresentationHelper<T> implements I
                 beanValue.getId() + ".data",
                 getDataAttribute(tagName),
                 file != null ? FileUtil.getRelativePath(file,
-                    ENV.getConfigPath()) : "",
+                    ENV.getConfigPath()) : Util.asString(beanValue.getValue()),
                 ATTR_CLASS,
                 "beanfielddata",
                 ATTR_TITLE, //fallback to show an info text, if data couldn't be shown

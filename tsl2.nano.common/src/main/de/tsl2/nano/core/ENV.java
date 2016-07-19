@@ -183,7 +183,7 @@ public class ENV implements Serializable {
      * @param service interface of service
      * @return implementation of service
      */
-    public static <T> T get(Class<T> service) {
+    public static synchronized <T> T get(Class<T> service) {
         Object s = services().get(service);
         if (s == null) {
             debug(self, "no service found for " + service);

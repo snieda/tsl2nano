@@ -310,6 +310,7 @@ public class NanoH5 extends NanoHTTPD implements ISystemConnector<Persistence> {
     public static URL getServiceURL(String serviceURLString) {
         if (serviceURLString == null) {
             serviceURLString = ENV.get("service.url", "http://localhost:8067");
+            return NetUtil.url(serviceURLString);
         }
         //perhaps activate secure transport layer TLS
         if (serviceURLString.startsWith("https"))

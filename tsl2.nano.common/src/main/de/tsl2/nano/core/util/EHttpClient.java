@@ -167,8 +167,8 @@ public class EHttpClient extends HttpClient {
      * @return new url path
      */
     @SuppressWarnings("unchecked")
-    public static String path(String url, String... args) {
-        return StringUtil.insertProperties(url, MapUtil.asMap(args));
+    public static String path(String url, Object... args) {
+        return StringUtil.insertProperties(url, MapUtil.asMap(args), "{", "}");
     }
 
     /**
@@ -180,11 +180,16 @@ public class EHttpClient extends HttpClient {
      * @return
      */
     private static String parameter(String url, char[] separators, Object... args) {
-        StringBuilder buf = new StringBuilder(url);
-        char c = url.endsWith(String.valueOf(separators[0])) ? 0 : separators[0];
+        StringBuilder buf = new StringBuilder(path(url, args));
         if (args != null) {
+            char c = url.endsWith(String.valueOf(separators[0])) ? 0 : separators[0];
             for (int i = 0; i < args.length; i++) {
                 try {
+                    //WORKAROUND: if (parameter was already inserted (perhaps through path()) ignore key and value
+                    if (i < args.length -1 && (args[i+1] == null || buf.indexOf(separators[2] + args[i+1].toString()) != -1)) {
+                        ++i;
+                        continue;
+                    }
                     buf.append((c != 0 ? c : "") + URLEncoder.encode(StringUtil.toString(args[i]), UTF8));
                 } catch (UnsupportedEncodingException e) {
                     ManagedException.forward(e);

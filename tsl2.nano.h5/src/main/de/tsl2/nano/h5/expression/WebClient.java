@@ -145,6 +145,8 @@ public class WebClient<T> extends AbstractRunnable<T> {
                         BeanUtil.toValueMap(data, false, false, false, getName());
                     extArgs = valuesOnly ? valueMap.values().toArray() : MapUtil.asArray(valueMap);
                 }
+            } else if (Util.isEmpty(extArgs) && context.size() > 0) {
+                extArgs = valuesOnly ? context.values().toArray() : MapUtil.asArray(context);
             } else {
                 LOG.warn("the given context may not have desired informations for url " + operation + ": "
                     + context);

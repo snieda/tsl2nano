@@ -12,6 +12,7 @@ package de.tsl2.nano.execution;
 import java.io.Serializable;
 import java.util.Map;
 
+import de.tsl2.nano.core.ManagedException;
 import de.tsl2.nano.historize.Volatile;
 
 /**
@@ -37,6 +38,7 @@ public class VolatileResult<T> extends Volatile<T> {
             } catch(Exception ex) {
                 //on errors , the expired should be set, too
                 activate();
+                ManagedException.forward(ex);
             } finally {
                 isRunning = false;
             }
