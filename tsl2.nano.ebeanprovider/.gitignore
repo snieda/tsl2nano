@@ -1,6 +1,6 @@
 /bin
 /*.jar
-/test
+/test/**
 /nbproject
 /ci/*.xml
 /target
