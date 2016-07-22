@@ -46,7 +46,7 @@ public class WebClient<T> extends AbstractRunnable<T> {
 
     private static final Log LOG = LogFactory.getLog(WebClient.class);
     @SuppressWarnings({ "unchecked", "rawtypes" })
-    transient Volatile response = new Volatile(300, null);
+    transient Volatile response = new Volatile(1000, null);
 
     /** REST method type */
     @Attribute(required = false)
@@ -54,8 +54,6 @@ public class WebClient<T> extends AbstractRunnable<T> {
     /** content-type/media-type like application/xml etc. */
     @Attribute(required = false)
     String contentType;
-//    /** class of content to be POST/PUT. all available attributes will be evaluated to be inserted into the expression */
-//    String contentClass;
     /**
      * (optional) key name of context entry to be used as content, if method is not GET. if null, the attributes type
      * name will be used.
@@ -77,6 +75,9 @@ public class WebClient<T> extends AbstractRunnable<T> {
      */
     @Attribute(required = false)
     boolean handleResponse;
+    /** constrain the read timeout of an http request */
+    @Attribute(required = false)
+    Integer readTimeout;
 
     /**
      * constructor
@@ -154,6 +155,8 @@ public class WebClient<T> extends AbstractRunnable<T> {
             EHttpClient http = new EHttpClient(
                 operation + (valuesOnly ? URLEncoder.encode(StringUtil.concat(new char[]{' '}, extArgs)) : ""),
                 urlRESTSeparators);
+            if (readTimeout != null)
+                http.setReadTimeout(readTimeout);
             if (valuesOnly)
                 response.set(http.getString());
             else
