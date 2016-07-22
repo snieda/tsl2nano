@@ -71,6 +71,10 @@ public class HttpClient implements Runnable {
         return this;
     }
 
+    public void setReadTimeout(int timeout) {
+        http.setReadTimeout(timeout);
+    }
+    
     /**
      * delegates to {@link #http(String, String, String, byte[])} with method GET
      * 

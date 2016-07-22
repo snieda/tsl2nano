@@ -3364,7 +3364,7 @@ MapExpressionFormat.parseObject(..) --> ve.from() raus
   hibernate not depending slf4j-simple --> ant-task error
   (v) login ok-button not working on ALT-o
   status-line with tooltip not working
-  
+  first app login --> Inet6Address, second session request: Inet4Address
 createDataTag, isData <-- iframe + srcdoc, +svg
 
 <svg height="130" width="500">

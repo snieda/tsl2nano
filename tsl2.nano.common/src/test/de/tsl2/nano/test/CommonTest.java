@@ -464,7 +464,7 @@ public class CommonTest {
         long last = System.currentTimeMillis();
         ConcurrentUtil.sleep(1500);
         float sec = DateUtil.seconds(System.currentTimeMillis() - last);
-        assertTrue(1.5 < sec && sec < 2);
+        assertTrue(1.5 <= sec && sec < 2.5);
         
         //print all date time locale formats
         Locale[] availableLocales = Locale.getAvailableLocales();
@@ -1192,7 +1192,7 @@ public class CommonTest {
         };
         TypeBean myBean10000 = euroValue.multiply(euro_100);
         assertTrue(myBean10000.getPrimitiveDouble() == 100d * 100d);
-        assertTrue(euroValue.toString().equals("100.0 ï¿½"));
+        assertTrue(euroValue.toString().equals("100.0 €"));
 
         /*
          * second, test the converting
@@ -1737,7 +1737,7 @@ public class CommonTest {
     }
 
     @Test
-    public void testResourcebundleTranslation() throws Exception {
+    public void testTranslation() throws Exception {
         Properties p = createTestTranslationProperties();
         Properties t = Translator.translateProperties("test", p, Locale.ENGLISH, Locale.GERMAN);
 
@@ -1746,7 +1746,7 @@ public class CommonTest {
     }
 
     @Test
-    public void testBlockTranslation() throws Exception {
+    public void testTranslationFast() throws Exception {
         Map p = createTestTranslationProperties();
         Map t = Translator.translatePropertiesFast("test", p, Locale.ENGLISH, Locale.GERMAN);
         //the words are german - so, no translation can be done --> p = t. it's only an integration test
@@ -1843,7 +1843,17 @@ public class CommonTest {
     }
     @Test
     public void testEHttpClient() throws Exception {
-        new EHttpClient("https://www.openstreetmap.org/").get("search?", "city", "Mï¿½nchen");
+        //query url
+        String urlQuery = EHttpClient.parameter("http://www.openstreetmap.org/search?", false, "city", "München", "street", "Berliner Str.1");
+        assertEquals("http://www.openstreetmap.org/search?city=M%C3%BCnchen&street=Berliner+Str.1", urlQuery);
+
+        //rest url
+        String resource = "http://localhost:8080/myresource/";
+        String urlREST = EHttpClient.parameter(resource, true, "city", "München", "street", "Berliner Str.1");
+        assertEquals(resource + "city/M%C3%BCnchen/street/Berliner+Str.1", urlREST);
+
+        urlREST = EHttpClient.parameter(resource + "{city}", true, "city", "München", "street", null);
+        assertEquals(resource + "M%C3%BCnchen", urlREST);
     }
 
     @Test

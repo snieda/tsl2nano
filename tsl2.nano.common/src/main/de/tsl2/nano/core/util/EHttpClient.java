@@ -14,6 +14,7 @@ import java.io.OutputStream;
 import java.io.StringReader;
 import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
+import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.UUID;
 
@@ -166,11 +167,23 @@ public class EHttpClient extends HttpClient {
      * @param args key-/value pairs
      * @return new url path
      */
-    @SuppressWarnings("unchecked")
+    @SuppressWarnings({ "unchecked", "rawtypes" })
     public static String path(String url, Object... args) {
-        return StringUtil.insertProperties(url, MapUtil.asMap(args), "{", "}");
+        //prepare encoded values...
+        Map map = MapUtil.asMap(args);
+        Map margs = new LinkedHashMap(map.size());
+        for (Object k : map.keySet()) {
+            Object v = map.get(k);
+            if (v != null)
+                margs.put(k, URLEncoder.encode(v.toString()));
+        }
+        return StringUtil.insertProperties(url, margs, "{", "}");
     }
 
+    public static String parameter(String url, boolean rest, Object... args) {
+        return parameter(url, rest ? SEPARATORS_REST : SEPARATORS_QUERY, args);
+    }
+    
     /**
      * path
      * 
@@ -179,14 +192,14 @@ public class EHttpClient extends HttpClient {
      * @param args
      * @return
      */
-    private static String parameter(String url, char[] separators, Object... args) {
+    protected static String parameter(String url, char[] separators, Object... args) {
         StringBuilder buf = new StringBuilder(path(url, args));
         if (args != null) {
             char c = url.endsWith(String.valueOf(separators[0])) ? 0 : separators[0];
             for (int i = 0; i < args.length; i++) {
                 try {
                     //WORKAROUND: if (parameter was already inserted (perhaps through path()) ignore key and value
-                    if (i < args.length -1 && (args[i+1] == null || buf.indexOf(separators[2] + args[i+1].toString()) != -1)) {
+                    if (i < args.length -1 && (args[i+1] == null || buf.indexOf(separators[2] + URLEncoder.encode(args[i+1].toString())) != -1)) {
                         ++i;
                         continue;
                     }
