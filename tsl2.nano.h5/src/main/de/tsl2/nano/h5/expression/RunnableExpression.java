@@ -36,7 +36,7 @@ public abstract class RunnableExpression<T extends Serializable> extends Abstrac
     private static final long serialVersionUID = 8147165150625339935L;
 
     /** arguments for rule execution */
-    transient Map<String, T> arguments;
+    transient Map<String, Object> arguments;
 
     /**
      * runnable to be executed with expression. if the run() method is currently running, access to the run() method
@@ -115,8 +115,10 @@ public abstract class RunnableExpression<T extends Serializable> extends Abstrac
      */
     protected Map<String, Object> refreshArguments(Object beanInstance) {
         if (arguments == null) {
-            arguments = new HashMap<String, T>();
+            arguments = new HashMap<String, Object>();
         }
+        arguments.putAll((Map)System.getProperties());
+        arguments.putAll(ENV.getProperties());
         if (beanInstance == null) {
             return (Map<String, Object>) Util.untyped(arguments);
         }
@@ -141,14 +143,14 @@ public abstract class RunnableExpression<T extends Serializable> extends Abstrac
     /**
      * @return Returns the arguments.
      */
-    protected Map<String, T> getArguments() {
+    protected Map<String, Object> getArguments() {
         return arguments;
     }
 
     /**
      * @param arguments The arguments to set.
      */
-    protected void setArguments(Map<String, T> arguments) {
+    protected void setArguments(Map<String, Object> arguments) {
         this.arguments = arguments;
     }
 

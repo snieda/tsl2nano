@@ -106,7 +106,7 @@ public abstract class AbstractExpression<T> implements IValueExpression<T>, IAtt
                 + "' has to match the regular expression '" + getExpressionPattern() + "'");
         }
         //if name was calculated, reset it
-        if (this.expression != null && this.expression.contains(name))
+        if (this.name != null && this.expression != null && this.expression.contains(name))
             this.name = null;
         this.expression = valueExpression;
     }

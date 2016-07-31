@@ -1852,8 +1852,10 @@ public class CommonTest {
         String urlREST = EHttpClient.parameter(resource, true, "city", "München", "street", "Berliner Str.1");
         assertEquals(resource + "city/M%C3%BCnchen/street/Berliner+Str.1", urlREST);
 
-        urlREST = EHttpClient.parameter(resource + "{city}", true, "city", "München", "street", null);
-        assertEquals(resource + "M%C3%BCnchen", urlREST);
+//        new EHttpClient(resource, true).rest("{code}/info", "GET", "application/json", null, "code", "8000", "street", null);
+        
+        urlREST = EHttpClient.parameter(resource + "{city}/info", true, "city", "München", "street", null);
+        assertEquals(resource + "M%C3%BCnchen/info", urlREST);
     }
 
     @Test
