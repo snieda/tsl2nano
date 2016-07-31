@@ -1,12 +1,11 @@
 <h6 align="center">FullRelation Nano.H5<br/>
 <font size="-1">&copy; Thomas Schneider 2012-2016
 <br/>
-<a href="http://sourceforge.net/projects/tsl2nano/files/1.0.0-beta/tsl2.nano.h5.0.8.0.jar/download">Download on sourceforge</a>
+<a href="http://sourceforge.net/projects/tsl2nano/files/1.0.0-beta/tsl2.nano.h5.1.0.0.jar/download">Download on sourceforge</a>
 <br/>
 <a href="http://sourceforge.net/projects/tsl2nano/files/1.0.0-beta/nano.h5.jnlp">Start Nano.H5 through WebStart</a>
-<p hidden>
 </font></h6>
-</p>
+<p/>
 
 [TOC]
 
@@ -2177,35 +2176,30 @@ After you typed your attribute expression you can click the save- and assign- bu
 The result should be the changed bean presenter in the directory MY-ENVIRONMENT/presenter:
 
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-   <attribute name="openstreetmap.org">
+   <attribute name="geonames.org">
       <attributeDefinition id="false" unique="false" doValidation="true" composition="false" cascading="false" generatedValue="false">
          <declaring class="de.tsl2.nano.h5.expression.URLExpression" declaringClass="org.anonymous.project.Address" type="de.tsl2.nano.bean.def.BeanDefinition$1">
-            <expression><![CDATA[@openstreetmap.org]]></expression>
+            <expression><![CDATA[@geonames.org]]></expression>
          </declaring>
          <constraint type="java.lang.Object" nullable="true" length="-1" scale="-1" precision="-1"/>
-         <description>openstreetmap.org</description>
+         <description>geonames.org</description>
          <presentable class="de.tsl2.nano.h5.Html5Presentable" type="-1" style="-1" visible="true" searchable="true" nesting="false">
-            <label>Address:@openstreetmap.org</label>
-            <description>Address:@openstreetmap.org</description>
+            <label>Address:@geonames.org</label>
+            <description>Address:@geonames.org</description>
             <enabler class="de.tsl2.nano.action.IActivable$2" active="false"/>
          </presentable>
       </attributeDefinition>
    </attribute>
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-The WebClient definition can be found in the specification folder as file 'openstreetmap.org.xml':
+The WebClient definition can be found in the specification folder as file 'geonames.org.xml':
 
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-<webClient name="openstreetmap.org" method="GET" urlRESTSeparators="false" valuesOnly="true" handleResponse="false">
-   <operation>http://openstreetmap.org/search?query=</operation>
+<webClient name="geonames.org" method="GET" urlRESTSeparators="false" valuesOnly="true" handleResponse="false">
+   <operation>http://geonames.org/search.html?q=</operation>
    <contextKey>address</contextKey>
-   <parameterNames length="6">
-      <string>id</string>
-      <string>code</string>
+   <parameterNames length="1">
       <string>city</string>
-      <string>street</string>
-      <string>country</string>
-      <string>locations</string>
    </parameterNames>
 </webClient>
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -2877,7 +2871,7 @@ Actual list: http://infocenter.pentaho.com/help/index.jsp?topic=%2Fsupported_com
  1.0.0b | 10.04.2016 | beancontainer now using ThreadLocal, NEW: Compositor
  1.0.0c | 08.05.2016 | H2-Database included as default instead of HSQLDB, because the compatibility mode is working better there.
  1.0.0d | 02.07.2016 | layout and styles (responsive for three resolutions) for all panels enhanced.
- 1.0.0e | 09.07.2016 | RESTful attributes enhanced. NEW: runtime attribute definition NEW: broadcast messages to all sessions.
+ 1.0.0e | 21.07.2016 | RESTful attributes enhanced. NEW: runtime attribute definition NEW: broadcast messages to all sessions.
  
 [GLOSSARY]
 
@@ -3364,7 +3358,7 @@ MapExpressionFormat.parseObject(..) --> ve.from() raus
   hibernate not depending slf4j-simple --> ant-task error
   (v) login ok-button not working on ALT-o
   status-line with tooltip not working
-  first app login --> Inet6Address, second session request: Inet4Address
+  MS InternetExplorer: first app login --> Inet6Address, second session request: Inet4Address
 createDataTag, isData <-- iframe + srcdoc, +svg
 
 <svg height="130" width="500">
@@ -3383,3 +3377,14 @@ Sorry, your browser does not support inline SVG.
 </svg>
 
   nalgox ?
+  
+Anyway			: Allgemeine DB für timesheet, bestell+kasse, estore
+EM-2016			: https://editor.ponyorm.com/user/ts/ResulteB#
+Skill-DB		: https://editor.ponyorm.com/user/ts/SkillDB
+eStore			: https://editor.ponyorm.com/user/pony/eStore
+forum			: https://editor.ponyorm.com/user/pony/Forum2
+PhotoSharing	: https://editor.ponyorm.com/user/pony/PhotoSharing
+Logbuch			: Eintragung von Aktivitäten, Summierung+Statistiken
+Haushaltsplan	: Dienstplan und Eintragung letzter Aktivitäten
+ 
+JSON-Test: https://jsonplaceholder.typicode.com/
