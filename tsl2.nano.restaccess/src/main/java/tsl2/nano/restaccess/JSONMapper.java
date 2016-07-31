@@ -4,6 +4,8 @@
 package tsl2.nano.restaccess;
 
 import java.io.IOException;
+import java.util.logging.Logger;
+
 import org.codehaus.jackson.map.ObjectMapper;
 
 /**
@@ -13,7 +15,7 @@ import org.codehaus.jackson.map.ObjectMapper;
  */
 public class JSONMapper<T> extends JOMapper<T> {
   private static final long serialVersionUID = -7056788058308961179L;
-
+  private static final Logger logger = Logger.getLogger(JOMapper.class.getSimpleName());
   /** package holding type */
   private String basePath;
   
@@ -26,6 +28,15 @@ public class JSONMapper<T> extends JOMapper<T> {
   
   public JSONMapper() {
     super();
+  }
+
+  /**
+   * constructor
+   * @param content
+   */
+  public JSONMapper(String content) {
+      super(content);
+      // TODO Auto-generated constructor stub
   }
 
   
@@ -44,6 +55,7 @@ public class JSONMapper<T> extends JOMapper<T> {
     this.type = cls.getSimpleName();
     try {
       this.content = new ObjectMapper().writeValueAsString(object);
+      logger.info("new JSON object createed: " + content);
     } catch (IOException e) {
       throw new RuntimeException(e);
     }
@@ -74,14 +86,5 @@ public class JSONMapper<T> extends JOMapper<T> {
       throw new RuntimeException(e);
     }
   }
-
-/**
- * constructor
- * @param content
- */
-public JSONMapper(String content) {
-    super(content);
-    // TODO Auto-generated constructor stub
-}
 
 }

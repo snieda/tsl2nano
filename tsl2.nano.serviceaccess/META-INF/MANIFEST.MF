@@ -4,7 +4,7 @@ Ant-Version: Apache Ant 1.7.1
 Created-By: Thomas Schneider
 Main-Class: de.tsl2.nano.core.AppLoader
 Main-Arguments: de.tsl2.nano.execution.ScriptUtil ant shell.xml
-Class-Path: ./ 
+Class-Path: 
  commons-collections-3.2.1.jar 
  commons-logging-1.1.1.jar 
  velocity-1.6-dep.jar 
@@ -23,4 +23,3 @@ Class-Path: ./
  jboss-interceptors-api_1.1_spec.jar 
  jboss-connector-api_1.5_spec.jar
  jta-1.1.jar  
- fs-connector.rar 

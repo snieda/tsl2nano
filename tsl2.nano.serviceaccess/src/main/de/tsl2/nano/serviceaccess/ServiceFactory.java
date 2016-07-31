@@ -92,6 +92,8 @@ public class ServiceFactory {
     public static final String KEY_USER_OBJECT = "user.object";
     /** user properties key name for the mandator object */
     public static final String KEY_MANDATOR_OBJECT = "mandator.object";
+    /** flag to indicate whether a jndi mapping name will be created ({@link #KEY_JNDI_PREFIX} and used. */
+    public static final String KEY_USE_JNDI_MAPPING = "serviceaccess.use.jndimapping";
 
     /**
      * private instance creation
@@ -111,7 +113,8 @@ public class ServiceFactory {
                 LOG.info("couldn't load optional properties from serviceaccess.properties in classpath");
             }
             // set the default jndi prefix
-            jndiPrefix = properties.getProperty(KEY_JNDI_PREFIX, ENV.getName().toLowerCase().trim());
+            if (Boolean.valueOf(properties.getProperty(KEY_USE_JNDI_MAPPING, "false")))
+                jndiPrefix = properties.getProperty(KEY_JNDI_PREFIX, ENV.getName().toLowerCase().trim());
         } catch (final Exception e) {
             throw new RuntimeException(e);
         }

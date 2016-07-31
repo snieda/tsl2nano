@@ -52,7 +52,7 @@ public class ServiceLocator {
     private final Map<String, Object> services = Collections.synchronizedMap(new Hashtable<String, Object>());
     private ClassLoader classLoader;
 
-    /** using cached services directly */
+    /** using cached services directly - no context will be created! */
     public static final String NO_JNDI = "NO_JNDI";
 
     /**

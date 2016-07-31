@@ -19,7 +19,8 @@ import javax.ws.rs.core.Response;
 
 import de.tsl2.nano.bean.BeanContainer;
 import de.tsl2.nano.core.cls.BeanClass;
-import de.tsl2.nano.service.util.GenericServiceBean;
+import de.tsl2.nano.service.util.BeanContainerUtil;
+import de.tsl2.nano.service.util.IGenericService;
 
 /**
  * http://localhost:8080/beancontainer/findById/Person/3 --> {"id":3,"name":"test","description":"test..."}
@@ -31,12 +32,13 @@ import de.tsl2.nano.service.util.GenericServiceBean;
 @Path("")
 @SuppressWarnings({"unchecked", "rawtypes"})
 public class RESTBeanContainer {
-//    @EJB GenericServiceBean genService;
+    @EJB IGenericService genService;
     
     /**
      * constructor
      */
     public RESTBeanContainer() {
+        BeanContainerUtil.initGenericServices(Thread.currentThread().getContextClassLoader());
         // initialize EntityManager and BeanContainer
 //        GenericLocalBeanContainer.initLocalContainer(Thread.currentThread().getContextClassLoader(), false);
     }
@@ -46,15 +48,16 @@ public class RESTBeanContainer {
     @Produces(MediaType.APPLICATION_JSON)
     public JSONMapper getById(@PathParam("type") String type, @PathParam("id") String id) {
         Class<?> eType = BeanClass.createInstance(type);
-        return new JSONMapper(BeanContainer.instance().getByID(eType, id));
+        JSONMapper result = new JSONMapper(BeanContainer.instance().getByID(eType, id));
+        return new JSONMapper(new Person(0l));
     }
 
     @GET
     @Path("/findAll/{type}/{start}/{count}")
     @Produces(MediaType.APPLICATION_JSON)
-    public Collection<Person> getAll(@PathParam("type") String type, @PathParam("start") int start, @PathParam("count") int count) {
+    public Collection<JSONMapper> getAll(@PathParam("type") String type, @PathParam("start") String start, @PathParam("count") String count) {
         
-        return Arrays.asList(new Person(0l));
+        return Arrays.asList(new JSONMapper(new Person(0l)));
     }
 
     @GET

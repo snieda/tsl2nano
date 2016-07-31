@@ -1,0 +1,7 @@
+31.07.2016 16:57:34 - [      LogFactory]: error: LogFactory couldn't save xml properties
+	ConcurrentUtil]: starting thread logger
+java.lang.IllegalStateException: 500: Internal Server Error [[Connection=keep-alive,Content-Length=8342,Content-Type=text/html;charset=UTF-8,Date=Sun, 31 Jul 2016 14:57:34 GMT]]
+	at tsl2.nano.restaccess.RESTBeanContainerTest.send(RESTBeanContainerTest.java:80)
+	at tsl2.nano.restaccess.RESTBeanContainerTest.options(RESTBeanContainerTest.java:60)
+	at tsl2.nano.restaccess.RESTBeanContainerTest.main(RESTBeanContainerTest.java:104)
+31.07.2016 16:57:34 # [ManagedException]: tsl2nano.forwarded

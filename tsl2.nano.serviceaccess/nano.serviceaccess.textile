@@ -395,7 +395,8 @@ The service may be used inside your business services, but may be called directl
 The service is usable by standalone applications (without application-server), too. The __persistence.xml__ will define the behaviour of the sessions __EntityManager__ with caching and logging etc.
 
 An optional configuration file __genericservice.properties__ will be loaded by the __GenericServiceBean__ (the implementation of __IGenericService__). The following properties will be evaluated:
-* maxresult (default: 10000)
+* maxresult (default: 10000): maximum row count to load from server
+* serviceaccess.use.jndimapping (default: false): whether to create a default jndi-prefix (see serviceaccess.jndi.prefix) (a mapped-name) for services that has to be used in the standalone.xml and ejb-jar.xml* serviceaccess.jndi.prefix (default: ENV.getName().toLowerCase()): the jndi-prefix
 
 If you are on client side, use the ServiceFactory to get the GenericServiceBean.
 Example:

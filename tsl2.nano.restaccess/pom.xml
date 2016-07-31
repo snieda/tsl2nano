@@ -14,6 +14,8 @@
 			<url>https://opensource.org/licenses/lgpl-2.1.php</url>
 		</license>
 	</licenses>
+	<!-- <repositories> <repository> <id>local-libs</id> <url>file://${basedir}/lib</url> 
+		</repository> </repositories> -->
 	<properties>
 		<projectname>skiller</projectname>
 		<package>de.idv.skiller</package>
@@ -32,6 +34,11 @@
 			<version>1.0.0.Final</version>
 		</dependency>
 
+		<!-- <dependency>
+			<groupId>tsl2.nano</groupId>
+			<artifactId>common</artifactId>
+			<version>1.0.0</version>
+		</dependency> -->
 		<!-- use the beancontainer -->
 		<dependency>
 			<groupId>tsl2.nano</groupId>
@@ -105,6 +112,25 @@
 	</dependencies>
 	<build>
 		<plugins>
+			<!-- inlude local libs defined for scope=system -->
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-dependency-plugin</artifactId>
+				<version>2.8</version>
+				<executions>
+					<execution>
+						<id>copy-dependencies</id>
+						<phase>compile</phase>
+						<goals>
+							<goal>copy-dependencies</goal>
+						</goals>
+						<configuration>
+							<outputDirectory>${project.build.directory}/${project.build.finalName}/WEB-INF/lib</outputDirectory>
+							<includeScope>system</includeScope>
+						</configuration>
+					</execution>
+				</executions>
+			</plugin>
 			<!-- generate backend database and entities -->
 			<plugin>
 				<groupId>org.codehaus.mojo</groupId>
@@ -154,7 +180,7 @@
 					<dependency>
 						<groupId>com.h2database</groupId>
 						<artifactId>h2</artifactId>
-						<version>1.4.191</version>
+						<version>RELEASE</version>
 					</dependency>
 				</dependencies>
 				<configuration>
@@ -217,7 +243,7 @@
 					<dependency>
 						<groupId>com.h2database</groupId>
 						<artifactId>h2</artifactId>
-						<version>1.4.191</version>
+						<version>RELEASE</version>
 					</dependency>
 				</dependencies>
 				<executions>

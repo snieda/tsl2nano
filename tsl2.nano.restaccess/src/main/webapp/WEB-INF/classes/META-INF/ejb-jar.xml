@@ -1,0 +1,49 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ejb-jar xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xmlns="http://java.sun.com/xml/ns/javaee" xmlns:ejb="http://java.sun.com/xml/ns/javaee/ejb-jar_3_0.xsd"
+	xsi:schemaLocation="http://java.sun.com/xml/ns/javaee http://java.sun.com/xml/ns/javaee/ejb-jar_3_0.xsd"
+	version="3.0">
+	<display-name>RESTServiceAccess</display-name>
+	<enterprise-beans>
+		<session>
+			<ejb-name>GenericServiceBean</ejb-name>
+			<!--  <mapped-name>serviceaccess/IGenericService</mapped-name> -->
+			<ejb-class>de.tsl2.nano.service.util.GenericServiceBean</ejb-class>
+			<session-type>Stateless</session-type>
+            <ejb-ref>
+                    <ejb-ref-name>serviceaccess/IGenericService</ejb-ref-name>
+                    <remote>de.tsl2.nano.service.util.IGenericService</remote>
+            </ejb-ref>
+			<ejb-local-ref>
+				<ejb-ref-name>serviceaccess/IGenericLocalService</ejb-ref-name>
+				<local>de.tsl2.nano.service.util.IGenericLocalService</local>
+			</ejb-local-ref>
+			<persistence-unit-ref>
+				<persistence-unit-ref-name>genericPersistenceUnit</persistence-unit-ref-name>
+			</persistence-unit-ref>
+			<!--
+				Der folgende Eintrag 'biegt' eine existente persistenceunit auf eine
+				andere um!
+			-->
+			<!--
+				<persistence-context-ref>
+				<persistence-context-ref-name>persistence/serviceaccessPersistenceUnit</persistence-context-ref-name>
+				<persistence-unit-name>../serviceaccess-services.jar#serviceaccessPersistenceUnit</persistence-unit-name>
+				</persistence-context-ref>
+			-->
+		</session>
+		<session>
+			<ejb-name>FileServiceBean</ejb-name>
+			<!-- <mapped-name>serviceaccess/IFileService</mapped-name>  -->
+			<ejb-class>de.tsl2.nano.service.util.FileServiceBean</ejb-class>
+			<session-type>Stateless</session-type>
+			<ejb-local-ref>
+				<ejb-ref-name>serviceaccess/IFileLocalService</ejb-ref-name>
+				<local>de.tsl2.nano.service.util.IFileLocalService</local>
+			</ejb-local-ref>
+			<persistence-unit-ref>
+				<persistence-unit-ref-name>genericPersistenceUnit</persistence-unit-ref-name>
+			</persistence-unit-ref>
+		</session>
+	</enterprise-beans>
+</ejb-jar>

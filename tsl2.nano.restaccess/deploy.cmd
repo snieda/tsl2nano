@@ -1,0 +1,1 @@
+mvn wildfly:deploy -DwarName=beancontainer.war -Dhost=localhost -Dport=9990
