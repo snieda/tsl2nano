@@ -5,9 +5,10 @@ Created-By: Thomas Schneider
 Main-Class: de.tsl2.nano.core.AppLoader
 Main-Arguments: de.tsl2.nano.execution.ScriptUtil ant shell.xml
 Class-Path: tsl2.nano.common.1.1.2.jar 
- tsl2.nano.serviceaccess.1.0.1.jar 
- ant.jar ant-launcher.jar 
- ant-nodeps.jar
+ tsl2.nano.serviceaccess.1.0.2.jar 
+ ant.jar 
+ ant-launcher.jar 
+ ant-nodeps.jar 
  hibernate-jpa-2.0-api.jar 
  jboss-ejb-api_3.1_spec.jar 
  jboss-interceptors-api_1.1_spec.jar 
