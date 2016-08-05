@@ -72,14 +72,14 @@ public class ActionScript<T> extends AbstractRunnable<T> {
             : new ScriptEngineManager().getEngineFactories().iterator().next().getScriptEngine();
         if (engine == null)
             throw new IllegalStateException("couldn't create engine for: '" + language + "'\n\tavailable engines: "
-                + StringUtil.toFormattedString(new ScriptEngineManager().getEngineFactories(), 1, true));
+                + StringUtil.toFormattedString(new ScriptEngineManager().getEngineFactories(), -1, true));
         LOG.info("script engine loaded: " + engine);
         return engine;
     }
 
     private static void provideLanguage(String language) {
-        if (new ClassFinder().fuzzyFind(language).size() == 0)
-            ENV.loadJarDependencies(language);
+        if (new ClassFinder().findClass(language) == null)
+            ENV.loadClassDependencies("org." + language); //TODO: find solution for fixed '.org'
         if (new ScriptEngineManager().getEngineFactories().isEmpty())
             throw new IllegalStateException("couldn't create engine for: '" + language + "'\n\tavailable engines: "
                     + StringUtil.toFormattedString(new ScriptEngineManager().getEngineFactories(), 1, true));

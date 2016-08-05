@@ -57,6 +57,7 @@ A cool way to see the power of this tool can be seen in chapter _Online Quick-St
 * navigation can be a configurable workflow - or simply an entity browser 
 * pre-defines formatting, validation and presentation of relations
 * pure html-5 (no javascript, only html5-scripting-api for websockets)
+* jvm scripts like javascript, groovy and python can be included by rules using the java scriptengine
 * using websockets to show status messages, input-assist and dependency field or timer refreshing
 * pure jpa - jpa-annotations are read to resolve attribute-presentation
 * independent of a special o/r mapper. all o/r mappers supporting javax.persistence with an EntityManager are usable.
@@ -704,6 +705,28 @@ Example for programmatically adding plugins:
 To do a structured work on a usable specification, rules, queries and actions can be defined before implementing or configuring the presentation. This is done by creating these items as xml-files inside the environments _specifiation_ directory. To see how it works, hit the applications menu button 'sample-codes' and have a look into the specification directory.
 
 All items in the specification directory will be tested against their own _specification_ entries. These are assertions for simple test or boundary conditions. The tests/checks are done on creating the instances of the rules. To switch these tests off, set the environment variable _"rule.check.specifications"_ to false.
+
+### The __ActionScript__ and __RuleScript__ can interpret the following script languages:
+
+* Javascript(included as nashorn)
+* Groovy	(maven: org.codehaus.groovy=groovy-all)
+* Python	(maven: org.python=jython)
+* Scala		(org.scala-lang=scala-library)
+* JRuby		(org.jruby=jruby-complete)
+* Rhino		(org.mozilla=rhino)
+* Closure	(org.clojure=clojure)
+* BeanShell	(org.beanshell=bsh)
+* Ceylon	(org.ceylon-lang=ceylon.language)
+* Golo		(org.golo-lang=golo)
+
+to use another jvm script language than the internal javascript you have to add the attribute 'language' to your action or rule in the root tag:
+
+Example:
+	<ruleScript name="calcTime" language="python">
+ 
+	<actionScript name="calcTime" language="groovy">
+	
+### Examples
 
 Example for a query:
 

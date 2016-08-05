@@ -18,6 +18,7 @@ import javax.script.Bindings;
 import javax.script.ScriptEngine;
 
 import org.apache.commons.logging.Log;
+import org.simpleframework.xml.Attribute;
 import org.simpleframework.xml.core.Commit;
 
 import de.tsl2.nano.core.ENV;
@@ -38,6 +39,7 @@ public class RuleScript<T> extends AbstractRule<T> {
 
     private static final Log LOG = LogFactory.getLog(RuleScript.class);
 
+    @Attribute(required=false)
     String language;
     
     transient ScriptEngine engine;

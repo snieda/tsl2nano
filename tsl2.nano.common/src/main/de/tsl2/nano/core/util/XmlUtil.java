@@ -466,25 +466,29 @@ public class XmlUtil {
                     fileInputStream = new FileInputStream(new File(xmlFile)));
         } catch (Exception e) {
             //mark the loaded xml file as corrupt
-            File file = new File(xmlFile);
-            if (file.canWrite()) {
-                fileInputStream = FileUtil.close(fileInputStream, false);
-                LOG.info("renaming corrupted file '" + xmlFile + "' to: " + xmlFile + ".failed");
-                if (!file.renameTo(new File(file.getPath() + ".failed")))
-                    LOG.warn("couldn't rename corrupted file '" + xmlFile + "' to '" + xmlFile
-                        + ".failed' !");
+            if (!ENV.get("app.mode.strict", false)) {
+                File file = new File(xmlFile);
+                if (file.canWrite()) {
+                    fileInputStream = FileUtil.close(fileInputStream, false);
+                    LOG.info("renaming corrupted file '" + xmlFile + "' to: " + xmlFile + ".failed");
+                    if (!file.renameTo(new File(file.getPath() + ".failed")))
+                        LOG.warn("couldn't rename corrupted file '" + xmlFile + "' to '" + xmlFile
+                            + ".failed' !");
+                }
             }
             //write the error to an equal-named file
             String stackTraceFile = xmlFile + ".stacktrace";
-            PrintStream printStream = null;
-            try {
-                printStream = new PrintStream(stackTraceFile);
-                e.printStackTrace(printStream);
-            } catch (FileNotFoundException e1) {
-                LOG.error("cant' write stacktrace to " + stackTraceFile);
-            } finally {
-                if (printStream != null)
-                    printStream.close();
+            if (!new File(stackTraceFile).exists()) {
+                PrintStream printStream = null;
+                try {
+                    printStream = new PrintStream(stackTraceFile);
+                    e.printStackTrace(printStream);
+                } catch (FileNotFoundException e1) {
+                    LOG.error("cant' write stacktrace to " + stackTraceFile);
+                } finally {
+                    if (printStream != null)
+                        printStream.close();
+                }
             }
             //don't use the ManagedException.forward(), because the LogFactory is using this, too!
             throw new RuntimeException(e);

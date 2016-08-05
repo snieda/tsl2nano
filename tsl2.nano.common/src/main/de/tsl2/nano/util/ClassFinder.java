@@ -42,6 +42,11 @@ public class ClassFinder {
         classes = (Vector<Class<?>>) new PrivateAccessor(classLoader).member("classes", Vector.class);
     }
 
+    public Class findClass(String filter) {
+        Map<Double, Class> result = fuzzyFind(filter);
+        return result.size() > 0 && result.containsKey(1d) ? result.get(1d) : null;
+    }
+    
     public <M extends Map<Double, Class>> M fuzzyFind(String filter) {
         return fuzzyFind(filter, Class.class, -1, null);
     }
@@ -54,7 +59,7 @@ public class ClassFinder {
      * @param resultType (optional) restricts to search for classes , methods or fields.
      * @param modifier (optional, -1: all) see {@link Modifier}.
      * @param annotation (optional) class/method/field annotation as constraint.
-     * @return all found java elements.
+     * @return all found java elements sorted by matching quote down. best quote is 1. 
      */
     @SuppressWarnings("unchecked")
     public <T, M extends Map<Double, T>> M fuzzyFind(String filter,

@@ -860,7 +860,7 @@ public class ENV implements Serializable {
     public static final Object loadJarDependencies(String... dependencyNames) {
         //evaluate already loaded jars (no class-cast possible --> using reflection!)
         String[] nestedJars =
-            (String[]) BeanClass.call(Thread.currentThread().getContextClassLoader().getParent(), "getNestedJars");
+            (String[]) BeanClass.call(Thread.currentThread().getContextClassLoader(), "getNestedJars");
         File[] environmentJars = FileUtil.getFiles(getConfigPath(), ".*[.]jar");
         Collection<String> availableJars =
             new ArrayList<String>((nestedJars != null ? nestedJars.length : 0) + environmentJars.length);
