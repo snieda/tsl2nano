@@ -16,6 +16,7 @@ import java.io.InputStream;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.io.ObjectStreamClass;
+import java.io.OutputStream;
 import java.io.PipedInputStream;
 import java.io.PipedOutputStream;
 import java.io.PrintStream;
@@ -88,6 +89,21 @@ public class ByteUtil extends Util {
         }
     }
 
+    /**
+     * simple convenience to add string bytes to the given output stream
+     * @param out
+     * @param data
+     * @param close
+     */
+    public static void addToByteStream(OutputStream out, String data, boolean close) {
+        try {
+            out.write(data.getBytes());
+        } catch (IOException e) {
+            ManagedException.forward(e);
+        }
+        if (close)
+            FileUtil.close(out, true);
+    }
     /**
      * getBytes
      * 

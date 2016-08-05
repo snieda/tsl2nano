@@ -14,7 +14,7 @@ import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.HashMap;
+import java.util.Collections;
 import java.util.LinkedHashMap;
 import java.util.LinkedList;
 import java.util.List;
@@ -27,7 +27,6 @@ import java.util.regex.MatchResult;
 
 import org.apache.tools.ant.filters.StringInputStream;
 
-import de.tsl2.nano.collection.FloatArray;
 import de.tsl2.nano.core.ICallback;
 import de.tsl2.nano.core.util.FileUtil;
 import de.tsl2.nano.core.util.StringUtil;
@@ -41,6 +40,7 @@ import de.tsl2.nano.core.util.Util;
  * Features:
  * - key/value properties.
  * - any field-structure per line
+ * - calls your ICallback in a foreach() loop
  * </pre>
  * 
  * you can combine these features to read complex data structures.
@@ -346,14 +346,22 @@ public class FieldReader {
     }
 
     /**
+     * convenience delegating to {@link #forEach(InputStream, String, String, ICallback)} with standard block definitions.
+     */
+    public static <RESULT> List<RESULT> forEach(InputStream stream, ICallback<RESULT> callback) {
+        return forEach(stream, null, null, callback);
+    }
+    
+    /**
      * runs through the stream, searching for the given blocks and providing each block content as property map to the callback. 
      * @param stream source stream
      * @param blockExpression defining the content of one block to read the properties from
      * @param keyValueDelimiter key-value delimiter
      * @param callback worker
-     * @return loop count
+     * @return threadsafe list of loop-count elements containing all callback results (null results are allowed) 
      */
-    public static long forEach(InputStream stream, String blockExpression, String keyValueDelimiter, ICallback callback) {
+    public static <RESULT> List<RESULT> forEach(InputStream stream, String blockExpression, String keyValueDelimiter, ICallback<RESULT> callback) {
+        List<RESULT> results = Collections.synchronizedList(new LinkedList<RESULT>());
         Scanner sc = new Scanner(stream);
         long count = 0;
         StringBuilder block = new StringBuilder();
@@ -363,13 +371,13 @@ public class FieldReader {
             if (!Util.isEmpty(entry = StringUtil.extract(block, blockExpression))) {
                 //a scanner reads per line
                 entry = entry.replace('\t', '\n');
-                callback.run(read(new StringInputStream(entry), keyValueDelimiter, DEL_PROP, Locale.getDefault(), false));
+                results.add(callback.run(read(new StringInputStream(entry), keyValueDelimiter, DEL_PROP, Locale.getDefault(), false)));
                 block.setLength(0);
                 count++;
             }
         }
         sc.close();
-        return count;
+        return results;
     }
     
     /**

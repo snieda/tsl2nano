@@ -17,6 +17,7 @@ import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 
 import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.Reader;
 import java.io.Serializable;
@@ -76,6 +77,7 @@ import de.tsl2.nano.bean.def.IPresentable;
 import de.tsl2.nano.bean.def.Presentable;
 import de.tsl2.nano.bean.def.ValueExpression;
 import de.tsl2.nano.bean.def.ValueMatcher;
+import de.tsl2.nano.bean.def.ValueStream;
 import de.tsl2.nano.bean.enhance.BeanEnhancer;
 import de.tsl2.nano.collection.ArrSegList;
 import de.tsl2.nano.collection.CollectionUtil;
@@ -93,6 +95,7 @@ import de.tsl2.nano.core.execution.Profiler;
 import de.tsl2.nano.core.execution.ThreadState;
 import de.tsl2.nano.core.log.LogFactory;
 import de.tsl2.nano.core.util.AnnotationProxy;
+import de.tsl2.nano.core.util.ByteUtil;
 import de.tsl2.nano.core.util.ConcurrentUtil;
 import de.tsl2.nano.core.util.Crypt;
 import de.tsl2.nano.core.util.DateUtil;
@@ -1146,6 +1149,14 @@ public class CommonTest {
         Collection<TypeBean> c = Arrays.asList(tb, tb1);
         assertEquals("test-1==>2; nix-9==>9", cef.format(c));
         assertEquals(2, ((Collection) cef.parseObject("test-1==>2; nix-9==>9")).size());
+        
+        //test value stream (import/export)
+        assertTrue(ByteUtil.equals(tb, ValueStream.read(ByteUtil.getInputStream("test-1==>2".getBytes()), ve).iterator().next()));
+
+        Bean.getBean(tb).setValueExpression(ve);
+        ByteArrayOutputStream out = new ByteArrayOutputStream();
+        ValueStream.write(out, Arrays.asList(tb));
+        assertEquals("test-1==>2", new String(out.toByteArray()));
     }
 
     /**

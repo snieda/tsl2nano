@@ -1586,12 +1586,51 @@ public class BeanPresentationHelper<T> {
                 });
 
             pageActions
-                .add(new SecureAction(bean.getClazz(), "export", IAction.MODE_UNDEFINED, false, "icons/view.png") {
+                .add(new SecureAction(bean.getClazz(), "plaintext", IAction.MODE_UNDEFINED, false, "icons/view.png") {
                     @Override
                     public Object action() throws Exception {
                         return getSimpleTextualPresentation();
                     }
                 });
+
+            pageActions
+            .add(new SecureAction(bean.getClazz(), "import", IAction.MODE_UNDEFINED, false, "icons/upload.png") {
+                String file = ENV.getConfigPath(bean.getClazz()) + ".txt";
+                @Override
+                public Object action() throws Exception {
+                    //import from file
+                    Collection<T> objects = ValueStream.read(file, bean.getValueExpression());
+                    Message.send("trying to import new " + bean.getName() + " objects: " + objects);
+                    //persist
+                    for (T e : objects) {
+                        //TODO: create a transaction on all objects
+                        if (e != null)
+                            BeanContainer.instance().save(e);
+                    }
+                    //reload
+                    ((BeanCollector)bean).getBeanFinder().getData();
+                    return bean;
+                }
+                @Override
+                public String getLongDescription() {
+                    return "imports " + bean.getName() + " elements from file " + file;
+                }
+            });
+
+            pageActions
+            .add(new SecureAction(bean.getClazz(), "export", IAction.MODE_UNDEFINED, false, "icons/save.png") {
+                String file = ENV.getConfigPath(bean.getClazz()) + "-" + System.currentTimeMillis() + ".txt";
+                @Override
+                public Object action() throws Exception {
+                    //export to file
+                    ValueStream.write(file, ((BeanCollector)bean).getBeanFinder().getData());
+                    return "exported file: " + file;
+                }
+                @Override
+                public String getLongDescription() {
+                    return "exports " + bean.getName() + " visible elements to file " + file;
+                }
+            });
 
             pageActions.add(new SecureAction(bean.getClazz(),
                 "document",

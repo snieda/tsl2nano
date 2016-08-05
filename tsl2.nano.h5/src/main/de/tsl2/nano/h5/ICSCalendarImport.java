@@ -10,6 +10,7 @@
 package de.tsl2.nano.h5;
 
 import java.text.SimpleDateFormat;
+import java.util.Collection;
 
 import de.tsl2.nano.core.ENV;
 import de.tsl2.nano.core.ICallback;
@@ -34,14 +35,13 @@ public class ICSCalendarImport {
      * @param period
      * @return count of entries
      */
-    protected long importCalendar(String country, String region, Period period, ICallback callback) {
+    protected <T> Collection<T> importCalendar(String country, String region, Period period, ICallback<T> callback) {
         String holServiceURL = ENV.get("app.holiday.service.url",
             "http://www.kayaposoft.com/enrico/ics/v1.0") 
                 + "?country=" + country + "&fromDate=" + SDF.format(period.getStart()) + "&toDate=" + SDF.format(period.getEnd()) + "&region=" + region;
         NetUtil.download(holServiceURL, ENV.getTempPathRel());
         String file = getDownloadFile(country, region, period);
-        long count = ICSCalendarReader.forEach(file, callback);
-        return count;
+        return (Collection<T>) ICSCalendarReader.forEach(file, callback);
     }
 
     protected String getDownloadFile(String country, String region, Period period) {

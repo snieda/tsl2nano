@@ -16,6 +16,7 @@ import static de.tsl2.nano.scanner.ICSCalendarReader.START;
 import static de.tsl2.nano.scanner.ICSCalendarReader.SUMMARY;
 
 import java.math.BigDecimal;
+import java.util.Collection;
 import java.util.Date;
 import java.util.Map;
 
@@ -41,23 +42,23 @@ import de.tsl2.nano.util.Period;
  * @author Tom, Thomas Schneider
  * @version $Revision$
  */
-public class ICSChargeImport extends ICSCalendarImport implements ICallback {
+public class ICSChargeImport extends ICSCalendarImport implements ICallback<Charge> {
 
-    public static long doImportHolidays() {
+    public static Collection<Charge> doImportHolidays() {
         ICSChargeImport imp = new ICSChargeImport();
         return imp.importCalendar("deu", "Bavaria",
             new Period(DateUtil.getStartOfYear(null), DateUtil.getEndOfYear(null)), imp);
     }
 
-    public static long doImportICS(String icsFile) {
-        return ICSCalendarReader.forEach(icsFile, new ICSChargeImport());
+    public static Collection<Charge> doImportICS(String icsFile) {
+        return (Collection<Charge>) ICSCalendarReader.forEach(icsFile, new ICSChargeImport());
     }
 
     /**
      * {@inheritDoc}
      */
     @Override
-    public Object run(Map<Object, Object> entry) {
+    public Charge run(Map<Object, Object> entry) {
         BeanDefinition<Item> itemDef = BeanDefinition.getBeanDefinition(Item.class);
         BeanDefinition<Party> paDef = BeanDefinition.getBeanDefinition(Party.class);
         Charge c = new Charge();

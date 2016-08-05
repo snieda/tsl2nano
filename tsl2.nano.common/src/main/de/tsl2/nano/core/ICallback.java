@@ -18,7 +18,7 @@ import java.util.Map;
  * @author Tom
  * @version $Revision$
  */
-public interface ICallback {
+public interface ICallback<RESULT> {
     /** callback to be called inside each loop pass. the entry provides all informations of the current pass */
-    Object run(Map<Object, Object> passInfo);
+    RESULT run(Map<Object, Object> passInfo);
 }

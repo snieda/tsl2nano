@@ -562,6 +562,15 @@ public class FileUtil {
         }
     }
 
+    public static final OutputStream getFileOutput(String name) {
+        try {
+            return new FileOutputStream(new File(name));
+        } catch (final FileNotFoundException e) {
+            ManagedException.forward(e);
+            return null;
+        }
+    }
+
     /**
      * Read File into a byte-array
      */

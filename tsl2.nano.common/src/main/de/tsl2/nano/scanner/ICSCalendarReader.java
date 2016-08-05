@@ -12,6 +12,7 @@ package de.tsl2.nano.scanner;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
@@ -42,13 +43,12 @@ public class ICSCalendarReader {
      * @param callback
      * @return loop count
      */
-    public static long forEach(String icsFile, final ICallback callback) {
-        return FieldReader.forEach(FileUtil.getFile(icsFile), BLOCK, ":", new ICallback() {
+    public static List<?> forEach(String icsFile, final ICallback<?> callback) {
+        return FieldReader.forEach(FileUtil.getFile(icsFile), BLOCK, ":", new ICallback<Object>() {
             @Override
             public Object run(Map<Object, Object> passInfo) {
                 Set<Object> keys = passInfo.keySet();
                 Map<Object, Object> dateObjects = new HashMap<Object, Object>();
-                Object v;
                 for (Object k : keys) {
                     //replace date strings with date objects
                     if (k.toString().startsWith(START)) {

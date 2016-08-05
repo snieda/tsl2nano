@@ -525,6 +525,4 @@ public class TypeBean implements Serializable, Comparable<TypeBean> {
     public int compareTo(TypeBean o) {
         return new Double(primitiveDouble).compareTo(o.primitiveDouble) ;
     }
-
-    
 }
