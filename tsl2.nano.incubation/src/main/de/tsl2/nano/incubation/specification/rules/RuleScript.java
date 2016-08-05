@@ -38,6 +38,8 @@ public class RuleScript<T> extends AbstractRule<T> {
 
     private static final Log LOG = LogFactory.getLog(RuleScript.class);
 
+    String language;
+    
     transient ScriptEngine engine;
 
     public static final char PREFIX = '%';
@@ -49,6 +51,10 @@ public class RuleScript<T> extends AbstractRule<T> {
         super();
     }
 
+    public RuleScript(String name, String operation, LinkedHashMap<String, ParType> parameter) {
+        this(null, name, operation, parameter);
+    }
+    
     /**
      * constructor
      * 
@@ -56,13 +62,14 @@ public class RuleScript<T> extends AbstractRule<T> {
      * @param operation
      * @param parameter
      */
-    public RuleScript(String name, String operation, LinkedHashMap<String, ParType> parameter) {
+    public RuleScript(String language, String name, String operation, LinkedHashMap<String, ParType> parameter) {
         super(name, operation, parameter);
-        init();
+        init(language);
     }
 
-    void init() {
-        engine = ActionScript.createEngine();
+    void init(String engineName) {
+        this.language = engineName;
+        engine = ActionScript.createEngine(engineName);
     }
 
     @Override
@@ -114,7 +121,7 @@ public class RuleScript<T> extends AbstractRule<T> {
     @Override
     @Commit
     protected void initDeserializing() {
-        init();
+        init(language);
         super.initDeserializing();
     }
 }

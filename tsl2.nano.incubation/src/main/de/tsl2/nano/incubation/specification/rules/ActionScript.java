@@ -17,14 +17,17 @@ import javax.script.ScriptEngine;
 import javax.script.ScriptEngineManager;
 
 import org.apache.commons.logging.Log;
+import org.simpleframework.xml.Attribute;
 import org.simpleframework.xml.core.Commit;
 
 import de.tsl2.nano.core.AppLoader;
+import de.tsl2.nano.core.ENV;
 import de.tsl2.nano.core.ManagedException;
 import de.tsl2.nano.core.log.LogFactory;
 import de.tsl2.nano.core.util.StringUtil;
 import de.tsl2.nano.incubation.specification.AbstractRunnable;
 import de.tsl2.nano.incubation.specification.ParType;
+import de.tsl2.nano.util.ClassFinder;
 
 /**
  * Uses javascript engine (java6+7: rhino, java8: nashorn) to evaluate an operation.
@@ -36,6 +39,9 @@ public class ActionScript<T> extends AbstractRunnable<T> {
     private static final Log LOG = LogFactory.getLog(ActionScript.class);
     /** serialVersionUID */
     private static final long serialVersionUID = -5452505496704132851L;
+
+    @Attribute(required=false)
+    String language;
 
     transient ScriptEngine engine;
 
@@ -54,19 +60,29 @@ public class ActionScript<T> extends AbstractRunnable<T> {
      */
     public ActionScript(String name, String operation, LinkedHashMap<String, ParType> parameter) {
         super(name, operation, parameter);
-        engine = createEngine();
+        engine = createEngine(language);
     }
 
-    public static ScriptEngine createEngine() {
+    public static ScriptEngine createEngine(String language) {
+        provideLanguage(language);
 //        if (!AppLoader.hasCompiler())
 //           throw new IllegalStateException("can't start javascript engine on jre environment. a full jdk must be present!");
         //java7 provides rhino as javascript, java8 provides nashorn
-        ScriptEngine engine = new ScriptEngineManager().getEngineByName(isJava8() ? "nashorn" : "javascript");
+        ScriptEngine engine = language != null ? new ScriptEngineManager().getEngineByName(language)
+            : new ScriptEngineManager().getEngineFactories().iterator().next().getScriptEngine();
         if (engine == null)
-            throw new IllegalStateException("couldn't create engine for: 'javascript'\n\tavailable engines: "
+            throw new IllegalStateException("couldn't create engine for: '" + language + "'\n\tavailable engines: "
                 + StringUtil.toFormattedString(new ScriptEngineManager().getEngineFactories(), 1, true));
         LOG.info("script engine loaded: " + engine);
         return engine;
+    }
+
+    private static void provideLanguage(String language) {
+        if (new ClassFinder().fuzzyFind(language).size() == 0)
+            ENV.loadJarDependencies(language);
+        if (new ScriptEngineManager().getEngineFactories().isEmpty())
+            throw new IllegalStateException("couldn't create engine for: '" + language + "'\n\tavailable engines: "
+                    + StringUtil.toFormattedString(new ScriptEngineManager().getEngineFactories(), 1, true));
     }
 
     private static boolean isJava8() {
@@ -93,7 +109,7 @@ public class ActionScript<T> extends AbstractRunnable<T> {
     @Override
     @Commit
     protected void initDeserializing() {
-        engine = createEngine();
+        engine = createEngine(language);
         super.initDeserializing();
     }
 }
