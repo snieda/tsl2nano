@@ -429,14 +429,20 @@ public class XmlUtil {
     }
 
     public static final <T> T loadXml(String xmlFile, Class<T> type) {
-        return loadXml(xmlFile, type, ENV.get(CompatibilityLayer.class), true);
+        return loadXml(xmlFile, type, ENV.get(CompatibilityLayer.class), true, true);
+    }
+
+    public static final <T> T loadXml(String xmlFile, Class<T> type, boolean renameOnError) {
+        return loadXml(xmlFile, type, ENV.get(CompatibilityLayer.class), true, renameOnError);
     }
 
     @SuppressWarnings("unchecked")
     public static final <T> T loadXml(String xmlFile,
             Class<T> type,
             CompatibilityLayer compLayer,
-            boolean assignClassloader) {
+            boolean assignClassloader,
+            boolean renameOnError
+            ) {
         //not available on android
         /*if (compLayer.isAvailable("javax.xml.bind.JAXB")) {
             return javax.xml.bind.JAXB.unmarshal(xmlFile, type);
@@ -445,7 +451,7 @@ public class XmlUtil {
                 ENV.assignClassloaderToCurrentThread();
             }
             LOG.debug("loading type '" + type.getName() + "' from '" + xmlFile + "'");
-            return loadSimpleXml_(xmlFile, type);
+            return loadSimpleXml_(xmlFile, type, renameOnError);
         } else {
             return (T) FileUtil.loadXml(xmlFile);
         }
@@ -458,7 +464,7 @@ public class XmlUtil {
      * @param type
      * @return
      */
-    public static <T> T loadSimpleXml_(String xmlFile, Class<T> type) {
+    public static <T> T loadSimpleXml_(String xmlFile, Class<T> type, boolean renameOnError) {
         FileInputStream fileInputStream = null;
         try {
             return new org.simpleframework.xml.core.Persister(getSimpleXmlProxyStrategy(),
@@ -466,7 +472,7 @@ public class XmlUtil {
                     fileInputStream = new FileInputStream(new File(xmlFile)));
         } catch (Exception e) {
             //mark the loaded xml file as corrupt
-            if (!ENV.get("app.mode.strict", false)) {
+            if (renameOnError && !ENV.get("app.mode.strict", false)) {
                 File file = new File(xmlFile);
                 if (file.canWrite()) {
                     fileInputStream = FileUtil.close(fileInputStream, false);

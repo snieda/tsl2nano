@@ -10,10 +10,12 @@
 package de.tsl2.nano.incubation.specification.rules;
 
 import java.util.LinkedHashMap;
+import java.util.List;
 import java.util.Map;
 
 import javax.script.Bindings;
 import javax.script.ScriptEngine;
+import javax.script.ScriptEngineFactory;
 import javax.script.ScriptEngineManager;
 
 import org.apache.commons.logging.Log;
@@ -71,20 +73,34 @@ public class ActionScript<T> extends AbstractRunnable<T> {
         ScriptEngine engine = language != null ? new ScriptEngineManager().getEngineByName(language)
             : new ScriptEngineManager().getEngineFactories().iterator().next().getScriptEngine();
         if (engine == null)
-            throw new IllegalStateException("couldn't create engine for: '" + language + "'\n\tavailable engines: "
-                + StringUtil.toFormattedString(new ScriptEngineManager().getEngineFactories(), -1, true));
+            throw new IllegalStateException("couldn't create engine for: '" + language + "'\n\tavailable engines:\n"
+                + printEngines());
         LOG.info("script engine loaded: " + engine);
         return engine;
     }
 
     private static void provideLanguage(String language) {
-        if (new ClassFinder().findClass(language) == null)
-            ENV.loadClassDependencies("org." + language); //TODO: find solution for fixed '.org'
-        if (new ScriptEngineManager().getEngineFactories().isEmpty())
-            throw new IllegalStateException("couldn't create engine for: '" + language + "'\n\tavailable engines: "
-                    + StringUtil.toFormattedString(new ScriptEngineManager().getEngineFactories(), 1, true));
+        if (language != null && new ClassFinder().findClass(language) == null) {
+            String pck = ENV.getPackagePrefix(language);
+            ENV.loadClassDependencies(pck);
+        }
+        List<ScriptEngineFactory> engines = new ScriptEngineManager().getEngineFactories();
+        if (engines.isEmpty())
+            throw new IllegalStateException("no script engine available!");
+        else if (language != null && new ScriptEngineManager().getEngineByName(language) == null)
+            throw new IllegalStateException("couldn't create engine for: '" + language + "'\n\tavailable engines:\n"
+                    + printEngines());
     }
 
+    public static String printEngines() {
+        StringBuilder str = new StringBuilder("\n--------------------------------------------------------------------------------");
+        List<ScriptEngineFactory> engs = new ScriptEngineManager().getEngineFactories();
+        for (ScriptEngineFactory e : engs) {
+            str.append(e.getEngineName() + ": " + e.getLanguageName() + " " + e.getLanguageVersion() + "\n");
+        }
+        return str.append("--------------------------------------------------------------------------------\n").toString();
+    }
+    
     private static boolean isJava8() {
         return AppLoader.getJavaVersion().equals("1.8");
     }

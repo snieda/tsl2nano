@@ -874,7 +874,7 @@ public class StringUtil {
             lb = content.indexOf(filter.charAt(i), la + 1);
             if (lb < 0)
                 return 0;
-            weight /= (lb - la);
+            weight /= la < 0 ? 1  : (lb - la);
             la = lb;
         }
         return weight;

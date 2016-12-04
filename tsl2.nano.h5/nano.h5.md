@@ -625,7 +625,7 @@ Static Dependencies (direct referenced by tsl2.nano):
 ##### No Dependencies, but useful to do the work
 
 * jdbc database driver (like hsqldb.jar)
-* jpa o/r mapper (like hibernate, toplink, eclipselink, openjpa, batoo-jpa, ormlite or ebean)
+* jpa o/r mapper (like hibernate, toplink, eclipselink, openjpa, datanucleus, batoo-jpa, ormlite or ebean)
 * generator tool to create entity beans (like hibernate-tools or openjpa)
 
 Hibernate 4 for example would have the following dependencies:
@@ -708,7 +708,7 @@ All items in the specification directory will be tested against their own _speci
 
 ### The __ActionScript__ and __RuleScript__ can interpret the following script languages:
 
-* Javascript(included as nashorn)
+* Javascript(default, included as nashorn)
 * Groovy	(maven: org.codehaus.groovy=groovy-all)
 * Python	(maven: org.python=jython)
 * Scala		(org.scala-lang=scala-library)
@@ -719,16 +719,16 @@ All items in the specification directory will be tested against their own _speci
 * Ceylon	(org.ceylon-lang=ceylon.language)
 * Golo		(org.golo-lang=golo)
 
-to use another jvm script language than the internal javascript you have to add the attribute 'language' to your action or rule in the root tag:
+to use a jvm script language (other than the internal javascript) you have to add the attribute 'language' to your action or rule in the root tag:
 
 Example:
 	<ruleScript name="calcTime" language="python">
  
 	<actionScript name="calcTime" language="groovy">
 	
-### Examples
+nano.h5 will try to download and add the script libraries to the classpath.
 
-Example for a query:
+### Example for a query
 
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 <query name="personen" nativeQuery="false">
@@ -736,7 +736,7 @@ Example for a query:
 </query>
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-Example for an action, starting an ant-script:
+### Example for an action, starting an ant-script
 
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 <action name="ant" declaringClass="de.tsl2.nano.execution.ScriptUtil">
@@ -2895,6 +2895,7 @@ Actual list: http://infocenter.pentaho.com/help/index.jsp?topic=%2Fsupported_com
  1.0.0c | 08.05.2016 | H2-Database included as default instead of HSQLDB, because the compatibility mode is working better there.
  1.0.0d | 02.07.2016 | layout and styles (responsive for three resolutions) for all panels enhanced.
  1.0.0e | 21.07.2016 | RESTful attributes enhanced. NEW: runtime attribute definition NEW: broadcast messages to all sessions.
+ 1.0.0f | 07.08.2016 | rules/actions/covers now able to use scripts groovy, scala, jruby, python, clojure, beanshell, ceylon, golo. NEW: ValueExpression import/export
  
 [GLOSSARY]
 
@@ -3383,6 +3384,8 @@ MapExpressionFormat.parseObject(..) --> ve.from() raus
   status-line with tooltip not working
   MS InternetExplorer: first app login --> Inet6Address, second session request: Inet4Address
 createDataTag, isData <-- iframe + srcdoc, +svg
+integrating VNet as scripting rule with parameters
+rule: attribute 'test' for specification on 'app.clean' or 'app.fast'
 
 <svg height="130" width="500">
   <defs>
@@ -3408,6 +3411,68 @@ eStore			: https://editor.ponyorm.com/user/pony/eStore
 forum			: https://editor.ponyorm.com/user/pony/Forum2
 PhotoSharing	: https://editor.ponyorm.com/user/pony/PhotoSharing
 Logbuch			: Eintragung von Aktivitäten, Summierung+Statistiken
-Haushaltsplan	: Dienstplan und Eintragung letzter Aktivitäten
+Haushaltsplan	: Dienstplan und Eintragung letzter Aktivitäten (==>timesheet)
+Nahrung			: Erechne aus eingeg. Nahrung den Anteil von Stoffen am Tagesbedarf
+Bestellung+Kasse: Bestellung+Kasse
  
 JSON-Test: https://jsonplaceholder.typicode.com/
+
+TOOD: android (java?, datanucleus?), jarresolver.properties, EM-2016, neue apps (siehe unten)
+
+--Haushaltsplan:
+Aufgabe (name, gewichtung, frequenz)
+Teilnehmer (name)
+Aktion(teilnehmer, aufgabe, datum)
+Plan(teilnehmer, aufgabe, datum)
+
+--Logbuch:
+Teilnehmer (name)
+Eintrag (datum, beschreibung)
+
+--Zeiterfassung (anyway):
+Organisation	-> Betrieb, Mandant
+Party			-> Mitarbeiter
+Category		-> Art des Kunden
+Area			-> Kunde
+Type			-> Typ des Dienstes
+Item			-> Projekt
+Classification	-> 
+Charge			-> Zeiteintrag
+Discharge		-> Abrechnung
+
+--Bestellung+Kasse (anyway):
+Organisation	-> Betrieb
+Party			-> Mitarbeiter
+Category		-> Reservierung / Bestellung
+Area			-> z.B. Lokal
+Type			-> 
+Item			-> z.B. Tisch
+Classification	-> 
+Charge			-> Anfrage (Bestellung, Reservierung)
+Discharge		-> Kasse
+
+--Haushalt (anyway):
+Organisation	-> Haus
+Party			-> Bewohner
+Category		-> Typ der Einteilung (Zimmer/Keller, ...)
+Area			-> Einteilung (Wohnzimmer o.ä.)
+Type			-> Typ der Aktion (Wischen)
+Item			-> Gegenstand (Küchenherd)
+Classification	-> 
+Charge			-> Aktion pro Zeit in bezug auf Gegenstand
+Discharge		-> Abgeltung
+
+
+NanoAnd:
+jar-file: #anyway.jar
+--> javax.persistence.PersistenceException: No Persistence provider for EntityManager named genericPersistenceUnit
+--> 
+
+Problem bei Eingabe im Timesheet wahrscheinlich in:
+	NanoWebSocketServer.injectChangeObject(IValueDefinition)
+	AbstractDependencyListener.setStateObject(..)
+
+* User-Agent(Mobile) (store in Session-Thread) in Html5BeanPresentation as filter?
+* ERROR: persistence loaded in nano app instead of session - using this on all sessions
+	-> eigentlich correct implementiert, siehe NanoH5.connect(..)
+	

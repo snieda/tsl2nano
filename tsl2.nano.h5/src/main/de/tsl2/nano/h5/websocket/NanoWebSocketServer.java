@@ -94,8 +94,10 @@ public class NanoWebSocketServer extends WebSocketServer {
     @Override
     public void onClose(WebSocket arg0, int arg1, String arg2, boolean arg3) {
         LOG.debug("closing websocket (reason: " + arg2 + "): " + arg0);
+        attachment_info = null;
+        changeObjects = null;
         arg0.send("websocket closed");
-    }
+    }   
 
     /**
      * {@inheritDoc}
@@ -112,7 +114,7 @@ public class NanoWebSocketServer extends WebSocketServer {
     @Override
     public void onMessage(WebSocket conn, String msg) {
         LOG.debug("receiving message: '" + msg + "' from " + conn);
-        ((NanoH5Session)session).assignSessionToCurrentThread(false);
+        ((NanoH5Session)session).assignSessionToCurrentThread(false, null);
         //if we are in configuration mode, do nothing
         Package pck = ((BeanDefinition) session.getWorkingObject()).getDeclaringClass().getPackage();
         if (pck.equals(BeanConfigurator.class.getPackage()) || pck.equals(BeanDefinition.class.getPackage())) {

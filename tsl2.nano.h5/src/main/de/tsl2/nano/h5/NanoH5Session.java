@@ -348,7 +348,7 @@ public class NanoH5Session implements ISession<BeanDefinition>, Serializable, IL
         ManagedException ex = null;
         try {
             //refresh session values on the current thread
-            assignSessionToCurrentThread(true);
+            assignSessionToCurrentThread(true, MapUtil.filter(header, "User-Agent"));
 
             if (LOG.isDebugEnabled()) {
                 LOG.debug(
@@ -362,7 +362,7 @@ public class NanoH5Session implements ISession<BeanDefinition>, Serializable, IL
                 LOG.info(String.format("serving request " + requests + " : uri: %s, method: %s, %s, parms: %s",
                     uri,
                     method,
-                    MapUtil.filter(header, "http-client-ip"),
+                    MapUtil.filter(header, "http-client-ip", "User-Agent"),
                     parms));
             }
             //WORKAROUND for uri-problem
@@ -438,12 +438,15 @@ public class NanoH5Session implements ISession<BeanDefinition>, Serializable, IL
     /**
      * assignSessionToCurrentThread
      */
-    public void assignSessionToCurrentThread(boolean newRequest) {
+    public void assignSessionToCurrentThread(boolean newRequest, Map properties) {
         if (newRequest) {
             lastAccess = System.currentTimeMillis();
             requests++;
             if (nav.current() instanceof Bean && ((Bean) nav.current()).getInstance() instanceof BeanConfigurator) {
                 this.beanConfigurator = (BeanConfigurator) ((Bean) nav.current()).getInstance();
+            }
+            if (properties != null && !properties.isEmpty()) {
+                ConcurrentUtil.setCurrent(properties);
             }
         }
         Thread.currentThread().setContextClassLoader(sessionClassloader);
@@ -451,6 +454,18 @@ public class NanoH5Session implements ISession<BeanDefinition>, Serializable, IL
         ConcurrentUtil.setCurrent(getUserAuthorization(), beanContainer, beanConfigurator);
     }
 
+    /**
+     * isMobile
+     * @return true, if client request comes from mobile device
+     */
+    public boolean isMobile() {
+        Map props = ConcurrentUtil.getCurrent(Map.class);
+        if (props == null)
+            return false;
+        Object userAgent = props.get("User-Agent");
+        return userAgent != null && userAgent.toString().contains("Mobile");
+    }
+    
     /**
      * defines, which values have to be provided to the current thread. each thread lives only for one request! this is
      * needed because the app instance provides most of this values and is open for all sessions.
@@ -573,6 +588,8 @@ public class NanoH5Session implements ISession<BeanDefinition>, Serializable, IL
             if (uriLinkNumber != null) {
                 BeanCollector collector = (BeanCollector) nav.current();
                 Collection data = collector.getCurrentData();
+//                if (data.isEmpty())
+//                    
                 ListSet listSet = CollectionUtil.asListSet(data);
                 Object selectedItem =
                     listSet.get(uriLinkNumber.intValue()

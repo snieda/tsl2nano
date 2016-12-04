@@ -17,6 +17,7 @@ import java.util.Map;
 import java.util.Set;
 import java.util.TreeMap;
 
+import org.apache.commons.logging.Log;
 import org.simpleframework.xml.Attribute;
 import org.simpleframework.xml.Default;
 import org.simpleframework.xml.DefaultType;
@@ -29,6 +30,7 @@ import de.tsl2.nano.collection.CollectionUtil;
 import de.tsl2.nano.collection.FilteringIterator;
 import de.tsl2.nano.core.cls.AReference;
 import de.tsl2.nano.core.cls.BeanClass;
+import de.tsl2.nano.core.log.LogFactory;
 import de.tsl2.nano.core.util.FileUtil;
 import de.tsl2.nano.core.util.StringUtil;
 import de.tsl2.nano.core.util.XmlUtil;
@@ -47,6 +49,8 @@ public class Context implements Serializable, Map {
     /** serialVersionUID */
     private static final long serialVersionUID = -5738577461481485970L;
 
+    private static final Log LOG = LogFactory.getLog(Context.class);
+    
     @Attribute
     String name;
 
@@ -72,8 +76,10 @@ public class Context implements Serializable, Map {
             String fname = getFileName(name);
             File file = new File(fname);
             if (file.exists()) {
+                LOG.debug("loading Context for '" + name + "'");
                 context = XmlUtil.loadXml(file.getPath(), Context.class);
             } else {
+                LOG.debug("creating new Context for '" + name + "' (file: " + fname + ")");
                 context = new Context(name);
             }
         }

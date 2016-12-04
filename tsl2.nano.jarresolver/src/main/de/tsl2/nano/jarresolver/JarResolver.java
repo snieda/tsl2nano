@@ -297,6 +297,42 @@ public class JarResolver {
         props.setProperty(JAR_DEPENDENCIES, jars);
     }
 
+    /**
+     * convenience for extern calls, creating a new {@link JarResolver} instance and returning result of {@link #findPackage(String)}
+     * @param part
+     * @return
+     */
+    public static String getPackage(String part) {
+        return new JarResolver().findPackage(part);
+    }
+    
+    /**
+     * searches for the given expression part inside all package names and their values. if an entry looks like
+     * 'PACKAGE.org.pyhton=jython' and you search for 'python' or 'jython' you will get 'org.pyhton'
+     * 
+     * @param part package or value part.
+     * @return package (group-id) name
+     */
+    public String findPackage(String part) {
+        Set<String> keys = props.stringPropertyNames();
+        //first, search in the keys
+        for (String k : keys) {
+            if (k.startsWith(PRE_PACKAGE) && k.contains(part))
+                return StringUtil.substring(k, PRE_PACKAGE, null);
+        }
+        //second: search in the values
+        Collection<Object> values = props.values();
+        for (Object v : values) {
+            if (v.toString().contains(part)) {
+                for (String k : keys) {
+                    if (v.equals(props.get(k)))
+                        return StringUtil.substring(k, PRE_PACKAGE, null);
+                }
+            }
+        }
+        return null;
+    }
+
     private String findPackageByArtifactId(String artifactId) {
         Set<Object> keySet = props.keySet();
         String key;
@@ -425,16 +461,16 @@ public class JarResolver {
     public static void main(String[] args) {
         if (Util.isEmpty(args)) {
             System.out.println(
-                    "+-----------------------------------------------------------------+\n"
-                +   "| jar resolver copyright Thomas Schneider / 2012-2016             |\n"
-                +   "| finds and downloads jar libraries for given java class packages.|\n"
-                +   "| jpr: java -jar de.tsl2.nano.jarresolver.JarResolver args[]      |\n"
-                +   "+-----------------------------------------------------------------+\n"
-                +   "| syntax    : jpr class-package [class-package [...]]             |\n"
-                +   "| example-1 : jpr org.hsqldb                                      |\n"
-                +   "| example-2 : jpr ant-1.7.0 org.hsqldb                            |\n"
-                +   "| example-2 : jpr org.hsqldb.jdbc.JDBCDriver                      |\n"
-                +   "+-----------------------------------------------------------------+\n");
+                "+-----------------------------------------------------------------+\n"
+                    + "| jar resolver copyright Thomas Schneider / 2012-2016             |\n"
+                    + "| finds and downloads jar libraries for given java class packages.|\n"
+                    + "| jpr: java -jar de.tsl2.nano.jarresolver.JarResolver args[]      |\n"
+                    + "+-----------------------------------------------------------------+\n"
+                    + "| syntax    : jpr class-package [class-package [...]]             |\n"
+                    + "| example-1 : jpr org.hsqldb                                      |\n"
+                    + "| example-2 : jpr ant-1.7.0 org.hsqldb                            |\n"
+                    + "| example-2 : jpr org.hsqldb.jdbc.JDBCDriver                      |\n"
+                    + "+-----------------------------------------------------------------+\n");
             return;
         }
         try {

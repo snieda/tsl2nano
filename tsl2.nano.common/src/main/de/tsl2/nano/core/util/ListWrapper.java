@@ -28,7 +28,8 @@ public class ListWrapper<E> implements Serializable, Iterable<E> {
     /** serialVersionUID */
     private static final long serialVersionUID = -4272308851598689048L;
 
-    @ElementList(empty = true, inline = true)
+    /** main content. reqired=false, but all constructors init a new list*/
+    @ElementList(required = false, empty = true, inline = true)
     List<E> list;
 
     /**

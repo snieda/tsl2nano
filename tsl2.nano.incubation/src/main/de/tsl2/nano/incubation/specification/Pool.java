@@ -92,7 +92,7 @@ public class Pool<T extends IPRunnable<?, ?>> {
 
     private <I extends T> I loadRunnable(String path, Class<I> type) {
         try {
-            I r = ENV.load(path, type);
+            I r = ENV.load(path, type, false);
             runnables.put(r.getName(), r);
             return r;
         } catch (Exception e) {

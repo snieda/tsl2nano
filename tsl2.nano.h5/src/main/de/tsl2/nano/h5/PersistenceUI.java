@@ -391,7 +391,7 @@ public class PersistenceUI {
                 .setLayoutConstraints((Serializable) MapUtil.asMap("style", "width:120;"));
                 login.getAttribute("connectionPassword").getPresentation()
                 .setLayoutConstraints((Serializable) MapUtil.asMap("style", "width:120;"));
-                login.setValueExpression(new ValueExpression<Persistence>(ENV.translate(ENV.getName(), true)));
+                login.setValueExpression(new ValueExpression<Persistence>(ENV.translate("tsl2nano.login.title", true)));
             }
         }
         if (login.toString().matches(ENV.get("app.login.present.attribute.multivalue", ".*"))) {

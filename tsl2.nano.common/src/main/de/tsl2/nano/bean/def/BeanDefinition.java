@@ -1165,9 +1165,14 @@ public class BeanDefinition<T> extends BeanClass<T> implements IPluggable<BeanDe
         }
         Collection<BeanDefinition<?>> types = new ArrayList<BeanDefinition<?>>();
         String name;
+        BeanDefinition<?> bean;
         for (File file : virtDefs) {
             name = StringUtil.substring(PREFIX_VIRTUAL + "." + file.getName(), null, POSTFIX_FILE_EXT);
-            types.add(getBeanDefinition(name));
+            bean = getBeanDefinition(name);
+            if (bean.getPresentable().isVisible())
+                types.add(bean);
+            else
+                LOG.debug("virtul bean " + name + " is declared as invisible -> removing from list");
         }
         return types;
     }

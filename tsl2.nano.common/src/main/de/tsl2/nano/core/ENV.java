@@ -259,7 +259,7 @@ public class ENV implements Serializable {
 
         File configFile = new File(dir + "/" + CONFIG_NAME + ".xml");//new File(System.getProperty(KEY_CONFIG_PATH, System.getProperty("user.dir")));
         if (configFile.canRead()) {
-            self = XmlUtil.loadXml(configFile.getPath(), ENV.class, layer, false);
+            self = XmlUtil.loadXml(configFile.getPath(), ENV.class, layer, false, true);
 //            String configPath = getConfigPath();
 //            if (!configPath.endsWith("/") && !configPath.endsWith("\\"))
 //                setProperty(KEY_CONFIG_PATH, configPath + "/");
@@ -592,6 +592,9 @@ public class ENV implements Serializable {
         return pck;
     }
 
+    public static <T> T load(String name, Class<T> type) {
+        return load(name, type, true);
+    }
     /**
      * loads from xml or yaml file. see property app.configuration.persist.yaml.
      * 
@@ -599,13 +602,13 @@ public class ENV implements Serializable {
      * @param type type to de-serialize
      * @return java instance
      */
-    public static <T> T load(String name, Class<T> type) {
+    public static <T> T load(String name, Class<T> type, boolean renameOnError) {
         name = StringUtil.substring(name, null, ".xml");
         String path = cleanpath(name);
         if (self().get("app.configuration.persist.yaml", false)) {
             return self().get(YamlUtil.class).load(new File(path + ".yml"), type);
         } else {
-            return self().get(XmlUtil.class).loadXml(path + ".xml", type);
+            return self().get(XmlUtil.class).loadXml(path + ".xml", type, renameOnError);
         }
     }
 
@@ -616,6 +619,7 @@ public class ENV implements Serializable {
 
     /**
      * see {@link #load(String, Class)}
+     * 
      * @param name relative path + file name (if {@link #getConfigPath()} is not included, it will be inserted.
      * @param obj object to serialize
      */
@@ -627,7 +631,7 @@ public class ENV implements Serializable {
             self().get(XmlUtil.class).saveXml(path + ".xml", obj);
         }
     }
-    
+
     /**
      * @return Returns the autopersist.
      */
@@ -884,6 +888,11 @@ public class ENV implements Serializable {
         return "nothing to do!";
     }
 
+    public static final String getPackagePrefix(String mvnNamePart) {
+        return (String) get(CompatibilityLayer.class).run("de.tsl2.nano.jarresolver.JarResolver", "getPackage",
+            new Class[] { String.class }, mvnNamePart);
+    }
+
     public static final Object loadClassDependencies(String... dependencyNames) {
         CompatibilityLayer cl = get(CompatibilityLayer.class);
         //check given dependencies
@@ -987,6 +996,7 @@ public class ENV implements Serializable {
 
     /**
      * createServiceMap
+     * 
      * @return
      */
     static Map<Class<?>, Object> createServiceMap() {

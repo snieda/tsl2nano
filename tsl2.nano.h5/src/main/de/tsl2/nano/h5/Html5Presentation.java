@@ -336,7 +336,7 @@ public class Html5Presentation<T> extends BeanPresentationHelper<T> implements I
             }
             return html;
         } catch (Exception ex) {
-            return HtmlUtil.createMessagePage(ENV.translate("tsl2nano.error", true),
+            return HtmlUtil.createMessagePage(ENV.translate("tsl2nano.error", true), message + "<p/>" +
                 ManagedException.toRuntimeEx(ex, true, true).getMessage());
         }
     }
@@ -428,7 +428,9 @@ public class Html5Presentation<T> extends BeanPresentationHelper<T> implements I
                     TAG_IMAGE,
                     content(title),
                     ATTR_SRC,
-                    image);
+                    image,
+                    ATTR_STYLE,
+                    style("display", "inline"));
             } else {
                 String docURL;
                 if (bean != null && ENV.class.isAssignableFrom(bean.getClazz()))
@@ -437,10 +439,12 @@ public class Html5Presentation<T> extends BeanPresentationHelper<T> implements I
                     docURL = ENV.get("doc.url." + bean.getName().toLowerCase(),
                         "doc/" + StringUtil.toFirstLower(title) + "/index.html");
                 if (new File(ENV.getConfigPath() + docURL).canRead() || NetUtil.isURL(docURL)) {
-                    c2 = appendElement(c2, TAG_H3, ATTR_ALIGN, ALIGN_CENTER);
+                    c2 = appendElement(c2, TAG_H3, ATTR_ALIGN, ALIGN_CENTER, ATTR_STYLE,
+                        style("display", "inline"));
                     appendElement(c2, TAG_LINK, content(title), ATTR_HREF, ENV.getConfigPath() + docURL);
                 } else {
-                    c2 = appendElement(c2, TAG_H3, content(title), ATTR_ALIGN, ALIGN_CENTER);
+                    c2 = appendElement(c2, TAG_H3, content(title), ATTR_ALIGN, ALIGN_CENTER, ATTR_STYLE,
+                        style("display", "inline"));
                 }
             }
             Element c3 = appendTag(row, TABLE(TAG_CELL, ATTR_ALIGN, ALIGN_RIGHT));
@@ -462,7 +466,8 @@ public class Html5Presentation<T> extends BeanPresentationHelper<T> implements I
                         ATTR_ACTION,
                         "?",
                         ATTR_METHOD,
-                        ENV.get("html5.http.method", "post"));
+                        ENV.get("html5.http.method", "post"), ATTR_STYLE,
+                        style("display", "inline"));
                     c3 = createExpandable(c3, "Menu", ENV.get("layout.header.menu.open", false));
                     Collection<IAction> actions = new ArrayList<IAction>(getPageActions(session));
                     actions.addAll(getApplicationActions(session));
@@ -879,7 +884,7 @@ public class Html5Presentation<T> extends BeanPresentationHelper<T> implements I
         appendAttributes(grid, bean.getPresentable(), true);
 
         if (interactive && ENV.get("layout.grid.searchrow.show", true)
-            && bean.hasMode(IBeanCollector.MODE_SEARCHABLE)) {
+            && bean.hasMode(IBeanCollector.MODE_SEARCHABLE) && (!(session instanceof NanoH5Session)  || !((NanoH5Session)session).isMobile())) {
             Collection<T> data = new LinkedList<T>(bean.getSearchPanelBeans());
             //this looks complicated, but if currentdata is a collection with a FilteringIterator, we need a copy of the filtered items!
             if (bean.getCurrentData() != null)
@@ -1039,7 +1044,7 @@ public class Html5Presentation<T> extends BeanPresentationHelper<T> implements I
      */
     private Element createMenu(Element parent, String name, String... attributes) {
         Element div = appendElement(parent, "div"/*, "class", "wrap"*/);
-        Element nav = appendElement(div, "nav");
+        Element nav = appendElement(div, "nav", attributes);
         return appendElement(nav, "ul", "class", "menu");
     }
 

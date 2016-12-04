@@ -1,7 +1,6 @@
 package de.tsl2.nano.core.log;
 
 import java.io.File;
-import java.io.FileNotFoundException;
 import java.io.PrintStream;
 import java.io.Serializable;
 import java.text.MessageFormat;
@@ -21,6 +20,8 @@ import org.simpleframework.xml.Element;
 import org.simpleframework.xml.ElementMap;
 import org.simpleframework.xml.core.Commit;
 import org.simpleframework.xml.core.Persist;
+
+import com.sun.corba.se.spi.orbutil.fsm.State;
 
 import de.tsl2.nano.core.ManagedException;
 import de.tsl2.nano.core.util.BitUtil;
@@ -123,7 +124,7 @@ public/*abstract*/class LogFactory implements Runnable, Serializable {
              */
             if (new File(logFactoryXml).canRead()) {
                 try {
-                    self = XmlUtil.loadSimpleXml_(logFactoryXml, LogFactory.class);
+                    self = XmlUtil.loadSimpleXml_(logFactoryXml, LogFactory.class, true);
                     if (self.loglevels == null) {
                         self.loglevels = new HashMap<String, Integer>();
                     }
@@ -374,32 +375,32 @@ public/*abstract*/class LogFactory implements Runnable, Serializable {
 
             @Override
             public boolean isWarnEnabled() {
-                return instance().isEnabled(WARN);
+                return LogFactory.isEnabled(WARN);
             }
 
             @Override
             public boolean isTraceEnabled() {
-                return instance().isEnabled(TRACE);
+                return LogFactory.isEnabled(TRACE);
             }
 
             @Override
             public boolean isInfoEnabled() {
-                return instance().isEnabled(INFO);
+                return LogFactory.isEnabled(INFO);
             }
 
             @Override
             public boolean isFatalEnabled() {
-                return instance().isEnabled(FATAL);
+                return LogFactory.isEnabled(FATAL);
             }
 
             @Override
             public boolean isErrorEnabled() {
-                return instance().isEnabled(ERROR);
+                return LogFactory.isEnabled(ERROR);
             }
 
             @Override
             public boolean isDebugEnabled() {
-                return instance().isEnabled(DEBUG);
+                return LogFactory.isEnabled(DEBUG);
             }
 
             @Override
@@ -532,7 +533,7 @@ public/*abstract*/class LogFactory implements Runnable, Serializable {
      */
     protected static void log(Class<?> logClass, int state, Object message, Throwable ex) {
         final LogFactory factory = instance();
-        if (factory.isEnabled(state) && factory.hasLogLevel(logClass, state)) {
+        if (LogFactory.isEnabled(state) && factory.hasLogLevel(logClass, state)) {
             if (message != null) {
                 //TODO: evaluate performance of predefined pattern in MessageFormat (MsgFormat)
                 // is there a fast way doing the formatting inside the other thread?
@@ -574,7 +575,7 @@ public/*abstract*/class LogFactory implements Runnable, Serializable {
      * @param cls any class to log
      * @return logger for given instance
      */
-    public static final Log logger(Class cls) {
+    public static final Log logger(Class<?> cls) {
         return getLog(cls);
     }
 }

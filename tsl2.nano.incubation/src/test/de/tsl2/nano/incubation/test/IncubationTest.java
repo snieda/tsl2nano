@@ -574,7 +574,7 @@ public class IncubationTest {
         String xmlfile = "test/typebean.xml";
         new File(xmlfile).getParentFile().mkdirs();
         XmlUtil.saveSimpleXml_(xmlfile, bean);
-        TypeBean bean1 = XmlUtil.loadSimpleXml_(xmlfile, TypeBean.class);
+        TypeBean bean1 = XmlUtil.loadSimpleXml_(xmlfile, TypeBean.class, true);
         assertEquals(bean.getType(), bean1.getType());
     }
 

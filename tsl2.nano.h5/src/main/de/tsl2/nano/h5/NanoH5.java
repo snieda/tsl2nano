@@ -195,6 +195,7 @@ public class NanoH5 extends NanoHTTPD implements ISystemConnector<Persistence> {
             try {
                 if (AppLoader.isUnixFS()) {
                     ENV.extractResourceToDir("run.sh", "../", false, true);
+                    ENV.extractResourceToDir("runasservice.sh", "../", false, true);
                     ENV.extractResource("mda.sh", true);
                 } else {
                     ENV.extractResourceToDir("run.bat", "../", false, false);
@@ -353,9 +354,9 @@ public class NanoH5 extends NanoHTTPD implements ISystemConnector<Persistence> {
      */
     protected String createStartPage(String resultHtmlFile) {
         InputStream stream = ENV.getResource("start.template");
-        String startPage = String.valueOf(FileUtil.getFileData(stream, null));
-        startPage = StringUtil.insertProperties(startPage,
-            MapUtil.asMap("url", serviceURL, "text", ENV.getName()));
+//        String startPage = String.valueOf(FileUtil.getFileData(stream, null));
+//        startPage = StringUtil.insertProperties(startPage,
+//            MapUtil.asMap("url", serviceURL, "text", ENV.getName()));
         String page =
             Html5Presentation.createMessagePage("start.template", ENV.translate("tsl2nano.start", true) + " "
                 + ENV.translate(ENV.getName(), true), serviceURL);
@@ -638,7 +639,8 @@ public class NanoH5 extends NanoHTTPD implements ISystemConnector<Persistence> {
                 null);
             if (!BeanContainer.isConnected()
                 || BeanContainer.instance().hasPermission(collector.getName().toLowerCase() + ".view", null))
-                types.add(collector);
+                if (collector.getPresentable().isVisible())
+                    types.add(collector);
         }
         /*
          * Load virtual BeanCollectors like QueryResult from directory.

@@ -19,6 +19,9 @@ import java.util.List;
 import java.util.Map;
 
 import org.apache.commons.logging.Log;
+import org.simpleframework.xml.Default;
+import org.simpleframework.xml.DefaultType;
+import org.simpleframework.xml.ElementList;
 import org.simpleframework.xml.Transient;
 import org.simpleframework.xml.core.Commit;
 
@@ -52,6 +55,7 @@ import de.tsl2.nano.service.util.ServiceUtil;
  * @version $Revision$
  */
 @SuppressWarnings("unchecked")
+@Default(value = DefaultType.FIELD, required = false)
 public class Statistic<COLLECTIONTYPE extends Collection<T>, T> extends BeanCollector<COLLECTIONTYPE, T> {
     /** serialVersionUID */
     private static final long serialVersionUID = 1L;
@@ -63,6 +67,7 @@ public class Statistic<COLLECTIONTYPE extends Collection<T>, T> extends BeanColl
     /** columnNames of the statistic table */
     @Transient
     //this Transient annotation marks the attribute as extension member
+    //@ElementList(name = "column", inline = true, required = false/*, type=ValueColumn.class*/)
     ListWrapper<String> columnNames;
 
     @Transient

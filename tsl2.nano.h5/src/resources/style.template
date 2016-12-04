@@ -55,6 +55,9 @@ i:hover + p {
 	display: block;
 }
 
+@-ms-viewport only screen and (max-width: 640px){
+  user-scalable: no;
+}
 @media only screen and (max-width: 640px) {
 tr, .tr {
    	display: flex; flex-wrap: wrap; 
@@ -69,6 +72,9 @@ td, th, .td, .th {
 }
 }
 @media only screen and (max-width: 480px) {
+thead, .thead {
+	display: none;
+}
 tr, .tr {
    	width: 100%;
 } 

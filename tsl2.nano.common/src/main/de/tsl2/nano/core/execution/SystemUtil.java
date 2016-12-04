@@ -62,7 +62,11 @@ public class SystemUtil {
                     + processBuilder.environment() : ""));
 
             provideJdkAsJavaHome(processBuilder.environment());
-            processBuilder.inheritIO();
+            try {//on dalvik, inheritIO is not present - no problem 
+                processBuilder.inheritIO();
+            } catch (NoSuchMethodError err) {
+                LOG.warn(err.toString());
+            }
             process = processBuilder.start();
             //IMPROVE: could we use redirection? we need output to standard + log file
             Scanner scanner = new Scanner(process.getInputStream());
