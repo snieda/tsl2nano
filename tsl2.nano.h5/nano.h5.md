@@ -3476,3 +3476,26 @@ Problem bei Eingabe im Timesheet wahrscheinlich in:
 * ERROR: persistence loaded in nano app instead of session - using this on all sessions
 	-> eigentlich correct implementiert, siehe NanoH5.connect(..)
 	
+* Schulverwaltung (Noten-Listen):
+	+ Klassen-Raum
+		+ Resource
+	+ Kontroll-Enum
+	+ Status-Enum
+	+ Durchschnitts-Noten pro Schueler
+	+ Durchschnitts-Note pro Kontrolle
+	+ Durchschnitts-Note, Anzahl-Schüler pro Klasse
++ Schulplanung?
+
+YAML2DDL (mapOfMaps):
+Schule:
+	id: primary-key
+		int
+		not-null
+		default: 1
+	lehrer:
+		set(Lehrer)
+	name:
+		string
+Schueler:
+	id
+	klasse: Klasse.id

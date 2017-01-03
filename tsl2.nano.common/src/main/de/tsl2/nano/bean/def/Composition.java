@@ -149,7 +149,8 @@ public class Composition<C> {
      */
     @SuppressWarnings({ "unchecked", "rawtypes" })
     public C createChildOnTarget(Object targetInstance) {
-        BeanClass<C> bc = BeanClass.getBeanClass(Collection.class.isAssignableFrom(parent.getType()) ? parent.getGenericType(0) : parent.getType());
+        // BeanClass<C> bc = BeanClass.getBeanClass(Collection.class.isAssignableFrom(parent.getType()) ? parent.getGenericType(0) : parent.getType());
+        BeanDefinition<C> bc = BeanDefinition.getBeanDefinition(Collection.class.isAssignableFrom(parent.getType()) ? parent.getGenericType(0) : parent.getType());
         C child = (C) (target == null ? targetInstance : bc.createInstance());
         BeanContainer.createId(child);
         if (this.target != null && targetInstance != null) {

@@ -174,10 +174,11 @@ public class NanoWebSocketServer extends WebSocketServer {
         Object changeObject = null;
         Collection<IListener> listeners = attribute.changeHandler().getListeners(WSEvent.class);
         IStatefulListener obs;
+        boolean initializing = changeObjects == null;
         for (IListener l : listeners) {
-            if ((obs = (IStatefulListener) l).getStateObject() == null) {
-                if (changeObject == null)
-                    changeObject = getChangeObject(attribute);
+            obs = (IStatefulListener) l;
+            if (initializing || obs.getStateObject() == null) {
+                changeObject = getChangeObject(attribute);
                 obs.setStateObject(changeObject);
             }
         }

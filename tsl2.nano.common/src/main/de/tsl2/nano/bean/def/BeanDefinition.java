@@ -62,8 +62,6 @@ import de.tsl2.nano.core.util.FileUtil;
 import de.tsl2.nano.core.util.ListSet;
 import de.tsl2.nano.core.util.StringUtil;
 import de.tsl2.nano.core.util.Util;
-import de.tsl2.nano.core.util.XmlUtil;
-import de.tsl2.nano.core.util.YamlUtil;
 import de.tsl2.nano.format.DefaultFormat;
 import de.tsl2.nano.messaging.ChangeEvent;
 import de.tsl2.nano.messaging.IListener;
@@ -1442,6 +1440,13 @@ public class BeanDefinition<T> extends BeanClass<T> implements IPluggable<BeanDe
         return valueGroup;
     }
 
+    @Override
+    public T createInstance(Object... args) {
+        T instance = super.createInstance(args);
+        setDefaultValues(instance, args != null && args.length > 0);
+        return instance;
+    }
+    
     public void setDefaultValues(Object instance) {
         setDefaultValues(instance, false);
     }
