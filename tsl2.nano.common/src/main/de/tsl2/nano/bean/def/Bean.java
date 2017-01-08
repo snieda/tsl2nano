@@ -535,6 +535,7 @@ public class Bean<T> extends BeanDefinition<T> {
                 newBean = bean;
             } else {
                 newBean = BeanContainer.instance().save(bean);
+                
                 /*
                  * after the save operation, the presenter can be used only after
                  * a BeanContainer.resolveLayzRelation() and a reset()-call.
@@ -554,15 +555,15 @@ public class Bean<T> extends BeanDefinition<T> {
         } finally {
 //          detach();
         }
+        //refresh the old bean with the new id
+        final BeanAttribute idAttribute = BeanContainer.getIdAttribute(bean);
+        if (idAttribute != null) {
+            idAttribute.setValue(bean, idAttribute.getValue(newBean));
+        }
         //if the saved object is the presenters bean - use the new refreshed bean
         if (newBean.getClass().equals(instance.getClass())) {
             instance = (T) newBean;
-        } else {//refresh the old bean with the new id
-            final BeanAttribute idAttribute = BeanContainer.getIdAttribute(bean);
-            if (idAttribute != null) {
-                idAttribute.setValue(bean, idAttribute.getValue(newBean));
-            }
-        }
+        } 
         return newBean;
     }
 
