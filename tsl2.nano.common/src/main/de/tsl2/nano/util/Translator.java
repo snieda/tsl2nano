@@ -127,7 +127,7 @@ public class Translator {
             tt.setLength(0);
             //concat camelcase words...works only on same length
             for (int j = 0; j < tos.length; j++) {
-                if (++i < t.length)
+                if (i+1 < t.length)
                     tt.append(t[i++] + " ");
             }
 //            System.out.println(k + " ("+ origin.get(k) + ") --> " + tt);

@@ -3408,6 +3408,7 @@ Anyway			: Allgemeine DB für timesheet, bestell+kasse, estore
 EM-2016			: https://editor.ponyorm.com/user/ts/ResulteB#
 Skill-DB		: https://editor.ponyorm.com/user/ts/SkillDB
 eStore			: https://editor.ponyorm.com/user/pony/eStore
+                  https://editor.ponyorm.com/user/pony/OnlineStore
 forum			: https://editor.ponyorm.com/user/pony/Forum2
 PhotoSharing	: https://editor.ponyorm.com/user/pony/PhotoSharing
 Logbuch			: Eintragung von Aktivitäten, Summierung+Statistiken
@@ -3484,6 +3485,7 @@ Problem bei Eingabe im Timesheet wahrscheinlich in:
 	+ Durchschnitts-Noten pro Schueler
 	+ Durchschnitts-Note pro Kontrolle
 	+ Durchschnitts-Note, Anzahl-Schüler pro Klasse
+	+ Note für Schüler zusammengesetzt aus Kontrollen
 + Schulplanung?
 
 YAML2DDL (mapOfMaps):
@@ -3499,3 +3501,6 @@ Schule:
 Schueler:
 	id
 	klasse: Klasse.id
+
+	
+keywords: class, from, until, order, table, column, view 
