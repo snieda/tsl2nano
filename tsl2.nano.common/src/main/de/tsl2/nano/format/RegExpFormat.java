@@ -476,8 +476,12 @@ public class RegExpFormat extends Format implements INumberFormatCheck {
          * so, the decimal part should not exceed length of dec.
          */
         dec -= fract;
+        // a len of 0 will be changed to 1!
+        if (dec <= 0)
+            dec = 1;
         final int r = dec % 3;
-        p.append("\\d{0," + r + "}" + "[" + GROUPING_SEPARATOR + "]?");
+        if (r > 0)
+            p.append("\\d{0," + r + "}" + "[" + GROUPING_SEPARATOR + "]?");
         final String a = "\\d{0,3}" + "[" + GROUPING_SEPARATOR + "]?";
         final int c = (dec - r) / 3;
         for (int i = 0; i < c; i++) {
