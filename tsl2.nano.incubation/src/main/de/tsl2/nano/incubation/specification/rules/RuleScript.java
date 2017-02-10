@@ -71,9 +71,14 @@ public class RuleScript<T> extends AbstractRule<T> {
 
     void init(String engineName) {
         this.language = engineName;
-        engine = ActionScript.createEngine(engineName);
     }
 
+    protected ScriptEngine engine() {
+        if (engine == null)
+            engine = ActionScript.createEngine(language);
+        return engine;
+    }
+    
     @Override
     public String prefix() {
         return String.valueOf(PREFIX);
@@ -89,7 +94,7 @@ public class RuleScript<T> extends AbstractRule<T> {
 
         try {
             LOG.debug("running rule <" + toString() + "> on arguments: " + arguments);
-            Object obj = engine.eval(getOperation(), bind(arguments));
+            Object obj = engine().eval(getOperation(), bind(arguments));
             T result = (T) transform(obj);
             checkConstraint(Operator.KEY_RESULT, result);
             return result;
@@ -117,7 +122,7 @@ public class RuleScript<T> extends AbstractRule<T> {
     }
 
     private Bindings bind(Map<String, Object> arguments) {
-        return ActionScript.bind(engine, arguments);
+        return ActionScript.bind(engine(), arguments);
     }
 
     @Override

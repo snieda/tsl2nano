@@ -26,6 +26,6 @@ if [ "$1" == "stop" ]
 	echo "$APPNAME stopped successfully"
 	exit 0
 fi
-nohup ./run.sh $APPDIR $PORT
-tail -F $APPDIR/logfactory.log
+nohup ./run.sh $APPDIR $PORT 
+# < /dev/null & tail -F $APPDIR/logfactory.log
 

@@ -585,7 +585,7 @@ public class ENV implements Serializable {
     public static String getApplicationMainPackage() {
         String pck = (String) get("app.main.package");
         if (pck == null) {
-            pck = "org.nano." + getName().toLowerCase().trim();
+            pck = "org.nano" + (getName().startsWith(".") ? "" : ".") + getName().toLowerCase().trim();
             self().info("WARNING: no 'app.main.package' defined in environment! using default: " + pck);
             self().setProperty("app.main.package", pck);
         }

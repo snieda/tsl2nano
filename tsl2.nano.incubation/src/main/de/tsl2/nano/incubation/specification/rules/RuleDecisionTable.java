@@ -7,6 +7,7 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Scanner;
@@ -178,7 +179,8 @@ public class RuleDecisionTable<T> extends AbstractRule<T> {
 
     @SuppressWarnings("unchecked")
     private List<T> getResultVector() {
-        return (List<T>) Arrays.asList((Object[]) properties.get(DecisionTableInterpreter.KEY_RESULT));
+        Object[] resultVector = (Object[]) properties.get(DecisionTableInterpreter.KEY_RESULT);
+        return (List<T>) (resultVector != null ? (List<T>) Arrays.asList(resultVector) : new LinkedList<>());
     }
 
     private byte[][] createEmptyMatchTable() {

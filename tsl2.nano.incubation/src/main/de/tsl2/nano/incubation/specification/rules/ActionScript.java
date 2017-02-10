@@ -62,7 +62,6 @@ public class ActionScript<T> extends AbstractRunnable<T> {
      */
     public ActionScript(String name, String operation, LinkedHashMap<String, ParType> parameter) {
         super(name, operation, parameter);
-        engine = createEngine(language);
     }
 
     public static ScriptEngine createEngine(String language) {
@@ -79,6 +78,12 @@ public class ActionScript<T> extends AbstractRunnable<T> {
         return engine;
     }
 
+    protected ScriptEngine engine() {
+        if (engine == null)
+            engine = ActionScript.createEngine(language);
+        return engine;
+    }
+    
     private static void provideLanguage(String language) {
         if (language != null && new ClassFinder().findClass(language) == null) {
             String pck = ENV.getPackagePrefix(language);
@@ -109,7 +114,7 @@ public class ActionScript<T> extends AbstractRunnable<T> {
     @Override
     public T run(Map<String, Object> arguments, Object... extArgs) {
         try {
-            return (T) engine.eval(getOperation(), bind(engine, arguments));
+            return (T) engine().eval(getOperation(), bind(engine(), arguments));
         } catch (Exception e) {
             ManagedException.forward(e);
             return null;
@@ -122,10 +127,4 @@ public class ActionScript<T> extends AbstractRunnable<T> {
         return bindings;
     }
 
-    @Override
-    @Commit
-    protected void initDeserializing() {
-        engine = createEngine(language);
-        super.initDeserializing();
-    }
 }

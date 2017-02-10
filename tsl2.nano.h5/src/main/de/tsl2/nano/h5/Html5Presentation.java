@@ -85,6 +85,7 @@ import de.tsl2.nano.core.ManagedException;
 import de.tsl2.nano.core.Messages;
 import de.tsl2.nano.core.cls.BeanClass;
 import de.tsl2.nano.core.cls.IAttribute;
+import de.tsl2.nano.core.exception.Message;
 import de.tsl2.nano.core.log.LogFactory;
 import de.tsl2.nano.core.util.BitUtil;
 import de.tsl2.nano.core.util.ByteUtil;
@@ -1925,7 +1926,13 @@ public class Html5Presentation<T> extends BeanPresentationHelper<T> implements I
      * @return
      */
     private Element createLayoutConstraints(Element parent, IPresentable p) {
-        Object lc = p.getLayoutConstraints();
+        Object lc = null;
+        try {
+            lc = p.getLayoutConstraints();
+        } catch (Exception ex) {
+            LOG.error(ex);
+            Message.send(ex);
+        }
         if (lc instanceof Map) {
             HtmlUtil.appendAttributes(parent, MapUtil.asArray((Map<String, String>) lc));
         } else if (lc instanceof String) {
