@@ -29,6 +29,7 @@ import de.tsl2.nano.bean.def.ValueExpressionFormat;
 import de.tsl2.nano.core.ENV;
 import de.tsl2.nano.core.cls.BeanClass;
 import de.tsl2.nano.core.cls.IAttribute;
+import de.tsl2.nano.core.exception.Message;
 import de.tsl2.nano.core.util.ConcurrentUtil;
 import de.tsl2.nano.core.util.Util;
 import de.tsl2.nano.format.RegExpFormat;
@@ -144,6 +145,8 @@ public class AttributeConfigurator implements Serializable {
             return ((DecimalFormat) f).toPattern();
         else if (f instanceof RegExpFormat)
             return ((RegExpFormat) f).getPattern();
+        else if (f instanceof ValueExpressionFormat)
+            return ((ValueExpressionFormat) f).getPattern();
         else
             return f != null ? f.toString() : "";
     }
@@ -249,7 +252,7 @@ public class AttributeConfigurator implements Serializable {
     public void actionAddListener(
             @Constraint(pattern = "(\\w+") String observer,
             @Constraint(pattern = "(\\w+") String observable,
-            @Constraint(pattern = "[%§!]\\w+") String rule) {
+            @Constraint(pattern = "[%§!][\\w-_:.]+") String rule) {
         BeanDefinition def = def();
         Html5Presentation helper = (Html5Presentation) def.getPresentationHelper();
         helper.addRuleListener(observer, rule, 2, observable);
@@ -274,10 +277,13 @@ public class AttributeConfigurator implements Serializable {
     @SuppressWarnings({ "rawtypes", "unchecked" })
     @de.tsl2.nano.bean.annotation.Action(name = "createRule", argNames = { "Rule-Name", "Rule-Expression" })
     public void actionCreateRule(
-            @Constraint(defaultValue = "presentable.layoutConstraints", pattern = "[%§!]\\w+", allowed = {
+            @Constraint(defaultValue = "presentable.layoutConstraints", pattern = "[%§!][\\w-_:.]+", allowed = {
                 "presentable", "presentable.layout", "columnDefinition" }) String name,
             @Constraint(pattern = ".*") String expression) {
-        ENV.get(RulePool.class).add(new RuleScript(name, expression, null));
+        if (name != null && expression != null)
+            ENV.get(RulePool.class).add(new RuleScript(name, expression, null));
+        else
+            Message.send("No Rule-Name or Rule-Expression given");
     }
 
 }

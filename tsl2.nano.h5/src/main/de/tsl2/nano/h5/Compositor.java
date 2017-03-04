@@ -21,7 +21,6 @@ import org.simpleframework.xml.core.Commit;
 import de.tsl2.nano.action.IAction;
 import de.tsl2.nano.bean.BeanContainer;
 import de.tsl2.nano.bean.BeanUtil;
-import de.tsl2.nano.bean.ValueHolder;
 import de.tsl2.nano.bean.def.Bean;
 import de.tsl2.nano.bean.def.BeanCollector;
 import de.tsl2.nano.bean.def.BeanFinder;
@@ -193,18 +192,21 @@ public class Compositor<COLLECTIONTYPE extends Collection<T>, T> extends BeanCol
                     BeanContainer.initDefaults(item);
                     setDefaultValues(item, true);
 
+                    //fill context parameters
+                    fillContext(item, getParameter());
+                    
                     BeanValue parent;
                     parent = (BeanValue) Bean.getBean(base).getAttribute(baseAttribute);
                     //on manyTomany targetAttribute must not be null
                     Composition comp = new Composition(parent,
                         targetAttribute != null ? getAttribute(targetAttribute) : null);
                     Object resolver = comp.createChildOnTarget(item);
-                    if (!forceUserInteraction && Bean.getBean(item).isValid(new HashMap<BeanValue<?>, String>())) {
+                    if (!forceUserInteraction && Bean.getBean(item).isValid(new HashMap<BeanValue<?>, String>(), true)) {
                         resolver = (T) Bean.getBean(resolver).save();
                         item = (T) Bean.getBean(item).save();
                         getCurrentData().add(item);
                         return (T) _this;//the type T should be removed
-                    } else if (targetAttribute != null)
+                    } else if (targetAttribute != null && !Collection.class.isAssignableFrom(parent.getType()))
                         Bean.getBean(resolver).save();
                     getCurrentData().add(item);
                     return item;
@@ -220,6 +222,7 @@ public class Compositor<COLLECTIONTYPE extends Collection<T>, T> extends BeanCol
         return actions;
     }
 
+    @SuppressWarnings("unchecked")
     @Override
     @Commit
     protected void initDeserialization() {

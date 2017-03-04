@@ -25,6 +25,13 @@ public class Period implements Comparable<Period>, Serializable {
     public final static SimpleDateFormat DEFAULT_TIMEFORMAT_DE = new SimpleDateFormat("HH:mm");
 
     /**
+     * constructor
+     */
+    Period() {
+        super();
+    }
+    
+    /**
      * Constructor.
      * 
      * @param start startDate

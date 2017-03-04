@@ -614,7 +614,7 @@ public class ENV implements Serializable {
 
     private static String cleanpath(String name) {
         name = StringUtil.substring(name, null, ".xml");
-        return name.contains(getName()) || !FileUtil.isRelative(name) ? name : getConfigPath() + name;
+        return name.contains(getName()) || FileUtil.isAbsolute(name) ? name : getConfigPath() + name;
     }
 
     /**

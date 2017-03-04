@@ -9,16 +9,9 @@
  */
 package de.tsl2.nano.h5;
 
-import static de.tsl2.nano.h5.HtmlUtil.ATTR_BGCOLOR;
-import static de.tsl2.nano.h5.HtmlUtil.ATTR_COLOR;
-import static de.tsl2.nano.h5.HtmlUtil.STYLE_BACKGROUND_COLOR;
-
 import java.io.InputStream;
 import java.io.StringReader;
 import java.io.StringWriter;
-import java.net.URI;
-import java.util.Hashtable;
-import java.util.Map;
 
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
@@ -42,7 +35,6 @@ import de.tsl2.nano.core.ENV;
 import de.tsl2.nano.core.ManagedException;
 import de.tsl2.nano.core.log.LogFactory;
 import de.tsl2.nano.core.util.FileUtil;
-import de.tsl2.nano.core.util.MapUtil;
 import de.tsl2.nano.core.util.NetUtil;
 import de.tsl2.nano.core.util.StringUtil;
 import de.tsl2.nano.core.util.Util;

@@ -63,6 +63,10 @@ public class ValueExpressionFormat<T> extends Format {
         return ve().from(source);
     }
     
+    public String getPattern() {
+        return ve().getExpression();
+    }
+    
     public void applyPattern(String pattern) {
         ve().setExpression(pattern);
     }

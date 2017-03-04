@@ -41,6 +41,7 @@ import de.tsl2.nano.bean.BeanContainer;
 import de.tsl2.nano.bean.BeanUtil;
 import de.tsl2.nano.bean.IAttributeDef;
 import de.tsl2.nano.bean.IBeanContainer;
+import de.tsl2.nano.bean.IValueAccess;
 import de.tsl2.nano.bean.ValueHolder;
 import de.tsl2.nano.collection.CollectionUtil;
 import de.tsl2.nano.collection.Entry;
@@ -280,7 +281,7 @@ public class BeanCollector<COLLECTIONTYPE extends Collection<T>, T> extends Bean
     }
 
     @Override
-    public <B extends BeanDefinition<T>> B  onActivation() {
+    public <B extends BeanDefinition<T>> B onActivation() {
         super.onActivation();
         iterator = null;
         if (!isStaticCollection && Util.isEmpty(collection)) {
@@ -427,7 +428,10 @@ public class BeanCollector<COLLECTIONTYPE extends Collection<T>, T> extends Bean
                             @Override
                             public boolean eval(T arg0) {
                                 return getAttributeDefinitions().size() > 0 && BeanContainer.instance()
-                                    .hasPermission(BeanClass.getDefiningClass(arg0.getClass()).getSimpleName().toLowerCase() + "." + getValueExpression().to(arg0), "read");
+                                    .hasPermission(
+                                        BeanClass.getDefiningClass(arg0.getClass()).getSimpleName().toLowerCase() + "."
+                                            + getValueExpression().to(arg0),
+                                        "read");
                             }
                         });
                     } else {
@@ -737,6 +741,7 @@ public class BeanCollector<COLLECTIONTYPE extends Collection<T>, T> extends Bean
             @Override
             public Object action() throws Exception {
                 T newBean = createItem(getFirstSelectedElement());
+                fillContext(newBean, getParameter());
                 if (newBean == null) {
                     throw new ManagedException("tsl2nano.no_type_available");
                 }
@@ -828,7 +833,8 @@ public class BeanCollector<COLLECTIONTYPE extends Collection<T>, T> extends Bean
              */
             @Override
             public boolean isEnabled() {
-                return super.isEnabled() && hasMode(MODE_CREATABLE) && (hasSelection() || !ENV.get("app.event.fire.onselectionchange", false));
+                return super.isEnabled() && hasMode(MODE_CREATABLE)
+                    && (hasSelection() || !ENV.get("app.event.fire.onselectionchange", false));
             }
 
             @Override
@@ -874,7 +880,8 @@ public class BeanCollector<COLLECTIONTYPE extends Collection<T>, T> extends Bean
 
             @Override
             public boolean isEnabled() {
-                return super.isEnabled() && hasMode(MODE_EDITABLE) && (hasSelection() || !ENV.get("app.event.fire.onselectionchange", false));
+                return super.isEnabled() && hasMode(MODE_EDITABLE)
+                    && (hasSelection() || !ENV.get("app.event.fire.onselectionchange", false));
             }
 
             @Override
@@ -1610,4 +1617,39 @@ public class BeanCollector<COLLECTIONTYPE extends Collection<T>, T> extends Bean
     public static <T> ValueHolder<BeanCollector<?, T>> createBeanCollectorHolder(Collection<T> instance, int mode) {
         return new ValueHolder<BeanCollector<?, T>>(getBeanCollector(instance, mode));
     }
+
+    /**
+     * fills given parameters to instance, if attribute value of right type is null.
+     * 
+     * @param instance to be filled
+     * @param pars parameters given by session context.
+     */
+    protected void fillContext(T instance, Object[] pars) {
+        Collection<IAttributeDefinition<?>> attrs = getAttributeDefinitions().values();
+        Map map = null;
+        if (pars.length == 1 && pars[0] instanceof Map) {
+            map = (Map) pars[0];
+        }
+        for (IAttributeDefinition a : attrs) {
+            if (a.getValue(instance) == null) {
+                if (map != null) {
+                    Object value = map.get(BeanClass.getName(a.getType(), false));
+                    if (value != null) {
+                        if (value instanceof Bean)
+                            value = ((Bean)value).instance;
+                        a.setValue(instance, value);
+                    }
+                } else {//simple argument array
+                    for (int i = 0; i < pars.length; i++) {
+                        //first wins
+                        if (pars[i] != null && a.getType().isAssignableFrom(pars[i].getClass())) {
+                            a.setValue(instance, pars[i]);
+                            break;
+                        }
+                    }
+                }
+            }
+        }
+    }
+
 }

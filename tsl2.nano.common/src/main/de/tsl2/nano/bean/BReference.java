@@ -13,6 +13,7 @@ import de.tsl2.nano.bean.def.Bean;
 import de.tsl2.nano.core.cls.AReference;
 import de.tsl2.nano.core.cls.BeanAttribute;
 import de.tsl2.nano.core.cls.BeanClass;
+import de.tsl2.nano.core.util.StringUtil;
 
 /**
  * implements a detach/attach or de-/materialize or pointer/content algorithm for entities using the BeanContainer.
@@ -34,13 +35,17 @@ public class BReference<O> extends AReference<Class<O>, O> {
 
     @SuppressWarnings("unchecked")
     @Override
-    protected Class<O> type(String strType) {
-        return BeanClass.load(strType);
+    protected Class<O> type(String description) {
+        return BeanClass.load(StringUtil.substring(description, null, ":"));
     }
     
     @Override
     protected Object id(Class<O> type, String strId) {
         return BeanAttribute.wrap(strId, BeanContainer.getIdAttribute(type).getType());
+    }
+    
+    public String name() {
+        return StringUtil.substring(super.toString(), null, ":");
     }
     
     @Override
@@ -58,5 +63,10 @@ public class BReference<O> extends AReference<Class<O>, O> {
 
     public Bean<O> bean() {
         return resolve() != null ? Bean.getBean(instance) : null;
+    }
+    
+    @Override
+    public String toString() {
+        return instance != null ? Bean.getBean(instance).toString() : super.toString();
     }
 }

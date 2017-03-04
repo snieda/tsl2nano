@@ -1176,7 +1176,7 @@ public class FileUtil {
         });
     }
 
-    public static final boolean isRelative(String path) {
+    public static final boolean isAbsolute(String path) {
         return path.startsWith(File.separator) || path.contains(":" + File.separator);
     }
     

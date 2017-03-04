@@ -1,5 +1,5 @@
 <h6 align="center">FullRelation Nano.H5<br/>
-<font size="-1">&copy; Thomas Schneider 2012-2016
+<font size="-1">&copy; Thomas Schneider 2012-2017
 <br/>
 <a href="http://sourceforge.net/projects/tsl2nano/files/1.0.0-beta/tsl2.nano.h5.1.0.0.jar/download">Download on sourceforge</a>
 <br/>
@@ -16,11 +16,11 @@
 
 
 <meta-tag>
-crud, grud, crud2gui, crud2html, bean2html, entity2html, bean2gui, entity2gui, jpa2gui, jpa2html, jpa persistence provider, openjpa, hibernate, datanucleus, eclipselink, toplink, batoo, ormlite, ebean, data-editor, data-sheet, entity browser, jpa2, full stack framework, orm, o/r mapper, projector, callback, rule
+crud, grud, crud2gui, crud2html, bean2html, naked objects, entity2html, bean2gui, entity2gui, jpa2gui, jpa2html, jpa persistence provider, openjpa, hibernate, datanucleus, eclipselink, toplink, batoo, ormlite, ebean, data-editor, data-sheet, entity browser, jpa2, full stack framework, orm, o/r mapper, projector, callback, rule
 </meta-tag>
 
 <description>
-crud, grud, crud2gui, crud2html, bean2html, entity2html, bean2gui, entity2gui, jpa2gui, jpa2html, jpa persistence provider, openjpa, hibernate, datanucleus, eclipselink, toplink, batoo, ormlite, ebean, data-editor, data-sheet, entity browser, jpa2, full stack framework, orm, o/r mapper, projector, callback, rule
+crud, grud, crud2gui, crud2html, bean2html, naked objects, entity2html, bean2gui, entity2gui, jpa2gui, jpa2html, jpa persistence provider, openjpa, hibernate, datanucleus, eclipselink, toplink, batoo, ormlite, ebean, data-editor, data-sheet, entity browser, jpa2, full stack framework, orm, o/r mapper, projector, callback, rule
 </description>
 
 ## Introduction
@@ -28,7 +28,7 @@ crud, grud, crud2gui, crud2html, bean2html, entity2html, bean2gui, entity2gui, j
 NanoH5 (or FullRelation) is an UI independent gui implementation framework providing a model driven design (MDA) and following the projector pattern. Rules are used to describe any data or presentation value. NanoH5 is bound to the app framework __tsl2.nano.commons__ and the jpa-service framework __tsl2.nano.serviceaccess__. It is possible to build a complete html5 application through a given class- or database-model. An Html5 presentation layer using websockets is provided as default.
 
 - Everything will be filled for you by defaults - presenting a full application getting a database connection through any persistence provider (jpa 2.x)
-- define it or implement it - all object-types have their representation as readable xml-file.
+- define it or implement it - all object-types have their representation (naked objects) as readable xml-file.
 - ...or just use it as intelligent bean-browser or entity-browser
 
 To do a *quick-start*, go to chapter _Starting / Test_.
@@ -45,7 +45,7 @@ A cool way to see the power of this tool can be seen in chapter _Online Quick-St
 * it provides several working modes: single standalone app, network/multi-user and/or access to an application-server
 
 ### Features and Technical Goals
-* pure model implementation + platform independence (works on android, too).
+* pure model implementation + platform independence (naked objects, works on android, too).
 * small, having as less as possible static dependencies to other libraries
 * everything has a default - all defaults are configurable (Convention over Configuration)
 * application, session and entity behaviors are configurable
@@ -532,6 +532,44 @@ The environment defines, how to show the login page:
 
 The default _app.login.administration_ value is true. all database and persistence properties are editable and visible. If you switch it to _false_, only a simple user login with name and password are available.
 
+#### Login with secure Authentification
+
+On default, then environment property __app.login.secure__ is false. All persistence user will be added to __users.xml__.
+If you set it to true, the synthetic user will be the user asked by the login. If user, hashed password and validity time-period are ok, the mapped real database user will be evaluated to be given to the persistence provider. 
+
+To create a hash for a new password start the following:
+ 
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+	java -cp tsl2.nano.h5.1.0.0-standalone.jar de.tsl2.nano.h5.User mypassword
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+This hashcode then can be used inside the __usercheck.xml for the synthetic user:
+
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+<?xml version="1.0" encoding="UTF-8"?>
+<users>
+   <mapping>
+      <auth>
+         <name>MUSTER</name>
+         <passwd>84d0e5950bde3076bdba0e0753af62cd939dadc4</passwd>
+         <valid>
+            <start>2017-01-01 00:00:00.0 MEZ</start>
+            <end>2027-12-31 23:59:59.999 MEZ</end>
+         </valid>
+      </auth>
+      <persist>
+         <name>SA</name>
+         <passwd>9hjVww2ScUl/+3QU6ifjj6U+fuJAXMFGlgykQvmH8ug=</passwd>
+         <valid>
+            <start>2017-01-01 00:00:00.0 MEZ</start>
+            <end>2027-12-31 23:59:59.999 MEZ</end>
+         </valid>
+      </persist>
+   </mapping>
+</users>~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+...here the synthetic auth user name was changed from default SA to MUSTER and the synthetic password was changed to the new hashcode.
+ 
 ### The Session and it's context
 
 A session will be opened after a user-login. The session stores a context, containing 'memorized' entities and search parameters of bean-collectors to a temporary file. So, search-panels will open with last search parameters. The memorized entities will be pre-selected on creating new entities, if there is a many-to-one relation.
@@ -641,6 +679,17 @@ Hibernate 4 for example would have the following dependencies:
 * antlr.jar
  
 ## Runtime Configuration
+
+### Going Online - The Production Configuration
+
+To go online, set the following environment variables:
+
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+	app.login.secure=true
+	app.login.administration=false
+	app.login.save.persistence=false
+	app.mode.script=false
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 ## The Administration Panel
 
@@ -1177,6 +1226,15 @@ In this example (from timesheet package), you have the model with a manyToMany r
 
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 	Item (*) --> (1) ChargeItem (1) --> (*) Charge 
+
+	==>
+	
+	[Item.class.getName() --> Item.chargeItems --> Charge.chargeItem]
+
+	base type             : Item
+	base attribute name   : chargeitems 
+	target attribute name : chargeitem
+	icon attribute name   : icon
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 The entities have the following access methods:
@@ -1627,7 +1685,7 @@ If you use crypt, the en- decryption will be done on saving or loading the bean 
 
 ### Bean Actions
 
-Each entity can define methods that will automically be presented as buttons on a detail panel. This methods must follow the following constraints:
+Each entity can define methods that will automatically be presented as buttons on a detail panel. This methods must follow the following constraints:
 
 1. the method must be public in any class inside the current class hierarchy.
 2. the method name must start with prefix 'action' or must have the annotation @Action.
@@ -2896,6 +2954,7 @@ Actual list: http://infocenter.pentaho.com/help/index.jsp?topic=%2Fsupported_com
  1.0.0d | 02.07.2016 | layout and styles (responsive for three resolutions) for all panels enhanced.
  1.0.0e | 21.07.2016 | RESTful attributes enhanced. NEW: runtime attribute definition NEW: broadcast messages to all sessions.
  1.0.0f | 07.08.2016 | rules/actions/covers now able to use scripts groovy, scala, jruby, python, clojure, beanshell, ceylon, golo. NEW: ValueExpression import/export
+ 1.0.0g | 05.03.2017 | NEW: authentication mapping between 'auth' and 'persist' user, many bugfixes 
  
 [GLOSSARY]
 
@@ -3447,7 +3506,7 @@ Party			-> Mitarbeiter
 Category		-> Reservierung / Bestellung
 Area			-> z.B. Lokal
 Type			-> 
-Item			-> z.B. Tisch
+Item			-> z.B. Tisch 1 o. Wasser 
 Classification	-> 
 Charge			-> Anfrage (Bestellung, Reservierung)
 Discharge		-> Kasse
@@ -3504,3 +3563,13 @@ Schueler:
 
 	
 keywords: class, from, until, order, table, column, view 
+
+TODO: create help files (forwarding):
+- beanconfigurator.help.html:<meta http-equiv="refresh" content="0; URL=https://sourceforge.net/p/tsl2nano/wiki/tsl2-nano%20Home/#changing-layouts-through-the-beanconfigurator">
+
+attributeconfigurator.help.html
+persistence.help.html
+entry.help.html
+
+<meta http-equiv="refresh" content="0; URL=https://sourceforge.net/p/tsl2nano/wiki/tsl2-nano%20Home/#changing-layouts-through-the-beanconfigurator">
+

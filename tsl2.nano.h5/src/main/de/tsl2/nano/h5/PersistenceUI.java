@@ -9,6 +9,12 @@
  */
 package de.tsl2.nano.h5;
 
+import static de.tsl2.nano.bean.def.BeanPresentationHelper.PROP_ENABLER;
+import static de.tsl2.nano.bean.def.BeanPresentationHelper.PROP_LENGTH;
+import static de.tsl2.nano.bean.def.BeanPresentationHelper.PROP_NULLABLE;
+import static de.tsl2.nano.bean.def.BeanPresentationHelper.PROP_STYLE;
+import static de.tsl2.nano.bean.def.BeanPresentationHelper.PROP_VISIBLE;
+
 import java.io.Serializable;
 import java.util.Arrays;
 import java.util.Properties;
@@ -33,8 +39,6 @@ import de.tsl2.nano.h5.websocket.WSEvent;
 import de.tsl2.nano.h5.websocket.WebSocketDependencyListener;
 import de.tsl2.nano.persistence.Persistence;
 
-import static de.tsl2.nano.bean.def.BeanPresentationHelper.*;
-
 /**
  * factory to create a user interface for {@link Persistence}.
  * 
@@ -42,7 +46,7 @@ import static de.tsl2.nano.bean.def.BeanPresentationHelper.*;
  * @version $Revision$
  */
 public class PersistenceUI {
-
+    
     /**
      * constructor
      */
@@ -445,7 +449,12 @@ public class PersistenceUI {
             //TODO: ref. to persistence class
             @Override
             public Object action() throws Exception {
-                if (ENV.get("app.login.save.persistence", true))
+                User user = Users.load().auth(persistence.getConnectionUserName(), persistence.getConnectionPassword());
+                persistence.setAuth(persistence.getConnectionUserName());
+                persistence.setConnectionUserName(user.getName());
+                persistence.setConnectionPassword(user.getPasswd());
+                    
+                if (/*ENV.get("app.login.administration", true) && */ENV.get("app.login.save.persistence", true))
                     persistence.save();
                 return connector.connect(persistence);
             }

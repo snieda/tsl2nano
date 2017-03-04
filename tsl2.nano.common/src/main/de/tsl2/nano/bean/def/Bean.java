@@ -359,12 +359,18 @@ public class Bean<T> extends BeanDefinition<T> {
      * @return true, if current value is ok
      */
     public boolean isValid(Map<BeanValue<?>, String> messages) {
+        return isValid(messages, false);
+    }
+    public boolean isValid(Map<BeanValue<?>, String> messages, boolean refresh) {
         final List<BeanValue<?>> attributes = getBeanValues();
         boolean valid = true;
-        for (final BeanValue<?> beanValue : attributes) {
-            if (!beanValue.getStatus().ok()) {
+        IStatus status = IStatus.STATUS_OK;
+        for (final BeanValue beanValue : attributes) {
+            if ((refresh && !(status = beanValue.isValid(beanValue.getValue())).ok()) || (!refresh && !beanValue.getStatus().ok())) {
                 messages.put(beanValue, beanValue.getStatus().message());
-                if (beanValue.getStatus().error() != null) {
+                if (refresh)
+                    beanValue.status = status;
+                if (!status.ok()) {
                     valid = false;
                 }
             }
@@ -376,8 +382,11 @@ public class Bean<T> extends BeanDefinition<T> {
      * checks all attribute values and throws an {@link IllegalArgumentException}, if any value is not valid
      */
     public void check() {
+        check(false);
+    }
+    public void check(boolean refresh) {
         final Map<BeanValue<?>, String> msgMap = new LinkedHashMap<BeanValue<?>, String>();
-        final boolean isValid = isValid(msgMap);
+        final boolean isValid = isValid(msgMap, refresh);
         if (!isValid) {
             throw new IllegalArgumentException(StringUtil.toString(msgMap, 0));
         }

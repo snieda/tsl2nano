@@ -94,6 +94,7 @@ public class Crypt implements ISecure {
     //some transformation paths
     public static final String ALGO_DES = "DES/ECB/PKCS5Padding";
     public static final String ALGO_AES = "AES/CBC/PKCS5Padding";
+    public static final String ALGO_AES_NOPADDING = "AES/CBC/NoPadding";
     public static final String ALGO_PBEWithSHAAndAES = "PBEWithSHAAndAES";
     public static final String ALGO_PBEWithMD5AndDES = "PBEWithMD5AndDES";
     public static final String ALGO_PBEWithHmacSHA1AndDESede = "PBEWithHmacSHA1AndDESede";
@@ -132,7 +133,7 @@ public class Crypt implements ISecure {
      * encoding.
      */
     public Crypt(byte[] pwd, String algorithm) {
-        this(generateKey(pwd, algorithm),
+        this(generateKey(pwd, getAlgorithmFromPath(algorithm)),
             algorithm,
             ENCODE_UTF8, true);
     }
@@ -170,6 +171,12 @@ public class Crypt implements ISecure {
         provide(algorithm);
     }
 
+    /**
+     * generateKey
+     * @param pwd password for key creation (on standard java for AES: 32 bytes --> AES256)
+     * @param algorithm key generation algorithm like AES (not something like AES/CBC/PKCS5Padding)
+     * @return
+     */
     static Key generateKey(byte[] pwd, String algorithm) {
         return pwd == null || pwd.length == 0 ? generateRandomKey(algorithm) : isPBE(algorithm) ? generatePBEKey(
             toCharArray(pwd), algorithm) : generateSecretKey(pwd, algorithm);
@@ -196,6 +203,14 @@ public class Crypt implements ISecure {
         return algorithm + "/" + mode + "/" + padding;
     }
 
+    /**
+     * getAlgorithmFromPath
+     * @param path something like AES/CBC/PKCS5Padding
+     * @return pure algorithm (like AES)
+     */
+    public static String getAlgorithmFromPath(String path) {
+        return StringUtil.substring(path, null, "/");
+    }
     public static String providers() {
         StringBuilder ps = new StringBuilder("available security providers:\n");
         Provider[] providers = Security.getProviders();
@@ -241,8 +256,11 @@ public class Crypt implements ISecure {
     private static Key generateSecretKey(byte[] pwd, String algorithm) {
         preInit(algorithm);
         try {
-            SecretKeyFactory keyFac = SecretKeyFactory.getInstance(algorithm);
-            return keyFac.generateSecret(new SecretKeySpec(pwd, algorithm));
+            // It seems that the AES secret key factory is missing in 1.7 (a known bug ).
+//            SecretKeyFactory keyFac = SecretKeyFactory.getInstance(algorithm);
+//            return keyFac.generateSecret(new SecretKeySpec(pwd, algorithm));
+
+            return new SecretKeySpec(pwd, algorithm);
         } catch (Exception e) {
             ManagedException.forward(e);
             return null;
@@ -274,7 +292,7 @@ public class Crypt implements ISecure {
         preInit(algorithm);
         try {
             //for key generation use only the algorithm name like AES (not AES/CBC/PKCS5Padding)
-            algorithm = StringUtil.substring(algorithm, null, "/");
+            algorithm = getAlgorithmFromPath(algorithm);
             KeyGenerator generator = KeyGenerator.getInstance(algorithm);
             generator.init(new SecureRandom());
             return generator.generateKey();
@@ -435,7 +453,7 @@ public class Crypt implements ISecure {
     public static String encrypt(String data,
             String key,
             String algorithm) {
-        return encrypt(data.getBytes(), generateKey(key.getBytes(), algorithm), createParamSpec(algorithm),
+        return encrypt(data.getBytes(), generateKey(key.getBytes(), getAlgorithmFromPath(algorithm)), createParamSpec(algorithm),
             algorithm, ENCODE_UTF8, true, 0, data.length());
     }
 
@@ -498,21 +516,21 @@ public class Crypt implements ISecure {
      */
     @Override
     public String decrypt(String encrypted) {
-        return decrypt(encrypted, key, paramSpec, algorithm, encoding, useBASE64, 0, encrypted.length());
+        return decrypt(encrypted, key, paramSpec, algorithm, encoding, useBASE64, 0, useBASE64 ? Integer.MAX_VALUE : encrypted.length());
     }
 
     public static String decrypt(String encrypted,
             String key,
             String algorithm) {
-        return decrypt(encrypted, generateKey(key.getBytes(), algorithm), createParamSpec(algorithm), algorithm,
-            ENCODE_UTF8, true, 0, encrypted.length());
+        return decrypt(encrypted, generateKey(key.getBytes(), getAlgorithmFromPath(algorithm)), createParamSpec(algorithm), algorithm,
+            ENCODE_UTF8, true, 0, Integer.MAX_VALUE);
     }
 
     static String decrypt(String encrypted,
             Key key,
             AlgorithmParameterSpec paramSpec,
             String algorithm) {
-        return decrypt(encrypted, key, paramSpec, algorithm, ENCODE_UTF8, true, 0, encrypted.length());
+        return decrypt(encrypted, key, paramSpec, algorithm, ENCODE_UTF8, true, 0, Integer.MAX_VALUE);
     }
 
     static String decrypt(String encrypted,
@@ -541,6 +559,14 @@ public class Crypt implements ISecure {
         }
     }
 
+    static int base64Length(int n) {
+        return 4 * (n / 3) + (n % 3 != 0 ? 4 : 0);
+    }
+    static int base64ToByteLength(int n) {
+        //NOT YET IMPLEMENTED!
+        return 3 * (n / 4) - (n % 3 != 0 ? 4 : 0);
+        
+    }
     static byte[] decodeBase64(String encrypted) {
         try {
             return new BASE64Decoder().decodeBuffer(encrypted);

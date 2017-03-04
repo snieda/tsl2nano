@@ -49,7 +49,7 @@ public class Persistence implements Serializable, Cloneable {
     protected String jarFile = DEFAULT_DATABASE + ".jar";
     protected String connectionDriverClass = STD_LOCAL_DATABASE_DRIVER;
     protected String connectionUrl = STD_LOCAL_DATABASE_URL;
-    protected String connectionUserName = "SA";
+    protected String connectionUserName = "SA";//used for persistence
     protected String connectionPassword = "";
     protected String hibernateDialect = "org.hibernate.dialect.H2Dialect";
     protected String defaultSchema = DEFAULT_SCHEMA;
@@ -58,6 +58,7 @@ public class Persistence implements Serializable, Cloneable {
     protected String port = "9092";//"9003";
     protected String database = DEFAULT_DATABASE;
     private Persistence replication;
+    private String auth = "SA"; //used for authentication/authorization
     /** One of 'hbm2java' or 'openjpa-reverse-eng' */
     private String generator = GEN_HIBERNATE;
     /**
@@ -652,5 +653,15 @@ public class Persistence implements Serializable, Cloneable {
     @Override
     public Persistence clone() throws CloneNotSupportedException {
         return (Persistence) super.clone();
+    }
+    /**
+     * getAuth
+     * @return user authentication/authorization name
+     */
+    public String getAuth() {
+        return auth;
+    }
+    public void setAuth(String auth) {
+        this.auth = auth;
     }
 }

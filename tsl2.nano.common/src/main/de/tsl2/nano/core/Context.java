@@ -25,6 +25,7 @@ import org.simpleframework.xml.ElementMap;
 
 import de.tsl2.nano.bean.BReference;
 import de.tsl2.nano.bean.BeanContainer;
+import de.tsl2.nano.bean.def.Bean;
 import de.tsl2.nano.bean.def.BeanDefinition;
 import de.tsl2.nano.collection.CollectionUtil;
 import de.tsl2.nano.collection.FilteringIterator;
@@ -50,7 +51,7 @@ public class Context implements Serializable, Map {
     private static final long serialVersionUID = -5738577461481485970L;
 
     private static final Log LOG = LogFactory.getLog(Context.class);
-    
+
     @Attribute
     String name;
 
@@ -148,7 +149,7 @@ public class Context implements Serializable, Map {
     }
 
     public Object add(Object obj) {
-        String k = obj.getClass().getName();//String.valueOf(obj.hashCode());
+        String k = BeanClass.getDefiningClass(obj.getClass()).getName();//String.valueOf(obj.hashCode());
         put(k, obj);
         return k;
     }
@@ -259,13 +260,14 @@ public class Context implements Serializable, Map {
         return CollectionUtil.getTransforming(properties.values(), new ITransformer<Object, T>() {
             @Override
             public T transform(Object toTransform) {
-                return (T) (toTransform instanceof BReference ? BeanDefinition.class.isAssignableFrom(valueType) ? ((BReference)toTransform).bean() : ((BReference)toTransform).resolve() : toTransform);
+                return (T) (toTransform instanceof BReference ? BeanDefinition.class.isAssignableFrom(valueType)
+                    ? ((BReference) toTransform).bean() : ((BReference) toTransform).resolve() : toTransform);
             }
-        } ,new IPredicate() {
+        }, new IPredicate() {
             @Override
             public boolean eval(Object arg0) {
                 if (BeanDefinition.class.isAssignableFrom(valueType) && (arg0 instanceof BReference))
-                    return ((BReference)arg0).resolve() != null;
+                    return ((BReference) arg0).resolve() != null;
                 return arg0 != null && (valueType.isAssignableFrom(arg0.getClass()) || (arg0 instanceof AReference
                     && valueType.isAssignableFrom(((AReference) arg0).resolve().getClass())));
             }
@@ -299,8 +301,18 @@ public class Context implements Serializable, Map {
         return ENV.getTempPathRel() + "context-" + name + ".xml";
     }
 
+    String toStringEntries() {
+        StringBuilder str = new StringBuilder();
+        String ks;
+        for (Object k : properties.keySet()) {
+            ks = StringUtil.substring((String) k, ".", null, true);
+            str.append(StringUtil.fixString(ENV.translate(ks, true), 32, ' ', true) + " : " + properties.get(k) + "\n");
+        }
+        return str.toString();
+    }
+
     @Override
     public String toString() {
-        return getName() + " (items: " + StringUtil.toFormattedString(properties, 20) + ")";
+        return getName() + " (items: " + StringUtil.toFormattedString(toStringEntries(), 20) + ")";
     }
 }

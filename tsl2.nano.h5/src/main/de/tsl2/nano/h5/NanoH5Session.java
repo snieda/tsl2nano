@@ -737,12 +737,23 @@ public class NanoH5Session implements ISession<BeanDefinition>, Serializable, IL
         Iterator<BeanDefinition> con = getContext().get(BeanDefinition.class);
         Parameter p = new Parameter();
         LOG.debug("filling context for session: " + this);
-        for (BeanDefinition c = con.next(); con.hasNext();) {
+        //full beans
+        BeanDefinition c;
+        while (con.hasNext()) {
+            c = con.next();
+            p.put(c.getName(), c);
+        }
+        //all bean attributes
+        con = getContext().get(BeanDefinition.class);
+        while (con.hasNext()) {
+            c = con.next();
             p.putAll(c.toValueMap(p));
         }
         //do that twice to let rules and queries use defined parameter
         LOG.debug("second iteration on context for session: " + this);
-        for (BeanDefinition c = con.next(); con.hasNext();) {
+        con = getContext().get(BeanDefinition.class);
+        while (con.hasNext()) {
+            c = con.next();
             p.putAll(c.toValueMap(p));
         }
         if (LOG.isDebugEnabled()) {

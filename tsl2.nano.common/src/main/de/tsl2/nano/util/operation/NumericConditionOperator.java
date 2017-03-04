@@ -41,7 +41,7 @@ public class NumericConditionOperator extends ConditionOperator<Object> {
     @Override
     public BigDecimal eval(CharSequence expression, Map<CharSequence, Object> v) {
         Object result = super.eval(wrap(expression), v);
-        return (BigDecimal) (result instanceof BigDecimal ? result : result != null ? new BigDecimal(result.toString()
+        return (BigDecimal) (result instanceof BigDecimal ? result : result != null && !result.equals("null") ? new BigDecimal(result.toString()
             .trim()) : null);
     }
 

@@ -201,63 +201,65 @@ public class Html5Presentation<T> extends BeanPresentationHelper<T> implements I
     @SuppressWarnings("serial")
     @Override
     protected void addAdministrationActions(final ISession session, Bean bEnv) {
-        bEnv.addAction(new SecureAction(bean.getClazz(),
-            "Scripttool",
-            IAction.MODE_UNDEFINED,
-            false,
-            "icons/go.png") {
-            Bean beanTool;
-
-            @Override
-            public Object action() throws Exception {
-                /*
-                 * show the script tool to do direct sql or ant
-                 */
-                if (beanTool == null) {
-                    BeanConfigurator.defineAction(null);
-                    final ScriptTool tool = ScriptTool.createInstance();
-                    beanTool = Bean.getBean(tool);
-                    beanTool.setAttributeFilter("sourceFile", "selectedAction", "text"/*, "result"*/);
-                    beanTool.getAttribute("text").getPresentation().setType(TYPE_INPUT_MULTILINE);
-                    beanTool.getAttribute("text").getConstraint().setLength(100000);
-                    beanTool.getAttribute("text").getConstraint()
-                        .setFormat(null/*RegExpFormat.createLengthRegExp(0, 100000, 0)*/);
-//                        beanTool.getAttribute("result").getPresentation().setType(TYPE_TABLE);
-                    beanTool.getAttribute("sourceFile").getPresentation().setType(TYPE_ATTACHMENT);
-                    beanTool.getAttribute("selectedAction").setRange(tool.availableActions());
-                    beanTool.addAction(tool.runner());
-
-                    String id = "scripttool.define.query";
-                    String lbl = ENV.translate(id, true);
-                    IAction queryDefiner = new CommonAction(id, lbl, lbl) {
-                        @Override
-                        public Object action() throws Exception {
-                            String name =
-                                tool.getSourceFile() != null ? tool.getSourceFile().toLowerCase() : FileUtil
-                                    .getValidFileName(tool.getText().replace('.', '_'));
-                            //some file-systems may have problems on longer file names!
-                            name = StringUtil.cut(name, 64);
-                            Query query =
-                                new Query(name, tool.getText(), tool.getSelectedAction().getId()
-                                    .equals("scripttool.sql.id"),
-                                    null);
-                            ENV.get(QueryPool.class).add(query);
-                            QueryResult qr = new QueryResult(query.getName());
-                            qr.getPresentable().setIcon("icons/barchart.png");
-                            qr.saveDefinition();
-                            return "New created specification-query: " + name;
-                        }
-
-                        @Override
-                        public String getImagePath() {
-                            return "icons/save.png";
-                        }
-                    };
-                    beanTool.addAction(queryDefiner);
+        if (ENV.get("app.login.administration", true)) {
+            bEnv.addAction(new SecureAction(bean.getClazz(),
+                "Scripttool",
+                IAction.MODE_UNDEFINED,
+                false,
+                "icons/go.png") {
+                Bean beanTool;
+    
+                @Override
+                public Object action() throws Exception {
+                    /*
+                     * show the script tool to do direct sql or ant
+                     */
+                    if (beanTool == null) {
+                        BeanConfigurator.defineAction(null);
+                        final ScriptTool tool = ScriptTool.createInstance();
+                        beanTool = Bean.getBean(tool);
+                        beanTool.setAttributeFilter("sourceFile", "selectedAction", "text"/*, "result"*/);
+                        beanTool.getAttribute("text").getPresentation().setType(TYPE_INPUT_MULTILINE);
+                        beanTool.getAttribute("text").getConstraint().setLength(100000);
+                        beanTool.getAttribute("text").getConstraint()
+                            .setFormat(null/*RegExpFormat.createLengthRegExp(0, 100000, 0)*/);
+    //                        beanTool.getAttribute("result").getPresentation().setType(TYPE_TABLE);
+                        beanTool.getAttribute("sourceFile").getPresentation().setType(TYPE_ATTACHMENT);
+                        beanTool.getAttribute("selectedAction").setRange(tool.availableActions());
+                        beanTool.addAction(tool.runner());
+    
+                        String id = "scripttool.define.query";
+                        String lbl = ENV.translate(id, true);
+                        IAction queryDefiner = new CommonAction(id, lbl, lbl) {
+                            @Override
+                            public Object action() throws Exception {
+                                String name =
+                                    tool.getSourceFile() != null ? tool.getSourceFile().toLowerCase() : FileUtil
+                                        .getValidFileName(tool.getText().replace('.', '_'));
+                                //some file-systems may have problems on longer file names!
+                                name = StringUtil.cut(name, 64);
+                                Query query =
+                                    new Query(name, tool.getText(), tool.getSelectedAction().getId()
+                                        .equals("scripttool.sql.id"),
+                                        null);
+                                ENV.get(QueryPool.class).add(query);
+                                QueryResult qr = new QueryResult(query.getName());
+                                qr.getPresentable().setIcon("icons/barchart.png");
+                                qr.saveDefinition();
+                                return "New created specification-query: " + name;
+                            }
+    
+                            @Override
+                            public String getImagePath() {
+                                return "icons/save.png";
+                            }
+                        };
+                        beanTool.addAction(queryDefiner);
+                    }
+                    return beanTool;
                 }
-                return beanTool;
-            }
-        });
+            });
+        }
         super.addAdministrationActions(session, bEnv);
     }
 

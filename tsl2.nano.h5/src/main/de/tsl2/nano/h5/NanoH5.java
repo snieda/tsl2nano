@@ -206,6 +206,10 @@ public class NanoH5 extends NanoHTTPD implements ISystemConnector<Persistence> {
                 ENV.extractResource("mda.xml");
                 ENV.extractResource("tsl2nano-appcache.mf");
                 ENV.extractResource("favicon.ico");
+                ENV.extractResource("beanconfigurator.help.html");
+                ENV.extractResource("attributeconfigurator.help.html");
+                ENV.extractResource("entry.help.html");
+                ENV.extractResource("persistence.help.html");
                 onStandaloneExtractJars();
             } catch (Exception ex) {
                 LOG.error("couldn't extract ant or shell script", ex);
@@ -575,7 +579,7 @@ public class NanoH5 extends NanoHTTPD implements ISystemConnector<Persistence> {
         Thread.currentThread().setContextClassLoader(runtimeClassloader);
 //        ENV.addService(ClassLoader.class, runtimeClassloader);
 
-        createAuthorization(persistence);
+        createAuthorization(persistence.getAuth());
 
         //load all beans from selected jar-file and provide them in a beancontainer
         List<Class> beanClasses = null;
@@ -612,8 +616,7 @@ public class NanoH5 extends NanoHTTPD implements ISystemConnector<Persistence> {
      * @param persistence
      * @return
      */
-    private void createAuthorization(final Persistence persistence) {
-        String userName = persistence.getConnectionUserName();
+    private void createAuthorization(final String userName) {
         Message.send("creating authorization for " + userName);
         ConcurrentUtil.setCurrent(Authorization.create(userName, ENV.get("app.login.secure", false)));
     }

@@ -15,13 +15,15 @@ import java.util.Collection;
 import de.tsl2.nano.bean.BeanContainer;
 import de.tsl2.nano.core.cls.BeanClass;
 import de.tsl2.nano.core.cls.IAttribute;
+import de.tsl2.nano.core.util.StringUtil;
 
 /**
+ * <pre>
  * On relational models, a composition child (like the uml-composition) needs a connection to it's parent. If a new
  * child is created, this child has to be put into the attribute list of it's parent.
- * <p/>
+ * 
  * Example: Customer(1)==>(*)Address. But the address cannot exist without it's parent, the customer.
- * <p/>
+ *
  * If a relation model needs to resolve a connection of type: Group (*) ==> (*) Player, a new table 'PlayersGroup'
  * should be created as resolver: Group (*) ==> (1) PlayersGroup (1) ==> (*) Player. The #target is required to resolve this
  * many-to-many relation. In this example, the members are:<br/>
@@ -29,6 +31,13 @@ import de.tsl2.nano.core.cls.IAttribute;
  * child = PlayersGroup<br/>
  * target = Player
  * 
+ * a second case is:
+ * 
+ * Group (1) ==> Players (*) ==> (1) Type
+ * 
+ * here the resolver is a collection.
+ * 
+ * </pre> 
  * @author ts
  * @version $Revision$
  */
@@ -152,9 +161,16 @@ public class Composition<C> {
         // BeanClass<C> bc = BeanClass.getBeanClass(Collection.class.isAssignableFrom(parent.getType()) ? parent.getGenericType(0) : parent.getType());
         BeanDefinition<C> bc = BeanDefinition.getBeanDefinition(Collection.class.isAssignableFrom(parent.getType()) ? parent.getGenericType(0) : parent.getType());
         C child = (C) (target == null ? targetInstance : bc.createInstance());
-        BeanContainer.createId(child);
         if (this.target != null && targetInstance != null) {
-            this.target.setValue(targetInstance, child);
+            if (Collection.class.isAssignableFrom(this.target.getType())) {
+                ((Collection)this.target.getValue(targetInstance)).add(child);
+                bc.setValue(child, StringUtil.toFirstLower(target.getDeclaringClass().getSimpleName()), targetInstance);
+            } else {// standard: only a single target instance 
+                BeanContainer.createId(child);
+                this.target.setValue(targetInstance, child);
+            }
+        } else {
+            BeanContainer.createId(child);
         }
         IAttribute attr = bc.getAttribute(parent.getDeclaringClass());
         if (attr != null)
