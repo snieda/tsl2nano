@@ -172,7 +172,7 @@ public class NanoH5 extends NanoHTTPD implements ISystemConnector<Persistence> {
      * @param args
      */
     public static void main(String[] args) {
-        startApplication(NanoH5.class, MapUtil.asMap(0, "service.url"), args);
+        startApplication(NanoH5.class, MapUtil.asMap(0, "service.port"), args);
     }
 
     /**
@@ -206,10 +206,11 @@ public class NanoH5 extends NanoHTTPD implements ISystemConnector<Persistence> {
                 ENV.extractResource("mda.xml");
                 ENV.extractResource("tsl2nano-appcache.mf");
                 ENV.extractResource("favicon.ico");
-                ENV.extractResource("beanconfigurator.help.html");
-                ENV.extractResource("attributeconfigurator.help.html");
-                ENV.extractResource("entry.help.html");
-                ENV.extractResource("persistence.help.html");
+                
+                ENV.extractResource("doc/beanconfigurator.help.html");
+                ENV.extractResource("doc/attributeconfigurator.help.html");
+                ENV.extractResource("doc/entry.help.html");
+                ENV.extractResource("doc/persistence.help.html");
                 onStandaloneExtractJars();
             } catch (Exception ex) {
                 LOG.error("couldn't extract ant or shell script", ex);
@@ -417,7 +418,7 @@ public class NanoH5 extends NanoHTTPD implements ISystemConnector<Persistence> {
                     //don't lose the connection - the first item is the login
 //                    session.nav.next(session.nav.toArray()[1]);
                 }
-            } else if (method.equals("GET") && parms.size() < 2 /* contains 'QUERY_STRING = null' */
+            } else if (session.response != null && method.equals("GET") && parms.size() < 2 /* contains 'QUERY_STRING = null' */
                 && (uri.length() < 2 || header.get("referer") == null) || isDoubleClickDelay(session)) {
                 LOG.debug("reloading cached page...");
                 try {
@@ -921,7 +922,8 @@ public class NanoH5 extends NanoHTTPD implements ISystemConnector<Persistence> {
         Message.send("creating new database " + persistence.getDatabase() + " for url "
             + persistence.getConnectionUrl());
         Properties p = new Properties();
-
+        ENV.setProperty("app.doc.name", persistence.getDatabase());
+        
         //give mda.xml the information to don't start nano.h5
         p.put("nano.h5.running", "true");
 
@@ -980,6 +982,8 @@ public class NanoH5 extends NanoHTTPD implements ISystemConnector<Persistence> {
         ENV.setProperty("service.url", serviceURL.toString());
         NetworkClassLoader.resetUnresolvedClasses(ENV.getConfigPath());
         Thread.currentThread().setContextClassLoader(appstartClassloader);
+
+        HtmlUtil.tableDivStyle = null;
         createPageBuilder();
         builder = ENV.get(IPageBuilder.class);
     }

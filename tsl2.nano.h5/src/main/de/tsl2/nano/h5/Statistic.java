@@ -21,7 +21,6 @@ import java.util.Map;
 import org.apache.commons.logging.Log;
 import org.simpleframework.xml.Default;
 import org.simpleframework.xml.DefaultType;
-import org.simpleframework.xml.ElementList;
 import org.simpleframework.xml.Transient;
 import org.simpleframework.xml.core.Commit;
 
@@ -343,6 +342,13 @@ public class Statistic<COLLECTIONTYPE extends Collection<T>, T> extends BeanColl
         to = _to;
     }
 
+    @Override
+    public Statistic<COLLECTIONTYPE, T> refreshed() {
+        if (isStale())
+            return new Statistic<>(beanType, from, to);
+        return this;
+    }
+    
     @Commit
     @Override
     protected void initDeserialization() {

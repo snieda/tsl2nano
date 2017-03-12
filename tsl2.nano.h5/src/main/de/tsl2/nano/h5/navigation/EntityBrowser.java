@@ -23,6 +23,7 @@ import de.tsl2.nano.bean.def.Bean;
 import de.tsl2.nano.bean.def.BeanCollector;
 import de.tsl2.nano.bean.def.BeanDefinition;
 import de.tsl2.nano.bean.def.IBeanCollector;
+import de.tsl2.nano.core.ENV;
 import de.tsl2.nano.core.util.StringUtil;
 import de.tsl2.nano.core.util.Util;
 import de.tsl2.nano.h5.Html5Presentation;
@@ -58,6 +59,8 @@ public class EntityBrowser implements IBeanNavigator {
      */
     @Override
     public BeanDefinition<?> next(Object userResponseObject) {
+        if (ENV.get("app.login.administration", true))
+            refreshStack();
         boolean isOnWork = false;
         boolean goBack = userResponseObject == null || userResponseObject == IAction.CANCELED;
         if (!goBack) {
@@ -91,6 +94,12 @@ public class EntityBrowser implements IBeanNavigator {
             removeUnpersistedNewEntities((BeanCollector) current);
         }
         return current;
+    }
+
+    private void refreshStack() {
+        for (int i = 0; i < navigation.size(); i++) {
+            navigation.set(i, navigation.get(i).refreshed());
+        }
     }
 
     @Override

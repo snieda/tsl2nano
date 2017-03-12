@@ -125,4 +125,12 @@ public class Controller<COLLECTIONTYPE extends Collection<T>, T> extends BeanCol
         }
         return valueExpression;
     }
+
+    @Override
+    public Controller<COLLECTIONTYPE, T> refreshed() {
+        if (isStale())
+            return new Controller(this, workingMode);
+        return this;
+    }
+    
 }

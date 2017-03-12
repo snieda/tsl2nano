@@ -506,7 +506,8 @@ public class BeanPresentationHelper<T> {
                 regexp = RegExpFormat.createDateRegExp();
             }
         } else if (BeanClass.isAssignableFrom(String.class, type)) {
-            int l = attribute.length() != UNDEFINED ? attribute.length() : ENV.get("value.format.default.text.length", 5000);
+            int l = attribute.length() != UNDEFINED ? attribute.length()
+                : ENV.get("value.format.default.text.length", 5000);
             regexp = RegExpFormat.createAlphaNumRegExp(l, false);
         } else {
             regexp = new GenericParser(attribute.getType());
@@ -1343,7 +1344,8 @@ public class BeanPresentationHelper<T> {
 
     /**
      * addAdministrationActions
-     * @param session 
+     * 
+     * @param session
      */
     protected void addAdministrationActions(final ISession session, Bean bEnv) {
         bEnv.addAction(new SecureAction(bean.getClazz(),
@@ -1354,8 +1356,8 @@ public class BeanPresentationHelper<T> {
             @Override
             public Object action() throws Exception {
                 //TODO should we reset the whole application - closing all sessions?
-//                session.getApplication().reset();
-                ENV.get(BeanPresentationHelper.class).reset();
+                session.getApplication().reset();
+//                ENV.get(BeanPresentationHelper.class).reset();
                 return page("configuration refreshed");
             }
 
@@ -1413,7 +1415,7 @@ public class BeanPresentationHelper<T> {
                     "icons/yellow_pin.png") {
                     @Override
                     public Object action() throws Exception {
-                        ((Context) vsession.getValue().getContext()).add(((Bean)bean).getInstance());
+                        ((Context) vsession.getValue().getContext()).add(((Bean) bean).getInstance());
                         return bean;
                     }
 
@@ -1594,43 +1596,47 @@ public class BeanPresentationHelper<T> {
                 });
 
             pageActions
-            .add(new SecureAction(bean.getClazz(), "import", IAction.MODE_UNDEFINED, false, "icons/upload.png") {
-                String file = ENV.getConfigPath(bean.getClazz()) + ".txt";
-                @Override
-                public Object action() throws Exception {
-                    //import from file
-                    Collection<T> objects = ValueStream.read(file, bean.getValueExpression());
-                    Message.send("trying to import new " + bean.getName() + " objects: " + objects);
-                    //persist
-                    for (T e : objects) {
-                        //TODO: create a transaction on all objects
-                        if (e != null)
-                            BeanContainer.instance().save(e);
+                .add(new SecureAction(bean.getClazz(), "import", IAction.MODE_UNDEFINED, false, "icons/upload.png") {
+                    String file = ENV.getConfigPath(bean.getClazz()) + ".txt";
+
+                    @Override
+                    public Object action() throws Exception {
+                        //import from file
+                        Collection<T> objects = ValueStream.read(file, bean.getValueExpression());
+                        Message.send("trying to import new " + bean.getName() + " objects: " + objects);
+                        //persist
+                        for (T e : objects) {
+                            //TODO: create a transaction on all objects
+                            if (e != null)
+                                BeanContainer.instance().save(e);
+                        }
+                        //reload
+                        ((BeanCollector) bean).getBeanFinder().getData();
+                        return bean;
                     }
-                    //reload
-                    ((BeanCollector)bean).getBeanFinder().getData();
-                    return bean;
-                }
-                @Override
-                public String getLongDescription() {
-                    return "imports " + bean.getName() + " elements from file " + file;
-                }
-            });
+
+                    @Override
+                    public String getLongDescription() {
+                        return "imports " + bean.getName() + " elements from file " + file;
+                    }
+                });
 
             pageActions
-            .add(new SecureAction(bean.getClazz(), "export", IAction.MODE_UNDEFINED, false, "icons/save.png") {
-                String file = ENV.getConfigPath(bean.getClazz()) + "-" + System.currentTimeMillis() + ".txt";
-                @Override
-                public Object action() throws Exception {
-                    //export to file
-                    ValueStream.write(file, ((BeanCollector)bean).getBeanFinder().getData());
-                    return "exported file: " + file;
-                }
-                @Override
-                public String getLongDescription() {
-                    return "exports " + bean.getName() + " visible elements to file " + file;
-                }
-            });
+                .add(new SecureAction(bean.getClazz(), "export", IAction.MODE_UNDEFINED, false, "icons/save.png") {
+                    String file = ENV.getConfigPath(bean.getClazz()) + "-" + System.currentTimeMillis() + ".txt";
+
+                    @Override
+                    public Object action() throws Exception {
+                        //export to file
+                        ValueStream.write(file, ((BeanCollector) bean).getBeanFinder().getData());
+                        return "exported file: " + file;
+                    }
+
+                    @Override
+                    public String getLongDescription() {
+                        return "exports " + bean.getName() + " visible elements to file " + file;
+                    }
+                });
 
             pageActions.add(new SecureAction(bean.getClazz(),
                 "document",
@@ -1673,10 +1679,19 @@ public class BeanPresentationHelper<T> {
                 IAction.MODE_UNDEFINED,
                 false,
                 "icons/trust_unknown.png") {
-                final String helpFile = ENV.getConfigPathRel() + bean.getName().toLowerCase() + ".help.";
+                //TODO: move to static constant class
+                final String HTML_FORWARD =
+                    "<html><head><meta http-equiv=\"refresh\" content=\"0; URL=%s\"></head></html>";
+
+                final String helpFile = ENV.getConfigPathRel() + "doc/" + bean.getName().toLowerCase() + ".help.";
                 final File htmlFile = new File(helpFile + "html");
                 final File pdfFile = new File(helpFile + "pdf");
                 final String tooltip = htmlFile.getPath() + " or " + pdfFile.getPath();
+                // the docName is the dir where html.doc generates html-doc on generating the database
+                String docName = ENV.get("app.doc.name", ENV.get("app.main.package", "test"));
+                final File generatedIndexFile =
+                    new File(ENV.getConfigPathRel() + "doc/" + docName + "/index.html");
+                final File generatedIndexFileURL = new File("doc/" + docName + "/index.html");
 
                 @Override
                 public Object action() throws Exception {
@@ -1697,6 +1712,10 @@ public class BeanPresentationHelper<T> {
 
                 @Override
                 public boolean isEnabled() {
+                    if (!htmlFile.exists() && generatedIndexFile.exists()) {
+                        FileUtil.writeBytes(String.format(HTML_FORWARD, generatedIndexFileURL.getPath()).getBytes(),
+                            htmlFile.getPath(), false);
+                    }
                     return htmlFile.canRead() || pdfFile.canRead();
                 }
             });

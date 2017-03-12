@@ -95,6 +95,13 @@ public class QueryResult<COLLECTIONTYPE extends Collection<T>, T> extends BeanCo
     }
     
     @Override
+    public QueryResult<COLLECTIONTYPE, T> refreshed() {
+        if (isStale())
+            return new QueryResult(queryName);
+        return this;
+    }
+    
+    @Override
     @Commit
     protected void initDeserialization() {
         query = (Query<Collection<Object[]>>) ENV.get(QueryPool.class).get(queryName);

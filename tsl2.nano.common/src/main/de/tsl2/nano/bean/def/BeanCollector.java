@@ -110,6 +110,7 @@ public class BeanCollector<COLLECTIONTYPE extends Collection<T>, T> extends Bean
     /** defines the behavior and the actions of the beancollector */
     @Transient
     protected int workingMode = MODE_EDITABLE | MODE_CREATABLE | MODE_SEARCHABLE;
+    
     /**
      * search panel instructions.
      */
@@ -600,6 +601,13 @@ public class BeanCollector<COLLECTIONTYPE extends Collection<T>, T> extends Bean
         //nothing to do on default implementation
     }
 
+    @Override
+    public BeanCollector<COLLECTIONTYPE, T> refreshed() {
+        if (isStale())
+            return getBeanCollector(collection, workingMode);
+        return this;
+    }
+    
     /**
      * {@inheritDoc}
      */
@@ -1492,6 +1500,29 @@ public class BeanCollector<COLLECTIONTYPE extends Collection<T>, T> extends Bean
         asString = null;
     }
 
+    /**
+     * if presentable is of type GroupingPresentable and group-by's are defined, return them
+     * @return groups or null
+     */
+    public Collection<GroupBy> getGroups() {
+        IPresentable p = getPresentable();
+        if (p instanceof GroupingPresentable)
+            return ((GroupingPresentable)p).getGroups();
+        return null;
+    }
+    
+    /**
+     * getGroupByFor
+     * @param instance instance to check for GroupBy expressions
+     * @return GroupBy or null
+     */
+    public GroupBy getGroupByFor(Object instance) {
+        IPresentable p = getPresentable();
+        if (p instanceof GroupingPresentable)
+            return ((GroupingPresentable)p).getGroupByFor(this, instance);
+        return null;
+    }
+    
     /**
      * evaluates the next row in the list of data and prepares some properties.
      * 

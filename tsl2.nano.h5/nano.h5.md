@@ -1100,7 +1100,33 @@ Of course you have to use values that are compatible with the attributes type.
 
 You are able to predefine/memorize beans to be used on new beans or to constrain the search attributes. Go into the detail page of a bean and click 'memorize' at the top menu to store that bean inside your current session as default bean of that type.
 
-#### creating a detailed summary for a bean collector
+#### Grouping list of data in expandable panels
+
+Sometimes you need to group your data in expandable blocks. This can be done through the presentable instance providing a _groupby_ property.
+
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+	<beanDefinition clazz="org.anonymous.project.Request" name="Request" isNested="false" isdefault="false" xmlns="http://sourceforge.net/projects/tsl2nano ./beandef.xsd">
+	   <presentable class="de.tsl2.nano.h5.Html5Presentable" type="0" style="0" visible="true" searchable="true" nesting="false">
+	      <label>Request</label>
+	      <description>Request</description>
+		  <groupby title="test" attribute="name" having=".*test.*" expanded="true" />
+	   </presentable>
+	   ...
+	</beanDefinition>
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+The _title_ is the title of the expandable panel and _attribute_ is the name of an attribute defined inside this beandefinition.
+The _having_ property is a regular expression that given attributes value has to match to be grouped inside this group-by.
+
+In the example above all rows are grouped into the expandable "test" where the attribute _name_ contains the string "test".
+
+Most Browsers will build unexpected results, so this feature is disabled on default. To activate it, please set the environment property
+
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+	collector.ignore.groupby.expandables = true
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+	
+#### Creating a detailed summary for a bean collector
 
 Example using the standard summary function of the bean collector on numbers:
 
@@ -3573,3 +3599,4 @@ entry.help.html
 
 <meta http-equiv="refresh" content="0; URL=https://sourceforge.net/p/tsl2nano/wiki/tsl2-nano%20Home/#changing-layouts-through-the-beanconfigurator">
 
+YAML: howto invoke initSerialization() + initDeserialization() (32 occurrencies)

@@ -254,7 +254,7 @@ function processDataFromClipboard(clipboard) {
  * not working yet...
  */
 function fade(btn) {
-	document.getElementByTagName("body").className = "fade-out";
+	document.getElementsByTagName("body")[0].className = "fade-out";
 }
 
 function disablePage(e) {

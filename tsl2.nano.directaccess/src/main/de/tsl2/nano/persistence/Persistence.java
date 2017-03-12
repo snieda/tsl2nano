@@ -58,7 +58,7 @@ public class Persistence implements Serializable, Cloneable {
     protected String port = "9092";//"9003";
     protected String database = DEFAULT_DATABASE;
     private Persistence replication;
-    private String auth = "SA"; //used for authentication/authorization
+    transient private String auth = "SA"; //used for authentication/authorization
     /** One of 'hbm2java' or 'openjpa-reverse-eng' */
     private String generator = GEN_HIBERNATE;
     /**

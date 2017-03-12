@@ -7,8 +7,8 @@ import java.io.Serializable;
 import java.util.LinkedHashMap;
 
 import de.tsl2.nano.bean.def.AttributeDefinition;
+import de.tsl2.nano.bean.def.GroupingPresentable;
 import de.tsl2.nano.bean.def.IPresentable;
-import de.tsl2.nano.bean.def.Presentable;
 import de.tsl2.nano.core.ENV;
 import de.tsl2.nano.core.util.Util;
 
@@ -20,11 +20,12 @@ import de.tsl2.nano.core.util.Util;
  * @version $Revision$
  */
 @SuppressWarnings({ "unchecked" })
-public class Html5Presentable extends Presentable {
+public class Html5Presentable extends GroupingPresentable {
     /** serialVersionUID */
     private static final long serialVersionUID = 1L;
 
     private static final LinkedHashMap<String, String> DEFAULT_HASHMAP = new LinkedHashMap<String, String>();
+
     protected Html5Presentable() {
     }
 

@@ -858,6 +858,13 @@ public class Bean<T> extends BeanDefinition<T> {
         return (B) this;
     }
 
+    @Override
+    public Bean<T> refreshed() {
+        if (isStale())
+            return getBean(instance);
+        return this;
+    }
+    
     public String toStringDescription() {
         final Collection<? extends IAttribute> attributes = getAttributes();
         final StringBuilder buf = new StringBuilder(attributes.size() * 15);

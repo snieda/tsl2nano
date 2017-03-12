@@ -49,6 +49,8 @@ import de.tsl2.nano.core.util.Util;
 public class HtmlUtil {
     private static final Log LOG = LogFactory.getLog(HtmlUtil.class);
 
+    public static final String HTML_FORWARD = "<html><head><meta http-equiv=\"refresh\" content=\"0; URL={0}\"></head></html>";
+    
     public static final String TAG_HTML = "html";
     public static final String TAG_HEAD = "head";
     public static final String TAG_BODY = "body";

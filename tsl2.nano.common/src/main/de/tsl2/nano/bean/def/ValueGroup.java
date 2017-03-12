@@ -95,7 +95,8 @@ public class ValueGroup extends Presentable {
      * @return true, if this attribute name should be showed with details (sub-panel).
      */
     public boolean isDetail(String attributeName) {
-        return attributes.get(attributeName);
+        Boolean isDetail = false;
+        return (isDetail = attributes.get(attributeName)) != null && isDetail;
     }
 
     public void addNesting(BeanValue<?> attributeNestingBean) {

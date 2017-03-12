@@ -206,7 +206,7 @@ public class Compositor<COLLECTIONTYPE extends Collection<T>, T> extends BeanCol
                         item = (T) Bean.getBean(item).save();
                         getCurrentData().add(item);
                         return (T) _this;//the type T should be removed
-                    } else if (targetAttribute != null && !Collection.class.isAssignableFrom(parent.getType()))
+                    } else if (targetAttribute != null && !Collection.class.isAssignableFrom(getAttribute(targetAttribute).getType()))
                         Bean.getBean(resolver).save();
                     getCurrentData().add(item);
                     return item;
@@ -222,6 +222,13 @@ public class Compositor<COLLECTIONTYPE extends Collection<T>, T> extends BeanCol
         return actions;
     }
 
+    @Override
+    public Compositor<COLLECTIONTYPE, T> refreshed() {
+        if (isStale())
+            return new Compositor<>(clazz, parentType, baseAttribute, targetAttribute, iconAttribute);
+        return this;
+    }
+    
     @SuppressWarnings("unchecked")
     @Override
     @Commit

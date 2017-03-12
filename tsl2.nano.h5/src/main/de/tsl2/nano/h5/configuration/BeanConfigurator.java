@@ -213,9 +213,11 @@ public class BeanConfigurator<T> implements Serializable {
         //add not-selected attributes as invisibles at the end
         for (IAttributeDefinition<?> a : invisibles.values()) {
             //IMPROVE: enhance interfaces to set index without reflection
-            new PrivateAccessor(a.getColumnDefinition()).set("columnIndex", ++i);
             a.getPresentation().setVisible(false);
-            a.getColumnDefinition().getPresentable().setVisible(false);
+            if (a.getColumnDefinition() != null) {
+                new PrivateAccessor(a.getColumnDefinition()).set("columnIndex", ++i);
+                a.getColumnDefinition().getPresentable().setVisible(false);
+            }
             def.addAttribute(a);
         }
         attrConfigurators = null;

@@ -104,7 +104,7 @@ public class BeanDefinition<T> extends BeanClass<T> implements IPluggable<BeanDe
      * optional plugins - like rule names to cover properties of this beandefinition. perhaps you cover the value of
      * property 'constraint.visible' with a rule defined in your specification.
      */
-    @ElementList(inline = true, entry = "plugin", required = false)
+   @ElementList (inline = true, entry = "plugin", required = false)
     protected Collection<IConnector<BeanDefinition>> plugins;
 
     /** should be able to create a representable string for the given instance */
@@ -153,7 +153,9 @@ public class BeanDefinition<T> extends BeanClass<T> implements IPluggable<BeanDe
     private static final List<BeanDefinition> virtualBeanCache = new ListSet<BeanDefinition>();
     private static final BeanDefinition volatileBean = new BeanDefinition(Object.class);
     private static boolean usePersistentCache = ENV.get("beandef.usepersistent.cache", true);
-
+    
+    private long seal;
+    
     /**
      * This constructor is only for internal use (serialization) - don't call this constructor - use
      * {@link #getBeanDefinition(Class)}, {@link #getBeanDefinition(String)} or
@@ -940,6 +942,7 @@ public class BeanDefinition<T> extends BeanClass<T> implements IPluggable<BeanDe
                         || name.equalsIgnoreCase(FileUtil
                             .getValidFileName(beandef.getName()))
                             && (type == null || type.equals(beandef.getClazz())))) {
+                        beandef.newSeal(); // only persisted defs have a seal > 0
                         virtualBeanCache.add(beandef);
                     } else {
                         LOG.warn("the file " + xmlFile.getPath() + " doesn't define the bean with name '" + name
@@ -1413,6 +1416,21 @@ public class BeanDefinition<T> extends BeanClass<T> implements IPluggable<BeanDe
         this.valueExpression = valueExpression;
     }
 
+    public boolean isStale() {
+        return seal < getBeanDefinition(getDeclaringClass()).seal;
+    }
+    
+    private void newSeal() {
+        seal = new Date().getTime();
+    }
+    
+    public BeanDefinition<T> refreshed() {
+        if (isStale()) {
+            return getBeanDefinition(getDeclaringClass());
+        }
+        return this;
+    }
+    
     /**
      * getValueGroups. see {@link #addValueGroup(String, String...)}
      * 

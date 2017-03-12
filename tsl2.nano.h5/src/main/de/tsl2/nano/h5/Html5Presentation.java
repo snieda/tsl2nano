@@ -42,6 +42,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
@@ -68,6 +69,7 @@ import de.tsl2.nano.bean.def.BeanCollector;
 import de.tsl2.nano.bean.def.BeanDefinition;
 import de.tsl2.nano.bean.def.BeanPresentationHelper;
 import de.tsl2.nano.bean.def.BeanValue;
+import de.tsl2.nano.bean.def.GroupBy;
 import de.tsl2.nano.bean.def.IBeanCollector;
 import de.tsl2.nano.bean.def.IPageBuilder;
 import de.tsl2.nano.bean.def.IPresentable;
@@ -208,7 +210,7 @@ public class Html5Presentation<T> extends BeanPresentationHelper<T> implements I
                 false,
                 "icons/go.png") {
                 Bean beanTool;
-    
+
                 @Override
                 public Object action() throws Exception {
                     /*
@@ -223,11 +225,11 @@ public class Html5Presentation<T> extends BeanPresentationHelper<T> implements I
                         beanTool.getAttribute("text").getConstraint().setLength(100000);
                         beanTool.getAttribute("text").getConstraint()
                             .setFormat(null/*RegExpFormat.createLengthRegExp(0, 100000, 0)*/);
-    //                        beanTool.getAttribute("result").getPresentation().setType(TYPE_TABLE);
+                        //                        beanTool.getAttribute("result").getPresentation().setType(TYPE_TABLE);
                         beanTool.getAttribute("sourceFile").getPresentation().setType(TYPE_ATTACHMENT);
                         beanTool.getAttribute("selectedAction").setRange(tool.availableActions());
                         beanTool.addAction(tool.runner());
-    
+
                         String id = "scripttool.define.query";
                         String lbl = ENV.translate(id, true);
                         IAction queryDefiner = new CommonAction(id, lbl, lbl) {
@@ -248,7 +250,7 @@ public class Html5Presentation<T> extends BeanPresentationHelper<T> implements I
                                 qr.saveDefinition();
                                 return "New created specification-query: " + name;
                             }
-    
+
                             @Override
                             public String getImagePath() {
                                 return "icons/save.png";
@@ -887,7 +889,8 @@ public class Html5Presentation<T> extends BeanPresentationHelper<T> implements I
         appendAttributes(grid, bean.getPresentable(), true);
 
         if (interactive && ENV.get("layout.grid.searchrow.show", true)
-            && bean.hasMode(IBeanCollector.MODE_SEARCHABLE) && (!(session instanceof NanoH5Session)  || !((NanoH5Session)session).isMobile())) {
+            && bean.hasMode(IBeanCollector.MODE_SEARCHABLE)
+            && (!(session instanceof NanoH5Session) || !((NanoH5Session) session).isMobile())) {
             Collection<T> data = new LinkedList<T>(bean.getSearchPanelBeans());
             //this looks complicated, but if currentdata is a collection with a FilteringIterator, we need a copy of the filtered items!
             if (bean.getCurrentData() != null)
@@ -970,12 +973,25 @@ public class Html5Presentation<T> extends BeanPresentationHelper<T> implements I
         int i = 0;
         boolean hasSearchFilter = tableDescriptor.getBeanFinder().getFilterRange() != null;
         tabIndex = data.size() > editableRowNumbers.length ? editableRowNumbers.length * -1 : 0;
+        
+        // provide expandable details for search and group panels
+        boolean useDetailsInTable = ENV.get("collector.ignore.groupby.expandables", false);
+        Element searchDetail = hasSearchFilter && useDetailsInTable ? appendElement(grid, TAG_EXP_DETAILS, ATTR_TITLE, "Search") : grid;
+        Map<String, Element> groups = new HashMap<>();
+        if (tableDescriptor.getGroups() != null && useDetailsInTable) {
+            for (GroupBy g : tableDescriptor.getGroups()) {
+                groups.put(g.getTitle(), appendElement(grid, TAG_EXP_DETAILS, ATTR_TITLE, g.getTitle(), g.isExpanded() ? ATTR_EXP_OPEN : null));
+            }
+        }
+        
         for (T item : data) {
             if (hasSearchFilter && editableRows.contains(i++) && ENV.get("layout.grid.searchrow.show", true)) {
-                addEditableRow(grid, tableDescriptor, item, i == 1 ? prop(KEY_FILTER_FROM_LABEL)
+                addEditableRow(searchDetail, tableDescriptor, item, i == 1 ? prop(KEY_FILTER_FROM_LABEL)
                     : i == 2 ? prop(KEY_FILTER_TO_LABEL) : toString(item, vef));
             } else {
-                addRow(session, grid, tableDescriptor.hasMode(MODE_MULTISELECTION) && interactive, tableDescriptor,
+                GroupBy group = useDetailsInTable ? tableDescriptor.getGroupByFor(item) : null;
+                addRow(session, group != null ? groups.get(group.getTitle()) : grid,
+                    tableDescriptor.hasMode(MODE_MULTISELECTION) && interactive, tableDescriptor,
                     item, interactive);
             }
         }
