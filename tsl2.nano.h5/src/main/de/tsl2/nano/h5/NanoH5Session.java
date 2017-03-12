@@ -815,6 +815,11 @@ public class NanoH5Session implements ISession<BeanDefinition>, Serializable, IL
                         }
                         String oldString = bv.getValueText();
                         String newString = parms.get(p);
+                        // checkboxes will send 'on' as value
+                        if (boolean.class.isAssignableFrom(type) || Boolean.class.isAssignableFrom(type))
+                            if (newString.equals("on"))
+                                newString = "true";
+                        
                         if (oldString == null || !oldString.equals(newString)) {
                             vmodel.setParsedValue(p, newString);
                         } else {

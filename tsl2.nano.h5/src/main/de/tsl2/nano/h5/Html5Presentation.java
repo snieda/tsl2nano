@@ -707,17 +707,24 @@ public class Html5Presentation<T> extends BeanPresentationHelper<T> implements I
      * 
      * @param parent
      */
-    private Element createBean(ISession session, Element parent, Bean<?> bean, boolean interactive, boolean fullwidth) {
+    private Element createBean(ISession session, Element parent0, Bean<?> bean, boolean interactive, boolean fullwidth) {
         Collection<ValueGroup> valueGroups = bean.getValueGroups();
         if (Util.isEmpty(valueGroups)) {
-            return createFieldPanel(session, parent, bean.getPresentable(), bean.getBeanValues(), bean.getActions(),
+            return createFieldPanel(session, parent0, bean.getPresentable(), bean.getBeanValues(), bean.getActions(),
                 interactive, fullwidth);
         } else {//work on value groups
 //            parent = appendElement(parent, TAG_DIV);
+            Element parent;
             Collection<IAction> noActions = new LinkedList<IAction>();
             for (ValueGroup valueGroup : valueGroups) {
                 if (!valueGroup.isVisible()) {
                     continue;
+                }
+                if (ENV.get("bean.valuegroup.expandable", true)) {
+                    parent = appendElement(parent0, TAG_EXP_DETAILS, ATTR_TITLE, valueGroup.getLabel(), "open");
+                    parent = appendElement(parent, TAG_EXP_SUMMARY, content(valueGroup.getLabel()));
+                } else {
+                    parent = parent0;
                 }
                 Collection<BeanValue<?>> beanValues =
                     new ArrayList<BeanValue<?>>(valueGroup.getAttributes().size());
@@ -756,7 +763,7 @@ public class Html5Presentation<T> extends BeanPresentationHelper<T> implements I
                 }
                 createFieldPanel(session, parent, valueGroup, beanValues, noActions, interactive, fullwidth);
             }
-            return parent;
+            return parent0;
         }
     }
 
@@ -985,15 +992,16 @@ public class Html5Presentation<T> extends BeanPresentationHelper<T> implements I
         }
         
         for (T item : data) {
-            if (hasSearchFilter && editableRows.contains(i++) && ENV.get("layout.grid.searchrow.show", true)) {
-                addEditableRow(searchDetail, tableDescriptor, item, i == 1 ? prop(KEY_FILTER_FROM_LABEL)
-                    : i == 2 ? prop(KEY_FILTER_TO_LABEL) : toString(item, vef));
+            if (hasSearchFilter && editableRows.contains(i) && ENV.get("layout.grid.searchrow.show", true)) {
+                addEditableRow(searchDetail, tableDescriptor, item, i == 0 ? prop(KEY_FILTER_FROM_LABEL)
+                    : i == 1 ? prop(KEY_FILTER_TO_LABEL) : toString(item, vef));
             } else {
                 GroupBy group = useDetailsInTable ? tableDescriptor.getGroupByFor(item) : null;
                 addRow(session, group != null ? groups.get(group.getTitle()) : grid,
                     tableDescriptor.hasMode(MODE_MULTISELECTION) && interactive, tableDescriptor,
-                    item, interactive);
+                    item, interactive, i);
             }
+            i++;
         }
         Element footer =
             appendElement(grid, "tfoot", ATTR_STYLE, ENV.get("layout.grid.footer.style", ""));
@@ -1349,7 +1357,7 @@ public class Html5Presentation<T> extends BeanPresentationHelper<T> implements I
             boolean multiSelection,
             BeanCollector<?, T> tableDescriptor,
             T item,
-            boolean interactive) {
+            boolean interactive, int index) {
         boolean isSelected = tableDescriptor.getSelectionProvider() != null ? tableDescriptor.getSelectionProvider()
             .getValue()
             .contains(item) : false;
@@ -1391,7 +1399,7 @@ public class Html5Presentation<T> extends BeanPresentationHelper<T> implements I
                 /*ATTR_BGCOLOR, rowBGColor*/));
 
         //first cell: bean reference as link
-        String length = String.valueOf(grid.getChildNodes().getLength() - 1);
+        String length = String.valueOf(index/*grid.getChildNodes().getLength() - 1*/);
         Element firstCell = appendTag(row, TABLE(TAG_CELL));
         appendElement(firstCell, TAG_LINK, content(), ATTR_HREF, length);
         if (multiSelection) {

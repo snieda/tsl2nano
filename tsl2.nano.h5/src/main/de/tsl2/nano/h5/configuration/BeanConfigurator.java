@@ -89,7 +89,7 @@ public class BeanConfigurator<T> implements Serializable {
                 configPres.setAttributeFilter("label", "description", "icon", "type", "style", "visible", "searchable",
                     "nesting", "width",
                     "height", "layout",
-                    "layoutConstraints");
+                    "layoutConstraints", "groups");
                 configPres.getPresentable().setLayout(layout);
 //            configPres.saveDefinition();
 
