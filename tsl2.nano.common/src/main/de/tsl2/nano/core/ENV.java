@@ -714,6 +714,9 @@ public class ENV implements Serializable {
         Messages.reload();
         services().putAll(tempServices);
         self().properties.putAll(tempProperties);
+        // don't know why there remain nulls
+        MapUtil.removeAllNulls(services());
+        MapUtil.removeAllNulls(self().properties);
     }
 
     /**

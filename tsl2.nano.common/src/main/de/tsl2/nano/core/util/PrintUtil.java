@@ -89,6 +89,20 @@ public class PrintUtil {
     /**
      * delegates to {@link #print(String, String, InputStream, PrintQuality, int, int[]...)}.
      */
+    static DocPrintJob print(String fileName) {
+        return print(null, fileName);
+    }
+
+    /**
+     * delegates to {@link #print(String, String, InputStream, PrintQuality, int, int[]...)}.
+     */
+    static DocPrintJob print(String printerName, String fileName) {
+        return print(printerName + "-" + fileName, printerName, fileName);
+    }
+
+    /**
+     * delegates to {@link #print(String, String, InputStream, PrintQuality, int, int[]...)}.
+     */
     static DocPrintJob print(String jobName,
             String printerName,
             String fileName) {

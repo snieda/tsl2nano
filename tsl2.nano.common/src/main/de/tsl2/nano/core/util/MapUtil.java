@@ -13,6 +13,7 @@ import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
 import java.util.LinkedList;
@@ -159,6 +160,16 @@ public class MapUtil {
         Set<K> keys = new LinkedHashSet<K>(toRemove);
         for (K k : keys) {
             src.remove(k);
+        }
+        return src;
+    }
+
+    public static <K, V> Map<K, V> removeAllNulls(Map<K, V> src) {
+        //don't know how it is possible, but without a new set instance, we get a concurrentmodificationexception
+        for (Iterator it = src.keySet().iterator(); it.hasNext();) {
+            Object key = it.next();
+            if (src.containsKey(key) && src.get(key) == null)
+                it.remove();
         }
         return src;
     }
