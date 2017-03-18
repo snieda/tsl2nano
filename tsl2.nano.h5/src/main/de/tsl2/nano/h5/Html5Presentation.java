@@ -742,7 +742,7 @@ public class Html5Presentation<T> extends BeanPresentationHelper<T> implements I
 
                     Object v = attr.getValue();
 
-                    if (valueGroup.isDetail(name) && v != null) {
+                    if (valueGroup.isDetail(name) && v != null && !Util.isJavaType(attr.getType())) {
                         if (attr.isMultiValue()) {
                             bv =
                                 BeanValue.getBeanValue(
@@ -751,10 +751,12 @@ public class Html5Presentation<T> extends BeanPresentationHelper<T> implements I
                                     ValueHolder.ATTR_VALUE);
                             bv.setDescription(name);
                         } else {
-                            bv =
-                                BeanValue.getBeanValue(
-                                    new ValueHolder(Bean.getBean((Serializable) bean.getValue(name))),
-                                    ValueHolder.ATTR_VALUE);
+//                            bv =
+//                                BeanValue.getBeanValue(
+//                                    new ValueHolder(Bean.getBean((Serializable) bean.getValue(name))),
+//                                    ValueHolder.ATTR_VALUE);
+                            createBean(session, parent, Bean.getBean((Serializable) bean.getValue(name)), interactive, fullwidth);
+                            continue;
                         }
                     } else {
                         bv = BeanValue.getBeanValue(bean.getInstance(), name);

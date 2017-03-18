@@ -100,6 +100,7 @@ import de.tsl2.nano.core.ManagedException;
 import de.tsl2.nano.core.util.DateUtil;
 import de.tsl2.nano.core.util.FileUtil;
 import de.tsl2.nano.core.util.MapUtil;
+import de.tsl2.nano.core.util.PrintUtil;
 import de.tsl2.nano.execution.ScriptUtil;
 import de.tsl2.nano.h5.Compositor;
 import de.tsl2.nano.h5.Controller;
@@ -390,6 +391,15 @@ public class Timesheet extends NanoH5App {
             ManagedException.forward(e);
         }
         a = new Action<>(icsImport);
+        ENV.get(ActionPool.class).add(a);
+
+        java.lang.reflect.Method printAction = null;
+        try {
+            printAction = PrintUtil.class.getMethod("print", String.class);
+        } catch (Exception e) {
+            ManagedException.forward(e);
+        }
+        a = new Action<>(printAction);
         ENV.get(ActionPool.class).add(a);
 
         BeanDefinition<Charge> chargeDef = BeanDefinition.getBeanDefinition(Charge.class);
