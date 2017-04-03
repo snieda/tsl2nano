@@ -12,7 +12,6 @@ package de.tsl2.nano.core.util;
 import java.io.ByteArrayInputStream;
 import java.io.InputStream;
 import java.math.BigInteger;
-import java.nio.charset.Charset;
 import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -469,7 +468,8 @@ public class StringUtil {
     }
 
     /**
-     * extracts all expressions found. On StringBuilder/StringBuffer the regexp was replaced with "". 
+     * extracts all expressions found. On StringBuilder/StringBuffer the regexp was replaced with "".
+     * 
      * @param source to be searched on
      * @param regexp to be found
      * @param groups group to use
@@ -479,7 +479,7 @@ public class StringUtil {
         String e;
         List<String> all = new LinkedList<String>();
         int i = 0;
-        while  (!Util.isEmpty((e = extract(source, regexp, "", i, groups)))) {
+        while (!Util.isEmpty((e = extract(source, regexp, "", i, groups)))) {
             all.add(e);
             if (source instanceof String) //on StringBuilder the extracted string was replaced with ""
                 i = ((String) source).indexOf(e, i) + e.length();
@@ -647,6 +647,7 @@ public class StringUtil {
     public static final String[] splitWordBinding(String word) {
         return word.split("[-./]");
     }
+
     /**
      * splits a name with camel-case concatenation into an array of names.
      * <p/>
@@ -853,6 +854,7 @@ public class StringUtil {
      * search for the given filter. the filter will be divided to its characters. an 100 percent match is done, if all
      * characters where found as sequence.
      * 
+     * @TODO: perhaps this should be moved to the FuzzyFinder class.
      * @param item holding the content to be matched through the given filter. if null, weight is 0.
      * @param filter stream of characters to be found in item. if null, weight is 1.
      * @return weight of match. 0: not all characters of the given filter were found. 1: all characters were found as
@@ -874,7 +876,7 @@ public class StringUtil {
             lb = content.indexOf(filter.charAt(i), la + 1);
             if (lb < 0)
                 return 0;
-            weight /= la < 0 ? 1  : (lb - la);
+            weight /= la < 0 ? 1 : (lb - la);
             la = lb;
         }
         return weight;

@@ -335,8 +335,8 @@ public class NanoH5Test {
         createENV("restful");
         new NanoH5();
         BeanConfigurator<Address> bconf = BeanConfigurator.create(Address.class).getInstance();
-        bconf.actionAddAttribute("@http://openstreemap.org/search?query={city}<<GET:text/html");
-        bconf.actionAddAttribute("?select count(*) from Address");
+        bconf.actionAddAttribute("", "@http://openstreemap.org/search?query={city}<<GET:text/html");
+        bconf.actionAddAttribute("", "?select count(*) from Address");
         
         Bean.clearCache();
         ENV.reload();

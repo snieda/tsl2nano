@@ -17,6 +17,7 @@ import java.text.SimpleDateFormat;
 import java.util.Collection;
 
 import de.tsl2.nano.bean.annotation.Constraint;
+import de.tsl2.nano.bean.annotation.ConstraintValueSet;
 import de.tsl2.nano.bean.def.AttributeDefinition;
 import de.tsl2.nano.bean.def.BeanDefinition;
 import de.tsl2.nano.bean.def.IAttributeDefinition;
@@ -31,10 +32,15 @@ import de.tsl2.nano.core.cls.BeanClass;
 import de.tsl2.nano.core.cls.IAttribute;
 import de.tsl2.nano.core.exception.Message;
 import de.tsl2.nano.core.util.ConcurrentUtil;
+import de.tsl2.nano.core.util.FileUtil;
+import de.tsl2.nano.core.util.StringUtil;
 import de.tsl2.nano.core.util.Util;
 import de.tsl2.nano.format.RegExpFormat;
 import de.tsl2.nano.h5.Html5Presentation;
 import de.tsl2.nano.h5.RuleCover;
+import de.tsl2.nano.incubation.specification.actions.Action;
+import de.tsl2.nano.incubation.specification.actions.ActionPool;
+import de.tsl2.nano.incubation.specification.rules.Rule;
 import de.tsl2.nano.incubation.specification.rules.RulePool;
 import de.tsl2.nano.incubation.specification.rules.RuleScript;
 import de.tsl2.nano.messaging.IListener;
@@ -47,6 +53,7 @@ import de.tsl2.nano.util.PrivateAccessor;
  * @version $Revision$
  */
 
+@SuppressWarnings({"rawtypes", "unchecked"})
 public class AttributeConfigurator implements Serializable {
     /** serialVersionUID */
     private static final long serialVersionUID = 1L;
@@ -246,15 +253,17 @@ public class AttributeConfigurator implements Serializable {
         return Util.toString(getClass(), attr);
     }
 
-    @SuppressWarnings("rawtypes")
-    @de.tsl2.nano.bean.annotation.Action(name = "addListener", argNames = { "Observer Attribute",
+    @de.tsl2.nano.bean.annotation.Action(name = "addListener", argNames = { "observerAttribute",
         "Observable Attribute", "Rule-Name" })
     public void actionAddListener(
-            @Constraint(pattern = "(\\w+") String observer,
-            @Constraint(pattern = "(\\w+") String observable,
-            @Constraint(pattern = "[%§!][\\w-_:.]+") String rule) {
+            @Constraint(allowed=ConstraintValueSet.ALLOWED_APPBEANATTRS) String observer,
+            @Constraint(allowed=ConstraintValueSet.ALLOWED_APPBEANATTRS) String observable,
+            @Constraint(allowed=ConstraintValueSet.ALLOWED_ENVFILES + ".*specification/rule.*") String rule) {
         BeanDefinition def = def();
         Html5Presentation helper = (Html5Presentation) def.getPresentationHelper();
+        observer = StringUtil.substring(observer, ".", null, true);
+        observable = StringUtil.substring(observable, ".", null, true);
+        rule = StringUtil.substring(FileUtil.replaceWindowsSeparator(rule), "/", ".", true);
         helper.addRuleListener(observer, rule, 2, observable);
     }
 
@@ -262,11 +271,12 @@ public class AttributeConfigurator implements Serializable {
 //        RuleCover.removeCover(attr.getDeclaringClass(), attr.getName(), child);
 //    }
 //
-    @de.tsl2.nano.bean.annotation.Action(name = "addRuleCover", argNames = { "Property of Attribute", "Rule-Name" })
+    @de.tsl2.nano.bean.annotation.Action(name = "addRuleCover", argNames = { "propertyOfAttribute", "ruleName" })
     public void actionAddRuleCover(
             @Constraint(defaultValue = "presentable.layoutConstraints", pattern = "(\\w+[\\.]?)+", allowed = {
                 "presentable", "presentable.layout", "columnDefinition" }) String child,
-            @Constraint(pattern = "[%§!]\\w+") String rule) {
+            @Constraint(allowed=ConstraintValueSet.ALLOWED_ENVFILES + ".*specification/rule.*") String rule) {
+        rule = StringUtil.substring(FileUtil.replaceWindowsSeparator(rule), "/", ".", true);
         RuleCover.cover(attr.getDeclaringClass(), attr.getName(), child, rule);
     }
 
@@ -274,16 +284,20 @@ public class AttributeConfigurator implements Serializable {
         RuleCover.removeCover(attr.getDeclaringClass(), attr.getName(), child);
     }
 
-    @SuppressWarnings({ "rawtypes", "unchecked" })
-    @de.tsl2.nano.bean.annotation.Action(name = "createRule", argNames = { "Rule-Name", "Rule-Expression" })
-    public void actionCreateRule(
-            @Constraint(defaultValue = "presentable.layoutConstraints", pattern = "[%§!][\\w-_:.]+", allowed = {
-                "presentable", "presentable.layout", "columnDefinition" }) String name,
-            @Constraint(pattern = ".*") String expression) {
-        if (name != null && expression != null)
-            ENV.get(RulePool.class).add(new RuleScript(name, expression, null));
+    @SuppressWarnings({ "rawtypes" })
+    @de.tsl2.nano.bean.annotation.Action(name = "createRuleOrAction", argNames = { "newRuleName", "actionType",
+        "actionExpression" })
+    public void actionCreateRuleOrAction(String name,
+            @de.tsl2.nano.bean.annotation.Constraint(defaultValue = "%: RuleScript (--> JavaScript)", allowed = {
+                "§: Rule (--> Operation)", "%: RuleScript (--> JavaScript)", "!: Action (--> Java)" }) String type,
+            @de.tsl2.nano.bean.annotation.Constraint(pattern = ".*") String expression) {
+
+        if (type.startsWith("%"))
+            ENV.get(RulePool.class).add(new RuleScript<>(name, expression, null));
+        else if (type.startsWith("§"))
+            ENV.get(RulePool.class).add(new Rule(name, expression, null));
         else
-            Message.send("No Rule-Name or Rule-Expression given");
+            ENV.get(ActionPool.class).add(new Action(name, expression));
     }
 
 }

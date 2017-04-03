@@ -124,6 +124,15 @@ public class Util {
     }
 
     /**
+     * if given value {@link #isEmpty(Object)}, null will be returned, the value itself otherwise
+     * @param value to be checked
+     * @return null or value
+     */
+    public static final <T> T nonEmpty(T value) {
+        return isEmpty(value) ? null : value;
+    }
+    
+    /**
      * delegates to {@link #isContainer(Class)}
      */
     public static final boolean isContainer(Object obj) {

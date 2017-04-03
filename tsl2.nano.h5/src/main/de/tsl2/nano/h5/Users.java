@@ -11,6 +11,7 @@ package de.tsl2.nano.h5;
 
 import java.util.Map;
 import java.util.TreeMap;
+import java.util.concurrent.ConcurrentHashMap;
 
 import org.apache.commons.logging.Log;
 import org.simpleframework.xml.Default;
@@ -18,7 +19,9 @@ import org.simpleframework.xml.DefaultType;
 import org.simpleframework.xml.ElementMap;
 
 import de.tsl2.nano.core.ENV;
+import de.tsl2.nano.core.ManagedException;
 import de.tsl2.nano.core.log.LogFactory;
+import de.tsl2.nano.core.util.ConcurrentUtil;
 
 /**
  * create/load user mapping for secure logins
@@ -36,6 +39,8 @@ public class Users {
     @ElementMap(inline = true, entry = "mapping", key = "auth", required = false, keyType = User.class, value = "persist", valueType = CUser.class)
     private Map<User, User> userMapping = new TreeMap<User, User>();
 
+    private static final Map<String, Integer>userTries = new ConcurrentHashMap<String, Integer>();
+    
     /**
      * constructor
      */
@@ -69,24 +74,44 @@ public class Users {
      * @throws IllegalArgumentException if secure mode and no user entry was found.
      */
     public User auth(String name, String passwd) {
-        if (!ENV.get("app.login.secure", false)) {
-            //not secure: add all new users
-            User user = new User(name, passwd);
-            userMapping.put(user, new CUser(name, passwd));
-            ENV.save(NAME_USERMAPPING, this);
-        }
-        // only defined (userMapping) users should be connected
-        User user = null, cUser = null;
-        for (Map.Entry<User, User> e : userMapping.entrySet()) {
-            if (e.getKey().getName().equals(name)) {
-                user = e.getKey();
-                user.check(passwd);
-                cUser = e.getValue();
-                break;
+        try{
+            if (!ENV.get("app.login.secure", false)) {
+                //not secure: add all new users
+                User user = new User(name, passwd);
+                userMapping.put(user, new CUser(name, passwd));
+                ENV.save(NAME_USERMAPPING, this);
             }
+            // only defined (userMapping) users should be connected
+            User user = null, cUser = null;
+            for (Map.Entry<User, User> e : userMapping.entrySet()) {
+                if (e.getKey().getName().equals(name)) {
+                    user = e.getKey();
+                    user.check(passwd);
+                    cUser = e.getValue();
+                    break;
+                }
+            }
+            if (cUser == null) {
+                throw new IllegalArgumentException("user and/or password incorrect!");
+            }
+            resetRetries(name);
+            return cUser;
+        } catch (Exception ex) {
+            sleepOnRetry(name);
+            ManagedException.forward(ex);
+            return null;
         }
-        if (cUser == null)
-            throw new IllegalArgumentException("user and/or password incorrect!");
-        return cUser;
     }
+    
+    private static void sleepOnRetry(String userName) {
+        Integer tries = userTries.get(userName);
+        tries = tries == null ? 2 : tries + 1;
+        userTries.put(userName, tries);
+        ConcurrentUtil.sleep(tries * tries * 1000);
+    }
+
+    private static void resetRetries(String userName) {
+        userTries.remove(userName);
+    }
+    
 }

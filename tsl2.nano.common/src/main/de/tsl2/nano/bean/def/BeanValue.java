@@ -94,6 +94,12 @@ public class BeanValue<T> extends AttributeDefinition<T> implements IValueDefini
         beanValueCache.add(this);
     }
 
+    public BeanValue(Object bean, String name, IConstraint<T> constraint) {
+        super(name, constraint);
+        this.instance = bean;
+        beanValueCache.add(this);
+    }
+
     /**
      * constructor
      * 

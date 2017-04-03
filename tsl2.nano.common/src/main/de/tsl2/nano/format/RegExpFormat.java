@@ -45,6 +45,7 @@ import org.simpleframework.xml.core.Persist;
 
 import de.tsl2.nano.bean.BeanContainer;
 import de.tsl2.nano.collection.ReferenceMap;
+import de.tsl2.nano.core.ENV;
 import de.tsl2.nano.core.ManagedException;
 import de.tsl2.nano.core.cls.BeanAttribute;
 import de.tsl2.nano.core.cls.BeanClass;
@@ -308,8 +309,11 @@ public class RegExpFormat extends Format implements INumberFormatCheck {
         if (pattern.indexOf('{') == -1 && pattern.indexOf('[') == -1 && pattern.indexOf('(') == -1) {
             return pattern.length();
         }
-        throw new ManagedException("tsl2nano.implementationerror", new Object[] { pattern,
-            "only simple patterns without length definitions (like {0,5}) are allowed!" });
+//        throw new ManagedException("tsl2nano.implementationerror", new Object[] { pattern,
+//            "only simple patterns without length definitions (like {0,5}) are allowed!" });
+        int length = ENV.get("field.pattern.regexp.default.length", 64);
+        LOG.warn("can't calculate pattern lenght for " + pattern + " --> using default length of " + length);
+        return length;
     }
 
     /**

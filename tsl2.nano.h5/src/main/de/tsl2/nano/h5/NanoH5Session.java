@@ -669,16 +669,27 @@ public class NanoH5Session implements ISession<BeanDefinition>, Serializable, IL
                         Object result;
                         //on parametrized actions provide a new detail dialog/page
                         if (!Util.isEmpty(action.getArgumentTypes())) {
-                            if (!nav.current().isMultiValue()) {//define the arguments
-                                Map<String, Object> args = MapUtil.fromKeys(MethodAction.getArgumentNames(action));
-                                //TODO: extend the BeanCollector to use @Constraint of each argument (=row)
-                                BeanDefinition bean = BeanCollector.getBeanCollector(Util.getContainer(args), 0);
-                                bean.addAction(action);
-                                result = bean;
+                            if (!nav.current().getName().equals(action.getShortDescription())) {//define the arguments
+                                if (action instanceof MethodAction) {
+                                    result = ((MethodAction)action).toBean();
+                                } else {
+                                    Map<String, Object> args = MapUtil.fromKeys(MethodAction.getArgumentNames(action));
+                                    //TODO: extend the BeanCollector to use @Constraint of each argument (=row)
+                                    BeanDefinition bean = BeanCollector.getBeanCollector(Util.getContainer(args), 0);
+                                    bean.setName(action.getShortDescription());
+                                    bean.addAction(action);
+                                    result = bean;
+                                }
                             } else {//set the arguments and start the parametrized action
-                                MapEntrySet argSet = (MapEntrySet) ((BeanCollector) nav.current()).getCurrentData();
+                                Object[] values = null;
+                                if (nav.current() instanceof BeanCollector) {
+                                    MapEntrySet argSet = (MapEntrySet) ((BeanCollector) nav.current()).getCurrentData();
+                                    values = argSet.map().values().toArray();
+                                } else {
+                                    values = nav.current().toValueMap(null).values().toArray();
+                                }
                                 Object[] args = CollectionUtil.concat(Arrays.copyOfRange(action.getParameter(), 0, 1),
-                                    argSet.map().values().toArray());
+                                    values);
                                 action.setParameter(args);
                                 result = action.activate();
                             }

@@ -43,6 +43,7 @@ import de.tsl2.nano.messaging.IStatefulListener;
  * @author Tom, Thomas Schneider
  * @version $Revision$
  */
+@SuppressWarnings("rawtypes")
 public class NanoWebSocketServer extends WebSocketServer {
     private static final Log LOG = LogFactory.getLog(NanoWebSocketServer.class);
 
@@ -110,7 +111,6 @@ public class NanoWebSocketServer extends WebSocketServer {
     /**
      * {@inheritDoc}
      */
-    @SuppressWarnings("rawtypes")
     @Override
     public void onMessage(WebSocket conn, String msg) {
         LOG.debug("receiving message: '" + msg + "' from " + conn);
@@ -169,7 +169,6 @@ public class NanoWebSocketServer extends WebSocketServer {
      * 
      * @param attribute to get the parent bean and the event handler from
      */
-    @SuppressWarnings("rawtypes")
     private void injectChangeObject(IValueDefinition attribute) {
         Object changeObject = null;
         Collection<IListener> listeners = attribute.changeHandler().getListeners(WSEvent.class);
@@ -184,7 +183,6 @@ public class NanoWebSocketServer extends WebSocketServer {
         }
     }
 
-    @SuppressWarnings("rawtypes")
     private Object getChangeObject(IValueDefinition attribute) {
         Object o;
         if (changeObjects == null)

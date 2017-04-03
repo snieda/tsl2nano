@@ -136,4 +136,6 @@ public interface IAction<RETURNTYPE> extends Runnable {
      * @return action mode
      */
     int getActionMode();
+
+    boolean isRunning();
 }

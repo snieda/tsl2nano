@@ -145,6 +145,10 @@ public class BeanDefinition<T> extends BeanClass<T> implements IPluggable<BeanDe
     /** used by virtual beans, having no object instance. TODO: will not work in different vm's */
     @SuppressWarnings("serial")
     static final Serializable UNDEFINED = new Serializable() {
+        @Override
+        public String toString() {
+            return "UNDEFINED";
+        }
     };
 
     public static final String PREFIX_VIRTUAL = "virtual";

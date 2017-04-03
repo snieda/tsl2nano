@@ -48,9 +48,11 @@ import de.tsl2.nano.core.util.ByteUtil;
 import de.tsl2.nano.core.util.DelegationHandler;
 import de.tsl2.nano.core.util.FormatUtil;
 import de.tsl2.nano.core.util.ISecure;
+import de.tsl2.nano.core.util.MapUtil;
 import de.tsl2.nano.core.util.NumberUtil;
 import de.tsl2.nano.core.util.StringUtil;
 import de.tsl2.nano.core.util.Util;
+import de.tsl2.nano.format.RegExpFormat;
 import de.tsl2.nano.messaging.EventController;
 import de.tsl2.nano.messaging.IListener;
 import de.tsl2.nano.util.PrivateAccessor;
@@ -137,6 +139,11 @@ public class AttributeDefinition<T> implements IAttributeDefinition<T> {
         }
     }
 
+    public AttributeDefinition(String name, IConstraint<T> constraint) {
+        this(new VAttribute<T>(name));
+        this.constraint = constraint;
+    }
+
     protected AttributeDefinition(Method readAccessMethod) {
         super();
         attribute = new BeanAttribute(readAccessMethod);
@@ -161,6 +168,7 @@ public class AttributeDefinition<T> implements IAttributeDefinition<T> {
      * jpa-annotations.
      */
     protected void defineDefaults() {
+        defineFromAnnotations();
         if (BeanContainer.isInitialized() && BeanContainer.instance().isPersistable(getDeclaringClass())) {
             IAttributeDef def = BeanContainer.instance().getAttributeDef(getDeclaringClass(), getName());
             if (def != null) {
@@ -177,6 +185,41 @@ public class AttributeDefinition<T> implements IAttributeDefinition<T> {
         }
         if (status == null)
             initDeserialization();
+    }
+
+    private void defineFromAnnotations() {
+        Method m = getAccessMethod();
+        if (m != null) {
+            if (constraint == null && m.isAnnotationPresent(de.tsl2.nano.bean.annotation.Constraint.class)) {
+                de.tsl2.nano.bean.annotation.Constraint c =
+                    m.getAnnotation(de.tsl2.nano.bean.annotation.Constraint.class);
+                constraint = new Constraint(c.type(), c.allowed());
+                constraint.setBasicDef(c.length(), c.nullable(),
+                    new RegExpFormat(c.pattern(), 255), (T) Util.nonEmpty(c.defaultValue()));
+            }
+            if (presentable == null && m.isAnnotationPresent(de.tsl2.nano.bean.annotation.Presentable.class)) {
+                de.tsl2.nano.bean.annotation.Presentable p =
+                    m.getAnnotation(de.tsl2.nano.bean.annotation.Presentable.class);
+                presentable = new Presentable(this);
+                presentable.setPresentation(p.label(), p.type(), p.style(), p.enabled() ? IActivable.ACTIVE : IActivable.INACTIVE, p.visible()
+                    , (Serializable)MapUtil.asMap(p.layout()), (Serializable)MapUtil.asMap(p.layoutConstraints()), p.description());
+                presentable.setIcon(p.icon());
+            }
+            if (columnDefinition == null && m.isAnnotationPresent(de.tsl2.nano.bean.annotation.Column.class)) {
+                de.tsl2.nano.bean.annotation.Column c =
+                    m.getAnnotation(de.tsl2.nano.bean.annotation.Column.class);
+                columnDefinition = new ValueColumn<T>(this);
+                ValueColumn<T> vc = (ValueColumn<T>) columnDefinition;
+                vc.name = c.name();
+                vc.format = new RegExpFormat(c.pattern(), 255);
+                vc.columnIndex = c.index();
+                vc.width = c.width();
+                vc.sortIndex = c.sortIndex();
+                vc.isSortUpDirection = c.sortUp();
+//                vc.minsearch = c.min();
+//                vc.maxsearch = c.max();
+            }
+        }
     }
 
     @Persist
@@ -878,6 +921,10 @@ public class AttributeDefinition<T> implements IAttributeDefinition<T> {
         attribute.setName(name);
     }
 
+    public String getPath() {
+        return getDeclaringClass().getName() + "." + getName();
+    }
+    
     /**
      * {@inheritDoc}
      */

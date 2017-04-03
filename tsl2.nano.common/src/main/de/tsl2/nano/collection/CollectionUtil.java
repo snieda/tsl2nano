@@ -152,6 +152,16 @@ public class CollectionUtil {
         return getList(getTransforming(toTransform, transformer).iterator());
     }
 
+    public static <S> Collection<String> toStringTransformed(Collection<S> toTransform) {
+        final ITransformer<S, String> transformer = new ITransformer<S, String>() {
+            @Override
+            public String transform(S arg0) {
+                return arg0 != null ? arg0.toString() : "";
+            }
+        };
+        return getList(getTransforming(toTransform, transformer).iterator());
+    }
+    
     /**
      * @deprecated: use {@link #getFilteringBetween(Iterable, Comparable, Comparable)} or
      *              {@link #getFilteringBetween(Iterable, Object, Object, boolean)} instead. getFilteredCollection

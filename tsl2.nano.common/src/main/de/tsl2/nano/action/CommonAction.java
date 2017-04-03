@@ -40,6 +40,7 @@ public abstract class CommonAction<RETURNTYPE> implements IAction<RETURNTYPE>, S
     protected IActivable enabler;
     protected Object[] parameter;
     protected String imagePath;
+    private transient boolean isRunning;
     private static final Log LOG = LogFactory.getLog(CommonAction.class);
     protected static final String UNNAMED = "unknown";
 
@@ -236,9 +237,7 @@ public abstract class CommonAction<RETURNTYPE> implements IAction<RETURNTYPE>, S
                     + "' parameter: "
                     + parameter);
             }
-
             result = action();
-
             if (isDebugMode() || !UNNAMED.equals(getShortDescription())) {
                 LOG.info("finishing " + (synchron ? " " : "asyncron ")
                     + "action ==> '"
@@ -274,10 +273,12 @@ public abstract class CommonAction<RETURNTYPE> implements IAction<RETURNTYPE>, S
 //            ManagedException.implementationError("Aktion ist deaktiviert!", getShortDescription());
 //        }
         if (isSynchron()) {
+            isRunning = true;
             final Object lastCursor = setWaitCursor();
             try {
                 run();
             } finally {
+                isRunning = false;
                 resetCursor(lastCursor);
             }
         } else {// asynchron
@@ -401,4 +402,10 @@ public abstract class CommonAction<RETURNTYPE> implements IAction<RETURNTYPE>, S
         return MODE_UNDEFINED;
     }
 
+    /**
+     * @return Returns the isRunning.
+     */
+    public boolean isRunning() {
+        return isRunning;
+    }
 }

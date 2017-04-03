@@ -15,20 +15,19 @@ import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
 /**
- * Define attribute constraints for {@link Action}s.
+ * Define attribute table column definitions.. For further informmations, see IColumn.
  * @author Tom
  * @version $Revision$ 
  */
 @Retention(RetentionPolicy.RUNTIME)
 @Target({ElementType.PARAMETER, ElementType.METHOD})
-public @interface Constraint {
+public @interface Column {
     String name() default "";
-    Class<?> type() default Object.class;
+    int index() default -1;
+    int sortIndex() default -1;
+    boolean sortUp() default false;
     String pattern() default "";
-    int length() default -1;
-    boolean nullable() default true;
-    String defaultValue() default "";
+    int width() default -1;
     String min() default "";
     String max() default "";
-    String[] allowed() default {};
 }

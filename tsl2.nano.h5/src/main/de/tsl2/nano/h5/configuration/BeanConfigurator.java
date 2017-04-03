@@ -20,6 +20,7 @@ import java.util.List;
 import java.util.Map;
 
 import de.tsl2.nano.action.CommonAction;
+import de.tsl2.nano.bean.annotation.ConstraintValueSet;
 import de.tsl2.nano.bean.def.AttributeDefinition;
 import de.tsl2.nano.bean.def.Bean;
 import de.tsl2.nano.bean.def.BeanDefinition;
@@ -35,13 +36,18 @@ import de.tsl2.nano.collection.Entry;
 import de.tsl2.nano.core.ENV;
 import de.tsl2.nano.core.cls.BeanClass;
 import de.tsl2.nano.core.cls.IAttribute;
-import de.tsl2.nano.core.log.LogFactory;
 import de.tsl2.nano.core.util.ConcurrentUtil;
+import de.tsl2.nano.core.util.FileUtil;
 import de.tsl2.nano.core.util.MapUtil;
+import de.tsl2.nano.core.util.StringUtil;
 import de.tsl2.nano.core.util.Util;
 import de.tsl2.nano.h5.Compositor;
 import de.tsl2.nano.h5.Html5Presentable;
 import de.tsl2.nano.h5.SpecifiedAction;
+import de.tsl2.nano.h5.expression.Query;
+import de.tsl2.nano.h5.expression.QueryPool;
+import de.tsl2.nano.h5.expression.WebClient;
+import de.tsl2.nano.h5.expression.WebPool;
 import de.tsl2.nano.incubation.specification.actions.Action;
 import de.tsl2.nano.incubation.specification.actions.ActionPool;
 import de.tsl2.nano.incubation.specification.rules.Rule;
@@ -324,41 +330,53 @@ public class BeanConfigurator<T> implements Serializable {
     }
 
     @SuppressWarnings({ "rawtypes" })
-    @de.tsl2.nano.bean.annotation.Action(name = "createRuleOrAction", argNames = { "New ActionName", "Type",
-        "Action-Expression" })
-    public void actionCreateRuleOrAction(
-            @de.tsl2.nano.bean.annotation.Constraint(defaultValue = "presentable.layoutConstraints", pattern = "\\w+", allowed = {
-                "presentable", "presentable.layout", "columnDefinition" }) String name,
-            @de.tsl2.nano.bean.annotation.Constraint(defaultValue = "%: RuleScript (--> JavaScript)", pattern = "\\w+", allowed = {
-                "§: Rule (--> Operation)", "%: RuleScript (--> JavaScript)", "!: Action (--> Java)" }) String type,
+    @de.tsl2.nano.bean.annotation.Action(name = "createRuleOrAction", argNames = { "newActionName", "actionType",
+        "actionExpression" })
+    public void actionCreateRuleOrAction(String name,
+            @de.tsl2.nano.bean.annotation.Constraint(defaultValue = "%: RuleScript (--> JavaScript)", allowed = {
+                "§: Rule (--> Operation)", "%: RuleScript (--> JavaScript)", "!: Action (--> Java)"
+                , "?: Query (SQL statement)", "@: Web (URL/REST)" }) String type,
             @de.tsl2.nano.bean.annotation.Constraint(pattern = ".*") String expression) {
 
         if (type.startsWith("%"))
             ENV.get(RulePool.class).add(new RuleScript<>(name, expression, null));
         else if (type.startsWith("§"))
             ENV.get(RulePool.class).add(new Rule(name, expression, null));
-        else
+        else if (type.startsWith("!"))
             ENV.get(ActionPool.class).add(new Action(name, expression));
+        else if (type.startsWith("@"))
+            ENV.get(WebPool.class).add(WebClient.create(expression, def.getDeclaringClass()));
+        else if (type.startsWith("?"))
+            ENV.get(QueryPool.class).add(new Query(name, expression, true, null));
+        
     }
 
     @SuppressWarnings({ "rawtypes", "unchecked" })
-    @de.tsl2.nano.bean.annotation.Action(name = "addAction", argNames = { "Specified Actioname" })
+    @de.tsl2.nano.bean.annotation.Action(name = "addAction", argNames = { "specifiedAction" })
     public void actionAddAction(
-            @de.tsl2.nano.bean.annotation.Constraint(defaultValue = "presentable.layoutConstraints", pattern = "[%§!]\\w+", allowed = {
-                "presentable", "presentable.layout", "columnDefinition" }) String name) {
+    //            @de.tsl2.nano.bean.annotation.Constraint(defaultValue = "presentable.layoutConstraints", pattern = "[%§!]\\w+", allowed = {
+    //                "presentable", "presentable.layout", "columnDefinition" }) String name) {
+            @de.tsl2.nano.bean.annotation.Constraint(allowed=ConstraintValueSet.ALLOWED_ENVFILES + ".*specification/action.*") String name) {
         //check, if action available
+        name = StringUtil.substring(FileUtil.replaceWindowsSeparator(name), "/", ".", true);
         ENV.get(ActionPool.class).get(name);
         SpecifiedAction<Object> action = new SpecifiedAction(name, null);
         def.addAction(action);
     }
 
     @SuppressWarnings({ "rawtypes", "unchecked" })
-    @de.tsl2.nano.bean.annotation.Action(name = "createCompositor", argNames = { "base type", "base attribute name",
-        "target attribute name (only on manyToMany)", "icon attribute name (optional)" })
+    @de.tsl2.nano.bean.annotation.Action(name = "createCompositor", argNames = { "baseType", "baseAttributeName",
+        "targetAttributeName", "iconAttributeName" })
     public void actionCreateCompositor(
-            String baseType, String baseAttribute, String targetAttribute, String iconAttribute) {
+            @de.tsl2.nano.bean.annotation.Constraint(allowed=ConstraintValueSet.ALLOWED_APPCLASSES) String baseType, 
+            @de.tsl2.nano.bean.annotation.Constraint(allowed=ConstraintValueSet.ALLOWED_APPBEANATTRS) String baseAttribute, 
+            @de.tsl2.nano.bean.annotation.Constraint(allowed=ConstraintValueSet.ALLOWED_APPBEANATTRS) String targetAttribute, 
+            @de.tsl2.nano.bean.annotation.Constraint(nullable=true, allowed=ConstraintValueSet.ALLOWED_APPBEANATTRS) String iconAttribute) {
         BeanClass bcBaseType = BeanClass.createBeanClass(baseType);
         //check the attributes
+        baseAttribute = StringUtil.substring(baseAttribute, ".", null, true);
+        targetAttribute = StringUtil.substring(targetAttribute, ".", null, true);
+        iconAttribute = StringUtil.substring(iconAttribute, ".", null, true);
         bcBaseType.getAttribute(baseAttribute);
         bcBaseType.getAttribute(iconAttribute);
         def.getAttribute(targetAttribute);
@@ -372,10 +390,14 @@ public class BeanConfigurator<T> implements Serializable {
     }
 
     @SuppressWarnings({ "rawtypes", "unchecked" })
-    @de.tsl2.nano.bean.annotation.Action(name = "addAttribute", argNames = { "attribute-expression"})
+    @de.tsl2.nano.bean.annotation.Action(name = "addAttribute", argNames = { "attributeType", "attributeExpression"})
     public void actionAddAttribute(
+            @de.tsl2.nano.bean.annotation.Constraint(allowed = {" : (--> PathExpression)",
+                "§: Rule (--> Operation)", "%: RuleScript (--> JavaScript)", "!: Action (--> Java)"
+                , "?: Query (select statement)", "@: Web (URL/REST)" }) String type,
             String attributeExpression) {
-        ExpressionDescriptor<Object> exDescr = new ExpressionDescriptor<>(def.getDeclaringClass(), attributeExpression);
+        type = String.valueOf(type.charAt(0)).trim();
+        ExpressionDescriptor<Object> exDescr = new ExpressionDescriptor<>(def.getDeclaringClass(), type + attributeExpression);
         AttributeDefinition attr = def.addAttribute(exDescr.getName(), exDescr.toInstance(), null, null);
         attr.getPresentation().setType(IPresentable.TYPE_DEPEND);
         attr.getPresentation().setStyle(IPresentable.UNDEFINED);

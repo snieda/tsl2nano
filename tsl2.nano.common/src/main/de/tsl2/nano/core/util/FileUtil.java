@@ -1009,7 +1009,7 @@ public class FileUtil {
      * @return all files, matching the given include expression.
      */
     public static List<File> getFileset(String dir, String include, FileDetail sortBy, boolean sortUp) {
-        return getTreeFiles(dir, transformAntToRegEx(include), sortBy, sortUp);
+        return getTreeFiles(dir, transformAntToRegEx(include), sortBy, sortUp, true);
     }
 
     /**
@@ -1017,7 +1017,15 @@ public class FileUtil {
      */
     public static List<File> getTreeFiles(String basePath,
             final String regExFilename) {
-        return getTreeFiles(basePath, regExFilename, null, true);
+        return getTreeFiles(basePath, regExFilename, null, true, true);
+    }
+
+    /**
+     * delegates to {@link #getTreeFiles(String, String, FileDetail, boolean)}.
+     */
+    public static List<File> getTreeFiles(String basePath,
+            final String regExFilename, boolean caseSensitive) {
+        return getTreeFiles(basePath, regExFilename, null, true, caseSensitive);
     }
 
     /**
@@ -1031,10 +1039,11 @@ public class FileUtil {
     public static List<File> getTreeFiles(String basePath,
             final String regExFilename,
             FileDetail sortBy,
-            boolean sortUp) {
+            boolean sortUp,
+            boolean caseSensitive) {
         LinkedList<File> result = new LinkedList<File>();
         try {
-            getTreeFiles(basePath, basePath, regExFilename, result);
+            getTreeFiles(basePath, basePath, regExFilename, result, caseSensitive);
             if (sortBy != null) {
                 Collections.sort(result, new FileComparator(sortBy, sortUp));
             }
@@ -1046,24 +1055,26 @@ public class FileUtil {
         }
     }
 
-    static Collection<File> getTreeFiles(String basePath, String path, String regExFilename, Collection<File> result)
+    static Collection<File> getTreeFiles(String basePath, String path, String regExFilename, Collection<File> result, boolean caseSensitive)
             throws Exception {
-        File dir = new File(path);
-        File[] files = dir.listFiles();
+        File[] files = new File(path).listFiles();
         if (files == null) {
             throw new IllegalArgumentException("'" + path + "' is not a directory");
         }
+        regExFilename = caseSensitive ? regExFilename : regExFilename.toLowerCase();
+        String canonPath = new File(basePath).getCanonicalPath();
+        path = caseSensitive ? canonPath : canonPath.toLowerCase();
         String pattern =
-            "\\Q" + new File(basePath).getCanonicalPath() + "\\E"
+            "\\Q" + path + "\\E"
                 + regExFilename.replace("/", "\\Q" + File.separator + "\\E");
-
         for (File file : files) {
-            if (file.getCanonicalPath().matches(pattern)) {
+            if ((caseSensitive && file.getCanonicalPath().matches(pattern))
+                    || (!caseSensitive && file.getCanonicalPath().toLowerCase().matches(pattern))) {
                 result.add(file);
             }
             //no else-if, a directory can match, too. --> recursion
             if (file.isDirectory()) {
-                getTreeFiles(basePath, file.getPath(), regExFilename, result);
+                getTreeFiles(basePath, file.getPath(), regExFilename, result, caseSensitive);
             }
         }
         return result;

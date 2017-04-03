@@ -91,7 +91,7 @@ public class Constraint<T> extends AbstractConstraint<T> implements IConstraint<
     }
 
     public Constraint(Class<T> type, T... allowedValues) {
-        this(type, Arrays.asList(allowedValues));
+        this(type, allowedValues != null ? Arrays.asList(allowedValues) : null);
     }
     /**
      * tries to set values from given type and allowedValues. will set the length, scale and precision.
@@ -101,7 +101,7 @@ public class Constraint<T> extends AbstractConstraint<T> implements IConstraint<
     public Constraint(Class<T> type, Collection<T> allowedValues) {
         super();
         setType(type);
-        if (allowedValues.size() > 0) {
+        if (allowedValues != null && allowedValues.size() > 0) {
             setRange(allowedValues);
             setDefault(allowedValues.iterator().next());
             int length = -1;

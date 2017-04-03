@@ -713,6 +713,11 @@ public class Bean<T> extends BeanDefinition<T> {
         }
         if (instanceOrName instanceof String) {
             BeanDefinition<I> beandef = (BeanDefinition<I>) getBeanDefinition((String) instanceOrName);
+            // check, if beandef is for virtual type
+            if (!beandef.getDeclaringClass().equals(UNDEFINED.getClass())) {
+                beandef = new BeanDefinition();
+                beandef.setName(instanceOrName.toString());
+            }
             bean = createBean((I) UNDEFINED, beandef);
         } else if (instanceOrName.getClass().isArray()) {
             bean = createArrayBean(instanceOrName);

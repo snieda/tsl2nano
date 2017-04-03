@@ -20,7 +20,9 @@ import org.simpleframework.xml.core.Commit;
 
 import de.tsl2.nano.action.CommonAction;
 import de.tsl2.nano.action.IAction;
+import de.tsl2.nano.bean.ValueHolder;
 import de.tsl2.nano.bean.annotation.Action;
+import de.tsl2.nano.bean.annotation.ConstraintValueSet;
 import de.tsl2.nano.core.ENV;
 import de.tsl2.nano.core.ManagedException;
 import de.tsl2.nano.core.Messages;
@@ -119,18 +121,21 @@ public class MethodAction<T> extends CommonAction<T> {
                 //on each parameter, the constraint annotation has to be the first one
                 de.tsl2.nano.bean.annotation.Constraint c;
                 for (int i = 0; i < cana.length; i++) {
-                    c = (de.tsl2.nano.bean.annotation.Constraint) cana[i][0];
-                    //IMPROvE: allowed are only strings...
-                    constraints[i] =
-                        new Constraint(c.type() != Object.class ? c.type() : getArgumentTypes()[i],
-                            c.allowed().length > 0 ? c.allowed() : null);
-                    constraints[i].defaultValue = !c.defaultValue().isEmpty() ? c.defaultValue() : null;
-                    constraints[i].format =
-                        !c.pattern().isEmpty() ? c.length() > -1 ? new RegExpFormat(c.pattern(), c.length())
-                            : new RegExpFormat(c.pattern(), null) : null;
-                    constraints[i].length = c.length();
-                    constraints[i].min = !c.min().isEmpty() ? c.min() : null;
-                    constraints[i].max = !c.max().isEmpty() ? c.max() : null;
+                    if (cana[i].length > 0) {
+                        c = (de.tsl2.nano.bean.annotation.Constraint) cana[i][0];
+                        //IMPROvE: allowed are only strings...
+                        String[] allowed = ConstraintValueSet.preDefined(c.allowed());
+                        constraints[i] =
+                            new Constraint(c.type() != Object.class ? c.type() : getArgumentTypes()[i],
+                                allowed.length > 0 ? allowed : null);
+                        constraints[i].defaultValue = !c.defaultValue().isEmpty() ? c.defaultValue() : null;
+                        constraints[i].format =
+                            !c.pattern().isEmpty() ? c.length() > -1 ? new RegExpFormat(c.pattern(), c.length())
+                                : new RegExpFormat(c.pattern(), null) : null;
+                        constraints[i].length = c.length();
+                        constraints[i].min = !c.min().isEmpty() ? c.min() : null;
+                        constraints[i].max = !c.max().isEmpty() ? c.max() : null;
+                    }
                 }
             }
         }
@@ -159,13 +164,15 @@ public class MethodAction<T> extends CommonAction<T> {
 
     /**
      * convenience for any parametrized action to evaluate its argument names
+     * 
      * @param action any action
      * @return default argument names or - if annotations found - defined argument names
      */
     public static final String[] getArgumentNames(IAction action) {
-        return action instanceof MethodAction ? ((MethodAction)action).getArgumentNames() : getIdNames(action.getArgumentTypes());
+        return action instanceof MethodAction ? ((MethodAction) action).getArgumentNames()
+            : getIdNames(action.getArgumentTypes());
     }
-    
+
     /**
      * uses names of given argument classes. if not unique, adds a counter to be unique.
      * 
@@ -199,6 +206,23 @@ public class MethodAction<T> extends CommonAction<T> {
             ManagedException.forward(e);
             return null;
         }
+    }
+
+    /**
+     * creates a new bean through informations of argument names and constraints
+     * 
+     * @return
+     */
+    public BeanDefinition toBean() {
+        Bean b = new Bean();
+        b.setName(getShortDescription());
+        String[] args = getArgumentNames();
+        Constraint[] c = getConstraints();
+        for (int i = 0; i < args.length; i++) {
+            b.addAttribute(new BeanValue<T>(new ValueHolder(null), args[i], c[i]));
+        }
+        b.addAction(this);
+        return b;
     }
 
     @Commit
