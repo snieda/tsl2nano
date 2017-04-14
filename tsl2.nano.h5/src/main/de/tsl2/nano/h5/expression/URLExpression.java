@@ -83,6 +83,8 @@ public class URLExpression<T extends Serializable> extends RunnableExpression<T>
 
     @Override
     public String getName() {
-        return createRunnable().getName();
+        if (name == null)
+            name = createRunnable().getName();
+        return name;
     }
 }

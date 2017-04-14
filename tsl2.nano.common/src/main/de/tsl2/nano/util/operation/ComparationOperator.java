@@ -34,8 +34,8 @@ public class ComparationOperator extends SOperator<Boolean> {
             @Override
             public Boolean action() throws Exception {
                 return
-                (parameter[0] instanceof Comparable
-                    ? ((Comparable) parameter[0]).compareTo(parameter[1]) == 0 : parameter[1] == null
+                (parameters().getValue(0) instanceof Comparable
+                    ? ((Comparable) parameters().getValue(0)).compareTo(parameters().getValue(1)) == 0 : parameters().getValue(1) == null
                         ? true : false);
             }
         });
@@ -43,8 +43,8 @@ public class ComparationOperator extends SOperator<Boolean> {
             @Override
             public Boolean action() throws Exception {
                 return
-                (parameter[0] instanceof Comparable
-                    ? ((Comparable) parameter[0]).compareTo(parameter[1]) > 0 : parameter[1] == null
+                (parameters().getValue(0) instanceof Comparable
+                    ? ((Comparable) parameters().getValue(0)).compareTo(parameters().getValue(1)) > 0 : parameters().getValue(1) == null
                         ? false : false);
             }
         });
@@ -52,8 +52,8 @@ public class ComparationOperator extends SOperator<Boolean> {
             @Override
             public Boolean action() throws Exception {
                 return
-                (parameter[0] instanceof Comparable
-                    ? ((Comparable) parameter[0]).compareTo(parameter[1]) > 0 : parameter[1] == null
+                (parameters().getValue(0) instanceof Comparable
+                    ? ((Comparable) parameters().getValue(0)).compareTo(parameters().getValue(1)) > 0 : parameters().getValue(1) == null
                         ? false : true);
             }
         });

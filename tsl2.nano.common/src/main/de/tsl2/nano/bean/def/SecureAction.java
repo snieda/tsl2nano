@@ -10,6 +10,8 @@
 package de.tsl2.nano.bean.def;
 
 import org.apache.commons.logging.Log;
+import org.simpleframework.xml.Default;
+import org.simpleframework.xml.DefaultType;
 
 import de.tsl2.nano.action.CommonAction;
 import de.tsl2.nano.action.IAction;
@@ -23,6 +25,7 @@ import de.tsl2.nano.core.log.LogFactory;
  * @author Thomas Schneider
  * @version $Revision$
  */
+@Default(value = DefaultType.FIELD, required = false)
 public abstract class SecureAction<RETURNTYPE> extends CommonAction<RETURNTYPE> {
     /** serialVersionUID */
     private static final long serialVersionUID = 2212543928201596619L;

@@ -78,25 +78,25 @@ public class BooleanOperator extends SOperator<Boolean> {
         addOperation("&", new CommonAction<Boolean>() {
             @Override
             public Boolean action() throws Exception {
-                return (Boolean) parameter[0] & (Boolean) parameter[1];
+                return (Boolean) parameters().getValue(0) & (Boolean) parameters().getValue(1);
             }
         });
         addOperation("|", new CommonAction<Boolean>() {
             @Override
             public Boolean action() throws Exception {
-                return (Boolean) parameter[0] | (Boolean) parameter[1];
+                return (Boolean) parameters().getValue(0) | (Boolean) parameters().getValue(1);
             }
         });
         addOperation("!", new CommonAction<Boolean>() {
             @Override
             public Boolean action() throws Exception {
-                return !(Boolean) parameter[1];
+                return !(Boolean) parameters().getValue(1);
             }
         });
         addOperation("=", new CommonAction<Boolean>() {
             @Override
             public Boolean action() throws Exception {
-                return Util.equals(parameter);
+                return Util.equals(parameter.getValues());
             }
         });
     }

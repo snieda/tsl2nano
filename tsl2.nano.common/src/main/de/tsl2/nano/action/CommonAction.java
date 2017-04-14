@@ -13,6 +13,9 @@ import java.io.Serializable;
 import java.util.Collection;
 
 import org.apache.commons.logging.Log;
+import org.simpleframework.xml.Default;
+import org.simpleframework.xml.DefaultType;
+import org.simpleframework.xml.ElementList;
 
 import de.tsl2.nano.core.ManagedException;
 import de.tsl2.nano.core.log.LogFactory;
@@ -24,7 +27,8 @@ import de.tsl2.nano.core.util.StringUtil;
  * @author Thomas Schneider
  * @version $Revision$
  */
-public abstract class CommonAction<RETURNTYPE> implements IAction<RETURNTYPE>, Serializable {
+@Default(value = DefaultType.FIELD, required = false)
+public abstract class CommonAction<RETURNTYPE> implements IAction<RETURNTYPE>, Serializable, Comparable<CommonAction<RETURNTYPE>> {
 
     /** serialVersionUID */
     private static final long serialVersionUID = 7933702124402104693L;
@@ -38,7 +42,8 @@ public abstract class CommonAction<RETURNTYPE> implements IAction<RETURNTYPE>, S
     RETURNTYPE result;
     protected Collection<String> receiverIDs;
     protected IActivable enabler;
-    protected Object[] parameter;
+    @ElementList(inline = true, entry = "parameter", required = false, type=Parameter.class)
+    protected Parameters parameter;
     protected String imagePath;
     private transient boolean isRunning;
     private static final Log LOG = LogFactory.getLog(CommonAction.class);
@@ -314,9 +319,13 @@ public abstract class CommonAction<RETURNTYPE> implements IAction<RETURNTYPE>, S
         return receiverIDs;
     }
 
+    public Parameters parameters() {
+        return parameter;
+    }
+    
     @Override
     public Class[] getArgumentTypes() {
-        return null;
+        return parameter != null ? parameter.getTypes() : null;
     }
     
     /**
@@ -324,12 +333,12 @@ public abstract class CommonAction<RETURNTYPE> implements IAction<RETURNTYPE>, S
      */
     @Override
     public Object[] getParameter() {
-        return parameter;
+        return parameter != null ? parameter.getValues() : null;
     }
 
     @Override
     public Object getParameter(int i) {
-        return parameter != null && parameter.length > i ? parameter[i] : null;
+        return parameter != null ? parameter.getValue(i) : null;
     }
     
     /**
@@ -337,7 +346,9 @@ public abstract class CommonAction<RETURNTYPE> implements IAction<RETURNTYPE>, S
      */
     @Override
     public void setParameter(Object... parameter) {
-        this.parameter = parameter;
+        if (this.parameter == null)
+            this.parameter = new Parameters();
+        this.parameter.setValues(parameter);
     }
 
     /**
@@ -362,6 +373,11 @@ public abstract class CommonAction<RETURNTYPE> implements IAction<RETURNTYPE>, S
 
     public void setImagePath(String imagePath) {
         this.imagePath = imagePath;
+    }
+ 
+    @Override
+    public int compareTo(CommonAction<RETURNTYPE> o) {
+        return this.shortDescription.compareTo(o.shortDescription);
     }
     
     @Override

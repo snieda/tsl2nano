@@ -11,17 +11,22 @@ package de.tsl2.nano.h5;
 
 import java.io.File;
 import java.util.LinkedHashMap;
+import java.util.Map;
 import java.util.Set;
 
 import org.simpleframework.xml.Attribute;
 import org.simpleframework.xml.core.Commit;
 
+import de.tsl2.nano.action.Parameter;
+import de.tsl2.nano.action.Parameters;
 import de.tsl2.nano.bean.BeanUtil;
 import de.tsl2.nano.bean.IConnector;
+import de.tsl2.nano.bean.def.Constraint;
 import de.tsl2.nano.bean.def.SecureAction;
 import de.tsl2.nano.core.ENV;
 import de.tsl2.nano.core.exception.Message;
 import de.tsl2.nano.core.util.Util;
+import de.tsl2.nano.incubation.specification.ParType;
 import de.tsl2.nano.incubation.specification.actions.Action;
 import de.tsl2.nano.incubation.specification.actions.ActionPool;
 
@@ -104,6 +109,7 @@ public class SpecifiedAction<RETURNTYPE> extends SecureAction<RETURNTYPE> implem
         return this;
     }
 
+    @SuppressWarnings("rawtypes")
     @Override
     public Class[] getArgumentTypes() {
         return getActionRunner().getParameterList().toArray(new Class[0]);
@@ -111,6 +117,21 @@ public class SpecifiedAction<RETURNTYPE> extends SecureAction<RETURNTYPE> implem
     
     public Set<String> getArgumentNames() {
         return getActionRunner().getParameter().keySet();
+    }
+    
+    @SuppressWarnings({ "unchecked", "rawtypes" })
+    @Override
+    public Parameters parameters() {
+        //to be compatible...
+        if (parameter == null) {
+            Map<String, ParType> parMap = getActionRunner().getParameter();
+            parameter = new Parameters(parMap.size());
+            Set<String> keys = parMap.keySet();
+            for (String k : keys) {
+                parameter.add(new Parameter(k, new Constraint<>(parMap.get(k).getType()), null));
+            }
+        }
+        return parameter;
     }
     
     @Override

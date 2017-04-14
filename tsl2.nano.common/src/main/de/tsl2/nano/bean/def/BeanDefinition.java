@@ -292,6 +292,10 @@ public class BeanDefinition<T> extends BeanClass<T> implements IPluggable<BeanDe
         return isdefault;
     }
 
+    public void setDefault(boolean isdefault) {
+        this.isdefault = isdefault;
+    }
+    
     /**
      * {@inheritDoc}
      */
@@ -502,7 +506,7 @@ public class BeanDefinition<T> extends BeanClass<T> implements IPluggable<BeanDe
         AttributeDefinition<A> bv = new AttributeDefinition<A>(expression);
         bv.setBasicDef(-1, true, null, null, description != null ? description : name);
         bv.setPresentation(presentation);
-        return (AttributeDefinition<A>) addAttribute(name, bv);
+        return (AttributeDefinition<A>) addAttribute(bv.getName(), bv);
     }
 
     /**
@@ -1536,7 +1540,7 @@ public class BeanDefinition<T> extends BeanClass<T> implements IPluggable<BeanDe
     }
 
     /**
-     * fills a map with all bean-attribute-names and their values. keys in alphabetic order.
+     * fills a map with all bean-attribute-names and their values. keys in defined order.
      * 
      * @param keyPrefix to be used as prefix for the bean attribute name
      * @param onlySingleValues if true, collections will be ignored
@@ -1553,7 +1557,7 @@ public class BeanDefinition<T> extends BeanClass<T> implements IPluggable<BeanDe
             boolean onlyFilteredAttributes,
             String... filterAttributes) {
         final List<? extends IAttribute> attributes = onlySingleValues ? getSingleValueAttributes() : getAttributes();
-        if (filterAttributes == null || filterAttributes.length == 0) {
+        if ((filterAttributes == null || filterAttributes.length == 0) && attributeFilter == null) {
             Collections.sort(attributes);
         }
         final Map<String, Object> map = new LinkedHashMap<String, Object>(attributes.size());

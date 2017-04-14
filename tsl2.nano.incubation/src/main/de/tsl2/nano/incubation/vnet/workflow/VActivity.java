@@ -12,6 +12,7 @@ package de.tsl2.nano.incubation.vnet.workflow;
 import java.io.Serializable;
 import java.util.Map;
 
+import de.tsl2.nano.action.CommonAction;
 import de.tsl2.nano.incubation.vnet.ILocatable;
 import de.tsl2.nano.incubation.vnet.Notification;
 import de.tsl2.nano.messaging.IListener;
@@ -25,8 +26,7 @@ import de.tsl2.nano.messaging.IListener;
 public abstract class VActivity<S, T> extends Activity<S, T> implements
         IListener<Notification>,
         ILocatable,
-        Serializable,
-        Comparable<VActivity> {
+        Serializable {
 
     /** serialVersionUID */
     private static final long serialVersionUID = 7844715887456324364L;
@@ -68,8 +68,11 @@ public abstract class VActivity<S, T> extends Activity<S, T> implements
         return getShortDescription();
     }
 
+    @SuppressWarnings("rawtypes")
     @Override
-    public int compareTo(VActivity o) {
-        return getPath().compareTo(o.getPath());
+    public int compareTo(CommonAction<T> o) {
+        if (!(o instanceof VActivity))
+            return -1;
+        return getPath().compareTo(((VActivity)o).getPath());
     }
 }

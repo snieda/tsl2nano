@@ -254,7 +254,7 @@ public class AttributeConfigurator implements Serializable {
     }
 
     @de.tsl2.nano.bean.annotation.Action(name = "addListener", argNames = { "observerAttribute",
-        "Observable Attribute", "Rule-Name" })
+        "observableAttribute", "ruleName" })
     public void actionAddListener(
             @Constraint(allowed=ConstraintValueSet.ALLOWED_APPBEANATTRS) String observer,
             @Constraint(allowed=ConstraintValueSet.ALLOWED_APPBEANATTRS) String observable,
@@ -280,11 +280,10 @@ public class AttributeConfigurator implements Serializable {
         RuleCover.cover(attr.getDeclaringClass(), attr.getName(), child, rule);
     }
 
-    public void actionRemoveRuleCover(String child, String rule) {
+    public void actionRemoveRuleCover(String child) {
         RuleCover.removeCover(attr.getDeclaringClass(), attr.getName(), child);
     }
 
-    @SuppressWarnings({ "rawtypes" })
     @de.tsl2.nano.bean.annotation.Action(name = "createRuleOrAction", argNames = { "newRuleName", "actionType",
         "actionExpression" })
     public void actionCreateRuleOrAction(String name,

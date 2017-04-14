@@ -51,8 +51,8 @@ public abstract class GenericBeanContainer extends BeanContainerUtil {
         IAction idFinder = new CommonAction() {
             @Override
             public Object action() {
-                Class entityType = (Class) parameter[0];
-                Object id = parameter[1];
+                Class entityType = (Class) parameters().getValue(0);
+                Object id = parameters().getValue(1);
                 if (!BeanClass.getBeanClass(entityType).isAnnotationPresent(Entity.class)) {
                     return null;
                 }
@@ -62,9 +62,9 @@ public abstract class GenericBeanContainer extends BeanContainerUtil {
         IAction<Collection<?>> typeFinder = new CommonAction<Collection<?>>() {
             @Override
             public Collection<?> action() {
-                Class entityType = (Class) parameter[0];
-                int startIndex = (Integer) parameter[1];
-                int maxResult = (Integer) parameter[2];
+                Class entityType = (Class) parameters().getValue(0);
+                int startIndex = (Integer) parameters().getValue(1);
+                int maxResult = (Integer) parameters().getValue(2);
                 if (!BeanClass.getBeanClass(entityType).isAnnotationPresent(Entity.class)) {
                     return null;
                 }
@@ -74,88 +74,88 @@ public abstract class GenericBeanContainer extends BeanContainerUtil {
         IAction<Collection<?>> exampleFinder = new CommonAction<Collection<?>>() {
             @Override
             public Collection<?> action() {
-                boolean useLike = parameter[1] instanceof Boolean && ((Boolean) parameter[1]);
+                boolean useLike = parameters().getValue(1) instanceof Boolean && ((Boolean) parameters().getValue(1));
                 if (useLike) {
-                    return container.getGenService().findByExampleLike(parameter[0], true, (Integer) parameter[2],
-                        (Integer) parameter[3]);
+                    return container.getGenService().findByExampleLike(parameters().getValue(0), true, (Integer) parameters().getValue(2),
+                        (Integer) parameters().getValue(3));
                 } else {
-                    return container.getGenService().findByExample(parameter[0], true);
+                    return container.getGenService().findByExample(parameters().getValue(0), true);
                 }
             }
         };
         IAction<Collection<?>> betweenFinder = new CommonAction<Collection<?>>() {
             @Override
             public Collection<?> action() {
-                return container.getGenService().findBetween(parameter[0], parameter[1], true, (Integer) parameter[2],
-                    (Integer) parameter[3]);
+                return container.getGenService().findBetween(parameters().getValue(0), parameters().getValue(1), true, (Integer) parameters().getValue(2),
+                    (Integer) parameters().getValue(3));
             }
         };
         IAction<Collection<?>> queryFinder = new CommonAction<Collection<?>>() {
             @Override
             public Collection<?> action() {
-                return container.getGenService().findByQuery((String) parameter[0],
-                    (Boolean) parameter[1],
-                    (Object[]) parameter[2],
-                    (Class[]) parameter[3]);
+                return container.getGenService().findByQuery((String) parameters().getValue(0),
+                    (Boolean) parameters().getValue(1),
+                    (Object[]) parameters().getValue(2),
+                    (Class[]) parameters().getValue(3));
             }
         };
         IAction<Collection<?>> queryMapFinder = new CommonAction<Collection<?>>() {
             @Override
             public Collection<?> action() {
-                return container.getGenService().findByQuery((String) parameter[0],
-                    (Boolean) parameter[1],
-                    (Map<String, Object>) parameter[2],
-                    (Class[]) parameter[3]);
+                return container.getGenService().findByQuery((String) parameters().getValue(0),
+                    (Boolean) parameters().getValue(1),
+                    (Map<String, Object>) parameters().getValue(2),
+                    (Class[]) parameters().getValue(3));
             }
         };
         IAction lazyrelationResolver = new CommonAction() {
             @Override
             public Object action() {
                 //use the weak implementation of BeanClass to avoid classloader problems!
-                if (BeanClass.getBeanClass(parameter[0].getClass()).isAnnotationPresent(Entity.class)) {
-                    return container.getGenService().instantiateLazyRelationship(parameter[0]);
+                if (BeanClass.getBeanClass(parameters().getValue(0).getClass()).isAnnotationPresent(Entity.class)) {
+                    return container.getGenService().instantiateLazyRelationship(parameters().getValue(0));
                 } else {
-                    return parameter[0];
+                    return parameters().getValue(0);
                 }
             }
         };
         IAction saveAction = new CommonAction() {
             @Override
             public Object action() {
-                return container.getGenService().persist(parameter[0]);
+                return container.getGenService().persist(parameters().getValue(0));
             }
         };
         IAction deleteAction = new CommonAction() {
             @Override
             public Object action() {
-                container.getGenService().remove(parameter[0]);
+                container.getGenService().remove(parameters().getValue(0));
                 return null;
             }
         };
         IAction attrAction = new CommonAction() {
             @Override
             public Object action() {
-                return getAttributeDefinitions(parameter[0], (String) parameter[1]);
+                return getAttributeDefinitions(parameters().getValue(0), (String) parameters().getValue(1));
             }
         };
         IAction permissionAction = new CommonAction() {
             @Override
             public Object action() {
-                return hasPermission((String) parameter[0], (String) (parameter.length > 1 ? parameter[1] : null));
+                return hasPermission((String) parameters().getValue(0), (String) (parameters().size() > 1 ? parameters().getValue(1) : null));
             }
         };
         IAction persistableAction = new CommonAction() {
             @Override
             public Object action() {
-                return isPersistable((Class<?>) parameter[0]);
+                return isPersistable((Class<?>) parameters().getValue(0));
             }
         };
         final IAction<Integer> executeAction = new CommonAction<Integer>() {
             @Override
             public Integer action() {
-                return container.getGenService().executeQuery((String) parameter[0],
-                    (Boolean) parameter[1],
-                    (Object[]) parameter[2]);
+                return container.getGenService().executeQuery((String) parameters().getValue(0),
+                    (Boolean) parameters().getValue(1),
+                    (Object[]) parameters().getValue(2));
             }
         };
         BeanContainer.initServiceActions(idFinder,

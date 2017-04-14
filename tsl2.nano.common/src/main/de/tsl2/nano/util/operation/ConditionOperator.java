@@ -93,22 +93,22 @@ public class ConditionOperator<T> extends SOperator<T> {
             @Override
             public T action() throws Exception {
                 boolean result =
-                    parameter[0] instanceof Boolean ? (Boolean) parameter[0] : op.eval((String) parameter[0]);
+                    parameters().getValue(0) instanceof Boolean ? (Boolean) parameters().getValue(0) : op.eval((String) parameters().getValue(0));
                 /*
                  * if expression is true, we start an action or simply return a stored value.
                  */
-                return executeIf((T) parameter[1], result);
+                return executeIf((T) parameters().getValue(1), result);
             }
         });
         addOperation(KEY_ELSE, new CommonAction<T>() {
             @Override
             public T action() throws Exception {
                 boolean result =
-                    parameter[0] instanceof Boolean ? (Boolean) parameter[0] : op.eval((String) parameter[0]);
+                    parameters().getValue(0) instanceof Boolean ? (Boolean) parameters().getValue(0) : op.eval((String) parameters().getValue(0));
                 /*
                  * if expression is false, we start an action or simply return a stored value.
                  */
-                return executeIf((T) parameter[1], !result);
+                return executeIf((T) parameters().getValue(1), !result);
             }
         });
         addOperation(KEY_EQUALS, new CommonAction<T>() {
@@ -117,7 +117,7 @@ public class ConditionOperator<T> extends SOperator<T> {
                 /*
                  * if both parameter are equal, return true
                  */
-                return (T)Util.untyped(Util.equals(parameter));
+                return (T)Util.untyped(Util.equals(parameter.getValues()));
             }
         });
 
@@ -204,13 +204,13 @@ class TypeOP<T> extends CommonAction<T> {
     @Override
     public T action() throws Exception {
         T o1 =
-            parameter[0] != null && type.isAssignableFrom(parameter[0].getClass()) ? (T) parameter[0]
+            parameters().getValue(0) != null && type.isAssignableFrom(parameters().getValue(0).getClass()) ? (T) parameters().getValue(0)
             : op.converter
-                .to((CharSequence) parameter[0]);
+                .to((CharSequence) parameters().getValue(0));
         T o2 =
-            parameter[1] != null && type.isAssignableFrom(parameter[1].getClass()) ? (T) parameter[1]
+            parameters().getValue(1) != null && type.isAssignableFrom(parameters().getValue(1).getClass()) ? (T) parameters().getValue(1)
             : op.converter
-                .to((CharSequence) parameter[1]);
+                .to((CharSequence) parameters().getValue(1));
         IAction<T> operation = op.operationDefs.get(sop);
         operation.setParameter(new Object[] { o1, o2 });
         return operation.activate();

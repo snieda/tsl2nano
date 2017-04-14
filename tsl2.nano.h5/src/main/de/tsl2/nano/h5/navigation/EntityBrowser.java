@@ -19,6 +19,7 @@ import org.simpleframework.xml.Attribute;
 
 import de.tsl2.nano.action.IAction;
 import de.tsl2.nano.bean.BeanContainer;
+import de.tsl2.nano.bean.BeanUtil;
 import de.tsl2.nano.bean.def.Bean;
 import de.tsl2.nano.bean.def.BeanCollector;
 import de.tsl2.nano.bean.def.BeanDefinition;
@@ -64,11 +65,7 @@ public class EntityBrowser implements IBeanNavigator {
         boolean isOnWork = false;
         boolean goBack = userResponseObject == null || userResponseObject == IAction.CANCELED;
         if (!goBack) {
-            BeanDefinition<?> userResponseBean =
-                (BeanDefinition<?>) (userResponseObject instanceof BeanDefinition<?> ? userResponseObject
-                    : (Util.isContainer(userResponseObject)
-                        ? BeanCollector.getBeanCollector(Util.getContainer(userResponseObject), 0)
-                        : Bean.getBean((Serializable) userResponseObject)));
+            BeanDefinition<?> userResponseBean = BeanUtil.getBean(userResponseObject);
             isOnWork = navigation.contains(userResponseBean);
             if (!isOnWork) {
                 return (current = navigation.push(userResponseBean));

@@ -14,6 +14,7 @@ import java.lang.reflect.Array;
 import java.text.Format;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -208,6 +209,8 @@ public class Bean<T> extends BeanDefinition<T> {
             if (!isVirtual()) {
                 if (instance != null) {
                     actions = getActionsByClass(instance.getClass(), null, new Object[] { instance });
+                    actions = new ArrayList<IAction>(actions);
+                    Collections.sort((List)actions);
                 }
             }
         }

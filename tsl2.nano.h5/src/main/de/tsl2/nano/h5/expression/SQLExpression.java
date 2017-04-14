@@ -75,6 +75,8 @@ public class SQLExpression<T extends Serializable> extends RunnableExpression<T>
 
     @Override
     public String getName() {
-        return expression.substring(1);
+        if (name == null)
+            name = expression.substring(1);
+        return name;
     }
 }

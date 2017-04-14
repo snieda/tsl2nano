@@ -566,7 +566,8 @@ This hashcode then can be used inside the __usercheck.xml for the synthetic user
          </valid>
       </persist>
    </mapping>
-</users>~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+</users>
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 ...here the synthetic auth user name was changed from default SA to MUSTER and the synthetic password was changed to the new hashcode.
  
@@ -2981,6 +2982,7 @@ Actual list: http://infocenter.pentaho.com/help/index.jsp?topic=%2Fsupported_com
  1.0.0e | 21.07.2016 | RESTful attributes enhanced. NEW: runtime attribute definition NEW: broadcast messages to all sessions.
  1.0.0f | 07.08.2016 | rules/actions/covers now able to use scripts groovy, scala, jruby, python, clojure, beanshell, ceylon, golo. NEW: ValueExpression import/export
  1.0.0g | 05.03.2017 | NEW: authentication mapping between 'auth' and 'persist' user, many bugfixes 
+ 1.1.0  | 16.04.2017 | NEW: attribute/actions annotations, Bean-/Attribute-Configurator with decorated parameters, REFACT: action+parameter
  
 <style class="fallback">body{white-space:pre;font-family:monospace}</style><script src="markdeep.min.js"></script><script src="http://casual-effects.com/markdeep/latest/markdeep.min.js"></script>
 
@@ -3593,11 +3595,23 @@ Schueler:
 keywords: class, from, until, order, table, column, view 
 
 TODO: yaml --> @PostConstruct
-
+<!--
 <meta http-equiv="refresh" content="0; URL=https://sourceforge.net/p/tsl2nano/wiki/tsl2-nano%20Home/#changing-layouts-through-the-beanconfigurator">
-
+-->
 YAML: howto invoke initSerialization() + initDeserialization() (32 occurrencies)
 
 constraints on methodaction: +predefined sets (all classes, all beans, all bean-attributes)
 create standard actions: print, crypt, etc.
 fill messages.properites with all configurator action names
+
+Tutorial-Plan:
+- run with name
+- model from ponyorm
+- copy as database
+- ok --> create environment
+- color-theme
+- model: item, party... -> value-expression
+- model: charge -> create compositor
+- create rule: weekday-color
+- create rule: calchours
+- create slq-query: project statistics

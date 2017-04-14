@@ -9,6 +9,7 @@
  */
 package de.tsl2.nano.bean.def;
 
+import java.util.LinkedList;
 import java.util.List;
 
 import de.tsl2.nano.collection.CollectionUtil;
@@ -28,12 +29,14 @@ public class AttributeFinder extends FuzzyFinder<String> {
     @SuppressWarnings({ "unchecked", "rawtypes" })
     public AttributeFinder() {
         super(new IFuzzyDescriptor<String>() {
-            List<BeanValue> bvs = (List<BeanValue>) BeanClass.getStatic(BeanValue.class, "beanValueCache");
+//            List<BeanValue> bvs = (List<BeanValue>) BeanClass.getStatic(BeanValue.class, "beanValueCache");
+            List<BeanDefinition> bds = (List<BeanDefinition>) BeanClass.getStatic(BeanDefinition.class, "virtualBeanCache");
+            
             @Override
             public Iterable<String> getAvailables() {
-                return CollectionUtil.getTransforming(bvs, new ITransformer<BeanValue, String>() {
+                return CollectionUtil.getTransforming(collectAttributes(bds), new ITransformer<AttributeDefinition, String>() {
                     @Override
-                    public String transform(BeanValue toTransform) {
+                    public String transform(AttributeDefinition toTransform) {
                         return toTransform.getPath();
                     }
                 });
@@ -45,5 +48,12 @@ public class AttributeFinder extends FuzzyFinder<String> {
             }
         });
     }
-
+    @SuppressWarnings({ "rawtypes", "unchecked" })
+    static List<AttributeDefinition> collectAttributes(List<BeanDefinition> bds) {
+        List<AttributeDefinition> attrs = new LinkedList<AttributeDefinition>();
+        for (BeanDefinition bd : bds) {
+            attrs.addAll(bd.getAttributeDefinitions().values());
+        }
+        return attrs;
+    }
 }

@@ -89,7 +89,9 @@ public class RuleExpression<T extends Serializable> extends RunnableExpression<T
 
     @Override
     public String getName() {
-        return expression.substring(1);
+        if (name == null)
+            name = expression.substring(1);
+        return name;
     }
     public static Class<? extends AbstractRule> getRunnableType(String ruleName) {
         return ruleName.charAt(0) == RuleScript.PREFIX ? RuleScript.class : ruleName.charAt(0) == RuleDecisionTable.PREFIX ? RuleDecisionTable.class : Rule.class;

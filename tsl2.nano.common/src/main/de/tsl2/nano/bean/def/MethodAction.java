@@ -114,7 +114,7 @@ public class MethodAction<T> extends CommonAction<T> {
         if (constraints == null && method.isAnnotationPresent(Action.class)) {
             Action annAction = method.getAnnotation(Action.class);
             if (!annAction.name().isEmpty())
-                shortDescription = annAction.name();
+                shortDescription = ENV.translate(annAction.name(), true);
             Annotation[][] cana;
             if ((cana = method.getParameterAnnotations()) != null) {
                 constraints = new Constraint[cana.length];
@@ -158,7 +158,7 @@ public class MethodAction<T> extends CommonAction<T> {
             && (ana = method.getAnnotation(Action.class)).argNames().length > 0) {
             return ana.argNames();
         } else {
-            return getIdNames(getArgumentTypes());
+            return parameters().getNames();
         }
     }
 
@@ -170,7 +170,7 @@ public class MethodAction<T> extends CommonAction<T> {
      */
     public static final String[] getArgumentNames(IAction action) {
         return action instanceof MethodAction ? ((MethodAction) action).getArgumentNames()
-            : getIdNames(action.getArgumentTypes());
+            : action instanceof CommonAction ? ((CommonAction)action).parameters().getNames() : getIdNames(action.getArgumentTypes());
     }
 
     /**
@@ -219,9 +219,10 @@ public class MethodAction<T> extends CommonAction<T> {
         String[] args = getArgumentNames();
         Constraint[] c = getConstraints();
         for (int i = 0; i < args.length; i++) {
-            b.addAttribute(new BeanValue<T>(new ValueHolder(null), args[i], c[i]));
+            b.addAttribute(new BeanValue<T>(new ValueHolder(null), args[i], c != null && c.length > i ? c[i] : null));
         }
         b.addAction(this);
+        b.setDefault(false);
         return b;
     }
 

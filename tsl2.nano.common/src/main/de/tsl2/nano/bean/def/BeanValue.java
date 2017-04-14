@@ -617,7 +617,7 @@ public class BeanValue<T> extends AttributeDefinition<T> implements IValueDefini
                      * has not the new value, yet.
                      */
 
-                    s = (Collection) (parameter[0] != null ? parameter[0] : selectionProvider.getValue());
+                    s = (Collection) (parameters().getValue(0) != null ? parameters().getValue(0) : selectionProvider.getValue());
                     setValue(s.isEmpty() ? null : (T) s.iterator().next());
 //                    setValue((T) selectionProvider.getFirstElement());
                 }

@@ -91,6 +91,9 @@ public class ConstraintValueSet {
                 String exp = StringUtil.substring(allowed[i], ":", null);
                 preAllowed.addAll(CollectionUtil
                     .toStringTransformed(new ClassFinder().fuzzyFind(exp, Field.class, -1, null).values()));
+            } else if (allowed[i].equals(ALLOWED_BEANS)) {
+                String exp = ENV.get("bean.generation.packagename", "");
+                preAllowed.addAll(CollectionUtil.toStringTransformed(new AttributeFinder().fuzzyFind(exp).values()));
             } else if (allowed[i].equals(ALLOWED_BEANATTRS)) {
                 String exp = StringUtil.substring(allowed[i], ":", null);
                 preAllowed.addAll(CollectionUtil.toStringTransformed(new AttributeFinder().fuzzyFind(exp).values()));

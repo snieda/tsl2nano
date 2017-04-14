@@ -688,8 +688,8 @@ public class NanoH5Session implements ISession<BeanDefinition>, Serializable, IL
                                 } else {
                                     values = nav.current().toValueMap(null).values().toArray();
                                 }
-                                Object[] args = CollectionUtil.concat(Arrays.copyOfRange(action.getParameter(), 0, 1),
-                                    values);
+                                Object[] args = action.getParameter() != null ? CollectionUtil.concat(Arrays.copyOfRange(action.getParameter(), 0, 1),
+                                    values) : values;
                                 action.setParameter(args);
                                 result = action.activate();
                             }

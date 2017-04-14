@@ -63,37 +63,37 @@ public class NumericOperator extends SOperator<BigDecimal> {
         addOperation("+", new CommonAction<BigDecimal>() {
             @Override
             public BigDecimal action() throws Exception {
-                return ((BigDecimal) parameter[0]).add(((BigDecimal) parameter[1]));
+                return ((BigDecimal) parameters().getValue(0)).add(((BigDecimal) parameters().getValue(1)));
             }
         });
         addOperation("-", new CommonAction<BigDecimal>() {
             @Override
             public BigDecimal action() throws Exception {
-                return ((BigDecimal) parameter[0]).subtract(((BigDecimal) parameter[1]));
+                return ((BigDecimal) parameters().getValue(0)).subtract(((BigDecimal) parameters().getValue(1)));
             }
         });
         addOperation("*", new CommonAction<BigDecimal>() {
             @Override
             public BigDecimal action() throws Exception {
-                return ((BigDecimal) parameter[0]).multiply(((BigDecimal) parameter[1]));
+                return ((BigDecimal) parameters().getValue(0)).multiply(((BigDecimal) parameters().getValue(1)));
             }
         });
         addOperation("/", new CommonAction<BigDecimal>() {
             @Override
             public BigDecimal action() throws Exception {
-                return ((BigDecimal) parameter[0]).divide(((BigDecimal) parameter[1]));
+                return ((BigDecimal) parameters().getValue(0)).divide(((BigDecimal) parameters().getValue(1)));
             }
         });
         addOperation("%", new CommonAction<BigDecimal>() {
             @Override
             public BigDecimal action() throws Exception {
-                return new BigDecimal(((BigDecimal)parameter[0]).intValueExact() % ((BigDecimal)parameter[1]).intValueExact());
+                return new BigDecimal(((BigDecimal)parameters().getValue(0)).intValueExact() % ((BigDecimal)parameters().getValue(1)).intValueExact());
             }
         });
         addOperation("^", new CommonAction<BigDecimal>() {
             @Override
             public BigDecimal action() throws Exception {
-                return ((BigDecimal) parameter[0]).pow(((BigDecimal)parameter[1]).intValueExact());
+                return ((BigDecimal) parameters().getValue(0)).pow(((BigDecimal)parameters().getValue(1)).intValueExact());
             }
         });
     }

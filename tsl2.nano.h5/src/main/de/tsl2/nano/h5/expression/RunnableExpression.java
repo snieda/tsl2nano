@@ -74,7 +74,9 @@ public abstract class RunnableExpression<T extends Serializable> extends Abstrac
 
     @Override
     public String getName() {
-        return getResult().getName();
+        if (name == null)
+            name = getResult().getName();
+        return name;
     }
 
     /**

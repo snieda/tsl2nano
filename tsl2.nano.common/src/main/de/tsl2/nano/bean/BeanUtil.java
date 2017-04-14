@@ -13,6 +13,7 @@ import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.Reader;
+import java.io.Serializable;
 import java.io.StreamTokenizer;
 import java.lang.reflect.Method;
 import java.lang.reflect.ParameterizedType;
@@ -115,49 +116,49 @@ public class BeanUtil extends ByteUtil {
      * uses lamdas of jdk 1.8. handles: iterable, enum, number - not handled yet: map, array
      */
 /*    @SuppressWarnings({ "rawtypes", "unchecked" })
-    private static Object deepCopy(Object src, Object dest) throws Exception {
-      BeanUtils.copyProperties(src, dest);
-      PropertyDescriptor[] pdSrc = BeanUtils.getPropertyDescriptors(src.getClass());
-      PropertyDescriptor pdDest;
-      String name;
-      Object vold, vnew;
-      Class type;
-      for (int i = 0; i < pdSrc.length; i++) {
-        name = pdSrc[i].getName();
-        vold = null;
-        vnew = null;
-        pdDest = BeanUtils.getPropertyDescriptor(dest.getClass(), name);
-        if (pdDest != null && pdSrc[i].getReadMethod() != null && (vold = pdSrc[i].getReadMethod().invoke(src)) != null
-            && (pdDest.getReadMethod() == null || (vnew = pdDest.getReadMethod().invoke(dest)) == null)) {
-          type = pdDest.getReadMethod().getReturnType();
-          //create instance of enum, number or entity
-          vnew = type.isEnum() ? Enum.valueOf((Class) type, ((Enum) vold).name())
-              : Number.class.isAssignableFrom(type) ? type.getConstructor(String.class).newInstance(vold.toString()) : type.newInstance();
-          //set the new value and go into recursion
-          pdDest.getWriteMethod().invoke(dest, deepCopy(vold, vnew));
-        } else if (vold != null && Iterable.class.isAssignableFrom(type = pdDest.getReadMethod().getReturnType())) {
-          //handle collections with recursion
-          Collection it = (Collection) vold;
-          Collection cnew = (Collection) vnew;
-          Object genType = pdDest.getReadMethod().getGenericReturnType();
-          if (genType instanceof ParameterizedType) {
-            genType = ((ParameterizedType) genType).getActualTypeArguments()[0];
-          }
-          if (genType instanceof Class) {
-            Class gtype = (Class) genType;
-            boolean javaType = gtype.getPackage().getName().startsWith("java");
-            it.forEach((Object o) -> {
-              try {
-                cnew.add(javaType ? o : deepCopy(o, gtype.newInstance()));
-              } catch (Exception e) {
-                throw new RuntimeException(e);
-              }
-            });
-          }
-        }
+private static Object deepCopy(Object src, Object dest) throws Exception {
+  BeanUtils.copyProperties(src, dest);
+  PropertyDescriptor[] pdSrc = BeanUtils.getPropertyDescriptors(src.getClass());
+  PropertyDescriptor pdDest;
+  String name;
+  Object vold, vnew;
+  Class type;
+  for (int i = 0; i < pdSrc.length; i++) {
+    name = pdSrc[i].getName();
+    vold = null;
+    vnew = null;
+    pdDest = BeanUtils.getPropertyDescriptor(dest.getClass(), name);
+    if (pdDest != null && pdSrc[i].getReadMethod() != null && (vold = pdSrc[i].getReadMethod().invoke(src)) != null
+        && (pdDest.getReadMethod() == null || (vnew = pdDest.getReadMethod().invoke(dest)) == null)) {
+      type = pdDest.getReadMethod().getReturnType();
+      //create instance of enum, number or entity
+      vnew = type.isEnum() ? Enum.valueOf((Class) type, ((Enum) vold).name())
+          : Number.class.isAssignableFrom(type) ? type.getConstructor(String.class).newInstance(vold.toString()) : type.newInstance();
+      //set the new value and go into recursion
+      pdDest.getWriteMethod().invoke(dest, deepCopy(vold, vnew));
+    } else if (vold != null && Iterable.class.isAssignableFrom(type = pdDest.getReadMethod().getReturnType())) {
+      //handle collections with recursion
+      Collection it = (Collection) vold;
+      Collection cnew = (Collection) vnew;
+      Object genType = pdDest.getReadMethod().getGenericReturnType();
+      if (genType instanceof ParameterizedType) {
+        genType = ((ParameterizedType) genType).getActualTypeArguments()[0];
       }
-      return dest;
+      if (genType instanceof Class) {
+        Class gtype = (Class) genType;
+        boolean javaType = gtype.getPackage().getName().startsWith("java");
+        it.forEach((Object o) -> {
+          try {
+            cnew.add(javaType ? o : deepCopy(o, gtype.newInstance()));
+          } catch (Exception e) {
+            throw new RuntimeException(e);
+          }
+        });
+      }
     }
+  }
+  return dest;
+}
 */
     /**
      * wraps all attributes having a collection as value into a new {@link ListSet} instance to unbind a
@@ -299,7 +300,8 @@ public class BeanUtil extends ByteUtil {
      * @return true, if type is not a map, collection or array.
      */
     public static boolean isSingleValueType(Class<?> type) {
-        return !(type.isArray() || Collection.class.isAssignableFrom(type) || Map.class.isAssignableFrom(type) || isByteStream(type));
+        return !(type.isArray() || Collection.class.isAssignableFrom(type) || Map.class.isAssignableFrom(type)
+            || isByteStream(type));
     }
 
     /**
@@ -347,15 +349,19 @@ public class BeanUtil extends ByteUtil {
                 return getGeneric(interfaces[i], pos);
         }
         if (cls.getGenericSuperclass() != null)//TODO: leider gehen hier die generic-infos verloren
-            return ((Class)getGenericInterfaceType((Class) ((ParameterizedType)cls.getGenericSuperclass()).getRawType(), interfaze, pos));
+            return ((Class) getGenericInterfaceType(
+                (Class) ((ParameterizedType) cls.getGenericSuperclass()).getRawType(), interfaze, pos));
         throw new IllegalArgumentException("the given class " + cls + " has no generic interface: " + interfaze);
     }
 
     protected static Class<?> getGenericInterface(Type type) {
-        return (Class<?>) (ParameterizedType.class.isAssignableFrom(type.getClass()) ? ((ParameterizedType)type).getRawType() : type);
+        return (Class<?>) (ParameterizedType.class.isAssignableFrom(type.getClass())
+            ? ((ParameterizedType) type).getRawType() : type);
     }
+
     /**
      * getClass
+     * 
      * @param genericType
      * @return
      */
@@ -364,7 +370,8 @@ public class BeanUtil extends ByteUtil {
         if (type instanceof ParameterizedType) {
             return (Class<?>) ((ParameterizedType) type).getRawType();
         } else if (type instanceof TypeVariable) {
-            return (Class<?>) ((TypeVariable)type).getGenericDeclaration().getTypeParameters()[0].getGenericDeclaration();
+            return (Class<?>) ((TypeVariable) type).getGenericDeclaration().getTypeParameters()[0]
+                .getGenericDeclaration();
         }
         return type instanceof Class ? (Class<?>) type : null;
     }
@@ -387,8 +394,7 @@ public class BeanUtil extends ByteUtil {
     }
 
     /**
-     * @deprecated: use {@link #getGenericInterfaceType(Object, Class)} instead
-     * getGenericType
+     * @deprecated: use {@link #getGenericInterfaceType(Object, Class)} instead getGenericType
      * 
      * @param clazz class of field
      * @return first generic type of given class - or null
@@ -605,13 +611,17 @@ public class BeanUtil extends ByteUtil {
      * reads a flat file (like csv) and tries to put the values to the given bean type. the given bean type should have
      * a default constructor. the given bean holds an example instance of your root-type. it is possible to provide an
      * overridden bean, to implement the method {@link Bean#newInstance(Object...)} to initialize your desired instance.
-     * a new instance will be created on each new line.</p> there are two possibilities to use this method:</br> - with
-     * a field separator (like comma or semicolon)</br> - with line-column definitions (like
-     * '1-10:myBeanAttributeName)</p>
+     * a new instance will be created on each new line.
+     * </p>
+     * there are two possibilities to use this method:</br>
+     * - with a field separator (like comma or semicolon)</br>
+     * - with line-column definitions (like '1-10:myBeanAttributeName)
+     * </p>
      * 
      * with the first alternative, you give a separator (not null) and the pure attribute names of the given rootType
      * (included in your bean). it is possible to give attribute-relations like 'myAttr1.myAttr2.myAttr3'. to ignore
-     * fields, use <code>null</code> as beanattribute-name.</p>
+     * fields, use <code>null</code> as beanattribute-name.
+     * </p>
      * 
      * the second alternative needs all beanattribute names with a column-prefix like 'begin-end:attributename'. for
      * example: 1-11:date. it is possible to use bean relations as in the first alternative, too.
@@ -932,6 +942,21 @@ public class BeanUtil extends ByteUtil {
             result = prime * result + (v == null ? 0 : v.hashCode());
         }
         return result;
+    }
+
+    /**
+     * if not already a bean or beancollector, the given object will wrapped into a bean or beancollector. if it is not
+     * serializable, a map of values will be packed into a beancollector.
+     * 
+     * @param obj
+     * @return
+     */
+    public static BeanDefinition<?> getBean(Object obj) {
+        return (BeanDefinition<?>) (obj instanceof BeanDefinition<?> ? obj
+            : (Util.isContainer(obj)
+                ? BeanCollector.getBeanCollector(Util.getContainer(obj), 0)
+                : obj instanceof Serializable ? Bean.getBean((Serializable) obj)
+                    : BeanCollector.getBeanCollector(Util.getContainer(BeanUtil.toValueMap(obj)), 0)));
     }
 
 }
