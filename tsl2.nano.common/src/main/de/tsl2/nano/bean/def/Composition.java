@@ -167,7 +167,8 @@ public class Composition<C> {
                 bc.setValue(child, StringUtil.toFirstLower(target.getDeclaringClass().getSimpleName()), targetInstance);
             } else {// standard: only a single target instance 
                 BeanContainer.createId(child);
-                this.target.setValue(targetInstance, child);
+                if (this.target.getType().isAssignableFrom(child.getClass()))
+                    this.target.setValue(targetInstance, child);
             }
         } else {
             BeanContainer.createId(child);

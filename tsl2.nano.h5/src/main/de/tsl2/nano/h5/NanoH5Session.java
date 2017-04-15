@@ -874,7 +874,7 @@ public class NanoH5Session implements ISession<BeanDefinition>, Serializable, IL
     private IAction<?> getAction(Collection<IAction> actions, String id) {
         if (actions != null) {
             for (IAction a : actions) {
-                if (a.getId().equals(id)) {
+                if (a.getId().trim().equals(id)) {
                     return a;
                 }
             }

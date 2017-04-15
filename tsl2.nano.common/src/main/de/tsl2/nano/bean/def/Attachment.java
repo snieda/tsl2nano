@@ -197,7 +197,8 @@ public class Attachment implements IValueAccess<byte[]>, IAttribute<byte[]> {
      * can be used, if for example a bean value is a byte-array to be used from outside (perhaps on an html-page loading
      * an image). if the value is not a byte-array, it will be created through serialization. this byte-array will be
      * saved (if not saved before) to a file inside a temp-directory of your environment.
-     * 
+     * @param id attribute id (bean-name+attribute-name)
+     * @param v byte object (of bean value) to be saved and transferred
      * @return temporary file-path of the current bean-value, saved as byte-array.
      */
     public static File getValueFile(String id, Object v) {

@@ -21,6 +21,7 @@ import org.simpleframework.xml.core.Commit;
 import de.tsl2.nano.action.IAction;
 import de.tsl2.nano.bean.BeanContainer;
 import de.tsl2.nano.bean.BeanUtil;
+import de.tsl2.nano.bean.def.Attachment;
 import de.tsl2.nano.bean.def.Bean;
 import de.tsl2.nano.bean.def.BeanCollector;
 import de.tsl2.nano.bean.def.BeanFinder;
@@ -201,21 +202,33 @@ public class Compositor<COLLECTIONTYPE extends Collection<T>, T> extends BeanCol
                     Composition comp = new Composition(parent,
                         targetAttribute != null ? getAttribute(targetAttribute) : null);
                     Object resolver = comp.createChildOnTarget(item);
-                    if (!forceUserInteraction && Bean.getBean(item).isValid(new HashMap<BeanValue<?>, String>(), true)) {
+                    if (!forceUserInteraction && Bean.getBean(item).isValid(null, true)) {
                         resolver = (T) Bean.getBean(resolver).save();
                         item = (T) Bean.getBean(item).save();
                         getCurrentData().add(item);
                         return (T) _this;//the type T should be removed
                     } else if (targetAttribute != null && !Collection.class.isAssignableFrom(getAttribute(targetAttribute).getType()))
-                        Bean.getBean(resolver).save();
+                        if (Bean.getBean(resolver).isValid(null, true))
+                            Bean.getBean(resolver).save();
                     getCurrentData().add(item);
                     return item;
                 }
 
                 @Override
                 public String getImagePath() {
-                    return (String) (iconAttribute != null ? Bean.getBean(base).getValue(iconAttribute)
-                        : Bean.getBean(base).getPresentable().getIcon());
+                    if (iconAttribute != null) {
+                        Bean bean = Bean.getBean(base);
+                        Object pictInfo = bean.getValue(iconAttribute);
+                        if (pictInfo instanceof String)
+                            return (String) pictInfo;
+                        else if (pictInfo != null) {
+                            return Attachment.getValueFile(bean.getAttribute(iconAttribute).getId(), pictInfo).getPath();
+                        } else {
+                            return null;
+                        }
+                    } else {
+                        return Bean.getBean(base).getPresentable().getIcon();
+                    }
                 }
             });
         }

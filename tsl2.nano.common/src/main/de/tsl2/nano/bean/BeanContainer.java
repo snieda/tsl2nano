@@ -23,7 +23,9 @@ import org.apache.commons.logging.Log;
 
 import de.tsl2.nano.action.CommonAction;
 import de.tsl2.nano.action.IAction;
+import de.tsl2.nano.bean.def.AttributeDefinition;
 import de.tsl2.nano.bean.def.Bean;
+import de.tsl2.nano.bean.def.BeanDefinition;
 import de.tsl2.nano.bean.def.BeanValue;
 import de.tsl2.nano.bean.def.IAttributeDefinition;
 import de.tsl2.nano.core.ENV;
@@ -31,6 +33,7 @@ import de.tsl2.nano.core.ManagedException;
 import de.tsl2.nano.core.Messages;
 import de.tsl2.nano.core.cls.BeanAttribute;
 import de.tsl2.nano.core.cls.BeanClass;
+import de.tsl2.nano.core.cls.IAttribute;
 import de.tsl2.nano.core.log.LogFactory;
 import de.tsl2.nano.core.util.DateUtil;
 import de.tsl2.nano.core.util.ListSet;
@@ -646,6 +649,12 @@ public class BeanContainer implements IBeanContainer {
                     } else {
                         value = ENV.counter("collector.new.id.number.counter.start", 1);
                     }
+                } else if (ENV.get("container.try.generate.multi.primary.key", true) 
+                        && (idAttribute.getType().getPackage() == null || idAttribute.getType().getPackage().equals(newItem.getClass().getPackage()))) {
+                    value = createCompositeKey(newItem, idAttribute);
+                    if (value == null)
+                        LOG.warn("the id-attribute " + idAttribute + " can't be created for "
+                                + idAttribute.getType());
                 } else {
                     LOG.warn("the id-attribute " + idAttribute + " can't be assigned to a generated value of type "
                         + idAttribute.getType());
@@ -655,5 +664,35 @@ public class BeanContainer implements IBeanContainer {
             }
         }
         LOG.debug("no id will be generated for new item " + newItem);
+    }
+
+    /**
+     * tries to create the 
+     * @param newItem
+     * @param idAttribute
+     * @return
+     */
+    private static Object createCompositeKey(Object newItem, BeanAttribute idAttribute) {
+        Object value = BeanClass.createInstance(idAttribute.getType());
+        //TODO: implement going through all item attributes, get their idAttributes and try to set them to idValue
+        Bean<Object> bean = Bean.getBean(newItem);
+        BeanDefinition idAttrs = BeanDefinition.getBeanDefinition(idAttribute.getType());
+        IAttribute originAttr;
+        Object originValue;
+        for (Object idAttrObj : idAttrs.getAttributes()) {
+            IAttribute idAttr = (IAttribute) idAttrObj;
+            try {
+                originAttr = bean.getAttribute(idAttr.getName());
+                if (originAttr != null) {
+                    originValue = originAttr.getValue(newItem);
+                    if (originValue != null)
+                        idAttr.setValue(value, getIdAttribute(originValue).getValue(originValue));
+                }
+            } catch (Exception ex) {
+                LOG.error("can't generate composite key for " + idAttribute);
+                return null;
+            }
+        }
+        return value;
     }
 }

@@ -30,7 +30,7 @@ if [ "$3"= "nopause" ]
 	then NOPAUSE=nopause
 fi
 
-#STANDALONE="-standalone"
+STANDALONE="-standalone"
 #OFFLINE=-Dtsl2nano.offline=true
 #UH=-Denv.user.home=true
 #USERDIR=-Duser.dir=$PRJ

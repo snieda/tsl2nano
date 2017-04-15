@@ -370,7 +370,8 @@ public class Bean<T> extends BeanDefinition<T> {
         IStatus status = IStatus.STATUS_OK;
         for (final BeanValue beanValue : attributes) {
             if ((refresh && !(status = beanValue.isValid(beanValue.getValue())).ok()) || (!refresh && !beanValue.getStatus().ok())) {
-                messages.put(beanValue, beanValue.getStatus().message());
+                if (messages != null)
+                    messages.put(beanValue, beanValue.getStatus().message());
                 if (refresh)
                     beanValue.status = status;
                 if (!status.ok()) {
