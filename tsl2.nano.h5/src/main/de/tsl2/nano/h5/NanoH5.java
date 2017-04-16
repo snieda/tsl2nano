@@ -989,6 +989,12 @@ public class NanoH5 extends NanoHTTPD implements ISystemConnector<Persistence> {
     }
 
     @Override
+    public void persist() {
+        super.persist();
+        ENV.persist();
+    }
+    
+    @Override
     public EventController getEventController() {
         return eventController;
     }

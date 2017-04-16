@@ -97,6 +97,9 @@ public class Main {
     public void reset() {
     }
     
+    public void persist() {
+    }
+    
     public EventController getEventController() {
         throw new UnsupportedOperationException();
     }

@@ -154,6 +154,9 @@ public class Translator {
         Map komplex = new LinkedHashMap();
         String txt;
         for (String k : keySet) {
+            //TODO: key/values are shifted in more komplex bundles. the framework bundles have only en/de!
+            if (!ENV.get("app.translate.bundle.framework", false) && k.startsWith("tsl2nano"))
+                continue;
             txt = Messages.getString(k);
             if (txt.indexOf(' ') == -1 && txt.indexOf('.') == -1) {
                 p.put(k, txt);
@@ -163,9 +166,6 @@ public class Translator {
                 }
             } else
                 komplex.put(k, txt);
-            //TODO: key/values are shifted in more komplex bundles. the framework bundles have only en/de!
-            if (!ENV.get("app.translate.bundle.framework", false))
-                break;
         }
         map.putAll(translatePropertiesFast(name, p, srcLang, destLang));
         //TODO: is the service now able to translate sentences?

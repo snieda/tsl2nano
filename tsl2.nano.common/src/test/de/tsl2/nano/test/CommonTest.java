@@ -1380,7 +1380,7 @@ public class CommonTest {
         NestedJarClassLoader cl = new NestedJarClassLoader(contextClassLoader, "standalone") {
             @Override
             protected String getRootJarPath() {
-                return "../../target/test.h5.sample/tsl2.nano.h5.1.0.0-standalone.jar";
+                return "../../target/test.h5.sample/tsl2.nano.h5.1.1.0-standalone.jar";
             }
 //
 //            @Override
@@ -1464,7 +1464,7 @@ public class CommonTest {
                     String url;
                     //https://sourceforge.net/projects/tsl2nano/files/latest/download?source=navbar
                     File download = NetUtil.download(url =
-                        "http://downloads.sourceforge.net/project/tsl2nano/1.0.0-beta/tsl2.nano.h5.1.0.0.jar",
+                        "http://downloads.sourceforge.net/project/tsl2nano/1.1.0/tsl2.nano.h5.1.1.0.jar",
                         "test/", true, true);
                     NetUtil.check(url, download, 3 * 1024 * 1024);
                 }

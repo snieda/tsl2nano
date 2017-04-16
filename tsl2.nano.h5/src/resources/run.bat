@@ -25,7 +25,7 @@ rem set DEBUG="-agentlib:jdwp=transport=dt_socket,address=8787,server=y,suspend=
 rem set AGENT=-javaagent:%PRJ%/aspectjweaver.jar
 rem set PROXY=-Dhttp.proxyHost=myproxy -Dhttp.proxyPort=8080
 if "%SILENT%"=="true" (set JAVA=@start javaw) else (set JAVA=java)
-%JAVA% %OFFLINE% %LANG% %USERDIR% %NANO_DEBUG% %AGENT% %PROXY% -Xmx512m -Djava.awt.headless=true %DEBUG% %UH% -jar tsl2.nano.h5.1.0.0%STANDALONE%.jar %PRJ% %PORT% 
+%JAVA% %OFFLINE% %LANG% %USERDIR% %NANO_DEBUG% %AGENT% %PROXY% -Xmx512m -Djava.awt.headless=true %DEBUG% %UH% -jar tsl2.nano.h5.1.1.0%STANDALONE%.jar %PRJ% %PORT% 
 REM -agentpath:...visualvm_138/profiler/lib/deployed/jdk16/windows/profilerinterface.dll=...\visualvm_138\profiler\lib,5140
 REM >%PRJ%.log
 if not "%SILENT%"=="true" pause

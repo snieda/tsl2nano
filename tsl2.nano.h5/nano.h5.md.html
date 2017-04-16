@@ -1,9 +1,9 @@
 <h6 align="center">FullRelation Nano.H5<br/>
 <font size="-1">&copy; Thomas Schneider 2012-2017
 <br/>
-<a href="http://sourceforge.net/projects/tsl2nano/files/1.0.0-beta/tsl2.nano.h5.1.0.0.jar/download">Download on sourceforge</a>
+<a href="http://sourceforge.net/projects/tsl2nano/files/1.1.0/tsl2.nano.h5.1.1.0.jar/download">Download on sourceforge</a>
 <br/>
-<a href="http://sourceforge.net/projects/tsl2nano/files/1.0.0-beta/nano.h5.jnlp">Start Nano.H5 through WebStart</a>
+<a href="http://sourceforge.net/projects/tsl2nano/files/1.1.0/nano.h5.jnlp">Start Nano.H5 through WebStart</a>
 </font></h6>
 <p/>
 
@@ -438,7 +438,7 @@ Here is a short description how to use a model from PonyORM and starting a full 
  - select a datbase dialect on the top tab panel and click on it (prefered: oracle)
  - click the button _select all_
  - copy the selection to the clipboard using _Ctrl+C_ or simply with the context menu of a right-mouse-click on the selection
- - go to the tsl2.nano.h5 documentation page https://sourceforge.net/p/tsl2nano/wiki/Home/ and click on the link _Start Nano.H5 through WebStart_ http://sourceforge.net/projects/tsl2nano/files/1.0.0-beta/nano.h5.jnlp
+ - go to the tsl2.nano.h5 documentation page https://sourceforge.net/p/tsl2nano/wiki/Home/ and click on the link _Start Nano.H5 through WebStart_ http://sourceforge.net/projects/tsl2nano/files/1.1.0-beta/nano.h5.jnlp
  - after a while, Nano.H5 will open a page in your browser. click on the centered link of that page
  - expand the detail panel
  - click into the field _Database_
@@ -540,7 +540,7 @@ If you set it to true, the synthetic user will be the user asked by the login. I
 To create a hash for a new password start the following:
  
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-	java -cp tsl2.nano.h5.1.0.0-standalone.jar de.tsl2.nano.h5.User mypassword
+	java -cp tsl2.nano.h5.1.1.0-standalone.jar de.tsl2.nano.h5.User mypassword
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 This hashcode then can be used inside the __usercheck.xml for the synthetic user:
@@ -1755,7 +1755,7 @@ New specified Actionname	: testaction
 Action-Expression			: de.tsl2.nano.core.util.NetUtil.getRestfulJSON
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-...this will result in file _.../specification/action/testaction.xml:
+...this will result in file _.../specification/action/testaction.xml_:
 
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 <?xml version="1.0" encoding="UTF-8"?>
@@ -1861,7 +1861,7 @@ Each standard table of beans will provide a table-header with Buttons to do up/d
 
 ## Webstart with JNLP
 
-_nano.h5_ provides a jnlp file on [http://sourceforge.net/projects/tsl2nano/files/1.0.0-beta/nano.h5.jnlp]. This webstart downloads the self-certificated *tsl2.nano.h5.<version>-signed.jar* to be started. On java 8, you have to add this download site to the exception list. Do the following steps:
+_nano.h5_ provides a jnlp file on [http://sourceforge.net/projects/tsl2nano/files/1.1.0-beta/nano.h5.jnlp]. This webstart downloads the self-certificated *tsl2.nano.h5.<version>-signed.jar* to be started. On java 8, you have to add this download site to the exception list. Do the following steps:
 * open the java control panel
 * go to the security tab panel
 * click 'edit site list'
@@ -3592,7 +3592,7 @@ Schueler:
 	klasse: Klasse.id
 
 	
-keywords: class, from, until, order, table, column, view 
+keywords: class, from, until, order, table, column, view, like 
 
 TODO: yaml --> @PostConstruct
 <!--

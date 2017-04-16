@@ -1366,6 +1366,23 @@ public class BeanPresentationHelper<T> {
                 return super.isEnabled() && isRootBean();
             }
         });
+        bEnv.addAction(new SecureAction(bean.getClazz(),
+            "save",
+            IAction.MODE_UNDEFINED,
+            false,
+            "icons/save.png") {
+            @Override
+            public Object action() throws Exception {
+                session.getApplication().persist();
+//                ENV.get(BeanPresentationHelper.class).reset();
+                return page("configuration refreshed");
+            }
+
+            @Override
+            public boolean isEnabled() {
+                return super.isEnabled() && isRootBean();
+            }
+        });
         bEnv.addAction(new SecureAction<Object>(bean.getClazz(), "switch-debug-logging",
             IAction.MODE_UNDEFINED, false, "icons/view.png") {
             @Override
