@@ -1463,8 +1463,9 @@ public class CommonTest {
                 public void run() {
                     String url;
                     //https://sourceforge.net/projects/tsl2nano/files/latest/download?source=navbar
+                    //http://downloads.sourceforge.net/project/tsl2nano/1.1.0/tsl2.nano.h5.1.1.0.jar
                     File download = NetUtil.download(url =
-                        "http://downloads.sourceforge.net/project/tsl2nano/1.1.0/tsl2.nano.h5.1.1.0.jar",
+                        "http://netcologne.dl.sourceforge.net/project/tsl2nano/1.1.0/tsl2.nano.h5.1.1.0.jar",
                         "test/", true, true);
                     NetUtil.check(url, download, 3 * 1024 * 1024);
                 }
