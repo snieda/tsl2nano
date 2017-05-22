@@ -189,6 +189,7 @@ public class NanoH5 extends NanoHTTPD implements ISystemConnector<Persistence> {
         });
         try {
 //            LogFactory.setLogLevel(LogFactory.LOG_ALL);
+                
             LOG.debug(System.getProperties());
             createStartPage();
 
@@ -530,7 +531,7 @@ public class NanoH5 extends NanoHTTPD implements ISystemConnector<Persistence> {
         if (workflow == null || workflow.isEmpty() || workflowDone) {
             LOG.debug("creating navigation stack");
             Stack<BeanDefinition<?>> navigationModel = new Stack<BeanDefinition<?>>();
-            Bean<String> startPage = Bean.getBean(START_PAGE);
+            Bean<String> startPage = Bean.getBean(START_PAGE + " (" + StringUtil.substring(ENV.getName(), ".", null, true) + ")");
             navigationModel.push(startPage);
 
             //perhaps, use META-INF/persistence.xml directly without user input

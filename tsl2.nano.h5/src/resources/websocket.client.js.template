@@ -263,6 +263,22 @@ function disablePage(e) {
 	gp.style.display='none';
 //	e.stopPropagation();
 }
+
+ /**
+  * used in HtmlUtil.java
+  */
+function openNav() {
+    document.getElementById("tslSidenav").style.width = "250px";
+    document.getElementById("glasspane").style.marginLeft = "250px";
+    document.body.style.backgroundColor = "rgba(0,0,0,0.4)";
+}
+
+function closeNav() {
+    document.getElementById("tslSidenav").style.width = "0";
+    document.getElementById("glasspane").style.marginLeft= "0";
+    document.body.style.backgroundColor = "white";
+}
+
 /**
  * if a submit (reload page from server) was requested, disable the current page and don't handle the event further...
  */
@@ -272,3 +288,4 @@ window.addEventListener('onsubmit', function(e){
 document.addEventListener('ondblclick', function(e){
 	disablePage(e);
 });
+

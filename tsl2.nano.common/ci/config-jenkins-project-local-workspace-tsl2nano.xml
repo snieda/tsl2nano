@@ -2,8 +2,16 @@
 <project>
   <actions/>
   <description>&lt;a href=&quot;https://sourceforge.net/p/tsl2nano/wiki/Home/&quot;&gt;tsl2nano Documentation&lt;/a&gt;</description>
+  <logRotator class="hudson.tasks.LogRotator">
+    <daysToKeep>-1</daysToKeep>
+    <numToKeep>-1</numToKeep>
+    <artifactDaysToKeep>-1</artifactDaysToKeep>
+    <artifactNumToKeep>-1</artifactNumToKeep>
+  </logRotator>
   <keepDependencies>false</keepDependencies>
-  <properties/>
+  <properties>
+    <hudson.plugins.disk__usage.DiskUsageProperty plugin="disk-usage@0.25"/>
+  </properties>
   <scm class="hudson.scm.NullSCM"/>
   <canRoam>true</canRoam>
   <disabled>false</disabled>
@@ -192,7 +200,7 @@
     </hudson.tasks.junit.JUnitResultArchiver>
     <hudson.plugins.jacoco.JacocoPublisher plugin="jacoco@1.0.19">
       <execPattern>**/**.exec</execPattern>
-      <classPattern>**/classes</classPattern>
+      <classPattern>**/bin</classPattern>
       <sourcePattern>**/src/main/java</sourcePattern>
       <inclusionPattern></inclusionPattern>
       <exclusionPattern></exclusionPattern>

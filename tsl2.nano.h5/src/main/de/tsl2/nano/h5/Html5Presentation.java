@@ -141,6 +141,10 @@ public class Html5Presentation<T> extends BeanPresentationHelper<T> implements I
     private transient String row1style;
     private transient String row2style;
 
+    /** on sidenav action bars, all action  are integrated into this one sidebar */
+    private transient Element sideNav;
+    
+    
     Log LOG = LogFactory.getLog(Html5Presentation.class);
     private static transient String jsWebsocketTemplate;
 
@@ -157,6 +161,8 @@ public class Html5Presentation<T> extends BeanPresentationHelper<T> implements I
     static final String MSG_FOOTER = "progress";
 
     static final String ICON_DEFAULT = "icons/trust_unknown.png";
+    private static final String CSS_CLASS_PANEL_ACTION = "panelaction";
+    private static final String CSS_CLASS_ACTION = "panelaction";
 
     /**
      * constructor
@@ -473,7 +479,8 @@ public class Html5Presentation<T> extends BeanPresentationHelper<T> implements I
                         ATTR_METHOD,
                         ENV.get("html5.http.method", "post"), ATTR_STYLE,
                         style("display", "inline"));
-                    c3 = createExpandable(c3, "Menu", ENV.get("layout.header.menu.open", false));
+                    if (!ENV.get("layout.sidenav", true))
+                        c3 = createExpandable(c3, "Menu", ENV.get("layout.header.menu.open", false));
                     Collection<IAction> actions = new ArrayList<IAction>(getPageActions(session));
                     actions.addAll(getApplicationActions(session));
                     actions.addAll(getSessionActions(session));
@@ -496,7 +503,7 @@ public class Html5Presentation<T> extends BeanPresentationHelper<T> implements I
         HtmlUtil.appendAttributes(html, "manifest", ENV.get("html5.manifest.file", "tsl2nano-appcache.mf"));
         Element head = appendElement(html, TAG_HEAD, ATTR_TITLE, "Nano-H5 Application: " + title);
 
-        appendElement(head, "meta", "name", "author", "content", "tsl2.nano.h5 (by Thomas Schneider/2012-2016)");
+        appendElement(head, "meta", "name", "author", "content", "tsl2.nano.h5 (by Thomas Schneider/2012-2017)");
         appendElement(head, "meta", "name", "viewport", "content",
             "width=device-width, height=device-height, initial-scale=1");
 //        appendElement(head, "link", "rel", "stylesheet", "href", "css/style.css");
@@ -568,6 +575,7 @@ public class Html5Presentation<T> extends BeanPresentationHelper<T> implements I
             BeanDefinition<?>... navigation) {
         boolean isRoot = parent == null;
         if (isRoot) {
+            sideNav = null;
             availableshortCuts = new ArrayList(Arrays.asList(SHORTCUTS));
             tabIndex = -1;
             row1style = "";
@@ -720,12 +728,12 @@ public class Html5Presentation<T> extends BeanPresentationHelper<T> implements I
                 if (!valueGroup.isVisible()) {
                     continue;
                 }
-                if (ENV.get("bean.valuegroup.expandable", true)) {
-                    parent = appendElement(parent0, TAG_EXP_DETAILS, ATTR_TITLE, valueGroup.getLabel(), "open");
-                    parent = appendElement(parent, TAG_EXP_SUMMARY, content(valueGroup.getLabel()));
-                } else {
+//                if (ENV.get("bean.valuegroup.expandable", true) && bean.getValueGroups() != null) {
+//                    parent = appendElement(parent0, TAG_EXP_DETAILS, ATTR_TITLE, valueGroup.getLabel(), "open");
+//                    parent = appendElement(parent, TAG_EXP_SUMMARY, content(valueGroup.getLabel()));
+//                } else {
                     parent = parent0;
-                }
+//                }
                 Collection<BeanValue<?>> beanValues =
                     new ArrayList<BeanValue<?>>(valueGroup.getAttributes().size());
                 BeanValue bv;
@@ -783,7 +791,8 @@ public class Html5Presentation<T> extends BeanPresentationHelper<T> implements I
         int columns = (int) Math.ceil(beanValues.size() / (float) maxrows) * 3;
         columns = columns > maxcols ? maxcols : columns;
 
-        parent = interactive ? createExpandable(parent, p.getDescription(), p.getEnabler().isActive()) : parent;
+        parent = interactive && ENV.get("layout.field.panel.expandable", true) 
+                ? createExpandable(parent, p.getDescription(), p.getEnabler().isActive()) : parent;
         Element panel =
             createGrid(parent, ENV.translate("tsl2nano.input", false), "field.panel", fullwidth, 0);
         //fallback: setting style from environment-properties
@@ -882,9 +891,10 @@ public class Html5Presentation<T> extends BeanPresentationHelper<T> implements I
          * create the column header
          */
         bean.addMode(MODE_MULTISELECTION);
-        parent =
-            interactive ? createExpandable(parent, bean.getPresentable().getDescription(), bean.getPresentable()
-                .getEnabler().isActive()) : parent;
+        if (ENV.get("layout.collector.expandable", false))
+            parent =
+                interactive ? createExpandable(parent, bean.getPresentable().getDescription(), bean.getPresentable()
+                    .getEnabler().isActive()) : parent;
         Element grid;
         if (interactive) {
             grid = createGrid(parent, bean.toString(), false, bean, fullwidth);
@@ -1118,15 +1128,28 @@ public class Html5Presentation<T> extends BeanPresentationHelper<T> implements I
             Collection<IAction> actions,
             boolean showText,
             String... attributes) {
-        Element panel = createGrid(parent, "Actions", "action.panel", /*actions != null ? 1 + actions.size() : 1*/0);
-        Element row = appendTag(panel, TABLE(TAG_ROW, ATTR_CLASS, "actionpanel"));
-        Element cell = appendTag(row, TABLE(TAG_CELL, attributes));
+        int width = 0;
+        Element cell = null;
+        if (ENV.get("layout.sidenav", true)) {
+            cell = sideNav = HtmlUtil.createSidebarNavMenuButton(parent, sideNav);
+            width = ENV.get("layout.action.width", -1);
+            if (width == -1)
+                ENV.setProperty("layout.action.width", 200);
+        } else {
+            Element panel = createGrid(parent, "Actions", "action.panel", /*actions != null ? 1 + actions.size() : 1*/0);
+            Element row = appendTag(panel, TABLE(TAG_ROW, ATTR_CLASS, "actionpanel"));
+            cell = appendTag(row, TABLE(TAG_CELL, attributes));
+        }
         HtmlUtil.appendAttributes(cell, ATTR_STYLE, ENV.get("layout.action.panel", ""));
         if (actions != null) {
             for (IAction a : actions) {
                 if (ENV.get("layout.action.show.disabled", true) || a.isEnabled())
                     createAction(cell, a, showText);
             }
+        }
+        if (ENV.get("layout.sidenav", true)) {
+            if (width == -1)
+                ENV.setProperty("layout.action.width", width);
         }
         return cell;
     }
@@ -1146,6 +1169,7 @@ public class Html5Presentation<T> extends BeanPresentationHelper<T> implements I
         String path;
         return createAction(cell,
             a.getId(),
+            showText && !a.getShortDescription().equals("...") ? CSS_CLASS_PANEL_ACTION : CSS_CLASS_ACTION,
             showText ? a.getShortDescription() : null,
             a.getLongDescription(),
             "submit",
@@ -1170,7 +1194,7 @@ public class Html5Presentation<T> extends BeanPresentationHelper<T> implements I
         if (model.isMultiValue() && model instanceof BeanCollector
             && ((BeanCollector) model).hasMode(MODE_ASSIGNABLE)) {
             String assignLabel = Messages.getStringOpt("tsl2nano.assign", true);
-            createAction(panel, BTN_ASSIGN, assignLabel, assignLabel, "submit", null, "icons/links.png", true, true,
+            createAction(panel, BTN_ASSIGN, CSS_CLASS_PANEL_ACTION, assignLabel, assignLabel, "submit", null, "icons/links.png", true, true,
                 false);
         }
         createCloseAction(panel);
@@ -1179,7 +1203,7 @@ public class Html5Presentation<T> extends BeanPresentationHelper<T> implements I
 
     void createCloseAction(Element panel) {
         String closeLabel = Messages.getStringOpt("tsl2nano.close", true);
-        createAction(panel, IAction.CANCELED, closeLabel, closeLabel, null, null, "icons/stop.png", true, false, true);
+        createAction(panel, IAction.CANCELED, CSS_CLASS_PANEL_ACTION, closeLabel, closeLabel, null, null, "icons/stop.png", true, false, true);
     }
 
     /**
@@ -1192,7 +1216,7 @@ public class Html5Presentation<T> extends BeanPresentationHelper<T> implements I
      */
     Element createAction(Element cell, String id, String type, String image) {
         String label = ENV.translate(id, true);
-        return createAction(cell, id, label, label, type, null, image, true, false, false);
+        return createAction(cell, id, CSS_CLASS_ACTION, label, label, type, null, image, true, false, false);
     }
 
     /**
@@ -1206,6 +1230,7 @@ public class Html5Presentation<T> extends BeanPresentationHelper<T> implements I
      */
     Element createAction(Element cell,
             String id,
+            String cssClass,
             String label,
             String tooltip,
             String type,
@@ -1230,6 +1255,8 @@ public class Html5Presentation<T> extends BeanPresentationHelper<T> implements I
             content(label),
             ATTR_ID,
             id,
+            ATTR_CLASS,
+            cssClass,
             ATTR_NAME,
             id,
             ATTR_TITLE,
@@ -1746,6 +1773,7 @@ public class Html5Presentation<T> extends BeanPresentationHelper<T> implements I
                         String shortcut = shortCut(++tabIndex);
                         Element a = createAction(cell,
                             beanValue.getName() + POSTFIX_SELECTOR,
+                            CSS_CLASS_ACTION,
                             ENV.translate("tsl2nano.finder.action.label", false),
                             ENV.translate("tsl2nano.selection", true),
                             null,

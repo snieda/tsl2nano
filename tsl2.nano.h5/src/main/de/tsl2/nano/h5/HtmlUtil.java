@@ -224,6 +224,7 @@ public class HtmlUtil {
     public static final String BTN_ASSIGN = "tsl2nano.assign";
     public static final String BTN_SUBMIT = "tsl2nano.save";
     public static final String BTN_CANCEL = "tsl2nano.cancel";
+    public static final String BTN_SIDENAVCLOSE = "button.sidenav.close";
 
     public static final String BTN_SELECT_ALL = "tsl2nano.selectall";
     public static final String BTN_DESELECT_ALL = "tsl2nano.deselectall";
@@ -625,5 +626,18 @@ public class HtmlUtil {
             tableDivStyle = StringUtil.removeFormatChars(String.valueOf(FileUtil.getFileData(stream, "UTF-8")));
         }
         return tableDivStyle;
+    }
+
+    public static Element createSidebarNavMenuButton(Element parent, Element sidenav) {
+        // see style.template and websocket.client.js.template
+        // <a href="javascript:void(0)" class="closebtn" onclick="closeNav()">&times;</a>
+        //return "<span style=\"font-size:30px;cursor:pointer\" onclick=\"openNav()\">&#9776; open</span>"; //☰, &#8801; ≡
+        //✖ = &#10006; or &times;
+        appendElement(parent, TAG_SPAN, content("☰"), ATTR_CLASS, "openbtn", "onclick", "openNav()", ATTR_ACCESSKEY, "!", ATTR_STYLE, styles("font-size", "30px", "cursor", "pointer", "background", "radial-gradient(#9999FF, #000000)"));
+        if (sidenav == null) {
+            sidenav = appendElement(parent, TAG_DIV, ATTR_ID, "tslSidenav", ATTR_CLASS, "sidenav");
+        }
+        appendElement(sidenav, TAG_LINK, content("✖"), ATTR_HREF, "javascript:void(0)", ATTR_ID, "button.sidenav.close", ATTR_CLASS, "closebtn", "onclick", "closeNav()", ATTR_ACCESSKEY, "<", "cursor", "pointer", "background", "radial-gradient(#9999FF, #000000)");
+        return sidenav;
     }
 }

@@ -10,6 +10,8 @@
 package de.tsl2.nano.core;
 
 import java.io.File;
+import java.lang.reflect.Field;
+import java.nio.charset.Charset;
 import java.security.Permission;
 import java.security.Policy;
 import java.security.ProtectionDomain;
@@ -192,7 +194,8 @@ public class AppLoader {
 
             //TODO: should be removed after resolving access problems
             noSecurity();
-
+            useUTF8();
+            
             /*
              * create the classloader to be used by the new application
              */
@@ -242,6 +245,21 @@ public class AppLoader {
             ex.printStackTrace();
             LOG.error(ex);
         }
+    }
+
+    /**
+     * internal hack to guarantee utf-8
+     */
+    protected void useUTF8() {
+        try {
+            System.setProperty("file.encoding","UTF-8");
+            Field charset = Charset.class.getDeclaredField("defaultCharset");
+            charset.setAccessible(true);
+                charset.set(null,null);
+            } catch (Exception e) {
+                System.err.println(e.toString());
+                System.out.println("continuing after utf-8 error, followed by html rendering problems...");
+            }            
     }
 
     /**
