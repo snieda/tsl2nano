@@ -72,7 +72,7 @@ i:hover + p {
     padding-top: 60px;
 }
 
-.sidenav a, button {
+.sidenav a, .panelaction {
     #padding: 8px 8px 8px 32px;
     text-decoration: none;
     display: block;
@@ -100,9 +100,26 @@ i:hover + p {
 }
 */
 
+.openbtn, .closebtn {
+	font-size: 36px;
+	cursor: pointer;
+	color: white;
+	background: radial-gradient(#9999FF, #000000);
+}
+
 #glasspane {
     transition: margin-left .5s;
     padding: 16px;
+}
+
+#field§quicksearch {
+	padding-top: 3;
+    padding-bottom: 2;
+}
+
+#beancollectorliste§quicksearch {
+	padding-top: 0;
+    padding-bottom: 6;
 }
 
 @-ms-viewport only screen and (max-width: 640px){
@@ -131,7 +148,7 @@ tr, .tr {
 td, th, .td, .th {
    	width: 100%;
 }
-button, input, #field.quicksearch, .actionpanel {
+button, input, #field§quicksearch, .actionpanel {
 	width: 100%;
 }
 .sidenav {padding-top: 15px;}

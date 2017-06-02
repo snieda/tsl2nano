@@ -1003,6 +1003,7 @@ The following entries define panel layouts through css styles or html5 attribute
 * layout.panel.columncount	9
 * layout.panel.maxrowcount	25
 * layout.panel.style
+* layout.sidenav false
 
 this will look like:
 
@@ -1059,6 +1060,14 @@ Example setting a simple background image:
 The same can be done for a bean-collector, defining the property _beancollector.grid.style_ and for bean-details with _bean.grid.style_.
 
 *Tip:* Use [CSS3Generator](css3generator.com) to prepare your css styles.
+
+#### The Menu, the Actions and their Buttons
+
+If you set *layout.sidenav* to *true*, all actions and their buttons will be positioned into a scrolling side navigation bar. This makes sense on small displays. On standard desktop-displays you should prefere the standard action bars.
+
+[[img src=h5.sidenav-1.png]]
+
+[[img src=h5.sidenav-2.png]]
 
 #### Collectors, Beans and Attributes
 
@@ -2984,6 +2993,7 @@ Actual list: http://infocenter.pentaho.com/help/index.jsp?topic=%2Fsupported_com
  1.0.0g | 05.03.2017 | NEW: authentication mapping between 'auth' and 'persist' user, many bugfixes 
  1.1.0  | 16.04.2017 | NEW: attribute/actions annotations, Bean-/Attribute-Configurator with decorated parameters, REFACT: action+parameter
  1.1.0b | 21.05.2017 | NEW: sidebar menu (using utf-8 icon)
+ 1.1.0c | 05.06.2017 | NEW: themes through css stylings
  
 <style class="fallback">body{white-space:pre;font-family:monospace}</style><script src="markdeep.min.js"></script><script src="http://casual-effects.com/markdeep/latest/markdeep.min.js"></script>
 

@@ -272,6 +272,8 @@ public class HtmlUtil {
 
     protected static final StringBuilder EMPTY_CONTENT = new StringBuilder();
 
+    private static final char CSS_ID_SEPARATOR = '§';
+
     static String tableDivStyle;
 
     public static Element appendElements(Element parent, String... tagNames) {
@@ -400,6 +402,8 @@ public class HtmlUtil {
                 attrName = StringUtil.substring(attrName, PRE_ATTRIBUTE_FLAG, null);
                 attr = doc.createAttribute(attrName);
             } else if (i < attributes.length - 1 && !Util.isEmpty(attributes[i + 1])) {
+                if (ATTR_ID.equals(attrName))
+                    attrName = cssID(attrName);
                 attr = doc.createAttribute(attrName);
                 attr.setValue(Util.asString(attributes[++i]));
             } else {
@@ -633,11 +637,22 @@ public class HtmlUtil {
         // <a href="javascript:void(0)" class="closebtn" onclick="closeNav()">&times;</a>
         //return "<span style=\"font-size:30px;cursor:pointer\" onclick=\"openNav()\">&#9776; open</span>"; //☰, &#8801; ≡
         //✖ = &#10006; or &times;
-        appendElement(parent, TAG_SPAN, content("☰"), ATTR_CLASS, "openbtn", "onclick", "openNav()", ATTR_ACCESSKEY, "!", ATTR_STYLE, styles("font-size", "30px", "cursor", "pointer", "background", "radial-gradient(#9999FF, #000000)"));
+        appendElement(parent, TAG_SPAN, content("☰"), ATTR_CLASS, "openbtn", "onclick", "openNav()", ATTR_ACCESSKEY, "!");
         if (sidenav == null) {
             sidenav = appendElement(parent, TAG_DIV, ATTR_ID, "tslSidenav", ATTR_CLASS, "sidenav");
+        } else { // the last parent is the most important one
+            sidenav.getParentNode().removeChild(sidenav);
+            parent.appendChild(sidenav);
         }
-        appendElement(sidenav, TAG_LINK, content("✖"), ATTR_HREF, "javascript:void(0)", ATTR_ID, "button.sidenav.close", ATTR_CLASS, "closebtn", "onclick", "closeNav()", ATTR_ACCESSKEY, "<", "cursor", "pointer", "background", "radial-gradient(#9999FF, #000000)");
+        appendElement(sidenav, TAG_LINK, content("✖"), ATTR_HREF, "javascript:void(0)", ATTR_ID, "button.sidenav.close", ATTR_CLASS, "closebtn", "onclick", "closeNav()", ATTR_ACCESSKEY, "<");
         return sidenav;
     }
+    
+    public static String cssID(String id) {
+        return id.replace('.', CSS_ID_SEPARATOR);
+    }
+    public static String beanID(String id) {
+        return id != null ? id.replace(CSS_ID_SEPARATOR, '.') : id;
+    }
+
 }

@@ -12,7 +12,7 @@ package de.tsl2.nano.h5;
 import static de.tsl2.nano.bean.def.BeanPresentationHelper.KEY_FILTER_FROM_LABEL;
 import static de.tsl2.nano.bean.def.BeanPresentationHelper.KEY_FILTER_TO_LABEL;
 import static de.tsl2.nano.bean.def.IBeanCollector.MODE_SEARCHABLE;
-import static de.tsl2.nano.h5.HtmlUtil.BTN_ASSIGN;
+import static de.tsl2.nano.h5.HtmlUtil.*;
 import static de.tsl2.nano.h5.HtmlUtil.BTN_CANCEL;
 import static de.tsl2.nano.h5.HtmlUtil.BTN_SUBMIT;
 import static de.tsl2.nano.h5.NanoH5.OFFSET_FILTERLINES;
@@ -555,6 +555,7 @@ public class NanoH5Session implements ISession<BeanDefinition>, Serializable, IL
 //            stop();
 //            main(null);
 //        }
+        convertIDs(parms);
         Object responseObject = null;
         if (parms.containsKey(IAction.CANCELED)) {
             logaction(IAction.CANCELED, null);
@@ -736,6 +737,13 @@ public class NanoH5Session implements ISession<BeanDefinition>, Serializable, IL
             }
         }
         return responseObject;
+    }
+
+    private void convertIDs(Map<String, String> parms) {
+        Set<String> keys = parms.keySet();
+        for (String k : keys) {
+            parms.put(k, beanID(parms.get(k)));
+        }
     }
 
     /**

@@ -104,6 +104,8 @@ public class Users {
     }
     
     private static void sleepOnRetry(String userName) {
+        if (userName == null)
+            userName = "XXXXXXXX";
         Integer tries = userTries.get(userName);
         tries = tries == null ? 2 : tries + 1;
         userTries.put(userName, tries);

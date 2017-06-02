@@ -141,10 +141,9 @@ public class Html5Presentation<T> extends BeanPresentationHelper<T> implements I
     private transient String row1style;
     private transient String row2style;
 
-    /** on sidenav action bars, all action  are integrated into this one sidebar */
+    /** on sidenav action bars, all action are integrated into this one sidebar */
     private transient Element sideNav;
-    
-    
+
     Log LOG = LogFactory.getLog(Html5Presentation.class);
     private static transient String jsWebsocketTemplate;
 
@@ -162,7 +161,7 @@ public class Html5Presentation<T> extends BeanPresentationHelper<T> implements I
 
     static final String ICON_DEFAULT = "icons/trust_unknown.png";
     private static final String CSS_CLASS_PANEL_ACTION = "panelaction";
-    private static final String CSS_CLASS_ACTION = "panelaction";
+    private static final String CSS_CLASS_ACTION = "action";
 
     /**
      * constructor
@@ -479,7 +478,7 @@ public class Html5Presentation<T> extends BeanPresentationHelper<T> implements I
                         ATTR_METHOD,
                         ENV.get("html5.http.method", "post"), ATTR_STYLE,
                         style("display", "inline"));
-                    if (!ENV.get("layout.sidenav", true))
+                    if (!useSideNav())
                         c3 = createExpandable(c3, "Menu", ENV.get("layout.header.menu.open", false));
                     Collection<IAction> actions = new ArrayList<IAction>(getPageActions(session));
                     actions.addAll(getApplicationActions(session));
@@ -494,6 +493,10 @@ public class Html5Presentation<T> extends BeanPresentationHelper<T> implements I
             ManagedException.forward(e);
             return null;
         }
+    }
+
+    private boolean useSideNav() {
+        return ENV.get("layout.sidenav", true);
     }
 
     private Element createMetaAndBody(ISession session, Element html, String title, boolean interactive) {
@@ -715,7 +718,11 @@ public class Html5Presentation<T> extends BeanPresentationHelper<T> implements I
      * 
      * @param parent
      */
-    private Element createBean(ISession session, Element parent0, Bean<?> bean, boolean interactive, boolean fullwidth) {
+    private Element createBean(ISession session,
+            Element parent0,
+            Bean<?> bean,
+            boolean interactive,
+            boolean fullwidth) {
         Collection<ValueGroup> valueGroups = bean.getValueGroups();
         if (Util.isEmpty(valueGroups)) {
             return createFieldPanel(session, parent0, bean.getPresentable(), bean.getBeanValues(), bean.getActions(),
@@ -732,7 +739,7 @@ public class Html5Presentation<T> extends BeanPresentationHelper<T> implements I
 //                    parent = appendElement(parent0, TAG_EXP_DETAILS, ATTR_TITLE, valueGroup.getLabel(), "open");
 //                    parent = appendElement(parent, TAG_EXP_SUMMARY, content(valueGroup.getLabel()));
 //                } else {
-                    parent = parent0;
+                parent = parent0;
 //                }
                 Collection<BeanValue<?>> beanValues =
                     new ArrayList<BeanValue<?>>(valueGroup.getAttributes().size());
@@ -763,7 +770,8 @@ public class Html5Presentation<T> extends BeanPresentationHelper<T> implements I
 //                                BeanValue.getBeanValue(
 //                                    new ValueHolder(Bean.getBean((Serializable) bean.getValue(name))),
 //                                    ValueHolder.ATTR_VALUE);
-                            createBean(session, parent, Bean.getBean((Serializable) bean.getValue(name)), interactive, fullwidth);
+                            createBean(session, parent, Bean.getBean((Serializable) bean.getValue(name)), interactive,
+                                fullwidth);
                             continue;
                         }
                     } else {
@@ -791,8 +799,8 @@ public class Html5Presentation<T> extends BeanPresentationHelper<T> implements I
         int columns = (int) Math.ceil(beanValues.size() / (float) maxrows) * 3;
         columns = columns > maxcols ? maxcols : columns;
 
-        parent = interactive && ENV.get("layout.field.panel.expandable", true) 
-                ? createExpandable(parent, p.getDescription(), p.getEnabler().isActive()) : parent;
+        parent = interactive && ENV.get("layout.field.panel.expandable", true)
+            ? createExpandable(parent, p.getDescription(), p.getEnabler().isActive()) : parent;
         Element panel =
             createGrid(parent, ENV.translate("tsl2nano.input", false), "field.panel", fullwidth, 0);
         //fallback: setting style from environment-properties
@@ -933,7 +941,7 @@ public class Html5Presentation<T> extends BeanPresentationHelper<T> implements I
             HtmlUtil.appendAttributes(input, "onkeypress",
                 ENV.get("websocket.inputassist.function", "inputassist(event)"));
         }
-        createAction(parent, action);
+        createAction(parent, action, false);
     }
 
     /**
@@ -992,17 +1000,19 @@ public class Html5Presentation<T> extends BeanPresentationHelper<T> implements I
         int i = 0;
         boolean hasSearchFilter = tableDescriptor.getBeanFinder().getFilterRange() != null;
         tabIndex = data.size() > editableRowNumbers.length ? editableRowNumbers.length * -1 : 0;
-        
+
         // provide expandable details for search and group panels
         boolean useDetailsInTable = ENV.get("collector.ignore.groupby.expandables", false);
-        Element searchDetail = hasSearchFilter && useDetailsInTable ? appendElement(grid, TAG_EXP_DETAILS, ATTR_TITLE, "Search") : grid;
+        Element searchDetail =
+            hasSearchFilter && useDetailsInTable ? appendElement(grid, TAG_EXP_DETAILS, ATTR_TITLE, "Search") : grid;
         Map<String, Element> groups = new HashMap<>();
         if (tableDescriptor.getGroups() != null && useDetailsInTable) {
             for (GroupBy g : tableDescriptor.getGroups()) {
-                groups.put(g.getTitle(), appendElement(grid, TAG_EXP_DETAILS, ATTR_TITLE, g.getTitle(), g.isExpanded() ? ATTR_EXP_OPEN : null));
+                groups.put(g.getTitle(), appendElement(grid, TAG_EXP_DETAILS, ATTR_TITLE, g.getTitle(),
+                    g.isExpanded() ? ATTR_EXP_OPEN : null));
             }
         }
-        
+
         for (T item : data) {
             if (hasSearchFilter && editableRows.contains(i) && ENV.get("layout.grid.searchrow.show", true)) {
                 addEditableRow(searchDetail, tableDescriptor, item, i == 0 ? prop(KEY_FILTER_FROM_LABEL)
@@ -1128,28 +1138,32 @@ public class Html5Presentation<T> extends BeanPresentationHelper<T> implements I
             Collection<IAction> actions,
             boolean showText,
             String... attributes) {
-        int width = 0;
+        int width = -1;
         Element cell = null;
-        if (ENV.get("layout.sidenav", true)) {
-            cell = sideNav = HtmlUtil.createSidebarNavMenuButton(parent, sideNav);
-            width = ENV.get("layout.action.width", -1);
-            if (width == -1)
-                ENV.setProperty("layout.action.width", 200);
-        } else {
-            Element panel = createGrid(parent, "Actions", "action.panel", /*actions != null ? 1 + actions.size() : 1*/0);
-            Element row = appendTag(panel, TABLE(TAG_ROW, ATTR_CLASS, "actionpanel"));
-            cell = appendTag(row, TABLE(TAG_CELL, attributes));
-        }
-        HtmlUtil.appendAttributes(cell, ATTR_STYLE, ENV.get("layout.action.panel", ""));
-        if (actions != null) {
-            for (IAction a : actions) {
-                if (ENV.get("layout.action.show.disabled", true) || a.isEnabled())
-                    createAction(cell, a, showText);
+        try {
+            if (useSideNav()) {
+                cell = sideNav = HtmlUtil.createSidebarNavMenuButton(parent, sideNav);
+                width = ENV.get("layout.action.width", -1);
+                if (width == -1)
+                    ENV.setProperty("layout.action.width", 200);
+            } else {
+                Element panel =
+                    createGrid(parent, "Actions", "action.panel", /*actions != null ? 1 + actions.size() : 1*/0);
+                Element row = appendTag(panel, TABLE(TAG_ROW, ATTR_CLASS, "actionpanel"));
+                cell = appendTag(row, TABLE(TAG_CELL, attributes));
             }
-        }
-        if (ENV.get("layout.sidenav", true)) {
-            if (width == -1)
-                ENV.setProperty("layout.action.width", width);
+            HtmlUtil.appendAttributes(cell, ATTR_STYLE, ENV.get("layout.action.panel", ""));
+            if (actions != null) {
+                for (IAction a : actions) {
+                    if (ENV.get("layout.action.show.disabled", true) || a.isEnabled())
+                        createAction(cell, a, showText);
+                }
+            }
+        } finally {
+            if (useSideNav()) {
+                if (width == -1)
+                    ENV.setProperty("layout.action.width", width);
+            }
         }
         return cell;
     }
@@ -1169,7 +1183,8 @@ public class Html5Presentation<T> extends BeanPresentationHelper<T> implements I
         String path;
         return createAction(cell,
             a.getId(),
-            showText && !a.getShortDescription().equals("...") ? CSS_CLASS_PANEL_ACTION : CSS_CLASS_ACTION,
+            showText && !a.getShortDescription().equals("...") && !a.getShortDescription().isEmpty()
+                ? getCSSPanelAction() : CSS_CLASS_ACTION,
             showText ? a.getShortDescription() : null,
             a.getLongDescription(),
             "submit",
@@ -1180,6 +1195,10 @@ public class Html5Presentation<T> extends BeanPresentationHelper<T> implements I
             a.isEnabled(),
             a.isDefault(),
             a.getActionMode() != IAction.MODE_DLG_OK);
+    }
+
+    private String getCSSPanelAction() {
+        return useSideNav() ? CSS_CLASS_PANEL_ACTION : "panelactionsimple";
     }
 
     /**
@@ -1194,7 +1213,9 @@ public class Html5Presentation<T> extends BeanPresentationHelper<T> implements I
         if (model.isMultiValue() && model instanceof BeanCollector
             && ((BeanCollector) model).hasMode(MODE_ASSIGNABLE)) {
             String assignLabel = Messages.getStringOpt("tsl2nano.assign", true);
-            createAction(panel, BTN_ASSIGN, CSS_CLASS_PANEL_ACTION, assignLabel, assignLabel, "submit", null, "icons/links.png", true, true,
+
+            createAction(panel, BTN_ASSIGN, getCSSPanelAction(), assignLabel, assignLabel, "submit", null,
+                "icons/links.png", true, true,
                 false);
         }
         createCloseAction(panel);
@@ -1203,7 +1224,8 @@ public class Html5Presentation<T> extends BeanPresentationHelper<T> implements I
 
     void createCloseAction(Element panel) {
         String closeLabel = Messages.getStringOpt("tsl2nano.close", true);
-        createAction(panel, IAction.CANCELED, CSS_CLASS_PANEL_ACTION, closeLabel, closeLabel, null, null, "icons/stop.png", true, false, true);
+        createAction(panel, IAction.CANCELED, getCSSPanelAction(), closeLabel, closeLabel, null, null, "icons/stop.png",
+            true, false, true);
     }
 
     /**
@@ -1217,6 +1239,21 @@ public class Html5Presentation<T> extends BeanPresentationHelper<T> implements I
     Element createAction(Element cell, String id, String type, String image) {
         String label = ENV.translate(id, true);
         return createAction(cell, id, CSS_CLASS_ACTION, label, label, type, null, image, true, false, false);
+    }
+
+    Element createAction(Element cell,
+            String id,
+            String cssClass,
+            String label,
+            String tooltip,
+            String type,
+            Object shortcut,
+            String image,
+            boolean enabled,
+            boolean asDefault,
+            boolean formnovalidate) {
+        return createAction(cell, id, cssClass, label, tooltip, type, shortcut, image, -1, enabled, asDefault,
+            formnovalidate);
     }
 
     /**
@@ -1236,6 +1273,7 @@ public class Html5Presentation<T> extends BeanPresentationHelper<T> implements I
             String type,
             Object shortcut,
             String image,
+            int width,
             boolean enabled,
             boolean asDefault,
             boolean formnovalidate) {
@@ -1282,9 +1320,8 @@ public class Html5Presentation<T> extends BeanPresentationHelper<T> implements I
         }
         String style =
             ENV.get("layout.action.style", ""/*STYLE_BACKGROUND_TRANSPARENT + style(STYLE_COLOR, COLOR_WHITE)*/);
-        int btnWidth;
-        if ((btnWidth = ENV.get("layout.action.width", -1)) != -1) {
-            style += style(ATTR_WIDTH, btnWidth);
+        if (width != -1 || (width == -1 && (width = ENV.get("layout.action.width", -1)) != -1)) {
+            style += style(ATTR_WIDTH, width);
         }
         HtmlUtil.appendAttributes(action, ATTR_STYLE, style);
         return action;
@@ -1386,7 +1423,8 @@ public class Html5Presentation<T> extends BeanPresentationHelper<T> implements I
             boolean multiSelection,
             BeanCollector<?, T> tableDescriptor,
             T item,
-            boolean interactive, int index) {
+            boolean interactive,
+            int index) {
         boolean isSelected = tableDescriptor.getSelectionProvider() != null ? tableDescriptor.getSelectionProvider()
             .getValue()
             .contains(item) : false;
