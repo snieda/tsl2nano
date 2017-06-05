@@ -1191,7 +1191,7 @@ public class BeanDefinition<T> extends BeanClass<T> implements IPluggable<BeanDe
      */
     public static void dump() {
         for (BeanDefinition<?> bd : virtualBeanCache) {
-            if (!BeanUtil.isStandardType(bd.clazz)) {
+            if (!BeanUtil.isStandardType(bd.clazz) && !BeanUtil.isFrameworkClass(bd.clazz)) {
                 bd.saveDefinition();
             }
         }

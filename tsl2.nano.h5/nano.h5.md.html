@@ -72,6 +72,7 @@ A cool way to see the power of this tool can be seen in chapter _Online Quick-St
 * automatic translations through network connection
 * secure connection over https and wss (_app.ssl.activate=true)
 * supporting yaml on environment and bean configurations.
+* update mechanism
 * planned interfaces: 
 	* xsd-->bean
 	* java-interface-->java-bean (mock through internal proxy)
@@ -2993,7 +2994,7 @@ Actual list: http://infocenter.pentaho.com/help/index.jsp?topic=%2Fsupported_com
  1.0.0g | 05.03.2017 | NEW: authentication mapping between 'auth' and 'persist' user, many bugfixes 
  1.1.0  | 16.04.2017 | NEW: attribute/actions annotations, Bean-/Attribute-Configurator with decorated parameters, REFACT: action+parameter
  1.1.0b | 21.05.2017 | NEW: sidebar menu (using utf-8 icon)
- 1.1.0c | 05.06.2017 | NEW: themes through css stylings
+ 1.1.0c | 05.06.2017 | NEW: update mechanism
  
 <style class="fallback">body{white-space:pre;font-family:monospace}</style><script src="markdeep.min.js"></script><script src="http://casual-effects.com/markdeep/latest/markdeep.min.js"></script>
 
@@ -3636,3 +3637,7 @@ II:
 - admin=false, secure=true
 - color-theme
 - adding a REST-attribute
+
+version-update-script:
+	- previous->next: java-action-script (like "copy old env.xml", "remove property app.frame.style")
+	

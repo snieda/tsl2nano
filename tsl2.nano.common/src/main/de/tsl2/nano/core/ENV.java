@@ -50,6 +50,7 @@ import de.tsl2.nano.core.execution.CompatibilityLayer;
 import de.tsl2.nano.core.execution.Profiler;
 import de.tsl2.nano.core.execution.SystemUtil;
 import de.tsl2.nano.core.log.LogFactory;
+import de.tsl2.nano.core.update.Updater;
 import de.tsl2.nano.core.util.FileUtil;
 import de.tsl2.nano.core.util.MapUtil;
 import de.tsl2.nano.core.util.NetUtil;
@@ -225,12 +226,13 @@ public class ENV implements Serializable {
         String name = StringUtil.substring(dir, ".nanoh5.", null);
         LogFactory.setLogFile(dir + "/" + name + ".log");
         LogFactory.setLogFactoryXml(dir + "/" + "logfactory.xml");
-
+        String buildInfo = getBuildInformations();
+        
         LogFactory.log("\n===========================================================\n"
             + "creating environment "
             + dir
             + "\n"
-            + SystemUtil.createInfo(getBuildInformations())
+            + SystemUtil.createInfo(buildInfo)
             + "===========================================================");
 
         //provide some external functions as options for this framework
@@ -257,17 +259,18 @@ public class ENV implements Serializable {
             true,
             Object.class);
 
-        File configFile = new File(dir + "/" + CONFIG_NAME + ".xml");//new File(System.getProperty(KEY_CONFIG_PATH, System.getProperty("user.dir")));
+        File configFile = getConfigFile(dir, ".xml");//new File(System.getProperty(KEY_CONFIG_PATH, System.getProperty("user.dir")));
         if (configFile.canRead()) {
             self = XmlUtil.loadXml(configFile.getPath(), ENV.class, layer, false, true);
 //            String configPath = getConfigPath();
 //            if (!configPath.endsWith("/") && !configPath.endsWith("\\"))
 //                setProperty(KEY_CONFIG_PATH, configPath + "/");
-        } else if ((configFile = new File(dir + "/" + CONFIG_NAME + ".yml")).canRead()) {
+        } else if ((configFile = getConfigFile(dir, ".yml")).canRead()) {
             self = YamlUtil.load(new File(configFile.getPath()), ENV.class);
         } else {
             self = new ENV();
             self.properties = createPropertyMap();
+            configFile = getConfigFile(dir, ".xml");
 //          LOG.warn("no environment.properties available");
         }
 
@@ -288,10 +291,31 @@ public class ENV implements Serializable {
         Thread.setDefaultUncaughtExceptionHandler(exceptionHandler);
         addService(UncaughtExceptionHandler.class, exceptionHandler);
 
+        self.update(configFile, buildInfo);
         //add frameworks beandef classes as standard-types
 //        BeanUtil.addStandardTypePackages("de.tsl2.nano.bean.def");
 //        self.persist();
         return self;
+    }
+
+    private void update(File configFile, String buildInfo) {
+        String currentVersion = get("app.version", "0.0.0");
+        Updater updater = new Updater();
+        String versionURL;
+        if ((versionURL = get("app.update.url", "https://sourceforge.net/projects/tsl2nano/files/latest/download?source=navbar")) != null)
+            updater.checkAndUpdate(currentVersion, versionURL);
+        if (new Updater().run(configFile.getPath(), currentVersion, buildInfo, self) || currentVersion == null)
+            setProperty("app.version", buildInfo);
+        
+    }
+
+    public File getConfigFile() {
+        //TODO: ext: xml or yaml
+        return getConfigFile(getConfigPath() + CONFIG_NAME, ".xml");
+    }
+
+    private static File getConfigFile(String dir, String ext) {
+        return new File(dir + "/" + CONFIG_NAME + ext);
     }
 
     /**

@@ -496,7 +496,7 @@ public class Html5Presentation<T> extends BeanPresentationHelper<T> implements I
     }
 
     private boolean useSideNav() {
-        return ENV.get("layout.sidenav", true);
+        return ENV.get("layout.sidenav", false);
     }
 
     private Element createMetaAndBody(ISession session, Element html, String title, boolean interactive) {
@@ -1321,7 +1321,7 @@ public class Html5Presentation<T> extends BeanPresentationHelper<T> implements I
         String style =
             ENV.get("layout.action.style", ""/*STYLE_BACKGROUND_TRANSPARENT + style(STYLE_COLOR, COLOR_WHITE)*/);
         if (width != -1 || (width == -1 && (width = ENV.get("layout.action.width", -1)) != -1)) {
-            style += style(ATTR_WIDTH, width);
+            style += (style.isEmpty() || style.endsWith(";") ? "" : ";") + style(ATTR_WIDTH, width);
         }
         HtmlUtil.appendAttributes(action, ATTR_STYLE, style);
         return action;
