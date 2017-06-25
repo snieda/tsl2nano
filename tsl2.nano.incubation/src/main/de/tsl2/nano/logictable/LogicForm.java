@@ -11,6 +11,9 @@ package de.tsl2.nano.logictable;
 
 import java.text.Format;
 
+import de.tsl2.nano.collection.CollectionUtil;
+import de.tsl2.nano.core.util.FormatUtil;
+
 /**
  * Adds direct cell formatting to the {@link LogicTable}.
  * <p/>
@@ -26,13 +29,38 @@ public class LogicForm<H extends Format & Comparable<H>, ID> extends LogicTable<
 
     /**
      * constructor
+     * @param header
+     */
+    public LogicForm(H... header) {
+        super(header);
+    }
+
+    public LogicForm(Object... header) {
+        super((H[]) CollectionUtil.copyOfRange(header, 0, header.length, DefaultHeader[].class));
+    }
+
+    /**
+     * constructor
      * 
      * @param columnCount
      */
-    public LogicForm(int columnCount) {
-        super(columnCount);
+    public LogicForm(String name, int columnCount) {
+        super(name, columnCount);
     }
 
+    /**
+     * constructor
+     * @param cols
+     * @param rows
+     */
+    public LogicForm(String name, int cols, int rows) {
+        super(name, cols, rows);
+    }
+    
+    protected static Object createDefaultHeader(Object source) {
+        return new DefaultHeader((String)source);
+    }
+    
     /**
      * {@inheritDoc}
      */
@@ -54,8 +82,8 @@ public class LogicForm<H extends Format & Comparable<H>, ID> extends LogicTable<
         return e;
     }
 
+    @SuppressWarnings("unchecked")
     private H createFormat(String string) {
-        // TODO Auto-generated method stub
-        return null;
+        return (H) FormatUtil.getDefaultFormat(string, true);
     }
 }

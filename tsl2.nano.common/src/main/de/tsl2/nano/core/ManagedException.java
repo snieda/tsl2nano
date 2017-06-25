@@ -165,6 +165,10 @@ public class ManagedException extends RuntimeException {
         return getRootCause(cause);
     }
 
+    public static Throwable forward(Throwable ex) {
+        return forward(ex, true);
+    }
+    
     /**
      * will throw ex if it is a RuntimeException, otherwise it will wrap it to a ManagedException (extension of
      * RuntimeException) and throw it. The exception text will be logged once!
@@ -173,8 +177,8 @@ public class ManagedException extends RuntimeException {
      * @return the forwarding exception, on any case an exception will be thrown. the return value is to do a
      *         convenience on calling!
      */
-    public static Throwable forward(Throwable ex) {
-        throw toRuntimeEx(ex, false, true);
+    public static Throwable forward(Throwable ex, boolean logNow) {
+        throw toRuntimeEx(ex, false, logNow);
     }
 
     /**

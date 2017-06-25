@@ -102,6 +102,7 @@ import de.tsl2.nano.core.util.FileUtil;
 import de.tsl2.nano.core.util.MapUtil;
 import de.tsl2.nano.core.util.PrintUtil;
 import de.tsl2.nano.execution.ScriptUtil;
+import de.tsl2.nano.h5.CSheet;
 import de.tsl2.nano.h5.Compositor;
 import de.tsl2.nano.h5.Controller;
 import de.tsl2.nano.h5.Html5Presentation;
@@ -263,13 +264,13 @@ public class Timesheet extends NanoH5App {
 //        ruleCover.connect(charge.getAttribute(ATTR_VALUE));
 
         //create a decision-table
-        TableList tl = new TableList<>(2);
+        TableList tl = new TableList<>("weekcolor", 2);
         tl.add("matrix", "<1>", "<2>", "<3>", "<4>", "<5>", "<6>", "<7>");
         tl.add("weekday", "Mo", "Di", "Mi", "Do", "Fr","Sa", "So");
         tl.add("result", greenColorStyle, greenColorStyle, greenColorStyle, greenColorStyle, greenColorStyle, redColorStyle, redColorStyle);
         String ruleDir = ENV.get(RulePool.class).getDirectory();
-        FileUtil.save(ruleDir + "weekcolor.csv", tl.dump());
-        
+        FileUtil.save(ruleDir + "weekcolor", tl.dump());
+        tl.save(ruleDir);
         RuleDecisionTable dtRule = RuleDecisionTable.fromCSV(ruleDir + "weekcolor.csv");
         ENV.get(RulePool.class).add(dtRule);
         RuleCover.cover(Charge.class, ATTR_FROMDATE, "presentable.layoutConstraints", "&" + dtRule.getName());
@@ -441,7 +442,7 @@ public class Timesheet extends NanoH5App {
             new BeanCollector<Collection<Times>, Times>(Times.class, times, BeanCollector.MODE_ALL, null);
 
         AttributeDefinition space1 = beanCollector.getPresentationHelper().addSpaceValue();
-        beanCollector.addAttribute("path-test", new PathExpression<>(Times.class, "relation.string"), null, null);
+        beanCollector.addAttribute("pathTest", new PathExpression<>(Times.class, "relation.pathTest"), null, null);
         beanCollector.addAttribute("rule-test", new RuleExpression<>(Times.class, "§test-import"), null, null);
         beanCollector
             .addAttribute(
@@ -453,7 +454,7 @@ public class Timesheet extends NanoH5App {
         beanCollector.addAttribute("virtual-test", "I'm virtual", null, null, null);
         beanCollector.addAttribute(ATTR_BINARY, new Attachment("picture", ENV.getConfigPath()
             + "/icons/attach.png"), null, null);
-        beanCollector.setAttributeFilter("path-test", ATTR_TIMESTAMP, ATTR_TIME, ATTR_DATE, space1.getName(),
+        beanCollector.setAttributeFilter("pathTest", ATTR_TIMESTAMP, ATTR_TIME, ATTR_DATE, space1.getName(),
             ATTR_STRING,
             ATTR_OBJECT, ATTR_IMMUTABLEINTEGER);
         //more fields on one line (one field has grid-width 3)
@@ -461,6 +462,12 @@ public class Timesheet extends NanoH5App {
         //let the field 'comment' grow to full width
         beanCollector.getAttribute(ATTR_OBJECT).getPresentation()
             .setLayoutConstraints((Serializable) MapUtil.asMap(ATTR_SPANCOL, 11, ATTR_BORDER, 1, ATTR_SIZE, 150));
+
+        /*
+         * test csheet as logic table like excel
+         */
+        CSheet cSheet = new CSheet("csheet", 3, 3);
+        cSheet.saveDefinition();
 
         /*
          * add a specified action

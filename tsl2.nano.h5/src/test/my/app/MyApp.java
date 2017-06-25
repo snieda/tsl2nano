@@ -219,11 +219,11 @@ public class MyApp extends NanoH5 {
             new BeanCollector<Collection<Times>, Times>(Times.class, times, BeanCollector.MODE_ALL, null);
 
         AttributeDefinition space1 = beanCollector.getPresentationHelper().addSpaceValue();
-        beanCollector.addAttribute("path-test", new PathExpression<>(Times.class, "relation.string"), null, null);
-        beanCollector.addAttribute("rule-test", new RuleExpression<>(Times.class, "§test-import"), null, null);
+        beanCollector.addAttribute("pathTest", new PathExpression<>(Times.class, "relation.pathTest"), null, null);
+        beanCollector.addAttribute("ruleTest", new RuleExpression<>(Times.class, "§test-import"), null, null);
         beanCollector
             .addAttribute(
-                "sql-test",
+                "sqlTest",
                 new SQLExpression<>(
                     Times.class,
                     "?" + query.getName(), Object[].class),
@@ -231,7 +231,7 @@ public class MyApp extends NanoH5 {
         beanCollector.addAttribute("virtual-test", "I'm virtual", null, null, null);
         beanCollector.addAttribute(ATTR_BINARY, new Attachment("picture", ENV.getConfigPath()
             + "/icons/attach.png"), null, null);
-        beanCollector.setAttributeFilter("path-test", ATTR_TIMESTAMP, ATTR_TIME, ATTR_DATE, space1.getName(),
+        beanCollector.setAttributeFilter("pathTest", ATTR_TIMESTAMP, ATTR_TIME, ATTR_DATE, space1.getName(),
             ATTR_STRING,
             ATTR_OBJECT, ATTR_IMMUTABLEINTEGER);
         //more fields on one line (one field has grid-width 3)

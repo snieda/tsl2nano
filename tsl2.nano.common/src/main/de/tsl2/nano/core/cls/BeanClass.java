@@ -611,6 +611,10 @@ public class BeanClass<T> implements Serializable {
         return BeanClass.getBeanClass(type).callMethod(null, staticMethodName, null, usePrimitives, args);
     }
 
+    public static Object call(Class<?> type, String staticMethodName, Class[] par, Object... args) {
+        return BeanClass.getBeanClass(type).callMethod(null, staticMethodName, par, args);
+    }
+
     public static Object call(Object instance, String methodName) {
         return BeanClass.getBeanClass(instance.getClass()).callMethod(instance, methodName, new Class[0]);
     }

@@ -206,7 +206,7 @@ public class UnboundAccessor<T> {
             Object v = f.get(instance);
             return path.length > 1 && v != null ? member(v, Arrays.copyOfRange(path, 1, path.length)) : v;
         } catch (Exception e) {
-            ManagedException.forward(e);
+            ManagedException.forward(e, false);
             return null;
         }
     }

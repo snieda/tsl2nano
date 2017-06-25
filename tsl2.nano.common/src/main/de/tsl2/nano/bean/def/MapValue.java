@@ -13,6 +13,7 @@ import java.lang.reflect.Method;
 import java.util.Map;
 
 import org.simpleframework.xml.Attribute;
+import org.simpleframework.xml.Element;
 
 import de.tsl2.nano.bean.IValueAccess;
 import de.tsl2.nano.core.cls.IAttribute;
@@ -32,9 +33,12 @@ public class MapValue<T> implements IValueAccess<T>, IAttribute<T> {
     transient Map map;
     @Attribute
     Class<T> type;
-    @Attribute
+    @Element
     Object name;
     transient EventController eventController;
+
+    protected MapValue() {
+    }
 
     public MapValue(Object name) {
         this(name, null, null);
@@ -74,12 +78,16 @@ public class MapValue<T> implements IValueAccess<T>, IAttribute<T> {
     
     @Override
     public T getValue(Object instance) {
-        return (T) ((Map) instance).get(name);
+        return (T) (instance != null ? ((Map) instance).get(name) : map.get(name));
     }
 
     @Override
     public void setValue(Object instance, T value) {
-        ((Map) instance).put(name, value);
+        if (instance != null) {
+            ((Map) instance).put(name, value);
+        } else {
+            map.put(name, value);
+        }
     }
 
     @Override
@@ -138,6 +146,10 @@ public class MapValue<T> implements IValueAccess<T>, IAttribute<T> {
         return type;
     }
 
+    public void setMap(Map map) {
+        this.map = map;
+    }
+    
     @Override
     public EventController changeHandler() {
         if (eventController == null) {

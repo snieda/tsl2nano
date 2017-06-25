@@ -115,6 +115,9 @@ public interface IPresentable extends Serializable {
     /** convenience to evaluate layout/layoutconstraint properties (perhaps, if layout or layoutconstraints are maps) */
     public <T> T layout(String name, T defaultValue);
     
+    /** don't use that value - don't set any default values on it */
+    public static final int UNUSABLE = -2;
+
     /** usable for int definitions that are not bitfields */
     public static final int UNDEFINED = IConstraint.UNDEFINED;
 

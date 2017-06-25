@@ -9,15 +9,22 @@
  */
 package de.tsl2.nano.collection;
 
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.Serializable;
 import java.lang.reflect.Array;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Scanner;
 
 import org.apache.commons.logging.Log;
+import org.xml.sax.helpers.DefaultHandler;
 
+import de.tsl2.nano.core.ManagedException;
 import de.tsl2.nano.core.cls.BeanClass;
 import de.tsl2.nano.core.log.LogFactory;
+import de.tsl2.nano.core.util.FileUtil;
 import de.tsl2.nano.core.util.StringUtil;
 
 /**
@@ -34,7 +41,11 @@ import de.tsl2.nano.core.util.StringUtil;
  */
 
 @SuppressWarnings("unchecked")
-public class TableList<H extends Comparable<H>, ID> {
+public class TableList<H extends Comparable<H>, ID> implements Serializable {
+    /** serialVersionUID */
+    private static final long serialVersionUID = -9192974285797951377L;
+
+    protected String name;
     protected Class<H> headerType;
     protected H[] header;
     protected List<Row<ID>> rows;
@@ -44,15 +55,25 @@ public class TableList<H extends Comparable<H>, ID> {
     /**
      * used by dumps
      */
-    static final String DIV = "\t";
-    private static final String LF = System.getProperty("line.separator");
-
+    protected static final String DIV = "\t";
+    protected static final String LF = System.getProperty("line.separator");
+    public static final String FILE_EXT = ".csv";
+    public static final String CELL_ROOT = "--";
+    
+    protected TableList() {}
+    
+    public TableList(String name, int cols, int rows) {
+        this(name, cols);
+        fill((Class<ID>) DefaultHandler.class, rows);
+    }
+    
     /**
      * column headers will be of type String.  see {@link #TableList(Class, int)}
      */
-    public TableList(int columnCount) {
+    public TableList(String name, int columnCount) {
         //don't use the generic type H (Class<H>) to be compilable on standard jdk javac.
         this((Class) String.class, columnCount);
+        this.name = name;
     }
 
     /**
@@ -100,6 +121,10 @@ public class TableList<H extends Comparable<H>, ID> {
         rows = new ArrayList<Row<ID>>();
     }
 
+    public <T extends TableList<H, ID>> T fill(int rowCount) {
+        return fill((Class<ID>) Row.class, rowCount);
+    }
+    
     /**
      * pre fill (e.g. a fixed sized table) with empty values
      * 
@@ -154,6 +179,38 @@ public class TableList<H extends Comparable<H>, ID> {
         }
     }
 
+    public TableList<H, ID> addAll(boolean includedRowIds, List values) {
+        return addAll(includedRowIds, values.toArray());
+    }
+    
+    /**
+     * addAll
+     * @param includedRowIds if true, row-ids are included in the values
+     * @param values to be splitted and packed into col/rows
+     * @return tablelist itself
+     */
+    public TableList<H, ID> addAll(boolean includedRowIds, Object... values) {
+        int colSize = getColumnCount() + (includedRowIds ? 1 : 0);
+        Object[][] rows = CollectionUtil.split(values, colSize);
+        Object rowId;
+        for (int i = 0; i < rows.length; i++) {
+            if (includedRowIds && i % colSize == 0) {
+                rowId = rows[i][0];
+            } else {
+                rowId = createRowID(i);
+            }
+            add((ID) rowId, CollectionUtil.copyOfRange(rows[i], 1, rows[i].length));
+        }
+        return this;
+    }
+    
+    protected ID createRowID(int i) {
+        return (ID)Integer.valueOf(i);
+    }
+
+    protected Row<ID> createRow(int index, Object...values) {
+        return new Row<ID>(index, createRowID(index), values);
+    }
     /**
      * adds a new row to the table. if no values are given, an empty row will be added. if some values were given, but
      * not the size of the header, an exception will be thrown
@@ -393,6 +450,8 @@ public class TableList<H extends Comparable<H>, ID> {
      */
     public int indexOf(ID rowId) {
         Row.temp.rowId = rowId;
+        if (rowId.equals(Integer.valueOf(0))) // header row
+            return -1;
         int i = rows.indexOf(Row.temp);
         if (i == -1) {
             throw new IllegalArgumentException("The row-id " + rowId + " couldn't be found on table " + this);
@@ -424,6 +483,10 @@ public class TableList<H extends Comparable<H>, ID> {
      */
     public int getColumnCount() {
         return header.length;
+    }
+
+    public int getRowCount() {
+        return size();
     }
 
     protected final void checkSizes(int row, int column) {
@@ -459,12 +522,76 @@ public class TableList<H extends Comparable<H>, ID> {
         assert values.length != header.length : "value array must have same size as header array!";
     }
 
+    public void save(String relDir) {
+        String path = relDir + name + FILE_EXT;
+        new File(path).getParentFile().mkdirs();
+        FileUtil.save(path, dump());
+    }
+    
+    /**
+     * @return Returns the name.
+     */
+    public String getName() {
+        return name;
+    }
+
+    public static <T> T load(String file) {
+        return (T) load(file, TableList.class);
+    }
+    public static <T extends TableList> T load(String file, Class<T> type) {
+        return load(file, type, DIV);
+    }
+    public static <T extends TableList> T load(String file, Class<T> type, String div) {
+        //TODO: load from dump...
+        T logic = null;
+        try {
+            Scanner sc = new Scanner(new File(file));
+            if (sc.hasNextLine()) {//header
+                String[] header = sc.nextLine().split(div);
+                Object[] args = new Object[1];
+                String[] header1 = CollectionUtil.copyOfRange(header, 1, header.length);
+                //convert the header(strings) into types defaultHeaderType 
+                Comparable[] h = new Comparable[header1.length];
+                for (int i = 0; i < header1.length; i++) {
+                    h[i] = (Comparable) BeanClass.call(type, "createDefaultHeader", new Class[]{Object.class}, header1[i]);
+                }
+                args[0] = h;
+                //create the table instance
+                logic = BeanClass.createInstance(type, args);
+
+                while (sc.hasNextLine()) {
+                    Object[] row = sc.nextLine().split(div);
+                    //TODO: row-id?
+                    logic.addAll(true, row);
+                }
+            }
+        } catch (FileNotFoundException e) {
+            ManagedException.forward(e);
+        }
+        return logic;
+    }
+    
+    /**
+     * wraps the given source string into a default header instance of this class. this implementatino simply returns
+     * the source string. each extension class shuold provide its own 'createDefaultHeader(string)'
+     * 
+     * @param source header to be wrapped
+     * @return wrapped source
+     */
+    protected static Object createDefaultHeader(Object source) {
+        return source;
+    }
+    
+    public String dump() {
+        return dump(DIV, true);
+    }
+    
     /**
      * dump
      * 
      * @return
      */
-    public String dump() {
+    public String dump(String div, boolean resolve) {
         StringBuilder buf = new StringBuilder(20 + header.length
             * 5
             + +rows.size()
@@ -472,15 +599,19 @@ public class TableList<H extends Comparable<H>, ID> {
             + rows.size()
             * header.length
             * 4);
-        buf.append("--" + DIV);//row-id header
+        buf.append(CELL_ROOT + div);//row-id header
         for (int i = 0; i < header.length; i++) {
-            buf.append(header[i] + DIV);
+            buf.append(header[i] + div);
         }
         buf.append(LF);
+        dumpValues(buf, div, resolve);
+        return buf.toString();
+    }
+
+    protected void dumpValues(StringBuilder buf, String div, boolean resolve) {
         for (Row<ID> r : rows) {
             buf.append(r.dump() + LF);
         }
-        return buf.toString();
     }
 
     /**
@@ -553,14 +684,19 @@ class Row<ID> {
     }
 
     public String dump() {
+        return dump(TableList.DIV);
+    }
+    
+    public String dump(String div) {
         StringBuilder buf = new StringBuilder(values.length * 4 + 20);
-        buf.append(rowId + TableList.DIV);
+        buf.append(rowId + div);
         for (int i = 0; i < values.length; i++) {
-            buf.append(values[i] + TableList.DIV);
+            buf.append(values[i] + div);
         }
         return buf.toString();
     }
 
+    
     @Override
     public String toString() {
         return index + ":" + rowId;

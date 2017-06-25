@@ -135,6 +135,9 @@ public class Bean<T> extends BeanDefinition<T> {
     /** inner function to detach this bean from a beancollector */
     private IAction detacher;
 
+    /** used to registere/find extensions of BeanDefinition/Bean through ENV property */
+    public static final String BEANWRAPPER = "BeanWrapper";
+    
     /**
      * hold beans only for a short time. this will enhance performance on loading a bean. holding beans to long will
      * result in memory problems as the application may be used by many clients.
@@ -210,7 +213,7 @@ public class Bean<T> extends BeanDefinition<T> {
                 if (instance != null) {
                     actions = getActionsByClass(instance.getClass(), null, new Object[] { instance });
                     actions = new ArrayList<IAction>(actions);
-                    Collections.sort((List)actions);
+                    Collections.sort((List) actions);
                 }
             }
         }
@@ -364,12 +367,14 @@ public class Bean<T> extends BeanDefinition<T> {
     public boolean isValid(Map<BeanValue<?>, String> messages) {
         return isValid(messages, false);
     }
+
     public boolean isValid(Map<BeanValue<?>, String> messages, boolean refresh) {
         final List<BeanValue<?>> attributes = getBeanValues();
         boolean valid = true;
         IStatus status = IStatus.STATUS_OK;
         for (final BeanValue beanValue : attributes) {
-            if ((refresh && !(status = beanValue.isValid(beanValue.getValue())).ok()) || (!refresh && !beanValue.getStatus().ok())) {
+            if ((refresh && !(status = beanValue.isValid(beanValue.getValue())).ok())
+                || (!refresh && !beanValue.getStatus().ok())) {
                 if (messages != null)
                     messages.put(beanValue, beanValue.getStatus().message());
                 if (refresh)
@@ -388,6 +393,7 @@ public class Bean<T> extends BeanDefinition<T> {
     public void check() {
         check(false);
     }
+
     public void check(boolean refresh) {
         final Map<BeanValue<?>, String> msgMap = new LinkedHashMap<BeanValue<?>, String>();
         final boolean isValid = isValid(msgMap, refresh);
@@ -548,7 +554,7 @@ public class Bean<T> extends BeanDefinition<T> {
                 newBean = bean;
             } else {
                 newBean = BeanContainer.instance().save(bean);
-                
+
                 /*
                  * after the save operation, the presenter can be used only after
                  * a BeanContainer.resolveLayzRelation() and a reset()-call.
@@ -576,7 +582,7 @@ public class Bean<T> extends BeanDefinition<T> {
         //if the saved object is the presenters bean - use the new refreshed bean
         if (newBean.getClass().equals(instance.getClass())) {
             instance = (T) newBean;
-        } 
+        }
         return newBean;
     }
 
@@ -591,6 +597,10 @@ public class Bean<T> extends BeanDefinition<T> {
         return toValueMap(instance, true, false, false);
     }
 
+    protected static <I> Bean<I> createBean(I instance, BeanDefinition<I> beandef) {
+        return createBean(instance, beandef, new Bean<I>());
+    }
+    
     /**
      * creates a bean through informations of a bean-definition
      * 
@@ -599,16 +609,17 @@ public class Bean<T> extends BeanDefinition<T> {
      * @param beandef bean description
      * @return new created bean holding given instance
      */
-    protected static <I> Bean<I> createBean(I instance, BeanDefinition<I> beandef) {
-        Bean<I> bean = new Bean<I>();
-        copy(beandef, bean, "attributeFilter", "attributeDefinitions", "asString", "presentationHelper", "presentable", "actions");
+    protected static <I> Bean<I> createBean(I instance, BeanDefinition<I> beandef, Bean<I> beanWrapper) {
+        Bean<I> bean = beanWrapper;
+        copy(beandef, bean, "attributeFilter", "attributeDefinitions", "asString", "presentationHelper", "presentable",
+            "actions");
         bean.attributeFilter = beandef.attributeFilter != null ? CollectionUtil.copy(beandef.attributeFilter) : null;
         bean.attributeDefinitions =
             (LinkedHashMap<String, IAttributeDefinition<?>>) Util.untyped(createValueDefinitions(beandef
                 .getAttributeDefinitions()));
         if (beandef.presentable != null)
             bean.presentable = BeanUtil.copy(beandef.presentable);
-        
+
         if (beandef.actions != null) {
             bean.actions = new ArrayList<IAction>(beandef.actions.size());
             for (IAction a : beandef.actions) {
@@ -738,9 +749,15 @@ public class Bean<T> extends BeanDefinition<T> {
                 c.setType(BeanClass.getDefiningClass(entry.getValue().getClass()));
             }
         } else {
+            Class type = instanceOrName.getClass();
             BeanDefinition<I> beandef =
-                getBeanDefinition((Class<I>) BeanClass.getDefiningClass(instanceOrName.getClass()));
-            bean = createBean(instanceOrName, beandef);
+                    getBeanDefinition((Class<I>) BeanClass.getDefiningClass(instanceOrName.getClass()));
+            Class instanceBeanWrapper = ENV.get(type.getName() + BEANWRAPPER, null);
+            if (instanceBeanWrapper != null) {
+                bean = createBean(instanceOrName, beandef, (Bean)BeanClass.createInstance(instanceBeanWrapper, instanceOrName));
+            } else {
+                bean = createBean(instanceOrName, beandef);
+            }
         }
 
         if (cacheInstance && ENV.get("bean.use.cache", true)) {
@@ -753,8 +770,8 @@ public class Bean<T> extends BeanDefinition<T> {
     //not yet used on creation
     public void autoInit(String name) {
         super.autoInit(name);
-        List<BeanValue<?>> beanValues = getBeanValues();
-        for (BeanValue<?> bv : beanValues) {
+        List<IAttributeDefinition<?>> beanValues = getBeanAttributes();
+        for (IAttributeDefinition<?> bv : beanValues) {
             bv.getPresentation();
             bv.getColumnDefinition();
         }
@@ -778,8 +795,9 @@ public class Bean<T> extends BeanDefinition<T> {
             for (Object k : keySet) {
                 v = map.get(k);
                 bean.addAttribute(
-                    new BeanValue(bean.instance, new MapValue(v != null ? v : k, (v != null ? BeanClass.getDefiningClass(v
-                        .getClass()) : null), map)));
+                    new BeanValue(bean.instance,
+                        new MapValue(v != null ? v : k, (v != null ? BeanClass.getDefiningClass(v
+                            .getClass()) : null), map)));
             }
         }
         return bean;
@@ -873,7 +891,7 @@ public class Bean<T> extends BeanDefinition<T> {
             return getBean(instance);
         return this;
     }
-    
+
     public String toStringDescription() {
         final Collection<? extends IAttribute> attributes = getAttributes();
         final StringBuilder buf = new StringBuilder(attributes.size() * 15);
@@ -924,6 +942,8 @@ class SaveAction<T> extends SecureAction<T> implements Serializable, IConstructa
     /** instance to save - may differ from bean.instance! */
     private T instance;
 
+    protected SaveAction() {}
+    
     public SaveAction(T instance,
             String id,
             String shortDescription,

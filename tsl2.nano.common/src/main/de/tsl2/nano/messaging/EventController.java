@@ -73,7 +73,8 @@ public class EventController implements Serializable {
         ArrayList<IListener> all = new ArrayList<IListener>();
         if (listener != null) {
             for (ListWrapper<IListener> l : listener.values()) {
-                all.addAll((Collection<? extends IListener>) l.getList());
+                if (l != null) //TODO: why can l be null?
+                    all.addAll((Collection<? extends IListener>) l.getList());
             }
         }
         return all;

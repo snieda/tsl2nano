@@ -21,7 +21,7 @@ import de.tsl2.nano.core.util.FileUtil;
 import de.tsl2.nano.core.util.StringUtil;
 
 /**
- * reads value-expressions from file and creates corresponding objects. writes objects through there value-expressions.
+ * reads value-expressions from file and creates corresponding objects. writes objects through their value-expressions.
  * 
  * @author Tom
  * @version $Revision$

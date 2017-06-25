@@ -12,6 +12,7 @@ package de.tsl2.nano.bean.def;
 import java.util.Collection;
 import java.util.LinkedList;
 
+import org.simpleframework.xml.Attribute;
 import org.simpleframework.xml.ElementList;
 
 /**
@@ -27,7 +28,11 @@ public class GroupingPresentable extends Presentable {
     /** optional grouping informations */
     @ElementList(inline = true, entry = "groupby", type = GroupBy.class, required = false)
     protected Collection<GroupBy> groups;
-
+    @Attribute
+    protected int gridWidth;
+    @Attribute
+    protected int gridHeight;
+    
     /**
      * constructor
      */
@@ -82,6 +87,41 @@ public class GroupingPresentable extends Presentable {
             }
         }
         return null;
+    }
+
+    /**
+     * @return Returns the gridWidth.
+     */
+    public int getGridWidth() {
+        return gridWidth;
+    }
+
+    /**
+     * @param gridWidth The gridWidth to set.
+     */
+    public void setGridWidth(int gridWidth) {
+        this.gridWidth = gridWidth;
+    }
+
+    /**
+     * @return Returns the gridHeight.
+     */
+    public int getGridHeight() {
+        return gridHeight;
+    }
+
+    /**
+     * @param gridHeight The gridHeight to set.
+     */
+    public void setGridHeight(int gridHeight) {
+        this.gridHeight = gridHeight;
+    }
+
+    /**
+     * @return Returns the serialversionuid.
+     */
+    public static long getSerialversionuid() {
+        return serialVersionUID;
     }
 
 }

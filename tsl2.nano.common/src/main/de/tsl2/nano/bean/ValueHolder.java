@@ -27,12 +27,15 @@ public class ValueHolder<T> implements Serializable, IValueAccess<T> {
     /** serialVersionUID */
     private static final long serialVersionUID = 7453785034902931979L;
 
-    @Element
+    @Element(required=false)
     T value;
     @Attribute(required=false)
     Class<T> type;
     transient EventController changeHandler;
 
+    protected ValueHolder() {
+    }
+    
     public ValueHolder(T object) {
         this(object, null);
     }

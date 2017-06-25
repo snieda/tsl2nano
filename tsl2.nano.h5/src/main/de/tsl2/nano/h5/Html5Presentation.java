@@ -70,6 +70,7 @@ import de.tsl2.nano.bean.def.BeanDefinition;
 import de.tsl2.nano.bean.def.BeanPresentationHelper;
 import de.tsl2.nano.bean.def.BeanValue;
 import de.tsl2.nano.bean.def.GroupBy;
+import de.tsl2.nano.bean.def.GroupingPresentable;
 import de.tsl2.nano.bean.def.IBeanCollector;
 import de.tsl2.nano.bean.def.IPageBuilder;
 import de.tsl2.nano.bean.def.IPresentable;
@@ -792,13 +793,18 @@ public class Html5Presentation<T> extends BeanPresentationHelper<T> implements I
             Collection<IAction> actions,
             boolean interactive,
             boolean fullwidth) {
-        int maxrows = ENV.get("layout.panel.maxrowcount", 25);
-        int maxcols =
-            p.layout(L_GRIDWIDTH, ENV.get("layout.panel.columncount", (AppLoader.isDalvik() ? 3 : 9)));
-
-        int columns = (int) Math.ceil(beanValues.size() / (float) maxrows) * 3;
-        columns = columns > maxcols ? maxcols : columns;
-
+        int columns = -1;
+        if (p instanceof GroupingPresentable) {
+            GroupingPresentable gp = (GroupingPresentable) p;
+            columns = gp.getGridWidth();
+        } if (columns < 1) {
+            int maxrows = ENV.get("layout.panel.maxrowcount", 25);
+            int maxcols =
+                p.layout(L_GRIDWIDTH, ENV.get("layout.panel.columncount", (AppLoader.isDalvik() ? 3 : 9)));
+    
+            columns = (int) Math.ceil(beanValues.size() / (float) maxrows) * 3;
+            columns = columns > maxcols ? maxcols : columns;
+        }
         parent = interactive && ENV.get("layout.field.panel.expandable", true)
             ? createExpandable(parent, p.getDescription(), p.getEnabler().isActive()) : parent;
         Element panel =
@@ -1745,6 +1751,8 @@ public class Html5Presentation<T> extends BeanPresentationHelper<T> implements I
                 String width = Presentable.asText(p.getWidth());
                 if (width == null) {
                     width = ENV.get("field.input.size", "50");
+                } else if (p.getWidth() == IPresentable.UNUSABLE) {
+                    width = null;
                 }
                 boolean isOption = "checkbox".equals(type);
                 //Attention on Autoboxing with null values!

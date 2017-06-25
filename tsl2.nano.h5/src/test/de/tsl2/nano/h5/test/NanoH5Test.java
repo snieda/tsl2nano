@@ -13,6 +13,7 @@ import static org.junit.Assert.assertTrue;
 
 import java.io.File;
 import java.io.IOException;
+import java.math.BigDecimal;
 import java.net.URL;
 import java.text.SimpleDateFormat;
 import java.util.LinkedHashMap;
@@ -21,6 +22,7 @@ import java.util.Properties;
 
 import org.anonymous.project.Address;
 import org.anonymous.project.Charge;
+import org.junit.Assert;
 import org.junit.Ignore;
 import org.junit.Test;
 
@@ -36,7 +38,7 @@ import de.tsl2.nano.bean.IBeanContainer;
 import de.tsl2.nano.bean.def.Bean;
 import de.tsl2.nano.bean.def.BeanDefinition;
 import de.tsl2.nano.bean.def.BeanPresentationHelper;
-import de.tsl2.nano.bean.def.IAttributeDefinition;
+import de.tsl2.nano.bean.def.IPresentable;
 import de.tsl2.nano.bean.def.IStatus;
 import de.tsl2.nano.bean.def.IValueDefinition;
 import de.tsl2.nano.core.ENV;
@@ -50,10 +52,10 @@ import de.tsl2.nano.core.util.FileUtil;
 import de.tsl2.nano.core.util.MapUtil;
 import de.tsl2.nano.core.util.NetUtil;
 import de.tsl2.nano.execution.AntRunner;
+import de.tsl2.nano.h5.CSheet;
 import de.tsl2.nano.h5.Html5Presentation;
 import de.tsl2.nano.h5.NanoH5;
 import de.tsl2.nano.h5.configuration.BeanConfigurator;
-import de.tsl2.nano.h5.configuration.ExpressionDescriptor;
 import de.tsl2.nano.h5.expression.QueryPool;
 import de.tsl2.nano.h5.navigation.Workflow;
 import de.tsl2.nano.h5.timesheet.Timesheet;
@@ -351,7 +353,33 @@ public class NanoH5Test {
 
         //TODO: queries are defined in 'specification'.
         //TODO: name clash...
-        attr = bean.getAttribute("select count(*) from Address");
+        attr = bean.getAttribute(FileUtil.getValidFileName(" ?select count(*) from Address"));
         System.out.println(attr.getValue());
     }
+    
+    @Test
+    public void testCSheet() throws Exception {
+        /*
+         * test csheet as logic table like excel
+         */
+        ENV.addService(BeanPresentationHelper.class, new Html5Presentation<>());
+        CSheet cSheet = new CSheet("test", 3, 3);
+        cSheet.set(0, 1, 2, 3);
+        cSheet.set(1, 4, 5, "=A2*B2");
+        //test the bean button
+        cSheet.getActions().iterator().next().activate();
+        //and reload it
+        Bean.clearCache();
+        BeanDefinition<?> loadedSheet = BeanDefinition.getBeanDefinition("virtual.test");
+        Assert.assertTrue(loadedSheet instanceof CSheet);
+        cSheet = (CSheet) loadedSheet;
+        Assert.assertTrue(cSheet.getLogicForm().getRowCount() == 3);
+        Assert.assertTrue(cSheet.getLogicForm().get(1, 2).equals(new BigDecimal(20)));
+
+        cSheet.set(1, 0, new BigDecimal(5));
+        Assert.assertTrue(cSheet.get(1, 2).equals(new BigDecimal(25)));
+        
+        
+    }
+    
 }

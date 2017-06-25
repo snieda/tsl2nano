@@ -13,14 +13,24 @@ public class DefaultHeader extends DefaultFormat implements Comparable<DefaultHe
     private static final long serialVersionUID = 4873057720074938549L;
     
     static final char charStart = 'A';
-    int maxColumn;
     int columnIndex;
     String title;
 
-    public DefaultHeader(int columnIndex, int maxColumn) {
-        this.columnIndex = columnIndex;
-        this.maxColumn = maxColumn;
+    protected DefaultHeader() {
     }
+    
+    public DefaultHeader(int columnIndex) {
+        this.columnIndex = columnIndex;
+    }
+
+    /**
+     * constructor
+     * @param title
+     */
+    public DefaultHeader(String title) {
+        this.title = title;
+    }
+
 
     @Override
     public String toString() {

@@ -13,11 +13,12 @@ import java.lang.reflect.Method;
 
 import org.simpleframework.xml.Attribute;
 
+import de.tsl2.nano.bean.IValueAccess;
 import de.tsl2.nano.bean.ValueHolder;
 import de.tsl2.nano.core.cls.IAttribute;
 
 /**
- * 
+ * Simple implementation of {@link IValueAccess} and {@link IAttribute}
  * @author Tom
  * @version $Revision$ 
  */
@@ -27,9 +28,17 @@ public class Value<T> extends ValueHolder<T> implements IAttribute<T> {
 
     @Attribute
     String name;
+
+    protected Value() {
+        
+    }
     
     public Value(String name) {
         this(name, null, null);
+    }
+    
+    public Value(String name, T object) {
+        this(name, null, object);
     }
     
     /**

@@ -340,6 +340,15 @@ public class CollectionUtil {
         }
     }
 
+    public static <T> T[][] split(T[] origin, int itemCount) {
+        int arrCount = (origin.length / itemCount);
+        T[][] splitted = (T[][]) Array.newInstance(origin.getClass().getComponentType(), arrCount, 0);
+        for (int i = 0; i < splitted.length; i++) {
+            splitted[i] = copyOfRange(origin, i * itemCount, (i+1) * itemCount); 
+        }
+        return splitted;
+    }
+    
     public static <T> T[] copyOfRange(T[] original, int from, int to) {
         return (T[]) copyOfRange(original, from, to, original.getClass());
     }

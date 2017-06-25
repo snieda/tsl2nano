@@ -103,10 +103,10 @@ public class EquationSolver extends NumericOperator {
         /*
          * the value map may contain any values - but the found value must have the right type!
          */
-        BigDecimal n1 = (BigDecimal) values.get(o1);
-        n1 = n1 != null ? n1 : new BigDecimal(o1);
-        BigDecimal n2 = (BigDecimal) values.get(o2);
-        n2 = n2 != null ? n2 : new BigDecimal(o2);
+        Object v1 = values.get(o1);
+        BigDecimal n1 = (BigDecimal) (v1 instanceof BigDecimal ? v1 : new BigDecimal(String.valueOf(v1)));
+        Object v2 = values.get(o2);
+        BigDecimal n2 = (BigDecimal) (v2 instanceof BigDecimal ? v2 : new BigDecimal(String.valueOf(v2)));
 
         BigDecimal result;
         switch (op.charAt(0)) {

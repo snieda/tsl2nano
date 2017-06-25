@@ -141,7 +141,7 @@ public class BeanValue<T> extends AttributeDefinition<T> implements IValueDefini
                 getConstraint().setType(super.getType());
             } else if (temporalType() != null) {
                 getConstraint().setType((Class<T>) temporalType());
-            } else if (isVirtual()) {
+            } else if (isVirtual() && instance != null) {
                 getConstraint().setType(((IValueAccess<T>) instance).getType());
             } else if (instance != null && ENV.get("value.use.instancetype", true)) {
                 try {
@@ -407,8 +407,11 @@ public class BeanValue<T> extends AttributeDefinition<T> implements IValueDefini
     @Override
     public String getId() {
         if (isVirtual()) {
+            String name;
             if (description != null) {
                 return description;
+            } else if ((name=getName()) != null){
+                return StringUtil.toString(getParent()) + getName();
             } else {
                 return BeanUtil.createUUID();
             }

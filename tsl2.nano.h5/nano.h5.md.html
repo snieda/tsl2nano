@@ -1298,6 +1298,28 @@ There is a flag (see the xml-file) _forceUserInteraction_ to define, whether the
 
 All buttons marked with a questionmark (the default icon) are compositor actions defined on runtime through evaluation of entries of type _Item_ (in this example) of the current database.
 
+#### Creating a CSheet like an Excel-Sheet
+
+The CSheet is a bean that can be created through bean-configuration, giving a name, column-count and row-count. If an entry of a cell starts with '=', a calculation will be done.
+The LogicTable as base class will dump its output to a file [name].csv in the specification directory.
+
+Example:
+
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+  CSheet cSheet = new CSheet("test", 3, 3);
+  cSheet.set(0, 1, 2, 3);
+  cSheet.set(1, 4, 5, "=A2*B2");
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+will create a 3x3 table with one formula:
+
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+--	A	B	C	
+1	1	2	3	
+2	4	5	=A2+B2	
+3	null	null	null	
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
 ### Bean Presentation
 
 A bean - as container of it's attributes - will always be presented as detail page. 
@@ -2995,6 +3017,7 @@ Actual list: http://infocenter.pentaho.com/help/index.jsp?topic=%2Fsupported_com
  1.1.0  | 16.04.2017 | NEW: attribute/actions annotations, Bean-/Attribute-Configurator with decorated parameters, REFACT: action+parameter
  1.1.0b | 21.05.2017 | NEW: sidebar menu (using utf-8 icon)
  1.1.0c | 05.06.2017 | NEW: update mechanism
+ 1.1.0d | 05.06.2017 | NEW: CSheet(LogicTable) -> like an Excel-Sheet
  
 <style class="fallback">body{white-space:pre;font-family:monospace}</style><script src="markdeep.min.js"></script><script src="http://casual-effects.com/markdeep/latest/markdeep.min.js"></script>
 
@@ -3640,4 +3663,10 @@ II:
 
 version-update-script:
 	- previous->next: java-action-script (like "copy old env.xml", "remove property app.frame.style")
+	
+CSheet-TODO:
+	- sql
+	- formula extensions
+	- labels
+	- growing fields
 	

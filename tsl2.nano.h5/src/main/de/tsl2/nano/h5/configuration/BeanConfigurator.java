@@ -41,6 +41,7 @@ import de.tsl2.nano.core.util.FileUtil;
 import de.tsl2.nano.core.util.MapUtil;
 import de.tsl2.nano.core.util.StringUtil;
 import de.tsl2.nano.core.util.Util;
+import de.tsl2.nano.h5.CSheet;
 import de.tsl2.nano.h5.Compositor;
 import de.tsl2.nano.h5.Html5Presentable;
 import de.tsl2.nano.h5.SpecifiedAction;
@@ -389,6 +390,14 @@ public class BeanConfigurator<T> implements Serializable {
         Bean.clearCache();
     }
 
+    @de.tsl2.nano.bean.annotation.Action(name = "createSheet", argNames = { "title", "cols", "rows" })
+    public void actionCreateSheet(
+            String title, 
+            int cols, 
+            int rows) {
+        new CSheet(title, cols, rows).save();
+    }
+
     @SuppressWarnings({ "rawtypes", "unchecked" })
     @de.tsl2.nano.bean.annotation.Action(name = "addAttribute", argNames = { "attributeType", "attributeExpression"})
     public void actionAddAttribute(
@@ -396,7 +405,10 @@ public class BeanConfigurator<T> implements Serializable {
                 "§: Rule (--> Operation)", "%: RuleScript (--> JavaScript)", "!: Action (--> Java)"
                 , "?: Query (select statement)", "@: Web (URL/REST)" }) String type,
             String attributeExpression) {
-        type = String.valueOf(type.charAt(0)).trim();
+        if (Util.isEmpty(type))
+            type = String.valueOf(attributeExpression.charAt(0));
+        else
+            type = String.valueOf(type.charAt(0)).trim();
         ExpressionDescriptor<Object> exDescr = new ExpressionDescriptor<>(def.getDeclaringClass(), type + attributeExpression);
         AttributeDefinition attr = def.addAttribute(exDescr.getName(), exDescr.toInstance(), null, null);
         attr.getPresentation().setType(IPresentable.TYPE_DEPEND);

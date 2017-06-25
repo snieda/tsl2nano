@@ -380,11 +380,17 @@ public class IncubationTest {
 
     @Test
     public void testLogicTable() {
-        TableList<DefaultHeader, String> table = new LogicTable<DefaultHeader, String>(2).fill(String.class, 2);
+        TableList<DefaultHeader, String> table = new LogicTable<DefaultHeader, String>("test", 2).fill(String.class, 2);
         table.set(0, 0, new BigDecimal(10));
         table.set(1, 0, new BigDecimal(9));
         table.set(1, 1, "=A1 * A2");
+        System.out.println(table.dump());
         assertEquals(new BigDecimal(90), table.get(1, 1));
+        
+        table.save("test/");
+        TableList loadedTableList = table.load("test/test.csv");
+        System.out.println(loadedTableList.dump());
+        assertEquals("90", loadedTableList.get(1, 1));
     }
 
     @Test
