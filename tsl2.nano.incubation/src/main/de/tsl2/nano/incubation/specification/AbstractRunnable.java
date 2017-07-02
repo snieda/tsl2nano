@@ -3,6 +3,7 @@ package de.tsl2.nano.incubation.specification;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.LinkedList;
 import java.util.List;
@@ -51,6 +52,11 @@ public abstract class AbstractRunnable<T> implements IPRunnable<T, Map<String, O
     protected String operation;
     transient protected String operationContent;
 
+    /**
+     * add this key to your arguments, if you want to fill the parameter not through key-names but through a sequence
+     */
+    static final String KEY_ARGUMENTS_AS_SEQUENCE = "arguments as sequence";
+
     public AbstractRunnable() {
         super();
     }
@@ -87,7 +93,11 @@ public abstract class AbstractRunnable<T> implements IPRunnable<T, Map<String, O
         return par;
     }
 
-    protected Map<String, ParType> createSimpleParameters(String...names) {
+    public static LinkedHashMap<String, ParType> parameters(String... names) {
+        return (LinkedHashMap<String, ParType>) createSimpleParameters(names);
+    }
+
+    protected static Map<String, ParType> createSimpleParameters(String... names) {
         Map<String, ParType> par = new LinkedHashMap<>();
         for (int i = 0; i < names.length; i++) {
             par.put(names[i], new ParType(Object.class));
@@ -96,24 +106,33 @@ public abstract class AbstractRunnable<T> implements IPRunnable<T, Map<String, O
     }
 
     /**
-     * checks arguments against defined parameter and returns new map of arguments, defined by parameters.
+     * checks arguments against defined parameter and returns new map of arguments, defined by parameters. Use
+     * {@link #KEY_ARGUMENTS_AS_SEQUENCE} to define a sequential iteration of arguments (without using key names)
      * 
      * @param arguments to be checked and collected
      * @param strict if true, arguments not defined as parameter will throw an {@link IllegalArgumentException}.
      */
     @Override
     public Map<String, Object> checkedArguments(Map<String, Object> arguments, boolean strict) {
+        boolean asSequence = arguments.remove(KEY_ARGUMENTS_AS_SEQUENCE) != null;
         Map<String, Object> args = new LinkedHashMap<String, Object>();
         Set<String> keySet = arguments.keySet();
         Set<String> defs = parameter != null ? parameter.keySet() : arguments.keySet();
+        Iterator<Object> values = arguments.values().iterator();
         Object arg;
         for (String par : defs) {
-            if (!keySet.contains(par)) {
-                arg = parameter != null ? parameter.get(par).getDefaultValue() : null;
-                if (arg == null && strict)
-                    throw new IllegalArgumentException(par);
+            if (asSequence) {
+                arg = values.next();
+                if (arg == null && parameter != null)
+                    arg = parameter.get(par).getDefaultValue();
             } else {
-                arg = arguments.get(par);
+                if (!keySet.contains(par)) {
+                    arg = parameter != null ? parameter.get(par).getDefaultValue() : null;
+                    if (arg == null && strict)
+                        throw new IllegalArgumentException(par);
+                } else {
+                    arg = arguments.get(par);
+                }
             }
             checkConstraint(par, arg);
             args.put(par, arg);
@@ -276,6 +295,11 @@ public abstract class AbstractRunnable<T> implements IPRunnable<T, Map<String, O
         operationContent = null;
     }
 
+    @SuppressWarnings({ "unchecked", "rawtypes" })
+    public static void markArgumentsAsSequence(Map args) {
+        args.put(KEY_ARGUMENTS_AS_SEQUENCE, Boolean.TRUE);
+    }
+    
     @Commit
     protected void initDeserializing() {
         createConstraints();
