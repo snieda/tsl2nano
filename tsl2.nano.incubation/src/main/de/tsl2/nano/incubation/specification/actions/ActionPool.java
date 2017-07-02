@@ -18,4 +18,7 @@ import de.tsl2.nano.incubation.specification.Pool;
  */
 public class ActionPool extends Pool<Action<?>> {
 
+    static {
+        Pool.registerPool(ActionPool.class);
+    }
 }

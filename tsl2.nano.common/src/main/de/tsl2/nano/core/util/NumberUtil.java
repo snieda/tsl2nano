@@ -309,9 +309,11 @@ public class NumberUtil extends BitUtil {
      * @param value
      * @return if value is parseable to a number
      */
-    public static boolean isNumber(String value) {
+    public static boolean isNumber(Object value) {
         try {
-            return Integer.valueOf(value) != null;
+            if (value == null)
+                return false;
+            return new BigDecimal(value.toString()) != null;
         } catch (NumberFormatException ex) {
             //ok, not a number
             return false;

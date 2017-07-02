@@ -19,6 +19,10 @@ import de.tsl2.nano.incubation.specification.Pool;
  */
 public class QueryPool extends Pool<Query<?>> {
 
+    static {
+        Pool.registerPool(QueryPool.class);
+    }
+
     /**
      * constructor
      */

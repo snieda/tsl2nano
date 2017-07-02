@@ -379,7 +379,7 @@ public class Bean<T> extends BeanDefinition<T> {
                     messages.put(beanValue, beanValue.getStatus().message());
                 if (refresh)
                     beanValue.status = status;
-                if (!status.ok()) {
+                if (!beanValue.status.ok()) {
                     valid = false;
                 }
             }

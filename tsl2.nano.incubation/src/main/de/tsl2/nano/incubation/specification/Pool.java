@@ -11,7 +11,9 @@ package de.tsl2.nano.incubation.specification;
 
 import java.io.File;
 import java.lang.reflect.Modifier;
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import org.apache.commons.logging.Log;
@@ -38,11 +40,18 @@ import de.tsl2.nano.execution.IPRunnable;
  * @author Tom, Thomas Schneider
  * @version $Revision$
  */
+@SuppressWarnings("rawtypes")
 public class Pool<T extends IPRunnable<?, ?>> {
 
     private static final Log LOG = LogFactory.getLog(Pool.class);
     Map<String, T> runnables;
 
+    private static List<Class<? extends Pool>> registeredPools = new ArrayList<>();
+    
+    protected static void registerPool(Class<? extends Pool> p) {
+        registeredPools.add(p);
+    }
+    
     private Map<String, T> runnables() {
         if (runnables == null)
             loadRunnables();
@@ -101,6 +110,15 @@ public class Pool<T extends IPRunnable<?, ?>> {
         }
     }
 
+    public IPRunnable find(String name) {
+        IPRunnable runner;
+        for (Class<? extends Pool> p : registeredPools) {
+            if ((runner = ENV.get(p).get(name)) != null)
+                return runner;
+        }
+        return null;
+    }
+    
     /**
      * gets the runnable by name
      * 
@@ -122,7 +140,12 @@ public class Pool<T extends IPRunnable<?, ?>> {
     public <I extends T> I get(String name, Class<I> type) {
         T runnable = runnables().get(name);
         //perhaps not loaded (new or recursive)
+        if (type == null || Pool.class.equals(type)) {
+            //TODO: if type not specified, try all...
+            return null;
+        } else  {
         return (I) (runnable != null ? runnable : loadRunnable(getFileName(name), type));
+        }
     }
 
     protected String getFileName(String name) {

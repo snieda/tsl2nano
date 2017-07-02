@@ -18,6 +18,10 @@ import de.tsl2.nano.incubation.specification.Pool;
  * @version $Revision$
  */
 public class RulePool extends Pool<AbstractRule<?>> {
+    
+    static {
+        Pool.registerPool(RulePool.class);
+    }
     /**
      * constructor
      */

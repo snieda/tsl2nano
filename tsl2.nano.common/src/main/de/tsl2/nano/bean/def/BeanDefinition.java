@@ -1149,8 +1149,10 @@ public class BeanDefinition<T> extends BeanClass<T> implements IPluggable<BeanDe
         for (IAttributeDefinition<?> a : attributes) {
             id = a.getId();
             if (ENV.translate(id, false).startsWith(Messages.TOKEN_MSG_NOTFOUND)) {
-                p.put(id, a.getPresentation().getLabel());
-                p.put(id + Messages.POSTFIX_TOOLTIP, a.getPresentation().getDescription());
+                if (a.getPresentation().getLabel() != null)
+                    p.put(id, a.getPresentation().getLabel());
+                if (a.getPresentation().getDescription() != null)
+                    p.put(id + Messages.POSTFIX_TOOLTIP, a.getPresentation().getDescription());
             }
         }
         Collection<IAction> actions = getActions();

@@ -19,6 +19,10 @@ import de.tsl2.nano.incubation.specification.Pool;
  */
 public class WebPool extends Pool<WebClient<?>> {
 
+    static {
+        Pool.registerPool(WebPool.class);
+    }
+    
     /**
      * constructor
      */

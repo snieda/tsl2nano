@@ -34,12 +34,12 @@ import de.tsl2.nano.collection.TableList;
 import de.tsl2.nano.core.ENV;
 import de.tsl2.nano.core.cls.IAttribute;
 import de.tsl2.nano.core.log.LogFactory;
+import de.tsl2.nano.core.util.NumberUtil;
 import de.tsl2.nano.core.util.Util;
 import de.tsl2.nano.incubation.specification.Pool;
 import de.tsl2.nano.logictable.ICellVisitor;
 import de.tsl2.nano.logictable.LogicForm;
 import de.tsl2.nano.util.PrivateAccessor;
-import de.tsl2.nano.util.UnboundAccessor;
 
 /**
  * Provides calculation sheets as tables with columns and rows. each cell is owned by an {@link MapValue} as BeanValue.
@@ -173,10 +173,15 @@ public class CSheet extends Bean<Object> {
         for (int i = 0; i < rc; i++) {
             for (int j = 0; j < cc; j++) {
                 v = get(i, j);
-                if (v != null)
-                    v = logicForm.isFormula(v) ? v : new BigDecimal(String.valueOf(v));
+                if (v != null) {
+                    if (!(v instanceof BigDecimal))
+                        if (NumberUtil.isNumber(v))
+                            v = new BigDecimal(v.toString());
+                }
                 // get the pure cell value (not calculated)
                 oldValue = logicForm.get(logicForm.getRowID(i))[j];
+                if (v != null && v.equals(oldValue))
+                    continue;
                 //formulas have high priority
                 if (Util.isEmpty(v) || !logicForm.isFormula(oldValue) || logicForm.isFormula(v))
                     logicForm.set(i, j, v);

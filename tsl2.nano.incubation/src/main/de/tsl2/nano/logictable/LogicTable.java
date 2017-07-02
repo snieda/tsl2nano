@@ -14,9 +14,9 @@ import java.util.Collection;
 import java.util.Map;
 import java.util.Set;
 
+import de.tsl2.nano.collection.CollectionUtil;
 import de.tsl2.nano.collection.TableList;
 import de.tsl2.nano.core.util.StringUtil;
-import sun.font.CreatedFontTracker;
 
 /**
  * An Extension of {@link TableList} providing logic expressions to be filled into cells like in excel.
@@ -34,9 +34,9 @@ public class LogicTable<H extends Format & Comparable<H>, ID> extends TableList<
     String regexpHeader = "[A-Z]+";
     transient Map<String, Object> valueMap;
 
-    
     /**
      * constructor
+     * 
      * @param cols
      * @param rows
      */
@@ -48,10 +48,15 @@ public class LogicTable<H extends Format & Comparable<H>, ID> extends TableList<
 
     /**
      * constructor
+     * 
      * @param header
      */
     public LogicTable(H... header) {
         super(header);
+    }
+
+    public LogicTable(Object... header) {
+        super((H[]) CollectionUtil.copyOfRange(header, 0, header.length, DefaultHeader[].class));
     }
 
     /**
@@ -68,11 +73,14 @@ public class LogicTable<H extends Format & Comparable<H>, ID> extends TableList<
             valueMap = createValueMap();
         return valueMap;
     }
-    
+
     protected static Object createDefaultHeader(Object source) {
-        return new DefaultHeader((Integer)source);
+        if (source instanceof Integer)
+            return new DefaultHeader((Integer) source);
+        else
+            return new DefaultHeader(source.toString());
     }
-    
+
     /**
      * createStandardHeader
      * 
@@ -90,7 +98,7 @@ public class LogicTable<H extends Format & Comparable<H>, ID> extends TableList<
     public boolean isFormula(Object cell) {
         return String.valueOf(cell).startsWith(EquationSolver.EQUATION);
     }
-    
+
     /**
      * sets a new value through given column/row-id as strings
      * 
@@ -130,7 +138,7 @@ public class LogicTable<H extends Format & Comparable<H>, ID> extends TableList<
             String expression = (String) e;
             if (expression.startsWith(EquationSolver.EQUATION)) {
                 try {
-                    EquationSolver solver = new EquationSolver(null, valueMap);
+                    EquationSolver solver = new EquationSolver(null, getValueMap());
                     return solver.eval(expression.substring(1));
                 } catch (Exception ex) {
                     return e;
@@ -177,12 +185,12 @@ public class LogicTable<H extends Format & Comparable<H>, ID> extends TableList<
 
             @Override
             public boolean isEmpty() {
-                throw new UnsupportedOperationException();
+                return size() == 0;
             }
 
             @Override
             public boolean containsKey(Object key) {
-                throw new UnsupportedOperationException();
+                return get(key) != null;
             }
 
             @Override
@@ -249,7 +257,7 @@ public class LogicTable<H extends Format & Comparable<H>, ID> extends TableList<
             return String.valueOf(0) + getRowID(row);
         return getHeader()[col].toString() + getRowID(row);
     }
-    
+
     /**
      * transforms a flat string into header and row info to address a table-cell
      * 
@@ -271,11 +279,11 @@ public class LogicTable<H extends Format & Comparable<H>, ID> extends TableList<
     public void doOnValues(ICellVisitor visitor) {
         for (int i = -1; i < rows.size(); i++) {
             for (int j = -1; j < header.length; j++) {
-                visitor.visit(i, j, i<0 || j<0 ? get(i,  j): super.get(i, j)); //not-calculated
+                visitor.visit(i, j, i < 0 || j < 0 ? get(i, j) : super.get(i, j)); //not-calculated
             }
         }
     }
-    
+
     @Override
     protected void dumpValues(final StringBuilder buf, final String div, boolean resolve) {
         if (resolve) {
@@ -289,8 +297,7 @@ public class LogicTable<H extends Format & Comparable<H>, ID> extends TableList<
                         buf.append(LF);
                 }
             });
-        }
-        else {//the super-class knows only cell-content
+        } else {//the super-class knows only cell-content
             super.dumpValues(buf, DIV, resolve);
         }
     }

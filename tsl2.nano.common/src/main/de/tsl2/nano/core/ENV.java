@@ -126,6 +126,8 @@ public class ENV implements Serializable {
 
     static final String DEF_PATHSEPRATOR = "/";
 
+    static final String UNKNOWN_BUILD_INFORMATIONS = "<unknown build informations>";
+    
     private ENV() {
         self = this;
     }
@@ -167,10 +169,10 @@ public class ENV implements Serializable {
                     System.setProperty(KEY_BUILDINFO, buildInfo);
                     System.getProperties().putAll(bi);
                 } else {
-                    return "<unknown build informations>";
+                    return UNKNOWN_BUILD_INFORMATIONS;
                 }
             } catch (Exception e) {
-                return "<unknown build informations>";
+                return UNKNOWN_BUILD_INFORMATIONS;
             }
         }
         return buildInfo;
@@ -299,6 +301,10 @@ public class ENV implements Serializable {
     }
 
     private void update(File configFile, String buildInfo) {
+        if (buildInfo == null || UNKNOWN_BUILD_INFORMATIONS.equals(buildInfo)) {
+            warn(this, UNKNOWN_BUILD_INFORMATIONS + " --> " + "no version update check");
+            return;
+        }
         String currentVersion = get("app.version", "0.0.0");
         Updater updater = new Updater();
         String versionURL;

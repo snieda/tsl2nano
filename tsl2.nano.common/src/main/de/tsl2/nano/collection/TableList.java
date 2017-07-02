@@ -558,9 +558,11 @@ public class TableList<H extends Comparable<H>, ID> implements Serializable {
                 args[0] = h;
                 //create the table instance
                 logic = BeanClass.createInstance(type, args);
-
+                logic.name = StringUtil.substring(file, "/", ".");
+                String[] ss;
                 while (sc.hasNextLine()) {
-                    Object[] row = sc.nextLine().split(div);
+                    ss = sc.nextLine().split(div);
+                    Object[] row = CollectionUtil.copyOfRange(ss, 0, ss.length, Object[].class);
                     //TODO: row-id?
                     logic.addAll(true, row);
                 }
@@ -594,7 +596,7 @@ public class TableList<H extends Comparable<H>, ID> implements Serializable {
     public String dump(String div, boolean resolve) {
         StringBuilder buf = new StringBuilder(20 + header.length
             * 5
-            + +rows.size()
+            + rows.size()
             * 20
             + rows.size()
             * header.length

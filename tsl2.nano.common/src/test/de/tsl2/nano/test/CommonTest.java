@@ -1156,7 +1156,7 @@ public class CommonTest {
         Bean.getBean(tb).setValueExpression(ve);
         ByteArrayOutputStream out = new ByteArrayOutputStream();
         ValueStream.write(out, Arrays.asList(tb));
-        assertEquals("test-1==>2", new String(out.toByteArray()));
+        assertEquals("test-1==>2\n", new String(out.toByteArray()));
     }
 
     /**
@@ -1867,7 +1867,7 @@ public class CommonTest {
 //        new EHttpClient(resource, true).rest("{code}/info", "GET", "application/json", null, "code", "8000", "street", null);
         
         urlREST = EHttpClient.parameter(resource + "{city}/info", true, "city", "München", "street", null);
-        assertEquals(resource + "M%C3%BCnchen/info", urlREST);
+        assertEquals(resource + "M%FCnchen/info", urlREST);
     }
 
     @Test

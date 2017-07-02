@@ -66,7 +66,14 @@ public class ClassFinder {
             Class<T> resultType,
             int modifier,
             Class<? extends Annotation> annotation) {
-        Map<Double, T> result = new TreeMap<Double, T>();
+        Map<Double, T> result = new TreeMap<Double, T>() {
+          @Override
+            public T put(Double key, T value) {
+                  while (containsKey(key))
+                      key += 0000000001;
+                return super.put(key, value);
+            }  
+        };
         Class cls;
         double match;
         boolean addClasses = resultType == null || Class.class.isAssignableFrom(resultType);
@@ -80,8 +87,6 @@ public class ClassFinder {
                     && (annotation == null || cls.getAnnotation(annotation) != null)) {
                     match = StringUtil.fuzzyMatch(cls.getName(), filter);
                     if (match > 0) {
-                        while (result.containsKey(match))
-                            match += 0000000001;
                         result.put(match, (T) cls);
                     }
                 }
@@ -100,7 +105,14 @@ public class ClassFinder {
             String filter,
             int modifier,
             Class<? extends Annotation> annotation) {
-        HashMap<Double, Method> map = new HashMap<Double, Method>();
+        HashMap<Double, Method> map = new HashMap<Double, Method>() {
+            @Override
+            public Method put(Double key, Method value) {
+                  while (containsKey(key))
+                      key += 0000000001;
+                return super.put(key, value);
+            }  
+        };
         Method[] methods = Modifier.isPublic(modifier) ? cls.getMethods() : cls.getDeclaredMethods();
         double match;
         for (int i = 0; i < methods.length; i++) {
@@ -118,7 +130,14 @@ public class ClassFinder {
             String filter,
             int modifier,
             Class<? extends Annotation> annotation) {
-        HashMap<Double, Field> map = new HashMap<Double, Field>();
+        HashMap<Double, Field> map = new HashMap<Double, Field>() {
+            @Override
+            public Field put(Double key, Field value) {
+                  while (containsKey(key))
+                      key += 0000000001;
+                return super.put(key, value);
+            }  
+        };
         Field[] fields = Modifier.isPublic(modifier) ? cls.getFields() : cls.getDeclaredFields();
         double match;
         for (int i = 0; i < fields.length; i++) {

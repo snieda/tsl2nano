@@ -730,6 +730,10 @@ public class StringUtil {
         return StringUtil.concat(CR.toCharArray(), lines.toArray());
     }
 
+    /**
+     * finds the regex in the given text, starting from start
+     * @return returns the first matching substring or null
+     */
     public static final String findRegExp(String text, String regex, int start) {
         final Matcher matcher = Pattern.compile(regex).matcher(text);
         return matcher.find(start) ? matcher.group() : null;

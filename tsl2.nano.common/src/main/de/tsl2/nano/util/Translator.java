@@ -113,9 +113,11 @@ public class Translator {
             Locale srcLang,
             Locale destLang/*, int requestWordCount*/) {
         String words = StringUtil.toString(origin.values(), -1);//.replaceAll("[,\\s]+", " ");
+        if (words.length() > 1)
+            words = words.substring(1, words.length()-1);
         String trans = translate(srcLang, destLang, words);
         //create the target properties
-        String[] t = trans.split("[,\\s]+");
+        String[] t = trans.split("[,]\\s*");
         Properties target = new Properties();
         int i = 0;
         String tos[];

@@ -2,6 +2,7 @@ package de.tsl2.nano.bean.def;
 
 import java.io.Serializable;
 import java.lang.reflect.Method;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
@@ -216,6 +217,19 @@ public abstract class AbstractExpression<T> implements IValueExpression<T>, IAtt
 //        setValueExpression(extension);
 //    }
 //
+    
+    public static String createRegExpOnAllRegistered() {
+        StringBuilder buf = new StringBuilder();
+        buf.append("(");
+        Collection<String> regExps = registeredExtensions.keySet();
+        for (String e : regExps) {
+            buf.append("(" + e + ")" + "|");
+        }
+        buf.deleteCharAt(buf.length()-1);
+        buf.append(")");
+        return buf.toString();
+    }
+    
     /**
      * see {@link #registeredExtensions}, {@link #getImplementation(String)} and {@link #getBeanValue(Object, String)}.
      * 

@@ -154,7 +154,7 @@ public class ConditionOperator<T> extends SOperator<T> {
     @Override
     public T eval(CharSequence expression) {
         CharSequence ifCond = subElement(expression, null, KEY_THEN, false);
-        if (!isEmpty(ifCond) && !ifCond.equals(expression)) {
+        if (!isEmpty(ifCond) && !ifCond.equals(expression.toString())) {
             //perhaps extract the last expression before key_then
             CharSequence prefix = subElement(ifCond, null, syntax.get(KEY_BEGIN), true);
             CharSequence ifCondSub = subElement(ifCond, syntax.get(KEY_BEGIN), syntax.get(KEY_END), true);

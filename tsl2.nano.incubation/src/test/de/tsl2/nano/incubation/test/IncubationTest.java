@@ -15,14 +15,12 @@ import static junit.framework.Assert.assertNotNull;
 import static junit.framework.Assert.assertTrue;
 import static junit.framework.Assert.fail;
 
-import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.io.InputStream;
 import java.io.Serializable;
 import java.math.BigDecimal;
 import java.sql.Time;
 import java.text.DateFormat;
-import java.text.DecimalFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
@@ -108,7 +106,6 @@ import de.tsl2.nano.messaging.IListener;
 import de.tsl2.nano.structure.Cover;
 import de.tsl2.nano.structure.IConnection;
 import de.tsl2.nano.test.TypeBean;
-import de.tsl2.nano.util.operation.ConditionOperator;
 import de.tsl2.nano.util.operation.Function;
 
 /**
@@ -388,7 +385,25 @@ public class IncubationTest {
         assertEquals(new BigDecimal(90), table.get(1, 1));
         
         table.save("test/");
-        TableList loadedTableList = table.load("test/test.csv");
+        TableList loadedTableList = table.load("test/test.csv", LogicTable.class);
+        System.out.println(loadedTableList.dump());
+        assertEquals(new BigDecimal(90), loadedTableList.get(1, 1));
+    }
+
+    @Test
+    public void testLogicTableFuncions() {
+        Rule<Object> testRule = new Rule("mul", "x*y", Rule.parameters("x", "y"));
+        ENV.get(RulePool.class).add(testRule);
+        
+        TableList<DefaultHeader, String> table = new LogicTable<DefaultHeader, String>("test", 2).fill(String.class, 2);
+        table.set(0, 0, new BigDecimal(10));
+        table.set(1, 0, new BigDecimal(9));
+        table.set(1, 1, "=mul(A1, A2)");
+        System.out.println(table.dump());
+        assertEquals("90", table.get(1, 1));
+        
+        table.save("test/");
+        TableList loadedTableList = table.load("test/test.csv", LogicTable.class);
         System.out.println(loadedTableList.dump());
         assertEquals("90", loadedTableList.get(1, 1));
     }
