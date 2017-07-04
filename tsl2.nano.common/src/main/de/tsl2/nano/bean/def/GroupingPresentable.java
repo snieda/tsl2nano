@@ -28,9 +28,9 @@ public class GroupingPresentable extends Presentable {
     /** optional grouping informations */
     @ElementList(inline = true, entry = "groupby", type = GroupBy.class, required = false)
     protected Collection<GroupBy> groups;
-    @Attribute
+    @Attribute(required=false)
     protected int gridWidth;
-    @Attribute
+    @Attribute(required=false)
     protected int gridHeight;
     
     /**

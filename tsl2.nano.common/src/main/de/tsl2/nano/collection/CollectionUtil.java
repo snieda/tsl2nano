@@ -28,7 +28,6 @@ import java.util.SortedSet;
 import java.util.TreeSet;
 
 import org.apache.commons.logging.Log;
-import org.apache.tools.ant.util.CollectionUtils;
 
 import de.tsl2.nano.action.IAction;
 import de.tsl2.nano.bean.BeanUtil;
@@ -127,7 +126,7 @@ public class CollectionUtil {
     }
 
     /**
-     * Uses apache collection utils to transform a collection. see {@link CollectionUtils}.
+     * transform a collection.
      * 
      * @param <S> real type of collection items
      * @param <T> transformed type of collection items

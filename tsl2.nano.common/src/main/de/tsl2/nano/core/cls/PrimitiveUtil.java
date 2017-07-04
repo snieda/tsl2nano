@@ -16,7 +16,6 @@ import java.util.Comparator;
 
 import org.apache.commons.logging.Log;
 
-import de.tsl2.nano.collection.CollectionUtil;
 import de.tsl2.nano.core.ManagedException;
 import de.tsl2.nano.core.log.LogFactory;
 import de.tsl2.nano.core.util.FormatUtil;
@@ -83,7 +82,8 @@ public class PrimitiveUtil {
      */
     public static boolean isPrimitiveOrWrapper(Class<?> type) {
         //binarySearch removed in cause of having Classes that are not Comparable!
-        return type.isPrimitive() || (Comparable.class.isAssignableFrom(type) && CollectionUtil.contains(wrappers, type));
+        //CollectionUtil not usable - not in core package
+        return type.isPrimitive() || (Comparable.class.isAssignableFrom(type) && Arrays.asList(wrappers).indexOf(type) != -1);
     }
 
     /**

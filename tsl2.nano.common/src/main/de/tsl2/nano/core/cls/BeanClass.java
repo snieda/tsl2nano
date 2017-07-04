@@ -655,7 +655,7 @@ public class BeanClass<T> implements Serializable {
             }
         } else {//wrap argument objects to have the right types
             if (args.length == 1 && par.length == 1 && par[0].isArray()) {
-                args = BeanAttribute.wrap(args, par[0]);
+                //args = BeanAttribute.wrap(args, par[0]);
             } else {
                 for (int i = 0; i < args.length; i++) {
                     args[i] = BeanAttribute.wrap(args[i], par[i]);
