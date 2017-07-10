@@ -1121,4 +1121,8 @@ public class ServiceUtil {
     static boolean isEntity(Object value) {
         return BeanClass.getBeanClass(value.getClass()).isAnnotationPresent(Entity.class);
     }
+    
+    public static boolean isExcecutionStatement(String strStmt) {
+        return StringUtil.findRegExp(strStmt.toLowerCase(), "^\\s*select", 0) == null;
+    }
 }

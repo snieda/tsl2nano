@@ -638,6 +638,9 @@ public class GenericServiceBean extends NamedQueryServiceBean implements IGeneri
             if (ServiceUtil.useNamedParameters(queryString)) {
                 query = ServiceUtil.setNamedParameters(query, args);
             } else {
+                if (args[0] instanceof Map) { //<- Linkedhashmap to be ordered. TODO: is that the right place?
+                    args = ((Map)args[0]).values().toArray();
+                }
                 query = ServiceUtil.setParameters(query, args);
             }
         }
@@ -676,11 +679,7 @@ public class GenericServiceBean extends NamedQueryServiceBean implements IGeneri
             boolean nativeQuery,
             Map<String, ?> args,
             Class... lazyRelations) {
-        Query query = createQuery(queryString, nativeQuery, 0, -1, null);
-        final Set<String> nameSet = args.keySet();
-        for (final String name : nameSet) {
-            query.setParameter(name, args.get(name));
-        }
+        Query query = createQuery(queryString, nativeQuery, 0, -1, null, args);
         return fillTree(query.getResultList(), lazyRelations);
     }
 

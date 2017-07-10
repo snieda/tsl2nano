@@ -114,7 +114,7 @@ public abstract class AbstractRunnable<T> implements IPRunnable<T, Map<String, O
      */
     @Override
     public Map<String, Object> checkedArguments(Map<String, Object> arguments, boolean strict) {
-        boolean asSequence = arguments.remove(KEY_ARGUMENTS_AS_SEQUENCE) != null;
+        boolean asSequence = asSequence(arguments);
         Map<String, Object> args = new LinkedHashMap<String, Object>();
         Set<String> keySet = arguments.keySet();
         Set<String> defs = parameter != null ? parameter.keySet() : arguments.keySet();
@@ -300,6 +300,10 @@ public abstract class AbstractRunnable<T> implements IPRunnable<T, Map<String, O
         args.put(KEY_ARGUMENTS_AS_SEQUENCE, Boolean.TRUE);
     }
     
+    public static boolean asSequence(Map<String, Object> arguments) {
+        return arguments.remove(KEY_ARGUMENTS_AS_SEQUENCE) != null;
+    }
+
     @Commit
     protected void initDeserializing() {
         createConstraints();

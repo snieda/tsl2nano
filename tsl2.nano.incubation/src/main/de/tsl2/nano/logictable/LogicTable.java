@@ -141,7 +141,7 @@ public class LogicTable<H extends Format & Comparable<H>, ID> extends TableList<
                     EquationSolver solver = new EquationSolver(null, getValueMap());
                     return solver.eval(expression.substring(1));
                 } catch (Exception ex) {
-                    return e;
+                    return e + " !!! " + ex.toString();
                 }
             }
         }

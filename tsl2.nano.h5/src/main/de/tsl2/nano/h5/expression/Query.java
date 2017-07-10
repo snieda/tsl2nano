@@ -13,6 +13,7 @@ import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -24,10 +25,13 @@ import org.simpleframework.xml.Element;
 import org.simpleframework.xml.ElementMap;
 
 import de.tsl2.nano.bean.BeanContainer;
+import de.tsl2.nano.core.ENV;
 import de.tsl2.nano.core.log.LogFactory;
 import de.tsl2.nano.core.util.StringUtil;
 import de.tsl2.nano.core.util.Util;
 import de.tsl2.nano.execution.IPRunnable;
+import de.tsl2.nano.incubation.specification.AbstractRunnable;
+import de.tsl2.nano.service.util.ServiceUtil;
 
 /**
  * class to execute sql statements. not an inheritance of AbstractRunnable in cause of not having constraints in its
@@ -94,16 +98,18 @@ public class Query<RESULT> implements IPRunnable<RESULT, Map<String, Object>> {
         //workaround for hibernate/query not allowing parameter with dots
         Set<String> pars = getParameter().keySet();
         String op = operation;
-        Map<String, Object> cont = new HashMap<String, Object>();
+        
+        Map<String, Object> args = checkedArguments(context, ENV.get("app.mode.strict", false));
         String sqlvar;
         for (String p : pars) {
             sqlvar = p.replace('.', 'X');
-            cont.put(sqlvar, context.get(p));
+            args.put(sqlvar, context.get(p));
             op = op.replace(":" + p, ":" + sqlvar);
         }
 
         //do the job
-        return (RESULT) BeanContainer.instance().getBeansByQuery(op, nativeQuery, cont);
+        return (RESULT) (ServiceUtil.isExcecutionStatement(op) ? BeanContainer.instance().executeStmt(op, nativeQuery, args.values().toArray()) 
+            : BeanContainer.instance().getBeansByQuery(op, nativeQuery, args));
     }
 
     @Override
@@ -166,8 +172,28 @@ public class Query<RESULT> implements IPRunnable<RESULT, Map<String, Object>> {
     }
 
     @Override
-    public Map<String, Object> checkedArguments(Map<String, Object> args, boolean strict) {
-        // TODO implement (see Rule) - using select-statement-columns
+    public Map<String, Object> checkedArguments(Map<String, Object> arguments, boolean strict) {
+        boolean asSequence = AbstractRunnable.asSequence(arguments);
+        Map<String, Object> args = new LinkedHashMap<String, Object>();
+        Set<String> keySet = arguments.keySet();
+        Set<String> defs = !Util.isEmpty(parameter) ? parameter.keySet() : arguments.keySet();
+        Iterator<Object> values = arguments.values().iterator();
+        Object arg = null;
+        int i = 0;
+        for (String par : defs) {
+            if (asSequence) {
+                par = "" + (++i);
+                arg = values.next();
+            } else {
+                if (!keySet.contains(par)) {
+                    if (strict)
+                        throw new IllegalArgumentException(par);
+                } else {
+                    arg = arguments.get(par);
+                }
+            }
+            args.put(par, arg);
+        }
         return args;
     }
 

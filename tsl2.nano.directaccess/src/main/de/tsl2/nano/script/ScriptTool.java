@@ -28,6 +28,7 @@ import de.tsl2.nano.core.util.StringUtil;
 import de.tsl2.nano.core.util.Util;
 import de.tsl2.nano.execution.ScriptUtil;
 import de.tsl2.nano.persistence.Persistence;
+import de.tsl2.nano.service.util.ServiceUtil;
 
 /**
  * 
@@ -234,7 +235,7 @@ public class ScriptTool implements Serializable {
 
     protected Object executeStatement(String strStmt, boolean pureSQL) throws Exception {
         //jpa access
-        if (StringUtil.findRegExp(strStmt.toLowerCase(), "^\\s*select", 0) != null) {
+        if (!ServiceUtil.isExcecutionStatement(strStmt)) {
             Object result = BeanContainer.instance().getBeansByQuery(strStmt, pureSQL, new Object[0]);
             //if result is only a single value, return this single value
             if (result instanceof Collection) {
