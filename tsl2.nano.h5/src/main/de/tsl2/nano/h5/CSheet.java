@@ -22,6 +22,7 @@ import org.simpleframework.xml.core.Commit;
 import org.simpleframework.xml.core.Persist;
 
 import de.tsl2.nano.action.IActivable;
+import de.tsl2.nano.bean.def.AttributeDefinition;
 import de.tsl2.nano.bean.def.Bean;
 import de.tsl2.nano.bean.def.BeanValue;
 import de.tsl2.nano.bean.def.GroupingPresentable;
@@ -30,8 +31,10 @@ import de.tsl2.nano.bean.def.IPresentable;
 import de.tsl2.nano.bean.def.IValueDefinition;
 import de.tsl2.nano.bean.def.MapValue;
 import de.tsl2.nano.bean.def.SecureAction;
+import de.tsl2.nano.bean.def.Status;
 import de.tsl2.nano.collection.TableList;
 import de.tsl2.nano.core.ENV;
+import de.tsl2.nano.core.ManagedException;
 import de.tsl2.nano.core.cls.IAttribute;
 import de.tsl2.nano.core.log.LogFactory;
 import de.tsl2.nano.core.util.NumberUtil;
@@ -39,6 +42,7 @@ import de.tsl2.nano.core.util.Util;
 import de.tsl2.nano.incubation.specification.Pool;
 import de.tsl2.nano.logictable.ICellVisitor;
 import de.tsl2.nano.logictable.LogicForm;
+import de.tsl2.nano.logictable.LogicTable;
 import de.tsl2.nano.util.PrivateAccessor;
 
 /**
@@ -127,7 +131,12 @@ public class CSheet extends Bean<Object> {
     }
     
     public Object get(int row, int col) {
-        return getAttribute(createAttributeName(row, col)).getValue();
+        IValueDefinition attr = getAttribute(createAttributeName(row, col));
+        Object e = attr.getValue();
+        if (e != null && e.toString().startsWith(LogicTable.ERROR))
+            if (attr instanceof AttributeDefinition)
+                ((AttributeDefinition)attr).setStatus(new Status(new ManagedException(e.toString())));
+        return e;
     }
     
     public void set(int row, int col, Object value) {

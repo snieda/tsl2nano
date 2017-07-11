@@ -39,8 +39,8 @@ public class EquationSolver extends NumericOperator {
     static final String OPERATION = "([+-/*%])";
     static final String EQUATION = "=";
     static final String TERM = B_OPEN + "[^)(]*" + B_CLOSE;
-    static final String OPERAND = "([a-zA-Z0-9]+)";
-    static final String SET = OPERAND + "(" + CONCAT + OPERAND + ")*";
+    static final String OPERAND = "([a-zA-Z0-9_]+)";
+    static final String SET = "(" + OPERAND + "(" + CONCAT + OPERAND + ")*)*";
     static final String FUNC = OPERAND + B_OPEN + SET + B_CLOSE;
 
     /** a map containing any values. values found by this solver must be of right type */
@@ -85,14 +85,23 @@ public class EquationSolver extends NumericOperator {
         StringBuilder t;
         while (true) {
             term = extract(expression, TERM);
-            if (term.isEmpty()) {
+            if (isEmpty(term)) {
                 break;
             }
             t = new StringBuilder(term.substring(1, term.length() - 1));
             StringUtil.replace(expression, term, String.valueOf(operate(t, values)));
         }
-        return !Util.isEmpty(expression) && expression.toString().matches(".*" + OPERATION + ".*") 
+        return !isEmpty(expression) && expression.toString().matches(".*" + OPERATION + ".*") 
                 ? operate(expression, values) : expression.toString();
+    }
+
+    /**
+     * isEmpty
+     * @param term
+     * @return
+     */
+    boolean isEmpty(String term) {
+        return term.isEmpty() || term.equals("()");
     }
 
     /**

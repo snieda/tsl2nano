@@ -1320,6 +1320,15 @@ will create a 3x3 table with one formula:
 3	null	null	null	
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
+If a cell starts with '=', it will be calculated. The calculation may contain any specified formula: rules, rule-scripts, sql-statements and actions.
+
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+--	A	B	C	
+1	1	2	3	
+2	4	5	=my_select(A1, A2)	
+3	null	null	=my_update(A1, A2)	
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
 ### Bean Presentation
 
 A bean - as container of it's attributes - will always be presented as detail page. 

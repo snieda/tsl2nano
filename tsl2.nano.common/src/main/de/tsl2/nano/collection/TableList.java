@@ -558,7 +558,7 @@ public class TableList<H extends Comparable<H>, ID> implements Serializable {
                 args[0] = h;
                 //create the table instance
                 logic = BeanClass.createInstance(type, args);
-                logic.name = StringUtil.substring(file, "/", ".");
+                logic.name = StringUtil.substring(file, "/", ".", true);
                 String[] ss;
                 while (sc.hasNextLine()) {
                     ss = sc.nextLine().split(div);

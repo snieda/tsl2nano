@@ -714,6 +714,10 @@ public class AttributeDefinition<T> implements IAttributeDefinition<T> {
         return status;
     }
 
+    public void setStatus(IStatus status) {
+        this.status = status;
+    }
+    
     /** see IVirtualDefinition#isRelation() */
     @Override
     public boolean isRelation() {

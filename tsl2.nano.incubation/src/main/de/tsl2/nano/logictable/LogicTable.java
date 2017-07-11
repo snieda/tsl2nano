@@ -28,6 +28,8 @@ import de.tsl2.nano.core.util.StringUtil;
  */
 @SuppressWarnings("unchecked")
 public class LogicTable<H extends Format & Comparable<H>, ID> extends TableList<H, ID> {
+    public static final String ERROR = "ERROR:";
+
     /** serialVersionUID */
     private static final long serialVersionUID = -7404922627823743263L;
 
@@ -141,7 +143,7 @@ public class LogicTable<H extends Format & Comparable<H>, ID> extends TableList<
                     EquationSolver solver = new EquationSolver(null, getValueMap());
                     return solver.eval(expression.substring(1));
                 } catch (Exception ex) {
-                    return e + " !!! " + ex.toString();
+                    return ERROR + ex.toString() + "<<<" + e;
                 }
             }
         }
