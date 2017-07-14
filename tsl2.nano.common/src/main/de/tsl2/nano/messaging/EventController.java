@@ -96,7 +96,7 @@ public class EventController implements Serializable {
      * @param l listener to register
      */
     public void addListener(IListener l) {
-        Class<?> type = BeanUtil.getGenericInterfaceType(l.getClass(), IListener.class, 0);
+        Class type = BeanUtil.getGenericInterfaceType(l.getClass(), IListener.class, 0);
         addListener(l, type != null ? type : ChangeEvent.class);
     }
 

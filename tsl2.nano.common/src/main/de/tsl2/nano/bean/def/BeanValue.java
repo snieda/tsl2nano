@@ -665,7 +665,7 @@ class Selector<T> {
         }
     }
 
-    Class<T> getCollectionEntryType() {
+    Class getCollectionEntryType() {
         checkForMap();
         return isMap ? Entry.class : getAttribute() instanceof BeanAttribute
             ? ((BeanAttribute) getAttribute()).getGenericType() : Object.class;
