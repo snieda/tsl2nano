@@ -1300,7 +1300,7 @@ public class CommonTest {
         assertFalse((Boolean) new ConditionOperator(values).eval(f));
     }
 
-    @Test
+    //...running long...:@Test
     public void testArrayPerformance() {
         final int c = 2;//1000;
         String description =
@@ -1390,7 +1390,7 @@ public class CommonTest {
         };
 
         // filter the 'standalones'
-        assertTrue(cl.getNestedJars().length == 24);
+        assertTrue(cl.getNestedJars().length == 25);
     }
 
     /**
@@ -1455,7 +1455,7 @@ public class CommonTest {
         assertTrue("invoked".equals(aopBean.getObject()));
     }
 
-    @Test
+    //don't do that automatic: @Test
     public void testNetUtilDownload() throws Exception {
         if (NetUtil.isOnline()) {
             Profiler.si().stressTest("downloader", 20, new Runnable() {
