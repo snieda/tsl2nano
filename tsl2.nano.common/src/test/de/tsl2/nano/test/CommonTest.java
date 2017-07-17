@@ -1870,6 +1870,7 @@ public class CommonTest {
         assertEquals(resource + "M%FCnchen/info", urlREST);
     }
 
+    @Ignore
     @Test
     public void testCPUTime() throws Exception {
         new ThreadState().top(500);

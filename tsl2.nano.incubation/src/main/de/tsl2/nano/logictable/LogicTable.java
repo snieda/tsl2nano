@@ -294,7 +294,7 @@ public class LogicTable<H extends Format & Comparable<H>, ID> extends TableList<
                 public void visit(int row, int col, Object cell) {
                     if (row == -1) // header was already printed
                         return;
-                    buf.append(cell + div);
+                    buf.append(nonull(cell) + div);
                     if (col == getColumnCount() - 1)
                         buf.append(LF);
                 }
@@ -302,6 +302,10 @@ public class LogicTable<H extends Format & Comparable<H>, ID> extends TableList<
         } else {//the super-class knows only cell-content
             super.dumpValues(buf, DIV, resolve);
         }
+    }
+
+    protected String nonull(Object value) {
+        return value == null ? "-" : value.toString();
     }
 
 }
