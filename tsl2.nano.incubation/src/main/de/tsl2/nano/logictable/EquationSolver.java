@@ -79,6 +79,7 @@ public class EquationSolver extends NumericOperator {
 
     public Object eval(StringBuilder expression) {
         //extract all functions
+        evalActions(expression);
         evalFunctions(expression);
         //extract all terms
         String term;
@@ -104,31 +105,44 @@ public class EquationSolver extends NumericOperator {
         return term.isEmpty() || term.equals("()");
     }
 
+    protected void evalActions(StringBuilder expression) {
+        eval(expression, "\\<\\<" + FUNC.substring(1) + "\\>\\>", true);
+    }
+    
     /**
      * replaces all found functions/rule inside the expression with their calculation results.
      * 
      * @param expression
      */
-    @SuppressWarnings({ "rawtypes", "unchecked" })
     protected void evalFunctions(StringBuilder expression) {
-        String regex = FUNC;//AbstractExpression.createRegExpOnAllRegistered();
+        eval(expression, FUNC, true);
+    }
+    
+    @SuppressWarnings({ "rawtypes", "unchecked" })
+    protected void eval(StringBuilder expression, String regex, boolean replace) {
         String expr = expression.toString();
         Object result;
         Map args; //TODO: use extra args?
         StringBuilder func, tempFunc;
-        String sfunc, fname;
+        String sfunc, fname, sresult;
         int i = 0;
         do {
             sfunc = StringUtil.findRegExp(expr, regex, i);
-            if (Util.isEmpty(sfunc))
+            if (Util.isEmpty(sfunc)) {
                 break;
+            }
             func = new StringBuilder(sfunc);
             fname = StringUtil.extract(tempFunc=new StringBuilder(func), OPERAND, "");
             args = getFunctionArgs(tempFunc, values);
             IPRunnable runner = ENV.get(Pool.class).find(fname);
             result = runner.run(args);
-            StringUtil.replace(expression, func.toString(), StringUtil.toString(result), i);
-            i += func.length();
+            if (replace) {
+                sresult = StringUtil.toString(result);
+                StringUtil.replace(expression, func.toString(), sresult, i);
+                i += sresult.length();
+            } else {
+                i += func.length();
+            }
         } while (true);
     }
 
