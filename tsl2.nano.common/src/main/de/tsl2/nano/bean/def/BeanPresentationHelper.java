@@ -582,7 +582,7 @@ public class BeanPresentationHelper<T> {
      */
     public boolean isDefaultAttribute(IAttribute attribute) {
         AttributeDefinition<?> attr = (AttributeDefinition<?>) attribute;
-        return (BeanContainer.instance() == null || BeanContainer.instance().hasPermission(attribute.getId(), null))
+        return (!BeanContainer.isInitialized() || BeanContainer.instance().hasPermission(attribute.getId(), null))
             && (!attr.id() || matches("default.present.attribute.id",
                 false))
             && (!attr.isMultiValue() || matches("default.present.attribute.multivalue", true))

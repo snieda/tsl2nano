@@ -693,12 +693,16 @@ class Row<ID> {
         StringBuilder buf = new StringBuilder(values.length * 4 + 20);
         buf.append(rowId + div);
         for (int i = 0; i < values.length; i++) {
-            buf.append(values[i] + div);
+            buf.append(nonull(values[i]) + div);
         }
         return buf.toString();
     }
 
     
+    protected String nonull(Object value) {
+        return value == null ? "-" : value.toString();
+    }
+
     @Override
     public String toString() {
         return index + ":" + rowId;
