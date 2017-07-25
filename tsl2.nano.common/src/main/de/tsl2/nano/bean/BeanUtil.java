@@ -49,6 +49,7 @@ import de.tsl2.nano.core.log.LogFactory;
 import de.tsl2.nano.core.util.ByteUtil;
 import de.tsl2.nano.core.util.FormatUtil;
 import de.tsl2.nano.core.util.ListSet;
+import de.tsl2.nano.core.util.NumberUtil;
 import de.tsl2.nano.core.util.StringUtil;
 import de.tsl2.nano.core.util.Util;
 import de.tsl2.nano.format.DefaultFormat;
@@ -160,6 +161,32 @@ private static Object deepCopy(Object src, Object dest) throws Exception {
   return dest;
 }
 */
+    /**
+     * creates new objects, cloned from defaultClone and with increasing attribute value - evaluated by first+count+step.
+     * @param defaultClone
+     * @param attributeName
+     * @param first first attribute value - defaultClone can contain the value or this must not be null
+     * @param count number of objects to create
+     * @param step step of increase
+     * @return list of new created objects
+     */
+    public static <S>  List<S> create(S defaultClone, String attributeName, Object first, int count, double step) {
+        Object clone, value;
+        ArrayList result = new ArrayList();
+        if (first == null) {
+            first = Bean.getBean(defaultClone).getAttribute(attributeName).getValue();
+        }
+        long start = NumberUtil.toNumber(first);
+        long end = start + count;
+        for (long i = start; i < end; i+=step) {
+            clone = clone(defaultClone);
+            value = NumberUtil.fromNumber(i, first.getClass());
+            Bean.getBean(clone).getAttribute(attributeName).setValue(value);
+            result.add(clone);
+        }
+        return result;
+    }
+    
     /**
      * wraps all attributes having a collection as value into a new {@link ListSet} instance to unbind a
      * {@link #clone()} instance.

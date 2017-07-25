@@ -15,6 +15,7 @@ import java.util.List;
 
 import org.simpleframework.xml.Transient;
 
+import de.tsl2.nano.bean.BeanUtil;
 import de.tsl2.nano.bean.def.Bean;
 import de.tsl2.nano.bean.def.BeanCollector;
 import de.tsl2.nano.bean.def.BeanDefinition;
@@ -46,6 +47,9 @@ public class Controller<COLLECTIONTYPE extends Collection<T>, T> extends BeanCol
     @Transient
     String beanName;
 
+    @Transient
+    Increaser itemProvider;
+    
     transient List<IAttribute> attributes;
 
     /**
@@ -132,5 +136,30 @@ public class Controller<COLLECTIONTYPE extends Collection<T>, T> extends BeanCol
             return new Controller(this, workingMode);
         return this;
     }
-    
+
+    @Override
+    public <B extends BeanDefinition<T>> B onActivation() {
+        if (getCurrentData().isEmpty() && itemProvider != null) {
+            getCurrentData().addAll(provideTransientData());
+        }
+        return super.onActivation();
+    }
+
+    private Collection<? extends T> provideTransientData() {
+        return BeanUtil.create(createItem(null), itemProvider.getName(), null, itemProvider.getCount(), itemProvider.getStep());
+    }
+
+    /**
+     * @return Returns the itemProvider.
+     */
+    public Increaser getItemProvider() {
+        return itemProvider;
+    }
+
+    /**
+     * @param itemProvider The itemProvider to set.
+     */
+    public void setItemProvider(Increaser itemProvider) {
+        this.itemProvider = itemProvider;
+    }
 }

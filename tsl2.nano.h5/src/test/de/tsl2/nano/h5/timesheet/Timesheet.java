@@ -106,6 +106,7 @@ import de.tsl2.nano.h5.CSheet;
 import de.tsl2.nano.h5.Compositor;
 import de.tsl2.nano.h5.Controller;
 import de.tsl2.nano.h5.Html5Presentation;
+import de.tsl2.nano.h5.Increaser;
 import de.tsl2.nano.h5.QueryResult;
 import de.tsl2.nano.h5.RuleCover;
 import de.tsl2.nano.h5.SpecifiedAction;
@@ -432,6 +433,31 @@ public class Timesheet extends NanoH5App {
         timeActionBean.saveDefinition();
         controller.getPresentable().setIcon("icons/forward.png");
         controller.saveDefinition();
+
+        /*
+         * define a Controller as Collector of Actions of a Bean
+         */
+        final BeanDefinition reservationBean = new BeanDefinition(Charge.class);
+        reservationBean.setName("reservation");
+        BeanDefinition.define(reservationBean);
+        final Controller reservation = new Controller(reservationBean, IBeanCollector.MODE_SEARCHABLE);
+        reservationBean.getActions().clear();
+        reservationBean.addAction(new SecureAction("reservate", "reservate") {
+            @Override
+            public Object action() throws Exception {
+                return reservation;
+            }
+        });
+        timeActionBean.addAction(new SecureAction("cancel", "cancel") {
+            @Override
+            public Object action() throws Exception {
+                return reservation;
+            }
+        });
+        reservation.setItemProvider(new Increaser("fromTime", 12, 3600 * 1000));
+        reservationBean.saveDefinition();
+        reservation.getPresentable().setIcon("icons/forward.png");
+        reservation.saveDefinition();
 
         /*
          * define own beans to present your entities another way

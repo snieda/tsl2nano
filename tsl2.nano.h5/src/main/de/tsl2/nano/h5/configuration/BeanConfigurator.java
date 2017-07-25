@@ -27,6 +27,7 @@ import de.tsl2.nano.bean.def.BeanDefinition;
 import de.tsl2.nano.bean.def.CollectionExpressionTypeFormat;
 import de.tsl2.nano.bean.def.Constraint;
 import de.tsl2.nano.bean.def.IAttributeDefinition;
+import de.tsl2.nano.bean.def.IBeanCollector;
 import de.tsl2.nano.bean.def.IPresentable;
 import de.tsl2.nano.bean.def.Presentable;
 import de.tsl2.nano.bean.def.ValueColumn;
@@ -43,6 +44,7 @@ import de.tsl2.nano.core.util.StringUtil;
 import de.tsl2.nano.core.util.Util;
 import de.tsl2.nano.h5.CSheet;
 import de.tsl2.nano.h5.Compositor;
+import de.tsl2.nano.h5.Controller;
 import de.tsl2.nano.h5.Html5Presentable;
 import de.tsl2.nano.h5.SpecifiedAction;
 import de.tsl2.nano.h5.expression.Query;
@@ -396,6 +398,11 @@ public class BeanConfigurator<T> implements Serializable {
             int cols, 
             int rows) {
         new CSheet(title, cols, rows).save();
+    }
+
+    @de.tsl2.nano.bean.annotation.Action(name = "createController")
+    public void actionCreateController () {
+        new Controller<>(def, IBeanCollector.MODE_SEARCHABLE).saveDefinition();
     }
 
     @SuppressWarnings({ "rawtypes", "unchecked" })

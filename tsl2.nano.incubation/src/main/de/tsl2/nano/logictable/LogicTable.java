@@ -138,7 +138,7 @@ public class LogicTable<H extends Format & Comparable<H>, ID> extends TableList<
         Object e = super.get(row, column);
         if (e instanceof String) {
             String expression = (String) e;
-            if (expression.startsWith(EquationSolver.EQUATION)) {
+            if (expression.startsWith(EquationSolver.EQUATION) || expression.startsWith(EquationSolver.ACTION)) {
                 try {
                     EquationSolver solver = new EquationSolver(null, getValueMap());
                     return solver.eval(expression.substring(1));

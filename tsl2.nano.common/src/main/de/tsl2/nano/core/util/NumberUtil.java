@@ -17,6 +17,7 @@ import java.text.NumberFormat;
 import java.text.ParseException;
 import java.text.ParsePosition;
 import java.util.Comparator;
+import java.util.Date;
 import java.util.Locale;
 
 import de.tsl2.nano.core.cls.BeanClass;
@@ -363,5 +364,26 @@ public class NumberUtil extends BitUtil {
      */
     public static boolean isNaN(Object number) {
         return number != null && number instanceof Double && ((Double)number).isNaN();
+    }
+    
+    /**
+     * tries to convert any object to an identifying long number (bijective)
+     * @param obj any object
+     * @return number, representing this object
+     */
+    public static long toNumber(Object obj) {
+        if (obj instanceof Date)
+            return ((Date)obj).getTime();
+        else if (obj instanceof Number)
+            return ((Number)obj).longValue();
+        else
+            return new BigInteger(1, obj.toString().getBytes()).longValue();
+    }
+
+    public static <T> T fromNumber(long identifier, Class<T> type) {
+        if (String.class.isAssignableFrom(type))
+            return (T) StringUtil.fromDecString(String.valueOf(identifier));
+        else
+            return BeanClass.createInstance(type, identifier);
     }
 }
