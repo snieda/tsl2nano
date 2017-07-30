@@ -177,7 +177,7 @@ private static Object deepCopy(Object src, Object dest) throws Exception {
             first = Bean.getBean(defaultClone).getAttribute(attributeName).getValue();
         }
         long start = NumberUtil.toNumber(first);
-        long end = start + count;
+        long end = (long) (start + count * step);
         for (long i = start; i < end; i+=step) {
             clone = clone(defaultClone);
             value = NumberUtil.fromNumber(i, first.getClass());

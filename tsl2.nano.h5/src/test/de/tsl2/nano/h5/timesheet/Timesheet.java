@@ -415,7 +415,7 @@ public class Timesheet extends NanoH5App {
         final BeanDefinition timeActionBean = new BeanDefinition(Charge.class);
         timeActionBean.setName("time-actions");
         BeanDefinition.define(timeActionBean);
-        final Controller controller = new Controller(timeActionBean, IBeanCollector.MODE_SEARCHABLE);
+        final Controller controller = new Controller(timeActionBean.getName());
         timeActionBean.getActions().clear();
         timeActionBean.addAction(new SecureAction("times.actions.one.hour.add", "+1") {
             @Override
@@ -440,7 +440,7 @@ public class Timesheet extends NanoH5App {
         final BeanDefinition reservationBean = new BeanDefinition(Charge.class);
         reservationBean.setName("reservation");
         BeanDefinition.define(reservationBean);
-        final Controller reservation = new Controller(reservationBean, IBeanCollector.MODE_SEARCHABLE);
+        final Controller reservation = new Controller(reservationBean.getName());
         reservationBean.getActions().clear();
         reservationBean.addAction(new SecureAction("reservate", "reservate") {
             @Override

@@ -9,17 +9,27 @@
  */
 package de.tsl2.nano.h5;
 
+import java.io.Serializable;
+
+import org.simpleframework.xml.Default;
+import org.simpleframework.xml.DefaultType;
+
 /**
  * holds properties to create new instances with an increasing attribute
  * 
  * @author Tom, Thomas Schneider
  * @version $Revision$
  */
-public class Increaser {
+public class Increaser implements Serializable {
+
+    private static final long serialVersionUID = 4984470230289140956L;
 
     private int count;
     private int step;
     private String name;
+
+    protected Increaser() {
+    }
 
     /**
      * constructor

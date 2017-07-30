@@ -86,7 +86,7 @@ public class ValueExpression<TYPE> implements
     transient String format;
 
     /** only used to convert/parse from string to object */
-    @Attribute
+    @Attribute(required=false)
     Class<TYPE> type;
     /** attributes, extracted from expression */
     transient String[] attributes;

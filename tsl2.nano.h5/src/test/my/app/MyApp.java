@@ -34,7 +34,6 @@ import de.tsl2.nano.bean.def.AttributeDefinition;
 import de.tsl2.nano.bean.def.BeanCollector;
 import de.tsl2.nano.bean.def.BeanDefinition;
 import de.tsl2.nano.bean.def.Constraint;
-import de.tsl2.nano.bean.def.IBeanCollector;
 import de.tsl2.nano.bean.def.IPageBuilder;
 import de.tsl2.nano.bean.def.IPresentable;
 import de.tsl2.nano.bean.def.IValueDefinition;
@@ -179,7 +178,7 @@ public class MyApp extends NanoH5 {
         final BeanDefinition timeActionBean = new BeanDefinition(Times.class);
         timeActionBean.setName("time-actions");
         BeanDefinition.define(timeActionBean);
-        final Controller controller = new Controller(timeActionBean, IBeanCollector.MODE_SEARCHABLE);
+        final Controller controller = new Controller(timeActionBean.getName());
         timeActionBean.getActions().clear();
         timeActionBean.addAction(new SecureAction("times.actions.one.hour.add", "+1") {
             @Override

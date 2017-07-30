@@ -687,7 +687,7 @@ public class Html5Presentation<T> extends BeanPresentationHelper<T> implements I
         if (controller.getPresentable() != null) {
             appendAttributes(table, controller.getPresentable(), true);
         }
-        createActionTableContent(table, controller, controller.getBeanFinder().getData());
+        createActionTableContent(table, controller, controller.getCurrentData());
         return table;
     }
 
@@ -1687,7 +1687,7 @@ public class Html5Presentation<T> extends BeanPresentationHelper<T> implements I
             appendTag(grid,
                 TABLE(TAG_ROW,
                     ATTR_ID,
-                    itemBean.getId().toString(),
+                    itemBean.toString(),
                     ATTR_TABINDEX,
                     ++tabIndex + "",
                     ATTR_FORMTARGET,

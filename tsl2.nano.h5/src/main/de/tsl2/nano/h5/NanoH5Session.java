@@ -12,9 +12,10 @@ package de.tsl2.nano.h5;
 import static de.tsl2.nano.bean.def.BeanPresentationHelper.KEY_FILTER_FROM_LABEL;
 import static de.tsl2.nano.bean.def.BeanPresentationHelper.KEY_FILTER_TO_LABEL;
 import static de.tsl2.nano.bean.def.IBeanCollector.MODE_SEARCHABLE;
-import static de.tsl2.nano.h5.HtmlUtil.*;
+import static de.tsl2.nano.h5.HtmlUtil.BTN_ASSIGN;
 import static de.tsl2.nano.h5.HtmlUtil.BTN_CANCEL;
 import static de.tsl2.nano.h5.HtmlUtil.BTN_SUBMIT;
+import static de.tsl2.nano.h5.HtmlUtil.beanID;
 import static de.tsl2.nano.h5.NanoH5.OFFSET_FILTERLINES;
 import static de.tsl2.nano.h5.NanoHTTPD.MIME_HTML;
 
@@ -425,6 +426,10 @@ public class NanoH5Session implements ISession<BeanDefinition>, Serializable, IL
             actionLog.clear();
             //don't forget that there was an exception. to be seen on the next exception ;-)
             logaction(ex.toString(), parms);
+            Message.broadcast(this,
+                ENV.translate("nanoh5.error", false, this.getUserAuthorization().getUser(), 
+                    nav.current(), e.getLocalizedMessage()),
+                "*");
         }
         //TODO: eliminate bug in NanoHTTPD not resetting uri...
 //        header.clear();
@@ -838,6 +843,9 @@ public class NanoH5Session implements ISession<BeanDefinition>, Serializable, IL
                         if (boolean.class.isAssignableFrom(type) || Boolean.class.isAssignableFrom(type))
                             if (newString.equals("on"))
                                 newString = "true";
+                        if (Date.class.isAssignableFrom(type))
+                            if (newString.matches("\\d{2,2}[:]\\d{2,2}"))
+                                newString += ":00"; //append 0 seconds to respect format HH:mm:ss
                         
                         if (oldString == null || !oldString.equals(newString)) {
                             vmodel.setParsedValue(p, newString);
