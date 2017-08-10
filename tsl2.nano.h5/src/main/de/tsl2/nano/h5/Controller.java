@@ -13,6 +13,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
 
 import org.simpleframework.xml.Transient;
 
@@ -72,7 +73,7 @@ public class Controller<COLLECTIONTYPE extends Collection<T>, T> extends Composi
      * @param workingMode
      */
     public Controller(String beanName, String baseType, String baseAttribute, String targetAttribute, String iconAttribute) {
-        this((BeanDefinition<T>) BeanDefinition.getBeanDefinition(beanName), (BeanDefinition<T>) BeanDefinition.getBeanDefinition(baseType), baseAttribute, targetAttribute, iconAttribute);
+        this((BeanDefinition<T>) BeanDefinition.getBeanDefinition(beanName), (BeanDefinition<T>) (baseType != null ? BeanDefinition.getBeanDefinition(baseType) : null), baseAttribute, targetAttribute, iconAttribute);
     }
 
     /**
@@ -82,7 +83,7 @@ public class Controller<COLLECTIONTYPE extends Collection<T>, T> extends Composi
      * @param workingMode
      */
     public Controller(BeanDefinition<T> beanDef, BeanDefinition<T> baseType, String baseAttribute, String targetAttribute, String iconAttribute) {
-        this(beanDef.getDeclaringClass(), baseType.getDeclaringClass(), baseAttribute, targetAttribute, iconAttribute);
+        this(beanDef.getDeclaringClass(), baseType != null ? baseType.getDeclaringClass() : null, baseAttribute, targetAttribute, iconAttribute);
     }
 
     public Controller(Class<T> beanDef, Class<T> baseType, String baseAttribute, String targetAttribute, String iconAttribute) {
@@ -117,14 +118,17 @@ public class Controller<COLLECTIONTYPE extends Collection<T>, T> extends Composi
      * extracts the bean-instance and the action id and starts it.
      * 
      * @param actionIdWithRowNumber the row-number has to be one-based!
+     * @param session 
      * @return result of given action
      */
-    public Object doAction(String actionIdWithRowNumber) {
+    public Object doAction(String actionIdWithRowNumber, Map context) {
         String strRow = StringUtil.substring(actionIdWithRowNumber, PREFIX_CTRLACTION, POSTFIX_CTRLACTION);
         Number row = NumberUtil.extractNumber(strRow);
         ArrayList<T> list = new ArrayList<T>(getCurrentData());
         String id = StringUtil.substring(actionIdWithRowNumber, POSTFIX_CTRLACTION, null);
-        return getBean(list.get(row.intValue() - 1)).getAction(id).activate();
+        IAction<?> action = getBean(list.get(row.intValue() - 1)).getAction(id);
+        action.setParameter(context);
+        return action.activate();
     }
 
     @Override
@@ -150,16 +154,19 @@ public class Controller<COLLECTIONTYPE extends Collection<T>, T> extends Composi
     
 
     @Override
-    public <B extends BeanDefinition<T>> B onActivation() {
+    public <B extends BeanDefinition<T>> B onActivation(Map context) {
         if (itemProvider != null && itemProvider.getCount() > getCurrentData().size()) {
                 //TODO: create only missing items
-                getCurrentData().addAll(provideTransientData());
+                getCurrentData().addAll(provideTransientData(context));
         }
-        return super.onActivation();
+        return super.onActivation(context);
     }
 
-    private Collection<? extends T> provideTransientData() {
-        return BeanUtil.create(createItem(null), itemProvider.getName(), null, itemProvider.getCount(), itemProvider.getStep());
+    private Collection<? extends T> provideTransientData(Map context) {
+        T item = createItem(null);
+        if (context != null)
+            fillContext(item, context.values().toArray());
+        return BeanUtil.create(item, itemProvider.getName(), null, itemProvider.getCount(), itemProvider.getStep());
     }
 
     /**

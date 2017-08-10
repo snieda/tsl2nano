@@ -543,7 +543,7 @@ public class NanoH5Session implements ISession<BeanDefinition>, Serializable, IL
         }
         BeanDefinition<?> model = injectContext(nav.next(returnCode));
         if (model != null)
-            model.onActivation();
+            model.onActivation(getContextParameter());
         return model != null ? builder.build(this, model, msg, true, nav.toArray()) : server.createStartPage();
     }
 
@@ -565,7 +565,7 @@ public class NanoH5Session implements ISession<BeanDefinition>, Serializable, IL
         if (parms.containsKey(IAction.CANCELED)) {
             logaction(IAction.CANCELED, null);
             if (nav.current() != null) {
-                ((BeanDefinition) nav.current()).onDeactivation();
+                ((BeanDefinition) nav.current()).onDeactivation(getContextParameter());
 
                 //perhaps remove configuration bean
                 BeanConfigurator configurator = ConcurrentUtil.getCurrent(BeanConfigurator.class);
@@ -585,7 +585,7 @@ public class NanoH5Session implements ISession<BeanDefinition>, Serializable, IL
             Controller ctrl = (Controller) nav.current();
             String actionName = (String) parms.keySet().iterator().next();
             if (actionName != null && actionName.startsWith(Controller.PREFIX_CTRLACTION)) {
-                return ctrl.doAction(actionName);
+                return ctrl.doAction(actionName, getContextParameter());
             }
         }
         //follow links or fill selected items
@@ -632,7 +632,7 @@ public class NanoH5Session implements ISession<BeanDefinition>, Serializable, IL
         if (nav.current() != null) {
             BeanDefinition<?> c = nav.current();
             actions = new ArrayList<IAction>();
-            if (nav.current().getActions() != null) {
+            if (c.getActions() != null) {
                 actions.addAll(c.getActions());
             }
             actions.addAll(c.getPresentationHelper().getPageActions(this));
@@ -758,26 +758,24 @@ public class NanoH5Session implements ISession<BeanDefinition>, Serializable, IL
      * @return context parameters
      */
     private Parameter getContextParameter() {
-        Iterator<BeanDefinition> con = getContext().get(BeanDefinition.class);
+        Collection con = getContext().values();
         Parameter p = new Parameter();
         LOG.debug("filling context for session: " + this);
         //full beans
         BeanDefinition c;
-        while (con.hasNext()) {
-            c = con.next();
+        for (Object v : con) {
+            c = Bean.getBean(v);
             p.put(c.getName(), c);
         }
         //all bean attributes
-        con = getContext().get(BeanDefinition.class);
-        while (con.hasNext()) {
-            c = con.next();
+        for (Object v : con) {
+            c = Bean.getBean(v);
             p.putAll(c.toValueMap(p));
         }
         //do that twice to let rules and queries use defined parameter
         LOG.debug("second iteration on context for session: " + this);
-        con = getContext().get(BeanDefinition.class);
-        while (con.hasNext()) {
-            c = con.next();
+        for (Object v : con) {
+            c = Bean.getBean(v);
             p.putAll(c.toValueMap(p));
         }
         if (LOG.isDebugEnabled()) {

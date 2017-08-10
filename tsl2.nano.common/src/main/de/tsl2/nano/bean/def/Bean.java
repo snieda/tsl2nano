@@ -835,8 +835,8 @@ public class Bean<T> extends BeanDefinition<T> {
     }
 
     @Override
-    public void onDeactivation() {
-        super.onDeactivation();
+    public void onDeactivation(Map context) {
+        super.onDeactivation(context);
         //if a new object was cancelled, it must be removed
         if (!isMultiValue()) {
             detach("remove");
@@ -875,7 +875,7 @@ public class Bean<T> extends BeanDefinition<T> {
     }
     
     @Override
-    public <B extends BeanDefinition<T>> B onActivation() {
+    public <B extends BeanDefinition<T>> B onActivation(Map context) {
         //on new beans, we fill manyToOne relations if exactly one item is available
         if (!BeanContainer.isInitialized()
             || BeanContainer.instance().isTransient(instance) && ENV.get("bean.new.fill.relations.on.one.item", true)) {
@@ -889,7 +889,7 @@ public class Bean<T> extends BeanDefinition<T> {
                 }
             }
         }
-        super.onActivation();
+        super.onActivation(context);
         return (B) this;
     }
 

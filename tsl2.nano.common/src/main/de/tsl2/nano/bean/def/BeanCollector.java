@@ -30,7 +30,6 @@ import java.util.Map;
 import org.apache.commons.logging.Log;
 import org.simpleframework.xml.Default;
 import org.simpleframework.xml.DefaultType;
-import org.simpleframework.xml.ElementList;
 import org.simpleframework.xml.Transient;
 import org.simpleframework.xml.core.Commit;
 
@@ -40,8 +39,6 @@ import de.tsl2.nano.action.IActivable;
 import de.tsl2.nano.bean.BeanContainer;
 import de.tsl2.nano.bean.BeanUtil;
 import de.tsl2.nano.bean.IAttributeDef;
-import de.tsl2.nano.bean.IBeanContainer;
-import de.tsl2.nano.bean.IValueAccess;
 import de.tsl2.nano.bean.ValueHolder;
 import de.tsl2.nano.collection.CollectionUtil;
 import de.tsl2.nano.collection.Entry;
@@ -282,8 +279,8 @@ public class BeanCollector<COLLECTIONTYPE extends Collection<T>, T> extends Bean
     }
 
     @Override
-    public <B extends BeanDefinition<T>> B onActivation() {
-        super.onActivation();
+    public <B extends BeanDefinition<T>> B onActivation(Map context) {
+        super.onActivation(context);
         iterator = null;
         if (!isStaticCollection && Util.isEmpty(collection)) {
             long countCheck = ENV.get("collector.search.auto.count.lowerthan", 20);
@@ -328,15 +325,15 @@ public class BeanCollector<COLLECTIONTYPE extends Collection<T>, T> extends Bean
     }
 
     @Override
-    public void onDeactivation() {
-        super.onDeactivation();
+    public void onDeactivation(Map context) {
+        super.onDeactivation(context);
         iterator = null;
         /*
          * if a bean-collector was left through cancel, new created compositions must be removed!
          */
         if (composition != null) {
             for (T instance : collection) {
-                Bean.getBean((Serializable) instance).onDeactivation();
+                Bean.getBean((Serializable) instance).onDeactivation(context);
             }
         } else {
             if (ENV.get("collector.ondeactivation.selection.clear", true))

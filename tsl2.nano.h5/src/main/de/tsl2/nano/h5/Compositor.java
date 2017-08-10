@@ -13,6 +13,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Map;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -25,6 +26,7 @@ import de.tsl2.nano.bean.BeanUtil;
 import de.tsl2.nano.bean.def.Attachment;
 import de.tsl2.nano.bean.def.Bean;
 import de.tsl2.nano.bean.def.BeanCollector;
+import de.tsl2.nano.bean.def.BeanDefinition;
 import de.tsl2.nano.bean.def.BeanFinder;
 import de.tsl2.nano.bean.def.BeanValue;
 import de.tsl2.nano.bean.def.Composition;
@@ -68,7 +70,9 @@ public class Compositor<COLLECTIONTYPE extends Collection<T>, T> extends BeanCol
     /** if true, the user will be asked to save the new item */
     protected boolean forceUserInteraction = false;
     @Transient
-    protected String actionFilterRule;
+    protected String actionEnablerRule;
+    
+    private transient List<IAction> compositorActions;
 
     /**
      * constructor
@@ -123,13 +127,15 @@ public class Compositor<COLLECTIONTYPE extends Collection<T>, T> extends BeanCol
 
     @Override
     public Collection<IAction> getActions() {
-        Collection<IAction> actions = super.getActions();
-        if (parentType == null)
-            return actions;
-        List<IAction> compositorActions =
-            createCompositorActions(parentType, getSearchPanelBeans().iterator().next(), baseAttribute, targetAttribute,
+        if (compositorActions == null) {
+            Collection<IAction> actions = super.getActions();
+            if (parentType == null)
+                return actions;
+            compositorActions = createCompositorActions(parentType, getSearchPanelBeans().iterator().next(),
+                baseAttribute, targetAttribute,
                 iconAttribute);
-        compositorActions.addAll(actions);
+            compositorActions.addAll(actions);
+        }
         return compositorActions;
     }
 
@@ -233,8 +239,8 @@ public class Compositor<COLLECTIONTYPE extends Collection<T>, T> extends BeanCol
                 @Override
                 public boolean isEnabled() {
                     boolean actionEnabled = true;
-                    if (actionFilterRule != null) {
-                        IPRunnable filterRule = ENV.get(Pool.class).get(actionFilterRule);
+                    if (actionEnablerRule != null) {
+                        IPRunnable filterRule = ENV.get(Pool.class).get(actionEnablerRule);
                         if (filterRule != null)
                             actionEnabled = (boolean) filterRule.run(MapUtil.asMap(base));
                     }
@@ -262,6 +268,12 @@ public class Compositor<COLLECTIONTYPE extends Collection<T>, T> extends BeanCol
         return actions;
     }
 
+    @Override
+    public <B extends BeanDefinition<T>> B onActivation(Map context) {
+        compositorActions = null;
+        return super.onActivation(context);
+    }
+    
     @Override
     public Compositor<COLLECTIONTYPE, T> refreshed() {
         if (isStale())

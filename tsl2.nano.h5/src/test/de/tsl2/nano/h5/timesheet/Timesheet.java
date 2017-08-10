@@ -291,7 +291,7 @@ public class Timesheet extends NanoH5App {
         //TODO: Statistics executes queries immediately to evaluate group-by column names
         Statistic<Collection<Charge>, Charge> statistic = new Statistic<>(Charge.class);
         statistic.getPresentable().setIcon("icons/barchart.png");
-        statistic.onActivation().saveDefinition();
+        statistic.onActivation(null).saveDefinition();
 
         /*
          * statistic queries
