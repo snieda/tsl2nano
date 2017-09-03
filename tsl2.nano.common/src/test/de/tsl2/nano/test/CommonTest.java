@@ -1300,7 +1300,8 @@ public class CommonTest {
         assertFalse((Boolean) new ConditionOperator(values).eval(f));
     }
 
-    //...running long...:@Test
+    @Ignore("...running long...")
+    @Test
     public void testArrayPerformance() {
         final int c = 2;//1000;
         String description =
@@ -1455,7 +1456,8 @@ public class CommonTest {
         assertTrue("invoked".equals(aopBean.getObject()));
     }
 
-    //don't do that automatic: @Test
+    @Ignore("don't do that automatic") 
+    @Test
     public void testNetUtilDownload() throws Exception {
         if (NetUtil.isOnline()) {
             Profiler.si().stressTest("downloader", 20, new Runnable() {
@@ -1511,7 +1513,8 @@ public class CommonTest {
         NetUtil.scans(0, 10000);
     }
 
-//    @Test
+    @Ignore
+    @Test
     public void testNetUtilWCopy() throws Exception {
         //not a real test - only to see it working!
         NetUtil.wcopy("http://mobile.chefkoch.de", "test/", null, null);
@@ -1870,6 +1873,7 @@ public class CommonTest {
         assertEquals(resource + "M%FCnchen/info", urlREST);
     }
 
+    @Ignore
     @Test
     public void testCPUTime() throws Exception {
         new ThreadState().top(500);
