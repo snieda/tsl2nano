@@ -218,7 +218,6 @@ public class ArrSegList<TARRAY, T> implements List<T> {
 
     @Override
     public boolean remove(Object o) {
-        // TODO Auto-generated method stub
         return false;
     }
 
@@ -243,43 +242,34 @@ public class ArrSegList<TARRAY, T> implements List<T> {
 
     @Override
     public boolean addAll(int index, Collection<? extends T> c) {
-        // TODO Auto-generated method stub
         return false;
     }
 
     @Override
     public boolean removeAll(Collection<?> c) {
-        // TODO Auto-generated method stub
         return false;
     }
 
     @Override
     public boolean retainAll(Collection<?> c) {
-        // TODO Auto-generated method stub
         return false;
     }
 
     @Override
     public void clear() {
-        // TODO Auto-generated method stub
-
     }
 
     @Override
     public T set(int index, T element) {
-        // TODO Auto-generated method stub
         return null;
     }
 
     @Override
     public void add(int index, T element) {
-        // TODO Auto-generated method stub
-
     }
 
     @Override
     public T remove(int index) {
-        // TODO Auto-generated method stub
         return null;
     }
 

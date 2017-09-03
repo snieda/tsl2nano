@@ -39,7 +39,6 @@ public class Finished extends ManagedException {
      */
     @Override
     public String getLocalizedMessage() {
-        // TODO Auto-generated method stub
         return super.getLocalizedMessage();
     }
 

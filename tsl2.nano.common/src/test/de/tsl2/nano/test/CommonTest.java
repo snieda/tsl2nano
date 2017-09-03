@@ -1778,7 +1778,7 @@ public class CommonTest {
     public void testAnnotationProxy() throws Exception {
         Element origin = AnnotationProxy.getAnnotation(SimpleXmlAnnotator.class, "attribute", Element.class);
         Annotation proxy =
-            AnnotationProxy.createProxy(new AnnotationProxy(origin, "name", "ruleCover", "type", CommonTest.class));
+            (Annotation) AnnotationProxy.createProxy(new AnnotationProxy(origin, "name", "ruleCover", "type", CommonTest.class));
         //this seems not work on suns jdk1.7
         Annotation[] annotations = AnnotationProxy.getAnnotations(SimpleXmlAnnotator.class, "attribute");
 
