@@ -11,10 +11,12 @@ package de.tsl2.nano.h5;
 
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Map;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.simpleframework.xml.Transient;
 import org.simpleframework.xml.core.Commit;
 
@@ -24,12 +26,17 @@ import de.tsl2.nano.bean.BeanUtil;
 import de.tsl2.nano.bean.def.Attachment;
 import de.tsl2.nano.bean.def.Bean;
 import de.tsl2.nano.bean.def.BeanCollector;
+import de.tsl2.nano.bean.def.BeanDefinition;
 import de.tsl2.nano.bean.def.BeanFinder;
 import de.tsl2.nano.bean.def.BeanValue;
 import de.tsl2.nano.bean.def.Composition;
 import de.tsl2.nano.bean.def.IAttributeDefinition;
 import de.tsl2.nano.bean.def.Presentable;
 import de.tsl2.nano.bean.def.SecureAction;
+import de.tsl2.nano.core.ENV;
+import de.tsl2.nano.core.util.MapUtil;
+import de.tsl2.nano.execution.IPRunnable;
+import de.tsl2.nano.incubation.specification.Pool;
 
 /**
  * The Compositor is a fast- or one-click collector using a base-type to create composition instances from. It's a kind
@@ -45,21 +52,27 @@ import de.tsl2.nano.bean.def.SecureAction;
 public class Compositor<COLLECTIONTYPE extends Collection<T>, T> extends BeanCollector<COLLECTIONTYPE, T> {
     /** serialVersionUID */
     private static final long serialVersionUID = 1L;
+    private static final Log LOG = LogFactory.getLog(Compositor.class);
+    
     /** base type of items to create composition instances from */
     @Transient
     Class<?> parentType;
     /** composition instance attribute to assign the base instance to */
     @Transient
-    private String baseAttribute;
+    protected String baseAttribute;
     /** composition instance attribute to assign the target instance to */
     @Transient
-    private String targetAttribute;
+    protected String targetAttribute;
     /** base instance attribute name to evaluate an image path for the compositor action */
     @Transient
-    private String iconAttribute;
+    protected String iconAttribute;
     @Transient
     /** if true, the user will be asked to save the new item */
     protected boolean forceUserInteraction = false;
+    @Transient
+    protected String actionEnablerRule;
+    
+    private transient List<IAction> compositorActions;
 
     /**
      * constructor
@@ -85,7 +98,10 @@ public class Compositor<COLLECTIONTYPE extends Collection<T>, T> extends BeanCol
         attributeDefinitions = new LinkedHashMap<String, IAttributeDefinition<?>>(getAttributeDefinitions());
         presentable = (Presentable) BeanUtil.copy(bc.getPresentable());
         init(collection, new BeanFinder(beanType), workingMode, composition);
-        init(beanType, baseType, baseAttribute, targetAttribute, iconAttribute);
+        if (baseType != null)
+            init(beanType, baseType, baseAttribute, targetAttribute, iconAttribute);
+        else
+            LOG.warn("no baseType defined -> Compositor provides no function");
     }
 
     /**
@@ -111,11 +127,15 @@ public class Compositor<COLLECTIONTYPE extends Collection<T>, T> extends BeanCol
 
     @Override
     public Collection<IAction> getActions() {
-        Collection<IAction> actions = super.getActions();
-        List<IAction> compositorActions =
-            createCompositorActions(parentType, getSearchPanelBeans().iterator().next(), baseAttribute, targetAttribute,
+        if (compositorActions == null) {
+            Collection<IAction> actions = super.getActions();
+            if (parentType == null)
+                return actions;
+            compositorActions = createCompositorActions(parentType, getSearchPanelBeans().iterator().next(),
+                baseAttribute, targetAttribute,
                 iconAttribute);
-        compositorActions.addAll(actions);
+            compositorActions.addAll(actions);
+        }
         return compositorActions;
     }
 
@@ -194,7 +214,9 @@ public class Compositor<COLLECTIONTYPE extends Collection<T>, T> extends BeanCol
                     setDefaultValues(item, true);
 
                     //fill context parameters
-                    fillContext(item, getParameter());
+                    Object[] pars = getParameter();
+                    if (pars != null)
+                        fillContext(item, pars);
                     
                     BeanValue parent;
                     parent = (BeanValue) Bean.getBean(base).getAttribute(baseAttribute);
@@ -214,6 +236,17 @@ public class Compositor<COLLECTIONTYPE extends Collection<T>, T> extends BeanCol
                     return item;
                 }
 
+                @Override
+                public boolean isEnabled() {
+                    boolean actionEnabled = true;
+                    if (actionEnablerRule != null) {
+                        IPRunnable filterRule = ENV.get(Pool.class).get(actionEnablerRule);
+                        if (filterRule != null)
+                            actionEnabled = (boolean) filterRule.run(MapUtil.asMap(base));
+                    }
+                    return super.isEnabled() && actionEnabled;
+                }
+                
                 @Override
                 public String getImagePath() {
                     if (iconAttribute != null) {
@@ -235,6 +268,12 @@ public class Compositor<COLLECTIONTYPE extends Collection<T>, T> extends BeanCol
         return actions;
     }
 
+    @Override
+    public <B extends BeanDefinition<T>> B onActivation(Map context) {
+        compositorActions = null;
+        return super.onActivation(context);
+    }
+    
     @Override
     public Compositor<COLLECTIONTYPE, T> refreshed() {
         if (isStale())

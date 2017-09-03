@@ -218,7 +218,7 @@ public class NanoH5Test {
         ENV.create(DIR_TEST);
         for (int i = 0; i < beanTypesToCheck.length; i++) {
             Bean bean = Bean.getBean(BeanClass.createInstance(beanTypesToCheck[i]));
-            bean.onActivation();
+            bean.onActivation(null);
             System.out.println(bean.toValueMap(null));
             Bean.getBean(bean.getPresentable()).toValueMap(null);
             bean.getActions();
@@ -237,7 +237,7 @@ public class NanoH5Test {
 //                if (attr.getColumnDefinition() != null)
 //                    Bean.getBean(attr.getColumnDefinition()).toValueMap(null);
             }
-            bean.onDeactivation();
+            bean.onDeactivation(null);
         }
 
         //check xml failed files - these are written, if simple-xml has problems on deserializing from xml

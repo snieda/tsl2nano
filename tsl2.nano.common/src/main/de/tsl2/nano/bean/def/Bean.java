@@ -135,6 +135,8 @@ public class Bean<T> extends BeanDefinition<T> {
     /** inner function to detach this bean from a beancollector */
     private IAction detacher;
 
+    transient protected boolean addSaveAction = true;
+
     /** used to registere/find extensions of BeanDefinition/Bean through ENV property */
     public static final String BEANWRAPPER = "BeanWrapper";
     
@@ -190,13 +192,15 @@ public class Bean<T> extends BeanDefinition<T> {
      * @param instance
      */
     public Bean<T> setInstance(T instance) {
-        if (clazz.equals(UNDEFINED.getClass())) {
+        //TODO: why clazz can be simple Object.class instead of UNDEFINED?
+        if (clazz.equals(UNDEFINED.getClass()) || clazz.equals(Object.class)) {
             this.clazz = (Class<T>) instance.getClass();
         }
         this.asString = null;
         this.instance = instance;
         replaceInstanceInAttributes(instance);
-
+        if (valueExpression != null && !valueExpression.hasArguments)
+            valueExpression = null;
         if (actions != null) {
             for (IAction a : actions) {
                 if (a instanceof IConstructable)
@@ -217,7 +221,7 @@ public class Bean<T> extends BeanDefinition<T> {
                 }
             }
         }
-        if (!hasOkAction(actions) && isSelectable()) {
+        if (addSaveAction && !hasOkAction(actions) && isSelectable()) {
             addDefaultSaveAction();
         }
         return super.getActions();
@@ -730,7 +734,7 @@ public class Bean<T> extends BeanDefinition<T> {
             BeanDefinition<I> beandef = (BeanDefinition<I>) getBeanDefinition((String) instanceOrName);
             // check, if beandef is for virtual type
             if (!beandef.getDeclaringClass().equals(UNDEFINED.getClass())) {
-                beandef = new BeanDefinition();
+                //beandef = new BeanDefinition(); // this would overwrite all configurations???
                 beandef.setName(instanceOrName.toString());
             }
             bean = createBean((I) UNDEFINED, beandef);
@@ -831,8 +835,8 @@ public class Bean<T> extends BeanDefinition<T> {
     }
 
     @Override
-    public void onDeactivation() {
-        super.onDeactivation();
+    public void onDeactivation(Map context) {
+        super.onDeactivation(context);
         //if a new object was cancelled, it must be removed
         if (!isMultiValue()) {
             detach("remove");
@@ -866,8 +870,12 @@ public class Bean<T> extends BeanDefinition<T> {
         asString = null;
     }
 
+    public void setAddSaveAction(boolean addSaveAction) {
+        this.addSaveAction = addSaveAction;
+    }
+    
     @Override
-    public <B extends BeanDefinition<T>> B onActivation() {
+    public <B extends BeanDefinition<T>> B onActivation(Map context) {
         //on new beans, we fill manyToOne relations if exactly one item is available
         if (!BeanContainer.isInitialized()
             || BeanContainer.instance().isTransient(instance) && ENV.get("bean.new.fill.relations.on.one.item", true)) {
@@ -881,7 +889,7 @@ public class Bean<T> extends BeanDefinition<T> {
                 }
             }
         }
-        super.onActivation();
+        super.onActivation(context);
         return (B) this;
     }
 

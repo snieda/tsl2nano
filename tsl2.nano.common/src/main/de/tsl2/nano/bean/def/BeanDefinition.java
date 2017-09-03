@@ -185,12 +185,15 @@ public class BeanDefinition<T> extends BeanClass<T> implements IPluggable<BeanDe
      * selecting the bean - this is done by a specialized gui implementation. see {@link #activationActionNames}.
      * 
      * see {@link #setActivationActionNames(String...)}. {@link #activationActionNames} and {@link #getActions()}.
+     * @param context 
      */
-    public <B extends BeanDefinition<T>> B onActivation() {
+    public <B extends BeanDefinition<T>> B onActivation(Map context) {
         LOG.info("onActivation of " + toString() + ": searching activation actions");
         if (activationActionNames != null) {
             for (int i = 0; i < activationActionNames.length; i++) {
-                getAction(activationActionNames[i]).activate();
+                IAction<?> a = getAction(activationActionNames[i]);
+                a.setParameter(context);
+                a.activate();
             }
         }
         return (B) this;
@@ -199,7 +202,7 @@ public class BeanDefinition<T> extends BeanClass<T> implements IPluggable<BeanDe
     /**
      * callback method to be invoked by framework to do some cleanups, if this bean loses it's focus without any action.
      */
-    public void onDeactivation() {
+    public void onDeactivation(Map context) {
 
     }
 

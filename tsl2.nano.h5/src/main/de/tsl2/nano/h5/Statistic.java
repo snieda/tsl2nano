@@ -263,8 +263,8 @@ public class Statistic<COLLECTIONTYPE extends Collection<T>, T> extends BeanColl
             new StringBuffer(), from, to, parameter, true);
     }
 
-    public <B extends BeanDefinition<T>> B  onActivation() {
-        super.onActivation();
+    public <B extends BeanDefinition<T>> B  onActivation(Map context) {
+        super.onActivation(context);
         collection = (COLLECTIONTYPE) create(beanType, columnNames.getList(), from, to);
         return (B) this;
     }

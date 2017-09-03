@@ -106,7 +106,7 @@ public class Query<RESULT> implements IPRunnable<RESULT, Map<String, Object>> {
             args.put(sqlvar, context.get(p));
             op = op.replace(":" + p, ":" + sqlvar);
         }
-
+        
         //do the job
         return (RESULT) (ServiceUtil.isExcecutionStatement(op) ? BeanContainer.instance().executeStmt(op, nativeQuery, args.values().toArray()) 
             : BeanContainer.instance().getBeansByQuery(op, nativeQuery, args));

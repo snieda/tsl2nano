@@ -818,13 +818,25 @@ public class StringUtil {
      * @return decimal string
      */
     public static String fromHexString(String hex) {
+        return fromBaseString(hex, 16);
+    }
+    
+    public static String fromBaseString(String hex, int base) {
         StringBuilder buf = new StringBuilder(hex.length());
         for (int i = 0; i < hex.length(); i += 2) {
-            buf.append((char) Integer.parseInt(hex.substring(i, i + 2), 16));
+            buf.append((char) Integer.parseInt(hex.substring(i, i + 2), base));
         }
         return buf.toString();
     }
 
+    public static final String toDecString(byte[] bytes) {
+        return new BigInteger(1, bytes).toString(10);
+    }
+
+    public static String fromDecString(String number) {
+        return fromBaseString(number, 10);
+    }
+    
     /**
      * cuts the given string to have a maximum length of maxLength characters.
      * 

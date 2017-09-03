@@ -285,6 +285,7 @@ public abstract class CommonAction<RETURNTYPE> implements IAction<RETURNTYPE>, S
             } finally {
                 isRunning = false;
                 resetCursor(lastCursor);
+
             }
         } else {// asynchron
             result = null;

@@ -27,6 +27,7 @@ import de.tsl2.nano.bean.def.BeanDefinition;
 import de.tsl2.nano.bean.def.CollectionExpressionTypeFormat;
 import de.tsl2.nano.bean.def.Constraint;
 import de.tsl2.nano.bean.def.IAttributeDefinition;
+import de.tsl2.nano.bean.def.IBeanCollector;
 import de.tsl2.nano.bean.def.IPresentable;
 import de.tsl2.nano.bean.def.Presentable;
 import de.tsl2.nano.bean.def.ValueColumn;
@@ -43,7 +44,9 @@ import de.tsl2.nano.core.util.StringUtil;
 import de.tsl2.nano.core.util.Util;
 import de.tsl2.nano.h5.CSheet;
 import de.tsl2.nano.h5.Compositor;
+import de.tsl2.nano.h5.Controller;
 import de.tsl2.nano.h5.Html5Presentable;
+import de.tsl2.nano.h5.Increaser;
 import de.tsl2.nano.h5.SpecifiedAction;
 import de.tsl2.nano.h5.expression.Query;
 import de.tsl2.nano.h5.expression.QueryPool;
@@ -373,6 +376,40 @@ public class BeanConfigurator<T> implements Serializable {
             @de.tsl2.nano.bean.annotation.Constraint(allowed=ConstraintValueSet.ALLOWED_APPBEANATTRS) String baseAttribute, 
             @de.tsl2.nano.bean.annotation.Constraint(allowed=ConstraintValueSet.ALLOWED_APPBEANATTRS) String targetAttribute, 
             @de.tsl2.nano.bean.annotation.Constraint(nullable=true, allowed=ConstraintValueSet.ALLOWED_APPBEANATTRS) String iconAttribute) {
+        Compositor compositor = createCompositorBean(Compositor.class, "icons/properties.png", baseType, baseAttribute, targetAttribute, iconAttribute);
+        compositor.saveDefinition();
+        Bean.clearCache();
+    }
+
+    @de.tsl2.nano.bean.annotation.Action(name = "createController"
+            , argNames = {"increaseAttribute", "increaseCount", "increaseStep", "baseType", "baseAttributeName",
+                            "targetAttributeName", "iconAttributeName"})
+    public void actionCreateController (
+            @de.tsl2.nano.bean.annotation.Constraint(allowed=ConstraintValueSet.ALLOWED_APPBEANATTRS) String increaseAttribute,
+            int increaseCount,
+            int increaseStep,
+            @de.tsl2.nano.bean.annotation.Constraint(allowed=ConstraintValueSet.ALLOWED_APPCLASSES) String baseType, 
+            @de.tsl2.nano.bean.annotation.Constraint(allowed=ConstraintValueSet.ALLOWED_APPBEANATTRS) String baseAttribute, 
+            @de.tsl2.nano.bean.annotation.Constraint(allowed=ConstraintValueSet.ALLOWED_APPBEANATTRS) String targetAttribute, 
+            @de.tsl2.nano.bean.annotation.Constraint(nullable=true, allowed=ConstraintValueSet.ALLOWED_APPBEANATTRS) String iconAttribute
+            ) {
+        Controller controller = createCompositorBean(Controller.class, "icons/cascade.png", baseType, baseAttribute, targetAttribute, iconAttribute);
+        if (increaseAttribute != null) {
+            increaseAttribute = StringUtil.substring(increaseAttribute, ".", null, true);
+            controller.setItemProvider(new Increaser(increaseAttribute, increaseCount, increaseStep));
+        }
+        controller.saveDefinition();
+        Bean.clearCache();
+    }
+
+    /**
+     * createCompositorBean
+     * @param baseType
+     * @param baseAttribute
+     * @param targetAttribute
+     * @param iconAttribute
+     */
+    <C extends Compositor> C createCompositorBean(Class<C> compositorExtension, String compositorIcon, String baseType, String baseAttribute, String targetAttribute, String iconAttribute) {
         BeanClass bcBaseType = BeanClass.createBeanClass(baseType);
         //check the attributes
         baseAttribute = StringUtil.substring(baseAttribute, ".", null, true);
@@ -382,19 +419,20 @@ public class BeanConfigurator<T> implements Serializable {
         bcBaseType.getAttribute(iconAttribute);
         def.getAttribute(targetAttribute);
         //now create the compositor
-        Compositor compositor =
-            new Compositor(def.getClazz(), bcBaseType.getClazz(), baseAttribute, targetAttribute, iconAttribute);
-        compositor.getPresentable().setIcon("icons/properties.png");
+        Compositor compositor = BeanClass.createInstance(compositorExtension, def.getClazz(), bcBaseType.getClazz(), baseAttribute, targetAttribute, iconAttribute);
+        compositor.getPresentable().setIcon(compositorIcon);
 //        compositor.getActions();
-        compositor.saveDefinition();
-        Bean.clearCache();
+        return (C) compositor;
     }
 
     @de.tsl2.nano.bean.annotation.Action(name = "createSheet", argNames = { "title", "cols", "rows" })
     public void actionCreateSheet(
             String title, 
             int cols, 
-            int rows) {
+            int rows,
+            String increaseAttribute,
+            int increaseCount,
+            int increaseStep) {
         new CSheet(title, cols, rows).save();
     }
 

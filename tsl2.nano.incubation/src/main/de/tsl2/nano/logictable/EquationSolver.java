@@ -38,6 +38,7 @@ public class EquationSolver extends NumericOperator {
     static final String CONCAT = "\\s*[" + SEPARATOR + BETWEEN + "]\\s*";
     static final String OPERATION = "([+-/*%])";
     static final String EQUATION = "=";
+    static final String ACTION = "<<";
     static final String TERM = B_OPEN + "[^)(]*" + B_CLOSE;
     static final String OPERAND = "([a-zA-Z0-9_]+)";
     static final String SET = "(" + OPERAND + "(" + CONCAT + OPERAND + ")*)*";
@@ -106,7 +107,7 @@ public class EquationSolver extends NumericOperator {
     }
 
     protected void evalActions(StringBuilder expression) {
-        eval(expression, "\\<\\<" + FUNC.substring(1) + "\\>\\>", true);
+        eval(expression, "\\<\\<" + FUNC + "\\>\\>", true);
     }
     
     /**
@@ -139,10 +140,9 @@ public class EquationSolver extends NumericOperator {
             if (replace) {
                 sresult = StringUtil.toString(result);
                 StringUtil.replace(expression, func.toString(), sresult, i);
-                i += sresult.length();
-            } else {
-                i += func.length();
+//                i += sresult.length();
             }
+            i += func.length();
         } while (true);
     }
 

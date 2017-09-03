@@ -11,10 +11,14 @@ package de.tsl2.nano.h5;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
 
 import org.simpleframework.xml.Transient;
 
+import de.tsl2.nano.action.IAction;
+import de.tsl2.nano.bean.BeanUtil;
 import de.tsl2.nano.bean.def.Bean;
 import de.tsl2.nano.bean.def.BeanCollector;
 import de.tsl2.nano.bean.def.BeanDefinition;
@@ -35,7 +39,7 @@ import de.tsl2.nano.core.util.StringUtil;
  * @version $Revision$
  */
 @SuppressWarnings({ "unchecked", "rawtypes" })
-public class Controller<COLLECTIONTYPE extends Collection<T>, T> extends BeanCollector<COLLECTIONTYPE, T> {
+public class Controller<COLLECTIONTYPE extends Collection<T>, T> extends Compositor<COLLECTIONTYPE, T> {
     /** serialVersionUID */
     private static final long serialVersionUID = 1L;
 
@@ -46,6 +50,9 @@ public class Controller<COLLECTIONTYPE extends Collection<T>, T> extends BeanCol
     @Transient
     String beanName;
 
+    @Transient
+    Increaser itemProvider;
+    
     transient List<IAttribute> attributes;
 
     /**
@@ -55,14 +62,18 @@ public class Controller<COLLECTIONTYPE extends Collection<T>, T> extends BeanCol
         super();
     }
 
+    public Controller(String beanName) {
+        this(beanName, null, null, null, null);
+    }
+    
     /**
      * constructor
      * 
      * @param beanType
      * @param workingMode
      */
-    public Controller(String beanName, int workingMode) {
-        this((BeanDefinition<T>) BeanDefinition.getBeanDefinition(beanName), workingMode);
+    public Controller(String beanName, String baseType, String baseAttribute, String targetAttribute, String iconAttribute) {
+        this((BeanDefinition<T>) BeanDefinition.getBeanDefinition(beanName), (BeanDefinition<T>) (baseType != null ? BeanDefinition.getBeanDefinition(baseType) : null), baseAttribute, targetAttribute, iconAttribute);
     }
 
     /**
@@ -71,20 +82,15 @@ public class Controller<COLLECTIONTYPE extends Collection<T>, T> extends BeanCol
      * @param beanType
      * @param workingMode
      */
-    public Controller(BeanDefinition<T> beanDef, int workingMode) {
-        super(beanDef.getDeclaringClass(), workingMode);
-        beanName = beanDef.getName();
+    public Controller(BeanDefinition<T> beanDef, BeanDefinition<T> baseType, String baseAttribute, String targetAttribute, String iconAttribute) {
+        this(beanDef.getDeclaringClass(), baseType != null ? baseType.getDeclaringClass() : null, baseAttribute, targetAttribute, iconAttribute);
     }
 
-//    @Override
-//    public List<IAttribute> getAttributes(boolean readAndWriteAccess) {
-//        if (attributeDefinitions == null) {
-//            attributeDefinitions = new LinkedHashMap<String, IAttributeDefinition<?>>();
-//            attributeDefinitions.put("nix", new AttributeDefinition<T>(new VAttribute("nix")));
-//        }
-//        return new ArrayList<IAttribute>((Collection<? extends IAttribute>) attributeDefinitions.values().iterator().next());
-//    }
-//    
+    public Controller(Class<T> beanDef, Class<T> baseType, String baseAttribute, String targetAttribute, String iconAttribute) {
+        super(beanDef, baseType, baseAttribute, targetAttribute, iconAttribute);
+        this.name = "Controller (" + (baseType != null ? baseType.getSimpleName() + "-" : "") + beanDef.getSimpleName() + ")";
+        beanName = name;
+    }
 
     /**
      * gets the defined bean (see {@link #beanName} for the given instance.
@@ -93,7 +99,17 @@ public class Controller<COLLECTIONTYPE extends Collection<T>, T> extends BeanCol
      * @return bean holding instance
      */
     public Bean<T> getBean(T instance) {
-        Bean<T> bean = (Bean<T>) Bean.getBean(beanName);
+        Bean<T> bean = BeanUtil.copy((Bean<T>) Bean.getBean(beanName));
+        bean.setAddSaveAction(false);
+        bean.setActions(getActions());
+        //filter collector actions
+        for (Iterator it = bean.getActions().iterator(); it.hasNext();) {
+            IAction a = (IAction) it.next();
+            //TODO: internal name convention - is there a better way?
+            if (!a.getId().startsWith("controller"))
+                it.remove();
+        }
+        bean.setValueExpression(getValueExpression());
         bean.setInstance(instance);
         return bean;
     }
@@ -102,14 +118,17 @@ public class Controller<COLLECTIONTYPE extends Collection<T>, T> extends BeanCol
      * extracts the bean-instance and the action id and starts it.
      * 
      * @param actionIdWithRowNumber the row-number has to be one-based!
+     * @param session 
      * @return result of given action
      */
-    public Object doAction(String actionIdWithRowNumber) {
+    public Object doAction(String actionIdWithRowNumber, Map context) {
         String strRow = StringUtil.substring(actionIdWithRowNumber, PREFIX_CTRLACTION, POSTFIX_CTRLACTION);
         Number row = NumberUtil.extractNumber(strRow);
         ArrayList<T> list = new ArrayList<T>(getCurrentData());
         String id = StringUtil.substring(actionIdWithRowNumber, POSTFIX_CTRLACTION, null);
-        return getBean(list.get(row.intValue() - 1)).getAction(id).activate();
+        IAction<?> action = getBean(list.get(row.intValue() - 1)).getAction(id);
+        action.setParameter(context);
+        return action.activate();
     }
 
     @Override
@@ -127,10 +146,42 @@ public class Controller<COLLECTIONTYPE extends Collection<T>, T> extends BeanCol
     }
 
     @Override
-    public Controller<COLLECTIONTYPE, T> refreshed() {
+    public Compositor<COLLECTIONTYPE, T> refreshed() {
         if (isStale())
-            return new Controller(this, workingMode);
+            return new Controller(clazz, parentType, baseAttribute, targetAttribute, iconAttribute);
         return this;
     }
     
+
+    @Override
+    public <B extends BeanDefinition<T>> B onActivation(Map context) {
+        if (itemProvider != null && itemProvider.getCount() > getCurrentData().size()) {
+                //TODO: create only missing items
+                getCurrentData().addAll(provideTransientData(context));
+        }
+        return super.onActivation(context);
+    }
+
+    private Collection<? extends T> provideTransientData(Map context) {
+        T item = createItem(null);
+        if (context != null)
+            fillContext(item, context.values().toArray());
+        return BeanUtil.create(item, itemProvider.getName(), null, itemProvider.getCount(), itemProvider.getStep());
+    }
+
+    /**
+     * @return Returns the itemProvider.
+     */
+    public Increaser getItemProvider() {
+        return itemProvider;
+    }
+
+    /**
+     * @param itemProvider The itemProvider to set.
+     */
+    public Controller setItemProvider(Increaser itemProvider) {
+        this.itemProvider = itemProvider;
+        setValueExpression(new ValueExpression<T>("{" + itemProvider.getName() + "}"));
+        return this;
+    }
 }

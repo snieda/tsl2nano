@@ -260,8 +260,12 @@ public class Context implements Serializable, Map {
         return CollectionUtil.getTransforming(properties.values(), new ITransformer<Object, T>() {
             @Override
             public T transform(Object toTransform) {
-                return (T) (toTransform instanceof BReference ? BeanDefinition.class.isAssignableFrom(valueType)
-                    ? ((BReference) toTransform).bean() : ((BReference) toTransform).resolve() : toTransform);
+                if (toTransform instanceof BReference) {
+                    return (T) (BeanDefinition.class.isAssignableFrom(valueType)
+                            ? ((BReference) toTransform).bean() : ((BReference) toTransform).resolve());
+                } else {
+                    return (T) toTransform;
+                }
             }
         }, new IPredicate() {
             @Override
