@@ -427,7 +427,8 @@ public class NanoH5Session implements ISession<BeanDefinition>, Serializable, IL
             //don't forget that there was an exception. to be seen on the next exception ;-)
             logaction(ex.toString(), parms);
             Message.broadcast(this,
-                ENV.translate("nanoh5.error", false, this.getUserAuthorization().getUser(), 
+                ENV.translate("nanoh5.error", false,
+                    this.getUserAuthorization() != null ? this.getUserAuthorization().getUser() : "<unkown user>", 
                     nav.current(), e.getLocalizedMessage()),
                 "*");
         }
@@ -769,12 +770,16 @@ public class NanoH5Session implements ISession<BeanDefinition>, Serializable, IL
         }
         //all bean attributes
         for (Object v : con) {
+            if (v instanceof IRange)
+                v = ((IRange)v).getFrom();
             c = Bean.getBean(v);
             p.putAll(c.toValueMap(p));
         }
         //do that twice to let rules and queries use defined parameter
         LOG.debug("second iteration on context for session: " + this);
         for (Object v : con) {
+            if (v instanceof IRange)
+                v = ((IRange)v).getFrom();
             c = Bean.getBean(v);
             p.putAll(c.toValueMap(p));
         }

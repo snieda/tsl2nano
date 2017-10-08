@@ -172,7 +172,7 @@ public class NetworkClassLoader extends NestedJarClassLoader {
         return BeanClass.createBeanClass("de.tsl2.nano.core.ENV").callMethod(null,
             "loadDependencies",
             new Class[] { String[].class },
-            new String[]{name});
+            new Object[] {new String[]{name}});
     }
 
     /**
