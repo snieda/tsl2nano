@@ -631,118 +631,145 @@ public class NanoH5Session implements ISession<BeanDefinition>, Serializable, IL
         //collect available actions
         Collection<IAction> actions = null;
         if (nav.current() != null) {
-            BeanDefinition<?> c = nav.current();
-            actions = new ArrayList<IAction>();
-            if (c.getActions() != null) {
-                actions.addAll(c.getActions());
-            }
-            actions.addAll(c.getPresentationHelper().getPageActions(this));
-            actions.addAll(c.getPresentationHelper().getSessionActions(this));
-            actions.addAll(c.getPresentationHelper().getApplicationActions(this));
-            if (c.isMultiValue() && c instanceof BeanCollector) {
-                actions.addAll(((BeanCollector) c).getColumnSortingActions());
-                actions.add(((BeanCollector) c).getQuickSearchAction());
-            }
-            //start the actions
-            //respect action-call through menu-link (with method GET but starting with '!!!'
-            Set<Object> keySet = new HashSet<Object>();
-            if (uri.contains(Html5Presentation.PREFIX_ACTION)) {
-                keySet.add(StringUtil.substring(uri, Html5Presentation.PREFIX_ACTION, null));
-            }
-            keySet.addAll(parms.keySet());
-            for (Object k : keySet) {
-                String p = (String) k;
-                IAction<?> action = getAction(actions, p);
-                if (action != null) {
-                    logaction(action, parms);
-                    //send this information to the client to show a progress bar.
-                    Message.send("submit");
-                    Message.send(ENV.translate("tsl2nano.starting", true) + " "
-                        + action.getShortDescription() + " ...");
-                    if (c.isMultiValue() && action.getId().endsWith(BeanCollector.POSTFIX_QUICKSEARCH)) {
-                        action.setParameter(parms.get(Html5Presentation.ID_QUICKSEARCH_FIELD));
-                        responseObject = action.activate();
-                    } else if (c.isMultiValue() && c instanceof BeanCollector
-                        && isSearchRequest(action.getId(), (BeanCollector<?, ?>) c)) {
-                        responseObject = processSearchRequest(parms, (BeanCollector<?, ?>) c);
-                    } else {
-                        /*
-                         * submit/assign and cancel will not push a new element to the navigation stack!
-                         * TODO: refactore access to names ('reset' and 'save')
-                         */
-                        if (action.getParameter() == null) {
-                            action.setParameter(getContextParameter());
-                        }
-                        Object result;
-                        //on parametrized actions provide a new detail dialog/page
-                        if (!Util.isEmpty(action.getArgumentTypes())) {
-                            if (!nav.current().getName().equals(action.getShortDescription())) {//define the arguments
-                                if (action instanceof MethodAction) {
-                                    result = ((MethodAction)action).toBean();
-                                } else {
-                                    Map<String, Object> args = MapUtil.fromKeys(MethodAction.getArgumentNames(action));
-                                    //TODO: extend the BeanCollector to use @Constraint of each argument (=row)
-                                    BeanDefinition bean = BeanCollector.getBeanCollector(Util.getContainer(args), 0);
-                                    bean.setName(action.getShortDescription());
-                                    bean.addAction(action);
-                                    result = bean;
-                                }
-                            } else {//set the arguments and start the parametrized action
-                                Object[] values = null;
-                                if (nav.current() instanceof BeanCollector) {
-                                    MapEntrySet argSet = (MapEntrySet) ((BeanCollector) nav.current()).getCurrentData();
-                                    values = argSet.map().values().toArray();
-                                } else {
-                                    values = nav.current().toValueMap(null).values().toArray();
-                                }
-                                Object[] args = action.getParameter() != null ? CollectionUtil.concat(Arrays.copyOfRange(action.getParameter(), 0, 1),
-                                    values) : values;
-                                action.setParameter(args);
-                                result = action.activate();
-                            }
-                        } else {
-                            result = action.activate();
-                            if (action.getId().endsWith(".save") || action.getId().endsWith(".delete"))
-                                Message.broadcast(this,
-                                    ENV.translate("tsl2nano.value.changed", false,
-                                        nav.current().getName() + ": " + nav.current(),
-                                        this.getUserAuthorization().getUser(), action.getShortDescription()),
-                                    "*");
-                        }
+            responseObject = performAction(uri, nav.current(), parms, responseObject);
+        }
+        return responseObject;
+    }
 
-                        /*
-                         * if action is asynchron, it's a long term action showing the same page again
-                         * with progress informations
-                         */
-//                        if (action.isSynchron())
-//                            throw new Message("starting long term request:\t" + action.getShortDescription());
-                        if (result != null && responseObject != IAction.CANCELED && !action.getId().endsWith("save")) {
-                            responseObject = result;
-                            if (c instanceof Bean
-                                && ((Bean) c).getInstance() instanceof Persistence) {
-                                setUserAuthorization(ConcurrentUtil.getCurrent(Authorization.class));
-                                setBeanContainer(ConcurrentUtil.getCurrent(BeanContainer.class));
-                            }
-                        } else if (action.getId().endsWith("reset")) {
-                            responseObject = c;
-                        } else {
-//                            action.activate();
-                            return responseObject;
-                        }
-                    }
+    /**
+     * performAction
+     * @param uri
+     * @param current 
+     * @param parms
+     * @param responseObject
+     * @return
+     */
+    Object performAction(String uri, BeanDefinition<?> current, Map<String, String> parms, Object responseObject) {
+        Collection<IAction> actions;
+        actions = new ArrayList<IAction>();
+        if (current.getActions() != null) {
+            actions.addAll(current.getActions());
+        }
+        actions.addAll(current.getPresentationHelper().getPageActions(this));
+        actions.addAll(current.getPresentationHelper().getSessionActions(this));
+        actions.addAll(current.getPresentationHelper().getApplicationActions(this));
+        if (current.isMultiValue() && current instanceof BeanCollector) {
+            actions.addAll(((BeanCollector) current).getColumnSortingActions());
+            actions.add(((BeanCollector) current).getQuickSearchAction());
+        }
+        //start the actions
+        //respect action-call through menu-link (with method GET but starting with '!!!'
+        Set<Object> keySet = new HashSet<Object>();
+        if (uri.contains(Html5Presentation.PREFIX_ACTION)) {
+            keySet.add(StringUtil.substring(uri, Html5Presentation.PREFIX_ACTION, null));
+        }
+        keySet.addAll(parms.keySet());
+        for (Object k : keySet) {
+            String p = (String) k;
+            IAction<?> action = getAction(actions, p);
+            if (action != null) {
+                Object result = performStandardAction(action, current, parms, responseObject);
+                if (result != null)
+                    return result;
+                else
                     break;
-                } else {
-                    if (p.endsWith(IPresentable.POSTFIX_SELECTOR)) {
-                        logaction(p, null);
-                        String n = StringUtil.substring(p, null, IPresentable.POSTFIX_SELECTOR);
-                        final BeanValue assignableAttribute = (BeanValue) c.getAttribute(n);
-                        responseObject = assignableAttribute.connectToSelector(c);
-                        break;
-                    }
+            } else {
+                if (p.endsWith(IPresentable.POSTFIX_SELECTOR)) {
+                    logaction(p, null);
+                    String n = StringUtil.substring(p, null, IPresentable.POSTFIX_SELECTOR);
+                    final BeanValue assignableAttribute = (BeanValue) current.getAttribute(n);
+                    responseObject = assignableAttribute.connectToSelector(current);
+                    break;
                 }
             }
         }
         return responseObject;
+    }
+
+    private Object performStandardAction(IAction<?> action,
+            BeanDefinition<?> current,
+            Map<String, String> parms,
+            Object responseObject) {
+
+        logaction(action, parms);
+        //send this information to the client to show a progress bar.
+        Message.send("submit");
+        Message.send(ENV.translate("tsl2nano.starting", true) + " "
+            + action.getShortDescription() + " ...");
+        if (current.isMultiValue() && action.getId().endsWith(BeanCollector.POSTFIX_QUICKSEARCH)) {
+            action.setParameter(parms.get(Html5Presentation.ID_QUICKSEARCH_FIELD));
+            responseObject = action.activate();
+        } else if (current.isMultiValue() && current instanceof BeanCollector
+            && isSearchRequest(action.getId(), (BeanCollector<?, ?>) current)) {
+            responseObject = processSearchRequest(parms, (BeanCollector<?, ?>) current);
+        } else {
+            /*
+             * submit/assign and cancel will not push a new element to the navigation stack!
+             * TODO: refactore access to names ('reset' and 'save')
+             */
+            if (action.getParameter() == null) {
+                action.setParameter(getContextParameter());
+            }
+            Object result;
+            //on parametrized actions provide a new detail dialog/page
+            if (!Util.isEmpty(action.getArgumentTypes())) {
+                if (!nav.current().getName().equals(action.getShortDescription())) {//define the arguments
+                    if (action instanceof MethodAction) {
+                        result = ((MethodAction) action).toBean();
+                    } else {
+                        Map<String, Object> args = MapUtil.fromKeys(MethodAction.getArgumentNames(action));
+                        //TODO: extend the BeanCollector to use @Constraint of each argument (=row)
+                        BeanDefinition bean = BeanCollector.getBeanCollector(Util.getContainer(args), 0);
+                        bean.setName(action.getShortDescription());
+                        bean.addAction(action);
+                        result = bean;
+                    }
+                } else {//set the arguments and start the parametrized action
+                    Object[] values = null;
+                    if (nav.current() instanceof BeanCollector) {
+                        MapEntrySet argSet = (MapEntrySet) ((BeanCollector) nav.current()).getCurrentData();
+                        values = argSet.map().values().toArray();
+                    } else {
+                        values = nav.current().toValueMap(null).values().toArray();
+                    }
+                    Object[] args = action.getParameter() != null
+                        ? CollectionUtil.concat(Arrays.copyOfRange(action.getParameter(), 0, 1),
+                            values)
+                        : values;
+                    action.setParameter(args);
+                    result = action.activate();
+                }
+            } else {
+                result = action.activate();
+                if (action.getId().endsWith(".save") || action.getId().endsWith(".delete"))
+                    Message.broadcast(this,
+                        ENV.translate("tsl2nano.value.changed", false,
+                            nav.current().getName() + ": " + nav.current(),
+                            this.getUserAuthorization().getUser(), action.getShortDescription()),
+                        "*");
+            }
+
+            /*
+             * if action is asynchron, it's a long term action showing the same page again
+             * with progress informations
+             */
+//                if (action.isSynchron())
+//                    throw new Message("starting long term request:\t" + action.getShortDescription());
+            if (result != null && responseObject != IAction.CANCELED && !action.getId().endsWith("save")) {
+                responseObject = result;
+                if (current instanceof Bean
+                    && ((Bean) current).getInstance() instanceof Persistence) {
+                    setUserAuthorization(ConcurrentUtil.getCurrent(Authorization.class));
+                    setBeanContainer(ConcurrentUtil.getCurrent(BeanContainer.class));
+                }
+            } else if (action.getId().endsWith("reset")) {
+                responseObject = current;
+            } else {
+//                    action.activate();
+                return responseObject;
+            }
+        }
+        return null;
     }
 
     private void convertIDs(Map<String, String> parms) {
