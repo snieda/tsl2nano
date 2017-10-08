@@ -11,7 +11,7 @@ rem ##########################################################################
 
 if "%1"=="" (set PRJ=.nanoh5.environment) else (set PRJ=%1)
 if "%2"=="" (set PORT=8067) else (set PORT=%2)
-if "%3"=="debug" (set DEBUG="-agentlib:jdwp=transport=dt_socket,address=8787,server=y,suspend=n")
+if "%3"=="debug" (set DEBUG="-agentlib:jdwp=transport=dt_socket,address=localhost:8787,server=y,suspend=n")
 if "%3"=="ndebug" (set NANO_DEBUG=-Dtsl2.nano.log.level=debug)
 if "%3"=="test" (set NANO_TEST=-Dtsl2.nano.test=true)
 if "%3"=="nopause" (set NOPAUSE=nopause)

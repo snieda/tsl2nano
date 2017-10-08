@@ -36,7 +36,7 @@ public class BReference<O> extends AReference<Class<O>, O> {
     @SuppressWarnings("unchecked")
     @Override
     protected Class<O> type(String description) {
-        return BeanClass.load(StringUtil.substring(description, null, ":"));
+        return BeanClass.load(StringUtil.substring(description, PREFIX_REFERENCE, PREFIX_ID));
     }
     
     @Override
