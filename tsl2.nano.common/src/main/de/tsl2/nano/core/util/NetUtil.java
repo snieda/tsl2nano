@@ -44,6 +44,7 @@ import java.util.Set;
 
 import javax.json.Json;
 import javax.json.JsonStructure;
+import javax.net.ssl.SSLHandshakeException;
 
 import org.apache.commons.logging.Log;
 
@@ -180,6 +181,17 @@ public class NetUtil {
             }
             return response;
         } catch (Exception e) {
+            if (e instanceof SSLHandshakeException) {
+                String info = 
+                "\n>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>\n" +
+                "Java failed to decrypt 256 bits of encryption. Solutions:\n" +
+                "  Java 6: Add below jars into {JAVA_HOME}/jre/lib/ext. 1. bcprov-ext-jdk15on-154.jar 2. bcprov-jdk15on-154.jar\n" +
+                "    Add property into {JAVA_HOME}/jre/lib/security/java.security security.provider.1=org.bouncycastle.jce.provider.BouncyCastleProvider\n" +
+                "  Java 7:download jar from below link and add to {JAVA_HOME}/jre/lib/security http://www.oracle.com/technetwork/java/javase/downloads/jce-7-download-432124.html\n" +
+                "  Java 8:download jar from below link and add to {JAVA_HOME}/jre/lib/security http://www.oracle.com/technetwork/java/javase/downloads/jce8-download-2133166.html\n" +
+                ">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>\n";
+                LOG.error(info);
+            }
             ManagedException.forward(e);
             return null;
         }

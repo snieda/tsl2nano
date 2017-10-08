@@ -823,35 +823,47 @@ public class ENV implements Serializable {
      *         always false.
      */
     public static final boolean extractResourceToDir(String resourceName, String destinationDir) {
-        return extractResourceToDir(resourceName, destinationDir, false, false);
+        return extractResourceToDir(resourceName, destinationDir, false, false, true);
     }
 
     public static final boolean extractResourceToDir(String resourceName,
             String destinationDir,
             boolean flat,
-            boolean executable) {
+            boolean executable,
+            boolean logError) {
         //put build informations into system-properties
         getBuildInformations();
         //perhaps enrich resource name with version-number from build-infos etc.
         resourceName = System.getProperty(resourceName, resourceName);
         //perhaps get a templates destination name
         String destName = System.getProperty(resourceName + ".destination", resourceName);
-        return AppLoader.isNestingJar() ? extractResource(resourceName, destinationDir + destName, flat, executable)
+        return AppLoader.isNestingJar() ? extractResource(resourceName, destinationDir + destName, flat, executable, logError)
             : false;
     }
 
-    public static final boolean extractResource(String resourceName, boolean flat, boolean executable) {
-        return extractResourceToDir(resourceName, "", flat, executable);
+    public static final boolean extractResource(String resourceName, boolean flat, boolean executable, boolean logError) {
+        return extractResourceToDir(resourceName, "", flat, executable, logError);
     }
 
+    public static final boolean extractResource(String resourceName, boolean flat, boolean executable) {
+        return extractResourceToDir(resourceName, "", flat, executable, true);
+    }
+    
     public static final boolean extractResource(String resourceName, boolean executable) {
-        return extractResourceToDir(resourceName, "", false, executable);
+        return extractResourceToDir(resourceName, "", false, executable, true);
     }
 
     public static final boolean extractResource(String resourceName) {
-        return extractResourceToDir(resourceName, "", false, false);
+        return extractResourceToDir(resourceName, "", false, false, true);
     }
 
+    public static final boolean extractResource(String resourceName,
+            String fileName,
+            boolean flat,
+            boolean executable) {
+        return extractResource(resourceName, fileName, flat, executable, true);
+    }
+    
     /**
      * saves the resource (contained in your jar) to the file-system into the {@link #getConfigPath()} - only if not
      * done yet.
@@ -862,7 +874,8 @@ public class ENV implements Serializable {
     public static final boolean extractResource(String resourceName,
             String fileName,
             boolean flat,
-            boolean executable) {
+            boolean executable,
+            boolean logError) {
         File destFile = new File(fileName);
         File file =
             destFile.isAbsolute() ? destFile : new File(getConfigPath() + (flat ? destFile.getName() : fileName));
@@ -881,7 +894,7 @@ public class ENV implements Serializable {
                     file.setExecutable(true);
                 return true;
             } catch (Exception e) {
-                ManagedException.forward(e);
+                ManagedException.forward(e, logError);
             }
         }
         return false;

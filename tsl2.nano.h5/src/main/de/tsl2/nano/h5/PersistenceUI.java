@@ -291,6 +291,8 @@ public class PersistenceUI {
                                     String prefix = getDriverPrefix(url);
                                     if (!Util.isEmpty(prefix)) {
                                         return StringUtil.extract(url, "[:]\\d+[:/;](\\w+)");
+                                    } else {
+                                        return StringUtil.extract(url, "(\\w+)");
                                     }
                                 }
                                 //fallback

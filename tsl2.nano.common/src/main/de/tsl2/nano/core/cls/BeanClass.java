@@ -662,6 +662,7 @@ public class BeanClass<T> implements Serializable {
                 }
             }
         }
+        Method method;
         try {
             LOG.debug("calling " + (clazz.getClassLoader() != null ? clazz.getClassLoader().toString() + ":" : "")
                 + clazz.getName()
@@ -669,12 +670,14 @@ public class BeanClass<T> implements Serializable {
                 + methodName
                 + " with parameters:"
                 + StringUtil.toString(par, 80));
-            Method method = clazz.getMethod(methodName, par);
+            method = clazz.getMethod(methodName, par);
+            LOG.trace(method);
             method.setAccessible(true);
             return method.invoke(instance, args);
         } catch (NoSuchMethodException e1) {
             try {
-                Method method = clazz.getDeclaredMethod(methodName, par);
+                method = clazz.getDeclaredMethod(methodName, par);
+                LOG.trace(method);
                 method.setAccessible(true);
                 return method.invoke(instance, args);
             } catch (Exception e2) {

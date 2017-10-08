@@ -88,6 +88,7 @@ import de.tsl2.nano.core.ENV;
 import de.tsl2.nano.core.ITransformer;
 import de.tsl2.nano.core.ManagedException;
 import de.tsl2.nano.core.classloader.NestedJarClassLoader;
+import de.tsl2.nano.core.classloader.NetworkClassLoader;
 import de.tsl2.nano.core.cls.BeanAttribute;
 import de.tsl2.nano.core.cls.BeanClass;
 import de.tsl2.nano.core.cls.PrimitiveUtil;
@@ -1883,4 +1884,16 @@ public class CommonTest {
         }
     }
 
+    @Test
+    public void testLoadDependencies() throws Exception {
+        try {
+            LogFactory.setLogLevel(LogFactory.DEBUG);
+            new NetworkClassLoader(getClass().getClassLoader()).findClass("paket.Irgendwas");
+            fail("Classloader should simply not find that class");
+        } catch (Exception ex) {
+            if (!(ex instanceof ClassNotFoundException) || !ex.getMessage().contains("paket.Irgendwas"))
+                fail("Classloader should simply not find that class - without any other Exceptions");
+        }
+    }
+    
 }

@@ -195,11 +195,11 @@ public class NanoH5 extends NanoHTTPD implements ISystemConnector<Persistence> {
 
             try {
                 if (AppLoader.isUnixFS()) {
-                    ENV.extractResourceToDir("run.sh", "../", false, true);
-                    ENV.extractResourceToDir("runasservice.sh", "../", false, true);
-                    ENV.extractResource("mda.sh", true);
+                    ENV.extractResourceToDir("run.sh", "../", false, true, true);
+                    ENV.extractResourceToDir("runasservice.sh", "../", false, true, true);
+                    ENV.extractResource("mda.sh", true, true);
                 } else {
-                    ENV.extractResourceToDir("run.bat", "../", false, false);
+                    ENV.extractResourceToDir("run.bat", "../", false, false, true);
                     ENV.extractResource("mda.bat");
                 }
                 ENV.extractResource("readme.txt");
@@ -887,10 +887,11 @@ public class NanoH5 extends NanoHTTPD implements ISystemConnector<Persistence> {
 
         //check if an equal named ddl-script is inside our jar file. should be done on 'anyway' or 'timedb'.
         try {
-            ENV.extractResource(persistence.getDatabase() + ".sql");
-            ENV.extractResource("drop-" + persistence.getDatabase() + ".sql");
-            ENV.extractResource("init-" + persistence.getDatabase() + ".sql");
+            ENV.extractResource(persistence.getDatabase() + ".sql", false, false, false);
+            ENV.extractResource("drop-" + persistence.getDatabase() + ".sql", false, false, false);
+            ENV.extractResource("init-" + persistence.getDatabase() + ".sql", false, false, false);
         } catch (Exception e) {
+            LOG.warn(e);
             //ok, it was only a try ;-)
         }
         ENV.extractResource(HIBREVNAME_TEMPLATE);
