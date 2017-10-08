@@ -29,8 +29,8 @@ public abstract class AReference<T, O> {
     
     protected transient O instance;
 
-    static final String PREFIX_REFERENCE = "@";
-    static final String PREFIX_ID = ":";
+    protected static final String PREFIX_REFERENCE = "@";
+    protected static final String PREFIX_ID = ":";
 
     /**
      * constructor for deserialization

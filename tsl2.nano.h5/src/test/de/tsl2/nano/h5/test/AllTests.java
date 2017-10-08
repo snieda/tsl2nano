@@ -9,7 +9,8 @@
  */
 package de.tsl2.nano.h5.test;
 
-import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.junit.runners.Suite;
 import org.junit.runners.Suite.SuiteClasses;
 
 import de.tsl2.nano.incubation.test.IncubationTest;
@@ -21,8 +22,7 @@ import de.tsl2.nano.test.CommonTest;
  * @author Tom, Thomas Schneider
  * @version $Revision$ 
  */
+@RunWith(Suite.class)
 @SuiteClasses(value = { CommonTest.class, ServiceAccessTest.class, IncubationTest.class, NanoH5Test.class })
 public class AllTests {
-    @Test
-    public void runAll() {}
 }

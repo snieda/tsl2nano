@@ -669,11 +669,8 @@ public class NanoH5Session implements ISession<BeanDefinition>, Serializable, IL
             String p = (String) k;
             IAction<?> action = getAction(actions, p);
             if (action != null) {
-                Object result = performStandardAction(action, current, parms, responseObject);
-                if (result != null)
-                    return result;
-                else
-                    break;
+                responseObject = performStandardAction(action, current, parms, responseObject);
+                break;
             } else {
                 if (p.endsWith(IPresentable.POSTFIX_SELECTOR)) {
                     logaction(p, null);
@@ -767,10 +764,10 @@ public class NanoH5Session implements ISession<BeanDefinition>, Serializable, IL
                 responseObject = current;
             } else {
 //                    action.activate();
-                return responseObject;
+//                return responseObject;
             }
         }
-        return null;
+        return responseObject;
     }
 
     private void convertIDs(Map<String, String> parms) {
