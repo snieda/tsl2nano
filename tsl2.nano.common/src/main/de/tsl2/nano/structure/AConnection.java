@@ -32,7 +32,5 @@ public class AConnection<T, D> implements IConnection<T, D>, IListener<INode<T, 
 
     @Override
     public void handleEvent(INode<T, D> event) {
-        // TODO Auto-generated method stub
-        
     }
 }

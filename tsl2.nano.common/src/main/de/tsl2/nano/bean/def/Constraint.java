@@ -327,7 +327,7 @@ public class Constraint<T> extends AbstractConstraint<T> implements IConstraint<
     public <C extends IConstraint<T>> C setType(Class<T> type) {
         this.type = type;
         if (type.isEnum()) {
-            setRange(CollectionUtil.getEnumValues((Class<Enum>) type));
+            setRange(CollectionUtil.getEnumValues((Class) type));
         }
         return (C) this;
     }
@@ -349,10 +349,11 @@ public class Constraint<T> extends AbstractConstraint<T> implements IConstraint<
         initDeserialization();
     }
 
+    @SuppressWarnings("rawtypes")
     @Commit
     private void initDeserialization() {
         if (Enum.class.isAssignableFrom(getType())) {
-            allowedValues = CollectionUtil.getEnumValues((Class<Enum>) getType());
+            allowedValues = CollectionUtil.getEnumValues((Class) getType());
         }
         if (format == null) {
             format = createFormat(getType());

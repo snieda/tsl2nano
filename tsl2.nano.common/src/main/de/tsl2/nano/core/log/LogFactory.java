@@ -21,8 +21,6 @@ import org.simpleframework.xml.ElementMap;
 import org.simpleframework.xml.core.Commit;
 import org.simpleframework.xml.core.Persist;
 
-import com.sun.corba.se.spi.orbutil.fsm.State;
-
 import de.tsl2.nano.core.ManagedException;
 import de.tsl2.nano.core.util.BitUtil;
 import de.tsl2.nano.core.util.ConcurrentUtil;
