@@ -1729,6 +1729,8 @@ public class BeanPresentationHelper<T> {
 
                 @Override
                 public boolean isEnabled() {
+                    if (!super.isEnabled())
+                        return false;
                     if (!htmlFile.exists() && generatedIndexFile.exists()) {
                         FileUtil.writeBytes(String.format(HTML_FORWARD, generatedIndexFileURL.getPath()).getBytes(),
                             htmlFile.getPath(), false);

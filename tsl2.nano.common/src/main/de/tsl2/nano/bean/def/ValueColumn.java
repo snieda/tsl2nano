@@ -32,6 +32,8 @@ public class ValueColumn<T> implements IPresentableColumn, Serializable {
     /** serialVersionUID */
     private static final long serialVersionUID = 3998475409703066783L;
 
+    private static final String POSTFIX_SORT = ".sort";
+
     transient IAttributeDefinition<T> attributeDefinition;
     transient IAction<?> actionSortColumn;
 
@@ -194,7 +196,7 @@ public class ValueColumn<T> implements IPresentableColumn, Serializable {
     public IAction<?> getSortingAction(final IBeanCollector<?, ?> collector) {
         if (actionSortColumn == null) {
             actionSortColumn =
-                new CommonAction<Object>(name, Messages.getStringOpt(getPresentable().getLabel(), true),
+                new CommonAction<Object>(name + POSTFIX_SORT, Messages.getStringOpt(getPresentable().getLabel(), true),
                     getDescription()) {
                     /** serialVersionUID */
                     private static final long serialVersionUID = 1L;
