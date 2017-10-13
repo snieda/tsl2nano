@@ -679,12 +679,12 @@ public class CommonTest {
          * test it , using another separation string and an empty line at the end
          */
         //first, create an example file and test bean
-        testFile = "commontest-fromflatfile.txt";
+        testFile = ENV.getConfigPath() + "commontest-fromflatfile.txt";
         s = "\"0123\",\"456789\",\"Monday\"\n\"1234\",\"567890\",\"Tuesday\"\n";
         FileUtil.writeBytes(s.getBytes(), testFile, false);
 
         //first, create an example file and test bean
-        testFile = "commontest-fromflatfile.txt";
+        testFile = ENV.getConfigPath() + "commontest-fromflatfile.txt";
         s = "header\n\"0123\",\"456,789\",\"Monday\"\n\"1234\",\"567890\",\"Tuesday\"\n";
         FileUtil.writeBytes(s.getBytes(), testFile, false);
 

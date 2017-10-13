@@ -458,7 +458,7 @@ public class IncubationTest {
         rule.addConstraint("x1", new Constraint(BigDecimal.class, new BigDecimal(0), new BigDecimal(1)));
         BigDecimal r2 = rule.run(MapUtil.asMap("A", false, "x1", new BigDecimal(1), "x2", new BigDecimal(2)));
         assertEquals(new BigDecimal(4), r2);
-        XmlUtil.saveXml("test.xml", rule);
+        //XmlUtil.saveXml("test.xml", rule);
 
         Pool pool = new RulePool();
         pool.add(rule);
@@ -474,7 +474,7 @@ public class IncubationTest {
         rule.addConstraint("result", new Constraint(BigDecimal.class, new BigDecimal(1), new BigDecimal(4)));
         BigDecimal r3 = ruleWithImport.run(MapUtil.asMap("A", true, "x1", new BigDecimal(1), "x2", new BigDecimal(2)));
         assertEquals(new BigDecimal(3), r3);
-        XmlUtil.saveXml("test-import.xml", ruleWithImport);
+        //XmlUtil.saveXml("test-import.xml", ruleWithImport);
     }
 
     @Test
