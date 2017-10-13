@@ -427,7 +427,6 @@ public class NanoH5Session implements ISession<BeanDefinition>, Serializable, IL
             //don't forget that there was an exception. to be seen on the next exception ;-)
             logaction(ex.toString(), parms);
             Message.broadcast(this,
-                ENV.translate("nanoh5.error", false, (this.getUserAuthorization() != null ? this.getUserAuthorization().getUser() : "<unauthorized>"), 
                 ENV.translate("nanoh5.error", false,
                     this.getUserAuthorization() != null ? this.getUserAuthorization().getUser() : "<unkown user>", 
                     nav.current(), e.getLocalizedMessage()),
