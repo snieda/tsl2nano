@@ -36,6 +36,9 @@ import java.util.concurrent.Callable;
 import javax.print.attribute.standard.MediaSizeName;
 
 import org.apache.commons.logging.Log;
+import org.junit.After;
+import org.junit.Before;
+import org.junit.BeforeClass;
 import org.junit.Ignore;
 import org.junit.Test;
 
@@ -114,9 +117,24 @@ import de.tsl2.nano.util.operation.Function;
  * @author Thomas Schneider
  * @version $Revision$
  */
-@SuppressWarnings({ "unchecked", "rawtypes", "serial" })
+@SuppressWarnings({ "unchecked", "rawtypes" })
 public class IncubationTest {
+    private static final String BASE_DIR_INCUBATION = "../tsl2.nano.incubation/";
+    private static final String POSTFIX_TEST = "test/";
 
+    @Before
+    public void setUp() {
+        ENV.create(BASE_DIR_INCUBATION + POSTFIX_TEST);
+        ENV.setProperty(ENV.KEY_CONFIG_PATH, POSTFIX_TEST);
+//        Environment.setProperty("app.strict.mode", true);
+        ENV.deleteEnvironment();
+    }
+
+    @After
+    public void tearDown() {
+        ENV.deleteEnvironment();
+    }
+    
     @Test
     public void testEventPerformance() {
         final IListener<Object> listener = new IListener<Object>() {

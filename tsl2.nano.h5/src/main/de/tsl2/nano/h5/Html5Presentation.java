@@ -146,6 +146,7 @@ public class Html5Presentation<T> extends BeanPresentationHelper<T> implements I
     private transient Element sideNav;
 
     Log LOG = LogFactory.getLog(Html5Presentation.class);
+    private transient boolean isAuthenticated;
     private static transient String jsWebsocketTemplate;
 
     public static final String L_GRIDWIDTH = "layout.gridwidth";
@@ -353,6 +354,7 @@ public class Html5Presentation<T> extends BeanPresentationHelper<T> implements I
     }
 
     Element createFormDocument(ISession session, String name, String image, boolean interactive) {
+        isAuthenticated = session.getUserAuthorization() != null;
         Element body = createHeader(session, name, image, interactive);
         Element glasspane = createGlasspane(body);
         return appendElement(glasspane,
@@ -497,7 +499,8 @@ public class Html5Presentation<T> extends BeanPresentationHelper<T> implements I
     }
 
     private boolean useSideNav() {
-        return ENV.get("layout.sidenav", false);
+        // use sideNav after login...
+        return isAuthenticated && ENV.get("layout.sidenav", false);
     }
 
     private Element createMetaAndBody(ISession session, Element html, String title, boolean interactive) {

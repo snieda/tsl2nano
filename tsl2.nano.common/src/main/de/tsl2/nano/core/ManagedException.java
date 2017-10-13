@@ -193,7 +193,7 @@ public class ManagedException extends RuntimeException {
             if (!(ex instanceof ManagedException)) {
                 if (wrapToForwardedException) {
                     ex = new ManagedException(ex, logNow);
-                } else {
+                } else if (logNow){
                     LOG.error(MESSAGE_FORWARDED, ex);
                 }
             }

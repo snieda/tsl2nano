@@ -383,6 +383,10 @@ public class ENV implements Serializable {
      * WARNING: deletes all config files. no reset on Environment will be done!
      */
     public static boolean deleteEnvironment() {
+        if (getConfigPath() == null) {
+            warn(ENV.class, "no environment active to be deleted!");
+            return false;
+        }
         File config = new File(getConfigPath());
         boolean done = FileUtil.deleteRecursive(config);
         if (done) {

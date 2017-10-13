@@ -57,7 +57,9 @@ import javax.json.JsonStructure;
 import org.apache.commons.logging.Log;
 import org.apache.tools.ant.types.FileSet;
 import org.apache.xmlgraphics.util.MimeConstants;
+import org.junit.After;
 import org.junit.Assert;
+import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Ignore;
 import org.junit.Test;
@@ -141,14 +143,22 @@ import de.tsl2.nano.util.operation.Operator;
 @SuppressWarnings({ "unchecked", "rawtypes", "serial" })
 public class CommonTest {
     private static final Log LOG = LogFactory.getLog(CommonTest.class);
+    private static final String BASE_DIR_COMMON = "../tsl2.nano.common/";
+    private static final String POSTFIX_TEST = "test/";
 
-    @BeforeClass
-    public static void setUp() {
-        ENV.setProperty(ENV.KEY_CONFIG_PATH, "test/");
+    @Before
+    public void setUp() {
+        ENV.create(BASE_DIR_COMMON + POSTFIX_TEST);
+        ENV.setProperty(ENV.KEY_CONFIG_PATH, POSTFIX_TEST);
 //        Environment.setProperty("app.strict.mode", true);
         ENV.deleteEnvironment();
     }
 
+    @After
+    public void tearDown() {
+        ENV.deleteEnvironment();
+    }
+    
     @Test
     public void testStringUtil() throws Exception {
         //split and concat
@@ -204,13 +214,13 @@ public class CommonTest {
         p.put("shared.lib.dir", "lib");
         p.put("server.lib.dir", "lib");
         p.put("lib-tools.dir", "lib");
-        if (!ScriptUtil.ant("../tsl2.nano.common/shell.xml", "help", p)) {
+        if (!ScriptUtil.ant(BASE_DIR_COMMON + "shell.xml", "help", p)) {
             fail("ant call didn't work!");
         }
 
         //works only on windows
         assertTrue(ScriptUtil.execute("cmd", "/C", "echo", "hello").exitValue() == 0);
-        assertTrue(ScriptUtil.execute("cmd", "/C", "runsh.bat").exitValue() == 0);
+        assertTrue(ScriptUtil.execute("cmd", "/C", System.getProperty("user.dir") + "/" + BASE_DIR_COMMON + "runsh.bat").exitValue() == 0);
         //works only on windows
 //        ScriptUtil.execute("c:/Program Files (x86)/Adobe/Reader 10.0/Reader/AcroRd32.exe", "c:/eigen/SVN-Eclipse-Einrichtung.pdf");
 //        ScriptUtil.executeRegisteredWindowsPrg("c:/eigen/SVN-Eclipse-Einrichtung.pdf");
@@ -226,7 +236,7 @@ public class CommonTest {
         Collection<File> files = FileUtil.getTreeFiles("./", ".*/resources");
         assertTrue(files.size() == 1 && files.iterator().next().getName().equals("resources"));
 
-        files = FileUtil.getFileset("./", "**/resources/**/*class.vm");
+        files = FileUtil.getFileset(BASE_DIR_COMMON, "**/resources/**/*class.vm");
         assertTrue(files.size() == 1 && files.iterator().next().getName().equals("beanclass.vm"));
 
     }
@@ -1392,7 +1402,7 @@ public class CommonTest {
         };
 
         // filter the 'standalones'
-        assertTrue(cl.getNestedJars().length == 25);
+        assertTrue(cl.getNestedJars().length == 26);
     }
 
     /**
@@ -1523,6 +1533,10 @@ public class CommonTest {
 
     @Test
     public void testNetUtilJSON() throws Exception {
+        if (!NetUtil.isOnline()) {
+            LOG.warn("SKIPPING online tests for JSON");
+            return;
+        }
         JsonStructure structure = NetUtil
             .getRestfulJSON("http://headers.jsontest.com/"/*"https://graph.facebook.com/search?q=java&type=post"*/);
         System.out.println(StringUtil.toString(structure, -1));
@@ -1754,6 +1768,10 @@ public class CommonTest {
 
     @Test
     public void testTranslation() throws Exception {
+        if (!NetUtil.isOnline()) {
+            LOG.warn("SKIPPING online tests for JSON");
+            return;
+        }
         Properties p = createTestTranslationProperties();
         Properties t = Translator.translateProperties("test", p, Locale.ENGLISH, Locale.GERMAN);
 
@@ -1763,6 +1781,10 @@ public class CommonTest {
 
     @Test
     public void testTranslationFast() throws Exception {
+        if (!NetUtil.isOnline()) {
+            LOG.warn("SKIPPING online tests for Online-Translation");
+            return;
+        }
         Map p = createTestTranslationProperties();
         Map t = Translator.translatePropertiesFast("test", p, Locale.ENGLISH, Locale.GERMAN);
         //the words are german - so, no translation can be done --> p = t. it's only an integration test

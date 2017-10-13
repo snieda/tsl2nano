@@ -38,7 +38,7 @@ public class ServiceProxy<T> extends DefaultService implements InvocationHandler
      */
     protected ServiceProxy(T delegate) {
         super();
-        assert delegate != null : "the service delegate must not be null";
+        //assert delegate != null : "the service delegate must not be null";
         this.delegate = delegate;
     }
 
@@ -51,13 +51,22 @@ public class ServiceProxy<T> extends DefaultService implements InvocationHandler
      * @return implementation of the given interface.
      */
     public static <T> T createBeanImplementation(Class<T> interfaze, T delegate, ClassLoader classLoader) {
+        checkDelegate(interfaze, delegate);
+        return (T) Proxy.newProxyInstance(classLoader, new Class[] { interfaze }, new ServiceProxy(delegate));
+    }
+
+    /**
+     * checkDelegate
+     * @param interfaze
+     * @param delegate
+     */
+    static <T> void checkDelegate(Class<T> interfaze, T delegate) {
         if (delegate == null || !interfaze.isAssignableFrom(delegate.getClass())) {
             throw new ManagedException("the delegate instance must implement the service interface!\ninterface: " + interfaze
                 + "\ndelegate: "
                 + Messages.stripParameterBrackets(String.valueOf(delegate))
                 + "\n\nmostly the reason are missing appserver-client-libraries to your client.");
         }
-        return (T) Proxy.newProxyInstance(classLoader, new Class[] { interfaze }, new ServiceProxy(delegate));
     }
 
     /**
