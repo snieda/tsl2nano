@@ -767,7 +767,7 @@ public class NanoH5 extends NanoHTTPD implements ISystemConnector<Persistence> {
             Boolean generationComplete =
                 generateJarFile(jarName, persistence.getGenerator(), persistence.getDefaultSchema());
             //return value may be null or false
-            if (!Boolean.TRUE.equals(generationComplete) || !new File(jarName).exists()) {
+            if (generationComplete == null || !Boolean.TRUE.equals(generationComplete) || !new File(jarName).exists()) {
                 throw new ManagedException(
                     "Couldn't generate bean jar file '"
                         + jarName
