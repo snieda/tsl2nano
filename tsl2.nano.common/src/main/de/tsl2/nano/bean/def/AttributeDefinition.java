@@ -290,9 +290,11 @@ public class AttributeDefinition<T> implements IAttributeDefinition<T> {
                     //create proxy for each bean instance
                     if (handler instanceof DelegationHandler && handler instanceof IRuleCover) {
                         // compare instances: if attr is a delegation-handler we must ignore its delegate!
-                        if (item == instance)
-                            throw new IllegalStateException("the given instance " + instance
+                        if (item == instance) {
+                            LOG.warn/*throw new IllegalStateException*/("the given instance " + instance
                                 + " seems to be a rulecover itself!");
+                            continue;
+                        }
                         handler = (InvocationHandler) ((DelegationHandler<I>) handler).clone();
                         item = DelegationHandler.createProxy((DelegationHandler<I>) handler);
                         acc.set((String) k, item);

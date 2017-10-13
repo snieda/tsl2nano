@@ -588,6 +588,6 @@ public class Timesheet extends NanoH5App {
             else if (beandef.getName().equals(new QueryResult(STAT_TYPES).getName()))
                 count++;
         }
-        assertTrue(5 == count);
+        assertTrue(6 == count);
     }
 }

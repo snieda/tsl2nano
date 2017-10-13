@@ -14,8 +14,10 @@ import static org.junit.Assert.assertTrue;
 import java.io.File;
 import java.io.IOException;
 import java.math.BigDecimal;
+import java.net.Socket;
 import java.net.URL;
 import java.text.SimpleDateFormat;
+import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Properties;
@@ -55,6 +57,7 @@ import de.tsl2.nano.execution.AntRunner;
 import de.tsl2.nano.h5.CSheet;
 import de.tsl2.nano.h5.Html5Presentation;
 import de.tsl2.nano.h5.NanoH5;
+import de.tsl2.nano.h5.NanoHTTPD.Method;
 import de.tsl2.nano.h5.configuration.BeanConfigurator;
 import de.tsl2.nano.h5.expression.QueryPool;
 import de.tsl2.nano.h5.navigation.Workflow;
@@ -172,6 +175,7 @@ public class NanoH5Test {
         createAndTest(new MyApp(getServiceURL(), null) {
             @Override
             public void start() {
+                createStartPage();
                 createBeanCollectors(null);
             }
         }, null, Times.class);
@@ -191,21 +195,12 @@ public class NanoH5Test {
         System.setProperty("bean.generation.outputpath", DIR_TEST);
         PackageGenerator.main(new String[] { "bin/" + pckName.replace('.', '/') });
 
+        Persistence.current().save();
+        
         ENV.addService(BeanPresentationHelper.class, new Html5Presentation<>());
-        try {
-            Persistence.current().save();
-        } catch (IOException e) {
-            ManagedException.forward(e);
-        }
-        String userName = Persistence.current().getConnectionUserName();
-        Authorization auth = Authorization.create(userName, false);
-        ENV.addService(IAuthorization.class, auth);
-        ConcurrentUtil.setCurrent(auth);
 
-//      BeanContainer.initEmtpyServiceActions();
-        GenericLocalBeanContainer.initLocalContainer(Thread.currentThread().getContextClassLoader(), false);
-        ENV.addService(IBeanContainer.class, BeanContainer.instance());
-        ConcurrentUtil.setCurrent(BeanContainer.instance());
+        initServices();
+        
         app.start();
 //        Translator.translateBundle(ENV.getConfigPath() + "messages", Messages.keySet(), Locale.ENGLISH,
 //            Locale.getDefault());
@@ -216,6 +211,9 @@ public class NanoH5Test {
         ENV.reset();
 
         ENV.create(DIR_TEST);
+        initServices();
+        Socket sampleSocket = new Socket();
+        app.serve("/", Method.POST, MapUtil.asMap("socket", sampleSocket), new HashMap<>(), new HashMap<>());
         for (int i = 0; i < beanTypesToCheck.length; i++) {
             Bean bean = Bean.getBean(BeanClass.createInstance(beanTypesToCheck[i]));
             bean.onActivation(null);
@@ -232,11 +230,12 @@ public class NanoH5Test {
                     throw new IllegalStateException(status.error());
                 attr.changeHandler().fireEvent(ChangeEvent.createEvent(attr, null, null, false));
                 //trigger all possible rulecovers
-//                Bean.getBean(attr.getConstraint()).toValueMap(null);
-//                Bean.getBean(attr.getPresentation()).toValueMap(null);
-//                if (attr.getColumnDefinition() != null)
-//                    Bean.getBean(attr.getColumnDefinition()).toValueMap(null);
+                Bean.getBean(attr.getConstraint()).toValueMap(null);
+                Bean.getBean(attr.getPresentation()).toValueMap(null);
+                if (attr.getColumnDefinition() != null)
+                    Bean.getBean(attr.getColumnDefinition()).toValueMap(null);
             }
+            app.serve("/" + i+1, Method.POST, MapUtil.asMap("socket", sampleSocket), new HashMap<>(), new HashMap<>());
             bean.onDeactivation(null);
         }
 
@@ -301,6 +300,19 @@ public class NanoH5Test {
 //        p.clear();
 //        p.put("dir", DIR_TEST);
 //        AntRunner.runTask(AntRunner.TASK_DELETE, p, (String)null);
+    }
+
+    private void initServices() {
+        ENV.addService(BeanPresentationHelper.class, new Html5Presentation<>());
+        String userName = Persistence.current().getConnectionUserName();
+        Authorization auth = Authorization.create(userName, false);
+        ENV.addService(IAuthorization.class, auth);
+        ConcurrentUtil.setCurrent(auth);
+
+//      BeanContainer.initEmtpyServiceActions();
+        GenericLocalBeanContainer.initLocalContainer(Thread.currentThread().getContextClassLoader(), false);
+        ENV.addService(IBeanContainer.class, BeanContainer.instance());
+        ConcurrentUtil.setCurrent(BeanContainer.instance());
     }
 
     /**
