@@ -13,11 +13,13 @@ import java.io.IOException;
 import java.nio.charset.MalformedInputException;
 
 import org.junit.BeforeClass;
+import org.junit.Ignore;
 import org.junit.Test;
 
 import de.tsl2.nano.service.util.BaseServiceTest;
 import de.tsl2.nano.service.util.IFileService;
 //import sun.io.MalformedInputException;
+import de.tsl2.nano.serviceaccess.ServiceFactory;
 
 /**
  * Tests for FileService
@@ -31,9 +33,11 @@ public class FileServiceTest extends BaseServiceTest {
 
     @BeforeClass
     public static void setUp() {
+        System.setProperty(ServiceFactory.NO_JNDI, Boolean.toString(true));
 //        createTestData("akten");
     }
 
+    @Ignore
     @Test
     public void testStandardMode() throws Exception {
         final String testFile = "fileservice-testfile.txt";

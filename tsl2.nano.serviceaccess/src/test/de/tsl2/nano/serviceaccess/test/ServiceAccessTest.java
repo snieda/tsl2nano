@@ -79,7 +79,7 @@ public class ServiceAccessTest {
         // "testclient");
         // Thread.currentThread().setContextClassLoader(
         // new ExternPluginClassloader());
-//        System.setProperty(ServiceFactory.NO_JNDI, Boolean.toString(true));
+        System.setProperty(ServiceFactory.NO_JNDI, Boolean.toString(true));
         ServiceFactory.createInstance(ServiceAccessTest.class.getClassLoader());
 
         //works only in development-environment with bin-dir!
@@ -88,6 +88,7 @@ public class ServiceAccessTest {
         final URL policyUrl = this.getClass().getClassLoader().getResource("logincontext.policy");
         System.setProperty("java.security.manager", "");
         System.setProperty("java.security.policy", policyUrl.toString());
+//        System.setProperty("java.naming.factory.initial", "todo");
     }
 
     @Test
