@@ -2,8 +2,8 @@
 	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
 	<modelVersion>4.0.0</modelVersion>
 	<groupId>tsl2.nano</groupId>
-	<artifactId>ormliteprovider</artifactId>
-	<version>0.0.1-SNAPSHOT</version>
+	<artifactId>tsl2.nano.ormliteprovider</artifactId>
+	<version>0.0.1</version>
 	<build>
 		<sourceDirectory>src/main</sourceDirectory>
 		<testSourceDirectory>src/test</testSourceDirectory>
@@ -46,5 +46,12 @@
 			<version>4.48</version>
 		</dependency>
 
+		<dependency>
+			<groupId>tsl2.nano</groupId>
+			<artifactId>tsl2.nano.directaccess</artifactId>
+			<version>0.0.5</version>
+		</dependency>
 	</dependencies>
+	<name>TSL2 ORMlite provider</name>
+	<description>TSL2 ORMlite provider</description>
 </project>

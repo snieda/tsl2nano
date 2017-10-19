@@ -12,16 +12,12 @@ package de.tsl2.nano.core.classloader;
 import java.io.File;
 import java.net.URL;
 import java.net.URLStreamHandlerFactory;
-import java.util.Collection;
 
 import org.apache.commons.logging.Log;
 
-import de.tsl2.nano.core.AppLoader;
-import de.tsl2.nano.core.Argumentator;
 //import de.tsl2.nano.core.ENV;
 import de.tsl2.nano.core.cls.BeanClass;
 import de.tsl2.nano.core.log.LogFactory;
-import de.tsl2.nano.core.util.FileUtil;
 import de.tsl2.nano.core.util.ListSet;
 import de.tsl2.nano.core.util.StringUtil;
 
@@ -45,7 +41,7 @@ public class NetworkClassLoader extends NestedJarClassLoader {
     public static final String REGEX_EXCLUDE = "standalone";
     
     /**
-     * environment config path. as it is not possible to use the type Environment.class itself (import class is loaded
+     * environment config path. as it is not possible to use the type ENV.class itself (import class is loaded
      * by AppLoader, but a new Environment was created), we use this variable instead.
      */
     String environment;
@@ -117,13 +113,13 @@ public class NetworkClassLoader extends NestedJarClassLoader {
         super(urls, parent);
     }
 
-    @SuppressWarnings("unchecked")
     @Override
     public void addLibraryPath(String path) {
         super.addLibraryPath(path);
 
         //only for the first time we load the persisted ignore list
         if (environment == null || !environment.equals(path)) {
+            path = path != null ? path : ".";
             File persistedList = new File(path + "/" + FILENAME_UNRESOLVEABLES);
             if (persistedList.canRead()) {
                 unresolveables.addAll(ListSet.load(persistedList.getPath()));
@@ -158,6 +154,8 @@ public class NetworkClassLoader extends NestedJarClassLoader {
                         LOG.warn("couldn't load class " + name);
                     }
                     unresolveables.add(pckName);
+                    if (environment == null)
+                        environment = "."; 
                     unresolveables.save(environment + "/" + FILENAME_UNRESOLVEABLES);
                 }
             }

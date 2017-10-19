@@ -2,10 +2,9 @@
 	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
 	<modelVersion>4.0.0</modelVersion>
 	<groupId>tsl2.nano</groupId>
-	<artifactId>ebeanprovider</artifactId>
-	<version>0.0.1-SNAPSHOT</version>
-	<name>orm on ebean</name>
-	<description>orm on ebean</description>
+	<artifactId>tsl2.nano.ebeanprovider</artifactId>
+	<version>0.0.1</version>
+	<name>TSL2 ORM EBean provider</name>
 	<build>
 		<sourceDirectory>src/main</sourceDirectory>
 		<testSourceDirectory>src/test</testSourceDirectory>
@@ -34,5 +33,16 @@
 			<artifactId>avaje-ebeanorm</artifactId>
 			<version>3.4.2</version>
 		</dependency>
+		<dependency>
+			<groupId>tsl2.nano</groupId>
+			<artifactId>tsl2.nano.directaccess</artifactId>
+			<version>0.0.5</version>
+		</dependency>
+		<dependency>
+			<groupId>org.hibernate.javax.persistence</groupId>
+			<artifactId>hibernate-jpa-2.1-api</artifactId>
+			<version>1.0.0.Final</version>
+		</dependency>
 	</dependencies>
+	<description>TSL2 ORM EBean provider</description>
 </project>

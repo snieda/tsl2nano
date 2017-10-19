@@ -2,10 +2,9 @@
 	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
 	<modelVersion>4.0.0</modelVersion>
 	<groupId>tsl2.nano</groupId>
-	<artifactId>common</artifactId>
-	<version>0.0.1-SNAPSHOT</version>
-	<name>tsl2 common</name>
-	<description>tsl2 commons</description>
+	<artifactId>tsl2.nano.common</artifactId>
+	<version>1.1.2</version>
+	<name>TSL2 framework commons</name>
 	<build>
 		<sourceDirectory>src/main</sourceDirectory>
 		<testSourceDirectory>src/test</testSourceDirectory>
@@ -122,4 +121,5 @@
 		<!-- <dependency> <groupId>avalon-framework</groupId> <artifactId>avalon-framework-impl</artifactId> 
 			<version>4.2.0</version> </dependency> -->
 	</dependencies>
+	<description>TSL2 framework commons</description>
 </project>

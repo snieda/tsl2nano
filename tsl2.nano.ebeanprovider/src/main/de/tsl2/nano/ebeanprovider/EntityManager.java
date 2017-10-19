@@ -39,6 +39,7 @@ import de.tsl2.nano.core.ManagedException;
 import de.tsl2.nano.core.log.LogFactory;
 import de.tsl2.nano.core.util.FileUtil;
 import de.tsl2.nano.persistence.provider.NanoEntityManagerFactory;
+import de.tsl2.nano.persistence.provider.NanoEntityManagerFactory.AbstractEntityManager;
 
 /**
  * reduced OrmLite jpa persistence-provider extending {@link NanoEntityManagerFactory}.
@@ -47,7 +48,7 @@ import de.tsl2.nano.persistence.provider.NanoEntityManagerFactory;
  * @version $Revision$
  */
 @SuppressWarnings({ "rawtypes", "unchecked" })
-public class EntityManager extends NanoEntityManagerFactory.AbstractEntityManager {
+public class EntityManager extends AbstractEntityManager {
     private static final Log LOG = LogFactory.getLog(EntityManager.class);
 
     EbeanServer server;
@@ -100,10 +101,10 @@ public class EntityManager extends NanoEntityManagerFactory.AbstractEntityManage
         return server;
     }
     
-    @Override
+//    @Override
     public <X> TypedQuery<X> createQuery(final String qstr, final Class<X> type) {
         return NanoEntityManagerFactory.instance().new AbstractQuery() {
-            @Override
+//            @Override
             public List getResultList() {
                     Class t = type;
                     if (type == null || Object.class.isAssignableFrom(type)) {
@@ -117,7 +118,7 @@ public class EntityManager extends NanoEntityManagerFactory.AbstractEntityManage
                     return query.findList();
             }
 
-            @Override
+//            @Override
             public int executeUpdate() {
                 SqlUpdate query = getServer().createSqlUpdate(qstr);
                 Set<String> keySet = parameter.keySet();
@@ -130,23 +131,23 @@ public class EntityManager extends NanoEntityManagerFactory.AbstractEntityManage
         };
     }
 
-    @Override
+//    @Override
     public <T> T find(Class<T> arg0, Object arg1) {
         return Ebean.find(arg0, arg1);
     }
 
-    @Override
+//    @Override
     public <T> T merge(T arg0) {
         Ebean.save(arg0);
         return arg0;
     }
 
-    @Override
+//    @Override
     public void remove(Object arg0) {
         Ebean.delete(arg0);
     }
 
-    @Override
+//    @Override
     public void detach(Object arg0) {
         Object beanId = getServer().getBeanId(arg0);
         Ebean.getServerCacheManager().getBeanCache(arg0.getClass()).remove(beanId);
@@ -157,91 +158,91 @@ public class EntityManager extends NanoEntityManagerFactory.AbstractEntityManage
         Ebean.refresh(arg0);
     }
 
-    @Override
+//    @Override
     public boolean isOpen() {
         //how can I check that?
         return getServer() != null;
     }
 
-    @Override
+//    @Override
     public void close() {
         //this would be normally to much...
         getServer().shutdown(true, true);
     }
 
-    @Override
+//    @Override
     public boolean contains(Object arg0) {
         ServerCache cache = Ebean.getServerCacheManager().getBeanCache(arg0.getClass());
         Object beanId = getServer().getBeanId(arg0);
         return cache.get(beanId) != null;
     }
 
-    @Override
+//    @Override
     public void clear() {
         Ebean.getServerCacheManager().clearAll();
     }
 
-    @Override
+//    @Override
     public <T> EntityGraph<T> createEntityGraph(Class<T> arg0) {
         // TODO Auto-generated method stub
         return null;
     }
 
-    @Override
+//    @Override
     public EntityGraph<?> createEntityGraph(String arg0) {
         // TODO Auto-generated method stub
         return null;
     }
 
-    @Override
+//    @Override
     public StoredProcedureQuery createNamedStoredProcedureQuery(String arg0) {
         // TODO Auto-generated method stub
         return null;
     }
 
-    @Override
+//    @Override
     public javax.persistence.Query createQuery(CriteriaUpdate arg0) {
         // TODO Auto-generated method stub
         return null;
     }
 
-    @Override
+//    @Override
     public javax.persistence.Query createQuery(CriteriaDelete arg0) {
         // TODO Auto-generated method stub
         return null;
     }
 
-    @Override
+//    @Override
     public StoredProcedureQuery createStoredProcedureQuery(String arg0) {
         // TODO Auto-generated method stub
         return null;
     }
 
-    @Override
+//    @Override
     public StoredProcedureQuery createStoredProcedureQuery(String arg0, Class... arg1) {
         // TODO Auto-generated method stub
         return null;
     }
 
-    @Override
+//    @Override
     public StoredProcedureQuery createStoredProcedureQuery(String arg0, String... arg1) {
         // TODO Auto-generated method stub
         return null;
     }
 
-    @Override
+//    @Override
     public EntityGraph<?> getEntityGraph(String arg0) {
         // TODO Auto-generated method stub
         return null;
     }
 
-    @Override
+//    @Override
     public <T> List<EntityGraph<? super T>> getEntityGraphs(Class<T> arg0) {
         // TODO Auto-generated method stub
         return null;
     }
 
-    @Override
+//    @Override
     public boolean isJoinedToTransaction() {
         // TODO Auto-generated method stub
         return false;

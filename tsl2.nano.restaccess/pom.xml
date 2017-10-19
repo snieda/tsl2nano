@@ -2,11 +2,10 @@
 	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
 	<modelVersion>4.0.0</modelVersion>
 	<groupId>tsl2.nano.restaccess</groupId>
-	<packaging>war</packaging>
 	<version>1.0-SNAPSHOT</version>
-	<name>restaccess</name>
+	<name>TSL2 framework REST access</name>
 	<url>http://maven.apache.org</url>
-	<artifactId>restaccess</artifactId>
+	<artifactId>tsl2.nano.restaccess</artifactId>
 	<inceptionYear>2016</inceptionYear>
 	<licenses>
 		<license>
@@ -42,7 +41,7 @@
 		<!-- use the beancontainer -->
 		<dependency>
 			<groupId>tsl2.nano</groupId>
-			<artifactId>common</artifactId>
+			<artifactId>tsl2.nano.common</artifactId>
 			<scope>system</scope>
 			<version>RELEASE</version>
 			<systemPath>${basedir}\src\lib\tsl2.nano.common.1.1.2.jar</systemPath>
@@ -320,4 +319,5 @@
 			</plugin>
 		</plugins>
 	</build>
+	<description>TSL2 framework REST access</description>
 </project>

@@ -17,9 +17,6 @@ import javax.ejb.Remote;
 import de.tsl2.nano.resource.fs.FsConnection;
 import de.tsl2.nano.resource.fs.FsConnectionFactory;
 
-//import de.tsl2.nano.resource.fs.FsConnection;
-//import de.tsl2.nano.resource.fs.FsConnectionFactory;
-
 /**
  * Local Services for server side file access through filesystem-connector.
  * 
