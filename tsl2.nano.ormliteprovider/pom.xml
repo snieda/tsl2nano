@@ -3,7 +3,7 @@
 	<modelVersion>4.0.0</modelVersion>
 	<groupId>tsl2.nano</groupId>
 	<artifactId>tsl2.nano.ormliteprovider</artifactId>
-	<version>0.0.1</version>
+	<version>0.0.2</version>
 	<build>
 		<sourceDirectory>src/main</sourceDirectory>
 		<testSourceDirectory>src/test</testSourceDirectory>
@@ -49,7 +49,7 @@
 		<dependency>
 			<groupId>tsl2.nano</groupId>
 			<artifactId>tsl2.nano.directaccess</artifactId>
-			<version>0.0.5</version>
+			<version>0.0.6</version>
 		</dependency>
 	</dependencies>
 	<name>TSL2 ORMlite provider</name>

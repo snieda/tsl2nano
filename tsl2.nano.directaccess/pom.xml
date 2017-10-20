@@ -3,7 +3,7 @@
 	<modelVersion>4.0.0</modelVersion>
 	<groupId>tsl2.nano</groupId>
 	<artifactId>tsl2.nano.directaccess</artifactId>
-	<version>0.0.5</version>
+	<version>0.0.6</version>
 	<name>TSL2 JEE direct access</name>
 	<description>TSL2 JEE direct access</description>
 	<build>
@@ -35,7 +35,7 @@
 		<dependency>
 			<groupId>tsl2.nano</groupId>
 			<artifactId>tsl2.nano.serviceaccess</artifactId>
-			<version>1.0.2</version>
+			<version>1.0.3</version>
 		</dependency>
 	</dependencies>
 </project>

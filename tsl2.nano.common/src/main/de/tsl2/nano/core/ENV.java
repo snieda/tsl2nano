@@ -127,6 +127,20 @@ public class ENV implements Serializable {
     static final String DEF_PATHSEPRATOR = "/";
 
     static final String UNKNOWN_BUILD_INFORMATIONS = "<unknown build informations>";
+
+//    private static final String FRAMEWORK_INFO = 
+//   "             ______   ______     __       "
+// + "            /\__  _\ /\  ___\   /\ \      "      
+// + "            \/_/\ \/ \ \___  \  \ \ \____ "
+// + "               \ \_\  \/\_____\  \ \_____\"
+// + "                \/_/   \/_____/   \/_____/"
+// + "                                          "
+// + "               __   __     ______     __   __     ______    "   
+// + "               /\ "-.\ \   /\  __ \   /\ "-.\ \   /\  __ \  "
+// + "               \ \ \-.  \  \ \  __ \  \ \ \-.  \  \ \ \/\ \ "
+// + "                \ \_\\"\_\  \ \_\ \_\  \ \_\\"\_\  \ \_____\"
+// + "                 \/_/ \/_/   \/_/\/_/   \/_/ \/_/   \/_____/"
+//;
     
     private ENV() {
         self = this;
@@ -231,6 +245,7 @@ public class ENV implements Serializable {
         String buildInfo = getBuildInformations();
         
         LogFactory.log("\n===========================================================\n"
+            + new String(FileUtil.getFileBytes("tsl-logo.txt", null))
             + "creating environment "
             + dir
             + "\n"
