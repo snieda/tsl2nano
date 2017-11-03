@@ -12,6 +12,7 @@ package de.tsl2.nano.h5.websocket;
 import java.io.Closeable;
 import java.io.IOException;
 import java.util.Set;
+import java.util.Collection;
 
 import org.java_websocket.WebSocket;
 
@@ -51,7 +52,7 @@ public class WebSocketExceptionHandler extends ExceptionHandler implements Close
             super.uncaughtException(t, e);
         }
 //        else {
-            Set<WebSocket> connections = socket.connections();
+            Collection<WebSocket> connections = socket.connections();
             for (WebSocket webSocket : connections) {
                 webSocket.send(e.getMessage());
             }

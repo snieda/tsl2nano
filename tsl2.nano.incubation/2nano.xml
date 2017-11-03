@@ -1,4 +1,5 @@
 <!-- =========================================================================
+ DEPRECATED 11/2017: maven build activated
  build script for tsl2.nano.h5 and base libraries
  author: Thomas Schneider 2013
  - creates jar files in target-directory

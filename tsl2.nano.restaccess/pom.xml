@@ -119,7 +119,7 @@
 				<executions>
 					<execution>
 						<id>copy-dependencies</id>
-						<phase>compile</phase>
+						<phase>post-clean</phase>
 						<goals>
 							<goal>copy-dependencies</goal>
 						</goals>

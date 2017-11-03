@@ -12,7 +12,6 @@ package de.tsl2.nano.h5.test;
 import static org.junit.Assert.assertTrue;
 
 import java.io.File;
-import java.io.IOException;
 import java.math.BigDecimal;
 import java.net.Socket;
 import java.net.URL;
@@ -25,13 +24,8 @@ import java.util.Properties;
 import org.anonymous.project.Address;
 import org.anonymous.project.Charge;
 import org.junit.Assert;
-import org.junit.Ignore;
 import org.junit.Test;
 
-import com.gargoylesoftware.htmlunit.History;
-import com.gargoylesoftware.htmlunit.WebClient;
-import com.gargoylesoftware.htmlunit.html.HtmlForm;
-import com.gargoylesoftware.htmlunit.html.HtmlPage;
 import com.sun.jersey.api.container.httpserver.HttpServerFactory;
 import com.sun.net.httpserver.HttpServer;
 
@@ -40,11 +34,9 @@ import de.tsl2.nano.bean.IBeanContainer;
 import de.tsl2.nano.bean.def.Bean;
 import de.tsl2.nano.bean.def.BeanDefinition;
 import de.tsl2.nano.bean.def.BeanPresentationHelper;
-import de.tsl2.nano.bean.def.IPresentable;
 import de.tsl2.nano.bean.def.IStatus;
 import de.tsl2.nano.bean.def.IValueDefinition;
 import de.tsl2.nano.core.ENV;
-import de.tsl2.nano.core.ManagedException;
 import de.tsl2.nano.core.classloader.RuntimeClassloader;
 import de.tsl2.nano.core.cls.BeanClass;
 import de.tsl2.nano.core.execution.SystemUtil;
@@ -83,55 +75,6 @@ import my.app.Times;
 public class NanoH5Test {
     static String getServiceURL() {
         return "http://localhost:" + NetUtil.getFreePort();
-    }
-
-    @Test
-    @Ignore
-    public void testNano() throws Exception {
-        String serviceURL = getServiceURL();
-        runNano(serviceURL);
-
-        WebClient webClient = new WebClient();
-        HtmlPage page = webClient.getPage(serviceURL);
-        page = submit(page, "tsl2.nano.login.ok");
-        page = submit(page, "beancollector.selectall");
-        page = submit(page, "beancollector.open");
-
-        for (int i = 0; i < 7; i++) {
-            //create and delete objects of all sample types
-            page = testObjectCreation(page);
-        }
-    }
-
-    private HtmlPage submit(HtmlPage page, String buttonName) throws Exception {
-        HtmlForm form = page.getFormByName("page.form");
-        return form.getInputByName(buttonName).click();
-    }
-
-    private History back(HtmlPage page) throws Exception {
-        return page.getWebClient().getWebWindows().get(0).getHistory().back();
-    }
-
-    private HtmlPage testObjectCreation(HtmlPage page) throws Exception {
-        String beanName = page.getTitleText();
-        page = submit(page, beanName + "." + "search");
-        page = submit(page, beanName + "." + "forward");
-        submit(page, beanName + "." + "print");
-        back(page);
-        submit(page, beanName + "." + "export");
-        back(page);
-
-        page = submit(page, beanName + "." + "new");
-        page = submit(page, beanName + "." + "save");
-        page = submit(page, beanName + "." + "delete");
-        page = submit(page, beanName + "." + "reset");
-        page = submit(page, beanName + "." + "cancel");
-        return page;
-    }
-
-    private void runNano(String serviceURL) throws IOException {
-        //TODO: start nano.h5 and hsqldb
-        new NanoH5(serviceURL, null);
     }
 
     @Test

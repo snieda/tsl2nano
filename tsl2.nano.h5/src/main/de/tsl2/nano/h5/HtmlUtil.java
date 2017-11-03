@@ -272,7 +272,7 @@ public class HtmlUtil {
 
     protected static final StringBuilder EMPTY_CONTENT = new StringBuilder();
 
-    private static final char CSS_ID_SEPARATOR = "§";
+    private static final char CSS_ID_SEPARATOR = '$';
 
     static String tableDivStyle;
 

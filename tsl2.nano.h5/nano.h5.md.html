@@ -448,8 +448,9 @@ Here is a short description how to use a model from PonyORM and starting a full 
  - after some minutes, Nano.H5 should show a list of available beans/tables.
  - open a type, create a new bean and click 'configure' to configure the presentation of this bean type.
  
-#### Known Problems on HsqlDB compatibility mode or DDL scripts provided by PonyORM
+#### Known Problems on HsqlDB/H2 compatibility mode or DDL scripts provided by PonyORM
 
+* don't use SQL/DB-Keywords (like begin, end, day, ...) in your table- or column-names
 *     mysql   : AUTO_INCREMENT must be before PRIMARY KEY
 *     postgres: BYTEA <-- unknown
 *     oracle  : Triggers with :NEW
@@ -1901,6 +1902,16 @@ Each action is able to define a shortcut (keystroke). if not set, the default wi
 ### Tableheader Buttons
 
 Each standard table of beans will provide a table-header with Buttons to do up/down sorting (on first activation, up-sorting will be done, on second activation, down-sorting). On these Buttons we can't use the algorithm above to avoid shortcut collisions. These buttons will have shortcuts depending on their indexes. So, the first table-header column will be activated through a hit to _ALT+1_.
+
+### Injecting own logic on the forms html DOM document
+
+Implement the interface _IDOMExtender_ and provide the compiled class to the environment (copying the jar into the environment directory) to edit/change the default DOM tree. Here you can add additional informations and scripts to be sent to the client browser without knowing the tsl2.nano framework.
+
+Example: TODO
+
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 ## Webstart with JNLP
 
@@ -3684,4 +3695,9 @@ CSheet-TODO:
 Controller:
 	- (x) create transient default entries to be saved by controller actions
 	- AsciiSignature: http://www.kammerl.de/ascii/AsciiSignature.php mit sub-zero
+	
+maven TODO:
+	- signing
+	- integration test NanoH5
+	- jars: war, sign, standalone, pure, sishell
 	

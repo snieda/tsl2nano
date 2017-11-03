@@ -113,6 +113,7 @@ import de.tsl2.nano.incubation.specification.rules.RulePool;
 import de.tsl2.nano.messaging.ChangeEvent;
 import de.tsl2.nano.messaging.IListener;
 import de.tsl2.nano.script.ScriptTool;
+import de.tsl2.nano.util.ClassFinder;
 import de.tsl2.nano.util.PrivateAccessor;
 
 /**
@@ -342,6 +343,13 @@ public class Html5Presentation<T> extends BeanPresentationHelper<T> implements I
                 form = createPage(session, null, "Leaving Application!<br/>Restart", false, navigation);
             }
 
+            //TODO: Some external extensions...
+//            extendCurrentDom(form);
+//            Collection<IDOMExtender> domExtenders = ClassFinder.find(IDOMExtender.class);
+//            for (IDOMExtender domExt  : domExtenders) {
+//                domExt.extend(session, form.getOwnerDocument(), parms);
+//            }
+            
             String html = HtmlUtil.toString(form.getOwnerDocument());
             if (LOG.isDebugEnabled()) {
                 FileUtil.writeBytes(html.getBytes(), ENV.getConfigPath() + "html-server-response.html", false);

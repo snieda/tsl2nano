@@ -3,9 +3,19 @@
 	<modelVersion>4.0.0</modelVersion>
 	<groupId>tsl2.nano</groupId>
 	<artifactId>tsl2.nano.h5</artifactId>
-	<version>1.1.3</version>
+	<version>1.1.1</version>
 	<name>TSL2 framework html5 extensions</name>
-	<description>TSL2 framework commons</description>
+	<description>TSL2 framework h5 extensions</description>
+	<properties>
+		<maven.test.skip>true</maven.test.skip>
+	</properties>
+
+	<parent>
+		<groupId>tsl2.nano</groupId>
+		<artifactId>tsl2.nano.h5-package</artifactId>
+		<version>1.1.1</version>
+		<relativePath>../pom.xml</relativePath>
+	</parent>
 	<build>
 		<sourceDirectory>src/main</sourceDirectory>
 		<testSourceDirectory>src/test</testSourceDirectory>
@@ -22,14 +32,93 @@
 					<exclude>**/*.java</exclude>
 				</excludes>
 			</resource>
+			<resource>
+				<directory>../tsl2.nano.common/target/classes</directory>
+				<includes>
+					<include>**/core/**</include>
+				</includes>
+			</resource>
+			<resource>
+				<directory>../tsl2.nano.common/target/classes</directory>
+				<excludes>
+					<exclude>**/*.class</exclude>
+				</excludes>
+			</resource>
+			<resource>
+				<directory>../tsl2.nano.common/target/classes</directory>
+				<includes>
+					<include>org/**/*.class</include>
+				</includes>
+			</resource>
+			<resource>
+				<directory>../tsl2.nano.serviceaccess/target/classes</directory>
+				<excludes>
+					<exclude>**/*.class</exclude>
+				</excludes>
+			</resource>
+			<resource>
+				<directory>../tsl2.nano.directaccess/target/classes</directory>
+				<excludes>
+					<exclude>**/*.class</exclude>
+				</excludes>
+			</resource>
+			<resource>
+				<directory>../tsl2.nano.jarresolver/target/classes</directory>
+				<excludes>
+					<exclude>**/*.class</exclude>
+				</excludes>
+			</resource>
+			<resource>
+				<directory>../tsl2.nano.incubation/target/classes</directory>
+				<excludes>
+					<exclude>**/*.class</exclude>
+				</excludes>
+			</resource>
+			<resource>
+				<directory>${project.build.directory}/${project.build.finalName}.lib</directory>
+			</resource>
 		</resources>
 		<plugins>
 			<plugin>
-				<artifactId>maven-compiler-plugin</artifactId>
-				<version>3.7.0</version>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-dependency-plugin</artifactId>
+				<version>2.10</version>
+				<executions>
+					<execution>
+						<id>copy-dependencies</id>
+						<phase>generate-resources</phase>
+						<goals>
+							<goal>tree</goal>
+							<goal>copy-dependencies</goal>
+						</goals>
+						<configuration>
+							<includeScope>runtime</includeScope>
+							<includeArtifactIds>tsl2.nano.common,tsl2.nano.incubation,tsl2.nano.serviceaccess,tsl2.nano.directaccess,tsl2.nano.jarresolver,tsl2.nano.ormliteprovider,tsl2.nano.ebeanprovider,simple-xml,snakeyaml,Java-WebSocket,xml-apis,xchart,VectorGraphics2D,javax.json,javax.json-api,jboss-ejb-api_3.2_spec,dom4j,hibernate-jpa-2.1-api,jboss-transaction-api_1.2_spec,jboss-interceptor-apim,jboss-connector-api_1.7_spec,jta</includeArtifactIds>
+							<!-- standalone:<includeArtifactIds>ant,ant-launcher,ant-nodeps,antlr,mysql-connector-java,h2,app,avalon-framework,commands,common,commons-collections,commons-logging,contenttype,dom4j,freemarker,hibernate-commons-annotations,hibernate-core,hibernate-entitymanager,hibernate-jpa-2.1-api,hibernate-tools,jandex,javassist,jboss-logging,jboss-logging-annotations,jobs,jta,jtidy,logkit,org.eclipse.jdt.core,osgi,preferences,registry,runtime,servlet-api,text,hibernate-tools,log4j,slf4j-api,slf4j-simple</includeArtifactIds> -->
+							<!-- <excludeArtifactIds> commons-codec,javax.json,junit,jasperreports,javassist,avalon-framework-impl,avalon-framework-api,avalon-framework-impl,fop,velocity,tools,aspectjweaver,jersey-bundle,icu4j 
+								</excludeArtifactIds> -->
+							<!-- <excludeTransitive>true</excludeTransitive> -->
+							<outputDirectory>${project.build.directory}/${project.build.finalName}.lib</outputDirectory>
+						</configuration>
+					</execution>
+				</executions>
+			</plugin>
+			<plugin>
+				<artifactId>maven-jar-plugin</artifactId>
+				<version>2.3</version>
 				<configuration>
-					<source>1.8</source>
-					<target>1.8</target>
+					<signedjar>${project.build.directory}/${project.build.finalName}-signed.jar</signedjar>
+					<alias>tsl2</alias>
+					<storepass>tsl2tsl2</storepass>
+					<keystore>tsl2store</keystore>
+					<checkCerts>true</checkCerts>
+					<archive>
+						<manifestFile>META-INF/MANIFEST.MF</manifestFile>
+					</archive>
+					<!-- <archive> <manifest> <addClasspath>true</addClasspath> <classpathLayoutType>repository</classpathLayoutType> 
+						</manifest> </archive> <includes> <include>../**/core/**</include> <include>../**/resources/**</include> 
+						<include>${project.build.outputDirectory}/**/h5/**</include> <include>${project.build.directory}/${project.build.finalName}.lib/**</include> 
+						</includes> -->
 				</configuration>
 			</plugin>
 		</plugins>
@@ -38,23 +127,61 @@
 		<dependency>
 			<groupId>org.java-websocket</groupId>
 			<artifactId>Java-WebSocket</artifactId>
-			<version>1.3.4</version>
+			<version>1.3.0</version>
 		</dependency><!-- https://mvnrepository.com/artifact/net.sourceforge.htmlunit/htmlunit -->
 		<dependency>
 			<groupId>net.sourceforge.htmlunit</groupId>
 			<artifactId>htmlunit</artifactId>
 			<version>2.15</version>
+			<scope>test</scope>
 		</dependency>
 		<!-- https://mvnrepository.com/artifact/com.sun.jersey/jersey-bundle -->
 		<dependency>
 			<groupId>com.sun.jersey</groupId>
 			<artifactId>jersey-bundle</artifactId>
 			<version>1.19.4</version>
+			<scope>compile</scope>
 		</dependency>
 		<dependency>
 			<groupId>tsl2.nano</groupId>
 			<artifactId>tsl2.nano.incubation</artifactId>
 			<version>0.5.2</version>
+		</dependency>
+		<dependency>
+			<groupId>tsl2.nano</groupId>
+			<artifactId>tsl2.nano.jarresolver</artifactId>
+			<version>0.0.2</version>
+		</dependency>
+		<dependency>
+			<groupId>tsl2.nano</groupId>
+			<artifactId>tsl2.nano.ormliteprovider</artifactId>
+			<version>0.0.2</version>
+		</dependency>
+		<dependency>
+			<groupId>tsl2.nano</groupId>
+			<artifactId>tsl2.nano.ebeanprovider</artifactId>
+			<version>0.0.2</version>
+		</dependency>
+		<!-- https://mvnrepository.com/artifact/com.h2database/h2 -->
+		<dependency>
+			<groupId>com.h2database</groupId>
+			<artifactId>h2</artifactId>
+			<version>1.4.196</version>
+			<scope>runtime</scope>
+		</dependency>
+		<!-- https://mvnrepository.com/artifact/mysql/mysql-connector-java -->
+		<dependency>
+			<groupId>mysql</groupId>
+			<artifactId>mysql-connector-java</artifactId>
+			<version>6.0.6</version>
+			<scope>runtime</scope>
+		</dependency>
+		<!-- https://mvnrepository.com/artifact/org.hibernate/hibernate-tools -->
+		<dependency>
+			<groupId>org.hibernate</groupId>
+			<artifactId>hibernate-tools</artifactId>
+			<version>4.3.5.Final</version>
+			<scope>runtime</scope>
 		</dependency>
 	</dependencies>
 </project>

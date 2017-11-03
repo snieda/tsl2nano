@@ -6,6 +6,10 @@
 	<version>0.5.2</version>
 	<name>TSL2 framework incubations</name>
 	<description>TSL2 framework incubations</description>
+	<properties>
+		<!-- we have a problem on tools.jar if java.home points to JRE -->
+		<java.home>c:\Program Files\Java\jdk1.8.0_66\jre</java.home>
+	</properties>
 	<build>
 		<sourceDirectory>src/main</sourceDirectory>
 		<testSourceDirectory>src/test</testSourceDirectory>
@@ -33,6 +37,7 @@
 			<groupId>org.aspectj</groupId>
 			<artifactId>aspectjweaver</artifactId>
 			<version>1.8.11</version>
+			<scope>compile</scope>
 		</dependency><!-- https://mvnrepository.com/artifact/org.knowm.xchart/xchart -->
 		<dependency>
 			<groupId>org.knowm.xchart</groupId>

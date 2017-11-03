@@ -1,0 +1,60 @@
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+	<modelVersion>4.0.0</modelVersion>
+	<groupId>tsl2.nano</groupId>
+	<artifactId>tsl2.nano.h5-package</artifactId>
+	<version>1.1.1</version>
+	<packaging>pom</packaging>
+	<name>TSL2 Html5 Application framework</name>
+	<description>TSL2 Html5 Application framework</description>
+	<properties>
+		<maven.test.skip>true</maven.test.skip>
+	</properties>
+	<inceptionYear>2012</inceptionYear>
+	<licenses>
+		<license>
+			<name>LGPL</name>
+			<url>https://opensource.org/licenses/lgpl-2.1.php</url>
+		</license>
+	</licenses>
+	<modules>
+		<module>tsl2.nano.common</module>
+		<module>tsl2.nano.serviceaccess</module>
+		<module>tsl2.nano.directaccess</module>
+		<module>tsl2.nano.ebeanprovider</module>
+		<module>tsl2.nano.ormliteprovider</module>
+		<module>tsl2.nano.jarresolver</module>
+		<module>tsl2.nano.incubation</module>
+		<module>tsl2.nano.h5</module>
+	</modules>
+	<build>
+		<plugins>
+			<plugin>
+				<artifactId>maven-compiler-plugin</artifactId>
+				<version>3.7.0</version>
+				<configuration>
+					<source>1.8</source>
+					<target>1.8</target>
+				</configuration>
+			</plugin><!--
+			<plugin>
+				<artifactId>maven-assembly-plugin</artifactId>
+				<version>3.1.0</version>
+				<configuration>
+					<descriptorRefs>
+						<descriptorRef>jar-with-dependencies</descriptorRef>
+					</descriptorRefs>
+				</configuration>
+				<executions>
+					<execution>
+						<id>make-assembly</id>
+						<phase>package</phase>
+						<goals>
+							<goal>single</goal>
+						</goals>
+					</execution>
+				</executions>
+			</plugin>-->
+		</plugins>
+	</build>
+</project>

@@ -55,7 +55,7 @@ public class NanoWebSocketClient extends WebSocketClient {
      * @param headers
      */
     public NanoWebSocketClient(URI serverUri, Draft draft, Map<String, String> headers) {
-        super(serverUri, draft, headers);
+        super(serverUri, draft, headers, /*timeout*/300);
     }
 
     /**

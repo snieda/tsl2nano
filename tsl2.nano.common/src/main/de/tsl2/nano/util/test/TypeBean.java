@@ -6,7 +6,7 @@
  * 
  * $Id$ 
  */
-package de.tsl2.nano.test;
+package de.tsl2.nano.util.test;
 
 import java.io.Serializable;
 import java.math.BigDecimal;
@@ -17,7 +17,7 @@ import java.util.Date;
 import java.util.Map;
 
 /**
- * Simple Bean, holding attributes of most types.
+ * Simple Test-Bean, holding (public) attributes of most types.
  * 
  * don't change the annotations. they are used by junit testing!!!
  * 
@@ -59,43 +59,48 @@ public class TypeBean implements Serializable, Comparable<TypeBean> {
     public static final String ATTR_IMMUTABLEDOUBLE = "immutableDouble";
     /** serialVersionUID */
     private static final long serialVersionUID = -6960081067363829887L;
-    String string;
-    boolean primitiveBoolean;
-    byte primitiveByte;
-    char primitiveChar;
-    short primitiveShort;
-    int primitiveInt;
-    long primitiveLong;
-    float primitiveFloat;
-    double primitiveDouble;
-
-    Boolean immutableBoolean;
-    Byte immutableByte;
-    Character immutableChar;
-    Short immutableShort;
-    Integer immutableInteger;
-    Long immutableLong;
-    Float immutableFloat;
-    Double immutableDouble;
-
-    BigDecimal bigDecimal;
-
-    Date date;
-    Time time;
-    Timestamp timestamp;
-    Object object;
-
-    Collection<?> collection;
-    Map<?,?> map;
-    @Deprecated
-    Object[] arrayObject;
-    int[] arrayPrimitive;
-    byte[] binary;
-    WeekdayEnum weekdayEnum;
     
-    Class type;
+    /*
+     * all attributes public for test purposes...
+     */
+    public String string;
+    public boolean primitiveBoolean;
+    public byte primitiveByte;
+    public char primitiveChar;
+    public short primitiveShort;
+    public int primitiveInt;
+    public long primitiveLong;
+    public float primitiveFloat;
+    public double primitiveDouble;
 
-    TypeBean relation;
+    public Boolean immutableBoolean;
+    public Byte immutableByte;
+    public Character immutableChar;
+    public Short immutableShort;
+    public Integer immutableInteger;
+    public Long immutableLong;
+    public Float immutableFloat;
+    public Double immutableDouble;
+
+    public BigDecimal bigDecimal;
+
+    public Date date;
+    public Time time;
+    public Timestamp timestamp;
+    public Object object;
+
+    public Collection<?> collection;
+    public Map<?,?> map;
+    
+    @Deprecated
+    public Object[] arrayObject;
+    public int[] arrayPrimitive;
+    public byte[] binary;
+    public WeekdayEnum weekdayEnum;
+    
+    public Class type;
+
+    public TypeBean relation;
     
     /**
      * @return Returns the string.

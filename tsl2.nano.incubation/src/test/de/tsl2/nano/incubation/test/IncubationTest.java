@@ -37,6 +37,7 @@ import javax.print.attribute.standard.MediaSizeName;
 
 import org.apache.commons.logging.Log;
 import org.junit.After;
+import org.junit.AfterClass;
 import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Ignore;
@@ -108,8 +109,8 @@ import de.tsl2.nano.messaging.EventController;
 import de.tsl2.nano.messaging.IListener;
 import de.tsl2.nano.structure.Cover;
 import de.tsl2.nano.structure.IConnection;
-import de.tsl2.nano.test.TypeBean;
 import de.tsl2.nano.util.operation.Function;
+import de.tsl2.nano.util.test.TypeBean;
 
 /**
  * basic tests for algorithms to be refactored to the project tsl2nano.common in future.
@@ -122,16 +123,16 @@ public class IncubationTest {
     private static final String BASE_DIR_INCUBATION = "../tsl2.nano.incubation/";
     private static final String POSTFIX_TEST = "test/";
 
-    @Before
-    public void setUp() {
+    @BeforeClass
+    public static void setUp() {
         ENV.create(BASE_DIR_INCUBATION + POSTFIX_TEST);
         ENV.setProperty(ENV.KEY_CONFIG_PATH, POSTFIX_TEST);
 //        Environment.setProperty("app.strict.mode", true);
-        ENV.deleteEnvironment();
+//        ENV.deleteEnvironment();
     }
 
-    @After
-    public void tearDown() {
+    @AfterClass
+    public static void tearDown() {
         ENV.deleteEnvironment();
     }
     

@@ -57,9 +57,8 @@ import javax.json.JsonStructure;
 import org.apache.commons.logging.Log;
 import org.apache.tools.ant.types.FileSet;
 import org.apache.xmlgraphics.util.MimeConstants;
-import org.junit.After;
+import org.junit.AfterClass;
 import org.junit.Assert;
-import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Ignore;
 import org.junit.Test;
@@ -134,6 +133,8 @@ import de.tsl2.nano.util.operation.IConvertableUnit;
 import de.tsl2.nano.util.operation.NumericOperator;
 import de.tsl2.nano.util.operation.OperableUnit;
 import de.tsl2.nano.util.operation.Operator;
+import de.tsl2.nano.util.test.TypeBean;
+import de.tsl2.nano.util.test.WeekdayEnum;
 
 /**
  * 
@@ -146,16 +147,16 @@ public class CommonTest {
     private static final String BASE_DIR_COMMON = "../tsl2.nano.common/";
     private static final String POSTFIX_TEST = "test/";
 
-    @Before
-    public void setUp() {
+    @BeforeClass
+    public static void setUp() {
         ENV.create(BASE_DIR_COMMON + POSTFIX_TEST);
         ENV.setProperty(ENV.KEY_CONFIG_PATH, POSTFIX_TEST);
 //        Environment.setProperty("app.strict.mode", true);
         ENV.deleteEnvironment();
     }
 
-    @After
-    public void tearDown() {
+    @AfterClass
+    public static void tearDown() {
         ENV.deleteEnvironment();
     }
     

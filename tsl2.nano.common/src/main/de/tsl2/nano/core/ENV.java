@@ -40,7 +40,6 @@ import org.simpleframework.xml.DefaultType;
 import org.simpleframework.xml.ElementMap;
 import org.simpleframework.xml.core.Persist;
 
-import de.tsl2.nano.bean.BeanUtil;
 import de.tsl2.nano.collection.PersistableSingelton;
 import de.tsl2.nano.collection.PersistentCache;
 import de.tsl2.nano.core.cls.BeanClass;
@@ -55,6 +54,7 @@ import de.tsl2.nano.core.util.FileUtil;
 import de.tsl2.nano.core.util.MapUtil;
 import de.tsl2.nano.core.util.NetUtil;
 import de.tsl2.nano.core.util.NumberUtil;
+import de.tsl2.nano.core.util.ObjectUtil;
 import de.tsl2.nano.core.util.StringUtil;
 import de.tsl2.nano.core.util.Util;
 import de.tsl2.nano.core.util.XmlUtil;
@@ -1038,7 +1038,7 @@ public class ENV implements Serializable {
             Object key = keyIt.next();
             Object value = properties.get(key);
             if (value != null && (isNotSerializable(value)
-                || !BeanUtil.isSingleValueType(value.getClass())) || value instanceof ClassLoader) {
+                || !ObjectUtil.isSingleValueType(value.getClass())) || value instanceof ClassLoader) {
                 info("removing property '" + key
                     + "' from serialization while its value is not serializable or doesn't have a default constructor!");
                 keyIt.remove();
@@ -1077,7 +1077,7 @@ public class ENV implements Serializable {
      */
     private boolean isNotSerializable(Object value) {
         return value != null
-            && (!Serializable.class.isAssignableFrom(value.getClass()) || (!BeanUtil.isStandardType(value) && !BeanClass
+            && (!Serializable.class.isAssignableFrom(value.getClass()) || (!ObjectUtil.isStandardType(value) && !BeanClass
                 .hasDefaultConstructor(value.getClass())));
     }
 

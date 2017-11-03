@@ -298,6 +298,7 @@ public class NestedJarClassLoader extends LibClassLoader implements Cloneable {
     protected ZipStream getJarInputStream(String jarName) {
         ZipStream zipStream = jarFileStreams.get(jarName);
         if (zipStream == null) {
+            System.out.println("loading nested jar:" + jarName + " ...");
             zipStream = new ZipStream(this, jarName);
             jarFileStreams.put(jarName, zipStream);
         }

@@ -289,7 +289,7 @@ public class NanoH5Session implements ISession<BeanDefinition>, Serializable, IL
                 @Override
                 public void run() {
                     try {
-                        Set<WebSocket> sockets = socketServer.connections();
+                        Collection<WebSocket> sockets = socketServer.connections();
                         for (WebSocket webSocket : sockets) {
                             webSocket.send(" === APPLICATION STOPPED! === ");
 //                            Message.send("APPLICATION STOPPED!");

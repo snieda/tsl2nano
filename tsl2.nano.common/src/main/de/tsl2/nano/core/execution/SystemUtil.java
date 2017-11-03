@@ -163,6 +163,8 @@ public class SystemUtil {
                 + "  net-ip: ${inetadress.myip} (host-name: ${inetadress.hostname})\n";
         Properties p = new Properties();
         p.putAll(System.getProperties());
+        if (System.getProperty("java.compiler") == null)
+            p.put("java.compiler", "unspecified");
         p.put("nano.tstamp", new Date());
         p.put("main.context.classloader", Thread.currentThread().getContextClassLoader());
 

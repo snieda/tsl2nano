@@ -7,7 +7,7 @@
  * 
  * Copyright: (c) Thomas Schneider 2012, all rights reserved
  */
-package de.tsl2.nano.test;
+package de.tsl2.nano.util.test;
 
 /**
  * Only for enum testing

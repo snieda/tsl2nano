@@ -11,11 +11,11 @@ package de.tsl2.nano.h5.test;
 
 import org.junit.runner.RunWith;
 import org.junit.runners.Suite;
-import org.junit.runners.Suite.SuiteClasses;
-
-import de.tsl2.nano.incubation.test.IncubationTest;
-import de.tsl2.nano.serviceaccess.test.ServiceAccessTest;
-import de.tsl2.nano.test.CommonTest;
+//import org.junit.runners.Suite.SuiteClasses;
+//
+//import de.tsl2.nano.incubation.test.IncubationTest;
+//import de.tsl2.nano.serviceaccess.test.ServiceAccessTest;
+//import de.tsl2.nano.test.CommonTest;
 
 /**
  * 
@@ -23,6 +23,6 @@ import de.tsl2.nano.test.CommonTest;
  * @version $Revision$ 
  */
 @RunWith(Suite.class)
-@SuiteClasses(value = { CommonTest.class, ServiceAccessTest.class, IncubationTest.class, NanoH5Test.class })
+//@SuiteClasses(value = { CommonTest.class, ServiceAccessTest.class, IncubationTest.class, NanoH5Test.class })
 public class AllTests {
 }
