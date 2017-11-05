@@ -13,6 +13,7 @@ import java.lang.annotation.Annotation;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
@@ -34,6 +35,7 @@ public class ClassFinder {
     public ClassFinder() {
         this(Thread.currentThread().getContextClassLoader());
     }
+
     /**
      * constructor
      */
@@ -42,24 +44,31 @@ public class ClassFinder {
         classes = (Vector<Class<?>>) new PrivateAccessor(classLoader).member("classes", Vector.class);
     }
 
+    @SuppressWarnings("unchecked")
+    public <T> Collection<Class<T>> findClass(Class<T> base) {
+        return (Collection<Class<T>>) fuzzyFind(null, base, -1, null).values();
+    }
+
     public Class findClass(String filter) {
         Map<Double, Class> result = fuzzyFind(filter);
         return result.size() > 0 && result.containsKey(1d) ? result.get(1d) : null;
     }
-    
+
     public <M extends Map<Double, Class>> M fuzzyFind(String filter) {
         return fuzzyFind(filter, Class.class, -1, null);
     }
-    
+
     /**
      * finds all classes/methods/fields of the given classloader fuzzy matching the given filter, having the given
      * modifiers (or modifiers is -1) and having the given annotation (or annotation is null)
      * 
      * @param filter fuzzy filter
-     * @param resultType (optional) restricts to search for classes , methods or fields.
+     * @param resultType (optional) restricts to search for classes/extensions , methods or fields. If it is
+     *            {@link Method}, only method matches will be returned. if it is an interface, all matching
+     *            implementations will be returned.
      * @param modifier (optional, -1: all) see {@link Modifier}.
      * @param annotation (optional) class/method/field annotation as constraint.
-     * @return all found java elements sorted by matching quote down. best quote is 1. 
+     * @return all found java elements sorted by matching quote down. best quote is 1.
      */
     @SuppressWarnings("unchecked")
     public <T, M extends Map<Double, T>> M fuzzyFind(String filter,
@@ -67,27 +76,31 @@ public class ClassFinder {
             int modifier,
             Class<? extends Annotation> annotation) {
         Map<Double, T> result = new TreeMap<Double, T>() {
-          @Override
+            @Override
             public T put(Double key, T value) {
-                  while (containsKey(key))
-                      key += 0000000001;
+                while (containsKey(key))
+                    key += 0000000001;
                 return super.put(key, value);
-            }  
+            }
         };
         Class cls;
         double match;
-        boolean addClasses = resultType == null || Class.class.isAssignableFrom(resultType);
         boolean addMethods = resultType == null || Method.class.isAssignableFrom(resultType);
         boolean addFields = resultType == null || Field.class.isAssignableFrom(resultType);
+        boolean addClasses =
+            resultType == null || Class.class.isAssignableFrom(resultType) || (!addMethods && !addFields);
         //clone the classes vector to avoid concurrent modification - when the classloader is working
         for (Iterator<Class<?>> it = ((Vector<Class<?>>) classes.clone()).iterator(); it.hasNext();) {
             cls = it.next();
             if (addClasses) {
                 if ((modifier < 0 || cls.getModifiers() == modifier)
                     && (annotation == null || cls.getAnnotation(annotation) != null)) {
-                    match = StringUtil.fuzzyMatch(cls.getName(), filter);
+                    match = filter != null ? StringUtil.fuzzyMatch(cls.getName(), filter) : 1;
                     if (match > 0) {
-                        result.put(match, (T) cls);
+                        if (resultType == null || Class.class.isAssignableFrom(resultType)
+                            || resultType.isAssignableFrom(cls))
+                            if (!cls.equals(resultType)) //don't return the base class itself
+                                result.put(match, (T) cls);
                     }
                 }
             }
@@ -101,17 +114,17 @@ public class ClassFinder {
         return (M) result;
     }
 
-    private Map<Double, Method> fuzzyFindMethods(Class cls,
+    public Map<Double, Method> fuzzyFindMethods(Class cls,
             String filter,
             int modifier,
             Class<? extends Annotation> annotation) {
         HashMap<Double, Method> map = new HashMap<Double, Method>() {
             @Override
             public Method put(Double key, Method value) {
-                  while (containsKey(key))
-                      key += 0000000001;
+                while (containsKey(key))
+                    key += 0000000001;
                 return super.put(key, value);
-            }  
+            }
         };
         Method[] methods = Modifier.isPublic(modifier) ? cls.getMethods() : cls.getDeclaredMethods();
         double match;
@@ -126,17 +139,17 @@ public class ClassFinder {
         return map;
     }
 
-    private Map<Double, Field> fuzzyFindFields(Class cls,
+    public Map<Double, Field> fuzzyFindFields(Class cls,
             String filter,
             int modifier,
             Class<? extends Annotation> annotation) {
         HashMap<Double, Field> map = new HashMap<Double, Field>() {
             @Override
             public Field put(Double key, Field value) {
-                  while (containsKey(key))
-                      key += 0000000001;
+                while (containsKey(key))
+                    key += 0000000001;
                 return super.put(key, value);
-            }  
+            }
         };
         Field[] fields = Modifier.isPublic(modifier) ? cls.getFields() : cls.getDeclaredFields();
         double match;

@@ -39,7 +39,7 @@ public class NanoH5IntegrationTest {
 
 
     @Test
-    @Ignore
+//    @Ignore
     public void testNano() throws Exception {
         String serviceURL = getServiceURL();
         runNano(serviceURL);

@@ -5,10 +5,11 @@
 	<artifactId>tsl2.nano.h5-package</artifactId>
 	<version>1.1.1</version>
 	<packaging>pom</packaging>
-	<name>TSL2 Html5 Application framework</name>
-	<description>TSL2 Html5 Application framework</description>
+	<name>TSL2 Html5 Application Framework</name>
+	<description>TSL2 Html5 Application Framework</description>
 	<properties>
 		<maven.test.skip>true</maven.test.skip>
+		<fail-at-end>true</fail-at-end>
 	</properties>
 	<inceptionYear>2012</inceptionYear>
 	<licenses>
@@ -36,7 +37,36 @@
 					<source>1.8</source>
 					<target>1.8</target>
 				</configuration>
-			</plugin><!--
+			</plugin>
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-surefire-plugin</artifactId>
+				<version>2.12.4</version>
+				<executions>
+					<execution>
+						<id>junit</id>
+						<phase>test</phase>
+						<configuration>
+							<parallel>true</parallel>
+							<skipTests>true</skipTests>
+							<excludes>
+								<exclude>**/*IntegrationTest.java</exclude>
+							</excludes>
+						</configuration>
+					</execution>
+					<execution>
+						<id>integration-test</id>
+						<phase>integration-test</phase>
+						<configuration>
+							<skipTests>false</skipTests>
+							<includes>
+								<include>**/*IntegrationTest.java</include>
+							</includes>
+						</configuration>
+					</execution>
+				</executions>
+			</plugin>
+			<!--
 			<plugin>
 				<artifactId>maven-assembly-plugin</artifactId>
 				<version>3.1.0</version>

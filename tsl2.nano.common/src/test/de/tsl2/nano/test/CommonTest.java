@@ -68,6 +68,7 @@ import de.tsl2.nano.action.CommonAction;
 import de.tsl2.nano.action.IAction;
 import de.tsl2.nano.action.IActivable;
 import de.tsl2.nano.bean.BeanUtil;
+import de.tsl2.nano.bean.IBeanContainer;
 import de.tsl2.nano.bean.ValueHolder;
 import de.tsl2.nano.bean.def.Bean;
 import de.tsl2.nano.bean.def.BeanCollector;
@@ -215,7 +216,7 @@ public class CommonTest {
         p.put("shared.lib.dir", "lib");
         p.put("server.lib.dir", "lib");
         p.put("lib-tools.dir", "lib");
-        if (!ScriptUtil.ant(BASE_DIR_COMMON + "shell.xml", "help", p)) {
+        if (!ScriptUtil.ant(BASE_DIR_COMMON + "src/resources/" + "shell.xml", "help", p)) {
             fail("ant call didn't work!");
         }
 
@@ -1843,6 +1844,7 @@ public class CommonTest {
         assertTrue(finder.fuzzyFind(c[1], null, Modifier.PUBLIC, null).containsValue(ClassFinder.class));
         assertTrue(finder.fuzzyFind(c[2], Method.class, -1, null).containsValue(
             ClassFinder.class.getMethod("fuzzyFind", String.class, Class.class, int.class, Class.class)));
+        assertTrue(finder.findClass(IBeanContainer.class).size() == 1);
     }
     
     @Ignore

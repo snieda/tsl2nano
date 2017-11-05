@@ -6,8 +6,12 @@
 	<version>1.1.1</version>
 	<name>TSL2 framework html5 extensions</name>
 	<description>TSL2 framework h5 extensions</description>
+	<!-- TODO: create property file with versions like in build-tsl.nano.h5.properties -->
 	<properties>
 		<maven.test.skip>true</maven.test.skip>
+		<keystore>../tsl2store</keystore>
+		<alias>tsl2</alias>
+		<storepass>tsl2tsl2</storepass>
 	</properties>
 
 	<parent>
@@ -104,22 +108,115 @@
 				</executions>
 			</plugin>
 			<plugin>
+				<!-- FIXME: It is not recommended to create more than one jar file -->
 				<artifactId>maven-jar-plugin</artifactId>
 				<version>2.3</version>
-				<configuration>
-					<signedjar>${project.build.directory}/${project.build.finalName}-signed.jar</signedjar>
-					<alias>tsl2</alias>
-					<storepass>tsl2tsl2</storepass>
-					<keystore>tsl2store</keystore>
-					<checkCerts>true</checkCerts>
-					<archive>
-						<manifestFile>META-INF/MANIFEST.MF</manifestFile>
-					</archive>
-					<!-- <archive> <manifest> <addClasspath>true</addClasspath> <classpathLayoutType>repository</classpathLayoutType> 
-						</manifest> </archive> <includes> <include>../**/core/**</include> <include>../**/resources/**</include> 
-						<include>${project.build.outputDirectory}/**/h5/**</include> <include>${project.build.directory}/${project.build.finalName}.lib/**</include> 
-						</includes> -->
-				</configuration>
+				<executions>
+					<execution>
+						<id>standard-jar</id>
+						<goals>
+							<goal>jar</goal>
+						</goals>
+						<phase>package</phase>
+						<configuration>
+							<classifier></classifier>
+							<archive>
+								<manifest>
+									<addClasspath>true</addClasspath>
+									<mainClass>de.tsl2.nano.h5.Loader</mainClass>
+								</manifest>
+							</archive>
+							<excludes>
+								<exclude>**/standalone.zip</exclude>
+							</excludes>
+						</configuration>
+					</execution>
+					<execution>
+						<id>standalone-jar</id>
+						<goals>
+							<goal>jar</goal>
+						</goals>
+						<phase>package</phase>
+						<configuration>
+							<classifier>standalone</classifier>
+							<archive>
+								<manifest>
+									<addClasspath>true</addClasspath>
+									<mainClass>de.tsl2.nano.h5.Loader</mainClass>
+								</manifest>
+							</archive>
+						</configuration>
+					</execution>
+					<execution>
+						<id>signed-jar</id>
+						<goals>
+							<goal>jar</goal>
+						</goals>
+						<phase>package</phase>
+						<configuration>
+							<classifier>signed</classifier>
+							<archive>
+								<manifest>
+									<addClasspath>true</addClasspath>
+									<mainClass>de.tsl2.nano.h5.Loader</mainClass>
+								</manifest>
+							</archive>
+							<!-- <archive> <manifest> <addClasspath>true</addClasspath> <classpathLayoutType>repository</classpathLayoutType> 
+								</manifest> </archive> <includes> <include>../**/core/**</include> <include>../**/resources/**</include> 
+								<include>${project.build.outputDirectory}/**/h5/**</include> <include>${project.build.directory}/${project.build.finalName}.lib/**</include> 
+								</includes> -->
+						</configuration>
+					</execution>
+					<execution>
+						<id>container-war</id>
+						<goals>
+							<goal>jar</goal>
+						</goals>
+						<phase>package</phase>
+						<configuration>
+							<classifier>war</classifier>
+							<archive>
+								<manifest>
+									<addClasspath>true</addClasspath>
+									<mainClass>de.tsl2.nano.h5.Loader</mainClass>
+								</manifest>
+							</archive>
+						</configuration>
+					</execution>
+				</executions>
+			</plugin>
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-jarsigner-plugin</artifactId>
+				<version>1.4</version>
+				<executions>
+					<execution>
+						<goals>
+							<!-- <goal>sign</goal> -->
+						</goals>
+						<phase>package</phase>
+						<configuration>
+							<includes>
+								<include>**/*-signed.jar</include>
+							</includes>
+							<keystore>${keystore}</keystore>
+							<alias>${alias}</alias>
+							<storepass>${storepass}</storepass>
+						</configuration>
+					</execution>
+				</executions>
+			</plugin>
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-site-plugin</artifactId>
+			</plugin>
+			<plugin>
+				<groupId>org.codehaus.mojo</groupId>
+				<artifactId>findbugs-maven-plugin</artifactId>
+			</plugin>
+			<plugin>
+				<groupId>org.jacoco</groupId>
+				<artifactId>jacoco-maven-plugin</artifactId>
 			</plugin>
 		</plugins>
 	</build>
@@ -184,4 +281,27 @@
 			<scope>runtime</scope>
 		</dependency>
 	</dependencies>
+	<reporting>
+		<plugins>
+			<plugin>
+				<groupId>org.codehaus.mojo</groupId>
+				<artifactId>findbugs-maven-plugin</artifactId>
+				<configuration>
+					<onlyAnalyze>tsl2.*</onlyAnalyze>
+				</configuration>
+			</plugin>
+			<plugin>
+				<groupId>org.jacoco</groupId>
+				<artifactId>jacoco-maven-plugin</artifactId>
+				<reportSets>
+					<reportSet>
+						<reports>
+							<!-- select non-aggregate reports -->
+							<report>report</report>
+						</reports>
+					</reportSet>
+				</reportSets>
+			</plugin>
+		</plugins>
+	</reporting>
 </project>

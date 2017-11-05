@@ -343,12 +343,8 @@ public class Html5Presentation<T> extends BeanPresentationHelper<T> implements I
                 form = createPage(session, null, "Leaving Application!<br/>Restart", false, navigation);
             }
 
-            //TODO: Some external extensions...
-//            extendCurrentDom(form);
-//            Collection<IDOMExtender> domExtenders = ClassFinder.find(IDOMExtender.class);
-//            for (IDOMExtender domExt  : domExtenders) {
-//                domExt.extend(session, form.getOwnerDocument(), parms);
-//            }
+            //Some external extensions...
+            extendCurrentDom(form, session);
             
             String html = HtmlUtil.toString(form.getOwnerDocument());
             if (LOG.isDebugEnabled()) {
@@ -358,6 +354,16 @@ public class Html5Presentation<T> extends BeanPresentationHelper<T> implements I
         } catch (Exception ex) {
             return HtmlUtil.createMessagePage(ENV.translate("tsl2nano.error", true), message + "<p/>" +
                 ManagedException.toRuntimeEx(ex, true, true).getMessage());
+        }
+    }
+
+    protected void extendCurrentDom(Element form, ISession session) {
+        Collection<Class<IDOMExtender>> domExtenders = new ClassFinder().findClass(IDOMExtender.class);
+        for (Class<IDOMExtender> clsDOMExt  : domExtenders) {
+            LOG.info("==> starting DOM-Extension: " + clsDOMExt);
+            IDOMExtender instance = BeanClass.createInstance(clsDOMExt);
+            instance.extend(form.getOwnerDocument(), session);
+            LOG.info("<== DOM-Extension " + clsDOMExt + " finished!");
         }
     }
 

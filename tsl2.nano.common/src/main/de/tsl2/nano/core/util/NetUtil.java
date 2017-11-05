@@ -581,10 +581,9 @@ public class NetUtil {
                 LOG.info(buf);
             return currentProxy;
         } catch (URISyntaxException e) {
-            e.printStackTrace();
-            new RuntimeException(e);
+            ManagedException.forward(e);
+            return null;
         }
-        return null;
     }
 
     static String getSystem(String k) {
