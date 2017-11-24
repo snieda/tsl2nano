@@ -1,9 +1,0 @@
-Manifest-Version: 1.0
-Signature-Version: 0.0.4 (29.11.2015)
-Ant-Version: Apache Ant 1.7.1
-Created-By: Thomas Schneider
-Application-Name: tsl2 shell
-Permissions: all-permissions
-Main-Class: de.tsl2.nano.core.AppLoader
-Main-Arguments: de.tsl2.nano.execution.ScriptUtil ant shell.xml
-Class-Path: simple-xml-2.7.jar ant.jar ant-launcher.jar ant-nodeps.jar

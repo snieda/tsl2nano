@@ -73,6 +73,7 @@ A cool way to see the power of this tool can be seen in chapter _Online Quick-St
 * secure connection over https and wss (_app.ssl.activate=true)
 * supporting yaml on environment and bean configurations.
 * update mechanism
+* injecting own logic on the forms html dom document
 * planned interfaces: 
 	* xsd-->bean
 	* java-interface-->java-bean (mock through internal proxy)
@@ -3700,4 +3701,10 @@ maven TODO:
 	- signing
 	- integration test NanoH5
 	- jars: war, sign, standalone, pure, sishell
+
+tmux display-message -p -F "#{pane_current_path}" -t0
+
+https://medium.com/njiuko/using-fzf-instead-of-dmenu-2780d184753f
+
+myVar=$(grep -Po "(?<=^HereIsAKey ).*" file)
 	
