@@ -40,6 +40,7 @@ import de.tsl2.nano.core.ENV;
 import de.tsl2.nano.core.classloader.RuntimeClassloader;
 import de.tsl2.nano.core.cls.BeanClass;
 import de.tsl2.nano.core.execution.SystemUtil;
+import de.tsl2.nano.core.util.ByteUtil;
 import de.tsl2.nano.core.util.ConcurrentUtil;
 import de.tsl2.nano.core.util.DateUtil;
 import de.tsl2.nano.core.util.FileUtil;
@@ -50,6 +51,7 @@ import de.tsl2.nano.h5.CSheet;
 import de.tsl2.nano.h5.Html5Presentation;
 import de.tsl2.nano.h5.NanoH5;
 import de.tsl2.nano.h5.NanoHTTPD.Method;
+import de.tsl2.nano.h5.NanoHTTPD.Response;
 import de.tsl2.nano.h5.configuration.BeanConfigurator;
 import de.tsl2.nano.h5.expression.QueryPool;
 import de.tsl2.nano.h5.navigation.Workflow;
@@ -153,6 +155,10 @@ public class NanoH5Test {
         new Html5Presentation().reset();
         ENV.reset();
 
+        //preload class DOMExtender to be found by ClassFinder
+        DOMExtender preloadClass = new DOMExtender();
+        System.out.print(preloadClass.toString());
+        
         ENV.create(DIR_TEST);
         initServices();
         Socket sampleSocket = new Socket();
@@ -178,7 +184,9 @@ public class NanoH5Test {
                 if (attr.getColumnDefinition() != null)
                     Bean.getBean(attr.getColumnDefinition()).toValueMap(null);
             }
-            app.serve("/" + i+1, Method.POST, MapUtil.asMap("socket", sampleSocket), new HashMap<>(), new HashMap<>());
+            Response response = app.serve("/" + i+1, Method.POST, MapUtil.asMap("socket", sampleSocket), new HashMap<>(), new HashMap<>());
+            String html = ByteUtil.toString(response.getData(), "UTF-8");
+            assertTrue(html.contains(DOMExtender.class.getName())); // see DOMExtender class
             bean.onDeactivation(null);
         }
 

@@ -15,10 +15,14 @@ import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
 import java.util.Collection;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Map;
+import java.util.Set;
 import java.util.TreeMap;
 import java.util.Vector;
+
+import org.apache.tools.ant.taskdefs.Classloader;
 
 import de.tsl2.nano.core.util.StringUtil;
 
@@ -28,9 +32,9 @@ import de.tsl2.nano.core.util.StringUtil;
  * @author Tom
  * @version $Revision$
  */
-@SuppressWarnings("rawtypes")
+@SuppressWarnings({"rawtypes", "unchecked"})
 public class ClassFinder {
-    private Vector<Class<?>> classes;
+    private Set<Class<?>> classes;
 
     public ClassFinder() {
         this(Thread.currentThread().getContextClassLoader());
@@ -39,12 +43,23 @@ public class ClassFinder {
     /**
      * constructor
      */
-    @SuppressWarnings("unchecked")
     public ClassFinder(ClassLoader classLoader) {
-        classes = (Vector<Class<?>>) new PrivateAccessor(classLoader).member("classes", Vector.class);
+        classes = new HashSet<>();
+        addClasses(ClassLoader.getSystemClassLoader(), classes);
+        while ((classLoader = addClasses(classLoader, classes)) != null);
+        System.out.println("ClassFinder created for " + classes.size() + " classes");
     }
 
-    @SuppressWarnings("unchecked")
+    /**
+     * addClasses
+     * @param classLoader
+     * @return parent ClassLoader
+     */
+    private static ClassLoader addClasses(ClassLoader classLoader, Set<Class<?>> classes) {
+        classes.addAll((Collection<? extends Class<?>>) new PrivateAccessor(classLoader).member("classes", Vector.class));
+        return (ClassLoader) new PrivateAccessor(classLoader).call("getParent", Classloader.class);
+    }
+
     public <T> Collection<Class<T>> findClass(Class<T> base) {
         return (Collection<Class<T>>) fuzzyFind(null, base, -1, null).values();
     }
@@ -70,7 +85,6 @@ public class ClassFinder {
      * @param annotation (optional) class/method/field annotation as constraint.
      * @return all found java elements sorted by matching quote down. best quote is 1.
      */
-    @SuppressWarnings("unchecked")
     public <T, M extends Map<Double, T>> M fuzzyFind(String filter,
             Class<T> resultType,
             int modifier,
@@ -90,7 +104,7 @@ public class ClassFinder {
         boolean addClasses =
             resultType == null || Class.class.isAssignableFrom(resultType) || (!addMethods && !addFields);
         //clone the classes vector to avoid concurrent modification - when the classloader is working
-        for (Iterator<Class<?>> it = ((Vector<Class<?>>) classes.clone()).iterator(); it.hasNext();) {
+        for (Iterator<Class<?>> it = /*((Vector<Class<?>>) */classes/*.clone())*/.iterator(); it.hasNext();) {
             cls = it.next();
             if (addClasses) {
                 if ((modifier < 0 || cls.getModifiers() == modifier)

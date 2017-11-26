@@ -29,7 +29,7 @@ public class DOMExtender implements IDOMExtender {
     public void extend(Document doc, ISession<?> session) {
         //TODO: create Testcase for that...
         Element node = doc.createElement("h1");
-        node.setTextContent("Mein Test");
+        node.setTextContent(this.getClass().getName());
        doc.getDocumentElement().appendChild(node);
     }
 
