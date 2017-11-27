@@ -40,15 +40,15 @@ import de.tsl2.nano.core.Messages;
 import de.tsl2.nano.core.cls.BeanAttribute;
 import de.tsl2.nano.core.cls.BeanClass;
 import de.tsl2.nano.core.cls.IAttribute;
+import de.tsl2.nano.core.cls.PrivateAccessor;
 import de.tsl2.nano.core.log.LogFactory;
+import de.tsl2.nano.core.util.DefaultFormat;
 import de.tsl2.nano.core.util.FormatUtil;
 import de.tsl2.nano.core.util.ListSet;
 import de.tsl2.nano.core.util.NumberUtil;
 import de.tsl2.nano.core.util.ObjectUtil;
 import de.tsl2.nano.core.util.StringUtil;
 import de.tsl2.nano.core.util.Util;
-import de.tsl2.nano.format.DefaultFormat;
-import de.tsl2.nano.util.PrivateAccessor;
 
 /**
  * A Utility-Class for beans
@@ -155,16 +155,6 @@ private static Object deepCopy(Object src, Object dest) throws Exception {
             }
         }
         return src;
-    }
-
-    /**
-     * calls the internal {@link Object#clone()} method.
-     * 
-     * @param src source to copy
-     * @return copied object
-     */
-    public static <T> T cloneObject(T src) {
-        return (T) new PrivateAccessor<T>(src).call("clone", null);
     }
 
     /**
@@ -652,39 +642,6 @@ private static Object deepCopy(Object src, Object dest) throws Exception {
         return UUID.randomUUID().toString();
     }
 
-    private static String OBJ_TOSTRING;
-    static {
-        try {
-            OBJ_TOSTRING = Object.class.getMethod("toString", new Class[0]).toString();
-        } catch (final Exception e) {
-            ManagedException.forward(e);
-        }
-    }
-
-    public static boolean hasToString(Object obj) {
-        return obj != null && hasToString(obj.getClass());
-    }
-
-    /**
-     * checks, whether the class of the given object implements 'toString()' itself.
-     * 
-     * @param obj instance of class to evaluate
-     * @return true, if class of object overrides toString()
-     */
-    public static boolean hasToString(Class cls) {
-        try {
-            if (cls.isInterface()) {
-                return false;
-            }
-            final Method method = cls.getMethod("toString", new Class[0]);
-            //pure objects, representating there instance id
-            return !method.toString().equals(OBJ_TOSTRING);
-        } catch (final Exception e) {
-            ManagedException.forward(e);
-            return false;
-        }
-    }
-
     /**
      * creates a hashcode through all single-value attibutes of given bean instance
      * 
@@ -717,9 +674,9 @@ private static Object deepCopy(Object src, Object dest) throws Exception {
     public static BeanDefinition<?> getBean(Object obj) {
         return (BeanDefinition<?>) (obj instanceof BeanDefinition<?> ? obj
             : (Util.isContainer(obj)
-                ? BeanCollector.getBeanCollector(Util.getContainer(obj), 0)
+                ? BeanCollector.getBeanCollector(CollectionUtil.getContainer(obj), 0)
                 : obj instanceof Serializable ? Bean.getBean((Serializable) obj)
-                    : BeanCollector.getBeanCollector(Util.getContainer(BeanUtil.toValueMap(obj)), 0)));
+                    : BeanCollector.getBeanCollector(CollectionUtil.getContainer(BeanUtil.toValueMap(obj)), 0)));
     }
 
 }

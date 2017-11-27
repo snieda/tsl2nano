@@ -16,8 +16,8 @@ import org.simpleframework.xml.DefaultType;
 import org.simpleframework.xml.core.Commit;
 
 import de.tsl2.nano.core.util.DateUtil;
+import de.tsl2.nano.core.util.Period;
 import de.tsl2.nano.core.util.StringUtil;
-import de.tsl2.nano.util.Period;
 
 /**
  * used for a mapping from an public synthetic user to an internal real user. passwords and internal user-names are

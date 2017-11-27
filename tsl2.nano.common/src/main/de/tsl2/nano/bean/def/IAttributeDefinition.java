@@ -16,7 +16,7 @@ import java.util.Collection;
 import de.tsl2.nano.bean.IAttributeDef;
 import de.tsl2.nano.core.cls.IAttribute;
 import de.tsl2.nano.core.util.ISecure;
-import de.tsl2.nano.messaging.EventController;
+import de.tsl2.nano.core.messaging.EventController;
 
 /**
  * full bean attribute definition - to validate attribute value.

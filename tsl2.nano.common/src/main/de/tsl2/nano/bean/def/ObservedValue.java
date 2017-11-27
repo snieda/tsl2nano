@@ -10,7 +10,7 @@
 package de.tsl2.nano.bean.def;
 
 import de.tsl2.nano.bean.ValueHolder;
-import de.tsl2.nano.messaging.EventController;
+import de.tsl2.nano.core.messaging.EventController;
 
 /**
  * 

@@ -12,8 +12,8 @@ package de.tsl2.nano.bean.def;
 import java.util.Arrays;
 
 import de.tsl2.nano.bean.IValueAccess;
-import de.tsl2.nano.messaging.ChangeEvent;
-import de.tsl2.nano.messaging.IListener;
+import de.tsl2.nano.core.messaging.ChangeEvent;
+import de.tsl2.nano.core.messaging.IListener;
 
 /**
  * Wraps enum value names to boolean attributes (up to 10 values). May be used for field bindings.<br>

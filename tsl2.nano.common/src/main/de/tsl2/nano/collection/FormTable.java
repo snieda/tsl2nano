@@ -11,7 +11,7 @@ package de.tsl2.nano.collection;
 
 import java.text.Format;
 
-import de.tsl2.nano.format.DefaultFormat;
+import de.tsl2.nano.core.util.DefaultFormat;
 
 /**
  * Simple extension of {@link TableList} to get formatted values.

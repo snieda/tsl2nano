@@ -20,6 +20,7 @@ import java.util.Properties;
 import de.tsl2.nano.bean.def.Constraint;
 import de.tsl2.nano.bean.def.IConstraint;
 import de.tsl2.nano.core.cls.BeanClass;
+import de.tsl2.nano.core.cls.PrivateAccessor;
 import de.tsl2.nano.core.execution.SystemUtil;
 import de.tsl2.nano.core.util.FileUtil;
 import de.tsl2.nano.core.util.StringUtil;
@@ -43,7 +44,6 @@ import de.tsl2.nano.incubation.terminal.item.selector.SQLSelector;
 import de.tsl2.nano.incubation.terminal.item.selector.Sequence;
 import de.tsl2.nano.incubation.terminal.item.selector.XPathSelector;
 import de.tsl2.nano.incubation.vnet.workflow.Condition;
-import de.tsl2.nano.util.PrivateAccessor;
 
 /**
  * item administration shell

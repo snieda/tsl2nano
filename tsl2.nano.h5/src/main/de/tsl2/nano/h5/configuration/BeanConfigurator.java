@@ -37,6 +37,7 @@ import de.tsl2.nano.collection.Entry;
 import de.tsl2.nano.core.ENV;
 import de.tsl2.nano.core.cls.BeanClass;
 import de.tsl2.nano.core.cls.IAttribute;
+import de.tsl2.nano.core.cls.PrivateAccessor;
 import de.tsl2.nano.core.util.ConcurrentUtil;
 import de.tsl2.nano.core.util.FileUtil;
 import de.tsl2.nano.core.util.MapUtil;
@@ -57,7 +58,6 @@ import de.tsl2.nano.incubation.specification.actions.ActionPool;
 import de.tsl2.nano.incubation.specification.rules.Rule;
 import de.tsl2.nano.incubation.specification.rules.RulePool;
 import de.tsl2.nano.incubation.specification.rules.RuleScript;
-import de.tsl2.nano.util.PrivateAccessor;
 
 /**
  * wrapper class to handle presentation of a bean-definition. at a time, only one BeanConfigurator is active. this

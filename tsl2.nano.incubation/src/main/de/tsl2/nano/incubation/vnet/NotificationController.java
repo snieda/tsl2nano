@@ -9,7 +9,7 @@
  */
 package de.tsl2.nano.incubation.vnet;
 
-import de.tsl2.nano.messaging.IListener;
+import de.tsl2.nano.core.messaging.IListener;
 
 /**
  * On notifying all listeners about a new {@link Notification}, the listener will first be checked, if its

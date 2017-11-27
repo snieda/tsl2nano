@@ -16,11 +16,11 @@ import java.util.Map;
 import org.simpleframework.xml.Attribute;
 
 import de.tsl2.nano.core.cls.BeanClass;
+import de.tsl2.nano.core.cls.PrivateAccessor;
+import de.tsl2.nano.core.cls.UnboundAccessor;
 import de.tsl2.nano.core.util.StringUtil;
 import de.tsl2.nano.incubation.specification.AbstractRunnable;
 import de.tsl2.nano.incubation.specification.ParType;
-import de.tsl2.nano.util.PrivateAccessor;
-import de.tsl2.nano.util.UnboundAccessor;
 
 /**
  * Action to be loaded by ActionPool and provided to SpecifiedAction.

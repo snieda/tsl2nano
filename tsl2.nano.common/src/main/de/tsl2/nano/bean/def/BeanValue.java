@@ -31,7 +31,6 @@ import de.tsl2.nano.action.IAction;
 import de.tsl2.nano.bean.BeanUtil;
 import de.tsl2.nano.bean.IValueAccess;
 import de.tsl2.nano.bean.ValueHolder;
-import de.tsl2.nano.collection.CollectionUtil;
 import de.tsl2.nano.collection.Entry;
 import de.tsl2.nano.collection.MapEntrySet;
 import de.tsl2.nano.core.ENV;
@@ -42,13 +41,14 @@ import de.tsl2.nano.core.cls.IAttribute;
 import de.tsl2.nano.core.cls.PrimitiveUtil;
 import de.tsl2.nano.core.log.LogFactory;
 import de.tsl2.nano.core.util.ByteUtil;
+import de.tsl2.nano.collection.CollectionUtil;
 import de.tsl2.nano.core.util.FileUtil;
 import de.tsl2.nano.core.util.ListSet;
 import de.tsl2.nano.core.util.StringUtil;
 import de.tsl2.nano.core.util.Util;
-import de.tsl2.nano.messaging.ChangeEvent;
-import de.tsl2.nano.messaging.EventController;
-import de.tsl2.nano.messaging.IListener;
+import de.tsl2.nano.core.messaging.ChangeEvent;
+import de.tsl2.nano.core.messaging.EventController;
+import de.tsl2.nano.core.messaging.IListener;
 
 /**
  * BeanAttribute holding the bean instance, observers and exact attribute definitions - with validation.

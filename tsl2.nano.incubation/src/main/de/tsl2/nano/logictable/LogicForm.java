@@ -11,7 +11,7 @@ package de.tsl2.nano.logictable;
 
 import java.text.Format;
 
-import de.tsl2.nano.collection.CollectionUtil;
+import de.tsl2.nano.core.util.CollectionUtil;
 import de.tsl2.nano.core.util.FormatUtil;
 
 /**

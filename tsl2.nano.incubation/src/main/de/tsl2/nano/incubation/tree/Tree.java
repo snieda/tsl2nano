@@ -17,9 +17,9 @@ import java.util.Scanner;
 import java.util.SortedMap;
 import java.util.TreeMap;
 
-import de.tsl2.nano.collection.CollectionUtil;
 import de.tsl2.nano.core.IPredicate;
 import de.tsl2.nano.core.ITransformer;
+import de.tsl2.nano.collection.CollectionUtil;
 import de.tsl2.nano.core.util.StringUtil;
 
 /**

@@ -42,6 +42,8 @@ import de.tsl2.nano.core.Finished;
 import de.tsl2.nano.core.ManagedException;
 import de.tsl2.nano.core.Messages;
 import de.tsl2.nano.core.classloader.NetworkClassLoader;
+import de.tsl2.nano.core.cls.PrivateAccessor;
+import de.tsl2.nano.core.cls.UnboundAccessor;
 import de.tsl2.nano.core.execution.CompatibilityLayer;
 import de.tsl2.nano.core.execution.SystemUtil;
 import de.tsl2.nano.core.log.LogFactory;
@@ -56,9 +58,7 @@ import de.tsl2.nano.incubation.platform.PlatformManagement;
 import de.tsl2.nano.incubation.terminal.IItem.Type;
 import de.tsl2.nano.incubation.terminal.item.Container;
 import de.tsl2.nano.incubation.terminal.item.selector.Sequence;
-import de.tsl2.nano.util.PrivateAccessor;
 import de.tsl2.nano.util.SchedulerUtil;
-import de.tsl2.nano.util.UnboundAccessor;
 
 /**
  * Structured Input Shell (SIShell) showing a textual manual. The configuration can be read through an xml file
@@ -260,7 +260,7 @@ public class SIShell implements IItemHandler, Serializable {
             && !new CompatibilityLayer().isAvailable("org.apache.tools.ant.Task"))
             throw new ManagedException("error.ant.missing", file);
         SIShell t =
-            ffile.exists() ? XmlUtil.loadXml(file, SIShell.class) : new SIShell(new Container(file, null));
+            ffile.exists() ? XmlGenUtil.loadXml(file, SIShell.class) : new SIShell(new Container(file, null));
         t.name = file;
         return t;
     }
@@ -343,7 +343,7 @@ public class SIShell implements IItemHandler, Serializable {
 
     protected void save(boolean saveConfiguration) {
         if (saveConfiguration) {
-            XmlUtil.saveXml(name, this);
+            XmlGenUtil.saveXml(name, this);
         }
         Set<Object> keys = env.keySet();
         //replace objects through their toString()

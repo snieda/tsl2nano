@@ -43,6 +43,8 @@ import de.tsl2.nano.core.ManagedException;
 import de.tsl2.nano.core.cls.BeanAttribute;
 import de.tsl2.nano.core.cls.BeanClass;
 import de.tsl2.nano.core.cls.IAttribute;
+import de.tsl2.nano.core.cls.PrivateAccessor;
+import de.tsl2.nano.core.cls.UnboundAccessor;
 import de.tsl2.nano.core.log.LogFactory;
 import de.tsl2.nano.core.util.ByteUtil;
 import de.tsl2.nano.core.util.DelegationHandler;
@@ -53,10 +55,8 @@ import de.tsl2.nano.core.util.NumberUtil;
 import de.tsl2.nano.core.util.StringUtil;
 import de.tsl2.nano.core.util.Util;
 import de.tsl2.nano.format.RegExpFormat;
-import de.tsl2.nano.messaging.EventController;
-import de.tsl2.nano.messaging.IListener;
-import de.tsl2.nano.util.PrivateAccessor;
-import de.tsl2.nano.util.UnboundAccessor;
+import de.tsl2.nano.core.messaging.EventController;
+import de.tsl2.nano.core.messaging.IListener;
 
 /**
  * 

@@ -34,8 +34,8 @@ import de.tsl2.nano.core.util.StringUtil;
 import de.tsl2.nano.h5.NanoH5Session;
 import de.tsl2.nano.h5.configuration.BeanConfigurator;
 import de.tsl2.nano.math.vector.Point;
-import de.tsl2.nano.messaging.IListener;
-import de.tsl2.nano.messaging.IStatefulListener;
+import de.tsl2.nano.core.messaging.IListener;
+import de.tsl2.nano.core.messaging.IStatefulListener;
 
 /**
  * Html5 WebSocket Server to provide a rich client gui interaction.

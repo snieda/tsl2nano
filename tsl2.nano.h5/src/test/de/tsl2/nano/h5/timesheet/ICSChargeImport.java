@@ -31,9 +31,9 @@ import de.tsl2.nano.bean.def.BeanDefinition;
 import de.tsl2.nano.core.ICallback;
 import de.tsl2.nano.core.exception.Message;
 import de.tsl2.nano.core.util.DateUtil;
+import de.tsl2.nano.core.util.Period;
 import de.tsl2.nano.h5.ICSCalendarImport;
 import de.tsl2.nano.scanner.ICSCalendarReader;
-import de.tsl2.nano.util.Period;
 
 /**
  * import any ICS calendar from file. the CATEGRORIES must exist as project with same name, the CLASS must exist as

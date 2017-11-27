@@ -59,7 +59,7 @@ public class Authorization implements IAuthorization {
         Subject subject = new Subject();
         String permissions = ENV.getConfigPath() + userName + "-permissons.xml";
         if (new File(permissions).canRead()) {
-            Subject subjectDef = XmlUtil.loadXml(permissions, Subject.class);
+            Subject subjectDef = XmlGenUtil.loadXml(permissions, Subject.class);
             subject.getPrincipals().addAll(subjectDef.getPrincipals());
         } else if (ENV.get("service.autorization.new.createdefault", true)){
             //if no permission was defined, a wildcard for all permissions will be set.
@@ -68,7 +68,7 @@ public class Authorization implements IAuthorization {
                 subject.getPrincipals().add(new Role("admin", new APermission("*", "*")));
             }
             try {
-                XmlUtil.saveXml(permissions, subject);
+                XmlGenUtil.saveXml(permissions, subject);
             } catch (Exception e) {
                 LOG.error("Couldn't save authorization info in file '" + permissions + "'", e);
             }

@@ -15,8 +15,8 @@ import java.util.Set;
 
 import org.simpleframework.xml.core.Commit;
 
-import de.tsl2.nano.collection.CollectionUtil;
 import de.tsl2.nano.core.ITransformer;
+import de.tsl2.nano.core.util.CollectionUtil;
 import de.tsl2.nano.core.util.StringUtil;
 import de.tsl2.nano.core.util.Util;
 import de.tsl2.nano.incubation.tree.STree;

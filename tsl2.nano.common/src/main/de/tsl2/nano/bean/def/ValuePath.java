@@ -15,11 +15,11 @@ import org.simpleframework.xml.Default;
 import org.simpleframework.xml.DefaultType;
 
 import de.tsl2.nano.bean.IValueAccess;
-import de.tsl2.nano.collection.CollectionUtil;
 import de.tsl2.nano.core.ManagedException;
 import de.tsl2.nano.core.cls.BeanAttribute;
 import de.tsl2.nano.core.cls.BeanClass;
-import de.tsl2.nano.messaging.EventController;
+import de.tsl2.nano.core.util.CollectionUtil;
+import de.tsl2.nano.core.messaging.EventController;
 
 /**
  * resolves relations through a path to several beans/attributes

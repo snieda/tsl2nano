@@ -1,6 +1,6 @@
 package de.tsl2.nano.logictable;
 
-import de.tsl2.nano.format.DefaultFormat;
+import de.tsl2.nano.core.util.DefaultFormat;
 
 /**
  * simple column-formatter using alphabetic index

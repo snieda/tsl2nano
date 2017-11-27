@@ -105,8 +105,8 @@ import de.tsl2.nano.logictable.DefaultHeader;
 import de.tsl2.nano.logictable.EquationSolver;
 import de.tsl2.nano.logictable.LogicTable;
 import de.tsl2.nano.math.vector.Vector;
-import de.tsl2.nano.messaging.EventController;
-import de.tsl2.nano.messaging.IListener;
+import de.tsl2.nano.core.messaging.EventController;
+import de.tsl2.nano.core.messaging.IListener;
 import de.tsl2.nano.structure.Cover;
 import de.tsl2.nano.structure.IConnection;
 import de.tsl2.nano.util.operation.Function;
@@ -613,8 +613,8 @@ public class IncubationTest {
 
         String xmlfile = "test/typebean.xml";
         new File(xmlfile).getParentFile().mkdirs();
-        XmlUtil.saveSimpleXml_(xmlfile, bean);
-        TypeBean bean1 = XmlUtil.loadSimpleXml_(xmlfile, TypeBean.class, true);
+        XmlGenUtil.saveSimpleXml_(xmlfile, bean);
+        TypeBean bean1 = XmlGenUtil.loadSimpleXml_(xmlfile, TypeBean.class, true);
         assertEquals(bean.getType(), bean1.getType());
     }
 
@@ -688,9 +688,9 @@ public class IncubationTest {
         xml.add(new FileSelector("xsl-transformation", null, ".*xsl.*", "${user.dir}"));
         xml.add(new Input("xsl-destination", "${user.dir}/${source}.html", "xsl destination file", false));
         xml.add(new Input("xpath-expression", null, "xpath expression", false));
-        xml.add(new Action(XmlUtil.class, "transformVel", "source", Action.KEY_ENV));
-        xml.add(new Action(XmlUtil.class, "transformXsl", "source", "xsl-transformation", "xsl-destination"));
-        xml.add(new Action(XmlUtil.class, "xpath", "xpath-expression", "source"));
+        xml.add(new Action(XmlGenUtil.class, "transformVel", "source", Action.KEY_ENV));
+        xml.add(new Action(XmlGenUtil.class, "transformXsl", "source", "xsl-transformation", "xsl-destination"));
+        xml.add(new Action(XmlGenUtil.class, "xpath", "xpath-expression", "source"));
         xml.add(new Sequence(new de.tsl2.nano.incubation.terminal.item.Command("sequential echo command", "echo"),
             new XPathSelector(
                 "xpathselector", null, "bin/" + SIShell.DEFAULT_NAME, "//@name"),

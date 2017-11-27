@@ -23,8 +23,8 @@ import de.tsl2.nano.core.IPredicate;
 import de.tsl2.nano.core.ITransformer;
 import de.tsl2.nano.core.ManagedException;
 import de.tsl2.nano.core.util.ListSet;
-import de.tsl2.nano.messaging.EventController;
-import de.tsl2.nano.messaging.IListener;
+import de.tsl2.nano.core.messaging.EventController;
+import de.tsl2.nano.core.messaging.IListener;
 import de.tsl2.nano.structure.IConnection;
 import de.tsl2.nano.structure.INode;
 

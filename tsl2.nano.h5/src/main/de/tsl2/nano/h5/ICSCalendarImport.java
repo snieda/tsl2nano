@@ -15,8 +15,8 @@ import java.util.Collection;
 import de.tsl2.nano.core.ENV;
 import de.tsl2.nano.core.ICallback;
 import de.tsl2.nano.core.util.NetUtil;
+import de.tsl2.nano.core.util.Period;
 import de.tsl2.nano.scanner.ICSCalendarReader;
-import de.tsl2.nano.util.Period;
 
 /**
  * imports a holiday ics calendar from "http://www.kayaposoft.com/enrico/ics/v1.0?country=deu&fromDate=01-01-2016&toDate=31-12-2016&region=Bavaria".

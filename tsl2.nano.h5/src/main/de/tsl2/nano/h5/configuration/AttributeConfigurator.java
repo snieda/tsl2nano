@@ -30,6 +30,7 @@ import de.tsl2.nano.bean.def.ValueExpressionFormat;
 import de.tsl2.nano.core.ENV;
 import de.tsl2.nano.core.cls.BeanClass;
 import de.tsl2.nano.core.cls.IAttribute;
+import de.tsl2.nano.core.cls.PrivateAccessor;
 import de.tsl2.nano.core.exception.Message;
 import de.tsl2.nano.core.util.ConcurrentUtil;
 import de.tsl2.nano.core.util.FileUtil;
@@ -43,8 +44,7 @@ import de.tsl2.nano.incubation.specification.actions.ActionPool;
 import de.tsl2.nano.incubation.specification.rules.Rule;
 import de.tsl2.nano.incubation.specification.rules.RulePool;
 import de.tsl2.nano.incubation.specification.rules.RuleScript;
-import de.tsl2.nano.messaging.IListener;
-import de.tsl2.nano.util.PrivateAccessor;
+import de.tsl2.nano.core.messaging.IListener;
 
 /**
  * Provides a specific set of Attribute members to configure.

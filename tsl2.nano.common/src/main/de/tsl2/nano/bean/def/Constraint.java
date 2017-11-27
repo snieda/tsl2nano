@@ -23,8 +23,8 @@ import org.simpleframework.xml.core.Complete;
 import org.simpleframework.xml.core.Persist;
 
 import de.tsl2.nano.bean.BeanUtil;
-import de.tsl2.nano.collection.CollectionUtil;
 import de.tsl2.nano.core.ManagedException;
+import de.tsl2.nano.core.util.CollectionUtil;
 import de.tsl2.nano.core.util.FormatUtil;
 import de.tsl2.nano.format.GenericParser;
 

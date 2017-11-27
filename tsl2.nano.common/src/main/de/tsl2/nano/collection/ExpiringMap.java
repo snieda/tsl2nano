@@ -17,8 +17,8 @@ import java.util.Set;
 
 import org.apache.commons.logging.Log;
 
+import de.tsl2.nano.core.cls.PrivateAccessor;
 import de.tsl2.nano.core.log.LogFactory;
-import de.tsl2.nano.util.PrivateAccessor;
 
 /**
  * map holding entries with a lifecycle defined by a {@link #timeout}. on adding elements, old elements may be removed.

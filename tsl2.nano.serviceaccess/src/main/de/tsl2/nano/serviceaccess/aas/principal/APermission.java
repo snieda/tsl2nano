@@ -16,7 +16,7 @@ import javax.security.auth.Subject;
 
 import org.simpleframework.xml.Attribute;
 
-import de.tsl2.nano.util.PrivateAccessor;
+import de.tsl2.nano.core.cls.PrivateAccessor;
 
 
 /**

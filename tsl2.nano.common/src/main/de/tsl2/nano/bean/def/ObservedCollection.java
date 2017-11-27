@@ -12,7 +12,7 @@ package de.tsl2.nano.bean.def;
 import java.lang.reflect.Proxy;
 import java.util.Collection;
 
-import de.tsl2.nano.messaging.EventController;
+import de.tsl2.nano.core.messaging.EventController;
 import de.tsl2.nano.util.DelegatorProxy;
 
 /**

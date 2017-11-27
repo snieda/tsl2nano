@@ -16,7 +16,7 @@ import org.apache.commons.logging.Log;
 import de.tsl2.nano.core.ENV;
 import de.tsl2.nano.core.ManagedException;
 import de.tsl2.nano.core.log.LogFactory;
-import de.tsl2.nano.core.util.XmlUtil;
+import de.tsl2.nano.util.XmlGenUtil;
 
 /**
  * application cache to store simple data. uses an own {@link ReferenceMap} with weak keys to avoid out-of-memory errors.
@@ -61,7 +61,7 @@ public class PersistentCache {
         cacheFilePath = cachePath + "/tsl2nano-persistentcache.xml";
         try {
             if (new File(cacheFilePath).exists()) {
-                self.cache = ENV.get(XmlUtil.class).loadXml(cacheFilePath, ReferenceMap.class);
+                self.cache = ENV.get(XmlGenUtil.class).loadXml(cacheFilePath, ReferenceMap.class);
             }
         } catch (final Exception e) {
             ManagedException.forward(e);
@@ -85,7 +85,7 @@ public class PersistentCache {
     public Object put(Object key, Object value) {
         final Object result = cache.put(key, value);
         try {
-            ENV.get(XmlUtil.class).saveXml(cacheFilePath, cache);
+            ENV.get(XmlGenUtil.class).saveXml(cacheFilePath, cache);
         } catch (final Exception e) {
             ManagedException.forward(e);
         }
@@ -98,7 +98,7 @@ public class PersistentCache {
     public Object remove(Object key) {
         final Object result = cache.remove(key);
         try {
-            ENV.get(XmlUtil.class).saveXml(cacheFilePath, cache);
+            ENV.get(XmlGenUtil.class).saveXml(cacheFilePath, cache);
         } catch (final Exception e) {
             ManagedException.forward(e);
         }

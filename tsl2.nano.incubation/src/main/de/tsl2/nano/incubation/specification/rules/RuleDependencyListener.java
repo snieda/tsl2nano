@@ -22,10 +22,10 @@ import de.tsl2.nano.bean.def.Bean;
 import de.tsl2.nano.bean.def.BeanValue;
 import de.tsl2.nano.bean.def.IAttributeDefinition;
 import de.tsl2.nano.core.ENV;
+import de.tsl2.nano.core.cls.PrivateAccessor;
 import de.tsl2.nano.core.log.LogFactory;
 import de.tsl2.nano.core.util.StringUtil;
-import de.tsl2.nano.messaging.ChangeEvent;
-import de.tsl2.nano.util.PrivateAccessor;
+import de.tsl2.nano.core.messaging.ChangeEvent;
 
 /**
  * dependency listener evaluating its value through a given rule.

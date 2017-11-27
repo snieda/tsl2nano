@@ -23,6 +23,7 @@ import java.util.Date;
 
 import org.simpleframework.xml.Attribute;
 
+import de.tsl2.nano.core.util.DefaultFormat;
 import de.tsl2.nano.core.util.FormatUtil;
 
 /**

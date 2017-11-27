@@ -14,8 +14,8 @@ import java.util.Collection;
 import java.util.Map;
 import java.util.Set;
 
-import de.tsl2.nano.collection.CollectionUtil;
 import de.tsl2.nano.collection.TableList;
+import de.tsl2.nano.core.util.CollectionUtil;
 import de.tsl2.nano.core.util.StringUtil;
 
 /**

@@ -318,7 +318,7 @@ public class Persistence implements Serializable, Cloneable {
     public String save() throws IOException {
         ENV.saveBackup(getBeanFileName());
         provideDatabaseInputAsDDL();
-        ENV.get(XmlUtil.class).saveXml(getPath(getBeanFileName()), this);
+        ENV.get(XmlGenUtil.class).saveXml(getPath(getBeanFileName()), this);
         saveJdbcProperties();
         return savePersistenceXml();
     }
@@ -502,7 +502,7 @@ public class Persistence implements Serializable, Cloneable {
     public final boolean change(String beanjar) {
         if (Persistence.exists()) {
             Persistence persistence =
-                ENV.get(XmlUtil.class).loadXml(getPath(getBeanFileName()), Persistence.class);
+                ENV.get(XmlGenUtil.class).loadXml(getPath(getBeanFileName()), Persistence.class);
             persistence.setJarFile(beanjar);
             try {
                 persistence.save();
@@ -619,7 +619,7 @@ public class Persistence implements Serializable, Cloneable {
     public static Persistence current() {
         Persistence p;
         if (Persistence.exists()) {
-            p = ENV.get(XmlUtil.class).loadXml(getPath(FILE_PERSISTENCE_BEAN),
+            p = ENV.get(XmlGenUtil.class).loadXml(getPath(FILE_PERSISTENCE_BEAN),
                 Persistence.class);
         } else {
             p = new Persistence();

@@ -14,7 +14,7 @@ import java.io.Serializable;
 import de.tsl2.nano.incubation.vnet.ILocatable;
 import de.tsl2.nano.incubation.vnet.Notification;
 import de.tsl2.nano.math.vector.Vector3D;
-import de.tsl2.nano.messaging.IListener;
+import de.tsl2.nano.core.messaging.IListener;
 
 /**
  * 

@@ -1,6 +1,6 @@
 package de.tsl2.nano.bean;
 
-import de.tsl2.nano.messaging.EventController;
+import de.tsl2.nano.core.messaging.EventController;
 
 public interface IValueAccess<T> {
 

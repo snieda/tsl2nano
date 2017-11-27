@@ -48,7 +48,6 @@ import de.tsl2.nano.bean.IConnector;
 import de.tsl2.nano.bean.IValueAccess;
 import de.tsl2.nano.bean.ValueHolder;
 import de.tsl2.nano.bean.annotation.Action;
-import de.tsl2.nano.collection.CollectionUtil;
 import de.tsl2.nano.core.ENV;
 import de.tsl2.nano.core.IPredicate;
 import de.tsl2.nano.core.ManagedException;
@@ -56,16 +55,17 @@ import de.tsl2.nano.core.Messages;
 import de.tsl2.nano.core.cls.BeanAttribute;
 import de.tsl2.nano.core.cls.BeanClass;
 import de.tsl2.nano.core.cls.IAttribute;
+import de.tsl2.nano.core.cls.PrivateAccessor;
 import de.tsl2.nano.core.log.LogFactory;
+import de.tsl2.nano.collection.CollectionUtil;
 import de.tsl2.nano.core.util.DateUtil;
+import de.tsl2.nano.core.util.DefaultFormat;
 import de.tsl2.nano.core.util.FileUtil;
 import de.tsl2.nano.core.util.ListSet;
 import de.tsl2.nano.core.util.StringUtil;
 import de.tsl2.nano.core.util.Util;
-import de.tsl2.nano.format.DefaultFormat;
-import de.tsl2.nano.messaging.ChangeEvent;
-import de.tsl2.nano.messaging.IListener;
-import de.tsl2.nano.util.PrivateAccessor;
+import de.tsl2.nano.core.messaging.ChangeEvent;
+import de.tsl2.nano.core.messaging.IListener;
 
 /**
  * Holds all informations to define a bean as a container of bean-attributes. Uses {@link BeanClass} and

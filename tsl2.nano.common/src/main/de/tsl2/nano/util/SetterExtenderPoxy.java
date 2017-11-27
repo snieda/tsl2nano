@@ -15,6 +15,7 @@ import java.lang.reflect.Method;
 import java.lang.reflect.Proxy;
 
 import de.tsl2.nano.core.cls.BeanClass;
+import de.tsl2.nano.core.cls.PrivateAccessor;
 import de.tsl2.nano.core.util.StringUtil;
 
 /**

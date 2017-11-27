@@ -12,8 +12,8 @@ import org.simpleframework.xml.ElementMap;
 import org.simpleframework.xml.core.Persist;
 
 import de.tsl2.nano.action.IAction;
-import de.tsl2.nano.collection.CollectionUtil;
 import de.tsl2.nano.core.log.LogFactory;
+import de.tsl2.nano.core.util.CollectionUtil;
 import de.tsl2.nano.core.util.StringUtil;
 import de.tsl2.nano.core.util.Util;
 import de.tsl2.nano.util.parser.Parser;

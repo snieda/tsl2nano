@@ -11,8 +11,8 @@ package de.tsl2.nano.incubation.vnet;
 
 import java.io.Serializable;
 
-import de.tsl2.nano.messaging.EventController;
-import de.tsl2.nano.messaging.IListener;
+import de.tsl2.nano.core.messaging.EventController;
+import de.tsl2.nano.core.messaging.IListener;
 import de.tsl2.nano.structure.IConnection;
 
 /**

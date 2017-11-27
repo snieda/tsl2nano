@@ -71,7 +71,7 @@ public class XPathSelector extends Selector<String> {
             LOG.error("file " + xmlFileName + " can't be read!");
             result = null;
         } else {
-            result = ENV.get(XmlUtil.class).xpath(xpath, xmlFileName, Map.class);
+            result = ENV.get(XmlGenUtil.class).xpath(xpath, xmlFileName, Map.class);
         }
         return result != null ? new ArrayList<String>(result.values()) : new LinkedList<String>();
     }

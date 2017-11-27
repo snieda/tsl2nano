@@ -12,8 +12,8 @@ package de.tsl2.nano.incubation.vnet;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
-import de.tsl2.nano.messaging.EventController;
-import de.tsl2.nano.messaging.IListener;
+import de.tsl2.nano.core.messaging.EventController;
+import de.tsl2.nano.core.messaging.IListener;
 
 /**
  * a notification will be sent to all recipients fulfilling the given path of {@link ILocatable#getPath()}. the creator

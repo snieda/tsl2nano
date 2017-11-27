@@ -12,9 +12,9 @@ package de.tsl2.nano.bean.def;
 import java.util.LinkedList;
 import java.util.List;
 
-import de.tsl2.nano.collection.CollectionUtil;
 import de.tsl2.nano.core.ITransformer;
 import de.tsl2.nano.core.cls.BeanClass;
+import de.tsl2.nano.collection.CollectionUtil;
 import de.tsl2.nano.core.util.StringUtil;
 import de.tsl2.nano.util.FuzzyFinder;
 import de.tsl2.nano.util.IFuzzyDescriptor;

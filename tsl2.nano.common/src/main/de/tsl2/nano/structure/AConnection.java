@@ -1,6 +1,6 @@
 package de.tsl2.nano.structure;
 
-import de.tsl2.nano.messaging.IListener;
+import de.tsl2.nano.core.messaging.IListener;
 
 
 public class AConnection<T, D> implements IConnection<T, D>, IListener<INode<T, D>> {

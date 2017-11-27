@@ -25,7 +25,7 @@ import de.tsl2.nano.incubation.vnet.ILocatable;
 import de.tsl2.nano.incubation.vnet.Link;
 import de.tsl2.nano.incubation.vnet.Node;
 import de.tsl2.nano.incubation.vnet.Notification;
-import de.tsl2.nano.messaging.IListener;
+import de.tsl2.nano.core.messaging.IListener;
 import de.tsl2.nano.structure.Cover;
 import de.tsl2.nano.structure.IConnection;
 import de.tsl2.nano.structure.INode;

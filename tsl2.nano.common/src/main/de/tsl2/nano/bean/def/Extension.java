@@ -21,7 +21,7 @@ import org.simpleframework.xml.core.Commit;
 
 import de.tsl2.nano.bean.BeanUtil;
 import de.tsl2.nano.core.cls.BeanClass;
-import de.tsl2.nano.util.PrivateAccessor;
+import de.tsl2.nano.core.cls.PrivateAccessor;
 import de.tsl2.nano.util.operation.IConverter;
 
 /**

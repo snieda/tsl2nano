@@ -56,8 +56,7 @@ import de.tsl2.nano.bean.BeanUtil;
 import de.tsl2.nano.bean.IAttributeDef;
 import de.tsl2.nano.bean.IValueAccess;
 import de.tsl2.nano.bean.ValueHolder;
-import de.tsl2.nano.collection.CollectionUtil;
-import de.tsl2.nano.core.Context;
+import de.tsl2.nano.bean.Context;
 import de.tsl2.nano.core.ENV;
 import de.tsl2.nano.core.ISession;
 import de.tsl2.nano.core.ManagedException;
@@ -69,15 +68,16 @@ import de.tsl2.nano.core.exception.Message;
 import de.tsl2.nano.core.log.LogFactory;
 import de.tsl2.nano.core.util.BitUtil;
 import de.tsl2.nano.core.util.ByteUtil;
+import de.tsl2.nano.collection.CollectionUtil;
+import de.tsl2.nano.core.util.DefaultFormat;
 import de.tsl2.nano.core.util.FileUtil;
 import de.tsl2.nano.core.util.NumberUtil;
 import de.tsl2.nano.core.util.StringUtil;
 import de.tsl2.nano.core.util.Util;
-import de.tsl2.nano.format.DefaultFormat;
 import de.tsl2.nano.format.GenericParser;
 import de.tsl2.nano.format.RegExpFormat;
-import de.tsl2.nano.messaging.ChangeEvent;
-import de.tsl2.nano.messaging.IListener;
+import de.tsl2.nano.core.messaging.ChangeEvent;
+import de.tsl2.nano.core.messaging.IListener;
 
 /**
  * class to provide presentation definitions/algorithms for sets of attributes. this class holds only its parent

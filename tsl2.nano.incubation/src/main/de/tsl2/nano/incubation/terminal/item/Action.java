@@ -22,12 +22,12 @@ import de.tsl2.nano.bean.def.IConstraint;
 import de.tsl2.nano.core.ManagedException;
 import de.tsl2.nano.core.cls.BeanAttribute;
 import de.tsl2.nano.core.cls.BeanClass;
+import de.tsl2.nano.core.cls.PrivateAccessor;
 import de.tsl2.nano.core.execution.IRunnable;
 import de.tsl2.nano.core.log.LogFactory;
 import de.tsl2.nano.core.util.StringUtil;
 import de.tsl2.nano.incubation.terminal.IItem;
 import de.tsl2.nano.incubation.terminal.SIShell;
-import de.tsl2.nano.util.PrivateAccessor;
 
 /**
  * action to be used on {@link SIShell}s. no inline {@link Runnable} are supported as instances of this class must be

@@ -19,8 +19,8 @@ import org.apache.commons.logging.Log;
 import de.tsl2.nano.core.ManagedException;
 import de.tsl2.nano.core.log.LogFactory;
 import de.tsl2.nano.core.util.StringUtil;
-import de.tsl2.nano.messaging.EventController;
-import de.tsl2.nano.messaging.IListener;
+import de.tsl2.nano.core.messaging.EventController;
+import de.tsl2.nano.core.messaging.IListener;
 import de.tsl2.nano.structure.ANode;
 import de.tsl2.nano.structure.IConnection;
 

@@ -44,6 +44,7 @@ import org.java_websocket.WebSocket;
 import de.tsl2.nano.action.IAction;
 import de.tsl2.nano.bean.BeanContainer;
 import de.tsl2.nano.bean.BeanUtil;
+import de.tsl2.nano.bean.Context;
 import de.tsl2.nano.bean.def.Bean;
 import de.tsl2.nano.bean.def.BeanCollector;
 import de.tsl2.nano.bean.def.BeanDefinition;
@@ -54,9 +55,7 @@ import de.tsl2.nano.bean.def.IBeanFinder;
 import de.tsl2.nano.bean.def.IPageBuilder;
 import de.tsl2.nano.bean.def.IPresentable;
 import de.tsl2.nano.bean.def.MethodAction;
-import de.tsl2.nano.collection.CollectionUtil;
 import de.tsl2.nano.collection.MapEntrySet;
-import de.tsl2.nano.core.Context;
 import de.tsl2.nano.core.ENV;
 import de.tsl2.nano.core.ISession;
 import de.tsl2.nano.core.Main;
@@ -65,6 +64,9 @@ import de.tsl2.nano.core.exception.ExceptionHandler;
 import de.tsl2.nano.core.exception.Message;
 import de.tsl2.nano.core.execution.Profiler;
 import de.tsl2.nano.core.log.LogFactory;
+import de.tsl2.nano.core.messaging.EMessage;
+import de.tsl2.nano.core.messaging.IListener;
+import de.tsl2.nano.collection.CollectionUtil;
 import de.tsl2.nano.core.util.ConcurrentUtil;
 import de.tsl2.nano.core.util.DateUtil;
 import de.tsl2.nano.core.util.ListSet;
@@ -73,7 +75,6 @@ import de.tsl2.nano.core.util.NetUtil;
 import de.tsl2.nano.core.util.NumberUtil;
 import de.tsl2.nano.core.util.StringUtil;
 import de.tsl2.nano.core.util.Util;
-import de.tsl2.nano.core.util.XmlUtil;
 import de.tsl2.nano.format.RegExpFormat;
 import de.tsl2.nano.h5.NanoHTTPD.Method;
 import de.tsl2.nano.h5.NanoHTTPD.Response;
@@ -83,12 +84,11 @@ import de.tsl2.nano.h5.navigation.IBeanNavigator;
 import de.tsl2.nano.h5.navigation.Parameter;
 import de.tsl2.nano.h5.websocket.NanoWebSocketServer;
 import de.tsl2.nano.h5.websocket.WebSocketExceptionHandler;
-import de.tsl2.nano.messaging.EMessage;
-import de.tsl2.nano.messaging.IListener;
 import de.tsl2.nano.persistence.Persistence;
 import de.tsl2.nano.service.util.BeanContainerUtil;
 import de.tsl2.nano.serviceaccess.Authorization;
 import de.tsl2.nano.serviceaccess.IAuthorization;
+import de.tsl2.nano.util.XmlGenUtil;
 import de.tsl2.nano.util.operation.IRange;
 
 /**
@@ -160,7 +160,7 @@ public class NanoH5Session implements ISession<BeanDefinition>, Serializable, IL
         if (storedSessionFile != null && storedSessionFile.exists()) {
             try {
                 //try to load a temp stored session
-                session = ENV.get(XmlUtil.class).loadXml(storedSessionFile.getPath(), NanoH5Session.class);
+                session = ENV.get(XmlGenUtil.class).loadXml(storedSessionFile.getPath(), NanoH5Session.class);
                 session.init(server, inetAddress, navigator, appstartClassloader, authorization, context);
             } catch (Exception e) {
                 //on error we create a new session object
@@ -426,7 +426,7 @@ public class NanoH5Session implements ISession<BeanDefinition>, Serializable, IL
             actionLog.clear();
             //don't forget that there was an exception. to be seen on the next exception ;-)
             logaction(ex.toString(), parms);
-            Message.broadcast(this,
+            EMessage.broadcast(this,
                 ENV.translate("nanoh5.error", false,
                     this.getUserAuthorization() != null ? this.getUserAuthorization().getUser() : "<unkown user>", 
                     nav.current(), e.getLocalizedMessage()),
@@ -739,7 +739,7 @@ public class NanoH5Session implements ISession<BeanDefinition>, Serializable, IL
             } else {
                 result = action.activate();
                 if (action.getId().endsWith(".save") || action.getId().endsWith(".delete"))
-                    Message.broadcast(this,
+                    EMessage.broadcast(this,
                         ENV.translate("tsl2nano.value.changed", false,
                             nav.current().getName() + ": " + nav.current(),
                             this.getUserAuthorization().getUser(), action.getShortDescription()),
@@ -816,14 +816,14 @@ public class NanoH5Session implements ISession<BeanDefinition>, Serializable, IL
     @SuppressWarnings("static-access")
     protected void addContextObject(BeanDefinition<?> object) {
         ((Collection) this.context).add(object);
-        ENV.get(XmlUtil.class).saveXml(getSessionFile(authorization).getPath(), this);
+        ENV.get(XmlGenUtil.class).saveXml(getSessionFile(authorization).getPath(), this);
     }
 
     @SuppressWarnings("static-access")
     protected boolean removeContextObject(BeanDefinition<?> object) {
         boolean result = ((Collection) this.context).remove(object);
         if (result)
-            ENV.get(XmlUtil.class).saveXml(getSessionFile(authorization).getPath(), this);
+            ENV.get(XmlGenUtil.class).saveXml(getSessionFile(authorization).getPath(), this);
         return result;
     }
 

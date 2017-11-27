@@ -17,7 +17,7 @@ import org.simpleframework.xml.DefaultType;
 import org.simpleframework.xml.Element;
 
 import de.tsl2.nano.action.CommonAction;
-import de.tsl2.nano.util.PrivateAccessor;
+import de.tsl2.nano.core.cls.PrivateAccessor;
 
 /**
  * 

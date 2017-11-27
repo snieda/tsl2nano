@@ -17,7 +17,7 @@ import org.simpleframework.xml.Element;
 
 import de.tsl2.nano.bean.IValueAccess;
 import de.tsl2.nano.core.cls.IAttribute;
-import de.tsl2.nano.messaging.EventController;
+import de.tsl2.nano.core.messaging.EventController;
 
 /**
  * Object[] value.

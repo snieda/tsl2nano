@@ -16,9 +16,9 @@ import org.simpleframework.xml.Transient;
 
 import de.tsl2.nano.core.ManagedException;
 import de.tsl2.nano.core.util.Util;
-import de.tsl2.nano.messaging.EventController;
-import de.tsl2.nano.messaging.IListener;
-import de.tsl2.nano.messaging.IStatefulListener;
+import de.tsl2.nano.core.messaging.EventController;
+import de.tsl2.nano.core.messaging.IListener;
+import de.tsl2.nano.core.messaging.IStatefulListener;
 
 /**
  * standard dependency {@link IListener} to be added to the {@link EventController} of an {@link AttributeDefinition}.

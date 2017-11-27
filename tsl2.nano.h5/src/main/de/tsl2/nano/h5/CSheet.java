@@ -36,6 +36,7 @@ import de.tsl2.nano.collection.TableList;
 import de.tsl2.nano.core.ENV;
 import de.tsl2.nano.core.ManagedException;
 import de.tsl2.nano.core.cls.IAttribute;
+import de.tsl2.nano.core.cls.PrivateAccessor;
 import de.tsl2.nano.core.log.LogFactory;
 import de.tsl2.nano.core.util.NumberUtil;
 import de.tsl2.nano.core.util.Util;
@@ -43,7 +44,6 @@ import de.tsl2.nano.incubation.specification.Pool;
 import de.tsl2.nano.logictable.ICellVisitor;
 import de.tsl2.nano.logictable.LogicForm;
 import de.tsl2.nano.logictable.LogicTable;
-import de.tsl2.nano.util.PrivateAccessor;
 
 /**
  * Provides calculation sheets as tables with columns and rows. each cell is owned by an {@link MapValue} as BeanValue.

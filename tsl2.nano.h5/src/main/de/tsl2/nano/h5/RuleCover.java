@@ -30,6 +30,7 @@ import de.tsl2.nano.bean.def.BeanDefinition;
 import de.tsl2.nano.bean.def.IAttributeDefinition;
 import de.tsl2.nano.core.ENV;
 import de.tsl2.nano.core.cls.BeanAttribute;
+import de.tsl2.nano.core.cls.PrivateAccessor;
 import de.tsl2.nano.core.exception.Message;
 import de.tsl2.nano.core.log.LogFactory;
 import de.tsl2.nano.core.util.DelegationHandler;
@@ -38,7 +39,6 @@ import de.tsl2.nano.core.util.MapUtil;
 import de.tsl2.nano.core.util.StringUtil;
 import de.tsl2.nano.core.util.Util;
 import de.tsl2.nano.incubation.specification.rules.RulePool;
-import de.tsl2.nano.util.PrivateAccessor;
 
 /**
  * The RuleCover is a plugin to {@link AttributeDefinition}s and enables a container of properties to evaluate the

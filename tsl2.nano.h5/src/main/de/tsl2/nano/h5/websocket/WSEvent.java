@@ -9,7 +9,7 @@
  */
 package de.tsl2.nano.h5.websocket;
 
-import de.tsl2.nano.messaging.ChangeEvent;
+import de.tsl2.nano.core.messaging.ChangeEvent;
 
 /**
  * Websocket event holding a mouse click position
