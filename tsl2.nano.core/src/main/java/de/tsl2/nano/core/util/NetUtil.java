@@ -207,10 +207,10 @@ public class NetUtil {
         out.println(StringUtil.removeXMLTags(get(strUrl)));
     }
 
-//    public static JsonStructure getRestfulJSON(String url, Object... args) {
-//        String jsonStr = getRest(url, args);
-//        return Json.createReader(new StringReader(jsonStr)).read();
-//    }
+    public static JsonStructure getRestfulJSON(String url, Object... args) {
+        String jsonStr = getRest(url, args);
+        return Json.createReader(new StringReader(jsonStr)).read();
+    }
 
     @SuppressWarnings({ "unchecked", "rawtypes" })
     public static/*<T> T*/String getRest(String url/*, Class<T> responseType*/, Map args) {

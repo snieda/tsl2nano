@@ -260,7 +260,7 @@ public class SIShell implements IItemHandler, Serializable {
             && !new CompatibilityLayer().isAvailable("org.apache.tools.ant.Task"))
             throw new ManagedException("error.ant.missing", file);
         SIShell t =
-            ffile.exists() ? XmlGenUtil.loadXml(file, SIShell.class) : new SIShell(new Container(file, null));
+            ffile.exists() ? XmlUtil.loadXml(file, SIShell.class) : new SIShell(new Container(file, null));
         t.name = file;
         return t;
     }
@@ -343,7 +343,7 @@ public class SIShell implements IItemHandler, Serializable {
 
     protected void save(boolean saveConfiguration) {
         if (saveConfiguration) {
-            XmlGenUtil.saveXml(name, this);
+            XmlUtil.saveXml(name, this);
         }
         Set<Object> keys = env.keySet();
         //replace objects through their toString()

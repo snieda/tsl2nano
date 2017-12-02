@@ -55,6 +55,7 @@ import de.tsl2.nano.bean.def.IBeanFinder;
 import de.tsl2.nano.bean.def.IPageBuilder;
 import de.tsl2.nano.bean.def.IPresentable;
 import de.tsl2.nano.bean.def.MethodAction;
+import de.tsl2.nano.collection.CollectionUtil;
 import de.tsl2.nano.collection.MapEntrySet;
 import de.tsl2.nano.core.ENV;
 import de.tsl2.nano.core.ISession;
@@ -66,7 +67,6 @@ import de.tsl2.nano.core.execution.Profiler;
 import de.tsl2.nano.core.log.LogFactory;
 import de.tsl2.nano.core.messaging.EMessage;
 import de.tsl2.nano.core.messaging.IListener;
-import de.tsl2.nano.collection.CollectionUtil;
 import de.tsl2.nano.core.util.ConcurrentUtil;
 import de.tsl2.nano.core.util.DateUtil;
 import de.tsl2.nano.core.util.ListSet;
@@ -716,7 +716,7 @@ public class NanoH5Session implements ISession<BeanDefinition>, Serializable, IL
                     } else {
                         Map<String, Object> args = MapUtil.fromKeys(MethodAction.getArgumentNames(action));
                         //TODO: extend the BeanCollector to use @Constraint of each argument (=row)
-                        BeanDefinition bean = BeanCollector.getBeanCollector(Util.getContainer(args), 0);
+                        BeanDefinition bean = BeanCollector.getBeanCollector(CollectionUtil.getContainer(args), 0);
                         bean.setName(action.getShortDescription());
                         bean.addAction(action);
                         result = bean;

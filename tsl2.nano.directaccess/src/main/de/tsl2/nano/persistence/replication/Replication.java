@@ -74,7 +74,7 @@ public class Replication extends Persistence implements Runnable {
     @SuppressWarnings("static-access")
     public static Replication current() {
         if (Persistence.exists()) {
-            return ENV.get(XmlGenUtil.class).loadXml(getPath(FILE_PERSISTENCE_BEAN),
+            return ENV.get(XmlUtil.class).loadXml(getPath(FILE_PERSISTENCE_BEAN),
                 Replication.class);
         } else {
             return new Replication();
@@ -121,7 +121,7 @@ public class Replication extends Persistence implements Runnable {
     @Override
     public String save() throws IOException {
         FileUtil.removeToBackup(getPath(getBeanFileName()));
-        ENV.get(XmlGenUtil.class).saveXml(getPath(getBeanFileName()), this);
+        ENV.get(XmlUtil.class).saveXml(getPath(getBeanFileName()), this);
         saveJdbcProperties();
         return null;
     }

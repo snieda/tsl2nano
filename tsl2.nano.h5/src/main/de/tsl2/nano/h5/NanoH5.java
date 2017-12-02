@@ -54,6 +54,8 @@ import de.tsl2.nano.core.exception.Message;
 import de.tsl2.nano.core.execution.CompatibilityLayer;
 import de.tsl2.nano.core.execution.SystemUtil;
 import de.tsl2.nano.core.log.LogFactory;
+import de.tsl2.nano.core.messaging.EMessage;
+import de.tsl2.nano.core.messaging.EventController;
 import de.tsl2.nano.core.util.ConcurrentUtil;
 import de.tsl2.nano.core.util.DateUtil;
 import de.tsl2.nano.core.util.FileUtil;
@@ -65,16 +67,15 @@ import de.tsl2.nano.core.util.Util;
 import de.tsl2.nano.execution.AntRunner;
 import de.tsl2.nano.h5.NanoHTTPD.Response.Status;
 import de.tsl2.nano.h5.expression.QueryPool;
-import de.tsl2.nano.h5.expression.URLExpression;
 import de.tsl2.nano.h5.expression.RuleExpression;
 import de.tsl2.nano.h5.expression.SQLExpression;
 import de.tsl2.nano.h5.expression.SimpleExpression;
+import de.tsl2.nano.h5.expression.URLExpression;
 import de.tsl2.nano.h5.navigation.EntityBrowser;
 import de.tsl2.nano.h5.navigation.IBeanNavigator;
 import de.tsl2.nano.h5.navigation.Workflow;
 import de.tsl2.nano.incubation.specification.actions.ActionPool;
 import de.tsl2.nano.incubation.specification.rules.RulePool;
-import de.tsl2.nano.core.messaging.EventController;
 import de.tsl2.nano.persistence.GenericLocalBeanContainer;
 import de.tsl2.nano.persistence.Persistence;
 import de.tsl2.nano.persistence.PersistenceClassLoader;
@@ -799,7 +800,7 @@ public class NanoH5 extends NanoHTTPD implements ISystemConnector<Persistence> {
                 @Override
                 public void run() {
                     if (BeanContainer.isInitialized()) {
-                        Message.broadcast(this, "APPLICATION SHUTDOWN INITIALIZED...", "*");
+                        EMessage.broadcast(this, "APPLICATION SHUTDOWN INITIALIZED...", "*");
                         LOG.info("preparing shutdown of local database " + persistence.getConnectionUrl());
                         try {
                             BeanContainer.instance().executeStmt(ENV.get("app.shutdown.statement", "shutdown"), true,
