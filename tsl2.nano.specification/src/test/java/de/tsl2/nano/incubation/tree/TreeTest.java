@@ -1,0 +1,35 @@
+package de.tsl2.nano.incubation.tree;
+
+import java.util.Scanner;
+
+import org.junit.Ignore;
+import org.junit.Test;
+
+public class TreeTest {
+
+    @Test
+    @Ignore
+    public void testTree() throws Exception {
+        String src = "";
+//        digraph G {
+//            2: size ="4,4";
+//            3: main [shape=box]; /* this is a comment */
+//            4: main -> parse [weight=8];
+//            5: parse -> execute;
+//            6: main -> init [style=dotted];
+//            7: main -> cleanup;
+//            8: execute -> { make_string; printf}
+//            9: init -> make_string;
+//            10: edge [color=red]; // so is this
+//            11: main -> printf [style=bold,label="100 times"];
+//            12: make_string [label="make a\nstring"];
+//            13: node [shape=box,style=filled,color=".7 .3 1.0"];
+//            14: execute -> compare;
+//            15: } 
+
+        Tree<String, String> graph = new Tree<String, String>("main", null);
+//        graph.pu
+        graph = Tree.fromString(new Scanner(graph.toString()));
+    }
+
+}

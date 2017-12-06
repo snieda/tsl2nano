@@ -14,7 +14,6 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.Iterator;
-import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -23,8 +22,6 @@ import java.util.TreeSet;
 
 import org.apache.commons.logging.Log;
 
-import de.tsl2.nano.action.IAction;
-import de.tsl2.nano.bean.BeanUtil;
 import de.tsl2.nano.core.IPredicate;
 import de.tsl2.nano.core.ITransformer;
 import de.tsl2.nano.core.ManagedException;
@@ -33,6 +30,7 @@ import de.tsl2.nano.core.log.LogFactory;
 import de.tsl2.nano.core.util.DefaultFormat;
 import de.tsl2.nano.core.util.ListSet;
 import de.tsl2.nano.core.util.NumberUtil;
+import de.tsl2.nano.core.util.ObjectUtil;
 import de.tsl2.nano.core.util.StringUtil;
 
 /**
@@ -179,23 +177,6 @@ public class CollectionUtil extends de.tsl2.nano.core.util.CollectionUtil {
             wrapCollection.add(attribute.getValue(t));
         }
         return wrapCollection;
-    }
-
-    /**
-     * starts the given action for all items of the given collection - as first action parameter.
-     * 
-     * @param forCollection to iterate
-     * @param doAction to do
-     * @return iteration size
-     */
-    public static final int doFor(Collection<?> forCollection, IAction<?> doAction) {
-        int count = 0;
-        for (final Object item : forCollection) {
-            doAction.setParameter(new Object[] { item });
-            doAction.activate();
-            count++;
-        }
-        return count;
     }
 
     /**
@@ -423,14 +404,14 @@ public class CollectionUtil extends de.tsl2.nano.core.util.CollectionUtil {
             public boolean eval(T arg0) {
                 // to be able to reuse the predicate, we can't do the calculations outside (which would be better for the  performance)
                 String sfrom =
-                    from != null && !BeanUtil.isEmpty(from) ? ignoreCase && from.toString() != null ? from.toString()
+                    from != null && !ObjectUtil.isEmpty(from) ? ignoreCase && from.toString() != null ? from.toString()
                         .toUpperCase()
                         : from.toString() : null;
                 if (StringUtil.STR_ANY.equals(sfrom)) {
                     sfrom = null;
                 }
                 String sto =
-                    to != null && !BeanUtil.isEmpty(to) ? ignoreCase && to.toString() != null ? to.toString()
+                    to != null && !ObjectUtil.isEmpty(to) ? ignoreCase && to.toString() != null ? to.toString()
                         .toUpperCase()
                         : to.toString() : null;
                 if (StringUtil.STR_ANY.equals(sto)) {
@@ -475,12 +456,6 @@ public class CollectionUtil extends de.tsl2.nano.core.util.CollectionUtil {
             IPredicate<T> filter) {
         return TransformingIterator.getTransformingIterable((Iterable<S>) getFiltering((Iterable<T>) src, filter),
             transformer);
-    }
-
-    public static <T> Collection<NamedValue> asNamedCollection(Map<?, T> m) {
-        LinkedList<NamedValue> list = new LinkedList<NamedValue>();
-        NamedValue.putAll(m, list);
-        return list;
     }
 
     /**

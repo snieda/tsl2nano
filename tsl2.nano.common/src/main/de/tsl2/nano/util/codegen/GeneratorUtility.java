@@ -5,8 +5,8 @@ import java.util.Collection;
 import java.util.Date;
 import java.util.Properties;
 
-import de.tsl2.nano.bean.BeanUtil;
 import de.tsl2.nano.core.cls.BeanAttribute;
+import de.tsl2.nano.core.util.ObjectUtil;
 
 /**
  * helper class for {@linkplain ClassGenerator}
@@ -81,7 +81,7 @@ public class GeneratorUtility {
             type = "IFieldDescriptor.TYPE_DATE";
         } else if (attr.getType().isArray() || Collection.class.isAssignableFrom(attr.getType())) {//complex type --> list
             type = "IFieldDescriptor.TYPE_LIST_TABLE";
-        } else if (BeanUtil.isStandardType(attr.getType())) {
+        } else if (ObjectUtil.isStandardType(attr.getType())) {
             type = "IFieldDescriptor.TYPE_TEXT";
         } else {//complex type --> combo box list
             type = "IFieldDescriptor.TYPE_LIST";

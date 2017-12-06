@@ -9,8 +9,8 @@
  */
 package de.tsl2.nano.service.schedule;
 
-import java.io.Serializable;
 import java.text.DateFormat;
+import java.io.Serializable;
 import java.util.Collection;
 import java.util.Date;
 
@@ -19,7 +19,7 @@ import javax.ejb.TimerHandle;
 
 import org.apache.commons.logging.Log;
 
-import de.tsl2.nano.bean.def.IStatus;
+import de.tsl2.nano.action.IStatus;
 import de.tsl2.nano.bean.def.SStatus;
 import de.tsl2.nano.core.log.LogFactory;
 

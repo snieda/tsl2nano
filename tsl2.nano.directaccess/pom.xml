@@ -4,8 +4,8 @@
 	<groupId>tsl2.nano</groupId>
 	<artifactId>tsl2.nano.directaccess</artifactId>
 	<version>0.0.6</version>
-	<name>TSL2 JEE direct access</name>
-	<description>TSL2 JEE direct access</description>
+	<name>TSL2 JEE Direct Access</name>
+	<description>TSL2 JEE Direct Access</description>
 	<build>
 		<sourceDirectory>src/main</sourceDirectory>
 		<testSourceDirectory>src/test</testSourceDirectory>

@@ -19,16 +19,23 @@
 		</license>
 	</licenses>
 	<modules>
+		<module>tsl2.nano.core</module>
 		<module>tsl2.nano.common</module>
+		<module>tsl2.nano.operation</module>
+		<module>tsl2.nano.descriptor</module>
 		<module>tsl2.nano.serviceaccess</module>
 		<module>tsl2.nano.directaccess</module>
 		<module>tsl2.nano.ebeanprovider</module>
 		<module>tsl2.nano.ormliteprovider</module>
 		<module>tsl2.nano.jarresolver</module>
+		<module>tsl2.nano.specification</module>
+		<module>tsl2.nano.repeatable</module>
+		<module>tsl2.nano.logicstructure</module>
+		<module>tsl2.nano.terminal</module>
+		<module>tsl2.nano.vnet</module>
 		<module>tsl2.nano.incubation</module>
 		<module>tsl2.nano.h5</module>
-		<module>tsl2.nano.core</module>
-	</modules>
+</modules>
 	<build>
 		<plugins>
 			<plugin>

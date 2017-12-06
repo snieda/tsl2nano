@@ -4,7 +4,7 @@
 	<groupId>tsl2.nano</groupId>
 	<artifactId>tsl2.nano.incubation</artifactId>
 	<version>0.5.2</version>
-	<name>TSL2 framework incubations</name>
+	<name>TSL2 Framework Incubations</name>
 	<description>TSL2 framework incubations</description>
 	<properties>
 		<!-- we have a problem on tools.jar if java.home points to JRE -->

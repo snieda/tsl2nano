@@ -9,14 +9,14 @@
  */
 package de.tsl2.nano.service.util;
 
-import java.io.Serializable;
 import java.util.Hashtable;
+import java.io.Serializable;
 import java.util.LinkedList;
 
 import javax.security.auth.login.LoginContext;
 import javax.security.auth.login.LoginException;
 
-import de.tsl2.nano.bean.def.IStatus;
+import de.tsl2.nano.action.IStatus;
 import de.tsl2.nano.core.ManagedException;
 import de.tsl2.nano.core.cls.BeanClass;
 import de.tsl2.nano.core.execution.ICRunnable;

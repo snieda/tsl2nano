@@ -138,4 +138,22 @@ public interface IAction<RETURNTYPE> extends Runnable {
     int getActionMode();
 
     boolean isRunning();
+    
+    /**
+     * starts the given action for all items of the given collection - as first action parameter.
+     * 
+     * @param forCollection to iterate
+     * @param doAction to do
+     * @return iteration size
+     */
+    public static int doFor(Collection<?> forCollection, IAction<?> doAction) {
+        int count = 0;
+        for (final Object item : forCollection) {
+            doAction.setParameter(new Object[] { item });
+            doAction.activate();
+            count++;
+        }
+        return count;
+    }
+
 }
