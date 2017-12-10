@@ -12,15 +12,20 @@ import java.io.File;
 import java.io.FileWriter;
 import java.io.Writer;
 import java.lang.reflect.Array;
+import java.text.Format;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Scanner;
 import java.util.Set;
+import java.util.SortedSet;
+import java.util.TreeSet;
 
 import org.apache.commons.logging.Log;
 
@@ -239,6 +244,75 @@ public class CollectionUtil {
             collection.addAll((Collection<? extends T>) Arrays.asList(arrays[i]));
         }
         return collection;
+    }
+
+    /**
+     * delegates to {@link #getSortedList(Collection, Comparator, String, boolean)}, using
+     * {@link #getSimpleComparator(Format)}.
+     */
+    public static Collection<?> getSortedList(Collection<?> collection) {
+        return getSortedList(collection,
+            NumberUtil.getNumberAndStringComparator(new DefaultFormat()),
+            collection.toString(),
+            false);
+    }
+
+    /**
+     * delegates to {@link #getSortedList(Collection, Comparator, String, boolean)}, using
+     * {@link #getSimpleComparator(Format)}.
+     */
+    public static Collection<?> getSortedList(Collection<?> collection, Format formatter, String name) {
+        return getSortedList(collection, NumberUtil.getNumberAndStringComparator(formatter), name, false);
+    }
+
+    /**
+     * tries to sort the given collection through the given comparator. if the comparator or the collection is null,
+     * nothing will be done!
+     * 
+     * @param collection collection to sort
+     * @param comparator comparator
+     * @param name (optional) name of collection (only for logging)
+     * @param createSortedSet if true, a new sorted set will be created and returned - the original collection will not
+     *            be sorted!
+     * @return sorted list (new TreeSet or original collection)
+     */
+    public static <T> Collection<T> getSortedList(Collection<T> collection,
+            Comparator<T> comparator,
+            String name,
+            boolean createSortedSet) {
+        assert collection != null && comparator != null : "collection and comparator must not be null!";
+        if (createSortedSet) {
+            LOG.debug("sorting collection of '" + name
+                + " in a new TreeSet instance (size:"
+                + collection.size()
+                + ", comparator:"
+                + comparator);
+            final SortedSet<T> sortedSet = new TreeSet<T>(comparator);
+            sortedSet.addAll(collection);
+            LOG.debug("sorting finished (" + name + ")");
+            return sortedSet;
+        } else {
+            LOG.debug("sorting (one time!) collection of '" + name
+                + " in the current instance (size:"
+                + collection.size()
+                + ", comparator:"
+                + comparator);
+            List<T> slist;
+            if (collection instanceof List) {
+                slist = (List<T>) collection;
+            } else {
+                slist = new ArrayList<T>(collection);
+            }
+            Collections.sort(slist, comparator);
+            //avoid an instanceof call and use the direct reference ==> performance!
+            if (slist != collection) {
+                collection.clear();
+                collection.addAll(slist);
+            }
+            LOG.debug("sorting finished (" + name + ")");
+            //return the original instance
+            return collection;
+        }
     }
 
     /**

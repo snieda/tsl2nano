@@ -7,7 +7,7 @@
  * 
  * Copyright: (c) Thomas Schneider 2017, all rights reserved
  */
-package de.tsl2.nano.h5.test;
+package de.tsl2.nano.h5;
 
 import java.io.IOException;
 
@@ -39,7 +39,7 @@ public class NanoH5IntegrationTest {
 
 
     @Test
-//    @Ignore
+    @Ignore
     public void testNano() throws Exception {
         String serviceURL = getServiceURL();
         runNano(serviceURL);

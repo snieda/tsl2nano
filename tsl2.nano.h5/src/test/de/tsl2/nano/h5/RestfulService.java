@@ -1,4 +1,4 @@
-package de.tsl2.nano.h5.test;
+package de.tsl2.nano.h5;
 
 import javax.ws.rs.GET;
 import javax.ws.rs.Path;

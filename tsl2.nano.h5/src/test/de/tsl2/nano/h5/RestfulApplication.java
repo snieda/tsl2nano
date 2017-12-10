@@ -7,7 +7,7 @@
  * 
  * Copyright: (c) Thomas Schneider 2015, all rights reserved
  */
-package de.tsl2.nano.h5.test;
+package de.tsl2.nano.h5;
 
 import javax.ws.rs.ApplicationPath;
 import javax.ws.rs.core.Application;

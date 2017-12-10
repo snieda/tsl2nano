@@ -115,7 +115,7 @@ public class PackageGenerator extends ClassGenerator {
         } else {
             final File packageFilePath = new File(packagePath);
             if (!packageFilePath.isDirectory()) {
-                throw new ManagedException("the given package-file-path is not a directory!");
+                throw new ManagedException("the given package-file-path is not a directory: " + packagePath);
             }
             if (!packageFilePath.canRead()) {
                 throw new ManagedException("the given package-file-path is not readable!");

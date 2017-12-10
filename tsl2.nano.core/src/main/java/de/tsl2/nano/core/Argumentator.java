@@ -9,19 +9,14 @@
  */
 package de.tsl2.nano.core;
 
-import java.io.InputStream;
 import java.io.PrintStream;
-import java.net.URL;
-import java.util.Enumeration;
 import java.util.Map;
 import java.util.Properties;
 import java.util.Set;
 import java.util.jar.Attributes;
-import java.util.jar.Manifest;
 
 import de.tsl2.nano.core.classloader.RuntimeClassloader;
 import de.tsl2.nano.core.cls.BeanClass;
-import de.tsl2.nano.core.util.FileUtil;
 import de.tsl2.nano.core.util.StringUtil;
 
 /**

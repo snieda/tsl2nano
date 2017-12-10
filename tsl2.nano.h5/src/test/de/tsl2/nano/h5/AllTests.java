@@ -7,7 +7,7 @@
  * 
  * Copyright: (c) Thomas Schneider 2017, all rights reserved
  */
-package de.tsl2.nano.h5.test;
+package de.tsl2.nano.h5;
 
 import org.junit.runner.RunWith;
 import org.junit.runners.Suite;

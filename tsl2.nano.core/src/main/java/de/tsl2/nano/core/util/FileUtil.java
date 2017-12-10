@@ -1108,7 +1108,7 @@ public class FileUtil {
      * @return regular expression
      */
     public static final String transformAntToRegEx(String antFileFilter) {
-        return antFileFilter.replace("**", ".*").replaceAll("([^.])\\*", "$1.*");
+        return antFileFilter.replace("**/", ".*").replace("**", ".*").replaceAll("([^.])\\*", "$1.*");
     }
 
     /**

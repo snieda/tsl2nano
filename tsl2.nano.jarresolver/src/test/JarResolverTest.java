@@ -8,6 +8,7 @@ import org.junit.Test;
 
 import de.tsl2.nano.core.log.LogFactory;
 import de.tsl2.nano.core.util.FileUtil;
+import de.tsl2.nano.core.util.NetUtil;
 import de.tsl2.nano.core.util.StringUtil;
 import de.tsl2.nano.jarresolver.JarResolver;
 
@@ -47,6 +48,11 @@ public class JarResolverTest {
      */
     @Test
     public void testJarResolving() throws Exception {
+        if (!NetUtil.isOnline()) {
+            System.out.println("ignoring test 'testFindJar() - we are offline!");
+            return;
+        }
+
         //positive real tests
         assertTrue(download("org.apache.log4j.config.PropertyGetter", "log4j.*.jar"));
         assertTrue(download("log4j", "log4j.*.jar"));
@@ -96,9 +102,13 @@ public class JarResolverTest {
 
     @Test
     public void testFindJar() throws Exception {
-        String jarName = new JarResolver().findJarOnline("org.apache.log4j.config.PropertyGetter");
-        LOG.info("jar-file: " + jarName);
-        assertTrue(StringUtil.extract(jarName, "\\w+").equals("log4j"));
+        if (NetUtil.isOnline()) {
+            String jarName = new JarResolver().findJarOnline("org.apache.log4j.config.PropertyGetter");
+            LOG.info("jar-file: " + jarName);
+            assertTrue(StringUtil.extract(jarName, "\\w+").equals("log4j"));
+        } else {
+            System.out.println("ignoring test 'testFindJar() - we are offline!");
+        }
     }
 
     @AfterClass

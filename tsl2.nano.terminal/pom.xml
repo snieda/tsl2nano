@@ -3,7 +3,7 @@
   <parent>
     <groupId>tsl2.nano</groupId>
     <artifactId>tsl2.nano.h5-package</artifactId>
-    <version>1.1.1</version>
+    <version>2.0.0</version>
   </parent>
   <artifactId>tsl2.nano.terminal</artifactId>
   <version>0.5.2</version>

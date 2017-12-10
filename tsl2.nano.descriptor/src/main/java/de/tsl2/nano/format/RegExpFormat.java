@@ -1021,18 +1021,6 @@ public class RegExpFormat extends Format implements INumberFormatCheck {
     }
 
     /**
-     * delegates to {@link #getParser(Class, String, String, String, IConverter, boolean)} using @id attribute and
-     * cache.
-     */
-    public static <TYPE> RegExpFormat getParser(final Class<TYPE> type,
-            String pattern,
-            final IConverter<String, Object> converter) {
-        //workaround to have a simple instance for calling getIdAttribute(). poor performance - but works
-        TYPE instance = BeanClass.createInstance(type);
-        return getParser(type, BeanContainer.getIdAttribute(instance).getName(), pattern, null, converter, true);
-    }
-
-    /**
      * creates a {@link Format} that is able to format and parse the given type. useful on text-fields representing an
      * object.
      * <p/>

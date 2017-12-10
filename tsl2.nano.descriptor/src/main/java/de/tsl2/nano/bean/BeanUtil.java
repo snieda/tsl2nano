@@ -48,6 +48,8 @@ import de.tsl2.nano.core.util.NumberUtil;
 import de.tsl2.nano.core.util.ObjectUtil;
 import de.tsl2.nano.core.util.StringUtil;
 import de.tsl2.nano.core.util.Util;
+import de.tsl2.nano.format.RegExpFormat;
+import de.tsl2.nano.util.operation.IConverter;
 
 /**
  * A Utility-Class for beans
@@ -682,6 +684,18 @@ private static Object deepCopy(Object src, Object dest) throws Exception {
         LinkedList<NamedValue> list = new LinkedList<NamedValue>();
         NamedValue.putAll(m, list);
         return list;
+    }
+
+    /**
+     * delegates to {@link #getParser(Class, String, String, String, IConverter, boolean)} using @id attribute and
+     * cache.
+     */
+    public static <TYPE> RegExpFormat getParser(final Class<TYPE> type,
+            String pattern,
+            final IConverter<String, Object> converter) {
+        //workaround to have a simple instance for calling getIdAttribute(). poor performance - but works
+        TYPE instance = BeanClass.createInstance(type);
+        return RegExpFormat.getParser(type, BeanContainer.getIdAttribute(instance).getName(), pattern, null, converter, true);
     }
 
 }

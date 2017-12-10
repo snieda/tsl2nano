@@ -3,13 +3,13 @@
 	<modelVersion>4.0.0</modelVersion>
 	<groupId>tsl2.nano</groupId>
 	<artifactId>tsl2.nano.h5</artifactId>
-	<version>1.1.1</version>
+	<version>2.0.0</version>
 	<name>TSL2 framework Html5 Extensions</name>
 	<description>TSL2 framework Html5 Extensions</description>
 	<!-- TODO: create property file with versions like in build-tsl.nano.h5.properties -->
 	<properties>
-		<maven.test.skip>true</maven.test.skip>
-		<keystore>../tsl2store</keystore>
+<!-- 		<maven.test.skip>true</maven.test.skip>
+ -->		<keystore>../tsl2store</keystore>
 		<alias>tsl2</alias>
 		<storepass>tsl2tsl2</storepass>
 	</properties>
@@ -17,8 +17,7 @@
 	<parent>
 		<groupId>tsl2.nano</groupId>
 		<artifactId>tsl2.nano.h5-package</artifactId>
-		<version>1.1.1</version>
-		<relativePath>../pom.xml</relativePath>
+		<version>2.0.0</version>
 	</parent>
 	<build>
 		<sourceDirectory>src/main</sourceDirectory>
@@ -37,7 +36,7 @@
 				</excludes>
 			</resource>
 			<resource>
-				<directory>../tsl2.nano.common/target/classes</directory>
+				<directory>../tsl2.nano.core/target/classes</directory>
 				<includes>
 					<include>**/core/**</include>
 				</includes>
@@ -49,10 +48,52 @@
 				</excludes>
 			</resource>
 			<resource>
-				<directory>../tsl2.nano.common/target/classes</directory>
+				<directory>../tsl2.nano.core/target/classes</directory>
 				<includes>
 					<include>org/**/*.class</include>
 				</includes>
+			</resource>
+			<resource>
+				<directory>../tsl2.nano.core/target/classes</directory>
+				<excludes>
+					<exclude>**/*.class</exclude>
+				</excludes>
+			</resource>
+			<resource>
+				<directory>../tsl2.nano.operation/target/classes</directory>
+				<excludes>
+					<exclude>**/*.class</exclude>
+				</excludes>
+			</resource>
+			<resource>
+				<directory>../tsl2.nano.descriptor/target/classes</directory>
+				<excludes>
+					<exclude>**/*.class</exclude>
+				</excludes>
+			</resource>
+			<resource>
+				<directory>../tsl2.nano.specification/target/classes</directory>
+				<excludes>
+					<exclude>**/*.class</exclude>
+				</excludes>
+			</resource>
+			<resource>
+				<directory>../tsl2.nano.repeatable/target/classes</directory>
+				<excludes>
+					<exclude>**/*.class</exclude>
+				</excludes>
+			</resource>
+			<resource>
+				<directory>../tsl2.nano.incubation/logicstructure/classes</directory>
+				<excludes>
+					<exclude>**/*.class</exclude>
+				</excludes>
+			</resource>
+			<resource>
+				<directory>../tsl2.nano.vnet/target/classes</directory>
+				<excludes>
+					<exclude>**/*.class</exclude>
+				</excludes>
 			</resource>
 			<resource>
 				<directory>../tsl2.nano.serviceaccess/target/classes</directory>
@@ -97,7 +138,7 @@
 						</goals>
 						<configuration>
 							<includeScope>runtime</includeScope>
-							<includeArtifactIds>tsl2.nano.common,tsl2.nano.incubation,tsl2.nano.serviceaccess,tsl2.nano.directaccess,tsl2.nano.jarresolver,tsl2.nano.ormliteprovider,tsl2.nano.ebeanprovider,simple-xml,snakeyaml,Java-WebSocket,xml-apis,xchart,VectorGraphics2D,javax.json,javax.json-api,jboss-ejb-api_3.2_spec,dom4j,hibernate-jpa-2.1-api,jboss-transaction-api_1.2_spec,jboss-interceptor-apim,jboss-connector-api_1.7_spec,jta</includeArtifactIds>
+							<includeArtifactIds>tsl2.nano.common,tsl2.nano.operation, tsl2.nano.descriptor, tsl2.nano.specification, tsl2.nano.incubation, tsl2.nano.vnet, tsl2.nano.logicstructure, tsl2.nano.repeatable, tsl2.nano.terminal, tsl2.nano.serviceaccess,tsl2.nano.directaccess,tsl2.nano.jarresolver,tsl2.nano.ormliteprovider,tsl2.nano.ebeanprovider,simple-xml,snakeyaml,Java-WebSocket,xml-apis,xchart,VectorGraphics2D,javax.json,javax.json-api,jboss-ejb-api_3.2_spec,dom4j,hibernate-jpa-2.1-api,jboss-transaction-api_1.2_spec,jboss-interceptor-apim,jboss-connector-api_1.7_spec,jta</includeArtifactIds>
 							<!-- standalone:<includeArtifactIds>ant,ant-launcher,ant-nodeps,antlr,mysql-connector-java,h2,app,avalon-framework,commands,common,commons-collections,commons-logging,contenttype,dom4j,freemarker,hibernate-commons-annotations,hibernate-core,hibernate-entitymanager,hibernate-jpa-2.1-api,hibernate-tools,jandex,javassist,jboss-logging,jboss-logging-annotations,jobs,jta,jtidy,logkit,org.eclipse.jdt.core,osgi,preferences,registry,runtime,servlet-api,text,hibernate-tools,log4j,slf4j-api,slf4j-simple</includeArtifactIds> -->
 							<!-- <excludeArtifactIds> commons-codec,javax.json,junit,jasperreports,javassist,avalon-framework-impl,avalon-framework-api,avalon-framework-impl,fop,velocity,tools,aspectjweaver,jersey-bundle,icu4j 
 								</excludeArtifactIds> -->
@@ -292,7 +333,7 @@
 				<groupId>org.codehaus.mojo</groupId>
 				<artifactId>findbugs-maven-plugin</artifactId>
 				<configuration>
-					<onlyAnalyze>tsl2.*</onlyAnalyze>
+					<onlyAnalyze>de.tsl2.*</onlyAnalyze>
 				</configuration>
 			</plugin>
 			<plugin>

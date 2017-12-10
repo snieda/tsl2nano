@@ -1,37 +1,54 @@
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+  xsi:schemaLocation="http://maven.apache.org/POM/4.0.0
+                      http://maven.apache.org/xsd/maven-4.0.0.xsd">
   <modelVersion>4.0.0</modelVersion>
-  <groupId>tsl2.nano</groupId>
-  <artifactId>tsl2.nano.jarresolver</artifactId>
-  <version>0.0.2</version>
-  <build>
-    <sourceDirectory>src/main</sourceDirectory>
-    <testSourceDirectory>src/test</testSourceDirectory>
-    <resources>
-      <resource>
-        <directory>src/resources</directory>
-        <excludes>
-          <exclude>**/*.java</exclude>
-        </excludes>
-      </resource>
-    </resources>
-    <plugins>
-      <plugin>
-        <artifactId>maven-compiler-plugin</artifactId>
-        <version>3.7.0</version>
-        <configuration>
-          <source>1.8</source>
-          <target>1.8</target>
-        </configuration>
-      </plugin>
-    </plugins>
-  </build>
+  <groupId>tsl2.nano.jarresolver</groupId>
+  <artifactId>resolving.jars.now</artifactId>
+  <packaging>jar</packaging>
+  <version>-</version>
+  <name>resolving.jars.now</name>
+  <url>http://sourceforge.net/projects/tsl2nano</url>
   <dependencies>
-  	<dependency>
-  		<groupId>tsl2.nano</groupId>
-  		<artifactId>tsl2.nano.common</artifactId>
-  		<version>1.1.3</version>
-  	</dependency>
+      <dependency>
+      <groupId>log4j</groupId>
+      <artifactId>log4j</artifactId>
+      <version>RELEASE</version>
+    </dependency>
   </dependencies>
-  <name>TSL2 framework Jar Resolver</name>
-  <description>TSL2 framework Jar Resolver</description>
+  <repositories>
+    <repository>
+      <id>first-url</id>
+      <name>first-url</name>
+      <url>http://repo.maven.apache.org/maven2</url>
+    </repository>
+    <repository>
+      <id>second-url</id>
+      <name>second-url</name>
+      <url>http://mvnrepository.com</url>
+    </repository>
+    <repository>
+      <id>third-url</id>
+      <name>third-url</name>
+      <url>http://repo1.maven.org/maven2</url>
+    </repository>
+  </repositories>
+	<build>
+        <plugins>
+            <plugin>
+                <artifactId>maven-dependency-plugin</artifactId>
+                    <executions>
+                        <execution>
+                            <phase>install</phase>
+                            <goals>
+                                <goal>copy-dependencies</goal>
+                            </goals>
+                            <configuration>
+                                <outputDirectory>${basedir}</outputDirectory>
+                            </configuration>
+                        </execution>
+                    </executions>
+            </plugin>
+        </plugins>
+    </build>
 </project>
