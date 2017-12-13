@@ -1,1 +1,9 @@
-/target/
+/bin
+/*.jar
+/test
+/nbproject
+/ci/*.xml
+/target
+/dist
+/temp
+/*.log
