@@ -7,6 +7,7 @@
 	<packaging>pom</packaging>
 	<name>TSL2 Html5 Application Framework</name>
 	<description>TSL2 Html5 Application Framework</description>
+	<url>https://sourceforge.net/projects/tsl2nano/</url>
 	<properties>
 		<maven.test.skip>false</maven.test.skip>
 		<fail-at-end>true</fail-at-end>
@@ -17,7 +18,17 @@
 			<name>LGPL</name>
 			<url>https://opensource.org/licenses/lgpl-2.1.php</url>
 		</license>
+		<!-- <license> <name>Apache License, Version 2.0</name> <url>http://www.apache.org/licenses/LICENSE-2.0.txt</url> 
+			<distribution>repo</distribution> </license> -->
 	</licenses>
+	<scm>
+		<url>https://git.code.sf.net/p/tsl2nano/code tsl2nano-code</url>
+	</scm>
+	<parent>
+		<groupId>org.sonatype.oss</groupId>
+		<artifactId>oss-parent</artifactId>
+		<version>9</version>
+	</parent>
 	<modules>
 		<module>tsl2.nano.core</module>
 		<module>tsl2.nano.common</module>
@@ -35,7 +46,7 @@
 		<module>tsl2.nano.vnet</module>
 		<module>tsl2.nano.incubation</module>
 		<module>tsl2.nano.h5</module>
-</modules>
+	</modules>
 	<build>
 		<plugins>
 			<plugin>
@@ -74,25 +85,11 @@
 					</execution>
 				</executions>
 			</plugin>
-			<!--
-			<plugin>
-				<artifactId>maven-assembly-plugin</artifactId>
-				<version>3.1.0</version>
-				<configuration>
-					<descriptorRefs>
-						<descriptorRef>jar-with-dependencies</descriptorRef>
-					</descriptorRefs>
-				</configuration>
-				<executions>
-					<execution>
-						<id>make-assembly</id>
-						<phase>package</phase>
-						<goals>
-							<goal>single</goal>
-						</goals>
-					</execution>
-				</executions>
-			</plugin>-->
+			<!-- <plugin> <artifactId>maven-assembly-plugin</artifactId> <version>3.1.0</version> 
+				<configuration> <descriptorRefs> <descriptorRef>jar-with-dependencies</descriptorRef> 
+				</descriptorRefs> </configuration> <executions> <execution> <id>make-assembly</id> 
+				<phase>package</phase> <goals> <goal>single</goal> </goals> </execution> 
+				</executions> </plugin> -->
 		</plugins>
 	</build>
 </project>
