@@ -1,9 +1,13 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
 	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
 	<modelVersion>4.0.0</modelVersion>
-	<groupId>tsl2.nano</groupId>
+	<parent>
+		<groupId>net.sf.tsl2nano</groupId>
+		<artifactId>tsl2.nano.h5-package</artifactId>
+		<version>2.0.0-SNAPSHOT</version>
+	</parent>
 	<artifactId>tsl2.nano.h5</artifactId>
-	<version>2.0.0</version>
+	<version>2.0.0-SNAPSHOT</version>
 	<name>TSL2 framework Html5 Extensions</name>
 	<description>TSL2 framework Html5 Extensions</description>
 	<!-- TODO: create property file with versions like in build-tsl.nano.h5.properties -->
@@ -13,12 +17,6 @@
 		<alias>tsl2</alias>
 		<storepass>tsl2tsl2</storepass>
 	</properties>
-
-	<parent>
-		<groupId>tsl2.nano</groupId>
-		<artifactId>tsl2.nano.h5-package</artifactId>
-		<version>2.0.0</version>
-	</parent>
 	<build>
 		<sourceDirectory>src/main</sourceDirectory>
 		<testSourceDirectory>src/test</testSourceDirectory>
@@ -84,7 +82,7 @@
 				</excludes>
 			</resource>
 			<resource>
-				<directory>../tsl2.nano.incubation/logicstructure/classes</directory>
+				<directory>../tsl2.nano.logicstructure/target/classes</directory>
 				<excludes>
 					<exclude>**/*.class</exclude>
 				</excludes>
@@ -281,27 +279,27 @@
 			<scope>compile</scope>
 		</dependency>
 		<dependency>
-			<groupId>tsl2.nano</groupId>
+			<groupId>net.sf.tsl2nano</groupId>
 			<artifactId>tsl2.nano.incubation</artifactId>
 			<version>0.5.2</version>
 		</dependency>
 		<dependency>
-			<groupId>tsl2.nano</groupId>
+			<groupId>net.sf.tsl2nano</groupId>
 			<artifactId>tsl2.nano.vnet</artifactId>
 			<version>0.5.2</version>
 		</dependency>
 		<dependency>
-			<groupId>tsl2.nano</groupId>
+			<groupId>net.sf.tsl2nano</groupId>
 			<artifactId>tsl2.nano.jarresolver</artifactId>
 			<version>0.0.2</version>
 		</dependency>
 		<dependency>
-			<groupId>tsl2.nano</groupId>
+			<groupId>net.sf.tsl2nano</groupId>
 			<artifactId>tsl2.nano.ormliteprovider</artifactId>
 			<version>0.0.2</version>
 		</dependency>
 		<dependency>
-			<groupId>tsl2.nano</groupId>
+			<groupId>net.sf.tsl2nano</groupId>
 			<artifactId>tsl2.nano.ebeanprovider</artifactId>
 			<version>0.0.2</version>
 		</dependency>
@@ -327,27 +325,4 @@
 			<scope>runtime</scope>
 		</dependency>
 	</dependencies>
-	<reporting>
-		<plugins>
-			<plugin>
-				<groupId>org.codehaus.mojo</groupId>
-				<artifactId>findbugs-maven-plugin</artifactId>
-				<configuration>
-					<onlyAnalyze>de.tsl2.*</onlyAnalyze>
-				</configuration>
-			</plugin>
-			<plugin>
-				<groupId>org.jacoco</groupId>
-				<artifactId>jacoco-maven-plugin</artifactId>
-				<reportSets>
-					<reportSet>
-						<reports>
-							<!-- select non-aggregate reports -->
-							<report>report</report>
-						</reports>
-					</reportSet>
-				</reportSets>
-			</plugin>
-		</plugins>
-	</reporting>
 </project>

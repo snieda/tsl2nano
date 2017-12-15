@@ -1,7 +1,11 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
 	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
 	<modelVersion>4.0.0</modelVersion>
-	<groupId>tsl2.nano.restaccess</groupId>
+	  <parent>
+	    <groupId>net.sf.tsl2nano</groupId>
+	    <artifactId>tsl2.nano.h5-package</artifactId>
+	    <version>2.0.0-SNAPSHOT</version>
+	  </parent>
 	<version>1.0-SNAPSHOT</version>
 	<name>TSL2 framework REST access</name>
 	<url>http://maven.apache.org</url>
@@ -34,27 +38,27 @@
 		</dependency>
 
 		<!-- <dependency>
-			<groupId>tsl2.nano</groupId>
+			<groupId>net.sf.tsl2nano</groupId>
 			<artifactId>common</artifactId>
 			<version>1.0.0</version>
 		</dependency> -->
 		<!-- use the beancontainer -->
 		<dependency>
-			<groupId>tsl2.nano</groupId>
+			<groupId>net.sf.tsl2nano</groupId>
 			<artifactId>tsl2.nano.common</artifactId>
 			<scope>system</scope>
 			<version>RELEASE</version>
 			<systemPath>${basedir}\src\lib\tsl2.nano.common.1.1.2.jar</systemPath>
 		</dependency>
 		<dependency>
-			<groupId>tsl2.nano</groupId>
+			<groupId>net.sf.tsl2nano</groupId>
 			<artifactId>serviceaccess</artifactId>
 			<scope>system</scope>
 			<version>RELEASE</version>
 			<systemPath>${basedir}\src\lib\tsl2.nano.serviceaccess.1.0.2.jar</systemPath>
 		</dependency>
 		<dependency>
-			<groupId>tsl2.nano</groupId>
+			<groupId>net.sf.tsl2nano</groupId>
 			<artifactId>directaccess</artifactId>
 			<scope>system</scope>
 			<version>RELEASE</version>

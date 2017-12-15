@@ -3,12 +3,15 @@
   xsi:schemaLocation="http://maven.apache.org/POM/4.0.0
                       http://maven.apache.org/xsd/maven-4.0.0.xsd">
   <modelVersion>4.0.0</modelVersion>
-  <groupId>tsl2.nano.jarresolver</groupId>
-  <artifactId>resolving.jars.now</artifactId>
+  <parent>
+    <groupId>net.sf.tsl2nano</groupId>
+    <artifactId>tsl2.nano.h5-package</artifactId>
+    <version>2.0.0-SNAPSHOT</version>
+  </parent>
+  <artifactId>tsl2.nano.jarresolver</artifactId>
   <packaging>jar</packaging>
-  <version>-</version>
-  <name>resolving.jars.now</name>
-  <url>http://sourceforge.net/projects/tsl2nano</url>
+  <version>0.0.2</version>
+  <name>TSL2 Framework Runtime-Jar-Resolver</name>
   <dependencies>
       <dependency>
       <groupId>log4j</groupId>
@@ -16,39 +19,4 @@
       <version>RELEASE</version>
     </dependency>
   </dependencies>
-  <repositories>
-    <repository>
-      <id>first-url</id>
-      <name>first-url</name>
-      <url>http://repo.maven.apache.org/maven2</url>
-    </repository>
-    <repository>
-      <id>second-url</id>
-      <name>second-url</name>
-      <url>http://mvnrepository.com</url>
-    </repository>
-    <repository>
-      <id>third-url</id>
-      <name>third-url</name>
-      <url>http://repo1.maven.org/maven2</url>
-    </repository>
-  </repositories>
-	<build>
-        <plugins>
-            <plugin>
-                <artifactId>maven-dependency-plugin</artifactId>
-                    <executions>
-                        <execution>
-                            <phase>install</phase>
-                            <goals>
-                                <goal>copy-dependencies</goal>
-                            </goals>
-                            <configuration>
-                                <outputDirectory>${basedir}</outputDirectory>
-                            </configuration>
-                        </execution>
-                    </executions>
-            </plugin>
-        </plugins>
-    </build>
 </project>

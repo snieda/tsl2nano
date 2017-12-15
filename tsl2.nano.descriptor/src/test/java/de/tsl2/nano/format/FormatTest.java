@@ -89,7 +89,7 @@ public class FormatTest {
 		};
 		TypeBean myBean10000 = euroValue.multiply(euro_100);
 		assertTrue(myBean10000.getPrimitiveDouble() == 100d * 100d);
-		assertTrue(euroValue.toString().equals("100.0 €"));
+		assertTrue(euroValue.toString().equals("100.0 â‚¬"));
 
 		IConvertableUnit<TypeBean, Currency> demUnit = new IConvertableUnit<TypeBean, Currency>() {
 			CurrencyUnit currencyUnit = CurrencyUtil.getCurrency(DateUtil.getDate(2000, 1, 1));

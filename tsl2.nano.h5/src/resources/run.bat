@@ -15,6 +15,7 @@ if "%3"=="debug" (set DEBUG="-agentlib:jdwp=transport=dt_socket,address=localhos
 if "%3"=="ndebug" (set NANO_DEBUG=-Dtsl2.nano.log.level=debug)
 if "%3"=="test" (set NANO_TEST=-Dtsl2.nano.test=true)
 if "%3"=="nopause" (set NOPAUSE=nopause)
+set VERSION=2.0.0-SNAPSHOT
 rem set SILENT=true
 set STANDALONE=-standalone
 rem set OFFLINE=-Dtsl2nano.offline=true
@@ -25,7 +26,8 @@ rem set DEBUG="-agentlib:jdwp=transport=dt_socket,address=8787,server=y,suspend=
 rem set AGENT=-javaagent:%PRJ%/aspectjweaver.jar
 rem set PROXY=-Dhttp.proxyHost=myproxy -Dhttp.proxyPort=8080
 if "%SILENT%"=="true" (set JAVA=@start javaw) else (set JAVA=java)
-%JAVA% %OFFLINE% %LANG% %USERDIR% %NANO_DEBUG% %AGENT% %PROXY% -Xmx512m -Djava.awt.headless=true  -Dfile.encoding=UTF-8 %DEBUG% %UH% -jar tsl2.nano.h5-1.1.1%STANDALONE%.jar %PRJ% %PORT% 
+
+%JAVA% %OFFLINE% %LANG% %USERDIR% %NANO_DEBUG% %AGENT% %PROXY% -Xmx512m -Djava.awt.headless=true  -Dfile.encoding=UTF-8 %DEBUG% %UH% -jar tsl2.nano.h5-%VERSION%%STANDALONE%.jar %PRJ% %PORT% 
 REM -agentpath:...visualvm_138/profiler/lib/deployed/jdk16/windows/profilerinterface.dll=...\visualvm_138\profiler\lib,5140
 REM >%PRJ%.log
 if not "%SILENT%"=="true" pause

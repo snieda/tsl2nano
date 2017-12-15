@@ -725,17 +725,17 @@ public class CoreTest {
     @Test
     public void testEHttpClient() throws Exception {
         //query url
-        String urlQuery = EHttpClient.parameter("http://www.openstreetmap.org/search?", false, "city", "München", "street", "Berliner Str.1");
+        String urlQuery = EHttpClient.parameter("http://www.openstreetmap.org/search?", false, "city", "MÃ¼nchen", "street", "Berliner Str.1");
         assertEquals("http://www.openstreetmap.org/search?city=M%C3%BCnchen&street=Berliner+Str.1", urlQuery);
 
         //rest url
         String resource = "http://localhost:8080/myresource/";
-        String urlREST = EHttpClient.parameter(resource, true, "city", "München", "street", "Berliner Str.1");
+        String urlREST = EHttpClient.parameter(resource, true, "city", "MÃ¼nchen", "street", "Berliner Str.1");
         assertEquals(resource + "city/M%C3%BCnchen/street/Berliner+Str.1", urlREST);
 
 //        new EHttpClient(resource, true).rest("{code}/info", "GET", "application/json", null, "code", "8000", "street", null);
         
-        urlREST = EHttpClient.parameter(resource + "{city}/info", true, "city", "München", "street", null);
+        urlREST = EHttpClient.parameter(resource + "{city}/info", true, "city", "MÃ¼nchen", "street", null);
         assertEquals(resource + "M%FCnchen/info", urlREST);
     }
 
