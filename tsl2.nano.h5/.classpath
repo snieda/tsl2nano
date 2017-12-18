@@ -21,7 +21,7 @@
 	<classpathentry exported="true" kind="lib" path="lib/hsqldb.jar"/>
 	<classpathentry kind="lib" path="lib/jersey-bundle-1.19.jar"/>
 	<classpathentry kind="lib" path="lib/h2-1.4.186.jar"/>
-	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER/org.eclipse.jdt.internal.debug.ui.launcher.StandardVMType/JavaSE-1.8">
+	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER/org.eclipse.jdt.internal.debug.ui.launcher.StandardVMType/J2SE-1.5">
 		<attributes>
 			<attribute name="maven.pomderived" value="true"/>
 		</attributes>
@@ -56,6 +56,11 @@
 	<classpathentry exported="true" kind="lib" path="lib/htmlunit/xercesImpl-2.11.0.jar"/>
 	<classpathentry exported="true" kind="lib" path="lib/htmlunit/xml-apis-1.4.01.jar"/>
 	<classpathentry kind="con" path="org.eclipse.m2e.MAVEN2_CLASSPATH_CONTAINER">
+		<attributes>
+			<attribute name="maven.pomderived" value="true"/>
+		</attributes>
+	</classpathentry>
+	<classpathentry excluding="**" kind="src" output="target/classes" path="target/tsl2.nano.h5-2.0.0-SNAPSHOT.lib">
 		<attributes>
 			<attribute name="maven.pomderived" value="true"/>
 		</attributes>

@@ -24,7 +24,6 @@ import java.util.Properties;
 import org.anonymous.project.Address;
 import org.anonymous.project.Charge;
 import org.junit.Assert;
-import org.junit.Ignore;
 import org.junit.Test;
 
 import com.sun.jersey.api.container.httpserver.HttpServerFactory;
@@ -49,9 +48,6 @@ import de.tsl2.nano.core.util.FileUtil;
 import de.tsl2.nano.core.util.MapUtil;
 import de.tsl2.nano.core.util.NetUtil;
 import de.tsl2.nano.execution.AntRunner;
-import de.tsl2.nano.h5.CSheet;
-import de.tsl2.nano.h5.Html5Presentation;
-import de.tsl2.nano.h5.NanoH5;
 import de.tsl2.nano.h5.NanoHTTPD.Method;
 import de.tsl2.nano.h5.NanoHTTPD.Response;
 import de.tsl2.nano.h5.configuration.BeanConfigurator;
@@ -117,7 +113,7 @@ public class NanoH5Test {
     }
     
     @Test
-    @Ignore("problems with velocity generation")
+    //@Ignore("problems with velocity generation")
     public void testMyApp() throws Exception {
         createAndTest(new MyApp(getServiceURL(), null) {
             @Override
@@ -185,7 +181,7 @@ public class NanoH5Test {
                 Bean.getBean(attr.getConstraint()).toValueMap(null);
                 Bean.getBean(attr.getPresentation()).toValueMap(null);
                 if (attr.getColumnDefinition() != null)
-                    Bean.getBean(attr.getColumnDefinition()).toValueMap(null);
+                    Bean.getBean(attr.getColumnDefinition()).toValueMap(null, false, false, false, "value");
             }
             Response response = app.serve("/" + i+1, Method.POST, MapUtil.asMap("socket", sampleSocket), new HashMap<>(), new HashMap<>());
             String html = ByteUtil.toString(response.getData(), "UTF-8");
@@ -209,9 +205,10 @@ public class NanoH5Test {
         app.stop();
         
         //create xsd from trang.jar
-        assertTrue(new File(DIR_TEST + "/" + "../../../tsl2.nano.common/lib-tools/trang.jar").exists());
+        final String PATH_TRANG_JAR = "../../../../tsl2.nano.common/lib-tools/trang.jar";
+        assertTrue(new File(DIR_TEST + "/" + PATH_TRANG_JAR).exists());
         assertTrue(SystemUtil.execute(new File(DIR_TEST), "cmd", "/C",
-            "java -jar ../../../tsl2.nano.common/lib-tools/trang.jar presentation/*.xml presentation/beandef.xsd")
+            "java -jar " + PATH_TRANG_JAR + " presentation/*.xml presentation/beandef.xsd")
             .exitValue() == 0);
 
         //extract language messages
@@ -219,14 +216,15 @@ public class NanoH5Test {
         String srcPath = "de/tsl2/nano/h5/timesheet/";
         String path = "src/test/" + srcPath;
         String initDB = "init-" + name + "-anyway.sql";
+        final String BIN_DIR = "target/test-classes/";
         //TODO: create myapp test db
 //        assertTrue(FileUtil.copy(path + initDB, DIR_TEST + "/" + initDB));
         assertTrue(FileUtil.copy(path + "ICSChargeImport.java", DIR_TEST + "/generated-src/" + srcPath + "ICSChargeImport.java"));
         assertTrue(FileUtil.copy(path + "ActionImportHolidays.java", DIR_TEST +  "/generated-src/" + srcPath + "/ActionImportHolidays.java"));
         assertTrue(FileUtil.copy(path + "ActionImportCalendar.java", DIR_TEST +  "/generated-src/" + srcPath + "/ActionImportCalendar.java"));
-        assertTrue(FileUtil.copy("bin/" + srcPath + "ICSChargeImport.class", DIR_TEST + "/generated-bin/" + srcPath + "ICSChargeImport.class"));
-        assertTrue(FileUtil.copy("bin/" + srcPath + "ActionImportHolidays.class", DIR_TEST +  "/generated-bin/" + srcPath + "/ActionImportHolidays.class"));
-        assertTrue(FileUtil.copy("bin/" + srcPath + "ActionImportCalendar.class", DIR_TEST +  "/generated-bin/" + srcPath + "/ActionImportCalendar.class"));
+        assertTrue(FileUtil.copy(BIN_DIR + srcPath + "ICSChargeImport.class", DIR_TEST + "/generated-bin/" + srcPath + "ICSChargeImport.class"));
+        assertTrue(FileUtil.copy(BIN_DIR + srcPath + "ActionImportHolidays.class", DIR_TEST +  "/generated-bin/" + srcPath + "/ActionImportHolidays.class"));
+        assertTrue(FileUtil.copy(BIN_DIR + srcPath + "ActionImportCalendar.class", DIR_TEST +  "/generated-bin/" + srcPath + "/ActionImportCalendar.class"));
 
         assertTrue(FileUtil.copy(path + "messages_de.properties", DIR_TEST + "/messages_de.properties"));
         assertTrue(FileUtil.copy(path + "messages_de_DE.properties", DIR_TEST + "/messages_de_DE.properties"));
@@ -238,8 +236,8 @@ public class NanoH5Test {
         FileUtil.writeBytes(("run.sh " + new File(DIR_TEST).getName()).getBytes(), basedir + name + ".sh", false);
         
         //workaround: replace path 'test/.nanoh5.timesheet' with '.nanoh5.timesheet'
-        AntRunner.runRegexReplace("(test[/])([.]nanoh5[.]timesheet)[/](icons)", "\\3", new File(DIR_TEST).getParent(), "**");
-        AntRunner.runRegexReplace("(test[/])([.]nanoh5[.]timesheet)", "\\2", new File(DIR_TEST).getParent(), "**");
+        AntRunner.runRegexReplace("(target[/]test[/])([.]nanoh5[.]timesheet)[/](icons)", "\\3", new File(DIR_TEST).getParent(), "**");
+        AntRunner.runRegexReplace("(target[/]test[/])([.]nanoh5[.]timesheet)", "\\2", new File(DIR_TEST).getParent(), "**");
         
         //create a deployable package
         new File("target/").mkdirs();
@@ -263,8 +261,8 @@ public class NanoH5Test {
         ENV.addService(IAuthorization.class, auth);
         ConcurrentUtil.setCurrent(auth);
 
-//      BeanContainer.initEmtpyServiceActions();
-        GenericLocalBeanContainer.initLocalContainer(Thread.currentThread().getContextClassLoader(), false);
+        BeanContainer.initEmtpyServiceActions();
+//        GenericLocalBeanContainer.initLocalContainer(Thread.currentThread().getContextClassLoader(), false);
         ENV.addService(IBeanContainer.class, BeanContainer.instance());
         ConcurrentUtil.setCurrent(BeanContainer.instance());
     }
@@ -287,7 +285,7 @@ public class NanoH5Test {
         return DIR_TEST;
     }
 
-    @Ignore("problems with velocity generation")
+    //@Ignore("problems with velocity generation")
     @Test
     public void testTimesheet() throws Exception {
         Properties mapper = new Properties();
@@ -304,23 +302,23 @@ public class NanoH5Test {
         createENV("restful");
         new NanoH5();
         BeanConfigurator<Address> bconf = BeanConfigurator.create(Address.class).getInstance();
-        bconf.actionAddAttribute("", "@http://openstreemap.org/search?query={city}<<GET:text/html");
+        bconf.actionAddAttribute("", "@http://openstreetmap.org/search?query={city}<<GET:text/html");
         bconf.actionAddAttribute("", "?select count(*) from Address");
         
         Bean.clearCache();
         ENV.reload();
 
         Address address = new Address();
-        address.setCity("M�nchen");
+        address.setCity("München");
         address.setStreet("Frankfurter Strasse 1");
         Bean<Address> bean = Bean.getBean(address);
 
-        IValueDefinition attr = bean.getAttribute("openstreemap.org");
+        IValueDefinition attr = bean.getAttribute("openstreetmap.org");
         System.out.println(attr.getValue());
 
         //TODO: queries are defined in 'specification'.
         //TODO: name clash...
-        attr = bean.getAttribute(FileUtil.getValidFileName(" ?select count(*) from Address"));
+        attr = bean.getAttribute(FileUtil.getValidFileName("?select count(*) from Address"));
         System.out.println(attr.getValue());
     }
     

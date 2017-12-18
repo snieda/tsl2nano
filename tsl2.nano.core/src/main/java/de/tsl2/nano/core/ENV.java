@@ -24,6 +24,7 @@ import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.Hashtable;
 import java.util.Iterator;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
@@ -324,10 +325,12 @@ public class ENV implements Serializable {
         Updater updater = new Updater();
         String versionURL;
         if ((versionURL = get("app.update.url", "https://sourceforge.net/projects/tsl2nano/files/latest/download?source=navbar")) != null)
-            updater.checkAndUpdate(currentVersion, versionURL);
-        if (new Updater().run(configFile.getPath(), currentVersion, buildInfo, self) || currentVersion == null)
-            setProperty("app.version", buildInfo);
-        
+            if (updater.checkAndUpdate(currentVersion, versionURL) || true /* workaround, if alreaddy downloaded...*/) {
+		        if (updater.run(configFile.getPath(), currentVersion, buildInfo, self))
+		            setProperty("app.version", buildInfo);
+//            } else if (currentVersion == null) {
+//	            setProperty("app.version", buildInfo);
+            }
     }
 
     public File getConfigFile() {
@@ -1035,28 +1038,33 @@ public class ENV implements Serializable {
          */
 
         Set<Object> keySet = properties.keySet();
+        List<Object> unserializableProperties = new LinkedList<>();
         for (Iterator<?> keyIt = keySet.iterator(); keyIt.hasNext();) {
             Object key = keyIt.next();
             Object value = properties.get(key);
             if (value != null && (isNotSerializable(value)
                 || !ObjectUtil.isSingleValueType(value.getClass())) || value instanceof ClassLoader) {
-                info("removing property '" + key
-                    + "' from serialization while its value is not serializable or doesn't have a default constructor!");
                 keyIt.remove();
+                unserializableProperties.add(key);
             }
         }
-
+        if (unserializableProperties.size() > 0) {
+            info("removing properties from serialization while its value is not serializable or doesn't have a default constructor:\n\t" + unserializableProperties);
+        }
         if (services == null)
             services = createServiceMap();
         Set<Class<?>> serviceKeys = services.keySet();
+        List<Object> unserializableServices = new LinkedList<>();
         for (Iterator<?> keyIt = serviceKeys.iterator(); keyIt.hasNext();) {
             Object key = keyIt.next();
             Object value = services.get(key);
             if (isNotSerializable(value)) {
-                info("removing service '" + key
-                    + "' from serialization while its value is not serializable or doesn't have a default constructor!");
                 keyIt.remove();
+                unserializableServices.add(key);
             }
+        }
+        if (unserializableServices.size() > 0) {
+            info("removing services from serialization while its value is not serializable or doesn't have a default constructor:\n\t" + unserializableServices);
         }
     }
 

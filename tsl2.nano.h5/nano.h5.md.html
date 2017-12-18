@@ -3696,23 +3696,18 @@ CSheet-TODO:
 Controller:
 	- (x) create transient default entries to be saved by controller actions
 	- AsciiSignature: http://www.kammerl.de/ascii/AsciiSignature.php mit sub-zero
+
+analyse integration with REST etc.
 	
-maven TODO:
+maven+refactoring TODO:
 	- signing
+	- packaging signed, war, ...
 	- integration test NanoH5
 	- jars: war, sign, standalone, pure, sishell
-
-refact:
-	Period, XmlUtil, CollectionUtil, Context, PrintUtil
-
-	- core
-	- bean
-	- xmlmenu
-	- vnet
-
-tmux display-message -p -F "#{pane_current_path}" -t0
-
-https://medium.com/njiuko/using-fzf-instead-of-dmenu-2780d184753f
-
-myVar=$(grep -Po "(?<=^HereIsAKey ).*" file)
+	- Cp1252 -> UTF-8
+	- clean code (unused imports etc.)
+	- Test timing app
+	- dependencies (ant+hibernate -> javax validation-api)
+	- release
+	
 	

@@ -285,7 +285,7 @@ public class Timesheet extends NanoH5App {
         
         Bean<BeanConfigurator<Charge>> bconf = BeanConfigurator.create(Charge.class);
         bconf.getInstance().actionCreateCompositor(Item.class.getName(), "chargeitems", "chargeitem", "icon");
-        GenericLocalBeanContainer.initLocalContainer(Thread.currentThread().getContextClassLoader(), false);
+//        GenericLocalBeanContainer.initLocalContainer(Thread.currentThread().getContextClassLoader(), false);
 
         //TODO: Statistics executes queries immediately to evaluate group-by column names
         Statistic<Collection<Charge>, Charge> statistic = new Statistic<>(Charge.class);
@@ -468,7 +468,7 @@ public class Timesheet extends NanoH5App {
 
         AttributeDefinition space1 = beanCollector.getPresentationHelper().addSpaceValue();
         beanCollector.addAttribute("pathTest", new PathExpression<>(Times.class, "relation.pathTest"), null, null);
-        beanCollector.addAttribute("rule-test", new RuleExpression<>(Times.class, "§test-import"), null, null);
+        beanCollector.addAttribute("rule-test", new RuleExpression<>(Times.class, "ï¿½test-import"), null, null);
         beanCollector
             .addAttribute(
                 "sql-test",

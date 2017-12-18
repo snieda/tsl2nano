@@ -78,7 +78,7 @@ public class URLExpression<T extends Serializable> extends RunnableExpression<T>
     @SuppressWarnings("unchecked")
     @Override
     protected IPRunnable<T, Map<String, Object>> createRunnable() {
-        return (WebClient<T>) ENV.get(WebPool.class).get(expression.substring(1));
+        return (WebClient<T>) ENV.get(WebPool.class).get(WebClient.getName(expression.substring(1)));
     }
 
     @Override
