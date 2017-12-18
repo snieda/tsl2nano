@@ -65,7 +65,7 @@ import de.tsl2.nano.util.test.TypeBean;
 public class CommonTest {
     private static final Log LOG = LogFactory.getLog(CommonTest.class);
     private static final String BASE_DIR_COMMON = "../tsl2.nano.common/";
-    private static final String POSTFIX_TEST = "test/";
+    private static final String POSTFIX_TEST = "target/test/";
 
     @BeforeClass
     public static void setUp() {

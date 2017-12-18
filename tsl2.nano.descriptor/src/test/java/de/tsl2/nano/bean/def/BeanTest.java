@@ -62,7 +62,7 @@ import de.tsl2.nano.util.test.WeekdayEnum;
 public class BeanTest {
     private static final Log LOG = LogFactory.getLog(BeanTest.class);
     private static final String BASE_DIR_DESCRIPTOR = "../tsl2.nano.descriptor/";
-    private static final String POSTFIX_TEST = "test/";
+    private static final String POSTFIX_TEST = "target/test/";
 
     @Before
     public void setUp() {

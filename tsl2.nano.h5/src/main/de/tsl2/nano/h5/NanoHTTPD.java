@@ -1616,7 +1616,6 @@ public abstract class NanoHTTPD extends Main {
             }
         }
 
-        @SuppressWarnings("static-method")
         protected void printHeader(PrintWriter pw, String key, String value) {
             pw.append(key).append(": ").append(value).append("\r\n");
         }
@@ -2109,7 +2108,6 @@ public abstract class NanoHTTPD extends Main {
      * @return true if the gzip compression should be used if the client accespts it. Default this option is on for text
      *         content and off for everything. Override this for custom semantics.
      */
-    @SuppressWarnings("static-method")
     protected boolean useGzipWhenAccepted(Response r) {
         return r.getMimeType() != null && r.getMimeType().toLowerCase().contains("text/");
     }

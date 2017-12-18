@@ -42,7 +42,7 @@ import de.tsl2.nano.util.test.TypeBean;
 @SuppressWarnings({ "unchecked", "rawtypes" })
 public class IncubationTest {
     private static final String BASE_DIR_INCUBATION = "../tsl2.nano.incubation/";
-    private static final String POSTFIX_TEST = "test/";
+    private static final String POSTFIX_TEST = "target/test/";
 
     @BeforeClass
     public static void setUp() {

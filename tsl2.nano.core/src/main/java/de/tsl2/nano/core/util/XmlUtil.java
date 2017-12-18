@@ -315,7 +315,7 @@ public class XmlUtil {
         }
     }
 
-    @SuppressWarnings({ "rawtypes", "unused", "unchecked" })
+    @SuppressWarnings({ "rawtypes", "unchecked" })
     public static Strategy getSimpleXmlProxyStrategy() {
 //        return new TreeStrategy() {
 //            @Override

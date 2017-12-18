@@ -275,7 +275,7 @@ public class NanoH5Test {
      * @return
      */
     String createENV(String name) {
-        final String DIR_TEST = "test/.nanoh5." + name;
+        final String DIR_TEST = "target/test/.nanoh5." + name;
 //        new File(DIR_TEST).delete();
 //        Files.deleteIfExists(Paths.get(DIR_TEST));
         FileUtil.deleteRecursive(new File(DIR_TEST));
@@ -311,7 +311,7 @@ public class NanoH5Test {
         ENV.reload();
 
         Address address = new Address();
-        address.setCity("München");
+        address.setCity("Mï¿½nchen");
         address.setStreet("Frankfurter Strasse 1");
         Bean<Address> bean = Bean.getBean(address);
 

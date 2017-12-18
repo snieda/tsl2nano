@@ -73,7 +73,7 @@ import de.tsl2.nano.core.log.LogFactory;
 public class CoreTest {
     private static final Log LOG = LogFactory.getLog(CoreTest.class);
     private static final String BASE_DIR_CORE = "../tsl2.nano.core/";
-    private static final String POSTFIX_TEST = "test/";
+    private static final String POSTFIX_TEST = "target/test/";
 
     @BeforeClass
     public static void setUp() {
