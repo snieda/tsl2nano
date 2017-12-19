@@ -11,8 +11,7 @@
 	<description>TSL2 framework Html5 Extensions</description>
 	<!-- TODO: create property file with versions like in build-tsl.nano.h5.properties -->
 	<properties>
-<!-- 		<maven.test.skip>true</maven.test.skip>
- -->		<keystore>../tsl2store</keystore>
+		<keystore>../tsl2store</keystore>
 		<alias>tsl2</alias>
 		<storepass>tsl2tsl2</storepass>
 	</properties>
@@ -243,18 +242,6 @@
 						</configuration>
 					</execution>
 				</executions>
-			</plugin>
-			<plugin>
-				<groupId>org.apache.maven.plugins</groupId>
-				<artifactId>maven-site-plugin</artifactId>
-			</plugin>
-			<plugin>
-				<groupId>org.codehaus.mojo</groupId>
-				<artifactId>findbugs-maven-plugin</artifactId>
-			</plugin>
-			<plugin>
-				<groupId>org.jacoco</groupId>
-				<artifactId>jacoco-maven-plugin</artifactId>
 			</plugin>
 		</plugins>
 	</build>

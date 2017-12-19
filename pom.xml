@@ -3,19 +3,16 @@
 	<modelVersion>4.0.0</modelVersion>
 	<groupId>net.sf.tsl2nano</groupId>
 	<artifactId>tsl2.nano.h5-package</artifactId>
-	<version>2.0.0-SNAPSHOT</version>
+	<version>${tsl2.nano.h5.version}</version>
 	<packaging>pom</packaging>
 	<name>TSL2 Html5 Application Framework</name>
 	<description>TSL2 Html5 Application Framework</description>
 	<url>https://sourceforge.net/projects/tsl2nano/</url>
 	<properties>
-		<maven.test.skip>false</maven.test.skip>
-		<fail-at-end>true</fail-at-end>
-		<maven.compiler.source>1.8</maven.compiler.source>
-		<maaven.compiler.target>1.8</maaven.compiler.target>
+		<project.build.sourceEncoding>Cp1252</project.build.sourceEncoding>
+		<module.parent>${project.basedir}</module.parent>
         <timestamp>${maven.build.timestamp}</timestamp>
         <maven.build.timestamp.format>dd-MM-yyyy HH:mm</maven.build.timestamp.format>
-        <!-- <argLine></argLine>  -->
     </properties>
 	<inceptionYear>2012</inceptionYear>
 	<licenses>
@@ -29,7 +26,7 @@
 	<scm>
 		<url>https://git.code.sf.net/p/tsl2nano/code tsl2nano-code</url>
 	</scm>
-	<parent>
+	<parent> <!-- TODO: should we remove the parent? -->
 		<groupId>org.sonatype.oss</groupId>
 		<artifactId>oss-parent</artifactId>
 		<version>9</version>
@@ -76,6 +73,24 @@
         </resources>		
         <plugins>
 			<plugin>
+				<groupId>org.codehaus.mojo</groupId>
+				<artifactId>properties-maven-plugin</artifactId>
+				<version>1.0.0</version>
+				<executions>
+					<execution>
+						<phase>initialize</phase>
+						<goals>
+							<goal>read-project-properties</goal>
+						</goals>
+						<configuration>
+							<files>
+								<file>${module.parent}/build.properties</file>
+							</files>
+						</configuration>
+					</execution>
+				</executions>
+			</plugin>
+      			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-surefire-plugin</artifactId>
 				<version>2.12.4</version>
@@ -114,12 +129,6 @@
 						<goals>
 							<goal>prepare-agent</goal>
 						</goals>
-						<configuration>
-							<!-- Sets the path to the file which contains the execution data. -->
-							<!-- <destFile>${project.build.directory}/coverage-reports/jacoco-ut.exec</destFile>  -->
-							<!-- Sets the name of the property containing the settings for JaCoCo 
-								runtime agent. -->
-						</configuration>
 					</execution>
 				</executions>
 			</plugin>
@@ -127,9 +136,6 @@
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-source-plugin</artifactId>
 				<version>2.2.1</version>
-				<configuration>
-					<encoding>Cp1252</encoding>
-				</configuration>
 				<executions>
 					<execution>
 						<id>attach-sources</id>
@@ -144,7 +150,6 @@
 				<artifactId>maven-javadoc-plugin</artifactId>
 				<version>2.9.1</version>
 				<configuration>
-					<encoding>Cp1252</encoding>
 					<force>true</force>
 					<failOnError>false</failOnError>
 				</configuration>
@@ -193,6 +198,11 @@
    			<plugin>
 				<groupId>org.jacoco</groupId>
 				<artifactId>jacoco-maven-plugin</artifactId>
+				<configuration>
+					<excludes>
+						<exclude>**/*.jar</exclude>
+					</excludes>
+				</configuration>
 				<reportSets>
 					<reportSet>
 						<reports>
