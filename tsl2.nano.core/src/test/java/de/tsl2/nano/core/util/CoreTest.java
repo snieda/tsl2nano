@@ -70,27 +70,18 @@ import de.tsl2.nano.core.log.LogFactory;
  * @version $Revision$
  */
 @SuppressWarnings({ "unchecked", "rawtypes" })
-public class CoreTest {
+public class CoreTest  implements ENVTestPreparation {
     private static final Log LOG = LogFactory.getLog(CoreTest.class);
-    private static final String BASE_DIR_CORE = "../tsl2.nano.core/";
-    private static final String POSTFIX_TEST = "target/test/";
+    private static String BASE_DIR_CORE;
 
     @BeforeClass
     public static void setUp() {
-        ENV.create(BASE_DIR_CORE + POSTFIX_TEST);
-        ENV.setProperty(ENV.KEY_CONFIG_PATH, POSTFIX_TEST);
-//        Environment.setProperty("app.strict.mode", true);
-        ENV.deleteEnvironment();
+    	BASE_DIR_CORE = ENVTestPreparation.setUp("core", false);
     }
 
     @AfterClass
     public static void tearDown() {
-        try {
-			ENV.deleteEnvironment();
-		} catch (Exception e) {
-			//...this may result in problems on other tests...
-			System.out.println(e.toString());
-		}
+    	ENVTestPreparation.tearDown();
     }
     
     @Test

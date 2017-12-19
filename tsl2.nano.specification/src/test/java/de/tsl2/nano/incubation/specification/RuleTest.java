@@ -5,16 +5,30 @@ import static junit.framework.Assert.assertEquals;
 import java.math.BigDecimal;
 import java.util.LinkedHashMap;
 
+import org.junit.AfterClass;
+import org.junit.BeforeClass;
 import org.junit.Test;
 
 import de.tsl2.nano.bean.def.Constraint;
 import de.tsl2.nano.core.ENV;
+import de.tsl2.nano.core.util.ENVTestPreparation;
 import de.tsl2.nano.core.util.MapUtil;
 import de.tsl2.nano.incubation.specification.rules.Rule;
 import de.tsl2.nano.incubation.specification.rules.RulePool;
 
-public class RuleTest {
+public class RuleTest implements ENVTestPreparation {
 
+    @BeforeClass
+    public static void setUp() {
+    	ENVTestPreparation.setUp("specification", false);
+    }
+
+    @AfterClass
+    public static void tearDown() {
+    	ENVTestPreparation.tearDown();
+    }
+    
+    
     @Test
     public void testRules() throws Exception {
         Rule<BigDecimal> rule =
@@ -45,7 +59,7 @@ public class RuleTest {
         pool.add(rule);
         ENV.addService(pool);
         Rule<BigDecimal> ruleWithImport =
-            new Rule<BigDecimal>("test-import", "A ? 1 + §test : (x2 * 3)",
+            new Rule<BigDecimal>("test-import", "A ? 1 + ï¿½test : (x2 * 3)",
                 (LinkedHashMap<String, ParType>) MapUtil.asMap("A",
                     ParType.BOOLEAN,
                     "x1",

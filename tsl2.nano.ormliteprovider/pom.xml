@@ -4,10 +4,13 @@
 	  <parent>
 	    <groupId>net.sf.tsl2nano</groupId>
 	    <artifactId>tsl2.nano.h5-package</artifactId>
-	    <version>2.0.0-SNAPSHOT</version>
+	    <version>${tsl2.nano.h5.version}</version>
 	  </parent>
 	<artifactId>tsl2.nano.ormliteprovider</artifactId>
 	<version>0.0.2</version>
+	<properties>
+		<module.parent>..</module.parent>
+	</properties>
 	<build>
 		<sourceDirectory>src/main</sourceDirectory>
 		<testSourceDirectory>src/test</testSourceDirectory>
@@ -27,16 +30,6 @@
 				</excludes>
 			</testResource>
 		</testResources>
-		<plugins>
-			<plugin>
-				<artifactId>maven-compiler-plugin</artifactId>
-				<version>3.7.0</version>
-				<configuration>
-					<source>1.8</source>
-					<target>1.8</target>
-				</configuration>
-			</plugin>
-		</plugins>
 	</build>
 	<dependencies><!-- https://mvnrepository.com/artifact/com.j256.ormlite/ormlite-core -->
 		<dependency>

@@ -6,13 +6,26 @@ import java.io.Serializable;
 import java.util.concurrent.Callable;
 
 import org.apache.commons.logging.Log;
+import org.junit.AfterClass;
+import org.junit.BeforeClass;
 import org.junit.Test;
 
 import de.tsl2.nano.core.log.LogFactory;
+import de.tsl2.nano.core.util.ENVTestPreparation;
 
 public class JobServerTest {
 
-    @Test
+    @BeforeClass
+    public static void setUp() {
+    	ENVTestPreparation.setUp("core", false);
+    }
+
+    @AfterClass
+    public static void tearDown() {
+    	ENVTestPreparation.tearDown();
+    }
+    
+   @Test
     public void testJobServer() throws Exception {
         JobServer jobServer = new JobServer();
         String result = jobServer.executeWait("test", new TestJob(), 5000);

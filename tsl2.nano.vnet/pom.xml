@@ -3,11 +3,14 @@
   <parent>
     <groupId>net.sf.tsl2nano</groupId>
     <artifactId>tsl2.nano.h5-package</artifactId>
-    <version>2.0.0-SNAPSHOT</version>
+    <version>${tsl2.nano.h5.version}</version>
   </parent>
   <artifactId>tsl2.nano.vnet</artifactId>
   <version>0.5.2</version>
   <name>TSL2 Framework VirtualNetwork</name>
+	<properties>
+		<module.parent>..</module.parent>
+	</properties>
 	<dependencies>
 		<dependency>
 			<groupId>net.sf.tsl2nano</groupId>

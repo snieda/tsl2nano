@@ -7,11 +7,15 @@ import java.util.Map;
 
 import javax.print.attribute.standard.MediaSizeName;
 
+import org.junit.AfterClass;
+import org.junit.BeforeClass;
 import org.junit.Test;
 
 import de.tsl2.nano.bean.def.Constraint;
+import de.tsl2.nano.core.ENV;
 import de.tsl2.nano.core.execution.IRunnable;
 import de.tsl2.nano.core.util.Crypt;
+import de.tsl2.nano.core.util.ENVTestPreparation;
 import de.tsl2.nano.core.util.FileUtil;
 import de.tsl2.nano.core.util.NetUtil;
 import de.tsl2.nano.core.util.Permutator;
@@ -31,8 +35,19 @@ import de.tsl2.nano.incubation.vnet.workflow.Condition;
 import de.tsl2.nano.util.PrintUtil;
 import de.tsl2.nano.util.XmlGenUtil;
 
-public class TerminalTest {
+public class TerminalTest implements ENVTestPreparation {
 
+    @BeforeClass
+    public static void setUp() {
+    	ENVTestPreparation.setUp("terminal", false);
+    }
+
+    @AfterClass
+    public static void tearDown() {
+    	ENVTestPreparation.tearDown();
+    }
+    
+    
 //  @Test
 //  public void testTerminal() throws Exception {
 //      Tree root = new Tree("selection1", null, new ArrayList<IItem>(), null);

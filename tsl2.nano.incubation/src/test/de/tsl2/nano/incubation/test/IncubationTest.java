@@ -26,6 +26,7 @@ import de.tsl2.nano.core.Finished;
 import de.tsl2.nano.core.execution.IRunnable;
 import de.tsl2.nano.core.util.ByteUtil;
 import de.tsl2.nano.core.util.Crypt;
+import de.tsl2.nano.core.util.ENVTestPreparation;
 import de.tsl2.nano.core.util.MapUtil;
 import de.tsl2.nano.core.util.Permutator;
 import de.tsl2.nano.core.util.StringUtil;
@@ -41,21 +42,17 @@ import de.tsl2.nano.util.test.TypeBean;
  */
 @SuppressWarnings({ "unchecked", "rawtypes" })
 public class IncubationTest {
-    private static final String BASE_DIR_INCUBATION = "../tsl2.nano.incubation/";
-    private static final String POSTFIX_TEST = "target/test/";
 
     @BeforeClass
     public static void setUp() {
-        ENV.create(BASE_DIR_INCUBATION + POSTFIX_TEST);
-        ENV.setProperty(ENV.KEY_CONFIG_PATH, POSTFIX_TEST);
-//        Environment.setProperty("app.strict.mode", true);
-//        ENV.deleteEnvironment();
+        ENVTestPreparation.setUp("incubation", false);
     }
 
     @AfterClass
     public static void tearDown() {
-        ENV.deleteEnvironment();
+        ENVTestPreparation.tearDown();
     }
+    
     
     @Test
     public void testPermutator() throws Exception {
@@ -97,7 +94,7 @@ public class IncubationTest {
         bean.setPrimitiveChar(' ');
         bean.setType(cls);
 
-        String xmlfile = "test/typebean.xml";
+        String xmlfile = "target/test/typebean.xml";
         new File(xmlfile).getParentFile().mkdirs();
         XmlGenUtil.saveSimpleXml_(xmlfile, bean);
         TypeBean bean1 = XmlGenUtil.loadSimpleXml_(xmlfile, TypeBean.class, true);
@@ -111,6 +108,7 @@ public class IncubationTest {
 
     @Test
     public void testSVGGraph() throws Exception {
+        new File(ENV.getTempPath()).mkdirs();
         SVGChart.createGraph("Nano Graph", "X", "Y", 500, 400, 2d, 1d, 0d);
 
         //test the file import

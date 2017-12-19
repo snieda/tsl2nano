@@ -11,6 +11,8 @@ import java.text.DateFormat;
 import java.util.ArrayList;
 import java.util.Collection;
 
+import org.junit.AfterClass;
+import org.junit.BeforeClass;
 import org.junit.Test;
 
 import de.tsl2.nano.core.ENV;
@@ -18,6 +20,7 @@ import de.tsl2.nano.core.ManagedException;
 import de.tsl2.nano.core.execution.Profiler;
 import de.tsl2.nano.core.messaging.EventController;
 import de.tsl2.nano.core.messaging.IListener;
+import de.tsl2.nano.core.util.ENVTestPreparation;
 import de.tsl2.nano.core.util.StringUtil;
 import de.tsl2.nano.incubation.vnet.neuron.VNeuron;
 import de.tsl2.nano.incubation.vnet.routing.Location;
@@ -28,8 +31,18 @@ import de.tsl2.nano.incubation.vnet.workflow.VActivity;
 import de.tsl2.nano.structure.Cover;
 import de.tsl2.nano.structure.IConnection;
 
-public class VNetTest {
+public class VNetTest implements ENVTestPreparation {
 
+    @BeforeClass
+    public static void setUp() {
+    	ENVTestPreparation.setUp("vnet", false);
+    }
+
+    @AfterClass
+    public static void tearDown() {
+    	ENVTestPreparation.tearDown();
+    }
+    
 	@Test
 	public void testVNetWithNeuralNet() {
 		Net<VNeuron, Float> net = new Net<VNeuron, Float>();
@@ -106,13 +119,13 @@ public class VNetTest {
 		 * Beispiel
 		 */
 		Net<Location, Float> net = new Net<Location, Float>();
-		Node<Location, Float> saarbruecken = net.add(new Location("Saarbrücken", 222, 0, 0));
+		Node<Location, Float> saarbruecken = net.add(new Location("Saarbrï¿½cken", 222, 0, 0));
 		Node<Location, Float> kaiserslautern = net.add(new Location("Kaiserslautern", 158, 0, 0));
 		Node<Location, Float> karlsruhe = net.add(new Location("Karlsruhe", 140, 0, 0));
 		Node<Location, Float> ludwigshafen = net.add(new Location("Ludwigshafen", 108, 0, 0));
 		Node<Location, Float> frankfurt = net.add(new Location("Frankfurt", 96, 0, 0));
 		Node<Location, Float> heilbronn = net.add(new Location("Heilbronn", 87, 0, 0));
-		Node<Location, Float> wuerzburg = net.add(new Location("Würzburg", 0, 0, 0));
+		Node<Location, Float> wuerzburg = net.add(new Location("Wï¿½rzburg", 0, 0, 0));
 
 		saarbruecken.connect(kaiserslautern, 70f);
 		saarbruecken.connect(karlsruhe, 145f);

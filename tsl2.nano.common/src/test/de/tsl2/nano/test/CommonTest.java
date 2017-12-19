@@ -45,6 +45,7 @@ import de.tsl2.nano.core.cls.BeanClass;
 import de.tsl2.nano.core.execution.Profiler;
 import de.tsl2.nano.core.log.LogFactory;
 import de.tsl2.nano.core.util.ConcurrentUtil;
+import de.tsl2.nano.core.util.ENVTestPreparation;
 import de.tsl2.nano.core.util.NetUtil;
 import de.tsl2.nano.core.util.StringUtil;
 import de.tsl2.nano.core.util.Util;
@@ -62,23 +63,20 @@ import de.tsl2.nano.util.test.TypeBean;
  * @version $Revision$
  */
 @SuppressWarnings({ "unchecked", "rawtypes" })
-public class CommonTest {
+public class CommonTest implements ENVTestPreparation {
     private static final Log LOG = LogFactory.getLog(CommonTest.class);
-    private static final String BASE_DIR_COMMON = "../tsl2.nano.common/";
-    private static final String POSTFIX_TEST = "target/test/";
+    private static String BASE_DIR_COMMON;
 
     @BeforeClass
     public static void setUp() {
-        ENV.create(BASE_DIR_COMMON + POSTFIX_TEST);
-        ENV.setProperty(ENV.KEY_CONFIG_PATH, POSTFIX_TEST);
-//        Environment.setProperty("app.strict.mode", true);
-        ENV.deleteEnvironment();
+        BASE_DIR_COMMON = ENVTestPreparation.setUp("common", false);
     }
 
     @AfterClass
     public static void tearDown() {
-        ENV.deleteEnvironment();
+        ENVTestPreparation.tearDown();
     }
+    
     
     @Ignore("old ant version 1.65 is on the classpath, result in error")
     @Test

@@ -50,6 +50,7 @@ import de.tsl2.nano.core.messaging.ChangeEvent;
 import de.tsl2.nano.core.messaging.IListener;
 import de.tsl2.nano.core.util.ByteUtil;
 import de.tsl2.nano.core.util.DateUtil;
+import de.tsl2.nano.core.util.ENVTestPreparation;
 import de.tsl2.nano.core.util.FileUtil;
 import de.tsl2.nano.core.util.MapUtil;
 import de.tsl2.nano.currency.CurrencyUnit;
@@ -61,20 +62,15 @@ import de.tsl2.nano.util.test.WeekdayEnum;
 
 public class BeanTest {
     private static final Log LOG = LogFactory.getLog(BeanTest.class);
-    private static final String BASE_DIR_DESCRIPTOR = "../tsl2.nano.descriptor/";
-    private static final String POSTFIX_TEST = "target/test/";
 
-    @Before
-    public void setUp() {
-        ENV.create(BASE_DIR_DESCRIPTOR + POSTFIX_TEST);
-        ENV.setProperty(ENV.KEY_CONFIG_PATH, POSTFIX_TEST);
-//        Environment.setProperty("app.strict.mode", true);
-        ENV.deleteEnvironment();
+    @BeforeClass
+    public static void setUp() {
+    	ENVTestPreparation.setUp("descriptor", false);
     }
 
-    @After
-    public void tearDown() {
-        ENV.deleteEnvironment();
+    @AfterClass
+    public static void tearDown() {
+    	ENVTestPreparation.tearDown();
     }
     
 

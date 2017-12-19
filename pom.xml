@@ -9,7 +9,6 @@
 	<description>TSL2 Html5 Application Framework</description>
 	<url>https://sourceforge.net/projects/tsl2nano/</url>
 	<properties>
-		<project.build.sourceEncoding>Cp1252</project.build.sourceEncoding>
 		<module.parent>${project.basedir}</module.parent>
         <timestamp>${maven.build.timestamp}</timestamp>
         <maven.build.timestamp.format>dd-MM-yyyy HH:mm</maven.build.timestamp.format>
@@ -121,6 +120,17 @@
 			<plugin>
 				<groupId>org.jacoco</groupId>
 				<artifactId>jacoco-maven-plugin</artifactId>
+				<version>0.7.9</version>
+				<!-- TODO: the configuration is duplicated in the reporting section... -->
+				<configuration>
+					<includes>
+						<include>**/de/tsl2/nano/**/*.class</include>
+					</includes>
+					<excludes>
+						<exclude>**/*.jar</exclude>
+						<exclude>**/*.zip</exclude>
+					</excludes>
+				</configuration>
 				<executions>
 					<!-- Prepares the property pointing to the JaCoCo runtime agent which 
 						is passed as VM argument when Maven the Surefire plugin is executed. -->
@@ -184,8 +194,14 @@
 	<reporting>
 		<plugins>
 			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-project-info-reports-plugin</artifactId>
+				<version>2.9</version>
+			</plugin>
+			<plugin>
 				<groupId>org.codehaus.mojo</groupId>
 				<artifactId>findbugs-maven-plugin</artifactId>
+				<version>3.0.5</version>
 				<configuration>
 					<onlyAnalyze>de.tsl2.*</onlyAnalyze>
 				</configuration>
@@ -198,9 +214,14 @@
    			<plugin>
 				<groupId>org.jacoco</groupId>
 				<artifactId>jacoco-maven-plugin</artifactId>
+				<version>0.7.9</version>
 				<configuration>
+					<includes>
+						<include>**/de/tsl2/nano/**/*.class</include>
+					</includes>
 					<excludes>
 						<exclude>**/*.jar</exclude>
+						<exclude>**/*.zip</exclude>
 					</excludes>
 				</configuration>
 				<reportSets>

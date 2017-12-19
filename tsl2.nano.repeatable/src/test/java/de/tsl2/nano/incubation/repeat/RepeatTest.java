@@ -6,10 +6,13 @@ import static junit.framework.Assert.assertTrue;
 
 import java.io.Serializable;
 
+import org.junit.AfterClass;
+import org.junit.BeforeClass;
 import org.junit.Test;
 
 import de.tsl2.nano.bean.BeanUtil;
 import de.tsl2.nano.core.cls.BeanClass;
+import de.tsl2.nano.core.util.ENVTestPreparation;
 import de.tsl2.nano.core.util.StringUtil;
 import de.tsl2.nano.incubation.repeat.impl.AChange;
 import de.tsl2.nano.incubation.repeat.impl.ACommand;
@@ -18,6 +21,16 @@ import de.tsl2.nano.util.test.TypeBean;
 
 public class RepeatTest {
 
+    @BeforeClass
+    public static void setUp() {
+    	ENVTestPreparation.setUp("repeatable", false);
+    }
+
+    @AfterClass
+    public static void tearDown() {
+    	ENVTestPreparation.tearDown();
+    }
+    
     @Test
     public void testUndoRedo() throws Exception {
         /*

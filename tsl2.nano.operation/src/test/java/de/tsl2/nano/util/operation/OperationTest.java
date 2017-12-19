@@ -8,14 +8,29 @@ import java.math.BigDecimal;
 import java.util.Hashtable;
 import java.util.Map;
 
+import org.junit.AfterClass;
+import org.junit.Before;
+import org.junit.BeforeClass;
 import org.junit.Test;
 
+import de.tsl2.nano.core.ENV;
 import de.tsl2.nano.core.cls.BeanClass;
+import de.tsl2.nano.core.util.ENVTestPreparation;
 import de.tsl2.nano.core.util.MapUtil;
 
-public class OperationTest {
+public class OperationTest implements ENVTestPreparation {
 
+    @BeforeClass
+    public static void setUp() {
+    	ENVTestPreparation.setUp("operation", false);
+    }
 
+    @AfterClass
+    public static void tearDown() {
+    	ENVTestPreparation.tearDown();
+    }
+    
+    
     @Test
     public void testNumericOperator() {
         String f = "1+ ((x1 + x2)*3 + 4)+5";
