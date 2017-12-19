@@ -316,7 +316,7 @@ public class Html5Presentation<T> extends BeanPresentationHelper<T> implements I
         super.reset();
         //clear template cache
         jsWebsocketTemplate = null;
-        HtmlUtil.tableDivStyle = null;
+        tableDivStyle = null;
     }
 
     /**
@@ -486,7 +486,7 @@ public class Html5Presentation<T> extends BeanPresentationHelper<T> implements I
                         getPageActions(session));
                 } else {
                     //fallback: setting style from environment-properties
-                    HtmlUtil.appendAttributes((Element) c3.getParentNode(), ATTR_STYLE,
+                    appendAttributes((Element) c3.getParentNode(), ATTR_STYLE,
                         ENV.get("layout.header.grid.style", "background-image: url(icons/spe.jpg);"));
                     c3 = appendElement(c3,
                         TAG_FORM,
@@ -521,7 +521,7 @@ public class Html5Presentation<T> extends BeanPresentationHelper<T> implements I
         appendElement(html, TAG_STYLE,
             content(
                 ENV.get("app.frame.style", CSS_BACKGROUND_FADING_KEYFRAMES + tableDivStyles())));
-        HtmlUtil.appendAttributes(html, "manifest", ENV.get("html5.manifest.file", "tsl2nano-appcache.mf"));
+        appendAttributes(html, "manifest", ENV.get("html5.manifest.file", "tsl2nano-appcache.mf"));
         Element head = appendElement(html, TAG_HEAD, ATTR_TITLE, "Nano-H5 Application: " + title);
 
         appendElement(head, "meta", "name", "author", "content", "tsl2.nano.h5 (by Thomas Schneider/2012-2017)");
@@ -545,7 +545,7 @@ public class Html5Presentation<T> extends BeanPresentationHelper<T> implements I
             String style =
                 ENV.get("app.page.style", STYLE_BACKGROUND_RADIAL_GRADIENT
                     + STYLE_BACKGROUND_FADING_KEYFRAMES);
-            HtmlUtil.appendAttributes(body, /*"background", "icons/spe.jpg", */ATTR_STYLE,
+            appendAttributes(body, /*"background", "icons/spe.jpg", */ATTR_STYLE,
                 style, "ononline", "showStatusMessage('ONLINE')", "onoffline", "showStatusMessage('-- OFFLINE --')");
         }
         return body;
@@ -697,12 +697,12 @@ public class Html5Presentation<T> extends BeanPresentationHelper<T> implements I
 //        if (Environment.get("html5.table.show.caption", false))
 //            appendElement(table, "caption", content(title));
         //fallback: setting style from environment-properties
-        HtmlUtil.appendAttributes(table, ATTR_STYLE,
+        appendAttributes(table, ATTR_STYLE,
             ENV.get("layout.grid.style",
                 "background: transparent, border: 10;"));
 
         if (controller.getPresentable() != null) {
-            appendAttributes(table, controller.getPresentable(), true);
+            addAttributes(table, controller.getPresentable(), true);
         }
         createActionTableContent(table, controller, controller.getCurrentData());
         return table;
@@ -828,15 +828,15 @@ public class Html5Presentation<T> extends BeanPresentationHelper<T> implements I
             createGrid(parent, ENV.translate("tsl2nano.input", false), "field.panel", fullwidth, 0);
         //fallback: setting style from environment-properties
         if (isBeanConfiguration()) {
-            HtmlUtil.appendAttributes((Element) panel.getParentNode(), "class", "fieldpanel", ATTR_STYLE,
+            appendAttributes((Element) panel.getParentNode(), "class", "fieldpanel", ATTR_STYLE,
                 ENV.get("layout.configurator.grid.style", "background-image: url(icons/art029.jpg);")
                     + VAL_ROUNDCORNER);
         } else {
-            HtmlUtil.appendAttributes((Element) panel.getParentNode(), "class", "fieldpanel", ATTR_STYLE,
+            appendAttributes((Element) panel.getParentNode(), "class", "fieldpanel", ATTR_STYLE,
                 ENV.get("layout.panel.style", "background-image: url(icons/spe.jpg);") + VAL_ROUNDCORNER);
         }
         //set layout and constraints into the grid
-        appendAttributes((Element) panel.getParentNode(), p, true);
+        addAttributes((Element) panel.getParentNode(), p, true);
         boolean firstFocused = false;
         int count = 0;
         Element field = null;
@@ -933,10 +933,10 @@ public class Html5Presentation<T> extends BeanPresentationHelper<T> implements I
             grid = createGrid(parent, bean.toString(), "collector.table", false, fullwidth, getColumnNames(bean));
         }
         //fallback: setting style from environment-properties
-        HtmlUtil.appendAttributes(grid, "class", "beancollector", ATTR_STYLE,
+        appendAttributes(grid, "class", "beancollector", ATTR_STYLE,
             ENV.get("layout.grid.style", "background: transparent, border: 10;"));
 
-        appendAttributes(grid, bean.getPresentable(), true);
+        addAttributes(grid, bean.getPresentable(), true);
 
         if (interactive && ENV.get("layout.grid.searchrow.show", true)
             && bean.hasMode(IBeanCollector.MODE_SEARCHABLE)
@@ -961,7 +961,7 @@ public class Html5Presentation<T> extends BeanPresentationHelper<T> implements I
             appendElement(parent, TAG_INPUT, ATTR_ID, ID_QUICKSEARCH_FIELD, ATTR_NAME, ID_QUICKSEARCH_FIELD, ATTR_TYPE,
                 ATTR_TYPE_SEARCH, ATTR_TITLE, tooltip, ATTR_TABINDEX, ++tabIndex + "");
         if (ENV.get("websocket.use.inputassist", true)) {
-            HtmlUtil.appendAttributes(input, "onkeypress",
+            appendAttributes(input, "onkeypress",
                 ENV.get("websocket.inputassist.function", "inputassist(event)"));
         }
         createAction(parent, action, false);
@@ -980,22 +980,22 @@ public class Html5Presentation<T> extends BeanPresentationHelper<T> implements I
         return cnames.toArray(new String[0]);
     }
 
-    private void appendAttributes(Element grid, IPresentable p, boolean isContainer) {
-        appendAttributes(grid, null, p, isContainer);
+    private void addAttributes(Element grid, IPresentable p, boolean isContainer) {
+        addAttributes(grid, null, p, isContainer);
     }
 
-    private void appendAttributes(Element grid, String parentBGColor, IPresentable p, boolean isContainer) {
+    private void addAttributes(Element grid, String parentBGColor, IPresentable p, boolean isContainer) {
         appendStyle(grid, parentBGColor, STYLE_BACKGROUND_COLOR,
             convert(ATTR_BGCOLOR, p.getBackground(), null), STYLE_COLOR,
             convert(STYLE_COLOR, p.getForeground(), null));
 
         if (!isContainer) {
-            HtmlUtil.appendAttributes(grid,
+            appendAttributes(grid,
                 ATTR_ALIGN,
                 getTextAlignment(p.getStyle()));
         }
         if (p.getLayout() instanceof Map) {
-            HtmlUtil.appendAttributes(grid, MapUtil.asArray((Map<String, Object>) p.getLayout()));
+            appendAttributes(grid, MapUtil.asArray((Map<String, Object>) p.getLayout()));
         }
         //TODO: only layout-constraints should be set
         createLayoutConstraints(grid, p);
@@ -1165,7 +1165,7 @@ public class Html5Presentation<T> extends BeanPresentationHelper<T> implements I
         Element cell = null;
         try {
             if (useSideNav()) {
-                cell = sideNav = HtmlUtil.createSidebarNavMenuButton(parent, sideNav);
+                cell = sideNav = createSidebarNavMenuButton(parent, sideNav);
                 width = ENV.get("layout.action.width", -1);
                 if (width == -1)
                     ENV.setProperty("layout.action.width", 200);
@@ -1175,7 +1175,7 @@ public class Html5Presentation<T> extends BeanPresentationHelper<T> implements I
                 Element row = appendTag(panel, TABLE(TAG_ROW, ATTR_CLASS, "actionpanel"));
                 cell = appendTag(row, TABLE(TAG_CELL, attributes));
             }
-            HtmlUtil.appendAttributes(cell, ATTR_STYLE, ENV.get("layout.action.panel", ""));
+            appendAttributes(cell, ATTR_STYLE, ENV.get("layout.action.panel", ""));
             if (actions != null) {
                 for (IAction a : actions) {
                     if (ENV.get("layout.action.show.disabled", true) || a.isEnabled())
@@ -1346,7 +1346,7 @@ public class Html5Presentation<T> extends BeanPresentationHelper<T> implements I
         if (width != -1 || (width == -1 && (width = ENV.get("layout.action.width", -1)) != -1)) {
             style += (style.isEmpty() || style.endsWith(";") ? "" : ";") + style(ATTR_WIDTH, width);
         }
-        HtmlUtil.appendAttributes(action, ATTR_STYLE, style);
+        appendAttributes(action, ATTR_STYLE, style);
         return action;
     }
 
@@ -1413,7 +1413,7 @@ public class Html5Presentation<T> extends BeanPresentationHelper<T> implements I
         }
         Element head = appendTag(table, TABLE(TAG_THEAD));
         if (collector.getPresentable() != null) {
-            appendAttributes(table, collector.getPresentable(), true);
+            addAttributes(table, collector.getPresentable(), true);
         }
         Element colgroup = appendTag(head, TABLE(TAG_ROW, ATTR_BORDER, "1"));
         if (collector.hasMode(MODE_MULTISELECTION)) {
@@ -1434,7 +1434,7 @@ public class Html5Presentation<T> extends BeanPresentationHelper<T> implements I
                     ATTR_STYLE,
                     ENV.get("layout.grid.header.column.style", "")));
             if (c.getPresentable() != null) {
-                appendAttributes(th, c.getPresentable(), true);
+                addAttributes(th, c.getPresentable(), true);
             }
             createAction(th, c.getSortingAction(collector));
         }
@@ -1531,11 +1531,11 @@ public class Html5Presentation<T> extends BeanPresentationHelper<T> implements I
                                 + ", " + c.getIndex() + "]"));
                     Element data = createDataTag(cell, beanValue);
                     if (c.getPresentable() != null) {
-                        appendAttributes(data, rowBackground, c.getPresentable(), false);
-                        appendAttributes(cell, rowBackground, c.getPresentable(), false);
+                        addAttributes(data, rowBackground, c.getPresentable(), false);
+                        addAttributes(cell, rowBackground, c.getPresentable(), false);
                     }
                     if (value != null && Messages.isMarkedAsProblem(value)) {
-                        HtmlUtil.appendAttributes(cell, ATTR_COLOR, COLOR_RED);
+                        appendAttributes(cell, ATTR_COLOR, COLOR_RED);
                     }
                 } else if (attr != null && tableDescriptor.hasMode(IBeanCollector.MODE_SHOW_NESTINGDETAILS)
                     && !BeanUtil.isStandardType(attr.getType())
@@ -1558,10 +1558,10 @@ public class Html5Presentation<T> extends BeanPresentationHelper<T> implements I
                             tableDescriptor.getId() + "[" + tabIndex
                                 + ", " + c.getIndex() + "]"));
                     if (c.getPresentable() != null) {
-                        appendAttributes(cell, rowBackground, c.getPresentable(), false);
+                        addAttributes(cell, rowBackground, c.getPresentable(), false);
                     }
                     if (Messages.isMarkedAsProblem(value)) {
-                        HtmlUtil.appendAttributes(cell, ATTR_COLOR, COLOR_RED);
+                        appendAttributes(cell, ATTR_COLOR, COLOR_RED);
                     }
                 }
             }
@@ -1574,7 +1574,7 @@ public class Html5Presentation<T> extends BeanPresentationHelper<T> implements I
                     tableDescriptor.getId() + "[" + tabIndex
                         + ", 0" + "]"));
             if (Messages.isMarkedAsProblem(value)) {
-                HtmlUtil.appendAttributes(cell, ATTR_COLOR, COLOR_RED);
+                appendAttributes(cell, ATTR_COLOR, COLOR_RED);
             }
         }
         return row;
@@ -1652,7 +1652,7 @@ public class Html5Presentation<T> extends BeanPresentationHelper<T> implements I
         Element row = appendTag(table, TABLE(TAG_ROW, ATTR_STYLE,
             ENV.get("layout.grid.searchrow.style", STYLE_BACKGROUND_LIGHTGRAY), ATTR_ALIGN, ALIGN_CENTER));
         if (rowName != null) {
-            HtmlUtil.appendAttributes(row, ATTR_CLASS, "beancollectorsearchrow");
+            appendAttributes(row, ATTR_CLASS, "beancollectorsearchrow");
             Element r = appendTag(row, TABLE(TAG_CELL));
             appendElement(r, TAG_PARAGRAPH, content(rowName), ATTR_ALIGN, VAL_ALIGN_CENTER);
         }
@@ -1757,7 +1757,7 @@ public class Html5Presentation<T> extends BeanPresentationHelper<T> implements I
         Element input = null;
         if (isData(beanValue)) {
             input = createDataTag(cell, beanValue);
-            appendAttributes(input, p, false);
+            addAttributes(input, p, false);
         }
         if (beanValue.getConstraint().getAllowedValues() == null) {
             if (input == null || BitUtil.hasBit(p.getType(), TYPE_ATTACHMENT)) {
@@ -1818,7 +1818,7 @@ public class Html5Presentation<T> extends BeanPresentationHelper<T> implements I
                         enableFlag(ATTR_REQUIRED, !beanValue.nullable() && !beanValue.generatedValue()));
 
                 if (multiLineText) {
-                    HtmlUtil.appendAttributes(input, ATTR_ROWS, p.layout("rows", "5"), ATTR_COLS,
+                    appendAttributes(input, ATTR_ROWS, p.layout("rows", "5"), ATTR_COLS,
                         p.layout("cols", ENV.get("field.input.size", "50")),
                         enable("wrap", p.layout("wrap", true)));
                     input.setTextContent(beanValue.getValueText());
@@ -1826,7 +1826,7 @@ public class Html5Presentation<T> extends BeanPresentationHelper<T> implements I
                 //some input assist - completion values?
                 if (p.getItemList() != null) {
                     String dataListID = beanValue.getId() + "." + TAG_DATALIST;
-                    HtmlUtil.appendAttributes(input, ATTR_LIST, dataListID);
+                    appendAttributes(input, ATTR_LIST, dataListID);
                     Element datalist = appendElement(cell, TAG_DATALIST, ATTR_ID, dataListID);
                     createOptions(datalist, false, null, p.getItemList());
                 }
@@ -1845,32 +1845,32 @@ public class Html5Presentation<T> extends BeanPresentationHelper<T> implements I
                             beanValue.hasWriteAccess(),
                             false,
                             true);
-                        HtmlUtil.appendAttributes(a, "tabindex", shortcut);
+                        appendAttributes(a, "tabindex", shortcut);
 
                     }
                     if (p.getEnabler().isActive()) {
                         //perhaps create an input assist listener
                         if (beanValue.getValueExpression() != null && ENV.get("websocket.use.inputassist", true)) {
-                            HtmlUtil.appendAttributes(input, "onkeypress",
+                            appendAttributes(input, "onkeypress",
                                 ENV.get("websocket.inputassist.function", "inputassist(event)"));
                         }
                         //on focus gained, preselect text
                         if (ENV.get("websocket.autoselect", true)) {
-                            HtmlUtil.appendAttributes(input, "onfocus", "this.select();");
+                            appendAttributes(input, "onfocus", "this.select();");
                         }
 
                         //perhaps create an dependency listener
                         if (beanValue.hasListeners()) {
-                            HtmlUtil.appendAttributes(input, "onblur",
+                            appendAttributes(input, "onblur",
                                 ENV.get("websocket.dependency.function", "evaluatedependencies(event)"));
                             if (true/*(isData(beanValue)*/) {//provide mouseclicks on pictures
-                                HtmlUtil.appendAttributes(input, "onclick",
+                                appendAttributes(input, "onclick",
                                     ENV.get("websocket.dependency.function", "evaluatedependencies(event)"));
                             }
                         }
                         //handle attachments
                         if (BitUtil.hasBit(beanValue.getPresentation().getType(), TYPE_ATTACHMENT)) {
-                            HtmlUtil.appendAttributes(input, "onchange",
+                            appendAttributes(input, "onchange",
                                 ENV.get("websocket.attachment.function", "transferattachment(this)"));
                             /*
                              * save the attachment to file system to be transferred by http-server,
@@ -1903,7 +1903,7 @@ public class Html5Presentation<T> extends BeanPresentationHelper<T> implements I
                         }
 //                    }
                     } else {//gray background on disabled
-                        HtmlUtil.appendAttributes(input, ATTR_STYLE,
+                        appendAttributes(input, ATTR_STYLE,
                             ENV.get("layout.field.disabled.style", STYLE_BACKGROUND_LIGHTGRAY));
                     }
                 }
@@ -1912,7 +1912,7 @@ public class Html5Presentation<T> extends BeanPresentationHelper<T> implements I
             input = createSelectorField(cell, beanValue);
         }
         if (!isData(beanValue)) {
-            appendAttributes(input, p, false);
+            addAttributes(input, p, false);
         }
 
         if (beanValue.hasStatusError()) {
@@ -1967,8 +1967,8 @@ public class Html5Presentation<T> extends BeanPresentationHelper<T> implements I
         if (tagName.equals(TAG_FRAME)) {
             String html = Util.asString(beanValue.getValue());
             if (html != null && !NetUtil.isURL(html))
-                HtmlUtil.appendAttributes(data, ATTR_SRCDOC, html);
-            HtmlUtil.appendAttributes(data, ATTR_WIDTH, "100%");
+                appendAttributes(data, ATTR_SRCDOC, html);
+            appendAttributes(data, ATTR_WIDTH, "100%");
         }
         return data;
     }
@@ -2053,9 +2053,9 @@ public class Html5Presentation<T> extends BeanPresentationHelper<T> implements I
             Message.send(ex);
         }
         if (lc instanceof Map) {
-            HtmlUtil.appendAttributes(parent, MapUtil.asArray((Map<String, String>) lc));
+            appendAttributes(parent, MapUtil.asArray((Map<String, String>) lc));
         } else if (lc instanceof String) {
-            HtmlUtil.appendAttributes(parent, ATTR_STYLE, lc);
+            appendAttributes(parent, ATTR_STYLE, lc);
         }
         return parent;
     }
@@ -2229,7 +2229,7 @@ public class Html5Presentation<T> extends BeanPresentationHelper<T> implements I
         Element table = createGrid(body, "Status", "page.footer.table", 0);
 
         //fallback: setting style from environment-properties
-        HtmlUtil.appendAttributes((Element) table.getParentNode(), ATTR_STYLE,
+        appendAttributes((Element) table.getParentNode(), ATTR_STYLE,
             ENV.get("layout.footer.grid.style", "background-image: url(icons/spe.jpg);"));
 
         Element preFooter;
@@ -2242,7 +2242,7 @@ public class Html5Presentation<T> extends BeanPresentationHelper<T> implements I
             preFooter.setTextContent(((Throwable) footer).getMessage());
         } else {
             String strFooter = Util.asString(footer);
-            if (strFooter != null && !HtmlUtil.isHtml(strFooter)) {
+            if (strFooter != null && !isHtml(strFooter)) {
                 String[] split = strFooter.split("([:,=] )|[\t\n]");
                 preFooter = doc.createElement(TAG_SPAN);
                 preFooter.setAttribute(ATTR_ID, "footer");
@@ -2254,13 +2254,13 @@ public class Html5Presentation<T> extends BeanPresentationHelper<T> implements I
                         appendElement(preFooter, TAG_IMAGE, ATTR_SRC, "icons/properties.png");
                     }
                     //evaluate the text and optional a title (tooltip)
-                    txt = split[i].split("§");
+                    txt = split[i].split("ï¿½");
                     Element e = appendElement(preFooter, isKey ? "b" : "i", content(txt[0] + "  "), ATTR_COLOR, isKey
                         ? COLOR_BLUE
                         : COLOR_BLACK);
                     if (txt.length > 1) {
                         txt[1] = StringUtil.fromHexString(txt[1]);
-                        HtmlUtil.appendAttributes(e, ATTR_TITLE, txt[1]);
+                        appendAttributes(e, ATTR_TITLE, txt[1]);
                         appendElement(e, TAG_PARAGRAPH, content(txt[1]), ATTR_CLASS, "tooltip");
                     }
                 }
@@ -2276,7 +2276,7 @@ public class Html5Presentation<T> extends BeanPresentationHelper<T> implements I
         appendElement(preFooter, "progress", ATTR_ID, "progressbar", "hidden", "true");
         appendElement(preFooter, TAG_SPAN, content(" \tinitializing..."), ATTR_ID, MSG_FOOTER);
 //            appendElement(progress, TAG_SPAN, content("0"), ATTR_STYLE, "position:relative");
-//            HtmlUtil.appendAttributes(progress, "max", "100", "value", "0%", ATTR_STYLE, "position:relative");
+//            appendAttributes(progress, "max", "100", "value", "0%", ATTR_STYLE, "position:relative");
 
         return addRow(table, preFooter);
     }
@@ -2331,8 +2331,8 @@ public class Html5Presentation<T> extends BeanPresentationHelper<T> implements I
         Element body = createGlasspane(createHeader(null, title, null, false));
         if (message != null) {
             //don't know, whether 'pluginspage' is an html5 attribute
-            appendElement(body, HtmlUtil.TAG_EMBED, ATTR_SRC, message, ATTR_WIDTH, VAL_100PERCENT,
-                HtmlUtil.ATTR_HEIGHT,
+            appendElement(body, TAG_EMBED, ATTR_SRC, message, ATTR_WIDTH, VAL_100PERCENT,
+                ATTR_HEIGHT,
                 String.valueOf(700), "pluginspage", "http://www.adobe.com/products/acrobat/readstep2.html");
         }
         createCloseAction(body);

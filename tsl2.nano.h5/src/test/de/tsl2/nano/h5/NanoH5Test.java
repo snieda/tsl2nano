@@ -324,6 +324,7 @@ public class NanoH5Test {
     
     @Test
     public void testCSheet() throws Exception {
+        createENV("csheet");
         /*
          * test csheet as logic table like excel
          */
