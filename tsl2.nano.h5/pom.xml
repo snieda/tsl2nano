@@ -140,7 +140,7 @@
 							<!-- <excludeArtifactIds> commons-codec,javax.json,junit,jasperreports,javassist,avalon-framework-impl,avalon-framework-api,avalon-framework-impl,fop,velocity,tools,aspectjweaver,jersey-bundle,icu4j 
 								</excludeArtifactIds> -->
 							<!-- <excludeTransitive>true</excludeTransitive> -->
-							<outputDirectory>${project.build.directory}/${project.build.finalName}.lib</outputDirectory>
+							<outputDirectory>${project.build.directory}/classes</outputDirectory>
 						</configuration>
 					</execution>
 				</executions>
@@ -205,10 +205,41 @@
 								</includes> -->
 						</configuration>
 					</execution>
+				</executions>
+			</plugin>
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-jarsigner-plugin</artifactId>
+				<version>1.4</version>
+				<executions>
+					<execution>
+						<goals>
+							<goal>sign</goal>
+						</goals>
+						<phase>package</phase>
+						<configuration>
+							<includeClassifiers>
+								<includeClassifier>signed</includeClassifier>
+							</includeClassifiers>
+							<includes>
+								<include>**/*-signed.jar</include>
+							</includes>
+							<keystore>${keystore}</keystore>
+							<alias>${alias}</alias>
+							<storepass>${storepass}</storepass>
+						</configuration>
+					</execution>
+				</executions>
+			</plugin>
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-war-plugin</artifactId>
+				<version>3.2.0</version>
+				<executions>
 					<execution>
 						<id>container-war</id>
 						<goals>
-							<goal>jar</goal>
+							<goal>war</goal>
 						</goals>
 						<phase>package</phase>
 						<configuration>
@@ -219,27 +250,9 @@
 									<mainClass>de.tsl2.nano.h5.Loader</mainClass>
 								</manifest>
 							</archive>
-						</configuration>
-					</execution>
-				</executions>
-			</plugin>
-			<plugin>
-				<groupId>org.apache.maven.plugins</groupId>
-				<artifactId>maven-jarsigner-plugin</artifactId>
-				<version>1.4</version>
-				<executions>
-					<execution>
-						<goals>
-							<!-- <goal>sign</goal> -->
-						</goals>
-						<phase>package</phase>
-						<configuration>
-							<includes>
-								<include>**/*-signed.jar</include>
-							</includes>
-							<keystore>${keystore}</keystore>
-							<alias>${alias}</alias>
-							<storepass>${storepass}</storepass>
+							<!-- excludes don't work! -->
+							<packagingExcludes>.*standalone.zip</packagingExcludes>
+							<webXml>src/resources/WEB-INF/web.xml</webXml>
 						</configuration>
 					</execution>
 				</executions>
@@ -261,7 +274,7 @@
 				<executions>
 					<execution>
 						<goals>
-							<goal>merge</goal>
+							<goal>report-aggregate</goal>
 						</goals>
 					</execution>
 				</executions>
