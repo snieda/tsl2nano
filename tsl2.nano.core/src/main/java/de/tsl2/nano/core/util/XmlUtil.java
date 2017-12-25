@@ -242,7 +242,7 @@ public class XmlUtil {
                     fileInputStream = new FileInputStream(new File(xmlFile)));
         } catch (Exception e) {
             //mark the loaded xml file as corrupt
-            if (renameOnError && !ENV.get("app.mode.strict", false)) {
+            if (renameOnError && (ENV.isAvailable() && !ENV.get("app.mode.strict", false))) {
                 File file = new File(xmlFile);
                 if (file.canWrite()) {
                     fileInputStream = FileUtil.close(fileInputStream, false);

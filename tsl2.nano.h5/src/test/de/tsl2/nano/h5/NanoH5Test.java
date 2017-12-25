@@ -232,7 +232,7 @@ public class NanoH5Test {
         assertTrue(FileUtil.copy("src/resources/run.sh", basedir + "run.sh"));
 
         //create  run configuration
-        FileUtil.writeBytes(("run.bat " + new File(DIR_TEST).getName()).getBytes(), basedir + name + ".bat", false);
+        FileUtil.writeBytes(("run.bat " + new File(DIR_TEST).getName()).getBytes(), basedir + name + ".cmd", false);
         FileUtil.writeBytes(("run.sh " + new File(DIR_TEST).getName()).getBytes(), basedir + name + ".sh", false);
         
         //workaround: replace path 'test/.nanoh5.timesheet' with '.nanoh5.timesheet'
@@ -240,11 +240,10 @@ public class NanoH5Test {
         AntRunner.runRegexReplace("(target[/]test[/])([.]nanoh5[.]timesheet)", "\\2", new File(DIR_TEST).getParent(), "**");
         
         //create a deployable package
-        new File("target/").mkdirs();
         String destFile = "target/" + name + ".zip";
         Properties p = new Properties();
         p.put("destFile", destFile);
-        AntRunner.runTask(AntRunner.TASK_ZIP, p, new File(DIR_TEST).getParent() + ":{**/" + name + "/**}");
+        AntRunner.runTask(AntRunner.TASK_ZIP, p, FileUtil.replaceWindowsSeparator(new File(DIR_TEST).getParent()) + "/:{**/*" + name + "*/**}{timesheet.*}");
         
         //delete the test output
 //        ConcurrentUtil.sleep(10000);

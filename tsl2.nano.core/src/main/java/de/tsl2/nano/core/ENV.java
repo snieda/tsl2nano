@@ -228,7 +228,7 @@ public class ENV implements Serializable {
      * @return true, if environment was already created
      */
     public final static boolean isAvailable() {
-        return self != null;
+        return self != null && self.properties != null && self.services != null;
     }
 
     protected final static ENV self() {

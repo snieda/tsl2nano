@@ -8,6 +8,11 @@
 	<name>TSL2 Html5 Application Framework</name>
 	<description>TSL2 Html5 Application Framework</description>
 	<url>https://sourceforge.net/projects/tsl2nano/</url>
+	<!--
+	This is a multi module project
+	* if multimodule version changes: start "mvn -N versions:update-child-modules" to assign the child modules
+	* to do a fast complete build: "mvn -amd -DskipTest install site"
+	-->
 	<properties>
 		<module.parent>${project.basedir}</module.parent>
         <timestamp>${maven.build.timestamp}</timestamp>
