@@ -22,12 +22,14 @@ rem set OFFLINE=-Dtsl2nano.offline=true
 rem set UH=-Denv.user.home=true
 rem set USERDIR=-Duser.dir=%PRJ%
 rem set LANG=-Duser.country=FR -Duser.language=fr
+rem set ENCODING=-Dfile.encoding=Cp1252
+rem set JSU_ENC=-Dsun.jnu.encoding=Cp1252
 rem set DEBUG="-agentlib:jdwp=transport=dt_socket,address=8787,server=y,suspend=n"
 rem set AGENT=-javaagent:%PRJ%/aspectjweaver.jar
 rem set PROXY=-Dhttp.proxyHost=myproxy -Dhttp.proxyPort=8080
 if "%SILENT%"=="true" (set JAVA=@start javaw) else (set JAVA=java)
 
-%JAVA% %OFFLINE% %LANG% %USERDIR% %NANO_DEBUG% %AGENT% %PROXY% -Xmx512m -Djava.awt.headless=true  -Dfile.encoding=UTF-8 %DEBUG% %UH% -jar tsl2.nano.h5-%VERSION%%STANDALONE%.jar %PRJ% %PORT% 
+%JAVA% %OFFLINE% %LANG% %ENCODING% %JSUENC% %USERDIR% %NANO_DEBUG% %AGENT% %PROXY% -Xmx512m -Djava.awt.headless=true  -Dfile.encoding=UTF-8 %DEBUG% %UH% -jar tsl2.nano.h5-%VERSION%%STANDALONE%.jar %PRJ% %PORT% 
 REM -agentpath:...visualvm_138/profiler/lib/deployed/jdk16/windows/profilerinterface.dll=...\visualvm_138\profiler\lib,5140
 REM >%PRJ%.log
 if not "%SILENT%"=="true" pause
