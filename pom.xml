@@ -19,6 +19,7 @@
 		<module.parent>${project.basedir}</module.parent>
         <timestamp>${maven.build.timestamp}</timestamp>
         <maven.build.timestamp.format>dd-MM-yyyy HH:mm</maven.build.timestamp.format>
+		<dependency.locations.enabled>false</dependency.locations.enabled>
     </properties>
 	<inceptionYear>2012</inceptionYear>
 	<licenses>
@@ -32,7 +33,8 @@
 	<scm>
 		<url>https://git.code.sf.net/p/tsl2nano/code tsl2nano-code</url>
 	</scm>
-	<parent> <!-- TODO: should we remove the parent? -->
+	<!-- TODO: should we remove the parent? -->
+	<parent>
 		<groupId>org.sonatype.oss</groupId>
 		<artifactId>oss-parent</artifactId>
 		<version>9</version>
