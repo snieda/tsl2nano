@@ -1123,7 +1123,7 @@ public class ServiceUtil {
     }
     
     public static boolean isExcecutionStatement(String strStmt) {
-        strStmt = strStmt.replaceAll("\\s--.*\n", "");
+        strStmt = strStmt.replaceAll("\\s*--.*\n", "");
         return StringUtil.findRegExp(strStmt.toLowerCase(), "^\\s*select", 0) == null;
     }
 }
