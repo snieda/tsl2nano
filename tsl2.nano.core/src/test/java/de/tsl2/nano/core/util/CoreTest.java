@@ -138,7 +138,7 @@ public class CoreTest  implements ENVTestPreparation {
         }
 
         Collection<File> files = FileUtil.getTreeFiles("./", ".*/resources");
-        assertTrue(files.size() == 2 && files.iterator().next().getName().equals("resources"));
+        assertTrue(files.size() >= 2 && files.iterator().next().getName().equals("resources"));
 
         files = FileUtil.getFileset(BASE_DIR_CORE, "**/resources/**/*logo.txt");
         assertTrue(files.size() == 1 && files.iterator().next().getName().equals("tsl-logo.txt"));
