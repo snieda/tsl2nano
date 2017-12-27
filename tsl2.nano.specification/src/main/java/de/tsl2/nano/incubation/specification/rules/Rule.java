@@ -23,7 +23,7 @@ import de.tsl2.nano.util.operation.Operator;
 
 /**
  * rule engine using operators (see {@link Operator}) for numeric and boolean values. rules can reference other rules
- * through using '§' + name.
+ * through using 'Â§' + name.
  * <p/>
  * every rule defines parameters and an operation. the parameters will be checked against the arguments given on
  * {@link #execute(Map)}. additionally, there may be constraints for value ranges. Example:
@@ -40,7 +40,7 @@ import de.tsl2.nano.util.operation.Operator;
  * 
  * or
  * 
- *         Rule<BigDecimal> ruleWithImport = new Rule<BigDecimal>("test-import", "A ? 1 + §test : (x2 * 3)", MapUtil.asMap("A",
+ *         Rule<BigDecimal> ruleWithImport = new Rule<BigDecimal>("test-import", "A ? 1 + Â§test : (x2 * 3)", MapUtil.asMap("A",
  *             Boolean.class,
  *             "x1",
  *             BigDecimal.class,

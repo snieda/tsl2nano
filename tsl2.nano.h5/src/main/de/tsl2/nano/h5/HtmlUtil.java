@@ -635,16 +635,16 @@ public class HtmlUtil {
     public static Element createSidebarNavMenuButton(Element parent, Element sidenav) {
         // see style.template and websocket.client.js.template
         // <a href="javascript:void(0)" class="closebtn" onclick="closeNav()">&times;</a>
-        //return "<span style=\"font-size:30px;cursor:pointer\" onclick=\"openNav()\">&#9776; open</span>"; //☰, &#8801; ≡
-        //✖ = &#10006; or &times;
-        appendElement(parent, TAG_SPAN, content("☰"), ATTR_CLASS, "openbtn", "onclick", "openNav()", ATTR_ACCESSKEY, "!");
+        //return "<span style=\"font-size:30px;cursor:pointer\" onclick=\"openNav()\">&#9776; open</span>"; //â˜°, &#8801; â‰¡
+        //âœ– = &#10006; or &times;
+        appendElement(parent, TAG_SPAN, content("â˜°"), ATTR_CLASS, "openbtn", "onclick", "openNav()", ATTR_ACCESSKEY, "!");
         if (sidenav == null) {
             sidenav = appendElement(parent, TAG_DIV, ATTR_ID, "tslSidenav", ATTR_CLASS, "sidenav");
         } else { // the last parent is the most important one
             sidenav.getParentNode().removeChild(sidenav);
             parent.appendChild(sidenav);
         }
-        appendElement(sidenav, TAG_LINK, content("✖"), ATTR_HREF, "javascript:void(0)", ATTR_ID, "button.sidenav.close", ATTR_CLASS, "closebtn", "onclick", "closeNav()", ATTR_ACCESSKEY, "<");
+        appendElement(sidenav, TAG_LINK, content("âœ–"), ATTR_HREF, "javascript:void(0)", ATTR_ID, "button.sidenav.close", ATTR_CLASS, "closebtn", "onclick", "closeNav()", ATTR_ACCESSKEY, "<");
         return sidenav;
     }
     

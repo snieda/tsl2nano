@@ -58,10 +58,10 @@ import de.tsl2.nano.incubation.tree.Tree;
  * 
  * <pre>
  * Name;ABR-7493;;;;;;;
- * Beschreibung;"Rezeptfehler ""Betragshorror"" bei §302: Rezept kann ohne Änderung der Daten nicht abgerechnet werden.";;;;;;;
- * ;"Rezeptfehler ""Betragshorror"" bei §300, Rechnungstyp Arzneimittel oder Hilfsmittel: Rezept kann ohne Änderung der Daten nicht abgerechnet werden.";;;;;;;
- * ;"Rezeptfehler ""Betragshorror"" bei §300, Rechnungstyp Pflegehilfsmittel: Rezept kann ohne Änderung der Daten abgerechnet werden.";;;;;;;
- * ;"*Rezeptfehler ""Betragshorror"" bei §300 Pflegehilfsmittel Irrläufer: Rezept kann ohne Änderung der Daten abgerechnet werden.";;;;;;;
+ * Beschreibung;"Rezeptfehler ""Betragshorror"" bei Â§302: Rezept kann ohne Ã„nderung der Daten nicht abgerechnet werden.";;;;;;;
+ * ;"Rezeptfehler ""Betragshorror"" bei Â§300, Rechnungstyp Arzneimittel oder Hilfsmittel: Rezept kann ohne Ã„nderung der Daten nicht abgerechnet werden.";;;;;;;
+ * ;"Rezeptfehler ""Betragshorror"" bei Â§300, Rechnungstyp Pflegehilfsmittel: Rezept kann ohne Ã„nderung der Daten abgerechnet werden.";;;;;;;
+ * ;"*Rezeptfehler ""Betragshorror"" bei Â§300 Pflegehilfsmittel IrrlÃ¤ufer: Rezept kann ohne Ã„nderung der Daten abgerechnet werden.";;;;;;;
  * ;;;;;;;;
  * MATRIX;R1;R2;R3;R4;R5;R6;R7;R8
  * DIFF;0;0;0;0;>0;>0;>0;>0

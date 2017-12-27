@@ -81,7 +81,7 @@ public class Input<T> extends AItem<T> {
     protected void initDeserialization() {
         super.initDeserialization();
         if (!getConstraints().isNullable()) {
-            prefix.setCharAt(PREFIX, 'ง');
+            prefix.setCharAt(PREFIX, 'ยง');
         } else {
             prefix.setCharAt(PREFIX, '*');
         }

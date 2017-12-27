@@ -308,7 +308,7 @@ public class NanoH5Test {
         ENV.reload();
 
         Address address = new Address();
-        address.setCity("München");
+        address.setCity("MÃ¼nchen");
         address.setStreet("Frankfurter Strasse 1");
         Bean<Address> bean = Bean.getBean(address);
 

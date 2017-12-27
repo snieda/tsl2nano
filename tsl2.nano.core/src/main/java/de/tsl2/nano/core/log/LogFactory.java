@@ -87,7 +87,7 @@ public/*abstract*/class LogFactory implements Runnable, Serializable {
     public static final int LOG_ALL = INFO | WARN | ERROR | FATAL | DEBUG | TRACE;
 
     static final String[] STATEDESCRIPTION = new String[] { "fatal", "error", "warn", "info", "debug", "trace" };
-    static final String[] STATETXT = new String[] { "!", "ง", "#", " ", "-", "=" };
+    static final String[] STATETXT = new String[] { "!", "ยง", "#", " ", "-", "=" };
 
     /** bit set of states to log. will be used in inner log class */
     @Attribute

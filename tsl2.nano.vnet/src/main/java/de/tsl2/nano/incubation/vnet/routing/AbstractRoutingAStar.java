@@ -65,13 +65,13 @@ public abstract class AbstractRoutingAStar<T extends IListener<Notification> & I
     public Connection<T, D> route(Node<T, D> start, Node<T, D> destination) {
         Connection<T, D> currentConnection, route;
         // Initialisierung der Open List, die Closed List ist noch leer
-        // (die Priorität bzw. der f Wert des Startknotens ist unerheblich)
+        // (die PrioritÃ¤t bzw. der f Wert des Startknotens ist unerheblich)
         log("starting at: " + start);
         route = new Connection<T, D>(start, null);
         openlist.add(new Link<Connection<T, D>, Float>(route, 0f));
         // diese Schleife wird durchlaufen bis entweder
-        // - die optimale Lösung gefunden wurde oder
-        // - feststeht, dass keine Lösung existiert
+        // - die optimale LÃ¶sung gefunden wurde oder
+        // - feststeht, dass keine LÃ¶sung existiert
         do {
             // Knoten mit dem geringsten f Wert aus der Open List entfernen
             currentConnection = openlist.poll().getContent();
@@ -84,7 +84,7 @@ public abstract class AbstractRoutingAStar<T extends IListener<Notification> & I
             // des aktuellen Knotens auf die Open List setzen
             log("checking connection " + currentConnection);
             expandNode(currentConnection, destination);
-            // der aktuelle Knoten ist nun abschließend untersucht
+            // der aktuelle Knoten ist nun abschlieÃŸend untersucht
             closedlist.add(currentConnection);
         } while (!openlist.isEmpty());
         // die Open List ist leer, es existiert kein Pfad zum Ziel
@@ -93,7 +93,7 @@ public abstract class AbstractRoutingAStar<T extends IListener<Notification> & I
 
     /**
      * <pre>
-     * überprüft alle Nachfolgeknoten und fügt sie der Open List hinzu, wenn entweder
+     * Ã¼berprÃ¼ft alle Nachfolgeknoten und fÃ¼gt sie der Open List hinzu, wenn entweder
      * - expandNode 
      * - der Nachfolgeknoten zum ersten Mal gefunden wird oder 
      * - ein besserer Weg zu diesem Knoten gefunden wird
@@ -115,7 +115,7 @@ public abstract class AbstractRoutingAStar<T extends IListener<Notification> & I
             if (closedlist.contains(con)) {
                 continue;
             }
-            // g Wert für den neuen Weg berechnen: g Wert des Vorgängers plus
+            // g Wert fÃ¼r den neuen Weg berechnen: g Wert des VorgÃ¤ngers plus
             // die Kosten der gerade benutzten Kante
             g = g(con);
             tentative_g = g(currentConnection) + g;
@@ -125,9 +125,9 @@ public abstract class AbstractRoutingAStar<T extends IListener<Notification> & I
             if (openlist.contains(new Link(con, g)) && tentative_g >= g) {
                 continue;
             }
-            // Vorgängerzeiger setzen und g Wert merken
+            // VorgÃ¤ngerzeiger setzen und g Wert merken
             // f Wert des Knotens in der Open List aktualisieren
-            // bzw. Knoten mit f Wert in die Open List einfügen
+            // bzw. Knoten mit f Wert in die Open List einfÃ¼gen
             f = tentative_g + h(successor, destination);
             log("\t f = " + f);
 //         if (openlist.contains(successor)) {

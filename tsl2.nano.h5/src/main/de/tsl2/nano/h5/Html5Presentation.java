@@ -2254,7 +2254,7 @@ public class Html5Presentation<T> extends BeanPresentationHelper<T> implements I
                         appendElement(preFooter, TAG_IMAGE, ATTR_SRC, "icons/properties.png");
                     }
                     //evaluate the text and optional a title (tooltip)
-                    txt = split[i].split("�");
+                    txt = split[i].split("ï¿½");
                     Element e = appendElement(preFooter, isKey ? "b" : "i", content(txt[0] + "  "), ATTR_COLOR, isKey
                         ? COLOR_BLUE
                         : COLOR_BLACK);

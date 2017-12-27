@@ -140,7 +140,7 @@ public class MyApp extends NanoH5 {
         ENV.get(RulePool.class).add(testRule);
 
         //another rule to test sub-rule-imports
-        ENV.get(RulePool.class).add(new Rule<BigDecimal>("test-import", "A ? 1 + §test : (x2 * 3)", par));
+        ENV.get(RulePool.class).add(new Rule<BigDecimal>("test-import", "A ? 1 + Â§test : (x2 * 3)", par));
 
         BigDecimal result =
             (BigDecimal) ENV.get(RulePool.class).get("test-import")
@@ -219,7 +219,7 @@ public class MyApp extends NanoH5 {
 
         AttributeDefinition space1 = beanCollector.getPresentationHelper().addSpaceValue();
         beanCollector.addAttribute("pathTest", new PathExpression<>(Times.class, "relation.pathTest"), null, null);
-        beanCollector.addAttribute("ruleTest", new RuleExpression<>(Times.class, "§test-import"), null, null);
+        beanCollector.addAttribute("ruleTest", new RuleExpression<>(Times.class, "Â§test-import"), null, null);
         beanCollector
             .addAttribute(
                 "sqlTest",

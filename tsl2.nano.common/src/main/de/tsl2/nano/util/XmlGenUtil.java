@@ -145,7 +145,7 @@ public class XmlGenUtil extends XmlUtil {
     }
 
     /**
-     * Druckt eine xml-Datei über apache fop (version 1.1) in ein angegebenes mime-ausgabe format - entweder in eine
+     * Druckt eine xml-Datei Ã¼ber apache fop (version 1.1) in ein angegebenes mime-ausgabe format - entweder in eine
      * Datei oder direkt an den Drucker.
      * <p/>
      * Alle verwendbaren Ausgabe-Formate sind hier einzusehen: {@link org.apache.xmlgraphics.util.MimeConstants}.

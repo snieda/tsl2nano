@@ -1681,7 +1681,7 @@ public class BeanPresentationHelper<T> {
 
                 @Override
                 public String getLongDescription() {
-                    return "exporting (see environment.properties, variable names are starting and ending with §§) to: "
+                    return "exporting (see environment.properties, variable names are starting and ending with Â§Â§) to: "
                         + exportFileName;
                 }
 

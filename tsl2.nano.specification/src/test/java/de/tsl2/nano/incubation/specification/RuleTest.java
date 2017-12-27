@@ -59,7 +59,7 @@ public class RuleTest implements ENVTestPreparation {
         pool.add(rule);
         ENV.addService(pool);
         Rule<BigDecimal> ruleWithImport =
-            new Rule<BigDecimal>("test-import", "A ? 1 + �test : (x2 * 3)",
+            new Rule<BigDecimal>("test-import", "A ? 1 + §test : (x2 * 3)",
                 (LinkedHashMap<String, ParType>) MapUtil.asMap("A",
                     ParType.BOOLEAN,
                     "x1",

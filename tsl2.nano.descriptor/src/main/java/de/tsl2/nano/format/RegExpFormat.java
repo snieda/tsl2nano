@@ -1,9 +1,9 @@
 /*
  * 
  * 
- * Copyright © 2002-2008 Thomas Schneider
+ * Copyright Â© 2002-2008 Thomas Schneider
  * Alle Rechte vorbehalten.
- * Weiterverbreitung, Benutzung, Vervielfältigung oder Offenlegung,
+ * Weiterverbreitung, Benutzung, VervielfÃ¤ltigung oder Offenlegung,
  * auch auszugsweise, nur mit Genehmigung.
  *
  */
@@ -123,7 +123,7 @@ public class RegExpFormat extends Format implements INumberFormatCheck {
      */
     public static final String PATTERN_SINGLE_BYTE = "[\\x00-\\xFF]";
 
-    public static final String PATTERN_SINGLE_BYTE_SPACE = "[\\x00-\\xFF €]";
+    public static final String PATTERN_SINGLE_BYTE_SPACE = "[\\x00-\\xFF â‚¬]";
 
     // TODO how to get the date format from locale? 
     public static final String FORMAT_DATE_SQL = "[1-2]\\d\\d\\d\\-[0-1]\\d\\-[0-3]\\d";
@@ -131,7 +131,7 @@ public class RegExpFormat extends Format implements INumberFormatCheck {
     public static final String FORMAT_TIME = "[0-2]\\d\\:[0-5]\\d(\\:[0-5]\\d)?";
     public static final String FORMAT_DATETIME = FORMAT_DATE_SQL + "( " + FORMAT_TIME + ")?";
     public static final String FORMAT_DATETIME_DE = FORMAT_DATE_DE + "( " + FORMAT_TIME + ")?";
-    public static final String FORMAT_NAME_ALPHA_DE = "[a-zA-ZäöüÄÖÜß]+";
+    public static final String FORMAT_NAME_ALPHA_DE = "[a-zA-ZÃ¤Ã¶Ã¼Ã„Ã–ÃœÃŸ]+";
     public static final String FORMAT_NAME_ALPHA_EXT_DE = FORMAT_NAME_ALPHA_DE + PATTERN_SINGLE_BYTE_SPACE;
     public static final String FORMAT_NAME_ALPHA = "[a-zA-Z]*";
     public static final String FORMAT_NAME_ALPHA_NUM = "[a-zA-Z0-9]*";
@@ -544,7 +544,7 @@ public class RegExpFormat extends Format implements INumberFormatCheck {
      */
     public static RegExpFormat createCurrencyRegExp() {
         final int dec = 11, fract = 2;
-        return new RegExpFormat(numberWithGrouping(dec, fract, false) + getCurrencyPostfix(), null, dec + fract + 3,//28082012ts: 1 -->3 to enable a number like 123456789 --> 123.456.789,00 €
+        return new RegExpFormat(numberWithGrouping(dec, fract, false) + getCurrencyPostfix(), null, dec + fract + 3,//28082012ts: 1 -->3 to enable a number like 123456789 --> 123.456.789,00 â‚¬
             0,
             getCurrencyFormat());
     }
@@ -556,7 +556,7 @@ public class RegExpFormat extends Format implements INumberFormatCheck {
      */
     public static RegExpFormat createCurrencyNoSymbol() {
         final int dec = 11, fract = 2;
-        return new RegExpFormat(numberWithGrouping(dec, fract, false) + "", null, dec + fract + 3,//28082012ts: 1 -->3 to enable a number like 123456789 --> 123.456.789,00 €
+        return new RegExpFormat(numberWithGrouping(dec, fract, false) + "", null, dec + fract + 3,//28082012ts: 1 -->3 to enable a number like 123456789 --> 123.456.789,00 â‚¬
             0,
             getCurrencyFormatNoSymbol());
     }
@@ -570,7 +570,7 @@ public class RegExpFormat extends Format implements INumberFormatCheck {
         final int dec = 11, fract = 0;
         return new RegExpFormat(numberWithGrouping(dec - 2, fract, false) + getCurrencyPostfix(),
             null,
-            dec + fract + 3,//28082012ts: 1 -->3 to enable a number like 123456789 --> 123.456.789,00 €
+            dec + fract + 3,//28082012ts: 1 -->3 to enable a number like 123456789 --> 123.456.789,00 â‚¬
             0,
             getCurrencyFormatNoFraction());
     }
@@ -585,7 +585,7 @@ public class RegExpFormat extends Format implements INumberFormatCheck {
         final int dec = 17, fract = 0;
         return new RegExpFormat(numberWithGrouping(dec - 2, fract, false) + getCurrencyPostfix(),
             null,
-            dec + fract + 3,//28082012ts: 1 -->3 to enable a number like 123456789 --> 123.456.789,00 €
+            dec + fract + 3,//28082012ts: 1 -->3 to enable a number like 123456789 --> 123.456.789,00 â‚¬
             0,
             getCurrencyFormat());
     }

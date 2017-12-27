@@ -40,7 +40,7 @@ public class SimpleExpression extends RunnableExpression<String> {
     @Override
     public String getExpressionPattern() {
         //no other expression type...
-        return "[^@!ง$%&].*";
+        return "[^@!ยง$%&].*";
     }
 
     @SuppressWarnings("serial")

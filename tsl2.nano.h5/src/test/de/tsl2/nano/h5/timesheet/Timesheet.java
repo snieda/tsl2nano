@@ -468,7 +468,7 @@ public class Timesheet extends NanoH5App {
 
         AttributeDefinition space1 = beanCollector.getPresentationHelper().addSpaceValue();
         beanCollector.addAttribute("pathTest", new PathExpression<>(Times.class, "relation.pathTest"), null, null);
-        beanCollector.addAttribute("rule-test", new RuleExpression<>(Times.class, "�test-import"), null, null);
+        beanCollector.addAttribute("rule-test", new RuleExpression<>(Times.class, "§test-import"), null, null);
         beanCollector
             .addAttribute(
                 "sql-test",

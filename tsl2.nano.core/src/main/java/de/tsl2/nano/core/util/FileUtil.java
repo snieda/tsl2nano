@@ -1,9 +1,9 @@
 /*
  * SVN-INFO: $Id: FileUtil.java,v 1.0 11.12.2008 15:38:19 15:03:02 ts Exp $ 
  * 
- * Copyright © 2002-2008 Thomas Schneider
+ * Copyright Â© 2002-2008 Thomas Schneider
  * Alle Rechte vorbehalten.
- * Weiterverbreitung, Benutzung, Vervielfältigung oder Offenlegung,
+ * Weiterverbreitung, Benutzung, VervielfÃ¤ltigung oder Offenlegung,
  * auch auszugsweise, nur mit Genehmigung.
  *
  */

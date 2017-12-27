@@ -234,7 +234,7 @@
             <item class="de.tsl2.nano.incubation.terminal.item.Input" name="ip">
                <constraints type="java.lang.String" nullable="true" length="-1" scale="-1" precision="-1"/>
                <description>internet address to be scanned</description>
-               <value class="java.lang.String">192.168.242.29</value>
+               <value class="java.lang.String">192.168.242.17</value>
             </item>
             <item class="de.tsl2.nano.incubation.terminal.item.Input" name="lowest-port">
                <constraints type="java.lang.Integer" nullable="true" length="-1" scale="-1" precision="-1"/>

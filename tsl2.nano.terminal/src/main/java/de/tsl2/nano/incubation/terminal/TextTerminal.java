@@ -51,7 +51,7 @@ public class TextTerminal {
     public static final char GRAPH_MEDIUMGRAY_BAR = 0xB1;
     public static final char GRAPH_DARKGRAY_BAR = 0xB2;
 
-    //double line for example: ÉÍÍÍÍÍÍÍÍ», º Halloo º, ÈÍÍÍÍÍÍÍÍ¼
+    //double line for example: Ã‰ÃÃÃÃÃÃÃÃÂ», Âº Halloo Âº, ÃˆÃÃÃÃÃÃÃÃÂ¼
     public static final char GRAPH_HOR_DBLLINE = 0xCD;
     public static final char GRAPH_VER_DBLLINE = 0xBA;
     public static final char GRAPH_TOPLEFT_DBLLINE = 0xC9;
@@ -267,21 +267,21 @@ public class TextTerminal {
         System.out.println("| Halloo |"); //0xB3
         System.out.println("\\--------/"); //0xC4
         //einfache Linie
-        System.out.println("/ÄÄÄÄÄÄÄÄ\\"); //0xC4
-        System.out.println("³ Halloo ³"); //0xB3
-        System.out.println("\\ÄÄÄÄÄÄÄÄ/"); //0xC4
+        System.out.println("/Ã„Ã„Ã„Ã„Ã„Ã„Ã„Ã„\\"); //0xC4
+        System.out.println("Â³ Halloo Â³"); //0xB3
+        System.out.println("\\Ã„Ã„Ã„Ã„Ã„Ã„Ã„Ã„/"); //0xC4
         //Balken
-        System.out.println("ÜÜÜÜÜÜÜÜÜÜ"); //0xDC
-        System.out.println("Û Halloo Û"); //0xDB
-        System.out.println("ßßßßßßßßßß"); //0xDF
+        System.out.println("ÃœÃœÃœÃœÃœÃœÃœÃœÃœÃœ"); //0xDC
+        System.out.println("Ã› Halloo Ã›"); //0xDB
+        System.out.println("ÃŸÃŸÃŸÃŸÃŸÃŸÃŸÃŸÃŸÃŸ"); //0xDF
         //gepunkteter Balken
-        System.out.println("²²²²²²²²²²"); //0xB0, 0xB1, 0xB2
-        System.out.println("² Halloo ²"); //0xB2
-        System.out.println("²²²²²²²²²²"); //0xB2
+        System.out.println("Â²Â²Â²Â²Â²Â²Â²Â²Â²Â²"); //0xB0, 0xB1, 0xB2
+        System.out.println("Â² Halloo Â²"); //0xB2
+        System.out.println("Â²Â²Â²Â²Â²Â²Â²Â²Â²Â²"); //0xB2
         //doppelte linie
-        System.out.println("ÉÍÍÍÍÍÍÍÍ»"); //0xC9,CD,BB
-        System.out.println("º Halloo º"); //0xBA
-        System.out.println("ÈÍÍÍÍÍÍÍÍ¼"); //0xC8,CD,BC
+        System.out.println("Ã‰ÃÃÃÃÃÃÃÃÂ»"); //0xC9,CD,BB
+        System.out.println("Âº Halloo Âº"); //0xBA
+        System.out.println("ÃˆÃÃÃÃÃÃÃÃÂ¼"); //0xC8,CD,BC
     }
 
     public static void main(String[] args) {

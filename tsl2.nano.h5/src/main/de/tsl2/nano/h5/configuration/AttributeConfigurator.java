@@ -288,12 +288,12 @@ public class AttributeConfigurator implements Serializable {
         "actionExpression" })
     public void actionCreateRuleOrAction(String name,
             @de.tsl2.nano.bean.annotation.Constraint(defaultValue = "%: RuleScript (--> JavaScript)", allowed = {
-                "ง: Rule (--> Operation)", "%: RuleScript (--> JavaScript)", "!: Action (--> Java)" }) String type,
+                "ยง: Rule (--> Operation)", "%: RuleScript (--> JavaScript)", "!: Action (--> Java)" }) String type,
             @de.tsl2.nano.bean.annotation.Constraint(pattern = ".*") String expression) {
 
         if (type.startsWith("%"))
             ENV.get(RulePool.class).add(new RuleScript<>(name, expression, null));
-        else if (type.startsWith("ง"))
+        else if (type.startsWith("ยง"))
             ENV.get(RulePool.class).add(new Rule(name, expression, null));
         else
             ENV.get(ActionPool.class).add(new Action(name, expression));

@@ -338,8 +338,8 @@ public class Persistence implements Serializable, Cloneable {
             }
             String file = ENV.getConfigPath() + name + ".sql";
             Message.send("ddl script detected in field database. saving content to " + file);
-            //remove ´` characters and save.
-            FileUtil.writeBytes(database.replaceAll("[´`]", "").getBytes(), file , false);
+            //remove Â´` characters and save.
+            FileUtil.writeBytes(database.replaceAll("[Â´`]", "").getBytes(), file , false);
             setDatabase(name);
         }
     }

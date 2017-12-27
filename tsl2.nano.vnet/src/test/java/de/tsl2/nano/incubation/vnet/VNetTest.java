@@ -119,13 +119,13 @@ public class VNetTest implements ENVTestPreparation {
 		 * Beispiel
 		 */
 		Net<Location, Float> net = new Net<Location, Float>();
-		Node<Location, Float> saarbruecken = net.add(new Location("Saarbr�cken", 222, 0, 0));
+		Node<Location, Float> saarbruecken = net.add(new Location("Saarbrï¿½cken", 222, 0, 0));
 		Node<Location, Float> kaiserslautern = net.add(new Location("Kaiserslautern", 158, 0, 0));
 		Node<Location, Float> karlsruhe = net.add(new Location("Karlsruhe", 140, 0, 0));
 		Node<Location, Float> ludwigshafen = net.add(new Location("Ludwigshafen", 108, 0, 0));
 		Node<Location, Float> frankfurt = net.add(new Location("Frankfurt", 96, 0, 0));
 		Node<Location, Float> heilbronn = net.add(new Location("Heilbronn", 87, 0, 0));
-		Node<Location, Float> wuerzburg = net.add(new Location("W�rzburg", 0, 0, 0));
+		Node<Location, Float> wuerzburg = net.add(new Location("Würzburg", 0, 0, 0));
 
 		saarbruecken.connect(kaiserslautern, 70f);
 		saarbruecken.connect(karlsruhe, 145f);

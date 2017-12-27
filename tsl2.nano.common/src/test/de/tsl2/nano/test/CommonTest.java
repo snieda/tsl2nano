@@ -103,7 +103,7 @@ public class CommonTest implements ENVTestPreparation {
     @Test
     public void testCollectionUtil() throws Exception {
         //1. converting from arrays to a list
-        Object[] arr1 = new Object[] { "Hans M�ller", "Hans Mueller" };
+        Object[] arr1 = new Object[] { "Hans Mï¿½ller", "Hans Mueller" };
         String[] arr2 = new String[] { "Carsten1", "Carsten0" };
         String[] arr3 = new String[] { "Berta", "Anton" };
         String[] arr4 = new String[] { "1100", "11", "111", "101", "1" };
@@ -122,7 +122,7 @@ public class CommonTest implements ENVTestPreparation {
             "Carsten0",
             "Carsten1",
             "Hans Mueller",
-            "Hans M�ller"), sortedList);
+            "Hans Mï¿½ller"), sortedList);
 
         //3. filtering data
         Collection<String> filteredBetween = CollectionUtil.getFilteringBetween(list, "Anton", "Carsten1");

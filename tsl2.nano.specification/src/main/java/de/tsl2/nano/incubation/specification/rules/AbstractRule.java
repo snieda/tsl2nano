@@ -21,7 +21,7 @@ public abstract class AbstractRule<T> extends AbstractRunnable<T> {
     /** the rule is initialized when all sub-rules are imported. see {@link #importSubRules()} */
     protected boolean initialized;
 
-    public static final char PREFIX = 'ง';
+    public static final char PREFIX = 'ยง';
 
     public AbstractRule() {
         super();

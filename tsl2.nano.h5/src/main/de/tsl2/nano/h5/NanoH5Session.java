@@ -509,7 +509,7 @@ public class NanoH5Session implements ISession<BeanDefinition>, Serializable, IL
     String createStatusText(long startTime) {
         String user =
             authorization != null ? ENV.translate("tsl2nano.login.user", true) + ": "
-                + authorization.getUser() + "�"
+                + authorization.getUser() + "§"
                 + StringUtil.toHexString((getUserAuthorization() + "\n" + "RequestID: " + requests).getBytes())
                 + ", " + "Online: "
                 + DateUtil.getFormattedMinutes(getDuration()) + " min, " : "";
@@ -517,7 +517,7 @@ public class NanoH5Session implements ISession<BeanDefinition>, Serializable, IL
             + ENV.translate("tsl2nano.time", true)
             + ": " + DateUtil.getFormattedDateTime(new Date()) + ", "
             + (nav != null ? ENV.translate("tsl2nano.session", true)
-                + ": " + ENV.translate(nav.getName(), true) + "�"
+                + ": " + ENV.translate(nav.getName(), true) + "§"
                 + StringUtil.toHexString(getContext().toString().getBytes()) : "")
             + ", "
             + ENV.translate("tsl2nano.request", true) + ": "

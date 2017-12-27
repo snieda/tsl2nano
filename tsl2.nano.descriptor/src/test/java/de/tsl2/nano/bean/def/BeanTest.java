@@ -649,7 +649,7 @@ public class BeanTest {
         assertEquals("EUR", newCurrency.getCurrencyCode());
 
         DecimalFormat df = (DecimalFormat) DecimalFormat.getInstance();
-        df.applyPattern("###,###,###.00 �");
+        df.applyPattern("###,###,###.00 ï¿½");
         LOG.info(df.format(123456789));
 
         //test the factor and rounding mode

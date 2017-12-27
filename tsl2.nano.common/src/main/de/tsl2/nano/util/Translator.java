@@ -38,7 +38,7 @@ public class Translator {
         "http://www.worldlingo.com/S000.1/api?wl_srclang={0}&wl_trglang={1}&wl_password=secret&wl_mimetype=text%2Fplain&wl_data={2}";
 
     //Der KEY ist mit einem google-account + projekt verbunden. Fuer dieses Projekt muss 'abrechenbar' aktiviert sein, so dass
-    //Bank-Konto-Daten verf�gbar sein m�ssen :-(
+    //Bank-Konto-Daten verfï¿½gbar sein mï¿½ssen :-(
 //        String googleTranslateUrl =
 //            "https://www.googleapis.com/language/translate/v2?key=INSERT-YOUR-KEY&q=hello%20world&source=en&target=de";
 

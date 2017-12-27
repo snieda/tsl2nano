@@ -52,8 +52,6 @@ import de.tsl2.nano.core.AppLoader;
 import de.tsl2.nano.core.Argumentator;
 import de.tsl2.nano.core.ENV;
 import de.tsl2.nano.core.Finished;
-import de.tsl2.nano.core.ICallback;
-import de.tsl2.nano.core.Main;
 import de.tsl2.nano.core.ManagedException;
 import de.tsl2.nano.core.classloader.NestedJarClassLoader;
 import de.tsl2.nano.core.classloader.NetworkClassLoader;
@@ -107,9 +105,9 @@ public class CoreTest  implements ENVTestPreparation {
         assertEquals(str, StringUtil.fromHexString(hex));
         
         //test crypto
-        String[] passwds = new String[] { "meinpass", "12345678", "azAz����" };
+        String[] passwds = new String[] { "meinpass", "12345678", "azAzï¿½ï¿½ï¿½ï¿½" };
         for (int i = 0; i < passwds.length; i++) {
-            byte[] cryptoHash = StringUtil.cryptoHash("��������");
+            byte[] cryptoHash = StringUtil.cryptoHash("ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½");
             LOG.info(passwds[i] + " ==> " + "(" + cryptoHash.length + ") " + StringUtil.toString(cryptoHash, 1000));
             LOG.info(passwds[i] + " crypto-hex: " + StringUtil.toHexString(cryptoHash));
             LOG.info(passwds[i] + "        hex: " + StringUtil.toHexString(passwds[i].getBytes()));

@@ -1,7 +1,7 @@
 /*
  * Alle Rechte vorbehalten.
- * Copyright © 2002-2009 Thomas Schneider
- * Weiterverbreitung, Benutzung, Vervielfältigung oder Offenlegung,
+ * Copyright Â© 2002-2009 Thomas Schneider
+ * Weiterverbreitung, Benutzung, VervielfÃ¤ltigung oder Offenlegung,
  * auch auszugsweise, nur mit Genehmigung.
  * 
  * $Id$ 
