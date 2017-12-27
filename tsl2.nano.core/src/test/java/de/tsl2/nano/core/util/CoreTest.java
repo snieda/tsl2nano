@@ -742,7 +742,9 @@ public class CoreTest  implements ENVTestPreparation {
     public void testLoadDependencies() throws Exception {
         try {
             LogFactory.setLogLevel(LogFactory.DEBUG);
-            new NetworkClassLoader(getClass().getClassLoader()).findClass("paket.Irgendwas");
+            NetworkClassLoader classLoader = new NetworkClassLoader(getClass().getClassLoader());
+            classLoader.addLibraryPath(ENV.getConfigPath());
+            classLoader.findClass("paket.Irgendwas");
             fail("Classloader should simply not find that class");
         } catch (Exception ex) {
             if (!(ex instanceof ClassNotFoundException) || !ex.getMessage().contains("paket.Irgendwas"))

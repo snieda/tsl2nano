@@ -27,6 +27,7 @@ import org.apache.commons.logging.Log;
 
 import de.tsl2.nano.bean.BeanProxy;
 import de.tsl2.nano.bean.BeanUtil;
+import de.tsl2.nano.core.ENV;
 import de.tsl2.nano.core.ManagedException;
 import de.tsl2.nano.core.cls.BeanClass;
 import de.tsl2.nano.core.log.LogFactory;
@@ -117,7 +118,7 @@ public class BeanEnhancer<T> {
                     fields[i].getType());
             }
 //            if (LOG.isDebugEnabled()) {
-            cls.debugWriteFile();
+            cls.debugWriteFile(ENV.getConfigPath());
             System.out.println(cls.toString());
             cache.put(bean.getClass(), cls);
             return createInterface ? (T) BeanProxy.createBeanImplementation(cls.toClass(),
