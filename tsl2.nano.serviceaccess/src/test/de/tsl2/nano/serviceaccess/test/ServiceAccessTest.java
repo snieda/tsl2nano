@@ -124,7 +124,7 @@ public class ServiceAccessTest {
      * @throws Exception
      */
     @Test
-    @Ignore
+//    @Ignore
     //TODO: how to initialize context?
     public void testAuthentication() throws Exception {
         log("SecurityManager: " + System.getSecurityManager());
@@ -178,7 +178,7 @@ public class ServiceAccessTest {
     }
 
     @Test
-    @Ignore
+    @Ignore("logincontext.policy seems not to be loaded - to enable the exit action")
     //TODO: how to initialize context?
     public void testAuthorization() throws Exception {
         testAuthentication();

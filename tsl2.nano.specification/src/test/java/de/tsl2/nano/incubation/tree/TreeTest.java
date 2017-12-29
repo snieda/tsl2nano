@@ -2,13 +2,14 @@ package de.tsl2.nano.incubation.tree;
 
 import java.util.Scanner;
 
+import org.junit.Assert;
 import org.junit.Ignore;
 import org.junit.Test;
 
 public class TreeTest {
 
     @Test
-    @Ignore
+//    @Ignore
     public void testTree() throws Exception {
         String src = "";
 //        digraph G {
@@ -28,8 +29,15 @@ public class TreeTest {
 //            15: } 
 
         Tree<String, String> graph = new Tree<String, String>("main", null);
-//        graph.pu
-        graph = Tree.fromString(new Scanner(graph.toString()));
+        graph.add("label=nix", "child");
+        graph.add("color=unsichtbar", "{leaf1, leaf2,leaf3}");
+        Tree<String, String> graph2 = Tree.fromString(new Scanner(graph.toString()));
+        String formatGraph = "main -> leaf1[color=unsichtbar];\r\n" + 
+        		"main -> child[label=nix];\r\n" + 
+        		"main -> leaf2[leaf2];\r\n" + 
+        		"main -> leaf3[leaf3];\r\n";
+        		
+        Assert.assertEquals(formatGraph, graph2.toString());
     }
 
 }

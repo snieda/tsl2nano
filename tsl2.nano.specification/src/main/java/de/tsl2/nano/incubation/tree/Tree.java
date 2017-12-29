@@ -17,9 +17,9 @@ import java.util.Scanner;
 import java.util.SortedMap;
 import java.util.TreeMap;
 
+import de.tsl2.nano.collection.CollectionUtil;
 import de.tsl2.nano.core.IPredicate;
 import de.tsl2.nano.core.ITransformer;
-import de.tsl2.nano.collection.CollectionUtil;
 import de.tsl2.nano.core.util.StringUtil;
 
 /**
@@ -36,6 +36,8 @@ public class Tree<C, T> extends TreeMap<C, Tree<C, T>> {
 
     Tree<C, T> parent;
     protected T node;
+
+    static final String SEP_LINE = System.getProperty("line.separator");
     
     /**
      * constructor
@@ -159,7 +161,7 @@ public class Tree<C, T> extends TreeMap<C, Tree<C, T>> {
         List<Tree<C, T>> list = collectTree(new IPredicate<Tree<C, T>>() {
             @Override
             public boolean eval(Tree<C, T> n) {
-                return node.equals(n);
+                return node.equals(n.node);
             }
         });
         return list.size() > 0 ? list.iterator().next() : null;
@@ -254,24 +256,42 @@ public class Tree<C, T> extends TreeMap<C, Tree<C, T>> {
     }
 
     public static Tree<String, String> fromString(Scanner scanner) {
-        TreeMap<String,Tree<String,String>> treeMap = new TreeMap<String, Tree<String, String>>();
-        Tree<String, String> node, parent = null;
-        String n, child, connection, sep = "->";
-        for (String s = scanner.nextLine(); scanner.hasNext();) {
-            n = StringUtil.substring(s, null, sep).trim();
-            node = treeMap.get(n);
-            if (node == null)
-                node = new Tree<String, String>(n, parent);
-            connection = StringUtil.substring(s, sep, ";");
-            child = StringUtil.extract(connection, "\\w+");
-            connection = StringUtil.substring(connection, child, null);
-            node.put(connection, new Tree<String, String>(child, node));
-            parent = node;
+        Tree<String, String> node, parent = null, root = null;
+        String s, n, childs[], c, connection, sep = "->";
+		while (scanner.hasNext()) {
+			s = scanner.nextLine();
+			n = StringUtil.substring(s, null, sep).trim();
+			node = root != null ? root.getNode(n) : null;
+			if (node == null) {
+				node = new Tree<String, String>(n, parent);
+				if (root == null) {
+					root = node;
+				}
+			}
+			connection = StringUtil.substring(s, sep, ";");
+			childs = extractChilds(connection);
+			// connection: [label=name,color=blue]
+			connection = StringUtil.substring(connection, "[", "]", true, true);
+			for (int i = 0; i < childs.length; i++) {
+				connection = connection != null  ? connection : childs[i].trim();
+				node.put(connection, new Tree<String, String>(childs[i].trim(), node));
+				connection = null;
+			}
+			parent = node;
         }
-        return treeMap.isEmpty() ? null : treeMap.firstEntry().getValue().getRoot();
+        return root;
     }
 
-    /**
+    private static String[] extractChilds(String connection) {
+    	if (connection.trim().startsWith("{")) {
+    		String childNames = StringUtil.substring(connection, "{", "}");
+    		return childNames.split(",");
+    	} else {
+    		return new String[] {StringUtil.extract(connection, "\\w+")};
+    	}
+	}
+
+	/**
      * creates a graphviz like string.
      */
     @Override
@@ -280,10 +300,10 @@ public class Tree<C, T> extends TreeMap<C, Tree<C, T>> {
         transformTree(new ITransformer<Tree<C, T>, Tree<C, T>>() {
             @Override
             public Tree<C, T> transform(Tree<C, T> t) {
-                for (java.util.Map.Entry<C, Tree<C, T>> e : entrySet()) {
-                    buf.append(t.node + " -> " + e.getValue().node + ";" + "/*" + e.getKey() + "*/");
+                for (java.util.Map.Entry<C, Tree<C, T>> e : t.entrySet()) {
+                    buf.append(t.node + " -> " + e.getValue().node + "[" + e.getKey() + "]" + ";" + SEP_LINE);
                 }
-                return null;
+                return t;
             }
         });
         return buf.toString();

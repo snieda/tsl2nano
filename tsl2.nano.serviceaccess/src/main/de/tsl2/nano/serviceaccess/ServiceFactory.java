@@ -200,9 +200,11 @@ public class ServiceFactory {
                 : null;
             if (userPrincipal == null) {
                 LOG.warn("No user principal defined --> services are not able to retrieve sessioncontext.getCallerPrincipal");
-                getServiceLocator().getInitialContext().removeFromEnvironment(Context.SECURITY_PRINCIPAL);
+                if (getServiceLocator().getInitialContext() != null)
+                    getServiceLocator().getInitialContext().removeFromEnvironment(Context.SECURITY_PRINCIPAL);
             } else {
-                getServiceLocator().getInitialContext().addToEnvironment(Context.SECURITY_PRINCIPAL, userPrincipal);
+                if (getServiceLocator().getInitialContext() != null)
+                    getServiceLocator().getInitialContext().addToEnvironment(Context.SECURITY_PRINCIPAL, userPrincipal);
             }
         } catch (final Exception e) {
             ManagedException.forward(e);
