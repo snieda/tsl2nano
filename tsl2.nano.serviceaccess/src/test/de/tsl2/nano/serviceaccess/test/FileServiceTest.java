@@ -16,7 +16,9 @@ import org.junit.BeforeClass;
 import org.junit.Ignore;
 import org.junit.Test;
 
+import de.tsl2.nano.core.util.MapUtil;
 import de.tsl2.nano.service.util.BaseServiceTest;
+import de.tsl2.nano.service.util.FileServiceBean;
 import de.tsl2.nano.service.util.IFileService;
 //import sun.io.MalformedInputException;
 import de.tsl2.nano.serviceaccess.ServiceFactory;
@@ -71,6 +73,8 @@ public class FileServiceTest extends BaseServiceTest {
      * @throws IOException
      */
     private void doFileTest(String testFile, String testFileContent) throws Exception {
+        ServiceFactory.createInstance(getClass().getClassLoader());
+        ServiceFactory.instance().setInitialServices(MapUtil.asMap(IFileService.class.getName(), new FileServiceBean()));
         final IFileService fileService = getService(IFileService.class);
         //first: create it!
         assert !fileService.exists(testFile);

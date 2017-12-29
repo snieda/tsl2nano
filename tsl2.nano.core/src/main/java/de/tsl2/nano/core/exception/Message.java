@@ -35,6 +35,9 @@ public class Message extends RuntimeException {
 
     private static final String BYTEBUFFER = "BYTEBUFFER";
 
+    protected Message() {
+	}
+    
     /**
      * constructor
      * 

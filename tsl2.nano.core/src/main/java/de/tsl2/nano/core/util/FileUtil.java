@@ -456,6 +456,10 @@ public class FileUtil {
         }
     }
 
+    public static Properties loadProperties(String resourceFile) {
+    	return loadProperties(resourceFile, null);
+    }
+    
     /**
      * loads a property resource file through main application plugin.
      * 

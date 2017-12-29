@@ -175,7 +175,7 @@ public class CommonTest implements ENVTestPreparation {
         /*assertTrue(Arrays.equals(new Long[3][3], */BeanClass.createInstance(Long[].class, 3, 3);//));
     }
 
-    @Ignore("...running long...")
+//    @Ignore("...running long...")
     @Test
     public void testArrayPerformance() {
         final int c = 2;//1000;
@@ -245,29 +245,6 @@ public class CommonTest implements ENVTestPreparation {
                 numArrayList.toArray();
             }
         });
-    }
-
-    /**
-     * testJarClassloader
-     */
-    @Ignore
-    @Test
-    public void testJarClassloader() {
-        ClassLoader contextClassLoader = Thread.currentThread().getContextClassLoader();
-        NestedJarClassLoader cl = new NestedJarClassLoader(contextClassLoader, "standalone") {
-            @Override
-            protected String getRootJarPath() {
-                return "../../target/test.h5.sample/tsl2.nano.h5.1.1.0-standalone.jar";
-            }
-//
-//            @Override
-//            protected ZipInputStream getJarInputStream(String jarName) {
-//                return getExternalJarInputStream(jarName);
-//            }
-        };
-
-        // filter the 'standalones'
-        assertTrue(cl.getNestedJars().length == 26);
     }
 
     @Test

@@ -41,6 +41,9 @@ import org.simpleframework.xml.DefaultType;
 import org.simpleframework.xml.ElementMap;
 import org.simpleframework.xml.core.Persist;
 
+import de.tsl2.nano.core.classloader.LibClassLoader;
+import de.tsl2.nano.core.classloader.NetworkClassLoader;
+import de.tsl2.nano.core.classloader.RuntimeClassloader;
 //import de.tsl2.nano.collection.PersistableSingelton;
 //import de.tsl2.nano.collection.PersistentCache;
 import de.tsl2.nano.core.cls.BeanClass;
@@ -783,6 +786,23 @@ public class ENV implements Serializable {
             addService(ClassLoader.class, Thread.currentThread().getContextClassLoader());
 //            get(Log.class).warn("no classloader defined!");
         }
+    }
+
+    /**
+     * delegates to {@link #assignENVClassloaderToCurrentThread(LibClassLoader)} 
+     * using a new instance of {@link NetworkClassLoader}.
+     */
+    public static void assignENVClassloaderToCurrentThread() {
+    	assignENVClassloaderToCurrentThread(new NetworkClassLoader((ClassLoader) self().services.get(ClassLoader.class)));
+    }
+    
+    /**
+     * @param cl classloader to add {@link ENV#getConfigPath()} and to be set to current thread
+     */
+    public static <CL extends LibClassLoader> void assignENVClassloaderToCurrentThread(CL cl) {
+    	cl.addLibraryPath(getConfigPath());
+    	addService(ClassLoader.class, cl);
+    	assignClassloaderToCurrentThread();
     }
 
     /**

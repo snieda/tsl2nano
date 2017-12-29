@@ -9,6 +9,7 @@
  */
 package de.tsl2.nano.h5;
 
+import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 
 import java.io.File;
@@ -24,6 +25,7 @@ import java.util.Properties;
 import org.anonymous.project.Address;
 import org.anonymous.project.Charge;
 import org.junit.Assert;
+import org.junit.Ignore;
 import org.junit.Test;
 
 import com.sun.jersey.api.container.httpserver.HttpServerFactory;
@@ -37,8 +39,10 @@ import de.tsl2.nano.bean.def.BeanDefinition;
 import de.tsl2.nano.bean.def.BeanPresentationHelper;
 import de.tsl2.nano.bean.def.IValueDefinition;
 import de.tsl2.nano.core.ENV;
+import de.tsl2.nano.core.classloader.NestedJarClassLoader;
 import de.tsl2.nano.core.classloader.RuntimeClassloader;
 import de.tsl2.nano.core.cls.BeanClass;
+import de.tsl2.nano.core.execution.Profiler;
 import de.tsl2.nano.core.execution.SystemUtil;
 import de.tsl2.nano.core.messaging.ChangeEvent;
 import de.tsl2.nano.core.util.ByteUtil;
@@ -113,7 +117,6 @@ public class NanoH5Test {
     }
     
     @Test
-    //@Ignore("problems with velocity generation")
     public void testMyApp() throws Exception {
         createAndTest(new MyApp(getServiceURL(), null) {
             @Override
@@ -347,4 +350,59 @@ public class NanoH5Test {
         
     }
     
+    /**
+     * testJarClassloader
+     */
+    @Test
+    @Ignore("the jar file will be created after test...")
+    public void testJarClassloader() {
+        ENV.create("target/test/classloader");
+        ENV.assignENVClassloaderToCurrentThread();
+        FileUtil.copy("../build.properties", ENV.getConfigPath() + "build-version.properties");
+        String version = getCurrentVersion();
+        assertTrue(version != null);
+        ClassLoader contextClassLoader = Thread.currentThread().getContextClassLoader();
+        NestedJarClassLoader cl = new NestedJarClassLoader(contextClassLoader, "standalone") {
+            @Override
+            protected String getRootJarPath() {
+                return "target/tsl2.nano.h5-" + version + "-standalone.jar";
+            }
+//
+//            @Override
+//            protected ZipInputStream getJarInputStream(String jarName) {
+//                return getExternalJarInputStream(jarName);
+//            }
+        };
+
+        // filter the 'standalones'
+        assertEquals(26, cl.getNestedJars().length);
+    }
+
+//    @Ignore("don't do that automatically") 
+    @Test
+    public void testNetUtilDownload() throws Exception {
+        //the test checks the current download path of sourceforge...
+        if (NetUtil.isOnline()) {
+            Profiler.si().stressTest("downloader", 2, new Runnable() {
+                @Override
+                public void run() {
+                    String url;
+                    //https://sourceforge.net/projects/tsl2nano/files/latest/download?source=navbar
+                    //http://downloads.sourceforge.net/project/tsl2nano/1.1.0/tsl2.nano.h5.1.1.0.jar
+                    //http://netcologne.dl.sourceforge.net/project/tsl2nano/1.1.0/tsl2.nano.h5.1.1.0.jar
+                    File download = NetUtil.download(url =
+                        "https://iweb.dl.sourceforge.net/project/tsl2nano/1.1.0/tsl2.nano.h5.1.1.0.jar",
+                        "target/test/", true, true);
+                    NetUtil.check(url, download, 3 * 1024 * 1024);
+                }
+            });
+        }
+    }
+
+    private String getCurrentVersion() {
+        Properties props = FileUtil.loadProperties("build-version.properties");
+        return props.getProperty("tsl2.nano.h5.version");
+//        return "2.0.0-SNAPSHOT";
+    }
+
 }

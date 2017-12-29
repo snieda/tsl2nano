@@ -15,12 +15,12 @@ import de.tsl2.nano.core.ENV;
  */
 public interface ENVTestPreparation {
 	static final String BASE_DIR = "../tsl2.nano.";
-	static final String POSTFIX_TEST = "target/test/";
+	static final String TARGET_TEST = "target/test/";
 
 	static String setUp(String moduleShort, boolean strict) {
 		String baseDirModule = BASE_DIR + moduleShort + "/";
-		ENV.create(baseDirModule + POSTFIX_TEST);
-		ENV.setProperty(ENV.KEY_CONFIG_PATH, POSTFIX_TEST);
+		ENV.create(baseDirModule + TARGET_TEST);
+		ENV.setProperty(ENV.KEY_CONFIG_PATH, TARGET_TEST);
 		ENV.setProperty("app.strict.mode", strict);
 		ENV.deleteEnvironment();
 		return baseDirModule;

@@ -32,7 +32,6 @@ import org.junit.AfterClass;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.BeforeClass;
-import org.junit.Ignore;
 import org.junit.Test;
 
 import de.tsl2.nano.action.CommonAction;
@@ -63,13 +62,13 @@ import de.tsl2.nano.util.test.WeekdayEnum;
 public class BeanTest {
     private static final Log LOG = LogFactory.getLog(BeanTest.class);
 
-    @BeforeClass
-    public static void setUp() {
+    @Before
+    public void setUp() {
     	ENVTestPreparation.setUp("descriptor", false);
     }
 
-    @AfterClass
-    public static void tearDown() {
+    @After
+    public void tearDown() {
     	ENVTestPreparation.tearDown();
     }
     
@@ -525,7 +524,7 @@ public class BeanTest {
 
     }
 
-    @Ignore("works only sometimes - perhaps setup/teardown doesn't work")
+//    @Ignore("works only sometimes - perhaps setup/teardown doesn't work")
     @Test
     public void testValueExpression() throws Exception {
         /*

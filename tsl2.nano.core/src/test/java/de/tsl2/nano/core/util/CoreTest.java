@@ -58,6 +58,7 @@ import de.tsl2.nano.core.classloader.NetworkClassLoader;
 import de.tsl2.nano.core.cls.BeanClass;
 import de.tsl2.nano.core.cls.ClassFinder;
 import de.tsl2.nano.core.cls.PrimitiveUtil;
+import de.tsl2.nano.core.exception.Message;
 import de.tsl2.nano.core.execution.Profiler;
 import de.tsl2.nano.core.execution.ThreadState;
 import de.tsl2.nano.core.log.LogFactory;
@@ -387,48 +388,6 @@ public class CoreTest  implements ENVTestPreparation {
         /*assertTrue(Arrays.equals(new Long[3][3], */BeanClass.createInstance(Long[].class, 3, 3);//));
     }
 
-    /**
-     * testJarClassloader
-     */
-    @Ignore
-    @Test
-    public void testJarClassloader() {
-        ClassLoader contextClassLoader = Thread.currentThread().getContextClassLoader();
-        NestedJarClassLoader cl = new NestedJarClassLoader(contextClassLoader, "standalone") {
-            @Override
-            protected String getRootJarPath() {
-                return "../../target/test.h5.sample/tsl2.nano.h5.1.1.0-standalone.jar";
-            }
-//
-//            @Override
-//            protected ZipInputStream getJarInputStream(String jarName) {
-//                return getExternalJarInputStream(jarName);
-//            }
-        };
-
-        // filter the 'standalones'
-        assertTrue(cl.getNestedJars().length == 26);
-    }
-
-    @Ignore("don't do that automatic") 
-    @Test
-    public void testNetUtilDownload() throws Exception {
-        if (NetUtil.isOnline()) {
-            Profiler.si().stressTest("downloader", 20, new Runnable() {
-                @Override
-                public void run() {
-                    String url;
-                    //https://sourceforge.net/projects/tsl2nano/files/latest/download?source=navbar
-                    //http://downloads.sourceforge.net/project/tsl2nano/1.1.0/tsl2.nano.h5.1.1.0.jar
-                    File download = NetUtil.download(url =
-                        "http://netcologne.dl.sourceforge.net/project/tsl2nano/1.1.0/tsl2.nano.h5.1.1.0.jar",
-                        "test/", true, true);
-                    NetUtil.check(url, download, 3 * 1024 * 1024);
-                }
-            });
-        }
-    }
-
     @Test
     public void testFileChecksum() throws Exception {
         //use a verified example from internet...
@@ -467,14 +426,13 @@ public class CoreTest  implements ENVTestPreparation {
         NetUtil.scans(0, 10000);
     }
 
-    @Ignore
     @Test
     public void testNetUtilWCopy() throws Exception {
         //not a real test - only to see it working!
-        NetUtil.wcopy("http://mobile.chefkoch.de", "test/", null, null);
+        NetUtil.wcopy("http://mobile.chefkoch.de", TARGET_TEST, null, null);
     }
 
-    @Ignore("problems on loading dependency javax.json on test")
+//    @Ignore("problems on loading dependency javax.json on test")
     @Test
     public void testNetUtilJSON() throws Exception {
         if (!NetUtil.isOnline()) {
@@ -639,29 +597,27 @@ public class CoreTest  implements ENVTestPreparation {
     }
 
     @Test
-    @Ignore("seems not to work on suns jdk1.7")
+    @Ignore("seems not to work since suns jdk1.7")
     public void testAnnotationProxy() throws Exception {
         Element origin = AnnotationProxy.getAnnotation(SimpleXmlAnnotator.class, "attribute", Element.class);
         Annotation proxy =
             (Annotation) AnnotationProxy.createProxy(new AnnotationProxy(origin, "name", "ruleCover", "type", CoreTest.class));
-        //this seems not work on suns jdk1.7
+        //this seems not work since suns jdk1.7
         Annotation[] annotations = AnnotationProxy.getAnnotations(SimpleXmlAnnotator.class, "attribute");
 
         annotations[0] = proxy;
 
-        assertTrue(CoreTest.class
-            .equals(AnnotationProxy.getAnnotation(SimpleXmlAnnotator.class, "attribute", Element.class).type()));
+        assertEquals(CoreTest.class, AnnotationProxy.getAnnotation(SimpleXmlAnnotator.class, "attribute", Element.class).type());
     }
 
     @Test
-    @Ignore("seems not to work on suns jdk1.7")
+//    @Ignore("seems not to work since suns jdk1.7")
     public void testAnnotationValueChange() throws Exception {
         Element origin = AnnotationProxy.getAnnotation(SimpleXmlAnnotator.class, "attribute", Element.class);
-        //this seems not to work on suns jdk1.7
+        //this seems not to work since suns jdk1.7
         int count = AnnotationProxy.setAnnotationValues(origin, "name", "ruleCover", "type", CoreTest.class);
         assertTrue(count == 2);
-        assertTrue(CoreTest.class
-            .equals(AnnotationProxy.getAnnotation(SimpleXmlAnnotator.class, "attribute", Element.class).type()));
+        assertEquals(CoreTest.class, AnnotationProxy.getAnnotation(SimpleXmlAnnotator.class, "attribute", Element.class).type());
     }
 
     @Test
@@ -686,7 +642,7 @@ public class CoreTest  implements ENVTestPreparation {
         assertTrue(finder.findClass(ManagedException.class).size() >= 1);
     }
     
-    @Ignore
+//    @Ignore
     @Test
     public void testYaml() throws Exception {
         /*
@@ -700,19 +656,22 @@ public class CoreTest  implements ENVTestPreparation {
         /*
          * test it on BeanDefinitions
          */
-        Argumentator def = new Argumentator("test", null);
+        Message def = new Message("test");
         dump = YamlUtil.dump(def);
         System.out.println(dump);
         //to compare xml with yaml...
 //        XmlUtil.saveXml("test.xml", def);
         
         //reload the yaml
-        Argumentator def2 = YamlUtil.load(dump, Argumentator.class);
-        assertTrue(def.equals(def2));
+        Message def2 = YamlUtil.load(dump, Message.class);
+        assertTrue(def.getMessage().equals(def2.getMessage()));
     }
 
     @Test
     public void testEHttpClient() throws Exception {
+    	tearDown();
+    	setUp();
+    	
         //query url
         String urlQuery = EHttpClient.parameter("http://www.openstreetmap.org/search?", false, "city", "München", "street", "Berliner Str.1");
         assertEquals("http://www.openstreetmap.org/search?city=M%C3%BCnchen&street=Berliner+Str.1", urlQuery);
@@ -728,7 +687,7 @@ public class CoreTest  implements ENVTestPreparation {
         assertEquals(resource + "M%FCnchen/info", urlREST);
     }
 
-    @Ignore
+//    @Ignore
     @Test
     public void testCPUTime() throws Exception {
         new ThreadState().top(500);
@@ -740,6 +699,9 @@ public class CoreTest  implements ENVTestPreparation {
 
     @Test
     public void testLoadDependencies() throws Exception {
+    	//avoid interferences with other tests
+    	tearDown();
+    	setUp();
         try {
             LogFactory.setLogLevel(LogFactory.DEBUG);
             NetworkClassLoader classLoader = new NetworkClassLoader(getClass().getClassLoader());
@@ -748,7 +710,7 @@ public class CoreTest  implements ENVTestPreparation {
             fail("Classloader should simply not find that class");
         } catch (Exception ex) {
             if (!(ex instanceof ClassNotFoundException) || !ex.getMessage().contains("paket.Irgendwas"))
-                fail("Classloader should simply not find that class - without any other Exceptions");
+                fail("Classloader should simply throw a ClassNotFoundException - wrong Exception: " + ex);
         }
     }
     
