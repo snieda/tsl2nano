@@ -3,7 +3,7 @@
 	<modelVersion>4.0.0</modelVersion>
 	<groupId>net.sf.tsl2nano</groupId>
 	<artifactId>tsl2.nano.h5-package</artifactId>
-	<version>2.0.0</version>
+	<version>2.0.1-SNAPSHOT</version>
 	<packaging>pom</packaging>
 	<name>TSL2 Html5 Application Framework</name>
 	<description>TSL2 Html5 Application Framework</description>
