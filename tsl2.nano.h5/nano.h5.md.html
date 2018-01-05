@@ -366,7 +366,7 @@ attributeDefinitions:
     composition: false
     constraint: !<Constraint>
       format: !<RegExpFormat> {fullMatch: true, isAbleToParse: false, maxCharacterCount: 5000,
-        pattern: '[\x00-\xFF €]{0,5000}', regExpFlags: 8}
+        pattern: '[\x00-\xFF ï¿½]{0,5000}', regExpFlags: 8}
       length: -1
       nullable: true
       precision: -1
@@ -1155,7 +1155,7 @@ Example using the query _sumvalue_ defined in specification:
 <columnDefinition>
 ...
 	<summary class="de.tsl2.nano.h5.expression.SQLExpression">
-		<expression><![CDATA[§sumvalue]]></expression>
+		<expression><![CDATA[ï¿½sumvalue]]></expression>
 	</summary>
 ...
 </columnDefinition>
@@ -1686,7 +1686,7 @@ Example:
 A1 & A2 ? ((x1 + x2) * $myrule2) : 0
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-Where A1, A2 are boolean values and x1, x2 numbers and myrule2 another referenced (using '§') rule.
+Where A1, A2 are boolean values and x1, x2 numbers and myrule2 another referenced (using 'ï¿½') rule.
 
 Example xml-file for a rule:
 
@@ -1734,7 +1734,7 @@ Example for a rule using another sub-rule:
    <parameter name="x2">
       <type>NUMBER</type>
    </parameter>
-   <operation>A ? 1 + (A ? (x1 + 1) : (x2 * 2)) : §test</operation>
+   <operation>A ? 1 + (A ? (x1 + 1) : (x2 * 2)) : ï¿½test</operation>
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 #### Presenting data or media like images, audio, video
@@ -1780,7 +1780,7 @@ Example with Annotation:
 public void actionAddListener(
         @Constraint(pattern = "(\\w+") String observer,
         @Constraint(pattern = "(\\w+") String observable,
-        @Constraint(pattern = "[%§!]\\w+") String rule) {
+        @Constraint(pattern = "[%ï¿½!]\\w+") String rule) {
     BeanDefinition def = ENV.get(BeanConfigurator.class).def;
     Html5Presentation helper = (Html5Presentation) def.getPresentationHelper();
     helper.addRuleListener(observer, rule, observable);
@@ -2617,7 +2617,7 @@ The next code pieces generate examples for all _nano.h5_ aspects. The generated 
 
     //another rule to test sub-rule-imports
     Environment.get(RulePool.class).add("test-import",
-        new Rule<BigDecimal>("test-import", "A ? 1 + §test : (x2 * 3)", par));
+        new Rule<BigDecimal>("test-import", "A ? 1 + ï¿½test : (x2 * 3)", par));
 
     BigDecimal result =
         (BigDecimal) Environment.get(RulePool.class).get("test-import")
@@ -2715,7 +2715,7 @@ The next code pieces generate examples for all _nano.h5_ aspects. The generated 
 
     AttributeDefinition space1 = beanCollector.getPresentationHelper().addSpaceValue();
     beanCollector.addAttribute("path-test", new PathExpression<>(Times.class, "id.dbBegin"), null, null);
-    beanCollector.addAttribute("rule-test", new RuleExpression<>(Times.class, "§test-import"), null, null);
+    beanCollector.addAttribute("rule-test", new RuleExpression<>(Times.class, "ï¿½test-import"), null, null);
     beanCollector
         .addAttribute(
             "sql-test",
@@ -3041,6 +3041,7 @@ Actual list: http://infocenter.pentaho.com/help/index.jsp?topic=%2Fsupported_com
  1.1.0b | 21.05.2017 | NEW: sidebar menu (using utf-8 icon)
  1.1.0c | 05.06.2017 | NEW: update mechanism
  1.1.0d | 05.06.2017 | NEW: CSheet(LogicTable) -> like an Excel-Sheet
+ 2.0.0  | 05.01.2018 | REF: java8 enabled, maven-build (RELEASED on maven-central through OSSRH), UTF-8, multiple submodules with lots of package refactorings
  
 <style class="fallback">body{white-space:pre;font-family:monospace}</style><script src="markdeep.min.js"></script><script src="http://casual-effects.com/markdeep/latest/markdeep.min.js"></script>
 
@@ -3218,15 +3219,15 @@ Actual list: http://infocenter.pentaho.com/help/index.jsp?topic=%2Fsupported_com
 * (v) changing beandefs value expression will not change attributes value expressions.
 
 * *TODO*
-* wenn übernehmen aktiv, diesen button als default deklarieren
-* (?) löschen: navigations-fehler
+* wenn ï¿½bernehmen aktiv, diesen button als default deklarieren
+* (?) lï¿½schen: navigations-fehler
 * collector mehrfach verwendet --> nav nicht als set
 * (v) jpa: was, wenn collection-joincolumn nullable = false? <== composition!
 * (v) persist von composition-kette
 * (v) ve von composition darf nicht id sein - da bei neu-anlage erst mit parent erstellt
 * (v) enum.toString() mit Punkten (siehe Festsetzungsmethode)
-* löschen von transientem und persistentem composite läuft manchmal schief!
-* deaktivieren von neuen composites zeigt nicht erwünschtes ergebnis an
+* lï¿½schen von transientem und persistentem composite lï¿½uft manchmal schief!
+* deaktivieren von neuen composites zeigt nicht erwï¿½nschtes ergebnis an
 * (v) verwende incubation-rule in constraint (-->check())
 * (v) verwende incubation-rule in bean (-->check())
 * (v) attribute.presentable +isSearchable
@@ -3248,7 +3249,7 @@ Actual list: http://infocenter.pentaho.com/help/index.jsp?topic=%2Fsupported_com
 * *create jars for:*
 	* weltjar (getjar, NetworkingClassloader, main with instrumentation and input)
 	* schalentier (ant + shell.xml + tsl2nano.common)
-	* wähler: menuitem
+	* wï¿½hler: menuitem
 	* verteiler: vNet
 * UNDO, MARCRO
 * avoid dump of bean PersistenceUI$8 < simple-xml exception
@@ -3295,9 +3296,9 @@ Net:Connection-->Link-->Cover(content, descriptor)
 ** file-selector
 ** picture viewer (asciipicture)
 ** beanexaminer ;-)
-* (-) automatische Uebersetzungen einer messages.properties ueber restful (--> Google Übersetzer)
+* (-) automatische Uebersetzungen einer messages.properties ueber restful (--> Google ï¿½bersetzer)
 * Volltextsuche
-* Query wird bei jeder Aktion ausgeführt - um den Context zu aktualisieren
+* Query wird bei jeder Aktion ausgefï¿½hrt - um den Context zu aktualisieren
 * (x) Sequence (action through a selector)
 * xpath-selector
 * sql-selector
@@ -3305,10 +3306,10 @@ Net:Connection-->Link-->Cover(content, descriptor)
 * (x) reflect <name> <method> <arguments>
 * checker (polling action)
 
-*TODO* für zeiterfassung
+*TODO* fï¿½r zeiterfassung
 * (v) id --> sequence
 * (v) Vorbelegungen und Suche in Suchmaske (z.B. aktueller Monat <-- 'Merken')
-* (v) labels, tooltips not from presentable but from messages* charge=Erfassung, order: fromdate + wochentag, party-kürzel, fromtime, totime, value, comment 
+* (v) labels, tooltips not from presentable but from messages* charge=Erfassung, order: fromdate + wochentag, party-kï¿½rzel, fromtime, totime, value, comment 
 ** pause=(end-start)-value, +chargeitems.item.name
 ** -todate, -discharges
 ** dependeny: fromdate --> todate
@@ -3318,21 +3319,21 @@ Net:Connection-->Link-->Cover(content, descriptor)
 * Type: Typ des Dienstes (meist Standard)
 * Classification: Klasse (frei, ?)
 * Item: Projekt (Standard)
-* messages übersetzen
+* messages ï¿½bersetzen
 * (v) +Bankverbindung (+Paypal, ...)
-* +Party.kürzel
+* +Party.kï¿½rzel
 * ER-Diagramme link
 * frm an online-model zum verlinken
 * Digital Identity (mail, twitter, homepage...)
 * (v) Bilder mit blob?
 * (v) Summenzeile (beandef oder columndef: + summarize=$feld1-$feld2)
 * Wochentage + unterschiedliche Farben am WE+Feiertage
-* DependencyListener für Stunden-Berechnung: Ende-Beginn
+* DependencyListener fï¿½r Stunden-Berechnung: Ende-Beginn
 * Sekunden entfernen
 * macros aufnehmen und abspielen
-* verschiedene workflows zur verfügung stellen
+* verschiedene workflows zur verfï¿½gung stellen
 * datenbank-user --> benutzer --> session-context + actions
-* (v) Statistik eingeschränkt auf Suchparameter
+* (v) Statistik eingeschrï¿½nkt auf Suchparameter
 * https://editor.ponyorm.com/explore
 * erweiterte attribut-sortierung: von --> bis, string --> date --> time --> value --> timestamp --> blob
 
@@ -3344,7 +3345,7 @@ Net:Connection-->Link-->Cover(content, descriptor)
 ** using jax-rs: javascript implementieren
 * Datenbank: +Version, +Benutzer+Rollen
 * Nano.H5 im Web-Container starten
-** über Restful: nano.h5/start/config/8686
+** ï¿½ber Restful: nano.h5/start/config/8686
 ** als Servlet
 * QS (jenkins Probleme)
 ** Jacoco agent erstellt kein *.exec
@@ -3413,7 +3414,7 @@ war:
 * Es darf nur eine RestfulApplication in WEB-INF/classes... existieren
 * Alle nicht-jars aus jar-Hauptverzeichnis nach WEB-INF/classes verschieben
 * nach WEB-INF/lib: simple, common, direct, incubation websocket
-* serviceaccess nach WEB-INF/lib: Problem NamedQueryCache in Modul schon vorhanden <-- MANIFEST.MF löschen
+* serviceaccess nach WEB-INF/lib: Problem NamedQueryCache in Modul schon vorhanden <-- MANIFEST.MF lï¿½schen
 * - am besten serviceaccess in WEB-INF/classes, dann als resource nach .nano.h5
 * - im JAX-RS den parent.class.path auf war-file setzen
 * - serviceaccess: persistence.xml_ --> persistence.xml
@@ -3499,7 +3500,7 @@ slf-api Version (1.5.8 --> 1.7.5) Problem
 * top buttons invisible
 * top buttons -> aside
 * listener zerschiesst wert beim speichern
-* select-first-item: nur wenn nur ein item verfügbar
+* select-first-item: nur wenn nur ein item verfï¿½gbar
 * beanconfigurator thread-safe
 * translate bundle --> onetime access
 * NanoSwiX? Nano + Switch (Schaltung (Defaults), Leitungen (Relationen)) + X (Anlehnung an Namen bei Asterix)
@@ -3515,7 +3516,7 @@ Mannschaft
 
 
 h5.sessions, ENV.properties, ENV.services, ConcurrentUtil -> Collections.synchronizedMap(.)
-h5.builder überflüssig
+h5.builder ï¿½berflï¿½ssig
 h5.serve synchronized raus
 info: min --> sec
 h5.request --> info tooltip
@@ -3551,15 +3552,15 @@ Sorry, your browser does not support inline SVG.
 
   nalgox ?
   
-Anyway			: Allgemeine DB für timesheet, bestell+kasse, estore
+Anyway			: Allgemeine DB fÃ¼r timesheet, bestell+kasse, estore
 EM-2016			: https://editor.ponyorm.com/user/ts/ResulteB#
 Skill-DB		: https://editor.ponyorm.com/user/ts/SkillDB
 eStore			: https://editor.ponyorm.com/user/pony/eStore
                   https://editor.ponyorm.com/user/pony/OnlineStore
 forum			: https://editor.ponyorm.com/user/pony/Forum2
 PhotoSharing	: https://editor.ponyorm.com/user/pony/PhotoSharing
-Logbuch			: Eintragung von Aktivitäten, Summierung+Statistiken
-Haushaltsplan	: Dienstplan und Eintragung letzter Aktivitäten (==>timesheet)
+Logbuch			: Eintragung von AktivitÃ¤ten, Summierung+Statistiken
+Haushaltsplan	: Dienstplan und Eintragung letzter AktivitÃ¤ten (==>timesheet)
 Nahrung			: Erechne aus eingeg. Nahrung den Anteil von Stoffen am Tagesbedarf
 Bestellung+Kasse: Bestellung+Kasse
  
@@ -3603,9 +3604,9 @@ Discharge		-> Kasse
 Organisation	-> Haus
 Party			-> Bewohner
 Category		-> Typ der Einteilung (Zimmer/Keller, ...)
-Area			-> Einteilung (Wohnzimmer o.ä.)
+Area			-> Einteilung (Wohnzimmer o.Ã¤.)
 Type			-> Typ der Aktion (Wischen)
-Item			-> Gegenstand (Küchenherd)
+Item			-> Gegenstand (Kï¿½chenherd)
 Classification	-> 
 Charge			-> Aktion pro Zeit in bezug auf Gegenstand
 Discharge		-> Abgeltung
@@ -3631,8 +3632,8 @@ Problem bei Eingabe im Timesheet wahrscheinlich in:
 	+ Status-Enum
 	+ Durchschnitts-Noten pro Schueler
 	+ Durchschnitts-Note pro Kontrolle
-	+ Durchschnitts-Note, Anzahl-Schüler pro Klasse
-	+ Note für Schüler zusammengesetzt aus Kontrollen
+	+ Durchschnitts-Note, Anzahl-Schï¿½ler pro Klasse
+	+ Note fÃ¼r SchÃ¼ler zusammengesetzt aus Kontrollen
 + Schulplanung?
 
 YAML2DDL (mapOfMaps):
@@ -3701,12 +3702,12 @@ analyse integration with REST etc.
 	
 maven+refactoring TODO:
 	- integration test NanoH5
-	- jars: war, sign, standalone, pure, sishell
-	- Cp1252 -> UTF-8
+	- (x) jars: war, sign, standalone, pure, sishell
+	- (v) Cp1252 -> UTF-8
 	- clean code (unused imports etc.)
 	- Test timing app
-	- dependencies (ant+hibernate -> javax validation-api)
+	- (?) dependencies (ant+hibernate -> javax validation-api)
 	- build: replace src/resources/standalone.zip with maven build
-	- release
+	- (v) release
 	
 	
