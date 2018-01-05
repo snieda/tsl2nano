@@ -12,9 +12,9 @@
 	<!-- TODO: create property file with versions like in build-tsl.nano.h5.properties -->
 	<properties>
 		<module.parent>..</module.parent>
-		<keystore>../tsl2store</keystore>
+		<keystore>${module.parent}/tsl2store</keystore>
 		<alias>tsl2</alias>
-		<storepass>tsl2tsl2</storepass>
+		<storepass>${gpg.passphrase}</storepass>
 	</properties>
 	<build>
 		<sourceDirectory>src/main</sourceDirectory>

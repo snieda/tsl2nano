@@ -10,16 +10,30 @@
 	<url>https://sourceforge.net/projects/tsl2nano/</url>
 	<!--
 	This is a multi module project
+	* to start only a submodule-build: "mvn -pl tsl2.nano.core"
 	* if multimodule version changes: start "mvn -N versions:update-child-modules" to assign the child modules
 	* to do a fast complete build: "mvn -amd -DskipTest install site"
 	* increase version number: "mvn release:update-versions -DautoVersionSubmodules=true"
 	* batch-increase version : "mvn - -batch-mode release:update-versions -DdevelopmentVersion=1.2.0-SNAPSHOT"
+	* to deploy a new snapshot-version: "mvn deploy"
+	* to deploy a release version, install gpg4win and start:
+	*   (OPTIONAL) git config - -global gpg.program "c:/Program Files (x86)/GNU/GnuPG/gpg.exe"
+	*   paste the full output of "gpg -a - -export" (your generated public key) to the keyserver "http://keyserver.ubuntu.com"
+	* to create an encrypted password:
+	*   create the file settings-security.xml in your .m2 directory
+	*   start "mvn - -encrypt-master-password" and paste the result into the tag "settingsSecurity/master"
+	*   start "mvn - -encrypt-password" and paste the result into the tag "settings/server/password"
+	* to deploy a new release-version: "mvn deploy -P release"
+	*   before you have to generate a key: "gpg - -gen-key"
+	*   then you should define a "default-key {KEY-ID}" in your gpg.conf in home dir
+	*   test that with: "gpg - -clearsign {my-test-file}"
 	-->
 	<properties>
 		<module.parent>${project.basedir}</module.parent>
         <timestamp>${maven.build.timestamp}</timestamp>
         <maven.build.timestamp.format>dd-MM-yyyy HH:mm</maven.build.timestamp.format>
 		<dependency.locations.enabled>false</dependency.locations.enabled>
+		<javadoc.opts>-Xdoclint:none</javadoc.opts>
     </properties>
 	<inceptionYear>2012</inceptionYear>
 	<licenses>
@@ -173,6 +187,7 @@
 				<configuration>
 					<force>true</force>
 					<failOnError>false</failOnError>
+					 <additionalparam>${javadoc.opts}</additionalparam>
 				</configuration>
 				<executions>
 					<execution>
@@ -183,7 +198,24 @@
 					</execution>
 				</executions>
 			</plugin>
-			<!--  deploy to maven central -->
+			<!-- to release to maven-central, the jars must be signed including an .asc file -->
+			<plugin>
+			    <groupId>org.apache.maven.plugins</groupId>
+			    <artifactId>maven-gpg-plugin</artifactId>
+			    <version>1.6</version>
+			    <executions>
+			     <execution>
+			     <configuration><excludes><exclude>**/*-signed.jar</exclude></excludes>
+			     </configuration>
+			      <id>sign-artifacts</id>
+			      <phase>verify</phase>
+			      <goals>
+			       <goal>sign</goal>
+			      </goals>
+			     </execution>
+			    </executions>
+			   </plugin>
+   			<!--  deploy to maven central -->
 			<plugin>
 				<groupId>org.sonatype.plugins</groupId>
 				<artifactId>nexus-staging-maven-plugin</artifactId>
