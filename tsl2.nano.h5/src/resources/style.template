@@ -112,12 +112,12 @@ i:hover + p {
     padding: 16px;
 }
 
-#field§quicksearch {
+#fieldÂ§quicksearch {
 	padding-top: 3;
     padding-bottom: 2;
 }
 
-#beancollectorliste§quicksearch {
+#beancollectorlisteÂ§quicksearch {
 	padding-top: 0;
     padding-bottom: 6;
 }
@@ -148,7 +148,7 @@ tr, .tr {
 td, th, .td, .th {
    	width: 100%;
 }
-button, input, #field§quicksearch, .actionpanel {
+button, input, #fieldÂ§quicksearch, .actionpanel {
 	width: 100%;
 }
 .sidenav {padding-top: 15px;}
