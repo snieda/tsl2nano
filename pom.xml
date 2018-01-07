@@ -27,6 +27,7 @@
 	*   before you have to generate a key: "gpg - -gen-key"
 	*   then you should define a "default-key {KEY-ID}" in your gpg.conf in home dir
 	*   test that with: "gpg - -clearsign {my-test-file}"
+	* NOTE: doing a release has to be done on all sub-modules explizit (e.g. "mvn deploy -pl tsl2.nano.core")
 	-->
 	<properties>
 		<module.parent>${project.basedir}</module.parent>
