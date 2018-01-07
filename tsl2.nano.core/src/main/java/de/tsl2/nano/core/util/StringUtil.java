@@ -3,7 +3,7 @@
  * 
  * Copyright ï¿½ 2002-2008 Thomas Schneider
  * Alle Rechte vorbehalten.
- * Weiterverbreitung, Benutzung, Vervielfï¿½ltigung oder Offenlegung,
+ * Weiterverbreitung, Benutzung, Vervielfältigung oder Offenlegung,
  * auch auszugsweise, nur mit Genehmigung.
  *
  */

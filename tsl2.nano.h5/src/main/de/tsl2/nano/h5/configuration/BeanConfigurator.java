@@ -338,13 +338,13 @@ public class BeanConfigurator<T> implements Serializable {
         "actionExpression" })
     public void actionCreateRuleOrAction(String name,
             @de.tsl2.nano.bean.annotation.Constraint(defaultValue = "%: RuleScript (--> JavaScript)", allowed = {
-                "ï¿½: Rule (--> Operation)", "%: RuleScript (--> JavaScript)", "!: Action (--> Java)"
+                "§: Rule (--> Operation)", "%: RuleScript (--> JavaScript)", "!: Action (--> Java)"
                 , "?: Query (SQL statement)", "@: Web (URL/REST)" }) String type,
             @de.tsl2.nano.bean.annotation.Constraint(pattern = ".*") String expression) {
 
         if (type.startsWith("%"))
             ENV.get(RulePool.class).add(new RuleScript<>(name, expression, null));
-        else if (type.startsWith("ï¿½"))
+        else if (type.startsWith("§"))
             ENV.get(RulePool.class).add(new Rule(name, expression, null));
         else if (type.startsWith("!"))
             ENV.get(ActionPool.class).add(new Action(name, expression));
@@ -358,7 +358,7 @@ public class BeanConfigurator<T> implements Serializable {
     @SuppressWarnings({ "rawtypes", "unchecked" })
     @de.tsl2.nano.bean.annotation.Action(name = "addAction", argNames = { "specifiedAction" })
     public void actionAddAction(
-    //            @de.tsl2.nano.bean.annotation.Constraint(defaultValue = "presentable.layoutConstraints", pattern = "[%ï¿½!]\\w+", allowed = {
+    //            @de.tsl2.nano.bean.annotation.Constraint(defaultValue = "presentable.layoutConstraints", pattern = "[%§!]\\w+", allowed = {
     //                "presentable", "presentable.layout", "columnDefinition" }) String name) {
             @de.tsl2.nano.bean.annotation.Constraint(allowed=ConstraintValueSet.ALLOWED_ENVFILES + ".*specification/action.*") String name) {
         //check, if action available
@@ -440,7 +440,7 @@ public class BeanConfigurator<T> implements Serializable {
     @de.tsl2.nano.bean.annotation.Action(name = "addAttribute", argNames = { "attributeType", "attributeExpression"})
     public void actionAddAttribute(
             @de.tsl2.nano.bean.annotation.Constraint(allowed = {" : (--> PathExpression)",
-                "ï¿½: Rule (--> Operation)", "%: RuleScript (--> JavaScript)", "!: Action (--> Java)"
+                "§: Rule (--> Operation)", "%: RuleScript (--> JavaScript)", "!: Action (--> Java)"
                 , "?: Query (select statement)", "@: Web (URL/REST)" }) String type,
             String attributeExpression) {
         if (Util.isEmpty(type))
