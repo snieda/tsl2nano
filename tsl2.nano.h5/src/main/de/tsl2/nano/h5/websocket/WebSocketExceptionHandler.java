@@ -48,13 +48,14 @@ public class WebSocketExceptionHandler extends ExceptionHandler implements Close
 
     @Override
     public void uncaughtException(Thread t, Throwable e) {
-        if (e.getMessage() != null && e.getMessage().startsWith(NanoH5Session.PREFIX_STATUS_LINE)) {
+        String msg = e.getMessage(); 
+        if (msg != null && msg.startsWith(NanoH5Session.PREFIX_STATUS_LINE)) {
             super.uncaughtException(t, e);
         }
 //        else {
             Collection<WebSocket> connections = socket.connections();
             for (WebSocket webSocket : connections) {
-                webSocket.send(e.getMessage());
+                webSocket.send(msg != null ? msg : e.toString());
             }
 //        }
     }

@@ -97,8 +97,8 @@ public class PersistenceUI {
                     props.setProperty("DRIVER_jdbc.hsqldb", persistence.STD_LOCAL_DATABASE_DRIVER);
                     props.setProperty("DRIVER_jdbc.h2", "org.h2.Driver");
                     props.setProperty("DRIVER_jdbc.sybase", "com.sybase.jdbc2.jdbc.SybDriver");
-                    props.setProperty("DRIVER_jdbc.derby", "org.apache.derby.jdbc.EmbeddedDriver");
-//                props.setProperty("DRIVER_jdbc.derby", "org.apache.derby.jdbc.ClientDriver");
+                    props.setProperty("DRIVER_jdbc.derby.embedded", "org.apache.derby.jdbc.EmbeddedDriver");
+                    props.setProperty("DRIVER_jdbc.derby.client", "org.apache.derby.jdbc.ClientDriver");
                     props.setProperty("DRIVER_jdbc.xerial", "org.sqlite.JDBC");
                     props.setProperty("DRIVER_jdbc.sqldroid", "org.sqldroid.SQLDroidDriver");
                     props.setProperty("DRIVER_jdbc.postgresql", "org.postgresql.Driver");
@@ -147,7 +147,7 @@ public class PersistenceUI {
                     props.setProperty("URLSYNTAX_jdbc.h2", "jdbc:h2:[tcp://]<HOST>[:port(default 9092)]");
                     props.setProperty("URLSYNTAX_jdbc.sybase", "jdbc:sybase:Tds:<HOST>:<PORT>");
                     props.setProperty("URLSYNTAX_jdbc.derby",
-                        "jdbc:derby:[subsubprotocol:][databaseName][;attribute=value]*");
+                        "jdbc:derby://[server:][:port][databaseName][;attribute=value]*");
                     props.setProperty("URLSYNTAX_jdbc.xerial", "jdbc:sqlite:<db-file-path>");
                     props.setProperty("URLSYNTAX_jdbc.sqldroid", "jdbc:sqlite:<db-file-path>");
                     props.setProperty("URLSYNTAX_jdbc.postgresql", "jdbc:postgresql://<HOST>:<PORT>/<DB>");

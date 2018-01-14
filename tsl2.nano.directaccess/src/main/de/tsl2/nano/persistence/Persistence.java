@@ -83,12 +83,14 @@ public class Persistence implements Serializable, Cloneable {
     public static final String HSQLDB_DATABASE_URL = "jdbc:hsqldb:hsql://localhost:9003";
     public static final String H2_DATABASE_DRIVER = "org.h2.Driver";
     public static final String H2_DATABASE_URL = "jdbc:h2:tcp://localhost:9092/" + DEFAULT_CATALOG;
+    public static final String DERBY_DATABASE_DRIVER = "org.apache.derby.jdbc.ClientDriver";
+    public static final String DERBY_DATABASE_URL = "jdbc:derby://localhost:1527/" + DEFAULT_DATABASE;
 
     public static final String STD_LOCAL_DATABASE_DRIVER = H2_DATABASE_DRIVER;
     public static final String STD_LOCAL_DATABASE_URL = H2_DATABASE_URL;
 
     public static final String[] STD_LOCAL_DATABASE_DRIVERS = { HSQLDB_DATABASE_DRIVER, "org.hsqldb.jdbcDriver",
-        H2_DATABASE_DRIVER };
+        H2_DATABASE_DRIVER, DERBY_DATABASE_DRIVER };
 
     /**
      * constructor

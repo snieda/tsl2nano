@@ -14,6 +14,10 @@ import java.net.InetAddress;
 import java.net.MalformedURLException;
 import java.net.Socket;
 import java.net.URL;
+import java.sql.Connection;
+import java.sql.DriverManager;
+import java.sql.ResultSet;
+import java.sql.SQLException;
 import java.text.FieldPosition;
 import java.text.Format;
 import java.text.ParsePosition;
@@ -751,6 +755,7 @@ public class NanoH5 extends NanoHTTPD implements ISystemConnector<Persistence> {
             ENV.extractResource(JAR_SERVICEACCESS);
 
             provideScripts(persistence);
+            copyJavaDBDriverFiles(persistence);
 
             String generatorTask;
             if (persistence.getGenerator().equals(Persistence.GEN_HIBERNATE)) {
@@ -765,6 +770,9 @@ public class NanoH5 extends NanoHTTPD implements ISystemConnector<Persistence> {
                 || persistence.autoDllIsCreateDrop()) {
                 generateDatabase(persistence);
             }
+            if (ENV.get("app.db.check.connection", true))
+                checkJDBCConnection(persistence);
+            
             Boolean generationComplete =
                 generateJarFile(jarName, persistence.getGenerator(), persistence.getDefaultSchema());
             //return value may be null or false
@@ -881,6 +889,62 @@ public class NanoH5 extends NanoHTTPD implements ISystemConnector<Persistence> {
         ENV.setProperty("service.loadedBeanTypes", beanClasses);
 
         return beanClasses;
+    }
+
+    private void checkJDBCConnection(Persistence persistence) {
+        Connection con = null;
+        try {
+            Class.forName(persistence.getConnectionDriverClass());
+            con = DriverManager.getConnection(persistence.getConnectionUrl(), persistence.getConnectionUserName(), persistence.getConnectionPassword());
+            String schema = !Util.isEmpty(persistence.getDefaultSchema()) ? persistence.getDefaultSchema() : null;
+            ResultSet tables = con.getMetaData().getTables(null, schema, null, null);
+            
+            if (!tables.next()) {
+                LOG.info("Available tables are:\n" + getTablesAsString(con.getMetaData().getTables(null, null, null, null)));
+                throw new ManagedException("The desired jdbc connection provides no tables to work on!");
+            }
+        } catch (Exception e) {
+            ManagedException.forward(e);
+        } finally {
+            if (con != null) {
+                try {
+                    con.close();
+                } catch (SQLException e) {
+                    ManagedException.forward(e);
+                }
+            }
+        }
+        
+    }
+
+    private String getTablesAsString(ResultSet tables) throws SQLException {
+        StringBuilder str = new StringBuilder();
+        int cc = tables.getMetaData().getColumnCount();
+        ArrayList<Object> row = new ArrayList<>(cc);
+        while(tables.next()) {
+            for (int i = 1; i < cc; i++) {
+                row.add(tables.getObject(i));
+            }
+            str.append(StringUtil.toString(row, -1));
+            row.clear();
+        }
+        return str.toString();
+    }
+
+    private void copyJavaDBDriverFiles(Persistence persistence) {
+        String path = System.getProperty("java.home") + "/../db/lib/";
+        String dest = ENV.getConfigPath();
+        if (persistence.getConnectionUrl().contains("derby") && ! new File(dest + "derby.jar").exists()) {
+            if (new File(path + "derby.jar").canRead()) {
+                LOG.info("copying derby/javadb database driver files to environment");
+                FileUtil.copy(path + "derby.jar", ENV.getConfigPath() + "derby.jar");
+                FileUtil.copy(path + "derbynet.jar", ENV.getConfigPath() + "derbynet.jar");
+                FileUtil.copy(path + "derbytools.jar", ENV.getConfigPath() + "derbytools.jar");
+                FileUtil.copy(path + "derbyclient.jar", ENV.getConfigPath() + "derbyclient.jar");
+            } else {
+                LOG.warn("cannot copy derby driver files from jdk path: " + path);
+            }
+        }
     }
 
     private void provideScripts(Persistence persistence) {
