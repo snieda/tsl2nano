@@ -937,10 +937,17 @@ public class NanoH5 extends NanoHTTPD implements ISystemConnector<Persistence> {
         if (persistence.getConnectionUrl().contains("derby") && ! new File(dest + "derby.jar").exists()) {
             if (new File(path + "derby.jar").canRead()) {
                 LOG.info("copying derby/javadb database driver files to environment");
-                FileUtil.copy(path + "derby.jar", ENV.getConfigPath() + "derby.jar");
-                FileUtil.copy(path + "derbynet.jar", ENV.getConfigPath() + "derbynet.jar");
-                FileUtil.copy(path + "derbytools.jar", ENV.getConfigPath() + "derbytools.jar");
-                FileUtil.copy(path + "derbyclient.jar", ENV.getConfigPath() + "derbyclient.jar");
+                FileUtil.copy(path + "derby.jar", dest + "derby.jar");
+                FileUtil.copy(path + "derbynet.jar", dest + "derbynet.jar");
+                FileUtil.copy(path + "derbytools.jar", dest + "derbytools.jar");
+                FileUtil.copy(path + "derbyclient.jar", dest + "derbyclient.jar");
+                
+                try {
+                    FileUtil.writeBytes("java -cp * org.apache.derby.drda.NetworkServerControl start %*".getBytes(), dest + "runServer.cmd", false);
+                    FileUtil.writeBytes("java -cp derby*.jar org.apache.derby.drda.NetworkServerControl start %*".getBytes(), dest + "runServer.sh", false);
+                } catch (Exception e) {
+                    LOG.warn(e.toString());
+                }
             } else {
                 LOG.warn("cannot copy derby driver files from jdk path: " + path);
             }
