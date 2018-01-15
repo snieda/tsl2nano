@@ -174,7 +174,7 @@ public class NetUtil {
      */
     public static String get(String strUrl) {
         try {
-            LOG.debug("starting request: " + strUrl);
+            LOG.info("starting request: " + strUrl);
             String response = String.valueOf(FileUtil.getFileData(url(strUrl).openStream(), null));
             if (LOG.isDebugEnabled()) {
                 LOG.debug("response: " + StringUtil.toString(response, 100));

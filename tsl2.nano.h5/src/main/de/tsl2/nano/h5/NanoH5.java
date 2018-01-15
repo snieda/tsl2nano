@@ -925,7 +925,7 @@ public class NanoH5 extends NanoHTTPD implements ISystemConnector<Persistence> {
             for (int i = 1; i < cc; i++) {
                 row.add(tables.getObject(i));
             }
-            str.append(StringUtil.toString(row, -1));
+            str.append(StringUtil.toString(row, -1) + "\n");
             row.clear();
         }
         return str.toString();
