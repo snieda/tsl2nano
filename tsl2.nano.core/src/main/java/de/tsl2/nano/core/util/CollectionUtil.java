@@ -12,12 +12,15 @@ import java.io.File;
 import java.io.FileWriter;
 import java.io.Writer;
 import java.lang.reflect.Array;
+import java.lang.reflect.Field;
+import java.lang.reflect.Modifier;
 import java.text.Format;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Comparator;
+import java.util.HashMap;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
@@ -475,5 +478,24 @@ public class CollectionUtil {
     }
     public static final int indexOf(Object[] array, Object element) {
         return Arrays.asList(array).indexOf(element);
+    }
+    
+    @SuppressWarnings({"serial"})
+    public static <T> Map<Double, T> fuzzyFind(Collection<T> src, String expression) {
+        HashMap<Double, T> map = new HashMap<Double, T>() {
+            @Override
+            public T put(Double key, T value) {
+                while (containsKey(key))
+                    key += 0000000001d;
+                return super.put(key, value);
+            }
+        };
+        double match;
+        for (T item : src) {
+            match = StringUtil.fuzzyMatch(item, expression);
+            if (match > 0)
+                map.put(match, item);
+        }
+        return map;
     }
 }

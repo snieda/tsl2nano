@@ -36,6 +36,7 @@ import java.util.Collections;
 import java.util.Date;
 import java.util.List;
 import java.util.Locale;
+import java.util.Map;
 import java.util.Properties;
 
 import javax.json.JsonObject;
@@ -628,6 +629,14 @@ public class CoreTest  implements ENVTestPreparation {
         assertTrue(StringUtil.fuzzyMatch(c[2], "dist") == 0);
     }
 
+    @Test
+    public void testCollectionFinder() throws Exception {
+        List<String> list = Arrays.asList("DisT", "Dies ist ein Test", "irgendwas anderes" );
+        Map<Double, String> fuzzyFind = CollectionUtil.fuzzyFind(list, "dist");
+        assertTrue(fuzzyFind.size() == 2);
+        assertEquals(fuzzyFind.values().toArray(), new Object[] {list.get(0), list.get(1)});
+    }
+    
     @Test
     public void testClassFinder() throws Exception {
         //trigger the classloader to load that class

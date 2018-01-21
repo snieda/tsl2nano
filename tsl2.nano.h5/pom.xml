@@ -135,7 +135,8 @@
 						</goals>
 						<configuration>
 							<includeScope>runtime</includeScope>
-							<includeArtifactIds>tsl2.nano.common,tsl2.nano.operation, tsl2.nano.descriptor, tsl2.nano.specification, tsl2.nano.incubation, tsl2.nano.vnet, tsl2.nano.logicstructure, tsl2.nano.repeatable, tsl2.nano.terminal, tsl2.nano.serviceaccess,tsl2.nano.directaccess,tsl2.nano.jarresolver,tsl2.nano.ormliteprovider,tsl2.nano.ebeanprovider,simple-xml,snakeyaml,Java-WebSocket,xml-apis,xchart,VectorGraphics2D,javax.json,javax.json-api,jboss-ejb-api_3.2_spec,dom4j,hibernate-jpa-2.1-api,jboss-transaction-api_1.2_spec,jboss-interceptor-apim,jboss-connector-api_1.7_spec,jta</includeArtifactIds>
+							<includeArtifactIds>tsl2.nano.common,tsl2.nano.operation, tsl2.nano.descriptor, tsl2.nano.specification, tsl2.nano.incubation, tsl2.nano.vnet, tsl2.nano.logicstructure, tsl2.nano.repeatable, tsl2.nano.terminal, tsl2.nano.serviceaccess,tsl2.nano.directaccess,tsl2.nano.jarresolver,tsl2.nano.ormliteprovider,tsl2.nano.ebeanprovider,simple-xml,snakeyaml,Java-WebSocket,xchart,VectorGraphics2D,javax.json,javax.json-api,jboss-ejb-api_3.2_spec,hibernate-jpa-2.1-api,jboss-transaction-api_1.2_spec,jboss-interceptor-api,jboss-connector-api_1.7_spec,javax.json-api,jboss-jaxrs-api,jboss-annotations-api
+							</includeArtifactIds>
 							<!-- standalone:<includeArtifactIds>ant,ant-launcher,ant-nodeps,antlr,mysql-connector-java,h2,app,avalon-framework,commands,common,commons-collections,commons-logging,contenttype,dom4j,freemarker,hibernate-commons-annotations,hibernate-core,hibernate-entitymanager,hibernate-jpa-2.1-api,hibernate-tools,jandex,javassist,jboss-logging,jboss-logging-annotations,jobs,jta,jtidy,logkit,org.eclipse.jdt.core,osgi,preferences,registry,runtime,servlet-api,text,hibernate-tools,log4j,slf4j-api,slf4j-simple</includeArtifactIds> -->
 							<!-- <excludeArtifactIds> commons-codec,javax.json,junit,jasperreports,javassist,avalon-framework-impl,avalon-framework-api,avalon-framework-impl,fop,velocity,tools,aspectjweaver,jersey-bundle,icu4j 
 								</excludeArtifactIds> -->
@@ -163,9 +164,15 @@
 									<addClasspath>true</addClasspath>
 									<mainClass>de.tsl2.nano.h5.Loader</mainClass>
 								</manifest>
+								<manifestEntries>
+									<Application-Name>Nano.H5</Application-Name>
+									<Application-Source>http://downloads.sourceforge.net/project/tsl2nano/1.1.0/tsl2.nano.h5.1.1.0-signed.jar</Application-Source>
+									<Application-redirect>/download</Application-redirect>
+									<Permissions>all-permissions</Permissions>
+								</manifestEntries>
 							</archive>
 							<excludes>
-								<exclude>**/standalone.zip</exclude>
+								<exclude>standalone.zip</exclude>
 							</excludes>
 						</configuration>
 					</execution>
@@ -182,6 +189,12 @@
 									<addClasspath>true</addClasspath>
 									<mainClass>de.tsl2.nano.h5.Loader</mainClass>
 								</manifest>
+								<manifestEntries>
+									<Application-Name>Nano.H5</Application-Name>
+									<Application-Source>http://downloads.sourceforge.net/project/tsl2nano/1.1.0/tsl2.nano.h5.1.1.0-signed.jar</Application-Source>
+									<Application-redirect>/download</Application-redirect>
+									<Permissions>all-permissions</Permissions>
+								</manifestEntries>
 							</archive>
 						</configuration>
 					</execution>
@@ -198,6 +211,12 @@
 									<addClasspath>true</addClasspath>
 									<mainClass>de.tsl2.nano.h5.Loader</mainClass>
 								</manifest>
+								<manifestEntries>
+									<Application-Name>Nano.H5</Application-Name>
+									<Application-Source>http://downloads.sourceforge.net/project/tsl2nano/1.1.0/tsl2.nano.h5.1.1.0-signed.jar</Application-Source>
+									<Application-redirect>/download</Application-redirect>
+									<Permissions>all-permissions</Permissions>
+								</manifestEntries>
 							</archive>
 							<!-- <archive> <manifest> <addClasspath>true</addClasspath> <classpathLayoutType>repository</classpathLayoutType> 
 								</manifest> </archive> <includes> <include>../**/core/**</include> <include>../**/resources/**</include> 
@@ -251,7 +270,7 @@
 								</manifest>
 							</archive>
 							<!-- excludes don't work! -->
-							<packagingExcludes>.*standalone.zip</packagingExcludes>
+							<packagingExcludes>standalone.zip</packagingExcludes>
 							<webXml>src/resources/WEB-INF/web.xml</webXml>
 						</configuration>
 					</execution>

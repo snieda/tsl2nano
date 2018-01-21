@@ -97,6 +97,7 @@ public class Updater {
                 String vo = getVersionNo(currentVersion);
                 String vn = getVersionNo(newVersion);
                 if (!vo.equals(vn)) {
+                	LogFactory.log("updating tsl2.nano: " + vo + " -> " + vn );
                     String downloadURL = getDownloadURL(newVersion);
                     NetUtil.download(downloadURL, System.getenv("user.dir"));
                 }

@@ -20,6 +20,7 @@ import java.text.SimpleDateFormat;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Locale;
 import java.util.Properties;
 
 import org.anonymous.project.Address;
@@ -67,6 +68,7 @@ import de.tsl2.nano.persistence.Persistence;
 import de.tsl2.nano.serviceaccess.Authorization;
 import de.tsl2.nano.serviceaccess.IAuthorization;
 import de.tsl2.nano.util.codegen.PackageGenerator;
+import de.tsl2.nano.util.test.BaseTest;
 import my.app.MyApp;
 import my.app.Times;
 
@@ -165,6 +167,7 @@ public class NanoH5Test {
         initServices();
         Socket sampleSocket = new Socket();
         app.serve("/", Method.POST, MapUtil.asMap("socket", sampleSocket), new HashMap<>(), new HashMap<>());
+        String html = null, exptectedHtml;
         for (int i = 0; i < beanTypesToCheck.length; i++) {
             Bean bean = Bean.getBean(BeanClass.createInstance(beanTypesToCheck[i]));
             bean.onActivation(null);
@@ -187,11 +190,23 @@ public class NanoH5Test {
                     Bean.getBean(attr.getColumnDefinition()).toValueMap(null, false, false, false, "value");
             }
             Response response = app.serve("/" + i+1, Method.POST, MapUtil.asMap("socket", sampleSocket), new HashMap<>(), new HashMap<>());
-            String html = ByteUtil.toString(response.getData(), "UTF-8");
+            html = ByteUtil.toString(response.getData(), "UTF-8");
             assertTrue(html.contains(DOMExtender.class.getName())); // see DOMExtender class
             bean.onDeactivation(null);
         }
 
+        // check encoding (only if german!)
+//        assertTrue(!Locale.getDefault().equals(Locale.GERMANY) || html.contains("Schlie&ßen"));
+
+        //static check against last expteced state
+//        exptectedHtml = new String(FileUtil.getFileBytes("test-timesheet-output.html", null), "UTF-8");
+//        BaseTest.assertEquals(exptectedHtml, html, true, MapUtil.asMap("\\:[0-9]{5,5}", ":XXXXX",
+//            "[0-9]{3,3} Msec", "XXX Msec", "statusinfo-[0-9]{13,13}\\.txt", "statusinfo-XXXXXXXXXXXXX.txt",
+//            BaseTest.REGEX_DATE_US, BaseTest.XXX,
+//            BaseTest.REGEX_DATE_DE, BaseTest.XXX,
+//            BaseTest.REGEX_TIME_DE, BaseTest.XXX
+//            ));
+        
         //check xml failed files - these are written, if simple-xml has problems on deserializing from xml
         List<File> failed = FileUtil.getTreeFiles(DIR_TEST, ".*.xml.failed");
         assertTrue(failed.toString(), failed.size() == 0);

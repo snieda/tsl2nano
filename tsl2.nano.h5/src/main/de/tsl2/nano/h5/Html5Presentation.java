@@ -528,6 +528,7 @@ public class Html5Presentation<T> extends BeanPresentationHelper<T> implements I
         appendElement(head, "meta", "name", "viewport", "content",
             "width=device-width, height=device-height, initial-scale=1");
 //        appendElement(head, "link", "rel", "stylesheet", "href", "css/style.css");
+        appendElement(head, "meta", "charset", "UTF-8");
 
         /*
          * WebSocket integration

@@ -283,6 +283,22 @@ public class StringUtil {
     }
 
     /**
+     * @param src StringBuffer in cause of Matcher ony working on StringBuffer directly
+     * @param regex regular expression
+     * @param replacement replacement
+     * @return count of findings
+     */
+    public static int replaceAll(StringBuffer src, String regex, String replacement) {
+    	int count = 0;
+        Matcher matcher = Pattern.compile(regex).matcher(src);
+        while (matcher.find()) {
+            matcher.appendReplacement(src, replacement);
+            count++;
+        }
+        return count;
+    }
+    
+    /**
      * calls toString() of obj object if not null, otherwise an empty string will be returned
      * 
      * @param obj object or null

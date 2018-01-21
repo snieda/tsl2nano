@@ -5,6 +5,14 @@ import static org.junit.Assert.assertTrue;
 import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
+import java.util.Map;
+import java.util.Set;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+
+import org.junit.Assert;
+
+import de.tsl2.nano.core.util.StringUtil;
  
 /**
 * extend this class for your test. create a (not junit) test-method with all method-parameters you need, but the last method-parameter should be the list of expected values (see
@@ -43,6 +51,11 @@ import java.util.List;
 */
 public class BaseTest {
  
+    public static String REGEX_DATE_DE = "\\d\\d\\.\\d\\d\\.\\d\\d\\d\\d";
+    public static String REGEX_DATE_US = "\\d\\d\\-\\d\\d\\-\\d\\d\\d\\d";
+    public static String REGEX_TIME_DE = "\\d\\d\\:\\d\\d(\\:\\d\\d([.,]\\d\\d(\\d)?)?)?";
+    public static String XXX = "XXX";
+    
   /**
    * convenience to create a set of parameter
    *
@@ -169,6 +182,25 @@ public class BaseTest {
     }
   }
  
+  public static void assertEquals(String exptected, String result, boolean ignoreWhitespace, Map<String, String> replacements) {
+      if (ignoreWhitespace) {
+          exptected = exptected.replaceAll("\\w+", " ");
+          result = result.replaceAll("\\w+", " ");
+      }
+      StringBuffer exp = new StringBuffer(exptected);
+      StringBuffer res = new StringBuffer(result);
+      prepareForComparison(exp, res, replacements);
+      Assert.assertEquals(exp.toString(), res.toString());
+  }
+  
+  public static void prepareForComparison(StringBuffer expected, StringBuffer result, Map<String, String> replacements) {
+      Set<String> keys = replacements.keySet();
+      for (String regex : keys) {
+        StringUtil.replaceAll(expected, regex, replacements.get(regex));
+        StringUtil.replaceAll(result, regex, replacements.get(regex));
+    }
+  }
+  
   /**
    * condition for exptected value and calculated result.
    */
