@@ -22,9 +22,10 @@ import de.tsl2.nano.core.ENV;
 import de.tsl2.nano.core.IPredicate;
 import de.tsl2.nano.core.ITransformer;
 import de.tsl2.nano.core.ManagedException;
-import de.tsl2.nano.core.util.ListSet;
 import de.tsl2.nano.core.messaging.EventController;
 import de.tsl2.nano.core.messaging.IListener;
+import de.tsl2.nano.core.util.FileUtil;
+import de.tsl2.nano.core.util.ListSet;
 import de.tsl2.nano.structure.IConnection;
 import de.tsl2.nano.structure.INode;
 
@@ -55,7 +56,11 @@ import de.tsl2.nano.structure.INode;
  * @author Thomas Schneider, Thomas Schneider
  * @version $Revision$
  */
-public class Net<T extends IListener<Notification> & ILocatable & Serializable & Comparable<? super T>, D extends Comparable<? super D>> {
+public class Net<T extends IListener<Notification> & ILocatable & Serializable & Comparable<? super T>, D extends Comparable<? super D>> implements Serializable {
+	
+	private static final long serialVersionUID = -8224858182720810370L;
+
+	String name;
     /** all net nodes */
     Map<String, Node<T, D>> elements;
     /** using {@link #notifyIdles(Collection, IListener, long, long)}, all waiting sleep times are added */
@@ -63,14 +68,32 @@ public class Net<T extends IListener<Notification> & ILocatable & Serializable &
     /** normally true, but if you want to work without threading, you can set it to false */
     static boolean workParallel = true;
 
+    public Net() {
+    	this("vnet-" + Net.class.getSimpleName().toLowerCase());
+    }
+    
     /**
      * constructor
      */
-    public Net() {
+    public Net(String name) {
+    	this.name = name;
         elements = new TreeMap<String, Node<T, D>>();
         ENV.removeService(NotificationController.class);
     }
 
+	@SuppressWarnings("rawtypes")
+	public static Net create(String vnetFile) {
+    	try {
+			return (Net) FileUtil.loadXml(FileUtil.getFile(vnetFile));
+		} catch (Exception e) {
+			ManagedException.forward(e);
+			return null;
+		}
+    }
+	
+	public void save() {
+		FileUtil.saveXml(this, FileUtil.getUniqueFileName(getName()) + ".xml");
+	}
     /**
      * addAll
      * 
@@ -298,7 +321,8 @@ public class Net<T extends IListener<Notification> & ILocatable & Serializable &
      * @param resultType type of notification results
      * @return notification results
      */
-    public <R> Collection<R> notifyIdlesAndCollect(Collection<Notification> notifications,
+    @SuppressWarnings("unchecked")
+	public <R> Collection<R> notifyIdlesAndCollect(Collection<Notification> notifications,
             Class<R> resultType
             ) {
         log("==> starting notify and collect on " + notifications.size() + " notifications");
@@ -403,7 +427,15 @@ public class Net<T extends IListener<Notification> & ILocatable & Serializable &
         return buf.toString();
     }
 
-    @Override
+    public String getName() {
+		return name;
+	}
+
+	public void setName(String name) {
+		this.name = name;
+	}
+
+	@Override
     public String toString() {
         return /*new BeanClass(this.getClass()).getGenericType() + */" Net with " + elements.size() + " elements";
     }

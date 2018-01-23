@@ -49,7 +49,11 @@ public class ThreadingEventController extends EventController {
             @Override
             public void run() {
                 Net.log_("new task " + Thread.currentThread() + " for '" + l + "' handling '" + e + "'\n");
-                l.handleEvent(e);
+                try {
+					l.handleEvent(e);
+				} catch (Exception e1) {
+					e1.printStackTrace();
+				}
             }
         });
     }

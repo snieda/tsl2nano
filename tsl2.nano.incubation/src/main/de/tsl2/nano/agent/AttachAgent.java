@@ -6,6 +6,8 @@ import java.lang.reflect.Method;
 
 import com.sun.tools.attach.VirtualMachine;
 
+import de.tsl2.nano.core.util.NumberUtil;
+
 /**
  * is able to attach java agent on runtime (if not done on starting java with e.g. '-javaagent:lib/aspectjweaver.jar').
  * 
@@ -22,7 +24,7 @@ public class AttachAgent {
    * @delegates to {@link #attachGivenAgentToThisVM(String, String, String)} without class and method to check.
    */
   public static boolean attachGivenAgentToThisVM(String pathToAgentJar) {
-    return attachGivenAgentToThisVM(pathToAgentJar, null, null);
+    return attachGivenAgentToThisVM(pathToAgentJar, null, null, null);
   }
 
   /**
@@ -31,14 +33,14 @@ public class AttachAgent {
    * @param pathToAgentJar agent jar
    * @param agentClass agent class name
    * @param agentMethod optional agent method to call/check
+   * @param optional PID (OS process id of VM). if null, the current VM will be used
    * @return if agent was loaded and - if agentClass and/or method was given, if it could be invoked
    */
-  public static boolean attachGivenAgentToThisVM(String pathToAgentJar, String agentClass, String agentMethod) {
+  public static boolean attachGivenAgentToThisVM(String pathToAgentJar, String agentClass, String agentMethod, String pid) {
     try {
-      String nameOfRunningVM = ManagementFactory.getRuntimeMXBean().getName();
-      String pid = nameOfRunningVM.substring(0, nameOfRunningVM.indexOf('@'));
+      pid = pid == null ? getPIDofCurrentVM() : pid;
       VirtualMachine vm = VirtualMachine.attach(pid);
-      log("attaching agent " + pathToAgentJar + " to VM " + vm + " : " + nameOfRunningVM);
+      log("attaching agent " + pathToAgentJar + " to VM " + vm + " : " + vm.toString());
       vm.loadAgent(pathToAgentJar, "");
       vm.detach();
       if (agentClass != null)
@@ -51,7 +53,12 @@ public class AttachAgent {
     }
   }
 
-  /**
+  private static String getPIDofCurrentVM() {
+      String nameOfRunningVM = ManagementFactory.getRuntimeMXBean().getName();
+      return nameOfRunningVM.substring(0, nameOfRunningVM.indexOf('@'));
+}
+
+/**
    * check, if given agent is loaded
    * 
    * @param agentClass class name of agent
@@ -88,15 +95,19 @@ public class AttachAgent {
     System.setProperty("LogMeAs.system.out", "true");
     if (args == null)
       args = new String[0];
-    if (args.length == 1 && args[0].contains("?")) {
-      System.out.println(AttachAgent.class.getName() + " [agent-lib-jar [agent-class [argent-method]]]");
+    if (args.length <= 1 && (args[0].contains("?") || args[0].toLowerCase().contains("help"))) {
+      System.out.println(AttachAgent.class.getName() + "{VM-PID or 0} [agent-lib-jar [agent-class [argent-method]]]");
       return;
     }
-      
-    String jar = args.length > 0 ? args[0] : AGENT_JAR_ASPECTJ;
-    String cls = args.length > 1 ? args[1] : AGENT_CLS_ASPECTJ;
-    String mtd = args.length > 2 ? args[2] : AGENT_MTD_ASPECTJ;
-    if (!attachGivenAgentToThisVM(jar, cls, mtd))
+    int i = 0;
+    String pid = args.length > i ? args[i++] : null;
+    String jar = args.length > i ? args[i++] : AGENT_JAR_ASPECTJ;
+    String cls = args.length > i ? args[i++] : AGENT_CLS_ASPECTJ;
+    String mtd = args.length > i ? args[i++] : AGENT_MTD_ASPECTJ;
+    
+    if (NumberUtil.toNumber(pid) <= 0)
+        pid = null;
+    if (!attachGivenAgentToThisVM(jar, cls, mtd, pid))
       throw new IllegalStateException("agent couldn't be loaded!");
   }
 }

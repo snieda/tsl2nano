@@ -1,3 +1,5 @@
+package de.tsl2.nano.jarresolver;
+
 import static junit.framework.Assert.assertFalse;
 import static junit.framework.Assert.assertTrue;
 
@@ -7,8 +9,9 @@ import org.junit.BeforeClass;
 import org.junit.Test;
 
 import de.tsl2.nano.core.log.LogFactory;
-import de.tsl2.nano.core.util.FileUtil;
+import de.tsl2.nano.core.util.ENVTestPreparation;
 import de.tsl2.nano.core.util.NetUtil;
+import de.tsl2.nano.core.util.FileUtil;
 import de.tsl2.nano.core.util.StringUtil;
 import de.tsl2.nano.jarresolver.JarResolver;
 
@@ -28,16 +31,21 @@ import de.tsl2.nano.jarresolver.JarResolver;
  * @author Tom
  * @version $Revision$
  */
-public class JarResolverTest {
+public class JarResolverTest   implements ENVTestPreparation {
     private static final Log LOG = LogFactory.getLog(JarResolverTest.class);
 
-    private static final String BASEDIR = "./";
+    private static String BASE_DIR_JARRESOLVER;
 
     @BeforeClass
     public static void setUp() {
-        //set another start path to store the jar files to
+        BASE_DIR_JARRESOLVER = ENVTestPreparation.setUp("jarresolver", false);
     }
 
+    @AfterClass
+    public static void tearDown() {
+        ENVTestPreparation.tearDown();
+    }
+    
     /**
      * NEEDS TO BE ONLINE!
      * <p/>
@@ -72,7 +80,7 @@ public class JarResolverTest {
             //Ok - shouldn't be found
         }
         
-        FileUtil.forEach("./", "(dist|target|temp, action)", FileUtil.DO_DELETE);
+        FileUtil.forEach(BASE_DIR_JARRESOLVER, "(dist|target|temp, action)", FileUtil.DO_DELETE);
     }
 
     /**
@@ -80,7 +88,7 @@ public class JarResolverTest {
      */
     private boolean download(String pckOrName, String jarName) {
         if (jarName != null) {
-            FileUtil.forEach("./", jarName, FileUtil.DO_DELETE);
+            FileUtil.forEach(BASE_DIR_JARRESOLVER, jarName, FileUtil.DO_DELETE);
         }
         new JarResolver().start(new String[] { pckOrName });
         return jarName != null ? loaded(jarName) : false;
@@ -93,9 +101,9 @@ public class JarResolverTest {
      * @return
      */
     private boolean loaded(String name) {
-        boolean found = FileUtil.getFiles(BASEDIR, name).length > 0;
+        boolean found = FileUtil.getFiles(BASE_DIR_JARRESOLVER, name).length > 0;
         if (found) {
-            FileUtil.forEach("./", name, FileUtil.DO_DELETE);
+            FileUtil.forEach(BASE_DIR_JARRESOLVER, name, FileUtil.DO_DELETE);
         }
         return found;
     }
@@ -109,10 +117,5 @@ public class JarResolverTest {
         } else {
             System.out.println("ignoring test 'testFindJar() - we are offline!");
         }
-    }
-
-    @AfterClass
-    public static void tearDown() {
-        //TODO: delete all loaded jars
     }
 }

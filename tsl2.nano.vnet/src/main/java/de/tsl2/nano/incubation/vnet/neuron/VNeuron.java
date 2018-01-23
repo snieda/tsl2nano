@@ -14,6 +14,7 @@ import java.io.Serializable;
 import de.tsl2.nano.incubation.vnet.ILocatable;
 import de.tsl2.nano.incubation.vnet.Notification;
 import de.tsl2.nano.core.messaging.IListener;
+import de.tsl2.nano.core.util.NumberUtil;
 
 /**
  * Technical extension of {@link Neuron} to fulfill the preconditions of a node core in vnet.
@@ -41,9 +42,19 @@ public class VNeuron extends Neuron<String> implements
 
     @Override
     public void handleEvent(Notification event) {
-        if (feedSignal((Float) event.getNotification()) == Neuron.FIRE) {
-            event.addResponse(getPath(), getPath());
-        }
+    	float signal= 0f;
+    	Object note = event.getNotification();
+    	
+    	//there are notifications from Net or from neighbour nodes
+    	if (this.getKernel().equals(note)) { //from Net
+    		signal = 1f;
+    		feedSignal(signal); //the input will not be added to the response
+    	} else if (NumberUtil.isNumber(note)) { //from neighbour
+    		signal = NumberUtil.extractNumber(note.toString()).floatValue();
+            if (feedSignal(signal) == Neuron.FIRE) {
+                event.addResponse(getPath(), getPath());
+            }
+    	}
     }
 
     @Override

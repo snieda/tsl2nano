@@ -234,6 +234,6 @@ public class Node<T extends IListener<Notification> & ILocatable & Serializable 
      */
     @Override
     public String toString() {
-        return core + "(x" + connections.size() + ")";
+        return core + " (x" + connections.size() + ")";
     }
 }
