@@ -30,14 +30,14 @@ if [ "$3" == "nopause" ]
 	then NOPAUSE=nopause
 fi
 
-VERSION=2.0.0-SNAPSHOT
+VERSION=2.0.1
 STANDALONE="-standalone"
 #OFFLINE=-Dtsl2nano.offline=true
 #UH=-Denv.user.home=true
 #USERDIR=-Duser.dir=$PRJ
 #LLANG=-Duser.country=FR -Duser.language=fr
-#ENCODING=-Dfile.encoding=Cp1252
-#JSU_ENC=-Dsun.jnu.encoding=Cp1252
+ENCODING=-Dfile.encoding=UTF-8
+JSU_ENC=-Dsun.jnu.encoding=UTF-8
 #DEBUG="-agentlib:jdwp=transport=dt_socket,address=localhost:8787,server=y,suspend=n"
 #AGENT=-javaagent:%PRJ%/aspectjweaver.jar
 #PROXY=-Dhttp.proxyHost=myproxy -Dhttp.proxyPort=8080
