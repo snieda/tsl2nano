@@ -90,7 +90,7 @@ public class JarResolverTest   implements ENVTestPreparation {
         if (jarName != null) {
             FileUtil.forEach(BASE_DIR_JARRESOLVER, jarName, FileUtil.DO_DELETE);
         }
-        new JarResolver().start(new String[] { pckOrName });
+        new JarResolver(BASE_DIR_JARRESOLVER).start(new String[] { pckOrName });
         return jarName != null ? loaded(jarName) : false;
     }
 
@@ -111,7 +111,7 @@ public class JarResolverTest   implements ENVTestPreparation {
     @Test
     public void testFindJar() throws Exception {
         if (NetUtil.isOnline()) {
-            String jarName = new JarResolver().findJarOnline("org.apache.log4j.config.PropertyGetter");
+            String jarName = new JarResolver(BASE_DIR_JARRESOLVER).findJarOnline("org.apache.log4j.config.PropertyGetter");
             LOG.info("jar-file: " + jarName);
             assertTrue(StringUtil.extract(jarName, "\\w+").equals("log4j"));
         } else {

@@ -94,14 +94,19 @@ public class JarResolver {
     static final String PACKAGE_EXCEPTION = "package.exception.regex";
     static final String ONLY_LOAD_DEFINED = "only.load.defined.packages";
 
+    public JarResolver() {
+        this(basedir);
+    }
+    
     /**
      * constructor
      */
-    public JarResolver() {
+    public JarResolver(String baseDir) {
         props = new Properties();
         try {
             props.load(ENV.getResource("jarresolver.properties"));
             String updateUrl = props.getProperty(URL_UPDATE_PROPERTIES);
+            this.basedir = baseDir != null ? baseDir : props.getProperty(DIR_LOCALREPOSITORY, ENV.getConfigPath());
             if (updateUrl != null) {
                 try {
                     LOG.info("updating jarresolver.properties through " + updateUrl);
@@ -252,8 +257,6 @@ public class JarResolver {
      * @return downloaded local file
      */
     protected File download(String strUrl, boolean flat, boolean overwrite) {
-        basedir = props.getProperty(DIR_LOCALREPOSITORY);
-        basedir = !Util.isEmpty(basedir) ? basedir : ENV.getConfigPath();
         return NetUtil.download(strUrl, basedir, flat, overwrite);
     }
 

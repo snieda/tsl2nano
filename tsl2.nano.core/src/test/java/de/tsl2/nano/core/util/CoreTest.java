@@ -17,6 +17,7 @@ import static org.junit.Assert.fail;
 
 import java.io.ByteArrayInputStream;
 import java.io.File;
+import java.io.IOException;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
@@ -440,21 +441,30 @@ public class CoreTest  implements ENVTestPreparation {
             LOG.warn("SKIPPING online tests for JSON");
             return;
         }
-        JsonStructure structure = NetUtil
-            .getRestfulJSON("http://headers.jsontest.com/"/*"https://graph.facebook.com/search?q=java&type=post"*/);
-        System.out.println(StringUtil.toString(structure, -1));
+        try {
+	        JsonStructure structure = NetUtil
+	            .getRestfulJSON("http://headers.jsontest.com/"/*"https://graph.facebook.com/search?q=java&type=post"*/);
+	        System.out.println(StringUtil.toString(structure, -1));
+	
+	        //TODO: in cause of bean dependencies commented
+	//        Bean<JsonStructure> bean = Bean.getBean(structure);
+	//        System.out.println(bean);
+	
+	        String echoService = "http://echo.jsontest.com";
+			structure = NetUtil.getRestfulJSON(echoService, "mykey1", "myvalue1", "mykey2", "myvalue2");
+			System.out.println(StringUtil.toString(structure, -1));
 
-        //TODO: in cause of bean dependencies commented
-//        Bean<JsonStructure> bean = Bean.getBean(structure);
-//        System.out.println(bean);
-
-        String echoService = "http://echo.jsontest.com";
-        structure = NetUtil.getRestfulJSON(echoService, "mykey1", "myvalue1", "mykey2", "myvalue2");
-        System.out.println(StringUtil.toString(structure, -1));
-
-        JsonObject obj = (JsonObject) structure;
-        assertTrue(obj.get("mykey1").toString().equals("\"myvalue1\""));
-        assertTrue(obj.get("mykey2").toString().equals("\"myvalue2\""));
+			JsonObject obj = (JsonObject) structure;
+			assertTrue(obj.get("mykey1").toString().equals("\"myvalue1\""));
+			assertTrue(obj.get("mykey2").toString().equals("\"myvalue2\""));
+		} catch (Exception e) {
+			// the URL may be out of service!
+			if (e.toString().contains("code: 503")) {
+				LOG.warn(e.toString());
+			} else {
+				ManagedException.forward(e);
+			}
+		}
     }
 
     @Test
