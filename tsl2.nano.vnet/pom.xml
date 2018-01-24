@@ -8,6 +8,7 @@
   <artifactId>tsl2.nano.vnet</artifactId>
   <version>0.5.2</version>
   <name>TSL2 Framework VirtualNetwork</name>
+  <description>TSL2 Framework VirtualNetwork (Generic parallelized Network-Mechanism providing implementations for: NeuronalNetwork, Routing, Workflow)</description>
 	<properties>
 		<module.parent>..</module.parent>
 	</properties>

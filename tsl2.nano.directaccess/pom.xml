@@ -9,7 +9,7 @@
 	<artifactId>tsl2.nano.directaccess</artifactId>
 	<version>0.0.6</version>
 	<name>TSL2 JEE Direct Access</name>
-	<description>TSL2 JEE Direct Access</description>
+	<description>TSL2 JEE Direct Access (local JPA through GenericLocalBeanContainer, GenericLocalServiceBean, GenericEntityManager, ScriptTool, Replication)</description>
 	<properties>
 		<module.parent>..</module.parent>
 	</properties>

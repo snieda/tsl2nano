@@ -8,6 +8,7 @@
   <artifactId>tsl2.nano.specification</artifactId>
   <version>0.5.2</version>
   <name>TSL2 Framework Specification</name>
+  <description>TSL2 Framework Specification (Pools of descripted and runnable Actions and Rules, Generic Tree)</description>
 	<properties>
 		<module.parent>..</module.parent>
 	</properties>

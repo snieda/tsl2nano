@@ -9,7 +9,7 @@
 	<artifactId>tsl2.nano.serviceaccess</artifactId>
 	<version>1.0.3</version>
 	<name>TSL2 JEE Service Access</name>
-	<description>TSL2 JEE Service Access</description>
+	<description>TSL2 JEE Service Access (Generic Services for Entity Access, JEE File-System-Connector, Generic Featuring, Job-Scheduling, BeanContainer, Batch, Comfortable Bean Query Definitions, JAAS, Authentification, Authorization, )</description>
 	<properties>
 		<module.parent>..</module.parent>
 	</properties>

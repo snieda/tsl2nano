@@ -8,7 +8,7 @@
 	</parent>
 	<artifactId>tsl2.nano.h5</artifactId>
 	<name>TSL2 framework Html5 Extensions</name>
-	<description>TSL2 framework Html5 Extensions</description>
+	<description>TSL2 framework Html5 Extensions (WebServer, Html5Presentation, RuleCover, BeanConfigurator, LogicTable-Sheet, Expression-Descriptors for Actions, Rules, URLs, Queries)</description>
 	<!-- TODO: create property file with versions like in build-tsl.nano.h5.properties -->
 	<properties>
 		<module.parent>..</module.parent>
@@ -158,7 +158,7 @@
 						</goals>
 						<phase>package</phase>
 						<configuration>
-							<classifier></classifier>
+							<classifier>std</classifier>
 							<archive>
 								<manifest>
 									<addClasspath>true</addClasspath>

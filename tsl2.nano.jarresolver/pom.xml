@@ -11,6 +11,7 @@
   <artifactId>tsl2.nano.jarresolver</artifactId>
   <version>0.0.2</version>
   <name>TSL2 Framework Runtime-Jar-Resolver</name>
+  <description>TSL2 Framework Runtime-Jar-Resolver (can load missed Classes through an intelligent package finding mechanism using maven)</description>
 	<properties>
 		<module.parent>..</module.parent>
 	</properties>

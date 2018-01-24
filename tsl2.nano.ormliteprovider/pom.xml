@@ -50,5 +50,5 @@
 		</dependency>
 	</dependencies>
 	<name>TSL2 ORMlite provider</name>
-	<description>TSL2 ORMlite provider</description>
+	<description>TSL2 ORMlite (providing an EntityManager for ormlite)</description>
 </project>

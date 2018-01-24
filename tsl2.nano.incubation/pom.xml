@@ -9,7 +9,7 @@
 	<artifactId>tsl2.nano.incubation</artifactId>
 	<version>0.5.2</version>
 	<name>TSL2 Framework Incubations</name>
-	<description>TSL2 framework incubations</description>
+	<description>TSL2 Framework Incubations (currently: Attach Agents on Runtime, SVGChart)</description>
 	<properties>
 		<module.parent>..</module.parent>
 	</properties>

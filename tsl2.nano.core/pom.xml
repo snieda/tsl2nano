@@ -8,7 +8,7 @@
   <artifactId>tsl2.nano.core</artifactId>
   <version>1.1.3</version>
 	<name>TSL2 Framework Core</name>
-	<description>TSL2 Framework Core</description>
+	<description>TSL2 Framework Core (Main-Loader, Environment, Logging, Classloading, ManagedExceptions, Progress, System-Execution, CPU/Profiling, Compatibility-Layer, Messaging, Updater)</description>
 	<properties>
 		<module.parent>..</module.parent>
 	</properties>

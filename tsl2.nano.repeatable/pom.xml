@@ -8,6 +8,7 @@
   <artifactId>tsl2.nano.repeatable</artifactId>
   <version>0.5.2</version>
   <name>TSL2 Framework Repeatable</name>
+  <description>TSL2 Framework Repeatable (generic Undo/Redo and Macro mechanism)</description>
 	<properties>
 		<module.parent>..</module.parent>
 	</properties>

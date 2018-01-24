@@ -8,6 +8,7 @@
   <artifactId>tsl2.nano.terminal</artifactId>
   <version>0.5.2</version>
   <name>TSL2 Framework Terminal</name>
+  <description>TSL2 Framework Terminal (Console Application Framework named SIShell, providing Actions, Options, Commands, Inputs, lots of Selectors, PlatformManagement)</description>
 	<properties>
 		<module.parent>..</module.parent>
 	</properties>

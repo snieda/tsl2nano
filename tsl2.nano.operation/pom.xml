@@ -11,6 +11,7 @@
 	<properties>
 		<module.parent>..</module.parent>
 	</properties>
+	<description>TSL2 Framework Operation (abstract parser, conditioned functional or boolean operations - abstract structure for rule-engines)</description>
   <dependencies>
   	<dependency>
   		<groupId>net.sf.tsl2nano</groupId>

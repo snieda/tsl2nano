@@ -8,6 +8,7 @@
   <artifactId>tsl2.nano.logicstructure</artifactId>
   <version>0.5.2</version>
   <name>TSL2 Framework LogicTable/Tree/Vector</name>
+  <description>TSL2 Framework LogicTable/Tree/Vector (Excel-like table logic with equation solving through tsl2.nano.operation, mathemical Vector/Matrix-calculation)</description>
 	<properties>
 		<module.parent>..</module.parent>
 	</properties>

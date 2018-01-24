@@ -41,5 +41,5 @@
 			<version>1.0.0.Final</version>
 		</dependency>
 	</dependencies>
-	<description>TSL2 ORM EBean provider</description>
+	<description>TSL2 ORM EBean (providing an EntityManager for ebean)</description>
 </project>
