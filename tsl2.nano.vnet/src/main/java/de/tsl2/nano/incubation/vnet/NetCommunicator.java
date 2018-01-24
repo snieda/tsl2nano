@@ -1,0 +1,102 @@
+/**
+ * 
+ */
+package de.tsl2.nano.incubation.vnet;
+
+import java.util.Map;
+import java.util.Scanner;
+
+import de.tsl2.nano.core.Argumentator;
+import de.tsl2.nano.core.cls.BeanClass;
+import de.tsl2.nano.core.cls.ClassFinder;
+import de.tsl2.nano.core.messaging.IListener;
+import de.tsl2.nano.core.util.MapUtil;
+
+/**
+ * provides a terminal communnication with a {@link Net}
+ * 
+ * @author Tom
+ */
+public class NetCommunicator implements Runnable {
+	Class implementation;
+	private Argumentator art;
+
+	public NetCommunicator(Argumentator art) {
+		this.art = art;
+	}
+
+	@SuppressWarnings("rawtypes")
+	public static void main(String[] args) throws Exception {
+		Argumentator art = new Argumentator("VNet", createManual(), args);
+		new NetCommunicator(art).run();
+	}
+
+	@SuppressWarnings("unchecked")
+	private static Map<String, String> createManual() {
+		return MapUtil.asMap(
+				"description", "unknown content will be learned, otherwise the net will be notifed, ENTER will exit", 
+				"file", "serialized vnet xml file to create the net from", 
+				"implementation", "full class name to a node core (pojo)",
+				"cover", "full class name to a node cover implementation"
+				);
+	}
+
+	@Override
+	public void run() {
+		if (art.check(System.out)) {
+			Net net;
+			if (art.get("file") != null) {
+				net = Net.create(art.get("file"));
+				implementation = net.elements.keySet().iterator().next().getClass();
+			} else {
+				if (art.get("implementation") == null) {
+					log("Creating new Net. Please give an Node implementation - currently found on classpath:");
+					log(new ClassFinder().findClass(IListener.class));
+					return;
+				}
+				net = new Net();
+				implementation = BeanClass.load(art.get("implementation"));
+			}
+			// create a callback for responses
+			IListener<Notification> responseHandler = new IListener<Notification>() {
+				@Override
+				public synchronized void handleEvent(Notification event) {
+					log("RESPONSE: " + event.getNotification());
+				}
+			};
+			log("Net created: " + net.toString());
+			log("cover implementation: " + implementation);
+			log("core implementation: " + implementation.getSuperclass());
+			Scanner scr = new Scanner(System.in);
+			try {
+				while (scr.hasNextLine()) {
+					String input = scr.nextLine();
+					if (input.isEmpty())
+						break;
+					String[] words = input.split(" ");
+					Node node = null;
+					for (int i = 0; i < words.length; i++) {
+						IListener coreCover = (IListener) BeanClass.createInstance(implementation,
+								new Object[] { words[i] });
+						if (net.getNode(coreCover) == null) {
+							if (node != null)
+								node = net.addAndConnect(coreCover, (IListener) node.getCore(), 1f);
+							else
+								node = net.add(coreCover);
+						} else {
+							net.notify(new Notification(words[i], words[i], null, responseHandler));
+						}
+					}
+					log(net.dump());
+				}
+			} finally {
+				scr.close();
+				net.save();
+			}
+		}
+	}
+
+	void log(Object obj) {
+		System.out.println(obj);
+	}
+}
