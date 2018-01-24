@@ -1749,8 +1749,8 @@ Using pixel or vector pictures as attribute content and defining a dependency li
 
 Set the _secure_ property on your attribute - if it is of type String - to have an attribute encryption. The framework provides two implementations:
  
-1. hashes: de.tsl2.nano.core.util.Hash
-2. crypt : de.tsl2.nano.core.util.Crypt
+1. hashes: de.tsl2.nano.core.secure.Hash
+2. crypt : de.tsl2.nano.core.secure.Crypt
 
 If you use hash, the presentation will automatically be a password field. Setting a new value will directly hash the value.
 If you use crypt, the en- decryption will be done on saving or loading the bean and its attributes.

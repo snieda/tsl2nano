@@ -17,8 +17,8 @@ import de.tsl2.nano.action.IConstraint;
 import de.tsl2.nano.action.IStatus;
 import de.tsl2.nano.bean.IAttributeDef;
 import de.tsl2.nano.core.cls.IAttribute;
-import de.tsl2.nano.core.util.ISecure;
 import de.tsl2.nano.core.messaging.EventController;
+import de.tsl2.nano.core.secure.ISecure;
 
 /**
  * full bean attribute definition - to validate attribute value.

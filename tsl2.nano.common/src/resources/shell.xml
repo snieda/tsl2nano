@@ -848,7 +848,7 @@ compiler basedir: ${basedir}. classpath: @{sh.compile.classpath};@{sh.compile.cl
 		<!--		<property name="arg3" value="shell.xml" />
 		<property name="arg4" value="count(//target)" /> -->
 		<antcall target="sh.call.method">
-			<param name="arg1" value="de.tsl2.nano.core.util.XmlUtil" />
+			<param name="arg1" value="de.tsl2.nano.core.serialize.XmlUtil" />
 			<param name="arg2" value="xpath" />
 			<param name="arg3" value="${sh.xml.xpath.file}" />
 			<param name="arg4" value="${sh.xml.xpath.expression}" />
@@ -867,7 +867,7 @@ compiler basedir: ${basedir}. classpath: @{sh.compile.classpath};@{sh.compile.cl
 	<target name="sh.xml.velocity" unless="sh.disable.velocity" description="do velocity transformations with template and object infos">
 		<property name="sh.xml.velocity.template" value="template.vm" />
 		<antcall target="sh.call.method">
-			<param name="arg1" value="de.tsl2.nano.core.util.XmlUtil" />
+			<param name="arg1" value="de.tsl2.nano.core.serialize.XmlUtil" />
 			<param name="arg2" value="transform" />
 			<param name="arg3" value="${sh.xml.velocity.template}" />
 		</antcall>

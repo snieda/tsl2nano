@@ -22,10 +22,10 @@ import org.simpleframework.xml.core.Commit;
 import org.simpleframework.xml.core.Persist;
 
 import de.tsl2.nano.core.ManagedException;
+import de.tsl2.nano.core.serialize.XmlUtil;
 import de.tsl2.nano.core.util.BitUtil;
 import de.tsl2.nano.core.util.ConcurrentUtil;
 import de.tsl2.nano.core.util.StringUtil;
-import de.tsl2.nano.core.util.XmlUtil;
 
 /**
  * simple logfactory implementation to enable use of common logging interfaces. useful if apache logging is not

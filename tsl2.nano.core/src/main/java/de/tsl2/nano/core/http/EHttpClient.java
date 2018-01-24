@@ -7,7 +7,7 @@
  * 
  * Copyright: (c) Thomas Schneider 2016, all rights reserved
  */
-package de.tsl2.nano.core.util;
+package de.tsl2.nano.core.http;
 
 import java.io.InputStream;
 import java.io.OutputStream;
@@ -25,6 +25,9 @@ import org.apache.commons.logging.Log;
 
 import de.tsl2.nano.core.ManagedException;
 import de.tsl2.nano.core.log.LogFactory;
+import de.tsl2.nano.core.util.FileUtil;
+import de.tsl2.nano.core.util.MapUtil;
+import de.tsl2.nano.core.util.StringUtil;
 
 /**
  * Extended Http Client, providing REST param evaluation and multipart form data with files.

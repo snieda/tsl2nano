@@ -14,7 +14,7 @@ import java.io.UnsupportedEncodingException;
 import org.simpleframework.xml.core.Commit;
 
 import de.tsl2.nano.core.ManagedException;
-import de.tsl2.nano.core.util.Crypt;
+import de.tsl2.nano.core.secure.Crypt;
 
 /**
  * encrypted user passwd

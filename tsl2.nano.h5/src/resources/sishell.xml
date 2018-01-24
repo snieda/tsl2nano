@@ -98,7 +98,7 @@
             <value class="java.lang.String">.*</value>
          </item>
          <item class="de.tsl2.nano.incubation.terminal.item.MainAction" name="Crypt">
-            <mainClass>de.tsl2.nano.core.util.Crypt</mainClass>
+            <mainClass>de.tsl2.nano.core.secure.Crypt</mainClass>
             <method>main</method>
             <argNames length="5">
                <string>password</string>
@@ -127,7 +127,7 @@
             <description>action to do a back-transformation for each keys value</description>
          </item>
          <item class="de.tsl2.nano.incubation.terminal.item.MainAction" name="Permutator">
-            <mainClass>de.tsl2.nano.core.util.Permutator</mainClass>
+            <mainClass>de.tsl2.nano.core.secure.Permutator</mainClass>
             <method>main</method>
             <argNames length="4">
                <string>source</string>
@@ -156,7 +156,7 @@
             <description>xpath expression</description>
          </item>
          <item class="de.tsl2.nano.incubation.terminal.item.Action" name="transformVel">
-            <mainClass>de.tsl2.nano.core.util.XmlUtil</mainClass>
+            <mainClass>de.tsl2.nano.core.serialize.XmlUtil</mainClass>
             <method>transformVel</method>
             <argNames length="2">
                <string>source</string>
@@ -164,7 +164,7 @@
             </argNames>
          </item>
          <item class="de.tsl2.nano.incubation.terminal.item.Action" name="transformXsl">
-            <mainClass>de.tsl2.nano.core.util.XmlUtil</mainClass>
+            <mainClass>de.tsl2.nano.core.serialize.XmlUtil</mainClass>
             <method>transformXsl</method>
             <argNames length="3">
                <string>source</string>
@@ -173,7 +173,7 @@
             </argNames>
          </item>
          <item class="de.tsl2.nano.incubation.terminal.item.Action" name="xpath">
-            <mainClass>de.tsl2.nano.core.util.XmlUtil</mainClass>
+            <mainClass>de.tsl2.nano.core.serialize.XmlUtil</mainClass>
             <method>xpath</method>
             <argNames length="2">
                <string>xpath-expression</string>

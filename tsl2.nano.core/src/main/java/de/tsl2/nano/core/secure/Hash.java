@@ -7,9 +7,11 @@
  * 
  * Copyright: (c) Thomas Schneider 2015, all rights reserved
  */
-package de.tsl2.nano.core.util;
+package de.tsl2.nano.core.secure;
 
 import org.simpleframework.xml.Attribute;
+
+import de.tsl2.nano.core.util.Util;
 
 /**
  * Provides secure hashing of data

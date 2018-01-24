@@ -7,7 +7,7 @@
  * 
  * Copyright: (c) Thomas Schneider 2014, all rights reserved
  */
-package de.tsl2.nano.core.util;
+package de.tsl2.nano.core.secure;
 
 import java.io.InputStream;
 import java.io.PipedInputStream;
@@ -17,6 +17,8 @@ import java.util.LinkedHashMap;
 import java.util.Map;
 
 import de.tsl2.nano.core.ManagedException;
+import de.tsl2.nano.core.util.ByteUtil;
+import de.tsl2.nano.core.util.StringUtil;
 
 /**
  * permutes the given array in the given range and prints to the given print stream. usable as brute force algorithm.

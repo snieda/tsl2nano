@@ -7,7 +7,7 @@
  * 
  * Copyright: (c) Thomas Schneider 2016, all rights reserved
  */
-package de.tsl2.nano.core.util;
+package de.tsl2.nano.core.http;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -19,6 +19,7 @@ import org.apache.commons.logging.Log;
 
 import de.tsl2.nano.core.ManagedException;
 import de.tsl2.nano.core.log.LogFactory;
+import de.tsl2.nano.core.util.ByteUtil;
 
 /**
  * simple http client

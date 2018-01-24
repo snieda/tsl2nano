@@ -14,7 +14,7 @@ import java.util.Hashtable;
 
 import de.tsl2.nano.core.ENV;
 import de.tsl2.nano.core.ManagedException;
-import de.tsl2.nano.core.util.XmlUtil;
+import de.tsl2.nano.core.serialize.XmlUtil;
 
 /**
  * simple base class for a stored object as singelton.

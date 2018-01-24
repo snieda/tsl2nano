@@ -33,9 +33,9 @@ import de.tsl2.nano.core.ITransformer;
 import de.tsl2.nano.core.cls.AReference;
 import de.tsl2.nano.core.cls.BeanClass;
 import de.tsl2.nano.core.log.LogFactory;
+import de.tsl2.nano.core.serialize.XmlUtil;
 import de.tsl2.nano.core.util.FileUtil;
 import de.tsl2.nano.core.util.StringUtil;
-import de.tsl2.nano.core.util.XmlUtil;
 
 /**
  * persistable context. avoids serializing entities (mostly having a tree of dependencies) directly - using

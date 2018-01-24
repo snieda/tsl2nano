@@ -98,7 +98,7 @@
             <value class="java.lang.String">.*</value>
          </item>
          <item class="de.tsl2.nano.incubation.terminal.item.MainAction" name="Crypt">
-            <mainClass>de.tsl2.nano.core.util.Crypt</mainClass>
+            <mainClass>de.tsl2.nano.core.secure.Crypt</mainClass>
             <method>main</method>
             <argNames length="5">
                <string>password</string>
@@ -127,7 +127,7 @@
             <description>action to do a back-transformation for each keys value</description>
          </item>
          <item class="de.tsl2.nano.incubation.terminal.item.MainAction" name="Permutator">
-            <mainClass>de.tsl2.nano.core.util.Permutator</mainClass>
+            <mainClass>de.tsl2.nano.core.secure.Permutator</mainClass>
             <method>main</method>
             <argNames length="4">
                <string>source</string>
@@ -234,7 +234,7 @@
             <item class="de.tsl2.nano.incubation.terminal.item.Input" name="ip">
                <constraints type="java.lang.String" nullable="true" length="-1" scale="-1" precision="-1"/>
                <description>internet address to be scanned</description>
-               <value class="java.lang.String">192.168.242.31</value>
+               <value class="java.lang.String">192.168.242.15</value>
             </item>
             <item class="de.tsl2.nano.incubation.terminal.item.Input" name="lowest-port">
                <constraints type="java.lang.Integer" nullable="true" length="-1" scale="-1" precision="-1"/>

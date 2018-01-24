@@ -22,10 +22,10 @@ import java.util.Properties;
 import de.tsl2.nano.core.ENV;
 import de.tsl2.nano.core.ManagedException;
 import de.tsl2.nano.core.exception.Message;
+import de.tsl2.nano.core.serialize.XmlUtil;
 import de.tsl2.nano.core.util.FileUtil;
 import de.tsl2.nano.core.util.StringUtil;
 import de.tsl2.nano.core.util.Util;
-import de.tsl2.nano.core.util.XmlUtil;
 import de.tsl2.nano.persistence.replication.Replication;
 
 /**

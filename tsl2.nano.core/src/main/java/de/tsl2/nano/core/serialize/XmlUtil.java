@@ -7,7 +7,7 @@
  * 
  * Copyright: (c) Thomas Schneider 2012, all rights reserved
  */
-package de.tsl2.nano.core.util;
+package de.tsl2.nano.core.serialize;
 
 import java.io.File;
 import java.io.FileInputStream;
@@ -56,6 +56,11 @@ import de.tsl2.nano.core.cls.PrimitiveUtil;
 import de.tsl2.nano.core.cls.Reflection;
 import de.tsl2.nano.core.execution.CompatibilityLayer;
 import de.tsl2.nano.core.log.LogFactory;
+import de.tsl2.nano.core.util.AnnotationProxy;
+import de.tsl2.nano.core.util.DelegationHandler;
+import de.tsl2.nano.core.util.FileUtil;
+import de.tsl2.nano.core.util.MapUtil;
+import de.tsl2.nano.core.util.StringUtil;
 
 /**
  * provides convenience methods for:

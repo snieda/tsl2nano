@@ -20,7 +20,7 @@ import org.apache.commons.logging.Log;
 import de.tsl2.nano.core.ENV;
 import de.tsl2.nano.core.Messages;
 import de.tsl2.nano.core.log.LogFactory;
-import de.tsl2.nano.core.util.XmlUtil;
+import de.tsl2.nano.core.serialize.XmlUtil;
 import de.tsl2.nano.serviceaccess.aas.principal.APermission;
 import de.tsl2.nano.serviceaccess.aas.principal.Role;
 import de.tsl2.nano.serviceaccess.aas.principal.UserPrincipal;

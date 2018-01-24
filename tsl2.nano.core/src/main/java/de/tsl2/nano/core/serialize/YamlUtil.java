@@ -7,7 +7,7 @@
  * 
  * Copyright: (c) Thomas Schneider 2016, all rights reserved
  */
-package de.tsl2.nano.core.util;
+package de.tsl2.nano.core.serialize;
 
 import java.io.File;
 import java.io.FileInputStream;
@@ -34,6 +34,8 @@ import org.yaml.snakeyaml.representer.Representer;
 import de.tsl2.nano.core.ManagedException;
 import de.tsl2.nano.core.cls.ClassFinder;
 import de.tsl2.nano.core.cls.PrivateAccessor;
+import de.tsl2.nano.core.util.FileUtil;
+import de.tsl2.nano.core.util.Util;
 
 /**
  * serializes (dumps) and de-serializes (loads) yaml documents and beans. default properties are BeanAccess.FIELD and

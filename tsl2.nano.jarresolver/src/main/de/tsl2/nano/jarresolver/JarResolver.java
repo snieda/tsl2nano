@@ -95,7 +95,7 @@ public class JarResolver {
     static final String ONLY_LOAD_DEFINED = "only.load.defined.packages";
 
     public JarResolver() {
-        this(basedir);
+        this(null);
     }
     
     /**
@@ -106,7 +106,7 @@ public class JarResolver {
         try {
             props.load(ENV.getResource("jarresolver.properties"));
             String updateUrl = props.getProperty(URL_UPDATE_PROPERTIES);
-            this.basedir = baseDir != null ? baseDir : props.getProperty(DIR_LOCALREPOSITORY, ENV.getConfigPath());
+            setBaseDir(baseDir);
             if (updateUrl != null) {
                 try {
                     LOG.info("updating jarresolver.properties through " + updateUrl);
@@ -120,6 +120,11 @@ public class JarResolver {
         } catch (IOException e) {
             ManagedException.forward(e);
         }
+    }
+
+    private void setBaseDir(String baseDir) {
+        this.basedir = baseDir != null ? baseDir : props.getProperty(DIR_LOCALREPOSITORY, ENV.getConfigPath());
+        LOG.info("basedir is: " + this.basedir);
     }
 
     /**
@@ -155,8 +160,13 @@ public class JarResolver {
      * @return mvn process exit value (0: Ok, >0 otherwise)
      */
     private int loadDependencies() {
-        System.setProperty("M2_HOME", mvnRoot);
-        String script = AppLoader.isUnix() ? "/bin/mvn" : "/bin/mvn.bat";
+        try {
+            System.setProperty("M2_HOME", new File(mvnRoot).getCanonicalPath());
+        } catch (IOException e) {
+            ManagedException.forward(e);
+        }
+        LOG.info("setting M2_HOME=" + System.getProperty("M2_HOME"));
+        String script = AppLoader.isUnix() ? "/bin/mvn" : "/bin/mvn.cmd";
         new File(mvnRoot + script).setExecutable(true);
         Process process = SystemUtil.execute(new File(basedir), mvnRoot + script, "install");
         if (process.exitValue() != 0) {
@@ -257,6 +267,7 @@ public class JarResolver {
      * @return downloaded local file
      */
     protected File download(String strUrl, boolean flat, boolean overwrite) {
+        setBaseDir(this.basedir);
         return NetUtil.download(strUrl, basedir, flat, overwrite);
     }
 

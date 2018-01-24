@@ -7,7 +7,7 @@
  * 
  * Copyright: (c) Thomas Schneider 2016, all rights reserved
  */
-package de.tsl2.nano.core.util;
+package de.tsl2.nano.core.secure;
 
 import java.io.BufferedInputStream;
 import java.io.ByteArrayInputStream;
@@ -45,6 +45,8 @@ import org.apache.commons.logging.Log;
 import de.tsl2.nano.core.Argumentator;
 import de.tsl2.nano.core.ManagedException;
 import de.tsl2.nano.core.log.LogFactory;
+import de.tsl2.nano.core.util.FileUtil;
+import de.tsl2.nano.core.util.MapUtil;
 
 /**
  * works with keystores, certificates and de-/encryption. can create signed certificates. For java security properties,

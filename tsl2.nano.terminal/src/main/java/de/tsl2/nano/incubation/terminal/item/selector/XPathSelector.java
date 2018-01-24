@@ -20,8 +20,8 @@ import org.simpleframework.xml.Element;
 
 import de.tsl2.nano.core.ENV;
 import de.tsl2.nano.core.log.LogFactory;
+import de.tsl2.nano.core.serialize.XmlUtil;
 import de.tsl2.nano.core.util.StringUtil;
-import de.tsl2.nano.core.util.XmlUtil;
 
 /**
  * creates a list of options for this container, reading xpath expression patterns from an xml file.

@@ -558,7 +558,7 @@ public class BeanTest {
         /*
          * third: using a collection
          */
-        BeanDefinition.clearCache();
+//        BeanDefinition.clearCache();
         BeanDefinition<TypeBean> beandef = BeanDefinition.getBeanDefinition(TypeBean.class);
         beandef.setAttributeFilter("string", "primitiveInt", "primitiveShort");
         beandef.setValueExpression(new ValueExpression("{string}-{primitiveInt}==>{primitiveShort}", TypeBean.class));
