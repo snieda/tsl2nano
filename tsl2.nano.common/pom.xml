@@ -49,7 +49,7 @@
 							<Created-By>Thomas Schneider</Created-By>
 							<Main-Arguments>de.tsl2.nano.execution.ScriptUtil ant shell.xml</Main-Arguments>
 							<Application-Name>tsl2 shell</Application-Name>
-							<Application-Source>http://downloads.sourceforge.net/project/tsl2nano/1.1.0/tsl2.nano.h5.1.1.0-signed.jar</Application-Source>
+							<Application-Source>${application.source}</Application-Source>
 							<Application-redirect>/download</Application-redirect>
 							<Permissions>all-permissions</Permissions>
 						</manifestEntries>

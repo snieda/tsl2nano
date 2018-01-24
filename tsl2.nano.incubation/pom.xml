@@ -38,7 +38,7 @@
 							<Created-By>Thomas Schneider</Created-By>
 							<Main-Arguments>de.tsl2.nano.agent.AttachAgent</Main-Arguments>
 							<Application-Name>AttachAgent</Application-Name>
-							<Application-Source>http://downloads.sourceforge.net/project/tsl2nano/1.1.0/tsl2.nano.h5.1.1.0-signed.jar</Application-Source>
+							<Application-Source>${application.source}</Application-Source>
 							<Application-redirect>/download</Application-redirect>
 							<Permissions>all-permissions</Permissions>
 						</manifestEntries>
