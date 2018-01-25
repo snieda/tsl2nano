@@ -31,7 +31,7 @@ if [ "$3" == "nopause" ]
 fi
 
 VERSION=2.0.1
-STANDALONE="-standalone"
+EXTENSION="-standalone"
 #OFFLINE=-Dtsl2nano.offline=true
 #UH=-Denv.user.home=true
 #USERDIR=-Duser.dir=$PRJ
@@ -45,5 +45,5 @@ JSU_ENC=-Dsun.jnu.encoding=UTF-8
 JAVA_OPTS="-Xmx512m -Djava.awt.headless=true"
 #LOG=">$PRJ.log"
 
-java $OFFLINE $UH $LLANG $ENCODING $JSU_ENC $USERDIR $NANO_DEBUG $AGENT $PROXY  $DEBUG $UH $PROFILER $JAVA_OPTS -jar tsl2.nano.h5-$VERSION$STANDALONE.jar $PRJ $PORT $LOG 
+java $OFFLINE $UH $LLANG $ENCODING $JSU_ENC $USERDIR $NANO_DEBUG $AGENT $PROXY  $DEBUG $UH $PROFILER $JAVA_OPTS -jar tsl2.nano.h5-$VERSION$EXTENSION.jar $PRJ $PORT $LOG 
 #if [ not "$NOPAUSE" == "nopause" ] then 'read -p' fi

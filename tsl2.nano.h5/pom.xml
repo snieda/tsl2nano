@@ -158,7 +158,7 @@
 						</goals>
 						<phase>package</phase>
 						<configuration>
-							<classifier>min</classifier>
+							<classifier>virgin</classifier>
 							<archive>
 								<manifest>
 									<addClasspath>true</addClasspath>

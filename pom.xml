@@ -15,6 +15,7 @@
 	* to start only a submodule-build: "mvn -pl tsl2.nano.core"
 	* if multimodule version changes: start "mvn -N versions:update-child-modules" to assign the child modules
 	* to do a fast complete build: "mvn -amd -DskipTest install site"
+	* to start only a single test: "mvn -Dtest=*Jar*Test#testOne+testTwo test"
 	* increase version number: "mvn release:update-versions -DautoVersionSubmodules=true"
 	* batch-increase version : "mvn - -batch-mode release:update-versions -DdevelopmentVersion=1.2.0-SNAPSHOT"
 	* to deploy a new snapshot-version: "mvn deploy"
@@ -30,6 +31,7 @@
 	*   then you should define a "default-key {KEY-ID}" in your gpg.conf in home dir
 	*   test that with: "gpg - -clearsign {my-test-file}"
 	* NOTE: doing a release has to be done on all sub-modules explizit (e.g. "mvn deploy -pl tsl2.nano.core")
+	* NOTE: on problems with encoding: property files have to be ascii+unicode. please convert them with jdks native2ascii
 	-->
 	<properties>
 		<module.parent>${project.basedir}</module.parent>
