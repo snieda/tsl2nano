@@ -184,21 +184,25 @@ public class BaseTest {
  
   public static void assertEquals(String exptected, String result, boolean ignoreWhitespace, Map<String, String> replacements) {
       if (ignoreWhitespace) {
-          exptected = exptected.replaceAll("\\w+", " ");
-          result = result.replaceAll("\\w+", " ");
+          exptected = exptected.replaceAll("([\r]?\n)+", "\n");
+          exptected = exptected.replaceAll("[ \t]+", " ");
+          result = result.replaceAll("([\r]?\n)+", "\n");
+          result = result.replaceAll("[ \t]+", " ");
       }
-      StringBuffer exp = new StringBuffer(exptected);
-      StringBuffer res = new StringBuffer(result);
+      StringBuilder exp = new StringBuilder(exptected);
+      StringBuilder res = new StringBuilder(result);
       prepareForComparison(exp, res, replacements);
       Assert.assertEquals(exp.toString(), res.toString());
   }
   
-  public static void prepareForComparison(StringBuffer expected, StringBuffer result, Map<String, String> replacements) {
+  public static void prepareForComparison(StringBuilder expected, StringBuilder result, Map<String, String> replacements) {
       Set<String> keys = replacements.keySet();
+      int ignored = 0;
       for (String regex : keys) {
         StringUtil.replaceAll(expected, regex, replacements.get(regex));
-        StringUtil.replaceAll(result, regex, replacements.get(regex));
+        ignored += StringUtil.replaceAll(result, regex, replacements.get(regex));
     }
+      System.out.println("preparedForComparison with " + replacements.size() + " replacements: ignored " + ignored + " positions");
   }
   
   /**

@@ -289,13 +289,17 @@ public class StringUtil {
      * @param replacement replacement
      * @return count of findings
      */
-    public static int replaceAll(StringBuffer src, String regex, String replacement) {
+    public static int replaceAll(StringBuilder src, String regex, String replacement) {
     	int count = 0;
         Matcher matcher = Pattern.compile(regex).matcher(src);
+        StringBuffer sb = new StringBuffer();
         while (matcher.find()) {
-            matcher.appendReplacement(src, replacement);
+            matcher.appendReplacement(sb, replacement);
             count++;
         }
+        matcher.appendTail(sb);
+        src.setLength(0);
+        src.append(sb);
         return count;
     }
     
