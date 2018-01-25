@@ -15,7 +15,7 @@ import de.tsl2.nano.core.ENV;
  */
 public interface ENVTestPreparation {
 	static final String BASE_DIR = "../tsl2.nano.";
-	static final String TARGET_TEST = "target/test/";
+	static final String TARGET_TEST = "target/" + ENV.PREFIX_ENVNAME + "test/";
 
 	static String setUp(String moduleShort, boolean strict) {
 		String baseDirModule = BASE_DIR + moduleShort + "/";

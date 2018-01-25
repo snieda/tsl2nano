@@ -20,7 +20,6 @@ import java.text.SimpleDateFormat;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
-import java.util.Locale;
 import java.util.Properties;
 
 import org.anonymous.project.Address;
@@ -63,12 +62,10 @@ import de.tsl2.nano.incubation.specification.ParType;
 import de.tsl2.nano.incubation.specification.actions.ActionPool;
 import de.tsl2.nano.incubation.specification.rules.RulePool;
 import de.tsl2.nano.incubation.specification.rules.RuleScript;
-import de.tsl2.nano.persistence.GenericLocalBeanContainer;
 import de.tsl2.nano.persistence.Persistence;
 import de.tsl2.nano.serviceaccess.Authorization;
 import de.tsl2.nano.serviceaccess.IAuthorization;
 import de.tsl2.nano.util.codegen.PackageGenerator;
-import de.tsl2.nano.util.test.BaseTest;
 import my.app.MyApp;
 import my.app.Times;
 
@@ -261,7 +258,7 @@ public class NanoH5Test {
         String destFile = "target/" + name + ".zip";
         Properties p = new Properties();
         p.put("destFile", destFile);
-        AntRunner.runTask(AntRunner.TASK_ZIP, p, FileUtil.replaceWindowsSeparator(new File(DIR_TEST).getParent()) + "/:{**/*" + name + "*/**}{timesheet.*}");
+        AntRunner.runTask(AntRunner.TASK_ZIP, p, FileUtil.replaceToJavaSeparator(new File(DIR_TEST).getParent()) + "/:{**/*" + name + "*/**}{timesheet.*}");
         
         //delete the test output
 //        ConcurrentUtil.sleep(10000);

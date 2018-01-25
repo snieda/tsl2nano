@@ -978,6 +978,14 @@ public class FileUtil {
     }
 
     /**
+     * @param dir directory ending with or without "/"
+     * @param file file name starting with or without "/"
+     * @return clean full file path, respecting multiple "/" between dir and file 
+     */
+    public static final String concat(String dir, String file) {
+    	return StringUtil.substring(dir, null, "/", true) + "/" + StringUtil.substring(file, "/", "/", false);
+    }
+    /**
      * encodeBase64. the base64 output file will be saved on fileName + .base64
      * 
      * @param fileName
@@ -1218,13 +1226,17 @@ public class FileUtil {
      */
     public static String getRelativePath(String file, String currentPath) {
         String relpath =
-            StringUtil.substring(replaceWindowsSeparator(file), replaceWindowsSeparator(currentPath), null);
+            StringUtil.substring(replaceToJavaSeparator(file), replaceToJavaSeparator(currentPath), null);
         return relpath.startsWith("/") && (File.separatorChar == '\\' || !new File(relpath).exists()) ? relpath
             .substring(1) : relpath;
     }
 
-    public static final String replaceWindowsSeparator(String path) {
+    public static final String replaceToJavaSeparator(String path) {
         return path.replace(File.separatorChar, '/');
+    }
+
+    public static final String replaceToSystemSeparator(String path) {
+        return path.replace('/', File.separatorChar);
     }
 
     /**
@@ -1234,7 +1246,7 @@ public class FileUtil {
      * @return true, if file or URL exists
      */
     public static File getURIFile(String pathOrURL) {
-        return new File(URI.create(replaceWindowsSeparator(pathOrURL)).getSchemeSpecificPart());
+        return new File(URI.create(replaceToJavaSeparator(pathOrURL)).getSchemeSpecificPart());
     }
 
     public static InputStream getURLStream(String url) {

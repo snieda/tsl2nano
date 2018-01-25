@@ -263,7 +263,7 @@ public class AttributeConfigurator implements Serializable {
         Html5Presentation helper = (Html5Presentation) def.getPresentationHelper();
         observer = StringUtil.substring(observer, ".", null, true);
         observable = StringUtil.substring(observable, ".", null, true);
-        rule = StringUtil.substring(FileUtil.replaceWindowsSeparator(rule), "/", ".", true);
+        rule = StringUtil.substring(FileUtil.replaceToJavaSeparator(rule), "/", ".", true);
         helper.addRuleListener(observer, rule, 2, observable);
     }
 
@@ -276,7 +276,7 @@ public class AttributeConfigurator implements Serializable {
             @Constraint(defaultValue = "presentable.layoutConstraints", pattern = "(\\w+[\\.]?)+", allowed = {
                 "presentable", "presentable.layout", "columnDefinition" }) String child,
             @Constraint(allowed=ConstraintValueSet.ALLOWED_ENVFILES + ".*specification/rule.*") String rule) {
-        rule = StringUtil.substring(FileUtil.replaceWindowsSeparator(rule), "/", ".", true);
+        rule = StringUtil.substring(FileUtil.replaceToJavaSeparator(rule), "/", ".", true);
         RuleCover.cover(attr.getDeclaringClass(), attr.getName(), child, rule);
     }
 

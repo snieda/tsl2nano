@@ -54,7 +54,7 @@ public class JarResolverTest   implements ENVTestPreparation {
      * 
      * @throws Exception
      */
-    @Ignore("maven does not start with the base dir (target/test) given in this test")
+//    @Ignore("maven does not start with the base dir (target/test) given in this test")
     @Test
     public void testJarResolving() throws Exception {
         if (!NetUtil.isOnline()) {

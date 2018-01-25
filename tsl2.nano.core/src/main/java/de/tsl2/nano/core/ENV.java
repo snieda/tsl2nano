@@ -43,7 +43,6 @@ import org.simpleframework.xml.core.Persist;
 
 import de.tsl2.nano.core.classloader.LibClassLoader;
 import de.tsl2.nano.core.classloader.NetworkClassLoader;
-import de.tsl2.nano.core.classloader.RuntimeClassloader;
 //import de.tsl2.nano.collection.PersistableSingelton;
 //import de.tsl2.nano.collection.PersistentCache;
 import de.tsl2.nano.core.cls.BeanClass;
@@ -132,20 +131,8 @@ public class ENV implements Serializable {
 
     static final String UNKNOWN_BUILD_INFORMATIONS = "<unknown build informations>";
 
-//    private static final String FRAMEWORK_INFO = 
-//   "             ______   ______     __       "
-// + "            /\__  _\ /\  ___\   /\ \      "      
-// + "            \/_/\ \/ \ \___  \  \ \ \____ "
-// + "               \ \_\  \/\_____\  \ \_____\"
-// + "                \/_/   \/_____/   \/_____/"
-// + "                                          "
-// + "               __   __     ______     __   __     ______    "   
-// + "               /\ "-.\ \   /\  __ \   /\ "-.\ \   /\  __ \  "
-// + "               \ \ \-.  \  \ \  __ \  \ \ \-.  \  \ \ \/\ \ "
-// + "                \ \_\\"\_\  \ \_\ \_\  \ \_\\"\_\  \ \_____\"
-// + "                 \/_/ \/_/   \/_/\/_/   \/_/ \/_/   \/_____/"
-//;
-    
+	public static final String PREFIX_ENVNAME = ".nanoh5.";
+
     private ENV() {
         self = this;
     }
@@ -243,8 +230,8 @@ public class ENV implements Serializable {
 
     public static ENV create(String dir) {
         new File(dir).mkdirs();
-        String name = StringUtil.substring(dir, ".nanoh5.", null);
-        LogFactory.setLogFile(dir + "/" + name + ".log");
+        String name = StringUtil.substring(dir, PREFIX_ENVNAME, "/");
+        LogFactory.setLogFile(FileUtil.concat(dir, name) + ".log");
         LogFactory.setLogFactoryXml(dir + "/" + "logfactory.xml");
         String buildInfo = getBuildInformations();
         

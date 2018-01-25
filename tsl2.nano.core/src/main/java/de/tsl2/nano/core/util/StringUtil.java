@@ -20,6 +20,7 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Properties;
+import java.util.Scanner;
 import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -881,6 +882,34 @@ public class StringUtil {
     public static InputStream toInputStream(String text) {
         return new ByteArrayInputStream(text.getBytes());
     }
+
+	public static String fromInputStream(InputStream stream) {
+		return fromInputStream(stream, "");
+	}
+	public static String fromInputStream(InputStream stream, String lineEnd) {
+		return fromInputStream(stream, "", lineEnd);
+	}
+	
+	/**
+	 * @param stream input stream to follow and close
+	 * @param lineStart starting sequence on each new line. use "" if not needed
+	 * @param lineEnd ending sequence on each new line. use "" if not needed
+	 * @return string, scanned from input
+	 */
+	public static String fromInputStream(InputStream stream, String lineStart, String lineEnd) {
+		Scanner scanner = null;
+		try {
+			scanner = new Scanner(stream);
+			StringBuilder buf = new StringBuilder();
+			while (scanner.hasNextLine()) {
+				buf.append(lineStart + scanner.nextLine() + lineEnd);
+			}
+			return buf.toString();
+		} finally {
+			if (scanner != null)
+				scanner.close();
+		}
+	}
 
     /**
      * search for the given filter. the filter will be divided to its characters. an 100 percent match is done, if all

@@ -8,7 +8,6 @@ import java.security.Policy;
 import java.util.Date;
 import java.util.Map;
 import java.util.Properties;
-import java.util.Scanner;
 
 import org.apache.commons.logging.Log;
 
@@ -63,28 +62,22 @@ public class SystemUtil {
 
             provideJdkAsJavaHome(processBuilder.environment());
             try {//on dalvik, inheritIO is not present - no problem 
-                processBuilder.inheritIO();
+//                processBuilder.inheritIO();
             } catch (NoSuchMethodError err) {
                 LOG.warn(err.toString());
             }
             process = processBuilder.start();
             //IMPROVE: could we use redirection? we need output to standard + log file
-            Scanner scanner = new Scanner(process.getInputStream());
-            while (scanner.hasNextLine()) {
-                LOG.info(scanner.nextLine());
-            }
-            scanner.close();
+            String input = StringUtil.fromInputStream(process.getInputStream());
+            if (input.length() > 0)
+            	LOG.info("process input: " + input);
+            
             int result = process.waitFor();
+
             LOG.info("\n-------------------------------------------------------------------\n"
                 + "process '" + StringUtil.toString(command, -1) + "' finished with errorlevel: " + result);
             if (result != 0) {
-                scanner = new Scanner(process.getErrorStream());
-                StringBuilder buf = new StringBuilder();
-                while (scanner.hasNextLine()) {
-                    buf.append(scanner.nextLine() + "\n");
-                }
-                LOG.error(buf.toString());
-                scanner.close();
+                LOG.error("process errors: " + StringUtil.fromInputStream(process.getErrorStream(), "\n"));
             }
             LOG.info("\n-------------------------------------------------------------------");
         } catch (final Exception e) {

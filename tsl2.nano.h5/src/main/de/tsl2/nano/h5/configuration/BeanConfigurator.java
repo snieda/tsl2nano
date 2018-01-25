@@ -362,7 +362,7 @@ public class BeanConfigurator<T> implements Serializable {
     //                "presentable", "presentable.layout", "columnDefinition" }) String name) {
             @de.tsl2.nano.bean.annotation.Constraint(allowed=ConstraintValueSet.ALLOWED_ENVFILES + ".*specification/action.*") String name) {
         //check, if action available
-        name = StringUtil.substring(FileUtil.replaceWindowsSeparator(name), "/", ".", true);
+        name = StringUtil.substring(FileUtil.replaceToJavaSeparator(name), "/", ".", true);
         ENV.get(ActionPool.class).get(name);
         SpecifiedAction<Object> action = new SpecifiedAction(name, null);
         def.addAction(action);

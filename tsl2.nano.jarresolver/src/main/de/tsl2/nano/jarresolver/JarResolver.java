@@ -166,9 +166,18 @@ public class JarResolver {
             ManagedException.forward(e);
         }
         LOG.info("setting M2_HOME=" + System.getProperty("M2_HOME"));
-        String script = AppLoader.isUnix() ? "/bin/mvn" : "/bin/mvn.cmd";
-        new File(mvnRoot + script).setExecutable(true);
-        Process process = SystemUtil.execute(new File(basedir), mvnRoot + script, "install");
+        String mvnRootRel = FileUtil.replaceToSystemSeparator(FileUtil.getRelativePath(mvnRoot, basedir));
+        File baseDirectory = new File(FileUtil.replaceToSystemSeparator(basedir));
+        Process process = null;
+        if (AppLoader.isWindows()) {
+            String script = "\\bin\\mvn.cmd";
+            new File(mvnRoot + script).setExecutable(true);
+            process = SystemUtil.execute(baseDirectory, "cmd", "/C", mvnRootRel + script, "install");
+        } else {
+            String script = "/bin/mvn";
+            new File(mvnRoot + script).setExecutable(true);
+            process = SystemUtil.execute(baseDirectory, mvnRootRel + script, "install");
+        }
         if (process.exitValue() != 0) {
             LOG.error("Process returned with: " + process.exitValue());
         }
