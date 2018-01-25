@@ -6,7 +6,6 @@ import static junit.framework.Assert.assertTrue;
 import org.apache.commons.logging.Log;
 import org.junit.AfterClass;
 import org.junit.BeforeClass;
-import org.junit.Ignore;
 import org.junit.Test;
 
 import de.tsl2.nano.core.log.LogFactory;

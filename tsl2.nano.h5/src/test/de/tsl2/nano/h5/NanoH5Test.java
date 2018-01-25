@@ -48,6 +48,7 @@ import de.tsl2.nano.core.messaging.ChangeEvent;
 import de.tsl2.nano.core.util.ByteUtil;
 import de.tsl2.nano.core.util.ConcurrentUtil;
 import de.tsl2.nano.core.util.DateUtil;
+import de.tsl2.nano.core.util.ENVTestPreparation;
 import de.tsl2.nano.core.util.FileUtil;
 import de.tsl2.nano.core.util.MapUtil;
 import de.tsl2.nano.core.util.NetUtil;
@@ -74,7 +75,7 @@ import my.app.Times;
  * @author Tom, Thomas Schneider
  * @version $Revision$
  */
-public class NanoH5Test {
+public class NanoH5Test implements ENVTestPreparation {
     static String getServiceURL() {
         return "http://localhost:" + NetUtil.getFreePort();
     }
@@ -287,7 +288,9 @@ public class NanoH5Test {
      * @return
      */
     String createENV(String name) {
-        final String DIR_TEST = "target/test/.nanoh5." + name;
+        final String DIR_TEST = "target/test/" + ENV.PREFIX_ENVNAME + name;
+        
+        Bean.clearCache();
 //        new File(DIR_TEST).delete();
 //        Files.deleteIfExists(Paths.get(DIR_TEST));
         FileUtil.deleteRecursive(new File(DIR_TEST));
