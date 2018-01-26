@@ -82,6 +82,7 @@
 		<module>tsl2.nano.vnet</module>
 		<module>tsl2.nano.incubation</module>
 		<module>tsl2.nano.h5</module>
+		<module>tsl2-report</module>
 	</modules>
 	<distributionManagement>
 		<snapshotRepository>

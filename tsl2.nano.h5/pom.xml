@@ -282,28 +282,6 @@
 					</execution>
 				</executions>
 			</plugin>
-			<!-- lets get coverage through all modules -->
-   			<plugin>
-				<groupId>org.jacoco</groupId>
-				<artifactId>jacoco-maven-plugin</artifactId>
-				<configuration>
-					<fileSets>
-						<fileSet implementation="org.apache.maven.shared.model.fileset.FileSet">
-							<directory>${module.parent}</directory>
-							<includes>
-								<include>**/*.exec</include>
-							</includes>
-						</fileSet>
-					</fileSets>
-				</configuration>
-				<executions>
-					<execution>
-						<goals>
-							<goal>report-aggregate</goal>
-						</goals>
-					</execution>
-				</executions>
-			</plugin>
 		</plugins>
 	</build>
 	<dependencies>
