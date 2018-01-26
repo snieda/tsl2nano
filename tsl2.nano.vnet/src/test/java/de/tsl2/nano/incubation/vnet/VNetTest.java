@@ -20,6 +20,7 @@ import de.tsl2.nano.core.ManagedException;
 import de.tsl2.nano.core.execution.Profiler;
 import de.tsl2.nano.core.messaging.EventController;
 import de.tsl2.nano.core.messaging.IListener;
+import de.tsl2.nano.core.util.ConcurrentUtil;
 import de.tsl2.nano.core.util.ENVTestPreparation;
 import de.tsl2.nano.core.util.StringUtil;
 import de.tsl2.nano.incubation.vnet.neuron.VNeuron;
@@ -73,6 +74,21 @@ public class VNetTest implements ENVTestPreparation {
 		// should output: ich habe hunger
 	}
 
+	@Test
+	public void testVNetWithNeuralNetCommunicator() throws Exception {
+		//don't throw an Exception
+		NetCommunicator.main(new String[0]);
+		
+		// start and exit
+		System.setIn(StringUtil.toInputStream(
+				"ich bin tom\nwer bin ich\n\n"));
+		
+		NetCommunicator.main(new String[] {
+				"implementation=" + VNeuron.class.getName()
+		});
+		
+	}
+	
 	@Test
 	public void testVNetWithWorkflow() {
 		final ComparableMap<CharSequence, Object> state = new ComparableMap<CharSequence, Object>();

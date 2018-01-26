@@ -18,14 +18,15 @@ import de.tsl2.nano.core.util.MapUtil;
  * @author Tom
  */
 public class NetCommunicator implements Runnable {
-	Class implementation;
+	/** implementation of the cover class */
+	Class<?> implementation;
+	/** handles command line arguments */
 	private Argumentator art;
 
 	public NetCommunicator(Argumentator art) {
 		this.art = art;
 	}
 
-	@SuppressWarnings("rawtypes")
 	public static void main(String[] args) throws Exception {
 		Argumentator art = new Argumentator("VNet", createManual(), args);
 		new NetCommunicator(art).run();
@@ -36,11 +37,11 @@ public class NetCommunicator implements Runnable {
 		return MapUtil.asMap(
 				"description", "unknown content will be learned, otherwise the net will be notifed, ENTER will exit", 
 				"file", "serialized vnet xml file to create the net from", 
-				"implementation", "full class name to a node core (pojo)",
-				"cover", "full class name to a node cover implementation"
+				"implementation", "full class name to a node cover implementation"
 				);
 	}
 
+	@SuppressWarnings({ "rawtypes", "unchecked" })
 	@Override
 	public void run() {
 		if (art.check(System.out)) {
@@ -50,6 +51,7 @@ public class NetCommunicator implements Runnable {
 				implementation = net.elements.keySet().iterator().next().getClass();
 			} else {
 				if (art.get("implementation") == null) {
+					log(art);
 					log("Creating new Net. Please give an Node implementation - currently found on classpath:");
 					log(new ClassFinder().findClass(IListener.class));
 					return;

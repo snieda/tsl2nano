@@ -92,7 +92,7 @@ public class Net<T extends IListener<Notification> & ILocatable & Serializable &
     }
 	
 	public void save() {
-		FileUtil.saveXml(this, FileUtil.getUniqueFileName(getName()) + ".xml");
+		FileUtil.saveXml(this, ENV.getConfigPath() + FileUtil.getUniqueFileName(getName()) + ".xml");
 	}
     /**
      * addAll

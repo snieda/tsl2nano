@@ -49,13 +49,8 @@ import de.tsl2.nano.core.util.StringUtil;
 *
  * @author Tom, Thomas Schneider
 */
-public class BaseTest {
+public class BaseTest extends TextComparison {
  
-    public static String REGEX_DATE_DE = "\\d\\d\\.\\d\\d\\.\\d\\d\\d\\d";
-    public static String REGEX_DATE_US = "\\d\\d\\-\\d\\d\\-\\d\\d\\d\\d";
-    public static String REGEX_TIME_DE = "\\d\\d\\:\\d\\d(\\:\\d\\d([.,]\\d\\d(\\d)?)?)?";
-    public static String XXX = "XXX";
-    
   /**
    * convenience to create a set of parameter
    *
@@ -182,29 +177,6 @@ public class BaseTest {
     }
   }
  
-  public static void assertEquals(String exptected, String result, boolean ignoreWhitespace, Map<String, String> replacements) {
-      if (ignoreWhitespace) {
-          exptected = exptected.replaceAll("([\r]?\n)+", "\n");
-          exptected = exptected.replaceAll("[ \t]+", " ");
-          result = result.replaceAll("([\r]?\n)+", "\n");
-          result = result.replaceAll("[ \t]+", " ");
-      }
-      StringBuilder exp = new StringBuilder(exptected);
-      StringBuilder res = new StringBuilder(result);
-      prepareForComparison(exp, res, replacements);
-      Assert.assertEquals(exp.toString(), res.toString());
-  }
-  
-  public static void prepareForComparison(StringBuilder expected, StringBuilder result, Map<String, String> replacements) {
-      Set<String> keys = replacements.keySet();
-      int ignored = 0;
-      for (String regex : keys) {
-        StringUtil.replaceAll(expected, regex, replacements.get(regex));
-        ignored += StringUtil.replaceAll(result, regex, replacements.get(regex));
-    }
-      System.out.println("preparedForComparison with " + replacements.size() + " replacements: ignored " + ignored + " positions");
-  }
-  
   /**
    * condition for exptected value and calculated result.
    */
