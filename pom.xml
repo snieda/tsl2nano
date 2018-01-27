@@ -33,6 +33,7 @@
 	*   then you should define a "default-key {KEY-ID}" in your gpg.conf in home dir
 	*   test that with: "gpg - -clearsign {my-test-file}"
 	* NOTE: doing a release has to be done on all sub-modules explizit (e.g. "mvn deploy -pl tsl2.nano.core")
+	* NOTE: on doing a deploy, the tsl2-report module has to be commented from this parent pom!
 	* NOTE: on problems with encoding: property files have to be ascii+unicode. please convert them with jdks native2ascii
 	-->
 	<properties>
@@ -82,7 +83,7 @@
 		<module>tsl2.nano.vnet</module>
 		<module>tsl2.nano.incubation</module>
 		<module>tsl2.nano.h5</module>
-		<module>tsl2-report</module>
+		<!-- <module>tsl2-report</module> -->
 	</modules>
 	<distributionManagement>
 		<snapshotRepository>

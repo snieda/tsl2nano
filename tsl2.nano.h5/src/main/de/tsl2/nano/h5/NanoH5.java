@@ -394,6 +394,8 @@ public class NanoH5 extends NanoHTTPD implements ISystemConnector<Persistence> {
         }
 
         long startTime = System.currentTimeMillis();
+        //TODO: in InternetExporer/Edge we get sometimes IP4 and sometimes IP6. should we set system property java.net.preferIPv6Addresses?
+        //           sessions.keySet().iterator().next().getAllByName(requestor.getHostName()).equals(requestor) returns false
         InetAddress requestor = ((Socket) ((Map) header).get("socket")).getInetAddress();
         NanoH5Session session = sessions.get(requestor);
         //if a user reconnects on the same machine, we remove his old session

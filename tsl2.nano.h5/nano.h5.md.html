@@ -1907,10 +1907,32 @@ Each standard table of beans will provide a table-header with Buttons to do up/d
 ### Injecting own logic on the forms html DOM document
 
 Implement the interface _IDOMExtender_ and provide the compiled class to the environment (copying the jar into the environment directory) to edit/change the default DOM tree. Here you can add additional informations and scripts to be sent to the client browser without knowing the tsl2.nano framework.
+The Interface-method  _extend(Document doc, ISession<?> session)_ provides the full DOM-Document of the current response and the current session, holding all informations you need.
 
-Example: TODO
+Example:
 
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+public class DOMExtender implements IDOMExtender {
+
+    @Override
+    public void extend(Document doc, ISession<?> session) {
+        //TODO: create Testcase for that...
+        Element node = doc.createElement("h1");
+        node.setTextContent(this.getClass().getName());
+        //the session provides all informations you need
+        if (session instanceof NanoH5Session) {//on NanoH5 this is allways the case
+            NanoH5Session h5Session = (NanoH5Session) session;
+            Main app = h5Session.getApplication();
+            BeanDefinition<?> currentBean = h5Session.getWorkingObject();
+            Object user = h5Session.getUserAuthorization();
+			
+			//...here you could include client side html/js frameworks to extend the standard page...
+			//...or you can use template engine frameworks like velocity, freemarker or thymeleaf
+			// the generated html can be appended/inserted as node to the DOM Document
+			//...
+        }
+       doc.getDocumentElement().appendChild(node);
+    }
 
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
@@ -3749,3 +3771,5 @@ log info for extract standalone.zip
 on external database, anyway-scripts are used 'anyway'
 	
 - Bean: multi-instance holder?
+
+PROBLEM: style.template saved as UTF-8 becomes NULNULNUL at the end on saving it in environmnet.xml

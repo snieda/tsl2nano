@@ -82,6 +82,7 @@ public class PersistenceUI {
                 if ((props = FileUtil.loadPropertiesFromFile(pfile)) == null) {
                     props = new Properties();
                     props.setProperty("PROVIDER_Hibernate", "org.hibernate.ejb.HibernatePersistence");
+                    props.setProperty("PROVIDER_Hibernate5", "org.hibernate.jpa.HibernatePersistenceProvider");
                     props.setProperty("PROVIDER_OpenJPA", "org.apache.openjpa.persistence.PersistenceProviderImpl");
                     props.setProperty("PROVIDER_EclipseLink", "org.eclipse.persistence.jpa.PersistenceProvider");
                     props.setProperty("PROVIDER_TopLink", "oracle.toplink.essentials.PersistenceProvider");
@@ -94,11 +95,11 @@ public class PersistenceUI {
                     props.setProperty("DRIVER_jdbc.odbc", "sun.jdbc.odbc.JdbcOdbcDriver");
                     props.setProperty("DRIVER_jdbc.oracle", "oracle.jdbc.OracleDriver");
                     props.setProperty("DRIVER_jdbc.db2", "com.ibm.db2.jcc.DB2Driver");
-                    props.setProperty("DRIVER_jdbc.hsqldb", persistence.STD_LOCAL_DATABASE_DRIVER);
-                    props.setProperty("DRIVER_jdbc.h2", "org.h2.Driver");
+                    props.setProperty("DRIVER_jdbc.hsqldb", Persistence.HSQLDB_DATABASE_DRIVER);
+                    props.setProperty("DRIVER_jdbc.h2", Persistence.H2_DATABASE_DRIVER);
                     props.setProperty("DRIVER_jdbc.sybase", "com.sybase.jdbc2.jdbc.SybDriver");
                     props.setProperty("DRIVER_jdbc.derby.embedded", "org.apache.derby.jdbc.EmbeddedDriver");
-                    props.setProperty("DRIVER_jdbc.derby.client", "org.apache.derby.jdbc.ClientDriver");
+                    props.setProperty("DRIVER_jdbc.derby.client", Persistence.DERBY_DATABASE_DRIVER);
                     props.setProperty("DRIVER_jdbc.xerial", "org.sqlite.JDBC");
                     props.setProperty("DRIVER_jdbc.sqldroid", "org.sqldroid.SQLDroidDriver");
                     props.setProperty("DRIVER_jdbc.postgresql", "org.postgresql.Driver");
@@ -113,9 +114,9 @@ public class PersistenceUI {
                     props.setProperty("DATASOURCE_jdbc.oracle", "oracle.jdbc.pool.OracleDataSource");
                     props.setProperty("DATASOURCE_jdbc.db2", "com.ibm.db2.jcc.DB2Driver");
                     props.setProperty("DATASOURCE_jdbc.hsqldb", "org.hsqldb.jdbc.JDBCDataSource");
-                    props.setProperty("DATASOURCE_jdbc.h2", "org.h2.Driver");
+                    props.setProperty("DATASOURCE_jdbc.h2", Persistence.H2_DATABASE_DRIVER);
                     props.setProperty("DATASOURCE_jdbc.sybase", "com.sybase.jdbc2.jdbc.SybDataSource");
-                    props.setProperty("DATASOURCE_jdbc.derby", "org.apache.derby.jdbc.ClientDriver");
+                    props.setProperty("DATASOURCE_jdbc.derby", Persistence.DERBY_DATABASE_DRIVER);
                     props.setProperty("DATASOURCE_jdbc.xerial", "org.sqlite.JDBC");
                     props.setProperty("DATASOURCE_jdbc.sqldroid", "org.sqldroid.SQLDroidDriver");
                     props.setProperty("DATASOURCE_jdbc.postgresql", "org.postgresql.Driver");
