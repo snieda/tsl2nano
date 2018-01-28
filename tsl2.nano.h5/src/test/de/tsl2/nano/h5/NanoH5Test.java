@@ -209,7 +209,8 @@ public class NanoH5Test implements ENVTestPreparation {
 
         // check encoding (only if german!)
          assertTrue(!Locale.getDefault().equals(Locale.GERMANY) || html.contains("S&amp;chlie&szlig"));
-
+         assertTrue("possible enoding problems found in html-output", !html.contains("ï»¿"));
+         
          //create a new expected file (after new changes in the gui)
          String expFileName = "test-" + name + "-output.html";
          FileUtil.writeBytes(html.getBytes(), ENV.getConfigPath() + expFileName, false);

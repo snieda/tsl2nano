@@ -581,25 +581,28 @@ public class FileUtil {
      */
     public static synchronized byte[] getFileBytes(String strFile, ClassLoader classLoader) {
         LOG.info("Try to open File " + strFile);
-        InputStream file = null;
+        InputStream stream = null;
         try {
             if (classLoader == null) {
                 classLoader = Thread.currentThread().getContextClassLoader();
             }
-            file = getResource(strFile, classLoader);
-            if (file == null) {
-                file = getFile(strFile);
+            stream = getResource(strFile, classLoader);
+            if (stream == null) {
+                stream = getFile(strFile);
             }
-            final int length = file.available();
+            final int length = stream.available();
             final byte data[] = new byte[length];
-            file.read(data);
-            file.close();
+            stream.read(data);
             LOG.info(ByteUtil.amount(length));
+            //stream.available() does not guarantee to return the total amount of bytes!
+            if (stream.available() > 0) {
+            	throw new IllegalAccessException("not all bytes were read from stream! The InputStream" + stream + " should not be read with this method!");
+            }
             return data;
         } catch (final Exception e) {
             ManagedException.forward(e);
         } finally {
-            close(file, true);
+            close(stream, true);
         }
         return null;
     }
@@ -725,9 +728,18 @@ public class FileUtil {
 
             final int length = stream.available();
             final char data[] = new char[length];
-            file.read(data);
-            file.close();
+            int len = file.read(data);
+            if (len < length) {
+            	LOG.debug("stream.available(): " + length + " bytes, but only " + len + " bytes read -> filling rest with ' '");
+            	for (int i = len; i < length; i++) {
+					data[i] = ' ';
+				}
+            }
             LOG.info(ByteUtil.amount(length) + " read from stream " + stream);
+            //stream.available() does not guarantee to return the total amount of bytes!
+            if (stream.available() > 0) {
+            	throw new IllegalAccessException("not all bytes were read from stream! The InputStream" + stream + " should not be read with this method!");
+            }
             return data;
         } catch (final Exception ex) {
             throw new RuntimeException(ex);
