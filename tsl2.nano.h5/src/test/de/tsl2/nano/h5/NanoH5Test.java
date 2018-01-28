@@ -441,7 +441,6 @@ public class NanoH5Test implements ENVTestPreparation {
     private String getCurrentVersion() {
         Properties props = FileUtil.loadProperties("build-version.properties");
         return props.getProperty("tsl2.nano.h5.version");
-//        return "2.0.0-SNAPSHOT";
     }
 
 }
