@@ -16,12 +16,12 @@ import java.text.NumberFormat;
 import java.text.SimpleDateFormat;
 import java.util.Collection;
 
+import de.tsl2.nano.action.IConstraint;
 import de.tsl2.nano.bean.annotation.Constraint;
 import de.tsl2.nano.bean.annotation.ConstraintValueSet;
 import de.tsl2.nano.bean.def.AttributeDefinition;
 import de.tsl2.nano.bean.def.BeanDefinition;
 import de.tsl2.nano.bean.def.IAttributeDefinition;
-import de.tsl2.nano.action.IConstraint;
 import de.tsl2.nano.bean.def.IIPresentable;
 import de.tsl2.nano.bean.def.IPresentable;
 import de.tsl2.nano.bean.def.IPresentableColumn;
@@ -31,7 +31,7 @@ import de.tsl2.nano.core.ENV;
 import de.tsl2.nano.core.cls.BeanClass;
 import de.tsl2.nano.core.cls.IAttribute;
 import de.tsl2.nano.core.cls.PrivateAccessor;
-import de.tsl2.nano.core.exception.Message;
+import de.tsl2.nano.core.messaging.IListener;
 import de.tsl2.nano.core.util.ConcurrentUtil;
 import de.tsl2.nano.core.util.FileUtil;
 import de.tsl2.nano.core.util.StringUtil;
@@ -44,7 +44,6 @@ import de.tsl2.nano.incubation.specification.actions.ActionPool;
 import de.tsl2.nano.incubation.specification.rules.Rule;
 import de.tsl2.nano.incubation.specification.rules.RulePool;
 import de.tsl2.nano.incubation.specification.rules.RuleScript;
-import de.tsl2.nano.core.messaging.IListener;
 
 /**
  * Provides a specific set of Attribute members to configure.

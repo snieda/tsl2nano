@@ -57,7 +57,6 @@ import de.tsl2.nano.core.util.Util;
 import de.tsl2.nano.incubation.platform.PlatformManagement;
 import de.tsl2.nano.incubation.terminal.IItem.Type;
 import de.tsl2.nano.incubation.terminal.item.Container;
-import de.tsl2.nano.incubation.terminal.item.selector.Sequence;
 import de.tsl2.nano.util.SchedulerUtil;
 
 /**

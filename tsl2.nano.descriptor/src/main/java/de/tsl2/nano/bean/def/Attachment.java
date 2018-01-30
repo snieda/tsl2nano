@@ -15,15 +15,14 @@ import java.util.UUID;
 
 import org.simpleframework.xml.Attribute;
 
-import de.tsl2.nano.bean.BeanUtil;
 import de.tsl2.nano.bean.IValueAccess;
 import de.tsl2.nano.core.ENV;
 import de.tsl2.nano.core.cls.IAttribute;
+import de.tsl2.nano.core.messaging.EventController;
 import de.tsl2.nano.core.util.BitUtil;
 import de.tsl2.nano.core.util.ByteUtil;
 import de.tsl2.nano.core.util.FileUtil;
 import de.tsl2.nano.core.util.Util;
-import de.tsl2.nano.core.messaging.EventController;
 
 /**
  * byte[]-value from file-system.

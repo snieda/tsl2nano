@@ -21,7 +21,6 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import java.util.TreeMap;
 
 import javax.ejb.TransactionAttribute;
 import javax.ejb.TransactionAttributeType;
@@ -34,14 +33,12 @@ import javax.persistence.metamodel.EntityType;
 import org.apache.commons.logging.Log;
 
 import de.tsl2.nano.bean.BeanContainer;
-import de.tsl2.nano.bean.def.Bean;
 import de.tsl2.nano.bean.def.BeanValue;
 import de.tsl2.nano.core.ENV;
 import de.tsl2.nano.core.ITransformer;
 import de.tsl2.nano.core.ManagedException;
 import de.tsl2.nano.core.cls.BeanAttribute;
 import de.tsl2.nano.core.cls.BeanClass;
-import de.tsl2.nano.core.cls.PrivateAccessor;
 import de.tsl2.nano.core.exception.Message;
 import de.tsl2.nano.core.log.LogFactory;
 import de.tsl2.nano.core.util.ConcurrentUtil;

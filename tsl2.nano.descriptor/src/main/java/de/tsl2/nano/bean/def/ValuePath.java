@@ -18,8 +18,8 @@ import de.tsl2.nano.bean.IValueAccess;
 import de.tsl2.nano.core.ManagedException;
 import de.tsl2.nano.core.cls.BeanAttribute;
 import de.tsl2.nano.core.cls.BeanClass;
-import de.tsl2.nano.core.util.CollectionUtil;
 import de.tsl2.nano.core.messaging.EventController;
+import de.tsl2.nano.core.util.CollectionUtil;
 
 /**
  * resolves relations through a path to several beans/attributes

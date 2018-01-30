@@ -27,7 +27,6 @@ import de.tsl2.nano.bean.def.BeanDefinition;
 import de.tsl2.nano.bean.def.CollectionExpressionTypeFormat;
 import de.tsl2.nano.bean.def.Constraint;
 import de.tsl2.nano.bean.def.IAttributeDefinition;
-import de.tsl2.nano.bean.def.IBeanCollector;
 import de.tsl2.nano.bean.def.IPresentable;
 import de.tsl2.nano.bean.def.Presentable;
 import de.tsl2.nano.bean.def.ValueColumn;

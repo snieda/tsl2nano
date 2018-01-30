@@ -9,8 +9,8 @@
  */
 package de.tsl2.nano.incubation.terminal;
 
-import java.io.PrintStream;
 import java.io.InputStream;
+import java.io.PrintStream;
 import java.io.Serializable;
 import java.util.Properties;
 

@@ -11,9 +11,6 @@ package de.tsl2.nano.h5;
 
 import java.io.Serializable;
 
-import org.simpleframework.xml.Default;
-import org.simpleframework.xml.DefaultType;
-
 /**
  * holds properties to create new instances with an increasing attribute
  * 

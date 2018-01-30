@@ -9,8 +9,8 @@
  */
 package de.tsl2.nano.service.schedule;
 
-import java.text.DateFormat;
 import java.io.Serializable;
+import java.text.DateFormat;
 import java.util.Collection;
 import java.util.Date;
 

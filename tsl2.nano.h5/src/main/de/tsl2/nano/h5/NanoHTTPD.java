@@ -102,7 +102,6 @@ import de.tsl2.nano.core.ENV;
 import de.tsl2.nano.core.Main;
 import de.tsl2.nano.core.ManagedException;
 import de.tsl2.nano.core.exception.Message;
-import de.tsl2.nano.core.log.LogFactory;
 import de.tsl2.nano.h5.NanoHTTPD.Response.IStatus;
 import de.tsl2.nano.h5.NanoHTTPD.Response.Status;
 

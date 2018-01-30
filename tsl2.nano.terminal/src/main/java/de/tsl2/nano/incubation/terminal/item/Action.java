@@ -9,8 +9,8 @@
  */
 package de.tsl2.nano.incubation.terminal.item;
 
-import java.io.PrintStream;
 import java.io.InputStream;
+import java.io.PrintStream;
 import java.lang.reflect.Method;
 import java.util.Properties;
 import java.util.Set;
@@ -20,7 +20,6 @@ import org.simpleframework.xml.ElementArray;
 
 import de.tsl2.nano.action.IConstraint;
 import de.tsl2.nano.core.ManagedException;
-import de.tsl2.nano.core.cls.BeanAttribute;
 import de.tsl2.nano.core.cls.BeanClass;
 import de.tsl2.nano.core.cls.PrivateAccessor;
 import de.tsl2.nano.core.execution.IRunnable;

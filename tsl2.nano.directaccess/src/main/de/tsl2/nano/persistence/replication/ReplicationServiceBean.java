@@ -28,7 +28,6 @@ import de.tsl2.nano.core.log.LogFactory;
 import de.tsl2.nano.core.util.StringUtil;
 import de.tsl2.nano.persistence.GenericLocalServiceBean;
 import de.tsl2.nano.service.util.ServiceUtil;
-import de.tsl2.nano.serviceaccess.ServiceFactory;
 
 /**
  * Service for persistence-unit 'replication'

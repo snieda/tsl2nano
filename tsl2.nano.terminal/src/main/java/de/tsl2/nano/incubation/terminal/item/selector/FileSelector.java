@@ -21,7 +21,6 @@ import java.util.Properties;
 
 import org.simpleframework.xml.Element;
 import org.simpleframework.xml.ElementList;
-import org.simpleframework.xml.core.Commit;
 
 import de.tsl2.nano.core.util.FileUtil;
 import de.tsl2.nano.core.util.StringUtil;

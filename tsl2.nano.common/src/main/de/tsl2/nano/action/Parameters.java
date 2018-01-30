@@ -15,8 +15,6 @@ import java.util.List;
 
 import org.simpleframework.xml.Attribute;
 
-import de.tsl2.nano.action.IConstraint;
-
 /**
  * Parameter handler for IAction
  * 

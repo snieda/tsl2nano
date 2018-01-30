@@ -11,9 +11,9 @@ package de.tsl2.nano.incubation.vnet;
 
 import java.util.concurrent.Callable;
 
-import de.tsl2.nano.incubation.network.JobServer;
 import de.tsl2.nano.core.messaging.EventController;
 import de.tsl2.nano.core.messaging.IListener;
+import de.tsl2.nano.incubation.network.JobServer;
 
 /**
  * Overrides the fire-method of {@link EventController} to call the listeners on a network. This class may be used instead

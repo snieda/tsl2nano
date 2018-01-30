@@ -11,8 +11,6 @@ package de.tsl2.nano.action;
 
 import org.simpleframework.xml.Attribute;
 
-import de.tsl2.nano.action.IConstraint;
-
 /**
  * 
  * @author Tom

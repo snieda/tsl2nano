@@ -10,7 +10,6 @@
 package de.tsl2.nano.core;
 
 import java.lang.Thread.UncaughtExceptionHandler;
-import java.util.Collection;
 
 /**
  * functions of an application session.

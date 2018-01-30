@@ -49,7 +49,6 @@ import de.tsl2.nano.core.log.LogFactory;
 import de.tsl2.nano.core.util.ByteUtil;
 import de.tsl2.nano.core.util.FileUtil;
 import de.tsl2.nano.core.util.StringUtil;
-import de.tsl2.nano.util.XmlGenUtil;
 
 /**
  * provides generic print convenience methods for non-interactive prints.

@@ -11,10 +11,10 @@ package de.tsl2.nano.incubation.vnet.neuron;
 
 import java.io.Serializable;
 
-import de.tsl2.nano.incubation.vnet.ILocatable;
-import de.tsl2.nano.incubation.vnet.Notification;
 import de.tsl2.nano.core.messaging.IListener;
 import de.tsl2.nano.core.util.NumberUtil;
+import de.tsl2.nano.incubation.vnet.ILocatable;
+import de.tsl2.nano.incubation.vnet.Notification;
 
 /**
  * Technical extension of {@link Neuron} to fulfill the preconditions of a node core in vnet.

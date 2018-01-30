@@ -11,11 +11,11 @@ package de.tsl2.nano.structure;
 
 import java.util.List;
 
-import de.tsl2.nano.core.ITransformer;
 import de.tsl2.nano.collection.CollectionUtil;
-import de.tsl2.nano.core.util.StringUtil;
+import de.tsl2.nano.core.ITransformer;
 import de.tsl2.nano.core.messaging.EventController;
 import de.tsl2.nano.core.messaging.IListener;
+import de.tsl2.nano.core.util.StringUtil;
 
 /**
  * see {@link INode}

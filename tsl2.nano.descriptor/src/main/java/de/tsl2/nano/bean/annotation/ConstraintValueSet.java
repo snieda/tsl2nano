@@ -18,10 +18,10 @@ import java.util.LinkedList;
 import java.util.List;
 
 import de.tsl2.nano.bean.def.AttributeFinder;
+import de.tsl2.nano.collection.CollectionUtil;
 import de.tsl2.nano.core.ENV;
 import de.tsl2.nano.core.ITransformer;
 import de.tsl2.nano.core.cls.ClassFinder;
-import de.tsl2.nano.collection.CollectionUtil;
 import de.tsl2.nano.core.util.FileUtil;
 import de.tsl2.nano.core.util.StringUtil;
 

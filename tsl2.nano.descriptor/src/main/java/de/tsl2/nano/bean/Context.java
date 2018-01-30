@@ -23,10 +23,8 @@ import org.simpleframework.xml.Default;
 import org.simpleframework.xml.DefaultType;
 import org.simpleframework.xml.ElementMap;
 
-import de.tsl2.nano.bean.def.Bean;
 import de.tsl2.nano.bean.def.BeanDefinition;
 import de.tsl2.nano.collection.CollectionUtil;
-import de.tsl2.nano.collection.FilteringIterator;
 import de.tsl2.nano.core.ENV;
 import de.tsl2.nano.core.IPredicate;
 import de.tsl2.nano.core.ITransformer;

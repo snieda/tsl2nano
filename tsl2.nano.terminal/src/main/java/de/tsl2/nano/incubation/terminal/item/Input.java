@@ -9,8 +9,8 @@
  */
 package de.tsl2.nano.incubation.terminal.item;
 
-import java.io.PrintStream;
 import java.io.InputStream;
+import java.io.PrintStream;
 import java.util.Properties;
 
 import org.simpleframework.xml.core.Commit;

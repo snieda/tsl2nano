@@ -21,9 +21,9 @@ import org.simpleframework.xml.ElementList;
 import org.simpleframework.xml.core.Commit;
 
 import de.tsl2.nano.action.IConstraint;
+import de.tsl2.nano.collection.CollectionUtil;
 import de.tsl2.nano.core.ENV;
 import de.tsl2.nano.core.IPredicate;
-import de.tsl2.nano.collection.CollectionUtil;
 import de.tsl2.nano.core.util.StringUtil;
 import de.tsl2.nano.core.util.Util;
 import de.tsl2.nano.incubation.terminal.IContainer;

@@ -17,7 +17,6 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Scanner;
 
-
 import de.tsl2.nano.collection.FloatArray;
 import de.tsl2.nano.core.ManagedException;
 import de.tsl2.nano.core.util.ByteUtil;

@@ -9,16 +9,16 @@
  */
 package de.tsl2.nano.incubation.terminal;
 
-import java.io.PrintStream;
 import java.io.InputStream;
+import java.io.PrintStream;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Properties;
 
-import de.tsl2.nano.bean.def.Constraint;
 import de.tsl2.nano.action.IConstraint;
+import de.tsl2.nano.bean.def.Constraint;
 import de.tsl2.nano.core.cls.BeanClass;
 import de.tsl2.nano.core.cls.PrivateAccessor;
 import de.tsl2.nano.core.execution.SystemUtil;

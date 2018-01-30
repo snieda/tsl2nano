@@ -3,10 +3,10 @@ package de.tsl2.nano.incubation.vnet.runner;
 import java.io.Serializable;
 import java.util.Map;
 
+import de.tsl2.nano.core.messaging.IListener;
 import de.tsl2.nano.execution.IPRunnable;
 import de.tsl2.nano.incubation.vnet.ILocatable;
 import de.tsl2.nano.incubation.vnet.Notification;
-import de.tsl2.nano.core.messaging.IListener;
 import de.tsl2.nano.structure.Cover;
 
 /**

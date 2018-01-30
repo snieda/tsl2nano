@@ -24,8 +24,8 @@ import de.tsl2.nano.bean.def.IAttributeDefinition;
 import de.tsl2.nano.core.ENV;
 import de.tsl2.nano.core.cls.PrivateAccessor;
 import de.tsl2.nano.core.log.LogFactory;
-import de.tsl2.nano.core.util.StringUtil;
 import de.tsl2.nano.core.messaging.ChangeEvent;
+import de.tsl2.nano.core.util.StringUtil;
 
 /**
  * dependency listener evaluating its value through a given rule.

@@ -9,19 +9,14 @@
  */
 package de.tsl2.nano.incubation.terminal.item.selector;
 
-import java.io.File;
-import java.io.FileNotFoundException;
-import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Properties;
-import java.util.Scanner;
 
 import org.simpleframework.xml.Element;
 
 import de.tsl2.nano.core.ENV;
-import de.tsl2.nano.core.ManagedException;
 import de.tsl2.nano.core.util.FileUtil;
 import de.tsl2.nano.core.util.StringUtil;
 import de.tsl2.nano.execution.AntRunner;

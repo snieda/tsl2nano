@@ -9,8 +9,8 @@
  */
 package de.tsl2.nano.service.util;
 
-import java.util.Hashtable;
 import java.io.Serializable;
+import java.util.Hashtable;
 import java.util.LinkedList;
 
 import javax.security.auth.login.LoginContext;

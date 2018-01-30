@@ -16,7 +16,6 @@ import java.io.PrintStream;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.Enumeration;
-import java.util.Hashtable;
 import java.util.Map;
 import java.util.Properties;
 import java.util.Set;
@@ -35,7 +34,6 @@ import org.apache.tools.ant.taskdefs.MatchingTask;
 import org.apache.tools.ant.types.FileSet;
 import org.apache.tools.ant.types.resources.Files;
 import org.apache.tools.ant.types.selectors.FileSelector;
-import org.apache.tools.ant.types.selectors.FilenameSelector;
 
 import de.tsl2.nano.core.ManagedException;
 import de.tsl2.nano.core.cls.BeanAttribute;

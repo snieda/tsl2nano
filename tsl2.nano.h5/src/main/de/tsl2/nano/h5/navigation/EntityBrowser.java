@@ -9,7 +9,6 @@
  */
 package de.tsl2.nano.h5.navigation;
 
-import java.io.Serializable;
 import java.util.Collection;
 import java.util.Iterator;
 import java.util.Properties;
@@ -20,13 +19,11 @@ import org.simpleframework.xml.Attribute;
 import de.tsl2.nano.action.IAction;
 import de.tsl2.nano.bean.BeanContainer;
 import de.tsl2.nano.bean.BeanUtil;
-import de.tsl2.nano.bean.def.Bean;
 import de.tsl2.nano.bean.def.BeanCollector;
 import de.tsl2.nano.bean.def.BeanDefinition;
 import de.tsl2.nano.bean.def.IBeanCollector;
 import de.tsl2.nano.core.ENV;
 import de.tsl2.nano.core.util.StringUtil;
-import de.tsl2.nano.core.util.Util;
 import de.tsl2.nano.h5.Html5Presentation;
 
 /**

@@ -1,5 +1,10 @@
 package de.tsl2.nano.core.util;
 
+import static java.util.Calendar.DAY_OF_WEEK;
+import static java.util.Calendar.MINUTE;
+import static java.util.Calendar.SATURDAY;
+import static java.util.Calendar.SUNDAY;
+
 import java.sql.Time;
 import java.text.DateFormat;
 import java.text.ParseException;
@@ -12,8 +17,6 @@ import java.util.List;
 import java.util.concurrent.TimeUnit;
 
 import de.tsl2.nano.core.ManagedException;
-import de.tsl2.nano.core.util.Period;
-import static java.util.Calendar.*;
 
 /**
  * Utility-class for date and time operations. on default, it is not thread safe! call {@link #multithreaded} to be

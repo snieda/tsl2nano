@@ -15,8 +15,6 @@ import java.util.Collections;
 import java.util.LinkedList;
 import java.util.List;
 
-import de.tsl2.nano.core.util.StringUtil;
-
 /**
  * simple exception handler to be used by several threads.
  * 

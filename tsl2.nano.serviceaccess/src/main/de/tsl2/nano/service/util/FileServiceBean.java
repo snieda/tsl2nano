@@ -15,7 +15,6 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 
-import javax.annotation.Resource;
 import javax.ejb.Local;
 import javax.ejb.Remote;
 import javax.ejb.Stateless;

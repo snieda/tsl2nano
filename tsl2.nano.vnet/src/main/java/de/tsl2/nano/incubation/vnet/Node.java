@@ -14,13 +14,10 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
 
-import org.apache.commons.logging.Log;
-
 import de.tsl2.nano.core.ManagedException;
-import de.tsl2.nano.core.log.LogFactory;
-import de.tsl2.nano.core.util.StringUtil;
 import de.tsl2.nano.core.messaging.EventController;
 import de.tsl2.nano.core.messaging.IListener;
+import de.tsl2.nano.core.util.StringUtil;
 import de.tsl2.nano.structure.ANode;
 import de.tsl2.nano.structure.IConnection;
 

@@ -19,13 +19,13 @@ import java.util.List;
 import java.util.PriorityQueue;
 import java.util.Set;
 
+import de.tsl2.nano.core.messaging.IListener;
 import de.tsl2.nano.core.util.Util;
 import de.tsl2.nano.incubation.vnet.Connection;
 import de.tsl2.nano.incubation.vnet.ILocatable;
 import de.tsl2.nano.incubation.vnet.Link;
 import de.tsl2.nano.incubation.vnet.Node;
 import de.tsl2.nano.incubation.vnet.Notification;
-import de.tsl2.nano.core.messaging.IListener;
 import de.tsl2.nano.structure.Cover;
 import de.tsl2.nano.structure.IConnection;
 import de.tsl2.nano.structure.INode;

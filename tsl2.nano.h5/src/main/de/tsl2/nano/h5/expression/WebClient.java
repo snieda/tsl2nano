@@ -18,7 +18,6 @@ import org.simpleframework.xml.Attribute;
 import org.simpleframework.xml.Default;
 import org.simpleframework.xml.DefaultType;
 import org.simpleframework.xml.Element;
-import org.simpleframework.xml.ElementArray;
 
 import de.tsl2.nano.bean.BeanUtil;
 import de.tsl2.nano.bean.def.BeanDefinition;

@@ -28,9 +28,9 @@ import java.util.Map;
 import org.apache.commons.logging.Log;
 
 import de.tsl2.nano.bean.BeanUtil;
+import de.tsl2.nano.collection.CollectionUtil;
 import de.tsl2.nano.core.IPredicate;
 import de.tsl2.nano.core.log.LogFactory;
-import de.tsl2.nano.collection.CollectionUtil;
 import de.tsl2.nano.core.util.FileUtil;
 import de.tsl2.nano.core.util.MapUtil;
 import de.tsl2.nano.core.util.Period;

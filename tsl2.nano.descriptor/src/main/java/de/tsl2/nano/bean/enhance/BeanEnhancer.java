@@ -14,15 +14,6 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
 
-import javassist.ClassPool;
-import javassist.CtClass;
-import javassist.CtConstructor;
-import javassist.CtField;
-import javassist.CtMethod;
-import javassist.CtNewConstructor;
-import javassist.CtNewMethod;
-import javassist.bytecode.AccessFlag;
-
 import org.apache.commons.logging.Log;
 
 import de.tsl2.nano.bean.BeanProxy;
@@ -32,6 +23,14 @@ import de.tsl2.nano.core.ManagedException;
 import de.tsl2.nano.core.cls.BeanClass;
 import de.tsl2.nano.core.log.LogFactory;
 import de.tsl2.nano.core.util.StringUtil;
+import javassist.ClassPool;
+import javassist.CtClass;
+import javassist.CtConstructor;
+import javassist.CtField;
+import javassist.CtMethod;
+import javassist.CtNewConstructor;
+import javassist.CtNewMethod;
+import javassist.bytecode.AccessFlag;
 
 /**
  * enhance bean to have getter/setter methods.

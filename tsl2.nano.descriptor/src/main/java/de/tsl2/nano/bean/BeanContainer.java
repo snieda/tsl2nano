@@ -23,7 +23,6 @@ import org.apache.commons.logging.Log;
 
 import de.tsl2.nano.action.CommonAction;
 import de.tsl2.nano.action.IAction;
-import de.tsl2.nano.bean.def.AttributeDefinition;
 import de.tsl2.nano.bean.def.Bean;
 import de.tsl2.nano.bean.def.BeanDefinition;
 import de.tsl2.nano.bean.def.BeanValue;

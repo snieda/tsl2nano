@@ -9,14 +9,10 @@
  */
 package de.tsl2.nano.bean.annotation;
 
-import java.io.Serializable;
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
-import java.util.List;
-
-import de.tsl2.nano.action.IActivable;
 
 /**
  * Define attribute presentation. For further informmations, see IPresentable.

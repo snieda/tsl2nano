@@ -20,14 +20,12 @@ import javax.script.ScriptEngineManager;
 
 import org.apache.commons.logging.Log;
 import org.simpleframework.xml.Attribute;
-import org.simpleframework.xml.core.Commit;
 
 import de.tsl2.nano.core.AppLoader;
 import de.tsl2.nano.core.ENV;
 import de.tsl2.nano.core.ManagedException;
 import de.tsl2.nano.core.cls.ClassFinder;
 import de.tsl2.nano.core.log.LogFactory;
-import de.tsl2.nano.core.util.StringUtil;
 import de.tsl2.nano.incubation.specification.AbstractRunnable;
 import de.tsl2.nano.incubation.specification.ParType;
 
