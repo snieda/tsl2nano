@@ -267,6 +267,10 @@
 				<version>2.9</version>
 			</plugin>
 			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-jxr-plugin</artifactId>
+			</plugin>
+			<plugin>
 				<groupId>org.codehaus.mojo</groupId>
 				<artifactId>findbugs-maven-plugin</artifactId>
 				<version>3.0.5</version>
@@ -278,6 +282,16 @@
             	<groupId>org.apache.maven.plugins</groupId>
             	<artifactId>maven-pmd-plugin</artifactId>
             	<version>3.8</version>
+				<reportSets>
+					<reportSet>
+						<reports>
+							<report>pmd</report>
+							<report>check</report>
+							<report>cpd</report>
+							<report>cpd-check</report>
+						</reports>
+					</reportSet>
+				</reportSets>
        		</plugin>
    			<plugin>
 				<groupId>org.jacoco</groupId>

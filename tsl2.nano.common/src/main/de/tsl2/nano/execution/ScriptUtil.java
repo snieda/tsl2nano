@@ -132,6 +132,7 @@ public class ScriptUtil extends SystemUtil {
     public static final void main(String[] args) {
         if (args.length < 2) {
             System.out.println("scriptutil start: <build-target of shell.xml>");
+            return;
         }
         Properties p = new File("shell.properties").canRead() ? FileUtil.loadProperties("shell.properties",
             Thread.currentThread().getContextClassLoader()) : new Properties();

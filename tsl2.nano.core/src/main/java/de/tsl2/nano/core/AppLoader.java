@@ -126,9 +126,14 @@ public class AppLoader {
             nargs = new String[0];
         } else {
             //if a full path was given, use that directly
-            environment = args[0].startsWith("/") || args[0].contains(":") ? args[0] : getFileSystemPrefix() + args[0];
-            mainclass = args[1];
-            int processed = 2;
+            int processed = 1;
+        	if (args[0].startsWith("/") || args[0].contains(":")) {
+                environment = args[0];
+                mainclass = args[processed++];
+        	} else {
+                environment = getFileSystemPrefix() + "." + StringUtil.substring(args[0], ".", null, true).toLowerCase();
+                mainclass = args[0];
+        	}
             mainmethod = args.length > 2 ? args[processed++] : "main";
 
             nargs = new String[args.length - processed];
@@ -301,8 +306,7 @@ public class AppLoader {
         String sa = System.getProperty("apploader.args");
         String[] sargs = sa != null ? sa.split(",") : new String[0];
         args =
-            CollectionUtil.concat(String[].class, getArgumentsFromManifest(),
-                sargs, args);
+            CollectionUtil.concat(String[].class, sargs, args, getArgumentsFromManifest());
         new AppLoader().start(args);
     }
 
