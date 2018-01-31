@@ -77,11 +77,12 @@ public class VNetTest implements ENVTestPreparation {
 	@Test
 	public void testVNetWithNeuralNetCommunicator() throws Exception {
 		//don't throw an Exception
+		System.setIn(StringUtil.toInputStream("\n"));
 		NetCommunicator.main(new String[0]);
 		
 		// start and exit
 		System.setIn(StringUtil.toInputStream(
-				"ich bin tom\nwer bin ich\n\n"));
+				VNeuron.class.getName()+  "\nich bin tom\nwer bin ich\n\n"));
 		
 		NetCommunicator.main(new String[] {
 				"implementation=" + VNeuron.class.getName()
@@ -135,7 +136,7 @@ public class VNetTest implements ENVTestPreparation {
 		 * Beispiel
 		 */
 		Net<Location, Float> net = new Net<Location, Float>();
-		Node<Location, Float> saarbruecken = net.add(new Location("Saarbrï¿½cken", 222, 0, 0));
+		Node<Location, Float> saarbruecken = net.add(new Location("Saarbrücken", 222, 0, 0));
 		Node<Location, Float> kaiserslautern = net.add(new Location("Kaiserslautern", 158, 0, 0));
 		Node<Location, Float> karlsruhe = net.add(new Location("Karlsruhe", 140, 0, 0));
 		Node<Location, Float> ludwigshafen = net.add(new Location("Ludwigshafen", 108, 0, 0));

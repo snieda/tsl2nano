@@ -306,7 +306,7 @@ public class AppLoader {
         String sa = System.getProperty("apploader.args");
         String[] sargs = sa != null ? sa.split(",") : new String[0];
         args =
-            CollectionUtil.concat(String[].class, sargs, args, getArgumentsFromManifest());
+            CollectionUtil.concat(String[].class, getArgumentsFromManifest(), sargs, args);
         new AppLoader().start(args);
     }
 

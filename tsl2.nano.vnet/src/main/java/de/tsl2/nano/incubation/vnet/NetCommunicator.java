@@ -52,12 +52,14 @@ public class NetCommunicator implements Runnable {
 			} else {
 				if (art.get("implementation") == null) {
 					log(art);
-					log("Creating new Net. Please give an Node implementation - currently found on classpath:");
-					log(new ClassFinder().findClass(IListener.class));
-					return;
+					log("Creating new Net. Please give a Node implementation - currently found on classpath:");
+					net = setImplementationByUserInput();
+					if (implementation == null)
+						return;
+				} else {
+					net = new Net();
+					implementation = BeanClass.load(art.get("implementation"));
 				}
-				net = new Net();
-				implementation = BeanClass.load(art.get("implementation"));
 			}
 			// create a callback for responses
 			IListener<Notification> responseHandler = new IListener<Notification>() {
@@ -71,6 +73,7 @@ public class NetCommunicator implements Runnable {
 			log("core implementation: " + implementation.getSuperclass());
 			Scanner scr = new Scanner(System.in);
 			try {
+				System.out.print(": ");
 				while (scr.hasNextLine()) {
 					String input = scr.nextLine();
 					if (input.isEmpty())
@@ -90,12 +93,35 @@ public class NetCommunicator implements Runnable {
 						}
 					}
 					log(net.dump());
+					System.out.print(": ");
 				}
 			} finally {
 				scr.close();
 				net.save();
 			}
 		}
+	}
+
+	private Net setImplementationByUserInput() {
+		log(new ClassFinder().findClass(IListener.class));
+		Scanner input = new Scanner(System.in);
+		Net net = new Net();
+		String line;
+		do {
+			try {
+				System.out.print("please input the implementation classname: ");
+				 line = input.nextLine();
+				 if (line.length() > 0)
+					 implementation = BeanClass.load(line);
+				break;
+			} catch (Exception e) {
+				log("ERROR: " + e.toString());
+				//->continue in while-loop
+			}
+		} while((input.hasNext()));
+		//input.close(); //don't close it - we need System.in later...
+		log("implementation class loaded: " + implementation);
+		return net;
 	}
 
 	void log(Object obj) {

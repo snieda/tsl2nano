@@ -2,7 +2,6 @@ package de.tsl2.nano.core;
 
 import static org.junit.Assert.assertTrue;
 
-import java.io.PrintStream;
 import java.security.Policy;
 
 import org.junit.AfterClass;
@@ -10,9 +9,7 @@ import org.junit.BeforeClass;
 import org.junit.Test;
 
 import de.tsl2.nano.core.cls.BeanClass;
-import de.tsl2.nano.core.execution.SystemUtil;
 import de.tsl2.nano.core.util.ENVTestPreparation;
-import de.tsl2.nano.core.util.StringUtil;
 
 public class CoreTest implements ENVTestPreparation {
 	static int aufrufe = 0;

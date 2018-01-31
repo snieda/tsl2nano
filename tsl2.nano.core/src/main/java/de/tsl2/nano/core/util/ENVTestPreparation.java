@@ -4,6 +4,7 @@
 package de.tsl2.nano.core.util;
 
 import de.tsl2.nano.core.ENV;
+import de.tsl2.nano.core.log.LogFactory;
 
 /**
  * Prepares a tsl2.nano unit test with an ENV in directory 'target/test'
@@ -16,6 +17,8 @@ public interface ENVTestPreparation {
 
 	static String setUp(String moduleShort, boolean strict) {
 		String baseDirModule = BASE_DIR + moduleShort + "/";
+		LogFactory.setLogFactoryXml(baseDirModule + TARGET_TEST + "test-logging.xml");
+		LogFactory.setLogFile(baseDirModule + TARGET_TEST + "test.log");
 		ENV.create(baseDirModule + TARGET_TEST);
 		ENV.setProperty(ENV.KEY_CONFIG_PATH, TARGET_TEST);
 		ENV.setProperty("app.strict.mode", strict);

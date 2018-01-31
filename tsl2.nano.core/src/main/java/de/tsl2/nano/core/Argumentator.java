@@ -328,4 +328,10 @@ public class Argumentator {
     public static Attributes readManifest() {
         return RuntimeClassloader.readManifest();
     }
+    
+    @Override
+    public String toString() {
+    	String ln = "===============================================================================\n";
+    	return ln + getClass().getSimpleName() + ":\n" + StringUtil.toFormattedString(man, -1) + "\ncalled with:\n" + StringUtil.toFormattedString(argMap, -1) + ln;
+    }
 }

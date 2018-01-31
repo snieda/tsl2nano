@@ -83,7 +83,7 @@
 		<module>tsl2.nano.vnet</module>
 		<module>tsl2.nano.incubation</module>
 		<module>tsl2.nano.h5</module>
-		<!-- <module>tsl2-report</module> -->
+		<module>tsl2-report</module>
 	</modules>
 	<distributionManagement>
 		<snapshotRepository>
@@ -275,20 +275,28 @@
 				<artifactId>findbugs-maven-plugin</artifactId>
 				<version>3.0.5</version>
 				<configuration>
+					<aggregate>true</aggregate>
 					<onlyAnalyze>de.tsl2.*</onlyAnalyze>
 				</configuration>
 			</plugin>
 			<plugin>
             	<groupId>org.apache.maven.plugins</groupId>
             	<artifactId>maven-pmd-plugin</artifactId>
-            	<version>3.8</version>
+            	<version>3.9.0</version>
 				<reportSets>
 					<reportSet>
+						<id>module</id>
 						<reports>
 							<report>pmd</report>
-							<report>check</report>
 							<report>cpd</report>
-							<report>cpd-check</report>
+						</reports>
+					</reportSet>
+					<reportSet>
+						<id>all</id>
+						<configuration><aggregate>true</aggregate></configuration>
+						<reports>
+							<report>pmd</report>
+							<report>cpd</report>
 						</reports>
 					</reportSet>
 				</reportSets>
@@ -296,7 +304,7 @@
    			<plugin>
 				<groupId>org.jacoco</groupId>
 				<artifactId>jacoco-maven-plugin</artifactId>
-				<version>0.7.9</version>
+				<version>0.8.0</version>
 				<configuration>
 					<excludes>
 						<exclude>**/*.jar</exclude>

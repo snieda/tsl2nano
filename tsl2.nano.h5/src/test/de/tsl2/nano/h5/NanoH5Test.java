@@ -175,6 +175,13 @@ public class NanoH5Test implements ENVTestPreparation {
         String html = null, exptectedHtml;
         for (int i = 0; i < beanTypesToCheck.length; i++) {
             Bean bean = Bean.getBean(BeanClass.createInstance(beanTypesToCheck[i]));
+            //check session and collector
+            BeanCollector<Collection<Object>,Object> beanCollector = BeanCollector.getBeanCollector(Arrays.asList(bean.getInstance()), BeanCollector.MODE_ALL);
+            beanCollector.onActivation(null);
+            ((Html5Presentation)beanCollector.getPresentationHelper()).build(session, beanCollector, "test", true, session.getNavigationStack());
+            beanCollector.onDeactivation(null);
+
+            //check bean and  attributes
             bean.onActivation(null);
             System.out.println(bean.toValueMap(null));
             Bean.getBean(bean.getPresentable()).toValueMap(null);
@@ -200,11 +207,6 @@ public class NanoH5Test implements ENVTestPreparation {
             assertTrue(html.contains(DOMExtender.class.getName())); // see DOMExtender class
             bean.onDeactivation(null);
 
-            //check session and collector
-//            BeanCollector<Collection<Object>,Object> beanCollector = BeanCollector.getBeanCollector(Arrays.asList(bean.getInstance()), BeanCollector.MODE_ALL);
-//            beanCollector.onActivation(null);
-//            ((Html5Presentation)beanCollector.getPresentationHelper()).build(session, beanCollector, "test", true, session.getNavigationStack());
-//            beanCollector.onDeactivation(null);
         }
 
         // check encoding (only if german!)
