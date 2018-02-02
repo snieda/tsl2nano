@@ -9,14 +9,13 @@
  */
 package de.tsl2.nano.bean.def;
 
-import java.lang.reflect.Method;
 import java.util.Map;
 
 import org.simpleframework.xml.Attribute;
 import org.simpleframework.xml.Element;
 
 import de.tsl2.nano.bean.IValueAccess;
-import de.tsl2.nano.core.cls.IAttribute;
+import de.tsl2.nano.core.cls.IDefaultAttribute;
 import de.tsl2.nano.core.messaging.EventController;
 
 /**
@@ -26,7 +25,7 @@ import de.tsl2.nano.core.messaging.EventController;
  * @version $Revision$
  */
 @SuppressWarnings({ "unchecked", "rawtypes" })
-public class MapValue<T> implements IValueAccess<T>, IAttribute<T> {
+public class MapValue<T> implements IValueAccess<T>, IDefaultAttribute<T> {
     /** serialVersionUID */
     private static final long serialVersionUID = -1460468414949211876L;
 
@@ -57,11 +56,6 @@ public class MapValue<T> implements IValueAccess<T>, IAttribute<T> {
     }
 
     @Override
-    public int compareTo(IAttribute<T> o) {
-        return getId().compareTo(o.getId());
-    }
-
-    @Override
     public Class<?> getDeclaringClass() {
         return map.getClass();
     }
@@ -88,26 +82,6 @@ public class MapValue<T> implements IValueAccess<T>, IAttribute<T> {
         } else {
             map.put(name, value);
         }
-    }
-
-    @Override
-    public String getId() {
-        return getType().getSimpleName() + "." + name;
-    }
-
-    @Override
-    public boolean hasWriteAccess() {
-        return true;
-    }
-
-    @Override
-    public Method getAccessMethod() {
-        return null;
-    }
-
-    @Override
-    public boolean isVirtual() {
-        return true;
     }
 
     /**

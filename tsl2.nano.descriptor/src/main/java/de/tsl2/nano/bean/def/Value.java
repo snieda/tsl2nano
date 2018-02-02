@@ -9,20 +9,19 @@
  */
 package de.tsl2.nano.bean.def;
 
-import java.lang.reflect.Method;
-
 import org.simpleframework.xml.Attribute;
 
 import de.tsl2.nano.bean.IValueAccess;
 import de.tsl2.nano.bean.ValueHolder;
 import de.tsl2.nano.core.cls.IAttribute;
+import de.tsl2.nano.core.cls.IDefaultAttribute;
 
 /**
  * Simple implementation of {@link IValueAccess} and {@link IAttribute}
  * @author Tom
  * @version $Revision$ 
  */
-public class Value<T> extends ValueHolder<T> implements IAttribute<T> {
+public class Value<T> extends ValueHolder<T> implements IDefaultAttribute<T> {
     /** serialVersionUID */
     private static final long serialVersionUID = -1460468414949211876L;
 
@@ -52,11 +51,6 @@ public class Value<T> extends ValueHolder<T> implements IAttribute<T> {
     }
     
     @Override
-    public int compareTo(IAttribute<T> o) {
-        return getId().compareTo(o.getId());
-    }
-
-    @Override
     public Class getDeclaringClass() {
         return getType();
     }
@@ -79,42 +73,6 @@ public class Value<T> extends ValueHolder<T> implements IAttribute<T> {
     @Override
     public void setValue(Object instance, T value) {
         setValue(value);
-    }
-
-    @Override
-    public String getId() {
-        return getType().getSimpleName() + "." + name;
-    }
-
-    @Override
-    public boolean hasWriteAccess() {
-        return true;
-    }
-
-    @Override
-    public Method getAccessMethod() {
-        return null;
-    }
-
-    @Override
-    public boolean isVirtual() {
-        return true;
-    }
-    
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    public int hashCode() {
-        return getId().hashCode();
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    public boolean equals(Object obj) {
-        return hashCode() == obj.hashCode();
     }
 
     @Override

@@ -9,15 +9,13 @@
  */
 package de.tsl2.nano.bean.def;
 
-import java.lang.reflect.Method;
-
 import org.simpleframework.xml.Attribute;
 import org.simpleframework.xml.Default;
 import org.simpleframework.xml.DefaultType;
 import org.simpleframework.xml.Element;
 
 import de.tsl2.nano.bean.IValueAccess;
-import de.tsl2.nano.core.cls.IAttribute;
+import de.tsl2.nano.core.cls.IDefaultAttribute;
 import de.tsl2.nano.core.messaging.EventController;
 
 /**
@@ -27,7 +25,7 @@ import de.tsl2.nano.core.messaging.EventController;
  * @version $Revision$
  */
 @Default(value = DefaultType.FIELD, required = false)
-public class ArrayValue<T> implements IValueAccess<T>, IAttribute<T> {
+public class ArrayValue<T> implements IValueAccess<T>, IDefaultAttribute<T> {
     /** serialVersionUID */
     private static final long serialVersionUID = -1460468414949211876L;
 
@@ -63,11 +61,6 @@ public class ArrayValue<T> implements IValueAccess<T>, IAttribute<T> {
     }
 
     @Override
-    public int compareTo(IAttribute<T> o) {
-        return getId().compareTo(o.getId());
-    }
-
-    @Override
     public Class getDeclaringClass() {
         return Object[].class;
     }
@@ -91,26 +84,6 @@ public class ArrayValue<T> implements IValueAccess<T>, IAttribute<T> {
     @Override
     public void setValue(Object instance, T value) {
         ((Object[]) instance)[index] = value;
-    }
-
-    @Override
-    public String getId() {
-        return getType().getSimpleName() + "." + name;
-    }
-
-    @Override
-    public boolean hasWriteAccess() {
-        return true;
-    }
-
-    @Override
-    public Method getAccessMethod() {
-        return null;
-    }
-
-    @Override
-    public boolean isVirtual() {
-        return true;
     }
 
     /**
