@@ -130,7 +130,7 @@
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-dependency-plugin</artifactId>
-				<version>2.10</version>
+				<version>3.0.2</version>
 				<executions>
 					<execution>
 						<id>copy-dependencies</id>
@@ -155,7 +155,7 @@
 			<plugin>
 				<!-- FIXME: It is not recommended to create more than one jar file -->
 				<artifactId>maven-jar-plugin</artifactId>
-				<version>2.3</version>
+				<version>3.0.2</version>
 				<executions>
 					<execution>
 						<id>standard-jar</id>

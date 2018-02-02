@@ -118,11 +118,11 @@ public class RuleCover<T> extends DelegationHandler<T> implements
     }
 
     /**
-     * covers the given child of the instance attribute with the given rule
+     * covers the given child (as member!) of the instance attribute with the given rule
      * 
      * @param cls class holding the attribute
      * @param attr class attribute
-     * @param child child of attribute
+     * @param child child (member!) of attribute
      * @param rule rule to cover the attribute child
      * @return {@link RuleCover} instance
      */
@@ -159,13 +159,23 @@ public class RuleCover<T> extends DelegationHandler<T> implements
         String parent = StringUtil.substring(child, null, ".", true);
         IAttributeDefinition attribute = BeanDefinition.getBeanDefinition(cls).getAttribute(attr);
         Bean<IAttributeDefinition> bean = Bean.getBean(attribute);
-        Object parentProxy = bean.getAttribute(parent);
+        //first we try it through bean-attribute relation path
+        Object parentProxy = bean.getAttribute(parent, false);
+        
+        PrivateAccessor<IAttributeDefinition> privAcc = null;
+        if (parentProxy == null) { //try it through its members
+            privAcc = new PrivateAccessor<>(attribute);
+            parentProxy = privAcc.member(StringUtil.substring(child, ".", null));
+        }
         if (!Proxy.isProxyClass(parentProxy.getClass()))
             LOG.error("no rule-cover found for " + attr + "." + child);
         InvocationHandler handler = Proxy.getInvocationHandler(parentProxy);
         if (handler instanceof RuleCover) {
             Object realObject = ((RuleCover) handler).getDelegate();
-            bean.setValue(parent, realObject);
+            if (privAcc != null) //-> as member
+                privAcc.set(StringUtil.substring(child, ".", null), realObject);
+            else //as bean attribute
+                bean.setValue(parent, realObject);
         } else {
             LOG.error("proxy for " + attr + "." + child + " is not a RuleCover instance!");
         }

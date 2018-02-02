@@ -279,6 +279,10 @@ public class AttributeConfigurator implements Serializable {
         RuleCover.cover(attr.getDeclaringClass(), attr.getName(), child, rule);
     }
 
+    /**
+     * removes a rule cover defined by the attributes child (as member!). throws an exception, if there is no rule cover.
+     * @param child {@link AttributeDefinition} member
+     */
     public void actionRemoveRuleCover(String child) {
         RuleCover.removeCover(attr.getDeclaringClass(), attr.getName(), child);
     }

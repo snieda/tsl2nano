@@ -42,6 +42,7 @@ import de.tsl2.nano.bean.def.BeanCollector;
 import de.tsl2.nano.bean.def.BeanDefinition;
 import de.tsl2.nano.bean.def.BeanPresentationHelper;
 import de.tsl2.nano.bean.def.IValueDefinition;
+import de.tsl2.nano.bean.def.ValueGroup;
 import de.tsl2.nano.core.ENV;
 import de.tsl2.nano.core.classloader.NestedJarClassLoader;
 import de.tsl2.nano.core.classloader.RuntimeClassloader;
@@ -59,11 +60,13 @@ import de.tsl2.nano.core.util.NetUtil;
 import de.tsl2.nano.execution.AntRunner;
 import de.tsl2.nano.h5.NanoHTTPD.Method;
 import de.tsl2.nano.h5.NanoHTTPD.Response;
+import de.tsl2.nano.h5.configuration.AttributeConfigurator;
 import de.tsl2.nano.h5.configuration.BeanConfigurator;
 import de.tsl2.nano.h5.expression.QueryPool;
 import de.tsl2.nano.h5.navigation.Workflow;
 import de.tsl2.nano.h5.timesheet.Timesheet;
 import de.tsl2.nano.incubation.specification.ParType;
+import de.tsl2.nano.incubation.specification.actions.Action;
 import de.tsl2.nano.incubation.specification.actions.ActionPool;
 import de.tsl2.nano.incubation.specification.rules.RulePool;
 import de.tsl2.nano.incubation.specification.rules.RuleScript;
@@ -341,6 +344,34 @@ public class NanoH5Test implements ENVTestPreparation {
         }, mapper, Charge.class);
     }
     
+    @Test
+    public void testConfigurators() throws Exception {
+        createENV("beanconf");
+        new NanoH5();
+        BeanContainer.initEmtpyServiceActions();
+        ENV.get(ActionPool.class).add(new Action("testaction", Address.class, "getCity", null));
+        BeanConfigurator<Address> bconf = BeanConfigurator.create(Address.class).getInstance();
+        bconf.actionAddAction("testaction");
+        bconf.actionAddAttribute("date", "expression");
+        bconf.actionCreateCompositor(Address.class.getName(), "city", "code", "wrench.png");
+        bconf.actionCreateController("code", 1, 1, Address.class.getName(), "city", "code", "wrench.png");
+        bconf.actionCreateRuleOrAction("testaction", "!", Address.class.getName() + ".getCity");
+        bconf.actionCreateSheet("sheet", 2, 2, "1", 1, 1);
+        bconf.setValueGroups(Arrays.asList(new ValueGroup("test", false, "city", "code")));
+        
+        List<AttributeConfigurator> attributes = bconf.getAttributes();
+        for (AttributeConfigurator aconf : attributes) {
+            aconf.actionAddListener(aconf.getName(), "city", "test");
+            assertTrue(aconf.getListener() != null);
+
+            aconf.actionAddRuleCover("presentable", "test");
+            aconf.actionCreateRuleOrAction("testaction", "!", Address.class.getName() + ".getCity");
+            aconf.actionRemoveRuleCover("presentable");
+            if (aconf.getColumnDefinition() != null) //may be null on virtual attributes
+            assertEquals(aconf.getPresentable().getLabel(), aconf.getColumnDefinition().getPresentable().getLabel());
+        }
+    }
+
     @Test
     public void testAttributeExpression() throws Exception {
         createENV("restful");
