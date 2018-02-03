@@ -13,7 +13,7 @@ import javax.imageio.ImageIO;
 import de.tsl2.nano.core.util.FileUtil;
 
 /**
- * transforms a picture of pixels into a picture of characters.
+ * transforms a picture of pixels into a picture of characters (code page 850, cp1252).
  * <p/>
  * Important Note: as ImageIO.read() returns java.awt.BufferedImage, this class is not usable on android systems!
  * 

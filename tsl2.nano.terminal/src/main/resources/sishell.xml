@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<SIShell name="sishell.xml" width="79" height="22" style="1" bars="true" refreshConfig="false" useNetworkExtension="true" sequential="false">
+<SIShell name="sishell.xml" width="79" height="22" style="7" bars="true" refreshConfig="false" useNetworkExtension="true" sequential="false">
    <definition name="image.out">
       <value class="java.lang.String">-out</value>
    </definition>
@@ -57,7 +57,7 @@
             <condition>
                <expression>quality=NORMAL</expression>
             </condition>
-            <mainClass>de.tsl2.nano.core.util.PrintUtil</mainClass>
+            <mainClass>de.tsl2.nano.util.PrintUtil</mainClass>
             <method>main</method>
             <argNames length="10">
                <string>source</string>
@@ -156,7 +156,7 @@
             <description>xpath expression</description>
          </item>
          <item class="de.tsl2.nano.incubation.terminal.item.Action" name="transformVel">
-            <mainClass>de.tsl2.nano.core.serialize.XmlUtil</mainClass>
+            <mainClass>de.tsl2.nano.util.XmlGenUtil</mainClass>
             <method>transformVel</method>
             <argNames length="2">
                <string>source</string>
@@ -164,7 +164,7 @@
             </argNames>
          </item>
          <item class="de.tsl2.nano.incubation.terminal.item.Action" name="transformXsl">
-            <mainClass>de.tsl2.nano.core.serialize.XmlUtil</mainClass>
+            <mainClass>de.tsl2.nano.util.XmlGenUtil</mainClass>
             <method>transformXsl</method>
             <argNames length="3">
                <string>source</string>
@@ -173,7 +173,7 @@
             </argNames>
          </item>
          <item class="de.tsl2.nano.incubation.terminal.item.Action" name="xpath">
-            <mainClass>de.tsl2.nano.core.serialize.XmlUtil</mainClass>
+            <mainClass>de.tsl2.nano.util.XmlGenUtil</mainClass>
             <method>xpath</method>
             <argNames length="2">
                <string>xpath-expression</string>
@@ -234,7 +234,7 @@
             <item class="de.tsl2.nano.incubation.terminal.item.Input" name="ip">
                <constraints type="java.lang.String" nullable="true" length="-1" scale="-1" precision="-1"/>
                <description>internet address to be scanned</description>
-               <value class="java.lang.String">192.168.56.1</value>
+               <value class="java.lang.String">192.168.242.12</value>
             </item>
             <item class="de.tsl2.nano.incubation.terminal.item.Input" name="lowest-port">
                <constraints type="java.lang.Integer" nullable="true" length="-1" scale="-1" precision="-1"/>

@@ -22,6 +22,7 @@ import java.security.PermissionCollection;
 import java.security.Permissions;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.Enumeration;
 import java.util.LinkedList;
 import java.util.List;
@@ -36,6 +37,7 @@ import de.tsl2.nano.core.log.LogFactory;
 import de.tsl2.nano.core.util.ByteUtil;
 import de.tsl2.nano.core.util.ConcurrentUtil;
 import de.tsl2.nano.core.util.FileUtil;
+import de.tsl2.nano.core.util.MapUtil;
 import de.tsl2.nano.core.util.StringUtil;
 
 /**
@@ -307,7 +309,9 @@ public class RuntimeClassloader extends URLClassLoader {
                 try {
                     Manifest manifest = new Manifest(in);
 
-                    attributes.putAll(manifest.getMainAttributes());
+                    Attributes mainAttributes = manifest.getMainAttributes();
+                    MapUtil.removeAll(mainAttributes, attributes.keySet()); //first wins
+					attributes.putAll(mainAttributes);
 //                String arguments = mainAttributes.getValue("Arguments");
 //                if (arguments != null)
 //                    log("Found arguments: " + arguments);

@@ -255,15 +255,21 @@ public class AppLoader {
     /**
      * internal hack to guarantee utf-8
      */
-    protected void useUTF8() {
+    public static void useUTF8() {
+    	useCharset("UTF-8");
+    }
+    public static void useCp1252() {
+    	useCharset("Cp1252");
+    }
+    protected static void useCharset(String encoding) {
         try {
-            System.setProperty("file.encoding","UTF-8");
+            System.setProperty("file.encoding", encoding);
             Field charset = Charset.class.getDeclaredField("defaultCharset");
             charset.setAccessible(true);
                 charset.set(null,null);
             } catch (Exception e) {
                 System.err.println(e.toString());
-                System.out.println("continuing after utf-8 error, followed by html rendering problems...");
+                System.out.println("continuing after " + encoding + " error, followed by html rendering problems...");
             }            
     }
 

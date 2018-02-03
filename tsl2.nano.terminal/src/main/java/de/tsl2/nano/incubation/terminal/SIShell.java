@@ -733,6 +733,8 @@ public class SIShell implements IItemHandler, Serializable {
     }
 
     public static void main(String[] args) {
+    	AppLoader.useCp1252();
+    	
 //        if (args.length == 0) {
 //            System.out.println("Please provide a file name as base for this terminal");
 //            return;

@@ -66,6 +66,7 @@ public class TerminalTest implements ENVTestPreparation {
 //      SIShell.main(new String[] { SIShell.DEFAULT_NAME, TerminalAdmin.ADMIN });
 //  }
 //
+  @SuppressWarnings({ "unchecked", "rawtypes" })
   @Test
   public void testSIShellTools() throws Exception {
 
