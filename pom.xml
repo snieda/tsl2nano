@@ -56,12 +56,12 @@
 		<url>https://git.code.sf.net/p/tsl2nano/code tsl2nano-code</url>
 	</scm>
 	<!-- TODO: should we remove the parent? -->
-<!-- 	<parent>
+ 	<parent>
 		<groupId>org.sonatype.oss</groupId>
 		<artifactId>oss-parent</artifactId>
 		<version>9</version>
 	</parent>
- -->	<developers>
+	<developers>
 		<developer>
 			<name>Thomas Schneider</name>
 		</developer>
@@ -244,7 +244,7 @@
 			<plugin>
 				<groupId>org.sonatype.plugins</groupId>
 				<artifactId>nexus-staging-maven-plugin</artifactId>
-				<version>1.6.8</version>
+				<version>1.6.7</version>
 				<extensions>true</extensions>
 				<configuration>
 					<serverId>ossrh</serverId>

@@ -42,22 +42,17 @@
 				<directory>../tsl2.nano.core/target/classes</directory>
 				<includes>
 					<include>**/core/**</include>
-				</includes>
-			</resource>
-			<resource>
-				<directory>../tsl2.nano.common/target/classes</directory>
-				<excludes>
-					<exclude>**/*.class</exclude>
-				</excludes>
-			</resource>
-			<resource>
-				<directory>../tsl2.nano.core/target/classes</directory>
-				<includes>
 					<include>org/**/*.class</include>
 				</includes>
 			</resource>
 			<resource>
 				<directory>../tsl2.nano.core/target/classes</directory>
+				<excludes>
+					<exclude>**/*.class</exclude>
+				</excludes>
+			</resource>
+			<resource>
+				<directory>../tsl2.nano.common/target/classes</directory>
 				<excludes>
 					<exclude>**/*.class</exclude>
 				</excludes>

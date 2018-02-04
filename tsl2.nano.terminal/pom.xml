@@ -24,7 +24,7 @@
 					<include>*.*ml</include>
 					<include>*.txt</include>
 					<include>**/core/**</include>
-					<include>**/apache/**</include>
+					<include>org/**/*.class</include>
 				</includes>
 			</resource>
 			<resource>
