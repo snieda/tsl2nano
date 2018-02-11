@@ -480,6 +480,28 @@ public class NetUtil {
 
     }
 
+    /**
+     * this methods provide a free port - starting from given port. but no guarantee is given that this port will be opened by another task right
+     * now. if you need a server-socket, call new ServerSocket(0) instead (see {@link ServerSocket#ServerSocket(int)}).
+     * 
+     * @param startingPort port to start search from
+     * @return serversocket instance
+     */
+    public static int getNextFreePort(int startingPort) {
+        Integer port = null;
+        do {
+	        try {
+	            ServerSocket s = new ServerSocket(startingPort++);
+	            port = s.getLocalPort();
+	            s.close();
+	            return port;
+	        } catch (IOException e) {
+	        	System.out.print(".");
+	        }
+        } while (startingPort < 99999);
+        return port;
+    }
+
 //    public static String gateway() {
 //        try (DatagramSocket s = new DatagramSocket()) {
 //          s.connect(InetAddress.getByAddress(new byte[] { 1, 1, 1, 1 }), 0);

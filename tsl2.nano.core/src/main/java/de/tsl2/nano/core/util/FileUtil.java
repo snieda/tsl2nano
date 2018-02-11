@@ -825,9 +825,11 @@ public class FileUtil {
     public static boolean copy(String srcFile, String destFile) {
         try {
             final File f1 = new File(srcFile);
-            final File f2 = new File(destFile);
+            File f2 = new File(destFile);
             if (f2.getParentFile() != null)
                 f2.getParentFile().mkdirs();
+            if (f2.isDirectory())
+            	f2 = new File(f2.getPath() + "/" + f1.getName());
             write(new FileInputStream(f1), new FileOutputStream(f2), destFile, true);
             LOG.info("file " + srcFile + " copied to " + destFile);
             return true;

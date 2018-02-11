@@ -1326,7 +1326,7 @@ public class Html5Presentation<T> extends BeanPresentationHelper<T> implements I
             enable(ATTR_TYPE, type != null),
             type,
             enable("onclick", type != null),
-            enable("fade(this)", type != null),
+            enable("fade(this)", type != null && ENV.get("websocket.use", true)),
             ATTR_ACCESSKEY,
             sc,
             ATTR_FORMTARGET,
@@ -1850,56 +1850,58 @@ public class Html5Presentation<T> extends BeanPresentationHelper<T> implements I
 
                     }
                     if (p.getEnabler().isActive()) {
-                        //perhaps create an input assist listener
-                        if (beanValue.getValueExpression() != null && ENV.get("websocket.use.inputassist", true)) {
-                            appendAttributes(input, "onkeypress",
-                                ENV.get("websocket.inputassist.function", "inputassist(event)"));
-                        }
                         //on focus gained, preselect text
                         if (ENV.get("websocket.autoselect", true)) {
                             appendAttributes(input, "onfocus", "this.select();");
                         }
 
-                        //perhaps create an dependency listener
-                        if (beanValue.hasListeners()) {
-                            appendAttributes(input, "onblur",
-                                ENV.get("websocket.dependency.function", "evaluatedependencies(event)"));
-                            if (true/*(isData(beanValue)*/) {//provide mouseclicks on pictures
-                                appendAttributes(input, "onclick",
-                                    ENV.get("websocket.dependency.function", "evaluatedependencies(event)"));
+                        if (ENV.get("websocket.use", true)) {
+                            //perhaps create an input assist listener
+                            if (beanValue.getValueExpression() != null && ENV.get("websocket.use.inputassist", true)) {
+                                appendAttributes(input, "onkeypress",
+                                    ENV.get("websocket.inputassist.function", "inputassist(event)"));
                             }
-                        }
-                        //handle attachments
-                        if (BitUtil.hasBit(beanValue.getPresentation().getType(), TYPE_ATTACHMENT)) {
-                            appendAttributes(input, "onchange",
-                                ENV.get("websocket.attachment.function", "transferattachment(this)"));
-                            /*
-                             * save the attachment to file system to be transferred by http-server,
-                             * using bean-id and attribute name
-                             */
-                            Object v = beanValue.getValue();
-//                        if (beanValue instanceof Attachment) {
-//                            FileUtil.writeBytes(((Attachment)beanValue).getValue(), FileUtil.getValidFileName(beanValue.getName()), false);
-//                        } else {
-                            if (!Util.isEmpty(v)) {
-                                boolean writeFile = true;
-                                if (v instanceof String)
-                                    if (new File((String) v).exists())
-                                        v =
-                                            FileUtil.getFileBytes(Attachment.getFilename(beanValue.getInstance(),
-                                                beanValue.getName(), (String) v), null);
-                                    else //not a file name and no data --> do nothing
-                                        writeFile = false;
-
-                                if (writeFile && (ByteUtil.isByteStream(v.getClass())
-                                    || Serializable.class.isAssignableFrom(v.getClass())))
-                                    FileUtil.writeBytes(ByteUtil.getBytes(v),
-                                        ENV.getTempPath() + beanValue.getValueFile().getPath(),
-                                        false);
-                                else if (writeFile)
-                                    throw new IllegalStateException("attachment of attribute '"
-                                        + beanValue.getValueId()
-                                        + "' should be of type byte[], ByteBuffer, Blob or String - or at least Serializable!");
+                            //perhaps create an dependency listener
+                            if (beanValue.hasListeners()) {
+                                appendAttributes(input, "onblur",
+                                    ENV.get("websocket.dependency.function", "evaluatedependencies(event)"));
+                                if (true/*(isData(beanValue)*/) {//provide mouseclicks on pictures
+                                    appendAttributes(input, "onclick",
+                                        ENV.get("websocket.dependency.function", "evaluatedependencies(event)"));
+                                }
+                            }
+                            //handle attachments
+                            if (BitUtil.hasBit(beanValue.getPresentation().getType(), TYPE_ATTACHMENT)) {
+                                appendAttributes(input, "onchange",
+                                    ENV.get("websocket.attachment.function", "transferattachment(this)"));
+                                /*
+                                 * save the attachment to file system to be transferred by http-server,
+                                 * using bean-id and attribute name
+                                 */
+                                Object v = beanValue.getValue();
+    //                        if (beanValue instanceof Attachment) {
+    //                            FileUtil.writeBytes(((Attachment)beanValue).getValue(), FileUtil.getValidFileName(beanValue.getName()), false);
+    //                        } else {
+                                if (!Util.isEmpty(v)) {
+                                    boolean writeFile = true;
+                                    if (v instanceof String)
+                                        if (new File((String) v).exists())
+                                            v =
+                                                FileUtil.getFileBytes(Attachment.getFilename(beanValue.getInstance(),
+                                                    beanValue.getName(), (String) v), null);
+                                        else //not a file name and no data --> do nothing
+                                            writeFile = false;
+    
+                                    if (writeFile && (ByteUtil.isByteStream(v.getClass())
+                                        || Serializable.class.isAssignableFrom(v.getClass())))
+                                        FileUtil.writeBytes(ByteUtil.getBytes(v),
+                                            ENV.getTempPath() + beanValue.getValueFile().getPath(),
+                                            false);
+                                    else if (writeFile)
+                                        throw new IllegalStateException("attachment of attribute '"
+                                            + beanValue.getValueId()
+                                            + "' should be of type byte[], ByteBuffer, Blob or String - or at least Serializable!");
+                                }
                             }
                         }
 //                    }

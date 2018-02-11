@@ -251,7 +251,7 @@ public class Util {
     }
 
     /**
-     * value of array at given
+     * value of array at given index
      * 
      * @param arr array
      * @param index array index for value

@@ -643,12 +643,7 @@ public class SIShell implements IItemHandler, Serializable {
     }
 
     public void setBatch(String... cmds) {
-        in = createBatchStream(cmds);
-    }
-
-    public static InputStream createBatchStream(String... cmds) {
-        String concat = StringUtil.concat(new char[] { '\n' }, cmds);
-        return ByteUtil.getInputStream(concat.getBytes());
+        in = SystemUtil.createBatchStream(cmds);
     }
 
     private boolean isCommand(String input, String cmd) {

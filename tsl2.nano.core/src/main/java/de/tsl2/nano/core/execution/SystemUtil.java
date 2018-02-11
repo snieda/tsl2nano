@@ -3,6 +3,7 @@ package de.tsl2.nano.core.execution;
 import java.io.DataOutputStream;
 import java.io.File;
 import java.io.IOException;
+import java.io.InputStream;
 import java.net.InetAddress;
 import java.security.Policy;
 import java.util.Date;
@@ -14,6 +15,8 @@ import org.apache.commons.logging.Log;
 import de.tsl2.nano.core.ManagedException;
 import de.tsl2.nano.core.log.LogFactory;
 import de.tsl2.nano.core.util.BitUtil;
+import de.tsl2.nano.core.util.ByteUtil;
+import de.tsl2.nano.core.util.CollectionUtil;
 import de.tsl2.nano.core.util.NetUtil;
 import de.tsl2.nano.core.util.StringUtil;
 
@@ -35,10 +38,21 @@ public class SystemUtil {
      */
     public static final Process execute(String... command) {
         File dir = new File(command[0]);
-        dir = dir.isFile() ? dir.getParentFile() : new File(System.getProperty("user.dir"));
-        return execute(dir, command);
+        if (!dir.exists() || dir.isFile())
+        	dir = null;
+        else {
+            if (command.length > 1)
+            	command = CollectionUtil.copyOfRange(command, 1, command.length);
+            else
+            	LOG.error("only directory but not executable given! command: " + command);
+        }
+        return execute(dir, true, command);
     }
 
+    public static final Process execute(File directory, String... command) {
+    	return execute(directory, true, command);
+    }
+    
     /**
      * execute system call - waiting for process to end - and logging its console output.<br>
      * example: <code>ScriptUtil.execute("cmd", "/C", "echo", "hello");</code>
@@ -49,7 +63,7 @@ public class SystemUtil {
      * @param directory where to start the command from
      * @param command command with arguments
      */
-    public static final Process execute(File directory, String... command) {
+    public static final Process execute(File directory, boolean waitFor, String... command) {
         final ProcessBuilder processBuilder = new ProcessBuilder(command);
         processBuilder.directory(directory);
         Process process = null;
@@ -62,24 +76,26 @@ public class SystemUtil {
 
             provideJdkAsJavaHome(processBuilder.environment());
             try {//on dalvik, inheritIO is not present - no problem 
-//                processBuilder.inheritIO();
+                processBuilder.inheritIO();
             } catch (NoSuchMethodError err) {
                 LOG.warn(err.toString());
             }
             process = processBuilder.start();
             //IMPROVE: could we use redirection? we need output to standard + log file
-            String input = StringUtil.fromInputStream(process.getInputStream());
-            if (input.length() > 0)
-            	LOG.info("process input: " + input);
+            if (waitFor) {
+	            String input = StringUtil.fromInputStream(process.getInputStream());
+	            if (input.length() > 0)
+	            	LOG.info("process input: " + input);
             
-            int result = process.waitFor();
-
-            LOG.info("\n-------------------------------------------------------------------\n"
-                + "process '" + StringUtil.toString(command, -1) + "' finished with errorlevel: " + result);
-            if (result != 0) {
-                LOG.error("process errors: " + StringUtil.fromInputStream(process.getErrorStream(), "\n"));
+	            int result = process.waitFor();
+	
+	            LOG.info("\n-------------------------------------------------------------------\n"
+	                + "process '" + StringUtil.toString(command, -1) + "' finished with errorlevel: " + result);
+	            if (result != 0) {
+	                LOG.error("process errors: " + StringUtil.fromInputStream(process.getErrorStream(), "\n"));
+	            }
+	            LOG.info("\n-------------------------------------------------------------------");
             }
-            LOG.info("\n-------------------------------------------------------------------");
         } catch (final Exception e) {
             ManagedException.forward(e);
         }
@@ -188,5 +204,10 @@ public class SystemUtil {
         p.put("disc", f.toString());
         p.put("build.info", buildInfo);
         return StringUtil.insertProperties(info, p);
+    }
+    
+    public static InputStream createBatchStream(String... cmds) {
+        String concat = StringUtil.concat(new char[] { '\n' }, cmds);
+        return ByteUtil.getInputStream(concat.getBytes());
     }
 }
