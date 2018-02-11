@@ -23,7 +23,9 @@ import org.junit.Test;
 
 import com.gargoylesoftware.htmlunit.History;
 import com.gargoylesoftware.htmlunit.WebClient;
+import com.gargoylesoftware.htmlunit.html.DomElement;
 import com.gargoylesoftware.htmlunit.html.HtmlButton;
+import com.gargoylesoftware.htmlunit.html.HtmlCheckBoxInput;
 import com.gargoylesoftware.htmlunit.html.HtmlPage;
 
 import de.tsl2.nano.core.ENV;
@@ -32,6 +34,7 @@ import de.tsl2.nano.core.util.ConcurrentUtil;
 import de.tsl2.nano.core.util.ENVTestPreparation;
 import de.tsl2.nano.core.util.FileUtil;
 import de.tsl2.nano.core.util.NetUtil;
+import de.tsl2.nano.core.util.StringUtil;
 
 /**
  * 
@@ -40,10 +43,12 @@ import de.tsl2.nano.core.util.NetUtil;
  */
 public class NanoH5IntegrationTest implements ENVTestPreparation {
     private static String TEST_DIR;
-
+    static boolean nanoAlreadyRunning = false;
+    
     @BeforeClass
     public static void setUp() {
-        TEST_DIR = ENVTestPreparation.setUp("h5", false) + TARGET_TEST;
+        if (!nanoAlreadyRunning)
+            TEST_DIR = ENVTestPreparation.setUp("h5", false) + TARGET_TEST;
     }
 
     @AfterClass
@@ -51,8 +56,8 @@ public class NanoH5IntegrationTest implements ENVTestPreparation {
 //        ENVTestPreparation.tearDown();
     }
 
-    static String getServiceURL() {
-        return "http://localhost:" + NetUtil.getNextFreePort(8067);
+    static String getServiceURL(boolean nextFreePort) {
+        return "http://localhost:" + (nextFreePort ? NetUtil.getNextFreePort(8067) : 8067);
     }
 
     private void runNano(String serviceURL) throws IOException {
@@ -83,16 +88,17 @@ public class NanoH5IntegrationTest implements ENVTestPreparation {
         System.setProperty("sun.jnu.encoding", "UTF-8");
         System.setProperty("JAVA_OPTS", "-Xmx512m -Djava.awt.headless -agentlib:jdwp=transport=dt_socket,address=8787,server=y,suspend=n");
         System.setProperty("tsl2nano.offline", "true");
-        String serviceURL = getServiceURL();
+        String serviceURL = getServiceURL(!nanoAlreadyRunning);
 //        runNano(serviceURL);
         Process process = null;
         PipedOutputStream myOut = new PipedOutputStream();
         InputStream testIn = new PipedInputStream(myOut);
         System.setIn(testIn);
         try {
+            if (!nanoAlreadyRunning)
+                process = runNanoFromJar();
             
-            process = runNanoFromJar();
-            
+            System.getProperties().put("org.apache.commons.logging.simplelog.defaultlog", "info");
             WebClient webClient = new WebClient();
             webClient.getOptions().setTimeout(1200000); //20min
             HtmlPage page = webClient.getPage(serviceURL);
@@ -102,8 +108,11 @@ public class NanoH5IntegrationTest implements ENVTestPreparation {
 
             for (int i = 0; i < 7; i++) {
                 //create and delete objects of all sample types
+//                HtmlCheckBoxInput checkbox = page.getElementByName(String.valueOf(i));
+//                page = submit(page, "beancollectorliste.open");
                 page = testObjectCreation(page);
             }
+            //TODO: logout
         } finally {
             if (process != null) {
                 myOut.write("\n\n".getBytes());
@@ -129,7 +138,7 @@ public class NanoH5IntegrationTest implements ENVTestPreparation {
     }
 
     private HtmlPage testObjectCreation(HtmlPage page) throws Exception {
-        String beanName = page.getBody().getId();
+        String beanName = StringUtil.toFirstLower(page.getBody().getId()) + "liste";
         page = submit(page, beanName + "." + "search");
         page = submit(page, beanName + "." + "forward");
         submit(page, beanName + "." + "print");

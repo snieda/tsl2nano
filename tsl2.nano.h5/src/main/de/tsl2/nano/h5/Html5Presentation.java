@@ -541,7 +541,7 @@ public class Html5Presentation<T> extends BeanPresentationHelper<T> implements I
          * The body
          */
         Element body =
-            appendElement(html, TAG_BODY, ATTR_ID, (!Util.isEmpty(title, true) ? title : TAG_BODY));
+            appendElement(html, TAG_BODY, ATTR_ID, bean != null ? bean.getName() : title);
         if (interactive) {
             String style =
                 ENV.get("app.page.style", STYLE_BACKGROUND_RADIAL_GRADIENT
