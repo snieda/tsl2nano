@@ -8,6 +8,8 @@
  */
 package de.tsl2.nano.core;
 
+import java.io.PrintWriter;
+import java.io.StringWriter;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.UndeclaredThrowableException;
 import java.util.Arrays;
@@ -201,5 +203,12 @@ public class ManagedException extends RuntimeException {
         } else {
             return new ManagedException(ex, logNow);
         }
+    }
+    
+    public static String toString(Throwable ex) {
+    	StringWriter sw = new StringWriter();
+    	PrintWriter pw = new PrintWriter(sw);
+    	ex.printStackTrace(pw);
+    	return sw.toString();
     }
 }

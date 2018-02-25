@@ -69,6 +69,7 @@ import de.tsl2.nano.core.messaging.EMessage;
 import de.tsl2.nano.core.messaging.IListener;
 import de.tsl2.nano.core.util.ConcurrentUtil;
 import de.tsl2.nano.core.util.DateUtil;
+import de.tsl2.nano.core.util.FileUtil;
 import de.tsl2.nano.core.util.ListSet;
 import de.tsl2.nano.core.util.MapUtil;
 import de.tsl2.nano.core.util.NetUtil;
@@ -422,6 +423,7 @@ public class NanoH5Session implements ISession<BeanDefinition>, Serializable, IL
                 }
             };
             msg = refreshPage(ex);
+            FileUtil.writeBytes(msg.getBytes(), ENV.getTempPath() + "page-failed-" + getId() + ".html", false);
             response = server.createResponse(Status.BAD_REQUEST, MIME_HTML, msg);
             actionLog.clear();
             //don't forget that there was an exception. to be seen on the next exception ;-)
@@ -598,10 +600,10 @@ public class NanoH5Session implements ISession<BeanDefinition>, Serializable, IL
 //                if (data.isEmpty())
 //                    
                 ListSet listSet = CollectionUtil.asListSet(data);
-                Object selectedItem =
-                    listSet.get(uriLinkNumber.intValue()
-                        - (ENV.get("layout.grid.searchrow.show", true) && collector.hasMode(MODE_SEARCHABLE)
-                            && collector.hasFilter() ? 2 : 0));
+                int selectedIndex = uriLinkNumber.intValue()
+                    - (ENV.get("layout.grid.searchrow.show", true) && collector.hasMode(MODE_SEARCHABLE)
+                        && collector.hasFilter() ? 2 : 0);
+                Object selectedItem = listSet.get(selectedIndex);
                 boolean isTypeList = BeanCollector.class.isAssignableFrom(collector.getClazz());
                 responseObject = isTypeList ? selectedItem : Bean.getBean((Serializable) selectedItem);
                 return responseObject;

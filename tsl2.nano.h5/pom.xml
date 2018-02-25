@@ -277,6 +277,35 @@
 					</execution>
 				</executions>
 			</plugin>
+			<plugin> <!-- WHY IS IT NOT STARTED ON PRE_INTEGRATION-TEST??? -->
+				<groupId>org.apache.maven.plugins</groupId>
+	            <artifactId>maven-antrun-plugin</artifactId>
+	            <executions>
+	                <execution>
+	                    <id>start-nanoh5-jar</id>
+	                    <phase>pre-integration-test</phase>
+	                    <goals>
+	                        <goal>run</goal>
+	                    </goals>
+	                    <inherited>true</inherited>
+	                    <configuration>
+	                    	<failOnError>true</failOnError>
+	                    	<!--  <skip>${skipTests}</skip> -->
+	                        <tasks>
+	                            <java jar="target/${project.build.finalName}-standalone.jar"
+	                            	  dir="target/test"
+	                                  fork="true"
+	                                  spawn="true">
+	                                <sysproperty key="app.server.running" value="true" />
+	                                <sysproperty key="websocket.use" value="false" />
+	                                
+	                                <!-- <arg value="-xyz" /> <arg value="123" /> -->
+	                            </java>
+	                        </tasks>
+	                    </configuration>
+	                </execution>
+	            </executions>
+	        </plugin>
 		</plugins>
 	</build>
 	<dependencies>
@@ -289,7 +318,7 @@
 		<dependency>
 			<groupId>net.sourceforge.htmlunit</groupId>
 			<artifactId>htmlunit</artifactId>
-			<version>2.15</version>
+			<version>2.29</version>
 			<scope>test</scope>
 		</dependency>
 		<!-- https://mvnrepository.com/artifact/com.sun.jersey/jersey-bundle -->

@@ -269,8 +269,9 @@ public class PrimitiveUtil {
             return null;
         
         //first: convert the non-number values to numbers
-        if (isAssignableFrom(Boolean.class, value.getClass()))
-            value = (Boolean)value ? 1 : 0;
+        if (isAssignableFrom(Boolean.class, value.getClass())
+        		|| "false".equals(value) || "true".equals(value))
+            value = Boolean.valueOf(value.toString()) ? 1 : 0;
         else if (isAssignableFrom(Character.class, value.getClass()))
             value = value.hashCode();
         else if (isAssignableFrom(String.class, value.getClass()))

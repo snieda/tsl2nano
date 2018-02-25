@@ -22,33 +22,45 @@ import org.junit.BeforeClass;
 import org.junit.Test;
 
 import com.gargoylesoftware.htmlunit.History;
+import com.gargoylesoftware.htmlunit.Page;
 import com.gargoylesoftware.htmlunit.WebClient;
 import com.gargoylesoftware.htmlunit.html.DomElement;
 import com.gargoylesoftware.htmlunit.html.HtmlButton;
 import com.gargoylesoftware.htmlunit.html.HtmlCheckBoxInput;
 import com.gargoylesoftware.htmlunit.html.HtmlPage;
 
+import de.tsl2.nano.bean.def.BeanCollector;
 import de.tsl2.nano.core.ENV;
+import de.tsl2.nano.core.ManagedException;
+import de.tsl2.nano.core.Messages;
 import de.tsl2.nano.core.execution.SystemUtil;
 import de.tsl2.nano.core.util.ConcurrentUtil;
 import de.tsl2.nano.core.util.ENVTestPreparation;
 import de.tsl2.nano.core.util.FileUtil;
 import de.tsl2.nano.core.util.NetUtil;
 import de.tsl2.nano.core.util.StringUtil;
+import de.tsl2.nano.core.util.Util;
 
 /**
  * 
  * @author Tom, Thomas Schneider
  * @version $Revision$ 
  */
-public class NanoH5IntegrationTest implements ENVTestPreparation {
+public class NanoH5IT implements ENVTestPreparation {
     private static String TEST_DIR;
-    static boolean nanoAlreadyRunning = false;
+    static boolean nanoAlreadyRunning = true;//Boolean.getBoolean("app.server.running");
+
+    static final String BEANCOLLECTORLIST = (BeanCollector.class.getSimpleName() 
+            + Messages.getString("tsl2nano.list")).toLowerCase();
     
     @BeforeClass
     public static void setUp() {
         if (!nanoAlreadyRunning)
             TEST_DIR = ENVTestPreparation.setUp("h5", false) + TARGET_TEST;
+        else {
+            System.out.println("NanoH5IT: nanoAlreadyRunning=true ==> trying to connect to external NanoH5");
+            ConcurrentUtil.sleep(15000);
+        }
     }
 
     @AfterClass
@@ -91,6 +103,7 @@ public class NanoH5IntegrationTest implements ENVTestPreparation {
         String serviceURL = getServiceURL(!nanoAlreadyRunning);
 //        runNano(serviceURL);
         Process process = null;
+        HtmlPage page = null;
         PipedOutputStream myOut = new PipedOutputStream();
         InputStream testIn = new PipedInputStream(myOut);
         System.setIn(testIn);
@@ -100,21 +113,41 @@ public class NanoH5IntegrationTest implements ENVTestPreparation {
             
             System.getProperties().put("org.apache.commons.logging.simplelog.defaultlog", "info");
             WebClient webClient = new WebClient();
+            webClient.getOptions().setJavaScriptEnabled(true);
             webClient.getOptions().setTimeout(1200000); //20min
-            HtmlPage page = webClient.getPage(serviceURL);
+            webClient.getOptions().setPrintContentOnFailingStatusCode(true);
+            webClient.getOptions().setCssEnabled(true);
+            page = webClient.getPage(serviceURL);
             page = submit(page, "tsl2nano.login.ok");
-            page = submit(page, "beancollectorliste.selectall");
-            page = submit(page, "beancollectorliste.open");
+            page = submit(page, BEANCOLLECTORLIST + ".selectall");
+            page = submit(page, BEANCOLLECTORLIST + ".open");
 
-            for (int i = 0; i < 7; i++) {
+            //-> all collectors now open - closing them in the testObjectCreation()
+            int beanTypeCount = 1;//TODO: test it for all bean-types!
+            for (int i = 0; i < beanTypeCount; i++) {
                 //create and delete objects of all sample types
 //                HtmlCheckBoxInput checkbox = page.getElementByName(String.valueOf(i));
 //                page = submit(page, "beancollectorliste.open");
                 page = testObjectCreation(page);
             }
-            //TODO: logout
+
         } finally {
+            if (page != null) {
+                int i = 0;
+                String id;
+                //TODO: does not work yet!!!
+                while (i ++ < 30) {
+                    id = page.getBody().getId();
+                    if (!Util.isEmpty(id) && id.toLowerCase().equals(BEANCOLLECTORLIST)) {
+                        page = submit(page, BEANCOLLECTORLIST + ".administration");
+                        page = submit(page, BEANCOLLECTORLIST + ".shutdown");
+                        break;
+                    }
+                    page = back(page);
+                }
+            }
             if (process != null) {
+                System.out.println("trying to shutdown nanoh5 server through ENTER...");
                 myOut.write("\n\n".getBytes());
 //                process.destroy();
             }
@@ -129,28 +162,44 @@ public class NanoH5IntegrationTest implements ENVTestPreparation {
 //        HtmlForm form = page.getFormByName("page.form");
 //        HtmlForm  form = (HtmlForm) page.getElementById("page.form");
         System.out.println("htmlUnit testing button: " + buttonName);
-        return ((HtmlButton)page.getElementById(buttonName)).click();
+        try {
+            return ((HtmlButton)page.getElementById(buttonName)).click();
+        } catch (Exception e) {
+            String asXml = "<!--\nbutton not found: " + buttonName + "\n" +
+                    ManagedException.toString(e) + "\n-->\n" + page.asXml();
+            FileUtil.writeBytes(asXml.getBytes(), ENV.getTempPath() + "page-failed.html", false);
+            ManagedException.forward(e);
+            return page;
+        }
 //        return form.getInputByName(buttonName).click();
     }
 
-    private History back(HtmlPage page) throws Exception {
-        return page.getWebClient().getWebWindows().get(0).getHistory().back();
+    private HtmlPage back(HtmlPage page) throws Exception {
+        page.getWebClient().getWebWindows().get(0).getHistory().back();
+        return (HtmlPage) page;//.refresh();
     }
 
     private HtmlPage testObjectCreation(HtmlPage page) throws Exception {
-        String beanName = StringUtil.toFirstLower(page.getBody().getId()) + "liste";
-        page = submit(page, beanName + "." + "search");
-        page = submit(page, beanName + "." + "forward");
-        submit(page, beanName + "." + "print");
-        back(page);
-        submit(page, beanName + "." + "export");
-        back(page);
+        String pageId = page.getBody().getId();
+        if (Util.isEmpty(pageId))
+            throw new IllegalStateException("pageId is empty!");
+        String beanName = StringUtil.toFirstLower(pageId); 
+        String beanList = beanName +  Messages.getString("tsl2nano.list").toLowerCase();
+        
+        //TODO: check pages with with saved last current state
+        page = submit(page, beanList + "." + "search");
+        page = submit(page, beanList + "." + "forward");
+        page = submit(page, beanList + "." + "back");
+//        submit(page, beanList + "." + "print");
+//        page = back(page);
+//        submit(page, beanList + "." + "export");
+//        page = back(page);
 
-        page = submit(page, beanName + "." + "new");
-        page = submit(page, beanName + "." + "save");
-        page = submit(page, beanName + "." + "delete");
-        page = submit(page, beanName + "." + "reset");
-        page = submit(page, beanName + "." + "cancel");
+        page = submit(page, beanList + "." + "new");
+        page = submit(page, "de.tsl2.nano.action.action_cancelled");
+//        page = submit(page, beanName + "." + "save");
+//        page = submit(page, beanList + "." + "delete");
+//        page = submit(page, beanName + "." + "reset");
         return page;
     }
 

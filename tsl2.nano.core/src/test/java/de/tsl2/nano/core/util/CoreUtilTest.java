@@ -584,7 +584,7 @@ public class CoreUtilTest implements ENVTestPreparation {
 		// "application/json", null, "code", "8000", "street", null);
 
 		urlREST = EHttpClient.parameter(resource + "{city}/info", true, "city", "München", "street", null);
-		assertEquals(resource + "M%C3%BCnchen/info", urlREST);
+		assertEquals(resource + "M%FCnchen/info", urlREST);
 	}
 
 	// @Ignore

@@ -634,6 +634,15 @@ On top of each html page you will see on the left side an application icon (clic
 
 Each entity can define actions to be presented as buttons itself. See chapter _Bean Actions_.
 
+### Administrating the Application
+
+to control the application, it listens to commands on a connected session. The commands have to start with the instance-ID of the current NanoH5 instance. This is can be read from file *instance-id.txt* in the environments temp directory.
+
+At the moment, the following commands are known:
+* shutdown: does a system.exit(0)
+* close: closes the current session
+* back: goes back to the next working item
+ 
 ### Dependencies
 
 While the _tsl2.nano_ framework has only a static dependency to simple-xml, using datbase-connections, bean or ddl generation will result in additional dependencies to other libraries. It's easy to add these libraries putting them into the environment path - they will be load on runtime, too. If you have a network connection, the _tsl2.nano_ framework tries to resolve the dependencies for you.
@@ -3067,6 +3076,7 @@ Actual list: http://infocenter.pentaho.com/help/index.jsp?topic=%2Fsupported_com
  2.0.0  | 05.01.2018 | REF: java8 enabled, maven-build (RELEASED on maven-central through OSSRH), UTF-8, multiple submodules with lots of package refactorings
  2.0.1  | 28.01.2018 | env.xml and prop-file enc. corr., sub-module MF-files filled, tests enhanced,  REF: Cryp, PKI -> secure, HttpClient -> http, Xml, YAML -> serialize
  2.0.2  | 04.02.2018 | AppLoader with MANIFEST.MF loading corrected, tsl2.nano.terminal now standalone, tests/reports enhanced
+ 2.0.3  | 04.03.2018 | integration-tests with failsafe+antrun, admin-commands starting with nano.hash
 
 <style class="fallback">body{white-space:pre;font-family:monospace}</style><script src="markdeep.min.js"></script><script src="http://casual-effects.com/markdeep/latest/markdeep.min.js"></script>
 

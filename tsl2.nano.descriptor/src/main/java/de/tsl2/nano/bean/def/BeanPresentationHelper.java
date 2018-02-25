@@ -1401,6 +1401,9 @@ public class BeanPresentationHelper<T> {
             IAction.MODE_UNDEFINED, false, "icons/turnoff.png") {
             @Override
             public Object action() throws Exception {
+            	System.out.println("-----------------------------------------------");
+            	System.out.println("shutdown action request: doing a System.exit(0)");
+            	System.out.println("-----------------------------------------------");
                 System.exit(0);
                 return null;
             }

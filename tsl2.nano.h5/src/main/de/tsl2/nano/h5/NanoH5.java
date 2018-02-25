@@ -155,6 +155,7 @@ public class NanoH5 extends NanoHTTPD implements ISystemConnector<Persistence> {
     public NanoH5(String serviceURL, IPageBuilder<?, String> builder) throws IOException {
 //        super(null, getPort(serviceURL), new File(ENV.getConfigPath()), !LOG.isDebugEnabled());
         super(getPort(serviceURL), new File(ENV.getConfigPath()));
+        FileUtil.writeBytes(String.valueOf(hashCode()).getBytes(), ENV.getTempPath() + "instance-id.txt", false);
         this.serviceURL = getServiceURL(serviceURL);
         this.builder = builder != null ? builder : createPageBuilder();
         ENV.registerBundle(NanoH5.class.getPackage().getName() + ".messages", true);
@@ -277,7 +278,8 @@ public class NanoH5 extends NanoHTTPD implements ISystemConnector<Persistence> {
             try {
                 LOG.info("Listening on port " + serviceURL.getPort() + ". Hit Enter or Strg+C to stop.\n");
                 LOG.debug("waiting for input on " + System.in);
-                System.in.read();
+                if (System.in.read() == -1)
+                    throw new IllegalStateException("Empty System-Input returning -1");
             } catch (Exception ex) {
                 LOG.debug("server mode without input console available (message: " + ex.toString() + ")");
                 while (true) {
@@ -385,7 +387,7 @@ public class NanoH5 extends NanoHTTPD implements ISystemConnector<Persistence> {
             Map<String, String> parms,
             Map<String, String> files) {
         String method = m.name();
-        if (method.equals("GET")) {
+        if (method.equals("GET") && !isAdmin(uri)) {
             // serve files
             if (!NumberUtil.isNumber(uri.substring(1)) && HtmlUtil.isURI(uri)
                 && !uri.contains(Html5Presentation.PREFIX_BEANREQUEST)) {
@@ -398,6 +400,10 @@ public class NanoH5 extends NanoHTTPD implements ISystemConnector<Persistence> {
         //           sessions.keySet().iterator().next().getAllByName(requestor.getHostName()).equals(requestor) returns false
         InetAddress requestor = ((Socket) ((Map) header).get("socket")).getInetAddress();
         NanoH5Session session = sessions.get(requestor);
+        // application commands
+        if (isAdmin(uri)) {
+            control(StringUtil.substring(uri, String.valueOf(hashCode())+"-", null), session);
+        }
         //if a user reconnects on the same machine, we remove his old session
         if (session != null && session.getUserAuthorization() != null && parms.containsKey("connectionUserName")
             && !parms.get("connectionUserName").equals(session.getUserAuthorization().getUser().toString())) {
@@ -443,6 +449,21 @@ public class NanoH5 extends NanoHTTPD implements ISystemConnector<Persistence> {
 //        lastHeader = header;
 
         return session.serve(uri, method, header, parms, files);
+    }
+
+    private boolean isAdmin(String uri) {
+        return uri.contains(String.valueOf(hashCode()));
+    }
+
+    //TODO: do some encryptions...
+    //TODO: provide generic semantics on beans
+    private void control(String cmd, NanoH5Session session) {
+        if (cmd.equals("shutdown"))
+            System.exit(0);
+        else if (cmd.equals("close"))
+            session.close();
+        else if (cmd.equals("back"))
+            session.nav.next(null);
     }
 
     private boolean isDoubleClickDelay(NanoH5Session session) {
@@ -813,9 +834,9 @@ public class NanoH5 extends NanoHTTPD implements ISystemConnector<Persistence> {
                         EMessage.broadcast(this, "APPLICATION SHUTDOWN INITIALIZED...", "*");
                         LOG.info("preparing shutdown of local database " + persistence.getConnectionUrl());
                         try {
-                            BeanContainer.instance().executeStmt(ENV.get("app.shutdown.statement", "shutdown"), true,
+                            BeanContainer.instance().executeStmt(ENV.get("app.shutdown.statement", "SHUTDOWN"), true,
                                 null);
-                            Thread.sleep(1000);
+                            Thread.sleep(2000);
                         } catch (Exception e) {
                             LOG.error(e.toString());
                         }

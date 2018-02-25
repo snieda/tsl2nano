@@ -48,7 +48,6 @@ import de.tsl2.nano.core.execution.CompatibilityLayer;
 import de.tsl2.nano.core.execution.SystemUtil;
 import de.tsl2.nano.core.log.LogFactory;
 import de.tsl2.nano.core.serialize.XmlUtil;
-import de.tsl2.nano.core.util.ByteUtil;
 import de.tsl2.nano.core.util.ConcurrentUtil;
 import de.tsl2.nano.core.util.FileUtil;
 import de.tsl2.nano.core.util.NetUtil;
@@ -610,7 +609,7 @@ public class SIShell implements IItemHandler, Serializable {
         SchedulerUtil.runAt(delay, period, end, unit, new Runnable() {
             @Override
             public void run() {
-                InputStream in0 = createBatchStream("\n");
+                InputStream in0 = SystemUtil.createBatchStream("\n");
                 action.react(item, input, in0, out, env);
             }
         });

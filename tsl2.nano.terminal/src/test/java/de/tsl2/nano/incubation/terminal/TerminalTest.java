@@ -14,6 +14,7 @@ import org.junit.Test;
 import de.tsl2.nano.bean.def.Constraint;
 import de.tsl2.nano.core.ENV;
 import de.tsl2.nano.core.execution.IRunnable;
+import de.tsl2.nano.core.execution.SystemUtil;
 import de.tsl2.nano.core.secure.Crypt;
 import de.tsl2.nano.core.secure.Permutator;
 import de.tsl2.nano.core.util.ENVTestPreparation;
@@ -213,11 +214,11 @@ public class TerminalTest implements ENVTestPreparation {
       defs.put("image.out", "-out");
       System.getProperties().put(SIShell.KEY_SEQUENTIAL, true);
 
-      InputStream in = SIShell.createBatchStream("Printing", "jobname", "test", "10", "", ":quit");
+      InputStream in = SystemUtil.createBatchStream("Printing", "jobname", "test", "10", "", ":quit");
       new SIShell(root, in, System.out, 79, 22, 1, defs).run();
 
       //check, if serialization was ok
-      System.setIn(SIShell.createBatchStream("", "Printing", "jobname", "test", "10", "", ":quit"));
+      System.setIn(SystemUtil.createBatchStream("", "Printing", "jobname", "test", "10", "", ":quit"));
       SIShell.main(new String[] { SIShell.DEFAULT_NAME });
 
       //ok? --> use it in our project!

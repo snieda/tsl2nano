@@ -46,6 +46,7 @@ import de.tsl2.nano.core.classloader.NetworkClassLoader;
 //import de.tsl2.nano.collection.PersistableSingelton;
 //import de.tsl2.nano.collection.PersistentCache;
 import de.tsl2.nano.core.cls.BeanClass;
+import de.tsl2.nano.core.cls.PrimitiveUtil;
 import de.tsl2.nano.core.exception.ExceptionHandler;
 import de.tsl2.nano.core.exception.Message;
 import de.tsl2.nano.core.execution.CompatibilityLayer;
@@ -416,12 +417,36 @@ public class ENV implements Serializable {
         return get(key, null);
     }
 
+    /**
+     * reads key-value from ENV.properties (stored in environment.xml). First it searches in System.properties. 
+     * if not existing in ENV.properties, defaultvalue or system.property will be stored in environment.xml.
+     * @param key system or ENV property
+     * @param defaultValue default value to be set
+     * @return system ENV or default value
+     */
     public static final <T> T get(String key, T defaultValue) {
-        T value = (T) self().properties.get(key);
-        if (value == null && defaultValue != null) {
-            value = defaultValue;
-            setProperty(key, value);
-        }
+    	String sysValue = System.getProperty(key);
+    	T value = null;
+    	if (sysValue != null) { //system properties win...
+    		if (defaultValue != null) {
+    			if (PrimitiveUtil.isPrimitiveOrWrapper(defaultValue.getClass())) {
+    				value = (T) PrimitiveUtil.convert(sysValue, defaultValue.getClass());
+    			} else {
+    				throw new IllegalArgumentException("system property " + key + "=" + sysValue + " cannot be converted to " + defaultValue.getClass());
+    			}
+    		} else {
+    			value = (T) sysValue;
+    		}
+    		if (!self().properties.containsKey(key)) {
+    			setProperty(key, value);
+    		}
+    	} else {
+    		value = (T) self().properties.get(key);
+            if (value == null && defaultValue != null) {
+                value = defaultValue;
+                setProperty(key, value);
+            }
+    	}
         return value;
     }
 

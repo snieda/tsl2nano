@@ -1312,6 +1312,7 @@ public class Html5Presentation<T> extends BeanPresentationHelper<T> implements I
         sc = checkedShortCut(sc.charAt(0));
         label = Messages.stripMnemonics(label);
         tooltip = tooltip + " (ALT+" + sc + ")";
+        type = type != null ? type : "button";
         Element action = appendElement(cell,
             TAG_BUTTON,
             content(label),
@@ -1323,7 +1324,7 @@ public class Html5Presentation<T> extends BeanPresentationHelper<T> implements I
             id,
             ATTR_TITLE,
             tooltip,
-            enable(ATTR_TYPE, type != null),
+            ATTR_TYPE,
             type,
             enable("onclick", type != null),
             enable("fade(this)", type != null && ENV.get("websocket.use", true)),

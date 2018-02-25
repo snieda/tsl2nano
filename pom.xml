@@ -56,12 +56,12 @@
 		<url>https://git.code.sf.net/p/tsl2nano/code tsl2nano-code</url>
 	</scm>
 	<!-- TODO: should we remove the parent? -->
- 	<parent>
+<!--  	<parent>
 		<groupId>org.sonatype.oss</groupId>
 		<artifactId>oss-parent</artifactId>
 		<version>9</version>
 	</parent>
-	<developers>
+ -->	<developers>
 		<developer>
 			<name>Thomas Schneider</name>
 		</developer>
@@ -101,7 +101,16 @@
 	           <directory>src/main/resources</directory>
 	           <filtering>true</filtering>
 	        </resource>
-        </resources>		
+        </resources>
+        <pluginManagement>
+	        <plugins>
+	        <!-- before this management, the antrun version was 1.3 -->
+		        <plugin>
+		          <artifactId>maven-antrun-plugin</artifactId>
+		          <version>1.8</version>
+		        </plugin>
+	        </plugins>
+        </pluginManagement>
         <plugins>
 			<plugin>
 				<groupId>org.codehaus.mojo</groupId>
@@ -128,28 +137,35 @@
 				<executions>
 					<execution>
 						<id>junit</id>
-						<phase>test</phase>
+						<inherited>true</inherited>
 						<configuration>
-							<parallel>true</parallel>
+							<!-- <parallel>true</parallel> -->
 							<!-- <skipTests>true</skipTests>  -->
-							<excludes>
-								<exclude>**/*IntegrationTest.java</exclude>
-							</excludes>
-						</configuration>
-					</execution>
-					<execution>
-						<id>integration-test</id>
-						<phase>integration-test</phase>
-						<configuration>
-							<skipTests>false</skipTests>
-							<includes>
-								<include>**/*IntegrationTest.java</include>
-							</includes>
 						</configuration>
 					</execution>
 				</executions>
 			</plugin>
-			<plugin>
+   			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-failsafe-plugin</artifactId>
+				<version>2.20.1</version>
+				<configuration>
+					<!-- <skipITs>true</skipITs> -->
+					<forkCount>${forkCount}</forkCount>
+					<forkedProcessExitTimeoutInSeconds>900</forkedProcessExitTimeoutInSeconds>
+					<forkedProcessTimeoutInSeconds>900</forkedProcessTimeoutInSeconds>
+				</configuration>
+				<executions>
+					<execution>
+						<inherited>true</inherited>
+						<goals>
+							<goal>integration-test</goal>
+							<goal>verify</goal>
+						</goals>
+					</execution>
+				</executions>
+			</plugin>
+ 			<plugin>
 				<groupId>org.jacoco</groupId>
 				<artifactId>jacoco-maven-plugin</artifactId>
 				<version>0.8.0</version>
@@ -174,12 +190,14 @@
 						is passed as VM argument when Maven the Surefire plugin is executed. -->
 					<execution>
 						<id>pre-unit-test</id>
+						<inherited>true</inherited>
 						<goals>
 							<goal>prepare-agent</goal>
 						</goals>
 					</execution>
 					<!-- <execution>
 						<id>report-aggregate</id>
+						<inherited>true</inherited>
 						<phase>prepare-package</phase>
 						<goals>
 							<goal>report-aggregate</goal>
@@ -286,6 +304,7 @@
 				<reportSets>
 					<reportSet>
 						<id>module</id>
+						<inherited>true</inherited>
 						<reports>
 							<report>pmd</report>
 							<report>cpd</report>
@@ -293,6 +312,7 @@
 					</reportSet>
 					<reportSet>
 						<id>all</id>
+						<inherited>true</inherited>
 						<configuration><aggregate>true</aggregate></configuration>
 						<reports>
 							<report>pmd</report>
@@ -306,11 +326,14 @@
 				<artifactId>jacoco-maven-plugin</artifactId>
 				<version>0.8.0</version>
 				<configuration>
-					<excludes>
+				<includes>
+					<include>de/tsl2/**/*.class</include>
+				</includes>
+<!-- 					<excludes>
 						<exclude>**/*.jar</exclude>
 						<exclude>**/*.zip</exclude>
 					</excludes>
-				</configuration>
+ -->				</configuration>
 				<reportSets>
 					<reportSet>
 						<reports>
