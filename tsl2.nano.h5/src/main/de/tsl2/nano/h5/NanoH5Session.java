@@ -225,8 +225,7 @@ public class NanoH5Session implements ISession<BeanDefinition>, Serializable, IL
         initContext(authorization, context);
         this.sessionStart = System.currentTimeMillis();
         Persistence p = Persistence.current();
-        this.id = inetAddress + p.getConnectionUrl() + "." + p.getConnectionUserName() + "." + p.getJarFile();
-
+        this.id = inetAddress + p.getConnectionUrl() + "&" + p.getConnectionUserName() + "&" + p.getJarFile();
     }
 
     /**
@@ -1103,7 +1102,7 @@ public class NanoH5Session implements ISession<BeanDefinition>, Serializable, IL
 
     @Override
     public Object getId() {
-        return inetAddress.getHostName() + "&" + authorization.getUser();
+        return id;//inetAddress.getHostName() + "&" + authorization.getUser();
     }
 
     @Override
@@ -1189,7 +1188,7 @@ public class NanoH5Session implements ISession<BeanDefinition>, Serializable, IL
 
     @Override
     public String toString() {
-        return id;
+        return getId().toString();
     }
 
 }
