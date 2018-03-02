@@ -169,6 +169,9 @@ public class NanoH5Test implements ENVTestPreparation {
         DOMExtender preloadClass = new DOMExtender();
         System.out.print(preloadClass.toString());
         
+        DOMExtenderThymeleaf preloadThyme = new DOMExtenderThymeleaf();
+        System.out.print(preloadThyme.toString());
+
         ENV.create(DIR_TEST);
         initServices();
         NanoH5Session session = app.createSession(NetUtil.getInetAddress());

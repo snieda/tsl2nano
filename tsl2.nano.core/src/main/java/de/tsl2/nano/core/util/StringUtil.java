@@ -11,6 +11,8 @@ package de.tsl2.nano.core.util;
 
 import java.io.ByteArrayInputStream;
 import java.io.InputStream;
+import java.io.PrintWriter;
+import java.io.StringWriter;
 import java.math.BigInteger;
 import java.text.MessageFormat;
 import java.util.ArrayList;
@@ -22,6 +24,8 @@ import java.util.Map;
 import java.util.Properties;
 import java.util.Scanner;
 import java.util.Set;
+import java.util.function.Consumer;
+import java.util.function.Predicate;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -957,5 +961,12 @@ public class StringUtil {
         if (src == null)
             return null;
         return src.replaceAll("[\t\r\n]+", "");
+    }
+    
+    public static String printToString(Consumer<PrintWriter> c) {
+    	StringWriter sw = new StringWriter();
+    	PrintWriter pw = new PrintWriter(sw);
+    	c.accept(pw);
+    	return sw.toString();
     }
 }

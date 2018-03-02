@@ -206,9 +206,6 @@ public class ManagedException extends RuntimeException {
     }
     
     public static String toString(Throwable ex) {
-    	StringWriter sw = new StringWriter();
-    	PrintWriter pw = new PrintWriter(sw);
-    	ex.printStackTrace(pw);
-    	return sw.toString();
+    	return StringUtil.printToString(c->ex.printStackTrace(c));
     }
 }
