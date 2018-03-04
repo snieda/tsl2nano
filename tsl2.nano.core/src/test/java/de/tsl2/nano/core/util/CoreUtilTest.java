@@ -540,7 +540,11 @@ public class CoreUtilTest implements ENVTestPreparation {
 		assertTrue(finder.findClass(ManagedException.class).size() >= 1);
 	}
 
-	// @Ignore
+	@Test
+	public void testPackageFinder() throws Exception {
+		new ClassFinder().collectPackageClasses(Thread.currentThread().getContextClassLoader());
+	}
+
 	@Test
 	public void testYaml() throws Exception {
 		/*

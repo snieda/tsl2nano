@@ -13,7 +13,7 @@ import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 
 import de.tsl2.nano.core.ISession;
-import de.tsl2.nano.h5.IDOMExtender;
+import de.tsl2.nano.h5.inspect.IDOMExtender;
 
 /**
  * 

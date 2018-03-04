@@ -7,7 +7,7 @@
  * 
  * Copyright: (c) Thomas Schneider 2017, all rights reserved
  */
-package de.tsl2.nano.h5;
+package de.tsl2.nano.h5.inspect;
 
 import org.w3c.dom.Document;
 

@@ -19,6 +19,7 @@ import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.FileReader;
+import java.io.FileWriter;
 import java.io.FilenameFilter;
 import java.io.FilterReader;
 import java.io.IOException;
@@ -27,8 +28,10 @@ import java.io.InputStreamReader;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.io.OutputStream;
+import java.io.PrintWriter;
 import java.io.Reader;
 import java.io.Serializable;
+import java.io.StringWriter;
 import java.io.Writer;
 import java.net.URI;
 import java.net.URL;
@@ -41,6 +44,7 @@ import java.util.Date;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Properties;
+import java.util.function.Consumer;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
 import java.util.zip.ZipOutputStream;
@@ -738,7 +742,8 @@ public class FileUtil {
             LOG.info(ByteUtil.amount(length) + " read from stream " + stream);
             //stream.available() does not guarantee to return the total amount of bytes!
             if (stream.available() > 0) {
-            	throw new IllegalAccessException("not all bytes were read from stream! The InputStream" + stream + " should not be read with this method!");
+            	LOG.warn("not all bytes (" + stream.available() + " bytes left) were read from stream! The InputStream " + stream + " should not be read with this method!");
+//            	throw new IllegalAccessException("not all bytes were read from stream! The InputStream" + stream + " should not be read with this method!");
             }
             return data;
         } catch (final Exception ex) {
@@ -1420,6 +1425,18 @@ public class FileUtil {
             throw new IllegalStateException(
                 file + ": file hash error. file seems to be corrupt (expected hash: " + expectedHash);
     }
+
+    public static void printToFile(String fileName, Consumer<PrintWriter> c) {
+    	FileWriter fw;
+		try {
+			fw = new FileWriter(fileName);
+	    	PrintWriter pw = new PrintWriter(fw);
+	    	c.accept(pw);
+		} catch (IOException e) {
+			ManagedException.forward(e);
+		}
+    }
+    
 }
 
 class FileComparator implements Comparator<File> {

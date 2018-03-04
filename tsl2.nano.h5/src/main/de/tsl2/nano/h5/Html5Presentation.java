@@ -109,6 +109,7 @@ import de.tsl2.nano.h5.configuration.BeanConfigurator;
 import de.tsl2.nano.h5.configuration.ExpressionDescriptor;
 import de.tsl2.nano.h5.expression.Query;
 import de.tsl2.nano.h5.expression.QueryPool;
+import de.tsl2.nano.h5.inspect.IDOMExtender;
 import de.tsl2.nano.h5.websocket.WSEvent;
 import de.tsl2.nano.h5.websocket.WebSocketRuleDependencyListener;
 import de.tsl2.nano.incubation.specification.actions.ActionPool;
