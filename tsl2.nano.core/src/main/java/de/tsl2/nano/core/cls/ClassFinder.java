@@ -26,11 +26,11 @@ import java.util.Map;
 import java.util.ServiceLoader;
 import java.util.Set;
 import java.util.TreeMap;
-import java.util.Vector;
 
 import org.apache.commons.logging.Log;
 
 import de.tsl2.nano.core.ManagedException;
+import de.tsl2.nano.core.classloader.RuntimeClassloader;
 import de.tsl2.nano.core.log.LogFactory;
 import de.tsl2.nano.core.util.StringUtil;
 
@@ -60,11 +60,13 @@ public class ClassFinder {
 		ClassLoader baseClassLoader = classLoader;
 		classes = new HashSet<>();
 		//TODO: let our own classloader implementations provide the loaded classes!
-		addClasses(ClassLoader.getSystemClassLoader(), classes);
-		while ((classLoader = addClasses(classLoader, classes)) != null)
-			;
-		collectPackageClasses(baseClassLoader);
+//		addClasses(ClassLoader.getSystemClassLoader(), classes);
+//		while ((classLoader = addClasses(classLoader, classes)) != null)
+//			;
+		collectPackageClasses(baseClassLoader, classes);
+		System.out.println("---------------------------------------------------------------------");
 		System.out.println("ClassFinder created for " + classes.size() + " classes");
+		System.out.println("---------------------------------------------------------------------");
 	}
 
 	/**
@@ -73,38 +75,46 @@ public class ClassFinder {
 	 * @param classLoader
 	 * @return parent ClassLoader
 	 */
-	private static ClassLoader addClasses(ClassLoader classLoader, Set<Class<?>> classes) {
-		classes.addAll(
-				(Collection<? extends Class<?>>) new PrivateAccessor(classLoader).member("classes", Vector.class));
-		return (ClassLoader) new PrivateAccessor(classLoader).call("getParent", ClassLoader.class);
-	}
+//	private static ClassLoader addClasses(ClassLoader classLoader, Set<Class<?>> classes) {
+//		classes.addAll(
+//				(Collection<? extends Class<?>>) new PrivateAccessor(classLoader).member("classes", Vector.class));
+//		return (ClassLoader) new PrivateAccessor(classLoader).call("getParent", ClassLoader.class);
+//	}
 
-	public void collectPackageClasses(ClassLoader classLoader) {
-		collectPackageClasses(ClassLoader.getSystemClassLoader(), classes);
-		while ((classLoader = collectPackageClasses(classLoader, classes)) != null)
-			;
-	}
+//	private void collectPackageClasses(ClassLoader classLoader) {
+//		collectPackageClasses(ClassLoader.getSystemClassLoader(), classes);
+//		while ((classLoader = collectPackageClasses(classLoader, classes)) != null)
+//			;
+//	}
 
-	private ClassLoader collectPackageClasses(ClassLoader cl, Set<Class<?>> classes) {
-		Package[] packages = Package.getPackages();
+	ClassLoader collectPackageClasses(ClassLoader cl, Set<Class<?>> classes) {
+		Package[] packages = cl instanceof RuntimeClassloader ? ((RuntimeClassloader)cl).getPackages() : Package.getPackages();
+		System.out.println("---------------------------------------------------------------------");
+		System.out.println(packages.length + " Packages will be loaded on classloader " + cl);
+		System.out.println("---------------------------------------------------------------------");
 		for (int i = 0; i < packages.length; i++) {
-			classes.addAll(collectPackageClasses(cl, packages[i], classes));
+			classes.addAll(collectPackageClasses(cl, packages[i].getName(), classes));
 		}
 		LOG.info(classes.size() + " classes scanned by ClassFinder");
-		return (ClassLoader) new PrivateAccessor(cl).call("getParent", ClassLoader.class);
+		return cl.getParent();
 	}
 
-	private Collection<Class<?>> collectPackageClasses(ClassLoader cl, Package pck, Set<Class<?>> classes) {
-		String pack = pck.getName();
-		System.out.print("loading classes on " + pack);
-		URL upackage = cl.getResource(pack.replace('.', '/'));
-		if (upackage == null) {
-			System.out.println();
-			return classes;
-		}
-		DataInputStream dis;
+	private Collection<Class<?>> collectPackageClasses(ClassLoader cl, String pack, Set<Class<?>> classes) {
+		System.out.print("loading classes on " + pack + ": ");
 		int i = 0;
 		try {
+//			Enumeration<URL> entries = cl.getResources(pack.replace('.', '/'));
+//			// recurse into sub-packages
+//			while (entries.hasMoreElements()) {
+//				collectPackageClasses(cl, entries.nextElement().getPath(), classes);
+//			}
+
+			URL upackage = cl.getResource(pack.replace('.', '/'));
+			if (upackage == null) {
+//				System.out.println();
+				return classes;
+			}
+			DataInputStream dis;
 			dis = new DataInputStream((InputStream) upackage.getContent());
 			String line = null;
 			while ((line = dis.readLine()) != null) {
@@ -116,6 +126,8 @@ public class ClassFinder {
 					} catch (ClassNotFoundException e) {
 						ManagedException.forward(e);
 					}
+				} else {
+					classes.addAll(collectPackageClasses(cl, pack + "." + line, classes));
 				}
 			}
 		} catch (IOException e1) {
@@ -179,7 +191,7 @@ public class ClassFinder {
 	 *            (optional) restricts to search for classes/extensions , methods or
 	 *            fields. If it is {@link Method}, only method matches will be
 	 *            returned. if it is an interface, all matching implementations will
-	 *            be returned.
+	 *            be returned. The class itself will not be returned
 	 * @param modifier
 	 *            (optional, -1: all) see {@link Modifier}.
 	 * @param annotation
@@ -197,8 +209,9 @@ public class ClassFinder {
 				return super.put(key, value);
 			}
 		};
-		addFromServiceLoader(resultType);
-		if (PackageDescriptor.class.isAssignableFrom(annotation))
+		if (resultType != null)
+			addFromServiceLoader(resultType);
+		if (annotation != null && PackageDescriptor.class.isAssignableFrom(annotation))
 			addFromPackageAnnotation((Class<? extends PackageDescriptor>) annotation);
 
 		Class cls;

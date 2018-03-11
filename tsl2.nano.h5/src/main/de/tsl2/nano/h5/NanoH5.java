@@ -75,11 +75,13 @@ import de.tsl2.nano.h5.expression.RuleExpression;
 import de.tsl2.nano.h5.expression.SQLExpression;
 import de.tsl2.nano.h5.expression.SimpleExpression;
 import de.tsl2.nano.h5.expression.URLExpression;
+import de.tsl2.nano.h5.inspect.INanoHandler;
 import de.tsl2.nano.h5.navigation.EntityBrowser;
 import de.tsl2.nano.h5.navigation.IBeanNavigator;
 import de.tsl2.nano.h5.navigation.Workflow;
 import de.tsl2.nano.incubation.specification.actions.ActionPool;
 import de.tsl2.nano.incubation.specification.rules.RulePool;
+import de.tsl2.nano.inspection.Inspectors;
 import de.tsl2.nano.persistence.GenericLocalBeanContainer;
 import de.tsl2.nano.persistence.Persistence;
 import de.tsl2.nano.persistence.PersistenceClassLoader;
@@ -170,6 +172,8 @@ public class NanoH5 extends NanoHTTPD implements ISystemConnector<Persistence> {
         AbstractExpression.registerExpression(SQLExpression.class);
         AbstractExpression.registerExpression(URLExpression.class);
         AbstractExpression.registerExpression(SimpleExpression.class);
+        
+        Inspectors.process(INanoHandler.class).configuration(ENV.getProperties(), ENV.services());
     }
 
     /**
@@ -483,7 +487,7 @@ public class NanoH5 extends NanoHTTPD implements ISystemConnector<Persistence> {
      * adds services for presentation and page-builder
      */
     protected IPageBuilder<?, String> createPageBuilder() {
-        Html5Presentation pageBuilder = new Html5Presentation();
+        Html5Presentation pageBuilder = Inspectors.process(INanoHandler.class).definePresentationType(new Html5Presentation());
         ENV.addService(BeanPresentationHelper.class, pageBuilder);
         ENV.addService(IPageBuilder.class, pageBuilder);
         return pageBuilder;
@@ -554,7 +558,7 @@ public class NanoH5 extends NanoHTTPD implements ISystemConnector<Persistence> {
             ConcurrentUtil.sleep(2000);
         }
 
-        Workflow workflow = ENV.get(Workflow.class);
+        IBeanNavigator workflow = ENV.get(Workflow.class);
 
         if (workflow == null || workflow.isEmpty() || workflowDone) {
             LOG.debug("creating navigation stack");
@@ -568,21 +572,22 @@ public class NanoH5 extends NanoHTTPD implements ISystemConnector<Persistence> {
             } else {
                 navigationModel.push(connect((Persistence) login.getInstance()));
             }
-            return new EntityBrowser("entity-browser", navigationModel);
+            workflow = new EntityBrowser("entity-browser", navigationModel);
         } else {
             //create a copy for the new session
             try {
-                workflow = workflow.clone();
+                 workflow = workflow.clone();
             } catch (CloneNotSupportedException e) {
                 ManagedException.forward(e);
             }
             if (ENV.get("app.login.use.gui", true)) {
-                workflow.setLogin(login);
+                workflow.setRoot(login);
             } else {
                 workflow.add(connect((Persistence) login.getInstance()));
             }
-            return workflow;
         }
+        Inspectors.process(INanoHandler.class).workflowHandler(workflow);
+        return workflow;
     }
 
     @Override
@@ -601,6 +606,8 @@ public class NanoH5 extends NanoHTTPD implements ISystemConnector<Persistence> {
      */
     @Override
     public synchronized BeanDefinition<?> connect(Persistence persistence) {
+        Inspectors.process(INanoHandler.class).definePersistence(persistence);
+        
         //define a new classloader to access all beans of given jar-file
         PersistenceClassLoader runtimeClassloader = new PersistenceClassLoader(new URL[0],
             rootClassloader());
@@ -648,7 +655,9 @@ public class NanoH5 extends NanoHTTPD implements ISystemConnector<Persistence> {
      */
     private void createAuthorization(final String userName) {
         Message.send("creating authorization for " + userName);
-        ConcurrentUtil.setCurrent(Authorization.create(userName, ENV.get("app.login.secure", false)));
+        Authorization auth = Authorization.create(userName, ENV.get("app.login.secure", false));
+        Inspectors.process(INanoHandler.class).onAuthentication(auth);
+        ConcurrentUtil.setCurrent(auth);
     }
 
     /**
@@ -662,7 +671,7 @@ public class NanoH5 extends NanoHTTPD implements ISystemConnector<Persistence> {
     protected BeanDefinition<?> createBeanCollectors(List<Class> beanClasses) {
         Message.send("loading bean collectors for " + beanClasses.size() + " types");
         LOG.debug("creating collector for: ");
-        List types = new ArrayList(beanClasses.size());
+        List<BeanDefinition> types = new ArrayList(beanClasses.size());
         for (Class cls : beanClasses) {
             LOG.debug("creating collector for: " + cls);
             BeanCollector collector = BeanCollector.getBeanCollector(cls, null,
@@ -680,6 +689,10 @@ public class NanoH5 extends NanoHTTPD implements ISystemConnector<Persistence> {
          * name-convention: beandef/virtual/*.xml
          */
         types.addAll(BeanDefinition.loadVirtualDefinitions());
+
+        for (BeanDefinition beanDef : types) {
+            Inspectors.process(INanoHandler.class).defineBeanDefinition(beanDef);
+        }
 
         /*
          * perhaps, do auto-translation if no resourcebundle present for current locale

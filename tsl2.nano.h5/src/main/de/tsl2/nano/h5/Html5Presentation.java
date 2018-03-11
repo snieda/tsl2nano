@@ -86,7 +86,6 @@ import de.tsl2.nano.core.ISession;
 import de.tsl2.nano.core.ManagedException;
 import de.tsl2.nano.core.Messages;
 import de.tsl2.nano.core.cls.BeanClass;
-import de.tsl2.nano.core.cls.ClassFinder;
 import de.tsl2.nano.core.cls.IAttribute;
 import de.tsl2.nano.core.cls.PrivateAccessor;
 import de.tsl2.nano.core.exception.Message;
@@ -109,12 +108,13 @@ import de.tsl2.nano.h5.configuration.BeanConfigurator;
 import de.tsl2.nano.h5.configuration.ExpressionDescriptor;
 import de.tsl2.nano.h5.expression.Query;
 import de.tsl2.nano.h5.expression.QueryPool;
-import de.tsl2.nano.h5.inspect.IDOMExtender;
+import de.tsl2.nano.h5.inspect.IDOMDecorator;
 import de.tsl2.nano.h5.websocket.WSEvent;
 import de.tsl2.nano.h5.websocket.WebSocketRuleDependencyListener;
 import de.tsl2.nano.incubation.specification.actions.ActionPool;
 import de.tsl2.nano.incubation.specification.rules.RuleDependencyListener;
 import de.tsl2.nano.incubation.specification.rules.RulePool;
+import de.tsl2.nano.inspection.Inspectors;
 import de.tsl2.nano.script.ScriptTool;
 
 /**
@@ -345,7 +345,7 @@ public class Html5Presentation<T> extends BeanPresentationHelper<T> implements I
             }
 
             //Some external extensions...
-            extendCurrentDom(form, session);
+            Inspectors.process(IDOMDecorator.class).decorate(form.getOwnerDocument(), session);
             
             String html = HtmlUtil.toString(form.getOwnerDocument());
             if (LOG.isDebugEnabled()) {
@@ -355,16 +355,6 @@ public class Html5Presentation<T> extends BeanPresentationHelper<T> implements I
         } catch (Exception ex) {
             return HtmlUtil.createMessagePage(ENV.translate("tsl2nano.error", true), message + "<p/>" +
                 ManagedException.toRuntimeEx(ex, true, true).getMessage());
-        }
-    }
-
-    protected void extendCurrentDom(Element form, ISession session) {
-        Collection<Class<IDOMExtender>> domExtenders = new ClassFinder().findClass(IDOMExtender.class);
-        for (Class<IDOMExtender> clsDOMExt  : domExtenders) {
-            LOG.info("==> starting DOM-Extension: " + clsDOMExt);
-            IDOMExtender instance = BeanClass.createInstance(clsDOMExt);
-            instance.extend(form.getOwnerDocument(), session);
-            LOG.info("<== DOM-Extension " + clsDOMExt + " finished!");
         }
     }
 

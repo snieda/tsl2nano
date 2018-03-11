@@ -348,7 +348,7 @@ public class ENV implements Serializable {
      * 
      * @return map of loaded services
      */
-    protected final static Map<Class<?>, Object> services() {
+    public final static Map<Class<?>, Object> services() {
         return self().services;
     }
 
@@ -488,7 +488,7 @@ public class ENV implements Serializable {
      * @return Returns the properties.
      */
     @SuppressWarnings("rawtypes")
-    public static Map getProperties() {
+    public static SortedMap getProperties() {
         return self().properties;
     }
 

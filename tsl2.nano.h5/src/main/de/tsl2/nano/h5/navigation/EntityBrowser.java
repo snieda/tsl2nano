@@ -173,4 +173,14 @@ public class EntityBrowser implements IBeanNavigator {
     public boolean done() {
         return current == null && isEmpty();
     }
+
+    @Override
+    public void setRoot(BeanDefinition<?> rootBean) {
+        throw new UnsupportedOperationException();
+    }
+
+    @Override
+    public EntityBrowser clone() throws CloneNotSupportedException {
+        return (EntityBrowser) super.clone();
+    }
 }

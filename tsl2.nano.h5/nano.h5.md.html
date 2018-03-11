@@ -3870,3 +3870,71 @@ on external database, anyway-scripts are used 'anyway'
 - Bean: multi-instance holder?
 
 - (v) PROBLEM: style.template saved as UTF-8 becomes NULNULNUL at the end on saving it in environment.xml
+
+
+public static List<Class<?>> findClasses(String packageName) throws IOException, ClassNotFoundException
+	{
+		ClassLoader classLoader = ClassLoader.getSystemClassLoader();
+		String path = packageName.replace('.', '/');
+		Enumeration<URL> resources = classLoader.getResources(path);
+		List<String> dirs = new ArrayList<>();
+		while(resources.hasMoreElements())
+		{
+			URL resource = resources.nextElement();
+			dirs.add(resource.getFile());
+		}
+		TreeSet<String> classes = new TreeSet<>();
+		for(String directory : dirs)
+		{
+			classes.addAll(findClasses(directory, packageName));
+		}
+		ArrayList<Class<?>> classList = new ArrayList<>();
+		for(String clazz : classes)
+		{
+			classList.add(Class.forName(clazz));
+		}
+		return classList;
+	}
+
+	private static TreeSet<String> findClasses(String directory, String packageName) throws IOException
+	{
+		TreeSet<String> classes = new TreeSet<>();
+		String classNamePrefix = packageName + ".";
+		if(directory.startsWith("file:") && directory.contains("!"))
+		{
+			String[] split = directory.split("!");
+			URL jar = new URL(split[0]);
+			ZipInputStream zip = new ZipInputStream(jar.openStream());
+			ZipEntry entry = null;
+			while((entry = zip.getNextEntry()) != null)
+			{
+				if(entry.getName().endsWith(".class"))
+				{
+					String className = entry.getName().replaceAll("[$].*", "").replaceAll("[.]class", "").replace('/', '.');
+					if (className.startsWith(classNamePrefix)) classes.add(className);
+				}
+			}
+		}
+		File dir = new File(directory);
+		if(!dir.exists())
+		{
+			return classes;
+		}
+		File[] files = dir.listFiles();
+		for(File file : files)
+		{
+			if(file.isDirectory())
+			{
+				if (file.getName().equals(".svn")) {
+					continue;
+				}
+				assert !file.getName().contains(".");
+				classes.addAll(findClasses(file.getAbsolutePath(), classNamePrefix + file.getName()));
+			}
+			else if(file.getName().endsWith(".class"))
+			{
+				classes.add(packageName + '.' + file.getName().substring(0, file.getName().length() - 6));
+			}
+		}
+		return classes;
+	}

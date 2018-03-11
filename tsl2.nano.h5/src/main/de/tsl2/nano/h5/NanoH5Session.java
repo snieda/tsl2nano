@@ -81,10 +81,12 @@ import de.tsl2.nano.h5.NanoHTTPD.Method;
 import de.tsl2.nano.h5.NanoHTTPD.Response;
 import de.tsl2.nano.h5.NanoHTTPD.Response.Status;
 import de.tsl2.nano.h5.configuration.BeanConfigurator;
+import de.tsl2.nano.h5.inspect.INanoHandler;
 import de.tsl2.nano.h5.navigation.IBeanNavigator;
 import de.tsl2.nano.h5.navigation.Parameter;
 import de.tsl2.nano.h5.websocket.NanoWebSocketServer;
 import de.tsl2.nano.h5.websocket.WebSocketExceptionHandler;
+import de.tsl2.nano.inspection.Inspectors;
 import de.tsl2.nano.persistence.Persistence;
 import de.tsl2.nano.service.util.BeanContainerUtil;
 import de.tsl2.nano.serviceaccess.Authorization;
@@ -421,6 +423,7 @@ public class NanoH5Session implements ISession<BeanDefinition>, Serializable, IL
                         + StringUtil.toFormattedString(actionLog, 1000, true);
                 }
             };
+            Inspectors.process(INanoHandler.class).exceptionHandler(ex);
             msg = refreshPage(ex);
             FileUtil.writeBytes(msg.getBytes(), ENV.getTempPath() + "page-failed-" + getId() + ".html", false);
             response = server.createResponse(Status.BAD_REQUEST, MIME_HTML, msg);
@@ -690,6 +693,7 @@ public class NanoH5Session implements ISession<BeanDefinition>, Serializable, IL
             Object responseObject) {
 
         logaction(action, parms);
+        Inspectors.process(INanoHandler.class).actionBeforeHandler(action);
         //send this information to the client to show a progress bar.
         Message.send("submit");
         Message.send(ENV.translate("tsl2nano.starting", true) + " "
@@ -746,6 +750,7 @@ public class NanoH5Session implements ISession<BeanDefinition>, Serializable, IL
                             this.getUserAuthorization().getUser(), action.getShortDescription()),
                         "*");
             }
+            Inspectors.process(INanoHandler.class).actionAfterHandler(action);
 
             /*
              * if action is asynchron, it's a long term action showing the same page again

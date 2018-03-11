@@ -17,7 +17,7 @@ import de.tsl2.nano.bean.def.BeanDefinition;
  * @author Tom, Thomas Schneider
  * @version $Revision$
  */
-public interface IBeanNavigator {
+public interface IBeanNavigator extends Cloneable {
     /**
      * getName
      * @return navigators name
@@ -70,4 +70,8 @@ public interface IBeanNavigator {
      * @return true, if no more navigation objects are available
      */
     boolean done();
+
+    IBeanNavigator clone() throws CloneNotSupportedException;
+    
+    void setRoot(BeanDefinition<?> rootBean);
 }

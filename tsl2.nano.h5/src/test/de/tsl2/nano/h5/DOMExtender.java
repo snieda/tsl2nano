@@ -13,20 +13,20 @@ import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 
 import de.tsl2.nano.core.ISession;
-import de.tsl2.nano.h5.inspect.IDOMExtender;
+import de.tsl2.nano.h5.inspect.IDOMDecorator;
 
 /**
  * 
  * @author Tom, Thomas Schneider
  * @version $Revision$ 
  */
-public class DOMExtender implements IDOMExtender {
+public class DOMExtender implements IDOMDecorator {
 
     /**
      * {@inheritDoc}
      */
     @Override
-    public void extend(Document doc, ISession<?> session) {
+    public void decorate(Document doc, ISession<?> session) {
         Element node = doc.createElement("h1");
         node.setTextContent(this.getClass().getName());
        doc.getDocumentElement().appendChild(node);

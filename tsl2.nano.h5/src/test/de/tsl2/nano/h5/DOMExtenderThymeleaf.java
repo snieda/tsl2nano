@@ -24,20 +24,20 @@ import org.w3c.dom.Node;
 import de.tsl2.nano.core.ENV;
 import de.tsl2.nano.core.ISession;
 import de.tsl2.nano.core.util.FileUtil;
-import de.tsl2.nano.h5.inspect.IDOMExtender;
+import de.tsl2.nano.h5.inspect.IDOMDecorator;
 
 /**
  * 
  * @author Tom, Thomas Schneider
  * @version $Revision$ 
  */
-public class DOMExtenderThymeleaf implements IDOMExtender {
+public class DOMExtenderThymeleaf implements IDOMDecorator {
 
     /**
      * {@inheritDoc}
      */
     @Override
-    public void extend(Document doc, ISession<?> session) {
+    public void decorate(Document doc, ISession<?> session) {
         ClassLoaderTemplateResolver templateResolver = new ClassLoaderTemplateResolver();
         templateResolver.setPrefix("./");
         templateResolver.setSuffix(".html");

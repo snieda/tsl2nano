@@ -22,6 +22,7 @@ import java.lang.reflect.Modifier;
 import java.math.BigDecimal;
 import java.math.MathContext;
 import java.net.InetAddress;
+import java.net.URL;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -50,6 +51,7 @@ import de.tsl2.nano.core.ENV;
 import de.tsl2.nano.core.Finished;
 import de.tsl2.nano.core.ManagedException;
 import de.tsl2.nano.core.classloader.NetworkClassLoader;
+import de.tsl2.nano.core.classloader.RuntimeClassloader;
 import de.tsl2.nano.core.cls.BeanClass;
 import de.tsl2.nano.core.cls.ClassFinder;
 import de.tsl2.nano.core.cls.PrimitiveUtil;
@@ -530,6 +532,7 @@ public class CoreUtilTest implements ENVTestPreparation {
 	public void testClassFinder() throws Exception {
 		// trigger the classloader to load that class
 		System.out.println(getClass().getClassLoader().loadClass(Finished.class.getName()));
+		System.out.println(getClass().getClassLoader().loadClass(ManagedException.class.getName()));
 
 		String[] c = new String[] { ClassFinder.class.getName(), "tslcoreclsfind", "fzzyfnd" };
 		ClassFinder finder = new ClassFinder(this.getClass().getClassLoader());
@@ -542,7 +545,7 @@ public class CoreUtilTest implements ENVTestPreparation {
 
 	@Test
 	public void testPackageFinder() throws Exception {
-		new ClassFinder().collectPackageClasses(Thread.currentThread().getContextClassLoader());
+		new ClassFinder(Thread.currentThread().getContextClassLoader());
 	}
 
 	@Test
