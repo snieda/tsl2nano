@@ -99,6 +99,15 @@ public class RuntimeClassloader extends URLClassLoader {
     }
 
     /**
+     * provide the known packages to class crawlers
+     * @return all known packages
+     */
+    @Override
+    public Package[] getPackages() {
+    	return super.getPackages();
+    }
+    
+    /**
      * {@inheritDoc}
      */
     @Override

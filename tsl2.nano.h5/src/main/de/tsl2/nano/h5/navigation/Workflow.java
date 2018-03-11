@@ -43,7 +43,7 @@ public class Workflow extends EntityBrowser implements Cloneable {
     @ElementList(entry = "activity", inline = true, required = true)
     Collection<BeanAct> activities;
     @Transient Map<String, BeanDefinition<?>> cache;
-    @Transient Bean<?> login;
+    @Transient BeanDefinition<?> login;
     @Transient String asString;
     @Transient Parameter context = new Parameter();
     @Transient StatusInfo status;
@@ -157,7 +157,7 @@ public class Workflow extends EntityBrowser implements Cloneable {
      * 
      * @param login
      */
-    public void setLogin(Bean<?> login) {
+    public void setRoot(BeanDefinition<?> login) {
         this.login = login;
     }
 

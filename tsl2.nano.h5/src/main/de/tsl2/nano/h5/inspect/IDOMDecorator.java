@@ -12,6 +12,7 @@ package de.tsl2.nano.h5.inspect;
 import org.w3c.dom.Document;
 
 import de.tsl2.nano.core.ISession;
+import de.tsl2.nano.inspection.Inspector;
 
 /**
  * extends a prebuild DOM, given by Document - using informations on the current session
@@ -19,7 +20,7 @@ import de.tsl2.nano.core.ISession;
  * @author Tom, Thomas Schneider
  * @version $Revision$
  */
-public interface IDOMExtender {
+public interface IDOMDecorator extends Inspector {
     /** extends a prebuild DOM, given by Document - using informations on the current session */
-    void extend(Document doc, ISession<?> session);
+    void decorate(Document doc, ISession<?> session);
 }
