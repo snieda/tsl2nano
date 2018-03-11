@@ -7,7 +7,6 @@
 	    <version>2.0.3-SNAPSHOT</version>
 	  </parent>
 	<artifactId>tsl2.nano.ebeanprovider</artifactId>
-	<version>0.0.2</version>
 	<name>TSL2 ORM EBean provider</name>
 	<properties>
 		<module.parent>..</module.parent>
@@ -33,7 +32,7 @@
 		<dependency>
 			<groupId>net.sf.tsl2nano</groupId>
 			<artifactId>tsl2.nano.directaccess</artifactId>
-			<version>0.0.6</version>
+			<version>${project.version}</version>
 		</dependency>
 		<dependency>
 			<groupId>org.hibernate.javax.persistence</groupId>

@@ -6,7 +6,6 @@
     <version>2.0.3-SNAPSHOT</version>
   </parent>
   <artifactId>tsl2.nano.terminal</artifactId>
-  <version>0.5.2</version>
   <name>TSL2 Framework Terminal</name>
   <description>TSL2 Framework Terminal (Console Application Framework named SIShell, providing Actions, Options, Commands, Inputs, lots of Selectors, PlatformManagement)</description>
 	<properties>
@@ -83,12 +82,12 @@
 		<dependency>
 			<groupId>net.sf.tsl2nano</groupId>
 			<artifactId>tsl2.nano.vnet</artifactId>
-			<version>0.5.2</version>
+			<version>${project.version}</version>
 		</dependency>
 		<dependency>
 			<groupId>net.sf.tsl2nano</groupId>
 			<artifactId>tsl2.nano.jarresolver</artifactId>
-			<version>0.0.2</version>
+			<version>${project.version}</version>
 		</dependency>
 	</dependencies>
 </project>

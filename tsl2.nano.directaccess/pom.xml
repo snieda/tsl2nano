@@ -7,7 +7,6 @@
 	    <version>2.0.3-SNAPSHOT</version>
 	  </parent>
 	<artifactId>tsl2.nano.directaccess</artifactId>
-	<version>0.0.6</version>
 	<name>TSL2 JEE Direct Access</name>
 	<description>TSL2 JEE Direct Access (local JPA through GenericLocalBeanContainer, GenericLocalServiceBean, GenericEntityManager, ScriptTool, Replication)</description>
 	<properties>
@@ -54,7 +53,7 @@
 		<dependency>
 			<groupId>net.sf.tsl2nano</groupId>
 			<artifactId>tsl2.nano.serviceaccess</artifactId>
-			<version>1.0.3</version>
+			<version>${project.version}</version>
 		</dependency>
 	</dependencies>
 </project>

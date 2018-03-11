@@ -7,7 +7,6 @@
 	    <version>2.0.3-SNAPSHOT</version>
 	  </parent>
 	<artifactId>tsl2.nano.ormliteprovider</artifactId>
-	<version>0.0.2</version>
 	<properties>
 		<module.parent>..</module.parent>
 	</properties>
@@ -46,7 +45,7 @@
 		<dependency>
 			<groupId>net.sf.tsl2nano</groupId>
 			<artifactId>tsl2.nano.directaccess</artifactId>
-			<version>0.0.6</version>
+			<version>${project.version}</version>
 		</dependency>
 	</dependencies>
 	<name>TSL2 ORMlite provider</name>

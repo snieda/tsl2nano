@@ -331,27 +331,27 @@
 		<dependency>
 			<groupId>net.sf.tsl2nano</groupId>
 			<artifactId>tsl2.nano.incubation</artifactId>
-			<version>0.5.2</version>
+			<version>${project.version}</version>
 		</dependency>
 		<dependency>
 			<groupId>net.sf.tsl2nano</groupId>
 			<artifactId>tsl2.nano.vnet</artifactId>
-			<version>0.5.2</version>
+			<version>${project.version}</version>
 		</dependency>
 		<dependency>
 			<groupId>net.sf.tsl2nano</groupId>
 			<artifactId>tsl2.nano.jarresolver</artifactId>
-			<version>0.0.2</version>
+			<version>${project.version}</version>
 		</dependency>
 		<dependency>
 			<groupId>net.sf.tsl2nano</groupId>
 			<artifactId>tsl2.nano.ormliteprovider</artifactId>
-			<version>0.0.2</version>
+			<version>${project.version}</version>
 		</dependency>
 		<dependency>
 			<groupId>net.sf.tsl2nano</groupId>
 			<artifactId>tsl2.nano.ebeanprovider</artifactId>
-			<version>0.0.2</version>
+			<version>${project.version}</version>
 		</dependency>
 		<!-- https://mvnrepository.com/artifact/com.h2database/h2 -->
 		<dependency>
