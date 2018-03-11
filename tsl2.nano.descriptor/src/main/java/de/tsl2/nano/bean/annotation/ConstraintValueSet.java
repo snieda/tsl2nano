@@ -66,7 +66,7 @@ public class ConstraintValueSet {
             if (allowed[i].equals(ALLOWED_CLASSES)) {
                 String exp = StringUtil.substring(allowed[i], ":", null);
                 preAllowed.addAll((Collection<? extends String>) CollectionUtil.getList(CollectionUtil.getTransforming(
-                    new ClassFinder().fuzzyFind(exp).values(), new ITransformer<Class, String>() {
+                    ClassFinder.self().fuzzyFind(exp).values(), new ITransformer<Class, String>() {
 
                         @Override
                         public String transform(Class toTransform) {
@@ -76,7 +76,7 @@ public class ConstraintValueSet {
             } else if (allowed[i].equals(ALLOWED_APPCLASSES)) {
                 String exp = ENV.get("bean.generation.packagename", "");
                 preAllowed.addAll((Collection<? extends String>) CollectionUtil.getList(CollectionUtil.getTransforming(
-                    new ClassFinder().fuzzyFind(exp).values(), new ITransformer<Class, String>() {
+                    ClassFinder.self().fuzzyFind(exp).values(), new ITransformer<Class, String>() {
                         @Override
                         public String transform(Class toTransform) {
                             return toTransform.getName();
@@ -85,11 +85,11 @@ public class ConstraintValueSet {
             } else if (allowed[i].equals(ALLOWED_METHODS)) {
                 String exp = StringUtil.substring(allowed[i], ":", null);
                 preAllowed.addAll(CollectionUtil
-                    .toStringTransformed(new ClassFinder().fuzzyFind(exp, Method.class, -1, null).values()));
+                    .toStringTransformed(ClassFinder.self().fuzzyFind(exp, Method.class, -1, null).values()));
             } else if (allowed[i].equals(ALLOWED_FIELDS)) {
                 String exp = StringUtil.substring(allowed[i], ":", null);
                 preAllowed.addAll(CollectionUtil
-                    .toStringTransformed(new ClassFinder().fuzzyFind(exp, Field.class, -1, null).values()));
+                    .toStringTransformed(ClassFinder.self().fuzzyFind(exp, Field.class, -1, null).values()));
             } else if (allowed[i].equals(ALLOWED_BEANS)) {
                 String exp = ENV.get("bean.generation.packagename", "");
                 preAllowed.addAll(CollectionUtil.toStringTransformed(new AttributeFinder().fuzzyFind(exp).values()));

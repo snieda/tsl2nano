@@ -103,7 +103,7 @@ public class NetCommunicator implements Runnable {
 	}
 
 	private Net setImplementationByUserInput() {
-		log(new ClassFinder().findClass(IListener.class));
+		log(ClassFinder.self().findClass(IListener.class));
 		Scanner input = new Scanner(System.in);
 		Net net = new Net();
 		String line;

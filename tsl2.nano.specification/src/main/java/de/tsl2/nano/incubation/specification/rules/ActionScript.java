@@ -83,7 +83,7 @@ public class ActionScript<T> extends AbstractRunnable<T> {
     }
     
     private static void provideLanguage(String language) {
-        if (language != null && new ClassFinder().findClass(language) == null) {
+        if (language != null && ClassFinder.self().findClass(language) == null) {
             String pck = ENV.getPackagePrefix(language);
             ENV.loadClassDependencies(pck);
         }

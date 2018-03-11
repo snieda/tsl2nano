@@ -535,17 +535,12 @@ public class CoreUtilTest implements ENVTestPreparation {
 		System.out.println(getClass().getClassLoader().loadClass(ManagedException.class.getName()));
 
 		String[] c = new String[] { ClassFinder.class.getName(), "tslcoreclsfind", "fzzyfnd" };
-		ClassFinder finder = new ClassFinder(this.getClass().getClassLoader());
+		ClassFinder finder = ClassFinder.self();
 		assertTrue(finder.fuzzyFind(c[0], Class.class, -1, null).containsValue(ClassFinder.class));
 		assertTrue(finder.fuzzyFind(c[1], null, Modifier.PUBLIC, null).containsValue(ClassFinder.class));
 		assertTrue(finder.fuzzyFind(c[2], Method.class, -1, null).containsValue(
 				ClassFinder.class.getMethod("fuzzyFind", String.class, Class.class, int.class, Class.class)));
 		assertTrue(finder.findClass(ManagedException.class).size() >= 1);
-	}
-
-	@Test
-	public void testPackageFinder() throws Exception {
-		new ClassFinder(Thread.currentThread().getContextClassLoader());
 	}
 
 	@Test

@@ -19,6 +19,7 @@ import java.lang.reflect.Modifier;
 import java.net.URL;
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -26,6 +27,7 @@ import java.util.Map;
 import java.util.ServiceLoader;
 import java.util.Set;
 import java.util.TreeMap;
+import java.util.Vector;
 
 import org.apache.commons.logging.Log;
 
@@ -47,26 +49,44 @@ import de.tsl2.nano.core.util.StringUtil;
 public class ClassFinder {
 	private static final Log LOG = LogFactory.getLog(ClassFinder.class);
 
+	private static ClassFinder self = null;
+	
 	private Set<Class<?>> classes;
 
-	public ClassFinder() {
+	public static ClassFinder self() {
+		if (self == null)
+			self = new ClassFinder();
+		return self;
+	}
+	
+	ClassFinder() {
 		this(Thread.currentThread().getContextClassLoader());
 	}
 
 	/**
 	 * constructor
 	 */
-	public ClassFinder(ClassLoader classLoader) {
+	ClassFinder(ClassLoader classLoader) {
+		init(classLoader);
+	}
+
+	private void init(ClassLoader classLoader) {
 		ClassLoader baseClassLoader = classLoader;
 		classes = new HashSet<>();
+
 		//TODO: let our own classloader implementations provide the loaded classes!
-//		addClasses(ClassLoader.getSystemClassLoader(), classes);
-//		while ((classLoader = addClasses(classLoader, classes)) != null)
-//			;
+		try {
+			addClasses(ClassLoader.getSystemClassLoader(), classes);
+			while ((classLoader = addClasses(classLoader, classes)) != null)
+				;
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+		
 		collectPackageClasses(baseClassLoader, classes);
-		System.out.println("---------------------------------------------------------------------");
-		System.out.println("ClassFinder created for " + classes.size() + " classes");
-		System.out.println("---------------------------------------------------------------------");
+		LOG.info("---------------------------------------------------------------------");
+		LOG.info("ClassFinder created for " + classes.size() + " classes");
+		LOG.info("---------------------------------------------------------------------");
 	}
 
 	/**
@@ -75,11 +95,11 @@ public class ClassFinder {
 	 * @param classLoader
 	 * @return parent ClassLoader
 	 */
-//	private static ClassLoader addClasses(ClassLoader classLoader, Set<Class<?>> classes) {
-//		classes.addAll(
-//				(Collection<? extends Class<?>>) new PrivateAccessor(classLoader).member("classes", Vector.class));
-//		return (ClassLoader) new PrivateAccessor(classLoader).call("getParent", ClassLoader.class);
-//	}
+	private static ClassLoader addClasses(ClassLoader classLoader, Set<Class<?>> classes) {
+		classes.addAll(
+				(Collection<? extends Class<?>>) new PrivateAccessor(classLoader).member("classes", Vector.class));
+		return (ClassLoader) new PrivateAccessor(classLoader).call("getParent", ClassLoader.class);
+	}
 
 //	private void collectPackageClasses(ClassLoader classLoader) {
 //		collectPackageClasses(ClassLoader.getSystemClassLoader(), classes);
@@ -89,9 +109,9 @@ public class ClassFinder {
 
 	ClassLoader collectPackageClasses(ClassLoader cl, Set<Class<?>> classes) {
 		Package[] packages = cl instanceof RuntimeClassloader ? ((RuntimeClassloader)cl).getPackages() : Package.getPackages();
-		System.out.println("---------------------------------------------------------------------");
-		System.out.println(packages.length + " Packages will be loaded on classloader " + cl);
-		System.out.println("---------------------------------------------------------------------");
+		LOG.debug("---------------------------------------------------------------------");
+		LOG.debug(packages.length + " Packages will be loaded on classloader " + cl);
+		LOG.debug("---------------------------------------------------------------------");
 		for (int i = 0; i < packages.length; i++) {
 			classes.addAll(collectPackageClasses(cl, packages[i].getName(), classes));
 		}
@@ -100,7 +120,8 @@ public class ClassFinder {
 	}
 
 	private Collection<Class<?>> collectPackageClasses(ClassLoader cl, String pack, Set<Class<?>> classes) {
-		System.out.print("loading classes on " + pack + ": ");
+		if (LOG.isDebugEnabled())
+			System.out.print("loading classes on " + pack + ": ");
 		int i = 0;
 		try {
 //			Enumeration<URL> entries = cl.getResources(pack.replace('.', '/'));
@@ -111,7 +132,6 @@ public class ClassFinder {
 
 			URL upackage = cl.getResource(pack.replace('.', '/'));
 			if (upackage == null) {
-//				System.out.println();
 				return classes;
 			}
 			DataInputStream dis;
@@ -133,7 +153,8 @@ public class ClassFinder {
 		} catch (IOException e1) {
 			ManagedException.forward(e1);
 		} finally {
-			System.out.println(i);
+			if (LOG.isDebugEnabled())
+				System.out.println(i);
 		}
 		return classes;
 	}
@@ -293,4 +314,7 @@ public class ClassFinder {
 		return map;
 	}
 
+	public void reset() {
+		init(Thread.currentThread().getContextClassLoader());
+	}
 }

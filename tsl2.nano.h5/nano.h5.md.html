@@ -2613,6 +2613,53 @@ Run the script tsl2.nano.incubation/2nano.xml. un-comment the first entry of _re
 
 ## Creating an own project
 
+There are several ways to create an own project using this framework as base. We describe two of them - the first with an dependency injection (DI) mechanism, the second using the old class extending style.
+
+### Implementing an own project through dependency injection (DI)
+
+The interfaces
+
+* de.tsl2.nano.h5.inspect.INanoHandler
+* de.tsl2.nano.h5.inspect.IDomDecorator
+
+are used as entry points by the framework to visit all implementations and inspect or decorate the given arguments.
+Through DI your implementation will be found and the implemented interface methods will be called directly after the framework has created new default objects/trees to be inspected or decorated.
+
+#### Application Inspectors
+
+Your implementation of  _INanoHandler_ works as application inspector, changing the default configuration, handling authentication, bean definitions, bean-presentation etc.  
+
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+public interface INanoHandler extends Inspector {
+    void onAuthentication(IAuthorization auth);
+    void configuration(SortedMap<?, ?> properties, Map<Class<?>, Object> services);
+    public <PAGE, OUTPUT, T extends IPageBuilder<PAGE, OUTPUT>> T definePresentationType(T pageBuilder);
+    void defineBeanDefinition(BeanDefinition<?> beanDef);
+    void definePersistence(Persistence persistence);
+    void actionBeforeHandler(IAction<?> action);
+    void actionAfterHandler(IAction<?> action);
+    void workflowHandler(IBeanNavigator workflow);
+    void exceptionHandler(Exception ex);
+}
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+#### Html DOM Decorators
+
+Your implementation of  _IDOMDecorator_ will be called on each html page creation. The DOM-Document, created by the framework will be given as parameter to be optional decorated / changed by your code.  
+Through the given session object, you have access to the authentication informations, the current bean and the navigation stack of the current workflow.
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+public interface IDOMDecorator extends Inspector {
+    /** extends a prebuild DOM, given by Document - using informations on the current session */
+    void decorate(Document doc, ISession<?> session);
+}
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+Here you can use template generating framworks like velocity or thymeleaf.
+
+For further informations and examples, have a look at chapter "Injecting own logic on the forms html DOM document"
+
+###  Implementing an own project through framework class extensions
+
 _Nano.H5_ is based on the framework _tsl2.common_ and it's bean package. The bean package provides a generic and comfortable way to describe your user interface. If the standards of _Nano.H5_ don't fulfil your needs, you can develop own beans on top of _Nano.H5_ - without creating special gui-elements or interaction, this will be done by the framework - generating html-pages through the _BeanPresentation_ implementation. Of course, this implementation is extendable, too. Have a look at chapter _Dependencies_ to know, which jar-files you should copy to the environment directory (f.e. _h5.sample_).
 
 If you download and unpack _test.h5.sample_, you yield an eclipse project referencing the _tsl2.nano_ jar-files.

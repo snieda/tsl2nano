@@ -85,7 +85,7 @@ public class YamlUtil {
     @SuppressWarnings({ "rawtypes", "unchecked" })
     static Yaml createYamlWriter(boolean skipEmpties, boolean fields, String shortCutPackage) {
         Representer representer = skipEmpties ? new SkipEmptyRepresenter() : new Representer();
-        Map<Double, Class> classes = new ClassFinder().fuzzyFind(shortCutPackage);
+        Map<Double, Class> classes = ClassFinder.self().fuzzyFind(shortCutPackage);
         for (Class cls : classes.values()) {
             if (cls.getSimpleName().length() > 0)
                 representer.addClassTag(cls, new Tag(cls.getSimpleName()));
@@ -129,7 +129,7 @@ public class YamlUtil {
     @SuppressWarnings({ "rawtypes", "unchecked" })
     static Yaml createYamlLoader(boolean fields, String shortCutPackage) {
         Constructor constructor = new PostConstructor();
-        Map<Double, Class> classes = new ClassFinder().fuzzyFind(shortCutPackage);
+        Map<Double, Class> classes = ClassFinder.self().fuzzyFind(shortCutPackage);
         TypeDescription typeDef;
         for (Class cls : classes.values()) {
             if (cls.getSimpleName().length() > 0) {

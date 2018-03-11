@@ -53,7 +53,7 @@ public class Inspectors {
      * instances of provided implementations for the given interface
      */
     public static <T> List<T> getImplementations(Class<T> interfaze) {
-        Collection<Class<T>> implClasses = new ClassFinder().findClass(interfaze);
+        Collection<Class<T>> implClasses = ClassFinder.self().findClass(interfaze);
         ArrayList<T> handler = new ArrayList<>(implClasses.size());
         log("implementations for " + interfaze + "\n" + StringUtil.toFormattedString(implClasses, -1));
         for (Class<T> implClass : implClasses) {

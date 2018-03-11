@@ -16,5 +16,5 @@ package de.tsl2.nano.inspection;
  * @version $Revision$
  */
 public interface Inspector {
-    boolean isEnabled();
+    default boolean isEnabled() {return true;}
 }
