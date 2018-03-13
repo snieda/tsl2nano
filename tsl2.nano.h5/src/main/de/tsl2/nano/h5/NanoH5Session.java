@@ -425,7 +425,12 @@ public class NanoH5Session implements ISession<BeanDefinition>, Serializable, IL
             };
             Inspectors.process(INanoHandler.class).exceptionHandler(ex);
             msg = refreshPage(ex);
-            FileUtil.writeBytes(msg.getBytes(), ENV.getTempPath() + "page-failed-" + getId() + ".html", false);
+            try {// only a try, don't throw a new exception in this catch block
+                FileUtil.writeBytes(msg.getBytes(), ENV.getTempPath() + "page-failed-" 
+                        + getUserAuthorization().getUser() + "-" + DateUtil.getFormattedTimeStamp() + ".html", false);
+            } catch (Exception e1) {
+                LOG.error(e1);
+            }
             response = server.createResponse(Status.BAD_REQUEST, MIME_HTML, msg);
             actionLog.clear();
             //don't forget that there was an exception. to be seen on the next exception ;-)
