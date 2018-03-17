@@ -90,12 +90,13 @@ import de.tsl2.nano.format.RegExpFormat;
  */
 @SuppressWarnings({ "rawtypes", "unchecked", "serial" })
 public class BeanPresentationHelper<T> {
-    private static final Log LOG = LogFactory.getLog(BeanPresentationHelper.class);
-    protected BeanDefinition<T> bean;
-    protected Properties config = new Properties();
-    protected Collection<IAction> appActions;
-    protected Collection<IAction> sessionActions;
-    protected Collection<IAction> pageActions;
+    transient private static final Log LOG = LogFactory.getLog(BeanPresentationHelper.class);
+    //this class is not serializable - but simple-xml will serialize <- we need transient modifiers
+    transient protected BeanDefinition<T> bean;
+    transient protected Properties config = new Properties();
+    transient protected Collection<IAction> appActions;
+    transient protected Collection<IAction> sessionActions;
+    transient protected Collection<IAction> pageActions;
 
     /*
      * IAttributeDefinitions

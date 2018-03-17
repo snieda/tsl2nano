@@ -83,6 +83,7 @@ public class NanoH5IT implements ENVTestPreparation {
         assertTrue(FileUtil.copy(targetPath + jarName, TEST_DIR));
         
         ENV.setProperty("websocket.use", false);
+        ENV.setProperty("app.app.show.startpage", false);
         ENV.persist();
         assertTrue(FileUtil.copy(TEST_DIR + "environment.xml", TEST_DIR + ENV.PREFIX_ENVNAME + ENV.CONFIG_NAME + "/environment.xml"));
         

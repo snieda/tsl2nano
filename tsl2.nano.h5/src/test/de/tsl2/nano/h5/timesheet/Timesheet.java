@@ -30,6 +30,7 @@ import static org.anonymous.project.presenter.ChargeConst.ATTR_PARTY;
 import static org.anonymous.project.presenter.ChargeConst.ATTR_PAUSE;
 import static org.anonymous.project.presenter.ChargeConst.ATTR_TOTIME;
 import static org.anonymous.project.presenter.ChargeConst.ATTR_VALUE;
+import static org.junit.Assert.assertEquals;
 
 import java.io.IOException;
 import java.io.Serializable;
@@ -126,7 +127,6 @@ import de.tsl2.nano.incubation.specification.actions.ActionPool;
 import de.tsl2.nano.incubation.specification.rules.RuleDecisionTable;
 import de.tsl2.nano.incubation.specification.rules.RulePool;
 import de.tsl2.nano.incubation.specification.rules.RuleScript;
-import de.tsl2.nano.persistence.GenericLocalBeanContainer;
 import de.tsl2.nano.util.PrintUtil;
 import my.app.Times;
 
@@ -547,29 +547,29 @@ public class Timesheet extends NanoH5App {
         c.setFromdate(sunday);
         c.setFromtime(DateUtil.getTime(8, 30));
         bean.getAttribute(ATTR_TOTIME).setValue(DateUtil.getTime(20, 0));
-        assertTrue(new BigDecimal(11.5).equals(c.getValue()));
+        assertEquals(new BigDecimal(11.5), c.getValue());
 
         Map lc = bean.getAttribute(ATTR_VALUE).getPresentation().getLayoutConstraints();
-        assertTrue(redColorStyle.equals(lc.get("style")));
+        assertEquals(redColorStyle, lc.get("style"));
 
         String style = bean.getAttribute(ATTR_FROMDATE).getPresentation().getLayoutConstraints();
-        assertTrue(redColorStyle.equals(style));
+        assertEquals(redColorStyle, style);
 
         //test it on value-column
         style = bean.getAttribute(ATTR_FROMDATE).getColumnDefinition().getPresentable().getLayoutConstraints();
-        assertTrue(redColorStyle.equals(style));
+        assertEquals(redColorStyle, style);
 
         //test it on value-column in beancollector
         BeanCollector<Collection<Charge>,Charge> collector = BeanCollector.getBeanCollector(Arrays.asList(c), 0);
         collector.nextRow();
         style = collector.getAttribute(ATTR_FROMDATE).getColumnDefinition().getPresentable().getLayoutConstraints();
-        assertTrue(redColorStyle.equals(style));
+        assertEquals(redColorStyle, style);
 
         //test the queries
         QueryPool qpool = ENV.get(QueryPool.class);
-        assertTrue(qpool.get(STAT_TIMESHEET_STATISTICS).getColumnNames().equals(Arrays.asList("Month", "Workdays", "Hours", "Dayhours", "Ill", "Holiday")));
-        assertTrue(qpool.get(STAT_PROJECTS).getColumnNames().equals(Arrays.asList("Project", "Hours")));
-        assertTrue(qpool.get(STAT_TYPES).getColumnNames().equals(Arrays.asList("Type", "Hours")));
+        assertEquals(qpool.get(STAT_TIMESHEET_STATISTICS).getColumnNames(), Arrays.asList("Month", "Workdays", "Hours", "Dayhours", "Ill", "Holiday"));
+        assertEquals(qpool.get(STAT_PROJECTS).getColumnNames(), Arrays.asList("Project", "Hours"));
+        assertEquals(qpool.get(STAT_TYPES).getColumnNames(), Arrays.asList("Type", "Hours"));
         super.stop();
         
         //test virtual beans
@@ -587,6 +587,6 @@ public class Timesheet extends NanoH5App {
             else if (beandef.getName().equals(new QueryResult(STAT_TYPES).getName()))
                 count++;
         }
-        assertTrue(6 == count);
+        assertEquals(6, count);
     }
 }

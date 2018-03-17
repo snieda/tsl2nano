@@ -8,7 +8,6 @@ import static de.tsl2.nano.bean.def.IBeanCollector.MODE_SEARCHABLE;
 import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.io.IOException;
-import java.io.InputStream;
 import java.lang.Thread.UncaughtExceptionHandler;
 import java.net.InetAddress;
 import java.net.MalformedURLException;
@@ -201,49 +200,50 @@ public class NanoH5 extends NanoHTTPD implements ISystemConnector<Persistence> {
 //            LogFactory.setLogLevel(LogFactory.LOG_ALL);
                 
             LOG.debug(System.getProperties());
+
             createStartPage();
 
+            extractJarScripts();
+            extractDefaultResources();
+            //perhaps activate secure transport layer TLS
+            enableSSL(ENV.get("app.ssl.activate", false));
+            runHttpServer();
+        } catch (Exception ioe) {
+            LOG.error("Couldn't start server: ", ioe);
+            ConcurrentUtil.sleep(3000);
+            System.exit(-1);
+        }
+    }
+
+    private void enableSSL(boolean ssl) throws IOException {
+        if (ssl) {
+            String keyStore = ENV.get("app.ssl.keystore.file", "nanoh5.jks");
+            LOG.info("activating ssl using keystore " + keyStore);
+            makeSecure(NanoHTTPD.makeSSLSocketFactory(keyStore,
+                ENV.get("app.ssl.keystore.password", "nanoh5").toCharArray()), null);
+        } else {
+            ENV.setProperty("app.ssl.shortcut", "");
+        }
+    }
+
+    private void extractDefaultResources() {
+        String dir = ENV.getConfigPath();
+        File icons = new File(dir + "icons");
+        if (!icons.exists()) {
             try {
-                if (AppLoader.isUnixFS()) {
-                    ENV.extractResourceToDir("run.sh", "../", false, true, true);
-                    ENV.extractResourceToDir("runasservice.sh", "../", false, true, true);
-                    ENV.extractResource("mda.sh", true, true);
-                } else {
-                    ENV.extractResourceToDir("run.bat", "../", false, false, true);
-                    ENV.extractResource("mda.bat");
-                }
-                ENV.extractResource("readme.txt");
-                ENV.extractResource("shell.xml");
-                ENV.extractResource("mda.xml");
-                ENV.extractResource("tsl2nano-appcache.mf");
-                ENV.extractResource("favicon.ico");
-                
-                ENV.extractResource("doc/beanconfigurator.help.html");
-                ENV.extractResource("doc/attributeconfigurator.help.html");
-                ENV.extractResource("doc/entry.help.html");
-                ENV.extractResource("doc/persistence.help.html");
-                onStandaloneExtractJars();
+                FileUtil.extractNestedZip(JAR_RESOURCES, dir, null);
             } catch (Exception ex) {
-                LOG.error("couldn't extract ant or shell script", ex);
-                ENV.get(UncaughtExceptionHandler.class).uncaughtException(null, ex);
-            }
-            String dir = ENV.getConfigPath();
-            File icons = new File(dir + "icons");
-            if (!icons.exists()) {
+                //this shouldn't influence the application start!
+                LOG.warn("couldn't extract resources from internal file " + JAR_RESOURCES,
+                    ex);
                 try {
-                    FileUtil.extractNestedZip(JAR_RESOURCES, dir, null);
-                } catch (Exception ex) {
-                    //this shouldn't influence the application start!
-                    LOG.warn("couldn't extract resources from internal file " + JAR_RESOURCES,
-                        ex);
-                    try {
-                        ENV.extractResource("icons/**");
-                    } catch (Exception ex1) {
-                        LOG.warn("couldn't extract resources from icons directory",
-                            ex1);
-                        ENV.get(UncaughtExceptionHandler.class).uncaughtException(null, ex);
-                    }
+                    ENV.extractResource("icons/**");
+                } catch (Exception ex1) {
+                    LOG.warn("couldn't extract resources from icons directory",
+                        ex1);
+                    ENV.get(UncaughtExceptionHandler.class).uncaughtException(null, ex);
                 }
+            }
 //                if (AppLoader.isDalvik()) {//on android, we cannot yet create the beans-jar-file
 //                    try {
 //                        ENV.extractResource("anyway.jar");
@@ -252,48 +252,62 @@ public class NanoH5 extends NanoHTTPD implements ISystemConnector<Persistence> {
 //                            e1);
 //                    }
 //                }
-                /*
-                 * DEPRECATED: we integrate the 'anyway' database as sample
-                 * on first start, extract the sample files
-                 */
-                if (ENV.get("app.create.sample.files.on.first.start", false))
-                    ((Html5Presentation) ENV.get(BeanPresentationHelper.class)).createSampleEnvironment();
-            }
-            //perhaps activate secure transport layer TLS
-            if (ENV.get("app.ssl.activate", false)) {
-                String keyStore = ENV.get("app.ssl.keystore.file", "nanoh5.jks");
-                LOG.info("activating ssl using keystore " + keyStore);
-                makeSecure(NanoHTTPD.makeSSLSocketFactory(keyStore,
-                    ENV.get("app.ssl.keystore.password", "nanoh5").toCharArray()), null);
+            /*
+             * DEPRECATED: we integrate the 'anyway' database as sample
+             * on first start, extract the sample files
+             */
+            if (ENV.get("app.create.sample.files.on.first.start", false))
+                ((Html5Presentation) ENV.get(BeanPresentationHelper.class)).createSampleEnvironment();
+        }
+    }
+
+    private void extractJarScripts() {
+        try {
+            if (AppLoader.isUnixFS()) {
+                ENV.extractResourceToDir("run.sh", "../", false, true, true);
+                ENV.extractResourceToDir("runasservice.sh", "../", false, true, true);
+                ENV.extractResource("mda.sh", true, true);
             } else {
-                ENV.setProperty("app.ssl.shortcut", "");
+                ENV.extractResourceToDir("run.bat", "../", false, false, true);
+                ENV.extractResource("mda.bat");
             }
-            super.start();
+            ENV.extractResource("readme.txt");
+            ENV.extractResource("shell.xml");
+            ENV.extractResource("mda.xml");
+            ENV.extractResource("tsl2nano-appcache.mf");
+            ENV.extractResource("favicon.ico");
+            
+            ENV.extractResource("doc/beanconfigurator.help.html");
+            ENV.extractResource("doc/attributeconfigurator.help.html");
+            ENV.extractResource("doc/entry.help.html");
+            ENV.extractResource("doc/persistence.help.html");
+            onStandaloneExtractJars();
+        } catch (Exception ex) {
+            LOG.error("couldn't extract ant or shell script", ex);
+            ENV.get(UncaughtExceptionHandler.class).uncaughtException(null, ex);
+        }
+    }
 
-            if (System.getProperty("os.name").startsWith("Windows")) {
-                SystemUtil.executeRegisteredWindowsPrg(applicationHtmlFile());
-            } else {
-                LOG.info("Please open the URL '" + serviceURL.toString() + "' in your browser");
+    private void runHttpServer() {
+        super.start();
+
+        if (System.getProperty("os.name").startsWith("Windows")
+                && ENV.get("app.show.startpage", true)) {
+            SystemUtil.executeRegisteredWindowsPrg(applicationHtmlFile());
+        } else {
+            LOG.info("Please open the URL '" + serviceURL.toString() + "' in your browser");
+        }
+
+        try {
+            LOG.info("Listening on port " + serviceURL.getPort() + ". Hit Enter or Strg+C to stop.\n");
+            LOG.debug("waiting for input on " + System.in);
+            if (System.in.read() == -1)
+                throw new IllegalStateException("Empty System-Input returning -1");
+        } catch (Exception ex) {
+            LOG.debug("server mode without input console available (message: " + ex.toString() + ")");
+            while (true) {
+                ConcurrentUtil.sleep(3000);
             }
-
-//            myOut = LogFactory.getOut();
-//            myErr = LogFactory.getErr();
-
-            try {
-                LOG.info("Listening on port " + serviceURL.getPort() + ". Hit Enter or Strg+C to stop.\n");
-                LOG.debug("waiting for input on " + System.in);
-                if (System.in.read() == -1)
-                    throw new IllegalStateException("Empty System-Input returning -1");
-            } catch (Exception ex) {
-                LOG.debug("server mode without input console available (message: " + ex.toString() + ")");
-                while (true) {
-                    ConcurrentUtil.sleep(3000);
-                }
-            }
-        } catch (Exception ioe) {
-            LOG.error("Couldn't start server: ", ioe);
-            ConcurrentUtil.sleep(3000);
-            System.exit(-1);
         }
     }
 
@@ -370,10 +384,6 @@ public class NanoH5 extends NanoHTTPD implements ISystemConnector<Persistence> {
      * @param resultHtmlFile
      */
     protected String createStartPage(String resultHtmlFile) {
-        InputStream stream = ENV.getResource("start.template");
-//        String startPage = String.valueOf(FileUtil.getFileData(stream, null));
-//        startPage = StringUtil.insertProperties(startPage,
-//            MapUtil.asMap("url", serviceURL, "text", ENV.getName()));
         String page =
             Html5Presentation.createMessagePage("start.template", ENV.translate("tsl2nano.start", true) + " "
                 + ENV.translate(ENV.getName(), true), serviceURL);
@@ -390,6 +400,7 @@ public class NanoH5 extends NanoHTTPD implements ISystemConnector<Persistence> {
             Map<String, String> header,
             Map<String, String> parms,
             Map<String, String> files) {
+        Inspectors.process(INanoHandler.class).requestHandler(uri, m, header, parms, files);
         String method = m.name();
         if (method.equals("GET") && !isAdmin(uri)) {
             // serve files
@@ -456,7 +467,7 @@ public class NanoH5 extends NanoHTTPD implements ISystemConnector<Persistence> {
     }
 
     private boolean isAdmin(String uri) {
-        return uri.contains(String.valueOf(hashCode()));
+        return uri != null && uri.contains(String.valueOf(hashCode()));
     }
 
     //TODO: do some encryptions...
@@ -487,8 +498,11 @@ public class NanoH5 extends NanoHTTPD implements ISystemConnector<Persistence> {
      * adds services for presentation and page-builder
      */
     protected IPageBuilder<?, String> createPageBuilder() {
-        Html5Presentation pageBuilder = Inspectors.process(INanoHandler.class).definePresentationType(new Html5Presentation());
-        ENV.addService(BeanPresentationHelper.class, pageBuilder);
+        IPageBuilder pageBuilder = Inspectors.process(INanoHandler.class).definePresentationType(new Html5Presentation());
+        if (pageBuilder instanceof BeanPresentationHelper)
+            ENV.addService(BeanPresentationHelper.class, (BeanPresentationHelper)pageBuilder);
+        else 
+            ENV.addService(BeanPresentationHelper.class, new Html5Presentation<>());
         ENV.addService(IPageBuilder.class, pageBuilder);
         return pageBuilder;
     }

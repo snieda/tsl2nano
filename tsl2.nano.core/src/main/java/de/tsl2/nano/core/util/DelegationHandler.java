@@ -19,6 +19,8 @@ import java.util.Map;
 
 import org.apache.commons.logging.Log;
 import org.simpleframework.xml.Element;
+import org.simpleframework.xml.ElementArray;
+import org.simpleframework.xml.ElementList;
 import org.simpleframework.xml.ElementMap;
 import org.simpleframework.xml.core.Commit;
 
@@ -41,10 +43,13 @@ public class DelegationHandler<T> implements IDelegationHandler<T>, Serializable
     /** values for this proxy to use - overruling the {@link #delegate} */
     @ElementMap(attribute = true, inline = true, keyType = String.class, required = false)
     protected Map<String, Object> properties;
-    /** optional delegate (real object) */
+    /** optional delegate (real object, proxy instances will not be serialized) */
     @Element(required = false)
     protected T delegate;
-
+    /** depends on delegation object. after serialization, only the interfaces may be present */
+    @ElementArray(entry = "interface", required = false)
+    protected Class<T>[] interfaces;
+    
     /**
      * constructor
      */
@@ -98,14 +103,21 @@ public class DelegationHandler<T> implements IDelegationHandler<T>, Serializable
      * @param delegate
      * @param properties
      */
-    public DelegationHandler(T delegate, Map<String, Object> properties) {
+    @SuppressWarnings("unchecked")
+	public DelegationHandler(T delegate, Map<String, Object> properties) {
         super();
         if (delegate == null && Util.isEmpty(properties))
             //don't escalate here - this may be done in extension 
             LOG.warn("delegate handler without delegate and any property!");
         this.delegate = delegate;
         this.properties = properties != null ? properties : getProperties();
+        setInterfaces(delegate);
     }
+
+	private void setInterfaces(T delegate) {
+		this.interfaces = delegate != null ? BeanClass.getBeanClass(delegate.getClass())
+                .getInterfaces() : new Class[0];
+	}
 
     @Override
     public T getDelegate() {
@@ -135,10 +147,10 @@ public class DelegationHandler<T> implements IDelegationHandler<T>, Serializable
         return method.invoke(getDelegate(), args);
     }
 
-    @SuppressWarnings("unchecked")
+    @SuppressWarnings({ "unchecked", "rawtypes" })
     @Override
     public Class[] getInterfaces() {
-        return getDelegate().getClass().getInterfaces();
+        return interfaces;
     }
 
     protected Map<String, Object> getProperties() {
@@ -173,7 +185,8 @@ public class DelegationHandler<T> implements IDelegationHandler<T>, Serializable
 
     @Commit
     protected void initDeserialization() {
-
+    	if (delegate != null && interfaces == null)
+    		setInterfaces(delegate);
     }
 
     @Override
@@ -201,7 +214,8 @@ public class DelegationHandler<T> implements IDelegationHandler<T>, Serializable
     public static final <T> T createProxy(DelegationHandler<T> invocationHandler) {
         LOG.debug("creating proxy for handler: " + invocationHandler);
         return (T) Proxy.newProxyInstance(Thread.currentThread().getContextClassLoader(),
-            BeanClass.getBeanClass(invocationHandler.getDelegate().getClass())
-                .getInterfaces(), invocationHandler);
+            invocationHandler.getInterfaces(), invocationHandler);
     }
+    
+    
 }

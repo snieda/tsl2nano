@@ -21,8 +21,10 @@ import java.text.SimpleDateFormat;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
+import javax.xml.namespace.QName;
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
+import javax.xml.stream.events.StartElement;
 import javax.xml.transform.Transformer;
 import javax.xml.transform.TransformerConfigurationException;
 import javax.xml.transform.TransformerException;
@@ -341,7 +343,8 @@ public class XmlUtil {
             @Override
             public Object read(InputNode n) throws Exception {
                 //WORKAROUND to evaluate the class name. where can we extract the class name from?
-                final Class cls = BeanClass.load("de.tsl2.nano.h5.RuleCover");
+            	String clsName = ((StartElement)n.getSource()).getAttributeByName(new QName("class")).getValue();
+                final Class cls = BeanClass.load( clsName != null ? clsName : "de.tsl2.nano.h5.RuleCover");
                 Element element = AnnotationProxy.getAnnotation(SimpleXmlAnnotator.class, "attribute", Element.class);
                 AnnotationProxy.setAnnotationValues(element, "name", "ruleCover", "type", cls);
                 Object ih = persister.read(cls, n.getNext(), false);

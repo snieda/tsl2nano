@@ -130,6 +130,7 @@ import de.tsl2.nano.script.ScriptTool;
  */
 @SuppressWarnings({ "unchecked", "rawtypes" })
 public class Html5Presentation<T> extends BeanPresentationHelper<T> implements IPageBuilder<Element, String> {
+    //this class is not serializable - but simple-xml will serialize <- we need transient modifiers
     protected transient int tabIndex;
     private transient List<Character> availableshortCuts;
     private transient static final Character SHORTCUTS[];

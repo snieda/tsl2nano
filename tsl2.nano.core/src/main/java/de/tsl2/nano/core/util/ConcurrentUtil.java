@@ -45,8 +45,11 @@ public class ConcurrentUtil {
         return st.length > 2 ? st[2].toString() : "<unknown>";
     }
 
-    public static Thread startDaemon(String name,
-            Runnable runtime) {
+    public static Thread startDaemon(Runnable runnable) {
+        return startDaemon(runnable.toString(), runnable, true, null);
+    }
+
+    public static Thread startDaemon(String name, Runnable runtime) {
         return startDaemon(name, runtime, true, null);
     }
 
@@ -180,6 +183,14 @@ public class ConcurrentUtil {
         }
         LOG.error("couldn't find thread " + threadName);
         return false;
+    }
+
+    public static void runWorker(Runnable...runnables) {
+    	createParallelWorker(runnables[0].toString()).run(runnables);
+    }
+    
+    public static Worker<Object, Object> createParallelWorker(String name) {
+        return createParallelWorker(name, 0, Object.class, Object.class);
     }
 
     /**
