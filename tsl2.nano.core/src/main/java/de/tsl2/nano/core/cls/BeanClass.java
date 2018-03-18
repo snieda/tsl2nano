@@ -983,6 +983,10 @@ public class BeanClass<T> implements Serializable {
         return load(className, null);
     }
 
+    static Class load(String className, ClassLoader classloader) {
+    	return load(className, classloader, true);
+    }
+    
     /**
      * load
      * 
@@ -990,7 +994,7 @@ public class BeanClass<T> implements Serializable {
      * @param classloader (optional) if null, the threads context classloader will be used.
      * @return loaded class
      */
-    static Class load(String className, ClassLoader classloader) {
+    public static Class load(String className, ClassLoader classloader, boolean logException) {
         if (classloader == null) {
             classloader = Thread.currentThread().getContextClassLoader();
         }
@@ -998,7 +1002,7 @@ public class BeanClass<T> implements Serializable {
             LOG.debug("loading class " + className + " through classloader " + classloader);
             return classloader.loadClass(className);
         } catch (Exception e) {
-            ManagedException.forward(e);
+            ManagedException.forward(e, logException);
             return null;
         }
     }

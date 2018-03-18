@@ -71,7 +71,7 @@ public class Updater {
      */
     void versionUpdate(Object environment, String currentVersion, String newVersionNumber) {
         Class<Runnable> updClass =
-            (Class<Runnable>) BeanClass.load(getVersionUpdaterClass(environment.getClass(), newVersionNumber));
+            (Class<Runnable>) BeanClass.load(getVersionUpdaterClass(environment.getClass(), newVersionNumber), null, false);
         BeanClass.createInstance(updClass, environment, currentVersion).run();
     }
 
