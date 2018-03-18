@@ -10,35 +10,35 @@ import java.util.Collection;
  * @author Thomas Schneider
  * @version $Revision$
  */
-public interface IBeanCollector<COLLECTIONTYPE extends Collection<T>, T> extends ITableDescriptor<T> {
+interface IBeanCollector<COLLECTIONTYPE extends Collection<T>, T> extends ITableDescriptor<T> {
 
     /** whether a selected bean can be opened to be changed */
-    public static final int MODE_EDITABLE = 1;
+    static final int MODE_EDITABLE = 1;
     /** whether new items can be added to the collection of bean-collector  */
-    public static final int MODE_CREATABLE = 2;
+    static final int MODE_CREATABLE = 2;
     /** whether items can be deleted from collection of bean-collector  */
-    public static final int MODE_DELETABLE = 4;
+    static final int MODE_DELETABLE = 4;
 
     /** whether more than one item of the collection can be selected */
-    public static final int MODE_MULTISELECTION = 8;
+    static final int MODE_MULTISELECTION = 8;
     /** whether a filter/search panel should be available */
-    public static final int MODE_SEARCHABLE = 16;
+    static final int MODE_SEARCHABLE = 16;
     /** whether the selection should be returned to the parent caller - to be assigned as result */
-    public static final int MODE_ASSIGNABLE = 32;
+    static final int MODE_ASSIGNABLE = 32;
     /** show one-to-many relations in table (will have effects on {@link BeanDefinition#attributeFilter} and {@link BeanDefinition#attributeDefinitions} */
-    public static final int MODE_SHOW_MULTIPLES = 64;
+    static final int MODE_SHOW_MULTIPLES = 64;
     /** if a beans attribute is a relation, show its details in a nested panel */
-    public static final int MODE_SHOW_NESTINGDETAILS = 128;
+    static final int MODE_SHOW_NESTINGDETAILS = 128;
 
-    public static final int MODE_ALL_SINGLE = MODE_EDITABLE | MODE_CREATABLE | MODE_DELETABLE | MODE_SEARCHABLE | MODE_ASSIGNABLE;
-    public static final int MODE_ALL = MODE_ALL_SINGLE | MODE_MULTISELECTION | MODE_SHOW_MULTIPLES;
+    static final int MODE_ALL_SINGLE = MODE_EDITABLE | MODE_CREATABLE | MODE_DELETABLE | MODE_SEARCHABLE | MODE_ASSIGNABLE;
+    static final int MODE_ALL = MODE_ALL_SINGLE | MODE_MULTISELECTION | MODE_SHOW_MULTIPLES;
     
     /**
      * setWorkingMode
      * 
      * @param mode
      */
-    public void setMode(int mode);
+    void setMode(int mode);
 
     /**
      * hasWorkingMode
@@ -46,30 +46,30 @@ public interface IBeanCollector<COLLECTIONTYPE extends Collection<T>, T> extends
      * @param mode - one of {@link #MODE_EDITABLE}, {@link #MODE_CREATABLE} etc.
      * @return whether the bean collector has the given mode
      */
-    public boolean hasMode(int mode);
+    boolean hasMode(int mode);
 
     /**
      * adds a mode bit to the existing
      * @param modebit - one of {@link #MODE_EDITABLE}, {@link #MODE_CREATABLE}, etc.
      */
-    public void addMode(int modebit);
+    void addMode(int modebit);
     
-    public void removeMode(int modebit);
+    void removeMode(int modebit);
     
     /**
      * @return Returns the beanFinder.
      */
-    public abstract IBeanFinder<T, ?> getBeanFinder();
+    abstract IBeanFinder<T, ?> getBeanFinder();
 
     /**
      * @return Returns the selectionProvider.
      */
-    public ISelectionProvider<T> getSelectionProvider();
+    ISelectionProvider<T> getSelectionProvider();
     
     /**
      * refresh
      */
-    public abstract void refresh();
+    abstract void refresh();
 
     /**
      * override this method to create an edit dialog (executeOpenCommand).
@@ -77,7 +77,7 @@ public interface IBeanCollector<COLLECTIONTYPE extends Collection<T>, T> extends
      * @param bean bean to present in new dialog
      * @return command result
      */
-    public abstract Object editItem(Object bean);
+    abstract Object editItem(Object bean);
 
     /**
      * will be called, before object deletion. overwrite this method to do an alternate deletion or throw an exception
@@ -86,14 +86,14 @@ public interface IBeanCollector<COLLECTIONTYPE extends Collection<T>, T> extends
      * @param selection objects to delete
      */
     @SuppressWarnings("rawtypes")
-    public abstract void checkBeforeDelete(Collection selection);
+    abstract void checkBeforeDelete(Collection selection);
 
     /**
      * deleteItem
      * 
      * @param item item to remove
      */
-    public abstract void deleteItem(T item);
+    abstract void deleteItem(T item);
 
     /**
      * ceates a new object
@@ -102,16 +102,16 @@ public interface IBeanCollector<COLLECTIONTYPE extends Collection<T>, T> extends
      * 
      * @return new object
      */
-    public abstract T createItem(T selectedItem);
+    abstract T createItem(T selectedItem);
 
     /**
      * @return Returns the collection.
      */
-    public COLLECTIONTYPE getCurrentData();
+    COLLECTIONTYPE getCurrentData();
     
   /**
      * getSearchStatus
      * @return search status as text to be used as summary/footer for the table
      */
-    public String getSummary();
+    String getSummary();
 }

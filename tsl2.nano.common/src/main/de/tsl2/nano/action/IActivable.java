@@ -30,7 +30,7 @@ public interface IActivable extends Serializable {
     boolean isActive();
 
     /** {@link #isActive()} will return always true */
-    public static final IActivable ACTIVE = new IActivable() {
+    static final IActivable ACTIVE = new IActivable() {
         /** serialVersionUID */
         private static final long serialVersionUID = -8362817368656975730L;
         //workaround to have at least one member for simple-xml to serialize
@@ -48,7 +48,7 @@ public interface IActivable extends Serializable {
     };
 
     /** {@link #isActive()} will return always false */
-    public static final IActivable INACTIVE = new IActivable() {
+    static final IActivable INACTIVE = new IActivable() {
         /** serialVersionUID */
         private static final long serialVersionUID = 5470534334831173886L;
         //workaround to have at least one member for simple-xml to serialize

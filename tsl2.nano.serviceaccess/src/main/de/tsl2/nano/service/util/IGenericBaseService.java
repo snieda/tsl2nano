@@ -28,9 +28,9 @@ import java.util.Map;
  * 
  */
 @SuppressWarnings("rawtypes")
-public interface IGenericBaseService extends IStatelessService, INamedQueryService {
+interface IGenericBaseService extends IStatelessService, INamedQueryService {
     /** find all beans of type beanType (statement cache will be used!) */
-    public <T> Collection<T> findAll(Class<T> beanType, Class... lazyRelations);
+    <T> Collection<T> findAll(Class<T> beanType, Class... lazyRelations);
 
     /**
      * find all beans of type beanType (statement cache will be used!)
@@ -41,7 +41,7 @@ public interface IGenericBaseService extends IStatelessService, INamedQueryServi
      * @param lazyRelations (optional) pre-loaded lazy-relation types
      * @return filled collection with beans of type beantype
      */
-    public <T> Collection<T> findAll(Class<T> beanType, int startIndex, int maxResult, Class... lazyRelations);
+    <T> Collection<T> findAll(Class<T> beanType, int startIndex, int maxResult, Class... lazyRelations);
 
     /**
      * find all beans of type beanType beeing members of holder. useful if your beanType has no access to the holder.
@@ -100,16 +100,16 @@ public interface IGenericBaseService extends IStatelessService, INamedQueryServi
     <T> T findByExample(T exampleBean, Class... lazyRelations);
 
     /** find all beans with same attributes (only single value attributes!) as exampleBean */
-    public <T> Collection<T> findByExample(T exampleBean, boolean caseInsensitive, Class... lazyRelations);
+    <T> Collection<T> findByExample(T exampleBean, boolean caseInsensitive, Class... lazyRelations);
 
     /** find all beans with similar (like) attributes (only single value attributes!) as exampleBean */
-    public <T> Collection<T> findByExampleLike(T exampleBean, boolean caseInsensitive, int startIndex, int maxResult, Class... lazyRelations);
+    <T> Collection<T> findByExampleLike(T exampleBean, boolean caseInsensitive, int startIndex, int maxResult, Class... lazyRelations);
 
     /** find bean with given id */
-    public <T> T findById(Class<T> beanType, Object id, Class... lazyRelations);
+    <T> T findById(Class<T> beanType, Object id, Class... lazyRelations);
 
     /** find all beans with same attributes (only single value attributes!) between first and second bean */
-    public <T> Collection<T> findBetween(T firstBean, T secondBean, Class... lazyRelations);
+    <T> Collection<T> findBetween(T firstBean, T secondBean, Class... lazyRelations);
 
     /**
      * finds all beans, having properties between firstBean and secondBean.
@@ -123,7 +123,7 @@ public interface IGenericBaseService extends IStatelessService, INamedQueryServi
      * @param lazyRelations (optional) pre-loaded lazy-relation types
      * @return filled collection with beans of type T
      */
-    public <T> Collection<T> findBetween(T firstBean,
+    <T> Collection<T> findBetween(T firstBean,
             T secondBean,
             boolean caseInsensitive,
             int startIndex,
@@ -139,7 +139,7 @@ public interface IGenericBaseService extends IStatelessService, INamedQueryServi
      *            sequentially filled with the values of args
      * @return count of changed rows
      */
-    public int executeQuery(String queryString, boolean nativeQuery, Object[] args);
+    int executeQuery(String queryString, boolean nativeQuery, Object[] args);
 
     /**
      * find items by query. args are optional. if nativeQuery is true, a standard sql-query will be done
@@ -151,7 +151,7 @@ public interface IGenericBaseService extends IStatelessService, INamedQueryServi
      * @param lazyRelations (optional) one-to-many types to be filled before returning
      * @return result of query
      */
-    public Collection<?> findByQuery(String queryString, boolean nativeQuery, Object[] args, Class... lazyRelations);
+    Collection<?> findByQuery(String queryString, boolean nativeQuery, Object[] args, Class... lazyRelations);
 
     /**
      * find items by query. args are optional. if nativeQuery is true, a standard sql-query will be done
@@ -166,7 +166,7 @@ public interface IGenericBaseService extends IStatelessService, INamedQueryServi
      * @param lazyRelations (optional) one-to-many types to be filled before returning
      * @return result of query
      */
-    public Collection<?> findByQuery(String queryString,
+    Collection<?> findByQuery(String queryString,
             boolean nativeQuery,
             int startIndex,
             int maxresult,
@@ -184,7 +184,7 @@ public interface IGenericBaseService extends IStatelessService, INamedQueryServi
      * @param lazyRelations (optional) one-to-many types to be filled before returning
      * @return result of query
      */
-    public Collection<?> findByQuery(String queryString,
+    Collection<?> findByQuery(String queryString,
             boolean nativeQuery,
             Map<String, ?> args,
             Class... lazyRelations);
@@ -193,7 +193,7 @@ public interface IGenericBaseService extends IStatelessService, INamedQueryServi
      * find one item by query. args are optional. if nativeQuery is true, a standard sql-query will be done. for further
      * informations, see {@link #findByQuery(String, boolean, Object[], Class...)}.
      */
-    public Object findItemByQuery(String queryString, boolean nativeQuery, Object[] args, Class... lazyRelations);
+    Object findItemByQuery(String queryString, boolean nativeQuery, Object[] args, Class... lazyRelations);
 
     /**
      * find one value by query - fast way to get a single value like through 'count(*)' without packing it to a bean. BE
@@ -202,42 +202,42 @@ public interface IGenericBaseService extends IStatelessService, INamedQueryServi
      * standard sql-query will be done. for further informations, see
      * {@link #findByQuery(String, boolean, Object[], Class...)}.
      */
-    public Object findValueByQuery(String queryString, boolean nativeQuery, Object... args);
+    Object findValueByQuery(String queryString, boolean nativeQuery, Object... args);
 
     /**
      * persists or merges the given object - committing a transaction and calling refresh and flush after.
      * {@link #persistNoTransaction(Object, boolean, boolean)} to work on bean-managed transactions
      */
-    public <T> T persist(T bean, Class... lazyRelations);
+    <T> T persist(T bean, Class... lazyRelations);
 
     /**
      * persists or merges the given object - committing a transaction. if refresh and flush are false, you have a high
      * performance. use {@link #persistNoTransaction(Object, boolean, boolean)} to work on bean-managed transactions
      */
-    public <T> T persist(T bean, boolean refreshBean, boolean flush, Class... lazyRelations);
+    <T> T persist(T bean, boolean refreshBean, boolean flush, Class... lazyRelations);
 
     /**
      * persists or merges the given object without accessing a transaction. if refresh and flush are false, you have a
      * high performance.
      */
-    public <T> T persistNoTransaction(T bean, boolean refreshBean, boolean flush, Class... lazyRelations);
+    <T> T persistNoTransaction(T bean, boolean refreshBean, boolean flush, Class... lazyRelations);
 
     /** persists or merges the objects of the given collection - using one transaction. */
-    public <T> Collection<T> persistCollection(Collection<T> beans, Class... lazyRelations);
+    <T> Collection<T> persistCollection(Collection<T> beans, Class... lazyRelations);
 
     /**
      * persists or merges the given objects - perhaps different entity types - and returns the new elements. Goal: doing
      * that in one transaction!
      */
-    public Object[] persistAll(Object... beans);
+    Object[] persistAll(Object... beans);
 
     /** refreshes the given object - reloads it in the current transaction / session! */
-    public <T> T refresh(T bean);
+    <T> T refresh(T bean);
 
     /** removes the given object */
-    public void remove(Object bean);
+    void remove(Object bean);
 
     /** removes the objects of the given collection - using one transaction. */
-    public void removeCollection(Collection<Object> beans);
+    void removeCollection(Collection<Object> beans);
 
 }

@@ -20,7 +20,6 @@ import java.util.Map;
 import org.apache.commons.logging.Log;
 import org.simpleframework.xml.Element;
 import org.simpleframework.xml.ElementArray;
-import org.simpleframework.xml.ElementList;
 import org.simpleframework.xml.ElementMap;
 import org.simpleframework.xml.core.Commit;
 

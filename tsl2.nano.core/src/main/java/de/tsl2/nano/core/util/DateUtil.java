@@ -27,34 +27,34 @@ import de.tsl2.nano.core.ManagedException;
  */
 public final class DateUtil {
     /** the default date-time format */
-    private static final DateFormat DEFAULT_DATETIME_FORMAT = DateFormat.getDateTimeInstance(DateFormat.MEDIUM,
+    private static DateFormat DEFAULT_DATETIME_FORMAT = DateFormat.getDateTimeInstance(DateFormat.MEDIUM,
         DateFormat.MEDIUM);
     /** the default date format */
-    private static final DateFormat DEFAULT_DATE_FORMAT = DateFormat.getDateInstance(DateFormat.MEDIUM);
+    private static DateFormat DEFAULT_DATE_FORMAT = DateFormat.getDateInstance(DateFormat.MEDIUM);
     /** the default time format */
-    private static final DateFormat DEFAULT_TIME_FORMAT = DateFormat.getTimeInstance(DateFormat.MEDIUM);
+    private static DateFormat DEFAULT_TIME_FORMAT = DateFormat.getTimeInstance(DateFormat.MEDIUM);
     /** sql date format (used by database queries). not assignable to a specific locale */
-    private static final DateFormat SQL_DATE_FORMAT = new SimpleDateFormat("yyyy-MM-dd");
-    private static final DateFormat MINUTE_FORMAT = new SimpleDateFormat("mm:ss");
+    private static DateFormat SQL_DATE_FORMAT = new SimpleDateFormat("yyyy-MM-dd");
+    private static DateFormat MINUTE_FORMAT = new SimpleDateFormat("mm:ss");
 
-    private static final long MILLI_TO_MINUTES = 60 * 1000;
-    private static final int HOUR_TO_MINUTES = 60;
-    private static final int DAY_TO_HOUR = 24;
+    private static long MILLI_TO_MINUTES = 60 * 1000;
+    private static int HOUR_TO_MINUTES = 60;
+    private static int DAY_TO_HOUR = 24;
 
-    public static final long T_MINUTE = MILLI_TO_MINUTES;
-    public static final long T_HOUR = T_MINUTE * HOUR_TO_MINUTES;
-    public static final long T_DAY = DAY_TO_HOUR * T_HOUR;
+    public static long T_MINUTE = MILLI_TO_MINUTES;
+    public static long T_HOUR = T_MINUTE * HOUR_TO_MINUTES;
+    public static long T_DAY = DAY_TO_HOUR * T_HOUR;
 
-    public static final Date MIN_DATE = getDate(0, 0, 0);
-    public static final Date MAX_DATE = getDate(9999, -1, -1);
+    public static Date MIN_DATE = getDate(0, 0, 0);
+    public static Date MAX_DATE = getDate(9999, -1, -1);
 
     /** 4 quarters beginnings without year */
-    public static final Date Q1 = getDate(9999, 1, 1);
-    public static final Date Q2 = getDate(9999, 4, 1);
-    public static final Date Q3 = getDate(9999, 7, 1);
-    public static final Date Q4 = getDate(9999, 10, 1);
+    public static Date Q1 = getDate(9999, 1, 1);
+    public static Date Q2 = getDate(9999, 4, 1);
+    public static Date Q3 = getDate(9999, 7, 1);
+    public static Date Q4 = getDate(9999, 10, 1);
 
-    static final Date[] QUARTERS = new Date[] { Q1, Q2, Q3, Q4 };
+    static Date[] QUARTERS = new Date[] { Q1, Q2, Q3, Q4 };
 
     /**
      * Default-Constructor
@@ -79,11 +79,11 @@ public final class DateUtil {
      * @param minutes minutes
      * @return milliseconds
      */
-    public static final long minutesToMillis(int minutes) {
+    public static long minutesToMillis(int minutes) {
         return minutes * MILLI_TO_MINUTES;
     }
 
-    public static final int diffHours(Date date1, Date date2) {
+    public static int diffHours(Date date1, Date date2) {
         return millisToMinutes(diffMillis(date1, date2)) / HOUR_TO_MINUTES;
     }
 
@@ -94,7 +94,7 @@ public final class DateUtil {
      * @param date2 the "start date" (from which subtraction is done)
      * @return the diff in minutes
      */
-    public static final int diffMinutes(Date date1, Date date2) {
+    public static int diffMinutes(Date date1, Date date2) {
         return millisToMinutes(diffMillis(date1, date2));
     }
 
@@ -106,11 +106,11 @@ public final class DateUtil {
      * @return the difference in milliseconds
      */
     public static long diffMillis(Date date1, Date date2) {
-        final Calendar cal = getCalendar();
+        Calendar cal = getCalendar();
         cal.setTime(date1);
-        final long long1 = cal.getTimeInMillis();// + cal.getTimeZone().getOffset(cal.getTimeInMillis());
+        long long1 = cal.getTimeInMillis();// + cal.getTimeZone().getOffset(cal.getTimeInMillis());
         cal.setTime(date2);
-        final long long2 = cal.getTimeInMillis();// + cal.getTimeZone().getOffset(cal.getTimeInMillis());
+        long long2 = cal.getTimeInMillis();// + cal.getTimeZone().getOffset(cal.getTimeInMillis());
         return long2 - long1;
     }
 
@@ -122,7 +122,7 @@ public final class DateUtil {
      * @return the new date
      */
     public static Date addMillis(Date date, long millis) {
-        final Calendar cal = getCalendar();
+        Calendar cal = getCalendar();
         cal.setTimeInMillis(date.getTime() + millis);
         return cal.getTime();
     }
@@ -135,7 +135,7 @@ public final class DateUtil {
      * @return the new date
      */
     public static Date addMinutes(Date date, int minutes) {
-        final Calendar cal = getCalendar();
+        Calendar cal = getCalendar();
         cal.setTime(date);
         cal.add(MINUTE, minutes);
         return cal.getTime();
@@ -150,7 +150,7 @@ public final class DateUtil {
      * @return the new date
      */
     public static Date addHours(Date date, int hours) {
-        final Calendar cal = getCalendar();
+        Calendar cal = getCalendar();
         cal.setTime(date);
         cal.add(Calendar.HOUR_OF_DAY, hours);
         return cal.getTime();
@@ -165,7 +165,7 @@ public final class DateUtil {
      * @return the new date
      */
     public static Date addDays(Date date, int days) {
-        final Calendar cal = getCalendar();
+        Calendar cal = getCalendar();
         cal.setTime(date);
         cal.add(Calendar.DAY_OF_MONTH, days);
         return cal.getTime();
@@ -179,7 +179,7 @@ public final class DateUtil {
      * @return the new date
      */
     public static Date addMonths(Date date, int months) {
-        final Calendar cal = getCalendar();
+        Calendar cal = getCalendar();
         cal.setTime(date);
         cal.add(Calendar.MONTH, months);
         return cal.getTime();
@@ -193,7 +193,7 @@ public final class DateUtil {
      * @return the new date
      */
     public static Date addYears(Date date, int years) {
-        final Calendar cal = getCalendar();
+        Calendar cal = getCalendar();
         cal.setTime(date);
         cal.add(Calendar.YEAR, years);
         return cal.getTime();
@@ -207,16 +207,16 @@ public final class DateUtil {
      * @return the concatenated date
      */
     public static Date concatDateAndTime(Date date, Date time) {
-        final Calendar cal = getCalendar();
+        Calendar cal = getCalendar();
 
         cal.setTime(date);
-        final int year = cal.get(Calendar.YEAR);
-        final int month = cal.get(Calendar.MONTH);
-        final int day = cal.get(Calendar.DAY_OF_MONTH);
+        int year = cal.get(Calendar.YEAR);
+        int month = cal.get(Calendar.MONTH);
+        int day = cal.get(Calendar.DAY_OF_MONTH);
         cal.setTime(time);
-        final int hours = cal.get(Calendar.HOUR_OF_DAY);
-        final int minutes = cal.get(Calendar.MINUTE);
-        final int seconds = cal.get(Calendar.SECOND);
+        int hours = cal.get(Calendar.HOUR_OF_DAY);
+        int minutes = cal.get(Calendar.MINUTE);
+        int seconds = cal.get(Calendar.SECOND);
 
         cal.set(year, month, day, hours, minutes, seconds);
         return cal.getTime();
@@ -289,7 +289,7 @@ public final class DateUtil {
      * @return a date (current or from param "date") with time: 00:00:00.000)
      */
     public static Date getStartOfDay(Date date) {
-        final Calendar startOfDay = getCalendar();
+        Calendar startOfDay = getCalendar();
         if (date != null) {
             startOfDay.setTime(date);
         }
@@ -303,7 +303,7 @@ public final class DateUtil {
      * @return a date (current or from param "date") with time: 23:59:59.999)
      */
     public static Date getEndOfDay(Date date) {
-        final Calendar endOfDay = getCalendar();
+        Calendar endOfDay = getCalendar();
         if (date != null) {
             endOfDay.setTime(date);
         }
@@ -318,7 +318,7 @@ public final class DateUtil {
      * @return a date (current or from param "date") with time: 00:00:00.000)
      */
     public static Date getStartOfMonth(Date date) {
-        final Calendar startOfMonth = getCalendar();
+        Calendar startOfMonth = getCalendar();
         if (date != null) {
             startOfMonth.setTime(date);
         }
@@ -333,7 +333,7 @@ public final class DateUtil {
      * @return a date (current or from param "date") with time: 23:59:59.999)
      */
     public static Date getEndOfMonth(Date date) {
-        final Calendar endOfMonth = getCalendar();
+        Calendar endOfMonth = getCalendar();
         if (date != null) {
             endOfMonth.setTime(date);
         }
@@ -348,7 +348,7 @@ public final class DateUtil {
      * @return a date (current or from param "date") with time: 00:00:00.000)
      */
     public static Date getStartOfYear(Date date) {
-        final Calendar startOfYear = getCalendar();
+        Calendar startOfYear = getCalendar();
         if (date != null) {
             startOfYear.setTime(date);
         }
@@ -363,7 +363,7 @@ public final class DateUtil {
      * @return a date (current or from param "date") with time: 23:59:59.999)
      */
     public static Date getEndOfYear(Date date) {
-        final Calendar endOfYear = getCalendar();
+        Calendar endOfYear = getCalendar();
         if (date != null) {
             endOfYear.setTime(date);
         }
@@ -391,7 +391,7 @@ public final class DateUtil {
      * 
      * @return formatted actual timestamp
      */
-    public static final String getFormattedTimeStamp() {
+    public static String getFormattedTimeStamp() {
         return getFormattedDate(new Date(), "yyyy-MMM-dd_HHmmss_sss");
     }
 
@@ -449,7 +449,7 @@ public final class DateUtil {
     public static String getFormattedDate(Date d, String pattern) {
         String str = "";
         if (d != null) {
-            final SimpleDateFormat sdf = new SimpleDateFormat(pattern);
+            SimpleDateFormat sdf = new SimpleDateFormat(pattern);
             str = sdf.format(d);
         }
 
@@ -465,7 +465,7 @@ public final class DateUtil {
      * @return date instance
      */
     public static Date getDate(int year, int month, int day) {
-        final Calendar cal = getCalendar();
+        Calendar cal = getCalendar();
         cal.clear();
 
         if (year == -1) {
@@ -524,7 +524,7 @@ public final class DateUtil {
      * @return value of date field
      */
     public static int getFieldOfDate(Date date, int field) {
-        final Calendar cal = getCalendar();
+        Calendar cal = getCalendar();
         cal.setTime(date);
         return cal.get(field);
     }
@@ -535,7 +535,7 @@ public final class DateUtil {
      * @param date date to eval
      * @return year of given date
      */
-    public static final int getYear(Date date) {
+    public static int getYear(Date date) {
         return getFieldOfDate(date, Calendar.YEAR);
     }
 
@@ -545,7 +545,7 @@ public final class DateUtil {
      * @param date date to eval
      * @return month of given date
      */
-    public static final int getMonth(Date date) {
+    public static int getMonth(Date date) {
         return getFieldOfDate(date, Calendar.MONTH);
     }
 
@@ -555,7 +555,7 @@ public final class DateUtil {
      * @param date date to eval
      * @return day of month of given date
      */
-    public static final int getDay(Date date) {
+    public static int getDay(Date date) {
         return getFieldOfDate(date, Calendar.DAY_OF_MONTH);
     }
 
@@ -568,7 +568,7 @@ public final class DateUtil {
      * @return the new date
      */
     public static Date add(Date date, int field, int amount) {
-        final Calendar cal = getCalendar();
+        Calendar cal = getCalendar();
         cal.setTime(date);
         cal.add(field, amount);
         return cal.getTime();
@@ -583,7 +583,7 @@ public final class DateUtil {
      * @return the new date
      */
     public static Date change(Date date, int field, int value) {
-        final Calendar cal = getCalendar();
+        Calendar cal = getCalendar();
         cal.setTime(date);
         cal.set(field, value);
         return cal.getTime();
@@ -597,7 +597,7 @@ public final class DateUtil {
      * @return the new date
      */
     public static Date setMaximum(Date date, int field) {
-        final Calendar cal = getCalendar();
+        Calendar cal = getCalendar();
         cal.setTime(date);
         cal.set(field, cal.getActualMaximum(field));
         return cal.getTime();
@@ -641,7 +641,7 @@ public final class DateUtil {
     public static Date getDate(String formattedString) {
         try {
             return DEFAULT_DATE_FORMAT.parse(formattedString);
-        } catch (final ParseException e) {
+        } catch (ParseException e) {
             ManagedException.forward(e);
             return null;
         }
@@ -657,7 +657,7 @@ public final class DateUtil {
     public static Date getDateSQL(String formattedString) {
         try {
             return SQL_DATE_FORMAT.parse(formattedString);
-        } catch (final ParseException e) {
+        } catch (ParseException e) {
             ManagedException.forward(e);
             return null;
         }
@@ -669,7 +669,7 @@ public final class DateUtil {
      * @param date (optional) to format as sql date
      * @return String with pattern yyyy-MM-dd or null if date is null
      */
-    public static final String toSqlDateString(Date date) {
+    public static String toSqlDateString(Date date) {
         return date != null ? SQL_DATE_FORMAT.format(date) : null;
     }
 
@@ -687,7 +687,7 @@ public final class DateUtil {
             int second,
             int milli) {
         if (source == null) {
-            final Calendar cal = getCalendar();
+            Calendar cal = getCalendar();
             source = cal.getTime();
         }
         return setTime(setDate(source, year, month, day), hour, minute, second, milli);
@@ -703,7 +703,7 @@ public final class DateUtil {
      * @return changed date
      */
     public static Date setDate(Date source, int year, int month, int day) {
-        final Calendar cal = getCalendar();
+        Calendar cal = getCalendar();
         cal.setTime(source);
         return setDate(cal, year, month, day).getTime();
     }
@@ -732,7 +732,7 @@ public final class DateUtil {
      * @return date with new time
      */
     public static Date setTime(Date source, int hour, int minute, int second, int milli) {
-        final Calendar cal = getCalendar();
+        Calendar cal = getCalendar();
         if (source != null)
             cal.setTime(source);
         return setTime(cal, hour, minute, second, milli).getTime();
@@ -800,7 +800,7 @@ public final class DateUtil {
      * @return next workday, that is not weekend or holiday
      */
     public static Date getNextWorkday(Date d, Collection<Date> holidays) {
-        final Calendar cal = getCalendar();
+        Calendar cal = getCalendar();
         cal.setTime(d);
 
         while (true) {
@@ -838,7 +838,7 @@ public final class DateUtil {
      * @param to2 (optional) second periods to.
      * @return true, if the two periods intersect.
      */
-    public static final boolean intersect(Date from1, Date to1, Date from2, Date to2) {
+    public static boolean intersect(Date from1, Date to1, Date from2, Date to2) {
         if (from1 == null) {
             from1 = MIN_DATE;
         }
@@ -862,7 +862,7 @@ public final class DateUtil {
      * @param dateToCheck date to be checked for period
      * @return true, if period contains dateToCheck
      */
-    public static final boolean includes(Date periodFrom, Date periodTo, Date dateToCheck) {
+    public static boolean includes(Date periodFrom, Date periodTo, Date dateToCheck) {
         return new Period(periodFrom, periodTo).contains(new Period(dateToCheck, dateToCheck));
     }
 
@@ -872,7 +872,7 @@ public final class DateUtil {
      * 
      * @return calendar without lenient calculation
      */
-    private static final Calendar getCalendar() {
+    private static Calendar getCalendar() {
         Calendar cal = ConcurrentUtil.getCurrent(Calendar.class);
         if (cal == null) {
             cal = Calendar.getInstance();
@@ -888,7 +888,7 @@ public final class DateUtil {
      * @param startTime start time
      * @return date instance without GMT correction
      */
-    public static final Date getTimeDiffUTC(long endTime, long startTime) {
+    public static Date getTimeDiffUTC(long endTime, long startTime) {
         Calendar cal = Calendar.getInstance();
         cal.setLenient(false);
         cal.setTimeInMillis(endTime - startTime);
@@ -896,16 +896,16 @@ public final class DateUtil {
         return cal.getTime();
     }
 
-    public static final int getTimeZoneOffset(long timeInMillis) {
+    public static int getTimeZoneOffset(long timeInMillis) {
         Calendar cal = Calendar.getInstance();
         return cal.getTimeZone().getOffset(timeInMillis);
     }
 
-    public static final Date clearTime(Date src) {
+    public static Date clearTime(Date src) {
         return setTime(src, 0, 0, 0, 0);
     }
 
-    public static final Date clearSeconds(Date src) {
+    public static Date clearSeconds(Date src) {
         return setTime(src, -1, -1, 0, 0);
     }
 
@@ -915,7 +915,7 @@ public final class DateUtil {
      * @param cal calendar instance
      * @return the given calendar instance
      */
-    protected static final Calendar clearDate(Calendar cal) {
+    protected static Calendar clearDate(Calendar cal) {
         return setDate(cal, 0, 0, 0);
     }
 
@@ -929,7 +929,7 @@ public final class DateUtil {
      * @param millisecond
      * @return the given calendar instance
      */
-    protected static final Calendar setSeconds(Calendar cal, int second, int millisecond) {
+    protected static Calendar setSeconds(Calendar cal, int second, int millisecond) {
         cal.set(Calendar.SECOND, second);
         cal.set(Calendar.MILLISECOND, millisecond);
         return cal;
@@ -942,7 +942,7 @@ public final class DateUtil {
      * @param second second to compare
      * @return true, if year, month and day are equal
      */
-    public static final boolean equalsDate(Date first, Date second) {
+    public static boolean equalsDate(Date first, Date second) {
         //IMPROVE: not performance optimized!
         Calendar fcal = getCalendar();
         fcal.setTime(first);
@@ -960,7 +960,7 @@ public final class DateUtil {
      * @param date date to look for
      * @return count of days in year of given date
      */
-    public static final int getDaysOfYear(Date date) {
+    public static int getDaysOfYear(Date date) {
         Calendar fcal = getCalendar();
         fcal.setTime(date);
         return fcal.get(Calendar.DAY_OF_YEAR);
@@ -972,7 +972,7 @@ public final class DateUtil {
      * @param date date to evaluate
      * @return true, if date is before now
      */
-    public static final boolean isPast(Date date) {
+    public static boolean isPast(Date date) {
         return date.before(new Date());
     }
 
@@ -982,7 +982,7 @@ public final class DateUtil {
      * @param date date to evaluate
      * @return true, if date is after now
      */
-    public static final boolean isFuture(Date date) {
+    public static boolean isFuture(Date date) {
         return date.after(new Date());
     }
 
@@ -1003,7 +1003,7 @@ public final class DateUtil {
      * @param quarter one of {@link #Q1}, {@link #Q2}, {@link #Q3}, {@link #Q4}
      * @return date with year and quarter
      */
-    public static final Date getQuarter(int year, Date quarter) {
+    public static Date getQuarter(int year, Date quarter) {
         return change(quarter, Calendar.YEAR, year);
     }
 
@@ -1013,7 +1013,7 @@ public final class DateUtil {
      * @param date date to analyze
      * @return a number between 1 and 4
      */
-    public static final int getCurrentQuarter(Date date) {
+    public static int getCurrentQuarter(Date date) {
         int i;
         int year = getYear(date);
         for (i = 0; i < QUARTERS.length - 1; i++) {
@@ -1031,7 +1031,7 @@ public final class DateUtil {
      * @param date date to analyze
      * @return a number between 1 and 4
      */
-    public static final int getNextQuarter(Date date) {
+    public static int getNextQuarter(Date date) {
         int q = getCurrentQuarter(date);
         return q == QUARTERS.length ? 1 : q + 1;
     }
@@ -1042,7 +1042,7 @@ public final class DateUtil {
      * @param dates dates to evaluate quarters for
      * @return unique list of quarters, given by dates
      */
-    public static final List<Date> getQuarters(Date... dates) {
+    public static List<Date> getQuarters(Date... dates) {
         List<Date> quarters = new ListSet<Date>();
         for (int i = 0; i < dates.length; i++) {
             quarters.add(getQuarter(getYear(dates[i]), QUARTERS[getCurrentQuarter(dates[i]) - 1]));
@@ -1056,7 +1056,7 @@ public final class DateUtil {
      * @param date date
      * @return week of year
      */
-    public static final int getWeekOfYear(Date date) {
+    public static int getWeekOfYear(Date date) {
         return (getFieldOfDate(date, Calendar.DAY_OF_YEAR) / 7) + 1;
     }
 
@@ -1066,7 +1066,7 @@ public final class DateUtil {
      * @param dates dates to eval
      * @return min date
      */
-    public static final Date min(Date... dates) {
+    public static Date min(Date... dates) {
         return NumberUtil.min(dates);
     }
 
@@ -1076,7 +1076,7 @@ public final class DateUtil {
      * @param dates dates to eval
      * @return max date
      */
-    public static final Date max(Date... dates) {
+    public static Date max(Date... dates) {
         return NumberUtil.max(dates);
     }
 
@@ -1088,7 +1088,7 @@ public final class DateUtil {
      * @param timeInMillis
      * @return millis without year information
      */
-    public static final int getMillisWithoutYear(long timeInMillis) {
+    public static int getMillisWithoutYear(long timeInMillis) {
         return (int) timeInMillis - (getYear(getToday()) * 365 * 24 * 3600 * 1000);
     }
 
@@ -1098,11 +1098,11 @@ public final class DateUtil {
      * @param timeInMillis
      * @return given time without seconds and milliseconds
      */
-    public static final long cutSeconds(long timeInMillis) {
+    public static long cutSeconds(long timeInMillis) {
         return timeInMillis - (timeInMillis % MILLI_TO_MINUTES);
     }
 
-    public static final long cutTime(long timeInMillis) {
+    public static long cutTime(long timeInMillis) {
         return timeInMillis - (timeInMillis % (DAY_TO_HOUR * HOUR_TO_MINUTES * MILLI_TO_MINUTES));
     }
 }

@@ -179,10 +179,10 @@ public class Argumentator {
             return;
         }
         //TODO: check args against manual 'man'
-        String rule = null;
-        if (false) {
-            throw new IllegalArgumentException(rule);
-        }
+//        String rule = null;
+//        if (false) {
+//            throw new IllegalArgumentException(rule);
+//        }
     }
 
     /**

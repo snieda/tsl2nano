@@ -17,7 +17,7 @@ import java.util.Map;
  * @author ts 01.12.2008
  * @version $Revision$
  */
-public interface IBeanContainer {
+interface IBeanContainer {
     /**
      * returns bean instance of given id
      * 
@@ -46,7 +46,7 @@ public interface IBeanContainer {
      * @param exampleBean example bean with optional filled attributes
      * @return matching beans
      */
-    public <T> Collection<T> getBeansByExample(T exampleBean);
+    <T> Collection<T> getBeansByExample(T exampleBean);
 
     /**
      * returns all beans that match the attributes of exampleBean
@@ -57,7 +57,7 @@ public interface IBeanContainer {
      * @param maxResult (optional: set -1 to use no definition) maximum result count
      * @return matching beans
      */
-    public <T> Collection<T> getBeansByExample(T exampleBean, Boolean useLike, int startIndex, int maxResult );
+    <T> Collection<T> getBeansByExample(T exampleBean, Boolean useLike, int startIndex, int maxResult );
 
     /**
      * returns all beans that match the range of firstBean and secondBean. if firstBean equals secondBean, it is a
@@ -70,7 +70,7 @@ public interface IBeanContainer {
      * @param maxResult (optional: set -1 to use no definition) maximum result count
      * @return matching beans
      */
-    public <T> Collection<T> getBeansBetween(T firstBean, T secondBean, int startIndex, int maxResult);
+    <T> Collection<T> getBeansBetween(T firstBean, T secondBean, int startIndex, int maxResult);
 
     /**
      * getBeansByQuery
@@ -82,7 +82,7 @@ public interface IBeanContainer {
      * @param lazyRelations optional types to preload
      * @return query result
      */
-    public <T> Collection<T> getBeansByQuery(String query, Boolean nativeQuery, Object[] args, Class... lazyRelations);
+    <T> Collection<T> getBeansByQuery(String query, Boolean nativeQuery, Object[] args, Class... lazyRelations);
     
     /**
      * getBeansByQuery
@@ -94,7 +94,7 @@ public interface IBeanContainer {
      * @param lazyRelations optional types to preload
      * @return query result
      */
-    public <T> Collection<T> getBeansByQuery(String query, Boolean nativeQuery, Map<String, Object> par, Class... lazyRelations);
+    <T> Collection<T> getBeansByQuery(String query, Boolean nativeQuery, Map<String, Object> par, Class... lazyRelations);
     /**
      * execute a statement changing structure or data (like insert, update, delete, create)
      * 
@@ -104,7 +104,7 @@ public interface IBeanContainer {
      * @param args query arguments
      * @return query result
      */
-    public Integer executeStmt(String query, Boolean nativeQuery, Object[] args);
+    Integer executeStmt(String query, Boolean nativeQuery, Object[] args);
 
     /**
      * createBean
@@ -131,7 +131,7 @@ public interface IBeanContainer {
      * @param bean bean instance with lazy relations
      * @return same bean but new instance with fetched relations.
      */
-    public <T> T resolveLazyRelations(T bean);
+    <T> T resolveLazyRelations(T bean);
 
     /**
      * getAttributeDef

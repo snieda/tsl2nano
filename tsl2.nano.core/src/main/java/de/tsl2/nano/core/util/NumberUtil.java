@@ -101,7 +101,7 @@ public class NumberUtil extends BitUtil {
      * @return the sum
      */
     public static final BigDecimal add(BigDecimal... values) {
-        BigDecimal value = new BigDecimal(0);
+        BigDecimal value = BigDecimal.ZERO;
         for (final BigDecimal s : values) {
             value = value.add(s);
         }
@@ -116,7 +116,7 @@ public class NumberUtil extends BitUtil {
      * @return the sum
      */
     public static final BigDecimal add(Number... values) {
-        BigDecimal value = new BigDecimal(0);
+        BigDecimal value = BigDecimal.ZERO;
         for (final Number s : values) {
             value = value.add(new BigDecimal(s.doubleValue()));
         }

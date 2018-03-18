@@ -33,7 +33,7 @@ import javax.security.auth.Subject;
  */
 @Local
 @SuppressWarnings("rawtypes")
-public interface IGenericLocalService extends IGenericBaseService, IQueryService, IBatchService {
+interface IGenericLocalService extends IGenericBaseService, IQueryService, IBatchService {
     /**
      * calls any method on the relation to invoke an instantiation of the given relation. this can't be done on a bean,
      * that was already serialized, so we have to get a 'fresh' source bean to call any method on the given attribute.
@@ -44,7 +44,7 @@ public interface IGenericLocalService extends IGenericBaseService, IQueryService
      * @param attributes optional relation attributes to instantiate. if null, all attributes will be instantiated.
      * @return new bean with given id.
      */
-    public <T> T instantiateLazyRelationship(Class<T> clazz, Object beanId, String[] attributes);
+    <T> T instantiateLazyRelationship(Class<T> clazz, Object beanId, String[] attributes);
 
     /**
      * calls any method on the relation to invoke an instantiation of the given relation. this can't be done on a bean,
@@ -60,7 +60,7 @@ public interface IGenericLocalService extends IGenericBaseService, IQueryService
      * @param fillTypes optional relation types to instantiate. if null, all attributes will be instantiated.
      * @return new bean with given id.
      */
-    public <T> T instantiateLazyRelationship(Class<T> clazz, Object beanId, List<Class> fillTypes);
+    <T> T instantiateLazyRelationship(Class<T> clazz, Object beanId, List<Class> fillTypes);
 
     /**
      * fills recursive all attribute-relations of type fillType.
@@ -70,7 +70,7 @@ public interface IGenericLocalService extends IGenericBaseService, IQueryService
      * @param attributes (optional) relations. if null, all attributes will be instantiated.
      * @param fillTypes (optional) relation types to fill. if null, all types will be filled.
      */
-    public <T> T instantiateLazyRelationship(T bean, String[] attributes, List<Class> fillTypes);
+    <T> T instantiateLazyRelationship(T bean, String[] attributes, List<Class> fillTypes);
 
     /**
      * tries to find the right user entity through the user principal
@@ -81,7 +81,7 @@ public interface IGenericLocalService extends IGenericBaseService, IQueryService
      * @param userIdAttribute user name attribute
      * @return bean representing current subject
      */
-    public <T> T getUser(Subject subject, Class<T> userEntity, String userIdAttribute);
+    <T> T getUser(Subject subject, Class<T> userEntity, String userIdAttribute);
 
     /**
      * only for tests - creates an empty server side factory.

@@ -20,7 +20,7 @@ import javax.ejb.Remote;
  * @version $Revision$
  */
 @Remote
-public interface INamedQueryService {
+interface INamedQueryService {
     static final String NAMEDQUERY_ALL = "findAll";
     static final String NAMEDQUERY_ID = "findById";
     static final String NAMEDQUERY_BETWEEN = "findBetween";

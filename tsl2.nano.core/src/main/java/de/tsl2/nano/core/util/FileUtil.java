@@ -31,7 +31,6 @@ import java.io.OutputStream;
 import java.io.PrintWriter;
 import java.io.Reader;
 import java.io.Serializable;
-import java.io.StringWriter;
 import java.io.Writer;
 import java.net.URI;
 import java.net.URL;

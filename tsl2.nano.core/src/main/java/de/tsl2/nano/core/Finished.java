@@ -38,14 +38,6 @@ public class Finished extends ManagedException {
      * {@inheritDoc}
      */
     @Override
-    public String getLocalizedMessage() {
-        return super.getLocalizedMessage();
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    @Override
     public synchronized Throwable fillInStackTrace() {
         return this;
     }

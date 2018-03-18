@@ -16,7 +16,7 @@ import java.util.Collection;
  * @author Thomas Schneider
  * @version $Revision$ 
  */
-public interface ITableDescriptor<T> {
+interface ITableDescriptor<T> {
 
     /**
      * getColumnDefinitions
@@ -34,7 +34,7 @@ public interface ITableDescriptor<T> {
      * @return String or or <code>null</code> if there is no text for the 
      *  given object at columnIndex
      */
-    public String getColumnText(T element, int columnIndex);
+    String getColumnText(T element, int columnIndex);
 
     /**
      * Returns the label text for the given column-summary of the given element.
@@ -43,15 +43,15 @@ public interface ITableDescriptor<T> {
      * @return String or or <code>null</code> if there is no text for the 
      *  given object at columnIndex
      */
-    public String getSummaryText(Object context, int columnIndex);
+    String getSummaryText(Object context, int columnIndex);
     
     /**
      * shiftSortIndexes
      */
 
-    public void shiftSortIndexes();
+    void shiftSortIndexes();
     /**
      * sort
      */
-    public void sort();
+    void sort();
 }

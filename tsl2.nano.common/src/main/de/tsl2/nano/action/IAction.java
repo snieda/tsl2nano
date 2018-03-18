@@ -9,15 +9,15 @@ import java.util.Collection;
  * @author ts 13.11.2008
  * @version $Revision: 1.0 $
  */
-public interface IAction<RETURNTYPE> extends Runnable {
-    public static final String CANCELED = "de.tsl2.nano.action.action_cancelled";
+interface IAction<RETURNTYPE> extends Runnable {
+    static final String CANCELED = "de.tsl2.nano.action.action_cancelled";
 
     /** dialog return value - no dialog handling will be done */
-    public static final int MODE_UNDEFINED = 0;
+    static final int MODE_UNDEFINED = 0;
     /** dialog return value: dialog will be closed, and IDialogConstants.CANCEL_ID will be returned */
-    public static final int MODE_DLG_CANCEL = 1;
+    static final int MODE_DLG_CANCEL = 1;
     /** dialog return value: dialog will be closed, and IDialogConstants.OK_ID will be returned */
-    public static final int MODE_DLG_OK = 2;
+    static final int MODE_DLG_OK = 2;
 
     /**
      * Getter isEnabled
@@ -78,14 +78,14 @@ public interface IAction<RETURNTYPE> extends Runnable {
      * 
      * @param isDefault whether to set the action as default action
      */
-    public void setDefault(boolean isDefault);
+    void setDefault(boolean isDefault);
 
     /**
      * Getter isSynchron
      * 
      * @return Returns the synchron.
      */
-    public boolean isSynchron();
+    boolean isSynchron();
 
     /**
      * The action to be started
@@ -93,14 +93,14 @@ public interface IAction<RETURNTYPE> extends Runnable {
      * @return result of the action. use {@link #CANCELED} to define for buttons, the action was canceled.
      * @throws Exception
      */
-    public RETURNTYPE action() throws Exception;
+    RETURNTYPE action() throws Exception;
 
     /**
      * starts this action.
      * 
      * @return the result
      */
-    public RETURNTYPE activate();
+    RETURNTYPE activate();
 
     /**
      * the receivers will receive the result of the activation.
@@ -146,7 +146,7 @@ public interface IAction<RETURNTYPE> extends Runnable {
      * @param doAction to do
      * @return iteration size
      */
-    public static int doFor(Collection<?> forCollection, IAction<?> doAction) {
+    static int doFor(Collection<?> forCollection, IAction<?> doAction) {
         int count = 0;
         for (final Object item : forCollection) {
             doAction.setParameter(new Object[] { item });

@@ -26,7 +26,7 @@ import de.tsl2.nano.core.log.LogFactory;
  */
 @SuppressWarnings({ "rawtypes", "unchecked" })
 public final class Finder {
-    private static final Log LOG = LogFactory.getLog(Finder.class);
+    private static Log LOG = LogFactory.getLog(Finder.class);
 
     /**
      * creates the query for the given finders
@@ -93,7 +93,7 @@ public final class Finder {
      * @param relationsToLoad lazy collections to be preloaded. makes only sense on remote access.
      * @return Id finder expression
      */
-    public static final <T> Id<T> id(Class<T> type, Object id, Class... relationsToLoad) {
+    public static <T> Id<T> id(Class<T> type, Object id, Class... relationsToLoad) {
         return new Id<T>(type, id, relationsToLoad);
     }
 
@@ -105,7 +105,7 @@ public final class Finder {
      * @param relationsToLoad lazy collections to be preloaded. makes only sense on remote access.
      * @return Id finder expression
      */
-    public static final <T> All<T> all(Class<T> type, Class... relationsToLoad) {
+    public static <T> All<T> all(Class<T> type, Class... relationsToLoad) {
         return new All<T>(type, relationsToLoad);
     }
     /**
@@ -117,7 +117,7 @@ public final class Finder {
      * @param relationsToLoad lazy collections to be preloaded. makes only sense on remote access.
      * @return Between finder expression
      */
-    public static final <T> Between<T> between(T minObject, T maxObject, Class... relationsToLoad) {
+    public static <T> Between<T> between(T minObject, T maxObject, Class... relationsToLoad) {
         return new Between<T>(minObject, maxObject, relationsToLoad);
     }
 
@@ -129,7 +129,7 @@ public final class Finder {
      * @param relationsToLoad lazy collections to be preloaded. makes only sense on remote access.
      * @return Example finder expression
      */
-    public static final <T> Example<T> example(T example, Class... relationsToLoad) {
+    public static <T> Example<T> example(T example, Class... relationsToLoad) {
         return new Example<T>(example, relationsToLoad);
     }
 
@@ -143,7 +143,7 @@ public final class Finder {
      * @param relationsToLoad lazy collections to be preloaded. makes only sense on remote access.
      * @return Member finder expression
      */
-    public static final <T, H> Member<T, H> member(H holder,
+    public static <T, H> Member<T, H> member(H holder,
             Class<T> beanType,
             String attributeName,
             Class... relationsToLoad) {
@@ -160,7 +160,7 @@ public final class Finder {
      * @param relationsToLoad lazy collections to be preloaded. makes only sense on remote access.
      * @return Member finder expression
      */
-    public static final <T, H> Holder<T, H> holder(T member,
+    public static <T, H> Holder<T, H> holder(T member,
             Class<H> holderType,
             String attributeName,
             Class... relationsToLoad) {
@@ -174,7 +174,7 @@ public final class Finder {
      * @param relationsToLoad lazy collections to be preloaded. makes only sense on remote access.
      * @return InSelection expression
      */
-    public static final <T> InSelection<T> inSelection(Class<T> resultType, String attribute, Collection<?> selection, Class... relationsToLoad) {
+    public static <T> InSelection<T> inSelection(Class<T> resultType, String attribute, Collection<?> selection, Class... relationsToLoad) {
         return new InSelection<T>(resultType, attribute, selection, relationsToLoad);
     }
 
@@ -186,7 +186,7 @@ public final class Finder {
      * @param relationsToLoad lazy collections to be preloaded. makes only sense on remote access.
      * @return query finder expression
      */
-    public static final <T> Expression<T> expression(Class<T> resultType,
+    public static <T> Expression<T> expression(Class<T> resultType,
             String queryString,
             boolean asSubSelect,
             Object[] args,
@@ -202,7 +202,7 @@ public final class Finder {
      * @param relationsToLoad lazy collections to be preloaded. makes only sense on remote access.
      * @return order by expression
      */
-    public static final <T> OrderBy<T> orderBy(Class<T> resultType, String... attributeNames) {
+    public static <T> OrderBy<T> orderBy(Class<T> resultType, String... attributeNames) {
         return new OrderBy<T>(resultType, attributeNames);
     }
 
@@ -214,7 +214,7 @@ public final class Finder {
      * @param relationsToLoad lazy collections to be preloaded. makes only sense on remote access.
      * @return order by expression
      */
-    public static final <T> GroupBy<T> groupBy(Class<T> resultType, String... attributeNames) {
+    public static <T> GroupBy<T> groupBy(Class<T> resultType, String... attributeNames) {
         return new GroupBy<T>(attributeNames);
     }
 
@@ -224,7 +224,7 @@ public final class Finder {
      * @param <T> result bean type
      * @return union expression
      */
-    public static final <T> Union<T> union(Class<T> resultType) {
+    public static <T> Union<T> union(Class<T> resultType) {
         return new Union<T>(resultType);
     }
 

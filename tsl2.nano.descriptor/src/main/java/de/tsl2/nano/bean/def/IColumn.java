@@ -18,46 +18,46 @@ import java.text.Format;
  * @author Thomas Schneider
  * @version $Revision$
  */
-public interface IColumn extends Comparable<IColumn> {
+interface IColumn extends Comparable<IColumn> {
 
     /**
      * @return Returns the columnText.
      */
-    public abstract String getDescription();
+    abstract String getDescription();
 
     /**
      * the position of that column in a table.
      * 
      * @return Returns the index.
      */
-    public abstract int getIndex();
+    abstract int getIndex();
 
     /**
      * the index of sorting - on multiple column sort.
      * 
      * @return Returns the sortIndex.
      */
-    public abstract int getSortIndex();
+    abstract int getSortIndex();
 
     /**
      * @return Returns the sortDirection.
      */
-    public abstract boolean isSortUpDirection();
+    abstract boolean isSortUpDirection();
 
     /**
      * @return Returns the pixel-width of the column.
      */
-    public abstract int getWidth();
+    abstract int getWidth();
 
     /**
      * @return Returns the attribute name.
      */
-    public abstract String getName();
+    abstract String getName();
 
     /**
      * @return Returns the columns format, to format a columns value.
      */
-    public abstract Format getFormat();
+    abstract Format getFormat();
 
     /**
      * @return a fixed minimum search value

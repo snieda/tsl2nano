@@ -91,8 +91,8 @@ public interface IConstraint<T> {
     <C extends IConstraint<T>> C  setDefault(T defaultValue);
     
     /** usable for int definitions that are not bitfields */
-    public static final int UNDEFINED = -1;
+    static final int UNDEFINED = -1;
 
     /** usable for all int definitions like bitfiels type and style */
-    public static final int UNSET = 0;
+    static final int UNSET = 0;
 }
