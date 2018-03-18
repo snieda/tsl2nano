@@ -16,7 +16,7 @@ import java.util.Collection;
  * @author Thomas Schneider
  * @version $Revision$ 
  */
-interface ITableDescriptor<T> {
+public interface ITableDescriptor<T> {
 
     /**
      * getColumnDefinitions

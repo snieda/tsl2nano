@@ -9,7 +9,7 @@ import java.lang.reflect.Method;
  * @author Tom
  *
  */
-interface IDefaultAttribute<T> extends IAttribute<T> {
+public interface IDefaultAttribute<T> extends IAttribute<T> {
 
     default int compareTo(IAttribute<T> o) {
         return getId().compareTo(o.getId());

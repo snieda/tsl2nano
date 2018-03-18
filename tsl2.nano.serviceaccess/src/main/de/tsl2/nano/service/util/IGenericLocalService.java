@@ -33,7 +33,7 @@ import javax.security.auth.Subject;
  */
 @Local
 @SuppressWarnings("rawtypes")
-interface IGenericLocalService extends IGenericBaseService, IQueryService, IBatchService {
+public interface IGenericLocalService extends IGenericBaseService, IQueryService, IBatchService {
     /**
      * calls any method on the relation to invoke an instantiation of the given relation. this can't be done on a bean,
      * that was already serialized, so we have to get a 'fresh' source bean to call any method on the given attribute.

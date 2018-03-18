@@ -4,7 +4,7 @@ import java.security.Principal;
 
 import javax.security.auth.Subject;
 
-interface IAuthorization {
+public interface IAuthorization {
     static final String PERM_READ = "read";
     static final String PERM_WRITE = "write";
     static final String PERM_EXE = "execute";

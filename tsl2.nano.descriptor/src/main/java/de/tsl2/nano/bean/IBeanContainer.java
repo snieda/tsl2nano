@@ -17,7 +17,7 @@ import java.util.Map;
  * @author ts 01.12.2008
  * @version $Revision$
  */
-interface IBeanContainer {
+public interface IBeanContainer {
     /**
      * returns bean instance of given id
      * 

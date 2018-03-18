@@ -9,7 +9,7 @@ import java.util.Collection;
  * @author ts 13.11.2008
  * @version $Revision: 1.0 $
  */
-interface IAction<RETURNTYPE> extends Runnable {
+public interface IAction<RETURNTYPE> extends Runnable {
     static final String CANCELED = "de.tsl2.nano.action.action_cancelled";
 
     /** dialog return value - no dialog handling will be done */

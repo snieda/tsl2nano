@@ -28,7 +28,7 @@ import java.util.Map;
  * 
  */
 @SuppressWarnings("rawtypes")
-interface IGenericBaseService extends IStatelessService, INamedQueryService {
+public interface IGenericBaseService extends IStatelessService, INamedQueryService {
     /** find all beans of type beanType (statement cache will be used!) */
     <T> Collection<T> findAll(Class<T> beanType, Class... lazyRelations);
 

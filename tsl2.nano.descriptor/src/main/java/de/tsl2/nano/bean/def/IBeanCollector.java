@@ -10,7 +10,7 @@ import java.util.Collection;
  * @author Thomas Schneider
  * @version $Revision$
  */
-interface IBeanCollector<COLLECTIONTYPE extends Collection<T>, T> extends ITableDescriptor<T> {
+public interface IBeanCollector<COLLECTIONTYPE extends Collection<T>, T> extends ITableDescriptor<T> {
 
     /** whether a selected bean can be opened to be changed */
     static final int MODE_EDITABLE = 1;
