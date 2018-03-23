@@ -17,6 +17,7 @@ import java.security.Policy;
 import java.security.ProtectionDomain;
 import java.util.LinkedHashMap;
 import java.util.Map;
+import java.util.jar.Attributes;
 
 import org.apache.commons.logging.Log;
 
@@ -316,8 +317,12 @@ public class AppLoader {
         new AppLoader().start(args);
     }
 
+    protected static Attributes getManifestAttributes() {
+    	return Argumentator.readManifest();
+    }
+    
     static String[] getArgumentsFromManifest() {
-        String argss = Argumentator.readManifest().getValue("Main-Arguments");
+        String argss = getManifestAttributes().getValue("Main-Arguments");
         return argss != null ? argss.split("\\s") : new String[0];
     }
 

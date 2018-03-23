@@ -24,17 +24,21 @@ import de.tsl2.nano.core.util.NetUtil;
  * @version $Revision$
  */
 public class Loader extends AppLoader {
+    private static final String PREFIX_APP = "Application-";
+    private static final String APP_CLASS =  PREFIX_APP + "Class";
+    private static final String APP_SOURCE =  PREFIX_APP + "Source";
+    static private Attributes attributes;
+
     @Override
     protected NetworkClassLoader provideClassloader(String environment) {
         //read the manifest before creating the new classloader - perhaps we lose that informations
-        Attributes attributes = NetworkClassLoader.readManifest(Thread.currentThread().getContextClassLoader());
         
         NetworkClassLoader cl = super.provideClassloader(environment);
         
         //if this app was started through jnlp, we have to download the main jar again
         if (!FileUtil.hasResource("websocket.client.js.template")) {
             //IMPROVE: could be done through system property jnlpx.origFilenameArg
-            String appUrl = attributes.getValue("Application-Source");
+            String appUrl = getAttributes().getValue(APP_SOURCE);
             System.out.println("downloading webstart main jar file from " + appUrl);
             File rootjar = NetUtil.download(appUrl, environment, true, false);
             cl.addFile(rootjar.getPath());
@@ -60,7 +64,13 @@ public class Loader extends AppLoader {
         return cl;
     }
 
+    static protected Attributes getAttributes() {
+        if (attributes == null)
+            attributes = AppLoader.getManifestAttributes();
+        return attributes;
+    }
+    
     public static void main(String[] args) {
-        new Loader().start("de.tsl2.nano.h5.NanoH5", args);
+        new Loader().start(getAttributes().getValue(APP_CLASS), args);
     }
 }

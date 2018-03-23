@@ -167,6 +167,7 @@
 								</manifest>
 								<manifestEntries>
 									<Application-Name>Nano.H5</Application-Name>
+									<Application-Class>de.tsl2.nano.h5.NanoH5</Application-Class>
 									<Application-Source>${application.source}</Application-Source>
 									<Application-redirect>/download</Application-redirect>
 									<Permissions>all-permissions</Permissions>
@@ -192,6 +193,7 @@
 								</manifest>
 								<manifestEntries>
 									<Application-Name>Nano.H5</Application-Name>
+									<Application-Class>de.tsl2.nano.h5.NanoH5</Application-Class>
 									<Application-Source>${application.source}</Application-Source>
 									<Application-redirect>/download</Application-redirect>
 									<Permissions>all-permissions</Permissions>
@@ -214,6 +216,7 @@
 								</manifest>
 								<manifestEntries>
 									<Application-Name>Nano.H5</Application-Name>
+									<Application-Class>de.tsl2.nano.h5.NanoH5</Application-Class>
 									<Application-Source>${application.source}</Application-Source>
 									<Application-redirect>/download</Application-redirect>
 									<Permissions>all-permissions</Permissions>
@@ -269,6 +272,13 @@
 									<addClasspath>true</addClasspath>
 									<mainClass>de.tsl2.nano.h5.Loader</mainClass>
 								</manifest>
+								<manifestEntries>
+									<Application-Name>Nano.H5</Application-Name>
+									<Application-Class>de.tsl2.nano.h5.NanoH5</Application-Class>
+									<Application-Source>${application.source}</Application-Source>
+									<Application-redirect>/download</Application-redirect>
+									<Permissions>all-permissions</Permissions>
+								</manifestEntries>
 							</archive>
 							<!-- excludes don't work! -->
 							<packagingExcludes>standalone.zip</packagingExcludes>
