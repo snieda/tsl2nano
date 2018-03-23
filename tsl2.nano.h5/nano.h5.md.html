@@ -2617,6 +2617,8 @@ There are several ways to create an own project using this framework as base. We
 
 ### Implementing an own project through dependency injection (DI)
 
+There are two java interfaces to be implemented. You can see them as plugin or feature definitions.
+ 
 The interfaces
 
 * de.tsl2.nano.h5.plugin.INanoPlugin
@@ -2627,19 +2629,74 @@ Through DI your implementation will be found and the implemented interface metho
 
 #### Application Inspectors
 
-Your implementation of  _INanoHandler_ works as application inspector, changing the default configuration, handling authentication, bean definitions, bean-presentation etc.  
+Your implementation of  _INanoPlugin_ works as application inspector, changing the default configuration, handling authentication, bean definitions, bean-presentation etc.  
 
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-public interface INanoHandler extends Inspector {
+/**
+ * NanoH5 Plugin interface to define an own NanoH5 Application through callbacks invoked on most important entry
+ * points. All classpath-implmenetations of this interface will be found by the framework and will be invoked on the
+ * instruction points.
+ * <p/>
+ * At least one implementation should have a main function calling
+ * 
+ * <pre>
+ * Main.startApplication(NanoH5.class, null, args);
+ * </pre>
+ * 
+ * Each method will be called with parameters, pre-filled and provided by the framework.
+ * <p>
+ * To enhance the the Html-Output, see {@link IDOMDecorator}.
+ * 
+ * @author Tom, Thomas Schneider
+ * @version $Revision$
+ */
+public interface INanoPlugin extends Plugin {
+    /** do some inspections on authentication. The auth object is pre-filled */
     void onAuthentication(IAuthorization auth);
-    void configuration(SortedMap<?, ?> properties, Map<Class<?>, Object> services);
+
+    /**
+     * change the default properties of the application. see 'environment.xml' for a list of all keys and their defaults
+     */
+    void configuration(SortedMap<Object, Object> properties, Map<Class<?>, Object> services);
+
+    /**
+     * The Html page-builder defines the creation of each response. you must return an instance of pageBuilder (null
+     * will result in errors)!
+     */
     public <PAGE, OUTPUT, T extends IPageBuilder<PAGE, OUTPUT>> T definePresentationType(T pageBuilder);
+
+    /**
+     * for each bean type (belonging to an entity class) the default handling can be changed. the output can be found at
+     * the presentation directory
+     */
     void defineBeanDefinition(BeanDefinition<?> beanDef);
+
+    /**
+     * before an authentication, the properties for the jpa persistence.xml will be defined. You can change these
+     * settings before a new session will be started
+     */
     void definePersistence(Persistence persistence);
+
+    /** before running the requested user interaction, you can inspect the action that will be called */
     void actionBeforeHandler(IAction<?> action);
+
+    /** after running the requested user interaction, you can inspect the action that was called */
     void actionAfterHandler(IAction<?> action);
+
+    /**
+     * on creating a new session, the workflow / navigation stack is defined by loading from 'workflow.xml' or if not
+     * found by providing all entity beans in a list. This workflow can be changed by your inspector.
+     */
     void workflowHandler(IBeanNavigator workflow);
+
     void exceptionHandler(Exception ex);
+
+    /** on each new http request, you can inspect and change the header, parameters and files */
+    void requestHandler(String uri,
+            Method m,
+            Map<String, String> header,
+            Map<String, String> parms,
+            Map<String, String> files);
 }
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
@@ -2648,7 +2705,7 @@ public interface INanoHandler extends Inspector {
 Your implementation of  _IDOMDecorator_ will be called on each html page creation. The DOM-Document, created by the framework will be given as parameter to be optional decorated / changed by your code.  
 Through the given session object, you have access to the authentication informations, the current bean and the navigation stack of the current workflow.
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-public interface IDOMDecorator extends Inspector {
+public interface IDOMDecorator extends Plugin {
     /** extends a prebuild DOM, given by Document - using informations on the current session */
     void decorate(Document doc, ISession<?> session);
 }
@@ -2657,6 +2714,176 @@ public interface IDOMDecorator extends Inspector {
 Here you can use template generating framworks like velocity or thymeleaf.
 
 For further informations and examples, have a look at chapter "Injecting own logic on the forms html DOM document"
+
+#### The maven build for your application plugin
+
+* Your maven build has to have a dependency to the artifact _tsl2.nano.h5_, provided by the maven central repository.
+* If your implementation provides a java main method, this method has to be assigned to the manifest entry _Application-Class_
+	* the maven build has to create a jar including all items of the _tsl2.nano.h5_ jar and all your own items
+
+maven build:
+  
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+	<modelVersion>4.0.0</modelVersion>
+	<groupId>de.tsl2nano.extensiontest</groupId>
+	<artifactId>extensiontest</artifactId>
+	<version>0.0.1-SNAPSHOT</version>
+	<name>TSL2NANO Extension Test</name>
+	<build>
+		<plugins>
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-dependency-plugin</artifactId>
+				<version>3.0.2</version>
+				<executions>
+					<execution>
+						<id>upack-nanoh5</id>
+						<phase>generate-resources</phase>
+						<goals>
+							<goal>unpack-dependencies</goal>
+						</goals>
+						<configuration>
+							<includeScope>runtime</includeScope>
+							<includeArtifactIds>tsl2.nano.h5</includeArtifactIds>
+							<outputDirectory>${project.build.directory}/classes</outputDirectory>
+						</configuration>
+					</execution>
+				</executions>
+			</plugin>
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-jar-plugin</artifactId>
+				<configuration>
+					<archive>
+						<manifest>
+							<addClasspath>true</addClasspath>
+							<mainClass>de.tsl2.nano.h5.Loader</mainClass>
+						</manifest>
+						<manifestEntries>
+							<Application-Name>My NanoH5 Plugin</Application-Name>
+							<Application-Class>de.my.test.MyNanoApplication</Application-Class>
+							<Application-Source>${application.source}</Application-Source>
+							<Application-redirect>/download</Application-redirect>
+							<Permissions>all-permissions</Permissions>
+						</manifestEntries>
+					</archive>
+				</configuration>
+			</plugin>
+		</plugins>
+	</build>
+	<dependencies>
+		<dependency>
+			<groupId>net.sf.tsl2nano</groupId>
+			<artifactId>tsl2.nano.h5</artifactId>
+			<version>2.1-SNAPSHOT</version>
+		</dependency>
+	</dependencies>
+</project>
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+Your implementation may look like this:
+
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+package de.my.test;
+
+import java.util.Map;
+import java.util.SortedMap;
+
+import org.w3c.dom.Document;
+
+import de.tsl2.nano.action.IAction;
+import de.tsl2.nano.bean.def.BeanDefinition;
+import de.tsl2.nano.bean.def.IPageBuilder;
+import de.tsl2.nano.core.ISession;
+import de.tsl2.nano.core.Main;
+import de.tsl2.nano.h5.NanoH5;
+import de.tsl2.nano.h5.NanoHTTPD.Method;
+import de.tsl2.nano.h5.navigation.IBeanNavigator;
+import de.tsl2.nano.h5.plugin.IDOMDecorator;
+import de.tsl2.nano.h5.plugin.INanoPlugin;
+import de.tsl2.nano.persistence.Persistence;
+import de.tsl2.nano.serviceaccess.IAuthorization;
+
+public class MyNanoApplication implements INanoPlugin, IDOMDecorator {
+
+    static String ID;
+    
+    private int callCount;
+    List<String> calledActions = new LinkedList<>();
+
+    public static void main(String[] args) {
+        ID = args[1];
+        
+        Main.startApplication(NanoH5.class, MapUtil.asMap(0, "service.url"), args);
+    }
+    
+    @Override
+    public boolean isEnabled() {
+        return ID != null;
+    }
+    
+    @Override
+    public void onAuthentication(IAuthorization auth) {
+        if (callCount++ < 1)
+            throw new IllegalStateException(ID);
+    }
+
+    @Override
+    public void configuration(SortedMap<Object, Object> properties, Map<Class<?>, Object> services) {
+        properties.put("app.app.show.startpage", false);
+        properties.put("app.db.check.connection", false);
+        
+        properties.put(ID, ID);
+    }
+
+    @Override
+    public <PAGE, OUTPUT, T extends IPageBuilder<PAGE, OUTPUT>> T definePresentationType(T pageBuilder) {
+        return DelegationHandler.createProxy(new DelegationHandler<T>(pageBuilder));
+    }
+
+    @Override
+    public void defineBeanDefinition(BeanDefinition<?> beanDef) {
+        beanDef.addAttribute(new AttributeDefinition<>(new VAttribute<>(ID)));
+    }
+
+    @Override
+    public void definePersistence(Persistence persistence) {
+        persistence.setConnectionUserName(ID);
+    }
+
+    @Override
+    public void actionBeforeHandler(IAction<?> action) {
+        calledActions.add(action.getShortDescription() + "->BEFORE");
+    }
+
+    @Override
+    public void actionAfterHandler(IAction<?> action) {
+        calledActions.add(action.getShortDescription() + "->AFTER");
+    }
+
+    @Override
+    public void workflowHandler(IBeanNavigator workflow) {
+        workflow.add(new Bean<>(ID));
+    }
+
+    @Override
+    public void exceptionHandler(Exception ex) {
+        ex.setStackTrace(new StackTraceElement[] {new StackTraceElement(ID, ID, ID, 0)});
+    }
+
+    @Override
+    public void requestHandler(String uri,
+            Method m,
+            Map<String, String> header,
+            Map<String, String> parms,
+            Map<String, String> files) {
+        header.put(ID, ID);
+    }
+
+}
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 ###  Implementing an own project through framework class extensions
 
