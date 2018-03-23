@@ -28,8 +28,8 @@ import de.tsl2.nano.core.util.ENVTestPreparation;
 import de.tsl2.nano.core.util.FileUtil;
 import de.tsl2.nano.core.util.MapUtil;
 import de.tsl2.nano.h5.NanoHTTPD.Method;
-import de.tsl2.nano.h5.inspect.INanoHandler;
 import de.tsl2.nano.h5.navigation.IBeanNavigator;
+import de.tsl2.nano.h5.plugin.INanoPlugin;
 import de.tsl2.nano.persistence.Persistence;
 import de.tsl2.nano.serviceaccess.IAuthorization;
 
@@ -89,7 +89,7 @@ public class NanoHandlerTest implements ENVTestPreparation {
     }
 }
 
-class NanoHandlerApp implements INanoHandler {
+class NanoHandlerApp implements INanoPlugin {
     static String ID;
     
     private int callCount;

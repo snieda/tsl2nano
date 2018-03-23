@@ -74,17 +74,17 @@ import de.tsl2.nano.h5.expression.RuleExpression;
 import de.tsl2.nano.h5.expression.SQLExpression;
 import de.tsl2.nano.h5.expression.SimpleExpression;
 import de.tsl2.nano.h5.expression.URLExpression;
-import de.tsl2.nano.h5.inspect.INanoHandler;
 import de.tsl2.nano.h5.navigation.EntityBrowser;
 import de.tsl2.nano.h5.navigation.IBeanNavigator;
 import de.tsl2.nano.h5.navigation.Workflow;
+import de.tsl2.nano.h5.plugin.INanoPlugin;
 import de.tsl2.nano.incubation.specification.actions.ActionPool;
 import de.tsl2.nano.incubation.specification.rules.RulePool;
-import de.tsl2.nano.inspection.Inspectors;
 import de.tsl2.nano.persistence.GenericLocalBeanContainer;
 import de.tsl2.nano.persistence.Persistence;
 import de.tsl2.nano.persistence.PersistenceClassLoader;
 import de.tsl2.nano.persistence.provider.NanoEntityManagerFactory;
+import de.tsl2.nano.plugin.Plugins;
 import de.tsl2.nano.service.util.BeanContainerUtil;
 import de.tsl2.nano.serviceaccess.Authorization;
 import de.tsl2.nano.serviceaccess.ServiceFactory;
@@ -172,7 +172,7 @@ public class NanoH5 extends NanoHTTPD implements ISystemConnector<Persistence> {
         AbstractExpression.registerExpression(URLExpression.class);
         AbstractExpression.registerExpression(SimpleExpression.class);
         
-        Inspectors.process(INanoHandler.class).configuration(ENV.getProperties(), ENV.services());
+        Plugins.process(INanoPlugin.class).configuration(ENV.getProperties(), ENV.services());
     }
 
     /**
@@ -400,7 +400,7 @@ public class NanoH5 extends NanoHTTPD implements ISystemConnector<Persistence> {
             Map<String, String> header,
             Map<String, String> parms,
             Map<String, String> files) {
-        Inspectors.process(INanoHandler.class).requestHandler(uri, m, header, parms, files);
+        Plugins.process(INanoPlugin.class).requestHandler(uri, m, header, parms, files);
         String method = m.name();
         if (method.equals("GET") && !isAdmin(uri)) {
             // serve files
@@ -498,7 +498,7 @@ public class NanoH5 extends NanoHTTPD implements ISystemConnector<Persistence> {
      * adds services for presentation and page-builder
      */
     protected IPageBuilder<?, String> createPageBuilder() {
-        IPageBuilder pageBuilder = Inspectors.process(INanoHandler.class).definePresentationType(new Html5Presentation());
+        IPageBuilder pageBuilder = Plugins.process(INanoPlugin.class).definePresentationType(new Html5Presentation());
         if (pageBuilder instanceof BeanPresentationHelper)
             ENV.addService(BeanPresentationHelper.class, (BeanPresentationHelper)pageBuilder);
         else 
@@ -600,7 +600,7 @@ public class NanoH5 extends NanoHTTPD implements ISystemConnector<Persistence> {
                 workflow.add(connect((Persistence) login.getInstance()));
             }
         }
-        Inspectors.process(INanoHandler.class).workflowHandler(workflow);
+        Plugins.process(INanoPlugin.class).workflowHandler(workflow);
         return workflow;
     }
 
@@ -620,7 +620,7 @@ public class NanoH5 extends NanoHTTPD implements ISystemConnector<Persistence> {
      */
     @Override
     public synchronized BeanDefinition<?> connect(Persistence persistence) {
-        Inspectors.process(INanoHandler.class).definePersistence(persistence);
+        Plugins.process(INanoPlugin.class).definePersistence(persistence);
         
         //define a new classloader to access all beans of given jar-file
         PersistenceClassLoader runtimeClassloader = new PersistenceClassLoader(new URL[0],
@@ -670,7 +670,7 @@ public class NanoH5 extends NanoHTTPD implements ISystemConnector<Persistence> {
     private void createAuthorization(final String userName) {
         Message.send("creating authorization for " + userName);
         Authorization auth = Authorization.create(userName, ENV.get("app.login.secure", false));
-        Inspectors.process(INanoHandler.class).onAuthentication(auth);
+        Plugins.process(INanoPlugin.class).onAuthentication(auth);
         ConcurrentUtil.setCurrent(auth);
     }
 
@@ -705,7 +705,7 @@ public class NanoH5 extends NanoHTTPD implements ISystemConnector<Persistence> {
         types.addAll(BeanDefinition.loadVirtualDefinitions());
 
         for (BeanDefinition beanDef : types) {
-            Inspectors.process(INanoHandler.class).defineBeanDefinition(beanDef);
+            Plugins.process(INanoPlugin.class).defineBeanDefinition(beanDef);
         }
 
         /*

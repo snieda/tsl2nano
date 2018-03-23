@@ -2619,8 +2619,8 @@ There are several ways to create an own project using this framework as base. We
 
 The interfaces
 
-* de.tsl2.nano.h5.inspect.INanoHandler
-* de.tsl2.nano.h5.inspect.IDomDecorator
+* de.tsl2.nano.h5.plugin.INanoPlugin
+* de.tsl2.nano.h5.plugin.IDomDecorator
 
 are used as entry points by the framework to visit all implementations and inspect or decorate the given arguments.
 Through DI your implementation will be found and the implemented interface methods will be called directly after the framework has created new default objects/trees to be inspected or decorated.
@@ -3917,71 +3917,8 @@ on external database, anyway-scripts are used 'anyway'
 - Bean: multi-instance holder?
 
 - (v) PROBLEM: style.template saved as UTF-8 becomes NULNULNUL at the end on saving it in environment.xml
+- ( ) NanoHandler -> replace Loader or Main-Class in h5 manifest
+- ( ) test timesheet with rulecover
 
 
-public static List<Class<?>> findClasses(String packageName) throws IOException, ClassNotFoundException
-	{
-		ClassLoader classLoader = ClassLoader.getSystemClassLoader();
-		String path = packageName.replace('.', '/');
-		Enumeration<URL> resources = classLoader.getResources(path);
-		List<String> dirs = new ArrayList<>();
-		while(resources.hasMoreElements())
-		{
-			URL resource = resources.nextElement();
-			dirs.add(resource.getFile());
-		}
-		TreeSet<String> classes = new TreeSet<>();
-		for(String directory : dirs)
-		{
-			classes.addAll(findClasses(directory, packageName));
-		}
-		ArrayList<Class<?>> classList = new ArrayList<>();
-		for(String clazz : classes)
-		{
-			classList.add(Class.forName(clazz));
-		}
-		return classList;
-	}
 
-	private static TreeSet<String> findClasses(String directory, String packageName) throws IOException
-	{
-		TreeSet<String> classes = new TreeSet<>();
-		String classNamePrefix = packageName + ".";
-		if(directory.startsWith("file:") && directory.contains("!"))
-		{
-			String[] split = directory.split("!");
-			URL jar = new URL(split[0]);
-			ZipInputStream zip = new ZipInputStream(jar.openStream());
-			ZipEntry entry = null;
-			while((entry = zip.getNextEntry()) != null)
-			{
-				if(entry.getName().endsWith(".class"))
-				{
-					String className = entry.getName().replaceAll("[$].*", "").replaceAll("[.]class", "").replace('/', '.');
-					if (className.startsWith(classNamePrefix)) classes.add(className);
-				}
-			}
-		}
-		File dir = new File(directory);
-		if(!dir.exists())
-		{
-			return classes;
-		}
-		File[] files = dir.listFiles();
-		for(File file : files)
-		{
-			if(file.isDirectory())
-			{
-				if (file.getName().equals(".svn")) {
-					continue;
-				}
-				assert !file.getName().contains(".");
-				classes.addAll(findClasses(file.getAbsolutePath(), classNamePrefix + file.getName()));
-			}
-			else if(file.getName().endsWith(".class"))
-			{
-				classes.add(packageName + '.' + file.getName().substring(0, file.getName().length() - 6));
-			}
-		}
-		return classes;
-	}

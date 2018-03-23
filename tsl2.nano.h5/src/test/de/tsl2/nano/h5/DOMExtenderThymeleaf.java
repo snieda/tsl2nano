@@ -24,7 +24,7 @@ import org.w3c.dom.Node;
 import de.tsl2.nano.core.ENV;
 import de.tsl2.nano.core.ISession;
 import de.tsl2.nano.core.util.FileUtil;
-import de.tsl2.nano.h5.inspect.IDOMDecorator;
+import de.tsl2.nano.h5.plugin.IDOMDecorator;
 
 /**
  * 

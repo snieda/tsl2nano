@@ -7,7 +7,7 @@
  * 
  * Copyright: (c) Thomas Schneider 2018, all rights reserved
  */
-package de.tsl2.nano.h5.inspect;
+package de.tsl2.nano.h5.plugin;
 
 import static java.lang.annotation.ElementType.TYPE;
 import static java.lang.annotation.RetentionPolicy.RUNTIME;

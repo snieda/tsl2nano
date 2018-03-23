@@ -1,4 +1,4 @@
-package de.tsl2.nano.h5.inspect;
+package de.tsl2.nano.h5.plugin;
 
 import java.util.Map;
 import java.util.SortedMap;
@@ -8,12 +8,12 @@ import de.tsl2.nano.bean.def.BeanDefinition;
 import de.tsl2.nano.bean.def.IPageBuilder;
 import de.tsl2.nano.h5.NanoHTTPD.Method;
 import de.tsl2.nano.h5.navigation.IBeanNavigator;
-import de.tsl2.nano.inspection.Inspector;
 import de.tsl2.nano.persistence.Persistence;
+import de.tsl2.nano.plugin.Plugin;
 import de.tsl2.nano.serviceaccess.IAuthorization;
 
 /**
- * NanoH5 Handler interface to define an own NanoH5 Application through callbacks invoked on most important entry
+ * NanoH5 Plugin interface to define an own NanoH5 Application through callbacks invoked on most important entry
  * points. All classpath-implmenetations of this interface will be found by the framework and will be invoked on the
  * instruction points.
  * <p/>
@@ -30,7 +30,7 @@ import de.tsl2.nano.serviceaccess.IAuthorization;
  * @author Tom, Thomas Schneider
  * @version $Revision$
  */
-public interface INanoHandler extends Inspector {
+public interface INanoPlugin extends Plugin {
     /** do some inspections on authentication. The auth object is pre-filled */
     void onAuthentication(IAuthorization auth);
 

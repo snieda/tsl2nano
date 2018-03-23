@@ -108,13 +108,13 @@ import de.tsl2.nano.h5.configuration.BeanConfigurator;
 import de.tsl2.nano.h5.configuration.ExpressionDescriptor;
 import de.tsl2.nano.h5.expression.Query;
 import de.tsl2.nano.h5.expression.QueryPool;
-import de.tsl2.nano.h5.inspect.IDOMDecorator;
+import de.tsl2.nano.h5.plugin.IDOMDecorator;
 import de.tsl2.nano.h5.websocket.WSEvent;
 import de.tsl2.nano.h5.websocket.WebSocketRuleDependencyListener;
 import de.tsl2.nano.incubation.specification.actions.ActionPool;
 import de.tsl2.nano.incubation.specification.rules.RuleDependencyListener;
 import de.tsl2.nano.incubation.specification.rules.RulePool;
-import de.tsl2.nano.inspection.Inspectors;
+import de.tsl2.nano.plugin.Plugins;
 import de.tsl2.nano.script.ScriptTool;
 
 /**
@@ -346,7 +346,7 @@ public class Html5Presentation<T> extends BeanPresentationHelper<T> implements I
             }
 
             //Some external extensions...
-            Inspectors.process(IDOMDecorator.class).decorate(form.getOwnerDocument(), session);
+            Plugins.process(IDOMDecorator.class).decorate(form.getOwnerDocument(), session);
             
             String html = HtmlUtil.toString(form.getOwnerDocument());
             if (LOG.isDebugEnabled()) {

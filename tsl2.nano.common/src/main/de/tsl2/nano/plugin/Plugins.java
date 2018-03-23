@@ -7,7 +7,7 @@
  * 
  * Copyright: (c) Thomas Schneider 2018, all rights reserved
  */
-package de.tsl2.nano.inspection;
+package de.tsl2.nano.plugin;
 
 import java.lang.reflect.InvocationHandler;
 import java.lang.reflect.Proxy;
@@ -28,23 +28,23 @@ import de.tsl2.nano.core.util.StringUtil;
  * @author Tom
  * @version $Revision$
  */
-public class Inspectors {
-    private static Inspectors self = null;
-    Map<Class<? extends Inspector>, Object> implementations = new HashMap<>();
+public class Plugins {
+    private static Plugins self = null;
+    Map<Class<? extends Plugin>, Object> implementations = new HashMap<>();
 
-    public static <T extends Inspector> T process(Class<T> inspectorInterface) {
-        return process(inspectorInterface, DecorationProxy.class);
+    public static <T extends Plugin> T process(Class<T> pluginInterface) {
+        return process(pluginInterface, DecorationProxy.class);
     }
 
     @SuppressWarnings("unchecked")
-    public static <T extends Inspector> T process(Class<T> inspectorInterface, Class<? extends InvocationHandler> processingType) {
+    public static <T extends Plugin> T process(Class<T> pluginInterface, Class<? extends InvocationHandler> processingType) {
         if (self == null)
-            self = new Inspectors();
-        Object dec = self.implementations.get(inspectorInterface);
+            self = new Plugins();
+        Object dec = self.implementations.get(pluginInterface);
         if (dec == null) {
             dec = Proxy.newProxyInstance(Thread.currentThread().getContextClassLoader(),
-                new Class[] { inspectorInterface }, BeanClass.createInstance(processingType, inspectorInterface));
-            self.implementations.put(inspectorInterface, dec);
+                new Class[] { pluginInterface }, BeanClass.createInstance(processingType, pluginInterface));
+            self.implementations.put(pluginInterface, dec);
         }
         return (T) dec;
     }

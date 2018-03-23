@@ -7,12 +7,12 @@
  * 
  * Copyright: (c) Thomas Schneider 2017, all rights reserved
  */
-package de.tsl2.nano.h5.inspect;
+package de.tsl2.nano.h5.plugin;
 
 import org.w3c.dom.Document;
 
 import de.tsl2.nano.core.ISession;
-import de.tsl2.nano.inspection.Inspector;
+import de.tsl2.nano.plugin.Plugin;
 
 /**
  * extends a prebuild DOM, given by Document - using informations on the current session
@@ -20,7 +20,7 @@ import de.tsl2.nano.inspection.Inspector;
  * @author Tom, Thomas Schneider
  * @version $Revision$
  */
-public interface IDOMDecorator extends Inspector {
+public interface IDOMDecorator extends Plugin {
     /** extends a prebuild DOM, given by Document - using informations on the current session */
     void decorate(Document doc, ISession<?> session);
 }

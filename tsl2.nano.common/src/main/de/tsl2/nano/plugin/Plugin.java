@@ -7,14 +7,14 @@
  * 
  * Copyright: (c) Thomas Schneider 2018, all rights reserved
  */
-package de.tsl2.nano.inspection;
+package de.tsl2.nano.plugin;
 
 /**
- * All interfaces that should be used by Inspectors Proxy have to implement this base interface.
+ * All interfaces that should be used by Plugins Proxy have to implement this base interface.
  * 
  * @author Tom
  * @version $Revision$
  */
-public interface Inspector {
+public interface Plugin {
     default boolean isEnabled() {return true;}
 }
