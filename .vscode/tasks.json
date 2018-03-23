@@ -1,0 +1,37 @@
+{
+    // See https://go.microsoft.com/fwlink/?LinkId=733558
+    // for the documentation about the tasks.json format
+    "version": "2.0.0",
+    "tasks": [
+        {
+            "taskName": "mvn install",
+            "command": "mvn install",
+            "type": "shell"
+        }
+        {
+            "taskName": "mvn clean install",
+            "command": "mvn clean install",
+            "type": "shell"
+        }
+        {
+            "taskName": "mvn clean install site",
+            "command": "mvn clean install site",
+            "type": "shell"
+        }
+        {
+            "taskName": "mvn deploy",
+            "command": "mvn deploy",
+            "type": "shell"
+        }
+        {
+            "taskName": "mvn version:update-child-modules",
+            "command": "mvn -N versions:update-child-modules",
+            "type": "shell"
+        }
+        {
+            "taskName": "mvn -amd -pl tsl2.nano.h5 -DskipTest install site",
+            "command": "mvn -amd -pl tsl2.nano.h5 -DskipTest install site",
+            "type": "shell"
+        }
+    ]
+}
