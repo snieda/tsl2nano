@@ -30,7 +30,7 @@ if [ "$3" == "nopause" ]
 	then NOPAUSE=nopause
 fi
 
-VERSION=2.0.3
+VERSION=2.1
 EXTENSION="-standalone"
 #OFFLINE=-Dtsl2nano.offline=true
 #UH=-Denv.user.home=true

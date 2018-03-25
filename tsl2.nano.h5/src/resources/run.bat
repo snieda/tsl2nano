@@ -15,7 +15,7 @@ if "%3"=="debug" (set DEBUG="-agentlib:jdwp=transport=dt_socket,address=localhos
 if "%3"=="ndebug" (set NANO_DEBUG=-Dtsl2.nano.log.level=debug)
 if "%3"=="test" (set NANO_TEST=-Dtsl2.nano.test=true)
 if "%3"=="nopause" (set NOPAUSE=nopause)
-set VERSION=2.0.3
+set VERSION=2.1
 set EXTENSION=-standalone
 rem set OFFLINE=-Dtsl2nano.offline=true
 rem set UH=-Denv.user.home=true
