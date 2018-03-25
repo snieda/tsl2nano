@@ -172,7 +172,12 @@ public class NanoH5IT implements ENVTestPreparation {
         try {
             return ((HtmlButton)page.getElementById(buttonName)).click();
         } catch (Exception e) {
-            DomElement pageDom = page.getFormByName("page.form");
+            DomElement pageDom = null;
+            try {
+                pageDom = page.getFormByName("page.form");
+            } catch (Exception e1) {
+                //ok, not found
+            }
             String pageName = pageDom != null ? pageDom.getNodeValue() : "<unknown>"; 
             String buttonNotFound = "button not found: " + buttonName + " on page " + pageName + "\n";
             String asXml = "<!--\n" + buttonNotFound +
