@@ -360,9 +360,9 @@ public class AppLoader {
         //set the classes directory before the root config directory!
         File binDir = new File(environment + "/" + NetworkClassLoader.DEFAULT_BIN_DIR);
         binDir.mkdirs();
-        nestedLoader.addLibraryPath(binDir.getAbsolutePath());
+        nestedLoader.addLibraryPath(binDir.getPath());
 
-        nestedLoader.addLibraryPath(new File(environment).getAbsolutePath());
+        nestedLoader.addLibraryPath(new File(environment).getPath());
         System.out.println("resetting current thread classloader " + contextClassLoader + " with " + nestedLoader);
         Thread.currentThread().setContextClassLoader(nestedLoader);
         return nestedLoader;

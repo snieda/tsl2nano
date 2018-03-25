@@ -10,6 +10,7 @@
 package de.tsl2.nano.h5;
 
 import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
 
 import java.io.File;
 import java.io.IOException;
@@ -49,6 +50,7 @@ import de.tsl2.nano.core.util.Util;
 public class NanoH5IT implements ENVTestPreparation {
     private static String TEST_DIR;
     static boolean nanoAlreadyRunning = true;//Boolean.getBoolean("app.server.running");
+    private static int port;
 
     static final String BEANCOLLECTORLIST = (BeanCollector.class.getSimpleName() 
             + Messages.getString("tsl2nano.list")).toLowerCase();
@@ -59,6 +61,7 @@ public class NanoH5IT implements ENVTestPreparation {
             TEST_DIR = ENVTestPreparation.setUp("h5", false) + TARGET_TEST;
         else {
             System.out.println("NanoH5IT: nanoAlreadyRunning=true ==> trying to connect to external NanoH5");
+//            ConcurrentUtil.waitFor(()->NetUtil.isOpen(port)); // läuft leider endlos...
             ConcurrentUtil.sleep(15000);
         }
     }
@@ -69,7 +72,7 @@ public class NanoH5IT implements ENVTestPreparation {
     }
 
     static String getServiceURL(boolean nextFreePort) {
-        return "http://localhost:" + (nextFreePort ? NetUtil.getNextFreePort(8067) : 8067);
+        return "http://localhost:" + (nextFreePort ? port = NetUtil.getNextFreePort(8067) : (port = 8067));
     }
 
     private void runNano(String serviceURL) throws IOException {
@@ -89,6 +92,7 @@ public class NanoH5IT implements ENVTestPreparation {
         
 //        Process process = Runtime.getRuntime().exec(new String[] {"cmd.exe", "/C", "java", "-jar", jarName}, null, new File(TEST_DIR));
         Process process = SystemUtil.execute(new File(TEST_DIR), false, "cmd.exe", "/C", "java", "-jar", jarName);
+//        ConcurrentUtil.waitFor(()->NetUtil.isOpen(port)); // läuft leider endlos...
         ConcurrentUtil.sleep(15000);
         return process;
     }
@@ -119,6 +123,8 @@ public class NanoH5IT implements ENVTestPreparation {
             webClient.getOptions().setPrintContentOnFailingStatusCode(true);
             webClient.getOptions().setCssEnabled(true);
             page = webClient.getPage(serviceURL);
+            if (page == null)
+                fail("web client can't get first page on " + serviceURL + "Please stop any running NanoH5 application on this port!");
             page = submit(page, "tsl2nano.login.ok");
             page = submit(page, BEANCOLLECTORLIST + ".selectall");
             page = submit(page, BEANCOLLECTORLIST + ".open");
@@ -166,9 +172,13 @@ public class NanoH5IT implements ENVTestPreparation {
         try {
             return ((HtmlButton)page.getElementById(buttonName)).click();
         } catch (Exception e) {
-            String asXml = "<!--\nbutton not found: " + buttonName + "\n" +
+            DomElement pageDom = page.getFormByName("page.form");
+            String pageName = pageDom != null ? pageDom.getNodeValue() : "<unknown>"; 
+            String buttonNotFound = "button not found: " + buttonName + " on page " + pageName + "\n";
+            String asXml = "<!--\n" + buttonNotFound +
                     ManagedException.toString(e) + "\n-->\n" + page.asXml();
             FileUtil.writeBytes(asXml.getBytes(), ENV.getTempPath() + "page-failed.html", false);
+            System.out.println(buttonNotFound);
             ManagedException.forward(e);
             return page;
         }

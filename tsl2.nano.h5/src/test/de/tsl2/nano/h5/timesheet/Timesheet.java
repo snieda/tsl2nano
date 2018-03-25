@@ -14,6 +14,9 @@ import static de.tsl2.nano.h5.Html5Presentation.L_GRIDWIDTH;
 import static de.tsl2.nano.h5.HtmlUtil.ATTR_BORDER;
 import static de.tsl2.nano.h5.HtmlUtil.ATTR_SIZE;
 import static de.tsl2.nano.h5.HtmlUtil.ATTR_SPANCOL;
+import static de.tsl2.nano.h5.NanoH5Util.define;
+import static de.tsl2.nano.h5.NanoH5Util.icon;
+import static de.tsl2.nano.h5.NanoH5Util.ve;
 import static de.tsl2.nano.util.test.TypeBean.ATTR_BINARY;
 import static de.tsl2.nano.util.test.TypeBean.ATTR_DATE;
 import static de.tsl2.nano.util.test.TypeBean.ATTR_IMMUTABLEINTEGER;
@@ -21,7 +24,6 @@ import static de.tsl2.nano.util.test.TypeBean.ATTR_OBJECT;
 import static de.tsl2.nano.util.test.TypeBean.ATTR_STRING;
 import static de.tsl2.nano.util.test.TypeBean.ATTR_TIME;
 import static de.tsl2.nano.util.test.TypeBean.ATTR_TIMESTAMP;
-import static junit.framework.Assert.assertTrue;
 import static org.anonymous.project.presenter.ChargeConst.ATTR_CHARGEITEM;
 import static org.anonymous.project.presenter.ChargeConst.ATTR_COMMENT;
 import static org.anonymous.project.presenter.ChargeConst.ATTR_FROMDATE;
@@ -107,6 +109,7 @@ import de.tsl2.nano.h5.Controller;
 import de.tsl2.nano.h5.Html5Presentation;
 import de.tsl2.nano.h5.Increaser;
 import de.tsl2.nano.h5.NanoH5App;
+import de.tsl2.nano.h5.NanoH5Util;
 import de.tsl2.nano.h5.QueryResult;
 import de.tsl2.nano.h5.RuleCover;
 import de.tsl2.nano.h5.SpecifiedAction;
@@ -525,15 +528,6 @@ public class Timesheet extends NanoH5App {
          * define your own navigation stack
          */
         return beanCollector;
-    }
-
-    /**
-     * icon
-     * @param name 
-     * @return
-     */
-    StringBuilder icon(String name) {
-        return new StringBuilder("icons/" + name + ".png");
     }
 
     /**

@@ -283,7 +283,9 @@ public class AttributeConfigurator implements Serializable {
      * removes a rule cover defined by the attributes child (as member!). throws an exception, if there is no rule cover.
      * @param child {@link AttributeDefinition} member
      */
-    public void actionRemoveRuleCover(String child) {
+    @de.tsl2.nano.bean.annotation.Action(name = "RemoveRuleCover", argNames = { "child"})
+    public void actionRemoveRuleCover(@Constraint(defaultValue = "presentable.layoutConstraints", pattern = "(\\w+[\\.]?)+", allowed = {
+        "presentable", "presentable.layout", "columnDefinition" }) String child) {
         RuleCover.removeCover(attr.getDeclaringClass(), attr.getName(), child);
     }
 

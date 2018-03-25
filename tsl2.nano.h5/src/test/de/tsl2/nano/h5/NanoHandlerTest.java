@@ -39,7 +39,7 @@ public class NanoHandlerTest implements ENVTestPreparation {
 
     @BeforeClass
     public static void setUp() {
-        TEST_DIR = ENVTestPreparation.setUp("h5", false) + TARGET_TEST;
+        TEST_DIR = ENVTestPreparation.setUp("h5", false) + TARGET_DIR + "testhandler/" ;
     }
 
     @AfterClass

@@ -332,42 +332,40 @@ public class BeanConfigurator<T> implements Serializable {
         return Util.toString(getClass(), def);
     }
 
-    @SuppressWarnings({ "rawtypes" })
+    @SuppressWarnings({ "rawtypes", "unchecked" })
     @de.tsl2.nano.bean.annotation.Action(name = "createRuleOrAction", argNames = { "newActionName", "actionType",
         "actionExpression" })
-    public void actionCreateRuleOrAction(String name,
+    public void actionCreateRuleOrAction(String newActionName,
             @de.tsl2.nano.bean.annotation.Constraint(defaultValue = "%: RuleScript (--> JavaScript)", allowed = {
-                "§: Rule (--> Operation)", "%: RuleScript (--> JavaScript)", "!: Action (--> Java)"
-                , "?: Query (SQL statement)", "@: Web (URL/REST)" }) String type,
-            @de.tsl2.nano.bean.annotation.Constraint(pattern = ".*") String expression) {
+                "§: Rule  (--> Operation)", "%: RuleScript (--> JavaScript)", "!: Action (--> Java)"
+                , "?: Query (--> SQL statement)", "@: Web   (--> URL/REST)" }) String actionType,
+            @de.tsl2.nano.bean.annotation.Constraint(pattern = ".*") String actionExpression) {
 
-        if (type.startsWith("%"))
-            ENV.get(RulePool.class).add(new RuleScript<>(name, expression, null));
-        else if (type.startsWith("§"))
-            ENV.get(RulePool.class).add(new Rule(name, expression, null));
-        else if (type.startsWith("!"))
-            ENV.get(ActionPool.class).add(new Action(name, expression));
-        else if (type.startsWith("@"))
-            ENV.get(WebPool.class).add(WebClient.create(expression, def.getDeclaringClass()));
-        else if (type.startsWith("?"))
-            ENV.get(QueryPool.class).add(new Query(name, expression, true, null));
+        if (actionType.startsWith("%"))
+            ENV.get(RulePool.class).add(new RuleScript<>(newActionName, actionExpression, null));
+        else if (actionType.startsWith("§"))
+            ENV.get(RulePool.class).add(new Rule(newActionName, actionExpression, null));
+        else if (actionType.startsWith("!"))
+            ENV.get(ActionPool.class).add(new Action(newActionName, actionExpression));
+        else if (actionType.startsWith("@"))
+            ENV.get(WebPool.class).add(WebClient.create(actionExpression, def.getDeclaringClass()));
+        else if (actionType.startsWith("?"))
+            ENV.get(QueryPool.class).add(new Query(newActionName, actionExpression, true, null));
         
     }
 
     @SuppressWarnings({ "rawtypes", "unchecked" })
     @de.tsl2.nano.bean.annotation.Action(name = "addAction", argNames = { "specifiedAction" })
     public void actionAddAction(
-    //            @de.tsl2.nano.bean.annotation.Constraint(defaultValue = "presentable.layoutConstraints", pattern = "[%§!]\\w+", allowed = {
-    //                "presentable", "presentable.layout", "columnDefinition" }) String name) {
-            @de.tsl2.nano.bean.annotation.Constraint(allowed=ConstraintValueSet.ALLOWED_ENVFILES + ".*specification/action.*") String name) {
+            @de.tsl2.nano.bean.annotation.Constraint(allowed=ConstraintValueSet.ALLOWED_ENVFILES + ".*specification/action.*") String specifiedAction) {
         //check, if action available
-        name = StringUtil.substring(FileUtil.replaceToJavaSeparator(name), "/", ".", true);
-        ENV.get(ActionPool.class).get(name);
-        SpecifiedAction<Object> action = new SpecifiedAction(name, null);
+        specifiedAction = StringUtil.substring(FileUtil.replaceToJavaSeparator(specifiedAction), "/", ".", true);
+        ENV.get(ActionPool.class).get(specifiedAction);
+        SpecifiedAction<Object> action = new SpecifiedAction(specifiedAction, null);
         def.addAction(action);
     }
 
-    @SuppressWarnings({ "rawtypes", "unchecked" })
+    @SuppressWarnings({ "rawtypes" })
     @de.tsl2.nano.bean.annotation.Action(name = "createCompositor", argNames = { "baseType", "baseAttributeName",
         "targetAttributeName", "iconAttributeName" })
     public void actionCreateCompositor(
@@ -428,26 +426,23 @@ public class BeanConfigurator<T> implements Serializable {
     public void actionCreateSheet(
             String title, 
             int cols, 
-            int rows,
-            String increaseAttribute,
-            int increaseCount,
-            int increaseStep) {
+            int rows) {
         new CSheet(title, cols, rows).save();
     }
 
     @SuppressWarnings({ "rawtypes", "unchecked" })
     @de.tsl2.nano.bean.annotation.Action(name = "addAttribute", argNames = { "attributeType", "attributeExpression"})
     public void actionAddAttribute(
-            @de.tsl2.nano.bean.annotation.Constraint(allowed = {" : (--> PathExpression)",
-                "§: Rule (--> Operation)", "%: RuleScript (--> JavaScript)", "!: Action (--> Java)"
-                , "?: Query (select statement)", "@: Web (URL/REST)" }) String type,
+            @de.tsl2.nano.bean.annotation.Constraint(allowed = {" :      (--> PathExpression)",
+                "§: Rule  (--> Operation)", "%: RuleScript (--> JavaScript)", "!: Action (--> Java)"
+                , "?: Query (--> sql statement)", "@: Web   (--> URL/REST)" }) String attributeType,
             String attributeExpression) {
-        if (Util.isEmpty(type))
-            type = String.valueOf(attributeExpression.charAt(0));
+        if (Util.isEmpty(attributeType))
+            attributeType = String.valueOf(attributeExpression.charAt(0));
         else
-            type = String.valueOf(type.charAt(0)).trim();
+            attributeType = String.valueOf(attributeType.charAt(0)).trim();
         
-        attributeExpression = type.length() > 0 && type.charAt(0) == attributeExpression.charAt(0) ? attributeExpression : type + attributeExpression;
+        attributeExpression = attributeType.length() > 0 && attributeType.charAt(0) == attributeExpression.charAt(0) ? attributeExpression : attributeType + attributeExpression;
         ExpressionDescriptor<Object> exDescr = new ExpressionDescriptor<>(def.getDeclaringClass(), attributeExpression);
         AttributeDefinition attr = def.addAttribute(exDescr.getName(), exDescr.toInstance(), null, null);
         attr.getPresentation().setType(IPresentable.TYPE_DEPEND);

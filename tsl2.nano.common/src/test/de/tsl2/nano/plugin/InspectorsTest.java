@@ -1,4 +1,4 @@
-package de.tsl2.nano.inspection;
+package de.tsl2.nano.plugin;
 
 import static org.junit.Assert.*;
 

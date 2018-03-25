@@ -335,7 +335,6 @@ public class NanoH5Test implements ENVTestPreparation {
         return DIR_TEST;
     }
 
-    //@Ignore("problems with velocity generation")
     @Test
     public void testTimesheet() throws Exception {
         Properties mapper = new Properties();
@@ -359,7 +358,7 @@ public class NanoH5Test implements ENVTestPreparation {
         bconf.actionCreateCompositor(Address.class.getName(), "city", "code", "wrench.png");
         bconf.actionCreateController("code", 1, 1, Address.class.getName(), "city", "code", "wrench.png");
         bconf.actionCreateRuleOrAction("testaction", "!", Address.class.getName() + ".getCity");
-        bconf.actionCreateSheet("sheet", 2, 2, "1", 1, 1);
+        bconf.actionCreateSheet("sheet", 2, 2);
         bconf.setValueGroups(Arrays.asList(new ValueGroup("test", false, "city", "code")));
         
         List<AttributeConfigurator> attributes = bconf.getAttributes();

@@ -1,5 +1,6 @@
 package de.tsl2.nano.incubation.terminal;
 
+import java.io.File;
 import java.io.InputStream;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -12,7 +13,6 @@ import org.junit.BeforeClass;
 import org.junit.Test;
 
 import de.tsl2.nano.bean.def.Constraint;
-import de.tsl2.nano.core.ENV;
 import de.tsl2.nano.core.execution.IRunnable;
 import de.tsl2.nano.core.execution.SystemUtil;
 import de.tsl2.nano.core.secure.Crypt;
@@ -38,9 +38,12 @@ import de.tsl2.nano.util.XmlGenUtil;
 
 public class TerminalTest implements ENVTestPreparation {
 
-    @BeforeClass
+    private static String TEST_DIR;
+
+	@BeforeClass
     public static void setUp() {
-    	ENVTestPreparation.setUp("terminal", false);
+    	TEST_DIR = ENVTestPreparation.setUp("terminal", false) + TARGET_TEST;
+    	ENVTestPreparation.setUserDirToTarget();
     }
 
     @AfterClass
@@ -71,7 +74,9 @@ public class TerminalTest implements ENVTestPreparation {
   @Test
   public void testSIShellTools() throws Exception {
 
-      FileUtil.removeToBackup(SIShell.DEFAULT_NAME);
+	  System.setProperty("user.dir", new File(TEST_DIR).getAbsolutePath());
+	  
+      FileUtil.removeToBackup(TEST_DIR + SIShell.DEFAULT_NAME);
 
       Container root = new Container("Toolbox", "Helpful Utilities");
 
@@ -219,10 +224,10 @@ public class TerminalTest implements ENVTestPreparation {
 
       //check, if serialization was ok
       System.setIn(SystemUtil.createBatchStream("", "Printing", "jobname", "test", "10", "", ":quit"));
-      SIShell.main(new String[] { SIShell.DEFAULT_NAME });
+      SIShell.main(new String[] { TEST_DIR + SIShell.DEFAULT_NAME });
 
       //ok? --> use it in our project!
-      FileUtil.copy(SIShell.DEFAULT_NAME, "src/resources/" + SIShell.DEFAULT_NAME);
+      FileUtil.copy(TEST_DIR + SIShell.DEFAULT_NAME, "src/resources/" + SIShell.DEFAULT_NAME);
 
       //admin console
 //      SIShell.main(new String[] { SIShell.DEFAULT_NAME, TerminalAdmin.ADMIN });

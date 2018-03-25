@@ -49,7 +49,8 @@ public class ClassFinder {
 	private static final Log LOG = LogFactory.getLog(ClassFinder.class);
 
 	private static ClassFinder self = null;
-	
+
+	private Set<String> packageNames; // only for performance aspects 
 	private Set<Class<?>> classes;
 
 	public static ClassFinder self() {
@@ -71,6 +72,7 @@ public class ClassFinder {
 
 	private void init(ClassLoader classLoader) {
 		ClassLoader baseClassLoader = classLoader;
+		packageNames = new HashSet<>();
 		classes = new HashSet<>();
 
 		//TODO: let our own classloader implementations provide the loaded classes!
@@ -112,7 +114,8 @@ public class ClassFinder {
 		LOG.debug(packages.length + " Packages will be loaded on classloader " + cl);
 		LOG.debug("---------------------------------------------------------------------");
 		for (int i = 0; i < packages.length; i++) {
-			classes.addAll(collectPackageClasses(cl, packages[i].getName(), classes));
+			if (!packageNames.contains(packages[i].getName()))
+				classes.addAll(collectPackageClasses(cl, packages[i].getName(), classes));
 		}
 		LOG.info(classes.size() + " classes scanned by ClassFinder");
 		return cl.getParent();
@@ -155,6 +158,7 @@ public class ClassFinder {
 			if (LOG.isDebugEnabled())
 				System.out.println(i);
 		}
+		packageNames.add(pack);
 		return classes;
 	}
 
@@ -229,6 +233,10 @@ public class ClassFinder {
 				return super.put(key, value);
 			}
 		};
+		if (filter != null)
+			collectPackageClasses(Thread.currentThread().getContextClassLoader(), filter, classes);
+		else
+			collectPackageClasses(Thread.currentThread().getContextClassLoader(), classes);
 		if (resultType != null)
 			addFromServiceLoader(resultType);
 		if (annotation != null && PackageDescriptor.class.isAssignableFrom(annotation))

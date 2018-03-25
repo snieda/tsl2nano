@@ -313,7 +313,7 @@ public class CommonTest implements ENVTestPreparation {
 
     @Test
     public void testAntRunner() {
-        String destFile = "test/test.jar";
+        String destFile = "target/test.jar";
         File basedir = new File("./");
         FileSet[] fileSets = AntRunner.createFileSets("./:{**/*.*ml}**/*.xml;" + basedir.getPath() + ":{*.txt}");
         Properties props = new Properties();

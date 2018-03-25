@@ -15,6 +15,7 @@ import java.util.Hashtable;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.Executors;
+import java.util.function.Supplier;
 
 import org.apache.commons.logging.Log;
 
@@ -164,6 +165,11 @@ public class ConcurrentUtil {
         }
     }
 
+    public static final void waitFor(Supplier<Boolean> callback) {
+    	while (!callback.get())
+    		sleep(1000);
+    }
+    
     /**
      * calls {@link Thread#interrupt()} on a thread with the given name in the current threadgroup.
      * 

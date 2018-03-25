@@ -33,6 +33,11 @@ public class CoreTest implements ENVTestPreparation {
         assertTrue(System.getSecurityManager() == null);
         assertTrue(Policy.getPolicy().toString().contains("all-permissions"));
     }
+
+    @Test
+    public void testReflection() {
+    	assertTrue(((Long)BeanClass.getStatic(BeanClass.class, "serialVersionUID")).longValue() > 0);
+    }
     
     @Test
     public void testAppLoaderMain() {

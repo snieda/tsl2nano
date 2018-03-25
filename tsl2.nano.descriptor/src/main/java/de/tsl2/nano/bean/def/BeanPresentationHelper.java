@@ -1599,24 +1599,8 @@ public class BeanPresentationHelper<T> {
                             && collector.getCurrentData().size() > 0;
                     }
                 });
-            }
-            pageActions
-                .add(new SecureAction(bean.getClazz(), "print", IAction.MODE_UNDEFINED, false, "icons/print.png") {
-                    @Override
-                    public Object action() throws Exception {
-                        return ENV.get(IPageBuilder.class).build(vsession.getValue(), bean, null, false);
-                    }
-                });
 
-            pageActions
-                .add(new SecureAction(bean.getClazz(), "plaintext", IAction.MODE_UNDEFINED, false, "icons/view.png") {
-                    @Override
-                    public Object action() throws Exception {
-                        return getSimpleTextualPresentation();
-                    }
-                });
-
-            pageActions
+                pageActions
                 .add(new SecureAction(bean.getClazz(), "import", IAction.MODE_UNDEFINED, false, "icons/upload.png") {
                     String file = ENV.getConfigPath(bean.getClazz()) + ".txt";
 
@@ -1656,6 +1640,23 @@ public class BeanPresentationHelper<T> {
                     @Override
                     public String getLongDescription() {
                         return "exports " + bean.getName() + " visible elements to file " + file;
+                    }
+                });
+
+            }
+            pageActions
+                .add(new SecureAction(bean.getClazz(), "print", IAction.MODE_UNDEFINED, false, "icons/print.png") {
+                    @Override
+                    public Object action() throws Exception {
+                        return ENV.get(IPageBuilder.class).build(vsession.getValue(), bean, null, false);
+                    }
+                });
+
+            pageActions
+                .add(new SecureAction(bean.getClazz(), "plaintext", IAction.MODE_UNDEFINED, false, "icons/view.png") {
+                    @Override
+                    public Object action() throws Exception {
+                        return getSimpleTextualPresentation();
                     }
                 });
 

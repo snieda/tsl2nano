@@ -20,7 +20,7 @@ class DecorationProxy<T extends Plugin> implements InvocationHandler {
     public Object invoke(Object proxy, Method method, Object[] args) throws Throwable {
         boolean decoratingChain = args.length == 1 && args[0] != null && method.getReturnType().isAssignableFrom(args[0].getClass());
         Object[] result = new Object[] {decoratingChain ? args[0] : null}; //workaround on non final result used in inner class
-        Plugins.log("starting " + implementations.size() + " inspections: " + method);
+        Plugins.log("starting " + implementations.size() + " plugins: " + method);
         implementations.stream().filter(h->h.isEnabled()).forEach(h->{
             try {
                 result[0] = decoratingChain ? method.invoke(h, result[0]) : method.invoke(h, args);
@@ -29,7 +29,7 @@ class DecorationProxy<T extends Plugin> implements InvocationHandler {
                 ManagedException.forward(e);
             }
         });
-        Plugins.log(" inspections done");
+        Plugins.log(" plugins done");
         return result[0];
     }
 

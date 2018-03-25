@@ -508,7 +508,8 @@ public class ENV implements Serializable {
     /**
      * @param properties The properties to set.
      */
-    public static void setProperties(Map properties) {
+    @SuppressWarnings("rawtypes")
+	public static void setProperties(SortedMap properties) {
         if (self().properties == null)
             self().properties = createPropertyMap();
         self().properties.putAll(properties);

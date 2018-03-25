@@ -148,7 +148,7 @@ public class Html5Presentation<T> extends BeanPresentationHelper<T> implements I
     /** on sidenav action bars, all action are integrated into this one sidebar */
     private transient Element sideNav;
 
-    Log LOG = LogFactory.getLog(Html5Presentation.class);
+    static final Log LOG = LogFactory.getLog(Html5Presentation.class);
     private transient boolean isAuthenticated;
     private static transient String jsWebsocketTemplate;
 

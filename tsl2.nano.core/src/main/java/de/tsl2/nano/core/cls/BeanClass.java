@@ -559,7 +559,7 @@ public class BeanClass<T> implements Serializable {
             field.setAccessible(true);
             return field.get(instance);
         } catch (Exception e) {
-            ManagedException.forward(e);
+            ManagedException.forward(e, declared);
             return null;
         }
     }

@@ -3,6 +3,8 @@
  */
 package de.tsl2.nano.core.util;
 
+import java.io.File;
+
 import de.tsl2.nano.core.ENV;
 import de.tsl2.nano.core.log.LogFactory;
 
@@ -13,7 +15,8 @@ import de.tsl2.nano.core.log.LogFactory;
  */
 public interface ENVTestPreparation {
 	static final String BASE_DIR = "../tsl2.nano.";
-	static final String TARGET_TEST = "target/" + ENV.PREFIX_ENVNAME + "test/";
+	static final String TARGET_DIR = "target/";
+	static final String TARGET_TEST = TARGET_DIR + ENV.PREFIX_ENVNAME + "test/";
 
 	static String setUp(String moduleShort, boolean strict) {
 		String baseDirModule = BASE_DIR + moduleShort + "/";
@@ -33,5 +36,13 @@ public interface ENVTestPreparation {
 			// ...this may result in problems on other tests...
 			System.out.println(e.toString());
 		}
+	}
+
+	static void setUserDirToTarget() {
+        System.setProperty("user.dir", new File(TARGET_DIR).getAbsolutePath());
+//		System.setProperty("user.dir", new File(baseDirModule + TARGET_DIR).getAbsolutePath());
+		System.out.println("------------------------------------------------------------");
+		System.out.println("user.dir: " + System.getProperty("user.dir"));
+		System.out.println("------------------------------------------------------------");
 	}
 }

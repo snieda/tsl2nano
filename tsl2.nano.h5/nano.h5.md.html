@@ -1832,7 +1832,7 @@ After saving the bean configuration, the new action should be available. test it
 
 The chapter before described the structure of all definitions. _Nano.H5_ provides an administration tool inside the application to do some configurations on runtime. If you are inside the detail-page of a bean, there is an action 'Configuration' on your headers button-group. If you activate it, you are inside a configuration mode, letting you change layout and styling of the current bean.
 
-[TODO: png]
+[[img src=beanconfigurator.png]]
 
 The value-expression defines the presentation of the current bean-definition. Inside the brackets there are any characters + several attribute-names to be present a bean-value.
 F.e., if you have a bean _Person_ with attributes _id_ and _name_, but want to show only the name of a person in a list, you define: _{name}_.
@@ -3436,6 +3436,7 @@ Actual list: http://infocenter.pentaho.com/help/index.jsp?topic=%2Fsupported_com
  2.0.1  | 28.01.2018 | env.xml and prop-file enc. corr., sub-module MF-files filled, tests enhanced,  REF: Cryp, PKI -> secure, HttpClient -> http, Xml, YAML -> serialize
  2.0.2  | 04.02.2018 | AppLoader with MANIFEST.MF loading corrected, tsl2.nano.terminal now standalone, tests/reports enhanced
  2.0.3  | 04.03.2018 | integration-tests with failsafe+antrun, admin-commands starting with nano.hash
+ 2.1.0  | 01.04.2018 | INanoPlugin for java+maven developers, all maven modules use parent version number
 
 <style class="fallback">body{white-space:pre;font-family:monospace}</style><script src="markdeep.min.js"></script><script src="http://casual-effects.com/markdeep/latest/markdeep.min.js"></script>
 
@@ -4094,19 +4095,15 @@ Controller:
 
 analyse integration with REST etc.
 	
-maven+refactoring TODO:
-	- integration test NanoH5
+(x) maven+refactoring TODO:
+	- (v) integration test NanoH5
 	- (x) jars: war, sign, standalone, pure, sishell
 	- (v) Cp1252 -> UTF-8
-	- clean code (unused imports etc.)
-	- Test timing app
+	- ( ) clean code (unused imports etc.)
+	- ( ) Test timing app
 	- (?) dependencies (ant+hibernate -> javax validation-api)
-	- build: replace src/resources/standalone.zip with maven build
+	- (-) build: replace src/resources/standalone.zip with maven build
 	- (v) release
-	
-	
-	
-	
 	
 	
 derby.jar + derbynet.jar aus JAVA_HOME/db/lib kopieren
@@ -4130,21 +4127,21 @@ java -cp * org.apache.derby.tools.ij
 refresh default-resources.jar
 
 
-refresh MANIFEST.MF in h5:
+(v) refresh MANIFEST.MF in h5:
 Application-Name: Nano.H5
 Application-Source: http://downloads.sourceforge.net/project/tsl2nano/
  1.1.0/tsl2.nano.h5.1.1.0-signed.jar
 Application-redirect: /download
 Permissions: all-permissions
 
-log info for extract standalone.zip
+- (v) log info for extract standalone.zip
 
 on external database, anyway-scripts are used 'anyway'
 	
 - Bean: multi-instance holder?
 
 - (v) PROBLEM: style.template saved as UTF-8 becomes NULNULNUL at the end on saving it in environment.xml
-- ( ) NanoHandler -> replace Loader or Main-Class in h5 manifest
+- (v) NanoHandler -> replace Loader or Main-Class in h5 manifest
 - ( ) test timesheet with rulecover
 
 

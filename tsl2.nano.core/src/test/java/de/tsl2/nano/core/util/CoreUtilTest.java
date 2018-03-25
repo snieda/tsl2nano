@@ -648,4 +648,17 @@ public class CoreUtilTest implements ENVTestPreparation {
 			bar.print(meinText, i);
 		}
 	}
+	
+	@Test
+	public void testWaitFor() {
+		LinkedList<Integer> list = new LinkedList<>();
+		ConcurrentUtil.waitFor(()->isTrue(list));
+		
+	}
+	boolean isTrue(List<Integer> list) {
+		int count = list.size();
+		System.out.println(count);
+		list.add(1);
+		return count++ > 2;
+	}
 }
