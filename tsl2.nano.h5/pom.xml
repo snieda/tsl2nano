@@ -241,6 +241,7 @@
 						</goals>
 						<phase>package</phase>
 						<configuration>
+							<skip>${skipTests}</skip>
 							<includeClassifiers>
 								<includeClassifier>signed</includeClassifier>
 							</includeClassifiers>
@@ -299,6 +300,7 @@
 	                    </goals>
 	                    <inherited>true</inherited>
 	                    <configuration>
+							<skip>${skipTests}</skip>
 	                    	<failOnError>true</failOnError>
 	                    	<!--  <skip>${skipTests}</skip> -->
 	                        <tasks>
