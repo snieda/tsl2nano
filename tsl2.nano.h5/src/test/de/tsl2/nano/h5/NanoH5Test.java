@@ -357,7 +357,11 @@ public class NanoH5Test implements ENVTestPreparation {
         bconf.actionAddAttribute("date", "expression");
         bconf.actionCreateCompositor(Address.class.getName(), "city", "code", "wrench.png");
         bconf.actionCreateController("code", 1, 1, Address.class.getName(), "city", "code", "wrench.png");
+        bconf.actionCreateRuleOrAction("testRule", "§", "1+1");
+        bconf.actionCreateRuleOrAction("testRuleScript", "%", "1+1");
         bconf.actionCreateRuleOrAction("testaction", "!", Address.class.getName() + ".getCity");
+        bconf.actionCreateRuleOrAction("testREST", "@", "http://web.de");
+        bconf.actionCreateRuleOrAction("testaction", "?", "select 1=1");
         bconf.actionCreateSheet("sheet", 2, 2);
         bconf.setValueGroups(Arrays.asList(new ValueGroup("test", false, "city", "code")));
         

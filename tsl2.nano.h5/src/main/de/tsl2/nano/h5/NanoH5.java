@@ -793,7 +793,7 @@ public class NanoH5 extends NanoHTTPD implements ISystemConnector<Persistence> {
                 FileUtil.copy(attFile.getPath(), persistence.jarFileInEnvironment());
             }
             selectedFile =
-                new File(ENV.getConfigPath()
+                new File((AppLoader.isNestingJar() ? ENV.getConfigPath() : "")
                     + FileUtil.getURIFile(jarName).getPath());
         }
         jarName = selectedFile.getPath();
@@ -982,9 +982,9 @@ public class NanoH5 extends NanoHTTPD implements ISystemConnector<Persistence> {
     }
 
     private void copyJavaDBDriverFiles(Persistence persistence) {
-        String path = System.getProperty("java.home") + "/../db/lib/";
         String dest = ENV.getConfigPath();
         if (persistence.getConnectionUrl().contains("derby") && ! new File(dest + "derby.jar").exists()) {
+            String path = System.getProperty("java.home") + "/../db/lib/";
             if (new File(path + "derby.jar").canRead()) {
                 LOG.info("copying derby/javadb database driver files to environment");
                 FileUtil.copy(path + "derby.jar", dest + "derby.jar");
@@ -1061,7 +1061,7 @@ public class NanoH5 extends NanoHTTPD implements ISystemConnector<Persistence> {
         ENV.extractResource(REVERSE_ENG_SCRIPT);
         ENV.extractResource(HIBREVNAME_TEMPLATE);
         Properties properties = new Properties();
-        properties.setProperty(HIBREVNAME, ENV.getConfigPath() + HIBREVNAME);
+        properties.setProperty(HIBREVNAME, (AppLoader.isNestingJar() ? ENV.getConfigPath() : "") + HIBREVNAME);
 //    properties.setProperty("hbm.conf.xml", "hibernate.conf.xml");
         properties.setProperty("server.db-config.file", Persistence.FILE_JDBC_PROP_FILE);
         properties.setProperty("dest.file", jarFile);

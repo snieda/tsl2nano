@@ -893,8 +893,8 @@ public class ENV implements Serializable {
         resourceName = System.getProperty(resourceName, resourceName);
         //perhaps get a templates destination name
         String destName = System.getProperty(resourceName + ".destination", resourceName);
-        return AppLoader.isNestingJar() ? extractResource(resourceName, destinationDir + destName, flat, executable, logError)
-            : false;
+        return !AppLoader.isNestingJar() && resourceName.endsWith("ar") 
+        		? false : extractResource(resourceName, destinationDir + destName, flat, executable, logError);
     }
 
     public static final boolean extractResource(String resourceName, boolean flat, boolean executable, boolean logError) {
@@ -942,6 +942,8 @@ public class ENV implements Serializable {
             InputStream res = get(ClassLoader.class).getResourceAsStream(resourceName);
             try {
                 if (res == null /*|| res.available() <= 0*/) {
+                	if (resourceName.endsWith("ar"))
+                		return false; // jar files are available only in nested mode
                     throw new IllegalStateException("the resource '" + resourceName
                         + "' of our main-jar-file is not available or empty!");
                 }

@@ -491,6 +491,13 @@ public class BeanDefinition<T> extends BeanClass<T> implements IPluggable<BeanDe
     }
 
     /**
+     * @delegates to {@link #addAttribute(String, IAttribute, String, IPresentable)}
+     */
+    public <A> AttributeDefinition<A> addAttribute(IAttribute<A> expression) {
+    	return addAttribute(expression.getName(), expression, null, null);
+    }
+    
+    /**
      * creates a new attribute with value. internally, a new {@link ValueHolder} instance will be created to work on its
      * {@link ValueHolder#getValue()} attribute. the value-expression will be added to work instead of the standard
      * mechanism. see {@link AttributeDefinition#setExpression(String)}.

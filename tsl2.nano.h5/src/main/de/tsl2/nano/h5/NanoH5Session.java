@@ -425,9 +425,10 @@ public class NanoH5Session implements ISession<BeanDefinition>, Serializable, IL
             };
             Plugins.process(INanoPlugin.class).exceptionHandler(ex);
             msg = refreshPage(ex);
+            String user = getUserAuthorization() != null ? (String)getUserAuthorization().getUser() : "unauthorized";
             try {// only a try, don't throw a new exception in this catch block
                 FileUtil.writeBytes(msg.getBytes(), ENV.getTempPath() + "page-failed-" 
-                        + getUserAuthorization().getUser() + "-" + DateUtil.getFormattedTimeStamp() + ".html", false);
+                        + "-" + DateUtil.getFormattedTimeStamp() + ".html", false);
             } catch (Exception e1) {
                 LOG.error(e1);
             }
@@ -437,7 +438,7 @@ public class NanoH5Session implements ISession<BeanDefinition>, Serializable, IL
             logaction(ex.toString(), parms);
             EMessage.broadcast(this,
                 ENV.translate("nanoh5.error", false,
-                    this.getUserAuthorization() != null ? this.getUserAuthorization().getUser() : "<unkown user>", 
+                    user, 
                     nav.current(), e.getLocalizedMessage()),
                 "*");
         }

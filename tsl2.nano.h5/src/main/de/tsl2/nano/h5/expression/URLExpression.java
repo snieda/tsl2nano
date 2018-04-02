@@ -38,8 +38,8 @@ public class URLExpression<T extends Serializable> extends RunnableExpression<T>
     public URLExpression() {
     }
 
-    public URLExpression(Class<?> declaringClass, String expression) {
-        this(declaringClass, expression, null);
+    public URLExpression(String expression) {
+        this(null, expression, null);
     }
 
     /**
