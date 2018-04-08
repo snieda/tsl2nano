@@ -22,20 +22,6 @@
 			<attribute name="maven.pomderived" value="true"/>
 		</attributes>
 	</classpathentry>
-	<classpathentry exported="true" kind="lib" path="lib/simple-xml-2.7.jar"/>
-	<classpathentry exported="true" kind="lib" path="lib-tools/ant-launcher.jar"/>
-	<classpathentry exported="true" kind="lib" path="lib-tools/ant-nodeps.jar"/>
-	<classpathentry exported="true" kind="lib" path="lib-tools/ant.jar"/>
-	<classpathentry exported="true" kind="lib" path="lib-tools/javassist-3.12.0.GA.jar"/>
-	<classpathentry exported="true" kind="lib" path="lib-tools/junit-4.8.2.jar"/>
-	<classpathentry exported="true" kind="lib" path="lib-tools/velocity-1.6-dep.jar"/>
-	<classpathentry exported="true" kind="lib" path="lib-tools/commons-codec-1.6.jar"/>
-	<classpathentry kind="lib" path="lib-tools/fop-1.1.jar"/>
-	<classpathentry kind="lib" path="lib-tools/jasperreports-6.0.0.jar"/>
-	<classpathentry kind="lib" path="lib-tools/xmlgraphics-commons-1.5.jar"/>
-	<classpathentry kind="lib" path="lib/javax.json-api-1.0.jar"/>
-	<classpathentry kind="lib" path="lib/javax.json-1.0.4.jar"/>
-	<classpathentry kind="lib" path="lib/snakeyaml-1.17.jar"/>
 	<classpathentry kind="con" path="org.eclipse.m2e.MAVEN2_CLASSPATH_CONTAINER">
 		<attributes>
 			<attribute name="maven.pomderived" value="true"/>
