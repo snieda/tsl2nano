@@ -156,7 +156,7 @@ public class NanoH5 extends NanoHTTPD implements ISystemConnector<Persistence> {
     public NanoH5(String serviceURL, IPageBuilder<?, String> builder) throws IOException {
 //        super(null, getPort(serviceURL), new File(ENV.getConfigPath()), !LOG.isDebugEnabled());
         super(getPort(serviceURL), new File(ENV.getConfigPath()));
-        FileUtil.writeBytes(String.valueOf(hashCode()).getBytes(), ENV.getTempPath() + "instance-id.txt", false);
+        FileUtil.writeBytes(String.valueOf(hashCode()).getBytes(), new File(ENV.getTempPath() + "instance-id.txt").getAbsolutePath(), false);
         this.serviceURL = getServiceURL(serviceURL);
         this.builder = builder != null ? builder : createPageBuilder();
         ENV.registerBundle(NanoH5.class.getPackage().getName() + ".messages", true);
@@ -792,51 +792,12 @@ public class NanoH5 extends NanoHTTPD implements ISystemConnector<Persistence> {
             if (attFile.canRead()) {
                 FileUtil.copy(attFile.getPath(), persistence.jarFileInEnvironment());
             }
-            selectedFile =
-                new File((AppLoader.isNestingJar() ? ENV.getConfigPath() : "")
-                    + FileUtil.getURIFile(jarName).getPath());
+            selectedFile = new File(ENV.getConfigPath() + FileUtil.getURIFilePath(jarName));
         }
         jarName = selectedFile.getPath();
         if (!selectedFile.exists() && !isAbsolutePath) {
             //ant-scripts can't use the nested jars. but normal beans shouldn't have dependencies to simple-xml.
-            ENV.extractResource(JAR_SIMPLEXML);
-            ENV.extractResource(JAR_COMMON);
-            ENV.extractResource(JAR_DIRECTACCESS);
-            ENV.extractResource(JAR_SERVICEACCESS);
-
-            provideScripts(persistence);
-            copyJavaDBDriverFiles(persistence);
-
-            String generatorTask;
-            if (persistence.getGenerator().equals(Persistence.GEN_HIBERNATE)) {
-                generatorTask = "org.hibernate.tool.ant.HibernateToolTask";
-            } else {
-                generatorTask = "org.apache.openjpa.jdbc.ant.ReverseMappingToolTask";
-            }
-            ENV.loadClassDependencies("org.apache.tools.ant.taskdefs.Taskdef",
-                generatorTask, persistence.getConnectionDriverClass(), persistence.getProvider());
-
-            if ((isLocalDatabase(persistence) && !canConnectToLocalDatabase(persistence))
-                || persistence.autoDllIsCreateDrop()) {
-                generateDatabase(persistence);
-            }
-            if (ENV.get("app.db.check.connection", true))
-                checkJDBCConnection(persistence);
-            
-            Boolean generationComplete =
-                generateJarFile(jarName, persistence.getGenerator(), persistence.getDefaultSchema());
-            //return value may be null or false
-            if (generationComplete == null || !Boolean.TRUE.equals(generationComplete) || !new File(jarName).exists()) {
-                throw new ManagedException(
-                    "Couldn't generate bean jar file '"
-                        + jarName
-                        + "' through ant-script 'reverse-eng.xml'! Please see log file for exceptions.\n"
-                        + (!ENV.get(CompatibilityLayer.class).isAvailable("java.lang.Compiler")
-                            ? "\tYOUR JAVA IS ONLY A JRE! We need the full JDK to compile the generated classes.\n"
-                            : "")
-                        + "\nAs alternative you may select an existing bean-jar file (-->no generation needed!) in field \"JarFile\"\n\n"
-                        + ENV.get(UncaughtExceptionHandler.class).toString());
-            }
+            generateDatabaseAndEntities(persistence, jarName);
         } else if (isAbsolutePath) {//copy it into the own classpath (to don't lock the file)
             if (!selectedFile.exists()) {
                 throw new IllegalArgumentException(
@@ -849,49 +810,20 @@ public class NanoH5 extends NanoHTTPD implements ISystemConnector<Persistence> {
 
         //may be on second start after having already generated the jar file
         if (isLocalDatabase(persistence) && !canConnectToLocalDatabase(persistence)) {
-            String[] cmd =
-                AppLoader.isUnix() ? new String[] { "sh", "runServer.cmd" } : new String[] { "cmd", "/C", "start",
-                    "runServer.cmd" };
-            SystemUtil.execute(new File(ENV.getConfigPathRel()), cmd);
-            //prepare shutdown and backup
-            Runtime.getRuntime().addShutdownHook(Executors.defaultThreadFactory().newThread(new Runnable() {
-                @Override
-                public void run() {
-                    if (BeanContainer.isInitialized()) {
-                        EMessage.broadcast(this, "APPLICATION SHUTDOWN INITIALIZED...", "*");
-                        LOG.info("preparing shutdown of local database " + persistence.getConnectionUrl());
-                        try {
-                            BeanContainer.instance().executeStmt(ENV.get("app.shutdown.statement", "SHUTDOWN"), true,
-                                null);
-                            Thread.sleep(2000);
-                        } catch (Exception e) {
-                            LOG.error(e.toString());
-                        }
-                        String hsqldbScript = isH2(persistence.getConnectionUrl())
-                            ? persistence.getDefaultSchema() + ".mv.db" : persistence.getDatabase() + ".script";
-                        String backupFile =
-                            ENV.getTempPathRel() + FileUtil.getUniqueFileName(ENV.get("app.database.backup.file",
-                                persistence.getDatabase()) + ".zip");
-                        LOG.info("creating database backup to file " + backupFile);
-                        FileUtil.writeToZip(backupFile, hsqldbScript, FileUtil.getFileBytes(hsqldbScript, null));
-                    }
-                }
-            }));
-            //do a periodical backup
-            SchedulerUtil.runAt(0, -1, TimeUnit.DAYS, new Runnable() {
-                @Override
-                public void run() {
-                    LOG.info("preparing backup of local database " + persistence.getConnectionUrl());
-                    try {
-                        BeanContainer.instance().executeStmt(
-                            ENV.get("app.backup.statement", "backup to temp/database-daily-backup.zip"), true, null);
-                    } catch (Exception e) {
-                        LOG.error(e.toString());
-                    }
-                }
-            });
+            runLocalDatabase(persistence);
         }
 
+        createPersistenceProvider(persistence, runtimeClassloader);
+
+        List<Class> beanClasses =
+            runtimeClassloader.loadBeanClasses(jarName,
+                ENV.get("bean.class.presentation.regexp", ".*"), null);
+        ENV.setProperty("service.loadedBeanTypes", beanClasses);
+
+        return beanClasses;
+    }
+
+    protected void createPersistenceProvider(final Persistence persistence, PersistenceClassLoader runtimeClassloader) {
         boolean useJPAPersistenceProvider = true;
         /* 
          * check, whether a real/existing jpa-persistence-provider was selected.
@@ -932,13 +864,91 @@ public class NanoH5 extends NanoHTTPD implements ISystemConnector<Persistence> {
         }
         ENV.addService(IBeanContainer.class, BeanContainer.instance());
         ConcurrentUtil.setCurrent(BeanContainer.instance());
+    }
 
-        List<Class> beanClasses =
-            runtimeClassloader.loadBeanClasses(jarName,
-                ENV.get("bean.class.presentation.regexp", ".*"), null);
-        ENV.setProperty("service.loadedBeanTypes", beanClasses);
+    protected void generateDatabaseAndEntities(final Persistence persistence, String jarName) throws ManagedException {
+        ENV.extractResource(JAR_SIMPLEXML);
+        ENV.extractResource(JAR_COMMON);
+        ENV.extractResource(JAR_DIRECTACCESS);
+        ENV.extractResource(JAR_SERVICEACCESS);
 
-        return beanClasses;
+        provideScripts(persistence);
+        copyJavaDBDriverFiles(persistence);
+
+        String generatorTask;
+        if (persistence.getGenerator().equals(Persistence.GEN_HIBERNATE)) {
+            generatorTask = "org.hibernate.tool.ant.HibernateToolTask";
+        } else {
+            generatorTask = "org.apache.openjpa.jdbc.ant.ReverseMappingToolTask";
+        }
+        ENV.loadClassDependencies("org.apache.tools.ant.taskdefs.Taskdef",
+            generatorTask, persistence.getConnectionDriverClass(), persistence.getProvider());
+
+        if ((isLocalDatabase(persistence) && !canConnectToLocalDatabase(persistence))
+            || persistence.autoDllIsCreateDrop()) {
+            generateDatabase(persistence);
+        }
+        if (ENV.get("app.db.check.connection", true))
+            checkJDBCConnection(persistence);
+        
+        Boolean generationComplete =
+            generateJarFile(jarName, persistence.getGenerator(), persistence.getDefaultSchema());
+        //return value may be null or false
+        if (generationComplete == null || !Boolean.TRUE.equals(generationComplete) || !new File(jarName).exists()) {
+            throw new ManagedException(
+                "Couldn't generate bean jar file '"
+                    + jarName
+                    + "' through ant-script 'reverse-eng.xml'! Please see log file for exceptions.\n"
+                    + (!ENV.get(CompatibilityLayer.class).isAvailable("java.lang.Compiler")
+                        ? "\tYOUR JAVA IS ONLY A JRE! We need the full JDK to compile the generated classes.\n"
+                        : "")
+                    + "\nAs alternative you may select an existing bean-jar file (-->no generation needed!) in field \"JarFile\"\n\n"
+                    + ENV.get(UncaughtExceptionHandler.class).toString());
+        }
+    }
+
+    protected void runLocalDatabase(final Persistence persistence) {
+        String[] cmd =
+            AppLoader.isUnix() ? new String[] { "sh", "runServer.cmd" } : new String[] { "cmd", "/C", "start",
+                "runServer.cmd" };
+        SystemUtil.execute(new File(ENV.getConfigPathRel()), cmd);
+        //prepare shutdown and backup
+        Runtime.getRuntime().addShutdownHook(Executors.defaultThreadFactory().newThread(new Runnable() {
+            @Override
+            public void run() {
+                if (BeanContainer.isInitialized()) {
+                    EMessage.broadcast(this, "APPLICATION SHUTDOWN INITIALIZED...", "*");
+                    LOG.info("preparing shutdown of local database " + persistence.getConnectionUrl());
+                    try {
+                        BeanContainer.instance().executeStmt(ENV.get("app.shutdown.statement", "SHUTDOWN"), true,
+                            null);
+                        Thread.sleep(2000);
+                    } catch (Exception e) {
+                        LOG.error(e.toString());
+                    }
+                    String hsqldbScript = isH2(persistence.getConnectionUrl())
+                        ? persistence.getDefaultSchema() + ".mv.db" : persistence.getDatabase() + ".script";
+                    String backupFile =
+                        ENV.getTempPathRel() + FileUtil.getUniqueFileName(ENV.get("app.database.backup.file",
+                            persistence.getDatabase()) + ".zip");
+                    LOG.info("creating database backup to file " + backupFile);
+                    FileUtil.writeToZip(backupFile, hsqldbScript, FileUtil.getFileBytes(hsqldbScript, null));
+                }
+            }
+        }));
+        //do a periodical backup
+        SchedulerUtil.runAt(0, -1, TimeUnit.DAYS, new Runnable() {
+            @Override
+            public void run() {
+                LOG.info("preparing backup of local database " + persistence.getConnectionUrl());
+                try {
+                    BeanContainer.instance().executeStmt(
+                        ENV.get("app.backup.statement", "backup to temp/database-daily-backup.zip"), true, null);
+                } catch (Exception e) {
+                    LOG.error(e.toString());
+                }
+            }
+        });
     }
 
     private void checkJDBCConnection(Persistence persistence) {
@@ -1055,13 +1065,14 @@ public class NanoH5 extends NanoHTTPD implements ISystemConnector<Persistence> {
             ENV.getConfigPath() + "mda.xml",
             "do.all",
             p);
+        Plugins.process(INanoPlugin.class).databaseGenerated(Persistence.current());
     }
 
     protected static Boolean generateJarFile(String jarFile, String generator, String schema) {
         ENV.extractResource(REVERSE_ENG_SCRIPT);
         ENV.extractResource(HIBREVNAME_TEMPLATE);
         Properties properties = new Properties();
-        properties.setProperty(HIBREVNAME, (AppLoader.isNestingJar() ? ENV.getConfigPath() : "") + HIBREVNAME);
+        properties.setProperty(HIBREVNAME, ENV.getConfigPath() + HIBREVNAME);
 //    properties.setProperty("hbm.conf.xml", "hibernate.conf.xml");
         properties.setProperty("server.db-config.file", Persistence.FILE_JDBC_PROP_FILE);
         properties.setProperty("dest.file", jarFile);
@@ -1078,10 +1089,13 @@ public class NanoH5 extends NanoHTTPD implements ISystemConnector<Persistence> {
         //If no environment was saved before, we should do it now!
         ENV.persist();
 
-        return (Boolean) ENV.get(CompatibilityLayer.class).runRegistered("ant",
+        Boolean result = (Boolean) ENV.get(CompatibilityLayer.class).runRegistered("ant",
             ENV.getConfigPath() + REVERSE_ENG_SCRIPT,
             "create.bean.jar",
             properties);
+        if (result)
+            Plugins.process(INanoPlugin.class).beansGenerated(Persistence.current());
+        return result;
     }
 
     private String applicationHtmlFile() {

@@ -164,4 +164,12 @@ class NanoHandlerApp implements INanoPlugin {
         header.put(ID, ID);
     }
 
+    @Override
+    public void databaseGenerated(Persistence persistence) {
+    }
+
+    @Override
+    public void beansGenerated(Persistence persistence) {
+    }
+
 }

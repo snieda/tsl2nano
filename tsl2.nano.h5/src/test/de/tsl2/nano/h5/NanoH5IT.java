@@ -16,6 +16,7 @@ import org.junit.Test;
 
 import com.gargoylesoftware.htmlunit.html.HtmlPage;
 
+import de.tsl2.nano.core.util.ENVTestPreparation;
 import de.tsl2.nano.core.util.Util;
 
 /**
@@ -27,20 +28,18 @@ public class NanoH5IT extends NanoH5Unit {
 
     @AfterClass
     public static void tearDown() {
-//        ENVTestPreparation.tearDown();
+//        NanoH5Unit.tearDown();
     }
 
     @Test
 //    @Ignore
     public void testNano() throws Exception {
-        String serviceURL = getServiceURL(!nanoAlreadyRunning);
-        startApplication();
         Process process = null;
         HtmlPage page = null;
         PipedOutputStream myOut = setPipedInputOutput();
         try {
             System.getProperties().put("org.apache.commons.logging.simplelog.defaultlog", "info");
-            page = runWebClient(serviceURL);
+            page = runWebClient();
             page = submit(page, BTN_LOGIN_OK);
             page = submit(page, BEANCOLLECTORLIST + BTN_SELECTALL);
             page = submit(page, BEANCOLLECTORLIST + BTN_OPEN);

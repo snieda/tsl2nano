@@ -35,6 +35,8 @@ import de.tsl2.nano.persistence.replication.Replication;
  * @version $Revision$
  */
 public class Persistence implements Serializable, Cloneable {
+    public static final String FIX_PATH = "!";
+
     /** serialVersionUID */
     private static final long serialVersionUID = 2360829578078838714L;
     
@@ -44,7 +46,7 @@ public class Persistence implements Serializable, Cloneable {
     
     protected String persistenceUnit = "genericPersistenceUnit";
     protected String transactionType = "RESOURCE_LOCAL";
-    protected String provider = "org.hibernate.ejb.HibernatePersistence";
+    protected String provider = "org.hibernate.jpa.HibernatePersistenceProvider";
     protected String jtaDataSource = "<UNDEFINED>";
     protected String jarFile = DEFAULT_DATABASE + ".jar";
     protected String connectionDriverClass = STD_LOCAL_DATABASE_DRIVER;
@@ -141,7 +143,7 @@ public class Persistence implements Serializable, Cloneable {
      */
     public String getJarFile() {
         //Workaround for eclipselink, using it's own classloader - loading from parent of META-INF/
-        return jarFile.startsWith("!") ? jarFile.substring(1) : StringUtil.substring(jarFile, "file:///", null);
+        return jarFile.startsWith(FIX_PATH) ? jarFile.substring(1) : StringUtil.substring(jarFile, "file:///", null);
     }
 
     /**
@@ -471,7 +473,7 @@ public class Persistence implements Serializable, Cloneable {
      */
     public String jarFileInEnvironment() {
         //Workaround for eclipselink, using it's own classloader - loading from parent of META-INF/
-        return jarFile.startsWith("!") ? getJarFile() : FileUtil.getRelativePath(ENV
+        return jarFile.startsWith(FIX_PATH) ? getJarFile() : FileUtil.getRelativePath(ENV
             .getConfigPath() + new File(getJarFile()).getName());
     }
 

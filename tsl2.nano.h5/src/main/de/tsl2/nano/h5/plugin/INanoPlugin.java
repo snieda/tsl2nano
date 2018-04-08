@@ -31,31 +31,37 @@ import de.tsl2.nano.serviceaccess.IAuthorization;
  * @version $Revision$
  */
 public interface INanoPlugin extends Plugin {
-    /** do some inspections on authentication. The auth object is pre-filled */
-    void onAuthentication(IAuthorization auth);
-
     /**
      * change the default properties of the application. see 'environment.xml' for a list of all keys and their defaults
      */
     void configuration(SortedMap<Object, Object> properties, Map<Class<?>, Object> services);
 
-    /**
-     * The Html page-builder defines the creation of each response. you must return an instance of pageBuilder (null
-     * will result in errors)!
-     */
-    public <PAGE, OUTPUT, T extends IPageBuilder<PAGE, OUTPUT>> T definePresentationType(T pageBuilder);
-
-    /**
-     * for each bean type (belonging to an entity class) the default handling can be changed. the output can be found at
-     * the presentation directory
-     */
-    void defineBeanDefinition(BeanDefinition<?> beanDef);
+    /** do some inspections on authentication. The auth object is pre-filled */
+    void onAuthentication(IAuthorization auth);
 
     /**
      * before an authentication, the properties for the jpa persistence.xml will be defined. You can change these
      * settings before a new session will be started
      */
     void definePersistence(Persistence persistence);
+
+    /** do some initializings on the database. the connection-info is inside the persistence object */
+    void databaseGenerated(Persistence persistence);
+    
+    /** do some initializings on the jar-file. the jar-file-name is inside the persistence object */
+    void beansGenerated(Persistence persistence);
+    
+    /**
+     * The Html page-builder defines the creation of each response. you must return an instance of pageBuilder (null
+     * will result in errors)!
+     */
+    <PAGE, OUTPUT, T extends IPageBuilder<PAGE, OUTPUT>> T definePresentationType(T pageBuilder);
+
+    /**
+     * for each bean type (belonging to an entity class) the default handling can be changed. the output can be found at
+     * the presentation directory
+     */
+    void defineBeanDefinition(BeanDefinition<?> beanDef);
 
     /** before running the requested user interaction, you can inspect the action that will be called */
     void actionBeforeHandler(IAction<?> action);

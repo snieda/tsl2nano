@@ -74,7 +74,7 @@ public class FileUtil {
     };
 
     private static ZipInputStream getZipInputStream(String zipfile) {
-        final File zip = new File(zipfile);
+        final File zip = userDirFile(zipfile);
         if (!zip.exists()) {
             LOG.warn("zip-file " + zipfile + " not existing!");
             return null;
@@ -212,10 +212,10 @@ public class FileUtil {
         for (String file : zipFiles) {
             byte[] data = FileUtil.readFromZip(zipStream, file, false);
             if (data == null || data.length == 0) {
-                new File(destDir + file).mkdirs();
-            } else if (!new File(destDir + file).exists()) {
-                FileUtil.writeBytes(data, destDir + file, false);
-                extracted.add(new File(destDir + file));
+            	userDirFile(destDir + file).mkdirs();
+            } else if (!userDirFile(destDir + file).exists()) {
+                writeBytes(data, destDir + file, false);
+                extracted.add(userDirFile(destDir + file));
             }
         }
         return extracted;
@@ -241,9 +241,9 @@ public class FileUtil {
         for (String file : zipFiles) {
             byte[] data = FileUtil.readFromZip(zipStream, file, false);
             if (data == null || data.length == 0) {
-                new File(destDir + file).mkdirs();
-            } else if (!new File(destDir + file).exists()) {
-                FileUtil.writeBytes(data, destDir + file, false);
+            	userDirFile(destDir + file).mkdirs();
+            } else if (!userDirFile(destDir + file).exists()) {
+                writeBytes(data, destDir + file, false);
             }
         }
 
@@ -293,7 +293,7 @@ public class FileUtil {
         //open a zip-file
         ZipOutputStream targetStream = null;
         try {
-            File zip = new File(zipfile);
+            File zip = userDirFile(zipfile);
             if (!zip.exists()) {
                 zip.getParentFile().mkdirs();
                 zip.createNewFile();
@@ -373,7 +373,7 @@ public class FileUtil {
      * @param fileWithPath file with path
      */
     public static void createPath(String fileWithPath) {
-        final File file = new File(fileWithPath);
+        final File file = userDirFile(fileWithPath);
         final File parent = file.getParentFile();
         if (parent != null) {
             file.getParentFile().mkdirs();
@@ -406,7 +406,7 @@ public class FileUtil {
         OutputStream stream = null;
         try {
             LOG.debug("serializing to xml: " + fileName);
-            stream = new FileOutputStream(new File(fileName));
+            stream = new FileOutputStream(userDirFile(fileName));
             saveXml(serializable, stream);
         } catch (final Exception e) {
             ManagedException.forward(e);
@@ -438,14 +438,14 @@ public class FileUtil {
     public static final Serializable loadXml(String fileName) {
         LOG.info("FileUtil.loadXml from --> " + fileName);
         try {
-            return loadXml(new FileInputStream(new File(fileName)));
+            return loadXml(new FileInputStream(userDirFile(fileName)));
         } catch (final Exception e) {
             return ManagedException.forward(e);
         }
     }
 
     public static Properties loadPropertiesFromFile(String resourceFile) {
-        File f = new File(resourceFile);
+        File f = userDirFile(resourceFile);
         if (!f.canRead()) {
             return null;
         }
@@ -500,7 +500,7 @@ public class FileUtil {
     public static void saveProperties(String resourceFile, Properties p) {
         try {
             p.store(
-                new FileOutputStream(new File(resourceFile)),
+                new FileOutputStream(userDirFile(resourceFile)),
                 "generated at " + DateFormat.getDateTimeInstance()
                     .format(new Date()) + " from code " + ConcurrentUtil.getCaller() + " by user "
                     + System.getProperty("user.name"));
@@ -549,7 +549,7 @@ public class FileUtil {
      */
     public static final void saveResourceToFileSystem(URL url, final String fileName) {
         try {
-            write((InputStream) url.getContent(), new FileOutputStream(fileName) {
+            write((InputStream) url.getContent(), new FileOutputStream(userDirFile(fileName)) {
                 @Override
                 public String toString() {
                     return fileName;
@@ -563,7 +563,7 @@ public class FileUtil {
 
     public static final InputStream getFile(String name) {
         try {
-            return new FileInputStream(new File(name));
+            return new FileInputStream(userDirFile(name));
         } catch (final FileNotFoundException e) {
             ManagedException.forward(e);
             return null;
@@ -572,7 +572,7 @@ public class FileUtil {
 
     public static final OutputStream getFileOutput(String name) {
         try {
-            return new FileOutputStream(new File(name));
+            return new FileOutputStream(userDirFile(name));
         } catch (final FileNotFoundException e) {
             ManagedException.forward(e);
             return null;
@@ -617,7 +617,7 @@ public class FileUtil {
         LOG.info("writing " + ByteUtil.amount(data.length) + " into file " + file);
         FileOutputStream out = null;
         try {
-            File f = new File(file);
+            File f = userDirFile(file);
             if (f.getParentFile() != null)
                 f.getParentFile().mkdirs();
             out = new FileOutputStream(f, append);
@@ -633,7 +633,11 @@ public class FileUtil {
         }
     }
 
-    /**
+    private static File userDirFile(String file) {
+		return new File(file).getAbsoluteFile();
+	}
+
+	/**
      * deserialize
      */
     public static Object load(String filename) {
@@ -641,7 +645,7 @@ public class FileUtil {
         Object l_return = null;
         ObjectInputStream o = null;
         try {
-            FileInputStream file = new FileInputStream(filename);
+            FileInputStream file = new FileInputStream(userDirFile(filename));
             o = new ObjectInputStream(file);
             l_return = o.readObject();
         } catch (Exception ex) {
@@ -662,7 +666,7 @@ public class FileUtil {
         LOG.info("serializing object to file: " + filename);
         ObjectOutputStream o = null;
         try {
-            final FileOutputStream file = new FileOutputStream(filename);
+            final FileOutputStream file = new FileOutputStream(userDirFile(filename));
             o = new ObjectOutputStream(file);
             o.writeObject(object);
         } catch (final IOException ex) {
@@ -705,7 +709,7 @@ public class FileUtil {
     public static synchronized char[] getFileData(final String fileName, String encoding) {
         try {
             LOG.debug("reading file " + fileName);
-            return getFileData(new FileInputStream(new File(fileName)) {
+            return getFileData(new FileInputStream(userDirFile(fileName)) {
                 @Override
                 public String toString() {
                     return fileName;
@@ -828,8 +832,8 @@ public class FileUtil {
      */
     public static boolean copy(String srcFile, String destFile) {
         try {
-            final File f1 = new File(srcFile);
-            File f2 = new File(destFile);
+            final File f1 = userDirFile(srcFile);
+            File f2 = userDirFile(destFile);
             if (f2.getParentFile() != null)
                 f2.getParentFile().mkdirs();
             if (f2.isDirectory())
@@ -851,7 +855,7 @@ public class FileUtil {
      */
     public static long write(InputStream in, final String fileName) {
         try {
-            return write(in, new FileOutputStream(new File(fileName)) {
+            return write(in, new FileOutputStream(userDirFile(fileName)) {
                 @Override
                 public String toString() {
                     return fileName;
@@ -921,13 +925,13 @@ public class FileUtil {
      * @return new file name (=backup-filename), if file could be removed, otherwise null
      */
     public static final String removeToBackup(String fileName, String backupExtension, boolean multiple) {
-        final File f = new File(fileName);
+        final File f = userDirFile(fileName);
         String newName = null;
         if (f.exists() && f.canWrite()) {
             if (fileName.endsWith(File.separator) || fileName.endsWith("/")) {
                 fileName = fileName.substring(0, fileName.length() - 1);
             }
-            final File bakFile = new File(fileName + (multiple ? DateUtil.getFormattedTimeStamp() : "") + ".bak");
+            final File bakFile = userDirFile(fileName + (multiple ? DateUtil.getFormattedTimeStamp() : "") + ".bak");
             if (!multiple && bakFile.exists() && bakFile.canWrite()) {
                 if (!bakFile.delete()) {
                     LOG.warn("couldn't delete bak file:" + bakFile.getPath());
@@ -959,9 +963,9 @@ public class FileUtil {
      * @return true, if file could be restored
      */
     public static final boolean restoreFrom(String fileName, String backupExtension) {
-        final File bakFile = new File(fileName + backupExtension);
+        final File bakFile = userDirFile(fileName + backupExtension);
         if (bakFile.exists() && bakFile.canWrite()) {
-            final File f = new File(fileName);
+            final File f = userDirFile(fileName);
             if (f.exists() && f.canWrite()) {
                 if (!f.delete()) {
                     LOG.warn("couldn't delete file:" + bakFile.getPath());
@@ -1119,7 +1123,7 @@ public class FileUtil {
      * @return files of directory 'dirPath' matching 'regExFilename'
      */
     public static File[] getFiles(String dirPath, final String regExFilename) {
-        return new File(dirPath).listFiles(new FilenameFilter() {
+        return userDirFile(dirPath).listFiles(new FilenameFilter() {
             @Override
             public boolean accept(File dir, String name) {
                 return name.matches(regExFilename);
@@ -1189,7 +1193,7 @@ public class FileUtil {
         @Override
         public Object run(File context, Object... extArgs) {
             copy(context.getPath(), (String) extArgs[0]);
-            return new File((String) extArgs[0]);
+            return userDirFile((String) extArgs[0]);
         }
     };
 
@@ -1206,12 +1210,12 @@ public class FileUtil {
             final String regExFilename,
             final IRunnable<Object, File> action,
             final Object... args) {
-        return new File(dirPath).listFiles(new FilenameFilter() {
+        return userDirFile(dirPath).listFiles(new FilenameFilter() {
             @Override
             public boolean accept(File dir, String name) {
                 boolean accept = name.matches(regExFilename);
                 if (accept && action != null) {
-                    action.run(new File(dir.getPath() + "/" + name), args);
+                    action.run(userDirFile(dir.getPath() + "/" + name), args);
                 }
                 return accept;
             }
@@ -1233,7 +1237,7 @@ public class FileUtil {
     }
 
     public static String getRelativePath(File file, String currentPath) {
-        return getRelativePath(file.getPath(), new File(currentPath).getPath());
+        return getRelativePath(file.getAbsoluteFile().getPath(), userDirFile(currentPath).getPath());
     }
 
     /**
@@ -1245,7 +1249,7 @@ public class FileUtil {
     public static String getRelativePath(String file, String currentPath) {
         String relpath =
             StringUtil.substring(replaceToJavaSeparator(file), replaceToJavaSeparator(currentPath), null);
-        return relpath.startsWith("/") && (File.separatorChar == '\\' || !new File(relpath).exists()) ? relpath
+        return relpath.startsWith("/") && (File.separatorChar == '\\' || !userDirFile(relpath).exists()) ? relpath
             .substring(1) : relpath;
     }
 
@@ -1264,8 +1268,12 @@ public class FileUtil {
      * @return true, if file or URL exists
      */
     public static File getURIFile(String pathOrURL) {
-        return new File(URI.create(replaceToJavaSeparator(pathOrURL)).getSchemeSpecificPart());
+        return userDirFile(getURIFilePath(pathOrURL));
     }
+
+	public static String getURIFilePath(String pathOrURL) {
+		return URI.create(replaceToJavaSeparator(pathOrURL)).getSchemeSpecificPart();
+	}
 
     public static InputStream getURLStream(String url) {
         return NetUtil.getURLStream(url);
@@ -1428,7 +1436,7 @@ public class FileUtil {
     public static void printToFile(String fileName, Consumer<PrintWriter> c) {
     	FileWriter fw;
 		try {
-			fw = new FileWriter(fileName);
+			fw = new FileWriter(userDirFile(fileName));
 	    	PrintWriter pw = new PrintWriter(fw);
 	    	c.accept(pw);
 		} catch (IOException e) {

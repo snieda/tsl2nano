@@ -934,7 +934,7 @@ public class ENV implements Serializable {
             boolean logError) {
         File destFile = new File(fileName);
         File file =
-            destFile.isAbsolute() ? destFile : new File(getConfigPath() + (flat ? destFile.getName() : fileName));
+            destFile.isAbsolute() ? destFile : new File(getConfigPath() + (flat ? destFile.getName() : fileName)).getAbsoluteFile();
         if (!file.exists()) {
             logger(ENV.class).debug("extracting resource " + resourceName);
             if (file.getParentFile() != null)
