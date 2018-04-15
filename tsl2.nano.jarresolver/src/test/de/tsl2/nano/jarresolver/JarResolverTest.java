@@ -37,7 +37,7 @@ public class JarResolverTest   implements ENVTestPreparation {
 
     @BeforeClass
     public static void setUp() {
-        BASE_DIR_JARRESOLVER = ENVTestPreparation.setUp("jarresolver", false) + TARGET_TEST;
+        BASE_DIR_JARRESOLVER = ENVTestPreparation.setUp() + TARGET_TEST;
     }
 
     @AfterClass

@@ -244,7 +244,7 @@ public class SIShell implements IItemHandler, Serializable {
 
     static Properties createEnvironment(String name, Map definitions) {
         String p = name + ".properties";
-        Properties env = new File(p).canRead() ? FileUtil.loadPropertiesFromFile(p) : new Properties();
+        Properties env = new File(p).getAbsoluteFile().canRead() ? FileUtil.loadPropertiesFromFile(p) : new Properties();
         if (definitions != null) {
             env.putAll(definitions);
         }

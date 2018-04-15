@@ -45,5 +45,11 @@
 			<version>1.0.4</version> <!-- 1.1 is compiled with jdk1.9 -->
 			<scope>compile</scope>
 		</dependency>
+		<dependency>
+		    <groupId>org.jmockit</groupId>
+		    <artifactId>jmockit</artifactId>
+		    <version>1.39</version>
+			<scope>test</scope>
+		</dependency>
 	</dependencies>
 </project>

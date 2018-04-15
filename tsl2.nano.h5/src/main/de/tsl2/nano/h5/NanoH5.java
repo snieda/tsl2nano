@@ -1060,7 +1060,7 @@ public class NanoH5 extends NanoHTTPD implements ISystemConnector<Persistence> {
         
         //give mda.xml the information to don't start nano.h5
         p.put("nano.h5.running", "true");
-
+        p.put("base.dir", ENV.getConfigPath());
         ENV.get(CompatibilityLayer.class).runRegistered("ant",
             ENV.getConfigPath() + "mda.xml",
             "do.all",
@@ -1074,6 +1074,7 @@ public class NanoH5 extends NanoHTTPD implements ISystemConnector<Persistence> {
         Properties properties = new Properties();
         properties.setProperty(HIBREVNAME, ENV.getConfigPath() + HIBREVNAME);
 //    properties.setProperty("hbm.conf.xml", "hibernate.conf.xml");
+        properties.setProperty("base.dir", ENV.getConfigPath());
         properties.setProperty("server.db-config.file", Persistence.FILE_JDBC_PROP_FILE);
         properties.setProperty("dest.file", jarFile);
         properties.setProperty("generator", generator);
@@ -1084,7 +1085,7 @@ public class NanoH5 extends NanoHTTPD implements ISystemConnector<Persistence> {
         properties.setProperty("plugin.dir", new File(plugin_dir).getAbsolutePath());
         if (plugin_dir.endsWith(".jar/")) {
             properties.setProperty("plugin_isjar", Boolean.toString(true));
-        }
+        } 
         Message.send("starting generation of '" + jarFile + "' through script " + REVERSE_ENG_SCRIPT);
         //If no environment was saved before, we should do it now!
         ENV.persist();
@@ -1093,7 +1094,7 @@ public class NanoH5 extends NanoHTTPD implements ISystemConnector<Persistence> {
             ENV.getConfigPath() + REVERSE_ENG_SCRIPT,
             "create.bean.jar",
             properties);
-        if (result)
+        if (result != null && result)
             Plugins.process(INanoPlugin.class).beansGenerated(Persistence.current());
         return result;
     }

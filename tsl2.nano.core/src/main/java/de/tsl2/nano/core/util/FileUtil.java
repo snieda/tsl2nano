@@ -633,7 +633,7 @@ public class FileUtil {
         }
     }
 
-    private static File userDirFile(String file) {
+    static File userDirFile(String file) {
 		return new File(file).getAbsoluteFile();
 	}
 

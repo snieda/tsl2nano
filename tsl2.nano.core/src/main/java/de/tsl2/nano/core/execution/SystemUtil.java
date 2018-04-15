@@ -4,6 +4,8 @@ import java.io.DataOutputStream;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.PipedInputStream;
+import java.io.PipedOutputStream;
 import java.net.InetAddress;
 import java.security.Policy;
 import java.util.Date;
@@ -210,4 +212,22 @@ public class SystemUtil {
         String concat = StringUtil.concat(new char[] { '\n' }, cmds);
         return ByteUtil.getInputStream(concat.getBytes());
     }
+
+    /**
+     * does a redirect on System.in, only if JVM has a console
+     * @return piped outputstream, connected to the System.in
+     * @throws IOException
+     */
+    public static PipedOutputStream setPipedInput() throws IOException {
+        //System.console() will be null if either stdin or stdout are redirected        
+        //if System.in or System.out is connected to a stream, we don't create a pipe on that
+    	//to work on more details of the system console, use jnr-posix (POSIXFactory.getPOSIX().isatty(FileDescriptor.out))
+        if (System.console() == null)
+            return null;
+        PipedOutputStream myOut = new PipedOutputStream();
+        InputStream testIn = new PipedInputStream(myOut);
+        System.setIn(testIn);
+        return myOut;
+    }
+    
 }

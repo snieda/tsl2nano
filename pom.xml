@@ -16,6 +16,7 @@
 	* if multimodule version changes: start "mvn -N versions:update-child-modules" to assign the child modules
 	* to do a fast complete build: "mvn -amd -DskipTest -o install"
 	* to start only a single test: "mvn -Dtest=*Jar*Test#testOne+testTwo test"
+	* to do a fast test:  mvn -o -T 4 -fae test
 	* to debug (port 5005) a test in surefire: "mvn -Dmaven.surefire.debug test"
 	* aggregate coverage output: "mvn jacoco:report-aggregate"
 	* increase version number: "mvn release:update-versions -DautoVersionSubmodules=true"

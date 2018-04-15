@@ -3,9 +3,6 @@ package de.tsl2.nano.h5;
 import static org.junit.Assert.fail;
 
 import java.io.IOException;
-import java.io.InputStream;
-import java.io.PipedInputStream;
-import java.io.PipedOutputStream;
 import java.lang.Thread.UncaughtExceptionHandler;
 import java.util.List;
 
@@ -54,27 +51,29 @@ public abstract class NanoH5Unit implements ENVTestPreparation {
     protected static final String BTN_SELECTALL = ".selectall";
 
     protected static String TEST_DIR;
-    protected static boolean nanoAlreadyRunning = false;
-    protected static int port = 8067;
+    protected static boolean nanoAlreadyRunning;
+    protected static int port = -1;
     protected static final String BEANCOLLECTORLIST = (BeanCollector.class.getSimpleName()
         + Messages.getString("tsl2nano.list")).toLowerCase();
 
     protected static String getServiceURL(boolean nextFreePort) {
-        return "http://localhost:" + (nextFreePort ? port = NetUtil.getNextFreePort(8067) : (port = 8067));
+        return "http://localhost:" + (port == -1 && nextFreePort ? port = NetUtil.getNextFreePort(8067) : port == -1 ? port = 8067 : port);
     }
 
     @BeforeClass
     public static void setUp() {
-        NanoH5UnitPlugin.setEnabled(true);
+        nanoAlreadyRunning = Boolean.getBoolean("app.server.running");
+        NanoH5UnitPlugin.setEnabled(!nanoAlreadyRunning);
+        TEST_DIR = ENVTestPreparation.setUp(false) + TARGET_TEST;
         if (!nanoAlreadyRunning) {
-            TEST_DIR = ENVTestPreparation.setUp() + TARGET_TEST;
-//          ENVTestPreparation.setUserDirToTarget();
-            startApplication(new String[0]);
+            ENV.setProperty("service.url", getServiceURL(!nanoAlreadyRunning));
+            startApplication();
             ConcurrentUtil.waitFor(()->NetUtil.isOpen(port));
         } else {
             System.out.println("NanoH5TestBase: nanoAlreadyRunning=true ==> trying to connect to external NanoH5");
         }
     }
+    
     @AfterClass
     public static void tearDown() {
         BeanContainer.instance().executeStmt(ENV.get("app.shutdown.statement", "SHUTDOWN"), true,
@@ -102,7 +101,7 @@ public abstract class NanoH5Unit implements ENVTestPreparation {
     }
 
     protected HtmlPage runWebClient() {
-        return runWebClient(getServiceURL(nanoAlreadyRunning));
+        return runWebClient(getServiceURL(!nanoAlreadyRunning));
     }
     
     protected HtmlPage runWebClient(String serviceURL) {
@@ -180,13 +179,6 @@ public abstract class NanoH5Unit implements ENVTestPreparation {
         return page;
     }
 
-    protected PipedOutputStream setPipedInputOutput() throws IOException {
-        PipedOutputStream myOut = new PipedOutputStream();
-        InputStream testIn = new PipedInputStream(myOut);
-        System.setIn(testIn);
-        return myOut;
-    }
-    
     protected static void shutdown() {
         System.exit(0);
     }

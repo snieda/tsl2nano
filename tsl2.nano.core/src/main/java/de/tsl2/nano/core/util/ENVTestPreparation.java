@@ -22,14 +22,24 @@ public interface ENVTestPreparation {
 	static final String TARGET_TEST = TARGET_DIR + TEST_DIR;
 
 	static String setUp() {
-		return setUp(System.getProperty("user.dir"), "", false);
+		//baseDir path is absolute!
+		return setUp(true);
+	}
+	
+	static String setUp(boolean deleteExistingEnvironment) {
+		//baseDir path is absolute!
+		return setUp(System.getProperty("user.dir"), "", false, deleteExistingEnvironment);
 	}
 	
 	static String setUp(String moduleShort, boolean strict) {
-		return setUp(BASE_DIR, moduleShort, strict);
+		return setUp(moduleShort, strict, true);
+	}
+	static String setUp(String moduleShort, boolean strict, boolean deleteExistingEnvironment) {
+		//ATTENTION: here the BASE_DIR path is relative!
+		return setUp(BASE_DIR, moduleShort, strict, deleteExistingEnvironment);
 	}
 	
-	static String setUp(String baseDir, String moduleShort, boolean strict) {
+	static String setUp(String baseDir, String moduleShort, boolean strict, boolean deleteExistingEnvironment) {
 		if (!System.getProperty("user.dir").endsWith(TARGET_DIR.substring(0, TARGET_DIR.length() - 1)))
 			setUserDirToTarget();
 		String baseDirModule = baseDir + moduleShort + "/";
@@ -38,7 +48,8 @@ public interface ENVTestPreparation {
 		ENV.create(baseDirModule + TARGET_TEST);
 		ENV.setProperty(ENV.KEY_CONFIG_PATH, new File(TEST_DIR).getAbsolutePath() + "/");
 		ENV.setProperty("app.strict.mode", strict);
-		ENV.deleteEnvironment();
+		if (deleteExistingEnvironment)
+			ENV.deleteEnvironment();
 		return baseDirModule;
 	}
 
@@ -57,5 +68,9 @@ public interface ENVTestPreparation {
 		System.out.println("------------------------------------------------------------");
 		System.out.println("user.dir: " + System.getProperty("user.dir"));
 		System.out.println("------------------------------------------------------------");
+	}
+	
+	static String testpath(String file) {
+		return FileUtil.userDirFile(file).getPath();
 	}
 }

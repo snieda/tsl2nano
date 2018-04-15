@@ -42,13 +42,12 @@ public class TerminalTest implements ENVTestPreparation {
 
 	@BeforeClass
     public static void setUp() {
-    	TEST_DIR = ENVTestPreparation.setUp("terminal", false) + TARGET_TEST;
-    	ENVTestPreparation.setUserDirToTarget();
+    	TEST_DIR = ENVTestPreparation.setUp() + TARGET_TEST;
     }
 
     @AfterClass
     public static void tearDown() {
-    	ENVTestPreparation.tearDown();
+//    	ENVTestPreparation.tearDown();
     }
     
     

@@ -45,7 +45,7 @@ public class IncubationTest {
 
     @BeforeClass
     public static void setUp() {
-        ENVTestPreparation.setUp("incubation", false);
+        ENVTestPreparation.setUp();
     }
 
     @AfterClass
@@ -94,10 +94,11 @@ public class IncubationTest {
         bean.setPrimitiveChar(' ');
         bean.setType(cls);
 
-        String xmlfile = "target/test/typebean.xml";
-        new File(xmlfile).getParentFile().mkdirs();
-        XmlGenUtil.saveSimpleXml_(xmlfile, bean);
-        TypeBean bean1 = XmlGenUtil.loadSimpleXml_(xmlfile, TypeBean.class, true);
+        String xmlfile = "test/typebean.xml";
+        File file = new File(xmlfile).getAbsoluteFile();
+        file.getParentFile().mkdirs();
+        XmlGenUtil.saveSimpleXml_(file.getPath(), bean);
+        TypeBean bean1 = XmlGenUtil.loadSimpleXml_(file.getPath(), TypeBean.class, true);
         assertEquals(bean.getType(), bean1.getType());
     }
 

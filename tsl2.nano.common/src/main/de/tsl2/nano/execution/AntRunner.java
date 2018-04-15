@@ -268,7 +268,7 @@ public class AntRunner {
         String s;
         for (int i = 0; i < fsets.length; i++) {
             FileSet fileSet = new FileSet();
-            fileSet.setDir(new File(StringUtil.substring(fsets[i], null, ":{")));
+            fileSet.setDir(new File(StringUtil.substring(fsets[i], null, ":{")).getAbsoluteFile());
             s = StringUtil.substring(fsets[i], "{", "}");
             includes = s.split(",");
             fileSet.appendIncludes(includes);

@@ -25,11 +25,6 @@
 	</build>
 	<dependencies><!-- https://mvnrepository.com/artifact/org.avaje.ebeanorm/avaje-ebeanorm -->
 		<dependency>
-			<groupId>org.avaje.ebeanorm</groupId>
-			<artifactId>avaje-ebeanorm</artifactId>
-			<version>3.4.2</version>
-		</dependency>
-		<dependency>
 			<groupId>net.sf.tsl2nano</groupId>
 			<artifactId>tsl2.nano.directaccess</artifactId>
 			<version>${project.version}</version>
@@ -38,6 +33,11 @@
 			<groupId>org.hibernate.javax.persistence</groupId>
 			<artifactId>hibernate-jpa-2.1-api</artifactId>
 			<version>1.0.0.Final</version>
+		</dependency>
+		<dependency>
+			<groupId>org.avaje.ebeanorm</groupId>
+			<artifactId>avaje-ebeanorm</artifactId>
+			<version>3.4.2</version>
 		</dependency>
 	</dependencies>
 	<description>TSL2 ORM EBean (providing an EntityManager for ebean)</description>

@@ -15,6 +15,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 
+import javax.annotation.Resource;
 import javax.ejb.Local;
 import javax.ejb.Remote;
 import javax.ejb.Stateless;
@@ -40,7 +41,7 @@ public class FileServiceBean implements IFileService, IFileLocalService {
 
     private static final Log LOG = LogFactory.getLog(FileServiceBean.class);
 
-//    @Resource(mappedName = "java:myproject/fsConnectionFactory")
+    @Resource(mappedName = "java:myproject/fsConnectionFactory")
     FsConnectionFactory fsConnectionFactory;
 
     FsConnection con = null;

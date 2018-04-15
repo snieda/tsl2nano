@@ -20,7 +20,7 @@ public class LogicTableTest implements ENVTestPreparation {
 
     @BeforeClass
     public static void setUp() {
-    	ENVTestPreparation.setUp("logicstructure", false);
+    	ENVTestPreparation.setUp();
     }
 
     @AfterClass
@@ -64,7 +64,7 @@ public class LogicTableTest implements ENVTestPreparation {
         assertEquals(new BigDecimal(90), table.get(1, 1));
         
         table.save("test/");
-        TableList loadedTableList = table.load("test/test.csv", LogicTable.class);
+        TableList loadedTableList = table.load(ENVTestPreparation.testpath("test/test.csv"), LogicTable.class);
         System.out.println(loadedTableList.dump());
         assertEquals(new BigDecimal(90), loadedTableList.get(1, 1));
     }
@@ -82,7 +82,7 @@ public class LogicTableTest implements ENVTestPreparation {
         assertEquals("90", table.get(1, 1));
         
         table.save("test/");
-        TableList loadedTableList = table.load("test/test.csv", LogicTable.class);
+        TableList loadedTableList = table.load(ENVTestPreparation.testpath("test/test.csv"), LogicTable.class);
         System.out.println(loadedTableList.dump());
         assertEquals("90", loadedTableList.get(1, 1));
     }

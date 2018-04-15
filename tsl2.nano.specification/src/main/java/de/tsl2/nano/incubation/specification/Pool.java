@@ -23,6 +23,7 @@ import de.tsl2.nano.core.ENV;
 import de.tsl2.nano.core.ManagedException;
 import de.tsl2.nano.core.cls.BeanClass;
 import de.tsl2.nano.core.log.LogFactory;
+import de.tsl2.nano.core.util.FileUtil;
 import de.tsl2.nano.core.util.StringUtil;
 import de.tsl2.nano.execution.IPRunnable;
 
@@ -149,6 +150,7 @@ public class Pool<T extends IPRunnable<?, ?>> {
     }
 
     protected String getFileName(String name) {
+    	name = FileUtil.getValidFileName(name);
         return name.endsWith(".xml") ? name : getDirectory() + name + ".xml";
     }
 

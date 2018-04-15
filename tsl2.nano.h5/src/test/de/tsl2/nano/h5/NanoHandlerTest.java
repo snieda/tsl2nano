@@ -34,12 +34,12 @@ import de.tsl2.nano.persistence.Persistence;
 import de.tsl2.nano.serviceaccess.IAuthorization;
 
 public class NanoHandlerTest implements ENVTestPreparation {
-    private static String TEST_DIR;
+    private static String MYTEST_DIR;
     private static final String MEINHANDLERTEST = "MEINHANDLERTEST";
 
     @BeforeClass
     public static void setUp() {
-        TEST_DIR = ENVTestPreparation.setUp("h5", false) + TARGET_DIR + "testhandler/" ;
+        MYTEST_DIR = ENVTestPreparation.setUp() + TARGET_TEST + "nanohandler/" ;
     }
 
     @AfterClass
@@ -55,13 +55,6 @@ public class NanoHandlerTest implements ENVTestPreparation {
         
         assertEquals(MEINHANDLERTEST, ENV.get(MEINHANDLERTEST));
         
-        FileUtil.copy("src/resources/mda.xml", TEST_DIR + "mda.xml");
-        FileUtil.copy("src/resources/mda.bat", TEST_DIR + "mda.bat");
-        FileUtil.copy("src/resources/mda.sh", TEST_DIR + "mda.sh");
-        FileUtil.copy("../tsl2.nano.directaccess/src/resources/reverse-eng.xml", TEST_DIR + "reverse-eng.xml");
-        FileUtil.copy("src/resources/anyway.sql", TEST_DIR + "anyway.sql");
-        FileUtil.copy("src/resources/drop-anyway.sql", TEST_DIR + "drop-anyway.sql");
-        FileUtil.copy("src/resources/init-anyway.sql", TEST_DIR + "init-anyway.sql");
         NanoH5 nanoH5 = (NanoH5) ENV.get(Main.class);
         Persistence persistence = new Persistence();
         try {

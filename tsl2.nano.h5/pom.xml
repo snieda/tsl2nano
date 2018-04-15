@@ -241,7 +241,6 @@
 						</goals>
 						<phase>package</phase>
 						<configuration>
-							<skip>${skipTests}</skip>
 							<includeClassifiers>
 								<includeClassifier>signed</includeClassifier>
 							</includeClassifiers>
@@ -300,9 +299,9 @@
 	                    </goals>
 	                    <inherited>true</inherited>
 	                    <configuration>
-							<skip>${skipTests}</skip>
+							<!-- <skip>true</skip> -->
 	                    	<failOnError>true</failOnError>
-	                    	<!--  <skip>${skipTests}</skip> -->
+	                    	<skip>${skipTests}</skip>
 	                        <tasks>
 	                            <java jar="target/${project.build.finalName}-standalone.jar"
 	                            	  dir="target/test"
@@ -310,7 +309,8 @@
 	                                  spawn="true">
 	                                <sysproperty key="app.server.running" value="true" />
 	                                <sysproperty key="websocket.use" value="false" />
-	                                
+	                                <sysproperty key="tsl2nano.offline" value="true" />
+	                                <sysproperty key="app.show.startpage" value="false" />
 	                                <!-- <arg value="-xyz" /> <arg value="123" /> -->
 	                            </java>
 	                        </tasks>

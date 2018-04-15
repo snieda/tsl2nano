@@ -69,7 +69,7 @@ public class CommonTest implements ENVTestPreparation {
 
     @BeforeClass
     public static void setUp() {
-        BASE_DIR_COMMON = ENVTestPreparation.setUp("common", false);
+        BASE_DIR_COMMON = ENVTestPreparation.setUp();
     }
 
     @AfterClass
@@ -313,14 +313,14 @@ public class CommonTest implements ENVTestPreparation {
 
     @Test
     public void testAntRunner() {
-        String destFile = "target/test.jar";
+        String destFile = "test.jar";
         File basedir = new File("./");
         FileSet[] fileSets = AntRunner.createFileSets("./:{**/*.*ml}**/*.xml;" + basedir.getPath() + ":{*.txt}");
         Properties props = new Properties();
-        props.put("destFile", new File(destFile));
+        props.put("destFile", ENVTestPreparation.testpath(destFile));
         AntRunner.runTask("Jar", props, fileSets);
-        assertTrue(new File(destFile).exists());
-        new File(destFile).delete();
+        assertTrue(new File(destFile).getAbsoluteFile().exists());
+        new File(destFile).getAbsoluteFile().delete();
     }
 
     @Test

@@ -44,6 +44,7 @@ import de.tsl2.nano.bean.def.BeanPresentationHelper;
 import de.tsl2.nano.bean.def.IValueDefinition;
 import de.tsl2.nano.bean.def.ValueGroup;
 import de.tsl2.nano.core.ENV;
+import de.tsl2.nano.core.Main;
 import de.tsl2.nano.core.classloader.NestedJarClassLoader;
 import de.tsl2.nano.core.classloader.RuntimeClassloader;
 import de.tsl2.nano.core.cls.BeanClass;
@@ -126,6 +127,7 @@ public class NanoH5Test implements ENVTestPreparation {
     
     @Test
     public void testMyApp() throws Exception {
+        setENVProperties();
         createAndTest(new MyApp(getServiceURL(), null) {
             @Override
             public void start() {
@@ -133,6 +135,15 @@ public class NanoH5Test implements ENVTestPreparation {
                 createBeanCollectors(null);
             }
         }, null, Times.class);
+    }
+
+    protected static void setENVProperties() {
+        System.setProperty("file.encoding", "UTF-8");
+        System.setProperty("sun.jnu.encoding", "UTF-8");
+        System.setProperty("JAVA_OPTS", "-Xmx512m -Djava.awt.headless -agentlib:jdwp=transport=dt_socket,address=8787,server=y,suspend=n");
+//        System.setProperty("tsl2nano.offline", "true");
+//        System.setProperty("websocket.use", "false");
+        System.setProperty("app.show.startpage", "false");
     }
 
     @SuppressWarnings({ "rawtypes", "unchecked" })
@@ -383,7 +394,7 @@ public class NanoH5Test implements ENVTestPreparation {
         createENV("restful");
         new NanoH5();
         BeanConfigurator<Address> bconf = BeanConfigurator.create(Address.class).getInstance();
-        bconf.actionAddAttribute("", "@http://openstreetmap.org/search?query={city}<<GET:text/html");
+        bconf.actionAddAttribute("", "@http://www.openstreetmap.org/search?query={city}<<GET:text/html");
         bconf.actionAddAttribute("", "?select count(*) from Address");
         
         Bean.clearCache();
@@ -394,7 +405,7 @@ public class NanoH5Test implements ENVTestPreparation {
         address.setStreet("Frankfurter Strasse 1");
         Bean<Address> bean = Bean.getBean(address);
 
-        IValueDefinition attr = bean.getAttribute("openstreetmap.org");
+        IValueDefinition attr = bean.getAttribute("www.openstreetmap.org");
         System.out.println(attr.getValue());
 
         //TODO: queries are defined in 'specification'.
