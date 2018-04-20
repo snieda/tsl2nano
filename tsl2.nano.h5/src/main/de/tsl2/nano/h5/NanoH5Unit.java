@@ -95,7 +95,8 @@ public abstract class NanoH5Unit implements ENVTestPreparation {
         ConcurrentUtil.startDaemon(new Runnable() {
             @Override
             public void run() {
-                Main.startApplication(NanoH5.class, null, args);
+                new Loader().start("de.tsl2.nano.h5.NanoH5", args);
+//                Main.startApplication(NanoH5.class, null, args);
             }
         });
     }

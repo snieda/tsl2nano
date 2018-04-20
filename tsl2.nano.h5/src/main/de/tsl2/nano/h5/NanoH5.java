@@ -929,10 +929,10 @@ public class NanoH5 extends NanoHTTPD implements ISystemConnector<Persistence> {
                     String hsqldbScript = isH2(persistence.getConnectionUrl())
                         ? persistence.getDefaultSchema() + ".mv.db" : persistence.getDatabase() + ".script";
                     String backupFile =
-                        ENV.getTempPathRel() + FileUtil.getUniqueFileName(ENV.get("app.database.backup.file",
+                        ENV.getTempPath() + FileUtil.getUniqueFileName(ENV.get("app.database.backup.file",
                             persistence.getDatabase()) + ".zip");
                     LOG.info("creating database backup to file " + backupFile);
-                    FileUtil.writeToZip(backupFile, hsqldbScript, FileUtil.getFileBytes(hsqldbScript, null));
+                    FileUtil.writeToZip(backupFile, hsqldbScript, FileUtil.getFileBytes(ENV.getConfigPath() + hsqldbScript, null));
                 }
             }
         }));
@@ -1053,6 +1053,7 @@ public class NanoH5 extends NanoHTTPD implements ISystemConnector<Persistence> {
     }
 
     private void generateDatabase(Persistence persistence) {
+        ENV.extractResource(REVERSE_ENG_SCRIPT);
         Message.send("creating new database " + persistence.getDatabase() + " for url "
             + persistence.getConnectionUrl());
         Properties p = new Properties();

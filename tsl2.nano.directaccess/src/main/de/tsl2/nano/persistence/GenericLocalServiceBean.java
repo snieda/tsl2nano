@@ -120,7 +120,8 @@ public class GenericLocalServiceBean extends GenericReplicatingServiceBean {
             connection().getTransaction().commit();
             return count;
         } catch (Exception ex) {
-            connection().getTransaction().rollback();
+            if (connection().getTransaction().isActive())
+                connection().getTransaction().rollback();
             ManagedException.forward(ex);
             return -1;
         }
