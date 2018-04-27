@@ -303,14 +303,14 @@ public class XmlUtil {
         try {
             new org.simpleframework.xml.core.Persister(getSimpleXmlProxyStrategy(),
                 new Format("<?xml version=\"1.0\" encoding=\"UTF-8\"?>")).write(
-                    obj, new File(xmlFile));
+                    obj, new File(xmlFile).getAbsoluteFile());
             //workaround for empty files
             if (FileUtil.getFile(xmlFile).available() == 0) {
-                new File(xmlFile).delete();
+                new File(xmlFile).getAbsoluteFile().delete();
             }
         } catch (Exception e) {
             //as simple-xml doesn't delete corrupt created files, we move it to temp
-            File file = new File(xmlFile);
+            File file = new File(xmlFile).getAbsoluteFile();
             if (file.exists()) {
                 File temp = new File(xmlFile + ".failed");
                 if (!temp.exists() || temp.delete()) {

@@ -80,8 +80,9 @@ public class EntityReplication {
         return hints;
     }
 
-    public static void main(String[] args) {
+    public static void main(String[] args) throws ClassNotFoundException {
         EntityReplication repl = new EntityReplication(args[0], args[1]);
-        repl.replicateFromIDs(Vertrag.class, args[2]);
+        Class<?> cls = Class.forName(args[2]);
+        repl.replicateFromIDs(cls, args[3]);
     }
 }

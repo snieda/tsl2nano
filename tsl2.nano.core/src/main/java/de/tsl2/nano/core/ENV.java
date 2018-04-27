@@ -95,7 +95,7 @@ public class ENV implements Serializable {
     /** serialVersionUID */
     private static final long serialVersionUID = 5988200267214868670L;
 
-    private static final String PATH_TEMP = "temp/";
+    public static final String PATH_TEMP = "temp/";
     private static ENV self;
     @SuppressWarnings("rawtypes")
     @ElementMap(entry = "property", key = "name", attribute = true, inline = true, required = false, keyType = String.class, valueType = Object.class)

@@ -15,7 +15,8 @@ if "%3"=="debug" (set DEBUG="-agentlib:jdwp=transport=dt_socket,address=localhos
 if "%3"=="ndebug" (set NANO_DEBUG=-Dtsl2.nano.log.level=debug)
 if "%3"=="test" (set NANO_TEST=-Dtsl2.nano.test=true)
 if "%3"=="nopause" (set NOPAUSE=nopause)
-set VERSION=2.1.1-SNAPSHOT
+set NAME=${project.artifactId}
+set VERSION=${project.version}
 set EXTENSION=-standalone
 rem set OFFLINE=-Dtsl2nano.offline=true
 rem set UH=-Denv.user.home=true
@@ -32,5 +33,5 @@ rem set LOG=">%PRJ%.log"
 rem set SILENT=true
 if "%SILENT%"=="true" (set JAVA=@start javaw) else (set JAVA=java)
 
-%JAVA% %OFFLINE% %LANG% %ENCODING% %JSU_ENC% %USERDIR% %NANO_DEBUG% %AGENT% %PROXY% %PROFILER% %JAVA_OPTS% %DEBUG% %UH% -jar tsl2.nano.h5-%VERSION%%EXTENSION%.jar %PRJ% %PORT%  %LOG%
+%JAVA% %OFFLINE% %LANG% %ENCODING% %JSU_ENC% %USERDIR% %NANO_DEBUG% %AGENT% %PROXY% %PROFILER% %JAVA_OPTS% %DEBUG% %UH% -jar %NAME%-%VERSION%%EXTENSION%.jar %PRJ% %PORT%  %LOG%
 if not "%SILENT%"=="true" pause

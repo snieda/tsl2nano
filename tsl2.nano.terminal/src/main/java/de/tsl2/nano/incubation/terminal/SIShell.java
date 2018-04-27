@@ -254,7 +254,7 @@ public class SIShell implements IItemHandler, Serializable {
     public static SIShell create(String file) {
         File ffile = new File(file);
         //do a pre-check on the toolbox configuration file which needs ant to be available
-        if (file.contains(DEFAULT_NAME) && ffile.exists() && !NetUtil.isOnline()
+        if (file.contains(DEFAULT_NAME) && ffile.getAbsoluteFile().exists() && !NetUtil.isOnline()
             && !new CompatibilityLayer().isAvailable("org.apache.tools.ant.Task"))
             throw new ManagedException("error.ant.missing", file);
         SIShell t =
@@ -332,7 +332,7 @@ public class SIShell implements IItemHandler, Serializable {
     }
 
     protected void shutdown() {
-        save(refreshConfig || !new File(name).exists());
+        save(refreshConfig || !new File(name).getAbsoluteFile().exists());
         String shutdownInfo =
             ENV.translate("message.shutdown", false, name);
         printScreen(shutdownInfo, in, out, null, width, height, style, true, isInBatchMode());

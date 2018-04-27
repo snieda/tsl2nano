@@ -2,7 +2,6 @@
 <classpath>
 	<classpathentry excluding="**" kind="src" output="target/classes" path="src/resources">
 		<attributes>
-			<attribute name="optional" value="true"/>
 			<attribute name="maven.pomderived" value="true"/>
 		</attributes>
 	</classpathentry>

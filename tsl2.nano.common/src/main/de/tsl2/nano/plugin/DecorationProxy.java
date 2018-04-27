@@ -24,7 +24,7 @@ class DecorationProxy<T extends Plugin> implements InvocationHandler {
             try {
                 Plugins.log("==> starting plugin " + h + " with: " + method);
                 result[0] = decoratingChain ? method.invoke(h, result[0]) : method.invoke(h, args);
-                Plugins.log("<== finished plugin \" + h + \" with: \" + method");
+                Plugins.log("<== finished plugin " + h + " with: " + method);
             } catch (IllegalAccessException | IllegalArgumentException | InvocationTargetException e) {
                 System.out.println("Error on: " + method + "(" + StringUtil.toString(decoratingChain ? result[0] : args, -1) + ")");
                 ManagedException.forward(e);

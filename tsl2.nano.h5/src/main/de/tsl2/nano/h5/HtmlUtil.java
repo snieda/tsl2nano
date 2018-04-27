@@ -21,6 +21,9 @@ import javax.xml.transform.TransformerException;
 import javax.xml.transform.TransformerFactory;
 import javax.xml.transform.dom.DOMSource;
 import javax.xml.transform.stream.StreamResult;
+import javax.xml.xpath.XPath;
+import javax.xml.xpath.XPathConstants;
+import javax.xml.xpath.XPathFactory;
 
 import org.apache.commons.logging.Log;
 import org.w3c.dom.Attr;
@@ -655,4 +658,22 @@ public class HtmlUtil {
         return id != null ? id.replace(CSS_ID_SEPARATOR, '.') : id;
     }
 
+    /**
+     * As {@link Document#getElementById(String)} returns only ids, where the Attribute-Type is an ID (not the name 'id), we use an XPath vor that. 
+     * @param rootElement
+     * @param id
+     * @return
+     */
+    public static Element getElementById(Element rootElement, String id) {
+        try {
+            String path = String.format("//*[@id = '%1$s' or @Id = '%1$s' or @ID = '%1$s' or @iD = '%1$s' ]", id);
+            XPath xPath = XPathFactory.newInstance().newXPath();
+            NodeList nodes = (NodeList)xPath.evaluate(path, rootElement, XPathConstants.NODESET);
+            return (Element) nodes.item(0);
+        } 
+        catch (Exception e) {
+            return null;
+        }
+    }
+    
 }

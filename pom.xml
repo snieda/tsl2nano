@@ -84,6 +84,7 @@
 		<module>tsl2.nano.vnet</module>
 		<module>tsl2.nano.incubation</module>
 		<module>tsl2.nano.h5</module>
+		<module>tsl2.nano.h5.thymeleaf-pack</module>
 		<!-- <module>tsl2-report</module> -->
 	</modules>
 	<distributionManagement>
@@ -119,6 +120,7 @@
 				<version>1.0.0</version>
 				<executions>
 					<execution>
+						<id>read-properties</id>
 						<phase>initialize</phase>
 						<goals>
 							<goal>read-project-properties</goal>
@@ -129,7 +131,17 @@
 							</files>
 						</configuration>
 					</execution>
-				</executions>
+					<execution>
+						<id>write-properties</id>
+						<phase>generate-resources</phase>
+						<goals>
+							<goal>write-project-properties</goal>
+						</goals>
+						<configuration>
+							<outputFile>${project.build.outputDirectory}/build-${project.artifactId}.properties</outputFile>
+						</configuration>
+					</execution>
+   				</executions>
 			</plugin>
       			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>

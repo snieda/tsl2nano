@@ -10,7 +10,7 @@
 ###########################################################################
 
 if [ "$1" == "" ] 
-	then PRJ=config
+	then PRJ=.nanoh5.environment
 	else PRJ=$1
 fi
 if [ "$2" == "" ] 
@@ -30,7 +30,8 @@ if [ "$3" == "nopause" ]
 	then NOPAUSE=nopause
 fi
 
-VERSION=2.1.1-SNAPSHOT
+NAME=${project.artifactId}
+VERSION=${project.version}
 EXTENSION="-standalone"
 #OFFLINE=-Dtsl2nano.offline=true
 #UH=-Denv.user.home=true
@@ -45,5 +46,5 @@ JSU_ENC=-Dsun.jnu.encoding=UTF-8
 JAVA_OPTS="-Xmx512m -Djava.awt.headless=true"
 #LOG=">$PRJ.log"
 
-java $OFFLINE $UH $LLANG $ENCODING $JSU_ENC $USERDIR $NANO_DEBUG $AGENT $PROXY  $DEBUG $UH $PROFILER $JAVA_OPTS -jar tsl2.nano.h5-$VERSION$EXTENSION.jar $PRJ $PORT $LOG 
+java $OFFLINE $UH $LLANG $ENCODING $JSU_ENC $USERDIR $NANO_DEBUG $AGENT $PROXY  $DEBUG $UH $PROFILER $JAVA_OPTS -jar $NAME-$VERSION$EXTENSION.jar $PRJ $PORT $LOG 
 #if [ not "$NOPAUSE" == "nopause" ] then 'read -p' fi

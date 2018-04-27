@@ -322,20 +322,19 @@ public class NanoH5 extends NanoHTTPD implements ISystemConnector<Persistence> {
             ENV.extractResource(JAR_JPA_API, true, false);
             FileUtil.extractNestedZip(ZIP_STANDALONE, ENV.getConfigPath(), null);
             //wait, until the ant jars are stored and loaded
-            ConcurrentUtil.startDaemon("regex-replace-run-scripts", new Runnable() {
-                @Override
-                public void run() {
-                    ConcurrentUtil.sleep(3000);
-                    try {
-                        AntRunner.runRegexReplace("rem (set STANDALONE)", "\\1", System.getProperty("user.dir"),
-                            "run.bat");
-                        AntRunner.runRegexReplace("[#](STANDALONE)", "\\1", System.getProperty("user.dir"), "run.sh");
-                    } catch (Exception e) {
-                        //ok, no real problem, but log it...
-                        LOG.error("", e);
-                    }
-                }
-            });
+//            ConcurrentUtil.startDaemon("regex-replace-run-scripts", new Runnable() {
+//                @Override
+//                public void run() {
+//                    ConcurrentUtil.sleep(3000);
+//                    try {
+//                        AntRunner.runRegexReplace("(NAME=).*", "\\1" + ENV.getName(), System.getProperty("user.dir"), "run.bat");
+//                        AntRunner.runRegexReplace("[#](STANDALONE)", "\\1", System.getProperty("user.dir"), "run.sh");
+//                    } catch (Exception e) {
+//                        //ok, no real problem, but log it...
+//                        LOG.error("", e);
+//                    }
+//                }
+//            });
         }
     }
 

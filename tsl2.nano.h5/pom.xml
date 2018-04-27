@@ -9,12 +9,25 @@
 	<artifactId>tsl2.nano.h5</artifactId>
 	<name>TSL2 framework Html5 Extensions</name>
 	<description>TSL2 framework Html5 Extensions (WebServer, Html5Presentation, RuleCover, BeanConfigurator, LogicTable-Sheet, Expression-Descriptors for Actions, Rules, URLs, Queries)</description>
-	<!-- TODO: create property file with versions like in build-tsl.nano.h5.properties -->
 	<properties>
 		<module.parent>..</module.parent>
 		<keystore>${module.parent}/tsl2store</keystore>
 		<alias>tsl2</alias>
 		<storepass>${gpg.passphrase}</storepass>
+		<build.name>${project.artifactId}</build.name>
+		<build.java>${maven.compiler.target}</build.java>
+		<build.version>${project.version}</build.version>
+		<build.number>2438</build.number>
+		<build.time>${timestamp}</build.time>
+		<build.user>${user.name}</build.user>
+		<tsl2.nano.common.jar>tsl2.nano.common-${project.version}.jar</tsl2.nano.common.jar>
+		<tsl2.nano.directaccess.jar>tsl2.nano.directaccess-${project.version}.jar</tsl2.nano.directaccess.jar>
+		<tsl2.nano.serviceaccess.jar>tsl2.nano.serviceaccess-${project.version}.jar</tsl2.nano.serviceaccess.jar>
+		<tsl2.nano.incubation.jar>tsl2.nano.incubation-${project.version}.jar</tsl2.nano.incubation.jar>
+		<tsl2.nano.simple-xml.jar>simple-xml-2.7.1.jar</tsl2.nano.simple-xml.jar>
+		<tsl2.nano.resources.jar>tsl2.nano.h5.default-resources.jar</tsl2.nano.resources.jar>
+		<tsl2.nano.sample.jar>tsl2.nano.h5.sample.jar</tsl2.nano.sample.jar>
+		<build.debug>${maven.compiler.debug}</build.debug>
 	</properties>
 	<build>
 		<sourceDirectory>src/main</sourceDirectory>
@@ -32,11 +45,20 @@
 					<exclude>**/*.java</exclude>
 				</excludes>
 			</resource>
-			<resource>
+			<resource><!-- don't insert project properties -->
 				<directory>src/resources</directory>
+				<filtering>false</filtering>
 				<excludes>
 					<exclude>**/*.java</exclude>
 				</excludes>
+			</resource>
+			<resource><!-- insert project properties, only on batch/script files -->
+				<directory>src/resources</directory>
+				<filtering>true</filtering>
+				<includes>
+					<include>**/*.bat</include>
+					<include>**/*.sh</include>
+				</includes>
 			</resource>
 			<resource>
 				<directory>../tsl2.nano.core/target/classes</directory>
@@ -164,8 +186,11 @@
 								<manifest>
 									<addClasspath>true</addClasspath>
 									<mainClass>de.tsl2.nano.h5.Loader</mainClass>
+									<addDefaultImplementationEntries>true</addDefaultImplementationEntries>
 								</manifest>
 								<manifestEntries>
+									<groupId>${project.groupId}</groupId>
+									<artifactId>${project.artifactId}</artifactId>
 									<Application-Name>Nano.H5</Application-Name>
 									<Application-Class>de.tsl2.nano.h5.NanoH5</Application-Class>
 									<Application-Source>${application.source}</Application-Source>
