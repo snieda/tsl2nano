@@ -6,7 +6,7 @@
   <parent>
     <groupId>net.sf.tsl2nano</groupId>
     <artifactId>tsl2.nano.h5-package</artifactId>
-    <version>2.1.1-SNAPSHOT</version>
+    <version>2.1.1</version>
   </parent>
   <artifactId>tsl2.nano.jarresolver</artifactId>
   <name>TSL2 Framework Runtime-Jar-Resolver</name>
