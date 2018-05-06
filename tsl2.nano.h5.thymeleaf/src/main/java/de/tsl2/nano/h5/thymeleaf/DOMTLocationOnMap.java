@@ -7,7 +7,7 @@
  * 
  * Copyright: (c) Thomas Schneider 2017, all rights reserved
  */
-package de.my.test;
+package de.tsl2.nano.h5.thymeleaf;
 
 import static de.tsl2.nano.h5.HtmlUtil.ATTR_HEIGHT;
 import static de.tsl2.nano.h5.HtmlUtil.ATTR_TITLE;
@@ -43,7 +43,7 @@ public class DOMTLocationOnMap implements IDOMDecorator {
 
     public static final String NODE_FIELDPANEL = "field.panel";
 
-    public DOMTLocationOnMap {
+    public DOMTLocationOnMap() {
 		ENV.extractResource("location-on-googlemaps.html");
 		ENV.extractResource("location-on-osm.html");
     }
