@@ -439,7 +439,7 @@ public class NanoH5Session implements ISession<BeanDefinition>, Serializable, IL
             EMessage.broadcast(this,
                 ENV.translate("nanoh5.error", false,
                     user, 
-                    nav.current(), e.getLocalizedMessage()),
+                    nav.current(), ex.getLocalizedMessage()),
                 "*");
         }
         //TODO: eliminate bug in NanoHTTPD not resetting uri...

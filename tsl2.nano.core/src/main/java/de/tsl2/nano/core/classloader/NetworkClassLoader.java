@@ -113,12 +113,16 @@ public class NetworkClassLoader extends NestedJarClassLoader {
         super(urls, parent);
     }
 
-    @Override
+	public void setEnvironment(String environment) {
+		this.environment = environment;
+	}
+
+	@Override
     public void addLibraryPath(String path) {
         super.addLibraryPath(path);
 
         //only for the first time we load the persisted ignore list
-        if (environment == null || !environment.equals(path)) {
+        if (unresolveables.size() == 0) {
             path = path != null ? path : ".";
             File persistedList = new File(path + "/" + FILENAME_UNRESOLVEABLES);
             if (persistedList.canRead()) {
@@ -126,7 +130,8 @@ public class NetworkClassLoader extends NestedJarClassLoader {
                 LOG.info("unresolvable class-packages are:\n\t" + unresolveables);
             }
         }
-        environment = path;
+    	if (environment == null)
+    		environment = path;
     }
 
     @Override

@@ -9,9 +9,11 @@
  */
 package de.tsl2.nano.core.cls;
 
+import java.io.BufferedReader;
 import java.io.DataInputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
@@ -136,8 +138,7 @@ public class ClassFinder {
 			if (upackage == null) {
 				return classes;
 			}
-			DataInputStream dis;
-			dis = new DataInputStream((InputStream) upackage.getContent());
+			BufferedReader dis = new BufferedReader(new InputStreamReader(((InputStream) upackage.getContent())));
 			String line = null;
 			while ((line = dis.readLine()) != null) {
 				if (line.endsWith(".class")) {

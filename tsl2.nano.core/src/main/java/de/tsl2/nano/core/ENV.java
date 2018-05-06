@@ -20,6 +20,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.Date;
 import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.Hashtable;
@@ -173,6 +174,7 @@ public class ENV implements Serializable {
                         + bi.getProperty("build.time")
                         + ("true".equals(bi.getProperty("build.debug")) ? "-d" : "");
                     System.setProperty(KEY_BUILDINFO, buildInfo);
+                    bi.keySet().removeAll(System.getProperties().keySet());
                     System.getProperties().putAll(bi);
                 } else {
                     return UNKNOWN_BUILD_INFORMATIONS;
@@ -312,12 +314,16 @@ public class ENV implements Serializable {
             warn(this, UNKNOWN_BUILD_INFORMATIONS + " --> " + "no version update check");
             return;
         }
+        String versionURL = get("app.update.url", "https://sourceforge.net/projects/tsl2nano/files/latest/download?source=navbar");
         String currentVersion = get("app.version", "0.0.0");
-        Updater updater = new Updater();
-        String versionURL;
-        if ((versionURL = get("app.update.url", "https://sourceforge.net/projects/tsl2nano/files/latest/download?source=navbar")) != null)
+        Updater updater = new Updater("h5",
+        		versionURL,
+        		currentVersion,
+        		ENV.get("app.update.last", new Date()),
+        		ENV.get("app.update.interval.days", 30));
+        if (versionURL != null)
             if (updater.checkAndUpdate(currentVersion, versionURL) || true /* workaround, if alreaddy downloaded...*/) {
-		        if (updater.run(configFile.getPath(), currentVersion, buildInfo, self))
+		        if (updater.run(configFile.getPath(), buildInfo, self))
 		            setProperty("app.version", buildInfo);
 //            } else if (currentVersion == null) {
 //	            setProperty("app.version", buildInfo);

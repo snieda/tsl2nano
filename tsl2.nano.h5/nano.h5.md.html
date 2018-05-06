@@ -642,7 +642,13 @@ At the moment, the following commands are known:
 * shutdown: does a system.exit(0)
 * close: closes the current session
 * back: goes back to the next working item
- 
+
+Example:
+
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+	http://xxx.xxx.xxx.xxx:8067/3217712234-shutdown
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
 ### Dependencies
 
 While the _tsl2.nano_ framework has only a static dependency to simple-xml, using datbase-connections, bean or ddl generation will result in additional dependencies to other libraries. It's easy to add these libraries putting them into the environment path - they will be load on runtime, too. If you have a network connection, the _tsl2.nano_ framework tries to resolve the dependencies for you.
@@ -3395,6 +3401,21 @@ Actual list: http://infocenter.pentaho.com/help/index.jsp?topic=%2Fsupported_com
 * SimpleXml: TransformationException on Lists
 	* use ListWrapper instead of type List
 	
+## Migrations
+
+### Migration from 1.1.0 to 2.1.2
+
+Lots of refactorings have been done, maven has replaced ant, java 8 is used now and a new plugin mechanism was added.
+
+- Migration 1.1.0 -> 2.1.2
+	- alle environment jar-files löschen - ausser dem generierten beans jar file
+	- ClassFinder -> InputStream.readLine -> NPE <- install new jdk8 version
+	- policy file problem <- java_home to jre
+	- de.tsl2.nano.DefaultFormat -> de.tsl2.nano.core.util.DefaultFormat
+	- de.tsl2.nano.messaging.ChangeEvent -> de.tsl2.nano.core.messaging.ChangeEvent
+	- de.tsl2.nano.h5.timesheet.ActionImportHolidays in test ?
+
+ 
 ## Changelog
 
  Version | Date | Description
@@ -3438,6 +3459,7 @@ Actual list: http://infocenter.pentaho.com/help/index.jsp?topic=%2Fsupported_com
  2.0.3  | 04.03.2018 | integration-tests with failsafe+antrun, admin-commands starting with nano.hash
  2.1.0  | 01.04.2018 | INanoPlugin for java+maven developers, all maven modules use parent version number
  2.1.1  | 01.05.2018 | supporting extensions through new maven pom module thymeleaf-pack
+ 2.1.2  | 06.05.2018 | Hotfixes for use on linux jdk, Updater catching LinkageError
   
 
 <style class="fallback">body{white-space:pre;font-family:monospace}</style><script src="markdeep.min.js"></script><script src="http://casual-effects.com/markdeep/latest/markdeep.min.js"></script>
@@ -4149,9 +4171,22 @@ on external database, anyway-scripts are used 'anyway'
 - ( ) test EntityReplication with JMockit
 - (v) int test: shell.xml not found by mda.xml
 - ( ) int test: DelegationHander in environment.xml
-- ( ) deploy 2.1.1
-- ( ) merge inspection brunch
-- ( ) create tag 2.1.1
+- ( ) deploy 2.1.2
+- (v) merge inspection brunch
+- ( ) create tag 2.1.2
+- (x) don't try to reload unresolved classes!
+- ( ) no script engine on linux
+- (x) &.*; wird in tables angezeigt...
+- ( ) button size ???
+- (x) useSideNav > 3 buttons
+
+- Migration 1.1.0 -> 2.1.2
+- (!) alle environment jar-files löschen - ausser dem generierten beans jar file
+- (v) ClassFinder -> InputStream.readLine -> NPE <- install new jdk8 version
+- (v) policy file problem <- java_home to jre
+- (!) de.tsl2.nano.DefaultFormat -> de.tsl2.nano.core.util.DefaultFormat
+- (!) de.tsl2.nano.messaging.ChangeEvent -> de.tsl2.nano.core.messaging.ChangeEvent
+- (v) de.tsl2.nano.h5.timesheet.ActionImportHolidays in test ?
 
 
  -->

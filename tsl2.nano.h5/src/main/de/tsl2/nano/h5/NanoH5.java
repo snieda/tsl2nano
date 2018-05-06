@@ -306,7 +306,7 @@ public class NanoH5 extends NanoHTTPD implements ISystemConnector<Persistence> {
         } catch (Exception ex) {
             LOG.debug("server mode without input console available (message: " + ex.toString() + ")");
             while (true) {
-                ConcurrentUtil.sleep(3000);
+                ConcurrentUtil.sleep(3000, false);
             }
         }
     }

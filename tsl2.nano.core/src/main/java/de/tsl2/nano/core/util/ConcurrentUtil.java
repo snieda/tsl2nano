@@ -150,16 +150,22 @@ public class ConcurrentUtil {
         }
     }
 
+    public static final void sleep(long milliseconds) {
+    	sleep(milliseconds, true);
+    }
+    
     /**
      * sleep convenience
      * 
      * @param milliseconds
      */
-    public static final void sleep(long milliseconds) {
+    public static final void sleep(long milliseconds, boolean doSysOutLog) {
         try {
-        	System.out.print("\nsleeping for " + milliseconds + " milliseconds...");
+        	if (doSysOutLog)
+        		System.out.print("\n" + Thread.currentThread().getName() + " sleeping for " + milliseconds + " milliseconds...");
             Thread.sleep(milliseconds);
-            System.out.print("...awake\n");
+        	if (doSysOutLog)
+        		System.out.print("...awake\n");
         } catch (InterruptedException e) {
             ManagedException.forward(e);
         }

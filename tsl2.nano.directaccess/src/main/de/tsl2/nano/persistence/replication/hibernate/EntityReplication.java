@@ -5,6 +5,7 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.function.Consumer;
+import java.util.function.Function;
 
 import javax.persistence.EntityManager;
 import javax.persistence.Persistence;
@@ -43,20 +44,19 @@ public class EntityReplication {
         T[] entities = Arrays.stream(ids).
                 map(id -> src.find(entityClass, id, readOnlyHints())).
                 toArray(s -> (T[])java.lang.reflect.Array.newInstance(entityClass, s));
-        replicate((Consumer<T>)null, (Consumer<T>)EntityReplication::strategySerialize, entities);
+        replicate((Function<T, T>)null, (Consumer<T>)EntityReplication::strategySerialize, entities);
     }
     
     public <T> void replicate(Class<T> entityClass, T...entities) {
-        replicate((Consumer<T>)null, (Consumer<T>)EntityReplication::strategySerialize, entities);
+        replicate((Function<T, T>)null, (Consumer<T>)EntityReplication::strategySerialize, entities);
     }
     
-    public <T> void replicate(Consumer<T> transformer, Consumer<T> strategy, T...entities) {
-        Session hibernateSession = dest.unwrap(Session.class);
+    public <T> void replicate(Function<T, T> transformer, Consumer<T> strategy, T...entities) {
         Arrays.stream(entities).forEach(e -> {
             //entity must be detached from src session
             src.detach(e);
             if (transformer != null)
-                transformer.accept(e);
+                e = transformer.apply(e);
             if (strategy != null)
                 strategy.accept(e);
             });
@@ -67,7 +67,8 @@ public class EntityReplication {
         JAXB.marshal(entity, new File(entity.getClass().getSimpleName() + ".xml"));
     }
     
-    public static void strategyHibReplicate(Session hibernateSession, Object entity) {
+    public void strategyHibReplicate(Object entity) {
+        Session hibernateSession = dest.unwrap(Session.class);
         hibernateSession.replicate(entity, ReplicationMode.OVERWRITE);
     }
     
@@ -80,9 +81,23 @@ public class EntityReplication {
         return hints;
     }
 
-    public static void main(String[] args) throws ClassNotFoundException {
-        EntityReplication repl = new EntityReplication(args[0], args[1]);
-        Class<?> cls = Class.forName(args[2]);
-        repl.replicateFromIDs(cls, args[3]);
+    /** <pre>
+     * Example parameters:
+     *  - myPersistenceUnit1
+     *  - myPersistenceUnit1
+     *  - de.myproject.MyEntity
+     *  - 10000000
+     * </pre>
+     */
+    public static void main(String[] args) throws Exception {
+        if (args.length == 4) {
+            EntityReplication repl = new EntityReplication(args[0], args[1]);
+            Class<?> entityClass = Class.forName(args[2]);
+            Object ids[] = new Object[args.length - 2];
+            System.arraycopy(args, 2, ids, 0, args.length - 2);
+            repl.replicateFromIDs(entityClass, ids);
+        } else {
+            System.out.println(EntityReplication.class.getSimpleName() + "\n\tusage: <persistenceunit-src> <persistenceunit-dest> <entity-class> <object-ids...>");
+        }
     }
 }

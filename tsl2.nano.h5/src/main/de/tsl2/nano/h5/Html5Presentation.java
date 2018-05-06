@@ -1157,7 +1157,7 @@ public class Html5Presentation<T> extends BeanPresentationHelper<T> implements I
         int width = -1;
         Element cell = null;
         try {
-            if (useSideNav()) {
+            if (useSideNav() && actions.size() > ENV.get("layout.sidenav.min.count.action", 3)) {
                 cell = sideNav = createSidebarNavMenuButton(parent, sideNav);
                 width = ENV.get("layout.action.width", -1);
                 if (width == -1)

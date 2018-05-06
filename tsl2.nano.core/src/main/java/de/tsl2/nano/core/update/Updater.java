@@ -9,8 +9,11 @@
  */
 package de.tsl2.nano.core.update;
 
+import java.util.Date;
+
 import de.tsl2.nano.core.cls.BeanClass;
 import de.tsl2.nano.core.log.LogFactory;
+import de.tsl2.nano.core.util.DateUtil;
 import de.tsl2.nano.core.util.FileUtil;
 import de.tsl2.nano.core.util.NetUtil;
 import de.tsl2.nano.core.util.StringUtil;
@@ -23,7 +26,29 @@ import de.tsl2.nano.core.util.StringUtil;
  */
 public class Updater {
 
-    /**
+	private String appName = "h5"; //default on tsl2.nano.h5 framework
+	private String downloadURL;
+	private String currentVersion;
+	private Date lastUpdate;
+	private int dayInterval;
+
+	
+	public Updater() {
+	}
+
+	public Updater(String appName, String downloadURL, String currentVersion, Date lastUpdate, int dayInterval) {
+		this.appName = appName;
+		this.downloadURL = downloadURL;
+		this.currentVersion = currentVersion;
+		this.lastUpdate = lastUpdate;
+		this.dayInterval = dayInterval;
+	}
+
+    public boolean run(String configFile, String newVersion, Object environment) {
+    	return run(configFile, currentVersion, newVersion, environment);
+    }
+    
+	/**
      * update mechanism for ENV applications. Does update the current environment if application was started with new
      * update (see {@link #checkAndUpdate(String, String)} - this update should provide a new version update class).
      * <p/>
@@ -76,13 +101,17 @@ public class Updater {
     }
 
     protected String getVersionNo(String txt) {
-        return StringUtil.substring(txt, "h5-", "-");
+        return StringUtil.substring(txt, appName + "-", "-");
     }
 
     protected String getVersionUpdaterClass(Class<? extends Object> cls, String version) {
         return cls.getPackage().getName() + ".update." + cls.getSimpleName() + "Update" + version.replace('.', 'v');
     }
 
+    public boolean checkAndUpdate() {
+    	return checkAndUpdate(currentVersion, downloadURL);
+    }
+    
     /**
      * checks for a new version and downloads it.
      * 
@@ -91,6 +120,10 @@ public class Updater {
      * @return
      */
     public boolean checkAndUpdate(String currentVersion, String versionURL) {
+    	if (!hasToCheck(lastUpdate, dayInterval)) {
+    		LogFactory.log("Updater: next update not before: " + lastUpdate + " + " + dayInterval + " days");
+    		return false;
+    	}
         try {
             if (NetUtil.isOnline()) {
                 String newVersion = NetUtil.get(versionURL);
@@ -105,8 +138,11 @@ public class Updater {
             } else {
                 LogFactory.log("offline -> no update-check possible");
             }
-        } catch (Exception e) {
-            LogFactory.log("couldn't download new version: " + e.toString());
+        } catch (Throwable e) {
+        	// why throwable: it's only an update and on downloading the Error ExceptionInInitializerError
+        	// may be thrown, if the jdk has an error on loading the unlimited jce-policy files
+            LogFactory.log("UPDATE-ERROR: couldn't download new version: " + e.toString());
+            LogFactory.log("may be you should download and install the unlimited jce-policy files in your jdk");
         }
         return false;
     }
@@ -114,4 +150,8 @@ public class Updater {
     protected String getDownloadURL(String newVersion) {
         return StringUtil.extract(newVersion, "http[s]?\\:\\/\\/.*-standalone[.]jar");
     }
+
+	public static boolean hasToCheck(Date lastUpdate, int dayInterval) {
+		return lastUpdate == null || DateUtil.addDays(lastUpdate, dayInterval).before(new Date());
+	}
 }

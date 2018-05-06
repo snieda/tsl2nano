@@ -9,6 +9,7 @@
  */
 package de.tsl2.nano.core.util;
 
+import java.io.File;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
@@ -52,11 +53,14 @@ public class ListSet<E> extends ArrayList<E> implements Set<E> {
      */
     public static <T> ListSet<T> load(String file, Class<T> type) {
         try {
-            Scanner s = new Scanner(file);
-            s.useDelimiter("\\[\\]\\,\\;\\:\\s\n");
+            Scanner s = new Scanner(new File(file));
+            s.useDelimiter("\\[|\\]|\\,|\\;|\\:|\\s|\n");
+            String c;
             ListSet<T> listSet = new ListSet<T>();
             while (s.hasNext()) {
-                listSet.add(BeanClass.createInstance(type, s.next().trim()));
+                c = s.next().trim();
+                if (c.length() > 2)
+                	listSet.add(BeanClass.createInstance(type, c));
             }
             return listSet;
         } catch (Exception e) {

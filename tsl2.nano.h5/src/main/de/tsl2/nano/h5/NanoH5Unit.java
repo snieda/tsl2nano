@@ -6,9 +6,6 @@ import java.io.IOException;
 import java.lang.Thread.UncaughtExceptionHandler;
 import java.util.List;
 
-import org.junit.AfterClass;
-import org.junit.BeforeClass;
-
 import com.gargoylesoftware.htmlunit.FailingHttpStatusCodeException;
 import com.gargoylesoftware.htmlunit.WebClient;
 import com.gargoylesoftware.htmlunit.html.HtmlButton;
@@ -17,7 +14,6 @@ import com.gargoylesoftware.htmlunit.html.HtmlPage;
 import de.tsl2.nano.bean.BeanContainer;
 import de.tsl2.nano.bean.def.BeanCollector;
 import de.tsl2.nano.core.ENV;
-import de.tsl2.nano.core.Main;
 import de.tsl2.nano.core.ManagedException;
 import de.tsl2.nano.core.Messages;
 import de.tsl2.nano.core.exception.ExceptionHandler;
@@ -60,7 +56,6 @@ public abstract class NanoH5Unit implements ENVTestPreparation {
         return "http://localhost:" + (port == -1 && nextFreePort ? port = NetUtil.getNextFreePort(8067) : port == -1 ? port = 8067 : port);
     }
 
-    @BeforeClass
     public static void setUp() {
         nanoAlreadyRunning = Boolean.getBoolean("app.server.running");
         NanoH5UnitPlugin.setEnabled(!nanoAlreadyRunning);
@@ -74,7 +69,6 @@ public abstract class NanoH5Unit implements ENVTestPreparation {
         }
     }
     
-    @AfterClass
     public static void tearDown() {
         BeanContainer.instance().executeStmt(ENV.get("app.shutdown.statement", "SHUTDOWN"), true,
             null);

@@ -2,14 +2,18 @@
 	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
 	<modelVersion>4.0.0</modelVersion>
 	<packaging>pom</packaging>
-	<groupId>net.sf.tsl2nano</groupId>
+	<parent>
+		<groupId>net.sf.tsl2nano</groupId>
+		<artifactId>tsl2.nano.h5-package</artifactId>
+		<version>2.1.2-SNAPSHOT</version>
+	</parent>
 	<artifactId>tsl2.nano.h5.thymeleaf-pack</artifactId>
-	<name>TSL2 Framework Thymeleaf-Package</name>
-	<version>2.1.1</version>
+	<name>TSL2 Framework H5 Thymeleaf-Package</name>
 	<properties>
 		<module.parent>..</module.parent>
 		<maven.compiler.source>1.8</maven.compiler.source>
 		<maven.compiler.target>1.8</maven.compiler.target>
+		<properties.quiet>true</properties.quiet>
 	</properties>
 	<!-- Warning: Inside Eclipse, the maven script may stop with error:
 			...Artifact has not been packaged yet. When used on reactor artifact, unpack should be executed after packaging... -->
@@ -18,26 +22,7 @@
 			<resource><directory>src/main/resources</directory></resource>
 		</resources>
 		<plugins>
-<!-- 			<plugin>
-				<groupId>org.codehaus.mojo</groupId>
-				<artifactId>properties-maven-plugin</artifactId>
-				<version>1.0.0</version>
-				<executions>
-					<execution>
-						<id>read-properties</id>
-						<phase>initialize</phase>
-						<goals>
-							<goal>read-project-properties</goal>
-						</goals>
-						<configuration>
-							<files>
-								<file>${module.parent}/build.properties</file>
-							</files>
-						</configuration>
-					</execution>
-				</executions>
-			</plugin>
- -->			<plugin>
+ 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-dependency-plugin</artifactId>
 				<version>3.0.2</version>
@@ -82,7 +67,7 @@
 							<groupId>${project.groupId}</groupId>
 							<artifactId>${project.artifactId}</artifactId>
 							<Application-Name>${project.name}</Application-Name>
-							<Application-Class>de.my.test.MyNanoApplication</Application-Class>
+							<Application-Class>${project.mainclass}</Application-Class>
 							<Application-Source>${application.source}</Application-Source>
 							<Application-redirect>/download</Application-redirect>
 							<Permissions>all-permissions</Permissions>
@@ -95,19 +80,14 @@
 	<dependencies>
 		<dependency>
 			<groupId>net.sf.tsl2nano</groupId>
-			<artifactId>tsl2.nano.h5</artifactId>
+			<artifactId>tsl2.nano.h5.thymeleaf</artifactId>
 			<version>${project.version}</version>
-		</dependency>
-		<!-- https://mvnrepository.com/artifact/org.thymeleaf/thymeleaf -->
-		<dependency><!-- internally used by thymeleaf!!! -->
-		    <groupId>org.slf4j</groupId>
-		    <artifactId>slf4j-simple</artifactId>
-		    <version>1.5.8</version>
-		</dependency>
-		<dependency>
-		    <groupId>org.thymeleaf</groupId>
-		    <artifactId>thymeleaf</artifactId>
-		    <version>3.0.9.RELEASE</version>
+			<exclusions>
+				<exclusion> <!-- on some reps, the japserreports is not available -->
+					<groupId>net.js.jasperreports</groupId>
+					<artifactId>jasperreports</artifactId>
+				</exclusion>
+			</exclusions>		
 		</dependency>
 	</dependencies>
 </project>

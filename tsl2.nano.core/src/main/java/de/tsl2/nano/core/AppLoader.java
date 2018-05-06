@@ -348,6 +348,7 @@ public class AppLoader {
             /*contextClassLoader instanceof URLClassLoader || */classPath.contains(";") || mngt != null || isDalvik()
                 ? contextClassLoader : null;
         NetworkClassLoader nestedLoader = new NetworkClassLoader(cl, NetworkClassLoader.REGEX_EXCLUDE);
+        nestedLoader.setEnvironment(environment);
         if (cl == null) {
             LOG.info("discarding boot classloader " + contextClassLoader);
             nestedLoader.addFile(classPath);
