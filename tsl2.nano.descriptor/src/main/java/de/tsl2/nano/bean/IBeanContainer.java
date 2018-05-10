@@ -39,6 +39,8 @@ public interface IBeanContainer {
      */
     <T> Collection<T> getBeans(Class<T> type, int startIndex, int maxResult);
 
+    <T> Collection<T> getBeans(BeanFindParameters<T> parameters);
+
     /**
      * returns all beans that match the attributes of exampleBean
      * 
@@ -59,6 +61,8 @@ public interface IBeanContainer {
      */
     <T> Collection<T> getBeansByExample(T exampleBean, Boolean useLike, int startIndex, int maxResult );
 
+    <T> Collection<T> getBeansByExample(T exampleBean, Boolean useLike, BeanFindParameters<T> parameters);
+
     /**
      * returns all beans that match the range of firstBean and secondBean. if firstBean equals secondBean, it is a
      * simple findByExample.
@@ -72,6 +76,8 @@ public interface IBeanContainer {
      */
     <T> Collection<T> getBeansBetween(T firstBean, T secondBean, int startIndex, int maxResult);
 
+    <T> Collection<T> getBeansBetween(T firstBean, T secondBean, BeanFindParameters<T> parameters);
+    
     /**
      * getBeansByQuery
      * 

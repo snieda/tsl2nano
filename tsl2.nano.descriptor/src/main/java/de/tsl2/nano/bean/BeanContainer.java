@@ -352,6 +352,11 @@ public class BeanContainer implements IBeanContainer {
         return (Collection<T>) typeFinderAction.activate();
     }
 
+    @Override
+    public <T> Collection<T> getBeans(BeanFindParameters<T> parameters) {
+        typeFinderAction.setParameter(new Object[] { parameters });
+        return (Collection<T>) typeFinderAction.activate();
+    }
     /**
      * {@inheritDoc}
      */
@@ -369,6 +374,12 @@ public class BeanContainer implements IBeanContainer {
         return (Collection<T>) exampleFinderAction.activate();
     }
 
+    @Override
+    public <T> Collection<T> getBeansByExample(T exampleBean, Boolean useLike, BeanFindParameters<T> parameters) {
+        exampleFinderAction.setParameter(new Object[] { exampleBean, useLike, parameters });
+        return (Collection<T>) exampleFinderAction.activate();
+    }
+    
     /**
      * {@inheritDoc}
      */
@@ -378,6 +389,12 @@ public class BeanContainer implements IBeanContainer {
         return (Collection<T>) betweenFinderAction.activate();
     }
 
+    @Override
+    public <T> Collection<T> getBeansBetween(T firstBean, T secondBean, BeanFindParameters<T> parameters) {
+        betweenFinderAction.setParameter(new Object[] { firstBean, secondBean, parameters });
+        return (Collection<T>) betweenFinderAction.activate();
+    }
+    
     /**
      * {@inheritDoc}
      */

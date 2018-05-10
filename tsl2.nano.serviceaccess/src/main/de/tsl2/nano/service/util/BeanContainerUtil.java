@@ -36,6 +36,7 @@ import de.tsl2.nano.action.CommonAction;
 import de.tsl2.nano.action.IAction;
 import de.tsl2.nano.bean.BeanContainer;
 import de.tsl2.nano.bean.BeanUtil;
+import de.tsl2.nano.bean.BeanFindParameters;
 import de.tsl2.nano.bean.IAttributeDef;
 import de.tsl2.nano.bean.def.Bean;
 import de.tsl2.nano.core.ENV;
@@ -85,32 +86,45 @@ public class BeanContainerUtil {
         final IAction<Collection<?>> typeFinder = new CommonAction<Collection<?>>() {
             @Override
             public Collection<?> action() {
-                final Class entityType = (Class) parameters().getValue(0);
-                final int startIndex = (Integer) parameters().getValue(1);
-                final int maxResult = (Integer) parameters().getValue(2);
-                if (!BeanClass.getBeanClass(entityType).isAnnotationPresent(Entity.class)) {
-                    return null;
+                if (parameters().getValue(0) instanceof BeanFindParameters) {
+                    return service.findAll((BeanFindParameters)parameters().getValue(0));
+                } else {
+                    final Class entityType = (Class) parameters().getValue(0);
+                    final int startIndex = (Integer) parameters().getValue(1);
+                    final int maxResult = (Integer) parameters().getValue(2);
+                    if (!BeanClass.getBeanClass(entityType).isAnnotationPresent(Entity.class)) {
+                        return null;
+                    }
+                    return service.findAll(entityType, startIndex, maxResult);
                 }
-                return service.findAll(entityType, startIndex, maxResult);
             }
         };
         final IAction<Collection<?>> exampleFinder = new CommonAction<Collection<?>>() {
             @Override
             public Collection<?> action() {
                 boolean useLike = parameters().getValue(1) instanceof Boolean && ((Boolean) parameters().getValue(1));
+                boolean useFindParameters = parameters().getValue(2) instanceof BeanFindParameters;
                 if (useLike) {
-                    return service.findByExampleLike(parameters().getValue(0), true, (Integer) parameters().getValue(2),
-                        (Integer) parameters().getValue(3));
+                    if (useFindParameters) {
+                        return service.findByExampleLike(parameters().getValue(0), true, (BeanFindParameters) parameters().getValue(2));
+                    } else {
+                        return service.findByExampleLike(parameters().getValue(0), true, (Integer) parameters().getValue(2),
+                            (Integer) parameters().getValue(3));
+                    }
                 } else {
-                    return service.findByExample(parameters().getValue(0), true);
+                        return service.findByExample(parameters().getValue(0), true);
                 }
             }
         };
         final IAction<Collection<?>> betweenFinder = new CommonAction<Collection<?>>() {
             @Override
             public Collection<?> action() {
-                return service.findBetween(parameters().getValue(0), parameters().getValue(1), true, (Integer) parameters().getValue(2),
-                    (Integer) parameters().getValue(3));
+                if (parameters().getValue(0) instanceof BeanFindParameters) {
+                    return service.findBetween(parameters().getValue(0), parameters().getValue(1), true, (BeanFindParameters)parameters().getValue(0));
+                } else {
+                    return service.findBetween(parameters().getValue(0), parameters().getValue(1), true, (Integer) parameters().getValue(2),
+                        (Integer) parameters().getValue(3));
+                }
             }
         };
         final IAction<Collection<?>> queryFinder = new CommonAction<Collection<?>>() {

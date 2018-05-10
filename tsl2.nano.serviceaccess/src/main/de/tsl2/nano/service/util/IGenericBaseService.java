@@ -13,6 +13,8 @@ import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 
+import de.tsl2.nano.bean.BeanFindParameters;
+
 /**
  * provides some basic service access methods to work with entity beans.
  * <p>
@@ -42,6 +44,8 @@ public interface IGenericBaseService extends IStatelessService, INamedQueryServi
      * @return filled collection with beans of type beantype
      */
     <T> Collection<T> findAll(Class<T> beanType, int startIndex, int maxResult, Class... lazyRelations);
+
+    <T> Collection<T> findAll(BeanFindParameters<T> findPars);
 
     /**
      * find all beans of type beanType beeing members of holder. useful if your beanType has no access to the holder.
@@ -105,6 +109,8 @@ public interface IGenericBaseService extends IStatelessService, INamedQueryServi
     /** find all beans with similar (like) attributes (only single value attributes!) as exampleBean */
     <T> Collection<T> findByExampleLike(T exampleBean, boolean caseInsensitive, int startIndex, int maxResult, Class... lazyRelations);
 
+    <T> Collection<T> findByExampleLike(T exampleBean, boolean caseInsensitive, BeanFindParameters<T> findPars);
+
     /** find bean with given id */
     <T> T findById(Class<T> beanType, Object id, Class... lazyRelations);
 
@@ -129,6 +135,11 @@ public interface IGenericBaseService extends IStatelessService, INamedQueryServi
             int startIndex,
             int maxResult,
             Class... lazyRelations);
+
+    <T> Collection<T> findBetween(T firstBean,
+            T secondBean,
+            boolean caseInsensitive,
+            BeanFindParameters<T> findPars);
 
     /**
      * executes a given query. may contain create/alter/insert/update/delete statements.

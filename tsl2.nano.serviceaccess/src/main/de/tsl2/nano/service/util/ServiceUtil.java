@@ -20,6 +20,8 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.Date;
 import java.util.HashSet;
+import java.util.Iterator;
+import java.util.LinkedHashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
@@ -959,6 +961,25 @@ public class ServiceUtil {
         return "select * from (" + originQuery + ") where rownum <= " + maxresult;
     }
 
+    /**
+     * addOrderBy
+     * @param columns map of columns and their information, if order is descending. <br/> 
+     * f.e.: Key="Name" and Value=true ==> "order by Name DESC"
+     * @return
+     */
+    public static String addOrderBy(List<String> columns) {
+        StringBuilder orderBy = new StringBuilder("order by ");
+        for (String c : columns) {
+            String desc = c.startsWith("-") ? " DESC" : "";
+            int s = desc.length() > 0 || c.startsWith("+") ? 1 : 0;
+            orderBy.append(c.substring(s) + desc + ", ");
+            
+        }
+        if (orderBy.length() > 1) //remove the last ", "
+            orderBy.setLength(orderBy.length() - 2);
+        return orderBy.toString();
+    }
+    
     /**
      * recursive method to find all occurrences of attributes annotated with 'annotation' having a value that equals
      * 'value'.

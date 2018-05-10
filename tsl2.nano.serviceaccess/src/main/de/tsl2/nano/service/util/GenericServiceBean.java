@@ -9,7 +9,7 @@
  */
 package de.tsl2.nano.service.util;
 
-import static de.tsl2.nano.service.util.ServiceUtil.addMemberExpression;
+import static de.tsl2.nano.service.util.ServiceUtil.*;
 import static de.tsl2.nano.service.util.ServiceUtil.createBetweenStatement;
 import static de.tsl2.nano.service.util.ServiceUtil.createExampleStatement;
 import static de.tsl2.nano.service.util.ServiceUtil.createStatement;
@@ -31,6 +31,7 @@ import javax.ejb.TransactionAttributeType;
 import javax.persistence.Query;
 import javax.security.auth.Subject;
 
+import de.tsl2.nano.bean.BeanFindParameters;
 import de.tsl2.nano.bean.def.Diff;
 import de.tsl2.nano.core.ManagedException;
 import de.tsl2.nano.core.cls.BeanAttribute;
@@ -67,26 +68,35 @@ public class GenericServiceBean extends NamedQueryServiceBean implements IGeneri
     /** {@inheritDoc} */
     @Override
     public <T> Collection<T> findAll(Class<T> beanType, Class... lazyRelations) {
-        return findAll(beanType, 0, -1, lazyRelations);
+        return findAll(new BeanFindParameters<T>(beanType, 0, -1, null, null, lazyRelations));
+    }
+
+    @Override
+    public <T> Collection<T> findAll(Class<T> beanType, int startIndex, int maxResult, Class... lazyRelations) {
+        return findAll(new BeanFindParameters(beanType, startIndex, maxResult, lazyRelations));
     }
 
     /** {@inheritDoc} */
     @Override
-    public <T> Collection<T> findAll(Class<T> beanType, int startIndex, int maxResult, Class... lazyRelations) {
+    public <T> Collection<T> findAll(BeanFindParameters<T> p) {
         checkContextSecurity();
+        Class<T> beanType = p.getBeanType();
         if (isVirtualEntity(beanType)) {
             if (isNamedQuery(beanType)) {
-                return findByNamedQuery(beanType, getNamedQueryByArguments(beanType), maxResult);
+                return findByNamedQuery(beanType, getNamedQueryByArguments(beanType), p.getMaxResult());
             }
         }
         final StringBuffer qStr = createStatement(beanType);
-        Map<String, ?> hints = MapUtil.asMap("org.hibernate.cacheable",
+        Map<String, Object> hints = MapUtil.asMap("org.hibernate.cacheable",
             Boolean.TRUE,
             "org.hibernate.readOnly",
             Boolean.TRUE);
+        if (p.getHints() != null) {
+            hints.putAll(p.getHints());
+        }
         //a findAll should only be done on 'configuration' tables
         //QUESTION: why does the query perform poor on activated cache????
-        return (Collection<T>) findByQuery(qStr.toString(), false, startIndex, maxResult, null, hints, lazyRelations);
+        return (Collection<T>) findByQuery(qStr.toString(), false, p.getStartIndex(), p.getMaxResult(), null, hints, p.getLazyRelations());
     }
 
     /** {@inheritDoc} */
@@ -506,17 +516,24 @@ public class GenericServiceBean extends NamedQueryServiceBean implements IGeneri
     /** {@inheritDoc} */
     @Override
     public <T> Collection<T> findByExample(T exampleBean, boolean caseInsensitive, Class... lazyRelations) {
-        return findByExample(exampleBean, caseInsensitive, false, 0, -1, lazyRelations);
+        return findByExample(exampleBean, caseInsensitive, false, new BeanFindParameters<>(null, lazyRelations));
     }
 
-    /** {@inheritDoc} */
     @Override
     public <T> Collection<T> findByExampleLike(T exampleBean,
             boolean caseInsensitive,
             int startIndex,
             int maxResult,
             Class... lazyRelations) {
-        return findByExample(exampleBean, caseInsensitive, true, startIndex, maxResult, lazyRelations);
+        return findByExampleLike(exampleBean, caseInsensitive, new BeanFindParameters<T>((Class<T>)null, startIndex, maxResult, lazyRelations));
+    }
+    
+    /** {@inheritDoc} */
+    @Override
+    public <T> Collection<T> findByExampleLike(T exampleBean,
+            boolean caseInsensitive,
+            BeanFindParameters<T> findPars) {
+        return findByExample(exampleBean, caseInsensitive, true, findPars);
     }
 
     /**
@@ -536,23 +553,21 @@ public class GenericServiceBean extends NamedQueryServiceBean implements IGeneri
     public <T> Collection<T> findByExample(T exampleBean,
             boolean caseInsensitive,
             boolean useLike,
-            int startIndex,
-            int maxResult,
-            Class... lazyRelations) {
+            BeanFindParameters<T> p) {
         checkContextSecurity();
         StringBuffer qStr = new StringBuffer();
         final Collection<?> parameter = createExampleStatement(qStr, exampleBean, useLike, caseInsensitive);
-        return (Collection<T>) findByQuery(qStr.toString(), false, startIndex, maxResult, parameter.toArray(), null,
-            lazyRelations);
+        qStr.append(addOrderBy(p.getOrderBy()));
+        return (Collection<T>) findByQuery(qStr.toString(), false, p.getStartIndex(), p.getMaxResult(), parameter.toArray(), p.getHints(),
+            p.getLazyRelations());
     }
 
     /** {@inheritDoc} */
     @Override
     public <T> Collection<T> findBetween(T firstBean, T secondBean, Class... lazyRelations) {
-        return findBetween(firstBean, secondBean, true, 0, -1, lazyRelations);
+        return findBetween(firstBean, secondBean, true, new BeanFindParameters<T>(null, lazyRelations));
     }
 
-    /** {@inheritDoc} */
     @Override
     public <T> Collection<T> findBetween(T firstBean,
             T secondBean,
@@ -560,23 +575,32 @@ public class GenericServiceBean extends NamedQueryServiceBean implements IGeneri
             int startIndex,
             int maxResult,
             Class... lazyRelations) {
+        return findBetween(firstBean, secondBean, caseInsensitive, new BeanFindParameters<>((Class<T>)null, startIndex, maxResult, lazyRelations));
+    }
+    
+    /** {@inheritDoc} */
+    @Override
+    public <T> Collection<T> findBetween(T firstBean,
+            T secondBean,
+            boolean caseInsensitive,
+            BeanFindParameters<T> p) {
         checkContextSecurity();
         final Class<T> beanType = (Class<T>) (firstBean != null ? firstBean.getClass()
             : secondBean != null ? secondBean.getClass() : null);
         if (isVirtualEntity(beanType)) {
             if (isNamedQuery(beanType)) {
-                return findByNamedQuery(beanType, getNamedQueryByArguments(beanType), maxResult);
+                return findByNamedQuery(beanType, getNamedQueryByArguments(beanType), p.getMaxResult());
             }
         }
         StringBuffer qStr = new StringBuffer();
         Collection<?> parameter = createBetweenStatement(qStr, firstBean, secondBean, caseInsensitive);
         return (Collection<T>) findByQuery(qStr.toString(),
             false,
-            startIndex,
-            maxResult,
+            p.getStartIndex(),
+            p.getMaxResult(),
             parameter.toArray(),
             null,
-            lazyRelations);
+            p.getLazyRelations());
     }
 
     /** {@inheritDoc} */

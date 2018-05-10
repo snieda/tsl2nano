@@ -18,6 +18,7 @@ import javax.persistence.Entity;
 import de.tsl2.nano.action.CommonAction;
 import de.tsl2.nano.action.IAction;
 import de.tsl2.nano.bean.BeanContainer;
+import de.tsl2.nano.bean.BeanFindParameters;
 import de.tsl2.nano.core.ENV;
 import de.tsl2.nano.core.cls.BeanClass;
 import de.tsl2.nano.core.util.ConcurrentUtil;
@@ -62,22 +63,31 @@ public abstract class GenericBeanContainer extends BeanContainerUtil {
         IAction<Collection<?>> typeFinder = new CommonAction<Collection<?>>() {
             @Override
             public Collection<?> action() {
-                Class entityType = (Class) parameters().getValue(0);
-                int startIndex = (Integer) parameters().getValue(1);
-                int maxResult = (Integer) parameters().getValue(2);
-                if (!BeanClass.getBeanClass(entityType).isAnnotationPresent(Entity.class)) {
-                    return null;
+                if (parameters().getValue(0) instanceof BeanFindParameters) {
+                    return container.getGenService().findAll((BeanFindParameters)parameters().getValue(0));
+                } else {
+                    Class entityType = (Class) parameters().getValue(0);
+                    int startIndex = (Integer) parameters().getValue(1);
+                    int maxResult = (Integer) parameters().getValue(2);
+                    if (!BeanClass.getBeanClass(entityType).isAnnotationPresent(Entity.class)) {
+                        return null;
+                    }
+                    return container.getGenService().findAll(entityType, startIndex, maxResult);
                 }
-                return container.getGenService().findAll(entityType, startIndex, maxResult);
             }
         };
         IAction<Collection<?>> exampleFinder = new CommonAction<Collection<?>>() {
             @Override
             public Collection<?> action() {
                 boolean useLike = parameters().getValue(1) instanceof Boolean && ((Boolean) parameters().getValue(1));
+                boolean useFindParameters = parameters().getValue(2) instanceof BeanFindParameters;
                 if (useLike) {
-                    return container.getGenService().findByExampleLike(parameters().getValue(0), true, (Integer) parameters().getValue(2),
-                        (Integer) parameters().getValue(3));
+                    if (useFindParameters) {
+                        return container.getGenService().findByExampleLike(parameters().getValue(0), true, (BeanFindParameters) parameters().getValue(2));
+                    } else {
+                        return container.getGenService().findByExampleLike(parameters().getValue(0), true, (Integer) parameters().getValue(2),
+                            (Integer) parameters().getValue(3));
+                    }
                 } else {
                     return container.getGenService().findByExample(parameters().getValue(0), true);
                 }
@@ -86,8 +96,12 @@ public abstract class GenericBeanContainer extends BeanContainerUtil {
         IAction<Collection<?>> betweenFinder = new CommonAction<Collection<?>>() {
             @Override
             public Collection<?> action() {
-                return container.getGenService().findBetween(parameters().getValue(0), parameters().getValue(1), true, (Integer) parameters().getValue(2),
-                    (Integer) parameters().getValue(3));
+                if (parameters().getValue(0) instanceof BeanFindParameters) {
+                    return container.getGenService().findBetween(parameters().getValue(0), parameters().getValue(1), true, (BeanFindParameters)parameters().getValue(0));
+                } else {
+                    return container.getGenService().findBetween(parameters().getValue(0), parameters().getValue(1), true, (Integer) parameters().getValue(2),
+                        (Integer) parameters().getValue(3));
+                }
             }
         };
         IAction<Collection<?>> queryFinder = new CommonAction<Collection<?>>() {
