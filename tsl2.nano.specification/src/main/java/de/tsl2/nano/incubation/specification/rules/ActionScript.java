@@ -9,6 +9,7 @@
  */
 package de.tsl2.nano.incubation.specification.rules;
 
+import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -62,20 +63,6 @@ public class ActionScript<T> extends AbstractRunnable<T> {
         super(name, operation, parameter);
     }
 
-    public static ScriptEngine createEngine(String language) {
-        provideLanguage(language);
-//        if (!AppLoader.hasCompiler())
-//           throw new IllegalStateException("can't start javascript engine on jre environment. a full jdk must be present!");
-        //java7 provides rhino as javascript, java8 provides nashorn
-        ScriptEngine engine = language != null ? new ScriptEngineManager().getEngineByName(language)
-            : new ScriptEngineManager().getEngineFactories().iterator().next().getScriptEngine();
-        if (engine == null)
-            throw new IllegalStateException("couldn't create engine for: '" + language + "'\n\tavailable engines:\n"
-                + printEngines());
-        LOG.info("script engine loaded: " + engine);
-        return engine;
-    }
-
     protected ScriptEngine engine() {
         if (engine == null)
             engine = ActionScript.createEngine(language);
@@ -85,19 +72,44 @@ public class ActionScript<T> extends AbstractRunnable<T> {
     private static void provideLanguage(String language) {
         if (language != null && ClassFinder.self().findClass(language) == null) {
             String pck = ENV.getPackagePrefix(language);
-            ENV.loadClassDependencies(pck);
+            if (pck != null)
+            	ENV.loadClassDependencies(pck);
         }
-        List<ScriptEngineFactory> engines = new ScriptEngineManager().getEngineFactories();
-        if (engines.isEmpty())
-            throw new IllegalStateException("no script engine available!");
-        else if (language != null && new ScriptEngineManager().getEngineByName(language) == null)
-            throw new IllegalStateException("couldn't create engine for: '" + language + "'\n\tavailable engines:\n"
-                    + printEngines());
     }
 
+	public static ScriptEngine createEngine(String language) {
+    	if (language == null) {
+    		LOG.warn("scrip language undefined -> using 'javascript' as default!");
+    		language = "javascript";
+    	}
+
+    	provideLanguage(language);
+		
+        ScriptEngineManager managerThread = new ScriptEngineManager();
+        ScriptEngine engine = managerThread.getEngineByName(language);
+        if (engine != null)
+        	return engine;
+        ScriptEngineManager managerSystem = new ScriptEngineManager(System.class.getClassLoader());
+        engine = managerSystem.getEngineByName(language);
+        if (engine != null)
+        	return engine;
+		List<ScriptEngineFactory> engines = managerThread.getEngineFactories();
+        if (engines.isEmpty()) {
+        	engines = new ScriptEngineManager(System.class.getClassLoader()).getEngineFactories();
+        	if (engines.isEmpty())
+        		throw new IllegalStateException("no script engine available!");
+        }
+        String info = "script engine " + language + " not found. Available engines are: " +
+        		printEngines();
+        throw new IllegalStateException(info);
+	}
+
     public static String printEngines() {
+        List<ScriptEngineFactory> engs = new ArrayList<>();
+        engs.addAll(new ScriptEngineManager().getEngineFactories());
+        engs.addAll(new ScriptEngineManager(System.class.getClassLoader()).getEngineFactories());
+        
         StringBuilder str = new StringBuilder("\n--------------------------------------------------------------------------------");
-        List<ScriptEngineFactory> engs = new ScriptEngineManager().getEngineFactories();
         for (ScriptEngineFactory e : engs) {
             str.append(e.getEngineName() + ": " + e.getLanguageName() + " " + e.getLanguageVersion() + "\n");
         }

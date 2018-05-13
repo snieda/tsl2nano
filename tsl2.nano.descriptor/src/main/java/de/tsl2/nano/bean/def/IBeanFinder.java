@@ -33,7 +33,7 @@ public interface IBeanFinder<T, F> {
      * @param toFilter to filter object
      * @return list of beans between from and to
      */
-    Collection<T> getData(F fromFilter, F toFilter);
+    Collection<T> getData(F fromFilter, F toFilter, String...orderBy);
 
     /**
      * delegates to {@link #getData(Object, Object)} using {@link #getFilterRange()}

@@ -96,8 +96,8 @@ public abstract class GenericBeanContainer extends BeanContainerUtil {
         IAction<Collection<?>> betweenFinder = new CommonAction<Collection<?>>() {
             @Override
             public Collection<?> action() {
-                if (parameters().getValue(0) instanceof BeanFindParameters) {
-                    return container.getGenService().findBetween(parameters().getValue(0), parameters().getValue(1), true, (BeanFindParameters)parameters().getValue(0));
+                if (parameters().getValue(2) instanceof BeanFindParameters) {
+                    return container.getGenService().findBetween(parameters().getValue(0), parameters().getValue(1), true, (BeanFindParameters)parameters().getValue(2));
                 } else {
                     return container.getGenService().findBetween(parameters().getValue(0), parameters().getValue(1), true, (Integer) parameters().getValue(2),
                         (Integer) parameters().getValue(3));

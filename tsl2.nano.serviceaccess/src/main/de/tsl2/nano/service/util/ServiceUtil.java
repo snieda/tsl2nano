@@ -968,7 +968,9 @@ public class ServiceUtil {
      * @return
      */
     public static String addOrderBy(List<String> columns) {
-        StringBuilder orderBy = new StringBuilder("order by ");
+        if (columns == null)
+            return "";
+        StringBuilder orderBy = new StringBuilder(" order by ");
         for (String c : columns) {
             String desc = c.startsWith("-") ? " DESC" : "";
             int s = desc.length() > 0 || c.startsWith("+") ? 1 : 0;

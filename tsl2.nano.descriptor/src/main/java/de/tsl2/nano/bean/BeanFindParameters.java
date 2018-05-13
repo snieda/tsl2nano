@@ -38,7 +38,7 @@ public class BeanFindParameters<T> {
     public BeanFindParameters() {
     }
 
-    public BeanFindParameters(Class<T> beanType, Class[] lazyRelations) {
+    public BeanFindParameters(Class<T> beanType, Class... lazyRelations) {
         super();
         this.beanType = beanType;
         this.lazyRelations = lazyRelations;
@@ -55,7 +55,7 @@ public class BeanFindParameters<T> {
         this.lazyRelations = lazyRelations;
     }
 
-    public BeanFindParameters(Class<T> beanType, int startIndex, int maxResult, Class[] lazyRelations) {
+    public BeanFindParameters(Class<T> beanType, int startIndex, int maxResult, Class... lazyRelations) {
         super();
         this.beanType = beanType;
         this.startIndex = startIndex;
@@ -68,7 +68,7 @@ public class BeanFindParameters<T> {
             int maxResult,
             List<String> orderBy,
             Map<String, Object> hints,
-            Class[] lazyRelations) {
+            Class... lazyRelations) {
         super();
         this.beanType = beanType;
         this.startIndex = startIndex;

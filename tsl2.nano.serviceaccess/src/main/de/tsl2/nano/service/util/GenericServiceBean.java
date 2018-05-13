@@ -87,6 +87,7 @@ public class GenericServiceBean extends NamedQueryServiceBean implements IGeneri
             }
         }
         final StringBuffer qStr = createStatement(beanType);
+        qStr.append(addOrderBy(p.getOrderBy()));
         Map<String, Object> hints = MapUtil.asMap("org.hibernate.cacheable",
             Boolean.TRUE,
             "org.hibernate.readOnly",
@@ -594,6 +595,7 @@ public class GenericServiceBean extends NamedQueryServiceBean implements IGeneri
         }
         StringBuffer qStr = new StringBuffer();
         Collection<?> parameter = createBetweenStatement(qStr, firstBean, secondBean, caseInsensitive);
+        qStr.append(addOrderBy(p.getOrderBy()));
         return (Collection<T>) findByQuery(qStr.toString(),
             false,
             p.getStartIndex(),

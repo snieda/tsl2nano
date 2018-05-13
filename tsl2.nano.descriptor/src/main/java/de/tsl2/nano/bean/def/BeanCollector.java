@@ -371,6 +371,7 @@ public class BeanCollector<COLLECTIONTYPE extends Collection<T>, T> extends Bean
                         Iterator<T> it = searchPanelBeans.iterator();
                         T from = searchPanelBeans.size() > 0 ? it.next() : null;
                         T to = searchPanelBeans.size() > 1 ? it.next() : null;
+                        String[] orderByIndexes = getOrderByColumns();
                         return getData(from, to);
                     }
                 }
@@ -380,7 +381,7 @@ public class BeanCollector<COLLECTIONTYPE extends Collection<T>, T> extends Bean
                     ENV.get(Profiler.class).starting(this, getName());
 
                     if (!isStaticCollection || (isPersistable() && composition == null)) {
-                        collection = (COLLECTIONTYPE) ((IBeanFinder<T, Object>) beanFinder).getData(from, to);
+                        collection = (COLLECTIONTYPE) ((IBeanFinder<T, Object>) beanFinder).getData(from, to, getOrderByColumns());
                         /*
                          * if it is a composition, all data has to be found in the compositions-parent-container
                          */
@@ -451,7 +452,18 @@ public class BeanCollector<COLLECTIONTYPE extends Collection<T>, T> extends Bean
         }
     }
 
-    /**
+    protected String[] getOrderByColumns() {
+    	Integer[] indexes = getSortIndexes();
+    	String sIndexes[] = new String[indexes.length];
+    	for (int i = 0; i < indexes.length; i++) {
+    		IPresentableColumn col = getColumn(indexes[i]);
+			boolean up = col.isSortUpDirection();
+			sIndexes[i] = (up ? "+": "-") + col.getName();
+		}
+		return sIndexes;
+	}
+
+	/**
      * @return Returns the selectionProvider.
      */
     @Override
@@ -1659,6 +1671,8 @@ public class BeanCollector<COLLECTIONTYPE extends Collection<T>, T> extends Bean
             map = (Map) pars[0];
         }
         for (IAttributeDefinition a : attrs) {
+        	if (!a.hasWriteAccess())
+        		continue;
             if (a.getValue(instance) == null) {
                 if (map != null) {
                     Object value = map.get(BeanClass.getName(a.getType(), false));

@@ -9,6 +9,8 @@
  */
 package de.tsl2.nano.h5;
 
+import static org.junit.Assert.assertTrue;
+
 import java.io.PipedOutputStream;
 
 import org.junit.AfterClass;
@@ -20,6 +22,7 @@ import com.gargoylesoftware.htmlunit.html.HtmlPage;
 import de.tsl2.nano.core.execution.SystemUtil;
 import de.tsl2.nano.core.util.ENVTestPreparation;
 import de.tsl2.nano.core.util.Util;
+import de.tsl2.nano.incubation.specification.rules.ActionScript;
 
 /**
  * 
@@ -45,6 +48,9 @@ public class NanoH5IT extends NanoH5Unit {
         HtmlPage page = null;
         PipedOutputStream myOut = SystemUtil.setPipedInput();
         try {
+            //is javascript through classloader available
+            assertTrue(ActionScript.createEngine(null) != null);
+            
             System.getProperties().put("org.apache.commons.logging.simplelog.defaultlog", "info");
             page = runWebClient();
             page = submit(page, BTN_LOGIN_OK);

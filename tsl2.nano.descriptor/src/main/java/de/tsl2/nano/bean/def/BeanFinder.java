@@ -10,6 +10,7 @@
 package de.tsl2.nano.bean.def;
 
 import java.io.Serializable;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.LinkedList;
@@ -18,10 +19,12 @@ import java.util.List;
 import org.apache.commons.logging.Log;
 
 import de.tsl2.nano.bean.BeanContainer;
+import de.tsl2.nano.bean.BeanFindParameters;
 import de.tsl2.nano.bean.BeanUtil;
 import de.tsl2.nano.core.ENV;
 import de.tsl2.nano.core.cls.BeanClass;
 import de.tsl2.nano.core.log.LogFactory;
+import de.tsl2.nano.core.util.Util;
 import de.tsl2.nano.util.operation.IRange;
 import de.tsl2.nano.util.operation.Range;
 
@@ -90,9 +93,9 @@ public class BeanFinder<T, F> implements IBeanFinder<T, F>, Serializable {
      * {@inheritDoc}
      */
     @Override
-    public Collection<T> getData(F fromFilter, F toFilter) {
+    public Collection<T> getData(F fromFilter, F toFilter, String...orderBy) {
         lastExpression = null;
-        return superGetData(fromFilter, toFilter);
+        return superGetData(fromFilter, toFilter, orderBy);
     }
 
     /**
@@ -142,16 +145,17 @@ public class BeanFinder<T, F> implements IBeanFinder<T, F>, Serializable {
      * override this method - it should only be called by the framework.
      */
     @SuppressWarnings("rawtypes")
-    public <S> Collection<T> superGetData(S fromFilter, S toFilter) {
+    public <S> Collection<T> superGetData(S fromFilter, S toFilter, String...orderBy) {
+    	BeanFindParameters pars = new BeanFindParameters(getType(), currentStartIndex, getMaxResultCount());
+    	if (!Util.isEmpty(orderBy))
+    		pars.setOrderBy(Arrays.asList(orderBy));
         if (fromFilter == null || toFilter == null) {
-            List<T> result = new LinkedList<T>(BeanContainer.instance().getBeans(getType(), currentStartIndex,
-                getMaxResultCount()));
-            Collections.sort(result, BeanDefinition.getBeanDefinition(type).getValueExpression().getComparator());
+            List<T> result = new LinkedList<T>(BeanContainer.instance().getBeans(pars));
+//            Collections.sort(result, BeanDefinition.getBeanDefinition(type).getValueExpression().getComparator());
             return result;
         } else {
-            List<T> result = new LinkedList(BeanContainer.instance().getBeansBetween(fromFilter, toFilter, currentStartIndex,
-                getMaxResultCount()));
-            Collections.sort(result, BeanDefinition.getBeanDefinition(type).getValueExpression().getComparator());
+            List<T> result = new LinkedList(BeanContainer.instance().getBeansBetween(fromFilter, toFilter, pars));
+//            Collections.sort(result, BeanDefinition.getBeanDefinition(type).getValueExpression().getComparator());
             return result;
         }
     }

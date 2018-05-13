@@ -19,6 +19,7 @@ import org.simpleframework.xml.Element;
 
 import de.tsl2.nano.action.CommonAction;
 import de.tsl2.nano.action.IAction;
+import de.tsl2.nano.core.ENV;
 import de.tsl2.nano.core.Messages;
 
 /**
@@ -206,7 +207,10 @@ public class ValueColumn<T> implements IPresentableColumn, Serializable {
                         collector.shiftSortIndexes();
                         sortIndex = 0;
                         isSortUpDirection = isSortUpDirection ? false : true;
-                        collector.sort();
+                        if (ENV.get("collector.sort.reload.data", false))
+                        	collector.getBeanFinder().getData();
+                        else
+                        	collector.sort();
                         return collector;
                     }
 
