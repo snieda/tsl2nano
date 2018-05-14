@@ -3,7 +3,7 @@
 	<modelVersion>4.0.0</modelVersion>
 	<groupId>net.sf.tsl2nano</groupId>
 	<artifactId>tsl2.nano.h5-package</artifactId>
-	<version>2.1.2</version>
+	<version>2.1.3-SNAPSHOT</version>
 	<packaging>pom</packaging>
 	<name>TSL2 Html5 Application Framework</name>
 	<description>NanoH5 (or FullRelation) is an UI independent gui implementation framework providing a model driven design (MDA). It is bound to the app framework 'tsl2.nano.commons' and the jpa-service framework 'tsl2.nano.serviceaccess'. It is possible to build a complete html5 application through a given class- or database-model.
@@ -13,7 +13,7 @@
 	This is a multi module project
 	* please use maven 3.3.9 as this is used currently in tsl2.nano.jarresolver
 	* to start only a submodule-build: "mvn -pl tsl2.nano.core"
-	* if multimodule version changes: start "mvn -N versions:update-child-modules" to assign the child modules
+	* if multimodule version changes: start "mvn -N versions:update-child-modules -DgenerateBackupPoms=false -DnewVersion=2.1.3-SNAPSHOT" to assign the child modules
 	* to do a fast complete build: "mvn -amd -DskipTest -o install"
 	* to start only a single test: "mvn -Dtest=*Jar*Test#testOne+testTwo test"
 	* to do a fast test:  mvn -o -T 4 -fae test
