@@ -109,7 +109,7 @@ public class QueryResult<COLLECTIONTYPE extends Collection<T>, T> extends BeanCo
             throw new IllegalStateException(this + " can't load query '" + queryName + "'");
         beanFinder = new BeanFinder() {
             @Override
-            public Collection superGetData(Object fromFilter, Object toFilter) {
+            public Collection superGetData(Object fromFilter, Object toFilter, String...orderBy) {
                 Map<String, Object> context = new HashMap<String, Object>();
                 if (fromFilter != null && toFilter != null) {
                     String[] names = query.getParameter().keySet().toArray(new String[0]);
