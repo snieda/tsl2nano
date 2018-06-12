@@ -62,12 +62,16 @@ public class NetCommunicator implements Runnable {
 				}
 			}
 			// create a callback for responses
+			StringBuilder output = new StringBuilder();
 			IListener<Notification> responseHandler = new IListener<Notification>() {
 				@Override
 				public synchronized void handleEvent(Notification event) {
-					log("RESPONSE: " + event.getNotification());
+					Object n = event.getNotification();
+					log("RESPONSE: " + n);
+					output.append(n.toString() + " ");
 				}
 			};
+			
 			log("Net created: " + net.toString());
 			log("cover implementation: " + implementation);
 			log("core implementation: " + implementation.getSuperclass());
@@ -76,8 +80,11 @@ public class NetCommunicator implements Runnable {
 				System.out.print(": ");
 				while (scr.hasNextLine()) {
 					String input = scr.nextLine();
-					if (input.isEmpty())
-						break;
+					if (input.isEmpty()) {
+						System.out.println("Realy want to exit vNet? (ENTER: yes, otherwise: no)");
+						if (!scr.hasNextLine() || scr.nextLine().isEmpty())
+							break;
+					}
 					String[] words = input.split(" ");
 					Node node = null;
 					for (int i = 0; i < words.length; i++) {
@@ -93,6 +100,7 @@ public class NetCommunicator implements Runnable {
 						}
 					}
 					log(net.dump());
+					log("\n\n" + output);
 					System.out.print(": ");
 				}
 			} finally {

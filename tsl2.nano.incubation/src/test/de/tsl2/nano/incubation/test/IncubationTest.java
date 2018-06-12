@@ -126,13 +126,4 @@ public class IncubationTest {
     }
 }
 
-class SRunnable implements IRunnable<String, Properties>, Serializable {
-    /** serialVersionUID */
-    private static final long serialVersionUID = 1L;
-
-    @Override
-    public String run(Properties context, Object... extArgs) {
-        return context.toString();
-    }
-}
 

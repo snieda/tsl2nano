@@ -402,6 +402,9 @@ public class StringUtil {
         return fixString("", fixLength, fillChar, true);
     }
 
+    public static String fixString(Object origin, int fixLength) {
+    	return fixString(origin.toString(), fixLength, ' ', true);
+    }
     /**
      * fills the given origin string on the left or right side with the given fill-chars to have the given fix-length.
      * 

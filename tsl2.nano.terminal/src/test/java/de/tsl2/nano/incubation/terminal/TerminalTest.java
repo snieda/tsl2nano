@@ -2,9 +2,12 @@ package de.tsl2.nano.incubation.terminal;
 
 import java.io.File;
 import java.io.InputStream;
+import java.io.Serializable;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Properties;
 
 import javax.print.attribute.standard.MediaSizeName;
 
@@ -18,6 +21,7 @@ import de.tsl2.nano.core.execution.IRunnable;
 import de.tsl2.nano.core.execution.SystemUtil;
 import de.tsl2.nano.core.secure.Crypt;
 import de.tsl2.nano.core.secure.Permutator;
+import de.tsl2.nano.core.util.ByteUtil;
 import de.tsl2.nano.core.util.ENVTestPreparation;
 import de.tsl2.nano.core.util.FileUtil;
 import de.tsl2.nano.core.util.NetUtil;
@@ -26,6 +30,7 @@ import de.tsl2.nano.incubation.terminal.item.Action;
 import de.tsl2.nano.incubation.terminal.item.Container;
 import de.tsl2.nano.incubation.terminal.item.Input;
 import de.tsl2.nano.incubation.terminal.item.MainAction;
+import de.tsl2.nano.incubation.terminal.item.Option;
 import de.tsl2.nano.incubation.terminal.item.selector.AntTaskSelector;
 import de.tsl2.nano.incubation.terminal.item.selector.DirSelector;
 import de.tsl2.nano.incubation.terminal.item.selector.FieldSelector;
@@ -33,7 +38,13 @@ import de.tsl2.nano.incubation.terminal.item.selector.FileSelector;
 import de.tsl2.nano.incubation.terminal.item.selector.PropertySelector;
 import de.tsl2.nano.incubation.terminal.item.selector.Sequence;
 import de.tsl2.nano.incubation.terminal.item.selector.XPathSelector;
+import de.tsl2.nano.incubation.tree.Tree;
+import de.tsl2.nano.incubation.vnet.NetCommunicator;
+import de.tsl2.nano.incubation.vnet.neuron.VNeuron;
+import de.tsl2.nano.incubation.vnet.routing.AbstractRoutingAStar;
+import de.tsl2.nano.incubation.vnet.routing.RoutingAStar;
 import de.tsl2.nano.incubation.vnet.workflow.Condition;
+import de.tsl2.nano.incubation.vnet.workflow.VActivity;
 import de.tsl2.nano.util.PrintUtil;
 import de.tsl2.nano.util.XmlGenUtil;
 
@@ -52,24 +63,29 @@ public class TerminalTest implements ENVTestPreparation {
     }
     
     
-//  @Test
-//  public void testTerminal() throws Exception {
-//      Tree root = new Tree("selection1", null, new ArrayList<IItem>(), null);
-//      root.add(new Option("option1", null, false, "Option 1"));
-//      root.add(new Option("option2", null, false, "Option 2"));
-//      root.add(new Option("option3", null, false, "Option 3"));
-//      root.add(new Input<Object>("input1", null, "Input 1", null));
-//      root.add(new Action("action1", null, new SRunnable(), "Action 1"));
-//
-//      InputStream in = ByteUtil.getInputStream("1\n2\n3\n4\n5\n\n".getBytes());
-//      new SIShell(root, in, System.out, 79, 10, 1).run();
-//
-//      SIShell.main(new String[] { SIShell.DEFAULT_NAME });
-//
-//      //admin console
-//      SIShell.main(new String[] { SIShell.DEFAULT_NAME, TerminalAdmin.ADMIN });
-//  }
-//
+  @Test
+  public void testTerminal() throws Exception {
+      Container root = new Container("selection1", null, new ArrayList<IItem>(), null);
+      root.add(new Option(root, "option1", null, false, "Option 1"));
+      root.add(new Option(root, "option2", null, false, "Option 2"));
+      root.add(new Option(root, "option3", null, false, "Option 3"));
+      root.add(new Input<Object>("input1", null, "Input 1", null));
+      root.add(new Action() {
+    	  @Override
+    	public Object run(Properties context) {
+    		return context.toString();
+    	}
+      });
+
+      InputStream in = ByteUtil.getInputStream("1\n2\n3\n4\n5\n\n".getBytes());
+      new SIShell(root, in, System.out, 79, 10, 1).run();
+
+      SIShell.main(new String[] { SIShell.DEFAULT_NAME });
+
+      //admin console
+      SIShell.main(new String[] { SIShell.DEFAULT_NAME, TerminalAdmin.ADMIN });
+  }
+
   @SuppressWarnings({ "unchecked", "rawtypes" })
   @Test
   public void testSIShellTools() throws Exception {
@@ -146,6 +162,15 @@ public class TerminalTest implements ENVTestPreparation {
       ant.add(new Input("filesets", "./:{**/*.*ml}**/*.xml;${user.dir}:{*.txt}", "filesets expression", false));
       ant.add(new Action(AntRunner.class, "runTask", "task", "properties", "filesets"));
       root.add(ant);
+
+      Container vnet = new Container("vNet", null);
+      Container impl = new Container("implementation", "vNet implementation");
+      impl.add(new Option(vnet, "NeuralNet", null, VNeuron.class.getName(), "NeuralNet implementation class"));
+      impl.add(new Option(vnet, "RoutingStar", null, RoutingAStar.class.getName(), "Routing implementation class"));
+      impl.add(new Option(vnet, "Workflow", null, VActivity.class.getName(), "Workflow implementation class"));
+      vnet.add(impl);
+      vnet.add(new Action(NetCommunicator.class, "main", "implementation"));
+      root.add(vnet);
 
 //      Tree getjar = new Tree("getJar", null);
 //      getjar.add(new Input("name", null, "name, jar-file or class package to load with dependencies from web"));

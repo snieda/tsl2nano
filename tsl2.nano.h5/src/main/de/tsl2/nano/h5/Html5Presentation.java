@@ -487,11 +487,11 @@ public class Html5Presentation<T> extends BeanPresentationHelper<T> implements I
                         ATTR_METHOD,
                         ENV.get("html5.http.method", "post"), ATTR_STYLE,
                         style("display", "inline"));
-                    if (!useSideNav())
-                        c3 = createExpandable(c3, "Menu", ENV.get("layout.header.menu.open", false));
                     Collection<IAction> actions = new ArrayList<IAction>(getPageActions(session));
                     actions.addAll(getApplicationActions(session));
                     actions.addAll(getSessionActions(session));
+                    if (!useSideNav(1 + actions.size()))
+                        c3 = createExpandable(c3, "Menu", ENV.get("layout.header.menu.open", false));
                     createActionPanel(c3, actions,
                         ENV.get("layout.header.button.text.show", true),
                         ATTR_ALIGN, ALIGN_RIGHT);
@@ -504,9 +504,10 @@ public class Html5Presentation<T> extends BeanPresentationHelper<T> implements I
         }
     }
 
-    private boolean useSideNav() {
+    private boolean useSideNav(int actionCount) {
         // use sideNav after login...
-        return isAuthenticated && ENV.get("layout.sidenav", false);
+        return isAuthenticated && ENV.get("layout.sidenav", false) 
+                && actionCount > ENV.get("layout.sidenav.min.count.action", 3);
     }
 
     private Element createMetaAndBody(ISession session, Element html, String title, boolean interactive) {
@@ -1157,7 +1158,7 @@ public class Html5Presentation<T> extends BeanPresentationHelper<T> implements I
         int width = -1;
         Element cell = null;
         try {
-            if (useSideNav() && actions.size() > ENV.get("layout.sidenav.min.count.action", 3)) {
+            if (useSideNav(actions.size())) {
                 cell = sideNav = createSidebarNavMenuButton(parent, sideNav);
                 width = ENV.get("layout.action.width", -1);
                 if (width == -1)
@@ -1176,7 +1177,7 @@ public class Html5Presentation<T> extends BeanPresentationHelper<T> implements I
                 }
             }
         } finally {
-            if (useSideNav()) {
+            if (useSideNav(actions.size())) {
                 if (width == -1)
                     ENV.setProperty("layout.action.width", width);
             }
@@ -1214,7 +1215,7 @@ public class Html5Presentation<T> extends BeanPresentationHelper<T> implements I
     }
 
     private String getCSSPanelAction() {
-        return useSideNav() ? CSS_CLASS_PANEL_ACTION : "panelactionsimple";
+        return useSideNav(Integer.MAX_VALUE) ? CSS_CLASS_PANEL_ACTION : "panelactionsimple";
     }
 
     /**

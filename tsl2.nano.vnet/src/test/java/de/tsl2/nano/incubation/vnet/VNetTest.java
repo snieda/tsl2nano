@@ -1,15 +1,18 @@
 package de.tsl2.nano.incubation.vnet;
 
-import static junit.framework.Assert.assertEquals;
-import static junit.framework.Assert.assertTrue;
-import static junit.framework.Assert.fail;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
 
 import java.io.Serializable;
 import java.math.BigDecimal;
 import java.sql.Time;
 import java.text.DateFormat;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
+import java.util.LinkedList;
+import java.util.List;
 
 import org.junit.AfterClass;
 import org.junit.BeforeClass;
@@ -52,11 +55,14 @@ public class VNetTest implements ENVTestPreparation {
 		Node<VNeuron, Float> nHabe = net.addAndConnect(new VNeuron("habe"), nHunger.getCore(), -1f);
 		net.addAndConnect(new VNeuron("ich"), nHabe.getCore(), -1f);
 
+		List<Object> output = new LinkedList<>();
 		// create a callback for responses
 		IListener<Notification> responseHandler = new IListener<Notification>() {
 			@Override
 			public synchronized void handleEvent(Notification event) {
-				System.out.println("RESPONSE: " + event.getNotification());
+				Object n = event.getNotification();
+				System.out.println("RESPONSE: " + n);
+				output.add(n.toString());
 			}
 		};
 
@@ -71,7 +77,7 @@ public class VNetTest implements ENVTestPreparation {
 			ManagedException.forward(e);
 		}
 
-		// should output: ich habe hunger
+		assertTrue("should output at least: ich habe hunger", output.containsAll(Arrays.asList("ich", "habe", "hunger")));
 	}
 
 	@Test
