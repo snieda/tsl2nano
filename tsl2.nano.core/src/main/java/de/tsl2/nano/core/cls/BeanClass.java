@@ -39,6 +39,7 @@ import org.simpleframework.xml.DefaultType;
 import de.tsl2.nano.core.IPredicate;
 import de.tsl2.nano.core.ManagedException;
 import de.tsl2.nano.core.log.LogFactory;
+import de.tsl2.nano.core.messaging.EventController;
 import de.tsl2.nano.core.util.AnnotationProxy;
 import de.tsl2.nano.core.util.BitUtil;
 import de.tsl2.nano.core.util.ByteUtil;
@@ -701,88 +702,10 @@ public class BeanClass<T> implements Serializable {
         return getValue(bean, path.split("\\."));
     }
 
-    /**
-     * evaluate the value of the given bean attribute path. if a relation is an iterable or map, it can be specified
-     * through a parameter.
-     * <p/>
-     * Example:
-     * 
-     * <pre>
-     * 1. customer.address[first].city
-     * 2. customer.address[0].city
-     * 3. customer.address.city     (the first address, too)
-     * 4. customer.address[last].street
-     * 5. customer.address[-1].code (the last address)
-     * 6. customer.address[street=berlinerstrasse].city
-     * </pre>
-     * 
-     * @param bean starting instance
-     * @param path full relation path
-     * @return attribute value or null
-     */
     public static Object getValue(Object bean, String... path) {
-        Object value = bean;
-        for (int i = 0; i < path.length; i++) {
-            try {
-                //eval the parameters of the last relation
-                String par = i > 0 ? StringUtil.substring(path[i - 1], "[", "]", false, true) : null;
-                if (value instanceof Iterable) {
-                    Iterable iter = (Iterable) value;
-                    if (!iter.iterator().hasNext()) {
-                        return null;
-                    }
-                    int p;
-                    if ("first".equalsIgnoreCase(par)) {
-                        p = 0;
-                    } else if ("last".equalsIgnoreCase(par)) {
-                        p = -1;
-                    } else if (par != null && par.contains("=")) {
-                        String att = StringUtil.substring(par, null, "=");
-                        String val = StringUtil.substring(par, "=", null);
-                        p = -2;
-                        int ii = 0;
-                        for (Object item : iter) {
-                            if (val.equals(getBeanValue(item, att))) {
-                                p = ii;
-                                break;
-                            }
-                            ii++;
-                        }
-                    } else if (par != null) {
-                        p = Integer.valueOf(par);
-                    } else {
-                        p = 0;
-                    }
-                    value = CollectionUtil.get(iter, p);
-                } else if (value instanceof Map) {
-                    Map map = (Map) value;
-                    if (map.size() == 0) {
-                        return null;
-                    }
-                    value = map.get(par);
-                }
-                String name = StringUtil.substring(path[i], null, "[");
-                //don't use the performance enhanced BeanValue.getBeanValue in cause dependency-cycles
-                value = getBeanValue(value, name);
-            } catch (final Exception ex) {
-                throw new ManagedException("Error on attribute path '" + StringUtil.toString(path, 1000)
-                    + "'! Attribute '"
-                    + path[i]
-                    + "' not available!", ex);
-            }
-            if (value == null) {
-                LOG.info("attribute '" + path[i] + "' of full path '" + StringUtil.toString(path, 1000) + "' is null");
-                return null;
-            }
-        }
-        return value;
+    	IValueAccess access = ValuePath.getValueAccess(bean, path);
+    	return access != null ? access.getValue() : null;
     }
-
-    protected static Object getBeanValue(Object value, String attributeName) {
-        final BeanAttribute attribute = BeanAttribute.getBeanAttribute(value.getClass(), attributeName);
-        return attribute.getValue(value);
-    }
-
     /**
      * is able to set a value of a bean.
      * 

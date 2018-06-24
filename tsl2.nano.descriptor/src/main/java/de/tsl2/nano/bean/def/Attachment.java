@@ -15,9 +15,9 @@ import java.util.UUID;
 
 import org.simpleframework.xml.Attribute;
 
-import de.tsl2.nano.bean.IValueAccess;
 import de.tsl2.nano.core.ENV;
 import de.tsl2.nano.core.cls.IAttribute;
+import de.tsl2.nano.core.cls.IValueAccess;
 import de.tsl2.nano.core.messaging.EventController;
 import de.tsl2.nano.core.util.BitUtil;
 import de.tsl2.nano.core.util.ByteUtil;

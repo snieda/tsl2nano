@@ -656,6 +656,7 @@ public class BeanAttribute<T> implements IAttribute<T> {
                         return PrimitiveUtil.convert(value, wrapperType);
                     else if (ByteUtil.isByteStream(wrapperType))
                         return ByteUtil.toByteStream((byte[])value, wrapperType);
+                    //IMPROVE: what's about the GenericParser (it's in the wrong module...)
                     return BeanClass.createInstance(wrapperType, value);
                 }
             }

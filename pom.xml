@@ -80,6 +80,7 @@
 		<module>tsl2.nano.jarresolver</module>
 		<module>tsl2.nano.specification</module>
 		<module>tsl2.nano.repeatable</module>
+		<module>tsl2.nano.cursus</module>
 		<module>tsl2.nano.logicstructure</module>
 		<module>tsl2.nano.terminal</module>
 		<module>tsl2.nano.vnet</module>

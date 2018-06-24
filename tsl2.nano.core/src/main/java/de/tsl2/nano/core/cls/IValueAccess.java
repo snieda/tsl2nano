@@ -1,4 +1,4 @@
-package de.tsl2.nano.bean;
+package de.tsl2.nano.core.cls;
 
 import de.tsl2.nano.core.messaging.EventController;
 

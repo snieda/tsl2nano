@@ -43,9 +43,10 @@ public class BReference<O> extends AReference<Class<O>, O> {
     protected Object id(Class<O> type, String strId) {
         return BeanAttribute.wrap(strId, BeanContainer.getIdAttribute(type).getType());
     }
+
     
     public String name() {
-        return StringUtil.substring(super.toString(), null, ":");
+        return StringUtil.substring(super.toString(), null, PREFIX_ID);
     }
     
     @Override
@@ -53,6 +54,11 @@ public class BReference<O> extends AReference<Class<O>, O> {
         return BeanContainer.getIdAttribute(resolve()).getValue(instance);
     }
 
+    @Override
+    protected void checkDescription(String description) {
+    	type(description);
+    }
+    
     @Override
     protected O materialize(String description) {
         if (!BeanContainer.isConnected())

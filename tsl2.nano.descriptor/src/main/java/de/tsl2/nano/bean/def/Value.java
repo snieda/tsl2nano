@@ -11,10 +11,10 @@ package de.tsl2.nano.bean.def;
 
 import org.simpleframework.xml.Attribute;
 
-import de.tsl2.nano.bean.IValueAccess;
 import de.tsl2.nano.bean.ValueHolder;
 import de.tsl2.nano.core.cls.IAttribute;
 import de.tsl2.nano.core.cls.IDefaultAttribute;
+import de.tsl2.nano.core.cls.IValueAccess;
 
 /**
  * Simple implementation of {@link IValueAccess} and {@link IAttribute}

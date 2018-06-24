@@ -9,15 +9,12 @@
  */
 package de.tsl2.nano.bean.def;
 
-import java.lang.reflect.Method;
-
 import org.simpleframework.xml.Default;
 import org.simpleframework.xml.DefaultType;
 
-import de.tsl2.nano.bean.IValueAccess;
-import de.tsl2.nano.core.ManagedException;
 import de.tsl2.nano.core.cls.BeanAttribute;
 import de.tsl2.nano.core.cls.BeanClass;
+import de.tsl2.nano.core.cls.IValueAccess;
 import de.tsl2.nano.core.messaging.EventController;
 import de.tsl2.nano.core.util.CollectionUtil;
 
@@ -96,14 +93,5 @@ public class ValuePath<B, T> extends PathExpression<T> implements IValueAccess<T
             eventController = new EventController();
         }
         return eventController;
-    }
-
-    static Method getReadAccessMethod() {
-        try {
-            return ValuePath.class.getMethod(ATTR_VALUE, new Class[0]);
-        } catch (Exception e) {
-            ManagedException.forward(e);
-            return null;
-        }
     }
 }

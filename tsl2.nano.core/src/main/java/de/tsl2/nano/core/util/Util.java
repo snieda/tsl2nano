@@ -67,7 +67,7 @@ public class Util {
      * @return true, if all objects are null
      */
     public static boolean isAllNull(Object... objects) {
-        checkParameterCount(objects, 1);
+        checkMinParameterCount(objects, 1);
         for (Object o : objects) {
             if (o != null) {
                 return false;
@@ -83,7 +83,7 @@ public class Util {
      * @return true, if at least one object is null
      */
     public static boolean hasNull(Object... objects) {
-        checkParameterCount(objects, 1);
+        checkMinParameterCount(objects, 1);
         for (Object o : objects) {
             if (o != null) {
                 return false;
@@ -92,7 +92,7 @@ public class Util {
         return true;
     }
 
-    protected static void checkParameterCount(Object[] objects, int i) {
+    protected static void checkMinParameterCount(Object[] objects, int i) {
         if (objects == null || objects.length < i) {
             throw new IllegalArgumentException("at least " + i + " parameter must be given!");
         }
@@ -156,7 +156,7 @@ public class Util {
      * @return true, if data is equal to one of c.
      */
     public static final <T> boolean in(T entry, T... elements) {
-        checkParameterCount(elements, 1);
+        checkMinParameterCount(elements, 1);
         return Arrays.asList(elements).contains(entry);
     }
 
@@ -228,18 +228,23 @@ public class Util {
      * @return combined hashcode
      */
     public static int hashCode(Object... objects) {
-        checkParameterCount(objects, 1);
+        checkMinParameterCount(objects, 1);
         return Arrays.hashCode(objects);
     }
 
     /**
      * checks, if all objects are equal
-     * 
+     * Usage in own equals() implementation:<code>
+		if (!(o instanceof MyClass))
+			return false;
+		MyClass m = (MyClass) o;
+		return Util.equals(this.member1, m.member1) && Util.equals(member2, m.member2) ...;
+     * </code>
      * @param objects objects to check
      * @return true, if all objects are equal
      */
     public static boolean equals(Object... objects) {
-        checkParameterCount(objects, 2);
+        checkMinParameterCount(objects, 2);
         Object last = objects[0];
         for (Object o : objects) {
             if (o != null && !o.equals(last)) {

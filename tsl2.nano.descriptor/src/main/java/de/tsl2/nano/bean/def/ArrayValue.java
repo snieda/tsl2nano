@@ -14,8 +14,8 @@ import org.simpleframework.xml.Default;
 import org.simpleframework.xml.DefaultType;
 import org.simpleframework.xml.Element;
 
-import de.tsl2.nano.bean.IValueAccess;
 import de.tsl2.nano.core.cls.IDefaultAttribute;
+import de.tsl2.nano.core.cls.IValueAccess;
 import de.tsl2.nano.core.messaging.EventController;
 
 /**

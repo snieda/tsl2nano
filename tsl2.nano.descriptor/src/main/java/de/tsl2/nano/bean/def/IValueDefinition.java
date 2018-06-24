@@ -9,7 +9,7 @@
  */
 package de.tsl2.nano.bean.def;
 
-import de.tsl2.nano.bean.IValueAccess;
+import de.tsl2.nano.core.cls.IValueAccess;
 
 /**
  * combination of {@link IAttributeDefinition} and {@link IValueAccess}.

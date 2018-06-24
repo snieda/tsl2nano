@@ -16,12 +16,12 @@ import org.apache.commons.logging.Log;
 import org.simpleframework.xml.Attribute;
 
 import de.tsl2.nano.bean.BeanUtil;
-import de.tsl2.nano.bean.IValueAccess;
 import de.tsl2.nano.bean.def.AbstractDependencyListener;
 import de.tsl2.nano.bean.def.Bean;
 import de.tsl2.nano.bean.def.BeanValue;
 import de.tsl2.nano.bean.def.IAttributeDefinition;
 import de.tsl2.nano.core.ENV;
+import de.tsl2.nano.core.cls.IValueAccess;
 import de.tsl2.nano.core.cls.PrivateAccessor;
 import de.tsl2.nano.core.log.LogFactory;
 import de.tsl2.nano.core.messaging.ChangeEvent;

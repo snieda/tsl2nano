@@ -168,7 +168,7 @@ public class NumberUtil extends BitUtil {
      * @return
      */
     public static final boolean hasEqualSigns(BigDecimal... numbers) {
-        checkParameterCount(numbers, 2);
+        checkMinParameterCount(numbers, 2);
         int sign = 0, s;
         for (int i = 0; i < numbers.length; i++) {
             s = numbers[i].signum();

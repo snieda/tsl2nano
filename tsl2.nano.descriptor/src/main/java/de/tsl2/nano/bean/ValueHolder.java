@@ -14,6 +14,7 @@ import java.io.Serializable;
 import org.simpleframework.xml.Attribute;
 import org.simpleframework.xml.Element;
 
+import de.tsl2.nano.core.cls.IValueAccess;
 import de.tsl2.nano.core.messaging.ChangeEvent;
 import de.tsl2.nano.core.messaging.EventController;
 

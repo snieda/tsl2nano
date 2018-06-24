@@ -31,6 +31,7 @@ public abstract class AReference<T, O> {
 
     protected static final String PREFIX_REFERENCE = "@";
     protected static final String PREFIX_ID = ":";
+    protected String postfixID = ""; //only to be extendable...
 
     /**
      * constructor for deserialization
@@ -67,7 +68,7 @@ public abstract class AReference<T, O> {
     }
 
     protected String createDescription(Object instance) {
-        return PREFIX_REFERENCE + toString(instance.getClass()) + PREFIX_ID + getId(instance);
+        return PREFIX_REFERENCE + toString(instance.getClass()) + PREFIX_ID + getId(instance) + postfixID;
     }
 
     protected static <B> String createDescription(Class<B> type, Object id) {
@@ -90,7 +91,7 @@ public abstract class AReference<T, O> {
      * @return type, id
      */
     protected Pointer getTypeAndId(String description) {
-        String[] o = description.substring(1).split(PREFIX_ID);
+        String[] o = description.substring(1).split("[" + PREFIX_ID + postfixID + "]");
         T type = type(o[0]);
         return new Pointer(type, id(type, o[1]));
     }
@@ -143,7 +144,19 @@ public abstract class AReference<T, O> {
         return instance;
     }
 
-    @SuppressWarnings("rawtypes")
+    public String getDescription() {
+		return description;
+	}
+
+    
+	protected void setDescription(String description) {
+		checkDescription(description);
+		this.description = description;
+	}
+
+	abstract protected void checkDescription(String description);
+
+	@SuppressWarnings("rawtypes")
     @Override
     public boolean equals(Object obj) {
         return description != null ? obj instanceof AReference && description.equals(((AReference)obj).description) : super.equals(obj);

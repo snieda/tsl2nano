@@ -11,7 +11,7 @@ package de.tsl2.nano.bean.def;
 
 import java.util.Collection;
 
-import de.tsl2.nano.bean.IValueAccess;
+import de.tsl2.nano.core.cls.IValueAccess;
 
 /**
  * see {@link MultiOptionsWrapper} but works on real enums.
