@@ -531,13 +531,18 @@ public class NanoH5Session implements ISession<BeanDefinition>, Serializable, IL
                 + StringUtil.toHexString(getContext().toString().getBytes()) : "")
             + ", "
             + ENV.translate("tsl2nano.request", true) + ": "
-            + DateUtil.seconds(System.currentTimeMillis() - startTime) + " msec"
+            + DateUtil.seconds(System.currentTimeMillis() - startTime) + " sec"
             + (LOG.isDebugEnabled() ? ", " + "Memory: " + (Profiler.getUsedMem() / (1024 * 1024)) + " MB" : "")
             + (LOG.isDebugEnabled() ? ", " + "working sessions: " + server.sessions.size() : "");
     }
 
     private String refreshPage(Object message) {
-        return builder.build(this, nav.current(), message, true, nav.toArray());
+        try {
+            return builder.build(this, nav.current(), message, true, nav.toArray());
+        } catch (Exception e) {
+            LOG.error(e);
+            return message.toString();
+        }
     }
 
     /**
@@ -686,6 +691,7 @@ public class NanoH5Session implements ISession<BeanDefinition>, Serializable, IL
                     String n = StringUtil.substring(p, null, IPresentable.POSTFIX_SELECTOR);
                     final BeanValue assignableAttribute = (BeanValue) current.getAttribute(n);
                     responseObject = assignableAttribute.connectToSelector(current);
+                    Message.send("open selection panel " + n + " ...");
                     break;
                 }
             }

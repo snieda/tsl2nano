@@ -2,18 +2,23 @@ package tsl2.nano.cursus;
 
 import java.io.Serializable;
 
-import javax.persistence.Entity;
-
 import de.tsl2.nano.core.util.Util;
 import de.tsl2.nano.incubation.repeat.IChange;
 
-@Entity
-class Mutatio implements IChange, Serializable {
+/**
+ * describes the change of an item/res from an old to a new value
+ * @author Tom
+ */
+public class Mutatio<O, V> implements IChange, Serializable {
 	private static final long serialVersionUID = 1L;
-	String previous;
-	String next;
-	Res res;
-	public Mutatio(String next, Res res) {
+	protected V previous;
+	protected V next;
+	protected Res<O, V> res;
+	
+	public Mutatio() {
+	}
+	
+	public Mutatio(V next, Res<O, V> res) {
 		this.next = next;
 		this.res = res;
 	}
@@ -22,16 +27,16 @@ class Mutatio implements IChange, Serializable {
 		return res;
 	}
 	@Override
-	public Object getOld() {
+	public V getOld() {
 		return previous;
 	}
 	@Override
-	public Object getNew() {
+	public V getNew() {
 		return next;
 	}
 	@Override
 	public IChange revert() {
-		return new Mutatio(previous, res);
+		return new Mutatio<O, V>(previous, res);
 	}
 	@Override
 	public int hashCode() {

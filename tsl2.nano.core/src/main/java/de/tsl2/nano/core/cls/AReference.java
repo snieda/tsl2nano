@@ -91,7 +91,10 @@ public abstract class AReference<T, O> {
      * @return type, id
      */
     protected Pointer getTypeAndId(String description) {
+    	assert description != null : "description must not be null!";
         String[] o = description.substring(1).split("[" + PREFIX_ID + postfixID + "]");
+        if (o.length < 2)
+        	throw new IllegalArgumentException("parsing exception on '" + description);
         T type = type(o[0]);
         return new Pointer(type, id(type, o[1]));
     }

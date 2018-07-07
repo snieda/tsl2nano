@@ -1,6 +1,7 @@
 package tsl2.nano.cursus;
 
 import java.io.Serializable;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Calendar;
 import java.util.Date;
@@ -9,8 +10,6 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Set;
 
-import javax.persistence.Entity;
-
 import de.tsl2.nano.core.util.DateUtil;
 import de.tsl2.nano.core.util.Util;
 
@@ -18,22 +17,21 @@ import de.tsl2.nano.core.util.Util;
  * Holds a start-end period and is able to walk through this period on given time-steps (see {@link #runThrough(Date, Date)} - then it is a generator.
  * @author Tom
  */
-@Entity
-class Timer implements Serializable {
+public class Timer implements Serializable {
 	private static final long serialVersionUID = 1L;
-	Date from;
-	Date until;
+	protected Date from;
+	protected Date until;
 	/** a value given by the {@link Calendar}. E.g. Calendar.DAY_OF_MONTH. */
-	int stepType;
+	protected int stepType;
 	/** number of {@link #stepType} for each step. If 0, the timer is only a period, not a generator */
-	int stepLength;
-	/** explizit step exceptions on given {@link #stepType} to be ignored. */
-	List<Integer> stepExceptions;
-	Set<Timer> subTimers; //TODO: implement sub-timers
+	protected int stepLength;
+	/** explizit step exceptions on given {@link #stepType} to be ignored. 
+	 * It is defined as ArrayList, as List or Set is not Serializable and cannot be handled by JPA! */
+	protected ArrayList<Integer> stepExceptions;
+	protected Set<Timer> subTimers; //TODO: implement sub-timers
 	
-	int currentSteps;
+	transient int currentSteps;
 	transient Calendar current;
-
 	
 	public Timer() {
 	}
@@ -47,7 +45,7 @@ class Timer implements Serializable {
 		this.until = until;
 		this.stepType = stepType;
 		this.stepLength = stepLength;
-		this.stepExceptions = Arrays.asList(stepExceptions);
+		this.stepExceptions = new ArrayList<>(Arrays.asList(stepExceptions));
 		current = Calendar.getInstance();
 		reset();
 	}
@@ -66,6 +64,9 @@ class Timer implements Serializable {
 	/** @return true, if timers period includes the given date */
 	boolean expired(Date date) {
 		return DateUtil.includes(from, current.getTime(), date);
+	}
+	boolean isPartOf(Date from, Date until) {
+		return DateUtil.contains(from, until, this.from, this.until);
 	}
 	List<Date> runThrough(Date from, Date until) {
 		LinkedList<Date> steps = new LinkedList<>();
@@ -94,6 +95,10 @@ class Timer implements Serializable {
 			subTimers = new HashSet<>();
 		return subTimers;
 	}
+	public void setSubTimers(Set<Timer> subTimers) {
+		this.subTimers = subTimers;
+	}
+
 	@Override
 	public String toString() {
 		return Util.toString(getClass(), from, stepLength > 0 ? " [" + (stepLength * stepType) + "] " : "", until);

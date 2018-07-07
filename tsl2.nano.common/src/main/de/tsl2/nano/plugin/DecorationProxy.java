@@ -30,7 +30,7 @@ class DecorationProxy<T extends Plugin> implements InvocationHandler {
                 ManagedException.forward(e);
             }
         });
-        Plugins.log(implementations.size() + " plugins done on: " + method.getName());
+        Plugins.log(implementations.size() + " plugins done on: " + method.getName() + " [" + StringUtil.fixString(args, 60) + "]");
         return result[0];
     }
 

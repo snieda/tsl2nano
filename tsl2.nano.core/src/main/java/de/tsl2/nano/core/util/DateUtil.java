@@ -854,6 +854,10 @@ public final class DateUtil {
         return new Period(from1, to1).intersects(from2, to2);
     }
 
+    public static boolean contains(Date periodFrom, Date periodTo, Date from1, Date to2) {
+        return new Period(periodFrom, periodTo).contains(new Period(from1, to2));
+    }
+    
     /**
      * UNTESTED YET checks, if the given dateToCheck is between periodFrom and periodTo.
      * 

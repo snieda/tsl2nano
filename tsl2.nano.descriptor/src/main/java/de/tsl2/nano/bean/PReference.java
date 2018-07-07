@@ -3,7 +3,6 @@
  */
 package de.tsl2.nano.bean;
 
-import de.tsl2.nano.bean.def.Bean;
 import de.tsl2.nano.core.cls.AReference;
 import de.tsl2.nano.core.cls.BeanAttribute;
 import de.tsl2.nano.core.cls.BeanClass;

@@ -3400,6 +3400,12 @@ Actual list: http://infocenter.pentaho.com/help/index.jsp?topic=%2Fsupported_com
 	* ormlite: "No fields have a DatabaseField annotation in class org.anonymous.project.Address"
 * SimpleXml: TransformationException on Lists
 	* use ListWrapper instead of type List
+* sometimes the mda.xml script does not compile the generated classes
+	* use the script compilejar.cmd to compile the classes and create a generated-model.jar file
+* sometimes the mda.xml script does not generate any sql file.
+	* get the sql file from any other tool, start the h2 database manager on localhost:8282 and run the script inside
+* java.lang.ClassCastException: org.hibernate.type.StringType cannot be cast to org.hibernate.type.VersionType
+	* -> remove generated '@Version' annotation from java files
 	
 ## Migrations
 
@@ -4198,5 +4204,10 @@ on external database, anyway-scripts are used 'anyway'
 - (!) de.tsl2.nano.messaging.ChangeEvent -> de.tsl2.nano.core.messaging.ChangeEvent
 - (v) de.tsl2.nano.h5.timesheet.ActionImportHolidays in test ?
 
+- Message beim Öffnen, Schliessen, Neu, ...
+- Zeitmessung falsch
+- Exception 'collection is empty but must contain at least one item'
+- quicksearch schränkt such-ergebnis nicht ein
+- (x) Performance bei BeanCollector.onActivation
 
  -->

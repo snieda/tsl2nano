@@ -1078,7 +1078,7 @@ public class BeanPresentationHelper<T> {
      */
     protected String getBestPresentationAttribute() {
         if (bean.isDefault() && bean.getAttributeDefinitions().size() > 0) {
-            Message.send("evaluating best attribute presentation for entity '" + bean.getName() + "'");
+            Message.send("evaluating best attribute presentation for '" + bean.getName() + "'");
             String[] names = bean.getAttributeNames();
             NavigableMap<Integer, Integer> levels = getBestAttributeOrder(names);
             bean.setAttributeFilter(getBestAttributeNames(names, levels.descendingMap().values()));

@@ -165,7 +165,11 @@
 		<echo message="compiler-path: ${env.java_home}" />
 
 		<!-- do some project-specific WORKAROUNDs -->
-
+	    <!--   <replaceregexp>
+	            <fileset dir="${src.dir}"><include name="**/*.java"/></fileset>
+	            <regexp pattern="@Version"/>
+	            <substitution expression="//@Version"/>
+	        </replaceregexp> -->
 		<!-- WORKAROUND END -->
 		<javac classpathref="project.classpath" srcdir="${src.dir}" destdir="${bin.dir}" fork="true" failonerror="true" />
 

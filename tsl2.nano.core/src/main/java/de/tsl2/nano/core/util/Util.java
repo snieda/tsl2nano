@@ -424,6 +424,11 @@ public class Util {
         return checkedGenericObject;
     }
 
+    /** does a fast toString() like the Object.toString() does. Usefull on logging. */
+    public static final String toObjString(Object instance) {
+    	return instance != null ? instance.getClass().getSimpleName() + "@" + instance.hashCode() : "null";
+    }
+    
     /**
      * standard toString implementation
      * 

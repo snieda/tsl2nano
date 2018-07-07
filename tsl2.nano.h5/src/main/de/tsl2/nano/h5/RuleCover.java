@@ -223,6 +223,7 @@ public class RuleCover<T> extends DelegationHandler<T> implements
     }
 
     /**
+     * Attention: this method is not called directly, but through reflection!
      * @param context The context to set.
      */
     @Override
@@ -290,6 +291,7 @@ public class RuleCover<T> extends DelegationHandler<T> implements
 
         if (!nameFound)
             throw new IllegalStateException("no attribute matches for attributedefinition for " + rules.keySet());
+        cachedConnectionEndTypes.add(connectionEnd.getDeclaringClass());
         return this;
     }
 
@@ -297,5 +299,4 @@ public class RuleCover<T> extends DelegationHandler<T> implements
     public void disconnect(IAttributeDefinition<?> connectionEnd) {
         throw new UnsupportedOperationException();
     }
-
 }

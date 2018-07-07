@@ -17,4 +17,11 @@ package de.tsl2.nano.core;
  */
 public interface IPredicate<T> {
     public boolean eval(T arg0);
+
+    public static final IPredicate ANY = new IPredicate() {
+		@Override
+		public boolean eval(Object arg0) {
+			return true;
+		}
+    };
 }

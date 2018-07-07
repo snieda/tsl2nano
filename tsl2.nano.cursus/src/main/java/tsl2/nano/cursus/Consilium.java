@@ -7,36 +7,34 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
-import javax.persistence.Entity;
-
 import de.tsl2.nano.core.util.ByteUtil;
+import de.tsl2.nano.core.util.ListSet;
 import de.tsl2.nano.core.util.StringUtil;
 import de.tsl2.nano.core.util.Util;
 import de.tsl2.nano.incubation.repeat.ICommand;
 import tsl2.nano.cursus.Processor.Id;
 
-@Entity
-class Consilium implements IConsilium, Comparable<Consilium>, Serializable, Cloneable {
+public class Consilium implements IConsilium, Comparable<Consilium>, Serializable, Cloneable {
 	private static final long serialVersionUID = 1L;
-	String author;
-	Date created;
-	Date changed;
-	Timer timer;
-	Priority priority;
-	Status status;
-	private String seal;
-	private List<Consecutio> consecutios;
-	
+	protected String author;
+	protected Date created;
+	protected Date changed;
+	protected Timer timer;
+	protected Priority priority;
+	protected Status status;
+	protected String seal;
+	protected  Set<? extends ICommand<?>> exsecutios;
 	transient Id trusted;
+
 	
 	public Consilium() {
 	}
 
-	public Consilium(String author, Timer timer, Priority priority, Consecutio...consecutios) {
+	public Consilium(String author, Timer timer, Priority priority, Exsecutio<?>...exsecutios) {
 		this.author = author;
 		this.timer = timer;
 		this.priority = priority;
-		this.consecutios = Arrays.asList(consecutios);
+		this.exsecutios = new ListSet<>(Arrays.asList(exsecutios));
 		created = new Date();
 		status = Status.INACTIVE;
 		seal = createSeal();
@@ -66,7 +64,7 @@ class Consilium implements IConsilium, Comparable<Consilium>, Serializable, Clon
 	
 	@Override
 	public String toString() {
-		return Util.toString(getClass(), consecutios, timer, status);
+		return Util.toString(getClass(), exsecutios, timer, status);
 	}
 
 	@Override
@@ -109,12 +107,17 @@ class Consilium implements IConsilium, Comparable<Consilium>, Serializable, Clon
 	}
 
 	@Override
-	public List<? extends ICommand> getConsecutios() {
-		return consecutios;
+	public Set<? extends ICommand<?>> getExsecutios() {
+		return exsecutios;
 	}
 
 	@Override
 	public Timer getTimer() {
 		return timer;
+	}
+
+	@Override
+	public boolean hasFixedContent() {
+		return getExsecutios().stream().anyMatch(e -> e instanceof Exsecutio && ((Exsecutio)e).hasFixedContent());
 	}
 }

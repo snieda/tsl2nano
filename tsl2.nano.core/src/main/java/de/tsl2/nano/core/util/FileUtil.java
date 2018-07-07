@@ -34,6 +34,7 @@ import java.io.Serializable;
 import java.io.Writer;
 import java.net.URI;
 import java.net.URL;
+import java.nio.charset.Charset;
 import java.text.DateFormat;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -730,19 +731,24 @@ public class FileUtil {
      */
     public static synchronized char[] getFileData(InputStream stream, String encoding) {
         InputStreamReader file = null;
+        char[] data = null;
         try {
             file = encoding != null ? new InputStreamReader(stream, encoding) : new InputStreamReader(stream);
 
             final int length = stream.available();
-            final char data[] = new char[length];
-            int len = file.read(data);
-            if (len < length) {
-            	LOG.debug("stream.available(): " + length + " bytes, but only " + len + " bytes read -> filling rest with ' '");
-            	for (int i = len; i < length; i++) {
-					data[i] = ' ';
-				}
+            if (length > 0) { //TODO: do we need that? readBytes is not enough?
+	            data = new char[length];
+	            int len = file.read(data);
+	            if (len < length) {
+	            	LOG.debug("stream.available(): " + length + " bytes, but only " + len + " bytes read -> filling rest with ' '");
+	            	for (int i = len; i < length; i++) {
+						data[i] = ' ';
+					}
+	            }
+	            LOG.info(ByteUtil.amount(length) + " read from stream " + stream);
+            } else {
+            	data = new String(readBytes(stream), encoding != null ? encoding : Charset.defaultCharset().name()).toCharArray();
             }
-            LOG.info(ByteUtil.amount(length) + " read from stream " + stream);
             //stream.available() does not guarantee to return the total amount of bytes!
             if (stream.available() > 0) {
             	LOG.warn("not all bytes (" + stream.available() + " bytes left) were read from stream! The InputStream " + stream + " should not be read with this method!");

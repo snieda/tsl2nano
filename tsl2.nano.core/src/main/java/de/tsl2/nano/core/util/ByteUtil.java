@@ -170,13 +170,17 @@ public class ByteUtil extends Util {
 
     }
 
+    public static Object convertToObject(byte[] bytes) {
+    	return convertToObject(bytes, null);
+    }
+    
     /**
      * deserialization of a byte-array
      * 
      * @param bytes to deserialize
      * @return deserialized bean
      */
-    protected static Object convertToObject(byte[] bytes, final ClassLoader classLoader) {
+    public static Object convertToObject(byte[] bytes, final ClassLoader classLoader) {
         try {
             final ByteArrayInputStream bis = new ByteArrayInputStream(bytes);
             final ObjectInputStream i;

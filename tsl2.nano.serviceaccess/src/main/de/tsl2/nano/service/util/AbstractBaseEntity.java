@@ -9,9 +9,7 @@
  */
 package de.tsl2.nano.service.util;
 
-import java.io.Serializable;
-import java.util.UUID;
-
+import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
 import javax.persistence.MappedSuperclass;
 
@@ -22,17 +20,17 @@ import javax.persistence.MappedSuperclass;
  * @version $Revision$
  */
 @MappedSuperclass
-public abstract class AbstractBaseEntity implements Serializable {
+public abstract class AbstractBaseEntity<ID> implements IPersistable<ID> {
     private static final long serialVersionUID = 1L;
 
-    @Id
-    private final String id;
+    @Id @GeneratedValue
+    private ID id;
 
     /**
      * constructor
      */
     public AbstractBaseEntity() {
-        this.id = UUID.randomUUID().toString();
+//        this.id = UUID.randomUUID().toString();
     }
 
     /**
@@ -40,7 +38,7 @@ public abstract class AbstractBaseEntity implements Serializable {
      */
     @Override
     public int hashCode() {
-        return id.hashCode();
+        return id != null ? id.hashCode() : super.hashCode();
     }
 
     /**
@@ -55,7 +53,7 @@ public abstract class AbstractBaseEntity implements Serializable {
             return false;
         }
         final AbstractBaseEntity other = (AbstractBaseEntity) obj;
-        return getId().equals(other.getId());
+        return getId() != null ? getId().equals(other.getId()) : false;
     }
 
     /**
@@ -63,7 +61,11 @@ public abstract class AbstractBaseEntity implements Serializable {
      * 
      * @return id
      */
-    public String getId() {
+    public ID getId() {
         return id;
+    }
+    
+    public void setId(ID id) {
+        this.id = id;
     }
 }

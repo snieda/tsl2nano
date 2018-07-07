@@ -94,6 +94,9 @@ public class JarResolver {
     static final String PACKAGE_EXCEPTION = "package.exception.regex";
     static final String ONLY_LOAD_DEFINED = "only.load.defined.packages";
 
+    private static final String KEY_FINDJAR_INDEX = "findjar.index";
+    private static final String KEY_FINDJAR_CLASS = "findjar.class";
+
     public JarResolver() {
         this(null);
     }
@@ -433,7 +436,8 @@ public class JarResolver {
      * @return jar-file name or null
      */
     public String findJarOnline(String pck) {
-        String content = NetUtil.get("http://findjar.com" + "/class/" + pck.replace(".", "/"));
+        String urlFindjarClass = props.getProperty(KEY_FINDJAR_CLASS, "https://findjar.com/class/");
+        String content = NetUtil.get(urlFindjarClass + pck.replace(".", "/"));
         //try to use that jar file where the a part of the package name could be found
         String jarName = null;
         final String ID_NAMEPART = "$MYNAMEPARTEXPRESSION$";
@@ -461,7 +465,8 @@ public class JarResolver {
      * @return full class name or null
      */
     public String findClassOnline(String pck) {
-        String content = NetUtil.get("http://findjar.com" + "/index.x?query=" + toURIParameter(pck));
+        String urlFindjar = props.getProperty(KEY_FINDJAR_INDEX, "http://findjar.com/index.x?query=");
+        String content = NetUtil.get(urlFindjar + toURIParameter(pck));
         String jarName = StringUtil.extract(content, "[a-zA-Z0-9_.-]+\\.jar");
         return Util.isEmpty(jarName) ? null : jarName;
     }

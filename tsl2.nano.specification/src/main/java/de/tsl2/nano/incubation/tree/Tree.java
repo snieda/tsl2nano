@@ -9,6 +9,7 @@
  */
 package de.tsl2.nano.incubation.tree;
 
+import java.util.Collection;
 import java.util.Comparator;
 import java.util.LinkedList;
 import java.util.List;
@@ -122,7 +123,7 @@ public class Tree<C, T> extends TreeMap<C, Tree<C, T>> {
      * getChildren
      * @return child nodes
      */
-    public List<T> getChildren() {
+    public Collection<T> getChildren() {
         return CollectionUtil.getTransforming(values(), new ITransformer<Tree<C, T>, T>() {
             @Override
             public T transform(Tree<C, T> t) {
@@ -166,6 +167,10 @@ public class Tree<C, T> extends TreeMap<C, Tree<C, T>> {
         });
         return list.size() > 0 ? list.iterator().next() : null;
     }
+
+	public List<T> collectChildNodes(T node) {
+		return getNode(node).collect(IPredicate.ANY);
+	}
 
     /**
      * @delegates to {@link #collect(IPredicate, List)}.

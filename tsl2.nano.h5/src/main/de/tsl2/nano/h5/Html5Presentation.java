@@ -338,7 +338,8 @@ public class Html5Presentation<T> extends BeanPresentationHelper<T> implements I
                     model.setPresentationHelper(createHelper(model));
                 }
                 form = ((Html5Presentation) model.getPresentationHelper()).createPage(session, null,
-                    message instanceof String ? ENV.translate(message, true) : message,
+                    message instanceof String && !(message.toString().contains(".") && NumberUtil.isNumber(message)) 
+                        ? ENV.translate(message, true) : message,
                     interactive,
                     navigation);
             } else {

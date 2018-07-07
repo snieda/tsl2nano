@@ -1,0 +1,26 @@
+package tsl2.nano.cursus.effectus;
+
+import de.tsl2.nano.bean.BeanUtil;
+import de.tsl2.nano.incubation.specification.rules.RulePool;
+import tsl2.nano.cursus.Res;
+
+public class RuleEffectus<O, V> extends Effectus<O, V> {
+	private static final long serialVersionUID = 1L;
+
+
+	private String ruleName;
+	
+	public RuleEffectus() {
+	}
+
+	public RuleEffectus(Res<O, V> res, boolean fixed, String ruleName) {
+		super(res, fixed);
+		this.ruleName = ruleName;
+	}
+
+	@Override
+	protected V evaluateNewValue() {
+		return (V) new RulePool().get(ruleName).run(BeanUtil.toValueMap(getItem()));
+	}
+
+}

@@ -275,17 +275,31 @@ public class AttributeDefinition<T> implements IAttributeDefinition<T> {
      * @param instance to be set as context object in all RuleCover Proxies.
      */
     protected static <I> void injectIntoRuleCover(UnboundAccessor acc, Object instance) {
+    	injectIntoRuleCover(acc, instance, 0);
+    }
+    protected static <I> void injectIntoRuleCover(UnboundAccessor acc, Object instance, int level) {
+    	if (!IRuleCover.cachedConnectionEndTypes.contains(instance.getClass())) {
+    		LOG.debug("no existing rule-covers for connection-end of type: " + instance.getClass());
+    		return;
+    	}
+    		
+    	if (level >= ENV.get("beancollector.rulecover.max.recursion", 4)) {
+    		LOG.info("maximum recursion of " + level + " reached. finishing rule-cover tree on " + acc.toString());
+    		return;
+    	}
         //connect optional rule-covers (use accessor instead of BeanDefinition to avoid stackoverflow
         Map members = acc.members();
         InvocationHandler handler;
         Object item;
+        LOG.info("walking through " + members.size() + " members of instance " + Util.toObjString(acc.instance()) 
+        		+ " to inject " + Util.toObjString(instance) + " into existing rule-covers ");
         for (Object k : members.keySet()) {
             item = members.get(k);
             if (item != null) {
                 //first inject the child tree - be careful, don't produce a stackoverflow
                 if (item != instance && Util.isFrameworkClass(item.getClass()) && !item.getClass().isAnonymousClass()
                     && !(item instanceof IAttribute) && !(item instanceof BeanDefinition))
-                    injectIntoRuleCover(new PrivateAccessor(item), instance);
+                    injectIntoRuleCover(new PrivateAccessor(item), instance, level+1);
                 //now the own direct members
                 if (Proxy.isProxyClass(item.getClass())) {
                     handler = Proxy.getInvocationHandler(item);
@@ -323,6 +337,7 @@ public class AttributeDefinition<T> implements IAttributeDefinition<T> {
                 if (l instanceof AbstractDependencyListener) {
                     AbstractDependencyListener<?, ?> dl = (AbstractDependencyListener<?, ?>) l;
                     if (isBean) {//create a specific listener instance for the given bean!
+                    	LOG.debug(beandef.getId() + ": re-assigning dependency-listener-clone " + dl);
                         dl = (AbstractDependencyListener<?, ?>) dl.clone();
                         Class eventType = changeHandler().getEventType(l);
                         changeHandler().removeListener(l);
@@ -330,6 +345,7 @@ public class AttributeDefinition<T> implements IAttributeDefinition<T> {
                     }
                     if (dl.attributeID != null) {
                         String name = StringUtil.substring(dl.attributeID, ".", null);
+                        LOG.debug(beandef.getId() + ": resetting value of attribute " + name);
                         dl.setAttribute((AttributeDefinition) beandef.getAttribute(name));
                     }
                 }

@@ -300,12 +300,6 @@ public class BeanCollector<COLLECTIONTYPE extends Collection<T>, T> extends Bean
                 getBeanFinder().getData();
             }
         }
-        if (hasMode(MODE_SEARCHABLE) && hasDefaultConstructor(getType())) {
-            T instance =
-                getSearchPanelBeans().size() > 0 ? getSearchPanelBeans().iterator().next() : BeanClass
-                    .createInstance(getType());
-            injectIntoRuleCovers(this, instance);
-        }
         return (B) this;
     }
 
@@ -405,6 +399,16 @@ public class BeanCollector<COLLECTIONTYPE extends Collection<T>, T> extends Bean
                     searchStatus = Messages.getFormattedString("tsl2nano.searchdialog.searchresultcount",
                         result.size());
                     sort();
+                    //TODO: this will be a performance issue!
+                    if (hasMode(MODE_SEARCHABLE) && hasDefaultConstructor(getType())) {
+                        T instance =
+                            getSearchPanelBeans().size() > 0 ? getSearchPanelBeans().iterator().next() : BeanClass
+                                .createInstance(getType());
+                        injectIntoRuleCovers(BeanCollector.this, instance);
+                    }
+                    for (T o : collection) {
+                        injectIntoRuleCovers(BeanCollector.this, o);
+					}
                     return result;
                 }
 
@@ -1544,8 +1548,6 @@ public class BeanCollector<COLLECTIONTYPE extends Collection<T>, T> extends Bean
         if (currentRow == null)
             iterator = null;
         else {
-            //TODO: this will be a performance issue!
-            injectIntoRuleCovers(this, currentRow);
             //avoid concurrentmodification exception because caller doesn't call the last nextRow()
             if (!iterator.hasNext())
                 iterator = null;

@@ -341,7 +341,7 @@ public class AItem<T> implements IItem<T>, Serializable {
     }
 
     protected String getName(int fixlength, char filler) {
-        String str = getPresentationPrefix() + translate(name);
+        String str = getPresentationPrefix() + (name != null ? translate(name) : "");
         return fixlength != -1 ? StringUtil.fixString(str, fixlength, filler, true) : str;
     }
 
