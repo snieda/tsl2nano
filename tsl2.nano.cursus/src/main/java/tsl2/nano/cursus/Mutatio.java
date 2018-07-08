@@ -28,6 +28,8 @@ public class Mutatio<O, V> implements IChange, Serializable {
 	}
 	@Override
 	public V getOld() {
+		if (previous == null && res != null) //TODO: constrain, if old value is really null!
+			previous = res.getValueAccess().getValue();
 		return previous;
 	}
 	@Override

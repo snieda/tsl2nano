@@ -4,6 +4,7 @@ import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
 
+import de.tsl2.nano.core.util.Util;
 import de.tsl2.nano.service.util.IPersistable;
 import tsl2.nano.cursus.Res;
 
@@ -37,7 +38,7 @@ public class ERes<O, V> extends Res<O, V> implements IPersistable<String> {
 			setDescription(createDescription(type, objectid, path));
 	}
 	public String getObjectid() {
-		return objectid.toString();
+		return Util.asString(objectid);
 	}
 	public void setObjectid(String objectid) {
 		this.objectid = objectid;

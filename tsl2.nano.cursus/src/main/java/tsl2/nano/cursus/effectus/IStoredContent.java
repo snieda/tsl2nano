@@ -1,6 +1,7 @@
 package tsl2.nano.cursus.effectus;
 
 /**
+ * NOT USED YET!<p/>
  * provides all informations to store/restore any object to/from byte[] stream. may be used for database blobs on instances.
  * @param <T> content type 
  * @author Tom

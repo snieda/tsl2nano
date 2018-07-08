@@ -153,6 +153,7 @@ public class SystemUtil {
         }
     }
     public static String createInfo(String buildInfo) {
+    	LOG.info("creating system-info...");
         String info =
             "  build : ${build.info}\n"
                 + "  args  : ${sun.java.command}\n"
@@ -181,6 +182,7 @@ public class SystemUtil {
 
         InetAddress myAddress = NetUtil.getMyAddress();
         p.put("inetadress.myip", myAddress.getHostAddress());
+        LOG.info("evaluating hostname...");
         p.put("inetadress.hostname", myAddress.getHostName());
 
         String free = BitUtil.amount(Runtime.getRuntime().freeMemory());

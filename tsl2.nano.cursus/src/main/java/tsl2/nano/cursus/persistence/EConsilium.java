@@ -77,7 +77,12 @@ public class EConsilium extends Consilium implements IPersistable<String> {
 		this.seal = seal;
 	}
 
-	public void setTimer(Timer timer) {
+	@Override
+	public ETimer getTimer() {
+		return (ETimer) super.getTimer();
+	}
+	
+	public void setTimer(ETimer timer) {
 		this.timer = timer;
 	}
 
@@ -90,8 +95,8 @@ public class EConsilium extends Consilium implements IPersistable<String> {
 		return (Set<EExsecutio<?>>) exsecutios;
 	}
 
-	public void setConsecutios(Set<EExsecutio<?>> consecutios) {
-		this.exsecutios = consecutios;
+	public void setExsecutios(Set<EExsecutio<?>> exsecutios) {
+		this.exsecutios = exsecutios;
 	}
 
 }

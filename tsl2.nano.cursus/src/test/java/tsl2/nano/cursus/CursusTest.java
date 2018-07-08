@@ -2,7 +2,8 @@ package tsl2.nano.cursus;
 
 
 import static org.junit.Assert.assertEquals;
-import static tsl2.nano.cursus.effectus.Effectree.*;
+import static tsl2.nano.cursus.effectus.Effectree.effect;
+
 import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
@@ -12,10 +13,19 @@ import org.junit.AfterClass;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
+import de.tsl2.nano.bean.def.Bean;
+import de.tsl2.nano.bean.def.BeanDefinition;
+import de.tsl2.nano.core.cls.PrivateAccessor;
 import de.tsl2.nano.core.util.DateUtil;
 import de.tsl2.nano.core.util.ENVTestPreparation;
 import tsl2.nano.cursus.effectus.Effectree;
 import tsl2.nano.cursus.effectus.IncEffectus;
+import tsl2.nano.cursus.persistence.EConsilium;
+import tsl2.nano.cursus.persistence.EExsecutio;
+import tsl2.nano.cursus.persistence.EMutatio;
+import tsl2.nano.cursus.persistence.ERes;
+import tsl2.nano.cursus.persistence.ERuleEffectus;
+import tsl2.nano.cursus.persistence.ETimer;
 
 /**
  * Test-Implementation for a complete Action-based Data-System.
@@ -24,6 +34,7 @@ import tsl2.nano.cursus.effectus.IncEffectus;
  *  - complete change history 
  * Disadvantage:
  */
+@SuppressWarnings({ "rawtypes", "unchecked" })
 public class CursusTest {
 	static Contract origin = new Contract();
 
@@ -38,8 +49,25 @@ public class CursusTest {
     }
 
     @Test
+    public void testEntityAttributeAccessability() throws Exception {
+    	accessAttributes(new EConsilium(), 9);
+    	accessAttributes(new EExsecutio(), 6);
+    	accessAttributes(new EMutatio(), 7);
+    	accessAttributes(new ERes(), 7);
+    	accessAttributes(new ETimer(), 7);
+    	//TODO: warum wird hier EMutatio angezogen? accessAttributes(new ERuleEffectus(), 7);
+    }
+
+	private void accessAttributes(Object instance, int attrCount) {
+		Bean<?> bean = Bean.getBean(instance);
+    	assertEquals(attrCount, bean.getAttributes(true).size());
+		bean.getAttributes(true).stream().forEach(a -> a.setValue(instance , a.getValue(instance)));
+	}
+    
+    @Test
     public void testContract() throws Exception {
-    	Effectree.instance().addEffects(Contract.class, "contract.end", effect(Contract.class, "contract.value", IncEffectus.class));
+    	Effectree.instance().addEffects(Contract.class, "contract.end", effect(Contract.class, "contract.value", TIncEffectus.class, 5));
+    	System.out.println(Effectree.instance().toString());
     	Consilium consilii[] = {
     		new Consilium("end", new Timer(DateUtil.getYesterday(), null), Consilium.Priority.HIGHEST, 
     				new Exsecutio(Action.CHANGE_END.name(), 
@@ -59,24 +87,51 @@ public class CursusTest {
     	assertEquals(new Date((String)((Exsecutio)consilii[0].getExsecutios().iterator().next()).mutatio.getNew()), origin.end);
     	assertEquals(Long.valueOf((String)((Exsecutio)consilii[1].getExsecutios().iterator().next()).mutatio.getNew()).longValue(), ((List<Account>)origin.accounts).get(1).saldo);
     	assertEquals(Consilium.Status.INACTIVE, consilii[2].status);
-    	//TODO: why this effect will not be found?
-//    	assertEquals(5d, origin.value);
+    	assertEquals(5d, origin.value);
     	assertEquals(2, origin.accounts.size());
-    	
-    	
     }
 }
+//Mock
 class TRes extends Res<Contract, Object> {
+	public TRes() {
+		super();
+		// TODO Auto-generated constructor stub
+	}
 	public TRes(String type, String objectid, String path) {
 		super(type, objectid, path);
 	}
-
+	@Override
+	protected Class<Contract> type(String description) {
+		return Contract.class;
+	}
 	@Override
 	protected Contract materialize(String description) {
 		return CursusTest.origin;
 	}	
 }
 
+//Mock
+class TIncRes extends TRes {
+	public TIncRes(String type, String objectid, String path) {
+		this.type = type;
+		this.objectid = objectid;
+		this.path = path;
+		setDescription(PREFIX_REFERENCE + type + PREFIX_ID + objectid + PREFIX_PATH + path);
+	}
+	@Override
+	protected void checkDescription(String description) {
+		//checks cannot be done on non-public test-classes
+	}
+}
+
+//Mock
+class TIncEffectus extends IncEffectus {
+	public TIncEffectus() {
+	}
+	public TIncEffectus(Res res, Number increase) {
+		super(new TIncRes(res.getType().toString(), res.getObjectid().toString(), res.getPath()), increase);
+	}
+}
 enum Action{
 	CHANGE_END, 
 	CHANGE_STATUS, 

@@ -26,7 +26,7 @@ public class Exsecutio<CONTEXT> implements ICommand<CONTEXT>, Serializable {
 	private static final long serialVersionUID = 1L;
 	protected String name;
 	protected Mutatio mutatio;
-	protected List<Effectus> effectus;
+	protected List<? extends Effectus> effectus;
 	protected String description;
 
 	transient CONTEXT context;
@@ -114,16 +114,9 @@ public class Exsecutio<CONTEXT> implements ICommand<CONTEXT>, Serializable {
 		return mutatio;
 	}
 
-	public List<Effectus> getEffectus() {
-		if (effectus == null) {
-			effectus = new LinkedList<>();
-			Entry entry = Effectree.change(mutatio.res);
-			Tree<Integer, Entry> node = Effectree.instance().getNode(entry);
-			if (node != null) {
-				List<STree<Effectree.Entry>> tree = node.collectTree(IPredicate.ANY);
-				if (tree != null)
-					tree.stream().forEach(t -> effectus.add((Effectus) BeanClass.createInstance(t.getNode().getChange(), t.getNode().getGrex().createResForId(mutatio.res.objectid))));
-			}
+	public List<? extends Effectus> getEffectus() {
+		if (effectus == null && mutatio != null) {
+			effectus = Effectree.generateEffects(mutatio.res);
 		}
 		return effectus;
 	}

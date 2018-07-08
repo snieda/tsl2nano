@@ -18,9 +18,17 @@ public class RuleEffectus<O, V> extends Effectus<O, V> {
 		this.ruleName = ruleName;
 	}
 
+	@SuppressWarnings("unchecked")
 	@Override
 	protected V evaluateNewValue() {
 		return (V) new RulePool().get(ruleName).run(BeanUtil.toValueMap(getItem()));
 	}
 
+	public String getRuleName() {
+		return ruleName;
+	}
+
+	public void setRuleName(String ruleName) {
+		this.ruleName = ruleName;
+	}
 }

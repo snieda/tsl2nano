@@ -3,7 +3,6 @@ package tsl2.nano.cursus;
 import java.io.Serializable;
 
 import de.tsl2.nano.bean.PReference;
-import de.tsl2.nano.core.util.Util;
 
 /**
  * References the real entity instance to change
@@ -21,7 +20,7 @@ public class Res<O, V> extends PReference<O, V> implements Serializable {
 	public Res(O instance, String path) {
 		super(instance, path);
 	}
-	public Res(Class type, Object objectid, String path) {
+	public Res(Class<O> type, Object objectid, String path) {
 		this(type.getName(), objectid, path);
 	}
 	public Res(String type, Object objectid, String path) {
@@ -29,6 +28,10 @@ public class Res<O, V> extends PReference<O, V> implements Serializable {
 		this.objectid = objectid;
 		this.path = path;
 		setDescription(createDescription(type, objectid, path));
+	}
+
+	public Object getObjectid() {
+		return objectid;
 	}
 	
 //	@Override

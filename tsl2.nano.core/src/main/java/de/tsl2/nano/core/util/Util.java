@@ -247,7 +247,7 @@ public class Util {
         checkMinParameterCount(objects, 2);
         Object last = objects[0];
         for (Object o : objects) {
-            if (o != null && !o.equals(last)) {
+            if ((o != null && !o.equals(last)) || (last != null && ! last.equals(o))) {
                 return false;
             }
             last = o;

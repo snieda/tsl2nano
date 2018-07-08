@@ -158,14 +158,14 @@ public class Tree<C, T> extends TreeMap<C, Tree<C, T>> {
      * @param node node to find
      * @return tree node or null
      */
-    public Tree<C, T> getNode(final T node) {
+    public <N extends Tree<C, T>> N getNode(final T node) {
         List<Tree<C, T>> list = collectTree(new IPredicate<Tree<C, T>>() {
             @Override
             public boolean eval(Tree<C, T> n) {
                 return node.equals(n.node);
             }
         });
-        return list.size() > 0 ? list.iterator().next() : null;
+        return list.size() > 0 ? (N)list.iterator().next() : null;
     }
 
 	public List<T> collectChildNodes(T node) {

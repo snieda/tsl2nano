@@ -1,8 +1,15 @@
 package tsl2.nano.cursus.effectus;
 
+import java.util.LinkedList;
+import java.util.List;
+
+import de.tsl2.nano.collection.CollectionUtil;
+import de.tsl2.nano.core.IPredicate;
+import de.tsl2.nano.core.cls.BeanClass;
 import de.tsl2.nano.core.util.Util;
 import de.tsl2.nano.incubation.repeat.IChange;
 import de.tsl2.nano.incubation.tree.STree;
+import de.tsl2.nano.incubation.tree.Tree;
 import tsl2.nano.cursus.Grex;
 import tsl2.nano.cursus.Res;
 
@@ -11,6 +18,7 @@ import tsl2.nano.cursus.Res;
  * @author Tom
  *
  */
+@SuppressWarnings({ "rawtypes", "unchecked" })
 public class Effectree extends STree<Effectree.Entry>{
 	private static final long serialVersionUID = 1L;
 	private static Effectree self;
@@ -19,8 +27,10 @@ public class Effectree extends STree<Effectree.Entry>{
 	}
 
 	public static Effectree instance() {
-		if (self == null)
+		if (self == null) {
 			self = new Effectree();
+			self.node = self.new Entry(null, null);
+		}
 		return self;
 	}
 
@@ -35,7 +45,9 @@ public class Effectree extends STree<Effectree.Entry>{
 		return addEffects(new Res(type, null, path), entries);
 	}
 	public STree<Entry> addEffects(Res<?, ?> res, Entry...entries) {
-		STree<Entry> tree = new STree<>(change(res.getType(), res.getPath()), this);
+		Entry node = change(res.getType(), res.getPath());
+		this.add(node);
+		STree<Entry> tree = getNode(node);
 		tree.add(entries);
 		return tree;
 	}
@@ -46,22 +58,45 @@ public class Effectree extends STree<Effectree.Entry>{
 	public static Entry change(Class<?> type, String path) {
 		return Effectree.self.new Entry(new Grex<>(type, path), null);
 	}
-	public static Entry effect(Class<?> type, String path, Class<? extends IChange> effectType) {
-		return Effectree.self.new Entry(new Grex<>(type, path), effectType);
+	public static Entry effect(Class<?> type, String path, Class<? extends IChange> effectType, Object effectParameter) {
+		return Effectree.self.new Entry(new Grex<>(type, path), effectType, effectParameter);
+	}
+	public static List<Effectus> generateEffects(Res res) {
+		List<Effectus> effectus = new LinkedList<>();
+		Entry entry = Effectree.change(res);
+		Tree<Integer, Entry> node = Effectree.instance().getNode(entry);
+		if (node != null) {
+			List<Tree<?, Effectree.Entry>> tree = node.collectTree(IPredicate.ANY);
+			if (tree != null) {
+				tree.stream().forEach(t -> {
+					Entry n = t.getNode();
+					if (n != null && n.getGrex() != null && n.getChangeType() != null) //TODO: wrong tree items?
+						effectus.add((Effectus) BeanClass.createInstance(n.getChangeType(), n.getParameter(res.getObjectid())));
+				});
+			}
+		}
+		return effectus;
 	}
 	public class Entry {
 		Grex<?, ?> grex;
-		Class<? extends IChange> change;
-		public Entry(Grex<?, ?> grex, Class<? extends IChange> change) {
+		Class<? extends IChange> changeType;
+		Object[] changeConstructorParameter;
+		
+		public Entry(Grex<?, ?> grex, Class<? extends IChange> changeType, Object...changeConstructorParameter) {
 			super();
 			this.grex = grex;
-			this.change = change;
+			this.changeType = changeType;
+			this.changeConstructorParameter = changeConstructorParameter;
 		}
 		public Grex<?, ?> getGrex() {
 			return grex;
 		}
-		public Class<? extends IChange> getChange() {
-			return change;
+		public Class<? extends IChange> getChangeType() {
+			return changeType;
+		}
+		
+		public Object[] getParameter(Object objectid) {
+			return CollectionUtil.concat(new Object[] {grex.createResForId(objectid)}, changeConstructorParameter);
 		}
 		@Override
 		public int hashCode() {
@@ -76,7 +111,7 @@ public class Effectree extends STree<Effectree.Entry>{
 		}
 		@Override
 		public String toString() {
-			return Util.toString(getClass(), grex, change);
+			return Util.toString(getClass(), grex, changeType);
 		}
 	}
 }

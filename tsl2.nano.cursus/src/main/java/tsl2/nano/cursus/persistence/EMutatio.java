@@ -45,11 +45,11 @@ public class EMutatio<O> extends Mutatio<O, String> implements IPersistable<Stri
 		this.next = next;
 	}
 
-	public Res<O, String> getRes() {
-		return res;
+	public ERes<O, String> getRes() {
+		return (ERes<O, String>) res;
 	}
 
-	public void setRes(Res<O, String> res) {
+	public void setRes(ERes<O, String> res) {
 		this.res = res;
 	}
 

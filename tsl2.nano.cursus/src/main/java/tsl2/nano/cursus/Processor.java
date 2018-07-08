@@ -82,10 +82,10 @@ public final class Processor {
 		return filter.collect(Collectors.toSet());
 	}
     static void log_(String msg) {
-        System.out.print(msg);
+        System.out.print(msg);//LOG.info(msg);
     }
 
     static void log(String msg) {
-        System.out.println(msg);
+        System.out.println(msg);//LOG.info(msg);
     }
 }

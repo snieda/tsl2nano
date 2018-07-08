@@ -1,5 +1,7 @@
 package tsl2.nano.cursus.persistence;
 
+import java.util.List;
+
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
@@ -7,6 +9,7 @@ import javax.persistence.Id;
 import de.tsl2.nano.service.util.IPersistable;
 import tsl2.nano.cursus.Exsecutio;
 import tsl2.nano.cursus.Mutatio;
+import tsl2.nano.cursus.effectus.Effectus;
 
 @Entity
 public class EExsecutio<CONTEXT> extends Exsecutio<CONTEXT> implements IPersistable<String> {
@@ -42,12 +45,21 @@ public class EExsecutio<CONTEXT> extends Exsecutio<CONTEXT> implements IPersista
 		this.name = name;
 	}
 
-	public Mutatio getMutatio() {
-		return mutatio;
+	public EMutatio getMutatio() {
+		return (EMutatio) mutatio;
 	}
 
-	public void setMutatio(Mutatio mutatio) {
+	public void setMutatio(EMutatio mutatio) {
 		this.mutatio = mutatio;
+	}
+
+	@Override
+	public List<ERuleEffectus> getEffectus() {
+		return (List<ERuleEffectus>) super.getEffectus();
+	}
+	
+	public void setEffectus(List<ERuleEffectus> effectus) {
+		this.effectus = effectus;
 	}
 
 	public String getDescription() {

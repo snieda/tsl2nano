@@ -15,26 +15,23 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import org.apache.commons.logging.Log;
-
 import de.tsl2.nano.core.IPredicate;
 import de.tsl2.nano.core.ITransformer;
 import de.tsl2.nano.core.ManagedException;
 import de.tsl2.nano.core.cls.BeanAttribute;
-import de.tsl2.nano.core.log.LogFactory;
 import de.tsl2.nano.core.util.ListSet;
 import de.tsl2.nano.core.util.ObjectUtil;
 import de.tsl2.nano.core.util.StringUtil;
 
 /**
- * some utility methods for collections
+ * some transformation und filter methods for collections
  * 
  * @author Thomas Schneider
  * @version $Revision$
  */
 @SuppressWarnings({ "unchecked", "rawtypes" })
 public class CollectionUtil extends de.tsl2.nano.core.util.CollectionUtil {
-    private static final Log LOG = LogFactory.getLog(CollectionUtil.class);
+//    private static final Log LOG = LogFactory.getLog(CollectionUtil.class);
 
     /**
      * if both interfaces ({@link List} and {@link Set}) are needed for one instance, the given collection will be

@@ -104,7 +104,7 @@ public abstract class AReference<T, O> {
      * @return
      */
     public T getType() {
-        return type(description);
+        return description != null ? type(description) : null;
     }
     
     /**

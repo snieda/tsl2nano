@@ -17,7 +17,7 @@ public class IncEffectus<O> extends Effectus<O, Number> {
 
 	@Override
 	protected Number evaluateNewValue() {
-		return getOld().doubleValue() + incValue.doubleValue();
+		return (getOld() != null ? getOld().doubleValue() : 0) + incValue.doubleValue();
 	}
 
 }

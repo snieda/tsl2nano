@@ -69,6 +69,10 @@ public class STree<T> extends Tree<Integer, T> {
             add(createKey(childs[i]), childs[i]);
         }
     }
+    @Override
+    public void add(Integer connection, T child) {
+        put(connection, new STree<T>(child, this));
+    }
     /**
      * creates a new connection-info as map-key for the map of child-trees. see {@link TreeOrderStrategy} for several creation-strategies.
      * @param node child node

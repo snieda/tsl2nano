@@ -70,6 +70,6 @@ public class PReference<O, V> extends BReference<O> {
 	
 	@SuppressWarnings("unchecked")
 	public IValueAccess<V> getValueAccess() {
-		return ValuePath.getValueAccess(resolve(), getPath().split("[.]"));
+		return getDescription() != null ? ValuePath.getValueAccess(resolve(), getPath().split("[.]")) : null;
 	}
 }

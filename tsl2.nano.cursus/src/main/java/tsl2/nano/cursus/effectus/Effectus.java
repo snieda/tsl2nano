@@ -1,17 +1,20 @@
 package tsl2.nano.cursus.effectus;
 
+import javax.persistence.MappedSuperclass;
+
 import tsl2.nano.cursus.Mutatio;
 import tsl2.nano.cursus.Res;
 
 /**
- * an effect can be created after a change was made.
+ * an effect can be created/processed after a change was made.
  * @author Tom
  * @param <CONTENT>
  */
+@MappedSuperclass
 public abstract class Effectus<O, V> extends Mutatio<O, V> {
 	private static final long serialVersionUID = 1L;
 	/** on activation, the changes will be stored into the content - to be reused and not recalculated */
-	boolean fixed;
+	protected boolean fixed;
 
 	public Effectus() {
 	}

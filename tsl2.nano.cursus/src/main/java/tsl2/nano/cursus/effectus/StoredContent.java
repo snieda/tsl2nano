@@ -6,6 +6,7 @@ package tsl2.nano.cursus.effectus;
 import de.tsl2.nano.core.util.ByteUtil;
 
 /**
+ * NOT USED YET!<p/>
  * Holds content, calculated once and reused on re-doing the same command again - without re-calcuation
  * @author Tom
  */
