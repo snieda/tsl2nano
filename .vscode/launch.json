@@ -3,12 +3,15 @@
     "configurations": [
         
     {
+        "name": "Debug (Attach on 8787)",
         "type": "java",
-        "name": "Debug (Attach)",
         "request": "attach",
+        // "remoteHost": "localhost",
+        // "remotePort": 8787,
         "hostName": "localhost",
-        "port": 8787
-    },
+        "port": 8787,
+        "preLaunchTask": "java -jar tsl2.nano.h5"
+        },
         {
             "name": "Java",
             "type": "java",

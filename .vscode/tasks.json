@@ -4,33 +4,43 @@
     "version": "2.0.0",
     "tasks": [
         {
-            "taskName": "mvn install",
-            "command": "mvn install",
-            "type": "shell"
-        }
+            "label": "java -jar tsl2.nano.h5",
+            "command": "java '-agentlib:jdwp=transport=dt_socket,address=8787,server=y,suspend=n' '-Dtsl2nano.offline=true' -jar tsl2.nano.h5-2.1.4-SNAPSHOT-standalone.jar",
+            "type": "shell",
+            "options": {
+                "cwd": "tsl2.nano.h5/target"
+            },
+            "problemMatcher": [],
+            "dependsOn": "mvn install"
+        },
         {
-            "taskName": "mvn clean install",
+            "label": "mvn install",
+            "command": "mvn -DskipTests -o install",
+            "type": "shell"
+        },
+        {
+            "label": "mvn clean install",
             "command": "mvn clean install",
             "type": "shell"
-        }
+        },
         {
-            "taskName": "mvn clean install site",
+            "label": "mvn clean install site",
             "command": "mvn clean install site",
             "type": "shell"
-        }
+        },
         {
-            "taskName": "mvn deploy",
+            "label": "mvn deploy",
             "command": "mvn deploy",
             "type": "shell"
-        }
+        },
         {
-            "taskName": "mvn version:update-child-modules",
+            "label": "mvn version:update-child-modules",
             "command": "mvn -N versions:update-child-modules",
             "type": "shell"
-        }
+        },
         {
-            "taskName": "mvn -amd -pl tsl2.nano.h5 -DskipTest install site",
-            "command": "mvn -amd -pl tsl2.nano.h5 -DskipTest install site",
+            "label": "mvn -amd -pl tsl2.nano.h5 -DskipTests install site",
+            "command": "mvn -amd -pl tsl2.nano.h5 -DskipTests install site",
             "type": "shell"
         }
     ]
