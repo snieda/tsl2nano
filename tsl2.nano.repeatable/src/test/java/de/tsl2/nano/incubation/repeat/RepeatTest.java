@@ -140,7 +140,7 @@ class Command extends ACommand<StringBuilder> {
     private static final long serialVersionUID = 1L;
 
     public Command(StringBuilder context, IChange... changes) {
-        super(context, changes);
+        super("", context, changes);
     }
 
     @Override
@@ -163,7 +163,7 @@ class ECommand extends ACommand<Serializable> {
     private static final long serialVersionUID = 1L;
 
     public ECommand(Serializable context, IChange... changes) {
-        super(context, changes);
+        super("", context, changes);
     }
 
     @Override

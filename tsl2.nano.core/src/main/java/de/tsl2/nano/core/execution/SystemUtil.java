@@ -134,6 +134,10 @@ public class SystemUtil {
         return execute("rundll32", "url.dll,FileProtocolHandler", fileName);
     }
 
+    public static final Process executeRegisteredLinuxBrowser(String fileName) {
+        return execute("x-www-browser", fileName);
+    }
+
     /**
      * runs the given commands as root
      * 

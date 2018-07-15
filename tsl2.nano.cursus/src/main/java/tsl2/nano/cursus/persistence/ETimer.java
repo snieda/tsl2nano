@@ -6,6 +6,7 @@ import java.util.Date;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
+import javax.persistence.Transient;
 
 import de.tsl2.nano.service.util.IPersistable;
 import tsl2.nano.cursus.Timer;
@@ -70,11 +71,17 @@ public class ETimer extends Timer implements IPersistable<String> {
 		this.stepLength = stepLength;
 	}
 
-	public ArrayList<Integer> getStepExceptions() {
-		return stepExceptions;
-	}
+	// public ArrayList<Integer> getStepExceptions() {
+	// 	return stepExceptions;
+	// }
 
-	public void setStepExceptions(ArrayList<Integer> stepExceptions) {
-		this.stepExceptions = stepExceptions;
+	// public void setStepExceptions(ArrayList<Integer> stepExceptions) {
+	// 	this.stepExceptions = stepExceptions;
+	// }
+	
+	@Override
+	@Transient
+	public boolean isGenerator() {
+		return super.isGenerator();
 	}
 }

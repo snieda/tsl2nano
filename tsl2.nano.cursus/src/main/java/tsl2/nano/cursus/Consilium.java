@@ -4,7 +4,6 @@ import java.io.Serializable;
 import java.util.Arrays;
 import java.util.Date;
 import java.util.HashSet;
-import java.util.List;
 import java.util.Set;
 
 import de.tsl2.nano.core.util.ByteUtil;
@@ -30,7 +29,7 @@ public class Consilium implements IConsilium, Comparable<Consilium>, Serializabl
 	public Consilium() {
 	}
 
-	public Consilium(String author, Timer timer, Priority priority, Exsecutio<?>...exsecutios) {
+	public Consilium(String author, Timer timer, Priority priority, ICommand<?>...exsecutios) {
 		this.author = author;
 		this.timer = timer;
 		this.priority = priority;
@@ -63,11 +62,6 @@ public class Consilium implements IConsilium, Comparable<Consilium>, Serializabl
 	}
 	
 	@Override
-	public String toString() {
-		return Util.toString(getClass(), exsecutios, timer, status);
-	}
-
-	@Override
 	public int compareTo(Consilium o) {
 		if (timer == null)
 			return 1;
@@ -75,7 +69,11 @@ public class Consilium implements IConsilium, Comparable<Consilium>, Serializabl
 			return -1;
 		int c = timer.from.compareTo(o.timer.from);
 		if (c == 0)
-			c = priority.index.compareTo(o.priority.index);
+			c = -1 * priority.index.compareTo(o.priority.index);
+		if (c == 0)
+			c = status.compareTo(o.status);
+		if (c == 0)
+			c = getName().compareTo(o.getName());
 		return c;
 	}
 	@Override
@@ -83,10 +81,13 @@ public class Consilium implements IConsilium, Comparable<Consilium>, Serializabl
 		return (Consilium) super.clone();
 	}
 	public Consilium createAutomated(Date from) {
+		return clone(new Timer(from, null), "AUTOMATED");
+	}
+	public Consilium clone(Timer timer, String author) {
 		try {
 			Consilium automated = clone();
-			automated.timer = new Timer(from, null);
-			automated.author = "AUTOMATED";
+			automated.timer = timer;
+			automated.author = author != null ? author : "cloned from: " + this.timer.toString();
 			automated.created = new Date();
 			return automated;
 		} catch (CloneNotSupportedException e) {
@@ -105,6 +106,11 @@ public class Consilium implements IConsilium, Comparable<Consilium>, Serializabl
 	public Status getStatus() {
 		return status;
 	}
+	
+	@Override
+	public void setStatus(Status newStatus) {
+		this.status = newStatus;
+	}
 
 	@Override
 	public Set<? extends ICommand<?>> getExsecutios() {
@@ -119,5 +125,19 @@ public class Consilium implements IConsilium, Comparable<Consilium>, Serializabl
 	@Override
 	public boolean hasFixedContent() {
 		return getExsecutios().stream().anyMatch(e -> e instanceof Exsecutio && ((Exsecutio)e).hasFixedContent());
+	}
+
+	@Override
+	public boolean affects(Object id) {
+		return getExsecutios().stream().anyMatch(e -> e instanceof Exsecutio && id.equals(((Exsecutio)e).getMutatio().res.objectid));
+	}
+
+	@Override
+	public String getName() {
+		return Util.isEmpty(exsecutios) ? "<undefined>" : exsecutios.iterator().next().getName();
+	}
+	@Override
+	public String toString() {
+		return Util.toString(getClass(), exsecutios, timer, status, changed);
 	}
 }

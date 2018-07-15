@@ -1,7 +1,5 @@
 package tsl2.nano.cursus.effectus;
 
-import javax.persistence.MappedSuperclass;
-
 import tsl2.nano.cursus.Mutatio;
 import tsl2.nano.cursus.Res;
 
@@ -10,7 +8,6 @@ import tsl2.nano.cursus.Res;
  * @author Tom
  * @param <CONTENT>
  */
-@MappedSuperclass
 public abstract class Effectus<O, V> extends Mutatio<O, V> {
 	private static final long serialVersionUID = 1L;
 	/** on activation, the changes will be stored into the content - to be reused and not recalculated */

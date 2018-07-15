@@ -1,22 +1,24 @@
 package tsl2.nano.cursus.persistence;
 
+import javax.persistence.CascadeType;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
+import javax.persistence.JoinColumn;
+import javax.persistence.OneToOne;
 
 import de.tsl2.nano.core.util.Util;
 import de.tsl2.nano.service.util.IPersistable;
 import tsl2.nano.cursus.Mutatio;
-import tsl2.nano.cursus.Res;
 
 @Entity
-public class EMutatio<O> extends Mutatio<O, String> implements IPersistable<String> {
+public class EMutatio extends Mutatio<Object, Object> implements IPersistable<String> {
 	private static final long serialVersionUID = 1L;
 
 	String id;
 	public EMutatio() {
 	}
-	public EMutatio(String next, Res<O, String> res) {
+	public EMutatio(String next, ERes res) {
 		super(next, res);
 	}
 	@Id
@@ -45,11 +47,13 @@ public class EMutatio<O> extends Mutatio<O, String> implements IPersistable<Stri
 		this.next = next;
 	}
 
-	public ERes<O, String> getRes() {
-		return (ERes<O, String>) res;
+	@OneToOne(targetEntity=ERes.class, mappedBy="res", cascade=CascadeType.ALL, orphanRemoval=true)
+	@JoinColumn(table="ERES")
+	public ERes getRes() {
+		return (ERes) res;
 	}
 
-	public void setRes(ERes<O, String> res) {
+	public void setRes(ERes res) {
 		this.res = res;
 	}
 

@@ -5,16 +5,11 @@ import java.util.LinkedList;
 import java.util.List;
 
 import de.tsl2.nano.bean.PReference;
-import de.tsl2.nano.core.IPredicate;
-import de.tsl2.nano.core.cls.BeanClass;
 import de.tsl2.nano.core.util.StringUtil;
 import de.tsl2.nano.core.util.Util;
 import de.tsl2.nano.incubation.repeat.IChange;
 import de.tsl2.nano.incubation.repeat.ICommand;
-import de.tsl2.nano.incubation.tree.STree;
-import de.tsl2.nano.incubation.tree.Tree;
 import tsl2.nano.cursus.effectus.Effectree;
-import tsl2.nano.cursus.effectus.Effectree.Entry;
 import tsl2.nano.cursus.effectus.Effectus;
 
 /**
@@ -122,7 +117,13 @@ public class Exsecutio<CONTEXT> implements ICommand<CONTEXT>, Serializable {
 	}
 
 	@Override
+	public String getName() {
+		return name;
+	}
+	
+	@Override
 	public String toString() {
 		return Util.toString(getClass(), name, mutatio);
 	}
+
 }

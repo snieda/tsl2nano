@@ -16,6 +16,7 @@ package de.tsl2.nano.incubation.repeat;
  * @version $Revision$
  */
 public interface ICommand<CONTEXT> extends Runnable {
+	String getName();
     /**
      * @return the context on which the command will be executed
      */

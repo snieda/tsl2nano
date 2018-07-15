@@ -9,7 +9,7 @@ import de.tsl2.nano.service.util.IPersistable;
 import tsl2.nano.cursus.Res;
 
 @Entity
-public class ERes<O, V> extends Res<O, V> implements IPersistable<String> {
+public class ERes extends Res<Object, Object> implements IPersistable<String> {
 	private static final long serialVersionUID = 1L;
 
 	String id;

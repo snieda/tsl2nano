@@ -15,7 +15,6 @@ import de.tsl2.nano.core.log.LogFactory;
 import de.tsl2.nano.incubation.repeat.ICommand;
 import de.tsl2.nano.incubation.repeat.impl.CommandManager;
 import tsl2.nano.cursus.IConsilium.Status;
-
 /**
  * Change Process for Entities using Cursus. It's final to secure the use of IConsilium.refreshSeal(Processor)
  */
@@ -44,8 +43,10 @@ public final class Processor {
 		CommandManager cmdManager = new CommandManager();
 		for (IConsilium c : cons) {
 			c.checkValidity(ID);
-			if (c.getStatus().equals(Consilium.Status.INACTIVE) && timer.expired(c.getTimer().from)) {
+			if (c.getStatus().equals(Status.INACTIVE) && timer.expired(c.getTimer().from)) {
+				c.getExsecutios().stream().filter(e -> e instanceof Obsidio).forEach(e -> ((Obsidio)e).setContext(cons));
 				cmdManager.doIt(c.getExsecutios().toArray(new ICommand[0]));
+				c.setStatus(Status.ACTIVE);
 				c.refreshSeal(ID);
 			}
 		}
@@ -78,7 +79,7 @@ public final class Processor {
 	private Set<Consilium> resetToStatus(Set<Consilium> consiliums, Date from, Date until, Status status) {
 		Stream<Consilium> filter = consiliums.stream().
 			filter(c -> !c.getTimer().isGenerator() && c.getTimer().isPartOf(from, until));
-			filter.forEach(c -> c.status = status);
+			filter.forEach(c -> c.setStatus(status));
 		return filter.collect(Collectors.toSet());
 	}
     static void log_(String msg) {

@@ -18,6 +18,8 @@ class DecorationProxy<T extends Plugin> implements InvocationHandler {
 
     @Override
     public Object invoke(Object proxy, Method method, Object[] args) throws Throwable {
+        // if (implementations.isEmpty())
+        //     return null; // --> only for performance (e.g. on logging)
         boolean decoratingChain = args.length == 1 && args[0] != null && method.getReturnType().isAssignableFrom(args[0].getClass());
         Object[] result = new Object[] {decoratingChain ? args[0] : null}; //workaround on non final result used in inner class
         implementations.stream().filter(h->h.isEnabled()).forEach(h->{
@@ -30,7 +32,7 @@ class DecorationProxy<T extends Plugin> implements InvocationHandler {
                 ManagedException.forward(e);
             }
         });
-        Plugins.log(implementations.size() + " plugins done on: " + method.getName() + " [" + StringUtil.fixString(args, 60) + "]");
+        Plugins.log(implementations.size() + " plugins done on: " + method.getName() + " [" + StringUtil.fixString(StringUtil.toString(args, 60), 60) + "]");
         return result[0];
     }
 

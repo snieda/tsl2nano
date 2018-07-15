@@ -34,13 +34,16 @@ public abstract class ACommand<CONTEXT> implements ICommand<CONTEXT>, Serializab
     CONTEXT context;
     IChange[] changes;
 
+	String name;
+
     /**
      * constructor
      * @param context
      * @param changes
      */
-    public ACommand(CONTEXT context, IChange... changes) {
+    public ACommand(String name, CONTEXT context, IChange... changes) {
         super();
+		this.name = name;
         this.context = context;
         this.changes = changes;
     }
@@ -54,6 +57,11 @@ public abstract class ACommand<CONTEXT> implements ICommand<CONTEXT>, Serializab
         runWith(changes);
     }
 
+    @Override
+    public String getName() {
+    	return name;
+    }
+    
     @Override
     public CONTEXT getContext() {
         return context;

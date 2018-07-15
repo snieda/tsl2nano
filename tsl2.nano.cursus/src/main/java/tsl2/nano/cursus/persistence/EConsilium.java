@@ -1,21 +1,18 @@
 package tsl2.nano.cursus.persistence;
 
 import java.util.Date;
-import java.util.List;
 import java.util.Set;
 
 import javax.persistence.CascadeType;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
+import javax.persistence.JoinColumn;
 import javax.persistence.OneToMany;
+import javax.persistence.OneToOne;
 
 import de.tsl2.nano.service.util.IPersistable;
-import tsl2.nano.cursus.Exsecutio;
 import tsl2.nano.cursus.Consilium;
-import tsl2.nano.cursus.Timer;
-import tsl2.nano.cursus.IConsilium.Priority;
-import tsl2.nano.cursus.IConsilium.Status;
 
 @Entity
 public class EConsilium extends Consilium implements IPersistable<String> {
@@ -25,7 +22,7 @@ public class EConsilium extends Consilium implements IPersistable<String> {
 	
 	public EConsilium() {
 	}
-	public EConsilium(String author, Timer timer, Priority priority, Exsecutio... consecutios) {
+	public EConsilium(String author, ETimer timer, Priority priority, EExsecutio... consecutios) {
 		super(author, timer, priority, consecutios);
 	}
 	@Id
@@ -78,6 +75,8 @@ public class EConsilium extends Consilium implements IPersistable<String> {
 	}
 
 	@Override
+	@OneToOne(targetEntity=ETimer.class, mappedBy="timer", cascade=CascadeType.ALL, orphanRemoval=true)
+	@JoinColumn(table="ETIMER")
 	public ETimer getTimer() {
 		return (ETimer) super.getTimer();
 	}
@@ -90,7 +89,8 @@ public class EConsilium extends Consilium implements IPersistable<String> {
 		this.status = status;
 	}
 
-	@OneToMany(cascade=CascadeType.ALL, orphanRemoval=true)
+	@OneToMany(targetEntity=EExsecutio.class, mappedBy="exsecutios", cascade=CascadeType.ALL, orphanRemoval=true)
+	@JoinColumn(table="EEXSECUTIO")
 	public Set<EExsecutio<?>> getExsecutios() {
 		return (Set<EExsecutio<?>>) exsecutios;
 	}
@@ -99,5 +99,8 @@ public class EConsilium extends Consilium implements IPersistable<String> {
 		this.exsecutios = exsecutios;
 	}
 
+	// public void setName(String name) {
+	// 	this.name = name;
+	// }
 }
  

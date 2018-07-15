@@ -10,8 +10,10 @@ package de.tsl2.nano.core.util;
 
 import java.lang.reflect.Array;
 import java.lang.reflect.Method;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
@@ -278,4 +280,8 @@ public class MapUtil {
         }
         return filter;
     }
+
+	public static <T> Set<T> asSet(T[] items) {
+		return new HashSet<>(Arrays.asList(items));
+	}
 }

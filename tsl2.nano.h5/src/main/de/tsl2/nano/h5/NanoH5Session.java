@@ -531,7 +531,7 @@ public class NanoH5Session implements ISession<BeanDefinition>, Serializable, IL
                 + StringUtil.toHexString(getContext().toString().getBytes()) : "")
             + ", "
             + ENV.translate("tsl2nano.request", true) + ": "
-            + DateUtil.seconds(System.currentTimeMillis() - startTime) + " sec"
+            + (int)DateUtil.seconds(System.currentTimeMillis() - startTime) + " sec"
             + (LOG.isDebugEnabled() ? ", " + "Memory: " + (Profiler.getUsedMem() / (1024 * 1024)) + " MB" : "")
             + (LOG.isDebugEnabled() ? ", " + "working sessions: " + server.sessions.size() : "");
     }

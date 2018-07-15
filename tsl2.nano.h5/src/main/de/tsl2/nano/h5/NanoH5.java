@@ -68,7 +68,6 @@ import de.tsl2.nano.core.util.NetUtil;
 import de.tsl2.nano.core.util.NumberUtil;
 import de.tsl2.nano.core.util.StringUtil;
 import de.tsl2.nano.core.util.Util;
-import de.tsl2.nano.execution.AntRunner;
 import de.tsl2.nano.h5.NanoHTTPD.Response.Status;
 import de.tsl2.nano.h5.expression.QueryPool;
 import de.tsl2.nano.h5.expression.RuleExpression;
@@ -114,6 +113,7 @@ public class NanoH5 extends NanoHTTPD implements ISystemConnector<Persistence> {
     public static final String JAR_SERVICEACCESS = "tsl2.nano.serviceaccess.jar";
     public static final String JAR_DIRECTACCESS = "tsl2.nano.directaccess.jar";
     public static final String JAR_INCUBATION = "tsl2.nano.incubation.jar";
+    public static final String JAR_CURSUS = "tsl2.nano.cursus.jar";
     public static final String JAR_SAMPLE = "tsl2.nano.h5.sample.jar";
     public static final String JAR_RESOURCES = "tsl2.nano.h5.default-resources.jar";
     public static final String JAR_SIMPLEXML = "tsl2.nano.simple-xml.jar";
@@ -206,6 +206,8 @@ public class NanoH5 extends NanoHTTPD implements ISystemConnector<Persistence> {
 
             extractJarScripts();
             extractDefaultResources();
+            ENV.extractResource(JAR_CURSUS);
+            
             //perhaps activate secure transport layer TLS
             enableSSL(ENV.get("app.ssl.activate", false));
             runHttpServer();
@@ -275,6 +277,7 @@ public class NanoH5 extends NanoHTTPD implements ISystemConnector<Persistence> {
             ENV.extractResource("readme.txt");
             ENV.extractResource("shell.xml");
             ENV.extractResource("mda.xml");
+            ENV.extractResource("compilejar.cmd");
             ENV.extractResource("tsl2nano-appcache.mf");
             ENV.extractResource("favicon.ico");
             
@@ -295,6 +298,9 @@ public class NanoH5 extends NanoHTTPD implements ISystemConnector<Persistence> {
         if (System.getProperty("os.name").startsWith("Windows")
                 && ENV.get("app.show.startpage", true)) {
             SystemUtil.executeRegisteredWindowsPrg(applicationHtmlFile());
+        } else if (System.getProperty("os.name").startsWith("Linux")
+                    && ENV.get("app.show.startpage", true)) {
+                SystemUtil.executeRegisteredLinuxBrowser(applicationHtmlFile());
         } else {
             LOG.info("Please open the URL '" + serviceURL.toString() + "' in your browser");
         }
@@ -908,9 +914,12 @@ public class NanoH5 extends NanoHTTPD implements ISystemConnector<Persistence> {
     }
 
     protected void runLocalDatabase(final Persistence persistence) {
+        String runserverFile = "runServer.cmd";
+        if (!new File(ENV.getConfigPathRel() + runserverFile).exists())
+            generateDatabase(persistence);
         String[] cmd =
-            AppLoader.isUnix() ? new String[] { "sh", "runServer.cmd" } : new String[] { "cmd", "/C", "start",
-                "runServer.cmd" };
+            AppLoader.isUnix() ? new String[] { "sh", runserverFile } : new String[] { "cmd", "/C", "start",
+                runserverFile };
         SystemUtil.execute(new File(ENV.getConfigPathRel()), cmd);
         //prepare shutdown and backup
         Runtime.getRuntime().addShutdownHook(Executors.defaultThreadFactory().newThread(new Runnable() {

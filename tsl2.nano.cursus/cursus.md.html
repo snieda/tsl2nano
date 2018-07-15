@@ -3,12 +3,22 @@
 
 ## Introduction
 
-Processor -> Consilium
-Consilium -> Exsecutio, Timer
-Exsecutio -> Mutatio, Effectus
-Mutatio -> Res
-Effectus -> Res, StoredContent
-StoredContent -> Fixed Content after calculation
+![](http://g.gravizo.com/g?digraph G {
+Processor -> Consilium [label="Führt nicht-aktive Consilii \nbei Terminierung aus."]
+Consilium -> Exsecutio [label="Absicht einer Ausführung"]
+Consilium -> Obsidio   [label="Verhindert die Ausführung\n anderer Absichten"]
+Consilium -> Timer     [label="Start/Ende/Generator"]
+Timer     -> Consilium [label="Definiert Erstellung \nvon periodischen Consilii"]
+Exsecutio -> Mutatio   [label="Änderung eines Wertes"]
+Mutatio   -> Res       [label="Identität, auf die sich \ndie Änderung bezieht"] 
+Exsecutio -> Effectree [label="Definitionen von \nWirkung und Auswirkungen"]
+Exsecutio -> Effectus  [label="Auswirkung der Änderung"]
+Effectree -> Effectus  [label="Erstellt Effectus für die Änderung eines Mutatio"]
+Effectree -> Grex      [label="Gruppe von Identitäten"]
+Effectus  -> RuleEffectus [label="Regel-basierte Ausprägung einer Auswirkung"]
+Effectus  -> Fixed     [label="Berechneter Wert wird \nals Blob in Datenbank abgelegt \nund unverändert wiederverwendet"]
+Effectus  -> Value     [label="Eine beliebige Funktion ermittelt \nden neuen Wert für eine Identität"]
+})
  
 Cursus:
 
@@ -63,7 +73,8 @@ target.toObject(), fromObject()
  Version | Date | Description
  ------- | ---- | -----------
  2.1.3 | 10.06.2018 | First alpha Version
- 2.1.4 | 01.07.2018 | Usable Beta Version
+ 2.1.3b| 01.07.2018 | Usable Beta Version
+ 2.1.4 | 15.07.2018 | Effectus, Obsidio added
 
 <style class="fallback">body{white-space:pre;font-family:monospace}</style><script src="markdeep.min.js"></script><script src="http://casual-effects.com/markdeep/latest/markdeep.min.js"></script>
 

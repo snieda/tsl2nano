@@ -1,14 +1,19 @@
 package tsl2.nano.cursus.persistence;
 
+import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 
+import javax.persistence.CascadeType;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
+import javax.persistence.JoinColumn;
+import javax.persistence.OneToMany;
+import javax.persistence.OneToOne;
 
 import de.tsl2.nano.service.util.IPersistable;
 import tsl2.nano.cursus.Exsecutio;
-import tsl2.nano.cursus.Mutatio;
 import tsl2.nano.cursus.effectus.Effectus;
 
 @Entity
@@ -20,7 +25,7 @@ public class EExsecutio<CONTEXT> extends Exsecutio<CONTEXT> implements IPersista
 	public EExsecutio() {
 	}
 
-	public EExsecutio(String name, Mutatio mutatio, String description) {
+	public EExsecutio(String name, EMutatio mutatio, String description) {
 		super(name, mutatio, description);
 	}
 
@@ -45,6 +50,8 @@ public class EExsecutio<CONTEXT> extends Exsecutio<CONTEXT> implements IPersista
 		this.name = name;
 	}
 
+	@OneToOne(targetEntity=EMutatio.class, mappedBy="mutatio", cascade=CascadeType.ALL, orphanRemoval=true)
+	@JoinColumn(table="EMUTATIO")
 	public EMutatio getMutatio() {
 		return (EMutatio) mutatio;
 	}
@@ -54,12 +61,14 @@ public class EExsecutio<CONTEXT> extends Exsecutio<CONTEXT> implements IPersista
 	}
 
 	@Override
+	@OneToMany(targetEntity=ERuleEffectus.class, mappedBy="effectus", cascade=CascadeType.ALL, orphanRemoval=true)
+	@JoinColumn(table="ERULEEFFECTUS")
 	public List<ERuleEffectus> getEffectus() {
-		return (List<ERuleEffectus>) super.getEffectus();
+		return (ArrayList<ERuleEffectus>) super.getEffectus();
 	}
 	
-	public void setEffectus(List<ERuleEffectus> effectus) {
-		this.effectus = effectus;
+	public void setEffectus(Collection<ERuleEffectus> effectus) {
+		this.effectus = (List<? extends Effectus>) effectus;
 	}
 
 	public String getDescription() {

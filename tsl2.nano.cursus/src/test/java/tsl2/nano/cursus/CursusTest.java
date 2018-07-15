@@ -2,6 +2,8 @@ package tsl2.nano.cursus;
 
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
 import static tsl2.nano.cursus.effectus.Effectree.effect;
 
 import java.util.Calendar;
@@ -14,17 +16,19 @@ import org.junit.BeforeClass;
 import org.junit.Test;
 
 import de.tsl2.nano.bean.def.Bean;
-import de.tsl2.nano.bean.def.BeanDefinition;
-import de.tsl2.nano.core.cls.PrivateAccessor;
+import de.tsl2.nano.core.cls.BeanClass;
+import de.tsl2.nano.core.util.CollectionUtil;
 import de.tsl2.nano.core.util.DateUtil;
 import de.tsl2.nano.core.util.ENVTestPreparation;
+import de.tsl2.nano.core.util.StringUtil;
+import tsl2.nano.cursus.IConsilium.Priority;
 import tsl2.nano.cursus.effectus.Effectree;
 import tsl2.nano.cursus.effectus.IncEffectus;
 import tsl2.nano.cursus.persistence.EConsilium;
 import tsl2.nano.cursus.persistence.EExsecutio;
 import tsl2.nano.cursus.persistence.EMutatio;
+import tsl2.nano.cursus.persistence.EObsidio;
 import tsl2.nano.cursus.persistence.ERes;
-import tsl2.nano.cursus.persistence.ERuleEffectus;
 import tsl2.nano.cursus.persistence.ETimer;
 
 /**
@@ -52,23 +56,67 @@ public class CursusTest {
     public void testEntityAttributeAccessability() throws Exception {
     	accessAttributes(new EConsilium(), 9);
     	accessAttributes(new EExsecutio(), 6);
-    	accessAttributes(new EMutatio(), 7);
-    	accessAttributes(new ERes(), 7);
-    	accessAttributes(new ETimer(), 7);
-    	//TODO: warum wird hier EMutatio angezogen? accessAttributes(new ERuleEffectus(), 7);
+    	accessAttributes(new EObsidio(), 5);
+    	accessAttributes(new EMutatio(), 4);
+    	accessAttributes(new ERes(), 4);
+    	accessAttributes(new ETimer(), 6);
+//    	//TODO: warum wird hier EMutatio angezogen? accessAttributes(new ERuleEffectus(), 3);
     }
 
 	private void accessAttributes(Object instance, int attrCount) {
 		Bean<?> bean = Bean.getBean(instance);
-    	assertEquals(attrCount, bean.getAttributes(true).size());
+		String[] attributesWithSetter = BeanClass.getBeanClass(instance).getAttributeNames(true);
+    	assertEquals(StringUtil.toString(attributesWithSetter, 100), attrCount, attributesWithSetter.length);
 		bean.getAttributes(true).stream().forEach(a -> a.setValue(instance , a.getValue(instance)));
 	}
     
     @Test
     public void testContract() throws Exception {
-    	Effectree.instance().addEffects(Contract.class, "contract.end", effect(Contract.class, "contract.value", TIncEffectus.class, 5));
+    	IConsilium[] consilii = process(createConsilii());
+    	
+    	assertEquals(new Date((String)((Exsecutio)consilii[0].getExsecutios().iterator().next()).mutatio.getNew()), origin.end);
+    	assertEquals(Long.valueOf((String)((Exsecutio)consilii[1].getExsecutios().iterator().next()).mutatio.getNew()).longValue(), ((List<Account>)origin.accounts).get(1).saldo);
+    	assertEquals(IConsilium.Status.INACTIVE, consilii[2].getStatus());
+    	assertEquals(5d, origin.value);
+    	assertEquals(2, origin.accounts.size());
+    }
+
+    @Test
+    public void testObsidio() throws Exception {
+    	Timer blockTime = new Timer(DateUtil.getYesterday(), DateUtil.getToday());
+    	IConsilium[] consilii = createConsilii();
+    	
+		String consiliumID = consilii[0].getName();
+		Consilium obsidio = new Consilium("BLOCKER", blockTime, Priority.HIGHEST, 
+    			new Obsidio("BLOCKEREX", consiliumID, blockTime, new Grex(Contract.class, "contract.end", "1")));
+    	process(CollectionUtil.concat(consilii, new IConsilium[] {obsidio}));
+    	assertEquals(null, origin.end);
+    }
+
+    @Test
+    public void testGrex() throws Exception {
+    	Grex<Contract, Object> grex = new Grex<>(Contract.class, "end", "1");
+    	Set<Res<Contract,Object>> parts = grex.createParts();
+    	assertEquals(1, parts.size());
+    	assertEquals(new Res(Contract.class, "1", "end"), parts.iterator().next());
+    	
+    	try {
+			grex.findParts(null);
+			fail("BeanContainer should not be initialized");
+		} catch (Throwable e) {
+			assertTrue(e.getMessage().startsWith("beancontainer not initialized"));
+		}
+    	
+    }
+	private IConsilium[] process(IConsilium[] consilii) {
+		Effectree.instance().addEffects(Contract.class, "contract.end", effect(Contract.class, "contract.value", TIncEffectus.class, 5));
     	System.out.println(Effectree.instance().toString());
-    	Consilium consilii[] = {
+    	new Processor().run(DateUtil.getStartOfYear(DateUtil.getToday()), DateUtil.getToday(), consilii);
+		return consilii;
+	}
+
+	private Consilium[] createConsilii() {
+		Consilium consilii[] = {
     		new Consilium("end", new Timer(DateUtil.getYesterday(), null), Consilium.Priority.HIGHEST, 
     				new Exsecutio(Action.CHANGE_END.name(), 
     				new Mutatio("01/01/2019", new TRes(Contract.class.getName(), "1", "contract.end")), null)),
@@ -82,20 +130,13 @@ public class CursusTest {
     				new Exsecutio(Action.CHANGE_SALDO.name(), 
     				new Mutatio("2001", new TRes(Contract.class.getName(), "1", "contract.accounts[?type=PAYMENT].saldo")), null)),
     	};
-    	new Processor().run(DateUtil.getStartOfYear(DateUtil.getToday()), DateUtil.getToday(), consilii);
-    	
-    	assertEquals(new Date((String)((Exsecutio)consilii[0].getExsecutios().iterator().next()).mutatio.getNew()), origin.end);
-    	assertEquals(Long.valueOf((String)((Exsecutio)consilii[1].getExsecutios().iterator().next()).mutatio.getNew()).longValue(), ((List<Account>)origin.accounts).get(1).saldo);
-    	assertEquals(Consilium.Status.INACTIVE, consilii[2].status);
-    	assertEquals(5d, origin.value);
-    	assertEquals(2, origin.accounts.size());
-    }
+		return consilii;
+	}
 }
 //Mock
 class TRes extends Res<Contract, Object> {
 	public TRes() {
 		super();
-		// TODO Auto-generated constructor stub
 	}
 	public TRes(String type, String objectid, String path) {
 		super(type, objectid, path);
