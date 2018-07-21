@@ -5,7 +5,6 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Calendar;
 import java.util.Date;
-import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Set;
@@ -86,18 +85,18 @@ public class Timer implements Serializable {
 	public boolean isGenerator() {
 		return stepLength > 0;
 	}
-	Timer each(Timer subTimer) {
-		getSubTimers().add(subTimer);
-		return this;
-	}
-	Set<Timer> getSubTimers() {
-		if (subTimers == null)
-			subTimers = new HashSet<>();
-		return subTimers;
-	}
-	public void setSubTimers(Set<Timer> subTimers) {
-		this.subTimers = subTimers;
-	}
+//	Timer each(Timer subTimer) {
+//		getSubTimers().add(subTimer);
+//		return this;
+//	}
+//	Set<Timer> getSubTimers() {
+//		if (subTimers == null)
+//			subTimers = new HashSet<>();
+//		return subTimers;
+//	}
+//	public void setSubTimers(Set<Timer> subTimers) {
+//		this.subTimers = subTimers;
+//	}
 
 	@Override
 	public String toString() {

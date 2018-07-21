@@ -64,6 +64,10 @@ public class NetworkClassLoader extends NestedJarClassLoader {
         return cl;
     }
 
+    protected NetworkClassLoader() {
+        this((ClassLoader)null);
+    }
+    
     /**
      * constructor
      * 
@@ -83,34 +87,16 @@ public class NetworkClassLoader extends NestedJarClassLoader {
         super(parent, exclude);
     }
 
-    /**
-     * constructor
-     * 
-     * @param urls
-     */
     public NetworkClassLoader(URL[] urls) {
         super(urls);
     }
 
-    /**
-     * constructor
-     * 
-     * @param urls
-     * @param parent
-     * @param factory
-     */
-    public NetworkClassLoader(URL[] urls, ClassLoader parent, URLStreamHandlerFactory factory) {
-        super(urls, parent, factory);
-    }
-
-    /**
-     * constructor
-     * 
-     * @param urls
-     * @param parent
-     */
     public NetworkClassLoader(URL[] urls, ClassLoader parent) {
         super(urls, parent);
+    }
+
+    public NetworkClassLoader(URL[] urls, ClassLoader parent, URLStreamHandlerFactory factory) {
+        super(urls, parent, factory);
     }
 
 	public void setEnvironment(String environment) {
@@ -188,6 +174,14 @@ public class NetworkClassLoader extends NestedJarClassLoader {
         return new File(path + FILENAME_UNRESOLVEABLES).delete();
     }
 
+//    @Override
+//    public Object clone() throws CloneNotSupportedException {
+//    	NetworkClassLoader clone = new NetworkClassLoader(getURLs(), getParent());
+//    	//for performance issue, we copy the loaded classes to the new one
+//    	//TODO: that's not the right way...
+//    	new PrivateAccessor<>(clone).member("classes", Collection.class).addAll(new PrivateAccessor<>(this).member("classes", Collection.class));
+//    	return clone;
+//    }
     @Override
     public String toString() {
         return super.toString() + "[downloaded-jars:" + downloadedjars + ", unresolved-classes:"

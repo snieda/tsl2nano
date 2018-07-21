@@ -21,9 +21,10 @@ import de.tsl2.nano.core.util.Util;
 public class Grex<O, V> implements Serializable {
 	private static final long serialVersionUID = 1L;
 
-	Res<O, V> genRes;
+	protected Res<O, V> genRes;
 	/** optional set of object ids */
-	Set<Object> validObjectIDs;
+	protected Set<Object> validObjectIDs;
+	
 	public Grex() {
 		super();
 	}

@@ -1,6 +1,5 @@
 package tsl2.nano.cursus.persistence;
 
-import javax.persistence.CascadeType;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
@@ -16,7 +15,7 @@ public class EObsidio extends Obsidio implements IPersistable<String>{
 	private static final long serialVersionUID = 1L;
 
 	String id;
-
+	
 	public EObsidio() {
 	}
 
@@ -51,8 +50,7 @@ public class EObsidio extends Obsidio implements IPersistable<String>{
 		this.grex = grex;
 	}
 
-	@OneToOne(targetEntity=ETimer.class, mappedBy="timer", cascade=CascadeType.ALL, orphanRemoval=true)
-	@JoinColumn(table="ETIMER")
+	@OneToOne @JoinColumn
 	public ETimer getTimer() {
 		return (ETimer) timer;
 	}

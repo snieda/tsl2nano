@@ -1,11 +1,13 @@
 package tsl2.nano.cursus.persistence;
 
-import java.util.ArrayList;
 import java.util.Date;
 
+import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
+import javax.persistence.Temporal;
+import javax.persistence.TemporalType;
 import javax.persistence.Transient;
 
 import de.tsl2.nano.service.util.IPersistable;
@@ -39,6 +41,8 @@ public class ETimer extends Timer implements IPersistable<String> {
 		this.id = id;
 	}
 
+	@Temporal(TemporalType.DATE)
+	@Column
 	public Date getFrom() {
 		return from;
 	}
@@ -47,6 +51,8 @@ public class ETimer extends Timer implements IPersistable<String> {
 		this.from = from;
 	}
 
+	@Temporal(TemporalType.DATE)
+	@Column
 	public Date getUntil() {
 		return until;
 	}

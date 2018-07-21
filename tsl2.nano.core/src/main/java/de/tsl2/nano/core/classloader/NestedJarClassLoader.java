@@ -15,6 +15,7 @@ import java.io.InputStream;
 import java.net.URL;
 import java.net.URLStreamHandlerFactory;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -25,7 +26,9 @@ import java.util.zip.ZipInputStream;
 
 import org.apache.commons.logging.Log;
 
+import de.tsl2.nano.core.AppLoader;
 import de.tsl2.nano.core.ManagedException;
+import de.tsl2.nano.core.cls.PrivateAccessor;
 import de.tsl2.nano.core.log.LogFactory;
 import de.tsl2.nano.core.util.FileUtil;
 import de.tsl2.nano.core.util.StringUtil;
@@ -57,11 +60,6 @@ public class NestedJarClassLoader extends LibClassLoader implements Cloneable {
     /** regular expression to exclude nesting jars from classpath */
     String exclude;
 
-    /**
-     * constructor
-     * 
-     * @param parent parent class loader
-     */
     public NestedJarClassLoader(ClassLoader parent) {
         this(parent, null);
     }
@@ -81,25 +79,12 @@ public class NestedJarClassLoader extends LibClassLoader implements Cloneable {
         super(urls);
     }
 
-    /**
-     * constructor
-     * 
-     * @param urls
-     * @param parent
-     * @param factory
-     */
-    public NestedJarClassLoader(URL[] urls, ClassLoader parent, URLStreamHandlerFactory factory) {
-        super(urls, parent, factory);
-    }
-
-    /**
-     * constructor
-     * 
-     * @param urls
-     * @param parent
-     */
     public NestedJarClassLoader(URL[] urls, ClassLoader parent) {
         super(urls, parent);
+    }
+
+    public NestedJarClassLoader(URL[] urls, ClassLoader parent, URLStreamHandlerFactory factory) {
+        super(urls, parent, factory);
     }
 
 //    @Override
@@ -320,9 +305,24 @@ public class NestedJarClassLoader extends LibClassLoader implements Cloneable {
         return super.toString() + "[nested: " + (getNestedJars() != null ? nestedJars.length : 0) + "]";
     }
 
+    public void reset() {
+    	if (!AppLoader.isJdkOracle())
+    		new PrivateAccessor<>(this).member("classes", Collection.class).clear();
+	}
+    
     @Override
     public Object clone() throws CloneNotSupportedException {
         return super.clone();
+    }
+    
+    @Override
+    public void close() throws IOException {
+    	super.close();
+    	Collection<ZipStream> streams = jarFileStreams.values();
+    	for (ZipStream s : streams) {
+    		if (s.zipStream != null)
+    			s.zipStream.close();
+		}
     }
 }
 
@@ -340,7 +340,10 @@ class ZipStream {
         super();
         zipEntryBytes = new HashMap<String, byte[]>();
         InputStream jarStream = cl.getResourceAsStream(jarName);
-        zipStream = new ZipInputStream(jarStream);
+        if (jarStream != null)
+        	zipStream = new ZipInputStream(jarStream);
+        else
+        	throw new IllegalStateException("resource '" + jarName + "' not found through classloader " + cl);
     }
 
     /**
@@ -394,5 +397,4 @@ class ZipStream {
             throw new RuntimeException(ex);
         }
     }
-
 }

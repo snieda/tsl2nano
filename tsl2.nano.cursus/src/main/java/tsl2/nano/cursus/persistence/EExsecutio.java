@@ -1,7 +1,6 @@
 package tsl2.nano.cursus.persistence;
 
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.List;
 
 import javax.persistence.CascadeType;
@@ -9,19 +8,20 @@ import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
 import javax.persistence.JoinColumn;
+import javax.persistence.ManyToOne;
 import javax.persistence.OneToMany;
 import javax.persistence.OneToOne;
 
 import de.tsl2.nano.service.util.IPersistable;
 import tsl2.nano.cursus.Exsecutio;
-import tsl2.nano.cursus.effectus.Effectus;
 
 @Entity
 public class EExsecutio<CONTEXT> extends Exsecutio<CONTEXT> implements IPersistable<String> {
 	private static final long serialVersionUID = 1L;
 	
 	String id;
-
+	EConsilium consilium;
+	
 	public EExsecutio() {
 	}
 
@@ -50,8 +50,7 @@ public class EExsecutio<CONTEXT> extends Exsecutio<CONTEXT> implements IPersista
 		this.name = name;
 	}
 
-	@OneToOne(targetEntity=EMutatio.class, mappedBy="mutatio", cascade=CascadeType.ALL, orphanRemoval=true)
-	@JoinColumn(table="EMUTATIO")
+	@OneToOne(mappedBy="exsecutio", cascade=CascadeType.ALL, orphanRemoval=true)
 	public EMutatio getMutatio() {
 		return (EMutatio) mutatio;
 	}
@@ -61,14 +60,13 @@ public class EExsecutio<CONTEXT> extends Exsecutio<CONTEXT> implements IPersista
 	}
 
 	@Override
-	@OneToMany(targetEntity=ERuleEffectus.class, mappedBy="effectus", cascade=CascadeType.ALL, orphanRemoval=true)
-	@JoinColumn(table="ERULEEFFECTUS")
+	@OneToMany(mappedBy="exsecutio", cascade=CascadeType.ALL, orphanRemoval=true)
 	public List<ERuleEffectus> getEffectus() {
 		return (ArrayList<ERuleEffectus>) super.getEffectus();
 	}
 	
-	public void setEffectus(Collection<ERuleEffectus> effectus) {
-		this.effectus = (List<? extends Effectus>) effectus;
+	public void setEffectus(List<ERuleEffectus> effectus) {
+		this.effectus = effectus;
 	}
 
 	public String getDescription() {
@@ -77,5 +75,14 @@ public class EExsecutio<CONTEXT> extends Exsecutio<CONTEXT> implements IPersista
 
 	public void setDescription(String description) {
 		this.description = description;
+	}
+
+	@ManyToOne @JoinColumn
+	public EConsilium getConsilium() {
+		return consilium;
+	}
+
+	public void setConsilium(EConsilium consilium) {
+		this.consilium = consilium;
 	}
 }

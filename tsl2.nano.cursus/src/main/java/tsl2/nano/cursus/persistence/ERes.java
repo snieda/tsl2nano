@@ -3,6 +3,8 @@ package tsl2.nano.cursus.persistence;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
+import javax.persistence.JoinColumn;
+import javax.persistence.ManyToOne;
 
 import de.tsl2.nano.core.util.Util;
 import de.tsl2.nano.service.util.IPersistable;
@@ -13,6 +15,7 @@ public class ERes extends Res<Object, Object> implements IPersistable<String> {
 	private static final long serialVersionUID = 1L;
 
 	String id;
+	EMutatio mutatio;
 	
 	@Id @GeneratedValue
 	public String getId() {
@@ -44,6 +47,13 @@ public class ERes extends Res<Object, Object> implements IPersistable<String> {
 		this.objectid = objectid;
 		if (type != null)
 			setDescription(createDescription(type, objectid, path));
+	}
+	@ManyToOne @JoinColumn
+	public EMutatio getMutatio() {
+		return mutatio;
+	}
+	public void setMutatio(EMutatio mutatio) {
+		this.mutatio = mutatio;
 	}
 
 }

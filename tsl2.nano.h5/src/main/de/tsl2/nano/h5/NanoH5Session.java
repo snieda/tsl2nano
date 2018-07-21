@@ -226,7 +226,7 @@ public class NanoH5Session implements ISession<BeanDefinition>, Serializable, IL
         this.authorization = authorization;
         initContext(authorization, context);
         this.sessionStart = System.currentTimeMillis();
-        Persistence p = Persistence.current();
+        Persistence p = Persistence.current(); //only for id-creation
         this.id = inetAddress + p.getConnectionUrl() + "&" + p.getConnectionUserName() + "&" + p.getJarFile();
     }
 
@@ -495,8 +495,7 @@ public class NanoH5Session implements ISession<BeanDefinition>, Serializable, IL
     @Override
     public void close() {
         LOG.debug("closing session " + this);
-        server.sessions.remove(inetAddress);
-        server.getEventController().removeListener(this);
+        server.removeSession(this);
         nav = null;
         response = null;
         authorization = null;

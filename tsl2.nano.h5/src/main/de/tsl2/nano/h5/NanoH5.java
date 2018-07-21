@@ -52,8 +52,8 @@ import de.tsl2.nano.core.AppLoader;
 import de.tsl2.nano.core.ENV;
 import de.tsl2.nano.core.ManagedException;
 import de.tsl2.nano.core.Messages;
-import de.tsl2.nano.core.classloader.NetworkClassLoader;
 import de.tsl2.nano.core.cls.BeanClass;
+import de.tsl2.nano.core.cls.UnboundAccessor;
 import de.tsl2.nano.core.exception.Message;
 import de.tsl2.nano.core.execution.CompatibilityLayer;
 import de.tsl2.nano.core.execution.SystemUtil;
@@ -66,6 +66,7 @@ import de.tsl2.nano.core.util.FileUtil;
 import de.tsl2.nano.core.util.MapUtil;
 import de.tsl2.nano.core.util.NetUtil;
 import de.tsl2.nano.core.util.NumberUtil;
+import de.tsl2.nano.core.util.ObjectUtil;
 import de.tsl2.nano.core.util.StringUtil;
 import de.tsl2.nano.core.util.Util;
 import de.tsl2.nano.h5.NanoHTTPD.Response.Status;
@@ -86,6 +87,7 @@ import de.tsl2.nano.persistence.PersistenceClassLoader;
 import de.tsl2.nano.persistence.provider.NanoEntityManagerFactory;
 import de.tsl2.nano.plugin.Plugins;
 import de.tsl2.nano.service.util.BeanContainerUtil;
+import de.tsl2.nano.service.util.IGenericService;
 import de.tsl2.nano.serviceaccess.Authorization;
 import de.tsl2.nano.serviceaccess.ServiceFactory;
 import de.tsl2.nano.util.SchedulerUtil;
@@ -140,6 +142,8 @@ public class NanoH5 extends NanoHTTPD implements ISystemConnector<Persistence> {
     ClassLoader appstartClassloader;
 
     private EventController eventController;
+
+    private Request lastRequest;
 
 //    /** workaround to avoid re-serving a cached request. */
 //    private Properties lastHeader;
@@ -293,6 +297,7 @@ public class NanoH5 extends NanoHTTPD implements ISystemConnector<Persistence> {
     }
 
     private void runHttpServer() {
+        System.setProperty("java.net.preferIPv6Addresses", "true");
         super.start();
 
         if (System.getProperty("os.name").startsWith("Windows")
@@ -420,6 +425,12 @@ public class NanoH5 extends NanoHTTPD implements ISystemConnector<Persistence> {
         //TODO: in InternetExporer/Edge we get sometimes IP4 and sometimes IP6. should we set system property java.net.preferIPv6Addresses?
         //           sessions.keySet().iterator().next().getAllByName(requestor.getHostName()).equals(requestor) returns false
         InetAddress requestor = ((Socket) ((Map) header).get("socket")).getInetAddress();
+        Request req = new Request(requestor, uri, m, header, parms, files);
+        if (lastRequest != null && lastRequest.equals(req)) {//waiting for the first request to 
+            LOG.warn("duplicated request from " + requestor);
+            ConcurrentUtil.sleep(2000);
+        }
+        lastRequest = req;
         NanoH5Session session = sessions.get(requestor);
         // application commands
         if (isAdmin(uri)) {
@@ -525,6 +536,7 @@ public class NanoH5 extends NanoHTTPD implements ISystemConnector<Persistence> {
                 createGenericNavigationModel(),
                 Thread.currentThread().getContextClassLoader(), ConcurrentUtil.getCurrent(Authorization.class),
                 createSessionContext());
+            //TODO: the new created session is not yet authorized...is it the right time to add it as known session?
             sessions.put(inetAddress, session);
             return session;
         } catch (Throwable e) {
@@ -630,7 +642,7 @@ public class NanoH5 extends NanoHTTPD implements ISystemConnector<Persistence> {
         
         //define a new classloader to access all beans of given jar-file
         PersistenceClassLoader runtimeClassloader = new PersistenceClassLoader(new URL[0],
-            rootClassloader());
+            ObjectUtil.cloneObject(rootClassloader()));
         runtimeClassloader.addLibraryPath(ENV.getConfigPath());
         //TODO: the environment and current thread shouldn't use the new sessions classloader! 
         Thread.currentThread().setContextClassLoader(runtimeClassloader);
@@ -1130,7 +1142,7 @@ public class NanoH5 extends NanoHTTPD implements ISystemConnector<Persistence> {
         ENV.reload();
         ENV.setProperty(ENV.KEY_CONFIG_PATH, configPath);
         ENV.setProperty("service.url", serviceURL.toString());
-        NetworkClassLoader.resetUnresolvedClasses(ENV.getConfigPath());
+        BeanClass.call("de.tsl2.nano.core.classloader.NetworkClassLoader", "resetUnresolvedClasses", ENV.getConfigPath());
         Thread.currentThread().setContextClassLoader(appstartClassloader);
 
         HtmlUtil.tableDivStyle = null;
@@ -1154,55 +1166,48 @@ public class NanoH5 extends NanoHTTPD implements ISystemConnector<Persistence> {
         return Util.toString(NanoH5.class, "serviceURL: " + serviceURL,
             "sessions: " + (sessions != null ? sessions.size() : 0), "requests: " + requests);
     }
-//    /**
-//     * createTestNavigationModel
-//     * 
-//     * @return navigation model for testing purpose
-//     */
-//    static Stack<BeanDefinition<?>> createTestNavigationModel() {
-//
-//        BeanContainer.initEmtpyServiceActions();
-//
-//        TypeBean b = new TypeBean();
-//        b.setDate(new Date());
-//        b.setString("test");
-//        b.setBigDecimal(new BigDecimal(10));
-//        Bean<TypeBean> bean = new Bean<TypeBean>();
-//        final Collection<TypeBean> rootBeanList = new ArrayList(Arrays.asList(b));
-//        BeanCollector<Collection<TypeBean>, TypeBean> root = new BeanCollector<Collection<TypeBean>, TypeBean>(TypeBean.class,
-//            true,
-//            true,
-//            false);
-//        BeanFinder<TypeBean, Object> beanFinder = new BeanFinder<TypeBean, Object>(TypeBean.class) {
-//            @Override
-//            public Collection<TypeBean> getData(Object fromFilter, Object toFilter) {
-//                return rootBeanList;
-//            }
-//        };
-//        beanFinder.setDetailBean(bean);
-//        root.setBeanFinder(beanFinder);
-//        final Bean<Object> model = new Bean<Object>();
-//        model.addAttribute("Name", "Stefan", RegularExpressionFormat.createAlphaNumRegExp(15, true), null, null);
-//        model.addAttribute("Kategorie", 1, null, null, null)
-//            .setRange(Arrays.asList(1, 2, 3))
-//            .setBasicDef(3, false, null, null, "Kategorie");
-//        model.addAction(new CommonAction<Object>("testid", "+xxx", null) {
-//            @Override
-//            public Object action() throws Exception {
-//                String newValue = model.getValue("Name") + "xxx";
-//                model.setValue("Name", newValue);
-//                return model;
-//            }
-//        });
-////        model.addDefaultSaveAction();
-//
-//        Bean appStart = new Bean();
-//        appStart.setName(START_PAGE);
-//
-//        Stack<BeanDefinition<?>> navigationModel = new Stack<BeanDefinition<?>>();
-//        navigationModel.push(appStart);
-//        navigationModel.push(root);
-//        navigationModel.push(model);
-//        return navigationModel;
-//    }
+
+    class Request {
+        String uri;
+        Method m;
+        Map<String, String> header;
+        Map<String, String> parms;
+        Map<String, String> files;
+        InetAddress requestor;
+        Request(InetAddress requestor, String uri,
+                Method m,
+                Map<String, String> header,
+                Map<String, String> parms,
+                Map<String, String> files) {
+            super();
+            this.requestor = requestor;
+            this.uri = uri;
+            this.m = m;
+            this.header = header;
+            this.parms = parms;
+            this.files = files;
+        }
+        @Override
+        public boolean equals(Object obj) {
+            if (this == obj)
+                return true;
+            if (!(obj instanceof Request))
+                return false;
+            Request o = (Request) obj;
+            return Util.equals(requestor, o.requestor) && Util.equals(uri, o.uri) && Util.equals(m, o.m) 
+                    && header.equals(o.header) && parms.equals(o.parms) && files.equals(o.files);
+        }
+    }
+
+    public void removeSession(NanoH5Session session) {
+        sessions.remove(session.inetAddress);
+        getEventController().removeListener(session);
+
+        if (sessions.isEmpty() && requests > 0) {
+            Message.send("All sessions closed -> resetting BeanContainer / GenericService / NetworkClassloader!");
+            new UnboundAccessor(rootClassloader()).call("reset", Void.class);
+            BeanContainerUtil.resetServices();
+            ENV.removeService(IGenericService.class);
+        }
+    }
 }

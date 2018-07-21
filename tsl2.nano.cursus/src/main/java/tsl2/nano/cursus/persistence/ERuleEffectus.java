@@ -1,10 +1,10 @@
 package tsl2.nano.cursus.persistence;
 
-import javax.persistence.CascadeType;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
 import javax.persistence.JoinColumn;
+import javax.persistence.ManyToOne;
 import javax.persistence.OneToOne;
 
 import de.tsl2.nano.service.util.IPersistable;
@@ -15,6 +15,7 @@ public class ERuleEffectus extends RuleEffectus<Object, Object> implements IPers
 	private static final long serialVersionUID = 1L;
 
 	String id;
+	EExsecutio exsecutio;
 	
 	public ERuleEffectus() {
 	}
@@ -31,6 +32,11 @@ public class ERuleEffectus extends RuleEffectus<Object, Object> implements IPers
 		this.id = id;
 	}
 	
+	@Override
+	public boolean isFixed() {
+		return super.isFixed();
+	}
+	
 	public void setFixed(boolean fixed) {
 		this.fixed = fixed;
 	}
@@ -39,14 +45,23 @@ public class ERuleEffectus extends RuleEffectus<Object, Object> implements IPers
 	protected Object evaluateNewValue() {
 		return getRuleName() != null ? super.evaluateNewValue() : null;
 	}
-	@OneToOne(targetEntity=ERes.class, mappedBy="res", cascade=CascadeType.ALL, orphanRemoval=true)
-	@JoinColumn(table="ERES")
+	@OneToOne @JoinColumn
 	public ERes getRes() {
 		return (ERes) res;
 	}
 
 	public void setRes(ERes res) {
 		this.res = res;
+	}
+
+	@ManyToOne
+	@JoinColumn
+	public EExsecutio getExsecutio() {
+		return exsecutio;
+	}
+
+	public void setExsecutio(EExsecutio exsecutio) {
+		this.exsecutio = exsecutio;
 	}
 
 }

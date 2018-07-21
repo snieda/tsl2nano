@@ -10,7 +10,6 @@
 package de.tsl2.nano.core.cls;
 
 import java.io.BufferedReader;
-import java.io.DataInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
@@ -32,6 +31,7 @@ import java.util.Vector;
 
 import org.apache.commons.logging.Log;
 
+import de.tsl2.nano.core.AppLoader;
 import de.tsl2.nano.core.ManagedException;
 import de.tsl2.nano.core.classloader.RuntimeClassloader;
 import de.tsl2.nano.core.log.LogFactory;
@@ -99,9 +99,14 @@ public class ClassFinder {
 	 * @return parent ClassLoader
 	 */
 	private static ClassLoader addClasses(ClassLoader classLoader, Set<Class<?>> classes) {
+		if (AppLoader.isJdkOracle()) {
 		classes.addAll(
 				(Collection<? extends Class<?>>) new PrivateAccessor(classLoader).member("classes", Vector.class));
-		return (ClassLoader) new PrivateAccessor(classLoader).call("getParent", ClassLoader.class);
+//		return (ClassLoader) new PrivateAccessor(classLoader).call("getParent", ClassLoader.class);
+		} else {
+			LOG.warn("cannot access oracle specific member of classloader. this may result in problems on finding classes.");
+		}
+		return classLoader.getParent();
 	}
 
 //	private void collectPackageClasses(ClassLoader classLoader) {

@@ -29,6 +29,9 @@ fi
 if [ "$3" == "nopause" ] 
 	then NOPAUSE=nopause
 fi
+if [ "$4" == "move" ] 
+	then mv $PRJ $PRJ + '~' 
+fi
 
 NAME=${project.artifactId}
 VERSION=${project.version}
@@ -45,6 +48,6 @@ JSU_ENC=-Dsun.jnu.encoding=UTF-8
 #PROFILER="-agentpath:...visualvm_138/profiler/lib/deployed/jdk16/windows/profilerinterface.dll=...\visualvm_138\profiler\lib,5140"
 JAVA_OPTS="-Xmx512m -Djava.awt.headless=true"
 #LOG=">$PRJ.log"
-
-java $OFFLINE $UH $LLANG $ENCODING $JSU_ENC $USERDIR $NANO_DEBUG $AGENT $PROXY  $DEBUG $UH $PROFILER $JAVA_OPTS -jar $NAME-$VERSION$EXTENSION.jar $PRJ $PORT $LOG 
+IPv4="-Djava.net.preferIPv4Stack=true"
+java $IPv4 $OFFLINE $UH $LLANG $ENCODING $JSU_ENC $USERDIR $NANO_DEBUG $AGENT $PROXY  $DEBUG $UH $PROFILER $JAVA_OPTS -jar $NAME-$VERSION$EXTENSION.jar $PRJ $PORT $LOG 
 #if [ not "$NOPAUSE" == "nopause" ] then 'read -p' fi

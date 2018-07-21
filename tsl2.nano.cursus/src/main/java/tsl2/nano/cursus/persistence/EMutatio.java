@@ -5,6 +5,7 @@ import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
 import javax.persistence.JoinColumn;
+import javax.persistence.ManyToOne;
 import javax.persistence.OneToOne;
 
 import de.tsl2.nano.core.util.Util;
@@ -16,6 +17,9 @@ public class EMutatio extends Mutatio<Object, Object> implements IPersistable<St
 	private static final long serialVersionUID = 1L;
 
 	String id;
+	
+	EExsecutio exsecutio;
+	
 	public EMutatio() {
 	}
 	public EMutatio(String next, ERes res) {
@@ -47,14 +51,21 @@ public class EMutatio extends Mutatio<Object, Object> implements IPersistable<St
 		this.next = next;
 	}
 
-	@OneToOne(targetEntity=ERes.class, mappedBy="res", cascade=CascadeType.ALL, orphanRemoval=true)
-	@JoinColumn(table="ERES")
+	@OneToOne(mappedBy="mutatio", cascade=CascadeType.ALL, orphanRemoval=true)
 	public ERes getRes() {
 		return (ERes) res;
 	}
 
 	public void setRes(ERes res) {
 		this.res = res;
+	}
+
+	@ManyToOne @JoinColumn
+	public EExsecutio getExsecutio() {
+		return exsecutio;
+	}
+	public void setExsecutio(EExsecutio exsecutio) {
+		this.exsecutio = exsecutio;
 	}
 
 }

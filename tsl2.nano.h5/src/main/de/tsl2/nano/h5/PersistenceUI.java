@@ -15,6 +15,7 @@ import static de.tsl2.nano.bean.def.BeanPresentationHelper.PROP_NULLABLE;
 import static de.tsl2.nano.bean.def.BeanPresentationHelper.PROP_STYLE;
 import static de.tsl2.nano.bean.def.BeanPresentationHelper.PROP_VISIBLE;
 
+import java.io.File;
 import java.io.Serializable;
 import java.util.Arrays;
 import java.util.Properties;
@@ -32,6 +33,7 @@ import de.tsl2.nano.bean.def.ValueExpression;
 import de.tsl2.nano.core.ENV;
 import de.tsl2.nano.core.util.FileUtil;
 import de.tsl2.nano.core.util.MapUtil;
+import de.tsl2.nano.core.util.SortedProperties;
 import de.tsl2.nano.core.util.StringUtil;
 import de.tsl2.nano.core.util.Util;
 import de.tsl2.nano.format.RegExpFormat;
@@ -80,7 +82,8 @@ public class PersistenceUI {
                 Properties props;
                 String pfile = ENV.getConfigPath() + "persistence.properties";
                 if ((props = FileUtil.loadPropertiesFromFile(pfile)) == null) {
-                    props = new Properties();
+                    props = new SortedProperties();
+                    addFileNames(props, "BEANJAR_");
                     props.setProperty("PROVIDER_Hibernate", "org.hibernate.ejb.HibernatePersistence");
                     props.setProperty("PROVIDER_Hibernate5", "org.hibernate.jpa.HibernatePersistenceProvider");
                     props.setProperty("PROVIDER_OpenJPA", "org.apache.openjpa.persistence.PersistenceProviderImpl");
@@ -164,6 +167,8 @@ public class PersistenceUI {
                 }
 
                 //input assists - completions
+                ((IIPresentable) login.getAttribute("jarFile").getPresentation())
+                    .setItemList(MapUtil.getValues(props, "BEANJAR_.*"));
                 ((IIPresentable) login.getAttribute("connectionUrl").getPresentation())
                     .setItemList(MapUtil.getValues(props, "URLSYNTAX_.*"));
                 ((IIPresentable) login.getAttribute("connectionDriverClass").getPresentation())
@@ -404,7 +409,7 @@ public class PersistenceUI {
         if (login.toString().matches(ENV.get("app.login.present.attribute.multivalue", ".*"))) {
             login.removeAttributes("jdbcProperties");
         }
-        if (ENV.get("app.login.jarfile.fileselector", true)) {
+        if (ENV.get("app.login.jarfile.fileselector", false)) {
             login.getAttribute("jarFile").getPresentation().setType(IPresentable.TYPE_ATTACHMENT);
             ((Html5Presentable) login.getAttribute("jarFile").getPresentation()).getLayoutConstraints().put("accept",
                 ".jar");
@@ -495,6 +500,18 @@ public class PersistenceUI {
         };
         login.addAction(loginAction);
         return login;
+    }
+
+    private static void addFileNames(Properties props, String prefix) {
+        addFiles(props, prefix, ".*\\.sql");
+        addFiles(props, prefix, ".*\\.jar");
+    }
+
+    private static void addFiles(Properties props, String prefix, String ext) {
+        File[] files = FileUtil.getFiles(ENV.getConfigPath(), ext);
+        for (int i = 0; i < files.length; i++) {
+            props.put(prefix + files[i].getName(), files[i].getName());
+        }
     }
 
     protected static String getDriverPrefix(String url) {

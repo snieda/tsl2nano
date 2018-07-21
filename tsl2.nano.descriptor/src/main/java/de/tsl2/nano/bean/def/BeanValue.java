@@ -446,15 +446,7 @@ public class BeanValue<T> extends AttributeDefinition<T> implements IValueDefini
      */
     @Override
     public int hashCode() {
-        final int prime = 31;
-        int result = super.hashCode();
-        result = prime * result + ((instance == null) ? 0 : instance.hashCode());
-        /*
-         * on using e.g. ValueHolders, the instance and its attribute (=value) are identical.
-         * then it is possible to distinguish them through the description, if defined
-         */
-        result = prime * result + ((description == null) ? 0 : description.hashCode());
-        return result;
+    	return Util.hashCode(instance, attribute);
     }
 
     /**
@@ -464,15 +456,13 @@ public class BeanValue<T> extends AttributeDefinition<T> implements IValueDefini
     public int compareTo(IAttribute<T> o) {
         //not really a compareTo...but a base for equals
         if (!(o instanceof BeanValue)) {
-            return -1;
+            return 1;
         }
-        if (instance != ((BeanValue) o).instance) {
-            return -1;
+        if (instance == ((BeanValue) o).instance) {
+        	return attribute.compareTo(((BeanValue)o).attribute);
+        } else {
+        	return super.compareTo(o);
         }
-        if (description != null && !description.equals(((BeanValue) o).description)) {
-            return -1;
-        }
-        return super.compareTo(o);
     }
 
     /**

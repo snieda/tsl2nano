@@ -296,7 +296,7 @@ public class ObjectUtil extends ByteUtil {
     }
 
     /**
-     * calls the internal {@link Object#clone()} method.
+     * calls the internal {@link Object#clone()} method. Throws a CloneNotSupportedException, if src class does not implement Cloneable!
      * 
      * @param src source to copy
      * @return copied object

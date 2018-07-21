@@ -168,7 +168,7 @@ public class SystemUtil {
                 + "  encode: ${file.encoding}\n"
                 + "  loader: ${main.context.classloader}\n"
                 + "  secure: ${security}\n"
-                + "  java  : ${java.vm.name}, ${java.runtime.version}\n"
+                + "  java  : ${java.vm.name}, ${java.runtime.version}, ${java.vm.vendor}\n"
                 + "  javhom: ${java.home}\n"
                 + "  complr: ${java.compiler}\n"
                 + "  memory: ${memory}\n"

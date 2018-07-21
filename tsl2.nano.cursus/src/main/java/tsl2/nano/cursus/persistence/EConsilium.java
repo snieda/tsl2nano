@@ -19,6 +19,7 @@ public class EConsilium extends Consilium implements IPersistable<String> {
 	private static final long serialVersionUID = 1L;
 	
 	String id;
+	String name;
 	
 	public EConsilium() {
 	}
@@ -75,8 +76,7 @@ public class EConsilium extends Consilium implements IPersistable<String> {
 	}
 
 	@Override
-	@OneToOne(targetEntity=ETimer.class, mappedBy="timer", cascade=CascadeType.ALL, orphanRemoval=true)
-	@JoinColumn(table="ETIMER")
+	@OneToOne @JoinColumn
 	public ETimer getTimer() {
 		return (ETimer) super.getTimer();
 	}
@@ -89,8 +89,7 @@ public class EConsilium extends Consilium implements IPersistable<String> {
 		this.status = status;
 	}
 
-	@OneToMany(targetEntity=EExsecutio.class, mappedBy="exsecutios", cascade=CascadeType.ALL, orphanRemoval=true)
-	@JoinColumn(table="EEXSECUTIO")
+	@OneToMany(mappedBy="consilium", cascade=CascadeType.ALL, orphanRemoval=true)
 	public Set<EExsecutio<?>> getExsecutios() {
 		return (Set<EExsecutio<?>>) exsecutios;
 	}
@@ -99,8 +98,13 @@ public class EConsilium extends Consilium implements IPersistable<String> {
 		this.exsecutios = exsecutios;
 	}
 
-	// public void setName(String name) {
-	// 	this.name = name;
-	// }
+	@Override
+	public String getName() {
+		return name;
+	}
+	
+	 public void setName(String name) {
+	 	this.name = name;
+	 }
 }
  

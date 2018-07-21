@@ -35,8 +35,8 @@ import org.apache.commons.logging.Log;
 import de.tsl2.nano.action.CommonAction;
 import de.tsl2.nano.action.IAction;
 import de.tsl2.nano.bean.BeanContainer;
-import de.tsl2.nano.bean.BeanUtil;
 import de.tsl2.nano.bean.BeanFindParameters;
+import de.tsl2.nano.bean.BeanUtil;
 import de.tsl2.nano.bean.IAttributeDef;
 import de.tsl2.nano.bean.def.Bean;
 import de.tsl2.nano.core.ENV;
@@ -644,4 +644,10 @@ public class BeanContainerUtil {
             }
         }
     }
+    
+    public static void resetServices() {
+        if (ServiceFactory.isInitialized())
+            ServiceFactory.instance().reset(true);
+    }
+    
 }

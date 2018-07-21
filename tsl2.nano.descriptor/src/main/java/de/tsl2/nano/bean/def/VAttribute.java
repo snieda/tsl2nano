@@ -15,6 +15,7 @@ import org.simpleframework.xml.Attribute;
 
 import de.tsl2.nano.core.cls.BeanAttribute;
 import de.tsl2.nano.core.cls.IValueAccess;
+import de.tsl2.nano.core.util.Util;
 
 /**
  * virtual attribute working on {@link IValueAccess#getValue()}.
@@ -73,5 +74,15 @@ public class VAttribute<T> extends BeanAttribute<T> {
             return;
         }
         super.setValue(beanInstance, value);
+    }
+    
+    @Override
+    public int hashCode() {
+    	return Util.hashCode(readAccessMethod, virtualName);
+    }
+    
+    @Override
+    public String toString() {
+    	return super.toString() + " -> " + virtualName;
     }
 }

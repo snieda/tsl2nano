@@ -46,6 +46,8 @@ public class Mutatio<O, V> implements IChange, Serializable {
 	}
 	@Override
 	public boolean equals(Object o) {
+		if (this == o)
+			return true;
 		if (!(o instanceof Mutatio))
 			return false;
 		Mutatio m = (Mutatio) o;

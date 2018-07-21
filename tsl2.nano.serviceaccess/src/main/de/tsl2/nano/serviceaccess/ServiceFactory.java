@@ -509,15 +509,21 @@ public class ServiceFactory {
      * 
      * @param complete if true, all caches and instances will be reseted
      */
-    public void reset(boolean complete) {
-        logout();
-        properties.clear();
+    public static void reset(boolean complete) {
+        if (self == null)
+            return;
+        try {
+            self.logout();
+        } catch (Exception e) {
+            LOG.error(e);
+        }
+        self.properties.clear();
         if (complete) {
-            userProperties = null;
-            auth = null;
-            services.clear();
-            classLoader = null;
-            serviceLocator = null;
+            self.userProperties = null;
+            self.auth = null;
+            self.services.clear();
+            self.classLoader = null;
+            self.serviceLocator = null;
             CachingBatchloader.instance().reset();
             self = null;
         }

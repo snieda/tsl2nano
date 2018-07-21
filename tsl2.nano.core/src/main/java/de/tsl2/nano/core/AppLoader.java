@@ -413,6 +413,9 @@ public class AppLoader {
         return System.getProperty("java.vm.specification.name").startsWith("Dalvik");
     }
 
+    public static final boolean isJdkOracle() {
+        return System.getProperty("java.vm.vendor").contains("Oracle");
+    }
     public static final boolean isUnix() {
         //we distinguish only between windows or not --> unix
         return !isWindows();
