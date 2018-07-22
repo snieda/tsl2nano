@@ -641,8 +641,14 @@ public class NanoH5 extends NanoHTTPD implements ISystemConnector<Persistence> {
         Plugins.process(INanoPlugin.class).definePersistence(persistence);
         
         //define a new classloader to access all beans of given jar-file
-        PersistenceClassLoader runtimeClassloader = new PersistenceClassLoader(new URL[0],
-            ObjectUtil.cloneObject(rootClassloader()));
+        ClassLoader rootCl;
+        if (rootClassloader() instanceof Cloneable)
+            rootCl = ObjectUtil.cloneObject(rootClassloader());
+        else {
+            LOG.warn("classloader " + rootClassloader() + " not clonable for new session - using rootClassloader itself");
+            rootCl = rootClassloader();
+        }
+        PersistenceClassLoader runtimeClassloader = new PersistenceClassLoader(new URL[0], rootCl);
         runtimeClassloader.addLibraryPath(ENV.getConfigPath());
         //TODO: the environment and current thread shouldn't use the new sessions classloader! 
         Thread.currentThread().setContextClassLoader(runtimeClassloader);

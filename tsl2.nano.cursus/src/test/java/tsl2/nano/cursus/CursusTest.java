@@ -54,11 +54,11 @@ public class CursusTest {
 
     @Test
     public void testEntityAttributeAccessability() throws Exception {
-    	accessAttributes(new EConsilium(), 9);
-    	accessAttributes(new EExsecutio(), 6);
+    	accessAttributes(new EConsilium(), 10);
+    	accessAttributes(new EExsecutio(), 7);
     	accessAttributes(new EObsidio(), 5);
-    	accessAttributes(new EMutatio(), 4);
-    	accessAttributes(new ERes(), 4);
+    	accessAttributes(new EMutatio(), 5);
+    	accessAttributes(new ERes(), 5);
     	accessAttributes(new ETimer(), 6);
 //    	//TODO: warum wird hier EMutatio angezogen? accessAttributes(new ERuleEffectus(), 3);
     }
