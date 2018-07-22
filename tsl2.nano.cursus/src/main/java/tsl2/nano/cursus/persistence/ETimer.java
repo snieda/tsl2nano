@@ -8,7 +8,6 @@ import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
 import javax.persistence.Temporal;
 import javax.persistence.TemporalType;
-import javax.persistence.Transient;
 
 import de.tsl2.nano.service.util.IPersistable;
 import tsl2.nano.cursus.Timer;
@@ -42,7 +41,7 @@ public class ETimer extends Timer implements IPersistable<String> {
 	}
 
 	@Temporal(TemporalType.DATE)
-	@Column
+	@Column(name="dfrom")
 	public Date getFrom() {
 		return from;
 	}
@@ -52,7 +51,7 @@ public class ETimer extends Timer implements IPersistable<String> {
 	}
 
 	@Temporal(TemporalType.DATE)
-	@Column
+	@Column(name="duntil")
 	public Date getUntil() {
 		return until;
 	}
@@ -86,8 +85,13 @@ public class ETimer extends Timer implements IPersistable<String> {
 	// }
 	
 	@Override
-	@Transient
+	//@Transient //its only a calculated value
 	public boolean isGenerator() {
 		return super.isGenerator();
 	}
+	
+	public void setGenerator(boolean isGenerator) {
+		stepLength = isGenerator ? 1 : 0;
+	}
+
 }

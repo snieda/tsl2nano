@@ -85,6 +85,10 @@ public class Timer implements Serializable {
 	public boolean isGenerator() {
 		return stepLength > 0;
 	}
+	
+	/*
+	 * TODO: implement cascading timers
+	 */
 //	Timer each(Timer subTimer) {
 //		getSubTimers().add(subTimer);
 //		return this;

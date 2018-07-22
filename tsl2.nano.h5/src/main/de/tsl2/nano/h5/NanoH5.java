@@ -1205,6 +1205,7 @@ public class NanoH5 extends NanoHTTPD implements ISystemConnector<Persistence> {
 
         if (sessions.isEmpty() && requests > 0) {
             Message.send("All sessions closed -> resetting BeanContainer / GenericService / NetworkClassloader!");
+            reset();
             new UnboundAccessor(rootClassloader()).call("reset", Void.class);
             BeanContainerUtil.resetServices();
             ENV.removeService(IGenericService.class);
