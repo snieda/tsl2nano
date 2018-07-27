@@ -115,7 +115,7 @@ function fillInputOptions(msg) {
 	// first, we remove the last input-assist
 	var e = document.getElementById(id);
 	e.setAttribute('list', id + '.datalist');
-	e = e.parentNode;
+	//e = e.parentNode;
 	var lastSelect = e.getElementsByTagName('datalist');
 	if (lastSelect.length > 0)
 		e.removeChild(lastSelect[0]);

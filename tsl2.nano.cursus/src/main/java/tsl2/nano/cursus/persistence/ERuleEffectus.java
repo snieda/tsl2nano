@@ -7,10 +7,14 @@ import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.OneToOne;
 
+import de.tsl2.nano.bean.annotation.Attributes;
+import de.tsl2.nano.bean.annotation.ValueExpression;
 import de.tsl2.nano.service.util.IPersistable;
 import tsl2.nano.cursus.effectus.RuleEffectus;
 
 @Entity
+@ValueExpression(expression="{ruleName}: {res}")
+@Attributes(names= {"ruleName", "res"})
 public class ERuleEffectus extends RuleEffectus<Object, Object> implements IPersistable<String> {
 	private static final long serialVersionUID = 1L;
 

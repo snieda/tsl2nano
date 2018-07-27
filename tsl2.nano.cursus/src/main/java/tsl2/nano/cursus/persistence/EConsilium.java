@@ -11,10 +11,16 @@ import javax.persistence.JoinColumn;
 import javax.persistence.OneToMany;
 import javax.persistence.OneToOne;
 
+import de.tsl2.nano.bean.annotation.Attributes;
+import de.tsl2.nano.bean.annotation.Presentable;
+import de.tsl2.nano.bean.annotation.ValueExpression;
 import de.tsl2.nano.service.util.IPersistable;
 import tsl2.nano.cursus.Consilium;
 
 @Entity
+@ValueExpression(expression="{name}: {timer} {status}")
+@Attributes(names= {"name", "author", "priority", "timer", "exsecutios"})
+@Presentable(label="Consilium")
 public class EConsilium extends Consilium implements IPersistable<String> {
 	private static final long serialVersionUID = 1L;
 	
@@ -23,11 +29,12 @@ public class EConsilium extends Consilium implements IPersistable<String> {
 	
 	public EConsilium() {
 	}
-	public EConsilium(String author, ETimer timer, Priority priority, EExsecutio... consecutios) {
-		super(author, timer, priority, consecutios);
+	public EConsilium(String author, ETimer timer, Priority priority, EExsecutio... exsecutios) {
+		super(author, timer, priority, exsecutios);
 	}
 	@Id
 	@GeneratedValue
+	@Presentable(visible=false)
 	@Override
 	public String getId() {
 		return id;
@@ -43,6 +50,7 @@ public class EConsilium extends Consilium implements IPersistable<String> {
 		this.author = author;
 	}
 
+	@Presentable(visible=false)
 	public Date getCreated() {
 		return created;
 	}
@@ -51,6 +59,7 @@ public class EConsilium extends Consilium implements IPersistable<String> {
 		this.created = created;
 	}
 
+	@Presentable(visible=false)
 	public Date getChanged() {
 		return changed;
 	}
@@ -67,6 +76,7 @@ public class EConsilium extends Consilium implements IPersistable<String> {
 		this.priority = priority;
 	}
 
+	@Presentable(visible=false)
 	public String getSeal() {
 		return seal;
 	}

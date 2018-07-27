@@ -1,6 +1,5 @@
 package tsl2.nano.cursus.persistence;
 
-import java.util.ArrayList;
 import java.util.List;
 
 import javax.persistence.CascadeType;
@@ -12,10 +11,15 @@ import javax.persistence.ManyToOne;
 import javax.persistence.OneToMany;
 import javax.persistence.OneToOne;
 
+import de.tsl2.nano.bean.annotation.Attributes;
+import de.tsl2.nano.bean.annotation.Presentable;
+import de.tsl2.nano.bean.annotation.ValueExpression;
 import de.tsl2.nano.service.util.IPersistable;
 import tsl2.nano.cursus.Exsecutio;
 
 @Entity
+@ValueExpression(expression="{name}: {mutatio} -> {effectus}")
+@Attributes(names= {"name", "description", "consilium", "mutatio", "effectus"})
 public class EExsecutio<CONTEXT> extends Exsecutio<CONTEXT> implements IPersistable<String> {
 	private static final long serialVersionUID = 1L;
 	
@@ -31,6 +35,7 @@ public class EExsecutio<CONTEXT> extends Exsecutio<CONTEXT> implements IPersista
 
 	@Id
 	@GeneratedValue
+	@Presentable(visible=false)
 	@Override
 	public String getId() {
 		return id;
@@ -62,7 +67,7 @@ public class EExsecutio<CONTEXT> extends Exsecutio<CONTEXT> implements IPersista
 	@Override
 	@OneToMany(mappedBy="exsecutio", cascade=CascadeType.ALL, orphanRemoval=true)
 	public List<ERuleEffectus> getEffectus() {
-		return (ArrayList<ERuleEffectus>) super.getEffectus();
+		return (List<ERuleEffectus>) super.getEffectus();
 	}
 	
 	public void setEffectus(List<ERuleEffectus> effectus) {

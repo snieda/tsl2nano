@@ -6,11 +6,15 @@ import javax.persistence.Id;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 
+import de.tsl2.nano.bean.annotation.Attributes;
+import de.tsl2.nano.bean.annotation.ValueExpression;
 import de.tsl2.nano.core.util.Util;
 import de.tsl2.nano.service.util.IPersistable;
 import tsl2.nano.cursus.Res;
 
 @Entity
+@ValueExpression(expression="@{typeName}:{objectid}->{path}")
+@Attributes(names= {"typeName", "path", "objectid"})
 public class ERes extends Res<Object, Object> implements IPersistable<String> {
 	private static final long serialVersionUID = 1L;
 

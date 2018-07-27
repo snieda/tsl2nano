@@ -37,6 +37,7 @@ import de.tsl2.nano.service.util.ServiceUtil;
 public class ScriptTool implements Serializable {
     String sourceFile;
     IAction selectedAction;
+    String name;
     String text;
     transient Collection<?> result;
     transient Collection<IAction> availableActions;
@@ -286,6 +287,14 @@ public class ScriptTool implements Serializable {
         this.sourceFile = sourceFile;
     }
 
+    public String getName() {
+        return name;
+    }
+    
+    public void setName(String name) {
+        this.name = name;
+    }
+    
     /**
      * @return Returns the text.
      */
@@ -346,4 +355,5 @@ public class ScriptTool implements Serializable {
         }
         return runner;
     }
+
 }

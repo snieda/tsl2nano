@@ -20,7 +20,7 @@ import java.lang.annotation.Target;
  * @version $Revision$ 
  */
 @Retention(RetentionPolicy.RUNTIME)
-@Target({ElementType.PARAMETER, ElementType.METHOD})
+@Target({ElementType.PARAMETER, ElementType.METHOD, ElementType.TYPE})
 public @interface Presentable {
     int type() default -1;
     int style() default -1;

@@ -47,6 +47,7 @@ import de.tsl2.nano.bean.BeanUtil;
 import de.tsl2.nano.bean.IConnector;
 import de.tsl2.nano.bean.ValueHolder;
 import de.tsl2.nano.bean.annotation.Action;
+import de.tsl2.nano.bean.annotation.Attributes;
 import de.tsl2.nano.collection.CollectionUtil;
 import de.tsl2.nano.core.ENV;
 import de.tsl2.nano.core.IPredicate;
@@ -64,6 +65,7 @@ import de.tsl2.nano.core.util.DateUtil;
 import de.tsl2.nano.core.util.DefaultFormat;
 import de.tsl2.nano.core.util.FileUtil;
 import de.tsl2.nano.core.util.ListSet;
+import de.tsl2.nano.core.util.MapUtil;
 import de.tsl2.nano.core.util.StringUtil;
 import de.tsl2.nano.core.util.Util;
 
@@ -306,20 +308,25 @@ public class BeanDefinition<T> extends BeanClass<T> implements IPluggable<BeanDe
     public List<IAttribute> getAttributes(boolean readAndWriteAccess) {
         if (!allDefinitionsCached) {
             if (attributeFilter == null) {
-                List<IAttribute> attributes = super.getAttributes(readAndWriteAccess);
-                attributeFilter =
-                    new String[attributes.size() + (attributeDefinitions != null ? attributeDefinitions.size() : 0)];
-                int i = 0;
-                for (IAttribute attr : attributes) {
-                    attributeFilter[i++] = attr.getName();
-                }
-                //the already defined virtual attributes should not be lost!
-                if (attributeDefinitions != null) {
-                    Set<String> defs = attributeDefinitions.keySet();
-                    for (String name : defs) {
-                        attributeFilter[i++] = name;
-                    }
-                }
+            	if (getClazz().isAnnotationPresent(Attributes.class)) {
+            		Attributes annAttributes = getClazz().getAnnotation(Attributes.class);
+            		attributeFilter = annAttributes.names();
+            	} else {
+	                List<IAttribute> attributes = super.getAttributes(readAndWriteAccess);
+	                attributeFilter =
+	                    new String[attributes.size() + (attributeDefinitions != null ? attributeDefinitions.size() : 0)];
+	                int i = 0;
+	                for (IAttribute attr : attributes) {
+	                    attributeFilter[i++] = attr.getName();
+	                }
+	                //the already defined virtual attributes should not be lost!
+	                if (attributeDefinitions != null) {
+	                    Set<String> defs = attributeDefinitions.keySet();
+	                    for (String name : defs) {
+	                        attributeFilter[i++] = name;
+	                    }
+	                }
+            	}
             }
             for (int i = 0; i < attributeFilter.length; i++) {
                 IAttributeDefinition v = getAttributeDefinitions().get(attributeFilter[i]);
@@ -763,9 +770,18 @@ public class BeanDefinition<T> extends BeanClass<T> implements IPluggable<BeanDe
      */
     public IPresentable getPresentable() {
         if (presentable == null) {
-            presentable = (Presentable) ENV.get(BeanPresentationHelper.class).createPresentable();
-            presentable.setLabel(toString());
-            presentable.setDescription(toString());
+            if (getClazz().isAnnotationPresent(de.tsl2.nano.bean.annotation.Presentable.class)) {
+                de.tsl2.nano.bean.annotation.Presentable p =
+                    getClazz().getAnnotation(de.tsl2.nano.bean.annotation.Presentable.class);
+                presentable = (Presentable) getPresentationHelper().createPresentable();
+                presentable.setPresentation(p.label(), p.type(), p.style(), p.enabled() ? IActivable.ACTIVE : IActivable.INACTIVE, p.visible()
+                    , (Serializable)MapUtil.asMap(p.layout()), (Serializable)MapUtil.asMap(p.layoutConstraints()), p.description());
+                presentable.setIcon(p.icon());
+            } else {
+	            presentable = (Presentable) ENV.get(BeanPresentationHelper.class).createPresentable();
+	            presentable.setLabel(toString());
+	            presentable.setDescription(toString());
+            }
         }
         return presentable;
     }
@@ -1417,12 +1433,17 @@ public class BeanDefinition<T> extends BeanClass<T> implements IPluggable<BeanDe
      */
     public ValueExpression<T> getValueExpression() {
         if (valueExpression == null) {
-            String presentingAttr = getPresentationHelper().getBestPresentationAttribute();
-            if (presentingAttr != null) {
-                valueExpression = new ValueExpression<T>("{" + presentingAttr + "}", getClazz());
-            } else {
-                valueExpression = new ValueExpression<T>(getName(), getClazz());
-            }
+        	if (getClazz().isAnnotationPresent(de.tsl2.nano.bean.annotation.ValueExpression.class)) {
+        		de.tsl2.nano.bean.annotation.ValueExpression expr = getClazz().getAnnotation(de.tsl2.nano.bean.annotation.ValueExpression.class);
+        		valueExpression = new ValueExpression<>(expr.expression(), getClazz());
+        	} else {
+	            String presentingAttr = getPresentationHelper().getBestPresentationAttribute();
+	            if (presentingAttr != null) {
+	                valueExpression = new ValueExpression<T>("{" + presentingAttr + "}", getClazz());
+	            } else {
+	                valueExpression = new ValueExpression<T>(getName(), getClazz());
+	            }
+        	}
         }
         return valueExpression;
     }

@@ -26,6 +26,7 @@ import tsl2.nano.cursus.effectus.Effectree;
 import tsl2.nano.cursus.effectus.IncEffectus;
 import tsl2.nano.cursus.persistence.EConsilium;
 import tsl2.nano.cursus.persistence.EExsecutio;
+import tsl2.nano.cursus.persistence.EGrex;
 import tsl2.nano.cursus.persistence.EMutatio;
 import tsl2.nano.cursus.persistence.EObsidio;
 import tsl2.nano.cursus.persistence.ERes;
@@ -60,7 +61,8 @@ public class CursusTest {
     	accessAttributes(new EMutatio(), 5);
     	accessAttributes(new ERes(), 5);
     	accessAttributes(new ETimer(), 6);
-//    	//TODO: warum wird hier EMutatio angezogen? accessAttributes(new ERuleEffectus(), 3);
+    	accessAttributes(new EGrex(), 2);
+//    	TODO: accessAttributes(new ERuleEffectus(), 5);
     }
 
 	private void accessAttributes(Object instance, int attrCount) {

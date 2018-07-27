@@ -145,6 +145,9 @@ public class NanoH5Session implements ISession<BeanDefinition>, Serializable, IL
     transient private BeanContainer beanContainer;
     transient private BeanConfigurator beanConfigurator;
 
+    /** workaround if nano sends the same page twice */
+    boolean cacheReloaded;
+
     public static final String PREFIX_STATUS_LINE = "@";
 
     public static final String PREFIX_CONTEXT_RANGE = "range:";
@@ -350,6 +353,7 @@ public class NanoH5Session implements ISession<BeanDefinition>, Serializable, IL
         String msg = "[undefined]";
         ManagedException ex = null;
         try {
+            cacheReloaded = false;
             //refresh session values on the current thread
             assignSessionToCurrentThread(true, MapUtil.filter(header, "User-Agent"));
 

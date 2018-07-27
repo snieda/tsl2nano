@@ -469,7 +469,10 @@ public class NanoH5 extends NanoHTTPD implements ISystemConnector<Persistence> {
                 LOG.debug("reloading cached page...");
                 try {
                     session.response.getData().reset();
-                    return new Response(Status.OK, "text/html", session.response.getData(), -1);
+                    if (!session.cacheReloaded) {
+                        session.cacheReloaded = true;
+                        return new Response(Status.OK, "text/html", session.response.getData(), -1);
+                    }
                 } catch (IOException e) {
                     LOG.error(e);
                 }

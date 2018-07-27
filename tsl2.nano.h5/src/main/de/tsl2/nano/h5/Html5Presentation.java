@@ -230,7 +230,7 @@ public class Html5Presentation<T> extends BeanPresentationHelper<T> implements I
                         BeanConfigurator.defineAction(null);
                         final ScriptTool tool = ScriptTool.createInstance();
                         beanTool = Bean.getBean(tool);
-                        beanTool.setAttributeFilter("sourceFile", "selectedAction", "text"/*, "result"*/);
+                        beanTool.setAttributeFilter("sourceFile", "selectedAction", "name", "text"/*, "result"*/);
                         beanTool.getAttribute("text").getPresentation().setType(TYPE_INPUT_MULTILINE);
                         beanTool.getAttribute("text").getConstraint().setLength(100000);
                         beanTool.getAttribute("text").getConstraint()
@@ -245,9 +245,11 @@ public class Html5Presentation<T> extends BeanPresentationHelper<T> implements I
                         IAction queryDefiner = new CommonAction(id, lbl, lbl) {
                             @Override
                             public Object action() throws Exception {
-                                String name =
-                                    tool.getSourceFile() != null ? tool.getSourceFile().toLowerCase() : FileUtil
+                                String name = tool.getName();
+                                if (Util.isEmpty(name)) {
+                                    name = tool.getSourceFile() != null ? tool.getSourceFile().toLowerCase() : FileUtil
                                         .getValidFileName(tool.getText().replace('.', '_'));
+                                }
                                 //some file-systems may have problems on longer file names!
                                 name = StringUtil.cut(name, 64);
                                 Query query =
