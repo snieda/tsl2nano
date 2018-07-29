@@ -20,7 +20,6 @@ import org.junit.Test;
 import com.gargoylesoftware.htmlunit.html.HtmlPage;
 
 import de.tsl2.nano.core.execution.SystemUtil;
-import de.tsl2.nano.core.util.ENVTestPreparation;
 import de.tsl2.nano.core.util.Util;
 import de.tsl2.nano.incubation.specification.rules.ActionScript;
 

@@ -3143,6 +3143,152 @@ The next code pieces generate examples for all _nano.h5_ aspects. The generated 
 
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
+### Annotatios: Enrich your beans with presentable informations
+
+Mostly, you wont be able to change the beans directly. But if you have direct access to the entities, you may enrich them with presentable informations.
+
+On your Entity you can add the following annotations:
+
+* @ValueExpression: string representation and generic creation information
+* @Attributes     : beans attribute filter and order
+* @Presentable    : beans presentable informations
+
+On your Entities methods you can enrich attribute definitions or define actions, that will be presented as buttons:
+
+* @Presentable    : attributes presentable informations
+* @Column         : table column presentable informations
+* @Constraint     : attribute value constraints
+* @RuleCover      : attribute cover (evaluating attribute properties through a rule) NOT IMPLEMENTED YET!
+* @Actions        : non-attribute but action marker. declares a method as action, presented by a button.
+
+There is a helper class _ConstraintValueSet_ providing some useful value sets:
+
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    public static final String ALLOWED_CLASSES = "ALLOWED_CLASSES:";
+    /** provides all methods of current classloader */
+    public static final String ALLOWED_METHODS = "ALLOWED_METHODS:";
+    /** provides all fields of current classloader */
+    public static final String ALLOWED_FIELDS = "ALLOWED_FIELDS:";
+    /** provides all generated application classes */
+    public static final String ALLOWED_APPCLASSES = "ALLOWED_APPCLASSES";
+    /** provides all loaded beans */
+    public static final String ALLOWED_BEANS = "ALLOWED_BEANS:";
+    /** provides all loaded bean-attributes */
+    public static final String ALLOWED_BEANATTRS = "ALLOWED_BEANATTRS:";
+    /** provides all loaded bean-attributes (without bean prefix) */
+    public static final String ALLOWED_BEANATTR_NAMES = "ALLOWED_BEANATTR_NAMES:";
+    /** provides all generated application bean-attributes */
+    public static final String ALLOWED_APPBEANATTRS = "ALLOWED_APPBEANATTRS";
+    /** provides all files inside current ENV-path, matching given reg-exp postfix */
+    public static final String ALLOWED_ENVFILES = "ALLOWED_ENVFILES:";
+    /** reads from given fileName as postfix, and splits the data through '\n' */
+    public static final String ALLOWED_FROMFILE = "ALLOWED_FROMFILE:";
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+Example of an Entity using the annotations:   
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+@Entity
+@ValueExpression(expression="{name}: {timer} {status}")
+@Attributes(names= {"name", "author", "priority", "timer", "exsecutios"})
+@Presentable(label="Consilium")
+public class EConsilium extends Consilium implements IPersistable<String> {
+	private static final long serialVersionUID = 1L;
+	
+	String id;
+	String name;
+	
+	public EConsilium() {
+	}
+	public EConsilium(String author, ETimer timer, Priority priority, EExsecutio... exsecutios) {
+		super(author, timer, priority, exsecutios);
+	}
+	@Id
+	@GeneratedValue
+	@Presentable(visible=false)
+	@Override
+	public String getId() {
+		return id;
+	}
+	public void setId(String id) {
+		this.id = id;
+	}
+	public String getAuthor() {
+		return author;
+	}
+
+	public void setAuthor(String author) {
+		this.author = author;
+	}
+
+	@Presentable(visible=false)
+	public Date getCreated() {
+		return created;
+	}
+
+	public void setCreated(Date created) {
+		this.created = created;
+	}
+
+	@Presentable(visible=false)
+	public Date getChanged() {
+		return changed;
+	}
+
+	public void setChanged(Date changed) {
+		this.changed = changed;
+	}
+
+	public Priority getPriority() {
+		return priority;
+	}
+
+	public void setPriority(Priority priority) {
+		this.priority = priority;
+	}
+
+	@Presentable(visible=false)
+	public String getSeal() {
+		return seal;
+	}
+
+	public void setSeal(String seal) {
+		this.seal = seal;
+	}
+
+	@Override
+	@OneToOne @JoinColumn
+	public ETimer getTimer() {
+		return (ETimer) super.getTimer();
+	}
+	
+	public void setTimer(ETimer timer) {
+		this.timer = timer;
+	}
+
+	public void setStatus(Status status) {
+		this.status = status;
+	}
+
+	@OneToMany(mappedBy="consilium", cascade=CascadeType.ALL, orphanRemoval=true)
+	public Set<EExsecutio<?>> getExsecutios() {
+		return (Set<EExsecutio<?>>) exsecutios;
+	}
+
+	public void setExsecutios(Set<EExsecutio<?>> exsecutios) {
+		this.exsecutios = exsecutios;
+	}
+
+	@Override
+	public String getName() {
+		return name;
+	}
+	
+	 public void setName(String name) {
+	 	this.name = name;
+	 }
+}
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
 ## Performance
 
 Generic features like authorization for actions and data, filtering of columns and field, loading bitmaps etc. may slow down the application performance. The following tips may increase the performance:
@@ -3466,6 +3612,8 @@ Lots of refactorings have been done, maven has replaced ant, java 8 is used now 
  2.1.0  | 01.04.2018 | INanoPlugin for java+maven developers, all maven modules use parent version number
  2.1.1  | 01.05.2018 | supporting extensions through new maven pom module thymeleaf-pack
  2.1.2  | 13.05.2018 | Hotfixes for use on linux jdk, Updater catching LinkageError
+ 2.1.3  | --.--.2018 | Hotfixes
+ 2.1.4	| 05.08.2018 | NEW: tsl2.nano.cursus as delta-processing-engine, NEW: @Attributes, @ValueExpression, minor extensions
   
 
 <style class="fallback">body{white-space:pre;font-family:monospace}</style><script src="markdeep.min.js"></script><script src="http://casual-effects.com/markdeep/latest/markdeep.min.js"></script>
@@ -4212,5 +4360,6 @@ on external database, anyway-scripts are used 'anyway'
 - [v] ETimer -> keine Entity? <- from, until muss umbenannt werden
 - (v) Relationen alle als Binary <- bijective manytoone, joincolumn
 - [v] jarFile mit Suchvorschlägen aus sql, jar funzt nicht, wegen falscher BeanValue-instance
+- [ ] ref. RuleCover --> bean extracting super class AttributeCover (RulePool is in specification)
 
  -->

@@ -39,6 +39,7 @@ import de.tsl2.nano.bean.IAttributeDef;
 import de.tsl2.nano.bean.IConnector;
 import de.tsl2.nano.bean.IRuleCover;
 import de.tsl2.nano.bean.ValueHolder;
+import de.tsl2.nano.bean.annotation.RuleCover;
 import de.tsl2.nano.core.ENV;
 import de.tsl2.nano.core.ManagedException;
 import de.tsl2.nano.core.cls.BeanAttribute;
@@ -220,6 +221,13 @@ public class AttributeDefinition<T> implements IAttributeDefinition<T> {
                 vc.isSortUpDirection = c.sortUp();
 //                vc.minsearch = c.min();
 //                vc.maxsearch = c.max();
+            }
+            if (presentable != null && m.isAnnotationPresent(RuleCover.class)) {
+            	RuleCover c = m.getAnnotation(RuleCover.class);
+            	
+            	//TODO: RuleCover is defined in h5...
+//            	de.tsl2.nano.h5.RuleCover.cover(getDeclaringClass(), getName(), c.child(), c.rule());
+            	throw new UnsupportedOperationException("not yet implemented: AttributeDefinition: RuleCover is in h5 - unaccessible");
             }
         }
     }
