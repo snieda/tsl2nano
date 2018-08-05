@@ -64,10 +64,10 @@ public class Grex<O, V> implements Serializable {
 		return parts;
 	}
 	public Res<O, V> createResForId(Object objectId) {
-		return new Res<>(genRes.type, objectId, genRes.path);
+		return new Res<>(genRes.getType(), objectId, genRes.getPath());
 	}
 	public boolean isPart(Res<O, V> res) {
-		return res.type.equals(genRes.type) && res.path.equals(genRes.path) 
+		return res.type.equals(genRes.type) && res.getPath().equals(genRes.getPath()) 
 				&& (validObjectIDs == null || validObjectIDs.contains(res.objectid));
 	}
 	@Override

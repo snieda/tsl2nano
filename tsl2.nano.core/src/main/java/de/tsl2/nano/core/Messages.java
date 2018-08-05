@@ -155,7 +155,7 @@ public class Messages {
                 s = StringUtil.toFirstUpper(s);
             }
         }
-        return StringUtil.spaceCamelCase(s);
+        return s.contains(".") ? s : StringUtil.spaceCamelCase(s);
     }
 
     /**

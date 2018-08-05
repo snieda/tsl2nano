@@ -234,6 +234,7 @@ public class ValuePath {
     }
 
 }
+@SuppressWarnings("rawtypes")
 interface IValue extends IValueAccess {
 	BeanAttribute getBeanAttribute();
 }

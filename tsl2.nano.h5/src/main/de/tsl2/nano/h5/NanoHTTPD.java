@@ -1553,6 +1553,10 @@ public abstract class NanoHTTPD extends Main {
         public IStatus getStatus() {
             return this.status;
         }
+        
+        public long getContentLength() {
+            return contentLength;
+        }
 
         public void setGzipEncoding(boolean encodeAsGzip) {
             this.encodeAsGzip = encodeAsGzip;

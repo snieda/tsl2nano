@@ -534,7 +534,8 @@ public class NanoH5Session implements ISession<BeanDefinition>, Serializable, IL
                 + StringUtil.toHexString(getContext().toString().getBytes()) : "")
             + ", "
             + ENV.translate("tsl2nano.request", true) + ": "
-            + (int)DateUtil.seconds(System.currentTimeMillis() - startTime) + " sec"
+            + (int)DateUtil.seconds(System.currentTimeMillis() - startTime) + " sec "
+            + (int)(response.getContentLength() / 1024) + " KB"
             + (LOG.isDebugEnabled() ? ", " + "Memory: " + (Profiler.getUsedMem() / (1024 * 1024)) + " MB" : "")
             + (LOG.isDebugEnabled() ? ", " + "working sessions: " + server.sessions.size() : "");
     }
@@ -725,7 +726,10 @@ public class NanoH5Session implements ISession<BeanDefinition>, Serializable, IL
              * TODO: refactore access to names ('reset' and 'save')
              */
             if (action.getParameter() == null) {
-                action.setParameter(getContextParameter());
+                if (current.isMultiValue() || !Util.isEmpty(action.getArgumentTypes()))
+                    action.setParameter(getContextParameter());
+                else if (current instanceof Bean)
+                    action.setParameter(((Bean)current).getInstance());
             }
             Object result;
             //on parametrized actions provide a new detail dialog/page

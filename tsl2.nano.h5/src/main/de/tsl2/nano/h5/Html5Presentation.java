@@ -537,7 +537,7 @@ public class Html5Presentation<T> extends BeanPresentationHelper<T> implements I
          * The body
          */
         Element body =
-            appendElement(html, TAG_BODY, ATTR_ID, bean != null ? bean.getName() : title);
+            appendElement(html, TAG_BODY, ATTR_ID, bean != null ? bean.getPresentable().getLabel() : title);
         if (interactive) {
             String style =
                 ENV.get("app.page.style", STYLE_BACKGROUND_RADIAL_GRADIENT
@@ -605,7 +605,7 @@ public class Html5Presentation<T> extends BeanPresentationHelper<T> implements I
                 return createFormDocument(session, message.toString(), null, interactive);
             } else {
                 parent =
-                    createFormDocument(session, ENV.translate(bean.getName(), true), getIcon(bean, null), interactive);
+                    createFormDocument(session, ENV.translate(bean.getPresentable().getLabel(), true), getIcon(bean, null), interactive);
             }
         }
 
@@ -2148,7 +2148,7 @@ public class Html5Presentation<T> extends BeanPresentationHelper<T> implements I
                 id = content;
                 description = ENV.translate(v.toString() + Messages.POSTFIX_TOOLTIP, true);
             } else {
-                Bean<Serializable> bv = Bean.getBean((Serializable) v);
+                BeanDefinition bv = v instanceof String ? BeanDefinition.getBeanDefinition((String)v) : Bean.getBean((Serializable) v);
                 content = bv.toString();
                 id = bv.getId().toString();
                 description = bv.getPresentable().getDescription();

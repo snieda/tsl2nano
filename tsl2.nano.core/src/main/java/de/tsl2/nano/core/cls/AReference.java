@@ -24,7 +24,7 @@ import org.simpleframework.xml.Attribute;
  */
 public abstract class AReference<T, O> {
     /** the description is a concatenation of the full class-name and a unique object-id */
-    @Attribute
+    @Attribute(required=false) //to be usable in a range
     String description;
     
     protected transient O instance;

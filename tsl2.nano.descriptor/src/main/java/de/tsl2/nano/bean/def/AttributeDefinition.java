@@ -39,6 +39,7 @@ import de.tsl2.nano.bean.IAttributeDef;
 import de.tsl2.nano.bean.IConnector;
 import de.tsl2.nano.bean.IRuleCover;
 import de.tsl2.nano.bean.ValueHolder;
+import de.tsl2.nano.bean.annotation.ConstraintValueSet;
 import de.tsl2.nano.bean.annotation.RuleCover;
 import de.tsl2.nano.core.ENV;
 import de.tsl2.nano.core.ManagedException;
@@ -196,7 +197,7 @@ public class AttributeDefinition<T> implements IAttributeDefinition<T> {
             if (constraint == null && m.isAnnotationPresent(de.tsl2.nano.bean.annotation.Constraint.class)) {
                 de.tsl2.nano.bean.annotation.Constraint c =
                     m.getAnnotation(de.tsl2.nano.bean.annotation.Constraint.class);
-                constraint = new Constraint(c.type(), c.allowed());
+                constraint = new Constraint(c.type(), (Object[])ConstraintValueSet.preDefined(c.allowed()));
                 constraint.setBasicDef(c.length(), c.nullable(),
                     new RegExpFormat(c.pattern(), 255), (T) Util.nonEmpty(c.defaultValue()));
             }

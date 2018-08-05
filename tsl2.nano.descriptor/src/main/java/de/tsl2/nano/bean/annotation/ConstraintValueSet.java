@@ -122,7 +122,9 @@ public class ConstraintValueSet {
                 preAllowed.add(allowed[i]);
             }
         }
-        return preAllowed.toArray(new String[0]);
+        String[] values = preAllowed.toArray(new String[0]);
+        Arrays.sort(values);
+        return values;
     }
 
 }

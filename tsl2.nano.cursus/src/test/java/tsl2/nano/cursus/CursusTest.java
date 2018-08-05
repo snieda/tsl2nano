@@ -16,6 +16,7 @@ import org.junit.BeforeClass;
 import org.junit.Test;
 
 import de.tsl2.nano.bean.def.Bean;
+import de.tsl2.nano.bean.def.BeanDefinition;
 import de.tsl2.nano.core.cls.BeanClass;
 import de.tsl2.nano.core.util.CollectionUtil;
 import de.tsl2.nano.core.util.DateUtil;
@@ -65,6 +66,13 @@ public class CursusTest {
 //    	TODO: accessAttributes(new ERuleEffectus(), 5);
     }
 
+    @Test
+    public void testAttributeOrder() throws Exception {
+    	BeanDefinition<ERes> bERes = BeanDefinition.getBeanDefinition(ERes.class);
+    	//there are two methods getObjectid() in hierarchy - the overwritten returning a string has to win
+    	assertEquals(String.class, bERes.getAttribute("objectid").getAccessMethod().getReturnType());
+    }
+    
 	private void accessAttributes(Object instance, int attrCount) {
 		Bean<?> bean = Bean.getBean(instance);
 		String[] attributesWithSetter = BeanClass.getBeanClass(instance).getAttributeNames(true);

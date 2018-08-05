@@ -19,6 +19,7 @@ import java.net.URL;
 import java.text.SimpleDateFormat;
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -44,10 +45,10 @@ import de.tsl2.nano.bean.def.BeanPresentationHelper;
 import de.tsl2.nano.bean.def.IValueDefinition;
 import de.tsl2.nano.bean.def.ValueGroup;
 import de.tsl2.nano.core.ENV;
-import de.tsl2.nano.core.Main;
 import de.tsl2.nano.core.classloader.NestedJarClassLoader;
 import de.tsl2.nano.core.classloader.RuntimeClassloader;
 import de.tsl2.nano.core.cls.BeanClass;
+import de.tsl2.nano.core.cls.DeclaredMethodComparator;
 import de.tsl2.nano.core.execution.Profiler;
 import de.tsl2.nano.core.execution.SystemUtil;
 import de.tsl2.nano.core.messaging.ChangeEvent;
@@ -75,7 +76,6 @@ import de.tsl2.nano.persistence.Persistence;
 import de.tsl2.nano.serviceaccess.Authorization;
 import de.tsl2.nano.serviceaccess.IAuthorization;
 import de.tsl2.nano.util.codegen.PackageGenerator;
-import de.tsl2.nano.util.test.BaseTest;
 import my.app.MyApp;
 import my.app.Times;
 
@@ -494,4 +494,63 @@ public class NanoH5Test implements ENVTestPreparation {
         return props.getProperty("tsl2.nano.h5.version");
     }
 
+    @Test
+    public void testPersistenceMethodOrder() {
+        Collection<java.lang.reflect.Method> elements = Arrays.asList(Persistence.class.getMethods());
+        VerifyComparators.verifyTransitivity(new DeclaredMethodComparator(), elements );
+        BeanDefinition<Persistence> bPers = BeanDefinition.getBeanDefinition(Persistence.class);
+        assertEquals(20, bPers.getAttributeNames().length);
+        
+        Bean<Persistence> persistenceUI = PersistenceUI.createPersistenceUI(Persistence.current(), null);
+        assertEquals("connectionUserName", persistenceUI.getAttributeNames()[0]);
+    }
+}
+//TODO: wieder rausschmeissen...
+class VerifyComparators
+{
+    /**
+     * only for testing comparators
+     */
+    public static <T> void verifyTransitivity(Comparator<T> comparator, Collection<T> elements)
+    {
+        for (T first: elements)
+        {
+            for (T second: elements)
+            {
+                int result1 = comparator.compare(first, second);
+                int result2 = comparator.compare(second, first);
+                if (result1 != -result2)
+                {
+                    // Uncomment the following line to step through the failed case
+                    //comparator.compare(first, second);
+                    throw new AssertionError("compare(" + first + ", " + second + ") == " + result1 +
+                        " but swapping the parameters returns " + result2);
+                }
+            }
+        }
+        for (T first: elements)
+        {
+            for (T second: elements)
+            {
+                int firstGreaterThanSecond = comparator.compare(first, second);
+                if (firstGreaterThanSecond <= 0)
+                    continue;
+                for (T third: elements)
+                {
+                    int secondGreaterThanThird = comparator.compare(second, third);
+                    if (secondGreaterThanThird <= 0)
+                        continue;
+                    int firstGreaterThanThird = comparator.compare(first, third);
+                    if (firstGreaterThanThird <= 0)
+                    {
+                        // Uncomment the following line to step through the failed case
+                        //comparator.compare(first, third);
+                        throw new AssertionError("compare(" + first + ", " + second + ") > 0, " +
+                            "compare(" + second + ", " + third + ") > 0, but compare(" + first + ", " + third + ") == " +
+                            firstGreaterThanThird);
+                    }
+                }
+            }
+        }
+    }
 }

@@ -9,10 +9,16 @@ import javax.persistence.Id;
 import javax.persistence.Temporal;
 import javax.persistence.TemporalType;
 
+import de.tsl2.nano.bean.annotation.Attributes;
+import de.tsl2.nano.bean.annotation.Presentable;
+import de.tsl2.nano.bean.annotation.ValueExpression;
 import de.tsl2.nano.service.util.IPersistable;
 import tsl2.nano.cursus.Timer;
 
 @Entity
+@ValueExpression(expression="{from}-{until} ({stepType}:{stepLength})")
+@Attributes(names= {"from", "until", "generator", "stepType", "stepLength"})
+@Presentable(label="ΔTimer", icon="icons/clock.png")
 public class ETimer extends Timer implements IPersistable<String> {
 	private static final long serialVersionUID = 1L;
 	
@@ -41,7 +47,7 @@ public class ETimer extends Timer implements IPersistable<String> {
 	}
 
 	@Temporal(TemporalType.DATE)
-	@Column(name="dfrom")
+	@Column(name="dfrom", length=10)
 	public Date getFrom() {
 		return from;
 	}
@@ -51,7 +57,7 @@ public class ETimer extends Timer implements IPersistable<String> {
 	}
 
 	@Temporal(TemporalType.DATE)
-	@Column(name="duntil")
+	@Column(name="duntil", length=10)
 	public Date getUntil() {
 		return until;
 	}

@@ -20,7 +20,7 @@ import de.tsl2.nano.core.util.StringUtil;
 public class PReference<O, V> extends BReference<O> {
     protected static final String PREFIX_PATH = "#";
 
-    transient String path;
+    protected String path;
     
 	public PReference() {
 		postfixID = PREFIX_PATH;
@@ -39,11 +39,21 @@ public class PReference<O, V> extends BReference<O> {
 		return path;
 	}
 
-	private String path(String description) {
+	protected String path(String description) {
+		if (description == null)
+			return null;
 		String path = StringUtil.substring(description, PREFIX_PATH, null);
 		//if path starts with the object type itself, we eliminate that
-		if (path != null && path.toLowerCase().startsWith(type(description).getSimpleName().toLowerCase()))
+		path = trimpath(type(description), path);
+		return path;
+	}
+
+
+	protected static String trimpath(Class type, String path) {
+		if (path != null && path.toLowerCase().startsWith(type.getSimpleName().toLowerCase()))
 			path = StringUtil.substring(path, ".", null);
+		else if (path != null && path.startsWith(type.getName()))
+			path = StringUtil.substring(path, type.getName() + ".", null);
 		return path;
 	}
 	
@@ -53,7 +63,8 @@ public class PReference<O, V> extends BReference<O> {
 	protected void checkDescription(String description) {
 		super.checkDescription(description);
 		Class<O> type = type(description);
-		checkPath(type, 0, path(description).split("\\."));
+		if (description != null)
+			checkPath(type, 0, path(description).split("\\."));
 	}
 	
 	void checkPath(Class<?> type, int attrIndex, String...spath) {
@@ -63,9 +74,16 @@ public class PReference<O, V> extends BReference<O> {
 			checkPath(genericType != null ? genericType : beanAttr.getType(), ++attrIndex, spath);
 		}
 	}
-	
+	@Override
+	protected void setDescription(String description) {
+		super.setDescription(description);
+		path = null;
+	}
 	protected static String createDescription(String type, Object id, Object path) {
-		return AReference.createDescription(BeanClass.load(type), id) + PREFIX_PATH + path;
+		
+		Class<?> ctype = BeanClass.load(type);
+		path = trimpath(ctype, String.valueOf(path));
+		return AReference.createDescription(ctype, id) + PREFIX_PATH + path;
 	}
 	
 	@SuppressWarnings("unchecked")

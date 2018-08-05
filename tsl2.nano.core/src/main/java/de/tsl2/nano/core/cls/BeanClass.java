@@ -39,11 +39,9 @@ import org.simpleframework.xml.DefaultType;
 import de.tsl2.nano.core.IPredicate;
 import de.tsl2.nano.core.ManagedException;
 import de.tsl2.nano.core.log.LogFactory;
-import de.tsl2.nano.core.messaging.EventController;
 import de.tsl2.nano.core.util.AnnotationProxy;
 import de.tsl2.nano.core.util.BitUtil;
 import de.tsl2.nano.core.util.ByteUtil;
-import de.tsl2.nano.core.util.CollectionUtil;
 import de.tsl2.nano.core.util.ObjectUtil;
 import de.tsl2.nano.core.util.StringUtil;
 import de.tsl2.nano.core.util.Util;
@@ -273,6 +271,7 @@ public class BeanClass<T> implements Serializable {
         }
 
         final Method[] allMethods = clazz.getMethods();
+        Arrays.sort(allMethods, new DeclaredMethodComparator());
         final LinkedList<String> accessedMethods = new LinkedList<String>();
         final List<IAttribute> beanAccessMethods = new LinkedList<IAttribute>();
         for (int i = 0; i < allMethods.length; i++) {

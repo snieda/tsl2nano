@@ -11,7 +11,6 @@ import de.tsl2.nano.bean.PReference;
 public class Res<O, V> extends PReference<O, V> implements Serializable {
 	private static final long serialVersionUID = 1L;
 	protected String type;
-	protected String path;
 	protected Object objectid;
 	
 	
@@ -26,7 +25,6 @@ public class Res<O, V> extends PReference<O, V> implements Serializable {
 	public Res(String type, Object objectid, String path) {
 		this.type = type;
 		this.objectid = objectid;
-		this.path = path;
 		setDescription(createDescription(type, objectid, path));
 	}
 

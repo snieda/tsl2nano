@@ -28,6 +28,7 @@ import de.tsl2.nano.collection.CollectionUtil;
 import de.tsl2.nano.core.ENV;
 import de.tsl2.nano.core.IPredicate;
 import de.tsl2.nano.core.ITransformer;
+import de.tsl2.nano.core.ManagedException;
 import de.tsl2.nano.core.cls.AReference;
 import de.tsl2.nano.core.cls.BeanClass;
 import de.tsl2.nano.core.log.LogFactory;
@@ -160,7 +161,13 @@ public class Context implements Serializable, Map {
     public Object put(Object key, Object value) {
         Object result = properties.put(key, reference(value));
         if (autopersist) {
-            save();
+            try {
+				save();
+			} catch (Exception e) {
+				properties.remove(key);
+				LOG.error(key + " cannot be serialized, so will not be stored in the context " + this);
+				ManagedException.forward(e);
+			}
         }
         return result;
     }

@@ -20,7 +20,7 @@ import tsl2.nano.cursus.Consilium;
 @Entity
 @ValueExpression(expression="{name}: {timer} {status}")
 @Attributes(names= {"name", "author", "priority", "timer", "exsecutios"})
-@Presentable(label="Consilium")
+@Presentable(label="ΔConsilium", icon="icons/blue_pin.png")
 public class EConsilium extends Consilium implements IPersistable<String> {
 	private static final long serialVersionUID = 1L;
 	
@@ -100,6 +100,7 @@ public class EConsilium extends Consilium implements IPersistable<String> {
 	}
 
 	@OneToMany(mappedBy="consilium", cascade=CascadeType.ALL, orphanRemoval=true)
+	@Presentable(enabled=false)
 	public Set<EExsecutio<?>> getExsecutios() {
 		return (Set<EExsecutio<?>>) exsecutios;
 	}

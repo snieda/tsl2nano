@@ -99,10 +99,15 @@ public class MethodAction<T> extends CommonAction<T> {
         return ENV.translate(name, true);
     }
 
+    protected Method method() {
+    	if (method == null)
+    		initDeserializing();
+    	return method;
+    }
     @Override
     public T action() throws Exception {
         Object[] args = Arrays.copyOfRange(getParameter(), 1, getParameter().length);
-        return (T) method.invoke(getParameter()[0], args);
+        return (T) method().invoke(getParameter()[0], args);
     }
 
     /**
@@ -111,8 +116,8 @@ public class MethodAction<T> extends CommonAction<T> {
      * @return method argument constraints
      */
     public Constraint[] getConstraints() {
-        if (constraints == null && method.isAnnotationPresent(Action.class)) {
-            Action annAction = method.getAnnotation(Action.class);
+        if (constraints == null && method().isAnnotationPresent(Action.class)) {
+            Action annAction = method().getAnnotation(Action.class);
             if (!annAction.name().isEmpty())
                 shortDescription = ENV.translate(annAction.name(), true);
             Annotation[][] cana;
@@ -144,7 +149,7 @@ public class MethodAction<T> extends CommonAction<T> {
 
     @Override
     public Class[] getArgumentTypes() {
-        return method.getParameterTypes();
+        return method().getParameterTypes();
     }
 
     /**
@@ -154,7 +159,7 @@ public class MethodAction<T> extends CommonAction<T> {
      */
     public String[] getArgumentNames() {
         Action ana;
-        if (method.isAnnotationPresent(Action.class)
+        if (method().isAnnotationPresent(Action.class)
             && (ana = method.getAnnotation(Action.class)).argNames().length > 0) {
             return ana.argNames();
         } else {
