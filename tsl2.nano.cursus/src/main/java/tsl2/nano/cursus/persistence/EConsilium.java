@@ -2,18 +2,23 @@ package tsl2.nano.cursus.persistence;
 
 import java.util.Date;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 import javax.persistence.CascadeType;
 import javax.persistence.Entity;
+import javax.persistence.EnumType;
+import javax.persistence.Enumerated;
 import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
 import javax.persistence.JoinColumn;
 import javax.persistence.OneToMany;
 import javax.persistence.OneToOne;
+import javax.persistence.Transient;
 
 import de.tsl2.nano.bean.annotation.Attributes;
 import de.tsl2.nano.bean.annotation.Presentable;
 import de.tsl2.nano.bean.annotation.ValueExpression;
+import de.tsl2.nano.core.util.Util;
 import de.tsl2.nano.service.util.IPersistable;
 import tsl2.nano.cursus.Consilium;
 
@@ -95,10 +100,7 @@ public class EConsilium extends Consilium implements IPersistable<String> {
 		this.timer = timer;
 	}
 
-	public void setStatus(Status status) {
-		this.status = status;
-	}
-
+	@SuppressWarnings("unchecked")
 	@OneToMany(mappedBy="consilium", cascade=CascadeType.ALL, orphanRemoval=true)
 	@Presentable(enabled=false)
 	public Set<EExsecutio<?>> getExsecutios() {
@@ -109,6 +111,25 @@ public class EConsilium extends Consilium implements IPersistable<String> {
 		this.exsecutios = exsecutios;
 	}
 
+	@Override
+	@Enumerated(EnumType.STRING)
+	public Status getStatus() {
+		return super.getStatus();
+	}
+	
+	public void setStatus(Status status) {
+		this.status = status;
+	}
+
+	public Set<EConsilium> followers() {
+		return getRes().getConsilii().stream().filter(c -> c.compareTo(this) >= 0).collect(Collectors.toSet());
+	}
+	
+	@Transient
+	public ERes getRes() {
+		//TODO: check, if exsecutios have different rei
+		return !Util.isEmpty(getExsecutios()) ? getExsecutios().iterator().next().getMutatio().getRes() : null;
+	}
 	@Override
 	public String getName() {
 		return name;

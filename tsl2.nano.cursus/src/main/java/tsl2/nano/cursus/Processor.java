@@ -12,6 +12,7 @@ import java.util.stream.Stream;
 import org.apache.commons.logging.Log;
 
 import de.tsl2.nano.core.log.LogFactory;
+import de.tsl2.nano.core.messaging.EventController;
 import de.tsl2.nano.incubation.repeat.ICommand;
 import de.tsl2.nano.incubation.repeat.impl.CommandManager;
 import tsl2.nano.cursus.IConsilium.Status;
@@ -19,15 +20,21 @@ import tsl2.nano.cursus.IConsilium.Status;
  * Change Process for Entities using Cursus. It's final to secure the use of IConsilium.refreshSeal(Processor)
  */
 public final class Processor {
+	public static final String FINISHED = "FINISHED";
+
 	private static final Log LOG = LogFactory.getLog(Processor.class);
+	
 	final Id ID = new Id();
 	class Id {
 		final long timestamp = System.currentTimeMillis();
 	}
+
+	EventController eventController = new EventController();
+	
 	/**
 	 * convenience to call {@link #run(Timer, IConsilium...)}
 	 */
-	void run(Date from, Date until, IConsilium...consiliums) {
+	public void run(Date from, Date until, IConsilium...consiliums) {
 		run(new Timer(from, until, 0, 0), consiliums);
 	}
 
@@ -35,21 +42,29 @@ public final class Processor {
 	 * @param timer holding from-until time period to do the process on
 	 * @param consiliums items to be processed, if there timer has expired
 	 */
-	void run(Timer timer, IConsilium...consiliums) {
+	public void run(Timer timer, IConsilium...consiliums) {
 		log("------------------------------------------------------------------------------");
 		log("processing " + consiliums.length + " consilii for period " + timer.from + " - " + timer.until);
 		Set<IConsilium> cons = new TreeSet<>(Arrays.asList(consiliums));
 		cons.addAll(evalTimedConsiliums(cons, timer.from, timer.until));
 		CommandManager cmdManager = new CommandManager();
 		for (IConsilium c : cons) {
+			eventController.fireEvent(c);
 			c.checkValidity(ID);
 			if (c.getStatus().equals(Status.INACTIVE) && timer.expired(c.getTimer().from)) {
 				c.getExsecutios().stream().filter(e -> e instanceof Obsidio).forEach(e -> ((Obsidio)e).setContext(cons));
-				cmdManager.doIt(c.getExsecutios().toArray(new ICommand[0]));
-				c.setStatus(Status.ACTIVE);
-				c.refreshSeal(ID);
+				
+				try {
+					cmdManager.doIt(c.getExsecutios().toArray(new ICommand[0]));
+					c.setStatus(Status.ACTIVE);
+					c.refreshSeal(ID);
+				} catch (Exception ex) {
+					LOG.error(ex);
+					eventController.fireEvent(ex);
+				}
 			}
 		}
+		eventController.fireEvent(FINISHED);
 		log("processing finished");
 		log("------------------------------------------------------------------------------");
 	}
@@ -69,15 +84,15 @@ public final class Processor {
 		return automated;
 	}
 
-	public void resetTo(Set<Consilium> consiliums, Consilium lastActiveConsilium) {
+	public void resetTo(Set<? extends Consilium> consiliums, Consilium lastActiveConsilium) {
 		deactivate(consiliums, lastActiveConsilium.getTimer().from, null);
 	}
-	public Set<Consilium> deactivate(Set<Consilium> consiliums, Date from, Date until) {
+	public Set<? extends Consilium> deactivate(Set<? extends Consilium> consiliums, Date from, Date until) {
 		return resetToStatus(consiliums, from, until, Status.REJECTED);
 	}
 
-	private Set<Consilium> resetToStatus(Set<Consilium> consiliums, Date from, Date until, Status status) {
-		Stream<Consilium> filter = consiliums.stream().
+	private Set<? extends Consilium> resetToStatus(Set<? extends Consilium> consiliums, Date from, Date until, Status status) {
+		Stream<? extends Consilium> filter = consiliums.stream().
 			filter(c -> !c.getTimer().isGenerator() && c.getTimer().isPartOf(from, until));
 			filter.forEach(c -> c.setStatus(status));
 		return filter.collect(Collectors.toSet());
@@ -89,4 +104,8 @@ public final class Processor {
     static void log(String msg) {
         System.out.println(msg);//LOG.info(msg);
     }
+
+	public EventController getEventController() {
+		return eventController;
+	}
 }

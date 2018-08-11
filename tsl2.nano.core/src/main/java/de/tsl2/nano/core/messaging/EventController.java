@@ -108,7 +108,7 @@ public class EventController implements Serializable {
      *            {@link #addListener(IListener)}.
      */
     public <T> void addListener(IListener<T> l, Class<T> eventType) {
-        hasTypedListener = true;
+        hasTypedListener |= !Object.class.equals(eventType);
         //TODO: check type
         listener(eventType).add(l);
     }

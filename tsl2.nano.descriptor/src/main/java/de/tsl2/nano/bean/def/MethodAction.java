@@ -23,21 +23,26 @@ import de.tsl2.nano.action.IAction;
 import de.tsl2.nano.bean.ValueHolder;
 import de.tsl2.nano.bean.annotation.Action;
 import de.tsl2.nano.bean.annotation.ConstraintValueSet;
+import de.tsl2.nano.bean.annotation.Presentable;
 import de.tsl2.nano.core.ENV;
 import de.tsl2.nano.core.ManagedException;
 import de.tsl2.nano.core.Messages;
+import de.tsl2.nano.core.util.StringUtil;
 import de.tsl2.nano.format.RegExpFormat;
 
 /**
  * uses the {@link IAction} to call a {@link Method}. The method can be enriched through annotations {@link Action} and
- * {@link Constraint}.
+ * {@link Constraint}. The first method argument value (see setParameters()) may be the instance on invoking the method. 
+ * So be careful setting the parameters and method arguments.
  * 
  * @author Tom
  * @version $Revision$
  */
 @SuppressWarnings({ "unchecked", "rawtypes" })
-public class MethodAction<T> extends CommonAction<T> {
-    /** serialVersionUID */
+public class MethodAction<T> extends CommonAction<T> implements IsPresentable {
+    public static final String DEFAULT_ICON = "icons/go.png";
+
+	/** serialVersionUID */
     private static final long serialVersionUID = -8818848476107346589L;
 
     @Element
@@ -48,6 +53,8 @@ public class MethodAction<T> extends CommonAction<T> {
     Class[] parameterTypes;
     transient Method method;
     transient Constraint[] constraints;
+
+	private IPresentable presentable;
 
     static final String ACTION_PREFIX = "action";
 
@@ -71,7 +78,7 @@ public class MethodAction<T> extends CommonAction<T> {
         if (Messages.hasKey(imagePath)) {
             setImagePath(Messages.getString(imagePath));
         } else {
-            setImagePath("icons/go.png");
+            setImagePath(DEFAULT_ICON);
         }
     }
 
@@ -106,9 +113,19 @@ public class MethodAction<T> extends CommonAction<T> {
     }
     @Override
     public T action() throws Exception {
-        Object[] args = Arrays.copyOfRange(getParameter(), 1, getParameter().length);
-        return (T) method().invoke(getParameter()[0], args);
+    	if (!hasInstanceAsFirstParameter())
+    		throw ManagedException.implementationError("First parameter of method " + this + " must be invoking instance!", getInstance(), parameters());
+        Object[] args = getArgumentValues();
+        return (T) method().invoke(getInstance(), args);
     }
+
+	private Object getInstance() {
+		return getParameter()[0];
+	}
+
+	private Object[] getArgumentValues() {
+		return Arrays.copyOfRange(getParameter(), 1, getParameter().length);
+	}
 
     /**
      * reads {@link Method} annotations {@link Action} and {@link Constraint} to create method argument constraints
@@ -161,11 +178,30 @@ public class MethodAction<T> extends CommonAction<T> {
         Action ana;
         if (method().isAnnotationPresent(Action.class)
             && (ana = method.getAnnotation(Action.class)).argNames().length > 0) {
+        	if (ana.argNames().length != getArgumentTypes().length)
+        		throw ManagedException.implementationError("The annotation " + ana + " must define exactly the argument-names for the method " + method(), ana.argNames(), getArgumentTypes());
             return ana.argNames();
         } else {
-            return parameters().getNames();
+            return getValidMethodParameterNames();
         }
     }
+
+	private String[] getValidMethodParameterNames() {
+		if (getArgumentTypes().length == 0)
+			return new String[0];
+		else if (parameters() != null && parameters().size() == getArgumentTypes().length)
+			return parameters().getNames();
+		else if (hasInstanceAsFirstParameter()) {
+			String[] names = parameters().getNames();
+			return Arrays.copyOfRange(names, 1, names.length);
+		} else {
+			return getIdNames(getArgumentTypes());
+		}
+	}
+
+	private boolean hasInstanceAsFirstParameter() {
+		return parameters() != null && parameters().size() == getArgumentTypes().length + 1;
+	}
 
     /**
      * convenience for any parametrized action to evaluate its argument names
@@ -213,18 +249,25 @@ public class MethodAction<T> extends CommonAction<T> {
         }
     }
 
+    public BeanDefinition toBean() {
+    	return toBean(Bean.UNDEFINED);
+    }
+    
     /**
      * creates a new bean through informations of argument names and constraints
      * 
      * @return
      */
-    public BeanDefinition toBean() {
+    public BeanDefinition toBean(Object instance) {
         Bean b = new Bean();
+        b.setInstance(instance);
         b.setName(getShortDescription());
         String[] args = getArgumentNames();
         Constraint[] c = getConstraints();
+        if (c != null && args.length != c.length)
+        	ManagedException.implementationError("The annotated argNames do not relate to the real methods arguments", StringUtil.toString(args, -1));
         for (int i = 0; i < args.length; i++) {
-            b.addAttribute(new BeanValue<T>(new ValueHolder(null), args[i], c != null && c.length > i ? c[i] : null));
+            b.addAttribute(new BeanValue<T>(new ValueHolder(null), args[i], c != null && c.length > i &&  c[i] != null ? c[i] : new Constraint(getArgumentTypes()[i])));
         }
         b.addAction(this);
         b.setDefault(false);
@@ -235,4 +278,14 @@ public class MethodAction<T> extends CommonAction<T> {
     private void initDeserializing() {
         method = getMethod(declaringClass, methodName, parameterTypes);
     }
+
+	@Override
+	public IPresentable getPresentable() {
+		if (presentable == null) {
+			if (method().isAnnotationPresent(Presentable.class)) {
+				presentable = de.tsl2.nano.bean.def.Presentable.createPresentable(method().getAnnotation(Presentable.class));
+			}
+		}
+		return presentable;
+	}
 }

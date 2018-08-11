@@ -20,8 +20,6 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.Date;
 import java.util.HashSet;
-import java.util.Iterator;
-import java.util.LinkedHashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
@@ -283,7 +281,7 @@ public class ServiceUtil {
         Object value;
         for (final BeanAttribute beanAttribute : attributes) {
             final IAttributeDef attributeDef = BeanContainerUtil.getAttributeDefinitions(beanAttribute);
-            if (attributeDef != null) {//only attributes with column-defs will be used!
+            if (attributeDef != null && !attributeDef.isTransient()) {//only attributes with column-defs will be used!
                 final String name = beanAttribute.getName();//getColumnName(beanAttribute);
                 final boolean isString = CharSequence.class.isAssignableFrom(beanAttribute.getType());
                 final String varName = caseInsensitive && isString ? "LOWER(" + attrPrefix + name + ") " : attrPrefix + name + " ";
@@ -409,7 +407,7 @@ public class ServiceUtil {
         String strValue;
         for (final BeanAttribute beanAttribute : attributes) {
             final IAttributeDef attributeDef = BeanContainerUtil.getAttributeDefinitions(beanAttribute);
-            if (attributeDef != null) {//only attributes with column-defs will be used!
+            if (attributeDef != null && !attributeDef.isTransient()) {//only attributes with column-defs will be used!
                 final String name = beanAttribute.getName();//getColumnName(beanAttribute);
                 final boolean isString = CharSequence.class.isAssignableFrom(beanAttribute.getType());
                 final String varName = caseInsensitive && isString ? "LOWER(" + attrPrefix + name + ") " : attrPrefix + name + " ";

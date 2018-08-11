@@ -65,7 +65,6 @@ import de.tsl2.nano.core.util.DateUtil;
 import de.tsl2.nano.core.util.DefaultFormat;
 import de.tsl2.nano.core.util.FileUtil;
 import de.tsl2.nano.core.util.ListSet;
-import de.tsl2.nano.core.util.MapUtil;
 import de.tsl2.nano.core.util.StringUtil;
 import de.tsl2.nano.core.util.Util;
 
@@ -80,7 +79,7 @@ import de.tsl2.nano.core.util.Util;
 @SuppressWarnings({ "rawtypes", "unchecked" })
 @Namespace(reference = "http://sourceforge.net/projects/tsl2nano ./" + BeanDefinition.BEANDEF_XSD)
 @Default(value = DefaultType.FIELD, required = false)
-public class BeanDefinition<T> extends BeanClass<T> implements IPluggable<BeanDefinition>, Serializable {
+public class BeanDefinition<T> extends BeanClass<T> implements IPluggable<BeanDefinition>, IsPresentable, Serializable {
     static final String BEANDEF_XSD = "beandef.xsd";
     /** serialVersionUID */
     private static final long serialVersionUID = -1110193041263724431L;
@@ -774,9 +773,7 @@ public class BeanDefinition<T> extends BeanClass<T> implements IPluggable<BeanDe
                 de.tsl2.nano.bean.annotation.Presentable p =
                     getClazz().getAnnotation(de.tsl2.nano.bean.annotation.Presentable.class);
                 presentable = (Presentable) getPresentationHelper().createPresentable();
-                presentable.setPresentation(p.label(), p.type(), p.style(), p.enabled() ? IActivable.ACTIVE : IActivable.INACTIVE, p.visible()
-                    , (Serializable)MapUtil.asMap(p.layout()), (Serializable)MapUtil.asMap(p.layoutConstraints()), p.description());
-                presentable.setIcon(p.icon());
+                Presentable.fillPresentable(p, presentable);
             } else {
 	            presentable = (Presentable) ENV.get(BeanPresentationHelper.class).createPresentable();
 	            presentable.setLabel(toString());

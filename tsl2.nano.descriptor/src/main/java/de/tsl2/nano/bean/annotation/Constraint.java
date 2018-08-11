@@ -15,7 +15,7 @@ import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
 /**
- * Define attribute constraints for {@link Action}s.
+ * Define attribute constraints for actions and attributes.
  * @author Tom
  * @version $Revision$ 
  */

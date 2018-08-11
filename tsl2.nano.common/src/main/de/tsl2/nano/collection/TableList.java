@@ -106,7 +106,7 @@ public class TableList<H extends Comparable<H>, ID> implements Serializable {
      * @param header array columns. must not be null and must contain at least one element!
      */
     public TableList(H... header) {
-        this((Class<H>) (header[0] != null ? header[0].getClass() : Object.class), header);
+        this((Class<H>) (header.length > 0 && header[0] != null ? header[0].getClass() : Object.class), header);
     }
 
     /**

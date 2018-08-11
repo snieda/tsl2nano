@@ -35,6 +35,7 @@ import org.junit.Test;
 import com.sun.jersey.api.container.httpserver.HttpServerFactory;
 import com.sun.net.httpserver.HttpServer;
 
+import de.tsl2.nano.action.IAction;
 import de.tsl2.nano.action.IStatus;
 import de.tsl2.nano.bean.BeanContainer;
 import de.tsl2.nano.bean.IBeanContainer;
@@ -43,8 +44,10 @@ import de.tsl2.nano.bean.def.BeanCollector;
 import de.tsl2.nano.bean.def.BeanDefinition;
 import de.tsl2.nano.bean.def.BeanPresentationHelper;
 import de.tsl2.nano.bean.def.IValueDefinition;
+import de.tsl2.nano.bean.def.MethodAction;
 import de.tsl2.nano.bean.def.ValueGroup;
 import de.tsl2.nano.core.ENV;
+import de.tsl2.nano.core.ManagedException;
 import de.tsl2.nano.core.classloader.NestedJarClassLoader;
 import de.tsl2.nano.core.classloader.RuntimeClassloader;
 import de.tsl2.nano.core.cls.BeanClass;
@@ -59,6 +62,7 @@ import de.tsl2.nano.core.util.ENVTestPreparation;
 import de.tsl2.nano.core.util.FileUtil;
 import de.tsl2.nano.core.util.MapUtil;
 import de.tsl2.nano.core.util.NetUtil;
+import de.tsl2.nano.core.util.StringUtil;
 import de.tsl2.nano.execution.AntRunner;
 import de.tsl2.nano.h5.NanoHTTPD.Method;
 import de.tsl2.nano.h5.NanoHTTPD.Response;
@@ -357,7 +361,9 @@ public class NanoH5Test implements ENVTestPreparation {
         }, mapper, Charge.class);
     }
     
+    @SuppressWarnings("rawtypes")
     @Test
+    //TODO: check the results!
     public void testConfigurators() throws Exception {
         createENV("beanconf");
         new NanoH5();
@@ -387,6 +393,40 @@ public class NanoH5Test implements ENVTestPreparation {
             if (aconf.getColumnDefinition() != null) //may be null on virtual attributes
             assertEquals(aconf.getPresentable().getLabel(), aconf.getColumnDefinition().getPresentable().getLabel());
         }
+        
+        checkMethodActions(bconf, 9, 8);
+    }
+
+    private void checkMethodActions(BeanConfigurator<Address> bconf, int actionCount, int methodActionCount) {
+        Bean bean = new Bean(bconf);
+        Collection<IAction<?>> actions = bean.getActions();
+        assertEquals(StringUtil.toFormattedString(actions, -1, true), actionCount, actions.size());
+        int count = 0;
+        for (IAction<?> a : actions) {
+            if (a instanceof MethodAction) {
+                Collection<IAction> mas = ((MethodAction)a).toBean(bconf).getActions();
+                IAction ma = mas.iterator().next();
+                Class[] argumentTypes = ma.getArgumentTypes();
+                Object[] args = new Object[argumentTypes.length+1];
+                args[0] = bconf;
+                for (int i = 1; i < args.length; i++) {
+                    args[i] = BeanClass.createInstance(argumentTypes[i-1]);
+                }
+                ma.setParameter(args);
+                count++;
+                try {
+                    ma.activate();
+                } catch (ManagedException e) {
+                    //OK, generic parameters not working - the test checkes not the action content!
+                    if (e.getMessage().contains("FileNotFoundException") || e.getMessage().contains("attribute Expression")
+                        || e.getMessage().contains("ClassNotFoundException")  || e.getMessage().contains("TableList"))
+                        continue;
+                    else
+                        ManagedException.forward(e);
+                }
+            }
+        }
+        assertEquals(StringUtil.toFormattedString(actions, -1, true), methodActionCount, count);
     }
 
     @Test

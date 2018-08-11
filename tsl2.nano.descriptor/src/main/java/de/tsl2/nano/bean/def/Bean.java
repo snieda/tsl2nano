@@ -186,7 +186,12 @@ public class Bean<T> extends BeanDefinition<T> {
         IAttribute idAttribute = getIdAttribute();
         return idAttribute != null ? idAttribute.getValue(instance) : super.getId();
     }
-
+    public void setId(Object value) {
+        IAttribute idAttribute = getIdAttribute();
+        if (idAttribute == null)
+        	throw new IllegalStateException(this + " has no idAttribute --> setId(.) cannot be called!");
+        idAttribute.setValue(instance, value);
+	}
     /**
      * only to be used by framework for performance aspects.
      * 
@@ -441,6 +446,12 @@ public class Bean<T> extends BeanDefinition<T> {
         return (List<BeanValue<?>>) result;
     }
 
+    @Override
+    public BeanValue getIdAttribute() {
+    	IAttribute idAttribute = super.getIdAttribute();
+		return idAttribute != null ? BeanValue.getBeanValue(getInstance(), idAttribute.getName()) : null;
+    }
+    
     /**
      * <p/>
      * Attention: this implementation uses the {@link BeanValue} cache - means, that the new instance may resist inside
