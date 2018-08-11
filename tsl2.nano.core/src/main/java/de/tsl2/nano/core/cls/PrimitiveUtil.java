@@ -117,8 +117,7 @@ public class PrimitiveUtil {
      * @return instanceof primitives immutable
      */
     public static <T> T getDefaultValue(Class<T> standardType) {
-        assert standardType.isPrimitive() : "standardType must be a primitive, but is:" + standardType;
-
+        
         if (standardType.equals(boolean.class) || standardType.equals(Boolean.class)) {
             return (T) Boolean.FALSE;
         } else if (standardType.equals(int.class) || standardType.equals(Integer.class)) {

@@ -20,7 +20,7 @@ import tsl2.nano.cursus.Exsecutio;
 @Entity
 @ValueExpression(expression="{name}: {mutatio} -> {effectus}")
 @Attributes(names= {"name", "description", "consilium", "mutatio", "effectus"})
-@Presentable(label="ΔExsecutio", icon="icons/go.png")
+@Presentable(label="ΔExsecutio", icon="icons/wrench.png")
 public class EExsecutio<CONTEXT> extends Exsecutio<CONTEXT> implements IPersistable<String> {
 	private static final long serialVersionUID = 1L;
 	
@@ -62,6 +62,8 @@ public class EExsecutio<CONTEXT> extends Exsecutio<CONTEXT> implements IPersista
 	}
 
 	public void setMutatio(EMutatio mutatio) {
+		if (mutatio != null)
+			mutatio.setExsecutio(this);
 		this.mutatio = mutatio;
 	}
 

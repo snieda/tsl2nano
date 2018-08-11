@@ -29,6 +29,7 @@ import javax.persistence.MapsId;
 import javax.persistence.OneToMany;
 import javax.persistence.Temporal;
 import javax.persistence.TemporalType;
+import javax.persistence.Transient;
 
 import org.apache.commons.logging.Log;
 
@@ -292,6 +293,7 @@ public class BeanContainerUtil {
                         Boolean composition;
                         Boolean cascading;
                         Boolean generatedValue;
+                        Boolean isTransient;
 
                         @Override
                         public int scale() {
@@ -366,6 +368,14 @@ public class BeanContainerUtil {
                             }
                             return generatedValue;
                         }
+
+                        @Override
+                        public boolean isTransient() {
+                            if (isTransient == null) {
+                                isTransient = battr.getAnnotation(Transient.class) != null;
+                            }
+                            return isTransient;
+                        }
                     };
                 } else {//column == null && joincolumn == null, if oneToMany == null, it may be not persistable!
                     def = new IAttributeDef() {
@@ -373,6 +383,7 @@ public class BeanContainerUtil {
                         Boolean composition;
                         Boolean cascading;
                         Boolean generatedValue;
+                        Boolean isTransient;
 
                         @Override
                         public int scale() {
@@ -443,6 +454,14 @@ public class BeanContainerUtil {
                             }
                             return generatedValue;
                         }
+
+                        @Override
+                        public boolean isTransient() {
+                            if (isTransient == null) {
+                                isTransient = battr.getAnnotation(Transient.class) != null;
+                            }
+                            return isTransient;
+                        }
                     };
                 }
             } else {//column != null
@@ -455,6 +474,7 @@ public class BeanContainerUtil {
                     Boolean unique;
                     Class<? extends Date> temporalType;
                     Boolean generatedValue;
+                    Boolean isTransient;
 
                     @Override
                     public int scale() {
@@ -529,6 +549,14 @@ public class BeanContainerUtil {
                             generatedValue = isGeneratedValue(clazz, attribute);
                         }
                         return generatedValue;
+                    }
+
+                    @Override
+                    public boolean isTransient() {
+                        if (isTransient == null) {
+                            isTransient = battr.getAnnotation(Transient.class) != null;
+                        }
+                        return isTransient;
                     }
                 };
             }

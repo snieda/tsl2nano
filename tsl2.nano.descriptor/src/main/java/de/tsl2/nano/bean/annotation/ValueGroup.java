@@ -15,20 +15,14 @@ import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
 /**
- * Define attribute constraints for actions and attributes.
+ * Define value groups for bean layout
  * @author Tom
  * @version $Revision$ 
  */
 @Retention(RetentionPolicy.RUNTIME)
-@Target({ElementType.PARAMETER, ElementType.METHOD})
-public @interface Constraint {
-    String name() default "";
-    Class<?> type() default Object.class;
-    String pattern() default "";
-    int length() default -1;
-    boolean nullable() default true;
-    String defaultValue() default "";
-    String min() default "";
-    String max() default "";
-    String[] allowed() default {};
+@Target({ElementType.PARAMETER, ElementType.TYPE})
+public @interface ValueGroup {
+    String label();
+    boolean open() default true;
+    String[] attributeNames() default {};
 }

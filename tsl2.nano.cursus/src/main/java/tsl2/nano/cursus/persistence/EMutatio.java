@@ -63,6 +63,8 @@ public class EMutatio extends Mutatio<Object, Object> implements IPersistable<St
 	}
 
 	public void setRes(ERes res) {
+		if (res != null)
+			res.setMutatio(this);
 		this.res = res;
 	}
 

@@ -75,6 +75,8 @@ import de.tsl2.nano.bean.def.IPageBuilder;
 import de.tsl2.nano.bean.def.IPresentable;
 import de.tsl2.nano.bean.def.IPresentableColumn;
 import de.tsl2.nano.bean.def.IValueDefinition;
+import de.tsl2.nano.bean.def.IsPresentable;
+import de.tsl2.nano.bean.def.MethodAction;
 import de.tsl2.nano.bean.def.Presentable;
 import de.tsl2.nano.bean.def.SecureAction;
 import de.tsl2.nano.bean.def.ValueExpressionFormat;
@@ -1201,7 +1203,22 @@ public class Html5Presentation<T> extends BeanPresentationHelper<T> implements I
      */
     private Element createAction(Element cell, IAction a, boolean showText) {
         String path;
-        return createAction(cell,
+        IPresentable p = a instanceof IsPresentable ? ((IsPresentable)a).getPresentable() : null;
+        String imagePath;
+        if (a.getImagePath() != null) {
+            if (!a.getImagePath().equals(MethodAction.DEFAULT_ICON))
+                imagePath = a.getImagePath();
+            else if (p != null && p.getIcon() != null)
+                imagePath = p.getIcon();
+            else
+                imagePath = a.getImagePath();
+        } else {
+            imagePath = new File(ENV.getConfigPath() + (path = "icons/" + StringUtil.substring(a.getId(), ".", null, true)
+            + ".png")).exists() ? path 
+                : ICON_DEFAULT;
+        }
+            
+        Element element = createAction(cell,
             a.getId(),
             showText && !a.getShortDescription().equals("...") && !a.getShortDescription().isEmpty()
                 ? getCSSPanelAction() : CSS_CLASS_ACTION,
@@ -1209,12 +1226,13 @@ public class Html5Presentation<T> extends BeanPresentationHelper<T> implements I
             a.getLongDescription(),
             "submit",
             a.getKeyStroke(),
-            (a.getImagePath() != null ? a.getImagePath()
-                : new File(ENV.getConfigPath() + (path = "icons/" + StringUtil.substring(a.getId(), ".", null, true)
-                    + ".png")).exists() ? path : ICON_DEFAULT),
+            imagePath,
             a.isEnabled(),
             a.isDefault(),
             a.getActionMode() != IAction.MODE_DLG_OK);
+        if (p != null)
+            addAttributes(element, p, false);
+        return element;
     }
 
     private String getCSSPanelAction() {

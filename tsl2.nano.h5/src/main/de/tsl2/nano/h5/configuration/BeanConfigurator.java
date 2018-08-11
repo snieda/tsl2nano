@@ -34,6 +34,7 @@ import de.tsl2.nano.bean.def.ValueExpression;
 import de.tsl2.nano.bean.def.ValueGroup;
 import de.tsl2.nano.collection.Entry;
 import de.tsl2.nano.core.ENV;
+import de.tsl2.nano.core.ManagedException;
 import de.tsl2.nano.core.cls.BeanClass;
 import de.tsl2.nano.core.cls.IAttribute;
 import de.tsl2.nano.core.cls.PrivateAccessor;
@@ -437,8 +438,10 @@ public class BeanConfigurator<T> implements Serializable {
                 "§: Rule  (--> Operation)", "%: RuleScript (--> JavaScript)", "!: Action (--> Java)"
                 , "?: Query (--> sql statement)", "@: Web   (--> URL/REST)" }) String attributeType,
             String attributeExpression) {
-        if (Util.isEmpty(attributeType))
+        if (Util.isEmpty(attributeType)) {
+            ManagedException.assertion(!Util.isEmpty(attributeExpression), "At least attributeExpression or attributeType must be filled!", attributeExpression, attributeType);
             attributeType = String.valueOf(attributeExpression.charAt(0));
+        }
         else
             attributeType = String.valueOf(attributeType.charAt(0)).trim();
         

@@ -19,6 +19,8 @@ import de.tsl2.nano.core.util.Util;
  * @param <V> value type
  */
 public class Grex<O, V> implements Serializable {
+	private static final String WILDCARD = "*";
+
 	private static final long serialVersionUID = 1L;
 
 	protected Res<O, V> genRes;
@@ -29,7 +31,7 @@ public class Grex<O, V> implements Serializable {
 		super();
 	}
 	public Grex(Class<O> type, String path, Object...objectIDs) {
-		this(new Res<>(type, "*", path), objectIDs);
+		this(new Res<>(type, WILDCARD, path), objectIDs);
 	}
 	
 	public Grex(Res<O, V> genericRes, Object...objectIDs) {
@@ -53,8 +55,11 @@ public class Grex<O, V> implements Serializable {
 		return rei;
 	}
 	
-	public Set<Res<O, V>> createParts() {
-		return validObjectIDs != null ? createNewParts(validObjectIDs.toArray()) : null;
+	@SuppressWarnings("unchecked")
+	public Set<? extends Res<O, V>> createParts() {
+		return validObjectIDs != null ? createNewParts(validObjectIDs.toArray()) 
+				: genRes.getObjectid().toString().contains(WILDCARD) ? null 
+						: MapUtil.asSet(createResForId(genRes.getObjectid()));
 	}
 	public Set<Res<O, V>> createNewParts(Object... objectIds) {
 		Set<Res<O, V>> parts = new HashSet<>(objectIds.length);

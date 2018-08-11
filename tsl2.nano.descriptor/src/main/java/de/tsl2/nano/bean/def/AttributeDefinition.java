@@ -56,7 +56,6 @@ import de.tsl2.nano.core.secure.ISecure;
 import de.tsl2.nano.core.util.ByteUtil;
 import de.tsl2.nano.core.util.DelegationHandler;
 import de.tsl2.nano.core.util.FormatUtil;
-import de.tsl2.nano.core.util.MapUtil;
 import de.tsl2.nano.core.util.NumberUtil;
 import de.tsl2.nano.core.util.StringUtil;
 import de.tsl2.nano.core.util.Util;
@@ -103,6 +102,8 @@ public class AttributeDefinition<T> implements IAttributeDefinition<T> {
     /** see {@link #generatedValue()} */
     @Attribute(required = false)
     private boolean generatedValue;
+    @Attribute(required = false)
+    private boolean isTransient;
 
     /** optional encryption */
     @Element(required = false)
@@ -204,10 +205,7 @@ public class AttributeDefinition<T> implements IAttributeDefinition<T> {
             if (presentable == null && m.isAnnotationPresent(de.tsl2.nano.bean.annotation.Presentable.class)) {
                 de.tsl2.nano.bean.annotation.Presentable p =
                     m.getAnnotation(de.tsl2.nano.bean.annotation.Presentable.class);
-                presentable = new Presentable(this);
-                presentable.setPresentation(p.label(), p.type(), p.style(), p.enabled() ? IActivable.ACTIVE : IActivable.INACTIVE, p.visible()
-                    , (Serializable)MapUtil.asMap(p.layout()), (Serializable)MapUtil.asMap(p.layoutConstraints()), p.description());
-                presentable.setIcon(p.icon());
+                presentable = Presentable.createPresentable(p, this);
             }
             if (columnDefinition == null && m.isAnnotationPresent(de.tsl2.nano.bean.annotation.Column.class)) {
                 de.tsl2.nano.bean.annotation.Column c =
@@ -225,10 +223,7 @@ public class AttributeDefinition<T> implements IAttributeDefinition<T> {
             }
             if (presentable != null && m.isAnnotationPresent(RuleCover.class)) {
             	RuleCover c = m.getAnnotation(RuleCover.class);
-            	
-            	//TODO: RuleCover is defined in h5...
-//            	de.tsl2.nano.h5.RuleCover.cover(getDeclaringClass(), getName(), c.child(), c.rule());
-            	throw new UnsupportedOperationException("not yet implemented: AttributeDefinition: RuleCover is in h5 - unaccessible");
+            	AttributeCover.cover(c.implementationClass(), getDeclaringClass(), getName(), c.child(), c.rule());
             }
         }
     }
@@ -804,7 +799,7 @@ public class AttributeDefinition<T> implements IAttributeDefinition<T> {
             final Map<String, Object> layout,
             final Map<String, Object> layoutConstraints,
             final String description) {
-        presentable = ENV.get(BeanPresentationHelper.class).createPresentable();
+        presentable = ENV.get(BeanPresentationHelper.class).createPresentable(this);
         presentable.setPresentation(label, type, style, enabler, visible, (Serializable) layout,
             (Serializable) layoutConstraints, description);
         return presentable;
@@ -884,6 +879,11 @@ public class AttributeDefinition<T> implements IAttributeDefinition<T> {
     }
 
     @Override
+	public boolean isTransient() {
+		return isTransient;
+	}
+
+	@Override
     public void setAsRelation(String relationChain) {
         new PrivateAccessor<AttributeDefinition<T>>(this).set("name", relationChain);
     }

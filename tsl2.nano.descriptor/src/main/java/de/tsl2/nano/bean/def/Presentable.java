@@ -26,6 +26,7 @@ import de.tsl2.nano.bean.BeanContainer;
 import de.tsl2.nano.core.ENV;
 import de.tsl2.nano.core.Messages;
 import de.tsl2.nano.core.cls.IAttribute;
+import de.tsl2.nano.core.util.MapUtil;
 import de.tsl2.nano.core.util.Util;
 
 /**
@@ -423,4 +424,24 @@ public class Presentable implements IIPresentable, Serializable {
     public static final String asText(int value) {
         return value == UNDEFINED ? null : String.valueOf(value);
     }
+	public static Presentable createPresentable(de.tsl2.nano.bean.annotation.Presentable p) {
+		return createPresentable(p, null);
+	}
+	public static Presentable createPresentable(de.tsl2.nano.bean.annotation.Presentable p, IAttribute attr) {
+		Presentable presentable = attr != null ? new Presentable(attr) : new Presentable();
+		fillPresentable(p, presentable);
+		return presentable;
+	}
+
+	public static void fillPresentable(de.tsl2.nano.bean.annotation.Presentable p, Presentable presentable) {
+		presentable.setPresentation(
+				!Util.isEmpty(p.label()) ? p.label() : presentable.label, 
+				p.type() != UNDEFINED ? p.type() : presentable.type, 
+				p.style() != UNDEFINED ? p.style() : presentable.style, 
+				p.enabled() ? IActivable.ACTIVE : IActivable.INACTIVE, 
+				p.visible()
+		    , (Serializable)MapUtil.asMap(p.layout()), (Serializable)MapUtil.asMap(p.layoutConstraints()), p.description());
+		presentable.setIcon(p.icon());
+	}
+
 }

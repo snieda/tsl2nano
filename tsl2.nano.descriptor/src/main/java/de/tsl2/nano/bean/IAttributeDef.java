@@ -57,4 +57,7 @@ public interface IAttributeDef {
 
     /** if an id attribute is a generated value */
     boolean generatedValue();
+    
+    /** jpa transient */
+    boolean isTransient();
 }

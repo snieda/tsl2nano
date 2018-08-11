@@ -15,23 +15,12 @@ import org.junit.AfterClass;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
-import de.tsl2.nano.bean.def.Bean;
-import de.tsl2.nano.bean.def.BeanDefinition;
-import de.tsl2.nano.core.cls.BeanClass;
 import de.tsl2.nano.core.util.CollectionUtil;
 import de.tsl2.nano.core.util.DateUtil;
 import de.tsl2.nano.core.util.ENVTestPreparation;
-import de.tsl2.nano.core.util.StringUtil;
 import tsl2.nano.cursus.IConsilium.Priority;
 import tsl2.nano.cursus.effectus.Effectree;
 import tsl2.nano.cursus.effectus.IncEffectus;
-import tsl2.nano.cursus.persistence.EConsilium;
-import tsl2.nano.cursus.persistence.EExsecutio;
-import tsl2.nano.cursus.persistence.EGrex;
-import tsl2.nano.cursus.persistence.EMutatio;
-import tsl2.nano.cursus.persistence.EObsidio;
-import tsl2.nano.cursus.persistence.ERes;
-import tsl2.nano.cursus.persistence.ETimer;
 
 /**
  * Test-Implementation for a complete Action-based Data-System.
@@ -54,32 +43,6 @@ public class CursusTest {
     	ENVTestPreparation.tearDown();
     }
 
-    @Test
-    public void testEntityAttributeAccessability() throws Exception {
-    	accessAttributes(new EConsilium(), 10);
-    	accessAttributes(new EExsecutio(), 7);
-    	accessAttributes(new EObsidio(), 5);
-    	accessAttributes(new EMutatio(), 5);
-    	accessAttributes(new ERes(), 5);
-    	accessAttributes(new ETimer(), 6);
-    	accessAttributes(new EGrex(), 2);
-//    	TODO: accessAttributes(new ERuleEffectus(), 5);
-    }
-
-    @Test
-    public void testAttributeOrder() throws Exception {
-    	BeanDefinition<ERes> bERes = BeanDefinition.getBeanDefinition(ERes.class);
-    	//there are two methods getObjectid() in hierarchy - the overwritten returning a string has to win
-    	assertEquals(String.class, bERes.getAttribute("objectid").getAccessMethod().getReturnType());
-    }
-    
-	private void accessAttributes(Object instance, int attrCount) {
-		Bean<?> bean = Bean.getBean(instance);
-		String[] attributesWithSetter = BeanClass.getBeanClass(instance).getAttributeNames(true);
-    	assertEquals(StringUtil.toString(attributesWithSetter, 100), attrCount, attributesWithSetter.length);
-		bean.getAttributes(true).stream().forEach(a -> a.setValue(instance , a.getValue(instance)));
-	}
-    
     @Test
     public void testContract() throws Exception {
     	IConsilium[] consilii = process(createConsilii());
@@ -106,7 +69,7 @@ public class CursusTest {
     @Test
     public void testGrex() throws Exception {
     	Grex<Contract, Object> grex = new Grex<>(Contract.class, "end", "1");
-    	Set<Res<Contract,Object>> parts = grex.createParts();
+    	Set<? extends Res<Contract,Object>> parts = grex.createParts();
     	assertEquals(1, parts.size());
     	assertEquals(new Res(Contract.class, "1", "end"), parts.iterator().next());
     	

@@ -43,7 +43,6 @@ import de.tsl2.nano.bean.def.BeanCollector;
 import de.tsl2.nano.bean.def.BeanDefinition;
 import de.tsl2.nano.bean.def.BeanPresentationHelper;
 import de.tsl2.nano.bean.def.IValueDefinition;
-import de.tsl2.nano.bean.def.ValueGroup;
 import de.tsl2.nano.core.ENV;
 import de.tsl2.nano.core.classloader.NestedJarClassLoader;
 import de.tsl2.nano.core.classloader.RuntimeClassloader;
@@ -62,13 +61,11 @@ import de.tsl2.nano.core.util.NetUtil;
 import de.tsl2.nano.execution.AntRunner;
 import de.tsl2.nano.h5.NanoHTTPD.Method;
 import de.tsl2.nano.h5.NanoHTTPD.Response;
-import de.tsl2.nano.h5.configuration.AttributeConfigurator;
 import de.tsl2.nano.h5.configuration.BeanConfigurator;
 import de.tsl2.nano.h5.expression.QueryPool;
 import de.tsl2.nano.h5.navigation.Workflow;
 import de.tsl2.nano.h5.timesheet.Timesheet;
 import de.tsl2.nano.incubation.specification.ParType;
-import de.tsl2.nano.incubation.specification.actions.Action;
 import de.tsl2.nano.incubation.specification.actions.ActionPool;
 import de.tsl2.nano.incubation.specification.rules.RulePool;
 import de.tsl2.nano.incubation.specification.rules.RuleScript;
@@ -76,6 +73,7 @@ import de.tsl2.nano.persistence.Persistence;
 import de.tsl2.nano.serviceaccess.Authorization;
 import de.tsl2.nano.serviceaccess.IAuthorization;
 import de.tsl2.nano.util.codegen.PackageGenerator;
+import de.tsl2.nano.util.test.BaseTest;
 import my.app.MyApp;
 import my.app.Times;
 
@@ -236,18 +234,19 @@ public class NanoH5Test implements ENVTestPreparation {
          
         //static check against last expteced state
        exptectedHtml = new String(FileUtil.getFileBytes(expFileName, null));
-//       BaseTest.assertEquals(exptectedHtml, html, true, MapUtil.asMap("\\:[0-9]{5,5}", ":XXXXX",
-//           "[0-9]{1,6} Msec", "XXX Msec", "statusinfo-[0-9]{13,13}\\.txt", "statusinfo-XXXXXXXXXXXXX.txt",
-//           BaseTest.REGEX_DATE_US, BaseTest.XXX,
-//           BaseTest.REGEX_DATE_DE, BaseTest.XXX,
-//           BaseTest.REGEX_TIME_DE, BaseTest.XXX,
-//           "startedAt", BaseTest.XXX,
-//           "endedAt", BaseTest.XXX,
-//           "Started At", BaseTest.XXX,
-//           "Ended At", BaseTest.XXX,
-//           "tsl2.nano.h5-\\d.\\d.\\d(-SNAPSHOT)?[-0-9]*", "tsl2.nano.h5-X.X.X",
-//           ".quicksearch", "?quicksearch" // the '?' does not match between the two sources!
-//           ));
+       BaseTest.assertEquals(exptectedHtml, html, true, MapUtil.asMap("\\:[0-9]{5,5}", ":XXXXX",
+           "[0-9]{1,6} S [0-9]{1,6} KB", "XXX Sec XXX KB", 
+           "statusinfo-[0-9]{13,13}\\.txt", "statusinfo-XXXXXXXXXXXXX.txt",
+           BaseTest.REGEX_DATE_US, BaseTest.XXX,
+           BaseTest.REGEX_DATE_DE, BaseTest.XXX,
+           BaseTest.REGEX_TIME_DE, BaseTest.XXX,
+           "startedAt", BaseTest.XXX,
+           "endedAt", BaseTest.XXX,
+           "Started At", BaseTest.XXX,
+           "Ended At", BaseTest.XXX,
+           "tsl2.nano.h5-\\d.\\d.\\d(-SNAPSHOT)?[-0-9]*", "tsl2.nano.h5-X.X.X",
+           ".quicksearch", "?quicksearch" // the '?' does not match between the two sources!
+           ));
        
         //check xml failed files - these are written, if simple-xml has problems on deserializing from xml
         List<File> failed = FileUtil.getTreeFiles(DIR_TEST, ".*.xml.failed");
@@ -331,7 +330,7 @@ public class NanoH5Test implements ENVTestPreparation {
      * @param name
      * @return
      */
-    String createENV(String name) {
+    public static String createENV(String name) {
         final String DIR_TEST = "target/test/" + ENV.PREFIX_ENVNAME + name;
         
         Bean.clearCache();
@@ -357,38 +356,6 @@ public class NanoH5Test implements ENVTestPreparation {
         }, mapper, Charge.class);
     }
     
-    @Test
-    public void testConfigurators() throws Exception {
-        createENV("beanconf");
-        new NanoH5();
-        BeanContainer.initEmtpyServiceActions();
-        ENV.get(ActionPool.class).add(new Action("testaction", Address.class, "getCity", null));
-        BeanConfigurator<Address> bconf = BeanConfigurator.create(Address.class).getInstance();
-        bconf.actionAddAction("testaction");
-        bconf.actionAddAttribute("date", "expression");
-        bconf.actionCreateCompositor(Address.class.getName(), "city", "code", "wrench.png");
-        bconf.actionCreateController("code", 1, 1, Address.class.getName(), "city", "code", "wrench.png");
-        bconf.actionCreateRuleOrAction("testRule", "§", "1+1");
-        bconf.actionCreateRuleOrAction("testRuleScript", "%", "1+1");
-        bconf.actionCreateRuleOrAction("testaction", "!", Address.class.getName() + ".getCity");
-        bconf.actionCreateRuleOrAction("testREST", "@", "http://web.de");
-        bconf.actionCreateRuleOrAction("testaction", "?", "select 1=1");
-        bconf.actionCreateSheet("sheet", 2, 2);
-        bconf.setValueGroups(Arrays.asList(new ValueGroup("test", false, "city", "code")));
-        
-        List<AttributeConfigurator> attributes = bconf.getAttributes();
-        for (AttributeConfigurator aconf : attributes) {
-            aconf.actionAddListener(aconf.getName(), "city", "test");
-            assertTrue(aconf.getListener() != null);
-
-            aconf.actionAddRuleCover("presentable", "test");
-            aconf.actionCreateRuleOrAction("testaction", "!", Address.class.getName() + ".getCity");
-            aconf.actionRemoveRuleCover("presentable");
-            if (aconf.getColumnDefinition() != null) //may be null on virtual attributes
-            assertEquals(aconf.getPresentable().getLabel(), aconf.getColumnDefinition().getPresentable().getLabel());
-        }
-    }
-
     @Test
     public void testAttributeExpression() throws Exception {
         createENV("restful");
@@ -480,8 +447,9 @@ public class NanoH5Test implements ENVTestPreparation {
                     //https://sourceforge.net/projects/tsl2nano/files/latest/download?source=navbar
                     //http://downloads.sourceforge.net/project/tsl2nano/1.1.0/tsl2.nano.h5.1.1.0.jar
                     //http://netcologne.dl.sourceforge.net/project/tsl2nano/1.1.0/tsl2.nano.h5.1.1.0.jar
+                    //https://iweb.dl.sourceforge.net/project/tsl2nano/1.1.0/tsl2.nano.h5.1.1.0.jar
                     File download = NetUtil.download(url =
-                        "https://iweb.dl.sourceforge.net/project/tsl2nano/1.1.0/tsl2.nano.h5.1.1.0.jar",
+                        "https://sourceforge.net/projects/tsl2nano/files/latest/download",   
                         "target/test/", true, true);
                     NetUtil.check(url, download, 3 * 1024 * 1024);
                 }

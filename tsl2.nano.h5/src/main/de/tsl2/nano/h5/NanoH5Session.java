@@ -726,17 +726,17 @@ public class NanoH5Session implements ISession<BeanDefinition>, Serializable, IL
              * TODO: refactore access to names ('reset' and 'save')
              */
             if (action.getParameter() == null) {
-                if (current.isMultiValue() || !Util.isEmpty(action.getArgumentTypes()))
-                    action.setParameter(getContextParameter());
-                else if (current instanceof Bean)
+                if (current instanceof Bean && !current.isMultiValue())
                     action.setParameter(((Bean)current).getInstance());
+                else if (current.isMultiValue())
+                    action.setParameter(getContextParameter());
             }
             Object result;
             //on parametrized actions provide a new detail dialog/page
             if (!Util.isEmpty(action.getArgumentTypes())) {
                 if (!nav.current().getName().equals(action.getShortDescription())) {//define the arguments
                     if (action instanceof MethodAction) {
-                        result = ((MethodAction) action).toBean();
+                        result = nav.current() instanceof Bean ? ((MethodAction) action).toBean(((Bean)nav.current()).getInstance()) : ((MethodAction) action).toBean();
                     } else {
                         Map<String, Object> args = MapUtil.fromKeys(MethodAction.getArgumentNames(action));
                         //TODO: extend the BeanCollector to use @Constraint of each argument (=row)

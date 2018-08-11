@@ -63,8 +63,8 @@ public class ManagedException extends RuntimeException {
         LOG.error(localizedMessage, cause);
     }
 
-    public static ManagedException illegalArgument(Object unknown, Object available) {
-        return new ManagedException("tsl2nano.unknowntype", null, unknown, StringUtil.toFormattedString(available,
+    public static ManagedException illegalArgument(Object argument, Object available) {
+        return new ManagedException("tsl2nano.unknowntype", null, argument, StringUtil.toFormattedString(available,
             40, false));
     }
 

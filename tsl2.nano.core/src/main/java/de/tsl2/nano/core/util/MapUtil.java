@@ -281,7 +281,7 @@ public class MapUtil {
         return filter;
     }
 
-	public static <T> Set<T> asSet(T[] items) {
+	public static <T> Set<T> asSet(T... items) {
 		return new HashSet<>(Arrays.asList(items));
 	}
 }

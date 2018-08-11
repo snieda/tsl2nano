@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<logFactory standard="fatal, error, warn, info" useFilter="true">
+   <queueCapacity>2147483647</queueCapacity>
+   <loglevel package="de.tsl2.nano.core" level="63"/>
+   <outputformat><![CDATA[%1$td.%1$tm.%1$tY %1$tT %2$s [%3$16s]: %4$s]]></outputformat>
+   <outputFile>logfactory.log</outputFile>
+</logFactory>
