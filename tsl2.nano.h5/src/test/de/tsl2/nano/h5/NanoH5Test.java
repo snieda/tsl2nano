@@ -356,6 +356,7 @@ public class NanoH5Test implements ENVTestPreparation {
         }, mapper, Charge.class);
     }
     
+    @SuppressWarnings("rawtypes")
     @Test
     public void testAttributeExpression() throws Exception {
         createENV("restful");
