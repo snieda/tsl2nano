@@ -57,7 +57,7 @@ public class Grex<O, V> implements Serializable {
 	
 	@SuppressWarnings("unchecked")
 	public Set<? extends Res<O, V>> createParts() {
-		return validObjectIDs != null ? createNewParts(validObjectIDs.toArray()) 
+		return !Util.isEmpty(validObjectIDs) ? createNewParts(validObjectIDs.toArray()) 
 				: genRes.getObjectid().toString().contains(WILDCARD) ? null 
 						: MapUtil.asSet(createResForId(genRes.getObjectid()));
 	}

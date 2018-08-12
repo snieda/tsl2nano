@@ -58,13 +58,9 @@ public class MethodAction<T> extends CommonAction<T> implements IsPresentable {
 
     static final String ACTION_PREFIX = "action";
 
-//    /**
-//     * constructor
-//     */
-//    public MethodAction() {
-//        super();
-//    }
-//
+    public MethodAction() {
+    }
+
     /**
      * constructor
      * 

@@ -2,7 +2,10 @@ package tsl2.nano.cursus;
 
 import static org.junit.Assert.assertEquals;
 
+import java.io.Serializable;
 import java.lang.annotation.Annotation;
+import java.text.DateFormat;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.Map;
 
@@ -12,6 +15,8 @@ import org.junit.AfterClass;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
+import de.tsl2.nano.bean.BeanContainer;
+import de.tsl2.nano.bean.ValueHolder;
 import de.tsl2.nano.bean.annotation.Attributes;
 import de.tsl2.nano.bean.annotation.Presentable;
 import de.tsl2.nano.bean.annotation.ValueExpression;
@@ -23,9 +28,12 @@ import de.tsl2.nano.core.cls.BeanClass;
 import de.tsl2.nano.core.cls.ClassFinder;
 import de.tsl2.nano.core.cls.IAttribute;
 import de.tsl2.nano.core.cls.UnboundAccessor;
+import de.tsl2.nano.core.util.ConcurrentUtil;
+import de.tsl2.nano.core.util.DateUtil;
 import de.tsl2.nano.core.util.ENVTestPreparation;
 import de.tsl2.nano.core.util.MapUtil;
 import de.tsl2.nano.core.util.StringUtil;
+import tsl2.nano.cursus.IConsilium.Priority;
 import tsl2.nano.cursus.persistence.EConsilium;
 import tsl2.nano.cursus.persistence.EExsecutio;
 import tsl2.nano.cursus.persistence.EGrex;
@@ -36,7 +44,7 @@ import tsl2.nano.cursus.persistence.ERes;
 import tsl2.nano.cursus.persistence.ERuleEffectus;
 import tsl2.nano.cursus.persistence.ETimer;
 
-public class CursusAnnotationTest {
+public class CursusEntityTest implements Serializable /* only for the inner-classes */ {
 
     @BeforeClass
     public static void setUp() {
@@ -48,6 +56,45 @@ public class CursusAnnotationTest {
     	ENVTestPreparation.tearDown();
     }
 
+	@Test
+	public void testProcess() {
+		BeanContainer.initEmtpyServiceActions();
+		Contract contract = new Contract();
+		contract.id="1";
+		contract.setEnd(DateUtil.MAX_DATE);
+		
+		ValueHolder<EConsilium> hCons = new ValueHolder<>(null);
+		ERes eRes = new ERes(Contract.class.getName(), "1", "end") {
+			@Override
+			public Collection<EConsilium> getConsilii() {
+				return Arrays.asList(hCons.getValue());
+			}
+			@Override
+			public Object resolve() {
+				return contract;
+			}
+		};
+		EMutatio eMutatio = new EMutatio("01/01/2019", eRes);
+		EExsecutio eExsecutio = new EExsecutio("Änderung-ENDE-Datum", eMutatio, null);
+		EConsilium eConsilium = new EConsilium("test", new ETimer(DateUtil.getYesterday(), DateUtil.getTomorrow()), Priority.NORMAL, eExsecutio);
+		hCons.setValue(eConsilium);
+		
+		EProcess eProcess = new EProcess(DateUtil.getYesterday(), DateUtil.getTomorrow()) {
+			@Override
+			protected void checkAndSave() {
+			}
+		};
+		EGrex grex = new EGrex(eRes) {
+			@Override
+			public ERes createResForId(Object objectId) {
+				return eRes;
+			}
+		};
+		eProcess.actionStart(grex);
+		ConcurrentUtil.sleep(2000);
+		assertEquals("01.01.2019"/*eMutatio.getNew()*/, DateFormat.getDateInstance().format(contract.end));
+	}
+	
 	@Test
 	public void testAnnotations() {
 		Collection<Class> entities = ClassFinder.self().fuzzyFind(EConsilium.class.getPackage().getName()).values();

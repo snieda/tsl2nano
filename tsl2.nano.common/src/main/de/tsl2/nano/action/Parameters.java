@@ -117,6 +117,8 @@ public class Parameters extends ArrayList<Parameter> {
     public void setValues(Object... args) {
         int i = 0;
         for (Parameter p : this) {
+            if (i >= args.length)
+                break;
             p.setValue(args[i++]);
         }
         for (int j = i; j < args.length; j++) {

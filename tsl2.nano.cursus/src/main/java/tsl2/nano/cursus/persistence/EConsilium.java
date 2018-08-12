@@ -30,12 +30,13 @@ public class EConsilium extends Consilium implements IPersistable<String> {
 	private static final long serialVersionUID = 1L;
 	
 	String id;
-	String name;
+	String name="";
 	
 	public EConsilium() {
 	}
 	public EConsilium(String author, ETimer timer, Priority priority, EExsecutio... exsecutios) {
 		super(author, timer, priority, exsecutios);
+		name = super.getName();
 	}
 	@Id
 	@GeneratedValue
@@ -102,12 +103,11 @@ public class EConsilium extends Consilium implements IPersistable<String> {
 
 	@SuppressWarnings("unchecked")
 	@OneToMany(mappedBy="consilium", cascade=CascadeType.ALL, orphanRemoval=true)
-	@Presentable(enabled=false)
-	public Set<EExsecutio<?>> getExsecutios() {
-		return (Set<EExsecutio<?>>) exsecutios;
+	public Set<EExsecutio> getExsecutios() {
+		return (Set<EExsecutio>) exsecutios;
 	}
 
-	public void setExsecutios(Set<EExsecutio<?>> exsecutios) {
+	public void setExsecutios(Set<EExsecutio> exsecutios) {
 		this.exsecutios = exsecutios;
 	}
 

@@ -6,16 +6,19 @@ import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 import static tsl2.nano.cursus.effectus.Effectree.effect;
 
+import java.io.Serializable;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
 import java.util.Set;
 
 import org.junit.AfterClass;
+import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
 import de.tsl2.nano.core.util.CollectionUtil;
+import de.tsl2.nano.core.util.ConcurrentUtil;
 import de.tsl2.nano.core.util.DateUtil;
 import de.tsl2.nano.core.util.ENVTestPreparation;
 import tsl2.nano.cursus.IConsilium.Priority;
@@ -30,8 +33,8 @@ import tsl2.nano.cursus.effectus.IncEffectus;
  * Disadvantage:
  */
 @SuppressWarnings({ "rawtypes", "unchecked" })
-public class CursusTest {
-	static Contract origin = new Contract();
+public class CursusTest implements Serializable /* only for inner-classes...*/{
+	Contract origin;
 
     @BeforeClass
     public static void setUp() {
@@ -43,6 +46,12 @@ public class CursusTest {
     	ENVTestPreparation.tearDown();
     }
 
+    @Before
+    public void setUpTest() {
+    	origin = new Contract();
+    	ConcurrentUtil.setCurrent(origin);
+    }
+    
     @Test
     public void testContract() throws Exception {
     	IConsilium[] consilii = process(createConsilii());
@@ -120,7 +129,7 @@ class TRes extends Res<Contract, Object> {
 	}
 	@Override
 	protected Contract materialize(String description) {
-		return CursusTest.origin;
+		return ConcurrentUtil.getCurrent(Contract.class);
 	}	
 }
 
@@ -154,7 +163,7 @@ enum Action{
 /*
  * try to simulate a simple insurance organization
  */
-class Contract {
+class Contract implements Serializable {
 	String id;
 	Tarif tarif;
 	Date start;
@@ -197,11 +206,11 @@ class Contract {
 	}
 }
 
-class Partner {
+class Partner  implements Serializable {
 	String id;
 	String name;
 }
-class Account {
+class Account  implements Serializable {
 	AccountType type;
 	long saldo;
 	public AccountType getType() {

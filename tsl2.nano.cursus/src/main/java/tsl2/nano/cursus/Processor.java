@@ -48,10 +48,11 @@ public final class Processor {
 		Set<IConsilium> cons = new TreeSet<>(Arrays.asList(consiliums));
 		cons.addAll(evalTimedConsiliums(cons, timer.from, timer.until));
 		CommandManager cmdManager = new CommandManager();
+		getEventController().fireEvent(cons.size());
 		for (IConsilium c : cons) {
 			eventController.fireEvent(c);
 			c.checkValidity(ID);
-			if (c.getStatus().equals(Status.INACTIVE) && timer.expired(c.getTimer().from)) {
+			if ((c.getStatus() == null || c.getStatus().equals(Status.INACTIVE)) && timer.expired(c.getTimer().from)) {
 				c.getExsecutios().stream().filter(e -> e instanceof Obsidio).forEach(e -> ((Obsidio)e).setContext(cons));
 				
 				try {

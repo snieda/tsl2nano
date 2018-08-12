@@ -56,10 +56,10 @@ public class Effectree extends STree<Effectree.Entry>{
 		return change((Class<?>) res.getType(), res.getPath());
 	}
 	public static Entry change(Class<?> type, String path) {
-		return Effectree.self.new Entry(new Grex<>(type, path), null);
+		return Effectree.instance().new Entry(new Grex<>(type, path), null);
 	}
 	public static Entry effect(Class<?> type, String path, Class<? extends IChange> effectType, Object effectParameter) {
-		return Effectree.self.new Entry(new Grex<>(type, path), effectType, effectParameter);
+		return Effectree.instance().new Entry(new Grex<>(type, path), effectType, effectParameter);
 	}
 	public static List<Effectus> generateEffects(Res res) {
 		List<Effectus> effectus = new LinkedList<>();

@@ -1,9 +1,11 @@
 package tsl2.nano.cursus.persistence;
 
+import java.lang.Thread.UncaughtExceptionHandler;
 import java.sql.Timestamp;
 import java.util.Date;
 import java.util.HashSet;
 import java.util.LinkedHashSet;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Set;
 
@@ -23,6 +25,7 @@ import de.tsl2.nano.bean.annotation.ValueExpression;
 import de.tsl2.nano.core.exception.Message;
 import de.tsl2.nano.core.messaging.IListener;
 import de.tsl2.nano.core.util.ConcurrentUtil;
+import de.tsl2.nano.core.util.Util;
 import de.tsl2.nano.service.util.IPersistable;
 import tsl2.nano.cursus.EProcessLog;
 import tsl2.nano.cursus.IConsilium;
@@ -54,6 +57,9 @@ public class EProcess implements IPersistable<String>, IListener<Object> {
 		prc.getEventController().addListener(this, Object.class);
 	}
 	
+	public EProcess(Date startPeriod, Date endPeriod) {
+		this(null, startPeriod, endPeriod, 0);
+	}
 	
 	public EProcess(Timestamp startedAt, Date startPeriod, Date endPeriod, long items) {
 		this();
@@ -88,6 +94,8 @@ public class EProcess implements IPersistable<String>, IListener<Object> {
 	}
 	@OneToMany(mappedBy="process", cascade=CascadeType.ALL, orphanRemoval=true)
 	public List<EProcessLog> getLog() {
+		if (log == null)
+			log = new LinkedList<>();
 		return log;
 	}
 	public void setLog(List<EProcessLog> log) {
@@ -124,16 +132,26 @@ public class EProcess implements IPersistable<String>, IListener<Object> {
 	public void actionStart(EGrex grex) {
 		Set<IConsilium> consilii = new LinkedHashSet<>();
 		Set<ERes> parts = grex.createParts();
-		if (parts == null)
-			throw new IllegalArgumentException("no objectIDs defined -> nothing to do!");
+		checkAndSave(parts);
 		for (ERes res : parts) {
 			consilii.addAll(res.getConsilii());
 		}
-		checkAndSave();
-		ConcurrentUtil.startDaemon(getId(), new Runnable() {
+		if (consilii.isEmpty())
+			throw new IllegalStateException("For given Grex " + grex + " no bound consilii were found! Nothing to do!");
+		final UncaughtExceptionHandler uncaughtExceptionHandler = Thread.currentThread().getUncaughtExceptionHandler();
+		ConcurrentUtil.startDaemon(toString(), new Runnable() {
 			@Override
 			public void run() {
-				prc.run(getStartPeriod(), getEndPeriod(), consilii.toArray(new EConsilium[0]));
+				try {
+					Thread.currentThread().setUncaughtExceptionHandler(uncaughtExceptionHandler);
+					prc.run(getStartPeriod(), getEndPeriod(), consilii.toArray(new EConsilium[0]));
+				} catch (Throwable e) {
+					e.printStackTrace();
+					Message.send(uncaughtExceptionHandler, e);
+					setEndedAt(new Date());
+					setStatus(Status.FAILED);
+					BeanContainer.instance().save(this);
+				}
 			}
 		});
 	}
@@ -150,8 +168,7 @@ public class EProcess implements IPersistable<String>, IListener<Object> {
 		prc.resetTo(lastActiveConsilium.followers(), lastActiveConsilium);
 	}
 
-
-	private void checkAndSave() {
+	protected void checkAndSave() {
 		if (getStartedAt() != null) {
 			throw new IllegalStateException("This process was already started! Please define a new one!");
 		}
@@ -159,13 +176,19 @@ public class EProcess implements IPersistable<String>, IListener<Object> {
 		setStatus(Status.RUNNING);
 		BeanContainer.instance().save(this);
 	}
+	protected void checkAndSave(Set<ERes> parts) {
+		if (Util.isEmpty(parts))
+			throw new IllegalArgumentException("no objectIDs defined -> nothing to do!");
+		checkAndSave();
+	}
 
 	@Override
 	public void handleEvent(Object event) {
-		if (event instanceof EConsilium) {
+		if (event instanceof Integer) {
+			setItems(((Integer)event).longValue());
+		} else if (event instanceof EConsilium) {
 			EProcessLog log = new EProcessLog(this, new Timestamp(System.currentTimeMillis()), (EConsilium) event);
 			getLog().add(log);
-//			BeanContainer.instance().save(log);
 		} else if (event instanceof Exception) {
 			setStatus(Status.RUNNING_WITH_FAILURES);
 			getLog().get(getLog().size()-1).setStatus(new de.tsl2.nano.bean.def.Status((Exception)event));
@@ -177,5 +200,10 @@ public class EProcess implements IPersistable<String>, IListener<Object> {
 		}
 		Message.send("processing (" + this + "): " + event.toString());
 		BeanContainer.instance().save(this);
+	}
+	
+	@Override
+	public String toString() {
+		return Util.toString(getClass(), startedAt, startPeriod, EndPeriod, status, items);
 	}
 }
