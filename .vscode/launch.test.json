@@ -1,0 +1,156 @@
+{
+    "run": {
+        "default": "",
+        "items": [
+            {
+                "name": "tsl2.nano.serviceaccess",
+                "projectName": "tsl2.nano.serviceaccess",
+                "workingDirectory": "c:\\Users\\Tom\\git\\code",
+                "args": [],
+                "vmargs": [],
+                "preLaunchTask": ""
+            },
+            {
+                "name": "tsl2.nano.incubation",
+                "projectName": "tsl2.nano.incubation",
+                "workingDirectory": "c:\\Users\\Tom\\git\\code",
+                "args": [],
+                "vmargs": [],
+                "preLaunchTask": ""
+            },
+            {
+                "name": "tsl2.nano.ebeanprovider",
+                "projectName": "tsl2.nano.ebeanprovider",
+                "workingDirectory": "c:\\Users\\Tom\\git\\code",
+                "args": [],
+                "vmargs": [],
+                "preLaunchTask": ""
+            },
+            {
+                "name": "tsl2.nano.core",
+                "projectName": "tsl2.nano.core",
+                "workingDirectory": "c:\\Users\\Tom\\git\\code",
+                "args": [],
+                "vmargs": [],
+                "preLaunchTask": ""
+            },
+            {
+                "name": "tsl2.nano.h5",
+                "projectName": "tsl2.nano.h5",
+                "workingDirectory": "c:\\Users\\Tom\\git\\code",
+                "args": [],
+                "vmargs": [],
+                "preLaunchTask": ""
+            },
+            {
+                "name": "tsl2.nano.ormliteprovider",
+                "projectName": "tsl2.nano.ormliteprovider",
+                "workingDirectory": "c:\\Users\\Tom\\git\\code",
+                "args": [],
+                "vmargs": [],
+                "preLaunchTask": ""
+            },
+            {
+                "name": "tsl2.nano.directaccess",
+                "projectName": "tsl2.nano.directaccess",
+                "workingDirectory": "c:\\Users\\Tom\\git\\code",
+                "args": [],
+                "vmargs": [],
+                "preLaunchTask": ""
+            },
+            {
+                "name": "tsl2.nano.jarresolver",
+                "projectName": "tsl2.nano.jarresolver",
+                "workingDirectory": "c:\\Users\\Tom\\git\\code",
+                "args": [],
+                "vmargs": [],
+                "preLaunchTask": ""
+            },
+            {
+                "name": "tsl2.nano.common",
+                "projectName": "tsl2.nano.common",
+                "workingDirectory": "c:\\Users\\Tom\\git\\code",
+                "args": [],
+                "vmargs": [],
+                "preLaunchTask": ""
+            }
+        ]
+    },
+    "debug": {
+        "default": "",
+        "items": [
+            {
+                "name": "tsl2.nano.serviceaccess",
+                "projectName": "tsl2.nano.serviceaccess",
+                "workingDirectory": "c:\\Users\\Tom\\git\\code",
+                "args": [],
+                "vmargs": [],
+                "preLaunchTask": ""
+            },
+            {
+                "name": "tsl2.nano.incubation",
+                "projectName": "tsl2.nano.incubation",
+                "workingDirectory": "c:\\Users\\Tom\\git\\code",
+                "args": [],
+                "vmargs": [],
+                "preLaunchTask": ""
+            },
+            {
+                "name": "tsl2.nano.ebeanprovider",
+                "projectName": "tsl2.nano.ebeanprovider",
+                "workingDirectory": "c:\\Users\\Tom\\git\\code",
+                "args": [],
+                "vmargs": [],
+                "preLaunchTask": ""
+            },
+            {
+                "name": "tsl2.nano.core",
+                "projectName": "tsl2.nano.core",
+                "workingDirectory": "c:\\Users\\Tom\\git\\code",
+                "args": [],
+                "vmargs": [],
+                "preLaunchTask": ""
+            },
+            {
+                "name": "tsl2.nano.h5",
+                "projectName": "tsl2.nano.h5",
+                "workingDirectory": "c:\\Users\\Tom\\git\\code",
+                "args": [],
+                "vmargs": [],
+                "preLaunchTask": ""
+            },
+            {
+                "name": "tsl2.nano.ormliteprovider",
+                "projectName": "tsl2.nano.ormliteprovider",
+                "workingDirectory": "c:\\Users\\Tom\\git\\code",
+                "args": [],
+                "vmargs": [],
+                "preLaunchTask": ""
+            },
+            {
+                "name": "tsl2.nano.directaccess",
+                "projectName": "tsl2.nano.directaccess",
+                "workingDirectory": "c:\\Users\\Tom\\git\\code",
+                "args": [],
+                "vmargs": [],
+                "preLaunchTask": ""
+            },
+            {
+                "name": "tsl2.nano.jarresolver",
+                "projectName": "tsl2.nano.jarresolver",
+                "workingDirectory": "c:\\Users\\Tom\\git\\code",
+                "args": [],
+                "vmargs": [],
+                "preLaunchTask": ""
+            },
+            {
+                "name": "tsl2.nano.common",
+                "projectName": "tsl2.nano.common",
+                "workingDirectory": "c:\\Users\\Tom\\git\\code",
+                "args": [],
+                "vmargs": [],
+                "preLaunchTask": ""
+            }
+        ]
+    }
+}
