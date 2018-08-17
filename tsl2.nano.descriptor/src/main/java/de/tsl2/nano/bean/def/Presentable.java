@@ -10,6 +10,7 @@
 package de.tsl2.nano.bean.def;
 
 import java.io.Serializable;
+import java.util.Arrays;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -441,7 +442,15 @@ public class Presentable implements IIPresentable, Serializable {
 				p.enabled() ? IActivable.ACTIVE : IActivable.INACTIVE, 
 				p.visible()
 		    , (Serializable)MapUtil.asMap(p.layout()), (Serializable)MapUtil.asMap(p.layoutConstraints()), p.description());
-		presentable.setIcon(p.icon());
+		presentable.setNesting(p.nesting());
+		if (!Util.isEmpty(p.icon()))
+			presentable.setIcon(p.icon());
+		if (!Util.isEmpty(p.background()))
+			presentable.setBackground(p.background());
+		if (!Util.isEmpty(p.foreground()))
+			presentable.setForeground(p.foreground());
+		if (!Util.isEmpty(p.items()))
+			presentable.setItemList(Arrays.asList(p.items()));
 	}
 
 }

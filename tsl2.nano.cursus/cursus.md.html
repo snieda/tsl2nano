@@ -3,6 +3,33 @@
 
 ## Introduction
 
+Cursus is a change management system or change log using delta entries and timers in a scheduled process. Target is any store or database content that should be changed in a scheduled manner. The advantage is a history of changes and the possibility to undo/redo/replay the changes at any time.
+
+Cursus is totally independent to the target system (e.g. a database) and needs relation pathes plus object ids to reference the target entries.
+
+Cursus may be instrumented by insurances and other financial systems to build a course/track through changes on contracts.
+
+### Overview
+ 
+![](http://g.gravizo.com/g?digraph G {
+Processor -> Consilium [label="Runs the process to activate\nscheduled change events\nthat may result in re-calculations"]
+Consilium -> Exsecutio [label="Intension for a change event"]
+Consilium -> Obsidio   [label="Blocks the excecution\nof a change event"]
+Consilium -> Timer     [label="Defines the start/end\nor stepwise generation\nof a change event"]
+Timer     -> Consilium [label="Defines the periodic excecution\nof a change event"]
+Exsecutio -> Mutatio   [label="Defines the change of a value"]
+Mutatio   -> Res       [label="Identifies the target to be changed"] 
+Exsecutio -> Effectree [label="Impact and consequences"]
+Exsecutio -> Effectus  [label="Consequence of change"]
+Effectree -> Effectus  [label="Creates consequences\non a change type"]
+Effectree -> Grex      [label="Identifies a group\nof targets"]
+Effectus  -> RuleEffectus [label="Rule-based consequence\nof a change"]
+Effectus  -> Fixed     [label="Stash or fixed value\nstored as blob\ncan be reused on replay"]
+Effectus  -> Value     [label="Any function will calculate\nthe new value for the given target"]
+})
+
+### Overview (german)
+ 
 ![](http://g.gravizo.com/g?digraph G {
 Processor -> Consilium [label="Führt nicht-aktive Consilii \nbei Terminierung aus."]
 Consilium -> Exsecutio [label="Absicht einer Ausführung"]
@@ -20,62 +47,32 @@ Effectus  -> Fixed     [label="Berechneter Wert wird \nals Blob in Datenbank abg
 Effectus  -> Value     [label="Eine beliebige Funktion ermittelt \nden neuen Wert für eine Identität"]
 })
  
-Cursus:
+## Process description
 
-ChangeLog (consilium):
+The processor gets an amount of described change events (Consilium) that define a timer-period (Timer), the new value (Mutatio) and the target (Res). This change event descriptors will be sorted by timer.start and priority. Optional blockers (Obsidio) can avoid the excecution of change events. If a change event is activated and processed, optional impacts (Effectus) will be excecuted.
+The target result and the change event descriptor will be sealed and stored.
 
-* Author
-* Creation
-* Consequence (consecutio)
-* Start
-* End
-* Status (INACTIVE, ACTIVE, REMOVED)
-* Target (VNR)
-* ChangedValues
-* Hash over ChangeLog+ChangedValues
+Activated change events may be deactivated through the processor:
+* _Processor.deactivate(Set<? extends Consilium> consiliums, Date from, Date until)_
+* _Processor.resetTo(Set<? extends Consilium> consiliums, Consilium lastActiveConsilium)_
 
-Consequence (consecutio)
+## JPA Entities
 
-* name
-* action (enum, Consumer)
+For each element of Cursus it exists a jpa entity with a name starting with 'E'. Additionally an _EProcess_ (can start the Processor) and an _EProcessLog_ are defined. Each _EProcess_ needs a date-period for the change event descriptors to respect.
 
-ChangedValues (mutatio):
+To define a full change event descriptor (_EConsilium_) you need to crawl through:
 
-* Target
-* last (redundant, für die Verwendung von Undo sinnvoll)
-* new
-
-Target (destinatum, objekt, res):
-
-* base (entity path)
-* id
-
-Stash:
-
-* Creation
-* Data as blob
-
-### Action-Listener
-
-* Meldet sich pro Ereignis-Action (=Typ) an und führt entsprechende Berechnungen- über einen Rechenkern durch. Diese können in der Historie abgerufen werden
-
-### Materialisierung von Target
-
-target.descriptor = path + @ + id
-target.toObject(), fromObject()
-
-### Store temp
-
-* Speichert berechneten Stand als blob zum Vergleichen mit aktuellen Berechnungen
-
+EConsilium -> EExsecutio -> EMutatio -> ERes
+  
 ## Changelog
 
- Version | Date | Description
- ------- | ---- | -----------
- 2.1.3 | 10.06.2018 | First alpha Version
- 2.1.3b| 01.07.2018 | Usable Beta Version
- 2.1.4 | 15.07.2018 | Effectus, Obsidio added
-
+ Version | Date       | Description
+ ------- | ---------- | -----------
+ 2.1.3   | 10.06.2018 | First alpha Version
+ 2.1.3b  | 01.07.2018 | Usable Beta Version
+ 2.1.4a  | 15.07.2018 | Effectus, Obsidio added
+ 2.1.4   | 12.08.2018 | jpa entities with presentable informations
+ 
 <style class="fallback">body{white-space:pre;font-family:monospace}</style><script src="markdeep.min.js"></script><script src="http://casual-effects.com/markdeep/latest/markdeep.min.js"></script>
 
 <!--

@@ -88,7 +88,7 @@ public class ERes extends Res<Object, Object> implements IPersistable<String> {
 	@Transient
 	public Collection<EConsilium> getConsilii() {
 //		String sql = "select c from EConsilium c where c.exsecutios.mutatio.res.objectid = %1";
-		EConsilium exCons = new EConsilium(null, null, null, new EExsecutio(null, new EMutatio(null, this), null));
+		EConsilium exCons = new EConsilium(null, null, null, null, new EExsecutio(null, new EMutatio(null, this), null));
 		PrivateAccessor<EConsilium> pa = new PrivateAccessor<>(exCons);
 		pa.set("status", null);
 		pa.set("seal", null);

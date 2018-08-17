@@ -60,8 +60,7 @@ public class ERuleEffectus extends RuleEffectus<Object, Object> implements IPers
 		this.res = res;
 	}
 
-	@ManyToOne
-	@JoinColumn
+	@ManyToOne @JoinColumn
 	public EExsecutio getExsecutio() {
 		return exsecutio;
 	}

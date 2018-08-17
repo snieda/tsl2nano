@@ -91,7 +91,7 @@ public class Message extends RuntimeException {
      */
     public static final void send(UncaughtExceptionHandler exceptionHandler, Object message) {
         if (exceptionHandler != null) {
-            if (!(message instanceof Throwable))
+            if (!(message instanceof Throwable)) 
                 LOG.info(message);
             exceptionHandler.uncaughtException(Thread.currentThread(), message instanceof ByteBuffer ? new Message(
                 (ByteBuffer) message) : new Message(String.valueOf(message)));

@@ -6,6 +6,7 @@ import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Set;
 import java.util.TreeSet;
+import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -20,6 +21,7 @@ import tsl2.nano.cursus.IConsilium.Status;
  * Change Process for Entities using Cursus. It's final to secure the use of IConsilium.refreshSeal(Processor)
  */
 public final class Processor {
+	public static final String STOPPED = "STOPPED";
 	public static final String FINISHED = "FINISHED";
 
 	private static final Log LOG = LogFactory.getLog(Processor.class);
@@ -29,6 +31,8 @@ public final class Processor {
 		final long timestamp = System.currentTimeMillis();
 	}
 
+	AtomicBoolean stop = new AtomicBoolean(false);
+	
 	EventController eventController = new EventController();
 	
 	/**
@@ -50,15 +54,20 @@ public final class Processor {
 		CommandManager cmdManager = new CommandManager();
 		getEventController().fireEvent(cons.size());
 		for (IConsilium c : cons) {
-			eventController.fireEvent(c);
+			if (stop.get()) {
+				eventController.fireEvent(STOPPED);
+				break;
+			}
 			c.checkValidity(ID);
 			if ((c.getStatus() == null || c.getStatus().equals(Status.INACTIVE)) && timer.expired(c.getTimer().from)) {
 				c.getExsecutios().stream().filter(e -> e instanceof Obsidio).forEach(e -> ((Obsidio)e).setContext(cons));
 				
 				try {
+					eventController.fireEvent(c);
 					cmdManager.doIt(c.getExsecutios().toArray(new ICommand[0]));
 					c.setStatus(Status.ACTIVE);
 					c.refreshSeal(ID);
+					eventController.fireEvent(c);
 				} catch (Exception ex) {
 					LOG.error(ex);
 					eventController.fireEvent(ex);
@@ -85,6 +94,10 @@ public final class Processor {
 		return automated;
 	}
 
+	public void stop() {
+		stop.set(true);
+	}
+	
 	public void resetTo(Set<? extends Consilium> consiliums, Consilium lastActiveConsilium) {
 		deactivate(consiliums, lastActiveConsilium.getTimer().from, null);
 	}

@@ -30,13 +30,13 @@ public class EConsilium extends Consilium implements IPersistable<String> {
 	private static final long serialVersionUID = 1L;
 	
 	String id;
-	String name="";
+	EConsiliumID name;
 	
 	public EConsilium() {
 	}
-	public EConsilium(String author, ETimer timer, Priority priority, EExsecutio... exsecutios) {
+	public EConsilium(EConsiliumID consiliumID, String author, ETimer timer, Priority priority, EExsecutio... exsecutios) {
 		super(author, timer, priority, exsecutios);
-		name = super.getName();
+		name = consiliumID;
 	}
 	@Id
 	@GeneratedValue
@@ -131,11 +131,11 @@ public class EConsilium extends Consilium implements IPersistable<String> {
 		return !Util.isEmpty(getExsecutios()) ? getExsecutios().iterator().next().getMutatio().getRes() : null;
 	}
 	@Override
-	public String getName() {
+	public EConsiliumID getName() {
 		return name;
 	}
 	
-	 public void setName(String name) {
+	 public void setName(EConsiliumID name) {
 	 	this.name = name;
 	 }
 }

@@ -21,7 +21,7 @@ import de.tsl2.nano.incubation.repeat.ICommand;
 public class Obsidio implements ICommand<Set<? extends IConsilium>>, Serializable {
 	private static final long serialVersionUID = 1L;
 	private static final Log LOG = LogFactory.getLog(Obsidio.class);
-	protected String consiliumID;
+	protected Object consiliumID;
 	protected Grex grex;
 	protected Timer timer;
 	private transient Set<? extends IConsilium> consilii;
@@ -30,7 +30,7 @@ public class Obsidio implements ICommand<Set<? extends IConsilium>>, Serializabl
 	public Obsidio() {
 	}
 
-	public Obsidio(String name, String consiliumID, Timer timer, Grex grex) {
+	public Obsidio(String name, Object consiliumID, Timer timer, Grex grex) {
 		this.name = name;
 		this.consiliumID = consiliumID;
 		this.timer = timer;

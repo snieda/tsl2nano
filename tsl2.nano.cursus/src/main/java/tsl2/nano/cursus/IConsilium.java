@@ -11,7 +11,7 @@ import tsl2.nano.cursus.Processor.Id;
  * @author Tom
  */
 public interface IConsilium {
-	String getName();
+	Object getName();
 	/** commands to run if activated */
 	Set<? extends ICommand<?>> getExsecutios();
 	/** should check against a seal to avoid invalid data changes */

@@ -68,7 +68,7 @@ public class CursusTest implements Serializable /* only for inner-classes...*/{
     	Timer blockTime = new Timer(DateUtil.getYesterday(), DateUtil.getToday());
     	IConsilium[] consilii = createConsilii();
     	
-		String consiliumID = consilii[0].getName();
+		Object consiliumID = consilii[0].getName();
 		Consilium obsidio = new Consilium("BLOCKER", blockTime, Priority.HIGHEST, 
     			new Obsidio("BLOCKEREX", consiliumID, blockTime, new Grex(Contract.class, "contract.end", "1")));
     	process(CollectionUtil.concat(consilii, new IConsilium[] {obsidio}));

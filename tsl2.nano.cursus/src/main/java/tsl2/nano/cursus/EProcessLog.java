@@ -8,10 +8,10 @@ import javax.persistence.Id;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 
-import de.tsl2.nano.action.IStatus;
 import de.tsl2.nano.bean.annotation.Attributes;
 import de.tsl2.nano.bean.annotation.Presentable;
 import de.tsl2.nano.bean.annotation.ValueExpression;
+import de.tsl2.nano.bean.def.SStatus;
 import de.tsl2.nano.service.util.IPersistable;
 import tsl2.nano.cursus.persistence.EConsilium;
 import tsl2.nano.cursus.persistence.EProcess;
@@ -26,7 +26,7 @@ public class EProcessLog implements IPersistable<String> {
 	String id;
 	Timestamp started;
 	EConsilium consilium;
-	IStatus status;
+	SStatus status;
 	EProcess process;
 	
 	public EProcessLog() {
@@ -61,10 +61,10 @@ public class EProcessLog implements IPersistable<String> {
 	public void setConsilium(EConsilium consilium) {
 		this.consilium = consilium;
 	}
-	public IStatus getStatus() {
+	public SStatus getStatus() {
 		return status;
 	}
-	public void setStatus(IStatus status) {
+	public void setStatus(SStatus status) {
 		this.status = status;
 	}
 	@ManyToOne @JoinColumn

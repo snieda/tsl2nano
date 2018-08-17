@@ -89,7 +89,7 @@ public class DefaultFormat extends Format {
         } else {
             //pure objects, representing there instance id --> use reflection
             CompatibilityLayer cl = ENV.get(CompatibilityLayer.class);
-            if (!ObjectUtil.hasToString(obj) && cl.isAvailable("tsl2.nano.format.ToStringBuilder")) {
+            if (!ObjectUtil.hasToString(obj) && cl.isAvailable("de.tsl2.nano.format.ToStringBuilder")) {
                 try {
                     result.append(StringUtil.toString(cl.runRegistered("reflectionToString", obj), 80));
                 } catch (final Exception e) {

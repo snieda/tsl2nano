@@ -40,6 +40,7 @@ import de.tsl2.nano.bean.IConnector;
 import de.tsl2.nano.bean.IRuleCover;
 import de.tsl2.nano.bean.ValueHolder;
 import de.tsl2.nano.bean.annotation.ConstraintValueSet;
+import de.tsl2.nano.bean.annotation.DependencyListener;
 import de.tsl2.nano.bean.annotation.RuleCover;
 import de.tsl2.nano.core.ENV;
 import de.tsl2.nano.core.ManagedException;
@@ -224,6 +225,12 @@ public class AttributeDefinition<T> implements IAttributeDefinition<T> {
             if (presentable != null && m.isAnnotationPresent(RuleCover.class)) {
             	RuleCover c = m.getAnnotation(RuleCover.class);
             	AttributeCover.cover(c.implementationClass(), getDeclaringClass(), getName(), c.child(), c.rule());
+            }
+            if (m.isAnnotationPresent(DependencyListener.class)) {
+            	DependencyListener c = m.getAnnotation(DependencyListener.class);
+            	//TODO: how to use html5 presentationhelper
+//                getPrsenentationHelper().addRuleListener(ATTR_VALUE, RuleScript.PREFIX + calcTime.getName(), 2, ATTR_FROMTIME, ATTR_TOTIME, ATTR_PAUSE);
+
             }
         }
     }

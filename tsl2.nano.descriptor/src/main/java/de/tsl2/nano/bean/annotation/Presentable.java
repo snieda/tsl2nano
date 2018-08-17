@@ -33,8 +33,8 @@ public @interface Presentable {
     String[] items() default {};
     String[] layout() default {};
     String[] layoutConstraints() default {};
-    int width() default -1;
-    int height() default -1;
+//    int width() default -1;
+//    int height() default -1;
     String icon() default "";
     int[] foreground() default {};
     int[] background() default {};

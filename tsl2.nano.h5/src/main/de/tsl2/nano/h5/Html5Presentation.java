@@ -1755,7 +1755,7 @@ public class Html5Presentation<T> extends BeanPresentationHelper<T> implements I
                 "beanfieldlabel",
                 ATTR_WIDTH,
                 ENV.get("layout.attribute.label.width", "250"), ATTR_STYLE, style(STYLE_FONT_COLOR,
-                    (String) BeanUtil.valueOf(p.getForeground(),
+                    (String) BeanUtil.valueOf(asString(p.getForeground()),
                         ENV.get("layout.attribute.label.color", "#0000cc"))),
                 enableFlag(ATTR_HIDDEN, !p.isVisible()),
                 enableFlag(ATTR_REQUIRED, !beanValue.nullable() && !isGeneratedValue(beanValue))));
@@ -1940,6 +1940,15 @@ public class Html5Presentation<T> extends BeanPresentationHelper<T> implements I
                 ATTR_STYLE, style(STYLE_FONT_COLOR, COLOR_RED)));
         }
         return input;
+    }
+
+    private String asString(int[] color) {
+        if (Util.isEmpty(color))
+            return null; 
+        else {
+            String c = Arrays.toString(color);
+            return c.substring(1, c.length() - 1);
+        }
     }
 
     /**

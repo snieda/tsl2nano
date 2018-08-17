@@ -35,6 +35,7 @@ import de.tsl2.nano.core.util.MapUtil;
 import de.tsl2.nano.core.util.StringUtil;
 import tsl2.nano.cursus.IConsilium.Priority;
 import tsl2.nano.cursus.persistence.EConsilium;
+import tsl2.nano.cursus.persistence.EConsiliumID;
 import tsl2.nano.cursus.persistence.EExsecutio;
 import tsl2.nano.cursus.persistence.EGrex;
 import tsl2.nano.cursus.persistence.EMutatio;
@@ -76,7 +77,7 @@ public class CursusEntityTest implements Serializable /* only for the inner-clas
 		};
 		EMutatio eMutatio = new EMutatio("01/01/2019", eRes);
 		EExsecutio eExsecutio = new EExsecutio("Änderung-ENDE-Datum", eMutatio, null);
-		EConsilium eConsilium = new EConsilium("test", new ETimer(DateUtil.getYesterday(), DateUtil.getTomorrow()), Priority.NORMAL, eExsecutio);
+		EConsilium eConsilium = new EConsilium(new EConsiliumID("test-change"), "test", new ETimer(DateUtil.getYesterday(), DateUtil.getTomorrow()), Priority.NORMAL, eExsecutio);
 		hCons.setValue(eConsilium);
 		
 		EProcess eProcess = new EProcess(DateUtil.getYesterday(), DateUtil.getTomorrow()) {

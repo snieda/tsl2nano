@@ -40,14 +40,22 @@ public class Timer implements Serializable {
 	}
 	
 	public Timer(Date from, Date until, int stepType, int stepLength, Integer...stepExceptions) {
-		this.from = from;
-		this.until = until;
+		this.from = Util.value(from, new Date(Long.MIN_VALUE));
+		this.until = Util.value(until, new Date(Long.MAX_VALUE));
 		this.stepType = stepType;
 		this.stepLength = stepLength;
 		this.stepExceptions = new ArrayList<>(Arrays.asList(stepExceptions));
-		current = Calendar.getInstance();
-		reset();
+		preparePeriod();
 	}
+	private void preparePeriod() {
+		if (current == null) {
+			from = Util.value(from, new Date(Long.MIN_VALUE));
+			until = Util.value(until, new Date(Long.MAX_VALUE));
+			current = Calendar.getInstance();
+			reset();
+		}
+	}
+
 	Date next() {
 		do {
 			current.add(stepType, stepLength);
@@ -62,12 +70,15 @@ public class Timer implements Serializable {
 //	}
 	/** @return true, if timers period includes the given date */
 	boolean expired(Date date) {
+		preparePeriod();
 		return DateUtil.includes(from, current.getTime(), date);
 	}
 	boolean isPartOf(Date from, Date until) {
+		preparePeriod();
 		return DateUtil.contains(from, until, this.from, this.until);
 	}
 	List<Date> runThrough(Date from, Date until) {
+		preparePeriod();
 		LinkedList<Date> steps = new LinkedList<>();
 		Date d;
 		while((d = next()) != null)

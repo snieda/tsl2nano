@@ -73,7 +73,7 @@ public class Consilium implements IConsilium, Comparable<Consilium>, Serializabl
 		if (c == 0)
 			c = status != null ? status.compareTo(o.status) : 0;
 		if (c == 0)
-			c = getName().compareTo(o.getName());
+			c = getName().toString().compareTo(o.getName().toString());
 		return c;
 	}
 	@Override
@@ -133,7 +133,7 @@ public class Consilium implements IConsilium, Comparable<Consilium>, Serializabl
 	}
 
 	@Override
-	public String getName() {
+	public Object getName() {
 		return Util.isEmpty(exsecutios) ? toString() : exsecutios.iterator().next().getName();
 	}
 	@Override

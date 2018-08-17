@@ -2,6 +2,7 @@ package tsl2.nano.cursus.persistence;
 
 import java.lang.Thread.UncaughtExceptionHandler;
 import java.sql.Timestamp;
+import java.util.Collection;
 import java.util.Date;
 import java.util.HashSet;
 import java.util.LinkedHashSet;
@@ -11,17 +12,23 @@ import java.util.Set;
 
 import javax.persistence.CascadeType;
 import javax.persistence.Entity;
+import javax.persistence.EnumType;
+import javax.persistence.Enumerated;
 import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
 import javax.persistence.OneToMany;
 import javax.persistence.Temporal;
 import javax.persistence.TemporalType;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+
 import de.tsl2.nano.bean.BeanContainer;
 import de.tsl2.nano.bean.annotation.Action;
 import de.tsl2.nano.bean.annotation.Attributes;
 import de.tsl2.nano.bean.annotation.Presentable;
 import de.tsl2.nano.bean.annotation.ValueExpression;
+import de.tsl2.nano.bean.def.SStatus;
 import de.tsl2.nano.core.exception.Message;
 import de.tsl2.nano.core.messaging.IListener;
 import de.tsl2.nano.core.util.ConcurrentUtil;
@@ -30,13 +37,16 @@ import de.tsl2.nano.service.util.IPersistable;
 import tsl2.nano.cursus.EProcessLog;
 import tsl2.nano.cursus.IConsilium;
 import tsl2.nano.cursus.Processor;
+import tsl2.nano.cursus.effectus.Effectree;
 
 @Entity
-@ValueExpression(expression="{startedAt}: {startPeriod}-{endPeriod} ({items})")
-@Attributes(names= {"startPeriod", "endPeriod", "startedAt"})
+@ValueExpression(expression="{startedAt}: {startPeriod}-{endPeriod} (Items: {items}, Status: {status})")
+@Attributes(names= {"startPeriod", "endPeriod", "startedAt", "items", "status", "log"})
 @Presentable(label="ΔProcess", icon="icons/go.png", enabled=false)
 public class EProcess implements IPersistable<String>, IListener<Object> {
 	private static final long serialVersionUID = 1L;
+	private static final Log LOG = LogFactory.getLog(EProcess.class);
+	
 	transient Processor prc = new Processor();
 	String id;
 	
@@ -47,11 +57,12 @@ public class EProcess implements IPersistable<String>, IListener<Object> {
 	Date startPeriod;
 	Date EndPeriod;
 	
-	long items;
+	long items = -1;
 	
 	List<EProcessLog> log;
+	private transient EProcess current;
 	
-	enum Status {CREATED, RUNNING, RUNNING_WITH_FAILURES, FINISHED_SUCCESS, FAILED, FINISHED_WITH_FAILURES};
+	enum Status {CREATED, RUNNING, RUNNING_WITH_FAILURES, FINISHED_SUCCESS, FAILED, FINISHED_WITH_FAILURES, CANCELED};
 	
 	public EProcess() {
 		prc.getEventController().addListener(this, Object.class);
@@ -93,12 +104,13 @@ public class EProcess implements IPersistable<String>, IListener<Object> {
 		EndPeriod = endPeriod;
 	}
 	@OneToMany(mappedBy="process", cascade=CascadeType.ALL, orphanRemoval=true)
+	@Presentable(enabled=false, nesting=true)
 	public List<EProcessLog> getLog() {
 		if (log == null)
 			log = new LinkedList<>();
 		return log;
 	}
-	public void setLog(List<EProcessLog> log) {
+	protected void setLog(List<EProcessLog> log) {
 		this.log = log;
 	}
 	@Temporal(TemporalType.TIMESTAMP)
@@ -109,18 +121,22 @@ public class EProcess implements IPersistable<String>, IListener<Object> {
 	public void setStartedAt(Date startedAt) {
 		this.startedAt = startedAt;
 	}
+	@Presentable(enabled=false)
 	public Date getEndedAt() {
 		return endedAt;
 	}
 	public void setEndedAt(Date endedAt) {
 		this.endedAt = endedAt;
 	}
+	@Enumerated(EnumType.STRING)
+	@Presentable(enabled=false)
 	public Status getStatus() {
 		return status;
 	}
 	public void setStatus(Status status) {
 		this.status = status;
 	}
+	@Presentable(enabled=false)
 	public long getItems() {
 		return items;
 	}
@@ -129,7 +145,8 @@ public class EProcess implements IPersistable<String>, IListener<Object> {
 	}
 	@Action(argNames= {"grex"})
 	@Presentable(icon="icons/go.png")
-	public void actionStart(EGrex grex) {
+	public List<EProcessLog> actionStart(EGrex grex) {
+		loadEffectree(grex);
 		Set<IConsilium> consilii = new LinkedHashSet<>();
 		Set<ERes> parts = grex.createParts();
 		checkAndSave(parts);
@@ -146,15 +163,40 @@ public class EProcess implements IPersistable<String>, IListener<Object> {
 					Thread.currentThread().setUncaughtExceptionHandler(uncaughtExceptionHandler);
 					prc.run(getStartPeriod(), getEndPeriod(), consilii.toArray(new EConsilium[0]));
 				} catch (Throwable e) {
-					e.printStackTrace();
-					Message.send(uncaughtExceptionHandler, e);
+					LOG.error(e.toString(), e);
+					Message.send(e);
 					setEndedAt(new Date());
 					setStatus(Status.FAILED);
-					BeanContainer.instance().save(this);
+					try { //if that failes, too, no error may be shown, so we should catch that
+						current = BeanContainer.instance().save(EProcess.this);
+					} catch (Throwable e1) {
+						LOG.error("", e1);
+					}
 				}
 			}
 		});
+		ConcurrentUtil.sleep(2000);
+		return current != null ? current.getLog() : null;
 	}
+
+	protected void loadEffectree(EGrex grex) {
+		if (Effectree.instance().isEmpty()) {
+			Collection<EGrexEffectus> grexEffectus = BeanContainer.instance().getBeans(EGrexEffectus.class, 0, -1);
+			for (EGrexEffectus ge : grexEffectus) {
+				ERes res = ge.getEffectus().getRes();
+				Effectree.instance().addEffects(ge.getGrex().getGenRes(),
+						Effectree.effect(res.getType(), res.getPath(), ERuleEffectus.class, null));
+			}
+		}
+	}
+
+	@Presentable(icon="icons/stop.png")
+	public List<EProcessLog> actionStop() {
+		prc.stop();
+		ConcurrentUtil.sleep(1000);
+		return current != null ? current.getLog() : null;
+	}
+	
 	@Action(argNames={"res"})
 	@Presentable(icon="icons/blocked.png")
 	public void actionDeactivate(ERes res) {
@@ -174,7 +216,7 @@ public class EProcess implements IPersistable<String>, IListener<Object> {
 		}
 		setStartedAt(new Date());
 		setStatus(Status.RUNNING);
-		BeanContainer.instance().save(this);
+		current = BeanContainer.instance().save(this);
 	}
 	protected void checkAndSave(Set<ERes> parts) {
 		if (Util.isEmpty(parts))
@@ -187,19 +229,30 @@ public class EProcess implements IPersistable<String>, IListener<Object> {
 		if (event instanceof Integer) {
 			setItems(((Integer)event).longValue());
 		} else if (event instanceof EConsilium) {
-			EProcessLog log = new EProcessLog(this, new Timestamp(System.currentTimeMillis()), (EConsilium) event);
+			EConsilium consilium = (EConsilium) event;
+			EProcessLog log = new EProcessLog(this, new Timestamp(System.currentTimeMillis()), consilium);
 			getLog().add(log);
+			if (!consilium.getStatus().equals(IConsilium.Status.INACTIVE)) {
+				log.setStatus(new SStatus(SStatus.OK, consilium.getStatus().name(), null));
+				BeanContainer.instance().save(consilium);
+			} else {
+				log.setStatus(new SStatus(SStatus.OK, "STARTED", null));
+			}
 		} else if (event instanceof Exception) {
 			setStatus(Status.RUNNING_WITH_FAILURES);
-			getLog().get(getLog().size()-1).setStatus(new de.tsl2.nano.bean.def.Status((Exception)event));
+			getLog().get(getLog().size()-1).setStatus(new de.tsl2.nano.bean.def.SStatus((Exception)event));
 		} else if (event.equals(Processor.FINISHED)){
+			setEndedAt(new Date());
 			if (getStatus().equals(Status.RUNNING_WITH_FAILURES))
 				setStatus(Status.FINISHED_WITH_FAILURES);
-			else
+			else {
+				if (getLog().size() > 0)
+					getLog().get(getLog().size()-1).setStatus(new SStatus(SStatus.OK, "FINSISHED", null));
 				setStatus(Status.FINISHED_SUCCESS);
+			}
 		}
 		Message.send("processing (" + this + "): " + event.toString());
-		BeanContainer.instance().save(this);
+		current = BeanContainer.instance().save(this);
 	}
 	
 	@Override

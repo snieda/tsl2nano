@@ -4,6 +4,7 @@ import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
 import javax.persistence.JoinColumn;
+import javax.persistence.ManyToOne;
 import javax.persistence.OneToOne;
 
 import de.tsl2.nano.bean.annotation.Attributes;
@@ -40,19 +41,21 @@ public class EObsidio extends Obsidio implements IPersistable<String>{
 	}
 
 
-	public String getConsiliumID() {
-		return consiliumID;
+	@ManyToOne @JoinColumn
+	public EConsiliumID getConsiliumID() {
+		return (EConsiliumID) consiliumID;
 	}
 
-	public void setConsiliumID(String consiliumID) {
+	public void setConsiliumID(EConsiliumID consiliumID) {
 		this.consiliumID = consiliumID;
 	}
 
-	public Grex getGrex() {
-		return grex;
+	@ManyToOne @JoinColumn
+	public EGrex getGrex() {
+		return (EGrex) grex;
 	}
 
-	public void setGrex(Grex grex) {
+	public void setGrex(EGrex grex) {
 		this.grex = grex;
 	}
 
