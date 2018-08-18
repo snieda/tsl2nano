@@ -42,13 +42,13 @@ import org.simpleframework.xml.core.Persist;
 import de.tsl2.nano.action.CommonAction;
 import de.tsl2.nano.action.IAction;
 import de.tsl2.nano.action.IActivable;
+import de.tsl2.nano.annotation.extension.AnnotationFactory;
 import de.tsl2.nano.bean.BeanContainer;
 import de.tsl2.nano.bean.BeanUtil;
 import de.tsl2.nano.bean.IConnector;
 import de.tsl2.nano.bean.ValueHolder;
 import de.tsl2.nano.bean.annotation.Action;
 import de.tsl2.nano.bean.annotation.Attributes;
-import de.tsl2.nano.bean.annotation.Compositor;
 import de.tsl2.nano.collection.CollectionUtil;
 import de.tsl2.nano.core.ENV;
 import de.tsl2.nano.core.IPredicate;
@@ -780,12 +780,6 @@ public class BeanDefinition<T> extends BeanClass<T> implements IPluggable<BeanDe
 	            presentable.setLabel(toString());
 	            presentable.setDescription(toString());
             }
-            if (getClazz().isAnnotationPresent(Compositor.class)) {
-            	Compositor c = getClazz().getAnnotation(Compositor.class);
-            	//TODO: how to use BeanConfigurator
-//            	BeanConfigurator.getInstance().actionCreateCompositor(
-//            			c.baseType().getName(), c.baseAttribute(), c.targetAttribute(), c.iconAttribute());
-            }
         }
         return presentable;
     }
@@ -1131,6 +1125,7 @@ public class BeanDefinition<T> extends BeanClass<T> implements IPluggable<BeanDe
                 p.connect(this);
             }
         }
+        AnnotationFactory.with(this, getClazz());
     }
 
     /**
