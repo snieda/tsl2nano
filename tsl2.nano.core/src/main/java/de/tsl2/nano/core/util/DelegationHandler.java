@@ -102,7 +102,6 @@ public class DelegationHandler<T> implements IDelegationHandler<T>, Serializable
      * @param delegate
      * @param properties
      */
-    @SuppressWarnings("unchecked")
 	public DelegationHandler(T delegate, Map<String, Object> properties) {
         super();
         if (delegate == null && Util.isEmpty(properties))
@@ -113,6 +112,7 @@ public class DelegationHandler<T> implements IDelegationHandler<T>, Serializable
         setInterfaces(delegate);
     }
 
+	@SuppressWarnings("unchecked")
 	private void setInterfaces(T delegate) {
 		this.interfaces = delegate != null ? BeanClass.getBeanClass(delegate.getClass())
                 .getInterfaces() : new Class[0];

@@ -79,7 +79,8 @@ import de.tsl2.nano.core.util.StringUtil;
  * @version $Revision$
  */
 public class XmlUtil {
-    private static final Log LOG = LogFactory.getLog(XmlUtil.class);
+    private static final String DE_TSL2_NANO_H5_RULE_COVER = "de.tsl2.nano.h5.RuleCover";
+	private static final Log LOG = LogFactory.getLog(XmlUtil.class);
 
     /**
      * does an xsl transformation
@@ -342,9 +343,10 @@ public class XmlUtil {
         final Converter proxyConverter = new Converter() {
             @Override
             public Object read(InputNode n) throws Exception {
+            	//TODO: refactore to avoid using elements of h5!
                 //WORKAROUND to evaluate the class name. where can we extract the class name from?
             	String clsName = ((StartElement)n.getSource()).getAttributeByName(new QName("class")).getValue();
-                final Class cls = BeanClass.load( clsName != null ? clsName : "de.tsl2.nano.h5.RuleCover");
+                final Class cls = BeanClass.load( clsName != null ? clsName : DE_TSL2_NANO_H5_RULE_COVER);
                 Element element = AnnotationProxy.getAnnotation(SimpleXmlAnnotator.class, "attribute", Element.class);
                 AnnotationProxy.setAnnotationValues(element, "name", "ruleCover", "type", cls);
                 Object ih = persister.read(cls, n.getNext(), false);

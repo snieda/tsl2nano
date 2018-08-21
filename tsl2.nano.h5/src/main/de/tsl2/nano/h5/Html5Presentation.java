@@ -60,6 +60,7 @@ import de.tsl2.nano.action.CommonAction;
 import de.tsl2.nano.action.IAction;
 import de.tsl2.nano.bean.BeanContainer;
 import de.tsl2.nano.bean.BeanUtil;
+import de.tsl2.nano.bean.IRuleCover;
 import de.tsl2.nano.bean.ValueHolder;
 import de.tsl2.nano.bean.def.Attachment;
 import de.tsl2.nano.bean.def.AttributeDefinition;
@@ -70,6 +71,7 @@ import de.tsl2.nano.bean.def.BeanPresentationHelper;
 import de.tsl2.nano.bean.def.BeanValue;
 import de.tsl2.nano.bean.def.GroupBy;
 import de.tsl2.nano.bean.def.GroupingPresentable;
+import de.tsl2.nano.bean.def.IAttributeDefinition;
 import de.tsl2.nano.bean.def.IBeanCollector;
 import de.tsl2.nano.bean.def.IPageBuilder;
 import de.tsl2.nano.bean.def.IPresentable;
@@ -316,6 +318,7 @@ public class Html5Presentation<T> extends BeanPresentationHelper<T> implements I
 
     @Override
     public void reset() {
+        IRuleCover.resetTypeCache();
         ENV.get(RulePool.class).reset();
         ENV.get(QueryPool.class).reset();
         ENV.get(ActionPool.class).reset();
@@ -1165,12 +1168,13 @@ public class Html5Presentation<T> extends BeanPresentationHelper<T> implements I
         try {
             if (useSideNav(actions.size())) {
                 cell = sideNav = createSidebarNavMenuButton(parent, sideNav);
-                width = ENV.get("layout.action.width", -1);
-                if (width == -1)
+                width = ENV.get("layout.action.width", 200);
+                if (width == -1) //previously set to UNDEFINED
                     ENV.setProperty("layout.action.width", 200);
             } else {
-                Element panel =
-                    createGrid(parent, "Actions", "action.panel", /*actions != null ? 1 + actions.size() : 1*/0);
+                int actionCount = actions != null ? actions.size() : 0;
+                boolean vertical = actionCount > ENV.get("layout.sidenav.min.count.action", 3);
+                Element panel = createGrid(parent, "Actions", "action.panel", vertical ? 0 : actionCount);
                 Element row = appendTag(panel, TABLE(TAG_ROW, ATTR_CLASS, "actionpanel"));
                 cell = appendTag(row, TABLE(TAG_CELL, attributes));
             }
@@ -1204,19 +1208,7 @@ public class Html5Presentation<T> extends BeanPresentationHelper<T> implements I
     private Element createAction(Element cell, IAction a, boolean showText) {
         String path;
         IPresentable p = a instanceof IsPresentable ? ((IsPresentable)a).getPresentable() : null;
-        String imagePath;
-        if (a.getImagePath() != null) {
-            if (!a.getImagePath().equals(MethodAction.DEFAULT_ICON))
-                imagePath = a.getImagePath();
-            else if (p != null && p.getIcon() != null)
-                imagePath = p.getIcon();
-            else
-                imagePath = a.getImagePath();
-        } else {
-            imagePath = new File(ENV.getConfigPath() + (path = "icons/" + StringUtil.substring(a.getId(), ".", null, true)
-            + ".png")).exists() ? path 
-                : ICON_DEFAULT;
-        }
+        String imagePath = evaluateImagePath(a, p);
             
         Element element = createAction(cell,
             a.getId(),
@@ -1233,6 +1225,24 @@ public class Html5Presentation<T> extends BeanPresentationHelper<T> implements I
         if (p != null)
             addAttributes(element, p, false);
         return element;
+    }
+
+    private String evaluateImagePath(IAction a, IPresentable p) {
+        String path;
+        String imagePath;
+        if (a.getImagePath() != null) {
+            if (!a.getImagePath().equals(MethodAction.DEFAULT_ICON))
+                imagePath = a.getImagePath();
+            else if (p != null && p.getIcon() != null)
+                imagePath = p.getIcon();
+            else
+                imagePath = a.getImagePath();
+        } else {
+            imagePath = new File(ENV.getConfigPath() + (path = "icons/" + StringUtil.substring(a.getId(), ".", null, true)
+            + ".png")).exists() ? path 
+                : ICON_DEFAULT;
+        }
+        return imagePath;
     }
 
     private String getCSSPanelAction() {
@@ -1290,8 +1300,8 @@ public class Html5Presentation<T> extends BeanPresentationHelper<T> implements I
             boolean enabled,
             boolean asDefault,
             boolean formnovalidate) {
-        return createAction(cell, id, cssClass, label, tooltip, type, shortcut, image, -1, enabled, asDefault,
-            formnovalidate);
+        return createAction(cell, id, cssClass, label, tooltip, type, shortcut, image, 
+            ENV.get("layout.action.width", -1), enabled, asDefault, formnovalidate);
     }
 
     /**
@@ -1359,7 +1369,7 @@ public class Html5Presentation<T> extends BeanPresentationHelper<T> implements I
         }
         String style =
             ENV.get("layout.action.style", ""/*STYLE_BACKGROUND_TRANSPARENT + style(STYLE_COLOR, COLOR_WHITE)*/);
-        if (width != -1 || (width == -1 && (width = ENV.get("layout.action.width", -1)) != -1)) {
+        if (width != -1) {
             style += (style.isEmpty() || style.endsWith(";") ? "" : ";") + style(ATTR_WIDTH, width);
         }
         appendAttributes(action, ATTR_STYLE, style);
@@ -2371,6 +2381,9 @@ public class Html5Presentation<T> extends BeanPresentationHelper<T> implements I
         return createMessagePage("message.template", message, null);
     }
 
+    public void addRuleListener(String observer, String rule, int type, String... observables) {
+        addRuleListener(bean.getAttribute(observer), rule, type, observables);
+    }
     /**
      * convenience to add two rule listeners on changing an attribute (observable), to refresh another attribute
      * (observer). The first is {@link WebSocketRuleDependencyListener} on user interaction, the other is the standard
@@ -2381,10 +2394,10 @@ public class Html5Presentation<T> extends BeanPresentationHelper<T> implements I
      * @param type 0: simple dependency listener, 1: websocket dependency listener, 2: both
      * @param observables changing attributes
      */
-    public void addRuleListener(String observer, String rule, int type, String... observables) {
+    public void addRuleListener(IAttributeDefinition<?> observer, String rule, int type, String... observables) {
         IListener<WSEvent> wsListener =
-            new WebSocketRuleDependencyListener(bean.getAttribute(observer), observer, rule);
-        IListener<ChangeEvent> listener = new RuleDependencyListener(bean.getAttribute(observer), observer, rule);
+            new WebSocketRuleDependencyListener(observer, observer.getName(), rule);
+        IListener<ChangeEvent> listener = new RuleDependencyListener(observer, observer.getName(), rule);
         for (int i = 0; i < observables.length; i++) {
             if (type % 2 == 0)
                 bean.getAttribute(observables[i]).changeHandler().addListener(listener, ChangeEvent.class);

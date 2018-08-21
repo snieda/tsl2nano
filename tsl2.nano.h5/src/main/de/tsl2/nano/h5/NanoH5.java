@@ -1140,6 +1140,13 @@ public class NanoH5 extends NanoHTTPD implements ISystemConnector<Persistence> {
 
         ConcurrentUtil.removeAllCurrent(NanoH5Session.getThreadLocalTypes());
 
+        IPageBuilder pageBuilder = ENV.get(IPageBuilder.class);
+        if (pageBuilder != null)
+            pageBuilder.reset();
+        else
+            new Html5Presentation<>().reset();
+        
+        //TODO: the following is done in pagebuilder.reset, too?
         ENV.get(RulePool.class).reset();
         ENV.get(QueryPool.class).reset();
         ENV.get(ActionPool.class).reset();

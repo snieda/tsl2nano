@@ -44,16 +44,18 @@ public interface IPageBuilder<PAGE, OUTPUT> {
     /**
      * creates extended actions like 'help', 'configure', 'exit' etc.
      */
-    public Collection<IAction> getApplicationActions(ISession session);
+    Collection<IAction> getApplicationActions(ISession session);
     
     /**
      * creates extended actions like 'logout' etc.
      */
-    public Collection<IAction> getSessionActions(ISession session);
+    Collection<IAction> getSessionActions(ISession session);
     
     /**
      * creates extended actions like 'print', 'help', 'export', 'select-all', 'deselect-all' etc.
      */
-    public Collection<IAction> getPageActions(ISession session);
+    Collection<IAction> getPageActions(ISession session);
+
+	void reset();
     
 }

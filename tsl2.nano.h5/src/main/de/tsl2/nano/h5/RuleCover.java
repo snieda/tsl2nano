@@ -13,6 +13,7 @@ import java.util.Map;
 
 import de.tsl2.nano.bean.def.AttributeCover;
 import de.tsl2.nano.bean.def.BeanDefinition;
+import de.tsl2.nano.bean.def.IAttributeDefinition;
 import de.tsl2.nano.core.ENV;
 import de.tsl2.nano.core.util.MapUtil;
 import de.tsl2.nano.incubation.specification.rules.RulePool;
@@ -75,6 +76,11 @@ public class RuleCover<T> extends AttributeCover<T> {
         return cover;
     }
 
+    @Override
+    public Object connect(IAttributeDefinition<?> connectionEnd) {
+        return super.connect(connectionEnd);
+    }
+    
     @Override
     protected boolean checkRule(String ruleName) {
         return ENV.get(RulePool.class).get(ruleName) != null;

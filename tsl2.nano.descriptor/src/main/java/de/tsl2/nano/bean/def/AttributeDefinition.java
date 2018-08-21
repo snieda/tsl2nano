@@ -18,6 +18,7 @@ import java.text.ParseException;
 import java.util.Collection;
 import java.util.Date;
 import java.util.LinkedList;
+import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 
@@ -250,9 +251,22 @@ public class AttributeDefinition<T> implements IAttributeDefinition<T> {
         }
         //injectAttributeOnChangeListeners() will be called from BeanDefinition
         injectIntoPlugins(this);
+        if (hasAttributeCover())
+        	IRuleCover.cachedConnectionEndTypes.add(getDeclaringClass());
     }
 
-    /**
+    private boolean hasAttributeCover() {
+    	PrivateAccessor<AttributeDefinition<T>> pa = new PrivateAccessor<>(this);
+    	List<String> memberNames = pa.memberNames();
+    	for (String m : memberNames) {
+    		Object value = pa.member(m);
+			if (value != null && Proxy.isProxyClass(value.getClass()))
+				return true;
+		}
+		return false;
+	}
+
+	/**
      * injectPlugins
      */
     protected void injectIntoPlugins(IAttributeDefinition<T> attr) {

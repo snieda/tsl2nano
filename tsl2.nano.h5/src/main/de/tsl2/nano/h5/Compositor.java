@@ -118,11 +118,15 @@ public class Compositor<COLLECTIONTYPE extends Collection<T>, T> extends BeanCol
             final String baseAttribute,
             final String targetAttribute,
             String iconAttribute) {
-        this.name = "Compositor (" + baseType.getSimpleName() + "-" + beanType.getSimpleName() + ")";
+        this.name = createName(beanType, baseType);
         this.parentType = baseType;
         this.baseAttribute = baseAttribute;
         this.targetAttribute = targetAttribute;
         this.iconAttribute = iconAttribute;
+    }
+
+    public static String createName(Class<?> beanType, Class<?> baseType) {
+        return "Compositor (" + baseType.getSimpleName() + "-" + beanType.getSimpleName() + ")";
     }
 
     @Override

@@ -156,7 +156,7 @@ public class BeanDefinition<T> extends BeanClass<T> implements IPluggable<BeanDe
     public static final String PREFIX_VIRTUAL = "virtual";
     protected static final String POSTFIX_FILE_EXT = ".xml";
 
-    private static final List<BeanDefinition> virtualBeanCache = new ListSet<BeanDefinition>();
+    public static final List<BeanDefinition> virtualBeanCache = new ListSet<BeanDefinition>();
     private static final BeanDefinition volatileBean = new BeanDefinition(Object.class);
     private static boolean usePersistentCache = ENV.get("beandef.usepersistent.cache", true);
     
@@ -994,6 +994,7 @@ public class BeanDefinition<T> extends BeanClass<T> implements IPluggable<BeanDe
                 beandef = new BeanDefinition<T>(type);
                 virtualBeanCache.add(beandef);
                 beandef.setName(name);
+                AnnotationFactory.with(beandef, type);
 //                if (fullInitStore)
 //                    if (true /*xmlFile.canWrite()*/) {
 //                        //be careful: having write access will introduce another behaviour
@@ -1125,7 +1126,6 @@ public class BeanDefinition<T> extends BeanClass<T> implements IPluggable<BeanDe
                 p.connect(this);
             }
         }
-        AnnotationFactory.with(this, getClazz());
     }
 
     /**

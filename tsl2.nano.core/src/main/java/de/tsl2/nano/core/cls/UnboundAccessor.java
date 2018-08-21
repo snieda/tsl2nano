@@ -123,7 +123,7 @@ public class UnboundAccessor<T> {
             for (int i = 0; i < annotations.length; i++) {
                 annotationTypes[i] = annotations[i].annotationType();
             }
-            if (Util.contains(annotationTypes, havingAnnotations)) {
+            if (Util.isEmpty(havingAnnotations) || Util.contains(annotationTypes, havingAnnotations)) {
                 memberNames.add(field.getName());
             }
         }

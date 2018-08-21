@@ -28,15 +28,24 @@ public interface AnnotationFactory<I, A extends Annotation> {
 
 	@SuppressWarnings({ "unchecked", "rawtypes" })
 	public static void with(Object instance, AnnotatedElement annotationElment) {
-		if (annotationElment.isAnnotationPresent(With.class)) {
+		if (annotationElment.isAnnotationPresent(Withs.class)
+		        || annotationElment.isAnnotationPresent(With.class)) {
 			Annotation[] annotations = annotationElment.getAnnotations();
+			With[] withs;
 			for (int i = 0; i < annotations.length; i++) {
-			    if (!(annotations[i] instanceof With))
+			    if (annotations[i] instanceof With) {
+		            withs = new With[] {annotationElment.getAnnotation(With.class)};
+			    } else if (annotations[i] instanceof Withs) {
+			        withs = annotationElment.getAnnotation(Withs.class).value();
+			    } else {
 			        continue;
-				With with = (With) annotations[i];
-				AnnotationFactory fact = BeanClass.createInstance(with.value());
-				check(with.value(), annotations[i + 1]);
-				fact.build(instance, annotations[i + 1]);
+			    }
+			    for (int j = 0; j < withs.length; j++) {
+	                AnnotationFactory fact = BeanClass.createInstance(withs[j].value());
+	                Annotation a = annotations[i + j + 1];
+                    check(withs[j].value(), a);
+	                fact.build(instance, a);
+                }
 			}
 		}
 	}
