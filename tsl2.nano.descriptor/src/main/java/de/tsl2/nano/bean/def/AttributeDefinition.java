@@ -332,11 +332,12 @@ public class AttributeDefinition<T> implements IAttributeDefinition<T> {
                                 + " seems to be a rulecover itself!");
                             continue;
                         }
-                        handler = (InvocationHandler) ((DelegationHandler<I>) handler).clone();
-                        item = DelegationHandler.createProxy((DelegationHandler<I>) handler);
+                        DelegationHandler<I> cover = ((DelegationHandler<I>) handler).clone();
+                        item = DelegationHandler.createProxy(cover);
                         acc.set((String) k, item);
-                        new UnboundAccessor(handler).call("setContext", null, new Class[] { Serializable.class },
-                            instance);
+                        ((IRuleCover)cover).setContext((Serializable)instance);
+//                        new UnboundAccessor(handler).call("setContext", null, new Class[] { Serializable.class },
+//                            instance);
                     }
                 }
             }

@@ -1,7 +1,11 @@
 package de.tsl2.nano.h5.annotation;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
 
+import java.io.FileNotFoundException;
+import java.io.Serializable;
 import java.util.Collection;
 
 import org.junit.AfterClass;
@@ -11,6 +15,7 @@ import org.junit.Test;
 import de.tsl2.nano.annotation.extension.With;
 import de.tsl2.nano.bean.BeanContainer;
 import de.tsl2.nano.bean.def.BeanDefinition;
+import de.tsl2.nano.bean.fi.Bean;
 import de.tsl2.nano.core.util.ENVTestPreparation;
 import de.tsl2.nano.h5.annotation.DependencyListener.ListenerType;
 import de.tsl2.nano.h5.annotation.Specification.SpecificationType;
@@ -52,6 +57,16 @@ public class AnnotationExtensionTest implements ENVTestPreparation {
     public void testVirtualAttributeAndDependencyListener() {
         //TODO: attribute name not correct!
         assertEquals("_" + MYVIRTUALATTRIBUTE, BeanDefinition.getBeanDefinition(BeanType.class).getAttribute("_" + MYVIRTUALATTRIBUTE).getName());
+        
+        Base base = new Base();
+        base.setName("XXX");
+        String ruleDefinitionFile = MYVIRTUALATTRIBUTE + ".xml";
+        try {
+            Bean.getBean(base).setValue("name", "YYY");
+            fail("icon should reference the rule '" + ruleDefinitionFile + " which is not defined! So a FileNotFoundException has to be thrown");
+        } catch (Exception e) {
+            assertTrue(e.getMessage().contains(FileNotFoundException.class.getSimpleName()) && e.getMessage().contains(ruleDefinitionFile));
+        }
     }
 
     private <T extends BeanDefinition<?>> T getVirtualDefinition(Class<T> type) {
@@ -93,7 +108,9 @@ class Composition {
         this.target = target;
     }
 }
-class Base {
+class Base implements Serializable {
+    private static final long serialVersionUID = 1L;
+
     String name;
     String icon;
     public String getName() {

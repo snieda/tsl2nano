@@ -1,0 +1,857 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<class-diagram version="1.2.2" icons="true" always-add-relationships="true" generalizations="true" realizations="true" 
+  associations="true" dependencies="true" nesting-relationships="true" router="FAN">  
+  <interface id="1" language="java" name="de.tsl2.nano.bean.def.IIPresentable" project="tsl2.nano.descriptor" 
+    file="/tsl2.nano.descriptor/src/main/java/de/tsl2/nano/bean/def/IIPresentable.java" binary="false" 
+    corner="BOTTOM_RIGHT">    
+    <position height="60" width="129" x="834" y="757"/>    
+    <display autosize="true" stereotype="true" package="true" initial-value="false" signature="true" 
+      sort-features="false" accessors="true" visibility="false">      
+      <attributes public="false" package="false" protected="false" private="false" static="false"/>      
+      <operations public="false" package="false" protected="false" private="false" static="false"/>    
+    </display>  
+  </interface>  
+  <interface id="2" language="java" name="de.tsl2.nano.bean.def.IValueExpression" project="tsl2.nano.descriptor" 
+    file="/tsl2.nano.descriptor/src/main/java/de/tsl2/nano/bean/def/IValueExpression.java" binary="false" 
+    corner="BOTTOM_RIGHT">    
+    <position height="60" width="174" x="1064" y="657"/>    
+    <display autosize="true" stereotype="true" package="true" initial-value="false" signature="true" 
+      sort-features="false" accessors="true" visibility="false">      
+      <attributes public="false" package="false" protected="false" private="false" static="false"/>      
+      <operations public="false" package="false" protected="false" private="false" static="false"/>    
+    </display>  
+  </interface>  
+  <interface id="3" language="java" name="de.tsl2.nano.bean.def.IConstructable" project="tsl2.nano.descriptor" 
+    file="/tsl2.nano.descriptor/src/main/java/de/tsl2/nano/bean/def/IConstructable.java" binary="false" 
+    corner="BOTTOM_RIGHT">    
+    <position height="60" width="156" x="239" y="37"/>    
+    <display autosize="true" stereotype="true" package="true" initial-value="false" signature="true" 
+      sort-features="false" accessors="true" visibility="false">      
+      <attributes public="false" package="false" protected="false" private="false" static="false"/>      
+      <operations public="false" package="false" protected="false" private="false" static="false"/>    
+    </display>  
+  </interface>  
+  <interface id="4" language="java" name="de.tsl2.nano.bean.def.IPresentableColumn" project="tsl2.nano.descriptor" 
+    file="/tsl2.nano.descriptor/src/main/java/de/tsl2/nano/bean/def/IPresentableColumn.java" binary="false" 
+    corner="BOTTOM_RIGHT">    
+    <position height="60" width="168" x="1319" y="557"/>    
+    <display autosize="true" stereotype="true" package="true" initial-value="false" signature="true" 
+      sort-features="false" accessors="true" visibility="false">      
+      <attributes public="false" package="false" protected="false" private="false" static="false"/>      
+      <operations public="false" package="false" protected="false" private="false" static="false"/>    
+    </display>  
+  </interface>  
+  <interface id="5" language="java" name="de.tsl2.nano.bean.def.IBeanFinder" project="tsl2.nano.descriptor" 
+    file="/tsl2.nano.descriptor/src/main/java/de/tsl2/nano/bean/def/IBeanFinder.java" binary="false" 
+    corner="BOTTOM_RIGHT">    
+    <position height="60" width="150" x="1621" y="757"/>    
+    <display autosize="true" stereotype="true" package="true" initial-value="false" signature="true" 
+      sort-features="false" accessors="true" visibility="false">      
+      <attributes public="false" package="false" protected="false" private="false" static="false"/>      
+      <operations public="false" package="false" protected="false" private="false" static="false"/>    
+    </display>  
+  </interface>  
+  <interface id="6" language="java" name="de.tsl2.nano.bean.def.IAttributeDefinition" project="tsl2.nano.descriptor" 
+    file="/tsl2.nano.descriptor/src/main/java/de/tsl2/nano/bean/def/IAttributeDefinition.java" binary="false" 
+    corner="BOTTOM_RIGHT">    
+    <position height="60" width="186" x="581" y="457"/>    
+    <display autosize="true" stereotype="true" package="true" initial-value="false" signature="true" 
+      sort-features="false" accessors="true" visibility="false">      
+      <attributes public="false" package="false" protected="false" private="false" static="false"/>      
+      <operations public="false" package="false" protected="false" private="false" static="false"/>    
+    </display>  
+  </interface>  
+  <interface id="7" language="java" name="de.tsl2.nano.bean.def.IColumn" project="tsl2.nano.descriptor" 
+    file="/tsl2.nano.descriptor/src/main/java/de/tsl2/nano/bean/def/IColumn.java" binary="false" corner="BOTTOM_RIGHT">    
+    <position height="60" width="129" x="1295" y="457"/>    
+    <display autosize="true" stereotype="true" package="true" initial-value="false" signature="true" 
+      sort-features="false" accessors="true" visibility="false">      
+      <attributes public="false" package="false" protected="false" private="false" static="false"/>      
+      <operations public="false" package="false" protected="false" private="false" static="false"/>    
+    </display>  
+  </interface>  
+  <interface id="8" language="java" name="de.tsl2.nano.bean.def.IPresentable" project="tsl2.nano.descriptor" 
+    file="/tsl2.nano.descriptor/src/main/java/de/tsl2/nano/bean/def/IPresentable.java" binary="false" 
+    corner="BOTTOM_RIGHT">    
+    <position height="60" width="129" x="874" y="657"/>    
+    <display autosize="true" stereotype="true" package="true" initial-value="false" signature="true" 
+      sort-features="false" accessors="true" visibility="false">      
+      <attributes public="false" package="false" protected="false" private="false" static="false"/>      
+      <operations public="false" package="false" protected="false" private="false" static="false"/>    
+    </display>  
+  </interface>  
+  <interface id="9" language="java" name="de.tsl2.nano.bean.def.IsPresentable" project="tsl2.nano.descriptor" 
+    file="/tsl2.nano.descriptor/src/main/java/de/tsl2/nano/bean/def/IsPresentable.java" binary="false" 
+    corner="BOTTOM_RIGHT">    
+    <position height="60" width="129" x="972" y="257"/>    
+    <display autosize="true" stereotype="true" package="true" initial-value="false" signature="true" 
+      sort-features="false" accessors="true" visibility="false">      
+      <attributes public="false" package="false" protected="false" private="false" static="false"/>      
+      <operations public="false" package="false" protected="false" private="false" static="false"/>    
+    </display>  
+  </interface>  
+  <interface id="10" language="java" name="de.tsl2.nano.bean.def.IBeanCollector" project="tsl2.nano.descriptor" 
+    file="/tsl2.nano.descriptor/src/main/java/de/tsl2/nano/bean/def/IBeanCollector.java" binary="false" 
+    corner="BOTTOM_RIGHT">    
+    <position height="60" width="301" x="1278" y="657"/>    
+    <display autosize="true" stereotype="true" package="true" initial-value="false" signature="true" 
+      sort-features="false" accessors="true" visibility="false">      
+      <attributes public="false" package="false" protected="false" private="false" static="false"/>      
+      <operations public="false" package="false" protected="false" private="false" static="false"/>    
+    </display>  
+  </interface>  
+  <interface id="11" language="java" name="de.tsl2.nano.bean.def.IPageBuilder" project="tsl2.nano.descriptor" 
+    file="/tsl2.nano.descriptor/src/main/java/de/tsl2/nano/bean/def/IPageBuilder.java" binary="false" 
+    corner="BOTTOM_RIGHT">    
+    <position height="60" width="242" x="1897" y="37"/>    
+    <display autosize="true" stereotype="true" package="true" initial-value="false" signature="true" 
+      sort-features="false" accessors="true" visibility="false">      
+      <attributes public="false" package="false" protected="false" private="false" static="false"/>      
+      <operations public="false" package="false" protected="false" private="false" static="false"/>    
+    </display>  
+  </interface>  
+  <interface id="12" language="java" name="de.tsl2.nano.bean.def.IInputAssist" project="tsl2.nano.descriptor" 
+    file="/tsl2.nano.descriptor/src/main/java/de/tsl2/nano/bean/def/IInputAssist.java" binary="false" 
+    corner="BOTTOM_RIGHT">    
+    <position height="60" width="134" x="341" y="657"/>    
+    <display autosize="true" stereotype="true" package="true" initial-value="false" signature="true" 
+      sort-features="false" accessors="true" visibility="false">      
+      <attributes public="false" package="false" protected="false" private="false" static="false"/>      
+      <operations public="false" package="false" protected="false" private="false" static="false"/>    
+    </display>  
+  </interface>  
+  <interface id="13" language="java" name="de.tsl2.nano.bean.def.ISelectionProvider" project="tsl2.nano.descriptor" 
+    file="/tsl2.nano.descriptor/src/main/java/de/tsl2/nano/bean/def/ISelectionProvider.java" binary="false" 
+    corner="BOTTOM_RIGHT">    
+    <position height="60" width="185" x="1876" y="757"/>    
+    <display autosize="true" stereotype="true" package="true" initial-value="false" signature="true" 
+      sort-features="false" accessors="true" visibility="false">      
+      <attributes public="false" package="false" protected="false" private="false" static="false"/>      
+      <operations public="false" package="false" protected="false" private="false" static="false"/>    
+    </display>  
+  </interface>  
+  <interface id="14" language="java" name="de.tsl2.nano.bean.def.IValueDefinition" project="tsl2.nano.descriptor" 
+    file="/tsl2.nano.descriptor/src/main/java/de/tsl2/nano/bean/def/IValueDefinition.java" binary="false" 
+    corner="BOTTOM_RIGHT">    
+    <position height="60" width="163" x="515" y="657"/>    
+    <display autosize="true" stereotype="true" package="true" initial-value="false" signature="true" 
+      sort-features="false" accessors="true" visibility="false">      
+      <attributes public="false" package="false" protected="false" private="false" static="false"/>      
+      <operations public="false" package="false" protected="false" private="false" static="false"/>    
+    </display>  
+  </interface>  
+  <interface id="15" language="java" name="de.tsl2.nano.bean.def.IPluggable" project="tsl2.nano.descriptor" 
+    file="/tsl2.nano.descriptor/src/main/java/de/tsl2/nano/bean/def/IPluggable.java" binary="false" 
+    corner="BOTTOM_RIGHT">    
+    <position height="60" width="248" x="642" y="257"/>    
+    <display autosize="true" stereotype="true" package="true" initial-value="false" signature="true" 
+      sort-features="false" accessors="true" visibility="false">      
+      <attributes public="false" package="false" protected="false" private="false" static="false"/>      
+      <operations public="false" package="false" protected="false" private="false" static="false"/>    
+    </display>  
+  </interface>  
+  <interface id="16" language="java" name="de.tsl2.nano.bean.def.ITableDescriptor" project="tsl2.nano.descriptor" 
+    file="/tsl2.nano.descriptor/src/main/java/de/tsl2/nano/bean/def/ITableDescriptor.java" binary="false" 
+    corner="BOTTOM_RIGHT">    
+    <position height="60" width="170" x="1085" y="457"/>    
+    <display autosize="true" stereotype="true" package="true" initial-value="false" signature="true" 
+      sort-features="false" accessors="true" visibility="false">      
+      <attributes public="false" package="false" protected="false" private="false" static="false"/>      
+      <operations public="false" package="false" protected="false" private="false" static="false"/>    
+    </display>  
+  </interface>  
+  <interface id="17" language="java" name="de.tsl2.nano.bean.IConnector" project="tsl2.nano.descriptor" 
+    file="/tsl2.nano.descriptor/src/main/java/de/tsl2/nano/bean/IConnector.java" binary="false" corner="BOTTOM_RIGHT">    
+    <position height="60" width="214" x="663" y="357"/>    
+    <display autosize="true" stereotype="true" package="true" initial-value="false" signature="true" 
+      sort-features="false" accessors="true" visibility="false">      
+      <attributes public="false" package="false" protected="false" private="false" static="false"/>      
+      <operations public="false" package="false" protected="false" private="false" static="false"/>    
+    </display>  
+  </interface>  
+  <interface id="18" language="java" name="de.tsl2.nano.bean.IMapable" project="tsl2.nano.descriptor" 
+    file="/tsl2.nano.descriptor/src/main/java/de/tsl2/nano/bean/IMapable.java" binary="false" corner="BOTTOM_RIGHT">    
+    <position height="60" width="120" x="60" y="37"/>    
+    <display autosize="true" stereotype="true" package="true" initial-value="false" signature="true" 
+      sort-features="false" accessors="true" visibility="false">      
+      <attributes public="false" package="false" protected="false" private="false" static="false"/>      
+      <operations public="false" package="false" protected="false" private="false" static="false"/>    
+    </display>  
+  </interface>  
+  <interface id="19" language="java" name="de.tsl2.nano.bean.IAttributeDef" project="tsl2.nano.descriptor" 
+    file="/tsl2.nano.descriptor/src/main/java/de/tsl2/nano/bean/IAttributeDef.java" binary="false" corner="BOTTOM_RIGHT">    
+    <position height="60" width="120" x="356" y="357"/>    
+    <display autosize="true" stereotype="true" package="true" initial-value="false" signature="true" 
+      sort-features="false" accessors="true" visibility="false">      
+      <attributes public="false" package="false" protected="false" private="false" static="false"/>      
+      <operations public="false" package="false" protected="false" private="false" static="false"/>    
+    </display>  
+  </interface>  
+  <interface id="20" language="java" name="de.tsl2.nano.bean.IBeanContainer" project="tsl2.nano.descriptor" 
+    file="/tsl2.nano.descriptor/src/main/java/de/tsl2/nano/bean/IBeanContainer.java" binary="false" 
+    corner="BOTTOM_RIGHT">    
+    <position height="60" width="135" x="299" y="257"/>    
+    <display autosize="true" stereotype="true" package="true" initial-value="false" signature="true" 
+      sort-features="false" accessors="true" visibility="false">      
+      <attributes public="false" package="false" protected="false" private="false" static="false"/>      
+      <operations public="false" package="false" protected="false" private="false" static="false"/>    
+    </display>  
+  </interface>  
+  <interface id="21" language="java" name="de.tsl2.nano.bean.IRuleCover" project="tsl2.nano.descriptor" 
+    file="/tsl2.nano.descriptor/src/main/java/de/tsl2/nano/bean/IRuleCover.java" binary="false" corner="BOTTOM_RIGHT">    
+    <position height="60" width="133" x="63" y="137"/>    
+    <display autosize="true" stereotype="true" package="true" initial-value="false" signature="true" 
+      sort-features="false" accessors="true" visibility="false">      
+      <attributes public="false" package="false" protected="false" private="false" static="false"/>      
+      <operations public="false" package="false" protected="false" private="false" static="false"/>    
+    </display>  
+  </interface>  
+  <class id="22" language="java" name="de.tsl2.nano.bean.def.BeanCollector" project="tsl2.nano.descriptor" 
+    file="/tsl2.nano.descriptor/src/main/java/de/tsl2/nano/bean/def/BeanCollector.java" binary="false" 
+    corner="BOTTOM_RIGHT">    
+    <position height="60" width="297" x="1508" y="257"/>    
+    <display autosize="true" stereotype="true" package="true" initial-value="false" signature="true" 
+      sort-features="false" accessors="true" visibility="false">      
+      <attributes public="false" package="false" protected="false" private="false" static="false"/>      
+      <operations public="false" package="false" protected="false" private="false" static="false"/>    
+    </display>  
+  </class>  
+  <class id="23" language="java" name="de.tsl2.nano.bean.def.ValueConnection" project="tsl2.nano.descriptor" 
+    file="/tsl2.nano.descriptor/src/main/java/de/tsl2/nano/bean/def/BeanDefinition.java" binary="false" 
+    corner="BOTTOM_RIGHT">    
+    <position height="60" width="144" x="1713" y="37"/>    
+    <display autosize="true" stereotype="true" package="true" initial-value="false" signature="true" 
+      sort-features="false" accessors="true" visibility="false">      
+      <attributes public="false" package="false" protected="false" private="false" static="false"/>      
+      <operations public="false" package="false" protected="false" private="false" static="false"/>    
+    </display>  
+  </class>  
+  <class id="24" language="java" name="de.tsl2.nano.bean.def.AttributeDefinition" project="tsl2.nano.descriptor" 
+    file="/tsl2.nano.descriptor/src/main/java/de/tsl2/nano/bean/def/AttributeDefinition.java" binary="false" 
+    corner="BOTTOM_RIGHT">    
+    <position height="60" width="182" x="455" y="37"/>    
+    <display autosize="true" stereotype="true" package="true" initial-value="false" signature="true" 
+      sort-features="false" accessors="true" visibility="false">      
+      <attributes public="false" package="false" protected="false" private="false" static="false"/>      
+      <operations public="false" package="false" protected="false" private="false" static="false"/>    
+    </display>  
+  </class>  
+  <class id="25" language="java" name="de.tsl2.nano.bean.def.BeanDefinition" project="tsl2.nano.descriptor" 
+    file="/tsl2.nano.descriptor/src/main/java/de/tsl2/nano/bean/def/BeanDefinition.java" binary="false" 
+    corner="BOTTOM_RIGHT">    
+    <position height="60" width="158" x="1164" y="137"/>    
+    <display autosize="true" stereotype="true" package="true" initial-value="false" signature="true" 
+      sort-features="false" accessors="true" visibility="false">      
+      <attributes public="false" package="false" protected="false" private="false" static="false"/>      
+      <operations public="false" package="false" protected="false" private="false" static="false"/>    
+    </display>  
+  </class>  
+  <class id="26" language="java" name="de.tsl2.nano.bean.def.ValueExpression" project="tsl2.nano.descriptor" 
+    file="/tsl2.nano.descriptor/src/main/java/de/tsl2/nano/bean/def/ValueExpression.java" binary="false" 
+    corner="BOTTOM_RIGHT">    
+    <position height="60" width="200" x="457" y="557"/>    
+    <display autosize="true" stereotype="true" package="true" initial-value="false" signature="true" 
+      sort-features="false" accessors="true" visibility="false">      
+      <attributes public="false" package="false" protected="false" private="false" static="false"/>      
+      <operations public="false" package="false" protected="false" private="false" static="false"/>    
+    </display>  
+  </class>  
+  <class id="27" language="java" name="de.tsl2.nano.incubation.specification.AbstractRunnable" 
+    project="tsl2.nano.specification" 
+    file="/tsl2.nano.specification/src/main/java/de/tsl2/nano/incubation/specification/AbstractRunnable.java" 
+    binary="false" corner="BOTTOM_RIGHT">    
+    <position height="59" width="210" x="677" y="37"/>    
+    <display autosize="true" stereotype="true" package="true" initial-value="false" signature="true" 
+      sort-features="false" accessors="true" visibility="false">      
+      <attributes public="false" package="false" protected="false" private="false" static="false"/>      
+      <operations public="false" package="false" protected="false" private="false" static="false"/>    
+    </display>  
+  </class>  
+  <interface id="28" language="java" name="de.tsl2.nano.action.IAction" project="tsl2.nano.common" 
+    file="/tsl2.nano.common/src/main/de/tsl2/nano/action/IAction.java" binary="false" corner="BOTTOM_RIGHT">    
+    <position height="60" width="194" x="1661" y="657"/>    
+    <display autosize="true" stereotype="true" package="true" initial-value="false" signature="true" 
+      sort-features="false" accessors="true" visibility="false">      
+      <attributes public="false" package="false" protected="false" private="false" static="false"/>      
+      <operations public="false" package="false" protected="false" private="false" static="false"/>    
+    </display>  
+  </interface>  
+  <interface id="29" language="java" name="de.tsl2.nano.action.IConstraint" project="tsl2.nano.common" 
+    file="/tsl2.nano.common/src/main/de/tsl2/nano/action/IConstraint.java" binary="false" corner="BOTTOM_RIGHT">    
+    <position height="60" width="130" x="259" y="757"/>    
+    <display autosize="true" stereotype="true" package="true" initial-value="false" signature="true" 
+      sort-features="false" accessors="true" visibility="false">      
+      <attributes public="false" package="false" protected="false" private="false" static="false"/>      
+      <operations public="false" package="false" protected="false" private="false" static="false"/>    
+    </display>  
+  </interface>  
+  <interface id="30" language="java" name="de.tsl2.nano.action.IActivable" project="tsl2.nano.common" 
+    file="/tsl2.nano.common/src/main/de/tsl2/nano/action/IActivable.java" binary="false" corner="BOTTOM_RIGHT">    
+    <position height="60" width="120" x="1024" y="757"/>    
+    <display autosize="true" stereotype="true" package="true" initial-value="false" signature="true" 
+      sort-features="false" accessors="true" visibility="false">      
+      <attributes public="false" package="false" protected="false" private="false" static="false"/>      
+      <operations public="false" package="false" protected="false" private="false" static="false"/>    
+    </display>  
+  </interface>  
+  <interface id="31" language="java" name="de.tsl2.nano.action.IStatus" project="tsl2.nano.common" 
+    file="/tsl2.nano.common/src/main/de/tsl2/nano/action/IStatus.java" binary="false" corner="BOTTOM_RIGHT">    
+    <position height="60" width="120" x="259" y="857"/>    
+    <display autosize="true" stereotype="true" package="true" initial-value="false" signature="true" 
+      sort-features="false" accessors="true" visibility="false">      
+      <attributes public="false" package="false" protected="false" private="false" static="false"/>      
+      <operations public="false" package="false" protected="false" private="false" static="false"/>    
+    </display>  
+  </interface>  
+  <association id="32">    
+    <end type="SOURCE" refId="23" navigable="false">      
+      <attribute id="33" name="bean"/>      
+      <multiplicity id="34" minimum="0" maximum="1"/>    
+    </end>    
+    <end type="TARGET" refId="25" navigable="true"/>    
+    <display labels="true" multiplicity="true"/>  
+  </association>  
+  <dependency id="35">    
+    <end type="SOURCE" refId="16"/>    
+    <end type="TARGET" refId="4"/>  
+  </dependency>  
+  <dependency id="36">    
+    <bendpoint x="464" y="137"/>    
+    <bendpoint x="464" y="257"/>    
+    <end type="SOURCE" refId="24"/>    
+    <end type="TARGET" refId="19"/>  
+  </dependency>  
+  <association id="37">    
+    <bendpoint x="1727" y="357"/>    
+    <bendpoint x="1727" y="457"/>    
+    <bendpoint x="1727" y="557"/>    
+    <end type="SOURCE" refId="22" navigable="false">      
+      <attribute id="38" name="editAction"/>      
+      <multiplicity id="39" minimum="0" maximum="1"/>    
+    </end>    
+    <end type="TARGET" refId="28" navigable="true"/>    
+    <display labels="true" multiplicity="true"/>  
+  </association>  
+  <dependency id="40">    
+    <end type="SOURCE" refId="26"/>    
+    <end type="TARGET" refId="14"/>  
+  </dependency>  
+  <association id="41">    
+    <bendpoint x="1835" y="257"/>    
+    <bendpoint x="1835" y="357"/>    
+    <bendpoint x="1835" y="457"/>    
+    <bendpoint x="1835" y="557"/>    
+    <end type="SOURCE" refId="25" navigable="false">      
+      <attribute id="42" name="actions"/>      
+      <multiplicity id="43" minimum="0" maximum="2147483647"/>    
+    </end>    
+    <end type="TARGET" refId="28" navigable="true"/>    
+    <display labels="true" multiplicity="true"/>  
+  </association>  
+  <generalization id="44">    
+    <end type="SOURCE" refId="1"/>    
+    <end type="TARGET" refId="8"/>  
+  </generalization>  
+  <generalization id="45">    
+    <end type="SOURCE" refId="4"/>    
+    <end type="TARGET" refId="7"/>  
+  </generalization>  
+  <association id="46">    
+    <bendpoint x="1496" y="357"/>    
+    <bendpoint x="1496" y="457"/>    
+    <end type="SOURCE" refId="22" navigable="false">      
+      <attribute id="47" name="columnDefinitions"/>      
+      <multiplicity id="48" minimum="0" maximum="2147483647"/>    
+    </end>    
+    <end type="TARGET" refId="4" navigable="true"/>    
+    <display labels="true" multiplicity="true"/>  
+  </association>  
+  <generalization id="49">    
+    <end type="SOURCE" refId="22"/>    
+    <end type="TARGET" refId="25"/>  
+  </generalization>  
+  <dependency id="50">    
+    <end type="SOURCE" refId="6"/>    
+    <end type="TARGET" refId="26"/>  
+  </dependency>  
+  <dependency id="51">    
+    <bendpoint x="506" y="137"/>    
+    <bendpoint x="485" y="257"/>    
+    <bendpoint x="325" y="357"/>    
+    <bendpoint x="268" y="457"/>    
+    <bendpoint x="268" y="557"/>    
+    <bendpoint x="268" y="657"/>    
+    <end type="SOURCE" refId="27"/>    
+    <end type="TARGET" refId="29"/>  
+  </dependency>  
+  <association id="52">    
+    <end type="SOURCE" refId="25" navigable="false">      
+      <attribute id="53" name="virtualBeanCache"/>      
+      <multiplicity id="54" minimum="0" maximum="2147483647"/>    
+    </end>    
+    <end type="TARGET" refId="25" navigable="true"/>    
+    <display labels="true" multiplicity="true"/>  
+  </association>  
+  <dependency id="55">    
+    <end type="SOURCE" refId="4"/>    
+    <end type="TARGET" refId="28"/>  
+  </dependency>  
+  <dependency id="56">    
+    <bendpoint x="527" y="137"/>    
+    <bendpoint x="527" y="257"/>    
+    <bendpoint x="569" y="357"/>    
+    <bendpoint x="797" y="457"/>    
+    <bendpoint x="797" y="557"/>    
+    <bendpoint x="797" y="657"/>    
+    <end type="SOURCE" refId="24"/>    
+    <end type="TARGET" refId="30"/>  
+  </dependency>  
+  <association id="57">    
+    <bendpoint x="1580" y="357"/>    
+    <bendpoint x="1596" y="457"/>    
+    <bendpoint x="1613" y="557"/>    
+    <bendpoint x="1630" y="657"/>    
+    <end type="SOURCE" refId="22" navigable="false">      
+      <attribute id="58" name="beanFinder"/>      
+      <multiplicity id="59" minimum="0" maximum="1"/>    
+    </end>    
+    <end type="TARGET" refId="5" navigable="true"/>    
+    <display labels="true" multiplicity="true"/>  
+  </association>  
+  <dependency id="60">    
+    <end type="SOURCE" refId="6"/>    
+    <end type="TARGET" refId="4"/>  
+  </dependency>  
+  <generalization id="61">    
+    <bendpoint x="1191" y="557"/>    
+    <end type="SOURCE" refId="10"/>    
+    <end type="TARGET" refId="16"/>  
+  </generalization>  
+  <dependency id="62">    
+    <bendpoint x="941" y="257"/>    
+    <bendpoint x="907" y="357"/>    
+    <bendpoint x="907" y="457"/>    
+    <bendpoint x="865" y="557"/>    
+    <bendpoint x="843" y="657"/>    
+    <end type="SOURCE" refId="25"/>    
+    <end type="TARGET" refId="1"/>  
+  </dependency>  
+  <dependency id="63">    
+    <bendpoint x="247" y="137"/>    
+    <bendpoint x="247" y="257"/>    
+    <bendpoint x="247" y="357"/>    
+    <bendpoint x="247" y="457"/>    
+    <bendpoint x="289" y="557"/>    
+    <end type="SOURCE" refId="24"/>    
+    <end type="TARGET" refId="14"/>  
+  </dependency>  
+  <association id="64">    
+    <bendpoint x="1622" y="357"/>    
+    <bendpoint x="1622" y="457"/>    
+    <bendpoint x="1622" y="557"/>    
+    <end type="SOURCE" refId="22" navigable="false">      
+      <attribute id="65" name="newAction"/>      
+      <multiplicity id="66" minimum="0" maximum="1"/>    
+    </end>    
+    <end type="TARGET" refId="28" navigable="true"/>    
+    <display labels="true" multiplicity="true"/>  
+  </association>  
+  <generalization id="67">    
+    <bendpoint x="632" y="357"/>    
+    <end type="SOURCE" refId="6"/>    
+    <end type="TARGET" refId="15"/>  
+  </generalization>  
+  <generalization id="68">    
+    <end type="SOURCE" refId="6"/>    
+    <end type="TARGET" refId="19"/>  
+  </generalization>  
+  <dependency id="69">    
+    <bendpoint x="1173" y="357"/>    
+    <bendpoint x="1054" y="457"/>    
+    <bendpoint x="1012" y="557"/>    
+    <end type="SOURCE" refId="22"/>    
+    <end type="TARGET" refId="8"/>  
+  </dependency>  
+  <realization id="70">    
+    <end type="SOURCE" refId="25"/>    
+    <end type="TARGET" refId="15"/>  
+  </realization>  
+  <dependency id="71">    
+    <bendpoint x="928" y="357"/>    
+    <end type="SOURCE" refId="22"/>    
+    <end type="TARGET" refId="6"/>  
+  </dependency>  
+  <association id="72">    
+    <bendpoint x="1685" y="357"/>    
+    <bendpoint x="1685" y="457"/>    
+    <bendpoint x="1685" y="557"/>    
+    <end type="SOURCE" refId="22" navigable="false">      
+      <attribute id="73" name="resetAction"/>      
+      <multiplicity id="74" minimum="0" maximum="1"/>    
+    </end>    
+    <end type="TARGET" refId="28" navigable="true"/>    
+    <display labels="true" multiplicity="true"/>  
+  </association>  
+  <dependency id="75">    
+    <bendpoint x="268" y="137"/>    
+    <bendpoint x="268" y="257"/>    
+    <bendpoint x="278" y="357"/>    
+    <bendpoint x="289" y="457"/>    
+    <end type="SOURCE" refId="24"/>    
+    <end type="TARGET" refId="26"/>  
+  </dependency>  
+  <dependency id="76">    
+    <end type="SOURCE" refId="8"/>    
+    <end type="TARGET" refId="29"/>  
+  </dependency>  
+  <association id="77">    
+    <end type="SOURCE" refId="25" navigable="false">      
+      <attribute id="78" name="volatileBean"/>      
+      <multiplicity id="79" minimum="0" maximum="1"/>    
+    </end>    
+    <end type="TARGET" refId="25" navigable="true"/>    
+    <display labels="true" multiplicity="true"/>  
+  </association>  
+  <association id="80">    
+    <bendpoint x="1706" y="357"/>    
+    <bendpoint x="1706" y="457"/>    
+    <bendpoint x="1706" y="557"/>    
+    <end type="SOURCE" refId="22" navigable="false">      
+      <attribute id="81" name="deleteAction"/>      
+      <multiplicity id="82" minimum="0" maximum="1"/>    
+    </end>    
+    <end type="TARGET" refId="28" navigable="true"/>    
+    <display labels="true" multiplicity="true"/>  
+  </association>  
+  <dependency id="83">    
+    <end type="SOURCE" refId="8"/>    
+    <end type="TARGET" refId="30"/>  
+  </dependency>  
+  <dependency id="84">    
+    <bendpoint x="1475" y="257"/>    
+    <bendpoint x="1475" y="357"/>    
+    <bendpoint x="1475" y="457"/>    
+    <end type="SOURCE" refId="25"/>    
+    <end type="TARGET" refId="4"/>  
+  </dependency>  
+  <association id="85">    
+    <bendpoint x="569" y="257"/>    
+    <bendpoint x="548" y="357"/>    
+    <bendpoint x="548" y="457"/>    
+    <end type="SOURCE" refId="25" navigable="false">      
+      <attribute id="86" name="valueExpression"/>      
+      <multiplicity id="87" minimum="0" maximum="1"/>    
+    </end>    
+    <end type="TARGET" refId="26" navigable="true"/>    
+    <display labels="true" multiplicity="true"/>  
+  </association>  
+  <dependency id="88">    
+    <end type="SOURCE" refId="20"/>    
+    <end type="TARGET" refId="19"/>  
+  </dependency>  
+  <generalization id="89">    
+    <bendpoint x="687" y="557"/>    
+    <end type="SOURCE" refId="14"/>    
+    <end type="TARGET" refId="6"/>  
+  </generalization>  
+  <association id="90">    
+    <bendpoint x="1877" y="137"/>    
+    <bendpoint x="1877" y="257"/>    
+    <bendpoint x="1877" y="357"/>    
+    <bendpoint x="1864" y="457"/>    
+    <bendpoint x="1864" y="557"/>    
+    <end type="SOURCE" refId="23" navigable="false">      
+      <attribute id="91" name="callback"/>      
+      <multiplicity id="92" minimum="0" maximum="1"/>    
+    </end>    
+    <end type="TARGET" refId="28" navigable="true"/>    
+    <display labels="true" multiplicity="true"/>  
+  </association>  
+  <dependency id="93">    
+    <end type="SOURCE" refId="24"/>    
+    <end type="TARGET" refId="21"/>  
+  </dependency>  
+  <dependency id="94">    
+    <end type="SOURCE" refId="24"/>    
+    <end type="TARGET" refId="25"/>  
+  </dependency>  
+  <dependency id="95">    
+    <end type="SOURCE" refId="22"/>    
+    <end type="TARGET" refId="19"/>  
+  </dependency>  
+  <realization id="96">    
+    <end type="SOURCE" refId="26"/>    
+    <end type="TARGET" refId="12"/>  
+  </realization>  
+  <association id="97">    
+    <bendpoint x="920" y="257"/>    
+    <end type="SOURCE" refId="25" navigable="false">      
+      <attribute id="98" name="plugins"/>      
+      <multiplicity id="99" minimum="0" maximum="2147483647"/>    
+    </end>    
+    <end type="TARGET" refId="17" navigable="true"/>    
+    <display labels="true" multiplicity="true"/>  
+  </association>  
+  <dependency id="100">    
+    <end type="SOURCE" refId="10"/>    
+    <end type="TARGET" refId="5"/>  
+  </dependency>  
+  <dependency id="101">    
+    <bendpoint x="1906" y="137"/>    
+    <bendpoint x="1906" y="257"/>    
+    <bendpoint x="1906" y="357"/>    
+    <bendpoint x="1906" y="457"/>    
+    <bendpoint x="1906" y="557"/>    
+    <end type="SOURCE" refId="11"/>    
+    <end type="TARGET" refId="28"/>  
+  </dependency>  
+  <association id="102">    
+    <bendpoint x="548" y="137"/>    
+    <bendpoint x="548" y="257"/>    
+    <bendpoint x="611" y="357"/>    
+    <bendpoint x="886" y="457"/>    
+    <bendpoint x="886" y="557"/>    
+    <end type="SOURCE" refId="24" navigable="false">      
+      <attribute id="103" name="presentable"/>      
+      <multiplicity id="104" minimum="0" maximum="1"/>    
+    </end>    
+    <end type="TARGET" refId="8" navigable="true"/>    
+    <display labels="true" multiplicity="true"/>  
+  </association>  
+  <dependency id="105">    
+    <end type="SOURCE" refId="4"/>    
+    <end type="TARGET" refId="10"/>  
+  </dependency>  
+  <association id="106">    
+    <bendpoint x="1601" y="357"/>    
+    <bendpoint x="1601" y="457"/>    
+    <bendpoint x="1601" y="557"/>    
+    <end type="SOURCE" refId="22" navigable="false">      
+      <attribute id="107" name="searchAction"/>      
+      <multiplicity id="108" minimum="0" maximum="1"/>    
+    </end>    
+    <end type="TARGET" refId="28" navigable="true"/>    
+    <display labels="true" multiplicity="true"/>  
+  </association>  
+  <association id="109">    
+    <bendpoint x="32" y="137"/>    
+    <bendpoint x="32" y="257"/>    
+    <bendpoint x="32" y="357"/>    
+    <bendpoint x="32" y="457"/>    
+    <bendpoint x="32" y="557"/>    
+    <bendpoint x="32" y="657"/>    
+    <bendpoint x="32" y="757"/>    
+    <end type="SOURCE" refId="24" navigable="false">      
+      <attribute id="110" name="status"/>      
+      <multiplicity id="111" minimum="0" maximum="1"/>    
+    </end>    
+    <end type="TARGET" refId="31" navigable="true"/>    
+    <display labels="true" multiplicity="true"/>  
+  </association>  
+  <association id="112">    
+    <bendpoint x="1133" y="137"/>    
+    <bendpoint x="1152" y="257"/>    
+    <bendpoint x="1152" y="357"/>    
+    <bendpoint x="1454" y="457"/>    
+    <end type="SOURCE" refId="24" navigable="false">      
+      <attribute id="113" name="columnDefinition"/>      
+      <multiplicity id="114" minimum="0" maximum="1"/>    
+    </end>    
+    <end type="TARGET" refId="4" navigable="true"/>    
+    <display labels="true" multiplicity="true"/>  
+  </association>  
+  <dependency id="115">    
+    <bendpoint x="1559" y="357"/>    
+    <bendpoint x="1575" y="457"/>    
+    <bendpoint x="1592" y="557"/>    
+    <bendpoint x="1609" y="657"/>    
+    <end type="SOURCE" refId="22"/>    
+    <end type="TARGET" refId="30"/>  
+  </dependency>  
+  <dependency id="116">    
+    <end type="SOURCE" refId="4"/>    
+    <end type="TARGET" refId="2"/>  
+  </dependency>  
+  <dependency id="117">    
+    <bendpoint x="1173" y="257"/>    
+    <bendpoint x="1103" y="357"/>    
+    <bendpoint x="1033" y="457"/>    
+    <bendpoint x="1033" y="557"/>    
+    <bendpoint x="1033" y="657"/>    
+    <end type="SOURCE" refId="25"/>    
+    <end type="TARGET" refId="30"/>  
+  </dependency>  
+  <dependency id="118">    
+    <bendpoint x="708" y="557"/>    
+    <bendpoint x="708" y="657"/>    
+    <bendpoint x="708" y="757"/>    
+    <end type="SOURCE" refId="6"/>    
+    <end type="TARGET" refId="31"/>  
+  </dependency>  
+  <realization id="119">    
+    <end type="SOURCE" refId="25"/>    
+    <end type="TARGET" refId="9"/>  
+  </realization>  
+  <dependency id="120">    
+    <end type="SOURCE" refId="10"/>    
+    <end type="TARGET" refId="13"/>  
+  </dependency>  
+  <dependency id="121">    
+    <bendpoint x="949" y="357"/>    
+    <bendpoint x="949" y="457"/>    
+    <bendpoint x="949" y="557"/>    
+    <end type="SOURCE" refId="9"/>    
+    <end type="TARGET" refId="8"/>  
+  </dependency>  
+  <association id="122">    
+    <bendpoint x="226" y="137"/>    
+    <bendpoint x="226" y="257"/>    
+    <bendpoint x="226" y="357"/>    
+    <bendpoint x="226" y="457"/>    
+    <bendpoint x="226" y="557"/>    
+    <bendpoint x="226" y="657"/>    
+    <end type="SOURCE" refId="24" navigable="false">      
+      <attribute id="123" name="constraint"/>      
+      <multiplicity id="124" minimum="0" maximum="1"/>    
+    </end>    
+    <end type="TARGET" refId="29" navigable="true"/>    
+    <display labels="true" multiplicity="true"/>  
+  </association>  
+  <dependency id="125">    
+    <end type="SOURCE" refId="4"/>    
+    <end type="TARGET" refId="8"/>  
+  </dependency>  
+  <association id="126">    
+    <bendpoint x="611" y="137"/>    
+    <bendpoint x="611" y="257"/>    
+    <end type="SOURCE" refId="24" navigable="false">      
+      <attribute id="127" name="plugins"/>      
+      <multiplicity id="128" minimum="0" maximum="2147483647"/>    
+    </end>    
+    <end type="TARGET" refId="17" navigable="true"/>    
+    <display labels="true" multiplicity="true"/>  
+  </association>  
+  <dependency id="129">    
+    <bendpoint x="310" y="557"/>    
+    <bendpoint x="310" y="657"/>    
+    <end type="SOURCE" refId="6"/>    
+    <end type="TARGET" refId="29"/>  
+  </dependency>  
+  <realization id="130">    
+    <bendpoint x="485" y="137"/>    
+    <bendpoint x="506" y="257"/>    
+    <bendpoint x="506" y="357"/>    
+    <end type="SOURCE" refId="24"/>    
+    <end type="TARGET" refId="6"/>  
+  </realization>  
+  <realization id="131">    
+    <bendpoint x="1538" y="357"/>    
+    <bendpoint x="1538" y="457"/>    
+    <bendpoint x="1538" y="557"/>    
+    <end type="SOURCE" refId="22"/>    
+    <end type="TARGET" refId="10"/>  
+  </realization>  
+  <dependency id="132">    
+    <bendpoint x="1012" y="357"/>    
+    <bendpoint x="928" y="457"/>    
+    <bendpoint x="823" y="557"/>    
+    <end type="SOURCE" refId="22"/>    
+    <end type="TARGET" refId="14"/>  
+  </dependency>  
+  <dependency id="133">    
+    <bendpoint x="844" y="557"/>    
+    <end type="SOURCE" refId="6"/>    
+    <end type="TARGET" refId="8"/>  
+  </dependency>  
+  <dependency id="134">    
+    <bendpoint x="1517" y="357"/>    
+    <bendpoint x="1517" y="457"/>    
+    <bendpoint x="1517" y="557"/>    
+    <end type="SOURCE" refId="22"/>    
+    <end type="TARGET" refId="2"/>  
+  </dependency>  
+  <dependency id="135">    
+    <end type="SOURCE" refId="11"/>    
+    <end type="TARGET" refId="25"/>  
+  </dependency>  
+  <association id="136">    
+    <bendpoint x="1664" y="357"/>    
+    <bendpoint x="1664" y="457"/>    
+    <bendpoint x="1664" y="557"/>    
+    <end type="SOURCE" refId="22" navigable="false">      
+      <attribute id="137" name="openAction"/>      
+      <multiplicity id="138" minimum="0" maximum="1"/>    
+    </end>    
+    <end type="TARGET" refId="28" navigable="true"/>    
+    <display labels="true" multiplicity="true"/>  
+  </association>  
+  <dependency id="139">    
+    <bendpoint x="970" y="357"/>    
+    <bendpoint x="865" y="457"/>    
+    <end type="SOURCE" refId="22"/>    
+    <end type="TARGET" refId="26"/>  
+  </dependency>  
+  <association id="140">    
+    <bendpoint x="1643" y="357"/>    
+    <bendpoint x="1643" y="457"/>    
+    <bendpoint x="1643" y="557"/>    
+    <end type="SOURCE" refId="22" navigable="false">      
+      <attribute id="141" name="quickSearchAction"/>      
+      <multiplicity id="142" minimum="0" maximum="1"/>    
+    </end>    
+    <end type="TARGET" refId="28" navigable="true"/>    
+    <display labels="true" multiplicity="true"/>  
+  </association>  
+  <dependency id="143">    
+    <end type="SOURCE" refId="27"/>    
+    <end type="TARGET" refId="25"/>  
+  </dependency>  
+  <realization id="144">    
+    <end type="SOURCE" refId="26"/>    
+    <end type="TARGET" refId="2"/>  
+  </realization>  
+  <dependency id="145">    
+    <bendpoint x="1131" y="257"/>    
+    <bendpoint x="991" y="357"/>    
+    <bendpoint x="991" y="457"/>    
+    <bendpoint x="991" y="557"/>    
+    <end type="SOURCE" refId="25"/>    
+    <end type="TARGET" refId="8"/>  
+  </dependency>  
+  <association id="146">    
+    <bendpoint x="1856" y="357"/>    
+    <bendpoint x="1885" y="457"/>    
+    <bendpoint x="1885" y="557"/>    
+    <bendpoint x="1885" y="657"/>    
+    <end type="SOURCE" refId="22" navigable="false">      
+      <attribute id="147" name="selectionProvider"/>      
+      <multiplicity id="148" minimum="0" maximum="1"/>    
+    </end>    
+    <end type="TARGET" refId="13" navigable="true"/>    
+    <display labels="true" multiplicity="true"/>  
+  </association>  
+  <association id="149">    
+    <bendpoint x="590" y="257"/>    
+    <bendpoint x="590" y="357"/>    
+    <end type="SOURCE" refId="25" navigable="false">      
+      <attribute id="150" name="attributeDefinitions"/>      
+      <multiplicity id="151" minimum="0" maximum="2147483647"/>    
+    </end>    
+    <end type="TARGET" refId="6" navigable="true"/>    
+    <display labels="true" multiplicity="true"/>  
+  </association>  
+  <dependency id="152">    
+    <end type="SOURCE" refId="29"/>    
+    <end type="TARGET" refId="31"/>  
+  </dependency>  
+  <dependency id="153">    
+    <end type="SOURCE" refId="15"/>    
+    <end type="TARGET" refId="17"/>  
+  </dependency>  
+  <classifier-display autosize="true" stereotype="true" package="true" initial-value="false" signature="true" 
+    sort-features="false" accessors="true" visibility="false">    
+    <attributes public="false" package="false" protected="false" private="false" static="false"/>    
+    <operations public="false" package="false" protected="false" private="false" static="false"/>  
+  </classifier-display>  
+  <association-display labels="true" multiplicity="true"/>
+</class-diagram>

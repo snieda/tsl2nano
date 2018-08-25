@@ -446,12 +446,6 @@ public class Bean<T> extends BeanDefinition<T> {
         return (List<BeanValue<?>>) result;
     }
 
-    @Override
-    public BeanValue getIdAttribute() {
-    	IAttribute idAttribute = super.getIdAttribute();
-		return idAttribute != null ? BeanValue.getBeanValue(getInstance(), idAttribute.getName()) : null;
-    }
-    
     /**
      * <p/>
      * Attention: this implementation uses the {@link BeanValue} cache - means, that the new instance may resist inside
@@ -648,12 +642,6 @@ public class Bean<T> extends BeanDefinition<T> {
         }
         bean.setInstance(instance);
 
-        injectIntoRuleCovers(bean, instance);
-        if (bean.getPlugins() != null) {
-            for (IConnector p : bean.getPlugins()) {
-                p.connect(bean);
-            }
-        }
         return bean;
     }
 
@@ -672,7 +660,7 @@ public class Bean<T> extends BeanDefinition<T> {
             for (IAttributeDefinition<?> attr : attributeDefinitions.values()) {
 //                if (!(attr instanceof IValueAccess)) {//--> standard attribute-definition
                 //use any simple arguments - they will be overwritten on next line in copy(...)
-                IValueAccess valueDef = new BeanValue();/*UNDEFINED, AttributeDefinition.UNDEFINEDMETHOD) {
+                BeanValue/*IValueAccess*/ valueDef = new BeanValue();/*UNDEFINED, AttributeDefinition.UNDEFINEDMETHOD) {
                                                         @Override
                                                         protected void defineDefaults() {
                                                         // don't set any defaults - overwrite members in the next step
@@ -680,9 +668,12 @@ public class Bean<T> extends BeanDefinition<T> {
                                                         };*/
                 valueDef = copy(attr, valueDef, "parent");
                 //Workaround for 'parent' field in BeanValue to avoid a ConcurrentModificationException in Android
-                if (attr instanceof BeanValue)
-                    ((BeanValue) valueDef).setParent(((BeanValue) attr).getParent());
-                BeanValue.beanValueCache.add((BeanValue) valueDef);
+                if (attr instanceof BeanValue) {
+                    valueDef.setParent(((BeanValue) attr).getParent());
+                }
+                if (attr.getColumnDefinition().getPresentable() != null)
+                	valueDef.getColumnDefinition().setPresentable(BeanUtil.copy(attr.getColumnDefinition().getPresentable()));
+                BeanValue.beanValueCache.add(valueDef);
                 if (valueDef instanceof IPluggable) {
                     Collection<IConnector> plugins = ((IPluggable) valueDef).getPlugins();
                     if (plugins != null) {
@@ -779,6 +770,12 @@ public class Bean<T> extends BeanDefinition<T> {
         if (cacheInstance && ENV.get("bean.use.cache", true)) {
             timedCache.put(instanceOrName, bean);
         }
+        injectIntoRuleCovers(bean, instanceOrName);
+        if (bean.getPlugins() != null) {
+            for (IConnector p : bean.getPlugins()) {
+                p.connect(bean);
+            }
+        }
         return bean;
     }
 
@@ -866,6 +863,7 @@ public class Bean<T> extends BeanDefinition<T> {
      */
     public boolean detach(Object... arguments) {
         timedCache.remove(this);
+        BeanValue.removeFromCache(this);
         if (detacher != null) {
             detacher.setParameter(arguments);
             detacher.run();

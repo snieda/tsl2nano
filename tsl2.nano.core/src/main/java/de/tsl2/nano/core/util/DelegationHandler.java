@@ -189,10 +189,10 @@ public class DelegationHandler<T> implements IDelegationHandler<T>, Serializable
     }
 
     @Override
-    public Object clone() {
+    public DelegationHandler<T> clone() {
         try {
             LOG.debug("cloning handler " + this);
-            return super.clone();
+            return (DelegationHandler<T>) super.clone();
         } catch (CloneNotSupportedException e) {
             ManagedException.forward(e);
             return null;

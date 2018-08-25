@@ -373,7 +373,7 @@ public class BeanCollector<COLLECTIONTYPE extends Collection<T>, T> extends Bean
                 public Collection<T> getData(T from, Object to) {
                     searchStatus = Messages.getFormattedString("tsl2nano.searchdialog.searchrunning");
                     ENV.get(Profiler.class).starting(this, getName());
-
+                    Message.send(searchStatus);
                     if (!isStaticCollection || (isPersistable() && composition == null)) {
                         collection = (COLLECTIONTYPE) ((IBeanFinder<T, Object>) beanFinder).getData(from, to, getOrderByColumns());
                         /*
@@ -398,8 +398,10 @@ public class BeanCollector<COLLECTIONTYPE extends Collection<T>, T> extends Bean
                     Collection<T> result = authorized(collection);
                     searchStatus = Messages.getFormattedString("tsl2nano.searchdialog.searchresultcount",
                         result.size());
+                    Message.send(searchStatus);
                     sort();
                     //TODO: this will be a performance issue!
+                    Message.send(" injecting new objects for rulecovers...");
                     if (hasMode(MODE_SEARCHABLE) && hasDefaultConstructor(getType())) {
                         T instance =
                             getSearchPanelBeans().size() > 0 ? getSearchPanelBeans().iterator().next() : BeanClass
@@ -407,8 +409,9 @@ public class BeanCollector<COLLECTIONTYPE extends Collection<T>, T> extends Bean
                         injectIntoRuleCovers(BeanCollector.this, instance);
                     }
                     for (T o : collection) {
-                        injectIntoRuleCovers(BeanCollector.this, o);
+                        injectIntoRuleCovers(Bean.getBean(o), o);
 					}
+                    Message.send(searchStatus);
                     return result;
                 }
 

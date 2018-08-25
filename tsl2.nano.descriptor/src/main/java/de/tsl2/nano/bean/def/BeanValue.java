@@ -71,7 +71,7 @@ public class BeanValue<T> extends AttributeDefinition<T> implements IValueDefini
     transient Selector selector;
     protected transient Bean<?> parent;
 
-    /** a cache of all created beanvalues - if bean cache is not deaktivated */
+    /** a cache of all created beanvalues - if bean cache is not deaktivated TODO: use a kind of SoftReferenceSet */
     protected static final List<BeanValue> beanValueCache = new LinkedList<BeanValue>();
     /** for performance enhancement one bean to be used to search inside the {@link #beanValueCache} */
     protected static final BeanValue searchBV = new BeanValue();
@@ -446,7 +446,11 @@ public class BeanValue<T> extends AttributeDefinition<T> implements IValueDefini
      */
     @Override
     public int hashCode() {
-    	return Util.hashCode(instance, attribute);
+	    /*
+	     * on using e.g. ValueHolders, the instance and its attribute (=value) are identical.
+	     * then it is possible to distinguish them through the description, if defined
+	     */
+    	return isVirtual() ? Util.hashCode(instance, attribute, description) : Util.hashCode(instance, attribute);
     }
 
     /**
@@ -625,6 +629,15 @@ public class BeanValue<T> extends AttributeDefinition<T> implements IValueDefini
         });
         return collector;
     }
+
+	public static int removeFromCache(Bean<?> bean) {
+		List<BeanValue<?>> beanValues = bean.getBeanValues();
+		int c = 0;
+		for (BeanValue<?> beanValue : beanValues) {
+			c += beanValue.removeFromCache() ? 1 : 0;
+		}
+		return c;
+	}
 }
 
 /**

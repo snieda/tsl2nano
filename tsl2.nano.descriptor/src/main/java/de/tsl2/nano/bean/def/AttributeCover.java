@@ -140,6 +140,7 @@ public abstract class AttributeCover<T> extends DelegationHandler<T> implements
     @SuppressWarnings("unchecked")
     public T cover(T child, Class<T> interfaze, Serializable contextObject) {
         delegate = child;
+        setContext(contextObject);
         return (T) Proxy.newProxyInstance(Thread.currentThread().getContextClassLoader(), new Class[] { interfaze }, this);
     }
 

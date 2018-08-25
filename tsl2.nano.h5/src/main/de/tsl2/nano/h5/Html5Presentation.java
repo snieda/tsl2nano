@@ -1166,17 +1166,18 @@ public class Html5Presentation<T> extends BeanPresentationHelper<T> implements I
         int width = -1;
         Element cell = null;
         try {
+            if (useSideNav(0)) {//using the side bar, all buttons must always have the same size!
+                width = ENV.get("layout.action.width", 200);
+                if (width == -1) // if already set to -1 previously... 
+                    ENV.setProperty("layout.action.width", 200);
+            }            
             if (useSideNav(actions.size())) {
                 cell = sideNav = createSidebarNavMenuButton(parent, sideNav);
-                width = ENV.get("layout.action.width", 200);
-                if (width == -1) //previously set to UNDEFINED
-                    ENV.setProperty("layout.action.width", 200);
             } else {
-                int actionCount = actions != null ? actions.size() : 0;
-                boolean vertical = actionCount > ENV.get("layout.sidenav.min.count.action", 3);
-                Element panel = createGrid(parent, "Actions", "action.panel", vertical ? 0 : actionCount);
-                Element row = appendTag(panel, TABLE(TAG_ROW, ATTR_CLASS, "actionpanel"));
-                cell = appendTag(row, TABLE(TAG_CELL, attributes));
+                Element panel =
+                        createGrid(parent, "Actions", "action.panel", /*actions != null ? 1 + actions.size() : 1*/0);
+                    Element row = appendTag(panel, TABLE(TAG_ROW, ATTR_CLASS, "actionpanel"));
+                    cell = appendTag(row, TABLE(TAG_CELL, attributes));
             }
             appendAttributes(cell, ATTR_STYLE, ENV.get("layout.action.panel", ""));
             if (actions != null) {
@@ -1537,9 +1538,11 @@ public class Html5Presentation<T> extends BeanPresentationHelper<T> implements I
         Element cell;
         String value;
         IValueDefinition<?> attr;
+        IPresentable colPres;
         if (colDefs.size() > 0) {
             for (IPresentableColumn c : colDefs) {
                 attr = itemBean.hasAttribute(c.getName()) ? itemBean.getAttribute(c.getName()) : null;
+                colPres = attr != null ? attr.getColumnDefinition().getPresentable() : c.getPresentable();
                 //on byte[] show an image through attached file
                 //workaround: on virtuals searching the attribute may cause an error
                 //TODO: if a virtual bean is empty, no attributes are available --> show a warning!
@@ -1556,9 +1559,9 @@ public class Html5Presentation<T> extends BeanPresentationHelper<T> implements I
                             tableDescriptor.getId() + "[" + tabIndex
                                 + ", " + c.getIndex() + "]"));
                     Element data = createDataTag(cell, beanValue);
-                    if (c.getPresentable() != null) {
-                        addAttributes(data, rowBackground, c.getPresentable(), false);
-                        addAttributes(cell, rowBackground, c.getPresentable(), false);
+                    if (colPres != null) {
+                        addAttributes(data, rowBackground, colPres, false);
+                        addAttributes(cell, rowBackground, colPres, false);
                     }
                     if (value != null && Messages.isMarkedAsProblem(value)) {
                         appendAttributes(cell, ATTR_COLOR, COLOR_RED);
@@ -1583,8 +1586,8 @@ public class Html5Presentation<T> extends BeanPresentationHelper<T> implements I
                             ATTR_HEADERS, c.getIndex() + ":" + c.getName(), ATTR_ID,
                             tableDescriptor.getId() + "[" + tabIndex
                                 + ", " + c.getIndex() + "]"));
-                    if (c.getPresentable() != null) {
-                        addAttributes(cell, rowBackground, c.getPresentable(), false);
+                    if (colPres != null) {
+                        addAttributes(cell, rowBackground, colPres, false);
                     }
                     if (Messages.isMarkedAsProblem(value)) {
                         appendAttributes(cell, ATTR_COLOR, COLOR_RED);

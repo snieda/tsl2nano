@@ -67,6 +67,12 @@ public class Volatile<T> {
         return expired() ? null : value;
     }
 
+    public T invalidate() {
+        T last = get();
+       value = null;
+       start = 0;
+       return last;
+    }
     public void set(T value) {
         this.value = value;
         activate();
