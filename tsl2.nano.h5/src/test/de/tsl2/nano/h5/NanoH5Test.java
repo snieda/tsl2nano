@@ -236,7 +236,7 @@ public class NanoH5Test implements ENVTestPreparation {
         //static check against last expteced state
        exptectedHtml = new String(FileUtil.getFileBytes(expFileName, null));
        BaseTest.assertEquals(exptectedHtml, html, true, MapUtil.asMap("\\:[0-9]{5,5}", ":XXXXX",
-           "[0-9]{1,6} S [0-9]{1,6} KB", "XXX Sec XXX KB", 
+           "[0-9]{1,6} Sec [0-9]{1,6} KB", "XXX Sec XXX KB", 
            "statusinfo-[0-9]{13,13}\\.txt", "statusinfo-XXXXXXXXXXXXX.txt",
            BaseTest.REGEX_DATE_US, BaseTest.XXX,
            BaseTest.REGEX_DATE_DE, BaseTest.XXX,

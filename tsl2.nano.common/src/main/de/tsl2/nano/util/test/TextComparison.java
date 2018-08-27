@@ -48,7 +48,7 @@ public class TextComparison {
             System.out.println("!!! DIFFERENCE BETWEEN EXPECTED AND RESULT:\n" + StringUtil.toFormattedString(diffs, -1, true));
             System.out.println("====================================================");
         }
-        Assert.assertEquals(exptected, result);
+        Assert.assertEquals(exp.toString(), res.toString());
     }
     
     public static void prepareForComparison(StringBuilder expected, StringBuilder result, Map<String, String> replacements) {
