@@ -3161,6 +3161,19 @@ On your Entities methods you can enrich attribute definitions or define actions,
 * @RuleCover      : attribute cover (evaluating attribute properties through a rule) NOT IMPLEMENTED YET!
 * @Actions        : non-attribute but action marker. declares a method as action, presented by a button.
 
+Extended annotations have to be used with a kind of pre- annotation that is multiple: _@With_:
+
+On your Entity (directly following a @With annotation): 
+* Compositor      : creates a compositor panel for the entity (@With(CompositorAnnotationFactory.class))
+* Query           : creates a view panel through a select (@With(QueryAnnotationFactory.class))
+* VirtualAttribute: defines a new virtual attribute for the entity to show a calculated value (@With(VirtualAttributeAnnotationFactory.class))
+* Specification   : defines a new rule, query, action, url to evaluate a value (@With(SpecificationAnnotationFactory.class))
+
+On a getter method (directly following a @With annotation): 
+
+* DependencyListener: usable to reference a rule calculating the new value for the observer, after a change on an observable (@With(DependencyListenerAnnotationFactory.class))
+* Specification   : defines a new rule, query, action, url to evaluate a value (@With(SpecificationAnnotationFactory.class))
+
 There is a helper class _ConstraintValueSet_ providing some useful value sets:
 
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -3286,6 +3299,60 @@ public class EConsilium extends Consilium implements IPersistable<String> {
 	 public void setName(String name) {
 	 	this.name = name;
 	 }
+}
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+An Example using the _@With_ annotation:
+
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+@With(VirtualAttributeAnnotationFactory.class) @VirtualAttribute(name=AnnotationExtensionTest.MYVIRTUALATTRIBUTE, specificationType=SpecificationType.RULE, expression="myvirtualattribute")
+@With(SpecificationAnnotationFactory.class) @Specification(name="myquery", specificationType=SpecificationType.QUERY, expression="select...")
+@With(QueryAnnotationFactory.class) @Query(name="myquery", icon="icons/go.png")
+@With(CompositorAnnotationFactory.class) @Compositor(baseType=Base.class, baseAttribute="name", targetAttribute="composition", iconAttribute="icon")
+class BeanType {
+    Composition composition;
+
+    public Composition getComposition() {
+        return composition;
+    }
+    public void setComposition(Composition composition) {
+        this.composition = composition;
+    }
+}
+class Composition {
+    BeanType beanType;
+    Base target;
+    public BeanType getBeanType() {
+        return beanType;
+    }
+    public void setBeanType(BeanType beanType) {
+        this.beanType = beanType;
+    }
+    public Base getTarget() {
+        return target;
+    }
+    public void setTarget(Base target) {
+        this.target = target;
+    }
+}
+class Base implements Serializable {
+    private static final long serialVersionUID = 1L;
+
+    String name;
+    String icon;
+    public String getName() {
+        return name;
+    }
+    public void setName(String name) {
+        this.name = name;
+    }
+    @With(DependencyListenerAnnotationFactory.class) @DependencyListener(rule="myvirtualattribute", listenerType=ListenerType.BOTH, observables= {"name"})
+    public String getIcon() {
+        return icon;
+    }
+    public void setIcon(String icon) {
+        this.icon = icon;
+    }
 }
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
@@ -4151,7 +4218,7 @@ Plan(teilnehmer, aufgabe, datum)
 
 --Logbuch:
 Teilnehmer (name)
-Eintrag (datum, beschreibung)
+Eintrag (datum, Kategorie, Werte-Typ, Wert, Einheit, Beschreibung, Bild)
 
 --Zeiterfassung (anyway):
 Organisation	-> Betrieb, Mandant
@@ -4280,7 +4347,7 @@ analyse integration with REST etc.
 	- (x) jars: war, sign, standalone, pure, sishell
 	- (v) Cp1252 -> UTF-8
 	- ( ) clean code (unused imports etc.)
-	- ( ) Test timing app
+	- (v) Test timing app
 	- (?) dependencies (ant+hibernate -> javax validation-api)
 	- (-) build: replace src/resources/standalone.zip with maven build
 	- (v) release
@@ -4364,5 +4431,6 @@ on external database, anyway-scripts are used 'anyway'
 - [v] ref. RuleCover --> bean extracting super class AttributeCover (RulePool is in specification)
 
 - [ ] Test new annotations
+- population 23.8.: ~7.600.314.137 (http://live-counter.com/weltbevoelkerung/)
 
  -->

@@ -400,18 +400,18 @@ public class BeanCollector<COLLECTIONTYPE extends Collection<T>, T> extends Bean
                         result.size());
                     Message.send(searchStatus);
                     sort();
-                    //TODO: this will be a performance issue!
-                    Message.send(" injecting new objects for rulecovers...");
-                    if (hasMode(MODE_SEARCHABLE) && hasDefaultConstructor(getType())) {
-                        T instance =
-                            getSearchPanelBeans().size() > 0 ? getSearchPanelBeans().iterator().next() : BeanClass
-                                .createInstance(getType());
-                        injectIntoRuleCovers(BeanCollector.this, instance);
-                    }
-                    for (T o : collection) {
-                        injectIntoRuleCovers(Bean.getBean(o), o);
-					}
-                    Message.send(searchStatus);
+//                    //TODO: this will be a performance issue!
+//                    Message.send(" injecting new objects for rulecovers...");
+//                    if (hasMode(MODE_SEARCHABLE) && hasDefaultConstructor(getType())) {
+//                        T instance =
+//                            getSearchPanelBeans().size() > 0 ? getSearchPanelBeans().iterator().next() : BeanClass
+//                                .createInstance(getType());
+//                        injectIntoRuleCovers(BeanCollector.this, instance);
+//                    }
+//                    for (T o : collection) {
+//                        injectIntoRuleCovers(Bean.getBean(o), o);
+//					}
+//                    Message.send(searchStatus);
                     return result;
                 }
 

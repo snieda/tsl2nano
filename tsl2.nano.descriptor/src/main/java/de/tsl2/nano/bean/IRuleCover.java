@@ -10,11 +10,7 @@
 package de.tsl2.nano.bean;
 
 import java.io.Serializable;
-import java.util.HashSet;
 import java.util.Map;
-import java.util.Set;
-
-import de.tsl2.nano.bean.def.IAttributeDefinition;
 
 /**
  * This cover overrules its delegate through evaluating given rules.
@@ -69,12 +65,4 @@ public interface IRuleCover<T> {
      */
     void setContext(Serializable contextObject);
     
-    /* technical workaround for performance */
-    
-    /** to perform on injecting instances into rule-covers, this set holds all types that have to be covered */
-    static Set<Class<?>> cachedConnectionEndTypes = new HashSet<>();
-    
-    public static void resetTypeCache() {
-        cachedConnectionEndTypes.clear();
-    }
 }

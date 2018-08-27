@@ -32,6 +32,10 @@ public class VolatileResult<T> extends Volatile<T> {
     }
 
     public T get(Map<String, Object> context, Object... extArgs) {
+        return get(runner, context, extArgs);
+    }
+    
+    public T get(IPRunnable<T, Map<String, Object>> runner, Map<String, Object> context, Object... extArgs) {
         if (expired() && !isRunning)
             try {
                 set(runner.run(context, extArgs));

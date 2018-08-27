@@ -890,7 +890,7 @@ public class RegExpFormat extends Format implements INumberFormatCheck {
         if (source != null) {
             mask = initMap.get(source);
         }
-        return mask != null ? mask : initMap.get(pattern);
+        return mask != null || initMap == null ? mask : initMap.get(pattern);
     }
 
     /**

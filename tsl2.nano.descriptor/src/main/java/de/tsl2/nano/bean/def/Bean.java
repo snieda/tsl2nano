@@ -668,11 +668,23 @@ public class Bean<T> extends BeanDefinition<T> {
                                                         };*/
                 valueDef = copy(attr, valueDef, "parent");
                 //Workaround for 'parent' field in BeanValue to avoid a ConcurrentModificationException in Android
-                if (attr instanceof BeanValue) {
-                    valueDef.setParent(((BeanValue) attr).getParent());
+                if (attr instanceof AttributeDefinition) {
+                	AttributeDefinition attrDef = (AttributeDefinition) attr;
+                    if (attr instanceof BeanValue) {
+                    	valueDef.setParent(((BeanValue)attrDef).getParent());
+                    }
+                    if (attrDef.hasRuleCover()) {
+    	                IPresentableColumn colDef = attrDef.getColumnDefinition();
+						if (colDef != null) {
+    	                	valueDef.setColumnDefinition(BeanUtil.copy(colDef));
+    	                	if (colDef instanceof ValueColumn)
+    	                		((ValueColumn)valueDef.getColumnDefinition()).attributeDefinition = valueDef; //its transient!
+    	                }
+    	                valueDef.attribute = BeanUtil.copy(attrDef.attribute);
+    	                if (attrDef.constraint != null)
+    	                	valueDef.constraint = BeanUtil.copy(attrDef.constraint);
+                    }
                 }
-                if (attr.getColumnDefinition().getPresentable() != null)
-                	valueDef.getColumnDefinition().setPresentable(BeanUtil.copy(attr.getColumnDefinition().getPresentable()));
                 BeanValue.beanValueCache.add(valueDef);
                 if (valueDef instanceof IPluggable) {
                     Collection<IConnector> plugins = ((IPluggable) valueDef).getPlugins();

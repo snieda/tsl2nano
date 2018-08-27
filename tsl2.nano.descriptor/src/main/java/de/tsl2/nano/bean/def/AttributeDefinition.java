@@ -252,7 +252,7 @@ public class AttributeDefinition<T> implements IAttributeDefinition<T> {
         //injectAttributeOnChangeListeners() will be called from BeanDefinition
         injectIntoPlugins(this);
         if (hasAttributeCover())
-        	IRuleCover.cachedConnectionEndTypes.add(getDeclaringClass());
+        	AttributeCover.addRuleCover(this);
     }
 
     private boolean hasAttributeCover() {
@@ -266,6 +266,9 @@ public class AttributeDefinition<T> implements IAttributeDefinition<T> {
 		return false;
 	}
 
+    public boolean hasRuleCover() {
+    	return AttributeCover.hasRuleCover(this);
+    }
 	/**
      * injectPlugins
      */
@@ -280,16 +283,6 @@ public class AttributeDefinition<T> implements IAttributeDefinition<T> {
     }
 
     /**
-     * injectRuleCover
-     * 
-     * @param attr new attribute definition to connect to rule cover instance
-     */
-    protected void injectIntoRuleCover(IValueDefinition<T> attr) {
-        //connect optional rule-covers (use accessor instead of BeanDefinition to avoid stackoverflow
-        injectIntoRuleCover(new PrivateAccessor(attr), attr.getInstance());
-    }
-
-    /**
      * inject the given attribute as context - walks recursive to the member tree of acc
      * 
      * @param acc direct/indirect member of attr in member tree
@@ -299,20 +292,20 @@ public class AttributeDefinition<T> implements IAttributeDefinition<T> {
     	injectIntoRuleCover(acc, instance, 0);
     }
     protected static <I> void injectIntoRuleCover(UnboundAccessor acc, Object instance, int level) {
-    	if (!IRuleCover.cachedConnectionEndTypes.contains(instance.getClass())) {
-    		LOG.debug("no existing rule-covers for connection-end of type: " + instance.getClass());
-    		return;
-    	}
+//    	if (!IRuleCover.hasRuleCover(acc.instance())) {
+//    		LOG.debug("no existing rule-covers for connection-end of type: " + instance.getClass());
+//    		return;
+//    	}
     		
     	if (level >= ENV.get("beancollector.rulecover.max.recursion", 4)) {
-    		LOG.info("maximum recursion of " + level + " reached. finishing rule-cover tree on " + acc.toString());
+    		LOG.warn("maximum recursion of " + level + " reached. finishing rule-cover tree on " + acc.toString());
     		return;
     	}
         //connect optional rule-covers (use accessor instead of BeanDefinition to avoid stackoverflow
         Map members = acc.members();
         InvocationHandler handler;
         Object item;
-        LOG.info("walking through " + members.size() + " members of instance " + Util.toObjString(acc.instance()) 
+        LOG.debug("walking through " + members.size() + " members of instance " + Util.toObjString(acc.instance()) 
         		+ " to inject " + Util.toObjString(instance) + " into existing rule-covers ");
         for (Object k : members.keySet()) {
             item = members.get(k);
@@ -1038,6 +1031,10 @@ public class AttributeDefinition<T> implements IAttributeDefinition<T> {
         return eventController;
     }
 
+    IAttribute internalAttribute() {
+    	return attribute;
+    }
+    
     @Override
     public boolean equals(Object obj) {
         return hashCode() == obj.hashCode();

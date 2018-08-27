@@ -13,6 +13,7 @@ import java.io.Serializable;
 
 import org.simpleframework.xml.core.Commit;
 
+import de.tsl2.nano.core.ENV;
 import de.tsl2.nano.core.cls.BeanClass;
 import de.tsl2.nano.core.util.StringUtil;
 import de.tsl2.nano.historize.Volatile;
@@ -101,7 +102,7 @@ public class PathExpression<T> extends AbstractExpression<T> implements IValueEx
 
     @Commit
     private void initDeserializing() {
-        v = new Volatile<T>(500, null);
+        v = new Volatile<T>(ENV.get("cache.expire.milliseconds.pathexpression", 500));
         attributePath = splitChain(expression);
     }
 

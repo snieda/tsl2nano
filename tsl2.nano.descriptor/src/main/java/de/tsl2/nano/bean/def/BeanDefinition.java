@@ -58,7 +58,6 @@ import de.tsl2.nano.core.cls.BeanAttribute;
 import de.tsl2.nano.core.cls.BeanClass;
 import de.tsl2.nano.core.cls.IAttribute;
 import de.tsl2.nano.core.cls.IValueAccess;
-import de.tsl2.nano.core.cls.PrivateAccessor;
 import de.tsl2.nano.core.log.LogFactory;
 import de.tsl2.nano.core.messaging.ChangeEvent;
 import de.tsl2.nano.core.messaging.IListener;
@@ -1035,8 +1034,9 @@ public class BeanDefinition<T> extends BeanClass<T> implements IPluggable<BeanDe
             //change listeners hold only the attribute-id and must have attribute instances
             if (a instanceof BeanValue) {
                 ((BeanValue) a).injectAttributeOnChangeListeners(beandef);
+                if (a.hasRuleCover())
+                	((BeanValue)a).injectIntoRuleCover();
             }
-            AttributeDefinition.injectIntoRuleCover(new PrivateAccessor(a), instance);
         }
     }
 

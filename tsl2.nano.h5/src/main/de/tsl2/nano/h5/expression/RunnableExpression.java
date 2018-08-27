@@ -67,7 +67,7 @@ public abstract class RunnableExpression<T extends Serializable> extends Abstrac
 
     public VolatileResult<T> getResult() {
         if (result == null) {
-            result = new VolatileResult<T>(ENV.get("value.expression.expiring", 300), createRunnable());
+            result = new VolatileResult<T>(ENV.get("cache.expire.milliseconds.pathexpression", 300), createRunnable());
         }
         return result;
     }

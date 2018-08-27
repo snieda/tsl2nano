@@ -21,6 +21,7 @@ import org.simpleframework.xml.Element;
 
 import de.tsl2.nano.bean.BeanUtil;
 import de.tsl2.nano.bean.def.BeanDefinition;
+import de.tsl2.nano.core.ENV;
 import de.tsl2.nano.core.cls.BeanClass;
 import de.tsl2.nano.core.exception.Message;
 import de.tsl2.nano.core.http.EHttpClient;
@@ -45,7 +46,7 @@ public class WebClient<T> extends AbstractRunnable<T> {
 
     private static final Log LOG = LogFactory.getLog(WebClient.class);
     @SuppressWarnings({ "unchecked", "rawtypes" })
-    transient Volatile response = new Volatile(1000, null);
+    transient Volatile response = new Volatile(ENV.get("cache.expire.milliseconds.webclient", 1000));
 
     /** REST method type */
     @Attribute(required = false)

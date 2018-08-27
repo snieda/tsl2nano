@@ -1,5 +1,6 @@
 package de.tsl2.nano.h5.annotation;
 
+import static java.lang.annotation.ElementType.METHOD;
 import static java.lang.annotation.ElementType.TYPE;
 import static java.lang.annotation.RetentionPolicy.RUNTIME;
 
@@ -14,7 +15,7 @@ import de.tsl2.nano.annotation.extension.With;
  * @version $Revision$ 
  */
 @Retention(RUNTIME)
-@Target(TYPE)
+@Target({TYPE, METHOD})
 @With(SpecificationAnnotationFactory.class)
 public @interface Specification {
     String name();

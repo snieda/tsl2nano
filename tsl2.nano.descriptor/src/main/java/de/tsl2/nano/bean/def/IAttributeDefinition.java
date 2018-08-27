@@ -110,4 +110,6 @@ public interface IAttributeDefinition<T> extends IAttribute<T>, IAttributeDef, I
     ISecure getSecure();
 
     EventController changeHandler();
+    
+    boolean hasRuleCover();
 }

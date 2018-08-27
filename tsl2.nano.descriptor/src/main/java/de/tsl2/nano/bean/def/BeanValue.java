@@ -41,6 +41,7 @@ import de.tsl2.nano.core.cls.BeanClass;
 import de.tsl2.nano.core.cls.IAttribute;
 import de.tsl2.nano.core.cls.IValueAccess;
 import de.tsl2.nano.core.cls.PrimitiveUtil;
+import de.tsl2.nano.core.cls.PrivateAccessor;
 import de.tsl2.nano.core.log.LogFactory;
 import de.tsl2.nano.core.messaging.ChangeEvent;
 import de.tsl2.nano.core.messaging.EventController;
@@ -527,6 +528,19 @@ public class BeanValue<T> extends AttributeDefinition<T> implements IValueDefini
         return parent != null ? parent.getName() + "." + parent.getId() + "." + getName() : getId();
     }
 
+    /**
+     * injectRuleCover
+     * 
+     * @param attr new attribute definition to connect to rule cover instance
+     */
+    protected void injectIntoRuleCover() {
+    	LOG.info("doing rule-cover injection on bean-value " + this + "...");
+    	if (!AttributeCover.hasRuleCover(this))
+    		throw ManagedException.implementationError("no injection into rule-covers should be done, no rule cover defined for this attribute", this, AttributeCover.cachedConnectionEndTypes);
+        //connect optional rule-covers (use accessor instead of BeanDefinition to avoid stackoverflow
+        injectIntoRuleCover(new PrivateAccessor<>(this), getInstance());
+    }
+    
     Selector<T> selector() {
         if (selector == null) {
             selector = new Selector(this);

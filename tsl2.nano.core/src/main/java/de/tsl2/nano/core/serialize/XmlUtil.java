@@ -56,6 +56,7 @@ import de.tsl2.nano.core.ManagedException;
 import de.tsl2.nano.core.cls.BeanClass;
 import de.tsl2.nano.core.cls.PrimitiveUtil;
 import de.tsl2.nano.core.cls.Reflection;
+import de.tsl2.nano.core.exception.Message;
 import de.tsl2.nano.core.execution.CompatibilityLayer;
 import de.tsl2.nano.core.log.LogFactory;
 import de.tsl2.nano.core.util.AnnotationProxy;
@@ -249,11 +250,13 @@ public class XmlUtil {
                 new SimpleXmlArrayWorkaround()).read(type,
                     fileInputStream = new FileInputStream(new File(xmlFile)));
         } catch (Exception e) {
+        	Message.send(e);
+        	if (fileInputStream != null)
+        		fileInputStream = FileUtil.close(fileInputStream, false);
             //mark the loaded xml file as corrupt
             if (renameOnError && (ENV.isAvailable() && !ENV.get("app.mode.strict", false))) {
                 File file = new File(xmlFile);
                 if (file.canWrite()) {
-                    fileInputStream = FileUtil.close(fileInputStream, false);
                     LOG.info("renaming corrupted file '" + xmlFile + "' to: " + xmlFile + ".failed");
                     if (!file.renameTo(new File(file.getPath() + ".failed")))
                         LOG.warn("couldn't rename corrupted file '" + xmlFile + "' to '" + xmlFile
@@ -276,8 +279,6 @@ public class XmlUtil {
             }
             //don't use the ManagedException.forward(), because the LogFactory is using this, too!
             throw new RuntimeException(e);
-        } finally {
-            FileUtil.close(fileInputStream, false);
         }
     }
 

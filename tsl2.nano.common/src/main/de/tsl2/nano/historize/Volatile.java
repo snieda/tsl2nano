@@ -37,6 +37,10 @@ public class Volatile<T> {
     /** value to hold for a short time */
     T value;
 
+    public Volatile(long period) {
+        this(period, null);
+    }
+    
     /**
      * constructor
      * 
@@ -73,9 +77,10 @@ public class Volatile<T> {
        start = 0;
        return last;
     }
-    public void set(T value) {
+    public T set(T value) {
         this.value = value;
         activate();
+        return value;
     }
 
     /**

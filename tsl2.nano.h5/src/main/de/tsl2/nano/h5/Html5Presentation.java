@@ -60,9 +60,9 @@ import de.tsl2.nano.action.CommonAction;
 import de.tsl2.nano.action.IAction;
 import de.tsl2.nano.bean.BeanContainer;
 import de.tsl2.nano.bean.BeanUtil;
-import de.tsl2.nano.bean.IRuleCover;
 import de.tsl2.nano.bean.ValueHolder;
 import de.tsl2.nano.bean.def.Attachment;
+import de.tsl2.nano.bean.def.AttributeCover;
 import de.tsl2.nano.bean.def.AttributeDefinition;
 import de.tsl2.nano.bean.def.Bean;
 import de.tsl2.nano.bean.def.BeanCollector;
@@ -318,7 +318,7 @@ public class Html5Presentation<T> extends BeanPresentationHelper<T> implements I
 
     @Override
     public void reset() {
-        IRuleCover.resetTypeCache();
+        AttributeCover.resetTypeCache();
         ENV.get(RulePool.class).reset();
         ENV.get(QueryPool.class).reset();
         ENV.get(ActionPool.class).reset();

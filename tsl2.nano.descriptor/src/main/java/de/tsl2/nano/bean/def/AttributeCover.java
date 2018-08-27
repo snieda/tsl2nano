@@ -24,6 +24,7 @@ import org.simpleframework.xml.ElementMap;
 
 import de.tsl2.nano.bean.IConnector;
 import de.tsl2.nano.bean.IRuleCover;
+import de.tsl2.nano.core.ENV;
 import de.tsl2.nano.core.cls.BeanAttribute;
 import de.tsl2.nano.core.cls.BeanClass;
 import de.tsl2.nano.core.cls.PrivateAccessor;
@@ -34,6 +35,7 @@ import de.tsl2.nano.core.util.IDelegationHandler;
 import de.tsl2.nano.core.util.MapUtil;
 import de.tsl2.nano.core.util.StringUtil;
 import de.tsl2.nano.core.util.Util;
+import de.tsl2.nano.historize.Volatile;
 
 /**
  * The AttributeCover is a plugin to {@link AttributeDefinition}s and enables a container of properties to evaluate the
@@ -63,6 +65,8 @@ public abstract class AttributeCover<T> extends DelegationHandler<T> implements
     transient Serializable contextObject;
     @Attribute(required = false)
     String name;
+
+	private transient Volatile<T> value;
 
     /**
      * constructor
@@ -189,17 +193,16 @@ public abstract class AttributeCover<T> extends DelegationHandler<T> implements
     @Override
     public boolean hasRule(String propertyPath) {
 //        String typedName = RuleExpression.expressionPattern().matches(propertyPath) ? propertyPath : AbstractRule.PREFIX + propertyPath;
-        boolean hasRule = rules.containsKey(propertyPath);
+        String ruleName = rules.get(propertyPath);
         boolean existRule = false;
-        if (hasRule) {
-            String ruleName = rules.get(propertyPath);
+        if (ruleName != null) {
             existRule = checkRule(ruleName);
             if (!existRule) {
                 Message.send("couldn't find rule '" + ruleName + "' for property '" + propertyPath
                     + "' in specifications!");
             }
         }
-        return hasRule && existRule;
+        return ruleName != null && existRule;
     }
 
     abstract protected boolean checkRule(String ruleName);
@@ -230,13 +233,20 @@ public abstract class AttributeCover<T> extends DelegationHandler<T> implements
         if (BeanAttribute.isGetterMethod(method)) {
             String name = BeanAttribute.getName(method);
             if (hasRule(name)) {
-                return eval(name);
+            	Volatile<T> vvalue = getVolatileValue();
+				return vvalue.expired() ? vvalue.set((T)eval(name)) : vvalue.get();
             }
         }
         return method.invoke(delegate, args);
     }
 
-    /**
+    private Volatile<T> getVolatileValue() {
+    	if (value == null)
+    		value = new Volatile<T>(ENV.get("cache.expire.milliseconds.attributecover", 50));
+		return value;
+	}
+
+	/**
      * {@inheritDoc} the connection will be done for definitions and instances!
      */
     @SuppressWarnings({ "unchecked", "rawtypes" })
@@ -282,12 +292,38 @@ public abstract class AttributeCover<T> extends DelegationHandler<T> implements
 
         if (!nameFound)
             throw new IllegalStateException("no attribute matches for attributedefinition for " + rules.keySet());
-        cachedConnectionEndTypes.add(connectionEnd.getDeclaringClass());
+        addRuleCover(connectionEnd);
         return this;
     }
 
     @Override
     public void disconnect(IAttributeDefinition<?> connectionEnd) {
         throw new UnsupportedOperationException();
+    }
+
+    /* 
+     * technical workaround for performance
+     * TODO: to enhance performance, all beans with their proxies should be cached!
+     * TODO: on Bean.createBean(...).createAttributeDefinitions(...) only valueColum+presentable are deep copies,
+     *       if a rule is defined on Constraint etc. these instances should be copied, too.
+     * TODO: define a clean caching-mechanism with access methods! 
+     */
+    
+    /** to perform on injecting instances into rule-covers, this set holds all attributes that have to be covered */
+    static Set<IAttributeDefinition<?>> cachedConnectionEndTypes = new HashSet<>();
+    static void addRuleCover(IAttributeDefinition<?> attr) {
+    	cachedConnectionEndTypes.add(definitionOf(attr));
+    }
+	static boolean hasRuleCover(IAttributeDefinition<?> attr) {
+		if (attr.isVirtual())
+			return false; //TODO: howto get BeanDefinition of virtual attribute?
+		return cachedConnectionEndTypes.contains(definitionOf(attr));
+    }
+    static IAttributeDefinition<?> definitionOf(IAttributeDefinition<?> attr) {
+		return attr.getClass().equals(AttributeDefinition.class) ? attr : BeanDefinition.getBeanDefinition(attr.getDeclaringClass()).getAttribute(attr.getName());
+	}
+
+    public static void resetTypeCache() {
+        cachedConnectionEndTypes.clear();
     }
 }

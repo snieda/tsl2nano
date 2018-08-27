@@ -38,9 +38,9 @@ import org.apache.commons.logging.Log;
 
 import de.tsl2.nano.bean.BeanContainer;
 import de.tsl2.nano.bean.IBeanContainer;
-import de.tsl2.nano.bean.IRuleCover;
 import de.tsl2.nano.bean.def.AbstractExpression;
 import de.tsl2.nano.bean.def.Attachment;
+import de.tsl2.nano.bean.def.AttributeCover;
 import de.tsl2.nano.bean.def.Bean;
 import de.tsl2.nano.bean.def.BeanCollector;
 import de.tsl2.nano.bean.def.BeanDefinition;
@@ -1152,7 +1152,7 @@ public class NanoH5 extends NanoHTTPD implements ISystemConnector<Persistence> {
         ENV.get(ActionPool.class).reset();
         BeanContainer.reset();
         Bean.clearCache();
-        IRuleCover.resetTypeCache();
+        AttributeCover.resetTypeCache();
         
         sessions.clear();
         ENV.reload();

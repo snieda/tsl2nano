@@ -109,7 +109,6 @@ import de.tsl2.nano.h5.Controller;
 import de.tsl2.nano.h5.Html5Presentation;
 import de.tsl2.nano.h5.Increaser;
 import de.tsl2.nano.h5.NanoH5App;
-import de.tsl2.nano.h5.NanoH5Util;
 import de.tsl2.nano.h5.QueryResult;
 import de.tsl2.nano.h5.RuleCover;
 import de.tsl2.nano.h5.SpecifiedAction;
@@ -553,11 +552,12 @@ public class Timesheet extends NanoH5App {
         style = bean.getAttribute(ATTR_FROMDATE).getColumnDefinition().getPresentable().getLayoutConstraints();
         assertEquals(redColorStyle, style);
 
-        //test it on value-column in beancollector
+        //test it on value-column in beancollector -> here it must be null, because its a definition, not a bean value!
         BeanCollector<Collection<Charge>,Charge> collector = BeanCollector.getBeanCollector(Arrays.asList(c), 0);
-        collector.nextRow();
         style = collector.getAttribute(ATTR_FROMDATE).getColumnDefinition().getPresentable().getLayoutConstraints();
-        assertEquals(redColorStyle, style);
+        assertEquals(null, style);
+
+        assertEquals(c, collector.nextRow());
 
         //test the queries
         QueryPool qpool = ENV.get(QueryPool.class);
