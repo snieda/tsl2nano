@@ -86,14 +86,6 @@ public abstract class AttributeCover<T> extends DelegationHandler<T> implements
         this.name = name;
         this.rules = rules;
 
-//        //store its own property rules (cutting the prefix of its name)
-//        Set<String> props = rules.keySet();
-//        rules = new Hashtable<>();
-//        for (String k : props) {
-//            if (k.startsWith(name + ".")) {
-//                rules.put(StringUtil.substring(k, name + ".", null), rules.get(k));
-//            }
-//        }
     }
 
     /**
@@ -119,6 +111,7 @@ public abstract class AttributeCover<T> extends DelegationHandler<T> implements
     /**
      * covers the given child (as member!) of the instance attribute with the given rule
      * 
+     * @param implementationClass AttributeCover implementation (e.g. RuleCover.class from tsl2.nano.h5)
      * @param cls class holding the attribute
      * @param attr class attribute
      * @param child child (member!) of attribute
@@ -144,6 +137,7 @@ public abstract class AttributeCover<T> extends DelegationHandler<T> implements
     @SuppressWarnings("unchecked")
     public T cover(T child, Class<T> interfaze, Serializable contextObject) {
         delegate = child;
+        interfaces = new Class[] {interfaze};
         setContext(contextObject);
         return (T) Proxy.newProxyInstance(Thread.currentThread().getContextClassLoader(), new Class[] { interfaze }, this);
     }
@@ -166,7 +160,7 @@ public abstract class AttributeCover<T> extends DelegationHandler<T> implements
         PrivateAccessor<IAttributeDefinition> privAcc = null;
         if (parentProxy == null) { //try it through its members
             privAcc = new PrivateAccessor<>(attribute);
-            parentProxy = privAcc.member(StringUtil.substring(child, ".", null));
+            parentProxy = privAcc.member(StringUtil.substring(child, null, "."));
         }
         if (!Proxy.isProxyClass(parentProxy.getClass()))
             LOG.error("no rule-cover found for " + attr + "." + child);
@@ -174,12 +168,14 @@ public abstract class AttributeCover<T> extends DelegationHandler<T> implements
         if (handler instanceof AttributeCover) {
             Object realObject = ((AttributeCover) handler).getDelegate();
             if (privAcc != null) //-> as member
-                privAcc.set(StringUtil.substring(child, ".", null), realObject);
+                privAcc.set(StringUtil.substring(child, null, "."), realObject);
             else //as bean attribute
                 bean.setValue(parent, realObject);
         } else {
             LOG.error("proxy for " + attr + "." + child + " is not a AttributeCover instance!");
         }
+        cachedConnectionEndTypes.remove(attribute);
+        
     }
 
     @Override
@@ -304,9 +300,6 @@ public abstract class AttributeCover<T> extends DelegationHandler<T> implements
     /* 
      * technical workaround for performance
      * TODO: to enhance performance, all beans with their proxies should be cached!
-     * TODO: on Bean.createBean(...).createAttributeDefinitions(...) only valueColum+presentable are deep copies,
-     *       if a rule is defined on Constraint etc. these instances should be copied, too.
-     * TODO: define a clean caching-mechanism with access methods! 
      */
     
     /** to perform on injecting instances into rule-covers, this set holds all attributes that have to be covered */

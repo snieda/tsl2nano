@@ -113,7 +113,7 @@ public class DelegationHandler<T> implements IDelegationHandler<T>, Serializable
     }
 
 	@SuppressWarnings("unchecked")
-	private void setInterfaces(T delegate) {
+	protected void setInterfaces(T delegate) {
 		this.interfaces = delegate != null ? BeanClass.getBeanClass(delegate.getClass())
                 .getInterfaces() : new Class[0];
 	}

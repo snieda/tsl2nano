@@ -6,6 +6,7 @@ import static org.junit.Assert.fail;
 
 import java.io.FileNotFoundException;
 import java.io.Serializable;
+import java.math.BigDecimal;
 import java.util.Collection;
 
 import org.junit.AfterClass;
@@ -49,6 +50,12 @@ public class AnnotationExtensionTest implements ENVTestPreparation {
     }
 
     @Test
+    public void testCSheet() {
+        de.tsl2.nano.h5.CSheet sheet = getVirtualDefinition(de.tsl2.nano.h5.CSheet.class);
+        assertEquals(new BigDecimal(6), sheet.get(0, 1));
+    }
+
+    @Test
     public void testQueryAndSpecification() {
         getVirtualDefinition(de.tsl2.nano.h5.QueryResult.class);
     }
@@ -82,6 +89,9 @@ public class AnnotationExtensionTest implements ENVTestPreparation {
 @With(SpecificationAnnotationFactory.class) @Specification(name="myquery", specificationType=SpecificationType.QUERY, expression="select...")
 @With(QueryAnnotationFactory.class) @Query(name="myquery", icon="icons/go.png")
 @With(CompositorAnnotationFactory.class) @Compositor(baseType=Base.class, baseAttribute="name", targetAttribute="composition", iconAttribute="icon")
+@With(CSheetAnnotationFactory.class) @CSheet(title="myCSheet", rows=3, cols=3, cells = {
+    @CCell(row=0, col=0, value="1"), @CCell(row=0, col=1, value="=A1+5")
+})
 class BeanType {
     Composition composition;
 

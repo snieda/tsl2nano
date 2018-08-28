@@ -3168,6 +3168,7 @@ On your Entity (directly following a @With annotation):
 * Query           : creates a view panel through a select (@With(QueryAnnotationFactory.class))
 * VirtualAttribute: defines a new virtual attribute for the entity to show a calculated value (@With(VirtualAttributeAnnotationFactory.class))
 * Specification   : defines a new rule, query, action, url to evaluate a value (@With(SpecificationAnnotationFactory.class))
+* CSheet          : defines a new CSheet (like a primitive excel-sheet to be filled with value, expressions, sql-statements) (@With(CSheetAnnotationFactory.class))
 
 On a getter method (directly following a @With annotation): 
 
@@ -3309,6 +3310,9 @@ An Example using the _@With_ annotation:
 @With(SpecificationAnnotationFactory.class) @Specification(name="myquery", specificationType=SpecificationType.QUERY, expression="select...")
 @With(QueryAnnotationFactory.class) @Query(name="myquery", icon="icons/go.png")
 @With(CompositorAnnotationFactory.class) @Compositor(baseType=Base.class, baseAttribute="name", targetAttribute="composition", iconAttribute="icon")
+@With(CSheetAnnotationFactory.class) @CSheet(title="myCSheet", rows=3, cols=3, cells = {
+    @CCell(row=0, col=0, value="1"), @CCell(row=0, col=1, value="=A1+5")
+})
 class BeanType {
     Composition composition;
 
