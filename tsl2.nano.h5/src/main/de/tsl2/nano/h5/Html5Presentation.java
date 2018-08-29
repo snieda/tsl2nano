@@ -1166,18 +1166,16 @@ public class Html5Presentation<T> extends BeanPresentationHelper<T> implements I
         int width = -1;
         Element cell = null;
         try {
-            if (useSideNav(0)) {//using the side bar, all buttons must always have the same size!
-                width = ENV.get("layout.action.width", 200);
-                if (width == -1) // if already set to -1 previously... 
-                    ENV.setProperty("layout.action.width", 200);
-            }            
             if (useSideNav(actions.size())) {
                 cell = sideNav = createSidebarNavMenuButton(parent, sideNav);
+                width = setTemporaryWidth200();
             } else {
+                if (useSideNav(Integer.MAX_VALUE))
+                    width = setTemporaryWidth200();
                 Element panel =
-                        createGrid(parent, "Actions", "action.panel", /*actions != null ? 1 + actions.size() : 1*/0);
-                    Element row = appendTag(panel, TABLE(TAG_ROW, ATTR_CLASS, "actionpanel"));
-                    cell = appendTag(row, TABLE(TAG_CELL, attributes));
+                    createGrid(parent, "Actions", "action.panel", /*actions != null ? 1 + actions.size() : 1*/0);
+                Element row = appendTag(panel, TABLE(TAG_ROW, ATTR_CLASS, "actionpanel"));
+                cell = appendTag(row, TABLE(TAG_CELL, attributes));
             }
             appendAttributes(cell, ATTR_STYLE, ENV.get("layout.action.panel", ""));
             if (actions != null) {
@@ -1193,6 +1191,14 @@ public class Html5Presentation<T> extends BeanPresentationHelper<T> implements I
             }
         }
         return cell;
+    }
+
+    private int setTemporaryWidth200() {
+        int width;
+        width = ENV.get("layout.action.width", -1);
+        if (width == -1)
+            ENV.setProperty("layout.action.width", 200);
+        return width;
     }
 
     private Element createAction(Element cell, IAction a) {
