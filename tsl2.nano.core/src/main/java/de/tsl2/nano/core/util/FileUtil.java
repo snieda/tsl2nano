@@ -1243,7 +1243,7 @@ public class FileUtil {
     }
 
     public static String getRelativePath(File file, String currentPath) {
-        return getRelativePath(file.getAbsoluteFile().getPath(), userDirFile(currentPath).getPath());
+        return getRelativePath(file.getPath(), userDirFile(currentPath).getPath());
     }
 
     /**

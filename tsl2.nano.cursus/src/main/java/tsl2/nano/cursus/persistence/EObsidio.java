@@ -15,7 +15,7 @@ import tsl2.nano.cursus.Grex;
 import tsl2.nano.cursus.Obsidio;
 
 @Entity
-@ValueExpression(expression="{consiliumID} ({grex}: {timer})")
+@ValueExpression("{consiliumID} ({grex}: {timer})")
 @Attributes(names= {"consiliumID", "grex", "timer"})
 @Presentable(label="ΔObsidio", icon="icons/blocked.png")
 public class EObsidio extends Obsidio implements IPersistable<String>{

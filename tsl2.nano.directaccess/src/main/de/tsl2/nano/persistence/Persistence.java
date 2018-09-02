@@ -659,6 +659,18 @@ public class Persistence implements Serializable, Cloneable {
         return (urlOrDriver.contains("hsqldb")
                 || urlOrDriver.contains("h2"));
     }
+
+    public static boolean isH2(String url) {
+        return url.matches("jdbc[:]h2[:].*");
+    }
+    /**
+     * url to an sql tool, if it is an embedded database.
+     * @return optional SQL Tool like the one of H2 on port 8082
+     */
+    public String getSQLToolURL() {
+        return isEmbeddedDatabase() && isH2(connectionUrl) ? "http://localhost:8082" : null;
+    }
+    
     @Override
     public Persistence clone() throws CloneNotSupportedException {
         return (Persistence) super.clone();
@@ -673,4 +685,5 @@ public class Persistence implements Serializable, Cloneable {
     public void setAuth(String auth) {
         this.auth = auth;
     }
+
 }

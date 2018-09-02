@@ -131,7 +131,7 @@ public class CursusEntityTest implements Serializable /* only for the inner-clas
 		checkAnnotation(entity, "attributeNames", Attributes.class, "names");
 		checkAnnotation(entity, "presentable.icon", Presentable.class, "icon");
 		checkAnnotation(entity, "presentable.label", Presentable.class, "label");
-		checkAnnotation(entity, "valueExpression.expression", ValueExpression.class, "expression");
+		checkAnnotation(entity, "valueExpression.expression", ValueExpression.class, "value");
 
 		checkAnnotation(entity, "presentable.visible", "id", Presentable.class, "visible");
 //		checkAnnotation(entity, "presentable.enabler.active", "exsecutios", Presentable.class, "enabled");

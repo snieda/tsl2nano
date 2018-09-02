@@ -12,7 +12,7 @@ import de.tsl2.nano.bean.annotation.ValueExpression;
 import de.tsl2.nano.service.util.IPersistable;
 
 @Entity
-@ValueExpression(expression="{grex}: {effectus}")
+@ValueExpression("{grex}: {effectus}")
 @Attributes(names= {"grex", "effectus"})
 @Presentable(label="ΔGrex-Effectus", icon="icons/links.png")
 public class EGrexEffectus implements IPersistable<String> {

@@ -14,7 +14,7 @@ import de.tsl2.nano.service.util.IPersistable;
 import tsl2.nano.cursus.effectus.RuleEffectus;
 
 @Entity
-@ValueExpression(expression="{ruleName}: {res}")
+@ValueExpression("{ruleName}: {res}")
 @Attributes(names= {"ruleName", "res"})
 @Presentable(label="ΔRule-Effectus", icon="icons/attach.png")
 public class ERuleEffectus extends RuleEffectus<Object, Object> implements IPersistable<String> {

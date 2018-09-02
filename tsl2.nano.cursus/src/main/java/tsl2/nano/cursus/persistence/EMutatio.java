@@ -16,7 +16,7 @@ import de.tsl2.nano.service.util.IPersistable;
 import tsl2.nano.cursus.Mutatio;
 
 @Entity
-@ValueExpression(expression="{res}: {next}")
+@ValueExpression("{res}: {next}")
 @Attributes(names= {"previous", "next", "res"})
 @Presentable(label="ΔMutatio", icon="icons/compose.png")
 public class EMutatio extends Mutatio<Object, Object> implements IPersistable<String> {

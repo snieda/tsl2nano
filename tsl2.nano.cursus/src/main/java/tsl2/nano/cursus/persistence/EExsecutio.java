@@ -18,7 +18,7 @@ import de.tsl2.nano.service.util.IPersistable;
 import tsl2.nano.cursus.Exsecutio;
 
 @Entity
-@ValueExpression(expression="{name}: {mutatio} -> {effectus}")
+@ValueExpression("{name}: {mutatio} -> {effectus}")
 @Attributes(names= {"name", "description", "consilium", "mutatio", "effectus"})
 @Presentable(label="ΔExsecutio", icon="icons/wrench.png")
 public class EExsecutio extends Exsecutio<Object> implements IPersistable<String> {

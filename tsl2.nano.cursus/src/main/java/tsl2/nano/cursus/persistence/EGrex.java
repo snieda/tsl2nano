@@ -20,7 +20,7 @@ import de.tsl2.nano.service.util.IPersistable;
 import tsl2.nano.cursus.Grex;
 
 @Entity
-@ValueExpression(expression="{genRes}")
+@ValueExpression("{genRes}")
 @Attributes(names= {"genRes", "validObjectIDs"})
 @Presentable(label="ΔGrex", icon="icons/cascade.png")
 public class EGrex extends Grex<Object, Object> implements IPersistable<String> {

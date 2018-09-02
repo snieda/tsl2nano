@@ -23,7 +23,7 @@ import de.tsl2.nano.service.util.IPersistable;
 import tsl2.nano.cursus.Consilium;
 
 @Entity
-@ValueExpression(expression="{name}: {timer} {status}")
+@ValueExpression("{name}: {timer} {status}")
 @Attributes(names= {"name", "author", "priority", "timer", "exsecutios"})
 @Presentable(label="ΔConsilium", icon="icons/blue_pin.png")
 public class EConsilium extends Consilium implements IPersistable<String> {

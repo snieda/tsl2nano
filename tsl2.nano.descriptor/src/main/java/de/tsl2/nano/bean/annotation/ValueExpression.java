@@ -22,5 +22,5 @@ import java.lang.annotation.Target;
 @Retention(RetentionPolicy.RUNTIME)
 @Target({ElementType.PARAMETER, ElementType.TYPE})
 public @interface ValueExpression {
-    String expression() default "";
+    String value();
 }

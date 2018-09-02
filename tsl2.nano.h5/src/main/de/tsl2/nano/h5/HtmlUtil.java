@@ -492,7 +492,9 @@ public class HtmlUtil {
             trans.setOutputProperty(OutputKeys.INDENT, "yes");
 //            trans.setOutputProperty(OutputKeys.METHOD, "xml");
             trans.setOutputProperty(OutputKeys.ENCODING, "UTF-8");
-
+            trans.setOutputProperty(OutputKeys.DOCTYPE_SYSTEM, "html");
+            trans.setOutputProperty(OutputKeys.VERSION, "text"); //-> to be ignored
+            
             //create string from xml tree
             StringWriter sw = new StringWriter();
             StreamResult result = new StreamResult(sw);

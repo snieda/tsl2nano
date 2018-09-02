@@ -21,7 +21,7 @@ import de.tsl2.nano.service.util.IPersistable;
 import tsl2.nano.cursus.Res;
 
 @Entity
-@ValueExpression(expression="@{typeName}:{objectid}->{path}")
+@ValueExpression("@{typeName}:{objectid}->{path}")
 @Attributes(names= {"typeName", "path", "objectid"})
 @Presentable(label="ΔRes", icon="icons/images_all.png")
 public class ERes extends Res<Object, Object> implements IPersistable<String> {

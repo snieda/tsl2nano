@@ -22,6 +22,7 @@ import de.tsl2.nano.core.messaging.EventController;
 import de.tsl2.nano.core.util.BitUtil;
 import de.tsl2.nano.core.util.ByteUtil;
 import de.tsl2.nano.core.util.FileUtil;
+import de.tsl2.nano.core.util.StringUtil;
 import de.tsl2.nano.core.util.Util;
 
 /**
@@ -178,6 +179,16 @@ public class Attachment implements IValueAccess<byte[]>, IAttribute<byte[]> {
         return FileUtil.getFileBytes(getFilename(instance, attribute, file), null);
     }
 
+    public static String getFilename(Object instance, String attribute, String name, boolean trailOnPath) {
+    	String filename = getFilename(instance, attribute, name);
+    	if (new File(filename).exists()) {
+    		return filename;
+    	} else {
+    		name = FileUtil.replaceToJavaSeparator(name);
+    		return getFilename(instance, attribute, StringUtil.substring(name, "/", null, true));
+    	} 
+    }
+    
     /**
      * getAttachmentFilename
      * 

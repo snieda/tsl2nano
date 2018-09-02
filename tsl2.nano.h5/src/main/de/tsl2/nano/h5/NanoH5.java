@@ -641,7 +641,6 @@ public class NanoH5 extends NanoHTTPD implements ISystemConnector<Persistence> {
      */
     @Override
     public synchronized BeanDefinition<?> connect(Persistence persistence) {
-        Plugins.process(INanoPlugin.class).definePersistence(persistence);
         
         //define a new classloader to access all beans of given jar-file
         ClassLoader rootCl;
@@ -1071,7 +1070,7 @@ public class NanoH5 extends NanoHTTPD implements ISystemConnector<Persistence> {
     }
 
     private boolean isH2(String url) {
-        return url.matches("jdbc[:]h2[:].*");
+        return Persistence.isH2(url);
     }
 
     private boolean canConnectToLocalDatabase(Persistence persistence) {

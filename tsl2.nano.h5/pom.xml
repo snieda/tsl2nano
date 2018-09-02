@@ -36,7 +36,10 @@
 		<testResources>
 			<testResource>
 				<directory>src/test</directory>
-				<excludes><exclude>**/*.class</exclude></excludes>
+				<excludes>
+					<exclude>**/*.class</exclude>
+					<exclude>**/persistence.xml</exclude>
+				</excludes>
 			</testResource>
 		</testResources>
 		<resources>

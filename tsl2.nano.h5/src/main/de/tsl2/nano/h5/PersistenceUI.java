@@ -37,9 +37,11 @@ import de.tsl2.nano.core.util.SortedProperties;
 import de.tsl2.nano.core.util.StringUtil;
 import de.tsl2.nano.core.util.Util;
 import de.tsl2.nano.format.RegExpFormat;
+import de.tsl2.nano.h5.plugin.INanoPlugin;
 import de.tsl2.nano.h5.websocket.WSEvent;
 import de.tsl2.nano.h5.websocket.WebSocketDependencyListener;
 import de.tsl2.nano.persistence.Persistence;
+import de.tsl2.nano.plugin.Plugins;
 
 /**
  * factory to create a user interface for {@link Persistence}.
@@ -499,6 +501,7 @@ public class PersistenceUI {
             }
         };
         login.addAction(loginAction);
+        Plugins.process(INanoPlugin.class).definePersistence(persistence);
         return login;
     }
 

@@ -118,6 +118,7 @@ import de.tsl2.nano.h5.websocket.WebSocketRuleDependencyListener;
 import de.tsl2.nano.incubation.specification.actions.ActionPool;
 import de.tsl2.nano.incubation.specification.rules.RuleDependencyListener;
 import de.tsl2.nano.incubation.specification.rules.RulePool;
+import de.tsl2.nano.persistence.Persistence;
 import de.tsl2.nano.plugin.Plugins;
 import de.tsl2.nano.script.ScriptTool;
 
@@ -273,6 +274,24 @@ public class Html5Presentation<T> extends BeanPresentationHelper<T> implements I
                             }
                         };
                         beanTool.addAction(queryDefiner);
+                        id = "scripttool.define.urltodatabase";
+                        lbl = ENV.translate("database tool", true);
+                        IAction dbToolURL = new CommonAction(id, lbl, lbl) {
+                            @Override
+                            public Object action() throws Exception {
+                                return Persistence.current().getSQLToolURL();
+                            }
+
+                            @Override
+                            public boolean isEnabled() {
+                                return super.isEnabled() && Persistence.current() != null && Persistence.current().getSQLToolURL() != null;
+                            }
+                            @Override
+                            public String getImagePath() {
+                                return "icons/equipment.png";
+                            }
+                        };
+                        beanTool.addAction(dbToolURL);
                     }
                     return beanTool;
                 }
@@ -1929,7 +1948,7 @@ public class Html5Presentation<T> extends BeanPresentationHelper<T> implements I
                                     if (writeFile && (ByteUtil.isByteStream(v.getClass())
                                         || Serializable.class.isAssignableFrom(v.getClass())))
                                         FileUtil.writeBytes(ByteUtil.getBytes(v),
-                                            ENV.getTempPath() + beanValue.getValueFile().getPath(),
+                                            beanValue.getValueFile().getPath(),
                                             false);
                                     else if (writeFile)
                                         throw new IllegalStateException("attachment of attribute '"

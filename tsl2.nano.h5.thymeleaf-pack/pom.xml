@@ -19,7 +19,9 @@
 			...Artifact has not been packaged yet. When used on reactor artifact, unpack should be executed after packaging... -->
 	<build>
 		<resources>
-			<resource><directory>src/main/resources</directory></resource>
+			<resource>
+				<directory>src/main/resources</directory>
+			</resource>
 		</resources>
 		<plugins>
  			<plugin>

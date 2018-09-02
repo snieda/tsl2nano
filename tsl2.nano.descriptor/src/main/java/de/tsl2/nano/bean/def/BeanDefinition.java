@@ -769,15 +769,13 @@ public class BeanDefinition<T> extends BeanClass<T> implements IPluggable<BeanDe
      */
     public IPresentable getPresentable() {
         if (presentable == null) {
+            presentable = (Presentable) ENV.get(BeanPresentationHelper.class).createPresentable();
+            presentable.setLabel(toString());
+            presentable.setDescription(toString());
             if (getClazz().isAnnotationPresent(de.tsl2.nano.bean.annotation.Presentable.class)) {
                 de.tsl2.nano.bean.annotation.Presentable p =
                     getClazz().getAnnotation(de.tsl2.nano.bean.annotation.Presentable.class);
-                presentable = (Presentable) getPresentationHelper().createPresentable();
                 Presentable.fillPresentable(p, presentable);
-            } else {
-	            presentable = (Presentable) ENV.get(BeanPresentationHelper.class).createPresentable();
-	            presentable.setLabel(toString());
-	            presentable.setDescription(toString());
             }
         }
         return presentable;
@@ -1434,7 +1432,7 @@ public class BeanDefinition<T> extends BeanClass<T> implements IPluggable<BeanDe
         if (valueExpression == null) {
         	if (getClazz().isAnnotationPresent(de.tsl2.nano.bean.annotation.ValueExpression.class)) {
         		de.tsl2.nano.bean.annotation.ValueExpression expr = getClazz().getAnnotation(de.tsl2.nano.bean.annotation.ValueExpression.class);
-        		valueExpression = new ValueExpression<>(expr.expression(), getClazz());
+        		valueExpression = new ValueExpression<>(expr.value(), getClazz());
         	} else {
 	            String presentingAttr = getPresentationHelper().getBestPresentationAttribute();
 	            if (presentingAttr != null) {

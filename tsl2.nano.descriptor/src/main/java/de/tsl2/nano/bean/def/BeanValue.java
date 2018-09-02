@@ -233,7 +233,7 @@ public class BeanValue<T> extends AttributeDefinition<T> implements IValueDefini
         if (Attachment.isAttachment(this)) {
             //--> attachment, holding the data (not a file-name only)
             //first: load the transferred temporary file
-            byte[] transferredBytes = FileUtil.getFileBytes(Attachment.getFilename(instance, getName(), source), null);
+            byte[] transferredBytes = FileUtil.getFileBytes(Attachment.getFilename(instance, getName(), source, true), null);
             //second: save that as new file - only for this instance!
             byte[] bytes = Attachment.getFileBytes(getId(), transferredBytes);
             //perhaps, convert the byte[] to an instanceof of Blob, InputStream,...

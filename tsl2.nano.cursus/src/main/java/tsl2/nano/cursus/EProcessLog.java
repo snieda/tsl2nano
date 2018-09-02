@@ -17,7 +17,7 @@ import tsl2.nano.cursus.persistence.EConsilium;
 import tsl2.nano.cursus.persistence.EProcess;
 
 @Entity
-@ValueExpression(expression="{process}: {started} {consilium} ({status})")
+@ValueExpression("{process}: {started} {consilium} ({status})")
 @Attributes(names= {"process", "started", "consilium", "status"})
 @Presentable(label="ΔProcessLog", icon="icons/about.png", enabled=false)
 public class EProcessLog implements IPersistable<String> {

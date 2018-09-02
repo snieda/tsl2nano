@@ -10,7 +10,7 @@ import de.tsl2.nano.bean.annotation.ValueExpression;
 import de.tsl2.nano.service.util.IPersistable;
 
 @Entity
-@ValueExpression(expression="{name}")
+@ValueExpression("{name}")
 @Attributes(names= {"name"})
 @Presentable(label="ΔConsilium-ID", icon="icons/point-green.png")
 public class EConsiliumID implements IPersistable<String> {

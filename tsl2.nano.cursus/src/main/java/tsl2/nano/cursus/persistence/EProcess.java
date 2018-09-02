@@ -40,7 +40,7 @@ import tsl2.nano.cursus.Processor;
 import tsl2.nano.cursus.effectus.Effectree;
 
 @Entity
-@ValueExpression(expression="{startedAt}: {startPeriod}-{endPeriod} (Items: {items}, Status: {status})")
+@ValueExpression("{startedAt}: {startPeriod}-{endPeriod} (Items: {items}, Status: {status})")
 @Attributes(names= {"startPeriod", "endPeriod", "startedAt", "items", "status", "log"})
 @Presentable(label="ΔProcess", icon="icons/go.png", enabled=false)
 public class EProcess implements IPersistable<String>, IListener<Object> {

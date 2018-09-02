@@ -16,7 +16,7 @@ import de.tsl2.nano.service.util.IPersistable;
 import tsl2.nano.cursus.Timer;
 
 @Entity
-@ValueExpression(expression="{from} <--> {until} (Step: {stepType}:{stepLength})")
+@ValueExpression("{from} <--> {until} (Step: {stepType}:{stepLength})")
 @Attributes(names= {"from", "until", "generator", "stepType", "stepLength"})
 @Presentable(label="ΔTimer", icon="icons/clock.png")
 public class ETimer extends Timer implements IPersistable<String> {
