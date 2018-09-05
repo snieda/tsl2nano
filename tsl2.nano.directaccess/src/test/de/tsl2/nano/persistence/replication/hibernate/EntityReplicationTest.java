@@ -1,9 +1,10 @@
 package de.tsl2.nano.persistence.replication.hibernate;
 
-import static org.junit.Assert.*;
+import javax.persistence.EntityManager;
 
 import org.junit.After;
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Test;
 
 public class EntityReplicationTest {
@@ -17,8 +18,13 @@ public class EntityReplicationTest {
     }
 
     @Test
+    @Ignore("entitymanager and entity must be filled!")
     public void testReplication() {
         //TODO
+        EntityManager destEM = null;
+        Object e = null;
+        new EntityReplication().replicate(new HibReplication(destEM)::strategyHibReplicate, e);
+        new EntityReplication().replicate((Class)e.getClass(), e);
     }
 
 }

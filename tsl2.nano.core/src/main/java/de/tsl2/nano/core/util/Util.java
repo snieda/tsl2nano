@@ -443,4 +443,10 @@ public class Util {
         }
         return buf.append(")").toString();
     }
+
+	public static ClassLoader getContextClassLoader() {
+		ClassLoader cl = Thread.currentThread().getContextClassLoader();
+		return cl != null ? cl : Util.class.getClassLoader();
+	}
+
 }

@@ -11,9 +11,6 @@ import javax.persistence.EntityManager;
 import javax.persistence.Persistence;
 import javax.xml.bind.JAXB;
 
-import org.hibernate.ReplicationMode;
-import org.hibernate.Session;
-
 /** <pre>
  * Replicates entities through hibernatesession.replicate(). EntityManagers will be load through their persistence unit names. 
  * To use it, 
@@ -29,6 +26,9 @@ import org.hibernate.Session;
 public class EntityReplication {
     private EntityManager src;
     private EntityManager dest;
+
+    public EntityReplication() {
+    }
     
     public EntityReplication(String srcPersistenceUnit, String destPersistenceUnit) {
         src = Persistence.createEntityManagerFactory(srcPersistenceUnit).createEntityManager();
@@ -48,28 +48,29 @@ public class EntityReplication {
     }
     
     public <T> void replicate(Class<T> entityClass, T...entities) {
-        replicate((Function<T, T>)null, (Consumer<T>)EntityReplication::strategySerialize, entities);
+        replicate((Consumer<T>)EntityReplication::strategySerialize, entities);
+    }
+    
+    public <T> void replicate(Consumer<T> strategy, T...entities) {
+        replicate((Function<T, T>)null, strategy, entities);
     }
     
     public <T> void replicate(Function<T, T> transformer, Consumer<T> strategy, T...entities) {
         Arrays.stream(entities).forEach(e -> {
             //entity must be detached from src session
-            src.detach(e);
+            if (src != null)
+                src.detach(e);
             if (transformer != null)
                 e = transformer.apply(e);
             if (strategy != null)
                 strategy.accept(e);
             });
-        dest.flush();
+        if (dest != null)
+            dest.flush();
     }
     
     public static void strategySerialize(Object entity) {
         JAXB.marshal(entity, new File(entity.getClass().getSimpleName() + ".xml"));
-    }
-    
-    public void strategyHibReplicate(Object entity) {
-        Session hibernateSession = dest.unwrap(Session.class);
-        hibernateSession.replicate(entity, ReplicationMode.OVERWRITE);
     }
     
     public static <T> T load(String fileName, Class<T> entityClass) {

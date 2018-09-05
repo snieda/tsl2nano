@@ -140,7 +140,7 @@ public class FileUtil {
      * @return
      */
     public static final ZipInputStream getJarInputStream(String jarName) {
-        InputStream jarStream = Thread.currentThread().getContextClassLoader().getResourceAsStream(jarName);
+        InputStream jarStream = Util.getContextClassLoader().getResourceAsStream(jarName);
         ZipInputStream zipStream = new ZipInputStream(jarStream);
         return zipStream;
     }
@@ -474,9 +474,10 @@ public class FileUtil {
      */
     public static Properties loadProperties(String resourceFile, ClassLoader classLoader) {
         if (classLoader == null) {
-            classLoader = Thread.currentThread().getContextClassLoader();
+            classLoader = Util.getContextClassLoader();
+        } else {
+        	Thread.currentThread().setContextClassLoader(classLoader);
         }
-        Thread.currentThread().setContextClassLoader(classLoader);
         final InputStream resource = classLoader.getResourceAsStream(resourceFile);
         if (resource == null) {
             throw new IllegalArgumentException("file: " + resourceFile + " not found");
@@ -517,7 +518,7 @@ public class FileUtil {
      * @return true, if resource was found by the current threads classloader
      */
     public static final boolean hasResource(String name) {
-        return Thread.currentThread().getContextClassLoader().getResource(name) != null;
+        return Util.getContextClassLoader().getResource(name) != null;
     }
 
     /**
@@ -525,7 +526,7 @@ public class FileUtil {
      */
     public static final InputStream getResource(String name) {
         try {
-            return getResource(name, Thread.currentThread().getContextClassLoader());
+            return getResource(name, Util.getContextClassLoader());
         } catch (Exception e) {
             ManagedException.forward(e);
             return null;
@@ -588,7 +589,7 @@ public class FileUtil {
         InputStream stream = null;
         try {
             if (classLoader == null) {
-                classLoader = Thread.currentThread().getContextClassLoader();
+                classLoader = Util.getContextClassLoader();
             }
             stream = getResource(strFile, classLoader);
             if (stream == null) {

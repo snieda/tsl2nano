@@ -1685,7 +1685,7 @@ public class Html5Presentation<T> extends BeanPresentationHelper<T> implements I
 
     protected String checkedShortCut(Character c) {
         //if there are more than 225 buttons, no check will be done!
-        if (!availableshortCuts.isEmpty() && !availableshortCuts.remove(c)) {
+        if (!Util.isEmpty(availableshortCuts) && !availableshortCuts.remove(c)) {
             c = availableshortCuts.remove(0);
         }
         return String.valueOf(c);

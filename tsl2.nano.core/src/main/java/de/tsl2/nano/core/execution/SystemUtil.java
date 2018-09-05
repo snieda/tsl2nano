@@ -21,6 +21,7 @@ import de.tsl2.nano.core.util.ByteUtil;
 import de.tsl2.nano.core.util.CollectionUtil;
 import de.tsl2.nano.core.util.NetUtil;
 import de.tsl2.nano.core.util.StringUtil;
+import de.tsl2.nano.core.util.Util;
 
 /**
  * provides some simple os execution utitilies.
@@ -182,7 +183,7 @@ public class SystemUtil {
         if (System.getProperty("java.compiler") == null)
             p.put("java.compiler", "unspecified");
         p.put("nano.tstamp", new Date());
-        p.put("main.context.classloader", Thread.currentThread().getContextClassLoader());
+        p.put("main.context.classloader", Util.getContextClassLoader());
 
         InetAddress myAddress = NetUtil.getMyAddress();
         p.put("inetadress.myip", myAddress.getHostAddress());

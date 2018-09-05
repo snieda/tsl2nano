@@ -903,7 +903,7 @@ public class BeanDefinition<T> extends BeanClass<T> implements IPluggable<BeanDe
          * will only work on about 99.9% - but works fast without castings. in java implementations, 
          * the class path is not contained in the hashCode.
          */
-        return hashCode() == obj.hashCode();
+        return obj != null && hashCode() == obj.hashCode();
     }
 
     /**

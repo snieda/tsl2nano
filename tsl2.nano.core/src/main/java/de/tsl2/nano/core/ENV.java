@@ -287,7 +287,7 @@ public class ENV implements Serializable {
 
         self.services = createServiceMap();
         addService(layer);
-        addService(ClassLoader.class, Thread.currentThread().getContextClassLoader());
+        addService(ClassLoader.class, Util.getContextClassLoader());
 
         self.properties.put(KEY_CONFIG_RELPATH, dir + "/");
         self.properties.put(KEY_CONFIG_PATH, new File(dir).getAbsolutePath().replace("\\", "/") + "/");
@@ -540,8 +540,7 @@ public class ENV implements Serializable {
      * @param head whether to add the bundle on top or bottom.
      */
     public static void registerBundle(String bundlePath, boolean head) {
-        ResourceBundle bundle = ResourceBundle.getBundle(bundlePath, Locale.getDefault(), Thread.currentThread()
-            .getContextClassLoader());
+        ResourceBundle bundle = ResourceBundle.getBundle(bundlePath, Locale.getDefault(), Util.getContextClassLoader());
         self().info("registering resource bundle '" + bundlePath + "'");
         Messages.registerBundle(bundle, head);
     }

@@ -29,7 +29,6 @@ import java.util.Properties;
 import org.anonymous.project.Address;
 import org.anonymous.project.Charge;
 import org.junit.Assert;
-import org.junit.Ignore;
 import org.junit.Test;
 
 import com.sun.jersey.api.container.httpserver.HttpServerFactory;
@@ -413,28 +412,31 @@ public class NanoH5Test implements ENVTestPreparation {
      * testJarClassloader
      */
     @Test
-    @Ignore("the jar file will be created after test...")
+//    @Ignore("the jar file will be created after test...")
     public void testJarClassloader() {
         ENV.create("target/test/classloader");
         ENV.assignENVClassloaderToCurrentThread();
         FileUtil.copy("../build.properties", ENV.getConfigPath() + "build-version.properties");
         String version = getCurrentVersion();
         assertTrue(version != null);
-        ClassLoader contextClassLoader = Thread.currentThread().getContextClassLoader();
-        NestedJarClassLoader cl = new NestedJarClassLoader(contextClassLoader, "standalone") {
-            @Override
-            protected String getRootJarPath() {
-                return "target/tsl2.nano.h5-" + version + "-standalone.jar";
-            }
-//
-//            @Override
-//            protected ZipInputStream getJarInputStream(String jarName) {
-//                return getExternalJarInputStream(jarName);
-//            }
-        };
-
-        // filter the 'standalones'
-        assertEquals(26, cl.getNestedJars().length);
+        String jarname = "target/tsl2.nano.h5-" + version + "-standalone.jar";
+        if (new File(jarname).exists()) {
+            ClassLoader contextClassLoader = Thread.currentThread().getContextClassLoader();
+            NestedJarClassLoader cl = new NestedJarClassLoader(contextClassLoader, "standalone") {
+                @Override
+                protected String getRootJarPath() {
+                    return jarname;
+                }
+    //
+    //            @Override
+    //            protected ZipInputStream getJarInputStream(String jarName) {
+    //                return getExternalJarInputStream(jarName);
+    //            }
+            };
+    
+            // filter the 'standalones'
+            assertEquals(26, cl.getNestedJars().length);
+        }
     }
 
 //    @Ignore("don't do that automatically") 

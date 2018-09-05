@@ -212,7 +212,7 @@ public class NanoH5Session implements ISession<BeanDefinition>, Serializable, IL
      * @param authorization
      * @param context
      */
-    void init(NanoH5 server,
+    protected void init(NanoH5 server,
             InetAddress inetAddress,
             IBeanNavigator navigator,
             ClassLoader appstartClassloader,

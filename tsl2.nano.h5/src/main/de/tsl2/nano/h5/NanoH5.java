@@ -165,7 +165,7 @@ public class NanoH5 extends NanoHTTPD implements ISystemConnector<Persistence> {
         this.serviceURL = getServiceURL(serviceURL);
         this.builder = builder != null ? builder : createPageBuilder();
         ENV.registerBundle(NanoH5.class.getPackage().getName() + ".messages", true);
-        appstartClassloader = Thread.currentThread().getContextClassLoader();
+        appstartClassloader = Util.getContextClassLoader();
         ENV.addService(ClassLoader.class, appstartClassloader);
         eventController = new EventController();
         sessions = Collections.synchronizedMap(
@@ -912,7 +912,8 @@ public class NanoH5 extends NanoHTTPD implements ISystemConnector<Persistence> {
 
         if ((isLocalDatabase(persistence) && !canConnectToLocalDatabase(persistence))
             || persistence.autoDllIsCreateDrop()) {
-            generateDatabase(persistence);
+            if (ENV.get("app.db.generate.database", true))
+                generateDatabase(persistence);
         }
         if (ENV.get("app.db.check.connection", true))
             checkJDBCConnection(persistence);

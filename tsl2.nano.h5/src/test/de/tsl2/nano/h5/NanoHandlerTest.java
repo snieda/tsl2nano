@@ -25,7 +25,6 @@ import de.tsl2.nano.core.Main;
 import de.tsl2.nano.core.util.ConcurrentUtil;
 import de.tsl2.nano.core.util.DelegationHandler;
 import de.tsl2.nano.core.util.ENVTestPreparation;
-import de.tsl2.nano.core.util.FileUtil;
 import de.tsl2.nano.core.util.MapUtil;
 import de.tsl2.nano.h5.NanoHTTPD.Method;
 import de.tsl2.nano.h5.navigation.IBeanNavigator;
@@ -56,14 +55,16 @@ public class NanoHandlerTest implements ENVTestPreparation {
         assertEquals(MEINHANDLERTEST, ENV.get(MEINHANDLERTEST));
         
         NanoH5 nanoH5 = (NanoH5) ENV.get(Main.class);
-        Persistence persistence = new Persistence();
+        Persistence persistence = null;
         try {
+            persistence = nanoH5.createConnectionInfo();
             nanoH5.connect(persistence);
             fail("on first time, the handler should throw an exception!");
         } catch (Exception e) {
             assertEquals("java.lang.IllegalStateException: " + MEINHANDLERTEST, e.getMessage());
         }
         try {
+            persistence = nanoH5.createConnectionInfo();
             nanoH5.connect(persistence);
         } catch (Exception e) {
 //            assertEquals(MEINHANDLERTEST, e.getStackTrace()[0].getClassName());
@@ -107,7 +108,8 @@ class NanoHandlerApp implements INanoPlugin {
 
     @Override
     public void configuration(SortedMap<Object, Object> properties, Map<Class<?>, Object> services) {
-        properties.put("app.app.show.startpage", false);
+        properties.put("app.show.startpage", false);
+        properties.put("app.db.generate.database", false);
         properties.put("app.db.check.connection", false);
         
         properties.put(ID, ID);
