@@ -224,7 +224,7 @@ public class NanoH5 extends NanoHTTPD implements ISystemConnector<Persistence> {
 
     private void enableSSL(boolean ssl) throws IOException {
         if (ssl) {
-            String keyStore = ENV.get("app.ssl.keystore.file", "nanoh5.jks");
+            String keyStore = ENV.get("app.ssl.keystore.file", "nanoh5.pks");
             LOG.info("activating ssl using keystore " + keyStore);
             makeSecure(NanoHTTPD.makeSSLSocketFactory(keyStore,
                 ENV.get("app.ssl.keystore.password", "nanoh5").toCharArray()), null);
@@ -353,6 +353,9 @@ public class NanoH5 extends NanoHTTPD implements ISystemConnector<Persistence> {
     public static URL getServiceURL(String serviceURLString) {
         if (serviceURLString == null) {
             serviceURLString = ENV.get("service.url", "http://localhost:8067");
+            //set defaults
+            ENV.get("app.ssl.activate", false);
+            ENV.get("app.ssl.shortcut", "");
             return NetUtil.url(serviceURLString);
         }
         //perhaps activate secure transport layer TLS
@@ -360,10 +363,10 @@ public class NanoH5 extends NanoHTTPD implements ISystemConnector<Persistence> {
             ENV.setProperty("app.ssl.activate", true);
         if (ENV.get("app.ssl.activate", false)) {
             ENV.setProperty("app.ssl.shortcut", "s");
-            serviceURLString.replace("http://", "https://");
+            serviceURLString = serviceURLString.replace("http://", "https://");
         } else {
             ENV.setProperty("app.ssl.shortcut", "");
-            serviceURLString.replace("https://", "http://");
+            serviceURLString = serviceURLString.replace("https://", "http://");
         }
         if (!serviceURLString.matches(".*[:][0-9]{3,5}")) {
             serviceURLString = "localhost:" + serviceURLString;

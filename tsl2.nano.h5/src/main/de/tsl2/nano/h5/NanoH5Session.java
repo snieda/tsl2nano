@@ -11,6 +11,8 @@ package de.tsl2.nano.h5;
 
 import static de.tsl2.nano.bean.def.BeanPresentationHelper.KEY_FILTER_FROM_LABEL;
 import static de.tsl2.nano.bean.def.BeanPresentationHelper.KEY_FILTER_TO_LABEL;
+import static de.tsl2.nano.bean.def.IBeanCollector.MODE_CREATABLE;
+import static de.tsl2.nano.bean.def.IBeanCollector.MODE_EDITABLE;
 import static de.tsl2.nano.bean.def.IBeanCollector.MODE_SEARCHABLE;
 import static de.tsl2.nano.h5.HtmlUtil.BTN_ASSIGN;
 import static de.tsl2.nano.h5.HtmlUtil.BTN_CANCEL;
@@ -26,6 +28,9 @@ import java.lang.Thread.UncaughtExceptionHandler;
 import java.net.InetAddress;
 import java.net.InetSocketAddress;
 import java.net.URL;
+import java.security.KeyManagementException;
+import java.security.KeyStore;
+import java.security.NoSuchAlgorithmException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
@@ -38,8 +43,11 @@ import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.Executors;
 
+import javax.net.ssl.SSLContext;
+
 import org.apache.commons.logging.Log;
 import org.java_websocket.WebSocket;
+import org.java_websocket.server.DefaultSSLWebSocketServerFactory;
 
 import de.tsl2.nano.action.IAction;
 import de.tsl2.nano.bean.BeanContainer;
@@ -67,6 +75,7 @@ import de.tsl2.nano.core.execution.Profiler;
 import de.tsl2.nano.core.log.LogFactory;
 import de.tsl2.nano.core.messaging.EMessage;
 import de.tsl2.nano.core.messaging.IListener;
+import de.tsl2.nano.core.secure.PKI;
 import de.tsl2.nano.core.util.ConcurrentUtil;
 import de.tsl2.nano.core.util.DateUtil;
 import de.tsl2.nano.core.util.FileUtil;
@@ -282,9 +291,9 @@ public class NanoH5Session implements ISession<BeanDefinition>, Serializable, IL
      */
     private void createExceptionHandler() {
         if (ENV.get("websocket.use", true)) {
-            final NanoWebSocketServer socketServer =
-                new NanoWebSocketServer(this, createSocketAddress());
-            websocketPort = socketServer.getPort();
+            final NanoWebSocketServer socketServer = createWebSocketServer(
+                ENV.get("app.ssl.keystore.file", "nanoh5.pks"), 
+                ENV.get("app.ssl.keystore.password", "nanoh5"));
             this.exceptionHandler =
                 (ExceptionHandler) ENV.addService(UncaughtExceptionHandler.class,
                     new WebSocketExceptionHandler(socketServer));
@@ -312,6 +321,23 @@ public class NanoH5Session implements ISession<BeanDefinition>, Serializable, IL
         }
         Thread.currentThread().setUncaughtExceptionHandler(exceptionHandler);
         ConcurrentUtil.setCurrent(exceptionHandler);
+    }
+
+    private NanoWebSocketServer createWebSocketServer(String keystoreName, String password) {
+        final NanoWebSocketServer socketServer =
+            new NanoWebSocketServer(this, createSocketAddress());
+        if (ENV.get("app.ssl.activate", false)) {
+            try {
+                SSLContext sslContext = SSLContext.getInstance(ENV.get("app.ssl.wss.protocol", "SSLv3"));
+                KeyStore keyStore = PKI.createKeyStore(KeyStore.getDefaultType(), keystoreName, password.toCharArray());
+                sslContext.init(PKI.getKeyManagerFactory(keyStore, password).getKeyManagers(), null, null);
+                socketServer.setWebSocketFactory(new DefaultSSLWebSocketServerFactory(sslContext));
+            } catch (NoSuchAlgorithmException | KeyManagementException e) {
+                ManagedException.forward(e);
+            }
+        }
+        websocketPort = socketServer.getPort();
+        return socketServer;
     }
 
     private InetSocketAddress createSocketAddress() {
@@ -610,20 +636,26 @@ public class NanoH5Session implements ISession<BeanDefinition>, Serializable, IL
         }
         //follow links or fill selected items
         if (nav.current() instanceof BeanCollector) {
+            BeanCollector collector = (BeanCollector) nav.current();
             //follow given link
             if (uriLinkNumber != null) {
-                BeanCollector collector = (BeanCollector) nav.current();
                 Collection data = collector.getCurrentData();
-//                if (data.isEmpty())
-//                    
-                ListSet listSet = CollectionUtil.asListSet(data);
-                int selectedIndex = uriLinkNumber.intValue()
-                    - (ENV.get("layout.grid.searchrow.show", true) && collector.hasMode(MODE_SEARCHABLE)
-                        && collector.hasFilter() ? 2 : 0);
-                Object selectedItem = listSet.get(selectedIndex);
-                boolean isTypeList = BeanCollector.class.isAssignableFrom(collector.getClazz());
-                responseObject = isTypeList ? selectedItem : Bean.getBean((Serializable) selectedItem);
-                return responseObject;
+                if (data.isEmpty() && !ENV.get("app.mode.strict", false)) {
+                    if (ENV.get("session.onemptycollector.create.newitem", true)) {
+                        Message.send("navigation error: empty collector -> creating new item...");
+                    } else {
+                        Message.send("navigation error: empty collector -> going back to " + nav.current());
+                        return nav.current();
+                    }
+                } else {
+                    ListSet listSet = CollectionUtil.asListSet(data);
+                    int selectedIndex = uriLinkNumber.intValue()
+                        - (ENV.get("layout.grid.searchrow.show", true) && collector.hasMode(MODE_SEARCHABLE)
+                            && collector.hasFilter() ? 2 : 0);
+                    Object selectedItem = listSet.get(selectedIndex);
+                    boolean isTypeList = BeanCollector.class.isAssignableFrom(collector.getClazz());
+                    responseObject = isTypeList ? selectedItem : Bean.getBean((Serializable) selectedItem);
+                }
             } else {
                 if (!isCanceled(parms)
                     && (/*isNewAction(parms, (BeanCollector) nav.current()) || */provideSelection(
@@ -640,6 +672,7 @@ public class NanoH5Session implements ISession<BeanDefinition>, Serializable, IL
                     }
                 }
             }
+            setNavigationGimmicks(responseObject, parms);
         } else if (nav.current() instanceof Bean) {//detail bean
             //on database models with composite-ids, these ids should be synchronized with standard values.
             Bean bean = (Bean) nav.current();
@@ -655,6 +688,28 @@ public class NanoH5Session implements ISession<BeanDefinition>, Serializable, IL
         return responseObject;
     }
 
+    private IAction<?> setNavigationGimmicks(Object responseObject, Map<String, String> parms) {
+        BeanCollector collector;
+        IAction<?> action = null;
+        if (responseObject instanceof BeanCollector) {
+            collector = (BeanCollector) responseObject;
+            if (collector.hasMode(MODE_CREATABLE) && collector.getActionByName(BeanCollector.ACTION_NEW).isEnabled()) {
+                if (collector.getCurrentData().isEmpty() && ENV.get("session.navigation.gimmick.onemptycollector.create.newitem", true)) {
+                    Message.send("empty collector -> creating new item...");
+                    action = collector.getActionByName(BeanCollector.ACTION_NEW);
+                    parms.put(action.getId(), "");
+                }
+            } else if (collector.hasMode(MODE_EDITABLE) && collector.getActionByName(BeanCollector.ACTION_OPEN).isEnabled()) {
+                if (collector.getCurrentData().size() == 1 && ENV.get("session.navigation.gimmick.ononeitemincollector.select.first", true)) {
+                    Message.send("collector with one item-> select that item...");
+                    action = collector.getActionByName(BeanCollector.ACTION_OPEN);
+                    parms.put(action.getId(), "");
+                }
+            }
+        }
+        return action;
+    }
+
     /**
      * performAction
      * @param uri
@@ -664,6 +719,59 @@ public class NanoH5Session implements ISession<BeanDefinition>, Serializable, IL
      * @return
      */
     Object performAction(String uri, BeanDefinition<?> current, Map<String, String> parms, Object responseObject) {
+        Collection<IAction> actions = evaluateActionsFor(current);
+        Collection<IAction> responseObjectActions = responseObject instanceof BeanDefinition ? evaluateActionsFor((BeanDefinition<?>) responseObject) : null;
+        //start the actions
+        //respect action-call through menu-link (with method GET but starting with '!!!'
+        Set<Object> keySet = new HashSet<Object>();
+        if (uri.contains(Html5Presentation.PREFIX_ACTION)) {
+            keySet.add(StringUtil.substring(uri, Html5Presentation.PREFIX_ACTION, null));
+        }
+        keySet.addAll(parms.keySet());
+        for (Object k : keySet) {
+            String p = (String) k;
+            IAction<?> action = getAction(actions, p);
+            if (action != null) {
+                ManagedException.assertion(action.isEnabled(), "action " + action.getShortDescription() + " is not enabled!");
+                responseObject = performStandardAction(action, current, parms, responseObject);
+                break;
+            } else {
+                if (p.endsWith(IPresentable.POSTFIX_SELECTOR)) {
+                    logaction(p, null);
+                    String n = StringUtil.substring(p, null, IPresentable.POSTFIX_SELECTOR);
+                    final BeanValue assignableAttribute = (BeanValue) current.getAttribute(n);
+                    ManagedException.assertion(assignableAttribute.isSelectable(), "attribute " + assignableAttribute + " is not selectable!");
+                    responseObject = assignableAttribute.connectToSelector(current);
+                    Message.send("open selection panel " + n + " ...");
+                    action = setNavigationGimmicks(responseObject, parms);
+                    if (action != null) {
+                        ManagedException.assertion(action.isEnabled(), "action " + action.getShortDescription() + " is not enabled!");
+                        responseObject = performStandardAction(action, (BeanDefinition<?>) responseObject, parms, null);
+                    }
+                    break;
+                } else {
+                    //try it on the responseObject...
+                    if (responseObjectActions != null) {//see navigation gimmicks
+                        action = getAction(responseObjectActions, p);
+                        if (action != null) {
+                            ManagedException.assertion(action.isEnabled(), "action " + action.getShortDescription() + " is not enabled!");
+                            responseObject = performStandardAction(action, (BeanDefinition<?>) responseObject, parms, null);
+                            break;
+                        }
+                    } else {//-> OK, it's no action...
+//                        String msg;
+//                        LOG.error(msg = "action with id " + p + " not found in beancollector " );
+//                        Message.send(msg);
+//                        if (ENV.get("app.mode.strict", false))
+//                            throw new ManagedException(msg);
+                    }
+                }
+            }
+        }
+        return responseObject;
+    }
+
+    private Collection<IAction> evaluateActionsFor(BeanDefinition<?> current) {
         Collection<IAction> actions;
         actions = new ArrayList<IAction>();
         if (current.getActions() != null) {
@@ -676,31 +784,7 @@ public class NanoH5Session implements ISession<BeanDefinition>, Serializable, IL
             actions.addAll(((BeanCollector) current).getColumnSortingActions());
             actions.add(((BeanCollector) current).getQuickSearchAction());
         }
-        //start the actions
-        //respect action-call through menu-link (with method GET but starting with '!!!'
-        Set<Object> keySet = new HashSet<Object>();
-        if (uri.contains(Html5Presentation.PREFIX_ACTION)) {
-            keySet.add(StringUtil.substring(uri, Html5Presentation.PREFIX_ACTION, null));
-        }
-        keySet.addAll(parms.keySet());
-        for (Object k : keySet) {
-            String p = (String) k;
-            IAction<?> action = getAction(actions, p);
-            if (action != null) {
-                responseObject = performStandardAction(action, current, parms, responseObject);
-                break;
-            } else {
-                if (p.endsWith(IPresentable.POSTFIX_SELECTOR)) {
-                    logaction(p, null);
-                    String n = StringUtil.substring(p, null, IPresentable.POSTFIX_SELECTOR);
-                    final BeanValue assignableAttribute = (BeanValue) current.getAttribute(n);
-                    responseObject = assignableAttribute.connectToSelector(current);
-                    Message.send("open selection panel " + n + " ...");
-                    break;
-                }
-            }
-        }
-        return responseObject;
+        return actions;
     }
 
     private Object performStandardAction(IAction<?> action,

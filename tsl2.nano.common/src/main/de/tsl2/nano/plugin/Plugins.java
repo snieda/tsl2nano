@@ -17,8 +17,11 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import org.apache.commons.logging.Log;
+
 import de.tsl2.nano.core.cls.BeanClass;
 import de.tsl2.nano.core.cls.ClassFinder;
+import de.tsl2.nano.core.log.LogFactory;
 import de.tsl2.nano.core.util.StringUtil;
 
 /**
@@ -29,6 +32,8 @@ import de.tsl2.nano.core.util.StringUtil;
  * @version $Revision$
  */
 public class Plugins {
+    static final Log LOG = LogFactory.getLog(Plugins.class);
+    
     private static Plugins self = null;
     Map<Class<? extends Plugin>, Object> implementations = new HashMap<>();
 
@@ -55,7 +60,7 @@ public class Plugins {
     public static <T> List<T> getImplementations(Class<T> interfaze) {
         Collection<Class<T>> implClasses = ClassFinder.self().findClass(interfaze);
         ArrayList<T> handler = new ArrayList<>(implClasses.size());
-        log("implementations for " + interfaze + "\n" + StringUtil.toFormattedString(implClasses, -1));
+        LOG.info("implementations for " + interfaze + "\n" + StringUtil.toFormattedString(implClasses, -1));
         for (Class<T> implClass : implClasses) {
             handler.add(BeanClass.createInstance(implClass));
         }

@@ -134,20 +134,48 @@ this software should provide a fast way to create a standard application through
  
 The _environment.xml_ in your current environment directory defines access-modes. F.e. _http.connection_ will define, if it is remote-accessible or not. For more informations, see chapter _The Environment_.
 
-#### Secure Connections over HTTPS
+#### Secure Connections over HTTPS and WSS
 
 It is possible to activate a secured connection with TLS (SSL). The following environment properties can be set:
 * *app.ssl.activate*: activates https connections
-* *app.ssl.keystore.file*: defines the name of the keystore to be used for the secured connection. default is *nanoh5.jks*
+* *app.ssl.keystore.file*: defines the name of the keystore to be used for the secured connection. default is *nanoh5.pks*
 * *app.ssl.keystore.password*: defines the password to access the keystore. default is *nanoh5*
 
-A default (nanoh5.jks) keystore is included in the environment, but you can create your own self-signed keystore using the java keytool:
+A default (nanoh5.pks and nanoh5.jks) keystore is included in the environment, but you can create your own self-signed keystore using the java keytool:
 
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 keytool -genkey -keyalg RSA -alias nanoh5 -keystore nanoh5.jks -storepass nanoh5 -keysize 2048 -ext SAN=DNS:localhost,IP:127.0.0.1  -validity 9999
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
+This java propietary JKS key can be converted to PKCS12 with:
+
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+keytool -importkeystore -srckeystore nanoh5.jks -destkeystore nanoh5.jks -deststoretype pkcs12
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
 So, the keystore and the password are contained in the environment directory. you should constrain the environment directory to only be readable by administrators.
+
+To let the websocket communicate between your client (browser) and the nano-server, you have to add the pks keystore as certificate into your browser!
+
+##### Import the nanoh5.pks certificate into your google Chrome browser
+
+* Menu->Properties
+* click on the last Extended button
+* manage certificates
+* import and select the nanoh5.pks file (that has to be extracted previously from the tsl2.nano...jar file)
+* enter the password 'nanoh5' and click all 'next' buttons until finish
+
+##### Import the nanoh5.pks certificate into your Internet-Explorer or Edge browser
+
+* go to internet options
+* activate the tab 'content'
+* got to certificates
+* import and select the nanoh5.pks file (that has to be extracted previously from the tsl2.nano...jar file)
+* enter the password 'nanoh5' and click all 'next' buttons until finish
+
+##### Import the nanoh5.pks certificate into your Firefox
+
+Its similar to the import in google chrome...
 
 #### Provided Start Packages
 
@@ -4437,7 +4465,9 @@ on external database, anyway-scripts are used 'anyway'
 - [v] ref. RuleCover --> bean extracting super class AttributeCover (RulePool is in specification)
 
 - [v] Test new annotations
-- [ ] Test attachments
+- [v] Test attachments
+- [ ] test https and use it as default
+- [v] check, why NanoWebSocketServer is not connected to client
 
 - population 23.8.: ~7.600.314.137 (http://live-counter.com/weltbevoelkerung/)
 

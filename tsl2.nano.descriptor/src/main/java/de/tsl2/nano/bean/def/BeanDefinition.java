@@ -739,6 +739,10 @@ public class BeanDefinition<T> extends BeanClass<T> implements IPluggable<BeanDe
         return this;
     }
 
+    public IAction<?> getActionByName(String name) {
+    	return getAction(BeanContainer.getActionId(getDeclaringClass(), false, name));
+    }
+    
     /**
      * getAction
      * 

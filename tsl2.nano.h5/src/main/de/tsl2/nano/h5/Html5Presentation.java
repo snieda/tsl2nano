@@ -595,8 +595,13 @@ public class Html5Presentation<T> extends BeanPresentationHelper<T> implements I
             p.put("websocket.server.ip", url.getHost());
             p.put("websocket.server.port", session.getWebsocketPort());
             p.put("websocket.element.id", elementId);
+            String jsWebSocket = StringUtil.insertProperties(jsWebsocketTemplate, p);
+            if (ENV.get("app.mode.strict", false))
+                if (jsWebSocket.matches("^(//).*\\$\\{\\}"))
+                        throw new IllegalStateException("websocket.client.js.template has unfilled variables of type ${...}");
+                
             script.appendChild(script.getOwnerDocument().createTextNode(
-                StringUtil.insertProperties(jsWebsocketTemplate, p)));
+                jsWebSocket));
         }
     }
 
@@ -2339,7 +2344,7 @@ public class Html5Presentation<T> extends BeanPresentationHelper<T> implements I
         //append progress bar for websocket messsages
 //            Element progress = doc.createElement("progress");
         appendElement(preFooter, "progress", ATTR_ID, "progressbar", "hidden", "true");
-        appendElement(preFooter, TAG_SPAN, content(" \tinitializing..."), ATTR_ID, MSG_FOOTER);
+        appendElement(preFooter, TAG_SPAN, content(" \tWAITING FOR WEBSOCKET TO CONNECT...!"), ATTR_ID, MSG_FOOTER);
 //            appendElement(progress, TAG_SPAN, content("0"), ATTR_STYLE, "position:relative");
 //            appendAttributes(progress, "max", "100", "value", "0%", ATTR_STYLE, "position:relative");
 

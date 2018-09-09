@@ -71,7 +71,12 @@ import de.tsl2.nano.util.DelegatorProxy;
 @Default(value = DefaultType.FIELD, required = false)
 public class BeanCollector<COLLECTIONTYPE extends Collection<T>, T> extends BeanDefinition<T> implements
         IBeanCollector<COLLECTIONTYPE, T> {
-    /** serialVersionUID */
+
+	public static final String ACTION_OPEN = "open";
+	public static final String ACTION_NEW = "new";
+    public static final String ACTION_DELETE = "delete";
+
+	/** serialVersionUID */
     private static final long serialVersionUID = -5260557109700841750L;
 
     private static final Log LOG = LogFactory.getLog(BeanCollector.class);
@@ -751,13 +756,18 @@ public class BeanCollector<COLLECTIONTYPE extends Collection<T>, T> extends Bean
         return copyValues(selectedItem, createInstance(), true, false, names.toArray(new String[0]));
     }
 
+    @Override
+    public IAction<?> getActionByName(String name) {
+    	return getAction(BeanContainer.getActionId(getType(), true, name));
+    }
+    
     /**
      * creates the new button with listeners inside the parent component
      * 
      * @param dform parent of search button
      */
     protected void createNewAction() {
-        final String actionId = BeanContainer.getActionId(getType(), true, "new");
+        final String actionId = BeanContainer.getActionId(getType(), true, ACTION_NEW);
         newAction = new SecureAction<Object>(actionId,
             BeanContainer.getActionText(actionId, false),
             BeanContainer.getActionText(actionId, true),
@@ -834,7 +844,7 @@ public class BeanCollector<COLLECTIONTYPE extends Collection<T>, T> extends Bean
      * @param dform parent of search button
      */
     protected void createDeleteAction() {
-        final String actionId = BeanContainer.getActionId(getType(), true, "delete");
+        final String actionId = BeanContainer.getActionId(getType(), true, ACTION_DELETE);
         deleteAction = new SecureAction<Object>(actionId,
             BeanContainer.getActionText(actionId, false),
             BeanContainer.getActionText(actionId, true),
@@ -876,7 +886,7 @@ public class BeanCollector<COLLECTIONTYPE extends Collection<T>, T> extends Bean
      * @param dform parent of search button
      */
     protected void createOpenAction() {
-        final String actionId = BeanContainer.getActionId(getType(), true, "open");
+        final String actionId = BeanContainer.getActionId(getType(), true, ACTION_OPEN);
         openAction = new SecureAction<Object>(actionId,
             BeanContainer.getActionText(actionId, false),
             BeanContainer.getActionText(actionId, true),

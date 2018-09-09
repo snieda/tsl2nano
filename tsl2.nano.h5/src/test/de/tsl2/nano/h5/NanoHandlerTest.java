@@ -76,7 +76,7 @@ public class NanoHandlerTest implements ENVTestPreparation {
         //TODO: test actions before and after
         
         Map header = MapUtil.asMap("socket", new Socket());
-        nanoH5.serve(null, Method.POST, header, new HashMap<>(), new HashMap<>());
+        nanoH5.serve("", Method.POST, header, new HashMap<>(), new HashMap<>());
         assertEquals(MEINHANDLERTEST, header.get(MEINHANDLERTEST));
         
         thread.interrupt();

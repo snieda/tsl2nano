@@ -59,6 +59,8 @@ public class NanoWebSocketServer extends WebSocketServer {
     /** holding a temp change object for each working object - to be injected into websocket listeners. */
     private Map<Class, Object> changeObjects;
 
+    private boolean isConnected;
+
     public static final String PRE_TARGET = "/";
     public static final String PRE_ID = "@";
     public static final String PRE_POS = "?";
@@ -97,7 +99,7 @@ public class NanoWebSocketServer extends WebSocketServer {
         LOG.debug("closing websocket (reason: " + arg2 + "): " + arg0);
         attachment_info = null;
         changeObjects = null;
-        arg0.send("websocket closed");
+        arg0.send("websocket closed: reason=" + arg2);
     }   
 
     /**
@@ -266,6 +268,13 @@ public class NanoWebSocketServer extends WebSocketServer {
     @Override
     public void onOpen(WebSocket arg0, ClientHandshake arg1) {
         LOG.debug("opening websocket: " + arg0);
-        arg0.send("websocket connected");
+        isConnected = true;
+        arg0.send("OK (websocket connected)");
     }
+
+    public boolean isConnected() {
+        return isConnected;
+    }
+    
+    
 }

@@ -16,7 +16,7 @@ if [ "$1" == "--help" ]
 fi
 if [ "$1" == "stop" ]
 	then
-	APPID=`ps -C java -o pid= -o command= | grep $APPNAME | grep -o -E "^[0-9]+"`
+	APPID=$(ps -C java -o pid= -o command= | grep $APPNAME | grep -o -E "^[0-9]+" | line)
 	if [ "$APPID" == "" ]
 		then
 		echo "$APPNAME is not running yet..."
@@ -26,6 +26,6 @@ if [ "$1" == "stop" ]
 	echo "$APPNAME stopped successfully"
 	exit 0
 fi
-nohup ./run.sh $APPDIR $PORT 
+nohup ./run.sh $APPDIR $PORT &Z 
 # < /dev/null & tail -F $APPDIR/logfactory.log
 

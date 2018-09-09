@@ -11,6 +11,7 @@ package de.tsl2.nano.core.secure;
 
 import java.io.BufferedInputStream;
 import java.io.ByteArrayInputStream;
+import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.InputStream;
@@ -18,9 +19,12 @@ import java.io.OutputStream;
 import java.security.Key;
 import java.security.KeyFactory;
 import java.security.KeyStore;
+import java.security.KeyStoreException;
+import java.security.NoSuchAlgorithmException;
 import java.security.PrivateKey;
 import java.security.PublicKey;
 import java.security.Signature;
+import java.security.UnrecoverableKeyException;
 import java.security.cert.CertPath;
 import java.security.cert.CertPathBuilder;
 import java.security.cert.CertPathBuilderResult;
@@ -39,6 +43,8 @@ import java.util.Collections;
 import java.util.Date;
 import java.util.Map;
 import java.util.Set;
+
+import javax.net.ssl.KeyManagerFactory;
 
 import org.apache.commons.logging.Log;
 
@@ -303,24 +309,44 @@ public class PKI {
      * @return keystore
      */
     public static KeyStore createKeyStore(String type, String file, char[] password) {
-        java.io.FileInputStream fis = null;
+        InputStream is = null;
         try {
             KeyStore ks = KeyStore.getInstance(type);
             if (file != null)
-                fis = new FileInputStream(file);
-            ks.load(fis, password);
+            	if (new File(file).exists())
+            		is = new FileInputStream(file);
+            	else
+            		is = Thread.currentThread().getContextClassLoader().getResourceAsStream(file);
+            ks.load(is, password);
             LOG.debug("keystore created: " + ks);
             return ks;
         } catch (Exception ex) {
             ManagedException.forward(ex);
             return null;
         } finally {
-            if (fis != null) {
-                FileUtil.close(fis, true);
+            if (is != null) {
+                FileUtil.close(is, true);
             }
         }
     }
 
+    /**
+     * convenience to create a keymanagerfactory - e.g. for an SSLContext.init(...).
+     * @param ks
+     * @param password
+     * @return
+     */
+    public static KeyManagerFactory getKeyManagerFactory(KeyStore ks, String password) {
+    	try {
+			KeyManagerFactory kmf = KeyManagerFactory.getInstance(KeyManagerFactory.getDefaultAlgorithm());
+			kmf.init(ks, password.toCharArray());
+			return kmf;
+		} catch (UnrecoverableKeyException | NoSuchAlgorithmException | KeyStoreException e) {
+			ManagedException.forward(e);
+			return null;
+		}    
+    }
+    
     /**
      * perists the given {@link KeyStore} to the given file. The keystore will be encrypted (see
      * {@link KeyStore#store(OutputStream, char[])}.

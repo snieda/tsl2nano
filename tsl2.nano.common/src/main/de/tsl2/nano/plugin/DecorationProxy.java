@@ -1,5 +1,7 @@
 package de.tsl2.nano.plugin;
 
+import static de.tsl2.nano.plugin.Plugins.LOG;
+
 import java.lang.reflect.InvocationHandler;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
@@ -8,6 +10,12 @@ import java.util.List;
 import de.tsl2.nano.core.ManagedException;
 import de.tsl2.nano.core.util.StringUtil;
 
+/**
+ * Invokes all classpath implementations of Plugin. see {@link Plugins}
+ * @param <T> implementation of Plugin
+ * @author Tom
+ * @version $Revision$ 
+ */
 class DecorationProxy<T extends Plugin> implements InvocationHandler {
     
     private List<T> implementations;
@@ -24,15 +32,15 @@ class DecorationProxy<T extends Plugin> implements InvocationHandler {
         Object[] result = new Object[] {decoratingChain ? args[0] : null}; //workaround on non final result used in inner class
         implementations.stream().filter(h->h.isEnabled()).forEach(h->{
             try {
-                Plugins.log("==> starting plugin " + h + " with: " + method);
+                LOG.debug("==> starting plugin " + h + " with: " + method);
                 result[0] = decoratingChain ? method.invoke(h, result[0]) : method.invoke(h, args);
-                Plugins.log("<== finished plugin " + h + " with: " + method);
+                LOG.debug("<== finished plugin " + h + " with: " + method);
             } catch (IllegalAccessException | IllegalArgumentException | InvocationTargetException e) {
                 System.out.println("Error on: " + method + "(" + StringUtil.toString(decoratingChain ? result[0] : args, -1) + ")");
                 ManagedException.forward(e);
             }
         });
-        Plugins.log(implementations.size() + " plugins done on: " + method.getName() + " [" + StringUtil.fixString(StringUtil.toString(args, 60), 60) + "]");
+        LOG.info(implementations.size() + " plugins done on: " + method.getName() + " [" + StringUtil.fixString(StringUtil.toString(args, 60), 60) + "]");
         return result[0];
     }
 
