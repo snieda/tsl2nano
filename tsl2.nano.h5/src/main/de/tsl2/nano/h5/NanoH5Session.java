@@ -333,7 +333,8 @@ public class NanoH5Session implements ISession<BeanDefinition>, Serializable, IL
                 sslContext.init(PKI.getKeyManagerFactory(keyStore, password).getKeyManagers(), null, null);
                 socketServer.setWebSocketFactory(new DefaultSSLWebSocketServerFactory(sslContext));
             } catch (NoSuchAlgorithmException | KeyManagementException e) {
-                ManagedException.forward(e);
+                //Don't stop the application, if websocket fails!
+                LOG.error(e);
             }
         }
         websocketPort = socketServer.getPort();
