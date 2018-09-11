@@ -16,6 +16,7 @@ socket.onopen = function() {
 
 socket.onerror = function(error) {
 	console.log('websocket error ' + error);
+	window.alert(error);
 };
 
 /**

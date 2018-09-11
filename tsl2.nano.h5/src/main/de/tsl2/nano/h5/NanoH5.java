@@ -228,6 +228,7 @@ public class NanoH5 extends NanoHTTPD implements ISystemConnector<Persistence> {
             LOG.info("activating ssl using keystore " + keyStore);
             makeSecure(NanoHTTPD.makeSSLSocketFactory(keyStore,
                 ENV.get("app.ssl.keystore.password", "nanoh5").toCharArray()), null);
+            ENV.setProperty("app.ssl.shortcut", "s");
         } else {
             ENV.setProperty("app.ssl.shortcut", "");
         }

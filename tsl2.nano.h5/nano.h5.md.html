@@ -140,6 +140,7 @@ It is possible to activate a secured connection with TLS (SSL). The following en
 * *app.ssl.activate*: activates https connections
 * *app.ssl.keystore.file*: defines the name of the keystore to be used for the secured connection. default is *nanoh5.pks*
 * *app.ssl.keystore.password*: defines the password to access the keystore. default is *nanoh5*
+* *app.ssl.protocol*: SSLv3 or TLSv1_1 or TLSv1_2
 
 A default (nanoh5.pks and nanoh5.jks) keystore is included in the environment, but you can create your own self-signed keystore using the java keytool:
 
@@ -157,6 +158,8 @@ So, the keystore and the password are contained in the environment directory. yo
 
 To let the websocket communicate between your client (browser) and the nano-server, you have to add the pks keystore as certificate into your browser!
 
+To test the websocket use the echo site https://www.websocket.org/echo.html.
+
 ##### Import the nanoh5.pks certificate into your google Chrome browser
 
 * Menu->Properties
@@ -167,15 +170,24 @@ To let the websocket communicate between your client (browser) and the nano-serv
 
 ##### Import the nanoh5.pks certificate into your Internet-Explorer or Edge browser
 
+* start internet explorer (not edge!) and open your site
+* if a certification error is shown in your address line, click on it
+* import your certificate (for the current user and let the store be selected automatically)
+* restart browser
+
+The other way:
 * go to internet options
 * activate the tab 'content'
 * got to certificates
 * import and select the nanoh5.pks file (that has to be extracted previously from the tsl2.nano...jar file)
 * enter the password 'nanoh5' and click all 'next' buttons until finish
 
+*Note*: use _127.0.0.1_ instead of _localhost_
+
 ##### Import the nanoh5.pks certificate into your Firefox
 
-Its similar to the import in google chrome...
+* open your site and, on error click on 'add exception'
+* restart the browser
 
 #### Provided Start Packages
 
@@ -4468,6 +4480,10 @@ on external database, anyway-scripts are used 'anyway'
 - [v] Test attachments
 - [ ] test https and use it as default
 - [v] check, why NanoWebSocketServer is not connected to client
+
+- [v] gimmicks not as default!
+- [x] what if table not loaded, but gimmick active?
+- [ ] Controller: go straight into the most reasonable entity and show directly all actions
 
 - population 23.8.: ~7.600.314.137 (http://live-counter.com/weltbevoelkerung/)
 

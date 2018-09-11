@@ -287,7 +287,12 @@ public class BeanCollector<COLLECTIONTYPE extends Collection<T>, T> extends Bean
     public <B extends BeanDefinition<T>> B onActivation(Map context) {
         super.onActivation(context);
         iterator = null;
-        if (!isStaticCollection && Util.isEmpty(collection)) {
+        doAutomaticSearch();
+        return (B) this;
+    }
+
+	public void doAutomaticSearch() {
+		if (!isStaticCollection && Util.isEmpty(collection)) {
             long countCheck = ENV.get("collector.search.auto.count.lowerthan", 20);
             boolean dosearch = countCheck > 0 && count() < countCheck;
 
@@ -305,8 +310,7 @@ public class BeanCollector<COLLECTIONTYPE extends Collection<T>, T> extends Bean
                 getBeanFinder().getData();
             }
         }
-        return (B) this;
-    }
+	}
 
     private long count() {
         long count = -1;

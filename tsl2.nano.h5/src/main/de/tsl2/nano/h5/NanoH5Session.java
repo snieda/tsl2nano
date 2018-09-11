@@ -328,7 +328,7 @@ public class NanoH5Session implements ISession<BeanDefinition>, Serializable, IL
             new NanoWebSocketServer(this, createSocketAddress());
         if (ENV.get("app.ssl.activate", false)) {
             try {
-                SSLContext sslContext = SSLContext.getInstance(ENV.get("app.ssl.wss.protocol", "SSLv3"));
+                SSLContext sslContext = SSLContext.getInstance(ENV.get("app.ssl.wss.protocol", "TLSv1.2"));//SSLv3
                 KeyStore keyStore = PKI.createKeyStore(KeyStore.getDefaultType(), keystoreName, password.toCharArray());
                 sslContext.init(PKI.getKeyManagerFactory(keyStore, password).getKeyManagers(), null, null);
                 socketServer.setWebSocketFactory(new DefaultSSLWebSocketServerFactory(sslContext));
@@ -695,13 +695,16 @@ public class NanoH5Session implements ISession<BeanDefinition>, Serializable, IL
         if (responseObject instanceof BeanCollector) {
             collector = (BeanCollector) responseObject;
             if (collector.hasMode(MODE_CREATABLE) && collector.getActionByName(BeanCollector.ACTION_NEW).isEnabled()) {
-                if (collector.getCurrentData().isEmpty() && ENV.get("session.navigation.gimmick.onemptycollector.create.newitem", true)) {
-                    Message.send("empty collector -> creating new item...");
-                    action = collector.getActionByName(BeanCollector.ACTION_NEW);
-                    parms.put(action.getId(), "");
+                if (collector.getCurrentData().isEmpty() && ENV.get("session.navigation.gimmick.onemptycollector.create.newitem", false)) {
+                    collector.doAutomaticSearch();
+                    if (collector.getCurrentData().isEmpty()) {
+                        Message.send("empty collector -> creating new item...");
+                        action = collector.getActionByName(BeanCollector.ACTION_NEW);
+                        parms.put(action.getId(), "");
+                    }
                 }
             } else if (collector.hasMode(MODE_EDITABLE) && collector.getActionByName(BeanCollector.ACTION_OPEN).isEnabled()) {
-                if (collector.getCurrentData().size() == 1 && ENV.get("session.navigation.gimmick.ononeitemincollector.select.first", true)) {
+                if (collector.getCurrentData().size() == 1 && ENV.get("session.navigation.gimmick.ononeitemincollector.select.first", false)) {
                     Message.send("collector with one item-> select that item...");
                     action = collector.getActionByName(BeanCollector.ACTION_OPEN);
                     parms.put(action.getId(), "");
