@@ -118,6 +118,7 @@ import de.tsl2.nano.h5.websocket.WebSocketRuleDependencyListener;
 import de.tsl2.nano.incubation.specification.actions.ActionPool;
 import de.tsl2.nano.incubation.specification.rules.RuleDependencyListener;
 import de.tsl2.nano.incubation.specification.rules.RulePool;
+import de.tsl2.nano.persistence.DatabaseTool;
 import de.tsl2.nano.persistence.Persistence;
 import de.tsl2.nano.plugin.Plugins;
 import de.tsl2.nano.script.ScriptTool;
@@ -279,12 +280,12 @@ public class Html5Presentation<T> extends BeanPresentationHelper<T> implements I
                         IAction dbToolURL = new CommonAction(id, lbl, lbl) {
                             @Override
                             public Object action() throws Exception {
-                                return Persistence.current().getSQLToolURL();
+                                return new DatabaseTool(Persistence.current()).getSQLToolURL();
                             }
 
                             @Override
                             public boolean isEnabled() {
-                                return super.isEnabled() && Persistence.current() != null && Persistence.current().getSQLToolURL() != null;
+                                return super.isEnabled() && Persistence.current() != null && new DatabaseTool(Persistence.current()).getSQLToolURL() != null;
                             }
                             @Override
                             public String getImagePath() {

@@ -179,7 +179,7 @@ public class Persistence implements Serializable, Cloneable {
      */
     public void setConnectionUrl(String connectionUrl) {
         this.connectionUrl = connectionUrl;
-        setPort(getPort(connectionUrl));
+        setPort(DatabaseTool.getPort(connectionUrl));
 
         setDatabase(StringUtil.substring(connectionUrl, getPort() + ":", null));
     }
@@ -634,43 +634,6 @@ public class Persistence implements Serializable, Cloneable {
         return p;
     }
 
-    /**
-     * extracts the port of the given database url
-     * @param url database url
-     * @return port or null
-     */
-    public String getPort(String url) {
-        return StringUtil.extract(url, "[:](\\d+)([:/;]\\w+)?", 1);
-    }
-
-    /**
-     * see {@link #isEmbeddedDatabase(String)}
-     */
-    public boolean isEmbeddedDatabase() {
-        return isEmbeddedDatabase(getConnectionUrl());
-    }
-
-    /**
-     * isEmbeddedDatabase
-     * @param urlOrDriver
-     * @return true, if it contains hsqldb or h2
-     */
-    public static boolean isEmbeddedDatabase(String urlOrDriver) {
-        return (urlOrDriver.contains("hsqldb")
-                || urlOrDriver.contains("h2"));
-    }
-
-    public static boolean isH2(String url) {
-        return url.matches("jdbc[:]h2[:].*");
-    }
-    /**
-     * url to an sql tool, if it is an embedded database.
-     * @return optional SQL Tool like the one of H2 on port 8082
-     */
-    public String getSQLToolURL() {
-        return isEmbeddedDatabase() && isH2(connectionUrl) ? "http://localhost:8082" : null;
-    }
-    
     @Override
     public Persistence clone() throws CloneNotSupportedException {
         return (Persistence) super.clone();

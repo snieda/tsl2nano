@@ -13,15 +13,11 @@ import java.net.InetAddress;
 import java.net.MalformedURLException;
 import java.net.Socket;
 import java.net.URL;
-import java.sql.Connection;
-import java.sql.DriverManager;
-import java.sql.ResultSet;
-import java.sql.SQLException;
 import java.text.FieldPosition;
 import java.text.Format;
 import java.text.ParsePosition;
 import java.util.ArrayList;
-import java.util.Arrays;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
@@ -29,8 +25,6 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.Properties;
 import java.util.Stack;
-import java.util.concurrent.Executors;
-import java.util.concurrent.TimeUnit;
 
 import javax.persistence.EntityManager;
 
@@ -58,7 +52,6 @@ import de.tsl2.nano.core.exception.Message;
 import de.tsl2.nano.core.execution.CompatibilityLayer;
 import de.tsl2.nano.core.execution.SystemUtil;
 import de.tsl2.nano.core.log.LogFactory;
-import de.tsl2.nano.core.messaging.EMessage;
 import de.tsl2.nano.core.messaging.EventController;
 import de.tsl2.nano.core.util.ConcurrentUtil;
 import de.tsl2.nano.core.util.DateUtil;
@@ -70,6 +63,7 @@ import de.tsl2.nano.core.util.ObjectUtil;
 import de.tsl2.nano.core.util.StringUtil;
 import de.tsl2.nano.core.util.Util;
 import de.tsl2.nano.h5.NanoHTTPD.Response.Status;
+import de.tsl2.nano.h5.expression.Query;
 import de.tsl2.nano.h5.expression.QueryPool;
 import de.tsl2.nano.h5.expression.RuleExpression;
 import de.tsl2.nano.h5.expression.SQLExpression;
@@ -81,6 +75,7 @@ import de.tsl2.nano.h5.navigation.Workflow;
 import de.tsl2.nano.h5.plugin.INanoPlugin;
 import de.tsl2.nano.incubation.specification.actions.ActionPool;
 import de.tsl2.nano.incubation.specification.rules.RulePool;
+import de.tsl2.nano.persistence.DatabaseTool;
 import de.tsl2.nano.persistence.GenericLocalBeanContainer;
 import de.tsl2.nano.persistence.Persistence;
 import de.tsl2.nano.persistence.PersistenceClassLoader;
@@ -90,7 +85,6 @@ import de.tsl2.nano.service.util.BeanContainerUtil;
 import de.tsl2.nano.service.util.IGenericService;
 import de.tsl2.nano.serviceaccess.Authorization;
 import de.tsl2.nano.serviceaccess.ServiceFactory;
-import de.tsl2.nano.util.SchedulerUtil;
 import de.tsl2.nano.util.Translator;
 
 /**
@@ -839,18 +833,33 @@ public class NanoH5 extends NanoHTTPD implements ISystemConnector<Persistence> {
         }
 
         //may be on second start after having already generated the jar file
-        if (isLocalDatabase(persistence) && !canConnectToLocalDatabase(persistence)) {
+        DatabaseTool dbTool = new DatabaseTool(persistence);
+        if (dbTool.isLocalDatabase(persistence) && !dbTool.canConnectToLocalDatabase(persistence)) {
             runLocalDatabase(persistence);
         }
 
         createPersistenceProvider(persistence, runtimeClassloader);
 
+        createLuceneIntegration(persistence);
+        
         List<Class> beanClasses =
             runtimeClassloader.loadBeanClasses(jarName,
                 ENV.get("bean.class.presentation.regexp", ".*"), null);
         ENV.setProperty("service.loadedBeanTypes", beanClasses);
 
         return beanClasses;
+    }
+
+    private void createLuceneIntegration(Persistence persistence) {
+        if (isH2(persistence.getConnectionUrl()) && ENV.get("app.db.h2.lucene.integration", true)) {
+            new H2LuceneIntegration(persistence).activateOnTables();
+
+            //create a view for fulltext search
+            String search = null; //TODO
+            Query fts = new Query("fulltextsearch", "select * from " + H2LuceneIntegration.createSearchQuery(search), true, null);
+            QueryResult<Collection<Object>,Object> queryResult = new QueryResult<>(fts.getName());
+            queryResult.saveDefinition();
+        }
     }
 
     protected void createPersistenceProvider(final Persistence persistence, PersistenceClassLoader runtimeClassloader) {
@@ -902,8 +911,9 @@ public class NanoH5 extends NanoHTTPD implements ISystemConnector<Persistence> {
         ENV.extractResource(JAR_DIRECTACCESS);
         ENV.extractResource(JAR_SERVICEACCESS);
 
+        DatabaseTool dbTool = new DatabaseTool(persistence);
         provideScripts(persistence);
-        copyJavaDBDriverFiles(persistence);
+        dbTool.copyJavaDBDriverFiles(persistence);
 
         String generatorTask;
         if (persistence.getGenerator().equals(Persistence.GEN_HIBERNATE)) {
@@ -914,13 +924,13 @@ public class NanoH5 extends NanoHTTPD implements ISystemConnector<Persistence> {
         ENV.loadClassDependencies("org.apache.tools.ant.taskdefs.Taskdef",
             generatorTask, persistence.getConnectionDriverClass(), persistence.getProvider());
 
-        if ((isLocalDatabase(persistence) && !canConnectToLocalDatabase(persistence))
+        if ((dbTool.isLocalDatabase(persistence) && !dbTool.canConnectToLocalDatabase(persistence))
             || persistence.autoDllIsCreateDrop()) {
             if (ENV.get("app.db.generate.database", true))
                 generateDatabase(persistence);
         }
         if (ENV.get("app.db.check.connection", true))
-            checkJDBCConnection(persistence);
+            dbTool.checkJDBCConnection();
         
         Boolean generationComplete =
             generateJarFile(jarName, persistence.getGenerator(), persistence.getDefaultSchema());
@@ -947,105 +957,9 @@ public class NanoH5 extends NanoHTTPD implements ISystemConnector<Persistence> {
                 runserverFile };
         SystemUtil.execute(new File(ENV.getConfigPathRel()), cmd);
         //prepare shutdown and backup
-        Runtime.getRuntime().addShutdownHook(Executors.defaultThreadFactory().newThread(new Runnable() {
-            @Override
-            public void run() {
-                if (BeanContainer.isInitialized()) {
-                    EMessage.broadcast(this, "APPLICATION SHUTDOWN INITIALIZED...", "*");
-                    LOG.info("preparing shutdown of local database " + persistence.getConnectionUrl());
-                    try {
-                        BeanContainer.instance().executeStmt(ENV.get("app.shutdown.statement", "SHUTDOWN"), true,
-                            null);
-                        Thread.sleep(2000);
-                    } catch (Exception e) {
-                        LOG.error(e.toString());
-                    }
-                    String hsqldbScript = isH2(persistence.getConnectionUrl())
-                        ? persistence.getDefaultSchema() + ".mv.db" : persistence.getDatabase() + ".script";
-                    String backupFile =
-                        ENV.getTempPath() + FileUtil.getUniqueFileName(ENV.get("app.database.backup.file",
-                            persistence.getDatabase()) + ".zip");
-                    LOG.info("creating database backup to file " + backupFile);
-                    FileUtil.writeToZip(backupFile, hsqldbScript, FileUtil.getFileBytes(ENV.getConfigPath() + hsqldbScript, null));
-                }
-            }
-        }));
-        //do a periodical backup
-        SchedulerUtil.runAt(0, -1, TimeUnit.DAYS, new Runnable() {
-            @Override
-            public void run() {
-                LOG.info("preparing backup of local database " + persistence.getConnectionUrl());
-                try {
-                    BeanContainer.instance().executeStmt(
-                        ENV.get("app.backup.statement", "backup to temp/database-daily-backup.zip"), true, null);
-                } catch (Exception e) {
-                    LOG.error(e.toString());
-                }
-            }
-        });
-    }
-
-    private void checkJDBCConnection(Persistence persistence) {
-        Connection con = null;
-        try {
-            Class.forName(persistence.getConnectionDriverClass());
-            con = DriverManager.getConnection(persistence.getConnectionUrl(), persistence.getConnectionUserName(), persistence.getConnectionPassword());
-            String schema = !Util.isEmpty(persistence.getDefaultSchema()) ? persistence.getDefaultSchema() : null;
-            ResultSet tables = con.getMetaData().getTables(null, schema, null, null);
-            
-            if (!tables.next()) {
-                LOG.info("Available tables are:\n" + getTablesAsString(con.getMetaData().getTables(null, null, null, null)));
-                throw new ManagedException("The desired jdbc connection provides no tables to work on!");
-            }
-        } catch (Exception e) {
-            ManagedException.forward(e);
-        } finally {
-            if (con != null) {
-                try {
-                    con.close();
-                } catch (SQLException e) {
-                    ManagedException.forward(e);
-                }
-            }
-        }
-        
-    }
-
-    private String getTablesAsString(ResultSet tables) throws SQLException {
-        StringBuilder str = new StringBuilder();
-        int cc = tables.getMetaData().getColumnCount();
-        ArrayList<Object> row = new ArrayList<>(cc);
-        while(tables.next()) {
-            for (int i = 1; i < cc; i++) {
-                row.add(tables.getObject(i));
-            }
-            str.append(StringUtil.toString(row, -1) + "\n");
-            row.clear();
-        }
-        return str.toString();
-    }
-
-    private void copyJavaDBDriverFiles(Persistence persistence) {
-        String dest = ENV.getConfigPath();
-        if (persistence.getConnectionUrl().contains("derby") && ! new File(dest + "derby.jar").exists()) {
-            String path = System.getProperty("java.home") + "/../db/lib/";
-            if (new File(path + "derby.jar").canRead()) {
-                LOG.info("copying derby/javadb database driver files to environment");
-                FileUtil.copy(path + "derby.jar", dest + "derby.jar");
-                FileUtil.copy(path + "derbynet.jar", dest + "derbynet.jar");
-                FileUtil.copy(path + "derbytools.jar", dest + "derbytools.jar");
-                FileUtil.copy(path + "derbyclient.jar", dest + "derbyclient.jar");
-                
-                try {
-                    FileUtil.writeBytes("java -cp * org.apache.derby.drda.NetworkServerControl start %*".getBytes(), dest + "runServer.cmd", false);
-                    FileUtil.writeBytes("java -cp derby*.jar org.apache.derby.drda.NetworkServerControl start %*".getBytes(), dest + "runServer.sh", false);
-                } catch (Exception e) {
-                    LOG.warn(e.toString());
-                }
-            } else {
-                LOG.warn("cannot copy derby driver files from jdk path: " + path);
-            }
-        }
+        DatabaseTool dbTool = new DatabaseTool(persistence);
+        dbTool.addShutdownHook();
+        dbTool.doPeriodicalBackup();
     }
 
     private void provideScripts(Persistence persistence) {
@@ -1064,26 +978,8 @@ public class NanoH5 extends NanoHTTPD implements ISystemConnector<Persistence> {
 
     }
 
-    private boolean isLocalDatabase(Persistence persistence) {
-        String url = persistence.getConnectionUrl();
-        if (!Util.isEmpty(persistence.getPort()) || isH2(url)) {
-            return Arrays.asList(persistence.STD_LOCAL_DATABASE_DRIVERS).contains(
-                persistence.getConnectionDriverClass())
-                && (url.contains("localhost") || url.contains("127.0.0.1") || isH2(url));
-        }
-        return false;
-    }
-
     private boolean isH2(String url) {
-        return Persistence.isH2(url);
-    }
-
-    private boolean canConnectToLocalDatabase(Persistence persistence) {
-        if (!Util.isEmpty(persistence.getPort())) {
-            int p = Integer.valueOf(persistence.getPort());
-            return NetUtil.isOpen(p);
-        }
-        return false;
+        return DatabaseTool.isH2(url);
     }
 
     private void generateDatabase(Persistence persistence) {

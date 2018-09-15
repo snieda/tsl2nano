@@ -40,6 +40,7 @@ import de.tsl2.nano.format.RegExpFormat;
 import de.tsl2.nano.h5.plugin.INanoPlugin;
 import de.tsl2.nano.h5.websocket.WSEvent;
 import de.tsl2.nano.h5.websocket.WebSocketDependencyListener;
+import de.tsl2.nano.persistence.DatabaseTool;
 import de.tsl2.nano.persistence.Persistence;
 import de.tsl2.nano.plugin.Plugins;
 
@@ -216,7 +217,7 @@ public class PersistenceUI {
                                 Object userName = Util.asString(value);
                                 String eval;
                                 if (userName != null && Util.isEmpty(defaultSchema)) {
-                                    if (value != null && persistence.isEmbeddedDatabase()) {
+                                    if (value != null && DatabaseTool.isEmbeddedDatabase(persistence.getConnectionUrl())) {
                                         eval = Persistence.DEFAULT_SCHEMA;
                                     } else {
                                         eval = userName.toString().toUpperCase();
@@ -320,7 +321,7 @@ public class PersistenceUI {
                                 if (url != null) {
                                     String prefix = getDriverPrefix(url);
                                     if (!Util.isEmpty(prefix)) {
-                                        return persistence.getPort(url);
+                                        return DatabaseTool.getPort(url);
                                     }
                                 }
                                 return null;
@@ -338,7 +339,7 @@ public class PersistenceUI {
                                 Object userName = login.getAttribute("connectionUserName").getValue();
                                 String eval = null;
                                 if (userName != null) {
-                                    if (value != null && Persistence.isEmbeddedDatabase((String) value)) {
+                                    if (value != null && DatabaseTool.isEmbeddedDatabase((String) value)) {
                                         eval = Persistence.DEFAULT_SCHEMA;
                                     } else {
                                         eval = userName.toString().toUpperCase();
