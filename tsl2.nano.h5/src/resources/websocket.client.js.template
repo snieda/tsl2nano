@@ -16,7 +16,8 @@ socket.onopen = function() {
 
 socket.onerror = function(error) {
 	console.log('websocket error ' + error);
-	window.alert(error);
+	if (${websocket.window.alert.message})
+		window.alert(error);
 };
 
 /**
@@ -68,8 +69,10 @@ function showStatusMessage(msg) {
 function showBroadcastMessage(msg) {
 //	document.getElementById('${broadcast.element.id}').childNodes[0].nodeValue = ' \t'
 //			+ msg;
-	speek(msg);
-	window.alert(getValue(msg));
+	if (${websocket.speek.alert.message})
+		speek(msg);
+	if (${websocket.window.alert.message})
+		window.alert(getValue(msg));
 }
 
 function speek(msg) {

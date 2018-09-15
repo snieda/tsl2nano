@@ -16,8 +16,12 @@ import javax.xml.bind.JAXB;
  * To use it, 
  *   - create a META-INF/persistence.xml in your classpath
  *   - describe the two persistence-units (source and destination)
- *   - call: new EntityManager(mySourceUnit, myDestUnit).replicate(myBeans)
- *   
+ *   - call: new EntityReplication(mySourceUnit, myDestUnit).replicate(new HibReplication(myDestUnit)::strategyHibReplicate, myBeans)
+ * or through serliazition:
+ *   - EntityReplication.setPersistableID(e -> (IPersistable)e).getId)
+ *   - new EntityReplication().replicate(myBeans)
+ *   - ...
+ *   - new EntityReplication().load(myID, myBeanType.class)
  * </pre>
  * @author Tom, Thomas Schneider
  * @version $Revision$ 
@@ -26,6 +30,7 @@ import javax.xml.bind.JAXB;
 public class EntityReplication {
     private EntityManager src;
     private EntityManager dest;
+    private static Function persistableID;
 
     public EntityReplication() {
     }
@@ -47,7 +52,7 @@ public class EntityReplication {
         replicate((Function<T, T>)null, (Consumer<T>)EntityReplication::strategySerialize, entities);
     }
     
-    public <T> void replicate(Class<T> entityClass, T...entities) {
+    public <T> void replicate(T...entities) {
         replicate((Consumer<T>)EntityReplication::strategySerialize, entities);
     }
     
@@ -56,6 +61,8 @@ public class EntityReplication {
     }
     
     public <T> void replicate(Function<T, T> transformer, Consumer<T> strategy, T...entities) {
+        if (dest != null)
+            dest.getTransaction().begin();
         Arrays.stream(entities).forEach(e -> {
             //entity must be detached from src session
             if (src != null)
@@ -66,15 +73,31 @@ public class EntityReplication {
                 strategy.accept(e);
             });
         if (dest != null)
-            dest.flush();
+            dest.getTransaction().commit();
     }
     
     public static void strategySerialize(Object entity) {
-        JAXB.marshal(entity, new File(entity.getClass().getSimpleName() + ".xml"));
+        JAXB.marshal(entity, getFile(entity.getClass(), getID(entity)));
     }
     
-    public static <T> T load(String fileName, Class<T> entityClass) {
-        return JAXB.unmarshal(new File(fileName), entityClass);
+    public static void setPersistableID(Function persistableID) {
+        EntityReplication.persistableID = persistableID;
+    }
+
+    private static Object getID(Object entity) {
+        assert persistableID != null : "please call 'setPersistableID() first!";
+        return persistableID.apply(entity);
+    }
+
+    public static <T> T load(String id, Class<T> entityClass) {
+        return load(getFile(entityClass, id), entityClass);
+    }
+    private static File getFile(Class<?> entityClass, Object id) {
+        return new File(entityClass.getSimpleName() + "-" + id + ".xml");
+    }
+
+    public static <T> T load(File file, Class<T> entityClass) {
+        return JAXB.unmarshal(file, entityClass);
     }
     private Map<String, Object> readOnlyHints() {
         HashMap<String, Object> hints = new HashMap<>();

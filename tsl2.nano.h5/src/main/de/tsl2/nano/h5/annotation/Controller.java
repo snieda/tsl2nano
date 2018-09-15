@@ -18,8 +18,8 @@ import de.tsl2.nano.annotation.extension.With;
 @With(ControllerAnnotationFactory.class)
 public @interface Controller {
     String increaseAttribute();
-    int increaseCount();
-    int increaseStep();
+    int increaseCount() default 1;
+    int increaseStep() default 1;
     Class<?> baseType();
     String baseAttribute();
     String targetAttribute();
