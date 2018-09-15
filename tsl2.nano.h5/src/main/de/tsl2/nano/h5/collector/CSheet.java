@@ -7,7 +7,7 @@
  * 
  * Copyright: (c) Thomas Schneider 2017, all rights reserved
  */
-package de.tsl2.nano.h5;
+package de.tsl2.nano.h5.collector;
 
 import java.math.BigDecimal;
 import java.text.Format;
@@ -40,6 +40,7 @@ import de.tsl2.nano.core.cls.PrivateAccessor;
 import de.tsl2.nano.core.log.LogFactory;
 import de.tsl2.nano.core.util.NumberUtil;
 import de.tsl2.nano.core.util.Util;
+import de.tsl2.nano.h5.Html5Presentable;
 import de.tsl2.nano.incubation.specification.Pool;
 import de.tsl2.nano.logictable.ICellVisitor;
 import de.tsl2.nano.logictable.LogicForm;

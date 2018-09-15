@@ -7,7 +7,7 @@
  * 
  * Copyright: (c) Thomas Schneider 2016, all rights reserved
  */
-package de.tsl2.nano.h5;
+package de.tsl2.nano.h5.collector;
 
 import java.util.ArrayList;
 import java.util.Collection;

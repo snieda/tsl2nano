@@ -8,7 +8,7 @@ public class CSheetAnnotationFactory implements AnnotationFactory<BeanDefinition
 
     @Override
     public void build(BeanDefinition instance, CSheet a) {
-        de.tsl2.nano.h5.CSheet sheet = new de.tsl2.nano.h5.CSheet(a.title(), a.cols(), a.rows());
+        de.tsl2.nano.h5.collector.CSheet sheet = new de.tsl2.nano.h5.collector.CSheet(a.title(), a.cols(), a.rows());
         CCell c;
         for (int i = 0; i < a.cells().length; i++) {
             c = a.cells()[i];

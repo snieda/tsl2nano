@@ -7,7 +7,7 @@
  * 
  * Copyright: (c) Thomas Schneider 2014, all rights reserved
  */
-package de.tsl2.nano.h5;
+package de.tsl2.nano.h5.collector;
 
 import java.io.File;
 import java.text.MessageFormat;

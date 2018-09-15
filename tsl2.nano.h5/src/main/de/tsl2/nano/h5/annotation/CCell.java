@@ -8,7 +8,7 @@ import java.lang.annotation.Retention;
 import java.lang.annotation.Target;
 
 /**
- * defines a cell in a {@link de.tsl2.nano.h5.CSheet} for a {@link CSheet}
+ * defines a cell in a {@link de.tsl2.nano.h5.collector.CSheet} for a {@link CSheet}
  * @author Tom, Thomas Schneider
  * @version $Revision$ 
  */

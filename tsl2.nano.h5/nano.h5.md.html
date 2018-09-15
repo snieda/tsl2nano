@@ -1235,7 +1235,7 @@ Example:
 
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 <queryResult clazz="java.lang.Object" name="virtual.times-overview" isNested="false" isdefault="true" xmlns="beandef.xsd">
-   <extension declaringClass="de.tsl2.nano.h5.QueryResult">
+   <extension declaringClass="de.tsl2.nano.h5.collector.QueryResult">
       <member name="queryName">
          <object class="java.lang.String">times-overview</object>
       </member>
@@ -1255,7 +1255,7 @@ Example:
 
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 <controller clazz="org.anonymous.project.Times" name="virtual.time-actions-controller" isNested="false" isdefault="true" xmlns="beandef.xsd">
-   <extension declaringClass="de.tsl2.nano.h5.Controller">
+   <extension declaringClass="de.tsl2.nano.h5.collector.Controller">
       <member name="beanName">
          <object class="java.lang.String">time-actions</object>
       </member>
@@ -1281,7 +1281,7 @@ Example:
    </presentable>
    <valueExpression expression="{chargeitem} ({fromdate}: {value})" type="org.anonymous.project.Charge"/>
    <isconnected>false</isconnected>
-   <extension declaringClass="de.tsl2.nano.h5.Compositor">
+   <extension declaringClass="de.tsl2.nano.h5.collector.Compositor">
       <member name="workingMode">
          <object class="java.lang.Integer">16</object>
       </member>

@@ -47,12 +47,12 @@ public class AnnotationExtensionTest implements ENVTestPreparation {
 
     @Test
     public void testCompositor() {
-        getVirtualDefinition(de.tsl2.nano.h5.Compositor.class);
+        getVirtualDefinition(de.tsl2.nano.h5.collector.Compositor.class);
     }
 
     @Test
     public void testController() {
-        de.tsl2.nano.h5.Controller c = getVirtualDefinition(de.tsl2.nano.h5.Controller.class);
+        de.tsl2.nano.h5.collector.Controller c = getVirtualDefinition(de.tsl2.nano.h5.collector.Controller.class);
         c.getCurrentData().add(new Base());
         //TODO: fill
         String actionIdWithRowNumber = null;
@@ -62,13 +62,13 @@ public class AnnotationExtensionTest implements ENVTestPreparation {
 
     @Test
     public void testCSheet() {
-        de.tsl2.nano.h5.CSheet sheet = getVirtualDefinition(de.tsl2.nano.h5.CSheet.class);
+        de.tsl2.nano.h5.collector.CSheet sheet = getVirtualDefinition(de.tsl2.nano.h5.collector.CSheet.class);
         assertEquals(new BigDecimal(6), sheet.get(0, 1));
     }
 
     @Test
     public void testQueryAndSpecification() {
-        getVirtualDefinition(de.tsl2.nano.h5.QueryResult.class);
+        getVirtualDefinition(de.tsl2.nano.h5.collector.QueryResult.class);
     }
 
     @Test

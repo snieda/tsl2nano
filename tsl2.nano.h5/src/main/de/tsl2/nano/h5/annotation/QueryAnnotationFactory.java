@@ -4,7 +4,7 @@ import java.util.Collection;
 
 import de.tsl2.nano.annotation.extension.AnnotationFactory;
 import de.tsl2.nano.bean.def.BeanDefinition;
-import de.tsl2.nano.h5.QueryResult;
+import de.tsl2.nano.h5.collector.QueryResult;
 
 @SuppressWarnings({ "rawtypes" })
 public class QueryAnnotationFactory implements AnnotationFactory<BeanDefinition, Query> {
