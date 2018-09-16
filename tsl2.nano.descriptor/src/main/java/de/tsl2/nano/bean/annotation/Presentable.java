@@ -36,6 +36,7 @@ public @interface Presentable {
 //    int width() default -1;
 //    int height() default -1;
     String icon() default "";
+    String iconFromField() default "";
     int[] foreground() default {};
     int[] background() default {};
 

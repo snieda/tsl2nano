@@ -1628,6 +1628,7 @@ public class Html5Presentation<T> extends BeanPresentationHelper<T> implements I
                     if (Messages.isMarkedAsProblem(value)) {
                         appendAttributes(cell, ATTR_COLOR, COLOR_RED);
                     }
+                    addManyToOnePicture(cell, attr);
                 }
             }
         } else {//don't show only an empty entry!
@@ -1643,6 +1644,15 @@ public class Html5Presentation<T> extends BeanPresentationHelper<T> implements I
             }
         }
         return row;
+    }
+
+    private void addManyToOnePicture(Element cell, IValueDefinition<?> attr) {
+        String iconFromField = BeanDefinition.getBeanDefinition(attr.getType()).getPresentable().getIconFromField();
+        if (iconFromField != null) {
+            Object manyToOneValue = attr.getValue();
+            if (manyToOneValue != null)
+            createDataTag(cell, (BeanValue<?>) Bean.getBean(manyToOneValue).getAttribute(iconFromField));
+        }
     }
 
     /**
@@ -1783,8 +1793,7 @@ public class Html5Presentation<T> extends BeanPresentationHelper<T> implements I
         for (IAction a : actions) {
             cell = appendTag(row, TABLE(TAG_CELL));
             Element btn = createAction(cell, a);
-            btn.setAttribute(ATTR_NAME, Controller.PREFIX_CTRLACTION + tabIndex + controller.POSTFIX_CTRLACTION
-                + a.getId());
+            btn.setAttribute(ATTR_NAME, Controller.createActionName(tabIndex, a.getId()));
         }
         return row;
     }
@@ -1911,7 +1920,7 @@ public class Html5Presentation<T> extends BeanPresentationHelper<T> implements I
                             false,
                             true);
                         appendAttributes(a, "tabindex", shortcut);
-
+                        addManyToOnePicture(cell, beanValue);
                     }
                     if (p.getEnabler().isActive()) {
                         //on focus gained, preselect text
