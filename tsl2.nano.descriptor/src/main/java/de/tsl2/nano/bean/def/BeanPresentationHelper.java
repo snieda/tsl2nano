@@ -1789,6 +1789,16 @@ public class BeanPresentationHelper<T> {
         return new Presentable(attr);
     }
 
+    public IAttribute getAttributeWithPicture() {
+        //if exactly one blob or bytearray field is available, fill iconFromField
+    	List<IAttribute> attributes = bean.getAttributes();
+    	for (IAttribute a : attributes) {
+    		if ( a instanceof IAttributeDefinition)
+    			if (Attachment.isAttachment((IAttributeDefinition<?>) a) )
+    				return a;
+		}
+    	return null;
+    }
     /**
      * generatedValue
      * 

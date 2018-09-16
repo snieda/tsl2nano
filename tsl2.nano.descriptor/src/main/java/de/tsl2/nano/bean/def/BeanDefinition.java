@@ -776,6 +776,9 @@ public class BeanDefinition<T> extends BeanClass<T> implements IPluggable<BeanDe
             presentable = (Presentable) ENV.get(BeanPresentationHelper.class).createPresentable();
             presentable.setLabel(toString());
             presentable.setDescription(toString());
+            IAttribute attributeWithPicture = getPresentationHelper().getAttributeWithPicture();
+            if (attributeWithPicture != null)
+                presentable.setIconFromField(attributeWithPicture.getName());
             if (getClazz().isAnnotationPresent(de.tsl2.nano.bean.annotation.Presentable.class)) {
                 de.tsl2.nano.bean.annotation.Presentable p =
                     getClazz().getAnnotation(de.tsl2.nano.bean.annotation.Presentable.class);

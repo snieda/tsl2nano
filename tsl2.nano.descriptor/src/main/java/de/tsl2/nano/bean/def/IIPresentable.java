@@ -46,6 +46,8 @@ public interface IIPresentable extends IPresentable, Serializable {
      */
     void setIcon(String icon);
 
+    void setIconFromField(String attributename);
+    
     /**
      * @param foreground The foreground to set.
      */

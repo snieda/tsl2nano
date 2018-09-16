@@ -115,6 +115,9 @@ public interface IPresentable extends Serializable {
     
     /** convenience to evaluate layout/layoutconstraint properties (perhaps, if layout or layoutconstraints are maps) */
     <T> T layout(String name, T defaultValue);
+
+    /** optional pointer to a bean attribute holding a picture (type: byte[] or blob) */
+    String getIconFromField();
     
     /** don't use that value - don't set any default values on it */
     static final int UNUSABLE = -2;
@@ -282,7 +285,13 @@ public interface IPresentable extends Serializable {
             return null;
         }
 
-        /**
+        
+        @Override
+		public String getIconFromField() {
+			return null;
+		}
+
+		/**
          * {@inheritDoc}
          */
         @Override

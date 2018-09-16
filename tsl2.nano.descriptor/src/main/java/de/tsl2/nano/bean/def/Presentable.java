@@ -81,6 +81,10 @@ public class Presentable implements IIPresentable, Serializable {
     /** needed for instances that wont be serialized */
     private transient boolean initialized;
 
+	private String pictureAttribute;
+
+	private String iconFromField;
+
     public Presentable() {
     }
 
@@ -222,7 +226,12 @@ public class Presentable implements IIPresentable, Serializable {
         return icon;
     }
 
-    /**
+    @Override
+	public String getIconFromField() {
+		return pictureAttribute;
+	}
+
+	/**
      * @return Returns the foreground.
      */
     @Override
@@ -369,7 +378,13 @@ public class Presentable implements IIPresentable, Serializable {
         this.icon = icon;
     }
 
+    
     @Override
+	public void setIconFromField(String attributename) {
+    	this.iconFromField = attributename;
+	}
+
+	@Override
     public void setForeground(int[] foreground) {
         this.foreground = foreground;
     }
@@ -445,6 +460,8 @@ public class Presentable implements IIPresentable, Serializable {
 		presentable.setNesting(p.nesting());
 		if (!Util.isEmpty(p.icon()))
 			presentable.setIcon(p.icon());
+		if (!Util.isEmpty(p.iconFromField()))
+			presentable.setIconFromField(p.iconFromField());
 		if (!Util.isEmpty(p.background()))
 			presentable.setBackground(p.background());
 		if (!Util.isEmpty(p.foreground()))
