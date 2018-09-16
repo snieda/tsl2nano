@@ -37,7 +37,7 @@ public class H2LuceneIntegration {
     
     protected void initialize() {
         String init = ENV.get("app.lucene.init.stmt", INIT_LUCENE);
-        BeanContainer.instance().executeStmt(init, true, null);
+        executeStmt(init);
     }
     
     public int activateOnTables(String...tables) {
@@ -64,9 +64,13 @@ public class H2LuceneIntegration {
         int i = 0;
         for (String t : tables) {
             actTableStmt = StringUtil.insertProperties(stmt, MapUtil.asMap("table", t));
-            i += BeanContainer.instance().executeStmt(actTableStmt, true, null);
+            i += executeStmt(actTableStmt);
         }
         return i;
+    }
+
+    Integer executeStmt(String stmt) {
+        return BeanContainer.instance().executeStmt(stmt, true, null);
     }
     
     public int dropIndex(String scheme, String... tables) {

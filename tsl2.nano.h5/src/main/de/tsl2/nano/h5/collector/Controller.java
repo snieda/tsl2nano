@@ -184,4 +184,8 @@ public class Controller<COLLECTIONTYPE extends Collection<T>, T> extends Composi
         setValueExpression(new ValueExpression<T>("{" + itemProvider.getName() + "}"));
         return this;
     }
+
+    public static String createActionName(int tabIndex, String id) {
+        return PREFIX_CTRLACTION + tabIndex + POSTFIX_CTRLACTION + id;
+    }
 }

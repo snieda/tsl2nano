@@ -14,6 +14,7 @@ import org.junit.AfterClass;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
+import de.tsl2.nano.action.IAction;
 import de.tsl2.nano.annotation.extension.With;
 import de.tsl2.nano.bean.BeanContainer;
 import de.tsl2.nano.bean.def.BeanDefinition;
@@ -53,11 +54,18 @@ public class AnnotationExtensionTest implements ENVTestPreparation {
     @Test
     public void testController() {
         de.tsl2.nano.h5.collector.Controller c = getVirtualDefinition(de.tsl2.nano.h5.collector.Controller.class);
-        c.getCurrentData().add(new Base());
-        //TODO: fill
-        String actionIdWithRowNumber = null;
+        Base instance = new Base();
+        c.getCurrentData().add(instance);
+        de.tsl2.nano.bean.def.Bean item = c.getBean(instance);
+        Collection<IAction> actions = item.getActions();
+        int i = 0;
         Map context = null;
-        c.doAction(actionIdWithRowNumber, context);
+        Object result;
+        for (IAction a : actions) {
+            String actionIdWithRowNumber = de.tsl2.nano.h5.collector.Controller.createActionName(i++, a.getId());
+            result = c.doAction(actionIdWithRowNumber, context);
+            System.out.println(result);
+        }
     }
 
     @Test

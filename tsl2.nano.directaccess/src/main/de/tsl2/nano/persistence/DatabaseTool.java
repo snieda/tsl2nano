@@ -158,7 +158,7 @@ public class DatabaseTool {
             String[] result = new String[cc];
             int i = 0;
             while(tables.next()) {
-                result[i++] = tables.getObject("TABLE").toString();
+                result[i++] = tables.getObject("TABLE_NAME").toString();
             }
             return result;
         } catch (Exception e) {
