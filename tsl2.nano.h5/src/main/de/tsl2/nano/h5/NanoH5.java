@@ -852,7 +852,7 @@ public class NanoH5 extends NanoHTTPD implements ISystemConnector<Persistence> {
     }
 
     private void createLuceneIntegration(Persistence persistence) {
-        if (isH2(persistence.getConnectionUrl()) && ENV.get("app.db.h2.lucene.integration", true)) {
+        if (isH2(persistence.getConnectionUrl()) && ENV.get("app.db.h2.lucene.integration", false)) {
             new H2LuceneIntegration(persistence).activateOnTables();
 
             //create a view for fulltext search

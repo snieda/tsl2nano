@@ -17,7 +17,7 @@ public class AttributeCoverTest {
 
     @Before
     public void setUp() {
-    	ENVTestPreparation.setUp("attributecover", false);
+    	ENVTestPreparation.setUp("descriptor", false);
     }
 
     @After

@@ -15,7 +15,7 @@ public class EntityReplicationTest  implements ENVTestPreparation {
 
     @BeforeClass
     public static void setUp() {
-        ENVTestPreparation.setUp("entityreplication", false);
+        ENVTestPreparation.setUp("directaccess", false);
     }
 
     @AfterClass

@@ -23,7 +23,7 @@ public class H2LuceneIntegrationTest implements ENVTestPreparation {
     
     @Before
     public void setUp() throws SQLException {
-        final String BASE_DIR = ENVTestPreparation.setUp("h2lucene", false);
+        final String BASE_DIR = ENVTestPreparation.setUp("h5", false);
         Server.createTcpServer("-baseDir", new File(BASE_DIR).getAbsolutePath(), "-tcpPort", "9092").start();
         createTestDatabase();
 //        BeanContainerUtil.initGenericServices(Thread.currentThread().getContextClassLoader());

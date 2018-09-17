@@ -1647,11 +1647,13 @@ public class Html5Presentation<T> extends BeanPresentationHelper<T> implements I
     }
 
     private void addManyToOnePicture(Element cell, IValueDefinition<?> attr) {
-        String iconFromField = BeanDefinition.getBeanDefinition(attr.getType()).getPresentable().getIconFromField();
-        if (iconFromField != null) {
-            Object manyToOneValue = attr.getValue();
-            if (manyToOneValue != null)
-            createDataTag(cell, (BeanValue<?>) Bean.getBean(manyToOneValue).getAttribute(iconFromField));
+        if (BeanContainer.instance().isPersistable(attr.getType())) {
+            String iconFromField = BeanDefinition.getBeanDefinition(attr.getType()).getPresentable().getIconFromField();
+            if (iconFromField != null) {
+                Object manyToOneValue = attr.getValue();
+                if (manyToOneValue != null)
+                createDataTag(cell, (BeanValue<?>) Bean.getBean(manyToOneValue).getAttribute(iconFromField));
+            }
         }
     }
 

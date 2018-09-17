@@ -81,8 +81,6 @@ public class Presentable implements IIPresentable, Serializable {
     /** needed for instances that wont be serialized */
     private transient boolean initialized;
 
-	private String pictureAttribute;
-
 	private String iconFromField;
 
     public Presentable() {
@@ -228,7 +226,7 @@ public class Presentable implements IIPresentable, Serializable {
 
     @Override
 	public String getIconFromField() {
-		return pictureAttribute;
+		return iconFromField;
 	}
 
 	/**
