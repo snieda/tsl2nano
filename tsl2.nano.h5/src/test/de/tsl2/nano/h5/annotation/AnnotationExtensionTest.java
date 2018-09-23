@@ -17,6 +17,7 @@ import org.junit.Test;
 import de.tsl2.nano.action.IAction;
 import de.tsl2.nano.annotation.extension.With;
 import de.tsl2.nano.bean.BeanContainer;
+import de.tsl2.nano.bean.annotation.Constraint;
 import de.tsl2.nano.bean.def.BeanDefinition;
 import de.tsl2.nano.bean.fi.Bean;
 import de.tsl2.nano.core.util.ENVTestPreparation;
@@ -51,20 +52,27 @@ public class AnnotationExtensionTest implements ENVTestPreparation {
         getVirtualDefinition(de.tsl2.nano.h5.collector.Compositor.class);
     }
 
+    @SuppressWarnings({ "rawtypes", "unchecked" })
     @Test
     public void testController() {
+        //BeanType <-> Composition.target -> Base.name
         de.tsl2.nano.h5.collector.Controller c = getVirtualDefinition(de.tsl2.nano.h5.collector.Controller.class);
         Base instance = new Base();
         c.getCurrentData().add(instance);
+        Collection testBeans = BeanContainer.initEmtpyServiceActions();
+        testBeans.add(instance);
+        
         de.tsl2.nano.bean.def.Bean item = c.getBean(instance);
         Collection<IAction> actions = item.getActions();
+        assertTrue(actions.size() > 0);
+        //TODO: fill context, actions.size > 0
         int i = 0;
         Map context = null;
         Object result;
         for (IAction a : actions) {
-            String actionIdWithRowNumber = de.tsl2.nano.h5.collector.Controller.createActionName(i++, a.getId());
+            String actionIdWithRowNumber = de.tsl2.nano.h5.collector.Controller.createActionName(++i, a.getId());
             result = c.doAction(actionIdWithRowNumber, context);
-            System.out.println(result);
+            assertTrue(result instanceof BeanType);
         }
     }
 
@@ -107,35 +115,42 @@ public class AnnotationExtensionTest implements ENVTestPreparation {
 @With(VirtualAttributeAnnotationFactory.class) @VirtualAttribute(name=AnnotationExtensionTest.MYVIRTUALATTRIBUTE, specificationType=SpecificationType.RULE, expression="myvirtualattribute")
 @With(SpecificationAnnotationFactory.class) @Specification(name="myquery", specificationType=SpecificationType.QUERY, expression="select...")
 @With(QueryAnnotationFactory.class) @Query(name="myquery", icon="icons/go.png")
-@With(CompositorAnnotationFactory.class) @Compositor(baseType=Base.class, baseAttribute="name", targetAttribute="composition", iconAttribute="icon")
-@With(ControllerAnnotationFactory.class) @Controller(baseType=Base.class, baseAttribute="name", targetAttribute="composition", iconAttribute="icon", increaseAttribute="value")
+@With(CompositorAnnotationFactory.class) @Compositor(baseType=Base.class, baseAttribute="composition", targetAttribute="baseComposition", iconAttribute="icon")
+@With(ControllerAnnotationFactory.class) @Controller(baseType=Base.class, baseAttribute="composition", targetAttribute="baseComposition", iconAttribute="icon", increaseAttribute="value")
 @With(CSheetAnnotationFactory.class) @CSheet(title="myCSheet", rows=3, cols=3, cells = {
     @CCell(row=0, col=0, value="1"), @CCell(row=0, col=1, value="=A1+5")
 })
 class BeanType {
     Composition composition;
-
-    public Composition getComposition() {
+    String name;
+    @Constraint(nullable=false)
+    public String getName() {
+        return name;
+    }
+    public void setName(String name) {
+        this.name = name;
+    }
+    public Composition getBaseComposition() {
         return composition;
     }
-    public void setComposition(Composition composition) {
+    public void setBaseComposition(Composition composition) {
         this.composition = composition;
     }
 }
 class Composition {
     BeanType beanType;
-    Base target;
+    Base parent;
     public BeanType getBeanType() {
         return beanType;
     }
     public void setBeanType(BeanType beanType) {
         this.beanType = beanType;
     }
-    public Base getTarget() {
-        return target;
+    public Base getParent() {
+        return parent;
     }
-    public void setTarget(Base target) {
-        this.target = target;
+    public void setParent(Base parent) {
+        this.parent = parent;
     }
 }
 class Base implements Serializable {
@@ -144,11 +159,20 @@ class Base implements Serializable {
     String name;
     String icon;
     int value;
+    Composition composition;
+    
     public String getName() {
         return name;
     }
     public void setName(String name) {
         this.name = name;
+    }
+    
+    public Composition getComposition() {
+        return composition;
+    }
+    public void setComposition(Composition composition) {
+        this.composition = composition;
     }
     @With(DependencyListenerAnnotationFactory.class) @DependencyListener(rule="myvirtualattribute", listenerType=ListenerType.BOTH, observables= {"name"})
     public String getIcon() {

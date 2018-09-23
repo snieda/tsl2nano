@@ -33,7 +33,9 @@ import de.tsl2.nano.core.util.StringUtil;
  * buttons with pictures on a touch-screen.
  * <p/>
  * Through the bean-definition of {@link #beanName}, a special bean, holding the actions, can start a selected action
- * through {@link #doAction(String)}.
+ * through {@link #doAction(String)}.<p/>
+ * The super class Compositor tries to build actions given by baseAttribute and targetAttribute. 
+ * The second possibility for creating actions is to set an itemProvider through {@link #setItemProvider(Increaser)}.
  * 
  * @author Tom, Thomas Schneider
  * @version $Revision$
@@ -166,7 +168,7 @@ public class Controller<COLLECTIONTYPE extends Collection<T>, T> extends Composi
         T item = createItem(null);
         if (context != null)
             fillContext(item, context.values().toArray());
-        return BeanUtil.create(item, itemProvider.getName(), null, itemProvider.getCount(), itemProvider.getStep());
+        return itemProvider.createItems(item, context);
     }
 
     /**

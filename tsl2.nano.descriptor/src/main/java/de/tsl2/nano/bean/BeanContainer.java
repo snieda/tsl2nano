@@ -148,12 +148,12 @@ public class BeanContainer implements IBeanContainer {
      * will call {@link #initServiceActions(IAction, IAction, IAction)} with simple actions, doing nothing. useful for
      * testing.
      */
-    public static final void initEmtpyServiceActions() {
+    public static final Collection initEmtpyServiceActions() {
         final Collection<?> EMPTY_LIST = new ListSet();
         final IAction idFinder = new CommonAction("empty.service.idFinder") {
             @Override
             public Object action() {
-                return null;
+                return EMPTY_LIST.size() > 0 ? EMPTY_LIST.iterator().next() : null;
             }
         };
         final IAction<Collection<?>> relationFinder = new CommonAction<Collection<?>>("empty.service.relationFinder") {
@@ -254,6 +254,7 @@ public class BeanContainer implements IBeanContainer {
             persistableAction,
             executeAction);
         self.emptyServices = true;
+		return EMPTY_LIST;
     }
 
     /**
@@ -643,7 +644,7 @@ public class BeanContainer implements IBeanContainer {
      * 
      * @param newItem
      */
-    public static void createId(Object newItem) {
+    public static boolean createId(Object newItem) {
         if (ENV.get("value.id.fill.uuid", true)) {
             final BeanAttribute idAttribute = BeanContainer.getIdAttribute(newItem);
             if (idAttribute != null) {
@@ -676,10 +677,11 @@ public class BeanContainer implements IBeanContainer {
                         + idAttribute.getType());
                 }
                 idAttribute.setValue(newItem, value);
-                return;
+                return true;
             }
         }
         LOG.debug("no id will be generated for new item " + newItem);
+        return false;
     }
 
     /**

@@ -158,7 +158,6 @@ public class Composition<C> {
      */
     @SuppressWarnings({ "unchecked", "rawtypes" })
     public C createChildOnTarget(Object targetInstance) {
-        // BeanClass<C> bc = BeanClass.getBeanClass(Collection.class.isAssignableFrom(parent.getType()) ? parent.getGenericType(0) : parent.getType());
         BeanDefinition<C> bc = BeanDefinition.getBeanDefinition(Collection.class.isAssignableFrom(parent.getType()) ? parent.getGenericType(0) : parent.getType());
         C child = (C) (target == null ? targetInstance : bc.createInstance());
         if (this.target != null && targetInstance != null) {
@@ -173,10 +172,19 @@ public class Composition<C> {
         } else {
             BeanContainer.createId(child);
         }
-        IAttribute attr = bc.getAttribute(parent.getDeclaringClass());
-        if (attr != null)
-            attr.setValue(child, parent.getInstance());
-        getParentContainer().add(child);
+        IAttribute attrParent = bc.getAttribute(parent.getDeclaringClass());
+        if (attrParent != null)
+            attrParent.setValue(child, parent.getInstance());
+        IAttribute attrTarget = bc.getAttribute(target.getDeclaringClass());
+        if (attrTarget != null && targetInstance != null)
+            attrTarget.setValue(child, targetInstance);
+        
+        if (parent.isMultiValue() && parent.getValue() != null)
+        	getParentContainer().add(child);
+        else if (parent.getType().isAssignableFrom(child.getClass()))
+        	parent.setValue(child);
+        else
+        	;//throw new ....
         return child;
     }
 

@@ -10,6 +10,12 @@
 package de.tsl2.nano.h5.collector;
 
 import java.io.Serializable;
+import java.util.Collection;
+import java.util.Map;
+
+import de.tsl2.nano.bean.BeanUtil;
+import de.tsl2.nano.bean.def.BeanCollector;
+import de.tsl2.nano.bean.def.IAttributeDefinition;
 
 /**
  * holds properties to create new instances with an increasing attribute
@@ -17,10 +23,11 @@ import java.io.Serializable;
  * @author Tom, Thomas Schneider
  * @version $Revision$
  */
-public class Increaser implements Serializable {
+public class Increaser<T> implements IItemProvider<T>, Serializable {
 
     private static final long serialVersionUID = 4984470230289140956L;
 
+    
     private int count;
     private int step;
     private String name;
@@ -37,25 +44,26 @@ public class Increaser implements Serializable {
         this.step = step;
     }
 
-    /**
-     * @return Returns the name.
-     */
+    @Override
+    public T createItem(T srcInstance, Map context) {
+        throw new UnsupportedOperationException();
+    }
+
+    @Override
+    public Collection<? extends T> createItems(T srcInstance, Map context) {
+        return BeanUtil.create(srcInstance, name, null, count, step);
+    }
+
     public String getName() {
         return name;
     }
 
-    /**
-     * @return Returns the count.
-     */
+    public void check(BeanCollector<Collection<T>, T> caller) {
+        IAttributeDefinition attribute = caller.getAttribute(getName());
+        createItems(caller.createItem(null), null);
+    }
+
     public int getCount() {
         return count;
     }
-
-    /**
-     * @return Returns the step.
-     */
-    public int getStep() {
-        return step;
-    }
-
 }

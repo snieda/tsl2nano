@@ -714,7 +714,7 @@ public class BeanCollector<COLLECTIONTYPE extends Collection<T>, T> extends Bean
             Timestamp ts = new Timestamp(DateUtil.cutSeconds(System.currentTimeMillis()));
             for (IAttribute a : attrs) {
                 IAttributeDef def = BeanContainer.instance().getAttributeDef(newItem, a.getName());
-                if (!def.nullable() && def.temporalType() != null
+                if (def != null && !def.nullable() && def.temporalType() != null
                     && Timestamp.class.isAssignableFrom(def.temporalType())) {
 //                    if (a instanceof IValueAccess) {
 //                        ((IValueAccess) a).setValue(ts);

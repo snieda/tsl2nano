@@ -40,7 +40,7 @@ import de.tsl2.nano.incubation.specification.Pool;
 
 /**
  * The Compositor is a fast- or one-click collector using a base-type to create composition instances from. It's a kind
- * of charging items of the base-type.
+ * of charging items of the base-type. see {@link Composition}
  * <p/>
  * It provides actions to refresh, save and storno the list of charges. Each charge (=add or create) will be done by
  * activing the representable action for an item. Each item will represented by such an action.

@@ -82,7 +82,7 @@ import de.tsl2.nano.util.operation.IConverter;
 public class RegExpFormat extends Format implements INumberFormatCheck {
     private static final long serialVersionUID = 1L;
     private static final Log LOG = LogFactory.getLog(RegExpFormat.class);
-    @Element(data = true)
+    @Element(data = true, required=false)
     private String pattern;
     @Attribute
     private int regExpFlags;
