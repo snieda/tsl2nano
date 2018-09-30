@@ -24,13 +24,13 @@ import de.tsl2.nano.bean.annotation.ConstraintValueSet;
 import de.tsl2.nano.bean.def.AttributeDefinition;
 import de.tsl2.nano.bean.def.Bean;
 import de.tsl2.nano.bean.def.BeanDefinition;
-import de.tsl2.nano.bean.def.CollectionExpressionTypeFormat;
 import de.tsl2.nano.bean.def.Constraint;
 import de.tsl2.nano.bean.def.IAttributeDefinition;
 import de.tsl2.nano.bean.def.IPresentable;
 import de.tsl2.nano.bean.def.Presentable;
 import de.tsl2.nano.bean.def.ValueColumn;
 import de.tsl2.nano.bean.def.ValueExpression;
+import de.tsl2.nano.bean.def.ValueExpressionFormat;
 import de.tsl2.nano.bean.def.ValueGroup;
 import de.tsl2.nano.collection.Entry;
 import de.tsl2.nano.core.ENV;
@@ -66,6 +66,7 @@ import de.tsl2.nano.incubation.specification.rules.RuleScript;
  * @author Tom, Thomas Schneider
  * @version $Revision$
  */
+@SuppressWarnings({ "rawtypes", "unchecked" })
 public class BeanConfigurator<T> implements Serializable {
     /** serialVersionUID */
     private static final long serialVersionUID = 1L;
@@ -80,7 +81,6 @@ public class BeanConfigurator<T> implements Serializable {
      * @param instance to evaluate the type and {@link BeanDefinition} for.
      * @return new bean configurator instance
      */
-    @SuppressWarnings({ "unchecked", "rawtypes" })
     public static <I extends Serializable> Bean<BeanConfigurator<I>> create(Class<I> type) {
         boolean autopersistEnv = ENV.isAutopersist();
         BeanConfigurator<?> configurer = ConcurrentUtil.getCurrent(BeanConfigurator.class);
@@ -150,7 +150,7 @@ public class BeanConfigurator<T> implements Serializable {
     
                     configBean.setAttributeFilter("name", "valueExpression", "presentable", "valueGroups", "attributes");
                     configBean.getPresentable().setLayout(layout);
-                    ((CollectionExpressionTypeFormat) configBean.getAttribute("attributes").getFormat())
+                    ((ValueExpressionFormat) configBean.getAttribute("attributes").getFormat())
                         .getValueExpression()
                         .setExpression("{name}");
     //          configBean.saveDefinition();
@@ -169,7 +169,6 @@ public class BeanConfigurator<T> implements Serializable {
      * 
      * @param layout
      */
-    @SuppressWarnings("rawtypes")
     public static void defineAction(Serializable layout) {
         BeanDefinition<CommonAction> configAction = BeanDefinition.getBeanDefinition(CommonAction.class);
         configAction.setAttributeFilter("id", "shortDescription", "longDescription", "keyStroke", "enabled", "default",
@@ -210,7 +209,6 @@ public class BeanConfigurator<T> implements Serializable {
     /**
      * @param attributes The attributeDefinitions to set.
      */
-    @SuppressWarnings({ "rawtypes", "unchecked" })
     public void setAttributes(List<AttributeConfigurator> attributes) {
         Map<String, IAttributeDefinition> definitions = defAccessor.call("getAttributeDefinitions", Map.class);
         Map<String, IAttributeDefinition> invisibles = new LinkedHashMap<>(definitions);
@@ -255,7 +253,6 @@ public class BeanConfigurator<T> implements Serializable {
     /**
      * @return Returns the presentable.
      */
-    @SuppressWarnings("unchecked")
     public Collection<ValueGroup> getValueGroups() {
         return defAccessor.member("valueGroups", Collection.class);
     }
@@ -338,7 +335,6 @@ public class BeanConfigurator<T> implements Serializable {
         return Util.toString(getClass(), def);
     }
 
-    @SuppressWarnings({ "rawtypes", "unchecked" })
     @de.tsl2.nano.bean.annotation.Action(name = "createRuleOrAction", argNames = { "newActionName", "actionType",
         "actionExpression" })
     public void actionCreateRuleOrAction(String newActionName,
@@ -360,7 +356,6 @@ public class BeanConfigurator<T> implements Serializable {
         
     }
 
-    @SuppressWarnings({ "rawtypes", "unchecked" })
     @de.tsl2.nano.bean.annotation.Action(name = "addAction", argNames = { "specifiedAction" })
     public void actionAddAction(
             @de.tsl2.nano.bean.annotation.Constraint(allowed=ConstraintValueSet.ALLOWED_ENVFILES + ".*specification/action.*") String specifiedAction) {
@@ -371,7 +366,6 @@ public class BeanConfigurator<T> implements Serializable {
         def.addAction(action);
     }
 
-    @SuppressWarnings({ "rawtypes" })
     @de.tsl2.nano.bean.annotation.Action(name = "createCompositor", argNames = { "baseType", "baseAttributeName",
         "targetAttributeName", "iconAttributeName" })
     public void actionCreateCompositor(
@@ -379,30 +373,42 @@ public class BeanConfigurator<T> implements Serializable {
             @de.tsl2.nano.bean.annotation.Constraint(allowed=ConstraintValueSet.ALLOWED_APPBEANATTRS) String baseAttribute, 
             @de.tsl2.nano.bean.annotation.Constraint(allowed=ConstraintValueSet.ALLOWED_APPBEANATTRS) String targetAttribute, 
             @de.tsl2.nano.bean.annotation.Constraint(nullable=true, allowed=ConstraintValueSet.ALLOWED_APPBEANATTRS) String iconAttribute) {
-        Compositor compositor = createCompositorBean(Compositor.class, "icons/properties.png", baseType, baseAttribute, targetAttribute, iconAttribute);
-        compositor.saveDefinition();
+        createCompositor(baseType, baseAttribute, targetAttribute, iconAttribute);
         Bean.clearCache();
+    }
+
+    public void createCompositor(String baseType, String baseAttribute, String targetAttribute, String iconAttribute) {
+        Compositor compositor = createCompositorBean(Compositor.class, "icons/properties.png", baseType, baseAttribute, null, targetAttribute, iconAttribute);
+        compositor.saveDefinition();
     }
 
     @de.tsl2.nano.bean.annotation.Action(name = "createController"
             , argNames = {"increaseAttribute", "increaseCount", "increaseStep", "baseType", "baseAttributeName",
                             "targetAttributeName", "iconAttributeName"})
     public void actionCreateController (
-            @de.tsl2.nano.bean.annotation.Constraint(allowed=ConstraintValueSet.ALLOWED_APPBEANATTRS) String increaseAttribute,
-            int increaseCount,
-            int increaseStep,
             @de.tsl2.nano.bean.annotation.Constraint(allowed=ConstraintValueSet.ALLOWED_APPCLASSES) String baseType, 
             @de.tsl2.nano.bean.annotation.Constraint(allowed=ConstraintValueSet.ALLOWED_APPBEANATTRS) String baseAttribute, 
+            @de.tsl2.nano.bean.annotation.Constraint(allowed=ConstraintValueSet.ALLOWED_APPCLASSES) String targetType, 
             @de.tsl2.nano.bean.annotation.Constraint(allowed=ConstraintValueSet.ALLOWED_APPBEANATTRS) String targetAttribute, 
-            @de.tsl2.nano.bean.annotation.Constraint(nullable=true, allowed=ConstraintValueSet.ALLOWED_APPBEANATTRS) String iconAttribute
+            @de.tsl2.nano.bean.annotation.Constraint(nullable=true, allowed=ConstraintValueSet.ALLOWED_APPBEANATTRS) String iconAttribute,
+            @de.tsl2.nano.bean.annotation.Constraint(allowed=ConstraintValueSet.ALLOWED_APPBEANATTRS) String increaseAttribute,
+            int increaseCount,
+            int increaseStep
             ) {
-        Controller controller = createCompositorBean(Controller.class, "icons/cascade.png", baseType, baseAttribute, targetAttribute, iconAttribute);
-        if (increaseAttribute != null) {
+        createControllerBean(baseType, baseAttribute, targetType, targetAttribute, iconAttribute, 
+            increaseAttribute, increaseCount, increaseStep);
+        Bean.clearCache();
+    }
+
+    public Controller createControllerBean(String baseType, String baseAttribute, String targetType, String targetAttribute, String iconAttribute,
+            String increaseAttribute, int increaseCount, int increaseStep) {
+        Controller controller = createCompositorBean(Controller.class, "icons/cascade.png", baseType, baseAttribute, targetType, targetAttribute, iconAttribute);
+        if (!Util.isEmpty(increaseAttribute)) {
             increaseAttribute = StringUtil.substring(increaseAttribute, ".", null, true);
             controller.setItemProvider(new Increaser(increaseAttribute, increaseCount, increaseStep));
         }
         controller.saveDefinition();
-        Bean.clearCache();
+        return controller;
     }
 
     /**
@@ -412,17 +418,25 @@ public class BeanConfigurator<T> implements Serializable {
      * @param targetAttribute
      * @param iconAttribute
      */
-    <C extends Compositor> C createCompositorBean(Class<C> compositorExtension, String compositorIcon, String baseType, String baseAttribute, String targetAttribute, String iconAttribute) {
+    public <C extends Compositor> C createCompositorBean(Class<C> compositorExtension, String compositorIcon, String baseType, String baseAttribute, String targetType, String targetAttribute, String iconAttribute) {
         BeanClass bcBaseType = BeanClass.createBeanClass(baseType);
+        BeanClass bcTargetType = !Util.isEmpty(targetType) ? BeanClass.createBeanClass(targetType) : null;
         //check the attributes
         baseAttribute = StringUtil.substring(baseAttribute, ".", null, true);
-        targetAttribute = StringUtil.substring(targetAttribute, ".", null, true);
-        iconAttribute = StringUtil.substring(iconAttribute, ".", null, true);
+        targetAttribute = Util.nonEmpty(StringUtil.substring(targetAttribute, ".", null, true));
+        iconAttribute = Util.nonEmpty(StringUtil.substring(iconAttribute, ".", null, true));
         bcBaseType.getAttribute(baseAttribute);
-        bcBaseType.getAttribute(iconAttribute);
-        def.getAttribute(targetAttribute);
+        if (iconAttribute != null)
+            bcBaseType.getAttribute(iconAttribute);
+        if (targetAttribute != null)
+            if (bcTargetType != null)
+                bcTargetType.getAttribute(targetAttribute);
+            else
+                def.getAttribute(targetAttribute);
         //now create the compositor
         Compositor compositor = BeanClass.createInstance(compositorExtension, def.getClazz(), bcBaseType.getClazz(), baseAttribute, targetAttribute, iconAttribute);
+        if (bcTargetType != null)
+            compositor.setTargetType(bcTargetType.getClazz());
         compositor.getPresentable().setIcon(compositorIcon);
 //        compositor.getActions();
         return (C) compositor;
@@ -436,13 +450,18 @@ public class BeanConfigurator<T> implements Serializable {
         new CSheet(title, cols, rows).save();
     }
 
-    @SuppressWarnings({ "rawtypes", "unchecked" })
     @de.tsl2.nano.bean.annotation.Action(name = "addAttribute", argNames = { "attributeType", "attributeExpression"})
     public void actionAddAttribute(
             @de.tsl2.nano.bean.annotation.Constraint(allowed = {" :      (--> PathExpression)",
                 "§: Rule  (--> Operation)", "%: RuleScript (--> JavaScript)", "!: Action (--> Java)"
                 , "?: Query (--> sql statement)", "@: Web   (--> URL/REST)" }) String attributeType,
             String attributeExpression) {
+        addAttribute(attributeType, attributeExpression);
+        def.saveDefinition();
+        Bean.clearCache();
+    }
+
+    public void addAttribute(String attributeType, String attributeExpression) {
         if (Util.isEmpty(attributeType)) {
             ManagedException.assertion(!Util.isEmpty(attributeExpression), "At least attributeExpression or attributeType must be filled!", attributeExpression, attributeType);
             attributeType = String.valueOf(attributeExpression.charAt(0));
@@ -455,8 +474,6 @@ public class BeanConfigurator<T> implements Serializable {
         AttributeDefinition attr = def.addAttribute(exDescr.getName(), exDescr.toInstance(), null, null);
         attr.getPresentation().setType(IPresentable.TYPE_DEPEND);
         attr.getPresentation().setStyle(IPresentable.UNDEFINED);
-        def.saveDefinition();
-        Bean.clearCache();
     }
 
 }

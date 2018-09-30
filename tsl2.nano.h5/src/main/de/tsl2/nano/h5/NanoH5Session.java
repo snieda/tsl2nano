@@ -631,9 +631,11 @@ public class NanoH5Session implements ISession<BeanDefinition>, Serializable, IL
 
         if (nav.current() instanceof Controller) {
             Controller ctrl = (Controller) nav.current();
-            String actionName = (String) parms.keySet().iterator().next();
-            if (actionName != null && actionName.startsWith(Controller.PREFIX_CTRLACTION)) {
-                return ctrl.doAction(actionName, getContextParameter());
+            Set<String> keys = parms.keySet();
+            for (String k : keys) {
+                if (k != null && k.startsWith(Controller.PREFIX_CTRLACTION)) {
+                    return ctrl.doAction(k, getContextParameter());
+                }
             }
         }
         //follow links or fill selected items

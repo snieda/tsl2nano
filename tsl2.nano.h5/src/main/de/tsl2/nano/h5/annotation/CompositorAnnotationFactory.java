@@ -10,8 +10,7 @@ public class CompositorAnnotationFactory implements AnnotationFactory<BeanDefini
     @Override
     public void build(BeanDefinition instance, Compositor a) {
         BeanConfigurator configurator = (BeanConfigurator) BeanConfigurator.create(instance.getClazz()).getInstance();
-        configurator.actionCreateCompositor(
-            a.baseType().getName(), a.baseAttribute(), a.targetAttribute(), a.iconAttribute());
+        configurator.createCompositor(a.baseType().getName(), a.baseAttribute(), a.targetAttribute(), a.iconAttribute());
     }
 
 }

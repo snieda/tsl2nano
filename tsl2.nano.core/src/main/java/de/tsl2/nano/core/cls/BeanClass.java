@@ -979,9 +979,10 @@ public class BeanClass<T> implements Serializable {
         }
         Collection<String> unavailable = new LinkedList<String>();
         for (int i = 0; i < attributeNames.length; i++) {
-            final BeanAttribute srcAttribute = BeanAttribute.getBeanAttribute(src.getClass(), attributeNames[i]);
-            BeanAttribute destAttribute;
-            destAttribute = BeanAttribute.getBeanAttribute(dest.getClass(), attributeNames[i], false);
+            final BeanAttribute srcAttribute = BeanAttribute.getBeanAttribute(src.getClass(), attributeNames[i], false);
+            if (srcAttribute == null)
+            	continue; //virtual attributes cannot be found through BeanAttribute.getBeanAttribute()
+            BeanAttribute destAttribute = BeanAttribute.getBeanAttribute(dest.getClass(), attributeNames[i], false);
             if (destAttribute == null) {
                 unavailable.add(attributeNames[i]);
                 continue;

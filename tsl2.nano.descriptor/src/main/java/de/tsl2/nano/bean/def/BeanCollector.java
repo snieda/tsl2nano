@@ -1474,6 +1474,11 @@ public class BeanCollector<COLLECTIONTYPE extends Collection<T>, T> extends Bean
             null);
     }
 
+    public static final <C extends Collection<I>, I/* extends Serializable*/> BeanCollector<C, I> getBeanCollector(
+            Class<I> beanType) {
+    	return getBeanCollector(beanType, null, 0, null);
+    }
+    
     /**
      * searches for an existing bean-definition and creates a bean-collector.
      * 

@@ -1091,7 +1091,7 @@ public class BeanPresentationHelper<T> {
              */
             NavigableSet<Integer> keySet = levels.descendingKeySet();
             //on initial the beancontainer is served with empty actions!
-            if (!Util.isFrameworkClass(bean.getClazz()) && !Util.isJavaType(bean.getClazz()) && bean.isPersistable()) {
+            if (bean.isSaveable()) {
                 boolean isEmpty;
                 try {
                     isEmpty =

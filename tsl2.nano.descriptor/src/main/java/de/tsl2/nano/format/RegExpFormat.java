@@ -349,6 +349,8 @@ public class RegExpFormat extends Format implements INumberFormatCheck {
             o = parser.format(obj);
         }
         if (compiledPattern == null) {
+        	if (Util.isEmpty(pattern))
+        		pattern = ".*";
             compiledPattern = Pattern.compile(pattern, regExpFlags);
         }
         //second: fill separation characters

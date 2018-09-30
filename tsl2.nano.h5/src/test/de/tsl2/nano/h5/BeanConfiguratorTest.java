@@ -49,7 +49,7 @@ public class BeanConfiguratorTest {
         bconf.actionAddAction("testaction");
         bconf.actionAddAttribute("date", "expression");
         bconf.actionCreateCompositor(Address.class.getName(), "city", "code", "wrench.png");
-        bconf.actionCreateController("code", 1, 1, Address.class.getName(), "city", "code", "wrench.png");
+        bconf.actionCreateController(Address.class.getName(), "city", Address.class.getName(), "code", "wrench.png", "code", 1, 1);
         bconf.actionCreateRuleOrAction("testRule", "§", "1+1");
         bconf.actionCreateRuleOrAction("testRuleScript", "%", "1+1");
         bconf.actionCreateRuleOrAction("testaction", "!", Address.class.getName() + ".getCity");

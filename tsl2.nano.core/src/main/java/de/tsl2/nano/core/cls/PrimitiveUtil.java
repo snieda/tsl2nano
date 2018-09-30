@@ -127,11 +127,11 @@ public class PrimitiveUtil {
         } else if (standardType.equals(short.class) || standardType.equals(Short.class)) {
             return (T) new Short((short) 0);
         } else if (standardType.equals(long.class) || standardType.equals(Long.class)) {
-            return (T) new Long(0);
+            return (T) new Long(0l);
         } else if (standardType.equals(float.class) || standardType.equals(Float.class)) {
-            return (T) new Float(0);
+            return (T) new Float(0f);
         } else if (standardType.equals(double.class) || standardType.equals(Double.class)) {
-            return (T) new Double(0);
+            return (T) new Double(0d);
         } else if (standardType.equals(byte.class) || standardType.equals(Byte.class)) {
             return (T) new Byte((byte) 0);
         } else if (standardType.equals(void.class) || standardType.equals(Void.class)) {

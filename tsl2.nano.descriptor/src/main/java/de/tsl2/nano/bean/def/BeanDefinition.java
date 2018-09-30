@@ -959,12 +959,19 @@ public class BeanDefinition<T> extends BeanClass<T> implements IPluggable<BeanDe
      *            (not only a name) and can be serialized to a file.
      * @return bean definition, found in cache - or new beandef
      */
-    public static <T> BeanDefinition<T> getBeanDefinition(final String name, Class<T> type, boolean fullInitStore) {
+    public static <T> BeanDefinition<T> getBeanDefinition(String name, Class<T> type, boolean fullInitStore) {
         volatileBean.name = name;
         //TODO: think about using a structure through package path on file system
         int i = virtualBeanCache.indexOf(volatileBean);
+        if (i == -1 && type != null) {//on stored name collisions
+        	volatileBean.name = type.getName().toLowerCase();
+            i = virtualBeanCache.indexOf(volatileBean);
+            if (i != -1)
+            	name = volatileBean.name;
+        }
         BeanDefinition<T> beandef = null;
-        if (i == -1) {
+        boolean nameCollision = false;
+        if (i == -1 || !(nameCollision=virtualBeanCache.get(i).getDeclaringClass().equals(type))) {
             File xmlFile = getDefinitionFile(name);
             if (usePersistentCache && xmlFile.canRead()) {
                 try {
@@ -998,12 +1005,12 @@ public class BeanDefinition<T> extends BeanClass<T> implements IPluggable<BeanDe
                 beandef = new BeanDefinition<T>(type);
                 virtualBeanCache.add(beandef);
                 beandef.setName(name);
-                AnnotationFactory.with(beandef, type);
+                AnnotationFactory.with(beandef, type != null ? type : beandef.getDeclaringClass());
 //                if (fullInitStore)
 //                    if (true /*xmlFile.canWrite()*/) {
 //                        //be careful: having write access will introduce another behaviour
 //                        if (type != UNDEFINED.getClass())
-                if (ENV.get("beandef.autoinit", true))
+                if (ENV.get("beandef.autoinit", true) /*&& beandef.isSaveable()*/)
                     beandef.autoInit(name);
 //                        beandef.saveBeanDefinition(xmlFile);
 //                    } else
@@ -1303,15 +1310,7 @@ public class BeanDefinition<T> extends BeanClass<T> implements IPluggable<BeanDe
         List<IAttributeDefinition<?>> attributes = getBeanAttributes();
         getValueExpression();
         getAttributeNames();
-        BeanCollector.createColumnDefinitions(this, new IActivable() {
-            /** serialVersionUID */
-            private static final long serialVersionUID = 1L;
-
-            @Override
-            public boolean isActive() {
-                return getPresentationHelper().matches("default.present.attribute.multivalue", true);
-            }
-        });
+        createColumnDefinitions();
         for (IAttributeDefinition<?> a : attributes) {
             a.getFormat();
             a.getPresentation();
@@ -1324,11 +1323,24 @@ public class BeanDefinition<T> extends BeanClass<T> implements IPluggable<BeanDe
         }
     }
 
+	private void createColumnDefinitions() {
+		BeanCollector.createColumnDefinitions(this, new IActivable() {
+            private static final long serialVersionUID = 1L;
+            @Override
+            public boolean isActive() {
+                return getPresentationHelper().matches("default.present.attribute.multivalue", true);
+            }
+        });
+	}
+
     protected boolean isSaveable() {
-        String clsName = clazz.getName();
-        return usePersistentCache && !clsName.startsWith("java") && !clazz.getName().startsWith(ENV.FRAMEWORK)
-            && !getClazz().isArray()/*simple-xml is not able to deserialize arrays*/;
+    	return isConfigurable(this);
     }
+
+	public static boolean isConfigurable(BeanDefinition bean) {
+		Class cls = bean.getClazz();
+		return usePersistentCache && !cls.isArray() && !Util.isFrameworkClass(cls) && !Util.isJavaType(cls) && bean.isPersistable();
+	}
 
     /**
      * get another field around the given one. not performance optimized!

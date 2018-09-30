@@ -10,7 +10,7 @@ public class VirtualAttributeAnnotationFactory implements AnnotationFactory<Bean
     @Override
     public void build(BeanDefinition instance, VirtualAttribute a) {
         BeanConfigurator configurator = (BeanConfigurator) BeanConfigurator.create(instance.getClazz()).getInstance();
-        configurator.actionAddAttribute(SpecificationAnnotationFactory.typePrefix(a.specificationType()), a.expression());
+        configurator.addAttribute(SpecificationAnnotationFactory.typePrefix(a.specificationType()), a.expression());
     }
 
 }

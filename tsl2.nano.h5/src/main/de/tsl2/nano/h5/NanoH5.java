@@ -396,7 +396,7 @@ public class NanoH5 extends NanoHTTPD implements ISystemConnector<Persistence> {
     protected String createStartPage(String resultHtmlFile) {
         String page =
             Html5Presentation.createMessagePage("start.template", ENV.translate("tsl2nano.start", true) + " "
-                + ENV.translate(ENV.getName(), true), serviceURL);
+                + ENV.translate(ENV.getName(), true), getServiceURL(serviceURL.toString()));
         FileUtil.writeBytes(page.getBytes(), resultHtmlFile, false);
         return page;
     }

@@ -10,8 +10,10 @@
 package de.tsl2.nano.h5.collector;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.Iterator;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 
@@ -32,7 +34,7 @@ import de.tsl2.nano.core.util.StringUtil;
  * actions to change attributes in an easy way - like de- or increasing a value. The best use-case is to show a set of
  * buttons with pictures on a touch-screen.
  * <p/>
- * Through the bean-definition of {@link #beanName}, a special bean, holding the actions, can start a selected action
+ * Through the bean-definition of {@link #name}, a special bean, holding the actions, can start a selected action
  * through {@link #doAction(String)}.<p/>
  * The super class Compositor tries to build actions given by baseAttribute and targetAttribute. 
  * The second possibility for creating actions is to set an itemProvider through {@link #setItemProvider(Increaser)}.
@@ -47,10 +49,8 @@ public class Controller<COLLECTIONTYPE extends Collection<T>, T> extends Composi
 
     public static final String PREFIX_CTRLACTION = "CTRLROW(";
     public static final String POSTFIX_CTRLACTION = ")";
-
+    private static final String PREFIX_CONTROLLER = "controller";
     /** the special bean-implementation holding all desired actions */
-    @Transient
-    String beanName;
 
     @Transient
     Increaser itemProvider;
@@ -90,32 +90,56 @@ public class Controller<COLLECTIONTYPE extends Collection<T>, T> extends Composi
 
     public Controller(Class<T> beanDef, Class<T> baseType, String baseAttribute, String targetAttribute, String iconAttribute) {
         super(beanDef, baseType, baseAttribute, targetAttribute, iconAttribute);
-        this.name = "Controller (" + (baseType != null ? baseType.getSimpleName() + "-" : "") + beanDef.getSimpleName() + ")";
-        beanName = name;
+        this.name = createName(beanDef, baseType);
+    }
+
+    public String createName(Class<?> beanDef, Class<?> baseType) {
+        return createBeanDefName(beanDef, baseType);
+    }
+
+    public static String createBeanDefName(Class<?> beanDef, Class<?> baseType) {
+        return createBeanDefName("Controller", beanDef, baseType);
     }
 
     /**
-     * gets the defined bean (see {@link #beanName} for the given instance.
+     * gets the defined bean (see {@link #name} for the given instance.
      * 
      * @param instance
      * @return bean holding instance
      */
     public Bean<T> getBean(T instance) {
-        Bean<T> bean = BeanUtil.copy((Bean<T>) Bean.getBean(beanName));
+        Bean<T> bean = BeanUtil.copy((Bean<T>) Bean.getBean(name));
         bean.setAddSaveAction(false);
-        bean.setActions(getActions());
-        //filter collector actions
-        for (Iterator it = bean.getActions().iterator(); it.hasNext();) {
-            IAction a = (IAction) it.next();
-            //TODO: internal name convention - is there a better way?
-            if (!a.getId().startsWith("controller"))
-                it.remove();
+        //if controlling from baseType (annotation on baseType), we want exactly one creation-action
+        if (getDeclaringClass().equals(parentType)) {
+            Collection<IAction> compActions = super.getActions();
+            String compositorActionId = createCompositorActionId(instance);
+            for (IAction a : compActions) {
+                if (a.getId().equals(compositorActionId)) {
+                    bean.setActions(Arrays.asList(a));
+                    break;
+                }
+            }
+        } else {//on each row get all compositor actions
+            bean.setActions(super.getActions());
+            //filter collector actions
+            for (Iterator it = bean.getActions().iterator(); it.hasNext();) {
+                IAction a = (IAction) it.next();
+                //TODO: internal name convention - is there a better way?
+                if (!a.getId().startsWith(PREFIX_CONTROLLER))
+                    it.remove();
+            }
         }
         bean.setValueExpression(getValueExpression());
         bean.setInstance(instance);
         return bean;
     }
 
+    @Override
+    public Collection<IAction> getActions() {
+        return new LinkedList<>(); //don't show the actions in the action panel again!
+    }
+    
     /**
      * extracts the bean-instance and the action id and starts it.
      * 
@@ -126,9 +150,12 @@ public class Controller<COLLECTIONTYPE extends Collection<T>, T> extends Composi
     public Object doAction(String actionIdWithRowNumber, Map context) {
         String strRow = StringUtil.substring(actionIdWithRowNumber, PREFIX_CTRLACTION, POSTFIX_CTRLACTION);
         Number row = NumberUtil.extractNumber(strRow);
+        assert row.intValue() > 0 : "row must be one-based!";
         ArrayList<T> list = new ArrayList<T>(getCurrentData());
+        assert row.intValue() <= list.size() : "row=" + row + " (one-based) is outside of list size=" + list.size();
         String id = StringUtil.substring(actionIdWithRowNumber, POSTFIX_CTRLACTION, null);
         IAction<?> action = getBean(list.get(row.intValue() - 1)).getAction(id);
+        assert action != null : "no action with id=" + id + " found on (one-based) row " + row + "! see: " + StringUtil.toString(list, 120);
         action.setParameter(context);
         return action.activate();
     }
@@ -187,7 +214,8 @@ public class Controller<COLLECTIONTYPE extends Collection<T>, T> extends Composi
         return this;
     }
 
-    public static String createActionName(int tabIndex, String id) {
-        return PREFIX_CTRLACTION + tabIndex + POSTFIX_CTRLACTION + id;
+    public static String createActionName(int row, String id) {
+        assert row > 0 : "row must be one-based!";
+        return PREFIX_CTRLACTION + row + POSTFIX_CTRLACTION + id;
     }
 }

@@ -42,7 +42,7 @@ import de.tsl2.nano.core.util.StringUtil;
  * @version $Revision$
  */
 public class Composition<C> {
-    /** parent-to-child attribute, holding the parent instance. the child works as a resolver in the middle */
+    /** parent-to-child (base) attribute, holding the parent (base)instance. the child works as a resolver in the middle */
     BeanValue<C> parent;
     /** child-to-target attribute definition. the child works as a resolver in the middle */
     @SuppressWarnings("rawtypes")
@@ -159,7 +159,9 @@ public class Composition<C> {
     @SuppressWarnings({ "unchecked", "rawtypes" })
     public C createChildOnTarget(Object targetInstance) {
         BeanDefinition<C> bc = BeanDefinition.getBeanDefinition(Collection.class.isAssignableFrom(parent.getType()) ? parent.getGenericType(0) : parent.getType());
-        C child = (C) (target == null ? targetInstance : bc.createInstance());
+        C child = (C) ((target == null && targetInstance != null) || (bc.getClazz().isAssignableFrom(targetInstance.getClass()) 
+        		&& !(targetInstance instanceof Collection)) 
+        		? targetInstance : bc.createInstance());
         if (this.target != null && targetInstance != null) {
             if (Collection.class.isAssignableFrom(this.target.getType())) {
                 ((Collection)this.target.getValue(targetInstance)).add(child);
@@ -169,22 +171,22 @@ public class Composition<C> {
                 if (this.target.getType().isAssignableFrom(child.getClass()))
                     this.target.setValue(targetInstance, child);
             }
+	        IAttribute attrTarget = bc.getAttribute(target.getDeclaringClass());
+	        if (attrTarget != null && targetInstance != null)
+	            attrTarget.setValue(child, targetInstance);
         } else {
             BeanContainer.createId(child);
         }
         IAttribute attrParent = bc.getAttribute(parent.getDeclaringClass());
         if (attrParent != null)
             attrParent.setValue(child, parent.getInstance());
-        IAttribute attrTarget = bc.getAttribute(target.getDeclaringClass());
-        if (attrTarget != null && targetInstance != null)
-            attrTarget.setValue(child, targetInstance);
         
-        if (parent.isMultiValue() && parent.getValue() != null)
-        	getParentContainer().add(child);
-        else if (parent.getType().isAssignableFrom(child.getClass()))
-        	parent.setValue(child);
-        else
-        	;//throw new ....
+//        if (parent.isMultiValue() && parent.getValue() != null)
+//        	getParentContainer().add(child);
+//        else if (parent.getType().isAssignableFrom(child.getClass()))
+//        	parent.setValue(child);
+//        else
+//        	;//TODO: throw new ....
         return child;
     }
 

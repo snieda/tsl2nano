@@ -34,6 +34,7 @@ import de.tsl2.nano.bean.def.IAttributeDefinition;
 import de.tsl2.nano.bean.def.Presentable;
 import de.tsl2.nano.bean.def.SecureAction;
 import de.tsl2.nano.core.ENV;
+import de.tsl2.nano.core.cls.IAttribute;
 import de.tsl2.nano.core.util.MapUtil;
 import de.tsl2.nano.execution.IPRunnable;
 import de.tsl2.nano.incubation.specification.Pool;
@@ -60,6 +61,9 @@ public class Compositor<COLLECTIONTYPE extends Collection<T>, T> extends BeanCol
     /** composition instance attribute to assign the base instance to */
     @Transient
     protected String baseAttribute;
+    /** composition target type - normally the type of this BeanDefinition */
+    @Transient
+    protected Class<?> targetType;
     /** composition instance attribute to assign the target instance to */
     @Transient
     protected String targetAttribute;
@@ -125,8 +129,11 @@ public class Compositor<COLLECTIONTYPE extends Collection<T>, T> extends BeanCol
         this.iconAttribute = iconAttribute;
     }
 
-    public static String createName(Class<?> beanType, Class<?> baseType) {
-        return "Compositor (" + baseType.getSimpleName() + "-" + beanType.getSimpleName() + ")";
+    public String createName(Class<?> beanType, Class<?> baseType) {
+        return createBeanDefName("Compositor", beanType, baseType);
+    }
+    public static String createBeanDefName(String classPrefix, Class<?> beanType, Class<?> baseType) {
+        return classPrefix + " (" + baseType.getSimpleName() + "-" + beanType.getSimpleName() + ")";
     }
 
     @Override
@@ -136,7 +143,7 @@ public class Compositor<COLLECTIONTYPE extends Collection<T>, T> extends BeanCol
             if (parentType == null)
                 return actions;
             compositorActions = createCompositorActions(parentType, getSearchPanelBeans().iterator().next(),
-                baseAttribute, targetAttribute,
+                baseAttribute, getTargetType(), targetAttribute,
                 iconAttribute);
             compositorActions.addAll(actions);
         }
@@ -192,6 +199,7 @@ public class Compositor<COLLECTIONTYPE extends Collection<T>, T> extends BeanCol
      * @param baseType see {@link #parentType}
      * @param preparedComposition pre-filled instance to be used to create new composition instances
      * @param baseAttribute see {@link #targetAttribute}
+     * @param targetType see #
      * @param targetAttribute see {@link #targetAttribute}
      * @param iconAttribute (optional) see {@link #iconAttribute}
      * @return list of compositor actions
@@ -199,13 +207,14 @@ public class Compositor<COLLECTIONTYPE extends Collection<T>, T> extends BeanCol
     public List<IAction> createCompositorActions(Class<?> baseType,
             final T preparedComposition,
             final String baseAttribute,
+            final Class<?> targetType,
             final String targetAttribute,
             final String iconAttribute) {
         final Compositor _this = this;
         Collection<?> bases = BeanContainer.instance().getBeans(baseType, 0, -1);
         ArrayList<IAction> actions = new ArrayList<>();
         for (final Object base : bases) {
-            actions.add(new SecureAction<T>(getName().toLowerCase() + "." + Bean.getBean(base).getId().toString(),
+            actions.add(new SecureAction<T>(createCompositorActionId(base),
                 Bean.getBean(base).toString()) {
 
                 @SuppressWarnings("unchecked")
@@ -213,7 +222,7 @@ public class Compositor<COLLECTIONTYPE extends Collection<T>, T> extends BeanCol
                 public T action() throws Exception {
                     getSelectionProvider().getValue().clear();
                     getSelectionProvider().getValue().add(preparedComposition);
-                    T item = createItem(preparedComposition);
+                    T item = targetAttribute == null ? createItem(preparedComposition) : (T) BeanCollector.getBeanCollector((Class)targetType).createItem(preparedComposition);
                     BeanContainer.initDefaults(item);
                     setDefaultValues(item, true);
 
@@ -222,18 +231,17 @@ public class Compositor<COLLECTIONTYPE extends Collection<T>, T> extends BeanCol
                     if (pars != null)
                         fillContext(item, pars);
                     
-                    BeanValue parent;
-                    parent = (BeanValue) Bean.getBean(base).getAttribute(baseAttribute);
+                    BeanValue parent = (BeanValue) Bean.getBean(base).getAttribute(baseAttribute);
                     //on manyTomany targetAttribute must not be null
-                    Composition comp = new Composition(parent,
-                        targetAttribute != null ? getAttribute(targetAttribute) : null);
+                    IAttribute<?> targetAttr = targetAttribute != null ? BeanDefinition.getBeanDefinition(targetType).getAttribute(targetAttribute) : null;
+                    Composition comp = new Composition(parent, targetAttr);
                     Object resolver = comp.createChildOnTarget(item);
                     if (!forceUserInteraction && Bean.getBean(item).isValid(null, true)) {
                         resolver = (T) Bean.getBean(resolver).save();
                         item = (T) Bean.getBean(item).save();
                         getCurrentData().add(item);
                         return (T) _this;//the type T should be removed
-                    } else if (targetAttribute != null && !Collection.class.isAssignableFrom(getAttribute(targetAttribute).getType()))
+                    } else if (targetAttr != null && !Collection.class.isAssignableFrom(targetAttr.getType()))
                         if (Bean.getBean(resolver).isValid(null, true))
                             Bean.getBean(resolver).save();
                     getCurrentData().add(item);
@@ -270,6 +278,25 @@ public class Compositor<COLLECTIONTYPE extends Collection<T>, T> extends BeanCol
             });
         }
         return actions;
+    }
+
+    protected String createCompositorActionId(final Object baseInstance) {
+        return getName().toLowerCase() + "." + Bean.getBean(baseInstance).getId().toString();
+    }
+
+    public void setForceUserInteraction(boolean forceUserInteraction) {
+        this.forceUserInteraction = forceUserInteraction;
+    }
+    
+    public Class<?> getTargetType() {
+        if (targetType == null)
+            targetType = getDeclaringClass();
+        return targetType;
+    }
+
+    public void setTargetType(Class<?> targetType) {
+        this.targetType = targetType;
+        this.name = createName(targetType, parentType);
     }
 
     @Override

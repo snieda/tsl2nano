@@ -305,7 +305,7 @@ public class BeanValue<T> extends AttributeDefinition<T> implements IValueDefini
                 T assignValue = getValue();
                 value = //the type may be changed through wrap()
                     value != null && oldValue != assignValue
-                        && !PrimitiveUtil.isAssignableFrom(getType(), value.getClass()) ? assignValue : value;
+                        && (getType().equals(Object.class) || !PrimitiveUtil.isAssignableFrom(getType(), value.getClass())) ? assignValue : value;
                 status = isValid(value);
             }
             event.hasChanged = true;

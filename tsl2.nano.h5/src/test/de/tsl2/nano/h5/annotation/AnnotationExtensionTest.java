@@ -57,6 +57,7 @@ public class AnnotationExtensionTest implements ENVTestPreparation {
     public void testController() {
         //BeanType <-> Composition.target -> Base.name
         de.tsl2.nano.h5.collector.Controller c = getVirtualDefinition(de.tsl2.nano.h5.collector.Controller.class);
+        assertEquals(BeanType.class, c.getTargetType());
         Base instance = new Base();
         c.getCurrentData().add(instance);
         Collection testBeans = BeanContainer.initEmtpyServiceActions();
@@ -65,7 +66,6 @@ public class AnnotationExtensionTest implements ENVTestPreparation {
         de.tsl2.nano.bean.def.Bean item = c.getBean(instance);
         Collection<IAction> actions = item.getActions();
         assertTrue(actions.size() > 0);
-        //TODO: fill context, actions.size > 0
         int i = 0;
         Map context = null;
         Object result;
