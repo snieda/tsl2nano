@@ -133,7 +133,7 @@ public class Compositor<COLLECTIONTYPE extends Collection<T>, T> extends BeanCol
         return createBeanDefName("Compositor", beanType, baseType);
     }
     public static String createBeanDefName(String classPrefix, Class<?> beanType, Class<?> baseType) {
-        return classPrefix + " (" + baseType.getSimpleName() + "-" + beanType.getSimpleName() + ")";
+        return classPrefix + " (" + (baseType != null ? baseType.getSimpleName() + "-" : "") + beanType.getSimpleName() + ")";
     }
 
     @Override

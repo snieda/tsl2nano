@@ -384,7 +384,7 @@ public class BeanConfigurator<T> implements Serializable {
 
     @de.tsl2.nano.bean.annotation.Action(name = "createController"
             , argNames = {"increaseAttribute", "increaseCount", "increaseStep", "baseType", "baseAttributeName",
-                            "targetAttributeName", "iconAttributeName"})
+                            "targetType", "targetAttributeName", "iconAttributeName"})
     public void actionCreateController (
             @de.tsl2.nano.bean.annotation.Constraint(allowed=ConstraintValueSet.ALLOWED_APPCLASSES) String baseType, 
             @de.tsl2.nano.bean.annotation.Constraint(allowed=ConstraintValueSet.ALLOWED_APPBEANATTRS) String baseAttribute, 

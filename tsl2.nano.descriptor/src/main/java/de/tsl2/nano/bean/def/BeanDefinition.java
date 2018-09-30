@@ -750,7 +750,7 @@ public class BeanDefinition<T> extends BeanClass<T> implements IPluggable<BeanDe
      * @return action or null
      */
     public IAction<?> getAction(String id) {
-        if (actions != null) {
+        if (getActions() != null) {
             for (IAction a : actions) {
                 if (a.getId().equals(id)) {
                     return a;
