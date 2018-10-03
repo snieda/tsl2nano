@@ -11,8 +11,8 @@ package de.tsl2.nano.bean;
 
 import de.tsl2.nano.bean.def.Bean;
 import de.tsl2.nano.core.cls.AReference;
-import de.tsl2.nano.core.cls.BeanAttribute;
 import de.tsl2.nano.core.cls.BeanClass;
+import de.tsl2.nano.core.util.ObjectUtil;
 import de.tsl2.nano.core.util.StringUtil;
 
 /**
@@ -41,7 +41,7 @@ public class BReference<O> extends AReference<Class<O>, O> {
     
     @Override
     protected Object id(Class<O> type, String strId) {
-        return BeanAttribute.wrap(strId, BeanContainer.getIdAttribute(type).getType());
+        return ObjectUtil.wrap(strId, BeanContainer.getIdAttribute(type).getType());
     }
 
     

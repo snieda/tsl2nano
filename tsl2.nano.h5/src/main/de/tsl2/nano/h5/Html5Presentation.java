@@ -1628,7 +1628,8 @@ public class Html5Presentation<T> extends BeanPresentationHelper<T> implements I
                     if (Messages.isMarkedAsProblem(value)) {
                         appendAttributes(cell, ATTR_COLOR, COLOR_RED);
                     }
-                    addManyToOnePicture(cell, attr);
+                    if (attr != null)
+                        addManyToOnePicture(cell, attr);
                 }
             }
         } else {//don't show only an empty entry!

@@ -23,6 +23,7 @@ import org.apache.commons.logging.Log;
 
 import de.tsl2.nano.core.ManagedException;
 import de.tsl2.nano.core.log.LogFactory;
+import de.tsl2.nano.core.util.ObjectUtil;
 import de.tsl2.nano.core.util.StringUtil;
 import de.tsl2.nano.core.util.Util;
 
@@ -238,7 +239,7 @@ public class UnboundAccessor<T> {
             Field f = getField(instance.getClass(), path[path.length - 1]);
             f.setAccessible(true);
             //TODO: refactor to avoid access to BeanAttribute
-            f.set(instance, BeanAttribute.wrap(newValue, f.getType()));
+            f.set(instance, ObjectUtil.wrap(newValue, f.getType()));
         } catch (Exception e) {
             ManagedException.forward(e);
         }

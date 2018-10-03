@@ -74,6 +74,7 @@ public class Main {
      *            key-position.
      */
     protected static void setEnvironmentArguments(String[] args, Map<Integer, String> argMapping) {
+    	String port = null;
         if (argMapping != null && argMapping.size() > 0) {
             for (int i = 0; i < args.length; i++) {
                 String argName = argMapping.get(i);
@@ -81,8 +82,16 @@ public class Main {
                     ENV.setProperty(argName, args[i]);
                 }
             }
+        } else {
+        	for (int i = 0; i < args.length; i++) {
+				if (args[i].matches("\\d{4,5}")) {
+					port = args[i];
+					break;
+				}
+			}
         }
-        String port = ENV.get("service.port", null);
+        if (port == null)
+        	port = ENV.get("service.port", null);
         if (port != null) {
             String url = ENV.get("service.url", "http://localhost:8067");
             ENV.setProperty("service.url", StringUtil.substring(url, null, ":", true) + ":" + port);

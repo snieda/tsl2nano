@@ -12,7 +12,6 @@ package de.tsl2.nano.core.cls;
 import java.io.IOException;
 import java.io.Serializable;
 import java.lang.annotation.Annotation;
-import java.lang.reflect.Constructor;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.lang.reflect.ParameterizedType;
@@ -31,7 +30,7 @@ import de.tsl2.nano.core.ENV;
 import de.tsl2.nano.core.ManagedException;
 import de.tsl2.nano.core.log.LogFactory;
 import de.tsl2.nano.core.util.AnnotationProxy;
-import de.tsl2.nano.core.util.ByteUtil;
+import de.tsl2.nano.core.util.ObjectUtil;
 import de.tsl2.nano.core.util.StringUtil;
 
 /**
@@ -631,53 +630,7 @@ public class BeanAttribute<T> implements IAttribute<T> {
     }
 
     T wrap(Object value) {
-        return wrap(value, getType());
-    }
-
-    /**
-     * sometimes the value is easily convertable to the desired type, like String-->File etc. respects primitives and
-     * wrapperType {@link Class}.
-     * 
-     * @param value to be wrapped into an instance of wrapperType.
-     * @param wrapperType having a constructor with parameter value.getClass()
-     * @return wrapped instance or value itself
-     */
-    @SuppressWarnings("unchecked")
-    public static <T> T wrap(Object value, Class<T> wrapperType) {
-        LOG.debug("trying to convert '" + value + "' to " + wrapperType);
-        // check, if constructor for value is available in wrapper type
-        try {
-            Constructor<T> c;
-            if (value != null && !PrimitiveUtil.isAssignableFrom(wrapperType, value.getClass())) {
-                if (Class.class.isAssignableFrom(wrapperType))
-                    return (T) BeanClass.load(value.toString());
-                else {
-                    if (PrimitiveUtil.isPrimitiveOrWrapper(wrapperType))
-                        return PrimitiveUtil.convert(value, wrapperType);
-                    else if (ByteUtil.isByteStream(wrapperType))
-                        return ByteUtil.toByteStream((byte[])value, wrapperType);
-                    //IMPROVE: what's about the GenericParser (it's in the wrong module...)
-                    return BeanClass.createInstance(wrapperType, value);
-                }
-            }
-        } catch (Exception e) {
-            ManagedException.forward(e);
-        }
-        return (T) value;
-    }
-
-    /**
-     * wraps (see {@link #wrap(Object, Class)}) the given value through the castInfo information to the desired cast.
-     * 
-     * @param value to wrap into an object defined by castInfo
-     * @param castInfo (optional) any text or name containing a part with: (<classpath>)
-     * @return if castInfo with cast to class was found: the wrapped (see {@link #wrap(Object, Class)}) value, otherwise
-     *         the value itself
-     */
-    @SuppressWarnings("unchecked")
-    public static Object cast(Object value, String castInfo) {
-        String cast = castInfo != null ? StringUtil.substring(castInfo, "(", ")", false, true) : null;
-        return cast != null ? BeanAttribute.wrap(value, BeanClass.createBeanClass(cast).getClazz()) : value;
+        return ObjectUtil.wrap(value, getType());
     }
 
 //    private void readObjectNoData() throws ObjectStreamException {

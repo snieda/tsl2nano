@@ -9,10 +9,13 @@
  */
 package de.tsl2.nano.core.util;
 
+import java.lang.reflect.Constructor;
 import java.lang.reflect.Method;
 import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
 import java.lang.reflect.TypeVariable;
+import java.sql.Time;
+import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
@@ -305,6 +308,53 @@ public class ObjectUtil extends ByteUtil {
         return (T) new PrivateAccessor<T>(src).call("clone", null);
     }
 
+    /**
+     * sometimes the value is easily convertable to the desired type, like String-->File etc. respects primitives and
+     * wrapperType {@link Class}.
+     * 
+     * @param value to be wrapped into an instance of wrapperType.
+     * @param wrapperType having a constructor with parameter value.getClass()
+     * @return wrapped instance or value itself
+     */
+    @SuppressWarnings("unchecked")
+    public static <T> T wrap(Object value, Class<T> wrapperType) {
+        LOG.debug("trying to convert '" + value + "' to " + wrapperType);
+        // check, if constructor for value is available in wrapper type
+        try {
+            Constructor<T> c;
+            if (value != null && !PrimitiveUtil.isAssignableFrom(wrapperType, value.getClass())) {
+                if (Class.class.isAssignableFrom(wrapperType))
+                    return (T) BeanClass.load(value.toString());
+                else {
+                    if (PrimitiveUtil.isPrimitiveOrWrapper(wrapperType))
+                        return PrimitiveUtil.convert(value, wrapperType);
+                    else if (ByteUtil.isByteStream(wrapperType))
+                        return ByteUtil.toByteStream((byte[])value, wrapperType);
+                    //IMPROVE: what's about the GenericParser (it's in the wrong module...)
+                    return BeanClass.createInstance(wrapperType, value);
+                }
+            }
+        } catch (Exception e) {
+            ManagedException.forward(e);
+        }
+        return (T) value;
+    }
+
+    /**
+     * wraps (see {@link #wrap(Object, Class)}) the given value through the castInfo information to the desired cast.
+     * 
+     * @param value to wrap into an object defined by castInfo
+     * @param castInfo (optional) any text or name containing a part with: (<classpath>)
+     * @return if castInfo with cast to class was found: the wrapped (see {@link #wrap(Object, Class)}) value, otherwise
+     *         the value itself
+     */
+    @SuppressWarnings("unchecked")
+    public static Object cast(Object value, String castInfo) {
+        String cast = castInfo != null ? StringUtil.substring(castInfo, "(", ")", false, true) : null;
+        return cast != null ? wrap(value, BeanClass.createBeanClass(cast).getClazz()) : value;
+    }
+
+
     private static String OBJ_TOSTRING;
     static {
         try {
@@ -337,5 +387,21 @@ public class ObjectUtil extends ByteUtil {
             return false;
         }
     }
+
+	@SuppressWarnings("unchecked")
+	public static <T> T createDefaultInstance(Class<T> gtype) {
+        if (isStandardType(gtype)) {
+            if (BeanClass.hasDefaultConstructor(gtype)) {
+                return BeanClass.createInstance(gtype);
+            } else if (NumberUtil.isNumber(gtype)) {
+                return (T) NumberUtil.getDefaultInstance((Class<Number>) gtype);
+            } else if (Time.class.isAssignableFrom(gtype)) {
+            	return (T) new Time(System.currentTimeMillis());
+            } else if (Timestamp.class.isAssignableFrom(gtype)) {
+            	return (T) new Timestamp(System.currentTimeMillis());
+            }
+        }
+		return null;
+	}
 
 }

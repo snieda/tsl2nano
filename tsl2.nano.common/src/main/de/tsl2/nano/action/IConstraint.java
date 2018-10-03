@@ -12,6 +12,9 @@ package de.tsl2.nano.action;
 import java.text.Format;
 import java.util.Collection;
 
+import de.tsl2.nano.core.cls.BeanClass;
+import de.tsl2.nano.core.util.Util;
+
 /**
  * 
  * @author Tom
@@ -95,4 +98,15 @@ public interface IConstraint<T> {
 
     /** usable for all int definitions like bitfiels type and style */
     static final int UNSET = 0;
+    
+    static Object fromString(Class<?> type, String def) {
+        if (type != null && !Util.isEmpty(def)) {
+            try {
+                return BeanClass.createInstance(type, def);
+            } catch (Exception e) { //don't stop the flow - the default/min/max will not be set!
+                e.printStackTrace();//TODO: log
+            }
+        }
+        return null;
+    }
 }

@@ -59,6 +59,7 @@ import de.tsl2.nano.core.util.ByteUtil;
 import de.tsl2.nano.core.util.DelegationHandler;
 import de.tsl2.nano.core.util.FormatUtil;
 import de.tsl2.nano.core.util.NumberUtil;
+import de.tsl2.nano.core.util.ObjectUtil;
 import de.tsl2.nano.core.util.StringUtil;
 import de.tsl2.nano.core.util.Util;
 import de.tsl2.nano.format.RegExpFormat;
@@ -182,8 +183,10 @@ public class AttributeDefinition<T> implements IAttributeDefinition<T> {
                 LOG.debug("setting defaults from annotations for attribute: " + getName());
                 setId(def.id());
                 setUnique(def.unique());
-                setBasicDef(def.length(), def.nullable(), null, null, null);
-                getConstraint().setNumberDef(def.scale(), def.precision());
+                if (constraint == null || def.length() != -1 || !def.nullable())
+                	setBasicDef(def.length(), def.nullable(), null, null, null);
+                if (constraint == null || def.scale() != -1 || def.precision() != -1)
+                	getConstraint().setNumberDef(def.scale(), def.precision());
                 temporalType = def.temporalType();
                 composition = def.composition();
                 cascading = def.cascading();
@@ -200,9 +203,11 @@ public class AttributeDefinition<T> implements IAttributeDefinition<T> {
             if (constraint == null && m.isAnnotationPresent(de.tsl2.nano.bean.annotation.Constraint.class)) {
                 de.tsl2.nano.bean.annotation.Constraint c =
                     m.getAnnotation(de.tsl2.nano.bean.annotation.Constraint.class);
-                constraint = new Constraint(c.type(), (Object[])ConstraintValueSet.preDefined(c.allowed()));
-                constraint.setBasicDef(c.length(), c.nullable(),
-                    new RegExpFormat(c.pattern(), 255), (T) Util.nonEmpty(c.defaultValue()));
+                Class<?> type = !c.equals(Object.class) ? c.type() : getType();
+                constraint = new Constraint(type, (Object[])ConstraintValueSet.preDefined(c.allowed()));
+                RegExpFormat format = !Util.isEmpty(c.pattern()) ? new RegExpFormat(c.pattern(), 255) : null;
+				constraint.setBasicDef(c.length(), c.nullable(), format, (T)IConstraint.fromString(type, c.defaultValue()));               	
+                constraint.setRange((Comparable<T>)IConstraint.fromString(type, c.min()), (Comparable<T>)IConstraint.fromString(type, c.max()));
             }
             if (presentable == null && m.isAnnotationPresent(de.tsl2.nano.bean.annotation.Presentable.class)) {
                 de.tsl2.nano.bean.annotation.Presentable p =
@@ -524,7 +529,7 @@ public class AttributeDefinition<T> implements IAttributeDefinition<T> {
      */
     @Override
     public Class<T> getType() {
-        return attribute.getType();
+        return temporalType() != null ? (Class<T>) temporalType() : attribute.getType();
     }
 
     @Override
@@ -620,12 +625,10 @@ public class AttributeDefinition<T> implements IAttributeDefinition<T> {
             && !BeanPresentationHelper.isGeneratedValue(this)) {
             Object genType = getAccessMethod().getGenericReturnType();
             if (genType instanceof Class) {
-                Class<T> gtype = (Class<T>) genType;
-                if (BeanUtil.isStandardType(gtype)) {
-                    if (BeanClass.hasDefaultConstructor(gtype)) {
-                        getConstraint().setDefault(BeanClass.createInstance(gtype));
-                    }
-                }
+                Class<T> gtype = temporalType() != null ? (Class<T>) temporalType() : (Class<T>) genType;
+                T value = ObjectUtil.createDefaultInstance(gtype);
+                    if (value != null)
+                    	getConstraint().setDefault(value);
             }
             if (c.getDefault() == null) {
                 if (NumberUtil.isNumber(getType())) {

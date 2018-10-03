@@ -499,7 +499,7 @@ public class NanoH5Session implements ISession<BeanDefinition>, Serializable, IL
         }
         Thread.currentThread().setContextClassLoader(sessionClassloader);
         Thread.currentThread().setUncaughtExceptionHandler(exceptionHandler);
-        ConcurrentUtil.setCurrent(getUserAuthorization(), beanContainer, beanConfigurator);
+        ConcurrentUtil.setCurrent(getUserAuthorization(), beanContainer, beanConfigurator, nav);
     }
 
     /**
@@ -685,7 +685,6 @@ public class NanoH5Session implements ISession<BeanDefinition>, Serializable, IL
             }
         }
         //collect available actions
-        Collection<IAction> actions = null;
         if (nav.current() != null) {
             responseObject = performAction(uri, nav.current(), parms, responseObject);
         }

@@ -212,6 +212,11 @@ public class NanoH5 extends NanoHTTPD implements ISystemConnector<Persistence> {
             runHttpServer();
         } catch (Exception ioe) {
             LOG.error("Couldn't start server: ", ioe);
+            try {//if not yet done...
+                ENV.persist();
+            } catch (Exception e1) {
+                LOG.error(e1);
+            }
             ConcurrentUtil.sleep(3000);
             System.exit(-1);
         }
@@ -624,6 +629,22 @@ public class NanoH5 extends NanoHTTPD implements ISystemConnector<Persistence> {
         return workflow;
     }
 
+    private static int createNavigationStartPoint(IBeanNavigator navigator, BeanCollector root) {
+        //simple optional entry point
+        //root will only be added, if at least one entrypoint was found!
+        String beanCollectorNames = ENV.get("session.navigation.start.beandefinitions", null);
+        if (beanCollectorNames != null) {
+            String[] beanDefNames = beanCollectorNames.split("[,;]");
+            navigator.add(root);
+            for (int i = 0; i < beanDefNames.length; i++) {
+                LOG.info("adding " + beanDefNames[i] + " to navigation stack");
+                navigator.add(BeanDefinition.getBeanDefinition(beanDefNames[i]));
+            }
+            return beanDefNames.length;
+        }
+        return 0;
+    }
+
     @Override
     public Persistence createConnectionInfo() {
         return createPersistenceUnit().getInstance();
@@ -778,7 +799,12 @@ public class NanoH5 extends NanoHTTPD implements ISystemConnector<Persistence> {
             BeanDefinition.dump();
         }
         ENV.setAutopersist(true);
-        return root;
+        
+        EntityBrowser entityBrowser = ConcurrentUtil.getCurrent(EntityBrowser.class);
+        int entryPoints = 0;
+        if (entityBrowser != null)
+            entryPoints = createNavigationStartPoint(entityBrowser, root);
+        return entryPoints == 0 ? root : entityBrowser.next(null); //if entrypoints are found, root and entrypoints are push to the navigationstack
     }
 
     /**
@@ -1048,6 +1074,7 @@ public class NanoH5 extends NanoHTTPD implements ISystemConnector<Persistence> {
             new Html5Presentation<>().reset();
         
         //TODO: the following is done in pagebuilder.reset, too?
+        ENV.removeService(Workflow.class);
         ENV.get(RulePool.class).reset();
         ENV.get(QueryPool.class).reset();
         ENV.get(ActionPool.class).reset();
@@ -1065,6 +1092,8 @@ public class NanoH5 extends NanoHTTPD implements ISystemConnector<Persistence> {
         HtmlUtil.tableDivStyle = null;
         createPageBuilder();
         builder = ENV.get(IPageBuilder.class);
+        lastRequest = null;
+        requests = 0;
     }
 
     @Override

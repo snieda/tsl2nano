@@ -586,7 +586,7 @@ public class BeanClass<T> implements Serializable {
         try {
             Field field = declared ? clazz.getDeclaredField(fieldName) : clazz.getField(fieldName);
             field.setAccessible(true);
-            field.set(instance, BeanAttribute.wrap(value, field.getType()));
+            field.set(instance, ObjectUtil.wrap(value, field.getType()));
         } catch (Exception e) {
             ManagedException.forward(e);
         }
@@ -658,7 +658,7 @@ public class BeanClass<T> implements Serializable {
                 //args = BeanAttribute.wrap(args, par[0]);
             } else {
                 for (int i = 0; i < args.length; i++) {
-                    args[i] = BeanAttribute.wrap(args[i], par[i]);
+                    args[i] = ObjectUtil.wrap(args[i], par[i]);
                 }
             }
         }
@@ -811,7 +811,7 @@ public class BeanClass<T> implements Serializable {
             } else {// simply fill the array
                 instance = (T) Array.newInstance(clazz.getComponentType(), args.length);
                 for (int i = 0; i < args.length; i++) {
-                    Array.set(instance, i, BeanAttribute.wrap(args[i], clazz.getComponentType()));
+                    Array.set(instance, i, ObjectUtil.wrap(args[i], clazz.getComponentType()));
                 }
             }
             return instance;
