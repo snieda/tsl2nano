@@ -122,4 +122,15 @@ public class QueryResult<COLLECTIONTYPE extends Collection<T>, T> extends BeanCo
         init(null, beanFinder, MODE_SEARCHABLE, null);
         isStaticCollection = false;
     }
+
+    public static QueryResult createQueryResult(String title, String stmt) {
+        Query<Object> query = new Query<>(title, stmt, true, null);
+        QueryPool queryPool = ENV.get(QueryPool.class);
+        queryPool.add(query);
+        QueryResult<Collection<Object>, Object> qr = new QueryResult<>(query.getName());
+        qr.getPresentable().setIcon("icons/barchart.png");
+        qr.saveDefinition();
+        return qr;
+    }
+
 }

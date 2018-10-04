@@ -114,7 +114,6 @@ import de.tsl2.nano.h5.collector.Increaser;
 import de.tsl2.nano.h5.collector.QueryResult;
 import de.tsl2.nano.h5.collector.Statistic;
 import de.tsl2.nano.h5.configuration.BeanConfigurator;
-import de.tsl2.nano.h5.expression.Query;
 import de.tsl2.nano.h5.expression.QueryPool;
 import de.tsl2.nano.h5.expression.RuleExpression;
 import de.tsl2.nano.h5.expression.SQLExpression;
@@ -313,28 +312,17 @@ public class Timesheet extends NanoH5App {
               ")\n" +
               "group by Month\n" +
               "order by Month\n";
-        Query<Object> query = new Query<>(STAT_TIMESHEET_STATISTICS, stat, true, null);
-        QueryPool queryPool = ENV.get(QueryPool.class);
-        queryPool.add(query);
-        QueryResult<Collection<Object>, Object> qr = new QueryResult<>(query.getName());
-        qr.getPresentable().setIcon("icons/barchart.png");
-        qr.saveDefinition();
+        QueryResult.createQueryResult(STAT_TIMESHEET_STATISTICS, stat);
 
         stat = "\n-- get a statistic table over projects\n" +
                 "select org.NAME || ' ' || i.NAME as Project, sum(value) as Hours from Charge c join CHARGEITEM ci on c.CHARGEITEM = ci.ID join ITEM i on ci.ITEM = i.ID join ORGANISATION org on i.ORGA = org.ID\n" + 
                 "group by Project\n";
-        queryPool.add(query = new Query<>(STAT_PROJECTS, stat, true, null));
-        qr = new QueryResult<>(query.getName());
-        qr.getPresentable().setIcon("icons/barchart.png");
-        qr.saveDefinition();
+        QueryResult.createQueryResult(STAT_PROJECTS, stat);
 
         stat = "\n-- get a statistic table over types\n" +
                 "select t.NAME as Type, sum(value) as Hours from Charge c join CHARGEITEM ci on c.CHARGEITEM = ci.ID join ITEM i on ci.ITEM = i.ID join TYPE t on i.TYPE = t.ID\n" +
                 "group by t.NAME\n";
-        queryPool.add(query = new Query<>(STAT_TYPES, stat, true, null));
-        qr = new QueryResult<>(query.getName());
-        qr.getPresentable().setIcon("icons/barchart.png");
-        qr.saveDefinition();
+        QueryResult.createQueryResult(STAT_TYPES, stat);
 
         /*
          * Sample Workflow with three activities
