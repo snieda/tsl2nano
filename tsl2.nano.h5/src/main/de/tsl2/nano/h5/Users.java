@@ -74,11 +74,15 @@ public class Users {
      * @throws IllegalArgumentException if secure mode and no user entry was found.
      */
     public User auth(String name, String passwd) {
+        return auth(name, passwd, name, passwd);
+    }
+    
+    public User auth(String name, String passwd, String dbName, String dbPasswd) {
         try{
             if (!ENV.get("app.login.secure", false)) {
                 //not secure: add all new users
                 User user = new User(name, passwd);
-                userMapping.put(user, new CUser(name, passwd));
+                userMapping.put(user, new CUser(dbName, dbPasswd));
                 ENV.save(NAME_USERMAPPING, this);
             }
             // only defined (userMapping) users should be connected
