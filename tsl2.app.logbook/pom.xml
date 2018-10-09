@@ -1,0 +1,17 @@
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+	<modelVersion>4.0.0</modelVersion>
+	<!-- NOTE: always do a clean before install! -->
+	<parent>
+		<groupId>net.sf.tsl2nano</groupId>
+		<artifactId>tsl2.nano.h5.thymeleaf-pack</artifactId>
+		<version>2.1.5-SNAPSHOT</version>
+	</parent>
+	<groupId>de.tsl2nano.example</groupId>
+	<artifactId>tsl2.app.logbook</artifactId>
+	<!-- <version>0.0.1-SNAPSHOT</version> -->
+	<name>TSL2NANO Logbook</name>
+	<properties>
+		<project.mainclass>de.my.logbook.LogbookApplication</project.mainclass>
+	</properties>
+</project>
