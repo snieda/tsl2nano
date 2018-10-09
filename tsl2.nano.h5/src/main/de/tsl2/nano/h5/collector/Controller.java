@@ -54,6 +54,11 @@ public class Controller<COLLECTIONTYPE extends Collection<T>, T> extends Composi
 
     @Transient
     Increaser itemProvider;
+
+    @Transient
+    boolean showText;
+    @Transient
+    boolean isTransparent=true;
     
     transient List<IAttribute> attributes;
 
@@ -217,5 +222,11 @@ public class Controller<COLLECTIONTYPE extends Collection<T>, T> extends Composi
     public static String createActionName(int row, String id) {
         assert row > 0 : "row must be one-based!";
         return PREFIX_CTRLACTION + row + POSTFIX_CTRLACTION + id;
+    }
+    public boolean showText() {
+        return showText;
+    }
+    public boolean isTransparent() {
+        return isTransparent;
     }
 }

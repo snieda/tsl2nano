@@ -22,6 +22,7 @@ import de.tsl2.nano.core.ENV;
 import de.tsl2.nano.core.ManagedException;
 import de.tsl2.nano.core.log.LogFactory;
 import de.tsl2.nano.core.util.ConcurrentUtil;
+import de.tsl2.nano.serviceaccess.Authorization;
 
 /**
  * create/load user mapping for secure logins
@@ -74,16 +75,18 @@ public class Users {
      * @throws IllegalArgumentException if secure mode and no user entry was found.
      */
     public User auth(String name, String passwd) {
-        return auth(name, passwd, name, passwd);
+        return auth(name, passwd, name, passwd, false);
     }
     
-    public User auth(String name, String passwd, String dbName, String dbPasswd) {
+    public User auth(String name, String passwd, String dbName, String dbPasswd, boolean admin) {
         try{
             if (!ENV.get("app.login.secure", false)) {
                 //not secure: add all new users
                 User user = new User(name, passwd);
                 userMapping.put(user, new CUser(dbName, dbPasswd));
                 ENV.save(NAME_USERMAPPING, this);
+                if (admin)
+                    Authorization.create(name, false);
             }
             // only defined (userMapping) users should be connected
             User user = null, cUser = null;

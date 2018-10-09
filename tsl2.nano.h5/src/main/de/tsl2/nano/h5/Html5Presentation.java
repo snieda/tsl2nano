@@ -723,15 +723,14 @@ public class Html5Presentation<T> extends BeanPresentationHelper<T> implements I
                 "box",
                 fullwidth ? ATTR_WIDTH : ATTR_ALIGN,
                 fullwidth ? VAL_100PERCENT : ALIGN_CENTER,
-                ATTR_BGCOLOR,
-                COLOR_LIGHT_BLUE,
+//                ATTR_BGCOLOR,
+//                COLOR_LIGHT_BLUE,
+                    ATTR_STYLE,
+                    VAL_TRANSPARENT + VAL_ROUNDCORNER,
                 enable("sortable", true)));
 //        if (Environment.get("html5.table.show.caption", false))
 //            appendElement(table, "caption", content(title));
         //fallback: setting style from environment-properties
-        appendAttributes(table, ATTR_STYLE,
-            ENV.get("layout.grid.style",
-                "background: transparent, border: 10;"));
 
         if (controller.getPresentable() != null) {
             addAttributes(table, controller.getPresentable(), true);
@@ -1649,11 +1648,14 @@ public class Html5Presentation<T> extends BeanPresentationHelper<T> implements I
 
     private void addManyToOnePicture(Element cell, IValueDefinition<?> attr) {
         if (BeanContainer.instance().isPersistable(attr.getType())) {
-            String iconFromField = BeanDefinition.getBeanDefinition(attr.getType()).getPresentable().getIconFromField();
+            addPicture(cell, attr.getType(), attr.getValue());
+        }
+    }
+    private void addPicture(Element cell, Class<?> type, Object instance) {
+        if (instance != null) {
+            String iconFromField = BeanDefinition.getBeanDefinition(type).getPresentable().getIconFromField();
             if (iconFromField != null) {
-                Object manyToOneValue = attr.getValue();
-                if (manyToOneValue != null)
-                createDataTag(cell, (BeanValue<?>) Bean.getBean(manyToOneValue).getAttribute(iconFromField));
+                    createDataTag(cell, (BeanValue<?>) Bean.getBean(instance).getAttribute(iconFromField));
             }
         }
     }
@@ -1787,16 +1789,19 @@ public class Html5Presentation<T> extends BeanPresentationHelper<T> implements I
                     ++tabIndex + "",
                     ATTR_FORMTARGET,
                     VAL_FRM_SELF,
+                    ATTR_WIDTH, VAL_100PERCENT,
                     ATTR_BGCOLOR, itemBean.getPresentable().layout(ATTR_BGCOLOR)));
 
-        //first cell: bean reference
-        Element cell = appendElement(row, TABLE(TAG_CELL)[0], content(itemBean.toString()));
 
         Collection<IAction> actions = itemBean.getActions();
+        //first cell: bean reference
+        Element cell = appendElement(row, TABLE(TAG_CELL)[0], content(controller.showText() || actions.size() == 0 ? itemBean.toString() : ""));
         for (IAction a : actions) {
             cell = appendTag(row, TABLE(TAG_CELL));
             Element btn = createAction(cell, a);
             btn.setAttribute(ATTR_NAME, Controller.createActionName(tabIndex, a.getId()));
+            btn.setAttribute(ATTR_WIDTH, VAL_100PERCENT);
+            addPicture(btn, item.getClass(), item);
         }
         return row;
     }

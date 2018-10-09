@@ -613,6 +613,21 @@ This hashcode then can be used inside the __usercheck.xml for the synthetic user
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 ...here the synthetic auth user name was changed from default SA to MUSTER and the synthetic password was changed to the new hashcode.
+
+### Run directly into a Bean after starting a session
+
+To jump directly into a bean like a controller or a compositor you can define the following ENV property:
+
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+session.navigation.start.beandefinitions
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+Example:
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+   <property name="session.navigation.start.beandefinitions">
+      <object class="java.lang.String">virtual.Controller (ValueType-Entry), Entry</object>
+   </property>
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
  
 ### The Session and it's context
 
@@ -4494,7 +4509,7 @@ on external database, anyway-scripts are used 'anyway'
 - [ ] sidebar button layout correction
 - [v] application.html without https
 - [ ] Verlaufs-Graph?
-- [ ] file or media from client not transferred
+- [ ] file or media from Mobile client not transferred
 - [ ] logbook --> git
 
 - population 23.8.: ~7.600.314.137 (http://live-counter.com/weltbevoelkerung/)
