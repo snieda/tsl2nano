@@ -14,9 +14,11 @@ do
 		cd $d
 		./runasservice.sh stop
 		sleep 2
-		./runasservice.sh start &Z
+		if [[ $1 != "stop" ]]; then
+			./runasservice.sh start &Z
+			echo "==> $d RESTARTET"
+		fi
 		cd ..
-		echo "==> $d RESTARTET"
 	else
 		echo "==> $d has no runasservice.sh --> no nanoh5 directory"
 	fi
@@ -43,5 +45,5 @@ if [[ "$dotail" ]]; then
 			TAILFILES=$TAILFILES $d"nohup.out"
 		fi
 	done
-	tail -f $TAILFILES
+	tail -F $TAILFILES
 fi

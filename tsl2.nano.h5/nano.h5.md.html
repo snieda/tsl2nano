@@ -59,6 +59,7 @@ A cool way to see the power of this tool can be seen in chapter _Online Quick-St
 * pure html-5 (no javascript, only html5-scripting-api for websockets)
 * jvm scripts like javascript, groovy and python can be included by rules using the java scriptengine
 * using websockets to show status messages, input-assist and dependency field or timer refreshing
+* using websockets to provide a chat system
 * pure jpa - jpa-annotations are read to resolve attribute-presentation
 * independent of a special o/r mapper. all o/r mappers supporting javax.persistence with an EntityManager are usable.
 * simple database replication on user-loaded data - offline working possible
@@ -2385,7 +2386,7 @@ These attributes may be BeanAttributes, getting their content f.e. from a databa
 
 ## Rich Client GUI interactions through WebSockets 
 
-The use of websockets and their internal javascripts is optional. Nano.h5 provides four mechanisms to use websockets:
+The use of websockets and their internal javascripts is optional. Nano.h5 provides the following mechanisms to use websockets:
 
 1. as application message service: providing status messages from main application 
 2. as input assist: supporting the user with available values
@@ -2393,6 +2394,8 @@ The use of websockets and their internal javascripts is optional. Nano.h5 provid
 4. as dependency listener: refreshing other dependent values through calls of RESTful services
 5. as file attachment transferrer: providing to transfer local content to the server
 6. as restful service request: the attribute has to present an _iframe. the current user interaction event will be sent to the service - the result will be embedded into the iframe.
+7. as chat system. Using the annotation @Chat on your entity will define the chat message and receiver
+
 The main exception handler is connected to a WebSocketServer. All messages, sent through __Message.send(msg)__ are transferred to all connected child sessions. After getting the 'submit' event, a progress bar is shown.
 
 ### The applications message service
@@ -2553,7 +2556,8 @@ Another feature is to define a timer through _createTimer(periodInSeconds)_ (xml
 The expression for an URL can contain extended informations. The syntax is:
 	http[s]?//.*<<(PUT|POST|DELETE)[:]<CONTENTTYPE>
 	
-The expression can contain url query arguments and it can end with '=' or the nano specific method/content-type description (e.g. <<PUT:application/xml)
+The expression can contain url query arguments and it can end with '=' or the nano specific method/content-type description (e.g. "<<PUT:application/xml")
+
 
 Examples:
 	http://www.openstreetmap.org/search?query=						// it ends with '=', bean attributes (given as context) will be appended directly without names. no restful syntax will be used
@@ -3415,6 +3419,46 @@ class Base implements Serializable {
 }
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
+### The Chat System
+
+You can provide a simple chat system through a definition in one of your entities.
+
+Example:
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+@Chat(receiver="to", message="message", attachment="attachment")
+public class ChatMessage implements IPersistable<String> {
+...
+	public String getMessage() {
+		return message;
+	}
+	public void setMessage(String message) {
+		this.message = message;
+	}
+	@Column(name="sfrom", length=64)
+	public String getFrom() {
+		return from;
+	}
+	public void setFrom(String from) {
+		this.from = from;
+	}
+	@Column(name="sto", length=64)
+	public String getTo() {
+		return to;
+	}
+	public void setTo(String to) {
+		this.to = to;
+	}
+	public byte[] getAttachment() {
+		return attachment;
+	}
+	public void setAttachment(byte[] attachment) {
+		this.attachment = attachment;
+	}
+}
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+If you edit and save a bean of that type in your nano app, the value of attribute 'message' will be sent to receiver as defined in value of 'to' attribute.
+
 ## Performance
 
 Generic features like authorization for actions and data, filtering of columns and field, loading bitmaps etc. may slow down the application performance. The following tips may increase the performance:
@@ -3743,7 +3787,7 @@ Lots of refactorings have been done, maven has replaced ant, java 8 is used now 
  2.1.3  | --.--.2018 | Hotfixes
  2.1.4	| 12.08.2018 | NEW: tsl2.nano.cursus as delta-processing-engine, NEW: @Attributes, @ValueExpression, minor extensions
  2.1.5	| 26.08.2018 | NEW: annotation extensions: @With -> (DependencyListener, Query, Compositor, Specification, VirtualAttribute)
-  
+ 2.2.0  | 14.10.2018 | REF: h5.Collectors -> h.collector.*, NEW: ChatMessage
 
 <style class="fallback">body{white-space:pre;font-family:monospace}</style><script src="markdeep.min.js"></script><script src="http://casual-effects.com/markdeep/latest/markdeep.min.js"></script>
 
@@ -4498,20 +4542,30 @@ on external database, anyway-scripts are used 'anyway'
 
 - [v] gimmicks not as default!
 - [x] what if table not loaded, but gimmick active?
-- [ ] Controller: go straight into the most reasonable entity and show directly all actions
+- [v] Controller: go straight into the most reasonable entity and show directly all actions
 - [x] h2-lucene integration <-- problem in h2
 - [-] hibernate-lucene integration (since hib 5.0)
 - [v] show picture instead of valueexpression
-- [ ] send broadcast)only to users defined by a rule (message context defined by rule, too)
+- [v] send broadcast)only to users defined by a rule (message context defined by rule, too)
       WebsocketExceptionHandler.server.session.main.sessions with websocket.address = session.address
       send bean attribute to session.authorization
-- [ ] error in configuration?
+- [x] error in configuration? <-- only on first start + initialization
 - [ ] sidebar button layout correction
 - [v] application.html without https
-- [ ] Verlaufs-Graph?
+- [?] Verlaufs-Graph?
 - [ ] file or media from Mobile client not transferred
-- [ ] logbook --> git
 
+Apps auf Serverway:
+- [v] logbook --> git
+- [v] haushalt : 8067
+- [v] timesheet: 8068 
+- [ ] exam     : 8069 connection refused <-- wrong/duplicate h2.jar libraries, users.xml?
+- [ ] ergdi    : 8070: npe: jarfile not found <-- jar-file selector true not working
+- [ ] skiller  : 8072: message 'object event'
+- [ ] logbook  : 8074/9094
+- [ ] GENERELL auf Serverway: Speicher-Problem
+- [ ] restart-all -> reset-all +restart
+ 
 - population 23.8.: ~7.600.314.137 (http://live-counter.com/weltbevoelkerung/)
 
  -->

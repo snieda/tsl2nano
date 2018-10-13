@@ -10,6 +10,7 @@
 package de.tsl2.nano.core;
 
 import java.lang.Thread.UncaughtExceptionHandler;
+import java.net.InetAddress;
 
 /**
  * functions of an application session.
@@ -62,4 +63,6 @@ public interface ISession<WORK> {
     
     /** return the current working object */
     WORK getWorkingObject();
+
+	InetAddress getInetAddress();
 }

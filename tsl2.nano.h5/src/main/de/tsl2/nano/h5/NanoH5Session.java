@@ -96,6 +96,7 @@ import de.tsl2.nano.h5.navigation.Parameter;
 import de.tsl2.nano.h5.plugin.INanoPlugin;
 import de.tsl2.nano.h5.websocket.NanoWebSocketServer;
 import de.tsl2.nano.h5.websocket.WebSocketExceptionHandler;
+import de.tsl2.nano.h5.websocket.chat.ChatMessage;
 import de.tsl2.nano.persistence.Persistence;
 import de.tsl2.nano.plugin.Plugins;
 import de.tsl2.nano.service.util.BeanContainerUtil;
@@ -230,6 +231,7 @@ public class NanoH5Session implements ISession<BeanDefinition>, Serializable, IL
             Map context) {
         this.server = server;
         this.server.getEventController().addListener(this);
+        this.server.getEventController().addListener((IListener)this, ChatMessage.class);
         this.inetAddress = inetAddress;
         this.builder = server.builder;
         this.nav = navigator;
@@ -853,11 +855,15 @@ public class NanoH5Session implements ISession<BeanDefinition>, Serializable, IL
             } else {
                 result = action.activate();
                 if (action.getId().endsWith(".save") || action.getId().endsWith(".delete"))
-                    EMessage.broadcast(this,
-                        ENV.translate("tsl2nano.value.changed", false,
-                            nav.current().getName() + ": " + nav.current(),
-                            this.getUserAuthorization().getUser(), action.getShortDescription()),
-                        "*");
+                    if (ChatMessage.isChatMessage(nav.current()) && nav.current() instanceof Bean) {
+                        ChatMessage.createChatRequest(this, (Bean)nav.current());
+                    } else {
+                        EMessage.broadcast(this,
+                            ENV.translate("tsl2nano.value.changed", false,
+                                nav.current().getName() + ": " + nav.current(),
+                                this.getUserAuthorization().getUser(), action.getShortDescription()),
+                            "*");
+                    }
             }
             Plugins.process(INanoPlugin.class).actionAfterHandler(action);
 
@@ -1264,6 +1270,10 @@ public class NanoH5Session implements ISession<BeanDefinition>, Serializable, IL
         return nav.current();
     }
 
+    public InetAddress getInetAddress() {
+        return inetAddress;
+    }
+    
     /**
      * {@inheritDoc}
      */
@@ -1291,7 +1301,9 @@ public class NanoH5Session implements ISession<BeanDefinition>, Serializable, IL
 
     @Override
     public void handleEvent(EMessage e) {
-        if (ENV.get("session.onpersist.broadcast.alert", true)) {
+        if (e instanceof ChatMessage) {
+            ((ChatMessage)e).handleChatRequest(this);
+        } else if (ENV.get("session.onpersist.broadcast.alert", true)) {
             if (BeanContainer.instance().hasPermission(e.getMsg().toString(), null)
                 && (e.getDestPath() == null
                     || toString().startsWith(StringUtil.substring(e.getDestPath(), null, "*")))) {

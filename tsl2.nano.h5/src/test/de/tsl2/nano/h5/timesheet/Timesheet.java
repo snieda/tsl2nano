@@ -107,6 +107,7 @@ import de.tsl2.nano.h5.Html5Presentation;
 import de.tsl2.nano.h5.NanoH5App;
 import de.tsl2.nano.h5.RuleCover;
 import de.tsl2.nano.h5.SpecifiedAction;
+import de.tsl2.nano.h5.Users;
 import de.tsl2.nano.h5.collector.CSheet;
 import de.tsl2.nano.h5.collector.Compositor;
 import de.tsl2.nano.h5.collector.Controller;
@@ -322,7 +323,7 @@ public class Timesheet extends NanoH5App {
         stat = "\n-- get a statistic table over types\n" +
                 "select t.NAME as Type, sum(value) as Hours from Charge c join CHARGEITEM ci on c.CHARGEITEM = ci.ID join ITEM i on ci.ITEM = i.ID join TYPE t on i.TYPE = t.ID\n" +
                 "group by t.NAME\n";
-        QueryResult.createQueryResult(STAT_TYPES, stat);
+        QueryResult queryResult = QueryResult.createQueryResult(STAT_TYPES, stat);
 
         /*
          * Sample Workflow with three activities
@@ -464,7 +465,7 @@ public class Timesheet extends NanoH5App {
                 "sql-test",
                 new SQLExpression<>(
                     Times.class,
-                    "?" + query.getName(), Object[].class),
+                    "?" + queryResult.getQueryName(), Object[].class),
                 null, null);
         beanCollector.addAttribute("virtual-test", "I'm virtual", null, null, null);
         beanCollector.addAttribute(ATTR_BINARY, new Attachment("picture", ENV.getConfigPath()
@@ -511,6 +512,12 @@ public class Timesheet extends NanoH5App {
         ((AttributeDefinition) b.getAttribute(ATTR_OBJECT)).getPresentation().setType(IPresentable.TYPE_ATTACHMENT);
 
         b.saveDefinition();
+        
+        /*
+         * create a user 
+         */
+        Users.load().auth("MUSTER", "meinmuster", "SA", "", true);
+        
         /*
          * define your own navigation stack
          */

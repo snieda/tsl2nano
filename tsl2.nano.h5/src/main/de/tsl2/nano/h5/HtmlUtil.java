@@ -475,7 +475,7 @@ public class HtmlUtil {
     }
 
     public static final String style(String styleKey, Object styleValue) {
-        return styleKey + ": " + styleValue + ";";
+        return styleKey + ": " + styleValue + "; ";
     }
 
     /**

@@ -351,6 +351,18 @@ public class NanoH5 extends NanoHTTPD implements ISystemConnector<Persistence> {
         }
     }
 
+    public NanoH5Session getSession(InetAddress address) {
+        return sessions.get(address);
+    }
+    
+    public NanoH5Session getSession(String userName) {
+        for (NanoH5Session s : sessions.values()) {
+            if (s.getUserAuthorization() != null && s.getUserAuthorization().getUser().toString().equals(userName))
+                return s;
+        }
+        return null;
+    }
+    
     public static URL getServiceURL(String serviceURLString) {
         if (serviceURLString == null) {
             serviceURLString = ENV.get("service.url", "http://localhost:8067");
@@ -505,6 +517,10 @@ public class NanoH5 extends NanoHTTPD implements ISystemConnector<Persistence> {
             session.nav.next(null);
     }
 
+    protected Map<InetAddress, NanoH5Session> getSessions() {
+        return sessions;
+    }
+    
     private boolean isDoubleClickDelay(NanoH5Session session) {
         return System.currentTimeMillis() - ENV.get("app.event.dblclick.delay", 100) < session.getLastAccess();
     }

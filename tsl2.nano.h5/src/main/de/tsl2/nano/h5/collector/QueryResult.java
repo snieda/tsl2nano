@@ -67,6 +67,10 @@ public class QueryResult<COLLECTIONTYPE extends Collection<T>, T> extends BeanCo
         initDeserialization();
     }
 
+    public String getQueryName() {
+        return queryName;
+    }
+    
     @Override
     public List<IAttribute> getAttributes(boolean readAndWriteAccess) {
         if (!allDefinitionsCached) {

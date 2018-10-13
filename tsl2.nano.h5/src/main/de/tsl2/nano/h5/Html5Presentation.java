@@ -1800,7 +1800,8 @@ public class Html5Presentation<T> extends BeanPresentationHelper<T> implements I
             cell = appendTag(row, TABLE(TAG_CELL));
             Element btn = createAction(cell, a);
             btn.setAttribute(ATTR_NAME, Controller.createActionName(tabIndex, a.getId()));
-            btn.setAttribute(ATTR_WIDTH, VAL_100PERCENT);
+            btn.setAttribute(ATTR_STYLE, ENV.get("layout.controller.action.style", 
+                STYLE_BACKGROUND_TRANSPARENT + style(STYLE_COLOR, COLOR_WHITE) + STYLE_ALIGN_CENTER + style(ATTR_WIDTH, VAL_100PERCENT)));
             addPicture(btn, item.getClass(), item);
         }
         return row;

@@ -20,10 +20,12 @@ import de.tsl2.nano.core.Main;
  * @version $Revision$ 
  */
 public class EMessage<T> extends EventObject {
-    private static final long serialVersionUID = -6344841433143131005L;
+    protected static final String PRE_BROADCAST = "/broadcast:";
+
+	private static final long serialVersionUID = -6344841433143131005L;
     
-    T msg;
-    String destPath;
+    protected T msg;
+    protected String destPath;
     /**
      * constructor
      */
@@ -52,7 +54,6 @@ public class EMessage<T> extends EventObject {
      * @param path to evaluate the destinations
      */
     public static void broadcast(Object src, Object message, String path) {
-        ENV.get(Main.class).getEventController().fireEvent(new EMessage(src, "/broadcast:" + message, path));
+        ENV.get(Main.class).getEventController().fireEvent(new EMessage(src, PRE_BROADCAST + message, path));
     }
-
 }

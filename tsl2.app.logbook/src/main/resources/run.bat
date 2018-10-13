@@ -9,7 +9,7 @@ rem   2. http port
 rem   3. 'debug', 'test' or 'nopause' option
 rem ##########################################################################
 
-if "%1"=="" (set PRJ=.logbook.environment) else (set PRJ=%1)
+if "%1"=="" (set PRJ=.nanoh5.logbook) else (set PRJ=%1)
 if "%2"=="" (set PORT=8067) else (set PORT=%2)
 if "%3"=="debug" (set DEBUG="-agentlib:jdwp=transport=dt_socket,address=localhost:8787,server=y,suspend=n")
 if "%3"=="ndebug" (set NANO_DEBUG=-Dtsl2.nano.log.level=debug)
