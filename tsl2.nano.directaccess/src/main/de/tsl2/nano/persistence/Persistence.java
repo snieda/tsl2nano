@@ -340,12 +340,18 @@ public class Persistence implements Serializable, Cloneable {
                 name = FileUtil.getUniqueFileName("ddlcopy");
                 setJarFile(name + ".jar");
             }
-            String file = ENV.getConfigPath() + name + ".sql";
+            String file = evalSqlFileName(name);
             Message.send("ddl script detected in field database. saving content to " + file);
             //remove ´` characters and save.
-            FileUtil.writeBytes(database.replaceAll("[´`]", "").getBytes(), file , false);
+            String ddl = database.replaceAll("[´`]", "\"");
+            ddl = ddl.toUpperCase().replace("VARCHAR(255)", "VARCHAR(" + ENV.get("database.ddlcopy.shorten.varchar255.to", 64) + ")");
+            FileUtil.writeBytes(H2DatabaseTool.replaceKeyWords(ddl).getBytes(), file , false);
             setDatabase(name);
         }
+    }
+
+    public String evalSqlFileName(String name) {
+        return ENV.getConfigPath() + name + ".sql";
     }
 
     protected String getBeanFileName() {

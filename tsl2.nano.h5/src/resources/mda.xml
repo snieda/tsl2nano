@@ -48,6 +48,15 @@ commit;
 commit;
 		</echo>
 
+		<echo message="preparing database..." />
+		<!-- do some database-specific WORKAROUNDs -->
+	    <!-- <replaceregexp flags="i">
+	        <fileset dir="${src.dir}"><include name="*${jdbc.database}*.sql"/></fileset>
+            <regexp pattern="(&quot;|[\s\(\'\´]+)(BEGIN|END|DATE|DAY|ALL|CHECK|CONSTRAINT|CROSS|CURRENT_DATE|CURRENT_TIME|CURRENT_TIMESTAMP|DISTINCT|EXCEPT|EXISTS|FALSE|FETCH|FOR|FOREIGN|FROM|FULL|GROUP|HAVING|INNER|INTERSECT|IS|JOIN|LIKE|LIMIT|MINUS|NATURAL|NOT|NULL|OFFSET|ON|ORDER|PRIMARY|ROWNUM|SELECT|SYSDATE|SYSTIME|SYSTIMESTAMP|TODAY|TRUE|UNION|UNIQUE|WHERE|WITH)(&quot;|[\s\'\`\)]+)"/>
+	        <substitution expression="\1\2_w\3"/>
+	    </replaceregexp> -->
+		<!-- WORKAROUND END -->
+		
 		<echo message="creating user..." />
 		<ant antfile="shell.xml" target="sh.sql">
 			<property name="sh.sql.include" value="createuser.sql"/>

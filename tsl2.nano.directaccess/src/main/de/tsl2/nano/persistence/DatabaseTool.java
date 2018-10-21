@@ -243,5 +243,9 @@ public class DatabaseTool {
     public String getSQLToolURL() {
         return isEmbeddedDatabase() && isH2(persistence.getConnectionUrl()) ? "http://localhost:8082" : null;
     }
-    
+
+    public void replaceKeyWords() {
+        if (isH2(persistence.getConnectionUrl()))
+            H2DatabaseTool.replaceKeyWords(persistence);
+    }
 }

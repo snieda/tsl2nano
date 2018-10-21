@@ -81,6 +81,7 @@ public class Presentable implements IIPresentable, Serializable {
     /** needed for instances that wont be serialized */
     private transient boolean initialized;
 
+    @Element(required = false)
 	private String iconFromField;
 
     public Presentable() {

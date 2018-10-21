@@ -701,6 +701,10 @@ public class FileUtil {
         return name.length() > 128 ? name.substring(0, 128) : name;
     }
 
+    public static String getFileString(String fileName) {
+    	return String.valueOf(getFileData(fileName, null));
+    }
+    
     /**
      * getFileData
      * 

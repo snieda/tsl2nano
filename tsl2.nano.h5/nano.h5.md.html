@@ -492,10 +492,12 @@ Here is a short description how to use a model from PonyORM and starting a full 
  
 #### Known Problems on HsqlDB/H2 compatibility mode or DDL scripts provided by PonyORM
 
-* don't use SQL/DB-Keywords (like begin, end, day, from, until, date, ...) in your table- or column-names
+* don't use SQL/DB-Keywords (select, where, like begin, end, day, from, until, date, order...) in your table- or column-names
 *     mysql   : AUTO_INCREMENT must be before PRIMARY KEY
 *     postgres: BYTEA <-- unknown
 *     oracle  : Triggers with :NEW
+* add __;IGNORECASE=TRUE;DATABASE_TO_UPPER=FALSE__ to the url if your DDL uses quotationmarks on tables/columns
+* set the hibernate dialect to the DDL script flavour
 
 ### Overview
 
@@ -3788,6 +3790,7 @@ Lots of refactorings have been done, maven has replaced ant, java 8 is used now 
  2.1.4	| 12.08.2018 | NEW: tsl2.nano.cursus as delta-processing-engine, NEW: @Attributes, @ValueExpression, minor extensions
  2.1.5	| 26.08.2018 | NEW: annotation extensions: @With -> (DependencyListener, Query, Compositor, Specification, VirtualAttribute)
  2.2.0  | 14.10.2018 | REF: h5.Collectors -> h.collector.*, NEW: ChatMessage
+ 2.2.1  | 21.10.2018 | H2 Database Keywords in copyddl eliminated
 
 <style class="fallback">body{white-space:pre;font-family:monospace}</style><script src="markdeep.min.js"></script><script src="http://casual-effects.com/markdeep/latest/markdeep.min.js"></script>
 
@@ -4557,14 +4560,16 @@ on external database, anyway-scripts are used 'anyway'
 
 Apps auf Serverway:
 - [v] logbook --> git
-- [v] haushalt : 8067
-- [v] timesheet: 8068 
-- [ ] exam     : 8069 connection refused <-- wrong/duplicate h2.jar libraries, users.xml?
-- [ ] ergdi    : 8070: npe: jarfile not found <-- jar-file selector true not working
-- [ ] skiller  : 8072: message 'object event'
+- [v] haushalt : 8067/9003
+- [v] timesheet: 8068/9004 
+- [ ] exam     : 8069/9093 connection refused <-- wrong/duplicate h2.jar libraries, users.xml?
+- [ ] ergdi    : 8070/9095: npe: jarfile not found <-- jar-file selector true not working
+- [ ] photo    : 8071/9097  npe: environment.xml corrupt
+- [ ] skiller  : 8072/9096: message 'object event'
+- [ ] EM-2016  : 8073/9092
 - [ ] logbook  : 8074/9094
 - [ ] GENERELL auf Serverway: Speicher-Problem
-- [ ] restart-all -> reset-all +restart
+- [v] restart-all -> reset-all +restart
  
 - population 23.8.: ~7.600.314.137 (http://live-counter.com/weltbevoelkerung/)
 

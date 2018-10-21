@@ -25,7 +25,6 @@ import java.util.Properties;
 import java.util.Scanner;
 import java.util.Set;
 import java.util.function.Consumer;
-import java.util.function.Predicate;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -798,7 +797,7 @@ public class StringUtil {
         for (int i = 0; i < strs.length; i++) {
             if (strs[i] == null && !useNull) {
                 strs[i] = "";
-            } else if (strs[i] != null && strs[i].toString().length() == 0 && useNull) {
+            } else if (strs[i] != null && strs[i].toString() != null && strs[i].toString().length() == 0 && useNull) {
                 strs[i] = null;
             }
         }
@@ -971,5 +970,18 @@ public class StringUtil {
     	PrintWriter pw = new PrintWriter(sw);
     	c.accept(pw);
     	return sw.toString();
+    }
+    public static int countFindings(String data, String search) {
+    	int c = 0;
+    	int i, last = 0;
+    	int ll = search.length();
+		do {
+    		i = data.indexOf(search, last);
+    		if (i == -1)
+    			break;
+    		last = i + ll;
+    		++c;
+    	} while (true);
+		return c;
     }
 }
