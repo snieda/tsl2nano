@@ -631,7 +631,7 @@ public class NanoH5Session implements ISession<BeanDefinition>, Serializable, IL
 
         refreshCurrentBeanValues(parms);
 
-        if (nav.current() instanceof Controller) {
+        if (nav.current() instanceof Controller) { //TODO: do we need this anymore?
             Controller ctrl = (Controller) nav.current();
             Set<String> keys = parms.keySet();
             for (String k : keys) {
@@ -837,7 +837,7 @@ public class NanoH5Session implements ISession<BeanDefinition>, Serializable, IL
                         bean.addAction(action);
                         result = bean;
                     }
-                } else {//set the arguments and start the parametrized action
+                } else {//set the arguments and start the parameterized action
                     Object[] values = null;
                     if (nav.current() instanceof BeanCollector) {
                         MapEntrySet argSet = (MapEntrySet) ((BeanCollector) nav.current()).getCurrentData();

@@ -141,6 +141,7 @@ CREATE TABLE Address (
 CREATE TABLE Party (
                 id INTEGER NOT NULL,
                 orga INTEGER NOT NULL,
+                mission INTEGER NOT NULL,
                 name VARCHAR(64) NOT NULL,
                 description VARCHAR(256),
                 shortname VARCHAR(8) NOT NULL,
@@ -149,6 +150,14 @@ CREATE TABLE Party (
 );
 COMMENT ON TABLE Party IS 'may be a person, client, reservation item like a restaurant table etc.';
 
+CREATE TABLE MISSION (
+                id INTEGER NOT NULL,
+                name VARCHAR(64) NOT NULL,
+                description VARCHAR(256),
+                icon BLOB,
+                CONSTRAINT idx_mission PRIMARY KEY (id)
+);
+COMMENT ON TABLE Mission IS 'defines the mission/operation of a party';
 
 CREATE TABLE Property (
                 id INTEGER NOT NULL,
@@ -183,6 +192,7 @@ COMMENT ON TABLE Location IS 'location of a party. can have an address or a coor
 CREATE TABLE Charge (
                 id INTEGER NOT NULL,
                 party INTEGER NOT NULL,
+                location INTEGER,
                 chargeitem INTEGER NOT NULL,
                 fromdate DATE NOT NULL,
                 fromtime TIME NOT NULL,
@@ -190,6 +200,7 @@ CREATE TABLE Charge (
                 totime TIME NOT NULL,
                 pause TIME,
                 value DECIMAL(8,2) NOT NULL,
+                status INTEGER,
                 comment VARCHAR(512),
                 CONSTRAINT idx_charge PRIMARY KEY (id)
 );
@@ -199,6 +210,18 @@ COMMENT ON TABLE Charge IS 'agreement, booking or reservation';
 CREATE INDEX Charge_idx
  ON Charge
  ( fromdate );
+
+CREATE TABLE ChargeStatus (
+                id INTEGER NOT NULL,
+                name VARCHAR(64) NOT NULL,
+                description VARCHAR(256),
+                icon BLOB,
+                CONSTRAINT idx_chargestatus PRIMARY KEY (id)
+);
+
+CREATE INDEX Chargestatus_idx
+ ON ChargeStatus
+ ( name );
 
 CREATE TABLE Discharge (
                 id INTEGER NOT NULL,
@@ -312,6 +335,14 @@ ON UPDATE NO ACTION
 -- NOT DEFERRABLE
 ;
 
+ALTER TABLE Charge ADD CONSTRAINT ChargeStatus_Charge_fk
+FOREIGN KEY (status)
+REFERENCES ChargeStatus (id)
+ON DELETE NO ACTION
+ON UPDATE NO ACTION
+-- NOT DEFERRABLE
+;
+
 ALTER TABLE Location ADD CONSTRAINT Coordinates_Location_fk
 FOREIGN KEY (coordinate)
 REFERENCES Coordinate (id)
@@ -331,6 +362,22 @@ ON UPDATE NO ACTION
 ALTER TABLE Charge ADD CONSTRAINT Party_Charge_fk
 FOREIGN KEY (party)
 REFERENCES Party (id)
+ON DELETE NO ACTION
+ON UPDATE NO ACTION
+-- NOT DEFERRABLE
+;
+
+ALTER TABLE Party ADD CONSTRAINT Party_Mission_fk
+FOREIGN KEY (mission)
+REFERENCES mission (id)
+ON DELETE NO ACTION
+ON UPDATE NO ACTION
+-- NOT DEFERRABLE
+;
+
+ALTER TABLE Charge ADD CONSTRAINT Charge_Location_fk
+FOREIGN KEY (location)
+REFERENCES location (id)
 ON DELETE NO ACTION
 ON UPDATE NO ACTION
 -- NOT DEFERRABLE

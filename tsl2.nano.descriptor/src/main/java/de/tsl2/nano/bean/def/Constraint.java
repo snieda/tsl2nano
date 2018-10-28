@@ -108,7 +108,7 @@ public class Constraint<T> extends AbstractConstraint<T> implements IConstraint<
             setDefault(allowedValues.iterator().next());
             int length = -1;
             for (T v : allowedValues) {
-                length = Math.max(length, v.toString().length());
+                length = Math.max(length, v != null ? v.toString().length() : 0);
             }
             setLength(length);
             

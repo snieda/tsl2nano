@@ -3790,7 +3790,7 @@ Lots of refactorings have been done, maven has replaced ant, java 8 is used now 
  2.1.4	| 12.08.2018 | NEW: tsl2.nano.cursus as delta-processing-engine, NEW: @Attributes, @ValueExpression, minor extensions
  2.1.5	| 26.08.2018 | NEW: annotation extensions: @With -> (DependencyListener, Query, Compositor, Specification, VirtualAttribute)
  2.2.0  | 14.10.2018 | REF: h5.Collectors -> h.collector.*, NEW: ChatMessage
- 2.2.1  | 21.10.2018 | H2 Database Keywords in copyddl eliminated
+ 2.2.1  | 21.10.2018 | H2 Database Keywords in copyddl eliminated. anyway.sql: +mission, +chargestatus, charge->location
 
 <style class="fallback">body{white-space:pre;font-family:monospace}</style><script src="markdeep.min.js"></script><script src="http://casual-effects.com/markdeep/latest/markdeep.min.js"></script>
 
@@ -4340,13 +4340,14 @@ Charge			-> Zeiteintrag
 Discharge		-> Abrechnung
 
 --Bestellung+Kasse (anyway):
-Organisation	-> Betrieb
-Party			-> Mitarbeiter
+Organisation	-> Betriebe
+Party			-> Betrieb/Admin/Mitarbeiter / Kunde
+Mission         -> Bedienung etc
 Category		-> Reservierung / Bestellung
-Area			-> z.B. Lokal
-Type			-> 
-Item			-> z.B. Tisch 1 o. Wasser 
-Classification	-> 
+Area			-> z.B. Lokal/Restaurant
+Type			-> Nicht definiert / Getränk / veg. Speisen / Speisen / Nachtisch ...
+Item			-> z.B. Tisch 1 o. Wasser
+Classification	-> schnelle Lieferung / Standard
 Charge			-> Anfrage (Bestellung, Reservierung)
 Discharge		-> Kasse
 
@@ -4570,7 +4571,10 @@ Apps auf Serverway:
 - [ ] logbook  : 8074/9094
 - [ ] GENERELL auf Serverway: Speicher-Problem
 - [v] restart-all -> reset-all +restart
- 
+- [ ] BeanConfigurator.actionCreateController testen
+- [ ] Translation uses random language
+- [ ] anyway.sql +Missino, +Charge->Location
+
 - population 23.8.: ~7.600.314.137 (http://live-counter.com/weltbevoelkerung/)
 
  -->

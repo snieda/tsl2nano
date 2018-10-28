@@ -221,7 +221,7 @@ public class FormatUtil {
                     @Override
                     public Object parseObject(String source, ParsePosition pos) {
                         pos.setIndex(!Util.isEmpty(source) ? source.length() : 1);
-                        return !Util.isEmpty(source) ? BeanClass.createInstance(type, source) : null;
+                        return !Util.isEmpty(source) ? ObjectUtil.wrap(source, type) : null;
                     }
 
                 };

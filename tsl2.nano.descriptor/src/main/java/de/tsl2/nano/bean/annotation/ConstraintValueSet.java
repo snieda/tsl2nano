@@ -32,6 +32,7 @@ import de.tsl2.nano.core.util.StringUtil;
  * @version $Revision$
  */
 public class ConstraintValueSet {
+	public static final String NULL_CLASS = Void.class.getName();
     // pre-defined allowed value sets (providing a dynamic postfix after ':')
     /** provides all classes of current classloader */
     public static final String ALLOWED_CLASSES = "ALLOWED_CLASSES:";
@@ -62,6 +63,7 @@ public class ConstraintValueSet {
      */
     public static String[] preDefined(String[] allowed) {
         LinkedList<String> preAllowed = new LinkedList<String>();
+        preAllowed.add(NULL_CLASS);
         for (int i = 0; i < allowed.length; i++) {
             if (allowed[i].equals(ALLOWED_CLASSES)) {
                 String exp = StringUtil.substring(allowed[i], ":", null);

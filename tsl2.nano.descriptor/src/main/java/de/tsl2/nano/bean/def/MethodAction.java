@@ -24,9 +24,11 @@ import de.tsl2.nano.bean.ValueHolder;
 import de.tsl2.nano.bean.annotation.Action;
 import de.tsl2.nano.bean.annotation.ConstraintValueSet;
 import de.tsl2.nano.bean.annotation.Presentable;
+import de.tsl2.nano.collection.CollectionUtil;
 import de.tsl2.nano.core.ENV;
 import de.tsl2.nano.core.ManagedException;
 import de.tsl2.nano.core.Messages;
+import de.tsl2.nano.core.cls.PrimitiveUtil;
 import de.tsl2.nano.core.util.StringUtil;
 import de.tsl2.nano.format.RegExpFormat;
 
@@ -119,6 +121,13 @@ public class MethodAction<T> extends CommonAction<T> implements IsPresentable {
 		return getParameter()[0];
 	}
 
+	@Override
+	public void setParameter(Object... parameter) {
+		super.setParameter(parameter);
+		if (parameters().getTypes() == null && getConstraints() != null)
+			parameters().setConstraints(CollectionUtil.concat(new Constraint[] {new Constraint<>(Object.class)}, getConstraints()));
+	}
+	
 	private Object[] getArgumentValues() {
 		return Arrays.copyOfRange(getParameter(), 1, getParameter().length);
 	}
@@ -135,7 +144,7 @@ public class MethodAction<T> extends CommonAction<T> implements IsPresentable {
                 shortDescription = ENV.translate(annAction.name(), true);
             Annotation[][] cana;
             if ((cana = method.getParameterAnnotations()) != null) {
-                constraints = new Constraint[cana.length];
+                constraints = new Constraint[method.getParameterTypes().length];
                 //on each parameter, the constraint annotation has to be the first one
                 de.tsl2.nano.bean.annotation.Constraint c;
                 for (int i = 0; i < cana.length; i++) {
@@ -153,6 +162,12 @@ public class MethodAction<T> extends CommonAction<T> implements IsPresentable {
                         constraints[i].length = c.length();
                         constraints[i].min = !c.min().isEmpty() ? c.min() : null;
                         constraints[i].max = !c.max().isEmpty() ? c.max() : null;
+                    } else {//if no constraint annotation was defined for a parameter, add the default
+                    	if (i == method.getParameterCount() - 1 && method.getParameterTypes()[i].isArray())
+                    		break; //last optional parameter
+                    	constraints[i] = new Constraint<>(method.getParameterTypes()[i]);
+                    	if (constraints[i].getType().isPrimitive())
+                    		constraints[i].setDefault(PrimitiveUtil.getDefaultValue(constraints[i].getType()));
                     }
                 }
             }

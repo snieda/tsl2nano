@@ -89,9 +89,10 @@ public class Parameters extends ArrayList<Parameter> {
      */
     public Object[] getValues() {
         List arrayList = new ArrayList();
+        Class[] types = getTypes();
         for (Parameter p : this) {
             Object v = p.getValue();
-            if (!onlyAvailables || v != null) //this is compatible to old code, but may create errors on the new structure...
+            if ((!onlyAvailables || (types != null && types.length > arrayList.size())) || v != null) //this is compatible to old code, but may create errors on the new structure...
                 arrayList.add(v);
         }
         return arrayList.size() > 0 ? arrayList.toArray(new Object[0]) : null;
@@ -109,6 +110,17 @@ public class Parameters extends ArrayList<Parameter> {
         return null;
     }
 
+    public void setConstraints(IConstraint...cs) {
+        int i = 0;
+        for (Parameter p : this) {
+            if (i >= cs.length)
+                break;
+            p.setConstraint(cs[i++]);
+        }
+        for (int j = i; j < cs.length; j++) {
+            add(new Parameter("arg" + j, cs[j], null));
+        }
+    }
     /**
      * setParameter
      * 

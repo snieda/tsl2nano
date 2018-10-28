@@ -383,8 +383,9 @@ public class BeanConfigurator<T> implements Serializable {
     }
 
     @de.tsl2.nano.bean.annotation.Action(name = "createController"
-            , argNames = {"increaseAttribute", "increaseCount", "increaseStep", "baseType", "baseAttributeName",
-                            "targetType", "targetAttributeName", "iconAttributeName"})
+            , argNames = {"baseType", "baseAttributeName",
+                          "targetType", "targetAttributeName", "iconAttributeName",
+                          "increaseAttribute", "increaseCount", "increaseStep", })
     public void actionCreateController (
             @de.tsl2.nano.bean.annotation.Constraint(allowed=ConstraintValueSet.ALLOWED_APPCLASSES) String baseType, 
             @de.tsl2.nano.bean.annotation.Constraint(allowed=ConstraintValueSet.ALLOWED_APPBEANATTRS) String baseAttribute, 
@@ -395,9 +396,18 @@ public class BeanConfigurator<T> implements Serializable {
             int increaseCount,
             int increaseStep
             ) {
-        createControllerBean(baseType, baseAttribute, targetType, targetAttribute, iconAttribute, 
-            increaseAttribute, increaseCount, increaseStep);
+        createControllerBean(notnull(baseType), notnull(baseAttribute), nullable(targetType), notnull(targetAttribute), nullable(iconAttribute), 
+            nullable(increaseAttribute), increaseCount, increaseStep);
         Bean.clearCache();
+    }
+
+    private String nullable(String arg) {
+        return ConstraintValueSet.NULL_CLASS.equals(arg) ? null : arg;
+    }
+
+    private String notnull(String arg) {
+        ManagedException.assertion(!ConstraintValueSet.NULL_CLASS.equals(arg), arg);
+        return arg;
     }
 
     public Controller createControllerBean(String baseType, String baseAttribute, String targetType, String targetAttribute, String iconAttribute,

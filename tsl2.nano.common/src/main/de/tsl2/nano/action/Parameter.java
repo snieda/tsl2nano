@@ -80,8 +80,13 @@ public class Parameter<T> {
      * @param value The value to set.
      */
     public void setValue(T value) {
-        if (constraint != null)
-            constraint.check(name, value); 
+        if (constraint != null) {
+            constraint.check(name, value);
+            if (value == null && constraint.getDefault() != null) {
+                this.value = constraint.getDefault();
+                return;
+            }
+        }
         this.value = value;
     }
     
