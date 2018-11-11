@@ -3726,6 +3726,8 @@ Actual list: http://infocenter.pentaho.com/help/index.jsp?topic=%2Fsupported_com
 	* -> remove generated '@Version' annotation from java files
 * no database-tables are created
 	* -> be careful with your persistence definition: database-url, database, and schema must fit together. E.g. on a H2 url jdbc:h2:tcp://localhost:9092/PUBLIC, the SCHEMA must be PUBLIC, too!
+* h2 database "java.io.ioexception: block not found in id"
+	* -> you have changed the database structure. shutdown the h2 database before you add or change data
 
 ## Migrations
 
@@ -4577,4 +4579,13 @@ Apps auf Serverway:
 
 - population 23.8.: ~7.600.314.137 (http://live-counter.com/weltbevoelkerung/)
 
+
+F1			Mi8
+4000mAh		GPS(2), Galileo(2)
+microSD		Schrittzähler
+			AmoLED
+			12MP Zweitkamera
+			NFC
+nur USB2	nur USB2
+			
  -->
