@@ -1,4 +1,4 @@
-package de.tsl2.nano.persistence.replication.hibernate;
+package de.tsl2.nano.persistence.replication.jpa;
 
 import javax.persistence.EntityManager;
 

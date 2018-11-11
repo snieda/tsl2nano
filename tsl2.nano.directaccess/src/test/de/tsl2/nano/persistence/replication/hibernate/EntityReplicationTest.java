@@ -6,9 +6,12 @@ import javax.persistence.EntityManager;
 
 import org.junit.AfterClass;
 import org.junit.BeforeClass;
+import org.junit.Ignore;
 import org.junit.Test;
 
 import de.tsl2.nano.core.util.ENVTestPreparation;
+import de.tsl2.nano.persistence.replication.jpa.EntityReplication;
+import de.tsl2.nano.persistence.replication.jpa.serializer.SerializeBytes;
 import de.tsl2.nano.service.util.IPersistable;
 
 public class EntityReplicationTest  implements ENVTestPreparation {
@@ -24,7 +27,7 @@ public class EntityReplicationTest  implements ENVTestPreparation {
     }
 
     @Test
-//    @Ignore("entitymanager and entity must be filled!")
+    @Ignore("entitymanager and entity must be filled!")
     public void testReplication() {
         MyEntity e = new MyEntity("1");
         
@@ -34,7 +37,7 @@ public class EntityReplicationTest  implements ENVTestPreparation {
         
         EntityReplication.setPersistableID(e1 -> ((IPersistable<String>)e1).getId());
         new EntityReplication().replicate(e);
-        MyEntity loadedEntity = new EntityReplication().load(e.getId(), e.getClass());
+        MyEntity loadedEntity = new EntityReplication().load(e.getId(), e.getClass(), new SerializeBytes());
         assertEquals(e.getId(), loadedEntity.getId());
     }
 
