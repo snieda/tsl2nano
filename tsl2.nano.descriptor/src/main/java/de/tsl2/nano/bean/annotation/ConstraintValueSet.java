@@ -17,13 +17,17 @@ import java.util.Collection;
 import java.util.LinkedList;
 import java.util.List;
 
+import de.tsl2.nano.action.IAction;
 import de.tsl2.nano.bean.def.AttributeFinder;
+import de.tsl2.nano.bean.def.Constraint;
+import de.tsl2.nano.bean.def.MethodAction;
 import de.tsl2.nano.collection.CollectionUtil;
 import de.tsl2.nano.core.ENV;
 import de.tsl2.nano.core.ITransformer;
 import de.tsl2.nano.core.cls.ClassFinder;
 import de.tsl2.nano.core.util.FileUtil;
 import de.tsl2.nano.core.util.StringUtil;
+import de.tsl2.nano.core.util.Util;
 
 /**
  * provides some value sets as allowed values for a Constraint Annotation
@@ -129,4 +133,13 @@ public class ConstraintValueSet {
         return values;
     }
 
+    public static Object transformEmptyToVoid(IAction a, int parameterIndex, Object value) {
+    	if (a instanceof MethodAction) {
+    		MethodAction ma = (MethodAction)a;
+    		Constraint c = ma.getConstraints() != null && ma.getConstraints().length > parameterIndex ? ma.getConstraints()[parameterIndex] : null;
+    		if (c != null && c.getAllowedValues() != null && c.getAllowedValues().contains(Void.class.getName()))
+    			return value instanceof String && Util.isEmpty(value) ? NULL_CLASS : value;
+    	}
+    	return value;
+    }
 }

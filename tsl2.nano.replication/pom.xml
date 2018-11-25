@@ -1,0 +1,83 @@
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+  <modelVersion>4.0.0</modelVersion>
+  <parent>
+    <groupId>net.sf.tsl2nano</groupId>
+    <artifactId>tsl2.nano.h5-package</artifactId>
+    <version>2.2.1-SNAPSHOT</version>
+  </parent>
+  <artifactId>tsl2.nano.replication</artifactId>
+  <name>TSL2 Database/XML Replication</name>
+  <description>Provides Database/XML Replication through JPA</description>
+	<properties>
+		<module.parent>..</module.parent>
+		<jmockit.version>1.39</jmockit.version>
+	</properties>
+	<build>
+		<plugins>
+		   <plugin>
+		      <artifactId>maven-surefire-plugin</artifactId>
+		      <version>2.21.0</version> <!-- or some other version -->
+		      <configuration>
+		         <argLine>
+		            -javaagent:${settings.localRepository}/org/jmockit/jmockit/${jmockit.version}/jmockit-${jmockit.version}.jar
+		         </argLine>
+		      </configuration>
+		    </plugin>
+			<plugin>
+				<artifactId>maven-jar-plugin</artifactId>
+				<version>2.3</version>
+				<configuration>
+					<archive>
+						<manifest>
+							<addClasspath>true</addClasspath>
+							<mainClass>de.tsl2.nano.replication.EntityReplication</mainClass>
+						</manifest>
+						<manifestEntries>
+							<Created-By>Thomas Schneider</Created-By>
+							<Application-Name>EntityReplication</Application-Name>
+							<Application-Source>${application.source}</Application-Source>
+							<Application-redirect>/download</Application-redirect>
+							<Permissions>all-permissions</Permissions>
+						</manifestEntries>
+					</archive>
+				</configuration>
+			</plugin>
+		</plugins>
+	</build>
+	<dependencies>
+		<!-- https://mvnrepository.com/artifact/org.hibernate/hibernate-entitymanager -->
+		<dependency>
+			<groupId>org.hibernate.javax.persistence</groupId>
+			<artifactId>hibernate-jpa-2.1-api</artifactId>
+			<version>1.0.0.Final</version>
+		</dependency>
+		<dependency>
+			<groupId>com.h2database</groupId>
+			<artifactId>h2</artifactId>
+			<version>1.4.196</version>
+		</dependency>
+		<dependency>
+			<groupId>org.hibernate</groupId>
+			<artifactId>hibernate-entitymanager</artifactId>
+			<version>4.3.11.Final</version>
+		</dependency>
+		<dependency>
+			<groupId>net.sf.tsl2nano</groupId>
+			<artifactId>tsl2.nano.core</artifactId>
+			<version>${project.version}</version>
+			<scope>test</scope>
+		</dependency>
+		<dependency>
+			<groupId>junit</groupId>
+			<artifactId>junit</artifactId>
+			<version>4.12</version>
+			<scope>test</scope>
+		</dependency>
+		<dependency>
+		    <groupId>org.jmockit</groupId>
+		    <artifactId>jmockit</artifactId>
+		    <version>${jmockit.version}</version>
+			<scope>test</scope>
+		</dependency>
+	</dependencies>
+</project>

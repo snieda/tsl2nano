@@ -73,6 +73,7 @@
 		<module>tsl2.nano.common</module>
 		<module>tsl2.nano.operation</module>
 		<module>tsl2.nano.descriptor</module>
+		<module>tsl2.nano.replication</module>
 		<module>tsl2.nano.serviceaccess</module>
 		<module>tsl2.nano.directaccess</module>
 		<module>tsl2.nano.ebeanprovider</module>

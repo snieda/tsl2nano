@@ -1,4 +1,4 @@
-package de.tsl2.nano.persistence.replication.jpa.serializer;
+package de.tsl2.nano.replication.serializer;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;

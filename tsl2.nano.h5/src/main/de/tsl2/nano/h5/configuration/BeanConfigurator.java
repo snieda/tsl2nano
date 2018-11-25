@@ -479,7 +479,7 @@ public class BeanConfigurator<T> implements Serializable {
         else
             attributeType = String.valueOf(attributeType.charAt(0)).trim();
         
-        attributeExpression = attributeType.length() > 0 && attributeType.charAt(0) == attributeExpression.charAt(0) ? attributeExpression : attributeType + attributeExpression;
+        attributeExpression = attributeType.length() > 0 && !Util.isEmpty(attributeExpression) && attributeType.charAt(0) == attributeExpression.charAt(0) ? attributeExpression : attributeType + attributeExpression;
         ExpressionDescriptor<Object> exDescr = new ExpressionDescriptor<>(def.getDeclaringClass(), attributeExpression);
         AttributeDefinition attr = def.addAttribute(exDescr.getName(), exDescr.toInstance(), null, null);
         attr.getPresentation().setType(IPresentable.TYPE_DEPEND);

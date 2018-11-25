@@ -14,6 +14,7 @@ import org.junit.Test;
 
 import de.tsl2.nano.action.IAction;
 import de.tsl2.nano.bean.BeanContainer;
+import de.tsl2.nano.bean.annotation.ConstraintValueSet;
 import de.tsl2.nano.bean.def.Bean;
 import de.tsl2.nano.bean.def.MethodAction;
 import de.tsl2.nano.bean.def.ValueGroup;
@@ -87,15 +88,17 @@ public class BeanConfiguratorTest {
                 args[0] = bconf;
                 for (int i = 1; i < args.length; i++) {
                     args[i] = BeanClass.createInstance(argumentTypes[i-1]);
+                    args[i] = ConstraintValueSet.transformEmptyToVoid(ma, i-1, args[i]);
                 }
                 ma.setParameter(args);
                 count++;
                 try {
                     ma.activate();
-                } catch (ManagedException e) {
+                } catch (Exception e) {
                     //OK, generic parameters not working - the test checkes not the action content!
-                    if (e.getMessage().contains("FileNotFoundException") || e.getMessage().contains("attribute Expression")
-                        || e.getMessage().contains("ClassNotFoundException")  || e.getMessage().contains("TableList"))
+                    String m = e.getMessage();
+                    if (m.contains("FileNotFoundException") || m.contains("attribute Expression") || m.contains("Void")
+                        || m.contains("ClassNotFoundException")  || m.contains("TableList"))
                         continue;
                     else
                         ManagedException.forward(e);

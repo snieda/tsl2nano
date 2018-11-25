@@ -304,8 +304,11 @@ public class NetUtil {
         }
         try {
             URI uri = URI.create(str);
-            if (isURL)
+            if (isURL) {
+            	if (!uri.isAbsolute())
+            		return false; //will be thrown on creating URL instance
                 uri.toURL();
+            }
             return str.contains(".") || str.contains("/");
         } catch (Exception e) {
             //ok, no url
