@@ -4,6 +4,7 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.lang.reflect.InvocationTargetException;
 import java.net.URL;
 import java.net.URLClassLoader;
 import java.nio.file.Files;
@@ -122,6 +123,13 @@ public class Util {
             return buffer.lines().collect(Collectors.joining("\n"));
         }
     }
+
+	public static void invoke(String call) throws IllegalAccessException, IllegalArgumentException, InvocationTargetException, NoSuchMethodException, SecurityException, ClassNotFoundException {
+        int div = call.lastIndexOf('.');
+        String clsName = call.substring(0, div);
+        String mthName = call.substring(div + 1);
+        Thread.currentThread().getContextClassLoader().loadClass(clsName).getMethod(mthName, new Class[0]).invoke(null);
+	}
 
 }
 

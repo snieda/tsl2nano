@@ -117,7 +117,6 @@ public class EntityReplication {
 			tmp.set(entityManagerFactory.createEntityManager());
 		}
 		ULog.log((System.currentTimeMillis() - start) + " ms");
-		
 		return tmp.get();
 	}
 	
@@ -345,21 +344,24 @@ public class EntityReplication {
 		}
 		String pers1 = args[0];
 		String pers2 = args[1];
-		EntityReplication repl = new EntityReplication(pers1, pers2);
-		Class cls = Thread.currentThread().getContextClassLoader().loadClass(args[2]);
-		boolean useHibernateReplication = Util.getProperty("use.hibernate.replication", Boolean.class);
-		assert pers2 != PERS_JNDI : "persistence-unit-2 must not be " + PERS_JNDI;
-		
-		Object[] ids = Arrays.copyOfRange(args, 3, args.length);
-		if (ids.length == 1 && ids[0].getClass().equals(String.class))
-			ids = ((String)ids[0]).split("[,;| ]");
-		log("starting replication with:" 
-				+ "\n\tpersistence-unit-1: " + pers1
-				+ "\n\tpersistence-unit-2: " + pers2
-				+ "\n\tentity-class      : " + cls
-				+ "\n\tentity-ids        : " + Arrays.toString(ids));
-		
+        String call;
 		try {
+	        if ((call = Util.getProperty("on.start.call", null, "")) != null)
+	                Util.invoke(call);
+			EntityReplication repl = new EntityReplication(pers1, pers2);
+			Class cls = Thread.currentThread().getContextClassLoader().loadClass(args[2]);
+			boolean useHibernateReplication = Util.getProperty("use.hibernate.replication", Boolean.class);
+			assert pers2 != PERS_JNDI : "persistence-unit-2 must not be " + PERS_JNDI;
+			
+			Object[] ids = Arrays.copyOfRange(args, 3, args.length);
+			if (ids.length == 1 && ids[0].getClass().equals(String.class))
+				ids = ((String)ids[0]).split("[,;| ]");
+			log("starting replication with:" 
+					+ "\n\tpersistence-unit-1: " + pers1
+					+ "\n\tpersistence-unit-2: " + pers2
+					+ "\n\tentity-class      : " + cls
+					+ "\n\tentity-ids        : " + Arrays.toString(ids));
+		
 	        Serializer ser;
 			if ((ser = getSerializer(pers1)) != null) {
 					repl.replicate(repl::strategyPersist, load(cls, ser, ids).toArray());
@@ -382,6 +384,10 @@ public class EntityReplication {
 			ULog.log("\nconsumed properties: " + Util.getConsumedProperties());
 			//TODO: store consumed properties
 			System.out.println("===============================================================================");
+            if (Util.getProperty("wait.on.finish", Boolean.class)) {
+                if (System.console() != null)
+                        System.console().readLine("Please press ENTER to shutdown Java VM: ");
+        }
 		}
 	}
 
