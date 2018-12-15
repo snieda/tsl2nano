@@ -13,6 +13,7 @@ import java.security.Provider;
 import java.security.SecureRandom;
 import java.security.Security;
 import java.security.spec.AlgorithmParameterSpec;
+import java.util.Base64;
 
 import javax.crypto.Cipher;
 import javax.crypto.CipherInputStream;
@@ -33,8 +34,6 @@ import de.tsl2.nano.core.util.ByteUtil;
 import de.tsl2.nano.core.util.FileUtil;
 import de.tsl2.nano.core.util.StringUtil;
 import de.tsl2.nano.core.util.Util;
-import sun.misc.BASE64Decoder;
-import sun.misc.BASE64Encoder;
 
 /**
  * simple java encryption. algorithms should have the format "algorithm/mode/padding". padding should be used encrypting
@@ -490,7 +489,7 @@ public class Crypt implements ISecure {
     }
 
     static String encodeBase64(byte[] raw) {
-        return new BASE64Encoder().encode(raw);
+        return Base64.getEncoder().encodeToString(raw);
     }
 
     static String hex(byte[] data) {
@@ -572,12 +571,7 @@ public class Crypt implements ISecure {
         
     }
     static byte[] decodeBase64(String encrypted) {
-        try {
-            return new BASE64Decoder().decodeBuffer(encrypted);
-        } catch (IOException e) {
-            ManagedException.forward(e);
-            return null;
-        }
+        return Base64.getDecoder().decode(encrypted);
     }
 
     private static final void log(String txt) {
