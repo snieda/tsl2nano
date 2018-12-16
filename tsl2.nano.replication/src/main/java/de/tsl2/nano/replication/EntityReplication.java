@@ -346,7 +346,7 @@ public class EntityReplication {
 		String pers2 = args[1];
         String call;
 		try {
-	        if ((call = Util.getProperty("on.start.call", null, "")) != null)
+	        if ((call = Util.getProperty("on.start.call", null, null)) != null)
 	                Util.invoke(call);
 			EntityReplication repl = new EntityReplication(pers1, pers2);
 			Class cls = Thread.currentThread().getContextClassLoader().loadClass(args[2]);
