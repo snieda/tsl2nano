@@ -4,8 +4,7 @@ import java.lang.instrument.Instrumentation;
 import java.lang.management.ManagementFactory;
 import java.lang.reflect.Method;
 
-import com.sun.tools.attach.VirtualMachine;
-
+import de.tsl2.nano.core.cls.BeanClass;
 import de.tsl2.nano.core.util.NumberUtil;
 
 /**
@@ -28,21 +27,25 @@ public class AttachAgent {
   }
 
   /**
-   * attaches the given agent to the current java vm
+   * attaches the given agent to the java vm given by vmPID
    * 
    * @param pathToAgentJar agent jar
    * @param agentClass agent class name
    * @param agentMethod optional agent method to call/check
-   * @param optional PID (OS process id of VM). if null, the current VM will be used
+   * @param optional vmPID (OS process id of VM). if null, the current VM will be used
    * @return if agent was loaded and - if agentClass and/or method was given, if it could be invoked
    */
-  public static boolean attachGivenAgentToThisVM(String pathToAgentJar, String agentClass, String agentMethod, String pid) {
+  public static boolean attachGivenAgentToThisVM(String pathToAgentJar, String agentClass, String agentMethod, String vmPID) {
     try {
-      pid = pid == null ? getPIDofCurrentVM() : pid;
-      VirtualMachine vm = VirtualMachine.attach(pid);
+      vmPID = vmPID == null ? getPIDofCurrentVM() : vmPID;
+      //do it by reflection - it's a direct call to a sun compiler class, that may not be available in other jdks
+//      VirtualMachine vm = VirtualMachine.attach(vmPID);
+      Object vm = BeanClass.call("com.sun.tools.attach.VirtualMachine", "attach", vmPID);
       log("attaching agent " + pathToAgentJar + " to VM " + vm + " : " + vm.toString());
-      vm.loadAgent(pathToAgentJar, "");
-      vm.detach();
+//      vm.loadAgent(pathToAgentJar, "");
+      BeanClass.call(vm, "loadAgent", new Class[] {String.class, String.class}, pathToAgentJar, "");
+      BeanClass.call(vm, "detach");
+//      vm.detach();
       if (agentClass != null)
         return isAgentLoaded(agentClass, agentMethod);
       else
@@ -67,9 +70,9 @@ public class AttachAgent {
    */
   public static boolean isAgentLoaded(String agentClass, String agentMethod) {
     try {
-      Class<?> cls = Class.forName("org.aspectj.weaver.loadtime.Agent");
+      Class<?> cls = Class.forName(agentClass); // "org.aspectj.weaver.loadtime.Agent"
       if (agentMethod != null) {
-        Method method = cls.getMethod("getInstrumentation");
+        Method method = cls.getMethod(agentMethod); // "getInstrumentation"
         Object instrumentation = method.invoke(null);
         if (instrumentation instanceof Instrumentation)
           log(instrumentation + ", initiated classes: " + ((Instrumentation)instrumentation).getInitiatedClasses(null).length);

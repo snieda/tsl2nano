@@ -62,6 +62,7 @@
 			<version>1.8.0</version>
 			<scope>system</scope>
 			<systemPath>${java.home}/../lib/tools.jar</systemPath>
+			<optional>true</optional>
 		</dependency>
 		<dependency>
 			<groupId>net.sf.tsl2nano</groupId>
