@@ -1057,6 +1057,11 @@ public class AttributeDefinition<T> implements IAttributeDefinition<T> {
     }
 
     @Override
+	public IAttribute<?> getAttribute(String name) {
+		return BeanDefinition.getBeanDefinition(getType()).getAttribute(name);
+	}
+
+    @Override
     public String toString() {
         return attribute != null ? attribute.toString() : super.toString();
     }

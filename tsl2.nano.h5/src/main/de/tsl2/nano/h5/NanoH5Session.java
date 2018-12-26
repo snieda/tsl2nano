@@ -631,7 +631,7 @@ public class NanoH5Session implements ISession<BeanDefinition>, Serializable, IL
 
         refreshCurrentBeanValues(parms);
 
-        if (nav.current() instanceof Controller) { //TODO: do we need this anymore?
+        if (nav.current() instanceof Controller) {
             Controller ctrl = (Controller) nav.current();
             Set<String> keys = parms.keySet();
             for (String k : keys) {

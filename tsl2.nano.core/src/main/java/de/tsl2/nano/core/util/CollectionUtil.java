@@ -117,6 +117,9 @@ public class CollectionUtil {
         return splitted;
     }
     
+    public static <T> T[] copyOfRange(T[] original, int from) {
+    	return copyOfRange(original, from, original.length);
+    }
     public static <T> T[] copyOfRange(T[] original, int from, int to) {
         return (T[]) copyOfRange(original, from, to, original.getClass());
     }

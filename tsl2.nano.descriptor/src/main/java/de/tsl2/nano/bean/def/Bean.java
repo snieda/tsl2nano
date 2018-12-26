@@ -257,7 +257,7 @@ public class Bean<T> extends BeanDefinition<T> {
      */
     public Object getValue(String... path) {
         if (isVirtual()) {
-            return getAttribute(path[0]).getValue();
+            return getAttribute(path[0]).getValue(); //TODO: no recursion? why?
         } else {
             return BeanClass.getValue(instance, path);
         }

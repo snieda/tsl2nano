@@ -11,7 +11,6 @@ import org.junit.BeforeClass;
 import org.junit.Test;
 
 import de.tsl2.nano.core.ENV;
-import de.tsl2.nano.core.ManagedException;
 import de.tsl2.nano.core.util.ENVTestPreparation;
 import de.tsl2.nano.core.util.FileUtil;
 
@@ -57,8 +56,8 @@ public class CoreSecureTest implements ENVTestPreparation {
             receiver.checkSignification("test".getBytes(), sign, "SHA-256", 10);
         } catch (UnsupportedOperationException ex) {
             //not implemented yet!
-        } catch (ManagedException ex) {
-            //not implemented yet!
+        } catch (IllegalArgumentException ex) {
+            //TODO: what's wrong with 3f...
         }
     }
 

@@ -42,6 +42,7 @@ import de.tsl2.nano.core.log.LogFactory;
 import de.tsl2.nano.core.util.AnnotationProxy;
 import de.tsl2.nano.core.util.BitUtil;
 import de.tsl2.nano.core.util.ByteUtil;
+import de.tsl2.nano.core.util.CollectionUtil;
 import de.tsl2.nano.core.util.ObjectUtil;
 import de.tsl2.nano.core.util.StringUtil;
 import de.tsl2.nano.core.util.Util;
@@ -716,6 +717,23 @@ public class BeanClass<T> implements Serializable {
         getAttribute(attributeName, true).setValue(instance, value);
     }
 
+    /**
+     * @param attributePath can be given as e.g: myAttr1.myAttr2 or as String array MYATTR1, MYATTR2
+     * @return last attribute in given path
+     */
+    public IAttribute getAttributePath(String... attributePath) {
+    	if (Util.isEmpty(attributePath))
+    		return null;
+    	if (attributePath.length == 1) //if attributePath was not given as array but as 'myattr1.myaatr2'
+    		attributePath = attributePath[0].split("\\.");
+    	
+		IAttribute attr = getAttribute(attributePath[0]);
+    	if (attributePath.length == 1) {
+			return attr;
+		}
+    	return new BeanClass(attr.getType()).getAttributePath(CollectionUtil.copyOfRange(attributePath, 1));
+    }
+    
     /**
      * creates a new instance through the given arguments
      * 

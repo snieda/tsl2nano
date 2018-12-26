@@ -181,12 +181,12 @@ public class Composition<C> {
         if (attrParent != null)
             attrParent.setValue(child, parent.getInstance());
         
-//        if (parent.isMultiValue() && parent.getValue() != null)
-//        	getParentContainer().add(child);
-//        else if (parent.getType().isAssignableFrom(child.getClass()))
-//        	parent.setValue(child);
-//        else
-//        	;//TODO: throw new ....
+        if (parent.isMultiValue() && parent.getValue() != null) 
+        	getParentContainer().add(child);
+        else if (parent.getType().isAssignableFrom(child.getClass()))
+        	parent.setValue(child);
+        else
+        	;//TODO: throw new ....
         return child;
     }
 

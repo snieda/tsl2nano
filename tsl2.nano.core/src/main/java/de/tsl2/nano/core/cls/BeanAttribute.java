@@ -578,7 +578,13 @@ public class BeanAttribute<T> implements IAttribute<T> {
         return AnnotationProxy.getAnnotation(f.getAnnotations(), annotationClass);
     }
 
-    /**
+    
+    @Override
+	public IAttribute<?> getAttribute(String name) {
+		return BeanClass.getBeanClass(getType()).getAttribute(name);
+	}
+
+	/**
      * {@inheritDoc}
      */
     @Override
