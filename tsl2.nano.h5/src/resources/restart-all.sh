@@ -8,12 +8,18 @@ echo ======================================================
 #    having the executable script 'runasservice.sh' 
 ###########################################################
 
+# activate this block and de-activate that in your projects run.sh to admin the program-version centralized
+export NAME=../tsl2.nano.h5-
+export VERSION=${project.version}
+export EXTENSION="-standalone"
+
 for d in $(ls -d */)
 do
 	if [[ -f $d"runasservice.sh" ]]; then
 		cd $d
 		./runasservice.sh stop
 		sleep 2
+		mv nohup.out nohup.$(date -d "today" +"%Y%m%d%H%M").sik
 		if [[ $1 != "stop" ]]; then
 			./runasservice.sh start &Z
 			echo "==> $d RESTARTET"
@@ -38,12 +44,13 @@ echo ======================================================
 
 read -p "start tail for all processes? [y|N]: " dotail
 
-if [[ "$dotail" ]]; then
-	for d in $(ls -d */)
-	do
-		if [[ -f $d"nohup.out" ]]; then
-			TAILFILES=$TAILFILES $d"nohup.out"
-		fi
-	done
-	tail -F $TAILFILES
-fi
+#if [[ "$dotail" ]]; then
+#	for d in $(ls -d */)
+#	do
+#		if [[ -f $d"nohup.out" ]]; then
+#			TAILFILES=$TAILFILES $d"nohup.out"
+#		fi
+#	done
+#	tail -F $TAILFILES
+#fi
+tail -F `find . -name *.out`
