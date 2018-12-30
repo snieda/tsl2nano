@@ -11,6 +11,7 @@ package de.tsl2.nano.h5.collector;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -34,8 +35,10 @@ import de.tsl2.nano.bean.def.IAttributeDefinition;
 import de.tsl2.nano.bean.def.Presentable;
 import de.tsl2.nano.bean.def.SecureAction;
 import de.tsl2.nano.core.ENV;
-import de.tsl2.nano.core.cls.IAttribute;
+import de.tsl2.nano.core.ManagedException;
+import de.tsl2.nano.core.exception.Message;
 import de.tsl2.nano.core.util.MapUtil;
+import de.tsl2.nano.core.util.StringUtil;
 import de.tsl2.nano.execution.IPRunnable;
 import de.tsl2.nano.incubation.specification.Pool;
 
@@ -233,19 +236,35 @@ public class Compositor<COLLECTIONTYPE extends Collection<T>, T> extends BeanCol
                     
                     BeanValue parent = (BeanValue) Bean.getBean(base).getAttribute(baseAttribute);
                     //on manyTomany targetAttribute must not be null
-                    IAttribute<?> targetAttr = targetAttribute != null ? BeanDefinition.getBeanDefinition(targetType).getAttribute(targetAttribute) : null;
+                    IAttributeDefinition<?> targetAttr = targetAttribute != null ? BeanDefinition.getBeanDefinition(targetType).getAttribute(targetAttribute) : null;
                     Composition comp = new Composition(parent, targetAttr);
                     Object resolver = comp.createChildOnTarget(item);
                     if (!forceUserInteraction && Bean.getBean(item).isValid(null, true)) {
-                        resolver = (T) Bean.getBean(resolver).save();
+                        resolver = (T) persistResolverIfNotCascading(targetAttr, resolver);
                         item = (T) Bean.getBean(item).save();
                         getCurrentData().add(item);
                         return (T) _this;//the type T should be removed
-                    } else if (targetAttr != null && !Collection.class.isAssignableFrom(targetAttr.getType()))
-                        if (Bean.getBean(resolver).isValid(null, true))
-                            Bean.getBean(resolver).save();
+                    } else if (targetAttr != null && !Collection.class.isAssignableFrom(targetAttr.getType())) {
+                        persistResolverIfNotCascading(targetAttr, resolver);
+                    }
                     getCurrentData().add(item);
                     return item;
+                }
+
+                private Object persistResolverIfNotCascading(IAttributeDefinition<?> targetAttr, Object resolver) {
+                    if (targetAttr == null || !targetAttr.cascading()) {
+                        HashMap<BeanValue<?>, String> errors = new HashMap<>();
+                        if (Bean.getBean(resolver).isValid(errors, true)) {
+                            resolver = Bean.getBean(resolver).save();
+                        } else {
+                            String msg = StringUtil.toFormattedString(errors, -1, true);
+                            if (ENV.get("app.mode.strict", false))
+                                throw new ManagedException(msg);
+                            else
+                                Message.send(msg);
+                        }
+                    }
+                    return resolver;
                 }
 
                 @Override
@@ -299,6 +318,11 @@ public class Compositor<COLLECTIONTYPE extends Collection<T>, T> extends BeanCol
         this.name = createName(targetType, parentType);
     }
 
+    public T getParentInstance(Object targetInstance) {
+        Object v = getAttribute(targetAttribute).getValue(targetInstance);
+        return (T) Bean.getBean(v).getAttribute(parentType).getValue(v);
+    }
+    
     @Override
     public <B extends BeanDefinition<T>> B onActivation(Map context) {
         compositorActions = null;

@@ -386,7 +386,7 @@ public class Bean<T> extends BeanDefinition<T> {
             if ((refresh && !(status = beanValue.isValid(beanValue.getValue())).ok())
                 || (!refresh && !beanValue.getStatus().ok())) {
                 if (messages != null)
-                    messages.put(beanValue, beanValue.getStatus().message());
+                    messages.put(beanValue, beanValue.getStatus().toString());
                 if (refresh)
                     beanValue.status = status;
                 if (!beanValue.status.ok()) {

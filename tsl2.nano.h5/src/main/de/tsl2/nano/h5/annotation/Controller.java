@@ -34,4 +34,7 @@ public @interface Controller {
     String increaseAttribute() default "";
     int increaseCount() default 1;
     int increaseStep() default 1;
+    boolean showText() default false;
+    boolean transparent() default true;
+    boolean creationOnly() default false;
 }

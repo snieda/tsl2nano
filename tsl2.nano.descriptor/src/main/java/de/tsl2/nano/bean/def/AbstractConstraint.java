@@ -12,6 +12,7 @@ package de.tsl2.nano.bean.def;
 import java.io.Serializable;
 import java.text.Format;
 import java.util.Collection;
+import java.util.Date;
 import java.util.LinkedList;
 
 import org.apache.commons.logging.Log;
@@ -86,7 +87,7 @@ public abstract class AbstractConstraint<T> implements IConstraint<T>, Serializa
                     status = Status.illegalArgument(name, fval, " greater than " + min);
                 } else if ((max = getMaximum()) != null && max.compareTo(value) < 0) {
                     status = Status.illegalArgument(name, fval, " lower than " + max);
-                } else if ((length = getLength()) > 0 && fval.length() > length) {
+                } else if ((length = getLength()) > 0 && (!(value instanceof Date) && fval.length() > length)) {
                     status = Status.illegalArgument(name, fval, " a maximum-length of " + length);
                 } else if (getAllowedValues() != null && !getAllowedValues().contains(parse(fval))) {
                     status = Status.illegalArgument(name, fval, " one of " + getAllowedValues());

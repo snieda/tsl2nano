@@ -5,4 +5,14 @@
 
 <hibernate-reverse-engineering>
   <schema-selection match-schema="PUBLIC"/>
+  <!-- 
+	<table name="charge" class="EntityName">
+		<foreign-key constraint-name="fk_EntityName_id">
+			<column-ref local-column="id" foreign-column="foreignId" />
+			<set property="nameOfListProperty" exclude="false" cascade="all" />
+	 				//cascade="delete-orphan"
+					//cascade="save-update, delete"
+ 		</foreign-key>
+	</table> -->
+
 </hibernate-reverse-engineering>

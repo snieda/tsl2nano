@@ -397,7 +397,7 @@ public class BeanConfigurator<T> implements Serializable {
             int increaseStep
             ) {
         createControllerBean(notnull(baseType), notnull(baseAttribute), nullable(targetType), notnull(targetAttribute), nullable(iconAttribute), 
-            nullable(increaseAttribute), increaseCount, increaseStep);
+            nullable(increaseAttribute), increaseCount, increaseStep, false, true, false); //TODO: let the user configure the presentationvalues 
         Bean.clearCache();
     }
 
@@ -411,8 +411,9 @@ public class BeanConfigurator<T> implements Serializable {
     }
 
     public Controller createControllerBean(String baseType, String baseAttribute, String targetType, String targetAttribute, String iconAttribute,
-            String increaseAttribute, int increaseCount, int increaseStep) {
+            String increaseAttribute, int increaseCount, int increaseStep, boolean showText, boolean transparent, boolean creationOnly) {
         Controller controller = createCompositorBean(Controller.class, "icons/cascade.png", baseType, baseAttribute, targetType, targetAttribute, iconAttribute);
+        controller.setPresentationValues(showText, transparent, creationOnly);
         if (!Util.isEmpty(increaseAttribute)) {
             increaseAttribute = StringUtil.substring(increaseAttribute, ".", null, true);
             controller.setItemProvider(new Increaser(increaseAttribute, increaseCount, increaseStep));

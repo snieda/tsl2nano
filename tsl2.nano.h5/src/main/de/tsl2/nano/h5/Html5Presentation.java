@@ -1121,8 +1121,9 @@ public class Html5Presentation<T> extends BeanPresentationHelper<T> implements I
             Controller<?, T> tableDescriptor,
             Collection<T> data) {
         tabIndex = 0;
+        LinkedList<T> collectedItems = new LinkedList<>();
         for (T item : data) {
-            addActionRow(grid, tableDescriptor, item);
+            addActionRow(grid, tableDescriptor, item, collectedItems);
         }
         Element footer = appendElement(grid, "tfoot");
         Element footerRow = appendTag(footer, TABLE(TAG_ROW));
@@ -1778,8 +1779,13 @@ public class Html5Presentation<T> extends BeanPresentationHelper<T> implements I
         return row;
     }
 
-    protected Element addActionRow(Element grid, Controller<?, T> controller, T item) {
-        Bean<T> itemBean = controller.getBean(item);
+    protected Element addActionRow(Element grid, Controller<?, T> controller, T item, List<T> collectedItems) {
+        Bean<T> itemBean = controller.getBean(item, collectedItems);
+        boolean hidden = (controller.isCreationOnly() && !controller.showText() && itemBean.getActions().size() == 0);
+        if (hidden) {//hidden seems not to work on chrome and edge
+            tabIndex++;
+            return null;
+        }
         Element row =
             appendTag(grid,
                 TABLE(TAG_ROW,
@@ -1790,18 +1796,22 @@ public class Html5Presentation<T> extends BeanPresentationHelper<T> implements I
                     ATTR_FORMTARGET,
                     VAL_FRM_SELF,
                     ATTR_WIDTH, VAL_100PERCENT,
-                    ATTR_BGCOLOR, itemBean.getPresentable().layout(ATTR_BGCOLOR)));
+                    ATTR_BGCOLOR, itemBean.getPresentable().layout(ATTR_BGCOLOR),
+                    enableFlag(ATTR_HIDDEN, hidden) //seems not to work on chrome and edge
+                    ));
 
 
         Collection<IAction> actions = itemBean.getActions();
         //first cell: bean reference
-        Element cell = appendElement(row, TABLE(TAG_CELL)[0], content(controller.showText() || actions.size() == 0 ? itemBean.toString() : ""));
+        Element cell;
+        if (controller.showText() || actions.size() == 0)
+            cell = appendElement(row, TABLE(TAG_CELL)[0], content(itemBean.toString()));
         for (IAction a : actions) {
             cell = appendTag(row, TABLE(TAG_CELL));
             Element btn = createAction(cell, a);
             btn.setAttribute(ATTR_NAME, Controller.createActionName(tabIndex, a.getId()));
             btn.setAttribute(ATTR_STYLE, ENV.get("layout.controller.action.style", 
-                STYLE_BACKGROUND_TRANSPARENT + style(STYLE_COLOR, COLOR_WHITE) + STYLE_ALIGN_CENTER + style(ATTR_WIDTH, VAL_100PERCENT)));
+                STYLE_BACKGROUND_TRANSPARENT + style(STYLE_COLOR, COLOR_WHITE) + style(ATTR_WIDTH, VAL_100PERCENT)));
             addPicture(btn, item.getClass(), item);
         }
         return row;

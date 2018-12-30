@@ -14,7 +14,7 @@ public class ControllerAnnotationFactory implements AnnotationFactory<BeanDefini
         Class<? extends Serializable> targetType = !isDefaultTargetType(a) ? a.targetType() : instance.getClazz();
         BeanConfigurator configurator = (BeanConfigurator) BeanConfigurator.create(instance.getClazz()).getInstance();
         configurator.createControllerBean(a.baseType().getName(), a.baseAttribute(), targetType.getName(), a.targetAttribute(), a.iconAttribute(),
-            a.increaseAttribute(), a.increaseCount(), a.increaseStep());
+            a.increaseAttribute(), a.increaseCount(), a.increaseStep(), a.showText(), a.transparent(), a.creationOnly());
     }
 
     private boolean isDefaultTargetType(Controller a) {

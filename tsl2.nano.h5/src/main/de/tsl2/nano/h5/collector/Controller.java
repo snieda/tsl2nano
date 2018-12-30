@@ -60,6 +60,11 @@ public class Controller<COLLECTIONTYPE extends Collection<T>, T> extends Composi
     @Transient
     boolean isTransparent=true;
     
+    /** if you want only one creation button/action per parent-instance, this should be true. 
+     * if you want to provide different actions on one bean, this should be false */
+    @Transient
+    boolean creationOnly=false;
+    
     transient List<IAttribute> attributes;
 
     /**
@@ -106,23 +111,36 @@ public class Controller<COLLECTIONTYPE extends Collection<T>, T> extends Composi
         return createBeanDefName("Controller", beanDef, baseType);
     }
 
+    public Bean<T> getBean(T instance) {
+        return getBean(instance, null);
+    }
     /**
      * gets the defined bean (see {@link #name} for the given instance.
      * 
      * @param instance
+     * @param collected (optional) to add actions only once per instance
      * @return bean holding instance
      */
-    public Bean<T> getBean(T instance) {
+    public Bean<T> getBean(T instance, Collection<T> collected) {
         Bean<T> bean = BeanUtil.copy((Bean<T>) Bean.getBean(name));
+        bean.setValueExpression(getValueExpression());
+        bean.setInstance(instance);
         bean.setAddSaveAction(false);
         //if controlling from baseType (annotation on baseType), we want exactly one creation-action
-        if (getDeclaringClass().equals(parentType)) {
-            Collection<IAction> compActions = super.getActions();
-            String compositorActionId = createCompositorActionId(instance);
-            for (IAction a : compActions) {
-                if (a.getId().equals(compositorActionId)) {
-                    bean.setActions(Arrays.asList(a));
-                    break;
+        if (getDeclaringClass().equals(parentType) || isCreationOnly()) {
+            if (!getDeclaringClass().equals(parentType)) {
+                instance = getParentInstance(instance);
+            }
+            if (collected == null || !collected.contains(instance)) {
+                if (collected != null) //only to avoid adding the same actions on several instances!
+                    collected.add(instance);
+                Collection<IAction> compActions = super.getActions();
+                String compositorActionId = createCompositorActionId(instance);
+                for (IAction a : compActions) {
+                    if (a.getId().equals(compositorActionId)) {
+                        bean.setActions(Arrays.asList(a));
+                        break;
+                    }
                 }
             }
         } else {//on each row get all compositor actions
@@ -135,8 +153,6 @@ public class Controller<COLLECTIONTYPE extends Collection<T>, T> extends Composi
                     it.remove();
             }
         }
-        bean.setValueExpression(getValueExpression());
-        bean.setInstance(instance);
         return bean;
     }
 
@@ -228,5 +244,26 @@ public class Controller<COLLECTIONTYPE extends Collection<T>, T> extends Composi
     }
     public boolean isTransparent() {
         return isTransparent;
+    }
+
+    public boolean isCreationOnly() {
+        return creationOnly;
+    }
+
+    public void setShowText(boolean showText) {
+        this.showText = showText;
+    }
+
+    public void setTransparent(boolean isTransparent) {
+        this.isTransparent = isTransparent;
+    }
+
+    public void setCreationOnly(boolean creationOnly) {
+        this.creationOnly = creationOnly;
+    }
+    public void setPresentationValues(boolean showText, boolean transparent, boolean creationOnly) {
+        setShowText(showText);
+        setTransparent(transparent);
+        setCreationOnly(creationOnly);
     }
 }
