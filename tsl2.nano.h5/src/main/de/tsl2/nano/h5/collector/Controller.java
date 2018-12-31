@@ -266,4 +266,9 @@ public class Controller<COLLECTIONTYPE extends Collection<T>, T> extends Composi
         setTransparent(transparent);
         setCreationOnly(creationOnly);
     }
+    @Override
+    protected long count() {
+        //to guarantee an automatic search in onActivation()
+        return 0;
+    }
 }

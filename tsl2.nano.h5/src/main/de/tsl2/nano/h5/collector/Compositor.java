@@ -225,20 +225,24 @@ public class Compositor<COLLECTIONTYPE extends Collection<T>, T> extends BeanCol
                 public T action() throws Exception {
                     getSelectionProvider().getValue().clear();
                     getSelectionProvider().getValue().add(preparedComposition);
-                    T item = targetAttribute == null ? createItem(preparedComposition) : (T) BeanCollector.getBeanCollector((Class)targetType).createItem(preparedComposition);
+                    BeanCollector c = targetAttribute == null ? Compositor.this : BeanCollector.getBeanCollector((Class)targetType);
+                    T item = (T) c.createItem(preparedComposition);
                     BeanContainer.initDefaults(item);
-                    setDefaultValues(item, true);
-
-                    //fill context parameters
-                    Object[] pars = getParameter();
-                    if (pars != null)
-                        fillContext(item, pars);
-                    
+                    if (targetAttribute == null) {
+                        setDefaultValues(item, true);
+    
+                        //fill context parameters
+                        Object[] pars = getParameter();
+                        if (pars != null)
+                            fillContext(item, pars);
+                    }
                     BeanValue parent = (BeanValue) Bean.getBean(base).getAttribute(baseAttribute);
                     //on manyTomany targetAttribute must not be null
-                    IAttributeDefinition<?> targetAttr = targetAttribute != null ? BeanDefinition.getBeanDefinition(targetType).getAttribute(targetAttribute) : null;
+                    IAttributeDefinition<?> targetAttr = targetAttribute != null ? c.getAttribute(targetAttribute) : null;
                     Composition comp = new Composition(parent, targetAttr);
                     Object resolver = comp.createChildOnTarget(item);
+                    if (resolver == item) //yes we need direct instance comparing with '=='
+                        resolver = base;
                     if (!forceUserInteraction && Bean.getBean(item).isValid(null, true)) {
                         resolver = (T) persistResolverIfNotCascading(targetAttr, resolver);
                         item = (T) Bean.getBean(item).save();
@@ -257,6 +261,7 @@ public class Compositor<COLLECTIONTYPE extends Collection<T>, T> extends BeanCol
                         if (Bean.getBean(resolver).isValid(errors, true)) {
                             resolver = Bean.getBean(resolver).save();
                         } else {
+                            LOG.error("couldn't persist resolver of type " + resolver.getClass() + " for composition target " + targetAttr);
                             String msg = StringUtil.toFormattedString(errors, -1, true);
                             if (ENV.get("app.mode.strict", false))
                                 throw new ManagedException(msg);

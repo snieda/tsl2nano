@@ -17,6 +17,8 @@ import java.util.Collection;
 import java.util.UUID;
 
 import javax.ejb.Stateless;
+import javax.persistence.Entity;
+import javax.persistence.MappedSuperclass;
 import javax.persistence.NamedNativeQueries;
 import javax.persistence.NamedNativeQuery;
 import javax.persistence.NamedQueries;
@@ -118,7 +120,8 @@ public class NamedQueryServiceBean extends AbstractStatelessServiceBean implemen
      * @return true, if no table is bound to entity
      */
     protected <T> boolean isVirtualEntity(Class<T> beanType) {
-        return !beanType.isAnnotationPresent(Table.class);
+        return !beanType.isAnnotationPresent(Table.class) && !beanType.isAnnotationPresent(Entity.class) 
+                && !beanType.isAnnotationPresent(MappedSuperclass.class);
     }
 
     /**

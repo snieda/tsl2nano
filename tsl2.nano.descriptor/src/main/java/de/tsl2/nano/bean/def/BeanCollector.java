@@ -312,7 +312,7 @@ public class BeanCollector<COLLECTIONTYPE extends Collection<T>, T> extends Bean
         }
 	}
 
-    private long count() {
+    protected long count() {
         long count = -1;
         try {
             count =

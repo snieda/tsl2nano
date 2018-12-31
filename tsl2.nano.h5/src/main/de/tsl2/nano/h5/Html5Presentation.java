@@ -651,7 +651,7 @@ public class Html5Presentation<T> extends BeanPresentationHelper<T> implements I
 
         Element panel =
             appendElement(parent, TAG_DIV, ATTR_STYLE,
-                (interactive ? ENV.get("layout.page.data.style", "overflow: auto; height: 70%;") : null));
+                (interactive ? ENV.get("layout.page.data.style", "overflow: auto; height: 70vh;") : null));
         createContentPanel(session, panel, bean, interactive, ENV.get("layout.page.data.fullwidth", false));
 
         if (isRoot) {
