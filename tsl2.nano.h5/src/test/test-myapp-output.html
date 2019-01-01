@@ -14,7 +14,7 @@
  * websocket client implementation.
  */
 var socket = new WebSocket(
-		'ws://' + window.document.location.hostname + ':61082');
+		'ws://' + window.document.location.hostname + ':62041');
 console.log('websocket created:' + socket);
 
 socket.onopen = function() {
@@ -307,7 +307,7 @@ document.addEventListener('ondblclick', function(e){
 <table border="0" frame="box" id="page.header.table" sortable="" width="100%">
 <tbody>
 <tr style="background-image: url(icons/spe.jpg);">
-<td><a href="https://sourceforge.net/p/tsl2nano/wiki/"><img src="icons/beanex-logo-micro.jpg" title="Framework Version: tsl2.nano.h5-2.1.5-SNAPSHOT-2438-13-10-2018 17:41-d"></a></td><td>
+<td><a href="https://sourceforge.net/p/tsl2nano/wiki/"><img src="icons/beanex-logo-micro.jpg" title="Framework Version: tsl2.nano.h5-2.2.1-SNAPSHOT-2438-31-12-2018 19:29-d"></a></td><td>
 <h3 align="center" style="display: inline; ">Status Info</h3>
 </td><td align="end">
 <form action="?" method="post" style="display: inline; ">
@@ -328,7 +328,7 @@ document.addEventListener('ondblclick', function(e){
 </table>
 <div id="glasspane" style="background: transparent;z-index:1001;">
 <form action="?" autocomplete="" id="page.form" method="post">
-<div style="overflow: auto; height: 70%;">
+<div style="overflow: auto; height: 70vh;">
 <details open="">
 <summary accesskey="V" align="left" style="color: #6666FF;" title="ALT+V">StatusInfo</summary>
 <table align="center" border="0" class="fieldpanel" frame="box" id="field.panel" sortable="" style="background-image: url(icons/art029.jpg);padding:6px;-webkit-border-radius:6px;-moz-border-radius:6px;border-radius:6px;">
@@ -336,21 +336,21 @@ document.addEventListener('ondblclick', function(e){
 <tr>
 <td class="beanfieldlabel" id="statusInfo.message.label" style="color: #0000cc; " width="250">Message</td><td>
 <table>
-<input align="start" autofocus="autofocus" class="beanfieldinput" disabled id="statusInfo.message" max="" maxlength="2147483647" min="" name="message" pattern="[\x00-\xFF &euro;]{0,5000}" readonly size="50" style="background-color: rgba(247,247,247,.5);" tabindex="2" title="statusInfo.message" type="text" value="test.workflow finished with status: OK{startedAt: 2018-10-13 19:43:02.281, endedAt: 2018-10-13 19:43:03.782}" width="50">
+<input align="start" autofocus="autofocus" class="beanfieldinput" disabled id="statusInfo.message" max="" maxlength="2147483647" min="" name="message" pattern="[\x00-\xFF &euro;]{0,5000}" readonly size="50" style="background-color: rgba(247,247,247,.5);" tabindex="2" title="statusInfo.message" type="text" value="test.workflow finished with status: OK{startedAt: 2018-12-31 20:38:35.487, endedAt: 2018-12-31 20:38:36.51}" width="50">
 </table>
 </td>
 </tr>
 <tr>
 <td class="beanfieldlabel" id="statusInfo.startedAt.label" style="color: #0000cc; " width="250">Started At</td><td>
 <table>
-<input align="start" class="beanfieldinput" disabled id="statusInfo.startedAt" max="" maxlength="2147483647" min="" name="startedAt" pattern="[0-3]\d\.[0-1]\d(\.[1-2]\d\d\d)?( [0-2]\d\:[0-5]\d(\:[0-5]\d)?)?" readonly size="50" style="background-color: rgba(247,247,247,.5);" tabindex="3" title="statusInfo.startedAt" type="date" value="2018-10-13" width="50">
+<input align="start" class="beanfieldinput" disabled id="statusInfo.startedAt" max="" maxlength="2147483647" min="" name="startedAt" pattern="[0-3]\d\.[0-1]\d(\.[1-2]\d\d\d)?( [0-2]\d\:[0-5]\d(\:[0-5]\d)?)?" readonly size="50" style="background-color: rgba(247,247,247,.5);" tabindex="3" title="statusInfo.startedAt" type="date" value="2018-12-31" width="50">
 </table>
 </td>
 </tr>
 <tr>
 <td class="beanfieldlabel" id="statusInfo.endedAt.label" style="color: #0000cc; " width="250">Ended At</td><td>
 <table>
-<input align="start" class="beanfieldinput" disabled id="statusInfo.endedAt" max="" maxlength="2147483647" min="" name="endedAt" pattern="[0-3]\d\.[0-1]\d(\.[1-2]\d\d\d)?( [0-2]\d\:[0-5]\d(\:[0-5]\d)?)?" readonly size="50" style="background-color: rgba(247,247,247,.5);" tabindex="4" title="statusInfo.endedAt" type="date" value="2018-10-13" width="50">
+<input align="start" class="beanfieldinput" disabled id="statusInfo.endedAt" max="" maxlength="2147483647" min="" name="endedAt" pattern="[0-3]\d\.[0-1]\d(\.[1-2]\d\d\d)?( [0-2]\d\:[0-5]\d(\:[0-5]\d)?)?" readonly size="50" style="background-color: rgba(247,247,247,.5);" tabindex="4" title="statusInfo.endedAt" type="date" value="2018-12-31" width="50">
 </table>
 </td>
 </tr>
@@ -379,7 +379,7 @@ RequestID: 1">SA  <p class="tooltip">Subjekt:
 	Principal: Role:  admin
 
 RequestID: 1</p>
-</i><img src="icons/properties.png"><b color="#0000FF">Online  </b><i color="#000000">00:00 Min  </i><img src="icons/properties.png"><b color="#0000FF">Zeit  </b><i color="#000000">2018 19:43:02  </i><img src="icons/properties.png"><b color="#0000FF">Sitzung  </b><i color="#000000" title="SA (items:  [0]: 
+</i><img src="icons/properties.png"><b color="#0000FF">Online  </b><i color="#000000">00:00 Min  </i><img src="icons/properties.png"><b color="#0000FF">Zeit  </b><i color="#000000">2018 20:38:35  </i><img src="icons/properties.png"><b color="#0000FF">Sitzung  </b><i color="#000000" title="SA (items:  [0]: 
 )">Workflow  <p class="tooltip">SA (items:  [0]: 
 )</p>
 </i><img src="icons/properties.png"><b color="#0000FF">Anforderung  </b><i color="#000000">0 Sec 39 KB  </i><img src="icons/properties.png"><progress hidden="true" id="progressbar"></progress>
