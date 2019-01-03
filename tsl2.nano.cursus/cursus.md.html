@@ -58,12 +58,35 @@ Activated change events may be deactivated through the processor:
 
 ## JPA Entities
 
-For each element of Cursus it exists a jpa entity with a name starting with 'E'. Additionally an _EProcess_ (can start the Processor) and an _EProcessLog_ are defined. Each _EProcess_ needs a date-period for the change event descriptors to respect.
+For each element of Cursus exists a jpa entity with a name starting with 'E'. Additionally an _EProcess_ (can start the Processor) and an _EProcessLog_ are defined. Each _EProcess_ needs a date-period for the change event descriptors to respect.
 
 To define a full change event descriptor (_EConsilium_) you need to crawl through:
 
 EConsilium -> EExsecutio -> EMutatio -> ERes
-  
+
+## Creating a path to the desired value to be changed
+
+A Mutatio (change) describes a path starting at the root object to the value to be changed
+
+The rules for the path are described in the class _ValuePath_:
+
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+ 1. customer.address[first].city
+ 2. customer.address[0].city                        <- the first address
+ 3. customer.address.city                           <- the first address
+ 4. customer.address[last].street                   <- the last address
+ 5. customer.address[-1].code                       <- the last address
+ 6. customer.address[street=berlinerstrasse].city
+ 7. customer.address[new].city                      <- create a new address
+ 8. customer.address[?street=berlinerstrasse].city  <- searches for given address, if not found, create a new one
+ 9. customer.address[?2].city                       <- find the third address, or if not existing, create a new one 
+ 10 customer.address[?].city                        <- find the first address, or if not existing, create a new one 
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+## Examples
+
+To see a simple example for a financial organization with Contracts, Partners and Accounts see the junit test *CursusTests*.
+
 ## Changelog
 
  Version | Date       | Description

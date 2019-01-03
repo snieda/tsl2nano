@@ -11,7 +11,6 @@ import de.tsl2.nano.incubation.repeat.IChange;
 import de.tsl2.nano.incubation.repeat.ICommand;
 import tsl2.nano.cursus.effectus.Effectree;
 import tsl2.nano.cursus.effectus.Effectus;
-import tsl2.nano.cursus.persistence.ERuleEffectus;
 
 /**
  * The command that do changes on an instance path. This class should be overwritten to implement specific change commands.

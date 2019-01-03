@@ -99,6 +99,7 @@ public class Consilium implements IConsilium, Comparable<Consilium>, Serializabl
 		for (Date d : timer.runThrough(from, until)) {
 			automated.add(createAutomated(d));
 		}
+		Processor.log("preparing " + automated.size() + " automated consilii of type \n\t" + this + "\n\tto processing instance");
 		return automated;
 	}
 

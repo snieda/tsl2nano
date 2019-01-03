@@ -236,6 +236,7 @@ public class NanoH5Test implements ENVTestPreparation {
         //static check against last expteced state
        exptectedHtml = new String(FileUtil.getFileBytes(expFileName, null));
        BaseTest.assertEquals(exptectedHtml, html, true, MapUtil.asMap("\\:[0-9]{5,5}", ":XXXXX",
+           "20\\d\\d(-\\d{2})*", BaseTest.XXX,
            "[0-9]{1,6} Sec [0-9]{1,6} KB", "XXX Sec XXX KB", 
            "statusinfo-[0-9]{13,13}\\.txt", "statusinfo-XXXXXXXXXXXXX.txt",
            BaseTest.REGEX_DATE_US, BaseTest.XXX,
@@ -245,7 +246,7 @@ public class NanoH5Test implements ENVTestPreparation {
            "endedAt", BaseTest.XXX,
            "Started At", BaseTest.XXX,
            "Ended At", BaseTest.XXX,
-           "tsl2.nano.h5-\\d.\\d.\\d(-SNAPSHOT)?[-0-9]*", "tsl2.nano.h5-X.X.X",
+           "tsl2.nano.h5-\\d+\\.\\d+\\.\\d+(-SNAPSHOT)?[\\-\\.0-9]*", "tsl2.nano.h5-X.X.X",
            ".quicksearch", "?quicksearch" // the '?' does not match between the two sources!
            ));
        

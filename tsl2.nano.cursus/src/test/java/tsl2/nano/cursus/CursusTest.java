@@ -93,11 +93,13 @@ public class CursusTest implements Serializable /* only for inner-classes...*/{
 	private IConsilium[] process(IConsilium[] consilii) {
 		Effectree.instance().addEffects(Contract.class, "contract.end", effect(Contract.class, "contract.value", TIncEffectus.class, 5));
     	System.out.println(Effectree.instance().toString());
-    	new Processor().run(DateUtil.getStartOfYear(DateUtil.getToday()), DateUtil.getToday(), consilii);
+    	Date lastYear = DateUtil.add(DateUtil.getToday(), Calendar.YEAR, -1);
+    	new Processor().run(DateUtil.getStartOfYear(lastYear), DateUtil.getToday(), consilii);
 		return consilii;
 	}
 
 	private Consilium[] createConsilii() {
+		int curYear = DateUtil.getFieldOfDate(DateUtil.getToday(), Calendar.YEAR);
 		Consilium consilii[] = {
     		new Consilium("end", new Timer(DateUtil.getYesterday(), null), Consilium.Priority.HIGHEST, 
     				new Exsecutio(Action.CHANGE_END.name(), 
@@ -108,7 +110,7 @@ public class CursusTest implements Serializable /* only for inner-classes...*/{
     		new Consilium("future", new Timer(DateUtil.getTomorrow(), null), Consilium.Priority.NORMAL, 
     				new Exsecutio(Action.CHANGE_SALDO.name(), 
     				new Mutatio("XXXX", new TRes(Contract.class.getName(), "1", "contract.accounts[type=CAPACITY].saldo")), null)),
-    		new Consilium("auto", new Timer(DateUtil.getDate(2018, 01, 1), DateUtil.getDate(2018, 12, 1), Calendar.MONTH, 1), Consilium.Priority.LOW, 
+    		new Consilium("auto", new Timer(DateUtil.getDate(curYear-1, 01, 1), DateUtil.getDate(curYear, 12, 1), Calendar.MONTH, 1), Consilium.Priority.LOW, 
     				new Exsecutio(Action.CHANGE_SALDO.name(), 
     				new Mutatio("2001", new TRes(Contract.class.getName(), "1", "contract.accounts[?type=PAYMENT].saldo")), null)),
     	};

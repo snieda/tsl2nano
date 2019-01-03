@@ -64,6 +64,7 @@ public final class Processor {
 				
 				try {
 					eventController.fireEvent(c);
+					log("expired: " + c.getName() + " with timer: "+ c.getTimer());
 					cmdManager.doIt(c.getExsecutios().toArray(new ICommand[0]));
 					c.setStatus(Status.ACTIVE);
 					c.refreshSeal(ID);
