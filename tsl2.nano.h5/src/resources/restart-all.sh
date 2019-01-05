@@ -20,6 +20,7 @@ do
 		./runasservice.sh stop
 		sleep 2
 		mv nohup.out nohup.$(date -d "today" +"%Y%m%d%H%M").sik
+		./backup.sh
 		if [[ $1 != "stop" ]]; then
 			./runasservice.sh start &Z
 			echo "==> $d RESTARTET"
