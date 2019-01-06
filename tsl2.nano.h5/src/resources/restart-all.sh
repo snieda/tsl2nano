@@ -9,18 +9,20 @@ echo ======================================================
 ###########################################################
 
 # activate this block and de-activate that in your projects run.sh to admin the program-version centralized
-export NAME=../tsl2.nano.h5-
+export NAME=../tsl2.nano.h5
 export VERSION=${project.version}
 export EXTENSION="-standalone"
 
+echo "<html><body><h1>Summary of all Tsl2Nano Services</h1><ul>" > app-index.html
 for d in $(ls -d */)
 do
 	if [[ -f $d"runasservice.sh" ]]; then
 		cd $d
 		./runasservice.sh stop
+		echo "<li><a href=http://$(hostname -I | cut -f1 -d ' '):$(grep -E 'PORT[=][0-9]' runasservice.sh | grep -E '[0-9]+' --only-matching)>$d</a></li>" >> ../app-index.html
 		sleep 2
 		mv nohup.out nohup.$(date -d "today" +"%Y%m%d%H%M").sik
-		./backup.sh
+		./runasservice.sh backup
 		if [[ $1 != "stop" ]]; then
 			./runasservice.sh start &Z
 			echo "==> $d RESTARTET"
@@ -30,6 +32,7 @@ do
 		echo "==> $d has no runasservice.sh --> no nanoh5 directory"
 	fi
 done
+echo "</ul></body></html>" >> app-index.html
 echo
 echo ------------------------------------------------------
 echo PROCESSES:
@@ -45,7 +48,7 @@ echo ======================================================
 
 read -p "start tail for all processes? [y|N]: " dotail
 
-#if [[ "$dotail" ]]; then
+if [[ "$dotail" != "n" ]]; then
 #	for d in $(ls -d */)
 #	do
 #		if [[ -f $d"nohup.out" ]]; then
@@ -53,5 +56,5 @@ read -p "start tail for all processes? [y|N]: " dotail
 #		fi
 #	done
 #	tail -F $TAILFILES
-#fi
-tail -F `find . -name *.out`
+    tail -F `find . -name *.out`
+fi

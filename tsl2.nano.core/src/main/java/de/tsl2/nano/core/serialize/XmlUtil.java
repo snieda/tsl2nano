@@ -250,7 +250,10 @@ public class XmlUtil {
                 new SimpleXmlArrayWorkaround()).read(type,
                     fileInputStream = new FileInputStream(new File(xmlFile)));
         } catch (Exception e) {
-        	Message.send(e);
+        	if (ENV.isAvailable())
+        		Message.send(e);
+        	else
+        		e.printStackTrace();
         	if (fileInputStream != null)
         		fileInputStream = FileUtil.close(fileInputStream, false);
             //mark the loaded xml file as corrupt

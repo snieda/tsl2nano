@@ -4567,15 +4567,17 @@ Apps auf Serverway:
 - [v] timesheet: 8068/9004 
 - [ ] exam     : 8069/9093 connection refused <-- wrong/duplicate h2.jar libraries, users.xml?
 - [ ] ergdi    : 8070/9095: npe: jarfile not found <-- jar-file selector true not working
-- [ ] photo    : 8071/9097  npe: environment.xml corrupt
+- [ ] photo    : 8071/9097  npe: environment.xml corrupt <-- wrong System LANG, LANGUAGE so Date cannot be loaded
 - [ ] skiller  : 8072/9096: message 'object event'
 - [ ] EM-2016  : 8073/9092
 - [ ] logbook  : 8074/9094
-- [ ] GENERELL auf Serverway: Speicher-Problem
-- [v] restart-all -> reset-all +restart
+- [ ] GENERELL auf Serverway: Speicher-Problem <-- Xmx512 -> Xmx256
+- [v] restart-all -> reset-all +restart +backup
 - [ ] BeanConfigurator.actionCreateController testen
 - [ ] Translation uses random language
-- [ ] anyway.sql +Mission, +Charge->Location
+- [v] anyway.sql +Mission, +Charge->Location
+
+- [ ] Date.toString() <-- LANG, LANGUAGE --> LocalDate verwenden
 
 - population 23.8.: ~7.600.314.137 (http://live-counter.com/weltbevoelkerung/)
 
