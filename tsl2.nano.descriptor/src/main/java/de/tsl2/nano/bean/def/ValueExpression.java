@@ -231,6 +231,8 @@ public class ValueExpression<TYPE> implements
      */
     public TYPE createExampleBean(String toValue, boolean addSearchPostfix) {
         TYPE exampleBean = createInstance(toValue);
+        if (String.class.isAssignableFrom(getType())) // the following Bean.getBean() doesn't know, that the string is an instance and not a name!
+        	return exampleBean;
         //TODO: how-to extract the attribute-name information from expression?
         Bean<TYPE> b = (Bean<TYPE>) Bean.getBean(exampleBean);
         String[] attributeValues = getAttributeValues(toValue);

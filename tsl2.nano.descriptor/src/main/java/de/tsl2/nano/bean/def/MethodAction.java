@@ -51,7 +51,7 @@ public class MethodAction<T> extends CommonAction<T> implements IsPresentable {
     Class declaringClass;
     @Attribute
     String methodName;
-    @Element
+    @Element(required=false)
     Class[] parameterTypes;
     transient Method method;
     transient Constraint[] constraints;

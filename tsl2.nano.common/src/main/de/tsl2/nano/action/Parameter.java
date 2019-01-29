@@ -9,6 +9,8 @@
  */
 package de.tsl2.nano.action;
 
+import java.io.Serializable;
+
 import org.simpleframework.xml.Attribute;
 
 /**
@@ -16,7 +18,9 @@ import org.simpleframework.xml.Attribute;
  * @author Tom
  * @version $Revision$ 
  */
-public class Parameter<T> {
+public class Parameter<T> implements Serializable {
+    private static final long serialVersionUID = -7323462415048503940L;
+
     @Attribute
     String name;
     IConstraint<T> constraint;

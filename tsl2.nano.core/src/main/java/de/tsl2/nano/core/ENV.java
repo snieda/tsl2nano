@@ -20,7 +20,6 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
-import java.util.Date;
 import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.Hashtable;
@@ -319,7 +318,7 @@ public class ENV implements Serializable {
         Updater updater = new Updater("h5",
         		versionURL,
         		currentVersion,
-        		ENV.get("app.update.last", new Date()),
+        		ENV.get("app.update.last", new java.sql.Date(System.currentTimeMillis())),
         		ENV.get("app.update.interval.days", 30));
         if (versionURL != null)
             if (updater.checkAndUpdate(currentVersion, versionURL) || true /* workaround, if alreaddy downloaded...*/) {

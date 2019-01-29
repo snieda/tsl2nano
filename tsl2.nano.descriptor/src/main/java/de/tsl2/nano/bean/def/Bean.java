@@ -917,7 +917,7 @@ public class Bean<T> extends BeanDefinition<T> {
 
     @Override
     public Bean<T> refreshed() {
-        if (isStale())
+        if (isStale() && !(isconnected))
             return getBean(instance);
         return this;
     }

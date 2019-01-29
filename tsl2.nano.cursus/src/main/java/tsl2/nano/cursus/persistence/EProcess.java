@@ -131,6 +131,8 @@ public class EProcess implements IPersistable<String>, IListener<Object> {
 	@Enumerated(EnumType.STRING)
 	@Presentable(enabled=false)
 	public Status getStatus() {
+		if (status == null)
+			status = Status.CREATED;
 		return status;
 	}
 	public void setStatus(Status status) {
@@ -176,7 +178,7 @@ public class EProcess implements IPersistable<String>, IListener<Object> {
 			}
 		});
 		ConcurrentUtil.sleep(2000);
-		return current != null ? current.getLog() : null;
+		return current != null && !Util.isEmpty(current.getLog()) ? current.getLog() : null;
 	}
 
 	protected void loadEffectree(EGrex grex) {

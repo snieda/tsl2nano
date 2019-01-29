@@ -63,6 +63,8 @@ public class Consilium implements IConsilium, Comparable<Consilium>, Serializabl
 	
 	@Override
 	public int compareTo(Consilium o) {
+		if (this == o)
+			return 0;
 		if (timer == null)
 			return 1;
 		if (o.timer == null)
@@ -105,6 +107,8 @@ public class Consilium implements IConsilium, Comparable<Consilium>, Serializabl
 
 	@Override
 	public Status getStatus() {
+		if (status == null)
+			status = Status.INACTIVE;
 		return status;
 	}
 	

@@ -954,7 +954,7 @@ public class NanoH5Session implements ISession<BeanDefinition>, Serializable, IL
 
     private void logaction(String id, Map<String, String> p) {
         actionLog.add(DateUtil.getFormattedTimeStamp() + " ==> " + id + " (" + nav.current() + ")"
-            + (!Util.isEmpty(p) ? "\n\t" + p : ""));
+            + (!Util.isEmpty(p) && !Persistence.class.isAssignableFrom(nav.current().getClazz()) ? "\n\t" + p : ""));
     }
 
     /**

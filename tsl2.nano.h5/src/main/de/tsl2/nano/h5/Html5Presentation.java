@@ -488,7 +488,7 @@ public class Html5Presentation<T> extends BeanPresentationHelper<T> implements I
                 else
                     docURL = ENV.get("doc.url." + bean.getName().toLowerCase(),
                         "doc/" + StringUtil.toFirstLower(title) + "/index.html");
-                if (new File(ENV.getConfigPath() + docURL).canRead() || NetUtil.isURL(docURL)) {
+                if (new File(ENV.getConfigPath() + docURL).canRead() || (!docURL.contains(" ") && NetUtil.isURL(docURL))) {
                     c2 = appendElement(c2, TAG_H3, ATTR_ALIGN, ALIGN_CENTER, ATTR_STYLE,
                         style("display", "inline"));
                     appendElement(c2, TAG_LINK, content(title), ATTR_HREF, ENV.getConfigPath() + docURL);
