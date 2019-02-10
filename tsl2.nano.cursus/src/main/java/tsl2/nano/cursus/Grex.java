@@ -57,10 +57,14 @@ public class Grex<O, V> implements Serializable {
 	
 	@SuppressWarnings("unchecked")
 	public Set<? extends Res<O, V>> createParts() {
-		return !Util.isEmpty(validObjectIDs) ? createNewParts(validObjectIDs.toArray()) 
+		return !Util.isEmpty(validObjectIDs) && !isWildcardOjbect(validObjectIDs) ? createNewParts(validObjectIDs.toArray()) 
 				: genRes.getObjectid().toString().contains(WILDCARD) ? null 
 						: MapUtil.asSet(createResForId(genRes.getObjectid()));
 	}
+	private boolean isWildcardOjbect(Set<Object> validObjectIDs) {
+		return validObjectIDs == null || (validObjectIDs.size() == 1 && validObjectIDs.iterator().next().equals(WILDCARD));
+	}
+	
 	public Set<Res<O, V>> createNewParts(Object... objectIds) {
 		Set<Res<O, V>> parts = new HashSet<>(objectIds.length);
 		for (int i = 0; i < objectIds.length; i++) {

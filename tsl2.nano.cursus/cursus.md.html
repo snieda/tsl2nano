@@ -89,7 +89,17 @@ To see a simple example for a financial organization with Contracts, Partners an
 
 ## First Steps using it in NanoH5
 
-* on the first login/connection dialog, select 'tsl2.nano.cursus-2.2.2-SNAPSHOT.jar' as jar-file
+* on the first login/connection dialog
+	* select 'tsl2.nano.cursus-2.2.2-SNAPSHOT.jar' as _jar-file_
+	* select 'update' on _Auto-DDL_
+* create a new _EConsilium_
+* create a new _EExecutio_ pointing to a new _EMutatio_ pointing to a new _ERes_
+	* the new _ERes_ has to point to your desired Entity with a known Entity ID 
+* create a new EProcess and start it
+	* create a new EGrex using the existing _ERes_, let the validObjectIDs empty to run the process through all inactive consilii
+	* press the button start - now the process starts and will show a result
+	* only inactive consilii with expired timer will be executed
+* check, if your desired Entity with your given ID was changed
 
 ## Changelog
 
