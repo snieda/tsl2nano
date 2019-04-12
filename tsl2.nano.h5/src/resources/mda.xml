@@ -119,9 +119,7 @@ commit;
 			else="${cmdpref}java -cp ${cp} org.h2.tools.Server -baseDir ${basedir} -web -webDaemon -tcp -tcpPort ${jdbc.port} -tcpAllowOthers -trace ${cmdargs}">
 			<contains string="${jdbc.driver}" substring="hsqldb" casesensitive="true"/>
 		</condition>
-		<echo file="runServer.cmd">
-${cmdline}
-		</echo>
+		<echo file="runServer.cmd">${cmdline}</echo>
 		<chmod perm="+x" file="runServer.cmd" />
 		<!-- start the database with name ${basedir} -->
 
