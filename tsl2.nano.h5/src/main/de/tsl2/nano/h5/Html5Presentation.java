@@ -2338,10 +2338,14 @@ public class Html5Presentation<T> extends BeanPresentationHelper<T> implements I
 
         Element preFooter;
         if (footer instanceof Throwable) {
-            Element details = doc.createElement(TAG_LINK);
-            details.setAttribute(ATTR_HREF, "./" + new File(LogFactory.getLogFileName()).getName());
-            details.setTextContent(ENV.translate("tsl2nano.exception", true));
-            addRow(table, details);
+            if (!ENV.get("app.login.secure", false)) {
+                preFooter = doc.createElement(TAG_PRE);
+                preFooter.setTextContent(((Throwable) footer).getMessage());
+                Element details = doc.createElement(TAG_LINK);
+                details.setAttribute(ATTR_HREF, "./" + new File(LogFactory.getLogFileName()).getName());
+                details.setTextContent(ENV.translate("tsl2nano.exception", true));
+                addRow(table, details);
+            }
             preFooter = doc.createElement(TAG_PRE);
             preFooter.setTextContent(((Throwable) footer).getMessage());
         } else {

@@ -57,6 +57,10 @@ socket.onclose = function(e) {
  * prints the given status message to the status line
  */
 function showStatusMessage(msg) {
+	console.log(msg);
+	if (${app.login.secure}) {
+		msg = ' \tok'; //don't show internal message in prod-system
+	}
 	document.getElementById('${websocket.element.id}').childNodes[0].nodeValue = ' \t'
 			+ msg;
 	//user must enable this feature in his browser...

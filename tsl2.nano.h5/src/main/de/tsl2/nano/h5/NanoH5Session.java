@@ -453,8 +453,11 @@ public class NanoH5Session implements ISession<BeanDefinition>, Serializable, IL
 
                 @Override
                 public String getMessage() {
-                    return super.getMessage() + "\n\nAction-Stack:\n"
-                        + StringUtil.toFormattedString(actionLog, 1000, true);
+                    if (ENV.get("app.login.secure", false))
+                        return super.getMessage();
+                    else
+                        return super.getMessage() + "\n\nAction-Stack:\n"
+                            + StringUtil.toFormattedString(actionLog, 1000, true);
                 }
             };
             Plugins.process(INanoPlugin.class).exceptionHandler(ex);

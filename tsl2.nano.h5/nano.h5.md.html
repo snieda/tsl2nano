@@ -217,6 +217,11 @@ for example:
 on default (see mda.xml) a h2-tool web-server will be provided at port 8082. if not, you can start that server-tool inside your environment directory through:
 	
 	java -cp * org.h2.tools.Server
+	
+to access the database from other than local and if you want to start sql-statements directly:
+
+	java -cp * org.h2.tools.Server  -web -webDaemon -tcp -tcpPort ${jdbc.port} -tcpAllowOthers -trace
+ 
 
 #### Commandline arguments
 
@@ -3793,6 +3798,7 @@ Lots of refactorings have been done, maven has replaced ant, java 8 is used now 
  2.1.5	| 26.08.2018 | NEW: annotation extensions: @With -> (DependencyListener, Query, Compositor, Specification, VirtualAttribute)
  2.2.0  | 14.10.2018 | REF: h5.Collectors -> h.collector.*, NEW: ChatMessage
  2.2.1  | 21.10.2018 | H2 Database Keywords in copyddl eliminated. anyway.sql: +mission, +chargestatus, charge->location
+ 2.2.2  | 22.04.2019 | bugfixing on cursus, linux-start-scripts, messages constraint on app.secure.login=true in cause of security aspects
 
 <style class="fallback">body{white-space:pre;font-family:monospace}</style><script src="markdeep.min.js"></script><script src="http://casual-effects.com/markdeep/latest/markdeep.min.js"></script>
 
@@ -4580,15 +4586,46 @@ Apps auf Serverway:
 - [x] Date.toString() <-- LANG, LANGUAGE --> LocalDate verwenden <--java.sql.Date eingebaut
 - [ ] app backup: service.url raus und app.update.last nur als Date
 - [ ] login funzt bei transferrierten apps nicht
- 
+
+- [ ] linux+openjdk10: NoClassDefFoundError java.sql.Blob
+	- --add-modules ALL-MODULES ALL-DEFAULT ALL-SYSTEM java.sql not solving
+	- --limit-modules java.base,java.sql not solving
+	- dos2unix on mda.sh, runServer.cmd, *.sql?
+	- createusers.sql as root?
+	- slf4j logger problem in mda.sh
+	
 - population 23.8.: ~7.600.314.137 (http://live-counter.com/weltbevoelkerung/)
 
+- [ ] OWASP-ZAP message: SQL-injection possible <- websocket info text
+- [x] action-logging + exceptions as link, exception-stack on client: remove that on production mode
+- [x]hsqldb/h2 server only local availability on default!
+	- [ ] java -cp path/to/hsqldb.jar org.hsqldb.server.ServerAcl path/to/acl.txt
+- [x] websocket info text not in production mode!
 
-F1			Mi8
-4000mAh		GPS(2), Galileo(2)
-microSD		AmoLED
-			12MP Zweitkamera
-			NFC
-nur USB2	nur USB2
-			
+java.lang.NoSuchMethodError: org.hibernate.boot.registry.classloading.internal.ClassLoaderServiceImpl.withTccl(Lorg/hibernate/boot/registry/classloading/internal/ClassLoaderServiceImpl$Work;)Ljava/lang/Object;
+	at org.hibernate.jpa.boot.internal.EntityManagerFactoryBuilderImpl.build(EntityManagerFactoryBuilderImpl.java:849)
+	at org.hibernate.jpa.HibernatePersistenceProvider.createEntityManagerFactory(HibernatePersistenceProvider.java:75)
+	at javax.persistence.Persistence.createEntityManagerFactory(Persistence.java:79)
+	at javax.persistence.Persistence.createEntityManagerFactory(Persistence.java:54)
+	at de.tsl2.nano.persistence.GenericLocalServiceBean.createEntityManager(GenericLocalServiceBean.java:166)
+	at de.tsl2.nano.persistence.GenericLocalServiceBean.<init>(GenericLocalServiceBean.java:33)
+	at de.tsl2.nano.persistence.GenericLocalBeanContainer.getGenService(GenericLocalBeanContainer.java:51)
+	at de.tsl2.nano.persistence.GenericLocalBeanContainer.initLocalContainer(GenericLocalBeanContainer.java:36)
+	at de.tsl2.nano.h5.NanoH5.createPersistenceProvider(NanoH5.java:944)
+	at de.tsl2.nano.h5.NanoH5.createBeanContainer(NanoH5.java:884)
+	at de.tsl2.nano.h5.NanoH5.connect(NanoH5.java:700)
+	at de.tsl2.nano.h5.NanoH5.connect(NanoH5.java:105)
+	at de.tsl2.nano.h5.PersistenceUI$12.action(PersistenceUI.java:470)
+	at de.tsl2.nano.action.CommonAction.run(CommonAction.java:245)
+	at de.tsl2.nano.action.CommonAction.activate(CommonAction.java:284)
+	at de.tsl2.nano.h5.NanoH5Session.performStandardAction(NanoH5Session.java:859)
+	at de.tsl2.nano.h5.NanoH5Session.performAction(NanoH5Session.java:747)
+	at de.tsl2.nano.h5.NanoH5Session.processInput(NanoH5Session.java:694)
+	at de.tsl2.nano.h5.NanoH5Session.serve(NanoH5Session.java:428)
+	at de.tsl2.nano.h5.NanoH5.serve(NanoH5.java:502)
+	at de.tsl2.nano.h5.NanoHTTPD.serve(NanoHTTPD.java:2219)
+	at de.tsl2.nano.h5.NanoHTTPD$HTTPSession.execute(NanoHTTPD.java:951)
+	at de.tsl2.nano.h5.NanoHTTPD$ClientHandler.run(NanoHTTPD.java:196)
+	at java.lang.Thread.run(Thread.java:748)
+
  -->
