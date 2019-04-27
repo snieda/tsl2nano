@@ -6,11 +6,11 @@
         "name": "Debug (Attach on 8787)",
         "type": "java",
         "request": "attach",
-        // "remoteHost": "localhost",
-        // "remotePort": 8787,
+        "remoteHost": "localhost",
+        "remotePort": 8787,
         "hostName": "localhost",
-        "port": 8787,
-        "preLaunchTask": "java -jar tsl2.nano.h5"
+        "port": 8787
+        //"preLaunchTask": "java -jar tsl2.nano.h5"
         },
         {
             "name": "Java",

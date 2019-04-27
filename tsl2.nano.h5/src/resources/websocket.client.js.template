@@ -58,9 +58,6 @@ socket.onclose = function(e) {
  */
 function showStatusMessage(msg) {
 	console.log(msg);
-	if (${app.login.secure}) {
-		msg = ' \tok'; //don't show internal message in prod-system
-	}
 	document.getElementById('${websocket.element.id}').childNodes[0].nodeValue = ' \t'
 			+ msg;
 	//user must enable this feature in his browser...
@@ -212,7 +209,9 @@ function evaluatedependencies(e) {
 	}
 	var msg = createMessage('dependency', target(e).id, target(e).value,
 			x, y);
-	showStatusMessage(msg);
+	if (!${app.login.secure}) {
+		showStatusMessage(msg);
+	}
 	socket.send(msg);
 }
 
@@ -221,7 +220,9 @@ function evaluatedependencies(e) {
  * server will inform these for the changes.
  */
 function refreshdependency(msg) {
-	showStatusMessage('refreshing dependency: ' + msg);
+	if (!${app.login.secure}) {
+		showStatusMessage('refreshing dependency: ' + msg);
+	}
 	var id = getId(msg);
 	var value = getValue(msg);
 	if (value != null)

@@ -8,10 +8,27 @@ echo ======================================================
 #    having the executable script 'runasservice.sh' 
 ###########################################################
 
+
 # activate this block and de-activate that in your projects run.sh to admin the program-version centralized
 export NAME=../tsl2.nano.h5
 export VERSION=${project.version}
 export EXTENSION="-standalone"
+
+if [[ $1 == "help" ]]; then
+	echo "usage:=========================================================================="
+	echo "clean    : removes all backup files (tar.gz and .sik) generated with this script"
+	echo "stop     : doesn't restart but stops all services, started by this script"
+	echo "help     : prints this help"
+	echo "================================================================================"
+	exit 0
+fi
+if [[ $1 == "clean" ]]; then
+	echo "cleaning all tsl2nano backup files..."
+	rm tsl2nano-all-services.tar.gz
+	find . -type f -name '*.tar.gz' -or -name '*.sik' -exec rm -I {} +
+fi
+echo "refreshing backup 'tsl2nano-all-services.tar.gz'..."
+tar -uf tsl2nano-all-services.tar.gz . --exclude *.gz --exclude=*.*ar --exclude *.log --exclude *.sik --exclude *.lck --exclude *.out --exclude temp --exclude target --exclude dist
 
 echo "<html><body><h1>Summary of all Tsl2Nano Services</h1><ul>" > app-index.html
 for d in $(ls -d */)
@@ -46,7 +63,7 @@ echo ======================================================
 echo RESTART SUCCESSFULL
 echo ======================================================
 
-read -p "start tail for all processes? [y|N]: " dotail
+read -p "start tail for all processes? [Y|n]: " dotail
 
 if [[ "$dotail" != "n" ]]; then
 #	for d in $(ls -d */)

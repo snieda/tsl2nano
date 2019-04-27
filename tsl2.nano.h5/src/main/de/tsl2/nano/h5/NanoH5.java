@@ -225,6 +225,10 @@ public class NanoH5 extends NanoHTTPD implements ISystemConnector<Persistence> {
     private void enableSSL(boolean ssl) throws IOException {
         if (ssl) {
             String keyStore = ENV.get("app.ssl.keystore.file", "nanoh5.pks");
+            if (keyStore.startsWith("nanoh5")) {
+                ENV.extractResource("nanoh5.pks");
+                ENV.extractResource("nanoh5.jks");
+            }
             LOG.info("activating ssl using keystore " + keyStore);
             makeSecure(NanoHTTPD.makeSSLSocketFactory(keyStore,
                 ENV.get("app.ssl.keystore.password", "nanoh5").toCharArray()), null);

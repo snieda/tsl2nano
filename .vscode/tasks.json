@@ -5,23 +5,35 @@
     "tasks": [
         {
             "label": "java -jar tsl2.nano.h5",
-            "command": "java '-agentlib:jdwp=transport=dt_socket,address=8787,server=y,suspend=n' '-Dtsl2nano.offline=true' -jar tsl2.nano.h5-2.1.4-SNAPSHOT-standalone.jar",
+            "command": "java '-agentlib:jdwp=transport=dt_socket,address=8787,server=y,suspend=n' '-Dtsl2nano.offline=true' -jar tsl2.nano.h5-2.2.2-SNAPSHOT-standalone.jar",
             "type": "shell",
             "options": {
                 "cwd": "tsl2.nano.h5/target"
             },
             "problemMatcher": [],
-            "dependsOn": "mvn install"
+            "dependsOn": "mvn install",
+            "group": "build"
         },
         {
-            "label": "mvn install",
+            "label": "mvn -DskipTests -o install",
             "command": "mvn -DskipTests -o install",
-            "type": "shell"
+            "type": "shell",
+            "problemMatcher": [
+                "$eslint-stylish"
+            ],
+            "group": {
+                "kind": "build",
+                "isDefault": true
+            }
         },
         {
             "label": "mvn clean install",
             "command": "mvn clean install",
-            "type": "shell"
+            "type": "shell",
+            "group": {
+                "kind": "test",
+                "isDefault": true
+            }
         },
         {
             "label": "mvn clean install site",
