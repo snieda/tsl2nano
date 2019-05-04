@@ -36,7 +36,7 @@ fi
 NAME=${project.artifactId}
 VERSION=${project.version}
 EXTENSION="-standalone"
-#OFFLINE=-Dtsl2nano.offline=true
+OFFLINE=-Dtsl2nano.offline=true
 #UH=-Denv.user.home=true
 #USERDIR=-Duser.dir=$PRJ
 #LLANG=-Duser.country=FR -Duser.language=fr

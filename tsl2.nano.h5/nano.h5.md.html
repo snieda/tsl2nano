@@ -141,7 +141,7 @@ It is possible to activate a secured connection with TLS (SSL). The following en
 * *app.ssl.activate*: activates https connections
 * *app.ssl.keystore.file*: defines the name of the keystore to be used for the secured connection. default is *nanoh5.pks*
 * *app.ssl.keystore.password*: defines the password to access the keystore. default is *nanoh5*
-* *app.ssl.protocol*: SSLv3 or TLSv1_1 or TLSv1_2
+* *app.ssl.protocol*: SSLv3 or TLSv1_1 or TLSv1_2 (default)
 
 A default (nanoh5.pks and nanoh5.jks) keystore is included in the environment, but you can create your own self-signed keystore using the java keytool:
 
@@ -3687,7 +3687,7 @@ http://publib.boulder.ibm.com/infocenter/wsdoc400/v6r0/index.jsp?topic=/com.ibm.
 
 Actual list: http://infocenter.pentaho.com/help/index.jsp?topic=%2Fsupported_components%2Freference_jdbc_drivers.html
 
-## Known Problems and some Solutions
+## FAQ Known Problems and some Solutions
 
 * Performance going down:
 	* to low memory for jvm:
@@ -3744,6 +3744,8 @@ Actual list: http://infocenter.pentaho.com/help/index.jsp?topic=%2Fsupported_com
 	* -> be careful with your persistence definition: database-url, database, and schema must fit together. E.g. on a H2 url jdbc:h2:tcp://localhost:9092/PUBLIC, the SCHEMA must be PUBLIC, too!
 * h2 database "java.io.ioexception: block not found in id"
 	* -> you have changed the database structure. shutdown the h2 database before you add or change data
+* java.lang.NoSuchMethodError: org.hibernate.boot.registry.classloading.internal.ClassLoaderServiceImpl.withTccl(Lorg/hibernate/boot/registry/classloading/internal/ClassLoaderServiceImpl$Work;)Ljava/lang/Object;
+  * -> version conflict for hibernate between 4 and 5. remove the hiberate 5 libraries     
 
 ## Migrations
 
@@ -4613,30 +4615,11 @@ Apps auf Serverway:
 	- [ ] java -cp path/to/hsqldb.jar org.hsqldb.server.ServerAcl path/to/acl.txt
 - [x] websocket info text not in production mode!
 
-java.lang.NoSuchMethodError: org.hibernate.boot.registry.classloading.internal.ClassLoaderServiceImpl.withTccl(Lorg/hibernate/boot/registry/classloading/internal/ClassLoaderServiceImpl$Work;)Ljava/lang/Object;
-	at org.hibernate.jpa.boot.internal.EntityManagerFactoryBuilderImpl.build(EntityManagerFactoryBuilderImpl.java:849)
-	at org.hibernate.jpa.HibernatePersistenceProvider.createEntityManagerFactory(HibernatePersistenceProvider.java:75)
-	at javax.persistence.Persistence.createEntityManagerFactory(Persistence.java:79)
-	at javax.persistence.Persistence.createEntityManagerFactory(Persistence.java:54)
-	at de.tsl2.nano.persistence.GenericLocalServiceBean.createEntityManager(GenericLocalServiceBean.java:166)
-	at de.tsl2.nano.persistence.GenericLocalServiceBean.<init>(GenericLocalServiceBean.java:33)
-	at de.tsl2.nano.persistence.GenericLocalBeanContainer.getGenService(GenericLocalBeanContainer.java:51)
-	at de.tsl2.nano.persistence.GenericLocalBeanContainer.initLocalContainer(GenericLocalBeanContainer.java:36)
-	at de.tsl2.nano.h5.NanoH5.createPersistenceProvider(NanoH5.java:944)
-	at de.tsl2.nano.h5.NanoH5.createBeanContainer(NanoH5.java:884)
-	at de.tsl2.nano.h5.NanoH5.connect(NanoH5.java:700)
-	at de.tsl2.nano.h5.NanoH5.connect(NanoH5.java:105)
-	at de.tsl2.nano.h5.PersistenceUI$12.action(PersistenceUI.java:470)
-	at de.tsl2.nano.action.CommonAction.run(CommonAction.java:245)
-	at de.tsl2.nano.action.CommonAction.activate(CommonAction.java:284)
-	at de.tsl2.nano.h5.NanoH5Session.performStandardAction(NanoH5Session.java:859)
-	at de.tsl2.nano.h5.NanoH5Session.performAction(NanoH5Session.java:747)
-	at de.tsl2.nano.h5.NanoH5Session.processInput(NanoH5Session.java:694)
-	at de.tsl2.nano.h5.NanoH5Session.serve(NanoH5Session.java:428)
-	at de.tsl2.nano.h5.NanoH5.serve(NanoH5.java:502)
-	at de.tsl2.nano.h5.NanoHTTPD.serve(NanoHTTPD.java:2219)
-	at de.tsl2.nano.h5.NanoHTTPD$HTTPSession.execute(NanoHTTPD.java:951)
-	at de.tsl2.nano.h5.NanoHTTPD$ClientHandler.run(NanoHTTPD.java:196)
-	at java.lang.Thread.run(Thread.java:748)
+- timsesheet with ssl:
+  - pks id. to logbook
+  - env id. to logbook
+  - tested on diff. browsers
+  - cert. imported
+  - 
 
  -->

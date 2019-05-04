@@ -590,6 +590,7 @@ public class Html5Presentation<T> extends BeanPresentationHelper<T> implements I
                 jsWebsocketTemplate = String.valueOf(FileUtil.getFileData(jsStream, "UTF-8"));
                 ENV.get("websocket.window.alert.message", true);
                 ENV.get("websocket.speek.alert.message", true);
+                ENV.get("app.login.secure", false);
             }
             Element script = appendElement(parent, TAG_SCRIPT, ATTR_TYPE, ATTR_TYPE_JS);
 
@@ -601,6 +602,7 @@ public class Html5Presentation<T> extends BeanPresentationHelper<T> implements I
             p.put("websocket.server.ip", url.getHost());
             p.put("websocket.server.port", session.getWebsocketPort());
             p.put("websocket.element.id", elementId);
+
             String jsWebSocket = StringUtil.insertProperties(jsWebsocketTemplate, p);
             if (ENV.get("app.mode.strict", false))
                 if (jsWebSocket.matches("^(//).*\\$\\{\\}"))

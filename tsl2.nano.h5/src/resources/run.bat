@@ -19,7 +19,7 @@ if "%4"=="move" (mv %PRJ% %PRJ%~)
 set NAME=${project.artifactId}
 set VERSION=${project.version}
 set EXTENSION=-standalone
-rem set OFFLINE=-Dtsl2nano.offline=true
+set OFFLINE=-Dtsl2nano.offline=true
 rem set UH=-Denv.user.home=true
 rem set USERDIR=-Duser.dir=%PRJ%
 rem set LANG=-Duser.country=FR -Duser.language=fr
