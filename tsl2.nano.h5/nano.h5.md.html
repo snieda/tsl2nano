@@ -145,6 +145,9 @@ It is possible to activate a secured connection with TLS (SSL). The following en
 
 A default (nanoh5.pks and nanoh5.jks) keystore is included in the environment, but you can create your own self-signed keystore using the java keytool:
 
+* be sure to have a permissions file for your user in the environment directory (e.g.: MUSTER-permissions.xml)
+* be sure to change host-name inside 'environment.xml'. remove all findings of 'localhost'
+
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 keytool -genkey -keyalg RSA -alias nanoh5 -keystore nanoh5.jks -storepass nanoh5 -keysize 2048 -ext SAN=DNS:localhost,IP:127.0.0.1  -validity 9999
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -4615,11 +4618,8 @@ Apps auf Serverway:
 	- [ ] java -cp path/to/hsqldb.jar org.hsqldb.server.ServerAcl path/to/acl.txt
 - [x] websocket info text not in production mode!
 
-- timsesheet with ssl:
-  - pks id. to logbook
-  - env id. to logbook
-  - tested on diff. browsers
-  - cert. imported
-  - 
+- [ ] date/time stamps on current time/date
+- [ ] beancontainer list height constraints
+- [ ] presenting key/values -> 1:key, 2:value
 
  -->

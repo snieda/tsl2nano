@@ -17,7 +17,7 @@ socket.onopen = function() {
 socket.onerror = function(error) {
 	console.log('websocket error ' + error);
 	if (${websocket.window.alert.message})
-		window.alert("websocket error: " + error);
+		window.alert("websocket error occurred! " + error + "\n\ndependency listeners, content assists and attachment uploading doesn't work!");
 };
 
 /**
