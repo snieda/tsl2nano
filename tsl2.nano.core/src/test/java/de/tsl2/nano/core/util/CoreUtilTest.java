@@ -136,10 +136,10 @@ public class CoreUtilTest implements ENVTestPreparation {
 			fail("getValidFileName() didn't work");
 		}
 
-		Collection<File> files = FileUtil.getTreeFiles("./", ".*/resources");
-		assertTrue(files.size() >= 2 && files.iterator().next().getName().equals("resources"));
+		Collection<File> files = FileUtil.getTreeFiles("../", ".*/resources");
+		assertTrue(files.size() >= 1 && files.iterator().next().getName().equals("resources"));
 
-		files = FileUtil.getFileset(BASE_DIR_CORE, "**/resources/**/*logo.txt");
+		files = FileUtil.getFileset("../", "**/resources/**/*logo.txt");
 		assertTrue(files.size() == 1 && files.iterator().next().getName().equals("tsl-logo.txt"));
 
 	}
@@ -586,7 +586,7 @@ public class CoreUtilTest implements ENVTestPreparation {
 		// "application/json", null, "code", "8000", "street", null);
 
 		urlREST = EHttpClient.parameter(resource + "{city}/info", true, "city", "München", "street", null);
-		assertEquals(resource + "M%FCnchen/info", urlREST);
+		assertEquals(resource + "M%C3%BCnchen/info", urlREST);
 	}
 
 	// @Ignore

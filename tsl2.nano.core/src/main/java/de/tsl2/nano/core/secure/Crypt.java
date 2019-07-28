@@ -13,6 +13,7 @@ import java.security.Provider;
 import java.security.SecureRandom;
 import java.security.Security;
 import java.security.spec.AlgorithmParameterSpec;
+import java.security.spec.RSAKeyGenParameterSpec;
 import java.util.Base64;
 
 import javax.crypto.Cipher;
@@ -243,7 +244,8 @@ public class Crypt implements ISecure {
         return isPBE(algorithm) ? createPBEParamSpec() : (algorithm.contains("/") && !algorithm.contains("ECB"))
             ? new IvParameterSpec(
                 algorithm.startsWith("DES") ? salt8 : salt16)
-            : null;
+            : algorithm.startsWith("RSA") ? new RSAKeyGenParameterSpec(2048, RSAKeyGenParameterSpec.F4)
+                : null;
 //        return isPBE(algorithm) ? createPBEParamSpec() : algorithm.startsWith("DES") || algorithm.contains("/ECB/")
 //            ? null : createAESParamSpec();
     }

@@ -68,7 +68,7 @@ public class BeanConfiguratorTest {
             aconf.actionCreateRuleOrAction("testaction", "!", Address.class.getName() + ".getCity");
             aconf.actionRemoveRuleCover("presentable");
             if (aconf.getColumnDefinition() != null) //may be null on virtual attributes
-            assertEquals(aconf.getPresentable().getLabel(), aconf.getColumnDefinition().getPresentable().getLabel());
+                assertEquals(aconf.getPresentable().getLabel(), aconf.getColumnDefinition().getPresentable().getLabel());
         }
         
         checkMethodActions(bconf, 9, 8);

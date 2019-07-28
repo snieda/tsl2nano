@@ -5,8 +5,6 @@ package de.tsl2.nano.core.util;
 
 import java.io.File;
 
-import org.junit.BeforeClass;
-
 import de.tsl2.nano.core.ENV;
 import de.tsl2.nano.core.log.LogFactory;
 
@@ -16,7 +14,8 @@ import de.tsl2.nano.core.log.LogFactory;
  * @author Tom
  */
 public interface ENVTestPreparation {
-	static final String BASE_DIR = "../tsl2.nano.";
+	static final String BASE_DIR_PREF = "tsl2.nano.";
+	static final String BASE_DIR = (System.getProperty("user.dir").contains(BASE_DIR_PREF) ? "../" : "") + BASE_DIR_PREF;
 	static final String TARGET_DIR = "target/";
 	static final String TEST_DIR = ENV.PREFIX_ENVNAME + "test/";
 	static final String TARGET_TEST = TARGET_DIR + TEST_DIR;
@@ -40,9 +39,9 @@ public interface ENVTestPreparation {
 	}
 	
 	static String setUp(String baseDir, String moduleShort, boolean strict, boolean deleteExistingEnvironment) {
-		if (!System.getProperty("user.dir").endsWith(TARGET_DIR.substring(0, TARGET_DIR.length() - 1)))
-			setUserDirToTarget();
 		String baseDirModule = baseDir + moduleShort + "/";
+		if (!System.getProperty("user.dir").endsWith(TARGET_DIR.substring(0, TARGET_DIR.length() - 1)))
+			setUserDirToTarget(baseDirModule);
 		LogFactory.setLogFactoryXml(baseDirModule + TARGET_TEST + "test-logging.xml");
 		LogFactory.setLogFile(baseDirModule + TARGET_TEST + "test.log");
 		ENV.create(baseDirModule + TARGET_TEST);
@@ -62,9 +61,17 @@ public interface ENVTestPreparation {
 		}
 	}
 
-	static void setUserDirToTarget() {
-        System.setProperty("user.dir", new File(TARGET_DIR).getAbsolutePath());
-//		System.setProperty("user.dir", new File(baseDirModule + TARGET_DIR).getAbsolutePath());
+	static void setUserDirToTarget(String baseDir) {
+		String userDir = System.getProperty("user.dir");
+		if (!userDir.endsWith(baseDir))
+	        userDir = new File(baseDir + TARGET_DIR).getAbsolutePath();
+		else
+			userDir = new File(TARGET_DIR).getAbsolutePath();
+			
+		File dir = new File(userDir);
+		if (!dir.exists() || !dir.isDirectory() || !dir.canWrite())
+			throw new IllegalAccessError("cannot access project directory " + userDir);
+		System.setProperty("user.dir", userDir);
 		System.out.println("------------------------------------------------------------");
 		System.out.println("user.dir: " + System.getProperty("user.dir"));
 		System.out.println("------------------------------------------------------------");

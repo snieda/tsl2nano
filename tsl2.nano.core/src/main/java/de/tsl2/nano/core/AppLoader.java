@@ -345,7 +345,7 @@ public class AppLoader {
         String mngt = System.getProperty("javax.management.builder.initial");
         //e.g. the JNLPClassLoader is of type URLClassLoader
         ClassLoader cl =
-            /*contextClassLoader instanceof URLClassLoader || */classPath.contains(";") || mngt != null || isDalvik()
+            /*contextClassLoader instanceof URLClassLoader || */classPath.contains(File.pathSeparator) || mngt != null || isDalvik()
                 ? contextClassLoader : null;
         NetworkClassLoader nestedLoader = new NetworkClassLoader(cl, NetworkClassLoader.REGEX_EXCLUDE);
         nestedLoader.setEnvironment(environment);
@@ -415,6 +415,9 @@ public class AppLoader {
 
     public static final boolean isJdkOracle() {
         return System.getProperty("java.vm.vendor").contains("Oracle");
+    }
+    public static final boolean isOpenJDK() {
+        return System.getProperty("java.vm.name").contains("OpenJDK");
     }
     public static final boolean isUnix() {
         //we distinguish only between windows or not --> unix

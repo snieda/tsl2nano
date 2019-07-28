@@ -5,9 +5,11 @@ import static org.junit.Assert.assertTrue;
 import java.security.Policy;
 
 import org.junit.AfterClass;
+import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
+import de.tsl2.nano.core.classloader.RuntimeClassloader;
 import de.tsl2.nano.core.cls.BeanClass;
 import de.tsl2.nano.core.util.ENVTestPreparation;
 
@@ -39,21 +41,28 @@ public class CoreTest implements ENVTestPreparation {
     	assertTrue(((Long)BeanClass.getStatic(BeanClass.class, "serialVersionUID")).longValue() > 0);
     }
     
-    @Test
-    public void testAppLoaderMain() {
-    	//on empty, don't throw an exception
-    	String[] args = new String[] {};
-		AppLoader.main(args );
+	@Test
+	public void testAppLoaderMainNoParameter() {
+		// on empty, don't throw an exception
+		String[] args = new String[] {};
+		AppLoader.main(args);
+	}
 
-		//only one parameter
-		args = new String[] {"test"};
-		AppLoader.main(args );
-		
+	@Test
+	public void testAppLoaderMainOneParameter() {
+		// only one parameter
+		String[] args = new String[] { "test" };
+		AppLoader.main(args);
+	}
+
+	@Test
+	public void testAppLoaderMainStandard() {
 		// standard call
-		args = new String[] {this.getClass().getName(), "sagEs", "Hello World"};
-		AppLoader.main(args );
+		Thread.currentThread().setContextClassLoader(CoreTest.class.getClassLoader());
+		String[] args = new String[] { this.getClass().getName(), "sagEs", "Hello World" };
+		AppLoader.main(args);
 		assertTrue("" + aufrufe, aufrufe > 0);
-    }
+	}
     
     public static void sagEs(String[] wasdenn) {
     	System.out.println(wasdenn[0]);

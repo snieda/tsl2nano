@@ -35,9 +35,9 @@ public class NanoH5AttachmentTest {
     @Test
 //  @Ignore
   public void testAttachmentsTransferInH5() throws Exception {
-      NanoH5Test.createENV("attachments");
+    String filename = new File(NanoH5Test.projectPath() + "doc/beanconfigator.png").getAbsolutePath();
+    NanoH5Test.createENV("attachments");
       //first: create the entity with a byte[]
-      String filename = "doc/beanconfigator.png";
       Party party = new Party();
       party.setId(1);
       byte[] b = FileUtil.getFileBytes(filename, null);

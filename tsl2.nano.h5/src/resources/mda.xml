@@ -119,6 +119,9 @@ commit;
 			else="${cmdpref}java -cp ${cp} org.h2.tools.Server -baseDir ${basedir} -tcp -tcpPort ${jdbc.port} -trace ${cmdargs}">
 			<contains string="${jdbc.driver}" substring="hsqldb" casesensitive="true"/>
 		</condition>
+		<condition property="dotslash" value="" else="./">
+			<contains string="${os.name}" substring="windows" casesensitive="false"/>
+		</condition>
 		<echo file="runServer.cmd">${cmdline}</echo>
 		<chmod perm="+x" file="runServer.cmd" />
 		<!-- start the database with name ${basedir} -->
@@ -128,7 +131,7 @@ commit;
 			<ant antfile="shell.xml" target="sh.exec.cmd">
 				<property name="sh.exec.cmd.dir" value="${basedir}"/>
 				<property name="sh.exec.cmd.arg1" value="${start}"/>
-				<property name="sh.exec.cmd.arg2" value="runServer.cmd"/>
+				<property name="sh.exec.cmd.arg2" value="${dotslash}runServer.cmd"/>
 				<property name="sh.exec.cmd.arg3" value="${background}"/>
 			</ant>
 			<sequential>

@@ -14,6 +14,7 @@ import java.util.Properties;
 
 import org.apache.commons.logging.Log;
 
+import de.tsl2.nano.core.AppLoader;
 import de.tsl2.nano.core.ManagedException;
 import de.tsl2.nano.core.log.LogFactory;
 import de.tsl2.nano.core.util.BitUtil;
@@ -33,7 +34,11 @@ public class SystemUtil {
 
     protected static final Log LOG = LogFactory.getLog(SystemUtil.class);
 
-    /**
+    public static final Process executeShell(File directory, String... command) {
+        String shell[] = AppLoader.isWindows() ? new String[]{"cmd", "/C"} :  new String[] {"sh", "-c"};
+        return execute(directory, CollectionUtil.concat(shell, command));
+    }
+        /**
      * executes given command in directory command[0].getParentFile().
      * 
      * @param command

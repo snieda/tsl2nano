@@ -936,7 +936,7 @@ public class BeanClass<T> implements Serializable {
      */
     public static Class load(String className, ClassLoader classloader, boolean logException) {
         if (classloader == null) {
-            classloader = Thread.currentThread().getContextClassLoader();
+                classloader = Util.getContextClassLoader();
         }
         try {
             LOG.debug("loading class " + className + " through classloader " + classloader);

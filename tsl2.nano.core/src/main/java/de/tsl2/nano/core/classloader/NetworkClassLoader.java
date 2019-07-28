@@ -20,6 +20,7 @@ import de.tsl2.nano.core.cls.BeanClass;
 import de.tsl2.nano.core.log.LogFactory;
 import de.tsl2.nano.core.util.ListSet;
 import de.tsl2.nano.core.util.StringUtil;
+import de.tsl2.nano.core.util.Util;
 
 /**
  * Extends the {@link NestedJarClassLoader} to load unresolved classes from network-connection through a maven
@@ -130,7 +131,7 @@ public class NetworkClassLoader extends NestedJarClassLoader {
         } catch (ClassNotFoundException e) {
             //try it again after loading it from network
             String pckName = BeanClass.getPackageName(name);
-            if (!unresolveables.contains(pckName)) {
+            if (!pckName.startsWith(Util.FRAMEWORK_PACKAGE) && !unresolveables.contains(pckName)) {
                 try {
                     if (BeanClass.isPublicClassName(name) && loadDependencies(name) != null) {
                         //reload jar-files from environment

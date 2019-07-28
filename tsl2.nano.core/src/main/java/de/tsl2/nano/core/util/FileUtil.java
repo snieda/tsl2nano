@@ -585,7 +585,7 @@ public class FileUtil {
      * Read File into a byte-array
      */
     public static synchronized byte[] getFileBytes(String strFile, ClassLoader classLoader) {
-        LOG.info("Try to open File " + strFile);
+        LOG.info("Try to open File/Resource " + strFile);
         InputStream stream = null;
         try {
             if (classLoader == null) {
@@ -593,6 +593,7 @@ public class FileUtil {
             }
             stream = getResource(strFile, classLoader);
             if (stream == null) {
+                LOG.debug(strFile + " not found on classpath " +  classLoader + "! trying now on file system path: " + System.getProperty("user.dir"));
                 stream = getFile(strFile);
             }
             final int length = stream.available();
@@ -635,7 +636,7 @@ public class FileUtil {
         }
     }
 
-    static File userDirFile(String file) {
+    public static File userDirFile(String file) {
 		return new File(file).getAbsoluteFile();
 	}
 
@@ -1103,12 +1104,12 @@ public class FileUtil {
 
     static Collection<File> getTreeFiles(String basePath, String path, String regExFilename, Collection<File> result, boolean caseSensitive)
             throws Exception {
-        File[] files = new File(path).listFiles();
+        File[] files = userDirFile(path).listFiles();
         if (files == null) {
             throw new IllegalArgumentException("'" + path + "' is not a directory");
         }
         regExFilename = caseSensitive ? regExFilename : regExFilename.toLowerCase();
-        String canonPath = new File(basePath).getCanonicalPath();
+        String canonPath = userDirFile(basePath).getCanonicalPath();
         path = caseSensitive ? canonPath : canonPath.toLowerCase();
         String pattern =
             "\\Q" + path + "\\E"

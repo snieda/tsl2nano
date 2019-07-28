@@ -19,9 +19,12 @@ import java.util.Collection;
 import java.util.Map;
 import java.util.Properties;
 
+import org.apache.commons.logging.Log;
+
 import de.tsl2.nano.core.ManagedException;
 import de.tsl2.nano.core.cls.PrimitiveUtil;
 import de.tsl2.nano.core.execution.IRunnable;
+import de.tsl2.nano.core.log.LogFactory;
 
 /**
  * utils for general purpose on simple objects.
@@ -30,6 +33,7 @@ import de.tsl2.nano.core.execution.IRunnable;
  * @version $Revision$
  */
 public class Util {
+    private static final Log LOG = LogFactory.getLog(Util.class);
     public static final String FRAMEWORK_PACKAGE;
     static {
         String pck = Util.class.getPackage().getName();
@@ -445,8 +449,14 @@ public class Util {
     }
 
 	public static ClassLoader getContextClassLoader() {
-		ClassLoader cl = Thread.currentThread().getContextClassLoader();
-		return cl != null ? cl : Util.class.getClassLoader();
+        ClassLoader cl = Thread.currentThread().getContextClassLoader();
+        if (cl == null) {
+            cl = Util.class.getClassLoader();
+            if (cl == null)
+                cl = ClassLoader.getSystemClassLoader();
+            LOG.warn("context classloader of current thread " + Thread.currentThread() + " is null! using classloader " + cl);
+        }
+        return cl;
 	}
 
 }

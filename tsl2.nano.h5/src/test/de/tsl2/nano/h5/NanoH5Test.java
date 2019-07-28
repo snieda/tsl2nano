@@ -26,6 +26,8 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Properties;
 
+import javax.ws.rs.Path;
+
 import org.anonymous.project.Address;
 import org.anonymous.project.Charge;
 import org.junit.Assert;
@@ -83,13 +85,16 @@ import my.app.Times;
  * @version $Revision$
  */
 public class NanoH5Test implements ENVTestPreparation {
+    static final String MVN_BUILD_PATH = "target";
+    
     static String getServiceURL() {
         return "http://localhost:" + NetUtil.getFreePort();
     }
 
     @Test
+    @Path("/")
     public void testNetUtilRestful() throws Exception {
-        String url = "http://localhost/rest";
+        String url = "http://localhost:9999/rest";
         Class<?> responseType = String.class;
 //        Event event =
 //            BeanProxy.createBeanImplementation(Event.class, MapUtil.asMap("type", "mouseclick", "target", null), null,
@@ -267,17 +272,18 @@ public class NanoH5Test implements ENVTestPreparation {
         
         //create xsd from trang.jar
         final String PATH_TRANG_JAR = "../../../../tsl2.nano.common/lib-tools/trang.jar";
-        assertTrue(new File(DIR_TEST + "/" + PATH_TRANG_JAR).exists());
-        assertTrue(SystemUtil.execute(new File(DIR_TEST), "cmd", "/C",
-            "java -jar " + PATH_TRANG_JAR + " presentation/*.xml presentation/beandef.xsd")
-            .exitValue() == 0);
+        assertTrue(FileUtil.userDirFile(DIR_TEST + "/" + PATH_TRANG_JAR).exists());
+        int trangResult = SystemUtil.executeShell(FileUtil.userDirFile(DIR_TEST),
+        "java -jar " + PATH_TRANG_JAR + " presentation/*.xml presentation/beandef.xsd")
+        .exitValue();
+        assertTrue(trangResult == 0);
 
         //extract language messages
-        String basedir = new File(DIR_TEST).getParent() + "/";
+        String basedir = FileUtil.userDirFile(DIR_TEST).getParent() + "/";
         String srcPath = "de/tsl2/nano/h5/timesheet/";
-        String path = "src/test/" + srcPath;
+        String path = projectPath() + "src/test/" + srcPath;
         String initDB = "init-" + name + "-anyway.sql";
-        final String BIN_DIR = "target/test-classes/";
+        final String BIN_DIR = targetPath() + "test-classes/";
         //TODO: create myapp test db
 //        assertTrue(FileUtil.copy(path + initDB, DIR_TEST + "/" + initDB));
         assertTrue(FileUtil.copy(path + "ICSChargeImport.java", DIR_TEST + "/generated-src/" + srcPath + "ICSChargeImport.java"));
@@ -289,12 +295,12 @@ public class NanoH5Test implements ENVTestPreparation {
 
         assertTrue(FileUtil.copy(path + "messages_de.properties", DIR_TEST + "/messages_de.properties"));
         assertTrue(FileUtil.copy(path + "messages_de_DE.properties", DIR_TEST + "/messages_de_DE.properties"));
-        assertTrue(FileUtil.copy("src/resources/run.bat", basedir + "run.bat"));
-        assertTrue(FileUtil.copy("src/resources/run.sh", basedir + "run.sh"));
+        assertTrue(FileUtil.copy(projectPath() + "src/resources/run.bat", basedir + "run.bat"));
+        assertTrue(FileUtil.copy(projectPath() + "src/resources/run.sh", basedir + "run.sh"));
 
         //create  run configuration
-        FileUtil.writeBytes(("run.bat " + new File(DIR_TEST).getName()).getBytes(), basedir + name + ".cmd", false);
-        FileUtil.writeBytes(("run.sh " + new File(DIR_TEST).getName()).getBytes(), basedir + name + ".sh", false);
+        FileUtil.writeBytes((projectPath() + "run.bat " + new File(DIR_TEST).getName()).getBytes(), basedir + name + ".cmd", false);
+        FileUtil.writeBytes((projectPath() + "run.sh " + new File(DIR_TEST).getName()).getBytes(), basedir + name + ".sh", false);
         
         //workaround: replace path 'test/.nanoh5.timesheet' with '.nanoh5.timesheet'
         AntRunner.runRegexReplace("(target[/]test[/])([.]nanoh5[.]timesheet)[/](icons)", "\\3", new File(DIR_TEST).getParent(), "**");
@@ -327,13 +333,25 @@ public class NanoH5Test implements ENVTestPreparation {
         ConcurrentUtil.setCurrent(BeanContainer.instance());
     }
 
+    //workaround for different base-paths on starting the tests (windows+maven <-> linux+maven)
+    public static String projectPath() {
+        String userDir = System.getProperty("user.dir");
+        return userDir.contains(MVN_BUILD_PATH) ? "../" : "";
+    }
+
+    //workaround for different base-paths on starting the tests (windows+maven <-> linux+maven)
+    public static String targetPath() {
+        String userDir = System.getProperty("user.dir");
+        return userDir.contains(MVN_BUILD_PATH) ? "" : MVN_BUILD_PATH + File.separatorChar;
+    }
     /**
      * createENV
      * @param name
      * @return
      */
     public static String createENV(String name) {
-        final String DIR_TEST = "target/test/" + ENV.PREFIX_ENVNAME + name;
+        String DIR_TEST = targetPath() + "test/" + ENV.PREFIX_ENVNAME + name;
+        DIR_TEST = new File(DIR_TEST).getAbsolutePath();
         
         Bean.clearCache();
 //        new File(DIR_TEST).delete();
