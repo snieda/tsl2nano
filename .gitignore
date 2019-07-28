@@ -7,3 +7,6 @@
 /dist
 /temp
 /*.log
+/.metadata
+/tsl2.nano.*/.settings
+/tsl2.nano.*/.vscode

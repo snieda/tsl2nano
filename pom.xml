@@ -63,9 +63,17 @@
 		<artifactId>oss-parent</artifactId>
 		<version>9</version>
 	</parent>
- -->	<developers>
+ -->
+	<contributors>
+		<contributor>
+			<name>Thomas Schneider</name>
+			<email>snieda@web.de</email>
+		</contributor>
+	</contributors>
+	<developers>
 		<developer>
 			<name>Thomas Schneider</name>
+			<email>snieda@web.de</email>
 		</developer>
 	</developers>
 	<modules>
