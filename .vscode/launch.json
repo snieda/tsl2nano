@@ -1,6 +1,14 @@
 {
     "version": "0.2.0",
     "configurations": [
+        {
+            "type": "java",
+            "name": "Debug (Attach MAVEN on 5005)",
+            "request": "attach",
+            "projectName": "tsl2.nano.h5",
+            "hostName": "localhost",
+            "port": 5005
+        },
         
     {
         "name": "Debug (Attach on 8787)",

@@ -56,7 +56,7 @@ public class PackageGenerator extends ClassGenerator {
     public static void main(String args[]) throws Exception {
         if (args.length == 0 || args.length > 3) {
             String help = 
-                    "syntax : PackageGenerator <package-file-path> [code-template] [[presenter-class-name [property-file]]\n"
+                    "syntax : PackageGenerator <package-file-path> [code-template] [[generator-class [property-file]]\n"
                   + "example: PackageGenerator bin/mylocale/mycompany/mypackagepath codegen/beanconstant.vm de.tsl2.nano.codegen.PackageGenerator\n"
                   + "\nreading system variables:\n"
                   + " - bean.generation.packagename: only class in that package\n"

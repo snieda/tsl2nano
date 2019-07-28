@@ -253,7 +253,7 @@ public class ClassGenerator {
         //TODO: class generator name for singelton!
         
         if (args.length != 2) {
-            System.out.print("Syntax: ClassGenerator <model> <template>");
+            System.out.print("Syntax: ClassGenerator <model-class-in-classpath> <velocity-template>");
             System.exit(1);
         }
 

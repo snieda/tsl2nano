@@ -7,3 +7,5 @@
 /dist
 /temp
 /*.log
+/.settings
+

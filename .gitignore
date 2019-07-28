@@ -7,6 +7,9 @@
 /dist
 /temp
 /*.log
+/logfactory.xml
 /.metadata
 /tsl2.nano.*/.settings
 /tsl2.nano.*/.vscode
+/tsl2.nano.*/.project
+/tsl2.nano.*/.classpath

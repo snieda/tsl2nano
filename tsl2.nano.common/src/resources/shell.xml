@@ -1,4 +1,4 @@
-<project name="ant.shell" default="help">
+<project name="ant.shell" default="help" xmlns:if="ant:if" xmlns:unless="ant:unless">
 	<description id="description">
 ==============================================================================
 Basic Ant-Script to provide most file, java, sql, xml functionalities.
@@ -630,10 +630,13 @@ compiler basedir: ${basedir}. classpath: @{sh.compile.classpath};@{sh.compile.cl
 
 	<!-- windows specific call to cmd.exe -->
 	<target name="sh.exec.cmd" unless="sh.disable.exec.cmd">
+		<condition property="os.family" value="windows" else="unix">
+			<contains string="${os.name}" substring="windows" casesensitive="false"/>
+		</condition>
 		<condition property="start.cmd" value="cmd.exe" else="sh">
 			<contains string="${os.name}" substring="windows" casesensitive="false"/>
 		</condition>
-		<condition property="slash.c" value="/C" else="">
+		<condition property="slash.c" value="/C" else="-c">
 			<contains string="${os.name}" substring="windows" casesensitive="false"/>
 		</condition>
 		<property name="sh.exec.cmd.dir" value="${basedir}" />
@@ -645,14 +648,14 @@ compiler basedir: ${basedir}. classpath: @{sh.compile.classpath};@{sh.compile.cl
 		<property name="sh.exec.cmd.arg4" value="" />
 		<property name="sh.exec.cmd.arg5" value="" />
 		<property name="sh.exec.cmd.arg6" value="" />
-		<exec dir="${sh.exec.cmd.dir}" executable="${start.cmd}" output="${sh.exec.cmd.outputfile}" resultproperty="${sh.exec.cmd.resultproperty}">
-			<arg value="${slash.c}" />
-			<arg value="${sh.exec.cmd.arg1}" />
-			<arg value="${sh.exec.cmd.arg2}" />
-			<arg value="${sh.exec.cmd.arg3}" />
-			<arg value="${sh.exec.cmd.arg4}" />
-			<arg value="${sh.exec.cmd.arg5}" />
-			<arg value="${sh.exec.cmd.arg6}" />
+		<exec dir="${sh.exec.cmd.dir}" executable="${start.cmd}" output="${sh.exec.cmd.outputfile}" resultproperty="${sh.exec.cmd.resultproperty}" osfamily="${os.family}">
+			<arg value="${slash.c}" /> <!-- unless used in cause of linux 'sh -c ...' not working on empty args -->
+			<arg value="${sh.exec.cmd.arg1}"  unless:blank="${sh.exec.cmd.arg1}"/>
+			<arg value="${sh.exec.cmd.arg2}"  unless:blank="${sh.exec.cmd.arg2}"/>
+			<arg value="${sh.exec.cmd.arg3}"  unless:blank="${sh.exec.cmd.arg3}"/>
+			<arg value="${sh.exec.cmd.arg4}"  unless:blank="${sh.exec.cmd.arg4}"/>
+			<arg value="${sh.exec.cmd.arg5}"  unless:blank="${sh.exec.cmd.arg5}"/>
+			<arg value="${sh.exec.cmd.arg6}"  unless:blank="${sh.exec.cmd.arg6}"/>
 		</exec>
 	</target>
 
