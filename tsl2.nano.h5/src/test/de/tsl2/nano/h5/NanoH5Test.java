@@ -252,7 +252,8 @@ public class NanoH5Test implements ENVTestPreparation {
            "Started At", BaseTest.XXX,
            "Ended At", BaseTest.XXX,
            "tsl2.nano.h5-\\d+\\.\\d+\\.\\d+(-SNAPSHOT)?[\\-\\.0-9]*", "tsl2.nano.h5-X.X.X",
-           ".quicksearch", "?quicksearch" // the '?' does not match between the two sources!
+           ".quicksearch", "?quicksearch", // the '?' does not match between the two sources!
+           "(\\w+[:])?((/|[\\\\])\\w+(\\.\\w+)*){2,99}", BaseTest.XXX //absolute file pathes
            ));
        
         //check xml failed files - these are written, if simple-xml has problems on deserializing from xml

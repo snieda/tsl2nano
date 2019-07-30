@@ -31,10 +31,8 @@ public class TextComparison {
     
     public static void assertEquals(String exptected, String result, boolean ignoreWhitespace, Map<String, String> replacements) {
         if (ignoreWhitespace) {
-            exptected = exptected.replaceAll("([\r]?\n)+", "\n");
-            exptected = exptected.replaceAll("[ \t]+", " ");
-            result = result.replaceAll("([\r]?\n)+", "\n");
-            result = result.replaceAll("[ \t]+", " ");
+            exptected = exptected.replaceAll("\\s+", " ");
+            result = result.replaceAll("\\s+", " ");
         }
         StringBuilder exp = new StringBuilder(exptected);
         StringBuilder res = new StringBuilder(result);

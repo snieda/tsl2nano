@@ -22,18 +22,18 @@ import de.tsl2.nano.core.util.Util;
 
 /**
  * <pre>
- * This class is only used manually to recreate the default presenters.
- * It is able to load model classes from a given path or a given jar-file.
+ * This class is able to load model classes from a given path or a given jar-file.
  * 
  * If you use a jar-file, be sure to set the classpath to find all needed classes!
  * 
  * how-to-start: start the main of this class with parameter:
  *   1. package path to find model classes to generate presenters for
- *   2. class name of presenter specialization
- *   3. property-file name
+ *   2. velocity template file
+ *   3. class name of generator specialization (default: PackageGenerator)
+ *   4. property-file name (default: null, system-properties will be used anyway)
  *   
  * example:
- *  PackageGenerator bin/org/anonymous/project/ de.tsl2.nano.codegen.PresenterGenerator
+ *  PackageGenerator bin/org/anonymous/project/ de.tsl2.nano.codegen.PackageGenerator
  *  PackageGenerator lib/mymodel.jar de.tsl2.nano.codegen.PresenterGenerator
  *  
  * To constrain the generation to a specific package path, set the environment variable "bean.generation.packagename".
