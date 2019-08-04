@@ -1,5 +1,5 @@
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
 	<modelVersion>4.0.0</modelVersion>
 	<groupId>net.sf.tsl2nano</groupId>
 	<artifactId>tsl2.nano.h5-package</artifactId>
@@ -79,6 +79,7 @@
 	<modules>
 		<module>tsl2.nano.core</module>
 		<module>tsl2.nano.common</module>
+		<!-- <module>tsl2.nano.mavengenerator</module> -->
 		<module>tsl2.nano.operation</module>
 		<module>tsl2.nano.descriptor</module>
 		<module>tsl2.nano.replication</module>
@@ -97,8 +98,9 @@
 		<module>tsl2.nano.h5</module>
 		<module>tsl2.nano.h5.thymeleaf</module>
 		<module>tsl2.nano.h5.thymeleaf-pack</module>
+		<module>tsl2.nano.archetype</module>
 		<module>tsl2.nano.aggregate-report</module>
-	</modules>
+  </modules>
 	<distributionManagement>
 		<snapshotRepository>
 			<id>ossrh</id>
@@ -277,7 +279,10 @@
 			    <version>1.6</version>
 			    <executions>
 			     <execution>
-			     <configuration><excludes><exclude>**/*-signed.jar</exclude></excludes>
+			     <configuration>
+              <excludes>
+                <exclude>**/*-signed.jar</exclude>
+              </excludes>
 					<skip>${skipTests}</skip>
 			     </configuration>
 			      <id>sign-artifacts</id>
@@ -343,7 +348,9 @@
 					<reportSet>
 						<id>all</id>
 						<inherited>true</inherited>
-						<configuration><aggregate>true</aggregate></configuration>
+						<configuration>
+              <aggregate>true</aggregate>
+            </configuration>
 						<reports>
 							<report>pmd</report>
 							<report>cpd</report>

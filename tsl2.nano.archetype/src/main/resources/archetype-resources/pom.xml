@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+	<modelVersion>4.0.0</modelVersion>
+	<!-- NOTE: always do a clean before install! -->
+	<parent>
+		<groupId>net.sf.tsl2nano</groupId>
+		<artifactId>tsl2.nano.h5.thymeleaf-pack</artifactId>
+		<version>2.2.2-SNAPSHOT</version>
+	</parent>
+	<!--TODO: the archetype generator inserts the archetype groupId+artifacroyId. Please correct that -->
+	<groupId>${groupId}</groupId>
+	<artifactId>${artifactId}</artifactId>
+	<version>${version}</version>
+	<name>TSL2NANO ${artifactId}</name>
+	<properties>
+		<project.mainclass>${package}.MyApplication</project.mainclass>
+	</properties>
+</project>
