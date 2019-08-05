@@ -14,6 +14,7 @@ import org.apache.velocity.app.VelocityEngine;
 import de.tsl2.nano.core.ManagedException;
 import de.tsl2.nano.core.cls.BeanClass;
 import de.tsl2.nano.core.log.LogFactory;
+import de.tsl2.nano.core.util.StringUtil;
 import de.tsl2.nano.core.util.Util;
 
 /**
@@ -147,6 +148,7 @@ public class ClassGenerator {
         LOG.info("generating " + templateFile + " + " + modelFile + "  ==>  " + destFile);
         context.put("package", getDestinationPackageName(modelFile, destFile));
         context.put("class", getModel(modelFile, classLoader));
+        context.put("postfix", getDestinationPostfix());
         context.put("util", util);
         context.put("time", new Timestamp(System.currentTimeMillis()));
         context.put("template", templateFile);
@@ -204,7 +206,11 @@ public class ClassGenerator {
     protected String getDefaultDestinationFile(String modelFile) {
 //        return engine.getProperty(DEST_FILENAME_PATTERN)
         modelFile = modelFile.replace('.', '/');
-        return "src/gen/" + modelFile + Util.get("bean.generation.namepostfix", "Const.java");
+        return DEFAULT_DEST_PREFIX + "/" + modelFile + getDestinationPostfix() + ".java";
+    }
+
+    protected String getDestinationPostfix() {
+        return Util.get("bean.generation.namepostfix", StringUtil.toFirstUpper(extractName(codeTemplate)));
     }
 
     /**
@@ -263,5 +269,8 @@ public class ClassGenerator {
         ClassGenerator.instance().init();
         ClassGenerator.instance().generate(modelFile, templateFile, null);
 
+    }
+    public static String extractName(String filePath) {
+        return StringUtil.substring(filePath, "/", ".", true);
     }
 }

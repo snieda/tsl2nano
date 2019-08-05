@@ -16,6 +16,7 @@ import java.util.Iterator;
 import java.util.Properties;
 
 import de.tsl2.nano.core.ManagedException;
+import de.tsl2.nano.core.cls.ClassFinder;
 import de.tsl2.nano.core.util.FileUtil;
 import de.tsl2.nano.core.util.StringUtil;
 import de.tsl2.nano.core.util.Util;
@@ -43,7 +44,6 @@ import de.tsl2.nano.core.util.Util;
  * @version $Revision$
  */
 public class PackageGenerator extends ClassGenerator {
-    private static final String POSTFIX_PACKAGE = "presenter";
     Properties properties = null;
     private String packagePath;
 
@@ -54,23 +54,25 @@ public class PackageGenerator extends ClassGenerator {
      * @throws Exception on any error
      */
     public static void main(String args[]) throws Exception {
-        if (args.length == 0 || args.length > 3) {
-            String help = 
-                    "syntax : PackageGenerator <package-file-path> [code-template] [[generator-class [property-file]]\n"
-                  + "example: PackageGenerator bin/mylocale/mycompany/mypackagepath codegen/beanconstant.vm de.tsl2.nano.codegen.PackageGenerator\n"
-                  + "\nreading system variables:\n"
-                  + " - bean.generation.packagename: only class in that package\n"
-                  + " - bean.generation.outputpath : output base path\n"
-                  + " - bean.generation.namepostfix: class name postfix (default: Const.java)\n";
-            System.out.println("help");
+        if (args.length == 0 || args.length > 4) {
+            String help =
+                "syntax : PackageGenerator <package-file-path> [code-template] [[generator-class [property-file]]\n"
+                    + "example: PackageGenerator bin/mylocale/mycompany/mypackagepath codegen/beanconstant.vm de.tsl2.nano.codegen.PackageGenerator\n"
+                    + "\nreading system variables:\n"
+                    + " - bean.generation.packagename     : only class in that package\n"
+                    + " - bean.generation.outputpath      : output base path\n"
+                    + " - bean.generation.nameprefix      : class+package name prefix (default: package + code-template)\n"
+                    + " - bean.generation.namepostfix     : class name postfix (default: {code-template}.java)\n";
+            System.out.println(help);
             System.exit(1);
         }
 
         PackageGenerator gen;
         if (args.length > 2) {
             gen = (PackageGenerator) ClassGenerator.instance(args[2]);
-            if (args.length > 3 && args[3].length() > 0) {
-                gen.getProperties().putAll(FileUtil.loadProperties(args[3], Thread.currentThread().getContextClassLoader()));
+            if (args.length > 3 && args[3] != null && args[3].length() > 0) {
+                gen.getProperties()
+                    .putAll(FileUtil.loadProperties(args[3], Thread.currentThread().getContextClassLoader()));
             }
         } else {
             gen = (PackageGenerator) ClassGenerator.instance(new PackageGenerator());
@@ -112,6 +114,14 @@ public class PackageGenerator extends ClassGenerator {
             if (classNames == null) {
                 throw new ManagedException("the given jar-file doesn't exist!");
             }
+        } else if (packagePath.matches("(\\w+\\.)+\\w+") && !(new File(packagePath).isDirectory())) {
+            p = packagePath;
+            Collection<Class> classes =  ClassFinder.self().fuzzyFind(packagePath + ".*", Class.class, 0, null).values();
+            classNames = new String[classes.size()];
+            int i = 0;
+            for (Class cls : classes) {
+                classNames[i++] = cls.getName();
+            }
         } else {
             final File packageFilePath = new File(packagePath);
             if (!packageFilePath.isDirectory()) {
@@ -147,7 +157,7 @@ public class PackageGenerator extends ClassGenerator {
     /**
      * getPackage
      * 
-     * @param fullpath path with classpath + package path
+     * @param fullpath    path with classpath + package path
      * @param classLoader classloader
      * @return package path
      */
@@ -179,8 +189,9 @@ public class PackageGenerator extends ClassGenerator {
             //evaluate the package-path for the classloader
             if (p != null) {
                 final int ii = p.indexOf('.');
+
                 if (ii == -1) {
-                    throw new ManagedException("can''t evaluate the class package path for " + packagePath);
+                    throw new ManagedException("can''t evaluate the class package path for " + packagePath + ". the classloader is not able to load any part of it.");
                 }
                 p = p.substring(ii + 1);
             }
@@ -218,7 +229,8 @@ public class PackageGenerator extends ClassGenerator {
 
     /**
      * override this method, to define the path to your own template.
-     * @param type 
+     * 
+     * @param type
      * 
      * @return file name of presenter constant class
      */
@@ -232,14 +244,15 @@ public class PackageGenerator extends ClassGenerator {
     @Override
     protected String getDefaultDestinationFile(String modelFile) {
         modelFile = super.getDefaultDestinationFile(modelFile);
-        modelFile = appendPackage(modelFile, POSTFIX_PACKAGE);
-        return Util.get("bean.generation.outputpath", "") + "/" + modelFile;
+        modelFile = appendPackage(modelFile, extractName(codeTemplate));
+        String outputPath = Util.get("bean.generation.outputpath", "");
+        return (outputPath.length() > 0 ? outputPath + "/" : "") + modelFile;
     }
 
     /**
      * appends the given package suffix to the given model class package path
      * 
-     * @param modelFile bean or model java class
+     * @param modelFile   bean or model java class
      * @param packageName source package
      * @return package + file name
      */

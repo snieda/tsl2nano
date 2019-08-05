@@ -3,13 +3,21 @@
     "configurations": [
         {
             "type": "java",
-            "name": "Debug (Attach MAVEN on 5005)",
+            "name": "Debug (Attach MAVEN Surefire on 5005)",
             "request": "attach",
             "projectName": "tsl2.nano.h5",
             "hostName": "localhost",
             "port": 5005
         },
         
+        {
+            "type": "java",
+            "name": "Debug (Attach MAVEN plugin on 8000)",
+            "request": "attach",
+            "projectName": "tsl2.nano.mavengenerator",
+            "hostName": "localhost",
+            "port": 8000
+        },
     {
         "name": "Debug (Attach on 8787)",
         "type": "java",

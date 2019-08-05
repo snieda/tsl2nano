@@ -30,7 +30,7 @@ ${util.toFirstLowerCase(${class.Name})}.${att.Name}.tooltip=${att.NameFU} toolti
  * @author Generated through velocity template (beanconstant.vm)
  * @version $Revision$ 
  */
-public interface ${class.Name}Const {
+public interface ${class.Name}${postfix} {
 
 #foreach( $att in $class.Attributes)    
     /** key name of $att.Name in resource bundle */

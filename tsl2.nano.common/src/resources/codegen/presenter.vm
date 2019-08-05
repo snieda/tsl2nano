@@ -64,13 +64,13 @@ import de.tsl2.nano.component.binding.Observables;
  * @author ts 22.11.2008
  * @version $Revision$ 
  */
-public class ${class.Name}UI<T>  extends DefaultPresenter<T> implements ${class.Name}Const {
+public class ${class.Name}${postfix}<T>  extends DefaultPresenter<T> implements ${class.Name}Beanconstant {
     /**
      * Constructor with specific bean data.
      * 
      * @param data bean instance
      */
-    public ${class.Name}UI (T data) {
+    public ${class.Name}${postfix} (T data) {
         this(data, new LinkedList<String>());
     }
 
@@ -80,7 +80,7 @@ public class ${class.Name}UI<T>  extends DefaultPresenter<T> implements ${class.
      * @param data bean instance
      * @param attributeNameFilter attribute names to filter.
      */
-    public ${class.Name}UI (T data, Collection<String> attributeNameFilter) {
+    public ${class.Name}${postfix} (T data, Collection<String> attributeNameFilter) {
         this(data, attributeNameFilter, false);
     }
 
@@ -91,7 +91,7 @@ public class ${class.Name}UI<T>  extends DefaultPresenter<T> implements ${class.
      * @param attributeNameFilter attribute names to filter.
      * @param useInversFilter if true, only elements, that are not contained in the filter will be shown.
      */
-    public ${class.Name}UI (T data, Collection<String> attributeNameFilter,
+    public ${class.Name}${postfix} (T data, Collection<String> attributeNameFilter,
             boolean useInversFilter) {
         super(data, attributeNameFilter, useInversFilter);
         //if an attribute filter was defined, use its order
